@@ -29,18 +29,6 @@ namespace "default" labeled
 
 For more details on deploying your application with Istio, read [this](https://istio.io/docs/setup/kubernetes/install/) documentation.
 
-You must also add the **sidecar.istio.io/inject** annotation with the value set to `true` to the Pod template specification, to enable the injection as shown in [this](https://github.com/kyma-project/examples/blob/master/monitoring-custom-metrics/deployment/deployment.yaml#L12) example.
-
-```yaml
-spec:
-  template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "true"
-```
-
-For more details on installing the Istio sidecar, read [this](https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/) documentation.
-
 The following ports are used in the Pod:
 
 - `8080` - Envoy captures the traffic only for ports listed in Pod's **containerPorts** (`containerPort: 8080`), or in the **traffic.sidecar.istio.io/includeInboundPorts** annotation. Thus, this port is a part of the Service Mesh and can be used for application's needs.

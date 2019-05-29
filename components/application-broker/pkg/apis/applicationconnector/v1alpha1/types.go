@@ -22,7 +22,7 @@ func (in *ApplicationMapping) GetObjectKind() schema.ObjectKind {
 }
 
 type ApplicationMappingSpec struct {
-	Services []ApplicationMappingService `json:services`
+	Services []ApplicationMappingService `json:"services"`
 }
 
 type ApplicationMappingService struct {

@@ -7,7 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 )
 
@@ -37,6 +37,8 @@ type ServiceAPI struct {
 	SpecificationUrl string
 	ApiType          string
 	Credentials      Credentials
+	Headers          *map[string][]string
+	QueryParameters  *map[string][]string
 }
 
 type CSRFInfo struct {
@@ -48,6 +50,8 @@ type Credentials struct {
 	SecretName        string
 	AuthenticationUrl string
 	CSRFInfo          *CSRFInfo
+	Headers           *map[string][]string
+	QueryParameters   *map[string][]string
 }
 
 // Service represents a service stored in Application RE

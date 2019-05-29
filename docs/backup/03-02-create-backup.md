@@ -12,31 +12,31 @@ Integrate these files with your scheduled or on-demand configurations to back up
 
 >**NOTE:** To fully back up a cluster, you must back up both user and system Namespaces. 
 
-Modify the files to adjust the backup scope. For details about the file format, see the [Ark documentation](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md).
+Modify the files to adjust the backup scope. For details about the file format, see the [documentation](https://velero.io/docs/v1.0.0/output-file-format/).
 
 ## Create manual backups
 
-If you want to use sample backup configurations, you must use Backup custom resources instead of Ark CLI. Add the following two CRs to the `heptio-ark` Namespace to instruct the Ark server to create a backup. Make sure the indentation is correct.
+If you want to use sample backup configurations, you can use Backup custom resources. Add the following two CRs to the `kyma-backup` Namespace to instruct the Velero server to create a backup. Make sure the indentation is correct.
 
 A sample backup configuration looks like this:
 
 ```yaml
 ---
-apiVersion: ark.heptio.com/v1
+apiVersion: velero.io/v1
 kind: Backup
 metadata:
   name: kyma-system-backup
-  namespace: heptio-ark
+  namespace: kyma-backup
 spec:
-    <INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP FILE HERE>
+    <INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP FILE HERE> ### E.g. docs/backup/assets/system-backup.yaml
 ---
-apiVersion: ark.heptio.com/v1
+apiVersion: velero.io/v1
 kind: Backup
 metadata:
   name: kyma-backup
-  namespace: heptio-ark
+  namespace: kyma-backup
 spec:
-    <INCLUDE CONTENT OF USER NAMESPACE BACKUP FILE HERE>
+    <INCLUDE CONTENT OF USER NAMESPACE BACKUP FILE HERE> ### E.g. docs/backup/assets/all-backup.yaml
 ```
 
 To create the backup, run the following command:
@@ -45,27 +45,27 @@ To create the backup, run the following command:
 
 ## Schedule periodic backups
 
-If you want to use sample backup configurations, ou must use Schedule custom resources instead of Ark CLI. Create two Schedule custom resources in the `heptio-ark` Namespace to instruct the Ark Server to schedule a cluster backup. Make sure the indentation is correct.
+If you want to use sample backup configurations, you can use Schedule custom resources. Create two Schedule custom resources in the `kyma-backup` Namespace to instruct the Velero Server to schedule a cluster backup. Make sure the indentation is correct.
 
 A sample scheduled backup configuration looks like this:
 
 ```yaml
 ---
-apiVersion: ark.heptio.com/v1
+apiVersion: velero.io/v1
 kind: Schedule
 metadata:
   name: kyma-system-backup
-  namespace: heptio-ark
+  namespace: kyma-backup
 spec:
     template:
         <INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP SPEC HERE>
     schedule: 0 1 * * *
 ---
-apiVersion: ark.heptio.com/v1
+apiVersion: velero.io/v1
 kind: Schedule
 metadata:
   name: kyma-backup
-  namespace: heptio-ark
+  namespace: kyma-backup
 spec:
     template:
         <INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP SPEC HERE>
@@ -78,7 +78,7 @@ To schedule a backup, run the following command:
 
 ## Backup retention period
 
-To set the retention period of a backup, define the **ttl** parameter in the Backup specification [definition](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md#definition):
+To set the retention period of a backup, define the **ttl** parameter in the Backup specification [definition](https://velero.io/docs/v1.0.0/output-file-format/):
 
 ```  The amount of time before this backup is eligible for garbage collection.
   ttl: 24h0m0s 

@@ -17,6 +17,10 @@ if(${PASSWORD} -ne "") {
   (Get-Content $CONFIG_OUTPUT_PATH).replace("global.adminPassword: `"`"", "global.adminPassword: `"${ENCODED_PASSWORD}`"") | Set-Content $CONFIG_OUTPUT_PATH
 }
 
+$cmd = "minikube ip"
+$minikubeIp = (Invoke-Expression -Command $cmd | Out-String).Trim()
+(Get-Content $CONFIG_OUTPUT_PATH).replace(".minikubeIP: `"`"", ".minikubeIP: `"${minikubeIp}`"") | Set-Content $CONFIG_OUTPUT_PATH
+
 ##########
 
 Write-Output "Applying configuration"

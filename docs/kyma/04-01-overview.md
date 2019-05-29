@@ -13,7 +13,8 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `cms` | ✅ | ✅ |
 | `cluster-essentials` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
-| `ark` | ✅ | ⛔️ |
+| `velero-essentials` | ✅ | ⛔️ |
+| `velero` | ✅ | ⛔️ |
 | `assetstore` | ✅ | ✅ |
 | `dex` | ✅ | ✅ |
 | `helm-broker` | ✅ | ✅ |

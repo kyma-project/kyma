@@ -44,8 +44,10 @@ type ApplicationEvent struct {
 }
 
 type ApplicationMapping struct {
-	Namespace   string `json:"namespace"`
-	Application string `json:"application"`
+	Namespace   string                       `json:"namespace"`
+	Application string                       `json:"application"`
+	AllServices *bool                        `json:"allServices"`
+	Services    []*ApplicationMappingService `json:"services"`
 }
 
 type ApplicationMutationOutput struct {
@@ -100,7 +102,7 @@ type ClusterDocsTopicEvent struct {
 	ClusterDocsTopic ClusterDocsTopic      `json:"clusterDocsTopic"`
 }
 
-type ClusterMicrofrontend struct {
+type ClusterMicroFrontend struct {
 	Name            string           `json:"name"`
 	Version         string           `json:"version"`
 	Category        string           `json:"category"`
@@ -225,6 +227,12 @@ type DocsTopicStatus struct {
 	Message string             `json:"message"`
 }
 
+type EnabledApplicationService struct {
+	ID          string `json:"id"`
+	DisplayName string `json:"displayName"`
+	Exist       bool   `json:"exist"`
+}
+
 type EnvPrefix struct {
 	Name string `json:"name"`
 }
@@ -237,6 +245,7 @@ type EventActivationEvent struct {
 	EventType   string `json:"eventType"`
 	Version     string `json:"version"`
 	Description string `json:"description"`
+	Schema      JSON   `json:"schema"`
 }
 
 type ExceededQuota struct {
@@ -300,7 +309,7 @@ type LocalObjectReferenceInput struct {
 	Name string `json:"name"`
 }
 
-type Microfrontend struct {
+type MicroFrontend struct {
 	Name            string           `json:"name"`
 	Version         string           `json:"version"`
 	Category        string           `json:"category"`
@@ -308,13 +317,20 @@ type Microfrontend struct {
 	NavigationNodes []NavigationNode `json:"navigationNodes"`
 }
 
+type NamespaceCreationOutput struct {
+	Name   string `json:"name"`
+	Labels Labels `json:"labels"`
+}
+
 type NavigationNode struct {
-	Label            string   `json:"label"`
-	NavigationPath   string   `json:"navigationPath"`
-	ViewURL          string   `json:"viewUrl"`
-	ShowInNavigation bool     `json:"showInNavigation"`
-	Order            int      `json:"order"`
-	Settings         Settings `json:"settings"`
+	Label               string               `json:"label"`
+	NavigationPath      string               `json:"navigationPath"`
+	ViewURL             string               `json:"viewUrl"`
+	ShowInNavigation    bool                 `json:"showInNavigation"`
+	Order               int                  `json:"order"`
+	Settings            Settings             `json:"settings"`
+	ExternalLink        *string              `json:"externalLink"`
+	RequiredPermissions []RequiredPermission `json:"requiredPermissions"`
 }
 
 type Pod struct {
@@ -344,6 +360,12 @@ type ReplicaSet struct {
 	JSON              JSON      `json:"json"`
 }
 
+type RequiredPermission struct {
+	Verbs    []string `json:"verbs"`
+	APIGroup string   `json:"apiGroup"`
+	Resource string   `json:"resource"`
+}
+
 type ResourceAttributes struct {
 	Verb            string  `json:"verb"`
 	APIGroup        *string `json:"apiGroup"`
@@ -363,6 +385,11 @@ type ResourceQuota struct {
 	Requests ResourceValues `json:"requests"`
 }
 
+type ResourceQuotaInput struct {
+	Limits   ResourceValuesInput `json:"limits"`
+	Requests ResourceValuesInput `json:"requests"`
+}
+
 type ResourceQuotasStatus struct {
 	Exceeded       bool            `json:"exceeded"`
 	ExceededQuotas []ExceededQuota `json:"exceededQuotas"`
@@ -380,6 +407,11 @@ type ResourceType struct {
 }
 
 type ResourceValues struct {
+	Memory *string `json:"memory"`
+	CPU    *string `json:"cpu"`
+}
+
+type ResourceValuesInput struct {
 	Memory *string `json:"memory"`
 	CPU    *string `json:"cpu"`
 }
@@ -545,6 +577,12 @@ type UsageKind struct {
 type UsageKindResource struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
+}
+
+type EnabledMappingService struct {
+	Namespace   string                       `json:"namespace"`
+	AllServices bool                         `json:"allServices"`
+	Services    []*EnabledApplicationService `json:"services"`
 }
 
 type ApplicationStatus string

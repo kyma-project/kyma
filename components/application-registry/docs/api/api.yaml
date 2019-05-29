@@ -254,6 +254,20 @@ components:
         spec:
           type: 'object'
           description: 'OpenApi v2 swagger file: https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json'
+        headers:
+          type: 'object'
+          description: 'Additional headers to be injected during proxying requests'
+          additionalProperties:
+            type: 'array'
+            items:
+              type: 'string'
+        queryParameters:
+          type: 'object'
+          description: 'Additional query parameters to be injected during proxying requests'
+          additionalProperties:
+            type: 'array'
+            items: 
+              type: 'string'
         SpecificationUrl:
           type: 'string'
           format: 'uri'
@@ -330,6 +344,20 @@ components:
           $ref: '#/components/schemas/Basic'
         certificateGen:
           $ref: '#/components/schemas/CertificateGen'
+        headers:
+          type: 'object'
+          description: 'Additional headers to be injected during auth requests'
+          additionalProperties:
+            type: 'array'
+            items: 
+              type: 'string'
+        queryParameters:
+          type: 'object'
+          description: 'Additional query parameters to be injected during auth requests'
+          additionalProperties:
+            type: 'array'
+            items: 
+              type: 'string'
     ApiCredentialsUpdate:
       type: 'object'
       properties:
@@ -339,6 +367,20 @@ components:
           $ref: '#/components/schemas/Basic'
         certificateGen:
           $ref: '#/components/schemas/CertificateGenUpdate'
+        headers:
+          type: 'object'
+          description: 'Additional headers to be injected during auth requests'
+          additionalProperties:
+            type: 'array'
+            items: 
+              type: 'string'
+        queryParameters:
+          type: 'object'
+          description: 'Additional query parameters to be injected during auth requests'
+          additionalProperties:
+            type: 'array'
+            items: 
+              type: 'string'
     OAuth:
       type: 'object'
       properties:
