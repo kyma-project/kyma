@@ -31,8 +31,11 @@
 # The `values.yaml` file for `core` chart
 /resources/core/values.yaml @kyma-project/developers
 
-# The `heptio ark` chart
-/resources/ark/ @mwieczorek @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
+# The `heptio velero essentials` chart
+/resources/velero-essentials/ @joek @rakesh-garimella @venturasr @lilitgh @k15r
+
+# The `heptio velero` chart
+/resources/velero/ @joek @rakesh-garimella @venturasr @lilitgh @k15r
 
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -332,8 +335,8 @@
 # The static-users-generator directory
 /tools/static-users-generator/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# The tools/ark-plugins directory
-/tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
+# The tools/velero-plugins directory
+/tools/velero-plugins/ @mwieczorek @joek @rakesh-garimella @venturasr @lilitgh @k15r
 
 # The tools/kyma-installer directory
 /tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere

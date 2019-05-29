@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -52,14 +54,19 @@ func (svc *resourceQuotaService) ListResourceQuotas(namespace string) ([]*v1.Res
 }
 
 func (svc *resourceQuotaService) CreateResourceQuota(namespace string, name string, resourceQuotaInput gqlschema.ResourceQuotaInput) (*v1.ResourceQuota, error) {
+	var errs apierror.ErrorFieldAggregate
 	memoryLimitsParsed, err := resource.ParseQuantity(*resourceQuotaInput.Limits.Memory)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while parsing %s memory limits", pretty.ResourceQuota)
+		errs = append(errs, apierror.NewInvalidField("limits.memory", *resourceQuotaInput.Limits.Memory, fmt.Sprintf("while parsing %s memory limits", pretty.ResourceQuota)))
 	}
 
 	memoryRequestsParsed, err := resource.ParseQuantity(*resourceQuotaInput.Requests.Memory)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while parsing %s memory requests", pretty.ResourceQuota)
+		errs = append(errs, apierror.NewInvalidField("requests.memory", *resourceQuotaInput.Requests.Memory, fmt.Sprintf("while parsing %s memory requests", pretty.ResourceQuota)))
+	}
+
+	if len(errs) > 0 {
+		return nil, apierror.NewInvalid(pretty.ResourceQuota, errs)
 	}
 
 	ResourceQuota := &v1.ResourceQuota{

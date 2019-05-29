@@ -49,8 +49,9 @@ func (r *resourceQuotaResolver) ResourceQuotasQuery(ctx context.Context, namespa
 func (r *resourceQuotaResolver) CreateResourceQuota(ctx context.Context, namespace string, name string, resourceQuotaInput gqlschema.ResourceQuotaInput) (*gqlschema.ResourceQuota, error) {
 	item, err := r.rqLister.CreateResourceQuota(namespace, name, resourceQuotaInput)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while creating %s [namespace: %s]", pretty.ResourceQuotas, namespace))
-		return nil, gqlerror.New(err, pretty.ResourceQuotas, gqlerror.WithNamespace(namespace))
+		newError := errors.Wrapf(err, "while creating %s [namespace: %s]", pretty.ResourceQuotas, namespace)
+		glog.Error(newError)
+		return nil, gqlerror.New(newError, pretty.ResourceQuotas, gqlerror.WithDetails(newError.Error()), gqlerror.WithNamespace(namespace))
 	}
 
 	return r.converter.ToGQL(item), nil
