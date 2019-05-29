@@ -3,7 +3,6 @@ package certificates
 import (
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/secrets"
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/types"
 )
 
 const (
@@ -16,15 +15,15 @@ type Preserver interface {
 }
 
 type certificatePreserver struct {
-	clusterCertSecretName types.NamespacedName
-	caCertSecretName      types.NamespacedName
+	clusterCertSecretName string
+	caCertSecretName      string
 	secretsRepository     secrets.Repository
 }
 
-func NewCertificatePreserver(clusterCertSecret types.NamespacedName, caCertSecret types.NamespacedName, secretsRepository secrets.Repository) *certificatePreserver {
+func NewCertificatePreserver(clusterCertSecretName string, caCertSecretName string, secretsRepository secrets.Repository) *certificatePreserver {
 	return &certificatePreserver{
-		clusterCertSecretName: clusterCertSecret,
-		caCertSecretName:      caCertSecret,
+		clusterCertSecretName: clusterCertSecretName,
+		caCertSecretName:      caCertSecretName,
 		secretsRepository:     secretsRepository,
 	}
 }

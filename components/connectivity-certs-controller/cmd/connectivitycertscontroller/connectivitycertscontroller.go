@@ -115,11 +115,9 @@ func newSecretsRepository(k8sConfig *restclient.Config, namespace string) (secre
 		return nil, errors.Wrap(err, "Failed to initialize core clientset")
 	}
 
-	sei := coreClientset.CoreV1()
+	sei := coreClientset.CoreV1().Secrets(namespace)
 
-	return secrets.NewRepository(func(namespace string) secrets.Manager {
-		return sei.Secrets(namespace)
-	}), nil
+	return secrets.NewRepository(sei), nil
 }
 
 func newConnectionManager(k8sConfig *restclient.Config) (centralconnection.Client, error) {

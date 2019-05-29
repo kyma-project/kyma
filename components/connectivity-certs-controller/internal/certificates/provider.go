@@ -6,8 +6,6 @@ import (
 	"encoding/pem"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/types"
-
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/secrets"
 
 	"github.com/pkg/errors"
@@ -19,12 +17,12 @@ type Provider interface {
 }
 
 type certificateProvider struct {
-	clusterCertSecretName types.NamespacedName
-	caCertSecretName      types.NamespacedName
+	clusterCertSecretName string
+	caCertSecretName      string
 	secretsRepository     secrets.Repository
 }
 
-func NewCertificateProvider(clusterCertSecretName types.NamespacedName, caCertSecretName types.NamespacedName, secretsRepository secrets.Repository) Provider {
+func NewCertificateProvider(clusterCertSecretName string, caCertSecretName string, secretsRepository secrets.Repository) Provider {
 	return &certificateProvider{
 		secretsRepository:     secretsRepository,
 		caCertSecretName:      caCertSecretName,
