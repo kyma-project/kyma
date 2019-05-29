@@ -66,6 +66,7 @@ connectivity_certs_controller:
 
 tests:
   application_connector_tests:
+    enabled: *connectorServiceEnabled
     connector_service:
       central: false
     skipSslVerify: true
