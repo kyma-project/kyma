@@ -39,9 +39,9 @@ type service struct {
 	downloadClient      download.Client
 }
 
-func NewService(repository DocsTopicRepository, uploadClient upload.Client, insecureAssetDownload bool, specRequestTimeout int) Service {
+func NewService(repository DocsTopicRepository, uploadClient upload.Client, insecureAssetDownload bool, assetstoreRequestTimeout int) Service {
 	downloadClient := download.NewClient(&http.Client{
-		Timeout:   time.Duration(specRequestTimeout) * time.Second,
+		Timeout:   time.Duration(assetstoreRequestTimeout) * time.Second,
 		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureAssetDownload}},
 	})
 
