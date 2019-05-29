@@ -8,6 +8,10 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
+const (
+	defaultNamespace = "default"
+)
+
 type options struct {
 	appName                     string
 	namespace                   string
@@ -51,7 +55,8 @@ func parseNamespacedName(value string) types.NamespacedName {
 
 	if len(parts) == 1 {
 		return types.NamespacedName{
-			Name: parts[0],
+			Name:      parts[0],
+			Namespace: defaultNamespace,
 		}
 	}
 
