@@ -48,7 +48,7 @@ func createAPIHandlers(tokenManager tokens.Manager, tokenCreatorProvider tokens.
 	}
 
 	revokedCertsRepo := newRevokedCertsRepository(coreClientSet, opts.namespace, opts.revocationConfigMapName)
-	secretsRepository := newSecretsRepository(coreClientSet, opts.namespace)
+	secretsRepository := newSecretsRepository(coreClientSet)
 
 	subjectValues := certificates.CSRSubject{
 		Country:            env.country,
@@ -168,10 +168,12 @@ func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *
 	return handlerBuilder.GetHandler()
 }
 
-func newSecretsRepository(coreClientSet *kubernetes.Clientset, namespace string) secrets.Repository {
-	sei := coreClientSet.CoreV1().Secrets(namespace)
+func newSecretsRepository(coreClientSet *kubernetes.Clientset) secrets.Repository {
+	sei := coreClientSet.CoreV1()
 
-	return secrets.NewRepository(sei)
+	return secrets.NewRepository(func(namespace string) secrets.Manager {
+		return sei.Secrets(namespace)
+	})
 }
 
 func newRevokedCertsRepository(coreClientSet *kubernetes.Clientset, namespace, revocationSecretName string) revocation.RevocationListRepository {
