@@ -3,7 +3,7 @@ title: GraphQL
 type: Details
 ---
 
-Kyma uses a custom [GraphQL](https://graphql.org/) implementation in the Console Backend Service and deploys an RBAC-based logic to control the access to the GraphQL endpoint. All calls to the GraphQL endpoint require a valid Kyma token for authentication.
+Kyma uses a custom [GraphQL](http://graphql.org/) implementation in the Console Backend Service and deploys an RBAC-based logic to control the access to the GraphQL endpoint. All calls to the GraphQL endpoint require a valid Kyma token for authentication.
 
 The authorization in GraphQL uses RBAC, which means that:
   - All of the Roles, RoleBindings, ClusterRoles and CluserRoleBindings that you create and assign are effective and give the same permissions when users interact with the cluster resources both through the CLI and the GraphQL endpoints.
