@@ -17,6 +17,6 @@ This table lists the configurable parameters, their descriptions, and default va
 |-----------|-------------|---------------|
 | **cluster.orgId** |  Defines the ID of the organization for which the Kyma cluster is installed. It shows under **General settings** in the Console UI. | `my-org-123` |
 | **cluster.orgName** | Defines the name of the organization for which the Kyma cluster is installed. It shows under **General settings** in the Console UI. | `My Organization` |
-| **cluster.headerLogoUrl** | Defines the location of the logo image that shows in the Console UI navigation panel. | `assets/logo.svg` |
+| **cluster.headerLogoUrl** | Defines the location of the logo image that shows in the Console UI navigation header. | `assets/logo.svg` |
 | **cluster.faviconUrl** | Defines the icon that shows in the address bar of a browser. | `favicon.ico` |
-| **cluster.headerTitle** | Defines an additional title that shows next to the logo image in the Console UI navigation panel. | None |
+| **cluster.headerTitle** | Defines an additional title that shows next to the logo image in the Console UI navigation header. | None |
