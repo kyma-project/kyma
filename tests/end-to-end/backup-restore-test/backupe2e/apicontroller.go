@@ -320,9 +320,6 @@ func (t ApiControllerTest) getFunctionPodStatus(namespace string, waitmax time.D
 			}
 			return errors.Errorf("Function in state %v: \n%+v", pod.Status.Phase, pod)
 		},
-		retry.RetryIf(func(_ error) bool {
-			return !failed
-		}),
 		retry.DelayType(retry.FixedDelay),
 		retry.Delay(waitmax/10), //doesn't have to be very precise
 		retry.OnRetry(func(n uint, err error) {
