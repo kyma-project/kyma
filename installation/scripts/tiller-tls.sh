@@ -8,11 +8,12 @@ NAMESPACE="kyma-installer"
 mkdir -p "$(helm home)"
 
 function findHelmSecret() {
-    kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" > /dev/null || return 1
+    kubectl get -n "${NAMESPACE}" secret "${SECRET_NAME}" > /dev/null
 }
 
 function defer() {
-    if [[ "${i}" -eq "${MAX_RETRIES}" ]]; then return 1; fi
+    local current="${1}"
+    if [[ "${current}" -eq "${MAX_RETRIES}" ]]; then return 1; fi
     echo "---> Retrying in ${RETRY_TIME} seconds..."
     sleep "${RETRY_TIME}"
 }
@@ -29,7 +30,7 @@ function saveCerts {
 }
 
 echo "---> Finding Helm secret..."
-for i in $(seq 1 "${MAX_RETRIES}"); do findHelmSecret && break || defer || fail ; done
+for i in $(seq 1 "${MAX_RETRIES}"); do findHelmSecret && break || defer "${i}" || fail ; done
 
 echo "---> Helm secret found. Saving Helm certificates under the \"$(helm home)\" directory..."
 saveCerts
