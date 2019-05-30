@@ -18,7 +18,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
-        - ip: {{ .Values.minikubeIP }}
+        - ip: {{ .Values.tests.application_connector_tests.minikubeIP }}
           hostnames:
             - "connector-service.{{ .Values.global.ingress.domainName }}"
             - "gateway.{{ .Values.global.ingress.domainName }}"
