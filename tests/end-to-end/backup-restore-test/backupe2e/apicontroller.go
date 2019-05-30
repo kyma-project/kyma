@@ -2,8 +2,10 @@ package backupe2e
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -295,28 +297,36 @@ func (t ApiControllerTest) createFunction(namespace string) (*kubelessV1.Functio
 }
 
 func (t ApiControllerTest) getFunctionPodStatus(namespace string, waitmax time.Duration) error {
-	failed := false
-	return retry.Do(func() error {
-		pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + t.functionName})
-		if err != nil {
-			return err
-		}
-		if len(pods.Items) == 0 {
-			return errors.New("pod not scheduled yet")
-		}
-		if len(pods.Items) > 1 {
-			failed = true
-			return errors.Errorf("expected 1 pod, got %v: %+v", len(pods.Items), pods)
-		}
+	return retry.Do(
+		func() error {
+			pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + t.functionName})
+			if err != nil {
+				return err
+			}
+			if len(pods.Items) == 0 {
+				return errors.New("pod not scheduled yet")
+			}
+			if len(pods.Items) > 1 {
+				jsonPods, err := json.Marshal(pods)
+				if err != nil {
+					return err
+				}
+				return errors.Errorf("expected 1 pod, got %d: %s", len(pods.Items), string(jsonPods))
+			}
 
-		pod := pods.Items[0]
-		if pod.Status.Phase == corev1.PodRunning {
-			return nil
-		}
-		return errors.Errorf("Function in state %v: \n%+v", pod.Status.Phase, pod)
-	},
+			pod := pods.Items[0]
+			if pod.Status.Phase == corev1.PodRunning {
+				return nil
+			}
+			return errors.Errorf("Function in state %v: \n%+v", pod.Status.Phase, pod)
+		},
 		retry.RetryIf(func(_ error) bool {
 			return !failed
+		}),
+		retry.DelayType(retry.FixedDelay),
+		retry.Delay(waitmax/10), //doesn't have to be very precise
+		retry.OnRetry(func(n uint, err error) {
+			log.Printf("Function Pod Status exection #%d: %s\n", n, err)
 		}),
 	)
 }
