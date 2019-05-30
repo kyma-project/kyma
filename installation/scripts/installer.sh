@@ -94,10 +94,8 @@ fi
 echo -e "\nConfiguring sub-components"
 bash ${CURRENT_DIR}/configure-components.sh
 
-echo -e "\nApplying combo yaml"
+echo -e "\nStarting installation!"
 kubectl apply -f - <<< "$COMBO_YAML"
 
-echo -e "\nDownloading Helm certificates"
+echo -e "\nGetting Helm certificates"
 ${CURRENT_DIR}/tiller-tls.sh && echo "Certificates successfully saved! " || echo "An unexpected error occured while saving Helm certificates. Please check the installation status"
-
-echo -e "\nInstallation triggered!"
