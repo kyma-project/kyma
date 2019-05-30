@@ -53,17 +53,26 @@ func (o *options) String() string {
 func parseNamespacedName(value string) types.NamespacedName {
 	parts := strings.Split(value, string(types.Separator))
 
-	if len(parts) == 1 {
+	if singleValueProvided(parts) {
 		return types.NamespacedName{
 			Name:      parts[0],
 			Namespace: defaultNamespace,
 		}
 	}
 
+	namespace := get(parts, 0)
+	if namespace == "" {
+		namespace = defaultNamespace
+	}
+
 	return types.NamespacedName{
-		Namespace: get(parts, 0),
+		Namespace: namespace,
 		Name:      get(parts, 1),
 	}
+}
+
+func singleValueProvided(split []string) bool {
+	return len(split) == 1 || get(split, 1) == ""
 }
 
 func get(array []string, index int) string {
