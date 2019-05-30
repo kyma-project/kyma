@@ -10,9 +10,9 @@ import (
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
 
 	// . "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/asset-store"
-	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/cms"
+	// . "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/cms"
 
-	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
+	// . "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
 	backupClient "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/backup"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
