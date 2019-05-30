@@ -3,43 +3,62 @@ title: Overview
 type: Configuration
 ---
 
+## Introduction
+
+Users can configure the way Kyma is installed using in two ways:
+  - Customize the list of the components to install
+  - Provide overrides that allow to set specific configuration values for a component or entire installation.
+
+The list of components to install is specified in the **Installation** Custom Resource which, once defined in the cluster, is processed by Kyma Installer to perform the installation.
+During the installation of a component, Kyma Installer finds and applies all defined overrides in order to customize the configuration used in the installation process.
+Detailed description of Overrides is [here](https://kyma.project.io).
+
+
 ## Default settings
 
-During installation, the Installer applies onto a cluster or Minikube all components defined in the `installer-cr-cluster.yaml.tpl` or `installer-cr.yaml.tpl` templates with their configuration defined in `values.yaml` files. It also imports the configuration overrides defined in the `installer-config-cluster.yaml.tpl` and `installer-config-local.yaml.tpl` templates located under the `installation/resources` subfolder.
+Default configuration settings depends on installation type.
 
-> **NOTE:** The installation and configuration templates serve as the basis for creating the installation (`kyma-installer-local.yaml` and `kyma-installer-cluster.yaml`) and configuration (`kyma-config-local.yaml` and `kyma-config-cluster.yaml`) release artifacts.
+### Cluster installation
+For cluster installations refer to the relevant cluster installation procedure documented [here](https://kyma.project.io/).
+There is a list of components available for every Kyma release in the release artifact named *kyma-installer-cluster.yaml*.
+The overrides, if any, are described in relevant cluster installation documentation. The set of overrides is small, since default values are embedded in Helm charts of released Kyma version.
 
-Both configuration files contain pre-defined overrides in the form of Secrets and ConfigMaps that the Installer uses during installation to replace default values specified in `values.yaml` files or to provide required configuration values. While the local configuration file contains hardcoded override values, the cluster configuration file is based on placeholders replaced with real values during installation.
-You can add multiple Secrets and ConfigMaps for one component. If you duplicate the same parameter in a few Secrets or ConfigMaps for a given component but give it different values, the Installer accepts the last value in the file.
+### Local installation
+For local installation the list of available components is stored in Kyma project sources in the file **kyma/installation/resources/installer-cr.yaml.tpl**
+Default installation overrides can be found in the file **kyma/installation/resources/installer-config-local.yaml.tpl**
+>**CAUTION:** The configuration files contain tested and recommended settings. Note that you modify them on your own risk.
 
->**CAUTION:** Both `values.yaml` and configuration files contain tested and recommended production settings. Note that you modify them on your own risk.
 
 ## Installation configuration
 
-Before you start the Kyma installation process, you can customize the default settings in installation and configuration files.
+Before you start the Kyma installation process, you can customize the default settings.
 
 ### Components
 
-One of the installation artifacts is the Kyma Installer image that contains all component charts located in the `kyma/resources` folder. Both cluster and local installation files contain a full list of these component names and their Namespaces.
-Components that are not an integral part of the default Kyma Lite package are preceded with hashtags (#). It means that the Installer skips them during installation.   
+One of the installation artifacts is the Kyma-Installer image that bundles the Installer executable with all component charts located in the `kyma/resources` folder and corresponding to some Kyma version.
+Both cluster and local installation files contain a full list of these component names and their Namespaces.
+Components that are not an integral part of the default Kyma Lite package are commented out with a hash character (#). It means that the Installer skips them during installation.
 You can customize component installation files by:
-- Removing hashtags in front of the component entries to enable a component installation.
+- Uncommenting component entries to enable a component installation.
 - Adding hashtags to disable a component installation.
-- Adding new components to the list along with their chart definition in the `kyma/resources` folder. In that case you must create your own [Kyma Installer image](#installation-use-your-own-kyma-installer-image) as you are adding new chart configuration.
+- Adding new components to the list along with their chart definition in the `kyma/resources` folder. In that case you must create your own [Kyma Installer image](#installation-use-your-own-kyma-installer-image) as you are adding new component to Kyma.
 
 For more details on custom component installation, see [this](#configuration-custom-component-installation) document.
 
 ### Overrides
 
-The configuration files provide production-ready settings for the Installer. These include ConfigMaps and Secrets with the overrides for the values hardcoded in the `values.yaml` files of component charts.
-
-You can modify local settings, such as memory limits for a given resource, by changing values in the existing ConfigMaps and Secrets or adding new ones. Every ConfigMap and Secret that the Installer reads must contain [obligatory labels](#configuration-helm-overrides-for-kyma-installation-user-defined-overrides).
-
+#### Cluster installations
+If you need to customize the installation beyond what's already described in the relevant [cluster installation](https://kyma.project.io) documents, you can define new Overrides.
+Remember that Overrides must exist in a cluster before the installation is started, otherwise the Installer is not able to apply them.
+Overrides that affect entire installation, e.g. domainName, are already described in cluster installation documentation.
+Other overrides are component-specific. To learn the available configuration options for a given component, refer to **Configuration** section of the component documentation.
+Once you know the name and possible set of values for an override, you can define it by extending an existing ConfigMap/Secret object, or creating a new one.
 [Read more](#configuration-helm-overrides-for-kyma-installation) about the types of overrides and the rules for creating them.
+
 
 ## Runtime configuration
 
-Once Kyma installation completes, you can still modify the installation artifacts. However, for these changes to take effect, you must trigger the update process:  
+Once Kyma installation completes, you can still modify the installation artifacts. However, for these changes to take effect, you must trigger the update process:
 
 ```
 kubectl label installation/kyma-installation action=install
