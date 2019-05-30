@@ -144,9 +144,9 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		req, err := http.NewRequest("GET", "/", nil)
 
-		hp.On("ParseCertificateHeader", *req).Return(certificates.CertInfo{}, nil)
-
 		require.NoError(t, err)
+
+		hp.On("ParseCertificateHeader", *req).Return(certificates.CertInfo{}, nil)
 
 		rr := httptest.NewRecorder()
 

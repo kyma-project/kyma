@@ -12,13 +12,16 @@ type HeaderParser interface {
 	ParseCertificateHeader(r http.Request) (CertInfo, apperrors.AppError)
 }
 
+type SubjectVerification func(i CertInfo) bool
+
 type headerParser struct {
-	country      string
-	locality     string
-	organization string
-	unit         string
-	province     string
-	central      bool
+	country             string
+	locality            string
+	organization        string
+	organizationalUnit  string
+	province            string
+	central             bool
+	subjectVerification SubjectVerification
 }
 
 type CertInfo struct {
@@ -27,14 +30,23 @@ type CertInfo struct {
 }
 
 func NewHeaderParser(country, province, locality, organization, unit string, central bool) HeaderParser {
-	return &headerParser{
-		country:      country,
-		locality:     locality,
-		organization: organization,
-		unit:         unit,
-		province:     province,
-		central:      central,
+
+	headerParser := headerParser{
+		country:            country,
+		locality:           locality,
+		organization:       organization,
+		organizationalUnit: unit,
+		province:           province,
+		central:            central,
 	}
+
+	if central {
+		headerParser.subjectVerification = headerParser.isSubjectMatchingCentral
+	} else {
+		headerParser.subjectVerification = headerParser.isSubjectMatching
+	}
+
+	return &headerParser
 }
 
 func (hp *headerParser) ParseCertificateHeader(r http.Request) (CertInfo, apperrors.AppError) {
@@ -54,11 +66,7 @@ func (hp *headerParser) ParseCertificateHeader(r http.Request) (CertInfo, apperr
 
 	certInfos := createCertInfos(subjects, hashes)
 
-	if hp.central {
-		return hp.getCertInfoWithNonEmptySubject(certInfos)
-	} else {
-		return hp.getCertInfoWithMatchingSubject(certInfos)
-	}
+	return hp.getCertInfoWithMatchingSubject(certInfos)
 }
 
 func extractFromHeader(certHeader string, regex *regexp.Regexp) []string {
@@ -82,26 +90,17 @@ func get(array []string, index int) string {
 }
 
 func createCertInfos(subjects, hashes []string) []CertInfo {
-	certInfos := make([]CertInfo, 0)
+	certInfos := make([]CertInfo, len(subjects))
 	for i := 0; i < len(subjects); i++ {
 		certInfo := newCertInfo(subjects[i], hashes[i])
-		certInfos = append(certInfos, certInfo)
+		certInfos[i] = certInfo
 	}
 	return certInfos
 }
 
-func (hp *headerParser) getCertInfoWithNonEmptySubject(infos []CertInfo) (CertInfo, apperrors.AppError) {
-	for _, i := range infos {
-		if hp.isSubjectMatchingCentral(i) {
-			return i, nil
-		}
-	}
-	return CertInfo{}, apperrors.BadRequest("Failed to get certificate subject from header.")
-}
-
 func (hp *headerParser) getCertInfoWithMatchingSubject(infos []CertInfo) (CertInfo, apperrors.AppError) {
 	for _, i := range infos {
-		if hp.isSubjectMatching(i) {
+		if hp.subjectVerification(i) {
 			return i, nil
 		}
 	}
@@ -117,7 +116,7 @@ func newCertInfo(subject, hash string) CertInfo {
 }
 
 func (hp *headerParser) isSubjectMatching(i CertInfo) bool {
-	return GetOrganization(i.Subject) == hp.organization && GetOrganizationalUnit(i.Subject) == hp.unit &&
+	return GetOrganization(i.Subject) == hp.organization && GetOrganizationalUnit(i.Subject) == hp.organizationalUnit &&
 		GetCountry(i.Subject) == hp.country && GetLocality(i.Subject) == hp.locality && GetProvince(i.Subject) == hp.province
 }
 
