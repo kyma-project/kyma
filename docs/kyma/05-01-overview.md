@@ -51,10 +51,10 @@ For more details on custom component installation, see [this](#configuration-cus
 ### Overrides
 
 #### Cluster installations
-Common overrides that affect entire installation, e.g. domainName, are already described in the cluster [installation procedure](https://kyma.project.io/).
+Common overrides that affect entire installation, for example `global.domainName`, are already described in the cluster [installation procedure](https://kyma.project.io/).
 Other overrides are component-specific.
-To learn available configuration options for a given component, refer to **Configuration** section of the component documentation.
-Once you know the name and possible set of values for a configuration option, you can define an override for it by extending an existing ConfigMap/Secret object, or creating a new one.
+To learn about configuration options for a given component, refer to **Configuration** section of the component documentation.
+Once you know the name and possible set of values for a configuration option, define an override for it by extending an existing ConfigMap/Secret object, or creating a new one.
 [Read more](#configuration-helm-overrides-for-kyma-installation) about the types of overrides and the rules for creating them.
 >**CAUTION:** An override must exist in a cluster before the installation is started, otherwise the Installer is not be able to apply it correctly.
 
@@ -62,17 +62,13 @@ Once you know the name and possible set of values for a configuration option, yo
 
 ## Runtime configuration
 
-Once Kyma installation completes, you can still modify the installation artifacts. However, for these changes to take effect, you must trigger the update process:
-
-```
-kubectl label installation/kyma-installation action=install
-```
-
->**NOTE:** You cannot uninstall a Kyma component that is already installed. If you remove it from any of the installation files or add hashtags in front of its `name` and `namespace` entries, you only disable its further updates.
-
-Apart from modifying the installation artifacts, you can use ConfigMaps and Secrets to configure the installed components and their behavior in the runtime.
-
+Changing static configuration of the Kyma after installation is generally not supported.
+Some components may support custom runtime configuration changes though.
 For an example of such a runtime configuration, see [Helm Broker configuration](/components/helm-broker/#configuration-configuration) in which you add links to the bundle repositories to a ConfigMap and label it with the `helm-broker-repo=true` label for the Helm Broker to expose additional Service Classes in the Service Catalog.
+
+Another solution for changing components configuration after installation is to alter it's overrides and update the component using Kyma's [upgrade procedure](https://kyma.project.io).
+Support for this is limited only to component-specific configuration options and depends on the component. Refer to the component's documentation for details.
+
 
 ## Advanced configuration
 
