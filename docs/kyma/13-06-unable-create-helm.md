@@ -10,6 +10,9 @@ If try to install Kyma using your own image and the installation freezes at the 
 The `my-kyma.yaml` file contains two `image` fields. One of them defines the Tiller TLS certificates image and cannot be edited. Make sure that you edit the field that defines the URL of the Installer image.
 
 ```
-image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a # This field defines the Tiller TLS certificates image URL. Do not edit.
-image: eu.gcr.io/kyma-project/develop/installer:0fdc80dd # This field defines the Kyma Installer image URL. Edit this field.
-``` 
+# This field defines the Tiller TLS certificates image URL. Do not edit.
+image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+
+# This field defines the Kyma Installer image URL. Edit this field.
+image: eu.gcr.io/kyma-project/develop/installer:0fdc80dd
+```
