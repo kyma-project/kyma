@@ -3,13 +3,14 @@ package broker
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 
-	"github.com/pkg/errors"
-
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
-
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
+	"github.com/pkg/errors"
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
+	"github.com/sirupsen/logrus"
+	helmErrors "k8s.io/helm/pkg/storage/errors"
 )
 
 type deprovisionService struct {
@@ -22,7 +23,8 @@ type deprovisionService struct {
 	operationIDProvider     func() (internal.OperationID, error)
 	helmDeleter             helmDeleter
 
-	mu sync.Mutex
+	mu  sync.Mutex
+	log logrus.FieldLogger
 
 	testHookAsyncCalled func(internal.OperationID)
 }
@@ -113,11 +115,15 @@ func (svc *deprovisionService) doAsync(ctx context.Context, iID internal.Instanc
 func (svc *deprovisionService) do(ctx context.Context, iID internal.InstanceID, opID internal.OperationID, releaseName internal.ReleaseName) {
 
 	fDo := func() error {
-		if err := svc.helmDeleter.Delete(releaseName); err != nil {
+		err := svc.helmDeleter.Delete(releaseName)
+		switch {
+		case err == nil:
+		case strings.Contains(err.Error(), helmErrors.ErrReleaseNotFound(string(releaseName)).Error()):
+		default:
 			return errors.Wrap(err, "while deleting helm release")
 		}
 
-		err := svc.instanceBindDataRemover.Remove(iID)
+		err = svc.instanceBindDataRemover.Remove(iID)
 		switch {
 		// we are not checking if instance was bindable and because of that NotFound error is also in happy path
 		// BEWARE: such solution can produce false positive errors e.g.
@@ -148,6 +154,7 @@ func (svc *deprovisionService) do(ctx context.Context, iID internal.InstanceID, 
 	}
 
 	if err := svc.operationUpdater.UpdateStateDesc(iID, opID, opState, &opDesc); err != nil {
-		// TODO: create event from broker and log as we are not able to propagate failure to service catalog
+		svc.log.Errorf("Cannot update state for instance [%s]: [%v]\n", iID, err)
+		return
 	}
 }

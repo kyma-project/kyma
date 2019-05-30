@@ -15,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker/automock"
+	helmErrors "k8s.io/helm/pkg/storage/errors"
 )
 
 func TestDeprovisionServiceDeprovisionSuccess(t *testing.T) {
@@ -36,6 +37,53 @@ func TestDeprovisionServiceDeprovisionSuccess(t *testing.T) {
 		}).Once()
 
 	ts.HelmClientMock.ExpectOnDelete(ts.Exp.ReleaseName).Once()
+
+	ts.InstBindDataMock.ExpectOnRemove(ts.Exp.InstanceID).Once()
+	ts.InstStorageMock.ExpectOnRemove(ts.Exp.InstanceID).Once()
+
+	ts.OpIDProviderFake = func() (internal.OperationID, error) {
+		return ts.Exp.OperationID, nil
+	}
+
+	svc := broker.NewDeprovisionService(ts.GetAllMocks())
+
+	osbCtx := *broker.NewOSBContext("", "v1")
+	req := ts.FixDeprovisionRequest()
+
+	// WHEN
+	resp, err := svc.Deprovision(context.Background(), osbCtx, &req)
+
+	// THEN
+	assert.NoError(t, err)
+	assert.True(t, resp.Async)
+	assert.EqualValues(t, ts.Exp.OperationID, *resp.OperationKey)
+
+	select {
+	case <-ts.UpdateStateDescMethodCalled:
+	case <-time.After(time.Millisecond * 100):
+		t.Fatal("timeout on operation succeeded")
+	}
+}
+
+func TestDeprovisionServiceDeprovisionSuccessIfReleaseNotFound(t *testing.T) {
+	// GIVEN
+	ts := newDeprovisionServiceTestSuite(t)
+	ts.SetUp()
+
+	defer ts.AssertExpectations(t)
+
+	ts.InstStateGetterMock.ExpectOnIsDeprovisioned(ts.Exp.InstanceID, false).Once()
+	ts.InstStateGetterMock.ExpectOnIsDeprovisioningInProgress(ts.Exp.InstanceID, internal.OperationID(""), false).Once()
+
+	ts.InstStorageMock.ExpectOnGet(ts.Exp.InstanceID, ts.FixInstance()).Once()
+
+	ts.OpStorageMock.ExpectOnInsert(ts.FixInstanceOperation()).Once()
+	ts.OpStorageMock.ExpectOnUpdateStateDesc(ts.Exp.InstanceID, ts.Exp.OperationID, internal.OperationStateSucceeded, "deprovisioning succeeded").
+		Run(func(args mock.Arguments) {
+			close(ts.UpdateStateDescMethodCalled)
+		}).Once()
+
+	ts.HelmClientMock.On("Delete", ts.Exp.ReleaseName).Return(helmErrors.ErrReleaseNotFound(string(ts.Exp.ReleaseName))).Once()
 
 	ts.InstBindDataMock.ExpectOnRemove(ts.Exp.InstanceID).Once()
 	ts.InstStorageMock.ExpectOnRemove(ts.Exp.InstanceID).Once()
