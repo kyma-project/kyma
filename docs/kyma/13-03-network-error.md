@@ -13,19 +13,19 @@ Fix this by following one of these two approaches:
       Minikube on MacOS
       </summary>
 
-      ```
-      sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain {PATH_TO_CERT}
-      ```
-      
+```
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain {PATH_TO_CERT}
+```
+
       </details>
       <details>
       <summary>
       Minikube on Linux
       </summary>
 
-      ```
-      certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n {CERT_DISPLAYNAME} -i {PATH_TO_CERT}
-      ```
+```
+certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n {CERT_DISPLAYNAME} -i {PATH_TO_CERT}
+```
 
       </details>
       <details>
@@ -33,13 +33,13 @@ Fix this by following one of these two approaches:
       Cluster installation with xip.io
       </summary>
 
-      Run this command after you install Kyma on your GKE or AKS cluster:
-      ```
-      tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
-      && kubectl get configmap cluster-certificate-overrides -n kyma-installer -o jsonpath='{.data.global\.tlsCrt}' | base64 --decode > $tmpfile \
-      && sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
-      && rm $tmpfile
-      ```
+Run this command after you install Kyma on your GKE or AKS cluster:
+```
+tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
+&& kubectl get configmap cluster-certificate-overrides -n kyma-installer -o jsonpath='{.data.global\.tlsCrt}' | base64 --decode > $tmpfile \
+&& sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
+&& rm $tmpfile
+```
 
       </details>
     </div>
