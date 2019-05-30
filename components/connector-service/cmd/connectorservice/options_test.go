@@ -75,8 +75,6 @@ func TestOptions_ParseDuration(t *testing.T) {
 }
 
 func TestParseNamespacedName(t *testing.T) {
-	defaultNamespace := "kyma-integration"
-
 	testCases := []struct {
 		value     string
 		namespace string
@@ -106,7 +104,7 @@ func TestParseNamespacedName(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(fmt.Sprintf("should parse \"%s\" namespaced name", test.value), func(t *testing.T) {
-			namespaceName := parseNamespacedName(test.value, defaultNamespace)
+			namespaceName := parseNamespacedName(test.value)
 			assert.Equal(t, test.namespace, namespaceName.Namespace)
 			assert.Equal(t, test.name, namespaceName.Name)
 		})

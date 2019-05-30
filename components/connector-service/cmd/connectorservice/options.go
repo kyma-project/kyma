@@ -13,7 +13,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const defaultCertificateValidityTime = 90 * 24 * time.Hour
+const (
+	defaultCertificateValidityTime = 90 * 24 * time.Hour
+	defaultNamespace               = "default"
+)
 
 type options struct {
 	appName                        string
@@ -152,7 +155,7 @@ func parseDuration(durationString string) (time.Duration, error) {
 	return time.Duration(timeLength) * unitsMap[timeUnit], nil
 }
 
-func parseNamespacedName(value, defaultNamespace string) types.NamespacedName {
+func parseNamespacedName(value string) types.NamespacedName {
 	parts := strings.Split(value, string(types.Separator))
 
 	if singleValueProvided(parts) {
