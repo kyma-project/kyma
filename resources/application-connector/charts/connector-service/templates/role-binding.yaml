@@ -40,3 +40,75 @@ roleRef:
   kind: Role
   name: {{ .Chart.Name }}-role
   apiGroup: rbac.authorization.k8s.io
+
+  {{ if .Values.secrets.caSecretNamespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Chart.Name }}-{{ .Values.secrets.caSecretName }}-role
+  namespace: {{ .Values.secrets.caSecretNamespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+rules:
+- apiGroups: ["*"]
+  resources: ["secrets"]
+  verbs: ["create", "get", "update", "delete"]
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}-{{ .Values.secrets.caSecretName }}-rolebinding
+  namespace: {{ .Values.secrets.caSecretNamespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+subjects:
+- kind: ServiceAccount
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Chart.Name }}-{{ .Values.secrets.caSecretName }}-role
+  apiGroup: rbac.authorization.k8s.io
+  {{ end }}
+
+  {{ if .Values.secrets.rootCACertificateSecretNamespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Chart.Name }}-{{ .Values.secrets.rootCACertificateSecretName }}-role
+  namespace: {{ .Values.secrets.rootCACertificateSecretNamespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+rules:
+- apiGroups: ["*"]
+  resources: ["secrets"]
+  verbs: ["create", "get", "update", "delete"]
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}-{{ .Values.secrets.rootCACertificateSecretName }}-rolebinding
+  namespace: {{ .Values.secrets.rootCACertificateSecretNamespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+subjects:
+- kind: ServiceAccount
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Chart.Name }}-{{ .Values.secrets.rootCACertificateSecretName }}-role
+  apiGroup: rbac.authorization.k8s.io
+  {{ end }}
