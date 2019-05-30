@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	gqlschema "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,7 +17,7 @@ import (
 func TestLimitRangeService_List(t *testing.T) {
 	// GIVEN
 	informer := fixLimitRangeInformer(fixLimitRange())
-	svc := newLimitRangeService(informer)
+	svc := newLimitRangeService(informer, nil)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 	// WHEN
@@ -31,7 +32,7 @@ func TestLimitRangeService_List(t *testing.T) {
 func TestLimitRangeService_List_NotFound(t *testing.T) {
 	// GIVEN
 	informer := fixLimitRangeInformer()
-	svc := newLimitRangeService(informer)
+	svc := newLimitRangeService(informer, nil)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 	// WHEN

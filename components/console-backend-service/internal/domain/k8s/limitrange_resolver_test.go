@@ -16,7 +16,7 @@ func TestLimitRangeResolver_LimitRangeQuery(t *testing.T) {
 	// GIVEN
 	informer := fixLimitRangeInformer(fixLimitRange())
 
-	svc := newLimitRangeService(informer)
+	svc := newLimitRangeService(informer, nil)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 	resolver := newLimitRangeResolver(svc)

@@ -8,17 +8,22 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
 )
 
-func newLimitRangeService(informer cache.SharedIndexInformer) *limitRangeService {
+func newLimitRangeService(informer cache.SharedIndexInformer, client corev1.CoreV1Interface) *limitRangeService {
 	return &limitRangeService{
 		informer: informer,
+		client:   client,
 	}
 }
 
 type limitRangeService struct {
 	informer cache.SharedIndexInformer
+	client   corev1.CoreV1Interface
 }
 
 func (svc *limitRangeService) List(ns string) ([]*v1.LimitRange, error) {

@@ -445,6 +445,7 @@ type ComplexityRoot struct {
 		UpdateService                 func(childComplexity int, name string, namespace string, service JSON) int
 		DeleteService                 func(childComplexity int, name string, namespace string) int
 		CreateNamespace               func(childComplexity int, name string, labels *Labels) int
+		CreateLimitRange              func(childComplexity int, namespace string, name string, limitRange LimitRangeInput) int
 	}
 
 	Namespace struct {
@@ -861,6 +862,7 @@ type MutationResolver interface {
 	UpdateService(ctx context.Context, name string, namespace string, service JSON) (*Service, error)
 	DeleteService(ctx context.Context, name string, namespace string) (*Service, error)
 	CreateNamespace(ctx context.Context, name string, labels *Labels) (NamespaceCreationOutput, error)
+	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*LimitRange, error)
 }
 type NamespaceResolver interface {
 	Applications(ctx context.Context, obj *Namespace) ([]string, error)
@@ -2117,6 +2119,39 @@ func field_Mutation_createNamespace_args(rawArgs map[string]interface{}) (map[st
 		}
 	}
 	args["labels"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_createLimitRange_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	var arg2 LimitRangeInput
+	if tmp, ok := rawArgs["limitRange"]; ok {
+		var err error
+		arg2, err = UnmarshalLimitRangeInput(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limitRange"] = arg2
 	return args, nil
 
 }
@@ -5277,6 +5312,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateNamespace(childComplexity, args["name"].(string), args["labels"].(*Labels)), true
+
+	case "Mutation.createLimitRange":
+		if e.complexity.Mutation.CreateLimitRange == nil {
+			break
+		}
+
+		args, err := field_Mutation_createLimitRange_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateLimitRange(childComplexity, args["namespace"].(string), args["name"].(string), args["limitRange"].(LimitRangeInput)), true
 
 	case "Namespace.name":
 		if e.complexity.Namespace.Name == nil {
@@ -15607,6 +15654,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "createLimitRange":
+			out.Values[i] = ec._Mutation_createLimitRange(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -16731,6 +16780,41 @@ func (ec *executionContext) _Mutation_createNamespace(ctx context.Context, field
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._NamespaceCreationOutput(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_createLimitRange(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_createLimitRange_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateLimitRange(rctx, args["namespace"].(string), args["name"].(string), args["limitRange"].(LimitRangeInput))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*LimitRange)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._LimitRange(ctx, field.Selections, res)
 }
 
 var namespaceImplementors = []string{"Namespace"}
@@ -28297,6 +28381,42 @@ func UnmarshalInputTopic(v interface{}) (InputTopic, error) {
 	return it, nil
 }
 
+func UnmarshalLimitRangeInput(v interface{}) (LimitRangeInput, error) {
+	var it LimitRangeInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "default":
+			var err error
+			it.Default, err = UnmarshalResourceValuesInput(v)
+			if err != nil {
+				return it, err
+			}
+		case "defaultRequest":
+			var err error
+			it.DefaultRequest, err = UnmarshalResourceValuesInput(v)
+			if err != nil {
+				return it, err
+			}
+		case "max":
+			var err error
+			it.Max, err = UnmarshalResourceValuesInput(v)
+			if err != nil {
+				return it, err
+			}
+		case "type":
+			var err error
+			it.Type, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func UnmarshalLocalObjectReferenceInput(v interface{}) (LocalObjectReferenceInput, error) {
 	var it LocalObjectReferenceInput
 	var asMap = v.(map[string]interface{})
@@ -29056,6 +29176,13 @@ type LimitRangeItem {
     defaultRequest: ResourceType!
 }
 
+input LimitRangeInput {
+    default: ResourceValuesInput!,
+    defaultRequest: ResourceValuesInput!
+    max: ResourceValuesInput!
+    type: String!
+}
+
 enum LimitType {
     Container
     Pod
@@ -29596,6 +29723,8 @@ type Mutation {
     deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
     createNamespace(name: String!, labels: Labels): NamespaceCreationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
+    
+    createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1"})
 }
 
 # Subscriptions
