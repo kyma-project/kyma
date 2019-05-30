@@ -17,7 +17,6 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RESOURCES_DIR="${CURRENT_DIR}/../resources"
 INSTALLER_YAML_PATH="${RESOURCES_DIR}/installer.yaml"
 INSTALLER_LOCAL_CONFIG_PATH="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
-INSTALLER_CLUSTER_CONFIG_PATH="${RESOURCES_DIR}/installer-config-cluster.yaml.tpl"
 INSTALLER_LOCAL_CR_PATH="${RESOURCES_DIR}/installer-cr.yaml.tpl"
 INSTALLER_CLUSTER_CR_PATH="${RESOURCES_DIR}/installer-cr-cluster.yaml.tpl"
 
@@ -43,8 +42,6 @@ function generateClusterArtifact() {
     ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER_YAML_PATH} ${TMP_CLUSTER_CR} \
       | sed -E ";s;image: eu.gcr.io\/kyma-project\/develop\/installer:.+;image: eu.gcr.io/kyma-project/${KYMA_INSTALLER_PUSH_DIR}kyma-installer:${KYMA_INSTALLER_VERSION};" \
       > ${ARTIFACTS_DIR}/kyma-installer-cluster.yaml
-
-    cp ${INSTALLER_CLUSTER_CONFIG_PATH} ${ARTIFACTS_DIR}/kyma-config-cluster.yaml
 
     rm -rf ${TMP_CLUSTER_CR}
 }
