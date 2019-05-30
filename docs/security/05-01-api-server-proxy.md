@@ -19,4 +19,4 @@ This table lists the configurable parameters, their descriptions, and default va
 | **port.insecure** | Specifies the port that exposes API Server Proxy through Istio Ingress. | `8444` |
 | **hpa.minReplicas** | Defines the initial number of created API Server Proxy instances. | `1` |
 | **hpa.maxReplicas** | Defines the maximum number of created API Server Proxy instances. | `3` |
-| **hpa.targetAverageUtilization** | Specifies the average percentage of a given instance memory utilization. After exceeding this limit, Kubernetes creates another API Server Proxy instance. | `50` |
+| **hpa.metrics.resource.targetAverageUtilization** | Specifies the average percentage of a given instance memory utilization. After exceeding this limit, Kubernetes creates another API Server Proxy instance. | `50` |
