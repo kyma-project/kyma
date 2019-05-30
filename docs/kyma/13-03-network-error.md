@@ -16,6 +16,7 @@ Fix this by following one of these two approaches:
       ```
       sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain {PATH_TO_CERT}
       ```
+      
       </details>
       <details>
       <summary>
@@ -25,6 +26,7 @@ Fix this by following one of these two approaches:
       ```
       certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n {CERT_DISPLAYNAME} -i {PATH_TO_CERT}
       ```
+
       </details>
       <details>
       <summary>
@@ -38,8 +40,9 @@ Fix this by following one of these two approaches:
       && sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
       && rm $tmpfile
       ```
+
       </details>
     </div>
 
-- Trust the certificate in your browser. Follow [this guide](https://stackoverflow.com/questions/7580508/getting-chrome-to-accept-self-signed-localhost-certificate) for Chrome or [this guide](https://origin-symwisedownload.symantec.com/resources/webguides/sslv/sslva_first_steps/Content/Topics/Configure/ssl_firefox_cert.htm) for Firefox. You must trust the certificate for the following addresses: `apiserver.foo.bar`, `console.foo.bar`, `dex.foo.bar`, `console-backend.foo.bar`.
+- Trust the certificate in your browser. Follow [this guide](https://stackoverflow.com/questions/7580508/getting-chrome-to-accept-self-signed-localhost-certificate) for Chrome or [this guide](https://origin-symwisedownload.symantec.com/resources/webguides/sslv/sslva_first_steps/Content/Topics/Configure/ssl_firefox_cert.htm) for Firefox. You must trust the certificate for these addresses: `apiserver.foo.bar`, `console.foo.bar`, `dex.foo.bar`, `console-backend.foo.bar`.
   >**TIP:** This solution is suitable for users who don't have administrative access to the OS.
