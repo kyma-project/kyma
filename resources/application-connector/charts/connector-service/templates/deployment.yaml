@@ -4,8 +4,6 @@ metadata:
   name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
   labels:
-    traffic.sidecar.istio.io/includeInboundPorts: "8080"
-    traffic.sidecar.istio.io/includeInboundPorts: "8081"
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}
     heritage: {{ .Release.Service }}

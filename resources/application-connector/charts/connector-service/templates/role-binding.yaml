@@ -9,9 +9,6 @@ metadata:
     heritage: {{ .Release.Service }}
 rules:
 - apiGroups: ["*"]
-  resources: ["secrets"]
-  verbs: ["create", "get", "update", "delete"]
-- apiGroups: ["*"]
   resources: ["configmaps"]
   verbs: ["get", "update"]
 {{- if .Values.podSecurityPolicy.enabled }}
@@ -41,7 +38,8 @@ roleRef:
   name: {{ .Chart.Name }}-role
   apiGroup: rbac.authorization.k8s.io
 
-  {{ if .Values.secrets.caSecretNamespace }}
+
+  {{ if .Values.secrets.caSecretName }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -77,13 +75,14 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   {{ end }}
 
-  {{ if .Values.secrets.rootCACertificateSecretNamespace }}
+
+  {{ if .Values.secrets.rootCACertificateSecretName  }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ .Chart.Name }}-{{ .Values.secrets.rootCACertificateSecretName }}-role
-  namespace: {{ .Values.secrets.rootCACertificateSecretNamespace }}
+  namespace: {{ .Values.secrets.rootCACertificateSecretNamespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}
@@ -98,7 +97,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Chart.Name }}-{{ .Values.secrets.rootCACertificateSecretName }}-rolebinding
-  namespace: {{ .Values.secrets.rootCACertificateSecretNamespace }}
+  namespace: {{ .Values.secrets.rootCACertificateSecretNamespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}
