@@ -3,7 +3,7 @@ title: Console access network error
 type: Troubleshooting
 ---
 
-If you try to access the Console of a local or a cluster Kyma deployment and your browser shows a 'Network Error', your machine doesn't have the Kyma self-signed TLS certificate added to your system's trusted certificate list.
+If you try to access the Console of a local or a cluster Kyma deployment and your browser shows a 'Network Error', your local machine doesn't have the Kyma self-signed TLS certificate added to the system trusted certificate list.
 Fix this by following one of these two approaches:
 
 - Add the Kyma certificate to the trusted certificates list of your OS:
