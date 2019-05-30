@@ -25,7 +25,6 @@ type namespaceSvc interface {
 
 //go:generate mockery -name=gqlNamespaceConverter -output=automock -outpkg=automock -case=underscore
 type gqlNamespaceConverter interface {
-	ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error)
 	ToGQLs(in []*v1.Namespace) ([]gqlschema.Namespace, error)
 }
 
@@ -105,17 +104,29 @@ func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschem
 	return appNames, nil
 }
 
-func (r *namespaceResolver) CreateNamespaceMutation(ctx context.Context, name string, labels gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) {
+func (r *namespaceResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) {
 
-	// TODO: remove the 'env' label when the method to distinguish if it's a system namespace or not
-	labels["env"] = "true"
-	_, err := r.namespaceSvc.Create(name, labels)
+	// Currently we distinguish the non-system namespaces, by the 'env' label, so we have to add it while creating a new namespace.
+	// TODO: Update this part once this solution for non-system namespace is changed.
+	gqlLabels := r.populateLabels(labels)
+	ns, err := r.namespaceSvc.Create(name, gqlLabels)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.Namespace, name))
 		return gqlschema.NamespaceCreationOutput{}, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
 	}
 	return gqlschema.NamespaceCreationOutput{
 		Name:   name,
-		Labels: labels,
+		Labels: ns.Labels,
 	}, nil
+}
+
+func (r *namespaceResolver) populateLabels(givenLabels *gqlschema.Labels) map[string]string {
+	labels := map[string]string{}
+	if givenLabels != nil {
+		for k, v := range *givenLabels {
+			labels[k] = v
+		}
+	}
+	labels["env"] = "true"
+	return labels
 }

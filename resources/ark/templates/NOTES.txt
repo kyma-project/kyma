@@ -1,4 +1,0 @@
-Once the Ark server is up and running, you need the client before you can use it.
-1. wget https://github.com/heptio/ark/releases/download/{{ .Values.image.tag }}/ark-{{ .Values.image.tag }}-darwin-amd64.tar.gz
-2. tar -xvf ark-{{ .Values.image.tag }}-darwin-amd64.tar.gz -C ark-client
-

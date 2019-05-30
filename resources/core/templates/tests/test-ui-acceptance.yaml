@@ -25,6 +25,7 @@ spec:
               - "lambdas-ui.{{ .Values.global.ingress.domainName }}"
               - "console-backend.{{ .Values.global.ingress.domainName }}"
               - "minio.{{ .Values.global.ingress.domainName }}"
+              - "ui-test-exposed-api.{{ .Values.global.ingress.domainName }}"
           {{ end }}
           serviceAccountName: "test-{{ template "fullname" . }}-ui-acceptance"
           containers:

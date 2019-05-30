@@ -1,0 +1,7 @@
+appVersion: 0.11.0
+name: velero-essentials
+version: 0.0.1
+description: Velero CRDs for Kyma
+keywords:
+  - Backup
+  - Heptio-Velero

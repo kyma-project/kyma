@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
@@ -38,6 +39,17 @@ func NewEventsHandler(maxRequestSize int64) http.Handler {
 	return &maxBytesHandler{next: http.HandlerFunc(handleEvents), limit: maxRequestSize}
 }
 
+func filterCEHeaders(req *http.Request) map[string][]string {
+	//forward `ce-` headers only
+	headers := make(map[string][]string)
+	for k := range req.Header {
+		if strings.HasPrefix(strings.ToUpper(k), "CE-") {
+			headers[k] = req.Header[k]
+		}
+	}
+	return headers
+}
+
 // handleEvents handles "/v1/events" requests
 func handleEvents(w http.ResponseWriter, req *http.Request) {
 	if req.Body == nil || req.ContentLength == 0 {
@@ -63,7 +75,9 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 
 	traceHeaders := getTraceHeaders(req)
 
-	err = handleEvent(parameters, resp, traceHeaders)
+	forwardHeaders := filterCEHeaders(req)
+
+	err = handleEvent(parameters, resp, traceHeaders, &forwardHeaders)
 	if err == nil {
 		if resp.Ok != nil || resp.Error != nil {
 			writeJSONResponse(w, resp)
@@ -78,7 +92,8 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	return
 }
 
-var handleEvent = func(publishRequest *api.PublishEventParameters, publishResponse *api.PublishEventResponses, traceHeaders *map[string]string) (err error) {
+var handleEvent = func(publishRequest *api.PublishEventParameters, publishResponse *api.PublishEventResponses,
+	traceHeaders *map[string]string, forwardHeaders *map[string][]string) (err error) {
 	checkResp := checkParameters(publishRequest)
 	if checkResp.Error != nil {
 		publishResponse.Error = checkResp.Error
@@ -90,7 +105,7 @@ var handleEvent = func(publishRequest *api.PublishEventParameters, publishRespon
 		return err
 	}
 	// send the event
-	sendEventResponse, err := bus.SendEvent(sendRequest, traceHeaders)
+	sendEventResponse, err := bus.SendEvent(sendRequest, traceHeaders, forwardHeaders)
 	if err != nil {
 		return err
 	}

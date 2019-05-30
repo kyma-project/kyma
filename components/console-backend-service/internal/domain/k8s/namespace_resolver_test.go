@@ -106,23 +106,28 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 	})
 }
 
-func TestNamespaceResolver_CreateNamespaceMutationn(t *testing.T) {
+func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		name := "exampleName"
-		labels := gqlschema.Labels{}
-		resource := fixNamespace(name, labels)
+		labels := gqlschema.Labels{
+			"test": "true",
+		}
+		expectedLabels := gqlschema.Labels{
+			"test": "true",
+			"env":  "true",
+		}
+		resource := fixNamespace(name, expectedLabels)
 		expected := gqlschema.NamespaceCreationOutput{
 			Name:   name,
-			Labels: labels,
+			Labels: expectedLabels,
 		}
 
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
-		svc.On("Create", name, labels).Return(resource, nil).Once()
+		svc.On("Create", name, expectedLabels).Return(resource, nil).Once()
 		defer svc.AssertExpectations(t)
 		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
-
-		result, err := resolver.CreateNamespaceMutation(nil, name, labels)
+		result, err := resolver.CreateNamespace(nil, name, &labels)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -131,14 +136,17 @@ func TestNamespaceResolver_CreateNamespaceMutationn(t *testing.T) {
 	t.Run("Error", func(t *testing.T) {
 		name := "exampleName"
 		labels := gqlschema.Labels{}
+		expectedLabels := gqlschema.Labels{
+			"env": "true",
+		}
 
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
-		svc.On("Create", name, labels).Return(nil, errors.New("Error")).Once()
+		svc.On("Create", name, expectedLabels).Return(nil, errors.New("Error")).Once()
 		defer svc.AssertExpectations(t)
 		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
 
-		result, err := resolver.CreateNamespaceMutation(nil, name, labels)
+		result, err := resolver.CreateNamespace(nil, name, &labels)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))

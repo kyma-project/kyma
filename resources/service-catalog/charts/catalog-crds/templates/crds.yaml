@@ -2,8 +2,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: clusterservicebrokers.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -12,6 +10,10 @@ spec:
     plural: clusterservicebrokers
     singular: clusterservicebroker
     kind: ClusterServiceBroker
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
   additionalPrinterColumns:
     - name: URL
       type: string
@@ -31,8 +33,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: servicebrokers.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -41,6 +41,10 @@ spec:
     plural: servicebrokers
     singular: servicebroker
     kind: ServiceBroker
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
   additionalPrinterColumns:
   - name: URL
     type: string
@@ -60,8 +64,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: serviceclasses.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -70,6 +72,10 @@ spec:
     plural: serviceclasses
     singular: serviceclass
     kind: ServiceClass
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
   additionalPrinterColumns:
   - name: External-Name
     type: string
@@ -89,8 +95,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: clusterserviceclasses.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -99,6 +103,10 @@ spec:
     plural: clusterserviceclasses
     singular: clusterserviceclass
     kind: ClusterServiceClass
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
   additionalPrinterColumns:
   - name: External-Name
     type: string
@@ -118,8 +126,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: serviceplans.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -128,6 +134,10 @@ spec:
     plural: serviceplans
     singular: serviceplan
     kind: ServicePlan
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
   additionalPrinterColumns:
   - name: External-Name
     type: string
@@ -150,8 +160,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: clusterserviceplans.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -160,6 +168,10 @@ spec:
     plural: clusterserviceplans
     singular: clusterserviceplan
     kind: ClusterServicePlan
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
   additionalPrinterColumns:
   - name: External-Name
     type: string
@@ -182,8 +194,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: serviceinstances.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -192,6 +202,10 @@ spec:
     plural: serviceinstances
     singular: serviceinstance
     kind: ServiceInstance
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
   additionalPrinterColumns:
   - name: Class
     type: string
@@ -214,8 +228,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: servicebindings.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -224,6 +236,10 @@ spec:
     plural: servicebindings
     singular: servicebinding
     kind: ServiceBinding
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
   additionalPrinterColumns:
   - name: Service-Instance
     type: string
@@ -239,5 +255,3 @@ spec:
     JSONPath: .metadata.creationTimestamp
   subresources:
     status: {}
-
----

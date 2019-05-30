@@ -81,5 +81,5 @@ func defaultConfig() (Interface, error) {
 
 	k8sClientset := k8s.NewForConfigOrDie(kubeConfig)
 
-	return New(networkingClientset, k8sClientset, testingGateway), nil
+	return New(networkingClientset, k8sClientset, testingGateway, defaultCorsConfig()), nil
 }

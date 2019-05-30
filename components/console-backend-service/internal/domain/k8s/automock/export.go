@@ -8,6 +8,10 @@ func NewResourceQuotaLister() *resourceQuotaLister {
 	return new(resourceQuotaLister)
 }
 
+func NewGQLResourceQuotaConverter() *gqlResourceQuotaConverter {
+	return new(gqlResourceQuotaConverter)
+}
+
 func NewStatefulSetLister() *statefulSetLister {
 	return new(statefulSetLister)
 }

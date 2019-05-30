@@ -7,20 +7,18 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestMicrofrontendConverter_ToGQL(t *testing.T) {
+func TestMicroFrontendConverter_ToGQL(t *testing.T) {
 	t.Run("All properties are given", func(t *testing.T) {
-		converter := microfrontendConverter{}
+		converter := newMicroFrontendConverter()
 		name := "test-name"
 		namespace := "test-namespace"
 		version := "v1"
 		category := "test-category"
 		viewBaseUrl := "http://test-viewBaseUrl.com"
-		settings, err := fixSettings()
-		assert.Nil(t, err)
 
+		navigationNode := fixNavigationNode(t)
 		item := v1alpha1.MicroFrontend{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
@@ -32,37 +30,20 @@ func TestMicrofrontendConverter_ToGQL(t *testing.T) {
 					Category:    category,
 					ViewBaseURL: viewBaseUrl,
 					NavigationNodes: []v1alpha1.NavigationNode{
-						v1alpha1.NavigationNode{
-							Label:            "test-mf",
-							NavigationPath:   "test-path",
-							ViewURL:          "/test/viewUrl",
-							ShowInNavigation: true,
-							Order:            2,
-							Settings: &runtime.RawExtension{
-								Raw: settings,
-							},
-						},
+						navigationNode,
 					},
 				},
 			},
 		}
 
-		expected := gqlschema.Microfrontend{
+		expectedNavigationNode := fixGqlNavigationNode()
+		expected := gqlschema.MicroFrontend{
 			Name:        name,
 			Version:     version,
 			Category:    category,
 			ViewBaseURL: viewBaseUrl,
 			NavigationNodes: []gqlschema.NavigationNode{
-				gqlschema.NavigationNode{
-					Label:            "test-mf",
-					NavigationPath:   "test-path",
-					ViewURL:          "/test/viewUrl",
-					ShowInNavigation: true,
-					Order:            2,
-					Settings: gqlschema.Settings{
-						"readOnly": true,
-					},
-				},
+				expectedNavigationNode,
 			},
 		}
 
@@ -73,7 +54,7 @@ func TestMicrofrontendConverter_ToGQL(t *testing.T) {
 	})
 
 	t.Run("Empty", func(t *testing.T) {
-		converter := &microfrontendConverter{}
+		converter := newMicroFrontendConverter()
 		item, err := converter.ToGQL(&v1alpha1.MicroFrontend{})
 
 		assert.Nil(t, err)
@@ -81,7 +62,7 @@ func TestMicrofrontendConverter_ToGQL(t *testing.T) {
 	})
 
 	t.Run("Nil", func(t *testing.T) {
-		converter := &microfrontendConverter{}
+		converter := newMicroFrontendConverter()
 		item, err := converter.ToGQL(nil)
 
 		assert.Nil(t, err)
@@ -89,14 +70,13 @@ func TestMicrofrontendConverter_ToGQL(t *testing.T) {
 	})
 }
 
-func TestMicrofrontendConverter_ToGQLs(t *testing.T) {
+func TestMicroFrontendConverter_ToGQLs(t *testing.T) {
 	name := "test-name"
 	namespace := "test-namespace"
 	version := "v1"
 	category := "test-category"
 	viewBaseUrl := "http://test-viewBaseUrl.com"
-	settings, err := fixSettings()
-	assert.Nil(t, err)
+	navigationNode := fixNavigationNode(t)
 
 	item := v1alpha1.MicroFrontend{
 		ObjectMeta: metav1.ObjectMeta{
@@ -109,48 +89,31 @@ func TestMicrofrontendConverter_ToGQLs(t *testing.T) {
 				Category:    category,
 				ViewBaseURL: viewBaseUrl,
 				NavigationNodes: []v1alpha1.NavigationNode{
-					v1alpha1.NavigationNode{
-						Label:            "test-mf",
-						NavigationPath:   "test-path",
-						ViewURL:          "/test/viewUrl",
-						ShowInNavigation: false,
-						Order:            2,
-						Settings: &runtime.RawExtension{
-							Raw: settings,
-						},
-					},
+					navigationNode,
 				},
 			},
 		},
 	}
 
-	expected := gqlschema.Microfrontend{
+	expectedNavigationNode := fixGqlNavigationNode()
+	expected := gqlschema.MicroFrontend{
 		Name:        name,
 		Version:     version,
 		Category:    category,
 		ViewBaseURL: viewBaseUrl,
 		NavigationNodes: []gqlschema.NavigationNode{
-			gqlschema.NavigationNode{
-				Label:            "test-mf",
-				NavigationPath:   "test-path",
-				ViewURL:          "/test/viewUrl",
-				ShowInNavigation: false,
-				Order:            2,
-				Settings: gqlschema.Settings{
-					"readOnly": true,
-				},
-			},
+			expectedNavigationNode,
 		},
 	}
 
 	t.Run("Success", func(t *testing.T) {
-		microfrontends := []*v1alpha1.MicroFrontend{
+		microFrontends := []*v1alpha1.MicroFrontend{
 			&item,
 			&item,
 		}
 
-		converter := microfrontendConverter{}
-		result, err := converter.ToGQLs(microfrontends)
+		converter := newMicroFrontendConverter()
+		result, err := converter.ToGQLs(microFrontends)
 
 		assert.Nil(t, err)
 		assert.Len(t, result, 2)
@@ -158,24 +121,24 @@ func TestMicrofrontendConverter_ToGQLs(t *testing.T) {
 	})
 
 	t.Run("Empty", func(t *testing.T) {
-		var microfrontends []*v1alpha1.MicroFrontend
+		var microFrontends []*v1alpha1.MicroFrontend
 
-		converter := microfrontendConverter{}
-		result, err := converter.ToGQLs(microfrontends)
+		converter := newMicroFrontendConverter()
+		result, err := converter.ToGQLs(microFrontends)
 
 		assert.Nil(t, err)
 		assert.Empty(t, result)
 	})
 
 	t.Run("With nil", func(t *testing.T) {
-		microfrontends := []*v1alpha1.MicroFrontend{
+		microFrontends := []*v1alpha1.MicroFrontend{
 			nil,
 			&item,
 			nil,
 		}
 
-		converter := microfrontendConverter{}
-		result, err := converter.ToGQLs(microfrontends)
+		converter := newMicroFrontendConverter()
+		result, err := converter.ToGQLs(microFrontends)
 
 		assert.Nil(t, err)
 		assert.Len(t, result, 1)

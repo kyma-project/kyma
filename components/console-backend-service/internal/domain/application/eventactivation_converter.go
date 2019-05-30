@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/content/storage"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/spec"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
@@ -34,7 +34,7 @@ func (c *eventActivationConverter) ToGQLs(in []*v1alpha1.EventActivation) []gqls
 	return result
 }
 
-func (c *eventActivationConverter) ToGQLEvents(in *storage.AsyncApiSpec) []gqlschema.EventActivationEvent {
+func (c *eventActivationConverter) ToGQLEvents(in *spec.AsyncAPISpec) []gqlschema.EventActivationEvent {
 	if in == nil {
 		return []gqlschema.EventActivationEvent{}
 	}
@@ -50,6 +50,7 @@ func (c *eventActivationConverter) ToGQLEvents(in *storage.AsyncApiSpec) []gqlsc
 			EventType:   eventType,
 			Version:     version,
 			Description: c.getSummary(topic),
+			Schema:      c.getPayload(topic),
 		})
 	}
 
@@ -90,6 +91,20 @@ func (c *eventActivationConverter) getSummary(in interface{}) string {
 	}
 
 	return result
+}
+
+func (c *eventActivationConverter) getPayload(in interface{}) map[string]interface{} {
+	subscribe, exists := c.convertToMap(in)["subscribe"]
+	if !exists {
+		return nil
+	}
+
+	payload, exists := c.convertToMap(subscribe)["payload"]
+	if !exists {
+		return nil
+	}
+
+	return c.convertToMap(payload)
 }
 
 func (c *eventActivationConverter) convertToMap(in interface{}) map[string]interface{} {

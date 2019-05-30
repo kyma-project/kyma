@@ -5,10 +5,9 @@ import (
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/content/storage"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/automock"
-	contentMock "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared/automock"
+	cmsMock "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
@@ -34,7 +33,7 @@ func TestClassResolver_ServiceClassQuery(t *testing.T) {
 		converter.On("ToGQL", resource).Return(expected, nil).Once()
 		defer converter.AssertExpectations(t)
 
-		resolver := servicecatalog.NewServiceClassResolver(resourceGetter, nil, nil, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(resourceGetter, nil, nil, nil)
 		resolver.SetClassConverter(converter)
 
 		result, err := resolver.ServiceClassQuery(nil, name, ns)
@@ -50,7 +49,7 @@ func TestClassResolver_ServiceClassQuery(t *testing.T) {
 		resourceGetter.On("Find", name, ns).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		resolver := servicecatalog.NewServiceClassResolver(resourceGetter, nil, nil, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(resourceGetter, nil, nil, nil)
 
 		result, err := resolver.ServiceClassQuery(nil, name, ns)
 
@@ -67,7 +66,7 @@ func TestClassResolver_ServiceClassQuery(t *testing.T) {
 		resourceGetter.On("Find", name, ns).Return(resource, expected).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		resolver := servicecatalog.NewServiceClassResolver(resourceGetter, nil, nil, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(resourceGetter, nil, nil, nil)
 
 		result, err := resolver.ServiceClassQuery(nil, name, ns)
 
@@ -105,7 +104,7 @@ func TestClassResolver_ServiceClassesQuery(t *testing.T) {
 		converter.On("ToGQLs", resources).Return(expected, nil)
 		defer converter.AssertExpectations(t)
 
-		resolver := servicecatalog.NewServiceClassResolver(resourceGetter, nil, nil, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(resourceGetter, nil, nil, nil)
 		resolver.SetClassConverter(converter)
 
 		result, err := resolver.ServiceClassesQuery(nil, ns, nil, nil)
@@ -121,7 +120,7 @@ func TestClassResolver_ServiceClassesQuery(t *testing.T) {
 		resourceGetter := automock.NewServiceClassListGetter()
 		resourceGetter.On("List", ns, pager.PagingParams{}).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceClassResolver(resourceGetter, nil, nil, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(resourceGetter, nil, nil, nil)
 		var expected []gqlschema.ServiceClass
 
 		result, err := resolver.ServiceClassesQuery(nil, ns, nil, nil)
@@ -139,7 +138,7 @@ func TestClassResolver_ServiceClassesQuery(t *testing.T) {
 		resourceGetter := automock.NewServiceClassListGetter()
 		resourceGetter.On("List", ns, pager.PagingParams{}).Return(resources, expected).Once()
 		defer resourceGetter.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceClassResolver(resourceGetter, nil, nil, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(resourceGetter, nil, nil, nil)
 
 		_, err := resolver.ServiceClassesQuery(nil, ns, nil, nil)
 
@@ -172,7 +171,7 @@ func TestClassResolver_ServiceClassInstancesField(t *testing.T) {
 			Namespace:    ns,
 		}
 
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, resourceGetter, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, resourceGetter, nil)
 
 		result, err := resolver.ServiceClassInstancesField(nil, &parentObj)
 
@@ -199,7 +198,7 @@ func TestClassResolver_ServiceClassInstancesField(t *testing.T) {
 			Namespace:    ns,
 		}
 
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, resourceGetter, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, resourceGetter, nil)
 
 		result, err := resolver.ServiceClassInstancesField(nil, parentObj)
 
@@ -222,7 +221,7 @@ func TestClassResolver_ServiceClassInstancesField(t *testing.T) {
 			Namespace:    ns,
 		}
 
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, resourceGetter, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, resourceGetter, nil)
 
 		_, err := resolver.ServiceClassInstancesField(nil, &parentObj)
 
@@ -247,7 +246,7 @@ func TestClassResolver_ServiceClassActivatedField(t *testing.T) {
 			Namespace:    ns,
 		}
 
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, resourceGetter, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, resourceGetter, nil)
 
 		result, err := resolver.ServiceClassActivatedField(nil, &parentObj)
 
@@ -269,7 +268,7 @@ func TestClassResolver_ServiceClassActivatedField(t *testing.T) {
 			Namespace:    ns,
 		}
 
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, resourceGetter, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, resourceGetter, nil)
 
 		result, err := resolver.ServiceClassActivatedField(nil, parentObj)
 
@@ -292,7 +291,7 @@ func TestClassResolver_ServiceClassActivatedField(t *testing.T) {
 			Namespace:    ns,
 		}
 
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, resourceGetter, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, resourceGetter, nil)
 
 		_, err := resolver.ServiceClassActivatedField(nil, &parentObj)
 
@@ -330,7 +329,7 @@ func TestClassResolver_ServiceClassPlansField(t *testing.T) {
 			Name:      name,
 			Namespace: ns,
 		}
-		resolver := servicecatalog.NewServiceClassResolver(nil, resourceGetter, nil, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(nil, resourceGetter, nil, nil)
 		resolver.SetPlanConverter(converter)
 
 		result, err := resolver.ServiceClassPlansField(nil, &parentObj)
@@ -350,7 +349,7 @@ func TestClassResolver_ServiceClassPlansField(t *testing.T) {
 			Name:      name,
 			Namespace: ns,
 		}
-		resolver := servicecatalog.NewServiceClassResolver(nil, resourceGetter, nil, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(nil, resourceGetter, nil, nil)
 
 		result, err := resolver.ServiceClassPlansField(nil, &parentObj)
 
@@ -370,385 +369,9 @@ func TestClassResolver_ServiceClassPlansField(t *testing.T) {
 			Name:      name,
 			Namespace: ns,
 		}
-		resolver := servicecatalog.NewServiceClassResolver(nil, resourceGetter, nil, nil, nil)
+		resolver := servicecatalog.NewServiceClassResolver(nil, resourceGetter, nil, nil)
 
 		result, err := resolver.ServiceClassPlansField(nil, &parentObj)
-
-		assert.Error(t, err)
-		assert.True(t, gqlerror.IsInternal(err))
-		assert.Nil(t, result)
-	})
-}
-
-func TestClassResolver_ServiceClassContentField(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		name := "name"
-		resource := &storage.Content{
-			Raw: map[string]interface{}{
-				"test": "data",
-			},
-		}
-		expected := new(gqlschema.JSON)
-		err := expected.UnmarshalGQL(resource.Raw)
-		require.NoError(t, err)
-
-		resourceGetter := new(contentMock.ContentGetter)
-		resourceGetter.On("Find", "service-class", name).Return(resource, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("Content").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassContentField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("NotFound", func(t *testing.T) {
-		name := "name"
-		resourceGetter := new(contentMock.ContentGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("Content").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassContentField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Nil(t, result)
-	})
-
-	t.Run("Error", func(t *testing.T) {
-		expectedErr := errors.New("Test")
-		name := "name"
-		resourceGetter := new(contentMock.ContentGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, expectedErr).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("Content").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassContentField(nil, &parentObj)
-
-		assert.Error(t, err)
-		assert.True(t, gqlerror.IsInternal(err))
-		assert.Nil(t, result)
-	})
-}
-
-func TestClassResolver_ServiceClassApiSpecField(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		name := "name"
-		resource := &storage.ApiSpec{
-			Raw: map[string]interface{}{
-				"test": "data",
-			},
-		}
-		expected := new(gqlschema.JSON)
-		err := expected.UnmarshalGQL(resource.Raw)
-		require.NoError(t, err)
-
-		resourceGetter := new(contentMock.ApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(resource, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("ApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassApiSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("NotFound", func(t *testing.T) {
-		name := "name"
-		resourceGetter := new(contentMock.ApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("ApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassApiSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Nil(t, result)
-	})
-
-	t.Run("Error", func(t *testing.T) {
-		expectedErr := errors.New("Test")
-		name := "name"
-		resourceGetter := new(contentMock.ApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, expectedErr).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("ApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassApiSpecField(nil, &parentObj)
-
-		assert.Error(t, err)
-		assert.True(t, gqlerror.IsInternal(err))
-		assert.Nil(t, result)
-	})
-}
-
-func TestClassResolver_ServiceClassOpenApiSpecField(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		name := "name"
-		resource := &storage.OpenApiSpec{
-			Raw: map[string]interface{}{
-				"test": "data",
-			},
-		}
-		expected := new(gqlschema.JSON)
-		err := expected.UnmarshalGQL(resource.Raw)
-		require.NoError(t, err)
-
-		resourceGetter := new(contentMock.OpenApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(resource, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("OpenApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassOpenApiSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("NotFound", func(t *testing.T) {
-		name := "name"
-		resourceGetter := new(contentMock.OpenApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("OpenApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassOpenApiSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Nil(t, result)
-	})
-
-	t.Run("Error", func(t *testing.T) {
-		expectedErr := errors.New("Test")
-		name := "name"
-		resourceGetter := new(contentMock.OpenApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, expectedErr).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("OpenApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassOpenApiSpecField(nil, &parentObj)
-
-		assert.Error(t, err)
-		assert.True(t, gqlerror.IsInternal(err))
-		assert.Nil(t, result)
-	})
-}
-
-func TestClassResolver_ServiceClassODataSpecField(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		name := "name"
-		expected := "{}"
-		resource := &storage.ODataSpec{
-			Raw: expected,
-		}
-
-		resourceGetter := new(contentMock.ODataSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(resource, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("ODataSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassODataSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Equal(t, &expected, result)
-	})
-
-	t.Run("NotFound", func(t *testing.T) {
-		name := "name"
-		resourceGetter := new(contentMock.ODataSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("ODataSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassODataSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Nil(t, result)
-	})
-
-	t.Run("Error", func(t *testing.T) {
-		expectedErr := errors.New("Test")
-		name := "name"
-		resourceGetter := new(contentMock.ODataSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, expectedErr).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("ODataSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassODataSpecField(nil, &parentObj)
-
-		assert.Error(t, err)
-		assert.True(t, gqlerror.IsInternal(err))
-		assert.Nil(t, result)
-	})
-}
-
-func TestClassResolver_ServiceClassAsyncApiSpecField(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		name := "name"
-		resource := &storage.AsyncApiSpec{
-			Raw: map[string]interface{}{
-				"test": "data",
-			},
-		}
-		expected := new(gqlschema.JSON)
-		err := expected.UnmarshalGQL(resource.Raw)
-		require.NoError(t, err)
-
-		resourceGetter := new(contentMock.AsyncApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(resource, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("AsyncApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassAsyncApiSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("NotFound", func(t *testing.T) {
-		name := "name"
-		resourceGetter := new(contentMock.AsyncApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("AsyncApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassAsyncApiSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Nil(t, result)
-	})
-
-	t.Run("Error", func(t *testing.T) {
-		expectedErr := errors.New("Test")
-		name := "name"
-		resourceGetter := new(contentMock.AsyncApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, expectedErr).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("AsyncApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ServiceClassAsyncApiSpecField(nil, &parentObj)
 
 		assert.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -769,15 +392,15 @@ func TestClassResolver_ServiceClassClusterDocsTopicsField(t *testing.T) {
 			Name: name,
 		}
 
-		resourceGetter := new(contentMock.ClusterDocsTopicGetter)
+		resourceGetter := new(cmsMock.ClusterDocsTopicGetter)
 		resourceGetter.On("Find", name).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := new(contentMock.GqlClusterDocsTopicConverter)
+		converter := new(cmsMock.GqlClusterDocsTopicConverter)
 		converter.On("ToGQL", resources).Return(expected, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(contentMock.CmsRetriever)
+		retriever := new(cmsMock.CmsRetriever)
 		retriever.On("ClusterDocsTopic").Return(resourceGetter)
 		retriever.On("ClusterDocsTopicConverter").Return(converter)
 
@@ -787,7 +410,7 @@ func TestClassResolver_ServiceClassClusterDocsTopicsField(t *testing.T) {
 			Namespace:    namespace,
 		}
 
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, nil, retriever)
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
 
 		result, err := resolver.ServiceClassClusterDocsTopicField(nil, &parentObj)
 
@@ -799,15 +422,15 @@ func TestClassResolver_ServiceClassClusterDocsTopicsField(t *testing.T) {
 		name := "name"
 		namespace := "namespace"
 
-		resourceGetter := new(contentMock.ClusterDocsTopicGetter)
+		resourceGetter := new(cmsMock.ClusterDocsTopicGetter)
 		resourceGetter.On("Find", name).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := new(contentMock.GqlClusterDocsTopicConverter)
+		converter := new(cmsMock.GqlClusterDocsTopicConverter)
 		converter.On("ToGQL", (*v1alpha1.ClusterDocsTopic)(nil)).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(contentMock.CmsRetriever)
+		retriever := new(cmsMock.CmsRetriever)
 		retriever.On("ClusterDocsTopic").Return(resourceGetter)
 		retriever.On("ClusterDocsTopicConverter").Return(converter)
 
@@ -817,7 +440,7 @@ func TestClassResolver_ServiceClassClusterDocsTopicsField(t *testing.T) {
 			Namespace:    namespace,
 		}
 
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, nil, retriever)
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
 
 		result, err := resolver.ServiceClassClusterDocsTopicField(nil, &parentObj)
 
@@ -830,11 +453,11 @@ func TestClassResolver_ServiceClassClusterDocsTopicsField(t *testing.T) {
 		name := "name"
 		namespace := "namespace"
 
-		resourceGetter := new(contentMock.ClusterDocsTopicGetter)
+		resourceGetter := new(cmsMock.ClusterDocsTopicGetter)
 		resourceGetter.On("Find", name).Return(nil, expectedErr).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(contentMock.CmsRetriever)
+		retriever := new(cmsMock.CmsRetriever)
 		retriever.On("ClusterDocsTopic").Return(resourceGetter)
 
 		parentObj := gqlschema.ServiceClass{
@@ -843,7 +466,7 @@ func TestClassResolver_ServiceClassClusterDocsTopicsField(t *testing.T) {
 			Namespace:    namespace,
 		}
 
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, nil, retriever)
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
 
 		result, err := resolver.ServiceClassClusterDocsTopicField(nil, &parentObj)
 
@@ -868,15 +491,15 @@ func TestClassResolver_ServiceClassDocsTopicsField(t *testing.T) {
 			Namespace: namespace,
 		}
 
-		resourceGetter := new(contentMock.DocsTopicGetter)
+		resourceGetter := new(cmsMock.DocsTopicGetter)
 		resourceGetter.On("Find", namespace, name).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := new(contentMock.GqlDocsTopicConverter)
+		converter := new(cmsMock.GqlDocsTopicConverter)
 		converter.On("ToGQL", resources).Return(expected, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(contentMock.CmsRetriever)
+		retriever := new(cmsMock.CmsRetriever)
 		retriever.On("DocsTopic").Return(resourceGetter)
 		retriever.On("DocsTopicConverter").Return(converter)
 
@@ -886,7 +509,7 @@ func TestClassResolver_ServiceClassDocsTopicsField(t *testing.T) {
 			Namespace:    namespace,
 		}
 
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, nil, retriever)
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
 
 		result, err := resolver.ServiceClassDocsTopicField(nil, &parentObj)
 
@@ -898,15 +521,15 @@ func TestClassResolver_ServiceClassDocsTopicsField(t *testing.T) {
 		name := "name"
 		namespace := "namespace"
 
-		resourceGetter := new(contentMock.DocsTopicGetter)
+		resourceGetter := new(cmsMock.DocsTopicGetter)
 		resourceGetter.On("Find", namespace, name).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := new(contentMock.GqlDocsTopicConverter)
+		converter := new(cmsMock.GqlDocsTopicConverter)
 		converter.On("ToGQL", (*v1alpha1.DocsTopic)(nil)).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(contentMock.CmsRetriever)
+		retriever := new(cmsMock.CmsRetriever)
 		retriever.On("DocsTopic").Return(resourceGetter)
 		retriever.On("DocsTopicConverter").Return(converter)
 
@@ -916,7 +539,7 @@ func TestClassResolver_ServiceClassDocsTopicsField(t *testing.T) {
 			Namespace:    namespace,
 		}
 
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, nil, retriever)
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
 
 		result, err := resolver.ServiceClassDocsTopicField(nil, &parentObj)
 
@@ -929,11 +552,11 @@ func TestClassResolver_ServiceClassDocsTopicsField(t *testing.T) {
 		name := "name"
 		namespace := "namespace"
 
-		resourceGetter := new(contentMock.DocsTopicGetter)
+		resourceGetter := new(cmsMock.DocsTopicGetter)
 		resourceGetter.On("Find", namespace, name).Return(nil, expectedErr).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(contentMock.CmsRetriever)
+		retriever := new(cmsMock.CmsRetriever)
 		retriever.On("DocsTopic").Return(resourceGetter)
 
 		parentObj := gqlschema.ServiceClass{
@@ -942,7 +565,7 @@ func TestClassResolver_ServiceClassDocsTopicsField(t *testing.T) {
 			Namespace:    namespace,
 		}
 
-		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, nil, retriever)
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
 
 		result, err := resolver.ServiceClassDocsTopicField(nil, &parentObj)
 

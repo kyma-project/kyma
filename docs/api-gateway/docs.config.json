@@ -1,8 +1,0 @@
-{
-  "spec":{
-    "id":"api-gateway",
-    "displayName":"API Gateway",
-    "description":"Overall documentation for API Gateway",
-    "type":"Components"
-  }
-}

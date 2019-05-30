@@ -12,7 +12,7 @@ The Console Backend Service uses a GraphQL implementation for authorization. Rea
 
 All available GraphQL actions are defined in the [`schema.graphql`](../internal/gqlschema/schema.graphql) file. This file also contains the definition of the `@HasAccess` directive.
 
-The `@HasAccess` directive is used to secure the action or a field in a type. It is used as a middleware before the resolver code is executed. 
+The `@HasAccess` directive is used to secure the action or a field in a type. It is used as a middleware before the resolver code is executed.
 
 use the following query as an example on how to secure a GraphQL action:
 ```
@@ -22,7 +22,7 @@ limitRanges(namespace: String!): [LimitRange!]! @HasAccess(attributes: {resource
 Reference this table for details on the elements that make up a defined and secured GraphQL action:
 
 | Defined GraphQL action element | Description |
-|:----------|:------|
+|----------|------|
 | `limitRanges(namespace: String!)` |  Name of the action, which in this case is a query, followed by a string that specifies the Namespace of the queried resources. |
 | `: [LimitRange!]!` | Defines the type of object returned by the query. In this case, it's a list of LimitRanges resources. |
 | `@HasAccess(attributes:` | Defines the GraphQL directive that secures access to the resource. |

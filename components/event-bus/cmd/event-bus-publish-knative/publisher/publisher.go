@@ -15,7 +15,7 @@ const (
 )
 
 type KnativePublisher interface {
-	Publish(knativeLib *knative.KnativeLib, channelName *string, namespace *string, headers *map[string]string,
+	Publish(knativeLib *knative.KnativeLib, channelName *string, namespace *string, headers *map[string][]string,
 		payload *[]byte, publishRequest *api.PublishRequest) (*api.Error, string)
 }
 
@@ -27,7 +27,7 @@ func NewKnativePublisher() KnativePublisher {
 }
 
 func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib, channelName *string,
-	namespace *string, headers *map[string]string, payload *[]byte, publishRequest *api.PublishRequest) (*api.Error,
+	namespace *string, headers *map[string][]string, payload *[]byte, publishRequest *api.PublishRequest) (*api.Error,
 	string) {
 	// knativelib should not be nil
 	if knativeLib == nil {

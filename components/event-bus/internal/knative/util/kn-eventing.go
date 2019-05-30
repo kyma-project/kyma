@@ -59,13 +59,13 @@ return
 type KnativeAccessLib interface {
 	GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error)
 	CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
-		timeout time.Duration)(*evapisv1alpha1.Channel, error)
+		timeout time.Duration) (*evapisv1alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string) error
 	DeleteSubscription(name string, namespace string) error
 	GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error)
 	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
-	SendMessage(channel *evapisv1alpha1.Channel, headers *map[string]string, message *string) error
+	SendMessage(channel *evapisv1alpha1.Channel, headers *map[string][]string, message *string) error
 	InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) error
 }
 
@@ -116,7 +116,7 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.
 
 // CreateChannel creates a Knative/Eventing channel controlled by the specified provisioner
 func (k *KnativeLib) CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
-	timeout time.Duration)(*evapisv1alpha1.Channel, error) {
+	timeout time.Duration) (*evapisv1alpha1.Channel, error) {
 	c := makeChannel(provisioner, name, namespace, labels)
 	if channel, err := k.evClient.Channels(namespace).Create(c); err != nil && !k8serrors.IsAlreadyExists(err) {
 		log.Printf("ERROR: CreateChannel(): creating channel: %v", err)
@@ -190,7 +190,7 @@ func (k *KnativeLib) UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evap
 }
 
 // SendMessage sends a message to a channel
-func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[string]string, payload *string) error {
+func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[string][]string, payload *string) error {
 	httpClient := &http.Client{
 		Transport: initHTTPTransport(),
 	}
@@ -208,7 +208,7 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[s
 	defer res.Body.Close()
 
 	if res.StatusCode == http.StatusNotFound {
-		// try to resend the mesasge only once
+		// try to resend the message only once
 		if err := resendMessage(httpClient, channel, headers, payload); err != nil {
 			log.Printf("ERROR: SendMessage(): resendMessage() failed: %v", err)
 			return err
@@ -227,7 +227,7 @@ func (r *KnativeLib) InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) 
 	return nil
 }
 
-func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, headers *map[string]string, message *string) error {
+func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, headers *map[string][]string, message *string) error {
 	timeout := time.After(10 * time.Second)
 	tick := time.Tick(200 * time.Millisecond)
 	req, err := makeHttpRequest(channel, headers, message)
@@ -284,14 +284,16 @@ func makeChannel(provisioner string, name string, namespace string, labels *map[
 		},
 		Spec: evapisv1alpha1.ChannelSpec{
 			Provisioner: &corev1.ObjectReference{
-				Name: provisioner,
+				Name:       provisioner,
+				APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
+				Kind:       "ClusterChannelProvisioner",
 			},
 		},
 	}
 	return c
 }
 
-func makeHttpRequest(channel *evapisv1alpha1.Channel, headers *map[string]string, payload *string) (*http.Request, error) {
+func makeHttpRequest(channel *evapisv1alpha1.Channel, headers *map[string][]string, payload *string) (*http.Request, error) {
 	var jsonStr = []byte(*payload)
 
 	channelUri := "http://" + channel.Status.Address.Hostname
@@ -300,11 +302,8 @@ func makeHttpRequest(channel *evapisv1alpha1.Channel, headers *map[string]string
 		log.Printf("ERROR: makeHttpRequest(): could not create HTTP request: %v", err)
 		return nil, err
 	}
+	req.Header = *headers
 	req.Header.Set("Content-Type", "application/json")
-
-	for k, v := range *headers {
-		req.Header.Set(k, v)
-	}
 
 	return req, nil
 }

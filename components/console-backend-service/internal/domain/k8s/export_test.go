@@ -37,6 +37,13 @@ func NewResourceQuotaService(rqInformer cache.SharedIndexInformer, rsInformer ca
 	return newResourceQuotaService(rqInformer, rsInformer, ssInformer, podClient)
 }
 
+func NewResourceQuotaConverter() *resourceQuotaConverter {
+	return &resourceQuotaConverter{}
+}
+func (r *resourceQuotaResolver) SetResourceQuotaConverter(converter gqlResourceQuotaConverter) {
+	r.converter = converter
+}
+
 // Pod
 
 func NewPodResolver(podSvc podSvc) *podResolver {
