@@ -297,6 +297,7 @@ func (t ApiControllerTest) createFunction(namespace string) (*kubelessV1.Functio
 }
 
 func (t ApiControllerTest) getFunctionPodStatus(namespace string, waitmax time.Duration) error {
+	const retriesCount = 10
 	return retry.Do(
 		func() error {
 			pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + t.functionName})
@@ -320,8 +321,9 @@ func (t ApiControllerTest) getFunctionPodStatus(namespace string, waitmax time.D
 			}
 			return errors.Errorf("Function in state %v: \n%+v", pod.Status.Phase, pod)
 		},
+		retry.Attempts(retriesCount),
 		retry.DelayType(retry.FixedDelay),
-		retry.Delay(waitmax/10), //doesn't have to be very precise
+		retry.Delay(waitmax/retriesCount), //doesn't have to be very precise
 		retry.OnRetry(func(n uint, err error) {
 			log.Printf("Function Pod Status exection #%d: %s\n", n, err)
 		}),
