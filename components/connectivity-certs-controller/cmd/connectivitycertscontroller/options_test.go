@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -34,12 +35,11 @@ func TestParseNamespacedName(t *testing.T) {
 		},
 	}
 
-	t.Run("should parse namespaced name", func(t *testing.T) {
-		for _, test := range testCases {
+	for _, test := range testCases {
+		t.Run(fmt.Sprintf("should parse \"%s\" namespaced name", test.value), func(t *testing.T) {
 			namespaceName := parseNamespacedName(test.value)
 			assert.Equal(t, test.namespace, namespaceName.Namespace)
 			assert.Equal(t, test.name, namespaceName.Name)
-		}
-	})
-
+		})
+	}
 }
