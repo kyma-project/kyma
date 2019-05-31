@@ -1,0 +1,14 @@
+apiVersion: eventing.kyma-project.io/v1alpha1
+kind: Subscription
+metadata:
+  name: sample-sub
+  labels:
+    example: sample-sub
+spec:
+  endpoint: http://http-db-service.demo-event-service-trigger:8017/events/order/created
+  include_subscription_name_header: true
+  max_inflight: 10
+  push_request_timeout_ms: 60
+  event_type: order.created
+  event_type_version: v1
+  source_id: sample-enterprise
