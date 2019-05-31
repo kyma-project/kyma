@@ -44,12 +44,18 @@ func main() {
 	err = ts.CreateResources()
 	if err != nil {
 		log.Fatal(err)
-		return
+	}
+
+	err = ts.StartTestServer()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	url := ts.GetTestServiceURL()
 
-	//cert, err := ts.FetchCertificate()
+	// log.Trace("creating Certificate")
+
+	// cert, err := ts.FetchCertificate()
 
 	log.Trace("registering Service")
 	id, err := ts.RegisterService(url)

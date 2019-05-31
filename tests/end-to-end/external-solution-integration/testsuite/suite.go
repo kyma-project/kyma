@@ -4,7 +4,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -13,8 +12,6 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/wait"
 	log "github.com/sirupsen/logrus"
-	v12 "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )
 
@@ -114,7 +111,7 @@ func (ts *testSuite) CreateResources() error {
 		return err
 	}
 
-	err = wait.Until(5, 10, ts.isLambdaReady)
+	err = wait.Until(5, 30, ts.lambdaClient.IsLambdaReady)
 
 	if err != nil {
 		return fmt.Errorf("Lambda function not ready, %s", err)
@@ -126,41 +123,6 @@ func (ts *testSuite) CreateResources() error {
 	}
 
 	return nil
-}
-
-func (ts *testSuite) isLambdaReady() (bool, error) {
-	podList, e := ts.k8sClient.ListPods(v1.ListOptions{})
-
-	pods := podList.Items
-
-	if e != nil {
-		return false, e
-	}
-
-	pods = filter(pods)
-
-	for _, pod := range pods {
-		for _, condition := range pod.Status.Conditions {
-			if condition.Status != "True" {
-				return false, nil
-			}
-		}
-	}
-
-	return true, nil
-}
-
-func filter(pods []v12.Pod) []v12.Pod {
-
-	var filteredPods []v12.Pod
-
-	for _, pod := range pods {
-		if strings.Contains(pod.Name, consts.AppName) {
-			filteredPods = append(filteredPods, pod)
-		}
-	}
-
-	return filteredPods
 }
 
 func (ts *testSuite) GetTestServiceURL() string {
@@ -178,7 +140,6 @@ func (ts *testSuite) createApplication() error {
 		log.Error(err)
 		return err
 	}
-
 	//TODO: Enable this
 	// checker := resourceskit.NewK8sChecker(ts.k8sClient)
 
@@ -276,6 +237,15 @@ func (ts *testSuite) CreateServiceBindingUsage() error {
 		return err
 	}
 
+	err = wait.Until(5, 30, ts.lambdaClient.IsFunctionAnnotated)
+	if err != nil {
+		return err
+	}
+
+	err = wait.Until(5, 30, ts.lambdaClient.IsLambdaReadyWithSBU)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -312,6 +282,7 @@ func (ts *testSuite) StartTestServer() error {
 }
 
 func (ts *testSuite) CleanUp() error {
+	return nil
 	errorOccured := false
 	var err error
 

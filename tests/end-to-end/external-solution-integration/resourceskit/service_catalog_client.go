@@ -6,6 +6,7 @@ import (
 	sbuv1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	sbuClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
+	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
@@ -41,6 +42,7 @@ func NewServiceCatalogClient(config *rest.Config, namespace string) (ServiceCata
 }
 
 func (c *serviceCatalogClient) CreateServiceInstance(siName, siID, serviceID string) (*scv1.ServiceInstance, error) {
+	log.WithFields(log.Fields{"name": siName, "id": siID, "serviceID": serviceID}).Debug("Creating ServiceInstance")
 	return c.scClient.ServicecatalogV1beta1().ServiceInstances(c.namespace).Create(&scv1.ServiceInstance{
 		TypeMeta: v1.TypeMeta{Kind: "ServiceInstance", APIVersion: scv1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{
@@ -70,10 +72,12 @@ func (c *serviceCatalogClient) CreateServiceInstance(siName, siID, serviceID str
 }
 
 func (c *serviceCatalogClient) DeleteServiceInstance(siName string) error {
+	log.WithFields(log.Fields{"ServiceInstanceName": siName}).Debug("Deleting ServiceInstance")
 	return c.scClient.ServicecatalogV1beta1().ServiceInstances(c.namespace).Delete(siName, &v1.DeleteOptions{})
 }
 
 func (c *serviceCatalogClient) CreateServiceBinding() (*scv1.ServiceBinding, error) {
+	log.WithFields(log.Fields{"ServiceBindingName": consts.ServiceBindingName}).Debug("Creating ServiceBinding")
 	serviceBinding := &scv1.ServiceBinding{
 		TypeMeta:   v1.TypeMeta{Kind: "ServiceBinding", APIVersion: scv1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: consts.ServiceBindingName, Namespace: c.namespace},
@@ -97,10 +101,12 @@ func (c *serviceCatalogClient) CreateServiceBinding() (*scv1.ServiceBinding, err
 }
 
 func (c *serviceCatalogClient) DeleteServiceBinding() error {
+	log.WithFields(log.Fields{"ServiceBindingName": consts.ServiceBindingName}).Debug("Deleting ServiceBinding")
 	return c.scClient.ServicecatalogV1beta1().ServiceBindings(c.namespace).Delete(consts.ServiceBindingName, &v1.DeleteOptions{})
 }
 
 func (c *serviceCatalogClient) CreateServiceBindingUsage() (*sbuv1.ServiceBindingUsage, error) {
+	log.WithFields(log.Fields{"ServiceBindingUsageName": consts.ServiceBindingUsageName}).Debug("Creating ServiceBindingUsage")
 	serviceBindingUsage := &sbuv1.ServiceBindingUsage{
 		TypeMeta: v1.TypeMeta{Kind: "ServiceBindingUsage", APIVersion: sbuv1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{
@@ -118,7 +124,7 @@ func (c *serviceCatalogClient) CreateServiceBindingUsage() (*sbuv1.ServiceBindin
 				Name: consts.ServiceBindingName,
 			},
 			UsedBy: sbuv1.LocalReferenceByKindAndName{
-				Kind: "Function",
+				Kind: "function",
 				Name: consts.AppName,
 			},
 		},
@@ -128,5 +134,6 @@ func (c *serviceCatalogClient) CreateServiceBindingUsage() (*sbuv1.ServiceBindin
 }
 
 func (c *serviceCatalogClient) DeleteServiceBindingUsage() error {
+	log.WithFields(log.Fields{"ServiceBindingUsageName": consts.ServiceBindingUsageName}).Debug("Deleting ServiceBindingUsage")
 	return c.sbuClient.ServicecatalogV1alpha1().ServiceBindingUsages(c.namespace).Delete(consts.ServiceBindingUsageName, &v1.DeleteOptions{})
 }

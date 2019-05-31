@@ -3,6 +3,8 @@ package resourceskit
 import (
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
 	acv1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	verac "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	trv1 "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
@@ -42,6 +44,7 @@ func NewAppConnectorClient(config *rest.Config, namespace string) (AppConnectorC
 }
 
 func (c *appConnectorClient) CreateTokenRequest() (*trv1.TokenRequest, error) {
+	log.WithFields(log.Fields{"name": consts.AppName}).Debug("Creating TokenRequest")
 	tokenRequest := &trv1.TokenRequest{
 		TypeMeta:   v1.TypeMeta{Kind: "Application", APIVersion: trv1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: consts.AppName, Namespace: c.namespace},
@@ -58,10 +61,12 @@ func (c *appConnectorClient) GetTokenRequest() (*trv1.TokenRequest, error) {
 }
 
 func (c *appConnectorClient) DeleteTokenRequest() error {
+	log.WithFields(log.Fields{"name": consts.AppName}).Debug("Deleting TokenRequest")
 	return c.tokenClient.ApplicationconnectorV1alpha1().TokenRequests(c.namespace).Delete(consts.AppName, &v1.DeleteOptions{})
 }
 
 func (c *appConnectorClient) CreateDummyApplication(skipInstallation bool) (*acv1.Application, error) {
+	log.WithFields(log.Fields{"name": consts.AppName}).Debug("Creating DummyApplication")
 	spec := acv1.ApplicationSpec{
 		Services:         []acv1.Service{},
 		AccessLabel:      consts.AccessLabel,
@@ -78,6 +83,7 @@ func (c *appConnectorClient) CreateDummyApplication(skipInstallation bool) (*acv
 }
 
 func (c *appConnectorClient) DeleteApplication() error {
+	log.WithFields(log.Fields{"name": consts.AppName}).Debug("Deleting DummyApplication")
 	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Delete(consts.AppName, &v1.DeleteOptions{})
 }
 

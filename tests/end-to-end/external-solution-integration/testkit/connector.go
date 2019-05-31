@@ -6,10 +6,11 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
+	"net/http"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/wait"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 type ConnectorClient interface {

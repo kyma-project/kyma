@@ -6,6 +6,7 @@ import (
 	subscriptionV1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	subscription "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
+	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )
@@ -44,6 +45,7 @@ func NewEventingClient(config *rest.Config, namespace string) (EventingClient, e
 }
 
 func (c *eventingClient) CreateMapping() (*acV1.ApplicationMapping, error) {
+	log.WithFields(log.Fields{"name": consts.AppName}).Debug("Creating ApplicationMapping")
 	am := &acV1.ApplicationMapping{
 		TypeMeta:   metav1.TypeMeta{Kind: "ApplicationMapping", APIVersion: acV1.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{Name: consts.AppName, Namespace: c.namespace},
@@ -53,10 +55,12 @@ func (c *eventingClient) CreateMapping() (*acV1.ApplicationMapping, error) {
 }
 
 func (c *eventingClient) DeleteMapping() error {
+	log.WithFields(log.Fields{"name": consts.AppName}).Debug("Deleting ApplicationMapping")
 	return c.appConnClientSet.ApplicationconnectorV1alpha1().ApplicationMappings(c.namespace).Delete(consts.AppName, &metav1.DeleteOptions{})
 }
 
 func (c *eventingClient) CreateEventActivation() (*acV1.EventActivation, error) {
+	log.WithFields(log.Fields{"name": consts.AppName}).Debug("Creating EventActivation")
 	eaSpec := acV1.EventActivationSpec{
 		DisplayName: "Commerce-events",
 		SourceID:    consts.AppName,
@@ -73,10 +77,12 @@ func (c *eventingClient) CreateEventActivation() (*acV1.EventActivation, error) 
 }
 
 func (c *eventingClient) DeleteEventActivation() error {
+	log.WithFields(log.Fields{"name": consts.AppName}).Debug("Deleting EventActivation")
 	return c.appConnClientSet.ApplicationconnectorV1alpha1().EventActivations(c.namespace).Delete(consts.AppName, &metav1.DeleteOptions{})
 }
 
 func (c *eventingClient) CreateSubscription() (*subscriptionV1.Subscription, error) {
+	log.WithFields(log.Fields{"name": consts.LambdaEndpoint}).Debug("Creating Subscription")
 	subSpec := subscriptionV1.SubscriptionSpec{
 		Endpoint:                      consts.LambdaEndpoint,
 		IncludeSubscriptionNameHeader: true,
@@ -98,5 +104,6 @@ func (c *eventingClient) CreateSubscription() (*subscriptionV1.Subscription, err
 }
 
 func (c *eventingClient) DeleteSubscription() error {
+	log.WithFields(log.Fields{"name": consts.LambdaEndpoint}).Debug("Deleting Subscription")
 	return c.subscriptionClientSet.EventingV1alpha1().Subscriptions(c.namespace).Delete(consts.AppName, &metav1.DeleteOptions{})
 }

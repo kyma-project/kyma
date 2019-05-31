@@ -18,8 +18,8 @@ const (
 	testServicePort       = 8090
 	testServiceImage      = "maladie/counterservice:latest"
 	labelKey              = "component"
-	healthEndpointFormat  = "http://%s.%s/health"
-	counterEndpointFormat = "http://%s.%s/counter"
+	healthEndpointFormat  = "http://%s.%s:%v/health"
+	counterEndpointFormat = "http://%s.%s:%v"
 )
 
 type TestService interface {
@@ -85,21 +85,26 @@ func (ts *testService) CheckValue() (int, error) {
 func (ts *testService) IsReady() (bool, error) {
 
 	url := ts.getHealthEndpointURL()
+	log.WithFields(log.Fields{"url": url}).Debug("IsReady?")
 
-	resp, err := ts.HttpClient.Get(url)
+	resp, _ := ts.HttpClient.Get(url)
 
-	if err != nil {
-		return false, err
-	}
+	// lets ignore all errors here, shall we?
 
-	if resp.StatusCode == http.StatusOK {
-		return true, nil
+	// if err != nil {
+	// return false, err
+	// }
+	if resp != nil {
+		if resp.StatusCode == http.StatusOK {
+			return true, nil
+		}
 	}
 
 	return false, nil
 }
 
 func (ts *testService) DeleteTestService() error {
+	log.WithFields(log.Fields{"name": testServiceName}).Debug("Deleting Deployment")
 	err := ts.K8sResourcesClient.DeleteDeployment(testServiceName, &v1.DeleteOptions{})
 
 	if err != nil {
@@ -107,6 +112,7 @@ func (ts *testService) DeleteTestService() error {
 		return err
 	}
 
+	log.WithFields(log.Fields{"name": testServiceName}).Debug("Deleting Service")
 	err = ts.K8sResourcesClient.DeleteService(testServiceName, &v1.DeleteOptions{})
 
 	if err != nil {
@@ -119,15 +125,16 @@ func (ts *testService) DeleteTestService() error {
 
 func (ts *testService) GetTestServiceURL() string {
 	namespace := ts.K8sResourcesClient.GetNamespace()
-	return fmt.Sprintf(counterEndpointFormat, testServiceName, namespace)
+	return fmt.Sprintf(counterEndpointFormat, testServiceName, namespace, testServicePort)
 }
 
 func (ts *testService) getHealthEndpointURL() string {
 	namespace := ts.K8sResourcesClient.GetNamespace()
-	return fmt.Sprintf(healthEndpointFormat, testServiceName, namespace)
+	return fmt.Sprintf(healthEndpointFormat, testServiceName, namespace, testServicePort)
 }
 
 func (ts *testService) createDeployment() error {
+	log.WithFields(log.Fields{"name": testServiceName}).Debug("Creating Deployment")
 	rs := int32(1)
 	deployment := &model.Deployment{
 		TypeMeta: v1.TypeMeta{
@@ -173,6 +180,7 @@ func (ts *testService) createDeployment() error {
 }
 
 func (ts *testService) createService() error {
+	log.WithFields(log.Fields{"name": testServiceName}).Debug("Creating Service")
 	service := &core.Service{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "Service",

@@ -8,7 +8,7 @@ const (
 	ProductionNamespace  = "production"
 
 	LambdaEndpoint = "http://e2e-lambda.production:8080"
-	EventType      = "exampleevent"
+	EventType      = "exampleEvent"
 	EventVersion   = "v1"
 
 	ServiceInstanceName = "e2e-test-app-si"
@@ -16,7 +16,7 @@ const (
 
 	ServiceBindingName   = "e2e-test-app-sb"
 	ServiceBindingID     = "e2e-test-app-sb-id"
-	ServiceBindingSecret = "e2e-test-app-sb-secret"
+	ServiceBindingSecret = "e2e-test-app-sb"
 
 	ServiceBindingUsageName = "e2e-test-app-sbu"
 
