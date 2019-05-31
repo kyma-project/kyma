@@ -9,6 +9,7 @@ import (
 const (
 	BasicAuthUsernameKey = "username"
 	BasicAuthPasswordKey = "password"
+	BasicAuthRequestParametersKey = "requestParameters"
 )
 
 type basicAuth struct{}
@@ -30,7 +31,7 @@ func (svc *basicAuth) CredentialsProvided(credentials *model.Credentials) bool {
 }
 
 func (svc *basicAuth) CreateSecretData(credentials *model.Credentials) (SecretData, apperrors.AppError) {
-	return svc.makeBasicAuthMap(credentials.Basic.Username, credentials.Basic.Password), nil
+	return svc.makeBasicAuthMap(credentials.Basic.Username, credentials.Basic.Password, credentials.Basic.RequestParameters), nil
 }
 
 func (svc *basicAuth) ToCredentialsInfo(credentials *model.Credentials, secretName string) applications.Credentials {
@@ -48,11 +49,10 @@ func (svc *basicAuth) ShouldUpdate(currentData SecretData, newData SecretData) b
 		string(currentData[BasicAuthPasswordKey]) != string(newData[BasicAuthPasswordKey])
 }
 
-func (svc *basicAuth) makeBasicAuthMap(username, password string) map[string][]byte {
+func (svc *basicAuth) makeBasicAuthMap(username, password string, requestParameters *model.RequestParameters) map[string][]byte {
 	return map[string][]byte{
 		BasicAuthUsernameKey: []byte(username),
 		BasicAuthPasswordKey: []byte(password),
-		"RequestParameters":
 	}
 }
 
