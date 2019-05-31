@@ -6,7 +6,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/strategy"
 )
 
 const (
@@ -26,14 +25,12 @@ type RequestParametersService interface {
 type requestParametersService struct {
 	nameResolver    k8sconsts.NameResolver
 	repository      Repository
-	strategyFactory strategy.Factory
 }
 
-func NewRequestParametersService(repository Repository, nameResolver k8sconsts.NameResolver, strategyFactory strategy.Factory) RequestParametersService {
+func NewRequestParametersService(repository Repository, nameResolver k8sconsts.NameResolver) RequestParametersService {
 	return &requestParametersService{
 		nameResolver:    nameResolver,
 		repository:      repository,
-		strategyFactory: strategyFactory,
 	}
 }
 

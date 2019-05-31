@@ -37,8 +37,7 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 					TargetUrl:        entry.TargetUrl,
 					SpecificationUrl: entry.SpecificationUrl,
 					ApiType:          entry.ApiType,
-					Headers:          entry.Headers,
-					QueryParameters:  entry.QueryParameters,
+					RequestParametersSecretName: entry.RequestParametersSecretName,
 					Credentials: Credentials{
 						AuthenticationUrl: entry.Credentials.AuthenticationUrl,
 						CSRFInfo:          fromK8sCSRFInfo(entry.Credentials.CSRFInfo),
@@ -93,8 +92,7 @@ func convertToK8sType(service Service) v1alpha1.Service {
 			TargetUrl:        service.API.TargetUrl,
 			SpecificationUrl: service.API.SpecificationUrl,
 			ApiType:          service.API.ApiType,
-			Headers:          service.API.Headers,
-			QueryParameters:  service.API.QueryParameters,
+			RequestParametersSecretName: service.API.RequestParametersSecretName,
 			Credentials: v1alpha1.Credentials{
 				AuthenticationUrl: service.API.Credentials.AuthenticationUrl,
 				CSRFInfo:          toK8sCSRFInfo(service.API.Credentials.CSRFInfo),

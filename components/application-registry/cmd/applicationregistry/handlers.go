@@ -72,7 +72,7 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 
 	accessServiceManager := newAccessServiceManager(coreClientset, opt.namespace, opt.proxyPort)
 	credentialsSecretsService := newSecretsRepository(coreClientset, nameResolver, opt.namespace)
-	requestParametersSecretsService := newRequestParametersSecretsRepository()
+	requestParametersSecretsService := newRequestParametersSecretsRepository(coreClientset, nameResolver, opt.namespace)
 
 	uuidGenerator := metauuid.GeneratorFunc(func() (string, error) {
 		uuidInstance, err := uuid.NewV4()
@@ -129,6 +129,13 @@ func newSecretsRepository(coreClientset *kubernetes.Clientset, nameResolver k8sc
 	repository := secrets.NewRepository(sei)
 
 	return secrets.NewService(repository, nameResolver, strategyFactory)
+}
+
+func newRequestParametersSecretsRepository(coreClientset *kubernetes.Clientset, nameResolver k8sconsts.NameResolver, namespace string) secrets.RequestParametersService {
+	sei := coreClientset.CoreV1().Secrets(namespace)
+	repository := secrets.NewRepository(sei)
+
+	return secrets.NewRequestParametersService(repository, nameResolver)
 }
 
 func newIstioService(config *restclient.Config, namespace string) (istio.Service, apperrors.AppError) {
