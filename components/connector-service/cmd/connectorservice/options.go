@@ -3,16 +3,20 @@ package main
 import (
 	"flag"
 	"fmt"
-	"k8s.io/apimachinery/pkg/types"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
+	"k8s.io/apimachinery/pkg/types"
+
 	"github.com/sirupsen/logrus"
 )
 
-const defaultCertificateValidityTime = 90 * 24 * time.Hour
+const (
+	defaultCertificateValidityTime = 90 * 24 * time.Hour
+	defaultNamespace               = "default"
+)
 
 type options struct {
 	appName                        string
@@ -89,8 +93,8 @@ func parseArgs() *options {
 		tokenLength:                    *tokenLength,
 		appTokenExpirationMinutes:      *appTokenExpirationMinutes,
 		runtimeTokenExpirationMinutes:  *runtimeTokenExpirationMinutes,
-		caSecretName:                   parseNamespacedName(*caSecretName, *namespace),
-		rootCACertificateSecretName:    parseNamespacedName(*rootCACertificateSecretName, *namespace),
+		caSecretName:                   parseNamespacedName(*caSecretName),
+		rootCACertificateSecretName:    parseNamespacedName(*rootCACertificateSecretName),
 		requestLogging:                 *requestLogging,
 		connectorServiceHost:           *connectorServiceHost,
 		gatewayBaseURL:                 *gatewayBaseURL,
@@ -151,20 +155,29 @@ func parseDuration(durationString string) (time.Duration, error) {
 	return time.Duration(timeLength) * unitsMap[timeUnit], nil
 }
 
-func parseNamespacedName(value, namespace string) types.NamespacedName {
+func parseNamespacedName(value string) types.NamespacedName {
 	parts := strings.Split(value, string(types.Separator))
 
-	if len(parts) == 1 {
+	if singleValueProvided(parts) {
 		return types.NamespacedName{
 			Name:      parts[0],
-			Namespace: namespace,
+			Namespace: defaultNamespace,
 		}
 	}
 
+	namespace := get(parts, 0)
+	if namespace == "" {
+		namespace = defaultNamespace
+	}
+
 	return types.NamespacedName{
-		Namespace: get(parts, 0),
+		Namespace: namespace,
 		Name:      get(parts, 1),
 	}
+}
+
+func singleValueProvided(split []string) bool {
+	return len(split) == 1 || get(split, 1) == ""
 }
 
 func get(array []string, index int) string {
