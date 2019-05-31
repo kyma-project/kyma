@@ -35,9 +35,13 @@ type CreateServiceResponse struct {
 type API struct {
 	TargetUrl        string               `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
 	Credentials      *Credentials         `json:"credentials,omitempty"`
+	RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
 	Spec             json.RawMessage      `json:"spec,omitempty"`
 	SpecificationUrl string               `json:"specificationUrl,omitempty"`
 	ApiType          string               `json:"apiType,omitempty"`
+}
+
+type RequestParameters struct {
 	Headers          *map[string][]string `json:"headers,omitempty"`
 	QueryParameters  *map[string][]string `json:"queryParameters,omitempty"`
 }
@@ -46,8 +50,6 @@ type Credentials struct {
 	Oauth           *Oauth               `json:"oauth,omitempty"`
 	Basic           *BasicAuth           `json:"basic,omitempty"`
 	CertificateGen  *CertificateGen      `json:"certificateGen,omitempty"`
-	Headers         *map[string][]string `json:"headers,omitempty"`
-	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
 }
 
 type CSRFInfo struct {
@@ -59,18 +61,21 @@ type Oauth struct {
 	ClientID     string    `json:"clientId" valid:"required~oauth clientId field cannot be empty"`
 	ClientSecret string    `json:"clientSecret" valid:"required~oauth clientSecret cannot be empty"`
 	CSRFInfo     *CSRFInfo `json:"csrfInfo,omitempty"`
+	RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
 }
 
 type BasicAuth struct {
 	Username string    `json:"username" valid:"required~basic auth username field cannot be empty"`
 	Password string    `json:"password" valid:"required~basic auth password field cannot be empty"`
 	CSRFInfo *CSRFInfo `json:"csrfInfo,omitempty"`
+	RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
 }
 
 type CertificateGen struct {
 	CommonName  string    `json:"commonName"`
 	Certificate string    `json:"certificate"`
 	CSRFInfo    *CSRFInfo `json:"csrfInfo,omitempty"`
+	RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
 }
 
 type Events struct {
@@ -123,12 +128,14 @@ func serviceDefinitionToServiceDetails(serviceDefinition model.ServiceDefinition
 			Spec:             serviceDefinition.Api.Spec,
 			SpecificationUrl: serviceDefinition.Api.SpecificationUrl,
 			ApiType:          serviceDefinition.Api.ApiType,
-			Headers:          serviceDefinition.Api.Headers,
-			QueryParameters:  serviceDefinition.Api.QueryParameters,
 		}
 
 		if serviceDefinition.Api.Credentials != nil {
 			serviceDetails.Api.Credentials = serviceDefinitionCredentialsToServiceDetailsCredentials(serviceDefinition.Api.Credentials)
+		}
+
+		if serviceDefinition.Api.RequestParameters != nil {
+			serviceDetails.Api.RequestParameters = serviceDefinitionRequestParametersToServiceDetailsRequestParameters(serviceDefinition.Api.RequestParameters)
 		}
 	}
 
@@ -149,6 +156,16 @@ func serviceDefinitionToServiceDetails(serviceDefinition model.ServiceDefinition
 	return serviceDetails, nil
 }
 
+func serviceDefinitionRequestParametersToServiceDetailsRequestParameters(requestParameters *model.RequestParameters) *RequestParameters {
+	if requestParameters == nil {
+		return nil
+	}
+	return &RequestParameters{
+		Headers: requestParameters.Headers,
+		QueryParameters: requestParameters.QueryParameters,
+	}
+}
+
 func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.Credentials) *Credentials {
 
 	csrfInfoFromModel := func(model *model.CSRFInfo) *CSRFInfo {
@@ -167,9 +184,8 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 				ClientSecret: stars,
 				URL:          credentials.Oauth.URL,
 				CSRFInfo:     csrfInfoFromModel(credentials.Oauth.CSRFInfo),
+				RequestParameters: serviceDefinitionRequestParametersToServiceDetailsRequestParameters(credentials.Oauth.RequestParameters),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
@@ -179,9 +195,8 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 				Username: stars,
 				Password: stars,
 				CSRFInfo: csrfInfoFromModel(credentials.Basic.CSRFInfo),
+				RequestParameters: serviceDefinitionRequestParametersToServiceDetailsRequestParameters(credentials.Basic.RequestParameters),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
@@ -191,9 +206,8 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 				CommonName:  credentials.CertificateGen.CommonName,
 				Certificate: credentials.CertificateGen.Certificate,
 				CSRFInfo:    csrfInfoFromModel(credentials.CertificateGen.CSRFInfo),
+				RequestParameters: serviceDefinitionRequestParametersToServiceDetailsRequestParameters(credentials.CertificateGen.RequestParameters),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
@@ -218,11 +232,12 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 			TargetUrl:        serviceDetails.Api.TargetUrl,
 			SpecificationUrl: serviceDetails.Api.SpecificationUrl,
 			ApiType:          serviceDetails.Api.ApiType,
-			Headers:          serviceDetails.Api.Headers,
-			QueryParameters:  serviceDetails.Api.QueryParameters,
 		}
 		if serviceDetails.Api.Credentials != nil {
 			serviceDefinition.Api.Credentials = serviceDetailsCredentialsToServiceDefinitionCredentials(serviceDetails.Api.Credentials)
+		}
+		if serviceDetails.Api.RequestParameters != nil {
+			serviceDefinition.Api.RequestParameters = serviceDetailsRequestParametersToServiceDefinitionRequestParameters(serviceDetails.Api.RequestParameters)
 		}
 		if serviceDetails.Api.Spec != nil {
 			serviceDefinition.Api.Spec = compact(serviceDetails.Api.Spec)
@@ -246,6 +261,16 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 	return serviceDefinition, nil
 }
 
+func serviceDetailsRequestParametersToServiceDefinitionRequestParameters(requestParameters *RequestParameters) *model.RequestParameters {
+	if requestParameters == nil {
+		return nil
+	}
+	return &model.RequestParameters{
+		Headers: requestParameters.Headers,
+		QueryParameters: requestParameters.QueryParameters,
+	}
+}
+
 func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Credentials) *model.Credentials {
 
 	csrfInfoToModel := func(api *CSRFInfo) *model.CSRFInfo {
@@ -264,9 +289,8 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 				ClientSecret: credentials.Oauth.ClientSecret,
 				URL:          credentials.Oauth.URL,
 				CSRFInfo:     csrfInfoToModel(credentials.Oauth.CSRFInfo),
+				RequestParameters:serviceDetailsRequestParametersToServiceDefinitionRequestParameters(credentials.Oauth.RequestParameters),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
@@ -276,9 +300,8 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 				Username: credentials.Basic.Username,
 				Password: credentials.Basic.Password,
 				CSRFInfo: csrfInfoToModel(credentials.Basic.CSRFInfo),
+				RequestParameters:serviceDetailsRequestParametersToServiceDefinitionRequestParameters(credentials.Basic.RequestParameters),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
@@ -287,9 +310,8 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 			CertificateGen: &model.CertificateGen{
 				CommonName: credentials.CertificateGen.CommonName,
 				CSRFInfo:   csrfInfoToModel(credentials.CertificateGen.CSRFInfo),
+				RequestParameters:serviceDetailsRequestParametersToServiceDefinitionRequestParameters(credentials.Basic.RequestParameters),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
@@ -317,16 +339,14 @@ func (api API) marshalWithJSONSpec() ([]byte, error) {
 		Spec             json.RawMessage      `json:"spec,omitempty"`
 		SpecificationUrl string               `json:"specificationUrl,omitempty"`
 		ApiType          string               `json:"apiType,omitempty"`
-		Headers          *map[string][]string `json:"headers,omitempty"`
-		QueryParameters  *map[string][]string `json:"queryParameters,omitempty"`
+		RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
 	}{
 		api.TargetUrl,
 		api.Credentials,
 		api.Spec,
 		api.SpecificationUrl,
 		api.ApiType,
-		api.Headers,
-		api.QueryParameters,
+		api.RequestParameters,
 	})
 }
 
@@ -337,15 +357,13 @@ func (api API) marshalWithNonJSONSpec() ([]byte, error) {
 		Spec             string               `json:"spec,omitempty"`
 		SpecificationUrl string               `json:"specificationUrl,omitempty"`
 		ApiType          string               `json:"apiType,omitempty"`
-		Headers          *map[string][]string `json:"headers,omitempty"`
-		QueryParameters  *map[string][]string `json:"queryParameters,omitempty"`
+		RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
 	}{
 		api.TargetUrl,
 		api.Credentials,
 		string(api.Spec),
 		api.SpecificationUrl,
 		api.ApiType,
-		api.Headers,
-		api.QueryParameters,
+		api.RequestParameters,
 	})
 }

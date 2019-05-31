@@ -48,10 +48,9 @@ type CSRFInfo struct {
 type Credentials struct {
 	Type              string
 	SecretName        string
+	RequestParamsSecretName string
 	AuthenticationUrl string
 	CSRFInfo          *CSRFInfo
-	Headers           *map[string][]string
-	QueryParameters   *map[string][]string
 }
 
 // Service represents a service stored in Application RE

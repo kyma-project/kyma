@@ -52,6 +52,7 @@ func (svc *basicAuth) makeBasicAuthMap(username, password string) map[string][]b
 	return map[string][]byte{
 		BasicAuthUsernameKey: []byte(username),
 		BasicAuthPasswordKey: []byte(password),
+		"RequestParameters":
 	}
 }
 

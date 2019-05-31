@@ -12,10 +12,8 @@ type API struct {
 	SpecificationUrl string
 	// ApiType is a type of and API ex. OData, OpenApi
 	ApiType string
-	// Headers
-	Headers *map[string][]string
-	// QueryParameters
-	QueryParameters *map[string][]string
+	// Request Parameters
+	RequestParameters *RequestParameters
 }
 
 // Credentials contains OAuth configuration.
@@ -24,6 +22,9 @@ type Credentials struct {
 	Oauth           *Oauth
 	Basic           *Basic
 	CertificateGen  *CertificateGen
+}
+
+type RequestParameters struct {
 	Headers         *map[string][]string
 	QueryParameters *map[string][]string
 }
@@ -42,6 +43,8 @@ type Oauth struct {
 	ClientSecret string
 	// Optional CSRF Data
 	CSRFInfo *CSRFInfo
+	// Request Parameters
+	RequestParameters *RequestParameters
 }
 
 // Basic contains details of Basic configuration.
@@ -52,6 +55,8 @@ type Basic struct {
 	Password string
 	// Optional CSRF Data
 	CSRFInfo *CSRFInfo
+	// Request Parameters
+	RequestParameters *RequestParameters
 }
 
 // CertificateGen contains common name of the certificate to generate
@@ -60,6 +65,8 @@ type CertificateGen struct {
 	Certificate string
 	// Optional CSRF Data
 	CSRFInfo *CSRFInfo
+	// Request Parameters
+	RequestParameters *RequestParameters
 }
 
 // ServiceDefinition is an internal representation of a service.
