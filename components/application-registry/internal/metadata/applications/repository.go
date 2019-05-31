@@ -37,8 +37,7 @@ type ServiceAPI struct {
 	SpecificationUrl string
 	ApiType          string
 	Credentials      Credentials
-	Headers          *map[string][]string
-	QueryParameters  *map[string][]string
+	RequestParametersSecretName string
 }
 
 type CSRFInfo struct {

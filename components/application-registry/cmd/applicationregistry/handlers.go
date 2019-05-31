@@ -71,7 +71,8 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 	}
 
 	accessServiceManager := newAccessServiceManager(coreClientset, opt.namespace, opt.proxyPort)
-	secretsService := newSecretsRepository(coreClientset, nameResolver, opt.namespace)
+	credentialsSecretsService := newSecretsRepository(coreClientset, nameResolver, opt.namespace)
+	requestParametersSecretsService := newRequestParametersSecretsRepository()
 
 	uuidGenerator := metauuid.GeneratorFunc(func() (string, error) {
 		uuidInstance, err := uuid.NewV4()
@@ -81,7 +82,7 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 		return uuidInstance.String(), nil
 	})
 
-	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, secretsService, istioService)
+	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, credentialsSecretsService, requestParametersSecretsService, istioService)
 
 	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, applicationServiceRepository, specificationService), nil
 }
