@@ -12,10 +12,8 @@ type API struct {
 	SpecificationUrl string
 	// ApiType is a type of and API ex. OData, OpenApi
 	ApiType string
-	// Headers
-	Headers *map[string][]string
-	// QueryParameters
-	QueryParameters *map[string][]string
+	// Request Parameters
+	RequestParameters *RequestParameters
 }
 
 // Credentials contains OAuth configuration.
@@ -24,6 +22,11 @@ type Credentials struct {
 	Oauth           *Oauth
 	Basic           *Basic
 	CertificateGen  *CertificateGen
+	Headers         *map[string][]string
+	QueryParameters *map[string][]string
+}
+
+type RequestParameters struct {
 	Headers         *map[string][]string
 	QueryParameters *map[string][]string
 }
