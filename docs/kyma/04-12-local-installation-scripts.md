@@ -43,6 +43,8 @@ If Minikube is already initialized, the system prompts you to agree to remove th
 - If you plan to perform a clean installation, answer `yes`.
 - If you installed Kyma to your Minikube cluster and then stopped the cluster using the `minikube stop` command, answer `no`.  This allows you to start the cluster again without reinstalling Kyma.
 
+Minikube is configured to disable the default Nginx Ingress Controller.
+
 >**NOTE:** For the complete list of parameters passed to the `minikube start` command, refer to the `installation/scripts/minikube.sh` script.
 
 Once Minikube is up and running, the script adds local installation entries to `/etc/hosts`.
