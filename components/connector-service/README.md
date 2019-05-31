@@ -27,7 +27,8 @@ The Connector Service has the following parameters:
 - **tokenLength** - Length of registration tokens. The default value is `64`.
 - **appTokenExpirationMinutes** - Time after which tokens for Applications expire and are no longer valid. The default value is `5` minutes.
 - **runtimeTokenExpirationMinutes** - Time after which tokens for Runtimes expire and are no longer valid. The default value is `10` minutes.
-- **caSecretName** - Name of the secret which contains the root Certificate Authority (CA). The default value is `nginx-auth-ca`.
+- **caSecretName** - Namespace and Name of the secret, in Namespace/Name format, which contains the certificate and key used for signing client certificates. The default value is `kyma-integration/nginx-auth-ca`.
+- **rootCACertificateSecretName** - Namespace and Name of the secret, in Namespace/Name format, which contains root CA (Certificate Authority) Certificate in case certificates are singed by intermediate CA.
 - **requestLogging** - Flag for logging incoming requests. It is set to `False` by default.
 - **connectorServiceHost** - Host under which this service is accessible. It is used for generating the URL. The default host is `cert-service.wormhole.cluster.kyma.cx`.
 - **gatewayBaseURL** - Base URL of the Gateway Service.
@@ -38,6 +39,8 @@ The Connector Service has the following parameters:
 - **runtimeCertificateValidityTime** - Time until which the certificates that the service issues for Runtimes are valid. The default value is 90 days.
 - **central** - Determines whether the Connector Service works in the central mode.
 - **revocationConfigMapName** - Name of the ConfigMap containing the revoked certificates list.
+- **lookupEnabled** - Flag that determines whether connector should make a call to get gateway endpoint. It is set to `False` by default.
+- **lookupConfigMapPath** - Path in the pod where Config Map for cluster lookup will be stored. Default value is `/etc/config/config.json`. It is used only when `lookupEnabled` is set to `True`
 
 Connector Service also uses following environmental variables for CSR - related information config:
 - **COUNTRY** (two-letter-long country code)
