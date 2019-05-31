@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"path/filepath"
 	"reflect"
 	"strconv"
@@ -164,48 +163,40 @@ func (s *store) ContainsAllObjects(ctx context.Context, bucketName, assetName st
 	return true, nil
 }
 
-func iterateSlice(files []string, fileNameChan chan string) {
+func iterateSlice(files []string) chan string {
+	fileNameChan := make(chan string, len(files))
 	defer close(fileNameChan)
 	for _, fileName := range files {
 		fileNameChan <- fileName
 	}
+
+	return fileNameChan
 }
 
 type objectAttrs struct {
 	bucketName, assetName, sourceBasePath string
 }
 
-func (s store) startWorkers(
-	ctx context.Context,
-	attrs objectAttrs,
-	fileNameChan chan string,
-	errChan chan error) {
-	defer close(errChan)
-
-	var waitGroup sync.WaitGroup
-	for i := 0; i < s.uploadWorkerCount; i++ {
-		waitGroup.Add(1)
-		go func() {
-			defer waitGroup.Done()
-			s.putObject(ctx, attrs, fileNameChan, errChan)
-		}()
-	}
-	waitGroup.Wait()
-}
-
 func (s *store) PutObjects(ctx context.Context, bucketName, assetName, sourceBasePath string, files []string) error {
-	id := time.Now().UnixNano()
-	logrus.Info("---> start putting objects ", id)
-	fileNameChan := make(chan string)
-	go iterateSlice(files, fileNameChan)
-
+	fileNameChan := iterateSlice(files)
 	errChan := make(chan error)
-	objAttrs := objectAttrs{
-		bucketName:     bucketName,
-		assetName:      assetName,
-		sourceBasePath: sourceBasePath,
-	}
-	go s.startWorkers(ctx, objAttrs, fileNameChan, errChan)
+	go func() {
+		defer close(errChan)
+		objAttrs := objectAttrs{
+			bucketName:     bucketName,
+			assetName:      assetName,
+			sourceBasePath: sourceBasePath,
+		}
+		var waitGroup sync.WaitGroup
+		for i := 0; i < s.uploadWorkerCount; i++ {
+			waitGroup.Add(1)
+			go func() {
+				defer waitGroup.Done()
+				s.putObject(ctx, objAttrs, fileNameChan, errChan)
+			}()
+		}
+		waitGroup.Wait()
+	}()
 
 	var errorMessages []string
 	for err := range errChan {
@@ -215,7 +206,6 @@ func (s *store) PutObjects(ctx context.Context, bucketName, assetName, sourceBas
 		return nil
 	}
 	errMsg := strings.Join(errorMessages, "\n")
-	logrus.Info("---> end putting objects ", id)
 	return errors.New(errMsg)
 }
 
