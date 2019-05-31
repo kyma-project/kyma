@@ -6,7 +6,6 @@ COPY api ./api
 COPY pkg              ./pkg
 COPY internal/trace   ./internal/trace
 COPY internal/knative ./internal/knative
-COPY internal/publish ./internal/publish
 COPY internal/ea ./internal/ea
 
 WORKDIR /go/src/github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/

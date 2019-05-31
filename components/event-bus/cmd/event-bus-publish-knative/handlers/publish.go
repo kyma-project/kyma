@@ -12,7 +12,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/validators"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
-	"github.com/kyma-project/kyma/components/event-bus/internal/publish"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
 	eventBusUtil "github.com/kyma-project/kyma/components/event-bus/pkg/util"
 	"github.com/opentracing/opentracing-go"
@@ -25,7 +24,7 @@ var (
 
 type Message struct {
 	Headers map[string][]string `json:"headers,omitempty"`
-	Payload api.AnyValue      `json:"payload,omitempty"`
+	Payload api.AnyValue        `json:"payload,omitempty"`
 }
 
 // WithRequestSizeLimiting creates a new request size limiting HandlerFunc
@@ -75,7 +74,7 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 	}
 }
 
-func filterCEHeaders(req  *http.Request) map[string][]string {
+func filterCEHeaders(req *http.Request) map[string][]string {
 	//forward `ce-` headers only
 	headers := make(map[string][]string)
 	for k := range req.Header {
@@ -93,7 +92,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 	publishRequest, err := validators.ValidateRequest(r)
 	if err != nil {
 		log.Printf("validate request failed: %v", err)
-		_ = publish.SendJSONError(w, err)
+		_ = sendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED
 	}
 
@@ -101,14 +100,14 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 	if hasSourceID := setSourceID(publishRequest, &r.Header); !hasSourceID {
 		err = api.ErrorResponseMissingFieldSourceId()
 		log.Printf("source-id missing: %v", err)
-		_ = publish.SendJSONError(w, err)
+		_ = sendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED
 	}
 
 	// validate the publish request
 	if err = api.ValidatePublish(publishRequest, opts.EventOptions); err != nil {
 		log.Printf("validate publish failed: %v", err)
-		_ = publish.SendJSONError(w, err)
+		_ = sendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED
 	}
 
@@ -118,7 +117,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 		if errEventID != nil {
 			err = api.ErrorResponseInternalServer()
 			log.Printf("EventID generation failed: %v", err)
-			_ = publish.SendJSONError(w, err)
+			_ = sendJSONError(w, err)
 			return nil, nil, nil, err, publisher.FAILED
 		}
 		publishRequest.EventID = eventID
@@ -134,7 +133,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 	if errMarshal != nil {
 		log.Printf("marshal message failed: %v", errMarshal.Error())
 		err = api.ErrorResponseInternalServer()
-		_ = publish.SendJSONError(w, err)
+		_ = sendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED
 	}
 
@@ -143,7 +142,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 		&publishRequest.EventTypeVersion)
 	if err = validators.ValidateChannelNameLength(&channelName, opts.MaxChannelNameLength); err != nil {
 		log.Printf("publish message failed: %v", err)
-		_ = publish.SendJSONError(w, err)
+		_ = sendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED
 	}
 
@@ -151,7 +150,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 	err, status := (*knativePublisher).Publish(knativeLib, &channelName, &defaultChannelNamespace, &message.Headers,
 		&messagePayload, publishRequest)
 	if err != nil {
-		_ = publish.SendJSONError(w, err)
+		_ = sendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED
 	}
 	// Succeed if the Status is IGNORED | PUBLISHED
@@ -230,4 +229,10 @@ func getPublishStatusReason(status *string) string {
 func addSpanTagsForMessage(publishSpan *opentracing.Span, message *Message) {
 	tags := trace.CreateTraceTagsFromMessageHeader(message.Headers)
 	trace.SetSpanTags(publishSpan, &tags)
+}
+
+func sendJSONError(w http.ResponseWriter, err *api.Error) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader((*err).Status)
+	return json.NewEncoder(w).Encode(*err)
 }
