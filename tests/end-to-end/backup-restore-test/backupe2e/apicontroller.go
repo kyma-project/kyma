@@ -327,11 +327,6 @@ func (t ApiControllerTest) getFunctionPodStatus(namespace string, waitmax time.D
 		retry.OnRetry(func(n uint, err error) {
 			log.Printf("Function Pod Status exection #%d: %s\n", n, err)
 		}),
-		retry.DelayType(retry.FixedDelay),
-		retry.Delay(waitmax/10), //doesn't have to be very precise
-		retry.OnRetry(func(n uint, err error) {
-			log.Printf("Function Pod Status exection #%d: %s\n", n, err)
-		}),
 	)
 }
 
