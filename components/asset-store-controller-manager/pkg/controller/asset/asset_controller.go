@@ -71,7 +71,7 @@ func Add(mgr manager.Manager) error {
 		metadataExtractor: metadataExtractor,
 	}
 
-	return add(mgr, reconciler, cfg.MaxConcurrentReconciles)
+	return add(mgr, reconciler, cfg.MaxAssetConcurrentReconciles)
 }
 
 func bucketFinder(mgr manager.Manager) func(ctx context.Context, namespace, name string) (*assetstorev1alpha2.CommonBucketStatus, bool, error) {

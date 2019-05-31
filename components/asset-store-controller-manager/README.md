@@ -55,7 +55,8 @@ Use the following environment variables to configure the application:
 | **APP_WEBHOOK_VALIDATION_TIMEOUT** | No | `1m` | The period of time after which validation is canceled |
 | **APP_LOADER_VERIFY_SSL** | No | `true` | The variable that verifies SSL certificate before downloading source files |
 | **APP_LOADER_TEMPORARY_DIRECTORY** | No | `/tmp` | The path to the directory used to temporarily store data |
-| **APP_MAX_CONCURRENT_RECONCILES** | No | 1 | The maximum number of concurrent Reconciles which will run |
+| **APP_MAX_ASSET_CONCURRENT_RECONCILES** | No | 1 | The maximum number of asset concurrent Reconciles which will run |
+| **APP_MAX_CLUSTER_ASSET_CONCURRENT_RECONCILES** | No | 1 | The maximum number of cluster asset concurrent Reconciles which will run |
 
 ## Development
 
