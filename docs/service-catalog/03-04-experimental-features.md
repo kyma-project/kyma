@@ -12,7 +12,7 @@ with a native Kubernetes solution - CustomResourceDefinitions (CRDs).
 
 To enable the CRDs feature in the Service Catalog, override the **service-catalog-apiserver.enabled** and **service-catalog-crds.enabled** parameters
 in the installation file:
-- For the local installation, add the `service-catalog-overrides` ConfigMap to the cluster before the installation starts:
+- For the local installation, modify the `service-catalog-overrides` ConfigMap in the [installer-config-local.yaml](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-config-local.yaml.tpl#L73) file:
     ```
     apiVersion: v1
     kind: ConfigMap
@@ -29,18 +29,9 @@ in the installation file:
       service-catalog-apiserver.enabled: "false"
       service-catalog-crds.enabled: "true"
     ```
-- For the cluster installation, add the `service-catalog-overrides` ConfigMap to the to the cluster before the installation starts:
+- For the cluster installation, add the `service-catalog-overrides` ConfigMap to the to the cluster before the installation starts. Execute:
     ```
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: service-catalog-overrides
-      namespace: kyma-installer
-      labels:
-        installer: overrides
-        component: service-catalog
-        kyma-project.io/installation: ""
-    data:
-      service-catalog-apiserver.enabled: "false"
-      service-catalog-crds.enabled: "true"
+    kubectl create configmap service-catalog-overrides -n kyma-installer --from-literal=service-catalog-apiserver.enabled=false  global.domainName=$DOMAIN --from-literal=service-catalog-crds.enabled=true" \
+    && kubectl label configmap service-catalog-overrides -n kyma-installer installer=overrides installer=overrides component=service-catalog
     ```
+
