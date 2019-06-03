@@ -1,0 +1,8 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: Application
+metadata:
+  name: perf-app
+spec:
+  description: Performance test application connector
+  labels:
+    app: perf-app

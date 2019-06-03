@@ -78,8 +78,7 @@ if [ $CR_PATH ]; then
 
 fi
 
-
-echo -e "\nApplying installation combo yaml"
+echo -e "\nCreating installation combo yaml"
 COMBO_YAML=$(bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${AZURE_BROKER_CONFIG} ${CR_PATH})
 
 rm -rf ${AZURE_BROKER_CONFIG}
@@ -94,13 +93,11 @@ if [ ${LOCAL} ]; then
     COMBO_YAML=$(sed 's/\.minikubeIP: .*/\.minikubeIP: '"${MINIKUBE_IP}"'/g' <<<"$COMBO_YAML")
 fi
 
-kubectl apply -f - <<<"$COMBO_YAML"
-
 echo -e "\nConfiguring sub-components"
 bash ${CURRENT_DIR}/configure-components.sh
 
-echo -e "\nGetting Helm secrets"
-bash ${CURRENT_DIR}/tiller-tls.sh
+echo -e "\nStarting installation!"
+kubectl apply -f - <<< "$COMBO_YAML"
 
-echo -e "\nTriggering installation"
-kubectl label installation/kyma-installation action=install
+echo -e "\nGetting Helm certificates"
+${CURRENT_DIR}/tiller-tls.sh && echo "Certificates successfully saved! " || echo "An unexpected error occured while saving Helm certificates. Please check the installation status"

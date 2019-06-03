@@ -40,6 +40,7 @@ func (c *resourceQuotaConverter) ToGQLs(in []*v1.ResourceQuota) []gqlschema.Reso
 	result := make([]gqlschema.ResourceQuota, 0)
 	for _, rq := range in {
 		converted := c.ToGQL(rq)
+
 		if converted != nil {
 			result = append(result, *converted)
 		}

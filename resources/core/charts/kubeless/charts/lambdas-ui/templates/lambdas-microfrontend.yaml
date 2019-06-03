@@ -10,6 +10,7 @@ spec:
   category: Development
   placement: namespace
   viewBaseUrl: 'https://lambdas-ui.{{ js .Values.global.ingress.domainName }}'
+  preloadUrl: '#/preload'
   navigationNodes:
     - label: Lambdas
       navigationPath: lambdas

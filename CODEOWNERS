@@ -24,14 +24,18 @@
 # The `pod-preset` subchart
 /resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# The Microfrontend CRD 
-/resources/cluster-essentials/templates/microfrontend.crd.yaml @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
+# The Microfrontend CRDs 
+/resources/cluster-essentials/templates/microfrontend.crd.yaml @kwiatekus @dariadomagala @y-kkamil @akucharska @sjanota @parostatkiem
+/resources/cluster-essentials/templates/clustermicrofrontend.crd.yaml @kwiatekus @dariadomagala @y-kkamil @akucharska @sjanota @parostatkiem
 
 # The `values.yaml` file for `core` chart
 /resources/core/values.yaml @kyma-project/developers
 
-# The `heptio ark` chart
-/resources/ark/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
+# The `heptio velero essentials` chart
+/resources/velero-essentials/ @joek @rakesh-garimella @venturasr @lilitgh @k15r
+
+# The `heptio velero` chart
+/resources/velero/ @joek @rakesh-garimella @venturasr @lilitgh @k15r
 
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -46,10 +50,10 @@
 /resources/core/charts/configurations-generator @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `assetstore` chart
-/resources/assetstore/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/resources/assetstore/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `cms` chart
-/resources/cms/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/resources/cms/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `application-connector` chart
 /resources/application-connector/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -100,13 +104,16 @@
 /resources/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `monitoring` subchart
-/resources/monitoring/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
+/resources/monitoring/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `kubeless` subchart
-/resources/core/charts/kubeless/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
+/resources/core/charts/kubeless/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
+
+# The `lambda-ui` subchart
+/resources/core/charts/kubeless/charts/lambdas-ui  @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r @kwiatekus @dariadomagala @y-kkamil @parostatkiem @akucharska @sjanota
 
 # The `logging` subchart
-/resources/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/resources/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `log-ui` subchart
 /resources/logging/charts/log-ui/ @rakesh-garimella @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @hisarbalik @a-thaler @igor-karpukhin
@@ -133,25 +140,25 @@
 /resources/service-catalog-addons/charts/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `brokers-ui` subchart
-/resources/service-catalog-addons/charts/brokers-ui/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/resources/service-catalog-addons/charts/brokers-ui/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @akucharska @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `catalog-ui` subchart
-/resources/service-catalog-addons/charts/catalog-ui/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/resources/service-catalog-addons/charts/catalog-ui/ @akucharska @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `instances-ui` subchart
-/resources/service-catalog-addons/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/resources/service-catalog-addons/charts/instances-ui/ @akucharska @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `docs` subchart
-/resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/resources/core/charts/docs/ @michal-hudy @m00g3n @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `console-backend-service` subchart
-/resources/core/charts/console-backend-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/resources/core/charts/console-backend-service/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `templates` chart
 /resources/core/templates/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `templates` chart
-/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld @jasiu001 @adamwalach
+/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @tgorgol @magicmatatjahu @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld @jasiu001 @adamwalach
 
 # The `messaging` subdirectory
 /resources/examples/lambda-messages/ @pbochynski @PK85
@@ -172,7 +179,7 @@
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `knative-serving` chart
-/resources/knative-serving/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/resources/knative-serving/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # The `knative-eventing` chart
 /resources/knative-eventing/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
@@ -181,7 +188,7 @@
 /resources/jaeger/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
 # The `prometheus-operator` chart
-/resources/prometheus-operator/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
+/resources/prometheus-operator/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
 
 # The `service-catalog` chart
 /resources/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -200,16 +207,16 @@
 /components/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Asset Store Controller Manager Component
-/components/asset-store-controller-manager/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/components/asset-store-controller-manager/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Asset Upload Service
-/components/asset-upload-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/components/asset-upload-service/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Asset Metadata Service
-/components/asset-metadata-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/components/asset-metadata-service/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # CMS Controller Manager Component
-/components/cms-controller-manager/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/components/cms-controller-manager/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Binding usage controller Component
 /components/service-binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -233,7 +240,7 @@
 /components/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # Console Backend Service Component
-/components/console-backend-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/components/console-backend-service/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # IDPPreset Component
 /components/idppreset/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
@@ -269,7 +276,7 @@
 /components/xip-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Kubeless Images
-/components/kubeless-images @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/components/kubeless-images @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # Tests
 # acceptance tests
@@ -277,16 +284,16 @@
 /tests/acceptance/dex @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Knative Serving Acceptance
-/tests/knative-serving/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/knative-serving/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # test-namespace-controller
 /tests/test-namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
 
 # monitoring tests
-/tests/monitoring/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/monitoring/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # test-logging tests
-/tests/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # api-controller acceptance tests
 /tests/api-controller-acceptance-tests/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -295,10 +302,10 @@
 /tests/apiserver-proxy-tests/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Console Backend Service tests
-/tests/console-backend-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/tests/console-backend-service/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # Asset Store tests
-/tests/asset-store/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/tests/asset-store/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Connector Service Tests
 /tests/connector-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -325,29 +332,26 @@
 # The gcp-broker-provider directory
 /tools/gcp-broker-provider/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# The docsbuilder directory
-/tools/docsbuilder/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
-
 # The failery directory
-/tools/failery/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/tools/failery/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
 
 # The static-users-generator directory
 /tools/static-users-generator/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# The tools/ark-plugins directory
-/tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
+# The tools/velero-plugins directory
+/tools/velero-plugins/ @mwieczorek @joek @rakesh-garimella @venturasr @lilitgh @k15r
 
 # The tools/kyma-installer directory
 /tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
 
 # The tools/load-test directory
-/tools/load-test/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
+/tools/load-test/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
 
 # kubeless-integration tests directory
-/tests/end-to-end/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/end-to-end/kubeless-integration/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # kubeless tests
-/tests/kubeless/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/kubeless/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # Event Bus Tests
 /tests/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
@@ -356,7 +360,7 @@
 /tests/gateway-tests/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
 # E2E Backup Tests
-/tests/end-to-end/backup-restore-test @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/end-to-end/backup-restore-test @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # E2E Upgrade Tests
 /tests/end-to-end/upgrade @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -371,4 +375,7 @@
 /docs/ @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+milv.config.yaml @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
+
+# performance tests
+/tests/perf/ @rakesh-garimella @venturasr @lilitgh @hisarbalik @lszymik @a-thaler

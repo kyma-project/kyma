@@ -23,7 +23,7 @@ Use the following tools to set up the project:
 To run the application without building the binary, run this command:
 
 ```bash
-APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_VERBOSE=true APP_CONTENT_ACCESS_KEY={accessKey} APP_CONTENT_SECRET_KEY={secretKey} APP_CONTENT_VERIFY_SSL=false APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE=kyma-integration APP_APPLICATION_CONNECTOR_URL=http://dummy.url APP_OIDC_ISSUER_URL=https://dex.{kymaDomain} APP_OIDC_CLIENT_ID=kyma-client go run main.go
+APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_VERBOSE=true APP_ASSET_STORE_ADDRESS=https://minio.{kymaDomain} APP_ASSET_STORE_VERIFY_SSL=false APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE=kyma-integration APP_APPLICATION_CONNECTOR_URL=http://dummy.url APP_OIDC_ISSUER_URL=https://dex.{kymaDomain} APP_OIDC_CLIENT_ID=kyma-client go run main.go
 ```
 
 For the descriptions of the available environment variables, see the [Configuration](./docs/configuration.md) document.
@@ -75,7 +75,7 @@ dep ensure -vendor-only
 
 This project uses the [GQLGen](https://github.com/99designs/gqlgen) library, which improves development by generating code from the [GraphQL schema definition](internal/gqlschema/schema.graphql).
 
-1.  Define types and their fields in `/internal/gqlschema/schema.graphql` using the [Schema Definition Language](https://graphql.org/learn/schema/).
+1.  Define types and their fields in `/internal/gqlschema/schema.graphql` using the [Schema Definition Language](http://graphql.org/learn/schema/).
 1.  Execute the `./gqlgen.sh` script to run the code generator.
 1.  Navigate to the `/internal/gqlschema/` directory.
 1.  Find newly generated methods in the `ResolverRoot` interface located in `./schema_gen.go`.

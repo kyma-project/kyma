@@ -4,6 +4,8 @@ kind: Job
 metadata:
   namespace: {{ .Release.Namespace }}
   name: istio-init-crd-certmanager-10
+  annotations:
+    "helm.sh/hook-delete-policy": "before-hook-creation"
 spec:
   template:
     metadata:

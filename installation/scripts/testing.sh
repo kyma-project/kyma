@@ -23,10 +23,19 @@ ${kc} get cm dex-config -n kyma-system -ojsonpath="{.data}" | grep --silent "#__
 if [[ $? -eq 1 ]]
 then
   # if static users are not available, do not execute tests which requires them
-  matchTests=$(${kc} get testdefinitions --all-namespaces -l 'require-static-users!=true' -o=go-template-file --template='./../resources/test-selector.yaml.tpl')
+  matchTests=$(${kc} get testdefinitions --all-namespaces -l 'require-static-users!=true' -o=go-template='  selectors:
+    matchNames:
+{{- range .items}}
+      - name: {{.metadata.name}}
+        namespace: {{.metadata.namespace}}
+{{- end}}')
   echo "WARNING: following tests will be skipped due to the lack of static users:"
   echo "$(${kc} get testdefinitions --all-namespaces -l 'require-static-users=true' -o=go-template --template='{{- range .items}}{{printf " - %s\n" .metadata.name}}{{- end}}')"
 fi
+
+# creates a config map which provides the testing bundles
+injectTestingBundles
+trap removeTestingBundles ERR EXIT
 
 cat <<EOF | ${kc} apply -f -
 apiVersion: testing.kyma-project.io/v1alpha1

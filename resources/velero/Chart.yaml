@@ -1,0 +1,7 @@
+appVersion: 0.11.0
+name: velero
+version: 0.0.1
+description: Velero for Kyma
+keywords:
+  - Backup
+  - Heptio-Velero

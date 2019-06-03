@@ -30,3 +30,12 @@ spec:
       # for the kubelet on API server nodes fail.
       insecureSkipVerify: true
     bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    relabelings:
+     - sourceLabels:
+         - __meta_kubernetes_namespace
+         - __meta_kubernetes_service_name
+         - __meta_kubernetes_endpoint_port_name
+       action: keep
+       regex: default;kubernetes;https
+     - targetLabel: __address__
+       replacement: kubernetes.default.svc:443

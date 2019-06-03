@@ -24,6 +24,15 @@ func (_m *Resolver) ApplicationEnabledInNamespacesField(ctx context.Context, obj
 	return r0, r1
 }
 
+// ApplicationEnabledMappingServices provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ApplicationEnabledMappingServices(ctx context.Context, obj *gqlschema.Application) ([]*gqlschema.EnabledMappingService, error) {
+	var r0 []*gqlschema.EnabledMappingService
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // ApplicationEventSubscription provides a failing mock function with given fields: ctx
 func (_m *Resolver) ApplicationEventSubscription(ctx context.Context) (<-chan gqlschema.ApplicationEvent, error) {
 	var r0 <-chan gqlschema.ApplicationEvent
@@ -96,8 +105,8 @@ func (_m *Resolver) DisableApplicationMutation(ctx context.Context, _a1 string, 
 	return r0, r1
 }
 
-// EnableApplicationMutation provides a failing mock function with given fields: ctx, _a1, namespace
-func (_m *Resolver) EnableApplicationMutation(ctx context.Context, _a1 string, namespace string) (*gqlschema.ApplicationMapping, error) {
+// EnableApplicationMutation provides a failing mock function with given fields: ctx, _a1, namespace, allServices, services
+func (_m *Resolver) EnableApplicationMutation(ctx context.Context, _a1 string, namespace string, allServices *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error) {
 	var r0 *gqlschema.ApplicationMapping
 	var r1 error
 	r1 = _m.err
@@ -117,6 +126,15 @@ func (_m *Resolver) EventActivationEventsField(ctx context.Context, eventActivat
 // EventActivationsQuery provides a failing mock function with given fields: ctx, namespace
 func (_m *Resolver) EventActivationsQuery(ctx context.Context, namespace string) ([]gqlschema.EventActivation, error) {
 	var r0 []gqlschema.EventActivation
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// OverloadApplicationMutation provides a failing mock function with given fields: ctx, _a1, namespace, allServices, services
+func (_m *Resolver) OverloadApplicationMutation(ctx context.Context, _a1 string, namespace string, allServices *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error) {
+	var r0 *gqlschema.ApplicationMapping
 	var r1 error
 	r1 = _m.err
 

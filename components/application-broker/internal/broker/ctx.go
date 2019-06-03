@@ -1,12 +1,41 @@
 package broker
 
-import "context"
+import (
+	"context"
+
+	"strings"
+
+	"github.com/pkg/errors"
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
+)
 
 type contextKey int
 
 const (
+	osbAPIVersion = "2.13"
+
 	osbContextKey contextKey = 5001
 )
+
+type osbContext struct {
+	APIVersion          string
+	OriginatingIdentity string
+	BrokerNamespace     string
+}
+
+func (ctx *osbContext) validateAPIVersion() error {
+	if ctx.APIVersion != osbAPIVersion {
+		return errors.Errorf("while checking 'X-Broker-API-Version' header, should be %s, got %s", osbAPIVersion, ctx.APIVersion)
+	}
+	return nil
+}
+
+func (ctx *osbContext) validateOriginatingIdentity() error {
+	if ctx.OriginatingIdentity != "" && !strings.Contains(ctx.OriginatingIdentity, osb.PlatformKubernetes) {
+		return errors.Errorf("while checking 'X-Broker-API-Originating-Identity' header, should be %s, got %s", osb.PlatformKubernetes, ctx.OriginatingIdentity)
+	}
+	return nil
+}
 
 func contextWithOSB(ctx context.Context, osbCtx osbContext) context.Context {
 	return context.WithValue(ctx, osbContextKey, osbCtx)

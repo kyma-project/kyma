@@ -45,7 +45,7 @@ function StartMinikube() {
         + " --memory ${MEMORY}"`
         + " --cpus 4"`
         + " --extra-config=apiserver.authorization-mode=RBAC"`
-	+ " --extra-config=apiserver.cors-allowed-origins='http://*'"`
+	    + " --extra-config=apiserver.cors-allowed-origins='http://*'"`
         + " --extra-config=apiserver.enable-admission-plugins='DefaultStorageClass,LimitRanger,MutatingAdmissionWebhook,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,ValidatingAdmissionWebhook'"`
         + " --kubernetes-version=v${KUBERNETES_VERSION}"`
         + " --disk-size=${DISK_SIZE}"`
