@@ -108,6 +108,40 @@ func (svc *apiService) Create(name string, namespace string, hostname string, se
 	return svc.client.GatewayV1alpha2().Apis(namespace).Create(&api)
 }
 
+func (svc *apiService) Update(name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, resourceVersion string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
+	api := v1alpha2.Api{
+		TypeMeta: v1.TypeMeta{
+			APIVersion: "authentication.kyma-project.io/v1alpha2",
+			Kind:       "API",
+		},
+		ObjectMeta: v1.ObjectMeta{
+			Name:   name,
+			Namespace: namespace,
+			ResourceVersion: resourceVersion,
+		},
+		Spec: v1alpha2.ApiSpec{
+			Service:                    v1alpha2.Service{
+				Name: serviceName,
+				Port: servicePort,
+			},
+			Hostname:                   hostname,
+			Authentication: []v1alpha2.AuthenticationRule{
+				{
+					Jwt: v1alpha2.JwtAuthentication{
+						JwksUri: jwksUri,
+						Issuer:  issuer,
+					},
+					Type: v1alpha2.AuthenticationType(authenticationType),
+				},
+			},
+			DisableIstioAuthPolicyMTLS: disableIstioAuthPolicyMTLS,
+			AuthenticationEnabled:      authenticationEnabled,
+		},
+	}
+
+	return svc.client.GatewayV1alpha2().Apis(namespace).Update(&api)
+}
+
 func (svc *apiService) Delete(name string, namespace string) error {
 	return svc.client.GatewayV1alpha2().Apis(namespace).Delete(name, nil)
 }

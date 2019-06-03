@@ -2,6 +2,7 @@ package apicontroller
 
 import (
 	"context"
+	"fmt"
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
@@ -54,6 +55,31 @@ func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace str
 	api, err := ar.apiLister.Create(name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s `%s` in namespace `%s`", pretty.API, name, namespace))
+		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	return gqlschema.API{
+		Name: api.Name,
+		Hostname: api.Spec.Hostname,
+		Service: gqlschema.ApiService{
+			Name: api.Spec.Service.Name,
+			Port: api.Spec.Service.Port,
+		},
+		AuthenticationPolicies: []gqlschema.AuthenticationPolicy{
+			{
+				JwksURI: jwksUri,
+				Issuer: issuer,
+				Type: gqlschema.AuthenticationPolicyType(authenticationType),
+			},
+		},
+	}, nil
+}
+
+func (ar *apiResolver) UpdateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, resourceVersion string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
+	fmt.Println("iugxiygwiwexioweixowoxjwojxnowdjxowdnxowdxhowdhxopwdhx")
+	api, err := ar.apiLister.Update(name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, resourceVersion, disableIstioAuthPolicyMTLS, authenticationEnabled)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while editing %s `%s` in namespace `%s`", pretty.API, name, namespace))
 		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 

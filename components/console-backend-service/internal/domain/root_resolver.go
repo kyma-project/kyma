@@ -328,6 +328,10 @@ func (r *mutationResolver) CreateAPI(ctx context.Context, name string, namespace
 	return r.ac.CreateAPI(ctx, name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
 }
 
+func (r *mutationResolver) UpdateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, resourceVersion string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
+	return r.ac.UpdateAPI(ctx, name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, resourceVersion, disableIstioAuthPolicyMTLS, authenticationEnabled)
+}
+
 func (r *mutationResolver) DeleteAPI(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
 	return r.ac.DeleteAPI(ctx, name, namespace)
 }

@@ -50,3 +50,12 @@ func (_m *Resolver) DeleteAPI(ctx context.Context, name string, namespace string
 
 	return r0, r1
 }
+
+// UpdateAPI provides a failing mock function with given fields: ctx, name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, resourceVersion, disableIstioAuthPolicyMTLS, authenticationEnabled
+func (_m *Resolver) UpdateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, resourceVersion string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
+	var r0 gqlschema.API
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
