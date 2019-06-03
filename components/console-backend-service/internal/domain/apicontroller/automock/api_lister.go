@@ -10,6 +10,29 @@ type apiLister struct {
 	mock.Mock
 }
 
+// Create provides a mock function with given fields: name, namespace, hostname, service, disableIstioAuthPolicyMTLS, authenticationEnabled
+func (_m *apiLister) Create(name string, namespace string, hostname string, service v1alpha2.Service, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
+	ret := _m.Called(name, namespace, hostname, service, disableIstioAuthPolicyMTLS, authenticationEnabled)
+
+	var r0 *v1alpha2.Api
+	if rf, ok := ret.Get(0).(func(string, string, string, v1alpha2.Service, *bool, *bool) *v1alpha2.Api); ok {
+		r0 = rf(name, namespace, hostname, service, disableIstioAuthPolicyMTLS, authenticationEnabled)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1alpha2.Api)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string, string, v1alpha2.Service, *bool, *bool) error); ok {
+		r1 = rf(name, namespace, hostname, service, disableIstioAuthPolicyMTLS, authenticationEnabled)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // List provides a mock function with given fields: namespace, serviceName, hostname
 func (_m *apiLister) List(namespace string, serviceName *string, hostname *string) ([]*v1alpha2.Api, error) {
 	ret := _m.Called(namespace, serviceName, hostname)

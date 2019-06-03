@@ -7,4 +7,5 @@ import (
 //go:generate mockery -name=apiLister -output=automock -outpkg=automock -case=underscore
 type apiLister interface {
 	List(namespace string, serviceName *string, hostname *string) ([]*v1alpha2.Api, error)
+	Create(name string, namespace string, hostname string, serviceName string, servicePort int, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error)
 }

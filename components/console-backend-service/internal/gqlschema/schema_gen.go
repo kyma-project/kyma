@@ -445,6 +445,7 @@ type ComplexityRoot struct {
 		UpdateService                 func(childComplexity int, name string, namespace string, service JSON) int
 		DeleteService                 func(childComplexity int, name string, namespace string) int
 		CreateNamespace               func(childComplexity int, name string, labels *Labels) int
+		CreateApi                     func(childComplexity int, name string, namespace string, hostname string, serviceName string, servicePort int, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) int
 	}
 
 	Namespace struct {
@@ -861,6 +862,7 @@ type MutationResolver interface {
 	UpdateService(ctx context.Context, name string, namespace string, service JSON) (*Service, error)
 	DeleteService(ctx context.Context, name string, namespace string) (*Service, error)
 	CreateNamespace(ctx context.Context, name string, labels *Labels) (NamespaceCreationOutput, error)
+	CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (API, error)
 }
 type NamespaceResolver interface {
 	Applications(ctx context.Context, obj *Namespace) ([]string, error)
@@ -2117,6 +2119,85 @@ func field_Mutation_createNamespace_args(rawArgs map[string]interface{}) (map[st
 		}
 	}
 	args["labels"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_createAPI_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["hostname"]; ok {
+		var err error
+		arg2, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["hostname"] = arg2
+	var arg3 string
+	if tmp, ok := rawArgs["serviceName"]; ok {
+		var err error
+		arg3, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["serviceName"] = arg3
+	var arg4 int
+	if tmp, ok := rawArgs["servicePort"]; ok {
+		var err error
+		arg4, err = graphql.UnmarshalInt(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["servicePort"] = arg4
+	var arg5 *bool
+	if tmp, ok := rawArgs["disableIstioAuthPolicyMTLS"]; ok {
+		var err error
+		var ptr1 bool
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalBoolean(tmp)
+			arg5 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["disableIstioAuthPolicyMTLS"] = arg5
+	var arg6 *bool
+	if tmp, ok := rawArgs["authenticationEnabled"]; ok {
+		var err error
+		var ptr1 bool
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalBoolean(tmp)
+			arg6 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["authenticationEnabled"] = arg6
 	return args, nil
 
 }
@@ -5277,6 +5358,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateNamespace(childComplexity, args["name"].(string), args["labels"].(*Labels)), true
+
+	case "Mutation.createAPI":
+		if e.complexity.Mutation.CreateApi == nil {
+			break
+		}
+
+		args, err := field_Mutation_createAPI_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateApi(childComplexity, args["name"].(string), args["namespace"].(string), args["hostname"].(string), args["serviceName"].(string), args["servicePort"].(int), args["disableIstioAuthPolicyMTLS"].(*bool), args["authenticationEnabled"].(*bool)), true
 
 	case "Namespace.name":
 		if e.complexity.Namespace.Name == nil {
@@ -15607,6 +15700,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "createAPI":
+			out.Values[i] = ec._Mutation_createAPI(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -16731,6 +16829,40 @@ func (ec *executionContext) _Mutation_createNamespace(ctx context.Context, field
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._NamespaceCreationOutput(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_createAPI(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_createAPI_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateAPI(rctx, args["name"].(string), args["namespace"].(string), args["hostname"].(string), args["serviceName"].(string), args["servicePort"].(int), args["disableIstioAuthPolicyMTLS"].(*bool), args["authenticationEnabled"].(*bool))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(API)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._API(ctx, field.Selections, &res)
 }
 
 var namespaceImplementors = []string{"Namespace"}
@@ -29596,6 +29728,7 @@ type Mutation {
     deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
     createNamespace(name: String!, labels: Labels): NamespaceCreationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
+    createAPI(name: String!, namespace: String!, hostname: String!, serviceName: String!, servicePort: Int!, disableIstioAuthPolicyMTLS: Boolean, authenticationEnabled: Boolean): API! @HasAccess(attributes: {resource: "apis", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
 }
 
 # Subscriptions

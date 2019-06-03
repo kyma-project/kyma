@@ -2,9 +2,9 @@ package apicontroller
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/disabled"
 	"time"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/disabled"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
 
@@ -42,7 +42,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Pluggabl
 
 func (r *PluggableResolver) Enable() error {
 	r.informerFactory = externalversions.NewSharedInformerFactory(r.cfg.client, r.cfg.informerResyncPeriod)
-	apiService := newApiService(r.informerFactory.Gateway().V1alpha2().Apis().Informer())
+	apiService := newApiService(r.informerFactory.Gateway().V1alpha2().Apis().Informer(), r.cfg.client)
 	apiResolver, err := newApiResolver(apiService)
 	if err != nil {
 		return err
@@ -74,6 +74,7 @@ type resolverConfig struct {
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
 type Resolver interface {
 	APIsQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error)
+	CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error)
 }
 
 type domainResolver struct {

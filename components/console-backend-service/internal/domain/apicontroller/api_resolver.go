@@ -35,3 +35,22 @@ func (ar *apiResolver) APIsQuery(ctx context.Context, namespace string, serviceN
 
 	return ar.apiConverter.ToGQLs(apis), nil
 }
+
+
+func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
+	api, err := ar.apiLister.Create(name, namespace, hostname, serviceName, servicePort, disableIstioAuthPolicyMTLS, authenticationEnabled)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while creating %s %v", pretty.APIs, name))
+		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithNamespace(namespace))
+	}
+
+	return gqlschema.API{
+		Name: api.Name,
+		Hostname: api.Spec.Hostname,
+		Service: gqlschema.ApiService{
+			Name: api.Spec.Service.Name,
+			Port: api.Spec.Service.Port,
+		},
+	}, nil
+	// AuthenticationPolicies
+}
