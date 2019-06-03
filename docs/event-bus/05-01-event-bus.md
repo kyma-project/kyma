@@ -15,7 +15,7 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **global.publishKnative.maxRequests** | Specifies the maximum number of parallel Event requests that **publish-knative** can process. If you increase this value, you may also have to increase memory resources for the Event Bus to handle the higher load. | `16` |
-| **global.publishKnative.maxRequestSize** | Specifies the maximum size of one Event. If you increase this value, you may also have to increase memory resources for the Event Bus to handle the higher load. | `65536` |
+| **global.publishKnative.maxRequests** | Specifies the maximum number of parallel Event requests that **publish-knative** can process. If you raise this value, you may also have to increase memory resources for the Event Bus to handle the higher load. | `16` |
+| **global.publishKnative.maxRequestSize** | Specifies the maximum size of one Event. If you raise this value, you may also have to increase memory resources for the Event Bus to handle the higher load. | `65536` |
 | **global.publishKnative.resources.limits.memory** | Specifies memory limits set for **publishKnative**. | `32M` |
 | **global.subscriptionControllerKnative.resources.limits.memory** | Specifies memory limits set for **subscription-controller-knative**. | `32M` |
