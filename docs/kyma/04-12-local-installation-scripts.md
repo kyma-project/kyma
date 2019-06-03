@@ -3,6 +3,9 @@ title: Local installation scripts deep-dive
 type: Installation
 ---
 
+
+>**WARNING:** This document will be removed with Kyma release 1.4. For local installation using Kyma CLI, see [this document](/root/kyma/#installation-install-kyma-locally).
+
 This document extends the [Install Kyma locally](#installation-install-kyma-locally) guide with a detailed breakdown of the `run.sh` script.
 
 The following snippet is the main element of the script:
