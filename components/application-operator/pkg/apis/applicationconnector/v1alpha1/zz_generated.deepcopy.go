@@ -195,44 +195,6 @@ func (in *Credentials) DeepCopy() *Credentials {
 func (in *Entry) DeepCopyInto(out *Entry) {
 	*out = *in
 	in.Credentials.DeepCopyInto(&out.Credentials)
-	if in.Headers != nil {
-		in, out := &in.Headers, &out.Headers
-		*out = new(map[string][]string)
-		if **in != nil {
-			in, out := *in, *out
-			*out = make(map[string][]string, len(*in))
-			for key, val := range *in {
-				var outVal []string
-				if val == nil {
-					(*out)[key] = nil
-				} else {
-					in, out := &val, &outVal
-					*out = make([]string, len(*in))
-					copy(*out, *in)
-				}
-				(*out)[key] = outVal
-			}
-		}
-	}
-	if in.QueryParameters != nil {
-		in, out := &in.QueryParameters, &out.QueryParameters
-		*out = new(map[string][]string)
-		if **in != nil {
-			in, out := *in, *out
-			*out = make(map[string][]string, len(*in))
-			for key, val := range *in {
-				var outVal []string
-				if val == nil {
-					(*out)[key] = nil
-				} else {
-					in, out := &val, &outVal
-					*out = make([]string, len(*in))
-					copy(*out, *in)
-				}
-				(*out)[key] = outVal
-			}
-		}
-	}
 	return
 }
 
