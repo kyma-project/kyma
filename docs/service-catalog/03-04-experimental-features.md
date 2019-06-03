@@ -31,7 +31,7 @@ in the installation file:
     ```
 - For the cluster installation, add the `service-catalog-overrides` ConfigMap to the to the cluster before the installation starts. Execute:
     ```
-    kubectl create configmap service-catalog-overrides -n kyma-installer --from-literal=service-catalog-apiserver.enabled=false  global.domainName=$DOMAIN --from-literal=service-catalog-crds.enabled=true" \
+    kubectl create configmap service-catalog-overrides -n kyma-installer --from-literal=service-catalog-apiserver.enabled=false --from-literal=service-catalog-crds.enabled=true \
     && kubectl label configmap service-catalog-overrides -n kyma-installer installer=overrides installer=overrides component=service-catalog
     ```
 
