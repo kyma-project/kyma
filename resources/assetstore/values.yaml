@@ -52,3 +52,6 @@ minio:
     limits:
       memory: 128Mi
       cpu: 100m
+
+  gcsgateway:
+    replicas: 1
