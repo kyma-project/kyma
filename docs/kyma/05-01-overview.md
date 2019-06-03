@@ -18,28 +18,28 @@ The Installer is the Kyma component that is responsible for reading and applying
 
 Default configuration is defined differently for cluster and local installations.
 
-    <div tabs>
-      <details>
-      <summary>
-      Local installation
-      </summary>
+<div tabs>
+  <details>
+  <summary>
+  Local installation
+  </summary>
 
-      For local installation, the list of available components is stored in Kyma project sources in the file **kyma/installation/resources/installer-cr.yaml.tpl**
-      Default installation overrides can be found in the file **kyma/installation/resources/installer-config-local.yaml.tpl**
-      All the other configuration values are defined directly in components in **/resources** subdirectory of Kyma project.
-      >**CAUTION:** The configuration files contain tested and recommended settings. Note that you modify them on your own risk.
-      </details>
-      <details>
-      <summary>
-      Cluster installation
-      </summary>
+  For local installation, the list of available components is stored in Kyma project sources in the file **kyma/installation/resources/installer-cr.yaml.tpl**
+  Default installation overrides can be found in the file **kyma/installation/resources/installer-config-local.yaml.tpl**
+  All the other configuration values are defined directly in components in **/resources** subdirectory of Kyma project.
+  >**CAUTION:** The configuration files contain tested and recommended settings. Note that you modify them on your own risk.
+  </details>
+  <details>
+  <summary>
+  Cluster installation
+  </summary>
 
-      Cluster installations are based on a released Kyma version.
-      You can find the list of available components in the release artifact **kyma-installer-cluster.yaml**.
-      The necessary overrides, if any, are described in relevant [installation procedure](#installation-install-kyma-on-a-cluster).
-      All the other configuration values are defined directly in components released with the Kyma version.
-      </details>
-    </div>
+  Cluster installations are based on a released Kyma version.
+  You can find the list of available components in the release artifact **kyma-installer-cluster.yaml**.
+  The necessary overrides, if any, are described in relevant [installation procedure](#installation-install-kyma-on-a-cluster).
+  All the other configuration values are defined directly in components released with the Kyma version.
+  </details>
+</div>
 
 ## Installation configuration
 
