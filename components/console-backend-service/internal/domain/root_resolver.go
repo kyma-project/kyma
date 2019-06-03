@@ -327,6 +327,7 @@ func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, lab
 func (r *mutationResolver) CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
 	return r.ac.CreateAPI(ctx, name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
 }
+
 // Queries
 
 type queryResolver struct {
@@ -471,6 +472,10 @@ func (r *queryResolver) EventActivations(ctx context.Context, namespace string) 
 
 func (r *queryResolver) Apis(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
 	return r.ac.APIsQuery(ctx, namespace, serviceName, hostname)
+}
+
+func (r *queryResolver) API(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
+	return r.ac.APIQuery(ctx, name, namespace)
 }
 
 func (r *queryResolver) IDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {

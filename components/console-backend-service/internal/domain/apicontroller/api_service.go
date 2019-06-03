@@ -3,6 +3,7 @@ package apicontroller
 import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
@@ -55,9 +56,26 @@ func (svc *apiService) List(namespace string, serviceName *string, hostname *str
 	return apis, nil
 }
 
+func (svc *apiService) Find(name string, namespace string) (*v1alpha2.Api, error) {
+	key := fmt.Sprintf("%s/%s", namespace, name)
+	item, exists, err := svc.informer.GetStore().GetByKey(key)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while finding API %s", name)
+	}
+
+	if !exists {
+		return nil, nil
+	}
+
+	res, ok := item.(*v1alpha2.Api)
+	if !ok {
+		return nil, fmt.Errorf("incorrect item type: %T, should be: *v1alpha2.Api", res)
+	}
+
+	return res, nil
+}
+
 func (svc *apiService) Create(name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
-
-
 	api := v1alpha2.Api{
 		TypeMeta: v1.TypeMeta{
 			APIVersion: "authentication.kyma-project.io/v1alpha2",
@@ -88,4 +106,8 @@ func (svc *apiService) Create(name string, namespace string, hostname string, se
 	}
 
 	return svc.client.GatewayV1alpha2().Apis(namespace).Create(&api)
+}
+
+func (svc *apiService) Delete(name string, namespace string) error {
+	return svc.client.GatewayV1alpha2().Apis(namespace).Delete(name, nil)
 }

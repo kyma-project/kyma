@@ -2,7 +2,6 @@ package apicontroller
 
 import (
 	"context"
-
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
@@ -36,6 +35,20 @@ func (ar *apiResolver) APIsQuery(ctx context.Context, namespace string, serviceN
 	return ar.apiConverter.ToGQLs(apis), nil
 }
 
+func (ar *apiResolver) APIQuery(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
+	apiObj, err := ar.apiLister.Find(name, namespace)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while getting %s", pretty.API, name))
+		return nil, gqlerror.New(err, pretty.APIs, gqlerror.WithNamespace(namespace))
+	}
+
+	if apiObj == nil {
+		return nil, nil
+	}
+
+	api := ar.apiConverter.ToGQL(apiObj)
+	return api, nil
+}
 
 func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
 	api, err := ar.apiLister.Create(name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)

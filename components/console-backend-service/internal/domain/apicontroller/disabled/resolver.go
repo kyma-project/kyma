@@ -15,6 +15,15 @@ func NewResolver(err error) *Resolver {
 	return &Resolver{err: err}
 }
 
+// APIQuery provides a failing mock function with given fields: ctx, name, namespace
+func (_m *Resolver) APIQuery(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
+	var r0 *gqlschema.API
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // APIsQuery provides a failing mock function with given fields: ctx, namespace, serviceName, hostname
 func (_m *Resolver) APIsQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
 	var r0 []gqlschema.API
