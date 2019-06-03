@@ -324,8 +324,8 @@ func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, lab
 	return r.k8s.CreateNamespace(ctx, name, labels)
 }
 
-func (r *mutationResolver) CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
-	return r.ac.CreateAPI(ctx, name, namespace, hostname, serviceName, servicePort, disableIstioAuthPolicyMTLS, authenticationEnabled)
+func (r *mutationResolver) CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
+	return r.ac.CreateAPI(ctx, name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
 }
 // Queries
 

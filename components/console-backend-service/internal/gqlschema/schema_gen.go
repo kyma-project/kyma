@@ -445,7 +445,7 @@ type ComplexityRoot struct {
 		UpdateService                 func(childComplexity int, name string, namespace string, service JSON) int
 		DeleteService                 func(childComplexity int, name string, namespace string) int
 		CreateNamespace               func(childComplexity int, name string, labels *Labels) int
-		CreateApi                     func(childComplexity int, name string, namespace string, hostname string, serviceName string, servicePort int, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) int
+		CreateApi                     func(childComplexity int, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) int
 	}
 
 	Namespace struct {
@@ -862,7 +862,7 @@ type MutationResolver interface {
 	UpdateService(ctx context.Context, name string, namespace string, service JSON) (*Service, error)
 	DeleteService(ctx context.Context, name string, namespace string) (*Service, error)
 	CreateNamespace(ctx context.Context, name string, labels *Labels) (NamespaceCreationOutput, error)
-	CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (API, error)
+	CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (API, error)
 }
 type NamespaceResolver interface {
 	Applications(ctx context.Context, obj *Namespace) ([]string, error)
@@ -2170,34 +2170,61 @@ func field_Mutation_createAPI_args(rawArgs map[string]interface{}) (map[string]i
 		}
 	}
 	args["servicePort"] = arg4
-	var arg5 *bool
+	var arg5 string
+	if tmp, ok := rawArgs["authenticationType"]; ok {
+		var err error
+		arg5, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["authenticationType"] = arg5
+	var arg6 string
+	if tmp, ok := rawArgs["jwksUri"]; ok {
+		var err error
+		arg6, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["jwksUri"] = arg6
+	var arg7 string
+	if tmp, ok := rawArgs["issuer"]; ok {
+		var err error
+		arg7, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["issuer"] = arg7
+	var arg8 *bool
 	if tmp, ok := rawArgs["disableIstioAuthPolicyMTLS"]; ok {
 		var err error
 		var ptr1 bool
 		if tmp != nil {
 			ptr1, err = graphql.UnmarshalBoolean(tmp)
-			arg5 = &ptr1
+			arg8 = &ptr1
 		}
 
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["disableIstioAuthPolicyMTLS"] = arg5
-	var arg6 *bool
+	args["disableIstioAuthPolicyMTLS"] = arg8
+	var arg9 *bool
 	if tmp, ok := rawArgs["authenticationEnabled"]; ok {
 		var err error
 		var ptr1 bool
 		if tmp != nil {
 			ptr1, err = graphql.UnmarshalBoolean(tmp)
-			arg6 = &ptr1
+			arg9 = &ptr1
 		}
 
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["authenticationEnabled"] = arg6
+	args["authenticationEnabled"] = arg9
 	return args, nil
 
 }
@@ -5369,7 +5396,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateApi(childComplexity, args["name"].(string), args["namespace"].(string), args["hostname"].(string), args["serviceName"].(string), args["servicePort"].(int), args["disableIstioAuthPolicyMTLS"].(*bool), args["authenticationEnabled"].(*bool)), true
+		return e.complexity.Mutation.CreateApi(childComplexity, args["name"].(string), args["namespace"].(string), args["hostname"].(string), args["serviceName"].(string), args["servicePort"].(int), args["authenticationType"].(string), args["jwksUri"].(string), args["issuer"].(string), args["disableIstioAuthPolicyMTLS"].(*bool), args["authenticationEnabled"].(*bool)), true
 
 	case "Namespace.name":
 		if e.complexity.Namespace.Name == nil {
@@ -16850,7 +16877,7 @@ func (ec *executionContext) _Mutation_createAPI(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateAPI(rctx, args["name"].(string), args["namespace"].(string), args["hostname"].(string), args["serviceName"].(string), args["servicePort"].(int), args["disableIstioAuthPolicyMTLS"].(*bool), args["authenticationEnabled"].(*bool))
+		return ec.resolvers.Mutation().CreateAPI(rctx, args["name"].(string), args["namespace"].(string), args["hostname"].(string), args["serviceName"].(string), args["servicePort"].(int), args["authenticationType"].(string), args["jwksUri"].(string), args["issuer"].(string), args["disableIstioAuthPolicyMTLS"].(*bool), args["authenticationEnabled"].(*bool))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -29728,7 +29755,7 @@ type Mutation {
     deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
     createNamespace(name: String!, labels: Labels): NamespaceCreationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
-    createAPI(name: String!, namespace: String!, hostname: String!, serviceName: String!, servicePort: Int!, disableIstioAuthPolicyMTLS: Boolean, authenticationEnabled: Boolean): API! @HasAccess(attributes: {resource: "apis", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
+    createAPI(name: String!, namespace: String!, hostname: String!, serviceName: String!, servicePort: Int!, authenticationType: String!, jwksUri: String!, issuer: String!, disableIstioAuthPolicyMTLS: Boolean, authenticationEnabled: Boolean): API! @HasAccess(attributes: {resource: "apis", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
 }
 
 # Subscriptions

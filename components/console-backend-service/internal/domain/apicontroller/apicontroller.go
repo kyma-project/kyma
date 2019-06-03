@@ -74,7 +74,7 @@ type resolverConfig struct {
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
 type Resolver interface {
 	APIsQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error)
-	CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error)
+	CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error)
 }
 
 type domainResolver struct {

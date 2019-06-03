@@ -37,8 +37,8 @@ func (ar *apiResolver) APIsQuery(ctx context.Context, namespace string, serviceN
 }
 
 
-func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
-	api, err := ar.apiLister.Create(name, namespace, hostname, serviceName, servicePort, disableIstioAuthPolicyMTLS, authenticationEnabled)
+func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
+	api, err := ar.apiLister.Create(name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s %v", pretty.APIs, name))
 		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithNamespace(namespace))
@@ -51,6 +51,12 @@ func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace str
 			Name: api.Spec.Service.Name,
 			Port: api.Spec.Service.Port,
 		},
+		AuthenticationPolicies: []gqlschema.AuthenticationPolicy{
+			{
+				JwksURI: jwksUri,
+				Issuer: issuer,
+				Type: gqlschema.AuthenticationPolicyType(authenticationType),
+			},
+		},
 	}, nil
-	// AuthenticationPolicies
 }

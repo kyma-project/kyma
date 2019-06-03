@@ -55,7 +55,7 @@ func (svc *apiService) List(namespace string, serviceName *string, hostname *str
 	return apis, nil
 }
 
-func (svc *apiService) Create(name string, namespace string, hostname string, serviceName string, servicePort int, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
+func (svc *apiService) Create(name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
 
 
 	api := v1alpha2.Api{
@@ -76,10 +76,10 @@ func (svc *apiService) Create(name string, namespace string, hostname string, se
 			Authentication: []v1alpha2.AuthenticationRule{
 				{
 					Jwt: v1alpha2.JwtAuthentication{
-						JwksUri: "https://test",
-						Issuer:  "test",
+						JwksUri: jwksUri,
+						Issuer:  issuer,
 					},
-					Type: "",
+					Type: v1alpha2.AuthenticationType(authenticationType),
 				},
 			},
 			DisableIstioAuthPolicyMTLS: disableIstioAuthPolicyMTLS,
