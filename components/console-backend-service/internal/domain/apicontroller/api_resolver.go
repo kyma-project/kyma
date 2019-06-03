@@ -38,8 +38,8 @@ func (ar *apiResolver) APIsQuery(ctx context.Context, namespace string, serviceN
 func (ar *apiResolver) APIQuery(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
 	apiObj, err := ar.apiLister.Find(name, namespace)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting %s", pretty.API, name))
-		return nil, gqlerror.New(err, pretty.APIs, gqlerror.WithNamespace(namespace))
+		glog.Error(errors.Wrapf(err, "while getting %s `%s` in namespace `%s`", pretty.API, name, namespace))
+		return nil, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	if apiObj == nil {
@@ -53,8 +53,8 @@ func (ar *apiResolver) APIQuery(ctx context.Context, name string, namespace stri
 func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
 	api, err := ar.apiLister.Create(name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while creating %s %v", pretty.APIs, name))
-		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithNamespace(namespace))
+		glog.Error(errors.Wrapf(err, "while creating %s `%s` in namespace `%s`", pretty.API, name, namespace))
+		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	return gqlschema.API{
@@ -72,4 +72,23 @@ func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace str
 			},
 		},
 	}, nil
+}
+
+func (ar *apiResolver) DeleteAPI(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
+	apiObj, err := ar.apiLister.Find(name, namespace)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while getting %s `%s` in namespace `%s`", pretty.API, name, namespace))
+		return nil, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	apiCopy := apiObj.DeepCopy()
+	err = ar.apiLister.Delete(name, namespace)
+
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while deleting %s `%s` from namespace `%s`", pretty.API, name, namespace))
+		return nil, gqlerror.New(err, pretty.API, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	deletedAPI := ar.apiConverter.ToGQL(apiCopy)
+	return deletedAPI, nil
 }

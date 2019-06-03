@@ -76,6 +76,7 @@ type Resolver interface {
 	APIsQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error)
 	APIQuery(ctx context.Context, name string, namespace string) (*gqlschema.API, error)
 	CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error)
+	DeleteAPI(ctx context.Context, name string, namespace string) (*gqlschema.API, error)
 }
 
 type domainResolver struct {

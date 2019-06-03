@@ -41,3 +41,12 @@ func (_m *Resolver) CreateAPI(ctx context.Context, name string, namespace string
 
 	return r0, r1
 }
+
+// DeleteAPI provides a failing mock function with given fields: ctx, name, namespace
+func (_m *Resolver) DeleteAPI(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
+	var r0 *gqlschema.API
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
