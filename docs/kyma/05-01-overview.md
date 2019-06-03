@@ -24,7 +24,7 @@ Default configuration is defined differently for cluster and local installations
   Local installation
   </summary>
 
-  For local installation, the list of available components is stored in Kyma project sources in the file **kyma/installation/resources/installer-cr.yaml.tpl**
+  The list of available components is stored in Kyma project sources in the file **kyma/installation/resources/installer-cr.yaml.tpl**
   Default installation overrides can be found in the file **kyma/installation/resources/installer-config-local.yaml.tpl**
   All the other configuration values are defined directly in components in **/resources** subdirectory of Kyma project.
   >**CAUTION:** The configuration files contain tested and recommended settings. Note that you modify them on your own risk.
@@ -34,9 +34,9 @@ Default configuration is defined differently for cluster and local installations
   Cluster installation
   </summary>
 
-  Cluster installations are based on a released Kyma version.
+  The installation is based on a released Kyma version.
   You can find the list of available components in the release artifact **kyma-installer-cluster.yaml**.
-  The necessary overrides, if any, are described in relevant [installation procedure](#installation-install-kyma-on-a-cluster).
+  Any necessary overrides are described in the [installation procedure](#installation-install-kyma-on-a-cluster).
   All the other configuration values are defined directly in components released with the Kyma version.
   </details>
 </div>
