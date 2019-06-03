@@ -2,7 +2,6 @@
 
 ###
 # Following script generates kyma-installer artifacts for a release.
-# It produces two files: kyma-config-local.yaml and kyma-config-cluster.yaml
 #
 # INPUTS:
 # - KYMA_INSTALLER_PUSH_DIR - (optional) directory where kyma-installer docker image is pushed, if specified should ends with a slash (/)
