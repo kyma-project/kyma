@@ -4,7 +4,7 @@ type: Troubleshooting
 ---
 
 If you try to access the Console of a local or a cluster Kyma deployment and your browser shows a 'Network Error', your local machine doesn't have the Kyma self-signed TLS certificate added to the system trusted certificate list.
-Fix this by following one of these two approaches:
+To fix this, follow one of these two approaches:
 
 - Add the Kyma certificate to the trusted certificates list of your OS:
 
@@ -49,6 +49,6 @@ tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
   </details>
 </div>
 
-- Trust the certificate in your browser. Follow [this guide](https://stackoverflow.com/questions/7580508/getting-chrome-to-accept-self-signed-localhost-certificate) for Chrome or [this guide](https://origin-symwisedownload.symantec.com/resources/webguides/sslv/sslva_first_steps/Content/Topics/Configure/ssl_firefox_cert.htm) for Firefox. You must trust the certificate for these addresses: `apiserver.foo.bar`, `console.foo.bar`, `dex.foo.bar`, `console-backend.foo.bar`.
+- Trust the certificate in your browser. Follow [this guide](https://stackoverflow.com/questions/7580508/getting-chrome-to-accept-self-signed-localhost-certificate) for Chrome or [this guide](https://origin-symwisedownload.symantec.com/resources/webguides/sslv/sslva_first_steps/Content/Topics/Configure/ssl_firefox_cert.htm) for Firefox. You must trust the certificate for these addresses: `apiserver.foo.bar`, `console.foo.bar`, `dex.foo.bar`, and `console-backend.foo.bar`.
 
 >**TIP:** This solution is suitable for users who don't have administrative access to the OS.

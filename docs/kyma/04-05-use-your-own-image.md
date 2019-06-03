@@ -51,7 +51,7 @@ In addition to the tools required to install Kyma on a cluster, you also need:
     ```
 
 5. The output of this operation is the `my-kyma.yaml` file.
-Find the following section in `my-kyma.yaml` and modify it to fetch the image you prepared. Change `image` attribute value to `{YOUR_DOCKER_LOGIN}/kyma-installer`:
+Find the following section in `my-kyma.yaml` and modify it to fetch the image you prepared. Change the `image` attribute value to `{YOUR_DOCKER_LOGIN}/kyma-installer`:
     ```
     spec:
       template:
