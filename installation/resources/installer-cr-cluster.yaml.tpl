@@ -3,6 +3,7 @@ kind: Installation
 metadata:
   name: kyma-installation
   labels:
+    action: install
     kyma-project.io/installation: ""
   finalizers:
     - finalizer.installer.kyma-project.io
