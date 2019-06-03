@@ -31,6 +31,9 @@ type proxyHandler struct {
 	eventServiceHost       string
 	appRegistryPathPrefix  string
 	appRegistryHost        string
+
+	eventsProxy      *httputil.ReverseProxy
+	appRegistryProxy *httputil.ReverseProxy
 }
 
 func NewProxyHandler(group, tenant, eventServicePathPrefix, eventServiceHost, appRegistryPathPrefix, appRegistryHost string) *proxyHandler {
@@ -41,13 +44,20 @@ func NewProxyHandler(group, tenant, eventServicePathPrefix, eventServiceHost, ap
 		eventServiceHost:       eventServiceHost,
 		appRegistryPathPrefix:  appRegistryPathPrefix,
 		appRegistryHost:        appRegistryHost,
+
+		eventsProxy:      createReverseProxy(eventServiceHost),
+		appRegistryProxy: createReverseProxy(appRegistryHost),
 	}
 }
 
 func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request) {
 	certInfoData := r.Header.Get(CertificateInfoHeader)
-	applicationName := mux.Vars(r)["application"]
+	if certInfoData == "" {
+		httptools.RespondWithError(w, apperrors.Internal("%s header not found", CertificateInfoHeader))
+		return
+	}
 
+	applicationName := mux.Vars(r)["application"]
 	if applicationName == "" {
 		httptools.RespondWithError(w, apperrors.BadRequest("Application name not specified"))
 		return
@@ -61,38 +71,26 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 		return
 	}
 
-	host, err := ph.determineHost(r.URL.Path)
+	reverseProxy, err := ph.mapRequestToProxy(r.URL.Path)
 	if err != nil {
 		httptools.RespondWithError(w, err)
 		return
 	}
 
-	reverseProxy := &httputil.ReverseProxy{
-		Director: func(request *http.Request) {
-			request.URL.Scheme = "http"
-			request.URL.Host = host
-			log.Infof("Proxying request to target URL: %s", request.URL)
-		},
-		ModifyResponse: func(response *http.Response) error {
-			log.Infof("Host responded with status: %s", response.Status)
-			return nil
-		},
-	}
-
 	reverseProxy.ServeHTTP(w, r)
 }
 
-func (ph *proxyHandler) determineHost(path string) (string, apperrors.AppError) {
+func (ph *proxyHandler) mapRequestToProxy(path string) (*httputil.ReverseProxy, apperrors.AppError) {
 
 	if strings.HasPrefix(path, ph.eventServicePathPrefix) {
-		return ph.eventServiceHost, nil
+		return ph.eventsProxy, nil
 	}
 
 	if strings.HasPrefix(path, ph.appRegistryPathPrefix) {
-		return ph.appRegistryHost, nil
+		return ph.appRegistryProxy, nil
 	}
 
-	return "", apperrors.NotFound("Could not determine destination host. Requested resource not found")
+	return nil, apperrors.NotFound("Could not determine destination host. Requested resource not found")
 }
 
 func hasValidSubject(subjects []string, appName, group, tenant string) bool {
@@ -176,4 +174,18 @@ func extractSubject(subject string) map[string]string {
 	}
 
 	return result
+}
+
+func createReverseProxy(destinationHost string) *httputil.ReverseProxy {
+	return &httputil.ReverseProxy{
+		Director: func(request *http.Request) {
+			request.URL.Scheme = "http"
+			request.URL.Host = destinationHost
+			log.Infof("Proxying request to target URL: %s", request.URL)
+		},
+		ModifyResponse: func(response *http.Response) error {
+			log.Infof("Host responded with status: %s", response.Status)
+			return nil
+		},
+	}
 }

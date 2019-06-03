@@ -106,7 +106,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			caseDescription: "X-Forwarded-Client-Cert header not specified",
 			tenant:          tenant,
 			group:           group,
-			expectedStatus:  http.StatusForbidden,
+			expectedStatus:  http.StatusInternalServerError,
 		},
 	}
 
@@ -177,6 +177,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 	t.Run("should return 400 when application not specified in path", func(t *testing.T) {
 		// given
+		certInfoHeader :=
+			`Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";URI=`
+
 		proxyHandler := NewProxyHandler(
 			group,
 			tenant,
@@ -187,6 +190,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
 		req, err := http.NewRequest(http.MethodGet, "/path", nil)
 		require.NoError(t, err)
+		req.Header.Set(CertificateInfoHeader, certInfoHeader)
 		recorder := httptest.NewRecorder()
 
 		// when
