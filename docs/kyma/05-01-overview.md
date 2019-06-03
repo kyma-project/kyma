@@ -21,7 +21,7 @@ Default configuration is defined differently for cluster and local installations
 ### Cluster installation
 Cluster installations are based on a released Kyma version.
 You can find the list of available components in the release artifact **kyma-installer-cluster.yaml**.
-The necessary overrides, if any, are described in relevant [installation procedure](https://kyma.project.io/).
+The necessary overrides, if any, are described in relevant [installation procedure](#installation-install-kyma-on-a-cluster).
 All the other configuration values are defined directly in components released with the Kyma version.
 
 ### Local installation
@@ -51,7 +51,7 @@ For more details on custom component installation, see [this](#configuration-cus
 ### Overrides
 
 #### Cluster installations
-Common overrides that affect entire installation, for example `global.domainName`, are already described in the cluster [installation procedure](https://kyma.project.io/).
+Common overrides that affect entire installation, for example `global.domainName`, are already described in the cluster [installation procedure](#installation-install-kyma-on-a-cluster).
 Other overrides are component-specific.
 To learn about configuration options for a given component, refer to **Configuration** section of the component documentation.
 Once you know the name and possible set of values for a configuration option, define an override for it by extending an existing ConfigMap/Secret object, or creating a new one.
