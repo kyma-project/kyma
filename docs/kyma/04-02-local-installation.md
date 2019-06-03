@@ -37,7 +37,7 @@ Follow these instructions to install Kyma from a release or from sources:
      ```bash
      kyma provision minikube
      ```
-     > **NOTE:** The `provision` command uses default Minikube VM driver installed for your operating system. For a list of supported VM drivers see [this document](https://kubernetes.io/docs/setup/minikube/#quickstart).
+     > **NOTE:** The `provision` command uses the default Minikube VM driver installed for your operating system. For a list of supported VM drivers see [this document](https://kubernetes.io/docs/setup/minikube/#quickstart).
   
   2. Install Kyma on Minikube:
      ```bash
