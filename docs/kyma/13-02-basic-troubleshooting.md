@@ -21,7 +21,21 @@ scripts/is-installed.sh --verbose
 
 ## Installation successful, component not working
 
-If the installation is successful but a component does not behave in an expected way, see if all deployed Pods are running. Run this command:
+If the installation is successful but a component does not behave in an expected way, inspect Helm releases for more details on all of the installed components.
+
+Run this command to list all of the available Helm releases:
+```
+helm list --tls
+```
+
+Run this command to get more detailed information about a given release:
+```
+helm status {RELEASE_NAME} --tls
+```
+>**NOTE:** Names of Helm releases correspond to names of Kyma components.
+
+
+Additionally, see if all deployed Pods are running. Run this command:
 
 ```
 kubectl get pods --all-namespaces

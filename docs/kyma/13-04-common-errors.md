@@ -11,8 +11,8 @@ In some cases, the logs of Kyma installer may show this error, which seemingly i
 Step error:  Details: Helm install error: rpc error: code = Unknown desc = validation failed: [unable to recognize "": no matches for kind "DestinationRule" in version "networking.istio.io/v1alpha3", unable to recognize "": no matches for kind "DestinationRule" in version "networking.istio.io/v1alpha3", unable to recognize "": no matches for kind "attributemanifest" in version "config.istio.io/v1alpha2"
 ```
 
-As Istio is the first sizeable component handled by the Installer, sometimes not all of the required CRDs are created before Installer proceeds to the next component. This situation doesn't cause the installation to fail.
-Instead, the Istio installation step repeats and gets more time for setup and the error message is logged.
+As Istio is the first sizeable component handled by the Kyma Installer, sometimes not all of the required CRDs are created before Installer proceeds to the next component. This situation doesn't cause the installation to fail.
+Instead, the Istio installation step repeats and gets more time for setup and the error message is logged regardless of that.
 
 ## Job failed: DeadlineExceeded error
 
@@ -39,3 +39,18 @@ If the problem repeats, find the job that causes the error and reach out to the 
   kubectl get jobs --all-namespaces
   ```
   Jobs that are not completed might be the cause of the error.
+
+## Installation fails without an apparent reason
+
+If the installation fails and the feedback you get from the console output isn't sufficient to identify the root cause of the errors, use the `helm history` command to inspect errors that were logged for every revision of a given Helm release.
+
+To list all of the available Helm releases, run:
+```
+helm list --tls
+```
+To inspect a release and its logged errors, run:
+```
+helm history {RELEASE_NAME} --tls
+```
+
+>**NOTE:** Names of Helm releases correspond to names of Kyma components.
