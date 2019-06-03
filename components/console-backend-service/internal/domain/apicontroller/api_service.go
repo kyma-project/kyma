@@ -108,7 +108,17 @@ func (svc *apiService) Create(name string, namespace string, hostname string, se
 	return svc.client.GatewayV1alpha2().Apis(namespace).Create(&api)
 }
 
-func (svc *apiService) Update(name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, resourceVersion string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
+func (svc *apiService) Update(name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
+
+	oldApi, err := svc.Find(name, namespace)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while finding API %s", name)
+	}
+
+	if oldApi == nil {
+		return nil, errors.New("API not found") //fix this error
+	}
+
 	api := v1alpha2.Api{
 		TypeMeta: v1.TypeMeta{
 			APIVersion: "authentication.kyma-project.io/v1alpha2",
@@ -117,7 +127,7 @@ func (svc *apiService) Update(name string, namespace string, hostname string, se
 		ObjectMeta: v1.ObjectMeta{
 			Name:   name,
 			Namespace: namespace,
-			ResourceVersion: resourceVersion,
+			ResourceVersion: oldApi.ObjectMeta.ResourceVersion,
 		},
 		Spec: v1alpha2.ApiSpec{
 			Service:                    v1alpha2.Service{
