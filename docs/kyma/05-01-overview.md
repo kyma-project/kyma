@@ -48,7 +48,7 @@ Before you start the Kyma installation process, you can customize the default se
 ### Components
 
 One of the released Kyma artifacts is the Kyma-Installer, a Docker image that combines the Installer executable with charts for all components available in the release.
-The Kyma-Installer can install only the components contained in it's image.
+The Kyma-Installer can install only the components contained in its image.
 **Installation** Custom Resource specifies which components of all available ones should be actually installed.
 Components that are not an integral part of the default Kyma Lite package are commented out with a hash character (#) and skipped during installation.
 You can customize list of components used for installation by:
