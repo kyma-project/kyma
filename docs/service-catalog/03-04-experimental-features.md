@@ -5,14 +5,14 @@ type: Details
 
 The Service Catalog requires its own instance of api-server and etcd, which increases the complexity of the cluster configuration and maintenance costs.
 In case of api-server downtime, all Service Catalog resources are unavailable.
-For this reason, Kyma developers contribute to the Service Catalog project to remove the dependency on these external components and replace them 
+For this reason, Kyma developers contribute to the Service Catalog project to remove the dependency on these external components and replace them
 with a native Kubernetes solution - CustomResourceDefinitions (CRDs).
 
 ### Enable CRDs
 
 To enable the CRDs feature in the Service Catalog, override the **service-catalog-apiserver.enabled** and **service-catalog-crds.enabled** parameters
 in the installation file:
-- For the local installation, modify the `service-catalog-overrides` ConfigMap in the [installer-config-local.yaml](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-config-local.yaml.tpl#L73) file:
+- For the local installation, add the `service-catalog-overrides` ConfigMap to the cluster before the installation starts:
     ```
     apiVersion: v1
     kind: ConfigMap
@@ -29,7 +29,7 @@ in the installation file:
       service-catalog-apiserver.enabled: "false"
       service-catalog-crds.enabled: "true"
     ```
-- For the cluster installation, add the `service-catalog-overrides` ConfigMap to the [installer-config-cluster.yaml.tpl](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-config-cluster.yaml.tpl) file: 
+- For the cluster installation, add the `service-catalog-overrides` ConfigMap to the to the cluster before the installation starts:
     ```
     apiVersion: v1
     kind: ConfigMap
