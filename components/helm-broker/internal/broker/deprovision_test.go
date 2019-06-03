@@ -123,7 +123,7 @@ func TestDeprovisionServiceDeprovisionFailureAsync(t *testing.T) {
 			ts.InstStorageMock.ExpectOnGet(ts.Exp.InstanceID, ts.FixInstance()).Once()
 
 			ts.OpStorageMock.ExpectOnInsert(ts.FixInstanceOperation()).Once()
-			expDesc := fmt.Sprintf("deprovisioning failed on error: while deleting helm release: %s", fixErr)
+			expDesc := fmt.Sprintf("deprovisioning failed on error: while deleting helm release %q: %s", ts.Exp.ReleaseName, fixErr)
 			ts.OpStorageMock.ExpectOnUpdateStateDesc(ts.Exp.InstanceID, ts.Exp.OperationID, internal.OperationStateFailed, expDesc).
 				Run(func(args mock.Arguments) {
 					close(ts.UpdateStateDescMethodCalled)
