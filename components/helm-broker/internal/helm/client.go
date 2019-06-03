@@ -57,7 +57,13 @@ func (cli *Client) Install(c *chart.Chart, values internal.ChartValues, releaseN
 	if err != nil {
 		return nil, errors.Wrapf(err, "while marshalling chart values: [%v]", values)
 	}
-	resp, err := cli.helmClient().InstallReleaseFromChart(c, string(namespace),
+	resp, err := cli.
+
+
+		break the code to failed test on CI
+
+
+	helmClient().InstallReleaseFromChart(c, string(namespace),
 		helm.InstallWait(true),
 		helm.InstallTimeout(int64(installTimeout.Seconds())),
 		helm.ValueOverrides(byteValues),
