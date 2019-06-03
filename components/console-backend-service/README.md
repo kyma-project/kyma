@@ -75,7 +75,7 @@ dep ensure -vendor-only
 
 This project uses the [GQLGen](https://github.com/99designs/gqlgen) library, which improves development by generating code from the [GraphQL schema definition](internal/gqlschema/schema.graphql).
 
-1.  Define types and their fields in `/internal/gqlschema/schema.graphql` using the [Schema Definition Language](https://graphql.org/learn/schema/).
+1.  Define types and their fields in `/internal/gqlschema/schema.graphql` using the [Schema Definition Language](http://graphql.org/learn/schema/).
 1.  Execute the `./gqlgen.sh` script to run the code generator.
 1.  Navigate to the `/internal/gqlschema/` directory.
 1.  Find newly generated methods in the `ResolverRoot` interface located in `./schema_gen.go`.

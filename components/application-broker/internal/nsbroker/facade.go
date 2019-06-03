@@ -100,7 +100,7 @@ func (f *Facade) Create(destinationNs string) error {
 
 // createServiceBroker returns just created or existing ServiceBroker
 func (f *Facade) createServiceBroker(svcURL, namespace string) (*v1beta1.ServiceBroker, error) {
-	url := fmt.Sprintf("%s/%s/", svcURL, namespace)
+	url := fmt.Sprintf("%s/%s", svcURL, namespace)
 	broker := &v1beta1.ServiceBroker{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      NamespacedBrokerName,

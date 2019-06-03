@@ -6,12 +6,14 @@ includedNamespaces:
 - default
 - natss
 excludedNamespaces:
-- heptio-ark
+- kyma-backup
 includedResources:
 - '*'
 excludedResources:
-- heptio-ark
+- testdefinitions.testing.kyma-project.io
+- pods
 includeClusterResources: null
 labelSelector: null
 storageLocation: default
-volumeSnapshotLocations: null
+volumeSnapshotLocations:
+- default

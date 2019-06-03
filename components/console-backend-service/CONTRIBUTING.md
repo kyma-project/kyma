@@ -36,7 +36,7 @@ Follow these rules while you develop new features for this project.
 - Use cache whenever possible for small pieces of data. Monitor resources usage and consider invalidating cache after some period of inactivity that lasts, for example, one day.
 
 **GraphQL:**
-- For queries and mutations that have more than three arguments, use [input types](https://graphql.org/learn/schema/#input-types).
+- For queries and mutations that have more than three arguments, use [input types](http://graphql.org/learn/schema/#input-types).
 - Define the mutated object as a result of the mutation.
 - For a query that returns a collection of objects, always return an empty array instead of `nil`. Mark all array elements as non-nullable. For example, define a query in the GraphQL schema that returns an array of service instances as `serviceInstances: [ServiceInstance!]!`.
 

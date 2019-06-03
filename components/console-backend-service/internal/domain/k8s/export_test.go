@@ -37,6 +37,13 @@ func NewResourceQuotaService(rqInformer cache.SharedIndexInformer, rsInformer ca
 	return newResourceQuotaService(rqInformer, rsInformer, ssInformer, podClient)
 }
 
+func NewResourceQuotaConverter() *resourceQuotaConverter {
+	return &resourceQuotaConverter{}
+}
+func (r *resourceQuotaResolver) SetResourceQuotaConverter(converter gqlResourceQuotaConverter) {
+	r.converter = converter
+}
+
 // Pod
 
 func NewPodResolver(podSvc podSvc) *podResolver {
@@ -126,4 +133,18 @@ func NewSelfSubjectRulesResolver(selfSubjectRulesSvc selfSubjectRulesSvc) *selfS
 
 func (r *selfSubjectRulesResolver) SetSelfSubjectRulesConverter(converter gqlSelfSubjectRulesConverter) {
 	r.gqlSelfSubjectRulesConverter = converter
+}
+
+//Namespace
+
+func NewNamespaceService(informer cache.SharedIndexInformer, client v1.CoreV1Interface) (*namespaceService, error) {
+	return newNamespaceService(informer, client)
+}
+
+func NewNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever) *namespaceResolver {
+	return newNamespaceResolver(namespaceSvc, appRetriever)
+}
+
+func (r *namespaceResolver) SetNamespaceConverter(converter gqlNamespaceConverter) {
+	r.namespaceConverter = converter
 }

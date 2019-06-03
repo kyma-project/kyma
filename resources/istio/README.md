@@ -42,39 +42,23 @@ The chart deploys Pods that consume minimum resources as specified in the resour
     $ kubectl apply -f install/kubernetes/helm/helm-service-account.yaml
     ```
 
-1. Install Tiller on your cluster with the service account:
+2. Install Tiller on your cluster with the service account:
     ```
     $ helm init --service-account tiller
     ```
 
-1. Set and create the namespace where Istio was installed:
+3. Set and create the namespace where Istio was installed:
     ```
     $ NAMESPACE=istio-system
     $ kubectl create ns $NAMESPACE
     ```
 
-1. If you are enabling `kiali`, you need to create the secret that contains the username and passphrase for `kiali` dashboard:
+4. If you enable Kiali, enable `prometheus-operator` and `monitoring` components first. The Kiali installer generates a random password for the `admin` user and stores it in a Secret. Use the `admin` user to login to the Kiali UI. Run this command to get the password:
     ```
-    $ echo -n 'admin' | base64
-    YWRtaW4=
-    $ echo -n '1f2d1e2e67df' | base64
-    MWYyZDFlMmU2N2Rm
-    $ cat <<EOF | kubectl apply -f -
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: kiali
-      namespace: $NAMESPACE
-      labels:
-        app: kiali
-    type: Opaque
-    data:
-      username: YWRtaW4=
-      passphrase: MWYyZDFlMmU2N2Rm
-    EOF
+    $ kubectl -n istio-system get secret kiali -o json | jq -r .data.passphrase | base64 --decode | awk '{print "Password:", $1}' 
     ```
 
-1. If you are using security mode for Grafana, create the secret first as follows:
+5. If you are using security mode for Grafana, create the secret first as follows:
 
     - Encode username, you can change the username to the name as you want:
     ```
@@ -105,13 +89,13 @@ The chart deploys Pods that consume minimum resources as specified in the resour
     EOF
     ```
 
-1. Add `istio.io` chart repository and point to the release:
+6. Add `istio.io` chart repository and point to the release:
     ```
     $ helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.1.6/charts
     ```
 
 
-1. To install the chart with the release name `istio` in namespace $NAMESPACE you defined above:
+7. To install the chart with the release name `istio` in namespace $NAMESPACE you defined above:
 
     - With [automatic sidecar injection](https://istio.io/docs/setup/kubernetes/sidecar-injection/#automatic-sidecar-injection) (requires Kubernetes >=1.9.0):
     ```
@@ -133,7 +117,7 @@ Helm charts expose configuration options which are currently in alpha.  The curr
 | Parameter | Description | Values | Default |
 | --- | --- | --- | --- |
 | `global.hub` | Specifies the HUB for most images used by Istio | registry/namespace | `docker.io/istio` |
-| `global.tag` | Specifies the TAG for most images used by Istio | valid image tag | `0.8.latest` |
+| `global.tag` | Specifies the TAG for most images used by Istio | valid image tag | `1.1.0` |
 | `global.proxy.image` | Specifies the proxy image name | valid proxy name | `proxyv2` |
 | `global.proxy.concurrency` | Specifies the number of proxy worker threads | number, 0 = auto | `0` |
 | `global.imagePullPolicy` | Specifies the image pull policy | valid image pull policy | `IfNotPresent` |

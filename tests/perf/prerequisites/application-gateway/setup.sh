@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -76,14 +78,15 @@ echo -e $(kubectl config current-context)
 
 check_dependencies
 
-$( kubectl apply -f application-gateway.yaml )
+kubectl create ns app-gateway-test
+kubectl apply -f ${WORKING_DIR}/application-gateway.yaml -n app-gateway-test
 
 echo -e "${GREEN}Kubeconfig file present, fetching url${NC}"
 echo "Creating TokenRequest"
 printf "apiVersion: applicationconnector.kyma-project.io/v1alpha1\nkind: TokenRequest\nmetadata:\n  name: perf-app" > ${APP_CONNECTOR_CERT_DIR}/generated.yaml
 
 # Create a TokenRequest and temporarily save it to the file
-kcapply=$( kubectl apply -f ${APP_CONNECTOR_CERT_DIR}/generated.yaml )
+kcapply=$( kubectl apply -f ${APP_CONNECTOR_CERT_DIR}/generated.yaml -n app-gateway-test )
 if [[ $? != 0 ]]
   then
     echo $kcapply
@@ -98,7 +101,7 @@ while [ $i -lt 6 ]
 do
   # Give controller some time to write the token to the CR
   sleep $i;
-  tokenRequest=$( kubectl get TokenRequest perf-app -o=jsonpath='{.status.url}' )
+  tokenRequest=$( kubectl -n app-gateway-test get TokenRequest perf-app -o=jsonpath='{.status.url}' )
   if [[ ! -z "${tokenRequest}" ]]
     then
       break;
@@ -227,9 +230,8 @@ echo "Cleaning up..."
 $( rm ${APP_CONNECTOR_CERT_DIR}/generated.csr )
 $( rm ${APP_CONNECTOR_CERT_DIR}/generated.yaml )
 
-$( kubectl delete TokenRequest perf-app &> /dev/null; )
+$( kubectl -n app-gateway-test delete TokenRequest perf-app &> /dev/null; )
 
 
 echo ""
 echo -e "${GREEN}Done!${NC}"
-

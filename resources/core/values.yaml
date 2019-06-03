@@ -27,10 +27,10 @@ global:
     version: "cb16ab4c"
   ui_acceptance_tests:
     dir:
-    version: "d1e8904d"
+    version: "7cc741c7"
   api_controller:
     dir: develop/
-    version: "1323f962"
+    version: "0a2e0fc9"
   api_controller_acceptance_tests:
     dir: develop/
     version: 736988df
@@ -63,10 +63,10 @@ global:
     version: 6b4c356f
   console_backend_service:
     dir: develop/
-    version: da6fa1b0
+    version: 52ba8d5a
   console_backend_service_test:
     dir: develop/
-    version: 48aaeb72
+    version: c1d55be1
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8

@@ -12,7 +12,7 @@ data:
     issuer: https://dex.{{ .Values.global.ingress.domainName }}
     # extending it to 15days because apparently Istio does not handle ID token validation properly
     expiry:
-{{ toYaml .Values.dex.expiry | indent 6 }}
+{{ toYaml .Values.dex.expiry | trim | indent 6 }}
     storage:
       type: kubernetes
       config:

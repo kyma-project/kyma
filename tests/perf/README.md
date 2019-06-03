@@ -58,6 +58,26 @@ The tags allow you to distinguish test results in [Grafana](https://grafana.perf
 
 See [this](./components/examples/http-db-service.js) file for a k6 test example run for **http-db-service**, that contains the pre-defined **testName** and **component** tag names:
 
+The example k6 script below require a test scenario deployment, which will deploy sample service and expose the service API. 
+
+Scenario deployment will be triggered from `setup.sh` which places in directory `prerequisites` in the corresponding subdirectory of component, in this case directory `prerequisites\examples`.
+
+The file `setup.sh` will be executed from Kyma load test generator to bootstrap setup process.
+
+```bash
+#!/usr/bin/env bash
+
+WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+kubectl apply -f ${WORKING_DIR}/example.yaml -n example-test-namespace
+```
+
+The example `setup.sh` above trigger a `kubectl apply` command for an example deployment which described in the file `example.yaml` and placed in the same directory as `setup.sh`, here is the important line is the 
+```bash
+WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+```
+which will ensure the current working directory for `setup.sh` doesnt matter where you trigger `setup.sh`, if this line not provided and used, you will have some side-effect since `setup.sh` used also from Kyma load generator.
+
 ```javascript
 import http from 'k6/http';
 import { check, sleep } from "k6";
@@ -141,3 +161,8 @@ You can also use the **-e** CLI flag for all platforms:
 ```bash
 k6 run -e CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx -e REVISION=123 components/examples/http-db-service.js
 ```
+
+If you want to use k6 with Grafana locally:
+
+- [Start Influxdb & Grafana](https://docs.k6.io/docs/influxdb-grafana#section-using-our-docker-compose-setup)
+- Run k6 with `--out influxdb=http://localhost:8086/myk6db` option
