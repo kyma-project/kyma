@@ -55,7 +55,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			expectedStatus: http.StatusOK,
 		},
 		{
-			caseDescription: "Application without group and tenant and Common Name is invalid",
+			caseDescription: "Application without group and tenant and with invalid Common Name",
 			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=invalid-cn,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
 				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
@@ -73,7 +73,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			expectedStatus: http.StatusOK,
 		},
 		{
-			caseDescription: "Application with group and tenant and Common Name is invalid",
+			caseDescription: "Application with group, tenant and invalid Common Name",
 			tenant:          tenant,
 			group:           group,
 			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=invalid-application,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
@@ -83,7 +83,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			expectedStatus: http.StatusForbidden,
 		},
 		{
-			caseDescription: "Application with group and tenant and Organizational Unit is invalid",
+			caseDescription: "Application with group, tenant and invalid Organizational Unit",
 			tenant:          tenant,
 			group:           group,
 			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=invalid,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
@@ -93,7 +93,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			expectedStatus: http.StatusForbidden,
 		},
 		{
-			caseDescription: "Application with group and tenant and Organization is invalid",
+			caseDescription: "Application with group, tenant and invalid Organization",
 			tenant:          tenant,
 			group:           group,
 			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=group,O=invalid,L=Waldorf,ST=Waldorf,C=DE";` +
