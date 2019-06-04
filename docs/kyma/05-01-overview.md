@@ -37,7 +37,7 @@ You can modify local settings, such as memory limits for a given resource, by ch
 
 [Read more](#configuration-helm-overrides-for-kyma-installation) about the types of overrides and the rules for creating them.
 
-> **NOTE:** Under each Kyma component documentation, you can find configuration documents that provide lists of configurable parameters from the `values.yaml` files for a given component chart or sub-chart. You can configure their values with overrides. Do not override values that are not exposed in the configuration documents.
+> **NOTE:** Under each Kyma component documentation, you can find configuration documents that provide lists of configurable parameters from the `values.yaml` files for a given component chart or sub-chart. Override values only for the parameters exposed in those configuration documents.
 
 ## Runtime configuration
 
