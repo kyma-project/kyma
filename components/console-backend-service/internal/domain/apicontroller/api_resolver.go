@@ -3,6 +3,8 @@ package apicontroller
 import (
 	"context"
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -11,7 +13,7 @@ import (
 
 type apiResolver struct {
 	apiLister    apiLister
-	apiConverter apiConverter
+	apiConverter *apiConverter
 }
 
 func newApiResolver(lister apiLister) (*apiResolver, error) {
@@ -21,18 +23,18 @@ func newApiResolver(lister apiLister) (*apiResolver, error) {
 
 	return &apiResolver{
 		apiLister:    lister,
-		apiConverter: apiConverter{},
+		apiConverter: &apiConverter{},
 	}, nil
 }
 
 func (ar *apiResolver) APIsQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
-	apis, err := ar.apiLister.List(namespace, serviceName, hostname)
+	apisObj, err := ar.apiLister.List(namespace, serviceName, hostname)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s for service name %v, hostname %v", pretty.APIs, serviceName, hostname))
 		return nil, gqlerror.New(err, pretty.APIs, gqlerror.WithNamespace(namespace))
 	}
-
-	return ar.apiConverter.ToGQLs(apis), nil
+	apis := ar.apiConverter.ToGQLs(apisObj)
+	return apis, nil
 }
 
 func (ar *apiResolver) APIQuery(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
@@ -72,6 +74,24 @@ func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace str
 			},
 		},
 	}, nil
+}
+
+func (ar *apiResolver) ApiEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ApiEvent, error) {
+	channel := make(chan gqlschema.ApiEvent, 1)
+	filter := func(api *v1alpha2.Api) bool {
+		return api != nil && api.Namespace == namespace
+	}
+
+	apiListener := listener.NewApi(channel, filter, ar.apiConverter)
+
+	ar.apiLister.Subscribe(apiListener)
+	go func() {
+		defer close(channel)
+		defer ar.apiLister.Unsubscribe(apiListener)
+		<-ctx.Done()
+	}()
+
+	return channel, nil
 }
 
 func (ar *apiResolver) UpdateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {

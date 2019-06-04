@@ -2,6 +2,7 @@ package apicontroller
 
 import (
 	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 )
 
 //go:generate mockery -name=apiLister -output=automock -outpkg=automock -case=underscore
@@ -11,4 +12,6 @@ type apiLister interface {
 	Create(name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error)
 	Update(name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error)
 	Delete(name string, namespace string) error
+	Subscribe(listener resource.Listener)
+	Unsubscribe(listener resource.Listener)
 }

@@ -27,6 +27,11 @@ type AddonsConfigurationEvent struct {
 	AddonsConfiguration AddonsConfiguration   `json:"addonsConfiguration"`
 }
 
+type ApiEvent struct {
+	Type SubscriptionEventType `json:"type"`
+	API  API                   `json:"api"`
+}
+
 type ApiService struct {
 	Name string `json:"name"`
 	Port int    `json:"port"`

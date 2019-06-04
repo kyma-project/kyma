@@ -73,6 +73,11 @@ type ComplexityRoot struct {
 		AddonsConfiguration func(childComplexity int) int
 	}
 
+	ApiEvent struct {
+		Type func(childComplexity int) int
+		Api  func(childComplexity int) int
+	}
+
 	ApiService struct {
 		Name func(childComplexity int) int
 		Port func(childComplexity int) int
@@ -781,6 +786,7 @@ type ComplexityRoot struct {
 		ServiceEvent              func(childComplexity int, namespace string) int
 		ConfigMapEvent            func(childComplexity int, namespace string) int
 		AddonsConfigurationEvent  func(childComplexity int) int
+		ApiEvent                  func(childComplexity int, namespace string) int
 	}
 
 	UsageKind struct {
@@ -955,6 +961,7 @@ type SubscriptionResolver interface {
 	ServiceEvent(ctx context.Context, namespace string) (<-chan ServiceEvent, error)
 	ConfigMapEvent(ctx context.Context, namespace string) (<-chan ConfigMapEvent, error)
 	AddonsConfigurationEvent(ctx context.Context) (<-chan AddonsConfigurationEvent, error)
+	APIEvent(ctx context.Context, namespace string) (<-chan ApiEvent, error)
 }
 
 func field_Asset_files_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -3709,6 +3716,21 @@ func field_Subscription_configMapEvent_args(rawArgs map[string]interface{}) (map
 
 }
 
+func field_Subscription_apiEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+
+}
+
 func field___Type_fields_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 bool
@@ -3829,6 +3851,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AddonsConfigurationEvent.AddonsConfiguration(childComplexity), true
+
+	case "ApiEvent.type":
+		if e.complexity.ApiEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.ApiEvent.Type(childComplexity), true
+
+	case "ApiEvent.api":
+		if e.complexity.ApiEvent.Api == nil {
+			break
+		}
+
+		return e.complexity.ApiEvent.Api(childComplexity), true
 
 	case "ApiService.name":
 		if e.complexity.ApiService.Name == nil {
@@ -7370,6 +7406,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscription.AddonsConfigurationEvent(childComplexity), true
 
+	case "Subscription.apiEvent":
+		if e.complexity.Subscription.ApiEvent == nil {
+			break
+		}
+
+		args, err := field_Subscription_apiEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.ApiEvent(childComplexity, args["namespace"].(string)), true
+
 	case "UsageKind.name":
 		if e.complexity.UsageKind.Name == nil {
 			break
@@ -7914,6 +7962,96 @@ func (ec *executionContext) _AddonsConfigurationEvent_addonsConfiguration(ctx co
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._AddonsConfiguration(ctx, field.Selections, &res)
+}
+
+var apiEventImplementors = []string{"ApiEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ApiEvent(ctx context.Context, sel ast.SelectionSet, obj *ApiEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, apiEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ApiEvent")
+		case "type":
+			out.Values[i] = ec._ApiEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "api":
+			out.Values[i] = ec._ApiEvent_api(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ApiEvent_type(ctx context.Context, field graphql.CollectedField, obj *ApiEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ApiEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ApiEvent_api(ctx context.Context, field graphql.CollectedField, obj *ApiEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ApiEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.API, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(API)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._API(ctx, field.Selections, &res)
 }
 
 var apiServiceImplementors = []string{"ApiService"}
@@ -26401,6 +26539,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_configMapEvent(ctx, fields[0])
 	case "addonsConfigurationEvent":
 		return ec._Subscription_addonsConfigurationEvent(ctx, fields[0])
+	case "apiEvent":
+		return ec._Subscription_apiEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -26805,6 +26945,37 @@ func (ec *executionContext) _Subscription_addonsConfigurationEvent(ctx context.C
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler {
 			return ec._AddonsConfigurationEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_apiEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_apiEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().APIEvent(rctx, args["namespace"].(string))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._ApiEvent(ctx, field.Selections, &res)
 		}())
 		return &out
 	}
@@ -29678,6 +29849,11 @@ type SecretEvent {
     secret: Secret!
 }
 
+type ApiEvent {
+    type: SubscriptionEventType!
+    api: API!
+}
+
 type ContainerState {
     state: ContainerStateType!
     reason: String!
@@ -30093,6 +30269,8 @@ type Subscription {
     configMapEvent(namespace: String!): ConfigMapEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     addonsConfigurationEvent: AddonsConfigurationEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1"})
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
+    apiEvent(namespace: String!): ApiEvent! @HasAccess(attributes: {resource: "apis", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
+
 }
 
 # Schema

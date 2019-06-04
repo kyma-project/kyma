@@ -33,6 +33,15 @@ func (_m *Resolver) APIsQuery(ctx context.Context, namespace string, serviceName
 	return r0, r1
 }
 
+// ApiEventSubscription provides a failing mock function with given fields: ctx, namespace
+func (_m *Resolver) ApiEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ApiEvent, error) {
+	var r0 <-chan gqlschema.ApiEvent
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // CreateAPI provides a failing mock function with given fields: ctx, name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled
 func (_m *Resolver) CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
 	var r0 gqlschema.API

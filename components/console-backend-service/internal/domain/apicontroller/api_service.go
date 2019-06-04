@@ -3,6 +3,7 @@ package apicontroller
 import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -13,12 +14,17 @@ import (
 type apiService struct {
 	informer cache.SharedIndexInformer
 	client   versioned.Interface
+	notifier resource.Notifier
 }
 
 func newApiService(informer cache.SharedIndexInformer, client versioned.Interface) *apiService {
+	notifier := resource.NewNotifier()
+	informer.AddEventHandler(notifier)
+
 	return &apiService{
 		informer: informer,
 		client: client,
+		notifier: notifier,
 	}
 }
 
@@ -106,6 +112,14 @@ func (svc *apiService) Create(name string, namespace string, hostname string, se
 	}
 
 	return svc.client.GatewayV1alpha2().Apis(namespace).Create(&api)
+}
+
+func (svc *apiService) Subscribe(listener resource.Listener) {
+ 	svc.notifier.AddListener(listener)
+}
+
+func (svc *apiService) Unsubscribe(listener resource.Listener) {
+	svc.notifier.DeleteListener(listener)
 }
 
 func (svc *apiService) Update(name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
