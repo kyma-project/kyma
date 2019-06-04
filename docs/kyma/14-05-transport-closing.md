@@ -10,4 +10,4 @@ Starting with Kyma release 0.9.0 the communication with Helm and Tiller is secur
 
 This problem is most common for cluster deployments where the user must add the required elements to Helm Home manually. When you install Kyma locally, this operation is performed automatically in the installation process.
 
-Read [this](components/security/#details-tls-in-tiller) document to learn more about security in communication with Helm and Tiller.
+Read [this](/components/security/#details-tls-in-tiller) document to learn more about security in communication with Helm and Tiller.
