@@ -4,7 +4,7 @@ type: Troubleshooting
 ---
 
 A response of code `503` error when trying to access the Console UI or any other endpoint in Kyma can be caused by a configuration error in the Istio Ingress gateway. As a result, the endpoint you call is not exposed.
-This problem is easily fixed by restarting the Pods of the gateway.
+To fix this problem, restart the Pods of the gateway.
 
 1. List all of the available endpoints:
   ```
