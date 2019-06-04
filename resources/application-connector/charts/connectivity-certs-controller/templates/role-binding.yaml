@@ -10,6 +10,7 @@ metadata:
 rules:
   - apiGroups: ["*"]
     resources: ["secrets"]
+    resourceNames: ["{{ .Values.secrets.clientCertificate.name }}"]
     verbs: ["create", "get", "update", "delete"]
 ---
 kind: RoleBinding
@@ -42,6 +43,7 @@ metadata:
 rules:
   - apiGroups: ["*"]
     resources: ["secrets"]
+    resourceNames: ["{{ .Values.secrets.caCertificate.name }}"]
     verbs: ["create", "get", "update", "delete"]
 ---
 kind: RoleBinding

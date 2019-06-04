@@ -18,7 +18,7 @@ spec:
     hosts:
     - "*.{{.Values.global.ingress.domainName}}"
   - port:
-      name: https-mtls
+      name: https-app-connector
       number: 443
       protocol: HTTPS
     tls:

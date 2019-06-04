@@ -53,6 +53,7 @@ metadata:
 rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
+  resourceNames: ["{{ .Values.secrets.caSecretName }}"]
   verbs: ["create", "get", "update", "delete"]
 
 ---
@@ -90,6 +91,7 @@ metadata:
 rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
+  resourceNames: ["{{ .Values.secrets.rootCACertificateSecretName }}"]
   verbs: ["create", "get", "update", "delete"]
 
 ---
