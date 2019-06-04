@@ -30,8 +30,8 @@ spec:
           - "/connectivitycertscontroller"
           - "--appName={{ .Chart.Name }}"
           - "--namespace={{ .Values.global.namespace }}"
-          - "--clusterCertificatesSecret={{ .Values.deployment.args.clusterCertificatesSecret }}"
-          - "--caCertificatesSecret={{ .Values.deployment.args.caCertificatesSecret }}"
+          - "--clusterCertificatesSecret={{ .Values.secrets.clientCertificate.namespace }}/{{ .Values.secrets.clientCertificate.name }}"
+          - "--caCertificatesSecret={{ .Values.secrets.caCertificate.namespace }}/{{ .Values.secrets.caCertificate.name }}"
           - "--controllerSyncPeriod={{ .Values.deployment.args.controllerSyncPeriod }}"
           - "--minimalConnectionSyncPeriod={{ .Values.deployment.args.minimalConnectionSyncPeriod }}"
         resources:

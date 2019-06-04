@@ -4,8 +4,6 @@ metadata:
   name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
   labels:
-    traffic.sidecar.istio.io/includeInboundPorts: "8080"
-    traffic.sidecar.istio.io/includeInboundPorts: "8081"
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}
     heritage: {{ .Release.Service }}
@@ -37,11 +35,11 @@ spec:
           - "--tokenLength={{ .Values.deployment.args.tokenLength }}"
           - "--appTokenExpirationMinutes={{ .Values.deployment.args.appTokenExpirationMinutes }}"
           - "--runtimeTokenExpirationMinutes={{ .Values.deployment.args.runtimeTokenExpirationMinutes }}"
-          - "--caSecretName={{ .Values.deployment.args.caSecretName }}"
-          - "--rootCACertificateSecretName={{ .Values.deployment.args.rootCACertificateSecretName }}"
+          - "--caSecretName={{ .Values.deployment.args.caSecretNamespace }}/{{ .Values.deployment.args.caSecretName }}"
+          - "--rootCACertificateSecretName={{ .Values.deployment.args.rootCACertificateSecretNamespace }}/{{ .Values.deployment.args.rootCACertificateSecretName }}"
           - "--connectorServiceHost=connector-service.{{ .Values.global.ingress.domainName }}"
-          - "--gatewayBaseURL=https://gateway.{{ .Values.global.applicationConnector.domainName }}"
-          - "--certificateProtectedHost=gateway.{{ .Values.global.applicationConnector.domainName }}"
+          - "--gatewayBaseURL=https://gateway.{{ .Values.global.ingress.domainName }}"
+          - "--certificateProtectedHost=gateway.{{ .Values.global.ingress.domainName }}"
           - "--appsInfoURL={{ tpl .Values.deployment.args.appsInfoURL . }}"
           - "--runtimesInfoURL={{ tpl .Values.deployment.args.runtimesInfoURL . }}"
           - "--appCertificateValidityTime={{ .Values.deployment.args.appValidityTime }}"
