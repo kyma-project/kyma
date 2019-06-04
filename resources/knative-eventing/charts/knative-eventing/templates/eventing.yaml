@@ -662,7 +662,7 @@ kind: ConfigMap
 metadata:
   name: default-channel-webhook
   namespace: knative-eventing
-  labels:
+  annotations:
     "helm.sh/hook": "pre-install"
 
 ---
