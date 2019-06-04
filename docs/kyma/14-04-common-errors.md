@@ -32,7 +32,7 @@ If the problem repeats, find the job that causes the error and reach out to the 
   ```
   helm status {RELEASE_NAME} --tls
   ```
-  Pods with not all containers in READY state can cause the error.
+  Pods with not all containers in `READY` state can cause the error.
 
 3. Get the deployed jobs:
   ```
