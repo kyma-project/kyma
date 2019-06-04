@@ -324,6 +324,10 @@ func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, lab
 	return r.k8s.CreateNamespace(ctx, name, labels)
 }
 
+func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace string, name string, limitRange gqlschema.LimitRangeInput) (*gqlschema.LimitRange, error) {
+	return r.k8s.CreateLimitRange(ctx, namespace, name, limitRange)
+}
+
 // Queries
 
 type queryResolver struct {
