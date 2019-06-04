@@ -19,6 +19,8 @@ const (
 	gatewayUrl   = "url-uuid-1"
 )
 
+// TODO - add test cases for APIs with RequestParams
+
 func TestNewService(t *testing.T) {
 	t.Run("should add all required components for API with OAuth credentials", func(t *testing.T) {
 		// given
@@ -57,7 +59,7 @@ func TestNewService(t *testing.T) {
 		istioService := new(istiomocks.Service)
 		istioService.On("Create", "app", "uuid-1", resourceName).Return(nil)
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, istioService)
+		service := NewService(nameResolver, accessServiceManager, secretsService, nil, istioService)
 
 		// when
 		applicationServiceAPI, err := service.New("app", "uuid-1", api)
@@ -111,7 +113,7 @@ func TestNewService(t *testing.T) {
 		istioService := new(istiomocks.Service)
 		istioService.On("Create", "app", "uuid-1", resourceName).Return(nil)
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, istioService)
+		service := NewService(nameResolver, accessServiceManager, secretsService, nil, istioService)
 
 		// when
 		applicationServiceAPI, err := service.New("app", "uuid-1", api)
@@ -145,7 +147,7 @@ func TestNewService(t *testing.T) {
 		istioService := new(istiomocks.Service)
 		istioService.On("Create", "app", "uuid-1", resourceName).Return(nil)
 
-		service := NewService(nameResolver, accessServiceManager, nil, istioService)
+		service := NewService(nameResolver, accessServiceManager, nil, nil, istioService)
 
 		// when
 		applicationServiceAPI, err := service.New("app", "uuid-1", api)
@@ -182,7 +184,7 @@ func TestNewService(t *testing.T) {
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", "app", "uuid-1", resourceName).Return(apperrors.Internal("some error"))
 
-		service := NewService(nameResolver, accessServiceManager, nil, nil)
+		service := NewService(nameResolver, accessServiceManager, nil, nil, nil)
 
 		// when
 		result, err := service.New("app", "uuid-1", api)
@@ -223,7 +225,7 @@ func TestNewService(t *testing.T) {
 			api.Credentials,
 		).Return(applications.Credentials{}, apperrors.Internal("some error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
+		service := NewService(nameResolver, accessServiceManager, secretsService, nil, nil)
 
 		// when
 		result, err := service.New("app", "uuid-1", api)
@@ -264,7 +266,7 @@ func TestNewService(t *testing.T) {
 			api.Credentials,
 		).Return(applications.Credentials{}, apperrors.Internal("some error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
+		service := NewService(nameResolver, accessServiceManager, secretsService, nil, nil)
 
 		// when
 		result, err := service.New("app", "uuid-1", api)
@@ -309,7 +311,7 @@ func TestNewService(t *testing.T) {
 		istioService := new(istiomocks.Service)
 		istioService.On("Create", "app", "uuid-1", resourceName).Return(apperrors.Internal("some error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, istioService)
+		service := NewService(nameResolver, accessServiceManager, secretsService, nil, istioService)
 
 		// when
 		result, err := service.New("app", "uuid-1", api)
@@ -348,7 +350,7 @@ func TestDefaultService_Read(t *testing.T) {
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Get", "app", applicationServiceAPi.Credentials).Return(credentials, nil)
 
-		service := NewService(nil, nil, secretsService, nil)
+		service := NewService(nil, nil, secretsService, nil, nil)
 
 		// when
 		api, err := service.Read("app", applicationServiceAPi)
@@ -384,7 +386,7 @@ func TestDefaultService_Read(t *testing.T) {
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Get", "app", applicationServiceAPi.Credentials).Return(credentials, nil)
 
-		service := NewService(nil, nil, secretsService, nil)
+		service := NewService(nil, nil, secretsService, nil, nil)
 
 		// when
 		api, err := service.Read("app", applicationServiceAPi)
@@ -405,7 +407,7 @@ func TestDefaultService_Read(t *testing.T) {
 			TargetUrl: "http://target.com",
 		}
 
-		service := NewService(nil, nil, nil, nil)
+		service := NewService(nil, nil, nil, nil, nil)
 
 		// when
 		api, err := service.Read("app", applicationServiceAPi)
@@ -432,7 +434,7 @@ func TestDefaultService_Read(t *testing.T) {
 		secretsService.On("Get", "app", applicationServiceAPi.Credentials).
 			Return(model.Credentials{}, apperrors.Internal("secret error"))
 
-		service := NewService(nil, nil, secretsService, nil)
+		service := NewService(nil, nil, secretsService, nil, nil)
 
 		// when
 		api, err := service.Read("app", applicationServiceAPi)
@@ -460,7 +462,7 @@ func TestDefaultService_Read(t *testing.T) {
 		secretsService.On("Get", "app", applicationServiceAPi.Credentials).
 			Return(model.Credentials{}, apperrors.Internal("secret error"))
 
-		service := NewService(nil, nil, secretsService, nil)
+		service := NewService(nil, nil, secretsService, nil, nil)
 
 		// when
 		api, err := service.Read("app", applicationServiceAPi)
@@ -489,7 +491,10 @@ func TestDefaultService_Delete(t *testing.T) {
 		istioService := new(istiomocks.Service)
 		istioService.On("Delete", resourceName).Return(nil)
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, istioService)
+		requestParamsService := &secretsmocks.RequestParametersService{}
+		requestParamsService.On("Delete", "app", "uuid-1").Return(nil)
+
+		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService, istioService)
 
 		// when
 		err := service.Delete("app", "uuid-1")
@@ -501,6 +506,7 @@ func TestDefaultService_Delete(t *testing.T) {
 		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 		istioService.AssertExpectations(t)
+		requestParamsService.AssertExpectations(t)
 	})
 
 	t.Run("should return an error if accessService deletion fails", func(t *testing.T) {
@@ -511,7 +517,7 @@ func TestDefaultService_Delete(t *testing.T) {
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Delete", resourceName).Return(apperrors.Internal("an error"))
 
-		service := NewService(nameResolver, accessServiceManager, nil, nil)
+		service := NewService(nameResolver, accessServiceManager, nil, nil, nil)
 
 		// when
 		err := service.Delete("app", "uuid-1")
@@ -536,7 +542,7 @@ func TestDefaultService_Delete(t *testing.T) {
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Delete", resourceName).Return(apperrors.Internal("an error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
+		service := NewService(nameResolver, accessServiceManager, secretsService, nil, nil)
 
 		// when
 		err := service.Delete("app", "uuid-1")
@@ -549,6 +555,36 @@ func TestDefaultService_Delete(t *testing.T) {
 		nameResolver.AssertExpectations(t)
 		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
+	})
+
+	t.Run("should return an error if request params secret fails", func(t *testing.T) {
+		// given
+		nameResolver := new(k8smocks.NameResolver)
+		nameResolver.On("GetResourceName", "app", "uuid-1").Return(resourceName)
+
+		accessServiceManager := new(asmocks.AccessServiceManager)
+		accessServiceManager.On("Delete", resourceName).Return(nil)
+
+		secretsService := new(secretsmocks.Service)
+		secretsService.On("Delete", resourceName).Return(nil)
+
+		requestParamsService := &secretsmocks.RequestParametersService{}
+		requestParamsService.On("Delete", "app", "uuid-1").Return(apperrors.Internal("error"))
+
+		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService, nil)
+
+		// when
+		err := service.Delete("app", "uuid-1")
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		assert.NotEmpty(t, err.Error())
+
+		nameResolver.AssertExpectations(t)
+		accessServiceManager.AssertExpectations(t)
+		secretsService.AssertExpectations(t)
+		requestParamsService.AssertExpectations(t)
 	})
 
 	t.Run("should return an error if istio deletion fails", func(t *testing.T) {
@@ -565,7 +601,10 @@ func TestDefaultService_Delete(t *testing.T) {
 		istioService := new(istiomocks.Service)
 		istioService.On("Delete", resourceName).Return(apperrors.Internal(""))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, istioService)
+		requestParamsService := &secretsmocks.RequestParametersService{}
+		requestParamsService.On("Delete", "app", "uuid-1").Return(nil)
+
+		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService, istioService)
 
 		// when
 		err := service.Delete("app", "uuid-1")
@@ -579,6 +618,7 @@ func TestDefaultService_Delete(t *testing.T) {
 		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 		istioService.AssertExpectations(t)
+		requestParamsService.AssertExpectations(t)
 	})
 }
 
@@ -610,17 +650,15 @@ func TestDefaultService_Update(t *testing.T) {
 		accessServiceManager.On("Upsert", "app", "uuid-1", resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On(
-			"Upsert",
-			"app",
-			"uuid-1",
-			api.Credentials,
-		).Return(applicationCredentials, nil)
+		secretsService.On("Upsert", "app", "uuid-1", api.Credentials).Return(applicationCredentials, nil)
+
+		requestParamsService := &secretsmocks.RequestParametersService{}
+		requestParamsService.On("Delete", "app", "uuid-1").Return(nil)
 
 		istioService := new(istiomocks.Service)
 		istioService.On("Upsert", "app", "uuid-1", resourceName).Return(nil)
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, istioService)
+		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService, istioService)
 
 		// when
 		applicationServiceAPI, err := service.Update("app", "uuid-1", api)
@@ -665,17 +703,15 @@ func TestDefaultService_Update(t *testing.T) {
 		accessServiceManager.On("Upsert", "app", "uuid-1", resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On(
-			"Upsert",
-			"app",
-			"uuid-1",
-			api.Credentials,
-		).Return(applicationCredentials, nil)
+		secretsService.On("Upsert", "app", "uuid-1", api.Credentials).Return(applicationCredentials, nil)
+
+		requestParamsService := &secretsmocks.RequestParametersService{}
+		requestParamsService.On("Delete", "app", "uuid-1").Return(nil)
 
 		istioService := new(istiomocks.Service)
 		istioService.On("Upsert", "app", "uuid-1", resourceName).Return(nil)
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, istioService)
+		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService, istioService)
 
 		// when
 		applicationServiceAPI, err := service.Update("app", "uuid-1", api)
@@ -711,15 +747,13 @@ func TestDefaultService_Update(t *testing.T) {
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Delete", resourceName).Return(nil)
 
+		requestParamsService := &secretsmocks.RequestParametersService{}
+		requestParamsService.On("Delete", "app", "uuid-1").Return(nil)
+
 		istioService := new(istiomocks.Service)
 		istioService.On("Upsert", "app", "uuid-1", resourceName).Return(nil)
 
-		service := NewService(
-			nameResolver,
-			accessServiceManager,
-			secretsService,
-			istioService,
-		)
+		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService, istioService)
 
 		// when
 		applicationServiceAPI, err := service.Update("app", "uuid-1", api)
@@ -759,7 +793,7 @@ func TestDefaultService_Update(t *testing.T) {
 		accessServiceManager.On("Upsert", "app", "uuid-1", resourceName).
 			Return(apperrors.Internal("some error"))
 
-		service := NewService(nameResolver, accessServiceManager, nil, nil)
+		service := NewService(nameResolver, accessServiceManager, nil, nil, nil)
 
 		// when
 		result, err := service.Update("app", "uuid-1", api)
@@ -795,14 +829,9 @@ func TestDefaultService_Update(t *testing.T) {
 		accessServiceManager.On("Upsert", "app", "uuid-1", resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On(
-			"Upsert",
-			"app",
-			"uuid-1",
-			api.Credentials,
-		).Return(applications.Credentials{}, apperrors.Internal("some error"))
+		secretsService.On("Upsert", "app", "uuid-1", api.Credentials).Return(applications.Credentials{}, apperrors.Internal("some error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
+		service := NewService(nameResolver, accessServiceManager, secretsService, nil, nil)
 
 		// when
 		result, err := service.Update("app", "uuid-1", api)
@@ -838,14 +867,9 @@ func TestDefaultService_Update(t *testing.T) {
 		accessServiceManager.On("Upsert", "app", "uuid-1", resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On(
-			"Upsert",
-			"app",
-			"uuid-1",
-			api.Credentials,
-		).Return(applications.Credentials{}, apperrors.Internal("some error"))
+		secretsService.On("Upsert", "app", "uuid-1", api.Credentials).Return(applications.Credentials{}, apperrors.Internal("some error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
+		service := NewService(nameResolver, accessServiceManager, secretsService, nil, nil)
 
 		// when
 		result, err := service.Update("app", "uuid-1", api)
@@ -878,7 +902,7 @@ func TestDefaultService_Update(t *testing.T) {
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Delete", resourceName).Return(apperrors.Internal("some error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
+		service := NewService(nameResolver, accessServiceManager, secretsService, nil, nil)
 
 		// when
 		result, err := service.Update("app", "uuid-1", api)
@@ -915,17 +939,15 @@ func TestDefaultService_Update(t *testing.T) {
 		accessServiceManager.On("Upsert", "app", "uuid-1", resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On(
-			"Upsert",
-			"app",
-			"uuid-1",
-			api.Credentials,
-		).Return(applications.Credentials{}, nil)
+		secretsService.On("Upsert", "app", "uuid-1", api.Credentials).Return(applications.Credentials{}, nil)
+
+		requestParamsService := &secretsmocks.RequestParametersService{}
+		requestParamsService.On("Delete", "app", "uuid-1").Return(nil)
 
 		istioService := new(istiomocks.Service)
 		istioService.On("Upsert", "app", "uuid-1", resourceName).Return(apperrors.Internal("some error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, istioService)
+		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService, istioService)
 
 		// when
 		result, err := service.Update("app", "uuid-1", api)

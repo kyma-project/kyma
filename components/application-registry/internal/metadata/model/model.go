@@ -19,16 +19,14 @@ type API struct {
 // Credentials contains OAuth configuration.
 type Credentials struct {
 	// Oauth is OAuth configuration.
-	Oauth           *Oauth
-	Basic           *Basic
-	CertificateGen  *CertificateGen
-	Headers         *map[string][]string
-	QueryParameters *map[string][]string
+	Oauth          *Oauth
+	Basic          *Basic
+	CertificateGen *CertificateGen
 }
 
 type RequestParameters struct {
-	Headers         *map[string][]string
-	QueryParameters *map[string][]string
+	Headers         *map[string][]string `json:"headers"`
+	QueryParameters *map[string][]string `json:"queryParameters"`
 }
 
 type CSRFInfo struct {

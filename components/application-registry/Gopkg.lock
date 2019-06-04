@@ -159,6 +159,7 @@
   version = "v1.0.1"
 
 [[projects]]
+  branch = "4204-Operator"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -167,7 +168,8 @@
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/cms-controller-manager/pkg/apis/cms/v1alpha1"
   ]
-  revision = "27571a1aefad57b84a8ab24e8b0d56b6a05bdb22"
+  revision = "d0b04e4a4e2d853ab9f52f6926e21055a926c029"
+  source = "github.com/franpog859/kyma"
 
 [[projects]]
   branch = "master"
@@ -586,6 +588,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bd0848b926f18c09cef94cf0a220f6635634f44dce9cbd876897799655a42e74"
+  inputs-digest = "d1a748ae0e7739fb9f28d5a7329e297d74d9961352801471443757ca614b4923"
   solver-name = "gps-cdcl"
   solver-version = 1

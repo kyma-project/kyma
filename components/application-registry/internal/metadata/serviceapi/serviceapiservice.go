@@ -23,11 +23,11 @@ type Service interface {
 }
 
 type defaultService struct {
-	nameResolver         k8sconsts.NameResolver
-	accessServiceManager accessservice.AccessServiceManager
-	secretsService       secrets.Service
+	nameResolver                    k8sconsts.NameResolver
+	accessServiceManager            accessservice.AccessServiceManager
+	secretsService                  secrets.Service
 	requestParametersSecretsService secrets.RequestParametersService
-	istioService         istio.Service
+	istioService                    istio.Service
 }
 
 func NewService(
@@ -38,11 +38,11 @@ func NewService(
 	istioService istio.Service) Service {
 
 	return defaultService{
-		nameResolver:         nameResolver,
-		accessServiceManager: accessServiceManager,
-		secretsService:       secretsService,
+		nameResolver:                    nameResolver,
+		accessServiceManager:            accessServiceManager,
+		secretsService:                  secretsService,
 		requestParametersSecretsService: requestParametersSecretsService,
-		istioService:         istioService,
+		istioService:                    istioService,
 	}
 }
 
@@ -103,11 +103,13 @@ func (sas defaultService) Read(application string, applicationAPI *applications.
 		api.Credentials = &credentials
 	}
 
-	requestParameters, err := sas.requestParametersSecretsService.Get(application, applicationAPI.RequestParametersSecretName)
-	if err != nil {
-		return nil, err
+	if applicationAPI.RequestParametersSecretName != "" {
+		requestParameters, err := sas.requestParametersSecretsService.Get(applicationAPI.RequestParametersSecretName)
+		if err != nil {
+			return nil, err
+		}
+		api.RequestParameters = &requestParameters
 	}
-	api.RequestParameters = &requestParameters
 
 	return api, nil
 }
@@ -123,6 +125,11 @@ func (sas defaultService) Delete(application, id string) apperrors.AppError {
 	err = sas.secretsService.Delete(resourceName)
 	if err != nil {
 		return apperrors.Internal("Deleting credentials secret failed, %s", err.Error())
+	}
+
+	err = sas.requestParametersSecretsService.Delete(application, id)
+	if err != nil {
+		return apperrors.Internal("Deleting request parameters secret failed, %s", err.Error())
 	}
 
 	err = sas.istioService.Delete(resourceName)
@@ -171,7 +178,7 @@ func (sas defaultService) Update(application, id string, api *model.API) (*appli
 
 		serviceAPI.RequestParametersSecretName = requestParametersSecretName
 	} else {
-		err := sas.requestParametersSecretsService.Delete(resourceName)
+		err := sas.requestParametersSecretsService.Delete(application, id)
 		if err != nil {
 			return nil, err
 		}

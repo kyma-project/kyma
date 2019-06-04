@@ -33,25 +33,23 @@ type CreateServiceResponse struct {
 }
 
 type API struct {
-	TargetUrl        string               `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
-	Credentials      *Credentials         `json:"credentials,omitempty"`
-	Spec             json.RawMessage      `json:"spec,omitempty"`
-	SpecificationUrl string               `json:"specificationUrl,omitempty"`
-	ApiType          string               `json:"apiType,omitempty"`
+	TargetUrl         string             `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
+	Credentials       *Credentials       `json:"credentials,omitempty"`
+	Spec              json.RawMessage    `json:"spec,omitempty"`
+	SpecificationUrl  string             `json:"specificationUrl,omitempty"`
+	ApiType           string             `json:"apiType,omitempty"`
 	RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
 }
 
 type RequestParameters struct {
-	Headers          *map[string][]string `json:"headers,omitempty"`
-	QueryParameters  *map[string][]string `json:"queryParameters,omitempty"`
+	Headers         *map[string][]string `json:"headers,omitempty"`
+	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
 }
 
 type Credentials struct {
-	Oauth           *Oauth               `json:"oauth,omitempty"`
-	Basic           *BasicAuth           `json:"basic,omitempty"`
-	CertificateGen  *CertificateGen      `json:"certificateGen,omitempty"`
-	Headers         *map[string][]string `json:"headers,omitempty"`
-	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
+	Oauth          *Oauth          `json:"oauth,omitempty"`
+	Basic          *BasicAuth      `json:"basic,omitempty"`
+	CertificateGen *CertificateGen `json:"certificateGen,omitempty"`
 }
 
 type CSRFInfo struct {
@@ -173,8 +171,6 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 				URL:          credentials.Oauth.URL,
 				CSRFInfo:     csrfInfoFromModel(credentials.Oauth.CSRFInfo),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
@@ -185,8 +181,6 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 				Password: stars,
 				CSRFInfo: csrfInfoFromModel(credentials.Basic.CSRFInfo),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
@@ -197,8 +191,6 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 				Certificate: credentials.CertificateGen.Certificate,
 				CSRFInfo:    csrfInfoFromModel(credentials.CertificateGen.CSRFInfo),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
@@ -267,7 +259,7 @@ func serviceDetailsRequestParametersToServiceDefinitionRequestParameters(request
 		return nil
 	}
 	return &model.RequestParameters{
-		Headers: requestParameters.Headers,
+		Headers:         requestParameters.Headers,
 		QueryParameters: requestParameters.QueryParameters,
 	}
 }
@@ -291,8 +283,6 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 				URL:          credentials.Oauth.URL,
 				CSRFInfo:     csrfInfoToModel(credentials.Oauth.CSRFInfo),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
@@ -303,8 +293,6 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 				Password: credentials.Basic.Password,
 				CSRFInfo: csrfInfoToModel(credentials.Basic.CSRFInfo),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
@@ -314,8 +302,6 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 				CommonName: credentials.CertificateGen.CommonName,
 				CSRFInfo:   csrfInfoToModel(credentials.CertificateGen.CSRFInfo),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
@@ -338,11 +324,11 @@ func (api API) MarshalJSON() ([]byte, error) {
 
 func (api API) marshalWithJSONSpec() ([]byte, error) {
 	return json.Marshal(&struct {
-		TargetUrl        string               `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
-		Credentials      *Credentials         `json:"credentials,omitempty"`
-		Spec             json.RawMessage      `json:"spec,omitempty"`
-		SpecificationUrl string               `json:"specificationUrl,omitempty"`
-		ApiType          string               `json:"apiType,omitempty"`
+		TargetUrl         string             `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
+		Credentials       *Credentials       `json:"credentials,omitempty"`
+		Spec              json.RawMessage    `json:"spec,omitempty"`
+		SpecificationUrl  string             `json:"specificationUrl,omitempty"`
+		ApiType           string             `json:"apiType,omitempty"`
 		RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
 	}{
 		api.TargetUrl,
@@ -356,11 +342,11 @@ func (api API) marshalWithJSONSpec() ([]byte, error) {
 
 func (api API) marshalWithNonJSONSpec() ([]byte, error) {
 	return json.Marshal(&struct {
-		TargetUrl        string               `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
-		Credentials      *Credentials         `json:"credentials,omitempty"`
-		Spec             string               `json:"spec,omitempty"`
-		SpecificationUrl string               `json:"specificationUrl,omitempty"`
-		ApiType          string               `json:"apiType,omitempty"`
+		TargetUrl         string             `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
+		Credentials       *Credentials       `json:"credentials,omitempty"`
+		Spec              string             `json:"spec,omitempty"`
+		SpecificationUrl  string             `json:"specificationUrl,omitempty"`
+		ApiType           string             `json:"apiType,omitempty"`
 		RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
 	}{
 		api.TargetUrl,

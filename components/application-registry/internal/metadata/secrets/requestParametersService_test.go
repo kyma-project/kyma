@@ -1,10 +1,12 @@
 package secrets
 
 import (
+	"fmt"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/strategy"
-	"testing"
 
 	"github.com/stretchr/testify/require"
 
@@ -13,23 +15,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	requestParametersSecretName = "requestParametersSecretName"
-)
-
 var (
 	requestParameters = &model.RequestParameters{
 		Headers: &map[string][]string{
-			"test header key": []string{
-				"test header value 1",
+			"TestHeader": []string{
+				"header value",
 			},
 		},
 		QueryParameters: &map[string][]string{
-			"test query parameter key": []string{
-				"test query parameter value 1",
+			"testQueryParam": []string{
+				"query parameter value",
 			},
 		},
 	}
+
+	requestParamsSecretData = strategy.SecretData{
+		"headers":         []byte(`{"TestHeader":["header value"]}`),
+		"queryParameters": []byte(`{"testQueryParam":["query parameter value"]}`),
+	}
+
+	baseResourceName            = fmt.Sprintf("%s-%s", appName, serviceId)
+	requestParametersSecretName = fmt.Sprintf("params-%s-%s", appName, serviceId)
 )
 
 func TestRequestParametersService_Create(t *testing.T) {
@@ -37,10 +43,10 @@ func TestRequestParametersService_Create(t *testing.T) {
 	t.Run("should create the secret", func(t *testing.T) {
 		// given
 		nameResolver := &k8smocks.NameResolver{}
-		nameResolver.On("GetResourceName", appName, serviceId).Return(requestParametersSecretName)
+		nameResolver.On("GetResourceName", appName, serviceId).Return(baseResourceName)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Create", appName, requestParametersSecretName, serviceId, secretData).Return(nil)
+		secretsRepository.On("Create", appName, requestParametersSecretName, serviceId, requestParamsSecretData).Return(nil)
 
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
@@ -72,10 +78,10 @@ func TestRequestParametersService_Create(t *testing.T) {
 	t.Run("should return error when failed to create the secret", func(t *testing.T) {
 		// given
 		nameResolver := &k8smocks.NameResolver{}
-		nameResolver.On("GetResourceName", appName, serviceId).Return(requestParametersSecretName)
+		nameResolver.On("GetResourceName", appName, serviceId).Return(baseResourceName)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Create", appName, requestParametersSecretName, serviceId, secretData).Return(apperrors.Internal("error"))
+		secretsRepository.On("Create", appName, requestParametersSecretName, serviceId, requestParamsSecretData).Return(apperrors.Internal("error"))
 
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
@@ -96,12 +102,12 @@ func TestRequestParametersService_Get(t *testing.T) {
 		nameResolver := &k8smocks.NameResolver{}
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, requestParametersSecretName).Return(secretData, nil)
+		secretsRepository.On("Get", requestParametersSecretName).Return(requestParamsSecretData, nil)
 
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
 		// when
-		createdRequestParameters, err := service.Get(appName, requestParametersSecretName)
+		createdRequestParameters, err := service.Get(requestParametersSecretName)
 
 		// then
 		require.NoError(t, err)
@@ -115,11 +121,11 @@ func TestRequestParametersService_Get(t *testing.T) {
 		nameResolver := &k8smocks.NameResolver{}
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, requestParametersSecretName).Return(nil, apperrors.Internal(""))
+		secretsRepository.On("Get", requestParametersSecretName).Return(nil, apperrors.Internal(""))
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
 		// when
-		createdRequestParameters, err := service.Get(appName, requestParametersSecretName)
+		createdRequestParameters, err := service.Get(requestParametersSecretName)
 
 		// then
 		require.Error(t, err)
@@ -133,30 +139,10 @@ func TestRequestParametersService_Upsert(t *testing.T) {
 	t.Run("should upsert the secret", func(t *testing.T) {
 		// given
 		nameResolver := &k8smocks.NameResolver{}
-		nameResolver.On("GetResourceName", appName, serviceId).Return(requestParametersSecretName)
+		nameResolver.On("GetResourceName", appName, serviceId).Return(baseResourceName)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, requestParametersSecretName).Return(strategy.SecretData{}, nil)
-		secretsRepository.On("Upsert", appName, requestParametersSecretName, serviceId, secretData).Return(nil)
-
-		service := NewRequestParametersService(secretsRepository, nameResolver)
-
-		// when
-		createdSecret, err := service.Upsert(appName, serviceId, requestParameters)
-
-		// then
-		require.NoError(t, err)
-		assert.Equal(t, requestParametersSecretName, createdSecret)
-		assertExpectations(t, nameResolver.Mock, secretsRepository.Mock)
-	})
-
-	t.Run("should not update if content is the same", func(t *testing.T) {
-		// given
-		nameResolver := &k8smocks.NameResolver{}
-		nameResolver.On("GetResourceName", appName, serviceId).Return(requestParametersSecretName)
-
-		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, requestParametersSecretName).Return(secretData, nil)
+		secretsRepository.On("Upsert", appName, requestParametersSecretName, serviceId, requestParamsSecretData).Return(nil)
 
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
@@ -172,11 +158,10 @@ func TestRequestParametersService_Upsert(t *testing.T) {
 	t.Run("should create the secret if not found", func(t *testing.T) {
 		// given
 		nameResolver := &k8smocks.NameResolver{}
-		nameResolver.On("GetResourceName", appName, serviceId).Return(requestParametersSecretName)
+		nameResolver.On("GetResourceName", appName, serviceId).Return(baseResourceName)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, requestParametersSecretName).Return(strategy.SecretData{}, apperrors.NotFound("error"))
-		secretsRepository.On("Create", appName, requestParametersSecretName, serviceId, secretData).Return(nil)
+		secretsRepository.On("Upsert", appName, requestParametersSecretName, serviceId, requestParamsSecretData).Return(nil)
 
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
@@ -189,33 +174,13 @@ func TestRequestParametersService_Upsert(t *testing.T) {
 		assertExpectations(t, nameResolver.Mock, secretsRepository.Mock)
 	})
 
-	t.Run("should return error when failed to get secret", func(t *testing.T) {
-		// given
-		nameResolver := &k8smocks.NameResolver{}
-		nameResolver.On("GetResourceName", appName, serviceId).Return(requestParametersSecretName)
-
-		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, requestParametersSecretName).Return(nil, apperrors.Internal(""))
-
-		service := NewRequestParametersService(secretsRepository, nameResolver)
-
-		// when
-		createdRequestParameters, err := service.Upsert(appName, serviceId, requestParameters)
-
-		// then
-		require.Error(t, err)
-		assert.Empty(t, createdRequestParameters)
-		assertExpectations(t, nameResolver.Mock, secretsRepository.Mock)
-	})
-
 	t.Run("should return error when failed to update secret", func(t *testing.T) {
 		// given
 		nameResolver := &k8smocks.NameResolver{}
-		nameResolver.On("GetResourceName", appName, serviceId).Return(requestParametersSecretName)
+		nameResolver.On("GetResourceName", appName, serviceId).Return(baseResourceName)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, requestParametersSecretName).Return(strategy.SecretData{}, nil)
-		secretsRepository.On("Upsert", appName, requestParametersSecretName, serviceId, secretData).Return(apperrors.Internal("error"))
+		secretsRepository.On("Upsert", appName, requestParametersSecretName, serviceId, requestParamsSecretData).Return(apperrors.Internal("error"))
 
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
@@ -234,13 +199,15 @@ func TestRequestParametersService_Delete(t *testing.T) {
 	t.Run("should delete a secret", func(t *testing.T) {
 		// given
 		nameResolver := &k8smocks.NameResolver{}
+		nameResolver.On("GetResourceName", appName, serviceId).Return(baseResourceName)
+
 		secretsRepository := &mocks.Repository{}
 		secretsRepository.On("Delete", requestParametersSecretName).Return(nil)
 
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
 		// when
-		err := service.Delete(requestParametersSecretName)
+		err := service.Delete(appName, serviceId)
 
 		// then
 		require.NoError(t, err)
@@ -250,13 +217,15 @@ func TestRequestParametersService_Delete(t *testing.T) {
 	t.Run("should return an error failed to delete secret", func(t *testing.T) {
 		// given
 		nameResolver := &k8smocks.NameResolver{}
+		nameResolver.On("GetResourceName", appName, serviceId).Return(baseResourceName)
+
 		secretsRepository := &mocks.Repository{}
 		secretsRepository.On("Delete", requestParametersSecretName).Return(apperrors.Internal("error"))
 
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
 		// when
-		err := service.Delete(requestParametersSecretName)
+		err := service.Delete(appName, serviceId)
 
 		// then
 		require.Error(t, err)
