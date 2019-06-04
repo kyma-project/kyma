@@ -18,13 +18,16 @@ global:
     version: '47ef2289'
   minio_client:
     image: 'minio/mc'
-    tag: 'RELEASE.2019-06-04T01-15-58Z'
+    tag: 'RELEASE.2019-04-03T17-59-57Z'
   alpine_kubectl:
     image: 'alpine-kubectl'
     dir: 'test-infra/'
     version: 'v20190325-ff66a3a'
 
 minio:
+  image:
+    tag: RELEASE.2019-06-04T01-15-58Z
+
   persistence:
     enabled: true
     size: 10Gi
