@@ -31,10 +31,10 @@ The Application Registry has the following parameters:
 - **externalAPIPort** - This port exposes the Metadata API to an external solution. The default port is `8081`.
 - **minioURL** - The URL of a Minio service which stores specifications and documentation.
 - **namespace** - Namespace where Application Registry is deployed. The default Namespace is `kyma-system`.
-- **requestTimeout** - A timeout for requests sent through the Application Registry. It is provided in seconds. The default timeout is `1`.
+- **requestTimeout** - A time-out for requests sent through the Application Registry. It is provided in seconds. The default time-out is `1`.
 - **requestLogging** - A flag for logging incoming requests. The default value is `false`.
-- **specRequestTimeout** - A timeout for requests fetching specifications provided by the user. It is provided in seconds. The default timeout is `5`.
-- **assetstoreRequestTimeout** - A timeout for requests fetching specifications from the Asset Store Service. It is provided in seconds. The default timeout is `5`.
+- **specRequestTimeout** - A time-out for requests fetching specifications provided by the user. It is provided in seconds. The default time-out is `5`.
+- **assetstoreRequestTimeout** - A time-out for requests fetching specifications from the Asset Store Service. It is provided in seconds. The default time-out is `5`.
 - **detailedErrorResponse** - A flag for showing detailed internal error messages in response bodies. The default value is `false` and all internal server error messages are shortened to `Internal error`, while all other error messages are shown as usual.
 
 ### Sample calls
