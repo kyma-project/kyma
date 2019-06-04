@@ -39,7 +39,7 @@ The Connector Service has the following parameters:
 - **runtimeCertificateValidityTime** - Time until which the certificates that the service issues for Runtimes are valid. The default value is 90 days.
 - **central** - Determines whether the Connector Service works in the central mode.
 - **revocationConfigMapName** - Name of the ConfigMap containing the revoked certificates list.
-- **lookupEnabled** - Flag that determines whether connector should make a call to get gateway endpoint. It is set to `False` by default.
+- **lookupEnabled** - Determines if the Connector should make a call to get the gateway endpoint. The default value is`False`.
 - **lookupConfigMapPath** - Path in the pod where Config Map for cluster lookup will be stored. Default value is `/etc/config/config.json`. It is used only when `lookupEnabled` is set to `True`
 
 Connector Service also uses following environmental variables for CSR - related information config:
