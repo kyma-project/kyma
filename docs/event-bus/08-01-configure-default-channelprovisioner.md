@@ -1,6 +1,6 @@
 ---
 title: Subscription
-type: Configure default ClusterChannelProvisioner
+type: Tutorials
 ---
 
 Kyma comes with NATSS as its default ClusterChannelProvisioner(See [default-channel-webhook](../../resources/knative-eventing/charts/knative-eventing/templates/eventing.yaml) ConfigMap). Other than NATSS, one can use any default channel provisioner of one's choice. Following are some provisioners which can be used.
