@@ -158,7 +158,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
   kubectl -n istio-system edit secret application-connector-ca-certs
   ```
 
-6. If you experiance any issues with new certificates not being trusted, restart Istio Ingress Gateway pods. Run:
+6. If you experience any issues with new certificates not being trusted, restart Istio Ingress Gateway pods. Run:
   ```
   kubectl -n istio-system delete po -l app=istio-ingressgateway
   ```
