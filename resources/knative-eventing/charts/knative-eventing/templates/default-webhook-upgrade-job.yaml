@@ -82,7 +82,7 @@ spec:
           args:
             - "-c"
             - "kubectl get cm -n knative-eventing default-channel-webhook -oyaml --export  | sed 's/name: default-channel-webhook/name: default-channel-webhook-backup/g' | kubectl -n knative-eventing apply -f -"
-      serviceAccountName: knative-eventing-pre-upgrade
+      serviceAccountName: knative-eventing-upgrade
 ---
 apiVersion: batch/v1
 kind: Job
@@ -108,4 +108,4 @@ spec:
           args:
             - "-c"
             - "kubectl get cm -n knative-eventing default-channel-webhook-backup -oyaml --export  | sed 's/name: default-channel-webhook-backup/name: default-channel-webhook/g' | kubectl -n knative-eventing apply -f -; kubectl delete po -n knative-eventing -l app=webhook"
-      serviceAccountName: knative-eventing-pre-upgrade
+      serviceAccountName: knative-eventing-upgrade
