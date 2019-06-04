@@ -1,5 +1,5 @@
 ---
-title: Subscription
+title: Configure default ClusterChannelProvisioner
 type: Tutorials
 ---
 
