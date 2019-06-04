@@ -1,5 +1,5 @@
 ---
-title: "Connection refused" errors after upgrade
+title: Connection refused errors after upgrade
 type: Troubleshooting
 ---
 
