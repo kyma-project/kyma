@@ -12,6 +12,7 @@ Start with the overarching [Kyma](./kyma) documentation where you can find the g
 -   [Backup](./backup/)
 -   [Console](./console/)
 -   [Event Bus](./event-bus/)
+-   [Headless CMS](./headless-cms/)
 -   [Helm Broker](./helm-broker/)
 -   [Logging](./logging/)
 -   [Monitoring](./monitoring/)
