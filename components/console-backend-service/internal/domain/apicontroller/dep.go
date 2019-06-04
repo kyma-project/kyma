@@ -9,8 +9,8 @@ import (
 type apiLister interface {
 	List(namespace string, serviceName *string, hostname *string) ([]*v1alpha2.Api, error)
 	Find(name string, namespace string) (*v1alpha2.Api, error)
-	Create(name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error)
-	Update(name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error)
+	Create(name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error)
+	Update(name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error)
 	Delete(name string, namespace string) error
 	Subscribe(listener resource.Listener)
 	Unsubscribe(listener resource.Listener)

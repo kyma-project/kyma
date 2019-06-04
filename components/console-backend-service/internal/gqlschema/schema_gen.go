@@ -450,8 +450,8 @@ type ComplexityRoot struct {
 		UpdateService                 func(childComplexity int, name string, namespace string, service JSON) int
 		DeleteService                 func(childComplexity int, name string, namespace string) int
 		CreateNamespace               func(childComplexity int, name string, labels *Labels) int
-		CreateApi                     func(childComplexity int, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) int
-		UpdateApi                     func(childComplexity int, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) int
+		CreateApi                     func(childComplexity int, name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) int
+		UpdateApi                     func(childComplexity int, name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) int
 		DeleteApi                     func(childComplexity int, name string, namespace string) int
 	}
 
@@ -871,8 +871,8 @@ type MutationResolver interface {
 	UpdateService(ctx context.Context, name string, namespace string, service JSON) (*Service, error)
 	DeleteService(ctx context.Context, name string, namespace string) (*Service, error)
 	CreateNamespace(ctx context.Context, name string, labels *Labels) (NamespaceCreationOutput, error)
-	CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (API, error)
-	UpdateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (API, error)
+	CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (API, error)
+	UpdateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (API, error)
 	DeleteAPI(ctx context.Context, name string, namespace string) (*API, error)
 }
 type NamespaceResolver interface {
@@ -2184,34 +2184,39 @@ func field_Mutation_createAPI_args(rawArgs map[string]interface{}) (map[string]i
 	}
 	args["servicePort"] = arg4
 	var arg5 string
-	if tmp, ok := rawArgs["authenticationType"]; ok {
+	if tmp, ok := rawArgs["jwksUri"]; ok {
 		var err error
 		arg5, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["authenticationType"] = arg5
+	args["jwksUri"] = arg5
 	var arg6 string
-	if tmp, ok := rawArgs["jwksUri"]; ok {
+	if tmp, ok := rawArgs["issuer"]; ok {
 		var err error
 		arg6, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["jwksUri"] = arg6
-	var arg7 string
-	if tmp, ok := rawArgs["issuer"]; ok {
+	args["issuer"] = arg6
+	var arg7 *bool
+	if tmp, ok := rawArgs["disableIstioAuthPolicyMTLS"]; ok {
 		var err error
-		arg7, err = graphql.UnmarshalString(tmp)
+		var ptr1 bool
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalBoolean(tmp)
+			arg7 = &ptr1
+		}
+
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["issuer"] = arg7
+	args["disableIstioAuthPolicyMTLS"] = arg7
 	var arg8 *bool
-	if tmp, ok := rawArgs["disableIstioAuthPolicyMTLS"]; ok {
+	if tmp, ok := rawArgs["authenticationEnabled"]; ok {
 		var err error
 		var ptr1 bool
 		if tmp != nil {
@@ -2223,21 +2228,7 @@ func field_Mutation_createAPI_args(rawArgs map[string]interface{}) (map[string]i
 			return nil, err
 		}
 	}
-	args["disableIstioAuthPolicyMTLS"] = arg8
-	var arg9 *bool
-	if tmp, ok := rawArgs["authenticationEnabled"]; ok {
-		var err error
-		var ptr1 bool
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalBoolean(tmp)
-			arg9 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["authenticationEnabled"] = arg9
+	args["authenticationEnabled"] = arg8
 	return args, nil
 
 }
@@ -2290,34 +2281,39 @@ func field_Mutation_updateAPI_args(rawArgs map[string]interface{}) (map[string]i
 	}
 	args["servicePort"] = arg4
 	var arg5 string
-	if tmp, ok := rawArgs["authenticationType"]; ok {
+	if tmp, ok := rawArgs["jwksUri"]; ok {
 		var err error
 		arg5, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["authenticationType"] = arg5
+	args["jwksUri"] = arg5
 	var arg6 string
-	if tmp, ok := rawArgs["jwksUri"]; ok {
+	if tmp, ok := rawArgs["issuer"]; ok {
 		var err error
 		arg6, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["jwksUri"] = arg6
-	var arg7 string
-	if tmp, ok := rawArgs["issuer"]; ok {
+	args["issuer"] = arg6
+	var arg7 *bool
+	if tmp, ok := rawArgs["disableIstioAuthPolicyMTLS"]; ok {
 		var err error
-		arg7, err = graphql.UnmarshalString(tmp)
+		var ptr1 bool
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalBoolean(tmp)
+			arg7 = &ptr1
+		}
+
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["issuer"] = arg7
+	args["disableIstioAuthPolicyMTLS"] = arg7
 	var arg8 *bool
-	if tmp, ok := rawArgs["disableIstioAuthPolicyMTLS"]; ok {
+	if tmp, ok := rawArgs["authenticationEnabled"]; ok {
 		var err error
 		var ptr1 bool
 		if tmp != nil {
@@ -2329,21 +2325,7 @@ func field_Mutation_updateAPI_args(rawArgs map[string]interface{}) (map[string]i
 			return nil, err
 		}
 	}
-	args["disableIstioAuthPolicyMTLS"] = arg8
-	var arg9 *bool
-	if tmp, ok := rawArgs["authenticationEnabled"]; ok {
-		var err error
-		var ptr1 bool
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalBoolean(tmp)
-			arg9 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["authenticationEnabled"] = arg9
+	args["authenticationEnabled"] = arg8
 	return args, nil
 
 }
@@ -5592,7 +5574,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateApi(childComplexity, args["name"].(string), args["namespace"].(string), args["hostname"].(string), args["serviceName"].(string), args["servicePort"].(int), args["authenticationType"].(string), args["jwksUri"].(string), args["issuer"].(string), args["disableIstioAuthPolicyMTLS"].(*bool), args["authenticationEnabled"].(*bool)), true
+		return e.complexity.Mutation.CreateApi(childComplexity, args["name"].(string), args["namespace"].(string), args["hostname"].(string), args["serviceName"].(string), args["servicePort"].(int), args["jwksUri"].(string), args["issuer"].(string), args["disableIstioAuthPolicyMTLS"].(*bool), args["authenticationEnabled"].(*bool)), true
 
 	case "Mutation.updateAPI":
 		if e.complexity.Mutation.UpdateApi == nil {
@@ -5604,7 +5586,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateApi(childComplexity, args["name"].(string), args["namespace"].(string), args["hostname"].(string), args["serviceName"].(string), args["servicePort"].(int), args["authenticationType"].(string), args["jwksUri"].(string), args["issuer"].(string), args["disableIstioAuthPolicyMTLS"].(*bool), args["authenticationEnabled"].(*bool)), true
+		return e.complexity.Mutation.UpdateApi(childComplexity, args["name"].(string), args["namespace"].(string), args["hostname"].(string), args["serviceName"].(string), args["servicePort"].(int), args["jwksUri"].(string), args["issuer"].(string), args["disableIstioAuthPolicyMTLS"].(*bool), args["authenticationEnabled"].(*bool)), true
 
 	case "Mutation.deleteAPI":
 		if e.complexity.Mutation.DeleteApi == nil {
@@ -17218,7 +17200,7 @@ func (ec *executionContext) _Mutation_createAPI(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateAPI(rctx, args["name"].(string), args["namespace"].(string), args["hostname"].(string), args["serviceName"].(string), args["servicePort"].(int), args["authenticationType"].(string), args["jwksUri"].(string), args["issuer"].(string), args["disableIstioAuthPolicyMTLS"].(*bool), args["authenticationEnabled"].(*bool))
+		return ec.resolvers.Mutation().CreateAPI(rctx, args["name"].(string), args["namespace"].(string), args["hostname"].(string), args["serviceName"].(string), args["servicePort"].(int), args["jwksUri"].(string), args["issuer"].(string), args["disableIstioAuthPolicyMTLS"].(*bool), args["authenticationEnabled"].(*bool))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -17252,7 +17234,7 @@ func (ec *executionContext) _Mutation_updateAPI(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateAPI(rctx, args["name"].(string), args["namespace"].(string), args["hostname"].(string), args["serviceName"].(string), args["servicePort"].(int), args["authenticationType"].(string), args["jwksUri"].(string), args["issuer"].(string), args["disableIstioAuthPolicyMTLS"].(*bool), args["authenticationEnabled"].(*bool))
+		return ec.resolvers.Mutation().UpdateAPI(rctx, args["name"].(string), args["namespace"].(string), args["hostname"].(string), args["serviceName"].(string), args["servicePort"].(int), args["jwksUri"].(string), args["issuer"].(string), args["disableIstioAuthPolicyMTLS"].(*bool), args["authenticationEnabled"].(*bool))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -30246,8 +30228,8 @@ type Mutation {
 
     createNamespace(name: String!, labels: Labels): NamespaceCreationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
 
-    createAPI(name: String!, namespace: String!, hostname: String!, serviceName: String!, servicePort: Int!, authenticationType: String!, jwksUri: String!, issuer: String!, disableIstioAuthPolicyMTLS: Boolean, authenticationEnabled: Boolean): API! @HasAccess(attributes: {resource: "apis", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
-    updateAPI(name: String!, namespace: String!, hostname: String!, serviceName: String!, servicePort: Int!, authenticationType: String!, jwksUri: String!, issuer: String!, disableIstioAuthPolicyMTLS: Boolean, authenticationEnabled: Boolean): API! @HasAccess(attributes: {resource: "apis", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
+    createAPI(name: String!, namespace: String!, hostname: String!, serviceName: String!, servicePort: Int!, jwksUri: String!, issuer: String!, disableIstioAuthPolicyMTLS: Boolean, authenticationEnabled: Boolean): API! @HasAccess(attributes: {resource: "apis", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
+    updateAPI(name: String!, namespace: String!, hostname: String!, serviceName: String!, servicePort: Int!, jwksUri: String!, issuer: String!, disableIstioAuthPolicyMTLS: Boolean, authenticationEnabled: Boolean): API! @HasAccess(attributes: {resource: "apis", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
     deleteAPI(name: String!, namespace: String!): API @HasAccess(attributes: {resource: "apis", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
 }
 

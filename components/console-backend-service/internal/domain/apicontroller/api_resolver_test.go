@@ -70,3 +70,262 @@ func TestApiResolver_APIsQuery(t *testing.T) {
 		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
+
+func TestApiResolver_APIQuery(t *testing.T) {
+	namespace := "test-1"
+	name := "test-api"
+
+	t.Run("Should return a an API in namespace", func(t *testing.T) {
+		api := v1alpha2.Api{
+			ObjectMeta: v1.ObjectMeta{
+				Name: "test-1",
+			},
+		}
+
+		expected := gqlschema.API{
+			Name: api.Name,
+		}
+
+		service := automock.NewApiLister()
+		service.On("Find", name, namespace).Return(&api, nil).Once()
+
+		resolver, err := newApiResolver(service)
+		require.NoError(t, err)
+
+		result, err := resolver.APIQuery(nil, name, namespace)
+
+		service.AssertExpectations(t)
+		require.NoError(t, err)
+		assert.Equal(t, &expected, result)
+	})
+
+	t.Run("Should return an empty object", func(t *testing.T) {
+		service := automock.NewApiLister()
+		service.On("Find", name, namespace).Return(nil, nil).Once()
+
+		resolver, err := newApiResolver(service)
+		require.NoError(t, err)
+
+		result, err := resolver.APIQuery(nil, name, namespace)
+
+		service.AssertExpectations(t)
+		require.NoError(t, err)
+		assert.Equal(t, (*gqlschema.API)(nil), result)
+	})
+
+	t.Run("Should return an error", func(t *testing.T) {
+		service := automock.NewApiLister()
+		service.On("Find", name, namespace).Return(nil, errors.New("test")).Once()
+
+		resolver, err := newApiResolver(service)
+		require.NoError(t, err)
+
+		_, err = resolver.APIQuery(nil, name, namespace)
+
+		service.AssertExpectations(t)
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+	})
+}
+
+
+func TestApiResolver_CreateAPI(t *testing.T) {
+	namespace := "test-1"
+	name := "test-api"
+	hostname := "test-hostname"
+	serviceName := "test-service-name"
+	servicePort := 8080
+	jwksUri := "http://test-jwks-uri"
+	issuer := "test-issuer"
+
+	t.Run("Should create an API", func(t *testing.T) {
+		api := fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
+		expected := testApiToGQL(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
+
+		var empty *bool = nil
+
+		service := automock.NewApiLister()
+		service.On("Create", name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, empty, empty).Return(api, nil).Once()
+
+		resolver, err := newApiResolver(service)
+		require.NoError(t, err)
+
+		result, err := resolver.CreateAPI(nil, name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, nil, nil)
+
+		service.AssertExpectations(t)
+		require.NoError(t, err)
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("Should return an error", func(t *testing.T) {
+		var empty *bool = nil
+
+		service := automock.NewApiLister()
+		service.On("Create", name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, empty, empty).Return(nil, errors.New("test")).Once()
+
+		resolver, err := newApiResolver(service)
+		require.NoError(t, err)
+
+		_, err = resolver.CreateAPI(nil, name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, nil, nil)
+
+		service.AssertExpectations(t)
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+	})
+
+}
+
+func TestApiResolver_UpdateAPI(t *testing.T) {
+	namespace := "test-1"
+	name := "test-api"
+	hostname := "test-hostname"
+	serviceName := "test-service-name"
+	servicePort := 8080
+	jwksUri := "http://test-jwks-uri"
+	issuer := "test-issuer"
+
+	t.Run("Should update an API", func(t *testing.T) {
+		api := fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
+		expected := testApiToGQL(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
+
+		var empty *bool = nil
+
+		service := automock.NewApiLister()
+		service.On("Update", name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, empty, empty).Return(api, nil).Once()
+
+		resolver, err := newApiResolver(service)
+		require.NoError(t, err)
+
+		result, err := resolver.UpdateAPI(nil, name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, nil, nil)
+
+		service.AssertExpectations(t)
+		require.NoError(t, err)
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("Should return an error", func(t *testing.T) {
+		var empty *bool = nil
+
+		service := automock.NewApiLister()
+		service.On("Update", name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, empty, empty).Return(nil, errors.New("test")).Once()
+
+		resolver, err := newApiResolver(service)
+		require.NoError(t, err)
+
+		_, err = resolver.UpdateAPI(nil, name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, nil, nil)
+
+		service.AssertExpectations(t)
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+	})
+
+}
+
+func TestApiResolver_DeleteAPI(t *testing.T) {
+	namespace := "test-1"
+	name := "test-api"
+	hostname := "test-hostname"
+	serviceName := "test-service-name"
+	servicePort := 8080
+	jwksUri := "http://test-jwks-uri"
+	issuer := "test-issuer"
+
+	t.Run("Should update an API", func(t *testing.T) {
+		api := fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
+		expected := testApiToGQL(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
+
+		service := automock.NewApiLister()
+		service.On("Find", name, namespace).Return(api, nil).Once()
+		service.On("Delete", name, namespace).Return(nil).Once()
+
+		resolver, err := newApiResolver(service)
+		require.NoError(t, err)
+
+		result, err := resolver.DeleteAPI(nil, name, namespace)
+
+		service.AssertExpectations(t)
+		require.NoError(t, err)
+		assert.Equal(t, &expected, result)
+	})
+
+	t.Run("Should return an error if api has not been found", func(t *testing.T) {
+		service := automock.NewApiLister()
+		service.On("Find", name, namespace).Return(nil, errors.New("test")).Once()
+
+		resolver, err := newApiResolver(service)
+		require.NoError(t, err)
+
+		_, err = resolver.DeleteAPI(nil, name, namespace)
+
+		service.AssertExpectations(t)
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+	})
+
+	t.Run("Should return an error if api couldnt be removed", func(t *testing.T) {
+		api := fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
+
+		service := automock.NewApiLister()
+		service.On("Find", name, namespace).Return(api, nil).Once()
+		service.On("Delete", name, namespace).Return(errors.New("test")).Once()
+
+		resolver, err := newApiResolver(service)
+		require.NoError(t, err)
+
+		_, err = resolver.DeleteAPI(nil, name, namespace)
+
+		service.AssertExpectations(t)
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+	})
+
+}
+
+func fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer string, servicePort int) *v1alpha2.Api {
+	api := v1alpha2.Api{
+		TypeMeta: v1.TypeMeta{
+			APIVersion: "authentication.kyma-project.io/v1alpha2",
+			Kind:       "API",
+		},
+		ObjectMeta: v1.ObjectMeta{
+			Name:   name,
+			Namespace: namespace,
+		},
+		Spec: v1alpha2.ApiSpec{
+			Service:                    v1alpha2.Service{
+				Name: serviceName,
+				Port: servicePort,
+			},
+			Hostname:                   hostname,
+			Authentication: []v1alpha2.AuthenticationRule{
+				{
+					Jwt: v1alpha2.JwtAuthentication{
+						JwksUri: jwksUri,
+						Issuer:  issuer,
+					},
+					Type: v1alpha2.AuthenticationType("JWT"),
+				},
+			},
+		},
+	}
+	return &api
+}
+
+func testApiToGQL (name, namespace, hostname, serviceName, jwksUri, issuer string, servicePort int) gqlschema.API {
+	gql := gqlschema.API{
+		Name: name,
+		Hostname: hostname,
+		Service: gqlschema.ApiService{
+			Name: serviceName,
+			Port: servicePort,
+		},
+		AuthenticationPolicies: []gqlschema.AuthenticationPolicy{
+			{
+				JwksURI: jwksUri,
+				Issuer: issuer,
+				Type: gqlschema.AuthenticationPolicyType("JWT"),
+			},
+		},
+	}
+	return gql
+}

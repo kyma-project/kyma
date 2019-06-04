@@ -81,7 +81,7 @@ func (svc *apiService) Find(name string, namespace string) (*v1alpha2.Api, error
 	return res, nil
 }
 
-func (svc *apiService) Create(name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
+func (svc *apiService) Create(name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
 	api := v1alpha2.Api{
 		TypeMeta: v1.TypeMeta{
 			APIVersion: "authentication.kyma-project.io/v1alpha2",
@@ -103,7 +103,7 @@ func (svc *apiService) Create(name string, namespace string, hostname string, se
 						JwksUri: jwksUri,
 						Issuer:  issuer,
 					},
-					Type: v1alpha2.AuthenticationType(authenticationType),
+					Type: v1alpha2.AuthenticationType("JWT"),
 				},
 			},
 			DisableIstioAuthPolicyMTLS: disableIstioAuthPolicyMTLS,
@@ -122,7 +122,7 @@ func (svc *apiService) Unsubscribe(listener resource.Listener) {
 	svc.notifier.DeleteListener(listener)
 }
 
-func (svc *apiService) Update(name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
+func (svc *apiService) Update(name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
 
 	oldApi, err := svc.Find(name, namespace)
 	if err != nil {
@@ -155,7 +155,7 @@ func (svc *apiService) Update(name string, namespace string, hostname string, se
 						JwksUri: jwksUri,
 						Issuer:  issuer,
 					},
-					Type: v1alpha2.AuthenticationType(authenticationType),
+					Type: v1alpha2.AuthenticationType("JWT"),
 				},
 			},
 			DisableIstioAuthPolicyMTLS: disableIstioAuthPolicyMTLS,

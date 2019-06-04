@@ -22,7 +22,8 @@ func TestApiService_List(t *testing.T) {
 		api3 := fixAPIWith("test-2", "test-1", "", "")
 
 		informer := fixAPIInformer(api1, api2, api3)
-		service := newApiService(informer)
+		client := fake.NewSimpleClientset(api1, api2, api3)
+		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
@@ -42,7 +43,8 @@ func TestApiService_List(t *testing.T) {
 		api3 := fixAPIWith("test-2", "test-1", "cba", "")
 
 		informer := fixAPIInformer(api1, api2, api3)
-		service := newApiService(informer)
+		client := fake.NewSimpleClientset(api1, api2, api3)
+		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
@@ -62,7 +64,8 @@ func TestApiService_List(t *testing.T) {
 		api3 := fixAPIWith("test-4", "test-1", "", "cba")
 
 		informer := fixAPIInformer(api1, api2, api3)
-		service := newApiService(informer)
+		client := fake.NewSimpleClientset(api1, api2, api3)
+		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
@@ -83,7 +86,8 @@ func TestApiService_List(t *testing.T) {
 		api3 := fixAPIWith("test-6", "test-1", hostname, "cba")
 
 		informer := fixAPIInformer(api1, api2, api3)
-		service := newApiService(informer)
+		client := fake.NewSimpleClientset(api1, api2, api3)
+		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
