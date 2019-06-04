@@ -1,28 +1,33 @@
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+# Required because Service Catalog has Istio sidecar which Prometheus Operator doesn't have
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
 metadata:
+  name: {{ template "fullname" . }}
+spec:
+  peers:
+  - mtls:
+      mode: PERMISSIVE
+  targets:
+  - name: {{ template "fullname" . }}-controller-manager
+---
+# Dedicated Service for metrics endpoint
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}
   labels:
-    prometheus: monitoring
-    app: {{ template "fullname" . }}-apiserver
+    app: {{ template "fullname" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
-  name: {{ template "fullname" . }}-apiserver
 spec:
-  endpoints:
-  - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-    interval: 30s
-    port: secure
-    scheme: https
-    tlsConfig:
-      insecureSkipVerify: true
-  namespaceSelector:
-    matchNames:
-    - "{{ .Release.Namespace }}"
+  ports:
+  - name: http-metrics
+    port: 30444
   selector:
-    matchLabels:
-      app: {{ template "fullname" . }}-apiserver
+    app: {{ template "fullname" . }}-controller-manager
 ---
+# Inform Prometheus to scrap the metrics endpoint
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -32,7 +37,7 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
-  name: {{ template "fullname" . }}
+  name: {{ template "fullname" . }}-controller-manager
 spec:
   endpoints:
   - interval: 30s

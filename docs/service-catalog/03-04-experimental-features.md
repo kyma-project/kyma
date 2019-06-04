@@ -10,28 +10,31 @@ with a native Kubernetes solution - CustomResourceDefinitions (CRDs).
 
 ### Enable CRDs
 
-To enable the CRDs feature in the Service Catalog, override the **service-catalog-apiserver.enabled** and **service-catalog-crds.enabled** parameters
+To enable the CRDs feature in the Service Catalog, override the **global.serviceCatalogApiserver.enabled** and **global.serviceCatalogCrds.enabled** parameters
 in the installation file:
-- For the local installation, modify the `service-catalog-overrides` ConfigMap in the [installer-config-local.yaml](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-config-local.yaml.tpl#L73) file:
+- For the local installation, modify the `installation-config-overrides` ConfigMap in the [installer-config-local.yaml](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-config-local.yaml.tpl#L41) file:
     ```
     apiVersion: v1
     kind: ConfigMap
     metadata:
-      name: service-catalog-overrides
+      name: installation-config-overrides
       namespace: kyma-installer
       labels:
         installer: overrides
-        component: service-catalog
         kyma-project.io/installation: ""
     data:
-      etcd-stateful.etcd.resources.limits.memory: 256Mi
-      etcd-stateful.replicaCount: "1"
-      service-catalog-apiserver.enabled: "false"
-      service-catalog-crds.enabled: "true"
+      global.isLocalEnv: "true"
+      global.domainName: "kyma.local"
+      global.etcdBackup.containerName: ""
+      global.etcdBackup.enabled: "false"
+      global.adminPassword: ""
+      nginx-ingress.controller.service.loadBalancerIP: ""
+      global.serviceCatalogApiserver.enabled: "true"
+      global.serviceCatalogCrds.enabled: "false"
     ```
 - For the cluster installation, add the `service-catalog-overrides` ConfigMap to the cluster before the installation starts. Run:
     ```
-    kubectl create configmap service-catalog-overrides -n kyma-installer --from-literal=service-catalog-apiserver.enabled=false --from-literal=service-catalog-crds.enabled=true \
-    && kubectl label configmap service-catalog-overrides -n kyma-installer installer=overrides component=service-catalog
+    kubectl create configmap service-catalog-overrides -n kyma-installer --from-literal=global.serviceCatalogApiserver.enabled=false --from-literal=global.serviceCatalogCrds.enabled=true \
+    && kubectl label configmap service-catalog-overrides -n kyma-installer installer=overrides
     ```
 
