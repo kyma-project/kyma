@@ -11,8 +11,8 @@ In some cases, the logs of Kyma installer may show this error, which seemingly i
 Step error:  Details: Helm install error: rpc error: code = Unknown desc = validation failed: [unable to recognize "": no matches for kind "DestinationRule" in version "networking.istio.io/v1alpha3", unable to recognize "": no matches for kind "DestinationRule" in version "networking.istio.io/v1alpha3", unable to recognize "": no matches for kind "attributemanifest" in version "config.istio.io/v1alpha2"
 ```
 
-As Istio is the first sizeable component handled by the Kyma Installer, sometimes not all of the required CRDs are created before Installer proceeds to the next component. This situation doesn't cause the installation to fail.
-Instead, the Istio installation step repeats and gets more time for setup and the error message is logged regardless of that.
+As Istio is the first sizeable component handled by the Kyma Installer, sometimes not all of the required CRDs are created before the Installer proceeds to the next component. This situation doesn't cause the installation to fail.
+Instead, the Istio installation step repeats and gets more time for setup. The error message is logged regardless of that.
 
 ## Job failed: DeadlineExceeded error
 
@@ -26,19 +26,19 @@ If the problem repeats, find the job that causes the error and reach out to the 
   ```
   helm ls --tls
   ```
-  A high number of revisions may suggest that a component was reinstalled several times. If a release has the status different to Deployed, the component wasn't installed.
+  A high number of revisions may suggest that a component was reinstalled several times. If a release has the status different to `Deployed`, the component wasn't installed.
 
 2. Get component details:
   ```
   helm status {RELEASE_NAME} --tls
   ```
-  Pods with not all containers in READY state might be the cause of the error.
+  Pods with not all containers in READY state can cause the error.
 
 3. Get the deployed jobs:
   ```
   kubectl get jobs --all-namespaces
   ```
-  Jobs that are not completed might be the cause of the error.
+  Jobs that are not completed can cause the error.
 
 ## Installation fails without an apparent reason
 

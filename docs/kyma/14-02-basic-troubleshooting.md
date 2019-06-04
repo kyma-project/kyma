@@ -5,7 +5,7 @@ type: Troubleshooting
 
 ## Console UI password
 
-If you don't set a password for the **admin@kyma.cx** user using the `--password` parameter or you forget the password you set, you can get it from the `admin-user` Secret located in the `kyma-system` Namespace. Run this command:
+If you don't set a password for the **admin@kyma.cx** user with the `--password` parameter or you forget the password you set, you can get it from the `admin-user` Secret located in the `kyma-system` Namespace. Run this command:
 
 ```
 kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
@@ -21,7 +21,7 @@ scripts/is-installed.sh --verbose
 
 ## Installation successful, component not working
 
-If the installation is successful but a component does not behave in an expected way, inspect Helm releases for more details on all of the installed components.
+If the installation is successful but a component does not behave in the expected way, inspect Helm releases for more details on all of the installed components.
 
 Run this command to list all of the available Helm releases:
 ```
@@ -40,9 +40,9 @@ Additionally, see if all deployed Pods are running. Run this command:
 ```
 kubectl get pods --all-namespaces
 ```
-The command retrieves all Pods from all Namespaces, the status of the Pods, and their instance numbers. Check if the status is `Running` for all Pods. If any of the Pods that you require do not start successfully, perform the installation again.
+The command retrieves all Pods from all Namespaces, the status of the Pods, and their instance numbers. Check if the status is `Running` for all Pods. If any of the Pods that you require do not start successfully, install Kyma again.
 
-## Can't log in to the Console after hibernating Minikube cluster
+## Can't log in to the Console after hibernating the Minikube cluster
 
 If you put a local cluster into hibernation or use `minikube stop` and `minikube start` the date and time settings of Minikube get out of sync with the system date and time settings. As a result, the access token used to log in cannot be properly validated by Dex and you cannot log in to the console. To fix that, set the date and time used by your machine in Minikube. Run:
 
