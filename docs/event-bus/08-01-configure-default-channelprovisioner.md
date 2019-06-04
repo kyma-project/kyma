@@ -8,7 +8,7 @@ Kyma comes with NATSS as its default ClusterChannelProvisioner(See [default-chan
 ### In-memory-channel
 In order to add an in-memory-channel provisioner follow this [guide](https://github.com/knative/eventing/tree/master/config/provisioners/in-memory-channel).
 
-> **Note**: Before installing this provisioner, add the annotation in the podTemplate.Spec [here](https://github.com/knative/eventing/blob/master/config/provisioners/in-memory-channel/in-memory-channel.yaml#L107) in the `in-memory-channel-controller` Deployment to get rid of the istio-sidecar.
+> **NOTE**: Before installing this provisioner, add the following annotation to the [`podTemplate.Spec`](https://github.com/knative/eventing/blob/master/config/provisioners/in-memory-channel/in-memory-channel.yaml#L107) in the `in-memory-channel-controller` Deployment to remove the Istio sidecar.
 
 ```yaml
 template:
