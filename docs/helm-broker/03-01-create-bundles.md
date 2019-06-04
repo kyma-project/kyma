@@ -114,7 +114,7 @@ The `meta.yaml` file contains the specification of the ClusterDocsTopic. The exa
 
 See [this](https://github.com/kyma-project/bundles/tree/master/bundles/testing-0.0.1/docs) example of the `docs` directory with documentation for the testing bundle.
 
-Using the Helm Broker, you can provision a broker which provides its own Service Classes. To learn how to upload documentation for those classes, read [this](#details-bundles-docs.md) document.
+Using the Helm Broker, you can provision a broker which provides its own Service Classes. To learn how to upload documentation for those classes, read [this](#details-provide-service-classes-documentation) document.
 
 ## Troubleshooting
 
