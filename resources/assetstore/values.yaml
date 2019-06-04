@@ -18,7 +18,7 @@ global:
     version: '47ef2289'
   minio_client:
     image: 'minio/mc'
-    tag: 'RELEASE.2019-04-03T17-59-57Z'
+    tag: 'RELEASE.2019-06-04T01-15-58Z'
   alpine_kubectl:
     image: 'alpine-kubectl'
     dir: 'test-infra/'
@@ -54,4 +54,4 @@ minio:
       cpu: 100m
 
   gcsgateway:
-    replicas: 1
+    replicas: 2
