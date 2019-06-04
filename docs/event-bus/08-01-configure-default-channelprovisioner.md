@@ -18,4 +18,4 @@ template:
       labels: *labels
 ```
 
-The default cluster channel provisioner can be changed by editing the [default-channel-webhook](../../resources/knative-eventing/charts/knative-eventing/templates/eventing.yaml) ConfigMap with the name of the ClusterChannelProvisioner. E.g. for in-memory-channel ClusterChannelProvisioner, see [here](https://github.com/knative/eventing/blob/master/config/400-default-channel-config.yaml).
+You can change the default cluster channel provisioner by editing the ClusterChannelProvisioner entry in the `default-channel-webhook` ConfigMap. For an example of the in-memory-channel ClusterChannelProvisioner configuration, see [this file](https://github.com/knative/eventing/blob/master/config/400-default-channel-config.yaml).
