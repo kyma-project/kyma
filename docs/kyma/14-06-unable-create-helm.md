@@ -3,7 +3,7 @@ title: Installation stuck at ContainerCreating
 type: Troubleshooting
 ---
 
-Starting with Kyma release 0.9.0 the communication with Helm and Tiller is [secured with TLS](components/security/#details-tls-in-tiller).
+Starting with Kyma release 0.9.0 the communication with Helm and Tiller is [secured with TLS](/components/security/#details-tls-in-tiller).
 
 If you try to install Kyma using your own image and the installation freezes at the `ContainerCreating` step, it means that the Installer cannot start because a required set of client-server certificates is not found in the system.
 
