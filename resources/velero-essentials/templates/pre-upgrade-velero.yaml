@@ -86,7 +86,7 @@ data:
     set -u
     kubectl get secret -n kyma-installer ark-credentials-overrides
     old_ark_secret_exists=$?
-    if [ "${old_ark_secret_exists}" != 0 ]; thenß
+    if [ "${old_ark_secret_exists}" != 0 ]; then
       echo "Ark is not installed so nothing to upgrade!"
       exit 0
     fi
