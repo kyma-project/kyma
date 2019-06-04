@@ -28,7 +28,7 @@ The Connector Service has the following parameters:
 - **appTokenExpirationMinutes** - Time after which tokens for Applications expire and are no longer valid. The default value is `5` minutes.
 - **runtimeTokenExpirationMinutes** - Time after which tokens for Runtimes expire and are no longer valid. The default value is `10` minutes.
 - **caSecretName** - Namespace and the name of the Secret which stores the certificate and key used to sign client certificates. Requires the `Namespace/secret name` format. The default value is `kyma-integration/nginx-auth-ca`.
-- **rootCACertificateSecretName** - Namespace and Name of the secret, in Namespace/Name format, which contains root CA (Certificate Authority) Certificate in case certificates are singed by intermediate CA.
+- **rootCACertificateSecretName** - Namespace and the name of the Secret which stores the root CA (Certificate Authority) Certificate in case the certificates are signed by the intermediate CA. Requires the `Namespace/secret name` format. 
 - **requestLogging** - Flag for logging incoming requests. It is set to `False` by default.
 - **connectorServiceHost** - Host under which this service is accessible. It is used for generating the URL. The default host is `cert-service.wormhole.cluster.kyma.cx`.
 - **gatewayBaseURL** - Base URL of the Gateway Service.
