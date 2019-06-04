@@ -22,9 +22,6 @@ const (
 	// ApplicationContextKey is the key value for storing Application in context
 	ApplicationContextKey clientContextKey = "ApplicationContext"
 
-	// SubjectHeader is key representing client certificate subject set in headers
-	SubjectHeader = "Client-Certificate-Subject"
-
 	// ApiURLsKey is the key value for storing API hosts in context
 	ApiURLsKey clientContextKey = "ApiURLs"
 
@@ -45,12 +42,6 @@ const (
 
 	// ApplicationEmpty represents empty value for Application
 	ApplicationEmpty = ""
-
-	// CtxEnabled represents value for required context
-	CtxEnabled CtxEnabledType = true
-
-	// CtxNotEnabled represents value for not required context
-	CtxNotEnabled CtxEnabledType = false
 
 	// LookupEnabled represents value for required fetch from Runtime
 	LookupEnabled LookupEnabledType = true

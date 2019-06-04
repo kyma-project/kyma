@@ -467,7 +467,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 
 	})
 
-	t.Run("should fail when Organization differs", func(t *testing.T) {
+	t.Run("should fail when organization differs", func(t *testing.T) {
 		// given
 		csrSubject := CSRSubject{
 			CommonName:         "cname",
