@@ -90,8 +90,8 @@ data:
   minio.gcsgateway.enabled: "true"
   minio.gcsgateway.projectId: "$PROJECT"
   minio.DeploymentUpdate.type=RollingUpdate
-  minio.DeploymentUpdate.maxSurge=0
-  minio.DeploymentUpdate.maxUnavailable=1
+  minio.DeploymentUpdate.maxSurge="0"
+  minio.DeploymentUpdate.maxUnavailable="1"
 EOF
 ```
 >**CAUTION:** When you install Kyma locally from sources, you need to manually add the ConfigMap and the Secret to the `installer-config-local.yaml.tpl` template located under the `installation/resources` subfolder before you run the installation script.
