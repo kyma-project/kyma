@@ -65,11 +65,11 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
   kubectl -n istio-system edit secret application-connector-ca-certs
   ```
 
-9. If you experiance any issues with new certificates not being trusted, restart Istio Ingress Gateway pods. Run:
+9. If you experience any issues with new certificates not being trusted, restart Istio Ingress Gateway Pods. Run:
   ```
   kubectl -n istio-system delete po -l app=istio-ingressgateway
   ```
-> **Note:** To maintain 100% avalibility you can scale up the deployment, restart the old pod and scale the deployment back down.
+> **NOTE:** To maintain 100% availability, you can scale up the deployment, restart the old Pod, and scale the deployment back down.
 
 10. Renew the certificates in a runtime. To do that, create a CertificateRequest CR in the runtime in which you want to renew the certificates. Alternatively, wait for the certificates to expire in a given runtime. The system renews the certificates automatically using the information stored in the Secrets you updated.
 
@@ -83,7 +83,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
   kubectl -n istio-system edit secret application-connector-ca-certs
   ```
 
-13. Again, for changes to take effect, you may need to restart the pods of Istio Ingess Gateway. Run: 
+13. For changes to take effect, you may need to restart the Pods of Istio Ingress Gateway. Run: 
   ```
   kubectl -n istio-system delete po -l app=istio-ingressgateway
   ```
@@ -118,7 +118,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
   kubectl -n istio-system edit secret application-connector-ca-certs
   ```
 
-6. If you experiance any issues with new certificates not being trusted, restart Istio Ingress Gateway pods. Run:
+6. If you experience any issues with new certificates not being trusted, restart Istio Ingress Gateway Pods. Run:
   ```
   kubectl -n istio-system delete po -l app=istio-ingressgateway
   ```

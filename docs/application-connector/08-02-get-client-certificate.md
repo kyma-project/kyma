@@ -142,9 +142,9 @@ Use `urls.metadataUrl` and `urls.eventsUrl` to get the URLs to the Application R
 
 ## Call the Application Registry and Event services on local deployment
 
-- Kyma installation on Minikube by default uses self signed certificate so it is required to skip TLS verification:
+- Since Kyma installation on Minikube uses the self-signed certificate by default, skip TLS verification:
 
-> **NOTE:** Adding `NodePort` to the the Gateway URL is no longer required.
+> **NOTE:** You no longer need to add `NodePort` to the the Gateway URL.
 
   ```
   curl https://gateway.kyma.local/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
