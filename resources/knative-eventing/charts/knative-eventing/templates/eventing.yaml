@@ -662,8 +662,6 @@ kind: ConfigMap
 metadata:
   name: default-channel-webhook
   namespace: knative-eventing
-  annotations:
-    "helm.sh/hook": "pre-install"
 
 ---
 apiVersion: v1

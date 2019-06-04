@@ -1,0 +1,5 @@
+kubectl:
+  image:
+    repository: eu.gcr.io/kyma-project/etcd-tls-setup
+    tag: 0.3.367
+    pullPolicy: IfNotPresent
