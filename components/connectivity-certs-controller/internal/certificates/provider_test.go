@@ -3,6 +3,8 @@ package certificates
 import (
 	"testing"
 
+	"k8s.io/apimachinery/pkg/types"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/pkg/errors"
@@ -13,8 +15,10 @@ import (
 )
 
 const (
-	clusterCertSecretName = "cluster-certificate"
-	caCertSecretName      = "ca-cert"
+	clusterCertSecretName      = "cluster-certificate"
+	clusterCertSecretNamespace = "kyma-integration"
+	caCertSecretName           = "ca-cert"
+	caCertSecretNamespace      = "istio-system"
 
 	pemCertificate = `-----BEGIN CERTIFICATE-----
 MIIEcDCCA1igAwIBAgIBAjANBgkqhkiG9w0BAQsFADBfMQ8wDQYDVQQLDAZDNGNv
@@ -70,6 +74,17 @@ m0BmlwDa5ONBGAqjBP9TTm42f4ufzsGF/eFLXZ8lAbpJmLqx
 -----END CERTIFICATE-----`
 )
 
+var (
+	clusterCertSecretNamespaceName = types.NamespacedName{
+		Name:      clusterCertSecretName,
+		Namespace: clusterCertSecretNamespace,
+	}
+	caCertSecretNamespaceName = types.NamespacedName{
+		Name:      caCertSecretName,
+		Namespace: caCertSecretNamespace,
+	}
+)
+
 func TestCertificateProvider_GetCACertificate(t *testing.T) {
 	t.Run("should get ca certificate", func(t *testing.T) {
 		// given
@@ -78,9 +93,9 @@ func TestCertificateProvider_GetCACertificate(t *testing.T) {
 		}
 
 		secretRepository := &mocks.Repository{}
-		secretRepository.On("Get", caCertSecretName).Return(secretData, nil)
+		secretRepository.On("Get", caCertSecretNamespaceName).Return(secretData, nil)
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretNamespaceName, caCertSecretNamespaceName, secretRepository)
 
 		// when
 		certs, err := certificateProvider.GetCACertificates()
@@ -94,9 +109,9 @@ func TestCertificateProvider_GetCACertificate(t *testing.T) {
 	t.Run("should return error when failed to read secret", func(t *testing.T) {
 		// given
 		secretRepository := &mocks.Repository{}
-		secretRepository.On("Get", caCertSecretName).Return(nil, errors.New("error"))
+		secretRepository.On("Get", caCertSecretNamespaceName).Return(nil, errors.New("error"))
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretNamespaceName, caCertSecretNamespaceName, secretRepository)
 
 		// when
 		_, err := certificateProvider.GetCACertificates()
@@ -110,9 +125,9 @@ func TestCertificateProvider_GetCACertificate(t *testing.T) {
 		secretData := map[string][]byte{}
 
 		secretRepository := &mocks.Repository{}
-		secretRepository.On("Get", caCertSecretName).Return(secretData, nil)
+		secretRepository.On("Get", caCertSecretNamespaceName).Return(secretData, nil)
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretNamespaceName, caCertSecretNamespaceName, secretRepository)
 
 		// when
 		_, err := certificateProvider.GetCACertificates()
@@ -128,9 +143,9 @@ func TestCertificateProvider_GetCACertificate(t *testing.T) {
 		}
 
 		secretRepository := &mocks.Repository{}
-		secretRepository.On("Get", caCertSecretName).Return(secretData, nil)
+		secretRepository.On("Get", caCertSecretNamespaceName).Return(secretData, nil)
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretNamespaceName, caCertSecretNamespaceName, secretRepository)
 
 		// when
 		_, err := certificateProvider.GetCACertificates()
@@ -202,9 +217,9 @@ MSQKrvrJLtY4kG8qTByW629n09aSZrZ4n1AY8LNbEPDEiGjzwF51psiDxBIx
 		}
 
 		secretRepository := &mocks.Repository{}
-		secretRepository.On("Get", clusterCertSecretName).Return(secretData, nil)
+		secretRepository.On("Get", clusterCertSecretNamespaceName).Return(secretData, nil)
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretNamespaceName, caCertSecretNamespaceName, secretRepository)
 
 		// when
 		key, cert, err := certificateProvider.GetClientCredentials()
@@ -218,9 +233,9 @@ MSQKrvrJLtY4kG8qTByW629n09aSZrZ4n1AY8LNbEPDEiGjzwF51psiDxBIx
 	t.Run("should return error when failed to read secret data", func(t *testing.T) {
 		// given
 		secretRepository := &mocks.Repository{}
-		secretRepository.On("Get", clusterCertSecretName).Return(nil, errors.New("error"))
+		secretRepository.On("Get", clusterCertSecretNamespaceName).Return(nil, errors.New("error"))
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretNamespaceName, caCertSecretNamespaceName, secretRepository)
 
 		// when
 		_, _, err := certificateProvider.GetClientCredentials()
@@ -236,9 +251,9 @@ MSQKrvrJLtY4kG8qTByW629n09aSZrZ4n1AY8LNbEPDEiGjzwF51psiDxBIx
 		}
 
 		secretRepository := &mocks.Repository{}
-		secretRepository.On("Get", clusterCertSecretName).Return(secretData, nil)
+		secretRepository.On("Get", clusterCertSecretNamespaceName).Return(secretData, nil)
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretNamespaceName, caCertSecretNamespaceName, secretRepository)
 
 		// when
 		_, _, err := certificateProvider.GetClientCredentials()
@@ -254,9 +269,9 @@ MSQKrvrJLtY4kG8qTByW629n09aSZrZ4n1AY8LNbEPDEiGjzwF51psiDxBIx
 		}
 
 		secretRepository := &mocks.Repository{}
-		secretRepository.On("Get", clusterCertSecretName).Return(secretData, nil)
+		secretRepository.On("Get", clusterCertSecretNamespaceName).Return(secretData, nil)
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretNamespaceName, caCertSecretNamespaceName, secretRepository)
 
 		// when
 		_, _, err := certificateProvider.GetClientCredentials()
@@ -272,9 +287,9 @@ MSQKrvrJLtY4kG8qTByW629n09aSZrZ4n1AY8LNbEPDEiGjzwF51psiDxBIx
 		}
 
 		secretRepository := &mocks.Repository{}
-		secretRepository.On("Get", clusterCertSecretName).Return(secretData, nil)
+		secretRepository.On("Get", clusterCertSecretNamespaceName).Return(secretData, nil)
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretNamespaceName, caCertSecretNamespaceName, secretRepository)
 
 		// when
 		_, _, err := certificateProvider.GetClientCredentials()
@@ -291,9 +306,9 @@ MSQKrvrJLtY4kG8qTByW629n09aSZrZ4n1AY8LNbEPDEiGjzwF51psiDxBIx
 		}
 
 		secretRepository := &mocks.Repository{}
-		secretRepository.On("Get", clusterCertSecretName).Return(secretData, nil)
+		secretRepository.On("Get", clusterCertSecretNamespaceName).Return(secretData, nil)
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretNamespaceName, caCertSecretNamespaceName, secretRepository)
 
 		// when
 		_, _, err := certificateProvider.GetClientCredentials()
