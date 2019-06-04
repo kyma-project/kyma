@@ -17,17 +17,17 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    dir: pr/
-    version: PR-4192
+    dir: develop/
+    version: d7092530
   application_operator_tests:
-    dir: pr/
-    version: PR-4192
+    dir: develop/
+    version: d7092530
   connector_service:
-    dir: pr/
-    version: PR-4200
+    dir: develop/
+    version: e6315e54
   connector_service_tests:
-    dir: pr/
-    version: PR-4203
+    dir: develop/
+    version: 29f4d46c
   connection_token_handler:
     dir: develop/
     version: 3d922c3d
@@ -35,8 +35,8 @@ global:
     dir: develop/
     version: 00d7f520
   connectivity_certs_controller:
-    dir: pr/
-    version: PR-4280
+    dir: develop/
+    version: 91adb4c1
   event_service:
     dir: develop/
     version: fedca3db
@@ -44,8 +44,8 @@ global:
     dir: develop/
     version: fedca3db
   application_connectivity_validator:
-    dir: pr/
-    version: PR-4192
+    dir: develop/
+    version: d7092530
   application_gateway:
     dir: develop/
     version: f76e0544
@@ -71,6 +71,6 @@ tests:
       central: false
     skipSslVerify: true
     image:
-      dir: pr/
-      version: PR-4220
+      dir: develop/
+      version: 84164981
       pullPolicy: IfNotPresent
