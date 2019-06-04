@@ -263,6 +263,9 @@
 # Application Gateway Component
 /components/application-gateway/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
+# Application Connectivity Validator Component
+/components/application-connectivity-validator/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
 # Event Bus Component
 /components/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
