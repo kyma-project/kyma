@@ -33,7 +33,7 @@ You can add a component before and after installation.
 ### Installation from the release
 
 1. Download the [newest version](https://github.com/kyma-project/kyma/releases) of Kyma.
-2. Customize the installation by adding a component to the list in the installation file or removing hash charcter (#) in front of the `name` and `namespace` entries. For example, to enable the Monitoring installation, add or unmark these entries:
+2. Customize the installation by adding a component to the list in the installation file or removing the hash character (#) in front of the `name` and `namespace` entries. For example, to enable the Monitoring installation, add or unmark these entries:
     ```
     - name: "monitoring"
       namespace: "kyma-system"
@@ -45,7 +45,7 @@ You can add a component before and after installation.
 
 ### Installation from sources
 
-1. Customize the installation by adding a component to the list of components or removing hash character (#) in front of the `name` and `namespace` entries in the following installation files:
+1. Customize the installation by adding a component to the list of components or removing the hash character (#) in front of the `name` and `namespace` entries in the following installation files:
   * [`installer-cr.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr.yaml.tpl) for the **local** installation
   *  [`installer-cr-cluster.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster.yaml.tpl) for the **cluster** installation
 
@@ -59,7 +59,7 @@ To add a component that was not installed with Kyma by default, modify the Insta
     ```
     kubectl edit installation kyma-installation
     ```
-2. Add the new component to the list of components or remove hash character (#) preceding these lines:
+2. Add the new component to the list of components or remove the hash character (#) preceding these lines:
     ```
     #- name: "jaeger"
     #  namespace: "kyma-system"
@@ -83,7 +83,7 @@ You can only remove the component before the installation process starts. To dis
 ### Installation from the release
 
 1. Download the [newest version](https://github.com/kyma-project/kyma/releases) of Kyma.
-2. Customize the installation by removing a component from the list in the installation file or adding hash character (#) in front of the `name` and `namespace` entries. For example, to disable the Application Connector installation, remove these entries or add hash character (#) in front of:
+2. Customize the installation by removing a component from the list in the installation file or adding a hash character (#) in front of the `name` and `namespace` entries. For example, to disable the Application Connector installation, remove these entries or add a hash character (#) in front of:
     ```
     - name: "application-connector"
     namespace: "kyma-system"
@@ -95,7 +95,7 @@ You can only remove the component before the installation process starts. To dis
 
 ### Installation from sources
 
-1. Customize the installation by removing a component from the list of components or adding hash character (#) in front of the `name` and `namespace` entries in the following installation files:
+1. Customize the installation by removing a component from the list of components or adding a hash character (#) in front of the `name` and `namespace` entries in the following installation files:
   * [`installer-cr.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr.yaml.tpl) for the **local** installation
   *  [`installer-cr-cluster.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster.yaml.tpl) for the **cluster** installation
 
