@@ -2,7 +2,7 @@
 
 set -o errexit
 
-echo "The build-kyma-installer.sh script is deprecated and will be removed with Kyma release 1.4. Use Kyma CLI instead"
+echo "The build-kyma-installer.sh script is deprecated and will be removed. Use Kyma CLI instead."
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR=${CURRENT_DIR}/../../

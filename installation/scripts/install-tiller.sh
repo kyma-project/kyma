@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo "The install-tiller.sh script is deprecated and will be removed with Kyma release 1.4. Use Kyma CLI instead"
+echo "The install-tiller.sh script is deprecated and will be removed. Use Kyma CLI instead."
 
 CURRENT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 

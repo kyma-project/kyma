@@ -5,7 +5,7 @@ param (
     [string]$MEMORY = "8192"
 )
 
-Write-Output @"The minikube.ps1 script is deprecated and will be removed with Kyma release 1.4. Use Kyma CLI instead"@
+Write-Output @"The minikube.ps1 script is deprecated and will be removed. Use Kyma CLI instead."@
 
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 $KUBERNETES_VERSION = "1.12.5"
