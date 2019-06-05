@@ -58,6 +58,7 @@ required= [
 
 [[constraint]]
   name = "k8s.io/helm"
+  # If you change that version be aware that you need to align it in the kyma/docs/helm-broker/03-05-bundles-validation.md
   version = "2.8.2"
 
 # etcd(release-3.3) has dependency to bbolt in this version:
