@@ -11,12 +11,12 @@ You can configure the Kyma installation by:
 
 The list of components to install is defined in the [Installation](#custom-resource-installation) custom resource (CR).
 The overrides are delivered as ConfigMaps or Secrets defined by the user before triggering the installation.
-The Installer is the Kyma component that is responsible for reading and applying the configuration.
+The Installer reads the configuration from the Installation CR and the overrides and applies it in the installation process.
 
 
 ## Default settings
 
-Default configuration is defined differently for cluster and local installations.
+The default settings for the cluster and local installation are defined in different files.
 
 <div tabs>
   <details>
