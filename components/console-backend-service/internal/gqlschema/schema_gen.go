@@ -453,6 +453,7 @@ type ComplexityRoot struct {
 		CreateApi                     func(childComplexity int, name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) int
 		UpdateApi                     func(childComplexity int, name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) int
 		DeleteApi                     func(childComplexity int, name string, namespace string) int
+		CreateLimitRange              func(childComplexity int, namespace string, name string, limitRange LimitRangeInput) int
 	}
 
 	Namespace struct {
@@ -874,6 +875,7 @@ type MutationResolver interface {
 	CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (API, error)
 	UpdateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (API, error)
 	DeleteAPI(ctx context.Context, name string, namespace string) (*API, error)
+	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*LimitRange, error)
 }
 type NamespaceResolver interface {
 	Applications(ctx context.Context, obj *Namespace) ([]string, error)
@@ -2350,6 +2352,39 @@ func field_Mutation_deleteAPI_args(rawArgs map[string]interface{}) (map[string]i
 		}
 	}
 	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_createLimitRange_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	var arg2 LimitRangeInput
+	if tmp, ok := rawArgs["limitRange"]; ok {
+		var err error
+		arg2, err = UnmarshalLimitRangeInput(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limitRange"] = arg2
 	return args, nil
 
 }
@@ -5599,6 +5634,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteApi(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
+	case "Mutation.createLimitRange":
+		if e.complexity.Mutation.CreateLimitRange == nil {
+			break
+		}
+
+		args, err := field_Mutation_createLimitRange_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateLimitRange(childComplexity, args["namespace"].(string), args["name"].(string), args["limitRange"].(LimitRangeInput)), true
 
 	case "Namespace.name":
 		if e.complexity.Namespace.Name == nil {
@@ -16055,6 +16102,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "deleteAPI":
 			out.Values[i] = ec._Mutation_deleteAPI(ctx, field)
+		case "createLimitRange":
+			out.Values[i] = ec._Mutation_createLimitRange(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -17282,6 +17331,41 @@ func (ec *executionContext) _Mutation_deleteAPI(ctx context.Context, field graph
 	}
 
 	return ec._API(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_createLimitRange(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_createLimitRange_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateLimitRange(rctx, args["namespace"].(string), args["name"].(string), args["limitRange"].(LimitRangeInput))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*LimitRange)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._LimitRange(ctx, field.Selections, res)
 }
 
 var namespaceImplementors = []string{"Namespace"}
@@ -28922,6 +29006,42 @@ func UnmarshalInputTopic(v interface{}) (InputTopic, error) {
 	return it, nil
 }
 
+func UnmarshalLimitRangeInput(v interface{}) (LimitRangeInput, error) {
+	var it LimitRangeInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "default":
+			var err error
+			it.Default, err = UnmarshalResourceValuesInput(v)
+			if err != nil {
+				return it, err
+			}
+		case "defaultRequest":
+			var err error
+			it.DefaultRequest, err = UnmarshalResourceValuesInput(v)
+			if err != nil {
+				return it, err
+			}
+		case "max":
+			var err error
+			it.Max, err = UnmarshalResourceValuesInput(v)
+			if err != nil {
+				return it, err
+			}
+		case "type":
+			var err error
+			it.Type, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func UnmarshalLocalObjectReferenceInput(v interface{}) (LocalObjectReferenceInput, error) {
 	var it LocalObjectReferenceInput
 	var asMap = v.(map[string]interface{})
@@ -29681,6 +29801,13 @@ type LimitRangeItem {
     defaultRequest: ResourceType!
 }
 
+input LimitRangeInput {
+    default: ResourceValuesInput!,
+    defaultRequest: ResourceValuesInput!
+    max: ResourceValuesInput!
+    type: String!
+}
+
 enum LimitType {
     Container
     Pod
@@ -30231,6 +30358,8 @@ type Mutation {
     createAPI(name: String!, namespace: String!, hostname: String!, serviceName: String!, servicePort: Int!, jwksUri: String!, issuer: String!, disableIstioAuthPolicyMTLS: Boolean, authenticationEnabled: Boolean): API! @HasAccess(attributes: {resource: "apis", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
     updateAPI(name: String!, namespace: String!, hostname: String!, serviceName: String!, servicePort: Int!, jwksUri: String!, issuer: String!, disableIstioAuthPolicyMTLS: Boolean, authenticationEnabled: Boolean): API! @HasAccess(attributes: {resource: "apis", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
     deleteAPI(name: String!, namespace: String!): API @HasAccess(attributes: {resource: "apis", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
+    
+    createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1"})
 }
 
 # Subscriptions

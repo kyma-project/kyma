@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"k8s.io/apimachinery/pkg/types"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
@@ -13,10 +14,16 @@ import (
 )
 
 const (
-	appName = "appName"
+	appName   = "appName"
+	namespace = "kyma-integration"
 )
 
 var (
+	namespacedName = types.NamespacedName{
+		Name:      appName,
+		Namespace: namespace,
+	}
+
 	expectedCaCrt = []byte("caCrtEncoded")
 	expectedCaKey = []byte("caKeyEncoded")
 )
@@ -32,10 +39,10 @@ func TestRepository_Get(t *testing.T) {
 		secretsManager := &mocks.Manager{}
 		secretsManager.On("Get", appName, metav1.GetOptions{}).Return(&v1.Secret{Data: secretMap}, nil)
 
-		repository := NewRepository(secretsManager)
+		repository := NewRepository(prepareManagerConstructor(secretsManager))
 
 		// when
-		encodedCrt, encodedKey, err := repository.Get(appName)
+		encodedCrt, encodedKey, err := repository.Get(namespacedName)
 
 		// then
 		require.NoError(t, err)
@@ -52,10 +59,10 @@ func TestRepository_Get(t *testing.T) {
 		secretsManager := &mocks.Manager{}
 		secretsManager.On("Get", appName, metav1.GetOptions{}).Return(nil, k8sNotFoundError)
 
-		repository := NewRepository(secretsManager)
+		repository := NewRepository(prepareManagerConstructor(secretsManager))
 
 		// when
-		encodedCrt, encodedKey, err := repository.Get(appName)
+		encodedCrt, encodedKey, err := repository.Get(namespacedName)
 
 		// then
 		require.Error(t, err)
@@ -69,10 +76,10 @@ func TestRepository_Get(t *testing.T) {
 		secretsManager := &mocks.Manager{}
 		secretsManager.On("Get", appName, metav1.GetOptions{}).Return(nil, &k8serrors.StatusError{})
 
-		repository := NewRepository(secretsManager)
+		repository := NewRepository(prepareManagerConstructor(secretsManager))
 
 		// when
-		encodedCrt, encodedKey, err := repository.Get(appName)
+		encodedCrt, encodedKey, err := repository.Get(namespacedName)
 
 		// then
 		require.Error(t, err)
@@ -80,4 +87,10 @@ func TestRepository_Get(t *testing.T) {
 		assert.Nil(t, encodedCrt)
 		assert.Nil(t, encodedKey)
 	})
+}
+
+func prepareManagerConstructor(manager Manager) ManagerConstructor {
+	return func(namespace string) Manager {
+		return manager
+	}
 }

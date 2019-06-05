@@ -653,7 +653,11 @@ spec:
 ---
 apiVersion: v1
 data:
-  default-channel-config: ""
+  default-channel-config: |
+    clusterdefault:
+      apiversion: eventing.knative.dev/v1alpha1
+      kind: ClusterChannelProvisioner
+      name: natss
 kind: ConfigMap
 metadata:
   name: default-channel-webhook

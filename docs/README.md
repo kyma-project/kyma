@@ -4,26 +4,27 @@
 
 The `docs` folder contains end-to-end documentation on Kyma and its components.
 
-Start with the overarching [Kyma](kyma/docs) documentation where you can find the general information on Kyma and the Getting Started guides. Then, read about the product in more detail:
+Start with the overarching [Kyma](./kyma) documentation where you can find the general information on Kyma and the Getting Started guides. Then, read about the product in more detail:
 
--   [API Gateway](./api-gateway/docs)
--   [Application Connector](./application-connector/docs/)
--   [Asset Store](./asset-store/docs/)
--   [Backup](./backup/docs/)
--   [Console](./console/docs/)
--   [Event Bus](./event-bus/docs/)
--   [Helm Broker](./helm-broker/docs/)
--   [Logging](./logging/docs/)
--   [Monitoring](./monitoring/docs/)
--   [Security](./security/docs/)
--   [Serverless](./serverless/docs/)
--   [Service Catalog](./service-catalog/docs/)
--   [Service Mesh](./service-mesh/docs/)
--   [Tracing](./tracing/docs/)
+-   [API Gateway](./api-gateway/)
+-   [Application Connector](./application-connector/)
+-   [Asset Store](./asset-store/)
+-   [Backup](./backup/)
+-   [Console](./console/)
+-   [Event Bus](./event-bus/)
+-   [Headless CMS](./headless-cms/)
+-   [Helm Broker](./helm-broker/)
+-   [Logging](./logging/)
+-   [Monitoring](./monitoring/)
+-   [Security](./security/)
+-   [Serverless](./serverless/)
+-   [Service Catalog](./service-catalog/)
+-   [Service Mesh](./service-mesh/)
+-   [Tracing](./tracing/)
 
 Read it directly in GitHub or inside the Kyma Console if you have access to the Kyma cluster.
 
-The navigation order of the documentation page is based on the [Manifest](manifest.yaml) file.
+The navigation order of the documentation page is based on the **cms.kyma-project.io/order** label specified in the [ClusterDocsTopic](../resources/core/charts/docs/charts/content-ui/templates) for a given Kyma component.
 
 ## Development
 

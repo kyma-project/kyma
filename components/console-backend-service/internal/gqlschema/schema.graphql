@@ -408,6 +408,13 @@ type LimitRangeItem {
     defaultRequest: ResourceType!
 }
 
+input LimitRangeInput {
+    default: ResourceValuesInput!,
+    defaultRequest: ResourceValuesInput!
+    max: ResourceValuesInput!
+    type: String!
+}
+
 enum LimitType {
     Container
     Pod
@@ -958,6 +965,8 @@ type Mutation {
     createAPI(name: String!, namespace: String!, hostname: String!, serviceName: String!, servicePort: Int!, jwksUri: String!, issuer: String!, disableIstioAuthPolicyMTLS: Boolean, authenticationEnabled: Boolean): API! @HasAccess(attributes: {resource: "apis", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
     updateAPI(name: String!, namespace: String!, hostname: String!, serviceName: String!, servicePort: Int!, jwksUri: String!, issuer: String!, disableIstioAuthPolicyMTLS: Boolean, authenticationEnabled: Boolean): API! @HasAccess(attributes: {resource: "apis", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
     deleteAPI(name: String!, namespace: String!): API @HasAccess(attributes: {resource: "apis", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
+    
+    createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1"})
 }
 
 # Subscriptions

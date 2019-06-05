@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
 
-	// . "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/asset-store"
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/asset-store"
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/cms"
 
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
@@ -59,20 +59,20 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	myNamespaceControllerTest, err := NewNamespaceControllerTestFromEnv()
 	fatalOnError(t, err, "while creating structure for NamespaceController test")
 
+	apiControllerTest, err := NewApiControllerTestFromEnv()
+	fatalOnError(t, err, "while creating structure for ApiController test")
+
+	myAssetStoreTest, err := NewAssetStoreTest(t)
+	fatalOnError(t, err, "while creating structure for AssetStore test")
+
+	myMicroFrontendTest, err := NewMicrofrontendTest()
+	fatalOnError(t, err, "while creating structure for MicroFrontend test")
+
 	// appBrokerTest, err := NewAppBrokerTest()
 	// fatalOnError(t, err, "while creating structure for AppBroker test")
 
 	// helmBrokerTest, err := NewHelmBrokerTest()
 	// fatalOnError(t, err, "while creating structure for HelmBroker test")
-
-	// apiControllerTest, err := NewApiControllerTestFromEnv()
-	// fatalOnError(t, err, "while creating structure for ApiController test")
-
-	// myMicroFrontendTest, err := NewMicrofrontendTest()
-	// fatalOnError(t, err, "while creating structure for MicroFrontend test")
-
-	// myAssetStoreTest, err := NewAssetStoreTest(t)
-	// fatalOnError(t, err, "while creating structure for AssetStore test")
 
 	myCmsTest, err := NewCmsTest(t)
 	fatalOnError(t, err, "while creating structure for Cms test")
@@ -86,11 +86,11 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		scAddonsTest,
 		myNamespaceControllerTest,
 		myCmsTest,
-		// myAssetStoreTest,
+		myAssetStoreTest,
+		apiControllerTest,
+		myMicroFrontendTest,
 		// appBrokerTest,
 		// helmBrokerTest,
-		// apiControllerTest,
-		// myMicroFrontendTest,
 	}
 	e2eTests := make([]e2eTest, len(backupTests))
 

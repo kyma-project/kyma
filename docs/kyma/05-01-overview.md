@@ -37,6 +37,8 @@ You can modify local settings, such as memory limits for a given resource, by ch
 
 [Read more](#configuration-helm-overrides-for-kyma-installation) about the types of overrides and the rules for creating them.
 
+> **CAUTION:** In documentation for each Kyma component, you can find configuration documents that list configurable parameters from the `values.yaml` files for a given component chart or sub-chart. Override values only for the parameters exposed in those configuration documents.
+
 ## Runtime configuration
 
 Once Kyma installation completes, you can still modify the installation artifacts. However, for these changes to take effect, you must trigger the update process:  

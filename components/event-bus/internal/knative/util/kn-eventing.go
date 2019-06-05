@@ -13,7 +13,6 @@ import (
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	evclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
 	eventingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
@@ -281,13 +280,6 @@ func makeChannel(provisioner string, name string, namespace string, labels *map[
 			Namespace: namespace,
 			Name:      name,
 			Labels:    *labels,
-		},
-		Spec: evapisv1alpha1.ChannelSpec{
-			Provisioner: &corev1.ObjectReference{
-				Name:       provisioner,
-				APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
-				Kind:       "ClusterChannelProvisioner",
-			},
 		},
 	}
 	return c

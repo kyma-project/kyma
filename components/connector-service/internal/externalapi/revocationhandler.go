@@ -2,7 +2,6 @@ package externalapi
 
 import (
 	"net/http"
-	"net/url"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
@@ -10,17 +9,15 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
 )
 
-const (
-	CertificateHeader = "Client-Certificate"
-)
-
 type revocationHandler struct {
 	revocationList revocation.RevocationListRepository
+	headerParser   certificates.HeaderParser
 }
 
-func NewRevocationHandler(revocationList revocation.RevocationListRepository) *revocationHandler {
+func NewRevocationHandler(revocationList revocation.RevocationListRepository, headerParser certificates.HeaderParser) *revocationHandler {
 	return &revocationHandler{
 		revocationList: revocationList,
+		headerParser:   headerParser,
 	}
 }
 
@@ -42,23 +39,12 @@ func (handler revocationHandler) Revoke(w http.ResponseWriter, r *http.Request) 
 }
 
 func (handler revocationHandler) getCertificateHash(r *http.Request) (string, apperrors.AppError) {
-	cert := r.Header.Get(CertificateHeader)
-
-	if cert == "" {
-		return "", apperrors.Internal("Cannot calculate certificate hash. Certificate not passed to the service.")
+	certInfo, appError := handler.headerParser.ParseCertificateHeader(*r)
+	if appError != nil {
+		return "", appError
 	}
 
-	pemCert, err := url.PathUnescape(cert)
-	if err != nil {
-		return "", apperrors.Internal("Failed to unescape characters from certificate.")
-	}
-
-	hash, err := certificates.FingerprintSHA256([]byte(pemCert))
-	if err != nil {
-		return "", apperrors.Internal("Failed to calculate certificate hash.")
-	}
-
-	return hash, nil
+	return certInfo.Hash, nil
 }
 
 func (handler revocationHandler) addToRevocationList(hash string) apperrors.AppError {

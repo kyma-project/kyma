@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	ingressNameFormat                          = "%s-application"
+	virtualSvcNameFormat                       = "%s"
 	applicationGatewayDeploymentFormat         = "%s-application-gateway"
 	applicationGatewayRoleFormat               = "%s-application-gateway"
 	applicationGatewayRoleBindingFormat        = "%s-application-gateway"
@@ -49,7 +49,7 @@ type K8sResourceChecker struct {
 
 func NewK8sChecker(client K8sResourcesClient, appName string) *K8sResourceChecker {
 	resources := []k8sResource{
-		newResource(fmt.Sprintf(ingressNameFormat, appName), "ingress", client.GetIngress),
+		newResource(fmt.Sprintf(virtualSvcNameFormat, appName), "virtualservice", client.GetVirtualService),
 		newResource(fmt.Sprintf(applicationGatewayDeploymentFormat, appName), "deployment", client.GetDeployment),
 		newResource(fmt.Sprintf(applicationGatewayRoleFormat, appName), "role", client.GetRole),
 		newResource(fmt.Sprintf(applicationGatewayRoleBindingFormat, appName), "rolebinding", client.GetRoleBinding),

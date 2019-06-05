@@ -6,11 +6,16 @@ type: Architecture
 ![Architecture Diagram](./assets/001-application-connector.svg)
 
 
-## Nginx Ingress Controller
+## Istio Ingress Gateway
 
-The Nginx Ingress Controller exposes the Application Connector by assigning a public IP address and a DNS name to it.
+The Istio Ingress Gateway exposes the Application Connector and other Kyma components.
 The DNS name of the Ingress is cluster-dependant and follows the `gateway.{cluster-dns}` format, for example `gateway.servicemanager.cluster.kyma.cx`.
-You can access every exposed Application (App) through its gateway by using the assigned path. For example, to reach the gateway for the `user-custom` App, use this URL: `gateway.servicemanager.cluster.kyma.cx/user-custom`. The Nginx Ingress Controller secures the endpoint with certificate validation. Each call must include a valid client certificate which is App-specific.
+Istio Ingress Gateway secures the endpoints with certificate validation. Each call must include a valid client certificate.
+You can access every exposed Application (App) using the assigned path. For example, to reach the gateway for the `user-custom` App, use `gateway.servicemanager.cluster.kyma.cx/user-custom`. 
+
+## Application Connectivity Validator
+
+The Application Connectivity Validator verifies the subject of the client certificate. It is deployed per Application and it proxies requests to the Application Registry and the Events Service.
 
 ## Connector Service
 

@@ -36,8 +36,8 @@ nodeSelector: {}
 
 ## Parameters for the ' default' Config resource
 ## See https://github.com/helm/charts/tree/master/stable/velero#configuration
-configuration:
-  provider: gcp
+# configuration:
+#   provider:
 
 global:
   isLocalEnv: false
@@ -48,14 +48,14 @@ global:
   #    region:
   #    apiTimeout:
 
-  backupStorageLocation:
-    name:
-    bucket:
-    provider: gcp
+  backupStorageLocation: {}
+    # name:
+    # bucket:
+    # provider:
     # prefix:
-    config:
-      resourceGroup:  # Only for Azure
-      storageAccount: # Only for Azure
+    # config:
+    #   resourceGroup:  # Only for Azure
+    #   storageAccount: # Only for Azure
     #  region:
     #  s3ForcePathStyle:
     #  s3Url:
