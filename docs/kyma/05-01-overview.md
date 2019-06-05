@@ -47,8 +47,8 @@ Before you start the Kyma installation process, you can customize the default se
 
 ### Components
 
-One of the released Kyma artifacts is the Kyma-Installer, a Docker image that combines the Installer executable with charts for all components available in the release.
-The Kyma-Installer can install only the components contained in its image.
+One of the released Kyma artifacts is the Kyma Installer, a Docker image that combines the Installer executable with charts of all components available in the release.
+The Kyma Installer can install only the components contained in its image.
 The Installation CR specifies which components of the available components are installed.
 The component list in the Installation CR has the components that are not an integral part of the default Kyma Lite package commented out with a hash character (#). The Installer doesn't install these components.
 You can customize the list of components by:
@@ -65,7 +65,7 @@ Other overrides are component-specific.
 To learn more about the configuration options available for a specific component, see the **Configuration** section of the component's documentation.
 Once you know the name and possible set of values for a configuration option, define an override for it by creating a ConfigMap or a Secret. You can also extend an existing one.
 [Read more](#configuration-helm-overrides-for-kyma-installation) about the types of overrides and the rules for creating them.
->**CAUTION:** An override must exist in a cluster before the installation is started, otherwise the Installer is not be able to apply it correctly.
+>**CAUTION:** An override must exist in a cluster before the installation starts. If you fail to deliver the override before the installation, the configuration can't be applied. 
 
 > **CAUTION:** In documentation for each Kyma component, you can find configuration documents that list configurable parameters from the `values.yaml` files for a given component chart or sub-chart. Override values only for the parameters exposed in those configuration documents.
 
