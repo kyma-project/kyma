@@ -115,11 +115,12 @@ func (svc *deprovisionService) doAsync(ctx context.Context, iID internal.Instanc
 func (svc *deprovisionService) do(ctx context.Context, iID internal.InstanceID, opID internal.OperationID, releaseName internal.ReleaseName) {
 
 	fDo := func() error {
-		if err := svc.helmDeleter.Delete(releaseName); err != nil && !isErrReleaseNotFound(err, string(releaseName)) {
+		err := svc.helmDeleter.Delete(releaseName)
+		if err != nil && !isErrReleaseNotFound(err, releaseName) {
 			return errors.Wrapf(err, "while deleting helm release %q", releaseName)
 		}
 
-		err := svc.instanceBindDataRemover.Remove(iID)
+		err = svc.instanceBindDataRemover.Remove(iID)
 		switch {
 		// we are not checking if instance was bindable and because of that NotFound error is also in happy path
 		// BEWARE: such solution can produce false positive errors e.g.
@@ -157,6 +158,6 @@ func (svc *deprovisionService) do(ctx context.Context, iID internal.InstanceID, 
 
 // isErrReleaseNotFound implements the error checking for Helm Releases, copied from
 // https://github.com/helm/helm/blob/HEAD@%7B2019-05-30T10:19:27Z%7D/cmd/helm/upgrade.go#L222
-func isErrReleaseNotFound(err error, releaseName string) bool {
+func isErrReleaseNotFound(err error, releaseName internal.ReleaseName) bool {
 	return strings.Contains(err.Error(), helmErrors.ErrReleaseNotFound(string(releaseName)).Error())
 }
