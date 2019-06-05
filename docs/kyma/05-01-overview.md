@@ -9,7 +9,7 @@ You can configure the Kyma installation by:
   - Customizing the list of the components to install.
   - Providing overrides that change the configuration values used by one or more components.
 
-The list of components to install is defined in the **Installation** Custom Resource.
+The list of components to install is defined in the [Installation](#custom-resource-installation) custom resource (CR).
 Overrides are defined as ConfigMap or Secret objects defined by the user before the installation starts.
 The Installer is the Kyma component that is responsible for reading and applying the configuration.
 
