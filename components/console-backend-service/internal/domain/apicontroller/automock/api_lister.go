@@ -11,13 +11,13 @@ type apiLister struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled
-func (_m *apiLister) Create(name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
-	ret := _m.Called(name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
+// Create provides a mock function with given fields: name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled
+func (_m *apiLister) Create(name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
+	ret := _m.Called(name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
 
 	var r0 *v1alpha2.Api
-	if rf, ok := ret.Get(0).(func(string, string, string, string, int, string, string, string, *bool, *bool) *v1alpha2.Api); ok {
-		r0 = rf(name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
+	if rf, ok := ret.Get(0).(func(string, string, string, string, int, string, string, *bool, *bool) *v1alpha2.Api); ok {
+		r0 = rf(name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha2.Api)
@@ -25,8 +25,8 @@ func (_m *apiLister) Create(name string, namespace string, hostname string, serv
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, string, string, int, string, string, string, *bool, *bool) error); ok {
-		r1 = rf(name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
+	if rf, ok := ret.Get(1).(func(string, string, string, string, int, string, string, *bool, *bool) error); ok {
+		r1 = rf(name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -104,13 +104,13 @@ func (_m *apiLister) Unsubscribe(listener resource.Listener) {
 	_m.Called(listener)
 }
 
-// Update provides a mock function with given fields: name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled
-func (_m *apiLister) Update(name string, namespace string, hostname string, serviceName string, servicePort int, authenticationType string, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
-	ret := _m.Called(name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
+// Update provides a mock function with given fields: name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled
+func (_m *apiLister) Update(name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (*v1alpha2.Api, error) {
+	ret := _m.Called(name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
 
 	var r0 *v1alpha2.Api
-	if rf, ok := ret.Get(0).(func(string, string, string, string, int, string, string, string, *bool, *bool) *v1alpha2.Api); ok {
-		r0 = rf(name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
+	if rf, ok := ret.Get(0).(func(string, string, string, string, int, string, string, *bool, *bool) *v1alpha2.Api); ok {
+		r0 = rf(name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha2.Api)
@@ -118,8 +118,8 @@ func (_m *apiLister) Update(name string, namespace string, hostname string, serv
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, string, string, int, string, string, string, *bool, *bool) error); ok {
-		r1 = rf(name, namespace, hostname, serviceName, servicePort, authenticationType, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
+	if rf, ok := ret.Get(1).(func(string, string, string, string, int, string, string, *bool, *bool) error); ok {
+		r1 = rf(name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
 	} else {
 		r1 = ret.Error(1)
 	}
