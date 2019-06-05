@@ -65,7 +65,7 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 		log.Printf("cannot find the knative channel '%v' in namespace '%v'", *channelName, *namespace)
 		log.Println("incrementing ignored messages counter")
 		metrics.TotalPublishedMessages.With(prometheus.Labels{
-			metrics.Namespace:            *namespace,
+			metrics.Namespace:                *namespace,
 			metrics.Status:           IGNORED,
 			metrics.SourceID:         publishRequest.SourceID,
 			metrics.EventType:        publishRequest.EventType,
