@@ -108,16 +108,9 @@ Valid certificate signed by the Kyma Certificate Authority.
   ```
 
 2. Include the request body you prepared in the following call to register a service:
-
-  - For a cluster deployment:
-    ```
-    curl -X POST -d '{YOUR_REQUEST_BODY}' https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-    ```
-
-  - For a local deployment:
-    ```
-    curl -X POST -d '{YOUR_REQUEST_BODY}' https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-    ```
+   ```
+   curl -X POST -d '{YOUR_REQUEST_BODY}' https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+   ```
 
 A successful response returns the ID of the registered service:
 ```
@@ -125,17 +118,9 @@ A successful response returns the ID of the registered service:
 ```
 
 ### Check the details of a registered service
-
-  - For a cluster deployment:
-    ```
-    curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-    ```
-
-  - For a local deployment:
-    ```
-    curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-    ```
-
+   ```
+   curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+   ```
 
 ## Register API with a specification URL
 
