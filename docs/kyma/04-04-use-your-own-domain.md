@@ -147,7 +147,7 @@ Follow these steps:
     ```
     gcloud container --project "$GCP_PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "$GCP_ZONE" \
-    --cluster-version "1.12.5" --machine-type "n1-standard-4" \
+    --cluster-version "1.12" --machine-type "n1-standard-4" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing
     ```
 
