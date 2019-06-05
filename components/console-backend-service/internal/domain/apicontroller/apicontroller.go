@@ -2,8 +2,9 @@ package apicontroller
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/disabled"
 	"time"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/disabled"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"

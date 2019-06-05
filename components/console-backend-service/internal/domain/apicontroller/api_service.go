@@ -2,10 +2,11 @@ package apicontroller
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	"k8s.io/client-go/tools/cache"
@@ -23,7 +24,7 @@ func newApiService(informer cache.SharedIndexInformer, client versioned.Interfac
 
 	return &apiService{
 		informer: informer,
-		client: client,
+		client:   client,
 		notifier: notifier,
 	}
 }
@@ -88,15 +89,15 @@ func (svc *apiService) Create(name string, namespace string, hostname string, se
 			Kind:       "API",
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name:   name,
+			Name:      name,
 			Namespace: namespace,
 		},
 		Spec: v1alpha2.ApiSpec{
-			Service:                    v1alpha2.Service{
+			Service: v1alpha2.Service{
 				Name: serviceName,
 				Port: servicePort,
 			},
-			Hostname:                   hostname,
+			Hostname: hostname,
 			Authentication: []v1alpha2.AuthenticationRule{
 				{
 					Jwt: v1alpha2.JwtAuthentication{
@@ -115,7 +116,7 @@ func (svc *apiService) Create(name string, namespace string, hostname string, se
 }
 
 func (svc *apiService) Subscribe(listener resource.Listener) {
- 	svc.notifier.AddListener(listener)
+	svc.notifier.AddListener(listener)
 }
 
 func (svc *apiService) Unsubscribe(listener resource.Listener) {
@@ -139,16 +140,16 @@ func (svc *apiService) Update(name string, namespace string, hostname string, se
 			Kind:       "API",
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name:   name,
-			Namespace: namespace,
+			Name:            name,
+			Namespace:       namespace,
 			ResourceVersion: oldApi.ObjectMeta.ResourceVersion,
 		},
 		Spec: v1alpha2.ApiSpec{
-			Service:                    v1alpha2.Service{
+			Service: v1alpha2.Service{
 				Name: serviceName,
 				Port: servicePort,
 			},
-			Hostname:                   hostname,
+			Hostname: hostname,
 			Authentication: []v1alpha2.AuthenticationRule{
 				{
 					Jwt: v1alpha2.JwtAuthentication{

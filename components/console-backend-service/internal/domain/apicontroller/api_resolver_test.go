@@ -128,7 +128,6 @@ func TestApiResolver_APIQuery(t *testing.T) {
 	})
 }
 
-
 func TestApiResolver_CreateAPI(t *testing.T) {
 	namespace := "test-1"
 	name := "test-api"
@@ -288,15 +287,15 @@ func fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer string, 
 			Kind:       "API",
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name:   name,
+			Name:      name,
 			Namespace: namespace,
 		},
 		Spec: v1alpha2.ApiSpec{
-			Service:                    v1alpha2.Service{
+			Service: v1alpha2.Service{
 				Name: serviceName,
 				Port: servicePort,
 			},
-			Hostname:                   hostname,
+			Hostname: hostname,
 			Authentication: []v1alpha2.AuthenticationRule{
 				{
 					Jwt: v1alpha2.JwtAuthentication{
@@ -311,9 +310,9 @@ func fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer string, 
 	return &api
 }
 
-func testApiToGQL (name, namespace, hostname, serviceName, jwksUri, issuer string, servicePort int) gqlschema.API {
+func testApiToGQL(name, namespace, hostname, serviceName, jwksUri, issuer string, servicePort int) gqlschema.API {
 	gql := gqlschema.API{
-		Name: name,
+		Name:     name,
 		Hostname: hostname,
 		Service: gqlschema.ApiService{
 			Name: serviceName,
@@ -322,8 +321,8 @@ func testApiToGQL (name, namespace, hostname, serviceName, jwksUri, issuer strin
 		AuthenticationPolicies: []gqlschema.AuthenticationPolicy{
 			{
 				JwksURI: jwksUri,
-				Issuer: issuer,
-				Type: gqlschema.AuthenticationPolicyType("JWT"),
+				Issuer:  issuer,
+				Type:    gqlschema.AuthenticationPolicyType("JWT"),
 			},
 		},
 	}

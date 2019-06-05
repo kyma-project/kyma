@@ -2,6 +2,7 @@ package apicontroller
 
 import (
 	"context"
+
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/listener"
@@ -60,7 +61,7 @@ func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace str
 	}
 
 	return gqlschema.API{
-		Name: api.Name,
+		Name:     api.Name,
 		Hostname: api.Spec.Hostname,
 		Service: gqlschema.ApiService{
 			Name: api.Spec.Service.Name,
@@ -69,8 +70,8 @@ func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace str
 		AuthenticationPolicies: []gqlschema.AuthenticationPolicy{
 			{
 				JwksURI: jwksUri,
-				Issuer: issuer,
-				Type: gqlschema.AuthenticationPolicyType("JWT"),
+				Issuer:  issuer,
+				Type:    gqlschema.AuthenticationPolicyType("JWT"),
 			},
 		},
 	}, nil
@@ -102,7 +103,7 @@ func (ar *apiResolver) UpdateAPI(ctx context.Context, name string, namespace str
 	}
 
 	return gqlschema.API{
-		Name: api.Name,
+		Name:     api.Name,
 		Hostname: api.Spec.Hostname,
 		Service: gqlschema.ApiService{
 			Name: api.Spec.Service.Name,
@@ -111,8 +112,8 @@ func (ar *apiResolver) UpdateAPI(ctx context.Context, name string, namespace str
 		AuthenticationPolicies: []gqlschema.AuthenticationPolicy{
 			{
 				JwksURI: jwksUri,
-				Issuer: issuer,
-				Type: gqlschema.AuthenticationPolicyType("JWT"),
+				Issuer:  issuer,
+				Type:    gqlschema.AuthenticationPolicyType("JWT"),
 			},
 		},
 	}, nil
