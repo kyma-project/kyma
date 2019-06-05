@@ -3,8 +3,6 @@ title: Overview
 type: Configuration
 ---
 
-## Introduction
-
 You can configure the Kyma installation by:
   - Customizing the list of the components to install.
   - Providing overrides that change the configuration values used by one or more components.
@@ -62,12 +60,10 @@ For more details on custom component installation, see [this](#configuration-cus
 
 The common overrides that affect the entire installation, are described in the installation guides.
 Other overrides are component-specific.
-To learn more about the configuration options available for a specific component, see the **Configuration** section of the component's documentation.
-Once you know the name and possible set of values for a configuration option, define an override for it by creating a ConfigMap or a Secret. You can also extend an existing one.
+To learn more about the configuration options available for a specific component, see the **Configuration** section of the component's documentation. Override only the parameters exposed in the configuration document.
 [Read more](#configuration-helm-overrides-for-kyma-installation) about the types of overrides and the rules for creating them.
->**CAUTION:** An override must exist in a cluster before the installation starts. If you fail to deliver the override before the installation, the configuration can't be applied. 
 
-> **CAUTION:** In documentation for each Kyma component, you can find configuration documents that list configurable parameters from the `values.yaml` files for a given component chart or sub-chart. Override values only for the parameters exposed in those configuration documents.
+>**CAUTION:** An override must exist in a cluster before the installation starts. If you fail to deliver the override before the installation, the configuration can't be applied.
 
 ## Runtime configuration
 
