@@ -3,11 +3,11 @@ title: Bundles validation
 type: Details
 ---
 
-Checker is a tool that validates bundles in the [`bundles`](https://github.com/kyma-project/bundles) repository on every pull request. It checks whether all [required](#details-create-a-bundle) fields are set in your bundles.
+The Checker is a tool that validates bundles in the [`bundles`](https://github.com/kyma-project/bundles) repository on every pull request. It checks whether all [required](#details-create-a-bundle) fields are set in your bundles.
 
-Checker also triggers the [helm lint](https://helm.sh/docs/helm/#helm-lint) command using `helm` in 2.8.2 version, which checks your bundles' charts.
+The Checker also triggers the [helm lint](https://helm.sh/docs/helm/#helm-lint) command using helm CLI in 2.8.2 version, which checks your bundles' charts.
 
-### Run Checker locally
+### Run the Checker locally
 
 Run the Checker locally to test if your bundles are valid:
 ```
