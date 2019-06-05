@@ -20,8 +20,6 @@ const (
 	oDataSpecFormat      = "%s/$metadata"
 	oDataSpecType        = "odata"
 	targetSwaggerVersion = "2.0"
-
-	specRequestTimeout = time.Duration(5 * time.Second)
 )
 
 type Service interface {
@@ -35,11 +33,11 @@ type specService struct {
 	downloadClient    download.Client
 }
 
-func NewSpecService(assetStoreService assetstore.Service) Service {
+func NewSpecService(assetStoreService assetstore.Service, specRequestTimeout int) Service {
 	return &specService{
 		assetStoreService: assetStoreService,
 		downloadClient: download.NewClient(&http.Client{
-			Timeout: specRequestTimeout,
+			Timeout: time.Duration(specRequestTimeout) * time.Second,
 		}),
 	}
 }

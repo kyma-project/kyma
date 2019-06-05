@@ -15,7 +15,6 @@ import (
 const (
 	docTopicDisplayNameFormat = "Documentation topic for service class id=%s"
 	docTopicDescriptionFormat = "Documentation topic for service class id=%s"
-	specRequestTimeout        = time.Duration(5 * time.Second)
 )
 
 const (
@@ -40,9 +39,9 @@ type service struct {
 	downloadClient      download.Client
 }
 
-func NewService(repository DocsTopicRepository, uploadClient upload.Client, insecureAssetDownload bool) Service {
+func NewService(repository DocsTopicRepository, uploadClient upload.Client, insecureAssetDownload bool, assetstoreRequestTimeout int) Service {
 	downloadClient := download.NewClient(&http.Client{
-		Timeout:   specRequestTimeout,
+		Timeout:   time.Duration(assetstoreRequestTimeout) * time.Second,
 		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureAssetDownload}},
 	})
 
