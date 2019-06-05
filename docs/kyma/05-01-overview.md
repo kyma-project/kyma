@@ -6,7 +6,7 @@ type: Configuration
 ## Introduction
 
 You can configure the Kyma installation by:
-  - Customize the list of the components to install
+  - Customizing the list of the components to install.
   - Provide overrides that change configuration values used by one or more components
 
 The list of components to install is defined in the **Installation** Custom Resource.
