@@ -54,15 +54,15 @@ The component list in the Installation CR has the components that are not an int
 You can customize the list of components by:
 - Uncommenting a component entry to install the component.
 - Commenting out a component entry using the hash character (#) to skip the installation of that component.
-- Adding new components to the list along with their chart definition. In that case you must create your own [Kyma-Installer image](#installation-use-your-own-kyma-installer-image) as you are adding new component to Kyma.
+- Adding new components along with their chart definitions to the list. If you do that, you must build your own [Kyma Installer image](#installation-use-your-own-kyma-installer-image) as you are adding a new component to Kyma.
 
 For more details on custom component installation, see [this](#configuration-custom-component-installation) document.
 
 ### Overrides
 
-Common overrides that affect entire installation, for example `global.domainName`, are already described in the [installation procedure](#installation-overview).
+The common overrides that affect the entire installation, are described in the installation guides.
 Other overrides are component-specific.
-To learn about configuration options for a given component, refer to **Configuration** section of the component's documentation.
+To learn more about the configuration options available for a specific component, see the **Configuration** section of the component's documentation.
 Once you know the name and possible set of values for a configuration option, define an override for it by creating a ConfigMap or a Secret. You can also extend an existing one.
 [Read more](#configuration-helm-overrides-for-kyma-installation) about the types of overrides and the rules for creating them.
 >**CAUTION:** An override must exist in a cluster before the installation is started, otherwise the Installer is not be able to apply it correctly.
