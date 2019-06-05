@@ -334,7 +334,8 @@ func (r *mutationResolver) UpdateAPI(ctx context.Context, name string, namespace
 
 func (r *mutationResolver) DeleteAPI(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
 	return r.ac.DeleteAPI(ctx, name, namespace)
-	
+}
+
 func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace string, name string, limitRange gqlschema.LimitRangeInput) (*gqlschema.LimitRange, error) {
 	return r.k8s.CreateLimitRange(ctx, namespace, name, limitRange)
 }
