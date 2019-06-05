@@ -18,6 +18,8 @@ used are stored in the `resources/istio` directory. The installation is customiz
   - Deletes all resources related to the `prometheus`, `tracing`, `grafana`, and `servicegraph`charts.
   - Enables sidecar injection in all Namespaces, except those labeled with `istio-injection: disabled`.
 
+Additionally, the job checks whether mTLS is enabled in the Istio deployment it customizes.
+
 To learn more about the custom Istio patch applied in Kyma, see the `components/istio-kyma-patch/` directory.
 
 ## Use an existing Istio installation with Kyma
