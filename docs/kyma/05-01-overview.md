@@ -65,16 +65,6 @@ To learn more about the configuration options available for a specific component
 
 >**CAUTION:** An override must exist in a cluster before the installation starts. If you fail to deliver the override before the installation, the configuration can't be applied.
 
-## Runtime configuration
-
-Changing static configuration of the Kyma after installation is generally not supported.
-Some components may support custom runtime configuration changes though.
-For an example of such a runtime configuration, see [Helm Broker configuration](/components/helm-broker/#configuration-configuration) in which you add links to the bundle repositories to a ConfigMap and label it with the `helm-broker-repo=true` label for the Helm Broker to expose additional Service Classes in the Service Catalog.
-
-Another solution for changing components configuration after installation is to alter its overrides and update the component using Kyma's [Update procedure](#installation-update-kyma).
-Support for this is limited only to component-specific configuration options and depends on the component. Refer to the component's documentation for details.
-
-
 ## Advanced configuration
 
 All `values.yaml` files in charts and sub-charts contain pre-defined attributes that are:
