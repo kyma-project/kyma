@@ -77,10 +77,13 @@ func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace str
 	}, nil
 }
 
-func (ar *apiResolver) ApiEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ApiEvent, error) {
+func (ar *apiResolver) ApiEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error) {
 	channel := make(chan gqlschema.ApiEvent, 1)
 	filter := func(api *v1alpha2.Api) bool {
-		return api != nil && api.Namespace == namespace
+		if serviceName == nil {
+			return api != nil && api.Namespace == namespace
+		}
+		return api != nil && api.Namespace == namespace && api.Spec.Service.Name == *serviceName
 	}
 
 	apiListener := listener.NewApi(channel, filter, ar.apiConverter)

@@ -588,8 +588,8 @@ func (r *subscriptionResolver) AddonsConfigurationEvent(ctx context.Context) (<-
 	return r.sca.Resolver.AddonsConfigurationEventSubscription(ctx)
 }
 
-func (r *subscriptionResolver) APIEvent(ctx context.Context, namespace string) (<-chan gqlschema.ApiEvent, error) {
-	return r.ac.ApiEventSubscription(ctx, namespace)
+func (r *subscriptionResolver) APIEvent(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error) {
+	return r.ac.ApiEventSubscription(ctx, namespace, serviceName)
 }
 
 // Service Instance

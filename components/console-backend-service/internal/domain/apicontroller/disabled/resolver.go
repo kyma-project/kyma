@@ -33,8 +33,8 @@ func (_m *Resolver) APIsQuery(ctx context.Context, namespace string, serviceName
 	return r0, r1
 }
 
-// ApiEventSubscription provides a failing mock function with given fields: ctx, namespace
-func (_m *Resolver) ApiEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ApiEvent, error) {
+// ApiEventSubscription provides a failing mock function with given fields: ctx, namespace, serviceName
+func (_m *Resolver) ApiEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error) {
 	var r0 <-chan gqlschema.ApiEvent
 	var r1 error
 	r1 = _m.err

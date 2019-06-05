@@ -788,7 +788,7 @@ type ComplexityRoot struct {
 		ServiceEvent              func(childComplexity int, namespace string) int
 		ConfigMapEvent            func(childComplexity int, namespace string) int
 		AddonsConfigurationEvent  func(childComplexity int) int
-		ApiEvent                  func(childComplexity int, namespace string) int
+		ApiEvent                  func(childComplexity int, namespace string, serviceName *string) int
 	}
 
 	UsageKind struct {
@@ -964,7 +964,7 @@ type SubscriptionResolver interface {
 	ServiceEvent(ctx context.Context, namespace string) (<-chan ServiceEvent, error)
 	ConfigMapEvent(ctx context.Context, namespace string) (<-chan ConfigMapEvent, error)
 	AddonsConfigurationEvent(ctx context.Context) (<-chan AddonsConfigurationEvent, error)
-	APIEvent(ctx context.Context, namespace string) (<-chan ApiEvent, error)
+	APIEvent(ctx context.Context, namespace string, serviceName *string) (<-chan ApiEvent, error)
 }
 
 func field_Asset_files_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -3745,6 +3745,20 @@ func field_Subscription_apiEvent_args(rawArgs map[string]interface{}) (map[strin
 		}
 	}
 	args["namespace"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["serviceName"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["serviceName"] = arg1
 	return args, nil
 
 }
@@ -7453,7 +7467,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Subscription.ApiEvent(childComplexity, args["namespace"].(string)), true
+		return e.complexity.Subscription.ApiEvent(childComplexity, args["namespace"].(string), args["serviceName"].(*string)), true
 
 	case "UsageKind.name":
 		if e.complexity.UsageKind.Name == nil {
@@ -27069,7 +27083,7 @@ func (ec *executionContext) _Subscription_apiEvent(ctx context.Context, field gr
 	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
 	//          and Tracer stack
 	rctx := ctx
-	results, err := ec.resolvers.Subscription().APIEvent(rctx, args["namespace"].(string))
+	results, err := ec.resolvers.Subscription().APIEvent(rctx, args["namespace"].(string), args["serviceName"].(*string))
 	if err != nil {
 		ec.Error(ctx, err)
 		return nil
@@ -30421,7 +30435,7 @@ type Subscription {
     configMapEvent(namespace: String!): ConfigMapEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     addonsConfigurationEvent: AddonsConfigurationEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1"})
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
-    apiEvent(namespace: String!): ApiEvent! @HasAccess(attributes: {resource: "apis", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
+    apiEvent(namespace: String!, serviceName: String): ApiEvent! @HasAccess(attributes: {resource: "apis", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
 
 }
 
