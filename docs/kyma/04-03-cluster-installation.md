@@ -174,9 +174,9 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 
 After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
 In case of an error, you can fetch the logs from the Installer by running:
-    ```
-    kubectl -n kyma-installer logs -l 'name=kyma-installer'
-    ```
+```
+kubectl -n kyma-installer logs -l 'name=kyma-installer'
+```
 
 ## Post-installation steps
 
