@@ -25,7 +25,7 @@ var (
 
 type Message struct {
 	Headers map[string][]string `json:"headers,omitempty"`
-	Payload api.AnyValue       `json:"payload,omitempty"`
+	Payload api.AnyValue      `json:"payload,omitempty"`
 }
 
 // WithRequestSizeLimiting creates a new request size limiting HandlerFunc
