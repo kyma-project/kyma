@@ -25,7 +25,7 @@ var (
 
 type Message struct {
 	Headers map[string][]string `json:"headers,omitempty"`
-	Payload api.AnyValue        `json:"payload,omitempty"`
+	Payload api.AnyValue       `json:"payload,omitempty"`
 }
 
 // WithRequestSizeLimiting creates a new request size limiting HandlerFunc
@@ -75,7 +75,7 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 	}
 }
 
-func filterCEHeaders(req *http.Request) map[string][]string {
+func filterCEHeaders(req  *http.Request) map[string][]string {
 	//forward `ce-` headers only
 	headers := make(map[string][]string)
 	for k := range req.Header {
