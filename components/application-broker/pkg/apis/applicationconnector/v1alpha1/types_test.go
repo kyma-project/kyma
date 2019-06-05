@@ -10,7 +10,8 @@ import (
 func TestApplicationMappingEmptySpec(t *testing.T) {
 	// given
 	am := v1alpha1.ApplicationMapping{
-		Spec: v1alpha1.ApplicationMappingSpec{},
+		Spec: v1alpha1.ApplicationMappingSpec{
+		},
 	}
 
 	// when/then
