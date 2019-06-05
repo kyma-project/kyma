@@ -58,7 +58,6 @@ files:
       white-list-external: ["https://minio.{DOMAIN}/minio"]
   - path: "./kyma/docs/event-bus/03-04-service-event-trigger-guide.md"
     config:
-      white-list-external: ["https://commerce.{CLUSTER_DOMAIN"]
-  - path: "./kyma/docs/event-bus/03-04-service-event-trigger-guide.md"
-    config:
-      white-list-external: ["http://{service-name}.{namespace-in-which-service-is-deployed}:{service-port}/{uri-path-to-handle-events"]
+      white-list-external:
+      - "https://commerce.{CLUSTER_DOMAIN"
+      - "http://{service-name"
