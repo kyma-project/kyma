@@ -7,24 +7,6 @@ metadata:
     app: istio-kyma-patch
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
-  istio-sidecar-injector.mutatingwebhookconfiguration.patch.json: |
-    [
-      {
-        "op": "replace",
-        "path": "/webhooks/0/namespaceSelector",
-        "value": {
-          "matchExpressions": [
-            {
-              "key": "istio-injection",
-              "operator": "NotIn",
-              "values": [
-                "disabled"
-              ]
-            }
-          ]
-        }
-      }
-    ]
 
   injection-in-namespaces: |
     istio-system disabled

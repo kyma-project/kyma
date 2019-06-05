@@ -11,8 +11,14 @@
 # Gateways Configuration, refer to the charts/gateways/values.yaml
 # for detailed configuration
 #
+kyma:
+  enabled: true
+
 gateways:
   enabled: true
+  istio-ingressgateway:
+    sds:
+      enabled: true
 
 #
 # sidecar-injector webhook configuration, refer to the
