@@ -4,6 +4,8 @@ import (
 	"errors"
 	"testing"
 
+	"k8s.io/apimachinery/pkg/types"
+
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/secrets/mocks"
@@ -16,9 +18,15 @@ import (
 const (
 	dataKey    = "dataKey"
 	secretName = "secret-name"
+	namespace  = "kyma-integration"
 )
 
 var (
+	namespacedName = types.NamespacedName{
+		Name:      secretName,
+		Namespace: namespace,
+	}
+
 	secretData = map[string][]byte{
 		"testKey2": []byte("testValue2"),
 		"testKey1": []byte("testValue1"),
@@ -28,15 +36,15 @@ var (
 func TestRepository_Get(t *testing.T) {
 	t.Run("should get given secret", func(t *testing.T) {
 		// given
-		secret := makeSecret(secretName, map[string][]byte{dataKey: []byte("data")})
+		secret := makeSecret(namespacedName, map[string][]byte{dataKey: []byte("data")})
 
 		secretsManagerMock := &mocks.Manager{}
 		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(secret, nil)
 
-		repository := NewRepository(secretsManagerMock)
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
 
 		// when
-		secrets, err := repository.Get(secretName)
+		secrets, err := repository.Get(namespacedName)
 
 		// then
 		assert.NoError(t, err)
@@ -52,10 +60,10 @@ func TestRepository_Get(t *testing.T) {
 			nil,
 			errors.New("some error"))
 
-		repository := NewRepository(secretsManagerMock)
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
 
 		// when
-		secretData, err := repository.Get(secretName)
+		secretData, err := repository.Get(namespacedName)
 
 		// then
 		assert.Error(t, err)
@@ -70,15 +78,15 @@ func TestRepository_Override(t *testing.T) {
 
 	t.Run("should create secret", func(t *testing.T) {
 		// given
-		secret := makeSecret(secretName, secretData)
+		secret := makeSecret(namespacedName, secretData)
 
 		secretsManagerMock := &mocks.Manager{}
 		secretsManagerMock.On("Create", secret).Return(secret, nil)
 
-		repository := NewRepository(secretsManagerMock)
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
 
 		// when
-		err := repository.UpsertWithReplace(secretName, secretData)
+		err := repository.UpsertWithReplace(namespacedName, secretData)
 
 		// then
 		assert.NoError(t, err)
@@ -87,15 +95,15 @@ func TestRepository_Override(t *testing.T) {
 
 	t.Run("should fail if unable to create secret", func(t *testing.T) {
 		// given
-		secret := makeSecret(secretName, secretData)
+		secret := makeSecret(namespacedName, secretData)
 
 		secretsManagerMock := &mocks.Manager{}
 		secretsManagerMock.On("Create", secret).Return(nil, errors.New("some error"))
 
-		repository := NewRepository(secretsManagerMock)
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
 
 		// when
-		err := repository.UpsertWithReplace(secretName, secretData)
+		err := repository.UpsertWithReplace(namespacedName, secretData)
 
 		// then
 		require.Error(t, err)
@@ -104,17 +112,17 @@ func TestRepository_Override(t *testing.T) {
 
 	t.Run("should override secret if already exist", func(t *testing.T) {
 		// given
-		secret := makeSecret(secretName, secretData)
+		secret := makeSecret(namespacedName, secretData)
 
 		secretsManagerMock := &mocks.Manager{}
 		secretsManagerMock.On("Create", secret).Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, "error")).Once()
 		secretsManagerMock.On("Create", secret).Return(nil, nil).Once()
 		secretsManagerMock.On("Delete", secretName, &metav1.DeleteOptions{}).Return(nil)
 
-		repository := NewRepository(secretsManagerMock)
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
 
 		// when
-		err := repository.UpsertWithReplace(secretName, secretData)
+		err := repository.UpsertWithReplace(namespacedName, secretData)
 
 		// then
 		require.NoError(t, err)
@@ -123,16 +131,16 @@ func TestRepository_Override(t *testing.T) {
 
 	t.Run("should return error if failed to delete secret", func(t *testing.T) {
 		// given
-		secret := makeSecret(secretName, secretData)
+		secret := makeSecret(namespacedName, secretData)
 
 		secretsManagerMock := &mocks.Manager{}
 		secretsManagerMock.On("Create", secret).Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, "error"))
 		secretsManagerMock.On("Delete", secretName, &metav1.DeleteOptions{}).Return(errors.New("error"))
 
-		repository := NewRepository(secretsManagerMock)
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
 
 		// when
-		err := repository.UpsertWithReplace(secretName, secretData)
+		err := repository.UpsertWithReplace(namespacedName, secretData)
 
 		// then
 		require.Error(t, err)
@@ -141,17 +149,17 @@ func TestRepository_Override(t *testing.T) {
 
 	t.Run("should return error if failed to create secret after deleting", func(t *testing.T) {
 		// given
-		secret := makeSecret(secretName, secretData)
+		secret := makeSecret(namespacedName, secretData)
 
 		secretsManagerMock := &mocks.Manager{}
 		secretsManagerMock.On("Create", secret).Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, "error")).Once()
 		secretsManagerMock.On("Create", secret).Return(nil, errors.New("error")).Once()
 		secretsManagerMock.On("Delete", secretName, &metav1.DeleteOptions{}).Return(nil)
 
-		repository := NewRepository(secretsManagerMock)
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
 
 		// when
-		err := repository.UpsertWithReplace(secretName, secretData)
+		err := repository.UpsertWithReplace(namespacedName, secretData)
 
 		// then
 		require.Error(t, err)
@@ -163,14 +171,14 @@ func TestRepository_UpsertData(t *testing.T) {
 
 	t.Run("should update secret data if it exists", func(t *testing.T) {
 		// given
-		secret := makeSecret(secretName, secretData)
+		secret := makeSecret(namespacedName, secretData)
 
 		additionalSecretData := map[string][]byte{
 			"testKey2": []byte("testValue2Modified"),
 			"testKey3": []byte("testValue3"),
 		}
 
-		updatedSecret := makeSecret(secretName, map[string][]byte{
+		updatedSecret := makeSecret(namespacedName, map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2Modified"),
 			"testKey3": []byte("testValue3"),
@@ -180,10 +188,10 @@ func TestRepository_UpsertData(t *testing.T) {
 		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(secret, nil)
 		secretsManagerMock.On("Update", updatedSecret).Return(secret, nil)
 
-		repository := NewRepository(secretsManagerMock)
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
 
 		// when
-		err := repository.UpsertWithMerge(secretName, additionalSecretData)
+		err := repository.UpsertWithMerge(namespacedName, additionalSecretData)
 
 		// then
 		assert.NoError(t, err)
@@ -192,17 +200,17 @@ func TestRepository_UpsertData(t *testing.T) {
 
 	t.Run("should create new secret if it does not exists", func(t *testing.T) {
 		// given
-		secret := makeSecret(secretName, secretData)
+		secret := makeSecret(namespacedName, secretData)
 
 		secretsManagerMock := &mocks.Manager{}
 		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
 		secretsManagerMock.On("Update", secret).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
 		secretsManagerMock.On("Create", secret).Return(secret, nil)
 
-		repository := NewRepository(secretsManagerMock)
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
 
 		// when
-		err := repository.UpsertWithMerge(secretName, secretData)
+		err := repository.UpsertWithMerge(namespacedName, secretData)
 
 		// then
 		assert.NoError(t, err)
@@ -214,10 +222,10 @@ func TestRepository_UpsertData(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(nil, errors.New("error"))
 
-		repository := NewRepository(secretsManagerMock)
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
 
 		// when
-		err := repository.UpsertWithMerge(secretName, secretData)
+		err := repository.UpsertWithMerge(namespacedName, secretData)
 
 		// then
 		assert.Error(t, err)
@@ -226,16 +234,16 @@ func TestRepository_UpsertData(t *testing.T) {
 
 	t.Run("should return error when failed to update secret", func(t *testing.T) {
 		// given
-		secret := makeSecret(secretName, secretData)
+		secret := makeSecret(namespacedName, secretData)
 
 		secretsManagerMock := &mocks.Manager{}
 		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
 		secretsManagerMock.On("Update", secret).Return(nil, errors.New("error"))
 
-		repository := NewRepository(secretsManagerMock)
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
 
 		// when
-		err := repository.UpsertWithMerge(secretName, secretData)
+		err := repository.UpsertWithMerge(namespacedName, secretData)
 
 		// then
 		assert.Error(t, err)
@@ -244,21 +252,27 @@ func TestRepository_UpsertData(t *testing.T) {
 
 	t.Run("should return error when failed to create secret", func(t *testing.T) {
 		// given
-		secret := makeSecret(secretName, secretData)
+		secret := makeSecret(namespacedName, secretData)
 
 		secretsManagerMock := &mocks.Manager{}
 		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
 		secretsManagerMock.On("Update", secret).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
 		secretsManagerMock.On("Create", secret).Return(nil, errors.New("error"))
 
-		repository := NewRepository(secretsManagerMock)
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
 
 		// when
-		err := repository.UpsertWithMerge(secretName, secretData)
+		err := repository.UpsertWithMerge(namespacedName, secretData)
 
 		// then
 		assert.Error(t, err)
 		secretsManagerMock.AssertExpectations(t)
 	})
 
+}
+
+func prepareManagerConstructor(manager Manager) ManagerConstructor {
+	return func(namespace string) Manager {
+		return manager
+	}
 }

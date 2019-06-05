@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	MetadataURLFormat = "%s/%s/v1/metadata/services"
-	EventsURLFormat   = "%s/%s/v1/events"
-  EventsInfoURLFormat = "%s/%s/v1/events/subscribed"
+	MetadataURLFormat   = "%s/%s/v1/metadata/services"
+	EventsURLFormat     = "%s/%s/v1/events"
+	EventsInfoURLFormat = "%s/%s/v1/events/subscribed"
 
 	RuntimeDefaultCommonName = "*Runtime*"
 )
@@ -63,7 +63,7 @@ func prepareRuntimeURLs(appCtx ApplicationContext, apiHosts ApiURLs) RuntimeURLs
 
 	if apiHosts.EventsBaseURL != "" {
 		eventsURL = fmt.Sprintf(EventsURLFormat, apiHosts.EventsBaseURL, appCtx.GetApplication())
-    eventsInfoURL = fmt.Sprintf(EventsInfoURLFormat, apiHosts.EventsBaseURL, appCtx.GetApplication())
+		eventsInfoURL = fmt.Sprintf(EventsInfoURLFormat, apiHosts.EventsBaseURL, appCtx.GetApplication())
 	}
 
 	return RuntimeURLs{

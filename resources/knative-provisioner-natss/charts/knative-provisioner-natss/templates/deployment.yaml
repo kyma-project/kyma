@@ -84,6 +84,8 @@ spec:
       app: natss-controller
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels: 
         <<: *labels
         rand: {{ randAlpha 6 }}

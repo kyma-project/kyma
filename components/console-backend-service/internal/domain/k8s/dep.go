@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	api "k8s.io/api/apps/v1beta2"
 	v1 "k8s.io/api/core/v1"
 )
@@ -13,4 +14,5 @@ type deploymentGetter interface {
 //go:generate mockery -name=limitRangeLister -output=automock -outpkg=automock -case=underscore
 type limitRangeLister interface {
 	List(ns string) ([]*v1.LimitRange, error)
+	Create(namespace string, name string, limitRangeInput gqlschema.LimitRangeInput) (*v1.LimitRange, error)
 }

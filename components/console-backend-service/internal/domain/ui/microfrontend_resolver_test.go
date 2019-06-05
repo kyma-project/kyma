@@ -14,7 +14,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestMicrofrontendResolver_MicrofrontendsQuery(t *testing.T) {
+func TestMicroFrontendResolver_MicroFrontendsQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		name := "test-name"
 		namespace := "test-namespace"
@@ -48,7 +48,7 @@ func TestMicrofrontendResolver_MicrofrontendsQuery(t *testing.T) {
 			item, item,
 		}
 
-		expectedItem := gqlschema.Microfrontend{
+		expectedItem := gqlschema.MicroFrontend{
 			Name:        name,
 			Version:     version,
 			Category:    category,
@@ -63,22 +63,22 @@ func TestMicrofrontendResolver_MicrofrontendsQuery(t *testing.T) {
 			},
 		}
 
-		expectedItems := []gqlschema.Microfrontend{
+		expectedItems := []gqlschema.MicroFrontend{
 			expectedItem, expectedItem,
 		}
 
-		resourceGetter := automock.NewMicrofrontendService()
+		resourceGetter := automock.NewMicroFrontendService()
 		resourceGetter.On("List", namespace).Return(items, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := automock.NewMicrofrontendConverter()
+		converter := automock.NewMicroFrontendConverter()
 		converter.On("ToGQLs", items).Return(expectedItems, nil)
 		defer converter.AssertExpectations(t)
 
-		resolver := ui.NewMicrofrontendResolver(resourceGetter)
-		resolver.SetMicrofrontendConverter(converter)
+		resolver := ui.NewMicroFrontendResolver(resourceGetter)
+		resolver.SetMicroFrontendConverter(converter)
 
-		result, err := resolver.MicrofrontendsQuery(nil, namespace)
+		result, err := resolver.MicroFrontendsQuery(nil, namespace)
 
 		require.NoError(t, err)
 		assert.Equal(t, expectedItems, result)
@@ -88,13 +88,13 @@ func TestMicrofrontendResolver_MicrofrontendsQuery(t *testing.T) {
 		namespace := "test-namespace"
 		var items []*v1alpha1.MicroFrontend
 
-		resourceGetter := automock.NewMicrofrontendService()
+		resourceGetter := automock.NewMicroFrontendService()
 		resourceGetter.On("List", namespace).Return(items, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
-		resolver := ui.NewMicrofrontendResolver(resourceGetter)
-		var expected []gqlschema.Microfrontend
+		resolver := ui.NewMicroFrontendResolver(resourceGetter)
+		var expected []gqlschema.MicroFrontend
 
-		result, err := resolver.MicrofrontendsQuery(nil, namespace)
+		result, err := resolver.MicroFrontendsQuery(nil, namespace)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -106,12 +106,12 @@ func TestMicrofrontendResolver_MicrofrontendsQuery(t *testing.T) {
 
 		var items []*v1alpha1.MicroFrontend
 
-		resourceGetter := automock.NewMicrofrontendService()
+		resourceGetter := automock.NewMicroFrontendService()
 		resourceGetter.On("List", namespace).Return(items, expected).Once()
 		defer resourceGetter.AssertExpectations(t)
-		resolver := ui.NewMicrofrontendResolver(resourceGetter)
+		resolver := ui.NewMicroFrontendResolver(resourceGetter)
 
-		_, err := resolver.MicrofrontendsQuery(nil, namespace)
+		_, err := resolver.MicroFrontendsQuery(nil, namespace)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))

@@ -9,10 +9,8 @@ import (
 	scbeta "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	typedCorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
@@ -43,96 +41,54 @@ type brokerSyncer interface {
 
 // Facade is responsible for creation k8s objects for namespaced broker
 type Facade struct {
-	brokerGetter        scbeta.ServiceBrokersGetter
-	servicesGetter      typedCorev1.ServicesGetter
-	serviceNameProvider serviceNameProvider
-	workingNamespace    string
-	abSelectorKey       string
-	abSelectorValue     string
-	abTargetPort        int32
-	log                 logrus.FieldLogger
+	brokerGetter     scbeta.ServiceBrokersGetter
+	servicesGetter   typedCorev1.ServicesGetter
+	workingNamespace string
+	abSelectorKey    string
+	abSelectorValue  string
+	abTargetPort     int32
+	serviceName      string
+	log              logrus.FieldLogger
 
-	serviceChecker serviceChecker
-	brokerSyncer   brokerSyncer
+	brokerSyncer brokerSyncer
 }
 
 // NewFacade returns facade
 func NewFacade(brokerGetter scbeta.ServiceBrokersGetter,
 	servicesGetter typedCorev1.ServicesGetter,
-	serviceNameProvider serviceNameProvider,
 	brokerSyncer brokerSyncer,
-	workingNamespace, abSelectorKey, abSelectorValue string,
+	workingNamespace, abSelectorKey, abSelectorValue string, serviceName string,
 	abTargetPort int32, log logrus.FieldLogger) *Facade {
 	return &Facade{
-		brokerGetter:        brokerGetter,
-		servicesGetter:      servicesGetter,
-		serviceNameProvider: serviceNameProvider,
-		abSelectorKey:       abSelectorKey,
-		abSelectorValue:     abSelectorValue,
-		abTargetPort:        abTargetPort,
-		workingNamespace:    workingNamespace,
-		serviceChecker:      newHTTPChecker(log),
-		brokerSyncer:        brokerSyncer,
-		log:                 log.WithField("service", "nsbroker-facade"),
+		brokerGetter:     brokerGetter,
+		servicesGetter:   servicesGetter,
+		abSelectorKey:    abSelectorKey,
+		abSelectorValue:  abSelectorValue,
+		abTargetPort:     abTargetPort,
+		workingNamespace: workingNamespace,
+		brokerSyncer:     brokerSyncer,
+		serviceName:      serviceName,
+		log:              log.WithField("service", "nsbroker-facade"),
 	}
 }
 
-// Create creates k8s service and ServiceBroker. Errors don't stop execution of method. AlreadyExist errors are ignored.
+// Create creates ServiceBroker. Errors don't stop execution of method. AlreadyExist errors are ignored.
 func (f *Facade) Create(destinationNs string) error {
 	var resultErr *multierror.Error
 
-	svcURL := fmt.Sprintf("http://%s.%s.svc.cluster.local", f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs), f.workingNamespace)
-	createdBroker, err := f.createServiceBroker(svcURL, destinationNs)
+	svcURL := fmt.Sprintf("http://%s.%s.svc.cluster.local", f.serviceName, f.workingNamespace)
+	_, err := f.createServiceBroker(svcURL, destinationNs)
 	if err != nil {
 		resultErr = multierror.Append(resultErr, err)
 		f.log.Warnf("Creation of namespaced-broker for namespace [%s] results in error: [%s]. AlreadyExist errors will be ignored.", destinationNs, err)
 		return err
 	}
 
-	if _, err := f.servicesGetter.Services(f.workingNamespace).Create(&corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs),
-			Namespace: f.workingNamespace,
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion: serviceBrokerAPIVersion,
-					Kind:       "ServiceBroker",
-					Name:       createdBroker.Name,
-					UID:        createdBroker.UID,
-				},
-			},
-		},
-		Spec: corev1.ServiceSpec{
-			Type: corev1.ServiceTypeNodePort,
-			Selector: map[string]string{
-				f.abSelectorKey: f.abSelectorValue,
-			},
-			Ports: []corev1.ServicePort{
-				{
-					Name: "http",
-					Port: 80,
-					TargetPort: intstr.IntOrString{
-						IntVal: f.abTargetPort,
-					},
-				},
-			},
-		},
-	}); err != nil {
-		f.log.Warnf("Creation of service for namespaced-broker for namespace [%s] results in error: [%s]. AlreadyExist error will be ignored.", destinationNs, err)
-		resultErr = multierror.Append(resultErr, err)
+	f.log.Infof("Triggering Service Catalog to do a sync with a broker in %s namespace", destinationNs)
+	err = f.brokerSyncer.SyncBroker(destinationNs)
+	if err != nil {
+		f.log.Warnf("Failed to sync a broker in the namespace %s: %s", destinationNs, err.Error())
 	}
-
-	go func(ns, url string) {
-		sURL := fmt.Sprintf("%s/statusz", url)
-		f.log.Infof("Checking service availability: %s", sURL)
-		f.serviceChecker.WaitUntilIsAvailable(sURL, 2*time.Minute)
-
-		f.log.Infof("Triggering Service Catalog to do a sync with a broker in %s namespace", destinationNs)
-		err := f.brokerSyncer.SyncBroker(destinationNs)
-		if err != nil {
-			f.log.Warnf("Failed to sync a broker in the namespace %s: %s", destinationNs, err.Error())
-		}
-	}(destinationNs, svcURL)
 
 	resultErr = f.filterOutMultiError(resultErr, f.ignoreAlreadyExist)
 
@@ -144,6 +100,7 @@ func (f *Facade) Create(destinationNs string) error {
 
 // createServiceBroker returns just created or existing ServiceBroker
 func (f *Facade) createServiceBroker(svcURL, namespace string) (*v1beta1.ServiceBroker, error) {
+	url := fmt.Sprintf("%s/%s", svcURL, namespace)
 	broker := &v1beta1.ServiceBroker{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      NamespacedBrokerName,
@@ -154,7 +111,7 @@ func (f *Facade) createServiceBroker(svcURL, namespace string) (*v1beta1.Service
 		},
 		Spec: v1beta1.ServiceBrokerSpec{
 			CommonServiceBrokerSpec: v1beta1.CommonServiceBrokerSpec{
-				URL: svcURL,
+				URL: url,
 			},
 		},
 	}
@@ -171,25 +128,18 @@ func (f *Facade) createServiceBroker(svcURL, namespace string) (*v1beta1.Service
 
 // Delete removes ServiceBroker and Facade. Errors don't stop execution of method. NotFound errors are ignored.
 func (f *Facade) Delete(destinationNs string) error {
-	var resultErr *multierror.Error
-	if err := f.brokerGetter.ServiceBrokers(destinationNs).Delete(NamespacedBrokerName, nil); err != nil {
-		f.log.Warnf("Deletion of namespaced-broker for namespace [%s] results in error: [%s]. NotFound errors will be ignored. ", destinationNs, err)
-		resultErr = multierror.Append(resultErr, err)
-	}
-
-	if err := f.servicesGetter.Services(f.workingNamespace).Delete(f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs), nil); err != nil {
-		f.log.Warnf("Deletion of service for namespaced-broker for namespace [%s] results in error: [%s]. NotFound errors will be ignored. ", destinationNs, err)
-		resultErr = multierror.Append(resultErr, err)
-	}
-
-	resultErr = f.filterOutMultiError(resultErr, f.ignoreIsNotFound)
-	if resultErr == nil {
+	err := f.brokerGetter.ServiceBrokers(destinationNs).Delete(NamespacedBrokerName, nil)
+	switch {
+	case k8serrors.IsNotFound(err):
 		return nil
+	case err != nil:
+		f.log.Warnf("Deletion of namespaced-broker for namespace [%s] results in error: [%s].", destinationNs, err)
 	}
-	return resultErr
+	return err
+
 }
 
-// Exist check if ServiceBroker and Service exist.
+// Exist check if ServiceBroker exists.
 func (f *Facade) Exist(destinationNs string) (bool, error) {
 	_, err := f.brokerGetter.ServiceBrokers(destinationNs).Get(NamespacedBrokerName, metav1.GetOptions{})
 	switch {
@@ -199,15 +149,6 @@ func (f *Facade) Exist(destinationNs string) (bool, error) {
 		return false, errors.Wrapf(err, "while checking if ServiceBroker [%s] exists in the namespace [%s]", NamespacedBrokerName, destinationNs)
 	}
 
-	svcName := f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs)
-	_, err = f.servicesGetter.Services(f.workingNamespace).Get(svcName, metav1.GetOptions{})
-	switch {
-	case k8serrors.IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, errors.Wrapf(err, "while checking if Service [%s] for ServiceBroker exists in the namespace [%s]", svcName, f.workingNamespace)
-
-	}
 	return true, nil
 }
 

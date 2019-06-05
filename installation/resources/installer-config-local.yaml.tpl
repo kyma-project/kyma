@@ -38,7 +38,6 @@ data:
   global.etcdBackup.enabled: "false"
   global.adminPassword: ""
   nginx-ingress.controller.service.loadBalancerIP: ""
-  cluster-users.users.adminGroup: ""
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -55,12 +54,24 @@ data:
   gateways.istio-ingressgateway.autoscaleEnabled: "false"
 
   pilot.resources.limits.memory: 1024Mi
-  pilot.resources.limits.cpu: 200m
-  pilot.resources.requests.memory: 256Mi
-  pilot.resources.requests.cpu: 100m
+  pilot.resources.limits.cpu: 500m
+  pilot.resources.requests.memory: 512Mi
+  pilot.resources.requests.cpu: 250m
+  pilot.autoscaleEnabled: "false"
 
-  mixer.resources.limits.memory: 256Mi
-  mixer.resources.requests.memory: 128Mi
+  mixer.policy.resources.limits.memory: 2048Mi
+  mixer.policy.resources.limits.cpu: 500m
+  mixer.policy.resources.requests.memory: 512Mi
+  mixer.policy.resources.requests.cpu: 300m
+
+  mixer.telemetry.resources.limits.memory: 2048Mi
+  mixer.telemetry.resources.limits.cpu: 500m
+  mixer.telemetry.resources.requests.memory: 512Mi
+  mixer.telemetry.resources.requests.cpu: 300m
+  mixer.loadshedding.mode: disabled
+
+  mixer.policy.autoscaleEnabled: "false"
+  mixer.telemetry.autoscaleEnabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -140,6 +151,7 @@ metadata:
     kyma-project.io/installation: ""
 data:
    application-registry.minikubeIP: ""
+   tests.application_connector_tests.minikubeIP: ""
 ---
 apiVersion: v1
 kind: ConfigMap

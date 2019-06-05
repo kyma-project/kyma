@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/content/storage"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/spec"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -86,11 +86,22 @@ func TestEventActivationConverter_ToGQLEvents(t *testing.T) {
 			EventType:   "sell",
 			Version:     "v1",
 			Description: "desc",
+			Schema: gqlschema.JSON{
+				"type": "string",
+			},
 		})
 		assert.Contains(t, result, gqlschema.EventActivationEvent{
 			EventType:   "sell",
 			Version:     "v2",
 			Description: "desc",
+			Schema: gqlschema.JSON{
+				"type": "object",
+				"properties": map[string]interface{}{
+					"name": map[string]interface{}{
+						"type": "string",
+					},
+				},
+			},
 		})
 	})
 
@@ -146,19 +157,30 @@ func fixEventActivation() *v1alpha1.EventActivation {
 	}
 }
 
-func fixAsyncApiSpec() *storage.AsyncApiSpec {
-	return &storage.AsyncApiSpec{
-		Data: storage.AsyncApiSpecData{
+func fixAsyncApiSpec() *spec.AsyncAPISpec {
+	return &spec.AsyncAPISpec{
+		Data: spec.AsyncAPISpecData{
 			AsyncAPI: "1.0.0",
 			Topics: map[string]interface{}{
 				"sell.v1": map[string]interface{}{
 					"subscribe": map[string]interface{}{
 						"summary": "desc",
+						"payload": map[string]interface{}{
+							"type": "string",
+						},
 					},
 				},
 				"sell.v2": map[string]interface{}{
 					"subscribe": map[string]interface{}{
 						"summary": "desc",
+						"payload": map[string]interface{}{
+							"type": "object",
+							"properties": map[string]interface{}{
+								"name": map[string]interface{}{
+									"type": "string",
+								},
+							},
+						},
 					},
 				},
 			},
@@ -166,9 +188,9 @@ func fixAsyncApiSpec() *storage.AsyncApiSpec {
 	}
 }
 
-func fixAsyncApiSpecWithoutVersion() *storage.AsyncApiSpec {
-	return &storage.AsyncApiSpec{
-		Data: storage.AsyncApiSpecData{
+func fixAsyncApiSpecWithoutVersion() *spec.AsyncAPISpec {
+	return &spec.AsyncAPISpec{
+		Data: spec.AsyncAPISpecData{
 			AsyncAPI: "1.0.0",
 			Topics: map[string]interface{}{
 				"sell": map[string]interface{}{

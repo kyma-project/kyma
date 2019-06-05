@@ -1,28 +1,25 @@
 package broker
 
 import (
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
-	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
-	"github.com/sirupsen/logrus"
+	"github.com/gorilla/mux"
+
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestOSBContextForNsScopedBroker(t *testing.T) {
 	// GIVEN
-	mockBrokerService := &automock.BrokerService{}
-	defer mockBrokerService.AssertExpectations(t)
-	url := "http://ab-ns-for-stage.kyma-system.svc.cluster.local/v2/catalog"
+	url := "http://ab-ns-for-stage.kyma-system.svc.cluster.local/stage/v2/catalog"
 
-	mockBrokerService.On("GetNsFromBrokerURL", "ab-ns-for-stage.kyma-system.svc.cluster.local").Return("stage", nil)
-
-	sut := NewOsbContextMiddleware(mockBrokerService, spy.NewLogDummy())
+	sut := &OSBContextMiddleware{}
 	req := httptest.NewRequest(http.MethodGet, url, nil)
+	req = mux.SetURLVars(req, map[string]string{"namespace": "stage"})
+	req.Header.Set(osb.APIVersionHeader, "2.13")
+	req.Header.Set(osb.OriginatingIdentityHeader, osb.PlatformKubernetes)
 	rw := httptest.NewRecorder()
 	nextCalled := false
 
@@ -39,24 +36,21 @@ func TestOSBContextForNsScopedBroker(t *testing.T) {
 
 }
 
-func TestOsbContextReturnsErrorWhenCannotExtractNamespace(t *testing.T) {
+func TestOSBContextPreconditionError(t *testing.T) {
 	// GIVEN
-	mockBrokerService := &automock.BrokerService{}
-	defer mockBrokerService.AssertExpectations(t)
+	url := "http://ab-ns-for-stage.kyma-system.svc.cluster.local/stage/v2/catalog"
 
-	mockBrokerService.On("GetNsFromBrokerURL", mock.Anything).Return("", errors.New("some error"))
-	logSink := spy.NewLogSink()
-	sut := NewOsbContextMiddleware(mockBrokerService, logSink.Logger)
-	req := httptest.NewRequest(http.MethodGet, "https://core-ab.kyma-system.svc.cluster.local/v2/catalog", nil)
+	sut := &OSBContextMiddleware{}
+	req := httptest.NewRequest(http.MethodGet, url, nil)
+	req = mux.SetURLVars(req, map[string]string{"namespace": "stage"})
 	rw := httptest.NewRecorder()
 	nextCalled := false
+
 	// WHEN
 	sut.ServeHTTP(rw, req, func(nextRw http.ResponseWriter, nextReq *http.Request) {
-		// THEN
 		nextCalled = true
 	})
 	// THEN
 	assert.False(t, nextCalled)
-	assert.Equal(t, http.StatusInternalServerError, rw.Result().StatusCode)
-	logSink.AssertLogged(t, logrus.ErrorLevel, "misconfiguration, broker is running as a namespace-scoped, but cannot extract namespace from request")
+	assert.Equal(t, http.StatusPreconditionFailed, rw.Result().StatusCode)
 }

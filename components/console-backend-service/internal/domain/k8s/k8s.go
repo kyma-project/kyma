@@ -3,9 +3,8 @@ package k8s
 import (
 	"time"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
-
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/informers"
 	k8sClientset "k8s.io/client-go/kubernetes"
@@ -47,12 +46,15 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 
 	informerFactory := informers.NewSharedInformerFactory(clientset, informerResyncPeriod)
 
-	namespaceService := newNamespaceService(client.Namespaces())
+	namespaceSvc, err := newNamespaceService(informerFactory.Core().V1().Namespaces().Informer(), client)
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating namespace service")
+	}
 	deploymentService, err := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating deployment service")
 	}
-	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer())
+	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer(), clientset.CoreV1())
 
 	podService := newPodService(informerFactory.Core().V1().Pods().Informer(), client)
 	resourceService := newResourceService(clientset.Discovery())
@@ -68,7 +70,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 
 	return &Resolver{
 		resourceResolver:            newResourceResolver(resourceService),
-		namespaceResolver:           newNamespaceResolver(namespaceService, applicationRetriever),
+		namespaceResolver:           newNamespaceResolver(namespaceSvc, applicationRetriever),
 		secretResolver:              newSecretResolver(*secretService),
 		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
 		podResolver:                 newPodResolver(podService),

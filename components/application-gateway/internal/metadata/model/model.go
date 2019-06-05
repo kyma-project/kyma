@@ -26,6 +26,10 @@ type API struct {
 	Credentials *Credentials
 	// Spec contains specification of an API.
 	Spec []byte
+	// Headers that are injected by the gateway
+	Headers *map[string][]string
+	// QueryParameters that are injected by the gateway
+	QueryParameters *map[string][]string
 }
 
 // Credentials contains OAuth or BasicAuth configuration.
@@ -38,6 +42,10 @@ type Credentials struct {
 	CertificateGen *CertificateGen
 	// CSRFTokenEndpointURL (optional) to fetch CSRF token
 	CSRFTokenEndpointURL string
+	// Headers that are injected by the gateway
+	Headers *map[string][]string
+	// QueryParameters that are injected by the gateway
+	QueryParameters *map[string][]string
 }
 
 // BasicAuth contains details of BasicAuth Auth configuration

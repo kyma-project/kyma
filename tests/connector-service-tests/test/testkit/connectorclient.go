@@ -12,20 +12,18 @@ import (
 )
 
 const (
-	ApplicationHeader  = "Application"
-	GroupHeader        = "Group"
-	TenantHeader       = "Tenant"
-	EventsHostHeader   = "EventsHost"
-	MetadataHostHeader = "MetadataHost"
-	Tenant             = "testkit-tenant"
-	Group              = "testkit-group"
-	Extensions         = ""
-	KeyAlgorithm       = "rsa2048"
+	ApplicationHeader = "Application"
+	GroupHeader       = "Group"
+	TenantHeader      = "Tenant"
+	Tenant            = "testkit-tenant"
+	Group             = "testkit-group"
+	Extensions        = ""
+	KeyAlgorithm      = "rsa2048"
 )
 
 type ConnectorClient interface {
 	CreateToken(t *testing.T) TokenResponse
-	GetInfo(t *testing.T, url string, headers map[string]string) (*InfoResponse, *Error)
+	GetInfo(t *testing.T, url string) (*InfoResponse, *Error)
 	RevokeCertificate(t *testing.T, revocationUrl, csr string) *Error
 	CreateCertChain(t *testing.T, csr, url string) (*CrtResponse, *Error)
 }
@@ -93,8 +91,8 @@ func (cc connectorClient) RevokeCertificate(t *testing.T, revocationUrl, hash st
 	return nil
 }
 
-func (cc connectorClient) GetInfo(t *testing.T, url string, headers map[string]string) (*InfoResponse, *Error) {
-	request := getRequestWithHeaders(t, url, headers)
+func (cc connectorClient) GetInfo(t *testing.T, url string) (*InfoResponse, *Error) {
+	request := getRequestWithHeaders(t, url)
 
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
@@ -141,17 +139,11 @@ func (cc connectorClient) CreateCertChain(t *testing.T, csr, url string) (*CrtRe
 	return crtResponse, nil
 }
 
-func getRequestWithHeaders(t *testing.T, url string, headers map[string]string) *http.Request {
+func getRequestWithHeaders(t *testing.T, url string) *http.Request {
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	require.NoError(t, err)
 
 	request.Close = true
-
-	if headers != nil {
-		for k, v := range headers {
-			request.Header.Set(k, v)
-		}
-	}
 
 	return request
 }

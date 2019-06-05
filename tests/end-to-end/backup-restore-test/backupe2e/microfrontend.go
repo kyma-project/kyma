@@ -63,7 +63,7 @@ func (t microfrontendTest) TestResources(namespace string) {
 	navNode := mfValue.Spec.NavigationNodes[0]
 
 	So(navNode.Label, ShouldEqual, "testMF")
-	So(navNode.NavigationPath, ShouldEqual, "/test/path")
+	So(navNode.NavigationPath, ShouldEqual, "path")
 	So(navNode.ViewURL, ShouldEqual, "/resourcePath")
 	So(navNode.ShowInNavigation, ShouldEqual, true)
 }

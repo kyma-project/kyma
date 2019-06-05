@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 )
@@ -14,14 +15,14 @@ type converter interface {
 	Convert(name internal.ApplicationName, svc internal.Service) (osb.Service, error)
 }
 
-//go:generate mockery -name=appEnabledChecker -output=automock -outpkg=automock -case=underscore
-type appEnabledChecker interface {
-	IsApplicationEnabled(namespace, name string) (bool, error)
+//go:generate mockery -name=serviceCheckerFactory -output=automock -outpkg=automock -case=underscore
+type serviceCheckerFactory interface {
+	NewServiceChecker(namespace, name string) (access.ServiceEnabledChecker, error)
 }
 
 type catalogService struct {
 	finder            applicationFinder
-	appEnabledChecker appEnabledChecker
+	appEnabledChecker serviceCheckerFactory
 	conv              converter
 }
 
@@ -34,15 +35,16 @@ func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*
 	resp := osb.CatalogResponse{}
 	resp.Services = make([]osb.Service, 0)
 	for _, app := range appList {
-		enabled, err := svc.appEnabledChecker.IsApplicationEnabled(osbCtx.BrokerNamespace, string(app.Name))
+		svcChecker, err := svc.appEnabledChecker.NewServiceChecker(osbCtx.BrokerNamespace, string(app.Name))
+
 		if err != nil {
 			return nil, errors.Wrap(err, "while checking if Application is enabled")
 		}
-		if !enabled {
-			continue
-		}
 
 		for _, s := range app.Services {
+			if !svcChecker.IsServiceEnabled(s) {
+				continue
+			}
 			s, err := svc.conv.Convert(app.Name, s)
 			if err != nil {
 				return nil, errors.Wrap(err, "while converting bundle to service")

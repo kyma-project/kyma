@@ -10,21 +10,21 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   hosts:
-  - connector-service.{{ .Values.global.ingress.domainName }}
+    - connector-service.{{ .Values.global.ingress.domainName }}
   gateways:
-  - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}.svc.cluster.local
+    - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   http:
-  - match:
-    - uri:
-        exact: /v1/applications/signingRequests/info
-    - uri:
-        exact: /v1/applications/certificates
-    - uri:
-        exact: /v1/runtimes/signingRequests/info
-    - uri:
-        exact: /v1/runtimes/certificates
-    route:
-    - destination:
-        port:
-          number: {{ .Values.service.externalapi.port }}
-        host: {{ .Chart.Name }}-external-api
+    - match:
+      - uri:
+          exact: /v1/applications/signingRequests/info
+      - uri:
+          exact: /v1/applications/certificates
+      - uri:
+          exact: /v1/runtimes/signingRequests/info
+      - uri:
+          exact: /v1/runtimes/certificates
+      route:
+        - destination:
+            port:
+              number: {{ .Values.service.externalapi.port }}
+            host: {{ .Chart.Name }}-external-api

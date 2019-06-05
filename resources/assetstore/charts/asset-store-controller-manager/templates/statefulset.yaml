@@ -17,6 +17,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
+        recreate: {{ .Release.Time.Seconds | quote }}
       labels:
         app: {{ template "name" . }}
         release: {{ .Release.Name }}

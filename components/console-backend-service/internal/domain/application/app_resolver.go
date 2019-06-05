@@ -27,7 +27,9 @@ type appSvc interface {
 	Create(name string, description string, labels gqlschema.Labels) (*appTypes.Application, error)
 	Delete(name string) error
 	Disable(namespace, name string) error
-	Enable(namespace, name string) (*mappingTypes.ApplicationMapping, error)
+	Enable(namespace, name string, services []*gqlschema.ApplicationMappingService) (*mappingTypes.ApplicationMapping, error)
+	UpdateApplicationMapping(namespace, name string, services []*gqlschema.ApplicationMappingService) (*mappingTypes.ApplicationMapping, error)
+	ListApplicationMapping(name string) ([]*mappingTypes.ApplicationMapping, error)
 	GetConnectionURL(application string) (string, error)
 	Subscribe(listener resource.Listener)
 	Unsubscribe(listener resource.Listener)
@@ -39,16 +41,18 @@ type statusGetter interface {
 }
 
 type applicationResolver struct {
-	appSvc       appSvc
-	appConverter applicationConverter
-	statusGetter statusGetter
+	appSvc              appSvc
+	appConverter        applicationConverter
+	appMappingConverter applicationMappingConverter
+	statusGetter        statusGetter
 }
 
 func NewApplicationResolver(appSvc appSvc, statusGetter statusGetter) *applicationResolver {
 	return &applicationResolver{
-		appSvc:       appSvc,
-		statusGetter: statusGetter,
-		appConverter: applicationConverter{},
+		appSvc:              appSvc,
+		statusGetter:        statusGetter,
+		appConverter:        applicationConverter{},
+		appMappingConverter: applicationMappingConverter{},
 	}
 }
 
@@ -159,9 +163,9 @@ func (r *applicationResolver) ConnectorServiceQuery(ctx context.Context, applica
 	return dto, nil
 }
 
-func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error) {
-	em, err := r.appSvc.Enable(namespace, application)
-
+func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, application string, namespace string, allServices *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error) {
+	services = r.configureServices(allServices, services)
+	em, err := r.appSvc.Enable(namespace, application, services)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while enabling %s", pretty.Application))
 		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithNamespace(namespace))
@@ -170,7 +174,45 @@ func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, app
 	return &gqlschema.ApplicationMapping{
 		Namespace:   em.Namespace,
 		Application: em.Name,
+		AllServices: allServices,
+		Services:    r.appMappingConverter.transformApplicationMappingServiceToGQL(em.Spec.Services),
 	}, nil
+}
+
+func (r *applicationResolver) OverloadApplicationMutation(ctx context.Context, application string, namespace string, allServices *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error) {
+	services = r.configureServices(allServices, services)
+	em, err := r.appSvc.UpdateApplicationMapping(namespace, application, services)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while updating %s", pretty.ApplicationMapping))
+		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithNamespace(namespace))
+	}
+
+	return &gqlschema.ApplicationMapping{
+		Namespace:   em.Namespace,
+		Application: em.Name,
+		AllServices: allServices,
+		Services:    r.appMappingConverter.transformApplicationMappingServiceToGQL(em.Spec.Services),
+	}, nil
+}
+
+func (r *applicationResolver) configureServices(allServices *bool, services []*gqlschema.ApplicationMappingService) []*gqlschema.ApplicationMappingService {
+	var all bool
+
+	if allServices == nil {
+		all = true
+	} else {
+		all = *allServices
+	}
+
+	if all {
+		services = nil
+	} else {
+		if services == nil {
+			services = []*gqlschema.ApplicationMappingService{}
+		}
+	}
+
+	return services
 }
 
 func (r *applicationResolver) DisableApplicationMutation(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error) {
@@ -198,6 +240,62 @@ func (r *applicationResolver) ApplicationEnabledInNamespacesField(ctx context.Co
 		return []string{}, gqlerror.New(err, pretty.Namespaces)
 	}
 	return items, nil
+}
+
+func (r *applicationResolver) ApplicationEnabledMappingServices(ctx context.Context, obj *gqlschema.Application) ([]*gqlschema.EnabledMappingService, error) {
+	if obj == nil {
+		glog.Error(fmt.Errorf("while resolving 'EnabledMappingServices' field obj is empty"))
+		return nil, gqlerror.NewInternal()
+	}
+
+	items, err := r.appSvc.ListApplicationMapping(obj.Name)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while listing %s for %s %q", pretty.ApplicationMapping, pretty.Application, obj.Name))
+		return nil, gqlerror.New(err, pretty.ApplicationMapping)
+	}
+
+	var collection []*gqlschema.EnabledMappingService
+	for _, mapping := range items {
+		ems := &gqlschema.EnabledMappingService{}
+
+		ems.Namespace = mapping.Namespace
+		ems.AllServices = mapping.IsAllApplicationServicesEnabled()
+		if !ems.AllServices {
+			ems.Services = r.findEnabledApplicationService(obj.Services, mapping)
+		}
+		collection = append(collection, ems)
+	}
+
+	return collection, nil
+}
+
+func (r *applicationResolver) findEnabledApplicationService(appServices []gqlschema.ApplicationService, mapping *mappingTypes.ApplicationMapping) []*gqlschema.EnabledApplicationService {
+	nameFinder := func(appServices []gqlschema.ApplicationService, id string) (string, bool) {
+		for _, val := range appServices {
+			if val.ID == id {
+				return val.DisplayName, true
+			}
+		}
+
+		return "", false
+	}
+
+	var result []*gqlschema.EnabledApplicationService
+	for _, srv := range mapping.Spec.Services {
+		es := &gqlschema.EnabledApplicationService{}
+		es.ID = srv.ID
+		name, exist := nameFinder(appServices, srv.ID)
+		if exist {
+			es.Exist = true
+			es.DisplayName = name
+		} else {
+			es.Exist = false
+		}
+
+		result = append(result, es)
+	}
+
+	return result
 }
 
 func (r *applicationResolver) ApplicationStatusField(ctx context.Context, app *gqlschema.Application) (gqlschema.ApplicationStatus, error) {
