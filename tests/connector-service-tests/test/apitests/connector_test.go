@@ -2,21 +2,12 @@ package apitests
 
 import (
 	"crypto/rsa"
-	"net/http"
-	"net/url"
-	"testing"
-	"time"
-
 	"github.com/kyma-project/kyma/tests/connector-service-tests/test/testkit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-)
-
-const (
-	retryWaitTimeSeconds = 5 * time.Second
-	retryCount           = 20
-	emptyMetadataHost    = ""
-	emptyEventsHost      = ""
+	"net/http"
+	"net/url"
+	"testing"
 )
 
 func TestConnector(t *testing.T) {
@@ -98,11 +89,10 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
 	clientKey := testkit.CreateKey(t)
-	csrInfoHeaders := createHostsHeaders(emptyMetadataHost, emptyEventsHost)
 
 	t.Run("should create client certificate", func(t *testing.T) {
 		// when
-		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, csrInfoHeaders)
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
 
 		//then
 		require.NotEmpty(t, crtResponse.CRTChain)
@@ -117,7 +107,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 	t.Run("should create two certificates in a chain", func(t *testing.T) {
 		// when
-		crtResponse, _ := createCertificateChain(t, client, clientKey, csrInfoHeaders)
+		crtResponse, _ := createCertificateChain(t, client, clientKey)
 
 		//then
 		require.NotEmpty(t, crtResponse.CRTChain)
@@ -131,7 +121,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 	t.Run("client cert should be signed by server cert", func(t *testing.T) {
 		//when
-		crtResponse, _ := createCertificateChain(t, client, clientKey, csrInfoHeaders)
+		crtResponse, _ := createCertificateChain(t, client, clientKey)
 
 		//then
 		require.NotEmpty(t, crtResponse.CRTChain)
@@ -145,7 +135,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 	t.Run("should respond with client certificate together with CA crt", func(t *testing.T) {
 		// when
-		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, csrInfoHeaders)
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
 
 		//then
 		require.NotEmpty(t, crtResponse.CRTChain)
@@ -171,7 +161,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
 
 		// when
-		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, csrInfoHeaders)
+		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL)
 
 		// then
 		require.Nil(t, errorResponse)
@@ -204,7 +194,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		wrongUrl := replaceToken(tokenResponse.URL, "incorrect-token")
 
 		// when
-		_, err := client.GetInfo(t, wrongUrl, csrInfoHeaders)
+		_, err := client.GetInfo(t, wrongUrl)
 
 		// then
 		require.NotNil(t, err)
@@ -222,7 +212,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
 
 		// when
-		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, csrInfoHeaders)
+		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL)
 
 		// then
 		require.Nil(t, errorResponse)
@@ -254,7 +244,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
 
 		// when
-		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, csrInfoHeaders)
+		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL)
 
 		// then
 		require.Nil(t, errorResponse)
@@ -294,7 +284,7 @@ func appCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, config te
 		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
 
 		// when
-		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, nil)
+		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL)
 
 		// then
 		require.Nil(t, errorResponse)
@@ -315,7 +305,7 @@ func subjectGenerationSuite(t *testing.T, tokenRequest *http.Request, config tes
 	require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
 
 	// when
-	infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, nil)
+	infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL)
 
 	// then
 	require.Nil(t, errorResponse)
@@ -350,7 +340,7 @@ func runtimeCsrInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Requ
 		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
 
 		// when
-		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, nil)
+		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL)
 
 		// then
 		require.Nil(t, errorResponse)
@@ -378,7 +368,7 @@ func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 		}
 
 		// when
-		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, nil)
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
 
 		// then
 		require.NotEmpty(t, crtResponse.CRTChain)
@@ -388,7 +378,7 @@ func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
 		// when
-		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, nil)
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL)
 		require.Nil(t, errorResponse)
 
 		// then
@@ -417,7 +407,7 @@ func runtimeMgmInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Requ
 
 	t.Run("should provide not empty management info response", func(t *testing.T) {
 		// when
-		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, nil)
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
 
 		// then
 		require.NotEmpty(t, crtResponse.CRTChain)
@@ -427,7 +417,7 @@ func runtimeMgmInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Requ
 		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
 		// when
-		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, nil)
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL)
 		require.Nil(t, errorResponse)
 
 		// then
@@ -448,7 +438,7 @@ func certificateRotationSuite(t *testing.T, tokenRequest *http.Request, skipVeri
 
 	t.Run("should renew client certificate", func(t *testing.T) {
 		// when
-		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, createHostsHeaders("", ""))
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
 		require.NotEmpty(t, crtResponse.CRTChain)
 		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
 		require.NotEmpty(t, infoResponse.Certificate)
@@ -456,7 +446,7 @@ func certificateRotationSuite(t *testing.T, tokenRequest *http.Request, skipVeri
 		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
 		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
-		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL)
 		require.Nil(t, errorResponse)
 		require.NotEmpty(t, mgmInfoResponse.URLs.RenewCertUrl)
 		require.NotEmpty(t, mgmInfoResponse.Certificate)
@@ -473,7 +463,7 @@ func certificateRotationSuite(t *testing.T, tokenRequest *http.Request, skipVeri
 		certificates = testkit.DecodeAndParseCerts(t, certificateResponse)
 		clientWithRenewedCert := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
-		mgmInfoResponse, errorResponse = clientWithRenewedCert.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
+		mgmInfoResponse, errorResponse = clientWithRenewedCert.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL)
 		require.Nil(t, errorResponse)
 	})
 }
@@ -485,7 +475,7 @@ func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 	t.Run("should revoke client certificate with external API", func(t *testing.T) {
 		// when
-		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, createHostsHeaders("", ""))
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
 
 		// then
 		require.NotEmpty(t, crtResponse.CRTChain)
@@ -495,7 +485,7 @@ func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
 		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
-		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL)
 
 		// then
 		require.Nil(t, errorResponse)
@@ -520,7 +510,7 @@ func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 	t.Run("should revoke client certificate with internal API", func(t *testing.T) {
 		// when
-		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, createHostsHeaders("", ""))
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
 
 		// then
 		require.NotEmpty(t, crtResponse.CRTChain)
@@ -530,7 +520,7 @@ func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
 		securedClient := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
-		mgmInfoResponse, errorResponse := securedClient.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
+		mgmInfoResponse, errorResponse := securedClient.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL)
 
 		// then
 		require.Nil(t, errorResponse)
@@ -557,7 +547,7 @@ func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 }
 
-func createCertificateChain(t *testing.T, connectorClient testkit.ConnectorClient, key *rsa.PrivateKey, csrInfoHeaders map[string]string) (*testkit.CrtResponse, *testkit.InfoResponse) {
+func createCertificateChain(t *testing.T, connectorClient testkit.ConnectorClient, key *rsa.PrivateKey) (*testkit.CrtResponse, *testkit.InfoResponse) {
 	// when
 	tokenResponse := connectorClient.CreateToken(t)
 
@@ -566,7 +556,7 @@ func createCertificateChain(t *testing.T, connectorClient testkit.ConnectorClien
 	require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
 
 	// when
-	infoResponse, errorResponse := connectorClient.GetInfo(t, tokenResponse.URL, csrInfoHeaders)
+	infoResponse, errorResponse := connectorClient.GetInfo(t, tokenResponse.URL)
 
 	// then
 	require.Nil(t, errorResponse)
@@ -594,11 +584,4 @@ func replaceToken(originalUrl string, newToken string) string {
 	parsedUrl.RawQuery = queryParams.Encode()
 
 	return parsedUrl.String()
-}
-
-func createHostsHeaders(metadataHost string, eventsHost string) map[string]string {
-	return map[string]string{
-		testkit.MetadataHostHeader: metadataHost,
-		testkit.EventsHostHeader:   eventsHost,
-	}
 }
