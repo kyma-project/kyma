@@ -5,7 +5,7 @@ type: Configuration
 
 ## Introduction
 
-Users can configure Kyma installation in two ways:
+You can configure the Kyma installation by:
   - Customize the list of the components to install
   - Provide overrides that change configuration values used by one or more components
 
