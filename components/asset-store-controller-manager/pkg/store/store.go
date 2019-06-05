@@ -227,7 +227,6 @@ func (s *store) putObject(ctx context.Context, attrs objectAttrs, fileNameChan c
 			if err != nil {
 				errChan <- err
 			}
-		default:
 		}
 	}
 }
