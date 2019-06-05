@@ -777,6 +777,7 @@ type API {
     hostname: String!
     service: ApiService!
     authenticationPolicies: [AuthenticationPolicy!]!
+    creationTimestamp: Timestamp!
 }
 
 # Backend Module

@@ -25,6 +25,7 @@ func (ac *apiConverter) ToGQL(in *v1alpha2.Api) *gqlschema.API {
 	return &gqlschema.API{
 		Name:     in.Name,
 		Hostname: in.Spec.Hostname,
+		CreationTimestamp: in.CreationTimestamp.Time,
 		Service: gqlschema.ApiService{
 			Name: in.Spec.Service.Name,
 			Port: in.Spec.Service.Port,

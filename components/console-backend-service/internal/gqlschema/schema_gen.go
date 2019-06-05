@@ -60,6 +60,7 @@ type ComplexityRoot struct {
 		Hostname               func(childComplexity int) int
 		Service                func(childComplexity int) int
 		AuthenticationPolicies func(childComplexity int) int
+		CreationTimestamp      func(childComplexity int) int
 	}
 
 	AddonsConfiguration struct {
@@ -3833,6 +3834,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Api.AuthenticationPolicies(childComplexity), true
+
+	case "API.creationTimestamp":
+		if e.complexity.Api.CreationTimestamp == nil {
+			break
+		}
+
+		return e.complexity.Api.CreationTimestamp(childComplexity), true
 
 	case "AddonsConfiguration.name":
 		if e.complexity.AddonsConfiguration.Name == nil {
@@ -7626,6 +7634,11 @@ func (ec *executionContext) _API(ctx context.Context, sel ast.SelectionSet, obj 
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "creationTimestamp":
+			out.Values[i] = ec._API_creationTimestamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -7777,6 +7790,33 @@ func (ec *executionContext) _API_authenticationPolicies(ctx context.Context, fie
 	}
 	wg.Wait()
 	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _API_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *API) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "API",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreationTimestamp, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return MarshalTimestamp(res)
 }
 
 var addonsConfigurationImplementors = []string{"AddonsConfiguration"}
@@ -30170,6 +30210,7 @@ type API {
     hostname: String!
     service: ApiService!
     authenticationPolicies: [AuthenticationPolicy!]!
+    creationTimestamp: Timestamp!
 }
 
 # Backend Module

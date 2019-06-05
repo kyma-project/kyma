@@ -14,6 +14,7 @@ type API struct {
 	Hostname               string                 `json:"hostname"`
 	Service                ApiService             `json:"service"`
 	AuthenticationPolicies []AuthenticationPolicy `json:"authenticationPolicies"`
+	CreationTimestamp      time.Time              `json:"creationTimestamp"`
 }
 
 type AddonsConfiguration struct {
