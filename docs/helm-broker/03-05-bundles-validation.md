@@ -3,22 +3,22 @@ title: Bundles validation
 type: Details
 ---
 
-The Checker tool is used in the [bundles](https://github.com/kyma-project/bundles) repo to validate a bundles on each pull request if all required fields are set. The requirements are described [here](03-01-create-bundles.md).
+Checker is a tool that validates bundles in the [`bundles`](https://github.com/kyma-project/bundles) repository on every pull request. It checks whether all [required](#details-create-a-bundle) fields are set in your bundles.
 
-It's also triggers the [helm lint](https://helm.sh/docs/helm/#helm-lint) command using the `helm` in version `2.8.2`, which checks the bundle's chart.
+Checker also triggers the [helm lint](https://helm.sh/docs/helm/#helm-lint) command using `helm` in 2.8.2 version, which checks your bundles' charts.
 
-### Run locally
+### Run Checker locally
 
-You can run the Checker locally to test if your bundles are valid. To run it locally use the following command:
+Run the Checker locally to test if your bundles are valid:
 ```
 go run components/helm-broker/cmd/checker/main.go {PATH_TO_YOUR_BUNDLES}
 ```
 
 ## Troubleshooting
 
-If some bundle does not meet the requirements, the Helm Broker won't expose it as a Service Class and it will put an information about this in the logs.
+If any bundle does not meet the requirements, the Helm Broker does not expose it as a Service Class. This situation is displayed in logs.
 
-To check logs from the Helm Broker, execute that commands:
+To check logs from the Helm Broker, run these commands:
 
 ```
 export HELM_BROKER_POD_NAME=kubectl get pod -n kyma-system -l app=helm-broker
