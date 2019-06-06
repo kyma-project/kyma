@@ -67,9 +67,9 @@ spec:
           - name: APP_TEMPORARY_DIRECTORY
             value: /tmp
           - name: APP_MAX_ASSET_CONCURRENT_RECONCILES
-            value: "3"
+            value: "{{ .Values.maxAssetConcurrentReconciles }}"
           - name: APP_MAX_CLUSTER_ASSET_CONCURRENT_RECONCILES
-            value: "3"
+            value: "{{ .Values.maxClusterAssetConcurrentReconciles }}"
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         ports:
