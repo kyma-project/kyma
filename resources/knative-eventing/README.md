@@ -15,3 +15,4 @@ Kyma-specific changes:
  * The image versions are changed to use the release tag.
  * Added requests.memory, requests.cpu, limits.cpu and limits.memory for deployment/eventing-controller, deployment/webhook (values motivated from knative/serving charts)
  * Removed istio-proxy side-car for eventing-controller
+ * Configured NATSS as default ClusterChannelProvisioner in default-channel-webhook ConfigMap

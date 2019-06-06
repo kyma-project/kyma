@@ -109,6 +109,9 @@ istio-ingressgateway:
   - name: ingressgateway-ca-certs
     secretName: istio-ingressgateway-ca-certs
     mountPath: /etc/istio/ingressgateway-ca-certs
+  - name: application-connector-ca-certs
+    secretName: application-connector-ca-certs
+    mountPath: /etc/istio/application-connector-ca-certs
   ### Advanced options ############
   env:
     # A gateway with this mode ensures that pilot generates an additional
@@ -191,7 +194,7 @@ istio-egressgateway:
     # enable cross cluster routing.
     ISTIO_META_ROUTER_MODE: "sni-dnat"
   nodeSelector: {}
-  
+
   # Specify the pod anti-affinity that allows you to constrain which nodes
   # your pod is eligible to be scheduled based on labels on pods that are
   # already running on the node rather than based on labels on nodes.
