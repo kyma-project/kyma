@@ -56,12 +56,14 @@ spec:
           resources:
             {{- toYaml .Values.loki.resources | nindent 12 }}
           livenessProbe:
+            initialDelaySeconds: 45
             exec:
               command:
                 - /bin/sh
                 - -c
                 - cat /dev/null | nc 127.0.0.1 {{ .Values.loki.port }}
           readinessProbe:
+            initialDelaySeconds: 45
             exec:
               command:
                 - /bin/sh
