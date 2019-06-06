@@ -1,9 +1,15 @@
 ---
 title: Configure default ClusterChannelProvisioner
-type: Tutorials
+type: Details
 ---
 
-Kyma comes with NATSS as its default ClusterChannelProvisioner.  You can see the configuration details in the [default-channel-webhook](../../resources/knative-eventing/charts/knative-eventing/templates/eventing.yaml) ConfigMap. You can, however, use other default channel provisioner of your choice. An example can be the in-memory-channel provisioner.
+# Overview
+
+Kyma comes with NATSS as its default ClusterChannelProvisioner.  You can see the configuration details in the [default-channel-webhook](../../resources/knative-eventing/charts/knative-eventing/templates/eventing.yaml) ConfigMap. 
+
+As an operator, it is possible to use a different messaging middleware other than NATS Streaming for Kyma eventing. This is achieved by configuring a ClusterChannelProvisioner which will connect to the running messaging middleware. Then next would be to configure the `default-channel-webhook` to use that particular ClusterChannelProvisioner.
+
+Below are some examples and their configuration details. 
 
 ### In-memory-channel
 Follow this [guide](https://github.com/knative/eventing/tree/master/config/provisioners/in-memory-channel) to to add an in-memory ClusterChannelProvisioner.
