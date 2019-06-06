@@ -1,0 +1,265 @@
+# Copyright 2018 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: eventing.knative.dev/v1alpha1
+kind: ClusterChannelProvisioner
+metadata:
+  name: gcp-pubsub
+spec: {}
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gcp-pubsub-channel-controller
+  namespace: knative-eventing
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gcp-pubsub-channel-controller
+rules:
+  - apiGroups:
+      - eventing.knative.dev
+    resources:
+      - channels
+      - channels/status
+      - clusterchannelprovisioners
+      - clusterchannelprovisioners/status
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+  - apiGroups:
+      - "" # Core API group.
+    resources:
+      - services
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - "" # Core API group.
+    resources:
+      - services
+    verbs:
+      - create
+      - update
+  - apiGroups:
+      - networking.istio.io
+    resources:
+      - virtualservices
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+  - apiGroups:
+      - "" # Core API Group.
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+      - update
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gcp-pubsub-channel-controller
+  namespace: knative-eventing
+subjects:
+  - kind: ServiceAccount
+    name: gcp-pubsub-channel-controller
+    namespace: knative-eventing
+roleRef:
+  kind: ClusterRole
+  name: gcp-pubsub-channel-controller
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gcp-pubsub-channel-controller
+  namespace: knative-eventing
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      clusterChannelProvisioner: gcp-pubsub
+      role: controller
+  template:
+    metadata:
+      labels: *labels
+    spec:
+      serviceAccountName: gcp-pubsub-channel-controller
+      containers:
+        - name: controller
+          image: eu.gcr.io/knative-releases/github.com/knative/eventing/contrib/gcppubsub/pkg/controller/cmd:v0.5.0
+          env:
+          - name: DEFAULT_GCP_PROJECT
+            value: REPLACE_WITH_GCP_PROJECT
+          - name: DEFAULT_SECRET_NAMESPACE
+            value: knative-eventing
+          - name: DEFAULT_SECRET_NAME
+            value: gcppubsub-channel-key
+          - name: DEFAULT_SECRET_KEY
+            value: key.json
+          - name: SYSTEM_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gcp-pubsub-channel-dispatcher
+  namespace: knative-eventing
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gcp-pubsub-channel-dispatcher
+  namespace: knative-eventing
+rules:
+  - apiGroups:
+      - eventing.knative.dev
+    resources:
+      - channels
+      - channels/status
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+  - apiGroups:
+      - "" # Core API group.
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - "" # Core API Group.
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+      - update
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gcp-pubsub-channel-dispatcher
+  namespace: knative-eventing
+subjects:
+  - kind: ServiceAccount
+    name: gcp-pubsub-channel-dispatcher
+    namespace: knative-eventing
+roleRef:
+  kind: ClusterRole
+  name: gcp-pubsub-channel-dispatcher
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gcp-pubsub-channel-dispatcher
+  namespace: knative-eventing
+spec:
+  replicas: 1
+  selector:
+    matchLabels: &labels
+      clusterChannelProvisioner: gcp-pubsub
+      role: dispatcher
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels: *labels
+    spec:
+      serviceAccountName: gcp-pubsub-channel-dispatcher
+      containers:
+        - name: dispatcher
+          image: eu.gcr.io/knative-releases/github.com/knative/eventing/contrib/gcppubsub/pkg/dispatcher/cmd:v0.5.0
+          env:
+          - name: DEFAULT_GCP_PROJECT
+            value: REPLACE_WITH_GCP_PROJECT
+          - name: DEFAULT_SECRET_NAMESPACE
+            value: knative-eventing
+          - name: DEFAULT_SECRET_NAME
+            value: gcppubsub-channel-key
+          - name: DEFAULT_SECRET_KEY
+            value: key.json
+          - name: SYSTEM_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: gcp-pubsub-dispatcher
+  namespace: knative-eventing
+spec:
+  type: ClusterIP
+  selector:
+    clusterChannelProvisioner: gcp-pubsub
+    role: dispatcher
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080
+
+---
+
+# Needed by the GCP PubSub Channel to communicate with GCP PubSub.
+
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: gcppubsub-bus-ext
+  namespace: knative-eventing
+spec:
+  hosts:
+  - "*.googleapis.com"
+  - "accounts.google.com"
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  location: MESH_EXTERNAL
