@@ -3,7 +3,7 @@ title: GraphQL request flow
 type: Details
 ---
 
-This diagram illustrates the request flow for the Console Backend Service which uses a custom [GraphQL](https://graphql.org/) implementation:
+This diagram illustrates the request flow for the Console Backend Service which uses a custom [GraphQL](http://graphql.org/) implementation:
 
 ![GraphQL request flow](./assets/002-graphql-request-flow.svg)
 

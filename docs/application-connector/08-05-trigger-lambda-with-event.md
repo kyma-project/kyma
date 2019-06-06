@@ -162,7 +162,7 @@ metadata:
   namespace: production
 spec:
   endpoint: http://my-events-lambda.production:8080/
-  event_type: exampleEvent
+  event_type: exampleevent
   event_type_version: v1
   include_subscription_name_header: true
   max_inflight: 400
@@ -172,28 +172,16 @@ EOF
 ```
 
 6. Send an event to trigger the created lambda.
-  - On a cluster:
-    ```
-    curl -X POST https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
-    '{
-        "event-type": "exampleEvent",
-        "event-type-version": "v1",
-        "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-        "event-time": "2018-10-16T15:00:00Z",
-        "data": "some data"
-    }'
-    ```
-  - On a local deployment:
-    ```
-    curl -X POST https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
-    '{
-        "event-type": "exampleEvent",
-        "event-type-version": "v1",
-        "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-        "event-time": "2018-10-16T15:00:00Z",
-        "data": "some data"
-    }'
-    ```
+   ```
+   curl -X POST https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+   '{
+       "event-type": "exampleevent",
+       "event-type-version": "v1",
+       "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+       "event-time": "2018-10-16T15:00:00Z",
+       "data": "some data"
+   }'
+   ```
 
 7. Check the logs of the lambda function to see if it was triggered. Every time an event successfully triggers the function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`. Run this command:
 ```

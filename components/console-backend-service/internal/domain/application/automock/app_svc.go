@@ -65,13 +65,13 @@ func (_m *appSvc) Disable(namespace string, name string) error {
 	return r0
 }
 
-// Enable provides a mock function with given fields: namespace, name
-func (_m *appSvc) Enable(namespace string, name string) (*applicationconnectorv1alpha1.ApplicationMapping, error) {
-	ret := _m.Called(namespace, name)
+// Enable provides a mock function with given fields: namespace, name, services
+func (_m *appSvc) Enable(namespace string, name string, services []*gqlschema.ApplicationMappingService) (*applicationconnectorv1alpha1.ApplicationMapping, error) {
+	ret := _m.Called(namespace, name, services)
 
 	var r0 *applicationconnectorv1alpha1.ApplicationMapping
-	if rf, ok := ret.Get(0).(func(string, string) *applicationconnectorv1alpha1.ApplicationMapping); ok {
-		r0 = rf(namespace, name)
+	if rf, ok := ret.Get(0).(func(string, string, []*gqlschema.ApplicationMappingService) *applicationconnectorv1alpha1.ApplicationMapping); ok {
+		r0 = rf(namespace, name, services)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*applicationconnectorv1alpha1.ApplicationMapping)
@@ -79,8 +79,8 @@ func (_m *appSvc) Enable(namespace string, name string) (*applicationconnectorv1
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(namespace, name)
+	if rf, ok := ret.Get(1).(func(string, string, []*gqlschema.ApplicationMappingService) error); ok {
+		r1 = rf(namespace, name, services)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -148,6 +148,29 @@ func (_m *appSvc) List(params pager.PagingParams) ([]*v1alpha1.Application, erro
 	var r1 error
 	if rf, ok := ret.Get(1).(func(pager.PagingParams) error); ok {
 		r1 = rf(params)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListApplicationMapping provides a mock function with given fields: name
+func (_m *appSvc) ListApplicationMapping(name string) ([]*applicationconnectorv1alpha1.ApplicationMapping, error) {
+	ret := _m.Called(name)
+
+	var r0 []*applicationconnectorv1alpha1.ApplicationMapping
+	if rf, ok := ret.Get(0).(func(string) []*applicationconnectorv1alpha1.ApplicationMapping); ok {
+		r0 = rf(name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*applicationconnectorv1alpha1.ApplicationMapping)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -227,6 +250,29 @@ func (_m *appSvc) Update(name string, description string, labels gqlschema.Label
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string, gqlschema.Labels) error); ok {
 		r1 = rf(name, description, labels)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateApplicationMapping provides a mock function with given fields: namespace, name, services
+func (_m *appSvc) UpdateApplicationMapping(namespace string, name string, services []*gqlschema.ApplicationMappingService) (*applicationconnectorv1alpha1.ApplicationMapping, error) {
+	ret := _m.Called(namespace, name, services)
+
+	var r0 *applicationconnectorv1alpha1.ApplicationMapping
+	if rf, ok := ret.Get(0).(func(string, string, []*gqlschema.ApplicationMappingService) *applicationconnectorv1alpha1.ApplicationMapping); ok {
+		r0 = rf(namespace, name, services)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*applicationconnectorv1alpha1.ApplicationMapping)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string, []*gqlschema.ApplicationMappingService) error); ok {
+		r1 = rf(namespace, name, services)
 	} else {
 		r1 = ret.Error(1)
 	}

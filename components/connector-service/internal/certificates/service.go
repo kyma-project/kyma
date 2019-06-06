@@ -3,6 +3,7 @@ package certificates
 import (
 	"crypto/x509"
 	"encoding/base64"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/secrets"
@@ -17,11 +18,11 @@ type Service interface {
 type certificateService struct {
 	secretsRepository           secrets.Repository
 	certUtil                    CertificateUtility
-	caSecretName                string
-	rootCACertificateSecretName string
+	caSecretName                types.NamespacedName
+	rootCACertificateSecretName types.NamespacedName
 }
 
-func NewCertificateService(secretRepository secrets.Repository, certUtil CertificateUtility, caSecretName, rootCACertificateSecretName string) Service {
+func NewCertificateService(secretRepository secrets.Repository, certUtil CertificateUtility, caSecretName, rootCACertificateSecretName types.NamespacedName) Service {
 	return &certificateService{
 		secretsRepository:           secretRepository,
 		certUtil:                    certUtil,
@@ -72,7 +73,7 @@ func (svc *certificateService) encodeCertificates(rawCaCertificate, rawClientCer
 	caCrtBytes := svc.certUtil.AddCertificateHeaderAndFooter(rawCaCertificate)
 	signedCrtBytes := svc.certUtil.AddCertificateHeaderAndFooter(rawClientCertificate)
 
-	if svc.rootCACertificateSecretName != "" {
+	if svc.rootCACertificateSecretName.Name != "" {
 		rootCABytes, err := svc.loadRootCACert()
 		if err != nil {
 			return EncodedCertificateChain{}, err

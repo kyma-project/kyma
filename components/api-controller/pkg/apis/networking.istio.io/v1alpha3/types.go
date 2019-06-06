@@ -33,15 +33,16 @@ func (s *VirtualServiceSpec) String() string {
 }
 
 type HTTPRoute struct {
-	Match []*HTTPMatchRequest  `json:"match"`
-	Route []*DestinationWeight `json:"route"`
+	Match      []*HTTPMatchRequest     `json:"match"`
+	Route      []*HTTPRouteDestination `json:"route"`
+	CorsPolicy *CorsPolicy             `json:"corsPolicy,omitempty"`
 }
 
 func (o *HTTPRoute) String() string {
 	return fmt.Sprintf("{Match: %v, Route: %v}", o.Match, o.Route)
 }
 
-type DestinationWeight struct {
+type HTTPRouteDestination struct {
 	Destination *Destination `json:"destination"`
 }
 
@@ -60,6 +61,12 @@ type HTTPMatchRequest struct {
 
 type StringMatch struct {
 	Regex string `json:"regex"`
+}
+
+type CorsPolicy struct {
+	AllowOrigin  []string `json:"allowOrigin,omitempty"`
+	AllowMethods []string `json:"allowMethods,omitempty"`
+	AllowHeaders []string `json:"allowHeaders,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

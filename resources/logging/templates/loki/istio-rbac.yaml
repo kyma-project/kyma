@@ -12,6 +12,13 @@ spec:
   - services: ["logging.kyma-system.svc.cluster.local"]
     methods: ["GET", "POST", "OPTIONS"]
     paths: ["/api/*"]
+  - services: ["logging.kyma-system.svc.cluster.local"]
+    methods: ["GET"]
+    paths: ["/metrics"]
+    constraints:
+    - key: "request.headers[User-Agent]"
+      values: ["Prometheus/*"]
+
 ---
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRoleBinding

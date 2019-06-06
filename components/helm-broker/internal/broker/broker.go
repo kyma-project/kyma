@@ -189,6 +189,7 @@ func newWithIDProvider(bs bundleStorage, cs chartStorage, os operationStorage, i
 			instanceBindDataRemover: ibd,
 			operationIDProvider:     idp,
 			helmDeleter:             hc,
+			log:                     log.WithField("service", "deprovisioner"),
 		},
 		binder: &bindService{
 			instanceBindDataGetter: ibd,

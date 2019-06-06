@@ -18,9 +18,6 @@ var (
 
 func TestCertificatePreserver_PreserveCertificates(t *testing.T) {
 
-	clusterCertSecretName := "cluster-secret-name"
-	caSecretName := "ca-secret-name"
-
 	certificates := Certificates{
 		CRTChain:  crtChain,
 		ClientCRT: clientCRT,
@@ -37,10 +34,10 @@ func TestCertificatePreserver_PreserveCertificates(t *testing.T) {
 		caSecretData := map[string][]byte{caCertificateSecretKey: caCRT}
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("UpsertWithMerge", clusterCertSecretName, clusterSecretData).Return(nil)
-		secretsRepository.On("UpsertWithMerge", caSecretName, caSecretData).Return(nil)
+		secretsRepository.On("UpsertWithMerge", clusterCertSecretNamespaceName, clusterSecretData).Return(nil)
+		secretsRepository.On("UpsertWithMerge", caCertSecretNamespaceName, caSecretData).Return(nil)
 
-		certificatePreserver := NewCertificatePreserver(clusterCertSecretName, caSecretName, secretsRepository)
+		certificatePreserver := NewCertificatePreserver(clusterCertSecretNamespaceName, caCertSecretNamespaceName, secretsRepository)
 
 		// when
 		err := certificatePreserver.PreserveCertificates(certificates)
@@ -58,9 +55,9 @@ func TestCertificatePreserver_PreserveCertificates(t *testing.T) {
 		}
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("UpsertWithMerge", clusterCertSecretName, clusterSecretData).Return(errors.New("error"))
+		secretsRepository.On("UpsertWithMerge", clusterCertSecretNamespaceName, clusterSecretData).Return(errors.New("error"))
 
-		certificatePreserver := NewCertificatePreserver(clusterCertSecretName, caSecretName, secretsRepository)
+		certificatePreserver := NewCertificatePreserver(clusterCertSecretNamespaceName, caCertSecretNamespaceName, secretsRepository)
 
 		// when
 		err := certificatePreserver.PreserveCertificates(certificates)
@@ -79,10 +76,10 @@ func TestCertificatePreserver_PreserveCertificates(t *testing.T) {
 		caSecretData := map[string][]byte{caCertificateSecretKey: caCRT}
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("UpsertWithMerge", clusterCertSecretName, clusterSecretData).Return(nil)
-		secretsRepository.On("UpsertWithMerge", caSecretName, caSecretData).Return(errors.New("error"))
+		secretsRepository.On("UpsertWithMerge", clusterCertSecretNamespaceName, clusterSecretData).Return(nil)
+		secretsRepository.On("UpsertWithMerge", caCertSecretNamespaceName, caSecretData).Return(errors.New("error"))
 
-		certificatePreserver := NewCertificatePreserver(clusterCertSecretName, caSecretName, secretsRepository)
+		certificatePreserver := NewCertificatePreserver(clusterCertSecretNamespaceName, caCertSecretNamespaceName, secretsRepository)
 
 		// when
 		err := certificatePreserver.PreserveCertificates(certificates)

@@ -196,6 +196,10 @@ type mutationResolver struct {
 	*RootResolver
 }
 
+func (r *mutationResolver) CreateResourceQuota(ctx context.Context, namespace string, name string, resourceQuotaInput gqlschema.ResourceQuotaInput) (*gqlschema.ResourceQuota, error) {
+	return r.k8s.CreateResourceQuota(ctx, namespace, name, resourceQuotaInput)
+}
+
 func (r *mutationResolver) CreateResource(ctx context.Context, namespace string, resource gqlschema.JSON) (*gqlschema.JSON, error) {
 	return r.k8s.CreateResourceMutation(ctx, namespace, resource)
 }
@@ -264,8 +268,12 @@ func (r *mutationResolver) DeleteServiceBindingUsage(ctx context.Context, servic
 	return r.sca.Resolver.DeleteServiceBindingUsageMutation(ctx, serviceBindingUsageName, ns)
 }
 
-func (r *mutationResolver) EnableApplication(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error) {
-	return r.app.Resolver.EnableApplicationMutation(ctx, application, namespace)
+func (r *mutationResolver) EnableApplication(ctx context.Context, application string, namespace string, all *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error) {
+	return r.app.Resolver.EnableApplicationMutation(ctx, application, namespace, all, services)
+}
+
+func (r *mutationResolver) OverloadApplication(ctx context.Context, application string, namespace string, all *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error) {
+	return r.app.Resolver.OverloadApplicationMutation(ctx, application, namespace, all, services)
 }
 
 func (r *mutationResolver) DisableApplication(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error) {
@@ -310,6 +318,14 @@ func (r *mutationResolver) AddAddonsConfigurationURLs(ctx context.Context, name 
 
 func (r *mutationResolver) RemoveAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
 	return r.sca.Resolver.RemoveAddonsConfigurationURLs(ctx, name, urls)
+}
+
+func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) {
+	return r.k8s.CreateNamespace(ctx, name, labels)
+}
+
+func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace string, name string, limitRange gqlschema.LimitRangeInput) (*gqlschema.LimitRange, error) {
+	return r.k8s.CreateLimitRange(ctx, namespace, name, limitRange)
 }
 
 // Queries
@@ -619,6 +635,10 @@ type appResolver struct {
 
 func (r *appResolver) EnabledInNamespaces(ctx context.Context, obj *gqlschema.Application) ([]string, error) {
 	return r.app.Resolver.ApplicationEnabledInNamespacesField(ctx, obj)
+}
+
+func (r *appResolver) EnabledMappingServices(ctx context.Context, obj *gqlschema.Application) ([]*gqlschema.EnabledMappingService, error) {
+	return r.app.Resolver.ApplicationEnabledMappingServices(ctx, obj)
 }
 
 func (r *appResolver) Status(ctx context.Context, obj *gqlschema.Application) (gqlschema.ApplicationStatus, error) {

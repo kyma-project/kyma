@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: knative-eventing-post-upgrade
+  namespace: knative-eventing
+  annotations:
+    "helm.sh/hook": "post-upgrade"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+      - name: post-upgrade
+        image: eu.gcr.io/kyma-project/event-bus/knative-eventing-post-upgrade:1.0.0
+      restartPolicy: Never
+      serviceAccountName: knative-eventing-post-upgrade
+  backoffLimit: 1
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: knative-eventing-post-upgrade
+  namespace: knative-eventing
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: knative-eventing-post-upgrade
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["create", "delete", "get", "list"]
+- apiGroups: ["eventing.knative.dev"]
+  resources: ["channels"]
+  verbs: ["get", "create", "update", "delete", "list"]
+- apiGroups: ["eventing.knative.dev"]
+  resources: ["subscriptions"]
+  verbs: ["get", "create", "delete", "list"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: knative-eventing-post-upgrade
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: knative-eventing-post-upgrade
+subjects:
+- kind: ServiceAccount
+  name: knative-eventing-post-upgrade
+  namespace: knative-eventing
+---

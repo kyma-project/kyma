@@ -12,6 +12,6 @@ By default, following changes are applied:
  * A DestinationRule CR disabling mTLS for requests to Helm Tiller.
 
 Changes moved into the Istio chart:
-- Configuration of Zipkin as a tracer, done by official Istio values (`global.tracer.zipkin.address`)
+- Configuration of Zipkin as a tracer, done by official Istio values (`global.tracer.zipkin.address` in the `values.yaml` file)
 - HostPorts in ingress-gateway deployment, done by editing the Istio chart (`istio/charts/gateways` `templates/deployment.yaml` and `values.yaml`)
 

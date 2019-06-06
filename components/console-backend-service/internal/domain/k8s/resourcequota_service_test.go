@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/stretchr/testify/assert"
@@ -36,6 +38,48 @@ func TestResourceQuotaResolver_ListSuccess(t *testing.T) {
 	assert.Len(t, result, 2)
 }
 
+func TestResourceQuota_Create(t *testing.T) {
+	const (
+		namespace = "production"
+	)
+
+	rq1 := fixResourceQuota("rq1", "production")
+	rq2 := fixResourceQuota("rq2", "stage")
+	client := fake.NewSimpleClientset(rq1, rq2)
+	svc := k8s.NewResourceQuotaService(nil, nil, nil, client.CoreV1())
+
+	for caseName, test := range map[string]struct {
+		namespace              string
+		name                   string
+		resourceLimitsMemory   string
+		resourceRequestsMemory string
+		success                bool
+	}{
+		"Success":            {"production", "mem-default", "1Gi", "512Mi", true},
+		"DifferentNamespace": {"stage", "test", "2Gi", "3006477108", true},
+		"Duplicate":          {"production", "rq1", "2Gi", "3006477108", false},
+	} {
+		t.Run(caseName, func(t *testing.T) {
+			resourceQuotaInputGQL := gqlschema.ResourceQuotaInput{
+				Limits: gqlschema.ResourceValuesInput{
+					Memory: &test.resourceLimitsMemory,
+				},
+				Requests: gqlschema.ResourceValuesInput{
+					Memory: &test.resourceRequestsMemory,
+				},
+			}
+			result, err := svc.CreateResourceQuota(namespace, test.name, resourceQuotaInputGQL)
+
+			if test.success {
+				require.NoError(t, err)
+				assert.NotNil(t, result)
+			} else {
+				require.Error(t, err)
+				assert.Nil(t, result)
+			}
+		})
+	}
+}
 func TestResourceQuotaService_ListReplicaSets(t *testing.T) {
 	// GIVEN
 	rs1 := fixReplicaSet("rs1", "prod", nil)

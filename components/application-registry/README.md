@@ -33,21 +33,16 @@ The Application Registry has the following parameters:
 - **namespace** - Namespace where Application Registry is deployed. The default Namespace is `kyma-system`.
 - **requestTimeout** - A time-out for requests sent through the Application Registry. It is provided in seconds. The default time-out is `1`.
 - **requestLogging** - A flag for logging incoming requests. The default value is `false`.
+- **specRequestTimeout** - A time-out for requests fetching specifications provided by the user. It is provided in seconds. The default time-out is `5`.
+- **assetstoreRequestTimeout** - A time-out for requests fetching specifications from the Asset Store Service. It is provided in seconds. The default time-out is `5`.
 - **detailedErrorResponse** - A flag for showing detailed internal error messages in response bodies. The default value is `false` and all internal server error messages are shortened to `Internal error`, while all other error messages are shown as usual.
 
 ### Sample calls
 
-To access the Application Registry on Minikube you need the NodePort of `application-connector-ingress-nginx-ingress-controller`.
-To get the NodePort, run this command:
-
-```
-kubectl -n kyma-system get svc application-connector-ingress-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
-```
-
 - Create a new service
 
 ```sh
-curl -X POST https://gateway.kyma.local:{NODE_PORT}/{APPLICATION_NAME}/v1/metadata/services --cert {CER_NAME}.crt --key {CERT_KEY}.key -k \
+curl -X POST https://gateway.kyma.local/{APPLICATION_NAME}/v1/metadata/services --cert {CER_NAME}.crt --key {CERT_KEY}.key -k \
   -d '{"name": "Some EC",
   "provider": "kyma",
   "description": "This is some EC!",
@@ -88,7 +83,7 @@ curl -X POST https://gateway.kyma.local:{NODE_PORT}/{APPLICATION_NAME}/v1/metada
 - Fetch all services
 
 ```
-curl https://gateway.kyma.local:{NODE_PORT}/{APPLICATION_NAME}/v1/metadata/services --cert {CERT_NAME}.crt --key {KEY_NAME}.key -k
+curl https://gateway.kyma.local/{APPLICATION_NAME}/v1/metadata/services --cert {CERT_NAME}.crt --key {KEY_NAME}.key -k
 ```
 
 ## Development

@@ -8,6 +8,7 @@ global:
   isLocalEnv: false
   namespace: kyma-integration
   istio:
+    namespace: istio-system
     tls:
       secretName: istio-ingress-certs
     gateway:
@@ -17,16 +18,16 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir: develop/
-    version: 27571a1a
+    version: d7092530
   application_operator_tests:
     dir: develop/
-    version: 68a39bb5
+    version: d7092530
   connector_service:
     dir: develop/
-    version: fedca3db
+    version: e6315e54
   connector_service_tests:
     dir: develop/
-    version: 3b4c9f62
+    version: 29f4d46c
   connection_token_handler:
     dir: develop/
     version: 3d922c3d
@@ -35,13 +36,16 @@ global:
     version: 00d7f520
   connectivity_certs_controller:
     dir: develop/
-    version: ffc9ea80
+    version: 91adb4c1
   event_service:
     dir: develop/
-    version: fedca3db
+    version: 5d1f50d1
   gateway_tests:
     dir: develop/
     version: fedca3db
+  application_connectivity_validator:
+    dir: develop/
+    version: d7092530
   application_gateway:
     dir: develop/
     version: f76e0544
@@ -56,6 +60,17 @@ global:
     version: 4c614be5
   application_broker:
     dir: develop/
-    version: af3d25ba
+    version: d999e831
 connectivity_certs_controller:
   enabled: false
+
+tests:
+  application_connector_tests:
+    enabled: *connectorServiceEnabled
+    connector_service:
+      central: false
+    skipSslVerify: true
+    image:
+      dir: develop/
+      version: "84164981"
+      pullPolicy: IfNotPresent

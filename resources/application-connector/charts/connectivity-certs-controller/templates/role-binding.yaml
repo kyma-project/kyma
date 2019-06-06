@@ -1,8 +1,8 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ .Chart.Name }}-role
-  namespace: {{ .Values.global.namespace }}
+  name: {{ .Chart.Name }}-client-cert-role
+  namespace: {{ .Values.secrets.clientCertificate.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}
@@ -10,13 +10,14 @@ metadata:
 rules:
   - apiGroups: ["*"]
     resources: ["secrets"]
+    resourceNames: ["{{ .Values.secrets.clientCertificate.name }}"]
     verbs: ["create", "get", "update", "delete"]
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Chart.Name }}-rolebinding
-  namespace: {{ .Values.global.namespace }}
+  name: {{ .Chart.Name }}-client-cert-rolebinding
+  namespace: {{ .Values.secrets.clientCertificate.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}
@@ -27,5 +28,38 @@ subjects:
     namespace: {{ .Values.global.namespace }}
 roleRef:
   kind: Role
-  name: {{ .Chart.Name }}-role
+  name: {{ .Chart.Name }}-client-cert-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Chart.Name }}-ca-cert-role
+  namespace: {{ .Values.secrets.caCertificate.namespace | default "default" }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+rules:
+  - apiGroups: ["*"]
+    resources: ["secrets"]
+    resourceNames: ["{{ .Values.secrets.caCertificate.name }}"]
+    verbs: ["create", "get", "update", "delete"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}-ca-cert-rolebinding
+  namespace: {{ .Values.secrets.caCertificate.namespace | default "default" }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}
+    namespace: {{ .Values.global.namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Chart.Name }}-ca-cert-role
   apiGroup: rbac.authorization.k8s.io

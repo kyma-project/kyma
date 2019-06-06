@@ -14,6 +14,6 @@ func NewMockKnativePublisher() publisher.KnativePublisher {
 }
 
 func (m *MockKnativePublisher) Publish(knativeLib *knative.KnativeLib, channelName *string, namespace *string,
-	headers *map[string]string, payload *[]byte, publishRequest *api.PublishRequest) (*api.Error, string) {
+	headers *map[string][]string, payload *[]byte, publishRequest *api.PublishRequest) (*api.Error, string) {
 	return nil, publisher.PUBLISHED
 }
