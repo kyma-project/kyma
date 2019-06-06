@@ -55,18 +55,7 @@ spec:
               protocol: TCP
           resources:
             {{- toYaml .Values.loki.resources | nindent 12 }}
-          livenessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - cat /dev/null | nc 127.0.0.1 {{ .Values.loki.port }}
-          readinessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - wget -O- http://127.0.0.1:{{ .Values.loki.port }}/ready
+          
       nodeSelector:
         {{- toYaml .Values.loki.nodeSelector | nindent 8 }}
       affinity:
