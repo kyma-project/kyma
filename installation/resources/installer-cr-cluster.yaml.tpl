@@ -1,4 +1,4 @@
-yapiVersion: "installer.kyma-project.io/v1alpha1"
+apiVersion: "installer.kyma-project.io/v1alpha1"
 kind: Installation
 metadata:
   name: kyma-installation
