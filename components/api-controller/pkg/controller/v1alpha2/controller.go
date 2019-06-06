@@ -2,7 +2,6 @@ package v1alpha2
 
 import (
 	"fmt"
-
 	"k8s.io/apimachinery/pkg/labels"
 
 	log "github.com/sirupsen/logrus"
@@ -31,15 +30,16 @@ import (
 )
 
 type Controller struct {
-	kymaInterface      kyma.Interface
-	apisLister         kymaListers.ApiLister
-	apisSynced         cache.InformerSynced
-	queue              workqueue.RateLimitingInterface
-	recorder           record.EventRecorder
-	virtualServiceCtrl networking.Interface
-	services           service.Interface
-	authentication     authentication.Interface
-	domainName         string
+	kymaInterface       kyma.Interface
+	apisLister          kymaListers.ApiLister
+	apisSynced          cache.InformerSynced
+	queue               workqueue.RateLimitingInterface
+	recorder            record.EventRecorder
+	virtualServiceCtrl  networking.Interface
+	services            service.Interface
+	authentication      authentication.Interface
+	domainName          string
+	blacklistedServices []string
 }
 
 func NewController(
@@ -48,20 +48,22 @@ func NewController(
 	services service.Interface,
 	authentication authentication.Interface,
 	internalInformerFactory kymaInformers.SharedInformerFactory,
-	domainName string) *Controller {
+	domainName string,
+	blacklistedServices []string) *Controller {
 
 	apisInformer := internalInformerFactory.Gateway().V1alpha2().Apis()
 
 	c := &Controller{
 
-		kymaInterface:      kymaInterface,
-		virtualServiceCtrl: virtualServiceCtrl,
-		services:           services,
-		authentication:     authentication,
-		apisLister:         apisInformer.Lister(),
-		apisSynced:         apisInformer.Informer().HasSynced,
-		queue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "apis"),
-		domainName:         domainName,
+		kymaInterface:       kymaInterface,
+		virtualServiceCtrl:  virtualServiceCtrl,
+		services:            services,
+		authentication:      authentication,
+		apisLister:          apisInformer.Lister(),
+		apisSynced:          apisInformer.Informer().HasSynced,
+		queue:               workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "apis"),
+		domainName:          domainName,
+		blacklistedServices: blacklistedServices,
 	}
 
 	apisInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -238,6 +240,12 @@ func (c *Controller) validateAPI(newAPI *kymaApi.Api, apiStatusHelper *ApiStatus
 		return status
 	}
 
+	err := c.validateVirtualService(newAPI)
+	if err != nil {
+		log.Errorf("Error while validating API %s/%s ver: %s. Root cause: %s", newAPI.Namespace, newAPI.Name, newAPI.ResourceVersion, err)
+		return setStatus(kymaMeta.Error)
+	}
+
 	targetServiceName := newAPI.Spec.Service.Name
 
 	existingAPIs, err := c.apisLister.Apis(newAPI.GetNamespace()).List(labels.Everything())
@@ -254,6 +262,18 @@ func (c *Controller) validateAPI(newAPI *kymaApi.Api, apiStatusHelper *ApiStatus
 	}
 
 	return setStatus(kymaMeta.Successful)
+}
+
+func (c *Controller) validateVirtualService(newAPI *kymaApi.Api)error{
+	for _, svc := range c.blacklistedServices {
+		separator := "."
+		props := strings.Split(svc, separator)
+
+		if newAPI.Spec.Service.Name == props[0] && newAPI.GetNamespace() == props[1]{
+			return fmt.Errorf("creating VirtualService for %s.%s is forbidden", newAPI.Spec.Service.Name, newAPI.GetNamespace())
+		}
+	}
+	return nil
 }
 
 func (c *Controller) createVirtualService(metaDto meta.Dto, api *kymaApi.Api, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
