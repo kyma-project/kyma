@@ -7,11 +7,6 @@ metadata:
     app: istio-kyma-patch
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
-
-  injection-in-namespaces: |
-    istio-system disabled
-    kube-system disabled
-
   delete: |
     deployment prometheus
     configmap prometheus

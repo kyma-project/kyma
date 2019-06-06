@@ -1,4 +1,4 @@
-apiVersion: "installer.kyma-project.io/v1alpha1"
+yapiVersion: "installer.kyma-project.io/v1alpha1"
 kind: Installation
 metadata:
   name: kyma-installation
@@ -17,10 +17,10 @@ spec:
       namespace: "kyma-system"
     - name: "istio-init"
       namespace: "istio-system"
-    - name: "istio"
-      namespace: "istio-system"
     - name: "xip-patch"
       namespace: "kyma-installer"
+    - name: "istio"
+      namespace: "istio-system"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
     - name: "knative-serving"

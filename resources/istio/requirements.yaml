@@ -1,4 +1,7 @@
 dependencies:
+  - name: kyma
+    version: 0.1.0
+    condition: kyma.enabled
   - name: sidecarInjectorWebhook
     version: 1.1.0
     condition: sidecarInjectorWebhook.enabled
@@ -41,6 +44,3 @@ dependencies:
   - name: certmanager
     version: 1.1.0
     condition: certmanager.enabled
-  - name: kyma
-    version: 0.1.0
-    condition: kyma.enabled

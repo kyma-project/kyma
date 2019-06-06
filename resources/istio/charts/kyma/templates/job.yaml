@@ -1,0 +1,27 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kyma-ns-label
+  # annotations:
+  #   "helm.sh/hook": pre-install,pre-upgrade
+  #   "helm.sh/hook-delete-policy": hook-succeeded
+  #   "helm.sh/hook-weight": 10
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: kyma-ns-label
+    spec:
+      serviceAccountName: kyma-ns-label
+      restartPolicy: OnFailure
+      containers:
+      - name: kyma-ns-label
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+        command:
+          - /bin/bash
+          - -c
+          - |
+            for NS in istio-system kube-system; do
+              kubectl label namespace "${NS}" "istio-injection=disabled" --overwrite
+            done
