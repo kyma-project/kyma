@@ -146,7 +146,7 @@ func getCORSConfig() istioNetworkingV1.CORSConfig {
 	}
 }
 
-func getBlacklistedServices() []string{
+func getBlacklistedServices() []string {
 	separator := ","
 	list := os.Getenv("BLACKLISTED_SERVICES")
 

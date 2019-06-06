@@ -2,6 +2,7 @@ package v1alpha2
 
 import (
 	"fmt"
+
 	"k8s.io/apimachinery/pkg/labels"
 
 	log "github.com/sirupsen/logrus"
@@ -264,12 +265,12 @@ func (c *Controller) validateAPI(newAPI *kymaApi.Api, apiStatusHelper *ApiStatus
 	return setStatus(kymaMeta.Successful)
 }
 
-func (c *Controller) validateVirtualService(newAPI *kymaApi.Api)error{
+func (c *Controller) validateVirtualService(newAPI *kymaApi.Api) error {
 	for _, svc := range c.blacklistedServices {
 		separator := "."
 		props := strings.Split(svc, separator)
 
-		if newAPI.Spec.Service.Name == props[0] && newAPI.GetNamespace() == props[1]{
+		if newAPI.Spec.Service.Name == props[0] && newAPI.GetNamespace() == props[1] {
 			return fmt.Errorf("creating VirtualService for %s.%s is forbidden", newAPI.Spec.Service.Name, newAPI.GetNamespace())
 		}
 	}
