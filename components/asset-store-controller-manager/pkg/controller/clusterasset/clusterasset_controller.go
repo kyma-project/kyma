@@ -46,7 +46,7 @@ func Add(mgr manager.Manager) error {
 		return errors.Wrapf(err, "while initializing Store client")
 	}
 
-	store := store.New(minioClient)
+	store := store.New(minioClient, cfg.Store.UploadWorkerCount)
 	loader := loader.New(cfg.Loader.TemporaryDirectory, cfg.Loader.VerifySSL)
 	findBucketFnc := bucketFinder(mgr)
 	deleteFinalizer := finalizer.New(deleteClusterAssetFinalizerName)
@@ -71,7 +71,7 @@ func Add(mgr manager.Manager) error {
 		metadataExtractor: metadataExtractor,
 	}
 
-	return add(mgr, reconciler)
+	return add(mgr, reconciler, cfg.MaxClusterAssetConcurrentReconciles)
 }
 
 func bucketFinder(mgr manager.Manager) func(ctx context.Context, namespace, name string) (*assetstorev1alpha2.CommonBucketStatus, bool, error) {
@@ -88,7 +88,7 @@ func bucketFinder(mgr manager.Manager) func(ctx context.Context, namespace, name
 			return nil, false, err
 		}
 
-		if instance == nil || instance.Status.Phase != assetstorev1alpha2.BucketReady {
+		if instance.Status.Phase != assetstorev1alpha2.BucketReady {
 			return nil, false, nil
 		}
 
@@ -97,9 +97,12 @@ func bucketFinder(mgr manager.Manager) func(ctx context.Context, namespace, name
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
-func add(mgr manager.Manager, r reconcile.Reconciler) error {
+func add(mgr manager.Manager, r reconcile.Reconciler, maxConcurrentReconciles int) error {
 	// Create a new controller
-	c, err := controller.New("clusterasset-controller", mgr, controller.Options{Reconciler: r})
+	c, err := controller.New("clusterasset-controller", mgr, controller.Options{
+		Reconciler: r,
+		MaxConcurrentReconciles: maxConcurrentReconciles,
+	})
 	if err != nil {
 		return err
 	}

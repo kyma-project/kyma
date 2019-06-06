@@ -19,3 +19,6 @@ This table lists the configurable parameters, their descriptions, and default va
 | **resources.limits.memory** | Defines limits for memory resources. | `128Mi` |
 | **resources.requests.cpu** | Defines requests for CPU resources. | `100m` |
 | **resources.requests.memory** | Defines requests for memory resources. | `64Mi` |
+| **maxClusterAssetConcurrentReconciles** | Defines the maximum number of cluster asset concurrent Reconciles which will run. | `3` |
+| **maxAssetConcurrentReconciles** | Defines the maximum number of asset concurrent Reconciles which will run. | `3` |
+| **maxClusterAssetConcurrentReconciles** | Defines the number of workers that will be used to upload files to storage bucket in parallel. | `3` |
