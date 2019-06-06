@@ -19,28 +19,33 @@ Choose the installation type and get started:
   GCP Marketplace
   </summary>
 
-  1. Access the Google Cloud Platform (GCP) Console at `https://console.cloud.google.com/`.
-  2. Select your project from the platform bar at the top of the page.
-  3. Search for GCP Marketplace in the search box and open the GCP Marketplace page.
-  4. Search for Kyma in the search box on the GCP Marketplace page and open **project Kyma** and click **CONFIGURE**.
-  5. You need to create a Kubernetes cluster for your Kyma installation. Select a cluster zone from the drop-down menu and click **Create cluster**. Wait for a few minutes for the Kubernetes cluster to deploy.
-  6. Leave the default values or adjust these settings:
+1. Access the [Google Cloud Platform (GCP) Marketplace](https://console.cloud.google.com/marketplace).
+
+2. Search for Kyma in the search box on the GCP Marketplace page. Open **project Kyma** and click **CONFIGURE**.
+
+3. When the pop-up box appears, select you project from the available list and confirm your choice.
+
+4. To create a Kubernetes cluster for your Kyma installation, select a cluster zone from the drop-down menu and click **Create cluster**. Wait for a few minutes for the Kubernetes cluster to deploy.
+
+5. Leave the default values or adjust these settings:
 
   | Field   |      Default value     |
   |----------|-------------|
-  | **Namespace**| `default`|
-  | **App instance Namespace** | `kyma` |
+  | **Namespace**| `default` |
+  | **App instance name** | `kyma-1` |
   | **Cluster Admin Service Account** | `Create a new service account` |
 
-  7. Click the **Deploy** button for the Kyma installation to start.
+6. Accept the GCP Marketplace Terms of Service to continue.
 
-  > **NOTE:** The installation can take several minutes to complete.
+7. Click the **Deploy** button for the Kyma installation to start.
 
-  8. Go back to the GCP Console and navigate to **Applications** in the left navigation menu for the installation status details.
-  9. If the installation status is green, follow the steps in the **INFO PANEL** under the **Next steps** section to import the self-signed TLS certificate to your keychain.
-  10. Access the cluster using the link and login details provided in the **Kyma info** section on the application details page.
+> **NOTE:** The installation can take several minutes to complete.
 
-  > **TIP:** You can also watch [this](https://www.youtube.com/watch?v=hxVhQqI1B5A) video to see how to install Kyma on Google Kubernetes Engine through Marketplace.
+7. Once you become redirected to the **Applications** page under **Kubernetes Engine** in the GCP Console, you get the installation status details. Check the installation status. If it is green, follow the steps in **INFO PANEL** under the **Next steps** section to import the self-signed TLS certificate to your keychain.
+
+9. Access the cluster using the link and login details provided in the **Kyma info** section on the application details page.
+
+> **TIP:** You can also watch [this](https://www.youtube.com/watch?v=hxVhQqI1B5A) video to see how to install Kyma on Google Kubernetes Engine through Marketplace.
 
   </details>
   <details>
@@ -120,7 +125,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
         ```
 
 After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
-    In case of an error, you can fetch the logs from the Installer by running:
+    If you receive an error, fetch the Installer logs using this command:
     ```
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
@@ -254,7 +259,7 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
         ```
 
 After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
-    In case of an error, you can fetch the logs from the Installer by running:
+    If you receive an error, fetch the Installer logs using this command:
     ```
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
