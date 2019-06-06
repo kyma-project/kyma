@@ -1,9 +1,10 @@
 package apicontroller
 
 import (
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/listener"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/listener"
 
 	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/fake"
@@ -43,9 +44,9 @@ func TestApiService_List(t *testing.T) {
 	})
 
 	t.Run("Should filter by namespace and hostname", func(t *testing.T) {
-		api1 := fixAPIWith("test-1",  namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
-		api2 := fixAPIWith("test-2",  "different-namespace", hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
-		api3 := fixAPIWith("test-3",  namespace, "different-hostname", serviceName, jwksUri, issuer, servicePort, nil, nil)
+		api1 := fixAPIWith("test-1", namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
+		api2 := fixAPIWith("test-2", "different-namespace", hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
+		api3 := fixAPIWith("test-3", namespace, "different-hostname", serviceName, jwksUri, issuer, servicePort, nil, nil)
 
 		informer := fixAPIInformer(api1, api2, api3)
 		client := fake.NewSimpleClientset(api1, api2, api3)
@@ -65,7 +66,7 @@ func TestApiService_List(t *testing.T) {
 		serviceName := "abc"
 
 		api1 := fixAPIWith("test-1", namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
-		api2 := fixAPIWith("test-2",  "different-namespace", hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
+		api2 := fixAPIWith("test-2", "different-namespace", hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
 		api3 := fixAPIWith("test-3", namespace, hostname, "different-service-name", jwksUri, issuer, servicePort, nil, nil)
 
 		informer := fixAPIInformer(api1, api2, api3)
@@ -87,7 +88,7 @@ func TestApiService_List(t *testing.T) {
 		hostname := "cba"
 
 		api1 := fixAPIWith("test-1", namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
-		api2 := fixAPIWith("test-2",  "different-namespace", hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
+		api2 := fixAPIWith("test-2", "different-namespace", hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
 		api3 := fixAPIWith("test-3", namespace, hostname, "different-service-name", jwksUri, issuer, servicePort, nil, nil)
 
 		informer := fixAPIInformer(api1, api2, api3)

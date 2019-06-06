@@ -2,6 +2,7 @@ package apicontroller
 
 import (
 	"fmt"
+
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
