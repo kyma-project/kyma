@@ -57,7 +57,7 @@ Use the following environment variables to configure the application:
 | **APP_LOADER_TEMPORARY_DIRECTORY** | No | `/tmp` | The path to the directory used to temporarily store data |
 | **APP_MAX_ASSET_CONCURRENT_RECONCILES** | No | 1 | The maximum number of asset concurrent Reconciles which will run |
 | **APP_MAX_CLUSTER_ASSET_CONCURRENT_RECONCILES** | No | 1 | The maximum number of cluster asset concurrent Reconciles which will run |
-| **APP_STORE_UPLOAD_WORKER_COUNT** | No | 10 | The number of workers that will be used to upload files to storage bucket in parallel |
+| **APP_STORE_UPLOAD_WORKER_COUNT** | No | `10` | The number of workers used to upload files to a storage bucket in parallel |
 
 ## Development
 
