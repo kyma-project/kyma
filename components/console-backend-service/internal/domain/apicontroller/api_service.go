@@ -2,6 +2,7 @@ package apicontroller
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
@@ -9,6 +10,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -131,7 +133,10 @@ func (svc *apiService) Update(name string, namespace string, hostname string, se
 	}
 
 	if oldApi == nil {
-		return nil, errors.New("API not found") //fix this error
+		return nil, apiErrors.NewNotFound(schema.GroupResource{
+			Group:    "authentication.kyma-project.io/v1alpha2",
+			Resource: "API",
+		}, name)
 	}
 
 	api := v1alpha2.Api{
