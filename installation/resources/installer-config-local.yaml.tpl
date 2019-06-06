@@ -151,6 +151,7 @@ metadata:
     kyma-project.io/installation: ""
 data:
    application-registry.minikubeIP: ""
+   tests.application_connector_tests.minikubeIP: ""
 ---
 apiVersion: v1
 kind: ConfigMap
