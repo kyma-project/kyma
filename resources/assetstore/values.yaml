@@ -25,6 +25,9 @@ global:
     version: 'v20190325-ff66a3a'
 
 minio:
+  image:
+    tag: RELEASE.2019-06-04T01-15-58Z
+
   persistence:
     enabled: true
     size: 10Gi
@@ -54,4 +57,4 @@ minio:
       cpu: 100m
 
   gcsgateway:
-    replicas: 1
+    replicas: 2
