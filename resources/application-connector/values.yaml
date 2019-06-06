@@ -43,6 +43,9 @@ global:
   gateway_tests:
     dir:
     version: 1.2.0-rc0
+  application_connectivity_validator:
+    dir:
+    version: 1.2.0-rc0
   application_gateway:
     dir:
     version: 1.2.0-rc0
