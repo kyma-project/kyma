@@ -147,12 +147,9 @@ func getCORSConfig() istioNetworkingV1.CORSConfig {
 }
 
 func getBlacklistedServices() []string {
-	separator := ","
 	list := os.Getenv("BLACKLISTED_SERVICES")
 
-	blacklistedServices := removeEmptyStrings(strings.Split(list, separator))
-
-	return blacklistedServices
+	return removeEmptyStrings(strings.Split(list, ","))
 }
 
 func removeEmptyStrings(strings []string) []string {

@@ -271,7 +271,7 @@ func (c *Controller) validateVirtualService(newAPI *kymaApi.Api) error {
 		props := strings.Split(svc, separator)
 
 		if newAPI.Spec.Service.Name == props[0] && newAPI.GetNamespace() == props[1] {
-			return fmt.Errorf("creating VirtualService for %s.%s is forbidden", newAPI.Spec.Service.Name, newAPI.GetNamespace())
+			return fmt.Errorf("Service %s.%s has been blacklisted by BLACKLISTED_SERVICES env", newAPI.Spec.Service.Name, newAPI.GetNamespace())
 		}
 	}
 	return nil
