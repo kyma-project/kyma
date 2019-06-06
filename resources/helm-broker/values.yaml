@@ -31,11 +31,11 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   helm_broker:
-    dir: develop/
-    version: fd24a42a
+    dir:
+    version: 1.2.0-rc0
   alpine_net:
-    dir: develop/
-    version: 149967d0
+    dir:
+    version: 1.2.0-rc0
   add_ons_ui:
     dir: ""
     version: 23b3d5a1
