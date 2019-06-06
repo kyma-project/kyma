@@ -31,7 +31,7 @@ Choose the installation type and get started:
 
   | Field   |      Default value     |
   |----------|-------------|
-  | **Namespace**| `default` |
+  | **Namespace** | `default` |
   | **App instance name** | `kyma-1` |
   | **Cluster Admin Service Account** | `Create a new service account` |
 
