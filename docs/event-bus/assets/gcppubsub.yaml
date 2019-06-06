@@ -111,6 +111,8 @@ spec:
       role: controller
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels: *labels
     spec:
       serviceAccountName: gcp-pubsub-channel-controller
