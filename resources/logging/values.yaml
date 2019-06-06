@@ -93,7 +93,7 @@ loki:
   persistence:
     enabled: true
     accessModes:
-      - ReadWriteOnce
+      - ReadWriteMany
     size: 10Gi
     storageClassName: ""
     # annotations: {}
