@@ -45,7 +45,7 @@ Choose the installation type and get started:
 
 9. Access the cluster using the link and login details provided in the **Kyma info** section on the application details page.
 
-> **TIP:** You can also watch [this](https://www.youtube.com/watch?v=hxVhQqI1B5A) video to see how to install Kyma on Google Kubernetes Engine through Marketplace.
+> **TIP:** Watch [this](https://www.youtube.com/watch?v=hxVhQqI1B5A) video for the installation demo.
 
   </details>
   <details>
