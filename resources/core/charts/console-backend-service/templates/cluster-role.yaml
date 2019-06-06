@@ -43,7 +43,7 @@ rules:
     verbs: ["get", "list", "watch"]
   - apiGroups: ["gateway.kyma-project.io"]
     resources: ["apis"]
-    verbs: ["get", "list", "watch"]
+    verbs: ["get", "list", "watch", "create", "delete", "update"]
   - apiGroups: ["authentication.kyma-project.io"]
     resources: ["idppresets"]
     verbs: ["get", "list", "watch", "create", "delete"]
