@@ -66,6 +66,10 @@ spec:
             value: 'false'
           - name: APP_TEMPORARY_DIRECTORY
             value: /tmp
+          - name: APP_MAX_ASSET_CONCURRENT_RECONCILES
+            value: "3"
+          - name: APP_MAX_CLUSTER_ASSET_CONCURRENT_RECONCILES
+            value: "3"
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         ports:
