@@ -161,5 +161,26 @@ func TestValidateApi(t *testing.T) {
 				So(statusCode, ShouldEqual, kymaMeta.Successful)
 			})
 		})
+
+		Convey("is fed with an API for a forbidden service", func() {
+			c.blacklistedServices = []string{"forbidden-service.test-ns"}
+
+			//given
+			testAPI.Spec.Service.Name = "forbidden-service"
+
+			statusHelper := NewApiStatusHelper(nil, testAPI)
+
+			Convey("it should update the helper with the \"Error\" status code and return this code", func() {
+
+				//when
+				statusCode := c.validateAPI(testAPI, statusHelper)
+
+				//then
+				So(statusHelper.hasChanged, ShouldBeTrue)
+				So(statusHelper.apiCopy.Status.ValidationStatus.IsSuccessful(), ShouldBeFalse)
+				So(statusHelper.apiCopy.Status.IsTargetServiceOccupied(), ShouldBeFalse)
+				So(statusCode, ShouldEqual, kymaMeta.Error)
+			})
+		})
 	})
 }
