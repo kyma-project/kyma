@@ -3,16 +3,18 @@ title: Configure default ClusterChannelProvisioner
 type: Details
 ---
 
-# Overview
 
-Kyma comes with NATSS as its default ClusterChannelProvisioner.  You can see the configuration details in the [default-channel-webhook](../../resources/knative-eventing/charts/knative-eventing/templates/eventing.yaml) ConfigMap. 
+Kyma comes with NATS Streaming as its default ClusterChannelProvisioner. You can see the configuration details in the [`default-channel-webhook`](../../resources/knative-eventing/charts/knative-eventing/templates/eventing.yaml) ConfigMap. 
 
-As an operator, it is possible to use a different messaging middleware other than NATS Streaming for Kyma eventing. This is achieved by configuring a ClusterChannelProvisioner which will connect to the running messaging middleware. Then next would be to configure the `default-channel-webhook` to use that particular ClusterChannelProvisioner.
+You can use a different messaging middleware, other than NATS Streaming, as the Kyma eventing operator. 
+To achieve that, configure:
+- A ClusterChannelProvisioner that connects with the running messaging middleware 
+- The `default-channel-webhook` to use that particular ClusterChannelProvisioner
 
-Below are some examples and their configuration details. 
+Read about the examples and the configuration details. 
 
-### In-memory-channel
-Follow this [guide](https://github.com/knative/eventing/tree/master/config/provisioners/in-memory-channel) to to add an in-memory ClusterChannelProvisioner.
+## In-memory channel
+Follow this [guide](https://github.com/knative/eventing/tree/master/config/provisioners/in-memory-channel) to add an in-memory ClusterChannelProvisioner.
 
 > **NOTE**: Before installing this provisioner, add the following annotation to the [`podTemplate.Spec`](https://github.com/knative/eventing/blob/master/config/provisioners/in-memory-channel/in-memory-channel.yaml#L107) in the `in-memory-channel-controller` Deployment to remove the Istio sidecar.
 
@@ -24,27 +26,27 @@ template:
       labels: *labels
 ```
 
-You can change the default cluster channel provisioner by editing the ClusterChannelProvisioner entry in the `default-channel-webhook` ConfigMap. For an example of the in-memory-channel ClusterChannelProvisioner configuration, see [this file](https://github.com/knative/eventing/blob/master/config/400-default-channel-config.yaml).
+You can change the default cluster channel provisioner by editing the ClusterChannelProvisioner entry in the `default-channel-webhook` ConfigMap. For an example of the in-memory ClusterChannelProvisioner configuration, see [this file](https://github.com/knative/eventing/blob/master/config/400-default-channel-config.yaml).
 
-### Google PubSub
+## Google PubSub
 
-* Follow the [prereqisite steps](https://github.com/knative/eventing/tree/release-0.5/contrib/gcppubsub/config#prerequisites) mentioned in the Knative eventing documentation.
+After you complete the [prereqisite steps](https://github.com/knative/eventing/tree/release-0.5/contrib/gcppubsub/config#prerequisites) mentioned in the Knative eventing documentation, follow these steps to configure the Google PubSub ClusterChannelProvisioner:
 
     > **NOTE:** Skip the last step to install `Knative eventing` as it is pre-installed with Kyma.
 
-* Deploy the Google PubSub ClusterChannelProvisioner.
+1. Deploy the Google PubSub ClusterChannelProvisioner:
 
     ```bash
     sed "s/REPLACE_WITH_GCP_PROJECT/$PROJECT_ID/" ./assets/gcppubsub.yaml | kubectl apply -f -
     ```
 
-* Change the `name` value under `clusterdefault` in `default-channel-webhook` ConfigMap in knative-eventing namespace to `gcp-pubsub`.
+2. In  the `default-channel-webhook` located in the `knative-eventing` Namespace, change the value of the **data.default-channel-config.clusterdefault.name** parameter to `gcp-pubsub`.
 
     ```bash
     kubectl -n knative-eventing edit configmaps default-channel-webhook
     ```
 
-After the change, the ConfigMap should look similiar to the below definition.
+After the change, the ConfigMap should have the following data:
 
 ```yaml
 apiVersion: v1
