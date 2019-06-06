@@ -10,6 +10,7 @@ func Authenticate(config idProviderConfig) (string, error) {
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
+		Timeout: config.ClientConfig.TimeoutSeconds,
 	}
 
 	idTokenProvider := newDexIdTokenProvider(httpClient, config)

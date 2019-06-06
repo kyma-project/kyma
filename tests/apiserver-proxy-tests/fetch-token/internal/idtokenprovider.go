@@ -12,6 +12,7 @@ import (
 
 	"log"
 
+	retry "github.com/avast/retry-go"
 	"github.com/pkg/errors"
 	"golang.org/x/net/html"
 )
@@ -44,6 +45,46 @@ func (p *dexIdTokenProvider) fetchIdToken() (string, error) {
 
 func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 
+	var result map[string]string = nil
+
+	err := retry.Do(
+		func() error {
+
+			loginEndpoint, err := p.authorizeCall()
+			if err != nil {
+				return err
+			}
+
+			approvalEndpoint, err := p.loginCall(loginEndpoint)
+			if err != nil {
+				return err
+			}
+
+			clientEndpointURL, err := p.tokenCall(approvalEndpoint)
+			if err != nil {
+				return err
+			}
+
+			result = p.parseResult(clientEndpointURL)
+			return nil
+		},
+		retry.Attempts(p.config.RetryConfig.MaxAttempts),
+		retry.Delay(p.config.RetryConfig.Delay),
+		retry.DelayType(retry.FixedDelay),
+		retry.OnRetry(func(retryNo uint, err error) {
+			log.Printf("[%d / %d] Status: %s", retryNo, p.config.RetryConfig.Delay, err)
+		}),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+//Performs call to the <authorize> endpoint.
+func (p *dexIdTokenProvider) authorizeCall() (string, error) {
+
 	authorizeResp, err := p.httpClient.PostForm(p.config.DexConfig.AuthorizeEndpoint, url.Values{
 		"response_type": {"id_token token"},
 		"client_id":     {p.config.ClientConfig.ID},
@@ -52,7 +93,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 		"nonce":         {"vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM"},
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer closeRespBody(authorizeResp)
 	authorizeRespBody := readRespBody(authorizeResp)
@@ -61,7 +102,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 	case http.StatusFound:
 	case http.StatusOK:
 	default:
-		return nil, fmt.Errorf("got unexpected response on authorize: %d - %s", authorizeResp.StatusCode, authorizeRespBody)
+		return "", fmt.Errorf("got unexpected response on authorize: %d - %s", authorizeResp.StatusCode, authorizeRespBody)
 	}
 
 	var loginEndpoint string
@@ -69,17 +110,22 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 		b := bytes.NewBufferString(authorizeRespBody)
 		loginEndpoint, err = getLocalAuthEndpoint(b)
 		if err != nil {
-			return nil, errors.Wrapf(err, "while fetching link to static authentication")
+			return "", errors.Wrapf(err, "while fetching link to static authentication")
 		}
 	} else {
 		loginEndpoint = authorizeResp.Header.Get("location")
 		if strings.Contains(loginEndpoint, "#.*error") {
-			return nil, fmt.Errorf("login - Redirected with error: '%s'", loginEndpoint)
+			return "", fmt.Errorf("login - Redirected with error: '%s'", loginEndpoint)
 		}
 	}
 
+	return loginEndpoint, nil
+}
+
+func (p *dexIdTokenProvider) loginCall(loginEndpoint string) (string, error) {
+
 	if _, err := p.httpClient.Get(p.config.DexConfig.BaseUrl + loginEndpoint); err != nil {
-		return nil, errors.Wrap(err, "while performing HTTP GET on login endpoint")
+		return "", errors.Wrap(err, "while performing HTTP GET on login endpoint")
 	}
 
 	loginResp, err := p.httpClient.PostForm(p.config.DexConfig.BaseUrl+loginEndpoint, url.Values{
@@ -87,19 +133,25 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 		"password": {p.config.UserCredentials.Password},
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "while performing HTTP POST on login endpoint")
+		return "", errors.Wrap(err, "while performing HTTP POST on login endpoint")
 	}
 	defer closeRespBody(loginResp)
 	loginRespBody := readRespBody(loginResp)
 
 	if loginResp.StatusCode < 300 || loginResp.StatusCode > 399 {
-		return nil, fmt.Errorf("login - response error: '%s' - %s", loginResp.Status, loginRespBody)
+		return "", fmt.Errorf("login - response error: '%s' - %s", loginResp.Status, loginRespBody)
 	}
 
 	approvalEndpoint := loginResp.Header.Get("location")
 	if strings.Contains(approvalEndpoint, "#.*error") {
-		return nil, fmt.Errorf("approval - Redirected with error: '%s'", approvalEndpoint)
+		return "", fmt.Errorf("approval - Redirected with error: '%s'", approvalEndpoint)
 	}
+
+	return approvalEndpoint, nil
+}
+
+func (p *dexIdTokenProvider) tokenCall(approvalEndpoint string) (*url.URL, error) {
+
 	approvalResp, err := p.httpClient.Get(p.config.DexConfig.BaseUrl + approvalEndpoint)
 	if err != nil {
 		return nil, err
@@ -121,6 +173,11 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 		return nil, parseErr
 	}
 
+	return parsedUrl, nil
+}
+
+func (p *dexIdTokenProvider) parseResult(parsedUrl *url.URL) map[string]string {
+
 	result := make(map[string]string)
 	fragmentParams := strings.Split(parsedUrl.Fragment, "&")
 	for _, param := range fragmentParams {
@@ -128,7 +185,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 		result[keyAndValue[0]] = keyAndValue[1]
 	}
 
-	return result, nil
+	return result
 }
 
 func readRespBody(resp *http.Response) string {
