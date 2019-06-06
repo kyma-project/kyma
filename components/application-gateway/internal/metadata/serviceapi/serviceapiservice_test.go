@@ -17,7 +17,7 @@ const (
 	clientId     = "clientId"
 	clientSecret = "clientSecret"
 	oauthUrl     = "http://oauth.com"
-	secretName   = "secret-name"
+	secretName   = "credentialsSecret-name"
 	username     = "username"
 	password     = "password"
 	commonName   = "commonName"
@@ -30,9 +30,11 @@ var (
 
 func TestDefaultService_Read(t *testing.T) {
 	testCases := []struct {
-		applicationAPI *applications.ServiceAPI
-		secret         map[string][]byte
-		resultingAPI   *model.API
+		applicationAPI          *applications.ServiceAPI
+		credentialsSecret       map[string][]byte
+		requestParamsSecretName string
+		requestParamsSecret     map[string][]byte
+		resultingAPI            *model.API
 	}{
 		{
 			applicationAPI: &applications.ServiceAPI{
@@ -43,7 +45,7 @@ func TestDefaultService_Read(t *testing.T) {
 					Url:        oauthUrl,
 				},
 			},
-			secret: map[string][]byte{
+			credentialsSecret: map[string][]byte{
 				ClientIDKey:     []byte(clientId),
 				ClientSecretKey: []byte(clientSecret),
 			},
@@ -67,7 +69,7 @@ func TestDefaultService_Read(t *testing.T) {
 					Url:        "",
 				},
 			},
-			secret: map[string][]byte{
+			credentialsSecret: map[string][]byte{
 				UsernameKey: []byte(username),
 				PasswordKey: []byte(password),
 			},
@@ -90,7 +92,7 @@ func TestDefaultService_Read(t *testing.T) {
 					Url:        "",
 				},
 			},
-			secret: map[string][]byte{
+			credentialsSecret: map[string][]byte{
 				CommonNameKey:  []byte(commonName),
 				CertificateKey: certificate,
 				PrivateKeyKey:  privateKey,
@@ -110,9 +112,32 @@ func TestDefaultService_Read(t *testing.T) {
 			applicationAPI: &applications.ServiceAPI{
 				TargetUrl: targetUrl,
 			},
-			secret: map[string][]byte{},
+			credentialsSecret: map[string][]byte{},
 			resultingAPI: &model.API{
 				TargetUrl: targetUrl,
+			},
+		},
+		{
+			applicationAPI: &applications.ServiceAPI{
+				TargetUrl:                   targetUrl,
+				RequestParametersSecretName: "params-secret",
+			},
+			credentialsSecret:       map[string][]byte{},
+			requestParamsSecretName: "params-secret",
+			requestParamsSecret: map[string][]byte{
+				HeadersKey:         []byte(`{"header":["headerValue"]}`),
+				QueryParametersKey: []byte(`{"query":["queryValue"]}`),
+			},
+			resultingAPI: &model.API{
+				TargetUrl: targetUrl,
+				RequestParameters: &model.RequestParameters{
+					Headers: &map[string][]string{
+						"header": {"headerValue"},
+					},
+					QueryParameters: &map[string][]string{
+						"query": {"queryValue"},
+					},
+				},
 			},
 		},
 	}
@@ -121,7 +146,11 @@ func TestDefaultService_Read(t *testing.T) {
 		// given
 		for _, test := range testCases {
 			secretsRepository := new(secretsmocks.Repository)
-			secretsRepository.On("Get", secretName).Return(test.secret, nil)
+			secretsRepository.On("Get", secretName).Return(test.credentialsSecret, nil)
+			if test.requestParamsSecretName != "" {
+				secretsRepository.On("Get", test.requestParamsSecretName).Return(test.requestParamsSecret, nil)
+			}
+
 			service := NewService(secretsRepository)
 
 			// when
@@ -133,20 +162,20 @@ func TestDefaultService_Read(t *testing.T) {
 		}
 	})
 
-	t.Run("should return error when reading secret fails", func(t *testing.T) {
+	t.Run("should return error when reading credentialsSecret fails", func(t *testing.T) {
 		// given
 		applicationServiceAPI := &applications.ServiceAPI{
 			TargetUrl: "http://target.com",
 			Credentials: &applications.Credentials{
 				Type:       "OAuth",
-				SecretName: "secret-name",
+				SecretName: "credentialsSecret-name",
 				Url:        "http://oauth.com",
 			},
 		}
 
 		secretsRepository := new(secretsmocks.Repository)
-		secretsRepository.On("Get", "secret-name").
-			Return(nil, apperrors.Internal("secret error"))
+		secretsRepository.On("Get", "credentialsSecret-name").
+			Return(nil, apperrors.Internal("credentialsSecret error"))
 
 		service := NewService(secretsRepository)
 
@@ -156,7 +185,31 @@ func TestDefaultService_Read(t *testing.T) {
 		// then
 		assert.Error(t, err)
 		assert.Nil(t, api)
-		assert.Contains(t, err.Error(), "secret error")
+		assert.Contains(t, err.Error(), "credentialsSecret error")
+
+		secretsRepository.AssertExpectations(t)
+	})
+
+	t.Run("should return error when reading request parameters fails", func(t *testing.T) {
+		// given
+		applicationServiceAPI := &applications.ServiceAPI{
+			TargetUrl:                   "http://target.com",
+			RequestParametersSecretName: secretName,
+		}
+
+		secretsRepository := new(secretsmocks.Repository)
+		secretsRepository.On("Get", secretName).
+			Return(nil, apperrors.Internal("request params error"))
+
+		service := NewService(secretsRepository)
+
+		// when
+		api, err := service.Read(applicationServiceAPI)
+
+		// then
+		assert.Error(t, err)
+		assert.Nil(t, api)
+		assert.Contains(t, err.Error(), "request params error")
 
 		secretsRepository.AssertExpectations(t)
 	})

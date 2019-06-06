@@ -14,8 +14,8 @@ const (
 
 	requestParamsNameFormat = "params-%s"
 
-	RequestParametersHeadersKey         = "headers"
-	RequestParametersQueryParametersKey = "queryParameters"
+	requestParametersHeadersKey         = "headers"
+	requestParametersQueryParametersKey = "queryParameters"
 )
 
 type requestParametersSecretModificationFunction func(application, name, serviceID string, newData map[string][]byte) apperrors.AppError
@@ -53,11 +53,11 @@ func (s *requestParametersService) Get(secretName string) (model.RequestParamete
 }
 
 func dataToRequestParameters(data map[string][]byte) (model.RequestParameters, apperrors.AppError) {
-	headers, err := getParameterFromJsonData(data, RequestParametersHeadersKey)
+	headers, err := getParameterFromJsonData(data, requestParametersHeadersKey)
 	if err != nil {
 		return model.RequestParameters{}, nil
 	}
-	queryParameters, err := getParameterFromJsonData(data, RequestParametersQueryParametersKey)
+	queryParameters, err := getParameterFromJsonData(data, requestParametersQueryParametersKey)
 	if err != nil {
 		return model.RequestParameters{}, nil
 	}
@@ -110,11 +110,11 @@ func createSecretData(requestParameters *model.RequestParameters) (map[string][]
 	data := make(map[string][]byte)
 	if requestParameters.Headers != nil {
 		headers, _ := json.Marshal(requestParameters.Headers)
-		data[RequestParametersHeadersKey] = headers
+		data[requestParametersHeadersKey] = headers
 	}
 	if requestParameters.QueryParameters != nil {
 		queryParameters, _ := json.Marshal(requestParameters.QueryParameters)
-		data[RequestParametersQueryParametersKey] = queryParameters
+		data[requestParametersQueryParametersKey] = queryParameters
 	}
 
 	return data, nil
