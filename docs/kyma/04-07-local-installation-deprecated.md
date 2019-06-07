@@ -3,7 +3,7 @@ title: Install Kyma locally (Scripts)
 type: Installation
 ---
 
->**CAUTION**: This document is deprecated and will be removed. For local installation using Kyma CLI, see [this document](/root/kyma/#installation-install-kyma-locally).
+>**CAUTION**: This document describes a deprecated flow. Follow [this document](/root/kyma/#installation-install-kyma-locally) to install locally using the Kyma CLI.
 
 This Installation guide shows you how to quickly deploy Kyma locally on the MacOS and Linux platforms. Kyma is installed locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites and instructions on how to install Kyma on your machine, as well as the troubleshooting tips.
 
@@ -182,29 +182,4 @@ Follow these steps to enable HPA:
   ```
   minikube addons list
   ```
-
-## Troubleshooting
-
-1. If you don't set the password for the **admin@kyma.cx** user using the `--password` parameter or you forget the password you set, you can get it from the `admin-user` Secret located in the `kyma-system` Namespace. Run this command:
-    ```
-    kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
-    ```
-
-2. If the Installer does not respond as expected, check the installation status using the `is-installed.sh` script with the `--verbose` flag added. Run:
-   ```
-   scripts/is-installed.sh --verbose
-   ```
-
-3. If the installation is successful but a component does not behave in an expected way, see if all deployed Pods are running. Run this command:
-   ```
-   kubectl get pods --all-namespaces
-   ```
-
-   The command retrieves all Pods from all Namespaces, the status of the Pods, and their instance numbers. Check if the STATUS column shows Running for all Pods. If any of the Pods that you require do not start successfully, perform the installation again.
-
-   If the problem persists, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue or reach out to the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.
-
-4. If you put your local running cluster into hibernation or use `minikube stop` and `minikube start` the date and time settings of Minikube get out of sync with the system date and time settings. As a result, the access token used to log in cannot be properly validated by Dex and you cannot log in to the console. To fix that, set the date and time used by your machine in Minikube. Run:
-   ```
-   minikube ssh -- docker run -i --rm --privileged --pid=host debian nsenter -t 1 -m -u -n -i date -u $(date -u +%m%d%H%M%Y)
-   ```
+  

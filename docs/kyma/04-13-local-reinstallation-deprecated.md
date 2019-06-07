@@ -3,7 +3,7 @@ title: Reinstall Kyma (Scripts)
 type: Installation
 ---
 
->**CAUTION**: This document is deprecated and will be removed. For local installation using Kyma CLI, see [this document](/root/kyma/#installation-reinstall-kyma).
+>**CAUTION**: This document describes a deprecated flow. Follow [this document](/root/kyma/#installation-install-kyma-locally) to install locally using the Kyma CLI.
 
 The custom scripts allow you to remove Kyma from a Minikube cluster and reinstall Kyma without removing the cluster.
 

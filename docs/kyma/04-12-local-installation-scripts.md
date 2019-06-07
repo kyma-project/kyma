@@ -4,7 +4,7 @@ type: Installation
 ---
 
 
->**CAUTION**: This document is deprecated and will be removed. For local installation using Kyma CLI, see [this document](/root/kyma/#installation-install-kyma-locally).
+>**CAUTION**: This document describes a deprecated flow. Follow [this document](/root/kyma/#installation-install-kyma-locally) to install locally using the Kyma CLI.
 
 This document extends the [Install Kyma locally](#installation-install-kyma-locally) guide with a detailed breakdown of the `run.sh` script.
 
