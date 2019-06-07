@@ -11,7 +11,7 @@ Choose your cloud provider and get started:
 
 >**CAUTION:** These instructions are valid starting with Kyma 1.2. If you want to install older releases, refer to the respective documentation versions.
 
-<div tabs>
+<div tabs name="provider-domain">
   <details>
   <summary>
   GKE
@@ -147,7 +147,7 @@ Follow these steps:
     ```
     gcloud container --project "$GCP_PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "$GCP_ZONE" \
-    --cluster-version "1.12.5" --machine-type "n1-standard-4" \
+    --cluster-version "1.12" --machine-type "n1-standard-4" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing
     ```
 
