@@ -3,7 +3,7 @@ containerRegistry:
 
 image:
   dir: develop/tests/
-  version: "fb5c7439"
+  version: "c4d1f53b"
   pullPolicy: "IfNotPresent"
 
 dex:
