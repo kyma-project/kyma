@@ -27,7 +27,7 @@ global:
     version: "1.2.0-rc1"
   ui_acceptance_tests:
     dir:
-    version: "7cc741c7"
+    version: "36f26584"
   api_controller:
     dir:
     version: "1.2.0-rc1"
