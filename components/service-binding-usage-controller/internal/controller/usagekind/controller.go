@@ -1,6 +1,7 @@
 package usagekind
 
 import (
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/metric"
 	ukInformer "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions/servicecatalog/v1alpha1"
 	ukLister "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/listers/servicecatalog/v1alpha1"
 
@@ -23,11 +24,19 @@ import (
 const defaultMaxRetries = 15
 
 //go:generate mockery -name=SupervisorRegistry -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=businessMetric -output=automock -outpkg=automock -case=underscore
 
 // SupervisorRegistry provides methods for register/unregister controller.KubernetesResourceSupervisor
 type SupervisorRegistry interface {
 	Register(k controller.Kind, supervisor controller.KubernetesResourceSupervisor) error
 	Unregister(k controller.Kind) error
+}
+
+type businessMetric interface {
+	RecordError(controllerName string)
+	IncrementQueueLength(controllerName string)
+	DecrementQueueLength(controllerName string)
+	RecordLatency(controllerName string, reconcileTime time.Duration)
 }
 
 // Controller watcher UsageKind resource and reflects UsageKind instances to registered supervisors in SupervisorRegistry
@@ -39,7 +48,8 @@ type Controller struct {
 	kindContainer SupervisorRegistry
 	dynamicClient dynamic.Interface
 
-	log logrus.FieldLogger
+	log    logrus.FieldLogger
+	metric businessMetric
 
 	// testHookAsyncOpDone used only in unit tests
 	testHookAsyncOpDone func()
@@ -50,7 +60,8 @@ func NewKindController(
 	kindInformer ukInformer.UsageKindInformer,
 	kindContainer SupervisorRegistry,
 	dynamicClient dynamic.Interface,
-	log logrus.FieldLogger) *Controller {
+	log logrus.FieldLogger,
+	cbm businessMetric) *Controller {
 
 	c := &Controller{
 		kindLister:    kindInformer.Lister(),
@@ -59,6 +70,7 @@ func NewKindController(
 		kindContainer: kindContainer,
 		dynamicClient: dynamicClient,
 		log:           log.WithField("service", "controller:usage-kind"),
+		metric:        cbm,
 		queue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "UsageKind"),
 	}
 
@@ -75,27 +87,33 @@ func (c *Controller) onAdd(obj interface{}) {
 	key, err := cache.MetaNamespaceKeyFunc(obj)
 	if err != nil {
 		c.log.Errorf("while handling addition event: couldn't get key: %v", err)
+		c.metric.RecordError(metric.UkController)
 		return
 	}
 	c.queue.Add(key)
+	c.metric.IncrementQueueLength(metric.UkController)
 }
 
 func (c *Controller) onUpdate(old, new interface{}) {
 	key, err := cache.MetaNamespaceKeyFunc(old)
 	if err != nil {
 		c.log.Errorf("while handling addition event: couldn't get key: %v", err)
+		c.metric.RecordError(metric.UkController)
 		return
 	}
 	c.queue.Add(key)
+	c.metric.IncrementQueueLength(metric.UkController)
 }
 
 func (c *Controller) onDelete(obj interface{}) {
 	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 	if err != nil {
 		c.log.Errorf("while handling deletion event: couldn't get key: %v", err)
+		c.metric.RecordError(metric.UkController)
 		return
 	}
 	c.queue.Add(key)
+	c.metric.IncrementQueueLength(metric.UkController)
 }
 
 // Run begins watching and syncing.
@@ -127,15 +145,20 @@ func (c *Controller) processNextWorkItem() bool {
 	}
 
 	key, shutdown := c.queue.Get()
+	reconcileStart := time.Now()
 	if shutdown {
 		return false
 	}
-	defer c.queue.Done(key)
+	defer func() {
+		c.queue.Done(key)
+		c.metric.RecordLatency(metric.UkController, time.Now().Sub(reconcileStart))
+	}()
 
 	err := c.reconcile(key.(string))
 	switch {
 	case err == nil:
 		c.queue.Forget(key)
+		c.metric.DecrementQueueLength(metric.UkController)
 
 	case c.queue.NumRequeues(key) < c.maxRetries:
 		c.log.Debugf("Error processing %q (will retry - it's %d of %d): %v", key, c.queue.NumRequeues(key), c.maxRetries, err)
@@ -143,7 +166,9 @@ func (c *Controller) processNextWorkItem() bool {
 
 	default: // err != nil and too many retries
 		c.log.Errorf("Error processing %q (giving up - to many retires): %v", key, err)
+		c.metric.RecordError(metric.UkController)
 		c.queue.Forget(key)
+		c.metric.DecrementQueueLength(metric.UkController)
 	}
 
 	return true
