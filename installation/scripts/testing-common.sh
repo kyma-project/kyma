@@ -184,7 +184,7 @@ function printImagesWithLatestTag() {
 TESTING_BUNDLES_MAP_NAME="testing-bundles-repos"
 
 function injectTestingBundles() {
-    kubectl create configmap ${TESTING_BUNDLES_MAP_NAME} -n kyma-system --from-literal=URLs=https://github.com/kyma-project/bundles/releases/download/latest/index-testing.yaml
+    kubectl create configmap ${TESTING_BUNDLES_MAP_NAME} -n kyma-system --from-literal=URLs=https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml
     kubectl label configmap ${TESTING_BUNDLES_MAP_NAME} -n kyma-system helm-broker-repo=true
 
     log "Testing bundles injected" green
