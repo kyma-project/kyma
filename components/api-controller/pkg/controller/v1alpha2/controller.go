@@ -266,12 +266,12 @@ func (c *Controller) validateAPI(newAPI *kymaApi.Api, apiStatusHelper *ApiStatus
 }
 
 func (c *Controller) validateVirtualService(newAPI *kymaApi.Api) error {
-	for _, svc := range c.blacklistedServices {
-		separator := "."
-		props := strings.Split(svc, separator)
+	newApiServiceFullName := fmt.Sprintf("%s.%s", newAPI.Spec.Service.Name, newAPI.GetNamespace())
 
-		if newAPI.Spec.Service.Name == props[0] && newAPI.GetNamespace() == props[1] {
-			return fmt.Errorf("Service %s.%s has been blacklisted by BLACKLISTED_SERVICES env", newAPI.Spec.Service.Name, newAPI.GetNamespace())
+	for _, svc := range c.blacklistedServices {
+
+		if newApiServiceFullName == svc {
+			return fmt.Errorf("service %s has been blacklisted by BLACKLISTED_SERVICES env", newApiServiceFullName)
 		}
 	}
 	return nil
