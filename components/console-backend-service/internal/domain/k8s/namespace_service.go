@@ -57,6 +57,25 @@ func (svc *namespaceService) List() ([]*v1.Namespace, error) {
 	return namespaces, nil
 }
 
+func (svc *namespaceService) Find(name string) (*v1.Namespace, error) {
+	item, exists, err := svc.informer.GetStore().GetByKey(name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !exists {
+		return nil, nil
+	}
+
+	namespace, ok := item.(*v1.Namespace)
+	if !ok {
+		return nil, fmt.Errorf("Incorrect item type: %T, should be: *Namespace", item)
+	}
+
+	return namespace, nil
+}
+
 func (svc *namespaceService) Create(name string, labels gqlschema.Labels) (*v1.Namespace, error) {
 	namespace := v1.Namespace{
 		TypeMeta: metav1.TypeMeta{
@@ -70,4 +89,8 @@ func (svc *namespaceService) Create(name string, labels gqlschema.Labels) (*v1.N
 	}
 
 	return svc.client.Namespaces().Create(&namespace)
+}
+
+func (svc *namespaceService) Delete(name string) error {
+	return svc.client.Namespaces().Delete(name, nil)
 }
