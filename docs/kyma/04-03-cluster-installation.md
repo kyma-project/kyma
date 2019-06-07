@@ -121,7 +121,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 
     ```
     kubectl get pods --all-namespaces
-        ```
+    ```
 
 3. To watch the installation progress, run:
 
@@ -134,7 +134,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 
 After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
 
-    If you receive an error, fetch the Installer logs using this command:
+If you receive an error, fetch the Installer logs using this command:
 
     ```
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
@@ -144,7 +144,7 @@ After the installation process is finished, the `Status: Installed, description:
 
 ### Add the xip.io self-signed certificate to your OS trusted certificates
 
-    After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS, run:
+After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS, run:
 
     ```
     tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
@@ -260,7 +260,7 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
     && kubectl label configmap aks-overrides -n kyma-installer installer=overrides component=istio
     ```
 
-    >**TIP:** An example config map is available [here](./assets/aks-overrides.yaml)
+    >**TIP:** An example config map is available [here](./assets/aks-overrides.yaml).
 
 ## Install Kyma
 
@@ -287,7 +287,7 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 
 After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
 
-    If you receive an error, fetch the Installer logs using this command:
+If you receive an error, fetch the Installer logs using this command:
 
     ```
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
@@ -297,7 +297,8 @@ After the installation process is finished, the `Status: Installed, description:
 
 ### Add the xip.io self-signed certificate to your OS trusted certificates
 
-After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS, run:
+After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS.
+For MacOS, run:
 
     ```
     tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
