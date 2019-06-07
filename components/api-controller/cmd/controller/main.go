@@ -60,7 +60,9 @@ func main() {
 
 	internalInformerFactory := kymaInformers.NewSharedInformerFactory(kymaClientSet, time.Second*30)
 
-	v1alpha2Controller := v1alpha2.NewController(kymaClientSet, istioNetworkingV1Interface, serviceV1Interface, authenticationV2Interface, internalInformerFactory, domainName, getBlacklistedServices())
+	list := os.Getenv("BLACKLISTED_SERVICES")
+
+	v1alpha2Controller := v1alpha2.NewController(kymaClientSet, istioNetworkingV1Interface, serviceV1Interface, authenticationV2Interface, internalInformerFactory, domainName, readBlacklistedServices(list))
 	internalInformerFactory.Start(stop)
 	err := v1alpha2Controller.Run(2, stop)
 	if err != nil {
@@ -144,9 +146,7 @@ func getCORSConfig() istioNetworkingV1.CORSConfig {
 	}
 }
 
-func getBlacklistedServices() []string {
-	list := os.Getenv("BLACKLISTED_SERVICES")
-
+func readBlacklistedServices(list string) []string {
 	return removeEmptyStrings(strings.Split(list, ","))
 }
 
