@@ -17,12 +17,7 @@ BINARY_NI = $(APP_NAME_NI)
 
 .PHONY: build
 build:
-	# todo activate before-commit phase and remove the gometalinter
-	#./before-commit.sh ci
-	dep ensure -vendor-only -v
-	go test ./...
-	curl https://raw.githubusercontent.com/alecthomas/gometalinter/master/scripts/install.sh | sh -s v2.0.8
-	./bin/gometalinter --skip=generated --vendor --deadline=2m --disable-all ./...
+	./before-commit.sh ci
 
 .PHONY: build-image
 build-image:

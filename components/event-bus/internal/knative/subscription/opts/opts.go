@@ -8,14 +8,13 @@ import (
 	"time"
 )
 
-var version = os.Getenv("APP_VERSION")
-
 const (
 	defaultPort           = 8080
 	defaultResyncPeriod   = 10 * time.Second
 	defaultChannelTimeout = 10 * time.Second
 )
 
+// Options represents the subscription options.
 type Options struct {
 	Port           int
 	ResyncPeriod   time.Duration
@@ -27,6 +26,7 @@ var (
 	once   sync.Once
 )
 
+// GetOptions returns an instance of the subscription options.
 func GetOptions() *Options {
 	once.Do(func() {
 		config = ParseFlags()
@@ -34,6 +34,7 @@ func GetOptions() *Options {
 	return config
 }
 
+// ParseFlags parses the command line flags.
 func ParseFlags() *Options {
 	fs := flag.NewFlagSet("sv", flag.ExitOnError)
 	opts, err := configureOptions(fs, os.Args[1:])
@@ -64,6 +65,7 @@ func configureOptions(fs *flag.FlagSet, args []string) (*Options, error) {
 	return opts, nil
 }
 
+// DefaultOptions returns the default subscription options.
 func DefaultOptions() *Options {
 	return &Options{
 		Port:           defaultPort,

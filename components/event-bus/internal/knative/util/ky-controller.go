@@ -13,7 +13,7 @@ import (
 	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// Helper functions to check and remove string from a slice of strings.
+// ContainsString returns true if the string exists in the array.
 func ContainsString(slice *[]string, s string) bool {
 	for _, item := range *slice {
 		if item == s {
@@ -23,6 +23,7 @@ func ContainsString(slice *[]string, s string) bool {
 	return false
 }
 
+// RemoveString removes the string from in the array and returns a new array instance.
 func RemoveString(slice *[]string, s string) (result []string) {
 	for _, item := range *slice {
 		if item == s {
@@ -33,9 +34,7 @@ func RemoveString(slice *[]string, s string) (result []string) {
 	return
 }
 
-//
-// Handle Kyma EventActivation
-//
+// UpdateEventActivation handles Kyma EventActivation
 func UpdateEventActivation(ctx context.Context, client runtimeClient.Client, u *eventingv1alpha1.EventActivation) error {
 	objectKey := runtimeClient.ObjectKey{Namespace: u.Namespace, Name: u.Name}
 	ea := &eventingv1alpha1.EventActivation{}
@@ -52,7 +51,8 @@ func UpdateEventActivation(ctx context.Context, client runtimeClient.Client, u *
 	return nil
 }
 
-// CheckIfEventActivationExistForSubscription
+// CheckIfEventActivationExistForSubscription returns a boolean value indicating if there is an EventActivation for
+// the Subscription or not.
 func CheckIfEventActivationExistForSubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription) bool {
 	subNamespace := sub.GetNamespace()
 	subSourceID := sub.SourceID
@@ -78,7 +78,8 @@ func CheckIfEventActivationExistForSubscription(ctx context.Context, client runt
 	return false
 }
 
-// GetSubscriptionsForEventActivation() gets all the subscriptions having the same "namespace" and the same "Source" as the "ea" object
+// GetSubscriptionsForEventActivation gets all the subscriptions having the same "namespace" and the same "Source"
+// as the "ea" object.
 func GetSubscriptionsForEventActivation(ctx context.Context, client runtimeClient.Client, ea *eventingv1alpha1.EventActivation) ([]*subApis.Subscription, error) {
 	eaNamespace := ea.GetNamespace()
 	eaSourceID := ea.EventActivationSpec.SourceID
@@ -106,31 +107,31 @@ func GetSubscriptionsForEventActivation(ctx context.Context, client runtimeClien
 	return subs, nil
 }
 
-//
-// Handle current time
-//
+// CurrentTime handles current time
 type CurrentTime interface {
 	GetCurrentTime() metav1.Time
 }
 
+// DefaultCurrentTime represents the default current time
 type DefaultCurrentTime struct{}
 
+// NewDefaultCurrentTime returns a new CurrentTime instance
 func NewDefaultCurrentTime() CurrentTime {
 	return new(DefaultCurrentTime)
 }
 
+// GetCurrentTime returns the current time.
 func (t *DefaultCurrentTime) GetCurrentTime() metav1.Time {
 	return metav1.NewTime(time.Now())
 }
 
-//
-// Handle Kyma subscriptions
-//
+// SubscriptionWithError handles Kyma subscriptions
 type SubscriptionWithError struct {
 	Sub *subApis.Subscription
 	Err error
 }
 
+// WriteSubscriptions writes subscriptions.
 func WriteSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription) []SubscriptionWithError {
 	var errorSubs []SubscriptionWithError
 	for _, u := range subs {
@@ -141,39 +142,51 @@ func WriteSubscriptions(ctx context.Context, client runtimeClient.Client, subs [
 	return errorSubs
 }
 
+// WriteSubscription writes a subscription.
 func WriteSubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription) error {
-	// update the subscription status subresource
-	if err := client.Status().Update(ctx, sub.DeepCopy()); err != nil {
+	var err error
+
+	// update the subscription status sub-resource
+	err = client.Status().Update(ctx, sub.DeepCopy())
+	if err != nil {
 		return err
 	}
+
 	// update the subscription resource
-	if err := client.Update(ctx, sub); err != nil {
+	err = client.Update(ctx, sub)
+	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
+// SetReadySubscription set subscription as ready.
 func SetReadySubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, msg string, time CurrentTime) error {
 	us := updateSubscriptionReadyStatus(sub, subApis.ConditionTrue, msg, time)
 	return WriteSubscription(ctx, client, us)
 }
 
-func SetNotReadySubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, msg string, time CurrentTime) error {
+// SetNotReadySubscription set subscription as not ready.
+func SetNotReadySubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, time CurrentTime) error {
 	us := updateSubscriptionReadyStatus(sub, subApis.ConditionFalse, "", time)
 	return WriteSubscription(ctx, client, us)
 }
 
+// IsSubscriptionActivated checks if the subscription is active or not.
 func IsSubscriptionActivated(sub *subApis.Subscription) bool {
 	activatedCondition := subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue}
 	return sub.HasCondition(activatedCondition)
 
 }
 
+// ActivateSubscriptions activates subscriptions.
 func ActivateSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription, log logr.Logger, time CurrentTime) error {
 	updatedSubs := updateSubscriptionsEventActivatedStatus(subs, subApis.ConditionTrue, time)
 	return updateSubscriptions(ctx, client, updatedSubs, log, time)
 }
 
+// DeactivateSubscriptions deactivate subscriptions.
 func DeactivateSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription, log logr.Logger, time CurrentTime) error {
 	updatedSubs := updateSubscriptionsEventActivatedStatus(subs, subApis.ConditionFalse, time)
 	return updateSubscriptions(ctx, client, updatedSubs, log, time)

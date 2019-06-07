@@ -13,7 +13,7 @@ func Test_ValidatePublish_MissingSourceId(t *testing.T) {
 	err := ValidatePublish(&publishRequest, GetDefaultEventOptions())
 	assert.Equal(t, len(err.Details), 1)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
-	assert.Equal(t, ErrorMessageMissingSourceId, err.Message)
+	assert.Equal(t, ErrorMessageMissingSourceID, err.Message)
 	assert.Equal(t, ErrorTypeMissingFieldOrHeader, err.Details[0].Type)
 }
 
@@ -95,28 +95,28 @@ func Test_ValidatePublish_InvalidEventID(t *testing.T) {
 	err := ValidatePublish(&publishRequest, GetDefaultEventOptions())
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
-	assert.Equal(t, FieldEventId, err.Details[0].Field)
+	assert.Equal(t, FieldEventID, err.Details[0].Field)
 }
 
 func Test_ValidatePublish_InvalidSourceId_In_Payload(t *testing.T) {
 	publishRequest := buildTestPublishRequest()
-	publishRequest.SourceIdFromHeader = false
+	publishRequest.SourceIDFromHeader = false
 	publishRequest.SourceID = "source/Id"
 	err := ValidatePublish(&publishRequest, GetDefaultEventOptions())
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
-	assert.Equal(t, FieldSourceId, err.Details[0].Field)
+	assert.Equal(t, FieldSourceID, err.Details[0].Field)
 	assert.Equal(t, ErrorTypeInvalidField, err.Details[0].Type)
 }
 
 func Test_ValidatePublish_InvalidSourceId_In_Header(t *testing.T) {
 	publishRequest := buildTestPublishRequest()
-	publishRequest.SourceIdFromHeader = true
+	publishRequest.SourceIDFromHeader = true
 	publishRequest.SourceID = "source/Id"
 	err := ValidatePublish(&publishRequest, GetDefaultEventOptions())
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
-	assert.Equal(t, HeaderSourceId, err.Details[0].Field)
+	assert.Equal(t, HeaderSourceID, err.Details[0].Field)
 	assert.Equal(t, ErrorTypeInvalidHeader, err.Details[0].Type)
 }
 
@@ -133,7 +133,7 @@ func Test_ValidatePublish_InvalidSourceIdLength(t *testing.T) {
 	err := ValidatePublish(&publishRequest, opts)
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
-	assert.Equal(t, FieldSourceId, err.Details[0].Field)
+	assert.Equal(t, FieldSourceID, err.Details[0].Field)
 	assert.Equal(t, ErrorTypeInvalidFieldLength, err.Details[0].Type)
 }
 
@@ -176,7 +176,7 @@ func TestSourceIDAndEventTypeRegex(t *testing.T) {
 
 	// run test cases
 	for testCase, expected := range testCases {
-		testRegex(t, isValidSourceId, testCase, expected)
+		testRegex(t, isValidSourceID, testCase, expected)
 		testRegex(t, isValidEventType, testCase, expected)
 	}
 }
@@ -206,8 +206,8 @@ func testRegex(t *testing.T, match func(s string) bool, target string, expected 
 	assert.Equal(t, expected, match(target))
 }
 
-func buildTestPublishRequest() PublishRequest {
-	publishRequest := PublishRequest{
+func buildTestPublishRequest() Request {
+	publishRequest := Request{
 		Data:             "{'key':'value'}",
 		EventID:          "4ea567cf-812b-49d9-a4b2-cb5ddf464094",
 		EventTime:        "2012-11-01T22:08:41+00:00",

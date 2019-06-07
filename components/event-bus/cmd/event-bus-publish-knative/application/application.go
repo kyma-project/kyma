@@ -10,6 +10,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
 )
 
+// KnativePublishApplication represents a Knative PublishApplication
 type KnativePublishApplication struct {
 	started          bool
 	options          *opts.Options
@@ -19,6 +20,7 @@ type KnativePublishApplication struct {
 	knativeLib       *knative.KnativeLib
 }
 
+// StartKnativePublishApplication starts a new KnativePublishApplication instance.
 func StartKnativePublishApplication(options *opts.Options, knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher, tracer *trace.Tracer) *KnativePublishApplication {
 	// init and start the knative publish application
 	application := newKnativePublishApplication(options, knativeLib, knativePublisher, tracer)
@@ -50,6 +52,7 @@ func (app *KnativePublishApplication) start() {
 	app.registerPublishHandler()
 }
 
+// ServeMux encapsulates an http.ServeMux
 func (app *KnativePublishApplication) ServeMux() *http.ServeMux {
 	return app.serveMux
 }

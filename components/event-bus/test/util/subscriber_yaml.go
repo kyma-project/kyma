@@ -7,9 +7,11 @@ import (
 )
 
 const (
+	// SubscriberName used in the tests
 	SubscriberName = "test-core-event-bus-subscriber"
 )
 
+// NewSubscriberDeployment creates a new v1.Deployment instance.
 func NewSubscriberDeployment(sbscrImg string) *appsv1.Deployment {
 	var replicas int32 = 1
 	return &appsv1.Deployment{
@@ -51,6 +53,7 @@ func NewSubscriberDeployment(sbscrImg string) *appsv1.Deployment {
 	}
 }
 
+// NewSubscriberService creates a new v1.Service instance.
 func NewSubscriberService() *apiv1.Service {
 	return &apiv1.Service{
 		ObjectMeta: metav1.ObjectMeta{

@@ -22,6 +22,7 @@ var (
 	defaultChannelNamespace = knative.GetDefaultChannelNamespace()
 )
 
+// Message represents the Knative publish message
 type Message struct {
 	Headers map[string][]string `json:"headers,omitempty"`
 	Payload api.AnyValue        `json:"payload,omitempty"`
@@ -35,6 +36,7 @@ func WithRequestSizeLimiting(next http.HandlerFunc, limit int64) http.HandlerFun
 	}
 }
 
+// KnativePublishHandler returns an http.HandlerFunc instance to handle publish requests
 func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher,
 	tracer *trace.Tracer, opts *opts.Options) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -57,7 +59,7 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		reason := getPublishStatusReason(&status)
-		publishResponse := &api.PublishResponse{
+		publishResponse := &api.Response{
 			EventID: message.Headers[trace.HeaderEventID][0],
 			Status:  status,
 			Reason:  reason,
@@ -98,7 +100,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 
 	// set source-id from the headers if missing in the payload
 	if hasSourceID := setSourceID(publishRequest, &r.Header); !hasSourceID {
-		err = api.ErrorResponseMissingFieldSourceId()
+		err = api.ErrorResponseMissingFieldSourceID()
 		log.Printf("source-id missing: %v", err)
 		_ = sendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED
@@ -166,16 +168,16 @@ func initTrace(r *http.Request, tracer *trace.Tracer) (span *opentracing.Span, c
 	return span, context
 }
 
-func setSourceID(publishRequest *api.PublishRequest, header *http.Header) bool {
+func setSourceID(publishRequest *api.Request, header *http.Header) bool {
 	// source-id in the request body
 	if len(publishRequest.SourceID) > 0 {
 		return true
 	}
 
 	// source-id in the request headers
-	if sourceId := header.Get(api.HeaderSourceId); len(sourceId) > 0 {
-		publishRequest.SourceID = sourceId
-		publishRequest.SourceIdFromHeader = true
+	if sourceID := header.Get(api.HeaderSourceID); len(sourceID) > 0 {
+		publishRequest.SourceID = sourceID
+		publishRequest.SourceIDFromHeader = true
 		return true
 	}
 
@@ -184,14 +186,14 @@ func setSourceID(publishRequest *api.PublishRequest, header *http.Header) bool {
 }
 
 func generateEventID() (string, error) {
-	if uid, err := uuid.NewV4(); err != nil {
+	uid, err := uuid.NewV4()
+	if err != nil {
 		return "", err
-	} else {
-		return uid.String(), nil
 	}
+	return uid.String(), nil
 }
 
-func buildMessage(publishRequest *api.PublishRequest, traceContext *api.TraceContext,
+func buildMessage(publishRequest *api.Request, traceContext *api.TraceContext,
 	headers map[string][]string) *Message {
 
 	headers[trace.HeaderSourceID] = []string{publishRequest.SourceID}
