@@ -27,6 +27,7 @@ gateways:
 sidecarInjectorWebhook:
   enabled: true
   rewriteAppHTTPProbe: true
+  enableNamespacesByDefault: true
 
 #
 # galley configuration, refer to charts/galley/values.yaml
