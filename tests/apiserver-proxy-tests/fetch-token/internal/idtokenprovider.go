@@ -51,22 +51,22 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 	err := retry.Do(
 		func() error {
 
-			loginEndpoint, err := p.authorizeCall()
+			loginEndpoint, err := p.initializeImplicitFlow()
 			if err != nil {
 				return err
 			}
 
-			approvalEndpoint, err := p.loginCall(loginEndpoint)
+			approvalEndpoint, err := p.login(loginEndpoint)
 			if err != nil {
 				return err
 			}
 
-			clientEndpointURL, err := p.tokenCall(approvalEndpoint)
+			finalRedirectURL, err := p.receiveToken(approvalEndpoint)
 			if err != nil {
 				return err
 			}
 
-			result = p.parseResult(clientEndpointURL)
+			result = p.parseTokenResponse(finalRedirectURL)
 			return nil
 		},
 		retry.Attempts(p.config.RetryConfig.MaxAttempts),
@@ -90,7 +90,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 }
 
 //Performs call to the <authorize> endpoint.
-func (p *dexIdTokenProvider) authorizeCall() (string, error) {
+func (p *dexIdTokenProvider) initializeImplicitFlow() (string, error) {
 
 	authorizeResp, err := p.httpClient.PostForm(p.config.DexConfig.AuthorizeEndpoint, url.Values{
 		"response_type": {"id_token token"},
@@ -129,7 +129,8 @@ func (p *dexIdTokenProvider) authorizeCall() (string, error) {
 	return loginEndpoint, nil
 }
 
-func (p *dexIdTokenProvider) loginCall(loginEndpoint string) (string, error) {
+//Handles redirect to login endpoint
+func (p *dexIdTokenProvider) login(loginEndpoint string) (string, error) {
 
 	if _, err := p.httpClient.Get(p.config.DexConfig.BaseUrl + loginEndpoint); err != nil {
 		return "", errors.Wrap(err, "while performing HTTP GET on login endpoint")
@@ -157,7 +158,8 @@ func (p *dexIdTokenProvider) loginCall(loginEndpoint string) (string, error) {
 	return approvalEndpoint, nil
 }
 
-func (p *dexIdTokenProvider) tokenCall(approvalEndpoint string) (*url.URL, error) {
+//Handles redirect to approval endpoint to get the token (end of flow)
+func (p *dexIdTokenProvider) receiveToken(approvalEndpoint string) (*url.URL, error) {
 
 	approvalResp, err := p.httpClient.Get(p.config.DexConfig.BaseUrl + approvalEndpoint)
 	if err != nil {
@@ -183,7 +185,7 @@ func (p *dexIdTokenProvider) tokenCall(approvalEndpoint string) (*url.URL, error
 	return parsedUrl, nil
 }
 
-func (p *dexIdTokenProvider) parseResult(parsedUrl *url.URL) map[string]string {
+func (p *dexIdTokenProvider) parseTokenResponse(parsedUrl *url.URL) map[string]string {
 
 	result := make(map[string]string)
 	fragmentParams := strings.Split(parsedUrl.Fragment, "&")
