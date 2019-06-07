@@ -104,22 +104,31 @@ func (sas defaultService) readCredentials(secret map[string][]byte, applicationA
 }
 
 func getRequestParameters(secret map[string][]byte) (*model.RequestParameters, apperrors.AppError) {
-	headers := &map[string][]string{}
-	err := json.Unmarshal(secret[HeadersKey], headers)
-	if err != nil {
-		return nil, apperrors.Internal("Failed to unmarshal headers, %s", err.Error())
+	requestParameters := &model.RequestParameters{}
+
+	headersData := secret[HeadersKey]
+	if headersData != nil {
+		var headers = &map[string][]string{}
+		err := json.Unmarshal(headersData, headers)
+		if err != nil {
+			return nil, apperrors.Internal("Failed to unmarshal headers, %s", err.Error())
+		}
+
+		requestParameters.Headers = headers
 	}
 
-	queryParameters := &map[string][]string{}
-	err = json.Unmarshal(secret[QueryParametersKey], queryParameters)
-	if err != nil {
-		return nil, apperrors.Internal("Failed to unmarshal query parameters, %s", err.Error())
+	queryParamsData := secret[QueryParametersKey]
+	if queryParamsData != nil {
+		var queryParameters = &map[string][]string{}
+		err := json.Unmarshal(queryParamsData, queryParameters)
+		if err != nil {
+			return nil, apperrors.Internal("Failed to unmarshal query parameters, %s", err.Error())
+		}
+
+		requestParameters.QueryParameters = queryParameters
 	}
 
-	return &model.RequestParameters{
-		Headers:         headers,
-		QueryParameters: queryParameters,
-	}, nil
+	return requestParameters, nil
 }
 
 func getOAuthCredentials(secret map[string][]byte, url string) *model.OAuth {

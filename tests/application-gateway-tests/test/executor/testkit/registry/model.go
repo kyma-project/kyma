@@ -48,11 +48,9 @@ type RequestParameters struct {
 }
 
 type Credentials struct {
-	Oauth           *Oauth               `json:"oauth,omitempty"`
-	Basic           *Basic               `json:"basic,omitempty"`
-	CertificateGen  *CertificateGen      `json:"certificateGen,omitempty"`
-	Headers         *map[string][]string `json:"headers,omitempty"`
-	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
+	Oauth          *Oauth          `json:"oauth,omitempty"`
+	Basic          *Basic          `json:"basic,omitempty"`
+	CertificateGen *CertificateGen `json:"certificateGen,omitempty"`
 }
 
 type Oauth struct {
