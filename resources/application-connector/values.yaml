@@ -71,6 +71,6 @@ tests:
       central: false
     skipSslVerify: true
     image:
-      dir: develop/
-      version: "84164981"
+      dir:
+      version: "1.2.0-rc1"
       pullPolicy: IfNotPresent
