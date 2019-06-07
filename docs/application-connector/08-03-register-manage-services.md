@@ -26,11 +26,13 @@ Valid certificate signed by the Kyma Certificate Authority.
     "api": {
       "targetUrl": "https://httpbin.org/",
       "spec": {},
-      "queryParameters": {
-        "param": ["bar"]
-      },
-      "headers": {
-        "custom-header": ["foo"]
+      "requestParameters": {
+        "queryParameters": {
+          "param": ["bar"]
+        },
+        "headers": {
+          "custom-header": ["foo"]
+        },
       },
       "credentials": {
         "basic": {
