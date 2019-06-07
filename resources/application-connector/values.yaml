@@ -50,8 +50,8 @@ global:
     dir: pr/
     version: PR-4341
   application_gateway_tests:
-    dir: develop/
-    version: 27571a1a
+    dir: pr/
+    version: PR-4341
   application_registry:
     dir: pr/
     version: PR-4341
