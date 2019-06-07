@@ -148,7 +148,7 @@ components:
     SubscribedEvents:
       type: 'object'
       properties:
-        events:
+        eventsInfo:
           type: 'array'
           items:
             type: 'object'
