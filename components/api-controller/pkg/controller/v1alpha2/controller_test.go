@@ -69,21 +69,30 @@ func (ffal *failingFakeAPILister) Apis(namespace string) listers.ApiNamespaceLis
 
 func TestValidateApi(t *testing.T) {
 
-	Convey("If validateApi", t, func() {
-
+	var initController = func() Controller{
 		c := &Controller{}
 		c.apisLister = &fakeAPILister{}
 
+		return *c
+	}
+
+	var getTestAPI = func(name, serviceName, namespace  string) *apis.Api {
 		testAPI := &apis.Api{}
-		testAPI.SetName("test-api-1")
-		testAPI.SetNamespace("test-ns")
+		testAPI.SetName(name)
+		testAPI.SetNamespace(namespace)
+		testAPI.Spec.Service.Name = serviceName
 		testAPI.Status.SetInProgress()
 
+		return testAPI
+	}
+
+	Convey("If validateApi", t, func() {
+
 		Convey("is fed with an API for a non-occupied service", func() {
+			c := initController()
 
 			//given
-			testAPI.Spec.Service.Name = "non-occupied-service"
-
+			testAPI := getTestAPI("test-api-1", "non-occupied-service", "test-ns")
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
 			Convey("it should update the helper with the \"Successful\" status code and return this code", func() {
@@ -100,10 +109,10 @@ func TestValidateApi(t *testing.T) {
 		})
 
 		Convey("is fed with an API for an occupied service", func() {
+			c := initController()
 
 			//given
-			testAPI.Spec.Service.Name = "occupied-service"
-
+			testAPI := getTestAPI("test-api-1","occupied-service", "test-ns")
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
 			Convey("it should update the helper with the \"TargetServiceOccupied\" status code and return this code", func() {
@@ -120,12 +129,11 @@ func TestValidateApi(t *testing.T) {
 		})
 
 		Convey("is unable to list existing APIs", func() {
-
-			//given
+			c := initController()
 			c.apisLister = &failingFakeAPILister{}
 
-			testAPI.Spec.Service.Name = "any-service"
-
+			//given
+			testAPI := getTestAPI("test-api-1","any-service", "test-ns")
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
 			Convey("it should update the helper with an error and return the \"Error\" status code", func() {
@@ -142,11 +150,10 @@ func TestValidateApi(t *testing.T) {
 		})
 
 		Convey("is called in OnUpdate context", func() {
+			c := initController()
 
 			//given
-			testAPI.SetName("existing-api")
-			testAPI.Spec.Service.Name = "occupied-service"
-
+			testAPI := getTestAPI("existing-api","occupied-service", "test-ns")
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
 			Convey("it should return the \"Successful\" status code if the service has not been changed", func() {
@@ -163,11 +170,11 @@ func TestValidateApi(t *testing.T) {
 		})
 
 		Convey("is fed with an API for a forbidden service", func() {
+			c := initController()
 			c.blacklistedServices = []string{"forbidden-service.test-ns"}
 
 			//given
-			testAPI.Spec.Service.Name = "forbidden-service"
-
+			testAPI := getTestAPI("test-api-1","forbidden-service", "test-ns")
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
 			Convey("it should update the helper with the \"Error\" status code and return this code", func() {
@@ -180,6 +187,36 @@ func TestValidateApi(t *testing.T) {
 				So(statusHelper.apiCopy.Status.ValidationStatus.IsSuccessful(), ShouldBeFalse)
 				So(statusHelper.apiCopy.Status.IsTargetServiceOccupied(), ShouldBeFalse)
 				So(statusCode, ShouldEqual, kymaMeta.Error)
+			})
+		})
+
+		Convey("is fed with an API for a forbidden services", func() {
+			c := initController()
+			c.blacklistedServices = []string{"forbidden-service-1.test-ns", "forbidden-service-2.test-ns"}
+
+			//given
+			testAPI := getTestAPI("test-api-1","forbidden-service-1", "test-ns")
+			statusHelper := NewApiStatusHelper(nil, testAPI)
+
+			testAPI2 := getTestAPI("test-api-2","forbidden-service-2", "test-ns")
+			statusHelper2 := NewApiStatusHelper(nil, testAPI2)
+
+			Convey("it should update the helper with the \"Error\" status code and return this code for both APIs", func() {
+
+				//when
+				statusCode := c.validateAPI(testAPI, statusHelper)
+				statusCode2 := c.validateAPI(testAPI2, statusHelper2)
+
+				//then
+				So(statusHelper.hasChanged, ShouldBeTrue)
+				So(statusHelper.apiCopy.Status.ValidationStatus.IsSuccessful(), ShouldBeFalse)
+				So(statusHelper.apiCopy.Status.IsTargetServiceOccupied(), ShouldBeFalse)
+				So(statusCode, ShouldEqual, kymaMeta.Error)
+
+				So(statusHelper2.hasChanged, ShouldBeTrue)
+				So(statusHelper2.apiCopy.Status.ValidationStatus.IsSuccessful(), ShouldBeFalse)
+				So(statusHelper2.apiCopy.Status.IsTargetServiceOccupied(), ShouldBeFalse)
+				So(statusCode2, ShouldEqual, kymaMeta.Error)
 			})
 		})
 	})
