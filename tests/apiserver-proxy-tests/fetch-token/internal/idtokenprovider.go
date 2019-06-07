@@ -47,6 +47,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 
 	var result map[string]string = nil
 
+	happyRun := true
 	err := retry.Do(
 		func() error {
 
@@ -72,13 +73,19 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 		retry.Delay(p.config.RetryConfig.Delay),
 		retry.DelayType(retry.FixedDelay),
 		retry.OnRetry(func(retryNo uint, err error) {
-			log.Printf("[%d / %d] Status: %s", retryNo, p.config.RetryConfig.Delay, err)
+			happyRun = false
+			log.Printf("Retry: [%d / %d], error: %s", retryNo, p.config.RetryConfig.MaxAttempts, err)
 		}),
 	)
 
 	if err != nil {
 		return nil, err
 	}
+
+	if happyRun {
+		log.Println("Flow finished flawlessly")
+	}
+
 	return result, nil
 }
 
