@@ -69,14 +69,14 @@ func (ffal *failingFakeAPILister) Apis(namespace string) listers.ApiNamespaceLis
 
 func TestValidateApi(t *testing.T) {
 
-	var initController = func() Controller{
+	var initController = func() Controller {
 		c := &Controller{}
 		c.apisLister = &fakeAPILister{}
 
 		return *c
 	}
 
-	var getTestAPI = func(name, serviceName, namespace  string) *apis.Api {
+	var getTestAPI = func(name, serviceName, namespace string) *apis.Api {
 		testAPI := &apis.Api{}
 		testAPI.SetName(name)
 		testAPI.SetNamespace(namespace)
@@ -112,7 +112,7 @@ func TestValidateApi(t *testing.T) {
 			c := initController()
 
 			//given
-			testAPI := getTestAPI("test-api-1","occupied-service", "test-ns")
+			testAPI := getTestAPI("test-api-1", "occupied-service", "test-ns")
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
 			Convey("it should update the helper with the \"TargetServiceOccupied\" status code and return this code", func() {
@@ -133,7 +133,7 @@ func TestValidateApi(t *testing.T) {
 			c.apisLister = &failingFakeAPILister{}
 
 			//given
-			testAPI := getTestAPI("test-api-1","any-service", "test-ns")
+			testAPI := getTestAPI("test-api-1", "any-service", "test-ns")
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
 			Convey("it should update the helper with an error and return the \"Error\" status code", func() {
@@ -153,7 +153,7 @@ func TestValidateApi(t *testing.T) {
 			c := initController()
 
 			//given
-			testAPI := getTestAPI("existing-api","occupied-service", "test-ns")
+			testAPI := getTestAPI("existing-api", "occupied-service", "test-ns")
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
 			Convey("it should return the \"Successful\" status code if the service has not been changed", func() {
@@ -174,7 +174,7 @@ func TestValidateApi(t *testing.T) {
 			c.blacklistedServices = []string{"forbidden-service.test-ns"}
 
 			//given
-			testAPI := getTestAPI("test-api-1","forbidden-service", "test-ns")
+			testAPI := getTestAPI("test-api-1", "forbidden-service", "test-ns")
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
 			Convey("it should update the helper with the \"Error\" status code and return this code", func() {
@@ -195,10 +195,10 @@ func TestValidateApi(t *testing.T) {
 			c.blacklistedServices = []string{"forbidden-service-1.test-ns", "forbidden-service-2.test-ns"}
 
 			//given
-			testAPI := getTestAPI("test-api-1","forbidden-service-1", "test-ns")
+			testAPI := getTestAPI("test-api-1", "forbidden-service-1", "test-ns")
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
-			testAPI2 := getTestAPI("test-api-2","forbidden-service-2", "test-ns")
+			testAPI2 := getTestAPI("test-api-2", "forbidden-service-2", "test-ns")
 			statusHelper2 := NewApiStatusHelper(nil, testAPI2)
 
 			Convey("it should update the helper with the \"Error\" status code and return this code for both APIs", func() {

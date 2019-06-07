@@ -59,7 +59,7 @@ func TestValidateApi(t *testing.T) {
 
 		Convey("is fed with string containing an empty item", func() {
 			//given
-			list := "svc-1.ns-1 , , svc-2.ns-1"
+			list := "svc-1.ns-1 , , svc-2.ns-1 ,, svc-3.ns-1"
 
 			Convey("it should return an array containing two items", func() {
 
@@ -68,11 +68,11 @@ func TestValidateApi(t *testing.T) {
 
 				//then
 				So(blacklistedSvc, ShouldNotBeEmpty)
-				So(len(blacklistedSvc), ShouldEqual, 2)
+				So(len(blacklistedSvc), ShouldEqual, 3)
 				So(blacklistedSvc[0], ShouldEqual, "svc-1.ns-1")
 				So(blacklistedSvc[1], ShouldEqual, "svc-2.ns-1")
+				So(blacklistedSvc[2], ShouldEqual, "svc-3.ns-1")
 			})
 		})
 	})
 }
-

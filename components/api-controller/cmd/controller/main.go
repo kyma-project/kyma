@@ -149,15 +149,16 @@ func readBlacklistedServices(list string) []string {
 	return removeEmptyStrings(splitStrings(list))
 }
 
-func splitStrings(list string) []string{
+func splitStrings(list string) []string {
 	return strings.Split(list, ",")
 }
 
 func removeEmptyStrings(list []string) []string {
 	result := make([]string, 0)
 	for _, s := range list {
-		if s != "" {
-			result = append(result, strings.TrimSpace(s))
+		ts := strings.TrimSpace(s)
+		if ts != "" {
+			result = append(result, ts)
 		}
 	}
 

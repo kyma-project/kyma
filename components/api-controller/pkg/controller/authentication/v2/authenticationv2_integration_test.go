@@ -42,8 +42,8 @@ func TestIntegrationCreateUpdateAndDeleteAuthentication(t *testing.T) {
 			Name:      "httpbin-api",
 			Namespace: "default",
 		},
-		ServiceName: "sample-app-kfvcdftg-0",
-		Rules:       rules,
+		ServiceName:           "sample-app-kfvcdftg-0",
+		Rules:                 rules,
 		AuthenticationEnabled: true,
 	}
 
