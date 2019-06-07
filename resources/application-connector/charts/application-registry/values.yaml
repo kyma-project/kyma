@@ -7,6 +7,8 @@ deployment:
     uploadServiceURL:  http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000
     requestTimeout: 10
     requestLogging: false
+    specRequestTimeout: 5
+    assetstoreRequestTimeout: 5
     insecureAssetDownload: true
 
 service:
