@@ -31,3 +31,14 @@ func (lr *limitRangeResolver) LimitRangesQuery(ctx context.Context, namespace st
 
 	return lr.converter.ToGQLs(limitRange), nil
 }
+
+func (lr *limitRangeResolver) CreateLimitRange(ctx context.Context, namespace string, name string, limitRange gqlschema.LimitRangeInput) (*gqlschema.LimitRange, error) {
+	createdLimitRange, err := lr.lister.Create(namespace, name, limitRange)
+
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while creating %s `%s` in namespace `%s`", pretty.LimitRange, name, namespace))
+		return nil, gqlerror.New(err, pretty.LimitRange, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	return lr.converter.ToGQL(createdLimitRange), err
+}

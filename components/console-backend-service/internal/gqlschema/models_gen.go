@@ -283,6 +283,13 @@ type LimitRange struct {
 	Limits []LimitRangeItem `json:"limits"`
 }
 
+type LimitRangeInput struct {
+	Default        ResourceValuesInput `json:"default"`
+	DefaultRequest ResourceValuesInput `json:"defaultRequest"`
+	Max            ResourceValuesInput `json:"max"`
+	Type           string              `json:"type"`
+}
+
 type LimitRangeItem struct {
 	LimitType      LimitType    `json:"limitType"`
 	Max            ResourceType `json:"max"`

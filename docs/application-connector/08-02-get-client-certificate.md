@@ -142,16 +142,13 @@ Use `urls.metadataUrl` and `urls.eventsUrl` to get the URLs to the Application R
 
 ## Call the Application Registry and Event services on local deployment
 
-When you connect an external solution to a local Kyma deployment, you must pass the NodePort of the `application-connector-ingress-nginx-ingress-controller` to successfully call the Application Registry and the Event Service.
+- Since Kyma installation on Minikube uses the self-signed certificate by default, skip TLS verification:
 
-- To get the NodePort, run:
+> **NOTE:** You no longer need to add `NodePort` to the the Gateway URL.
+
   ```
-  kubectl -n kyma-system get svc application-connector-ingress-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
-  ```
-- When you send requests to the Application Registry and the Event Service, pass the NodePort along with the generated certificate and key. For example:
-  ```
-  curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+  curl https://gateway.kyma.local/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
   ```
   ```
-  curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/events --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+  curl https://gateway.kyma.local/{APP_NAME}/v1/events --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
   ```

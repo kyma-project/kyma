@@ -112,19 +112,16 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 		labels := gqlschema.Labels{
 			"test": "true",
 		}
-		expectedLabels := gqlschema.Labels{
-			"test": "true",
-			"env":  "true",
-		}
-		resource := fixNamespace(name, expectedLabels)
+
+		resource := fixNamespace(name, labels)
 		expected := gqlschema.NamespaceCreationOutput{
 			Name:   name,
-			Labels: expectedLabels,
+			Labels: labels,
 		}
 
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
-		svc.On("Create", name, expectedLabels).Return(resource, nil).Once()
+		svc.On("Create", name, labels).Return(resource, nil).Once()
 		defer svc.AssertExpectations(t)
 		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
 		result, err := resolver.CreateNamespace(nil, name, &labels)
@@ -136,13 +133,10 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 	t.Run("Error", func(t *testing.T) {
 		name := "exampleName"
 		labels := gqlschema.Labels{}
-		expectedLabels := gqlschema.Labels{
-			"env": "true",
-		}
 
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
-		svc.On("Create", name, expectedLabels).Return(nil, errors.New("Error")).Once()
+		svc.On("Create", name, labels).Return(nil, errors.New("Error")).Once()
 		defer svc.AssertExpectations(t)
 		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
 

@@ -56,23 +56,20 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	scAddonsTest, err := NewServiceCatalogAddonsTest()
 	fatalOnError(t, err, "while creating structure for ScAddons test")
 
-	myNamespaceControllerTest, err := NewNamespaceControllerTestFromEnv()
-	fatalOnError(t, err, "while creating structure for NamespaceController test")
-
 	apiControllerTest, err := NewApiControllerTestFromEnv()
 	fatalOnError(t, err, "while creating structure for ApiController test")
 
 	myAssetStoreTest, err := NewAssetStoreTest(t)
 	fatalOnError(t, err, "while creating structure for AssetStore test")
 
+	myMicroFrontendTest, err := NewMicrofrontendTest()
+	fatalOnError(t, err, "while creating structure for MicroFrontend test")
+
 	// appBrokerTest, err := NewAppBrokerTest()
 	// fatalOnError(t, err, "while creating structure for AppBroker test")
 
 	// helmBrokerTest, err := NewHelmBrokerTest()
 	// fatalOnError(t, err, "while creating structure for HelmBroker test")
-
-	// myMicroFrontendTest, err := NewMicrofrontendTest()
-	// fatalOnError(t, err, "while creating structure for MicroFrontend test")
 
 	myCmsTest, err := NewCmsTest(t)
 	fatalOnError(t, err, "while creating structure for Cms test")
@@ -84,13 +81,12 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		myStatefulSetTest,
 		myGrafanaTest,
 		scAddonsTest,
-		myNamespaceControllerTest,
 		myCmsTest,
 		myAssetStoreTest,
 		apiControllerTest,
+		myMicroFrontendTest,
 		// appBrokerTest,
 		// helmBrokerTest,
-		// myMicroFrontendTest,
 	}
 	e2eTests := make([]e2eTest, len(backupTests))
 

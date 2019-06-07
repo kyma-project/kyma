@@ -5,12 +5,18 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
+
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/sirupsen/logrus"
 )
 
-const defaultCertificateValidityTime = 90 * 24 * time.Hour
+const (
+	defaultCertificateValidityTime = 90 * 24 * time.Hour
+	defaultNamespace               = "default"
+)
 
 type options struct {
 	appName                        string
@@ -20,8 +26,8 @@ type options struct {
 	tokenLength                    int
 	appTokenExpirationMinutes      int
 	runtimeTokenExpirationMinutes  int
-	caSecretName                   string
-	rootCACertificateSecretName    string
+	caSecretName                   types.NamespacedName
+	rootCACertificateSecretName    types.NamespacedName
 	requestLogging                 bool
 	connectorServiceHost           string
 	gatewayBaseURL                 string
@@ -52,8 +58,8 @@ func parseArgs() *options {
 	tokenLength := flag.Int("tokenLength", 64, "Length of a registration tokens.")
 	appTokenExpirationMinutes := flag.Int("appTokenExpirationMinutes", 5, "Time to Live of application tokens expressed in minutes.")
 	runtimeTokenExpirationMinutes := flag.Int("runtimeTokenExpirationMinutes", 10, "Time to Live of runtime tokens expressed in minutes.")
-	caSecretName := flag.String("caSecretName", "nginx-auth-ca", "Name of the secret which contains certificate and key used for signing client certificates.")
-	rootCACertificateSecretName := flag.String("rootCACertificateSecretName", "", "Name of the secret which contains root CA Certificate in case certificates are singed by intermediate CA.")
+	caSecretName := flag.String("caSecretName", "kyma-integration/nginx-auth-ca", "Namespace/name of the secret which contains certificate and key used for signing client certificates.")
+	rootCACertificateSecretName := flag.String("rootCACertificateSecretName", "", "Namespace/name of the secret which contains root CA Certificate in case certificates are singed by intermediate CA.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
 	connectorServiceHost := flag.String("connectorServiceHost", "cert-service.wormhole.cluster.kyma.cx", "Host at which this service is accessible.")
 	gatewayBaseURL := flag.String("gatewayBaseURL", "https://gateway.wormhole.cluster.kyma.cx", "Base URL of the gateway service.")
@@ -87,8 +93,8 @@ func parseArgs() *options {
 		tokenLength:                    *tokenLength,
 		appTokenExpirationMinutes:      *appTokenExpirationMinutes,
 		runtimeTokenExpirationMinutes:  *runtimeTokenExpirationMinutes,
-		caSecretName:                   *caSecretName,
-		rootCACertificateSecretName:    *rootCACertificateSecretName,
+		caSecretName:                   parseNamespacedName(*caSecretName),
+		rootCACertificateSecretName:    parseNamespacedName(*rootCACertificateSecretName),
 		requestLogging:                 *requestLogging,
 		connectorServiceHost:           *connectorServiceHost,
 		gatewayBaseURL:                 *gatewayBaseURL,
@@ -147,4 +153,36 @@ func parseDuration(durationString string) (time.Duration, error) {
 	}
 
 	return time.Duration(timeLength) * unitsMap[timeUnit], nil
+}
+
+func parseNamespacedName(value string) types.NamespacedName {
+	parts := strings.Split(value, string(types.Separator))
+
+	if singleValueProvided(parts) {
+		return types.NamespacedName{
+			Name:      parts[0],
+			Namespace: defaultNamespace,
+		}
+	}
+
+	namespace := get(parts, 0)
+	if namespace == "" {
+		namespace = defaultNamespace
+	}
+
+	return types.NamespacedName{
+		Namespace: namespace,
+		Name:      get(parts, 1),
+	}
+}
+
+func singleValueProvided(split []string) bool {
+	return len(split) == 1 || get(split, 1) == ""
+}
+
+func get(array []string, index int) string {
+	if len(array) > index {
+		return array[index]
+	}
+	return ""
 }

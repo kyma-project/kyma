@@ -1,43 +1,36 @@
 package middlewares
 
 import (
-	"net/http"
-	"net/url"
-
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
-	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
+	"net/http"
 )
 
 type revocationCheckMiddleware struct {
 	revocationList revocation.RevocationListRepository
+	headerParser   certificates.HeaderParser
 }
 
-func NewRevocationCheckMiddleware(revocationList revocation.RevocationListRepository) *revocationCheckMiddleware {
+func NewRevocationCheckMiddleware(revocationList revocation.RevocationListRepository, headerParser certificates.HeaderParser) *revocationCheckMiddleware {
 	return &revocationCheckMiddleware{
 		revocationList: revocationList,
+		headerParser:   headerParser,
 	}
 }
 
 func (rcm revocationCheckMiddleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		certificate := r.Header.Get(externalapi.CertificateHeader)
 
-		pemCert, err := url.PathUnescape(certificate)
-		if err != nil {
-			httphelpers.RespondWithErrorAndLog(w, apperrors.Internal("Failed to unescape characters from certificate."))
+		certInfo, appError := rcm.headerParser.ParseCertificateHeader(*r)
+
+		if appError != nil {
+			httphelpers.RespondWithErrorAndLog(w, appError)
 			return
 		}
 
-		hash, err := certificates.FingerprintSHA256([]byte(pemCert))
-		if err != nil {
-			httphelpers.RespondWithErrorAndLog(w, apperrors.Internal("Failed to calculate certificate hash."))
-			return
-		}
-
-		contains, err := rcm.revocationList.Contains(hash)
+		contains, err := rcm.revocationList.Contains(certInfo.Hash)
 		if err != nil {
 			httphelpers.RespondWithErrorAndLog(w, apperrors.Internal("Failed to read revocation list."))
 			return

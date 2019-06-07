@@ -106,8 +106,6 @@ func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschem
 
 func (r *namespaceResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) {
 
-	// Currently we distinguish the non-system namespaces, by the 'env' label, so we have to add it while creating a new namespace.
-	// TODO: Update this part once this solution for non-system namespace is changed.
 	gqlLabels := r.populateLabels(labels)
 	ns, err := r.namespaceSvc.Create(name, gqlLabels)
 	if err != nil {
@@ -127,6 +125,5 @@ func (r *namespaceResolver) populateLabels(givenLabels *gqlschema.Labels) map[st
 			labels[k] = v
 		}
 	}
-	labels["env"] = "true"
 	return labels
 }

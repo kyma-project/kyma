@@ -9,16 +9,47 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 If you need to use Helm and access Tiller, complete the [additional configuration](#installation-use-helm) after the installation.
 
->**CAUTION:** These instructions are valid starting with Kyma 1.2. If you want to install older releases, refer to the respective documentation versions.
+Choose the installation type and get started:
 
-Choose your cloud provider and get started:
+<div tabs name="provider-installation">
+  <details>
+  <summary>
+  GCP Marketplace
+  </summary>
 
-<div tabs>
+1. Access the [Google Cloud Platform (GCP) Marketplace](https://console.cloud.google.com/marketplace).
+
+2. Search for Kyma in the search box on the GCP Marketplace page. Open **project Kyma** and click **CONFIGURE**.
+
+3. When the pop-up box appears, select you project from the available list and confirm your choice.
+
+4. To create a Kubernetes cluster for your Kyma installation, select a cluster zone from the drop-down menu and click **Create cluster**. Wait for a few minutes for the Kubernetes cluster to deploy.
+
+5. Leave the default values or adjust these settings:
+
+  | Field   |      Default value     |
+  |----------|-------------|
+  | **Namespace** | `default` |
+  | **App instance name** | `kyma-1` |
+  | **Cluster Admin Service Account** | `Create a new service account` |
+
+6. Accept the GCP Marketplace Terms of Service to continue.
+
+7. Click the **Deploy** button for the Kyma installation to start.
+
+> **NOTE:** The installation can take several minutes to complete.
+
+8. Once you become redirected to the **Applications** page under **Kubernetes Engine** in the GCP Console, you get the installation status details. Check the installation status. If it is green, follow the steps in **INFO PANEL** under the **Next steps** section to import the self-signed TLS certificate to your keychain.
+
+9. Access the cluster using the link and login details provided in the **Kyma info** section on the application details page.
+
+> **TIP:** Watch [this](https://www.youtube.com/watch?v=hxVhQqI1B5A) video for the installation demo.
+
+  </details>
   <details>
   <summary>
   GKE
   </summary>
-
 
 Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) (GKE) cluster.
 
@@ -34,6 +65,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to install.
 
 2. Export the release version as an environment variable. Run:
+
     ```
     export KYMA_VERSION={KYMA_RELEASE_VERSION}
     ```
@@ -41,6 +73,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 ## Prepare the GKE cluster
 
 1. Select a name for your cluster. Export the cluster name, the name of your GCP project, and the zone you want to deploy to as environment variables. Run:
+
     ```
     export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
     export GCP_PROJECT={YOUR_GCP_PROJECT}
@@ -48,6 +81,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
     ```
 
 2. Create a cluster in the zone defined in the previous step. Run:
+
     ```
     gcloud container --project "$GCP_PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "$GCP_ZONE" \
@@ -56,11 +90,13 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
     ```
 
 3. Configure kubectl to use your new cluster. Run:
+
     ```
     gcloud container clusters get-credentials $CLUSTER_NAME --zone $GCP_ZONE --project $GCP_PROJECT
     ```
 
 4. Add your account as the cluster administrator:
+
     ```
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
     ```
@@ -69,6 +105,70 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 
     ```
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
+    ```
+
+## Install Kyma
+
+1. Deploy Kyma. Run:
+
+    ```
+    kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml
+    ```
+
+2. Check if the Pods of Tiller and the Kyma Installer are running:
+
+    ```
+    kubectl get pods --all-namespaces
+    ```
+
+3. To watch the installation progress, run:
+
+    ```
+    while true; do \
+      kubectl -n default get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}"; echo; \
+      sleep 5; \
+    done
+    ```
+
+After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
+
+If you receive an error, fetch the Installer logs using this command:
+
+  ```
+  kubectl -n kyma-installer logs -l 'name=kyma-installer'
+  ```
+
+## Post-installation steps
+
+### Add the xip.io self-signed certificate to your OS trusted certificates
+
+After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS, run:
+
+  ```
+  tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
+  && kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.tlsCrt}' | base64 --decode > $tmpfile \
+  && sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
+  && rm $tmpfile
+  ```
+
+### Access the cluster
+
+1. To get the address of the cluster's Console, check the host of the Console's virtual service. The name of the host of this virtual service corresponds to the Console URL. To get the virtual service host, run:
+
+    ```
+    kubectl get virtualservice core-console -n kyma-system -o jsonpath='{ .spec.hosts[0] }'
+    ```
+
+2. Access your cluster under this address:
+
+    ```
+    https://{VIRTUAL_SERVICE_HOST}
+    ```
+
+3. To log in to your cluster's Console UI, use the default `admin` static user. Click **Login with Email** and sign in with the **admin@kyma.cx** email address. Use the password contained in the `admin-user` Secret located in the `kyma-system` Namespace. To get the password, run:
+
+    ```
+    kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
     ```
 
   </details>
@@ -95,6 +195,7 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to install.
 
 2. Export the release version as an environment variable. Run:
+
     ```
     export KYMA_VERSION={KYMA_RELEASE_VERSION}
     ```
@@ -102,18 +203,21 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 ## Prepare the AKS cluster
 
 1. Select a name for your cluster. Set the cluster name, the resource group and region as environment variables. Run:
-  ```
-  export RS_GROUP={YOUR_RESOURCE_GROUP_NAME}
-  export CLUSTER_NAME={YOUR_CLUSTER_NAME}
-  export REGION={YOUR_REGION} #westeurope
-  ```
+
+    ```
+    export RS_GROUP={YOUR_RESOURCE_GROUP_NAME}
+    export CLUSTER_NAME={YOUR_CLUSTER_NAME}
+    export REGION={YOUR_REGION} #westeurope
+    ```
 
 2. Create a resource group that will contain all your resources:
-   ```
-   az group create --name $RS_GROUP --location $REGION
-   ```
+
+    ```
+    az group create --name $RS_GROUP --location $REGION
+    ```
 
 3. Create an AKS cluster. Run:
+
     ```
     az aks create \
       --resource-group $RS_GROUP \
@@ -125,46 +229,53 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
     ```
 
 4. To configure kubectl to use your new cluster, run:
+
     ```
     az aks get-credentials --resource-group $RS_GROUP --name $CLUSTER_NAME
     ```
 
 5. Install Tiller and add additional privileges to be able to access readiness probes endpoints on your AKS cluster.
 
-    * Installation from release
+* Installation from release:
+
     ```
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/tiller.yaml
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/azure-crb-for-healthz.yaml
     ```
-    * If you install Kyma from sources, check out [kyma-project](https://github.com/kyma-project/kyma) and enter the root folder. Run:
+
+* If you install Kyma from sources, check out [kyma-project](https://github.com/kyma-project/kyma) and enter the root folder. Run:
+
     ```
     kubectl apply -f installation/resources/tiller.yaml
     kubectl apply -f installation/resources/azure-crb-for-healthz.yaml
     ```
+
 6. Install custom installation overrides for AKS. Run:
+
     ```
     kubectl create namespace kyma-installer \
     && kubectl create configmap aks-overrides -n kyma-installer --from-literal=global.proxy.excludeIPRanges=10.0.0.1 \
     && kubectl label configmap aks-overrides -n kyma-installer installer=overrides component=istio
     ```
 
-    >**TIP:** An example config map is available [here](./assets/aks-overrides.yaml)
-  </details>
-</div>
+    >**TIP:** An example config map is available [here](./assets/aks-overrides.yaml).
 
 ## Install Kyma
 
 1. Deploy Kyma. Run:
+
     ```
     kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml
     ```
 
 2. Check if the Pods of Tiller and the Kyma Installer are running:
+
     ```
     kubectl get pods --all-namespaces
     ```
 
 3. To watch the installation progress, run:
+
     ```
     while true; do \
       kubectl -n default get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}"; echo; \
@@ -173,36 +284,47 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
     ```
 
 After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
-In case of an error, you can fetch the logs from the Installer by running:
-    ```
-    kubectl -n kyma-installer logs -l 'name=kyma-installer'
-    ```
+
+If you receive an error, fetch the Installer logs using this command:
+
+  ```
+  kubectl -n kyma-installer logs -l 'name=kyma-installer'
+  ```
 
 ## Post-installation steps
 
 ### Add the xip.io self-signed certificate to your OS trusted certificates
 
-After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS, run:
-```
-tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
-&& kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.tlsCrt}' | base64 --decode > $tmpfile \
-&& sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
-&& rm $tmpfile
-```
+After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS.
+For MacOS, run:
+
+  ```
+  tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
+  && kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.tlsCrt}' | base64 --decode > $tmpfile \
+  && sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
+  && rm $tmpfile
+  ```
 
 ### Access the cluster
 
 1. To get the address of the cluster's Console, check the host of the Console's virtual service. The name of the host of this virtual service corresponds to the Console URL. To get the virtual service host, run:
+
     ```
     kubectl get virtualservice core-console -n kyma-system -o jsonpath='{ .spec.hosts[0] }'
     ```
 
 2. Access your cluster under this address:
+
     ```
     https://{VIRTUAL_SERVICE_HOST}
     ```
 
 3. To log in to your cluster's Console UI, use the default `admin` static user. Click **Login with Email** and sign in with the **admin@kyma.cx** email address. Use the password contained in the `admin-user` Secret located in the `kyma-system` Namespace. To get the password, run:
+
     ```
     kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
     ```
+
+
+  </details>
+</div>
