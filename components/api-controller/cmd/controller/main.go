@@ -134,28 +134,32 @@ func isAuthPolicyMTLSEnabled() bool {
 }
 
 func getCORSConfig() istioNetworkingV1.CORSConfig {
-	separator := ","
 	allowOrigin := os.Getenv("CORS_ALLOW_ORIGIN")
 	allowMethods := os.Getenv("CORS_ALLOW_METHODS")
 	allowHeaders := os.Getenv("CORS_ALLOW_HEADERS")
 
 	return istioNetworkingV1.CORSConfig{
-		AllowOrigin:  removeEmptyStrings(strings.Split(allowOrigin, separator)),
-		AllowMethods: removeEmptyStrings(strings.Split(allowMethods, separator)),
-		AllowHeaders: removeEmptyStrings(strings.Split(allowHeaders, separator)),
+		AllowOrigin:  removeEmptyStrings(splitStrings(allowOrigin)),
+		AllowMethods: removeEmptyStrings(splitStrings(allowMethods)),
+		AllowHeaders: removeEmptyStrings(splitStrings(allowHeaders)),
 	}
 }
 
 func readBlacklistedServices(list string) []string {
-	return removeEmptyStrings(strings.Split(list, ","))
+	return removeEmptyStrings(splitStrings(list))
 }
 
-func removeEmptyStrings(strings []string) []string {
+func splitStrings(list string) []string{
+	return strings.Split(list, ",")
+}
+
+func removeEmptyStrings(list []string) []string {
 	result := make([]string, 0)
-	for _, s := range strings {
+	for _, s := range list {
 		if s != "" {
-			result = append(result, s)
+			result = append(result, strings.TrimSpace(s))
 		}
 	}
+
 	return result
 }
