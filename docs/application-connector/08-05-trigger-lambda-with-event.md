@@ -162,7 +162,7 @@ metadata:
   namespace: production
 spec:
   endpoint: http://my-events-lambda.production:8080/
-  event_type: exampleEvent
+  event_type: exampleevent
   event_type_version: v1
   include_subscription_name_header: true
   max_inflight: 400
@@ -175,7 +175,7 @@ EOF
    ```
    curl -X POST https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
    '{
-       "event-type": "exampleEvent",
+       "event-type": "exampleevent",
        "event-type-version": "v1",
        "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
        "event-time": "2018-10-16T15:00:00Z",

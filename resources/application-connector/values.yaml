@@ -39,7 +39,7 @@ global:
     version: 91adb4c1
   event_service:
     dir: develop/
-    version: fedca3db
+    version: 5d1f50d1
   gateway_tests:
     dir: develop/
     version: fedca3db

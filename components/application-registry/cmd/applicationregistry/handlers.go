@@ -96,9 +96,9 @@ func NewSpecificationService(dynamicClient dynamic.Interface, opt *options) spec
 
 	docsTopicRepository := assetstore.NewDocsTopicRepository(resourceInterface)
 	uploadClient := upload.NewClient(opt.uploadServiceURL)
-	assetStoreService := assetstore.NewService(docsTopicRepository, uploadClient, opt.insecureAssetDownload)
+	assetStoreService := assetstore.NewService(docsTopicRepository, uploadClient, opt.insecureAssetDownload, opt.assetstoreRequestTimeout)
 
-	return specification.NewSpecService(assetStoreService)
+	return specification.NewSpecService(assetStoreService, opt.specRequestTimeout)
 }
 
 func newApplicationRepository(config *restclient.Config) (applications.ServiceRepository, apperrors.AppError) {
