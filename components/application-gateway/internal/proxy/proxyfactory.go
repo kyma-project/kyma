@@ -37,12 +37,12 @@ func makeProxy(targetUrl string, requestParameters *model.RequestParameters, id 
 			req.URL.RawQuery = targetQuery + "&" + req.URL.RawQuery
 		}
 
-		removeForbiddenHeaders(req.Header)
-
 		if requestParameters != nil {
 			setCustomQueryParameters(req.URL, requestParameters.QueryParameters)
 			setCustomHeaders(req.Header, requestParameters.Headers)
 		}
+
+		removeForbiddenHeaders(req.Header)
 
 		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
 	}
