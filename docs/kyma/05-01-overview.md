@@ -60,7 +60,10 @@ For more details on custom component installation, see [this](#configuration-cus
 
 The common overrides that affect the entire installation, are described in the installation guides.
 Other overrides are component-specific.
-To learn more about the configuration options available for a specific component, see the **Configuration** section of the component's documentation. Override only the parameters exposed in the configuration document.
+To learn more about the configuration options available for a specific component, see the **Configuration** section of the component's documentation.
+
+>**CAUTION:** Override only values for those parameters from `values.yaml` files that are exposed in configuration documents for a given component.
+
 [Read more](#configuration-helm-overrides-for-kyma-installation) about the types of overrides and the rules for creating them.
 
 >**CAUTION:** An override must exist in a cluster before the installation starts. If you fail to deliver the override before the installation, the configuration can't be applied.
