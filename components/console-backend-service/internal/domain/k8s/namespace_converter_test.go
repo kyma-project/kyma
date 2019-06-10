@@ -63,3 +63,30 @@ func TestNamespaceConverter_ToGQLs(t *testing.T) {
 		assert.Equal(t, expectedName, result[0].Name)
 	})
 }
+
+func TestNamespaceConverter_ToGQL(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		converter := namespaceConverter{}
+		expectedName := "exampleName"
+		in := v1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: expectedName,
+			},
+		}
+
+		result, err := converter.ToGQL(&in)
+
+		require.NoError(t, err)
+		assert.Equal(t, expectedName, result.Name)
+	})
+
+	t.Run("Empty", func(t *testing.T) {
+		converter := namespaceConverter{}
+		var in *v1.Namespace
+
+		result, err := converter.ToGQL(in)
+
+		require.NoError(t, err)
+		assert.Empty(t, result)
+	})
+}
