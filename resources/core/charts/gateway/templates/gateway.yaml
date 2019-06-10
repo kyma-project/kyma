@@ -13,7 +13,7 @@ spec:
       protocol: HTTPS
     tls:
       mode: SIMPLE
-      credentialName: kyma-gateway-certs
+      credentialName: {{ .Values.global.istio.gateway.name }}-certs
     hosts:
     - "*.{{.Values.global.ingress.domainName}}"
   - port:
@@ -22,7 +22,7 @@ spec:
       protocol: HTTPS
     tls:
       mode: MUTUAL
-      credentialName: application-connector-certs
+      credentialName: {{ .Values.global.istio.gateway.name }}-certs
     hosts:
       - "gateway.{{.Values.global.ingress.domainName}}"
   - port:
