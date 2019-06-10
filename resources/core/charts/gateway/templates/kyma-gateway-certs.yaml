@@ -5,6 +5,6 @@ data:
   "cert": {{ .Values.global.ingress.tlsCrt }}
 kind: Secret
 metadata:
-  name: istio-ingressgateway-certs
+  name: kyma-gateway-certs
   namespace: istio-system
 type: Opaque
