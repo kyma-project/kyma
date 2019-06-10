@@ -37,7 +37,7 @@ Choose the installation type and get started:
 
 > **NOTE:** The installation can take several minutes to complete.
 
-7. Once you become redirected to the **Applications** page under **Kubernetes Engine** in the GCP Console, you get the installation status details. Check the installation status. Check the installation status. If it is green, follow the steps under the **Next steps** section in **INFO PANEL** to import the self-signed TLS certificate to your trusted certified authorities.
+7. Once you become redirected to the **Applications** page under **Kubernetes Engine** in the GCP Console, you get the installation status details. Check the installation status. If it is green, follow the steps under the **Next steps** section in **INFO PANEL** to import the self-signed TLS certificate to your trusted certified authorities.
 
 8. Access the cluster using the link and login details provided in the **Kyma info** section on the **Application details** page.
 
