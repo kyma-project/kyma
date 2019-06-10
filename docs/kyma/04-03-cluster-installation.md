@@ -37,18 +37,7 @@ Choose the installation type and get started:
 
 > **NOTE:** The installation can take several minutes to complete.
 
-7. Once you become redirected to the **Applications** page under **Kubernetes Engine** in the GCP Console, you get the installation status details. Check the installation status. If it is green, import the self-signed TLS certificate to your trusted certified authorities.
-
-To do this on MacOS, paste this command in the command line, copy the certificate string from the **Application details** page, and run the command:
-
-```
-tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
-&& pbpaste > $tmpfile \
-&& sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
-&& rm $tmpfile
-```
-
->**NOTE:** This step is also described under the **Next steps** section the **INFO PANEL** on the **Application details** page.
+7. Once you become redirected to the **Applications** page under **Kubernetes Engine** in the GCP Console, you get the installation status details. Check the installation status. Check the installation status. If it is green, follow the steps under the **Next steps** section in **INFO PANEL** to import the self-signed TLS certificate to your trusted certified authorities.
 
 8. Access the cluster using the link and login details provided in the **Kyma info** section on the **Application details** page.
 
