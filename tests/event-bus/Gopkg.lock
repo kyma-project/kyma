@@ -117,8 +117,7 @@
   version = "v1.1.6"
 
 [[projects]]
-  branch = "master"
-  digest = "1:688a41719642e5e64261752e7df73540e601ee4fb7037414909bd52178b5169c"
+  digest = "1:650dc36abb4a26e1b0ad4f73654494e9f3a3858ab85233837f1722ab49b7345c"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/event-bus/api/publish",
@@ -135,7 +134,7 @@
     "components/event-bus/test/util",
   ]
   pruneopts = "UT"
-  revision = "20e4eaf3bccf585c00984cbd965e480ba6b89444"
+  revision = "7fb23f072f5694209e5eeafba4f82ca8011423e8"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"

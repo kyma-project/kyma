@@ -53,9 +53,9 @@ spec:
             - name: http
               containerPort: {{ .Values.loki.port }}
               protocol: TCP
-
           resources:
             {{- toYaml .Values.loki.resources | nindent 12 }}
+          
       nodeSelector:
         {{- toYaml .Values.loki.nodeSelector | nindent 8 }}
       affinity:

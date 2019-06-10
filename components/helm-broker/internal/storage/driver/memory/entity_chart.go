@@ -108,5 +108,5 @@ func (*Chart) key(name internal.ChartName, ver semver.Version) (k chartNameVersi
 		return k, errors.New("both name and version must be set")
 	}
 
-	return chartNameVersion(fmt.Sprintf("%s|%s", name, ver.String())), nil
+	return chartNameVersion(fmt.Sprintf("%s|%s", name, ver.Original())), nil
 }

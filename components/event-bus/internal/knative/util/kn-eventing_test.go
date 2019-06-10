@@ -45,13 +45,6 @@ var (
 				"l2": "v2",
 			},
 		},
-		Spec: evapisv1alpha1.ChannelSpec{
-			Provisioner: &corev1.ObjectReference{
-				Name:       provisioner,
-				APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
-				Kind:       "ClusterChannelProvisioner",
-			},
-		},
 		Status: evapisv1alpha1.ChannelStatus{
 			Conditions: []duckv1alpha1.Condition{
 				{

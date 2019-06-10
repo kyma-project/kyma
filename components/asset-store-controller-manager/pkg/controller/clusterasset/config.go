@@ -11,11 +11,11 @@ import (
 )
 
 type Config struct {
-	Store   store.Config
-	Loader  loader.Config
-	Webhook assethook.Config
-
-	ClusterAssetRelistInterval time.Duration `envconfig:"default=30s"`
+	Store                               store.Config
+	Loader                              loader.Config
+	Webhook                             assethook.Config
+	MaxClusterAssetConcurrentReconciles int           `envconfig:"default=1"`
+	ClusterAssetRelistInterval          time.Duration `envconfig:"default=30s"`
 }
 
 func loadConfig(prefix string) (Config, error) {

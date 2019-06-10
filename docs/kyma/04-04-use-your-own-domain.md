@@ -9,9 +9,7 @@ This guide explains how to deploy Kyma on a cluster using your own domain.
 
 Choose your cloud provider and get started:
 
->**CAUTION:** These instructions are valid starting with Kyma 1.2. If you want to install older releases, refer to the respective documentation versions.
-
-<div tabs>
+<div tabs name="provider-domain">
   <details>
   <summary>
   GKE
@@ -95,7 +93,7 @@ Follow these steps:
     ```
     mkdir letsencrypt
     ```
-    
+
 3. Create a new service account and assign it to the **dns.admin** role. Run these commands:
     ```
     gcloud iam service-accounts create dnsmanager --display-name "dnsmanager" --project "$GCP_PROJECT"
@@ -147,7 +145,7 @@ Follow these steps:
     ```
     gcloud container --project "$GCP_PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "$GCP_ZONE" \
-    --cluster-version "1.12.5" --machine-type "n1-standard-4" \
+    --cluster-version "1.12" --machine-type "n1-standard-4" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing
     ```
 
@@ -208,13 +206,9 @@ export EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system istio-ingressgat
 
 export APISERVER_PUBLIC_IP=$(kubectl get service -n kyma-system apiserver-proxy-ssl -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
-export APP_CONNECTOR_PUBLIC_IP=$(kubectl get service -n kyma-system application-connector-ingress-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
-
 gcloud dns --project=$PROJECT record-sets transaction start --zone=$DNS_ZONE
 
 gcloud dns --project=$PROJECT record-sets transaction add $EXTERNAL_PUBLIC_IP --name=\*.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
-
-gcloud dns --project=$PROJECT record-sets transaction add $APP_CONNECTOR_PUBLIC_IP --name=\gateway.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
 
 gcloud dns --project=$PROJECT record-sets transaction add $APISERVER_PUBLIC_IP --name=\apiserver.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
 
@@ -438,15 +432,10 @@ Run these commands:
 ```
 export EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system istio-ingressgateway -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
-export REMOTE_ENV_IP=$(kubectl get service -n kyma-system application-connector-ingress-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
-
 export APISERVER_PUBLIC_IP=$(kubectl get service -n kyma-system apiserver-proxy-ssl -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
 az network dns record-set a create -g $RS_GROUP -z $DNS_DOMAIN -n \*.$SUB_DOMAIN --ttl 60
 az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n \*.$SUB_DOMAIN -a $EXTERNAL_PUBLIC_IP
-
-az network dns record-set a create -g $RS_GROUP -z $DNS_DOMAIN -n gateway.$SUB_DOMAIN --ttl 60
-az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n gateway.$SUB_DOMAIN -a $REMOTE_ENV_IP
 
 az network dns record-set a create -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.$SUB_DOMAIN --ttl 60
 az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.$SUB_DOMAIN -a $APISERVER_PUBLIC_IP

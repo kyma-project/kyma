@@ -25,7 +25,7 @@ func TestStore_BucketExists(t *testing.T) {
 		minio.On("BucketExists", name).Return(true, nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1 )
 
 		// When
 		exists, err := store.BucketExists(name)
@@ -44,7 +44,7 @@ func TestStore_BucketExists(t *testing.T) {
 		minio.On("BucketExists", name).Return(false, nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		exists, err := store.BucketExists(name)
@@ -63,7 +63,7 @@ func TestStore_BucketExists(t *testing.T) {
 		minio.On("BucketExists", name).Return(false, fmt.Errorf("test error")).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		exists, err := store.BucketExists(name)
@@ -86,7 +86,7 @@ func TestStore_CompareBucketPolicy(t *testing.T) {
 		minio.On("GetBucketPolicy", bucketName).Return(remotePolicy, nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		equal, err := store.CompareBucketPolicy(bucketName, expectedPolicy)
@@ -107,7 +107,7 @@ func TestStore_CompareBucketPolicy(t *testing.T) {
 		minio.On("GetBucketPolicy", bucketName).Return(remotePolicy, nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		equal, err := store.CompareBucketPolicy(bucketName, expectedPolicy)
@@ -128,7 +128,7 @@ func TestStore_CompareBucketPolicy(t *testing.T) {
 		minio.On("GetBucketPolicy", bucketName).Return(remotePolicy, nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		equal, err := store.CompareBucketPolicy(bucketName, expectedPolicy)
@@ -149,7 +149,7 @@ func TestStore_CompareBucketPolicy(t *testing.T) {
 		minio.On("GetBucketPolicy", bucketName).Return(remotePolicy, nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		equal, err := store.CompareBucketPolicy(bucketName, expectedPolicy)
@@ -170,7 +170,7 @@ func TestStore_CompareBucketPolicy(t *testing.T) {
 		minio.On("GetBucketPolicy", bucketName).Return(remotePolicy, nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		equal, err := store.CompareBucketPolicy(bucketName, expectedPolicy)
@@ -190,7 +190,7 @@ func TestStore_CompareBucketPolicy(t *testing.T) {
 		minio.On("GetBucketPolicy", bucketName).Return("", nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		equal, err := store.CompareBucketPolicy(bucketName, expectedPolicy)
@@ -210,7 +210,7 @@ func TestStore_CompareBucketPolicy(t *testing.T) {
 		minio.On("GetBucketPolicy", bucketName).Return("", errors.New("test-error")).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		_, err := store.CompareBucketPolicy(bucketName, expectedPolicy)
@@ -234,7 +234,7 @@ func TestStore_ContainsAllObjects(t *testing.T) {
 		minio.On("ListObjects", bucketName, assetName, true, ctx.Done()).Return(objCh).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		contains, err := store.ContainsAllObjects(ctx, bucketName, assetName, files)
@@ -257,7 +257,7 @@ func TestStore_ContainsAllObjects(t *testing.T) {
 		minio.On("ListObjects", bucketName, assetName, true, ctx.Done()).Return(objCh).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		contains, err := store.ContainsAllObjects(ctx, bucketName, assetName, files)
@@ -280,7 +280,7 @@ func TestStore_ContainsAllObjects(t *testing.T) {
 		minio.On("ListObjects", bucketName, assetName, true, ctx.Done()).Return(objCh).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		contains, err := store.ContainsAllObjects(ctx, bucketName, assetName, files)
@@ -303,7 +303,7 @@ func TestStore_ContainsAllObjects(t *testing.T) {
 		minio.On("ListObjects", bucketName, assetName, true, ctx.Done()).Return(objCh).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		contains, err := store.ContainsAllObjects(ctx, bucketName, assetName, files)
@@ -326,7 +326,7 @@ func TestStore_ContainsAllObjects(t *testing.T) {
 		minio.On("ListObjects", bucketName, assetName, true, ctx.Done()).Return(objCh).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		_, err := store.ContainsAllObjects(ctx, bucketName, assetName, files)
@@ -349,7 +349,7 @@ func TestStore_CreateBucket(t *testing.T) {
 		minio.On("MakeBucket", mock.AnythingOfType("string"), region).Return(nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		name, err := store.CreateBucket(namespace, crName, region)
@@ -371,7 +371,7 @@ func TestStore_CreateBucket(t *testing.T) {
 		minio.On("MakeBucket", mock.AnythingOfType("string"), region).Return(nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		name, err := store.CreateBucket("", crName, region)
@@ -395,7 +395,7 @@ func TestStore_CreateBucket(t *testing.T) {
 		minio.On("MakeBucket", mock.AnythingOfType("string"), region).Return(nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		name, err := store.CreateBucket(namespace, crName, region)
@@ -417,7 +417,7 @@ func TestStore_CreateBucket(t *testing.T) {
 		minio.On("BucketExists", mock.AnythingOfType("string")).Return(true, nil).Times(10)
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		_, err := store.CreateBucket(namespace, crName, region)
@@ -437,7 +437,7 @@ func TestStore_CreateBucket(t *testing.T) {
 		minio.On("BucketExists", mock.AnythingOfType("string")).Return(false, errors.New("test-err")).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		_, err := store.CreateBucket(namespace, crName, region)
@@ -459,7 +459,7 @@ func TestStore_CreateBucket(t *testing.T) {
 
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		_, err := store.CreateBucket(namespace, crName, region)
@@ -485,7 +485,7 @@ func TestStore_DeleteBucket(t *testing.T) {
 		minio.On("RemoveBucket", name).Return(nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.DeleteBucket(ctx, name)
@@ -507,7 +507,7 @@ func TestStore_DeleteBucket(t *testing.T) {
 		minio.On("RemoveBucket", name).Return(nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.DeleteBucket(ctx, name)
@@ -526,7 +526,7 @@ func TestStore_DeleteBucket(t *testing.T) {
 		minio.On("BucketExists", name).Return(false, nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.DeleteBucket(ctx, name)
@@ -545,7 +545,7 @@ func TestStore_DeleteBucket(t *testing.T) {
 		minio.On("BucketExists", name).Return(false, fmt.Errorf("test error")).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.DeleteBucket(ctx, name)
@@ -566,7 +566,7 @@ func TestStore_DeleteBucket(t *testing.T) {
 		minio.On("ListObjects", name, "", true, ctx.Done()).Return(objCh).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.DeleteBucket(ctx, name)
@@ -590,7 +590,7 @@ func TestStore_DeleteBucket(t *testing.T) {
 		minio.On("RemoveBucket", name).Return(errors.New("test-error")).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.DeleteBucket(ctx, name)
@@ -614,7 +614,7 @@ func TestStore_DeleteObjects(t *testing.T) {
 		minio.On("RemoveObjectsWithContext", ctx, name, mock.Anything).Return(errCh).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.DeleteObjects(ctx, name, "")
@@ -637,7 +637,7 @@ func TestStore_DeleteObjects(t *testing.T) {
 		minio.On("RemoveObjectsWithContext", ctx, name, mock.Anything).Return(errCh).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.DeleteObjects(ctx, name, prefix)
@@ -657,7 +657,7 @@ func TestStore_DeleteObjects(t *testing.T) {
 		minio.On("ListObjects", name, "", true, ctx.Done()).Return(objCh).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.DeleteObjects(ctx, name, "")
@@ -677,7 +677,7 @@ func TestStore_DeleteObjects(t *testing.T) {
 		minio.On("ListObjects", name, "", true, ctx.Done()).Return(objCh).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.DeleteObjects(ctx, name, "")
@@ -699,7 +699,7 @@ func TestStore_DeleteObjects(t *testing.T) {
 		minio.On("RemoveObjectsWithContext", ctx, name, mock.Anything).Return(errCh).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.DeleteObjects(ctx, name, "")
@@ -724,7 +724,7 @@ func TestStore_PutObjects(t *testing.T) {
 		minio.On("FPutObjectWithContext", ctx, bucketName, filepath.Join(assetName, files[1]), filepath.Join(sourceBasePath, files[1]), mock.Anything).Return(int64(1), nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,2)
 
 		// When
 		err := store.PutObjects(ctx, bucketName, assetName, sourceBasePath, files)
@@ -747,7 +747,7 @@ func TestStore_PutObjects(t *testing.T) {
 		minio.On("FPutObjectWithContext", ctx, bucketName, filepath.Join(assetName, files[1]), filepath.Join(sourceBasePath, files[1]), mock.Anything).Return(int64(1), errors.New("test-error")).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.PutObjects(ctx, bucketName, assetName, sourceBasePath, files)
@@ -768,7 +768,7 @@ func TestStore_PutObjects(t *testing.T) {
 		minio := new(automock.MinioClient)
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.PutObjects(ctx, bucketName, assetName, sourceBasePath, files)
@@ -790,7 +790,7 @@ func TestStore_SetBucketPolicy(t *testing.T) {
 		minio.On("SetBucketPolicy", bucketName, marshaledPolicy).Return(nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.SetBucketPolicy(bucketName, policy)
@@ -810,7 +810,7 @@ func TestStore_SetBucketPolicy(t *testing.T) {
 		minio.On("SetBucketPolicy", bucketName, marshaledPolicy).Return(nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.SetBucketPolicy(bucketName, expectedPolicy)
@@ -830,7 +830,7 @@ func TestStore_SetBucketPolicy(t *testing.T) {
 		minio.On("SetBucketPolicy", bucketName, marshaledPolicy).Return(nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.SetBucketPolicy(bucketName, expectedPolicy)
@@ -850,7 +850,7 @@ func TestStore_SetBucketPolicy(t *testing.T) {
 		minio.On("SetBucketPolicy", bucketName, marshaledPolicy).Return(nil).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.SetBucketPolicy(bucketName, expectedPolicy)
@@ -870,7 +870,7 @@ func TestStore_SetBucketPolicy(t *testing.T) {
 		minio.On("SetBucketPolicy", bucketName, marshaledPolicy).Return(errors.New("test-error")).Once()
 		defer minio.AssertExpectations(t)
 
-		store := store.New(minio)
+		store := store.New(minio,1)
 
 		// When
 		err := store.SetBucketPolicy(bucketName, expectedPolicy)

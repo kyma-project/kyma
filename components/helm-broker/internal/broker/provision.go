@@ -4,17 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"sync"
 
+	jsonhash "github.com/komkom/go-jsonhash"
+	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
-
-	"net/http"
-
-	jsonhash "github.com/komkom/go-jsonhash"
-	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
 
 const addonsRepositoryURLName = "addonsRepositoryURL"

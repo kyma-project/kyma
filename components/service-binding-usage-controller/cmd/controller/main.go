@@ -9,6 +9,7 @@ import (
 	serviceCatalogClientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	serviceCatalogInformers "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/metric"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/usagekind"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/platform/logger"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
@@ -16,6 +17,7 @@ import (
 	bindingUsageInformers "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/signal"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
@@ -89,11 +91,15 @@ func main() {
 		fatalOnError(err)
 	}
 
+	cbm := metric.NewControllerBusinessMetric()
+	prometheus.MustRegister(cbm)
+
 	kindController := usagekind.NewKindController(
 		bindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds(),
 		aggregator,
 		cp,
-		log)
+		log,
+		cbm)
 	ukProtectionController, err := usagekind.NewProtectionController(
 		bindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds(),
 		sbuInformer,
@@ -118,6 +124,7 @@ func main() {
 		podPresetModifier,
 		labelsFetcher,
 		log,
+		cbm,
 	)
 	ctr.AddOnDeleteListener(ukProtectionController)
 
