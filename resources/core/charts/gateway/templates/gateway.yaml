@@ -13,8 +13,7 @@ spec:
       protocol: HTTPS
     tls:
       mode: SIMPLE
-      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
-      privateKey: /etc/istio/ingressgateway-certs/tls.key
+      credentialName: istio-ingressgateway-certs
     hosts:
     - "*.{{.Values.global.ingress.domainName}}"
   - port:
@@ -22,10 +21,8 @@ spec:
       number: 443
       protocol: HTTPS
     tls:
-      caCertificates: /etc/istio/application-connector-ca-certs/ca.crt
       mode: MUTUAL
-      privateKey: /etc/istio/ingressgateway-certs/tls.key
-      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+      credentialName: application-connector-certs
     hosts:
       - "gateway.{{.Values.global.ingress.domainName}}"
   - port:
