@@ -7,7 +7,7 @@ The Central Connector Service uses the Root CA certificate to issue new certific
 
 Two different components use the Root CA certificate. As a result, the certificate is stored in two separate Secrets:
   - The `connector-service-app-ca` Connector Service CA Secret responsible for signing certificate requests
-  - The `application-connector-ca-certs` Istio Secret responsible for security in the Connector Service API
+  - The `kyma-gateway-ca-certs` Istio Secret responsible for security in the Connector Service API
 
 Keeping both Secrets up-to-date is vital for the security of your implementation as it guarantees that the Connector Service issues proper certificates and no unregistered applications can access its API.
 
@@ -45,9 +45,9 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
   kubectl -n kyma-integration edit secret connector-service-app-ca
   ```
 
-5. Get the existing Istio CA certificate. Fetch it from the `application-connector-ca-certs` Secret and save it to a `old-ca.crt` file. Run:
+5. Get the existing Istio CA certificate. Fetch it from the `kyma-gateway-ca-certs` Secret and save it to a `old-ca.crt` file. Run:
   ```
-  kubectl -n istio-system get secret application-connector-ca-certs -o=jsonpath='{.data.ca\.crt}' | base64 --decode > old-ca.crt
+  kubectl -n istio-system get secret kyma-gateway-ca-certs -o=jsonpath='{.data.ca\.crt}' | base64 --decode > old-ca.crt
   ```
 
 6. Merge the old Nginx certificate and the newly generated certificate into a single `nginx-ca.crt` file:
@@ -62,7 +62,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 
 8. Replace the old certificate in the Istio Secret. Edit the Secret and replace the `ca.crt` value with the `merged-ca.crt` base64-encoded certificate. Run:
   ```
-  kubectl -n istio-system edit secret application-connector-ca-certs
+  kubectl -n istio-system edit secret kyma-gateway-ca-certs
   ```
 
 9. If you experience any issues with new certificates not being trusted, restart Istio Ingress Gateway Pods. Run:
@@ -73,14 +73,14 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 
 10. Renew the certificates in a runtime. To do that, create a CertificateRequest CR in the runtime in which you want to renew the certificates. Alternatively, wait for the certificates to expire in a given runtime. The system renews the certificates automatically using the information stored in the Secrets you updated.
 
-11. After the certificates are renewed in a runtime, remove the `application-connector-ca-certs` Secret entry which contains the old certificate. First, encode the `new-ca.crt` file with base64:
+11. After the certificates are renewed in a runtime, remove the `kyma-gateway-ca-certs` Secret entry which contains the old certificate. First, encode the `new-ca.crt` file with base64:
   ```
   cat new-ca.crt | base64
   ```
 
 12. Edit the Secret and replace the `ca.crt` value with the `new-ca.crt` base64-encoded certificate. Run:
   ```
-  kubectl -n istio-system edit secret application-connector-ca-certs
+  kubectl -n istio-system edit secret kyma-gateway-ca-certs
   ```
 
 13. For changes to take effect, you may need to restart the Pods of Istio Ingress Gateway. Run: 
@@ -115,7 +115,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 
 5. Replace the old certificate in the Istio Secret. Edit the Secret and replace the `ca.crt` value with the new base64-encoded certificate. Run:
   ```
-  kubectl -n istio-system edit secret application-connector-ca-certs
+  kubectl -n istio-system edit secret kyma-gateway-ca-certs
   ```
 
 6. If you experience any issues with new certificates not being trusted, restart Istio Ingress Gateway Pods. Run:
@@ -155,7 +155,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 
 5. Replace the old certificate in the Istio Secret. Edit the Secret and replace the `ca.crt` value with the new base64-encoded certificate. Run:
   ```
-  kubectl -n istio-system edit secret application-connector-ca-certs
+  kubectl -n istio-system edit secret kyma-gateway-ca-certs
   ```
 
 6. If you experience any issues with new certificates not being trusted, restart Istio Ingress Gateway pods. Run:

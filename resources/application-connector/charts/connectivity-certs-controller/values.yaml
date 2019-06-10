@@ -7,7 +7,7 @@ deployment:
 
 secrets:
   caCertificate:
-    name: application-connector-ca-certs
+    name: kyma-gateway-ca-certs
     namespace: istio-system
   clientCertificate:
     name: cluster-client-certificates
