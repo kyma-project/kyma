@@ -60,7 +60,9 @@ func main() {
 
 	internalInformerFactory := kymaInformers.NewSharedInformerFactory(kymaClientSet, time.Second*30)
 
-	v1alpha2Controller := v1alpha2.NewController(kymaClientSet, istioNetworkingV1Interface, serviceV1Interface, authenticationV2Interface, internalInformerFactory, domainName)
+	list := os.Getenv("BLACKLISTED_SERVICES")
+
+	v1alpha2Controller := v1alpha2.NewController(kymaClientSet, istioNetworkingV1Interface, serviceV1Interface, authenticationV2Interface, internalInformerFactory, domainName, readBlacklistedServices(list))
 	internalInformerFactory.Start(stop)
 	err := v1alpha2Controller.Run(2, stop)
 	if err != nil {
@@ -132,24 +134,33 @@ func isAuthPolicyMTLSEnabled() bool {
 }
 
 func getCORSConfig() istioNetworkingV1.CORSConfig {
-	separator := ","
 	allowOrigin := os.Getenv("CORS_ALLOW_ORIGIN")
 	allowMethods := os.Getenv("CORS_ALLOW_METHODS")
 	allowHeaders := os.Getenv("CORS_ALLOW_HEADERS")
 
 	return istioNetworkingV1.CORSConfig{
-		AllowOrigin:  removeEmptyStrings(strings.Split(allowOrigin, separator)),
-		AllowMethods: removeEmptyStrings(strings.Split(allowMethods, separator)),
-		AllowHeaders: removeEmptyStrings(strings.Split(allowHeaders, separator)),
+		AllowOrigin:  removeEmptyStrings(splitStrings(allowOrigin)),
+		AllowMethods: removeEmptyStrings(splitStrings(allowMethods)),
+		AllowHeaders: removeEmptyStrings(splitStrings(allowHeaders)),
 	}
 }
 
-func removeEmptyStrings(strings []string) []string {
+func readBlacklistedServices(list string) []string {
+	return removeEmptyStrings(splitStrings(list))
+}
+
+func splitStrings(list string) []string {
+	return strings.Split(list, ",")
+}
+
+func removeEmptyStrings(list []string) []string {
 	result := make([]string, 0)
-	for _, s := range strings {
-		if s != "" {
-			result = append(result, s)
+	for _, s := range list {
+		ts := strings.TrimSpace(s)
+		if ts != "" {
+			result = append(result, ts)
 		}
 	}
+
 	return result
 }

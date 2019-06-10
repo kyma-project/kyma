@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller"
+	metricAutomock "github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/automock"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/metric"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/usagekind"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/usagekind/automock"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/platform/logger/spy"
@@ -20,11 +22,16 @@ import (
 func TestControllerRunAddAndDelete(t *testing.T) {
 	// GIVEN
 	registry := &automock.SupervisorRegistry{}
-	tc := newControllerTestCase(registry)
+	metrics := &metricAutomock.BusinessMetric{}
+
+	tc := newControllerTestCase(registry, metrics)
 	defer tc.TearDown()
 
 	// the goal of controller work is to register/unregister supervisor
 	registry.On("Register", controller.Kind(fixUsageKind().Name), mock.MatchedBy(tc.SupervisorMatcher())).Return(nil).Once()
+	metrics.ExpectOnIncrementQueueLength(metric.UkController).Once()
+	metrics.ExpectOnDecrementQueueLength(metric.UkController).Once()
+	metrics.ExpectOnRecordLatency(metric.UkController).Once()
 
 	tc.RunController()
 
@@ -34,9 +41,13 @@ func TestControllerRunAddAndDelete(t *testing.T) {
 	// THEN
 	tc.WaitForItemProcessed(t, 5*time.Second)
 	registry.AssertExpectations(t)
+	metrics.AssertExpectations(t)
 
 	// GIVEN
 	registry.On("Unregister", controller.Kind(fixUsageKind().Name)).Return(nil).Once()
+	metrics.ExpectOnIncrementQueueLength(metric.UkController).Once()
+	metrics.ExpectOnDecrementQueueLength(metric.UkController).Once()
+	metrics.ExpectOnRecordLatency(metric.UkController).Once()
 
 	// WHEN
 	tc.RemoveUsageKind(t, fixUsageKind().Name)
@@ -44,6 +55,7 @@ func TestControllerRunAddAndDelete(t *testing.T) {
 	// THEN
 	tc.WaitForItemProcessed(t, 5*time.Second)
 	registry.AssertExpectations(t)
+	metrics.AssertExpectations(t)
 }
 
 func fixUsageKind() *v1alpha1.UsageKind {
@@ -69,7 +81,7 @@ type controllerTestCase struct {
 	asyncOpDone chan struct{}
 }
 
-func newControllerTestCase(registry *automock.SupervisorRegistry) *controllerTestCase {
+func newControllerTestCase(registry *automock.SupervisorRegistry, metric *metricAutomock.BusinessMetric) *controllerTestCase {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
 	asyncOpDone := make(chan struct{})
@@ -82,7 +94,7 @@ func newControllerTestCase(registry *automock.SupervisorRegistry) *controllerTes
 	kindInformer := informersFactory.Servicecatalog().V1alpha1().UsageKinds()
 	cp := &dynamicFake.FakeDynamicClient{}
 
-	ctr := usagekind.NewKindController(kindInformer, registry, cp, spy.NewLogSink().Logger).WithTestHookOnAsyncOpDone(hookAsyncOp)
+	ctr := usagekind.NewKindController(kindInformer, registry, cp, spy.NewLogSink().Logger, metric).WithTestHookOnAsyncOpDone(hookAsyncOp)
 
 	informersFactory.Start(ctx.Done())
 	return &controllerTestCase{
