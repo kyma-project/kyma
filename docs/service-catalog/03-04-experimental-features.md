@@ -12,7 +12,7 @@ with a native Kubernetes solution - CustomResourceDefinitions (CRDs).
 
 To enable the CRDs feature in the Service Catalog, override the **global.serviceCatalogApiserver.enabled** and **global.serviceCatalogCrds.enabled** parameters
 in the installation file:
-- For the local installation, modify the `installation-config-overrides` ConfigMap in the [installer-config-local.yaml](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-config-local.yaml.tpl#L41) file:
+- For the local installation, modify the `installation-config-overrides` ConfigMap in the [installer-config-local.yaml](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-config-local.yaml.tpl) file:
     ```
     apiVersion: v1
     kind: ConfigMap
