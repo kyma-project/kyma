@@ -33,7 +33,7 @@ spec:
     - id: ac031e8c-9aa4-4cb7-8999-0d358726ffaa
     - id: bef3143c-d1a5-674c-8dc9-ab4788896fba
 ```
-The `services` list contains IDs of enabled services. If the list is specified, only the selected services are enabled. If the list is empty, all services of the Application are enabled.
+The `services` list contains IDs of enabled services.
 
 ## Custom resource parameters
 
@@ -43,6 +43,8 @@ This table lists all the possible parameters of a given resource together with t
 |----------|:-------------:|------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR and the App. |
 | **metadata.namespace** |    **YES**   | Specifies the Namespace in which the App is enabled. |
+| **spec.services** |    **NO**   | Specifies IDs of enabled services. If the list is specified, only the selected services are enabled. If the list is empty, all services of the Application are enabled.|
+
 
 ## Related resources and components
 
