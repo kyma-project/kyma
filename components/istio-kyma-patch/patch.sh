@@ -1,11 +1,40 @@
 #!/usr/bin/env bash
 
+function log() {
+    local exp=$1;
+    local color=$2;
+    local style=$3;
+    local NC='\033[0m'
+    if ! [[ ${color} =~ '^[0-9]$' ]] ; then
+       case $(echo ${color} | tr '[:upper:]' '[:lower:]') in
+        black) color='\e[30m' ;;
+        red) color='\e[31m' ;;
+        green) color='\e[32m' ;;
+        yellow) color='\e[33m' ;;
+        blue) color='\e[34m' ;;
+        magenta) color='\e[35m' ;;
+        cyan) color='\e[36m' ;;
+        white) color='\e[37m' ;;
+        nc|*) color=${NC} ;; # no color or invalid color
+       esac
+    fi
+    if ! [[ ${style} =~ '^[0-9]$' ]] ; then
+        case $(echo ${style} | tr '[:upper:]' '[:lower:]') in
+        bold) style='\e[1m' ;;
+        underline) style='\e[4m' ;;
+        inverted) style='\e[7m' ;;
+        *) style="" ;; # no style or invalid style
+       esac
+    fi
+    printf "${color}${style}${exp}${NC}\n"
+}
+
 set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
 if [[ -z ${REQUIRED_ISTIO_VERSION} ]]; then
-    echo "Please set REQUIRED_ISTIO_VERSION variable!"
+    log "Please set REQUIRED_ISTIO_VERSION variable!" red
     exit 1
 fi
 
@@ -17,7 +46,7 @@ function require_istio_version() {
     local version
     version=$(kubectl -n istio-system get deployment istio-pilot -o jsonpath='{.spec.template.spec.containers[0].image}' | awk -F: '{print $2}')
     if [[ "$version" != ${REQUIRED_ISTIO_VERSION} ]]; then
-        echo "Istio must be in version: $REQUIRED_ISTIO_VERSION!"
+        log "Istio must be in version: $REQUIRED_ISTIO_VERSION!" red
         exit 1
     fi
 }
@@ -26,38 +55,22 @@ function require_istio_system() {
     kubectl get namespace istio-system >/dev/null
 }
 
-function require_mtls_enabled() {
+function check_mtls_enabled() {
     # TODO: rethink how that should be done
     local mTLS=$(kubectl get meshpolicy default -o jsonpath='{.spec.peers[0].mtls.mode}')
     if [[ "${mTLS}" != "STRICT" ]] && [[ "${mTLS}" != "" ]]; then
-        echo "mTLS must be \"STRICT\""
+        log "mTLS must be \"STRICT\"" red
         exit 1
     fi
 }
 
-function configure_policy_checks(){
-  echo "--> Enable policy checks if not enabled"
+function check_policy_checks(){
+  log "--> Enable policy checks if not enabled"
   local istioConfigmap="$(kubectl -n istio-system get cm istio -o jsonpath='{@.data.mesh}')"
   local policyChecksDisabled=$(grep "disablePolicyChecks: true" <<< "$istioConfigmap")
   if [[ -n ${policyChecksDisabled} ]]; then
-    istioConfigmap=$(sed 's/disablePolicyChecks: true/disablePolicyChecks: false/' <<< "$istioConfigmap")
-
-    # Escape commented escaped newlines
-    istioConfigmap=$(sed 's/\\n/\\\\n/g' <<< "$istioConfigmap")
-
-    # Escape new lines and double quotes for kubectl
-    istioConfigmap=$(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' <<< "$istioConfigmap")
-    istioConfigmap=$(sed 's/"/\\"/g' <<< "$istioConfigmap")
-
-    set +e
-    local out
-    out=$(kubectl patch -n istio-system configmap istio --type merge -p '{"data": {"mesh":"'"$istioConfigmap"'"}}')
-    local result=$?
-    set -e
-    echo "$out"
-    if [[ ${result} -ne 0 ]] && [[ ! "$out" = *"not patched"* ]]; then
-      exit ${result}
-    fi
+      log "disablePolicyChecks must be FALSE" red
+      exit 1
   fi
 }
 
@@ -106,41 +119,14 @@ function label_namespaces(){
   done <"${CONFIG_DIR}"/injection-in-namespaces
 }
 
-function configure_sidecar_injector() {
+function check_sidecar_injector() {
   echo "--> Configure sidecar injector"
   local configmap=$(kubectl -n istio-system get configmap istio-sidecar-injector -o jsonpath='{.data.config}')
   local policyDisabled=$(grep "policy: disabled" <<< "$configmap")
   if [[ -n ${policyDisabled} ]]; then
     # Force automatic injecting
-    configmap=$(sed 's/policy: disabled/policy: enabled/' <<< "$configmap")
-  fi
-
-  configmap=$(sed 's/\[\[ .ProxyConfig.GetTracing.GetZipkin.GetAddress \]\]/zipkin.kyma-system:9411/g' <<< "$configmap")
-
-  # Set limits for sidecar. Our namespaces have resource quota set thus every container needs to have limits defined.
-  # In case there is no limits section add one at the beginning of container definition. It serves as default.
-  CONTAINERS="istio-init istio-proxy"
-  for CONTAINER in $CONTAINERS; do
-    INSERTED=$(sed -n "/- name: ${CONTAINER}/,/image:/p" <<< "$configmap" | wc -l)
-    if [[ "$INSERTED" -gt 2 ]]; then
-      echo "Patch already applied for ${CONTAINER}"
-    else
-      configmap=$(sed "s|  - name: ${CONTAINER}|  - name: ${CONTAINER}\n    resources: { limits: { memory: 128Mi, cpu: 100m }, requests: { memory: 128Mi, cpu: 10m } }|" <<< "$configmap")
-    fi
-  done
-
-  # Escape new lines and double quotes for kubectl
-  configmap=$(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' <<< "$configmap")
-  configmap=$(sed 's/"/\\"/g' <<< "$configmap")
-
-  set +e
-  local out
-  out=$(kubectl patch -n istio-system configmap istio-sidecar-injector --type merge -p '{"data": {"config":"'"$configmap"'"}}')
-  local result=$?
-  set -e
-  echo "$out"
-  if [[ ${result} -ne 0 ]] && [[ ! "$out" = *"not patched"* ]]; then
-    exit ${result}
+    log "Automatic injection policy must be ENABLED" red
+    exit 1
   fi
 }
 
@@ -154,18 +140,18 @@ function check_requirements() {
     echo "Require CRD ${crd}"
     kubectl get customresourcedefinitions "${crd}"
     if [[ $? -ne 0 ]]; then
-        echo "Cannot find required CRD ${crd}"
+        log "Cannot find required CRD ${crd}" red
     fi
   done <${CONFIG_DIR}/required-crds
 }
 
 require_istio_system
 require_istio_version
-require_mtls_enabled
+check_mtls_enabled
 check_requirements
-configure_policy_checks
-configure_sidecar_injector
-restart_sidecar_injector
-run_all_patches
-remove_not_used
-label_namespaces
+check_policy_checks
+check_sidecar_injector
+# restart_sidecar_injector
+# run_all_patches
+# remove_not_used
+# label_namespaces
