@@ -4,7 +4,7 @@ test:
   image:
     name: monitoring
     dir: develop/tests/
-    version: 06b8d357
+    version: 64feb986
 global:
   isLocalEnv: false
   containerRegistry:
