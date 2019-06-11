@@ -91,7 +91,7 @@ Follow these instructions to install Kyma from a release or from sources:
       </summary>
 
       ```bash
-      wget https://github.com/kyma-project/kyma/blob/master/installation/certs/workspace/raw/server.crt ; certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n {CERT_DISPLAYNAME} -i server.crt
+      wget https://raw.githubusercontent.com/kyma-project/kyma/master/installation/certs/workspace/raw/server.crt ; certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n {CERT_DISPLAYNAME} -i server.crt
       ```
       </details>
       </div>
