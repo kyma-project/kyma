@@ -13,7 +13,7 @@ spec:
       protocol: HTTPS
     tls:
       mode: SIMPLE
-      credentialName: kyma-gateway-certs
+      credentialName: {{ .Values.global.istio.gateway.name }}-certs
     hosts:
     - "*.{{.Values.global.ingress.domainName}}"
   - port:
