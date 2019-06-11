@@ -82,7 +82,7 @@ Follow these instructions to install Kyma from a release or from sources:
       </summary>
 
       ```bash
-      wget https://github.com/kyma-project/kyma/blob/master/installation/certs/workspace/raw/server.crt ; sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain server.crt
+      wget https://raw.githubusercontent.com/kyma-project/kyma/master/installation/certs/workspace/raw/server.crt ; sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain server.crt
       ```
       </details>
       <details>
