@@ -65,13 +65,14 @@ function check_mtls_enabled() {
 }
 
 function check_policy_checks(){
-  log "--> Enable policy checks if not enabled"
+  log "--> Check policy checks"
   local istioConfigmap="$(kubectl -n istio-system get cm istio -o jsonpath='{@.data.mesh}')"
   local policyChecksDisabled=$(grep "disablePolicyChecks: true" <<< "$istioConfigmap")
   if [[ -n ${policyChecksDisabled} ]]; then
-      log "disablePolicyChecks must be FALSE" red
+      log "    disablePolicyChecks must be FALSE" red
       exit 1
   fi
+  log "    Policy checks are enabled" green
 }
 
 function run_all_patches() {
@@ -120,14 +121,15 @@ function label_namespaces(){
 }
 
 function check_sidecar_injector() {
-  echo "--> Configure sidecar injector"
+  echo "--> Check sidecar injector"
   local configmap=$(kubectl -n istio-system get configmap istio-sidecar-injector -o jsonpath='{.data.config}')
   local policyDisabled=$(grep "policy: disabled" <<< "$configmap")
   if [[ -n ${policyDisabled} ]]; then
     # Force automatic injecting
-    log "Automatic injection policy must be ENABLED" red
+    log "    Automatic injection policy must be ENABLED" red
     exit 1
   fi
+  log "    Automatic injection policy is enabled" green
 }
 
 function restart_sidecar_injector() {
