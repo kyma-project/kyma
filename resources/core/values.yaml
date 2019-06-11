@@ -26,7 +26,7 @@ global:
     dir: develop/
     version: "cb16ab4c"
   ui_acceptance_tests:
-    dir: 
+    dir:
     version: "2b19932b"
   api_controller:
     dir: develop/
