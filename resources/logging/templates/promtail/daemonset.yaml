@@ -81,5 +81,3 @@ spec:
                   {{- with .Values.promtail.volumes }}
               {{- toYaml . | nindent 8 }}
         {{- end }}
-
-
