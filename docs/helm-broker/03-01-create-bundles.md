@@ -92,7 +92,7 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 
 ## docs directory
 
-In the `docs` directory, provide documentation for your bundle. The `docs` directory must contain a `meta.yaml` which provides information on how documentation for the bundle is uploaded.
+In the `docs` directory, provide documentation for your bundle. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` which provides information on how documentation for the bundle is uploaded.
 As the Helm Broker is installed as a ClusterServiceBroker, documentation for bundles is provided using [ClusterDocsTopics](/components/headless-cms/#custom-resource-clusterdocstopic).
 
 The `meta.yaml` file contains the specification of the ClusterDocsTopic. The example structure of the `meta.yaml` file looks as follows:
@@ -112,7 +112,9 @@ The `meta.yaml` file contains the specification of the ClusterDocsTopic. The exa
 
 >**NOTE:** Currently you can provide only one entry in the `docs` array.
 
-Using the Helm Broker, you can provision a broker which provides its own Service Classes. To learn how to upload documentation for those classes, read [this](#details-bundles-docs.md) document.
+See [this](https://github.com/kyma-project/bundles/tree/release-0.6/bundles/testing-0.0.1/docs) example of the `docs` directory with documentation for the testing bundle.
+
+Using the Helm Broker, you can provision a broker which provides its own Service Classes. To learn how to upload documentation for those classes, read [this](#details-provide-service-classes-documentation) document.
 
 ## Troubleshooting
 

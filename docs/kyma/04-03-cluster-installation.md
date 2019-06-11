@@ -17,15 +17,13 @@ Choose the installation type and get started:
   GCP Marketplace
   </summary>
 
-1. Access the [Google Cloud Platform (GCP) Marketplace](https://console.cloud.google.com/marketplace).
+1. Access **project Kyma** on the [Google Cloud Platform (GCP) Marketplace](https://console.cloud.google.com/marketplace/details/sap-public/kyma?q=kyma%20project) and click **CONFIGURE**.
 
-2. Search for Kyma in the search box on the GCP Marketplace page. Open **project Kyma** and click **CONFIGURE**.
+2. When the pop-up box appears, select you project from the available list and confirm your choice.
 
-3. When the pop-up box appears, select you project from the available list and confirm your choice.
+3. To create a Kubernetes cluster for your Kyma installation, select a cluster zone from the drop-down menu and click **Create cluster**. Wait for a few minutes for the Kubernetes cluster to deploy.
 
-4. To create a Kubernetes cluster for your Kyma installation, select a cluster zone from the drop-down menu and click **Create cluster**. Wait for a few minutes for the Kubernetes cluster to deploy.
-
-5. Leave the default values or adjust these settings:
+4. Leave the default values or adjust these settings:
 
   | Field   |      Default value     |
   |----------|-------------|
@@ -33,15 +31,15 @@ Choose the installation type and get started:
   | **App instance name** | `kyma-1` |
   | **Cluster Admin Service Account** | `Create a new service account` |
 
-6. Accept the GCP Marketplace Terms of Service to continue.
+5. Accept the GCP Marketplace Terms of Service to continue.
 
-7. Click the **Deploy** button for the Kyma installation to start.
+6. Click the **Deploy** button for the Kyma installation to start.
 
 > **NOTE:** The installation can take several minutes to complete.
 
-8. Once you become redirected to the **Applications** page under **Kubernetes Engine** in the GCP Console, you get the installation status details. Check the installation status. If it is green, follow the steps in **INFO PANEL** under the **Next steps** section to import the self-signed TLS certificate to your keychain.
+7. Once you become redirected to the **Applications** page under **Kubernetes Engine** in the GCP Console, you get the installation status details. Check the installation status. If it is green, follow the steps under the **Next steps** section in **INFO PANEL** to import the self-signed TLS certificate to your trusted certified authorities.
 
-9. Access the cluster using the link and login details provided in the **Kyma info** section on the application details page.
+8. Access the cluster using the link and login details provided in the **Kyma info** section on the **Application details** page.
 
 > **TIP:** Watch [this](https://www.youtube.com/watch?v=hxVhQqI1B5A) video for the installation demo.
 
