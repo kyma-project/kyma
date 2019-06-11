@@ -2,6 +2,8 @@
 
 set -o errexit
 
+echo "The build-kyma-installer.sh script is deprecated and will be removed. Use Kyma CLI instead."
+
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR=${CURRENT_DIR}/../../
 IMAGE_NAME="$(${CURRENT_DIR}/extract-kyma-installer-image.sh)"

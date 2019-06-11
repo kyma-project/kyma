@@ -2,6 +2,8 @@
 
 set -o errexit
 
+echo "The configure-components.sh script is deprecated and will be removed. Use Kyma CLI instead."
+
 ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 readonly FILE_NAME="components.env"
