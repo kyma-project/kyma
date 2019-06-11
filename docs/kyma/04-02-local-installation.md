@@ -83,7 +83,7 @@ Follow these instructions to install Kyma from a release or from sources:
      <div tabs>
       <details>
       <summary>
-         On MacOS, run:
+         MacOS
       </summary>
 
       ```bash
@@ -93,7 +93,7 @@ Follow these instructions to install Kyma from a release or from sources:
       </details>
       <details>
       <summary>
-         On Linux, run:
+         Linux
       </summary>
 
       ```bash
@@ -101,8 +101,9 @@ Follow these instructions to install Kyma from a release or from sources:
       ```
       
       </details>
-   </div>
-     >**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
+     </div>
+      
+      >**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
   
   2. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal once the installation process is completed.
 
@@ -113,7 +114,7 @@ To learn how to test Kyma, see [this](#details-testing-kyma) document.
 
 ## Stop and restart Kyma without reinstalling
 
-Use the `minikube.sh` script to restart the Minikube cluster without reinstalling Kyma. Follow these steps to stop and restart your cluster:
+Use the Kyma CLI to restart the Minikube cluster without reinstalling Kyma. Follow these steps to stop and restart your cluster:
 
 1. Stop the Minikube cluster with Kyma installed. Run:
    ```
