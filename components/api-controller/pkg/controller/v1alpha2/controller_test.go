@@ -184,8 +184,9 @@ func TestValidateApi(t *testing.T) {
 
 				//then
 				So(statusHelper.hasChanged, ShouldBeTrue)
-				So(statusHelper.apiCopy.Status.ValidationStatus.IsSuccessful(), ShouldBeFalse)
-				So(statusHelper.apiCopy.Status.IsTargetServiceOccupied(), ShouldBeFalse)
+				So(statusHelper.apiCopy.Status.ValidationStatus.IsError(), ShouldBeTrue)
+				So(statusHelper.apiCopy.Status.VirtualServiceStatus.IsEmpty(), ShouldBeTrue)
+				So(statusHelper.apiCopy.Status.AuthenticationStatus.IsEmpty(), ShouldBeTrue)
 				So(statusCode, ShouldEqual, kymaMeta.Error)
 			})
 		})
@@ -209,13 +210,15 @@ func TestValidateApi(t *testing.T) {
 
 				//then
 				So(statusHelper.hasChanged, ShouldBeTrue)
-				So(statusHelper.apiCopy.Status.ValidationStatus.IsSuccessful(), ShouldBeFalse)
-				So(statusHelper.apiCopy.Status.IsTargetServiceOccupied(), ShouldBeFalse)
+				So(statusHelper.apiCopy.Status.ValidationStatus.IsError(), ShouldBeTrue)
+				So(statusHelper.apiCopy.Status.VirtualServiceStatus.IsEmpty(), ShouldBeTrue)
+				So(statusHelper.apiCopy.Status.AuthenticationStatus.IsEmpty(), ShouldBeTrue)
 				So(statusCode, ShouldEqual, kymaMeta.Error)
 
 				So(statusHelper2.hasChanged, ShouldBeTrue)
-				So(statusHelper2.apiCopy.Status.ValidationStatus.IsSuccessful(), ShouldBeFalse)
-				So(statusHelper2.apiCopy.Status.IsTargetServiceOccupied(), ShouldBeFalse)
+				So(statusHelper2.apiCopy.Status.ValidationStatus.IsError(), ShouldBeTrue)
+				So(statusHelper2.apiCopy.Status.VirtualServiceStatus.IsEmpty(), ShouldBeTrue)
+				So(statusHelper2.apiCopy.Status.AuthenticationStatus.IsEmpty(), ShouldBeTrue)
 				So(statusCode2, ShouldEqual, kymaMeta.Error)
 			})
 		})
