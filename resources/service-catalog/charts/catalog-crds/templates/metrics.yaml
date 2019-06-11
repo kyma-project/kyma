@@ -10,23 +10,6 @@ spec:
   targets:
   - name: {{ template "fullname" . }}-controller-manager
 ---
-# Dedicated Service for metrics endpoint
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ template "fullname" . }}
-  labels:
-    app: {{ template "fullname" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
-spec:
-  ports:
-  - name: http-metrics
-    port: 30444
-  selector:
-    app: {{ template "fullname" . }}-controller-manager
----
 # Inform Prometheus to scrap the metrics endpoint
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
