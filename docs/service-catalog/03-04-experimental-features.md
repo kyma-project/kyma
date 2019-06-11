@@ -32,9 +32,9 @@ in the installation file:
       global.serviceCatalogApiserver.enabled: "true"
       global.serviceCatalogCrds.enabled: "false"
     ```
-- For the cluster installation, add the `service-catalog-overrides` ConfigMap to the cluster before the installation starts. Run:
+- For the cluster installation, add the `service-catalog-versions-overrides` ConfigMap to the cluster before the installation starts. Run:
     ```
-    kubectl create configmap service-catalog-overrides -n kyma-installer --from-literal=global.serviceCatalogApiserver.enabled=false --from-literal=global.serviceCatalogCrds.enabled=true \
-    && kubectl label configmap service-catalog-overrides -n kyma-installer installer=overrides
+    kubectl create configmap service-catalog-overrides-versions -n kyma-installer --from-literal=global.serviceCatalogApiserver.enabled=false --from-literal=global.serviceCatalogCrds.enabled=true \
+    && kubectl label configmap service-catalog-overrides-versions -n kyma-installer installer=overrides
     ```
 
