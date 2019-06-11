@@ -30,7 +30,7 @@ You can change the default cluster channel provisioner by editing the ClusterCha
 
 ## Google PubSub
 
-After you complete the [prereqisite steps](https://github.com/knative/eventing/tree/release-0.5/contrib/gcppubsub/config#prerequisites) mentioned in the Knative eventing documentation, follow these steps to configure the Google PubSub ClusterChannelProvisioner:
+After you complete the [prerequisite steps](https://github.com/knative/eventing/tree/release-0.5/contrib/gcppubsub/config#prerequisites) mentioned in the Knative eventing documentation, follow these steps to configure the Google PubSub ClusterChannelProvisioner:
 
     > **NOTE:** Skip the last step to install `Knative eventing` as it is pre-installed with Kyma.
 
