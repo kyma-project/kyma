@@ -324,12 +324,12 @@ func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, lab
 	return r.k8s.CreateNamespace(ctx, name, labels)
 }
 
-func (r *mutationResolver) CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
-	return r.ac.CreateAPI(ctx, name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
+func (r *mutationResolver) CreateAPI(ctx context.Context,  params gqlschema.APICreateInput) (gqlschema.API, error) {
+	return r.ac.CreateAPI(ctx, params)
 }
 
-func (r *mutationResolver) UpdateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
-	return r.ac.UpdateAPI(ctx, name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
+func (r *mutationResolver) UpdateAPI(ctx context.Context, params gqlschema.APICreateInput) (gqlschema.API, error) {
+	return r.ac.UpdateAPI(ctx, params)
 }
 
 func (r *mutationResolver) DeleteAPI(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {

@@ -53,11 +53,12 @@ func (ar *apiResolver) APIQuery(ctx context.Context, name string, namespace stri
 	return api, nil
 }
 
-func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
-	api, err := ar.apiLister.Create(name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
+func (ar *apiResolver) CreateAPI(ctx context.Context, params gqlschema.APICreateInput) (gqlschema.API, error) {
+
+	api, err := ar.apiLister.Create(params)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while creating %s `%s` in namespace `%s`", pretty.API, name, namespace))
-		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+		glog.Error(errors.Wrapf(err, "while creating %s `%s` in namespace `%s`", pretty.API, params.Name, params.Namespace))
+		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(params.Name), gqlerror.WithNamespace(params.Namespace))
 	}
 
 	return gqlschema.API{
@@ -69,8 +70,8 @@ func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace str
 		},
 		AuthenticationPolicies: []gqlschema.AuthenticationPolicy{
 			{
-				JwksURI: jwksUri,
-				Issuer:  issuer,
+				JwksURI: params.JwksURI,
+				Issuer:  params.Issuer,
 				Type:    gqlschema.AuthenticationPolicyType("JWT"),
 			},
 		},
@@ -98,11 +99,11 @@ func (ar *apiResolver) ApiEventSubscription(ctx context.Context, namespace strin
 	return channel, nil
 }
 
-func (ar *apiResolver) UpdateAPI(ctx context.Context, name string, namespace string, hostname string, serviceName string, servicePort int, jwksUri string, issuer string, disableIstioAuthPolicyMTLS *bool, authenticationEnabled *bool) (gqlschema.API, error) {
-	api, err := ar.apiLister.Update(name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, disableIstioAuthPolicyMTLS, authenticationEnabled)
+func (ar *apiResolver) UpdateAPI(ctx context.Context, params gqlschema.APICreateInput) (gqlschema.API, error) {
+	api, err := ar.apiLister.Update(params)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while editing %s `%s` in namespace `%s`", pretty.API, name, namespace))
-		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+		glog.Error(errors.Wrapf(err, "while editing %s `%s` in namespace `%s`", pretty.API, params.Name, params.Namespace))
+		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(params.Name), gqlerror.WithNamespace(params.Namespace))
 	}
 
 	return gqlschema.API{
@@ -114,8 +115,8 @@ func (ar *apiResolver) UpdateAPI(ctx context.Context, name string, namespace str
 		},
 		AuthenticationPolicies: []gqlschema.AuthenticationPolicy{
 			{
-				JwksURI: jwksUri,
-				Issuer:  issuer,
+				JwksURI: params.JwksURI,
+				Issuer:  params.Issuer,
 				Type:    gqlschema.AuthenticationPolicyType("JWT"),
 			},
 		},

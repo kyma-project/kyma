@@ -137,19 +137,19 @@ func TestApiResolver_CreateAPI(t *testing.T) {
 	jwksUri := "http://test-jwks-uri"
 	issuer := "test-issuer"
 
+	params := paramsToAPICreationInput(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
+
 	t.Run("Should create an API", func(t *testing.T) {
 		api := fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
 		expected := testApiToGQL(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
 
-		var empty *bool = nil
-
 		service := automock.NewApiLister()
-		service.On("Create", name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, empty, empty).Return(api, nil).Once()
+		service.On("Create", params).Return(api, nil).Once()
 
 		resolver, err := newApiResolver(service)
 		require.NoError(t, err)
 
-		result, err := resolver.CreateAPI(nil, name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, nil, nil)
+		result, err := resolver.CreateAPI(nil, params)
 
 		service.AssertExpectations(t)
 		require.NoError(t, err)
@@ -157,15 +157,13 @@ func TestApiResolver_CreateAPI(t *testing.T) {
 	})
 
 	t.Run("Should return an error", func(t *testing.T) {
-		var empty *bool = nil
-
 		service := automock.NewApiLister()
-		service.On("Create", name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, empty, empty).Return(nil, errors.New("test")).Once()
+		service.On("Create", params).Return(nil, errors.New("test")).Once()
 
 		resolver, err := newApiResolver(service)
 		require.NoError(t, err)
 
-		_, err = resolver.CreateAPI(nil, name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, nil, nil)
+		_, err = resolver.CreateAPI(nil, params)
 
 		service.AssertExpectations(t)
 		require.Error(t, err)
@@ -183,19 +181,19 @@ func TestApiResolver_UpdateAPI(t *testing.T) {
 	jwksUri := "http://test-jwks-uri"
 	issuer := "test-issuer"
 
+	params := paramsToAPICreationInput(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
+
 	t.Run("Should update an API", func(t *testing.T) {
 		api := fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
 		expected := testApiToGQL(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
 
-		var empty *bool = nil
-
 		service := automock.NewApiLister()
-		service.On("Update", name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, empty, empty).Return(api, nil).Once()
+		service.On("Update", params).Return(api, nil).Once()
 
 		resolver, err := newApiResolver(service)
 		require.NoError(t, err)
 
-		result, err := resolver.UpdateAPI(nil, name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, nil, nil)
+		result, err := resolver.UpdateAPI(nil, params)
 
 		service.AssertExpectations(t)
 		require.NoError(t, err)
@@ -203,15 +201,13 @@ func TestApiResolver_UpdateAPI(t *testing.T) {
 	})
 
 	t.Run("Should return an error", func(t *testing.T) {
-		var empty *bool = nil
-
 		service := automock.NewApiLister()
-		service.On("Update", name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, empty, empty).Return(nil, errors.New("test")).Once()
+		service.On("Update", params).Return(nil, errors.New("test")).Once()
 
 		resolver, err := newApiResolver(service)
 		require.NoError(t, err)
 
-		_, err = resolver.UpdateAPI(nil, name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, nil, nil)
+		_, err = resolver.UpdateAPI(nil, params)
 
 		service.AssertExpectations(t)
 		require.Error(t, err)
@@ -327,4 +323,18 @@ func testApiToGQL(name, namespace, hostname, serviceName, jwksUri, issuer string
 		},
 	}
 	return gql
+}
+
+func paramsToAPICreationInput(name, namespace, hostname, serviceName, jwksUri, issuer string, servicePort int, disableIstioAuthPolicyMTLS, authenticationEnabled *bool) gqlschema.APICreateInput {
+	return gqlschema.APICreateInput{
+		Name: name,
+		Namespace: namespace,
+		Hostname: hostname,
+		ServiceName: serviceName,
+		ServicePort: servicePort,
+		JwksURI: jwksUri,
+		Issuer: issuer,
+		DisableIstioAuthPolicyMTLS: disableIstioAuthPolicyMTLS,
+		AuthenticationEnabled: authenticationEnabled,
+	}
 }

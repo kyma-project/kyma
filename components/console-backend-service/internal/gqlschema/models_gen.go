@@ -17,6 +17,18 @@ type API struct {
 	CreationTimestamp      time.Time              `json:"creationTimestamp"`
 }
 
+type APICreateInput struct {
+	Name                       string `json:"name"`
+	Namespace                  string `json:"namespace"`
+	Hostname                   string `json:"hostname"`
+	ServiceName                string `json:"serviceName"`
+	ServicePort                int    `json:"servicePort"`
+	JwksURI                    string `json:"jwksUri"`
+	Issuer                     string `json:"issuer"`
+	DisableIstioAuthPolicyMTLS *bool  `json:"disableIstioAuthPolicyMTLS"`
+	AuthenticationEnabled      *bool  `json:"authenticationEnabled"`
+}
+
 type AddonsConfiguration struct {
 	Name   string   `json:"name"`
 	Urls   []string `json:"urls"`

@@ -153,6 +153,8 @@ func TestApiService_Create(t *testing.T) {
 	jwksUri := "http://test-jwks-uri"
 	issuer := "test-issuer"
 
+	params := paramsToAPICreationInput(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
+
 	t.Run("Should create an API", func(t *testing.T) {
 		informer := fixAPIInformer()
 		client := fake.NewSimpleClientset()
@@ -160,7 +162,7 @@ func TestApiService_Create(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		result, err := service.Create(name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, nil, nil)
+		result, err := service.Create(params)
 
 		require.NoError(t, err)
 		api := fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
@@ -175,7 +177,7 @@ func TestApiService_Create(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		_, err := service.Create(name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, nil, nil)
+		_, err := service.Create(params)
 
 		require.Error(t, err)
 	})
@@ -191,6 +193,8 @@ func TestApiService_Update(t *testing.T) {
 	jwksUri := "http://test-jwks-uri"
 	issuer := "test-issuer"
 
+	params := paramsToAPICreationInput(name, namespace, "new-hostname", serviceName, jwksUri, issuer, servicePort, nil, nil)
+
 	t.Run("Should update an API", func(t *testing.T) {
 		api := fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
 		informer := fixAPIInformer(api)
@@ -199,10 +203,10 @@ func TestApiService_Update(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		result, err := service.Update(name, namespace, "different-hostname", serviceName, servicePort, jwksUri, issuer, nil, nil)
+		result, err := service.Update(params)
 
 		require.NoError(t, err)
-		newApi := fixAPIWith(name, namespace, "different-hostname", serviceName, jwksUri, issuer, servicePort, nil, nil)
+		newApi := fixAPIWith(name, namespace, "new-hostname", serviceName, jwksUri, issuer, servicePort, nil, nil)
 		assert.Equal(t, newApi, result)
 	})
 
@@ -213,7 +217,7 @@ func TestApiService_Update(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		_, err := service.Update(name, namespace, hostname, serviceName, servicePort, jwksUri, issuer, nil, nil)
+		_, err := service.Update(params)
 
 		require.Error(t, err)
 	})
