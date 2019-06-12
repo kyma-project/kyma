@@ -1,0 +1,68 @@
+
+# Gopkg.toml example
+#
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+#
+# required = ["github.com/user/thing/cmd/thing"]
+# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
+#
+# [[constraint]]
+#   name = "github.com/user/project"
+#   version = "1.0.0"
+#
+# [[constraint]]
+#   name = "github.com/user/project2"
+#   branch = "dev"
+#   source = "github.com/myfork/project2"
+#
+# [[override]]
+#  name = "github.com/x/y"
+#  version = "2.4.0"
+
+required = [
+  "github.com/alecthomas/gometalinter",
+  "golang.org/x/tools/cmd/goimports",
+]
+
+[prune]
+  unused-packages = true
+  non-go = true
+  go-tests = true
+
+[[constraint]]
+  name = "github.com/heptio/velero"
+  version = "v0.11.0"
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "1.0.3"
+
+# Match Velero dependency versions
+[[constraint]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.11.0"
+
+[[override]]
+  name = "github.com/spf13/cobra"
+  version = "0.0.3"
+
+[[override]]
+  name = "github.com/spf13/pflag"
+  version = "1.0.2"
+
+[[override]]
+  name = "github.com/json-iterator/go"
+  revision = "f2b4162afba35581b6d4a50d3b8f34e33c144682"
+
+[[override]]
+  name = "github.com/Azure/go-autorest"
+  revision = "1ff28809256a84bb6966640ff3d0371af82ccba4"
+
+[[override]]
+  name = "github.com/Azure/azure-sdk-for-go"
+  version = "~11.3.0-beta"
+
+[[constraint]]
+  name = "github.com/kubernetes-incubator/service-catalog"
+  version = "=v0.1.34"

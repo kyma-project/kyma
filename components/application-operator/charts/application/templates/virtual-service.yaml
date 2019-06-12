@@ -1,0 +1,25 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Release.Name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  hosts:
+    - gateway.{{ .Values.global.domainName }}
+  gateways:
+    - {{ .Values.istio.gateway.name }}.{{ .Values.istio.gateway.namespace }}.svc.cluster.local
+  http:
+    - match:
+        - uri:
+            prefix: /{{ .Release.Name }}/v1/metadata
+        - uri:
+            prefix: /{{ .Release.Name }}/v1/events
+      route:
+        - destination:
+            port:
+              number: {{ .Values.applicationConnectivityValidator.args.proxyPort }}
+            host: {{ .Release.Name }}-connectivity-validator

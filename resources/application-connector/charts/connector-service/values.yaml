@@ -1,3 +1,9 @@
+secrets:
+  caSecretName: &caSecretName connector-service-app-ca
+  caSecretNamespace: &caSecretNamespace kyma-integration
+  rootCACertificateSecretName: &rootCACertificateSecretName ""
+  rootCACertificateSecretNamespace: &rootCACertificateSecretNamespace ""
+
 deployment:
   image:
     pullPolicy: IfNotPresent
@@ -9,10 +15,12 @@ deployment:
     tokenLength: 64
     appTokenExpirationMinutes: 5
     runtimeTokenExpirationMinutes: 10
-    caSecretName: connector-service-app-ca
-    rootCACertificateSecretName: ""
-    appsInfoURL: https://gateway.{{ .Values.global.applicationConnector.domainName }}/v1/applications/management/info
-    runtimesInfoURL: https://gateway.{{ .Values.global.applicationConnector.domainName }}/v1/runtimes/management/info
+    caSecretName: *caSecretName
+    caSecretNamespace: *caSecretNamespace
+    rootCACertificateSecretName: *rootCACertificateSecretName
+    rootCACertificateSecretNamespace: *rootCACertificateSecretNamespace
+    appsInfoURL: https://gateway.{{ .Values.global.ingress.domainName }}/v1/applications/management/info
+    runtimesInfoURL: https://gateway.{{ .Values.global.ingress.domainName }}/v1/runtimes/management/info
     appValidityTime: "92d"
     runtimeValidityTime: "92d"
     central: &central false
@@ -49,9 +57,9 @@ istio:
     enabled: true
     connectorServiceInternalApi:
       subjects:
-          - user: cluster.local/ns/kyma-integration/sa/connection-token-handler
-          - user: cluster.local/ns/kyma-integration/sa/{{ .Chart.Name }}-tests
-          - user: cluster.local/ns/kyma-system/sa/core-console-backend-service
+      - user: cluster.local/ns/kyma-integration/sa/connection-token-handler
+      - user: cluster.local/ns/kyma-integration/sa/{{ .Chart.Name }}-tests
+      - user: cluster.local/ns/kyma-system/sa/core-console-backend-service
 tests:
   enabled: true
   skipSslVerify: true

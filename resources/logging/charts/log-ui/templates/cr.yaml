@@ -9,5 +9,5 @@ spec:
   placement: cluster
   navigationNodes:
     - label: Logs
-      viewUrl: "/?function={nodeParams.function}&pod={nodeParams.pod}&namespace={nodeParams.namespace}"
+      viewUrl: "/?function={nodeParams.function}&pod={nodeParams.pod}&namespace={nodeParams.namespace}&container_name={nodeParams.container_name}"
       navigationPath: logs

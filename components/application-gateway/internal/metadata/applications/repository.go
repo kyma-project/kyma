@@ -35,10 +35,11 @@ type Credentials struct {
 
 // ServiceAPI stores information needed to call an API
 type ServiceAPI struct {
-	GatewayURL  string
-	AccessLabel string
-	TargetUrl   string
-	Credentials *Credentials
+	GatewayURL                  string
+	AccessLabel                 string
+	TargetUrl                   string
+	Credentials                 *Credentials
+	RequestParametersSecretName string
 }
 
 // Service represents a service stored in Application
@@ -112,10 +113,11 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 		for _, entry := range service.Entries {
 			if entry.Type == specAPIType {
 				api = &ServiceAPI{
-					GatewayURL:  entry.GatewayUrl,
-					AccessLabel: entry.AccessLabel,
-					TargetUrl:   entry.TargetUrl,
-					Credentials: convertCredentialsFromK8sType(entry.Credentials),
+					GatewayURL:                  entry.GatewayUrl,
+					AccessLabel:                 entry.AccessLabel,
+					TargetUrl:                   entry.TargetUrl,
+					Credentials:                 convertCredentialsFromK8sType(entry.Credentials),
+					RequestParametersSecretName: entry.RequestParametersSecretName,
 				}
 			} else if entry.Type == specEventsType {
 				events = true

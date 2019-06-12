@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1557743411868,
+  "iteration": 1557922635828,
   "links": [],
   "panels": [
     {
@@ -80,7 +80,7 @@
       "tableColumn": "Value",
       "targets": [
         {
-          "expr": "total_kyma_subscriptions{exported_namespace=\"$kyma_subscription_namespace\",name=\"$kyma_subscription_name\",ready=\"true\"} OR on() vector(0)",
+          "expr": "total_kyma_subscriptions{exported_namespace=~\"$kyma_subscription_namespace\",name=~\"$kyma_subscription_name\",ready=\"true\"} OR on() vector(0)",
           "format": "time_series",
           "hide": false,
           "instant": true,
@@ -120,7 +120,7 @@
       "colorValue": true,
       "colors": [
         "#F2495C",
-        "rgba(237, 129, 40, 0.89)",
+        "#FF9830",
         "#299c46"
       ],
       "datasource": "Prometheus",
@@ -178,7 +178,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "total_knative_subscriptions{exported_namespace=\"$kyma_subscription_namespace\", name=\"$kyma_subscription_name\", ready=\"true\"} OR on() vector(0)",
+          "expr": "total_knative_subscriptions{exported_namespace=~\"$kyma_subscription_namespace\", name=~\"$kyma_subscription_name\", ready=\"true\"} OR on() vector(0)",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -217,7 +217,7 @@
       "colorValue": true,
       "colors": [
         "#F2495C",
-        "rgba(237, 129, 40, 0.89)",
+        "#FF9830",
         "#299c46"
       ],
       "datasource": "Prometheus",
@@ -272,7 +272,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "total_knative_channels{name=\"$kyma_subscription_name\"} OR on() vector(0)",
+          "expr": "total_knative_channels{name=~\"$kyma_subscription_name\"} OR on() vector(0)",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -313,7 +313,6 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
           "text": "default",
           "value": "default"
         },
@@ -339,7 +338,6 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
           "text": "All",
           "value": "$__all"
         },

@@ -9,4 +9,4 @@ When the Applications list is available in the Service Catalog, you can provisio
 
 ## Details
 
-For more detailed information about the AB, check the [docs](../../../../docs/application-connector/docs) repository.
+For more detailed information about the AB, check the [docs](../../../../docs/application-connector) repository.

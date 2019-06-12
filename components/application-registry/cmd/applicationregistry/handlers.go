@@ -1,10 +1,11 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"net/http"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/certificates"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/strategy"
@@ -70,8 +71,12 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 		return nil, apperror
 	}
 
+	sei := coreClientset.CoreV1().Secrets(opt.namespace)
+	secretsRepository := secrets.NewRepository(sei)
+
 	accessServiceManager := newAccessServiceManager(coreClientset, opt.namespace, opt.proxyPort)
-	secretsService := newSecretsRepository(coreClientset, nameResolver, opt.namespace)
+	credentialsSecretsService := newSecretsService(secretsRepository, nameResolver)
+	requestParametersSecretsService := secrets.NewRequestParametersService(secretsRepository, nameResolver)
 
 	uuidGenerator := metauuid.GeneratorFunc(func() (string, error) {
 		uuidInstance, err := uuid.NewV4()
@@ -81,7 +86,7 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 		return uuidInstance.String(), nil
 	})
 
-	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, secretsService, istioService)
+	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, credentialsSecretsService, requestParametersSecretsService, istioService)
 
 	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, applicationServiceRepository, specificationService), nil
 }
@@ -96,9 +101,9 @@ func NewSpecificationService(dynamicClient dynamic.Interface, opt *options) spec
 
 	docsTopicRepository := assetstore.NewDocsTopicRepository(resourceInterface)
 	uploadClient := upload.NewClient(opt.uploadServiceURL)
-	assetStoreService := assetstore.NewService(docsTopicRepository, uploadClient, opt.insecureAssetDownload)
+	assetStoreService := assetstore.NewService(docsTopicRepository, uploadClient, opt.insecureAssetDownload, opt.assetstoreRequestTimeout)
 
-	return specification.NewSpecService(assetStoreService)
+	return specification.NewSpecService(assetStoreService, opt.specRequestTimeout)
 }
 
 func newApplicationRepository(config *restclient.Config) (applications.ServiceRepository, apperrors.AppError) {
@@ -122,10 +127,8 @@ func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace stri
 	return accessservice.NewAccessServiceManager(si, config)
 }
 
-func newSecretsRepository(coreClientset *kubernetes.Clientset, nameResolver k8sconsts.NameResolver, namespace string) secrets.Service {
-	sei := coreClientset.CoreV1().Secrets(namespace)
+func newSecretsService(repository secrets.Repository, nameResolver k8sconsts.NameResolver) secrets.Service {
 	strategyFactory := strategy.NewSecretsStrategyFactory(certificates.GenerateKeyAndCertificate)
-	repository := secrets.NewRepository(sei)
 
 	return secrets.NewService(repository, nameResolver, strategyFactory)
 }

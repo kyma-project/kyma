@@ -1,0 +1,57 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-connectivity-validator
+  labels:
+    app: {{ .Release.Name }}-connectivity-validator
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ .Release.Name }}-connectivity-validator
+        release: {{ .Release.Name }}-connectivity-validator
+    spec:
+      containers:
+        - name: {{ .Release.Name }}-connectivity-validator
+          image: {{ .Values.global.applicationConnectivityValidatorImage }}
+          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+          args:
+            - "/applicationconnectivityvalidator"
+            - "--proxyPort={{ .Values.applicationConnectivityValidator.args.proxyPort }}"
+            - "--tenant={{ .Values.global.tenant }}"
+            - "--group={{ .Values.global.group }}"
+            - "--eventServicePathPrefix=/{{ .Release.Name }}/v1/events"
+            - "--eventServiceHost={{ .Release.Name }}-event-service-external-api:{{ .Values.eventService.service.externalapi.port }}"
+            - "--appRegistryPathPrefix=/{{ .Release.Name }}/v1/metadata"
+            - "--appRegistryHost={{ .Values.applicationConnectivityValidator.args.appRegistryHost }}"
+          ports:
+            - containerPort: {{ .Values.applicationConnectivityValidator.args.proxyPort }}
+              name: http-proxy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-connectivity-validator
+  labels:
+    application: {{ .Release.Name }}
+    app: {{ .Release.Name }}-connectivity-validator
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.applicationConnectivityValidator.args.proxyPort }}
+      protocol: TCP
+      name: http-proxy
+  selector:
+    app: {{ .Release.Name }}-connectivity-validator
+    release: {{ .Release.Name }}-connectivity-validator

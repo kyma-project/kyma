@@ -34,11 +34,17 @@ type ErrorResponse struct {
 }
 
 type API struct {
-	TargetUrl        string          `json:"targetUrl"`
-	Credentials      *Credentials    `json:"credentials,omitempty"`
-	Spec             json.RawMessage `json:"spec,omitempty"`
-	SpecificationUrl string          `json:"specificationUrl,omitempty"`
-	ApiType          string          `json:"apiType"`
+	TargetUrl         string             `json:"targetUrl"`
+	Credentials       *Credentials       `json:"credentials,omitempty"`
+	Spec              json.RawMessage    `json:"spec,omitempty"`
+	SpecificationUrl  string             `json:"specificationUrl,omitempty"`
+	ApiType           string             `json:"apiType"`
+	RequestParameters *RequestParameters `json:"requestParameters"`
+}
+
+type RequestParameters struct {
+	Headers         *map[string][]string `json:"headers,omitempty"`
+	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
 }
 
 type Credentials struct {
@@ -102,6 +108,22 @@ func (api *API) WithOAuth(url, clientID, clientSecret string) *API {
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		URL:          url,
+	}
+
+	return api
+}
+
+func (api *API) WithCustomHeaders(headers *map[string][]string) *API {
+	api.RequestParameters = &RequestParameters{
+		Headers: headers,
+	}
+
+	return api
+}
+
+func (api *API) WithCustomQueryParams(queryParams *map[string][]string) *API {
+	api.RequestParameters = &RequestParameters{
+		QueryParameters: queryParams,
 	}
 
 	return api

@@ -18,6 +18,8 @@ import (
 	typedCorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
+const integrationNS = "kyma-integration"
+
 func TestMigrationServiceHappyPath(t *testing.T) {
 	// GIVEN
 	ns1 := "stage"
@@ -27,7 +29,7 @@ func TestMigrationServiceHappyPath(t *testing.T) {
 	// create namespaces
 	ts.createNamespace(ns1)
 	ts.createNamespace(ns2)
-	ts.createNamespace(fixWorkingNs())
+	ts.createNamespace(integrationNS)
 
 	// create legacy setup (which will be migrated)
 	ts.createLegacyBrokerAndService(ns1)
@@ -35,14 +37,13 @@ func TestMigrationServiceHappyPath(t *testing.T) {
 
 	//create other services, which must not be removed
 	ts.createService("qa", "other-service")
-	ts.createService(fixWorkingNs(), "other-service")
-	ts.createService(fixWorkingNs(), "application-broker")
+	ts.createService(integrationNS, "other-service")
+	ts.createService(integrationNS, "application-broker")
 
 	// create other ServiceBroker which must not be touched
 	ts.createServiceBroker("qa", "other-broker", "http://other-broker.kyma-integration.svc.cluster.local")
 
-	ts.assertServicesInNamespace(fixWorkingNs(),
-		"other-service", "application-broker", fmt.Sprintf("ab-ns-for-%s", ns1), fmt.Sprintf("ab-ns-for-%s", ns2))
+	ts.assertServicesInNamespace(integrationNS, "other-service", "application-broker")
 
 	migrationService := ts.newMigrationService()
 
@@ -50,12 +51,12 @@ func TestMigrationServiceHappyPath(t *testing.T) {
 	migrationService.Migrate()
 
 	// THEN
-	ts.assertServicesInNamespace(fixWorkingNs(), "other-service", "application-broker")
+	ts.assertServicesInNamespace(integrationNS, "other-service", "application-broker")
 	ts.assertServicesInNamespace("qa", "other-service")
 	ts.assertServicesInNamespace("production")
 
-	ts.assertServiceBrokerURL("stage", nsbroker.NamespacedBrokerName, fmt.Sprintf("http://application-broker.%s.svc.cluster.local/stage", fixWorkingNs()))
-	ts.assertServiceBrokerURL("production", nsbroker.NamespacedBrokerName, fmt.Sprintf("http://application-broker.%s.svc.cluster.local/production", fixWorkingNs()))
+	ts.assertServiceBrokerURL("stage", nsbroker.NamespacedBrokerName, fmt.Sprintf("http://application-broker.%s.svc.cluster.local/stage", integrationNS))
+	ts.assertServiceBrokerURL("production", nsbroker.NamespacedBrokerName, fmt.Sprintf("http://application-broker.%s.svc.cluster.local/production", integrationNS))
 	ts.assertServiceBrokerURL("qa", "other-broker", "http://other-broker.kyma-integration.svc.cluster.local")
 
 	// second execution of migration should not change anything
@@ -63,12 +64,35 @@ func TestMigrationServiceHappyPath(t *testing.T) {
 	migrationService.Migrate()
 
 	// THEN
-	ts.assertServicesInNamespace(fixWorkingNs(), "other-service", "application-broker")
+	ts.assertServicesInNamespace(integrationNS, "other-service", "application-broker")
 	ts.assertServicesInNamespace("qa", "other-service")
 
-	ts.assertServiceBrokerURL("stage", nsbroker.NamespacedBrokerName, fmt.Sprintf("http://application-broker.%s.svc.cluster.local/stage", fixWorkingNs()))
-	ts.assertServiceBrokerURL("production", nsbroker.NamespacedBrokerName, fmt.Sprintf("http://application-broker.%s.svc.cluster.local/production", fixWorkingNs()))
+	ts.assertServiceBrokerURL("stage", nsbroker.NamespacedBrokerName, fmt.Sprintf("http://application-broker.%s.svc.cluster.local/stage", integrationNS))
+	ts.assertServiceBrokerURL("production", nsbroker.NamespacedBrokerName, fmt.Sprintf("http://application-broker.%s.svc.cluster.local/production", integrationNS))
 	ts.assertServiceBrokerURL("qa", "other-broker", "http://other-broker.kyma-integration.svc.cluster.local")
+}
+
+func TestMigrationServiceNoServiceDeletion(t *testing.T) {
+	// GIVEN
+	ns1 := "stage"
+
+	ts := newTestSuite(t)
+	// create namespaces
+	ts.createNamespace(ns1)
+	ts.createNamespace(integrationNS)
+	ts.createService(integrationNS, "application-broker")
+
+	ts.createABServiceBroker(ns1, "ec-prod", fmt.Sprintf("http://application-broker.kyma-integration.svc.cluster.local/%s", ns1))
+	ts.createABServiceBroker(integrationNS, "ec-prod", "http://application-broker.kyma-integration.svc.cluster.local/")
+
+	migrationService := ts.newMigrationService()
+
+	// WHEN
+	migrationService.Migrate()
+
+	// THEN
+	ts.assertServicesInNamespace(integrationNS, "application-broker")
+	ts.assertServiceBrokerURL(ns1, "ec-prod", fmt.Sprintf("http://application-broker.kyma-integration.svc.cluster.local/%s", ns1))
 }
 
 type testSuite struct {
@@ -96,7 +120,7 @@ func newTestSuite(t *testing.T) *testSuite {
 }
 
 func (ts *testSuite) newMigrationService() *nsbroker.MigrationService {
-	ms, err := nsbroker.NewMigrationService(ts.servicesGetter, ts.brokerGetter, fixWorkingNs(), "application-broker", spy.NewLogDummy())
+	ms, err := nsbroker.NewMigrationService(ts.servicesGetter, ts.brokerGetter, integrationNS, "application-broker", spy.NewLogDummy())
 	require.NoError(ts.t, err)
 	return ms
 }
@@ -145,6 +169,24 @@ func (ts *testSuite) createServiceBroker(ns, name, url string) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: ns,
+		},
+		Spec: v1beta1.ServiceBrokerSpec{
+			CommonServiceBrokerSpec: v1beta1.CommonServiceBrokerSpec{
+				URL: url,
+			},
+		},
+	})
+	require.NoError(ts.t, err)
+}
+
+func (ts *testSuite) createABServiceBroker(ns, name, url string) {
+	_, err := ts.brokerGetter.ServiceBrokers(ns).Create(&v1beta1.ServiceBroker{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: ns,
+			Labels: map[string]string{
+				nsbroker.BrokerLabelKey: nsbroker.BrokerLabelValue,
+			},
 		},
 		Spec: v1beta1.ServiceBrokerSpec{
 			CommonServiceBrokerSpec: v1beta1.CommonServiceBrokerSpec{

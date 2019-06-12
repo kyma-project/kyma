@@ -32,7 +32,7 @@ global:
     path: eu.gcr.io/kyma-project
   helm_broker:
     dir: develop/
-    version: 73a9a5cd
+    version: e844d536
   alpine_net:
     dir: develop/
     version: 149967d0

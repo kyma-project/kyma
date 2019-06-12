@@ -11,38 +11,38 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:generate mockery -name=microfrontendLister -output=automock -outpkg=automock -case=underscore
-type microfrontendLister interface {
+//go:generate mockery -name=microFrontendLister -output=automock -outpkg=automock -case=underscore
+type microFrontendLister interface {
 	List(namespace string) ([]*v1alpha1.MicroFrontend, error)
 }
 
-//go:generate mockery -name=gqlMicrofrontendConverter -output=automock -outpkg=automock -case=underscore
-type gqlMicrofrontendConverter interface {
-	ToGQL(in *v1alpha1.MicroFrontend) (*gqlschema.Microfrontend, error)
-	ToGQLs(in []*v1alpha1.MicroFrontend) ([]gqlschema.Microfrontend, error)
+//go:generate mockery -name=gqlMicroFrontendConverter -output=automock -outpkg=automock -case=underscore
+type gqlMicroFrontendConverter interface {
+	ToGQL(in *v1alpha1.MicroFrontend) (*gqlschema.MicroFrontend, error)
+	ToGQLs(in []*v1alpha1.MicroFrontend) ([]gqlschema.MicroFrontend, error)
 }
 
-type microfrontendResolver struct {
-	microfrontendLister    microfrontendLister
-	microfrontendConverter gqlMicrofrontendConverter
+type microFrontendResolver struct {
+	microFrontendLister    microFrontendLister
+	microFrontendConverter gqlMicroFrontendConverter
 }
 
-func newMicrofrontendResolver(microfrontendLister microfrontendLister) *microfrontendResolver {
-	return &microfrontendResolver{
-		microfrontendLister:    microfrontendLister,
-		microfrontendConverter: &microfrontendConverter{},
+func newMicroFrontendResolver(microFrontendLister microFrontendLister) *microFrontendResolver {
+	return &microFrontendResolver{
+		microFrontendLister:    microFrontendLister,
+		microFrontendConverter: newMicroFrontendConverter(),
 	}
 }
 
-func (r *microfrontendResolver) MicrofrontendsQuery(ctx context.Context, namespace string) ([]gqlschema.Microfrontend, error) {
-	items, err := r.microfrontendLister.List(namespace)
+func (r *microFrontendResolver) MicroFrontendsQuery(ctx context.Context, namespace string) ([]gqlschema.MicroFrontend, error) {
+	items, err := r.microFrontendLister.List(namespace)
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s", pretty.MicroFrontends))
 		return nil, gqlerror.New(err, pretty.MicroFrontends)
 	}
 
-	mfs, err := r.microfrontendConverter.ToGQLs(items)
+	mfs, err := r.microFrontendConverter.ToGQLs(items)
 	if err != nil {
 		return nil, err
 	}

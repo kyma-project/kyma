@@ -2,7 +2,6 @@ knative-serving:
   gateway:
     name: kyma-gateway.kyma-system.svc.cluster.local
     serviceUrl: istio-ingressgateway.istio-system.svc.cluster.local
-  domainName: example.com
 
 global:
   isLocalEnv: false
@@ -11,7 +10,8 @@ global:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
     dir: develop/
-    version: 40c11b98
+    version: adaa993d
+  domainName: example.com
 
 test:
   target: "Test Target"

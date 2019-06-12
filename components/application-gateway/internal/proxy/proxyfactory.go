@@ -7,12 +7,15 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
+
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/httptools"
 	log "github.com/sirupsen/logrus"
 )
 
-func makeProxy(targetUrl string, id string, skipVerify bool) (*httputil.ReverseProxy, apperrors.AppError) {
+func makeProxy(targetUrl string, requestParameters *model.RequestParameters, id string, skipVerify bool) (*httputil.ReverseProxy, apperrors.AppError) {
 	target, err := url.Parse(targetUrl)
 	if err != nil {
 		log.Errorf("failed to parse target url '%s': '%s'", targetUrl, err.Error())
@@ -34,15 +37,12 @@ func makeProxy(targetUrl string, id string, skipVerify bool) (*httputil.ReverseP
 			req.URL.RawQuery = targetQuery + "&" + req.URL.RawQuery
 		}
 
-		if _, ok := req.Header[httpconsts.HeaderUserAgent]; !ok {
-			// explicitly disable User-Agent so it's not set to default value
-			req.Header.Set(httpconsts.HeaderUserAgent, "")
+		if requestParameters != nil {
+			setCustomQueryParameters(req.URL, requestParameters.QueryParameters)
+			setCustomHeaders(req.Header, requestParameters.Headers)
 		}
 
-		removeHeader(req.Header, httpconsts.HeaderXForwardedProto)
-		removeHeader(req.Header, httpconsts.HeaderXForwardedFor)
-		removeHeader(req.Header, httpconsts.HeaderXForwardedHost)
-		removeHeader(req.Header, httpconsts.HeaderXForwardedClientCert)
+		removeForbiddenHeaders(req.Header)
 
 		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
 	}
@@ -68,10 +68,22 @@ func joinPaths(a, b string) string {
 	}
 	return a + b
 }
+func setCustomQueryParameters(reqURL *url.URL, customQueryParams *map[string][]string) {
+	httptools.SetQueryParameters(reqURL, customQueryParams)
+}
 
-func removeHeader(headers http.Header, headerToRemove string) {
-	if _, ok := headers[headerToRemove]; ok {
-		log.Debugf("Removing header %s\n", headerToRemove)
-		headers.Del(headerToRemove)
+func removeForbiddenHeaders(reqHeaders http.Header) {
+	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedProto)
+	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedFor)
+	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedHost)
+	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedClientCert)
+}
+
+func setCustomHeaders(reqHeaders http.Header, customHeaders *map[string][]string) {
+	if _, ok := reqHeaders[httpconsts.HeaderUserAgent]; !ok {
+		// explicitly disable User-Agent so it's not set to default value
+		reqHeaders.Set(httpconsts.HeaderUserAgent, "")
 	}
+
+	httptools.SetHeaders(reqHeaders, customHeaders)
 }

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Application Broker (AB) provides applications in the [Service Catalog](../../docs/service-catalog/docs/01-01-service-catalog.md).
+The Application Broker (AB) provides applications in the [Service Catalog](../../docs/service-catalog/01-01-service-catalog.md).
 An Application represents a remote application connected to the Kyma instance.
 The AB implements the [Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md).
 
@@ -15,10 +15,13 @@ For more details about provisioning, deprovisioning, binding, and unbinding, see
 
 ## Prerequisites
 
-You need the following tools to set up the project:
-* The 1.9 or higher version of [Go](https://golang.org/dl/)
-* The latest version of [Docker](https://www.docker.com/)
-* The latest version of [Dep](https://github.com/golang/dep)
+To set up the project, download these tools:
+
+* [Go](https://golang.org/dl/) 1.11.4
+* [Dep](https://github.com/golang/dep) v0.5.0
+* [Docker](https://www.docker.com/)
+
+These Go and Dep versions are compliant with the `buildpack` used by Prow. For more details read [this](https://github.com/kyma-project/test-infra/blob/master/prow/images/buildpack-golang/README.md) document.
 
 ## Development
 

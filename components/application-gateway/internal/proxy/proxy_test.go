@@ -26,6 +26,122 @@ func TestProxy(t *testing.T) {
 
 	proxyTimeout := 10
 
+	t.Run("should proxy and add addidtional query parameters", func(t *testing.T) {
+		// given
+		ts := NewTestServer(func(req *http.Request) {
+			assert.Equal(t, "param-value-1", req.URL.Query().Get("param1"))
+
+			assert.Equal(t, 2, len(req.URL.Query()["param2"]))
+			assert.Equal(t, "param-value-2.1", req.URL.Query().Get("param2"))
+			assert.Equal(t, "param-value-2.1", req.URL.Query()["param2"][0])
+			assert.Equal(t, "param-value-2.2", req.URL.Query()["param2"][1])
+		})
+		defer ts.Close()
+
+		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		require.NoError(t, err)
+
+		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+
+		authStrategyMock := &authMock.Strategy{}
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
+			Return(nil).
+			Once()
+
+		credentials := &metadatamodel.Credentials{}
+		authStrategyFactoryMock := &authMock.StrategyFactory{}
+		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
+
+		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
+
+		requestParameters := &metadatamodel.RequestParameters{
+			QueryParameters: &map[string][]string{
+				"param1": []string{"param-value-1"},
+				"param2": []string{"param-value-2.1", "param-value-2.2"},
+			},
+		}
+
+		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
+		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
+			TargetUrl:         ts.URL,
+			Credentials:       credentials,
+			RequestParameters: requestParameters,
+		}, nil).Once()
+
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		rr := httptest.NewRecorder()
+
+		// when
+		handler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "test", rr.Body.String())
+		authStrategyFactoryMock.AssertExpectations(t)
+		authStrategyMock.AssertExpectations(t)
+		csrfFactoryMock.AssertExpectations(t)
+		csrfStrategyMock.AssertExpectations(t)
+	})
+
+	t.Run("should proxy and add addidtional headers", func(t *testing.T) {
+		// given
+		ts := NewTestServer(func(req *http.Request) {
+			assert.Equal(t, "custom-value-1", req.Header.Get("X-Custom1"))
+
+			assert.Equal(t, 2, len(req.Header["X-Custom2"]))
+			assert.Equal(t, "custom-value-2.1", req.Header.Get("X-Custom2"))
+			assert.Equal(t, "custom-value-2.1", req.Header["X-Custom2"][0])
+			assert.Equal(t, "custom-value-2.2", req.Header["X-Custom2"][1])
+		})
+		defer ts.Close()
+
+		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		require.NoError(t, err)
+
+		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+
+		authStrategyMock := &authMock.Strategy{}
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
+			Return(nil).
+			Once()
+
+		credentials := &metadatamodel.Credentials{}
+		authStrategyFactoryMock := &authMock.StrategyFactory{}
+		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
+
+		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
+
+		requestParameters := &metadatamodel.RequestParameters{
+			Headers: &map[string][]string{
+				"X-Custom1": []string{"custom-value-1"},
+				"X-Custom2": []string{"custom-value-2.1", "custom-value-2.2"},
+			},
+		}
+
+		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
+		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
+			TargetUrl:         ts.URL,
+			Credentials:       credentials,
+			RequestParameters: requestParameters,
+		}, nil).Once()
+
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		rr := httptest.NewRecorder()
+
+		// when
+		handler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "test", rr.Body.String())
+		authStrategyFactoryMock.AssertExpectations(t)
+		authStrategyMock.AssertExpectations(t)
+		csrfFactoryMock.AssertExpectations(t)
+		csrfStrategyMock.AssertExpectations(t)
+	})
+
 	t.Run("should proxy and remove headers", func(t *testing.T) {
 		// given
 		ts := NewTestServer(func(req *http.Request) {

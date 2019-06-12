@@ -8,27 +8,27 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-type clusterMicrofrontendService struct {
+type clusterMicroFrontendService struct {
 	informer cache.SharedIndexInformer
 }
 
-func newClusterMicrofrontendService(informer cache.SharedIndexInformer) *clusterMicrofrontendService {
-	return &clusterMicrofrontendService{
+func newClusterMicroFrontendService(informer cache.SharedIndexInformer) *clusterMicroFrontendService {
+	return &clusterMicroFrontendService{
 		informer: informer,
 	}
 }
 
-func (svc *clusterMicrofrontendService) List() ([]*v1alpha1.ClusterMicroFrontend, error) {
+func (svc *clusterMicroFrontendService) List() ([]*v1alpha1.ClusterMicroFrontend, error) {
 	items := svc.informer.GetStore().List()
 
-	var clusterMicrofrontends []*v1alpha1.ClusterMicroFrontend
+	var clusterMicroFrontends []*v1alpha1.ClusterMicroFrontend
 	for _, item := range items {
-		clusterMicrofrontend, ok := item.(*v1alpha1.ClusterMicroFrontend)
+		clusterMicroFrontend, ok := item.(*v1alpha1.ClusterMicroFrontend)
 		if !ok {
 			return nil, fmt.Errorf("Incorrect item type: %T, should be: *%s", item, pretty.ClusterMicroFrontend)
 		}
-		clusterMicrofrontends = append(clusterMicrofrontends, clusterMicrofrontend)
+		clusterMicroFrontends = append(clusterMicroFrontends, clusterMicroFrontend)
 	}
 
-	return clusterMicrofrontends, nil
+	return clusterMicroFrontends, nil
 }

@@ -92,9 +92,9 @@ func (p *proxy) getOrCreateCacheEntry(id string) (*CacheEntry, apperrors.AppErro
 
 	if found {
 		return cacheObj, nil
-	} else {
-		return p.createCacheEntry(id)
 	}
+
+	return p.createCacheEntry(id)
 }
 
 func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
@@ -103,7 +103,7 @@ func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
 		return nil, err
 	}
 
-	proxy, err := makeProxy(serviceApi.TargetUrl, id, p.skipVerify)
+	proxy, err := makeProxy(serviceApi.TargetUrl, serviceApi.RequestParameters, id, p.skipVerify)
 	if err != nil {
 		return nil, err
 	}

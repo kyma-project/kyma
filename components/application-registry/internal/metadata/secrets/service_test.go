@@ -197,7 +197,7 @@ func TestService_Get(t *testing.T) {
 		strategyFactory := &strategyMocks.Factory{}
 		strategyFactory.On("NewSecretAccessStrategy", &appCredentials).Return(modStrategy, nil)
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, secretName).Return(secretData, nil)
+		secretsRepository.On("Get", secretName).Return(secretData, nil)
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
@@ -238,7 +238,7 @@ func TestService_Get(t *testing.T) {
 		strategyFactory := &strategyMocks.Factory{}
 		strategyFactory.On("NewSecretAccessStrategy", &appCredentials).Return(modStrategy, nil)
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, secretName).Return(nil, apperrors.Internal(""))
+		secretsRepository.On("Get", secretName).Return(nil, apperrors.Internal(""))
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
@@ -268,7 +268,7 @@ func TestService_Update(t *testing.T) {
 		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, secretName).Return(strategy.SecretData{}, nil)
+		secretsRepository.On("Get", secretName).Return(strategy.SecretData{}, nil)
 		secretsRepository.On("Upsert", appName, secretName, serviceId, secretData).Return(nil)
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
@@ -298,7 +298,7 @@ func TestService_Update(t *testing.T) {
 		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, secretName).Return(secretData, nil)
+		secretsRepository.On("Get", secretName).Return(secretData, nil)
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
@@ -326,7 +326,7 @@ func TestService_Update(t *testing.T) {
 		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, secretName).Return(strategy.SecretData{}, apperrors.NotFound("error"))
+		secretsRepository.On("Get", secretName).Return(strategy.SecretData{}, apperrors.NotFound("error"))
 		secretsRepository.On("Create", appName, secretName, serviceId, secretData).Return(nil)
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
@@ -354,7 +354,7 @@ func TestService_Update(t *testing.T) {
 		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, secretName).Return(nil, apperrors.Internal(""))
+		secretsRepository.On("Get", secretName).Return(nil, apperrors.Internal(""))
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
@@ -381,7 +381,7 @@ func TestService_Update(t *testing.T) {
 		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, secretName).Return(strategy.SecretData{}, nil)
+		secretsRepository.On("Get", secretName).Return(strategy.SecretData{}, nil)
 		secretsRepository.On("Upsert", appName, secretName, serviceId, secretData).Return(apperrors.Internal("error"))
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)

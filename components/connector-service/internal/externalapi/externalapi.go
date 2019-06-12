@@ -25,6 +25,7 @@ type Config struct {
 	CertificateProtectedBaseURL string
 	CertService                 certificates.Service
 	RevokedCertsRepo            revocation.RevocationListRepository
+	HeaderParser                certificates.HeaderParser
 }
 
 type FunctionalMiddlewares struct {
@@ -76,7 +77,7 @@ func (hb *handlerBuilder) WithApps(appHandlerCfg Config) {
 	applicationRenewalHandler := NewSignatureHandler(appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
 	applicationSignatureHandler := NewSignatureHandler(appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
 	applicationManagementInfoHandler := NewManagementInfoHandler(appHandlerCfg.ContextExtractor, appHandlerCfg.CertificateProtectedBaseURL)
-	applicationRevocationHandler := NewRevocationHandler(appHandlerCfg.RevokedCertsRepo)
+	applicationRevocationHandler := NewRevocationHandler(appHandlerCfg.RevokedCertsRepo, appHandlerCfg.HeaderParser)
 
 	csrApplicationRouter := hb.router.PathPrefix("/v1/applications/signingRequests").Subrouter()
 	csrApplicationRouter.HandleFunc("/info", applicationInfoHandler.GetCSRInfo).Methods(http.MethodGet)
@@ -123,7 +124,7 @@ func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
 	runtimeRenewalHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.CertificateProtectedBaseURL)
-	runtimeRevocationHandler := NewRevocationHandler(runtimeHandlerCfg.RevokedCertsRepo)
+	runtimeRevocationHandler := NewRevocationHandler(runtimeHandlerCfg.RevokedCertsRepo, runtimeHandlerCfg.HeaderParser)
 
 	csrRuntimesRouter := hb.router.PathPrefix("/v1/runtimes/signingRequests").Subrouter()
 	csrRuntimesRouter.HandleFunc("/info", runtimeInfoHandler.GetCSRInfo).Methods(http.MethodGet)

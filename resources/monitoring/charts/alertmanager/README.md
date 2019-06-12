@@ -97,11 +97,11 @@ In order to enable alert notifications for the receivers, configure these four p
 **channel** refers to the Slack channel which receives the alerts notifications.
 **api_url** is the URL endpoint which sends the alerts.
 
-Only a part of the configuration is located in this chart. All of the four parameters' values are taken from the `{{ .Values.global.alertTools.credentials... }}` template. These values are configured in [this](../../../../installation/resources/installer-config-cluster.yaml.tpl) file. For example:
+Only a part of the configuration is located in this chart. All of the four parameters' values are passed as [overrides](../../../../docs/kyma/05-03-overrides.md) during the installation.
+The overrides must have `global.alertTools.credentials` prefix and are used to configure the following fragment of [values.yaml](./values.yaml) file:
 
 ```yaml
 global:
-  #Alerting tools credentials are as follows:
   alertTools:
     credentials:
       victorOps:

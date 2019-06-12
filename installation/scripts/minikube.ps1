@@ -5,6 +5,8 @@ param (
     [string]$MEMORY = "8192"
 )
 
+Write-Output @"The minikube.ps1 script is deprecated and will be removed. Use Kyma CLI instead."@
+
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 $KUBERNETES_VERSION = "1.12.5"
 
@@ -43,7 +45,7 @@ function StartMinikube() {
         + " --memory ${MEMORY}"`
         + " --cpus 4"`
         + " --extra-config=apiserver.authorization-mode=RBAC"`
-	+ " --extra-config=apiserver.cors-allowed-origins='http://*'"`
+	    + " --extra-config=apiserver.cors-allowed-origins='http://*'"`
         + " --extra-config=apiserver.enable-admission-plugins='DefaultStorageClass,LimitRanger,MutatingAdmissionWebhook,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,ValidatingAdmissionWebhook'"`
         + " --kubernetes-version=v${KUBERNETES_VERSION}"`
         + " --disk-size=${DISK_SIZE}"`

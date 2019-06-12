@@ -10,6 +10,7 @@ import (
 	scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	scInformer "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions/servicecatalog/v1beta1"
 	scLister "github.com/kubernetes-incubator/service-catalog/pkg/client/listers_generated/servicecatalog/v1beta1"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/metric"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/pretty"
 	sbuStatus "github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/status"
 	sbuTypes "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
@@ -34,6 +35,8 @@ const (
 	//
 	// 5ms, 10ms, 20ms, 40ms, 80ms, 160ms, 320ms, 640ms, 1.3s, 2.6s, 5.1s, 10.2s, 20.4s, 41s, 82s
 	defaultMaxRetries = 15
+	// LivenessBUCSample name of ServiceBindingUsage used for liveness probe
+	LivenessBUCSample = "informer.liveness.probe.service.binding.usage.name"
 )
 
 var podPresetOwnerAnnotationKey = fmt.Sprintf("servicebindingusages.%s/owner-name", sbuTypes.SchemeGroupVersion.Group)
@@ -42,6 +45,7 @@ var podPresetOwnerAnnotationKey = fmt.Sprintf("servicebindingusages.%s/owner-nam
 //go:generate mockery -name=kindsSupervisors -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=bindingLabelsFetcher -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=appliedSpecStorage -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=businessMetric -output=automock -outpkg=automock -case=underscore
 
 type (
 	podPresetModifier interface {
@@ -70,6 +74,13 @@ type (
 	onDeleteListener interface {
 		OnDeleteSBU(event *SBUDeletedEvent)
 	}
+
+	businessMetric interface {
+		RecordError(controllerName string)
+		IncrementQueueLength(controllerName string)
+		DecrementQueueLength(controllerName string)
+		RecordLatency(controllerName string, reconcileTime time.Duration)
+	}
 )
 
 // ServiceBindingUsageController watches ServiceBindingUsage and injects data to given Deployment/Function
@@ -87,6 +98,7 @@ type ServiceBindingUsageController struct {
 	log                      logrus.FieldLogger
 	queue                    workqueue.RateLimitingInterface
 	prefixGetter             prefixGetter
+	metric                   businessMetric
 
 	// testHookAsyncOpDone used only in unit tests
 	testHookAsyncOpDone func()
@@ -103,7 +115,8 @@ func NewServiceBindingUsage(
 	kindSupervisors kindsSupervisors,
 	podPresetModifier podPresetModifier,
 	labelsFetcher bindingLabelsFetcher,
-	log logrus.FieldLogger) *ServiceBindingUsageController {
+	log logrus.FieldLogger,
+	cbm businessMetric) *ServiceBindingUsageController {
 	c := &ServiceBindingUsageController{
 		appliedSpecStorage:       appliedSpecStorage,
 		bindingUsageClient:       bindingUsageClient,
@@ -118,6 +131,7 @@ func NewServiceBindingUsage(
 		log:                      log.WithField("service", "controller:service-binding-usage"),
 		queue:                    workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "ServiceBindingUsage"),
 		prefixGetter:             &envPrefixGetter{},
+		metric:                   cbm,
 	}
 
 	sbuInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -133,18 +147,24 @@ func (c *ServiceBindingUsageController) onAddServiceBindingUsage(obj interface{}
 	key, err := cache.MetaNamespaceKeyFunc(obj)
 	if err != nil {
 		c.log.Errorf("while handling addition event: couldn't get key: %v", err)
+		c.metric.RecordError(metric.SbuController)
 		return
 	}
+	c.log.Infof("new add event with key %q triggered", key)
 	c.queue.Add(key)
+	c.metric.IncrementQueueLength(metric.SbuController)
 }
 
 func (c *ServiceBindingUsageController) onDeleteServiceBindingUsage(obj interface{}) {
 	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 	if err != nil {
 		c.log.Errorf("while handling deletion event: couldn't get key: %v", err)
+		c.metric.RecordError(metric.SbuController)
 		return
 	}
+	c.log.Infof("new delete event with key %q triggered", key)
 	c.queue.Add(key)
+	c.metric.IncrementQueueLength(metric.SbuController)
 }
 
 func (c *ServiceBindingUsageController) onUpdateOrRelistServiceBindingUsage(old, cur interface{}) {
@@ -167,9 +187,12 @@ func (c *ServiceBindingUsageController) onUpdateOrRelistServiceBindingUsage(old,
 	key, err := cache.MetaNamespaceKeyFunc(cur)
 	if err != nil {
 		c.log.Errorf("while handling updating event: couldn't get key: %v", err)
+		c.metric.RecordError(metric.SbuController)
 		return
 	}
+	c.log.Infof("new update event with key %q triggered. Updated object: %s/%s", key, oldUsage.Namespace, oldUsage.Name)
 	c.queue.Add(key)
+	c.metric.IncrementQueueLength(metric.SbuController)
 }
 
 // Run begins watching and syncing.
@@ -202,15 +225,36 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 	}
 
 	key, shutdown := c.queue.Get()
+	reconcileStart := time.Now()
 	if shutdown {
+		c.log.Info("queue has been shutdown")
 		return false
 	}
-	defer c.queue.Done(key)
+	defer func() {
+		c.log.Infof("process for key %q has been completed", key)
+		c.queue.Done(key)
+		c.metric.RecordLatency(metric.SbuController, time.Now().Sub(reconcileStart))
+	}()
 
 	namespace, name, err := cache.SplitMetaNamespaceKey(key.(string))
 	if err != nil {
 		c.log.Errorf("Error processing %q (splitting meta namespace key failed): %v", key, err)
+		c.metric.RecordError(metric.SbuController)
 		c.queue.Forget(key)
+		c.metric.DecrementQueueLength(metric.SbuController)
+		return true
+	}
+	// Skip all reconcile process if ServiceBindingUsage comes from informer liveness probe
+	// in that case we only check informer handle the queue so we need to only change the SBU status,
+	// all process is not needed
+	if name == LivenessBUCSample {
+		err := c.handleServiceBindingUsageSample(namespace, name)
+		if err != nil {
+			c.log.Errorf("failed handle SBU sample: %s", err)
+			c.metric.RecordError(metric.SbuController)
+		}
+		c.queue.Forget(key)
+		c.metric.DecrementQueueLength(metric.SbuController)
 		return true
 	}
 
@@ -219,6 +263,7 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 	switch {
 	case err == nil:
 		c.queue.Forget(key)
+		c.metric.DecrementQueueLength(metric.SbuController)
 
 	case retry < c.maxRetires:
 		c.log.Debugf("Error processing %q (will retry - it's %d of %d): %v", key, retry, c.maxRetires, err)
@@ -226,22 +271,28 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 
 	default: // err != nil and too many retries
 		c.log.Errorf("Error processing %q (giving up - to many retires): %v", key, err)
+		c.metric.RecordError(metric.SbuController)
 		c.queue.Forget(key)
+		c.metric.DecrementQueueLength(metric.SbuController)
 	}
 
 	// set ServiceBindingUsage status if ServiceBindingUsage and his status exist
 	if usageStatus != nil {
+		c.log.Debug("Starting process of updating ServiceBindingUsageCondition")
 		usageStatus.wrapMessageForFailed(fmt.Sprintf("Process error during %d attempts from %d", retry, c.maxRetires))
 
 		bindingUsage, err := c.bindingUsageLister.ServiceBindingUsages(namespace).Get(name)
 		if err != nil {
 			c.log.Errorf("Cannot get ServiceBindingUsage %s/%s, got error: %v", namespace, name, err)
+			c.metric.RecordError(metric.SbuController)
 			return true
 		}
 
+		c.log.Debugf("Updating %q conditions", pretty.ServiceBindingUsageName(bindingUsage))
 		condition := sbuStatus.NewUsageCondition(usageStatus.sbuType, usageStatus.condition, usageStatus.reason, usageStatus.message)
 		if err := c.updateStatus(bindingUsage, *condition); err != nil {
 			c.log.Errorf("Error processing %q while updating sbu status with condition %+v", key, condition)
+			c.metric.RecordError(metric.SbuController)
 		}
 	}
 
@@ -284,7 +335,29 @@ func (c *ServiceBindingUsageController) syncServiceBindingUsage(namespace string
 	return bindingUsageStatus, nil
 }
 
+func (c *ServiceBindingUsageController) handleServiceBindingUsageSample(namespace, name string) error {
+	bindingUsage, err := c.bindingUsageLister.ServiceBindingUsages(namespace).Get(name)
+
+	switch {
+	case err == nil:
+		if err := c.updateStatus(bindingUsage, sbuTypes.ServiceBindingUsageCondition{
+			Status:             sbuTypes.ConditionTrue,
+			LastTransitionTime: metaV1.Now(),
+		}); err != nil {
+			c.log.Errorf("Error processing %q while updating sbu status for SBU sample: %s", err)
+		}
+	case apiErrors.IsNotFound(err):
+		// absence in store means watcher caught the deletion
+		return nil
+	default:
+		return errors.Wrap(err, "while getting ServiceBindingUsage")
+	}
+
+	return nil
+}
+
 func (c *ServiceBindingUsageController) reconcileServiceBindingUsageAdd(newUsage *sbuTypes.ServiceBindingUsage) *processBindingUsageError {
+	c.log.Debugf("process of reconcile %s", pretty.ServiceBindingUsageName(newUsage))
 	var (
 		workNS         = newUsage.Namespace
 		newBindingName = newUsage.Spec.ServiceBindingRef.Name
@@ -356,6 +429,7 @@ func (c *ServiceBindingUsageController) reconcileServiceBindingUsageAdd(newUsage
 		)
 	}
 
+	c.log.Debugf("process for %s has been completed", pretty.ServiceBindingUsageName(newUsage))
 	return nil
 }
 

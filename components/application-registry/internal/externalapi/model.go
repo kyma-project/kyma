@@ -33,11 +33,17 @@ type CreateServiceResponse struct {
 }
 
 type API struct {
-	TargetUrl        string          `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
-	Credentials      *Credentials    `json:"credentials,omitempty"`
-	Spec             json.RawMessage `json:"spec,omitempty"`
-	SpecificationUrl string          `json:"specificationUrl,omitempty"`
-	ApiType          string          `json:"apiType,omitempty"`
+	TargetUrl         string             `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
+	Credentials       *Credentials       `json:"credentials,omitempty"`
+	Spec              json.RawMessage    `json:"spec,omitempty"`
+	SpecificationUrl  string             `json:"specificationUrl,omitempty"`
+	ApiType           string             `json:"apiType,omitempty"`
+	RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
+}
+
+type RequestParameters struct {
+	Headers         *map[string][]string `json:"headers,omitempty"`
+	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
 }
 
 type Credentials struct {
@@ -124,6 +130,9 @@ func serviceDefinitionToServiceDetails(serviceDefinition model.ServiceDefinition
 		if serviceDefinition.Api.Credentials != nil {
 			serviceDetails.Api.Credentials = serviceDefinitionCredentialsToServiceDetailsCredentials(serviceDefinition.Api.Credentials)
 		}
+		if serviceDefinition.Api.RequestParameters != nil {
+			serviceDetails.Api.RequestParameters = serviceDefinitionRequestParametersToServiceDetailsRequestParameters(serviceDefinition.Api.RequestParameters)
+		}
 	}
 
 	if serviceDefinition.Events != nil {
@@ -188,6 +197,16 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 	return nil
 }
 
+func serviceDefinitionRequestParametersToServiceDetailsRequestParameters(requestParameters *model.RequestParameters) *RequestParameters {
+	if requestParameters == nil {
+		return nil
+	}
+	return &RequestParameters{
+		Headers:         requestParameters.Headers,
+		QueryParameters: requestParameters.QueryParameters,
+	}
+}
+
 func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.ServiceDefinition, apperrors.AppError) {
 	serviceDefinition := model.ServiceDefinition{
 		Provider:         serviceDetails.Provider,
@@ -213,6 +232,9 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 		if serviceDetails.Api.Spec != nil {
 			serviceDefinition.Api.Spec = compact(serviceDetails.Api.Spec)
 		}
+		if serviceDetails.Api.RequestParameters != nil {
+			serviceDefinition.Api.RequestParameters = serviceDetailsRequestParametersToServiceDefinitionRequestParameters(serviceDetails.Api.RequestParameters)
+		}
 	}
 
 	if serviceDetails.Events != nil && serviceDetails.Events.Spec != nil {
@@ -230,6 +252,16 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 	}
 
 	return serviceDefinition, nil
+}
+
+func serviceDetailsRequestParametersToServiceDefinitionRequestParameters(requestParameters *RequestParameters) *model.RequestParameters {
+	if requestParameters == nil {
+		return nil
+	}
+	return &model.RequestParameters{
+		Headers:         requestParameters.Headers,
+		QueryParameters: requestParameters.QueryParameters,
+	}
 }
 
 func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Credentials) *model.Credentials {
@@ -292,32 +324,36 @@ func (api API) MarshalJSON() ([]byte, error) {
 
 func (api API) marshalWithJSONSpec() ([]byte, error) {
 	return json.Marshal(&struct {
-		TargetUrl        string          `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
-		Credentials      *Credentials    `json:"credentials,omitempty"`
-		Spec             json.RawMessage `json:"spec,omitempty"`
-		SpecificationUrl string          `json:"specificationUrl,omitempty"`
-		ApiType          string          `json:"apiType,omitempty"`
+		TargetUrl         string             `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
+		Credentials       *Credentials       `json:"credentials,omitempty"`
+		Spec              json.RawMessage    `json:"spec,omitempty"`
+		SpecificationUrl  string             `json:"specificationUrl,omitempty"`
+		ApiType           string             `json:"apiType,omitempty"`
+		RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
 	}{
 		api.TargetUrl,
 		api.Credentials,
 		api.Spec,
 		api.SpecificationUrl,
 		api.ApiType,
+		api.RequestParameters,
 	})
 }
 
 func (api API) marshalWithNonJSONSpec() ([]byte, error) {
 	return json.Marshal(&struct {
-		TargetUrl        string       `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
-		Credentials      *Credentials `json:"credentials,omitempty"`
-		Spec             string       `json:"spec,omitempty"`
-		SpecificationUrl string       `json:"specificationUrl,omitempty"`
-		ApiType          string       `json:"apiType,omitempty"`
+		TargetUrl         string             `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
+		Credentials       *Credentials       `json:"credentials,omitempty"`
+		Spec              string             `json:"spec,omitempty"`
+		SpecificationUrl  string             `json:"specificationUrl,omitempty"`
+		ApiType           string             `json:"apiType,omitempty"`
+		RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
 	}{
 		api.TargetUrl,
 		api.Credentials,
 		string(api.Spec),
 		api.SpecificationUrl,
 		api.ApiType,
+		api.RequestParameters,
 	})
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source "${ROOT_PATH}/utils.sh"
+source "${ROOT_PATH}/testing-common.sh"
 
 #copied from  testing-common.sh: in testing-common.sh we use Octopus, here helm test. TODO later: rewrite e2e-testing to Octopus.
 
@@ -24,11 +25,24 @@ function cleanupHelmTestPods() {
     log "Success cleaning test pods.\n" nc bold
 }
 
+function getContainerFromPod() {
+    local namespace="$1"
+    local pod="$2"
+    local containers2ignore="istio-init istio-proxy manager"
+    containersInPod=$(kubectl get pods ${pod} -o jsonpath='{.spec.containers[*].name}' -n ${namespace})
+    for container in $containersInPod; do
+        if [[ ! ${containers2ignore[*]} =~ "${container}" ]]; then
+            echo "${container}"
+        fi
+    done
+}
+
 function printLogsFromPod() {
     local namespace=$1 pod=$2
     local tailLimit=2000 bytesLimit=500000
     log "Fetching logs from '${pod}' with options tailLimit=${tailLimit} and bytesLimit=${bytesLimit}" nc bold
-    result=$(kubectl $(context_arg)  logs --tail=${tailLimit} --limit-bytes=${bytesLimit} -n ${namespace} ${pod})
+    container=$(getContainerFromPod ${namespace} ${pod})
+    result=$(kubectl $(context_arg) logs --tail=${tailLimit} --limit-bytes=${bytesLimit} -n ${namespace} -c ${container} ${pod})
     if [ "${#result}" -eq 0 ]; then
         log "FAILED" red
         return 1
@@ -212,6 +226,9 @@ echo "----------------------------"
 
 exitCode=0
 
+# creates a config map which provides the testing bundles
+injectTestingBundles
+trap removeTestingBundles ERR EXIT
 
 testcase="${ROOT_PATH}"/../../tests/end-to-end/backup-restore-test/deploy/chart/backup-test
 release=$(basename "$testcase")
@@ -222,6 +239,7 @@ ADMIN_EMAIL=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.e
 ADMIN_PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode)
 
 helm install "$testcase" --name "${release}" --namespace end-to-end --set global.ingress.domainName="${DOMAIN}" --set-file global.adminEmail=<(echo -n "${ADMIN_EMAIL}") --set-file global.adminPassword=<(echo -n "${ADMIN_PASSWORD}") --tls
+
 helm test "${release}" --timeout 10000 --tls
 testResult=$?
 if [ $testResult -eq 0 ]
@@ -237,7 +255,6 @@ if [ $cleanupResult -ne 0 ]
 then
    exitCode=$cleanupResult
 fi
-
 
 for release in $releasesToClean; do
     cleanupHelmE2ERelease "${release}"

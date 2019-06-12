@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	istioAuthenticationClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/authentication.istio.io/clientset/versioned"
@@ -39,6 +40,8 @@ func main() {
 
 	domainName := initDomainName()
 
+	corsConfig := getCORSConfig()
+
 	apiExtensionsClientSet := apiExtensionsClient.NewForConfigOrDie(kubeConfig)
 
 	registerer := crd.NewRegistrar(apiExtensionsClientSet)
@@ -48,7 +51,7 @@ func main() {
 	serviceV1Interface := serviceV1.New(k8sClientSet)
 
 	istioNetworkingClientSet := istioNetworkingClient.NewForConfigOrDie(kubeConfig)
-	istioNetworkingV1Interface := istioNetworkingV1.New(istioNetworkingClientSet, k8sClientSet, istioGateway)
+	istioNetworkingV1Interface := istioNetworkingV1.New(istioNetworkingClientSet, k8sClientSet, istioGateway, corsConfig)
 
 	istioAuthenticationClientSet := istioAuthenticationClient.NewForConfigOrDie(kubeConfig)
 	authenticationV2Interface := authenticationV2.New(istioAuthenticationClientSet, jwtDefaultConfig, mTLSOptionEnabled)
@@ -57,7 +60,9 @@ func main() {
 
 	internalInformerFactory := kymaInformers.NewSharedInformerFactory(kymaClientSet, time.Second*30)
 
-	v1alpha2Controller := v1alpha2.NewController(kymaClientSet, istioNetworkingV1Interface, serviceV1Interface, authenticationV2Interface, internalInformerFactory, domainName)
+	list := os.Getenv("BLACKLISTED_SERVICES")
+
+	v1alpha2Controller := v1alpha2.NewController(kymaClientSet, istioNetworkingV1Interface, serviceV1Interface, authenticationV2Interface, internalInformerFactory, domainName, readBlacklistedServices(list))
 	internalInformerFactory.Start(stop)
 	err := v1alpha2Controller.Run(2, stop)
 	if err != nil {
@@ -126,4 +131,36 @@ func initDomainName() string {
 
 func isAuthPolicyMTLSEnabled() bool {
 	return os.Getenv("ENABLE_MTLS") == "true"
+}
+
+func getCORSConfig() istioNetworkingV1.CORSConfig {
+	allowOrigin := os.Getenv("CORS_ALLOW_ORIGIN")
+	allowMethods := os.Getenv("CORS_ALLOW_METHODS")
+	allowHeaders := os.Getenv("CORS_ALLOW_HEADERS")
+
+	return istioNetworkingV1.CORSConfig{
+		AllowOrigin:  removeEmptyStrings(splitStrings(allowOrigin)),
+		AllowMethods: removeEmptyStrings(splitStrings(allowMethods)),
+		AllowHeaders: removeEmptyStrings(splitStrings(allowHeaders)),
+	}
+}
+
+func readBlacklistedServices(list string) []string {
+	return removeEmptyStrings(splitStrings(list))
+}
+
+func splitStrings(list string) []string {
+	return strings.Split(list, ",")
+}
+
+func removeEmptyStrings(list []string) []string {
+	result := make([]string, 0)
+	for _, s := range list {
+		ts := strings.TrimSpace(s)
+		if ts != "" {
+			result = append(result, ts)
+		}
+	}
+
+	return result
 }

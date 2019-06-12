@@ -88,7 +88,7 @@
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
   ]
-  revision = "c109ba8343f521a5be658f55f51c8dacff563a24"
+  revision = "dd9f72adc14c41e129824770011f37722dc5bbff"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -392,6 +392,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c1d07a84a58e6400717f156303ea7c37f1c7d3867d8b3e6dcb336ff5284bab6f"
+  inputs-digest = "6da90b017df9a51f4971e212d61e1e78c01b6741ae2c1b92baca714430701ba7"
   solver-name = "gps-cdcl"
   solver-version = 1

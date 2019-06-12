@@ -2,6 +2,8 @@
 
 set -o errexit
 
+echo "The run.sh script is deprecated and will be removed. Use Kyma CLI instead."
+
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SCRIPTS_DIR="${CURRENT_DIR}/../scripts"
 DOMAIN="kyma.local"
@@ -16,7 +18,7 @@ source $SCRIPTS_DIR/utils.sh
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
-    
+
     key="$1"
 
     case ${key} in
@@ -64,7 +66,7 @@ if [ -z "$CR_PATH" ]; then
 
     TMPDIR=`mktemp -d "${CURRENT_DIR}/../../temp-XXXXXXXXXX"`
     CR_PATH="${TMPDIR}/installer-cr-local.yaml"
-    bash ${SCRIPTS_DIR}/create-cr.sh --output "${CR_PATH}" --domain "${DOMAIN}"
+    bash ${SCRIPTS_DIR}/create-cr.sh --output "${CR_PATH}"
 
 fi
 
