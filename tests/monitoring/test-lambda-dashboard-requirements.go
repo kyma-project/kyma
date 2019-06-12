@@ -76,12 +76,6 @@ func checkLambdaUIDashboard() {
 	}
 	log.Println("kube_deployment_status_replicas_available: Success")
 
-	err = checkMetricsAndlabels("kube_namespace_labels", "label_env")
-	if err != nil {
-		log.Fatalf("Unable to check kube_namespace_labels: %v \n", err)
-	}
-	log.Println("kube_namespace_labels: Success")
-
 	err = checkMetricsAndlabels("kube_service_labels", "namespace")
 	if err != nil {
 		log.Fatalf("Unable to check kube_service_labels: %v \n", err)

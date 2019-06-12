@@ -103,7 +103,7 @@ func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
 		return nil, err
 	}
 
-	proxy, err := makeProxy(serviceApi.TargetUrl, serviceApi.Headers, serviceApi.QueryParameters, id, p.skipVerify)
+	proxy, err := makeProxy(serviceApi.TargetUrl, serviceApi.RequestParameters, id, p.skipVerify)
 	if err != nil {
 		return nil, err
 	}

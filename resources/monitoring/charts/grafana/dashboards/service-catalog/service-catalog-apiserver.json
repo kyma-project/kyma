@@ -15,7 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1540194257160,
+  "id": 16,
+  "iteration": 1559645172234,
   "links": [],
   "panels": [
     {
@@ -297,25 +298,30 @@
       "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
-        "h": 8,
-        "w": 8,
+        "h": 7,
+        "w": 24,
         "x": 0,
         "y": 5
       },
       "id": 25,
       "legend": {
-        "avg": false,
-        "current": false,
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": false,
+        "hideZero": false,
         "max": false,
         "min": false,
+        "rightSide": true,
         "show": true,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -326,17 +332,42 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(sum(container_memory_usage_bytes{namespace=\"kyma-system\",pod_name=~\"$etcddeploy.*\"})  by (pod_name))/ 1024^2",
+          "expr": "sum by(container_name) (container_memory_usage_bytes{pod_name=~\"$etcddeploy.*\", container_name!=\"POD\"})",
           "format": "time_series",
+          "instant": false,
+          "interval": "10s",
           "intervalFactor": 1,
-          "legendFormat": "{{pod_name}}",
-          "refId": "B"
+          "legendFormat": "Current: {{ container_name }}",
+          "metric": "container_memory_usage_bytes",
+          "refId": "A",
+          "step": 15
+        },
+        {
+          "expr": "kube_pod_container_resource_requests_memory_bytes{pod=~\"$etcddeploy.*\"}",
+          "format": "time_series",
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Requests: {{ container }}",
+          "metric": "kube_pod_container_resource_requests_memory_bytes",
+          "refId": "B",
+          "step": 20
+        },
+        {
+          "expr": "kube_pod_container_resource_limits_memory_bytes{pod=~\"$etcddeploy.*\"}",
+          "format": "time_series",
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Limit: {{ container }}",
+          "metric": "kube_pod_container_resource_limits_memory_bytes",
+          "refId": "C",
+          "step": 20
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
-      "title": "[ETCD] Memory [MB]",
+      "title": "Memory Usage",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -382,24 +413,29 @@
       "fill": 1,
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 5
+        "w": 16,
+        "x": 0,
+        "y": 12
       },
       "id": 26,
       "legend": {
-        "avg": false,
-        "current": false,
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": false,
+        "hideZero": false,
         "max": false,
         "min": false,
+        "rightSide": true,
         "show": true,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -410,19 +446,41 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"kyma-system\",pod_name=~\"$etcddeploy.*\"}[1m])) by (pod_name)",
+          "expr": "sum by (container_name)(rate(container_cpu_usage_seconds_total{image!=\"\",container_name!=\"POD\",pod_name=~\"$etcddeploy.*\"}[1m]))",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "Current: {{ container_name }}",
+          "refId": "A",
+          "step": 30
+        },
+        {
+          "expr": "kube_pod_container_resource_requests_cpu_cores{pod=~\"$etcddeploy.*\"}",
           "format": "time_series",
           "instant": false,
-          "interval": "1m",
-          "intervalFactor": 1,
-          "legendFormat": "{{pod_name}}",
-          "refId": "A"
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Requests: {{ container }}",
+          "metric": "kube_pod_container_resource_requests_cpu_cores",
+          "refId": "B",
+          "step": 20
+        },
+        {
+          "expr": "kube_pod_container_resource_limits_cpu_cores{pod=~\"$etcddeploy.*\"}",
+          "format": "time_series",
+          "instant": false,
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Limit: {{ container }}",
+          "metric": "kube_pod_container_resource_limits_memory_bytes",
+          "refId": "C",
+          "step": 20
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
-      "title": "[ETCD] CPU",
+      "title": "CPU Usage",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -470,7 +528,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 5
+        "y": 12
       },
       "id": 27,
       "legend": {
@@ -486,6 +544,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -505,272 +564,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
-      "timeShift": null,
-      "title": "[ETCD] Network in [kB/s]",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 13
-      },
-      "id": 38,
-      "panels": [],
-      "title": "[CONTROLLER] Pod Metrics",
-      "type": "row"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 0,
-        "y": 14
-      },
-      "id": 10,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(container_memory_usage_bytes{namespace=\"kyma-system\",pod_name=~\"$controllerdeploy.*\"}) / 1024^2",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "Memory [GB]",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Memory [MB]",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 14
-      },
-      "id": 8,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"kyma-system\",pod_name=~\"$controllerdeploy.*\"}[1m]))",
-          "format": "time_series",
-          "instant": false,
-          "interval": "1m",
-          "intervalFactor": 1,
-          "legendFormat": "CPU",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "CPU",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 14
-      },
-      "id": 12,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum(rate(container_network_receive_bytes_total{namespace=\"kyma-system\",pod_name=~\"$controllerdeploy.*\"}[3m]))",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Network in [kB/s]",
       "tooltip": {
@@ -815,7 +609,334 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 20
+      },
+      "id": 38,
+      "panels": [],
+      "title": "[CONTROLLER] Pod Metrics",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "decimals": null,
+      "fill": 1,
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "id": 10,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": false,
+        "hideZero": false,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "paceLength": 10,
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by(container_name) (container_memory_usage_bytes{pod_name=~\"$controllerdeploy.*\", container_name!=\"POD\"}) / 1024^2",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "10s",
+          "intervalFactor": 1,
+          "legendFormat": "Current: {{ container_name }} [GB]",
+          "metric": "container_memory_usage_bytes",
+          "refId": "A",
+          "step": 15
+        },
+        {
+          "expr": "kube_pod_container_resource_requests_memory_bytes{pod=~\"$controllerdeploy.*\"}",
+          "format": "time_series",
+          "instant": false,
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Requests: {{ container }}",
+          "metric": "kube_pod_container_resource_requests_memory_bytes",
+          "refId": "B",
+          "step": 20
+        },
+        {
+          "expr": "kube_pod_container_resource_limits_memory_bytes{pod=~\"$controllerdeploy.*\"}",
+          "format": "time_series",
+          "instant": false,
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Limit: {{ container }}",
+          "metric": "kube_pod_container_resource_limits_memory_bytes",
+          "refId": "C",
+          "step": 20
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Memory Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fill": 1,
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 29
+      },
+      "id": 8,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": false,
+        "hideZero": false,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "paceLength": 10,
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by (container_name)(rate(container_cpu_usage_seconds_total{image!=\"\",container_name!=\"POD\",pod_name=~\"$controllerdeploy.*\"}[1m]))",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "Current: {{ container_name }}",
+          "refId": "A",
+          "step": 30
+        },
+        {
+          "expr": "kube_pod_container_resource_requests_cpu_cores{pod=~\"$controllerdeploy.*\"}",
+          "format": "time_series",
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Requests: {{ container }}",
+          "metric": "kube_pod_container_resource_requests_cpu_cores",
+          "refId": "B",
+          "step": 20
+        },
+        {
+          "expr": "kube_pod_container_resource_limits_cpu_cores{pod=~\"$controllerdeploy.*\"}",
+          "format": "time_series",
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Limit: {{ container }}",
+          "metric": "kube_pod_container_resource_limits_memory_bytes",
+          "refId": "C",
+          "step": 20
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "CPU Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fill": 1,
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 29
+      },
+      "id": 12,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "paceLength": 10,
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum(rate(container_network_receive_bytes_total{namespace=\"kyma-system\",pod_name=~\"$controllerdeploy.*\"}[3m]))",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Network in [kB/s]",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 37
       },
       "id": 31,
       "panels": [],
@@ -834,7 +955,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 23
+        "y": 38
       },
       "id": 34,
       "legend": {
@@ -852,6 +973,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -888,6 +1010,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "No. of classes and plans by Broker",
       "tooltip": {
@@ -895,7 +1018,6 @@
         "sort": 0,
         "value_type": "individual"
       },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -941,7 +1063,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 23
+        "y": 38
       },
       "id": 33,
       "legend": {
@@ -959,6 +1081,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -979,6 +1102,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Requests by API Method",
       "tooltip": {
@@ -986,7 +1110,6 @@
         "sort": 0,
         "value_type": "individual"
       },
-      "transparent": false,
       "type": "graph",
       "xaxis": {
         "buckets": null,
@@ -1024,7 +1147,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 47
       },
       "id": 29,
       "panels": [],
@@ -1040,24 +1163,29 @@
       "fill": 1,
       "gridPos": {
         "h": 8,
-        "w": 8,
+        "w": 24,
         "x": 0,
-        "y": 33
+        "y": 48
       },
       "id": 9,
       "legend": {
-        "avg": false,
-        "current": false,
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": false,
+        "hideZero": false,
         "max": false,
         "min": false,
-        "show": false,
+        "rightSide": true,
+        "show": true,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1068,17 +1196,42 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(container_memory_usage_bytes{namespace=\"kyma-system\",pod_name=~\"$apiserverdeploy.*\"}) / 1024^2",
+          "expr": "sum by(container_name) (container_memory_usage_bytes{pod_name=~\"$apiserverdeploy.*\", container_name!=\"POD\"}) / 1024^2",
           "format": "time_series",
+          "instant": false,
+          "interval": "10s",
           "intervalFactor": 1,
-          "legendFormat": "Memory [GB]",
-          "refId": "B"
+          "legendFormat": "Current: {{ container_name }} [GB]",
+          "metric": "container_memory_usage_bytes",
+          "refId": "A",
+          "step": 15
+        },
+        {
+          "expr": "kube_pod_container_resource_requests_memory_bytes{pod=~\"$apiserverdeploy.*\"}",
+          "format": "time_series",
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Requests: {{ container }}",
+          "metric": "kube_pod_container_resource_requests_memory_bytes",
+          "refId": "B",
+          "step": 20
+        },
+        {
+          "expr": "kube_pod_container_resource_limits_memory_bytes{pod=~\"$apiserverdeploy.*\"}",
+          "format": "time_series",
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Limit: {{ container }}",
+          "metric": "kube_pod_container_resource_limits_memory_bytes",
+          "refId": "C",
+          "step": 20
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
-      "title": "Memory [MB]",
+      "title": "Memory Usage",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1124,24 +1277,29 @@
       "fill": 1,
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 33
+        "w": 16,
+        "x": 0,
+        "y": 56
       },
       "id": 7,
       "legend": {
-        "avg": false,
-        "current": false,
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "hideEmpty": false,
+        "hideZero": false,
         "max": false,
         "min": false,
-        "show": false,
+        "rightSide": true,
+        "show": true,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1152,19 +1310,39 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"kyma-system\",pod_name=~\"$apiserverdeploy.*\"}[1m]))",
+          "expr": "sum by (container_name)(rate(container_cpu_usage_seconds_total{image!=\"\",container_name!=\"POD\",pod_name=~\"$apiserverdeploy.*\"}[1m]))",
           "format": "time_series",
-          "instant": false,
-          "interval": "1m",
-          "intervalFactor": 1,
-          "legendFormat": "CPU",
-          "refId": "A"
+          "intervalFactor": 2,
+          "legendFormat": "Current: {{ container_name }}",
+          "refId": "A",
+          "step": 30
+        },
+        {
+          "expr": "kube_pod_container_resource_requests_cpu_cores{pod=~\"$apiserverdeploy.*\"}",
+          "format": "time_series",
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Requests: {{ container }}",
+          "metric": "kube_pod_container_resource_requests_cpu_cores",
+          "refId": "B",
+          "step": 20
+        },
+        {
+          "expr": "kube_pod_container_resource_limits_cpu_cores{pod=~\"$apiserverdeploy.*\"}",
+          "format": "time_series",
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Limit: {{ container }}",
+          "metric": "kube_pod_container_resource_limits_memory_bytes",
+          "refId": "C",
+          "step": 20
         }
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
-      "title": "CPU",
+      "title": "CPU Usage",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1212,7 +1390,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 33
+        "y": 56
       },
       "id": 11,
       "legend": {
@@ -1228,6 +1406,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1246,6 +1425,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Network in [kB/s]",
       "tooltip": {
@@ -1290,7 +1470,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 41
+        "y": 64
       },
       "id": 42,
       "panels": [],
@@ -1308,7 +1488,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 42
+        "y": 65
       },
       "id": 16,
       "legend": {
@@ -1324,6 +1504,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1343,6 +1524,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "GC duration [s]",
       "tooltip": {
@@ -1395,7 +1577,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 42
+        "y": 65
       },
       "id": 24,
       "isNew": true,
@@ -1412,6 +1594,7 @@
       "linewidth": 2,
       "links": [],
       "nullPointMode": "connected",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1433,6 +1616,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "open fds",
       "tooltip": {
@@ -1483,7 +1667,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 42
+        "y": 65
       },
       "id": 18,
       "legend": {
@@ -1499,6 +1683,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1518,6 +1703,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Gothreads",
       "tooltip": {
@@ -1570,7 +1756,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 50
+        "y": 73
       },
       "id": 22,
       "isNew": true,
@@ -1587,6 +1773,7 @@
       "linewidth": 2,
       "links": [],
       "nullPointMode": "connected",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1641,6 +1828,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "go memstats",
       "tooltip": {
@@ -1691,7 +1879,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 50
+        "y": 73
       },
       "id": 17,
       "legend": {
@@ -1707,6 +1895,7 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "paceLength": 10,
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1726,6 +1915,7 @@
       ],
       "thresholds": [],
       "timeFrom": null,
+      "timeRegions": [],
       "timeShift": null,
       "title": "Goroutines",
       "tooltip": {
@@ -1765,7 +1955,8 @@
       }
     }
   ],
-  "schemaVersion": 16,
+  "refresh": false,
+  "schemaVersion": 18,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -1786,6 +1977,7 @@
           }
         ],
         "query": "service-catalog-apiserver",
+        "skipUrlSync": false,
         "type": "constant"
       },
       {
@@ -1804,6 +1996,7 @@
           }
         ],
         "query": "service-catalog-controller-manager",
+        "skipUrlSync": false,
         "type": "constant"
       },
       {
@@ -1822,6 +2015,7 @@
           }
         ],
         "query": "service-catalog-etcd-stateful-client",
+        "skipUrlSync": false,
         "type": "constant"
       },
       {
@@ -1840,6 +2034,7 @@
           }
         ],
         "query": "service-catalog-etcd-stateful",
+        "skipUrlSync": false,
         "type": "constant"
       }
     ]

@@ -32,20 +32,17 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 		for _, entry := range service.Entries {
 			if entry.Type == specAPIType {
 				api = &ServiceAPI{
-					GatewayURL:       entry.GatewayUrl,
-					AccessLabel:      entry.AccessLabel,
-					TargetUrl:        entry.TargetUrl,
-					SpecificationUrl: entry.SpecificationUrl,
-					ApiType:          entry.ApiType,
-					Headers:          entry.Headers,
-					QueryParameters:  entry.QueryParameters,
+					GatewayURL:                  entry.GatewayUrl,
+					AccessLabel:                 entry.AccessLabel,
+					TargetUrl:                   entry.TargetUrl,
+					SpecificationUrl:            entry.SpecificationUrl,
+					ApiType:                     entry.ApiType,
+					RequestParametersSecretName: entry.RequestParametersSecretName,
 					Credentials: Credentials{
 						AuthenticationUrl: entry.Credentials.AuthenticationUrl,
 						CSRFInfo:          fromK8sCSRFInfo(entry.Credentials.CSRFInfo),
 						SecretName:        entry.Credentials.SecretName,
 						Type:              entry.Credentials.Type,
-						Headers:           entry.Credentials.Headers,
-						QueryParameters:   entry.Credentials.QueryParameters,
 					},
 				}
 			} else if entry.Type == specEventsType {
@@ -87,21 +84,18 @@ func convertToK8sType(service Service) v1alpha1.Service {
 		}
 
 		apiEntry := v1alpha1.Entry{
-			Type:             specAPIType,
-			GatewayUrl:       service.API.GatewayURL,
-			AccessLabel:      service.API.AccessLabel,
-			TargetUrl:        service.API.TargetUrl,
-			SpecificationUrl: service.API.SpecificationUrl,
-			ApiType:          service.API.ApiType,
-			Headers:          service.API.Headers,
-			QueryParameters:  service.API.QueryParameters,
+			Type:                        specAPIType,
+			GatewayUrl:                  service.API.GatewayURL,
+			AccessLabel:                 service.API.AccessLabel,
+			TargetUrl:                   service.API.TargetUrl,
+			SpecificationUrl:            service.API.SpecificationUrl,
+			ApiType:                     service.API.ApiType,
+			RequestParametersSecretName: service.API.RequestParametersSecretName,
 			Credentials: v1alpha1.Credentials{
 				AuthenticationUrl: service.API.Credentials.AuthenticationUrl,
 				CSRFInfo:          toK8sCSRFInfo(service.API.Credentials.CSRFInfo),
 				SecretName:        service.API.Credentials.SecretName,
 				Type:              service.API.Credentials.Type,
-				Headers:           service.API.Credentials.Headers,
-				QueryParameters:   service.API.Credentials.QueryParameters,
 			},
 		}
 		serviceEntries = append(serviceEntries, apiEntry)

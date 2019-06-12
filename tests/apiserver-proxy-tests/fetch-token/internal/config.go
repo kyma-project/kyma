@@ -2,15 +2,17 @@ package internal
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
 )
 
 type envConfig struct {
-	Domain       string `envconfig:"default=kyma.local"`
-	UserEmail    string
-	UserPassword string
+	Domain        string `envconfig:"default=kyma.local"`
+	UserEmail     string
+	UserPassword  string
+	ClientTimeout time.Duration `envconfig:"default=10s"` //Don't forget the unit!
 }
 
 type Config struct {
@@ -22,6 +24,7 @@ type idProviderConfig struct {
 	DexConfig       dexConfig
 	ClientConfig    clientConfig
 	UserCredentials userCredentials
+	RetryConfig     retryConfig
 }
 
 type dexConfig struct {
@@ -31,8 +34,14 @@ type dexConfig struct {
 }
 
 type clientConfig struct {
-	ID          string
-	RedirectUri string
+	ID             string
+	RedirectUri    string
+	TimeoutSeconds time.Duration
+}
+
+type retryConfig struct {
+	MaxAttempts uint
+	Delay       time.Duration
 }
 
 type userCredentials struct {
@@ -56,8 +65,13 @@ func LoadConfig() (Config, error) {
 			TokenEndpoint:     fmt.Sprintf("https://dex.%s/token", env.Domain),
 		},
 		ClientConfig: clientConfig{
-			ID:          "kyma-client",
-			RedirectUri: "http://127.0.0.1:5555/callback",
+			ID:             "kyma-client",
+			RedirectUri:    "http://127.0.0.1:5555/callback",
+			TimeoutSeconds: env.ClientTimeout,
+		},
+		RetryConfig: retryConfig{
+			MaxAttempts: 4,
+			Delay:       3 * time.Second,
 		},
 	}
 

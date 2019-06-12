@@ -4,8 +4,8 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	"github.com/stretchr/testify/mock"
 	svcatSettings "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/settings/v1alpha1"
+	"github.com/stretchr/testify/mock"
 )
 
 func (_m *KubernetesResourceSupervisor) ExpectOnEnsureLabelsCreated(ns string, resourceName string, usageName string, labels map[string]string) *mock.Call {
@@ -42,5 +42,20 @@ func (_m *AppliedSpecStorage) ExpectOnGet(namespace, name string, spec *controll
 
 func (_m *AppliedSpecStorage) ExpectOnUpsert(bUsage *v1alpha1.ServiceBindingUsage, applied bool) *mock.Call {
 	return _m.On("Upsert", bUsage, applied).Return(nil)
+}
 
+func (_m *BusinessMetric) ExpectOnRecordError(key string) *mock.Call {
+	return _m.On("RecordError", key).Return(nil)
+}
+
+func (_m *BusinessMetric) ExpectOnIncrementQueueLength(key string) *mock.Call {
+	return _m.On("IncrementQueueLength", key).Return(nil)
+}
+
+func (_m *BusinessMetric) ExpectOnDecrementQueueLength(key string) *mock.Call {
+	return _m.On("DecrementQueueLength", key).Return(nil)
+}
+
+func (_m *BusinessMetric) ExpectOnRecordLatency(key string) *mock.Call {
+	return _m.On("RecordLatency", key, mock.Anything).Return(nil)
 }
