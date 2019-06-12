@@ -81,7 +81,6 @@
   version = "v1.0.1"
 
 [[projects]]
-  branch = "4204-Operator"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -89,8 +88,7 @@
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
   ]
-  revision = "d0b04e4a4e2d853ab9f52f6926e21055a926c029"
-  source = "github.com/franpog859/kyma"
+  revision = "dd9f72adc14c41e129824770011f37722dc5bbff"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -394,6 +392,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "60cba71648f490d1bc103e69643b911a349ca41b07e8a77a902f45480fe81970"
+  inputs-digest = "6da90b017df9a51f4971e212d61e1e78c01b6741ae2c1b92baca714430701ba7"
   solver-name = "gps-cdcl"
   solver-version = 1
