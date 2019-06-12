@@ -1,3 +1,4 @@
+{{- $version :=  semver .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -8,7 +9,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   annotations:
-    {{- toYaml .Values.promtail.annotations | nindent 4 }}
+        {{- toYaml .Values.promtail.annotations | nindent 4 }}
 spec:
   selector:
     matchLabels:
@@ -16,39 +17,45 @@ spec:
       release: {{ .Release.Name }}
   updateStrategy:
     type: {{ .Values.promtail.deploymentStrategy }}
-  {{- if ne .Values.promtail.deploymentStrategy "RollingUpdate" }}
+          {{- if ne .Values.promtail.deploymentStrategy "RollingUpdate" }}
     rollingUpdate: null
-  {{- end }}
+        {{- end }}
   template:
     metadata:
       labels:
         app: {{ template "promtail.name" . }}
         release: {{ .Release.Name }}
       annotations:
-        {{ toYaml .Values.promtail.podAnnotations | nindent 8 }}
+          {{ toYaml .Values.promtail.podAnnotations | nindent 8 }}
     spec:
       serviceAccountName: {{ template "promtail.serviceAccountName" . }}
-    {{- if .Values.promtail.priorityClassName }}
+            {{- if .Values.promtail.priorityClassName }}
       priorityClassName: {{ .Values.promtail.priorityClassName }}
-    {{- end }}
+            {{- end }}
       containers:
         - name: promtail
           image: "{{ .Values.promtail.image.repository }}:{{ .Values.promtail.image.tag }}"
           imagePullPolicy: {{ .Values.promtail.image.pullPolicy }}
           args:
-            - "-config.file=/etc/promtail/{{ .Values.global.logging.promtail.config.name }}"
+            {{- if (semverCompare ">=1.14.0" .Capabilities.KubeVersion.GitVersion) }}
+            - "-config.file=/etc/promtail/promtail-k8s-1-14.yaml"
+            {{- else if and (semverCompare ">=1.12.6-gke" .Capabilities.KubeVersion.GitVersion) (contains "gke" $version.Prerelease) }}
+            - "-config.file=/etc/promtail/promtail-k8s-1-14.yaml"
+            {{- else }}
+            - "-config.file=/etc/promtail/promtail.yaml"
+            {{- end }}
             - "-client.url=http://{{ template "loki.fullname" . }}:{{ .Values.loki.service.port }}/api/prom/push"
           volumeMounts:
             - name: config
               mountPath: /etc/promtail
-            {{- with .Values.promtail.volumeMounts }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
+                      {{- with .Values.promtail.volumeMounts }}
+                      {{- toYaml . | nindent 12 }}
+                {{- end }}
           env:
-          - name: HOSTNAME
-            valueFrom:
-              fieldRef:
-                fieldPath: spec.nodeName
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
           ports:
             - containerPort: 80
               name: http-metrics
@@ -56,23 +63,21 @@ spec:
             privileged: true
             runAsUser: 0
           livenessProbe:
-            {{- toYaml .Values.promtail.livenessProbe | nindent 12 }}
+                {{- toYaml .Values.promtail.livenessProbe | nindent 12 }}
           readinessProbe:
-            {{- toYaml .Values.promtail.readinessProbe | nindent 12 }}
+                {{- toYaml .Values.promtail.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.promtail.resources | nindent 12 }}
       nodeSelector:
-        {{- toYaml .Values.promtail.nodeSelector | nindent 8 }}
+            {{- toYaml .Values.promtail.nodeSelector | nindent 8 }}
       affinity:
-        {{- toYaml .Values.promtail.affinity | nindent 8 }}
+            {{- toYaml .Values.promtail.affinity | nindent 8 }}
       tolerations:
-        {{- toYaml .Values.promtail.tolerations | nindent 8 }}
+            {{- toYaml .Values.promtail.tolerations | nindent 8 }}
       volumes:
         - name: config
           configMap:
             name: {{ template "promtail.fullname" . }}
-        {{- with .Values.promtail.volumes }}
-        {{- toYaml . | nindent 8 }}
+                  {{- with .Values.promtail.volumes }}
+              {{- toYaml . | nindent 8 }}
         {{- end }}
-
-
