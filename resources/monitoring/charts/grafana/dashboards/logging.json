@@ -14,45 +14,11 @@
   },
   "description": "Monitoring for logging",
   "editable": true,
-  "gnetId": 10004,
   "graphTooltip": 1,
+  "id": 30,
   "links": [],
   "panels": [
     {
-      "alert": {
-        "conditions": [
-          {
-            "evaluator": {
-              "params": [
-                1024
-              ],
-              "type": "gt"
-            },
-            "operator": {
-              "type": "and"
-            },
-            "query": {
-              "params": [
-                "A",
-                "5m",
-                "now"
-              ]
-            },
-            "reducer": {
-              "params": [],
-              "type": "avg"
-            },
-            "type": "query"
-          }
-        ],
-        "executionErrorState": "alerting",
-        "for": "5m",
-        "frequency": "1m",
-        "handler": 1,
-        "name": "Loki Kilobytes per second alert",
-        "noDataState": "no_data",
-        "notifications": []
-      },
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
@@ -69,14 +35,14 @@
       "id": 2,
       "legend": {
         "alignAsTable": true,
-        "avg": false,
+        "avg": true,
         "current": true,
         "max": false,
         "min": false,
-        "rightSide": true,
+        "rightSide": false,
         "show": true,
-        "sort": "current",
-        "sortDesc": false,
+        "sort": null,
+        "sortDesc": null,
         "total": false,
         "values": true
       },
@@ -94,25 +60,17 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(loki_distributor_bytes_received_total[1s])/1024",
+          "expr": "rate(loki_distributor_bytes_received_total[1m])/1024",
           "format": "time_series",
           "hide": false,
           "instant": false,
           "interval": "1m",
           "intervalFactor": 1,
-          "legendFormat": "Kilobytes per second",
+          "legendFormat": "kilobytes/sec",
           "refId": "A"
         }
       ],
-      "thresholds": [
-        {
-          "colorMode": "critical",
-          "fill": true,
-          "line": true,
-          "op": "gt",
-          "value": 1024
-        }
-      ],
+      "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
@@ -136,7 +94,7 @@
           "label": "",
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -154,41 +112,9 @@
       }
     },
     {
-      "alert": {
-        "conditions": [
-          {
-            "evaluator": {
-              "params": [
-                100
-              ],
-              "type": "gt"
-            },
-            "operator": {
-              "type": "and"
-            },
-            "query": {
-              "params": [
-                "A",
-                "5m",
-                "now"
-              ]
-            },
-            "reducer": {
-              "params": [],
-              "type": "avg"
-            },
-            "type": "query"
-          }
-        ],
-        "executionErrorState": "alerting",
-        "for": "5m",
-        "frequency": "1m",
-        "handler": 1,
-        "name": "Loki request duration average alert",
-        "noDataState": "no_data",
-        "notifications": []
+      "aliasColors": {
+        "requests/sec": "blue"
       },
-      "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
@@ -204,11 +130,11 @@
       "id": 7,
       "legend": {
         "alignAsTable": true,
-        "avg": false,
+        "avg": true,
         "current": true,
         "max": false,
         "min": false,
-        "rightSide": true,
+        "rightSide": false,
         "show": true,
         "total": false,
         "values": true
@@ -227,27 +153,19 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(loki_request_duration_seconds_sum)",
+          "expr": "sum(rate(loki_request_duration_seconds_sum[1m]))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "request duration",
+          "legendFormat": "requests/sec",
           "refId": "B"
         }
       ],
-      "thresholds": [
-        {
-          "colorMode": "critical",
-          "fill": true,
-          "line": true,
-          "op": "gt",
-          "value": 100
-        }
-      ],
+      "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Loki request duration average",
+      "title": "Loki request per second",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -263,11 +181,11 @@
       },
       "yaxes": [
         {
-          "format": "ms",
+          "format": "reqps",
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
