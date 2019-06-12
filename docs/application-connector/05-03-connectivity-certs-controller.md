@@ -15,4 +15,4 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **deployment.args.minimalConnectionSyncPeriod** | Specifies the minimum period of time in seconds between particular attempts to synchronize with the Central Connector Service. | `300` |
+| **deployment.args.minimalConnectionSyncPeriod** | Specifies a minimum period of time between particular attempts to synchronize with the Central Connector Service. It is provided in seconds. | `300` |

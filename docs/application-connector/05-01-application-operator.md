@@ -15,4 +15,4 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **controller.args.installationTimeout** | Specifies the period of time given for Application Gateway and Event Service installation. The services are required for an application to be operational. | `240` |
+| **controller.args.installationTimeout** | Specifies a period of time provided for Application Gateway and Event Service installation. The services are required for an Application to be operational. The value is provided in seconds.| `240` |
