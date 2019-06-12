@@ -143,7 +143,7 @@ This is an example of the `api` section of the request body for an API secured w
 ### Use headers and query parameters for custom authentication
 
 You can specify additional headers and query parameters that will be injected to requests to the target API.
-Headers and query parameters are both stored in the Kubernetes Secret, therefor they can be used for custom authentication methods.  
+The Kubernetes Secret stores headers and query parameters which you can use for custom authentication methods.  
 
 This is an example of the **api** section of the request body for an API secured with Basic Authentication. It is enriched with the **custom-header** header with the `foo` value, and the **param** query parameter with the `bar` value.
 
