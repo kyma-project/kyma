@@ -43,13 +43,13 @@ func (_m *Repository) Delete(name string) apperrors.AppError {
 	return r0
 }
 
-// Get provides a mock function with given fields: application, name
-func (_m *Repository) Get(application string, name string) (strategy.SecretData, apperrors.AppError) {
-	ret := _m.Called(application, name)
+// Get provides a mock function with given fields: name
+func (_m *Repository) Get(name string) (strategy.SecretData, apperrors.AppError) {
+	ret := _m.Called(name)
 
 	var r0 strategy.SecretData
-	if rf, ok := ret.Get(0).(func(string, string) strategy.SecretData); ok {
-		r0 = rf(application, name)
+	if rf, ok := ret.Get(0).(func(string) strategy.SecretData); ok {
+		r0 = rf(name)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(strategy.SecretData)
@@ -57,8 +57,8 @@ func (_m *Repository) Get(application string, name string) (strategy.SecretData,
 	}
 
 	var r1 apperrors.AppError
-	if rf, ok := ret.Get(1).(func(string, string) apperrors.AppError); ok {
-		r1 = rf(application, name)
+	if rf, ok := ret.Get(1).(func(string) apperrors.AppError); ok {
+		r1 = rf(name)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(apperrors.AppError)

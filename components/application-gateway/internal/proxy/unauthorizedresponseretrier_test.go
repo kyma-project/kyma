@@ -259,7 +259,7 @@ func newUpdateCacheEntryFunction(t *testing.T, url string, strategy authorizatio
 	return func(id string) (*CacheEntry, apperrors.AppError) {
 		assert.Equal(t, "id1", id)
 
-		proxy, err := makeProxy(url, nil, nil, "id1", true)
+		proxy, err := makeProxy(url, nil, "id1", true)
 		require.NoError(t, err)
 
 		return &CacheEntry{
