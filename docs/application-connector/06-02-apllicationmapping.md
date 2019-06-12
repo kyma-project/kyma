@@ -43,8 +43,8 @@ This table lists all the possible parameters of a given resource together with t
 |----------|:-------------:|------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR and the App. |
 | **metadata.namespace** |    **YES**   | Specifies the Namespace in which the App is enabled. |
-| **spec.services** |    **NO**   | Specifies IDs of enabled services. If the list is specified, only the selected services are enabled. If the list is empty, all services of the Application are enabled.|
-
+| **spec.services[]** |    **NO**   | Lists enabled services. If the list is specified, only the selected services are enabled. If the list is empty, all services of the Application are enabled.|
+| **spec.services[].id** |    **NO**   | Specifies the ID of the enabled service.
 
 ## Related resources and components
 
