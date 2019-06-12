@@ -1,61 +1,62 @@
-# ---
-# apiVersion: v1
-# kind: ServiceAccount
-# metadata:
-#   name: migration-job
-#   annotations:
-#     "helm.sh/hook": pre-install,pre-upgrade
-#     "helm.sh/hook-weight": "1"
-# ---
-# apiVersion: rbac.authorization.k8s.io/v1
-# kind: Role
-# metadata:
-#   name: migration-job
-#   annotations:
-#     "helm.sh/hook": pre-install,pre-upgrade
-#     "helm.sh/hook-weight": "1"
-# rules:
-# - apiGroups: ["networking.istio.io"]
-#   resources: ["destinationrules"]
-#   verbs: ["get", "list", "delete"]
-# ---
-# apiVersion: rbac.authorization.k8s.io/v1
-# kind: RoleBinding
-# metadata:
-#   name: migration-job
-#   annotations:
-#     "helm.sh/hook": pre-install,pre-upgrade
-#     "helm.sh/hook-weight": "1"
-# roleRef:
-#   apiGroup: rbac.authorization.k8s.io
-#   kind: Role
-#   name: migration-job
-# subjects:
-# - kind: ServiceAccount
-#   name: migration-job
-#   namespace: {{ .Release.Namespace }}
-# ---
-# apiVersion: batch/v1
-# kind: Job
-# metadata:
-#   name: migration-job
-#   annotations:
-#     "helm.sh/hook": pre-install,pre-upgrade
-#     "helm.sh/hook-weight": "10"
-# spec:
-#   backoffLimit: 1
-#   template:
-#     metadata:
-#       name: migration-job
-#     spec:
-#       serviceAccountName: migration-job
-#       restartPolicy: OnFailure
-#       containers:
-#       - name: kyma-ns-label
-#         image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
-#         command:
-#           - /bin/bash
-#           - -c
-#           - |
-#             kubectl delete -n {{ .Release.Namespace }} DestinationRule istio-ingressgateway --ignore-not-found=true
-#             kubectl delete -n {{ .Release.Namespace }} DestinationRule tiller-deploy --ignore-not-found=true
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: migration-job
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: migration-job
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1"
+rules:
+- apiGroups: ["networking.istio.io"]
+  resources: ["destinationrules"]
+  verbs: ["get", "list", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: migration-job
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: migration-job
+subjects:
+- kind: ServiceAccount
+  name: migration-job
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migration-job
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "10"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: migration-job
+    spec:
+      serviceAccountName: migration-job
+      restartPolicy: OnFailure
+      containers:
+      - name: kyma-ns-label
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+        command:
+          - /bin/bash
+          - -c
+          - |
+            kubectl delete -n {{ .Release.Namespace }} DestinationRule istio-ingressgateway --ignore-not-found=true
+            kubectl delete -n {{ .Release.Namespace }} DestinationRule tiller-deploy --ignore-not-found=true
