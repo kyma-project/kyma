@@ -56,8 +56,8 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	appBrokerTest, err := NewAppBrokerTest()
 	fatalOnError(t, err, "while creating structure for AppBroker test")
 
-	// helmBrokerTest, err := NewHelmBrokerTest()
-	// fatalOnError(t, err, "while creating structure for HelmBroker test")
+	helmBrokerTest, err := NewHelmBrokerTest()
+	fatalOnError(t, err, "while creating structure for HelmBroker test")
 
 	// scAddonsTest, err := NewServiceCatalogAddonsTest()
 	// fatalOnError(t, err, "while creating structure for ScAddons test")
@@ -86,7 +86,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		// myAssetStoreTest,
 		appBrokerTest,
 		// scAddonsTest,
-		// helmBrokerTest,
+		helmBrokerTest,
 		// myNamespaceControllerTest,
 		// apiControllerTest,
 		// myMicroFrontendTest,
@@ -143,11 +143,11 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 
 		Convey("Check backup status", func() {
 
-			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 20*time.Minute)
+			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 35*time.Minute)
 			myBackupClient.DescribeBackup(systemBackupName)
 			So(err, ShouldBeNil)
 
-			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 20*time.Minute)
+			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 35*time.Minute)
 			myBackupClient.DescribeBackup(allBackupName)
 			So(err, ShouldBeNil)
 
@@ -168,11 +168,11 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 					err := myBackupClient.RestoreBackup(allBackupName)
 					So(err, ShouldBeNil)
 
-					err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 15*time.Minute)
+					err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 25*time.Minute)
 					myBackupClient.DescribeRestore(systemBackupName)
 					So(err, ShouldBeNil)
 
-					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 15*time.Minute)
+					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 25*time.Minute)
 					myBackupClient.DescribeRestore(allBackupName)
 					So(err, ShouldBeNil)
 
