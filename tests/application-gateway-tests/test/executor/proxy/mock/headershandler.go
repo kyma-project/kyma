@@ -8,26 +8,26 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type queryParamsHandler struct {
+type headersHandler struct {
 	logger *log.Entry
 }
 
-func NewQueryParamsHandler() *queryParamsHandler {
-	return &queryParamsHandler{
+func NewHeadersHandler() *headersHandler {
+	return &headersHandler{
 		logger: log.WithField("Handler", "Headers"),
 	}
 }
 
-func (qph *queryParamsHandler) RequestHandler(w http.ResponseWriter, r *http.Request) {
+func (h *headersHandler) RequestHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	expectedParam := vars["param"]
-	expectedParamValue := vars["value"]
-	qph.logger.Infof("Handling request. Expected: param: %s, with value: %s", expectedParam, expectedParamValue)
+	expectedHeader := vars["header"]
+	expectedHeaderValue := vars["value"]
+	h.logger.Infof("Handling request. Expected: param: %s, with value: %s", expectedHeader, expectedHeaderValue)
 
-	paramValue := r.URL.Query().Get(expectedParam)
+	headerValue := r.Header.Get(expectedHeader)
 
-	if expectedParamValue != paramValue {
-		qph.logger.Errorf("Invalid query parameter value provided")
+	if expectedHeaderValue != headerValue {
+		h.logger.Errorf("Invalid header value provided")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

@@ -19,22 +19,15 @@ import (
 
 func TestNamespacesService_List(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		labelsWithEnvTrue := map[string]string{
+		labels := map[string]string{
 			"test": "test",
 			"env":  "true",
 		}
-		labelsWithEnvFalse := map[string]string{
-			"test": "test",
-			"env":  "false",
-		}
-		labelsWithoutEnv := map[string]string{
-			"test": "test",
-		}
+		emptyLabels := map[string]string{}
 
-		namespace1 := fixNamespace("namespace-name", labelsWithEnvTrue)
-		namespace2 := fixNamespace("namespace-name-2", labelsWithEnvFalse)
-		namespace3 := fixNamespace("namespace-name-3", labelsWithoutEnv)
-		fixedInformer, _ := fixNamespaceInformer(namespace1, namespace2, namespace3)
+		namespace1 := fixNamespace("namespace-name", labels)
+		namespace2 := fixNamespace("namespace-name-2", emptyLabels)
+		fixedInformer, _ := fixNamespaceInformer(namespace1, namespace2)
 		svc, err := k8s.NewNamespaceService(fixedInformer, nil)
 		require.NoError(t, err)
 
@@ -43,17 +36,12 @@ func TestNamespacesService_List(t *testing.T) {
 		namespaces, err := svc.List()
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []*v1.Namespace{
-			namespace1,
+			namespace1, namespace2,
 		}, namespaces)
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		labelsWithoutEnv := map[string]string{
-			"test": "test",
-		}
-
-		namespace := fixNamespace("namespace-name", labelsWithoutEnv)
-		fixedInformer, _ := fixNamespaceInformer(namespace)
+		fixedInformer, _ := fixNamespaceInformer()
 		svc, err := k8s.NewNamespaceService(fixedInformer, nil)
 		require.NoError(t, err)
 

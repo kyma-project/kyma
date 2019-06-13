@@ -2,6 +2,8 @@
 
 set -o errexit
 
+echo "The installer.sh script is deprecated and will be removed. Use Kyma CLI instead."
+
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RESOURCES_DIR="${CURRENT_DIR}/../resources"
 INSTALLER="${RESOURCES_DIR}/installer.yaml"

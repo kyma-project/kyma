@@ -55,16 +55,18 @@ func TestProxy(t *testing.T) {
 
 		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
-		additionalQueryParams := map[string][]string{
-			"param1": []string{"param-value-1"},
-			"param2": []string{"param-value-2.1", "param-value-2.2"},
+		requestParameters := &metadatamodel.RequestParameters{
+			QueryParameters: &map[string][]string{
+				"param1": []string{"param-value-1"},
+				"param2": []string{"param-value-2.1", "param-value-2.2"},
+			},
 		}
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
-			TargetUrl:       ts.URL,
-			Credentials:     credentials,
-			QueryParameters: &additionalQueryParams,
+			TargetUrl:         ts.URL,
+			Credentials:       credentials,
+			RequestParameters: requestParameters,
 		}, nil).Once()
 
 		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
@@ -111,16 +113,18 @@ func TestProxy(t *testing.T) {
 
 		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
-		additionalHeaders := map[string][]string{
-			"X-Custom1": []string{"custom-value-1"},
-			"X-Custom2": []string{"custom-value-2.1", "custom-value-2.2"},
+		requestParameters := &metadatamodel.RequestParameters{
+			Headers: &map[string][]string{
+				"X-Custom1": []string{"custom-value-1"},
+				"X-Custom2": []string{"custom-value-2.1", "custom-value-2.2"},
+			},
 		}
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
-			TargetUrl:   ts.URL,
-			Credentials: credentials,
-			Headers:     &additionalHeaders,
+			TargetUrl:         ts.URL,
+			Credentials:       credentials,
+			RequestParameters: requestParameters,
 		}, nil).Once()
 
 		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
