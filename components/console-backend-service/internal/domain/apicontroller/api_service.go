@@ -2,6 +2,7 @@ package apicontroller
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"

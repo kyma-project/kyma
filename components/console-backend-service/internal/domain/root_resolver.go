@@ -324,7 +324,7 @@ func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, lab
 	return r.k8s.CreateNamespace(ctx, name, labels)
 }
 
-func (r *mutationResolver) CreateAPI(ctx context.Context,  params gqlschema.APICreateInput) (gqlschema.API, error) {
+func (r *mutationResolver) CreateAPI(ctx context.Context, params gqlschema.APICreateInput) (gqlschema.API, error) {
 	return r.ac.CreateAPI(ctx, params)
 }
 

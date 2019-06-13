@@ -135,7 +135,11 @@ func TestApisQuery(t *testing.T) {
 	t.Log("Checking authorization directives...")
 	as := auth.New()
 	ops := &auth.OperationsInput{
-		auth.List: {fixAPIQuery()},
+		auth.Get: {fixAPIQuery()},
+		auth.List: {fixAPIsQuery()},
+		auth.Create: {fixMutation("createAPI", hostname)},
+		auth.Update: {fixMutation("updateAPI", hostname)},
+		auth.Delete: {fixDeleteMutation(apiName, apiNamespace)},
 	}
 	as.Run(t, ops)
 }
@@ -216,6 +220,22 @@ func fixMutation(mutation string, hostname string) *graphql.Request {
 	return req
 }
 
+func fixDeleteMutation(name, namespace string) *graphql.Request {
+	query := fmt.Sprintf(`
+		mutation deleteAPI($name: String!, $namespace: String!) {
+			deleteAPI(name: $name, namespace: $namespace) {
+				%s
+			}
+		}
+	`, apiQuery)
+
+	req := graphql.NewRequest(query)
+	req.SetVar("name", name)
+	req.SetVar("namespace", namespace)
+
+	return req
+}
+
 func createApi(c *graphql.Client) (apiCreateResponse, error) {
 	req := fixMutation("createAPI", hostname)
 
@@ -235,17 +255,8 @@ func updateApi(c *graphql.Client) (apiUpdateResponse, error) {
 }
 
 func deleteApi(c *graphql.Client, name, namespace string) (apiDeleteResponse, error) {
-	query := fmt.Sprintf(`
-		mutation deleteAPI($name: String!, $namespace: String!) {
-			deleteAPI(name: $name, namespace: $namespace) {
-				%s
-			}
-		}
-	`, apiQuery)
+	req := fixDeleteMutation(name, namespace)
 
-	req := graphql.NewRequest(query)
-	req.SetVar("name", name)
-	req.SetVar("namespace", namespace)
 	var res apiDeleteResponse
 	err := c.Do(req, &res)
 
