@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex""github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 
@@ -25,6 +25,9 @@ const (
 	servicePort = 8080
 	jwksUri = "http://test-jwks-uri"
 	issuer = "test-issuer"
+	disableIstioAuthPolicyMTLS = true
+	authenticationEnabled = true
+	newHostname = "different-hostname"
 )
 
 type apiQueryResponse struct {
@@ -35,15 +38,15 @@ type apisQueryResponse struct {
 	Apis []api `json:"apis"`
 }
 
-type ApiCreateResponse struct {
+type apiCreateResponse struct {
 	CreateAPI api `json:"createAPI"`
 }
 
-type ApiUpdateResponse struct {
+type apiUpdateResponse struct {
 	UpdateAPI api `json:"updateAPI"`
 }
 
-type ApiDeleteResponse struct {
+type apiDeleteResponse struct {
 	DeleteAPI api `json:"deleteAPI"`
 }
 
@@ -94,7 +97,7 @@ func TestApisQuery(t *testing.T) {
 	defer subscription.Close()
 
 	t.Log("Creating API")
-	createRes, err := createApi(c, apiName, apiNamespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
+	createRes, err := createApi(c)
 	require.NoError(t, err)
 	checkOutput(t, createRes.CreateAPI)
 	assert.Equal(t, hostname, createRes.CreateAPI.Hostname)
@@ -104,9 +107,8 @@ func TestApisQuery(t *testing.T) {
 	assert.NoError(t, err)
 	checkApiEvent(t, "ADD", apiName, event)
 
-	newHostname := "different-hostname"
 	t.Log("Updating API")
-	updateRes, err := updateApi(c, apiName, apiNamespace, newHostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
+	updateRes, err := updateApi(c)
 	require.NoError(t, err)
 	checkOutput(t, updateRes.UpdateAPI)
 	assert.Equal(t, newHostname, updateRes.UpdateAPI.Hostname)
@@ -188,7 +190,7 @@ func fixAPIsQuery() *graphql.Request {
 	return req
 }
 
-func fixMutation(mutation string, name, namespace, hostname, serviceName, jwksUri, issuer string, servicePort int, disableIstioAuthPolicyMTLS, authenticationEnabled *bool) *graphql.Request {
+func fixMutation(mutation string, hostname string) *graphql.Request {
 	query := fmt.Sprintf(`
 		mutation %s($name: String!, $namespace: String!, $servicePort: Int!, $hostname: String!, $serviceName: String!, $jwksUri: String!, $issuer: String!) {
 			%s(params: {
@@ -200,38 +202,38 @@ func fixMutation(mutation string, name, namespace, hostname, serviceName, jwksUr
 	`, mutation, mutation, apiQuery)
 
 	req := graphql.NewRequest(query)
-	req.SetVar("name", name)
-	req.SetVar("namespace", namespace)
+	req.SetVar("name", apiName)
+	req.SetVar("namespace", apiNamespace)
 	req.SetVar("hostname", hostname)
 	req.SetVar("serviceName", serviceName)
 	req.SetVar("jwksUri", jwksUri)
 	req.SetVar("issuer", issuer)
 	req.SetVar("servicePort", servicePort)
-	req.SetVar("disableIstioAuthPolicyMTLS", nil)
-	req.SetVar("authenticationEnabled", nil)
+	req.SetVar("disableIstioAuthPolicyMTLS", disableIstioAuthPolicyMTLS)
+	req.SetVar("authenticationEnabled", authenticationEnabled)
 
 	return req
 }
 
-func createApi(c *graphql.Client, name, namespace, hostname, serviceName, jwksUri, issuer string, servicePort int, disableIstioAuthPolicyMTLS, authenticationEnabled *bool) (ApiCreateResponse, error) {
-	req := fixMutation("createAPI", name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, disableIstioAuthPolicyMTLS, authenticationEnabled)
+func createApi(c *graphql.Client) (apiCreateResponse, error) {
+	req := fixMutation("createAPI", hostname)
 
-	var res ApiCreateResponse
+	var res apiCreateResponse
 	err := c.Do(req, &res)
 
 	return res, err
 }
 
-func updateApi(c *graphql.Client, name, namespace, hostname, serviceName, jwksUri, issuer string, servicePort int, disableIstioAuthPolicyMTLS, authenticationEnabled *bool) (ApiUpdateResponse, error) {
-	req := fixMutation("updateAPI", name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, disableIstioAuthPolicyMTLS, authenticationEnabled)
+func updateApi(c *graphql.Client) (apiUpdateResponse, error) {
+	req := fixMutation("updateAPI", newHostname)
 
-	var res ApiUpdateResponse
+	var res apiUpdateResponse
 	err := c.Do(req, &res)
 
 	return res, err
 }
 
-func deleteApi(c *graphql.Client, name, namespace string) (ApiDeleteResponse, error) {
+func deleteApi(c *graphql.Client, name, namespace string) (apiDeleteResponse, error) {
 	query := fmt.Sprintf(`
 		mutation deleteAPI($name: String!, $namespace: String!) {
 			deleteAPI(name: $name, namespace: $namespace) {
@@ -243,7 +245,7 @@ func deleteApi(c *graphql.Client, name, namespace string) (ApiDeleteResponse, er
 	req := graphql.NewRequest(query)
 	req.SetVar("name", name)
 	req.SetVar("namespace", namespace)
-	var res ApiDeleteResponse
+	var res apiDeleteResponse
 	err := c.Do(req, &res)
 
 	return res, err
