@@ -22,8 +22,8 @@ func TestNamespace(t *testing.T) {
 	k8s, _, err := client.NewClientWithConfig()
 	require.NoError(t, err)
 
-	name := "tesr-namespace"
-	labels := labels{
+	name := "test-namespace"
+	labels := map[string]string{
 		"aaa": "bbb",
 	}
 
@@ -54,8 +54,7 @@ func TestNamespace(t *testing.T) {
 
 func fixNamespaceResponse(name string, labels labels) namespaceResponse {
 	return namespaceResponse{
-		name:   name,
-		labels: labels,
+		namespace: namespaceObj{name: name, labels: labels},
 	}
 }
 
@@ -96,7 +95,11 @@ func fixNamespaceDelete(name string) *graphql.Request {
 	return req
 }
 
-type namespaceResponse struct {
+type namespaceObj struct {
 	name   string
 	labels labels
+}
+
+type namespaceResponse struct {
+	namespace namespaceObj
 }
