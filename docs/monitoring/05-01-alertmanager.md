@@ -15,7 +15,7 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **global.alertTools.credentials.slack.apiurl** | Specifies the URL endpoint which sends the alerts fired by Prometheus rules.  | None |
-| **global.alertTools.credentials.slack.channel** | Refers to the Slack channel which receives the alerts notifications. | None |
+| **global.alertTools.credentials.slack.apiurl** | Specifies the URL endpoint which sends alerts triggered by Prometheus rules.  | None |
+| **global.alertTools.credentials.slack.channel** | Refers to the Slack channel which receives notifications on new alerts. | None |
 | **global.alertTools.credentials.victorOps.routingkey** | Defines the team routing key in VictorOps. | None |
 | **global.alertTools.credentials.victorOps.apikey** | Defines the team API key in VictorOps. | None |
