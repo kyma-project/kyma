@@ -1,0 +1,21 @@
+---
+title: Alertmanager sub-chart
+type: Configuration
+---
+
+To configure the Alertmanager sub-chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
+
+>**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
+>* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
+>* [Sub-charts overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation-sub-chart-overrides)
+
+## Configurable parameters
+
+This table lists the configurable parameters, their descriptions, and default values:
+
+| Parameter | Description | Default value |
+|-----------|-------------|---------------|
+| **global.alertTools.credentials.slack.apiurl** | Specifies the URL endpoint which sends the alerts fired by Prometheus rules.  | None |
+| **global.alertTools.credentials.slack.channel** | Refers to the Slack channel which receives the alerts notifications. | None |
+| **global.alertTools.credentials.victorOps.routingkey** | Defines the team routing key in VictorOps. | None |
+| **global.alertTools.credentials.victorOps.apikey** | Defines the team API key in VictorOps. | None |
