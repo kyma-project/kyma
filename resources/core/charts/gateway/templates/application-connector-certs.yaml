@@ -8,5 +8,4 @@ data:
 kind: Secret
 metadata:
   name: application-connector-certs
-  namespace: istio-system
 type: Opaque

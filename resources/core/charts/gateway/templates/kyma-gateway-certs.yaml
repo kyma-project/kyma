@@ -6,5 +6,4 @@ data:
 kind: Secret
 metadata:
   name: {{ .Values.global.istio.gateway.name }}-certs
-  namespace: istio-system
 type: Opaque
