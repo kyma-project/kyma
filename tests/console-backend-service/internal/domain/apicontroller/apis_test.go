@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"testing"
 
+	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
-	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -19,16 +19,16 @@ import (
 )
 
 const (
-	apiName      = "test-api"
-	apiNamespace = "console-backend-service-api"
-	hostname = "test-hostname"
-	serviceName = "test-service-name"
-	servicePort = 8080
-	jwksUri = "http://test-jwks-uri"
-	issuer = "test-issuer"
+	apiName                    = "test-api"
+	apiNamespace               = "console-backend-service-api"
+	hostname                   = "test-hostname"
+	serviceName                = "test-service-name"
+	servicePort                = 8080
+	jwksUri                    = "http://test-jwks-uri"
+	issuer                     = "test-issuer"
 	disableIstioAuthPolicyMTLS = true
-	authenticationEnabled = true
-	newHostname = "different-hostname"
+	authenticationEnabled      = true
+	newHostname                = "different-hostname"
 )
 
 type apiQueryResponse struct {
@@ -52,8 +52,8 @@ type apiDeleteResponse struct {
 }
 
 type apiEvent struct {
-	Type        string
-	API api
+	Type string
+	API  api
 }
 
 type service struct {
@@ -69,9 +69,9 @@ type api struct {
 }
 
 type authenticationPolicy struct {
-	Type string `json:"type"`
-	Issuer   string `json:"issuer"`
-	JwksURI  string `json:"jwksURI"`
+	Type    string `json:"type"`
+	Issuer  string `json:"issuer"`
+	JwksURI string `json:"jwksURI"`
 }
 
 func TestApisQuery(t *testing.T) {
@@ -135,8 +135,8 @@ func TestApisQuery(t *testing.T) {
 	t.Log("Checking authorization directives...")
 	as := auth.New()
 	ops := &auth.OperationsInput{
-		auth.Get: {fixAPIQuery()},
-		auth.List: {fixAPIsQuery()},
+		auth.Get:    {fixAPIQuery()},
+		auth.List:   {fixAPIsQuery()},
 		auth.Create: {fixMutation("createAPI", hostname)},
 		auth.Update: {fixMutation("updateAPI", hostname)},
 		auth.Delete: {fixDeleteMutation(apiName, apiNamespace)},
@@ -290,7 +290,7 @@ func readApiEvent(sub *graphql.Subscription) (apiEvent, error) {
 	return event.ApiEvent, err
 }
 
-func checkOutput(t *testing.T, apiMutation api)  {
+func checkOutput(t *testing.T, apiMutation api) {
 	assert.Equal(t, apiName, apiMutation.Name)
 	assert.Equal(t, serviceName, apiMutation.Service.Name)
 	assert.Equal(t, servicePort, apiMutation.Service.Port)
