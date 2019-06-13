@@ -7,7 +7,8 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex""github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 
