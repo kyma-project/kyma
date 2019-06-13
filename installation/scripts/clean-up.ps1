@@ -1,3 +1,5 @@
+Write-Output @"The clean-up.ps1 script is deprecated and will be removed. Use Kyma CLI instead."@
+
 $cmd = "kubectl.exe delete installation/kyma-installation"
 Invoke-Expression -Command $cmd
 
