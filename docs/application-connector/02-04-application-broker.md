@@ -18,6 +18,7 @@ When this process is complete, you can provision and bind your services.
 ## Provisioning and binding for an API ServiceClass
 
 This ServiceClass has a **bindable** flag set to `true` which means that you have to provision a ServiceInstance and bind it to the service or lambda to connect to the given API. The provisioning and binding workflow for an API ServiceClass consists of the following steps:
+
 1. Select an API ServiceClass from the Service Catalog.
 2. Provision this ServiceClass by creating its ServiceInstance in a Namespace.
 3. Bind your ServiceInstance to the service or lambda. During the binding process, ServiceBinding and ServiceBindingUsage resources are created.
@@ -31,6 +32,7 @@ This ServiceClass has a **bindable** flag set to `true` which means that you hav
 ## Provisioning and binding for an Event ServiceClass
 
 This ServiceClass has a **bindable** flag set to `false` which means that after provisioning a ServiceClass in the Namespace, given Events are ready to use for all services. The provisioning workflow for an Event ServiceClass consists of the following steps:
+
 1. Select a given Event ServiceClass from the Service Catalog.
 2. Provision this ServiceClass by creating a ServiceInstance in the given Namespace.
 3. During the provisioning process, the EventActivation resource is created together with the ServiceInstance. EventActivation allows you to create an Event Bus Subscription.
