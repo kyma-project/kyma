@@ -20,7 +20,7 @@ This table lists the configurable parameters, their descriptions, and default va
 | **deployment.args.runtimeTokenExpirationMinutes** | Specifies a period of time after which a token for a runtime expires. It is provided in minutes. | `10` |
 | **deployment.args.appValidityTime** | Specifies a period of time during which certificates that the service issues for an Application are valid. It is provided in days. | `92d` |
 | **deployment.args.runtimeValidityTime** | Specifies a period of time during which certificates that the service issues for a runtime are valid. It is provided in days. | `92d` |
-| **deployment.args.central** | Determines whether the Connector Service works in the central mode. | `&central false` |
+| **deployment.args.central** | Determines whether the Connector Service works in the central mode. | `false` |
 | **deployment.envvars.country** | Specifies a country which is required  generate a Certificate Signing Request. It is provided as a two-letter country code. | `DE` |
 | **deployment.envvars.organization** | Specifies an organization which is required to generate a Certificate Signing Request. | `Organization` |
 | **deployment.envvars.organizationalunit** | Specifies an organizational unit which is required to generate a Certificate Signing Request. | `OrgUnit` |
