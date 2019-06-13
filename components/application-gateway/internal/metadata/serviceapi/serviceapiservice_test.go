@@ -7,8 +7,8 @@ import (
 
 	secretsmocks "github.com/kyma-project/kyma/components/application-gateway/internal/metadata/secrets/mocks"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/applications"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/stretchr/testify/assert"
 )
 

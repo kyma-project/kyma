@@ -9,15 +9,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/csrf"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata"
 	metadatamodel "github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
 )
 
 type proxy struct {

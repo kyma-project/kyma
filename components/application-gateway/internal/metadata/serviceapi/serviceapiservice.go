@@ -3,10 +3,10 @@ package serviceapi
 import (
 	"encoding/json"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/secrets"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 )
 
 const (
