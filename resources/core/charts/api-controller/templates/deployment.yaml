@@ -37,4 +37,6 @@ spec:
           value: '{{ .Values.cors.allow_methods }}'
         - name: CORS_ALLOW_HEADERS
           value: '{{ .Values.cors.allow_headers }}'
+        - name: BLACKLISTER_SERVICES
+          value: '{{ .Values.blacklisted_services }}'
 
