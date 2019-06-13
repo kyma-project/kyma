@@ -7,31 +7,5 @@ metadata:
     app: istio-kyma-patch
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
-  injection-in-namespaces:
-  delete: |
-    deployment prometheus
-    configmap prometheus
-    service prometheus
-    serviceaccount prometheus
-
-    deployment servicegraph
-    service servicegraph
-
-    deployment grafana
-    configmap grafana
-    policy grafana-ports-mtls-disabled
-    pvc istio-grafana-pvc
-    secret grafana
-    service grafana
-
-    deployment istio-tracing
-    service zipkin
-    service tracing
-    service jaeger-query
-    service jaeger-agent
-    service jaeger-collector
-    pod -lapp=istio-ingressgateway
-    pod -lapp=policy
-
   required-crds: |
     policies.authentication.istio.io
