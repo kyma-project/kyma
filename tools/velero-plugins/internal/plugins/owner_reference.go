@@ -3,13 +3,10 @@ package plugins
 import (
 	"github.com/pkg/errors"
 
-	"github.com/heptio/velero/pkg/apis/velero/v1"
-	"github.com/heptio/velero/pkg/restore"
+	"github.com/heptio/velero/pkg/plugin/velero"
 	"github.com/sirupsen/logrus"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/runtime"
-
 	scApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
@@ -24,46 +21,58 @@ type SetOwnerReference struct {
 }
 
 // AppliesTo return list of resource kinds which should be handled by this plugin
-func (p *SetOwnerReference) AppliesTo() (restore.ResourceSelector, error) {
-	return restore.ResourceSelector{
+func (p *SetOwnerReference) AppliesTo() (velero.ResourceSelector, error) {
+	return velero.ResourceSelector{
 		IncludedResources: []string{"secret"},
 	}, nil
 }
 
 // Execute contains main logic for plugin
 // nolint
-func (p *SetOwnerReference) Execute(item runtime.Unstructured, restore *v1.Restore) (runtime.Unstructured, error, error) {
-	metadata, err := meta.Accessor(item)
+func (p *SetOwnerReference) Execute(input *velero.RestoreItemActionExecuteInput) (*velero.RestoreItemActionExecuteOutput, error) {
+	metadata, err := meta.Accessor(input.Item)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
+	}
+
+	metadataFromBackup, err := meta.Accessor(input.ItemFromBackup)
+	if err != nil {
+		return nil, err
+	}
+
+	var ownerRefs *metav1.OwnerReference
+	for _, ref := range metadataFromBackup.GetOwnerReferences() {
+		if ref.Kind == "ServiceBinding" {
+			ownerRefs = &ref
+		}
+	}
+	if ownerRefs == nil {
+		return velero.NewRestoreItemActionExecuteOutput(input.Item), nil
 	}
 
 	scClient, err := p.inClusterServiceCatalogClient()
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "while creating ServiceCatalog client")
+		return nil, errors.Wrap(err, "while creating ServiceCatalog client")
 	}
 
-	// Secret's name and service binding's name are not always equal (they are when created in kyma's console, but can be different when created by from yaml's)
-	// Searching service binding by name is a workaround before https://github.com/heptio/velero/issues/965 will be resolved
-	sb, err := scClient.ServiceBindings(metadata.GetNamespace()).Get(metadata.GetName(), metav1.GetOptions{})
+	sb, err := scClient.ServiceBindings(metadataFromBackup.GetNamespace()).Get(ownerRefs.Name, metav1.GetOptions{})
 	switch {
 	case err == nil:
 	case apierrors.IsNotFound(err):
 		// there's no servicebinding with such name so the secret should not have ownerReference set
-		p.Log.Infof("Couldn't get SB %s: %v", metadata.GetName(), err)
-		return item, nil, nil
+		p.Log.Infof("Couldn't get SB %s: %v", ownerRefs.Name, err)
+		return velero.NewRestoreItemActionExecuteOutput(input.Item), nil
 	default:
-		return item, err, nil
+		return velero.NewRestoreItemActionExecuteOutput(input.Item), err
 	}
 
-	p.Log.Infof("Setting owner reference for %s %s in namespace %s", item.GetObjectKind(), metadata.GetName(), metadata.GetNamespace())
-
+	p.Log.Infof("Setting owner reference for %s %s in namespace %s", input.Item.GetObjectKind(), metadataFromBackup.GetName(), metadataFromBackup.GetNamespace())
 	ownerReferences := []metav1.OwnerReference{
 		*metav1.NewControllerRef(sb, bindingControllerKind),
 	}
 	metadata.SetOwnerReferences(ownerReferences)
 
-	return item, nil, nil
+	return velero.NewRestoreItemActionExecuteOutput(input.Item), nil
 }
 
 // bindingControllerKind contains the schema.GroupVersionKind for ServiceCatalog controller type.

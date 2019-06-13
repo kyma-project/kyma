@@ -4,7 +4,7 @@
 
 Velero plugins provide an implementation of a few plugins required to properly restore the Kyma cluster and resources created inside it. They focus mainly on resources related to the Service Catalog, such as instances or bindings. Each plugin is defined in a separate file inside the [`internal/plugins`](internal/plugins) folder. The purpose of each plugin is defined in the file's comments.
 
-The structure of folders and files is based on the [Velero plugin example repository](https://github.com/heptio/velero-plugin-example).
+The structure of folders and files is based on the [Velero plugin example repository](https://github.com/he-ptio/velero-plugin-example).
 
 ## Installation
 
