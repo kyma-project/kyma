@@ -15,14 +15,14 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **deployment.args.tokenLength**| Specifies a number of characters of a registration token. | `64` |
+| **deployment.args.tokenLength**| Specifies a number of characters in a registration token. | `64` |
 | **deployment.args.appTokenExpirationMinutes** | Specifies a period of time after which a token for an Application expires. It is provided in minutes. | `5` |
 | **deployment.args.runtimeTokenExpirationMinutes** | Specifies a period of time after which a token for a runtime expires. It is provided in minutes. | `10` |
-| **deployment.args.appValidityTime** | Specifies a period of time during which certificates that the service issues for an Application are valid. It is provided in days. | `90d` |
-| **deployment.args.runtimeValidityTime** | Specifies a period of time during which certificates that the service issues for a runtime are valid. It is provided in days. | `90d` |
+| **deployment.args.appValidityTime** | Specifies a period of time during which certificates that the service issues for an Application are valid. It is provided in days. | `92d` |
+| **deployment.args.runtimeValidityTime** | Specifies a period of time during which certificates that the service issues for a runtime are valid. It is provided in days. | `92d` |
 | **deployment.args.central** | Determines whether the Connector Service works in the central mode. | `&central false` |
-| **deployment.envvars.country** | Specifies a country, using two-letter country codes, which is required to generate a Certificate Signing Request. | `DE` |
+| **deployment.envvars.country** | Specifies a country which is required  generate a Certificate Signing Request. It is provided as a two-letter country code. | `DE` |
 | **deployment.envvars.organization** | Specifies an organization which is required to generate a Certificate Signing Request. | `Organization` |
-| **deployment.envvars.organizationalunit** | Specifies an organization unit which is required to generate a Certificate Signing Request. | `OrgUnit` |
+| **deployment.envvars.organizationalunit** | Specifies an organizational unit which is required to generate a Certificate Signing Request. | `OrgUnit` |
 | **deployment.envvars.locality** | Specifies a locality which is required to generate a Certificate Signing Request. | `Waldorf` |
 | **deployment.envvars.province** | Specifies a province which is required to generate a Certificate Signing Request. | `Waldorf` |

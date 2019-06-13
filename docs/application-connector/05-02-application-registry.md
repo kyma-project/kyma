@@ -16,7 +16,7 @@ This table lists the configurable parameters, their descriptions, and default va
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
 | **deployment.args.requestTimeout** | Specifies an overall time-out after which requests to the Application Registry fail to be sent. It is provided in seconds. | `10` |
-| **deployment.args.requestLogging** | Enables logging incoming requests. By deafult, the logging is disabled. | `false` |
+| **deployment.args.requestLogging** | Enables logging incoming requests. By default, logging is disabled. | `false` |
 | **deployment.args.specRequestTimeout** | Specifies a period of time after which a request fetching specifications provided by the user fails to be sent. It is provided in seconds. | `5` |
 | **deployment.args.assetstoreRequestTimeout** | Specifies a period of time after which a request fetching specifications from the Asset Store fails to be sent. It is provided in seconds. | `5` |
-| **deployment.args.insecureAssetDownload** | Disables verifying certificates during downloading data from the Asset Store. | `true` | 
+| **deployment.args.insecureAssetDownload** | Disables verifying certificates when downloading data from the Asset Store. | `true` | 
