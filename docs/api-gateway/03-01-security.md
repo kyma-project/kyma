@@ -10,7 +10,7 @@ When you expose a service in Kyma, you can secure it by specifying the **authent
 
 If you don't specify any of these attributes, the API Controller doesn't create an Istio Authentication Policy for the service and leaves it unsecured.
 
->**NOTE:** You can secure only the entire service. You cannot secure the specific endpoints of the service.
+>**NOTE:** You can disable JWT validation for specific resource paths. This makes such resources unsecured. see [this](#custom-resource-api) document for details.
 
 ## Call a secured service
 
