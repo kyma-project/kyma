@@ -1,6 +1,10 @@
 package v1alpha2
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
+
 	kymaMeta "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1"
 	k8sMeta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -36,14 +40,71 @@ type AuthenticationRule struct {
 }
 
 type AuthenticationType string
+type matchExpressionType string
 
 const (
-	JwtType AuthenticationType = "JWT"
+	JwtType     AuthenticationType  = "JWT"
+	ExactMatch  matchExpressionType = "exact"
+	PrefixMatch matchExpressionType = "prefix"
+	SuffixMatch matchExpressionType = "suffix"
+	RegexMatch  matchExpressionType = "regex"
 )
 
+type TriggerRule struct {
+	ExcludedPaths []MatchExpression `json:"excludedPaths,omitempty"`
+}
+
+type MatchExpression struct {
+	ExprType matchExpressionType
+	Value    string
+}
+
+func (a *MatchExpression) UnmarshalJSON(b []byte) error {
+
+	var generic map[string]string
+	if err := json.Unmarshal(b, &generic); err != nil {
+		fmt.Println("Error during unmarshaling MatchExpression", err)
+		return err
+	}
+
+	me, err := toMatchExpression(generic)
+	if err != nil {
+		return err
+	}
+	*a = *me
+
+	return nil
+}
+
+func toMatchExpression(generic map[string]string) (*MatchExpression, error) {
+
+	if len(generic) != 1 {
+		return nil, errors.New(fmt.Sprintf("Expected exactly 1 entry in MatchExpression, got: %d", len(generic)))
+	}
+
+	for t, v := range generic {
+
+		switch t {
+		default:
+			return nil, errors.New(fmt.Sprintf("Unknown MatchExpression type: \"%s\"", t))
+		case string(ExactMatch):
+			fallthrough
+		case string(PrefixMatch):
+			fallthrough
+		case string(SuffixMatch):
+			fallthrough
+		case string(RegexMatch):
+			return &MatchExpression{matchExpressionType(t), v}, nil
+		}
+	}
+
+	return nil, errors.New("Failed to unmarshal MatchExpression.")
+}
+
 type JwtAuthentication struct {
-	JwksUri string `json:"jwksUri"`
-	Issuer  string `json:"issuer"`
+	JwksUri     string      `json:"jwksUri"`
+	Issuer      string      `json:"issuer"`
+	TriggerRule TriggerRule `json:"triggerRule,omitempty"`
 }
 
 type ApiStatus struct {
