@@ -139,11 +139,13 @@ function restart_sidecar_injector() {
 
 function check_requirements() {
   while read crd; do
-    echo "Require CRD ${crd}"
+    log "Require CRD ${crd}"
     kubectl get customresourcedefinitions "${crd}"
     if [[ $? -ne 0 ]]; then
         log "Cannot find required CRD ${crd}" red
+        exit 1
     fi
+    log "CRD ${crd} present" green
   done <${CONFIG_DIR}/required-crds
 }
 
@@ -157,3 +159,4 @@ check_sidecar_injector
 # run_all_patches
 # remove_not_used
 # label_namespaces
+log "Istio is configured to run Kyma!" green

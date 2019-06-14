@@ -7,6 +7,8 @@ spec:
   template:
     metadata:
       name: istio-kyma-patch
+      labels:
+        app: istio-kyma-patch
     spec:
       serviceAccountName: istio-kyma-patch
       restartPolicy: OnFailure
