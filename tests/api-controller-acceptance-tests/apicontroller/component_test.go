@@ -231,8 +231,8 @@ func TestComponentSpec(t *testing.T) {
 
 			So(err, ShouldBeNil)
 			So(testedApi.Status.IsTargetServiceOccupied(), ShouldBeTrue)
-			So(testedApi.Status.AuthenticationStatus.IsError(), ShouldBeTrue)
-			So(testedApi.Status.VirtualServiceStatus.IsError(), ShouldBeTrue)
+			So(testedApi.Status.AuthenticationStatus.IsEmpty(), ShouldBeTrue)
+			So(testedApi.Status.VirtualServiceStatus.IsEmpty(), ShouldBeTrue)
 			So(testedApi.Status.AuthenticationStatus.Resource.Name, ShouldBeEmpty)
 			So(testedApi.Status.VirtualServiceStatus.Resource.Name, ShouldBeEmpty)
 		})
@@ -292,8 +292,8 @@ func TestComponentSpec(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(testedApi.Status.IsTargetServiceOccupied(), ShouldBeTrue)
 
-			So(testedApi.Status.AuthenticationStatus.IsError(), ShouldBeTrue)
-			So(testedApi.Status.VirtualServiceStatus.IsError(), ShouldBeTrue)
+			So(testedApi.Status.AuthenticationStatus.IsEmpty(), ShouldBeTrue)
+			So(testedApi.Status.VirtualServiceStatus.IsEmpty(), ShouldBeTrue)
 
 			So(testedApi.Status.AuthenticationStatus.Resource, ctx.ShouldDeepEqual, originalTestedApi.Status.AuthenticationStatus.Resource)
 			So(testedApi.Status.VirtualServiceStatus.Resource, ctx.ShouldDeepEqual, originalTestedApi.Status.VirtualServiceStatus.Resource)
