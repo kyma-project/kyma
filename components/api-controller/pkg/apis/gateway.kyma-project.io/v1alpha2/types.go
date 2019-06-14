@@ -77,10 +77,7 @@ func (self *MatchExpression) UnmarshalJSON(b []byte) error {
 }
 
 func (self MatchExpression) MarshalJSON() ([]byte, error) {
-
-	res := map[string]string{}
-	res[string(self.ExprType)] = self.Value
-
+	res := map[string]string{string(self.ExprType): self.Value}
 	return json.Marshal(res)
 }
 
