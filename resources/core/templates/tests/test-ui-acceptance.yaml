@@ -30,7 +30,7 @@ spec:
           serviceAccountName: "test-{{ template "fullname" . }}-ui-acceptance"
           containers:
             - name: "test-{{ template "fullname" . }}-ui-acceptance"
-              image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_acceptance_tests.dir }}/pr/ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
+              image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_acceptance_tests.dir }}pr/ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
               imagePullPolicy: IfNotPresent
               resources:
                  requests:
