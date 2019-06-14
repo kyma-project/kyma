@@ -3,6 +3,10 @@
 package k8s
 
 import (
+	"fmt"
+	"github.com/avast/retry-go"
+	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"testing"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
@@ -11,54 +15,142 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 func TestNamespace(t *testing.T) {
 	dex.SkipTestIfSCIEnabled(t)
 
+	suite := givenNewTestNamespaceSuite(t)
+
+	createRsp, err := suite.whenNamespaceIsCreated()
+	suite.thenThereIsNoError(t, err)
+	suite.thenThereIsNoGqlError(t, createRsp.GqlErrors)
+	suite.thenCreateNamespaceResponseIsAsExpected(t, createRsp)
+	suite.thenNamespaceExistsInK8s(t)
+
+	queryRsp, err := suite.whenNamespaceIsQueried()
+	suite.thenThereIsNoError(t, err)
+	suite.thenThereIsNoGqlError(t, queryRsp.GqlErrors)
+	suite.thenNamespaceResponseIsAsExpected(t, queryRsp)
+
+	deleteRsp, err := suite.whenNamespaceIsDeleted()
+	suite.thenThereIsNoError(t, err)
+	suite.thenThereIsNoGqlError(t, deleteRsp.GqlErrors)
+	suite.thenDeleteNamespaceResponseIsAsExpected(t, deleteRsp)
+	suite.thenNamespaceIsRemovedFromK8sEventually(t)
+}
+
+type testNamespaceSuite struct {
+	gqlClient     *graphql.Client
+	k8sClient     *corev1.CoreV1Client
+	namespaceName string
+	labels        map[string]string
+}
+
+func givenNewTestNamespaceSuite(t *testing.T) testNamespaceSuite {
 	c, err := graphql.New()
 	require.NoError(t, err)
 
 	k8s, _, err := client.NewClientWithConfig()
 	require.NoError(t, err)
 
-	name := "test-namespace"
-	labels := map[string]string{
-		"aaa": "bbb",
+	suite := testNamespaceSuite{
+		gqlClient:     c,
+		k8sClient:     k8s,
+		namespaceName: "test-namespace",
+		labels: map[string]string{
+			"aaa": "bbb",
+		},
 	}
+	return suite
+}
 
+func (s testNamespaceSuite) whenNamespaceIsCreated() (createNamespaceResponse, error) {
+	var rsp createNamespaceResponse
+	err := s.gqlClient.Do(s.fixNamespaceCreate(), &rsp)
+	return rsp, err
+}
+
+func (s testNamespaceSuite) thenThereIsNoError(t *testing.T, err error) {
+	require.NoError(t, err)
+}
+
+func (s testNamespaceSuite) thenThereIsNoGqlError(t *testing.T, gqlErr GqlErrors) {
+	require.Empty(t, gqlErr.Errors)
+}
+
+func (s testNamespaceSuite) thenCreateNamespaceResponseIsAsExpected(t *testing.T, rsp createNamespaceResponse) {
+	assert.Equal(t, s.fixCreateNamespaceResponse(), rsp)
+}
+
+func (s testNamespaceSuite) thenNamespaceExistsInK8s(t *testing.T) {
+	ns, err := s.k8sClient.Namespaces().Get(s.namespaceName, metav1.GetOptions{})
+	require.NoError(t, err)
+	assert.Equal(t, ns.Name, s.namespaceName)
+	assert.Equal(t, ns.Labels, s.labels)
+}
+
+func (s testNamespaceSuite) whenNamespaceIsQueried() (namespaceResponse, error) {
 	var rsp namespaceResponse
-	err = c.Do(fixNamespaceCreate(name, labels), &rsp)
-	require.NoError(t, err)
-	assert.Equal(t, fixNamespaceResponse(name, labels), rsp)
-
-	ns, err := k8s.Namespaces().Get(name, metav1.GetOptions{})
-	require.NoError(t, err)
-	assert.Equal(t, ns.Name, name)
-	assert.Equal(t, ns.Labels, labels)
-
-	rsp = namespaceResponse{}
-	err = c.Do(fixNamespaceQuery(name), &rsp)
-	require.NoError(t, err)
-	assert.Equal(t, fixNamespaceResponse(name, labels), rsp)
-
-	rsp = namespaceResponse{}
-	err = c.Do(fixNamespaceDelete(name), &rsp)
-	require.NoError(t, err)
-	assert.Equal(t, fixNamespaceResponse(name, labels), rsp)
-
-	_, err = k8s.Namespaces().Get(name, metav1.GetOptions{})
-	require.Error(t, err)
-
+	err := s.gqlClient.Do(s.fixNamespaceQuery(), &rsp)
+	return rsp, err
 }
 
-func fixNamespaceResponse(name string, labels labels) namespaceResponse {
-	return namespaceResponse{
-		namespace: namespaceObj{name: name, labels: labels},
+func (s testNamespaceSuite) thenNamespaceResponseIsAsExpected(t *testing.T, rsp namespaceResponse) {
+	assert.Equal(t, s.fixNamespaceResponse(), rsp)
+}
+
+func (s testNamespaceSuite) whenNamespaceIsDeleted() (deleteNamespaceResponse, error) {
+	var rsp deleteNamespaceResponse
+	err := s.gqlClient.Do(s.fixNamespaceDelete(), &rsp)
+	return rsp, err
+}
+
+func (s testNamespaceSuite) thenDeleteNamespaceResponseIsAsExpected(t *testing.T, rsp deleteNamespaceResponse) {
+	assert.Equal(t, s.fixDeleteNamespaceResponse(), rsp)
+}
+
+func (s testNamespaceSuite) thenNamespaceIsRemovedFromK8sEventually(t *testing.T) {
+	err := retry.Do(func() error {
+		ns, err := s.k8sClient.Namespaces().Get(s.namespaceName, metav1.GetOptions{})
+		if apierrors.IsNotFound(err) {
+			return nil
+		}
+
+		if err == nil {
+			return namespaceTerminatingError{phase: ns.Status.Phase}
+		}
+
+		return err
+	}, retry.RetryIf(func(e error) bool {
+		_, isTerminating := e.(namespaceTerminatingError)
+		return isTerminating
+	}))
+	require.NoError(t, err)
+}
+
+func (s testNamespaceSuite) fixNamespaceObj() namespaceObj {
+	return namespaceObj{
+		Name:   s.namespaceName,
+		Labels: s.labels,
 	}
 }
 
-func fixNamespaceCreate(name string, labels labels) *graphql.Request {
+func (s testNamespaceSuite) fixCreateNamespaceResponse() createNamespaceResponse {
+	return createNamespaceResponse{CreateNamespace: s.fixNamespaceObj()}
+}
+
+func (s testNamespaceSuite) fixDeleteNamespaceResponse() deleteNamespaceResponse {
+	return deleteNamespaceResponse{DeleteNamespace: s.fixNamespaceObj()}
+}
+
+func (s testNamespaceSuite) fixNamespaceResponse() namespaceResponse {
+	return namespaceResponse{Namespace: s.fixNamespaceObj()}
+}
+
+func (s testNamespaceSuite) fixNamespaceCreate() *graphql.Request {
 	query := `mutation ($name: String!, $labels: Labels!) {
 				  createNamespace(name: $name, labels: $labels) {
 					name
@@ -66,12 +158,12 @@ func fixNamespaceCreate(name string, labels labels) *graphql.Request {
 				  }
 				}`
 	req := graphql.NewRequest(query)
-	req.SetVar("name", name)
-	req.SetVar("labels", labels)
+	req.SetVar("name", s.namespaceName)
+	req.SetVar("labels", s.labels)
 	return req
 }
 
-func fixNamespaceQuery(name string) *graphql.Request {
+func (s testNamespaceSuite) fixNamespaceQuery() *graphql.Request {
 	query := `query ($name: String!) {
 				  namespace(name: $name) {
 					name
@@ -79,11 +171,11 @@ func fixNamespaceQuery(name string) *graphql.Request {
 				  }
 				}`
 	req := graphql.NewRequest(query)
-	req.SetVar("name", name)
+	req.SetVar("name", s.namespaceName)
 	return req
 }
 
-func fixNamespaceDelete(name string) *graphql.Request {
+func (s testNamespaceSuite) fixNamespaceDelete() *graphql.Request {
 	query := `mutation ($name: String!) {
 				  deleteNamespace(name: $name) {
 					name
@@ -91,15 +183,38 @@ func fixNamespaceDelete(name string) *graphql.Request {
 				  }
 				}`
 	req := graphql.NewRequest(query)
-	req.SetVar("name", name)
+	req.SetVar("name", s.namespaceName)
 	return req
 }
 
 type namespaceObj struct {
-	name   string
-	labels labels
+	Name   string `json:"name"`
+	Labels labels `json:"labels"`
+}
+
+type GqlErrors struct {
+	Errors []interface{} `json:"errors"`
+}
+
+type createNamespaceResponse struct {
+	GqlErrors
+	CreateNamespace namespaceObj `json:"createNamespace"`
 }
 
 type namespaceResponse struct {
-	namespace namespaceObj
+	GqlErrors
+	Namespace namespaceObj `json:"namespace"`
+}
+
+type deleteNamespaceResponse struct {
+	GqlErrors
+	DeleteNamespace namespaceObj `json:"deleteNamespace"`
+}
+
+type namespaceTerminatingError struct{
+	phase v1.NamespacePhase
+}
+
+func (e namespaceTerminatingError) Error() string {
+	return fmt.Sprintf("Namespace is still terminating. Phase: %s", e.phase)
 }
