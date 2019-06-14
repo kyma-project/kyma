@@ -42,6 +42,16 @@ const (
 )
 
 type Jwt struct {
-	Issuer  string
-	JwksUri string
+	Issuer      string
+	JwksUri     string
+	TriggerRule TriggerRule
+}
+
+type TriggerRule struct {
+	ExcludedPaths []MatchExpression
+}
+
+type MatchExpression struct {
+	ExprType string
+	Value    string
 }

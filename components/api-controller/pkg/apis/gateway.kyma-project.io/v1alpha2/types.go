@@ -102,9 +102,9 @@ func toMatchExpression(generic map[string]string) (*MatchExpression, error) {
 }
 
 type JwtAuthentication struct {
-	JwksUri     string      `json:"jwksUri"`
-	Issuer      string      `json:"issuer"`
-	TriggerRule TriggerRule `json:"triggerRule,omitempty"`
+	JwksUri     string       `json:"jwksUri"`
+	Issuer      string       `json:"issuer"`
+	TriggerRule *TriggerRule `json:"triggerRule,omitempty"`
 }
 
 type ApiStatus struct {
