@@ -59,7 +59,7 @@ type MatchExpression struct {
 	Value    string
 }
 
-func (a *MatchExpression) UnmarshalJSON(b []byte) error {
+func (self *MatchExpression) UnmarshalJSON(b []byte) error {
 
 	var generic map[string]string
 	if err := json.Unmarshal(b, &generic); err != nil {
@@ -71,9 +71,17 @@ func (a *MatchExpression) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	*a = *me
+	*self = *me
 
 	return nil
+}
+
+func (self MatchExpression) MarshalJSON() ([]byte, error) {
+
+	res := map[string]string{}
+	res[string(self.ExprType)] = self.Value
+
+	return json.Marshal(res)
 }
 
 func toMatchExpression(generic map[string]string) (*MatchExpression, error) {
