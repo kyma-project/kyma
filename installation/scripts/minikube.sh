@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo "The minikube.sh script is deprecated and will be removed. Use Kyma CLI instead."
+
 set -o errexit
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
