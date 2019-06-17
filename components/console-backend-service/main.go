@@ -4,6 +4,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/tracing"
+
 	"net/http"
 	"time"
 
@@ -147,6 +150,7 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 		handler.WebsocketUpgrader(websocket.Upgrader{
 			CheckOrigin: origin.CheckFn(allowedOrigins),
 		}),
+		handler.Tracer(tracing.New()),
 	))
 
 	serverHandler := cors.New(cors.Options{
