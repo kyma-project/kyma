@@ -26,6 +26,7 @@ type TestSuite interface {
 	SendEvent() error
 	CleanUp() error
 	GetTestServiceURL() string
+	CheckCounterPod() error
 }
 
 type testSuite struct {
@@ -127,6 +128,18 @@ func (ts *testSuite) CreateResources() error {
 
 func (ts *testSuite) GetTestServiceURL() string {
 	return ts.testService.GetTestServiceURL()
+}
+
+func (ts *testSuite) CheckCounterPod() error {
+	count, err := ts.testService.CheckValue()
+	if err != nil {
+		return fmt.Errorf("Unable to fetch count from Error: %s", err)
+	}
+
+	if count != 1 {
+		return fmt.Errorf("Counter pod value is not as expected. The value is: %v", count)
+	}
+	return nil
 }
 
 func (ts *testSuite) createApplication() error {
@@ -252,7 +265,7 @@ func (ts *testSuite) CreateServiceBindingUsage() error {
 func (ts *testSuite) SendEvent() error {
 	event := prepareEvent()
 
-	return testkit.SendEvent("http://application-registry-external-api.kyma-integration.svc.cluster.local:8081/"+consts.AppName+"/v1/events", event)
+	return testkit.SendEvent("http://e2e-test-app-event-service-external-api.kyma-integration.svc.cluster.local:8081/"+consts.AppName+"/v1/events", event)
 }
 
 func prepareEvent() *testkit.ExampleEvent {
@@ -272,7 +285,7 @@ func (ts *testSuite) StartTestServer() error {
 		return err
 	}
 
-	err = wait.Until(5, 30, ts.testService.IsReady)
+	err = wait.Until(5, 60, ts.testService.IsReady)
 
 	if err != nil {
 		return fmt.Errorf("Test Service not started: %s", err)
@@ -282,15 +295,8 @@ func (ts *testSuite) StartTestServer() error {
 }
 
 func (ts *testSuite) CleanUp() error {
-	return nil
 	errorOccured := false
 	var err error
-
-	err = ts.lambdaClient.DeleteLambda()
-	if err != nil {
-		log.Error(err)
-		errorOccured = true
-	}
 
 	err = ts.scClient.DeleteServiceBindingUsage()
 	if err != nil {
@@ -305,6 +311,12 @@ func (ts *testSuite) CleanUp() error {
 	}
 
 	err = ts.scClient.DeleteServiceInstance(consts.ServiceInstanceName)
+	if err != nil {
+		log.Error(err)
+		errorOccured = true
+	}
+
+	err = ts.lambdaClient.DeleteLambda()
 	if err != nil {
 		log.Error(err)
 		errorOccured = true

@@ -7,7 +7,7 @@ const (
 	IntegrationNamespace = "kyma-integration"
 	ProductionNamespace  = "production"
 
-	LambdaEndpoint = "http://e2e-lambda.production:8080"
+	LambdaEndpoint = "http://e2e-test-app.production:8080"
 	EventType      = "exampleEvent"
 	EventVersion   = "v1"
 

@@ -20,7 +20,7 @@ const lambdaFunction = `
 	const request = require('request')
 	module.exports = { main: function (event, context) {
 		return new Promise((resolve, reject) => {
-			const url = "http://" + process.env.GATEWAY_URL + "/counter"
+			const url = process.env.GATEWAY_URL + "/counter"
 			sendReq(url, resolve, reject)
 		})
 	} }

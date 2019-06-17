@@ -34,10 +34,10 @@ func main() {
 
 	defer func() {
 		log.Info("Starting cleanup")
-		err := ts.CleanUp()
-		if err != nil {
-			log.Error(err)
-		}
+		// err := ts.CleanUp()
+		// if err != nil {
+		// 	log.Error(err)
+		// }
 	}()
 
 	log.Trace("creating resources")
@@ -88,14 +88,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//TODO: Sending event
 	log.Trace("Sending Event")
 	err = ts.SendEvent()
 	if err != nil {
 		log.Fatal(err)
 	}
+	time.Sleep(30 * time.Second)
+	log.Trace("Checking counter pod for the count.")
+	err = ts.CheckCounterPod()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	//TODO: Check
-
-	//TODO: CleanUp
+	log.Info("Successfully Finished the e2e test!!")
 }

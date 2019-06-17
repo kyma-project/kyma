@@ -59,7 +59,7 @@ func (ts *testService) CreateTestService() error {
 
 func (ts *testService) CheckValue() (int, error) {
 
-	url := ts.GetTestServiceURL()
+	url := ts.GetTestServiceURL() + "/counter"
 
 	resp, err := ts.HttpClient.Get(url)
 
@@ -70,7 +70,7 @@ func (ts *testService) CheckValue() (int, error) {
 	defer resp.Body.Close()
 
 	var response struct {
-		counter int
+		Counter int `json:"counter"`
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(&response)
@@ -79,7 +79,7 @@ func (ts *testService) CheckValue() (int, error) {
 		return 0, err
 	}
 
-	return response.counter, nil
+	return response.Counter, nil
 }
 
 func (ts *testService) IsReady() (bool, error) {
