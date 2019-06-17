@@ -124,7 +124,7 @@ func TestComponentSpec(t *testing.T) {
 			So(vs.Spec, ctx.ShouldDeepEqual, expectedVs)
 
 			lastPolicy, err := istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(lastAPI.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
-			expectedPolicy := ctx.policyFor(testID, fmt.Sprintf("https://dex.%s", domainName))
+			expectedPolicy := ctx.policyFor(testID, fmt.Sprintf("https://dex.%s", domainName), nil)
 			So(err, ShouldBeNil)
 			So(lastPolicy.Spec, ctx.ShouldDeepEqual, expectedPolicy)
 		})
@@ -185,7 +185,7 @@ func TestComponentSpec(t *testing.T) {
 			So(lastAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
 
 			policy, err := istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(lastAPI.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
-			expectedPolicy := ctx.policyFor(testID, api.Spec.Authentication[0].Jwt.Issuer)
+			expectedPolicy := ctx.policyFor(testID, api.Spec.Authentication[0].Jwt.Issuer, sampleTriggerRule)
 			So(err, ShouldBeNil)
 			So(policy.Spec, ctx.ShouldDeepEqual, expectedPolicy)
 		})
@@ -419,7 +419,18 @@ func (componentTestContext) virtualServiceFor(testID string, domainName string, 
 	}
 }
 
-func (componentTestContext) policyFor(testID, issuer string) *istioAuthApi.PolicySpec {
+func sampleTriggerRule() *istioAuthApi.TriggerRule {
+	return &istioAuthApi.TriggerRule{
+		ExcludedPaths: []*istioAuthApi.StringMatch{
+			&istioAuthApi.StringMatch{MatchType: "exact", Value: "/do/not/use/in/production"},
+			&istioAuthApi.StringMatch{MatchType: "prefix", Value: "/web"},
+			&istioAuthApi.StringMatch{MatchType: "suffix", Value: "/favicon.ico"},
+			&istioAuthApi.StringMatch{MatchType: "regex", Value: "^/api/orders/(.*?)?"},
+		},
+	}
+}
+
+func (componentTestContext) policyFor(testID, issuer string, triggerRule *istioAuthApi.TriggerRule) *istioAuthApi.PolicySpec {
 	return &istioAuthApi.PolicySpec{
 		Targets: istioAuthApi.Targets{
 			{Name: fmt.Sprintf("sample-app-svc-%s", testID)},
@@ -428,8 +439,9 @@ func (componentTestContext) policyFor(testID, issuer string) *istioAuthApi.Polic
 		Origins: istioAuthApi.Origins{
 			{
 				Jwt: &istioAuthApi.Jwt{
-					Issuer:  issuer,
-					JwksUri: "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
+					Issuer:      issuer,
+					JwksUri:     "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
+					TriggerRule: triggerRule,
 				},
 			},
 		},
@@ -453,6 +465,14 @@ func (componentTestContext) setCustomJwtAuthenticationConfig(api *kymaApi.Api) {
 			Jwt: kymaApi.JwtAuthentication{
 				Issuer:  issuer,
 				JwksUri: jwksURI,
+				TriggerRule: &kymaApi.TriggerRule{
+					ExcludedPaths: []kymaApi.MatchExpression{
+						kymaApi.MatchExpression{ExprType: kymaApi.ExactMatch, Value: "/do/not/use/in/production"},
+						kymaApi.MatchExpression{ExprType: kymaApi.PrefixMatch, Value: "/web"},
+						kymaApi.MatchExpression{ExprType: kymaApi.SuffixMatch, Value: "/favicon.ico"},
+						kymaApi.MatchExpression{ExprType: kymaApi.RegexMatch, Value: "^/padu/.*"},
+					},
+				},
 			},
 		},
 	}

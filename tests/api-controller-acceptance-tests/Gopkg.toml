@@ -42,7 +42,8 @@
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  branch = "master"
+  branch = "api-gateway-authentication-for-paths"
+  source = "git@github.com:Tomasz-Smelcerz-SAP/kyma.git"
 
 [[constraint]]
   name = "github.com/go-test/deep"
