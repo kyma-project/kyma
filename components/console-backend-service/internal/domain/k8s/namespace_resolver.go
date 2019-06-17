@@ -111,9 +111,6 @@ func (r *namespaceResolver) NamespaceQuery(ctx context.Context, name string) (*g
 		glog.Error(errors.Wrapf(err, "while getting %s with name %s", pretty.Namespace, name))
 		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
 	}
-	if namespace == nil {
-		return nil, nil
-	}
 
 	converted, err := r.namespaceConverter.ToGQL(namespace)
 
