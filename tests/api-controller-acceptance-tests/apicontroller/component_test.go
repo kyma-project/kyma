@@ -2,12 +2,13 @@ package apicontroller
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"math/rand"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/avast/retry-go"
 	"github.com/go-test/deep"
@@ -222,7 +223,7 @@ func TestComponentSpec(t *testing.T) {
 				}
 
 				if !testedApi.Status.IsTargetServiceOccupied() {
-					return errors.Errorf("Incorrect status: %s", testedApi.Status.ValidationStatus)
+					return errors.Errorf("Incorrect status: %d", testedApi.Status.ValidationStatus)
 				}
 
 				return nil
@@ -282,7 +283,7 @@ func TestComponentSpec(t *testing.T) {
 				}
 
 				if !testedApi.Status.IsTargetServiceOccupied() {
-					return errors.Errorf("Incorrect status: %s", testedApi.Status.ValidationStatus)
+					return errors.Errorf("Incorrect status: %d", testedApi.Status.ValidationStatus)
 				}
 
 				return nil
@@ -313,7 +314,7 @@ func TestComponentSpec(t *testing.T) {
 				}
 
 				if !testedApi.Status.IsSuccessful() {
-					return errors.Errorf("Incorrect status: %s", testedApi.Status.ValidationStatus)
+					return errors.Errorf("Incorrect status: %d", testedApi.Status.ValidationStatus)
 				}
 
 				return nil
@@ -401,7 +402,7 @@ func (componentTestContext) virtualServiceFor(testID string, domainName string, 
 						Uri: &istioNetApi.StringMatch{Regex: "/.*"},
 					},
 				},
-				Route: []*istioNetApi.DestinationWeight{
+				Route: []*istioNetApi.HTTPRouteDestination{
 					{
 						Destination: &istioNetApi.Destination{
 							Host: fmt.Sprintf("sample-app-svc-%s.%s.svc.cluster.local", testID, namespace),
