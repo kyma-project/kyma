@@ -510,6 +510,13 @@ func (in *CommonAssetSpec) DeepCopyInto(out *CommonAssetSpec) {
 	*out = *in
 	in.Source.DeepCopyInto(&out.Source)
 	out.BucketRef = in.BucketRef
+	if in.Metadata != nil {
+		in, out := &in.Metadata, &out.Metadata
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 

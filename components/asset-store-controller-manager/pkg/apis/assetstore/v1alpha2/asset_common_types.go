@@ -7,8 +7,9 @@ import (
 
 // CommonAssetSpec defines the desired state of Asset
 type CommonAssetSpec struct {
-	Source    AssetSource    `json:"source"`
-	BucketRef AssetBucketRef `json:"bucketRef,omitempty"`
+	Source    AssetSource       `json:"source"`
+	BucketRef AssetBucketRef    `json:"bucketRef,omitempty"`
+	Metadata  map[string]string `json:"metadata,omitempty"`
 }
 
 // CommonAssetStatus defines the observed state of Asset
