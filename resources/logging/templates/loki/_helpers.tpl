@@ -55,7 +55,8 @@ ingester:
   lifecycler:
     address: 127.0.0.1
     ring:
-      store: {{ .Values.loki.config.ingester.lifecycler.ring.store }}
+      kvstore:
+        store: {{ .Values.loki.config.ingester.lifecycler.ring.store }}
       replication_factor: {{ .Values.loki.config.ingester.lifecycler.ring.replication_factor }}
   chunk_idle_period: 15m
 
