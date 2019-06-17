@@ -94,9 +94,6 @@
 # The `namespace-controller` subchart
 /resources/core/charts/namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
 
-# The `etcd-operator` subchart
-/resources/core/charts/etcd-operator/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
-
 # The 'gateway' subchart
 /resources/core/charts/gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
@@ -326,8 +323,6 @@
 /tests/application-connector-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Tools
-# Etcd backup Component
-/components/etcd-backup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The alpine-net directory
 /tools/alpine-net/ @suleymanakbas91 @clebs @a-thaler @lilitgh
