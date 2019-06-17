@@ -185,7 +185,7 @@ func TestComponentSpec(t *testing.T) {
 			So(lastAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
 
 			policy, err := istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(lastAPI.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
-			expectedPolicy := ctx.policyFor(testID, api.Spec.Authentication[0].Jwt.Issuer, sampleTriggerRule)
+			expectedPolicy := ctx.policyFor(testID, api.Spec.Authentication[0].Jwt.Issuer, sampleTriggerRule())
 			So(err, ShouldBeNil)
 			So(policy.Spec, ctx.ShouldDeepEqual, expectedPolicy)
 		})
@@ -439,9 +439,9 @@ func (componentTestContext) policyFor(testID, issuer string, triggerRule *istioA
 		Origins: istioAuthApi.Origins{
 			{
 				Jwt: &istioAuthApi.Jwt{
-					Issuer:      issuer,
-					JwksUri:     "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
-					TriggerRule: triggerRule,
+					Issuer:       issuer,
+					JwksUri:      "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
+					TriggerRules: []*istioAuthApi.TriggerRule{triggerRule},
 				},
 			},
 		},
