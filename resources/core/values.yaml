@@ -65,8 +65,8 @@ global:
     dir: pr/
     version: PR-4454
   console_backend_service_test:
-    dir: PR-4538/
-    version: 13d254ff
+    dir: pr/
+    version: PR-4538
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8
