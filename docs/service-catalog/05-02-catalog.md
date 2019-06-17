@@ -25,7 +25,7 @@ This table lists the configurable parameters, their descriptions, and default va
 | **controllerManager.resources.limits.cpu** | Defines limits for CPU resources. | `100m` |
 | **controllerManager.resources.limits.memory** | Defines limits for memory resources. | `30Mi` |
 | **controllerManager.verbosity** | Defines log severity level. The possible values range from 0-10. | `10` |
-| **controllerManager.brokerRelistIntervalActivated** | Specifies whether or not the controller supports a --broker-relist-interval flag. If this is set to true, brokerRelistInterval will be used as the value for that flag. | `true` |
+| **controllerManager.brokerRelistIntervalActivated** | Specifies whether or not the controller supports a `--broker-relist-interval` flag. If this is set to `true`, brokerRelistInterval will be used as the value for that flag. | `true` |
 | **controllerManager.brokerRelistInterval** | Specifies how often the controller relists the catalogs of ready brokers. The duration format is 20m, 1h, etc. | `24h` |
 | **originatingIdentityEnabled** | Enables the OriginatingIdentity feature which controls whether the controller includes originating identity in the header of requests sent to brokers and persisted under a CustomResource. | `true` |
 | **asyncBindingOperationsEnabled** | Enables support for asynchronous binding operations. | `true` |
