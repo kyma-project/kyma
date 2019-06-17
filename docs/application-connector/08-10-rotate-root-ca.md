@@ -107,12 +107,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
   kubectl -n istio-system edit secret application-connector-certs-cacert
   ```
 
-6. If you experience any issues with new certificates not being trusted, restart Istio Ingress Gateway Pods. Run:
-  ```
-  kubectl -n istio-system delete po -l app=istio-ingressgateway
-  ```
-
-7. Generate new certificates in a runtime. To do that, create a CertificateRequest CR in the runtime in which you want to generate the certificates.
+6. Generate new certificates in a runtime. To do that, create a CertificateRequest CR in the runtime in which you want to generate the certificates.
 
 ## Rotating a compromised root CA key
 
@@ -147,9 +142,4 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
   kubectl -n istio-system edit secret application-connector-certs-cacert
   ```
 
-6. If you experience any issues with new certificates not being trusted, restart Istio Ingress Gateway pods. Run:
-  ```
-  kubectl -n istio-system delete po -l app=istio-ingressgateway
-  ```
-
-7. Generate new certificates in a runtime. To do that, create a CertificateRequest CR in the runtime in which you want to generate the certificates.
+6. Generate new certificates in a runtime. To do that, create a CertificateRequest CR in the runtime in which you want to generate the certificates.
