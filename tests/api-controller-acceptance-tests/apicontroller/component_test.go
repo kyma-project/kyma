@@ -431,6 +431,12 @@ func sampleTriggerRule() *istioAuthApi.TriggerRule {
 }
 
 func (componentTestContext) policyFor(testID, issuer string, triggerRule *istioAuthApi.TriggerRule) *istioAuthApi.PolicySpec {
+
+	var triggerRules []*istioAuthApi.TriggerRule = nil
+	if triggerRule != nil {
+		triggerRules = []*istioAuthApi.TriggerRule{triggerRule}
+	}
+
 	return &istioAuthApi.PolicySpec{
 		Targets: istioAuthApi.Targets{
 			{Name: fmt.Sprintf("sample-app-svc-%s", testID)},
@@ -441,7 +447,7 @@ func (componentTestContext) policyFor(testID, issuer string, triggerRule *istioA
 				Jwt: &istioAuthApi.Jwt{
 					Issuer:       issuer,
 					JwksUri:      "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
-					TriggerRules: []*istioAuthApi.TriggerRule{triggerRule},
+					TriggerRules: triggerRules,
 				},
 			},
 		},
