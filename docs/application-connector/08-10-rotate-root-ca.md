@@ -65,27 +65,16 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
   kubectl -n istio-system edit secret application-connector-certs-cacert
   ```
 
-9. If you experience any issues with new certificates not being trusted, restart Istio Ingress Gateway Pods. Run:
-  ```
-  kubectl -n istio-system delete po -l app=istio-ingressgateway
-  ```
-> **NOTE:** To maintain 100% availability, you can scale up the deployment, restart the old Pod, and scale the deployment back down.
+9. Renew the certificates in a runtime. To do that, create a CertificateRequest CR in the runtime in which you want to renew the certificates. Alternatively, wait for the certificates to expire in a given runtime. The system renews the certificates automatically using the information stored in the Secrets you updated.
 
-10. Renew the certificates in a runtime. To do that, create a CertificateRequest CR in the runtime in which you want to renew the certificates. Alternatively, wait for the certificates to expire in a given runtime. The system renews the certificates automatically using the information stored in the Secrets you updated.
-
-11. After the certificates are renewed in a runtime, remove the `application-connector-certs-cacert` Secret entry which contains the old certificate. First, encode the `new-ca.crt` file with base64:
+10. After the certificates are renewed in a runtime, remove the `application-connector-certs-cacert` Secret entry which contains the old certificate. First, encode the `new-ca.crt` file with base64:
   ```
   cat new-ca.crt | base64
   ```
 
-12. Edit the Secret and replace the `ca.crt` value with the `new-ca.crt` base64-encoded certificate. Run:
+11. Edit the Secret and replace the `ca.crt` value with the `new-ca.crt` base64-encoded certificate. Run:
   ```
   kubectl -n istio-system edit secret application-connector-certs-cacert
-  ```
-
-13. For changes to take effect, you may need to restart the Pods of Istio Ingress Gateway. Run: 
-  ```
-  kubectl -n istio-system delete po -l app=istio-ingressgateway
   ```
 
 ## Rotating a compromised Root CA certificate

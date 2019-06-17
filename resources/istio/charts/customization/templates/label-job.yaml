@@ -42,6 +42,7 @@ spec:
       containers:
       - name: kyma-ns-label
         image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+        terminationMessagePolicy: "FallbackToLogsOnError"
         command:
           - /bin/bash
           - -c

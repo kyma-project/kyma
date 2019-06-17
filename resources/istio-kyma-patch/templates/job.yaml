@@ -2,6 +2,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: istio-kyma-patch
+  annotations: 
+    "helm.sh/hook": post-install,post-upgrade
 spec:
   backoffLimit: 1
   template:
@@ -23,6 +25,7 @@ spec:
           value: /etc/config
         - name: REQUIRED_ISTIO_VERSION
           value: {{ .Values.global.required_istio_version }}
+        terminationMessagePolicy: "FallbackToLogsOnError"
       volumes:
       - name: config-volume
         configMap:
