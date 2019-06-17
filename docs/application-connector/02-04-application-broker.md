@@ -17,7 +17,7 @@ When this process is complete, you can provision and bind your services.
 
 ## Provisioning and binding for an API ServiceClass
 
-This ServiceClass has a **bindable** flag set to `true` which means that you have to provision a ServiceInstance and bind it to the service or lambda to connect to the given API. The provisioning and binding workflow for an API ServiceClass consists of the following steps:
+This ServiceClass has a **bindable** parameter set to `true` which means that you have to provision a ServiceInstance and bind it to the service or lambda to connect to the given API. The provisioning and binding workflow for an API ServiceClass consists of the following steps:
 
 1. Select an API ServiceClass from the Service Catalog.
 2. Provision this ServiceClass by creating its ServiceInstance in a Namespace.
@@ -31,7 +31,7 @@ This ServiceClass has a **bindable** flag set to `true` which means that you hav
 
 ## Provisioning and binding for an Event ServiceClass
 
-This ServiceClass has a **bindable** flag set to `false` which means that after provisioning a ServiceClass in the Namespace, given Events are ready to use for all services. The provisioning workflow for an Event ServiceClass consists of the following steps:
+This ServiceClass has a **bindable** parameter set to `false` which means that after provisioning a ServiceClass in the Namespace, given Events are ready to use for all services. The provisioning workflow for an Event ServiceClass consists of the following steps:
 
 1. Select a given Event ServiceClass from the Service Catalog.
 2. Provision this ServiceClass by creating a ServiceInstance in the given Namespace.
@@ -45,5 +45,5 @@ This ServiceClass has a **bindable** flag set to `false` which means that after 
 
 ## Provisioning and binding for both the API and Event ServiceClass
 
-This ServiceClass has a **bindable** flag set to `true`.
+This ServiceClass has a **bindable** parameter set to `true`.
 The provisioning and binding workflow for both the API and Event ServiceClass is a combination of steps described for an [API ServiceClass](#architecture-the-application-broker-architecture-provisioning-and-binding-for-an-api-serviceclass) and an [Event ServiceClass](#architecture-the-application-broker-architecture-provisioning-and-binding-for-an-event-serviceclass).
