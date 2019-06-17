@@ -36,6 +36,7 @@ type File {
 type Asset {
     name: String!
     namespace: String!
+    metadata: JSON!
     type: String!
     files(filterExtensions: [String!]): [File!]!
     status: AssetStatus!
