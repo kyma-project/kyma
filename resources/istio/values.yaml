@@ -80,7 +80,7 @@ grafana:
 # addon prometheus configuration
 #
 prometheus:
-  enabled: true
+  enabled: false
 
 #
 # addon servicegraph configuration
