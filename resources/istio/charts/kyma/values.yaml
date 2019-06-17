@@ -1,7 +1,0 @@
----
-enabled: false
-
-global:
-  ingress:
-    tlsCrt: ""
-    tlsKey: ""

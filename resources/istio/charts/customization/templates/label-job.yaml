@@ -12,6 +12,8 @@ rules:
 - apiGroups: [""]
   resources: ["namespaces"]
   verbs: ["get", "list", "watch", "patch"]
+  resourceNames:
+{{ .Values.namespaces2Label | toYaml | trim | indent 4 }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -31,7 +33,6 @@ kind: Job
 metadata:
   name: kyma-ns-label
 spec:
-  backoffLimit: 1
   template:
     metadata:
       name: kyma-ns-label
@@ -45,6 +46,8 @@ spec:
           - /bin/bash
           - -c
           - |
-            for NS in istio-system kube-system; do
-              kubectl label namespace "${NS}" "istio-injection=disabled" --overwrite
-            done
+            set -e
+            {{- range .Values.namespaces2Label }}
+            echo "---> Setting label to {{ . }}"
+            kubectl label namespace {{ . | quote }} "istio-injection=disabled" --overwrite
+            {{- end }}

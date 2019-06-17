@@ -11,8 +11,11 @@
 # Gateways Configuration, refer to the charts/gateways/values.yaml
 # for detailed configuration
 #
-kyma:
+customization:
   enabled: true
+  namespaces2Label:
+    - istio-system
+    - kube-system
 
 gateways:
   enabled: true
