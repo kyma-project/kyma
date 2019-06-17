@@ -1,8 +1,9 @@
 package k8s
 
 import (
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -52,7 +53,7 @@ func TestNamespaceConverter_ToGQLs(t *testing.T) {
 			nil,
 			&v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: expectedName,
+					Name:   expectedName,
 					Labels: map[string]string{"test": "label"},
 				},
 			},
@@ -75,7 +76,7 @@ func TestNamespaceConverter_ToGQL(t *testing.T) {
 		expectedLabels := gqlschema.Labels{"test": "label"}
 		in := v1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: expectedName,
+				Name:   expectedName,
 				Labels: map[string]string{"test": "label"},
 			},
 		}
