@@ -1,3 +1,5 @@
 ---
 enabled: true
-namespaces2Label: []
+namespaces2Label:
+  - istio-system
+  - kube-system
