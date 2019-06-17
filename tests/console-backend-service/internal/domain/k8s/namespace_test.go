@@ -4,10 +4,11 @@ package k8s
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/avast/retry-go"
 	v1 "k8s.io/api/core/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"testing"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
@@ -211,7 +212,7 @@ type deleteNamespaceResponse struct {
 	DeleteNamespace namespaceObj `json:"deleteNamespace"`
 }
 
-type namespaceTerminatingError struct{
+type namespaceTerminatingError struct {
 	phase v1.NamespacePhase
 }
 
