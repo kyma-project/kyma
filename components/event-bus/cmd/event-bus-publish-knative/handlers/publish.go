@@ -160,7 +160,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 }
 
 func initTrace(r *http.Request, tracer *trace.Tracer) (span *opentracing.Span, context *api.TraceContext) {
-	if (*tracer).Started() {
+	if (*tracer).IsStarted() {
 		spanContext := trace.ReadTraceHeaders(&r.Header)
 		span = trace.StartSpan(spanContext, &(*tracer).Options().OperationName, ext.SpanKindProducer)
 		context = trace.WriteSpan(span)

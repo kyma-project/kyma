@@ -35,7 +35,7 @@ type Options struct {
 
 // Tracer encapsulates the trace behaviours.
 type Tracer interface {
-	Started() bool
+	IsStarted() bool
 	Options() *Options
 	Stop()
 }
@@ -81,8 +81,8 @@ func (zk *OpenTracer) Start() {
 	}
 }
 
-// Started returns a boolean value indicating id the OpenTracer is started or not.
-func (zk *OpenTracer) Started() bool {
+// IsStarted returns a boolean value indicating id the OpenTracer is started or not.
+func (zk *OpenTracer) IsStarted() bool {
 	return zk.collector != nil
 }
 

@@ -78,8 +78,8 @@ func CheckIfEventActivationExistForSubscription(ctx context.Context, client runt
 	return false
 }
 
-// GetSubscriptionsForEventActivation gets all the subscriptions having the same "namespace" and the same "Source"
-// as the "ea" object.
+// GetSubscriptionsForEventActivation gets the "ea" object of all the subscriptions having
+// the same "namespace" and the same "Source"
 func GetSubscriptionsForEventActivation(ctx context.Context, client runtimeClient.Client, ea *eventingv1alpha1.EventActivation) ([]*subApis.Subscription, error) {
 	eaNamespace := ea.GetNamespace()
 	eaSourceID := ea.EventActivationSpec.SourceID

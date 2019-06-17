@@ -26,7 +26,7 @@ type SubscriptionSpec struct {
 	SourceID                      string `json:"source_id"`
 }
 
-// SubscriptionList for Kyma subscriptions.
+// SubscriptionList of Kyma subscriptions.
 type SubscriptionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
@@ -34,17 +34,17 @@ type SubscriptionList struct {
 	Items []Subscription `json:"items"`
 }
 
-// SubscriptionStatus for Kyma subscriptions.
+// SubscriptionStatus of Kyma subscriptions.
 type SubscriptionStatus struct {
 	Status `json:",inline"`
 }
 
-// Status for Kyma subscriptions.
+// Status of Kyma subscriptions.
 type Status struct {
 	Conditions Conditions `json:"conditions"`
 }
 
-// SubscriptionCondition for Kyma subscriptions.
+// SubscriptionCondition of Kyma subscriptions.
 type SubscriptionCondition struct {
 	Type               SubscriptionConditionType `json:"type"`
 	Status             ConditionStatus           `json:"status"`
@@ -63,13 +63,13 @@ type SubscriptionConditionType string
 type Conditions []SubscriptionCondition
 
 const (
-	// ConditionTrue for Kyma subscriptions.
+	// ConditionTrue value for the Kyma subscription condition status.
 	ConditionTrue ConditionStatus = "True"
-	// ConditionFalse for Kyma subscriptions.
+	// ConditionFalse value for the Kyma subscription condition status.
 	ConditionFalse ConditionStatus = "False"
 
-	// Ready for Kyma subscriptions.
+	// Ready label for the Kyma subscription condition type.
 	Ready SubscriptionConditionType = "is-ready"
-	// EventsActivated for Kyma subscriptions.
+	// EventsActivated label for the Kyma subscription condition type.
 	EventsActivated SubscriptionConditionType = "events-activated"
 )

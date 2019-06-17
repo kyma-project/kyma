@@ -34,7 +34,7 @@ if [ "$1" == "$CI_FLAG" ]; then
 fi
 
 ${buildEnv} go build -v -a -installsuffix cgo -o ./cmd/event-bus-publish-knative/event-bus-publish-knative ./cmd/event-bus-publish-knative/
-${buildEnv} go build -v -a -installsuffix cgo -o ./cmd/event-bus-subscription-controller-knative/event-bus-subscription-controller-knative ./cmd/event-bus-subscription-controller-knative/cmd/manager/
+${buildEnv} go build -v -a -installsuffix cgo -o ./cmd/event-bus-subscription-controller-knative/event-bus-subscription-controller-knative ./cmd/event-bus-subscription-controller-knative/...
 
 goBuildResult=$?
 if [ ${goBuildResult} != 0 ]; then

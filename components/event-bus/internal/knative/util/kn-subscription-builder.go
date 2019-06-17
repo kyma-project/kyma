@@ -6,7 +6,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// SubscriptionBuilder represents the subscription builder.
+// SubscriptionBuilder represents the subscription builder that is used in the internal knative util package
+// and the knative subscription controller tests.
 type SubscriptionBuilder struct {
 	*eventingv1alpha1.Subscription
 }

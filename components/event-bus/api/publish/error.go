@@ -150,7 +150,7 @@ func ErrorResponseBadPayload() (response *Error) {
 	return &apiError
 }
 
-// ErrorResponseMissingFieldSourceID returns an API error instance for the missing field source id error.
+// ErrorResponseMissingFieldSourceID returns an API error instance for the missing field source ID error.
 func ErrorResponseMissingFieldSourceID() (response *Error) {
 	apiErrorDetail := ErrorDetail{
 		Field:    FieldSourceID + "/" + HeaderSourceID,
@@ -199,12 +199,12 @@ func ErrorResponseWrongEventTime() (response *Error) {
 	return createInvalidFieldError(FieldEventTime)
 }
 
-// ErrorResponseWrongEventID returns an API error instance for the wrong event id error.
+// ErrorResponseWrongEventID returns an API error instance for the wrong event ID error.
 func ErrorResponseWrongEventID() (response *Error) {
 	return createInvalidFieldError(FieldEventID)
 }
 
-// ErrorResponseWrongSourceID returns an API error instance for the wrong source id error.
+// ErrorResponseWrongSourceID returns an API error instance for the wrong source ID error.
 func ErrorResponseWrongSourceID(sourceIDFromHeader bool) (response *Error) {
 	if sourceIDFromHeader {
 		return createInvalidFieldErrorWithType(HeaderSourceID, ErrorTypeInvalidHeader)
