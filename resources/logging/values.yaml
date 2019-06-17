@@ -20,7 +20,7 @@ loki:
 
   image:
     repository: grafana/loki
-    tag: master-ed94502
+    tag: v0.1.0 
     pullPolicy: Always # Always pull while in BETA
 
   service:
@@ -109,7 +109,7 @@ loki:
           store: inmemory
           replication_factor: 1
     schema_configs:
-      - from: 0
+      - from: 2000-01-01
         store: boltdb
         object_store: filesystem
         schema: v9
@@ -131,7 +131,7 @@ promtail:
 
   image:
     repository: grafana/promtail
-    tag: master-0d4131c
+    tag: v0.1.0 
     pullPolicy: Always # Always pull while in BETA
 
   volumes:
