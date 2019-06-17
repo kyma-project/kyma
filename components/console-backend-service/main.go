@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 
+	opentracing "github.com/opentracing/opentracing-go"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/tracing"
 
 	"net/http"
@@ -35,6 +37,8 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/origin"
+
+	zipkin "github.com/openzipkin/zipkin-go-opentracing"
 )
 
 type config struct {
@@ -132,6 +136,7 @@ func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
 }
 
 func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema, authenticator authenticatorpkg.Request) {
+	setupTracing()
 	var allowedOrigins []string
 	if len(allowedOrigins) == 0 {
 		allowedOrigins = []string{"*"}
@@ -178,5 +183,17 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 		glog.Errorf("HTTP server ListenAndServe: %v", err)
+	}
+}
+
+func setupTracing() {
+	collector, err := zipkin.NewHTTPCollector("http://zipkin.kyma-system:9411/api/v1/spans")
+	exitOnError(err, "zipkin")
+	recorder := zipkin.NewRecorder(collector, true, "3000", "console-backend-service")
+	tracer, err := zipkin.NewTracer(recorder, zipkin.TraceID128Bit(false))
+	exitOnError(err, "tracer")
+	opentracing.SetGlobalTracer(tracer)
+	if err != nil {
+		glog.Fatal(err)
 	}
 }
