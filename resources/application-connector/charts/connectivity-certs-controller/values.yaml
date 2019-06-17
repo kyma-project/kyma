@@ -7,7 +7,7 @@ deployment:
 
 secrets:
   caCertificate:
-    name: application-connector-certs-cacert
+    name: application-connector-certs
     namespace: istio-system
   clientCertificate:
     name: cluster-client-certificates
