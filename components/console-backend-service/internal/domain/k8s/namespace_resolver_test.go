@@ -145,6 +145,7 @@ func TestNamespaceResolver_NamespaceQuery(t *testing.T) {
 		defer svc.AssertExpectations(t)
 
 		converter := automock.NewNamespaceConverter()
+		converter.On("ToGQL", nil).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
