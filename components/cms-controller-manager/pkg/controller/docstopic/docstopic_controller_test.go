@@ -93,6 +93,13 @@ func TestReconcile(t *testing.T) {
 		err = c.Status().Update(context.TODO(), &asset)
 		g.Expect(err).ToNot(gomega.HaveOccurred())
 		g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(request)))
+
+		if asset.Annotations["cms.kyma-project.io/asset-short-name"] == "source-one" {
+			g.Expect(asset.Spec.Metadata).To(gomega.HaveLen(1))
+			g.Expect(asset.Spec.Metadata["test"]).To(gomega.Equal("true"))
+		} else {
+			g.Expect(asset.Spec.Metadata).To(gomega.BeEmpty())
+		}
 	}
 
 	// Update DocsTopic status
@@ -123,7 +130,7 @@ func TestReconcile(t *testing.T) {
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	g.Expect(assets.Items).To(gomega.HaveLen(len(currentTopic.Spec.Sources)))
 	for _, a := range assets.Items {
-		if a.Annotations["assetshortname.cms.kyma-project.io"] != "source-two" {
+		if a.Annotations["cms.kyma-project.io/asset-short-name"] != "source-two" {
 			continue
 		}
 		g.Expect(a.Spec.Source.Filter).To(gomega.Equal("zyx"))
@@ -143,10 +150,11 @@ func fixDocsTopic() *v1alpha1.DocsTopic {
 				DisplayName: "Test Topic",
 				Sources: []v1alpha1.Source{
 					{
-						Name: "source-one",
-						Type: "openapi",
-						Mode: v1alpha1.DocsTopicSingle,
-						URL:  "https://dummy.url/single",
+						Name:     "source-one",
+						Type:     "openapi",
+						Mode:     v1alpha1.DocsTopicSingle,
+						URL:      "https://dummy.url/single",
+						Metadata: map[string]string{"test": "true"},
 					},
 					{
 						Name:   "source-two",

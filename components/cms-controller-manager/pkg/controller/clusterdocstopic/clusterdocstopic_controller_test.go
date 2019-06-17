@@ -93,6 +93,13 @@ func TestReconcile(t *testing.T) {
 		err = c.Status().Update(context.TODO(), &asset)
 		g.Expect(err).ToNot(gomega.HaveOccurred())
 		g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(request)))
+
+		if asset.Annotations["cms.kyma-project.io/asset-short-name"] == "source-one" {
+			g.Expect(asset.Spec.Metadata).To(gomega.HaveLen(1))
+			g.Expect(asset.Spec.Metadata["test"]).To(gomega.Equal("true"))
+		} else {
+			g.Expect(asset.Spec.Metadata).To(gomega.BeEmpty())
+		}
 	}
 
 	// Update DocsTopic status
@@ -136,10 +143,11 @@ func fixClusterDocsTopic() *v1alpha1.ClusterDocsTopic {
 				DisplayName: "Test Topic",
 				Sources: []v1alpha1.Source{
 					{
-						Name: "source-one",
-						Type: "openapi",
-						Mode: v1alpha1.DocsTopicSingle,
-						URL:  "https://dummy.url/single",
+						Name:     "source-one",
+						Type:     "openapi",
+						Mode:     v1alpha1.DocsTopicSingle,
+						URL:      "https://dummy.url/single",
+						Metadata: map[string]string{"test": "true"},
 					},
 					{
 						Name:   "source-two",

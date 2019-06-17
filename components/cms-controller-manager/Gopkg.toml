@@ -24,9 +24,11 @@ required = [
     unused-packages = true
     non-go = true
 
+# TODO: WIP
 [[constraint]]
   name="github.com/kyma-project/kyma"
-  revision="1c4c7390617114ea7b28bcfe5664691e4a6d2384"
+  source="github.com/michal-hudy/kyma"
+  branch = "asset-tam-jest-meta"
 
 [[constraint]]
   name = "github.com/pkg/errors"
