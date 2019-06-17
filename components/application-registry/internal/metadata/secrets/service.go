@@ -41,7 +41,7 @@ func (s *service) Get(application string, credentials applications.Credentials) 
 		return model.Credentials{}, err.Append("Failed to initialize strategy")
 	}
 
-	data, err := s.repository.Get(application, credentials.SecretName)
+	data, err := s.repository.Get(credentials.SecretName)
 	if err != nil {
 		return model.Credentials{}, err
 	}
@@ -87,7 +87,7 @@ func (s *service) modifySecret(application, serviceID string, credentials *model
 }
 
 func (s *service) upsertSecret(modStrategy strategy.ModificationStrategy, application, name, serviceID string, newData strategy.SecretData) apperrors.AppError {
-	currentData, err := s.repository.Get(application, name)
+	currentData, err := s.repository.Get(name)
 	if err != nil {
 		if err.Code() == apperrors.CodeNotFound {
 			return s.repository.Create(application, name, serviceID, newData)

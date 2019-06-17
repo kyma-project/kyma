@@ -16,7 +16,7 @@ Read about the examples and the configuration details.
 ## In-memory channel
 Follow this [guide](https://github.com/knative/eventing/tree/master/config/provisioners/in-memory-channel) to add an in-memory ClusterChannelProvisioner.
 
-> **NOTE**: Before installing this provisioner, add the following annotation to the [`podTemplate.Spec`](https://github.com/knative/eventing/blob/master/config/provisioners/in-memory-channel/in-memory-channel.yaml#L107) in the `in-memory-channel-controller` Deployment to remove the Istio sidecar.
+>**NOTE**: Before installing this provisioner, add the following annotation to the [`podTemplate.Spec`](https://github.com/knative/eventing/blob/master/config/provisioners/in-memory-channel/in-memory-channel.yaml#L107) in the `in-memory-channel-controller` Deployment to remove the Istio sidecar.
 
 ```yaml
 template:
@@ -30,7 +30,7 @@ You can change the default cluster channel provisioner by editing the ClusterCha
 
 ## Google PubSub
 
-After you complete the [prereqisite steps](https://github.com/knative/eventing/tree/release-0.5/contrib/gcppubsub/config#prerequisites) mentioned in the Knative eventing documentation, follow these steps to configure the Google PubSub ClusterChannelProvisioner:
+After you complete the [prerequisite steps](https://github.com/knative/eventing/tree/release-0.5/contrib/gcppubsub/config#prerequisites) mentioned in the Knative eventing documentation, follow these steps to configure the Google PubSub ClusterChannelProvisioner:
 
     > **NOTE:** Skip the last step to install `Knative eventing` as it is pre-installed with Kyma.
 

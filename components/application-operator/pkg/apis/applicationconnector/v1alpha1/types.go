@@ -52,13 +52,12 @@ type Entry struct {
 	Type       string `json:"type"`
 	GatewayUrl string `json:"gatewayUrl"`
 	// AccessLabel is not required for Events, 'omitempty' is needed because of regexp validation
-	AccessLabel      string               `json:"accessLabel,omitempty"`
-	TargetUrl        string               `json:"targetUrl"`
-	SpecificationUrl string               `json:"specificationUrl,omitempty"`
-	ApiType          string               `json:"apiType,omitempty"`
-	Credentials      Credentials          `json:"credentials,omitempty"`
-	Headers          *map[string][]string `json:"headers,omitempty"`
-	QueryParameters  *map[string][]string `json:"queryParameters,omitempty"`
+	AccessLabel                 string      `json:"accessLabel,omitempty"`
+	TargetUrl                   string      `json:"targetUrl"`
+	SpecificationUrl            string      `json:"specificationUrl,omitempty"`
+	ApiType                     string      `json:"apiType,omitempty"`
+	Credentials                 Credentials `json:"credentials,omitempty"`
+	RequestParametersSecretName string      `json:"requestParametersSecretName,omitempty"`
 }
 
 type CSRFInfo struct {
@@ -67,12 +66,10 @@ type CSRFInfo struct {
 
 // Credentials defines type of authentication and where the credentials are stored
 type Credentials struct {
-	Type              string               `json:"type"`
-	SecretName        string               `json:"secretName"`
-	AuthenticationUrl string               `json:"authenticationUrl,omitempty"`
-	CSRFInfo          *CSRFInfo            `json:"csrfInfo,omitempty"`
-	Headers           *map[string][]string `json:"headers,omitempty"`
-	QueryParameters   *map[string][]string `json:"queryParameters,omitempty"`
+	Type              string    `json:"type"`
+	SecretName        string    `json:"secretName"`
+	AuthenticationUrl string    `json:"authenticationUrl,omitempty"`
+	CSRFInfo          *CSRFInfo `json:"csrfInfo,omitempty"`
 }
 
 // Service represents part of the remote environment, which is mapped 1 to 1 to service class in the service-catalog

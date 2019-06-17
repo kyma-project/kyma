@@ -3,9 +3,7 @@ package k8s
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -18,32 +16,14 @@ type namespaceService struct {
 }
 
 func newNamespaceService(informer cache.SharedIndexInformer, client corev1.CoreV1Interface) (*namespaceService, error) {
-
-	err := informer.AddIndexers(cache.Indexers{
-		"envLabelSelector": func(obj interface{}) ([]string, error) {
-			namespace, ok := obj.(*v1.Namespace)
-			if !ok {
-				return nil, fmt.Errorf("Incorrect item type: %T, should be: *Namespace", obj)
-			}
-			return []string{namespace.Labels["env"]}, nil
-		},
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "while adding indexers")
-	}
-
 	return &namespaceService{
 		informer: informer,
 		client:   client,
 	}, nil
 }
 
-func (svc *namespaceService) List() ([]*v1.Namespace, error) {
-	items, err := svc.informer.GetIndexer().ByIndex("envLabelSelector", "true")
-
-	if err != nil {
-		return nil, errors.Wrapf(err, "while listing %s", pretty.Namespace)
-	}
+func (svc *namespaceService) List() ([]*v1.Namespace, error) { //r error
+	items := svc.informer.GetStore().List()
 
 	var namespaces []*v1.Namespace
 	for _, item := range items {
