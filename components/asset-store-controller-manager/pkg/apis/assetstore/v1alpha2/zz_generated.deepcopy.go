@@ -512,10 +512,8 @@ func (in *CommonAssetSpec) DeepCopyInto(out *CommonAssetSpec) {
 	out.BucketRef = in.BucketRef
 	if in.Metadata != nil {
 		in, out := &in.Metadata, &out.Metadata
-		*out = make(map[string]string, len(*in))
-		for key, val := range *in {
-			(*out)[key] = val
-		}
+		*out = new(runtime.RawExtension)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }
