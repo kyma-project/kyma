@@ -26,8 +26,9 @@ type Source struct {
 	Type string `json:"type"`
 	URL  string `json:"url"`
 	// +kubebuilder:validation:Enum=single,package,index
-	Mode   DocsTopicMode `json:"mode"`
-	Filter string        `json:"filter,omitempty"`
+	Mode     DocsTopicMode     `json:"mode"`
+	Filter   string            `json:"filter,omitempty"`
+	Metadata map[string]string `json:"metadata,omitempty"`
 }
 
 type DocsTopicPhase string
