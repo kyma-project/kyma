@@ -284,7 +284,7 @@ func shutdown(code int) {
 	os.Exit(code)
 }
 
-func publishTestEvent(publishEventURL string) (*api.PublishResponse, error) {
+func publishTestEvent(publishEventURL string) (*api.Response, error) {
 	payload := fmt.Sprintf(
 		`{"source-id": "%s","event-type":"%s","event-type-version":"%s","event-time":"2018-11-02T22:08:41+00:00","data":"test-event-1"}`, srcID, eventType, eventTypeVersion)
 	log.Printf("event to be published: %v\n", payload)
@@ -297,7 +297,7 @@ func publishTestEvent(publishEventURL string) (*api.PublishResponse, error) {
 	if err := verifyStatusCode(res, 200); err != nil {
 		return nil, err
 	}
-	respObj := &api.PublishResponse{}
+	respObj := &api.Response{}
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 	err = json.Unmarshal(body, &respObj)
@@ -312,7 +312,7 @@ func publishTestEvent(publishEventURL string) (*api.PublishResponse, error) {
 	return respObj, err
 }
 
-func publishHeadersTestEvent(publishEventURL string) (*api.PublishResponse, error) {
+func publishHeadersTestEvent(publishEventURL string) (*api.Response, error) {
 	payload := fmt.Sprintf(
 		`{"source-id": "%s","event-type":"%s","event-type-version":"%s","event-time":"2018-11-02T22:08:41+00:00","data":"headers-test-event"}`, srcID, eventType, eventTypeVersion)
 	log.Printf("event to be published: %v\n", payload)
@@ -333,7 +333,7 @@ func publishHeadersTestEvent(publishEventURL string) (*api.PublishResponse, erro
 	if err := verifyStatusCode(res, 200); err != nil {
 		return nil, err
 	}
-	respObj := &api.PublishResponse{}
+	respObj := &api.Response{}
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 	err = json.Unmarshal(body, &respObj)
