@@ -3,11 +3,15 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: kyma-ns-label
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-ns-label
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
 rules:
 - apiGroups: [""]
   resources: ["namespaces"]
@@ -19,6 +23,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: kyma-ns-label
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -33,7 +39,7 @@ kind: Job
 metadata:
   name: kyma-ns-label
   annotations:
-    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   backoffLimit: 1
