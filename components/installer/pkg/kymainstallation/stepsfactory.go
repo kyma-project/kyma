@@ -16,30 +16,53 @@ type StepFactory interface {
 }
 
 type stepFactory struct {
-	chartsDirPath     string
 	helmClient        kymahelm.ClientInterface
 	installedReleases map[string]bool
-	overrideData      overrides.OverrideData
+}
+
+type installStepFactory struct {
+	stepFactory
+	chartsDirPath string
+	overrideData  overrides.OverrideData
+}
+
+type uninstallStepFactory struct {
+	stepFactory
 }
 
 // NewStep method returns instance of the step based on component details
-func (sf stepFactory) NewStep(component v1alpha1.KymaComponent) Step {
+func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 	step := step{
-		chartsDirPath: sf.chartsDirPath,
-		helmClient:    sf.helmClient,
-		overrideData:  sf.overrideData,
+		chartsDirPath: isf.chartsDirPath,
+		helmClient:    isf.helmClient,
+		overrideData:  isf.overrideData,
 		component:     component,
 	}
 
-	if sf.installedReleases[component.GetReleaseName()] {
+	if isf.installedReleases[component.GetReleaseName()] {
 		return upgradeStep{
-			step: step,
+			step,
 		}
 	}
 
 	return installStep{
-		step: step,
+		step,
 	}
+}
+
+func (usf uninstallStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
+	step := step{
+		helmClient: usf.helmClient,
+		component:  component,
+	}
+
+	if usf.installedReleases[component.GetReleaseName()] {
+		return uninstallStep{
+			step,
+		}
+	}
+
+	return nil
 }
 
 // NewStepFactory returns implementation of StepFactory implementation
@@ -62,10 +85,20 @@ func NewStepFactory(chartsDirPath string, helmClient kymahelm.ClientInterface, o
 		}
 	}
 
-	return stepFactory{
-		chartsDirPath:     chartsDirPath,
+	sf := stepFactory{
 		helmClient:        helmClient,
 		installedReleases: installedReleases,
-		overrideData:      overrideData,
+	}
+
+	if chartsDirPath != "" && overrideData != nil {
+		return installStepFactory{
+			sf,
+			chartsDirPath,
+			overrideData,
+		}, nil
+	}
+
+	return uninstallStepFactory{
+		sf,
 	}, nil
 }

@@ -59,35 +59,8 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 	}
 	steps.currentPackage = currentPackage
 
-	_ = steps.statusManager.InProgress("Verify installed components")
-	stepsFactory, factoryErr := kymainstallation.NewStepFactory(currentPackage.GetChartsDirPath(), steps.helmClient, overrideData)
-	if factoryErr != nil {
-		_ = steps.statusManager.Error("installer", "Verify installed components", factoryErr)
-		return factoryErr
-	}
-
-	log.Println("Processing Kyma components")
-
-	for _, component := range installationData.Components {
-
-		stepName := "Processing component " + component.GetReleaseName()
-		_ = steps.statusManager.InProgress(stepName)
-
-		step := stepsFactory.NewStep(component)
-		steps.PrintStep(stepName)
-
-		installErr := step.Run()
-		if steps.errorHandlers.CheckError("Step error: ", installErr) {
-			_ = steps.statusManager.Error(component.GetReleaseName(), stepName, installErr)
-			return installErr
-		}
-
-		log.Println(stepName + "...DONE")
-	}
-
-	err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
-
-	if steps.errorHandlers.CheckError("Error on removing label: ", err) {
+	err := steps.processComponents(installationData, overrideData, currentPackage.GetChartsDirPath())
+	if steps.errorHandlers.CheckError("install/update error: ", err) {
 		return err
 	}
 
@@ -96,19 +69,17 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 		return err
 	}
 
-	log.Println("Processing Kyma components ...DONE!")
-
 	return nil
 }
 
 //UninstallKyma .
 func (steps *InstallationSteps) UninstallKyma(installationData *config.InstallationData) error {
+
 	err := steps.DeprovisionAzureResources(DefaultDeprovisionConfig(), installationData.Context)
 	steps.errorHandlers.LogError("An error during deprovisioning: ", err)
-	steps.RemoveKymaComponents(installationData)
 
-	err = steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
-	if steps.errorHandlers.CheckError("Error on removing label: ", err) {
+	err = steps.processComponents(installationData, nil, "")
+	if steps.errorHandlers.CheckError("uninstall error: ", err) {
 		return err
 	}
 
@@ -125,4 +96,44 @@ func (steps *InstallationSteps) PrintStep(stepName string) {
 	log.Println("---------------------------")
 	log.Println(stepName)
 	log.Println("---------------------------")
+}
+
+func (steps *InstallationSteps) processComponents(installationData *config.InstallationData, overrideData overrides.OverrideData, chartsPathDir string) error {
+
+	_ = steps.statusManager.InProgress("Verify installed components")
+	stepsFactory, factoryErr := kymainstallation.NewStepFactory(chartsPathDir, steps.helmClient, overrideData)
+	if factoryErr != nil {
+		_ = steps.statusManager.Error("installer", "Verify installed components", factoryErr)
+		return factoryErr
+	}
+
+	log.Println("Processing Kyma components")
+
+	logPrefix := installationData.Action
+
+	for _, component := range installationData.Components {
+
+		stepName := logPrefix + " component " + component.GetReleaseName()
+		_ = steps.statusManager.InProgress(stepName)
+
+		step := stepsFactory.NewStep(component)
+		steps.PrintStep(stepName)
+
+		processErr := step.Run()
+		if steps.errorHandlers.CheckError("Step error: ", processErr) {
+			_ = steps.statusManager.Error(component.GetReleaseName(), stepName, processErr)
+			return processErr
+		}
+
+		log.Println(stepName + "...DONE!")
+	}
+
+	err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
+	if steps.errorHandlers.CheckError("Error on removing label: ", err) {
+		return err
+	}
+
+	log.Println(logPrefix + " Kyma components ...DONE!")
+
+	return nil
 }

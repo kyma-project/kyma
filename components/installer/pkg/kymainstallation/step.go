@@ -91,12 +91,12 @@ func (s upgradeStep) Run() error {
 	return nil
 }
 
-type deleteStep struct {
+type uninstallStep struct {
 	step
 }
 
 // Run method for deleteStep triggers step delete via helm
-func (s deleteStep) Run() error {
+func (s uninstallStep) Run() error {
 
 	_, deleteErr := s.helmClient.DeleteRelease(s.component.GetReleaseName())
 
