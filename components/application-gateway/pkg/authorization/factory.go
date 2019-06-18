@@ -47,14 +47,7 @@ func (asf authorizationStrategyFactory) Create(c *Credentials) Strategy {
 		strategy = newNoAuthStrategy()
 	}
 
-	var headers *map[string][]string
-	var queryParams *map[string][]string
-	if c != nil {
-		headers = c.Headers
-		queryParams = c.QueryParameters
-	}
-
-	return newExternalTokenStrategy(strategy, headers, queryParams)
+	return newExternalTokenStrategy(strategy)
 }
 
 // FactoryConfiguration holds factory configuration options

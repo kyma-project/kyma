@@ -3,25 +3,19 @@ package authorization
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/httptools"
-
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
 )
 
 type externalTokenStrategy struct {
-	strategy        Strategy
-	headers         *map[string][]string
-	queryParameters *map[string][]string
+	strategy Strategy
 }
 
-func newExternalTokenStrategy(strategy Strategy, headers, queryParameters *map[string][]string) Strategy {
-	return externalTokenStrategy{strategy, headers, queryParameters}
+func newExternalTokenStrategy(strategy Strategy) Strategy {
+	return externalTokenStrategy{strategy}
 }
 
 func (e externalTokenStrategy) AddAuthorization(r *http.Request, setter TransportSetter) apperrors.AppError {
-	httptools.SetHeaders(r.Header, e.headers)
-	httptools.SetQueryParameters(r.URL, e.queryParameters)
 
 	externalToken := r.Header.Get(httpconsts.HeaderAccessToken)
 	if externalToken != "" {
