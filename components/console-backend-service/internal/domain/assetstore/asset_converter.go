@@ -1,9 +1,13 @@
 package assetstore
 
 import (
+	"encoding/json"
+
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 //go:generate mockery -name=gqlAssetConverter -output=automock -outpkg=automock -case=underscore
@@ -23,13 +27,17 @@ func (c *assetConverter) ToGQL(item *v1alpha2.Asset) (*gqlschema.Asset, error) {
 	}
 
 	status := c.extractor.Status(item.Status.CommonAssetStatus)
+	metadata, err := c.extractMetadata(item.Spec.Metadata)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while extracting metadata from Asset [name: %s][namespace: %s]", item.Name, item.Namespace)
+	}
 
 	asset := gqlschema.Asset{
 		Name:      item.Name,
 		Namespace: item.Namespace,
 		Type:      item.Labels[CmsTypeLabel],
 		Status:    status,
-		Metadata:  item.Spec.Metadata,
+		Metadata:  metadata,
 	}
 
 	return &asset, nil
@@ -47,5 +55,18 @@ func (c *assetConverter) ToGQLs(in []*v1alpha2.Asset) ([]gqlschema.Asset, error)
 			result = append(result, *converted)
 		}
 	}
+	return result, nil
+}
+
+func (*assetConverter) extractMetadata(ext *runtime.RawExtension) (map[string]interface{}, error) {
+	if ext == nil {
+		return nil, nil
+	}
+	result := make(map[string]interface{})
+	err := json.Unmarshal(ext.Raw, &result)
+	if err != nil {
+		return nil, errors.Wrap(err, "while unmarshalling metadata")
+	}
+
 	return result, nil
 }

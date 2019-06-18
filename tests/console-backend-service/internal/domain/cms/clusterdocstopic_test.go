@@ -200,6 +200,7 @@ func clusterDocsTopicDetailsFields() string {
     	groupName
     	assets {
 			name
+			metadata
 			type
 			files {
 				url
@@ -262,6 +263,7 @@ func fixCommonClusterDocsTopicSpec() v1alpha1.CommonDocsTopicSpec {
 			{
 				Type: "openapi",
 				Name: "openapi",
+				Metadata: &runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)},
 				Mode: v1alpha1.DocsTopicSingle,
 				URL:  "https://petstore.swagger.io/v2/swagger.json",
 			},

@@ -150,6 +150,7 @@
   version = "v0.1.36"
 
 [[projects]]
+  branch = "asset-tam-jest-meta"
   digest = "1:98cb61d81eb057a4005f59dde41325db2f2c9f1da5d4d60e4d367866d7d69f0e"
   name = "github.com/kyma-project/kyma"
   packages = [
@@ -170,7 +171,8 @@
     "components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "1c4c7390617114ea7b28bcfe5664691e4a6d2384"
+  revision = "9a7e035a705681fabdfa0ba82a10429dec38bd5f"
+  source = "github.com/michal-hudy/kyma"
 
 [[projects]]
   digest = "1:d946fa644b263e26091e0ae20cd12ee958ab869926abbc2d111fbd39902f91eb"
