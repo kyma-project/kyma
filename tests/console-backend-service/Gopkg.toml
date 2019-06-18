@@ -27,7 +27,7 @@ required = [
 [[constraint]]
   name="github.com/kyma-project/kyma"
   source="github.com/michal-hudy/kyma"
-  branch = "asset-tam-jest-meta"
+  branch = "cms-gdzie-jest-meta"
 
 [[constraint]]
   name = "github.com/gorilla/websocket"
