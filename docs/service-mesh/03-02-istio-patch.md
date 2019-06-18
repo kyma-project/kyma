@@ -5,27 +5,28 @@ type: Details
 
 As a core component, Istio installs with every Kyma deployment by default. The installation consists of two steps:
 
-1. Istio installs using the official, raw charts from the currently supported release. The charts that are currently
-used are stored in the `resources/istio` directory. The installation is customized by enabling security in Istio.
+1. Istio installs using the official, charts from the currently supported release. The charts that are currently
+used are stored in the `resources/istio` directory. The installation is customized as described in [this document](#details-istio-customization)
 
->**NOTE:** Every installation of Istio for Kyma must have security enabled.
+2. A Istio patch is run, which verifies if the current installation has the following options:
+  - A specific version is Istio is installed
+  - mTLS(Mutual TLS) policy is enabled and set to `strict`
+  - Istio policy enforcement is enabled 
+  - Automatic sidecar injection is enabled
+  - The Istio CRD(CustomResourceDefinition) `policies.authentication.istio.io` is present in the system
 
-2. A custom Istio patch is applied to further customize the Istio installation. A Kubernetes job introduces these changes:
-  - Sets a memory limit for every sidecar.
-  - Modifies Istio components to use Zipkin in the `kyma-system` Namespace, instead of the default `istio-system`.
-  - Adds a webhook to the Istio Pilot.
-  - Creates a TLS certificate for the Ingress Gateway.
-  - Deletes all resources related to the `prometheus`, `tracing`, `grafana`, and `servicegraph`charts.
-  - Enables sidecar injection in all Namespaces, except those labeled with `istio-injection: disabled`.
+If any of the above options is missing, the patch fails, which results in a failed installation. In such a case logs of the patch can give some insight into which options are missing:
 
-Additionally, the job checks whether mTLS is enabled in the Istio deployment it customizes.
+```
+    kubectl logs -n istio-system -l app=istio-kyma-patch
+```
 
 To learn more about the custom Istio patch applied in Kyma, see the `components/istio-kyma-patch/` directory.
 
+>**NOTE:** This verification patch is an optional component and can be disabled. However, it is enabled by default
+
 ## Use an existing Istio installation with Kyma
 
-You can use an existing installation of Istio running on Kubernetes with Kyma. The custom Istio patch is applied to such an installation.
-
->**NOTE:** You cannot skip applying the Istio patch in the Kyma installation process.
+You can use an existing installation of Istio running on Kubernetes with Kyma. In such a case is is recommended to enable the patch component to verify if all the required options are set. 
 
 To allow such implementation, you must install Kyma without Istio. Read [this](/root/kyma#configuration-custom-component-installation) document for more details.
