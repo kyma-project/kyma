@@ -4,13 +4,15 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"strconv"
 
-	opentracing "github.com/opentracing/opentracing-go"
-
-	"github.com/kyma-project/kyma/components/console-backend-service/pkg/tracing"
+	"github.com/opentracing/opentracing-go/ext"
 
 	"net/http"
 	"time"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/tracing"
+	opentracing "github.com/opentracing/opentracing-go"
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/authn"
@@ -54,6 +56,7 @@ type config struct {
 	OIDC                 authn.OIDCConfig
 	SARCacheConfig       authz.SARCacheConfig
 	FeatureToggles       experimental.FeatureToggles
+	Tracing              tracing.Config
 }
 
 func main() {
@@ -136,7 +139,7 @@ func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
 }
 
 func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema, authenticator authenticatorpkg.Request) {
-	setupTracing()
+	setupTracing(cfg.Tracing, cfg.Port)
 	var allowedOrigins []string
 	if len(allowedOrigins) == 0 {
 		allowedOrigins = []string{"*"}
@@ -149,15 +152,31 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 	if authenticator != nil {
 		router.Use(authn.AuthMiddleware(authenticator))
 	}
-
 	router.HandleFunc("/", handler.Playground("Dataloader", "/graphql"))
-	router.HandleFunc("/graphql", handler.GraphQL(schema,
+	graphQLHandler := handler.GraphQL(schema,
 		handler.WebsocketUpgrader(websocket.Upgrader{
 			CheckOrigin: origin.CheckFn(allowedOrigins),
 		}),
 		handler.Tracer(tracing.New()),
-	))
-
+	)
+	var withParentSpan = func(next http.HandlerFunc) http.HandlerFunc {
+		return func(writer http.ResponseWriter, request *http.Request) {
+			spanContext, err := opentracing.GlobalTracer().Extract(
+				opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(request.Header))
+			if err != nil {
+				glog.Warning("opentracing parent span headers extract", err)
+				next(writer, request)
+			}
+			span := opentracing.StartSpan("console-backend-service",
+				opentracing.ChildOf(spanContext))
+			defer span.Finish()
+			ext.SpanKind.Set(span, "server")
+			ext.Component.Set(span, "console-backend-service")
+			ctx := opentracing.ContextWithSpan(request.Context(), span)
+			next(writer, request.WithContext(ctx))
+		}
+	}
+	router.HandleFunc("/graphql", withParentSpan(graphQLHandler))
 	serverHandler := cors.New(cors.Options{
 		AllowedOrigins: allowedOrigins,
 		AllowedMethods: []string{
@@ -186,10 +205,10 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 	}
 }
 
-func setupTracing() {
-	collector, err := zipkin.NewHTTPCollector("http://zipkin.kyma-system:9411/api/v1/spans")
+func setupTracing(cfg tracing.Config, hostPort int) {
+	collector, err := zipkin.NewHTTPCollector(cfg.Url)
 	exitOnError(err, "zipkin")
-	recorder := zipkin.NewRecorder(collector, true, "3000", "console-backend-service")
+	recorder := zipkin.NewRecorder(collector, cfg.Debug, strconv.Itoa(hostPort), cfg.ServiceName)
 	tracer, err := zipkin.NewTracer(recorder, zipkin.TraceID128Bit(false))
 	exitOnError(err, "tracer")
 	opentracing.SetGlobalTracer(tracer)

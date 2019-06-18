@@ -4,6 +4,7 @@ image:
   pullPolicy: IfNotPresent
 service:
   internalPort: 3000
+  internalPortName: http-cbs
   externalPort: 3000
   protocol: TCP
 virtualservice:

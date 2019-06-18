@@ -3,11 +3,11 @@ package tracing
 import (
 	"context"
 	"fmt"
-
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
+	"strings"
 )
 
 var _ graphql.Tracer = (tracerImpl)(0)
@@ -20,7 +20,17 @@ func New() graphql.Tracer {
 
 type tracerImpl int
 
-func (tracerImpl) StartOperationParsing(ctx context.Context) context.Context {
+func (impl *tracerImpl) getSpanName(rawQuery string) string {
+
+	index := strings.Index(rawQuery, "(")
+	if index < 0 {
+		return rawQuery
+	}
+
+	return rawQuery[:index]
+}
+
+func (impl tracerImpl) StartOperationParsing(ctx context.Context) context.Context {
 	return ctx
 }
 
@@ -34,11 +44,13 @@ func (tracerImpl) StartOperationValidation(ctx context.Context) context.Context 
 func (tracerImpl) EndOperationValidation(ctx context.Context) {
 }
 
-func (tracerImpl) StartOperationExecution(ctx context.Context) context.Context {
+func (impl tracerImpl) StartOperationExecution(ctx context.Context) context.Context {
 	requestContext := graphql.GetRequestContext(ctx)
-	span, ctx := opentracing.StartSpanFromContext(ctx, requestContext.RawQuery)
+	spanName := impl.getSpanName(requestContext.RawQuery)
+	span, ctx := opentracing.StartSpanFromContext(ctx, spanName)
+	span.SetTag("graphQL.query", requestContext.RawQuery)
 	ext.SpanKind.Set(span, "server")
-	ext.Component.Set(span, "gqlgen")
+	ext.Component.Set(span, "graphQL")
 
 	return ctx
 }
@@ -46,7 +58,7 @@ func (tracerImpl) StartOperationExecution(ctx context.Context) context.Context {
 func (tracerImpl) StartFieldExecution(ctx context.Context, field graphql.CollectedField) context.Context {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "unnamed")
 	ext.SpanKind.Set(span, "server")
-	ext.Component.Set(span, "gqlgen")
+	ext.Component.Set(span, "graphQL")
 
 	return ctx
 }
