@@ -16,4 +16,4 @@ This table lists the configurable parameters, their descriptions, and default va
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
 | **jaeger.memory.maxTraces** | Defines the maximum amount of traces that Jaeger can store. | `40000` |
-| **resources.limits.memory** | Defines limits for memory resources. | `512M` |
+| **resources.limits.memory** | Defines the maximum amount of memory that is available for storing traces in Jaeger. | `512M` |
