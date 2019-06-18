@@ -6,7 +6,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/installer/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymahelm"
-	"github.com/kyma-project/kyma/components/installer/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 	rls "k8s.io/helm/pkg/proto/hapi/release"
 )
@@ -17,7 +16,7 @@ type StepFactory interface {
 }
 
 type stepFactory struct {
-	kymaPackage       kymasources.KymaPackage
+	chartsDirPath     string
 	helmClient        kymahelm.ClientInterface
 	installedReleases map[string]bool
 	overrideData      overrides.OverrideData
@@ -26,10 +25,10 @@ type stepFactory struct {
 // NewStep method returns instance of the step based on component details
 func (sf stepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 	step := step{
-		kymaPackage:  sf.kymaPackage,
-		helmClient:   sf.helmClient,
-		overrideData: sf.overrideData,
-		component:    component,
+		chartsDirPath: sf.chartsDirPath,
+		helmClient:    sf.helmClient,
+		overrideData:  sf.overrideData,
+		component:     component,
 	}
 
 	if sf.installedReleases[component.GetReleaseName()] {
@@ -44,7 +43,7 @@ func (sf stepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 }
 
 // NewStepFactory returns implementation of StepFactory implementation
-func NewStepFactory(kymaPackage kymasources.KymaPackage, helmClient kymahelm.ClientInterface, overrideData overrides.OverrideData) (StepFactory, error) {
+func NewStepFactory(chartsDirPath string, helmClient kymahelm.ClientInterface, overrideData overrides.OverrideData) (StepFactory, error) {
 	installedReleases := make(map[string]bool)
 
 	relesesRes, err := helmClient.ListReleases()
@@ -64,7 +63,7 @@ func NewStepFactory(kymaPackage kymasources.KymaPackage, helmClient kymahelm.Cli
 	}
 
 	return stepFactory{
-		kymaPackage:       kymaPackage,
+		chartsDirPath:     chartsDirPath,
 		helmClient:        helmClient,
 		installedReleases: installedReleases,
 		overrideData:      overrideData,

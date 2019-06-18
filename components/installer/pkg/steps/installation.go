@@ -3,7 +3,7 @@ package steps
 import (
 	"log"
 
-	actionmanager "github.com/kyma-project/kyma/components/installer/pkg/actionmanager"
+	"github.com/kyma-project/kyma/components/installer/pkg/actionmanager"
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
 	internalerrors "github.com/kyma-project/kyma/components/installer/pkg/errors"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymahelm"
@@ -11,7 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/installer/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 	serviceCatalog "github.com/kyma-project/kyma/components/installer/pkg/servicecatalog"
-	statusmanager "github.com/kyma-project/kyma/components/installer/pkg/statusmanager"
+	"github.com/kyma-project/kyma/components/installer/pkg/statusmanager"
 	"github.com/kyma-project/kyma/components/installer/pkg/toolkit"
 	"k8s.io/client-go/kubernetes"
 )
@@ -60,7 +60,7 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 	steps.currentPackage = currentPackage
 
 	_ = steps.statusManager.InProgress("Verify installed components")
-	stepsFactory, factoryErr := kymainstallation.NewStepFactory(currentPackage, steps.helmClient, overrideData)
+	stepsFactory, factoryErr := kymainstallation.NewStepFactory(currentPackage.GetChartsDirPath(), steps.helmClient, overrideData)
 	if factoryErr != nil {
 		_ = steps.statusManager.Error("installer", "Verify installed components", factoryErr)
 		return factoryErr

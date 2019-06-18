@@ -7,7 +7,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/installer/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymahelm"
-	"github.com/kyma-project/kyma/components/installer/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 )
 
@@ -19,10 +18,10 @@ type Step interface {
 }
 
 type step struct {
-	helmClient   kymahelm.ClientInterface
-	kymaPackage  kymasources.KymaPackage
-	component    v1alpha1.KymaComponent
-	overrideData overrides.OverrideData
+	helmClient    kymahelm.ClientInterface
+	chartsDirPath string
+	component     v1alpha1.KymaComponent
+	overrideData  overrides.OverrideData
 }
 
 // ToString method returns step details in readable string
@@ -41,7 +40,7 @@ type installStep struct {
 
 // Run method for installStep triggers step installation via helm
 func (s installStep) Run() error {
-	chartDir := path.Join(s.kymaPackage.GetChartsDirPath(), s.component.Name)
+	chartDir := path.Join(s.chartsDirPath, s.component.Name)
 
 	releaseOverrides, releaseOverridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
 
@@ -70,7 +69,7 @@ type upgradeStep struct {
 
 // Run method for upgradeStep triggers step upgrade via helm
 func (s upgradeStep) Run() error {
-	chartDir := path.Join(s.kymaPackage.GetChartsDirPath(), s.component.Name)
+	chartDir := path.Join(s.chartsDirPath, s.component.Name)
 
 	releaseOverrides, releaseOverridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
 
@@ -88,6 +87,22 @@ func (s upgradeStep) Run() error {
 	}
 
 	s.helmClient.PrintRelease(upgradeResp.Release)
+
+	return nil
+}
+
+type deleteStep struct {
+	step
+}
+
+// Run method for deleteStep triggers step delete via helm
+func (s deleteStep) Run() error {
+
+	_, deleteErr := s.helmClient.DeleteRelease(s.component.GetReleaseName())
+
+	if deleteErr != nil {
+		return errors.New("Helm delete error: " + deleteErr.Error())
+	}
 
 	return nil
 }
