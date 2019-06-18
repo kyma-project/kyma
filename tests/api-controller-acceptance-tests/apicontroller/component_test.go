@@ -219,7 +219,6 @@ func TestComponentSpec(t *testing.T) {
 			expectedPolicy := ctx.policyAndTriggerRuleFor(testID, api.Spec.Authentication[0].Jwt.Issuer, sampleTriggerRule())
 			So(err, ShouldBeNil)
 			So(policy.Spec, ctx.ShouldDeepEqual, expectedPolicy)
-			So(err, ShouldNotBeNil)
 		})
 
 		Convey("create API should not process the request if another API exists for target service", func() {
