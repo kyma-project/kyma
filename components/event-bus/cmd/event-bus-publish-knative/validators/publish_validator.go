@@ -14,7 +14,8 @@ const (
 	requestBodyTooLargeErrorMessage = "http: request body too large"
 )
 
-func ValidateRequest(r *http.Request) (*api.PublishRequest, *api.Error) {
+// ValidateRequest validates the http.Request and returns an api.Request instance and an api.Error.
+func ValidateRequest(r *http.Request) (*api.Request, *api.Error) {
 	// validate the http method
 	if r.Method != http.MethodPost {
 		log.Printf("request method not supported: %v", r.Method)
@@ -41,7 +42,7 @@ func ValidateRequest(r *http.Request) (*api.PublishRequest, *api.Error) {
 	}
 
 	// validate parse the request body
-	publishRequest := &api.PublishRequest{}
+	publishRequest := &api.Request{}
 	err = json.Unmarshal(body, publishRequest)
 	if err != nil {
 		return nil, api.ErrorResponseBadPayload()
@@ -50,6 +51,7 @@ func ValidateRequest(r *http.Request) (*api.PublishRequest, *api.Error) {
 	return publishRequest, nil
 }
 
+// ValidateChannelNameLength validates the channel name length.
 func ValidateChannelNameLength(channelName *string, length int) *api.Error {
 	if len(*channelName) > length {
 		return util.ErrorInvalidChannelNameLength(length)

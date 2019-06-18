@@ -15,7 +15,7 @@ const (
 	defaultMaxRequests          = 100
 	defaultMaxRequestSize       = 65536
 	defaultMaxChannelNameLength = 33
-	defaultMonitoringPort		= 9090
+	defaultMonitoringPort       = 9090
 
 	// option names
 	port                      = "port"
@@ -33,6 +33,7 @@ const (
 	monitoringPort            = "monitoring_port"
 )
 
+// Options represents the publish options.
 type Options struct {
 	Port                 int
 	MaxRequests          int
@@ -40,9 +41,10 @@ type Options struct {
 	MaxChannelNameLength int
 	TraceOptions         *trace.Options
 	EventOptions         *publish.EventOptions
-	MonitoringPort		 int
+	MonitoringPort       int
 }
 
+// ParseFlags parses the command line flags.
 func ParseFlags() *Options {
 	opts := GetDefaultOptions()
 
@@ -68,6 +70,7 @@ func ParseFlags() *Options {
 	return opts
 }
 
+// GetDefaultOptions returns a default publish options instance.
 func GetDefaultOptions() *Options {
 	opts := &Options{
 		Port:                 defaultPort,
@@ -80,6 +83,7 @@ func GetDefaultOptions() *Options {
 	return opts
 }
 
+// Print prints the publish options to the standard output stream.
 func (options *Options) Print() {
 	log.Println(strings.Repeat("-", 50))
 	log.Printf(" %s %v", port, options.Port)

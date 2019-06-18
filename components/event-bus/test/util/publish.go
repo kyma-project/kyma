@@ -14,19 +14,28 @@ import (
 )
 
 const (
-	// publish request
-	TestSourceID                = "test-source-id"
-	TestSourceIDInHeader        = "test-source-id-in-header"
-	TestEventType               = "test-event-type"
-	TestEventTypeVersion        = "v1"
+	// TestSourceID used in the tests
+	TestSourceID = "test-source-id"
+	// TestEventType used in the tests
+	TestEventType = "test-event-type"
+	// TestEventTypeVersion used in the tests
+	TestEventTypeVersion = "v1"
+	// TestEventTypeVersionInvalid used in the tests
 	TestEventTypeVersionInvalid = "#"
-	TestEventTime               = "2012-11-01T22:08:41+00:00"
-	TestEventTimeInvalid        = "2012-11-01T22"
-	TestEventID                 = "4ea567cf-812b-49d9-a4b2-cb5ddf464094"
-	TestEventIDInvalid          = "4ea567cf"
-	TestSourceIdInvalid         = "source/Id"
-	TestData                    = "{'key':'value'}"
-	TestDataEmpty               = ""
+	// TestEventTime used in the tests
+	TestEventTime = "2012-11-01T22:08:41+00:00"
+	// TestEventTimeInvalid used in the tests
+	TestEventTimeInvalid = "2012-11-01T22"
+	// TestEventID used in the tests
+	TestEventID = "4ea567cf-812b-49d9-a4b2-cb5ddf464094"
+	// TestEventIDInvalid used in the tests
+	TestEventIDInvalid = "4ea567cf"
+	// TestSourceIDInvalid used in the tests
+	TestSourceIDInvalid = "source/Id"
+	// TestData used in the tests
+	TestData = "{'key':'value'}"
+	// TestDataEmpty used in the tests
+	TestDataEmpty = ""
 
 	// event payload format
 	eventFormat            = "{%v}"
@@ -55,36 +64,12 @@ func (b *eventBuilder) String() string {
 	return fmt.Sprintf(eventFormat, b.Buffer.String())
 }
 
-func buildTestPublishRequest(sourceID, eventType, eventTypeVersion, eventID, eventTime, data string) api.PublishRequest {
-	publishRequest := api.PublishRequest{
-		Data:             data,
-		EventID:          eventID,
-		EventTime:        eventTime,
-		EventType:        eventType,
-		EventTypeVersion: eventTypeVersion,
-		SourceID:         sourceID,
-	}
-	return publishRequest
-}
-
-func BuildDefaultTestSubjectAndPayload() (string, string) {
-	subject := BuildDefaultTestSubject()
-	payload := BuildDefaultTestPayload()
-	return subject, payload
-}
-
-func BuildDefaultTestSubject() string {
-	return buildTestSubject(TestSourceID, TestEventType, TestEventTypeVersion)
-}
-
-func buildTestSubject(sourceID, eventType, eventTypeVersion string) string {
-	return encodeSubject(buildTestPublishRequest(sourceID, eventType, eventTypeVersion, TestEventID, TestEventTime, TestData))
-}
-
+// BuildDefaultTestPayload returns a default test payload.
 func BuildDefaultTestPayload() string {
 	return BuildTestPayload(TestSourceID, TestEventType, TestEventTypeVersion, TestEventID, TestEventTime, TestData)
 }
 
+// BuildTestPayload returns a test payload.
 func BuildTestPayload(sourceID, eventType, eventTypeVersion, eventID, eventTime, data string) string {
 	builder := new(eventBuilder).
 		build(sourceIDFormat, sourceID).
@@ -97,6 +82,7 @@ func BuildTestPayload(sourceID, eventType, eventTypeVersion, eventID, eventTime,
 	return payload
 }
 
+// BuildDefaultTestBadPayload returns a default test bad payload.
 func BuildDefaultTestBadPayload() string {
 	builder := new(eventBuilder).
 		build(sourceIDFormat, TestSourceID).
@@ -110,7 +96,8 @@ func BuildDefaultTestBadPayload() string {
 	return payload
 }
 
-func BuildDefaultTestPayloadWithoutSourceId() string {
+// BuildDefaultTestPayloadWithoutSourceID returns a default test payload without the source-id.
+func BuildDefaultTestPayloadWithoutSourceID() string {
 	builder := new(eventBuilder).
 		build(eventTypeFormat, TestEventType).
 		build(eventTypeVersionFormat, TestEventTypeVersion).
@@ -121,6 +108,7 @@ func BuildDefaultTestPayloadWithoutSourceId() string {
 	return payload
 }
 
+// BuildDefaultTestPayloadWithoutEventType returns a default test payload without the event-type.
 func BuildDefaultTestPayloadWithoutEventType() string {
 	builder := new(eventBuilder).
 		build(sourceIDFormat, TestSourceID).
@@ -132,6 +120,7 @@ func BuildDefaultTestPayloadWithoutEventType() string {
 	return payload
 }
 
+// BuildDefaultTestPayloadWithoutEventTypeVersion returns a default test payload without the event-type-version.
 func BuildDefaultTestPayloadWithoutEventTypeVersion() string {
 	builder := new(eventBuilder).
 		build(sourceIDFormat, TestSourceID).
@@ -143,6 +132,7 @@ func BuildDefaultTestPayloadWithoutEventTypeVersion() string {
 	return payload
 }
 
+// BuildDefaultTestPayloadWithoutEventTime returns a default test payload without the event-time
 func BuildDefaultTestPayloadWithoutEventTime() string {
 	builder := new(eventBuilder).
 		build(sourceIDFormat, TestSourceID).
@@ -154,6 +144,7 @@ func BuildDefaultTestPayloadWithoutEventTime() string {
 	return payload
 }
 
+// BuildDefaultTestPayloadWithoutData returns a default test payload without the data
 func BuildDefaultTestPayloadWithoutData() string {
 	builder := new(eventBuilder).
 		build(sourceIDFormat, TestSourceID).
@@ -165,6 +156,7 @@ func BuildDefaultTestPayloadWithoutData() string {
 	return payload
 }
 
+// BuildDefaultTestPayloadWithEmptyData returns a default test payload with empty data
 func BuildDefaultTestPayloadWithEmptyData() string {
 	builder := new(eventBuilder).
 		build(sourceIDFormat, TestSourceID).
@@ -177,10 +169,7 @@ func BuildDefaultTestPayloadWithEmptyData() string {
 	return payload
 }
 
-func encodeSubject(r api.PublishRequest) string {
-	return fmt.Sprintf("%s.%s.%s", r.SourceID, r.EventType, r.EventTypeVersion)
-}
-
+// PerformPublishRequest performs a test publish request.
 func PerformPublishRequest(t *testing.T, publishURL string, payload string) ([]byte, int) {
 	res, err := http.Post(publishURL+"/v1/events", "application/json", strings.NewReader(payload))
 
@@ -197,6 +186,7 @@ func PerformPublishRequest(t *testing.T, publishURL string, payload string) ([]b
 	return body, res.StatusCode
 }
 
+// PerformPublishRequestWithHeaders performs a test publish request with HTTP headers.
 func PerformPublishRequestWithHeaders(t *testing.T, publishURL string, payload string, headers map[string]string) ([]byte, int) {
 	req, _ := http.NewRequest("POST", publishURL+"/v1/events", strings.NewReader(payload))
 
@@ -221,21 +211,7 @@ func PerformPublishRequestWithHeaders(t *testing.T, publishURL string, payload s
 	return body, res.StatusCode
 }
 
-func VerifyReceivedMsg(t *testing.T, a string, b []byte) {
-	var bReq api.PublishRequest
-	err := json.Unmarshal(b, &bReq)
-	if err != nil {
-		t.Error(err)
-	}
-	var aReq api.PublishRequest
-	err = json.Unmarshal([]byte(a), &aReq)
-	if err != nil {
-		t.Error(err)
-	}
-	assert.Equal(t, aReq.EventID, bReq.EventID)
-	assert.Equal(t, aReq.SourceID, bReq.SourceID)
-}
-
+// AssertExpectedError asserts an expected status-code and error.
 func AssertExpectedError(t *testing.T, body []byte, actualStatusCode int, expectedStatusCode int, errorField interface{}, errorType interface{}) {
 	var responseError api.Error
 	err := json.Unmarshal(body, &responseError)

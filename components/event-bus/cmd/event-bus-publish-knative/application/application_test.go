@@ -63,7 +63,7 @@ func Test_PublishWithSourceIdInPayload_ShouldSucceed(t *testing.T) {
 	assert.Equal(t, http.StatusOK, statusCode)
 
 	// get the response
-	publishResponse := &api.PublishResponse{}
+	publishResponse := &api.Response{}
 	err := json.Unmarshal(body, &publishResponse)
 
 	// assert
@@ -73,15 +73,15 @@ func Test_PublishWithSourceIdInPayload_ShouldSucceed(t *testing.T) {
 
 func Test_PublishWithSourceIdInHeader_ShouldSucceed(t *testing.T) {
 	// prepare and send payload
-	payload := test.BuildDefaultTestPayloadWithoutSourceId()
-	body, statusCode := test.PerformPublishRequestWithHeaders(t, server.URL, payload, map[string]string{api.HeaderSourceId: test.TestSourceID})
+	payload := test.BuildDefaultTestPayloadWithoutSourceID()
+	body, statusCode := test.PerformPublishRequestWithHeaders(t, server.URL, payload, map[string]string{api.HeaderSourceID: test.TestSourceID})
 
 	// assert
 	assert.NotNil(t, body)
 	assert.Equal(t, http.StatusOK, statusCode)
 
 	// get the response
-	publishResponse := &api.PublishResponse{}
+	publishResponse := &api.Response{}
 	err := json.Unmarshal(body, &publishResponse)
 
 	// assert
@@ -126,11 +126,11 @@ func Test_PublishWithBadPayload_ShouldFail(t *testing.T) {
 
 func Test_PublishWithoutSourceId_ShouldFail(t *testing.T) {
 	// prepare and send payload
-	payload := test.BuildDefaultTestPayloadWithoutSourceId()
+	payload := test.BuildDefaultTestPayloadWithoutSourceID()
 	body, statusCode := test.PerformPublishRequest(t, server.URL, payload)
 
 	// assert
-	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, fmt.Sprintf("%v/%v", api.FieldSourceId, api.HeaderSourceId), api.ErrorTypeValidationViolation)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, fmt.Sprintf("%v/%v", api.FieldSourceID, api.HeaderSourceID), api.ErrorTypeValidationViolation)
 }
 
 func Test_PublishWithoutEventType_ShouldFail(t *testing.T) {
@@ -202,25 +202,25 @@ func Test_PublishWithInvalidEventId_ShouldFail(t *testing.T) {
 	body, statusCode := test.PerformPublishRequest(t, server.URL, payload)
 
 	// assert
-	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventId, api.ErrorTypeValidationViolation)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventID, api.ErrorTypeValidationViolation)
 }
 
 func Test_PublishWithInvalidSourceIdInPayload_ShouldFail(t *testing.T) {
 	// prepare and send payload
-	payload := test.BuildTestPayload(test.TestSourceIdInvalid, test.TestEventType, test.TestEventTypeVersion, test.TestEventID, test.TestEventTime, test.TestData)
+	payload := test.BuildTestPayload(test.TestSourceIDInvalid, test.TestEventType, test.TestEventTypeVersion, test.TestEventID, test.TestEventTime, test.TestData)
 	body, statusCode := test.PerformPublishRequest(t, server.URL, payload)
 
 	// assert
-	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldSourceId, api.ErrorTypeValidationViolation)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldSourceID, api.ErrorTypeValidationViolation)
 }
 
 func Test_PublishWithInvalidSourceIdInHeader_ShouldFail(t *testing.T) {
 	// prepare and send payload
-	payload := test.BuildDefaultTestPayloadWithoutSourceId()
-	body, statusCode := test.PerformPublishRequestWithHeaders(t, server.URL, payload, map[string]string{api.HeaderSourceId: test.TestSourceIdInvalid})
+	payload := test.BuildDefaultTestPayloadWithoutSourceID()
+	body, statusCode := test.PerformPublishRequestWithHeaders(t, server.URL, payload, map[string]string{api.HeaderSourceID: test.TestSourceIDInvalid})
 
 	// assert
-	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.HeaderSourceId, api.ErrorTypeValidationViolation)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.HeaderSourceID, api.ErrorTypeValidationViolation)
 }
 
 func Test_PublishWithTooLargePayload_ShouldFail(t *testing.T) {
@@ -234,15 +234,15 @@ func Test_PublishWithTooLargePayload_ShouldFail(t *testing.T) {
 
 func Test_PublishResponseFields(t *testing.T) {
 	// prepare and send payload
-	payload := test.BuildDefaultTestPayloadWithoutSourceId()
-	body, statusCode := test.PerformPublishRequestWithHeaders(t, server.URL, payload, map[string]string{api.HeaderSourceId: test.TestSourceID})
+	payload := test.BuildDefaultTestPayloadWithoutSourceID()
+	body, statusCode := test.PerformPublishRequestWithHeaders(t, server.URL, payload, map[string]string{api.HeaderSourceID: test.TestSourceID})
 
 	// assert
 	assert.NotNil(t, body)
 	assert.Equal(t, http.StatusOK, statusCode)
 
 	// get the response
-	publishResponse := &api.PublishResponse{}
+	publishResponse := &api.Response{}
 	err := json.Unmarshal(body, &publishResponse)
 
 	// assert

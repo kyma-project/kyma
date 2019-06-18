@@ -9,15 +9,15 @@ var (
 	isValidEventID = regexp.MustCompile(AllowedEventIDChars).MatchString
 
 	// channel name components
-	isValidSourceId         = regexp.MustCompile(AllowedSourceIdChars).MatchString
+	isValidSourceID         = regexp.MustCompile(AllowedSourceIDChars).MatchString
 	isValidEventType        = regexp.MustCompile(AllowedEventTypeChars).MatchString
 	isValidEventTypeVersion = regexp.MustCompile(AllowedEventTypeVersionChars).MatchString
 )
 
 //ValidatePublish validates a publish POST request
-func ValidatePublish(r *PublishRequest, opts *EventOptions) *Error {
+func ValidatePublish(r *Request, opts *EventOptions) *Error {
 	if len(r.SourceID) == 0 {
-		return ErrorResponseMissingFieldSourceId()
+		return ErrorResponseMissingFieldSourceID()
 	}
 	if len(r.EventType) == 0 {
 		return ErrorResponseMissingFieldEventType()
@@ -46,8 +46,8 @@ func ValidatePublish(r *PublishRequest, opts *EventOptions) *Error {
 	}
 
 	// validate the fully-qualified topic name components
-	if !isValidSourceId(r.SourceID) {
-		return ErrorResponseWrongSourceId(r.SourceIdFromHeader)
+	if !isValidSourceID(r.SourceID) {
+		return ErrorResponseWrongSourceID(r.SourceIDFromHeader)
 	}
 	if !isValidEventType(r.EventType) {
 		return ErrorResponseWrongEventType()
@@ -57,10 +57,10 @@ func ValidatePublish(r *PublishRequest, opts *EventOptions) *Error {
 	}
 
 	if _, err := time.Parse(time.RFC3339, r.EventTime); err != nil {
-		return ErrorResponseWrongEventTime(err)
+		return ErrorResponseWrongEventTime()
 	}
 	if len(r.EventID) > 0 && !isValidEventID(r.EventID) {
-		return ErrorResponseWrongEventId()
+		return ErrorResponseWrongEventID()
 	}
 	return nil
 }
