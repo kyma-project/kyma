@@ -70,7 +70,7 @@ The test creates a new Namespace called `{TestName}-{UUID}`. This Namespace shou
 
 ### Run end-to-end tests locally
 
-> **NOTE:** Before running the test, configure Velero using [these](../../../docs/backup/03-01-backup-configuration.md) guidelines.
+> **NOTE:** Before running the test, configure Velero using [these](https://kyma-project.io/docs/components/backup/#configuration-velero-chart) guidelines.
 
 Run tests:
 ```bash
