@@ -112,7 +112,7 @@ func (ts *testSuite) CreateResources() error {
 		return err
 	}
 
-	err = wait.Until(5, 30, ts.lambdaClient.IsLambdaReady)
+	err = wait.Until(10, 30, ts.lambdaClient.IsLambdaReady)
 
 	if err != nil {
 		return fmt.Errorf("Lambda function not ready, %s", err)
@@ -131,13 +131,9 @@ func (ts *testSuite) GetTestServiceURL() string {
 }
 
 func (ts *testSuite) CheckCounterPod() error {
-	count, err := ts.testService.CheckValue()
+	err := wait.Until(5, 10, ts.testService.WaitForCounterPodToUpdateValue)
 	if err != nil {
-		return fmt.Errorf("Unable to fetch count from Error: %s", err)
-	}
-
-	if count != 1 {
-		return fmt.Errorf("Counter pod value is not as expected. The value is: %v", count)
+		return fmt.Errorf("The counter pod is not updated: %v", err)
 	}
 	return nil
 }
@@ -232,7 +228,15 @@ func prepareService(targetURL string) *testkit.ServiceDetails {
 }
 
 func (ts *testSuite) CreateInstance(serviceID string) (*v1beta1.ServiceInstance, error) {
-	return ts.scClient.CreateServiceInstance(consts.ServiceInstanceName, consts.ServiceInstanceID, serviceID)
+	svcInstance, err := ts.scClient.CreateServiceInstance(consts.ServiceInstanceName, consts.ServiceInstanceID, serviceID)
+	if err != nil {
+		return nil, err
+	}
+	err = wait.Until(8, 30, ts.scClient.WaitForServiceInstanceToCreate)
+	if err != nil {
+		return nil, err
+	}
+	return svcInstance, nil
 }
 
 func (ts *testSuite) CreateServiceBinding() error {
@@ -249,13 +253,17 @@ func (ts *testSuite) CreateServiceBindingUsage() error {
 	if err != nil {
 		return err
 	}
-
-	err = wait.Until(5, 30, ts.lambdaClient.IsFunctionAnnotated)
+	err = wait.Until(2, 30, ts.scClient.WaitForSBUToCreate)
 	if err != nil {
 		return err
 	}
 
-	err = wait.Until(5, 30, ts.lambdaClient.IsLambdaReadyWithSBU)
+	err = wait.Until(8, 30, ts.lambdaClient.IsFunctionAnnotated)
+	if err != nil {
+		return err
+	}
+
+	err = wait.Until(8, 30, ts.lambdaClient.IsLambdaReadyWithSBU)
 	if err != nil {
 		return err
 	}
@@ -311,6 +319,12 @@ func (ts *testSuite) CleanUp() error {
 	}
 
 	err = ts.scClient.DeleteServiceInstance(consts.ServiceInstanceName)
+	if err != nil {
+		log.Error(err)
+		errorOccured = true
+	}
+
+	err = wait.Until(5, 30, ts.scClient.WaitForServiceInstanceToDelete)
 	if err != nil {
 		log.Error(err)
 		errorOccured = true

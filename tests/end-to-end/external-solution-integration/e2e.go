@@ -34,10 +34,10 @@ func main() {
 
 	defer func() {
 		log.Info("Starting cleanup")
-		// err := ts.CleanUp()
-		// if err != nil {
-		// 	log.Error(err)
-		// }
+		err := ts.CleanUp()
+		if err != nil {
+			log.Error(err)
+		}
 	}()
 
 	log.Trace("creating resources")
@@ -71,16 +71,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	time.Sleep(120 * time.Second)
-
 	log.Trace("Creating Service Binding")
 	err = ts.CreateServiceBinding()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	//TODO: Get rid of constant time waits, you can check for readiness of SI / SB / SBU
-	time.Sleep(30 * time.Second)
 
 	log.Trace("Creating Service Binding Usage")
 	err = ts.CreateServiceBindingUsage()
@@ -93,7 +88,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	time.Sleep(30 * time.Second)
+
 	log.Trace("Checking counter pod for the count.")
 	err = ts.CheckCounterPod()
 	if err != nil {

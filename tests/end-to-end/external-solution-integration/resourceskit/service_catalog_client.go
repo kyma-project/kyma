@@ -1,6 +1,8 @@
 package resourceskit
 
 import (
+	"strings"
+
 	scv1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	scClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	sbuv1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
@@ -19,6 +21,9 @@ type ServiceCatalogClient interface {
 	DeleteServiceBinding() error
 	CreateServiceBindingUsage() (*sbuv1.ServiceBindingUsage, error)
 	DeleteServiceBindingUsage() error
+	WaitForServiceInstanceToDelete() (bool, error)
+	WaitForServiceInstanceToCreate() (bool, error)
+	WaitForSBUToCreate() (bool, error)
 }
 
 type serviceCatalogClient struct {
@@ -74,6 +79,41 @@ func (c *serviceCatalogClient) CreateServiceInstance(siName, siID, serviceID str
 func (c *serviceCatalogClient) DeleteServiceInstance(siName string) error {
 	log.WithFields(log.Fields{"ServiceInstanceName": siName}).Debug("Deleting ServiceInstance")
 	return c.scClient.ServicecatalogV1beta1().ServiceInstances(c.namespace).Delete(siName, &v1.DeleteOptions{})
+}
+
+func (c *serviceCatalogClient) WaitForServiceInstanceToDelete() (bool, error) {
+	siName := consts.ServiceInstanceName
+	log.WithFields(log.Fields{"ServiceInstanceName": siName}).Debug("Waiting for ServiceInstance to be deleted")
+	_, err := c.scClient.ServicecatalogV1beta1().ServiceInstances(c.namespace).Get(siName, v1.GetOptions{})
+
+	if err != nil && strings.Contains(err.Error(), "not found") {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (c *serviceCatalogClient) WaitForServiceInstanceToCreate() (bool, error) {
+	siName := consts.ServiceInstanceName
+	log.WithFields(log.Fields{"ServiceInstanceName": siName}).Debug("Waiting for ServiceInstance to be created")
+	svcInstance, _ := c.scClient.ServicecatalogV1beta1().ServiceInstances(c.namespace).Get(siName, v1.GetOptions{})
+
+	if svcInstance.Status.ProvisionStatus != "Provisioned" {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (c *serviceCatalogClient) WaitForSBUToCreate() (bool, error) {
+	sbuName := consts.ServiceBindingUsageName
+	log.WithFields(log.Fields{"ServiceBindingUsageName": sbuName}).Debug("Waiting for ServiceBindingUsage to be created")
+	sbuInstance, _ := c.sbuClient.ServicecatalogV1alpha1().ServiceBindingUsages(c.namespace).Get(sbuName, v1.GetOptions{})
+
+	if sbuInstance == nil {
+		return false, nil
+	}
+	return true, nil
 }
 
 func (c *serviceCatalogClient) CreateServiceBinding() (*scv1.ServiceBinding, error) {

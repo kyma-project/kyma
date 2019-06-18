@@ -25,9 +25,10 @@ const (
 type TestService interface {
 	CreateTestService() error
 	DeleteTestService() error
-	CheckValue() (int, error)
+	checkValue() (int, error)
 	IsReady() (bool, error)
 	GetTestServiceURL() string
+	WaitForCounterPodToUpdateValue() (bool, error)
 }
 
 type testService struct {
@@ -57,7 +58,7 @@ func (ts *testService) CreateTestService() error {
 	return nil
 }
 
-func (ts *testService) CheckValue() (int, error) {
+func (ts *testService) checkValue() (int, error) {
 
 	url := ts.GetTestServiceURL() + "/counter"
 
@@ -101,6 +102,18 @@ func (ts *testService) IsReady() (bool, error) {
 	}
 
 	return false, nil
+}
+func (ts *testService) WaitForCounterPodToUpdateValue() (bool, error) {
+	count, err := ts.checkValue()
+	if err != nil {
+		log.Error(err)
+		return false, err
+	}
+
+	if count != 1 {
+		return false, nil
+	}
+	return true, nil
 }
 
 func (ts *testService) DeleteTestService() error {
