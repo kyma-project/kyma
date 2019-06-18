@@ -14,7 +14,7 @@ To set up the project, use these tools:
 * The latest version of [Docker](https://www.docker.com/)
 * [Velero](../../../resources/velero/README.md#details)
 
->**NOTE:** Use [these](../../../docs/backup/03-01-backup-configuration.md) guidelines to configure Velero for a specific storage provider.
+>**NOTE:** Use [these](https://kyma-project.io/docs/components/backup/#configuration-velero-chart) guidelines to configure Velero for a specific storage provider.
 
 
 ## Usage
