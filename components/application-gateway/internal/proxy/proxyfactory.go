@@ -2,11 +2,12 @@ package proxy
 
 import (
 	"crypto/tls"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"

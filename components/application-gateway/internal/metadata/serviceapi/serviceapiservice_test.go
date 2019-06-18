@@ -1,8 +1,9 @@
 package serviceapi
 
 import (
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
 

@@ -2,6 +2,7 @@ package serviceapi
 
 import (
 	"encoding/json"
+
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/applications"
