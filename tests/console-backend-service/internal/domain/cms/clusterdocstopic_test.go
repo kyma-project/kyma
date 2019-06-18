@@ -4,16 +4,14 @@ package cms
 
 import (
 	"fmt"
-	"testing"
-
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
-
 	"strings"
+	"testing"
 
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
@@ -21,6 +19,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 const (
@@ -261,11 +260,11 @@ func fixCommonClusterDocsTopicSpec() v1alpha1.CommonDocsTopicSpec {
 		Description: fixture.DocsTopicDescription,
 		Sources: []v1alpha1.Source{
 			{
-				Type: "openapi",
-				Name: "openapi",
+				Type:     "openapi",
+				Name:     "openapi",
 				Metadata: &runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)},
-				Mode: v1alpha1.DocsTopicSingle,
-				URL:  "https://petstore.swagger.io/v2/swagger.json",
+				Mode:     v1alpha1.DocsTopicSingle,
+				URL:      "https://petstore.swagger.io/v2/swagger.json",
 			},
 		},
 	}
