@@ -433,6 +433,9 @@ func (componentTestContext) policyFor(testID, issuer string) *istioAuthApi.Polic
 				},
 			},
 		},
+		Peers: istioAuthApi.Peers{
+			&istioAuthApi.Peer{MTLS: struct{}{}},
+		},
 	}
 }
 
