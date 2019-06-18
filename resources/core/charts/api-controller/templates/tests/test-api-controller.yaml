@@ -13,7 +13,7 @@ spec:
       serviceAccount: api-controller-test-account
       containers:
       - name: test-api-controller-acceptance
-        image: tsmsap/api-gateway-tests:3
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.api_controller_acceptance_tests.dir }}api-controller-acceptance-tests:{{ .Values.global.api_controller_acceptance_tests.version }}
         command: ["/bin/sh"]
         args: ["-c", "sleep 10; /apicontroller.test -test.v; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
         env:

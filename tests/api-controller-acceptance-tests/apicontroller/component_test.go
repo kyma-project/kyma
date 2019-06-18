@@ -26,6 +26,8 @@ type componentTestContext struct{}
 
 func TestComponentSpec(t *testing.T) {
 
+	deep.MaxDepth = 40 //It looks it's also used for arrays/slices, we better don't lose some array's tail.
+
 	domainName := os.Getenv(domainNameEnv)
 	if domainName == "" {
 		t.Fatal("Domain name not set.")
@@ -98,14 +100,14 @@ func TestComponentSpec(t *testing.T) {
 			So(err, ShouldNotBeNil)
 		})
 
-		Convey("create API with default jwt configuration to enable authentication", func() {
-			t.Log("create API with default jwt configuration to enable authentication")
+		Convey("create API with default jwt configuration and disabled mTLS", func() {
+			t.Log("create API with default jwt configuration and disabled mTLS")
 
 			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
 			api := ctx.apiFor(testID, domainName, namespace, apiSecurityDisabled, true)
-			authEnabled := true
-			api.Spec.AuthenticationEnabled = &authEnabled
+			api.Spec.AuthenticationEnabled = boolPtr(true)
+			api.Spec.DisableIstioAuthPolicyMTLS = boolPtr(true)
 
 			lastAPI, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
 			defer ctx.cleanUpAPI(kymaClient, lastAPI, t, false, namespace)
@@ -124,7 +126,37 @@ func TestComponentSpec(t *testing.T) {
 			So(vs.Spec, ctx.ShouldDeepEqual, expectedVs)
 
 			lastPolicy, err := istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(lastAPI.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
-			expectedPolicy := ctx.policyFor(testID, fmt.Sprintf("https://dex.%s", domainName), nil)
+			expectedPolicy := ctx.policyWithoutMTLSFor(testID, fmt.Sprintf("https://dex.%s", domainName))
+			So(err, ShouldBeNil)
+			So(lastPolicy.Spec, ctx.ShouldDeepEqual, expectedPolicy)
+		})
+
+		Convey("create API with default jwt configuration to enable authentication", func() {
+			t.Log("create API with default jwt configuration to enable authentication")
+
+			testID := ctx.generateTestID(testIDLength)
+			t.Logf("Running test: %s", testID)
+			api := ctx.apiFor(testID, domainName, namespace, apiSecurityDisabled, true)
+			api.Spec.AuthenticationEnabled = boolPtr(true)
+
+			lastAPI, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
+			defer ctx.cleanUpAPI(kymaClient, lastAPI, t, false, namespace)
+			So(err, ShouldBeNil)
+			So(lastAPI, ShouldNotBeNil)
+			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
+
+			lastAPI, err = ctx.awaitAPIChanged(kymaClient, lastAPI, true, true, namespace)
+			So(err, ShouldBeNil)
+			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
+			So(lastAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
+
+			vs, err := istioNetClient.NetworkingV1alpha3().VirtualServices(namespace).Get(lastAPI.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
+			expectedVs := ctx.virtualServiceFor(testID, domainName, namespace)
+			So(err, ShouldBeNil)
+			So(vs.Spec, ctx.ShouldDeepEqual, expectedVs)
+
+			lastPolicy, err := istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(lastAPI.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
+			expectedPolicy := ctx.policyFor(testID, fmt.Sprintf("https://dex.%s", domainName))
 			So(err, ShouldBeNil)
 			So(lastPolicy.Spec, ctx.ShouldDeepEqual, expectedPolicy)
 		})
@@ -147,8 +179,7 @@ func TestComponentSpec(t *testing.T) {
 			So(createdAPI.ResourceVersion, ShouldNotBeEmpty)
 			So(createdAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
 
-			authEnabled := false
-			createdAPI.Spec.AuthenticationEnabled = &authEnabled
+			createdAPI.Spec.AuthenticationEnabled = boolPtr(false)
 
 			updatedAPI, err := kymaClient.GatewayV1alpha2().Apis(namespace).Update(createdAPI)
 			So(err, ShouldBeNil)
@@ -185,9 +216,10 @@ func TestComponentSpec(t *testing.T) {
 			So(lastAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
 
 			policy, err := istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(lastAPI.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
-			expectedPolicy := ctx.policyFor(testID, api.Spec.Authentication[0].Jwt.Issuer, sampleTriggerRule())
+			expectedPolicy := ctx.policyAndTriggerRuleFor(testID, api.Spec.Authentication[0].Jwt.Issuer, sampleTriggerRule())
 			So(err, ShouldBeNil)
 			So(policy.Spec, ctx.ShouldDeepEqual, expectedPolicy)
+			So(err, ShouldNotBeNil)
 		})
 
 		Convey("create API should not process the request if another API exists for target service", func() {
@@ -406,6 +438,7 @@ func (componentTestContext) virtualServiceFor(testID string, domainName string, 
 					{
 						Destination: &istioNetApi.Destination{
 							Host: fmt.Sprintf("sample-app-svc-%s.%s.svc.cluster.local", testID, namespace),
+							Port: &istioNetApi.PortSelector{Number: 80},
 						},
 					},
 				},
@@ -430,7 +463,17 @@ func sampleTriggerRule() *istioAuthApi.TriggerRule {
 	}
 }
 
-func (componentTestContext) policyFor(testID, issuer string, triggerRule *istioAuthApi.TriggerRule) *istioAuthApi.PolicySpec {
+func (ctc componentTestContext) policyFor(testID, issuer string) *istioAuthApi.PolicySpec {
+	return ctc.policyAndTriggerRuleFor(testID, issuer, nil)
+}
+
+func (ctc componentTestContext) policyWithoutMTLSFor(testID, issuer string) *istioAuthApi.PolicySpec {
+	res := ctc.policyAndTriggerRuleFor(testID, issuer, nil)
+	res.Peers = nil
+	return res
+}
+
+func (componentTestContext) policyAndTriggerRuleFor(testID, issuer string, triggerRule *istioAuthApi.TriggerRule) *istioAuthApi.PolicySpec {
 
 	var triggerRules []*istioAuthApi.TriggerRule = nil
 	if triggerRule != nil {
@@ -476,7 +519,7 @@ func (componentTestContext) setCustomJwtAuthenticationConfig(api *kymaApi.Api) {
 						kymaApi.MatchExpression{ExprType: kymaApi.ExactMatch, Value: "/do/not/use/in/production"},
 						kymaApi.MatchExpression{ExprType: kymaApi.PrefixMatch, Value: "/web"},
 						kymaApi.MatchExpression{ExprType: kymaApi.SuffixMatch, Value: "/favicon.ico"},
-						kymaApi.MatchExpression{ExprType: kymaApi.RegexMatch, Value: "^/padu/.*"},
+						kymaApi.MatchExpression{ExprType: kymaApi.RegexMatch, Value: "^/api/orders/(.*?)?"},
 					},
 				},
 			},
@@ -546,4 +589,8 @@ func (componentTestContext) cleanUpAPI(kymaClient *kyma.Clientset, api *kymaApi.
 	if !allowMissing && err != nil {
 		t.Fatalf("Cannot clean up API %s: %s", api.Name, err)
 	}
+}
+
+func boolPtr(arg bool) *bool {
+	return &arg
 }
