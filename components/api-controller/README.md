@@ -42,6 +42,19 @@ Use these environment variables to configure the application:
 | **CORS_ALLOW_HEADERS** | No | `""` | Used to set the `corsPolicy.allowHeaders` field in the specification of the Virtual Service. | `"*"` or comma-separated list of headers |
 | **BLACKLISTED_SERVICES** | No | `""` | Used to defined a list of services for which the API Controller doesn't create Virtual Services or Policies. | Comma-separated list of services and their source Namespace in the `{SERVICE_NAME}.{NAMESPACE}` format.
 
+### Blacklisted services
+
+The API Controller doesn't create a Virtual Service or Authentication Policies for these services: 
+- `kubernetes.default`
+- `istio-citadel.istio-system`
+- `istio-galley.istio-system`
+- `istio-ingressgateway.istio-system`
+- `istio-pilot.istio-system`
+- `istio-policy.istio-system`
+- `istio-sidecar-injector.istio-system`
+- `istio-telemetry.istio-system`
+- `apiserver-proxy.kyma-system`
+- `apiserver-proxy-ssl.kyma-system`
 
 ### Test
 

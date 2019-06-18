@@ -19,9 +19,6 @@ global:
   istio:
     gateway:
       name: kyma-gateway
-  etcdBackup:
-    enabled: false
-    secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
     version: "cb16ab4c"

@@ -14,6 +14,7 @@ data:
       hpaCpuTargetAverageUtilization: 50,
       functionResources:{requests:{cpu: '100m', memory: '100Mi'}},
       functionSizes: [
+          {size:{ name: 'XS', memory: '128Mi', cpu: '100m', minReplicas: 1, maxReplicas: 1, description: '' }},
           {size:{ name: 'S', memory: '128Mi', cpu: '100m', minReplicas: 1, maxReplicas: 2, description: '' }},
           {size:{ name: 'M', memory: '256Mi', cpu: '500m', minReplicas: 2, maxReplicas: 5, description: '' }},
           {size:{ name: 'L', memory: '512Mi', cpu: '1.0',  minReplicas: 5, maxReplicas: 10, description: '' }},

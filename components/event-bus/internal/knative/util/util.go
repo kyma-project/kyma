@@ -19,7 +19,7 @@ func GetKnSubscriptionName(kySubscriptionName, kySubscriptionNamespace *string) 
 	return fmt.Sprintf("%s%s%s", *kySubscriptionName, delimiter, escapeHyphensAndPeriods(kySubscriptionNamespace))
 }
 
-// GetDefaultChannelNamespace() returns the default namespace of Knative/Eventing channels and subscriptions
+// GetDefaultChannelNamespace returns the default namespace of Knative/Eventing channels and subscriptions
 func GetDefaultChannelNamespace() string {
 	return defaultChannelNamespace
 }
@@ -32,7 +32,7 @@ func escapeHyphensAndPeriods(str *string) string {
 	return replacer.Replace(*str)
 }
 
-// encodeChannelName function encodes and joins the given event components to construct the encoded channel name
+// EncodeChannelName function encodes and joins the given event components to construct the encoded channel name
 func EncodeChannelName(sourceID, eventType, eventTypeVersion *string) string {
 	return fmt.Sprintf("%s%s%s%s%s",
 		escapeHyphensAndPeriods(sourceID), delimiter,
