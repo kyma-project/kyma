@@ -3,6 +3,7 @@ package kymainstallation
 import (
 	"errors"
 	"fmt"
+	"github.com/istio/pkg/log"
 	"path"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/apis/installer/v1alpha1"
@@ -95,14 +96,16 @@ type uninstallStep struct {
 	step
 }
 
-// Run method for deleteStep triggers step delete via helm
+// Run method for deleteStep triggers step delete via helm. Uninstall should not be retried, hence no error is returned.
 func (s uninstallStep) Run() error {
 
-	_, deleteErr := s.helmClient.DeleteRelease(s.component.GetReleaseName())
+	uninstallReleaseResponse, deleteErr := s.helmClient.DeleteRelease(s.component.GetReleaseName())
 
 	if deleteErr != nil {
-		return errors.New("Helm delete error: " + deleteErr.Error())
+		log.Errorf("Helm delete error: %s", deleteErr.Error())
+		return nil
 	}
 
+	s.helmClient.PrintRelease(uninstallReleaseResponse.Release)
 	return nil
 }
