@@ -9,7 +9,12 @@ serviceAccount:
   create: true
   name:
 
+# enable tracing for debug, need install jaeger and specify right jaeger_agent_host
+tracing:
+  jaegerAgentHost:
+
 loki:
+  podManagementPolicy: OrderedReady
   nameOverride: loki
   replicas: 1
   minReadySeconds: 0
@@ -18,9 +23,23 @@ loki:
   port: 3100
   fullnameOverride: logging
 
+  updateStrategy:
+    type: RollingUpdate
+
+  podLabels: {}
+
+  securityContext:
+    fsGroup: 10001
+    runAsGroup: 10001
+    runAsNonRoot: true
+    runAsUser: 10001
+
+  extraArgs: {}
+    # log.level: debug
+
   image:
     repository: grafana/loki
-    tag: v0.1.0 
+    tag: v0.1.0
     pullPolicy: Always # Always pull while in BETA
 
   service:
@@ -103,24 +122,48 @@ loki:
   config:
     auth_enabled: false
     ingester:
+      chunk_idle_period: 15m
+      chunk_block_size: 262144
       lifecycler:
         address: 127.0.0.1
         ring:
-          store: inmemory
+          kvstore:
+            store: inmemory
           replication_factor: 1
-    schema_configs:
-      - from: 2000-01-01
-        store: boltdb
-        object_store: filesystem
-        schema: v9
-        index:
-          prefix: index_
-          period: 168h
+        ## Different ring configs can be used. E.g. Consul
+        # ring:
+        #   store: consul
+        #   replication_factor: 1
+        #   consul:
+        #     host: "consul:8500"
+        #     prefix: ""
+        #     httpclienttimeout: "20s"
+        #     consistentreads: true
+    limits_config:
+      enforce_metric_name: false
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h
+    schema_config:
+      configs:
+        - from: 2018-04-15
+          store: boltdb
+          object_store: filesystem
+          schema: v9
+          index:
+            prefix: index_
+            period: 168h
+    server:
+      http_listen_port: 3100
     storage_config:
       boltdb:
         directory: /data/loki/index
       filesystem:
         directory: /data/loki/chunks
+    chunk_store_config:
+      max_look_back_period: 0
+    table_manager:
+      retention_deletes_enabled: false
+      retention_period: 0
 
 promtail:
 
@@ -131,7 +174,7 @@ promtail:
 
   image:
     repository: grafana/promtail
-    tag: v0.1.0 
+    tag: v0.1.0
     pullPolicy: Always # Always pull while in BETA
 
   volumes:
