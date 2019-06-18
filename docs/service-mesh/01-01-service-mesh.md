@@ -7,6 +7,6 @@ is based on [Istio](https://istio.io/docs/concepts/what-is-istio/) open platform
 
 By default, the Kyma implementation of Istio has [mutual TLS (mTLS)](https://istio.io/docs/tasks/security/mutual-tls/) enabled and injects a sidecar container to every Pod. If you disable sidecar injection or mTLS traffic in a service or a Namespace, you must manage their traffic configuration by creating appropriate [Destination Rules](https://istio.io/docs/reference/config/networking/v1alpha3/destination-rule/) and [Authentication Policies](https://istio.io/docs/reference/config/istio.authentication.v1alpha1/). 
 
->**NOTE:** The only part of the Service Mesh that doesn't have mTLS enabled is the Mesh Control Plane.
+>**NOTE:** The Mesh Control Plane doesn't have mTLS enabled.
 
 See this [Istio diagram](https://istio.io/docs/concepts/what-is-istio/arch.svg) to understand the relationship between the Istio components and services.
