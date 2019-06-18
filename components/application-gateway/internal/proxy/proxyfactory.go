@@ -2,20 +2,19 @@ package proxy
 
 import (
 	"crypto/tls"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
-
-	"github.com/kyma-project/kyma/components/application-gateway/internal/httptools"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/httptools"
 	log "github.com/sirupsen/logrus"
 )
 
-func makeProxy(targetUrl string, requestParameters *model.RequestParameters, id string, skipVerify bool) (*httputil.ReverseProxy, apperrors.AppError) {
+func makeProxy(targetUrl string, requestParameters *authorization.RequestParameters, id string, skipVerify bool) (*httputil.ReverseProxy, apperrors.AppError) {
 	target, err := url.Parse(targetUrl)
 	if err != nil {
 		log.Errorf("failed to parse target url '%s': '%s'", targetUrl, err.Error())

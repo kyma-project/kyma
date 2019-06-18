@@ -1,6 +1,7 @@
 package serviceapi
 
 import (
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
@@ -53,8 +54,8 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 			resultingAPI: &model.API{
 				TargetUrl: targetUrl,
-				Credentials: &model.Credentials{
-					OAuth: &model.OAuth{
+				Credentials: &authorization.Credentials{
+					OAuth: &authorization.OAuth{
 						ClientID:     clientId,
 						ClientSecret: clientSecret,
 						URL:          oauthUrl,
@@ -78,8 +79,8 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 			resultingAPI: &model.API{
 				TargetUrl: targetUrl,
-				Credentials: &model.Credentials{
-					BasicAuth: &model.BasicAuth{
+				Credentials: &authorization.Credentials{
+					BasicAuth: &authorization.BasicAuth{
 						Username: username,
 						Password: password,
 					},
@@ -103,8 +104,8 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 			resultingAPI: &model.API{
 				TargetUrl: targetUrl,
-				Credentials: &model.Credentials{
-					CertificateGen: &model.CertificateGen{
+				Credentials: &authorization.Credentials{
+					CertificateGen: &authorization.CertificateGen{
 						CommonName:  commonName,
 						Certificate: certificate,
 						PrivateKey:  privateKey,
@@ -136,7 +137,7 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 			resultingAPI: &model.API{
 				TargetUrl: targetUrl,
-				RequestParameters: &model.RequestParameters{
+				RequestParameters: &authorization.RequestParameters{
 					Headers: &map[string][]string{
 						"header": {"headerValue"},
 					},
@@ -159,7 +160,7 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 			resultingAPI: &model.API{
 				TargetUrl: targetUrl,
-				RequestParameters: &model.RequestParameters{
+				RequestParameters: &authorization.RequestParameters{
 					QueryParameters: &map[string][]string{
 						"query": {"queryValue"},
 					},
@@ -179,7 +180,7 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 			resultingAPI: &model.API{
 				TargetUrl: targetUrl,
-				RequestParameters: &model.RequestParameters{
+				RequestParameters: &authorization.RequestParameters{
 					Headers: &map[string][]string{
 						"header": {"headerValue"},
 					},

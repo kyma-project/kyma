@@ -4,7 +4,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/oauth"
 	"net/http"
 
-	metadatamodel "github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/oauth/tokencache"
 )
@@ -20,7 +19,7 @@ type TransportSetter func(transport *http.Transport)
 
 type StrategyFactory interface {
 	// Creates strategy for credentials provided
-	Create(credentials *metadatamodel.Credentials) Strategy
+	Create(credentials *Credentials) Strategy
 }
 
 type OAuthClient interface {
@@ -35,7 +34,7 @@ type authorizationStrategyFactory struct {
 }
 
 // Create creates strategy for credentials provided
-func (asf authorizationStrategyFactory) Create(c *metadatamodel.Credentials) Strategy {
+func (asf authorizationStrategyFactory) Create(c *Credentials) Strategy {
 	var strategy Strategy
 
 	if c != nil && c.OAuth != nil {

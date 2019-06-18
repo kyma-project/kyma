@@ -3,7 +3,7 @@ package authorization
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/httptools"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/httptools"
 
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"

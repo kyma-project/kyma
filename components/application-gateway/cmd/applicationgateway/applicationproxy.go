@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/externalapi"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/httptools"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/secrets"
@@ -18,6 +17,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/csrf"
 	csrfClient "github.com/kyma-project/kyma/components/application-gateway/pkg/csrf/client"
 	csrfStrategy "github.com/kyma-project/kyma/components/application-gateway/pkg/csrf/strategy"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/httptools"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"

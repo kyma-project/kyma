@@ -2,6 +2,7 @@ package serviceapi
 
 import (
 	"encoding/json"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
@@ -75,21 +76,21 @@ func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.
 	return api, nil
 }
 
-func (sas defaultService) readCredentials(secret map[string][]byte, applicationAPI *applications.ServiceAPI) *model.Credentials {
-	var credentials *model.Credentials
+func (sas defaultService) readCredentials(secret map[string][]byte, applicationAPI *applications.ServiceAPI) *authorization.Credentials {
+	var credentials *authorization.Credentials
 
 	credentialsType := applicationAPI.Credentials.Type
 
 	if credentialsType == TypeOAuth {
-		credentials = &model.Credentials{
+		credentials = &authorization.Credentials{
 			OAuth: getOAuthCredentials(secret, applicationAPI.Credentials.Url),
 		}
 	} else if credentialsType == TypeBasic {
-		credentials = &model.Credentials{
+		credentials = &authorization.Credentials{
 			BasicAuth: getBasicAuthCredentials(secret),
 		}
 	} else if credentialsType == TypeCertificateGen {
-		credentials = &model.Credentials{
+		credentials = &authorization.Credentials{
 			CertificateGen: getCertificateGenCredentials(secret),
 		}
 	} else {
@@ -103,8 +104,8 @@ func (sas defaultService) readCredentials(secret map[string][]byte, applicationA
 	return credentials
 }
 
-func getRequestParameters(secret map[string][]byte) (*model.RequestParameters, apperrors.AppError) {
-	requestParameters := &model.RequestParameters{}
+func getRequestParameters(secret map[string][]byte) (*authorization.RequestParameters, apperrors.AppError) {
+	requestParameters := &authorization.RequestParameters{}
 
 	headersData := secret[HeadersKey]
 	if headersData != nil {
@@ -131,23 +132,23 @@ func getRequestParameters(secret map[string][]byte) (*model.RequestParameters, a
 	return requestParameters, nil
 }
 
-func getOAuthCredentials(secret map[string][]byte, url string) *model.OAuth {
-	return &model.OAuth{
+func getOAuthCredentials(secret map[string][]byte, url string) *authorization.OAuth {
+	return &authorization.OAuth{
 		ClientID:     string(secret[ClientIDKey]),
 		ClientSecret: string(secret[ClientSecretKey]),
 		URL:          url,
 	}
 }
 
-func getBasicAuthCredentials(secret map[string][]byte) *model.BasicAuth {
-	return &model.BasicAuth{
+func getBasicAuthCredentials(secret map[string][]byte) *authorization.BasicAuth {
+	return &authorization.BasicAuth{
 		Username: string(secret[UsernameKey]),
 		Password: string(secret[PasswordKey]),
 	}
 }
 
-func getCertificateGenCredentials(secret map[string][]byte) *model.CertificateGen {
-	return &model.CertificateGen{
+func getCertificateGenCredentials(secret map[string][]byte) *authorization.CertificateGen {
+	return &authorization.CertificateGen{
 		CommonName:  string(secret[CommonNameKey]),
 		Certificate: secret[CertificateKey],
 		PrivateKey:  secret[PrivateKeyKey],

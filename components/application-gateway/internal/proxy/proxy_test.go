@@ -49,13 +49,13 @@ func TestProxy(t *testing.T) {
 			Return(nil).
 			Once()
 
-		credentials := &metadatamodel.Credentials{}
+		credentials := &authorization.Credentials{}
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
 
 		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
-		requestParameters := &metadatamodel.RequestParameters{
+		requestParameters := &authorization.RequestParameters{
 			QueryParameters: &map[string][]string{
 				"param1": []string{"param-value-1"},
 				"param2": []string{"param-value-2.1", "param-value-2.2"},
@@ -107,13 +107,13 @@ func TestProxy(t *testing.T) {
 			Return(nil).
 			Once()
 
-		credentials := &metadatamodel.Credentials{}
+		credentials := &authorization.Credentials{}
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
 
 		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
-		requestParameters := &metadatamodel.RequestParameters{
+		requestParameters := &authorization.RequestParameters{
 			Headers: &map[string][]string{
 				"X-Custom1": []string{"custom-value-1"},
 				"X-Custom2": []string{"custom-value-2.1", "custom-value-2.2"},
@@ -167,7 +167,7 @@ func TestProxy(t *testing.T) {
 			Return(nil).
 			Once()
 
-		credentials := &metadatamodel.Credentials{}
+		credentials := &authorization.Credentials{}
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
 
@@ -213,7 +213,7 @@ func TestProxy(t *testing.T) {
 			Return(nil).
 			Twice()
 
-		credentials := &metadatamodel.Credentials{}
+		credentials := &authorization.Credentials{}
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
 
@@ -286,8 +286,8 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
 			TargetUrl: ts.URL,
-			Credentials: &metadatamodel.Credentials{
-				OAuth: &metadatamodel.OAuth{
+			Credentials: &authorization.Credentials{
+				OAuth: &authorization.OAuth{
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
 					URL:          tsOAuth.URL + "/token",
@@ -339,8 +339,8 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
 			TargetUrl: ts.URL,
-			Credentials: &metadatamodel.Credentials{
-				BasicAuth: &metadatamodel.BasicAuth{
+			Credentials: &authorization.Credentials{
+				BasicAuth: &authorization.BasicAuth{
 					Username: "username",
 					Password: "password",
 				},
@@ -390,8 +390,8 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
 			TargetUrl: ts.URL,
-			Credentials: &metadatamodel.Credentials{
-				OAuth: &metadatamodel.OAuth{
+			Credentials: &authorization.Credentials{
+				OAuth: &authorization.OAuth{
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
 					URL:          "www.example.com/token",
@@ -455,7 +455,7 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
 			TargetUrl:   tsf.URL,
-			Credentials: &metadatamodel.Credentials{},
+			Credentials: &authorization.Credentials{},
 		}, nil).Twice()
 
 		authStrategyMock := &authMock.Strategy{}
@@ -574,16 +574,16 @@ func createProxyConfig(proxyTimeout int) Config {
 	}
 }
 
-func createOAuthCredentialsMatcher(clientId, clientSecret, url string) func(*metadatamodel.Credentials) bool {
-	return func(c *metadatamodel.Credentials) bool {
+func createOAuthCredentialsMatcher(clientId, clientSecret, url string) func(*authorization.Credentials) bool {
+	return func(c *authorization.Credentials) bool {
 		return c.OAuth != nil && c.OAuth.ClientID == clientId &&
 			c.OAuth.ClientSecret == clientSecret &&
 			c.OAuth.URL == url
 	}
 }
 
-func createBasicCredentialsMatcher(username, password string) func(*metadatamodel.Credentials) bool {
-	return func(c *metadatamodel.Credentials) bool {
+func createBasicCredentialsMatcher(username, password string) func(*authorization.Credentials) bool {
+	return func(c *authorization.Credentials) bool {
 		return c.BasicAuth != nil && c.BasicAuth.Username == username &&
 			c.BasicAuth.Password == password
 	}

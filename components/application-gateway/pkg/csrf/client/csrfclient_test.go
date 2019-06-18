@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/testconsts"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/csrf"
@@ -39,7 +38,7 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 
 	sf := authorization.NewStrategyFactory(authorization.FactoryConfiguration{OAuthClientTimeout: timeoutDuration})
 
-	strategy := sf.Create(&model.Credentials{BasicAuth: &model.BasicAuth{
+	strategy := sf.Create(&authorization.Credentials{BasicAuth: &authorization.BasicAuth{
 		Username: testUsername,
 		Password: testPassword,
 	}})
@@ -125,7 +124,7 @@ func TestAddAuthorization(t *testing.T) {
 	t.Run("Should update request with authorization headers in case of basicAuth strategy", func(t *testing.T) {
 
 		// given
-		strategy := sf.Create(&model.Credentials{BasicAuth: &model.BasicAuth{
+		strategy := sf.Create(&authorization.Credentials{BasicAuth: &authorization.BasicAuth{
 			Username: testUsername,
 			Password: testPassword,
 		}})
@@ -145,7 +144,7 @@ func TestAddAuthorization(t *testing.T) {
 	t.Run("Should update httpClient with transport in case of certificateGen strategy", func(t *testing.T) {
 
 		// given
-		strategy := sf.Create(&model.Credentials{CertificateGen: &model.CertificateGen{
+		strategy := sf.Create(&authorization.Credentials{CertificateGen: &authorization.CertificateGen{
 			CommonName:  "",
 			PrivateKey:  privateKey,
 			Certificate: certificate,
