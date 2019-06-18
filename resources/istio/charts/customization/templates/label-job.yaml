@@ -32,16 +32,20 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: kyma-ns-label
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
 spec:
+  backoffLimit: 1
   template:
     metadata:
       name: kyma-ns-label
     spec:
       serviceAccountName: kyma-ns-label
-      restartPolicy: OnFailure
+      restartPolicy: Never
       containers:
       - name: kyma-ns-label
-        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+        image: {{ .Values.image }}
         terminationMessagePolicy: "FallbackToLogsOnError"
         command:
           - /bin/bash
