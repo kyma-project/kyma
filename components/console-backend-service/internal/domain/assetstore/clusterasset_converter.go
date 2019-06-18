@@ -2,6 +2,7 @@ package assetstore
 
 import (
 	"encoding/json"
+
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
