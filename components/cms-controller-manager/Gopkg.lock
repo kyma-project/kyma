@@ -215,11 +215,11 @@
 
 [[projects]]
   branch = "asset-tam-jest-meta"
-  digest = "1:befcadf2bf9db25ff6448cdf2682bb99ea824cb541e282faa7276ada43c55517"
+  digest = "1:542979ce9f85f1e41c151156642480e7dcdcf163dd203ddb02f1862e08c00260"
   name = "github.com/kyma-project/kyma"
   packages = ["components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"]
   pruneopts = "NUT"
-  revision = "0899c0f26cbaf6fda3e33ed662866f4a0d6c1f01"
+  revision = "9a7e035a705681fabdfa0ba82a10429dec38bd5f"
   source = "github.com/michal-hudy/kyma"
 
 [[projects]]
