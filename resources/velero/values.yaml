@@ -20,7 +20,7 @@ rbac:
 
 initContainers:
   - name: velero-plugins
-    image: eu.gcr.io/kyma-project/velero-plugins:1.2.0
+    image: eu.gcr.io/kyma-project/velero-plugins:1.2.1
     volumeMounts:
       - mountPath: /target
         name: plugins

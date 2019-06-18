@@ -10,7 +10,7 @@ global:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
     dir:
-    version: 1.2.0
+    version: 1.2.1
   domainName: example.com
 
 test:
