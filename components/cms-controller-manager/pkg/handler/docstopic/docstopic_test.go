@@ -15,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"testing"
@@ -132,7 +133,7 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
-		metadata := map[string]string{"test": "value", "test2": "{\"test\":\"value\"}"}
+		metadata := &runtime.RawExtension{Raw: []byte(`{"json":"true"}`)}
 		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle, metadata)}
 		testData := testData("halo", sources)
 
@@ -603,7 +604,7 @@ func fakeRecorder() record.EventRecorder {
 	return record.NewFakeRecorder(20)
 }
 
-func testSource(sourceName string, sourceType string, url string, mode v1alpha1.DocsTopicMode, metadata map[string]string) v1alpha1.Source {
+func testSource(sourceName string, sourceType string, url string, mode v1alpha1.DocsTopicMode, metadata *runtime.RawExtension) v1alpha1.Source {
 	return v1alpha1.Source{
 		Name:     sourceName,
 		Type:     sourceType,
