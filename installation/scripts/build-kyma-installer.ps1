@@ -3,6 +3,8 @@ param (
     [string]$VM_DRIVER
 )
 
+Write-Output @"The build-kyma-installer.ps1 script is deprecated and will be removed. Use Kyma CLI instead."@
+
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 $ROOT_DIR = "${CURRENT_DIR}\..\.."
 

@@ -80,7 +80,7 @@ fi
 
 connectToMinio
 
-if "$MODE" == "pre"; then
+if [ "$MODE" = "pre" ]; then
   copyFromBucket "$PRIVATE_BUCKET"
   copyFromBucket "$PUBLIC_BUCKET"
 else

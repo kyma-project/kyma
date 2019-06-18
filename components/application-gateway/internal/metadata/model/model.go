@@ -26,10 +26,14 @@ type API struct {
 	Credentials *Credentials
 	// Spec contains specification of an API.
 	Spec []byte
-	// Headers that are injected by the gateway
-	Headers *map[string][]string
-	// QueryParameters that are injected by the gateway
-	QueryParameters *map[string][]string
+	// RequestParameters will be used with request send by the Application Gateway
+	RequestParameters *RequestParameters
+}
+
+// RequestParameters contains Headers and QueryParameters
+type RequestParameters struct {
+	Headers         *map[string][]string `json:"headers,omitempty"`
+	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
 }
 
 // Credentials contains OAuth or BasicAuth configuration.
