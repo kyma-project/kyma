@@ -35,6 +35,43 @@ func (_m *namespaceSvc) Create(name string, labels gqlschema.Labels) (*v1.Namesp
 	return r0, r1
 }
 
+// Delete provides a mock function with given fields: name
+func (_m *namespaceSvc) Delete(name string) error {
+	ret := _m.Called(name)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(name)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// Find provides a mock function with given fields: name
+func (_m *namespaceSvc) Find(name string) (*v1.Namespace, error) {
+	ret := _m.Called(name)
+
+	var r0 *v1.Namespace
+	if rf, ok := ret.Get(0).(func(string) *v1.Namespace); ok {
+		r0 = rf(name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1.Namespace)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // List provides a mock function with given fields:
 func (_m *namespaceSvc) List() ([]*v1.Namespace, error) {
 	ret := _m.Called()

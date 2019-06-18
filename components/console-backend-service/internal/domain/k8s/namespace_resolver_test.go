@@ -72,7 +72,7 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 	t.Run("ErrorListing", func(t *testing.T) {
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
-		svc.On("List").Return(nil, errors.New("Error")).Once()
+		svc.On("List").Return(nil, errors.New("test error")).Once()
 		defer svc.AssertExpectations(t)
 		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
 
@@ -99,6 +99,106 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 		resolver.SetNamespaceConverter(converter)
 
 		result, err := resolver.NamespacesQuery(nil, nil)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+}
+
+func TestNamespaceResolver_NamespaceQuery(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "name"
+		labels := map[string]string{
+			"env": "true",
+		}
+		resource := fixNamespace(name, labels)
+		expected := gqlschema.Namespace{
+			Name:   name,
+			Labels: labels,
+		}
+
+		svc := automock.NewNamespaceSvc()
+		appRetriever := new(appAutomock.ApplicationRetriever)
+		svc.On("Find", name).Return(resource, nil).Once()
+		defer svc.AssertExpectations(t)
+
+		converter := automock.NewNamespaceConverter()
+		converter.On("ToGQL", resource).Return(&expected, nil).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
+		resolver.SetNamespaceConverter(converter)
+
+		result, err := resolver.NamespaceQuery(nil, name)
+
+		require.NoError(t, err)
+		assert.Equal(t, &expected, result)
+	})
+
+	t.Run("Empty", func(t *testing.T) {
+		name := "name"
+
+		svc := automock.NewNamespaceSvc()
+		appRetriever := new(appAutomock.ApplicationRetriever)
+		svc.On("Find", name).Return(nil, nil).Once()
+		defer svc.AssertExpectations(t)
+
+		converter := automock.NewNamespaceConverter()
+		var empty *v1.Namespace
+		converter.On("ToGQL", empty).Return(nil, nil).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
+		resolver.SetNamespaceConverter(converter)
+
+		result, err := resolver.NamespaceQuery(nil, name)
+
+		require.NoError(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("Error finding", func(t *testing.T) {
+		name := "name"
+
+		svc := automock.NewNamespaceSvc()
+		appRetriever := new(appAutomock.ApplicationRetriever)
+		svc.On("Find", name).Return(nil, errors.New("test error")).Once()
+		defer svc.AssertExpectations(t)
+
+		converter := automock.NewNamespaceConverter()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
+		resolver.SetNamespaceConverter(converter)
+
+		result, err := resolver.NamespaceQuery(nil, name)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+
+	t.Run("Error converting", func(t *testing.T) {
+		name := "name"
+		labels := map[string]string{
+			"env": "true",
+		}
+		resource := fixNamespace(name, labels)
+
+		svc := automock.NewNamespaceSvc()
+		appRetriever := new(appAutomock.ApplicationRetriever)
+		svc.On("Find", name).Return(resource, nil).Once()
+		defer svc.AssertExpectations(t)
+
+		converter := automock.NewNamespaceConverter()
+		converter.On("ToGQL", resource).Return(nil, errors.New("test error")).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
+		resolver.SetNamespaceConverter(converter)
+
+		result, err := resolver.NamespaceQuery(nil, name)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -136,7 +236,7 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
-		svc.On("Create", name, labels).Return(nil, errors.New("Error")).Once()
+		svc.On("Create", name, labels).Return(nil, errors.New("test error")).Once()
 		defer svc.AssertExpectations(t)
 		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
 
@@ -145,5 +245,114 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
 		assert.NotNil(t, result)
+	})
+}
+
+func TestNamespaceResolver_DeleteNamespace(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "name"
+		labels := map[string]string{
+			"env": "true",
+		}
+		resource := fixNamespace(name, labels)
+		expected := gqlschema.Namespace{
+			Name:   name,
+			Labels: labels,
+		}
+
+		svc := automock.NewNamespaceSvc()
+		appRetriever := new(appAutomock.ApplicationRetriever)
+		svc.On("Find", name).Return(resource, nil).Once()
+		svc.On("Delete", name).Return(nil).Once()
+		defer svc.AssertExpectations(t)
+
+		converter := automock.NewNamespaceConverter()
+		converter.On("ToGQL", resource).Return(&expected, nil).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
+		resolver.SetNamespaceConverter(converter)
+
+		result, err := resolver.DeleteNamespace(nil, name)
+
+		require.NoError(t, err)
+		assert.Equal(t, &expected, result)
+	})
+
+	t.Run("Error finding", func(t *testing.T) {
+		name := "name"
+		svc := automock.NewNamespaceSvc()
+		appRetriever := new(appAutomock.ApplicationRetriever)
+		svc.On("Find", name).Return(nil, errors.New("test error")).Once()
+		defer svc.AssertExpectations(t)
+
+		converter := automock.NewNamespaceConverter()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
+		resolver.SetNamespaceConverter(converter)
+
+		result, err := resolver.DeleteNamespace(nil, name)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+
+	t.Run("Error converting", func(t *testing.T) {
+		name := "name"
+		labels := map[string]string{
+			"env": "true",
+		}
+		resource := fixNamespace(name, labels)
+
+		svc := automock.NewNamespaceSvc()
+		appRetriever := new(appAutomock.ApplicationRetriever)
+		svc.On("Find", name).Return(resource, nil).Once()
+		defer svc.AssertExpectations(t)
+
+		converter := automock.NewNamespaceConverter()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
+		converter.On("ToGQL", resource).Return(nil, errors.New("test error")).Once()
+		resolver.SetNamespaceConverter(converter)
+
+		result, err := resolver.DeleteNamespace(nil, name)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+
+	t.Run("Error deleting", func(t *testing.T) {
+		name := "name"
+		labels := map[string]string{
+			"env": "true",
+		}
+		resource := fixNamespace(name, labels)
+		expected := gqlschema.Namespace{
+			Name:   name,
+			Labels: labels,
+		}
+
+		svc := automock.NewNamespaceSvc()
+		appRetriever := new(appAutomock.ApplicationRetriever)
+		svc.On("Find", name).Return(resource, nil).Once()
+		defer svc.AssertExpectations(t)
+
+		converter := automock.NewNamespaceConverter()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
+		converter.On("ToGQL", resource).Return(&expected, nil).Once()
+		svc.On("Delete", name).Return(errors.New("test error")).Once()
+		resolver.SetNamespaceConverter(converter)
+
+		result, err := resolver.DeleteNamespace(nil, name)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
 	})
 }
