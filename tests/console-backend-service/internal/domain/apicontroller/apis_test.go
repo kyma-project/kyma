@@ -198,8 +198,8 @@ func fixAPIsQuery() *graphql.Request {
 func fixMutation(mutation string, hostname string) *graphql.Request {
 	query := fmt.Sprintf(`
 		mutation %s($name: String!, $namespace: String!, $servicePort: Int!, $hostname: String!, $serviceName: String!, $jwksUri: String!, $issuer: String!) {
-			%s(params: {
-				name: $name, namespace: $namespace, servicePort: $servicePort, hostname: $hostname, serviceName: $serviceName, jwksUri: $jwksUri, issuer: $issuer
+			%s(name: $name, namespace: $namespace, params: {
+				servicePort: $servicePort, hostname: $hostname, serviceName: $serviceName, jwksUri: $jwksUri, issuer: $issuer
 			}) {
 			%s
 		  }

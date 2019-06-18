@@ -451,8 +451,8 @@ type ComplexityRoot struct {
 		UpdateService                 func(childComplexity int, name string, namespace string, service JSON) int
 		DeleteService                 func(childComplexity int, name string, namespace string) int
 		CreateNamespace               func(childComplexity int, name string, labels *Labels) int
-		CreateApi                     func(childComplexity int, params APICreateInput) int
-		UpdateApi                     func(childComplexity int, params APICreateInput) int
+		CreateApi                     func(childComplexity int, name string, namespace string, params APICreateInput) int
+		UpdateApi                     func(childComplexity int, name string, namespace string, params APICreateInput) int
 		DeleteApi                     func(childComplexity int, name string, namespace string) int
 		CreateLimitRange              func(childComplexity int, namespace string, name string, limitRange LimitRangeInput) int
 	}
@@ -873,8 +873,8 @@ type MutationResolver interface {
 	UpdateService(ctx context.Context, name string, namespace string, service JSON) (*Service, error)
 	DeleteService(ctx context.Context, name string, namespace string) (*Service, error)
 	CreateNamespace(ctx context.Context, name string, labels *Labels) (NamespaceCreationOutput, error)
-	CreateAPI(ctx context.Context, params APICreateInput) (API, error)
-	UpdateAPI(ctx context.Context, params APICreateInput) (API, error)
+	CreateAPI(ctx context.Context, name string, namespace string, params APICreateInput) (API, error)
+	UpdateAPI(ctx context.Context, name string, namespace string, params APICreateInput) (API, error)
 	DeleteAPI(ctx context.Context, name string, namespace string) (*API, error)
 	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*LimitRange, error)
 }
@@ -2141,30 +2141,66 @@ func field_Mutation_createNamespace_args(rawArgs map[string]interface{}) (map[st
 
 func field_Mutation_createAPI_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 APICreateInput
-	if tmp, ok := rawArgs["params"]; ok {
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
 		var err error
-		arg0, err = UnmarshalAPICreateInput(tmp)
+		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["params"] = arg0
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 APICreateInput
+	if tmp, ok := rawArgs["params"]; ok {
+		var err error
+		arg2, err = UnmarshalAPICreateInput(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["params"] = arg2
 	return args, nil
 
 }
 
 func field_Mutation_updateAPI_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 APICreateInput
-	if tmp, ok := rawArgs["params"]; ok {
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
 		var err error
-		arg0, err = UnmarshalAPICreateInput(tmp)
+		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["params"] = arg0
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 APICreateInput
+	if tmp, ok := rawArgs["params"]; ok {
+		var err error
+		arg2, err = UnmarshalAPICreateInput(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["params"] = arg2
 	return args, nil
 
 }
@@ -5467,7 +5503,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateApi(childComplexity, args["params"].(APICreateInput)), true
+		return e.complexity.Mutation.CreateApi(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(APICreateInput)), true
 
 	case "Mutation.updateAPI":
 		if e.complexity.Mutation.UpdateApi == nil {
@@ -5479,7 +5515,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateApi(childComplexity, args["params"].(APICreateInput)), true
+		return e.complexity.Mutation.UpdateApi(childComplexity, args["name"].(string), args["namespace"].(string), args["params"].(APICreateInput)), true
 
 	case "Mutation.deleteAPI":
 		if e.complexity.Mutation.DeleteApi == nil {
@@ -17139,7 +17175,7 @@ func (ec *executionContext) _Mutation_createAPI(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateAPI(rctx, args["params"].(APICreateInput))
+		return ec.resolvers.Mutation().CreateAPI(rctx, args["name"].(string), args["namespace"].(string), args["params"].(APICreateInput))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -17173,7 +17209,7 @@ func (ec *executionContext) _Mutation_updateAPI(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateAPI(rctx, args["params"].(APICreateInput))
+		return ec.resolvers.Mutation().UpdateAPI(rctx, args["name"].(string), args["namespace"].(string), args["params"].(APICreateInput))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -28814,18 +28850,6 @@ func UnmarshalAPICreateInput(v interface{}) (APICreateInput, error) {
 
 	for k, v := range asMap {
 		switch k {
-		case "name":
-			var err error
-			it.Name, err = graphql.UnmarshalString(v)
-			if err != nil {
-				return it, err
-			}
-		case "namespace":
-			var err error
-			it.Namespace, err = graphql.UnmarshalString(v)
-			if err != nil {
-				return it, err
-			}
 		case "hostname":
 			var err error
 			it.Hostname, err = graphql.UnmarshalString(v)
@@ -30140,8 +30164,6 @@ type API {
 }
 
 input APICreateInput {
-    name: String!
-    namespace: String!
     hostname: String!
     serviceName: String!
     servicePort: Int!
@@ -30334,8 +30356,8 @@ type Mutation {
 
     createNamespace(name: String!, labels: Labels): NamespaceCreationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
 
-    createAPI(params: APICreateInput!): API! @HasAccess(attributes: {resource: "apis", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
-    updateAPI(params: APICreateInput!): API! @HasAccess(attributes: {resource: "apis", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
+    createAPI(name: String!, namespace: String!, params: APICreateInput!): API! @HasAccess(attributes: {resource: "apis", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
+    updateAPI(name: String!, namespace: String!, params: APICreateInput!): API! @HasAccess(attributes: {resource: "apis", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
     deleteAPI(name: String!, namespace: String!): API @HasAccess(attributes: {resource: "apis", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
     
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1"})

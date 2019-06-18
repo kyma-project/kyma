@@ -42,8 +42,8 @@ func (_m *Resolver) ApiEventSubscription(ctx context.Context, namespace string, 
 	return r0, r1
 }
 
-// CreateAPI provides a failing mock function with given fields: ctx, params
-func (_m *Resolver) CreateAPI(ctx context.Context, params gqlschema.APICreateInput) (gqlschema.API, error) {
+// CreateAPI provides a failing mock function with given fields: ctx, name, namespace, params
+func (_m *Resolver) CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APICreateInput) (gqlschema.API, error) {
 	var r0 gqlschema.API
 	var r1 error
 	r1 = _m.err
@@ -60,8 +60,8 @@ func (_m *Resolver) DeleteAPI(ctx context.Context, name string, namespace string
 	return r0, r1
 }
 
-// UpdateAPI provides a failing mock function with given fields: ctx, params
-func (_m *Resolver) UpdateAPI(ctx context.Context, params gqlschema.APICreateInput) (gqlschema.API, error) {
+// UpdateAPI provides a failing mock function with given fields: ctx, name, namespace, params
+func (_m *Resolver) UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APICreateInput) (gqlschema.API, error) {
 	var r0 gqlschema.API
 	var r1 error
 	r1 = _m.err

@@ -12,13 +12,13 @@ type apiLister struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: params
-func (_m *apiLister) Create(params gqlschema.APICreateInput) (*v1alpha2.Api, error) {
-	ret := _m.Called(params)
+// Create provides a mock function with given fields: name, namespace, params
+func (_m *apiLister) Create(name string, namespace string, params gqlschema.APICreateInput) (*v1alpha2.Api, error) {
+	ret := _m.Called(name, namespace, params)
 
 	var r0 *v1alpha2.Api
-	if rf, ok := ret.Get(0).(func(gqlschema.APICreateInput) *v1alpha2.Api); ok {
-		r0 = rf(params)
+	if rf, ok := ret.Get(0).(func(string, string, gqlschema.APICreateInput) *v1alpha2.Api); ok {
+		r0 = rf(name, namespace, params)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha2.Api)
@@ -26,8 +26,8 @@ func (_m *apiLister) Create(params gqlschema.APICreateInput) (*v1alpha2.Api, err
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(gqlschema.APICreateInput) error); ok {
-		r1 = rf(params)
+	if rf, ok := ret.Get(1).(func(string, string, gqlschema.APICreateInput) error); ok {
+		r1 = rf(name, namespace, params)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -105,13 +105,13 @@ func (_m *apiLister) Unsubscribe(listener resource.Listener) {
 	_m.Called(listener)
 }
 
-// Update provides a mock function with given fields: params
-func (_m *apiLister) Update(params gqlschema.APICreateInput) (*v1alpha2.Api, error) {
-	ret := _m.Called(params)
+// Update provides a mock function with given fields: name, namespace, params
+func (_m *apiLister) Update(name string, namespace string, params gqlschema.APICreateInput) (*v1alpha2.Api, error) {
+	ret := _m.Called(name, namespace, params)
 
 	var r0 *v1alpha2.Api
-	if rf, ok := ret.Get(0).(func(gqlschema.APICreateInput) *v1alpha2.Api); ok {
-		r0 = rf(params)
+	if rf, ok := ret.Get(0).(func(string, string, gqlschema.APICreateInput) *v1alpha2.Api); ok {
+		r0 = rf(name, namespace, params)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha2.Api)
@@ -119,8 +119,8 @@ func (_m *apiLister) Update(params gqlschema.APICreateInput) (*v1alpha2.Api, err
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(gqlschema.APICreateInput) error); ok {
-		r1 = rf(params)
+	if rf, ok := ret.Get(1).(func(string, string, gqlschema.APICreateInput) error); ok {
+		r1 = rf(name, namespace, params)
 	} else {
 		r1 = ret.Error(1)
 	}

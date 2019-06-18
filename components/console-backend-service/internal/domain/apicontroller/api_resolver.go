@@ -53,12 +53,12 @@ func (ar *apiResolver) APIQuery(ctx context.Context, name string, namespace stri
 	return api, nil
 }
 
-func (ar *apiResolver) CreateAPI(ctx context.Context, params gqlschema.APICreateInput) (gqlschema.API, error) {
+func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APICreateInput) (gqlschema.API, error) {
 
-	api, err := ar.apiLister.Create(params)
+	api, err := ar.apiLister.Create(name, namespace, params)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while creating %s `%s` in namespace `%s`", pretty.API, params.Name, params.Namespace))
-		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(params.Name), gqlerror.WithNamespace(params.Namespace))
+		glog.Error(errors.Wrapf(err, "while creating %s `%s` in namespace `%s`", pretty.API, name, namespace))
+		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	return gqlschema.API{
@@ -99,11 +99,11 @@ func (ar *apiResolver) ApiEventSubscription(ctx context.Context, namespace strin
 	return channel, nil
 }
 
-func (ar *apiResolver) UpdateAPI(ctx context.Context, params gqlschema.APICreateInput) (gqlschema.API, error) {
-	api, err := ar.apiLister.Update(params)
+func (ar *apiResolver) UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APICreateInput) (gqlschema.API, error) {
+	api, err := ar.apiLister.Update(name, namespace, params)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while editing %s `%s` in namespace `%s`", pretty.API, params.Name, params.Namespace))
-		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(params.Name), gqlerror.WithNamespace(params.Namespace))
+		glog.Error(errors.Wrapf(err, "while editing %s `%s` in namespace `%s`", pretty.API, name, namespace))
+		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	return gqlschema.API{

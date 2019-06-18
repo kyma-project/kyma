@@ -18,8 +18,6 @@ type API struct {
 }
 
 type APICreateInput struct {
-	Name                       string `json:"name"`
-	Namespace                  string `json:"namespace"`
 	Hostname                   string `json:"hostname"`
 	ServiceName                string `json:"serviceName"`
 	ServicePort                int    `json:"servicePort"`

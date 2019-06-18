@@ -87,15 +87,15 @@ func (svc *apiService) Find(name string, namespace string) (*v1alpha2.Api, error
 	return res, nil
 }
 
-func (svc *apiService) Create(in gqlschema.APICreateInput) (*v1alpha2.Api, error) {
+func (svc *apiService) Create(name string, namespace string, in gqlschema.APICreateInput) (*v1alpha2.Api, error) {
 	api := v1alpha2.Api{
 		TypeMeta: v1.TypeMeta{
 			APIVersion: "authentication.kyma-project.io/v1alpha2",
 			Kind:       "API",
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name:      in.Name,
-			Namespace: in.Namespace,
+			Name:      name,
+			Namespace: namespace,
 		},
 		Spec: v1alpha2.ApiSpec{
 			Service: v1alpha2.Service{
@@ -117,7 +117,7 @@ func (svc *apiService) Create(in gqlschema.APICreateInput) (*v1alpha2.Api, error
 		},
 	}
 
-	return svc.client.GatewayV1alpha2().Apis(in.Namespace).Create(&api)
+	return svc.client.GatewayV1alpha2().Apis(namespace).Create(&api)
 }
 
 func (svc *apiService) Subscribe(listener resource.Listener) {
@@ -128,18 +128,18 @@ func (svc *apiService) Unsubscribe(listener resource.Listener) {
 	svc.notifier.DeleteListener(listener)
 }
 
-func (svc *apiService) Update(in gqlschema.APICreateInput) (*v1alpha2.Api, error) {
+func (svc *apiService) Update(name string, namespace string, in gqlschema.APICreateInput) (*v1alpha2.Api, error) {
 
-	oldApi, err := svc.Find(in.Name, in.Namespace)
+	oldApi, err := svc.Find(name, namespace)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while finding API %s", in.Name)
+		return nil, errors.Wrapf(err, "while finding API %s", name)
 	}
 
 	if oldApi == nil {
 		return nil, apiErrors.NewNotFound(schema.GroupResource{
 			Group:    "authentication.kyma-project.io/v1alpha2",
 			Resource: "API",
-		}, in.Name)
+		}, name)
 	}
 
 	api := v1alpha2.Api{
@@ -148,8 +148,8 @@ func (svc *apiService) Update(in gqlschema.APICreateInput) (*v1alpha2.Api, error
 			Kind:       "API",
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name:            in.Name,
-			Namespace:       in.Namespace,
+			Name:            name,
+			Namespace:       namespace,
 			ResourceVersion: oldApi.ObjectMeta.ResourceVersion,
 		},
 		Spec: v1alpha2.ApiSpec{
@@ -172,7 +172,7 @@ func (svc *apiService) Update(in gqlschema.APICreateInput) (*v1alpha2.Api, error
 		},
 	}
 
-	return svc.client.GatewayV1alpha2().Apis(in.Namespace).Update(&api)
+	return svc.client.GatewayV1alpha2().Apis(namespace).Update(&api)
 }
 
 func (svc *apiService) Delete(name string, namespace string) error {
