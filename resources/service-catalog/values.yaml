@@ -16,9 +16,3 @@ global:
   istio:
     gateway:
       name: kyma-gateway
-  etcdBackup:
-    enabled: false
-    secretName: etcd-backup-abs-credentials
-  etcd_backup_job:
-    dir: develop/
-    version: ad738fd7

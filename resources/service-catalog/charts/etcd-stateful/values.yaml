@@ -13,12 +13,3 @@ etcd:
     requests:
       cpu: 50m
       memory: 64Mi
-
-backupApp:
-  image:
-    tag: 0.3.187
-    pullPolicy: IfNotPresent
-  cronJobSchedule: "*/30 * * * *"
-  cleaner:
-    leaveMinNewestBackupBlobs: 3
-    expirationBlobTime: "72h"
