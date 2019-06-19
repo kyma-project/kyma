@@ -26,7 +26,7 @@ This table lists the configurable parameters, their descriptions, and default va
 | **config.schema_configs.object_store** | Specifies if you use local or cloud storages for data. | `filesystem` |
 | **config.schema_configs.schema** | Defines the schema version that Loki provides. | `v9` |
 | **config.schema_configs.index.prefix** | Specifies the prefix added to all index file names to distinguish them from log chunks. | `index_` |
-| **config.schema_configs.index.period** | Defines the retention period of indexes and log chunks. | `168h` |
+| **config.schema_configs.index.period** | Defines how long indexes and log chunks are retained. | `168h` |
 | **config.storage_config.boltdb.directory** | Specifies the physical location of indexes in `boltdb`. | `/data/loki/index` |
 | **config.storage_config.filesystem.directory** | Specifies the physical location of log chunks in `filesystem`. | `/data/loki/chunks` |
 
