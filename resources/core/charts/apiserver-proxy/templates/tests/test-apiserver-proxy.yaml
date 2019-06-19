@@ -9,6 +9,7 @@ metadata:
   labels:
     require-static-users: "true" # the test will fail if run on the cluster without static users
 spec:
+  disableConcurrency: true
   template:
     metadata:
       annotations:

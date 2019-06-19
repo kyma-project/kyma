@@ -61,6 +61,7 @@ kind: TestDefinition
 metadata:
   name: test-{{ template "fullname" . }}
 spec:
+  disableConcurrency: true
   template:
     metadata:
       annotations:
@@ -168,6 +169,7 @@ kind: TestDefinition
 metadata:
   name: test-{{ template "fullname" . }}-int
 spec:
+  disableConcurrency: true
   template:
     metadata:
       annotations:

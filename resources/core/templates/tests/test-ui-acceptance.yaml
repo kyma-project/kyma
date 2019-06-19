@@ -5,6 +5,7 @@ kind: TestDefinition
 metadata:
   name: "test-{{ template "fullname" . }}-ui-acceptance"
 spec:
+    disableConcurrency: true
     template:
         metadata:
           annotations:

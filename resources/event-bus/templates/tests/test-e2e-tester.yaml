@@ -92,6 +92,7 @@ kind: TestDefinition
 metadata:
   name: {{ .Values.e2eTests.nameTester }}
 spec:
+  disableConcurrency: true
   template:
     metadata:
       annotations:

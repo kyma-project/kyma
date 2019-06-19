@@ -4,6 +4,7 @@ kind: TestDefinition
 metadata:
   name: test-{{ template "fullname" . }}-acceptance
 spec:
+  disableConcurrency: true
   template:
     metadata:
       annotations:

@@ -6,6 +6,7 @@ metadata:
   name: {{ .Chart.Name }}-tests
   namespace: {{ .Values.global.namespace }}
 spec:
+  disableConcurrency: true
   template:
     spec:
       shareProcessNamespace: true
