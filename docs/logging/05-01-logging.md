@@ -15,9 +15,9 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **persistence.enabled** | Specifies whether you store logs on persistent volume instead of the volatile mounted volume. | `true` |
+| **persistence.enabled** | Specifies whether you store logs on a persistent volume instead of a volatile mounted volume. | `true` |
 | **persistence.size** | Defines the size of the persistent volume. | `10Gi` |
-| **config.auth_enabled** | Specifies that you use the basic HTTP authentication to access the logging service instead of the Dex authentication. | `false` |
+| **config.auth_enabled** | Specifies the authentication mechanism you use to access the logging service. Set it to `false` to use Dex authentication, or to `true` to use the basic HTTP authentication instead.  | `false` |
 | **config.ingester.lifecycler.address** | Specifies the address of the lifecycler that coordinates distributed logging services. | `127.0.0.1` |
 | **config.ingester.lifecycler.ring.store** | Specifies the storage for information on logging data and their copies. | `inmemory` |
 | **config.ingester.lifecycler.ring.replication_factor** | Specifies the number of data copies on separate storages. | `1` |
@@ -26,9 +26,9 @@ This table lists the configurable parameters, their descriptions, and default va
 | **config.schema_configs.object_store** | Specifies if you use local or cloud storages for data. | `filesystem` |
 | **config.schema_configs.schema** | Defines the schema version that Loki provides. | `v9` |
 | **config.schema_configs.index.prefix** | Specifies the prefix added to all index file names to distinguish them from log chunks. | `index_` |
-| **config.schema_configs.index.period** | Defines the retention period of logs and indexes. | `168h` |
+| **config.schema_configs.index.period** | Defines the retention period of indexes and log chunks. | `168h` |
 | **config.storage_config.boltdb.directory** | Specifies the physical location of indexes in `boltdb`. | `/data/loki/index` |
 | **config.storage_config.filesystem.directory** | Specifies the physical location of log chunks in `filesystem`. | `/data/loki/chunks` |
 
 
->**NOTE:** The Loki storage configuration consists of the **schema_config** and **storage_config** definitions. Use the **schema_config** to define your storage types, and **storage_config** to configure the already defined storage types.
+>**NOTE:** The Loki storage configuration consists of the **schema_config** and **storage_config** definitions. Use **schema_config** to define the storage types and **storage_config** to configure storage types that are already defined.
