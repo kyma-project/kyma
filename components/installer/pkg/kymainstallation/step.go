@@ -3,7 +3,7 @@ package kymainstallation
 import (
 	"errors"
 	"fmt"
-	"github.com/istio/pkg/log"
+	"log"
 	"path"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/apis/installer/v1alpha1"
@@ -96,16 +96,26 @@ type uninstallStep struct {
 	step
 }
 
-// Run method for deleteStep triggers step delete via helm. Uninstall should not be retried, hence no error is returned.
+// Run method for uninstallStep triggers step delete via helm. Uninstall should not be retried, hence no error is returned.
 func (s uninstallStep) Run() error {
 
 	uninstallReleaseResponse, deleteErr := s.helmClient.DeleteRelease(s.component.GetReleaseName())
 
 	if deleteErr != nil {
-		log.Errorf("Helm delete error: %s", deleteErr.Error())
+		log.Printf("Helm delete error: %s", deleteErr.Error())
 		return nil
 	}
 
 	s.helmClient.PrintRelease(uninstallReleaseResponse.Release)
+	return nil
+}
+
+type noStep struct {
+	step
+}
+
+// Run method for noStep logs the information about missing release
+func (s noStep) Run() error {
+	log.Printf("Component %s is not deployed, skipping...", s.component.Name)
 	return nil
 }

@@ -30,7 +30,7 @@ type uninstallStepFactory struct {
 	stepFactory
 }
 
-// NewStep method returns instance of the step based on component details
+// NewStep method returns instance of the installation/upgrade step based on component details
 func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 	step := step{
 		chartsDirPath: isf.chartsDirPath,
@@ -50,6 +50,7 @@ func (isf installStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 	}
 }
 
+// NewStep method returns instance of the uninstallation step based on component details
 func (usf uninstallStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 	step := step{
 		helmClient: usf.helmClient,
@@ -62,21 +63,51 @@ func (usf uninstallStepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 		}
 	}
 
-	return nil
+	return noStep{
+		step,
+	}
 }
 
-// NewStepFactory returns implementation of StepFactory implementation
-func NewStepFactory(chartsDirPath string, helmClient kymahelm.ClientInterface, overrideData overrides.OverrideData) (StepFactory, error) {
+// NewInstallStepFactory returns implementation of StepFactory interface used to install or upgrade Kyma
+func NewInstallStepFactory(chartsDirPath string, helmClient kymahelm.ClientInterface, overrideData overrides.OverrideData) (StepFactory, error) {
+
+	stepFactory, err := newStepsFactory(helmClient)
+	if err != nil {
+		return nil, err
+	}
+
+	return installStepFactory{
+		*stepFactory,
+		chartsDirPath,
+		overrideData,
+	}, nil
+}
+
+// NewUninstallStepFactory returns implementation of StepFactory interface used to uninstall Kyma
+func NewUninstallStepFactory(helmClient kymahelm.ClientInterface) (StepFactory, error) {
+
+	stepFactory, err := newStepsFactory(helmClient)
+	if err != nil {
+		return nil, err
+	}
+
+	return uninstallStepFactory{
+		*stepFactory,
+	}, nil
+}
+
+func newStepsFactory(helmClient kymahelm.ClientInterface) (*stepFactory, error) {
+
 	installedReleases := make(map[string]bool)
 
-	relesesRes, err := helmClient.ListReleases()
+	releasesRes, err := helmClient.ListReleases()
 	if err != nil {
 		return nil, errors.New("Helm error: " + err.Error())
 	}
 
-	if relesesRes != nil {
+	if releasesRes != nil {
 		log.Println("Helm releases list:")
-		for _, release := range relesesRes.Releases {
+		for _, release := range releasesRes.Releases {
 			statusCode := release.Info.Status.Code
 			log.Printf("%s status: %s", release.Name, statusCode)
 			if statusCode == rls.Status_DEPLOYED {
@@ -85,20 +116,8 @@ func NewStepFactory(chartsDirPath string, helmClient kymahelm.ClientInterface, o
 		}
 	}
 
-	sf := stepFactory{
+	return &stepFactory{
 		helmClient:        helmClient,
 		installedReleases: installedReleases,
-	}
-
-	if chartsDirPath != "" && overrideData != nil {
-		return installStepFactory{
-			sf,
-			chartsDirPath,
-			overrideData,
-		}, nil
-	}
-
-	return uninstallStepFactory{
-		sf,
 	}, nil
 }
