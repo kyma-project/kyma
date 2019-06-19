@@ -159,15 +159,23 @@
   version = "v1.0.1"
 
 [[projects]]
+  branch = "fetch-spec-with-authentication"
   name = "github.com/kyma-project/kyma"
   packages = [
+    "components/application-gateway/pkg/apperrors",
+    "components/application-gateway/pkg/authorization",
+    "components/application-gateway/pkg/authorization/oauth",
+    "components/application-gateway/pkg/authorization/oauth/tokencache",
+    "components/application-gateway/pkg/authorization/util",
+    "components/application-gateway/pkg/httpconsts",
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/cms-controller-manager/pkg/apis/cms/v1alpha1"
   ]
-  revision = "dd9f72adc14c41e129824770011f37722dc5bbff"
+  revision = "d45d2ad263286431838c9a00998931fe285b6048"
+  source = "github.com/akgalwas/kyma"
 
 [[projects]]
   branch = "master"
@@ -196,6 +204,12 @@
   packages = ["."]
   revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
   version = "1.0.1"
+
+[[projects]]
+  name = "github.com/patrickmn/go-cache"
+  packages = ["."]
+  revision = "a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0"
+  version = "v2.1.0"
 
 [[projects]]
   branch = "master"
@@ -586,6 +600,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "59dc5fdc766e0e27c8d83aef86fd331d6f9c26b8bf6065da724bdd1be5eabe57"
+  inputs-digest = "9e37f251694374dbbe1a3bf4db5dba50dc2a6cf110b116da16ca83db996ecf8f"
   solver-name = "gps-cdcl"
   solver-version = 1

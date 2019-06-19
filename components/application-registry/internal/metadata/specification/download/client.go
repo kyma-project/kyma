@@ -1,6 +1,7 @@
 package download
 
 import (
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"io/ioutil"
 	"net/http"
@@ -38,6 +39,16 @@ func (d downloader) Fetch(url string) ([]byte, apperrors.AppError) {
 
 		return bytes, nil
 	}
+}
+
+func (d downloader) FetchSecured(url string) ([]byte, apperrors.AppError) {
+
+	factory := authorization.NewStrategyFactory(authorization.FactoryConfiguration{})
+	s := factory.Create(nil)
+
+	s.AddAuthorization(nil, nil)
+
+	return nil, nil
 }
 
 func (d downloader) requestAPISpec(specUrl string) (*http.Response, apperrors.AppError) {
