@@ -27,10 +27,10 @@ global:
     version: "10874d67"
   api_controller:
     dir: develop/
-    version: "8625ab94"
+    version: "b8c31ef4"
   api_controller_acceptance_tests:
     dir: develop/
-    version: "4e0f19eb"
+    version: "07378445"
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
