@@ -13,7 +13,7 @@ kubectl get crd servicebindingusages.servicecatalog.kyma-project.io -o yaml
 
 This is a sample resource in which the ServiceBindingUsage injects a Secret associated with the `redis-instance-binding` ServiceBinding to the `redis-client` Deployment in the `production` Namespace. In this example, the **status.conditions.status** field is set to `True`, which means that the ServiceBinding injection is successful. If the injection fails, this field is set to `False` and the **message** and **reason** fields appear. This example has also the **envPrefix.name** field specified, which adds a prefix to all environment variables injected from a given Secret to your Pod. This allows you to separate environment variables injected from different Secrets. By default, the prefixing is disabled. Set the **envPrefix.name** to enable it.
 
->**NOTE:** The prefix itself is not separated from the name of an environment variable by any character. If you want to separate your prefix, add a special character at the end of it.
+>**NOTE:** The prefix is not separated from the name of an environment variable by any character. If you want to separate your prefix, add a special character at the end of it. For example, if you want your prefixed variable look like `pref1_var1`, set the `pref1_` prefix.
 
 ```
 apiVersion: servicecatalog.kyma-project.io/v1alpha1
@@ -61,14 +61,14 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.usedBy.kind** |    YES   | Specifies the name of the UsageKind custom resource. |
 | **spec.usedBy.name** |    YES   | Specifies the name of the application. |
 | **spec.parameters.envPrefix** |    NO   | Adds a prefix to environment variables injected from the given Secret. The prefixing is disabled by default. |
-| **spec.parameters.envPrefix.name** |    YES   | Defines the name of the prefix. This field is mandatory if **envPrefix** is specified.  |
+| **spec.parameters.envPrefix.name** |    YES   | Defines the value of the prefix. This field is mandatory if **envPrefix** is specified.  |
 | **status.conditions** |    NO   | Defines the state of the ServiceBindingUsage.|
 | **status.conditions.lastTransitionTime** |    NO   | Specifies the first time when the Service Binding Usage Controller processed the ServiceBindingUsage, or the time when the **status.conditions.status** field changed. |
 | **status.conditions.lastUpdateTime** |    NO   | Specifies the time of the last ServiceBindingUsage condition update. |
 | **status.conditions.status** |    NO   |  Specifies whether the ServiceBinding injection is successful or not. |
 | **status.conditions.type** |    NO   | Defines the type of the condition. The value of this field is always `ready`. |
 | **message** |    NO   | Describes in a human-readable way why the ServiceBinding injection failed. |
-| **reason** |    NO   | Specifies a unique, one-word, CamelCase reason for the ServiceBinding injection failure. See [this](../../components/service-binding-usage-controller/internal/controller/status/usage.go) file for the complete list of reasons. |
+| **reason** |    NO   | Specifies a unique, one-word, camelCase reason for the ServiceBinding injection failure. See [this](../../components/service-binding-usage-controller/internal/controller/status/usage.go) file for the complete list of reasons. |
 
 
 ## Related resources and components
