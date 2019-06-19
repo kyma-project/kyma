@@ -1,6 +1,31 @@
 #!/usr/bin/env bash
 ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
+CONCURRENCY=1
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+    key="$1"
+    case ${key} in
+        --concurrency|-c)
+            CONCURRENCY="$2"
+            shift
+            shift
+            ;;
+        -*)
+            echo "Unknown flag ${1}"
+            exit 1
+        ;;
+        *) # unknown option
+            POSITIONAL+=("$1") # save it in an array for later
+            shift # past argument
+            ;;
+    esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+
 source ${ROOT_PATH}/testing-common.sh
 
 suiteName="testsuite-all-$(date '+%Y-%m-%d-%H-%M')"
@@ -46,7 +71,7 @@ metadata:
   name: ${suiteName}
 spec:
   maxRetries: 1
-  concurrency: 1
+  concurrency: ${CONCURRENCY}
 ${matchTests}
 EOF
 
