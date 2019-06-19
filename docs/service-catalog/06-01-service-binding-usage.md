@@ -68,7 +68,7 @@ This table lists all the possible parameters of a given resource together with t
 | **status.conditions.status** |    NO   |  Specifies whether the ServiceBinding injection is successful or not. |
 | **status.conditions.type** |    NO   | Defines the type of the condition. The value of this field is always `ready`. |
 | **message** |    NO   | Describes in a human-readable way why the ServiceBinding injection failed. |
-| **reason** |    NO   | Specifies a unique, one-word, camelCase reason for the ServiceBinding injection failure. See [this](../../components/service-binding-usage-controller/internal/controller/status/usage.go) file for the complete list of reasons. |
+| **reason** |    NO   | Specifies a unique, one-word, camelCase reason for the ServiceBinding injection failure. See [this](https://github.com/kyma-project/kyma/blob/74f007d0618ee1688ad080eab8be10e6b81c8e67/components/service-binding-usage-controller/internal/controller/status/usage.go) file for the complete list of reasons. |
 
 
 ## Related resources and components
