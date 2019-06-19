@@ -34,10 +34,10 @@ metadata:
 data:
   global.isLocalEnv: "true"
   global.domainName: "kyma.local"
-  global.etcdBackup.containerName: ""
-  global.etcdBackup.enabled: "false"
   global.adminPassword: ""
   nginx-ingress.controller.service.loadBalancerIP: ""
+  global.serviceCatalogApiserver.enabled: "true"
+  global.serviceCatalogCrds.enabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap

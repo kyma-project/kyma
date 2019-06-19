@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:853d9a1a7b0d3ee96d855dfa22e268fa646667dfae16d25dc5d137f5e2e1f9c1"
+  name = "github.com/avast/retry-go"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "88ef2130df9642aa2849152b2985af9ba3676ee9"
+  version = "v2.3.0"
+
+[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -515,6 +523,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/avast/retry-go",
     "github.com/gorilla/websocket",
     "github.com/kisielk/errcheck",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",

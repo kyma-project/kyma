@@ -15,7 +15,6 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **etcd.secure** | Indicates whether TLS is used. | `false` |
 | **etcd.resources.limits.cpu** | Defines limits for CPU resources. | `200m` |
 | **etcd.resources.limits.memory** | Defines limits for memory resources. | `256Mi` |
 | **etcd.resources.requests.cpu** | Defines requests for CPU resources. | `50m` |

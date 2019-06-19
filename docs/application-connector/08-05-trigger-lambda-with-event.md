@@ -91,6 +91,8 @@ kind: Function
 metadata:
   name: my-events-lambda
   namespace: production
+  labels:
+    app: my-events-lambda
 spec:
   deployment:
     spec:

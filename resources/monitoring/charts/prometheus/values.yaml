@@ -129,20 +129,20 @@ remoteWrite: {}
 ##
 resources:
   requests:
-    memory: 200Mi
+    memory: 1024Mi
   limits:
     memory: 2Gi
 
 isLocalEnv:
   resources:
     requests:
-      memory: 200Mi
+      memory: 1024Mi
     limits:
-      memory: 1Gi
+      memory: 2Gi
 
 ## How long to retain metrics
 ## Reduced to 6h from 24h as to limit Prometheus use a max of 800 Mb memory in nightly azure cluster
-retention: 6h
+retention: 3h
 
 ## Prefix used to register routes, overriding externalUrl route.
 ## Useful for proxies that rewrite URLs.

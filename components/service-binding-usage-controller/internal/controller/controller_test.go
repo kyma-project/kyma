@@ -10,6 +10,7 @@ import (
 	scInformers "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/automock"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/metric"
 	sbuStatus "github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/status"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/platform/logger/spy"
 	sbuTypes "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
@@ -83,6 +84,16 @@ func TestControllerRunAddSuccess(t *testing.T) {
 		ExpectOnUpsert(expSBU, true).
 		Once()
 
+	tc.metrics.
+		ExpectOnIncrementQueueLength(metric.SbuController).
+		Once()
+	tc.metrics.
+		ExpectOnDecrementQueueLength(metric.SbuController).
+		Once()
+	tc.metrics.
+		ExpectOnRecordLatency(metric.SbuController).
+		Once()
+
 	asyncOpDone := make(chan struct{})
 	hookAsyncOp := func() {
 		asyncOpDone <- struct{}{}
@@ -98,7 +109,8 @@ func TestControllerRunAddSuccess(t *testing.T) {
 		tc.kindsSupervisorsMock,
 		tc.podPresetModifierMock,
 		tc.labelsFetcherMock,
-		logErrSink.Logger).
+		logErrSink.Logger,
+		tc.metrics).
 		WithTestHookOnAsyncOpDone(hookAsyncOp)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -165,6 +177,19 @@ func TestControllerRunDeleteOwnerReferencesToBinding(t *testing.T) {
 
 	logSink := spy.NewLogSink()
 
+	tc.metrics.
+		ExpectOnRecordError(metric.SbuController).
+		Once()
+	tc.metrics.
+		ExpectOnIncrementQueueLength(metric.SbuController).
+		Once()
+	tc.metrics.
+		ExpectOnDecrementQueueLength(metric.SbuController).
+		Once()
+	tc.metrics.
+		ExpectOnRecordLatency(metric.SbuController).
+		Once()
+
 	ctr := controller.NewServiceBindingUsage(
 		tc.sbuSpecStorageMock,
 		usageCli.ServicecatalogV1alpha1(),
@@ -172,7 +197,8 @@ func TestControllerRunDeleteOwnerReferencesToBinding(t *testing.T) {
 		scInformerFactory.Servicecatalog().V1beta1().ServiceBindings(),
 		tc.kindsSupervisorsMock,
 		tc.podPresetModifierMock, tc.labelsFetcherMock,
-		logSink.Logger).
+		logSink.Logger,
+		tc.metrics).
 		WithTestHookOnAsyncOpDone(hookAsyncOp).
 		WithoutRetries()
 
@@ -241,6 +267,19 @@ func TestControllerRunErrorOnDeleteOwnerReferences(t *testing.T) {
 
 	logSink := spy.NewLogSink()
 
+	tc.metrics.
+		ExpectOnRecordError(metric.SbuController).
+		Twice()
+	tc.metrics.
+		ExpectOnIncrementQueueLength(metric.SbuController).
+		Once()
+	tc.metrics.
+		ExpectOnDecrementQueueLength(metric.SbuController).
+		Once()
+	tc.metrics.
+		ExpectOnRecordLatency(metric.SbuController).
+		Once()
+
 	ctr := controller.NewServiceBindingUsage(
 		tc.sbuSpecStorageMock,
 		usageCli.ServicecatalogV1alpha1(),
@@ -248,7 +287,8 @@ func TestControllerRunErrorOnDeleteOwnerReferences(t *testing.T) {
 		scInformerFactory.Servicecatalog().V1beta1().ServiceBindings(),
 		tc.kindsSupervisorsMock,
 		tc.podPresetModifierMock, tc.labelsFetcherMock,
-		logSink.Logger).
+		logSink.Logger,
+		tc.metrics).
 		WithTestHookOnAsyncOpDone(hookAsyncOp).
 		WithoutRetries()
 
@@ -308,6 +348,19 @@ func TestControllerRunAddFailOnFetchingLabels(t *testing.T) {
 
 	logSink := spy.NewLogSink()
 
+	tc.metrics.
+		ExpectOnRecordError(metric.SbuController).
+		Once()
+	tc.metrics.
+		ExpectOnIncrementQueueLength(metric.SbuController).
+		Once()
+	tc.metrics.
+		ExpectOnDecrementQueueLength(metric.SbuController).
+		Once()
+	tc.metrics.
+		ExpectOnRecordLatency(metric.SbuController).
+		Once()
+
 	asyncOpDone := make(chan struct{})
 	hookAsyncOp := func() {
 		asyncOpDone <- struct{}{}
@@ -320,7 +373,8 @@ func TestControllerRunAddFailOnFetchingLabels(t *testing.T) {
 		scInformerFactory.Servicecatalog().V1beta1().ServiceBindings(),
 		tc.kindsSupervisorsMock,
 		tc.podPresetModifierMock, tc.labelsFetcherMock,
-		logSink.Logger).
+		logSink.Logger,
+		tc.metrics).
 		WithTestHookOnAsyncOpDone(hookAsyncOp).
 		WithoutRetries()
 
@@ -373,6 +427,19 @@ func TestControllerRunAddFailOnOwnerReferenceAdd(t *testing.T) {
 
 	logSink := spy.NewLogSink()
 
+	tc.metrics.
+		ExpectOnRecordError(metric.SbuController).
+		Twice()
+	tc.metrics.
+		ExpectOnIncrementQueueLength(metric.SbuController).
+		Once()
+	tc.metrics.
+		ExpectOnDecrementQueueLength(metric.SbuController).
+		Once()
+	tc.metrics.
+		ExpectOnRecordLatency(metric.SbuController).
+		Once()
+
 	ctr := controller.NewServiceBindingUsage(
 		tc.sbuSpecStorageMock,
 		usageCli.ServicecatalogV1alpha1(),
@@ -380,7 +447,8 @@ func TestControllerRunAddFailOnOwnerReferenceAdd(t *testing.T) {
 		scInformerFactory.Servicecatalog().V1beta1().ServiceBindings(),
 		tc.kindsSupervisorsMock,
 		tc.podPresetModifierMock, tc.labelsFetcherMock,
-		logSink.Logger).
+		logSink.Logger,
+		tc.metrics).
 		WithTestHookOnAsyncOpDone(hookAsyncOp).
 		WithoutRetries()
 
@@ -405,6 +473,7 @@ type ctrlTestCase struct {
 	labelsFetcherMock     *automock.BindingLabelsFetcher
 	sbuCheckerMock        *automock.BindingUsageChecker
 	sbuSpecStorageMock    *automock.AppliedSpecStorage
+	metrics               *automock.BusinessMetric
 }
 
 func newCtrlTestCase() *ctrlTestCase {
@@ -415,6 +484,7 @@ func newCtrlTestCase() *ctrlTestCase {
 		labelsFetcherMock:     &automock.BindingLabelsFetcher{},
 		sbuCheckerMock:        &automock.BindingUsageChecker{},
 		sbuSpecStorageMock:    &automock.AppliedSpecStorage{},
+		metrics:               &automock.BusinessMetric{},
 	}
 }
 
@@ -425,6 +495,7 @@ func (c *ctrlTestCase) AssertExpectation(t *testing.T) {
 	c.labelsFetcherMock.AssertExpectations(t)
 	c.sbuCheckerMock.AssertExpectations(t)
 	c.sbuSpecStorageMock.AssertExpectations(t)
+	c.metrics.AssertExpectations(t)
 }
 
 func (c *ctrlTestCase) fixDeploymentServiceBindingUsage() *sbuTypes.ServiceBindingUsage {

@@ -19,21 +19,18 @@ global:
   istio:
     gateway:
       name: kyma-gateway
-  etcdBackup:
-    enabled: false
-    secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
     version: "cb16ab4c"
   ui_acceptance_tests:
     dir:
-    version: "7cc741c7"
+    version: "10874d67"
   api_controller:
     dir: develop/
-    version: "0a2e0fc9"
+    version: "8625ab94"
   api_controller_acceptance_tests:
     dir: develop/
-    version: 736988df
+    version: "4e0f19eb"
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
@@ -57,13 +54,13 @@ global:
     version: a9bfa9fc
   test_apiserver_proxy:
     dir: develop/
-    version: 5c4376db
+    version: e31b2a0b
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
     dir: develop/
-    version: ff2378a9
+    version: ebc3ff12
   console_backend_service_test:
     dir: develop/
     version: 13d254ff

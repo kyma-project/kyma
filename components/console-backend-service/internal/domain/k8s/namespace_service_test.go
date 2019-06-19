@@ -19,22 +19,15 @@ import (
 
 func TestNamespacesService_List(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		labelsWithEnvTrue := map[string]string{
+		labels := map[string]string{
 			"test": "test",
 			"env":  "true",
 		}
-		labelsWithEnvFalse := map[string]string{
-			"test": "test",
-			"env":  "false",
-		}
-		labelsWithoutEnv := map[string]string{
-			"test": "test",
-		}
+		emptyLabels := map[string]string{}
 
-		namespace1 := fixNamespace("namespace-name", labelsWithEnvTrue)
-		namespace2 := fixNamespace("namespace-name-2", labelsWithEnvFalse)
-		namespace3 := fixNamespace("namespace-name-3", labelsWithoutEnv)
-		fixedInformer, _ := fixNamespaceInformer(namespace1, namespace2, namespace3)
+		namespace1 := fixNamespace("namespace-name", labels)
+		namespace2 := fixNamespace("namespace-name-2", emptyLabels)
+		fixedInformer, _ := fixNamespaceInformer(namespace1, namespace2)
 		svc, err := k8s.NewNamespaceService(fixedInformer, nil)
 		require.NoError(t, err)
 
@@ -43,17 +36,12 @@ func TestNamespacesService_List(t *testing.T) {
 		namespaces, err := svc.List()
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []*v1.Namespace{
-			namespace1,
+			namespace1, namespace2,
 		}, namespaces)
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		labelsWithoutEnv := map[string]string{
-			"test": "test",
-		}
-
-		namespace := fixNamespace("namespace-name", labelsWithoutEnv)
-		fixedInformer, _ := fixNamespaceInformer(namespace)
+		fixedInformer, _ := fixNamespaceInformer()
 		svc, err := k8s.NewNamespaceService(fixedInformer, nil)
 		require.NoError(t, err)
 
@@ -62,6 +50,40 @@ func TestNamespacesService_List(t *testing.T) {
 		namespaces, err := svc.List()
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []*v1.Namespace{}, namespaces)
+	})
+}
+
+func TestNamespacesService_Find(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "namespace-name"
+		labels := map[string]string{
+			"test": "test",
+			"env":  "true",
+		}
+
+		namespace1 := fixNamespace(name, labels)
+		fixedInformer, _ := fixNamespaceInformer(namespace1)
+		svc, err := k8s.NewNamespaceService(fixedInformer, nil)
+		require.NoError(t, err)
+
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
+
+		namespace, err := svc.Find(name)
+		require.NoError(t, err)
+		assert.Equal(t, namespace1, namespace)
+	})
+
+	t.Run("Not Found", func(t *testing.T) {
+		fixedInformer, _ := fixNamespaceInformer()
+		svc, err := k8s.NewNamespaceService(fixedInformer, nil)
+		require.NoError(t, err)
+
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
+
+		namespace, err := svc.Find("name")
+		require.NoError(t, err)
+		var empty *v1.Namespace
+		assert.Equal(t, empty, namespace)
 	})
 }
 
@@ -84,6 +106,36 @@ func TestNamespacesService_Create(t *testing.T) {
 		assert.Equal(t, name, namespace.Name)
 		assert.Equal(t, labels["env"], namespace.Labels["env"])
 		assert.Equal(t, labels["test"], namespace.Labels["test"])
+	})
+}
+
+func TestNamespacesService_Delete(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "namespace"
+		labels := map[string]string{
+			"test": "test",
+			"env":  "true",
+		}
+		namespace1 := fixNamespace(name, labels)
+		fixedInformer, client := fixNamespaceInformer(namespace1)
+		svc, err := k8s.NewNamespaceService(fixedInformer, client)
+		require.NoError(t, err)
+
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
+
+		err = svc.Delete(name)
+		require.NoError(t, err)
+	})
+
+	t.Run("Not Found", func(t *testing.T) {
+		fixedInformer, client := fixNamespaceInformer()
+		svc, err := k8s.NewNamespaceService(fixedInformer, client)
+		require.NoError(t, err)
+
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
+
+		err = svc.Delete("name")
+		require.Error(t, err)
 	})
 }
 

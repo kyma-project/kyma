@@ -13,6 +13,7 @@ var (
 	base32Encoding = base32.NewEncoding(encoder)
 )
 
+// ComputeHash computes hash for the given input.
 func ComputeHash(input *string) string {
 	h := sha1.New()
 	h.Write([]byte(*input))

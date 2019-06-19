@@ -20,7 +20,6 @@ cp -R ./api/push/      ./cmd/event-bus-publish-knative/docker/image/api/push/
 cp -R ./pkg      ./cmd/event-bus-publish-knative/docker/image/
 cp -R ./internal/trace/   ./cmd/event-bus-publish-knative/docker/image/internal/trace/
 cp -R ./internal/knative/ ./cmd/event-bus-publish-knative/docker/image/internal/knative/
-cp -R ./internal/publish/ ./cmd/event-bus-publish-knative/docker/image/internal/publish/
 cp -R ./internal/ea/ ./cmd/event-bus-publish-knative/docker/image/internal/ea/
 
 cp -R ./cmd/event-bus-publish-knative/main.go     ./cmd/event-bus-publish-knative/docker/image/

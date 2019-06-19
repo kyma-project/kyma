@@ -98,7 +98,7 @@ func TestRepository_Get(t *testing.T) {
 		secretsManagerMock.On("Get", "new-secret", metav1.GetOptions{}).Return(secret, nil)
 
 		// when
-		data, err := repository.Get("app", "new-secret")
+		data, err := repository.Get("new-secret")
 
 		// then
 		assert.NoError(t, err)
@@ -118,7 +118,7 @@ func TestRepository_Get(t *testing.T) {
 			errors.New("some error"))
 
 		// when
-		data, err := repository.Get("app", "secret-name")
+		data, err := repository.Get("secret-name")
 
 		// then
 		assert.Error(t, err)
@@ -142,7 +142,7 @@ func TestRepository_Get(t *testing.T) {
 				""))
 
 		// when
-		data, err := repository.Get("app", "secret-name")
+		data, err := repository.Get("secret-name")
 
 		// then
 		assert.Error(t, err)

@@ -23,23 +23,26 @@ type Service interface {
 }
 
 type defaultService struct {
-	nameResolver         k8sconsts.NameResolver
-	accessServiceManager accessservice.AccessServiceManager
-	secretsService       secrets.Service
-	istioService         istio.Service
+	nameResolver                    k8sconsts.NameResolver
+	accessServiceManager            accessservice.AccessServiceManager
+	secretsService                  secrets.Service
+	requestParametersSecretsService secrets.RequestParametersService
+	istioService                    istio.Service
 }
 
 func NewService(
 	nameResolver k8sconsts.NameResolver,
 	accessServiceManager accessservice.AccessServiceManager,
 	secretsService secrets.Service,
+	requestParametersSecretsService secrets.RequestParametersService,
 	istioService istio.Service) Service {
 
 	return defaultService{
-		nameResolver:         nameResolver,
-		accessServiceManager: accessServiceManager,
-		secretsService:       secretsService,
-		istioService:         istioService,
+		nameResolver:                    nameResolver,
+		accessServiceManager:            accessServiceManager,
+		secretsService:                  secretsService,
+		requestParametersSecretsService: requestParametersSecretsService,
+		istioService:                    istioService,
 	}
 }
 
@@ -53,8 +56,6 @@ func (sas defaultService) New(application, id string, api *model.API) (*applicat
 	serviceAPI.ApiType = api.ApiType
 	serviceAPI.GatewayURL = gatewayUrl
 	serviceAPI.AccessLabel = resourceName
-	serviceAPI.Headers = api.Headers
-	serviceAPI.QueryParameters = api.QueryParameters
 
 	err := sas.accessServiceManager.Create(application, id, resourceName)
 	if err != nil {
@@ -68,6 +69,14 @@ func (sas defaultService) New(application, id string, api *model.API) (*applicat
 		}
 
 		serviceAPI.Credentials = credentials
+	}
+	if api.RequestParameters != nil {
+		requestParametersSecretName, err := sas.requestParametersSecretsService.Create(application, id, api.RequestParameters)
+		if err != nil {
+			return nil, err
+		}
+
+		serviceAPI.RequestParametersSecretName = requestParametersSecretName
 	}
 
 	err = sas.istioService.Create(application, id, resourceName)
@@ -83,8 +92,6 @@ func (sas defaultService) Read(application string, applicationAPI *applications.
 		TargetUrl:        applicationAPI.TargetUrl,
 		SpecificationUrl: applicationAPI.SpecificationUrl,
 		ApiType:          applicationAPI.ApiType,
-		Headers:          applicationAPI.Headers,
-		QueryParameters:  applicationAPI.QueryParameters,
 	}
 
 	if applicationAPI.Credentials.Type != "" {
@@ -94,6 +101,14 @@ func (sas defaultService) Read(application string, applicationAPI *applications.
 		}
 
 		api.Credentials = &credentials
+	}
+
+	if applicationAPI.RequestParametersSecretName != "" {
+		requestParameters, err := sas.requestParametersSecretsService.Get(applicationAPI.RequestParametersSecretName)
+		if err != nil {
+			return nil, err
+		}
+		api.RequestParameters = &requestParameters
 	}
 
 	return api, nil
@@ -110,6 +125,11 @@ func (sas defaultService) Delete(application, id string) apperrors.AppError {
 	err = sas.secretsService.Delete(resourceName)
 	if err != nil {
 		return apperrors.Internal("Deleting credentials secret failed, %s", err.Error())
+	}
+
+	err = sas.requestParametersSecretsService.Delete(application, id)
+	if err != nil {
+		return apperrors.Internal("Deleting request parameters secret failed, %s", err.Error())
 	}
 
 	err = sas.istioService.Delete(resourceName)
@@ -130,8 +150,6 @@ func (sas defaultService) Update(application, id string, api *model.API) (*appli
 	serviceAPI.ApiType = api.ApiType
 	serviceAPI.GatewayURL = gatewayUrl
 	serviceAPI.AccessLabel = resourceName
-	serviceAPI.Headers = api.Headers
-	serviceAPI.QueryParameters = api.QueryParameters
 
 	err := sas.accessServiceManager.Upsert(application, id, resourceName)
 	if err != nil {
@@ -147,6 +165,20 @@ func (sas defaultService) Update(application, id string, api *model.API) (*appli
 		serviceAPI.Credentials = credentials
 	} else {
 		err := sas.secretsService.Delete(resourceName)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if api.RequestParameters != nil {
+		requestParametersSecretName, err := sas.requestParametersSecretsService.Upsert(application, id, api.RequestParameters)
+		if err != nil {
+			return nil, err
+		}
+
+		serviceAPI.RequestParametersSecretName = requestParametersSecretName
+	} else {
+		err := sas.requestParametersSecretsService.Delete(application, id)
 		if err != nil {
 			return nil, err
 		}

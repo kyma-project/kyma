@@ -13,7 +13,7 @@ import (
 // Repository contains operations for managing client credentials
 type Repository interface {
 	Create(application, name, serviceID string, data strategy.SecretData) apperrors.AppError
-	Get(application, name string) (strategy.SecretData, apperrors.AppError)
+	Get(name string) (strategy.SecretData, apperrors.AppError)
 	Delete(name string) apperrors.AppError
 	Upsert(application, name, secretID string, data strategy.SecretData) apperrors.AppError
 }
@@ -43,7 +43,7 @@ func (r *repository) Create(application, name, serviceID string, data strategy.S
 	return r.create(application, secret, name)
 }
 
-func (r *repository) Get(application, name string) (data strategy.SecretData, error apperrors.AppError) {
+func (r *repository) Get(name string) (data strategy.SecretData, error apperrors.AppError) {
 	secret, err := r.secretsManager.Get(name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {

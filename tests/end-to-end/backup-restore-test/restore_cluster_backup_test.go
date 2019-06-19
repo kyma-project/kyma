@@ -65,11 +65,11 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	myMicroFrontendTest, err := NewMicrofrontendTest()
 	fatalOnError(t, err, "while creating structure for MicroFrontend test")
 
-	// appBrokerTest, err := NewAppBrokerTest()
-	// fatalOnError(t, err, "while creating structure for AppBroker test")
+	appBrokerTest, err := NewAppBrokerTest()
+	fatalOnError(t, err, "while creating structure for AppBroker test")
 
-	// helmBrokerTest, err := NewHelmBrokerTest()
-	// fatalOnError(t, err, "while creating structure for HelmBroker test")
+	helmBrokerTest, err := NewHelmBrokerTest()
+	fatalOnError(t, err, "while creating structure for HelmBroker test")
 
 	myCmsTest, err := NewCmsTest(t)
 	fatalOnError(t, err, "while creating structure for Cms test")
@@ -85,8 +85,8 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		myAssetStoreTest,
 		apiControllerTest,
 		myMicroFrontendTest,
-		// appBrokerTest,
-		// helmBrokerTest,
+		appBrokerTest,
+		helmBrokerTest,
 	}
 	e2eTests := make([]e2eTest, len(backupTests))
 
@@ -139,11 +139,11 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 
 		Convey("Check backup status", func() {
 
-			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 20*time.Minute)
+			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 25*time.Minute)
 			myBackupClient.DescribeBackup(systemBackupName)
 			So(err, ShouldBeNil)
 
-			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 20*time.Minute)
+			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 25*time.Minute)
 			myBackupClient.DescribeBackup(allBackupName)
 			So(err, ShouldBeNil)
 
@@ -164,11 +164,11 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 					err := myBackupClient.RestoreBackup(allBackupName)
 					So(err, ShouldBeNil)
 
-					err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 15*time.Minute)
+					err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 20*time.Minute)
 					myBackupClient.DescribeRestore(systemBackupName)
 					So(err, ShouldBeNil)
 
-					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 15*time.Minute)
+					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 20*time.Minute)
 					myBackupClient.DescribeRestore(allBackupName)
 					So(err, ShouldBeNil)
 
