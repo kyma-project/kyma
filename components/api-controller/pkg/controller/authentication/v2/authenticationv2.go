@@ -172,8 +172,9 @@ func toIstioAuthPolicy(dto *Dto, defaultConfig JwtDefaultConfig, enableIstioAuth
 			if rule.Type == JwtType {
 				origins = append(origins, &istioAuthApi.Origin{
 					Jwt: &istioAuthApi.Jwt{
-						Issuer:  rule.Jwt.Issuer,
-						JwksUri: rule.Jwt.JwksUri,
+						Issuer:       rule.Jwt.Issuer,
+						JwksUri:      rule.Jwt.JwksUri,
+						TriggerRules: toIstioTriggerRules(rule.Jwt.TriggerRule.ExcludedPaths),
 					},
 				})
 			}
@@ -181,8 +182,9 @@ func toIstioAuthPolicy(dto *Dto, defaultConfig JwtDefaultConfig, enableIstioAuth
 	} else if dto.AuthenticationEnabled {
 		origins = append(origins, &istioAuthApi.Origin{
 			Jwt: &istioAuthApi.Jwt{
-				Issuer:  defaultConfig.Issuer,
-				JwksUri: defaultConfig.JwksUri,
+				Issuer:       defaultConfig.Issuer,
+				JwksUri:      defaultConfig.JwksUri,
+				TriggerRules: nil,
 			},
 		})
 	}
@@ -195,6 +197,25 @@ func toIstioAuthPolicy(dto *Dto, defaultConfig JwtDefaultConfig, enableIstioAuth
 		ObjectMeta: objectMetadata,
 		Spec:       spec,
 	}
+}
+
+//We convert our excludedPaths into an Istio TriggerRule array with a single item.
+func toIstioTriggerRules(excludedPaths []MatchExpression) []*istioAuthApi.TriggerRule {
+	if len(excludedPaths) == 0 {
+		return nil
+	}
+
+	strMatch := make([]*istioAuthApi.StringMatch, len(excludedPaths))
+	for i := 0; i < len(excludedPaths); i++ {
+		strMatch[i] = &istioAuthApi.StringMatch{
+			MatchType: excludedPaths[i].ExprType,
+			Value:     excludedPaths[i].Value,
+		}
+	}
+
+	singleRule := istioAuthApi.TriggerRule{ExcludedPaths: strMatch}
+	res := []*istioAuthApi.TriggerRule{&singleRule}
+	return res
 }
 
 func isAuthenticationDisabled(dto *Dto) bool {
