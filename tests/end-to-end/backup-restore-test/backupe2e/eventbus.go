@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	apiv1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apiV1 "k8s.io/api/core/v1"
+	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	publishApi "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
@@ -18,9 +18,9 @@ import (
 	subscriptionClientSet "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	"github.com/kyma-project/kyma/components/event-bus/test/util"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
-	k8sclientset "k8s.io/client-go/kubernetes"
+	k8sClientSet "k8s.io/client-go/kubernetes"
 
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/smartystreets/goconvey/convey"
 )
 
 const (
@@ -29,8 +29,6 @@ const (
 	eventActivationName = "test-ea"
 	srcID               = "test.local"
 
-	success     = 0
-	fail        = 1
 	noOfRetries = 20
 
 	subscriberName           = "test-core-event-bus-subscriber"
@@ -41,7 +39,7 @@ const (
 
 // EventBusTest tests the Event Bus business logic after restoring Kyma from a backup
 type EventBusTest struct {
-	K8sInterface  k8sclientset.Interface
+	K8sInterface  k8sClientSet.Interface
 	EaInterface   eaClientSet.Interface
 	SubsInterface subscriptionClientSet.Interface
 }
@@ -49,7 +47,7 @@ type EventBusTest struct {
 type eventBusFlow struct {
 	namespace string
 
-	k8sInterface  k8sclientset.Interface
+	k8sInterface  k8sClientSet.Interface
 	eaInterface   eaClientSet.Interface
 	subsInterface subscriptionClientSet.Interface
 }
@@ -61,7 +59,7 @@ func NewEventBusTest() (*EventBusTest, error) {
 		return nil, err
 	}
 
-	k8sCli, err := k8sclientset.NewForConfig(k8sConfig)
+	k8sCli, err := k8sClientSet.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -86,26 +84,25 @@ func NewEventBusTest() (*EventBusTest, error) {
 // CreateResources creates resources needed for e2e backup test
 func (eb *EventBusTest) CreateResources(namespace string) {
 	err := eb.newFlow(namespace).createResources()
-	So(err, ShouldBeNil)
+	convey.So(err, convey.ShouldBeNil)
 }
 
 // TestResources tests resources after restoring from a backup
 func (eb *EventBusTest) TestResources(namespace string) {
 	err := eb.newFlow(namespace).testResources()
-	So(err, ShouldBeNil)
+	convey.So(err, convey.ShouldBeNil)
 }
 
 // DeleteResources deletes resources before restoring from a backup
 func (eb *EventBusTest) DeleteResources(namespace string) {
 	// There is not need to be implemented for this test.
 	err := eb.newFlow(namespace).deleteResources()
-	So(err, ShouldBeNil)
+	convey.So(err, convey.ShouldBeNil)
 }
 
 func (eb *EventBusTest) newFlow(namespace string) *eventBusFlow {
 	return &eventBusFlow{
-		namespace: namespace,
-
+		namespace:     namespace,
 		k8sInterface:  eb.K8sInterface,
 		eaInterface:   eb.EaInterface,
 		subsInterface: eb.SubsInterface,
@@ -124,8 +121,7 @@ func (f *eventBusFlow) createResources() error {
 		f.publishTestEvent,
 		f.checkSubscriberReceivedEvent,
 	} {
-		err := fn()
-		if err != nil {
+		if err := fn(); err != nil {
 			return fmt.Errorf("CreateResources() failed with: %v", err)
 		}
 	}
@@ -142,8 +138,7 @@ func (f *eventBusFlow) testResources() error {
 		f.checkSubscriberReceivedEvent,
 		f.cleanup,
 	} {
-		err := fn()
-		if err != nil {
+		if err := fn(); err != nil {
 			return fmt.Errorf("TestResources() failed with: %v", err)
 		}
 	}
@@ -159,19 +154,19 @@ func (f *eventBusFlow) deleteResources() error {
 }
 
 func (f *eventBusFlow) createSubscriber() error {
-	if _, err := f.k8sInterface.AppsV1().Deployments(f.namespace).Get(subscriberName, metav1.GetOptions{}); err != nil {
+	if _, err := f.k8sInterface.AppsV1().Deployments(f.namespace).Get(subscriberName, metaV1.GetOptions{}); err != nil {
 		if _, err := f.k8sInterface.AppsV1().Deployments(f.namespace).Create(util.NewSubscriberDeployment(subscriberImage)); err != nil {
-			return fmt.Errorf("Create Subscriber deployment: %v", err)
+			return fmt.Errorf("create Subscriber deployment: %v", err)
 		}
 
 		if _, err := f.k8sInterface.CoreV1().Services(f.namespace).Create(util.NewSubscriberService()); err != nil {
-			return fmt.Errorf("Create Subscriber service failed: %v", err)
+			return fmt.Errorf("create Subscriber service failed: %v", err)
 		}
 		time.Sleep(30 * time.Second)
 
 		for i := 0; i < 60; i++ {
 			var podReady bool
-			if pods, err := f.k8sInterface.CoreV1().Pods(f.namespace).List(metav1.ListOptions{LabelSelector: "app=" + subscriberName}); err == nil {
+			if pods, err := f.k8sInterface.CoreV1().Pods(f.namespace).List(metaV1.ListOptions{LabelSelector: "app=" + subscriberName}); err == nil {
 				for _, pod := range pods.Items {
 					if podReady = isPodReady(&pod); !podReady {
 						break
@@ -209,7 +204,7 @@ func (f *eventBusFlow) createSubscription() error {
 	_, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Create(util.NewSubscription(subscriptionName, f.namespace, subscriberEventEndpointURL, eventType, "v1", srcID))
 	if err != nil {
 		if !strings.Contains(err.Error(), "already exists") {
-			return fmt.Errorf("Error in creating subscription: %v", err)
+			return fmt.Errorf("error in creating subscription: %v", err)
 		}
 	}
 	return err
@@ -246,15 +241,15 @@ func (f *eventBusFlow) checkSubscriptionReady() error {
 	var err error
 	activatedCondition := subApis.SubscriptionCondition{Type: subApis.Ready, Status: subApis.ConditionTrue}
 	for i := 0; i < noOfRetries; i++ {
-		kySub, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Get(subscriptionName, metav1.GetOptions{})
+		kySub, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Get(subscriptionName, metaV1.GetOptions{})
 		if err != nil {
-			return fmt.Errorf("Cannot get Kyma subscription, name: %v; namespace: %v", subscriptionName, f.namespace)
+			return fmt.Errorf("cannot get Kyma subscription, name: %v; namespace: %v", subscriptionName, f.namespace)
 		}
 		if kySub.HasCondition(activatedCondition) {
 			return nil
 		}
 
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Duration(i) * time.Second)
 	}
 	return err
 }
@@ -272,7 +267,7 @@ func (f *eventBusFlow) publishTestEvent() error {
 	}
 
 	if !eventSent {
-		return fmt.Errorf("Cannot send test event: %v", err)
+		return fmt.Errorf("cannot send test event: %v", err)
 	}
 	return nil
 }
@@ -282,7 +277,7 @@ func (f *eventBusFlow) publish(publishEventURL string) (*publishApi.PublishRespo
 		`{"source-id": "%s","event-type":"%s","event-type-version":"v1","event-time":"2018-11-02T22:08:41+00:00","data":"test-event-1"}`, srcID, eventType)
 	res, err := http.Post(publishEventURL, "application/json", strings.NewReader(payload))
 	if err != nil {
-		return nil, fmt.Errorf("Post request failed: %v", err)
+		return nil, fmt.Errorf("post request failed: %v", err)
 	}
 
 	if err := verifyStatusCode(res, 200); err != nil {
@@ -290,10 +285,12 @@ func (f *eventBusFlow) publish(publishEventURL string) (*publishApi.PublishRespo
 	}
 	respObj := &publishApi.PublishResponse{}
 	body, err := ioutil.ReadAll(res.Body)
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 	err = json.Unmarshal(body, &respObj)
 	if err != nil {
-		return nil, fmt.Errorf("Unmarshal error: %v", err)
+		return nil, fmt.Errorf("unmarshal error: %v", err)
 	}
 
 	if len(respObj.EventID) == 0 {
@@ -308,16 +305,16 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 		time.Sleep(time.Duration(i) * time.Second)
 		res, err := http.Get(subscriberResultsEndpointURL)
 		if err != nil {
-			return fmt.Errorf("Get request failed: %v", err)
+			return fmt.Errorf("get request failed: %v", err)
 		}
 
 		if err := verifyStatusCode(res, 200); err != nil {
-			return fmt.Errorf("Get request failed: %v", err)
+			return fmt.Errorf("get request failed: %v", err)
 		}
 		body, err := ioutil.ReadAll(res.Body)
 		var resp string
-		json.Unmarshal(body, &resp)
-		res.Body.Close()
+		_ = json.Unmarshal(body, &resp)
+		_ = res.Body.Close()
 		if len(resp) == 0 { // no event received by subscriber
 			continue
 		}
@@ -332,19 +329,19 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 func (f *eventBusFlow) cleanup() error {
 	subscriberShutdownEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/v1/shutdown"
 
-	http.Post(subscriberShutdownEndpointURL, "application/json", strings.NewReader(`{"shutdown": "true"}`))
+	_, _ = http.Post(subscriberShutdownEndpointURL, "application/json", strings.NewReader(`{"shutdown": "true"}`))
 
-	deletePolicy := metav1.DeletePropagationForeground
+	deletePolicy := metaV1.DeletePropagationForeground
 	gracePeriodSeconds := int64(0)
-	f.k8sInterface.AppsV1().Deployments(f.namespace).Delete(subscriberName,
-		&metav1.DeleteOptions{GracePeriodSeconds: &gracePeriodSeconds, PropagationPolicy: &deletePolicy})
+	_ = f.k8sInterface.AppsV1().Deployments(f.namespace).Delete(subscriberName,
+		&metaV1.DeleteOptions{GracePeriodSeconds: &gracePeriodSeconds, PropagationPolicy: &deletePolicy})
 
-	f.k8sInterface.CoreV1().Services(f.namespace).Delete(subscriberName,
-		&metav1.DeleteOptions{GracePeriodSeconds: &gracePeriodSeconds})
+	_ = f.k8sInterface.CoreV1().Services(f.namespace).Delete(subscriberName,
+		&metaV1.DeleteOptions{GracePeriodSeconds: &gracePeriodSeconds})
 
-	f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Delete(subscriptionName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy})
+	_ = f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Delete(subscriptionName, &metaV1.DeleteOptions{PropagationPolicy: &deletePolicy})
 
-	f.eaInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Delete(eventActivationName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy})
+	_ = f.eaInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Delete(eventActivationName, &metaV1.DeleteOptions{PropagationPolicy: &deletePolicy})
 
 	return nil
 }
@@ -371,7 +368,7 @@ func verifyStatusCode(res *http.Response, expectedStatusCode int) error {
 	return nil
 }
 
-func isPodReady(pod *apiv1.Pod) bool {
+func isPodReady(pod *apiV1.Pod) bool {
 	for _, cs := range pod.Status.ContainerStatuses {
 		if !cs.Ready {
 			return false
