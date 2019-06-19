@@ -20,8 +20,8 @@ global:
   isLocalEnv: false
   gateway:
     name: kyma-gateway
-  static_users_generator:
-    dir: develop/
-    version: 694495e9
+  dex_static_user_configurer:
+    dir: pr/
+    version: "PR-4588"
   containerRegistry:
     path: eu.gcr.io/kyma-project
