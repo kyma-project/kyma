@@ -27,7 +27,7 @@ func main() {
 
 	cfg := readAppConfig()
 
-	log.Infof("Starting configurations generator on port: %d...", cfg.port)
+	log.Infof("Starting IAM kubeconfig service on port: %d...", cfg.port)
 
 	oidcAuthenticator, err := authn.NewOIDCAuthenticator(&cfg.oidc)
 	if err != nil {
