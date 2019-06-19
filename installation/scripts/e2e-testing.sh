@@ -14,7 +14,7 @@ cleanupHelmE2ERelease () {
     local deleteErr=$?
     if [ ${deleteErr} -ne 0 ]
     then
-      log "FAILED cleaning release.\n" red
+      log "FAILED cleaning release. This might be because the release hasn't been installed yet \n" red
       return 1
     fi
     while helm list --deleting --tls 2>/dev/null | grep "${release}" ; do
@@ -46,8 +46,6 @@ then
    echo "ERROR: script requires ClusterTestSuite CRD"
    exit 1
 fi
-
-matchTests="" # match all tests
 
 matchTests=$(${kc} get testdefinitions --all-namespaces -l 'app=backup-test' -o=go-template='  selectors:
     matchNames:
