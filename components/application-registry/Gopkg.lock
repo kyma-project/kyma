@@ -167,6 +167,9 @@
     "components/application-gateway/pkg/authorization/oauth",
     "components/application-gateway/pkg/authorization/oauth/tokencache",
     "components/application-gateway/pkg/authorization/util",
+    "components/application-gateway/pkg/csrf",
+    "components/application-gateway/pkg/csrf/client",
+    "components/application-gateway/pkg/csrf/strategy",
     "components/application-gateway/pkg/httpconsts",
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/clientset/versioned",
@@ -600,6 +603,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9e37f251694374dbbe1a3bf4db5dba50dc2a6cf110b116da16ca83db996ecf8f"
+  inputs-digest = "d3c5f2854fd37757afbbae28709a38aeba4550dc926a2b7416b798d9b7bdf8b7"
   solver-name = "gps-cdcl"
   solver-version = 1
