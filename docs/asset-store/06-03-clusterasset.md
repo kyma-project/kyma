@@ -42,6 +42,8 @@ metadata:
 spec:
   source:
     mode: single
+    metadata:
+      disableHTML: true
     url: https://some.domain.com/main.js
     validationWebhookService:
     - name: swagger-operations-svc
@@ -88,6 +90,7 @@ This table lists all possible parameters of a given resource together with their
 |----------|:-------------:|------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **spec.source.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR formats. Use `single` for one file and `package` for a set of files. |
+| **spec.source.metadata** |    **NO**   | Specifies the set of the metadata for ClusterAsset. It must be defined in a valid YAML/JSON format. |
 | **spec.source.url** |    **YES**   | Specifies the location of the file. |
 | **spec.source.filter** |    **NO**   | Specifies the regex pattern used to select files to store from the package. |
 | **spec.source.validationwebhookservice** |    **NO**   | Provides specification of the validation webhook services. |
