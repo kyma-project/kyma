@@ -24,7 +24,7 @@ spec:
           - "dex.{{ .Values.global.ingress.domainName }}"
       {{ end }}
       containers:
-      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.configurations_generator.dir }}configurations-generator:{{ .Values.global.configurations_generator.version }}
+      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.iam_kubeconfig_service.dir }}iam-kubeconfig-service:{{ .Values.global.iam_kubeconfig_service.version }}
         name: {{ template "name" . }}
         command:
           - sh
