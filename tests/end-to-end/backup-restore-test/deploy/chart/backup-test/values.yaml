@@ -1,6 +1,8 @@
 containerRegistry:
   path: eu.gcr.io/kyma-project
 
+nameOverride: backup-test
+
 image:
   dir: develop/
   tag: c4d1f53b

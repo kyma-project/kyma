@@ -116,16 +116,16 @@
 /resources/logging/charts/log-ui/ @rakesh-garimella @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @hisarbalik @a-thaler @igor-karpukhin
 
 # The `event-bus` chart
-/resources/event-bus/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/resources/event-bus/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # The `nats-streaming` chart
-/resources/nats-streaming/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/resources/nats-streaming/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # The `knative-provisioner-natss` chart
-/resources/knative-provisioner-natss/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/resources/knative-provisioner-natss/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # The `k8s-dashboard-proxy` subchart
-/resources/core/charts/k8s-dashboard-proxy/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/resources/core/charts/k8s-dashboard-proxy/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # The `application-broker` subchart
 /resources/application-connector/charts/application-broker @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -179,13 +179,13 @@
 /resources/knative-serving/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # The `knative-eventing` chart
-/resources/knative-eventing/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/resources/knative-eventing/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # The `jaeger` charts
-/resources/jaeger/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/resources/jaeger/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `prometheus-operator` chart
-/resources/prometheus-operator/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
+/resources/prometheus-operator/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `service-catalog` chart
 /resources/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -267,13 +267,13 @@
 /components/application-connectivity-validator/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Event Bus Component
-/components/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/components/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # K8s Dashboard Proxy Component
-/components/k8s-dashboard-proxy/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/components/k8s-dashboard-proxy/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # Event Service Component
-/components/event-service/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/components/event-service/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # Xip Patch Component
 /components/xip-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -331,7 +331,7 @@
 # Tools
 
 # The alpine-net directory
-/tools/alpine-net/ @suleymanakbas91 @clebs @a-thaler @lilitgh
+/tools/alpine-net/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The etcd-tls-setup directory
 /tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
@@ -358,13 +358,13 @@
 /tests/kubeless/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # Event Bus Tests
-/tests/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/tests/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # Event Service Tests
-/tests/gateway-tests/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/tests/gateway-tests/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # E2E Backup Tests
-/tests/end-to-end/backup-restore-test @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
+/tests/end-to-end/backup-restore-test @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # E2E Upgrade Tests
 /tests/end-to-end/upgrade @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
