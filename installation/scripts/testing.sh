@@ -16,7 +16,7 @@ do
         -*)
             echo "Unknown flag ${1}"
             exit 1
-        ;;
+            ;;
         *) # unknown option
             POSITIONAL+=("$1") # save it in an array for later
             shift # past argument
