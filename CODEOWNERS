@@ -224,6 +224,9 @@
 # Configurations Generator Component
 /components/configurations-generator/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# IAM Kubeconfig Service Component
+/components/iam-kubeconfig-service/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+
 # Namespace controller Component
 /components/namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
 
@@ -277,6 +280,9 @@
 
 # Kubeless Images
 /components/kubeless-images @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
+
+# Dex Static User Configurer
+/components/dex-static-user-configurer/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Tests
 # acceptance tests
@@ -335,9 +341,6 @@
 
 # The failery directory
 /tools/failery/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
-
-# The static-users-generator directory
-/tools/static-users-generator/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The tools/velero-plugins directory
 /tools/velero-plugins/ @mwieczorek @joek @rakesh-garimella @venturasr @lilitgh @k15r
