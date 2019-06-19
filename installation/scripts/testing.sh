@@ -4,11 +4,25 @@ ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 CONCURRENCY=1
 
 POSITIONAL=()
+
+function validateConcurrency() {
+  if [[ -z "$1" ]]; then
+    echo "Error: --concurency requres a value"
+    exit 1
+  fi
+
+  if ! [[ "$1" =~ '^[0-9]+$' ]]; then
+    echo "Error: value passed to --concurrency must be a number"
+    exit 1
+  fi
+}
+
 while [[ $# -gt 0 ]]
 do
     key="$1"
     case ${key} in
         --concurrency|-c)
+            validateConcurrency "$2"
             CONCURRENCY="$2"
             shift
             shift
