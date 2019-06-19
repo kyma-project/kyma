@@ -12,7 +12,7 @@ The following tools are required to set up the project:
 
 ## Installation
 
-For installation use dedicated [Helm chart](https://github.com/kyma-project/kyma/tree/master/resources/core/charts/iam-kubeconfig-service)
+For installation use dedicated Helm chart
 
 ## Usage
 
