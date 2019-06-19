@@ -5,11 +5,10 @@ type: Details
 
 As a core component, Istio installs with every Kyma deployment by default. The installation consists of two steps:
 
-1. Istio installs using the official, charts from the currently supported release. The charts that are currently
-used are stored in the `resources/istio` directory. The installation is customized as described in [this document](#details-istio-customization)
+1. Istio installs using the official, charts from the currently supported release. The charts that are currently used are stored in the `resources/istio` directory. The installation is customized as described in [this document](#details-istio-customization)
 
 2. A Istio patch is run, which verifies if the current installation has the following options:
-  - A specific version is Istio is installed
+  - A specific version of Istio is installed
   - mTLS(Mutual TLS) policy is enabled and set to `strict`
   - Istio policy enforcement is enabled 
   - Automatic sidecar injection is enabled
@@ -27,6 +26,6 @@ To learn more about the custom Istio patch applied in Kyma, see the `components/
 
 ## Use an existing Istio installation with Kyma
 
-You can use an existing installation of Istio running on Kubernetes with Kyma. In such a case is is recommended to enable the patch component to verify if all the required options are set. 
+You can use an existing installation of Istio running on Kubernetes with Kyma. In such a case is is required to enable the patch component to verify if all the required options are set. 
 
 To allow such implementation, you must install Kyma without Istio. Read [this](/root/kyma#configuration-custom-component-installation) document for more details.
