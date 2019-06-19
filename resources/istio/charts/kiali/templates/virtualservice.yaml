@@ -8,9 +8,9 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 spec:
   gateways:
-  - kyma-gateway.kyma-system.svc.cluster.local
+  - {{ .Values.global.istio.gateway.name }}
   hosts:
-  - {{ .Values.global.domainName }} 
+  - kiali.{{ .Values.global.ingress.domainName }}
   http:
   - match:
     - uri:

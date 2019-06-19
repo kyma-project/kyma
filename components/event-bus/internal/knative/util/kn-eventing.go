@@ -54,7 +54,7 @@ if err := k.CreateSubscription("my-sub", namespace, channelName, &uri); err != n
 return
 */
 
-// Use it cause it should be mocked
+// KnativeAccessLib encapsulates the Knative access lib behaviours.
 type KnativeAccessLib interface {
 	GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error)
 	CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
@@ -73,6 +73,7 @@ func NewKnativeLib() (KnativeAccessLib, error) {
 	return GetKnativeLib()
 }
 
+// KnativeLib represents the knative lib.
 type KnativeLib struct {
 	evClient eventingv1alpha1.EventingV1alpha1Interface
 }
@@ -102,42 +103,43 @@ func GetKnativeLib() (*KnativeLib, error) {
 // If the channel doesn't exist, the error returned can be checked using the
 // standard K8S function: "k8serrors.IsNotFound(err) "
 func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error) {
-	if channel, err := k.evClient.Channels(namespace).Get(name, metav1.GetOptions{}); err != nil {
+	channel, err := k.evClient.Channels(namespace).Get(name, metav1.GetOptions{})
+	if err != nil {
 		//log.Printf("ERROR: GetChannel(): getting channel: %v", err)
 		return nil, err
-	} else {
-		if !channel.Status.IsReady() {
-			return nil, fmt.Errorf("ERROR: GetChannel():channel NotReady")
-		}
-		return channel, nil
 	}
+	if !channel.Status.IsReady() {
+		return nil, fmt.Errorf("ERROR: GetChannel():channel NotReady")
+	}
+	return channel, nil
 }
 
 // CreateChannel creates a Knative/Eventing channel controlled by the specified provisioner
 func (k *KnativeLib) CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
 	timeout time.Duration) (*evapisv1alpha1.Channel, error) {
-	c := makeChannel(provisioner, name, namespace, labels)
-	if channel, err := k.evClient.Channels(namespace).Create(c); err != nil && !k8serrors.IsAlreadyExists(err) {
+	c := makeChannel(name, namespace, labels)
+	channel, err := k.evClient.Channels(namespace).Create(c)
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		log.Printf("ERROR: CreateChannel(): creating channel: %v", err)
 		return nil, err
-	} else {
-		isReady := channel.Status.IsReady()
-		tout := time.After(timeout)
-		tick := time.Tick(100 * time.Millisecond)
-		for !isReady {
-			select {
-			case <-tout:
-				return nil, errors.New("timed out")
-			case <-tick:
-				if channel, err = k.evClient.Channels(namespace).Get(name, metav1.GetOptions{}); err != nil {
-					log.Printf("ERROR: CreateChannel(): geting channel: %v", err)
-				} else {
-					isReady = channel.Status.IsReady()
-				}
+	}
+
+	isReady := channel.Status.IsReady()
+	tout := time.After(timeout)
+	tick := time.Tick(100 * time.Millisecond)
+	for !isReady {
+		select {
+		case <-tout:
+			return nil, errors.New("timed out")
+		case <-tick:
+			if channel, err = k.evClient.Channels(namespace).Get(name, metav1.GetOptions{}); err != nil {
+				log.Printf("ERROR: CreateChannel(): geting channel: %v", err)
+			} else {
+				isReady = channel.Status.IsReady()
 			}
 		}
-		return channel, nil
 	}
+	return channel, nil
 }
 
 // DeleteChannel deletes a Knative/Eventing channel
@@ -151,7 +153,7 @@ func (k *KnativeLib) DeleteChannel(name string, namespace string) error {
 
 // CreateSubscription creates a Knative/Eventing subscription for the specified channel
 func (k *KnativeLib) CreateSubscription(name string, namespace string, channelName string, uri *string) error {
-	sub := Subscription(name, namespace).ToChannel(channelName).ToUri(uri).EmptyReply().Build()
+	sub := Subscription(name, namespace).ToChannel(channelName).ToURI(uri).EmptyReply().Build()
 	if _, err := k.evClient.Subscriptions(namespace).Create(sub); err != nil {
 		log.Printf("ERROR: CreateSubscription(): creating subscription: %v", err)
 		return err
@@ -170,22 +172,22 @@ func (k *KnativeLib) DeleteSubscription(name string, namespace string) error {
 
 // GetSubscription gets a Knative/Eventing subscription
 func (k *KnativeLib) GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error) {
-	if sub, err := k.evClient.Subscriptions(namespace).Get(name, metav1.GetOptions{}); err != nil {
+	sub, err := k.evClient.Subscriptions(namespace).Get(name, metav1.GetOptions{})
+	if err != nil {
 		//log.Printf("ERROR: GetSubscription(): getting subscription: %v", err)
 		return nil, err
-	} else {
-		return sub, nil
 	}
+	return sub, nil
 }
 
 // UpdateSubscription updates an existing subscription
 func (k *KnativeLib) UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error) {
-	if usub, err := k.evClient.Subscriptions(sub.Namespace).Update(sub); err != nil {
+	usub, err := k.evClient.Subscriptions(sub.Namespace).Update(sub)
+	if err != nil {
 		log.Printf("ERROR: UpdateSubscription(): updating subscription: %v", err)
 		return nil, err
-	} else {
-		return usub, nil
 	}
+	return usub, nil
 }
 
 // SendMessage sends a message to a channel
@@ -193,9 +195,9 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[s
 	httpClient := &http.Client{
 		Transport: initHTTPTransport(),
 	}
-	req, err := makeHttpRequest(channel, headers, payload)
+	req, err := makeHTTPRequest(channel, headers, payload)
 	if err != nil {
-		log.Printf("ERROR: SendMessage(): makeHttpRequest() failed: %v", err)
+		log.Printf("ERROR: SendMessage(): makeHTTPRequest() failed: %v", err)
 		return err
 	}
 
@@ -204,7 +206,9 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[s
 		log.Printf("ERROR: SendMessage(): could not send HTTP request: %v", err)
 		return err
 	}
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if res.StatusCode == http.StatusNotFound {
 		// try to resend the message only once
@@ -221,17 +225,17 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[s
 }
 
 // InjectClient injects a client, useful for running tests.
-func (r *KnativeLib) InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) error {
-	r.evClient = c
+func (k *KnativeLib) InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) error {
+	k.evClient = c
 	return nil
 }
 
 func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, headers *map[string][]string, message *string) error {
 	timeout := time.After(10 * time.Second)
 	tick := time.Tick(200 * time.Millisecond)
-	req, err := makeHttpRequest(channel, headers, message)
+	req, err := makeHTTPRequest(channel, headers, message)
 	if err != nil {
-		log.Printf("ERROR: resendMessage(): makeHttpRequest() failed: %v", err)
+		log.Printf("ERROR: resendMessage(): makeHTTPRequest() failed: %v", err)
 		return err
 	}
 	res, err := httpClient.Do(req)
@@ -239,7 +243,9 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 		log.Printf("ERROR: resendMessage(): could not send HTTP request: %v", err)
 		return err
 	}
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 	//dumpResponse(res)
 	sc := res.StatusCode
 	for sc == http.StatusNotFound {
@@ -248,9 +254,9 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 			log.Printf("ERROR: resendMessage(): timed out")
 			return errors.New("ERROR: timed out")
 		case <-tick:
-			req, err := makeHttpRequest(channel, headers, message)
+			req, err := makeHTTPRequest(channel, headers, message)
 			if err != nil {
-				log.Printf("ERROR: resendMessage(): makeHttpRequest() failed: %v", err)
+				log.Printf("ERROR: resendMessage(): makeHTTPRequest() failed: %v", err)
 				return err
 			}
 			res, err := httpClient.Do(req)
@@ -258,7 +264,7 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 				log.Printf("ERROR: resendMessage(): could not resend HTTP request: %v", err)
 				return err
 			}
-			defer res.Body.Close()
+			defer func() { _ = res.Body.Close() }()
 			dumpResponse(res)
 			sc = res.StatusCode
 		}
@@ -270,7 +276,7 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 	return nil
 }
 
-func makeChannel(provisioner string, name string, namespace string, labels *map[string]string) *evapisv1alpha1.Channel {
+func makeChannel(name string, namespace string, labels *map[string]string) *evapisv1alpha1.Channel {
 	c := &evapisv1alpha1.Channel{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
@@ -285,13 +291,13 @@ func makeChannel(provisioner string, name string, namespace string, labels *map[
 	return c
 }
 
-func makeHttpRequest(channel *evapisv1alpha1.Channel, headers *map[string][]string, payload *string) (*http.Request, error) {
+func makeHTTPRequest(channel *evapisv1alpha1.Channel, headers *map[string][]string, payload *string) (*http.Request, error) {
 	var jsonStr = []byte(*payload)
 
-	channelUri := "http://" + channel.Status.Address.Hostname
-	req, err := http.NewRequest(http.MethodPost, channelUri, bytes.NewBuffer(jsonStr))
+	channelURI := "http://" + channel.Status.Address.Hostname
+	req, err := http.NewRequest(http.MethodPost, channelURI, bytes.NewBuffer(jsonStr))
 	if err != nil {
-		log.Printf("ERROR: makeHttpRequest(): could not create HTTP request: %v", err)
+		log.Printf("ERROR: makeHTTPRequest(): could not create HTTP request: %v", err)
 		return nil, err
 	}
 	req.Header = *headers

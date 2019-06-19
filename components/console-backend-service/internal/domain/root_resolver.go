@@ -324,6 +324,10 @@ func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, lab
 	return r.k8s.CreateNamespace(ctx, name, labels)
 }
 
+func (r *mutationResolver) DeleteNamespace(ctx context.Context, name string) (*gqlschema.Namespace, error) {
+	return r.k8s.DeleteNamespace(ctx, name)
+}
+
 func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace string, name string, limitRange gqlschema.LimitRangeInput) (*gqlschema.LimitRange, error) {
 	return r.k8s.CreateLimitRange(ctx, namespace, name, limitRange)
 }
@@ -336,6 +340,10 @@ type queryResolver struct {
 
 func (r *queryResolver) Namespaces(ctx context.Context, application *string) ([]gqlschema.Namespace, error) {
 	return r.k8s.NamespacesQuery(ctx, application)
+}
+
+func (r *queryResolver) Namespace(ctx context.Context, name string) (*gqlschema.Namespace, error) {
+	return r.k8s.NamespaceQuery(ctx, name)
 }
 
 func (r *queryResolver) Deployments(ctx context.Context, namespace string, excludeFunctions *bool) ([]gqlschema.Deployment, error) {

@@ -48,6 +48,10 @@ func (f *brokersFlow) createEnvTester(testedEnv string) error {
 	if err != nil {
 		return err
 	}
+	_, err = f.k8sInterface.CoreV1().Services(f.namespace).Create(f.envTesterService(labels))
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -274,7 +278,8 @@ func (f *brokersFlow) waitForEnvTesterValue(expectedEnvName, expectedEnvValue st
 		}
 		// the "done" string is sent just after the value, it means the value was printed
 		if strings.Contains(string(logs), "done") {
-			return false, fmt.Errorf("unexpected environment variable value: %s", string(logs))
+			f.log.Errorf("unexpected environment variable value: %s", string(logs))
+			return false, nil
 		}
 		return false, nil
 	})

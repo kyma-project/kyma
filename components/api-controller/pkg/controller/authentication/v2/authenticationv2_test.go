@@ -1,6 +1,7 @@
 package v2
 
 import (
+	"fmt"
 	"testing"
 
 	istioAuthApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/authentication.istio.io/v1alpha1"
@@ -290,6 +291,58 @@ func TestDeleteAuthentication(t *testing.T) {
 
 		if err != nil {
 			t.Errorf("Unexpected error: %s", err)
+		}
+	})
+}
+
+func TestToIstioTriggerRules(t *testing.T) {
+	t.Run("Should return nil if excludedPaths is a nil slice", func(t *testing.T) {
+		var in []MatchExpression = nil
+		res := toIstioTriggerRules(in)
+
+		if res != nil {
+			t.Error("Result should be nil")
+		}
+	})
+
+	t.Run("Should return nil if excludedPaths is an empty slice", func(t *testing.T) {
+		var in []MatchExpression = []MatchExpression{}
+		res := toIstioTriggerRules(in)
+
+		if res != nil {
+			t.Error("Result should be nil")
+		}
+	})
+
+	t.Run("Should return non-empty slice for non-empty excludedPaths", func(t *testing.T) {
+		var in []MatchExpression = []MatchExpression{
+			MatchExpression{ExprType: "exact", Value: "/a"},
+			MatchExpression{ExprType: "prefix", Value: "/b"},
+		}
+		res := toIstioTriggerRules(in)
+
+		if res == nil {
+			t.Error("Result should not be nil")
+		}
+
+		if len(res) != 1 {
+			t.Error("Result should have length of 1")
+		}
+
+		if res[0].IncludedPaths != nil {
+			t.Error("IncludedPaths should be nil")
+		}
+
+		paths := res[0].ExcludedPaths
+		if len(paths) != 2 {
+			t.Error("ExcludedPaths should have length of 2")
+		}
+
+		if paths[0].MatchType != "exact" || paths[0].Value != "/a" {
+			t.Error(fmt.Sprintf("Invalid first expression. Expected: 'exact: /a', Actual: '%s: %s'", paths[0].MatchType, paths[0].Value))
+		}
+		if paths[1].MatchType != "prefix" || paths[1].Value != "/b" {
+			t.Error(fmt.Sprintf("Invalid first expression. Expected: 'prefix: /b', Actual: '%s: %s'", paths[1].MatchType, paths[1].Value))
 		}
 	})
 }
