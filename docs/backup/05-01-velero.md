@@ -15,11 +15,11 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **global.volumeSnapshotLocation.name** | Specifies the name of the cloud provider used to store the volume snapshots, such as `aws`, `gcp`, or `azure`. | None |
+| **global.volumeSnapshotLocation.name** | Specifies the name of the cloud provider used to store volume snapshots, such as `aws`, `gcp`, or `azure`. | None |
 | **global.volumeSnapshotLocation.bucket** | Specifies the name of the storage bucket where volume snapshots are uploaded. | None |
 | **global.volumeSnapshotLocation.config.region** | Provides the region in which the bucket is created. It only applies to AWS. See the full list of [AWS regions](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-available-regions). | None |
-| **global.volumeSnapshotLocation.config.apiTimeout** | Defines the amount of time after which an API request returns with a timeout status. It only applies to Azure. | None |
-| **global.backupStorageLocation.name** | Specifies the name of the cloud provider used to store the backups, such as `aws`, `gcp`, or `azure`. | None |
+| **global.volumeSnapshotLocation.config.apiTimeout** | Defines the amount of time after which an API request returns a timeout status. It only applies to Azure. | None |
+| **global.backupStorageLocation.name** | Specifies the name of the cloud provider used to store backups, such as `aws`, `gcp`, or `azure`. | None |
 | **global.backupStorageLocation.bucket** | Specifies the storage bucket where backups are uploaded.| None |
 | **global.backupStorageLocation.prefix** | Specifies the directory inside a storage bucket where backups are located. | None |
 | **global.backupStorageLocation.config.resourceGroup** | Specifies the name of the resource group containing the storage account for the backup storage location. It only applies to Azure. | None |
