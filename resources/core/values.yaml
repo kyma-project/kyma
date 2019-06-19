@@ -60,10 +60,10 @@ global:
     version: 6b4c356f
   console_backend_service:
     dir: develop/
-    version: ebc3ff12
+    version: 4ddbe1e1
   console_backend_service_test:
     dir: develop/
-    version: 13d254ff
+    version: 43cbdedd
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8
