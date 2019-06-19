@@ -1,4 +1,4 @@
-# Dex static user configurer
+# Dex Static User Configurer
 
 ## Overview
 
