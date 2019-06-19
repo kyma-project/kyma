@@ -40,7 +40,7 @@ echo "----------------------------"
 
 kc="kubectl $(context_arg)"
 
-${kc} get clustertestsuites.testing.kyma-project.io > /dev/null 2>&1
+${kc} get cts > /dev/null 2>&1
 if [[ $? -eq 1 ]]
 then
    echo "ERROR: script requires ClusterTestSuite CRD"
@@ -75,9 +75,9 @@ previousPrintTime=-1
 while true
 do
     currTime=$(date +%s)
-    statusSucceeded=$(${kc} get cts ${suiteName}  -ojsonpath="{.status.conditions[?(@.type=='Succeeded')]}")
-    statusFailed=$(${kc} get cts ${suiteName}  -ojsonpath="{.status.conditions[?(@.type=='Failed')]}")
-    statusError=$(${kc} get cts  ${suiteName} -ojsonpath="{.status.conditions[?(@.type=='Error')]}" )
+    statusSucceeded=$(${kc} get cts "${suiteName}"  -ojsonpath="{.status.conditions[?(@.type=='Succeeded')]}")
+    statusFailed=$(${kc} get cts "${suiteName}"  -ojsonpath="{.status.conditions[?(@.type=='Failed')]}")
+    statusError=$(${kc} get cts  "${suiteName}" -ojsonpath="{.status.conditions[?(@.type=='Error')]}" )
 
     if [[ "${statusSucceeded}" == *"True"* ]]; then
        echo "Test suite '${suiteName}' succeeded."
@@ -103,7 +103,7 @@ do
         testExitCode=1
         break
     fi
-    if (( $previousPrintTime != $min )); then
+    if (( previousPrintTime != min )); then
         echo "ClusterTestSuite not finished. Waiting..."
         previousPrintTime=${min}
     fi
@@ -111,17 +111,17 @@ do
 done
 
 echo "Test summary"
-kubectl get cts  ${suiteName} -o=go-template --template='{{range .status.results}}{{printf "Test status: %s - %s" .name .status }}{{ if gt (len .executions) 1 }}{{ print " (Retried)" }}{{end}}{{print "\n"}}{{end}}'
+kubectl get cts  "${suiteName}" -o=go-template --template='{{range .status.results}}{{printf "Test status: %s - %s" .name .status }}{{ if gt (len .executions) 1 }}{{ print " (Retried)" }}{{end}}{{print "\n"}}{{end}}'
 
-waitForTerminationAndPrintLogs ${suiteName}
+waitForTerminationAndPrintLogs "${suiteName}"
 cleanupExitCode=$?
 
 echo "ClusterTestSuite details:"
-kubectl get cts ${suiteName} -oyaml
+kubectl get cts "${suiteName}" -oyaml
 
-kubectl delete cts ${suiteName}
+kubectl delete cts "${suiteName}"
 
 cleanupHelmE2ERelease "${release}"
 releaseCleanupResult=$?
 
-exit $(($testExitCode + $cleanupExitCode + $releaseCleanupResult))
+exit $((testExitCode + cleanupExitCode + releaseCleanupResult))
