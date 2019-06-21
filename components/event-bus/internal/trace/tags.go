@@ -9,15 +9,15 @@ const (
 
 const (
 	// HeaderSourceID header
-	HeaderSourceID = "Ce-Source-ID"
+	HeaderSourceID = "ce-source"
 	// HeaderEventType header
-	HeaderEventType = "Ce-Event-Type"
+	HeaderEventType = "ce-type"
 	// HeaderEventTypeVersion header
-	HeaderEventTypeVersion = "Ce-Event-Type-Version"
+	HeaderEventTypeVersion = "ce-eventtypeversion"
 	// HeaderEventID header
-	HeaderEventID = "Ce-Event-ID"
+	HeaderEventID = "ce-id"
 	// HeaderEventTime header
-	HeaderEventTime = "Ce-Event-Time"
+	HeaderEventTime = "ce-time"
 )
 
 // CreateTraceTagsFromMessageHeader returns a map of trace headers.
