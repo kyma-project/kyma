@@ -17,7 +17,7 @@ This table lists the configurable parameters, their descriptions, and default va
 |-----------|-------------|---------------|
 | **persistence.enabled** | Specifies whether you store logs on a persistent volume instead of a volatile mounted volume. | `true` |
 | **persistence.size** | Defines the size of the persistent volume. | `10Gi` |
-| **config.auth_enabled** | Specifies the authentication mechanism you use to access the logging service. Set it to `false` to use Dex authentication or to `true` to use the basic HTTP authentication instead.  | `false` |
+| **config.auth_enabled** | Specifies the authentication mechanism you use to access the logging service. Set it to `false` to use built-in Istio authentication, or to `true` to use the basic HTTP authentication instead.  | `false` |
 | **config.ingester.lifecycler.address** | Specifies the address of the lifecycler that coordinates distributed logging services. | `127.0.0.1` |
 | **config.ingester.lifecycler.ring.store** | Specifies the storage for information on logging data and their copies. | `inmemory` |
 | **config.ingester.lifecycler.ring.replication_factor** | Specifies the number of data copies on separate storages. | `1` |
