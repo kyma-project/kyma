@@ -7,6 +7,7 @@ const (
 	eventTypeVersion = "event-type-ver"
 )
 
+// SpecVersion CE header value
 const SpecVersion = "0.3"
 
 const (
