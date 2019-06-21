@@ -340,6 +340,8 @@ metadata:
   labels:
     knative.dev/crd-install: "true"
   name: channels.eventing.knative.dev
+  annotations:
+    "helm.sh/hook": "crd-install"
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.conditions[?(@.type=="Ready")].status
@@ -433,6 +435,8 @@ metadata:
   labels:
     knative.dev/crd-install: "true"
   name: clusterchannelprovisioners.eventing.knative.dev
+  annotations:
+    "helm.sh/hook": "crd-install"
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.conditions[?(@.type=="Ready")].status
@@ -468,6 +472,8 @@ metadata:
   labels:
     knative.dev/crd-install: "true"
   name: subscriptions.eventing.knative.dev
+  annotations:
+    "helm.sh/hook": "crd-install"
 spec:
   additionalPrinterColumns:
   - JSONPath: .status.conditions[?(@.type=="Ready")].status
