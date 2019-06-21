@@ -201,6 +201,7 @@ func buildMessage(publishRequest *api.Request, traceContext *api.TraceContext,
 	headers[trace.HeaderEventTypeVersion] = []string{publishRequest.EventTypeVersion}
 	headers[trace.HeaderEventID] = []string{publishRequest.EventID}
 	headers[trace.HeaderEventTime] = []string{publishRequest.EventTime}
+	headers[trace.HeaderSpecVersion] = []string{trace.SpecVersion}
 	if traceContext != nil {
 		for k, v := range *traceContext {
 			headers[k] = []string{v}

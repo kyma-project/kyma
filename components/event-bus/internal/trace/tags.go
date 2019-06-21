@@ -7,6 +7,8 @@ const (
 	eventTypeVersion = "event-type-ver"
 )
 
+const SpecVersion = "0.3"
+
 const (
 	// HeaderSourceID header
 	HeaderSourceID = "ce-source"
@@ -18,6 +20,8 @@ const (
 	HeaderEventID = "ce-id"
 	// HeaderEventTime header
 	HeaderEventTime = "ce-time"
+	// HeaderSpecVersion header
+	HeaderSpecVersion = "ce-specversion"
 )
 
 // CreateTraceTagsFromMessageHeader returns a map of trace headers.
