@@ -175,6 +175,9 @@
 # The `istio-kyma-patch` chart
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# The `knative-build` chart
+/resources/knative-build/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
+
 # The `knative-serving` chart
 /resources/knative-serving/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
