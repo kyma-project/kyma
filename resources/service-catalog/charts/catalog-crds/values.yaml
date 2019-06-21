@@ -115,3 +115,6 @@ servicePlanDefaultsEnabled: false
 ## by example :
 ## securityContext: { runAsUser: 1001 }
 securityContext: {}
+## image for migration process prevent SBU deletion
+migrationImagePath: eu.gcr.io/kyma-project/develop/service-catalog-upgrade
+migrationImageVersion: latest

@@ -34,6 +34,7 @@ if [ "$1" == "$CI_FLAG" ]; then
 fi
 
 ${buildEnv} go build -o binding-usage-controller ./cmd/controller
+${buildEnv} go build -o service-catalog-upgrade ./cmd/migration
 
 goBuildResult=$?
 if [ ${goBuildResult} != 0 ]; then
