@@ -36,10 +36,10 @@ const (
 	fail    = 1
 	retries = 20
 
-	sourceIDHeader         = "Ce-Source-Id"
-	eventTypeHeader        = "Ce-Event-Type"
-	eventTypeVersionHeader = "Ce-Event-Type-Version"
-	customHeader           = "Ce-X-Custom-Header"
+	sourceIDHeader         = "Ce-Source"
+	eventTypeHeader        = "Ce-Type"
+	eventTypeVersionHeader = "Ce-Eventtypeversion"
+	customHeader           = "Ce-Xcustomheader"
 
 	ceSourceIDHeaderValue         = "override-source-ID"
 	ceEventTypeHeaderValue        = "override-event-type"
