@@ -23,11 +23,9 @@ required = [
   name = "github.com/kubernetes-incubator/service-catalog"
   version = "=v0.1.36"
 
-# TODO: WIP
 [[constraint]]
   name="github.com/kyma-project/kyma"
-  source="github.com/michal-hudy/kyma"
-  branch = "cms-gdzie-jest-meta"
+  revision = "0ad464e54adb7986337508e82284a6e2f1ba12e5"
 
 [[constraint]]
   name = "github.com/gorilla/websocket"
