@@ -56,7 +56,7 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		}
 
 		// send success response
-		w.Header().Set("content-type", "application/json")
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		reason := getPublishStatusReason(&status)
 		publishResponse := &api.Response{
