@@ -402,7 +402,7 @@ func checkSubscriberReceivedEventHeaders() error {
 		}
 
 		lowerResponseHeaders := make(map[string][]string)
-		for k:= range resp{
+		for k := range resp {
 			lowerResponseHeaders[strings.ToLower(k)] = resp[k]
 		}
 

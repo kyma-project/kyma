@@ -129,7 +129,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 
 	// build the message from the publish-request and the trace-context
 	message := buildMessage(publishRequest, context, headers)
-	
+
 	// marshal the message
 	messagePayload, errMarshal := json.Marshal(message.Payload)
 	if errMarshal != nil {
