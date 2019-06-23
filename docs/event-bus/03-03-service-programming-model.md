@@ -23,10 +23,10 @@ The following HTTP Headers provide information about the Event metadata.
 
 |Header| Description|
 |------|--------|
-| **ce-event-id** | Business Event's ID delivered to the microservice. |
-| **ce-event-time** | Business Event's time delivered to the microservice. |
-| **ce-event-type** | Business Event's type delivered to the microservice. |
-| **ce-event-type-version** | Business Event's version delivered to the microservice. |
+| **ce-id** | Business Event's ID delivered to the microservice. |
+| **ce-time** | Business Event's time delivered to the microservice. |
+| **ce-type** | Business Event's type delivered to the microservice. |
+| **ce-eventtypeversion** | Business Event's version delivered to the microservice. |
 | **ce-source-id** | Identifies the origin of Events. This can be an external solution or a defined identifier for internally generated Events. |
 | **kyma-subscription** | Subscription name defined in the subscription contract, or in a CRD. This business Event is published to its subscribers. |
 | **x-b3-flags** | Header used by the Zipkin tracer in Envoy. It encodes one or more options. See more on Zipkin tracing [here](https://github.com/openzipkin/b3-propagation). |
