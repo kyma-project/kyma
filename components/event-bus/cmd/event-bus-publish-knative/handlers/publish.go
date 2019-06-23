@@ -56,7 +56,7 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		}
 
 		// send success response
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		reason := getPublishStatusReason(&status)
 		publishResponse := &api.Response{
@@ -80,8 +80,8 @@ func filterCEHeaders(req *http.Request) map[string][]string {
 	//forward `ce-` headers only
 	headers := make(map[string][]string)
 	for k := range req.Header {
-		if strings.HasPrefix(strings.ToUpper(k), "CE-") {
-			headers[k] = req.Header[k]
+		if strings.HasPrefix(strings.ToLower(k), "ce-") {
+			headers[strings.ToLower(k)] = req.Header[k]
 		}
 	}
 	return headers
@@ -129,7 +129,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 
 	// build the message from the publish-request and the trace-context
 	message := buildMessage(publishRequest, context, headers)
-
+	
 	// marshal the message
 	messagePayload, errMarshal := json.Marshal(message.Payload)
 	if errMarshal != nil {
