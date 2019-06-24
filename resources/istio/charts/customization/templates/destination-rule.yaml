@@ -1,7 +1,8 @@
+---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: istio-ingressgateway
+  name: istio-ingressgateway-dr
 spec:
   host: istio-ingressgateway.istio-system.svc.cluster.local
   trafficPolicy:
@@ -12,7 +13,7 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: tiller-deploy
+  name: tiller-deploy-dr
 spec:
   host: tiller-deploy.kube-system.svc.cluster.local
   trafficPolicy:
