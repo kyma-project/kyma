@@ -11,7 +11,7 @@ fi
 AUTH_TOKEN=$(/root/app)
 
 getConfigFile() {
-	curl -s -H "Authorization: Bearer ${AUTH_TOKEN}" "${CONFIGURATIONS_GENERATOR_SERVICE_HOST}:${CONFIGURATIONS_GENERATOR_SERVICE_PORT_HTTP}/kube-config" -o "${PWD}/kubeconfig"
+	curl -s -H "Authorization: Bearer ${AUTH_TOKEN}" "${IAM_KUBECONFIG_SVC_FQDN}/kube-config" -o "${PWD}/kubeconfig"
 }
 
 test(){
