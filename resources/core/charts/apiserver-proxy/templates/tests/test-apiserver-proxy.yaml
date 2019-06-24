@@ -25,7 +25,7 @@ spec:
       shareProcessNamespace: true
       containers:
       - name: test-{{ .Release.Name }}-apiserver-proxy
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_apiserver_proxy.dir }}apiserver-proxy-test:{{ .Values.global.test_apiserver_proxy.version }}
+        image: eu.gcr.io/kyma-project/pr/apiserver-proxy-test:PR-4616
         imagePullPolicy: Always
         command: ["/bin/bash"]
         args: ["-c", "sleep 10; ./test.sh; exit_code=$?; pkill -INT pilot-agent; exit $exit_code;"]
@@ -46,5 +46,7 @@ spec:
                   secretKeyRef:
                       name: admin-user
                       key: password
+            - name: IAM_KUBECONFIG_SVC_FQDN
+              value: configurations-generator.{{ .Values.global.ingress.domainName }}
       restartPolicy: Never
 {{- end}}
