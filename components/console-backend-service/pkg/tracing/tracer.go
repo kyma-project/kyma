@@ -1,3 +1,7 @@
+// Base on https://github.com/99designs/gqlgen-contrib/blob/master/gqlopentracing/tracer.go,
+// contains the following modifications:
+// 	- shortens the name of the span created in StartOperationExecution method
+//	- full graphQL query is stored in graphQL.query span tag
 package tracing
 
 import (
