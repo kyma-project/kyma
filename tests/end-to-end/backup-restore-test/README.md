@@ -14,7 +14,7 @@ To set up the project, use these tools:
 * The latest version of [Docker](https://www.docker.com/)
 * [Velero](../../../resources/velero/README.md#details)
 
->**NOTE:** Use [these](https://kyma-project.io/docs/components/backup/#configuration-velero-chart) guidelines to configure Velero for a specific storage provider.
+>**NOTE:** Use [these](https://kyma-project.io/docs/master/components/backup/#configuration-velero-chart) guidelines to configure Velero for a specific storage provider.
 
 
 ## Usage
@@ -70,7 +70,7 @@ The test creates a new Namespace called `{TestName}-{UUID}`. This Namespace shou
 
 ### Run end-to-end tests locally
 
-> **NOTE:** Before running the test, configure Velero using [these](https://kyma-project.io/docs/components/backup/#configuration-velero-chart) guidelines.
+> **NOTE:** Before running the test, configure Velero using [these](https://kyma-project.io/docs/master/components/backup/#configuration-velero-chart) guidelines.
 
 Run tests:
 ```bash
