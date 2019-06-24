@@ -111,6 +111,7 @@ func (eb *EventBusTest) newFlow(namespace string) *eventBusFlow {
 
 func (f *eventBusFlow) createResources() error {
 	// iterate over steps
+	fmt.Printf("Are we creating!!!!!!!")
 	for _, fn := range []func() error{
 		f.createEventActivation,
 		f.createSubscription,
