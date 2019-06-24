@@ -23,6 +23,10 @@ cleanupHelmE2ERelease () {
     done
 }
 
+# creates a config map which provides the testing bundles	
+injectTestingBundles	
+trap removeTestingBundles ERR EXIT
+
 testcase="${ROOT_PATH}"/../../tests/end-to-end/backup-restore-test/deploy/chart/backup-test
 release=$(basename "$testcase")
 
