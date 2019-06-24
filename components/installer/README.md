@@ -77,7 +77,7 @@ Run this command to uninstall Kyma:
   kubectl label installation/kyma-installation action=uninstall
   ```
 
->**NOTE:** Uninstallation is an experimental feature and does not remove all resources from the cluster. Make sure to remove the remaining resources before you attempt to install Kyma again on a cluster from which it was uninstalled.  
+>**NOTE:** Uninstallation is an experimental feature that invokes the `helm delete --purge` command for each release specified in the CR. It is Helm's policy to prevent some types of resources (e.g. CRDs or namespaces) from being deleted. Make sure to remove them manually before you attempt to install Kyma again on a cluster from which it was uninstalled.  
 
 ## Custom resource file
 
