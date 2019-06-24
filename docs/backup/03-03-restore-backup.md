@@ -51,7 +51,7 @@ To check the restore progress, run this command:
 kubectl describe restore -n kyma-backup {restore name}
 ```
 
-To validate the result of the restore use the `kubectl get` command.
+To validate the result of the restore, use the `kubectl get` command.
 
 > **NOTE:** Even if the restore process is complete, it may take some time for the resources to become available again.
 
