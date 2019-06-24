@@ -5,4 +5,4 @@ nameOverride: backup-test
 
 image:
   dir: pr/
-  tag: PR-3738
+  tag: PR-4625
