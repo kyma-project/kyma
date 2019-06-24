@@ -6,6 +6,6 @@ global:
     dir: develop/
     version: 84219cbc
   istio_kyma_patch:
-    dir: develop/
-    version: "e7bcbd8c"
+    dir: pr/
+    version: "PR-4472"
   required_istio_version: 1.1.6
