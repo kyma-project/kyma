@@ -2,7 +2,7 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: test-{{ template "fullname" . }}-integration
+  name: test-dex-integration
 spec:
   template:
     metadata:
@@ -10,7 +10,7 @@ spec:
         sidecar.istio.io/inject: "true"
     spec:
       shareProcessNamespace: true
-      serviceAccountName: test-{{ template "fullname" . }}-integration
+      serviceAccountName: test-dex-integration
       containers:
       - name: test-{{ template "fullname" . }}-integration
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.dex_integration_tests.dir }}integration-dex:{{ .Values.global.dex_integration_tests.version }}
@@ -35,6 +35,6 @@ spec:
         - "/bin/sh"
         args:
         - "-c"
-        - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; sleep 4; exit $exit_code;"
+        - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -TERM pilot-agent; sleep 4; exit $exit_code;"
     restartPolicy: Never
 {{- end }}
