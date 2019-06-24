@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/opentracing/opentracing-go/ext"
-
 	"net/http"
 	"time"
 
@@ -159,24 +157,7 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 		}),
 		handler.Tracer(tracing.New()),
 	)
-	var withParentSpan = func(next http.HandlerFunc) http.HandlerFunc {
-		return func(writer http.ResponseWriter, request *http.Request) {
-			spanContext, err := opentracing.GlobalTracer().Extract(
-				opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(request.Header))
-			if err != nil {
-				glog.Warning("opentracing parent span headers extract", err)
-				next(writer, request)
-			}
-			span := opentracing.StartSpan("console-backend-service",
-				opentracing.ChildOf(spanContext))
-			defer span.Finish()
-			ext.SpanKind.Set(span, "server")
-			ext.Component.Set(span, "console-backend-service")
-			ctx := opentracing.ContextWithSpan(request.Context(), span)
-			next(writer, request.WithContext(ctx))
-		}
-	}
-	router.HandleFunc("/graphql", withParentSpan(graphQLHandler))
+	router.HandleFunc("/graphql", tracing.NewWithParentSpan(graphQLHandler))
 	serverHandler := cors.New(cors.Options{
 		AllowedOrigins: allowedOrigins,
 		AllowedMethods: []string{

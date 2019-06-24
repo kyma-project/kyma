@@ -23,7 +23,7 @@ type tracerImpl int
 func (impl *tracerImpl) getSpanName(rawQuery string) string {
 
 	index := strings.Index(rawQuery, "(")
-	if index < 0 {
+	if index < 1 {
 		return rawQuery
 	}
 
