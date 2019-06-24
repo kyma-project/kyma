@@ -75,6 +75,12 @@ spec:
             value: "kyma-client"
           - name: APP_OIDC_CA_FILE
             value: "/etc/ingress-tls-cert/tls.crt"
+          - name: APP_TRACING_COLLECTOR_URL
+            value: {{ .Values.tracing.collectorUrl }}
+          - name: APP_TRACING_DEBUG
+            value: "{{ .Values.tracing.debug }}"
+          - name: APP_TRACING_SERVICE_SPAN_NAME
+            value: {{ .Values.tracing.serviceSpanName }}
         ports:
           - containerPort: {{ .Values.service.internalPort }}
             name: {{ .Values.service.internalPortName }}

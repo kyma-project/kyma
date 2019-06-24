@@ -14,3 +14,7 @@ virtualservice:
 istio:
   namespace: istio-system
 verifySSL: false
+tracing:
+  collectorUrl: http://zipkin.kyma-system:9411/api/v1/spans
+  debug: false
+  serviceSpanName: console-backend-service
