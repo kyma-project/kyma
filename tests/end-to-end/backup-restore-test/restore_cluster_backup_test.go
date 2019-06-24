@@ -74,18 +74,19 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	//fatalOnError(t, err, "while creating structure for Cms test")
 
 	backupTests := []BackupTest{
-		myPrometheusTest,
-		myFunctionTest,
-		myDeploymentTest,
-		myStatefulSetTest,
-		myGrafanaTest,
-		scAddonsTest,
-		myCmsTest,
-		myAssetStoreTest,
-		apiControllerTest,
-		myMicroFrontendTest,
-		appBrokerTest,
-		helmBrokerTest,
+		// myPrometheusTest,
+		// myFunctionTest,
+		// myDeploymentTest,
+		// myStatefulSetTest,
+		// myGrafanaTest,
+		// scAddonsTest,
+		// myCmsTest,
+		// myAssetStoreTest,
+		// apiControllerTest,
+		// myMicroFrontendTest,
+		// appBrokerTest,
+		// helmBrokerTest,
+		myEventBusTest,
 	}
 	e2eTests := make([]e2eTest, len(backupTests))
 
