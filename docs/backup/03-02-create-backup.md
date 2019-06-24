@@ -8,9 +8,9 @@ Kyma provides two validated sample backup specification files:
 - [User Namespace Backup](./assets/all-backup.yaml)
 
 
-Integrate these files with your scheduled or on-demand configurations to back up system or user Namespaces. 
+Integrate these files with your scheduled or on-demand configurations to back up system or user Namespaces.
 
->**NOTE:** To fully back up a cluster, you must back up both user and system Namespaces. 
+>**NOTE:** To fully back up a cluster, you must back up both user and system Namespaces.
 
 Modify the files to adjust the backup scope. For details about the file format, see the [documentation](https://velero.io/docs/v1.0.0/output-file-format/).
 
@@ -28,7 +28,7 @@ metadata:
   name: kyma-system-backup
   namespace: kyma-backup
 spec:
-    <INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP FILE HERE> ### E.g. docs/backup/assets/system-backup.yaml
+    {INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP FILE HERE} ### E.g. docs/backup/assets/system-backup.yaml
 ---
 apiVersion: velero.io/v1
 kind: Backup
@@ -36,12 +36,14 @@ metadata:
   name: kyma-backup
   namespace: kyma-backup
 spec:
-    <INCLUDE CONTENT OF USER NAMESPACE BACKUP FILE HERE> ### E.g. docs/backup/assets/all-backup.yaml
+    {INCLUDE CONTENT OF USER NAMESPACE BACKUP FILE HERE} ### E.g. docs/backup/assets/all-backup.yaml
 ```
 
 To create the backup, run the following command:
 
-```$ kubectl apply -f <filename>```
+```
+$ kubectl apply -f {filename}
+```
 
 ## Schedule periodic backups
 
@@ -58,7 +60,7 @@ metadata:
   namespace: kyma-backup
 spec:
     template:
-        <INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP SPEC HERE>
+        {INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP SPEC HERE}
     schedule: 0 1 * * *
 ---
 apiVersion: velero.io/v1
@@ -68,18 +70,20 @@ metadata:
   namespace: kyma-backup
 spec:
     template:
-        <INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP SPEC HERE>
+        {INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP SPEC HERE}
     schedule: 0 1 * * *
 ```
 
 To schedule a backup, run the following command:
 
-```$ kubectl apply -f <filename>```
+```
+$ kubectl apply -f {filename}
+```
 
 ## Backup retention period
 
 To set the retention period of a backup, define the **ttl** parameter in the Backup specification [definition](https://velero.io/docs/v1.0.0/output-file-format/):
 
 ```  The amount of time before this backup is eligible for garbage collection.
-  ttl: 24h0m0s 
+  ttl: 24h0m0s
   ```
