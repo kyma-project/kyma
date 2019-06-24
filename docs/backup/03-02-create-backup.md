@@ -42,7 +42,7 @@ spec:
 To create the backup, run the following command:
 
 ```
-$ kubectl apply -f {filename}
+kubectl apply -f {filename}
 ```
 
 ## Schedule periodic backups
@@ -77,7 +77,7 @@ spec:
 To schedule a backup, run the following command:
 
 ```
-$ kubectl apply -f {filename}
+kubectl apply -f {filename}
 ```
 
 ## Backup retention period
