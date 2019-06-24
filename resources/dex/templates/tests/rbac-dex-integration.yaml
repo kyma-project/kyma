@@ -1,0 +1,43 @@
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: test-{{ template "fullname" . }}-integration
+  labels:
+    app: {{ template "name" . }}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: test-{{ template "fullname" . }}-integration
+  labels:
+    app: {{ template "name" . }}
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["create", "delete", "get", "list"]
+    nonResourceURLs: []
+  - apiGroups: [""]
+    resources: ["services", "namespaces", "pods", "pods/log", "events", "configmaps", "serviceaccounts"]
+    verbs: ["create", "delete", "get", "list", "update"]
+    nonResourceURLs: []
+  - apiGroups: ["config.istio.io"]
+    resources: ["rules", "checknothings", "deniers"]
+    verbs: ["create", "delete", "get", "list"]
+    nonResourceURLs: []
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["roles", "rolebindings"]
+    verbs: ["create"]
+    nonResourceURLs: []
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: test-{{ template "fullname" . }}-integration
+subjects:
+  - kind: ServiceAccount
+    name: test-{{ template "fullname" . }}-integration
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: test-{{ template "fullname" . }}-integration

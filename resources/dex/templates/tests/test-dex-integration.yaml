@@ -1,0 +1,40 @@
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: test-{{ template "fullname" . }}-integration
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      shareProcessNamespace: true
+      serviceAccountName: test-{{ template "fullname" . }}-integration
+      containers:
+      - name: test-{{ template "fullname" . }}-integration
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.dex_integration_tests.dir }}integration-dex:{{ .Values.global.dex_integration_tests.version }}
+        env:
+        - name: DOMAIN_NAME
+          value: {{ .Values.global.ingress.domainName }}
+        - name: IS_LOCAL_ENV
+          value: {{ .Values.global.isLocalEnv | toString | quote }}
+        - name: DEX_USER_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: admin-user
+              key: email
+        - name: DEX_USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: admin-user
+              key: password
+        - name: INGRESSGATEWAY_ADDRESS
+          value: istio-ingressgateway.istio-system.svc.cluster.local
+        command:
+        - "/bin/sh"
+        args:
+        - "-c"
+        - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; sleep 4; exit $exit_code;"
+    restartPolicy: Never
+{{- end }}
