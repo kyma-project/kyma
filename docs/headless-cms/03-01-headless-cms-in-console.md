@@ -15,7 +15,7 @@ Use these labels to mark and filter assets in the Console UI:
 
 ## Configuration
 
-To configure how DocsTopic and ClusterDocsTopic are rendered in UI, use the following parameters:
+To define how DocsTopic and ClusterDocsTopic are rendered in the UI, use the following parameters:
 
 | Parameter | Default Value | Description |
 | --------- | ------------- | ----------- |
