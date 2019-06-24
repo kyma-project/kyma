@@ -30,7 +30,7 @@ spec:
       name: docs
       mode: package
       metadata:
-        disableHTML: true
+        disableRelativeLinks: "true"
       url: https://github.com/kyma-project/kyma/archive/master.zip
       filter: /docs/service-mesh/docs/
 status:

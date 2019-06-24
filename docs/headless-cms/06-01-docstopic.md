@@ -28,7 +28,7 @@ spec:
       name: markdown-slack
       mode: single
       metadata:
-        disableHTML: true
+        disableRelativeLinks: "true"
       url: https://raw.githubusercontent.com/slackapi/slack-api-specs/master/README.md
     - type: asyncapi
       name: asyncapi-slack

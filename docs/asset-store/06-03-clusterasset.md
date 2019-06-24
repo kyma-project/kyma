@@ -43,7 +43,7 @@ spec:
   source:
     mode: single
     metadata:
-      disableHTML: true
+      disableRelativeLinks: "true"
     url: https://some.domain.com/main.js
     validationWebhookService:
     - name: swagger-operations-svc
