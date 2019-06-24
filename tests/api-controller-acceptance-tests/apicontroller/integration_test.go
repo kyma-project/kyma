@@ -140,8 +140,8 @@ func (integrationTestContext) setCustomJwtAuthenticationConfig(api *kymaApi.Api)
 
 	triggerRule := kymaApi.TriggerRule{
 		ExcludedPaths: []kymaApi.MatchExpression{
-			kymaApi.MatchExpression{ExprType: kymaApi.ExactMatch, Value: "/do/not/use/in/production1"},
-			kymaApi.MatchExpression{ExprType: kymaApi.SuffixMatch, Value: "/favicons.ico"},
+			kymaApi.MatchExpression{ExprType: kymaApi.ExactMatch, Value: "/do/not/use/in/production"},
+			kymaApi.MatchExpression{ExprType: kymaApi.SuffixMatch, Value: "/favicon.ico"},
 		},
 	}
 
