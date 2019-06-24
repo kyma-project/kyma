@@ -11,8 +11,14 @@
 # Gateways Configuration, refer to the charts/gateways/values.yaml
 # for detailed configuration
 #
+customization:
+  enabled: true
+
 gateways:
   enabled: true
+  istio-ingressgateway:
+    sds:
+      enabled: true
 
 #
 # sidecar-injector webhook configuration, refer to the
@@ -21,6 +27,7 @@ gateways:
 sidecarInjectorWebhook:
   enabled: true
   rewriteAppHTTPProbe: true
+  enableNamespacesByDefault: true
 
 #
 # galley configuration, refer to charts/galley/values.yaml
@@ -70,7 +77,7 @@ grafana:
 # addon prometheus configuration
 #
 prometheus:
-  enabled: true
+  enabled: false
 
 #
 # addon servicegraph configuration
@@ -148,7 +155,7 @@ global:
         cpu: 10m
         memory: 128Mi
       limits:
-        cpu: 500m
+        cpu: 100m
         memory: 128Mi
 
     # Controls number of Proxy worker threads.
