@@ -592,8 +592,9 @@ func toAuthenticationDto(metaDto meta.Dto, api *kymaApi.Api) *authentication.Dto
 			dtoRule := authentication.Rule{
 				Type: authentication.JwtType,
 				Jwt: authentication.Jwt{
-					Issuer:  authRule.Jwt.Issuer,
-					JwksUri: authRule.Jwt.JwksUri,
+					Issuer:      authRule.Jwt.Issuer,
+					JwksUri:     authRule.Jwt.JwksUri,
+					TriggerRule: toAuthTriggerRule(authRule.Jwt.TriggerRule),
 				},
 			}
 			dtoRules = append(dtoRules, dtoRule)
@@ -602,6 +603,20 @@ func toAuthenticationDto(metaDto meta.Dto, api *kymaApi.Api) *authentication.Dto
 	dto.Rules = dtoRules
 
 	return dto
+}
+
+func toAuthTriggerRule(src *kymaApi.TriggerRule) authentication.TriggerRule {
+	res := authentication.TriggerRule{}
+
+	if src != nil && len(src.ExcludedPaths) > 0 {
+		excludedPaths := make([]authentication.MatchExpression, len(src.ExcludedPaths))
+		for i := 0; i < len(src.ExcludedPaths); i++ {
+			excludedPaths[i] = authentication.MatchExpression{ExprType: string(src.ExcludedPaths[i].ExprType), Value: src.ExcludedPaths[i].Value}
+		}
+		res.ExcludedPaths = excludedPaths
+	}
+
+	return res
 }
 
 func toMetaDto(api *kymaApi.Api) meta.Dto {

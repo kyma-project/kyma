@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_filterCEHeaders(t *testing.T) {

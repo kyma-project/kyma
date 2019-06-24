@@ -34,28 +34,12 @@
   revision = "d566da7739c9aae63fe7fc9d267887fa73e5dda7"
 
 [[projects]]
-  branch = "master"
-  digest = "1:ef5b0622d834c139454148b8fd0c92bb314828900532b267ae62da9fec109866"
-  name = "github.com/armon/go-metrics"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "f0300d1749da6fa982027e449ec0c7a145510c3c"
-
-[[projects]]
   digest = "1:d6afaeed1502aa28e80a4ed0981d570ad91b2579193404256ce672ed0a609e0d"
   name = "github.com/beorn7/perks"
   packages = ["quantile"]
   pruneopts = "UT"
   revision = "4b2b341e8d7715fae06375aa633dbb6e91b3fb46"
   version = "v1.0.0"
-
-[[projects]]
-  digest = "1:0f98f59e9a2f4070d66f0c9c39561f68fcd1dc837b22a852d28d0003aebd1b1e"
-  name = "github.com/boltdb/bolt"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8"
-  version = "v1.3.1"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -218,6 +202,17 @@
   revision = "c65c006176ff7ff98bb916961c7abbc6b0afc0aa"
 
 [[projects]]
+  branch = "travis-1.9"
+  digest = "1:e8f5d9c09a7209c740e769713376abda388c41b777ba8e9ed52767e21acf379f"
+  name = "github.com/golang/lint"
+  packages = [
+    ".",
+    "golint",
+  ]
+  pruneopts = "UT"
+  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
+
+[[projects]]
   digest = "1:4c0989ca0bcd10799064318923b9bc2db6b4d6338dd75f3f2d86c3511aaaf5cf"
   name = "github.com/golang/protobuf"
   packages = [
@@ -301,22 +296,6 @@
   revision = "c63ab54fda8f77302f8d414e19933f2b6026a089"
 
 [[projects]]
-  digest = "1:2be5a35f0c5b35162c41bb24971e5dcf6ce825403296ee435429cdcc4e1e847e"
-  name = "github.com/hashicorp/go-immutable-radix"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "27df80928bb34bb1b0d6d0e01b9e679902e7a6b5"
-  version = "v1.0.0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:b8ba23b0b493e601d5ebaf21079bd3433eb304a5d73c0fb40b8aea526e94f46b"
-  name = "github.com/hashicorp/go-msgpack"
-  packages = ["codec"]
-  pruneopts = "UT"
-  revision = "fa3f63826f7c23912c15263591e65d54d080b458"
-
-[[projects]]
   digest = "1:8ec8d88c248041a6df5f6574b87bc00e7e0b493881dad2e7ef47b11dc69093b5"
   name = "github.com/hashicorp/golang-lru"
   packages = [
@@ -326,14 +305,6 @@
   pruneopts = "UT"
   revision = "20f1fb78b0740ba8c3cb143a61e86ba5c8669768"
   version = "v0.5.0"
-
-[[projects]]
-  digest = "1:56f26733346010e935b1ddb0e1ffa00bb054133b3ddb3f481261d27a7ae914df"
-  name = "github.com/hashicorp/raft"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "6d14f0c70869faabd9e60ba7ed88a6cbbd6a661f"
-  version = "v1.0.0"
 
 [[projects]]
   digest = "1:a1038ef593beb4771c8f0f9c26e8b00410acd800af5c6864651d9bf160ea1813"
@@ -476,20 +447,6 @@
   version = "1.0.1"
 
 [[projects]]
-  digest = "1:c8345cd0f623a01cd4f64c3e9a6af2cd90ee118a775cb6fb3ae939e680ec272b"
-  name = "github.com/nats-io/gnatsd"
-  packages = [
-    "conf",
-    "logger",
-    "server",
-    "server/pse",
-    "util",
-  ]
-  pruneopts = "UT"
-  revision = "eed4fbc1458ce110ad1aa1adf904229bc8fda2a7"
-  version = "v1.3.0"
-
-[[projects]]
   digest = "1:4ce94f3d2074662c04677db471456feb56078244ebcfe3789e6e95901c085bc5"
   name = "github.com/nats-io/go-nats"
   packages = [
@@ -511,20 +468,6 @@
   pruneopts = "UT"
   revision = "e15a53f85e4932540600a16b56f6c4f65f58176f"
   version = "v0.4.0"
-
-[[projects]]
-  digest = "1:bc30635a39080c391f5449c9aa627ef6cf5f749ea2bf3a252b6c4098507e1b7c"
-  name = "github.com/nats-io/nats-streaming-server"
-  packages = [
-    "logger",
-    "server",
-    "spb",
-    "stores",
-    "util",
-  ]
-  pruneopts = "UT"
-  revision = "8910c0c347bc51cc87227aeb27bef19d409bf5c2"
-  version = "v0.11.0"
 
 [[projects]]
   digest = "1:c3cd663f2f30b92536b9f290ac85c6310dae36a14cb8961553ae9ccf0d85ae41"
@@ -759,20 +702,9 @@
   version = "v1.0.3"
 
 [[projects]]
-  digest = "1:ac83cf90d08b63ad5f7e020ef480d319ae890c208f8524622a2f3136e2686b02"
-  name = "github.com/stretchr/objx"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "477a77ecc69700c7cdeb1fa9e129548e1c1c393c"
-  version = "v0.1.1"
-
-[[projects]]
-  digest = "1:15a4a7e5afac3cea801fa24831fce3bf3b5bd3620cbf8355a07b7dbf06877883"
+  digest = "1:18752d0b95816a1b777505a97f71c7467a8445b8ffb55631a7bf779f6ba4fa83"
   name = "github.com/stretchr/testify"
-  packages = [
-    "assert",
-    "mock",
-  ]
+  packages = ["assert"]
   pruneopts = "UT"
   revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
   version = "v1.2.2"
@@ -810,13 +742,9 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:001a4e7a40e50ff2ef32e2556bca50c4f77daa457db3ac6afc8bea9bb2122cfb"
+  digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
   name = "golang.org/x/crypto"
-  packages = [
-    "bcrypt",
-    "blowfish",
-    "ssh/terminal",
-  ]
+  packages = ["ssh/terminal"]
   pruneopts = "UT"
   revision = "7c1a557ab941a71c619514f229f0b27ccb0c27cf"
 
@@ -839,16 +767,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ad5a2b2dfd1430a35857c0a8f3fe7f3aad51b091e288ac0c22aae764dcf34b3b"
+  digest = "1:850d28ab022512e2cd3cf511a77f363c29e22689b4031f2050871f5de47ae4a0"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
-    "windows/registry",
-    "windows/svc",
-    "windows/svc/debug",
-    "windows/svc/eventlog",
-    "windows/svc/mgr",
   ]
   pruneopts = "UT"
   revision = "4497e2df6f9e69048a54498c7affbbec3294ad47"
@@ -899,10 +822,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:45751dc3302c90ea55913674261b2d74286b05cdd8e3ae9606e02e4e77f4353f"
+  digest = "1:ed94f1a799cdc296e2f24893fe84c69a6a4215d3d724e867498438e476b62778"
   name = "golang.org/x/tools"
   packages = [
+    "cmd/goimports",
     "go/ast/astutil",
+    "go/gcexportdata",
+    "go/internal/gcimporter",
+    "go/types/typeutil",
     "imports",
     "internal/fastwalk",
   ]
@@ -1252,6 +1179,7 @@
     "github.com/go-logr/logr",
     "github.com/gofrs/uuid",
     "github.com/golang/glog",
+    "github.com/golang/lint/golint",
     "github.com/google/go-cmp/cmp",
     "github.com/google/go-cmp/cmp/cmpopts",
     "github.com/knative/eventing/pkg/apis/eventing/v1alpha1",
@@ -1261,9 +1189,7 @@
     "github.com/knative/eventing/pkg/reconciler/testing",
     "github.com/knative/pkg/apis",
     "github.com/knative/pkg/apis/duck/v1alpha1",
-    "github.com/nats-io/go-nats",
     "github.com/nats-io/go-nats-streaming",
-    "github.com/nats-io/nats-streaming-server/server",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/opentracing/opentracing-go",
@@ -1274,7 +1200,7 @@
     "github.com/prometheus/client_golang/prometheus/promauto",
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/stretchr/testify/assert",
-    "github.com/stretchr/testify/mock",
+    "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
     "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",

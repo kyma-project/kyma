@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/application"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/httpserver"
@@ -48,7 +49,7 @@ func main() {
 	defer close(semaphore)
 
 	// start the HTTP server
-	server := httpserver.NewHttpServer(&options.Port, &handler)
+	server := httpserver.NewHTTPServer(&options.Port, &handler)
 	go server.Start()
 
 	metricsServeMux := http.NewServeMux()

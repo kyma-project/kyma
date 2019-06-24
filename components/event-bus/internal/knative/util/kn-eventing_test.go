@@ -139,7 +139,9 @@ func Test_SendMessage(t *testing.T) {
 	// create the test http server
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ := ioutil.ReadAll(r.Body)
-		defer r.Body.Close()
+		defer func() {
+			_ = r.Body.Close()
+		}()
 
 		log.Printf("Message received: %v", fmt.Sprintf("%s", fmt.Sprintf("%s", body)))
 		w.Header().Set("Content-Type", "application/json")
@@ -156,7 +158,7 @@ func Test_SendMessage(t *testing.T) {
 		return true, testChannel, nil
 	})
 	k := &KnativeLib{}
-	k.InjectClient(client.EventingV1alpha1())
+	_ = k.InjectClient(client.EventingV1alpha1())
 	ch, err := k.CreateChannel(provisioner, channelName, testNS, &labels, 10*time.Second)
 	assert.Nil(t, err)
 	u, err := url.Parse(srv.URL)
@@ -183,7 +185,7 @@ func Test_DeleteInexistentChannel(t *testing.T) {
 	log.Print("Test_DeleteInexistentChannel")
 	client := evclientsetfake.NewSimpleClientset().EventingV1alpha1()
 	k := &KnativeLib{}
-	k.InjectClient(client)
+	_ = k.InjectClient(client)
 	err := k.DeleteChannel(channelName, testNS)
 	assert.True(t, k8serrors.IsNotFound(err))
 }
@@ -197,7 +199,7 @@ func Test_CreateDeleteChannel(t *testing.T) {
 		return true, testChannel, nil
 	})
 	k := &KnativeLib{}
-	k.InjectClient(client.EventingV1alpha1())
+	_ = k.InjectClient(client.EventingV1alpha1())
 	ch, err := k.CreateChannel(provisioner, channelName, testNS, &labels, 1*time.Second)
 	assert.Nil(t, err)
 	err = k.DeleteChannel(ch.Name, ch.Namespace)
@@ -207,7 +209,7 @@ func Test_CreateDeleteChannel(t *testing.T) {
 func Test_CreateSubscription(t *testing.T) {
 	log.Print("Test_CreateSubscription")
 	k := &KnativeLib{}
-	k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1())
+	_ = k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1())
 	var uri = "dnsName: hello-00001-service.default"
 	err := k.CreateSubscription(subscriptionName, testNS, channelName, &uri)
 	assert.Nil(t, err)
@@ -216,7 +218,7 @@ func Test_CreateSubscription(t *testing.T) {
 func Test_DeleteInexistentSubscription(t *testing.T) {
 	log.Print("Test_DeleteInexistentSubscription")
 	k := &KnativeLib{}
-	k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1())
+	_ = k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1())
 	err := k.DeleteSubscription(subscriptionName, testNS)
 	assert.True(t, k8serrors.IsNotFound(err))
 }
@@ -224,7 +226,7 @@ func Test_DeleteInexistentSubscription(t *testing.T) {
 func Test_CreateDeleteSubscription(t *testing.T) {
 	log.Print("Test_CreateDeleteSubscription")
 	k := &KnativeLib{}
-	k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1())
+	_ = k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1())
 	var uri = "dnsName: hello-00001-service.default"
 	err := k.CreateSubscription(subscriptionName, testNS, channelName, &uri)
 	assert.Nil(t, err)
@@ -235,7 +237,7 @@ func Test_CreateDeleteSubscription(t *testing.T) {
 func Test_CreateSubscriptionAgain(t *testing.T) {
 	log.Print("Test_CreateSubscriptionAgain")
 	k := &KnativeLib{}
-	k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1())
+	_ = k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1())
 	var uri = "dnsName: hello-00001-service.default"
 	err := k.CreateSubscription(subscriptionName, testNS, channelName, &uri)
 	assert.Nil(t, err)
@@ -248,7 +250,7 @@ func Test_makeHttpRequest(t *testing.T) {
 	headers["ce-test"] = []string{"test-ce"}
 	headers["not-ce-test"] = []string{"test-not-ce"}
 	payload := ""
-	req, _ := makeHttpRequest(testChannel, &headers, &payload)
+	req, _ := makeHTTPRequest(testChannel, &headers, &payload)
 	assert.Equal(t, req.Header["Content-Type"][0], "application/json")
 	assert.Equal(t, req.Header["ce-test"][0], "test-ce")
 	for k := range req.Header {

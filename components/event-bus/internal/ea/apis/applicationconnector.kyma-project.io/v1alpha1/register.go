@@ -17,10 +17,12 @@ func Resource(resource string) schema.GroupResource {
 }
 
 var (
-	// localSchemeBuilder and AddToScheme will stay in k8s.io/kubernetes.
-	SchemeBuilder      runtime.SchemeBuilder
+	// SchemeBuilder instance
+	SchemeBuilder runtime.SchemeBuilder
+	// localSchemeBuilder instance
 	localSchemeBuilder = &SchemeBuilder
-	AddToScheme        = localSchemeBuilder.AddToScheme
+	// AddToScheme instance
+	AddToScheme = localSchemeBuilder.AddToScheme
 )
 
 func init() {

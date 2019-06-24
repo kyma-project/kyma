@@ -53,6 +53,40 @@ func TestNamespacesService_List(t *testing.T) {
 	})
 }
 
+func TestNamespacesService_Find(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "namespace-name"
+		labels := map[string]string{
+			"test": "test",
+			"env":  "true",
+		}
+
+		namespace1 := fixNamespace(name, labels)
+		fixedInformer, _ := fixNamespaceInformer(namespace1)
+		svc, err := k8s.NewNamespaceService(fixedInformer, nil)
+		require.NoError(t, err)
+
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
+
+		namespace, err := svc.Find(name)
+		require.NoError(t, err)
+		assert.Equal(t, namespace1, namespace)
+	})
+
+	t.Run("Not Found", func(t *testing.T) {
+		fixedInformer, _ := fixNamespaceInformer()
+		svc, err := k8s.NewNamespaceService(fixedInformer, nil)
+		require.NoError(t, err)
+
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
+
+		namespace, err := svc.Find("name")
+		require.NoError(t, err)
+		var empty *v1.Namespace
+		assert.Equal(t, empty, namespace)
+	})
+}
+
 func TestNamespacesService_Create(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		name := "namespace"
@@ -72,6 +106,36 @@ func TestNamespacesService_Create(t *testing.T) {
 		assert.Equal(t, name, namespace.Name)
 		assert.Equal(t, labels["env"], namespace.Labels["env"])
 		assert.Equal(t, labels["test"], namespace.Labels["test"])
+	})
+}
+
+func TestNamespacesService_Delete(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "namespace"
+		labels := map[string]string{
+			"test": "test",
+			"env":  "true",
+		}
+		namespace1 := fixNamespace(name, labels)
+		fixedInformer, client := fixNamespaceInformer(namespace1)
+		svc, err := k8s.NewNamespaceService(fixedInformer, client)
+		require.NoError(t, err)
+
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
+
+		err = svc.Delete(name)
+		require.NoError(t, err)
+	})
+
+	t.Run("Not Found", func(t *testing.T) {
+		fixedInformer, client := fixNamespaceInformer()
+		svc, err := k8s.NewNamespaceService(fixedInformer, client)
+		require.NoError(t, err)
+
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
+
+		err = svc.Delete("name")
+		require.Error(t, err)
 	})
 }
 

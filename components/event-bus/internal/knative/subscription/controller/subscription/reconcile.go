@@ -75,7 +75,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	requeue, reconcileErr := r.reconcile(ctx, subscription, KymaSubscriptionsGauge)
 	if reconcileErr != nil {
 		log.Error(reconcileErr, "Reconciling Subscription")
-		if err := util.SetNotReadySubscription(ctx, r.client, subscription, reconcileErr.Error(), r.time); err != nil {
+		if err := util.SetNotReadySubscription(ctx, r.client, subscription, r.time); err != nil {
 			log.Error(err, "SetNotReadySubscription() failed for the subscription:", "subscription", subscription)
 		}
 		r.recorder.Eventf(subscription, corev1.EventTypeWarning, subReconcileFailed, "Subscription reconciliation failed: %v", err)
@@ -102,7 +102,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 			}
 		} else {
 			// reconcile finished with no errors, but subscription is not activated
-			if err := util.SetNotReadySubscription(ctx, r.client, subscription, "", r.time); err != nil {
+			if err := util.SetNotReadySubscription(ctx, r.client, subscription, r.time); err != nil {
 				log.Error(err, "SetNotReadySubscription() failed for the subscription:", "subscription", subscription)
 				reconcileErr = err
 			} else {
@@ -139,11 +139,11 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		// then lets add the finalizer and update the object.
 		if !util.ContainsString(&subscription.ObjectMeta.Finalizers, finalizerName) {
 			subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, finalizerName)
-			if err := util.WriteSubscription(context.Background(), r.client, subscription); err == nil {
+			err := util.WriteSubscription(context.Background(), r.client, subscription)
+			if err == nil {
 				return true, nil
-			} else {
-				return false, err
 			}
+			return false, err
 		}
 	} else {
 		// The object is being deleted

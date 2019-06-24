@@ -6,20 +6,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-//
-// Subscriptions
-// var uri = ""
-// usage: subscription := Subscription("my-sub", "default").ToChannel("my-channel").ToUri(&uri).EmptyReply().Build()
-//
-
+// SubscriptionBuilder represents the subscription builder that is used in the internal knative util package
+// and the knative subscription controller tests.
 type SubscriptionBuilder struct {
 	*eventingv1alpha1.Subscription
 }
 
+// Build returns an v1alpha1.Subscription instance.
 func (s *SubscriptionBuilder) Build() *eventingv1alpha1.Subscription {
 	return s.Subscription
 }
 
+// ToChannel sets SubscriptionBuilder Channel.
 func (s *SubscriptionBuilder) ToChannel(name string) *SubscriptionBuilder {
 	s.Spec.Channel = corev1.ObjectReference{
 		Name:       name,
@@ -29,11 +27,13 @@ func (s *SubscriptionBuilder) ToChannel(name string) *SubscriptionBuilder {
 	return s
 }
 
+// EmptyReply sets the SubscriptionBuilder Reply.
 func (s *SubscriptionBuilder) EmptyReply() *SubscriptionBuilder {
 	s.Spec.Reply = &eventingv1alpha1.ReplyStrategy{}
 	return s
 }
 
+// ToK8sService sets the SubscriptionBuilder Subscriber to Kubernetes service.
 func (s *SubscriptionBuilder) ToK8sService(k8sServiceName string) *SubscriptionBuilder {
 	s.Spec.Subscriber = &eventingv1alpha1.SubscriberSpec{
 		Ref: &corev1.ObjectReference{
@@ -45,6 +45,7 @@ func (s *SubscriptionBuilder) ToK8sService(k8sServiceName string) *SubscriptionB
 	return s
 }
 
+// ToKNService sets the SubscriptionBuilder Subscriber to Knative service.
 func (s *SubscriptionBuilder) ToKNService(knServiceName string) *SubscriptionBuilder {
 	s.Spec.Subscriber = &eventingv1alpha1.SubscriberSpec{
 		Ref: &corev1.ObjectReference{
@@ -56,7 +57,8 @@ func (s *SubscriptionBuilder) ToKNService(knServiceName string) *SubscriptionBui
 	return s
 }
 
-func (s *SubscriptionBuilder) ToUri(uri *string) *SubscriptionBuilder {
+// ToURI sets the SubscriptionBuilder Subscriber URI.
+func (s *SubscriptionBuilder) ToURI(uri *string) *SubscriptionBuilder {
 	s.Spec.Subscriber = &eventingv1alpha1.SubscriberSpec{
 		DNSName: uri,
 	}
@@ -67,6 +69,7 @@ var (
 	emptyString = ""
 )
 
+// Subscription returns a new SubscriptionBuilder instance.
 func Subscription(name string, namespace string) *SubscriptionBuilder {
 	subscription := &eventingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
