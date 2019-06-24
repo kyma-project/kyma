@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
 	log "github.com/sirupsen/logrus"
@@ -28,7 +29,7 @@ type TestService interface {
 	checkValue() (int, error)
 	IsReady() (bool, error)
 	GetTestServiceURL() string
-	WaitForCounterPodToUpdateValue() (bool, error)
+	WaitForCounterPodToUpdateValue(val int) (bool, error)
 }
 
 type testService struct {
@@ -88,13 +89,17 @@ func (ts *testService) IsReady() (bool, error) {
 	url := ts.getHealthEndpointURL()
 	log.WithFields(log.Fields{"url": url}).Debug("IsReady?")
 
-	resp, _ := ts.HttpClient.Get(url)
+	resp, err := ts.HttpClient.Get(url)
 
-	// lets ignore all errors here, shall we?
+	if err != nil {
+		if strings.Contains(err.Error(), "connection reset by peer") {
+			log.WithFields(log.Fields{"err": err}).Debug("IsReady?")
+			return false, nil
+		}
+		log.WithFields(log.Fields{"err not caught": err.Error()}).Debug("IsReady?")
+		return false, err
+	}
 
-	// if err != nil {
-	// return false, err
-	// }
 	if resp != nil {
 		if resp.StatusCode == http.StatusOK {
 			return true, nil
@@ -103,14 +108,14 @@ func (ts *testService) IsReady() (bool, error) {
 
 	return false, nil
 }
-func (ts *testService) WaitForCounterPodToUpdateValue() (bool, error) {
+func (ts *testService) WaitForCounterPodToUpdateValue(val int) (bool, error) {
 	count, err := ts.checkValue()
 	if err != nil {
 		log.Error(err)
 		return false, err
 	}
 
-	if count != 1 {
+	if count != val {
 		return false, nil
 	}
 	return true, nil

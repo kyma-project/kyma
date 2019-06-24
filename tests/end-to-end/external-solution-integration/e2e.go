@@ -8,7 +8,6 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-//TODO: This is example use of testing suite, this still needs to be finished and cleaned up
 func main() {
 	time.Sleep(10 * time.Second)
 	log.SetReportCaller(true)
@@ -53,17 +52,13 @@ func main() {
 
 	url := ts.GetTestServiceURL()
 
-	// log.Trace("creating Certificate")
-
-	// cert, err := ts.FetchCertificate()
-
 	log.Trace("registering Service")
 	id, err := ts.RegisterService(url)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Debug("ID:", id)
+	log.Debug("Service ID:", id)
 
 	log.Trace("Creating Instance")
 	_, err = ts.CreateInstance(id)

@@ -131,7 +131,7 @@ func (ts *testSuite) GetTestServiceURL() string {
 }
 
 func (ts *testSuite) CheckCounterPod() error {
-	err := wait.Until(5, 10, ts.testService.WaitForCounterPodToUpdateValue)
+	err := wait.UntilWithParams(5, 10, ts.testService.WaitForCounterPodToUpdateValue, 1)
 	if err != nil {
 		return fmt.Errorf("The counter pod is not updated: %v", err)
 	}
@@ -149,14 +149,6 @@ func (ts *testSuite) createApplication() error {
 		log.Error(err)
 		return err
 	}
-	//TODO: Enable this
-	// checker := resourceskit.NewK8sChecker(ts.k8sClient)
-
-	// err = checker.CheckK8sResources()
-	// if err != nil {
-	// 	log.Error(err)
-	// 	return err
-	// }
 
 	return nil
 }
