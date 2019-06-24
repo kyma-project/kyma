@@ -62,9 +62,18 @@ func (a *istioImpl) Update(oldDto, newDto *Dto) (*kymaMeta.GatewayResource, erro
 	// there is an authentication policy to update / create
 	newIstioAuthPolicy := toIstioAuthPolicy(newDto, a.jwtDefaultConfig, a.enableIstioAuthPolicyMTLS)
 
+	log.Infof("oldDto status: %+v", oldDto.Status)
+	log.Infof("newDto status: %+v", newDto.Status)
+
+	// newDto have a resource already, but oldDto does not - that situation happens in the second turn of update - when controller reacts to status update
+	if oldDto.Status.Resource.Name == "" && newDto.Status.Resource.Name != "" {
+		log.Infof("Authentication policy already updated")
+		return gatewayResourceFrom(newIstioAuthPolicy), nil
+	}
+
 	log.Infof("Authentication enabled. Trying to create or update authentication policy with: %v", newIstioAuthPolicy)
 
-	// checking if authentication policy has to be created (was disabled before)
+	// checking if authentication policy has to be created (was disabled before or was not created due to some problems)
 	if isAuthenticationDisabled(oldDto) || oldDto.Status.Resource.Name == "" {
 
 		log.Infof("Authentication policy does not exist. Creating...")

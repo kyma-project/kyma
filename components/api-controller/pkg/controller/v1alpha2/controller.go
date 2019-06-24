@@ -560,6 +560,9 @@ func toAuthenticationDto(metaDto meta.Dto, api *kymaApi.Api) *authentication.Dto
 	// authentication disabled explicitly with authenticationEnabled
 	if api.Spec.AuthenticationEnabled != nil && !*api.Spec.AuthenticationEnabled {
 		return &authentication.Dto{
+			MetaDto:               metaDto,
+			ServiceName:           api.Spec.Service.Name,
+			Status:                api.Status.AuthenticationStatus,
 			AuthenticationEnabled: false,
 		}
 	}
@@ -567,6 +570,9 @@ func toAuthenticationDto(metaDto meta.Dto, api *kymaApi.Api) *authentication.Dto
 	// authentication disabled because authenticationEnabled flag is not provided and authentication rules are empty
 	if api.Spec.AuthenticationEnabled == nil && len(api.Spec.Authentication) == 0 {
 		return &authentication.Dto{
+			MetaDto:               metaDto,
+			ServiceName:           api.Spec.Service.Name,
+			Status:                api.Status.AuthenticationStatus,
 			AuthenticationEnabled: false,
 		}
 	}
