@@ -19,4 +19,4 @@ To define how DocsTopic and ClusterDocsTopic are rendered in the UI, use the fol
 
 | Parameter | Default Value | Description |
 | --------- | ------------- | ----------- |
-| **spec.sources.metadata.disableRelativeLinks** | `false` | Disables relative links when documentation is rendered. |
+| **spec.sources.metadata.disableRelativeLinks** | `false` | Disables relative links when documentation is rendered. It only applies to the `markdown` type of assets included in the (Cluster)DocsTopic CR. |
