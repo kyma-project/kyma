@@ -102,8 +102,7 @@ func (s uninstallStep) Run() error {
 	uninstallReleaseResponse, deleteErr := s.helmClient.DeleteRelease(s.component.GetReleaseName())
 
 	if deleteErr != nil {
-		log.Printf("Helm delete error: %s", deleteErr.Error())
-		return nil
+		return errors.New("Helm upgrade error: " + deleteErr.Error())
 	}
 
 	s.helmClient.PrintRelease(uninstallReleaseResponse.Release)
