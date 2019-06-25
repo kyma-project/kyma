@@ -89,8 +89,8 @@ func TestIntegrationSpec(t *testing.T) {
 			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 
 			ctx.validateAPISecured(httpClient, lastAPI.Spec.Hostname, "/")
-			ctx.validateAPINotSecured(httpClient, lastAPI.Spec.Hostname, "/do/not/use/in/production")
-			ctx.validateAPINotSecured(httpClient, lastAPI.Spec.Hostname, "/web/static/favicon.ico")
+			ctx.validateAPINotSecured(httpClient, lastAPI.Spec.Hostname, "/api.yaml")
+			ctx.validateAPINotSecured(httpClient, lastAPI.Spec.Hostname, "/namespace/default/orders")
 			lastAPI, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastAPI.Name, metav1.GetOptions{})
 			So(err, ShouldBeNil)
 			So(lastAPI, ShouldNotBeNil)
@@ -140,8 +140,8 @@ func (integrationTestContext) setCustomJwtAuthenticationConfig(api *kymaApi.Api)
 
 	triggerRule := kymaApi.TriggerRule{
 		ExcludedPaths: []kymaApi.MatchExpression{
-			kymaApi.MatchExpression{ExprType: kymaApi.ExactMatch, Value: "/do/not/use/in/production"},
-			kymaApi.MatchExpression{ExprType: kymaApi.SuffixMatch, Value: "/favicon.ico"},
+			kymaApi.MatchExpression{ExprType: kymaApi.ExactMatch, Value: "/api.yaml"},
+			kymaApi.MatchExpression{ExprType: kymaApi.SuffixMatch, Value: "/orders"},
 		},
 	}
 
