@@ -14,7 +14,7 @@ As a core component, Istio installs with every Kyma deployment by default. The i
   - Automatic sidecar injection is enabled.
   - Istio `policies.authentication.istio.io` CustomResourceDefinition (CRD) is present in the system.
 
-If the Istio deployment fails to meet any of these criteria, the patch fails, which results in a failed installation. If the installation failed, get the Istio patch logs to find out which criteria the Istio deployment didnt' meet. Run: 
+If the Istio deployment fails to meet any of these criteria, the patch fails, which results in a failed installation. If the installation failed, get the Istio patch logs to find out which criteria the Istio deployment didn't' meet. Run: 
 
 ```
 kubectl logs -n istio-system -l app=istio-kyma-patch
@@ -26,6 +26,6 @@ To learn more about the custom Istio patch applied in Kyma, see the `components/
 
 ## Use an existing Istio installation with Kyma
 
-You can use an existing installation of Istio running on Kubernetes with Kyma. In such a case is is required to enable the patch component to verify if all the required options are set. 
+You can use an existing installation of Istio running on Kubernetes with Kyma. In such a case is required to enable the patch component to verify if all the required options are set. 
 
 To allow such implementation, you must install Kyma without Istio. Read [this](/root/kyma/#configuration-custom-component-installation) document for more details.
