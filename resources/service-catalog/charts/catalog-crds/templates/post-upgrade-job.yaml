@@ -29,6 +29,9 @@ metadata:
     "helm.sh/hook-weight": "0"
     "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
 rules:
+  - apiGroups: ["extensions"]
+    resources: ["deployments"]
+    verbs:     ["get", "list", "update"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["servicebindings"]
     verbs:     ["list"]
@@ -89,12 +92,11 @@ spec:
       restartPolicy: Never
       serviceAccountName: upgrade-job-account
       containers:
-        - name: service-catalog-upgrade
+        - name: sbu-upgrade-protector
           image: {{ .Values.migrationImagePath }}:{{ .Values.migrationImageVersion }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-          command:
-          - bash
-          - -c
-          - |
-            set -e
-            /root/service-catalog-upgrade addOwnerReference
+          args:
+          - --action
+          - addOwnerReference
+          - --sbuControllerName
+          - {{ template  "sbu-controller-name" }}

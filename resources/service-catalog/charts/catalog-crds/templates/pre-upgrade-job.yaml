@@ -31,7 +31,7 @@ metadata:
 rules:
   - apiGroups: ["extensions"]
     resources: ["deployments"]
-    verbs:     ["get", "list"]
+    verbs:     ["get", "list", "update"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["servicebindings"]
     verbs:     ["list"]
@@ -93,32 +93,15 @@ spec:
       restartPolicy: Never
       serviceAccountName: upgrade-job-account
       containers:
-        - name: service-catalog-upgrade
+        - name: sbu-upgrade-protector
           image: {{ .Values.migrationImagePath }}:{{ .Values.migrationImageVersion }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-          command:
-          - bash
-          - -c
-          - |
-            set -e
-            NAMESPACE={{ .Release.Namespace }}
-            APISERVER={{ template "fullname-apiserver-version" . }}-apiserver
-            WEBHOOK={{ template "fullname" . }}-webhook
-
-            deployment=$(kubectl get deployments -n ${NAMESPACE} -ojson | jq -r '.items|.[].metadata.name')
-            indicator=0
-            for item in ${deployment[*]}
-            do
-              if [ "${item}" == "${APISERVER}" ]; then
-                indicator=$((indicator+1))
-              fi
-              if [ "${item}" == "${WEBHOOK}" ]; then
-                indicator=$((indicator-1))
-              fi
-            done
-
-            # if 1 apiserver exist (run migration), if -1 webhook exist,
-            # if 0 both do not exist, both exist (do not run migration)
-            if [ "$indicator" -gt 0 ]; then
-              /root/service-catalog-upgrade removeOwnerReference
-            fi
+          args:
+          - --action
+          - removeOwnerReference
+          - --namespace
+          - {{ .Release.Namespace }}
+          - --apiServerName
+          - {{ template "fullname-apiserver-version" . }}-apiserver
+          - --sbuControllerName
+          - {{ template  "sbu-controller-name" }}
