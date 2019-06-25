@@ -13,7 +13,7 @@ import (
 )
 
 type apiResolver struct {
-	apiSvc    apiSvc
+	apiSvc       apiSvc
 	apiConverter *apiConverter
 }
 
@@ -23,7 +23,7 @@ func newApiResolver(lister apiSvc) (*apiResolver, error) {
 	}
 
 	return &apiResolver{
-		apiSvc:    lister,
+		apiSvc:       lister,
 		apiConverter: &apiConverter{},
 	}, nil
 }
