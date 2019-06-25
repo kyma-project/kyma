@@ -16,9 +16,9 @@ import (
 )
 
 type apiService struct {
-	informer cache.SharedIndexInformer
-	client   versioned.Interface
-	notifier resource.Notifier
+	informer  cache.SharedIndexInformer
+	client    versioned.Interface
+	notifier  resource.Notifier
 	converter apiConverter
 }
 

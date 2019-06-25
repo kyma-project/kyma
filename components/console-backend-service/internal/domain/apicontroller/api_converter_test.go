@@ -105,12 +105,12 @@ func TestApiConverter_ToV1Api(t *testing.T) {
 func fixApi(name string, version string) *v1alpha2.Api {
 	return &v1alpha2.Api{
 		TypeMeta: v1.TypeMeta{
-			Kind: "API",
+			Kind:       "API",
 			APIVersion: "authentication.kyma-project.io/v1alpha2",
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name: name,
-			Namespace: "test",
+			Name:            name,
+			Namespace:       "test",
 			ResourceVersion: version,
 		},
 		Spec: v1alpha2.ApiSpec{
@@ -134,12 +134,12 @@ func fixApi(name string, version string) *v1alpha2.Api {
 
 func fixApiInput() gqlschema.APIInput {
 	return gqlschema.APIInput{
-		Hostname: "test-service.dev.kyma.cx",
-		ServiceName: "test-service",
-		ServicePort: 8080,
-		JwksURI: "http://sample-issuer/keys",
-		Issuer: "sample-issuer",
+		Hostname:                   "test-service.dev.kyma.cx",
+		ServiceName:                "test-service",
+		ServicePort:                8080,
+		JwksURI:                    "http://sample-issuer/keys",
+		Issuer:                     "sample-issuer",
 		DisableIstioAuthPolicyMTLS: nil,
-		AuthenticationEnabled: nil,
+		AuthenticationEnabled:      nil,
 	}
 }
