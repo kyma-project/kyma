@@ -3,10 +3,17 @@ package certificates
 import (
 	"crypto/x509"
 	"encoding/base64"
+
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/secrets"
+)
+
+const (
+	caCertificateSecretKey     = "ca.crt"
+	caKeySecretKey             = "ca.key"
+	rootCACertificateSecretKey = "cacert"
 )
 
 type Service interface {
@@ -46,17 +53,17 @@ func (svc *certificateService) SignCSR(encodedCSR []byte, subject CSRSubject) (E
 }
 
 func (svc *certificateService) signCSR(csr *x509.CertificateRequest) (EncodedCertificateChain, apperrors.AppError) {
-	caCrtBytesEncoded, caKeyBytesEncoded, err := svc.secretsRepository.Get(svc.caSecretName)
+	secretData, err := svc.secretsRepository.Get(svc.caSecretName)
 	if err != nil {
 		return EncodedCertificateChain{}, err
 	}
 
-	caCrt, err := svc.certUtil.LoadCert(caCrtBytesEncoded)
+	caCrt, err := svc.certUtil.LoadCert(secretData[caCertificateSecretKey])
 	if err != nil {
 		return EncodedCertificateChain{}, err
 	}
 
-	caKey, err := svc.certUtil.LoadKey(caKeyBytesEncoded)
+	caKey, err := svc.certUtil.LoadKey(secretData[caKeySecretKey])
 	if err != nil {
 		return EncodedCertificateChain{}, err
 	}
@@ -88,12 +95,12 @@ func (svc *certificateService) encodeCertificates(rawCaCertificate, rawClientCer
 }
 
 func (svc *certificateService) loadRootCACert() ([]byte, apperrors.AppError) {
-	rootCACertEncoded, _, err := svc.secretsRepository.Get(svc.rootCACertificateSecretName)
+	secretData, err := svc.secretsRepository.Get(svc.rootCACertificateSecretName)
 	if err != nil {
 		return nil, err
 	}
 
-	rootCACrt, err := svc.certUtil.LoadCert(rootCACertEncoded)
+	rootCACrt, err := svc.certUtil.LoadCert(secretData[rootCACertificateSecretKey])
 	if err != nil {
 		return nil, err
 	}

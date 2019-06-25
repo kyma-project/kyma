@@ -8,7 +8,9 @@ import (
 
 const (
 	clusterCertificateSecretKey = "crt"
-	caCertificateSecretKey      = "ca.crt"
+	clusterKeySecretKey         = "key"
+
+	caCertificateSecretKey = "cacert"
 )
 
 type Preserver interface {
