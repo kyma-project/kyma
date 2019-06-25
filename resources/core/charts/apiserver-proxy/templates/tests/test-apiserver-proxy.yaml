@@ -47,8 +47,8 @@ spec:
                       name: admin-user
                       key: password
             - name: IAM_KUBECONFIG_SVC_FQDN
-              value: configurations-generator.{{ .Release.Namespace }}.svc.cluster.local
+              value: "configurations-generator.{{ .Release.Namespace }}.svc.cluster.local"
             - name: IAM_KUBECONFIG_SVC_PORT
-              value: 8000
+              value: "8000"
       restartPolicy: Never
 {{- end}}
