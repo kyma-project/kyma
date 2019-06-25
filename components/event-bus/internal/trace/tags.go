@@ -1,34 +1,31 @@
 package trace
 
-import api "github.com/kyma-project/kyma/components/event-bus/api/publish"
-
 const (
-	eventID                 = "event-id"
-	sourceID                = "source-id"
-	eventType               = "event-type"
-	eventTypeVersion        = "event-type-ver"
-	SubscriptionName        = "sub-name"
-	SubscriptionEnvironment = "sub-env"
+	eventID          = "event-id"
+	sourceID         = "source-id"
+	eventType        = "event-type"
+	eventTypeVersion = "event-type-ver"
 )
 
+// SpecVersion CE header value
+const SpecVersion = "0.3"
+
 const (
-	// push request headers to endpoint
-	HeaderSourceID         = "Ce-Source-ID"
-	HeaderEventType        = "Ce-Event-Type"
-	HeaderEventTypeVersion = "Ce-Event-Type-Version"
-	HeaderEventID          = "Ce-Event-ID"
-	HeaderEventTime        = "Ce-Event-Time"
+	// HeaderSourceID header
+	HeaderSourceID = "ce-source"
+	// HeaderEventType header
+	HeaderEventType = "ce-type"
+	// HeaderEventTypeVersion header
+	HeaderEventTypeVersion = "ce-eventtypeversion"
+	// HeaderEventID header
+	HeaderEventID = "ce-id"
+	// HeaderEventTime header
+	HeaderEventTime = "ce-time"
+	// HeaderSpecVersion header
+	HeaderSpecVersion = "ce-specversion"
 )
 
-func CreateTraceTagsFromCloudEvent(cloudEvent *api.CloudEvent) map[string]string {
-	return map[string]string{
-		eventID:          cloudEvent.EventID,
-		sourceID:         cloudEvent.SourceID,
-		eventType:        cloudEvent.EventType,
-		eventTypeVersion: cloudEvent.EventTypeVersion,
-	}
-}
-
+// CreateTraceTagsFromMessageHeader returns a map of trace headers.
 func CreateTraceTagsFromMessageHeader(headers map[string][]string) map[string]string {
 	return map[string]string{
 		eventID:          headers[HeaderEventID][0],

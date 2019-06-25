@@ -7,7 +7,7 @@ import (
 
 type namespaceConverter struct{}
 
-func (c *namespaceConverter) toGQL(in *v1.Namespace) (*gqlschema.Namespace, error) {
+func (c *namespaceConverter) ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error) {
 	if in == nil {
 		return nil, nil
 	}
@@ -21,7 +21,7 @@ func (c *namespaceConverter) toGQL(in *v1.Namespace) (*gqlschema.Namespace, erro
 func (c *namespaceConverter) ToGQLs(in []*v1.Namespace) ([]gqlschema.Namespace, error) {
 	var result []gqlschema.Namespace
 	for _, u := range in {
-		converted, err := c.toGQL(u)
+		converted, err := c.ToGQL(u)
 		if err != nil {
 			return nil, err
 		}

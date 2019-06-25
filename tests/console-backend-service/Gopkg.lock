@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:853d9a1a7b0d3ee96d855dfa22e268fa646667dfae16d25dc5d137f5e2e1f9c1"
+  name = "github.com/avast/retry-go"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "88ef2130df9642aa2849152b2985af9ba3676ee9"
+  version = "v2.3.0"
+
+[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -142,7 +150,7 @@
   version = "v0.1.36"
 
 [[projects]]
-  digest = "1:98cb61d81eb057a4005f59dde41325db2f2c9f1da5d4d60e4d367866d7d69f0e"
+  digest = "1:007da15ff1e5940151b7ca5b405f69859bdcd52bbd1f99b52a879c8bc36216c7"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
@@ -162,7 +170,7 @@
     "components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "1c4c7390617114ea7b28bcfe5664691e4a6d2384"
+  revision = "0ad464e54adb7986337508e82284a6e2f1ba12e5"
 
 [[projects]]
   digest = "1:d946fa644b263e26091e0ae20cd12ee958ab869926abbc2d111fbd39902f91eb"
@@ -515,6 +523,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/avast/retry-go",
     "github.com/gorilla/websocket",
     "github.com/kisielk/errcheck",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",

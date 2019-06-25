@@ -1,6 +1,8 @@
 package v1alpha1
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 
 	k8sMeta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -66,8 +68,42 @@ type Peer struct {
 }
 
 type Jwt struct {
-	Issuer  string `json:"issuer"`
-	JwksUri string `json:"jwksUri"`
+	Issuer       string         `json:"issuer"`
+	JwksUri      string         `json:"jwksUri"`
+	TriggerRules []*TriggerRule `json:"trigger_rules,omitempty"`
+}
+
+type TriggerRule struct {
+	ExcludedPaths []*StringMatch `json:"excluded_paths,omitempty"`
+	IncludedPaths []*StringMatch `json:"included_paths,omitempty"`
+}
+
+type StringMatch struct {
+	MatchType string
+	Value     string
+}
+
+func (sm *StringMatch) UnmarshalJSON(b []byte) error {
+	var generic map[string]string
+
+	if err := json.Unmarshal(b, &generic); err != nil {
+		return err
+	}
+
+	if len(generic) != 1 {
+		return errors.New(fmt.Sprintf("Expected exactly 1 entry in StringMatch, got: %d", len(generic)))
+	}
+
+	for t, v := range generic {
+		*sm = StringMatch{t, v}
+	}
+
+	return nil
+}
+
+func (sm StringMatch) MarshalJSON() ([]byte, error) {
+	generic := map[string]string{sm.MatchType: sm.Value}
+	return json.Marshal(generic)
 }
 
 func (j *Jwt) String() string {

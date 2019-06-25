@@ -5,7 +5,9 @@ type: Installation
 
 >**CAUTION**: This document describes a deprecated flow. Follow [this document](/root/kyma/#installation-install-kyma-locally) to install locally using the Kyma CLI.
 
-This Installation guide shows you how to quickly deploy Kyma locally on the MacOS and Linux platforms. Kyma is installed locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites and instructions on how to install Kyma on your machine, as well as the troubleshooting tips.
+This Installation guide shows you how to quickly deploy Kyma locally on the MacOS and Linux platforms. Kyma is installed locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/).
+
+>**TIP:** See [this](#troubleshooting-overview) document for troubleshooting tips. 
 
 ## Prerequisites
 
@@ -182,4 +184,3 @@ Follow these steps to enable HPA:
   ```
   minikube addons list
   ```
-  

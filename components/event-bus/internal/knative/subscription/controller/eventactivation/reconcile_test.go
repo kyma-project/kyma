@@ -3,12 +3,13 @@ package eventactivation
 import (
 	"context"
 	"fmt"
+	"time"
+
 	controllertesting "github.com/knative/eventing/pkg/reconciler/testing"
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"time"
 
 	//	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	corev1 "k8s.io/api/core/v1"
@@ -23,7 +24,7 @@ import (
 )
 
 const (
-	subUid   = "test-uid"
+	subUID   = "test-uid"
 	subName  = "my-sub-1"
 	eaName   = "my-event-activation"
 	sourceID = "my_source_ID"
@@ -32,8 +33,8 @@ const (
 )
 
 func init() {
-	eventingv1alpha1.AddToScheme(scheme.Scheme)
-	subApis.AddToScheme(scheme.Scheme)
+	_ = eventingv1alpha1.AddToScheme(scheme.Scheme)
+	_ = subApis.AddToScheme(scheme.Scheme)
 }
 
 var testCases = []controllertesting.TestCase{
@@ -220,7 +221,7 @@ func makeSubscription(name string) *subApis.Subscription {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: testNamespace,
-			UID:       subUid,
+			UID:       subUID,
 		},
 		SubscriptionSpec: subApis.SubscriptionSpec{
 			SourceID: sourceID,

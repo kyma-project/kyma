@@ -117,7 +117,7 @@
     "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/scheme",
     "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3"
   ]
-  revision = "bc120200aa9d0d42b1dca21d4f13fa9853529ec0"
+  revision = "b8c31ef40b010f4d56def2cee042ed87025a73af"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"

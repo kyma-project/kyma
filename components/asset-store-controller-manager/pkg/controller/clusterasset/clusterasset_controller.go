@@ -100,7 +100,7 @@ func bucketFinder(mgr manager.Manager) func(ctx context.Context, namespace, name
 func add(mgr manager.Manager, r reconcile.Reconciler, maxConcurrentReconciles int) error {
 	// Create a new controller
 	c, err := controller.New("clusterasset-controller", mgr, controller.Options{
-		Reconciler: r,
+		Reconciler:              r,
 		MaxConcurrentReconciles: maxConcurrentReconciles,
 	})
 	if err != nil {

@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type CommonDocsTopicSpec struct {
@@ -28,6 +29,8 @@ type Source struct {
 	// +kubebuilder:validation:Enum=single,package,index
 	Mode   DocsTopicMode `json:"mode"`
 	Filter string        `json:"filter,omitempty"`
+	// +optional
+	Metadata *runtime.RawExtension `json:"metadata,omitempty"`
 }
 
 type DocsTopicPhase string
