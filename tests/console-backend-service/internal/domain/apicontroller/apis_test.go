@@ -164,6 +164,7 @@ const apiQuery = `
 		issuer
 		jwksURI
 	}
+	creationTimestamp
 `
 
 func fixAPIQuery() *graphql.Request {

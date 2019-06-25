@@ -53,7 +53,7 @@ func (ar *apiResolver) APIQuery(ctx context.Context, name string, namespace stri
 	return api, nil
 }
 
-func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APICreateInput) (gqlschema.API, error) {
+func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
 
 	api, err := ar.apiLister.Create(name, namespace, params)
 	if err != nil {
@@ -61,21 +61,7 @@ func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace str
 		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
-	return gqlschema.API{
-		Name:     api.Name,
-		Hostname: api.Spec.Hostname,
-		Service: gqlschema.ApiService{
-			Name: api.Spec.Service.Name,
-			Port: api.Spec.Service.Port,
-		},
-		AuthenticationPolicies: []gqlschema.AuthenticationPolicy{
-			{
-				JwksURI: params.JwksURI,
-				Issuer:  params.Issuer,
-				Type:    gqlschema.AuthenticationPolicyType("JWT"),
-			},
-		},
-	}, nil
+	return *ar.apiConverter.ToGQL(api), nil
 }
 
 func (ar *apiResolver) ApiEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error) {
@@ -99,28 +85,14 @@ func (ar *apiResolver) ApiEventSubscription(ctx context.Context, namespace strin
 	return channel, nil
 }
 
-func (ar *apiResolver) UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APICreateInput) (gqlschema.API, error) {
+func (ar *apiResolver) UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
 	api, err := ar.apiLister.Update(name, namespace, params)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while editing %s `%s` in namespace `%s`", pretty.API, name, namespace))
 		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
-	return gqlschema.API{
-		Name:     api.Name,
-		Hostname: api.Spec.Hostname,
-		Service: gqlschema.ApiService{
-			Name: api.Spec.Service.Name,
-			Port: api.Spec.Service.Port,
-		},
-		AuthenticationPolicies: []gqlschema.AuthenticationPolicy{
-			{
-				JwksURI: params.JwksURI,
-				Issuer:  params.Issuer,
-				Type:    gqlschema.AuthenticationPolicyType("JWT"),
-			},
-		},
-	}, nil
+	return *ar.apiConverter.ToGQL(api), nil
 }
 
 func (ar *apiResolver) DeleteAPI(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {

@@ -87,7 +87,7 @@ func (svc *apiService) Find(name string, namespace string) (*v1alpha2.Api, error
 	return res, nil
 }
 
-func (svc *apiService) Create(name string, namespace string, in gqlschema.APICreateInput) (*v1alpha2.Api, error) {
+func (svc *apiService) Create(name string, namespace string, in gqlschema.APIInput) (*v1alpha2.Api, error) {
 	api := v1alpha2.Api{
 		TypeMeta: v1.TypeMeta{
 			APIVersion: "authentication.kyma-project.io/v1alpha2",
@@ -128,7 +128,7 @@ func (svc *apiService) Unsubscribe(listener resource.Listener) {
 	svc.notifier.DeleteListener(listener)
 }
 
-func (svc *apiService) Update(name string, namespace string, in gqlschema.APICreateInput) (*v1alpha2.Api, error) {
+func (svc *apiService) Update(name string, namespace string, in gqlschema.APIInput) (*v1alpha2.Api, error) {
 
 	oldApi, err := svc.Find(name, namespace)
 	if err != nil {

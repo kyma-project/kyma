@@ -328,11 +328,11 @@ func (r *mutationResolver) DeleteNamespace(ctx context.Context, name string) (*g
 	return r.k8s.DeleteNamespace(ctx, name)
 }
 
-func (r *mutationResolver) CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APICreateInput) (gqlschema.API, error) {
+func (r *mutationResolver) CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
 	return r.ac.CreateAPI(ctx, name, namespace, params)
 }
 
-func (r *mutationResolver) UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APICreateInput) (gqlschema.API, error) {
+func (r *mutationResolver) UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
 	return r.ac.UpdateAPI(ctx, name, namespace, params)
 }
 

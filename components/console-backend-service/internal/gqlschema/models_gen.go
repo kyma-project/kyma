@@ -17,7 +17,7 @@ type API struct {
 	CreationTimestamp      time.Time              `json:"creationTimestamp"`
 }
 
-type APICreateInput struct {
+type APIInput struct {
 	Hostname                   string `json:"hostname"`
 	ServiceName                string `json:"serviceName"`
 	ServicePort                int    `json:"servicePort"`

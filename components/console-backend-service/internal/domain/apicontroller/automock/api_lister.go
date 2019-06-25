@@ -13,11 +13,11 @@ type apiLister struct {
 }
 
 // Create provides a mock function with given fields: name, namespace, params
-func (_m *apiLister) Create(name string, namespace string, params gqlschema.APICreateInput) (*v1alpha2.Api, error) {
+func (_m *apiLister) Create(name string, namespace string, params gqlschema.APIInput) (*v1alpha2.Api, error) {
 	ret := _m.Called(name, namespace, params)
 
 	var r0 *v1alpha2.Api
-	if rf, ok := ret.Get(0).(func(string, string, gqlschema.APICreateInput) *v1alpha2.Api); ok {
+	if rf, ok := ret.Get(0).(func(string, string, gqlschema.APIInput) *v1alpha2.Api); ok {
 		r0 = rf(name, namespace, params)
 	} else {
 		if ret.Get(0) != nil {
@@ -26,7 +26,7 @@ func (_m *apiLister) Create(name string, namespace string, params gqlschema.APIC
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, gqlschema.APICreateInput) error); ok {
+	if rf, ok := ret.Get(1).(func(string, string, gqlschema.APIInput) error); ok {
 		r1 = rf(name, namespace, params)
 	} else {
 		r1 = ret.Error(1)
@@ -106,11 +106,11 @@ func (_m *apiLister) Unsubscribe(listener resource.Listener) {
 }
 
 // Update provides a mock function with given fields: name, namespace, params
-func (_m *apiLister) Update(name string, namespace string, params gqlschema.APICreateInput) (*v1alpha2.Api, error) {
+func (_m *apiLister) Update(name string, namespace string, params gqlschema.APIInput) (*v1alpha2.Api, error) {
 	ret := _m.Called(name, namespace, params)
 
 	var r0 *v1alpha2.Api
-	if rf, ok := ret.Get(0).(func(string, string, gqlschema.APICreateInput) *v1alpha2.Api); ok {
+	if rf, ok := ret.Get(0).(func(string, string, gqlschema.APIInput) *v1alpha2.Api); ok {
 		r0 = rf(name, namespace, params)
 	} else {
 		if ret.Get(0) != nil {
@@ -119,7 +119,7 @@ func (_m *apiLister) Update(name string, namespace string, params gqlschema.APIC
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, gqlschema.APICreateInput) error); ok {
+	if rf, ok := ret.Get(1).(func(string, string, gqlschema.APIInput) error); ok {
 		r1 = rf(name, namespace, params)
 	} else {
 		r1 = ret.Error(1)

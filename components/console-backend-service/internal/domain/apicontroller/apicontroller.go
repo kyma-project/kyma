@@ -4,13 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/disabled"
-
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
-
 	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/disabled"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/rest"
 )
@@ -76,8 +74,8 @@ type resolverConfig struct {
 type Resolver interface {
 	APIsQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error)
 	APIQuery(ctx context.Context, name string, namespace string) (*gqlschema.API, error)
-	CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APICreateInput) (gqlschema.API, error)
-	UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APICreateInput) (gqlschema.API, error)
+	CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error)
+	UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error)
 	DeleteAPI(ctx context.Context, name string, namespace string) (*gqlschema.API, error)
 	ApiEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error)
 }

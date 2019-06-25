@@ -325,8 +325,8 @@ func testApiToGQL(name, hostname, serviceName, jwksUri, issuer string, servicePo
 	return gql
 }
 
-func paramsToAPICreationInput(hostname, serviceName, jwksUri, issuer string, servicePort int, disableIstioAuthPolicyMTLS, authenticationEnabled *bool) gqlschema.APICreateInput {
-	return gqlschema.APICreateInput{
+func paramsToAPICreationInput(hostname, serviceName, jwksUri, issuer string, servicePort int, disableIstioAuthPolicyMTLS, authenticationEnabled *bool) gqlschema.APIInput {
+	return gqlschema.APIInput{
 		Hostname:                   hostname,
 		ServiceName:                serviceName,
 		ServicePort:                servicePort,
