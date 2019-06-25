@@ -3,11 +3,13 @@ title: Istio setup in Kyma
 type: Details
 ---
 
-Istio is installed using the official charts from the currently supported release. However, those charts are customized for Kyma and differ from the official ones slightly. The charts that are currently used are stored in the `resources/istio` directory.
+Istio is installed using the official charts from the currently supported release. The charts are customized for Kyma and are stored in the `resources/istio` directory.
 
 ## Istio components
 
-| Component name | Enabled? | 
+This list shows the available Istio components and the component enabled by default: 
+
+| Component | Enabled? | 
 | :--- | :---: | 
 | Gateways | ✅ | 
 | Sidecar Injector | ✅ | 
@@ -22,19 +24,19 @@ Istio is installed using the official charts from the currently supported releas
 | Tracing | ⛔️ | 
 | Kiali | ⛔️ | 
 
-## Istio configuration 
-List of configuration changes to Istio in Kyma:
-- Only ingressgatewy is enabled
-- Secret Discovery Service ([SDS](https://www.envoyproxy.io/docs/envoy/latest/configuration/secret#config-secret-discovery-service)) in ingressgateway is enabled
-- Automatic sidecar injection is enabled by default, but the following namespaces are excluded:
-    + `istio-system`
-    + `kube-system`
-- New resource limits for istio sidecars is introduced (CPU: 100m, memory: 128Mi)
-- Mutual TLS ([mTLS](https://istio.io/docs/concepts/security/#mutual-tls-authentication)) is enabled cluster wide, but disabled for the management plane of istio 
-- Global tracing is set to use the Zipkin installation provided by Kyma (`zipkin.kyma-system`)
-- Ingressgatewy is expanded to handle `hostPorts 80, 443` in the case of a local (minikube) installation
-- DestinationRules are created by default, which disable mTLS for the following services:
-    + `istio-ingressgateway.istio-system.svc.cluster.local`
+## Kyma-specific configuration 
 
-### Customization subchart
-Part of the configuration is done in a private `customization` subchart, which is added to the official Istio charts. The component can be found in `resources/istio/charts/customization`. 
+These configuration changes are applied to customize Istio for use with Kyma: 
+
+- Only the Ingress gateway is enabled.
+- The [Secret Discovery Service](https://www.envoyproxy.io/docs/envoy/latest/configuration/secret#config-secret-discovery-service) is enabled in the Ingress Gateway.
+- Automatic sidecar injection is enabled by default, excluding the `istio-system` and `kube-system` Namespaces. 
+- New resource limits for Istio sidecars are introduced: CPU: `100m`, memory: `128Mi`.
+- [Mutual TLS (mTLS)](https://istio.io/docs/concepts/security/#mutual-tls-authentication) is enabled cluster-wide with the exception of the Istio Control Plane.  
+- Global tracing is set to use the Zipkin installation provided by Kyma.
+- Ingress Gateway is expanded to handle ports `80` and `443` for local Kyma deployments.
+- DestinationRules are created by default, which disables mTLS for the `istio-ingressgateway.istio-system.svc.cluster.local` service. 
+
+## The Customization sub-chart
+
+The Kyma-specific configuration is applied through the proprietary `customization` sub-chart added to the official Istio charts. The sub-chart is located in the `resources/istio/charts/customization` directory. 
