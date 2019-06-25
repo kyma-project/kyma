@@ -87,6 +87,24 @@ func Crd(domainName string) *k8sApiExtensions.CustomResourceDefinition {
 															Type:    "string",
 															Pattern: urlPattern,
 														},
+														"triggerRule": {
+															Type: "object",
+															Properties: map[string]k8sApiExtensions.JSONSchemaProps{
+																"excludedPaths": {
+																	Type: "array",
+																	Items: &k8sApiExtensions.JSONSchemaPropsOrArray{
+																		Schema: &k8sApiExtensions.JSONSchemaProps{
+																			OneOf: []k8sApiExtensions.JSONSchemaProps{
+																				{Type: "object", Required: []string{"exact"}, Properties: map[string]k8sApiExtensions.JSONSchemaProps{"exact": {Type: "string"}}},
+																				{Type: "object", Required: []string{"prefix"}, Properties: map[string]k8sApiExtensions.JSONSchemaProps{"prefix": {Type: "string"}}},
+																				{Type: "object", Required: []string{"suffix"}, Properties: map[string]k8sApiExtensions.JSONSchemaProps{"suffix": {Type: "string"}}},
+																				{Type: "object", Required: []string{"regex"}, Properties: map[string]k8sApiExtensions.JSONSchemaProps{"regex": {Type: "string"}}},
+																			},
+																		},
+																	},
+																},
+															},
+														},
 													},
 												},
 											},

@@ -130,6 +130,7 @@ type ComplexityRoot struct {
 	Asset struct {
 		Name      func(childComplexity int) int
 		Namespace func(childComplexity int) int
+		Metadata  func(childComplexity int) int
 		Type      func(childComplexity int) int
 		Files     func(childComplexity int, filterExtensions []string) int
 		Status    func(childComplexity int) int
@@ -163,10 +164,11 @@ type ComplexityRoot struct {
 	}
 
 	ClusterAsset struct {
-		Name   func(childComplexity int) int
-		Type   func(childComplexity int) int
-		Files  func(childComplexity int, filterExtensions []string) int
-		Status func(childComplexity int) int
+		Name     func(childComplexity int) int
+		Metadata func(childComplexity int) int
+		Type     func(childComplexity int) int
+		Files    func(childComplexity int, filterExtensions []string) int
+		Status   func(childComplexity int) int
 	}
 
 	ClusterAssetEvent struct {
@@ -4014,6 +4016,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Asset.Namespace(childComplexity), true
 
+	case "Asset.metadata":
+		if e.complexity.Asset.Metadata == nil {
+			break
+		}
+
+		return e.complexity.Asset.Metadata(childComplexity), true
+
 	case "Asset.type":
 		if e.complexity.Asset.Type == nil {
 			break
@@ -4130,6 +4139,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ClusterAsset.Name(childComplexity), true
+
+	case "ClusterAsset.metadata":
+		if e.complexity.ClusterAsset.Metadata == nil {
+			break
+		}
+
+		return e.complexity.ClusterAsset.Metadata(childComplexity), true
 
 	case "ClusterAsset.type":
 		if e.complexity.ClusterAsset.Type == nil {
@@ -9261,6 +9277,11 @@ func (ec *executionContext) _Asset(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "metadata":
+			out.Values[i] = ec._Asset_metadata(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "type":
 			out.Values[i] = ec._Asset_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -9343,6 +9364,33 @@ func (ec *executionContext) _Asset_namespace(ctx context.Context, field graphql.
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Asset_metadata(ctx context.Context, field graphql.CollectedField, obj *Asset) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Asset",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Metadata, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
 }
 
 // nolint: vetshadow
@@ -10029,6 +10077,11 @@ func (ec *executionContext) _ClusterAsset(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "metadata":
+			out.Values[i] = ec._ClusterAsset_metadata(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "type":
 			out.Values[i] = ec._ClusterAsset_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -10084,6 +10137,33 @@ func (ec *executionContext) _ClusterAsset_name(ctx context.Context, field graphq
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterAsset_metadata(ctx context.Context, field graphql.CollectedField, obj *ClusterAsset) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterAsset",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Metadata, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
 }
 
 // nolint: vetshadow
@@ -29555,6 +29635,7 @@ type File {
 type Asset {
     name: String!
     namespace: String!
+    metadata: JSON!
     type: String!
     files(filterExtensions: [String!]): [File!]!
     status: AssetStatus!
@@ -29567,6 +29648,7 @@ type AssetEvent {
 
 type ClusterAsset {
     name: String!
+    metadata: JSON!
     type: String!
     files(filterExtensions: [String!]): [File!]!
     status: AssetStatus!

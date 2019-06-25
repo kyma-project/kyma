@@ -15,7 +15,6 @@ import (
 
 const (
 	rsaKeySize          = 4096
-	clusterKeySecretKey = "key"
 )
 
 type CSRProvider interface {

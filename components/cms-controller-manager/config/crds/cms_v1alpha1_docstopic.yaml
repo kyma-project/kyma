@@ -46,6 +46,8 @@ spec:
                 properties:
                   filter:
                     type: string
+                  metadata:
+                    type: object
                   mode:
                     enum:
                     - single

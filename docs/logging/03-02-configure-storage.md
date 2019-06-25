@@ -1,5 +1,5 @@
 ---
-title: Storage configuration
+title: Storage configuration examples
 type: Details
 ---
 
@@ -35,15 +35,13 @@ data:
         index:
           prefix: index_
           period: 168h
-    storage_configs:
+    storage_config:
       - name: boltdb
         directory: /tmp/loki/index
       - name: filesystem
         directory: /tmp/loki/chunks
 
-``` 
-
-The Loki storage configuration consists of the **schema_config** and **storage_configs** definitions. Use the **schema_config** to define your storage types, and **storage_configs** to configure the already defined storage types.
+```
 
 A sample configuration for GCS looks as follows:
 
@@ -75,11 +73,11 @@ data:
         index:
           prefix: index_
           period: 168h
-    storage_configs:
+    storage_config:
       gcs:
         bucket_name: <YOUR_GCS_BUCKETNAME>
         project: <BIG_TABLE_PROJECT_ID>
         instance: <BIG_TABLE_INSTANCE_ID>
         grpc_client_config: <YOUR_CLIENT_SETTINGS>
-       
+
 ```

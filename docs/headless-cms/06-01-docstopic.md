@@ -27,6 +27,8 @@ spec:
     - type: markdown
       name: markdown-slack
       mode: single
+      metadata:
+        disableRelativeLinks: "true"
       url: https://raw.githubusercontent.com/slackapi/slack-api-specs/master/README.md
     - type: asyncapi
       name: asyncapi-slack
@@ -58,6 +60,7 @@ This table lists all possible parameters of a given resource together with their
 | **spec.sources.type** |    **YES**   | Specifies the type of assets included in the DocsTopic CR. |
 | **spec.sources.name** |    **YES**   | Defines an identifier of a given asset. It must be unique if there is more than one asset of a given type in a DocsTopic CR. |
 | **spec.sources.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR format. Use `single` for one file and `package` for a set of files.  |
+| **spec.sources.metadata** |    **NO**   | Specifies a set of metadata for the Asset. For example, use it to define what to render, disable, or modify in the UI. Define it in a valid YAML or JSON format. |
 | **spec.sources.url** |    **YES**   | Specifies the location of a single file or a package. |
 | **spec.sources.filter** |    **NO**   | Specifies a set of assets from the package to upload. The regex used in the filter must be [RE2](https://golang.org/s/re2syntax)-compliant. |
 | **status.lastheartbeattime** |    **Not applicable**   | Provides the last time when the DocsTopic Controller processed the DocsTopic CR. |
