@@ -33,7 +33,7 @@ spec:
 
       initContainers:
       - name: dex-users-configurator
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.static_users_generator.dir }}static-users-generator:{{ .Values.global.static_users_generator.version }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.dex_static_user_configurer.dir }}dex-static-user-configurer:{{ .Values.global.dex_static_user_configurer.version }}
         volumeMounts:
         - name: config
           mountPath: /config/dst

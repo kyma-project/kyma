@@ -74,7 +74,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Loki Kilobytes per second",
+      "title": "Loki push Kb/sec",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -165,7 +165,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Loki request per second",
+      "title": "Loki Queries/sec",
       "tooltip": {
         "shared": true,
         "sort": 0,

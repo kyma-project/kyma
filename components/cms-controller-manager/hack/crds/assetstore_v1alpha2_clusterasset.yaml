@@ -6,6 +6,16 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: clusterassets.assetstore.kyma-project.io
 spec:
+  additionalPrinterColumns:
+    - JSONPath: .status.phase
+      name: Phase
+      type: string
+    - JSONPath: .status.assetRef.baseUrl
+      name: Base URL
+      type: string
+    - JSONPath: .metadata.creationTimestamp
+      name: Age
+      type: date
   group: assetstore.kyma-project.io
   names:
     kind: ClusterAsset
@@ -35,22 +45,42 @@ spec:
                 name:
                   type: string
               required:
-              - name
+                - name
+              type: object
+            metadata:
               type: object
             source:
               properties:
                 filter:
                   type: string
+                metadataWebhookService:
+                  items:
+                    properties:
+                      endpoint:
+                        type: string
+                      filter:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    required:
+                      - name
+                      - namespace
+                    type: object
+                  type: array
                 mode:
                   enum:
-                  - single
-                  - package
-                  - index
+                    - single
+                    - package
+                    - index
                   type: string
                 mutationWebhookService:
                   items:
                     properties:
                       endpoint:
+                        type: string
+                      filter:
                         type: string
                       metadata:
                         type: object
@@ -58,6 +88,9 @@ spec:
                         type: string
                       namespace:
                         type: string
+                    required:
+                      - name
+                      - namespace
                     type: object
                   type: array
                 url:
@@ -67,33 +100,45 @@ spec:
                     properties:
                       endpoint:
                         type: string
+                      filter:
+                        type: string
                       metadata:
                         type: object
                       name:
                         type: string
                       namespace:
                         type: string
+                    required:
+                      - name
+                      - namespace
                     type: object
                   type: array
               required:
-              - mode
-              - url
+                - mode
+                - url
               type: object
           required:
-          - source
+            - source
           type: object
         status:
           properties:
             assetRef:
               properties:
-                assets:
-                  items:
-                    type: string
-                  type: array
                 baseUrl:
                   type: string
+                files:
+                  items:
+                    properties:
+                      metadata:
+                        type: object
+                      name:
+                        type: string
+                    required:
+                      - name
+                    type: object
+                  type: array
               required:
-              - baseUrl
+                - baseUrl
               type: object
             lastHeartbeatTime:
               format: date-time
@@ -108,9 +153,9 @@ spec:
             reason:
               type: string
           required:
-          - phase
-          - lastHeartbeatTime
-          - observedGeneration
+            - phase
+            - lastHeartbeatTime
+            - observedGeneration
           type: object
   version: v1alpha2
 status:

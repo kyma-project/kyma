@@ -86,55 +86,58 @@ subjects:
   name: {{ template "backup-test.fullname" . }}
   namespace: {{ .Release.Namespace }}
 ---
-apiVersion: v1
-kind: Pod
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
   name: {{ template "backup-test.fullname" . }}
   labels:
-    helm-chart-test: "true"
     app: {{ template "backup-test.name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
-  annotations:
-    "helm.sh/hook": test-success
-    "sidecar.istio.io/inject": "true"
 spec:
-  shareProcessNamespace: true
-  serviceAccount: {{ template "backup-test.fullname" . }}
-  containers:
-  - name: backup-test
-    command:
-    - "/bin/sh"
-    args:
-    - "-c"
-    - |
-      sleep 10
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      shareProcessNamespace: true
+      serviceAccount: {{ template "backup-test.fullname" . }}
+      containers:
+      - name: backup-test
+        command:
+        - "/bin/sh"
+        args:
+        - "-c"
+        - |
+          sleep 10
 
-      while ! curl -Ik https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT_HTTPS >/dev/null 2>/dev/null
-      do
-          sleep 1
-      done
+          while ! curl -Ik https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT_HTTPS >/dev/null 2>/dev/null
+          do
+              sleep 1
+          done
 
-      /restore.test -test.v
-      exit_code=$?
+          /restore.test -test.v
+          exit_code=$?
 
-      pkill -TERM pilot-agent
-      sleep 4
+          pkill -TERM pilot-agent
+          sleep 4
 
-      exit $exit_code
-    image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}tests/backup-restore-test:{{ .Values.image.tag }}"
-    imagePullPolicy: Always
-    env:
-    - name: DOMAIN
-      value: {{ .Values.global.ingress.domainName | default "kyma.local" }}
-    - name: USER_EMAIL
-      value: {{ .Values.global.adminEmail }}
-    - name: USER_PASSWORD
-      value: {{ .Values.global.adminPassword }}
-    - name: ALL_BACKUP_CONFIGURATION_FILE
-      value: "/all-backup.yaml"
-    - name: SYSTEM_BACKUP_CONFIGURATION_FILE
-      value: /system-backup.yaml
-  restartPolicy: Never
+          exit $exit_code
+        image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}tests/backup-restore-test:{{ .Values.image.tag }}"
+        imagePullPolicy: Always
+        env:
+        - name: DOMAIN
+          value: {{ .Values.global.ingress.domainName | default "kyma.local" }}
+        - name: USER_EMAIL
+          value: {{ .Values.global.adminEmail }}
+        - name: USER_PASSWORD
+          value: {{ .Values.global.adminPassword }}
+        - name: ALL_BACKUP_CONFIGURATION_FILE
+          value: "/all-backup.yaml"
+        - name: SYSTEM_BACKUP_CONFIGURATION_FILE
+          value: /system-backup.yaml
+      restartPolicy: Never
 ---
+{{- end }}

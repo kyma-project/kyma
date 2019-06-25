@@ -58,6 +58,8 @@ kind: Function
 metadata:
   name: my-lambda
   namespace: production
+  labels:
+    app: my-lambda
 spec:
   deployment:
     spec:

@@ -102,16 +102,7 @@ istio-ingressgateway:
     name: tcp-dns-tls
   ####### end MESH EXPANSION PORTS ######
   ##############
-  secretVolumes:
-  - name: ingressgateway-certs
-    secretName: istio-ingressgateway-certs
-    mountPath: /etc/istio/ingressgateway-certs
-  - name: ingressgateway-ca-certs
-    secretName: istio-ingressgateway-ca-certs
-    mountPath: /etc/istio/ingressgateway-ca-certs
-  - name: application-connector-ca-certs
-    secretName: application-connector-ca-certs
-    mountPath: /etc/istio/application-connector-ca-certs
+  secretVolumes: {}
   ### Advanced options ############
   env:
     # A gateway with this mode ensures that pilot generates an additional

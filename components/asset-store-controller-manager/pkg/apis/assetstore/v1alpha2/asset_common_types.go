@@ -9,6 +9,8 @@ import (
 type CommonAssetSpec struct {
 	Source    AssetSource    `json:"source"`
 	BucketRef AssetBucketRef `json:"bucketRef,omitempty"`
+	// +optional
+	Metadata *runtime.RawExtension `json:"metadata,omitempty"`
 }
 
 // CommonAssetStatus defines the observed state of Asset

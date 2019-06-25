@@ -24,13 +24,13 @@ global:
     version: "cb16ab4c"
   ui_acceptance_tests:
     dir:
-    version: "10874d67"
+    version: "c69dbf49"
   api_controller:
     dir: develop/
-    version: "8625ab94"
+    version: "b8c31ef4"
   api_controller_acceptance_tests:
     dir: develop/
-    version: "a221d552"
+    version: "07378445"
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
@@ -59,11 +59,11 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    dir: develop/
-    version: ebc3ff12
+    dir: pr/
+    version: 'PR-4581'
   console_backend_service_test:
-    dir: develop/
-    version: 13d254ff
+    dir: pr/
+    version: 'PR-4581'
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8

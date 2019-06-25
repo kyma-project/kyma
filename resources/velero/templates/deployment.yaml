@@ -50,20 +50,18 @@ spec:
             - /velero
           args:
             - server
-          {{- with .Values.configuration }}
-            {{- with .backupSyncPeriod }}
+            {{- with .Values.global.backupSyncPeriod }}
             - --backup-sync-period={{ . }}
             {{- end }}
-            {{- with .resticTimeout }}
+            {{- with .Values.global.resticTimeout }}
             - --restic-timeout={{ . }}
             {{- end }}
-            {{- if .restoreOnlyMode }}
+            {{- if .Values.global.restoreOnlyMode }}
             - --restore-only
             {{- end }}
-            {{- with .restoreResourcePriorities }}
+            {{- with .Values.global.restoreResourcePriorities }}
             - --restore-resource-priorities={{ . }}
             {{- end }}
-          {{- end }}
           {{- if eq $provider "azure" }}
           envFrom:
             - secretRef:
@@ -90,7 +88,7 @@ spec:
               value: /credentials/cloud
             - name: VELERO_SCRATCH_DIR
               value: /scratch
-          {{ with .Values.configuration.extraEnvVars }}
+          {{ with .Values.global.extraEnvVars }}
           {{- range $key, $value := . }}
             - name: {{ default "none" $key }}
               value: {{ default "none" $value }}
