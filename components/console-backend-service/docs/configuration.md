@@ -29,7 +29,7 @@ Use the following environment variables to configure the application:
 | APP_OIDC_GROUPS_CLAIM | No | `groups` | The name of a custom OpenID Connect claim for specifying user groups. |
 | APP_OIDC_GROUPS_PREFIX | NO | | If provided, all groups will be prefixed with this value. |
 | APP_OIDC_SUPPORTED_SIGNING_ALGS | NO | `RS256` | Comma-separated list of the allowed JOSE asymmetric signing algorithms. Tokens with the 'alg' header value not in this list will be rejected. Values are defined by [RFC 7518](https://tools.ietf.org/html/rfc7518#section-3.1). |
-| APP_TRACING_COLLECTOR_URL | YES |  | The collector Url for handle post request. |
+| APP_TRACING_COLLECTOR_URL | YES |  | The collector URL to handle post requests. |
 | APP_TRACING_DEBUG | YES |  | The recorder debug flag. |
 | APP_TRACING_SERVICE_SPAN_NAME | YES |  | The name of the service span. |
 
