@@ -26,7 +26,7 @@ type ApiSpec struct {
 	DisableIstioAuthPolicyMTLS *bool   `json:"disableIstioAuthPolicyMTLS,omitempty"`
 	AuthenticationEnabled      *bool   `json:"authenticationEnabled,omitempty"`
 	// +optional
-	Authentication []AuthenticationRule `json:"authentication"`
+	Authentication []AuthenticationRule `json:"authentication,omitempty"`
 }
 
 type Service struct {
