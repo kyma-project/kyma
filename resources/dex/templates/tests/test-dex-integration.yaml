@@ -10,7 +10,6 @@ spec:
         sidecar.istio.io/inject: "true"
     spec:
       shareProcessNamespace: true
-      # serviceAccountName: test-dex-integration
       containers:
       - name: test-{{ template "fullname" . }}-integration
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.dex_integration_tests.dir }}integration-dex:{{ .Values.global.dex_integration_tests.version }}
