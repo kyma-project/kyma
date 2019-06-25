@@ -12,7 +12,7 @@ import (
 
 func TestApiConverter_ToGQL(t *testing.T) {
 	t.Run("API definition given", func(t *testing.T) {
-		api := fixApi("test")
+		api := fixApi("test", "")
 
 		expected := &gqlschema.API{
 			Name:     api.Name,
@@ -47,8 +47,8 @@ func TestApiConverter_ToGQL(t *testing.T) {
 func TestApiConverter_ToGQLs(t *testing.T) {
 	t.Run("An array of APIs given", func(t *testing.T) {
 		apis := []*v1alpha2.Api{
-			fixApi("test-1"),
-			fixApi("test-2"),
+			fixApi("test-1", ""),
+			fixApi("test-2", ""),
 		}
 
 		converter := apiConverter{}
@@ -60,7 +60,7 @@ func TestApiConverter_ToGQLs(t *testing.T) {
 
 	t.Run("An array of APIs with nil given", func(t *testing.T) {
 		apis := []*v1alpha2.Api{
-			fixApi("test-1"),
+			fixApi("test-1", ""),
 			nil,
 		}
 
@@ -80,10 +80,38 @@ func TestApiConverter_ToGQLs(t *testing.T) {
 	})
 }
 
-func fixApi(name string) *v1alpha2.Api {
+func TestApiConverter_ToV1Api(t *testing.T) {
+	t.Run("ResourceVersion given", func(t *testing.T) {
+		expected := fixApi("test", "v1")
+
+		converter := apiConverter{}
+		apiInput := fixApiInput()
+		result := converter.ToV1Api("test", "test", apiInput, "v1")
+
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("ResourceVersion empty", func(t *testing.T) {
+		expected := fixApi("test", "")
+
+		converter := apiConverter{}
+		apiInput := fixApiInput()
+		result := converter.ToV1Api("test", "test", apiInput, "")
+
+		assert.Equal(t, expected, result)
+	})
+}
+
+func fixApi(name string, version string) *v1alpha2.Api {
 	return &v1alpha2.Api{
+		TypeMeta: v1.TypeMeta{
+			Kind: "API",
+			APIVersion: "authentication.kyma-project.io/v1alpha2",
+		},
 		ObjectMeta: v1.ObjectMeta{
 			Name: name,
+			Namespace: "test",
+			ResourceVersion: version,
 		},
 		Spec: v1alpha2.ApiSpec{
 			Hostname: "test-service.dev.kyma.cx",
@@ -101,5 +129,17 @@ func fixApi(name string) *v1alpha2.Api {
 				},
 			},
 		},
+	}
+}
+
+func fixApiInput() gqlschema.APIInput {
+	return gqlschema.APIInput{
+		Hostname: "test-service.dev.kyma.cx",
+		ServiceName: "test-service",
+		ServicePort: 8080,
+		JwksURI: "http://sample-issuer/keys",
+		Issuer: "sample-issuer",
+		DisableIstioAuthPolicyMTLS: nil,
+		AuthenticationEnabled: nil,
 	}
 }

@@ -7,12 +7,10 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
+	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/pkg/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/cache"
 )
@@ -21,6 +19,7 @@ type apiService struct {
 	informer cache.SharedIndexInformer
 	client   versioned.Interface
 	notifier resource.Notifier
+	converter apiConverter
 }
 
 func newApiService(informer cache.SharedIndexInformer, client versioned.Interface) *apiService {
@@ -88,36 +87,9 @@ func (svc *apiService) Find(name string, namespace string) (*v1alpha2.Api, error
 }
 
 func (svc *apiService) Create(name string, namespace string, in gqlschema.APIInput) (*v1alpha2.Api, error) {
-	api := v1alpha2.Api{
-		TypeMeta: v1.TypeMeta{
-			APIVersion: "authentication.kyma-project.io/v1alpha2",
-			Kind:       "API",
-		},
-		ObjectMeta: v1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: v1alpha2.ApiSpec{
-			Service: v1alpha2.Service{
-				Name: in.ServiceName,
-				Port: in.ServicePort,
-			},
-			Hostname: in.Hostname,
-			Authentication: []v1alpha2.AuthenticationRule{
-				{
-					Jwt: v1alpha2.JwtAuthentication{
-						JwksUri: in.JwksURI,
-						Issuer:  in.Issuer,
-					},
-					Type: v1alpha2.AuthenticationType("JWT"),
-				},
-			},
-			DisableIstioAuthPolicyMTLS: in.DisableIstioAuthPolicyMTLS,
-			AuthenticationEnabled:      in.AuthenticationEnabled,
-		},
-	}
+	api := svc.converter.ToV1Api(name, namespace, in, "")
 
-	return svc.client.GatewayV1alpha2().Apis(namespace).Create(&api)
+	return svc.client.GatewayV1alpha2().Apis(namespace).Create(api)
 }
 
 func (svc *apiService) Subscribe(listener resource.Listener) {
@@ -129,7 +101,6 @@ func (svc *apiService) Unsubscribe(listener resource.Listener) {
 }
 
 func (svc *apiService) Update(name string, namespace string, in gqlschema.APIInput) (*v1alpha2.Api, error) {
-
 	oldApi, err := svc.Find(name, namespace)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while finding API %s", name)
@@ -142,37 +113,9 @@ func (svc *apiService) Update(name string, namespace string, in gqlschema.APIInp
 		}, name)
 	}
 
-	api := v1alpha2.Api{
-		TypeMeta: v1.TypeMeta{
-			APIVersion: "authentication.kyma-project.io/v1alpha2",
-			Kind:       "API",
-		},
-		ObjectMeta: v1.ObjectMeta{
-			Name:            name,
-			Namespace:       namespace,
-			ResourceVersion: oldApi.ObjectMeta.ResourceVersion,
-		},
-		Spec: v1alpha2.ApiSpec{
-			Service: v1alpha2.Service{
-				Name: in.ServiceName,
-				Port: in.ServicePort,
-			},
-			Hostname: in.Hostname,
-			Authentication: []v1alpha2.AuthenticationRule{
-				{
-					Jwt: v1alpha2.JwtAuthentication{
-						JwksUri: in.JwksURI,
-						Issuer:  in.Issuer,
-					},
-					Type: v1alpha2.AuthenticationType("JWT"),
-				},
-			},
-			DisableIstioAuthPolicyMTLS: in.DisableIstioAuthPolicyMTLS,
-			AuthenticationEnabled:      in.AuthenticationEnabled,
-		},
-	}
+	api := svc.converter.ToV1Api(name, namespace, in, oldApi.ObjectMeta.ResourceVersion)
 
-	return svc.client.GatewayV1alpha2().Apis(namespace).Update(&api)
+	return svc.client.GatewayV1alpha2().Apis(namespace).Update(api)
 }
 
 func (svc *apiService) Delete(name string, namespace string) error {
