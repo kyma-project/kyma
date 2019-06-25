@@ -1,5 +1,5 @@
 package automock
 
-func NewApiLister() *apiLister {
-	return new(apiLister)
+func NewApiSvc() *apiSvc {
+	return new(apiSvc)
 }

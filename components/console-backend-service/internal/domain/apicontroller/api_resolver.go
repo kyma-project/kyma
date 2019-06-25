@@ -13,23 +13,23 @@ import (
 )
 
 type apiResolver struct {
-	apiLister    apiLister
+	apiSvc    apiSvc
 	apiConverter *apiConverter
 }
 
-func newApiResolver(lister apiLister) (*apiResolver, error) {
+func newApiResolver(lister apiSvc) (*apiResolver, error) {
 	if lister == nil {
-		return nil, errors.New("Nil pointer for apiLister")
+		return nil, errors.New("Nil pointer for apiSvc")
 	}
 
 	return &apiResolver{
-		apiLister:    lister,
+		apiSvc:    lister,
 		apiConverter: &apiConverter{},
 	}, nil
 }
 
 func (ar *apiResolver) APIsQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
-	apisObj, err := ar.apiLister.List(namespace, serviceName, hostname)
+	apisObj, err := ar.apiSvc.List(namespace, serviceName, hostname)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s for service name %v, hostname %v", pretty.APIs, serviceName, hostname))
 		return nil, gqlerror.New(err, pretty.APIs, gqlerror.WithNamespace(namespace))
@@ -39,7 +39,7 @@ func (ar *apiResolver) APIsQuery(ctx context.Context, namespace string, serviceN
 }
 
 func (ar *apiResolver) APIQuery(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
-	apiObj, err := ar.apiLister.Find(name, namespace)
+	apiObj, err := ar.apiSvc.Find(name, namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s `%s` in namespace `%s`", pretty.API, name, namespace))
 		return nil, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
@@ -55,7 +55,7 @@ func (ar *apiResolver) APIQuery(ctx context.Context, name string, namespace stri
 
 func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
 
-	api, err := ar.apiLister.Create(name, namespace, params)
+	api, err := ar.apiSvc.Create(name, namespace, params)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s `%s` in namespace `%s`", pretty.API, name, namespace))
 		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
@@ -75,10 +75,10 @@ func (ar *apiResolver) ApiEventSubscription(ctx context.Context, namespace strin
 
 	apiListener := listener.NewApi(channel, filter, ar.apiConverter)
 
-	ar.apiLister.Subscribe(apiListener)
+	ar.apiSvc.Subscribe(apiListener)
 	go func() {
 		defer close(channel)
-		defer ar.apiLister.Unsubscribe(apiListener)
+		defer ar.apiSvc.Unsubscribe(apiListener)
 		<-ctx.Done()
 	}()
 
@@ -86,7 +86,7 @@ func (ar *apiResolver) ApiEventSubscription(ctx context.Context, namespace strin
 }
 
 func (ar *apiResolver) UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
-	api, err := ar.apiLister.Update(name, namespace, params)
+	api, err := ar.apiSvc.Update(name, namespace, params)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while editing %s `%s` in namespace `%s`", pretty.API, name, namespace))
 		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
@@ -96,14 +96,14 @@ func (ar *apiResolver) UpdateAPI(ctx context.Context, name string, namespace str
 }
 
 func (ar *apiResolver) DeleteAPI(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
-	apiObj, err := ar.apiLister.Find(name, namespace)
+	apiObj, err := ar.apiSvc.Find(name, namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s `%s` in namespace `%s`", pretty.API, name, namespace))
 		return nil, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	apiCopy := apiObj.DeepCopy()
-	err = ar.apiLister.Delete(name, namespace)
+	err = ar.apiSvc.Delete(name, namespace)
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while deleting %s `%s` from namespace `%s`", pretty.API, name, namespace))

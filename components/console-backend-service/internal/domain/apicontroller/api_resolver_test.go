@@ -41,7 +41,7 @@ func TestApiResolver_APIsQuery(t *testing.T) {
 
 		var empty *string = nil
 
-		service := automock.NewApiLister()
+		service := automock.NewApiSvc()
 		service.On("List", namespace, empty, empty).Return(apis, nil).Once()
 
 		resolver, err := newApiResolver(service)
@@ -57,7 +57,7 @@ func TestApiResolver_APIsQuery(t *testing.T) {
 	t.Run("Should return an error", func(t *testing.T) {
 		var empty *string = nil
 
-		service := automock.NewApiLister()
+		service := automock.NewApiSvc()
 		service.On("List", namespace, empty, empty).Return(nil, errors.New("test")).Once()
 
 		resolver, err := newApiResolver(service)
@@ -86,7 +86,7 @@ func TestApiResolver_APIQuery(t *testing.T) {
 			Name: api.Name,
 		}
 
-		service := automock.NewApiLister()
+		service := automock.NewApiSvc()
 		service.On("Find", name, namespace).Return(&api, nil).Once()
 
 		resolver, err := newApiResolver(service)
@@ -100,7 +100,7 @@ func TestApiResolver_APIQuery(t *testing.T) {
 	})
 
 	t.Run("Should return an empty object", func(t *testing.T) {
-		service := automock.NewApiLister()
+		service := automock.NewApiSvc()
 		service.On("Find", name, namespace).Return(nil, nil).Once()
 
 		resolver, err := newApiResolver(service)
@@ -114,7 +114,7 @@ func TestApiResolver_APIQuery(t *testing.T) {
 	})
 
 	t.Run("Should return an error", func(t *testing.T) {
-		service := automock.NewApiLister()
+		service := automock.NewApiSvc()
 		service.On("Find", name, namespace).Return(nil, errors.New("test")).Once()
 
 		resolver, err := newApiResolver(service)
@@ -143,7 +143,7 @@ func TestApiResolver_CreateAPI(t *testing.T) {
 		api := fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
 		expected := testApiToGQL(name, hostname, serviceName, jwksUri, issuer, servicePort)
 
-		service := automock.NewApiLister()
+		service := automock.NewApiSvc()
 		service.On("Create", name, namespace, params).Return(api, nil).Once()
 
 		resolver, err := newApiResolver(service)
@@ -157,7 +157,7 @@ func TestApiResolver_CreateAPI(t *testing.T) {
 	})
 
 	t.Run("Should return an error", func(t *testing.T) {
-		service := automock.NewApiLister()
+		service := automock.NewApiSvc()
 		service.On("Create", name, namespace, params).Return(nil, errors.New("test")).Once()
 
 		resolver, err := newApiResolver(service)
@@ -187,7 +187,7 @@ func TestApiResolver_UpdateAPI(t *testing.T) {
 		api := fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
 		expected := testApiToGQL(name, hostname, serviceName, jwksUri, issuer, servicePort)
 
-		service := automock.NewApiLister()
+		service := automock.NewApiSvc()
 		service.On("Update", name, namespace, params).Return(api, nil).Once()
 
 		resolver, err := newApiResolver(service)
@@ -201,7 +201,7 @@ func TestApiResolver_UpdateAPI(t *testing.T) {
 	})
 
 	t.Run("Should return an error", func(t *testing.T) {
-		service := automock.NewApiLister()
+		service := automock.NewApiSvc()
 		service.On("Update", name, namespace, params).Return(nil, errors.New("test")).Once()
 
 		resolver, err := newApiResolver(service)
@@ -229,7 +229,7 @@ func TestApiResolver_DeleteAPI(t *testing.T) {
 		api := fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
 		expected := testApiToGQL(name, hostname, serviceName, jwksUri, issuer, servicePort)
 
-		service := automock.NewApiLister()
+		service := automock.NewApiSvc()
 		service.On("Find", name, namespace).Return(api, nil).Once()
 		service.On("Delete", name, namespace).Return(nil).Once()
 
@@ -244,7 +244,7 @@ func TestApiResolver_DeleteAPI(t *testing.T) {
 	})
 
 	t.Run("Should return an error if api has not been found", func(t *testing.T) {
-		service := automock.NewApiLister()
+		service := automock.NewApiSvc()
 		service.On("Find", name, namespace).Return(nil, errors.New("test")).Once()
 
 		resolver, err := newApiResolver(service)
@@ -260,7 +260,7 @@ func TestApiResolver_DeleteAPI(t *testing.T) {
 	t.Run("Should return an error if api couldnt be removed", func(t *testing.T) {
 		api := fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
 
-		service := automock.NewApiLister()
+		service := automock.NewApiSvc()
 		service.On("Find", name, namespace).Return(api, nil).Once()
 		service.On("Delete", name, namespace).Return(errors.New("test")).Once()
 

@@ -6,8 +6,8 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 )
 
-//go:generate mockery -name=apiLister -output=automock -outpkg=automock -case=underscore
-type apiLister interface {
+//go:generate mockery -name=apiSvc -output=automock -outpkg=automock -case=underscore
+type apiSvc interface {
 	List(namespace string, serviceName *string, hostname *string) ([]*v1alpha2.Api, error)
 	Find(name string, namespace string) (*v1alpha2.Api, error)
 	Create(name string, namespace string, params gqlschema.APIInput) (*v1alpha2.Api, error)
