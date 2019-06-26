@@ -4,6 +4,7 @@ image:
   pullPolicy: IfNotPresent
 service:
   internalPort: 3000
+  internalPortName: http-cbs
   externalPort: 3000
   protocol: TCP
 virtualservice:
@@ -13,3 +14,7 @@ virtualservice:
 istio:
   namespace: istio-system
 verifySSL: false
+tracing:
+  collectorUrl: http://zipkin.kyma-system:9411/api/v1/spans
+  debug: false
+  serviceSpanName: console-backend-service

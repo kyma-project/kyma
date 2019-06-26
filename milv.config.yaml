@@ -56,3 +56,6 @@ files:
   - path: "./kyma/docs/asset-store/05-01-asset-store.md"
     config:
       white-list-external: ["https://minio.{DOMAIN}/minio"]
+  - path: "./kyma/components/console-backend-service/docs/configuration.md"
+    config:
+      white-list-external: ["http://zipkin.kyma-system"]
