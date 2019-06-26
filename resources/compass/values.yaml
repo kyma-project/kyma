@@ -28,8 +28,6 @@ global:
   connector:
     port: 3000
 
-  ingress:
-    domainName: kyma.local
   istio:
     gateway: compass-istio-gateway
 
