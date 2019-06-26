@@ -35,7 +35,7 @@ fi
 
 # creates a config map which provides the testing bundles
 injectTestingBundles
-# trap removeTestingBundles ERR EXIT
+trap removeTestingBundles ERR EXIT
 
 cat <<EOF | ${kc} apply -f -
 apiVersion: testing.kyma-project.io/v1alpha1
