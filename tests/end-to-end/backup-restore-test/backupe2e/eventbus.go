@@ -95,7 +95,6 @@ func (eb *EventBusTest) TestResources(namespace string) {
 
 // DeleteResources deletes resources before restoring from a backup
 func (eb *EventBusTest) DeleteResources(namespace string) {
-	// There is not need to be implemented for this test.
 	err := eb.newFlow(namespace).deleteResources()
 	convey.So(err, convey.ShouldBeNil)
 }
@@ -111,7 +110,6 @@ func (eb *EventBusTest) newFlow(namespace string) *eventBusFlow {
 
 func (f *eventBusFlow) createResources() error {
 	// iterate over steps
-	fmt.Printf("Are we creating!!!!!!!")
 	for _, fn := range []func() error{
 		f.createEventActivation,
 		f.createSubscription,

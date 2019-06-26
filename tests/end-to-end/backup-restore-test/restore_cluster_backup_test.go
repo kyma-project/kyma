@@ -9,6 +9,11 @@ import (
 	"github.com/google/uuid"
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
 
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/asset-store"
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/cms"
+
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
+
 	backupClient "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/backup"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -32,60 +37,60 @@ type e2eTest struct {
 
 func TestBackupAndRestoreCluster(t *testing.T) {
 	cfg, err := loadConfig()
-	// fatalOnError(t, err, "while reading configuration from environment variables")
+	fatalOnError(t, err, "while reading configuration from environment variables")
 
-	//myFunctionTest, err := NewFunctionTest()
-	//fatalOnError(t, err, "while creating structure for Function test")
-	//
-	//myStatefulSetTest, err := NewStatefulSetTest()
-	//fatalOnError(t, err, "while creating structure for StatefulSet test")
-	//
-	//myDeploymentTest, err := NewDeploymentTest()
-	//fatalOnError(t, err, "while creating structure for Deployment test")
-	//
-	//myPrometheusTest, err := NewPrometheusTest()
-	//fatalOnError(t, err, "while creating structure for Prometheus test")
-	//
-	//myGrafanaTest, err := NewGrafanaTest()
-	//fatalOnError(t, err, "while creating structure for Grafana test")
-	//
-	//scAddonsTest, err := NewServiceCatalogAddonsTest()
-	//fatalOnError(t, err, "while creating structure for ScAddons test")
-	//
-	//apiControllerTest, err := NewApiControllerTestFromEnv()
-	//fatalOnError(t, err, "while creating structure for ApiController test")
-	//
-	//myAssetStoreTest, err := NewAssetStoreTest(t)
-	//fatalOnError(t, err, "while creating structure for AssetStore test")
-	//
-	//myMicroFrontendTest, err := NewMicrofrontendTest()
-	//fatalOnError(t, err, "while creating structure for MicroFrontend test")
+	myFunctionTest, err := NewFunctionTest()
+	fatalOnError(t, err, "while creating structure for Function test")
 
-	// appBrokerTest, err := NewAppBrokerTest()
-	// fatalOnError(t, err, "while creating structure for AppBroker test")
+	myStatefulSetTest, err := NewStatefulSetTest()
+	fatalOnError(t, err, "while creating structure for StatefulSet test")
 
-	// helmBrokerTest, err := NewHelmBrokerTest()
-	// fatalOnError(t, err, "while creating structure for HelmBroker test")
+	myDeploymentTest, err := NewDeploymentTest()
+	fatalOnError(t, err, "while creating structure for Deployment test")
+
+	myPrometheusTest, err := NewPrometheusTest()
+	fatalOnError(t, err, "while creating structure for Prometheus test")
+
+	myGrafanaTest, err := NewGrafanaTest()
+	fatalOnError(t, err, "while creating structure for Grafana test")
+
+	scAddonsTest, err := NewServiceCatalogAddonsTest()
+	fatalOnError(t, err, "while creating structure for ScAddons test")
+
+	apiControllerTest, err := NewApiControllerTestFromEnv()
+	fatalOnError(t, err, "while creating structure for ApiController test")
+
+	myAssetStoreTest, err := NewAssetStoreTest(t)
+	fatalOnError(t, err, "while creating structure for AssetStore test")
+
+	myMicroFrontendTest, err := NewMicrofrontendTest()
+	fatalOnError(t, err, "while creating structure for MicroFrontend test")
+
+	appBrokerTest, err := NewAppBrokerTest()
+	fatalOnError(t, err, "while creating structure for AppBroker test")
+
+	helmBrokerTest, err := NewHelmBrokerTest()
+	fatalOnError(t, err, "while creating structure for HelmBroker test")
 
 	myEventBusTest, err := NewEventBusTest()
 	fatalOnError(t, err, "while creating structure for EventBus test")
 
-	//myCmsTest, err := NewCmsTest(t)
-	//fatalOnError(t, err, "while creating structure for Cms test")
+	myCmsTest, err := NewCmsTest(t)
+	fatalOnError(t, err, "while creating structure for Cms test")
 
 	backupTests := []BackupTest{
-		// myPrometheusTest,
-		// myFunctionTest,
-		// myDeploymentTest,
-		// myStatefulSetTest,
-		// myGrafanaTest,
-		// scAddonsTest,
-		// myCmsTest,
-		// myAssetStoreTest,
-		// apiControllerTest,
-		// myMicroFrontendTest,
-		// appBrokerTest,
-		// helmBrokerTest,
+		myPrometheusTest,
+		myFunctionTest,
+		myDeploymentTest,
+		myStatefulSetTest,
+		myGrafanaTest,
+		scAddonsTest,
+		myCmsTest,
+		myAssetStoreTest,
+		apiControllerTest,
+		myMicroFrontendTest,
+		appBrokerTest,
+		helmBrokerTest,
 		myEventBusTest,
 	}
 	e2eTests := make([]e2eTest, len(backupTests))
@@ -129,19 +134,19 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		allBackupSpecFile := cfg.AllBackupConfigurationFile
 		allBackupName := "all-" + backupName
 
-		// systemBackupSpecFile := cfg.SystemBackupConfigurationFile
-		// systemBackupName := "system-" + backupName
+		systemBackupSpecFile := cfg.SystemBackupConfigurationFile
+		systemBackupName := "system-" + backupName
 
-		// err = myBackupClient.CreateBackup(systemBackupName, systemBackupSpecFile)
-		// So(err, ShouldBeNil)
+		err = myBackupClient.CreateBackup(systemBackupName, systemBackupSpecFile)
+		So(err, ShouldBeNil)
 		err := myBackupClient.CreateBackup(allBackupName, allBackupSpecFile)
 		So(err, ShouldBeNil)
 
 		Convey("Check backup status", func() {
 
-			// err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 25*time.Minute)
-			// myBackupClient.DescribeBackup(systemBackupName)
-			// So(err, ShouldBeNil)
+			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 25*time.Minute)
+			myBackupClient.DescribeBackup(systemBackupName)
+			So(err, ShouldBeNil)
 
 			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 25*time.Minute)
 			myBackupClient.DescribeBackup(allBackupName)
@@ -159,13 +164,12 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 				}
 
 				Convey("Restore Cluster", func() {
-					// err = myBackupClient.RestoreBackup(systemBackupName)
-					// So(err, ShouldBeNil)
+					err = myBackupClient.RestoreBackup(systemBackupName)
+					So(err, ShouldBeNil)
 					err := myBackupClient.RestoreBackup(allBackupName)
 					So(err, ShouldBeNil)
 
-					// err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 20*time.Minute)
-					// myBackupClient.DescribeRestore(systemBackupName)
+					err = myBackupClient.WaitForBackupToBeRestored(systemBackupSpecFile, 25*time.Minute)
 					So(err, ShouldBeNil)
 
 					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 20*time.Minute)
