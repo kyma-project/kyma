@@ -142,7 +142,7 @@ isLocalEnv:
 
 ## How long to retain metrics
 ## Reduced to 6h from 24h as to limit Prometheus use a max of 800 Mb memory in nightly azure cluster
-## this parameter set in-memory retention time not the persistence one
+## this parameter sets in-memory retention time not the persistence one
 retention: 2h
 
 ## Prefix used to register routes, overriding externalUrl route.
