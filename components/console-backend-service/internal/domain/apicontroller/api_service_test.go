@@ -152,7 +152,7 @@ func TestApiService_Create(t *testing.T) {
 	jwksUri := "http://test-jwks-uri"
 	issuer := "test-issuer"
 
-	params := paramsToAPICreationInput(hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
+	newApi := fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
 
 	t.Run("Should create an API", func(t *testing.T) {
 		informer := fixAPIInformer()
@@ -161,22 +161,21 @@ func TestApiService_Create(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		result, err := service.Create(name, namespace, params)
+		result, err := service.Create(newApi)
 
 		require.NoError(t, err)
-		api := fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
-		assert.Equal(t, api, result)
+		assert.Equal(t, newApi, result)
 	})
 
 	t.Run("Should throw an error if API already exists", func(t *testing.T) {
-		api := fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
-		informer := fixAPIInformer(api)
-		client := fake.NewSimpleClientset(api)
+		existingApi := fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
+		informer := fixAPIInformer(existingApi)
+		client := fake.NewSimpleClientset(existingApi)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		_, err := service.Create(name, namespace, params)
+		_, err := service.Create(newApi)
 
 		require.Error(t, err)
 	})
@@ -192,17 +191,17 @@ func TestApiService_Update(t *testing.T) {
 	jwksUri := "http://test-jwks-uri"
 	issuer := "test-issuer"
 
-	params := paramsToAPICreationInput("new-hostname", serviceName, jwksUri, issuer, servicePort, nil, nil)
+	newApi := fixAPIWith(name, namespace, "new-hostname", serviceName, jwksUri, issuer, servicePort, nil, nil)
 
 	t.Run("Should update an API", func(t *testing.T) {
-		api := fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
-		informer := fixAPIInformer(api)
-		client := fake.NewSimpleClientset(api)
+		existingApi := fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
+		informer := fixAPIInformer(existingApi)
+		client := fake.NewSimpleClientset(existingApi)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		result, err := service.Update(name, namespace, params)
+		result, err := service.Update(newApi)
 
 		require.NoError(t, err)
 		newApi := fixAPIWith(name, namespace, "new-hostname", serviceName, jwksUri, issuer, servicePort, nil, nil)
@@ -216,7 +215,7 @@ func TestApiService_Update(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		_, err := service.Update(name, namespace, params)
+		_, err := service.Update(newApi)
 
 		require.Error(t, err)
 	})

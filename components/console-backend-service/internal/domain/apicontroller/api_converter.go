@@ -48,7 +48,7 @@ func (c *apiConverter) ToGQLs(in []*v1alpha2.Api) []gqlschema.API {
 	return result
 }
 
-func (c *apiConverter) ToV1Api(name string, namespace string, in gqlschema.APIInput, resourceVersion string) *v1alpha2.Api {
+func (c *apiConverter) ToApi(name string, namespace string, in gqlschema.APIInput) *v1alpha2.Api {
 
 	return &v1alpha2.Api{
 		TypeMeta: v1.TypeMeta{
@@ -56,9 +56,8 @@ func (c *apiConverter) ToV1Api(name string, namespace string, in gqlschema.APIIn
 			Kind:       "API",
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name:            name,
-			Namespace:       namespace,
-			ResourceVersion: resourceVersion,
+			Name:      name,
+			Namespace: namespace,
 		},
 		Spec: v1alpha2.ApiSpec{
 			Service: v1alpha2.Service{

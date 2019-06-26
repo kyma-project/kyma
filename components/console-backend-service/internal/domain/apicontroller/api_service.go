@@ -5,7 +5,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/pkg/errors"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -14,10 +13,9 @@ import (
 )
 
 type apiService struct {
-	informer  cache.SharedIndexInformer
-	client    versioned.Interface
-	notifier  resource.Notifier
-	converter apiConverter
+	informer cache.SharedIndexInformer
+	client   versioned.Interface
+	notifier resource.Notifier
 }
 
 func newApiService(informer cache.SharedIndexInformer, client versioned.Interface) *apiService {
@@ -84,10 +82,8 @@ func (svc *apiService) Find(name string, namespace string) (*v1alpha2.Api, error
 	return res, nil
 }
 
-func (svc *apiService) Create(name string, namespace string, in gqlschema.APIInput) (*v1alpha2.Api, error) {
-	api := svc.converter.ToV1Api(name, namespace, in, "")
-
-	return svc.client.GatewayV1alpha2().Apis(namespace).Create(api)
+func (svc *apiService) Create(api *v1alpha2.Api) (*v1alpha2.Api, error) {
+	return svc.client.GatewayV1alpha2().Apis(api.ObjectMeta.Namespace).Create(api)
 }
 
 func (svc *apiService) Subscribe(listener resource.Listener) {
@@ -98,22 +94,20 @@ func (svc *apiService) Unsubscribe(listener resource.Listener) {
 	svc.notifier.DeleteListener(listener)
 }
 
-func (svc *apiService) Update(name string, namespace string, in gqlschema.APIInput) (*v1alpha2.Api, error) {
-	oldApi, err := svc.Find(name, namespace)
+func (svc *apiService) Update(api *v1alpha2.Api) (*v1alpha2.Api, error) {
+	oldApi, err := svc.Find(api.ObjectMeta.Name, api.ObjectMeta.Namespace)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while finding API %s", name)
+		return nil, errors.Wrapf(err, "while finding API %s", api.ObjectMeta.Name)
 	}
 
 	if oldApi == nil {
 		return nil, apiErrors.NewNotFound(schema.GroupResource{
 			Group:    "authentication.kyma-project.io/v1alpha2",
 			Resource: "API",
-		}, name)
+		}, api.ObjectMeta.Name)
 	}
-
-	api := svc.converter.ToV1Api(name, namespace, in, oldApi.ObjectMeta.ResourceVersion)
-
-	return svc.client.GatewayV1alpha2().Apis(namespace).Update(api)
+	api.ObjectMeta.ResourceVersion = oldApi.ObjectMeta.ResourceVersion
+	return svc.client.GatewayV1alpha2().Apis(api.ObjectMeta.Namespace).Update(api)
 }
 
 func (svc *apiService) Delete(name string, namespace string) error {

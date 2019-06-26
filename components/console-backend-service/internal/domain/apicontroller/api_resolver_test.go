@@ -143,8 +143,11 @@ func TestApiResolver_CreateAPI(t *testing.T) {
 		api := fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
 		expected := testApiToGQL(name, hostname, serviceName, jwksUri, issuer, servicePort)
 
+		converter := automock.NewApiConv()
+		converter.On("ToApi", name, namespace, params).Return(api, nil).Once()
+
 		service := automock.NewApiSvc()
-		service.On("Create", name, namespace, params).Return(api, nil).Once()
+		service.On("Create", api).Return(api, nil).Once()
 
 		resolver, err := newApiResolver(service)
 		require.NoError(t, err)
@@ -157,8 +160,13 @@ func TestApiResolver_CreateAPI(t *testing.T) {
 	})
 
 	t.Run("Should return an error", func(t *testing.T) {
+		api := fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
+
+		converter := automock.NewApiConv()
+		converter.On("ToApi", name, namespace, params).Return(api, nil).Once()
+
 		service := automock.NewApiSvc()
-		service.On("Create", name, namespace, params).Return(nil, errors.New("test")).Once()
+		service.On("Create", api).Return(nil, errors.New("test")).Once()
 
 		resolver, err := newApiResolver(service)
 		require.NoError(t, err)
@@ -187,8 +195,11 @@ func TestApiResolver_UpdateAPI(t *testing.T) {
 		api := fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
 		expected := testApiToGQL(name, hostname, serviceName, jwksUri, issuer, servicePort)
 
+		converter := automock.NewApiConv()
+		converter.On("ToApi", name, namespace, params).Return(api, nil).Once()
+
 		service := automock.NewApiSvc()
-		service.On("Update", name, namespace, params).Return(api, nil).Once()
+		service.On("Update", api).Return(api, nil).Once()
 
 		resolver, err := newApiResolver(service)
 		require.NoError(t, err)
@@ -201,8 +212,13 @@ func TestApiResolver_UpdateAPI(t *testing.T) {
 	})
 
 	t.Run("Should return an error", func(t *testing.T) {
+		api := fixTestApi(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort)
+
+		converter := automock.NewApiConv()
+		converter.On("ToApi", name, namespace, params).Return(api, nil).Once()
+
 		service := automock.NewApiSvc()
-		service.On("Update", name, namespace, params).Return(nil, errors.New("test")).Once()
+		service.On("Update", api).Return(nil, errors.New("test")).Once()
 
 		resolver, err := newApiResolver(service)
 		require.NoError(t, err)

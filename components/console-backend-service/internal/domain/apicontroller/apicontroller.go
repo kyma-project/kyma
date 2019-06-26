@@ -77,7 +77,7 @@ type Resolver interface {
 	CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error)
 	UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error)
 	DeleteAPI(ctx context.Context, name string, namespace string) (*gqlschema.API, error)
-	ApiEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error)
+	APIEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error)
 }
 
 type domainResolver struct {

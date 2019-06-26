@@ -2,7 +2,6 @@
 
 package automock
 
-import gqlschema "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 import mock "github.com/stretchr/testify/mock"
 import resource "github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 import v1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
@@ -12,13 +11,13 @@ type apiSvc struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: name, namespace, params
-func (_m *apiSvc) Create(name string, namespace string, params gqlschema.APIInput) (*v1alpha2.Api, error) {
-	ret := _m.Called(name, namespace, params)
+// Create provides a mock function with given fields: api
+func (_m *apiSvc) Create(api *v1alpha2.Api) (*v1alpha2.Api, error) {
+	ret := _m.Called(api)
 
 	var r0 *v1alpha2.Api
-	if rf, ok := ret.Get(0).(func(string, string, gqlschema.APIInput) *v1alpha2.Api); ok {
-		r0 = rf(name, namespace, params)
+	if rf, ok := ret.Get(0).(func(*v1alpha2.Api) *v1alpha2.Api); ok {
+		r0 = rf(api)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha2.Api)
@@ -26,8 +25,8 @@ func (_m *apiSvc) Create(name string, namespace string, params gqlschema.APIInpu
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, gqlschema.APIInput) error); ok {
-		r1 = rf(name, namespace, params)
+	if rf, ok := ret.Get(1).(func(*v1alpha2.Api) error); ok {
+		r1 = rf(api)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -105,13 +104,13 @@ func (_m *apiSvc) Unsubscribe(listener resource.Listener) {
 	_m.Called(listener)
 }
 
-// Update provides a mock function with given fields: name, namespace, params
-func (_m *apiSvc) Update(name string, namespace string, params gqlschema.APIInput) (*v1alpha2.Api, error) {
-	ret := _m.Called(name, namespace, params)
+// Update provides a mock function with given fields: api
+func (_m *apiSvc) Update(api *v1alpha2.Api) (*v1alpha2.Api, error) {
+	ret := _m.Called(api)
 
 	var r0 *v1alpha2.Api
-	if rf, ok := ret.Get(0).(func(string, string, gqlschema.APIInput) *v1alpha2.Api); ok {
-		r0 = rf(name, namespace, params)
+	if rf, ok := ret.Get(0).(func(*v1alpha2.Api) *v1alpha2.Api); ok {
+		r0 = rf(api)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha2.Api)
@@ -119,8 +118,8 @@ func (_m *apiSvc) Update(name string, namespace string, params gqlschema.APIInpu
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, gqlschema.APIInput) error); ok {
-		r1 = rf(name, namespace, params)
+	if rf, ok := ret.Get(1).(func(*v1alpha2.Api) error); ok {
+		r1 = rf(api)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -14,7 +14,7 @@ import (
 
 type apiResolver struct {
 	apiSvc       apiSvc
-	apiConverter *apiConverter
+	apiConverter apiConv
 }
 
 func newApiResolver(lister apiSvc) (*apiResolver, error) {
@@ -54,8 +54,9 @@ func (ar *apiResolver) APIQuery(ctx context.Context, name string, namespace stri
 }
 
 func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
+	apiObject := ar.apiConverter.ToApi(name, namespace, params)
 
-	api, err := ar.apiSvc.Create(name, namespace, params)
+	api, err := ar.apiSvc.Create(apiObject)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s `%s` in namespace `%s`", pretty.API, name, namespace))
 		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
@@ -64,7 +65,7 @@ func (ar *apiResolver) CreateAPI(ctx context.Context, name string, namespace str
 	return *ar.apiConverter.ToGQL(api), nil
 }
 
-func (ar *apiResolver) ApiEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error) {
+func (ar *apiResolver) APIEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error) {
 	channel := make(chan gqlschema.ApiEvent, 1)
 	filter := func(api *v1alpha2.Api) bool {
 		if serviceName == nil {
@@ -86,7 +87,9 @@ func (ar *apiResolver) ApiEventSubscription(ctx context.Context, namespace strin
 }
 
 func (ar *apiResolver) UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
-	api, err := ar.apiSvc.Update(name, namespace, params)
+	apiObject := ar.apiConverter.ToApi(name, namespace, params)
+
+	api, err := ar.apiSvc.Update(apiObject)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while editing %s `%s` in namespace `%s`", pretty.API, name, namespace))
 		return gqlschema.API{}, gqlerror.New(err, pretty.APIs, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))

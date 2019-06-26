@@ -10,9 +10,16 @@ import (
 type apiSvc interface {
 	List(namespace string, serviceName *string, hostname *string) ([]*v1alpha2.Api, error)
 	Find(name string, namespace string) (*v1alpha2.Api, error)
-	Create(name string, namespace string, params gqlschema.APIInput) (*v1alpha2.Api, error)
-	Update(name string, namespace string, params gqlschema.APIInput) (*v1alpha2.Api, error)
+	Create(api *v1alpha2.Api) (*v1alpha2.Api, error)
+	Update(api *v1alpha2.Api) (*v1alpha2.Api, error)
 	Delete(name string, namespace string) error
 	Subscribe(listener resource.Listener)
 	Unsubscribe(listener resource.Listener)
+}
+
+//go:generate mockery -name=apiConv -output=automock -outpkg=automock -case=underscore
+type apiConv interface {
+	ToGQL(in *v1alpha2.Api) *gqlschema.API
+	ToGQLs(in []*v1alpha2.Api) []gqlschema.API
+	ToApi(name string, namespace string, in gqlschema.APIInput) *v1alpha2.Api
 }

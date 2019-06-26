@@ -597,7 +597,7 @@ func (r *subscriptionResolver) AddonsConfigurationEvent(ctx context.Context) (<-
 }
 
 func (r *subscriptionResolver) APIEvent(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error) {
-	return r.ac.ApiEventSubscription(ctx, namespace, serviceName)
+	return r.ac.APIEventSubscription(ctx, namespace, serviceName)
 }
 
 // Service Instance
