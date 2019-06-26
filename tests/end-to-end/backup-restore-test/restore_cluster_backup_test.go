@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
@@ -30,7 +31,7 @@ type e2eTest struct {
 }
 
 func TestBackupAndRestoreCluster(t *testing.T) {
-	// cfg, err := loadConfig()
+	cfg, err := loadConfig()
 	// fatalOnError(t, err, "while reading configuration from environment variables")
 
 	//myFunctionTest, err := NewFunctionTest()
@@ -124,62 +125,62 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		}
 	})
 
-	// 	Convey("Backup Cluster", t, func() {
-	// 		allBackupSpecFile := cfg.AllBackupConfigurationFile
-	// 		allBackupName := "all-" + backupName
+	Convey("Backup Cluster", t, func() {
+		allBackupSpecFile := cfg.AllBackupConfigurationFile
+		allBackupName := "all-" + backupName
 
-	// 		systemBackupSpecFile := cfg.SystemBackupConfigurationFile
-	// 		systemBackupName := "system-" + backupName
+		// systemBackupSpecFile := cfg.SystemBackupConfigurationFile
+		// systemBackupName := "system-" + backupName
 
-	// 		err = myBackupClient.CreateBackup(systemBackupName, systemBackupSpecFile)
-	// 		So(err, ShouldBeNil)
-	// 		err := myBackupClient.CreateBackup(allBackupName, allBackupSpecFile)
-	// 		So(err, ShouldBeNil)
+		// err = myBackupClient.CreateBackup(systemBackupName, systemBackupSpecFile)
+		// So(err, ShouldBeNil)
+		err := myBackupClient.CreateBackup(allBackupName, allBackupSpecFile)
+		So(err, ShouldBeNil)
 
-	// 		Convey("Check backup status", func() {
+		Convey("Check backup status", func() {
 
-	// 			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 25*time.Minute)
-	// 			myBackupClient.DescribeBackup(systemBackupName)
-	// 			So(err, ShouldBeNil)
+			// err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 25*time.Minute)
+			// myBackupClient.DescribeBackup(systemBackupName)
+			// So(err, ShouldBeNil)
 
-	// 			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 25*time.Minute)
-	// 			myBackupClient.DescribeBackup(allBackupName)
-	// 			So(err, ShouldBeNil)
+			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 25*time.Minute)
+			myBackupClient.DescribeBackup(allBackupName)
+			So(err, ShouldBeNil)
 
-	// 			Convey("Delete resources from cluster\n", func() {
-	// 				for _, e2eTest := range e2eTests {
-	// 					e2eTest.backupTest.DeleteResources(e2eTest.namespace)
+			Convey("Delete resources from cluster\n", func() {
+				for _, e2eTest := range e2eTests {
+					e2eTest.backupTest.DeleteResources(e2eTest.namespace)
 
-	// 					err := myBackupClient.DeleteNamespace(e2eTest.namespace)
-	// 					So(err, ShouldBeNil)
+					err := myBackupClient.DeleteNamespace(e2eTest.namespace)
+					So(err, ShouldBeNil)
 
-	// 					err = myBackupClient.WaitForNamespaceToBeDeleted(e2eTest.namespace, 2*time.Minute)
-	// 					So(err, ShouldBeNil)
-	// 				}
+					err = myBackupClient.WaitForNamespaceToBeDeleted(e2eTest.namespace, 2*time.Minute)
+					So(err, ShouldBeNil)
+				}
 
-	// 				Convey("Restore Cluster", func() {
-	// 					err = myBackupClient.RestoreBackup(systemBackupName)
-	// 					So(err, ShouldBeNil)
-	// 					err := myBackupClient.RestoreBackup(allBackupName)
-	// 					So(err, ShouldBeNil)
+				Convey("Restore Cluster", func() {
+					// err = myBackupClient.RestoreBackup(systemBackupName)
+					// So(err, ShouldBeNil)
+					err := myBackupClient.RestoreBackup(allBackupName)
+					So(err, ShouldBeNil)
 
-	// 					err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 20*time.Minute)
-	// 					myBackupClient.DescribeRestore(systemBackupName)
-	// 					So(err, ShouldBeNil)
+					// err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 20*time.Minute)
+					// myBackupClient.DescribeRestore(systemBackupName)
+					So(err, ShouldBeNil)
 
-	// 					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 20*time.Minute)
-	// 					myBackupClient.DescribeRestore(allBackupName)
-	// 					So(err, ShouldBeNil)
+					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 20*time.Minute)
+					myBackupClient.DescribeRestore(allBackupName)
+					So(err, ShouldBeNil)
 
-	// 					Convey("Test restored resources\n", func() {
-	// 						for _, e2eTest := range e2eTests {
-	// 							e2eTest.backupTest.TestResources(e2eTest.namespace)
-	// 						}
-	// 					})
-	// 				})
-	// 			})
-	// 		})
-	// 	})
+					Convey("Test restored resources\n", func() {
+						for _, e2eTest := range e2eTests {
+							e2eTest.backupTest.TestResources(e2eTest.namespace)
+						}
+					})
+				})
+			})
+		})
+	})
 }
 
 func loadConfig() (config, error) {
