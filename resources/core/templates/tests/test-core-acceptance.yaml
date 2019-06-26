@@ -21,22 +21,6 @@ spec:
           value: http://application-broker.kyma-integration.svc.cluster.local
         - name: RELEASE_NAMESPACE
           value: {{ .Values.test.acceptance.core.application.brokerNamespace }}
-        - name: DOMAIN_NAME
-          value: {{ .Values.global.ingress.domainName }}
-        - name: IS_LOCAL_ENV
-          value: {{ .Values.global.isLocalEnv | toString | quote }}
-        - name: DEX_USER_EMAIL
-          valueFrom:
-            secretKeyRef:
-              name: admin-user
-              key: email
-        - name: DEX_USER_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: admin-user
-              key: password
-        - name: INGRESSGATEWAY_ADDRESS
-          value: istio-ingressgateway.istio-system.svc.cluster.local
         - name: STUBS_DOCKER_IMAGE
           value: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.acceptance_tests.dir }}acceptance-tests:{{ .Values.global.acceptance_tests.version }}
         - name: APPLICATION_UNLINKING_TIMEOUT
