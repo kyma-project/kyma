@@ -4,5 +4,5 @@ containerRegistry:
 nameOverride: backup-test
 
 image:
-  dir: develop/
-  tag: 164eb8ac
+  dir: snapshot/test/backup-test
+  tag: test14

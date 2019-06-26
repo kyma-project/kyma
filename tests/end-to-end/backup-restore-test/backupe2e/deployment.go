@@ -13,15 +13,14 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	. "github.com/smartystreets/goconvey/convey"
 	"k8s.io/client-go/kubernetes"
 )
 
 type deploymentTest struct {
-	deploymentName, uuid string
-	coreClient           *kubernetes.Clientset
+	deploymentName string
+	coreClient     *kubernetes.Clientset
 }
 
 func NewDeploymentTest() (deploymentTest, error) {
@@ -38,7 +37,6 @@ func NewDeploymentTest() (deploymentTest, error) {
 	return deploymentTest{
 		coreClient:     coreClient,
 		deploymentName: "hello",
-		uuid:           uuid.New().String(),
 	}, nil
 }
 
@@ -58,10 +56,6 @@ func (d deploymentTest) TestResources(namespace string) {
 	value, err := d.getOutput(host, 2*time.Minute)
 	So(err, ShouldBeNil)
 	So(value, ShouldContainSubstring, "Welcome to nginx!")
-}
-
-func (d deploymentTest) DeleteResources(namespace string) {
-	// There is not need to be implemented for this test.
 }
 
 func (d deploymentTest) getOutput(host string, waitmax time.Duration) (string, error) {
@@ -102,13 +96,13 @@ func (d deploymentTest) createDeployment(namespace string, replicas int32) error
 			Replicas: int32Ptr(replicas),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"app": "deployment" + d.uuid,
+					"app": "deployment",
 				},
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"app": "deployment" + d.uuid,
+						"app": "deployment",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -138,7 +132,7 @@ func (d deploymentTest) createService(namespace string) error {
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: map[string]string{
-				"app": "deployment" + d.uuid,
+				"app": "deployment",
 			},
 			Ports: []corev1.ServicePort{
 				corev1.ServicePort{
@@ -162,7 +156,7 @@ func (d deploymentTest) waitForPodDeployment(namespace string, replicas int32, w
 		case <-timeout:
 			return fmt.Errorf("Deployment %v could not be created within given time  %v", d.deploymentName, waitmax)
 		case <-tick:
-			pods, err := d.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app=deployment" + d.uuid})
+			pods, err := d.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app=deployment"})
 			if err != nil {
 				return err
 			}
