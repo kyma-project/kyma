@@ -54,13 +54,13 @@ global:
     version: a9bfa9fc
   test_apiserver_proxy:
     dir: develop/
-    version: e31b2a0b
+    version: 0cca016f
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
     dir: pr/
-    version: 'PR-4581'
+    version: PR-4554
   console_backend_service_test:
     dir: pr/
     version: 'PR-4581'
