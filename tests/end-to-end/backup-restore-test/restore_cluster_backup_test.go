@@ -69,8 +69,8 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	appBrokerTest, err := NewAppBrokerTest()
 	fatalOnError(t, err, "while creating structure for AppBroker test")
 
-	helmBrokerTest, err := NewHelmBrokerTest()
-	fatalOnError(t, err, "while creating structure for HelmBroker test")
+	// helmBrokerTest, err := NewHelmBrokerTest()
+	// fatalOnError(t, err, "while creating structure for HelmBroker test")
 
 	myEventBusTest, err := NewEventBusTest()
 	fatalOnError(t, err, "while creating structure for EventBus test")
@@ -90,7 +90,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		apiControllerTest,
 		myMicroFrontendTest,
 		appBrokerTest,
-		helmBrokerTest,
+		// helmBrokerTest,
 		myEventBusTest,
 	}
 	e2eTests := make([]e2eTest, len(backupTests))
