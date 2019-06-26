@@ -14,6 +14,7 @@ cp -R ../../api docker/image/
 cp -R ../../generated docker/image/
 cp -R ../../internal docker/image/
 cp -R ../../vendor docker/image/
+cp -R ../../pkg docker/image/
 tagName="${NAME}:${VERSION}"
 docker build --build-arg version=${VERSION} -t ${tagName} --label version=${VERSION} --label component=${COMPONENT} --rm docker/image
 rm -rf docker

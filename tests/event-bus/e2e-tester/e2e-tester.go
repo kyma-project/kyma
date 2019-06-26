@@ -36,13 +36,19 @@ const (
 	fail    = 1
 	retries = 20
 
-	sourceIDHeader         = "Ce-Source-Id"
-	eventTypeHeader        = "Ce-Event-Type"
-	eventTypeVersionHeader = "Ce-Event-Type-Version"
-	customHeader           = "Ce-X-Custom-Header"
+	idHeader               = "ce-id"
+	timeHeader             = "ce-time"
+	contentTypeHeader      = "content-type"
+	sourceHeader           = "ce-source"
+	eventTypeHeader        = "ce-type"
+	eventTypeVersionHeader = "ce-eventtypeversion"
+	customHeader           = "ce-xcustomheader"
+	specVersionHeader      = "ce-specversion"
 
 	ceSourceIDHeaderValue         = "override-source-ID"
 	ceEventTypeHeaderValue        = "override-event-type"
+	ceSpecVersionHeaderValue      = "0.3"
+	contentTypeHeaderValue        = "application/json"
 	ceEventTypeVersionHeaderValue = "override-event-type-version"
 	customHeaderValue             = "Ce-X-custom-header-value"
 )
@@ -319,7 +325,7 @@ func publishHeadersTestEvent(publishEventURL string) (*api.Response, error) {
 
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", publishEventURL, strings.NewReader(payload))
-	req.Header.Add(sourceIDHeader, ceSourceIDHeaderValue)
+	req.Header.Add(sourceHeader, ceSourceIDHeaderValue)
 	req.Header.Add(eventTypeHeader, ceEventTypeHeaderValue)
 	req.Header.Add(eventTypeVersionHeader, ceEventTypeVersionHeaderValue)
 	req.Header.Add(customHeader, customHeaderValue)
@@ -401,17 +407,34 @@ func checkSubscriberReceivedEventHeaders() error {
 			continue
 		}
 
-		if resp[sourceIDHeader][0] != srcID {
-			return fmt.Errorf("wrong response: %s, want: %s", resp[sourceIDHeader][0], srcID)
+		lowerResponseHeaders := make(map[string][]string)
+		for k := range resp {
+			lowerResponseHeaders[strings.ToLower(k)] = resp[k]
 		}
-		if resp[eventTypeHeader][0] != eventType {
-			return fmt.Errorf("wrong response: %s, want: %s", resp[eventTypeHeader][0], eventType)
+
+		if lowerResponseHeaders[sourceHeader][0] != srcID {
+			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[sourceHeader][0], srcID)
 		}
-		if resp[eventTypeVersionHeader][0] != eventTypeVersion {
-			return fmt.Errorf("wrong response: %s, want: %s", resp[eventTypeVersionHeader][0], eventTypeVersion)
+		if lowerResponseHeaders[eventTypeHeader][0] != eventType {
+			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[eventTypeHeader][0], eventType)
 		}
-		if resp[customHeader][0] != customHeaderValue {
-			return fmt.Errorf("wrong response: %s, want: %s", resp[customHeader][0], customHeaderValue)
+		if lowerResponseHeaders[eventTypeVersionHeader][0] != eventTypeVersion {
+			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[eventTypeVersionHeader][0], eventTypeVersion)
+		}
+		if lowerResponseHeaders[idHeader][0] == "" {
+			return fmt.Errorf("wrong response: %s, can't be empty", lowerResponseHeaders[idHeader][0])
+		}
+		if lowerResponseHeaders[timeHeader][0] == "" {
+			return fmt.Errorf("wrong response: %s, can't be empty", lowerResponseHeaders[timeHeader][0])
+		}
+		if lowerResponseHeaders[contentTypeHeader][0] != contentTypeHeaderValue {
+			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[contentTypeHeader][0], contentTypeHeaderValue)
+		}
+		if lowerResponseHeaders[specVersionHeader][0] != ceSpecVersionHeaderValue {
+			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[specVersionHeader][0], ceSpecVersionHeaderValue)
+		}
+		if lowerResponseHeaders[customHeader][0] != customHeaderValue {
+			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[customHeader][0], customHeaderValue)
 		}
 		return nil
 	}
@@ -420,11 +443,10 @@ func checkSubscriberReceivedEventHeaders() error {
 
 func dumpResponse(resp *http.Response) {
 	defer resp.Body.Close()
-	dump, err := httputil.DumpResponse(resp, true)
+	_, err := httputil.DumpResponse(resp, true)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("%q", dump)
 }
 
 func checkStatusCode(res *http.Response, expectedStatusCode int) bool {

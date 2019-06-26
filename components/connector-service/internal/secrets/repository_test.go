@@ -1,8 +1,9 @@
 package secrets
 
 import (
-	"k8s.io/apimachinery/pkg/types"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/secrets/mocks"
@@ -42,13 +43,13 @@ func TestRepository_Get(t *testing.T) {
 		repository := NewRepository(prepareManagerConstructor(secretsManager))
 
 		// when
-		encodedCrt, encodedKey, err := repository.Get(namespacedName)
+		secretData, err := repository.Get(namespacedName)
 
 		// then
 		require.NoError(t, err)
 
-		assert.Equal(t, expectedCaCrt, encodedCrt)
-		assert.Equal(t, expectedCaKey, encodedKey)
+		assert.Equal(t, expectedCaCrt, secretData["ca.crt"])
+		assert.Equal(t, expectedCaKey, secretData["ca.key"])
 	})
 
 	t.Run("should fail in case secret not found", func(t *testing.T) {
@@ -62,13 +63,12 @@ func TestRepository_Get(t *testing.T) {
 		repository := NewRepository(prepareManagerConstructor(secretsManager))
 
 		// when
-		encodedCrt, encodedKey, err := repository.Get(namespacedName)
+		secretData, err := repository.Get(namespacedName)
 
 		// then
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeNotFound, err.Code())
-		assert.Nil(t, encodedCrt)
-		assert.Nil(t, encodedKey)
+		assert.Nil(t, secretData)
 	})
 
 	t.Run("should fail if couldn't get secret", func(t *testing.T) {
@@ -79,13 +79,12 @@ func TestRepository_Get(t *testing.T) {
 		repository := NewRepository(prepareManagerConstructor(secretsManager))
 
 		// when
-		encodedCrt, encodedKey, err := repository.Get(namespacedName)
+		secretData, err := repository.Get(namespacedName)
 
 		// then
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
-		assert.Nil(t, encodedCrt)
-		assert.Nil(t, encodedKey)
+		assert.Nil(t, secretData)
 	})
 }
 

@@ -10,6 +10,7 @@ import (
 	"github.com/onsi/gomega"
 	coreV1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"testing"
 	"time"
@@ -21,6 +22,7 @@ import (
 var (
 	webhookCfgMapName      = "test"
 	webhookCfgMapNamespace = "test"
+	fixMetadata            = runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)}
 )
 
 const timeout = time.Second * 5
@@ -93,6 +95,13 @@ func TestReconcile(t *testing.T) {
 		err = c.Status().Update(context.TODO(), &asset)
 		g.Expect(err).ToNot(gomega.HaveOccurred())
 		g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(request)))
+
+		if asset.Annotations["cms.kyma-project.io/asset-short-name"] == "source-one" {
+			g.Expect(asset.Spec.Metadata).ToNot(gomega.BeNil())
+			g.Expect(asset.Spec.Metadata).To(gomega.Equal(&fixMetadata))
+		} else {
+			g.Expect(asset.Spec.Metadata).To(gomega.BeNil())
+		}
 	}
 
 	// Update DocsTopic status
@@ -123,7 +132,7 @@ func TestReconcile(t *testing.T) {
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	g.Expect(assets.Items).To(gomega.HaveLen(len(currentTopic.Spec.Sources)))
 	for _, a := range assets.Items {
-		if a.Annotations["assetshortname.cms.kyma-project.io"] != "source-two" {
+		if a.Annotations["cms.kyma-project.io/asset-short-name"] != "source-two" {
 			continue
 		}
 		g.Expect(a.Spec.Source.Filter).To(gomega.Equal("zyx"))
@@ -143,10 +152,11 @@ func fixDocsTopic() *v1alpha1.DocsTopic {
 				DisplayName: "Test Topic",
 				Sources: []v1alpha1.Source{
 					{
-						Name: "source-one",
-						Type: "openapi",
-						Mode: v1alpha1.DocsTopicSingle,
-						URL:  "https://dummy.url/single",
+						Name:     "source-one",
+						Type:     "openapi",
+						Mode:     v1alpha1.DocsTopicSingle,
+						URL:      "https://dummy.url/single",
+						Metadata: &fixMetadata,
 					},
 					{
 						Name:   "source-two",

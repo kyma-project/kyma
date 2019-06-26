@@ -3,6 +3,8 @@ package assetstore
 import (
 	"testing"
 
+	"k8s.io/apimachinery/pkg/runtime"
+
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
@@ -24,6 +26,7 @@ func TestAssetConverter_ToGQL(t *testing.T) {
 				Reason:  "ExampleReason",
 				Message: "ExampleMessage",
 			},
+			Metadata: gqlschema.JSON{"complex": map[string]interface{}{"data": "true"}, "json": "true"},
 		}
 
 		result, err := converter.ToGQL(item)
@@ -105,6 +108,7 @@ func fixAsset() *v1alpha2.Asset {
 				BucketRef: v1alpha2.AssetBucketRef{
 					Name: "ExampleBucketRef",
 				},
+				Metadata: &runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)},
 			},
 		},
 		Status: v1alpha2.AssetStatus{

@@ -1,4 +1,4 @@
-# Static users generator
+# Dex Static User Configurer
 
 ## Overview
 
@@ -10,8 +10,8 @@ The tool is a Dex init-container used by default in a Kyma installation.
 
 ## Development
 
-To build the image of static-users-generator execute:
+To build the image of dex-static-user-configurer execute:
 
 ```bash
-docker build -t static-users-generator:latest .
+docker build -t dex-static-user-configurer:latest .
 ```
