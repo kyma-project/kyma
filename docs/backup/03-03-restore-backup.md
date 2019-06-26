@@ -7,7 +7,9 @@ Restoring a Kyma cluster requires a fresh Kyma installation with the same versio
 
 Use this command to list available backups:
 
-```$ kubectl get backups -n kyma-backup```
+```
+kubectl get backups -n kyma-backup
+```
 
 Sample restore configuration:
 
@@ -38,17 +40,24 @@ spec:
 
 To trigger the restore process, run this command:
 
-```$ kubectl apply -f <filename>```
+```
+kubectl apply -f {filename}
+```
+
 
 To check the restore progress, run this command:
 
-```$ kubectl describe restore -n kyma-backup <restore name>```
+```
+kubectl describe restore -n kyma-backup {restore name}
+```
 
-To validate the result of the restore use the `kubectl get` command.
+To validate the result of the restore, use the `kubectl get` command.
 
 > **NOTE:** Even if the restore process is complete, it may take some time for the resources to become available again.
 
 > **NOTE:** In order to make Prometheus work after restore following steps need to be done:
+
+
 ```
 ### Save the prometheus resource in a file
 kubectl get Prometheus -n kyma-system monitoring -oyaml --export > prom.yaml
@@ -58,4 +67,5 @@ sed -i prom.yaml '/last-applied-configuration/d;/generation/d;/selfLink/d' prom.
 
 ### Reapply the prometheus resource using the file
 kubectl -n kyma-system apply -f prom.yaml
+
 ```

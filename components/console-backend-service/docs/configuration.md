@@ -29,6 +29,9 @@ Use the following environment variables to configure the application:
 | APP_OIDC_GROUPS_CLAIM | No | `groups` | The name of a custom OpenID Connect claim for specifying user groups. |
 | APP_OIDC_GROUPS_PREFIX | NO | | If provided, all groups will be prefixed with this value. |
 | APP_OIDC_SUPPORTED_SIGNING_ALGS | NO | `RS256` | Comma-separated list of the allowed JOSE asymmetric signing algorithms. Tokens with the 'alg' header value not in this list will be rejected. Values are defined by [RFC 7518](https://tools.ietf.org/html/rfc7518#section-3.1). |
+| APP_TRACING_COLLECTOR_URL | YES | `http://zipkin.kyma-system:9411/api/v1/spans` | The collector URL to handle post requests. |
+| APP_TRACING_DEBUG | YES | `false` | The recorder debug flag. |
+| APP_TRACING_SERVICE_SPAN_NAME | YES | `console-backend-service` | The name of the service span. |
 
 ## Configure logger verbosity level
 This application uses `glog` to log messages. Pass command line arguments described in the [glog.go](https://github.com/golang/glog/blob/master/glog.go) document to customize the log, such as log level and output.

@@ -1,11 +1,12 @@
 package shared
 
 type Asset struct {
-	Name      string      `json:"name"`
-	Namespace string      `json:"namespace"`
-	Type      string      `json:"type"`
-	Files     []File      `json:"files"`
-	Status    AssetStatus `json:"status"`
+	Name      string                 `json:"name"`
+	Namespace string                 `json:"namespace"`
+	Metadata  map[string]interface{} `json:"metadata"`
+	Type      string                 `json:"type"`
+	Files     []File                 `json:"files"`
+	Status    AssetStatus            `json:"status"`
 }
 
 type AssetStatus struct {

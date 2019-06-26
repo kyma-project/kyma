@@ -214,22 +214,23 @@ func (c *Controller) syncHandler(key string) error {
 		}
 
 	} else if installation.ShouldUninstall() {
+
 		err = c.conditionManager.UninstallStart()
 		if err != nil {
 			return err
 		}
 
 		err = c.kymaSteps.UninstallKyma(installationData)
-		if err != nil {
+		if c.errorHandlers.CheckError("Uninstall error: ", err) {
 			_ = c.conditionManager.UninstallError()
-
 			return err
 		}
 
 		err = c.conditionManager.UninstallSuccess()
-		if err != nil {
+		if c.errorHandlers.CheckError("Error finishing uninstall: ", err) {
 			return err
 		}
+
 	} else {
 		//Neither install nor uninstall, action unknown.
 		c.installBackoff.reset()

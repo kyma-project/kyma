@@ -5,33 +5,33 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
-	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/authn"
-
-	authenticatorpkg "k8s.io/apiserver/pkg/authentication/authenticator"
-
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
-	"k8s.io/client-go/kubernetes"
-
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/golang/glog"
-	"github.com/kyma-project/kyma/components/console-backend-service/pkg/signal"
-	"github.com/pkg/errors"
-	"github.com/rs/cors"
-	"github.com/vrischmann/envconfig"
-	restclient "k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-
 	"github.com/99designs/gqlgen/handler"
+	"github.com/golang/glog"
+	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/authn"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/authz"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/origin"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/signal"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/tracing"
+	opentracing "github.com/opentracing/opentracing-go"
+	zipkin "github.com/openzipkin/zipkin-go-opentracing"
+	"github.com/pkg/errors"
+	"github.com/rs/cors"
+	"github.com/vrischmann/envconfig"
+	authenticatorpkg "k8s.io/apiserver/pkg/authentication/authenticator"
+	"k8s.io/client-go/kubernetes"
+	restclient "k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 type config struct {
@@ -47,6 +47,7 @@ type config struct {
 	OIDC                 authn.OIDCConfig
 	SARCacheConfig       authz.SARCacheConfig
 	FeatureToggles       experimental.FeatureToggles
+	Tracing              tracing.Config
 }
 
 func main() {
@@ -129,6 +130,7 @@ func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
 }
 
 func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema, authenticator authenticatorpkg.Request) {
+	setupTracing(cfg.Tracing, cfg.Port)
 	var allowedOrigins []string
 	if len(allowedOrigins) == 0 {
 		allowedOrigins = []string{"*"}
@@ -141,14 +143,14 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 	if authenticator != nil {
 		router.Use(authn.AuthMiddleware(authenticator))
 	}
-
 	router.HandleFunc("/", handler.Playground("Dataloader", "/graphql"))
-	router.HandleFunc("/graphql", handler.GraphQL(schema,
+	graphQLHandler := handler.GraphQL(schema,
 		handler.WebsocketUpgrader(websocket.Upgrader{
 			CheckOrigin: origin.CheckFn(allowedOrigins),
 		}),
-	))
-
+		handler.Tracer(tracing.New()),
+	)
+	router.HandleFunc("/graphql", tracing.NewWithParentSpan(cfg.Tracing.ServiceSpanName, graphQLHandler))
 	serverHandler := cors.New(cors.Options{
 		AllowedOrigins: allowedOrigins,
 		AllowedMethods: []string{
@@ -175,4 +177,13 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 		glog.Errorf("HTTP server ListenAndServe: %v", err)
 	}
+}
+
+func setupTracing(cfg tracing.Config, hostPort int) {
+	collector, err := zipkin.NewHTTPCollector(cfg.CollectorUrl)
+	exitOnError(err, "Error while initializing zipkin")
+	recorder := zipkin.NewRecorder(collector, cfg.Debug, strconv.Itoa(hostPort), cfg.ServiceSpanName)
+	tracer, err := zipkin.NewTracer(recorder, zipkin.TraceID128Bit(false))
+	exitOnError(err, "Error while initializing tracer")
+	opentracing.SetGlobalTracer(tracer)
 }

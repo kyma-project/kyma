@@ -15,7 +15,7 @@ type Manager interface {
 }
 
 type Repository interface {
-	Get(name types.NamespacedName) (crt []byte, key []byte, appError apperrors.AppError)
+	Get(name types.NamespacedName) (secretData map[string][]byte, appError apperrors.AppError)
 }
 
 type repository struct {
@@ -29,15 +29,15 @@ func NewRepository(secretsManagerConstructor ManagerConstructor) Repository {
 	}
 }
 
-func (r *repository) Get(name types.NamespacedName) (crt []byte, key []byte, appError apperrors.AppError) {
+func (r *repository) Get(name types.NamespacedName) (secretData map[string][]byte, appError apperrors.AppError) {
 	secretsManager := r.secretsManagerConstructor(name.Namespace)
 	secret, err := secretsManager.Get(name.Name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			return nil, nil, apperrors.NotFound("secret %s not found", name)
+			return nil, apperrors.NotFound("secret %s not found", name)
 		}
-		return nil, nil, apperrors.Internal("failed to get %s secret, %s", name, err)
+		return nil, apperrors.Internal("failed to get %s secret, %s", name, err)
 	}
 
-	return secret.Data["ca.crt"], secret.Data["ca.key"], nil
+	return secret.Data, nil
 }

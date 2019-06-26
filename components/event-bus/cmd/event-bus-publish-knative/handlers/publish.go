@@ -80,8 +80,8 @@ func filterCEHeaders(req *http.Request) map[string][]string {
 	//forward `ce-` headers only
 	headers := make(map[string][]string)
 	for k := range req.Header {
-		if strings.HasPrefix(strings.ToUpper(k), "CE-") {
-			headers[k] = req.Header[k]
+		if strings.HasPrefix(strings.ToLower(k), "ce-") {
+			headers[strings.ToLower(k)] = req.Header[k]
 		}
 	}
 	return headers
@@ -201,6 +201,7 @@ func buildMessage(publishRequest *api.Request, traceContext *api.TraceContext,
 	headers[trace.HeaderEventTypeVersion] = []string{publishRequest.EventTypeVersion}
 	headers[trace.HeaderEventID] = []string{publishRequest.EventID}
 	headers[trace.HeaderEventTime] = []string{publishRequest.EventTime}
+	headers[trace.HeaderSpecVersion] = []string{trace.SpecVersion}
 	if traceContext != nil {
 		for k, v := range *traceContext {
 			headers[k] = []string{v}

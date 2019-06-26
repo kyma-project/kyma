@@ -53,9 +53,9 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.finalizers** | **NO** | Protects the CR from deletion. Read [this](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/#finalizers) Kubernetes document to learn more about finalizers. |
 | **spec.version** | **NO** | When manually installing Kyma on a cluster, specify any valid [SemVer](https://semver.org/) notation string. |
 | **spec.url** | **YES** | Specifies the location of the Kyma sources `tar.gz` package. For example, for the `master` branch of Kyma, the address is `https://github.com/kyma-project/kyma/archive/master.tar.gz` |
-| **spec.components** | **YES** | Lists which components of Helm chart components to install or update. |
+| **spec.components** | **YES** | Lists which components of Helm chart components to install, update or uninstall. |
 | **spec.components.name** | **YES** | Specifies the name of the component which is the same as the name of the component subdirectory in the `resources` directory. |
-| **spec.components.namespace** | **YES** | Defines the Namespace in which you want the Installer to install, or update the component. |
+| **spec.components.namespace** | **YES** | Defines the Namespace in which you want the Installer to install or update the component. |
 | **spec.components.release** | **NO** | Provides the name of the Helm release. The default parameter is the component name. |
 
 ## Additional information
@@ -66,7 +66,7 @@ The Kyma Installer adds the **status** section which describes the status of Kym
 |----------|:-------------:|------|
 | **status.state** | **YES** | Describes the installation state. Takes one of four values. |
 | **status.description** | **YES** | Describes the installation step the installer performs at the moment. |
-| **status.errorLog** | **YES** | Lists all errors that happen during installation. |
+| **status.errorLog** | **YES** | Lists all errors that happen during installation and uninstallation. |
 | **status.errorLog.component** | **YES** | Specifies the name of the component that causes the error. |
 | **status.errorLog.log** | **YES** | Provides a description of the error. |
 | **status.errorLog.occurrences** | **YES** | Specifies the number of subsequent occurrences of the error. |

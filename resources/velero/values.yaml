@@ -44,6 +44,7 @@ global:
 
   volumeSnapshotLocation: {}
   #  name:
+  #  bucket:
   #  config:
   #    region:
   #    apiTimeout:
@@ -51,7 +52,6 @@ global:
   backupStorageLocation: {}
     # name:
     # bucket:
-    # provider:
     # prefix:
     # config:
     #   resourceGroup:  # Only for Azure
