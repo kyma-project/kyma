@@ -17,13 +17,13 @@ type apiResolver struct {
 	apiConverter apiConv
 }
 
-func newApiResolver(lister apiSvc) (*apiResolver, error) {
-	if lister == nil {
+func newApiResolver(svc apiSvc) (*apiResolver, error) {
+	if svc == nil {
 		return nil, errors.New("Nil pointer for apiSvc")
 	}
 
 	return &apiResolver{
-		apiSvc:       lister,
+		apiSvc:       svc,
 		apiConverter: &apiConverter{},
 	}, nil
 }
