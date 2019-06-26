@@ -54,7 +54,7 @@ global:
     version: a9bfa9fc
   test_apiserver_proxy:
     dir: develop/
-    version: e31b2a0b
+    version: 0cca016f
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
