@@ -169,7 +169,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 					err := myBackupClient.RestoreBackup(allBackupName)
 					So(err, ShouldBeNil)
 
-					err = myBackupClient.WaitForBackupToBeRestored(systemBackupSpecFile, 30*time.Minute)
+					err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 30*time.Minute)
 					So(err, ShouldBeNil)
 
 					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 20*time.Minute)
