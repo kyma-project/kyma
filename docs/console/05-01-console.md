@@ -20,3 +20,4 @@ This table lists the configurable parameters, their descriptions, and default va
 | **cluster.headerLogoUrl** | Defines the address of the logo image that shows in the Console UI navigation header. | `assets/logo.svg` |
 | **cluster.faviconUrl** | Defines the icon that shows in the address bar of a browser. | `favicon.ico` |
 | **cluster.headerTitle** | Defines an additional title that shows next to the logo image in the Console UI navigation header. | None |
+| **cluster.disabledNavigationNodes** | An array of categories or specific nodes that should be hidden in the Console UI navigation. To hide a category, write **categoryLabel** for cluster-wide views, or namespace.**categoryLabel** for namespace related views. Similarly for a specific node write **categoryLabel.nodeLabel** or namespace.**categoryLabel.nodeLabel**. All labels should be written lowercase, without spaces and dashes. | [] |

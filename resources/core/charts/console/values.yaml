@@ -34,3 +34,4 @@ cluster:
   faviconUrl: 'favicon.ico'
   # Provide custom title for the UI application that will be shown in the header component
   headerTitle: ''
+  disabledNavigationNodes: []
