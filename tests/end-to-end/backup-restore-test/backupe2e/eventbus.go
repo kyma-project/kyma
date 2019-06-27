@@ -135,7 +135,6 @@ func (f *eventBusFlow) testResources() error {
 		f.checkSubscriptionReady,
 		f.publishTestEvent,
 		f.checkSubscriberReceivedEvent,
-		// f.cleanup,
 	} {
 		if err := fn(); err != nil {
 			return fmt.Errorf("TestResources() failed with: %v", err)
