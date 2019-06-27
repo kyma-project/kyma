@@ -20,8 +20,8 @@ global:
     gateway:
       name: kyma-gateway
   acceptance_tests:
-    dir: develop/
-    version: "cb16ab4c"
+    dir: pr/
+    version: "PR-4615"
   ui_acceptance_tests:
     dir:
     version: "c69dbf49"
@@ -30,14 +30,14 @@ global:
     version: "b8c31ef4"
   api_controller_acceptance_tests:
     dir: develop/
-    version: "07378445"
+    version: "52e36665"
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
     version: "962ad9b6"
-  configurations_generator:
+  iam_kubeconfig_service:
     dir: develop/
-    version: aabedc33
+    version: 2a1a064b
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release

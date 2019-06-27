@@ -2,21 +2,22 @@ package apicontroller
 
 import (
 	"fmt"
-	"github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/common/ingressgateway"
 	"math/rand"
 	"net/http"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/avast/retry-go"
+	"github.com/kyma-project/kyma/common/ingressgateway"
+
 	kymaApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/pkg/errors"
 )
 
 type integrationTestContext struct{}
@@ -70,7 +71,7 @@ func TestIntegrationSpec(t *testing.T) {
 			So(lastAPI, ShouldNotBeNil)
 			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 
-			ctx.validateAPINotSecured(httpClient, lastAPI.Spec.Hostname)
+			ctx.validateAPINotSecured(httpClient, lastAPI.Spec.Hostname, "/")
 			lastAPI, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastAPI.Name, metav1.GetOptions{})
 			So(err, ShouldBeNil)
 			So(lastAPI, ShouldNotBeNil)
@@ -87,7 +88,9 @@ func TestIntegrationSpec(t *testing.T) {
 			So(lastAPI, ShouldNotBeNil)
 			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 
-			ctx.validateAPISecured(httpClient, lastAPI)
+			ctx.validateAPISecured(httpClient, lastAPI.Spec.Hostname, "/")
+			ctx.validateAPINotSecured(httpClient, lastAPI.Spec.Hostname, "/api.yaml")
+			ctx.validateAPINotSecured(httpClient, lastAPI.Spec.Hostname, "/namespace/default/orders")
 			lastAPI, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastAPI.Name, metav1.GetOptions{})
 			So(err, ShouldBeNil)
 			So(lastAPI, ShouldNotBeNil)
@@ -135,12 +138,20 @@ func (integrationTestContext) setCustomJwtAuthenticationConfig(api *kymaApi.Api)
 	issuer := "https://accounts.google.com"
 	jwksURI := "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
 
+	triggerRule := kymaApi.TriggerRule{
+		ExcludedPaths: []kymaApi.MatchExpression{
+			kymaApi.MatchExpression{ExprType: kymaApi.ExactMatch, Value: "/api.yaml"},
+			kymaApi.MatchExpression{ExprType: kymaApi.SuffixMatch, Value: "/orders"},
+		},
+	}
+
 	rules := []kymaApi.AuthenticationRule{
 		{
 			Type: kymaApi.JwtType,
 			Jwt: kymaApi.JwtAuthentication{
-				Issuer:  issuer,
-				JwksUri: jwksURI,
+				Issuer:      issuer,
+				JwksUri:     jwksURI,
+				TriggerRule: &triggerRule,
 			},
 		},
 	}
@@ -165,20 +176,20 @@ func (integrationTestContext) hostnameFor(testID, domainName string, hostWithDom
 	return testID
 }
 
-func (ctx integrationTestContext) validateAPISecured(httpClient *http.Client, api *kymaApi.Api) {
+func (ctx integrationTestContext) validateAPISecured(httpClient *http.Client, hostname, path string) {
 
 	response, err := ctx.withRetries(func() (*http.Response, error) {
-		return httpClient.Get(fmt.Sprintf("https://%s", api.Spec.Hostname))
+		return httpClient.Get(fmt.Sprintf("https://%s%s", hostname, path))
 	}, ctx.httpUnauthorizedPredicate)
 
 	So(err, ShouldBeNil)
 	So(response.StatusCode, ShouldEqual, http.StatusUnauthorized)
 }
 
-func (ctx integrationTestContext) validateAPINotSecured(httpClient *http.Client, hostname string) {
+func (ctx integrationTestContext) validateAPINotSecured(httpClient *http.Client, hostname, path string) {
 
 	response, err := ctx.withRetries(func() (*http.Response, error) {
-		return httpClient.Get(fmt.Sprintf("https://%s", hostname))
+		return httpClient.Get(fmt.Sprintf("https://%s%s", hostname, path))
 	}, ctx.httpOkPredicate)
 
 	So(err, ShouldBeNil)

@@ -1,13 +1,13 @@
 ---
-title: Kubeconfig generator
+title: IAM Kubeconfig Service
 type: Details
 ---
 
-The Kubeconfig generator is a proprietary tool that generates a `kubeconfig` file which allows the user to access the Kyma cluster through the Command Line Interface (CLI), and to manage the connected cluster within the permission boundaries of the user.
+The IAM Kubeconfig Service is a proprietary tool that generates a `kubeconfig` file which allows the user to access the Kyma cluster through the Command Line Interface (CLI), and to manage the connected cluster within the permission boundaries of the user.
 
-The Kubeconfig generator rewrites the ID token issued for the user by Dex into the generated `kubeconfig` file. The time to live (TTL) of the ID token is 8 hours, which effectively means that the TTL of the generated `kubeconfig` file is 8 hours as well.
+The IAM Kubeconfig Service rewrites the ID token issued for the user by Dex into the generated `kubeconfig` file. The time to live (TTL) of the ID token is 8 hours, which effectively means that the TTL of the generated `kubeconfig` file is 8 hours as well.
 
-The generator is a publicly exposed service. You can access it directly under the `https://configurations-generator.{YOUR_CLUSTER_DOMAIN}` address. The service requires a valid ID token issued by Dex to return a code `200` result.
+The service is a publicly exposed service. You can access it directly under the `https://configurations-generator.{YOUR_CLUSTER_DOMAIN}` address. The service requires a valid ID token issued by Dex to return a code `200` result.
 
 ## Get the kubeconfig file and configure the CLI
 

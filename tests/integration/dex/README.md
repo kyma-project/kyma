@@ -1,9 +1,8 @@
-# Acceptance Tests
+# Dex Integration Tests
 
 ## Overview
 
-This project contains the acceptance tests that you can run as part of Kyma testing process.
-The tests are written in Go. Each component or group of scenarios has a separate folder, like `servicecatalog`.
+This project contains the integration tests for `dex` component
 
 ## Usage
 
