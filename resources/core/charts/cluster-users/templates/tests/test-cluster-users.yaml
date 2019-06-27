@@ -9,8 +9,6 @@ metadata:
 spec:
   template:
     metadata:
-      annotations:
-        sidecar.istio.io/inject: "false"
     spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -52,9 +50,7 @@ spec:
           - name: NAMESPACE
             value: {{ .Values.namespace }}
           - name: IAM_KUBECONFIG_SVC_FQDN
-            value: "iam-kubeconfig-service.{{ .Release.Namespace }}.svc.cluster.local"
-          - name: IAM_KUBECONFIG_SVC_PORT
-            value: "8000"
+            value: "https://configurations-generator.kyma.local"
       restartPolicy: Never
 ---
 apiVersion: v1
