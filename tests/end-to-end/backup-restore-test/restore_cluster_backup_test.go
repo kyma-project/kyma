@@ -144,11 +144,11 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 
 		Convey("Check backup status", func() {
 
-			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 25*time.Minute)
+			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 35*time.Minute)
 			myBackupClient.DescribeBackup(systemBackupName)
 			So(err, ShouldBeNil)
 
-			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 25*time.Minute)
+			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 35*time.Minute)
 			myBackupClient.DescribeBackup(allBackupName)
 			So(err, ShouldBeNil)
 
@@ -169,10 +169,10 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 					err := myBackupClient.RestoreBackup(allBackupName)
 					So(err, ShouldBeNil)
 
-					err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 30*time.Minute)
+					err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 35*time.Minute)
 					So(err, ShouldBeNil)
 
-					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 20*time.Minute)
+					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 35*time.Minute)
 					myBackupClient.DescribeRestore(allBackupName)
 					So(err, ShouldBeNil)
 
