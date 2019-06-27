@@ -20,25 +20,25 @@ function testPermissions() {
 	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" -n "${TEST_NS}")
 	set -e
 	if [[ ${TEST} == ${EXPECTED}* ]]; then
-	    echo "----> PASSED"
-	    return 0
+		echo "----> PASSED"
+		return 0
 	fi
 	echo "----> |FAIL| Expected: ${EXPECTED} got: ${TEST}"
 	return 1
 }
 
 function getConfigFile() {
-	readonly REGISTRATION_REQUEST=$(curl -s --fail -X GET -H 'Content-Type: application/x-www-form-urlencoded' "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth?response_type=id_token%20token&client_id=kyma-client&redirect_uri=http://127.0.0.1:5555/callback&scope=openid%20profile%20email%20groups&nonce=vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM")
+	readonly REGISTRATION_REQUEST=$(curl -s -k -f -X GET -H 'Content-Type: application/x-www-form-urlencoded' "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth?response_type=id_token%20token&client_id=kyma-client&redirect_uri=http://127.0.0.1:5555/callback&scope=openid%20profile%20email%20groups&nonce=vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM")
 	readonly REQUEST_ID=$(echo "${REGISTRATION_REQUEST}" | cut -d '"' -f 2 | cut -d '?' -f 2)
 	curl -X POST -F "login=${EMAIL}" -F "password=${PASSWORD}" "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth/local?${REQUEST_ID}"
 	readonly RESPONSE=$(curl -X GET "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/approval?${REQUEST_ID}")
 	readonly AUTH_TOKEN=$(echo "${RESPONSE}" | grep -o -P '(?<=id_token=).*(?=&amp;state)')
-	curl -s -H "Authorization: Bearer ${AUTH_TOKEN}" "${IAM_KUBECONFIG_SVC_FQDN}:${IAM_KUBECONFIG_SVC_PORT}/kube-config" -o "${PWD}/kubeconfig"
+	curl -s -k -f -H "Authorization: Bearer ${AUTH_TOKEN}" "${IAM_KUBECONFIG_SVC_FQDN}:${IAM_KUBECONFIG_SVC_PORT}/kube-config" -o "${PWD}/kubeconfig"
 }
 
 function runTests() {
-    EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
-    export KUBECONFIG="${PWD}/kubeconfig"
+	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
+	export KUBECONFIG="${PWD}/kubeconfig"
 	echo "--> ${DEVELOPER_EMAIL} should be able to get Deployments in ${NAMESPACE}"
 	testPermissions "get" "deployment" "${NAMESPACE}" "yes"
 
@@ -85,31 +85,30 @@ function runTests() {
 }
 
 function cleanup() {
-    unset KUBECONFIG
 	EXIT_STATUS=$?
-
-    if [ "${ERROR_LOGGING_GUARD}" = "true" ]; then
-        echo "AN ERROR OCCURED! Take a look at preceding log entries."
-    fi
-    echo "---> Deleting bindings for tests"
-    kubectl delete -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
-    MSG=""
-    if [[ ${EXIT_STATUS} -ne 0 ]]; then MSG="(exit status: ${EXIT_STATUS})"; fi
-    echo "Job is finished ${MSG}"
-    set -e
-    exit "${EXIT_STATUS}"
+	unset KUBECONFIG
+	if [ "${ERROR_LOGGING_GUARD}" = "true" ]; then
+		echo "AN ERROR OCCURED! Take a look at preceding log entries."
+	fi
+	echo "---> Deleting bindings for tests"
+	kubectl delete -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
+	MSG=""
+	if [[ ${EXIT_STATUS} -ne 0 ]]; then MSG="(exit status: ${EXIT_STATUS})"; fi
+	echo "Job is finished ${MSG}"
+	set -e
+	exit "${EXIT_STATUS}"
 }
 
 discoverUnsetVar=false
 
 for var in ADMIN_EMAIL ADMIN_PASSWORD DEVELOPER_EMAIL DEVELOPER_PASSWORD VIEW_EMAIL VIEW_PASSWORD NAMESPACE; do
-    if [ -z "${!var}" ] ; then
-        echo "ERROR: $var is not set"
-        discoverUnsetVar=true
-    fi
+	if [ -z "${!var}" ] ; then
+		echo "ERROR: $var is not set"
+		discoverUnsetVar=true
+	fi
 done
 if [ "${discoverUnsetVar}" = true ] ; then
-    exit 1
+	exit 1
 fi
 
 trap cleanup EXIT
