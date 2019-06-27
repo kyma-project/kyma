@@ -24,8 +24,18 @@ required= [
     "google.golang.org/grpc",
     "github.com/ugorji/go/codec",
     "github.com/golang/lint/golint",
-    "golang.org/x/tools/cmd/goimports"
-    ]
+    "golang.org/x/tools/cmd/goimports",
+
+    "k8s.io/code-generator/cmd/defaulter-gen",
+    "k8s.io/code-generator/cmd/deepcopy-gen",
+    "k8s.io/code-generator/cmd/conversion-gen",
+    "k8s.io/code-generator/cmd/client-gen",
+    "k8s.io/code-generator/cmd/lister-gen",
+    "k8s.io/code-generator/cmd/informer-gen",
+    "k8s.io/code-generator/cmd/openapi-gen",
+
+    "sigs.k8s.io/controller-tools/cmd/controller-gen", # for crd/rbac generation
+]
 
 [prune]
   unused-packages = true
@@ -61,35 +71,13 @@ required= [
   # If you change that version be aware that you need to align it in the kyma/docs/helm-broker/03-05-bundles-validation.md
   version = "2.8.2"
 
-# etcd(release-3.3) has dependency to bbolt in this version:
-# see https://github.com/coreos/etcd/blob/release-3.3/glide.yaml
-[[override]]
-  name = "github.com/coreos/bbolt"
-  version = "v1.3.1-coreos.6"
-
-[[override]]
-  name = "k8s.io/api"
-  version = "kubernetes-1.11.3"
-
-[[override]]
-  name = "k8s.io/apimachinery"
-  version = "kubernetes-1.11.3"
-
-[[override]]
-  name = "k8s.io/client-go"
-  version = "kubernetes-1.11.3"
-
-[[override]]
-  name = "k8s.io/code-generator"
-  version = "kubernetes-1.11.3"
-
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
-  version = "=v0.1.28"
+  version = "=v0.1.39"
 
 [[constraint]]
   name="sigs.k8s.io/controller-runtime"
-  version = "=v0.1.7"
+  version = "=v0.1.8"
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
@@ -98,3 +86,30 @@ required= [
 [[constraint]]
   name = "github.com/SpectoLabs/hoverfly"
   revision = "fc31737b316a35bd2a15da3e36c1baa325e87854"
+
+# etcd(release-3.3) has dependency to bbolt in this version:
+# see https://github.com/coreos/etcd/blob/release-3.3/glide.yaml
+[[override]]
+  name = "github.com/coreos/bbolt"
+  version = "v1.3.1-coreos.6"
+
+[[override]]
+  name="sigs.k8s.io/controller-tools"
+  version="v0.1.1"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.12.3"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.12.3"
+
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.12.3"
+
+[[override]]
+  name = "k8s.io/code-generator"
+  version = "kubernetes-1.12.3"
+
