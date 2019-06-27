@@ -12,7 +12,7 @@ spec:
   hosts:
     - '{{ .Values.virtualService.host }}.{{ .Values.global.ingress.domainName }}'
   gateways:
-    - {{ .Values.global.istio.gateway }}
+    - {{ .Values.global.istio.gateway.name }}
   http:
     - match:
         - uri:

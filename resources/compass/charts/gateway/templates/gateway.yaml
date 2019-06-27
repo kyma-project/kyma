@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: {{ .Values.global.istio.gateway }}
+  name: {{ .Values.global.istio.gateway.name }}
   namespace: {{.Release.Namespace }}
 spec:
   selector:
@@ -13,8 +13,7 @@ spec:
         protocol: HTTPS
       tls:
         mode: SIMPLE
-        serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
-        privateKey: /etc/istio/ingressgateway-certs/tls.key
+        credentialName: {{ .Values.global.istio.gateway.name }}-certs
       hosts:
         - "*.{{.Values.global.ingress.domainName}}"
     - port:

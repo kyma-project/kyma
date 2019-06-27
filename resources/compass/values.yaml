@@ -29,6 +29,5 @@ global:
     port: 3000
 
   istio:
-    gateway: compass-istio-gateway
-
-
+    gateway:
+      name: compass-istio-gateway
