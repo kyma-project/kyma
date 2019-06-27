@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/kyma-project/kyma/tests/apiserver-proxy-tests/fetch-token/internal"
+	"github.com/kyma-project/kyma/tests/integration/apiserver-proxy/fetch-token/internal"
 )
 
 func main() {
