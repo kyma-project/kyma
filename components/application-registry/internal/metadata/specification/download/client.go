@@ -11,8 +11,10 @@ import (
 	"time"
 )
 
+const timeout = 5
+
 type Client interface {
-	Fetch(url string) ([]byte, apperrors.AppError)
+	Fetch(url string, credentials *authorization.Credentials) ([]byte, apperrors.AppError)
 }
 
 type downloader struct {
@@ -29,10 +31,8 @@ func NewClient(client *http.Client) Client {
 	}
 }
 
-func (d downloader) Fetch(url string) ([]byte, apperrors.AppError) {
-
-	// TODO - Remove this function and use the function performing authorisation calls
-	res, err := d.requestAPISpec(url)
+func (d downloader) Fetch(url string, credentials *authorization.Credentials) ([]byte, apperrors.AppError) {
+	res, err := d.requestAPISpec(url, credentials)
 	if err != nil {
 		return nil, err
 	}
@@ -51,48 +51,17 @@ func (d downloader) Fetch(url string) ([]byte, apperrors.AppError) {
 	}
 }
 
-func (d downloader) FetchSecured(url string, credentials *authorization.Credentials) ([]byte, apperrors.AppError) {
+func (d downloader) requestAPISpec(specUrl string, credentials *authorization.Credentials) (*http.Response, apperrors.AppError) {
+	req, err := http.NewRequest(http.MethodGet, specUrl, nil)
+	if err != nil {
+		return nil, apperrors.Internal("Creating request for fetching API spec from %s failed, %s", specUrl, err.Error())
+	}
 
-	factory := authorization.NewStrategyFactory(authorization.FactoryConfiguration{})
-	s := factory.Create(nil)
-
-	s.AddAuthorization(nil, nil)
-
-	return nil, nil
-}
-
-func (d downloader) newCSRFTokenStrategy(authorizationStrategy authorization.Strategy, credentials *authorization.Credentials) csrf.TokenStrategy {
-	csrfTokenEndpointURL := ""
 	if credentials != nil {
-		csrfTokenEndpointURL = credentials.CSRFTokenEndpointURL
-	}
-	return d.csrfFactory.Create(authorizationStrategy, csrfTokenEndpointURL)
-}
-
-func (d downloader) newRequest(specUrl string, credentials *authorization.Credentials) (*http.Response, apperrors.AppError) {
-	req, err := http.NewRequest(http.MethodGet, specUrl, nil)
-	if err != nil {
-		return nil, apperrors.Internal("Creating request for fetching API spec from %s failed, %s", specUrl, err.Error())
-	}
-
-	strategy := d.authorizationFactory.Create(credentials)
-
-	client := &http.Client{
-		Timeout: time.Duration(5) * time.Second}
-
-	ts := func(transport *http.Transport) {
-		client.Transport = transport
-	}
-
-	strategy.AddAuthorization(req, ts)
-
-	return nil, nil
-}
-
-func (d downloader) requestAPISpec(specUrl string) (*http.Response, apperrors.AppError) {
-	req, err := http.NewRequest(http.MethodGet, specUrl, nil)
-	if err != nil {
-		return nil, apperrors.Internal("Creating request for fetching API spec from %s failed, %s", specUrl, err.Error())
+		err := d.addAuthorizationAndToken(req, credentials)
+		if err != nil {
+			return nil, apperrors.Internal("Adding authorization failed, %s", err.Error())
+		}
 	}
 
 	response, err := d.client.Do(req)
@@ -105,4 +74,41 @@ func (d downloader) requestAPISpec(specUrl string) (*http.Response, apperrors.Ap
 	}
 
 	return response, nil
+}
+
+func (d downloader) addAuthorizationAndToken(r *http.Request, credentials *authorization.Credentials) apperrors.AppError {
+	client := &http.Client{
+		Timeout: time.Duration(timeout) * time.Second}
+
+	ts := func(transport *http.Transport) {
+		client.Transport = transport
+	}
+
+	strategy := d.authorizationFactory.Create(credentials)
+
+	err := strategy.AddAuthorization(r, ts)
+
+	if err != nil {
+		return apperrors.Internal(err.Error())
+	}
+
+	return d.withCSRFToken(r, strategy, credentials)
+}
+
+func (d downloader) withCSRFToken(r *http.Request, strategy authorization.Strategy, credentials *authorization.Credentials) apperrors.AppError {
+	tokenStrategy := d.newCSRFTokenStrategy(strategy, credentials)
+	err := tokenStrategy.AddCSRFToken(r)
+
+	if err != nil {
+		return apperrors.Internal(err.Error())
+	}
+	return nil
+}
+
+func (d downloader) newCSRFTokenStrategy(authorizationStrategy authorization.Strategy, credentials *authorization.Credentials) csrf.TokenStrategy {
+	csrfTokenEndpointURL := ""
+	if credentials != nil {
+		csrfTokenEndpointURL = credentials.CSRFTokenEndpointURL
+	}
+	return d.csrfFactory.Create(authorizationStrategy, csrfTokenEndpointURL)
 }

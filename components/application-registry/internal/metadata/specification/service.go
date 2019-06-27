@@ -133,7 +133,7 @@ func (svc *specService) fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
 		return nil, apperr
 	}
 
-	return svc.downloadClient.Fetch(specUrl)
+	return svc.downloadClient.Fetch(specUrl, nil)
 }
 
 func determineSpecUrl(api *model.API) (string, apperrors.AppError) {
