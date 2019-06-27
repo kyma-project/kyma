@@ -283,9 +283,10 @@ func (f *eventBusFlow) publish(publishEventURL string) (*publishApi.PublishRespo
 	}
 	respObj := &publishApi.PublishResponse{}
 	body, err := ioutil.ReadAll(res.Body)
-	defer func() {
-		_ = res.Body.Close()
-	}()
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
 	err = json.Unmarshal(body, &respObj)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal error: %v", err)
@@ -311,8 +312,16 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 		}
 		body, err := ioutil.ReadAll(res.Body)
 		var resp string
-		_ = json.Unmarshal(body, &resp)
-		_ = res.Body.Close()
+		err = json.Unmarshal(body, &resp)
+		if err != nil {
+			return err
+		}
+
+		err = res.Body.Close()
+		if err != nil {
+			return err
+		}
+
 		if len(resp) == 0 { // no event received by subscriber
 			continue
 		}
@@ -327,19 +336,34 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 func (f *eventBusFlow) cleanup() error {
 	subscriberShutdownEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/v1/shutdown"
 
-	_, _ = http.Post(subscriberShutdownEndpointURL, "application/json", strings.NewReader(`{"shutdown": "true"}`))
+	_, err := http.Post(subscriberShutdownEndpointURL, "application/json", strings.NewReader(`{"shutdown": "true"}`))
+	if err != nil {
+		return err
+	}
 
 	deletePolicy := metaV1.DeletePropagationForeground
 	gracePeriodSeconds := int64(0)
-	_ = f.k8sInterface.AppsV1().Deployments(f.namespace).Delete(subscriberName,
+	err = f.k8sInterface.AppsV1().Deployments(f.namespace).Delete(subscriberName,
 		&metaV1.DeleteOptions{GracePeriodSeconds: &gracePeriodSeconds, PropagationPolicy: &deletePolicy})
+	if err != nil {
+		return err
+	}
 
-	_ = f.k8sInterface.CoreV1().Services(f.namespace).Delete(subscriberName,
+	err = f.k8sInterface.CoreV1().Services(f.namespace).Delete(subscriberName,
 		&metaV1.DeleteOptions{GracePeriodSeconds: &gracePeriodSeconds})
+	if err != nil {
+		return err
+	}
 
-	_ = f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Delete(subscriptionName, &metaV1.DeleteOptions{PropagationPolicy: &deletePolicy})
+	err = f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Delete(subscriptionName, &metaV1.DeleteOptions{PropagationPolicy: &deletePolicy})
+	if err != nil {
+		return err
+	}
 
-	_ = f.eaInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Delete(eventActivationName, &metaV1.DeleteOptions{PropagationPolicy: &deletePolicy})
+	err = f.eaInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Delete(eventActivationName, &metaV1.DeleteOptions{PropagationPolicy: &deletePolicy})
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
