@@ -2,7 +2,7 @@
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
-  name: {{ template "fullname" . }}-developer-binding
+  name: cluster-users-test-developer-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -11,17 +11,32 @@ subjects:
 - kind: User
   name: developer@kyma.cx
   apiGroup: rbac.authorization.k8s.io
-  namespace: {{ .Release.Namespace }}
+  namespace: default
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
-  name: {{ template "fullname" . }}-essentials-binding
+  name: cluster-users-test-admin-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: kyma-essentials
+  name: kyma-admin
 subjects:
 - kind: User
-  name: developer@kyma.cx
+  name: admin@kyma.cx
   apiGroup: rbac.authorization.k8s.io
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: cluster-users-test-ro-user-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-view
+subjects:
+- kind: User
+  name: read-only-user@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+  namespace: default
