@@ -21,7 +21,8 @@ const (
 // KnativePublisher encapsulates the publish behaviour.
 type KnativePublisher interface {
 	Publish(knativeLib *knative.KnativeLib, channelName *string, namespace *string, headers *map[string][]string,
-		payload *[]byte, publishRequest *api.Request) (*api.Error, string)
+		payload *[]byte, source string,
+		eventType string, eventTypeVersion string) (*api.Error, string)
 }
 
 // DefaultKnativePublisher is the default KnativePublisher instance.
@@ -35,7 +36,8 @@ func NewKnativePublisher() KnativePublisher {
 
 // Publish events using the KnativeLib
 func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib, channelName *string,
-	namespace *string, headers *map[string][]string, payload *[]byte, publishRequest *api.Request) (*api.Error,
+	namespace *string, headers *map[string][]string, payload *[]byte, source string,
+	eventType string, eventTypeVersion string) (*api.Error,
 	string) {
 	// knativelib should not be nil
 	if knativeLib == nil {
@@ -75,9 +77,9 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 		metrics.TotalPublishedMessages.With(prometheus.Labels{
 			metrics.Namespace:        *namespace,
 			metrics.Status:           IGNORED,
-			metrics.SourceID:         publishRequest.SourceID,
-			metrics.EventType:        publishRequest.EventType,
-			metrics.EventTypeVersion: publishRequest.EventTypeVersion}).Inc()
+			metrics.SourceID:         source,
+			metrics.EventType:        eventType,
+			metrics.EventTypeVersion: eventTypeVersion}).Inc()
 		return nil, IGNORED
 	}
 

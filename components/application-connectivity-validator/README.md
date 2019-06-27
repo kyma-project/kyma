@@ -10,7 +10,8 @@ A single instance of the component is deployed for an Application and uses these
 - **externalAPIPort** - The port on which the external API is exposed. The default port is `8080`.
 - **tenant** - The tenant of the Application for which the proxy is deployed. Omitted if empty.
 - **group** - The group of the Application for which the proxy is deployed. Omitted if empty.
-- **eventServicePathPrefix** - Path prefix for which requests will be forwarded to the Event Service. The default value is `/v1/events`.
+- **eventServicePathPrefixV1** - Path prefix for which requests will be forwarded to the Event Service V1 API. The default value is `/v1/events`.
+- **eventServicePathPrefixV2** - Path prefix for which requests will be forwarded to the Event Service V2 API. The default value is `/v2/events`.
 - **eventServiceHost** - Host and port of the Event Service. The default value is `events-api:8080`.
 - **appRegistryPathPrefix** - Path prefix for which requests will be forwarded to the Application Registry. The default value is `/v1/metadata`.
 - **appRegistryHost** - Host and port of the Event Service. The default value is `application-registry-external-api:8081`.
