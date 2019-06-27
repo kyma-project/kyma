@@ -1,4 +1,4 @@
 apiVersion: v1
-description: This chart tests the Velero backup
+description: This chart tests the Velero backupp
 name: backup-test
 version: 0.1.0
