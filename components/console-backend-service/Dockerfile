@@ -16,7 +16,7 @@ COPY ./main.go ${BASE_APP_DIR}/
 # Build app
 #
 
-RUN go build -v -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o main .
 RUN mkdir /app && mv ./main /app/main
 
 FROM alpine:3.8

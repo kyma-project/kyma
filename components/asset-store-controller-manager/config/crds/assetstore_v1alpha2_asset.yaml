@@ -47,6 +47,8 @@ spec:
               required:
               - name
               type: object
+            metadata:
+              type: object
             source:
               properties:
                 filter:

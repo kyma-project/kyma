@@ -6,6 +6,16 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: clusterbuckets.assetstore.kyma-project.io
 spec:
+  additionalPrinterColumns:
+    - JSONPath: .status.phase
+      name: Phase
+      type: string
+    - JSONPath: .status.url
+      name: URL
+      type: string
+    - JSONPath: .metadata.creationTimestamp
+      name: Age
+      type: date
   group: assetstore.kyma-project.io
   names:
     kind: ClusterBucket
@@ -32,24 +42,24 @@ spec:
           properties:
             policy:
               enum:
-              - ""
-              - none
-              - readonly
-              - writeonly
-              - readwrite
+                - ""
+                - none
+                - readonly
+                - writeonly
+                - readwrite
               type: string
             region:
               enum:
-              - ""
-              - us-east-1
-              - us-west-1
-              - us-west-2
-              - eu-west-1
-              - eu-central-1
-              - ap-southeast-1
-              - ap-southeast-2
-              - ap-northeast-1
-              - sa-east-1
+                - ""
+                - us-east-1
+                - us-west-1
+                - us-west-2
+                - eu-west-1
+                - eu-central-1
+                - ap-southeast-1
+                - ap-southeast-2
+                - ap-northeast-1
+                - sa-east-1
               type: string
           type: object
         status:
@@ -71,7 +81,7 @@ spec:
             url:
               type: string
           required:
-          - observedGeneration
+            - observedGeneration
           type: object
   version: v1alpha2
 status:

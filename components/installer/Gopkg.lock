@@ -208,8 +208,7 @@
 [[projects]]
   name = "github.com/jtolds/gls"
   packages = ["."]
-  revision = "77f18212c9c7edc9bd6a33d383a7b545ce62f064"
-  version = "v4.2.1"
+  revision = "b4936e06046bbecbb94cae9c18127ebe510a2cb9"
 
 [[projects]]
   name = "github.com/kubernetes-incubator/service-catalog"
