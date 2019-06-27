@@ -28,17 +28,18 @@ function testPermissions() {
 }
 
 function getConfigFile() {
-	readonly REGISTRATION_REQUEST=$(curl -s -k -f -X GET -H 'Content-Type: application/x-www-form-urlencoded' "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth?response_type=id_token%20token&client_id=kyma-client&redirect_uri=http://127.0.0.1:5555/callback&scope=openid%20profile%20email%20groups&nonce=vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM")
-	readonly REQUEST_ID=$(echo "${REGISTRATION_REQUEST}" | cut -d '"' -f 2 | cut -d '?' -f 2)
+	REGISTRATION_REQUEST=$(curl -s -k -f -X GET -H 'Content-Type: application/x-www-form-urlencoded' "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth?response_type=id_token%20token&client_id=kyma-client&redirect_uri=http://127.0.0.1:5555/callback&scope=openid%20profile%20email%20groups&nonce=vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM")
+	REQUEST_ID=$(echo "${REGISTRATION_REQUEST}" | cut -d '"' -f 2 | cut -d '?' -f 2)
 	curl -X POST -F "login=${EMAIL}" -F "password=${PASSWORD}" "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth/local?${REQUEST_ID}"
-	readonly RESPONSE=$(curl -X GET "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/approval?${REQUEST_ID}")
-	readonly AUTH_TOKEN=$(echo "${RESPONSE}" | grep -o -P '(?<=id_token=).*(?=&amp;state)')
+	RESPONSE=$(curl -X GET "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/approval?${REQUEST_ID}")
+	AUTH_TOKEN=$(echo "${RESPONSE}" | grep -o -P '(?<=id_token=).*(?=&amp;state)')
 	curl -s -k -f -H "Authorization: Bearer ${AUTH_TOKEN}" "${IAM_KUBECONFIG_SVC_FQDN}/kube-config" -o "${PWD}/kubeconfig"
 }
 
 function runTests() {
 	EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
+
 	echo "--> ${DEVELOPER_EMAIL} should be able to get Deployments in ${NAMESPACE}"
 	testPermissions "get" "deployment" "${NAMESPACE}" "yes"
 
@@ -61,6 +62,8 @@ function runTests() {
 	testPermissions "create" "service" "production" "no"
 
 	EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
+	export KUBECONFIG="${PWD}/kubeconfig"
+
 	echo "--> ${ADMIN_EMAIL} should be able to get ClusterRole"
 	testPermissions "get" "clusterrole" "${NAMESPACE}" "yes"
 
@@ -74,14 +77,22 @@ function runTests() {
 	testPermissions "delete" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
 
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
-	echo "--> ${VIEW_EMAIL} should NOT be able to get ClusterRole"
-	testPermissions "get" "clusterrole" "${NAMESPACE}" "no"
+	export KUBECONFIG="${PWD}/kubeconfig"
+	
+	echo "--> ${VIEW_EMAIL} should be able to get ClusterRole"
+	testPermissions "get" "clusterrole" "${NAMESPACE}" "yes"
 
-	echo "--> ${VIEW_EMAIL} should NOT be able to list Deployments"
-	testPermissions "list" "deployment" "${NAMESPACE}" "no"
+	echo "--> ${VIEW_EMAIL} should be able to list Deployments"
+	testPermissions "list" "deployment" "${NAMESPACE}" "yes"
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to create Namespace"
 	testPermissions "create" "ns" "${NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should NOT be able to edit pod"
+	testPermissions "edit" "pod" "${NAMESPACE}" "no"
+
+	echo "--> ${VIEW_EMAIL} should NOT be able to create secret"
+	testPermissions "create" "secret" "${NAMESPACE}" "no"
 }
 
 function cleanup() {
