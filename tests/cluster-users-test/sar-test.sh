@@ -115,7 +115,7 @@ trap cleanup EXIT
 ERROR_LOGGING_GUARD="true"
 
 echo "---> Create testing RoleBinding"
-kubectl apply -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
+kubectl create -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
 runTests
 
 echo "ALL TESTS PASSED"
