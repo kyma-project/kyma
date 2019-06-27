@@ -41,7 +41,7 @@ Run this command after you install Kyma on your GKE or AKS cluster:
 
 ```
 tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
-&& kubectl get configmap cluster-certificate-overrides -n kyma-installer -o jsonpath='{.data.global\.tlsCrt}' | base64 --decode > $tmpfile \
+&& kubectl get configmap net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.tlsCrt}' | base64 --decode > $tmpfile \
 && sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
 && rm $tmpfile
 ```
