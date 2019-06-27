@@ -63,12 +63,6 @@ rules:
 - apiGroups: ["monitoring.coreos.com"]
   resources: ["prometheuses"]
   verbs: ["*"]
-- apiGroups: ["applicationconnector.kyma-project.io"]
-  resources: ["eventactivations"]
-  verbs: ["*"]
-- apiGroups: ["eventing.kyma-project.io"]
-  resources: ["subscriptions","subscriptions/status"]
-  verbs: ["*"]
 ---
 apiVersion: v1
 kind: ServiceAccount
