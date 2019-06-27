@@ -287,7 +287,9 @@
 # Tests
 # acceptance tests
 /tests/acceptance/ @mszostok @polskikiel @piotrmiskiewicz @aszecowka @PK85 @jasiu001 @adamwalach
-/tests/acceptance/dex @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+
+# Dex integration tests
+/tests/integration/dex @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Knative Serving Acceptance
 /tests/knative-serving/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
