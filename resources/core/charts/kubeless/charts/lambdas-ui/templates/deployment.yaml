@@ -31,7 +31,8 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          # image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          image: eu.gcr.io/kyma-project/pr/lambda:PR-982
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
