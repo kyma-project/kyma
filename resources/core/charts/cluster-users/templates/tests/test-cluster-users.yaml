@@ -52,7 +52,7 @@ spec:
           - name: NAMESPACE
             value: {{ .Values.namespace }}
           - name: IAM_KUBECONFIG_SVC_FQDN
-            value: "configurations-generator.{{ .Release.Namespace }}.svc.cluster.local"
+            value: "iam-kubeconfig-service.{{ .Release.Namespace }}.svc.cluster.local"
           - name: IAM_KUBECONFIG_SVC_PORT
             value: "8000"
       restartPolicy: Never
