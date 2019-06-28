@@ -27,7 +27,7 @@ data:
   pre-upgrade.sh: |
     #!/usr/bin/env bash
     set -eu
-    echo "Hello"
+    echo "*** Pre upgrade job starts ***"
     kubectl delete crd subscriptions.eventing.knative.dev
     cat << EOF | kubectl apply -f - 
     apiVersion: apiextensions.k8s.io/v1beta1
@@ -148,6 +148,7 @@ data:
       name: config-observability
       namespace: knative-eventing
     EOF
+    echo "*** Pre upgrade job executed ***"
 kind: ConfigMap
 metadata:
   annotations:
