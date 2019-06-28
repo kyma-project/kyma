@@ -1,9 +1,9 @@
 ---
-title: Configurations Generator chart
+title: IAM Kubeconfig Service chart
 type: Configuration
 ---
 
-To configure the Configurations Generator chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
+To configure the IAM Kubeconfig Service chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
 
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents:
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
@@ -15,4 +15,4 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **service.port** | Specifies the port that exposes the Configurations Generator service. | `8000` |
+| **service.port** | Specifies the port that exposes the IAM Kubeconfig Service service. | `8000` |
