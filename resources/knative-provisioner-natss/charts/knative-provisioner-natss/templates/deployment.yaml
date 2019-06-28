@@ -205,7 +205,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
-      labels: 
+      labels:
         <<: *labels
         rand: {{ randAlpha 6 }}
     spec:

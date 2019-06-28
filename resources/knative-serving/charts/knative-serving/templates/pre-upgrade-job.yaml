@@ -1,0 +1,197 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pre-upgrade-knative-eventing
+  annotations:
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-5"
+  labels:
+    job: pre-upgrade-knative-eventing
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pre-upgrade
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-admin
+subjects:
+- kind: ServiceAccount
+  name: pre-upgrade-knative-eventing
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+data:
+  pre-upgrade.sh: |
+    #!/usr/bin/env bash
+    set -eu
+    echo "Hello"
+    kubectl delete crd subscriptions.eventing.knative.dev
+    cat << EOF | kubectl apply -f - 
+    apiVersion: apiextensions.k8s.io/v1beta1
+    kind: CustomResourceDefinition
+    metadata:
+      labels:
+        knative.dev/crd-install: "true"
+      name: subscriptions.eventing.knative.dev
+    spec:
+      additionalPrinterColumns:
+      - JSONPath: .status.conditions[?(@.type=="Ready")].status
+        name: Ready
+        type: string
+      - JSONPath: .status.conditions[?(@.type=="Ready")].reason
+        name: Reason
+        type: string
+      - JSONPath: .metadata.creationTimestamp
+        name: Age
+        type: date
+      group: eventing.knative.dev
+      names:
+        categories:
+        - all
+        - knative
+        - eventing
+        kind: Subscription
+        listKind: SubscriptionList
+        plural: subscriptions
+        shortNames:
+        - sub
+        singular: subscription
+      scope: Namespaced
+      subresources:
+        status: {}
+      validation:
+        openAPIV3Schema:
+          properties:
+            spec:
+              properties:
+                channel:
+                  properties:
+                    apiVersion:
+                      minLength: 1
+                      type: string
+                    kind:
+                      pattern: ^Channel$
+                      type: string
+                    name:
+                      minLength: 1
+                      type: string
+                  required:
+                  - apiVersion
+                  - kind
+                  - name
+                  type: object
+                reply:
+                  properties:
+                    channel:
+                      properties:
+                        apiVersion:
+                          minLength: 1
+                          type: string
+                        kind:
+                          pattern: ^Channel$
+                          type: string
+                        name:
+                          minLength: 1
+                          type: string
+                      required:
+                      - apiVersion
+                      - kind
+                      - name
+                      type: object
+                  type: object
+                subscriber:
+                  properties:
+                    dnsName:
+                      minLength: 1
+                      type: string
+                    ref:
+                      properties:
+                        apiVersion:
+                          minLength: 1
+                          type: string
+                        kind:
+                          minLength: 1
+                          type: string
+                        name:
+                          minLength: 1
+                          type: string
+                      required:
+                      - apiVersion
+                      - kind
+                      - name
+                      type: object
+                    uri:
+                      minLength: 1
+                      type: string
+                  type: object
+              required:
+              - channel
+      version: v1alpha1
+    EOF
+    cat << EOF | kubectl apply -f - 
+    apiVersion: v1
+    data:
+    kind: ConfigMap
+    metadata:
+      name: config-tracing
+      namespace: knative-eventing
+    EOF
+    cat << EOF | kubectl apply -f - 
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      labels:
+        eventing.knative.dev/release: devel
+      name: config-observability
+      namespace: knative-eventing
+    EOF
+kind: ConfigMap
+metadata:
+  annotations:
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-5"
+  labels:
+    job: pre-upgrade-knative-eventing
+  name: pre-upgrade-knative-eventing
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-4"
+  labels:
+    job: pre-upgrade-knative-eventing
+  name: pre-upgrade-knative-eventing
+spec:
+  backoffLimit: 1
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        job: pre-upgrade-knative-eventing
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - command: ["sh", "/scripts/pre-upgrade.sh"]
+        image: docker.io/istio/kubectl:1.1.6
+        imagePullPolicy: IfNotPresent
+        name: pre-upgrade-knative-eventing
+        volumeMounts:
+        - mountPath: /scripts
+          name: scripts
+          readOnly: true
+      serviceAccountName: pre-upgrade-knative-eventing
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: pre-upgrade-knative-eventing
+        name: scripts
