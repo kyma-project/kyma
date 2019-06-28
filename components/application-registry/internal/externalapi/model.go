@@ -40,7 +40,7 @@ type API struct {
 	ApiType                        string               `json:"apiType,omitempty"`
 	RequestParameters              *RequestParameters   `json:"requestParameters,omitempty"`
 	SpecificationCredentials       *Credentials         `json:"specificationCredentials,omitempty"`
-	specificationRequestParameters *RequestParameters   `json:"specificationRequestParameters,omitempty"`
+	SpecificationRequestParameters *RequestParameters   `json:"specificationRequestParameters,omitempty"`
 }
 
 type RequestParameters struct {
@@ -55,9 +55,9 @@ type Credentials struct {
 }
 
 type CredentialsWithCSRF struct {
-	Oauth          *OauthWithCSRF          `json:"oauth,omitempty"`
-	Basic          *BasicAuthWithCSRF      `json:"basic,omitempty"`
-	CertificateGen *CertificateGenWithCSRF `json:"certificateGen,omitempty"`
+	OauthWithCSRF          *OauthWithCSRF          `json:"oauth,omitempty"`
+	BasicWithCSRF          *BasicAuthWithCSRF      `json:"basic,omitempty"`
+	CertificateGenWithCSRF *CertificateGenWithCSRF `json:"certificateGen,omitempty"`
 }
 
 type CSRFInfo struct {
@@ -185,7 +185,7 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 
 	if credentials.Oauth != nil {
 		return &CredentialsWithCSRF{
-			Oauth: &OauthWithCSRF{
+			OauthWithCSRF: &OauthWithCSRF{
 				Oauth: Oauth{ClientID: stars,
 					ClientSecret: stars,
 					URL:          credentials.Oauth.URL,
@@ -197,7 +197,7 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 
 	if credentials.Basic != nil {
 		return &CredentialsWithCSRF{
-			Basic: &BasicAuthWithCSRF{
+			BasicWithCSRF: &BasicAuthWithCSRF{
 				BasicAuth: BasicAuth{
 					Username: stars,
 					Password: stars,
@@ -209,7 +209,7 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 
 	if credentials.CertificateGen != nil {
 		return &CredentialsWithCSRF{
-			CertificateGen: &CertificateGenWithCSRF{
+			CertificateGenWithCSRF: &CertificateGenWithCSRF{
 				CertificateGen: CertificateGen{
 					CommonName:  credentials.CertificateGen.CommonName,
 					Certificate: credentials.CertificateGen.Certificate,
@@ -300,32 +300,32 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 		}
 	}
 
-	if credentials.Oauth != nil {
+	if credentials.OauthWithCSRF != nil {
 		return &model.Credentials{
 			Oauth: &model.Oauth{
-				ClientID:     credentials.Oauth.ClientID,
-				ClientSecret: credentials.Oauth.ClientSecret,
-				URL:          credentials.Oauth.URL,
-				CSRFInfo:     csrfInfoToModel(credentials.Oauth.CSRFInfo),
+				ClientID:     credentials.OauthWithCSRF.ClientID,
+				ClientSecret: credentials.OauthWithCSRF.ClientSecret,
+				URL:          credentials.OauthWithCSRF.URL,
+				CSRFInfo:     csrfInfoToModel(credentials.OauthWithCSRF.CSRFInfo),
 			},
 		}
 	}
 
-	if credentials.Basic != nil {
+	if credentials.BasicWithCSRF != nil {
 		return &model.Credentials{
 			Basic: &model.Basic{
-				Username: credentials.Basic.Username,
-				Password: credentials.Basic.Password,
-				CSRFInfo: csrfInfoToModel(credentials.Basic.CSRFInfo),
+				Username: credentials.BasicWithCSRF.Username,
+				Password: credentials.BasicWithCSRF.Password,
+				CSRFInfo: csrfInfoToModel(credentials.BasicWithCSRF.CSRFInfo),
 			},
 		}
 	}
 
-	if credentials.CertificateGen != nil {
+	if credentials.CertificateGenWithCSRF != nil {
 		return &model.Credentials{
 			CertificateGen: &model.CertificateGen{
-				CommonName: credentials.CertificateGen.CommonName,
-				CSRFInfo:   csrfInfoToModel(credentials.CertificateGen.CSRFInfo),
+				CommonName: credentials.CertificateGenWithCSRF.CommonName,
+				CSRFInfo:   csrfInfoToModel(credentials.CertificateGenWithCSRF.CSRFInfo),
 			},
 		}
 	}
