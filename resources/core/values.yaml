@@ -24,7 +24,7 @@ global:
     version: "PR-4615"
   ui_acceptance_tests:
     dir:
-    version: "c69dbf49"
+    version: "PR-992"
   api_controller:
     dir: develop/
     version: "b8c31ef4"
