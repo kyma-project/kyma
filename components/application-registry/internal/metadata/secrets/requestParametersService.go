@@ -3,6 +3,7 @@ package secrets
 import (
 	"encoding/json"
 	"fmt"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
@@ -18,12 +19,12 @@ const (
 	requestParametersQueryParametersKey = "queryParameters"
 )
 
-type requestParametersSecretModificationFunction func(application, name, serviceID string, newData map[string][]byte) apperrors.AppError
+type requestParametersSecretModificationFunction func(application string, appUID types.UID, name, serviceID string, newData map[string][]byte) apperrors.AppError
 
 type RequestParametersService interface {
 	Get(secretName string) (model.RequestParameters, apperrors.AppError)
-	Create(application, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError)
-	Upsert(application, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError)
+	Create(application string, appUID types.UID, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError)
+	Upsert(application string, appUID types.UID, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError)
 	Delete(application, serviceId string) apperrors.AppError
 }
 
@@ -39,8 +40,8 @@ func NewRequestParametersService(repository Repository, nameResolver k8sconsts.N
 	}
 }
 
-func (s *requestParametersService) Create(application, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError) {
-	return s.modifySecret(application, serviceID, requestParameters, s.createSecret)
+func (s *requestParametersService) Create(application string, appUID types.UID, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError) {
+	return s.modifySecret(application, appUID, serviceID, requestParameters, s.createSecret)
 }
 
 func (s *requestParametersService) Get(secretName string) (model.RequestParameters, apperrors.AppError) {
@@ -76,8 +77,8 @@ func getParameterFromJsonData(data map[string][]byte, key string) (map[string][]
 	return parameter, nil
 }
 
-func (s *requestParametersService) Upsert(application, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError) {
-	return s.modifySecret(application, serviceID, requestParameters, s.upsertSecret)
+func (s *requestParametersService) Upsert(application string, appUID types.UID, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError) {
+	return s.modifySecret(application, appUID, serviceID, requestParameters, s.upsertSecret)
 }
 
 func (s *requestParametersService) Delete(application string, serviceId string) apperrors.AppError {
@@ -86,7 +87,7 @@ func (s *requestParametersService) Delete(application string, serviceId string) 
 	return s.repository.Delete(secretName)
 }
 
-func (s *requestParametersService) modifySecret(application, serviceID string, requestParameters *model.RequestParameters, modFunction requestParametersSecretModificationFunction) (string, apperrors.AppError) {
+func (s *requestParametersService) modifySecret(application string, appUID types.UID, serviceID string, requestParameters *model.RequestParameters, modFunction requestParametersSecretModificationFunction) (string, apperrors.AppError) {
 	if requestParameters == nil {
 		return "", nil
 	}
@@ -98,7 +99,7 @@ func (s *requestParametersService) modifySecret(application, serviceID string, r
 		return "", err.Append("Failed to create request parameters secret data")
 	}
 
-	err = modFunction(application, name, serviceID, secretData)
+	err = modFunction(application, appUID, name, serviceID, secretData)
 	if err != nil {
 		return "", err
 	}
@@ -120,12 +121,12 @@ func createSecretData(requestParameters *model.RequestParameters) (map[string][]
 	return data, nil
 }
 
-func (s *requestParametersService) upsertSecret(application, name, serviceID string, newData map[string][]byte) apperrors.AppError {
-	return s.repository.Upsert(application, name, serviceID, newData)
+func (s *requestParametersService) upsertSecret(application string, appUID types.UID, name, serviceID string, newData map[string][]byte) apperrors.AppError {
+	return s.repository.Upsert(application, appUID, name, serviceID, newData)
 }
 
-func (s *requestParametersService) createSecret(application, name, serviceID string, newData map[string][]byte) apperrors.AppError {
-	return s.repository.Create(application, name, serviceID, newData)
+func (s *requestParametersService) createSecret(application string, appUID types.UID, name, serviceID string, newData map[string][]byte) apperrors.AppError {
+	return s.repository.Create(application, appUID, name, serviceID, newData)
 }
 
 func (s *requestParametersService) createSecretName(application, serviceId string) string {
