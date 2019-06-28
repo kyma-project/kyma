@@ -21,8 +21,8 @@ type ServiceInterface interface {
 }
 
 type AccessServiceManager interface {
-	Create(application, serviceId, serviceName string) apperrors.AppError
-	Upsert(application, serviceId, serviceName string) apperrors.AppError
+	Create(application string, appUID types.UID, serviceId, serviceName string) apperrors.AppError
+	Upsert(application string, appUID types.UID, serviceId, serviceName string) apperrors.AppError
 	Delete(serviceName string) apperrors.AppError
 }
 
@@ -42,16 +42,16 @@ func NewAccessServiceManager(serviceInterface ServiceInterface, config AccessSer
 	}
 }
 
-func (m *accessServiceManager) Create(application, serviceId, serviceName string) apperrors.AppError {
-	_, err := m.create(application, serviceId, serviceName)
+func (m *accessServiceManager) Create(application string, appUID types.UID, serviceId, serviceName string) apperrors.AppError {
+	_, err := m.create(application, appUID, serviceId, serviceName)
 	if err != nil {
 		return apperrors.Internal("Creating service failed, %s", err.Error())
 	}
 	return nil
 }
 
-func (m *accessServiceManager) Upsert(application, serviceId, serviceName string) apperrors.AppError {
-	_, err := m.create(application, serviceId, serviceName)
+func (m *accessServiceManager) Upsert(application string, appUID types.UID, serviceId, serviceName string) apperrors.AppError {
+	_, err := m.create(application, appUID, serviceId, serviceName)
 	if err != nil {
 		if k8serrors.IsAlreadyExists(err) {
 			return nil
@@ -71,7 +71,7 @@ func (m *accessServiceManager) Delete(serviceName string) apperrors.AppError {
 	return nil
 }
 
-func (m *accessServiceManager) create(application, serviceId, serviceName string) (*corev1.Service, error) {
+func (m *accessServiceManager) create(application string, appUID types.UID, serviceId, serviceName string) (*corev1.Service, error) {
 	appName := fmt.Sprintf(appNameLabelFormat, application)
 
 	service := corev1.Service{
@@ -86,7 +86,7 @@ func (m *accessServiceManager) create(application, serviceId, serviceName string
 					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 					Kind: "Application",
 					Name: application,
-					UID: types.UID(serviceId), //TODO: It should be UID of the Application. Pass it from the metadatahandler!
+					UID: appUID,
 				},
 			},
 		},

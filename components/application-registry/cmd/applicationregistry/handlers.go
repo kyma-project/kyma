@@ -1,6 +1,7 @@
 package main
 
 import (
+	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore"
@@ -71,6 +72,11 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 		return nil, apperror
 	}
 
+	applicationManager, apperror := newApplicationManager(k8sConfig)
+	if apperror != nil {
+		return nil, apperror
+	}
+
 	sei := coreClientset.CoreV1().Secrets(opt.namespace)
 	secretsRepository := secrets.NewRepository(sei)
 
@@ -88,7 +94,7 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 
 	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, credentialsSecretsService, requestParametersSecretsService, istioService)
 
-	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, applicationServiceRepository, specificationService), nil
+	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, applicationServiceRepository, specificationService, applicationManager), nil
 }
 
 func NewSpecificationService(dynamicClient dynamic.Interface, opt *options) specification.Service {
@@ -107,14 +113,21 @@ func NewSpecificationService(dynamicClient dynamic.Interface, opt *options) spec
 }
 
 func newApplicationRepository(config *restclient.Config) (applications.ServiceRepository, apperrors.AppError) {
+	applicationManager, err := newApplicationManager(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return applications.NewServiceRepository(applicationManager), nil
+}
+
+func newApplicationManager(config *restclient.Config) (v1alpha12.ApplicationInterface, apperrors.AppError) {
 	applicationEnvironmentClientset, err := versioned.NewForConfig(config)
 	if err != nil {
 		return nil, apperrors.Internal("Failed to create k8s application client, %s", err)
 	}
 
-	rei := applicationEnvironmentClientset.ApplicationconnectorV1alpha1().Applications()
-
-	return applications.NewServiceRepository(rei), nil
+	return applicationEnvironmentClientset.ApplicationconnectorV1alpha1().Applications(), nil
 }
 
 func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace string, proxyPort int) accessservice.AccessServiceManager {
