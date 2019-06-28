@@ -19,8 +19,6 @@ type Subscription struct {
 type SubscriptionSpec struct {
 	Endpoint                      string `json:"endpoint"`
 	IncludeSubscriptionNameHeader bool   `json:"include_subscription_name_header"`
-	MaxInflight                   int    `json:"max_inflight"`
-	PushRequestTimeoutMS          int64  `json:"push_request_timeout_ms"`
 	EventType                     string `json:"event_type"`
 	EventTypeVersion              string `json:"event_type_version"`
 	SourceID                      string `json:"source_id"`

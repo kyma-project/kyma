@@ -1,15 +1,16 @@
 package apicontroller
 
 import (
+	"os"
+	"os/signal"
+	"testing"
+
 	log "github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"os"
-	"os/signal"
-	"testing"
 )
 
 var kubeConfig *rest.Config
@@ -85,8 +86,8 @@ func loadKubeConfigOrDie() *rest.Config {
 
 func testWithNamespace(m *testing.M) int {
 	catchInterrupt()
-	createNamespace()
 	defer deleteNamespace()
+	createNamespace()
 
 	return m.Run()
 }

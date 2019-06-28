@@ -29,8 +29,8 @@ global:
     dir: develop/
     version: "b8c31ef4"
   api_controller_acceptance_tests:
-    dir: develop/
-    version: "52e36665"
+    dir: pr/
+    version: "PR-4656"
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
@@ -60,10 +60,10 @@ global:
     version: 6b4c356f
   console_backend_service:
     dir: pr/
-    version: PR-4554
+    version: PR-4386
   console_backend_service_test:
     dir: pr/
-    version: 'PR-4581'
+    version: PR-4386
   cluster_users_test:
     dir: pr/
     version: "PR-4647"
