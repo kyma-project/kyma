@@ -13,6 +13,7 @@ import (
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/cms"
 
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
+
 	backupClient "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/backup"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -71,6 +72,9 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	helmBrokerTest, err := NewHelmBrokerTest()
 	fatalOnError(t, err, "while creating structure for HelmBroker test")
 
+	myEventBusTest, err := NewEventBusTest()
+	fatalOnError(t, err, "while creating structure for EventBus test")
+
 	myCmsTest, err := NewCmsTest(t)
 	fatalOnError(t, err, "while creating structure for Cms test")
 
@@ -87,6 +91,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		myMicroFrontendTest,
 		appBrokerTest,
 		helmBrokerTest,
+		myEventBusTest,
 	}
 	e2eTests := make([]e2eTest, len(backupTests))
 
@@ -139,11 +144,11 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 
 		Convey("Check backup status", func() {
 
-			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 25*time.Minute)
+			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 35*time.Minute)
 			myBackupClient.DescribeBackup(systemBackupName)
 			So(err, ShouldBeNil)
 
-			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 25*time.Minute)
+			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 35*time.Minute)
 			myBackupClient.DescribeBackup(allBackupName)
 			So(err, ShouldBeNil)
 
@@ -164,11 +169,10 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 					err := myBackupClient.RestoreBackup(allBackupName)
 					So(err, ShouldBeNil)
 
-					err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 20*time.Minute)
-					myBackupClient.DescribeRestore(systemBackupName)
+					err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 35*time.Minute)
 					So(err, ShouldBeNil)
 
-					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 20*time.Minute)
+					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 35*time.Minute)
 					myBackupClient.DescribeRestore(allBackupName)
 					So(err, ShouldBeNil)
 
