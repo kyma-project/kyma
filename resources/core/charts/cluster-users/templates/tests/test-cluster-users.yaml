@@ -51,11 +51,7 @@ spec:
           - name: NAMESPACE
             value: {{ .Values.namespace }}
           - name: IAM_KUBECONFIG_SVC_FQDN
-          {{- if .Values.global.isLocalEnv }}
-            value: "http://configurations-generator.kyma.local"
-          {{- else }}
             value: "http://configurations-generator.{{ .Values.global.ingress.domainName }}"
-          {{- end }}
       restartPolicy: Never
 ---
 apiVersion: v1
