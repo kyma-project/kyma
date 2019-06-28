@@ -20,16 +20,21 @@ var namespace string
 func TestMain(m *testing.M) {
 	namespace = os.Getenv(namespaceEnv)
 	if namespace == "" {
-		log.Fatal("Namespace not set.")
+		log.Error("Namespace not set.")
+		os.Exit(2)
 	}
 
-	kubeConfig = loadKubeConfigOrDie()
+	kubeConfig, err := loadKubeConfigOrDie()
+	if err != nil {
+		os.Exit(2)
+	}
+
 	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
 
 	os.Exit(testWithNamespace(m))
 }
 
-func createNamespace() {
+func createNamespace() error {
 	log.Infof("Creating namespace '%s", namespace)
 	_, err := k8sClient.CoreV1().Namespaces().Create(&v1.Namespace{
 		ObjectMeta: meta_v1.ObjectMeta{
@@ -42,8 +47,10 @@ func createNamespace() {
 		Spec: v1.NamespaceSpec{},
 	})
 	if err != nil {
-		log.Fatalf("Cannot create namespace '%s': %v", namespace, err)
+		log.Errorf("Cannot create namespace '%s': %v", namespace, err)
+		return err
 	}
+	return nil
 }
 
 func deleteNamespace() {
@@ -67,27 +74,32 @@ func catchInterrupt() {
 	}()
 }
 
-func loadKubeConfigOrDie() *rest.Config {
+func loadKubeConfigOrDie() (*rest.Config, error) {
 	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
 		cfg, err := rest.InClusterConfig()
 		if err != nil {
-			log.Fatalf("Cannot create in-cluster config: %v", err)
+			log.Errorf("Cannot create in-cluster config: %v", err)
+			return nil, err
 		}
-		return cfg
+		return cfg, nil
 	}
 
 	var err error
 	kubeConfig, err = clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
 	if err != nil {
-		log.Fatalf("Cannot read kubeconfig: %s", err)
+		log.Errorf("Cannot read kubeconfig: %s", err)
+		return nil, err
 	}
-	return kubeConfig
+	return kubeConfig, nil
 }
 
 func testWithNamespace(m *testing.M) int {
 	catchInterrupt()
+
 	defer deleteNamespace()
-	createNamespace()
+	if err := createNamespace(); err != nil {
+		panic(err)
+	}
 
 	return m.Run()
 }
