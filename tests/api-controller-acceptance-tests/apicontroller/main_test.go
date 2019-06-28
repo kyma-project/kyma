@@ -24,11 +24,7 @@ func TestMain(m *testing.M) {
 		os.Exit(2)
 	}
 
-	kubeConfig, err := loadKubeConfigOrDie()
-	if err != nil {
-		os.Exit(2)
-	}
-
+	kubeConfig := loadKubeConfigOrDie()
 	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
 
 	os.Exit(testWithNamespace(m))
@@ -74,23 +70,23 @@ func catchInterrupt() {
 	}()
 }
 
-func loadKubeConfigOrDie() (*rest.Config, error) {
+func loadKubeConfigOrDie() *rest.Config {
 	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
 		cfg, err := rest.InClusterConfig()
 		if err != nil {
 			log.Errorf("Cannot create in-cluster config: %v", err)
-			return nil, err
+			panic(err)
 		}
-		return cfg, nil
+		return cfg
 	}
 
 	var err error
 	kubeConfig, err = clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
 	if err != nil {
 		log.Errorf("Cannot read kubeconfig: %s", err)
-		return nil, err
+		panic(err)
 	}
-	return kubeConfig, nil
+	return kubeConfig
 }
 
 func testWithNamespace(m *testing.M) int {
