@@ -5,10 +5,8 @@ type: Installation
 
 This guide describes how to update Kyma deployed locally or on a cluster.
 
-If you are unsure of what version of Kyma you're running, check the name of the Installer image used for deployment. Run:
-```
-kubectl -n kyma-installer get deploy kyma-installer -o jsonpath='{.spec.template.spec.containers[].image}
-```
+>**NOTE:** Updating Kyma means introducing changes to a running deployment. If you want to upgrade to a newer version, read [this](##installation-upgrade-kyma) document.
+
 
 ## Prerequisites
 
