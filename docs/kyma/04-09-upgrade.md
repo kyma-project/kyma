@@ -7,7 +7,7 @@ Upgrading Kyma is the process of migrating from one version of the software to a
 
 To upgrade to a version that is several releases newer than the version you're currently using, you must move up to the desired release incrementally. You can skip patch releases.
 
-For example, ff you're running Kyma 1.0 and you want to upgrade to version 1.3, you must perform these operations:
+For example, if you're running Kyma 1.0 and you want to upgrade to version 1.3, you must perform these operations:
   1. Upgrade from version 1.0 to version 1.1.
   2. Upgrade from version 1.1 to version 1.2.
   3. Upgrade from version 1.2 to version 1.3.  
@@ -54,6 +54,33 @@ Follow these steps:
 
       ```
       kubectl apply -f {KYMA-INSTALLER-CLUSTER-FILE}
+      ```
+
+      </details>
+    </div>
+
+4. Applying the release artifcats to the cluster triggers the installation of the desired Kyma version. To watch the installation status, run:
+    <div tabs>
+      <details>
+      <summary>
+      Local deployment
+      </summary>
+
+      ```
+      ./is-installed.sh
+      ```
+
+      </details>
+      <details>
+      <summary>
+      Cluster deployment
+      </summary>
+
+      ```
+      while true; do \
+      kubectl -n default get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}"; echo; \
+      sleep 5; \
+      done
       ```
 
       </details>
