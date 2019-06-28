@@ -1,10 +1,10 @@
-APP_NAME = configurations-generator
+APP_NAME = integration-dex
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 
 .PHONY: build
 build:
-	./before-commit.sh ci
+	./build.sh
 
 .PHONY: build-image
 build-image:
@@ -26,8 +26,8 @@ ci-release: build build-image push-image
 
 .PHONY: clean
 clean:
-	rm -rf bin/
+	rm -f dex.test
 
-.PHONY: path-to-referenced-charts
-path-to-referenced-charts:
-	@echo "resources/core"
+#.PHONY: path-to-referenced-charts
+#path-to-referenced-charts:
+#	@echo "resources/core"

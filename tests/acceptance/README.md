@@ -3,7 +3,7 @@
 ## Overview
 
 This project contains the acceptance tests that you can run as part of Kyma testing process.
-The tests are written in Go. Each component or group of scenarios has a separate folder, like `dex` or `servicecatalog`.
+The tests are written in Go. Each component or group of scenarios has a separate folder, like `servicecatalog`.
 
 ## Usage
 
