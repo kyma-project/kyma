@@ -3,7 +3,7 @@ title: Upgrade Kyma
 type: Installation
 ---
 
-Upgrading Kyma is the process of migrating from one version of the software to a newer release. This operation depends on [release artefacts](https://github.com/kyma-project/kyma/releases) listed in the "assets" section of the GitHub releases page and migration guides delivered with the target release.
+Upgrading Kyma is the process of migrating from one version of the software to a newer release. This operation depends on [release artifacts](https://github.com/kyma-project/kyma/releases) listed in the "assets" section of the GitHub releases page and migration guides delivered with the target release.
 
 To upgrade to a version that is several releases newer than the version you're currently using, you must move up to the desired release incrementally. You can skip patch releases.
 
@@ -59,7 +59,7 @@ Follow these steps:
       </details>
     </div>
 
-4. Applying the release artifcats to the cluster triggers the installation of the desired Kyma version. To watch the installation status, run:
+4. Applying the release artifacts to the cluster triggers the installation of the desired Kyma version. To watch the installation status, run:
     <div tabs>
       <details>
       <summary>
