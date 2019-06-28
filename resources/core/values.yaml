@@ -26,11 +26,11 @@ global:
     dir:
     version: "c69dbf49"
   api_controller:
-    dir: develop/
-    version: "b8c31ef4"
+    dir: pr/
+    version: "PR-4582"
   api_controller_acceptance_tests:
     dir: pr/
-    version: "PR-4656"
+    version: "PR-4582"
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
