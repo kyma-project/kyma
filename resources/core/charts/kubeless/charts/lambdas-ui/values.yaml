@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   name: lambda
-  tag: c69dbf49
+  tag: 018977dc
   pullPolicy: IfNotPresent
 service:
   name: nginx

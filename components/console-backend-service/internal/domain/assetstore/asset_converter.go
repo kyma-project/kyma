@@ -4,6 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/pkg/errors"
 )
 
 //go:generate mockery -name=gqlAssetConverter -output=automock -outpkg=automock -case=underscore
@@ -14,7 +15,7 @@ type gqlAssetConverter interface {
 }
 
 type assetConverter struct {
-	extractor extractor.AssetStatusExtractor
+	extractor extractor.Common
 }
 
 func (c *assetConverter) ToGQL(item *v1alpha2.Asset) (*gqlschema.Asset, error) {
@@ -23,12 +24,17 @@ func (c *assetConverter) ToGQL(item *v1alpha2.Asset) (*gqlschema.Asset, error) {
 	}
 
 	status := c.extractor.Status(item.Status.CommonAssetStatus)
+	metadata, err := c.extractor.Metadata(item.Spec.CommonAssetSpec.Metadata)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while extracting metadata from Asset [name: %s][namespace: %s]", item.Name, item.Namespace)
+	}
 
 	asset := gqlschema.Asset{
 		Name:      item.Name,
 		Namespace: item.Namespace,
 		Type:      item.Labels[CmsTypeLabel],
 		Status:    status,
+		Metadata:  metadata,
 	}
 
 	return &asset, nil

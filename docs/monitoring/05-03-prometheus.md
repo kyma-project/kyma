@@ -15,5 +15,5 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **retention** | Specifies a period of time for which Prometheus stores the metrics. | `6h` |
+| **retention** | Specifies a period of time for which Prometheus stores the metrics in-memory. This retention time applies to in-memory storage only. Prometheus stores the recent data in-memory for the specified amount of time to avoid reading the entire data from disk.| `2h` |
 | **storageSpec.volumeClaimTemplate.spec.resources.requests.storage** | Specifies the size of a Persistent Volume Claim (PVC). | `4Gi` |
