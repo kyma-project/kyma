@@ -49,11 +49,12 @@ Follow these steps:
       Cluster deployment
       </summary>
 
-        - Download the `kyma-installer-cluster.yaml` artifact and apply it to the cluster to upgrade Kyma. Run:
-        ```
-        kubectl apply -f {KYMA-INSTALLER-CLUSTER-FILE}
-        ```
-        
+      Download the `kyma-installer-cluster.yaml` artifact and apply it to the cluster to upgrade Kyma. Run:
+
+      ```
+      kubectl apply -f {KYMA-INSTALLER-CLUSTER-FILE}
+      ```
+
       </details>
     </div>
 
