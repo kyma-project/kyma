@@ -53,7 +53,8 @@ Follow these steps:
         ```
         kubectl apply -f {KYMA-INSTALLER-CLUSTER-FILE}
         ```
+        
       </details>
     </div>
 
-4. 
+4.
