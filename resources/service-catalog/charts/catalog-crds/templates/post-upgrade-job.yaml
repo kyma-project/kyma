@@ -29,7 +29,7 @@ metadata:
     "helm.sh/hook-weight": "1"
     "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
 rules:
-  - apiGroups: ["extensions"]
+  - apiGroups: ["apps"]
     resources: ["deployments"]
     verbs:     ["get", "list", "update"]
   - apiGroups: ["servicecatalog.k8s.io"]
