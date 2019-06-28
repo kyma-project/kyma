@@ -3,8 +3,6 @@ package download
 import (
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/csrf"
-	csrfClient "github.com/kyma-project/kyma/components/application-gateway/pkg/csrf/client"
-	csrfStrategy "github.com/kyma-project/kyma/components/application-gateway/pkg/csrf/strategy"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"io/ioutil"
 	"net/http"
@@ -23,11 +21,11 @@ type downloader struct {
 	csrfFactory          csrf.TokenStrategyFactory
 }
 
-func NewClient(client *http.Client) Client {
+func NewClient(client *http.Client, authFactory authorization.StrategyFactory, csrfFactory csrf.TokenStrategyFactory) Client {
 	return downloader{
 		client:               client,
-		authorizationFactory: authorization.NewStrategyFactory(authorization.FactoryConfiguration{}),
-		csrfFactory:          csrfStrategy.NewTokenStrategyFactory(csrfClient.New(10, nil, nil)),
+		authorizationFactory: authFactory,
+		csrfFactory:          csrfFactory,
 	}
 }
 
