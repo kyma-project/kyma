@@ -118,23 +118,6 @@ data:
               - channel
       version: v1alpha1
     EOF
-    cat << EOF | kubectl apply -f - 
-    apiVersion: v1
-    data:
-    kind: ConfigMap
-    metadata:
-      name: config-tracing
-      namespace: knative-eventing
-    EOF
-    cat << EOF | kubectl apply -f - 
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      labels:
-        eventing.knative.dev/release: devel
-      name: config-observability
-      namespace: knative-eventing
-    EOF
     echo "*** Pre upgrade job executed ***"
 kind: ConfigMap
 metadata:
