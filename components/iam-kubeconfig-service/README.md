@@ -1,4 +1,4 @@
-# IAM kubeconfig Service
+# IAM Kubeconfig Service
 
 ## Overview
 
