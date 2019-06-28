@@ -25,8 +25,7 @@ Follow these steps:
 2. Perform the required actions described in the migration guide published with the release you want to upgrade to. Migration guides are linked in the [release notes](https://kyma-project.io/blog/) and are available on the respective [release branches](https://github.com/kyma-project/kyma/branches) in the `docs/migration-guides` directory.
   >**NOTE:** Not all releases require you to perform additional migration steps. If your target release doesn't come with a migration guide, proceed to the next step.
 
-3.
-    <div tabs>
+3. <div tabs>
       <details>
       <summary>
       Local deployment
@@ -43,15 +42,18 @@ Follow these steps:
       ```
       kubectl apply -f {KYMA-INSTALLER-LOCAL-FILE}
       ```
-      
+
       </details>
       <details>
       <summary>
-      SSH
+      Cluster deployment
       </summary>
 
-      ```
-      git clone git@github.com:kyma-project/kyma.git ; cd kyma
-      ```
+        - Download the `kyma-installer-cluster.yaml` artifact and apply it to the cluster to upgrade Kyma. Run:
+        ```
+        kubectl apply -f {KYMA-INSTALLER-CLUSTER-FILE}
+        ```
       </details>
     </div>
+
+4. 
