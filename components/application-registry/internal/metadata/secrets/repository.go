@@ -8,6 +8,7 @@ import (
 	"k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // Repository contains operations for managing client credentials
@@ -94,6 +95,14 @@ func makeSecret(name, serviceID, application string, data strategy.SecretData) *
 			Labels: map[string]string{
 				k8sconsts.LabelApplication: application,
 				k8sconsts.LabelServiceId:   serviceID,
+			},
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+					Kind: "Application",
+					Name: application,
+					UID: types.UID(serviceID), //TODO: It should be UID of the Application. Pass it from the metadatahandler!
+				},
 			},
 		},
 		Data: data,

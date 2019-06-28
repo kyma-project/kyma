@@ -2,6 +2,7 @@ package istio
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
@@ -177,6 +178,14 @@ func (repo *repository) makeDenierObject(application, serviceId, name string) *v
 				k8sconsts.LabelApplication: application,
 				k8sconsts.LabelServiceId:   serviceId,
 			},
+			OwnerReferences: []v1.OwnerReference{
+				{
+					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+					Kind: "Application",
+					Name: application,
+					UID: types.UID(serviceId), //TODO: It should be UID of the Application. Pass it from the metadatahandler!
+				},
+			},
 		},
 		Spec: &v1alpha2.DenierSpec{
 			Status: &v1alpha2.DenierStatus{
@@ -195,6 +204,14 @@ func (repo *repository) makeCheckNothingObject(application, serviceId, name stri
 				k8sconsts.LabelApplication: application,
 				k8sconsts.LabelServiceId:   serviceId,
 			},
+			OwnerReferences: []v1.OwnerReference{
+				{
+					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+					Kind: "Application",
+					Name: application,
+					UID: types.UID(serviceId), //TODO: It should be UID of the Application. Pass it from the metadatahandler!
+				},
+			},
 		},
 	}
 }
@@ -210,6 +227,14 @@ func (repo *repository) makeRuleObject(application, serviceId, name string) *v1a
 			Labels: map[string]string{
 				k8sconsts.LabelApplication: application,
 				k8sconsts.LabelServiceId:   serviceId,
+			},
+			OwnerReferences: []v1.OwnerReference{
+				{
+					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+					Kind: "Application",
+					Name: application,
+					UID: types.UID(serviceId), //TODO: It should be UID of the Application. Pass it from the metadatahandler!
+				},
 			},
 		},
 		Spec: &v1alpha2.RuleSpec{

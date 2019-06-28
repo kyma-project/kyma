@@ -14,7 +14,10 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const crPropagationWaitTime = 10
+const (
+	crPropagationWaitTime = 10
+	deleteApplicationResourcesWaitTime = 10
+)
 
 func TestK8sResources(t *testing.T) {
 
@@ -1135,4 +1138,80 @@ func TestK8sResources(t *testing.T) {
 
 	err = k8sResourcesClient.DeleteApplication(dummyApp.Name, &v1.DeleteOptions{})
 	require.NoError(t, err)
+
+	t.Run("when deleting application", func(t *testing.T) {
+		//given
+		dummyApp, err := k8sResourcesClient.CreateDummyApplication("appk8srestest1", v1.GetOptions{}, true)
+		require.NoError(t, err)
+
+		initialServiceDefinition := testkit.ServiceDetails{
+			Name:        "test service",
+			Provider:    "service provider",
+			Description: "service description",
+			Api: &testkit.API{
+				TargetUrl: "http://service.com",
+				Credentials: &testkit.Credentials{
+					Oauth: &testkit.Oauth{
+						URL:          "http://oauth.com",
+						ClientID:     "clientId",
+						ClientSecret: "clientSecret",
+					},
+				},
+				Spec: testkit.ApiRawSpec,
+			},
+			Events: &testkit.Events{
+				Spec: testkit.EventsRawSpec,
+			},
+		}
+
+		statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, statusCode)
+
+		serviceId := postResponseData.ID
+		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+
+		//when
+		err = k8sResourcesClient.DeleteApplication(dummyApp.Name, &v1.DeleteOptions{})
+		require.NoError(t, err)
+
+		time.Sleep(deleteApplicationResourcesWaitTime * time.Second)
+
+		//then
+		t.Run("should remove k8s service", func(t *testing.T) {
+			_, err := k8sResourcesClient.GetService(resourceName, v1.GetOptions{})
+			require.Error(t, err)
+			require.True(t, k8serrors.IsNotFound(err))
+		})
+
+		t.Run("should remove k8s secret with client credentials", func(t *testing.T) {
+			_, err := k8sResourcesClient.GetSecret(resourceName, v1.GetOptions{})
+			require.Error(t, err)
+			require.True(t, k8serrors.IsNotFound(err))
+		})
+
+		t.Run("should remove istio denier", func(t *testing.T) {
+			_, err := k8sResourcesClient.GetDenier(resourceName, v1.GetOptions{})
+			require.Error(t, err)
+			require.True(t, k8serrors.IsNotFound(err))
+		})
+
+		t.Run("should remove istio rule", func(t *testing.T) {
+			_, err := k8sResourcesClient.GetRule(resourceName, v1.GetOptions{})
+			require.Error(t, err)
+			require.True(t, k8serrors.IsNotFound(err))
+		})
+
+		t.Run("should remove istio checknothing", func(t *testing.T) {
+			_, err := k8sResourcesClient.GetChecknothing(resourceName, v1.GetOptions{})
+			require.Error(t, err)
+			require.True(t, k8serrors.IsNotFound(err))
+		})
+
+		t.Run("should remove service from application custom resource", func(t *testing.T) {
+			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
+			require.NoError(t, err)
+			testkit.CheckK8sApplicationNotContainsService(t, application, serviceId)
+		})
+	})
 }
