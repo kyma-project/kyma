@@ -156,13 +156,18 @@ func (sds *serviceDefinitionService) Update(application string, serviceDef *mode
 
 	var gatewayUrl string
 
+	appUID, apperr := sds.getApplicationUID(application)
+	if apperr != nil {
+		return model.ServiceDefinition{}, apperr.Append("Getting Application UID failed")
+	}
+
 	if !apiDefined(serviceDef) {
 		apperr = sds.serviceAPIService.Delete(application, serviceDef.ID)
 		if apperr != nil {
 			return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, deleting API failed", serviceDef.ID)
 		}
 	} else {
-		service.API, apperr = sds.serviceAPIService.Update(application, serviceDef.ID, serviceDef.Api)
+		service.API, apperr = sds.serviceAPIService.Update(application, appUID, serviceDef.ID, serviceDef.Api)
 		if apperr != nil {
 			return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, updating API failed", serviceDef.ID)
 		}
