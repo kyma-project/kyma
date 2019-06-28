@@ -34,6 +34,10 @@ function getConfigFile() {
 	RESPONSE=$(curl -X GET "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/approval?${REQUEST_ID}")
 	AUTH_TOKEN=$(echo "${RESPONSE}" | grep -o -P '(?<=id_token=).*(?=&amp;state)')
 	curl -s -k -f -H "Authorization: Bearer ${AUTH_TOKEN}" "${IAM_KUBECONFIG_SVC_FQDN}/kube-config" -o "${PWD}/kubeconfig"
+	if [[ ! -s "${PWD}/kubeconfig" ]]; then
+		echo "---> KUBECONFIG not created, or is empty!"
+		exit 1
+	fi
 }
 
 function runTests() {
