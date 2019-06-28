@@ -112,7 +112,7 @@ function cleanup() {
 		echo "AN ERROR OCCURED! Take a look at preceding log entries."
 	fi
 	echo "---> Deleting bindings for tests"
-	kubectl delete -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
+	kubectl delete -f ./kyma-test-bindings.yaml -n "${NAMESPACE}"
 	MSG=""
 	if [[ ${EXIT_STATUS} -ne 0 ]]; then MSG="(exit status: ${EXIT_STATUS})"; fi
 	echo "Job is finished ${MSG}"
@@ -136,7 +136,7 @@ trap cleanup EXIT
 ERROR_LOGGING_GUARD="true"
 
 echo "---> Create testing RoleBinding"
-kubectl create -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
+kubectl create -f ./kyma-test-bindings.yaml -n "${NAMESPACE}"
 runTests
 
 echo "ALL TESTS PASSED"
