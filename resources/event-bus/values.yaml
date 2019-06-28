@@ -10,7 +10,7 @@ global:
     version: b2b5f005
   event_bus_tests:
     dir: develop/
-    version: b2b5f005
+    version: 164eb8ac
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
