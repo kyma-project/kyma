@@ -200,15 +200,19 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Basic: &BasicAuth{
-						Username: "username",
-						Password: "password",
+				Credentials: &CredentialsWithCSRF{
+					Basic: &BasicAuthWithCSRF{
+						BasicAuth: BasicAuth{
+							Username: "username",
+							Password: "password",
+						},
 					},
-					Oauth: &Oauth{
-						URL:          "http://test.com/token",
-						ClientID:     "client",
-						ClientSecret: "secret",
+					Oauth: &OauthWithCSRF{
+						Oauth: Oauth{
+							URL:          "http://test.com/token",
+							ClientID:     "client",
+							ClientSecret: "secret",
+						},
 					},
 				},
 			},
@@ -234,11 +238,13 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Oauth: &Oauth{
-						URL:          "http://test.com/token",
-						ClientID:     "client",
-						ClientSecret: "secret",
+				Credentials: &CredentialsWithCSRF{
+					Oauth: &OauthWithCSRF{
+						Oauth: Oauth{
+							URL:          "http://test.com/token",
+							ClientID:     "client",
+							ClientSecret: "secret",
+						},
 					},
 				},
 			},
@@ -261,8 +267,8 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Oauth: &Oauth{},
+				Credentials: &CredentialsWithCSRF{
+					Oauth: &OauthWithCSRF{},
 				},
 			},
 		}
@@ -285,10 +291,12 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Oauth: &Oauth{
-						URL:      "http://test.com/token",
-						ClientID: "client",
+				Credentials: &CredentialsWithCSRF{
+					Oauth: &OauthWithCSRF{
+						Oauth: Oauth{
+							URL:      "http://test.com/token",
+							ClientID: "client",
+						},
 					},
 				},
 			},
@@ -312,11 +320,13 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Oauth: &Oauth{
-						URL:          "test_com/token",
-						ClientID:     "client",
-						ClientSecret: "secret",
+				Credentials: &CredentialsWithCSRF{
+					Oauth: &OauthWithCSRF{
+						Oauth: Oauth{
+							URL:          "test_com/token",
+							ClientID:     "client",
+							ClientSecret: "secret",
+						},
 					},
 				},
 			},
@@ -342,10 +352,12 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Basic: &BasicAuth{
-						Username: "username",
-						Password: "password",
+				Credentials: &CredentialsWithCSRF{
+					Basic: &BasicAuthWithCSRF{
+						BasicAuth: BasicAuth{
+							Username: "username",
+							Password: "password",
+						},
 					},
 				},
 			},
@@ -368,8 +380,8 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Basic: &BasicAuth{},
+				Credentials: &CredentialsWithCSRF{
+					Basic: &BasicAuthWithCSRF{},
 				},
 			},
 		}
@@ -392,9 +404,11 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Basic: &BasicAuth{
-						Username: "username",
+				Credentials: &CredentialsWithCSRF{
+					Basic: &BasicAuthWithCSRF{
+						BasicAuth: BasicAuth{
+							Username: "username",
+						},
 					},
 				},
 			},
@@ -420,8 +434,8 @@ func TestServiceDetailsValidator_API_Certificate(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					CertificateGen: &CertificateGen{},
+				Credentials: &CredentialsWithCSRF{
+					CertificateGen: &CertificateGenWithCSRF{},
 				},
 			},
 		}

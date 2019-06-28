@@ -73,7 +73,7 @@ func validateEventsSpec(events *Events) apperrors.AppError {
 func validateApiCredentials(api *API) apperrors.AppError {
 	if api != nil && api.Credentials != nil {
 		if validateToManyCredentials(api.Credentials) {
-			return apperrors.WrongInput("api.Credentials is invalid: to many authentication methods provided")
+			return apperrors.WrongInput("api.CredentialsWithCSRF is invalid: to many authentication methods provided")
 		}
 	}
 
@@ -85,7 +85,7 @@ func validateSpec(rawMessage json.RawMessage) error {
 	return json.Unmarshal(rawMessage, &m)
 }
 
-func validateToManyCredentials(credentials *Credentials) bool {
+func validateToManyCredentials(credentials *CredentialsWithCSRF) bool {
 	credentialsCount := 0
 
 	if credentials.Basic != nil {

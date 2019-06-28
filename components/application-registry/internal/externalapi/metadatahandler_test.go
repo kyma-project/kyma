@@ -42,11 +42,13 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Labels:           &map[string]string{"showcase": "true"},
 			Api: &API{
 				TargetUrl: "http://service.com",
-				Credentials: &Credentials{
-					Oauth: &Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
+				Credentials: &CredentialsWithCSRF{
+					Oauth: &OauthWithCSRF{
+						Oauth: Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -129,10 +131,12 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Labels:           &map[string]string{"showcase": "true"},
 			Api: &API{
 				TargetUrl: "http://service.com",
-				Credentials: &Credentials{
-					Basic: &BasicAuth{
-						Username: "username",
-						Password: "password",
+				Credentials: &CredentialsWithCSRF{
+					Basic: &BasicAuthWithCSRF{
+						BasicAuth: BasicAuth{
+							Username: "username",
+							Password: "password",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -214,9 +218,11 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Labels:           &map[string]string{"showcase": "true"},
 			Api: &API{
 				TargetUrl: "http://service.com",
-				Credentials: &Credentials{
-					CertificateGen: &CertificateGen{
-						CommonName: "commonName",
+				Credentials: &CredentialsWithCSRF{
+					CertificateGen: &CertificateGenWithCSRF{
+						CertificateGen: CertificateGen{
+							CommonName: "commonName",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -910,11 +916,13 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Description: "service description",
 			Api: &API{
 				TargetUrl: "http://service.com",
-				Credentials: &Credentials{
-					Oauth: &Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
+				Credentials: &CredentialsWithCSRF{
+					Oauth: &OauthWithCSRF{
+						Oauth: Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -1006,10 +1014,12 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Description: "service description",
 			Api: &API{
 				TargetUrl: "http://service.com",
-				Credentials: &Credentials{
-					Basic: &BasicAuth{
-						Username: "username",
-						Password: "password",
+				Credentials: &CredentialsWithCSRF{
+					Basic: &BasicAuthWithCSRF{
+						BasicAuth: BasicAuth{
+							Username: "username",
+							Password: "password",
+						},
 					},
 				},
 				Spec: apiRawSpec,
