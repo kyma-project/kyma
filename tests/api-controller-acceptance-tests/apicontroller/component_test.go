@@ -41,6 +41,124 @@ func TestComponentSpec(t *testing.T) {
 
 	Convey("API Controller should", t, func() {
 
+		Convey("update API with implicitly configured authentication to default authentication", func() {
+			t.Log("update API with implicitly configured authentication to default authentication")
+
+			testID := ctx.generateTestID(testIDLength)
+			t.Logf("Running test: %s", testID)
+
+			/*
+				  authentication:
+					- type: JWT
+					  jwt:
+						jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+						issuer: https://accounts.google.com
+			*/
+			api := ctx.apiFor(testID, domainName, namespace, apiSecurityDisabled, true)
+			ctx.setCustomJwtAuthenticationConfig(api)
+			api.Spec.AuthenticationEnabled = nil
+
+			createdAPI, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
+			defer ctx.cleanUpAPI(kymaClient, api, t, true, namespace)
+			So(err, ShouldBeNil)
+			So(createdAPI, ShouldNotBeNil)
+			So(createdAPI.ResourceVersion, ShouldNotBeEmpty)
+
+			createdAPI, err = ctx.awaitAPIChanged(kymaClient, createdAPI, true, false, namespace)
+			So(err, ShouldBeNil)
+			So(createdAPI.ResourceVersion, ShouldNotBeEmpty)
+			So(createdAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
+
+			/*
+				authenticationEnabled: true
+				# no authentication field
+			*/
+			updatedAPI, err := patchApi(*kymaClient, *createdAPI, remove("/spec/authentication"), replace("/spec/authenticationEnabled", true))
+
+			So(err, ShouldBeNil)
+			So(updatedAPI, ShouldNotBeNil)
+			So(updatedAPI.ResourceVersion, ShouldNotBeEmpty)
+
+			updatedAPI, err = ctx.awaitAPIChanged(kymaClient, updatedAPI, false, true, namespace)
+			So(err, ShouldBeNil)
+			So(updatedAPI.ResourceVersion, ShouldNotBeEmpty)
+			createdAPI.Spec.AuthenticationEnabled = boolPtr(true)           // that field was changed to true during the patch
+			createdAPI.Spec.Authentication = []kymaApi.AuthenticationRule{} // api controller changes that field from nil to empty table in the runtime
+			So(updatedAPI.Spec, ctx.ShouldDeepEqual, createdAPI.Spec)
+			So(updatedAPI.Status.AuthenticationStatus.Resource.Uid, ShouldNotBeEmpty)
+
+			// apply the first configuration
+			updatedAPI.Spec = api.Spec
+			finalAPI, err := kymaClient.GatewayV1alpha2().Apis(namespace).Update(updatedAPI)
+			So(err, ShouldBeNil)
+			So(finalAPI, ShouldNotBeNil)
+			So(finalAPI.ResourceVersion, ShouldNotBeEmpty)
+
+			finalAPI, err = ctx.awaitAPIChanged(kymaClient, finalAPI, false, true, namespace)
+			So(err, ShouldBeNil)
+			So(finalAPI.ResourceVersion, ShouldNotBeEmpty)
+			So(finalAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
+			So(finalAPI.Status.AuthenticationStatus.Resource.Uid, ShouldNotBeEmpty)
+
+			// a bugged program will lead to API-controller unable to update/delete policy, so we delete the API and check if policy was deleted
+			ctx.cleanUpAPI(kymaClient, updatedAPI, t, false, namespace)
+			err = ctx.verifyIstioResourcesCleanUp(istioAuthClient, istioNetClient, updatedAPI)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("update API with implicitly configured but disabled authentication to default authentication", func() {
+			t.Log("update API with implicitly configured but disabled authentication to default authentication")
+
+			testID := ctx.generateTestID(testIDLength)
+			t.Logf("Running test: %s", testID)
+
+			/*
+				  authenticationEnabled: false
+				  authentication:
+					- type: JWT
+					  jwt:
+						jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+						issuer: https://accounts.google.com
+			*/
+			api := ctx.apiFor(testID, domainName, namespace, apiSecurityDisabled, true)
+			ctx.setCustomJwtAuthenticationConfig(api)
+			api.Spec.AuthenticationEnabled = boolPtr(false)
+
+			createdAPI, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
+			defer ctx.cleanUpAPI(kymaClient, createdAPI, t, true, namespace)
+			So(err, ShouldBeNil)
+			So(createdAPI, ShouldNotBeNil)
+			So(createdAPI.ResourceVersion, ShouldNotBeEmpty)
+
+			createdAPI, err = ctx.awaitAPIChanged(kymaClient, createdAPI, true, false, namespace)
+			So(err, ShouldBeNil)
+			So(createdAPI.ResourceVersion, ShouldNotBeEmpty)
+			So(createdAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
+
+			/*
+				authenticationEnabled: true
+				# no authentication field
+			*/
+			updatedAPI, err := patchApi(*kymaClient, *createdAPI, remove("/spec/authentication"), replace("/spec/authenticationEnabled", true))
+
+			So(err, ShouldBeNil)
+			So(updatedAPI, ShouldNotBeNil)
+			So(updatedAPI.ResourceVersion, ShouldNotBeEmpty)
+
+			updatedAPI, err = ctx.awaitAPIChanged(kymaClient, updatedAPI, false, true, namespace)
+			So(err, ShouldBeNil)
+			So(updatedAPI.ResourceVersion, ShouldNotBeEmpty)
+			createdAPI.Spec.AuthenticationEnabled = boolPtr(true)           // that field was changed to true during the patch
+			createdAPI.Spec.Authentication = []kymaApi.AuthenticationRule{} // api controller changes that field from nil to empty table in the runtime
+			So(updatedAPI.Spec, ctx.ShouldDeepEqual, createdAPI.Spec)
+			So(updatedAPI.Status.AuthenticationStatus.Resource.Uid, ShouldNotBeEmpty)
+
+			// a bugged program will lead to API-controller unable to update/delete policy, so we delete the API and check if policy was deleted
+			ctx.cleanUpAPI(kymaClient, updatedAPI, t, false, namespace)
+			err = ctx.verifyIstioResourcesCleanUp(istioAuthClient, istioNetClient, updatedAPI)
+			So(err, ShouldBeNil)
+		})
+
 		Convey("create API with authentication disabled", func() {
 			t.Log("create API with authentication disabled")
 
@@ -588,6 +706,25 @@ func (componentTestContext) cleanUpAPI(kymaClient *kyma.Clientset, api *kymaApi.
 	if !allowMissing && err != nil {
 		t.Fatalf("Cannot clean up API %s: %s", api.Name, err)
 	}
+}
+
+func (componentTestContext) verifyIstioResourcesCleanUp(istioAuthClient *istioAuth.Clientset, istioNetClient *istioNet.Clientset, api *kymaApi.Api) error {
+	return retry.Do(func() error {
+		vs, _ := istioNetClient.NetworkingV1alpha3().VirtualServices(api.GetNamespace()).Get(api.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
+
+		emptyVirtualService := &istioNetApi.VirtualService{}
+		if deep.Equal(vs, emptyVirtualService) != nil {
+			return fmt.Errorf("VirtualService not deleted")
+		}
+
+		lastPolicy, _ := istioAuthClient.AuthenticationV1alpha1().Policies(api.GetNamespace()).Get(api.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{ResourceVersion: "1"})
+
+		emptyPolicy := &istioAuthApi.Policy{}
+		if deep.Equal(lastPolicy, emptyPolicy) != nil {
+			return fmt.Errorf("Policy not deleted")
+		}
+		return nil
+	}, retry.Attempts(5), retry.Delay(1*time.Second))
 }
 
 func boolPtr(arg bool) *bool {
