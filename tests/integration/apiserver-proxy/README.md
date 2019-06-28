@@ -2,16 +2,16 @@
 
 ## Overview
 
-This folder contains the integration tests for `apiserver-proxy` component.
+This folder contains the integration tests for the `apiserver-proxy` component.
 
 ## Details
-- Contains the `Dockerfile` for the image used in Kyma apiserver-proxy tests.
-- Contains the `fetch-token` application used for fetching authentication token from Dex.
+- Contains the Dockerfile for the image used in Kyma API Server Proxy tests.
+- Contains the `fetch-token` application used for fetching authentication tokens from Dex.
 - Contains the `test.sh` script that runs tests for the chart.
 
 ## Usage
 
-To test your changes and build an image, use the `make build build-image` command.
+To test your changes and build the image, run the `make build build-image` command.
 
 ## Configure Kyma
 
