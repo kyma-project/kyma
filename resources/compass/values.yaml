@@ -14,9 +14,6 @@ global:
     healthchecker:
       dir: develop/
       version: "6d888e37"
-    registry:
-      dir: develop/
-      version: "6d888e37"
     tests:
       e2e:
         dir: develop/
@@ -30,4 +27,5 @@ global:
 
   istio:
     gateway:
-      name: compass-istio-gateway
+      name: kyma-gateway
+      namespace: kyma-system
