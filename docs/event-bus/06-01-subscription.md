@@ -24,8 +24,6 @@ metadata:
     example: event-bus-lambda-subscription
 spec:
   endpoint: http://hello-with-data.{NAMESPACE}:8080/
-  push_request_timeout_ms: 2000
-  max_inflight: 400
   include_subscription_name_header: true
   event_type: order.created
   event_type_version: v1
@@ -40,8 +38,6 @@ This table lists all the possible parameters of a given resource together with t
 |-----------------------------------------|:---------:|---------------------------------------------------------------------------------------------------------------------------|
 | **metadata.name**                         | **YES**   | Specifies the name of the CR.                                                                                              |
 | **spec.endpoint**                         | **YES**   | The HTTP endpoint to which events are delivered as a POST request.                                                         |
-| **spec.push_request_timeout_ms**          | **YES**   | The HTTP request timeout. Once the timeout expires, the Event Bus retries to deliver the Event. Setting the **minimum** parameter to `0` applies the default value of `1000ms`.                                   |
-| **spec.max_inflight**                     | **YES**   | The maximum number of Events delivered concurrently. The final value is the **max_inflight** value multiplied by the number of  `push` applications.                                                          |
 | **spec.include_subscription_name_header** | **YES**   | The boolean flag indicating if the name of the Subscription should be included in the HTTP headers while delivering the Event. |
 | **spec.event_type**                       | **YES**   | The Event type to which the Event trigger is registered. For example, **order.created**.                                                                 |
 | **spec.event_type_version**               | **YES**   | The version of the Event type.                                                                                             |

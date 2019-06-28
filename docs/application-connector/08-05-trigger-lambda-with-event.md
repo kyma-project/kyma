@@ -167,8 +167,6 @@ spec:
   event_type: exampleevent
   event_type_version: v1
   include_subscription_name_header: true
-  max_inflight: 400
-  push_request_timeout_ms: 2000
   source_id: {APP_NAME}
 EOF
 ```
