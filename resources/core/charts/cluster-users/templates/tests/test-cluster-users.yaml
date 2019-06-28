@@ -1,6 +1,5 @@
-{{ if .Values.global.isLocalEnv }}
----
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+---
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
@@ -50,7 +49,7 @@ spec:
           - name: NAMESPACE
             value: {{ .Values.namespace }}
           - name: IAM_KUBECONFIG_SVC_FQDN
-            value: "https://configurations-generator.kyma.local"
+            value: "http://configurations-generator.{{ .Values.global.ingress.domainName }}"
       restartPolicy: Never
 ---
 apiVersion: v1
@@ -73,4 +72,3 @@ subjects:
   name: cluster-users-test
   namespace: {{ .Release.Namespace }}
 {{- end }}
-{{ end }}

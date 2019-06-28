@@ -49,6 +49,12 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should be able to get CRD in ${NAMESPACE}"
 	testPermissions "get" "crd" "${NAMESPACE}" "yes"
 
+	echo "--> ${DEVELOPER_EMAIL} should be able to delete secret in ${NAMESPACE}"
+	testPermissions "delete" "secret" "${NAMESPACE}" "yes"
+
+	echo "--> ${DEVELOPER_EMAIL} should be able to edit configmap in ${NAMESPACE}"
+	testPermissions "edit" "configmap" "${NAMESPACE}" "yes"
+
 	echo "--> ${DEVELOPER_EMAIL} should be able to get specific CRD in ${NAMESPACE}"
 	testPermissions "get" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
 
@@ -56,7 +62,7 @@ function runTests() {
 	testPermissions "delete" "clusterrole" "${NAMESPACE}" "no"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to list Deployments in production"
-	testPermissions "list" "deployment" "production" "yes"
+	testPermissions "list" "deployment" "production" "no"
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create Services in production"
 	testPermissions "create" "service" "production" "no"
