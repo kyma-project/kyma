@@ -12,7 +12,7 @@ The following tools are required to set up the project:
 
 ## Installation
 
-For installation use the dedicated [Helm chart](../resources/core/charts/iam-kubeconfig-service).
+For installation use the dedicated [Helm chart](../../resources/core/charts/iam-kubeconfig-service).
 
 ## Usage
 
