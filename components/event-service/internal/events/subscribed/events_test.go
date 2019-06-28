@@ -163,8 +163,6 @@ func createSubscription(namespace, application, eventType, testSubscriptionName,
 		SubscriptionSpec: v1alpha1.SubscriptionSpec{
 			Endpoint:                      "https://some.test.endpoint",
 			IncludeSubscriptionNameHeader: true,
-			MaxInflight:                   400,
-			PushRequestTimeoutMS:          2000,
 			EventType:                     eventType,
 			EventTypeVersion:              version,
 			SourceID:                      application,
