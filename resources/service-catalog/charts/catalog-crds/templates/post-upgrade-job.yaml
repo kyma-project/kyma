@@ -101,3 +101,5 @@ spec:
           - addOwnerReference
           - --sbuControllerName
           - {{ template  "sbu-controller-name" }}
+          - --namespace
+          - {{ .Release.Namespace }}
