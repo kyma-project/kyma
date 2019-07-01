@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/csrf"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
 	log "github.com/sirupsen/logrus"
 )

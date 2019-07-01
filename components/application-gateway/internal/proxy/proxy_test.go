@@ -10,13 +10,13 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
 
+	csrfMock "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/mocks"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httperrors"
 	metadataMock "github.com/kyma-project/kyma/components/application-gateway/internal/metadata/mocks"
 	metadatamodel "github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	authMock "github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/mocks"
-	csrfMock "github.com/kyma-project/kyma/components/application-gateway/pkg/csrf/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -57,8 +57,8 @@ func TestProxy(t *testing.T) {
 
 		requestParameters := &authorization.RequestParameters{
 			QueryParameters: &map[string][]string{
-				"param1": []string{"param-value-1"},
-				"param2": []string{"param-value-2.1", "param-value-2.2"},
+				"param1": {"param-value-1"},
+				"param2": {"param-value-2.1", "param-value-2.2"},
 			},
 		}
 
@@ -115,8 +115,8 @@ func TestProxy(t *testing.T) {
 
 		requestParameters := &authorization.RequestParameters{
 			Headers: &map[string][]string{
-				"X-Custom1": []string{"custom-value-1"},
-				"X-Custom2": []string{"custom-value-2.1", "custom-value-2.2"},
+				"X-Custom1": {"custom-value-1"},
+				"X-Custom2": {"custom-value-2.1", "custom-value-2.2"},
 			},
 		}
 

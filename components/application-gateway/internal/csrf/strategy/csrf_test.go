@@ -1,13 +1,13 @@
 package strategy
 
 import (
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/csrf/mocks"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf/mocks"
 	"net/http"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	authmocks "github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/mocks"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/csrf"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

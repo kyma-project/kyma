@@ -3,7 +3,7 @@ package strategy
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/csrf"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
 
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"

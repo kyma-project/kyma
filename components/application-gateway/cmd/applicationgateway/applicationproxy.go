@@ -6,6 +6,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
+	csrfClient "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/client"
+	csrfStrategy "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/strategy"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/applications"
@@ -14,9 +17,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-gateway/internal/proxy"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/csrf"
-	csrfClient "github.com/kyma-project/kyma/components/application-gateway/pkg/csrf/client"
-	csrfStrategy "github.com/kyma-project/kyma/components/application-gateway/pkg/csrf/strategy"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/httptools"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	log "github.com/sirupsen/logrus"
@@ -84,8 +84,8 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 	if serviceDefinitionService != nil {
 
 		authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
-		csrfClient := newCSRFClient(options.proxyTimeout)
-		csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfClient)
+		csrfCl := newCSRFClient(options.proxyTimeout)
+		csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfCl)
 
 		proxyConfig := proxy.Config{
 			SkipVerify:    options.skipVerify,

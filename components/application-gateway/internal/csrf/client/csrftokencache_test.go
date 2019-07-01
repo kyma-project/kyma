@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/csrf"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 	"github.com/stretchr/testify/assert"
 )
 

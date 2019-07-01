@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/csrf"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/k8sconsts"

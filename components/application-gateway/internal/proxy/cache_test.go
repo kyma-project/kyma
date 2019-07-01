@@ -4,8 +4,8 @@ import (
 	"net/http/httputil"
 	"testing"
 
+	csrfmocks "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/mocks"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/mocks"
-	csrfmocks "github.com/kyma-project/kyma/components/application-gateway/pkg/csrf/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/util/net"
