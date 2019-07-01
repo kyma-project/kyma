@@ -67,3 +67,5 @@ spec:
     #  namespace: "kyma-system"
     #- name: "monitoring"
     #  namespace: "kyma-system"
+    #- name: "compass"
+    #  namespace: "compass-system"
