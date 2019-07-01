@@ -5,7 +5,7 @@
 # For more details, read the following article on GitHub: https://help.github.com/articles/about-codeowners/.
 
 # These are the default owners for the whole content of the `kyma` repository. The default owners are automatically added as reviewers when you open a pull request, unless different owners are specified in the file.
-* @derberg @pbochynski @PK85 @a-thaler @lszymik @piotrmsc
+* @derberg @pbochynski @PK85 @a-thaler @piotrmsc
 
 /common/ @mszostok @aszecowka @piotrmiskiewicz @sjanota @Tomasz-Smelcerz-SAP @strekm @crabtree @akgalwas @janmedrek @Szymongib @sayanh @radufa @suleymanakbas91
 
@@ -24,7 +24,7 @@
 # The `pod-preset` subchart
 /resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# The Microfrontend CRDs 
+# The Microfrontend CRDs
 /resources/cluster-essentials/templates/microfrontend.crd.yaml @kwiatekus @dariadomagala @y-kkamil @akucharska @sjanota @parostatkiem
 /resources/cluster-essentials/templates/clustermicrofrontend.crd.yaml @kwiatekus @dariadomagala @y-kkamil @akucharska @sjanota @parostatkiem
 
@@ -46,8 +46,8 @@
 # The `cluster-users` subchart
 /resources/core/charts/cluster-users/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# The `configurations-generator` subchart
-/resources/core/charts/configurations-generator @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+# The `iam-kubeconfig-service` subchart
+/resources/core/charts/iam-kubeconfig-service @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `assetstore` chart
 /resources/assetstore/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
@@ -56,31 +56,31 @@
 /resources/cms/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `application-connector` chart
-/resources/application-connector/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `values.yaml` file for `application-connector` chart
 /resources/application-connector/values.yaml @kyma-project/developers
 
 # The `connector-service` subchart
-/resources/application-connector/charts/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector/charts/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `connection-token-handler` subchart
-/resources/application-connector/charts/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector/charts/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `connectivity-certs-controller` subchart
-/resources/application-connector/charts/connectivity-certs-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector/charts/connectivity-certs-controller/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `application-registry` subchart
-/resources/application-connector/charts/application-registry/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector/charts/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `application-operator` subchart
-/resources/application-connector/charts/application-operator/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector/charts/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `application-connector-helper` chart
-/resources/application-connector-helper/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector-helper/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `application-connector-ingress` chart
-/resources/application-connector-ingress/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector-ingress/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `console` subchart
 /resources/core/charts/console/ @kwiatekus @dariadomagala @y-kkamil @parostatkiem @akucharska @sjanota
@@ -196,6 +196,9 @@
 # The `ory` chart
 /resources/ory/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# The `compass` chart
+/resources/compass/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol
+
 # Components
 #API server proxy Component
 /components/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -221,8 +224,8 @@
 # Installer Component
 /components/installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @Demonsthere
 
-# Configurations Generator Component
-/components/configurations-generator/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+# Kyma Operator Component
+/components/kyma-operator/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
 
 # IAM Kubeconfig Service Component
 /components/iam-kubeconfig-service/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -246,25 +249,25 @@
 /components/idppreset/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
 
 # Connector Service Component
-/components/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/components/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Connection Token Handler Component
-/components/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/components/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Connectivity Certs Controller Component
-/components/connectivity-certs-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/components/connectivity-certs-controller/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Registry Component
-/components/application-registry/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/components/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Operator Component
-/components/application-operator/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/components/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Gateway Component
-/components/application-gateway/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/components/application-gateway/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Connectivity Validator Component
-/components/application-connectivity-validator/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/components/application-connectivity-validator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Event Bus Component
 /components/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
@@ -287,7 +290,9 @@
 # Tests
 # acceptance tests
 /tests/acceptance/ @mszostok @polskikiel @piotrmiskiewicz @aszecowka @PK85 @jasiu001 @adamwalach
-/tests/acceptance/dex @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+
+# Dex integration tests
+/tests/integration/dex @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Knative Serving Acceptance
 /tests/knative-serving/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
@@ -306,6 +311,7 @@
 
 # apiserver-proxy tests
 /tests/apiserver-proxy-tests/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+/tests/integration/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Console Backend Service tests
 /tests/console-backend-service/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -314,19 +320,19 @@
 /tests/asset-store/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Connector Service Tests
-/tests/connector-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/tests/connector-service-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Registry Tests
-/tests/application-registry-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/tests/application-registry-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Gateway Tests
-/tests/application-gateway-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/tests/application-gateway-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Operator Tests
-/tests/application-operator-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/tests/application-operator-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Connector Tests
-/tests/application-connector-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/tests/application-connector-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Tools
 
@@ -382,4 +388,4 @@
 milv.config.yaml @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
 
 # performance tests
-/tests/perf/ @rakesh-garimella @venturasr @lilitgh @hisarbalik @lszymik @a-thaler
+/tests/perf/ @rakesh-garimella @venturasr @lilitgh @hisarbalik @a-thaler

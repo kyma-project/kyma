@@ -9,6 +9,13 @@ all: test manager
 resolve:
 	dep ensure -v -vendor-only
 
+pull-licenses:
+ifdef LICENSE_PULLER_PATH
+	bash $(LICENSE_PULLER_PATH)
+else
+	mkdir -p licenses
+endif
+
 setup:
 	go get github.com/vektra/mockery/.../
 
@@ -49,7 +56,7 @@ generate:
 	go generate ./pkg/... ./cmd/...
 
 # Build the docker image
-docker-build: resolve test
+docker-build: resolve pull-licenses test
 	docker build . -t ${IMG}
 	@echo "updating kustomize image patch file for manager resource"
 	sed -i'' -e 's@image: .*@image: '"${IMG}"'@' ./config/default/manager_image_patch.yaml

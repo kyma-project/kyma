@@ -21,8 +21,6 @@ data:
           {size:{ name: 'XL', memory: '1024Mi', cpu: '2.0', minReplicas: 10, maxReplicas: 20, description: '' }}
         ],
       subscriptionConfig:{
-        pushRequestTimeoutMS: 60000,
-        maxInFlight: 400,
         includeSubscriptionNameHeader: true,
         eventType: "",
         eventTypeVersion: "",

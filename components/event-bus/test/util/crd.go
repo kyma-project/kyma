@@ -28,8 +28,6 @@ func NewSubscription(name string, namespace string, subscriberEventEndpointURL s
 		SubscriptionSpec: apiv1.SubscriptionSpec{
 			Endpoint:                      subscriberEventEndpointURL,
 			IncludeSubscriptionNameHeader: false,
-			MaxInflight:                   100,
-			PushRequestTimeoutMS:          10,
 			SourceID:                      sourceID,
 			EventType:                     eventType,
 			EventTypeVersion:              eventTypeVersion,

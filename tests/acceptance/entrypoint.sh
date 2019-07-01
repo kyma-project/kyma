@@ -2,10 +2,6 @@
 
 res=0
 
-echo "Run dex tests"
-./dex.test -test.v
-res=$((res+$?))
-
 echo "Run servicecatalog tests"
 ./servicecatalog.test -test.v
 res=$((res+$?))
