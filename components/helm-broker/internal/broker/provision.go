@@ -79,7 +79,7 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 	// bundleID is in 1:1 match with serviceID (from service catalog)
 	svcID := internal.ServiceID(req.ServiceID)
 	bundleID := internal.BundleID(svcID)
-	bundle, err := svc.bundleIDGetter.GetByID(bundleID)
+	bundle, err := svc.bundleIDGetter.GetByID(internal.ClusterWide, bundleID)
 	if err != nil {
 		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting bundle: %v", err))}
 	}
@@ -179,7 +179,7 @@ func (svc *provisionService) doAsync(ctx context.Context, input provisioningInpu
 func (svc *provisionService) do(ctx context.Context, input provisioningInput) {
 
 	fDo := func() (*rls.InstallReleaseResponse, error) {
-		c, err := svc.chartGetter.Get(input.bundlePlan.ChartRef.Name, input.bundlePlan.ChartRef.Version)
+		c, err := svc.chartGetter.Get(internal.ClusterWide, input.bundlePlan.ChartRef.Name, input.bundlePlan.ChartRef.Version)
 		if err != nil {
 			return nil, errors.Wrap(err, "while getting chart from storage")
 		}

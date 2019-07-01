@@ -181,7 +181,7 @@ func TestOSBAPICatalogSuccess(t *testing.T) {
 	defer ts.ServerShutdown()
 
 	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(fixBundle)
+	ts.StorageFactory.Bundle().Upsert(internal.ClusterWide, fixBundle)
 
 	// WHEN
 	_, err := ts.OSBClient().GetCatalog()
@@ -201,10 +201,10 @@ func TestOSBAPIProvisionSuccess(t *testing.T) {
 	defer ts.ServerShutdown()
 
 	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(fixBundle)
+	ts.StorageFactory.Bundle().Upsert(internal.ClusterWide, fixBundle)
 
 	fixChart := ts.Exp.NewChart()
-	ts.StorageFactory.Chart().Upsert(fixChart)
+	ts.StorageFactory.Chart().Upsert(internal.ClusterWide, fixChart)
 
 	nsUID := uuid.NewRandom().String()
 	req := &osb.ProvisionRequest{
@@ -538,7 +538,7 @@ func TestOSBAPILastOperationSuccess(t *testing.T) {
 	defer ts.ServerShutdown()
 
 	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(fixBundle)
+	ts.StorageFactory.Bundle().Upsert(internal.ClusterWide, fixBundle)
 
 	fixInstance := ts.Exp.NewInstance()
 	ts.StorageFactory.Instance().Insert(fixInstance)
@@ -570,7 +570,7 @@ func TestOSBAPILastOperationForNonExistingInstance(t *testing.T) {
 	defer ts.ServerShutdown()
 
 	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(fixBundle)
+	ts.StorageFactory.Bundle().Upsert(internal.ClusterWide, fixBundle)
 
 	// WHEN
 	opKey := osb.OperationKey(ts.Exp.OperationID)
@@ -594,7 +594,7 @@ func TestOSBAPIBindFailureWithDisallowedParametersFieldInReq(t *testing.T) {
 	defer ts.ServerShutdown()
 
 	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(fixBundle)
+	ts.StorageFactory.Bundle().Upsert(internal.ClusterWide, fixBundle)
 
 	// WHEN
 	req := &osb.BindRequest{

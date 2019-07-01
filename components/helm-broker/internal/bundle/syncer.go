@@ -14,9 +14,9 @@ import (
 )
 
 type bundleOperations interface {
-	FindAll() ([]*internal.Bundle, error)
-	Upsert(*internal.Bundle) (replace bool, err error)
-	RemoveAll() error
+	FindAll(internal.Namespace) ([]*internal.Bundle, error)
+	Upsert(internal.Namespace, *internal.Bundle) (replace bool, err error)
+	RemoveAll(internal.Namespace) error
 }
 
 //go:generate mockery -name=docsTopicsService -output=automock -outpkg=automock -case=underscore
@@ -26,7 +26,7 @@ type docsTopicsService interface {
 }
 
 type chartUpserter interface {
-	Upsert(c *chart.Chart) (replace bool, err error)
+	Upsert(ns internal.Namespace, c *chart.Chart) (replace bool, err error)
 }
 
 // Syncer is responsible for loading bundles from bundle providers and stores it into the storage.
@@ -69,7 +69,7 @@ func (s *Syncer) Execute() error {
 	s.log.Info("Loading bundles from repositories")
 	defer s.log.Info("Loading bundles finished")
 
-	previousBundles, err := s.bundleStorage.FindAll()
+	previousBundles, err := s.bundleStorage.FindAll(internal.ClusterWide)
 	if err != nil {
 		return errors.Wrap(err, "could not load existing bundles")
 	}
@@ -83,7 +83,7 @@ func (s *Syncer) Execute() error {
 	}
 
 	// remove bundles before upsert
-	if err := s.bundleStorage.RemoveAll(); err != nil {
+	if err := s.bundleStorage.RemoveAll(internal.ClusterWide); err != nil {
 		return errors.Wrap(err, "while removing all bundles")
 	}
 
@@ -168,13 +168,13 @@ func (s *Syncer) deleteUnusedDocsTopics(previousBundles []*internal.Bundle, newB
 }
 
 func (s *Syncer) upsertBundle(bundleWithCharts CompleteBundle) error {
-	_, err := s.bundleStorage.Upsert(bundleWithCharts.Bundle)
+	_, err := s.bundleStorage.Upsert(internal.ClusterWide, bundleWithCharts.Bundle)
 	if err != nil {
 		return errors.Wrapf(err, "could not upsert bundle %s (%s:%s)", bundleWithCharts.Bundle.ID, bundleWithCharts.Bundle.Name, bundleWithCharts.Bundle.Version.String())
 	}
 
 	for _, ch := range bundleWithCharts.Charts {
-		_, err := s.chartOperations.Upsert(ch)
+		_, err := s.chartOperations.Upsert(internal.ClusterWide, ch)
 		if err != nil {
 			return errors.Wrapf(err, "could not upsert chart %s:%s for bundle %s (%s:%s)", ch.Metadata.Name, ch.Metadata.Version, bundleWithCharts.Bundle.ID, bundleWithCharts.Bundle.Name, bundleWithCharts.Bundle.Version.String())
 		}
