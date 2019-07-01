@@ -78,8 +78,6 @@ spec:
       labels:
         <<: *labels
         rand: {{ randAlpha 6 }}
-        clusterChannelProvisioner: natss
-        role: controller
     spec:
       containers:
       - image: {{ .Values.controller.image.location }}
