@@ -200,15 +200,19 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Basic: &BasicAuth{
-						Username: "username",
-						Password: "password",
+				Credentials: &CredentialsWithCSRF{
+					BasicWithCSRF: &BasicAuthWithCSRF{
+						BasicAuth: BasicAuth{
+							Username: "username",
+							Password: "password",
+						},
 					},
-					Oauth: &Oauth{
-						URL:          "http://test.com/token",
-						ClientID:     "client",
-						ClientSecret: "secret",
+					OauthWithCSRF: &OauthWithCSRF{
+						Oauth: Oauth{
+							URL:          "http://test.com/token",
+							ClientID:     "client",
+							ClientSecret: "secret",
+						},
 					},
 				},
 			},
@@ -234,11 +238,13 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Oauth: &Oauth{
-						URL:          "http://test.com/token",
-						ClientID:     "client",
-						ClientSecret: "secret",
+				Credentials: &CredentialsWithCSRF{
+					OauthWithCSRF: &OauthWithCSRF{
+						Oauth: Oauth{
+							URL:          "http://test.com/token",
+							ClientID:     "client",
+							ClientSecret: "secret",
+						},
 					},
 				},
 			},
@@ -261,8 +267,8 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Oauth: &Oauth{},
+				Credentials: &CredentialsWithCSRF{
+					OauthWithCSRF: &OauthWithCSRF{},
 				},
 			},
 		}
@@ -285,10 +291,12 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Oauth: &Oauth{
-						URL:      "http://test.com/token",
-						ClientID: "client",
+				Credentials: &CredentialsWithCSRF{
+					OauthWithCSRF: &OauthWithCSRF{
+						Oauth: Oauth{
+							URL:      "http://test.com/token",
+							ClientID: "client",
+						},
 					},
 				},
 			},
@@ -312,11 +320,13 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Oauth: &Oauth{
-						URL:          "test_com/token",
-						ClientID:     "client",
-						ClientSecret: "secret",
+				Credentials: &CredentialsWithCSRF{
+					OauthWithCSRF: &OauthWithCSRF{
+						Oauth: Oauth{
+							URL:          "test_com/token",
+							ClientID:     "client",
+							ClientSecret: "secret",
+						},
 					},
 				},
 			},
@@ -342,10 +352,12 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Basic: &BasicAuth{
-						Username: "username",
-						Password: "password",
+				Credentials: &CredentialsWithCSRF{
+					BasicWithCSRF: &BasicAuthWithCSRF{
+						BasicAuth: BasicAuth{
+							Username: "username",
+							Password: "password",
+						},
 					},
 				},
 			},
@@ -368,8 +380,8 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Basic: &BasicAuth{},
+				Credentials: &CredentialsWithCSRF{
+					BasicWithCSRF: &BasicAuthWithCSRF{},
 				},
 			},
 		}
@@ -392,9 +404,11 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Basic: &BasicAuth{
-						Username: "username",
+				Credentials: &CredentialsWithCSRF{
+					BasicWithCSRF: &BasicAuthWithCSRF{
+						BasicAuth: BasicAuth{
+							Username: "username",
+						},
 					},
 				},
 			},
@@ -420,7 +434,218 @@ func TestServiceDetailsValidator_API_Certificate(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
+				Credentials: &CredentialsWithCSRF{
+					CertificateGenWithCSRF: &CertificateGenWithCSRF{},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.NoError(t, err)
+	})
+}
+
+func TestServiceDetailsValidator_Specification_OAuth(t *testing.T) {
+	t.Run("should accept OAuth specification credentials", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				SpecificationCredentials: &Credentials{
+					Oauth: &Oauth{
+						URL:          "http://test.com/token",
+						ClientID:     "client",
+						ClientSecret: "secret",
+					},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.NoError(t, err)
+	})
+
+	t.Run("should not accept OAuth specification credentials with empty oauth", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				SpecificationCredentials: &Credentials{
+					Oauth: &Oauth{},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+	})
+
+	t.Run("should not accept OAuth specification credentials with incomplete oauth", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				SpecificationCredentials: &Credentials{
+					Oauth: &Oauth{
+						URL:      "http://test.com/token",
+						ClientID: "client",
+					},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+	})
+
+	t.Run("should not accept OAuth specification credentials with wrong oauth url", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				SpecificationCredentials: &Credentials{
+					Oauth: &Oauth{
+						URL:          "test_com/token",
+						ClientID:     "client",
+						ClientSecret: "secret",
+					},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+	})
+}
+
+func TestServiceDetailsValidator_Specification_Basic(t *testing.T) {
+	t.Run("should accept Basic Auth specification credentials", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				SpecificationCredentials: &Credentials{
+					Basic: &BasicAuth{
+						Username: "username",
+						Password: "password",
+					},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.NoError(t, err)
+	})
+
+	t.Run("should not accept Basic Auth specification credentials with empty basic", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				SpecificationCredentials: &Credentials{
+					Basic: &BasicAuth{},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+	})
+
+	t.Run("should not accept Basic Auth specification credentials with incomplete basic", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				SpecificationCredentials: &Credentials{
+					Basic: &BasicAuth{
+						Username: "username",
+					},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+	})
+}
+
+func TestServiceDetailsValidator_Specification_Certificate(t *testing.T) {
+	t.Run("should accept Certificate specification credentials", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				SpecificationCredentials: &Credentials{
 					CertificateGen: &CertificateGen{},
 				},
 			},

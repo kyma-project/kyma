@@ -12,18 +12,18 @@ type Service struct {
 }
 
 // Create provides a mock function with given fields: application, serviceID, credentials
-func (_m *Service) Create(application string, serviceID string, credentials *model.Credentials) (applications.Credentials, apperrors.AppError) {
+func (_m *Service) Create(application string, serviceID string, credentials *model.CredentialsWithCSRF) (applications.Credentials, apperrors.AppError) {
 	ret := _m.Called(application, serviceID, credentials)
 
 	var r0 applications.Credentials
-	if rf, ok := ret.Get(0).(func(string, string, *model.Credentials) applications.Credentials); ok {
+	if rf, ok := ret.Get(0).(func(string, string, *model.CredentialsWithCSRF) applications.Credentials); ok {
 		r0 = rf(application, serviceID, credentials)
 	} else {
 		r0 = ret.Get(0).(applications.Credentials)
 	}
 
 	var r1 apperrors.AppError
-	if rf, ok := ret.Get(1).(func(string, string, *model.Credentials) apperrors.AppError); ok {
+	if rf, ok := ret.Get(1).(func(string, string, *model.CredentialsWithCSRF) apperrors.AppError); ok {
 		r1 = rf(application, serviceID, credentials)
 	} else {
 		if ret.Get(1) != nil {
@@ -51,14 +51,14 @@ func (_m *Service) Delete(name string) apperrors.AppError {
 }
 
 // Get provides a mock function with given fields: application, credentials
-func (_m *Service) Get(application string, credentials applications.Credentials) (model.Credentials, apperrors.AppError) {
+func (_m *Service) Get(application string, credentials applications.Credentials) (model.CredentialsWithCSRF, apperrors.AppError) {
 	ret := _m.Called(application, credentials)
 
-	var r0 model.Credentials
-	if rf, ok := ret.Get(0).(func(string, applications.Credentials) model.Credentials); ok {
+	var r0 model.CredentialsWithCSRF
+	if rf, ok := ret.Get(0).(func(string, applications.Credentials) model.CredentialsWithCSRF); ok {
 		r0 = rf(application, credentials)
 	} else {
-		r0 = ret.Get(0).(model.Credentials)
+		r0 = ret.Get(0).(model.CredentialsWithCSRF)
 	}
 
 	var r1 apperrors.AppError
@@ -74,18 +74,18 @@ func (_m *Service) Get(application string, credentials applications.Credentials)
 }
 
 // Upsert provides a mock function with given fields: application, serviceID, credentials
-func (_m *Service) Upsert(application string, serviceID string, credentials *model.Credentials) (applications.Credentials, apperrors.AppError) {
+func (_m *Service) Upsert(application string, serviceID string, credentials *model.CredentialsWithCSRF) (applications.Credentials, apperrors.AppError) {
 	ret := _m.Called(application, serviceID, credentials)
 
 	var r0 applications.Credentials
-	if rf, ok := ret.Get(0).(func(string, string, *model.Credentials) applications.Credentials); ok {
+	if rf, ok := ret.Get(0).(func(string, string, *model.CredentialsWithCSRF) applications.Credentials); ok {
 		r0 = rf(application, serviceID, credentials)
 	} else {
 		r0 = ret.Get(0).(applications.Credentials)
 	}
 
 	var r1 apperrors.AppError
-	if rf, ok := ret.Get(1).(func(string, string, *model.Credentials) apperrors.AppError); ok {
+	if rf, ok := ret.Get(1).(func(string, string, *model.CredentialsWithCSRF) apperrors.AppError); ok {
 		r1 = rf(application, serviceID, credentials)
 	} else {
 		if ret.Get(1) != nil {

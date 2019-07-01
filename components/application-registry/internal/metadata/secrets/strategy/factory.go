@@ -10,18 +10,18 @@ import (
 type SecretData map[string][]byte
 
 type ModificationStrategy interface {
-	CredentialsProvided(credentials *model.Credentials) bool
-	CreateSecretData(credentials *model.Credentials) (SecretData, apperrors.AppError)
-	ToCredentialsInfo(credentials *model.Credentials, secretName string) applications.Credentials
+	CredentialsProvided(credentials *model.CredentialsWithCSRF) bool
+	CreateSecretData(credentials *model.CredentialsWithCSRF) (SecretData, apperrors.AppError)
+	ToCredentialsInfo(credentials *model.CredentialsWithCSRF, secretName string) applications.Credentials
 	ShouldUpdate(currentData SecretData, newData SecretData) bool
 }
 
 type AccessStrategy interface {
-	ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.Credentials
+	ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.CredentialsWithCSRF
 }
 
 type Factory interface {
-	NewSecretModificationStrategy(credentials *model.Credentials) (ModificationStrategy, apperrors.AppError)
+	NewSecretModificationStrategy(credentials *model.CredentialsWithCSRF) (ModificationStrategy, apperrors.AppError)
 	NewSecretAccessStrategy(credentials *applications.Credentials) (AccessStrategy, apperrors.AppError)
 }
 
@@ -35,7 +35,7 @@ func NewSecretsStrategyFactory(certificateGenerator certificates.Generator) Fact
 	}
 }
 
-func (s *factory) NewSecretModificationStrategy(credentials *model.Credentials) (ModificationStrategy, apperrors.AppError) {
+func (s *factory) NewSecretModificationStrategy(credentials *model.CredentialsWithCSRF) (ModificationStrategy, apperrors.AppError) {
 	if !credentialsValid(credentials) {
 		return nil, apperrors.WrongInput("Error: only one credential type have to be provided.")
 	}
@@ -57,7 +57,7 @@ func (s *factory) NewSecretModificationStrategy(credentials *model.Credentials) 
 	return nil, apperrors.WrongInput("Invalid credential type provided")
 }
 
-func credentialsValid(credentials *model.Credentials) bool {
+func credentialsValid(credentials *model.CredentialsWithCSRF) bool {
 	credentialsCount := 0
 
 	if credentials.Basic != nil {

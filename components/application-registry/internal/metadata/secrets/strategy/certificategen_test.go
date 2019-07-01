@@ -23,9 +23,11 @@ const (
 )
 
 var (
-	certGenCredentials = &model.Credentials{
-		CertificateGen: &model.CertificateGen{
-			CommonName: commonName,
+	certGenCredentials = &model.CredentialsWithCSRF{
+		CertificateGen: &model.CertificateGenWithCSRF{
+			CertificateGen: model.CertificateGen{
+				CommonName: commonName,
+			},
 		},
 	}
 )
@@ -77,18 +79,26 @@ func TestCertificateGen_ToCredentials(t *testing.T) {
 
 func TestCertificateGen_CredentialsProvided(t *testing.T) {
 	testCases := []struct {
-		credentials *model.Credentials
+		credentials *model.CredentialsWithCSRF
 		result      bool
 	}{
 		{
-			credentials: &model.Credentials{
-				CertificateGen: &model.CertificateGen{CommonName: commonName},
+			credentials: &model.CredentialsWithCSRF{
+				CertificateGen: &model.CertificateGenWithCSRF{
+					CertificateGen: model.CertificateGen{
+						CommonName: commonName,
+					},
+				},
 			},
 			result: true,
 		},
 		{
-			credentials: &model.Credentials{
-				CertificateGen: &model.CertificateGen{CommonName: ""},
+			credentials: &model.CredentialsWithCSRF{
+				CertificateGen: &model.CertificateGenWithCSRF{
+					CertificateGen: model.CertificateGen{
+						CommonName: "",
+					},
+				},
 			},
 			result: false,
 		},

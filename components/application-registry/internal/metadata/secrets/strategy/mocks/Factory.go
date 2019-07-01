@@ -38,11 +38,11 @@ func (_m *Factory) NewSecretAccessStrategy(credentials *applications.Credentials
 }
 
 // NewSecretModificationStrategy provides a mock function with given fields: credentials
-func (_m *Factory) NewSecretModificationStrategy(credentials *model.Credentials) (strategy.ModificationStrategy, apperrors.AppError) {
+func (_m *Factory) NewSecretModificationStrategy(credentials *model.CredentialsWithCSRF) (strategy.ModificationStrategy, apperrors.AppError) {
 	ret := _m.Called(credentials)
 
 	var r0 strategy.ModificationStrategy
-	if rf, ok := ret.Get(0).(func(*model.Credentials) strategy.ModificationStrategy); ok {
+	if rf, ok := ret.Get(0).(func(*model.CredentialsWithCSRF) strategy.ModificationStrategy); ok {
 		r0 = rf(credentials)
 	} else {
 		if ret.Get(0) != nil {
@@ -51,7 +51,7 @@ func (_m *Factory) NewSecretModificationStrategy(credentials *model.Credentials)
 	}
 
 	var r1 apperrors.AppError
-	if rf, ok := ret.Get(1).(func(*model.Credentials) apperrors.AppError); ok {
+	if rf, ok := ret.Get(1).(func(*model.CredentialsWithCSRF) apperrors.AppError); ok {
 		r1 = rf(credentials)
 	} else {
 		if ret.Get(1) != nil {

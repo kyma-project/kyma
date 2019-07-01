@@ -15,7 +15,7 @@ func convertToModelCSRInfo(appCredentials *applications.Credentials) *model.CSRF
 	}
 }
 
-func toAppCSRFInfo(credentials *model.Credentials) *applications.CSRFInfo {
+func toAppCSRFInfo(credentials *model.CredentialsWithCSRF) *applications.CSRFInfo {
 
 	convertFromModel := func(csrfInfo *model.CSRFInfo) *applications.CSRFInfo {
 		if csrfInfo == nil {

@@ -27,11 +27,13 @@ const (
 )
 
 var (
-	credentials = &model.Credentials{
-		Oauth: &model.Oauth{
-			ClientID:     "clientID",
-			ClientSecret: "clientSecret",
-			URL:          "http://oauth.com",
+	credentials = &model.CredentialsWithCSRF{
+		Oauth: &model.OauthWithCSRF{
+			Oauth: model.Oauth{
+				ClientID:     "clientID",
+				ClientSecret: "clientSecret",
+				URL:          "http://oauth.com",
+			},
 		},
 	}
 

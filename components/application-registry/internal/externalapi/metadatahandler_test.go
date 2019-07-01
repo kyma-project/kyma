@@ -42,11 +42,13 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Labels:           &map[string]string{"showcase": "true"},
 			Api: &API{
 				TargetUrl: "http://service.com",
-				Credentials: &Credentials{
-					Oauth: &Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
+				Credentials: &CredentialsWithCSRF{
+					OauthWithCSRF: &OauthWithCSRF{
+						Oauth: Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -71,11 +73,13 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Labels:           &map[string]string{"showcase": "true"},
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Oauth: &model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
+				Credentials: &model.CredentialsWithCSRF{
+					Oauth: &model.OauthWithCSRF{
+						Oauth: model.Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -129,10 +133,12 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Labels:           &map[string]string{"showcase": "true"},
 			Api: &API{
 				TargetUrl: "http://service.com",
-				Credentials: &Credentials{
-					Basic: &BasicAuth{
-						Username: "username",
-						Password: "password",
+				Credentials: &CredentialsWithCSRF{
+					BasicWithCSRF: &BasicAuthWithCSRF{
+						BasicAuth: BasicAuth{
+							Username: "username",
+							Password: "password",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -157,10 +163,12 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Labels:           &map[string]string{"showcase": "true"},
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Basic: &model.Basic{
-						Username: "username",
-						Password: "password",
+				Credentials: &model.CredentialsWithCSRF{
+					Basic: &model.BasicWithCSRF{
+						Basic: model.Basic{
+							Username: "username",
+							Password: "password",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -214,9 +222,11 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Labels:           &map[string]string{"showcase": "true"},
 			Api: &API{
 				TargetUrl: "http://service.com",
-				Credentials: &Credentials{
-					CertificateGen: &CertificateGen{
-						CommonName: "commonName",
+				Credentials: &CredentialsWithCSRF{
+					CertificateGenWithCSRF: &CertificateGenWithCSRF{
+						CertificateGen: CertificateGen{
+							CommonName: "commonName",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -241,9 +251,11 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Labels:           &map[string]string{"showcase": "true"},
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					CertificateGen: &model.CertificateGen{
-						CommonName: "commonName",
+				Credentials: &model.CredentialsWithCSRF{
+					CertificateGen: &model.CertificateGenWithCSRF{
+						CertificateGen: model.CertificateGen{
+							CommonName: "commonName",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -434,11 +446,13 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Description: "service description",
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Oauth: &model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
+				Credentials: &model.CredentialsWithCSRF{
+					Oauth: &model.OauthWithCSRF{
+						Oauth: model.Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -477,9 +491,9 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		assert.Equal(t, "service provider", serviceDetails.Provider)
 		assert.Equal(t, "service description", serviceDetails.Description)
 		assert.Equal(t, "http://service.com", serviceDetails.Api.TargetUrl)
-		assert.Equal(t, "http://oauth.com", serviceDetails.Api.Credentials.Oauth.URL)
-		assert.Equal(t, stars, serviceDetails.Api.Credentials.Oauth.ClientID)
-		assert.Equal(t, stars, serviceDetails.Api.Credentials.Oauth.ClientSecret)
+		assert.Equal(t, "http://oauth.com", serviceDetails.Api.Credentials.OauthWithCSRF.URL)
+		assert.Equal(t, stars, serviceDetails.Api.Credentials.OauthWithCSRF.ClientID)
+		assert.Equal(t, stars, serviceDetails.Api.Credentials.OauthWithCSRF.ClientSecret)
 		assert.Equal(t, apiSpec, raw2Json(t, json.RawMessage(serviceDetails.Api.Spec)))
 		assert.Equal(t, eventsSpec, raw2Json(t, json.RawMessage(serviceDetails.Events.Spec)))
 		assert.Equal(t, "documentation name", serviceDetails.Documentation.DisplayName)
@@ -499,10 +513,12 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Description: "service description",
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Basic: &model.Basic{
-						Username: "username",
-						Password: "password",
+				Credentials: &model.CredentialsWithCSRF{
+					Basic: &model.BasicWithCSRF{
+						Basic: model.Basic{
+							Username: "username",
+							Password: "password",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -541,8 +557,8 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		assert.Equal(t, "service provider", serviceDetails.Provider)
 		assert.Equal(t, "service description", serviceDetails.Description)
 		assert.Equal(t, "http://service.com", serviceDetails.Api.TargetUrl)
-		assert.Equal(t, stars, serviceDetails.Api.Credentials.Basic.Username)
-		assert.Equal(t, stars, serviceDetails.Api.Credentials.Basic.Password)
+		assert.Equal(t, stars, serviceDetails.Api.Credentials.BasicWithCSRF.Username)
+		assert.Equal(t, stars, serviceDetails.Api.Credentials.BasicWithCSRF.Password)
 		assert.Equal(t, apiSpec, raw2Json(t, serviceDetails.Api.Spec))
 		assert.Equal(t, eventsSpec, raw2Json(t, serviceDetails.Events.Spec))
 		assert.Equal(t, "documentation name", serviceDetails.Documentation.DisplayName)
@@ -562,10 +578,12 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Description: "service description",
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					CertificateGen: &model.CertificateGen{
-						CommonName:  "commonName",
-						Certificate: "test-cert",
+				Credentials: &model.CredentialsWithCSRF{
+					CertificateGen: &model.CertificateGenWithCSRF{
+						CertificateGen: model.CertificateGen{
+							CommonName:  "commonName",
+							Certificate: "test-cert",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -604,7 +622,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		assert.Equal(t, "service provider", serviceDetails.Provider)
 		assert.Equal(t, "service description", serviceDetails.Description)
 		assert.Equal(t, "http://service.com", serviceDetails.Api.TargetUrl)
-		assert.Equal(t, "commonName", serviceDetails.Api.Credentials.CertificateGen.CommonName)
+		assert.Equal(t, "commonName", serviceDetails.Api.Credentials.CertificateGenWithCSRF.CommonName)
 		assert.Equal(t, apiSpec, raw2Json(t, serviceDetails.Api.Spec))
 		assert.Equal(t, eventsSpec, raw2Json(t, serviceDetails.Events.Spec))
 		assert.Equal(t, "documentation name", serviceDetails.Documentation.DisplayName)
@@ -625,11 +643,13 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Description: "service description",
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Oauth: &model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
+				Credentials: &model.CredentialsWithCSRF{
+					Oauth: &model.OauthWithCSRF{
+						Oauth: model.Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -664,9 +684,9 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		assert.Equal(t, "service provider", serviceDetails.Provider)
 		assert.Equal(t, "service description", serviceDetails.Description)
 		assert.Equal(t, "http://service.com", serviceDetails.Api.TargetUrl)
-		assert.Equal(t, "http://oauth.com", serviceDetails.Api.Credentials.Oauth.URL)
-		assert.Equal(t, stars, serviceDetails.Api.Credentials.Oauth.ClientID)
-		assert.Equal(t, stars, serviceDetails.Api.Credentials.Oauth.ClientSecret)
+		assert.Equal(t, "http://oauth.com", serviceDetails.Api.Credentials.OauthWithCSRF.URL)
+		assert.Equal(t, stars, serviceDetails.Api.Credentials.OauthWithCSRF.ClientID)
+		assert.Equal(t, stars, serviceDetails.Api.Credentials.OauthWithCSRF.ClientSecret)
 		assert.Equal(t, apiSpec, raw2Json(t, json.RawMessage(serviceDetails.Api.Spec)))
 		assert.Nil(t, serviceDetails.Events)
 		assert.Nil(t, serviceDetails.Documentation)
@@ -852,11 +872,13 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 			Description: "service description",
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Oauth: &model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
+				Credentials: &model.CredentialsWithCSRF{
+					Oauth: &model.OauthWithCSRF{
+						Oauth: model.Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
 					},
 				},
 				Spec: nonJsonApiSpec,
@@ -891,9 +913,9 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 		assert.Equal(t, "service provider", serviceDetails.Provider)
 		assert.Equal(t, "service description", serviceDetails.Description)
 		assert.Equal(t, "http://service.com", serviceDetails.Api.TargetUrl)
-		assert.Equal(t, "http://oauth.com", serviceDetails.Api.Credentials.Oauth.URL)
-		assert.Equal(t, stars, serviceDetails.Api.Credentials.Oauth.ClientID)
-		assert.Equal(t, stars, serviceDetails.Api.Credentials.Oauth.ClientSecret)
+		assert.Equal(t, "http://oauth.com", serviceDetails.Api.Credentials.OauthWithCSRF.URL)
+		assert.Equal(t, stars, serviceDetails.Api.Credentials.OauthWithCSRF.ClientID)
+		assert.Equal(t, stars, serviceDetails.Api.Credentials.OauthWithCSRF.ClientSecret)
 		assert.Equal(t, []byte("\"non json api spec\""), []byte(serviceDetails.Api.Spec))
 		assert.Nil(t, serviceDetails.Events)
 		assert.Nil(t, serviceDetails.Documentation)
@@ -910,11 +932,13 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Description: "service description",
 			Api: &API{
 				TargetUrl: "http://service.com",
-				Credentials: &Credentials{
-					Oauth: &Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
+				Credentials: &CredentialsWithCSRF{
+					OauthWithCSRF: &OauthWithCSRF{
+						Oauth: Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -936,11 +960,13 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Description: "service description",
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Oauth: &model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
+				Credentials: &model.CredentialsWithCSRF{
+					Oauth: &model.OauthWithCSRF{
+						Oauth: model.Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -984,9 +1010,9 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		assert.Equal(t, "service provider", serviceDetailsResponse.Provider)
 		assert.Equal(t, "service description", serviceDetailsResponse.Description)
 		assert.Equal(t, "http://service.com", serviceDetailsResponse.Api.TargetUrl)
-		assert.Equal(t, "http://oauth.com", serviceDetailsResponse.Api.Credentials.Oauth.URL)
-		assert.Equal(t, stars, serviceDetailsResponse.Api.Credentials.Oauth.ClientID)
-		assert.Equal(t, stars, serviceDetailsResponse.Api.Credentials.Oauth.ClientSecret)
+		assert.Equal(t, "http://oauth.com", serviceDetailsResponse.Api.Credentials.OauthWithCSRF.URL)
+		assert.Equal(t, stars, serviceDetailsResponse.Api.Credentials.OauthWithCSRF.ClientID)
+		assert.Equal(t, stars, serviceDetailsResponse.Api.Credentials.OauthWithCSRF.ClientSecret)
 		assert.Equal(t, apiSpec, raw2Json(t, serviceDetailsResponse.Api.Spec))
 		assert.Equal(t, eventsSpec, raw2Json(t, serviceDetailsResponse.Events.Spec))
 		assert.Equal(t, "documentation name", serviceDetailsResponse.Documentation.DisplayName)
@@ -998,7 +1024,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
-	t.Run("should update a service with Basic Auth credentials", func(t *testing.T) {
+	t.Run("should update a service with BasicWithCSRF Auth credentials", func(t *testing.T) {
 		// given
 		serviceDetails := ServiceDetails{
 			Name:        "service name",
@@ -1006,10 +1032,12 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Description: "service description",
 			Api: &API{
 				TargetUrl: "http://service.com",
-				Credentials: &Credentials{
-					Basic: &BasicAuth{
-						Username: "username",
-						Password: "password",
+				Credentials: &CredentialsWithCSRF{
+					BasicWithCSRF: &BasicAuthWithCSRF{
+						BasicAuth: BasicAuth{
+							Username: "username",
+							Password: "password",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -1031,10 +1059,12 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Description: "service description",
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Basic: &model.Basic{
-						Username: "username",
-						Password: "password",
+				Credentials: &model.CredentialsWithCSRF{
+					Basic: &model.BasicWithCSRF{
+						Basic: model.Basic{
+							Username: "username",
+							Password: "password",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -1078,8 +1108,8 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		assert.Equal(t, "service provider", serviceDetailsResponse.Provider)
 		assert.Equal(t, "service description", serviceDetailsResponse.Description)
 		assert.Equal(t, "http://service.com", serviceDetailsResponse.Api.TargetUrl)
-		assert.Equal(t, stars, serviceDetailsResponse.Api.Credentials.Basic.Username)
-		assert.Equal(t, stars, serviceDetailsResponse.Api.Credentials.Basic.Password)
+		assert.Equal(t, stars, serviceDetailsResponse.Api.Credentials.BasicWithCSRF.Username)
+		assert.Equal(t, stars, serviceDetailsResponse.Api.Credentials.BasicWithCSRF.Password)
 		assert.Equal(t, apiSpec, raw2Json(t, serviceDetailsResponse.Api.Spec))
 		assert.Equal(t, eventsSpec, raw2Json(t, serviceDetailsResponse.Events.Spec))
 		assert.Equal(t, "documentation name", serviceDetailsResponse.Documentation.DisplayName)
