@@ -3,16 +3,17 @@ package metadata
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	//"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/uuid"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 const (
@@ -40,16 +41,20 @@ type ServiceDefinitionService interface {
 	GetAPI(application, serviceId string) (*model.API, apperrors.AppError)
 }
 
+type ApplicationGetter interface {
+	Get(name string, options v1.GetOptions) (*alpha1.Application, error)
+}
+
 type serviceDefinitionService struct {
 	uuidGenerator         uuid.Generator
 	serviceAPIService     serviceapi.Service
 	applicationRepository applications.ServiceRepository
 	specService           specification.Service
-	applicationManager v1alpha1.ApplicationInterface
+	applicationManager ApplicationGetter
 }
 
 // NewServiceDefinitionService creates new ServiceDefinitionService with provided dependencies.
-func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService serviceapi.Service, applicationRepository applications.ServiceRepository, specService specification.Service, applicationManager v1alpha1.ApplicationInterface) ServiceDefinitionService {
+func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService serviceapi.Service, applicationRepository applications.ServiceRepository, specService specification.Service, applicationManager ApplicationGetter) ServiceDefinitionService {
 	return &serviceDefinitionService{
 		uuidGenerator:         uuidGenerator,
 		serviceAPIService:     serviceAPIService,
