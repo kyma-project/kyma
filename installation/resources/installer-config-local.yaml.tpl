@@ -170,3 +170,4 @@ metadata:
     kyma-project.io/installation: ""
 data:
   global.logging.promtail.config.name: ""
+

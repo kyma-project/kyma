@@ -1,0 +1,14 @@
+deployment:
+  image:
+    pullPolicy: IfNotPresent
+  args:
+    containerPort: &port 3000
+
+service:
+  port: *port
+
+gateway:
+  enabled: false
+
+virtualService:
+  host: compass-gateway
