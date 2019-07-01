@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
-	csrfClient "github.com/kyma-project/kyma/components/application-gateway/pkg/csrf/client"
-	csrfStrategy "github.com/kyma-project/kyma/components/application-gateway/pkg/csrf/strategy"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/download"
@@ -41,8 +39,7 @@ func NewSpecService(assetStoreService assetstore.Service, specRequestTimeout int
 		assetStoreService: assetStoreService,
 		downloadClient: download.NewClient(&http.Client{
 			Timeout: time.Duration(specRequestTimeout) * time.Second,
-		}, authorization.NewStrategyFactory(authorization.FactoryConfiguration{}),
-			csrfStrategy.NewTokenStrategyFactory(csrfClient.New(10, nil, nil))),
+		}, authorization.NewStrategyFactory(authorization.FactoryConfiguration{})),
 	}
 }
 

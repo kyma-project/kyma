@@ -3,7 +3,6 @@ package download
 import (
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/csrf"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"net/http"
@@ -14,8 +13,6 @@ import (
 const (
 	authHeader = "authorization"
 	authValue  = "authValue"
-	csrfHeader = "csrfToken"
-	csrfValue  = "csrfTokenValue"
 )
 
 func TestDownloader_Fetch(t *testing.T) {
@@ -23,7 +20,6 @@ func TestDownloader_Fetch(t *testing.T) {
 	t.Run("Should fetch with authorization and token", func(t *testing.T) {
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, authValue, r.Header.Get(authHeader))
-			assert.Equal(t, csrfValue, r.Header.Get(csrfHeader))
 			w.Write(testBody)
 			w.WriteHeader(http.StatusOK)
 		})
@@ -32,7 +28,7 @@ func TestDownloader_Fetch(t *testing.T) {
 
 		client := &http.Client{}
 
-		downloader := NewClient(client, authFactoryStub{}, csrfFactoryStub{})
+		downloader := NewClient(client, authFactoryStub{})
 
 		credentials := &authorization.Credentials{}
 
@@ -45,7 +41,6 @@ func TestDownloader_Fetch(t *testing.T) {
 	t.Run("Should fetch without authorization and token when credentials are nil", func(t *testing.T) {
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.NotEqual(t, authValue, r.Header.Get(authHeader))
-			assert.NotEqual(t, csrfValue, r.Header.Get(csrfHeader))
 			w.Write(testBody)
 			w.WriteHeader(http.StatusOK)
 		})
@@ -54,7 +49,7 @@ func TestDownloader_Fetch(t *testing.T) {
 
 		client := &http.Client{}
 
-		downloader := NewClient(client, authFactoryStub{}, csrfFactoryStub{})
+		downloader := NewClient(client, authFactoryStub{})
 
 		bytes, appError := downloader.Fetch(server.URL, nil)
 
@@ -78,19 +73,3 @@ func (as authStrategyStub) AddAuthorization(r *http.Request, setter authorizatio
 	r.Header.Set(authHeader, authValue)
 	return nil
 }
-
-//CSRF stubs
-type csrfFactoryStub struct{}
-
-type csrfStrategyStub struct{}
-
-func (cfs csrfFactoryStub) Create(authorizationStrategy authorization.Strategy, csrfTokenEndpointURL string) csrf.TokenStrategy {
-	return csrfStrategyStub{}
-}
-
-func (css csrfStrategyStub) AddCSRFToken(apiRequest *http.Request) apperrors.AppError {
-	apiRequest.Header.Set(csrfHeader, csrfValue)
-	return nil
-}
-
-func (css csrfStrategyStub) Invalidate() {}

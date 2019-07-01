@@ -2,7 +2,6 @@ package download
 
 import (
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/csrf"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"io/ioutil"
 	"net/http"
@@ -18,14 +17,12 @@ type Client interface {
 type downloader struct {
 	client               *http.Client
 	authorizationFactory authorization.StrategyFactory
-	csrfFactory          csrf.TokenStrategyFactory
 }
 
-func NewClient(client *http.Client, authFactory authorization.StrategyFactory, csrfFactory csrf.TokenStrategyFactory) Client {
+func NewClient(client *http.Client, authFactory authorization.StrategyFactory) Client {
 	return downloader{
 		client:               client,
 		authorizationFactory: authFactory,
-		csrfFactory:          csrfFactory,
 	}
 }
 
@@ -56,7 +53,7 @@ func (d downloader) requestAPISpec(specUrl string, credentials *authorization.Cr
 	}
 
 	if credentials != nil {
-		err := d.addAuthorizationAndToken(req, credentials)
+		err := d.addAuthorization(req, credentials)
 		if err != nil {
 			return nil, apperrors.Internal("Adding authorization failed, %s", err.Error())
 		}
@@ -74,7 +71,7 @@ func (d downloader) requestAPISpec(specUrl string, credentials *authorization.Cr
 	return response, nil
 }
 
-func (d downloader) addAuthorizationAndToken(r *http.Request, credentials *authorization.Credentials) apperrors.AppError {
+func (d downloader) addAuthorization(r *http.Request, credentials *authorization.Credentials) apperrors.AppError {
 	client := &http.Client{
 		Timeout: time.Duration(timeout) * time.Second}
 
@@ -90,23 +87,5 @@ func (d downloader) addAuthorizationAndToken(r *http.Request, credentials *autho
 		return apperrors.Internal(err.Error())
 	}
 
-	return d.withCSRFToken(r, strategy, credentials)
-}
-
-func (d downloader) withCSRFToken(r *http.Request, strategy authorization.Strategy, credentials *authorization.Credentials) apperrors.AppError {
-	tokenStrategy := d.newCSRFTokenStrategy(strategy, credentials)
-	err := tokenStrategy.AddCSRFToken(r)
-
-	if err != nil {
-		return apperrors.Internal(err.Error())
-	}
 	return nil
-}
-
-func (d downloader) newCSRFTokenStrategy(authorizationStrategy authorization.Strategy, credentials *authorization.Credentials) csrf.TokenStrategy {
-	csrfTokenEndpointURL := ""
-	if credentials != nil {
-		csrfTokenEndpointURL = credentials.CSRFTokenEndpointURL
-	}
-	return d.csrfFactory.Create(authorizationStrategy, csrfTokenEndpointURL)
 }

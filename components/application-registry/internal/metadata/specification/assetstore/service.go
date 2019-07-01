@@ -4,8 +4,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
-	csrfClient "github.com/kyma-project/kyma/components/application-gateway/pkg/csrf/client"
-	csrfStrategy "github.com/kyma-project/kyma/components/application-gateway/pkg/csrf/strategy"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload"
@@ -46,8 +44,7 @@ func NewService(repository DocsTopicRepository, uploadClient upload.Client, inse
 	downloadClient := download.NewClient(&http.Client{
 		Timeout:   time.Duration(assetstoreRequestTimeout) * time.Second,
 		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureAssetDownload}},
-	}, authorization.NewStrategyFactory(authorization.FactoryConfiguration{}),
-		csrfStrategy.NewTokenStrategyFactory(csrfClient.New(10, nil, nil)))
+	}, authorization.NewStrategyFactory(authorization.FactoryConfiguration{}))
 
 	return &service{
 		docsTopicRepository: repository,
