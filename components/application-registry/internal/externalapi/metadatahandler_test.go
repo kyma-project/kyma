@@ -73,11 +73,13 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Labels:           &map[string]string{"showcase": "true"},
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Oauth: &model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
+				Credentials: &model.CredentialsWithCSRF{
+					Oauth: &model.OauthWithCSRF{
+						Oauth: model.Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -161,10 +163,12 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Labels:           &map[string]string{"showcase": "true"},
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Basic: &model.Basic{
-						Username: "username",
-						Password: "password",
+				Credentials: &model.CredentialsWithCSRF{
+					Basic: &model.BasicWithCSRF{
+						Basic: model.Basic{
+							Username: "username",
+							Password: "password",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -247,9 +251,11 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Labels:           &map[string]string{"showcase": "true"},
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					CertificateGen: &model.CertificateGen{
-						CommonName: "commonName",
+				Credentials: &model.CredentialsWithCSRF{
+					CertificateGen: &model.CertificateGenWithCSRF{
+						CertificateGen: model.CertificateGen{
+							CommonName: "commonName",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -440,11 +446,13 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Description: "service description",
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Oauth: &model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
+				Credentials: &model.CredentialsWithCSRF{
+					Oauth: &model.OauthWithCSRF{
+						Oauth: model.Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -505,10 +513,12 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Description: "service description",
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Basic: &model.Basic{
-						Username: "username",
-						Password: "password",
+				Credentials: &model.CredentialsWithCSRF{
+					Basic: &model.BasicWithCSRF{
+						Basic: model.Basic{
+							Username: "username",
+							Password: "password",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -568,10 +578,12 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Description: "service description",
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					CertificateGen: &model.CertificateGen{
-						CommonName:  "commonName",
-						Certificate: "test-cert",
+				Credentials: &model.CredentialsWithCSRF{
+					CertificateGen: &model.CertificateGenWithCSRF{
+						CertificateGen: model.CertificateGen{
+							CommonName:  "commonName",
+							Certificate: "test-cert",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -631,11 +643,13 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Description: "service description",
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Oauth: &model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
+				Credentials: &model.CredentialsWithCSRF{
+					Oauth: &model.OauthWithCSRF{
+						Oauth: model.Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -858,11 +872,13 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 			Description: "service description",
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Oauth: &model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
+				Credentials: &model.CredentialsWithCSRF{
+					Oauth: &model.OauthWithCSRF{
+						Oauth: model.Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
 					},
 				},
 				Spec: nonJsonApiSpec,
@@ -944,11 +960,13 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Description: "service description",
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Oauth: &model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
+				Credentials: &model.CredentialsWithCSRF{
+					Oauth: &model.OauthWithCSRF{
+						Oauth: model.Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
 					},
 				},
 				Spec: apiRawSpec,
@@ -1006,7 +1024,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
-	t.Run("should update a service with Basic Auth credentials", func(t *testing.T) {
+	t.Run("should update a service with BasicWithCSRF Auth credentials", func(t *testing.T) {
 		// given
 		serviceDetails := ServiceDetails{
 			Name:        "service name",
@@ -1041,10 +1059,12 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Description: "service description",
 			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &model.Credentials{
-					Basic: &model.Basic{
-						Username: "username",
-						Password: "password",
+				Credentials: &model.CredentialsWithCSRF{
+					Basic: &model.BasicWithCSRF{
+						Basic: model.Basic{
+							Username: "username",
+							Password: "password",
+						},
 					},
 				},
 				Spec: apiRawSpec,

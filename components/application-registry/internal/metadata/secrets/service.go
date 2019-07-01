@@ -11,9 +11,9 @@ import (
 type modificationFunction func(modStrategy strategy.ModificationStrategy, application, name, serviceID string, newData strategy.SecretData) apperrors.AppError
 
 type Service interface {
-	Get(application string, credentials applications.Credentials) (model.Credentials, apperrors.AppError)
-	Create(application, serviceID string, credentials *model.Credentials) (applications.Credentials, apperrors.AppError)
-	Upsert(application, serviceID string, credentials *model.Credentials) (applications.Credentials, apperrors.AppError)
+	Get(application string, credentials applications.Credentials) (model.CredentialsWithCSRF, apperrors.AppError)
+	Create(application, serviceID string, credentials *model.CredentialsWithCSRF) (applications.Credentials, apperrors.AppError)
+	Upsert(application, serviceID string, credentials *model.CredentialsWithCSRF) (applications.Credentials, apperrors.AppError)
 	Delete(name string) apperrors.AppError
 }
 
@@ -31,25 +31,25 @@ func NewService(repository Repository, nameResolver k8sconsts.NameResolver, stra
 	}
 }
 
-func (s *service) Create(application, serviceID string, credentials *model.Credentials) (applications.Credentials, apperrors.AppError) {
+func (s *service) Create(application, serviceID string, credentials *model.CredentialsWithCSRF) (applications.Credentials, apperrors.AppError) {
 	return s.modifySecret(application, serviceID, credentials, s.createSecret)
 }
 
-func (s *service) Get(application string, credentials applications.Credentials) (model.Credentials, apperrors.AppError) {
+func (s *service) Get(application string, credentials applications.Credentials) (model.CredentialsWithCSRF, apperrors.AppError) {
 	accessStrategy, err := s.strategyFactory.NewSecretAccessStrategy(&credentials)
 	if err != nil {
-		return model.Credentials{}, err.Append("Failed to initialize strategy")
+		return model.CredentialsWithCSRF{}, err.Append("Failed to initialize strategy")
 	}
 
 	data, err := s.repository.Get(credentials.SecretName)
 	if err != nil {
-		return model.Credentials{}, err
+		return model.CredentialsWithCSRF{}, err
 	}
 
 	return accessStrategy.ToCredentials(data, &credentials), nil
 }
 
-func (s *service) Upsert(application, serviceID string, credentials *model.Credentials) (applications.Credentials, apperrors.AppError) {
+func (s *service) Upsert(application, serviceID string, credentials *model.CredentialsWithCSRF) (applications.Credentials, apperrors.AppError) {
 	return s.modifySecret(application, serviceID, credentials, s.upsertSecret)
 }
 
@@ -57,7 +57,7 @@ func (s *service) Delete(name string) apperrors.AppError {
 	return s.repository.Delete(name)
 }
 
-func (s *service) modifySecret(application, serviceID string, credentials *model.Credentials, modFunction modificationFunction) (applications.Credentials, apperrors.AppError) {
+func (s *service) modifySecret(application, serviceID string, credentials *model.CredentialsWithCSRF, modFunction modificationFunction) (applications.Credentials, apperrors.AppError) {
 	if credentials == nil {
 		return applications.Credentials{}, nil
 	}

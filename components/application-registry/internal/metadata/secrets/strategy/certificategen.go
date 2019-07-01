@@ -20,23 +20,25 @@ type certificateGen struct {
 	certificateGenerator certificates.Generator
 }
 
-func (svc *certificateGen) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.Credentials {
+func (svc *certificateGen) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.CredentialsWithCSRF {
 	commonName, cert := svc.readCertificateGenMap(secretData)
 
-	return model.Credentials{
-		CertificateGen: &model.CertificateGen{
-			CommonName:  commonName,
-			Certificate: cert,
-			CSRFInfo:    convertToModelCSRInfo(appCredentials),
+	return model.CredentialsWithCSRF{
+		CertificateGen: &model.CertificateGenWithCSRF{
+			CertificateGen: model.CertificateGen{
+				CommonName:  commonName,
+				Certificate: cert,
+			},
+			CSRFInfo: convertToModelCSRInfo(appCredentials),
 		},
 	}
 }
 
-func (svc *certificateGen) CredentialsProvided(credentials *model.Credentials) bool {
+func (svc *certificateGen) CredentialsProvided(credentials *model.CredentialsWithCSRF) bool {
 	return svc.certificateGenCredentialsProvided(credentials)
 }
 
-func (svc *certificateGen) CreateSecretData(credentials *model.Credentials) (SecretData, apperrors.AppError) {
+func (svc *certificateGen) CreateSecretData(credentials *model.CredentialsWithCSRF) (SecretData, apperrors.AppError) {
 	keyCertPair, err := svc.certificateGenerator(pkix.Name{CommonName: credentials.CertificateGen.CommonName})
 	if err != nil {
 		return nil, err.Append("Failed to generate key and certificate pair")
@@ -45,7 +47,7 @@ func (svc *certificateGen) CreateSecretData(credentials *model.Credentials) (Sec
 	return svc.makeCertificateGenMap(credentials.CertificateGen.CommonName, keyCertPair.PrivateKey, keyCertPair.Certificate), nil
 }
 
-func (svc *certificateGen) ToCredentialsInfo(credentials *model.Credentials, secretName string) applications.Credentials {
+func (svc *certificateGen) ToCredentialsInfo(credentials *model.CredentialsWithCSRF, secretName string) applications.Credentials {
 	applicationCredentials := applications.Credentials{
 		Type:       applications.CredentialsCertificateGenType,
 		SecretName: secretName,
@@ -59,7 +61,7 @@ func (svc *certificateGen) ShouldUpdate(currentData SecretData, newData SecretDa
 	return string(currentData[CertificateGenCNKey]) != string(newData[CertificateGenCNKey])
 }
 
-func (svc *certificateGen) certificateGenCredentialsProvided(credentials *model.Credentials) bool {
+func (svc *certificateGen) certificateGenCredentialsProvided(credentials *model.CredentialsWithCSRF) bool {
 	return credentials != nil && credentials.CertificateGen != nil && credentials.CertificateGen.CommonName != ""
 }
 

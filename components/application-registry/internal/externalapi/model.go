@@ -172,7 +172,7 @@ func serviceDefinitionToServiceDetails(serviceDefinition model.ServiceDefinition
 	return serviceDetails, nil
 }
 
-func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.Credentials) *CredentialsWithCSRF {
+func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.CredentialsWithCSRF) *CredentialsWithCSRF {
 
 	csrfInfoFromModel := func(model *model.CSRFInfo) *CSRFInfo {
 		if model == nil {
@@ -289,7 +289,7 @@ func serviceDetailsRequestParametersToServiceDefinitionRequestParameters(request
 	}
 }
 
-func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *CredentialsWithCSRF) *model.Credentials {
+func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *CredentialsWithCSRF) *model.CredentialsWithCSRF {
 
 	csrfInfoToModel := func(api *CSRFInfo) *model.CSRFInfo {
 		if api == nil {
@@ -301,31 +301,37 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 	}
 
 	if credentials.OauthWithCSRF != nil {
-		return &model.Credentials{
-			Oauth: &model.Oauth{
-				ClientID:     credentials.OauthWithCSRF.ClientID,
-				ClientSecret: credentials.OauthWithCSRF.ClientSecret,
-				URL:          credentials.OauthWithCSRF.URL,
-				CSRFInfo:     csrfInfoToModel(credentials.OauthWithCSRF.CSRFInfo),
+		return &model.CredentialsWithCSRF{
+			Oauth: &model.OauthWithCSRF{
+				Oauth: model.Oauth{
+					ClientID:     credentials.OauthWithCSRF.ClientID,
+					ClientSecret: credentials.OauthWithCSRF.ClientSecret,
+					URL:          credentials.OauthWithCSRF.URL,
+				},
+				CSRFInfo: csrfInfoToModel(credentials.OauthWithCSRF.CSRFInfo),
 			},
 		}
 	}
 
 	if credentials.BasicWithCSRF != nil {
-		return &model.Credentials{
-			Basic: &model.Basic{
-				Username: credentials.BasicWithCSRF.Username,
-				Password: credentials.BasicWithCSRF.Password,
+		return &model.CredentialsWithCSRF{
+			Basic: &model.BasicWithCSRF{
+				Basic: model.Basic{
+					Username: credentials.BasicWithCSRF.Username,
+					Password: credentials.BasicWithCSRF.Password,
+				},
 				CSRFInfo: csrfInfoToModel(credentials.BasicWithCSRF.CSRFInfo),
 			},
 		}
 	}
 
 	if credentials.CertificateGenWithCSRF != nil {
-		return &model.Credentials{
-			CertificateGen: &model.CertificateGen{
-				CommonName: credentials.CertificateGenWithCSRF.CommonName,
-				CSRFInfo:   csrfInfoToModel(credentials.CertificateGenWithCSRF.CSRFInfo),
+		return &model.CredentialsWithCSRF{
+			CertificateGen: &model.CertificateGenWithCSRF{
+				CertificateGen: model.CertificateGen{
+					CommonName: credentials.CertificateGenWithCSRF.CommonName,
+				},
+				CSRFInfo: csrfInfoToModel(credentials.CertificateGenWithCSRF.CSRFInfo),
 			},
 		}
 	}

@@ -5,7 +5,7 @@ type API struct {
 	// TargetUrl points to API.
 	TargetUrl string
 	// Credentials is a credentials of API.
-	Credentials *Credentials
+	Credentials *CredentialsWithCSRF
 	// Spec contains specification of an API.
 	Spec []byte
 	// SpecificationUrl is url from where the specification of an API can be acquired - used if Spec is not defined
@@ -14,14 +14,26 @@ type API struct {
 	ApiType string
 	// Request Parameters
 	RequestParameters *RequestParameters
+	// Specification Credentials is a credentials for fetching API spec.
+	SpecificationCredentials *Credentials
+	// Specification Request Parameters
+	SpecificationRequestParameters *RequestParameters
 }
 
 // Credentials contains OAuth configuration.
 type Credentials struct {
-	// OauthWithCSRF is OAuth configuration.
+	// Oauth is OAuth configuration.
 	Oauth          *Oauth
 	Basic          *Basic
 	CertificateGen *CertificateGen
+}
+
+// Credentials contains OAuth configuration.
+type CredentialsWithCSRF struct {
+	// OauthWithCSRF is OAuth configuration.
+	Oauth          *OauthWithCSRF
+	Basic          *BasicWithCSRF
+	CertificateGen *CertificateGenWithCSRF
 }
 
 type RequestParameters struct {
@@ -33,7 +45,6 @@ type CSRFInfo struct {
 	TokenEndpointURL string
 }
 
-// OauthWithCSRF contains details of OAuth configuration.
 type Oauth struct {
 	// URL to OAuth token provider.
 	URL string
@@ -41,24 +52,37 @@ type Oauth struct {
 	ClientID string
 	// ClientSecret to use for authentication.
 	ClientSecret string
+}
+
+// OauthWithCSRF contains details of OAuth configuration.
+type OauthWithCSRF struct {
+	Oauth
 	// Optional CSRF Data
 	CSRFInfo *CSRFInfo
 }
 
-// BasicWithCSRF contains details of BasicWithCSRF configuration.
 type Basic struct {
 	// Username to use for authentication.
 	Username string
 	// Password to use for authentication.
 	Password string
+}
+
+// BasicWithCSRF contains details of BasicWithCSRF configuration.
+type BasicWithCSRF struct {
+	Basic
 	// Optional CSRF Data
 	CSRFInfo *CSRFInfo
 }
 
-// CertificateGenWithCSRF contains common name of the certificate to generate
 type CertificateGen struct {
 	CommonName  string
 	Certificate string
+}
+
+// CertificateGenWithCSRF contains common name of the certificate to generate
+type CertificateGenWithCSRF struct {
+	CertificateGen
 	// Optional CSRF Data
 	CSRFInfo *CSRFInfo
 }
