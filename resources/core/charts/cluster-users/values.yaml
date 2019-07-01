@@ -40,7 +40,6 @@ clusterRoles:
       - "patch"
       - "update"
       - "watch"
-      - "edit"
     view:
       - "get"
       - "list"

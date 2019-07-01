@@ -57,7 +57,7 @@ function runTests() {
 	testPermissions "delete" "secret" "${NAMESPACE}" "yes"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to edit configmap in ${NAMESPACE}"
-	testPermissions "edit" "configmap" "${NAMESPACE}" "yes"
+	testPermissions "patch" "configmap" "${NAMESPACE}" "yes"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to get specific CRD in ${NAMESPACE}"
 	testPermissions "get" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
@@ -99,7 +99,7 @@ function runTests() {
 	testPermissions "create" "ns" "${NAMESPACE}" "no"
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to edit pod"
-	testPermissions "edit" "pod" "${NAMESPACE}" "no"
+	testPermissions "patch" "pod" "${NAMESPACE}" "no"
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to create secret"
 	testPermissions "create" "secret" "${NAMESPACE}" "no"
