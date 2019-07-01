@@ -58,6 +58,16 @@ Execute the `run.sh` script with the `--skip-minikube-start` flag to rerun Kyma 
   ./scripts/run.sh --skip-minikube-start
   ```
 
+## Upgrade Kyma
+
+The upgrade procedure relies heavily on Helm. When you trigger the upgrade, Helm performs `helm upgrade` on releases that exist in the cluster and are defined in the Kyma release you're upgrading to. If a Helm release is defined in the Kyma release you're upgrading to but is not present in the cluster when you trigger the upgrade, Helm performs `helm install` and installs such release.
+
+If you changed the name of a Helm release of a Kyma component, it won't be updated through `helm upgrade`. Instead, the component's release will be installed with its default name and the customized release won't be updated.
+
+The Operator doesn't support rollbacks.
+
+The Operator doesn't migrate Custom Resources to a new version when update is triggered. Custom Resource backward compatibility, or lack thereof, is determined at the component or Helm release level.
+
 ## Update the Kyma cluster
 
 Connect to the cluster that hosts your Kyma installation. Prepare the URL to the updated Kyma `tar.gz` package. Run the following command to edit the installation CR:

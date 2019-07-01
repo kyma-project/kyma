@@ -16,7 +16,7 @@ For example, if you're running Kyma 1.0 and you want to upgrade to version 1.3, 
 
 The upgrade procedure relies heavily on Helm. As a result, the availability of cluster services during the upgrade is not defined by Kyma and can vary from version to version. The existing Custom Resources (CRs) remain in the cluster.
 
->**NOTE:** For more technical details regarding the upgrade, read [this](link) document.
+>**NOTE:** To learn more about the technical aspects of the upgrade, read [this](https://github.com/kyma-project/kyma/blob/master/components/kyma-operator/README.md#upgrade-kyma) document.
 
 ## Upgrade your deployment to a newer version
 
@@ -26,7 +26,7 @@ Follow these steps:
   ```
   kubectl -n kyma-installer get deploy kyma-installer -o jsonpath='{.spec.template.spec.containers[].image}
   ```
-2. Perform the required actions described in the migration guide published with the release you want to upgrade to. Migration guides are linked in the [release notes](https://kyma-project.io/blog/) and are available on the respective [release branches](https://github.com/kyma-project/kyma/branches) in the `docs/migration-guides` directory.
+2. Perform the required actions as described in the migration guide published with the release you want to upgrade to. Migration guides are linked in the [release notes](https://kyma-project.io/blog/) and are available on the respective [release branches](https://github.com/kyma-project/kyma/branches) in the `docs/migration-guides` directory.
   >**NOTE:** Not all releases require you to perform additional migration steps. If your target release doesn't come with a migration guide, proceed to the next step.
 
 3. Trigger the upgrade:
