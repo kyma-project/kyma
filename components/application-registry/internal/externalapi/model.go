@@ -251,14 +251,25 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 			SpecificationUrl: serviceDetails.Api.SpecificationUrl,
 			ApiType:          serviceDetails.Api.ApiType,
 		}
+
 		if serviceDetails.Api.Credentials != nil {
-			serviceDefinition.Api.Credentials = serviceDetailsCredentialsToServiceDefinitionCredentials(serviceDetails.Api.Credentials)
+			serviceDefinition.Api.Credentials = serviceDetailsCredentialsToServiceDefinitionCredentialsWithCSRF(serviceDetails.Api.Credentials)
 		}
+
+		if serviceDetails.Api.SpecificationCredentials != nil {
+			serviceDefinition.Api.SpecificationCredentials = serviceDetailsCredentialsToServiceDefinitionCredentials(serviceDetails.Api.SpecificationCredentials)
+		}
+
 		if serviceDetails.Api.Spec != nil {
 			serviceDefinition.Api.Spec = compact(serviceDetails.Api.Spec)
 		}
+
 		if serviceDetails.Api.RequestParameters != nil {
 			serviceDefinition.Api.RequestParameters = serviceDetailsRequestParametersToServiceDefinitionRequestParameters(serviceDetails.Api.RequestParameters)
+		}
+
+		if serviceDetails.Api.SpecificationRequestParameters != nil {
+			serviceDefinition.Api.RequestParameters = serviceDetailsRequestParametersToServiceDefinitionRequestParameters(serviceDetails.Api.SpecificationRequestParameters)
 		}
 	}
 
@@ -289,7 +300,35 @@ func serviceDetailsRequestParametersToServiceDefinitionRequestParameters(request
 	}
 }
 
-func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *CredentialsWithCSRF) *model.CredentialsWithCSRF {
+func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Credentials) *model.Credentials {
+
+	if credentials.Oauth != nil {
+		oauth := serviceDetailsOauthToServiceDefinitionOauth(*credentials.Oauth)
+		return &model.Credentials{
+			Oauth: &oauth,
+		}
+	}
+
+	if credentials.Basic != nil {
+		basic := serviceDetailsToServiceDefinitionBasic(*credentials.Basic)
+
+		return &model.Credentials{
+			Basic: &basic,
+		}
+	}
+
+	if credentials.CertificateGen != nil {
+		certificate := serviceDetailsToServiceDefinitionCertficate(*credentials.CertificateGen)
+
+		return &model.Credentials{
+			CertificateGen: &certificate,
+		}
+	}
+
+	return nil
+}
+
+func serviceDetailsCredentialsToServiceDefinitionCredentialsWithCSRF(credentials *CredentialsWithCSRF) *model.CredentialsWithCSRF {
 
 	csrfInfoToModel := func(api *CSRFInfo) *model.CSRFInfo {
 		if api == nil {
@@ -303,11 +342,7 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 	if credentials.OauthWithCSRF != nil {
 		return &model.CredentialsWithCSRF{
 			Oauth: &model.OauthWithCSRF{
-				Oauth: model.Oauth{
-					ClientID:     credentials.OauthWithCSRF.ClientID,
-					ClientSecret: credentials.OauthWithCSRF.ClientSecret,
-					URL:          credentials.OauthWithCSRF.URL,
-				},
+				Oauth:    serviceDetailsOauthToServiceDefinitionOauth(credentials.OauthWithCSRF.Oauth),
 				CSRFInfo: csrfInfoToModel(credentials.OauthWithCSRF.CSRFInfo),
 			},
 		}
@@ -316,10 +351,7 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 	if credentials.BasicWithCSRF != nil {
 		return &model.CredentialsWithCSRF{
 			Basic: &model.BasicWithCSRF{
-				Basic: model.Basic{
-					Username: credentials.BasicWithCSRF.Username,
-					Password: credentials.BasicWithCSRF.Password,
-				},
+				Basic:    serviceDetailsToServiceDefinitionBasic(credentials.BasicWithCSRF.BasicAuth),
 				CSRFInfo: csrfInfoToModel(credentials.BasicWithCSRF.CSRFInfo),
 			},
 		}
@@ -328,15 +360,34 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 	if credentials.CertificateGenWithCSRF != nil {
 		return &model.CredentialsWithCSRF{
 			CertificateGen: &model.CertificateGenWithCSRF{
-				CertificateGen: model.CertificateGen{
-					CommonName: credentials.CertificateGenWithCSRF.CommonName,
-				},
-				CSRFInfo: csrfInfoToModel(credentials.CertificateGenWithCSRF.CSRFInfo),
+				CertificateGen: serviceDetailsToServiceDefinitionCertficate(credentials.CertificateGenWithCSRF.CertificateGen),
+				CSRFInfo:       csrfInfoToModel(credentials.CertificateGenWithCSRF.CSRFInfo),
 			},
 		}
 	}
 
 	return nil
+}
+
+func serviceDetailsOauthToServiceDefinitionOauth(oauth Oauth) model.Oauth {
+	return model.Oauth{
+		ClientID:     oauth.ClientID,
+		ClientSecret: oauth.ClientSecret,
+		URL:          oauth.URL,
+	}
+}
+
+func serviceDetailsToServiceDefinitionBasic(basic BasicAuth) model.Basic {
+	return model.Basic{
+		Username: basic.Username,
+		Password: basic.Password,
+	}
+}
+
+func serviceDetailsToServiceDefinitionCertficate(certificate CertificateGen) model.CertificateGen {
+	return model.CertificateGen{
+		CommonName: certificate.CommonName,
+	}
 }
 
 func (api API) MarshalJSON() ([]byte, error) {
