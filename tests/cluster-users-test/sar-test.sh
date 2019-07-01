@@ -65,7 +65,7 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to delete ClusterRole in ${NAMESPACE}"
 	testPermissions "delete" "clusterrole" "${NAMESPACE}" "no"
 
-	echo "--> ${DEVELOPER_EMAIL} should be able to list Deployments in production"
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to list Deployments in production"
 	testPermissions "list" "deployment" "production" "no"
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create Services in production"
