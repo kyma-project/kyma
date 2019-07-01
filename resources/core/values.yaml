@@ -52,7 +52,7 @@ global:
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
-  test_apiserver_proxy:
+  apiserver_proxy_integration_tests:
     dir: develop/
     version: 0cca016f
   test_namespace_controller:

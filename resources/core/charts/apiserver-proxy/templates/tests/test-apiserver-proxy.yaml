@@ -25,7 +25,7 @@ spec:
       shareProcessNamespace: true
       containers:
       - name: test-{{ .Release.Name }}-apiserver-proxy
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_apiserver_proxy.dir }}apiserver-proxy-test:{{ .Values.global.test_apiserver_proxy.version }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy_integration_tests.dir }}apiserver-proxy-test:{{ .Values.global.apiserver_proxy_integration_tests.version }}
         imagePullPolicy: Always
         command: ["/bin/bash"]
         args: ["-c", "sleep 10; ./test.sh; exit_code=$?; pkill -INT pilot-agent; exit $exit_code;"]
