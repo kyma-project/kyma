@@ -56,7 +56,7 @@ func (sm *statusManager) InstallDone(url, kymaVersion string) error {
 func (sm *statusManager) UninstallDone() error {
 	return sm.updateFunc(func(status *installationv1alpha1.InstallationStatus) {
 		status.State = installationv1alpha1.StateUninstalled
-		status.Description = "Kyma uninstalled"
+		status.Description = "Selected Kyma components uninstalled"
 	})
 }
 
