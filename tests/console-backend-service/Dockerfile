@@ -49,7 +49,7 @@ COPY ./run-compiled-tests.sh /app/tests/
 
 RUN mkdir -p /app/tests
 COPY --from=builder ${TESTS_DIR} /app/tests/
-COPY --from=builder ${TEST_DIR}/../../licenses/ /app/licenses/
+COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/console-backend-service/licenses/ /app/licenses/
 
 #
 # Run tests
