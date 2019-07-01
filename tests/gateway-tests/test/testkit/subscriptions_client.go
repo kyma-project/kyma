@@ -50,8 +50,6 @@ func (sc *client) Create(namespace, application, eventType string) error {
 		SubscriptionSpec: v1alpha1.SubscriptionSpec{
 			Endpoint:                      "https://some.test.endpoint",
 			IncludeSubscriptionNameHeader: true,
-			MaxInflight:                   400,
-			PushRequestTimeoutMS:          2000,
 			EventType:                     eventType,
 			EventTypeVersion:              "v1",
 			SourceID:                      application,
