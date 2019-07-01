@@ -214,7 +214,7 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 		}
 
 		resource := fixNamespace(name, labels)
-		expected := gqlschema.NamespaceCreationOutput{
+		expected := gqlschema.NamespaceMutationOutput{
 			Name:   name,
 			Labels: labels,
 		}

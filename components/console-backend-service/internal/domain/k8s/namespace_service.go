@@ -3,14 +3,14 @@ package k8s
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"github.com/pkg/errors"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -76,7 +76,7 @@ func (svc *namespaceService) Create(name string, labels gqlschema.Labels) (*v1.N
 }
 
 func (svc *namespaceService) Update(name string, labels gqlschema.Labels) (*v1.Namespace, error) {
-	maxUpdateRetries  := 5
+	maxUpdateRetries := 5
 	var lastErr error
 	for i := 0; i < maxUpdateRetries; i++ {
 		namespace, err := svc.Find(name)
