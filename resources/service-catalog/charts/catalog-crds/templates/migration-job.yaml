@@ -34,6 +34,9 @@ rules:
   - apiGroups: [""]
     resources: ["secrets"]
     verbs:     ["get", "update"]
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources: ["validatingwebhookconfigurations"]
+    verbs:     ["create", "delete"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources:
     - "clusterserviceclasses"
