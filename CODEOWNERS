@@ -310,7 +310,6 @@
 /tests/api-controller-acceptance-tests/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # apiserver-proxy tests
-/tests/apiserver-proxy-tests/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 /tests/integration/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Console Backend Service tests
