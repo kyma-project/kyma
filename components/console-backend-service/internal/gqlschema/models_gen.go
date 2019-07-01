@@ -340,7 +340,7 @@ type MicroFrontend struct {
 	NavigationNodes []NavigationNode `json:"navigationNodes"`
 }
 
-type NamespaceCreationOutput struct {
+type NamespaceMutationOutput struct {
 	Name   string `json:"name"`
 	Labels Labels `json:"labels"`
 }
