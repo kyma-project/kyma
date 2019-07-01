@@ -17,7 +17,8 @@ data:
     echo "*** Pre upgrade job starts ***"
     kubectl delete crd \
       subscriptions.eventing.knative.dev \
-      clusterchannelprovisioners.eventing.knative.dev
+      clusterchannelprovisioners.eventing.knative.dev \
+      channels.eventing.knative.dev
     echo "*** Pre upgrade job executed ***"
 kind: ConfigMap
 metadata:
