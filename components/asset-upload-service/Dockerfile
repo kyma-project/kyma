@@ -11,13 +11,14 @@ COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./internal/ ${BASE_APP_DIR}/internal/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
 COPY ./main.go ${BASE_APP_DIR}/
+COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 #
 # Build app
 #
 
 RUN go build -v -o main .
-RUN mkdir /app && mv ./main /app/main
+RUN mkdir /app && mv ./main /app/main && mv ${BASE_APP_DIR}/licenses /app/licenses
 
 FROM alpine:3.8
 LABEL source = git@github.com:kyma-project/kyma.git

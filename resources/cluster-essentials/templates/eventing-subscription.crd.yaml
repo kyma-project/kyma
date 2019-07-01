@@ -18,6 +18,10 @@ spec:
     openAPIV3Schema:
       properties:
         spec:
+          required:
+            - event_type
+            - event_type_version
+            - source_id
           properties:
             endpoint:
               type: string

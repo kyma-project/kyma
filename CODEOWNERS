@@ -24,7 +24,7 @@
 # The `pod-preset` subchart
 /resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# The Microfrontend CRDs 
+# The Microfrontend CRDs
 /resources/cluster-essentials/templates/microfrontend.crd.yaml @kwiatekus @dariadomagala @y-kkamil @akucharska @sjanota @parostatkiem
 /resources/cluster-essentials/templates/clustermicrofrontend.crd.yaml @kwiatekus @dariadomagala @y-kkamil @akucharska @sjanota @parostatkiem
 
@@ -196,6 +196,9 @@
 # The `ory` chart
 /resources/ory/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# The `compass` chart
+/resources/compass/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol
+
 # Components
 #API server proxy Component
 /components/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -220,6 +223,9 @@
 
 # Installer Component
 /components/installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @Demonsthere
+
+# Kyma Operator Component
+/components/kyma-operator/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
 
 # IAM Kubeconfig Service Component
 /components/iam-kubeconfig-service/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -305,6 +311,7 @@
 
 # apiserver-proxy tests
 /tests/apiserver-proxy-tests/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+/tests/integration/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Console Backend Service tests
 /tests/console-backend-service/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
