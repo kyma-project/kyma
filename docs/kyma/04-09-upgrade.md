@@ -14,6 +14,10 @@ For example, if you're running Kyma 1.0 and you want to upgrade to version 1.3, 
 
 >**NOTE:** Kyma does not support a dedicated downgrade procedure. You can achieve a similar result by restoring your cluster from a backup. Read [this](/components/backup/#overview-overview) document to learn more about backups.
 
+The upgrade procedure relies heavily on Helm. As a result, the availability of cluster services during the upgrade is not defined by Kyma and can vary from version to version. The existing Custom Resources (CRs) remain in the cluster.
+
+>**NOTE:** For more technical details regarding the upgrade, read [this](link) document.
+
 ## Upgrade your deployment to a newer version
 
 Follow these steps:
@@ -49,6 +53,8 @@ Follow these steps:
       <summary>
       Cluster deployment
       </summary>
+
+      >**NOTE:** Before you upgrade a cluster deployment, check if the overrides changed names in the version you're upgrading to.
 
       Download the `kyma-installer-cluster.yaml` artifact and apply it to the cluster to upgrade Kyma. Run:
 
