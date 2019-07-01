@@ -10,9 +10,11 @@ ci-release: resolve build-and-test build-image push-image
 
 resolve:
 	dep ensure -v -vendor-only
+pull-licenses:
+	sh $(LICENSE_PULLER_PATH)
 build-and-test:
 	./before-commit.sh ci
-build-image:
+build-image: pull-licenses
 	docker build -t $(IMG_NAME) .
 push-image:
 	docker tag $(IMG_NAME) $(IMG):$(TAG)
