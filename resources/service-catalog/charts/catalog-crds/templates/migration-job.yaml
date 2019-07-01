@@ -127,6 +127,10 @@ spec:
           - {{ .Release.Namespace }}
           - --controller-manager-deployment
           - {{ template "fullname" . }}-controller-manager
+          - --webhook-service-name
+          - {{ template "fullname" . }}-webhook
+          - --webhook-service-port
+          - "{{ .Values.webhook.service.port }}"
           - --storage-path=data/
           volumeMounts:
           - name: storage
