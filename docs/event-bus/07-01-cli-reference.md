@@ -40,8 +40,6 @@ The following examples show how to create new Subscriptions, list them, and obta
      namespace: stage
    spec:
      endpoint: http://testjs.default:8080/
-     push_request_timeout_ms: 2000
-     max_inflight: 400
      include_subscription_name_header: true
      event_type: order_created
      event_type_version: v1

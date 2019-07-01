@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Helm chart for Compass Gateway
+name: gateway
+version: 0.1.0

@@ -20,24 +20,24 @@ global:
     gateway:
       name: kyma-gateway
   acceptance_tests:
-    dir: develop/
-    version: "cb16ab4c"
+    dir: pr/
+    version: "PR-4615"
   ui_acceptance_tests:
     dir:
-    version: "c69dbf49"
+    version: "a68ac924"
   api_controller:
     dir: develop/
     version: "b8c31ef4"
   api_controller_acceptance_tests:
-    dir: develop/
-    version: "07378445"
+    dir: pr/
+    version: "PR-4656"
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
     version: "962ad9b6"
-  configurations_generator:
+  iam_kubeconfig_service:
     dir: develop/
-    version: aabedc33
+    version: 2a1a064b
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
@@ -52,7 +52,7 @@ global:
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
-  test_apiserver_proxy:
+  apiserver_proxy_integration_tests:
     dir: develop/
     version: 0cca016f
   test_namespace_controller:
@@ -60,10 +60,10 @@ global:
     version: 6b4c356f
   console_backend_service:
     dir: pr/
-    version: PR-4554
+    version: PR-4386
   console_backend_service_test:
     dir: pr/
-    version: 'PR-4581'
+    version: PR-4386
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8

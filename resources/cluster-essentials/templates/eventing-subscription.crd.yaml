@@ -18,6 +18,10 @@ spec:
     openAPIV3Schema:
       properties:
         spec:
+          required:
+            - event_type
+            - event_type_version
+            - source_id
           properties:
             endpoint:
               type: string
@@ -25,14 +29,6 @@ spec:
               maxLength: 512
             include_subscription_name_header:
               type: boolean
-            max_inflight:
-              type: integer
-              minimum: 1
-              maximum: 400
-            push_request_timeout_ms:
-              type: integer
-              minimum: 0 # 0 means apply default value, which is 1000ms
-              maximum: 60000
             event_type:
               type: string
               minLength: 1

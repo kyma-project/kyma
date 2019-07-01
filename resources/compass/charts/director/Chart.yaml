@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Helm chart for Compass Director
+name: director
+version: 0.1.0

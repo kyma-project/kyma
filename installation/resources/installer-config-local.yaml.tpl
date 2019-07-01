@@ -143,7 +143,7 @@ data:
   test.acceptance.ui.logging.enabled: ""
   test.acceptance.cbs.minikubeIP: ""
   apiserver-proxy.minikubeIP: ""
-  configurations-generator.minikubeIP: ""
+  iam-kubeconfig-service.minikubeIP: ""
   console-backend-service.minikubeIP: ""
 ---
 apiVersion: v1
@@ -170,3 +170,4 @@ metadata:
     kyma-project.io/installation: ""
 data:
   global.logging.promtail.config.name: ""
+

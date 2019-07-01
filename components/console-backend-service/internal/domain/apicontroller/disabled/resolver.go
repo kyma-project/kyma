@@ -15,9 +15,54 @@ func NewResolver(err error) *Resolver {
 	return &Resolver{err: err}
 }
 
+// APIQuery provides a failing mock function with given fields: ctx, name, namespace
+func (_m *Resolver) APIQuery(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
+	var r0 *gqlschema.API
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // APIsQuery provides a failing mock function with given fields: ctx, namespace, serviceName, hostname
 func (_m *Resolver) APIsQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
 	var r0 []gqlschema.API
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// APIEventSubscription provides a failing mock function with given fields: ctx, namespace, serviceName
+func (_m *Resolver) APIEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error) {
+	var r0 <-chan gqlschema.ApiEvent
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// CreateAPI provides a failing mock function with given fields: ctx, name, namespace, params
+func (_m *Resolver) CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
+	var r0 gqlschema.API
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// DeleteAPI provides a failing mock function with given fields: ctx, name, namespace
+func (_m *Resolver) DeleteAPI(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
+	var r0 *gqlschema.API
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// UpdateAPI provides a failing mock function with given fields: ctx, name, namespace, params
+func (_m *Resolver) UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
+	var r0 gqlschema.API
 	var r1 error
 	r1 = _m.err
 

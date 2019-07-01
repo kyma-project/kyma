@@ -1,0 +1,8 @@
+deployment:
+  image:
+    pullPolicy: IfNotPresent
+  args:
+    containerPort: &port 3000
+
+service:
+  healthcheckerPort: *port
