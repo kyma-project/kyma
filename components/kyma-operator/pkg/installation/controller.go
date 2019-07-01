@@ -20,11 +20,11 @@ import (
 	"k8s.io/client-go/util/retry"
 	"k8s.io/client-go/util/workqueue"
 
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/kyma-operator/v1alpha1"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	internalClientset "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
 	internalscheme "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned/scheme"
 	informers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/informers/externalversions"
-	listers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/listers/kyma-operator/v1alpha1"
+	listers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/listers/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/conditionmanager"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/finalizer"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/kyma-operator/v1alpha1"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/overrides"
 	rls "k8s.io/helm/pkg/proto/hapi/release"

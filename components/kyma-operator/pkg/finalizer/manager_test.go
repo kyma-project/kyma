@@ -3,7 +3,7 @@ package finalizer
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/kyma-operator/v1alpha1"
+	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	. "github.com/smartystreets/goconvey/convey"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )

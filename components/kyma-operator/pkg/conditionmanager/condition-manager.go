@@ -1,9 +1,9 @@
 package conditionmanager
 
 import (
-	installationv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/kyma-operator/v1alpha1"
+	installationv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	installationClientset "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
-	listers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/listers/kyma-operator/v1alpha1"
+	listers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/listers/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/consts"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
