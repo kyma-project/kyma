@@ -31,9 +31,11 @@ type: {Document type}
 
 - The `title` metadata defines the title of your document. If you want the title or its part to render inside quotation marks, place it between additional, single quotation marks or use a backslash (**/**) before the quoted word. See the following examples:
 
-  ✅ `title: '"Transport is closing" error'`<br>
-  ✅ `title: \"Transport is closing" error`<br>
-  ⛔️ `title: "Transport is closing" error`<br>
+  ✅ `title: '"Transport is closing" error'`
+
+  ✅ `title: \"Transport is closing" error`
+
+  ⛔️ `title: "Transport is closing" error`
 
 - The `type` metadata groups single documents together. Multiple documents that use the same `type` generate a grouping. For example, if you have multiple tutorials, you can group them under a navigation node called **Tutorials**.
 
