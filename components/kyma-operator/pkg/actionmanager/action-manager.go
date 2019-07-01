@@ -4,7 +4,7 @@ import (
 	"log"
 
 	clientset "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
-	listers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/listers/kyma-operator/v1alpha1"
+	listers "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/listers/installer/v1alpha1"
 	"k8s.io/client-go/util/retry"
 )
 
