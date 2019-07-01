@@ -2,6 +2,7 @@ package accessservice
 
 import (
 	"errors"
+	"k8s.io/apimachinery/pkg/types"
 	"testing"
 
 	"fmt"
@@ -21,6 +22,10 @@ var config = AccessServiceManagerConfig{
 	TargetPort: 8081,
 }
 
+const (
+	applicationUID = types.UID("appUID")
+)
+
 func TestAccessServiceManager_Create(t *testing.T) {
 
 	t.Run("should create new access service", func(t *testing.T) {
@@ -32,7 +37,7 @@ func TestAccessServiceManager_Create(t *testing.T) {
 		manager := NewAccessServiceManager(serviceInterface, config)
 
 		// when
-		err := manager.Create("ec-default", "uuid-1", "service-uuid1")
+		err := manager.Create("ec-default", "appUID", "uuid-1", "service-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -48,7 +53,7 @@ func TestAccessServiceManager_Create(t *testing.T) {
 		manager := NewAccessServiceManager(serviceInterface, config)
 
 		// when
-		err := manager.Create("ec-default", "uuid-1", "service-uuid1")
+		err := manager.Create("ec-default", "appUID", "uuid-1", "service-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -70,7 +75,7 @@ func TestAccessServiceManager_Upsert(t *testing.T) {
 		manager := NewAccessServiceManager(serviceInterface, config)
 
 		// when
-		err := manager.Upsert("ec-default", "uuid-1", "service-uuid1")
+		err := manager.Upsert("ec-default", "appUID", "uuid-1", "service-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -86,7 +91,7 @@ func TestAccessServiceManager_Upsert(t *testing.T) {
 		manager := NewAccessServiceManager(serviceInterface, config)
 
 		// when
-		err := manager.Upsert("ec-default", "uuid-1", "service-uuid1")
+		err := manager.Upsert("ec-default", "appUID", "uuid-1", "service-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -102,7 +107,7 @@ func TestAccessServiceManager_Upsert(t *testing.T) {
 		manager := NewAccessServiceManager(serviceInterface, config)
 
 		// when
-		err := manager.Upsert("ec-default", "uuid-1", "service-uuid1")
+		err := manager.Upsert("ec-default", "appUID", "uuid-1", "service-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -175,6 +180,14 @@ func mockService(application, serviceId, serviceName string, targetPort int32) *
 			Labels: map[string]string{
 				k8sconsts.LabelApplication: application,
 				k8sconsts.LabelServiceId:   serviceId,
+			},
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+					Kind: "Application",
+					Name: application,
+					UID: applicationUID,
+				},
 			},
 		},
 		Spec: corev1.ServiceSpec{
