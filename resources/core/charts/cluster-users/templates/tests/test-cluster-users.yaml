@@ -17,6 +17,16 @@ spec:
       containers:
         - name: test-cluster-users
           image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.cluster_users_test.dir }}cluster-users-test:{{ .Values.global.cluster_users_test.version }}
+          command: 
+            - /bin/bash
+            - -c
+            - |
+              sleep 10 
+              ./sar-test.sh 
+              exit_code=$?
+              pkill -TERM pilot-agent
+              sleep 5
+              exit $exit_code
           env:
           - name: ADMIN_EMAIL
             valueFrom:
@@ -51,7 +61,7 @@ spec:
           - name: NAMESPACE
             value: {{ .Values.namespace }}
           - name: IAM_KUBECONFIG_SVC_FQDN
-            value: "http://configurations-generator.{{ .Values.global.ingress.domainName }}"
+            value: "https://configurations-generator.{{ .Values.global.ingress.domainName }}"
       restartPolicy: Never
 ---
 apiVersion: v1
