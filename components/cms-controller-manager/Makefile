@@ -10,7 +10,7 @@ resolve:
 	dep ensure -v -vendor-only
 
 pull-licenses:
-	sh $(LICENSE_PULLER_PATH)
+	bash $(LICENSE_PULLER_PATH)
 
 setup:
 	go get github.com/vektra/mockery/.../

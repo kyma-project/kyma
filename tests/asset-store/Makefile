@@ -11,7 +11,7 @@ ci-release: resolve build-and-test build-image push-image
 resolve:
 	dep ensure -v -vendor-only
 pull-licenses:
-	sh $(LICENSE_PULLER_PATH)
+	bash $(LICENSE_PULLER_PATH)
 build-and-test:
 	./before-commit.sh ci
 build-image: pull-licenses
