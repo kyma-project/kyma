@@ -56,5 +56,5 @@ kci logs test-ec-default-acceptance
 === RUN   TestApiMetadata
 --- PASS: TestApiMetadata (0.00s)
 PASS
-ok  	github.com/kyma-project/gateway-tests/test	0.003s
+ok  	github.com/kyma-project/gateway/test	0.003s
 ```
