@@ -4,7 +4,7 @@ package versioned
 
 import (
 	glog "github.com/golang/glog"
-	installerv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned/typed/kyma-operator/v1alpha1"
+	installerv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned/typed/installer/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

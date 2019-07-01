@@ -8,8 +8,8 @@ import (
 	time "time"
 
 	versioned "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
+	installer "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/informers/externalversions/installer"
 	internalinterfaces "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/informers/externalversions/internalinterfaces"
-	kymaoperator "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/informers/externalversions/kyma-operator"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -107,9 +107,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Installer() kymaoperator.Interface
+	Installer() installer.Interface
 }
 
-func (f *sharedInformerFactory) Installer() kymaoperator.Interface {
-	return kymaoperator.New(f, f.namespace, f.tweakListOptions)
+func (f *sharedInformerFactory) Installer() installer.Interface {
+	return installer.New(f, f.namespace, f.tweakListOptions)
 }

@@ -4,8 +4,8 @@ package fake
 
 import (
 	clientset "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
-	installerv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned/typed/kyma-operator/v1alpha1"
-	fakeinstallerv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned/typed/kyma-operator/v1alpha1/fake"
+	installerv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned/typed/installer/v1alpha1"
+	fakeinstallerv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned/typed/installer/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
