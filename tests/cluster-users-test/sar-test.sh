@@ -56,7 +56,7 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should be able to delete secret in ${NAMESPACE}"
 	testPermissions "delete" "secret" "${NAMESPACE}" "yes"
 
-	echo "--> ${DEVELOPER_EMAIL} should be able to edit configmap in ${NAMESPACE}"
+	echo "--> ${DEVELOPER_EMAIL} should be able to patch configmap in ${NAMESPACE}"
 	testPermissions "patch" "configmap" "${NAMESPACE}" "yes"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to get specific CRD in ${NAMESPACE}"
@@ -98,7 +98,7 @@ function runTests() {
 	echo "--> ${VIEW_EMAIL} should NOT be able to create Namespace"
 	testPermissions "create" "ns" "${NAMESPACE}" "no"
 
-	echo "--> ${VIEW_EMAIL} should NOT be able to edit pod"
+	echo "--> ${VIEW_EMAIL} should NOT be able to patch pod"
 	testPermissions "patch" "pod" "${NAMESPACE}" "no"
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to create secret"
