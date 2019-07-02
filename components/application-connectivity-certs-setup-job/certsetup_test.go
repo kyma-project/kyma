@@ -91,7 +91,7 @@ func TestCertSetupHandler_SetupApplicationConnectorCertificate(t *testing.T) {
 			caCertificateSecret:        caSecretNamespacedName,
 			caCertificate:              "",
 			caKey:                      "",
-			generatedValidityTime:      validityTime,
+			generatedValidityTime: validityTime,
 		}
 
 		certSetupHandler := NewCertificateSetupHandler(options, secretRepository)
