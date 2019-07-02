@@ -73,6 +73,16 @@ func CheckK8sCertificateGenSecret(t *testing.T, secret *v1core.Secret, name stri
 	checkLabels(t, labels, secret.Labels)
 }
 
+func CheckK8sParamsSecret(t *testing.T, secret *v1core.Secret, name string, labels Labels, headerKey, headerValue, queryParameterKey, queryParameterValue string) {
+	require.Equal(t, name, secret.Name)
+
+	secretData := secret.Data
+	require.Equal(t, headerValue, string(secretData[headerKey]))
+	require.Equal(t, queryParameterValue, string(secretData[queryParameterKey]))
+
+	checkLabels(t, labels, secret.Labels)
+}
+
 func CheckK8sIstioDenier(t *testing.T, denier *istio.Denier, name string, labels Labels, code int, message string) {
 	require.Equal(t, name, denier.Name)
 

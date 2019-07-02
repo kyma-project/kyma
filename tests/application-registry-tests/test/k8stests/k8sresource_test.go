@@ -1,6 +1,7 @@
 package k8stests
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/stretchr/testify/require"
@@ -15,7 +16,7 @@ import (
 )
 
 const (
-	crPropagationWaitTime = 10
+	crPropagationWaitTime              = 10
 	deleteApplicationResourcesWaitTime = 10
 )
 
@@ -49,6 +50,14 @@ func TestK8sResources(t *testing.T) {
 						CSRFInfo:     csrf,
 					},
 				},
+				RequestParameters: &testkit.RequestParameters{
+					Headers: &map[string][]string{
+						"headerKey": []string{"headerValue"},
+					},
+					QueryParameters: &map[string][]string{
+						"queryParameterKey": []string{"queryParameterValue"},
+					},
+				},
 				Spec: testkit.ApiRawSpec,
 			},
 		}
@@ -59,6 +68,7 @@ func TestK8sResources(t *testing.T) {
 
 		serviceId := postResponseData.ID
 		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		paramsSecretName := fmt.Sprintf("params-%s", resourceName)
 
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
@@ -77,6 +87,13 @@ func TestK8sResources(t *testing.T) {
 			require.NoError(t, err)
 
 			testkit.CheckK8sOAuthSecret(t, k8sSecret, resourceName, expectedLabels, "clientId", "clientSecret")
+		})
+
+		t.Run("should create k8s secret with request parameters", func(t *testing.T) {
+			k8sSecret, err := k8sResourcesClient.GetSecret(paramsSecretName, v1.GetOptions{})
+			require.NoError(t, err)
+
+			testkit.CheckK8sParamsSecret(t, k8sSecret, paramsSecretName, expectedLabels, "headerKey", "headerValue", "queryParameterKey", "queryParameterValue")
 		})
 
 		t.Run("should create istio denier", func(t *testing.T) {
@@ -156,6 +173,14 @@ func TestK8sResources(t *testing.T) {
 						CSRFInfo: csrf,
 					},
 				},
+				RequestParameters: &testkit.RequestParameters{
+					Headers: &map[string][]string{
+						"headerKey": []string{"headerValue"},
+					},
+					QueryParameters: &map[string][]string{
+						"queryParameterKey": []string{"queryParameterValue"},
+					},
+				},
 				Spec: testkit.ApiRawSpec,
 			},
 		}
@@ -166,6 +191,7 @@ func TestK8sResources(t *testing.T) {
 
 		serviceId := postResponseData.ID
 		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		paramsSecretName := fmt.Sprintf("params-%s", resourceName)
 
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
@@ -184,6 +210,13 @@ func TestK8sResources(t *testing.T) {
 			require.NoError(t, err)
 
 			testkit.CheckK8sBasicAuthSecret(t, k8sSecret, resourceName, expectedLabels, "username", "password")
+		})
+
+		t.Run("should create k8s secret with request parameters", func(t *testing.T) {
+			k8sSecret, err := k8sResourcesClient.GetSecret(paramsSecretName, v1.GetOptions{})
+			require.NoError(t, err)
+
+			testkit.CheckK8sParamsSecret(t, k8sSecret, paramsSecretName, expectedLabels, "headerKey", "headerValue", "queryParameterKey", "queryParameterValue")
 		})
 
 		t.Run("should create istio denier", func(t *testing.T) {
@@ -262,6 +295,14 @@ func TestK8sResources(t *testing.T) {
 						CSRFInfo:   csrf,
 					},
 				},
+				RequestParameters: &testkit.RequestParameters{
+					Headers: &map[string][]string{
+						"headerKey": []string{"headerValue"},
+					},
+					QueryParameters: &map[string][]string{
+						"queryParameterKey": []string{"queryParameterValue"},
+					},
+				},
 				Spec: testkit.ApiRawSpec,
 			},
 		}
@@ -272,6 +313,7 @@ func TestK8sResources(t *testing.T) {
 
 		serviceId := postResponseData.ID
 		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		paramsSecretName := fmt.Sprintf("params-%s", resourceName)
 
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
@@ -290,6 +332,13 @@ func TestK8sResources(t *testing.T) {
 			require.NoError(t, err)
 
 			testkit.CheckK8sCertificateGenSecret(t, k8sSecret, resourceName, expectedLabels, "commonName")
+		})
+
+		t.Run("should create k8s secret with request parameters", func(t *testing.T) {
+			k8sSecret, err := k8sResourcesClient.GetSecret(paramsSecretName, v1.GetOptions{})
+			require.NoError(t, err)
+
+			testkit.CheckK8sParamsSecret(t, k8sSecret, paramsSecretName, expectedLabels, "headerKey", "headerValue", "queryParameterKey", "queryParameterValue")
 		})
 
 		t.Run("should create istio denier", func(t *testing.T) {
@@ -1157,6 +1206,14 @@ func TestK8sResources(t *testing.T) {
 						ClientSecret: "clientSecret",
 					},
 				},
+				RequestParameters: &testkit.RequestParameters{
+					Headers: &map[string][]string{
+						"headerKey": []string{"headerValue"},
+					},
+					QueryParameters: &map[string][]string{
+						"queryParameterKey": []string{"queryParameterValue"},
+					},
+				},
 				Spec: testkit.ApiRawSpec,
 			},
 			Events: &testkit.Events{
@@ -1170,6 +1227,7 @@ func TestK8sResources(t *testing.T) {
 
 		serviceId := postResponseData.ID
 		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		paramsSecretName := fmt.Sprintf("params-%s", resourceName)
 
 		//when
 		err = k8sResourcesClient.DeleteApplication(dummyApp.Name, &v1.DeleteOptions{})
@@ -1186,6 +1244,12 @@ func TestK8sResources(t *testing.T) {
 
 		t.Run("should remove k8s secret with client credentials", func(t *testing.T) {
 			_, err := k8sResourcesClient.GetSecret(resourceName, v1.GetOptions{})
+			require.Error(t, err)
+			require.True(t, k8serrors.IsNotFound(err))
+		})
+
+		t.Run("should remove k8s secret with request parameters", func(t *testing.T) {
+			_, err := k8sResourcesClient.GetSecret(paramsSecretName, v1.GetOptions{})
 			require.Error(t, err)
 			require.True(t, k8serrors.IsNotFound(err))
 		})
