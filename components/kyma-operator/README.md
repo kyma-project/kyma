@@ -62,7 +62,9 @@ Execute the `run.sh` script with the `--skip-minikube-start` flag to rerun Kyma 
 
 The upgrade procedure relies heavily on Helm. When you trigger the upgrade, Helm performs `helm upgrade` on Helm releases that exist in the cluster and are defined in the Kyma version you're upgrading to. If a Helm release is defined in the Kyma version you're upgrading to but is not present in the cluster when you trigger the upgrade, Helm performs `helm install` and installs such a release.
 
-When you trigger Kyma upgrade, the Operator lists the Helm releases installed in your current Kyma version. This list is compared against the list of Helm releases of the Kyma version you're upgrading to. The releases are mathed by their names. The releases that match between versions are upgraded through `helm upgrade`. Releases that don't match are treated as new and installed through `helm install`.
+When you trigger Kyma upgrade, the Kyma Operator lists the Helm releases installed in your current Kyma version. This list is compared against the list of Helm releases of the Kyma version you're upgrading to. The releases are matched by their names. The releases that match between versions are upgraded through `helm upgrade`. Releases that don't match are treated as new and installed through `helm install`.
+
+>**NOTE:** If you changed the name of a Helm release for a component, remove it before upgrading Kyma to prevent a situation where two Helm releases of the same component exist in the cluster.
 
 The Operator doesn't support rollbacks.
 
