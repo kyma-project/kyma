@@ -33,6 +33,7 @@ status:
   observedGeneration: 1
   repositories:
     - url: https://github.com/kyma-project/bundles/releases/download/0.6.0/index.yaml
+      status: Ready
       addons:
         - name: gcp-service-broker
           version: 0.0.2
@@ -48,6 +49,7 @@ status:
           version: 0.0.1
           status: Ready
     - url: https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml
+      status: Ready
       addons:
         - name: testing
           version: 0.0.1

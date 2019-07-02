@@ -19,3 +19,10 @@ Rules:
 
 
 > **NOTE:** If AddonsConfigurations/ClusterAddonsConfiguration is marked as `Failed` then all its addons are not available in Service Catalog.
+
+
+-- 
+
+TODO:
+
+- maybe add links to example status entries (with conflicts details)
