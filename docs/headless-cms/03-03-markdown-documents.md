@@ -33,7 +33,7 @@ type: {Document type}
 
   ✅ `title: '"Transport is closing" error'`
 
-  ✅ `title: \"Transport is closing" error`
+  ✅ `title: "\"Transport is closing\" error"`
 
   ⛔️ `title: "Transport is closing" error`
 
