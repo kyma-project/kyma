@@ -5,7 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 
-	"github.com/patrickmn/go-cache"
+	cache "github.com/patrickmn/go-cache"
 )
 
 //Cache for CSRF data items
