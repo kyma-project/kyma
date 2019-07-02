@@ -3,7 +3,7 @@ title: Upgrade Kyma
 type: Installation
 ---
 
-Upgrading Kyma is the process of migrating from one version of the software to a newer release. This operation depends on [release artifacts](https://github.com/kyma-project/kyma/releases) listed in the "assets" section of the GitHub releases page and migration guides delivered with the target release.
+Upgrading Kyma is the process of migrating from one version of the software to a newer release. This operation depends on [release artifacts](https://github.com/kyma-project/kyma/releases) listed in the **Assets** section of the GitHub releases page and migration guides delivered with the target release.
 
 To upgrade to a version that is several releases newer than the version you're currently using, you must move up to the desired release incrementally. You can skip patch releases.
 
@@ -18,7 +18,7 @@ The upgrade procedure relies heavily on Helm. As a result, the availability of c
 
 >**NOTE:** To learn more about the technical aspects of the upgrade, read [this](https://github.com/kyma-project/kyma/blob/master/components/kyma-operator/README.md) document.
 
-## Upgrade your deployment to a newer version
+## Upgrade Kyma to a newer version
 
 Follow these steps:
 
@@ -73,7 +73,7 @@ Follow these steps:
       </summary>
 
       ```
-      ./is-installed.sh
+      ./installation/scripts/is-installed.sh
       ```
 
       </details>
