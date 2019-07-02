@@ -11,7 +11,7 @@ If you don't set a password for the **admin@kyma.cx** user with the `--password`
 kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
 ```
 
-## Installer doesn't respond as expected
+## Kyma Installer doesn't respond as expected
 
 If the Installer does not respond as expected, check the installation status using the `is-installed.sh` script with the `--verbose` flag added. Run:
 
