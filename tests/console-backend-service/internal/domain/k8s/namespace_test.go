@@ -164,7 +164,7 @@ func (s testNamespaceSuite) fixNamespaceObj() namespaceObj {
 func (s testNamespaceSuite) fixNamespaceObjAfterUpdate() namespaceObj {
 	return namespaceObj{
 		Name:   s.namespaceName,
-		Labels:   s.updatedLabels,
+		Labels: s.updatedLabels,
 	}
 }
 
