@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/gateway-tests/test/testkit"
+	"github.com/kyma-project/kyma/tests/gateway/test/testkit"
 	"github.com/stretchr/testify/require"
 )
 
