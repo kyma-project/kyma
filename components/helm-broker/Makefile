@@ -7,6 +7,20 @@ TAG = $(DOCKER_TAG)
 build:
 	./before-commit.sh ci
 
+.PHONY: generates
+# Generate CRD manifests, clients etc.
+generates: crd-manifests client
+
+.PHONY: crd-manifests
+# Generate CRD manifests
+crd-manifests:
+	go run vendor/sigs.k8s.io/controller-tools/cmd/controller-gen/main.go crd --domain kyma-project.io
+
+# Generate code
+.PHONY: client
+client:
+	./contrib/hack/update-codegen.sh
+
 .PHONY: build-image
 build-image:
 	cp broker deploy/broker/helm-broker

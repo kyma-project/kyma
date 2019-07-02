@@ -4,6 +4,7 @@ kind: TestDefinition
 metadata:
   name: test-api-controller-acceptance
 spec:
+  disableConcurrency: true
   template:
     metadata:
       annotations:

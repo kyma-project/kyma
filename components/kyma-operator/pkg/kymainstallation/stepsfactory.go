@@ -100,14 +100,14 @@ func newStepsFactory(helmClient kymahelm.ClientInterface) (*stepFactory, error) 
 
 	installedReleases := make(map[string]bool)
 
-	releasesRes, err := helmClient.ListReleases()
+	list, err := helmClient.ListReleases()
 	if err != nil {
 		return nil, errors.New("Helm error: " + err.Error())
 	}
 
-	if releasesRes != nil {
+	if list != nil {
 		log.Println("Helm releases list:")
-		for _, release := range releasesRes.Releases {
+		for _, release := range list.Releases {
 			statusCode := release.Info.Status.Code
 			log.Printf("%s status: %s", release.Name, statusCode)
 			if statusCode == rls.Status_DEPLOYED {

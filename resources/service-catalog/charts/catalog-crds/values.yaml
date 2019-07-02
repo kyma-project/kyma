@@ -24,6 +24,7 @@ webhook:
     enabled: true
   # Attributes of the webhook's service resource
   service:
+    port: 443
     # Type of service; valid values are "LoadBalancer", "NodePort" or "ClusterIP"
     # NodePort is useful if deploying on bare metal or hacking locally on
     # minikube

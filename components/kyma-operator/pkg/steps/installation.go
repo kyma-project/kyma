@@ -86,11 +86,11 @@ func (steps *InstallationSteps) UninstallKyma(installationData *config.Installat
 	err := steps.DeprovisionAzureResources(DefaultDeprovisionConfig(), installationData.Context)
 	steps.errorHandlers.LogError("An error during deprovisioning: ", err)
 
-	_ = steps.statusManager.InProgress("Verify installed components")
+	_ = steps.statusManager.InProgress("Verify components to uninstall")
 
 	stepsFactory, factoryErr := kymainstallation.NewUninstallStepFactory(steps.helmClient)
 	if factoryErr != nil {
-		_ = steps.statusManager.Error("Kyma Operator", "Verify installed components", factoryErr)
+		_ = steps.statusManager.Error("Kyma Operator", "Verify components to uninstall", factoryErr)
 		return factoryErr
 	}
 
