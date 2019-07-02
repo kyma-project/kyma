@@ -35,6 +35,9 @@ type RepositoryStatus string
 const (
 	// RepositoryStatusFailed means that there is some problem with the given repository
 	RepositoryStatusFailed AddonStatus = "Failed"
+
+	// RepositoryStatusFailed means that given repository is correct
+	RepositoryStatusReady AddonStatus = "Ready"
 )
 
 // SpecRepository define the addon repository
@@ -44,7 +47,10 @@ type SpecRepository struct {
 
 // CommonAddonsConfigurationSpec defines the desired state of (Cluster)AddonsConfiguration
 type CommonAddonsConfigurationSpec struct {
-	Repositories []SpecRepository `json:"repositories"`
+	// ReprocessRequest is strictly increasing, non-negative integer counter
+	// that can be incremented by a user to manually trigger the reprocessing action of given CR.
+	ReprocessRequest uint64           `json:"reprocessRequest,omitempty"`
+	Repositories     []SpecRepository `json:"repositories"`
 }
 
 // Addon holds information about single addon
