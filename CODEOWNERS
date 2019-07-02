@@ -266,6 +266,9 @@
 # Application Connectivity Validator Component
 /components/application-connectivity-validator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
+# Application Connectivity Certs Setup Job Component
+/components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
 # Event Bus Component
 /components/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 

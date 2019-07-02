@@ -61,8 +61,22 @@ global:
   application_broker:
     dir: develop/
     version: d999e831
+  application_connectivity_certs_setup_job:
+    dir: pr/
+    version: PR-4724
 connectivity_certs_controller:
   enabled: false
+
+application_connectivity_certs_setup_job:
+  secrets:
+    connectorCertificateSecret:
+      name: connector-service-app-ca
+      namespace: kyma-integration
+    caCertificateSecret:
+      name: application-connector-certs
+      namespace: istio-system
+  certificate:
+    validityTime: 92d
 
 tests:
   application_connector_tests:
