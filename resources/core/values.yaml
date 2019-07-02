@@ -54,7 +54,7 @@ global:
     version: a9bfa9fc
   apiserver_proxy_integration_tests:
     dir: develop/
-    version: 0cca016f
+    version: 8026b77c
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
