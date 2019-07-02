@@ -48,7 +48,7 @@ func parseArgs() *options {
 		caCertificateSecret:        parseNamespacedName(*caCertificateSecret),
 		caCertificate:              *caCertificate,
 		caKey:                      *caKey,
-		generatedValidityTime: validityTime,
+		generatedValidityTime:      validityTime,
 	}
 }
 
