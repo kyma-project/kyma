@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	namespaceEnv                                   = "NAMESPACE"
-	domainNameEnv                                  = "DOMAIN_NAME"
-	testIDLength                                   = 8
-	apiSecurityDisabled                APISecurity = false
-	apiSecurityEnabled                 APISecurity = true
+	namespaceEnv                    = "NAMESPACE"
+	domainNameEnv                   = "DOMAIN_NAME"
+	testIDLength                    = 8
+	apiSecurityDisabled APISecurity = false
+	apiSecurityEnabled  APISecurity = true
 )
 
 //APISecurity Enable/disable security in API
@@ -40,16 +40,17 @@ func setUpOrExit(k8sInterface kubernetes.Interface, namespace string, testID str
 
 	sampleAppDepl, deplErr := sampleAppCtrl.createDeployment()
 	if deplErr != nil {
-
 		if errors.IsAlreadyExists(deplErr) {
 			log.Debug("SampleApp deployment already exists.")
 			if sampleAppDepl2, getDeplErr := sampleAppCtrl.getDeployment(); getDeplErr != nil {
-				log.Fatalf("error getting existing SampleApp deployment. Root cause: %v", getDeplErr)
+				log.Errorf("error getting existing SampleApp deployment. Root cause: %v", getDeplErr)
+				panic(getDeplErr)
 			} else {
 				sampleAppDepl = sampleAppDepl2
 			}
 		} else {
-			log.Fatalf("error creating SampleApp deployment. Root cause: %v", deplErr)
+			log.Errorf("error creating SampleApp deployment. Root cause: %v", deplErr)
+			panic(deplErr)
 		}
 	}
 	sampleAppService, svcErr := sampleAppCtrl.createService(&sampleAppDepl.Spec.Template)
@@ -57,12 +58,14 @@ func setUpOrExit(k8sInterface kubernetes.Interface, namespace string, testID str
 		if errors.IsAlreadyExists(deplErr) {
 			log.Debug("SampleApp service already exists.")
 			if sampleAppSvc2, getSvcErr := sampleAppCtrl.getService(); getSvcErr != nil {
-				log.Fatalf("error getting existing SampleApp service. Root cause: %v", getSvcErr)
+				log.Errorf("error getting existing SampleApp service. Root cause: %v", getSvcErr)
+				panic(getSvcErr)
 			} else {
 				sampleAppService = sampleAppSvc2
 			}
 		} else {
-			log.Fatalf("error creating SampleApp service. Root cause: %v", svcErr)
+			log.Errorf("error creating SampleApp service. Root cause: %v", svcErr)
+			panic(svcErr)
 		}
 	}
 
