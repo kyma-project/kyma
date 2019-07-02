@@ -5,6 +5,8 @@ kind: TestDefinition
 metadata:
   name: cluster-users-test
   namespace: {{ .Release.Namespace }}
+  labels:
+    require-static-users: "true"
 spec:
   template:
     metadata:
