@@ -34,3 +34,5 @@ cluster:
   faviconUrl: 'favicon.ico'
   # Provide custom title for the UI application that will be shown in the header component
   headerTitle: ''
+  # Provide a list of navigation nodes that should be hidden. For example 'namespace.operation.secrets settings foo.bar'
+  disabledNavigationNodes: ''
