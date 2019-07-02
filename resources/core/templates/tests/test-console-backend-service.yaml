@@ -4,6 +4,7 @@ kind: TestDefinition
 metadata:
   name: "test-{{ template "fullname" . }}-console-backend-service"
 spec:
+  disableConcurrency: true
   template:
     metadata:
       annotations:
