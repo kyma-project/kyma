@@ -109,9 +109,8 @@ func validateSpecificationCredentials(credentials *Credentials) apperrors.AppErr
 	if credentials != nil {
 		basic := credentials.Basic
 		oauth := credentials.Oauth
-		cert := credentials.CertificateGen
 
-		if validateCredentials(basic, oauth, cert) {
+		if validateCredentials(basic, oauth, nil) {
 			return apperrors.WrongInput("api.CredentialsWithCSRF is invalid: to many authentication methods provided")
 		}
 	}

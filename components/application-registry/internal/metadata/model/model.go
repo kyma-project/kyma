@@ -23,9 +23,8 @@ type API struct {
 // Credentials contains OAuth configuration.
 type Credentials struct {
 	// Oauth is OAuth configuration.
-	Oauth          *Oauth
-	Basic          *Basic
-	CertificateGen *CertificateGen
+	Oauth *Oauth
+	Basic *Basic
 }
 
 // Credentials contains OAuth configuration.
@@ -33,7 +32,7 @@ type CredentialsWithCSRF struct {
 	// OauthWithCSRF is OAuth configuration.
 	Oauth          *OauthWithCSRF
 	Basic          *BasicWithCSRF
-	CertificateGen *CertificateGenWithCSRF
+	CertificateGen *CertificateGen
 }
 
 type RequestParameters struct {
@@ -75,14 +74,10 @@ type BasicWithCSRF struct {
 	CSRFInfo *CSRFInfo
 }
 
+// CertificateGen contains common name of the certificate to generate
 type CertificateGen struct {
 	CommonName  string
 	Certificate string
-}
-
-// CertificateGenWithCSRF contains common name of the certificate to generate
-type CertificateGenWithCSRF struct {
-	CertificateGen
 	// Optional CSRF Data
 	CSRFInfo *CSRFInfo
 }

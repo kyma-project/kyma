@@ -24,10 +24,8 @@ const (
 
 var (
 	certGenCredentials = &model.CredentialsWithCSRF{
-		CertificateGen: &model.CertificateGenWithCSRF{
-			CertificateGen: model.CertificateGen{
-				CommonName: commonName,
-			},
+		CertificateGen: &model.CertificateGen{
+			CommonName: commonName,
 		},
 	}
 )
@@ -84,20 +82,16 @@ func TestCertificateGen_CredentialsProvided(t *testing.T) {
 	}{
 		{
 			credentials: &model.CredentialsWithCSRF{
-				CertificateGen: &model.CertificateGenWithCSRF{
-					CertificateGen: model.CertificateGen{
-						CommonName: commonName,
-					},
+				CertificateGen: &model.CertificateGen{
+					CommonName: commonName,
 				},
 			},
 			result: true,
 		},
 		{
 			credentials: &model.CredentialsWithCSRF{
-				CertificateGen: &model.CertificateGenWithCSRF{
-					CertificateGen: model.CertificateGen{
-						CommonName: "",
-					},
+				CertificateGen: &model.CertificateGen{
+					CommonName: "",
 				},
 			},
 			result: false,

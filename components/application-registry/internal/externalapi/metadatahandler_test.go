@@ -252,10 +252,8 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Api: &model.API{
 				TargetUrl: "http://service.com",
 				Credentials: &model.CredentialsWithCSRF{
-					CertificateGen: &model.CertificateGenWithCSRF{
-						CertificateGen: model.CertificateGen{
-							CommonName: "commonName",
-						},
+					CertificateGen: &model.CertificateGen{
+						CommonName: "commonName",
 					},
 				},
 				Spec: apiRawSpec,
@@ -579,11 +577,9 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Api: &model.API{
 				TargetUrl: "http://service.com",
 				Credentials: &model.CredentialsWithCSRF{
-					CertificateGen: &model.CertificateGenWithCSRF{
-						CertificateGen: model.CertificateGen{
-							CommonName:  "commonName",
-							Certificate: "test-cert",
-						},
+					CertificateGen: &model.CertificateGen{
+						CommonName:  "commonName",
+						Certificate: "test-cert",
 					},
 				},
 				Spec: apiRawSpec,

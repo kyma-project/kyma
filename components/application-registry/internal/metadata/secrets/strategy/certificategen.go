@@ -24,12 +24,10 @@ func (svc *certificateGen) ToCredentials(secretData SecretData, appCredentials *
 	commonName, cert := svc.readCertificateGenMap(secretData)
 
 	return model.CredentialsWithCSRF{
-		CertificateGen: &model.CertificateGenWithCSRF{
-			CertificateGen: model.CertificateGen{
-				CommonName:  commonName,
-				Certificate: cert,
-			},
-			CSRFInfo: convertToModelCSRInfo(appCredentials),
+		CertificateGen: &model.CertificateGen{
+			CommonName:  commonName,
+			Certificate: cert,
+			CSRFInfo:    convertToModelCSRInfo(appCredentials),
 		},
 	}
 }

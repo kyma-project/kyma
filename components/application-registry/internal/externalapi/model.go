@@ -49,9 +49,8 @@ type RequestParameters struct {
 }
 
 type Credentials struct {
-	Oauth          *Oauth          `json:"oauth,omitempty"`
-	Basic          *BasicAuth      `json:"basic,omitempty"`
-	CertificateGen *CertificateGen `json:"certificateGen,omitempty"`
+	Oauth *Oauth     `json:"oauth,omitempty"`
+	Basic *BasicAuth `json:"basic,omitempty"`
 }
 
 type CredentialsWithCSRF struct {
@@ -317,14 +316,6 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 		}
 	}
 
-	if credentials.CertificateGen != nil {
-		certificate := serviceDetailsToServiceDefinitionCertficate(*credentials.CertificateGen)
-
-		return &model.Credentials{
-			CertificateGen: &certificate,
-		}
-	}
-
 	return nil
 }
 
@@ -359,9 +350,9 @@ func serviceDetailsCredentialsToServiceDefinitionCredentialsWithCSRF(credentials
 
 	if credentials.CertificateGenWithCSRF != nil {
 		return &model.CredentialsWithCSRF{
-			CertificateGen: &model.CertificateGenWithCSRF{
-				CertificateGen: serviceDetailsToServiceDefinitionCertficate(credentials.CertificateGenWithCSRF.CertificateGen),
-				CSRFInfo:       csrfInfoToModel(credentials.CertificateGenWithCSRF.CSRFInfo),
+			CertificateGen: &model.CertificateGen{
+				CommonName: credentials.CertificateGenWithCSRF.CommonName,
+				CSRFInfo:   csrfInfoToModel(credentials.CertificateGenWithCSRF.CSRFInfo),
 			},
 		}
 	}

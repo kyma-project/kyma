@@ -128,13 +128,44 @@ func toApiSpecType(api *model.API) docstopic.ApiType {
 	return docstopic.OpenApiType
 }
 
+func toSpecAuthorizationCredentials(api *model.API) *authorization.Credentials {
+	if api.SpecificationCredentials != nil {
+		basicCredentials := api.SpecificationCredentials.Basic
+
+		if api.SpecificationCredentials.Basic != nil {
+			return &authorization.Credentials{
+				BasicAuth: &authorization.BasicAuth{
+					Username: basicCredentials.Username,
+					Password: basicCredentials.Password,
+				},
+			}
+		}
+
+		if api.SpecificationCredentials.Oauth != nil {
+			oauth := api.SpecificationCredentials.Oauth
+
+			return &authorization.Credentials{
+				OAuth: &authorization.OAuth{
+					ClientID:     oauth.ClientID,
+					ClientSecret: oauth.ClientSecret,
+					URL:          oauth.URL,
+				},
+			}
+		}
+	}
+
+	return nil
+}
+
 func (svc *specService) fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
 	specUrl, apperr := determineSpecUrl(api)
 	if apperr != nil {
 		return nil, apperr
 	}
 
-	return svc.downloadClient.Fetch(specUrl, nil)
+	specificationCredentials := toSpecAuthorizationCredentials(api)
+
+	return svc.downloadClient.Fetch(specUrl, specificationCredentials)
 }
 
 func determineSpecUrl(api *model.API) (string, apperrors.AppError) {
