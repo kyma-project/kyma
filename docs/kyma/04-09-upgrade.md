@@ -14,7 +14,7 @@ For example, if you're running Kyma 1.0 and you want to upgrade to version 1.3, 
 
 >**NOTE:** Kyma does not support a dedicated downgrade procedure. You can achieve a similar result by restoring your cluster from a backup. Read [this](/components/backup/#overview-overview) document to learn more about backups.
 
-The upgrade procedure relies heavily on Helm. As a result, the availability of cluster services during the upgrade is not defined by Kyma and can vary from version to version. The existing Custom Resources (CRs) remain in the cluster.
+The upgrade procedure relies heavily on Helm. As a result, the availability of cluster services during the upgrade is not defined by Kyma and can vary from version to version. The existing custom resources (CRs) remain in the cluster.
 
 >**NOTE:** To learn more about the technical aspects of the upgrade, read [this](https://github.com/kyma-project/kyma/blob/master/components/kyma-operator/README.md) document.
 
@@ -24,7 +24,7 @@ Follow these steps:
 
 1. Check which version you're currently running. Run this command:
   ```
-  kubectl -n kyma-installer get deploy kyma-installer -o jsonpath='{.spec.template.spec.containers[].image}
+  kubectl -n kyma-installer get deploy kyma-installer -o jsonpath='{.spec.template.spec.containers[].image}'
   ```
 2. Perform the required actions described in the migration guide published with the release you want to upgrade to. Migration guides are linked in the [release notes](https://kyma-project.io/blog/) and are available on the respective [release branches](https://github.com/kyma-project/kyma/branches) in the `docs/migration-guides` directory.
   >**NOTE:** Not all releases require you to perform additional migration steps. If your target release doesn't come with a migration guide, proceed to the next step.
