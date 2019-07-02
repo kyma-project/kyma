@@ -21,6 +21,10 @@ setup:
 	go get github.com/vektra/mockery/.../
 
 # Run tests
+# Default is 20s - available since controller-runtime 0.1.5
+test: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
+# Default is 20s - available since controller-runtime 0.1.5
+test: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
 test: generate fmt vet manifests
 	go test ./pkg/... ./cmd/... -coverprofile cover.out
 
