@@ -2,16 +2,18 @@ package download
 
 import (
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 )
 
 const timeout = 5
 
 type Client interface {
-	Fetch(url string, credentials *authorization.Credentials) ([]byte, apperrors.AppError)
+	Fetch(url string, credentials *authorization.Credentials, parameters *authorization.RequestParameters) ([]byte, apperrors.AppError)
 }
 
 type downloader struct {
@@ -26,8 +28,8 @@ func NewClient(client *http.Client, authFactory authorization.StrategyFactory) C
 	}
 }
 
-func (d downloader) Fetch(url string, credentials *authorization.Credentials) ([]byte, apperrors.AppError) {
-	res, err := d.requestAPISpec(url, credentials)
+func (d downloader) Fetch(url string, credentials *authorization.Credentials, parameters *authorization.RequestParameters) ([]byte, apperrors.AppError) {
+	res, err := d.requestAPISpec(url, credentials, parameters)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +48,7 @@ func (d downloader) Fetch(url string, credentials *authorization.Credentials) ([
 	}
 }
 
-func (d downloader) requestAPISpec(specUrl string, credentials *authorization.Credentials) (*http.Response, apperrors.AppError) {
+func (d downloader) requestAPISpec(specUrl string, credentials *authorization.Credentials, parameters *authorization.RequestParameters) (*http.Response, apperrors.AppError) {
 	req, err := http.NewRequest(http.MethodGet, specUrl, nil)
 	if err != nil {
 		return nil, apperrors.Internal("Creating request for fetching API spec from %s failed, %s", specUrl, err.Error())
@@ -55,8 +57,13 @@ func (d downloader) requestAPISpec(specUrl string, credentials *authorization.Cr
 	if credentials != nil {
 		err := d.addAuthorization(req, credentials)
 		if err != nil {
-			return nil, apperrors.Internal("Adding authorization failed, %s", err.Error())
+			return nil, apperrors.Internal("Adding authorization for fetching API spec from %s failed, %s", specUrl, err.Error())
 		}
+	}
+
+	if parameters != nil {
+		setCustomQueryParameters(req.URL, parameters.QueryParameters)
+		setCustomHeaders(req.Header, parameters.Headers)
 	}
 
 	response, err := d.client.Do(req)
@@ -88,4 +95,46 @@ func (d downloader) addAuthorization(r *http.Request, credentials *authorization
 	}
 
 	return nil
+}
+
+func setCustomQueryParameters(url *url.URL, queryParams *map[string][]string) {
+	if queryParams == nil {
+		return
+	}
+
+	reqQueryValues := url.Query()
+
+	for customQueryParam, values := range *queryParams {
+		if _, ok := reqQueryValues[customQueryParam]; ok {
+			continue
+		}
+
+		reqQueryValues[customQueryParam] = values
+	}
+
+	url.RawQuery = reqQueryValues.Encode()
+}
+
+func setCustomHeaders(reqHeaders http.Header, customHeaders *map[string][]string) {
+	if _, ok := reqHeaders[httpconsts.HeaderUserAgent]; !ok {
+		// explicitly disable User-Agent so it's not set to default value
+		reqHeaders.Set(httpconsts.HeaderUserAgent, "")
+	}
+
+	setHeaders(reqHeaders, customHeaders)
+}
+
+func setHeaders(reqHeaders http.Header, customHeaders *map[string][]string) {
+	if customHeaders == nil {
+		return
+	}
+
+	for header, values := range *customHeaders {
+		if _, ok := reqHeaders[header]; ok {
+			// if header is already specified we do not interfere with it
+			continue
+		}
+
+		reqHeaders[header] = values
+	}
 }
