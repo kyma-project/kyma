@@ -1,9 +1,10 @@
 package strategy
 
 import (
-	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf/mocks"
 	"net/http"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf/mocks"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
