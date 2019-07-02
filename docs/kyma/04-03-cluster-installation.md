@@ -58,6 +58,8 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 - [wget](https://www.gnu.org/software/wget/)
 
+>**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). You create these machines when you complete the **Prepare the GKE cluster** step. 
+
 ## Choose the release to install
 
 1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to install.
