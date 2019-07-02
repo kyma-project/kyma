@@ -9,6 +9,7 @@ spec:
   template:
     metadata:
     spec:
+      shareProcessNamespace: true
       {{- if .Values.global.isLocalEnv }}
       hostNetwork: true
       {{- end }}
