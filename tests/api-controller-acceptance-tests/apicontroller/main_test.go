@@ -24,7 +24,7 @@ func TestMain(m *testing.M) {
 		os.Exit(2)
 	}
 
-	kubeConfig := loadKubeConfigOrDie()
+	kubeConfig = loadKubeConfigOrDie()
 	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
 
 	os.Exit(testWithNamespace(m))
@@ -80,13 +80,12 @@ func loadKubeConfigOrDie() *rest.Config {
 		return cfg
 	}
 
-	var err error
-	kubeConfig, err = clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
+	cfg, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
 	if err != nil {
 		log.Errorf("Cannot read kubeconfig: %s", err)
 		panic(err)
 	}
-	return kubeConfig
+	return cfg
 }
 
 func testWithNamespace(m *testing.M) int {
