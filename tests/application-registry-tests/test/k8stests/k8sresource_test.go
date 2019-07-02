@@ -1207,11 +1207,5 @@ func TestK8sResources(t *testing.T) {
 			require.Error(t, err)
 			require.True(t, k8serrors.IsNotFound(err))
 		})
-
-		t.Run("should remove service from application custom resource", func(t *testing.T) {
-			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
-			require.NoError(t, err)
-			testkit.CheckK8sApplicationNotContainsService(t, application, serviceId)
-		})
 	})
 }
