@@ -36,7 +36,7 @@ func TestIntegrationSpec(t *testing.T) {
 
 	httpClient, err := ingressgateway.FromEnv().Client()
 	if err != nil {
-		t.Fatalf("Cannot get ingressgateway client: %s", err)
+		t.Fatalf("Can't get ingressgateway client: %s", err)
 	}
 
 	t.Logf("Set up...")
@@ -57,7 +57,7 @@ func TestIntegrationSpec(t *testing.T) {
 
 		kymaInterface, kymaErr := kyma.NewForConfig(kubeConfig)
 		if kymaErr != nil {
-			log.Fatalf("can create kyma clientset. Root cause: %v", kymaErr)
+			t.Fatalf("Can't create kyma clientset. Root cause: %v", kymaErr)
 		}
 
 		suiteFinished = false

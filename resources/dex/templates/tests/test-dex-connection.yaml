@@ -4,6 +4,7 @@ kind: TestDefinition
 metadata:
   name: "test-{{ template "fullname" . }}-connection-dex"
 spec:
+  disableConcurrency: true
   template:
     metadata:
       annotations:

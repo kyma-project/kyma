@@ -9,5 +9,5 @@ RUN apk update &&\
 	mv kubectl /usr/local/bin/kubectl
 
 ADD ./sar-test.sh sar-test.sh
-ADD ./kyma-developer-binding.yaml kyma-developer-binding.yaml
+ADD ./kyma-test-bindings.yaml kyma-test-bindings.yaml
 ENTRYPOINT ["/bin/bash", "-c", "/root/sar-test.sh"]
