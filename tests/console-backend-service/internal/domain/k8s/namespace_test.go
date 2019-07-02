@@ -57,6 +57,7 @@ type testNamespaceSuite struct {
 	k8sClient     *corev1.CoreV1Client
 	namespaceName string
 	labels        map[string]string
+	updatedLabels map[string]string
 }
 
 func givenNewTestNamespaceSuite(t *testing.T) testNamespaceSuite {
