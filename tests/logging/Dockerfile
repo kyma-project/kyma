@@ -10,5 +10,6 @@ RUN mkdir -p /root/.kube && touch /root/.kube/config
 
 COPY testCounterPod.yaml /
 COPY bin/app /test-logging
+COPY ./licenses/ /licenses
 
 CMD ["/test-logging"]
