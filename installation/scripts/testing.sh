@@ -11,7 +11,7 @@ function validateConcurrency() {
     exit 1
   fi
 
-  if [[ "$1" =~ '^[[:digit:]]+$' ]]; then
+  if ! [[ "$1" =~ ^[0-9]+$ ]]; then
     echo "Error: value passed to --concurrency must be a number"
     exit 1
   fi
@@ -20,20 +20,19 @@ function validateConcurrency() {
 while [[ $# -gt 0 ]]
 do
     key="$1"
+    shift
     case ${key} in
         --concurrency|-c)
-            validateConcurrency "$2"
-            CONCURRENCY="$2"
-            shift
+            validateConcurrency "$1"
+            CONCURRENCY="$1"
             shift
             ;;
         -*)
-            echo "Unknown flag ${1}"
+            echo "Unknown flag ${key}"
             exit 1
             ;;
         *) # unknown option
-            POSITIONAL+=("$1") # save it in an array for later
-            shift # past argument
+            POSITIONAL+=("$key") # save it in an array for later
             ;;
     esac
 done
