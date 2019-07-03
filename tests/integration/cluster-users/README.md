@@ -5,10 +5,10 @@
 - Contains the `sar-test.sh` script that runs tests for a chart.
 
 ## Details
-The test login into `Dex` using the static users emails and create calls to `iam-kubeconfig-service` to generate a *kubeconfig* for each of them. Afterwards `kubectl` tool is used to perform SAR (SubjectAccessReview) calls to the api-server.
+The test logs in to Dex using the static user's emails and creates calls to the IAM Kubeconfig Service to generate a `kubeconfig` file for each call. Afterwards, `kubectl` tool is used to perform SAR (SubjectAccessReview) calls to the api-server.
 
 **Test Scenario**:
-The tests ask the api-server if a specific user can perform specific operations on a specific object, an asserts the resuls:
+The tests ask the api-server if a specific user can perform specific operations on a specific object, and asserts the results:
 
 ```bash
 EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
