@@ -28,7 +28,7 @@ global:
   api_controller:
     dir: pr/
     version: "PR-4582"
-  api_controller_acceptance_tests:
+  api_controller_integration_tests:
     dir: pr/
     version: "PR-4582"
     testNamespace: api-controller-tests
