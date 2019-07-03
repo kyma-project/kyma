@@ -372,7 +372,7 @@
 /tests/end-to-end/upgrade @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # Cluster Users Test
-/tests/cluster-users-test @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+/tests/integration/cluster-users @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # All .md files
 *.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj
