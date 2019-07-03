@@ -19,7 +19,7 @@ func TestBundleGet(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
-		got, err := ts.s.Get(exp.Name, exp.Version)
+		got, err := ts.s.Get(internal.ClusterWide, exp.Name, exp.Version)
 
 		// THEN:
 		assert.NoError(t, err)
@@ -32,7 +32,7 @@ func TestBundleGet(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
-		got, err := ts.s.Get(exp.Name, exp.Version)
+		got, err := ts.s.Get(internal.ClusterWide, exp.Name, exp.Version)
 
 		// THEN:
 		ts.AssertNotFoundError(err)
@@ -48,7 +48,7 @@ func TestBundleGetByID(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
-		got, err := ts.s.GetByID(exp.ID)
+		got, err := ts.s.GetByID(internal.ClusterWide, exp.ID)
 
 		// THEN:
 		assert.NoError(t, err)
@@ -61,7 +61,7 @@ func TestBundleGetByID(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
-		got, err := ts.s.GetByID(exp.ID)
+		got, err := ts.s.GetByID(internal.ClusterWide, exp.ID)
 
 		// THEN:
 		ts.AssertNotFoundError(err)
@@ -76,7 +76,7 @@ func TestBundleUpsert(t *testing.T) {
 		fix := ts.MustGetFixture("A1")
 
 		// WHEN:
-		replace, err := ts.s.Upsert(fix)
+		replace, err := ts.s.Upsert(internal.ClusterWide, fix)
 
 		// THEN:
 		assert.NoError(t, err)
@@ -88,18 +88,18 @@ func TestBundleUpsert(t *testing.T) {
 		expDesc := "updated description"
 		ts := newBundleTestSuite(t, sf)
 		fix := ts.MustGetFixture("A1")
-		ts.s.Upsert(fix)
+		ts.s.Upsert(internal.ClusterWide, fix)
 
 		// WHEN:
 		fixNew := ts.MustCopyFixture(fix)
 		fixNew.Description = expDesc
-		replace, err := ts.s.Upsert(fixNew)
+		replace, err := ts.s.Upsert(internal.ClusterWide, fixNew)
 
 		// THEN:
 		assert.NoError(t, err)
 		assert.True(t, replace)
 
-		got, err := ts.s.GetByID(fixNew.ID)
+		got, err := ts.s.GetByID(internal.ClusterWide, fixNew.ID)
 		assert.NoError(t, err)
 		ts.AssertBundleEqual(fixNew, got)
 	})
@@ -111,7 +111,7 @@ func TestBundleUpsert(t *testing.T) {
 		fix.Version = semver.Version{}
 
 		// WHEN:
-		_, err := ts.s.Upsert(fix)
+		_, err := ts.s.Upsert(internal.ClusterWide, fix)
 
 		// THEN:
 		assert.EqualError(t, err, "both name and version must be set")
@@ -126,7 +126,7 @@ func TestBundleRemove(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
-		err := ts.s.Remove(exp.Name, exp.Version)
+		err := ts.s.Remove(internal.ClusterWide, exp.Name, exp.Version)
 
 		// THEN:
 		assert.NoError(t, err)
@@ -139,7 +139,7 @@ func TestBundleRemove(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
-		err := ts.s.Remove(exp.Name, exp.Version)
+		err := ts.s.Remove(internal.ClusterWide, exp.Name, exp.Version)
 
 		// THEN:
 		ts.AssertNotFoundError(err)
@@ -154,7 +154,7 @@ func TestBundleRemoveByID(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
-		err := ts.s.RemoveByID(exp.ID)
+		err := ts.s.RemoveByID(internal.ClusterWide, exp.ID)
 
 		// THEN:
 		assert.NoError(t, err)
@@ -167,7 +167,7 @@ func TestBundleRemoveByID(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
-		err := ts.s.RemoveByID(exp.ID)
+		err := ts.s.RemoveByID(internal.ClusterWide, exp.ID)
 
 		// THEN:
 		ts.AssertNotFoundError(err)
@@ -180,9 +180,15 @@ func TestBundleFindAll(t *testing.T) {
 		// GIVEN:
 		ts := newBundleTestSuite(t, sf)
 		ts.PopulateStorage()
+		ts.s.Upsert(internal.Namespace("stage"), &internal.Bundle{
+			ID:          internal.BundleID("id-0000"),
+			Name:        internal.BundleName("other-bundle"),
+			Version:     *semver.MustParse("1.1.1"),
+			Description: "",
+		})
 
 		// WHEN:
-		got, err := ts.s.FindAll()
+		got, err := ts.s.FindAll(internal.ClusterWide)
 
 		// THEN:
 		assert.NoError(t, err)
@@ -194,7 +200,7 @@ func TestBundleFindAll(t *testing.T) {
 		ts := newBundleTestSuite(t, sf)
 
 		// WHEN:
-		got, err := ts.s.FindAll()
+		got, err := ts.s.FindAll(internal.ClusterWide)
 
 		// THEN:
 		assert.Empty(t, got)
@@ -243,7 +249,7 @@ func (ts *bundleTestSuite) generateFixtures() {
 
 func (ts *bundleTestSuite) PopulateStorage() {
 	for _, b := range ts.fixtures {
-		ts.s.Upsert(ts.MustCopyFixture(b))
+		ts.s.Upsert(internal.ClusterWide, ts.MustCopyFixture(b))
 	}
 }
 
@@ -320,10 +326,10 @@ func (ts *bundleTestSuite) AssertNotFoundError(err error) bool {
 func (ts *bundleTestSuite) AssertBundleDoesNotExist(b *internal.Bundle) bool {
 	ts.t.Helper()
 
-	_, err := ts.s.GetByID(b.ID)
+	_, err := ts.s.GetByID(internal.ClusterWide, b.ID)
 	result := assert.True(ts.t, storage.IsNotFoundError(err), "NotFound error expected on GetByID")
 
-	_, err = ts.s.Get(b.Name, b.Version)
+	_, err = ts.s.Get(internal.ClusterWide, b.Name, b.Version)
 	result = assert.True(ts.t, storage.IsNotFoundError(err), "NotFound error expected on Get") && result
 
 	return result

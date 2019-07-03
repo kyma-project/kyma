@@ -79,12 +79,12 @@ func TestProvisionServiceProvisionSuccessAsyncInstall(t *testing.T) {
 	bgMock := &automock.BundleStorage{}
 	defer bgMock.AssertExpectations(t)
 	expBundle := ts.FixBundle()
-	bgMock.On("GetByID", ts.Exp.Bundle.ID).Return(&expBundle, nil).Once()
+	bgMock.On("GetByID", internal.ClusterWide, ts.Exp.Bundle.ID).Return(&expBundle, nil).Once()
 
 	cgMock := &automock.ChartGetter{}
 	defer cgMock.AssertExpectations(t)
 	expChart := ts.FixChart()
-	cgMock.On("Get", ts.Exp.Chart.Name, ts.Exp.Chart.Version).Return(&expChart, nil).Once()
+	cgMock.On("Get", internal.ClusterWide, ts.Exp.Chart.Name, ts.Exp.Chart.Version).Return(&expChart, nil).Once()
 
 	iiMock := &automock.InstanceStorage{}
 	defer iiMock.AssertExpectations(t)
@@ -181,7 +181,7 @@ func TestProvisionServiceProvisionFailureAsync(t *testing.T) {
 	bgMock := &automock.BundleStorage{}
 	defer bgMock.AssertExpectations(t)
 	expBundle := ts.FixBundle()
-	bgMock.On("GetByID", ts.Exp.Bundle.ID).Return(&expBundle, nil).Once()
+	bgMock.On("GetByID", internal.ClusterWide, ts.Exp.Bundle.ID).Return(&expBundle, nil).Once()
 	iiMock := &automock.InstanceStorage{}
 	defer iiMock.AssertExpectations(t)
 	expInstance := ts.FixInstance()
@@ -200,7 +200,7 @@ func TestProvisionServiceProvisionFailureAsync(t *testing.T) {
 	cgMock := &automock.ChartGetter{}
 	defer cgMock.AssertExpectations(t)
 	expChartError := errors.New("fake-chart-error")
-	cgMock.On("Get", ts.Exp.Chart.Name, ts.Exp.Chart.Version).Return(nil, expChartError).Once()
+	cgMock.On("Get", internal.ClusterWide, ts.Exp.Chart.Name, ts.Exp.Chart.Version).Return(nil, expChartError).Once()
 
 	operationFailed := make(chan struct{})
 	ioMock.On("UpdateStateDesc", ts.Exp.InstanceID, ts.Exp.OperationID, internal.OperationStateFailed, mock.Anything).Return(nil).Once().
