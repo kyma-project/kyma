@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -25,6 +25,27 @@ func NewBasicAuthHandler() *basicAuthHandler {
 }
 
 func (bah *basicAuthHandler) BasicAuth(w http.ResponseWriter, r *http.Request) {
+	statusCode, e := bah.checkBasicAuth(r)
+	if e != nil {
+		bah.logger.Error(e.Error())
+		w.WriteHeader(statusCode)
+		return
+	}
+	w.WriteHeader(statusCode)
+}
+
+func (bah *basicAuthHandler) BasicAuthSpec(w http.ResponseWriter, r *http.Request) {
+	statusCode, e := bah.checkBasicAuth(r)
+	if e != nil {
+		bah.logger.Error(e.Error())
+		w.WriteHeader(statusCode)
+		return
+	}
+	w.WriteHeader(statusCode)
+	http.ServeFile(w, r, "spec.json")
+}
+
+func (bah *basicAuthHandler) checkBasicAuth(r *http.Request) (statusCode int, err error) {
 	vars := mux.Vars(r)
 	expectedUserName := vars["username"]
 	expectedPassword := vars["password"]
@@ -32,9 +53,7 @@ func (bah *basicAuthHandler) BasicAuth(w http.ResponseWriter, r *http.Request) {
 	bah.logger.Infof("Handling BasicAuth request. Expected: username: %s, password: %s", expectedUserName, expectedPassword)
 
 	if expectedPassword == "" || expectedUserName == "" {
-		bah.logger.Errorf("Expected credentials not provided")
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return http.StatusBadRequest, errors.New("Expected credentials not provided")
 	}
 
 	authorizationHeader := r.Header.Get(AuthorizationHeader)
@@ -42,9 +61,7 @@ func (bah *basicAuthHandler) BasicAuth(w http.ResponseWriter, r *http.Request) {
 	encodedCredentials := strings.TrimPrefix(authorizationHeader, "Basic ")
 	decoded, err := base64.StdEncoding.DecodeString(encodedCredentials)
 	if err != nil {
-		bah.logger.Errorf("Failed to decode credentials")
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return http.StatusBadRequest, errors.New("Failed to decode credentials")
 	}
 
 	credentials := strings.Split(string(decoded), ":")
@@ -52,10 +69,7 @@ func (bah *basicAuthHandler) BasicAuth(w http.ResponseWriter, r *http.Request) {
 	password := credentials[1]
 
 	if userName != expectedUserName || password != expectedPassword {
-		bah.logger.Errorf("Invalid credentials provided")
-		w.WriteHeader(http.StatusForbidden)
-		return
+		return http.StatusBadRequest, errors.New("Invalid credentials provided")
 	}
-
-	successResponse(w)
+	return http.StatusOK, nil
 }

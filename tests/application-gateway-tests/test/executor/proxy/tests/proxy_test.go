@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/testkit/registry"
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/testkit/util"
 
@@ -106,6 +108,22 @@ func TestProxyService(t *testing.T) {
 		util.RequireStatus(t, http.StatusOK, resp)
 
 		t.Log("Successfully accessed application")
+	})
+
+	t.Run("basic auth spec url test", func(t *testing.T) {
+		userName := "myUser"
+		password := "mySecret"
+
+		mockServiceURL := testSuit.GetMockServiceURL()
+		specUrl := fmt.Sprintf("%s/spec/auth/basic/%s/%s", mockServiceURL, userName, password)
+
+		apiID := client.CreateAPIWithBasicAuthSecuredSpec(t, mockServiceURL, specUrl, userName, password)
+		t.Logf("Created service with apiID: %s", apiID)
+		defer func() {
+			t.Logf("Cleaning up service %s", apiID)
+			client.CleanupService(t, apiID)
+		}()
+		assert.NotEmpty(t, apiID)
 	})
 
 }

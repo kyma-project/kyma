@@ -61,6 +61,12 @@ func (arc *AppRegistryClient) CreateNotSecuredAPICustomQueryParams(t *testing.T,
 	return arc.createAPI(t, api)
 }
 
+func (arc *AppRegistryClient) CreateAPIWithBasicAuthSecuredSpec(t *testing.T, targetURL, specURL, username, password string) string {
+	api := arc.baseAPI(targetURL).WithAPISpecURL(specURL).WithBasicAuthSecuredSpec(username, password)
+
+	return arc.createAPI(t, api)
+}
+
 func (arc *AppRegistryClient) baseAPI(targetURL string) *API {
 	return &API{
 		TargetUrl: targetURL,
