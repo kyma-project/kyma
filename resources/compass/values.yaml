@@ -3,21 +3,21 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project/incubator
     connector:
-      dir: pr/
-      version: "PR-59"
+      dir:
+      version: 1.3.0-rc0
     director:
-      dir: pr/
-      version: "PR-79"
+      dir:
+      version: 1.3.0-rc0
     gateway:
-      dir: pr/
-      version: "PR-59"
+      dir:
+      version: 1.3.0-rc0
     healthchecker:
-      dir: develop/
-      version: "6d888e37"
+      dir:
+      version: 1.3.0-rc0
     tests:
       e2e:
-        dir: develop/
-        version: "ec80b7e4"
+        dir:
+        version: 1.3.0-rc0
 
   director:
     port: 3000
