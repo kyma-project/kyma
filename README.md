@@ -76,3 +76,4 @@ The repository has the following structure:
   ├── tests                       # Acceptance tests
   └── tools                       # Source code of utilities used, for example, for the installation and testing
   ```
+
