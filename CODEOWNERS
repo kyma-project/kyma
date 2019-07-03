@@ -32,10 +32,10 @@
 /resources/core/values.yaml @kyma-project/developers
 
 # The `heptio velero essentials` chart
-/resources/velero-essentials/ @joek @rakesh-garimella @venturasr @lilitgh @k15r
+/resources/velero-essentials/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @anishj0shi
 
 # The `heptio velero` chart
-/resources/velero/ @joek @rakesh-garimella @venturasr @lilitgh @k15r
+/resources/velero/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @anishj0shi
 
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -104,28 +104,28 @@
 /resources/monitoring/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `kubeless` subchart
-/resources/core/charts/kubeless/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
+/resources/core/charts/kubeless/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi
 
 # The `lambda-ui` subchart
-/resources/core/charts/kubeless/charts/lambdas-ui  @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r @kwiatekus @dariadomagala @y-kkamil @parostatkiem @akucharska @sjanota
+/resources/core/charts/kubeless/charts/lambdas-ui  @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r @kwiatekus @dariadomagala @y-kkamil @parostatkiem @akucharska @sjanota @anishj0shi
 
 # The `logging` subchart
 /resources/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `log-ui` subchart
-/resources/logging/charts/log-ui/ @rakesh-garimella @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @hisarbalik @a-thaler @igor-karpukhin
+/resources/logging/charts/log-ui/ @rakesh-garimella @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @hisarbalik @a-thaler @igor-karpukhin @anishj0shi
 
 # The `event-bus` chart
-/resources/event-bus/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @sayanh
+/resources/event-bus/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @sayanh @anishj0shi
 
 # The `nats-streaming` chart
-/resources/nats-streaming/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
+/resources/nats-streaming/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh @anishj0shi
 
 # The `knative-provisioner-natss` chart
-/resources/knative-provisioner-natss/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
+/resources/knative-provisioner-natss/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh @anishj0shi
 
 # The `k8s-dashboard-proxy` subchart
-/resources/core/charts/k8s-dashboard-proxy/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @sayanh
+/resources/core/charts/k8s-dashboard-proxy/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @sayanh @anishj0shi
 
 # The `application-broker` subchart
 /resources/application-connector/charts/application-broker @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -176,10 +176,10 @@
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `knative-serving` chart
-/resources/knative-serving/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
+/resources/knative-serving/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar @anishj0shi
 
 # The `knative-eventing` chart
-/resources/knative-eventing/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
+/resources/knative-eventing/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh @anishj0shi
 
 # The `jaeger` charts
 /resources/jaeger/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
@@ -270,19 +270,19 @@
 /components/application-connectivity-validator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Event Bus Component
-/components/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
+/components/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh @anishj0shi
 
 # K8s Dashboard Proxy Component
-/components/k8s-dashboard-proxy/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
+/components/k8s-dashboard-proxy/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh @anishj0shi
 
 # Event Service Component
-/components/event-service/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
+/components/event-service/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh @anishj0shi
 
 # Xip Patch Component
 /components/xip-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Kubeless Images
-/components/kubeless-images @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
+/components/kubeless-images @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar @anishj0shi
 
 # Dex Static User Configurer
 /components/dex-static-user-configurer/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -295,7 +295,7 @@
 /tests/integration/dex @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Knative Serving Acceptance
-/tests/knative-serving/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
+/tests/knative-serving/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar @anishj0shi
 
 # test-namespace-controller
 /tests/test-namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
@@ -348,25 +348,25 @@
 /tools/failery/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
 
 # The tools/velero-plugins directory
-/tools/velero-plugins/ @mwieczorek @joek @rakesh-garimella @venturasr @lilitgh @k15r
+/tools/velero-plugins/ @mwieczorek @joek @rakesh-garimella @venturasr @lilitgh @k15r @anishj0shi
 
 # The tools/kyma-installer directory
 /tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
 
 # The tools/load-test directory
-/tools/load-test/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
+/tools/load-test/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi
 
 # kubeless-integration tests directory
-/tests/end-to-end/kubeless-integration/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
+/tests/end-to-end/kubeless-integration/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar @anishj0shi
 
 # kubeless tests
-/tests/kubeless/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
+/tests/kubeless/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar @anishj0shi
 
 # Event Bus Tests
-/tests/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
+/tests/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh @anishj0shi
 
 # Event Service Tests
-/tests/gateway/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
+/tests/gateway/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh @anishj0shi
 
 # E2E Backup Tests
 /tests/end-to-end/backup-restore-test @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
@@ -387,4 +387,4 @@
 milv.config.yaml @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
 
 # performance tests
-/tests/perf/ @rakesh-garimella @venturasr @lilitgh @hisarbalik @a-thaler
+/tests/perf/ @rakesh-garimella @venturasr @lilitgh @hisarbalik @a-thaler @anishj0shi
