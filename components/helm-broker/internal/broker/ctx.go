@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 )
@@ -20,6 +21,7 @@ const (
 type OsbContext struct {
 	APIVersion          string
 	OriginatingIdentity string
+	BrokerNamespace     internal.Namespace
 }
 
 func (ctx *OsbContext) validateAPIVersion() error {
