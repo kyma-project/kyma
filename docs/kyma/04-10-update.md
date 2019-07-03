@@ -5,7 +5,7 @@ type: Installation
 
 This guide describes how to update Kyma deployed locally or on a cluster.
 
->**NOTE:** Updating Kyma means introducing changes to a running deployment. If you want to upgrade to a newer version, read [this](##installation-upgrade-kyma) document.
+>**NOTE:** Updating Kyma means introducing changes to a running deployment. If you want to upgrade to a newer version, read [this](#installation-upgrade-kyma) document.
 
 ## Prerequisites
 
