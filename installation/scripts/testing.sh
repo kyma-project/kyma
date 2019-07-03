@@ -11,7 +11,7 @@ function validateConcurrency() {
     exit 1
   fi
 
-  if ! [[ "$1" =~ ^[0-9]+$ ]]; then
+  if ! [[ "$1" =~ ^[1-9][0-9]?$ ]]; then
     echo "Error: value passed to --concurrency must be a number"
     exit 1
   fi
