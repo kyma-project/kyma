@@ -14,6 +14,9 @@ type OSBContextMiddleware struct{}
 // ServeHTTP adds content of Open Service Broker Api headers to the requests
 func (OSBContextMiddleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	brokerNamespace := mux.Vars(r)["namespace"]
+	if brokerNamespace == "" {
+		brokerNamespace = string(internal.ClusterWide)
+	}
 	osbCtx := OsbContext{
 		APIVersion:          r.Header.Get(osb.APIVersionHeader),
 		OriginatingIdentity: r.Header.Get(osb.OriginatingIdentityHeader),

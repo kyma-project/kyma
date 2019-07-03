@@ -127,7 +127,6 @@ func (srv *Server) createHandler() http.Handler {
 		fmt.Fprint(w, "OK")
 	}).Methods("GET")
 
-	// cluster
 	srv.handleRouter(rtr.PathPrefix("/cluster").Subrouter())
 	srv.handleRouter(rtr.PathPrefix("/ns/{namespace}").Subrouter())
 
