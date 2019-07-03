@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
@@ -35,7 +36,6 @@ func NewCertificateSetupHandler(options *options, secretRepo SecretRepository) *
 }
 
 func (csh *certSetupHandler) SetupApplicationConnectorCertificate() error {
-	// TODO: we should consider validating overrides provided by the user
 	if csh.certAndKeyProvided() {
 		return csh.populateSecrets([]byte(csh.options.caKey), []byte(csh.options.caCertificate))
 	}
@@ -76,7 +76,18 @@ func (csh *certSetupHandler) certificatesExists() (bool, error) {
 }
 
 func (csh *certSetupHandler) certAndKeyProvided() bool {
-	return csh.options.caKey != "" && csh.options.caCertificate != ""
+	if csh.options.caKey == "" && csh.options.caCertificate == "" {
+		return false
+	}
+
+	_, err := tls.X509KeyPair([]byte(csh.options.caCertificate), []byte(csh.options.caKey))
+	if err != nil {
+		logrus.Warningf("Failed to parse key and certificate, key or certificate is invalid: %s", err.Error())
+		logrus.Infoln("New key and certificate will be generated.")
+		return false
+	}
+
+	return true
 }
 
 func (csh *certSetupHandler) generateCertificate(key *rsa.PrivateKey) (*x509.Certificate, error) {

@@ -71,6 +71,29 @@ VsfqyMGcgeIrI2mzI8oDAHb0xkrKiQpOAGoq9ejBujwDI3L2g2MToHhB0aataCmC
 oiCU2Sf1LDG70bnyd0eLKshNEFjHEsVHJkzPwxeOFsM7xuKCZQ4uvnFBZyyQmuyY
 QbIjsJhuMRQuka2NB6eGq4qFaHHbkzc=
 -----END CERTIFICATE-----`
+
+	notMatchingCertificate = `-----BEGIN CERTIFICATE-----
+MIICmjCCAYICCQD5MM5a/ZNUQDANBgkqhkiG9w0BAQsFADAPMQ0wCwYDVQQDDARL
+eW1hMB4XDTE5MDcwMzEwMTYxNloXDTIwMDcwMjEwMTYxNlowDzENMAsGA1UEAwwE
+S3ltYTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOSOavHRErvHIBmX
+LUcva2rTu/SaqPERrz8S8IE2pQX6mJRwDZSJuGFUm803SBeuo/DPDjnqWYM2Grf0
+vK1ftjs8dQ61hYVbkeAefcCFVBGtHeTtpkm/YqL6pa8iRpX2ZBG5A92GVDBlfhS8
+yzeAgCeTnxodPVKRW7uoSsei8/+iOI0RAR07P9lPNvbiNW1q0hox0TF0Bo3VwrHP
+CbhHNbFX4YBG9xCGLwyt4T1yjP4dcUkeouMRB2tsg40c85zjFXUEAGs46LQTasfc
+GpH/z5Wq925cR7/0ykW88AEnuY2wt65XXFmCLcJjJNVyyfVifqXawiuYg5kAFb8U
+wkvvJNsCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAdxZsRi/1qHrrA/+pmpZgwz9G
+BmECYujN3Hos6hz768vLAdK2BfkEplH/VY9qg/PLbuhGIL76x8AQEAlA2859Zxrw
+3q7QJE0wZxU95Kh43E3VY1ArF+/GHq/zu/Am44zgQsM4yyeZal9qyxcgLeAxG97+
+kas7i+NCwSlU4kYjBy5O/5upa1do+MLqLIKezLC1wAVlw0pZmCuWXrGgP4gwx++9
+ob8w/gmij/nh5zApgrrhUXBccl4TntGsR664jMxU0I7eJySGfshjXCbh7oZEOVHm
+ibwixBXWcQIr7xX801h/MkAtVLH4e5vy3YLLojYMp3ak8VQubcLGNKlHUP86Bg==
+-----END CERTIFICATE-----`
+
+	invalidCertificate = `-----BEGIN CERTIFICATE-----
+-----END CERTIFICATE-----`
+
+	invalidKey = `-----BEGIN RSA PRIVATE KEY-----
+-----END RSA PRIVATE KEY-----`
 )
 
 var (
@@ -79,41 +102,6 @@ var (
 )
 
 func TestCertSetupHandler_SetupApplicationConnectorCertificate(t *testing.T) {
-
-	t.Run("should update secrets with new certificates", func(t *testing.T) {
-		// given
-		validityTime := time.Minute * 60
-
-		secretRepository := fakeRepositoryWithEmptySecrets()
-
-		options := &options{
-			connectorCertificateSecret: connectorSecretNamespacedName,
-			caCertificateSecret:        caSecretNamespacedName,
-			caCertificate:              "",
-			caKey:                      "",
-			generatedValidityTime: validityTime,
-		}
-
-		certSetupHandler := NewCertificateSetupHandler(options, secretRepository)
-
-		// when
-		err := certSetupHandler.SetupApplicationConnectorCertificate()
-
-		// then
-		require.NoError(t, err)
-
-		caSecret, err := secretRepository.Get(caSecretNamespacedName)
-		require.NoError(t, err)
-		caCert := assertCertificate(t, caSecret["cacert"])
-
-		connectorSecret, err := secretRepository.Get(connectorSecretNamespacedName)
-		require.NoError(t, err)
-		connectorCaCert := assertCertificate(t, connectorSecret["ca.crt"])
-		assertKey(t, connectorSecret["ca.key"])
-
-		assert.Equal(t, caCert, connectorCaCert)
-		assert.True(t, caCert.NotAfter.Unix() <= time.Now().Add(validityTime).Unix())
-	})
 
 	t.Run("should not modify existing certificates if new ones not provided", func(t *testing.T) {
 		// given
@@ -248,6 +236,92 @@ func TestCertSetupHandler_SetupApplicationConnectorCertificate(t *testing.T) {
 		require.Error(t, err)
 	})
 
+}
+
+func TestCertSetupHandler_SetupApplicationConnectorCertificate_GeneratingCertificates(t *testing.T) {
+	validityTime := time.Minute * 60
+
+	for _, test := range []struct {
+		description string
+		caCert      string
+		caKey       string
+	}{
+		{
+			description: "certificate and key not provided",
+			caCert:      "",
+			caKey:       "",
+		},
+		{
+			description: "certificate not provided",
+			caCert:      "",
+			caKey:       privateKeyPem,
+		},
+		{
+			description: "key not provided",
+			caCert:      caCertificateSecretKey,
+			caKey:       "",
+		},
+		{
+			description: "certificate is invalid pem",
+			caCert:      "invalid",
+			caKey:       privateKeyPem,
+		},
+		{
+			description: "key is invalid pem",
+			caCert:      certificatePem,
+			caKey:       "invalid",
+		},
+		{
+			description: "certificate is invalid",
+			caCert:      invalidCertificate,
+			caKey:       privateKeyPem,
+		},
+		{
+			description: "key is invalid",
+			caCert:      certificatePem,
+			caKey:       invalidKey,
+		},
+		{
+			description: "key and certificate does not match",
+			caCert:      notMatchingCertificate,
+			caKey:       privateKeyPem,
+		},
+	} {
+		t.Run("should generate key and certificate when "+test.description, func(t *testing.T) {
+			secretRepository := fakeRepositoryWithEmptySecrets()
+
+			options := &options{
+				connectorCertificateSecret: connectorSecretNamespacedName,
+				caCertificateSecret:        caSecretNamespacedName,
+				caCertificate:              test.caCert,
+				caKey:                      test.caKey,
+				generatedValidityTime: validityTime,
+			}
+
+			certSetupHandler := NewCertificateSetupHandler(options, secretRepository)
+
+			// when
+			err := certSetupHandler.SetupApplicationConnectorCertificate()
+
+			// then
+			require.NoError(t, err)
+			assertCertificateAndKeyGenerated(t, validityTime, secretRepository)
+		})
+	}
+}
+
+func assertCertificateAndKeyGenerated(t *testing.T, validityTime time.Duration, secretRepository SecretRepository) {
+	caSecret, err := secretRepository.Get(caSecretNamespacedName)
+	require.NoError(t, err)
+	caCert := assertCertificate(t, caSecret["cacert"])
+
+	connectorSecret, err := secretRepository.Get(connectorSecretNamespacedName)
+	require.NoError(t, err)
+	connectorCaCert := assertCertificate(t, connectorSecret["ca.crt"])
+	assertKey(t, connectorSecret["ca.key"])
+
+	assert.Equal(t, caCert, connectorCaCert)
+	assert.True(t, caCert.NotAfter.Unix() <= time.Now().Add(validityTime).Unix())
 }
 
 func assertCertificate(t *testing.T, cert []byte) *x509.Certificate {
