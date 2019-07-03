@@ -25,6 +25,7 @@ type Manager interface {
 type SecretRepository interface {
 	Get(name types.NamespacedName) (map[string][]byte, error)
 	Upsert(name types.NamespacedName, data map[string][]byte) error
+	ValuesProvided(secretName types.NamespacedName, keys []string) (bool, error)
 }
 
 type repository struct {
@@ -37,6 +38,28 @@ func NewSecretRepository(secretsManagerConstructor ManagerConstructor) SecretRep
 	return &repository{
 		secretsManagerConstructor: secretsManagerConstructor,
 	}
+}
+
+// ValuesProvided specifies if the secret exists with not empty values for provided keys
+func (r *repository) ValuesProvided(secretName types.NamespacedName, keys []string) (bool, error) {
+	secretManager := r.secretsManagerConstructor(secretName.Namespace)
+
+	secret, err := secretManager.Get(secretName.Name, metav1.GetOptions{})
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			return false, nil
+		}
+
+		return false, errors.Wrap(err, "Failed to get secret")
+	}
+
+	for _, key := range keys {
+		if len(secret.Data[key]) == 0 {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }
 
 // Get returns secret data for specified name

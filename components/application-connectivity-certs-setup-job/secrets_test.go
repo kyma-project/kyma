@@ -4,6 +4,10 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
+	v1 "k8s.io/api/core/v1"
+
 	"github.com/kyma-project/kyma/components/application-connectivity-certs-setup-job/mocks"
 
 	"k8s.io/apimachinery/pkg/types"
@@ -174,6 +178,88 @@ func TestRepository_Upsert(t *testing.T) {
 		// then
 		assert.Error(t, err)
 		secretsManagerMock.AssertExpectations(t)
+	})
+
+}
+
+func TestRepository_ValuesProvided(t *testing.T) {
+
+	testCases := []struct {
+		description    string
+		secret         *v1.Secret
+		error          error
+		searchedKeys   []string
+		valuesProvided bool
+	}{
+		{
+			description: "should return true if values provided",
+			secret: makeSecret(namespacedName, map[string][]byte{
+				dataKey: []byte("value"),
+			}),
+			searchedKeys:   []string{dataKey},
+			valuesProvided: true,
+		},
+		{
+			description: "should return false if value empty",
+			secret: makeSecret(namespacedName, map[string][]byte{
+				dataKey: []byte(""),
+			}),
+			searchedKeys:   []string{dataKey},
+			valuesProvided: false,
+		},
+		{
+			description: "should return false if at least one value is empty",
+			secret: makeSecret(namespacedName, map[string][]byte{
+				dataKey:      []byte("data"),
+				"anotherKey": []byte(""),
+			}),
+			searchedKeys:   []string{dataKey, "anotherKey"},
+			valuesProvided: false,
+		},
+		{
+			description:    "should return false if value does not exist",
+			secret:         makeSecret(namespacedName, map[string][]byte{}),
+			searchedKeys:   []string{dataKey},
+			valuesProvided: false,
+		},
+		{
+			description:    "should return false if secret not found",
+			secret:         nil,
+			error:          k8serrors.NewNotFound(schema.GroupResource{}, "error"),
+			searchedKeys:   []string{dataKey},
+			valuesProvided: false,
+		},
+	}
+
+	for _, test := range testCases {
+		t.Run(test.description, func(t *testing.T) {
+			// given
+			secretsManagerMock := &mocks.Manager{}
+			secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(test.secret, test.error)
+
+			repository := NewSecretRepository(prepareManagerConstructor(secretsManagerMock))
+
+			// when
+			provided, err := repository.ValuesProvided(namespacedName, test.searchedKeys)
+
+			// then
+			require.NoError(t, err)
+			assert.Equal(t, test.valuesProvided, provided)
+		})
+	}
+
+	t.Run("should return error when failed to get secret", func(t *testing.T) {
+		// given
+		secretsManagerMock := &mocks.Manager{}
+		secretsManagerMock.On("Get", secretName, metav1.GetOptions{}).Return(nil, errors.New("error"))
+
+		repository := NewSecretRepository(prepareManagerConstructor(secretsManagerMock))
+
+		// when
+		_, err := repository.ValuesProvided(namespacedName, []string{dataKey})
+
+		// then
+		require.Error(t, err)
 	})
 
 }

@@ -9,6 +9,8 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/pkg/errors"
 )
 
@@ -33,10 +35,19 @@ func NewCertificateSetupHandler(options *options, secretRepo SecretRepository) *
 }
 
 func (csh *certSetupHandler) SetupApplicationConnectorCertificate() error {
-	// TODO - should we validate those provided?
-	// TODO - should check if secrets already populated?
+	// TODO: we should consider validating overrides provided by the user
 	if csh.certAndKeyProvided() {
 		return csh.populateSecrets([]byte(csh.options.caKey), []byte(csh.options.caCertificate))
+	}
+
+	certsExists, err := csh.certificatesExists()
+	if err != nil {
+		return errors.Wrap(err, "Failed to check if certificates exists")
+	}
+
+	if certsExists {
+		logrus.Info("Certificates already exist in the Secrets")
+		return nil
 	}
 
 	key, certificate, err := csh.generateKeyAndCertificate()
@@ -48,6 +59,20 @@ func (csh *certSetupHandler) SetupApplicationConnectorCertificate() error {
 	keyBytes := pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(key)})
 
 	return csh.populateSecrets(keyBytes, certBytes)
+}
+
+func (csh *certSetupHandler) certificatesExists() (bool, error) {
+	connectorCertsProvided, err := csh.secretRepository.ValuesProvided(csh.options.connectorCertificateSecret, []string{connectorKeySecretKey, connectorCertSecretKey})
+	if err != nil {
+		return false, errors.Wrap(err, "Failed to check if Connector Service certs exist in the Secret")
+	}
+
+	caCertProvided, err := csh.secretRepository.ValuesProvided(csh.options.caCertificateSecret, []string{caCertificateSecretKey})
+	if err != nil {
+		return false, errors.Wrap(err, "Failed to check if CA cert exists in the Secret")
+	}
+
+	return connectorCertsProvided && caCertProvided, nil
 }
 
 func (csh *certSetupHandler) certAndKeyProvided() bool {
@@ -84,6 +109,8 @@ func (csh *certSetupHandler) generateCertificate(key *rsa.PrivateKey) (*x509.Cer
 }
 
 func (csh *certSetupHandler) generateKeyAndCertificate() (*rsa.PrivateKey, *x509.Certificate, error) {
+	logrus.Info("Generating certificate and key")
+
 	key, err := rsa.GenerateKey(rand.Reader, rsaKeySize)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "Failed to generate private key")
@@ -98,6 +125,8 @@ func (csh *certSetupHandler) generateKeyAndCertificate() (*rsa.PrivateKey, *x509
 }
 
 func (csh *certSetupHandler) populateSecrets(pemKey, pemCert []byte) error {
+	logrus.Info("Populating secrets")
+
 	caCertSecretData := map[string][]byte{
 		caCertificateSecretKey: pemCert,
 	}

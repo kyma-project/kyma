@@ -45,3 +45,24 @@ func (_m *SecretRepository) Upsert(name types.NamespacedName, data map[string][]
 
 	return r0
 }
+
+// ValuesProvided provides a mock function with given fields: secretName, keys
+func (_m *SecretRepository) ValuesProvided(secretName types.NamespacedName, keys []string) (bool, error) {
+	ret := _m.Called(secretName, keys)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(types.NamespacedName, []string) bool); ok {
+		r0 = rf(secretName, keys)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(types.NamespacedName, []string) error); ok {
+		r1 = rf(secretName, keys)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}

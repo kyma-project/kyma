@@ -115,6 +115,58 @@ func TestCertSetupHandler_SetupApplicationConnectorCertificate(t *testing.T) {
 		assert.True(t, caCert.NotAfter.Unix() <= time.Now().Add(validityTime).Unix())
 	})
 
+	t.Run("should not modify existing certificates if new ones not provided", func(t *testing.T) {
+		// given
+		existingCaSecret := &v1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      caSecretNamespacedName.Name,
+				Namespace: caSecretNamespacedName.Namespace,
+			},
+			Data: map[string][]byte{
+				"cacert": []byte("cacert"),
+			},
+		}
+		existingConnectorSecret := &v1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      connectorSecretNamespacedName.Name,
+				Namespace: connectorSecretNamespacedName.Namespace,
+			},
+			Data: map[string][]byte{
+				"ca.crt": []byte("cacert"),
+				"ca.key": []byte("key"),
+			},
+		}
+
+		fakeClientSet := fake.NewSimpleClientset(existingCaSecret, existingConnectorSecret).CoreV1()
+
+		secretRepository := NewSecretRepository(func(namespace string) Manager {
+			return fakeClientSet.Secrets(namespace)
+		})
+
+		options := &options{
+			connectorCertificateSecret: connectorSecretNamespacedName,
+			caCertificateSecret:        caSecretNamespacedName,
+			caCertificate:              "",
+			caKey:                      "",
+		}
+
+		certSetupHandler := NewCertificateSetupHandler(options, secretRepository)
+
+		// when
+		err := certSetupHandler.SetupApplicationConnectorCertificate()
+
+		// then
+		require.NoError(t, err)
+
+		caSecret, err := secretRepository.Get(caSecretNamespacedName)
+		require.NoError(t, err)
+		assert.EqualValues(t, existingCaSecret.Data, caSecret)
+
+		connectorSecret, err := secretRepository.Get(connectorSecretNamespacedName)
+		require.NoError(t, err)
+		assert.EqualValues(t, existingConnectorSecret.Data, connectorSecret)
+	})
+
 	t.Run("should update secrets with provided certificates", func(t *testing.T) {
 		// given
 		secretRepository := fakeRepositoryWithEmptySecrets()
