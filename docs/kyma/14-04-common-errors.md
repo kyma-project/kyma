@@ -5,7 +5,7 @@ type: Troubleshooting
 
 ## Istio-related error
 
-In some cases, the logs of Kyma installer may show this error, which seemingly indicates problems with Istio:
+In some cases, the logs of the Kyma Installer may show this error, which seemingly indicates problems with Istio:
 
 ```
 Step error:  Details: Helm install error: rpc error: code = Unknown desc = validation failed: [unable to recognize "": no matches for kind "DestinationRule" in version "networking.istio.io/v1alpha3", unable to recognize "": no matches for kind "DestinationRule" in version "networking.istio.io/v1alpha3", unable to recognize "": no matches for kind "attributemanifest" in version "config.istio.io/v1alpha2"

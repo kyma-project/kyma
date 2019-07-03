@@ -193,7 +193,7 @@ Follow these steps:
     done
     ```
 After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
-In case of an error, you can fetch the logs from the Installer by running:
+In case of an error, you can fetch the logs from the Kyma Installer by running:
     ```
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
@@ -420,7 +420,7 @@ Follow these steps:
     done
     ```
     After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
-    In case of an error, you can fetch the logs from the Installer by running:
+    In case of an error, you can fetch the logs from the Kyma Installer by running:
     ```
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```

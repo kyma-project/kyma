@@ -130,7 +130,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 
 After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
 
-If you receive an error, fetch the Installer logs using this command:
+If you receive an error, fetch the Kyma Installer logs using this command:
 
   ```
   kubectl -n kyma-installer logs -l 'name=kyma-installer'
@@ -283,7 +283,7 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 
 After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
 
-If you receive an error, fetch the Installer logs using this command:
+If you receive an error, fetch the Kyma Installer logs using this command:
 
   ```
   kubectl -n kyma-installer logs -l 'name=kyma-installer'
