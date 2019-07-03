@@ -12,6 +12,8 @@ global.applicationConnectorCaKey: {PRIVATE_KEY}
 global.applicationConnectorCa: {CERTIFICATE}
 ```
 
+>**NOTE:** For the Application Connector to use provided key and certificate, both values need to be specified.
+
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents: 
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
 
