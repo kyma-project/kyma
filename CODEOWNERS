@@ -113,7 +113,7 @@
 /resources/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `log-ui` subchart
-/resources/logging/charts/log-ui/ @rakesh-garimella @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @hisarbalik @a-thaler @igor-karpukhin @anishj0shi
+/resources/logging/charts/log-ui/ @rakesh-garimella @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @hisarbalik @a-thaler @igor-karpukhin
 
 # The `event-bus` chart
 /resources/event-bus/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
@@ -125,7 +125,7 @@
 /resources/knative-provisioner-natss/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # The `k8s-dashboard-proxy` subchart
-/resources/core/charts/k8s-dashboard-proxy/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @sayanh @anishj0shi
+/resources/core/charts/k8s-dashboard-proxy/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # The `application-broker` subchart
 /resources/application-connector/charts/application-broker @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -273,7 +273,7 @@
 /components/event-bus/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # K8s Dashboard Proxy Component
-/components/k8s-dashboard-proxy/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh @anishj0shi
+/components/k8s-dashboard-proxy/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # Event Service Component
 /components/event-service/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
