@@ -375,12 +375,6 @@ func serviceDetailsToServiceDefinitionBasic(basic BasicAuth) model.Basic {
 	}
 }
 
-func serviceDetailsToServiceDefinitionCertficate(certificate CertificateGen) model.CertificateGen {
-	return model.CertificateGen{
-		CommonName: certificate.CommonName,
-	}
-}
-
 func (api API) MarshalJSON() ([]byte, error) {
 	bytes, err := api.marshalWithJSONSpec()
 	if err == nil {
