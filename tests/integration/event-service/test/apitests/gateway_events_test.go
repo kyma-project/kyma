@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/gateway/test/testkit"
+	"github.com/kyma-project/kyma/tests/integration/event-service/test/testkit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
