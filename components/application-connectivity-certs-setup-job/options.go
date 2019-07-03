@@ -54,9 +54,10 @@ func parseArgs() *options {
 
 func (o *options) String() string {
 	return fmt.Sprintf("--connectorCertificateSecret=%s --caCertificateSecret=%s "+
-		"--generatedValidityTime=%d \n"+
+		"--generatedValidityTime=%s "+
 		"CA certificate provided: %t, CA key provided: %t",
-		o.connectorCertificateSecret, o.caCertificateSecret, o.generatedValidityTime,
+		o.connectorCertificateSecret, o.caCertificateSecret,
+		o.generatedValidityTime.String(),
 		o.caCertificate != "", o.caKey != "")
 }
 
