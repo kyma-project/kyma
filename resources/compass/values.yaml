@@ -1,0 +1,31 @@
+global:
+  images:
+    containerRegistry:
+      path: eu.gcr.io/kyma-project/incubator
+    connector:
+      dir: pr/
+      version: "PR-59"
+    director:
+      dir: pr/
+      version: "PR-79"
+    gateway:
+      dir: pr/
+      version: "PR-59"
+    healthchecker:
+      dir: develop/
+      version: "6d888e37"
+    tests:
+      e2e:
+        dir: develop/
+        version: "ec80b7e4"
+
+  director:
+    port: 3000
+  
+  connector:
+    port: 3000
+
+  istio:
+    gateway:
+      name: kyma-gateway
+      namespace: kyma-system

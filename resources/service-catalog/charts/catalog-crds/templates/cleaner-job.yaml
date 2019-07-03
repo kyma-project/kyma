@@ -81,6 +81,8 @@ spec:
   activeDeadlineSeconds: 100
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         cleaner-job: "true"
         app: {{ template "fullname" . }}-clean-job

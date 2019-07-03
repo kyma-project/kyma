@@ -39,10 +39,10 @@ global:
     version: f1454344
   event_service:
     dir: develop/
-    version: 5d1f50d1
+    version: 42e65688
   gateway_tests:
     dir: develop/
-    version: fedca3db
+    version: 42e65688
   application_connectivity_validator:
     dir: develop/
     version: d7092530

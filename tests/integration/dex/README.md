@@ -19,4 +19,4 @@ To add a new test:
 
 ### Configure Kyma
 
-After building and pushing the Docker image, set the proper tag in the `resources/core/values.yaml` file, in the`acceptanceTest.imageTag` property.
+After building and pushing the Docker image, set the proper directory and tag in the `resources/dex/values.yaml` file, in the `dex_integration_tests` property.
