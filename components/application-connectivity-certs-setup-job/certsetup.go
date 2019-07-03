@@ -46,7 +46,7 @@ func (csh *certSetupHandler) SetupApplicationConnectorCertificate() error {
 	}
 
 	if certsExists {
-		logrus.Info("Certificates already exist in the Secrets")
+		logrus.Info("Certificate and key already exist in the Secrets")
 		return nil
 	}
 
@@ -136,7 +136,7 @@ func (csh *certSetupHandler) generateKeyAndCertificate() (*rsa.PrivateKey, *x509
 }
 
 func (csh *certSetupHandler) populateSecrets(pemKey, pemCert []byte) error {
-	logrus.Info("Populating secrets")
+	logrus.Info("Populating secrets with key and certificate")
 
 	caCertSecretData := map[string][]byte{
 		caCertificateSecretKey: pemCert,
