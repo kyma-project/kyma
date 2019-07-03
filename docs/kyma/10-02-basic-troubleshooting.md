@@ -5,7 +5,7 @@ type: Troubleshooting
 
 ## Console UI password
 
-If you don't set a password for the **admin@kyma.cx** user with the `--password` parameter or you forget the password you set, you can get it from the `admin-user` Secret located in the `kyma-system` Namespace. Run this command:
+If you forget the password for the **admin@kyma.cx**, you can get it from the `admin-user` Secret located in the `kyma-system` Namespace. Run this command:
 
 ```
 kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
