@@ -62,8 +62,8 @@ global:
     dir: pr/
     version: PR-4386
   console_backend_service_test:
-    dir: pr/
-    version: PR-4386
+    dir: develop/
+    version: "82505335"
   cluster_users_test:
     dir: pr/
     version: "PR-4647"
