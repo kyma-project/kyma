@@ -1,0 +1,16 @@
+knative-serving:
+  gateway:
+    name: kyma-gateway.kyma-system.svc.cluster.local
+    serviceUrl: istio-ingressgateway.istio-system.svc.cluster.local
+
+global:
+  isLocalEnv: false
+  knative: false
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  test_knative_serving_acceptance:
+    dir: develop/
+    version: adaa993d
+
+test:
+  target: "Test Target"

@@ -23,6 +23,8 @@ spec:
       namespace: "kyma-installer"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
+    - name: "knative-serving-crds"
+      namespace: "knative-serving"
     - name: "knative-serving"
       namespace: "knative-serving"
     - name: "knative-build"
