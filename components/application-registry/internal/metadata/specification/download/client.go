@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"time"
 )
 
 const timeout = 5
@@ -36,13 +35,13 @@ func (d downloader) Fetch(url string, credentials *authorization.Credentials, pa
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return nil, apperrors.Internal("Failed to fetch from Asset Store.")
+		return nil, apperrors.Internal("Failed to fetch from %s.", url)
 	}
 
 	{
 		bytes, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			return nil, apperrors.Internal("Failed to read response body from Asset Store.")
+			return nil, apperrors.Internal("Failed to read response body from %s.", url)
 		}
 
 		return bytes, nil
@@ -80,11 +79,9 @@ func (d downloader) requestAPISpec(specUrl string, credentials *authorization.Cr
 }
 
 func (d downloader) addAuthorization(r *http.Request, credentials *authorization.Credentials) apperrors.AppError {
-	client := &http.Client{
-		Timeout: time.Duration(timeout) * time.Second}
 
 	ts := func(transport *http.Transport) {
-		client.Transport = transport
+		d.client.Transport = transport
 	}
 
 	strategy := d.authorizationFactory.Create(credentials)

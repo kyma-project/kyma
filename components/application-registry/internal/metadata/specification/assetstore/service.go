@@ -44,7 +44,7 @@ func NewService(repository DocsTopicRepository, uploadClient upload.Client, inse
 	downloadClient := download.NewClient(&http.Client{
 		Timeout:   time.Duration(assetstoreRequestTimeout) * time.Second,
 		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureAssetDownload}},
-	}, authorization.NewStrategyFactory(authorization.FactoryConfiguration{}))
+	}, authorization.NewStrategyFactory(authorization.FactoryConfiguration{OAuthClientTimeout: assetstoreRequestTimeout}))
 
 	return &service{
 		docsTopicRepository: repository,
