@@ -268,7 +268,7 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 		}
 
 		if serviceDetails.Api.SpecificationRequestParameters != nil {
-			serviceDefinition.Api.RequestParameters = serviceDetailsRequestParametersToServiceDefinitionRequestParameters(serviceDetails.Api.SpecificationRequestParameters)
+			serviceDefinition.Api.SpecificationRequestParameters = serviceDetailsRequestParametersToServiceDefinitionRequestParameters(serviceDetails.Api.SpecificationRequestParameters)
 		}
 	}
 
@@ -293,6 +293,7 @@ func serviceDetailsRequestParametersToServiceDefinitionRequestParameters(request
 	if requestParameters == nil {
 		return nil
 	}
+
 	return &model.RequestParameters{
 		Headers:         requestParameters.Headers,
 		QueryParameters: requestParameters.QueryParameters,
