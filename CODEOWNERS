@@ -221,9 +221,6 @@
 # Binding usage controller Component
 /components/service-binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# Installer Component
-/components/installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @Demonsthere
-
 # Kyma Operator Component
 /components/kyma-operator/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
 
