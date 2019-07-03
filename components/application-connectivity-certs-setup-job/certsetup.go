@@ -65,7 +65,9 @@ func (csh *certSetupHandler) generateCertificate(key *rsa.PrivateKey) (*x509.Cer
 		Subject: pkix.Name{
 			CommonName: "Kyma",
 		},
-		NotAfter: currentTime.Add(csh.options.generatedValidityTime),
+		NotAfter:              currentTime.Add(csh.options.generatedValidityTime),
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageCertSign | x509.KeyUsageDigitalSignature,
+		BasicConstraintsValid: true,
 	}
 
 	certBytes, err := x509.CreateCertificate(rand.Reader, certTemplate, certTemplate, &key.PublicKey, key)
