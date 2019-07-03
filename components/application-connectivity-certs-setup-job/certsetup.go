@@ -37,6 +37,7 @@ func NewCertificateSetupHandler(options *options, secretRepo SecretRepository) *
 
 func (csh *certSetupHandler) SetupApplicationConnectorCertificate() error {
 	if csh.certAndKeyProvided() {
+		logrus.Infoln("Valid certificate and key provided. Skipping generation.")
 		return csh.populateSecrets([]byte(csh.options.caKey), []byte(csh.options.caCertificate))
 	}
 
@@ -46,7 +47,7 @@ func (csh *certSetupHandler) SetupApplicationConnectorCertificate() error {
 	}
 
 	if certsExists {
-		logrus.Info("Certificate and key already exist in the Secrets")
+		logrus.Info("Certificate and key already exist in the Secrets. Skipping generation.")
 		return nil
 	}
 
