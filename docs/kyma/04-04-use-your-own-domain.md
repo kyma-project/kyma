@@ -236,7 +236,7 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 - [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 - A domain for your AKS cluster
 
->**NOTE:** Running Kyma on GKE requires three [`standard DSv2` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-memory#dsv2-series-11-15). You create these machines when you complete the **Prepare the AKS cluster** step.
+>**NOTE:** Running Kyma on AKS requires three [`standard DSv2` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-memory#dsv2-series-11-15). You create these machines when you complete the **Prepare the AKS cluster** step.
 
 ## Choose the release to install
 
