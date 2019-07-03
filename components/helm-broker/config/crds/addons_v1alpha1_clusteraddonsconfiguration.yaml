@@ -34,6 +34,9 @@ spec:
                 - url
                 type: object
               type: array
+            reprocessRequest:
+              format: int64
+              type: integer
           required:
           - repositories
           type: object

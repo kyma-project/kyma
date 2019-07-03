@@ -310,7 +310,6 @@
 /tests/api-controller-acceptance-tests/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # apiserver-proxy tests
-/tests/apiserver-proxy-tests/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 /tests/integration/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Console Backend Service tests
@@ -367,7 +366,7 @@
 /tests/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # Event Service Tests
-/tests/gateway-tests/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
+/tests/gateway/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # E2E Backup Tests
 /tests/end-to-end/backup-restore-test @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs

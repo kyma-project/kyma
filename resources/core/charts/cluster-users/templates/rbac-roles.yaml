@@ -29,6 +29,7 @@ rules:
     - "*" #give access to all non resource urls
   verbs:
     - "list"
+    - "get"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
