@@ -18,6 +18,9 @@ import (
 const (
 	crPropagationWaitTime              = 10
 	deleteApplicationResourcesWaitTime = 10
+
+	k8sResourceNameMaxLength = 64
+	requestParamsNameFormat = "params-%s"
 )
 
 func TestK8sResources(t *testing.T) {
@@ -68,7 +71,10 @@ func TestK8sResources(t *testing.T) {
 
 		serviceId := postResponseData.ID
 		resourceName := "app-" + dummyApp.Name + "-" + serviceId
-		paramsSecretName := fmt.Sprintf("params-%s", resourceName)
+		paramsSecretName := fmt.Sprintf(requestParamsNameFormat, resourceName)
+		if len(paramsSecretName) > k8sResourceNameMaxLength {
+			paramsSecretName = paramsSecretName[0 : k8sResourceNameMaxLength-1]
+		}
 
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
@@ -191,7 +197,10 @@ func TestK8sResources(t *testing.T) {
 
 		serviceId := postResponseData.ID
 		resourceName := "app-" + dummyApp.Name + "-" + serviceId
-		paramsSecretName := fmt.Sprintf("params-%s", resourceName)
+		paramsSecretName := fmt.Sprintf(requestParamsNameFormat, resourceName)
+		if len(paramsSecretName) > k8sResourceNameMaxLength {
+			paramsSecretName = paramsSecretName[0 : k8sResourceNameMaxLength-1]
+		}
 
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
@@ -313,7 +322,11 @@ func TestK8sResources(t *testing.T) {
 
 		serviceId := postResponseData.ID
 		resourceName := "app-" + dummyApp.Name + "-" + serviceId
-		paramsSecretName := fmt.Sprintf("params-%s", resourceName)
+
+		paramsSecretName := fmt.Sprintf(requestParamsNameFormat, resourceName)
+		if len(paramsSecretName) > k8sResourceNameMaxLength {
+			paramsSecretName = paramsSecretName[0 : k8sResourceNameMaxLength-1]
+		}
 
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
@@ -1227,7 +1240,10 @@ func TestK8sResources(t *testing.T) {
 
 		serviceId := postResponseData.ID
 		resourceName := "app-" + dummyApp.Name + "-" + serviceId
-		paramsSecretName := fmt.Sprintf("params-%s", resourceName)
+		paramsSecretName := fmt.Sprintf(requestParamsNameFormat, resourceName)
+		if len(paramsSecretName) > k8sResourceNameMaxLength {
+			paramsSecretName = paramsSecretName[0 : k8sResourceNameMaxLength-1]
+		}
 
 		//when
 		err = k8sResourcesClient.DeleteApplication(dummyApp.Name, &v1.DeleteOptions{})
