@@ -11,4 +11,4 @@ To test your changes and build the image, run the `make build build-image` comma
 
 ## Configuring Kyma
 
-After building and pushing the Docker image, set the proper directory and tag in the `resources/core/charts/api-controller/values.yaml` file, in the `tests.image.version` property.
+After building and pushing the Docker image, configure it to be used in Kyma by setting proper values for `dir` and `version` in the `global.api_controller_acceptance_tests` property in the `resources/core/values.yaml` file.
