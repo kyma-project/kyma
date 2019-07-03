@@ -30,7 +30,7 @@ global:
     version: "PR-4582"
   api_controller_integration_tests:
     dir: pr/
-    version: "PR-4582"
+    version: "PR-4752"
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
