@@ -31,8 +31,8 @@ func parseArgs() *options {
 	connectorCertificateSecret := flag.String("connectorCertificateSecret", "kyma-integration/connector-service-app-ca", "Secret namespace/name used by the Connector Service")
 	caCertificateSecret := flag.String("caCertificateSecret", "istio-system/ca-certificates", "Secret namespace/name where CA certificate is kept")
 
-	caCertificate := flag.String("caCertificate", "", "Pem encoded CA certificate")
-	caKey := flag.String("caKey", "", "Pem encoded CA key")
+	caCertificate := flag.String("caCertificate", "", "Base64 encoded pem CA certificate")
+	caKey := flag.String("caKey", "", "Base64 encoded pem CA key")
 
 	generatedValidityTime := flag.String("generatedValidityTime", "", "Validity time of the generated certificate")
 

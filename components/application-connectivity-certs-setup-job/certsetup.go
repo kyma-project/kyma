@@ -6,7 +6,9 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/base64"
 	"encoding/pem"
+	"fmt"
 	"math/big"
 	"time"
 
@@ -36,11 +38,18 @@ func NewCertificateSetupHandler(options *options, secretRepo SecretRepository) *
 }
 
 func (csh *certSetupHandler) SetupApplicationConnectorCertificate() error {
+	logrus.Infoln("Checking if certificate and key provided...")
 	if csh.certAndKeyProvided() {
-		logrus.Infoln("Valid certificate and key provided. Skipping generation.")
-		return csh.populateSecrets([]byte(csh.options.caKey), []byte(csh.options.caCertificate))
+		caKey, caCert, err := csh.validateProvidedCertAndKey()
+		if err == nil {
+			logrus.Infoln("Valid certificate and key provided. Skipping generation.")
+			return csh.populateSecrets(caKey, caCert)
+		}
+
+		logrus.Warningf("Certificate or key is invalid: %s", err.Error())
 	}
 
+	logrus.Infoln("Checking if certificate and key exists in Secrets...")
 	certsExists, err := csh.certificatesExists()
 	if err != nil {
 		return errors.Wrap(err, "Failed to check if certificates exists")
@@ -51,6 +60,7 @@ func (csh *certSetupHandler) SetupApplicationConnectorCertificate() error {
 		return nil
 	}
 
+	logrus.Infoln("New key and certificate will be generated.")
 	key, certificate, err := csh.generateKeyAndCertificate()
 	if err != nil {
 		return errors.Wrap(err, "Failed to generate key and certificate")
@@ -77,18 +87,26 @@ func (csh *certSetupHandler) certificatesExists() (bool, error) {
 }
 
 func (csh *certSetupHandler) certAndKeyProvided() bool {
-	if csh.options.caKey == "" && csh.options.caCertificate == "" {
-		return false
-	}
+	return csh.options.caKey != "" && csh.options.caCertificate != ""
+}
 
-	_, err := tls.X509KeyPair([]byte(csh.options.caCertificate), []byte(csh.options.caKey))
+func (csh *certSetupHandler) validateProvidedCertAndKey() ([]byte, []byte, error) {
+	caKey, err := base64.StdEncoding.DecodeString(csh.options.caKey)
 	if err != nil {
-		logrus.Warningf("Failed to parse key and certificate, key or certificate is invalid: %s", err.Error())
-		logrus.Infoln("New key and certificate will be generated.")
-		return false
+		return nil, nil, errors.New(fmt.Sprintf("Failed to decode base64 key: %s", err.Error()))
 	}
 
-	return true
+	caCert, err := base64.StdEncoding.DecodeString(csh.options.caCertificate)
+	if err != nil {
+		return nil, nil, errors.New(fmt.Sprintf("Failed to decode base64 certificate: %s", err.Error()))
+	}
+
+	_, err = tls.X509KeyPair(caCert, caKey)
+	if err != nil {
+		return nil, nil, errors.New(fmt.Sprintf("Failed to parse key and certificate, key or certificate is invalid: %s", err.Error()))
+	}
+
+	return caKey, caCert, nil
 }
 
 func (csh *certSetupHandler) generateCertificate(key *rsa.PrivateKey) (*x509.Certificate, error) {

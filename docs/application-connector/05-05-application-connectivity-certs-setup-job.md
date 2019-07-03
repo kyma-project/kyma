@@ -16,8 +16,8 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **global.applicationConnectorCaKey** | Specifies the private key for the Application Connector. If not specified it will be generated. | `` |
-| **global.applicationConnectorCa** | Specifies the certificate for the Application Connector. If not specified it will be generated | `` |
+| **global.applicationConnectorCaKey** | Specifies the base64 encoded private key for the Application Connector. If not specified it will be generated. | `` |
+| **global.applicationConnectorCa** | Specifies the base64 encoded certificate for the Application Connector. If not specified it will be generated | `` |
 | **application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.name** | Specifies the Secret name to which the certificate and key for the Connector Service should be saved | `connector-service-app-ca` |
 | **application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.namespace** | Specifies the Secret namespace to which the certificate and key for the Connector Service should be saved | `kyma-integration` |
 | **application_connectivity_certs_setup_job.secrets.caCertificateSecret.name** | Specifies the Secret name to which the CA certificate should be saved | `application-connector-certs` |

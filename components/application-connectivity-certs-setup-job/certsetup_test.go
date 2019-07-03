@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"errors"
 	"testing"
@@ -162,8 +163,8 @@ func TestCertSetupHandler_SetupApplicationConnectorCertificate(t *testing.T) {
 		options := &options{
 			connectorCertificateSecret: connectorSecretNamespacedName,
 			caCertificateSecret:        caSecretNamespacedName,
-			caCertificate:              certificatePem,
-			caKey:                      privateKeyPem,
+			caCertificate:              base64Encode(certificatePem),
+			caKey:                      base64Encode(privateKeyPem),
 		}
 
 		certSetupHandler := NewCertificateSetupHandler(options, secretRepository)
@@ -196,8 +197,8 @@ func TestCertSetupHandler_SetupApplicationConnectorCertificate(t *testing.T) {
 		options := &options{
 			connectorCertificateSecret: connectorSecretNamespacedName,
 			caCertificateSecret:        caSecretNamespacedName,
-			caCertificate:              certificatePem,
-			caKey:                      privateKeyPem,
+			caCertificate:              base64Encode(certificatePem),
+			caKey:                      base64Encode(privateKeyPem),
 		}
 
 		certSetupHandler := NewCertificateSetupHandler(options, secretRepository)
@@ -223,8 +224,8 @@ func TestCertSetupHandler_SetupApplicationConnectorCertificate(t *testing.T) {
 		options := &options{
 			connectorCertificateSecret: connectorSecretNamespacedName,
 			caCertificateSecret:        caSecretNamespacedName,
-			caCertificate:              certificatePem,
-			caKey:                      privateKeyPem,
+			caCertificate:              base64Encode(certificatePem),
+			caKey:                      base64Encode(privateKeyPem),
 		}
 
 		certSetupHandler := NewCertificateSetupHandler(options, secretRepository)
@@ -252,39 +253,49 @@ func TestCertSetupHandler_SetupApplicationConnectorCertificate_GeneratingCertifi
 			caKey:       "",
 		},
 		{
+			description: "invalid base64 certificate",
+			caCert:      "invalid base 64",
+			caKey:       base64Encode(privateKeyPem),
+		},
+		{
+			description: "invalid base64 certificate",
+			caCert:      base64Encode(certificatePem),
+			caKey:       "invalid base 64",
+		},
+		{
 			description: "certificate not provided",
 			caCert:      "",
-			caKey:       privateKeyPem,
+			caKey:       base64Encode(privateKeyPem),
 		},
 		{
 			description: "key not provided",
-			caCert:      caCertificateSecretKey,
+			caCert:      base64Encode(certificatePem),
 			caKey:       "",
 		},
 		{
 			description: "certificate is invalid pem",
-			caCert:      "invalid",
-			caKey:       privateKeyPem,
+			caCert:      base64Encode("invalid"),
+			caKey:       base64Encode(privateKeyPem),
 		},
 		{
 			description: "key is invalid pem",
-			caCert:      certificatePem,
-			caKey:       "invalid",
+			caCert:      base64Encode(certificatePem),
+			caKey:       base64Encode("invalid"),
 		},
 		{
 			description: "certificate is invalid",
-			caCert:      invalidCertificate,
-			caKey:       privateKeyPem,
+			caCert:      base64Encode(invalidCertificate),
+			caKey:       base64Encode(privateKeyPem),
 		},
 		{
 			description: "key is invalid",
-			caCert:      certificatePem,
-			caKey:       invalidKey,
+			caCert:      base64Encode(certificatePem),
+			caKey:       base64Encode(invalidKey),
 		},
 		{
 			description: "key and certificate does not match",
-			caCert:      notMatchingCertificate,
-			caKey:       privateKeyPem,
+			caCert:      base64Encode(notMatchingCertificate),
+			caKey:       base64Encode(privateKeyPem),
 		},
 	} {
 		t.Run("should generate key and certificate when "+test.description, func(t *testing.T) {
@@ -367,4 +378,8 @@ func emptySecret(name types.NamespacedName) *v1.Secret {
 		},
 		Data: map[string][]byte{},
 	}
+}
+
+func base64Encode(data string) string {
+	return base64.StdEncoding.EncodeToString([]byte(data))
 }
