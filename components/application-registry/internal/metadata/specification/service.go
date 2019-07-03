@@ -1,6 +1,7 @@
 package specification
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
@@ -34,11 +35,14 @@ type specService struct {
 	downloadClient    download.Client
 }
 
-func NewSpecService(assetStoreService assetstore.Service, specRequestTimeout int) Service {
+func NewSpecService(assetStoreService assetstore.Service, specRequestTimeout int, insecureSpecDownload bool) Service {
 	return &specService{
 		assetStoreService: assetStoreService,
 		downloadClient: download.NewClient(&http.Client{
 			Timeout: time.Duration(specRequestTimeout) * time.Second,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSpecDownload},
+			},
 		}, authorization.NewStrategyFactory(authorization.FactoryConfiguration{OAuthClientTimeout: specRequestTimeout})),
 	}
 }
