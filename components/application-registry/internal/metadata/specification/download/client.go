@@ -4,6 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -13,7 +14,7 @@ import (
 const timeout = 5
 
 type Client interface {
-	Fetch(url string, credentials *authorization.Credentials, parameters *authorization.RequestParameters) ([]byte, apperrors.AppError)
+	Fetch(url string, credentials *authorization.Credentials, parameters *model.RequestParameters) ([]byte, apperrors.AppError)
 }
 
 type downloader struct {
@@ -28,7 +29,7 @@ func NewClient(client *http.Client, authFactory authorization.StrategyFactory) C
 	}
 }
 
-func (d downloader) Fetch(url string, credentials *authorization.Credentials, parameters *authorization.RequestParameters) ([]byte, apperrors.AppError) {
+func (d downloader) Fetch(url string, credentials *authorization.Credentials, parameters *model.RequestParameters) ([]byte, apperrors.AppError) {
 	res, err := d.requestAPISpec(url, credentials, parameters)
 	if err != nil {
 		return nil, err
@@ -48,7 +49,7 @@ func (d downloader) Fetch(url string, credentials *authorization.Credentials, pa
 	}
 }
 
-func (d downloader) requestAPISpec(specUrl string, credentials *authorization.Credentials, parameters *authorization.RequestParameters) (*http.Response, apperrors.AppError) {
+func (d downloader) requestAPISpec(specUrl string, credentials *authorization.Credentials, parameters *model.RequestParameters) (*http.Response, apperrors.AppError) {
 	req, err := http.NewRequest(http.MethodGet, specUrl, nil)
 	if err != nil {
 		return nil, apperrors.Internal("Creating request for fetching API spec from %s failed, %s", specUrl, err.Error())

@@ -165,7 +165,7 @@ func (svc *specService) fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
 
 	specificationCredentials := toSpecAuthorizationCredentials(api)
 
-	return svc.downloadClient.Fetch(specUrl, specificationCredentials, nil)
+	return svc.downloadClient.Fetch(specUrl, specificationCredentials, api.SpecificationRequestParameters)
 }
 
 func determineSpecUrl(api *model.API) (string, apperrors.AppError) {

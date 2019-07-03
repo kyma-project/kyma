@@ -3,6 +3,7 @@ package download
 import (
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"net/http"
@@ -66,7 +67,7 @@ func TestDownloader_Fetch(t *testing.T) {
 		queryKey := "query"
 		queryValues := []string{"customParam", "secondParam"}
 
-		customParams := &authorization.RequestParameters{
+		customParams := &model.RequestParameters{
 			Headers:         &map[string][]string{headersKey: {headersVal}},
 			QueryParameters: &map[string][]string{queryKey: queryValues},
 		}
