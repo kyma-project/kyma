@@ -74,7 +74,6 @@ type StatusRepository struct {
 
 // CommonAddonsConfigurationStatus defines the observed state of AddonsConfiguration
 type CommonAddonsConfigurationStatus struct {
-	// +kubebuilder:validation:Enum=Ready,Pending,Failed
 	Phase              AddonsConfigurationPhase `json:"phase"`
 	LastProcessedTime  *metav1.Time             `json:"lastProcessedTime,omitempty"`
 	ObservedGeneration int64                    `json:"observedGeneration,omitempty"`
