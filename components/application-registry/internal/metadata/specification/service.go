@@ -39,7 +39,7 @@ func NewSpecService(assetStoreService assetstore.Service, specRequestTimeout int
 		assetStoreService: assetStoreService,
 		downloadClient: download.NewClient(&http.Client{
 			Timeout: time.Duration(specRequestTimeout) * time.Second,
-		}, authorization.NewStrategyFactory(authorization.FactoryConfiguration{})),
+		}, authorization.NewStrategyFactory(authorization.FactoryConfiguration{OAuthClientTimeout: specRequestTimeout})),
 	}
 }
 
