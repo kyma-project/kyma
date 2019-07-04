@@ -2,6 +2,7 @@ package servicecatalogaddons_test
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 	"testing"
 	"time"
 
