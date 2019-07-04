@@ -17,14 +17,11 @@ func (svc *oauth) ToCredentials(secretData SecretData, appCredentials *applicati
 	clientId, clientSecret := svc.readOauthMap(secretData)
 
 	return model.CredentialsWithCSRF{
-		Oauth: &model.OauthWithCSRF{
-			Oauth: model.Oauth{
-				ClientID:     clientId,
-				ClientSecret: clientSecret,
-				URL:          appCredentials.AuthenticationUrl,
-			},
-			CSRFInfo: convertToModelCSRInfo(appCredentials),
-		},
+		Oauth: &model.Oauth{
+			ClientID:     clientId,
+			ClientSecret: clientSecret,
+			URL:          appCredentials.AuthenticationUrl,
+		}, CSRFInfo: convertToModelCSRInfo(appCredentials),
 	}
 }
 

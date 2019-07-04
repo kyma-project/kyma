@@ -189,7 +189,7 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 					ClientSecret: stars,
 					URL:          credentials.Oauth.URL,
 				},
-				CSRFInfo: csrfInfoFromModel(credentials.Oauth.CSRFInfo),
+				CSRFInfo: csrfInfoFromModel(credentials.CSRFInfo),
 			},
 		}
 	}
@@ -201,7 +201,7 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 					Username: stars,
 					Password: stars,
 				},
-				CSRFInfo: csrfInfoFromModel(credentials.Basic.CSRFInfo),
+				CSRFInfo: csrfInfoFromModel(credentials.CSRFInfo),
 			},
 		}
 	}
@@ -213,7 +213,7 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 					CommonName:  credentials.CertificateGen.CommonName,
 					Certificate: credentials.CertificateGen.Certificate,
 				},
-				CSRFInfo: csrfInfoFromModel(credentials.CertificateGen.CSRFInfo),
+				CSRFInfo: csrfInfoFromModel(credentials.CSRFInfo),
 			},
 		}
 	}
@@ -303,17 +303,14 @@ func serviceDetailsRequestParametersToServiceDefinitionRequestParameters(request
 func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Credentials) *model.Credentials {
 
 	if credentials.Oauth != nil {
-		oauth := serviceDetailsOauthToServiceDefinitionOauth(*credentials.Oauth)
 		return &model.Credentials{
-			Oauth: &oauth,
+			Oauth: serviceDetailsOauthToServiceDefinitionOauth(*credentials.Oauth),
 		}
 	}
 
 	if credentials.Basic != nil {
-		basic := serviceDetailsToServiceDefinitionBasic(*credentials.Basic)
-
 		return &model.Credentials{
-			Basic: &basic,
+			Basic: serviceDetailsToServiceDefinitionBasic(*credentials.Basic),
 		}
 	}
 
@@ -333,19 +330,15 @@ func serviceDetailsCredentialsToServiceDefinitionCredentialsWithCSRF(credentials
 
 	if credentials.OauthWithCSRF != nil {
 		return &model.CredentialsWithCSRF{
-			Oauth: &model.OauthWithCSRF{
-				Oauth:    serviceDetailsOauthToServiceDefinitionOauth(credentials.OauthWithCSRF.Oauth),
-				CSRFInfo: csrfInfoToModel(credentials.OauthWithCSRF.CSRFInfo),
-			},
+			Oauth:    serviceDetailsOauthToServiceDefinitionOauth(credentials.OauthWithCSRF.Oauth),
+			CSRFInfo: csrfInfoToModel(credentials.OauthWithCSRF.CSRFInfo),
 		}
 	}
 
 	if credentials.BasicWithCSRF != nil {
 		return &model.CredentialsWithCSRF{
-			Basic: &model.BasicWithCSRF{
-				Basic:    serviceDetailsToServiceDefinitionBasic(credentials.BasicWithCSRF.BasicAuth),
-				CSRFInfo: csrfInfoToModel(credentials.BasicWithCSRF.CSRFInfo),
-			},
+			Basic:    serviceDetailsToServiceDefinitionBasic(credentials.BasicWithCSRF.BasicAuth),
+			CSRFInfo: csrfInfoToModel(credentials.BasicWithCSRF.CSRFInfo),
 		}
 	}
 
@@ -353,24 +346,24 @@ func serviceDetailsCredentialsToServiceDefinitionCredentialsWithCSRF(credentials
 		return &model.CredentialsWithCSRF{
 			CertificateGen: &model.CertificateGen{
 				CommonName: credentials.CertificateGenWithCSRF.CommonName,
-				CSRFInfo:   csrfInfoToModel(credentials.CertificateGenWithCSRF.CSRFInfo),
 			},
+			CSRFInfo: csrfInfoToModel(credentials.CertificateGenWithCSRF.CSRFInfo),
 		}
 	}
 
 	return nil
 }
 
-func serviceDetailsOauthToServiceDefinitionOauth(oauth Oauth) model.Oauth {
-	return model.Oauth{
+func serviceDetailsOauthToServiceDefinitionOauth(oauth Oauth) *model.Oauth {
+	return &model.Oauth{
 		ClientID:     oauth.ClientID,
 		ClientSecret: oauth.ClientSecret,
 		URL:          oauth.URL,
 	}
 }
 
-func serviceDetailsToServiceDefinitionBasic(basic BasicAuth) model.Basic {
-	return model.Basic{
+func serviceDetailsToServiceDefinitionBasic(basic BasicAuth) *model.Basic {
+	return &model.Basic{
 		Username: basic.Username,
 		Password: basic.Password,
 	}

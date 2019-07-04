@@ -28,12 +28,10 @@ const (
 
 var (
 	credentials = &model.CredentialsWithCSRF{
-		Oauth: &model.OauthWithCSRF{
-			Oauth: model.Oauth{
-				ClientID:     "clientID",
-				ClientSecret: "clientSecret",
-				URL:          "http://oauth.com",
-			},
+		Oauth: &model.Oauth{
+			ClientID:     "clientID",
+			ClientSecret: "clientSecret",
+			URL:          "http://oauth.com",
 		},
 	}
 

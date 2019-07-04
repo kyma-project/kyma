@@ -31,17 +31,5 @@ func toAppCSRFInfo(credentials *model.CredentialsWithCSRF) *applications.CSRFInf
 		return nil
 	}
 
-	if credentials.Oauth != nil {
-		return convertFromModel(credentials.Oauth.CSRFInfo)
-	}
-
-	if credentials.Basic != nil {
-		return convertFromModel(credentials.Basic.CSRFInfo)
-	}
-
-	if credentials.CertificateGen != nil {
-		return convertFromModel(credentials.CertificateGen.CSRFInfo)
-	}
-
-	return nil
+	return convertFromModel(credentials.CSRFInfo)
 }

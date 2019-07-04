@@ -20,10 +20,8 @@ const (
 
 var (
 	basicCredentials = &model.CredentialsWithCSRF{
-		Basic: &model.BasicWithCSRF{
-			Basic: model.Basic{
-				Username: username, Password: password,
-			},
+		Basic: &model.Basic{
+			Username: username, Password: password,
 		},
 	}
 )
@@ -59,8 +57,8 @@ func TestBasicAuth_ToCredentials(t *testing.T) {
 		assert.Equal(t, username, credentials.Basic.Username)
 		assert.Equal(t, password, credentials.Basic.Password)
 		assert.NotNil(t, credentials.Basic)
-		assert.NotNil(t, credentials.Basic.CSRFInfo)
-		assert.Equal(t, "https://test.it", credentials.Basic.CSRFInfo.TokenEndpointURL)
+		assert.NotNil(t, credentials.CSRFInfo)
+		assert.Equal(t, "https://test.it", credentials.CSRFInfo.TokenEndpointURL)
 
 	})
 }
@@ -73,31 +71,25 @@ func TestBasicAuth_CredentialsProvided(t *testing.T) {
 	}{
 		{
 			credentials: &model.CredentialsWithCSRF{
-				Basic: &model.BasicWithCSRF{
-					Basic: model.Basic{
-						Username: username,
-						Password: password},
-				},
+				Basic: &model.Basic{
+					Username: username,
+					Password: password},
 			},
 			result: true,
 		},
 		{
 			credentials: &model.CredentialsWithCSRF{
-				Basic: &model.BasicWithCSRF{
-					Basic: model.Basic{
-						Username: "",
-						Password: password},
-				},
+				Basic: &model.Basic{
+					Username: "",
+					Password: password},
 			},
 			result: false,
 		},
 		{
 			credentials: &model.CredentialsWithCSRF{
-				Basic: &model.BasicWithCSRF{
-					Basic: model.Basic{
-						Username: username,
-						Password: ""},
-				},
+				Basic: &model.Basic{
+					Username: username,
+					Password: ""},
 			},
 			result: false,
 		},

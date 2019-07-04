@@ -30,9 +30,11 @@ type Credentials struct {
 // Credentials contains OAuth configuration.
 type CredentialsWithCSRF struct {
 	// OauthWithCSRF is OAuth configuration.
-	Oauth          *OauthWithCSRF
-	Basic          *BasicWithCSRF
+	Oauth          *Oauth
+	Basic          *Basic
 	CertificateGen *CertificateGen
+	// Optional CSRF Data
+	CSRFInfo *CSRFInfo
 }
 
 type RequestParameters struct {
@@ -53,13 +55,6 @@ type Oauth struct {
 	ClientSecret string
 }
 
-// OauthWithCSRF contains details of OAuth configuration.
-type OauthWithCSRF struct {
-	Oauth
-	// Optional CSRF Data
-	CSRFInfo *CSRFInfo
-}
-
 type Basic struct {
 	// Username to use for authentication.
 	Username string
@@ -67,19 +62,10 @@ type Basic struct {
 	Password string
 }
 
-// BasicWithCSRF contains details of BasicWithCSRF configuration.
-type BasicWithCSRF struct {
-	Basic
-	// Optional CSRF Data
-	CSRFInfo *CSRFInfo
-}
-
 // CertificateGen contains common name of the certificate to generate
 type CertificateGen struct {
 	CommonName  string
 	Certificate string
-	// Optional CSRF Data
-	CSRFInfo *CSRFInfo
 }
 
 // ServiceDefinition is an internal representation of a service.

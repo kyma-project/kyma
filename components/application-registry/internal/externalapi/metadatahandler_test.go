@@ -74,12 +74,10 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Api: &model.API{
 				TargetUrl: "http://service.com",
 				Credentials: &model.CredentialsWithCSRF{
-					Oauth: &model.OauthWithCSRF{
-						Oauth: model.Oauth{
-							URL:          "http://oauth.com",
-							ClientID:     "clientId",
-							ClientSecret: "clientSecret",
-						},
+					Oauth: &model.Oauth{
+						URL:          "http://oauth.com",
+						ClientID:     "clientId",
+						ClientSecret: "clientSecret",
 					},
 				},
 				Spec: apiRawSpec,
@@ -164,11 +162,9 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Api: &model.API{
 				TargetUrl: "http://service.com",
 				Credentials: &model.CredentialsWithCSRF{
-					Basic: &model.BasicWithCSRF{
-						Basic: model.Basic{
-							Username: "username",
-							Password: "password",
-						},
+					Basic: &model.Basic{
+						Username: "username",
+						Password: "password",
 					},
 				},
 				Spec: apiRawSpec,
@@ -445,12 +441,10 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Api: &model.API{
 				TargetUrl: "http://service.com",
 				Credentials: &model.CredentialsWithCSRF{
-					Oauth: &model.OauthWithCSRF{
-						Oauth: model.Oauth{
-							URL:          "http://oauth.com",
-							ClientID:     "clientId",
-							ClientSecret: "clientSecret",
-						},
+					Oauth: &model.Oauth{
+						URL:          "http://oauth.com",
+						ClientID:     "clientId",
+						ClientSecret: "clientSecret",
 					},
 				},
 				Spec: apiRawSpec,
@@ -512,11 +506,9 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Api: &model.API{
 				TargetUrl: "http://service.com",
 				Credentials: &model.CredentialsWithCSRF{
-					Basic: &model.BasicWithCSRF{
-						Basic: model.Basic{
-							Username: "username",
-							Password: "password",
-						},
+					Basic: &model.Basic{
+						Username: "username",
+						Password: "password",
 					},
 				},
 				Spec: apiRawSpec,
@@ -640,12 +632,10 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Api: &model.API{
 				TargetUrl: "http://service.com",
 				Credentials: &model.CredentialsWithCSRF{
-					Oauth: &model.OauthWithCSRF{
-						Oauth: model.Oauth{
-							URL:          "http://oauth.com",
-							ClientID:     "clientId",
-							ClientSecret: "clientSecret",
-						},
+					Oauth: &model.Oauth{
+						URL:          "http://oauth.com",
+						ClientID:     "clientId",
+						ClientSecret: "clientSecret",
 					},
 				},
 				Spec: apiRawSpec,
@@ -869,12 +859,10 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 			Api: &model.API{
 				TargetUrl: "http://service.com",
 				Credentials: &model.CredentialsWithCSRF{
-					Oauth: &model.OauthWithCSRF{
-						Oauth: model.Oauth{
-							URL:          "http://oauth.com",
-							ClientID:     "clientId",
-							ClientSecret: "clientSecret",
-						},
+					Oauth: &model.Oauth{
+						URL:          "http://oauth.com",
+						ClientID:     "clientId",
+						ClientSecret: "clientSecret",
 					},
 				},
 				Spec: nonJsonApiSpec,
@@ -957,12 +945,10 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Api: &model.API{
 				TargetUrl: "http://service.com",
 				Credentials: &model.CredentialsWithCSRF{
-					Oauth: &model.OauthWithCSRF{
-						Oauth: model.Oauth{
-							URL:          "http://oauth.com",
-							ClientID:     "clientId",
-							ClientSecret: "clientSecret",
-						},
+					Oauth: &model.Oauth{
+						URL:          "http://oauth.com",
+						ClientID:     "clientId",
+						ClientSecret: "clientSecret",
 					},
 				},
 				Spec: apiRawSpec,
@@ -1056,11 +1042,9 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Api: &model.API{
 				TargetUrl: "http://service.com",
 				Credentials: &model.CredentialsWithCSRF{
-					Basic: &model.BasicWithCSRF{
-						Basic: model.Basic{
-							Username: "username",
-							Password: "password",
-						},
+					Basic: &model.Basic{
+						Username: "username",
+						Password: "password",
 					},
 				},
 				Spec: apiRawSpec,
