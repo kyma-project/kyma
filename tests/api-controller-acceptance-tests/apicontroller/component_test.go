@@ -41,8 +41,8 @@ func TestComponentSpec(t *testing.T) {
 
 	Convey("API Controller should", t, func() {
 
-		Convey("update API with implicitly configured authentication to default authentication", func() {
-			t.Log("update API with implicitly configured authentication to default authentication")
+		Convey("update API with explicitly configured authentication to default authentication", func() {
+			t.Log("update API with explicitly configured authentication to default authentication")
 
 			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
@@ -101,13 +101,13 @@ func TestComponentSpec(t *testing.T) {
 			So(finalAPI.Status.AuthenticationStatus.Resource.Uid, ShouldNotBeEmpty)
 
 			// a bugged program will lead to API-controller unable to update/delete policy, so we delete the API and check if policy was deleted
-			ctx.cleanUpAPI(kymaClient, updatedAPI, t, false, namespace)
+			ctx.cleanUpAPI(kymaClient, finalAPI, t, false, namespace)
 			err = ctx.verifyIstioResourcesCleanUp(istioAuthClient, istioNetClient, updatedAPI)
 			So(err, ShouldBeNil)
 		})
 
-		Convey("update API with implicitly configured but disabled authentication to default authentication", func() {
-			t.Log("update API with implicitly configured but disabled authentication to default authentication")
+		Convey("update API with explicitly configured but disabled authentication to default authentication", func() {
+			t.Log("update API with explicitly configured but disabled authentication to default authentication")
 
 			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
