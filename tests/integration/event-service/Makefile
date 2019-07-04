@@ -1,7 +1,6 @@
-APP_NAME = gateway-tests
+APP_NAME = event-service-integration-tests
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
-
 
 resolve: 
 	dep ensure -vendor-only -v
