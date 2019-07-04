@@ -2,11 +2,11 @@ package servicecatalogaddons_test
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 	"testing"
 	"time"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/client-go/rest"
