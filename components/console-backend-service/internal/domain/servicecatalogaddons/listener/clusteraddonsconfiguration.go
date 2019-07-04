@@ -5,21 +5,21 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	v1 "k8s.io/api/core/v1"
+	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 )
 
-//go:generate mockery -name=gqlAddonsConfigurationConverter -output=automock -outpkg=automock -case=underscore
-type gqlAddonsConfigurationConverter interface {
-	ToGQL(item *v1.ConfigMap) *gqlschema.AddonsConfiguration
+//go:generate mockery -name=gqlClusterAddonsConfigurationConverter -output=automock -outpkg=automock -case=underscore
+type gqlClusterAddonsConfigurationConverter interface {
+	ToGQL(item *v1alpha1.ClusterAddonsConfiguration) *gqlschema.AddonsConfiguration
 }
 
 type AddonsConfiguration struct {
 	channel   chan<- gqlschema.AddonsConfigurationEvent
-	filter    func(entity *v1.ConfigMap) bool
-	converter gqlAddonsConfigurationConverter
+	filter    func(entity *v1alpha1.ClusterAddonsConfiguration) bool
+	converter gqlClusterAddonsConfigurationConverter
 }
 
-func NewAddonsConfiguration(channel chan<- gqlschema.AddonsConfigurationEvent, filter func(entity *v1.ConfigMap) bool, converter gqlAddonsConfigurationConverter) *AddonsConfiguration {
+func NewClusterAddonsConfiguration(channel chan<- gqlschema.AddonsConfigurationEvent, filter func(entity *v1alpha1.ClusterAddonsConfiguration) bool, converter gqlClusterAddonsConfigurationConverter) *AddonsConfiguration {
 	return &AddonsConfiguration{
 		channel:   channel,
 		filter:    filter,
@@ -40,9 +40,9 @@ func (l *AddonsConfiguration) OnDelete(object interface{}) {
 }
 
 func (l *AddonsConfiguration) onEvent(eventType gqlschema.SubscriptionEventType, object interface{}) {
-	entity, ok := object.(*v1.ConfigMap)
+	entity, ok := object.(*v1alpha1.ClusterAddonsConfiguration)
 	if !ok {
-		glog.Error(fmt.Errorf("incorrect object type: %T, should be: *ConfigMap", object))
+		glog.Error(fmt.Errorf("incorrect object type: %T, should be: *v1alpha1.ClusterAddonsConfiguration", object))
 		return
 	}
 
@@ -51,7 +51,7 @@ func (l *AddonsConfiguration) onEvent(eventType gqlschema.SubscriptionEventType,
 	}
 }
 
-func (l *AddonsConfiguration) notify(eventType gqlschema.SubscriptionEventType, entity *v1.ConfigMap) {
+func (l *AddonsConfiguration) notify(eventType gqlschema.SubscriptionEventType, entity *v1alpha1.ClusterAddonsConfiguration) {
 	gqlAddonsConfiguration := l.converter.ToGQL(entity)
 	if gqlAddonsConfiguration == nil {
 		return

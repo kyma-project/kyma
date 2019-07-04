@@ -60,7 +60,7 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 	}
 	makePluggable(scContainer)
 
-	scaContainer, err := servicecatalogaddons.New(restConfig, informerResyncPeriod, scContainer.ServiceCatalogRetriever)
+	scaContainer, err := servicecatalogaddons.New(restConfig, informerResyncPeriod, scContainer.ServiceCatalogRetriever, featureToggles)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
 	}
