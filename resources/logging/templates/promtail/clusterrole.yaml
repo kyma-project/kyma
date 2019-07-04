@@ -7,18 +7,14 @@ metadata:
     chart: {{ template "promtail.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-{{- with .Values.promtail.annotations }}
-  annotations:
-{{ toYaml . | indent 4 }}
-{{- end }}
   name: {{ template "promtail.fullname" . }}-clusterrole
 rules:
-- apiGroups: [""] # "" indicates the core API group
-  resources:
-  - nodes
-  - nodes/proxy
-  - services
-  - endpoints
-  - pods  
-  verbs: ["get", "watch", "list"]
-{{- end}}
+  - apiGroups: [""] # "" indicates the core API group
+    resources:
+      - nodes
+      - nodes/proxy
+      - services
+      - endpoints
+      - pods
+    verbs: ["get", "watch", "list"]
+{{- end }}

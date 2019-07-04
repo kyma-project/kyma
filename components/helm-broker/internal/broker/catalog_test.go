@@ -27,7 +27,7 @@ func TestGetCatalog(t *testing.T) {
 	// GIVEN
 	tc := newCatalogTC()
 	defer tc.AssertExpectations(t)
-	tc.finderMock.On("FindAll").Return(tc.fixBundles(), nil).Once()
+	tc.finderMock.On("FindAll", internal.ClusterWide).Return(tc.fixBundles(), nil).Once()
 	tc.converterMock.On("Convert", tc.fixBundle()).Return(tc.fixService(), nil)
 
 	svc := broker.NewCatalogService(tc.finderMock, tc.converterMock)
@@ -46,7 +46,7 @@ func TestGetCatalogOnFindError(t *testing.T) {
 	// GIVEN
 	tc := newCatalogTC()
 	defer tc.AssertExpectations(t)
-	tc.finderMock.On("FindAll").Return(nil, tc.fixError()).Once()
+	tc.finderMock.On("FindAll", internal.ClusterWide).Return(nil, tc.fixError()).Once()
 	svc := broker.NewCatalogService(tc.finderMock, nil)
 	osbCtx := broker.NewOSBContext("not", "important")
 	// WHEN
@@ -61,7 +61,7 @@ func TestGetCatalogOnConversionError(t *testing.T) {
 	tc := newCatalogTC()
 	defer tc.AssertExpectations(t)
 
-	tc.finderMock.On("FindAll").Return(tc.fixBundles(), nil).Once()
+	tc.finderMock.On("FindAll", internal.ClusterWide).Return(tc.fixBundles(), nil).Once()
 	tc.converterMock.On("Convert", tc.fixBundle()).Return(osb.Service{}, tc.fixError())
 
 	svc := broker.NewCatalogService(tc.finderMock, tc.converterMock)

@@ -11,19 +11,19 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
 
-type chartNameVersion string
+type chartKey string
 
 // NewChart creates new storage for Charts
 func NewChart() *Chart {
 	return &Chart{
-		storage: make(map[chartNameVersion]*chart.Chart),
+		storage: make(map[chartKey]*chart.Chart),
 	}
 }
 
 // Chart entity
 type Chart struct {
 	threadSafeStorage
-	storage map[chartNameVersion]*chart.Chart
+	storage map[chartKey]*chart.Chart
 }
 
 // Upsert persists Chart in memory.
@@ -31,14 +31,14 @@ type Chart struct {
 // If chart already exists in storage than full replace is performed.
 //
 // True is returned if chart already existed in storage and was replaced.
-func (s *Chart) Upsert(c *chart.Chart) (replaced bool, err error) {
+func (s *Chart) Upsert(namespace internal.Namespace, c *chart.Chart) (replaced bool, err error) {
 	defer unlock(s.lockW())
 
 	if c == nil {
 		return replaced, errors.New("entity may not be nil")
 	}
 
-	nvk, err := s.keyFromChart(c)
+	nvk, err := s.keyFromChart(namespace, c)
 	if err != nil {
 		return replaced, err
 	}
@@ -53,10 +53,10 @@ func (s *Chart) Upsert(c *chart.Chart) (replaced bool, err error) {
 }
 
 // Get returns from memory Chart with given name and version
-func (s *Chart) Get(name internal.ChartName, ver semver.Version) (*chart.Chart, error) {
+func (s *Chart) Get(namespace internal.Namespace, name internal.ChartName, ver semver.Version) (*chart.Chart, error) {
 	defer unlock(s.lockR())
 
-	nkv, err := s.key(name, ver)
+	nkv, err := s.key(namespace, name, ver)
 	if err != nil {
 		return nil, err
 	}
@@ -70,10 +70,10 @@ func (s *Chart) Get(name internal.ChartName, ver semver.Version) (*chart.Chart, 
 }
 
 // Remove removes from memory Chart with given name and version
-func (s *Chart) Remove(name internal.ChartName, ver semver.Version) error {
+func (s *Chart) Remove(namespace internal.Namespace, name internal.ChartName, ver semver.Version) error {
 	defer unlock(s.lockW())
 
-	nkv, err := s.key(name, ver)
+	nkv, err := s.key(namespace, name, ver)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func (s *Chart) Remove(name internal.ChartName, ver semver.Version) error {
 	return nil
 }
 
-func (s *Chart) keyFromChart(c *chart.Chart) (k chartNameVersion, err error) {
+func (s *Chart) keyFromChart(namespace internal.Namespace, c *chart.Chart) (k chartKey, err error) {
 	if c == nil {
 		return k, errors.New("entity may not be nil")
 	}
@@ -100,13 +100,17 @@ func (s *Chart) keyFromChart(c *chart.Chart) (k chartNameVersion, err error) {
 		return k, errors.New("both name and version must be set")
 	}
 
-	return chartNameVersion(fmt.Sprintf("%s|%s", c.Metadata.Name, c.Metadata.Version)), nil
+	return s.createKey(namespace, c.Metadata.Name, c.Metadata.Version)
 }
 
-func (*Chart) key(name internal.ChartName, ver semver.Version) (k chartNameVersion, err error) {
+func (s *Chart) key(namespace internal.Namespace, name internal.ChartName, ver semver.Version) (k chartKey, err error) {
 	if name == "" || ver.Original() == "" {
 		return k, errors.New("both name and version must be set")
 	}
 
-	return chartNameVersion(fmt.Sprintf("%s|%s", name, ver.Original())), nil
+	return s.createKey(namespace, string(name), ver.Original())
+}
+
+func (*Chart) createKey(namespace internal.Namespace, name string, ver string) (k chartKey, err error) {
+	return chartKey(fmt.Sprintf("%s|%s|%s", namespace, name, ver)), nil
 }

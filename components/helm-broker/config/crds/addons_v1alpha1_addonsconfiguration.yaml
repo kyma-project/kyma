@@ -34,6 +34,9 @@ spec:
                 - url
                 type: object
               type: array
+            reprocessRequest:
+              format: int64
+              type: integer
           required:
           - repositories
           type: object
@@ -46,10 +49,6 @@ spec:
               format: int64
               type: integer
             phase:
-              enum:
-              - Ready
-              - Pending
-              - Failed
               type: string
             repositories:
               items:
