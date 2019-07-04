@@ -40,9 +40,9 @@ global:
   event_service:
     dir: develop/
     version: 42e65688
-  gateway_tests:
+  event_service_integration_tests:
     dir: develop/
-    version: 42e65688
+    version: fc7361ac
   application_connectivity_validator:
     dir: develop/
     version: d7092530
