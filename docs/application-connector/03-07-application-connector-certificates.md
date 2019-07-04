@@ -5,7 +5,7 @@ type: Details
 
 The Application Connector is secured with a client certificate verified by the Istio Ingress Gateway.
 
-Certificates are generated and put to Kubernetes Secrets by the Application Connector Certs Setup Job.
+The Certificates are generated and stored as Kubernetes Secrets by the Application Connector Certs Setup job.
 
 By default, the server key and certificate are automatically generated. 
 You can provide a custom server certificate and key during the installation by setting them as the following overrides:
