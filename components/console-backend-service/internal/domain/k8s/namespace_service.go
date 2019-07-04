@@ -97,10 +97,10 @@ func (svc *namespaceService) Update(name string, labels gqlschema.Labels) (*v1.N
 		return errors.Wrapf(err, "while updating %s [%s]", pretty.Namespace, name)
 	})
 
-	if err == nil {
-		return updated, nil
+	if err != nil {
+		return nil, errors.Wrapf(err, "couldn't update %s [%s], after %d retries", pretty.Namespace, name, retry.DefaultRetry.Steps)
 	}
-	return nil, errors.Wrapf(err, "couldn't update %s [%s], after %d retries", pretty.Namespace, name, retry.DefaultRetry.Steps)
+	return updated, nil
 }
 
 func (svc *namespaceService) Delete(name string) error {
