@@ -62,11 +62,11 @@ type addonsConfigurationResolver struct {
 
 func newAddonsRepoResolver(svc *clusterAddonsConfigurationService, addonsConfigurationFeatureEnabled bool) *addonsConfigurationResolver {
 	return &addonsConfigurationResolver{
-		addonsCfgLister:    svc,
-		addonsCfgUpdater:   svc,
-		addonsCfgService:   svc,
-		addonsCfgMutations: svc,
-		addonsCfgConverter: clusterAddonsConfigurationConverter{},
+		addonsCfgLister:                   svc,
+		addonsCfgUpdater:                  svc,
+		addonsCfgService:                  svc,
+		addonsCfgMutations:                svc,
+		addonsCfgConverter:                clusterAddonsConfigurationConverter{},
 		addonsConfigurationFeatureEnabled: addonsConfigurationFeatureEnabled,
 	}
 }
