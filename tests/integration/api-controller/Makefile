@@ -6,6 +6,14 @@ TAG = $(DOCKER_TAG)
 build:
 	./before-commit.sh
 
+.PHONY: pull-licenses
+pull-licenses:
+ifdef LICENSE_PULLER_PATH
+	bash $(LICENSE_PULLER_PATH)
+else
+	mkdir -p licenses
+endif
+
 .PHONY: build-image
 build-image:
 	docker build -t $(APP_NAME):latest .
