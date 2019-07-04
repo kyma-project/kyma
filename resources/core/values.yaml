@@ -59,7 +59,7 @@ global:
     dir:
     version: "1.3.0-rc0"
   console_backend_service:
-    dir: "1.3.0-rc0"
+    dir:
     version: "1.3.0-rc0"
   console_backend_service_test:
     dir:
