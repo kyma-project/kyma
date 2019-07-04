@@ -7,5 +7,6 @@ RUN apk add --no-cache curl
 LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY ./application-broker /root/application-broker
+COPY ./licenses/ /root/licenses
 
 ENTRYPOINT ["/root/application-broker"]

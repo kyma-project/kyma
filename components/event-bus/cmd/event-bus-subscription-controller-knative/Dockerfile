@@ -8,6 +8,7 @@ COPY api/ api/
 COPY pkg/ pkg/
 COPY internal/ internal/
 COPY generated/ generated/
+COPY licenses/ licenses/
 
 WORKDIR /go/src/github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-subscription-controller-knative
 COPY cmd/    cmd/
@@ -23,6 +24,7 @@ WORKDIR /root/
 RUN apk --no-cache upgrade && apk --no-cache add curl
 
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-subscription-controller-knative/manager .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/components/event-bus/licenses ./licenses
 
 EXPOSE 8080
 

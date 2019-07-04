@@ -7,6 +7,14 @@ TAG = $(DOCKER_TAG)
 build:
 	./before-commit.sh ci
 
+.PHONY: pull-licenses
+pull-licenses:
+ifdef LICENSE_PULLER_PATH
+	bash $(LICENSE_PULLER_PATH)
+else
+	mkdir -p licenses
+endif
+
 .PHONY: generates
 # Generate CRD manifests, clients etc.
 generates: crd-manifests client
@@ -22,7 +30,7 @@ client:
 	./contrib/hack/update-codegen.sh
 
 .PHONY: build-image
-build-image:
+build-image: pull-licenses
 	cp broker deploy/broker/helm-broker
 	cp targz deploy/tools/targz
 	cp indexbuilder deploy/tools/indexbuilder

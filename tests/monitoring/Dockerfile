@@ -11,5 +11,6 @@ RUN curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/
 
 RUN mkdir -p /root/.kube && touch /root/.kube/config
 COPY bin/app /test-monitoring
+COPY ./licenses /licenses
 
 CMD ["/test-monitoring"]

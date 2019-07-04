@@ -9,8 +9,16 @@ TAG = $(DOCKER_TAG)
 build:
 	./before-commit.sh
 
+.PHONY: pull-licenses
+pull-licenses:
+ifdef LICENSE_PULLER_PATH
+	bash $(LICENSE_PULLER_PATH)
+else
+	mkdir -p licenses
+endif
+
 .PHONY: build-image
-build-image:
+build-image: pull-licenses
 	docker build -t $(APP_NAME):latest . -f ./test/helmtest/Dockerfile --build-arg TEST_EXECUTOR_IMAGE=$(TEST_EXECUTOR_IMAGE):$(TAG)
 	docker build -t $(TEST_EXECUTOR_APP_NAME):latest . -f ./test/executor/Dockerfile
 

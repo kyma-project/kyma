@@ -6,5 +6,6 @@ RUN apk --no-cache add ca-certificates
 RUN apk add --no-cache curl
 
 ADD kyma-operator ./kyma-operator
+COPY ./licenses/ /app/licenses
 
 ENTRYPOINT ["/kyma-operator"]
