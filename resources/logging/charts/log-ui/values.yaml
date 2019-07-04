@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   name: log-ui
-  tag: PR-1005
+  tag: PR-1014
   dir: /pr
   pullPolicy: Always
 service:
