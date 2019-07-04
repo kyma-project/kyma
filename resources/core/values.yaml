@@ -24,7 +24,7 @@ global:
     version: "1.3.0-rc0"
   ui_acceptance_tests:
     dir:
-    version: "1.3.0-rc0"
+    version: "a68ac924"
   api_controller:
     dir:
     version: "1.3.0-rc0"
