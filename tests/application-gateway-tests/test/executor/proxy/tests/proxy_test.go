@@ -140,8 +140,8 @@ func TestProxyService(t *testing.T) {
 		clientSecret := "mySecret"
 
 		mockServiceURL := testSuit.GetMockServiceURL()
-		specUrl := fmt.Sprintf("/%s/spec/auth/oauth/%s/%s", mockServiceURL, clientId, clientSecret)
-		oauthUrl := fmt.Sprintf("/%s/auth/oauth/token", mockServiceURL)
+		specUrl := fmt.Sprintf("%s/spec/auth/oauth/%s/%s", mockServiceURL, clientId, clientSecret)
+		oauthUrl := fmt.Sprintf("%s/auth/oauth/token", mockServiceURL)
 
 		apiID := client.CreateAPIWithOAuthSecuredSpec(t, testSuit.GetMockServiceURL(), specUrl, oauthUrl, clientId, clientSecret)
 
