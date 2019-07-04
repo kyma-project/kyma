@@ -25,8 +25,8 @@ func NewAppMockServer(port int32) *AppMockServer {
 	router.Path("/spec/auth/basic/{username}/{password}").HandlerFunc(basicAuth.BasicAuthSpec)
 
 	oAuth := NewOauthHandler()
-	router.Path("/auth/oauth/token").HandlerFunc(oAuth.OAuthTokenHandler)
-	router.Path("/spec/auth/oauth/{clientid}/{clientsecret}").HandlerFunc(oAuth.OAuthSpecHandler)
+	router.Path("/auth/oauth/token/{clientid}/{clientsecret}").HandlerFunc(oAuth.OAuthTokenHandler)
+	router.Path("/spec/auth/oauth").HandlerFunc(oAuth.OAuthSpecHandler)
 
 	headers := NewHeadersHandler()
 	router.Path("/headers/{header}/{value}").HandlerFunc(headers.HeadersHandler)

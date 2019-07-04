@@ -5,14 +5,14 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/testkit/util"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/testkit/registry"
-	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/testkit/util"
-
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/proxy"
+	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/testkit/registry"
 )
 
 func TestProxyService(t *testing.T) {
@@ -140,10 +140,10 @@ func TestProxyService(t *testing.T) {
 		clientSecret := "mySecret"
 
 		mockServiceURL := testSuit.GetMockServiceURL()
-		specUrl := fmt.Sprintf("%s/spec/auth/oauth/%s/%s", mockServiceURL, clientId, clientSecret)
-		oauthUrl := fmt.Sprintf("%s/auth/oauth/token", mockServiceURL)
+		specUrl := fmt.Sprintf("%s/spec/auth/oauth", mockServiceURL)
+		oauthUrl := fmt.Sprintf("%s/auth/oauth/token/%s/%s", mockServiceURL, clientId, clientSecret)
 
-		apiID := client.CreateAPIWithOAuthSecuredSpec(t, testSuit.GetMockServiceURL(), specUrl, oauthUrl, clientId, clientSecret)
+		apiID := client.CreateAPIWithOAuthSecuredSpec(t, mockServiceURL, specUrl, oauthUrl, clientId, clientSecret)
 
 		require.NotEmpty(t, apiID)
 		t.Logf("Created service with apiID: %s", apiID)
@@ -170,7 +170,7 @@ func TestProxyService(t *testing.T) {
 		mockServiceURL := testSuit.GetMockServiceURL()
 		specUrl := fmt.Sprintf("%s/spec/queryparams/%s/%s", mockServiceURL, paramName, paramValue)
 
-		apiID := client.CreateAPIWithCustomQueryParamsSpec(t, testSuit.GetMockServiceURL(), specUrl, queryParams)
+		apiID := client.CreateAPIWithCustomQueryParamsSpec(t, mockServiceURL, specUrl, queryParams)
 
 		require.NotEmpty(t, apiID)
 		t.Logf("Created service with apiID: %s", apiID)
@@ -197,7 +197,7 @@ func TestProxyService(t *testing.T) {
 		mockServiceURL := testSuit.GetMockServiceURL()
 		specUrl := fmt.Sprintf("%s/spec/headers/%s/%s", mockServiceURL, headerName, headerValue)
 
-		apiID := client.CreateAPIWithCustomHeadersSpec(t, testSuit.GetMockServiceURL(), specUrl, headers)
+		apiID := client.CreateAPIWithCustomHeadersSpec(t, mockServiceURL, specUrl, headers)
 
 		require.NotEmpty(t, apiID)
 		t.Logf("Created service with apiID: %s", apiID)

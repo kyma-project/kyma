@@ -2,6 +2,7 @@ package mock
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -16,8 +18,6 @@ const (
 	bearerToken                = "1/mZ1edKKACtPAb7zGlwSzvs72PvhAbGmB8K1ZrGxpcNM"
 	headerContentType          = "Content-Type"
 	contentTypeApplicationJson = "application/json;charset=UTF-8"
-	clientIdKey                = "client_id"
-	clientSecretKey            = "client_secret"
 )
 
 type oauthHandler struct {
@@ -48,24 +48,6 @@ func (oh *oauthHandler) OAuthSpecHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (oh *oauthHandler) checkOauth(r *http.Request) (statusCode int, err error) {
-	vars := mux.Vars(r)
-	expectedClientId := vars["clientid"]
-	expectedClientSecret := vars["clientsecret"]
-
-	oh.logger.Infof("Handling OAuth secured spec request. Expected: clientID: %s, clientSecret: %s", expectedClientId, expectedClientSecret)
-
-	if expectedClientId == "" || expectedClientSecret == "" {
-		return http.StatusBadRequest, errors.New("Expected credentials not provided")
-	}
-
-	values := r.Form
-	clientId := values.Get(clientIdKey)
-	clientSecret := values.Get(clientSecretKey)
-
-	if clientId != expectedClientId || clientSecret != expectedClientSecret {
-		return http.StatusBadRequest, errors.New("Invalid credentials provided")
-	}
-
 	headerAauthorization := r.Header.Get(AuthorizationHeader)
 	oAuthToken := strings.TrimPrefix(headerAauthorization, "Bearer ")
 
@@ -78,6 +60,31 @@ func (oh *oauthHandler) checkOauth(r *http.Request) (statusCode int, err error) 
 func (oh *oauthHandler) OAuthTokenHandler(w http.ResponseWriter, r *http.Request) {
 	oh.logger.Info("Handling Oauth token request")
 
+	vars := mux.Vars(r)
+	expectedClientId := vars["clientid"]
+	expectedClientSecret := vars["clientsecret"]
+
+	oh.logger.Infof("Handling OAuth secured spec request. Expected: clientID: %s, clientSecret: %s", expectedClientId, expectedClientSecret)
+
+	if expectedClientId == "" || expectedClientSecret == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		oh.logger.Error("Expected credentials not provided")
+		return
+	}
+
+	encodedCredentials := strings.TrimPrefix(AuthorizationHeader, "Basic ")
+	decoded, err := base64.StdEncoding.DecodeString(encodedCredentials)
+
+	credentials := strings.Split(string(decoded), ":")
+	clientId := credentials[0]
+	clientSecret := credentials[1]
+
+	if clientId != expectedClientId || clientSecret != expectedClientSecret {
+		w.WriteHeader(http.StatusBadRequest)
+		oh.logger.Errorf("Invalid credentials provided clientID: %s, clientSecret: %s", clientId, clientSecret)
+		return
+	}
+
 	oauthRes := oauthResponse{
 		AccessToken: bearerToken,
 		TokenType:   "Bearer",
@@ -85,8 +92,12 @@ func (oh *oauthHandler) OAuthTokenHandler(w http.ResponseWriter, r *http.Request
 		Scope:       "",
 	}
 
-	err := respondWithBody(w, 200, oauthRes)
-	oh.logger.Error(err.Error())
+	err = respondWithBody(w, 200, oauthRes)
+
+	if err != nil {
+		oh.logger.Error(err.Error())
+		return
+	}
 }
 
 func respondWithBody(w http.ResponseWriter, statusCode int, responseBody interface{}) error {
