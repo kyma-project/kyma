@@ -2,6 +2,7 @@ package servicecatalogaddons_test
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 	"testing"
 	"time"
 
@@ -15,7 +16,7 @@ const testTimes = 3
 const informerResyncPeriod = 10 * time.Second
 
 func TestPluggableContainer(t *testing.T) {
-	pluggable, err := servicecatalogaddons.New(&rest.Config{}, informerResyncPeriod, nil)
+	pluggable, err := servicecatalogaddons.New(&rest.Config{}, informerResyncPeriod, nil, experimental.FeatureToggles{})
 	require.NoError(t, err)
 
 	pluggable.SetFakeClient()
