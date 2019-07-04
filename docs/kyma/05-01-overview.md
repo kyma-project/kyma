@@ -9,7 +9,7 @@ You can configure the Kyma installation by:
 
 The list of components to install is defined in the [Installation](#custom-resource-installation) custom resource (CR).
 The overrides are delivered as ConfigMaps or Secrets defined by the user before triggering the installation.
-The Installer reads the configuration from the Installation CR and the overrides and applies it in the installation process.
+The Kyma Installer reads the configuration from the Installation CR and the overrides and applies it in the installation process.
 
 
 ## Default settings
@@ -45,10 +45,10 @@ Before you start the Kyma installation process, you can customize the default se
 
 ### Components
 
-One of the released Kyma artifacts is the Kyma Installer, a Docker image that combines the Installer executable with charts of all components available in the release.
+One of the released Kyma artifacts is the Kyma Installer, a Docker image that combines the Kyma Operator executable with charts of all components available in the release.
 The Kyma Installer can install only the components contained in its image.
 The Installation CR specifies which components of the available components are installed.
-The component list in the Installation CR has the components that are not an integral part of the default Kyma Lite package commented out with a hash character (#). The Installer doesn't install these components.
+The component list in the Installation CR has the components that are not an integral part of the default Kyma Lite package commented out with a hash character (#). The Kyma Installer doesn't install these components.
 You can customize the list of components by:
 - Uncommenting a component entry to install the component.
 - Commenting out a component entry using the hash character (#) to skip the installation of that component.

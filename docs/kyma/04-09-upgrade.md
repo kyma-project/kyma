@@ -8,15 +8,16 @@ Upgrading Kyma is the process of migrating from one version of the software to a
 To upgrade to a version that is several releases newer than the version you're currently using, you must move up to the desired release incrementally. You can skip patch releases.
 
 For example, if you're running Kyma 1.0 and you want to upgrade to version 1.3, you must perform these operations:
-  1. Upgrade from version 1.0 to version 1.1.
-  2. Upgrade from version 1.1 to version 1.2.
-  3. Upgrade from version 1.2 to version 1.3.  
+
+1. Upgrade from version 1.0 to version 1.1.
+2. Upgrade from version 1.1 to version 1.2.
+3. Upgrade from version 1.2 to version 1.3.  
 
 >**NOTE:** Kyma does not support a dedicated downgrade procedure. You can achieve a similar result by restoring your cluster from a backup. Read [this](/components/backup/#overview-overview) document to learn more about backups.
 
 The upgrade procedure relies heavily on Helm. As a result, the availability of cluster services during the upgrade is not defined by Kyma and can vary from version to version. The existing custom resources (CRs) remain in the cluster.
 
->**NOTE:** To learn more about the technical aspects of the upgrade, read [this](https://github.com/kyma-project/kyma/blob/master/components/kyma-operator/README.md) document.
+>**NOTE:** To learn more about the technical aspects of the upgrade, read [this](https://github.com/kyma-project/kyma/blob/master/components/kyma-operator/README.md#upgrade-kyma) document.
 
 ## Upgrade Kyma to a newer version
 

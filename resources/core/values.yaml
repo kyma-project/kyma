@@ -30,7 +30,7 @@ global:
     version: "b8c31ef4"
   api_controller_acceptance_tests:
     dir: pr/
-    version: "PR-4656"
+    version: "PR-4686"
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
@@ -62,11 +62,11 @@ global:
     dir: pr/
     version: PR-4386
   console_backend_service_test:
-    dir: pr/
-    version: PR-4386
-  cluster_users_test:
     dir: develop/
-    version: 3d94e9d8
+    version: "82505335"
+  cluster_users_test:
+    dir: pr/
+    version: "PR-4741"
   xip_patch:
     dir: develop/
     version: "d20b1c29"
