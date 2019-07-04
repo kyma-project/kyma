@@ -137,17 +137,17 @@ func TestClusterAddonsConfiguration_OnUpdate(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// given
 		gqlClusterServiceBroker := new(gqlschema.AddonsConfiguration)
-		configMap := new(v1alpha1.ClusterAddonsConfiguration)
+		cfg := new(v1alpha1.ClusterAddonsConfiguration)
 		converter := automock.NewGQLClusterAddonsConfigurationConverter()
 
 		channel := make(chan gqlschema.AddonsConfigurationEvent, 1)
 		defer close(channel)
-		converter.On("ToGQL", configMap).Return(gqlClusterServiceBroker, nil).Once()
+		converter.On("ToGQL", cfg).Return(gqlClusterServiceBroker, nil).Once()
 		defer converter.AssertExpectations(t)
 		serviceBrokerListener := NewClusterAddonsConfiguration(channel, filterClusterAddonsConfigurationTrue, converter)
 
 		// when
-		serviceBrokerListener.OnUpdate(configMap, configMap)
+		serviceBrokerListener.OnUpdate(cfg, cfg)
 		result := <-channel
 
 		// then
