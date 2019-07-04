@@ -69,6 +69,16 @@ func TestComponentSpec(t *testing.T) {
 			So(createdAPI.ResourceVersion, ShouldNotBeEmpty)
 			So(createdAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
 
+			vs, err := istioNetClient.NetworkingV1alpha3().VirtualServices(namespace).Get(createdAPI.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
+			expectedVs := ctx.virtualServiceFor(testID, domainName, namespace)
+			So(err, ShouldBeNil)
+			So(vs.Spec, ctx.ShouldDeepEqual, expectedVs)
+
+			lastPolicy, err := istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(createdAPI.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
+			expectedPolicy := ctx.policyAndTriggerRuleFor(testID, "https://accounts.google.com", sampleTriggerRule())
+			So(err, ShouldBeNil)
+			So(lastPolicy.Spec, ctx.ShouldDeepEqual, expectedPolicy)
+
 			/*
 				authenticationEnabled: true
 				# no authentication field
@@ -87,6 +97,16 @@ func TestComponentSpec(t *testing.T) {
 			So(updatedAPI.Spec, ctx.ShouldDeepEqual, createdAPI.Spec)
 			So(updatedAPI.Status.AuthenticationStatus.Resource.Uid, ShouldNotBeEmpty)
 
+			vs, err = istioNetClient.NetworkingV1alpha3().VirtualServices(namespace).Get(updatedAPI.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
+			expectedVs = ctx.virtualServiceFor(testID, domainName, namespace)
+			So(err, ShouldBeNil)
+			So(vs.Spec, ctx.ShouldDeepEqual, expectedVs)
+
+			lastPolicy, err = istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(updatedAPI.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
+			expectedPolicy = ctx.policyFor(testID, fmt.Sprintf("https://dex.%s", domainName))
+			So(err, ShouldBeNil)
+			So(lastPolicy.Spec, ctx.ShouldDeepEqual, expectedPolicy)
+
 			// apply the first configuration
 			updatedAPI.Spec = api.Spec
 			finalAPI, err := kymaClient.GatewayV1alpha2().Apis(namespace).Update(updatedAPI)
@@ -99,6 +119,16 @@ func TestComponentSpec(t *testing.T) {
 			So(finalAPI.ResourceVersion, ShouldNotBeEmpty)
 			So(finalAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
 			So(finalAPI.Status.AuthenticationStatus.Resource.Uid, ShouldNotBeEmpty)
+
+			vs, err = istioNetClient.NetworkingV1alpha3().VirtualServices(namespace).Get(finalAPI.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
+			expectedVs = ctx.virtualServiceFor(testID, domainName, namespace)
+			So(err, ShouldBeNil)
+			So(vs.Spec, ctx.ShouldDeepEqual, expectedVs)
+
+			lastPolicy, err = istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(finalAPI.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
+			expectedPolicy = ctx.policyAndTriggerRuleFor(testID, "https://accounts.google.com", sampleTriggerRule())
+			So(err, ShouldBeNil)
+			So(lastPolicy.Spec, ctx.ShouldDeepEqual, expectedPolicy)
 
 			// a bugged program will lead to API-controller unable to update/delete policy, so we delete the API and check if policy was deleted
 			ctx.cleanUpAPI(kymaClient, finalAPI, t, false, namespace)
@@ -135,6 +165,11 @@ func TestComponentSpec(t *testing.T) {
 			So(createdAPI.ResourceVersion, ShouldNotBeEmpty)
 			So(createdAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
 
+			vs, err := istioNetClient.NetworkingV1alpha3().VirtualServices(namespace).Get(createdAPI.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
+			expectedVs := ctx.virtualServiceFor(testID, domainName, namespace)
+			So(err, ShouldBeNil)
+			So(vs.Spec, ctx.ShouldDeepEqual, expectedVs)
+
 			/*
 				authenticationEnabled: true
 				# no authentication field
@@ -152,6 +187,16 @@ func TestComponentSpec(t *testing.T) {
 			createdAPI.Spec.Authentication = []kymaApi.AuthenticationRule{} // api controller changes that field from nil to empty table in the runtime
 			So(updatedAPI.Spec, ctx.ShouldDeepEqual, createdAPI.Spec)
 			So(updatedAPI.Status.AuthenticationStatus.Resource.Uid, ShouldNotBeEmpty)
+
+			vs, err = istioNetClient.NetworkingV1alpha3().VirtualServices(namespace).Get(updatedAPI.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
+			expectedVs = ctx.virtualServiceFor(testID, domainName, namespace)
+			So(err, ShouldBeNil)
+			So(vs.Spec, ctx.ShouldDeepEqual, expectedVs)
+
+			lastPolicy, err := istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(updatedAPI.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
+			expectedPolicy := ctx.policyFor(testID, fmt.Sprintf("https://dex.%s", domainName))
+			So(err, ShouldBeNil)
+			So(lastPolicy.Spec, ctx.ShouldDeepEqual, expectedPolicy)
 
 			// a bugged program will lead to API-controller unable to update/delete policy, so we delete the API and check if policy was deleted
 			ctx.cleanUpAPI(kymaClient, updatedAPI, t, false, namespace)
