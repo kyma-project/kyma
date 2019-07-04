@@ -3,6 +3,8 @@ package mock
 import (
 	"net/http"
 
+	"github.com/pkg/errors"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/mux"
@@ -18,7 +20,28 @@ func NewQueryParamsHandler() *queryParamsHandler {
 	}
 }
 
-func (qph *queryParamsHandler) RequestHandler(w http.ResponseWriter, r *http.Request) {
+func (qph *queryParamsHandler) QueryParamsHandler(w http.ResponseWriter, r *http.Request) {
+	httpCode, err := qph.checkQueryParams(r)
+	if err != nil {
+		qph.logger.Errorf(err.Error())
+		w.WriteHeader(httpCode)
+		return
+	}
+	w.WriteHeader(httpCode)
+}
+
+func (qph *queryParamsHandler) QueryParamsHandlerSpec(w http.ResponseWriter, r *http.Request) {
+	httpCode, err := qph.checkQueryParams(r)
+	if err != nil {
+		qph.logger.Errorf(err.Error())
+		w.WriteHeader(httpCode)
+		return
+	}
+	w.WriteHeader(httpCode)
+	http.ServeFile(w, r, "spec.json")
+}
+
+func (qph *queryParamsHandler) checkQueryParams(r *http.Request) (httpCode int, err error) {
 	vars := mux.Vars(r)
 	expectedParam := vars["param"]
 	expectedParamValue := vars["value"]
@@ -27,10 +50,9 @@ func (qph *queryParamsHandler) RequestHandler(w http.ResponseWriter, r *http.Req
 	paramValue := r.URL.Query().Get(expectedParam)
 
 	if expectedParamValue != paramValue {
-		qph.logger.Errorf("Invalid query parameter value provided")
-		w.WriteHeader(http.StatusBadRequest)
-		return
+
+		return http.StatusBadRequest, errors.New("Invalid query parameter value provided")
 	}
 
-	successResponse(w)
+	return http.StatusOK, nil
 }

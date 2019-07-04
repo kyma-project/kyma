@@ -134,8 +134,38 @@ func (api *API) WithCustomHeaders(headers *map[string][]string) *API {
 	return api
 }
 
+func (api *API) WithOAuthSecuredSpec(oauthURL, clientID, clientSecret string) *API {
+	if api.SpecificationCredentials == nil {
+		api.SpecificationCredentials = &Credentials{}
+	}
+
+	api.SpecificationCredentials.Oauth = &Oauth{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		URL:          oauthURL,
+	}
+
+	return api
+}
+
+func (api *API) WithCustomHeadersSpec(headers *map[string][]string) *API {
+	api.SpecificationRequestParameters = &RequestParameters{
+		Headers: headers,
+	}
+
+	return api
+}
+
 func (api *API) WithCustomQueryParams(queryParams *map[string][]string) *API {
 	api.RequestParameters = &RequestParameters{
+		QueryParameters: queryParams,
+	}
+
+	return api
+}
+
+func (api *API) WithCustomQueryParamsSpec(queryParams *map[string][]string) *API {
+	api.SpecificationRequestParameters = &RequestParameters{
 		QueryParameters: queryParams,
 	}
 
