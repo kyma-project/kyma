@@ -2,9 +2,9 @@
 title: Architecture
 ---
 
-The Helm Broker is installed alongside other Kyma components and it automatically registers itself in the Service Catalog as a ClusterServiceBroker. The installation provides the default [ClusterAddonsConfiguration](#) (CAC) custom resource (CR). It contains URLs from which Helm Broker will fetch bundles.
+The Helm Broker is installed alongside other Kyma components and it automatically registers itself in the Service Catalog as a ClusterServiceBroker. The installation provides the default [ClusterAddonsConfiguration](#custom-resource-clusteraddonsconfiguration) (CAC) custom resource (CR). It contains URLs from which Helm Broker will fetch bundles.
 
-If you want the Helm Broker to act as a Namespace-scoped ServiceBroker, create the [AddonsConfiguration](#) (AC) custom resource. In such a case, the Helm Broker creates Service and registers itself in the Service Catalog as a ServiceBroker inside the Namespace in which the CR is created.
+If you want the Helm Broker to act as a Namespace-scoped ServiceBroker, create the [AddonsConfiguration](#custom-resource-addonsconfiguration) (AC) custom resource. In such a case, the Helm Broker creates Service and registers itself in the Service Catalog as a ServiceBroker inside the Namespace in which the CR is created.
 
 The Helm Broker workflow starts with the registration process, during which the Helm Broker fetches bundles from URLs provided in the ClusterAddonsConfiguration or AddonsConfiguration CRs, and registers them as Service Classes in the Service Catalog. These URLs point to the the Kyma [`bundles`](https://github.com/kyma-project/bundles) repository, but you can also add URLs to a remote HTTPS server.
 
