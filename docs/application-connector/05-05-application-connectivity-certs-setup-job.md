@@ -16,7 +16,7 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **global.applicationConnectorCaKey** | Specifies the base64 encoded private key for the Application Connector. If not provided it will be generated. | `` |
-| **global.applicationConnectorCa** | Specifies the base64 encoded certificate for the Application Connector. If not provided it will be generated | `` |
-| **application_connectivity_certs_setup_job.certificate.validityTime** | Specifies how long the generated certificate should be valid. | `92d` | 
+| **global.applicationConnectorCaKey** | Specifies the base64-encoded private key for the Application Connector. If you don't provide it, a private key is generated automatically. | `` |
+| **global.applicationConnectorCa** | Specifies the base64-encoded certificate for the Application Connector. If you don't provide it, the certificate is generated automatically. | `` |
+| **application_connectivity_certs_setup_job.certificate.validityTime** | Specifies how long the generated certificate is valid. | `92d` | 
 

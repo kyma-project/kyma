@@ -3,16 +3,16 @@ title: Application Connector Certificates
 type: Details
 ---
 
-Application Connector is secured with the client certificate which is being verified by the Istio Ingress Gateway.
+The Application Connector is secured with a client certificate verified by the Istio Ingress Gateway.
 
 By default, the server key and certificate are automatically generated. 
-The user can provide his own server certificate and key during the installation by setting them as the following overrides:
+You can provide a custom server certificate and key during the installation by setting them as the following overrides:
 ```
 global.applicationConnectorCaKey: {BASE64_ENCODED_PRIVATE_KEY}
 global.applicationConnectorCa: {BASE64_ENCODED_CERTIFICATE}
 ```
 
-The example Config Map containing the overrides:
+This is a sample ConfigMap that contains overrides with a custom certificate and key:
 ```
 apiVersion: v1
 kind: ConfigMap
@@ -27,7 +27,7 @@ data:
   global.applicationConnectorCaKey: "{BASE64_ENCODED_PRIVATE_KEY}"
 ```
 
->**NOTE:** For the Application Connector to use provided key and certificate, both values need to be specified. In case any of the values are missing or is incorrect, the new certificate and key pair will be generated.
+>**NOTE:** To use a custom certificate and key, you must provide both values through overrides. If either the certificate or key is incorrect or isn't provided, a new certificate and key pair is generated.
 
 >**TIP:** To learn more about how to use overrides in Kyma, see the following documents: 
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
