@@ -34,10 +34,6 @@ func (d downloader) Fetch(url string, credentials *authorization.Credentials, pa
 		return nil, err
 	}
 
-	if res.StatusCode != http.StatusOK {
-		return nil, apperrors.Internal("Failed to fetch from %s.", url)
-	}
-
 	{
 		bytes, err := ioutil.ReadAll(res.Body)
 		if err != nil {
