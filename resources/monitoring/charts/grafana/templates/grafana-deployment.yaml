@@ -53,7 +53,7 @@ spec:
         - name: GF_AUTH_GENERIC_OAUTH_SCOPES
           value: {{ .Values.auth.genericOauth.scopes | quote}}
         - name: GF_AUTH_GENERIC_OAUTH_TOKEN_URL
-          value: 'https://dex.{{ .Values.global.ingress.domainName }}/token'
+          value: 'http://dex-service:5556/token'
         - name: GF_AUTH_ANONYMOUS_ENABLED
           value: {{ .Values.auth.anonymous.enabled | quote}}
         - name: GF_AUTH_OAUTH_AUTO_LOGIN

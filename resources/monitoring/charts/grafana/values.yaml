@@ -117,7 +117,7 @@ auth:
     enabled: true
     clientId: grafana
     clientSecret: apie4eeX6hiC9ainieli
-    scopes: openid
+    scopes: openid email
 
 ##Custom Labels to be added to Grafana ServiceMonitors
 ##
