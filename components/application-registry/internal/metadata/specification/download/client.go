@@ -53,7 +53,7 @@ func (d downloader) requestAPISpec(specUrl string, credentials *authorization.Cr
 	if credentials != nil {
 		err := d.addAuthorization(req, credentials)
 		if err != nil {
-			return nil, apperrors.Internal("Adding authorization for fetching API spec from %s failed, %s", specUrl, err.Error())
+			return nil, apperrors.UpstreamServerCallFailed("Adding authorization for fetching API spec from %s failed, %s", specUrl, err.Error())
 		}
 	}
 
