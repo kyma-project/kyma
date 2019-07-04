@@ -9,6 +9,7 @@ import (
 const (
 	clusterCertificateSecretKey = "crt"
 	clusterKeySecretKey         = "key"
+	certificateChainSecretKey   = "crtChain"
 
 	caCertificateSecretKey = "cacert"
 )
@@ -32,7 +33,7 @@ func NewCertificatePreserver(clusterCertSecret types.NamespacedName, caCertSecre
 }
 
 func (cp *certificatePreserver) PreserveCertificates(certificates Certificates) error {
-	err := cp.saveClusterCertificateAndKey(certificates.ClientKey, certificates.ClientCRT)
+	err := cp.saveClusterCertificateAndKey(certificates.ClientKey, certificates.ClientCRT, certificates.CRTChain)
 	if err != nil {
 		return err
 	}
@@ -40,10 +41,11 @@ func (cp *certificatePreserver) PreserveCertificates(certificates Certificates) 
 	return cp.saveCACertificate(certificates.CaCRT)
 }
 
-func (cp *certificatePreserver) saveClusterCertificateAndKey(clientKey, certificateChain []byte) error {
+func (cp *certificatePreserver) saveClusterCertificateAndKey(clientKey, clientCert, certificateChain []byte) error {
 	clusterSecretData := map[string][]byte{
-		clusterCertificateSecretKey: certificateChain,
+		clusterCertificateSecretKey: clientCert,
 		clusterKeySecretKey:         clientKey,
+		certificateChainSecretKey:   certificateChain,
 	}
 
 	err := cp.secretsRepository.UpsertWithMerge(cp.clusterCertSecretName, clusterSecretData)

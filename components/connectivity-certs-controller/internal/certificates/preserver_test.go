@@ -30,6 +30,7 @@ func TestCertificatePreserver_PreserveCertificates(t *testing.T) {
 		clusterSecretData := map[string][]byte{
 			clusterCertificateSecretKey: clientCRT,
 			clusterKeySecretKey:         clientKey,
+			certificateChainSecretKey:   crtChain,
 		}
 		caSecretData := map[string][]byte{caCertificateSecretKey: caCRT}
 
@@ -52,6 +53,7 @@ func TestCertificatePreserver_PreserveCertificates(t *testing.T) {
 		clusterSecretData := map[string][]byte{
 			clusterCertificateSecretKey: clientCRT,
 			clusterKeySecretKey:         clientKey,
+			certificateChainSecretKey:   crtChain,
 		}
 
 		secretsRepository := &mocks.Repository{}
@@ -72,6 +74,7 @@ func TestCertificatePreserver_PreserveCertificates(t *testing.T) {
 		clusterSecretData := map[string][]byte{
 			clusterCertificateSecretKey: clientCRT,
 			clusterKeySecretKey:         clientKey,
+			certificateChainSecretKey:   crtChain,
 		}
 		caSecretData := map[string][]byte{caCertificateSecretKey: caCRT}
 

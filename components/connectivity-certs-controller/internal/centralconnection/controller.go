@@ -196,15 +196,15 @@ func (c *Controller) getCertificateCredentials() (connectorservice.CertificateCr
 		return connectorservice.CertificateCredentials{}, errors.Wrap(err, "Failed to get client key and certificate")
 	}
 
-	caCertificates, err := c.certificateProvider.GetCACertificates()
+	certificateChain, err := c.certificateProvider.GetCertificateChain()
 	if err != nil {
 		return connectorservice.CertificateCredentials{}, errors.Wrap(err, "Failed to get CA certificate")
 	}
 
 	return connectorservice.CertificateCredentials{
-		ClientKey:  clientKey,
-		ClientCert: clientCert,
-		CACerts:    caCertificates,
+		ClientKey:        clientKey,
+		ClientCert:       clientCert,
+		CertificateChain: certificateChain,
 	}, nil
 }
 

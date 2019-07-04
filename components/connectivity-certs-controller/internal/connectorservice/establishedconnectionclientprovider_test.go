@@ -15,9 +15,9 @@ func TestMutualTLSClientProvider_CreateClient(t *testing.T) {
 	t.Run("should create Mutual TLS Connector InitialConnectionClient", func(t *testing.T) {
 		// given
 		credentials := CertificateCredentials{
-			ClientKey:  &rsa.PrivateKey{},
-			ClientCert: &x509.Certificate{Subject: subject},
-			CACerts:    []*x509.Certificate{},
+			ClientKey:        &rsa.PrivateKey{},
+			ClientCert:       &x509.Certificate{Subject: subject},
+			CertificateChain: []*x509.Certificate{},
 		}
 
 		csrProvider := &mocks.CSRProvider{}
