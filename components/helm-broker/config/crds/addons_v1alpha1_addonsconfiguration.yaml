@@ -49,10 +49,6 @@ spec:
               format: int64
               type: integer
             phase:
-              enum:
-              - Ready
-              - Pending
-              - Failed
               type: string
             repositories:
               items:

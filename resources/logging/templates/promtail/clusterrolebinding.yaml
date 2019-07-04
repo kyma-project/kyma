@@ -8,10 +8,6 @@ metadata:
     chart: {{ template "promtail.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-{{- with .Values.promtail.annotations }}
-  annotations:
-{{ toYaml . | indent 4 }}
-{{- end }}
 subjects:
   - kind: ServiceAccount
     name: {{ template "promtail.serviceAccountName" . }}
@@ -20,4 +16,4 @@ roleRef:
   kind: ClusterRole
   name: {{ template "promtail.fullname" . }}-clusterrole
   apiGroup: rbac.authorization.k8s.io
-{{- end}}
+{{- end }}
