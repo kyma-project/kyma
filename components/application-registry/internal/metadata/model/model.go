@@ -4,7 +4,7 @@ package model
 type API struct {
 	// TargetUrl points to API.
 	TargetUrl string
-	// Credentials is a credentials of API.
+	// Credentials contains credentials of API.
 	Credentials *CredentialsWithCSRF
 	// Spec contains specification of an API.
 	Spec []byte
@@ -12,40 +12,48 @@ type API struct {
 	SpecificationUrl string
 	// ApiType is a type of and API ex. OData, OpenApi
 	ApiType string
-	// Request Parameters
+	// Additional request parameters
 	RequestParameters *RequestParameters
-	// Specification Credentials is a credentials for fetching API spec.
+	// Specification Credentials contains credentials for fetching API spec.
 	SpecificationCredentials *Credentials
-	// Specification Request Parameters
+	// Additional request parameters to be used when fetching specification
 	SpecificationRequestParameters *RequestParameters
 }
 
-// Credentials contains OAuth configuration.
+// Credentials contains OAuth or Basic Auth configuration.
 type Credentials struct {
-	// Oauth is OAuth configuration.
+	// OAuth configuration
 	Oauth *Oauth
+	// BasicAuth configuration
 	Basic *Basic
 }
 
-// Credentials contains OAuth configuration.
+// CredentialsWithCSRF contains OAuth, BasicAuth or Certificates configuration along with optional CSRF data.
 type CredentialsWithCSRF struct {
-	// OauthWithCSRF is OAuth configuration.
-	Oauth          *Oauth
-	Basic          *Basic
+	// OAuth configuration
+	Oauth *Oauth
+	// BasicAuth configuration
+	Basic *Basic
+	// Certificates configuration
 	CertificateGen *CertificateGen
 	// Optional CSRF Data
 	CSRFInfo *CSRFInfo
 }
 
+// RequestParameters contains additional headers and query parameters
 type RequestParameters struct {
-	Headers         *map[string][]string `json:"headers"`
+	// Additional headers
+	Headers *map[string][]string `json:"headers"`
+	// Additional query parameters
 	QueryParameters *map[string][]string `json:"queryParameters"`
 }
 
+// CSRFInfo contains data for performing CSRF token request
 type CSRFInfo struct {
 	TokenEndpointURL string
 }
 
+// Oauth contains data for performing Oauth token request
 type Oauth struct {
 	// URL to OAuth token provider.
 	URL string
@@ -55,6 +63,7 @@ type Oauth struct {
 	ClientSecret string
 }
 
+// Basic contains user and password for Basic Auth
 type Basic struct {
 	// Username to use for authentication.
 	Username string
