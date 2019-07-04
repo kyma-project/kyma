@@ -6,12 +6,20 @@ TAG = $(DOCKER_TAG)
 resolve: 
 	dep ensure -vendor-only -v
 
+.PHONY: pull-licenses
+pull-licenses:
+ifdef LICENSE_PULLER_PATH
+	bash $(LICENSE_PULLER_PATH)
+else
+	mkdir -p licenses
+endif
+
 validate:
 	go build -o golint-vendored ./vendor/github.com/golang/lint/golint
 	./golint-vendored
 	rm golint-vendored
 
-build-image:
+build-image: pull-licenses
 	docker build -t $(APP_NAME):latest .
 
 push-image:

@@ -10,4 +10,5 @@ RUN apk update &&\
 
 ADD ./sar-test.sh sar-test.sh
 ADD ./kyma-test-bindings.yaml kyma-test-bindings.yaml
+
 ENTRYPOINT ["/bin/bash", "-c", "/root/sar-test.sh"]

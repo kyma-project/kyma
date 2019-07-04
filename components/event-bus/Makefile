@@ -19,8 +19,16 @@ BINARY_NI = $(APP_NAME_NI)
 build:
 	./before-commit.sh ci
 
+.PHONY: pull-licenses
+pull-licenses:
+ifdef LICENSE_PULLER_PATH
+	bash $(LICENSE_PULLER_PATH)
+else
+	mkdir -p licenses
+endif
+
 .PHONY: build-image
-build-image:
+build-image: pull-licenses
 	./docker-build-event-bus-publish-knative.sh $(APP_NAME_PUBLISH_KN) latest event-bus
 	./docker-build-event-bus-sck.sh $(APP_NAME_SCK) latest event-bus
 	./docker-build-nats-init.sh $(APP_NAME_NI) latest event-bus
