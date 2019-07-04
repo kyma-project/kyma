@@ -45,11 +45,12 @@ func (oh *oauthHandler) OAuthSpecHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	w.WriteHeader(statusCode)
+	http.ServeFile(w, r, "spec.json")
 }
 
 func (oh *oauthHandler) checkOauth(r *http.Request) (statusCode int, err error) {
-	headerAauthorization := r.Header.Get(AuthorizationHeader)
-	oAuthToken := strings.TrimPrefix(headerAauthorization, "Bearer ")
+	headerAuthorization := r.Header.Get(AuthorizationHeader)
+	oAuthToken := strings.TrimPrefix(headerAuthorization, "Bearer ")
 
 	if oAuthToken != bearerToken {
 		return http.StatusBadRequest, errors.New("Invalid token provided")
@@ -68,14 +69,29 @@ func (oh *oauthHandler) OAuthTokenHandler(w http.ResponseWriter, r *http.Request
 
 	if expectedClientId == "" || expectedClientSecret == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		oh.logger.Error("Expected credentials not provided")
+		oh.logger.Error("Expected credentials not provided. ClientID, ClientSecret or both not provided")
 		return
 	}
 
-	encodedCredentials := strings.TrimPrefix(AuthorizationHeader, "Basic ")
+	headerAuthorization := r.Header.Get(AuthorizationHeader)
+
+	encodedCredentials := strings.TrimPrefix(headerAuthorization, "Basic ")
 	decoded, err := base64.StdEncoding.DecodeString(encodedCredentials)
 
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		oh.logger.Error("Failed to decode credentials")
+		return
+	}
+
 	credentials := strings.Split(string(decoded), ":")
+
+	if len(credentials) < 2 {
+		w.WriteHeader(http.StatusBadRequest)
+		oh.logger.Error("Decoded credentials are incomplete")
+		return
+	}
+
 	clientId := credentials[0]
 	clientSecret := credentials[1]
 
