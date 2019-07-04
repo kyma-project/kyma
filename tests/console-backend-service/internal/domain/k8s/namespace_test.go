@@ -43,6 +43,7 @@ func TestNamespace(t *testing.T) {
 	suite.thenThereIsNoError(t, err)
 	suite.thenThereIsNoGqlError(t, updateResp.GqlErrors)
 	suite.thenUpdateNamespaceResponseIsAsExpected(t, updateResp)
+	suite.thenNamespaceAfterUpdateExistsInK8s(t)
 
 	t.Log("Deleting namespace...")
 	deleteRsp, err := suite.whenNamespaceIsDeleted()
@@ -104,6 +105,13 @@ func (s testNamespaceSuite) thenNamespaceExistsInK8s(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, ns.Name, s.namespaceName)
 	assert.Equal(t, ns.Labels, s.labels)
+}
+
+func (s testNamespaceSuite) thenNamespaceAfterUpdateExistsInK8s(t *testing.T) {
+	ns, err := s.k8sClient.Namespaces().Get(s.namespaceName, metav1.GetOptions{})
+	require.NoError(t, err)
+	assert.Equal(t, ns.Name, s.namespaceName)
+	assert.Equal(t, ns.Labels, s.updatedLabels)
 }
 
 func (s testNamespaceSuite) whenNamespaceIsQueried() (namespaceResponse, error) {

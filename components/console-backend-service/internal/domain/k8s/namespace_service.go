@@ -12,6 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/util/retry"
 )
 
 type namespaceService struct {
@@ -76,34 +77,30 @@ func (svc *namespaceService) Create(name string, labels gqlschema.Labels) (*v1.N
 }
 
 func (svc *namespaceService) Update(name string, labels gqlschema.Labels) (*v1.Namespace, error) {
-	maxUpdateRetries := 5
-	var lastErr error
-	for i := 0; i < maxUpdateRetries; i++ {
+	var updated *v1.Namespace
+	err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		namespace, err := svc.Find(name)
 
 		if err != nil {
-			return nil, errors.Wrapf(err, "while getting %s [%s]", pretty.Namespace, name)
+			return errors.Wrapf(err, "while getting %s [%s]", pretty.Namespace, name)
 		}
 		if namespace == nil {
-			return nil, apiErrors.NewNotFound(schema.GroupResource{
+			return apiErrors.NewNotFound(schema.GroupResource{
 				Group:    "",
 				Resource: "namespaces",
 			}, name)
 		}
 		namespace.ObjectMeta.Labels = labels
 
-		updated, err := svc.client.Namespaces().Update(namespace)
-		switch {
-		case err == nil:
-			return updated, nil
-		case apiErrors.IsConflict(err):
-			lastErr = err
-			continue
-		default:
-			return nil, errors.Wrapf(err, "while updating %s [%s]", pretty.Namespace, name)
-		}
+		updated, err = svc.client.Namespaces().Update(namespace)
+
+		return errors.Wrapf(err, "while updating %s [%s]", pretty.Namespace, name)
+	})
+
+	if err == nil {
+		return updated, nil
 	}
-	return nil, errors.Wrapf(lastErr, "couldn't update %s [%s], after %d retries", pretty.Namespace, name, maxUpdateRetries)
+	return nil, errors.Wrapf(err, "couldn't update %s [%s], after %d retries", pretty.Namespace, name, retry.DefaultRetry.Steps)
 }
 
 func (svc *namespaceService) Delete(name string) error {
