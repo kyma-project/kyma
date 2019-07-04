@@ -189,7 +189,7 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 - [Docker Hub](https://hub.docker.com/) account
 - [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
->**NOTE:** Running Kyma on AKS requires three [`standard DSv2` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-memory#dsv2-series-11-15). You create these machines when you complete the **Prepare the AKS cluster** step.
+>**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general#dv3-series-1). You create these machines when you complete the **Prepare the AKS cluster** step.
 
 
 ## Choose the release to install
@@ -224,7 +224,7 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
     az aks create \
       --resource-group $RS_GROUP \
       --name $CLUSTER_NAME \
-      --node-vm-size "Standard_DS2_v2" \
+      --node-vm-size "Standard_D4_v3" \
       --kubernetes-version 1.12 \
       --enable-addons "monitoring,http_application_routing" \
       --generate-ssh-keys
