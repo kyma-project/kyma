@@ -69,11 +69,6 @@ image:
   repository: grafana/grafana
   tag: 6.0.1
 
-containersEnv:
-  gfAuthGenericOauthClientId: grafana
-  gfAuthGenericOauthClientSecret: apie4eeX6hiC9ainieli
-  gfAuthGenericOauthTokenUrlValue: http://dex-service:5556/token
-
 persistence:
 
   ## minio data Persistent Volume Storage Class
@@ -112,8 +107,17 @@ keepOriginalDashboards: true
 keepOriginalDatasources: true
 
 auth:
+  oauthAutoLogin: true
+  disableLoginForm: true
+  basic:
+    enabled: false
   anonymous:
-    enabled: "false"
+    enabled: false
+  genericOauth:
+    enabled: true
+    clientId: grafana
+    clientSecret: apie4eeX6hiC9ainieli
+    scopes: openid
 
 ##Custom Labels to be added to Grafana ServiceMonitors
 ##

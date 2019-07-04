@@ -39,27 +39,30 @@ spec:
         - name: GF_USERS_AUTO_ASSIGN_ORG_ROLE
           value: Editor
         - name: GF_AUTH_BASIC_ENABLED
-          value: "false"
+          value: {{ .Values.auth.basic.enabled | quote}}
         - name: GF_AUTH_DISABLE_LOGIN_FORM
-          value: "true"
+          value: {{ .Values.auth.disableLoginForm | quote}}
         - name: GF_AUTH_GENERIC_OAUTH_AUTH_URL
           value: 'https://dex.{{ .Values.global.ingress.domainName }}/auth'
         - name: GF_AUTH_GENERIC_OAUTH_CLIENT_ID
-          value: {{ .Values.containersEnv.gfAuthGenericOauthClientId }}
+          value: {{ .Values.auth.genericOauth.clientId | quote}}
         - name: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
-          value: {{ .Values.containersEnv.gfAuthGenericOauthClientSecret }}
+          value: {{ .Values.auth.genericOauth.clientSecret | quote}}
         - name: GF_AUTH_GENERIC_OAUTH_ENABLED
-          value: "true"
+          value: {{ .Values.auth.genericOauth.enabled | quote}}
         - name: GF_AUTH_GENERIC_OAUTH_SCOPES
-          value: openid profile email groups
+          value: {{ .Values.auth.genericOauth.scopes | quote}}
         - name: GF_AUTH_GENERIC_OAUTH_TOKEN_URL
-          value: {{ .Values.containersEnv.gfAuthGenericOauthTokenUrlValue }}
+          value: 'https://dex.{{ .Values.global.ingress.domainName }}/token'
         - name: GF_AUTH_ANONYMOUS_ENABLED
-          value: "{{ .Values.auth.anonymous.enabled }}"
+          value: {{ .Values.auth.anonymous.enabled | quote}}
+        - name: GF_AUTH_OAUTH_AUTO_LOGIN
+          value: {{ .Values.auth.oauthAutoLogin | quote}}
         - name: GF_SERVER_ROOT_URL
           value: 'https://grafana.{{ .Values.global.ingress.domainName }}/'
         - name: GF_USERS_DEFAULT_THEME
-          value: {{ .Values.users.default.theme }}
+          value: {{ .Values.users.default.theme | quote}}
+
 {{- if .Values.extraVars }}
 {{ toYaml .Values.extraVars | indent 8 }}
 {{- end }}
