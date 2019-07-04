@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: post-upgrade-knative-eventing
+  annotations:
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-weight": "-5"
+  labels:
+    job: post-upgrade-knative-eventing
+---
+apiVersion: v1
+data:
+  post-upgrade.sh: |
+    #!/usr/bin/env bash
+    set -eu
+    echo "*** Post upgrade job starts ***"
+    kubectl scale -n kyma-system deploy/event-bus-subscription-controller-knative --replicas=1
+    echo "*** Post upgrade job executed ***"
+kind: ConfigMap
+metadata:
+  annotations:
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-weight": "-5"
+  labels:
+    job: post-upgrade-knative-eventing
+  name: post-upgrade-knative-eventing
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: post-upgrade
+  annotations:
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-weight": "-4"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-admin
+subjects:
+- kind: ServiceAccount
+  name: post-upgrade-knative-eventing
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-weight": "-3"
+  labels:
+    job: post-upgrade-knative-eventing
+  name: post-upgrade-knative-eventing
+spec:
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        job: post-upgrade-knative-eventing
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - command: ["sh", "/scripts/post-upgrade.sh"]
+        image: docker.io/istio/kubectl:1.1.6
+        imagePullPolicy: IfNotPresent
+        name: post-upgrade-knative-eventing
+        volumeMounts:
+        - mountPath: /scripts
+          name: scripts
+          readOnly: true
+      serviceAccountName: post-upgrade-knative-eventing
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: post-upgrade-knative-eventing
+        name: scripts

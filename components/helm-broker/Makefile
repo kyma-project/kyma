@@ -7,6 +7,14 @@ TAG = $(DOCKER_TAG)
 build:
 	./before-commit.sh ci
 
+.PHONY: pull-licenses
+pull-licenses:
+ifdef LICENSE_PULLER_PATH
+	bash $(LICENSE_PULLER_PATH)
+else
+	mkdir -p licenses
+endif
+
 .PHONY: generates
 # Generate CRD manifests, clients etc.
 generates: crd-manifests client
@@ -22,11 +30,11 @@ client:
 	./contrib/hack/update-codegen.sh
 
 .PHONY: build-image
-build-image:
+build-image: pull-licenses
 	cp broker deploy/broker/helm-broker
 	cp targz deploy/tools/targz
 	cp indexbuilder deploy/tools/indexbuilder
-	cp preupgrade deploy/tools/preupgrade
+	cp cm2cac deploy/tools/cm2cac
 
 	docker build -t $(APP_NAME) deploy/broker
 	docker build -t $(TOOLS_NAME) deploy/tools
@@ -53,6 +61,7 @@ clean:
 	rm -f broker
 	rm -f targz
 	rm -f indexbuilder
+	rm -f cm2cac
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:

@@ -5,6 +5,7 @@ WORKDIR ${SRC_DIR}
 
 COPY ./apicontroller ${SRC_DIR}/apicontroller/
 COPY ./vendor ${SRC_DIR}/vendor/
+COPY ./licenses/ /app/licenses
 
 RUN go test -c ./apicontroller/ -o /apicontroller.test
 
@@ -13,5 +14,6 @@ FROM alpine:3.7
 LABEL source = git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /apicontroller.test /apicontroller.test
+COPY --from=builder /app/licenses /app/licenses
 
 ENTRYPOINT [ "/apicontroller.test", "-test.v" ]

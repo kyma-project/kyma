@@ -257,6 +257,11 @@ type ServicePlanID string
 // Namespace is the name of namespace in k8s
 type Namespace string
 
+const (
+	// ClusterWide is a value which refers to cluster wide resources.
+	ClusterWide Namespace = ""
+)
+
 // Instance contains info about Service exposed via Service Catalog.
 type Instance struct {
 	ID            InstanceID
