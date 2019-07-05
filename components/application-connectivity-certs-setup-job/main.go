@@ -6,9 +6,6 @@ import (
 	restclient "k8s.io/client-go/rest"
 )
 
-// TODO - mention it somewhere in the docs
-// TODO - not sure what will happen on update
-
 func main() {
 
 	log.Info("Starting Application Connectivity Certificates setup job")
