@@ -23,7 +23,7 @@ data:
       configurations.serving.knative.dev  \
       clusteringresses.networking.internal.knative.dev  \
       podautoscalers.autoscaling.internal.knative.dev \
-      images.caching.internal.knative.dev  \
+      images.caching.internal.knative.dev
     echo "*** Pre upgrade job executed ***"
 kind: ConfigMap
 metadata:
@@ -37,7 +37,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: pre-upgrade
+  name: pre-upgrade-knative-serving
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
     "helm.sh/hook": pre-upgrade
