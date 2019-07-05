@@ -83,13 +83,9 @@ func main() {
 }
 
 func testGrafanaIsReady(url string) {
-	respBody, statusCode := doGet(url)
-	expectedContent := "<a href=\"https:"
+	_, statusCode := doGet(url)
 	if statusCode != 302 {
 		log.Fatalf("Test grafana: Expected HTTP response code 302 but got %v", statusCode)
-	}
-	if !strings.Contains(respBody, expectedContent) {
-		log.Fatalf("Test grafana: Expected content in response: %s but got %s", expectedContent, respBody)
 	}
 	log.Printf("Test grafana UI: Success")
 }
