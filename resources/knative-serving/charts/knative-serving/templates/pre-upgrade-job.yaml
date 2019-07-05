@@ -34,6 +34,7 @@ metadata:
   labels:
     job: pre-upgrade-knative-serving
   name: pre-upgrade-knative-serving
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:

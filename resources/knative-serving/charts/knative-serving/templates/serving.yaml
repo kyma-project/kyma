@@ -1,4 +1,48 @@
-
+apiVersion: rbac.authorization.k8s.io/v1		
+kind: ClusterRole		
+metadata:		
+  labels:		
+    networking.knative.dev/certificate-provider: cert-manager		
+    serving.knative.dev/controller: "true"		
+    serving.knative.dev/release: "v0.6.1"		
+  name: knative-serving-certmanager		
+rules:		
+- apiGroups:		
+  - certmanager.k8s.io		
+  resources:		
+  - certificates		
+  verbs:		
+  - get		
+  - list		
+  - create		
+  - update		
+  - delete		
+  - patch		
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1		
+kind: ClusterRole		
+metadata:		
+  labels:		
+    networking.knative.dev/ingress-provider: istio		
+    serving.knative.dev/controller: "true"		
+    serving.knative.dev/release: "v0.6.1"		
+  name: knative-serving-istio		
+rules:		
+- apiGroups:		
+  - networking.istio.io		
+  resources:		
+  - virtualservices		
+  - gateways		
+  verbs:		
+  - get		
+  - list		
+  - create		
+  - update		
+  - delete		
+  - patch		
+  - watch		
+---
 aggregationRule:
   clusterRoleSelectors:
   - matchLabels:
@@ -687,7 +731,7 @@ metadata:
 apiVersion: v1
 data:
   gateway.{{ .Values.gateway.name }}: {{ .Values.gateway.serviceUrl }}
-  _example: |
+  #_example: |
     ################################
     #                              #
     #    EXAMPLE CONFIGURATION     #
@@ -706,7 +750,7 @@ data:
     # Default Knative Gateway after v0.3. It points to the Istio
     # standard istio-ingressgateway, instead of a custom one that we
     # used pre-0.3.
-    gateway.knative-ingress-gateway: "istio-ingressgateway.istio-system.svc.cluster.local"
+    #gateway.knative-ingress-gateway: "istio-ingressgateway.istio-system.svc.cluster.local"
 
     # A cluster local gateway to allow pods outside of the mesh to access
     # Services and Routes not exposing through an ingress.  If the users
@@ -716,7 +760,7 @@ data:
     # sidecar injection (like Knative's istio-lean.yaml).  Since every pod
     # is outside of the service mesh in that case, a cluster-local  service
     # will need to be exposed to a cluster-local gateway to be accessible.
-    local-gateway.cluster-local-gateway: "cluster-local-gateway.istio-system.svc.cluster.local"
+    #local-gateway.cluster-local-gateway: "cluster-local-gateway.istio-system.svc.cluster.local"
 kind: ConfigMap
 metadata:
   labels:
