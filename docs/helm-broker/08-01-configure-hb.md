@@ -7,6 +7,7 @@ By default, the Helm Broker fetches bundles listed in the `index.yaml` file from
 ## Steps
 
 Follow these steps to configure the Helm Broker to fetch bundle definitions from other remote HTTPS servers.
+
 <div tabs>
   <details>
   <summary>
