@@ -49,7 +49,6 @@ func TestDeleteUstreamCORSHeaders(t *testing.T) {
 	//Prepare ResponseWriter
 	res := httptest.NewRecorder()
 
-
 	//WHEN
 	corsHandler.ServeHTTP(res, req)
 
