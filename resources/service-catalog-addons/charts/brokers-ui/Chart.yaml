@@ -2,4 +2,4 @@ apiVersion: v1
 name: brokers-ui
 description: Service Broker UI for Kyma Console
 version: 0.1.0
-appVersion: PR-1018
+appVersion: a181964f
