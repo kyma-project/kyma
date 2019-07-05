@@ -107,11 +107,12 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 }
 
 func TestNamespaceResolver_NamespaceQuery(t *testing.T) {
+	name := "name"
+	labels := map[string]string{
+		"env": "true",
+	}
+
 	t.Run("Success", func(t *testing.T) {
-		name := "name"
-		labels := map[string]string{
-			"env": "true",
-		}
 		resource := fixNamespace(name, labels)
 		expected := gqlschema.Namespace{
 			Name:   name,
@@ -137,8 +138,6 @@ func TestNamespaceResolver_NamespaceQuery(t *testing.T) {
 	})
 
 	t.Run("Empty", func(t *testing.T) {
-		name := "name"
-
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
 		svc.On("Find", name).Return(nil, nil).Once()
@@ -159,8 +158,6 @@ func TestNamespaceResolver_NamespaceQuery(t *testing.T) {
 	})
 
 	t.Run("Error finding", func(t *testing.T) {
-		name := "name"
-
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
 		svc.On("Find", name).Return(nil, errors.New("test error")).Once()
@@ -180,10 +177,6 @@ func TestNamespaceResolver_NamespaceQuery(t *testing.T) {
 	})
 
 	t.Run("Error converting", func(t *testing.T) {
-		name := "name"
-		labels := map[string]string{
-			"env": "true",
-		}
 		resource := fixNamespace(name, labels)
 
 		svc := automock.NewNamespaceSvc()
@@ -207,8 +200,9 @@ func TestNamespaceResolver_NamespaceQuery(t *testing.T) {
 }
 
 func TestNamespaceResolver_CreateNamespace(t *testing.T) {
+	name := "exampleName"
+
 	t.Run("Success", func(t *testing.T) {
-		name := "exampleName"
 		labels := gqlschema.Labels{
 			"test": "true",
 		}
@@ -231,7 +225,6 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		name := "exampleName"
 		labels := gqlschema.Labels{}
 
 		svc := automock.NewNamespaceSvc()
@@ -249,12 +242,12 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 }
 
 func TestNamespaceResolver_UpdateNamespace(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		name := "exampleName"
-		labels := gqlschema.Labels{
-			"test": "true",
-		}
+	name := "exampleName"
+	labels := gqlschema.Labels{
+		"test": "true",
+	}
 
+	t.Run("Success", func(t *testing.T) {
 		resource := fixNamespace(name, labels)
 		expected := gqlschema.NamespaceMutationOutput{
 			Name:   name,
@@ -273,11 +266,6 @@ func TestNamespaceResolver_UpdateNamespace(t *testing.T) {
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		name := "exampleName"
-		labels := gqlschema.Labels{
-			"test": "true",
-		}
-
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
 		svc.On("Update", name, labels).Return(nil, errors.New("test error")).Once()
@@ -292,16 +280,17 @@ func TestNamespaceResolver_UpdateNamespace(t *testing.T) {
 }
 
 func TestNamespaceResolver_DeleteNamespace(t *testing.T) {
+	name := "name"
+	labels := map[string]string{
+		"env": "true",
+	}
+	expected := gqlschema.Namespace{
+		Name:   name,
+		Labels: labels,
+	}
+
 	t.Run("Success", func(t *testing.T) {
-		name := "name"
-		labels := map[string]string{
-			"env": "true",
-		}
 		resource := fixNamespace(name, labels)
-		expected := gqlschema.Namespace{
-			Name:   name,
-			Labels: labels,
-		}
 
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
@@ -323,7 +312,6 @@ func TestNamespaceResolver_DeleteNamespace(t *testing.T) {
 	})
 
 	t.Run("Error finding", func(t *testing.T) {
-		name := "name"
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
 		svc.On("Find", name).Return(nil, errors.New("test error")).Once()
@@ -343,10 +331,6 @@ func TestNamespaceResolver_DeleteNamespace(t *testing.T) {
 	})
 
 	t.Run("Error converting", func(t *testing.T) {
-		name := "name"
-		labels := map[string]string{
-			"env": "true",
-		}
 		resource := fixNamespace(name, labels)
 
 		svc := automock.NewNamespaceSvc()
@@ -369,15 +353,7 @@ func TestNamespaceResolver_DeleteNamespace(t *testing.T) {
 	})
 
 	t.Run("Error deleting", func(t *testing.T) {
-		name := "name"
-		labels := map[string]string{
-			"env": "true",
-		}
 		resource := fixNamespace(name, labels)
-		expected := gqlschema.Namespace{
-			Name:   name,
-			Labels: labels,
-		}
 
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
