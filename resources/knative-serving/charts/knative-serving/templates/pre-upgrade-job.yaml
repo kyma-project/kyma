@@ -17,13 +17,13 @@ data:
     echo "*** Pre upgrade job starts ***"
     kubectl scale -n knative-system deploy/activator--replicas=0
     kubectl delete crd \
-      services.serving.knative.dev
-      routes.serving.knative.dev
-      revisions.serving.knative.dev
-      configurations.serving.knative.dev
-      clusteringresses.networking.internal.knative.dev
-      podautoscalers.autoscaling.internal.knative.dev
-      images.caching.internal.knative.dev
+      services.serving.knative.dev  \
+      routes.serving.knative.dev  \
+      revisions.serving.knative.dev  \
+      configurations.serving.knative.dev  \
+      clusteringresses.networking.internal.knative.dev  \
+      podautoscalers.autoscaling.internal.knative.dev \
+      images.caching.internal.knative.dev  \
     echo "*** Pre upgrade job executed ***"
 kind: ConfigMap
 metadata:
@@ -48,7 +48,7 @@ roleRef:
   name: kyma-admin
 subjects:
 - kind: ServiceAccount
-  name: pre-upgrade-knative-eventing
+  name: pre-upgrade-knative-serving
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: batch/v1
@@ -59,8 +59,8 @@ metadata:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-weight": "-3"
   labels:
-    job: pre-upgrade-knative-eventing
-  name: pre-upgrade-knative-eventing
+    job: pre-upgrade-knative-serving
+  name: pre-upgrade-knative-serving
 spec:
   completions: 1
   parallelism: 1
