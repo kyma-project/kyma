@@ -5,21 +5,23 @@ import (
 	"os"
 
 	scCs "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis"
 	//hbConfig "github.com/kyma-project/kyma/components/helm-broker/internal/config"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
-	ctrlCfg "github.com/kyma-project/kyma/components/helm-broker/internal/controller/config"
+	ctrlCfg "github.com/kyma-project/kyma/components/helm-broker/internal/config"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
 	"github.com/sirupsen/logrus"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	//restclient "k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
+
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 )
 
 func main() {
@@ -28,12 +30,12 @@ func main() {
 	verbose := flag.Bool("verbose", false, "specify if log verbosely loading configuration")
 	flag.Parse()
 
-	ctrlCfg, err := ctrlCfg.Load(*verbose)
+	ctrCfg, err := ctrlCfg.LoadControllerConfig(*verbose)
 	fatalOnError(err)
 
-	log := logger.New(&ctrlCfg.Logger)
+	log := logger.New(&ctrCfg.Logger)
 
-	storageConfig := storage.ConfigList(ctrlCfg.Storage)
+	storageConfig := storage.ConfigList(ctrCfg.Storage)
 	sFact, err := storage.NewFactory(&storageConfig)
 	if err != nil {
 		log.Error(err, "unable to get storage factory")
@@ -59,36 +61,44 @@ func main() {
 	log.Info("Registering Components.")
 
 	// Setup Scheme for all resources
-	log.Info("setting up scheme")
+	log.Info("setting up schemes")
 	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "unable add APIs to scheme")
+		log.Error(err, "unable to add Addons APIs to scheme")
+		os.Exit(1)
+	}
+	if err := v1beta1.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "unable to add ServiceCatalog APIs to scheme")
+		os.Exit(1)
+	}
+	if err := v1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "unable to add CMS APIs to scheme")
 		os.Exit(1)
 	}
 
-	// TODO: change to InClusterConfig
-	k8sConfig, err := clientcmd.BuildConfigFromFlags("", "/Users/i355812/.kube/config")
-	//k8sConfig, err := restclient.InClusterConfig()
+	scClientSet, err := scCs.NewForConfig(mgr.GetConfig())
 	fatalOnError(err)
 
-	scClientSet, err := scCs.NewForConfig(k8sConfig)
+	dynamicClient, err := client.New(mgr.GetConfig(), client.Options{Scheme: mgr.GetScheme()})
 	fatalOnError(err)
 
-	brokerSyncer := broker.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1(), log)
-	sbFacade := broker.NewBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrlCfg.Namespace, ctrlCfg.ServiceName)
-	csbFacade := broker.NewClusterBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrlCfg.Namespace, ctrlCfg.ServiceName)
+	docsProvider := bundle.NewDocsProvider(dynamicClient)
+	// TODO: change SC client to generic client
+	brokerSyncer := broker.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1(), ctrCfg.ClusterServiceBrokerName, log)
+	sbFacade := broker.NewBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName)
+	csbFacade := broker.NewClusterBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, ctrCfg.ClusterServiceBrokerName)
 
-	bundleProvider := bundle.NewProvider(bundle.NewHTTPRepository(), bundle.NewLoader(ctrlCfg.TmpDir, log), log)
+	bundleProvider := bundle.NewProvider(bundle.NewHTTPRepository(), bundle.NewLoader(ctrCfg.TmpDir, log), log)
 
 	// Setup all Controllers
 	log.Info("Setting up controller")
-	acReconcile := controller.NewReconcileAddonsConfiguration(mgr, bundleProvider, sbFacade, sFact, ctrlCfg.DevelopMode)
+	acReconcile := controller.NewReconcileAddonsConfiguration(mgr, bundleProvider, sbFacade, sFact, ctrCfg.DevelopMode, docsProvider, brokerSyncer)
 	acController := controller.NewAddonsConfigurationController(acReconcile)
 	err = acController.Start(mgr)
 	if err != nil {
 		log.Error(err, "unable to start AddonsConfigurationController")
 	}
 
-	cacReconcile := controller.NewReconcileClusterAddonsConfiguration(mgr, csbFacade)
+	cacReconcile := controller.NewReconcileClusterAddonsConfiguration(mgr, csbFacade, docsProvider, brokerSyncer)
 	cacController := controller.NewClusterAddonsConfigurationController(cacReconcile)
 	err = cacController.Start(mgr)
 	if err != nil {

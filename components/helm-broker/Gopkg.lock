@@ -1266,14 +1266,12 @@
   version = "kubernetes-1.13.4"
 
 [[projects]]
-  digest = "1:47c5b92648e36e6c0252af9bcee9bef24e2a0d0b7da8ce97ef75ee583ecc0340"
+  digest = "1:9daae049adda77ec0286c7e13585a0e5aee35ee87f25453dde54517390c68d70"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "discovery/fake",
     "dynamic",
-    "informers/core/v1",
-    "informers/internalinterfaces",
     "kubernetes",
     "kubernetes/fake",
     "kubernetes/scheme",
@@ -1341,7 +1339,6 @@
     "kubernetes/typed/storage/v1alpha1/fake",
     "kubernetes/typed/storage/v1beta1",
     "kubernetes/typed/storage/v1beta1/fake",
-    "listers/core/v1",
     "pkg/apis/clientauthentication",
     "pkg/apis/clientauthentication/v1alpha1",
     "pkg/apis/clientauthentication/v1beta1",
@@ -1567,7 +1564,6 @@
     "github.com/coreos/etcd/clientv3/namespace",
     "github.com/coreos/etcd/integration",
     "github.com/coreos/pkg/capnslog",
-    "github.com/davecgh/go-spew/spew",
     "github.com/emicklei/go-restful",
     "github.com/fatih/structs",
     "github.com/ghodss/yaml",
@@ -1611,11 +1607,9 @@
     "k8s.io/apimachinery/pkg/runtime/serializer",
     "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/runtime",
-    "k8s.io/apimachinery/pkg/util/wait",
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
-    "k8s.io/client-go/informers/core/v1",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/fake",
     "k8s.io/client-go/kubernetes/scheme",
@@ -1627,7 +1621,6 @@
     "k8s.io/client-go/tools/clientcmd",
     "k8s.io/client-go/util/flowcontrol",
     "k8s.io/client-go/util/jsonpath",
-    "k8s.io/client-go/util/workqueue",
     "k8s.io/code-generator/cmd/client-gen",
     "k8s.io/code-generator/cmd/conversion-gen",
     "k8s.io/code-generator/cmd/deepcopy-gen",

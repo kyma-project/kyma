@@ -145,6 +145,3 @@ func ignoreAlreadyExist(err error) bool {
 	return !k8serrors.IsAlreadyExists(err)
 }
 
-func ignoreIsNotFound(err error) bool {
-	return !k8serrors.IsNotFound(err)
-}

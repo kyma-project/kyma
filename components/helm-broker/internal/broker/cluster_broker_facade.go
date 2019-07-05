@@ -13,7 +13,7 @@ import (
 )
 
 type clusterBrokerSyncer interface {
-	Sync(name string) error
+	Sync() error
 }
 
 // ClusterBrokersFacade is responsible for creation k8s objects for namespaced broker
@@ -22,23 +22,23 @@ type ClusterBrokersFacade struct {
 	workingNamespace    string
 	serviceName         string
 	log                 logrus.FieldLogger
+	clusterBrokerName   string
 
 	clusterBrokerSyncer clusterBrokerSyncer
 }
 
 // NewClusterBrokersFacade returns facade
 func NewClusterBrokersFacade(clusterBrokerGetter scbeta.ClusterServiceBrokersGetter, clusterBrokerSyncer clusterBrokerSyncer,
-	workingNamespace, serviceName string) *ClusterBrokersFacade {
+	workingNamespace, serviceName string, clusterBrokerName string) *ClusterBrokersFacade {
 	return &ClusterBrokersFacade{
 		clusterBrokerGetter: clusterBrokerGetter,
 		workingNamespace:    workingNamespace,
 		clusterBrokerSyncer: clusterBrokerSyncer,
+		clusterBrokerName:   clusterBrokerName,
 		serviceName:         serviceName,
 		log:                 logrus.WithField("service", "cluster-broker-facade"),
 	}
 }
-
-const brokerName = "helm-broker"
 
 // Create creates ClusterServiceBroker. Errors don't stop execution of method. AlreadyExist errors are ignored.
 func (f *ClusterBrokersFacade) Create() error {
@@ -48,13 +48,13 @@ func (f *ClusterBrokersFacade) Create() error {
 	_, err := f.createClusterServiceBroker(svcURL)
 	if err != nil {
 		resultErr = multierror.Append(resultErr, err)
-		f.log.Warnf("Creation of ClusterServiceBroker %s results in error: [%s]. AlreadyExist errors will be ignored.", brokerName, err)
+		f.log.Warnf("Creation of ClusterServiceBroker %s results in error: [%s]. AlreadyExist errors will be ignored.", f.clusterBrokerName, err)
 	}
 
-	f.log.Infof("Triggering Service Catalog to do a sync with a ClusterServiceBroker %s", brokerName)
-	err = f.clusterBrokerSyncer.Sync(brokerName)
+	f.log.Infof("Triggering Service Catalog to do a sync with a ClusterServiceBroker %s", f.clusterBrokerName)
+	err = f.clusterBrokerSyncer.Sync()
 	if err != nil {
-		f.log.Warnf("Failed to sync a broker %s : %v", brokerName, err.Error())
+		f.log.Warnf("Failed to sync a broker %s : %v", f.clusterBrokerName, err.Error())
 	}
 
 	resultErr = filterOutMultiError(resultErr, ignoreAlreadyExist)
@@ -67,12 +67,12 @@ func (f *ClusterBrokersFacade) Create() error {
 
 // Delete removes ClusterServiceBroker and BrokersFacade. Errors don't stop execution of method. NotFound errors are ignored.
 func (f *ClusterBrokersFacade) Delete() error {
-	err := f.clusterBrokerGetter.ClusterServiceBrokers().Delete(brokerName, nil)
+	err := f.clusterBrokerGetter.ClusterServiceBrokers().Delete(f.clusterBrokerName, nil)
 	switch {
 	case k8serrors.IsNotFound(err):
 		return nil
 	case err != nil:
-		f.log.Warnf("Deletion of ClusterServiceBroker %s results in error: [%s].", brokerName, err)
+		f.log.Warnf("Deletion of ClusterServiceBroker %s results in error: [%s].", f.clusterBrokerName, err)
 	}
 	return err
 
@@ -80,12 +80,12 @@ func (f *ClusterBrokersFacade) Delete() error {
 
 // Exist check if ClusterServiceBroker exists.
 func (f *ClusterBrokersFacade) Exist() (bool, error) {
-	_, err := f.clusterBrokerGetter.ClusterServiceBrokers().Get(brokerName, metav1.GetOptions{})
+	_, err := f.clusterBrokerGetter.ClusterServiceBrokers().Get(f.clusterBrokerName, metav1.GetOptions{})
 	switch {
 	case k8serrors.IsNotFound(err):
 		return false, nil
 	case err != nil:
-		return false, errors.Wrapf(err, "while checking if ServiceBroker [%s] exists in the namespace [%s]", brokerName)
+		return false, errors.Wrapf(err, "while checking if ClusterServiceBroker [%s] exists", f.clusterBrokerName)
 	}
 
 	return true, nil
@@ -96,7 +96,7 @@ func (f *ClusterBrokersFacade) createClusterServiceBroker(svcURL string) (*v1bet
 	url := fmt.Sprintf("%s/cluster", svcURL)
 	broker := &v1beta1.ClusterServiceBroker{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: brokerName,
+			Name: f.clusterBrokerName,
 		},
 		Spec: v1beta1.ClusterServiceBrokerSpec{
 			CommonServiceBrokerSpec: v1beta1.CommonServiceBrokerSpec{
@@ -108,7 +108,7 @@ func (f *ClusterBrokersFacade) createClusterServiceBroker(svcURL string) (*v1bet
 	createdBroker, err := f.clusterBrokerGetter.ClusterServiceBrokers().Create(broker)
 	if k8serrors.IsAlreadyExists(err) {
 		f.log.Infof("ClusterServiceBroker [%s] already exist. Attempt to get resource.", broker.Name)
-		createdBroker, err = f.clusterBrokerGetter.ClusterServiceBrokers().Get(brokerName, metav1.GetOptions{})
+		createdBroker, err = f.clusterBrokerGetter.ClusterServiceBrokers().Get(f.clusterBrokerName, metav1.GetOptions{})
 		return createdBroker, err
 	}
 

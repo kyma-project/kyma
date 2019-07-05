@@ -263,12 +263,10 @@ func fixBundleWithDocsURL(id, name, url, docsURL string) bundle.CompleteBundle {
 			},
 			Docs: []internal.BundleDocs{
 				{
-					Template: v1alpha1.ClusterDocsTopicSpec{
-						CommonDocsTopicSpec: v1alpha1.CommonDocsTopicSpec{
-							Sources: []v1alpha1.Source{
-								{
-									URL: docsURL,
-								},
+					Template: v1alpha1.CommonDocsTopicSpec{
+						Sources: []v1alpha1.Source{
+							{
+								URL: docsURL,
 							},
 						},
 					},
@@ -306,11 +304,9 @@ func fixBundleWithEmptyDocs(id, name, url string) bundle.CompleteBundle {
 			},
 			Docs: []internal.BundleDocs{
 				{
-					Template: v1alpha1.ClusterDocsTopicSpec{
-						CommonDocsTopicSpec: v1alpha1.CommonDocsTopicSpec{
+					Template: v1alpha1.CommonDocsTopicSpec{
 							Sources: []v1alpha1.Source{
 								{},
-							},
 						},
 					},
 				},

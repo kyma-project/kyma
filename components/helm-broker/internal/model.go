@@ -130,7 +130,7 @@ type BundleTag string
 
 // BundleDocs contains data to create ClusterDocsTopic for every ClusterServiceClass.
 type BundleDocs struct {
-	Template cms.ClusterDocsTopicSpec
+	Template cms.CommonDocsTopicSpec
 }
 
 // Bundle represents bundle as defined by OSB API.

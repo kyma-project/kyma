@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/repository"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
@@ -22,6 +21,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
 
 type brokerFacade interface {
@@ -33,6 +33,15 @@ type brokerFacade interface {
 type bundleProvider interface {
 	GetIndex(string) (*bundle.IndexDTO, error)
 	LoadCompleteBundle(bundle.EntryDTO) (bundle.CompleteBundle, error)
+}
+
+type docsProvider interface {
+	EnsureDocsTopic(bundle *internal.Bundle) error
+	EnsureDocsTopicRemoved(id string) error
+}
+
+type brokerSyncer interface {
+	SyncServiceBroker(namespace string) error
 }
 
 //
@@ -66,13 +75,15 @@ var _ reconcile.Reconciler = &ReconcileAddonsConfiguration{}
 
 // ReconcileAddonsConfiguration reconciles a AddonsConfiguration object
 type ReconcileAddonsConfiguration struct {
-	log logrus.FieldLogger
+	log               logrus.FieldLogger
 	client.Client
-	scheme       *runtime.Scheme
-	provider     bundleProvider
-	strg         storage.Factory
-	brokerFacade brokerFacade
-	developMode  bool
+	scheme            *runtime.Scheme
+	provider          bundleProvider
+	strg              storage.Factory
+	brokerFacade      brokerFacade
+	brokerSyncer      brokerSyncer
+	docsTopicProvider docsProvider
+	developMode       bool
 
 	// syncBroker informs ServiceBroker should be resync, it should be true if
 	// operation insert/delete was made on storage
@@ -80,7 +91,7 @@ type ReconcileAddonsConfiguration struct {
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, brokerFacade brokerFacade, s storage.Factory, dev bool) reconcile.Reconciler {
+func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, brokerFacade brokerFacade, s storage.Factory, dev bool, docsTopicProvider docsProvider, brokerSyncer brokerSyncer) reconcile.Reconciler {
 	return &ReconcileAddonsConfiguration{
 		log:      logrus.WithField("controller", "addons-configuration"),
 		Client:   mgr.GetClient(),
@@ -88,8 +99,10 @@ func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, bro
 		strg:     s,
 		provider: bp,
 
-		brokerFacade: brokerFacade,
-		developMode:  dev,
+		brokerSyncer:      brokerSyncer,
+		brokerFacade:      brokerFacade,
+		developMode:       dev,
+		docsTopicProvider: docsTopicProvider,
 	}
 }
 
@@ -101,8 +114,9 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			// Object not found, return.  Created objects are automatically garbage collected.
-			// For additional cleanup logic use finalizers.
+			if err := r.deleteAddonsProcess(request.Namespace); err != nil {
+				return reconcile.Result{}, exerr.Wrapf(err, "while deleting Addon Configuration from namespace %s", request.Namespace)
+			}
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
@@ -122,21 +136,20 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 		}
 	}
 
-	/* TODO: uncomment when it will work
 	exist, err := r.brokerFacade.Exist(instance.Namespace)
 	if err != nil {
-		return reconcile.Result{}, exerr.Wrap(err, "while checking if ServiceBroker exists")
+		return reconcile.Result{}, exerr.Wrapf(err, "while checking if ServiceBroker exist in namespace %s", instance.Namespace)
 	}
 	if !exist {
 		// status
 		if err := r.brokerFacade.Create(instance.Namespace); err != nil {
 			return reconcile.Result{}, exerr.Wrapf(err, "while creating ServiceBroker for addon %s in namespace %s", instance.Name, instance.Namespace)
 		}
+	} else if r.syncBroker {
+		if err := r.brokerSyncer.SyncServiceBroker(instance.Namespace); err != nil {
+			return reconcile.Result{}, exerr.Wrapf(err, "while syncing ServiceBroker for addon %s in namespace %s", instance.Name, instance.Namespace)
+		}
 	}
-	if r.syncBroker {
-		// TODO: resync ServiceBroker
-	}
-	*/
 
 	return reconcile.Result{}, nil
 }
@@ -173,7 +186,7 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 	repositories.ReviseBundleDuplicationInRepository()
 
 	r.log.Info("- check duplicates ID addons in existing addons configuration")
-	list, err := r.addonsConfigurationList(addon)
+	list, err := r.existingAddonsConfigurationList(addon)
 	if err != nil {
 		r.log.Errorf("cannot fetch AddonsConfiguration list: %s", err)
 		return exerr.Wrap(err, "while fetching addons configuration list")
@@ -195,19 +208,59 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 	return nil
 }
 
-func (r *ReconcileAddonsConfiguration) addonsConfigurationList(addon *addonsv1alpha1.AddonsConfiguration) (*addonsv1alpha1.AddonsConfigurationList, error) {
-	addonsList := &addonsv1alpha1.AddonsConfigurationList{}
-	addonsConfigurationList := &addonsv1alpha1.AddonsConfigurationList{}
+func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(namespace string) error {
+	r.log.Infof("Start delete AddonsConfiguration from namespace %s", namespace)
 
-	err := r.Client.List(context.TODO(), &client.ListOptions{Namespace: addon.Namespace}, addonsConfigurationList)
+	addonsCfgs, err := r.addonsConfigurationList(namespace)
 	if err != nil {
-		return addonsList, exerr.Wrap(err, "during fetching AddonConfiguration list by client")
+		return exerr.Wrapf(err, "while listing AddonsConfigurations in namespace %s", namespace)
+	}
+
+	deleteBroker := true
+	for _, addon := range addonsCfgs.Items {
+		if addon.Status.Phase != addonsv1alpha1.AddonsConfigurationReady {
+			// reprocess AddonConfig again if it was failed
+			addon.Spec.ReprocessRequest += 1
+			if err := r.Client.Update(context.Background(), &addon); err != nil {
+				return exerr.Wrapf(err, "while incrementing a reprocess requests for AddonConfiguration %s/%s", addon.Name, addon.Namespace)
+			}
+		} else {
+			deleteBroker = false
+		}
+	}
+	if deleteBroker {
+		if err := r.brokerFacade.Delete(namespace); err != nil {
+			return exerr.Wrapf(err, "while deleting ServiceBroker from namespace %s", namespace)
+		}
+	}
+
+	r.log.Info("Delete AddonsConfiguration process completed")
+	return nil
+}
+
+func (r *ReconcileAddonsConfiguration) existingAddonsConfigurationList(addon *addonsv1alpha1.AddonsConfiguration) (*addonsv1alpha1.AddonsConfigurationList, error) {
+	addonsList := &addonsv1alpha1.AddonsConfigurationList{}
+	addonsConfigurationList, err := r.addonsConfigurationList(addon.Namespace)
+	if err != nil {
+		return nil, exerr.Wrapf(err, "while listing AddonsConfigurations from namespace %s", addon.Namespace)
 	}
 
 	for _, existAddon := range addonsConfigurationList.Items {
 		if existAddon.Name != addon.Name {
 			addonsList.Items = append(addonsList.Items, existAddon)
 		}
+	}
+
+	return addonsList, nil
+}
+
+func (r *ReconcileAddonsConfiguration) addonsConfigurationList(namespace string) (*addonsv1alpha1.AddonsConfigurationList, error) {
+	addonsList := &addonsv1alpha1.AddonsConfigurationList{}
+	addonsConfigurationList := &addonsv1alpha1.AddonsConfigurationList{}
+
+	err := r.Client.List(context.TODO(), &client.ListOptions{Namespace: namespace}, addonsConfigurationList)
+	if err != nil {
+		return addonsList, exerr.Wrap(err, "during fetching AddonConfiguration list by client")
 	}
 
 	return addonsList, nil

@@ -15,13 +15,15 @@ import (
 type serviceBrokerSync struct {
 	clusterServiceBrokersGetter v1beta12.ClusterServiceBrokersGetter
 	serviceBrokerGetter         v1beta12.ServiceBrokersGetter
+	clusterBrokerName           string
 	log                         logrus.FieldLogger
 }
 
 // NewServiceBrokerSyncer allows to sync the ServiceBroker.
-func NewServiceBrokerSyncer(clusterServiceBrokersGetter v1beta12.ClusterServiceBrokersGetter, log logrus.FieldLogger) *serviceBrokerSync {
+func NewServiceBrokerSyncer(clusterServiceBrokersGetter v1beta12.ClusterServiceBrokersGetter, clusterBrokerName string, log logrus.FieldLogger) *serviceBrokerSync {
 	return &serviceBrokerSync{
 		clusterServiceBrokersGetter: clusterServiceBrokersGetter,
+		clusterBrokerName:           clusterBrokerName,
 		log:                         log.WithField("service", "clusterservicebroker-syncer"),
 	}
 }
@@ -29,10 +31,10 @@ func NewServiceBrokerSyncer(clusterServiceBrokersGetter v1beta12.ClusterServiceB
 const maxSyncRetries = 5
 
 // Sync syncs the ServiceBrokers, does not fail if the broker does not exists
-func (r *serviceBrokerSync) Sync(name string) error {
-	r.log.Infof("Trigger Service Catalog to refresh ClusterServiceBroker %s", name)
+func (r *serviceBrokerSync) Sync() error {
+	r.log.Infof("Trigger Service Catalog to refresh ClusterServiceBroker %s", r.clusterBrokerName)
 	for i := 0; i < maxSyncRetries; i++ {
-		broker, err := r.clusterServiceBrokersGetter.ClusterServiceBrokers().Get(name, v1.GetOptions{})
+		broker, err := r.clusterServiceBrokersGetter.ClusterServiceBrokers().Get(r.clusterBrokerName, v1.GetOptions{})
 		switch {
 		// do not return error if the broker does not exists, the method is dedicated to update
 		// ClusterServiceBroker resource if exists. If it is not created yet
@@ -40,7 +42,7 @@ func (r *serviceBrokerSync) Sync(name string) error {
 		case apiErrors.IsNotFound(err):
 			return nil
 		case err != nil:
-			return errors.Wrapf(err, "while getting ClusterServiceBrokers %s", name)
+			return errors.Wrapf(err, "while getting ClusterServiceBrokers %s", r.clusterBrokerName)
 		}
 
 		// update RelistRequests to trigger the relist
@@ -57,7 +59,7 @@ func (r *serviceBrokerSync) Sync(name string) error {
 		}
 	}
 
-	return fmt.Errorf("could not sync cluster service broker (%s) after %d retries", name, maxSyncRetries)
+	return fmt.Errorf("could not sync cluster service broker (%s) after %d retries", r.clusterBrokerName, maxSyncRetries)
 }
 
 // SyncBroker syncing the helm-broker ns-broker in the given namespace

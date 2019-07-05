@@ -23,13 +23,14 @@ func NewDocsProvider(dynamicClient client.Client) *DocsProvider {
 	}
 }
 
+const (
+	cmsLabelKey = "cms.kyma-project.io/view-context"
+	hbLabelKey  = "helm-broker.kyma-project.io/bundle-docs"
+)
+
 // EnsureClusterDocsTopic creates ClusterDocsTopic for a given bundle or updates it in case it already exists
 func (d *DocsProvider) EnsureClusterDocsTopic(bundle *internal.Bundle) error {
-	const cmsLabelKey = "cms.kyma-project.io/view-context"
-	const hbLabelKey = "helm-broker.kyma-project.io/bundle-docs"
-
-	bundle.Docs[0].Template.Sources = d.defaultBundleDocsSourcesURLs(bundle)
-
+	bundle.Docs[0].Template.Sources = d.defaultDocsSourcesURLs(bundle)
 	cdt := &v1alpha1.ClusterDocsTopic{
 		ObjectMeta: v1.ObjectMeta{
 			Name: string(bundle.ID),
@@ -38,7 +39,7 @@ func (d *DocsProvider) EnsureClusterDocsTopic(bundle *internal.Bundle) error {
 				hbLabelKey:  "true",
 			},
 		},
-		Spec: bundle.Docs[0].Template,
+		Spec: v1alpha1.ClusterDocsTopicSpec{CommonDocsTopicSpec: bundle.Docs[0].Template},
 	}
 
 	err := d.dynamicClient.Create(context.Background(), cdt)
@@ -55,18 +56,6 @@ func (d *DocsProvider) EnsureClusterDocsTopic(bundle *internal.Bundle) error {
 	return nil
 }
 
-func (d *DocsProvider) defaultBundleDocsSourcesURLs(bundle *internal.Bundle) []v1alpha1.Source {
-	// we use repositoryURL as the default sourceURL if its not provided
-	var sources []v1alpha1.Source
-	for _, source := range bundle.Docs[0].Template.Sources {
-		if source.URL == "" {
-			source.URL = bundle.RepositoryURL
-		}
-		sources = append(sources, source)
-	}
-	return sources
-}
-
 // EnsureClusterDocsTopicRemoved removes ClusterDocsTopic for a given bundle
 func (d *DocsProvider) EnsureClusterDocsTopicRemoved(id string) error {
 	cdt := &v1alpha1.ClusterDocsTopic{
@@ -79,6 +68,60 @@ func (d *DocsProvider) EnsureClusterDocsTopicRemoved(id string) error {
 		return errors.Wrapf(err, "while deleting ClusterDocsTopic %s", id)
 	}
 	return nil
+}
+
+// EnsureClusterDocsTopic creates ClusterDocsTopic for a given bundle or updates it in case it already exists
+func (d *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle) error {
+	bundle.Docs[0].Template.Sources = d.defaultDocsSourcesURLs(bundle)
+	cdt := &v1alpha1.DocsTopic{
+		ObjectMeta: v1.ObjectMeta{
+			Name: string(bundle.ID),
+			Labels: map[string]string{
+				cmsLabelKey: "service-catalog",
+				hbLabelKey:  "true",
+			},
+		},
+		Spec: v1alpha1.DocsTopicSpec{CommonDocsTopicSpec: bundle.Docs[0].Template},
+	}
+
+	err := d.dynamicClient.Create(context.Background(), cdt)
+	switch {
+	case err == nil:
+	case apiErrors.IsAlreadyExists(err):
+		if err := d.updateDocsTopic(bundle); err != nil {
+			return errors.Wrapf(err, "while DocsTopic %s already exists", bundle.ID)
+		}
+	default:
+		return errors.Wrapf(err, "while creating DocsTopic %s", bundle.ID)
+	}
+
+	return nil
+}
+
+// EnsureClusterDocsTopicRemoved removes ClusterDocsTopic for a given bundle
+func (d *DocsProvider) EnsureDocsTopicRemoved(id string) error {
+	cdt := &v1alpha1.DocsTopic{
+		ObjectMeta: v1.ObjectMeta{
+			Name: id,
+		},
+	}
+	err := d.dynamicClient.Delete(context.Background(), cdt)
+	if err != nil && !apiErrors.IsNotFound(err) {
+		return errors.Wrapf(err, "while deleting DocsTopic %s", id)
+	}
+	return nil
+}
+
+func (d *DocsProvider) defaultDocsSourcesURLs(bundle *internal.Bundle) []v1alpha1.Source {
+	// we use repositoryURL as the default sourceURL if its not provided
+	var sources []v1alpha1.Source
+	for _, source := range bundle.Docs[0].Template.Sources {
+		if source.URL == "" {
+			source.URL = bundle.RepositoryURL
+		}
+		sources = append(sources, source)
+	}
+	return sources
 }
 
 func (d *DocsProvider) updateClusterDocsTopic(bundle *internal.Bundle) error {
@@ -95,9 +138,32 @@ func (d *DocsProvider) updateClusterDocsTopic(bundle *internal.Bundle) error {
 	if err = d.dynamicClient.Get(context.Background(), key, cdt); err != nil {
 		return errors.Wrapf(err, "while getting ClusterDocsTopic %s", bundle.ID)
 	}
-	cdt.Spec = bundle.Docs[0].Template
+	cdt.Spec = v1alpha1.ClusterDocsTopicSpec{CommonDocsTopicSpec: bundle.Docs[0].Template}
 
 	if err = d.dynamicClient.Update(context.Background(), cdt); err != nil {
+		return errors.Wrapf(err, "while updating ClusterDocsTopic %s", bundle.ID)
+	}
+
+	return nil
+}
+
+func (d *DocsProvider) updateDocsTopic(bundle *internal.Bundle) error {
+	dt := &v1alpha1.DocsTopic{
+		ObjectMeta: v1.ObjectMeta{
+			Name: string(bundle.ID),
+		},
+	}
+	key, err := client.ObjectKeyFromObject(dt)
+	if err != nil {
+		return errors.Wrap(err, "while getting object key for ClusterDocsTopic")
+	}
+
+	if err = d.dynamicClient.Get(context.Background(), key, dt); err != nil {
+		return errors.Wrapf(err, "while getting ClusterDocsTopic %s", bundle.ID)
+	}
+	dt.Spec = v1alpha1.DocsTopicSpec{CommonDocsTopicSpec: bundle.Docs[0].Template}
+
+	if err = d.dynamicClient.Update(context.Background(), dt); err != nil {
 		return errors.Wrapf(err, "while updating ClusterDocsTopic %s", bundle.ID)
 	}
 
