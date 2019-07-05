@@ -2,6 +2,7 @@
 
 ## Overview
 
+This module is still experimental.
 This chart includes [knative-serving CRDs](https://github.com/knative/docs/tree/master/docs/serving) release files.
 
 Included releases:
@@ -15,5 +16,3 @@ Kyma-specific changes:
  * The `knative-serving` Namespace is no longer created. This happens during the installation process.
  * The image versions are changed to use the release tag.
  * Knative Serving uses the Kyma Istio Ingress gateway.
-
-> **NOTE:** The Knative build component is not installed.
