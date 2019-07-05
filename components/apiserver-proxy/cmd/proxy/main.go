@@ -172,6 +172,7 @@ func main() {
 	proxyForApiserver := strings.Contains(cfg.upstream, proxy.KUBERNETES_SERVICE)
 
 	rp := httputil.NewSingleHostReverseProxy(upstreamURL)
+	rp.ModifyResponse = deleteCORSHeaders
 
 	if proxyForApiserver {
 		t, err := rest.TransportFor(kcfg)
@@ -324,4 +325,12 @@ func initKubeConfig(kcLocation string) *rest.Config {
 	}
 
 	return kubeConfig
+}
+
+func deleteCORSHeaders(r *http.Response) (err error) {
+	corsHeaders := []string{"Access-Control-Allow-Origin", "Access-Control-Allow-Methods", "Access-Control-Allow-Headers"}
+	for _, h := range corsHeaders {
+		r.Header.Del(h)
+	}
+	return nil
 }
