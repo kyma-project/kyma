@@ -3,8 +3,6 @@ package controller
 import (
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/types"
-	"reflect"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -16,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -87,9 +86,17 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 		return reconcile.Result{}, err
 	}
 
-	err = r.addAddonsProcess(instance)
+	foundAddon := &addonsv1alpha1.AddonsConfiguration{}
+	err = r.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, foundAddon)
 	if err != nil {
-		return reconcile.Result{}, exerr.Wrapf(err, "while creating AddonsConfiguration %q", request.NamespacedName)
+		return reconcile.Result{}, err
+	}
+
+	if foundAddon.Status.ObservedGeneration == 0 {
+		err = r.addAddonsProcess(instance)
+		if err != nil {
+			return reconcile.Result{}, exerr.Wrapf(err, "while creating AddonsConfiguration %q", request.NamespacedName)
+		}
 	}
 
 	return reconcile.Result{}, nil
@@ -136,7 +143,7 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 	r.statusSnapshot(addon, repositories)
 	err = r.updateAddonStatus(addon)
 	if err != nil {
-		return exerr.Wrap(err, "while update process")
+		return exerr.Wrap(err, "while update AddonsConfiguration status")
 	}
 
 	return nil
@@ -215,15 +222,9 @@ func (r *ReconcileAddonsConfiguration) updateAddonStatus(addon *addonsv1alpha1.A
 	addon.Status.ObservedGeneration = addon.Status.ObservedGeneration + 1
 	addon.Status.LastProcessedTime = &v1.Time{time.Now()}
 
-	foundAddon := &addonsv1alpha1.AddonsConfiguration{}
-	_ = r.Get(context.TODO(), types.NamespacedName{Name: addon.Name, Namespace: addon.Namespace}, foundAddon)
-
-	if !reflect.DeepEqual(addon.Status, addon.Status) {
-		foundAddon.Status = addon.Status
-		err := r.Update(context.TODO(), foundAddon)
-		if err != nil {
-			return nil
-		}
+	err := r.Update(context.TODO(), addon)
+	if err != nil {
+		return exerr.Wrap(err, "while update AddonsConfiguration")
 	}
 
 	return nil
