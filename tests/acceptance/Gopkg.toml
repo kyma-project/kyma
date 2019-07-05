@@ -36,28 +36,37 @@ required = [
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.12.3"
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
   branch = "master"
 
+
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
-  version = "=v0.1.28"
+  version = "=v0.1.39"
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.12.3"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.12.3"
 
 [[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.12.3"
 
 [[constraint]]
   name = "github.com/pmorie/go-open-service-broker-client"
-  version = "=0.0.11"
+  version = "=0.0.12"
+
+[[constraint]]
+  name="sigs.k8s.io/controller-runtime"
+  version = "=v0.1.8"
+
+[[override]]
+  name="sigs.k8s.io/controller-tools"
+  version="v0.1.1"

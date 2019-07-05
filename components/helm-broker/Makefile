@@ -9,6 +9,10 @@ TAG = $(DOCKER_TAG)
 build:
 	./before-commit.sh ci
 
+.PHONY: integration-test
+integration-test:
+	go test -tags=integration ./test/integration/
+
 .PHONY: pull-licenses
 pull-licenses:
 ifdef LICENSE_PULLER_PATH
@@ -55,13 +59,13 @@ push-image:
 	docker push $(REPO)$(TOOLS_NAME):$(TAG)
 
 .PHONY: ci-pr
-ci-pr: build build-image push-image
+ci-pr: build integration-test build-image push-image
 
 .PHONY: ci-master
-ci-master: build build-image push-image
+ci-master: build integration-test build-image push-image
 
 .PHONY: ci-release
-ci-release: build build-image push-image
+ci-release: build integration-test build-image push-image
 
 .PHONY: clean
 clean:
