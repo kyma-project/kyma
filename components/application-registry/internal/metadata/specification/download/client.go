@@ -34,10 +34,6 @@ func (d downloader) Fetch(url string, credentials *authorization.Credentials, pa
 		return nil, err
 	}
 
-	if res.StatusCode != http.StatusOK {
-		return nil, apperrors.Internal("Failed to fetch from %s.", url)
-	}
-
 	{
 		bytes, err := ioutil.ReadAll(res.Body)
 		if err != nil {
@@ -57,7 +53,7 @@ func (d downloader) requestAPISpec(specUrl string, credentials *authorization.Cr
 	if credentials != nil {
 		err := d.addAuthorization(req, credentials)
 		if err != nil {
-			return nil, apperrors.Internal("Adding authorization for fetching API spec from %s failed, %s", specUrl, err.Error())
+			return nil, apperrors.UpstreamServerCallFailed("Adding authorization for fetching API spec from %s failed, %s", specUrl, err.Error())
 		}
 	}
 

@@ -25,12 +25,10 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com/token",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com/token",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 			Spec: []byte("{\"api\":\"spec\"}"),
@@ -674,12 +672,10 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com/token",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com/token",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 		}
@@ -842,12 +838,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com/token",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com/token",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 			Spec: []byte("{\"api\":\"spec\"}"),
@@ -919,12 +913,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com/token",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com/token",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 			Spec: []byte("{\"api\":\"spec\"}"),
@@ -1078,12 +1070,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com/token",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com/token",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 			Spec: []byte("api docs"),
@@ -1142,12 +1132,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com/token",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com/token",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 			Spec: []byte("api docs"),
@@ -1206,12 +1194,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com/token",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com/token",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 			Spec: []byte("{\"api\":\"spec\"}"),
@@ -1272,12 +1258,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com/token",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com/token",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 			Spec: []byte("{\"api\":\"spec\"}"),

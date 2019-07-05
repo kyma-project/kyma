@@ -28,12 +28,10 @@ func TestNewService(t *testing.T) {
 		api := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 		}
@@ -86,11 +84,9 @@ func TestNewService(t *testing.T) {
 		api := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Basic: &model.BasicWithCSRF{
-					Basic: model.Basic{
-						Username: "clientUsername",
-						Password: "clientPassword",
-					},
+				Basic: &model.Basic{
+					Username: "clientUsername",
+					Password: "clientPassword",
 				},
 			},
 		}
@@ -174,12 +170,10 @@ func TestNewService(t *testing.T) {
 		api := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 		}
@@ -209,12 +203,10 @@ func TestNewService(t *testing.T) {
 		api := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 		}
@@ -253,11 +245,9 @@ func TestNewService(t *testing.T) {
 		api := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Basic: &model.BasicWithCSRF{
-					Basic: model.Basic{
-						Username: "clientUsername",
-						Password: "clientPassword",
-					},
+				Basic: &model.Basic{
+					Username: "clientUsername",
+					Password: "clientPassword",
 				},
 			},
 		}
@@ -296,12 +286,10 @@ func TestNewService(t *testing.T) {
 		api := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 		}
@@ -403,12 +391,10 @@ func TestDefaultService_Read(t *testing.T) {
 		}
 
 		credentials := model.CredentialsWithCSRF{
-			Oauth: &model.OauthWithCSRF{
-				Oauth: model.Oauth{
-					ClientID:     "clientId",
-					ClientSecret: "clientSecret",
-					URL:          "http://oauth.com",
-				},
+			Oauth: &model.Oauth{
+				ClientID:     "clientId",
+				ClientSecret: "clientSecret",
+				URL:          "http://oauth.com",
 			},
 		}
 
@@ -442,11 +428,9 @@ func TestDefaultService_Read(t *testing.T) {
 		}
 
 		credentials := model.CredentialsWithCSRF{
-			Basic: &model.BasicWithCSRF{
-				Basic: model.Basic{
-					Username: "clientUsername",
-					Password: "clientPassword",
-				},
+			Basic: &model.Basic{
+				Username: "clientUsername",
+				Password: "clientPassword",
 			},
 		}
 
@@ -734,12 +718,10 @@ func TestDefaultService_Update(t *testing.T) {
 		api := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 		}
@@ -791,11 +773,9 @@ func TestDefaultService_Update(t *testing.T) {
 		api := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Basic: &model.BasicWithCSRF{
-					Basic: model.Basic{
-						Username: "clientUsername",
-						Password: "clientPassword",
-					},
+				Basic: &model.Basic{
+					Username: "clientUsername",
+					Password: "clientPassword",
 				},
 			},
 		}
@@ -887,12 +867,10 @@ func TestDefaultService_Update(t *testing.T) {
 		api := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 		}
@@ -925,12 +903,10 @@ func TestDefaultService_Update(t *testing.T) {
 		api := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 		}
@@ -966,11 +942,9 @@ func TestDefaultService_Update(t *testing.T) {
 		api := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Basic: &model.BasicWithCSRF{
-					Basic: model.Basic{
-						Username: "clientUsername",
-						Password: "clientPassword",
-					},
+				Basic: &model.Basic{
+					Username: "clientUsername",
+					Password: "clientPassword",
 				},
 			},
 		}
@@ -1039,12 +1013,10 @@ func TestDefaultService_Update(t *testing.T) {
 		api := &model.API{
 			TargetUrl: "http://target.com",
 			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.OauthWithCSRF{
-					Oauth: model.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
 				},
 			},
 		}

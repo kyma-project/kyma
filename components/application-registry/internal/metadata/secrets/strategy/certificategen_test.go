@@ -70,8 +70,8 @@ func TestCertificateGen_ToCredentials(t *testing.T) {
 		// then
 		assert.Equal(t, commonName, credentials.CertificateGen.CommonName)
 		assert.NotNil(t, credentials.CertificateGen)
-		assert.NotNil(t, credentials.CertificateGen.CSRFInfo)
-		assert.Equal(t, "https://test.it", credentials.CertificateGen.CSRFInfo.TokenEndpointURL)
+		assert.NotNil(t, credentials.CSRFInfo)
+		assert.Equal(t, "https://test.it", credentials.CSRFInfo.TokenEndpointURL)
 	})
 }
 

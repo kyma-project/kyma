@@ -17,13 +17,11 @@ func (svc *basicAuth) ToCredentials(secretData SecretData, appCredentials *appli
 	username, password := svc.readBasicAuthMap(secretData)
 
 	return model.CredentialsWithCSRF{
-		Basic: &model.BasicWithCSRF{
-			Basic: model.Basic{
-				Username: username,
-				Password: password,
-			},
-			CSRFInfo: convertToModelCSRInfo(appCredentials),
+		Basic: &model.Basic{
+			Username: username,
+			Password: password,
 		},
+		CSRFInfo: convertToModelCSRInfo(appCredentials),
 	}
 }
 
