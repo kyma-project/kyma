@@ -12,9 +12,9 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
-	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
@@ -40,16 +40,16 @@ type Loader struct {
 	tmpDir       string
 	loadChart    func(name string) (*chart.Chart, error)
 	createTmpDir func(dir, prefix string) (name string, err error)
-	log          logr.Logger
+	log          logrus.FieldLogger
 }
 
 // NewLoader returns new instance of Loader.
-func NewLoader(tmpDir string, log logr.Logger) *Loader {
+func NewLoader(tmpDir string) *Loader {
 	return &Loader{
 		tmpDir:       tmpDir,
 		loadChart:    chartutil.Load,
 		createTmpDir: ioutil.TempDir,
-		log:          log.WithValues("service", "bundle:loader"),
+		log:          logrus.WithField("service", "bundle:loader"),
 	}
 }
 

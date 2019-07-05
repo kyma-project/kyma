@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 
 	"github.com/ghodss/yaml"
-	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
@@ -39,11 +39,11 @@ type CompleteBundle struct {
 type BundleProvider struct {
 	bundleReader BundleReader
 	bundleLoader BundleLoader
-	log          logr.Logger
+	log          logrus.FieldLogger
 }
 
-func NewBundleProvider(br BundleReader, bl BundleLoader, logger logr.Logger) *BundleProvider {
-	return &BundleProvider{bundleReader: br, bundleLoader: bl, log: logger}
+func NewBundleProvider(br BundleReader, bl BundleLoader) *BundleProvider {
+	return &BundleProvider{bundleReader: br, bundleLoader: bl, log: logrus.WithField("service", "bundle:loader")}
 }
 
 func (bp *BundleProvider) GetIndex() (*BundleIndex, error) {

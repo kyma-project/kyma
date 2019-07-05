@@ -60,7 +60,7 @@ func main() {
 	// ServiceCatalog
 	scClientSet, err := scCs.NewForConfig(k8sConfig)
 	fatalOnError(err)
-	csbInterface := scClientSet.ServicecatalogV1beta1().ClusterServiceBrokers()
+	csbInterface := scClientSet.ServicecatalogV1beta1()
 
 	// broker sync
 	stopCh := make(chan struct{})
@@ -74,7 +74,7 @@ func main() {
 
 	docsProvider := bundle.NewDocsProvider(dynamicClient)
 	bundleSyncer := bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), docsProvider, log)
-	brokerSyncer := broker.NewClusterServiceBrokerSyncer(csbInterface, log)
+	brokerSyncer := broker.NewServiceBrokerSyncer(csbInterface, log)
 	cfgMapInformer := v1.NewFilteredConfigMapInformer(clientset, cfg.Namespace, 10*time.Minute, cache.Indexers{}, func(options *metav1.ListOptions) {
 		options.LabelSelector = fmt.Sprintf("%s=%s", mapLabelKey, mapLabelValue)
 	})
@@ -104,7 +104,7 @@ func main() {
 		waitForHelmBrokerIsReady(cfg.HelmBrokerURL, 15*time.Second, log)
 		log.Infof("%s service ready", cfg.HelmBrokerURL)
 
-		err := brokerSyncer.Sync(cfg.ClusterServiceBrokerName, 5)
+		err := brokerSyncer.Sync(cfg.ClusterServiceBrokerName)
 		if err != nil {
 			log.Errorf("Could not synchronize Service Catalog with the broker: %s", err)
 		}

@@ -2,41 +2,39 @@ package main
 
 import (
 	"flag"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"os"
 
+	"github.com/davecgh/go-spew/spew"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
+
+	scCs "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller"
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis"
+
 	//hbConfig "github.com/kyma-project/kyma/components/helm-broker/internal/config"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
+	ctrlCfg "github.com/kyma-project/kyma/components/helm-broker/internal/controller/config"
+	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
+	"github.com/sirupsen/logrus"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	restclient "k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 )
 
 func main() {
 	var metricsAddr string
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
+	verbose := flag.Bool("verbose", false, "specify if log verbosely loading configuration")
 	flag.Parse()
-	logf.SetLogger(logf.ZapLogger(false))
-	log := logf.Log.WithName("entrypoint")
-	//hbCfg, err := hbConfig.Load(false)
-	//if err != nil {
-	//	log.Error(err, "unable to set up helm broker config")
-	//	os.Exit(1)
-	//}
 
-	//storageConfig := storage.ConfigList(hbCfg.Storage)
-	storageConfig := storage.ConfigList{
-		{
-			Driver: storage.DriverMemory,
-			Provide: storage.ProviderConfigMap{
-				storage.EntityAll: storage.ProviderConfig{},
-			},
-		},
-	}
+	ctrlCfg, err := ctrlCfg.Load(*verbose)
+	fatalOnError(err)
+
+	log := logger.New(&ctrlCfg.Logger)
+
+	storageConfig := storage.ConfigList(ctrlCfg.Storage)
 	sFact, err := storage.NewFactory(&storageConfig)
 	if err != nil {
 		log.Error(err, "unable to get storage factory")
@@ -69,18 +67,26 @@ func main() {
 		os.Exit(1)
 	}
 
+	k8sConfig, err := restclient.InClusterConfig()
+	fatalOnError(err)
+
+	scClientSet, err := scCs.NewForConfig(k8sConfig)
+	fatalOnError(err)
+
+	brokerSyncer := broker.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1(), log)
+	sbFacade := broker.NewBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrlCfg.Namespace, ctrlCfg.ServiceName, log)
+	csbFacade := broker.NewClusterBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrlCfg.Namespace, ctrlCfg.ServiceName, log)
+
 	// Setup all Controllers
 	log.Info("Setting up controller")
-	var clog = logf.Log.WithName("controller")
-
-	acReconcile := controller.NewReconcileAddonsConfiguration(mgr, sFact, clog)
+	acReconcile := controller.NewReconcileAddonsConfiguration(mgr, sFact, sbFacade, log)
 	acController := controller.NewAddonsConfigurationController(acReconcile)
 	err = acController.Start(mgr)
 	if err != nil {
 		log.Error(err, "unable to start AddonsConfigurationController")
 	}
 
-	cacReconcile := controller.NewReconcileClusterAddonsConfiguration(mgr, clog)
+	cacReconcile := controller.NewReconcileClusterAddonsConfiguration(mgr, csbFacade, log)
 	cacController := controller.NewClusterAddonsConfigurationController(cacReconcile)
 	err = cacController.Start(mgr)
 	if err != nil {
@@ -92,5 +98,11 @@ func main() {
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
 		log.Error(err, "unable to run the manager")
 		os.Exit(1)
+	}
+}
+
+func fatalOnError(err error) {
+	if err != nil {
+		logrus.Fatal(err.Error())
 	}
 }
