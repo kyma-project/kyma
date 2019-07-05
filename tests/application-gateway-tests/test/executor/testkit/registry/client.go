@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools"
+
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/testkit/util"
 
 	"github.com/stretchr/testify/require"
@@ -18,8 +20,8 @@ import (
 const (
 	urlFormat          = "%s/%s/v1/metadata/services"
 	getDeleteURLFormat = "%s/%s/v1/metadata/services/%s"
-	retryCount         = 5
-	retryDelay         = 20 * time.Second
+	specFetchInterval  = 3 * time.Second
+	specFetchTimeout   = 60 * time.Second
 )
 
 type AppRegistryClient struct {
@@ -127,29 +129,32 @@ func (arc *AppRegistryClient) createAPI(t *testing.T, api *API) string {
 
 func (arc *AppRegistryClient) GetApiSpecWithRetries(t *testing.T, serviceId string) (json.RawMessage, error) {
 	var response *http.Response
-	var err error
 	var serviceDetails ServiceDetails
 
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(getDeleteURLFormat, arc.appRegistryURL, arc.application, serviceId), nil)
-	require.NoError(t, err)
+	url := fmt.Sprintf(getDeleteURLFormat, arc.appRegistryURL, arc.application, serviceId)
 
-	for i := 0; i < retryCount; i++ {
-		if response != nil {
-			response.Body.Close()
-		}
-		response, err = arc.httpClient.Do(req)
+	err := tools.WaitForFunction(specFetchInterval, specFetchTimeout, func() bool {
+		t.Logf("Fetching registered service at: %s", url)
+		var err error
+
+		response, err = arc.httpClient.Get(url)
 		require.NoError(t, err)
+		defer response.Body.Close()
 		util.RequireStatus(t, http.StatusOK, response)
 
 		err = json.NewDecoder(response.Body).Decode(&serviceDetails)
 		require.NoError(t, err)
 
-		if len(serviceDetails.Api.Spec) != 0 {
-			return serviceDetails.Api.Spec, nil
+		if len(serviceDetails.Api.Spec) == 0 {
+			t.Logf("API spec length is 0, retrying in %d seconds", specFetchInterval)
+			return false
 		}
-		time.Sleep(retryDelay)
-	}
-	return json.RawMessage{}, err
+
+		return true
+	})
+	require.NoError(t, err)
+
+	return serviceDetails.Api.Spec, nil
 }
 
 func (arc *AppRegistryClient) CleanupService(t *testing.T, serviceId string) {
