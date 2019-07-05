@@ -59,11 +59,11 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    dir: pr/
-    version: PR-4721
+    dir: develop/
+    version: b3441db9
   console_backend_service_test:
-    dir: pr/
-    version: PR-4721
+    dir: develop/
+    version: b3441db9
   cluster_users_test:
     dir: pr/
     version: "PR-4741"
