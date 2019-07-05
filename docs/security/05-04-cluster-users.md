@@ -15,9 +15,9 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **bindings.kymaEssentials.groups** | Specifies array of groups used in binding to **kyma-essentials** role. | `[]` |
-| **bindings.kymaView.groups** | Specifies array of groups used in binding to **kyma-view** role. | `[]` |
-| **bindings.kymaEdit.groups** | Specifies array of groups used in binding to **kyma-edit** role. | `[]` |
-| **bindings.kymaAdmin.groups** | Specifies array of groups used in binding to **kyma-admin** role. | `[]` |
-| **bindings.kymaDeveloper.groups** | Specifies array of groups used in binding to **kyma-developer** role. | `[]` |
-| **users.adminGroup** | Specifies name of the group used in binding to **kyma-admin** role. | `""` |
+| **bindings.kymaEssentials.groups** | Specifies the array of groups used in binding to **kyma-essentials** role. | `[]` |
+| **bindings.kymaView.groups** | Specifies the array of groups used in binding to the **kyma-view** role. | `[]` |
+| **bindings.kymaEdit.groups** | Specifies the array of groups used in binding to the **kyma-edit** role. | `[]` |
+| **bindings.kymaAdmin.groups** | Specifies the array of groups used in binding to the **kyma-admin** role. | `[]` |
+| **bindings.kymaDeveloper.groups** | Specifies the array of groups used in binding to the **kyma-developer** role. | `[]` |
+| **users.adminGroup** | Specifies the name of the group used in binding to the **kyma-admin** role. | `""` |
