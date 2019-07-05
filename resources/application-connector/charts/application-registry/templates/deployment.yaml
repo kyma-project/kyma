@@ -38,7 +38,6 @@ spec:
           - "--assetstoreRequestTimeout={{ .Values.deployment.args.assetstoreRequestTimeout }}"
           - "--insecureAssetDownload={{ .Values.deployment.args.insecureAssetDownload }}"
           - "--insecureSpecDownload={{ .Values.deployment.args.insecureSpecDownload }}"
-          -
         ports:
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
