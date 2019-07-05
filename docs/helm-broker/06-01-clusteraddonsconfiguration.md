@@ -15,9 +15,9 @@ This is a sample ClusterAddonsConfiguration which provides cluster-wide bundles.
 
 ```yaml
 apiVersion: addons.kyma-project.io/v1alpha1
-kind: AddonsConfiguration
+kind: ClusterAddonsConfiguration
 metadata:
-  name: addons-cfg--sample
+  name: addons-cfg-sample
   finalizers:
   - addons.kyma-project.io
 spec:
@@ -73,7 +73,7 @@ This table lists all possible parameters of a given resource together with their
 | Parameter                 | Mandatory          | Description                   |
 |---------------------------|:------------------:|-------------------------------|
 | **metadata.name**                      | **YES**            | Specifies the name of the CR.    |
-| **spec.reprocessRequest**              | **NO**             | Is a strictly increasing, non-negative integer counter that can be incremented by a user to manually trigger the reprocessing action of given CR.    |
+| **spec.reprocessRequest**              | **NO**             | Allows you to manually trigger the reprocessing action of this CR. It is a strictly increasing, non-negative integer counter.    |
 | **spec.repositories.url**              | **YES**            | Provides the full URL to the index file of addons repositories.    |
 | **status.phase**                       | **Not applicable** | Describes the status of processing the CR by the Helm Broker Controller. It can be `Ready`, `Failed`, or `Pending`.       |
 | **status.lastProcessedTime**           | **Not applicable** | Specifies the last time when the Helm Broker Controller processed the CR.     |
@@ -91,12 +91,6 @@ This table lists all possible parameters of a given resource together with their
 > **NOTE:** The Helm Broker Controller automatically adds all parameters marked as **Not applicable** to the ClusterAddonsConfiguration CR.
 
 ## Related resources and components
-
-These are the resources related to this CR:
-
-| Custom resource |   Description |
-|-----------------|---------------|
-| {Related CRD kind} |  {Briefly describe the relation between the resources}. |
 
 These components use this CR:
 
