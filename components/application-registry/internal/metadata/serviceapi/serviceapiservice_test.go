@@ -27,7 +27,7 @@ func TestNewService(t *testing.T) {
 		// given
 		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
@@ -83,7 +83,7 @@ func TestNewService(t *testing.T) {
 		// given
 		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Basic: &model.Basic{
 					Username: "clientUsername",
 					Password: "clientPassword",
@@ -169,7 +169,7 @@ func TestNewService(t *testing.T) {
 		// given
 		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
@@ -202,7 +202,7 @@ func TestNewService(t *testing.T) {
 		// given
 		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
@@ -244,7 +244,7 @@ func TestNewService(t *testing.T) {
 		// given
 		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Basic: &model.Basic{
 					Username: "clientUsername",
 					Password: "clientPassword",
@@ -285,7 +285,7 @@ func TestNewService(t *testing.T) {
 		// given
 		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
@@ -390,7 +390,7 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 		}
 
-		credentials := model.Credentials{
+		credentials := model.CredentialsWithCSRF{
 			Oauth: &model.Oauth{
 				ClientID:     "clientId",
 				ClientSecret: "clientSecret",
@@ -427,7 +427,7 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 		}
 
-		credentials := model.Credentials{
+		credentials := model.CredentialsWithCSRF{
 			Basic: &model.Basic{
 				Username: "clientUsername",
 				Password: "clientPassword",
@@ -483,7 +483,7 @@ func TestDefaultService_Read(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Get", appName, applicationServiceAPi.Credentials).
-			Return(model.Credentials{}, apperrors.Internal("secret error"))
+			Return(model.CredentialsWithCSRF{}, apperrors.Internal("secret error"))
 
 		service := NewService(nil, nil, secretsService, nil, nil)
 
@@ -511,7 +511,7 @@ func TestDefaultService_Read(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Get", appName, applicationServiceAPi.Credentials).
-			Return(model.Credentials{}, apperrors.Internal("secret error"))
+			Return(model.CredentialsWithCSRF{}, apperrors.Internal("secret error"))
 
 		service := NewService(nil, nil, secretsService, nil, nil)
 
@@ -717,7 +717,7 @@ func TestDefaultService_Update(t *testing.T) {
 		// given
 		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
@@ -772,7 +772,7 @@ func TestDefaultService_Update(t *testing.T) {
 		// given
 		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Basic: &model.Basic{
 					Username: "clientUsername",
 					Password: "clientPassword",
@@ -866,7 +866,7 @@ func TestDefaultService_Update(t *testing.T) {
 		// given
 		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
@@ -902,7 +902,7 @@ func TestDefaultService_Update(t *testing.T) {
 		// given
 		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
@@ -941,7 +941,7 @@ func TestDefaultService_Update(t *testing.T) {
 		// given
 		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Basic: &model.Basic{
 					Username: "clientUsername",
 					Password: "clientPassword",
@@ -1012,7 +1012,7 @@ func TestDefaultService_Update(t *testing.T) {
 		// given
 		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",

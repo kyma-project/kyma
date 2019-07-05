@@ -12,14 +12,14 @@ type AccessStrategy struct {
 }
 
 // ToCredentials provides a mock function with given fields: secretData, appCredentials
-func (_m *AccessStrategy) ToCredentials(secretData strategy.SecretData, appCredentials *applications.Credentials) model.Credentials {
+func (_m *AccessStrategy) ToCredentials(secretData strategy.SecretData, appCredentials *applications.Credentials) model.CredentialsWithCSRF {
 	ret := _m.Called(secretData, appCredentials)
 
-	var r0 model.Credentials
-	if rf, ok := ret.Get(0).(func(strategy.SecretData, *applications.Credentials) model.Credentials); ok {
+	var r0 model.CredentialsWithCSRF
+	if rf, ok := ret.Get(0).(func(strategy.SecretData, *applications.Credentials) model.CredentialsWithCSRF); ok {
 		r0 = rf(secretData, appCredentials)
 	} else {
-		r0 = ret.Get(0).(model.Credentials)
+		r0 = ret.Get(0).(model.CredentialsWithCSRF)
 	}
 
 	return r0

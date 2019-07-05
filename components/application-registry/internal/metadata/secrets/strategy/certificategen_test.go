@@ -23,7 +23,7 @@ const (
 )
 
 var (
-	certGenCredentials = &model.Credentials{
+	certGenCredentials = &model.CredentialsWithCSRF{
 		CertificateGen: &model.CertificateGen{
 			CommonName: commonName,
 		},
@@ -70,25 +70,29 @@ func TestCertificateGen_ToCredentials(t *testing.T) {
 		// then
 		assert.Equal(t, commonName, credentials.CertificateGen.CommonName)
 		assert.NotNil(t, credentials.CertificateGen)
-		assert.NotNil(t, credentials.CertificateGen.CSRFInfo)
-		assert.Equal(t, "https://test.it", credentials.CertificateGen.CSRFInfo.TokenEndpointURL)
+		assert.NotNil(t, credentials.CSRFInfo)
+		assert.Equal(t, "https://test.it", credentials.CSRFInfo.TokenEndpointURL)
 	})
 }
 
 func TestCertificateGen_CredentialsProvided(t *testing.T) {
 	testCases := []struct {
-		credentials *model.Credentials
+		credentials *model.CredentialsWithCSRF
 		result      bool
 	}{
 		{
-			credentials: &model.Credentials{
-				CertificateGen: &model.CertificateGen{CommonName: commonName},
+			credentials: &model.CredentialsWithCSRF{
+				CertificateGen: &model.CertificateGen{
+					CommonName: commonName,
+				},
 			},
 			result: true,
 		},
 		{
-			credentials: &model.Credentials{
-				CertificateGen: &model.CertificateGen{CommonName: ""},
+			credentials: &model.CredentialsWithCSRF{
+				CertificateGen: &model.CertificateGen{
+					CommonName: "",
+				},
 			},
 			result: false,
 		},
