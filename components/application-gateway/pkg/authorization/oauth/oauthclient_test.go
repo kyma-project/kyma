@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/oauth/tokencache/mocks"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/oauth/tokencache/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

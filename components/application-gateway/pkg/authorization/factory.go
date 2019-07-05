@@ -1,12 +1,11 @@
 package authorization
 
 import (
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/oauth"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/oauth"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/oauth/tokencache"
-	metadatamodel "github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/oauth/tokencache"
 )
 
 type Strategy interface {
@@ -20,7 +19,7 @@ type TransportSetter func(transport *http.Transport)
 
 type StrategyFactory interface {
 	// Creates strategy for credentials provided
-	Create(credentials *metadatamodel.Credentials) Strategy
+	Create(credentials *Credentials) Strategy
 }
 
 type OAuthClient interface {
@@ -35,7 +34,7 @@ type authorizationStrategyFactory struct {
 }
 
 // Create creates strategy for credentials provided
-func (asf authorizationStrategyFactory) Create(c *metadatamodel.Credentials) Strategy {
+func (asf authorizationStrategyFactory) Create(c *Credentials) Strategy {
 	var strategy Strategy
 
 	if c != nil && c.OAuth != nil {
@@ -48,14 +47,7 @@ func (asf authorizationStrategyFactory) Create(c *metadatamodel.Credentials) Str
 		strategy = newNoAuthStrategy()
 	}
 
-	var headers *map[string][]string
-	var queryParams *map[string][]string
-	if c != nil {
-		headers = c.Headers
-		queryParams = c.QueryParameters
-	}
-
-	return newExternalTokenStrategy(strategy, headers, queryParams)
+	return newExternalTokenStrategy(strategy)
 }
 
 // FactoryConfiguration holds factory configuration options

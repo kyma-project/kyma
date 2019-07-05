@@ -1,11 +1,10 @@
 package authorization
 
 import (
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/util"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/util"
-
-	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 )
 
 type basicAuthStrategy struct {

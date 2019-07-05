@@ -2,7 +2,7 @@
 
 package mocks
 
-import authorization "github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
+import authorization "github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 import csrf "github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 import mock "github.com/stretchr/testify/mock"
 

@@ -3,12 +3,14 @@ package serviceapi
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
 
 	secretsmocks "github.com/kyma-project/kyma/components/application-gateway/internal/metadata/secrets/mocks"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/applications"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -53,8 +55,8 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 			resultingAPI: &model.API{
 				TargetUrl: targetUrl,
-				Credentials: &model.Credentials{
-					OAuth: &model.OAuth{
+				Credentials: &authorization.Credentials{
+					OAuth: &authorization.OAuth{
 						ClientID:     clientId,
 						ClientSecret: clientSecret,
 						URL:          oauthUrl,
@@ -78,8 +80,8 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 			resultingAPI: &model.API{
 				TargetUrl: targetUrl,
-				Credentials: &model.Credentials{
-					BasicAuth: &model.BasicAuth{
+				Credentials: &authorization.Credentials{
+					BasicAuth: &authorization.BasicAuth{
 						Username: username,
 						Password: password,
 					},
@@ -103,8 +105,8 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 			resultingAPI: &model.API{
 				TargetUrl: targetUrl,
-				Credentials: &model.Credentials{
-					CertificateGen: &model.CertificateGen{
+				Credentials: &authorization.Credentials{
+					CertificateGen: &authorization.CertificateGen{
 						CommonName:  commonName,
 						Certificate: certificate,
 						PrivateKey:  privateKey,
@@ -136,7 +138,7 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 			resultingAPI: &model.API{
 				TargetUrl: targetUrl,
-				RequestParameters: &model.RequestParameters{
+				RequestParameters: &authorization.RequestParameters{
 					Headers: &map[string][]string{
 						"header": {"headerValue"},
 					},
@@ -159,7 +161,7 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 			resultingAPI: &model.API{
 				TargetUrl: targetUrl,
-				RequestParameters: &model.RequestParameters{
+				RequestParameters: &authorization.RequestParameters{
 					QueryParameters: &map[string][]string{
 						"query": {"queryValue"},
 					},
@@ -179,7 +181,7 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 			resultingAPI: &model.API{
 				TargetUrl: targetUrl,
-				RequestParameters: &model.RequestParameters{
+				RequestParameters: &authorization.RequestParameters{
 					Headers: &map[string][]string{
 						"header": {"headerValue"},
 					},

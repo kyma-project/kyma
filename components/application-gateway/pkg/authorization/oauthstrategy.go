@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
 	log "github.com/sirupsen/logrus"
 )
 

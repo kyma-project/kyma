@@ -5,11 +5,10 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/testconsts"
 	"net/http"
 	"net/http/httputil"
 	"testing"
-
-	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/testconsts"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

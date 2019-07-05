@@ -4,17 +4,16 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/util"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/util"
-
-	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/oauth/tokencache"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/oauth/tokencache"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
 )
 
 type oauthResponse struct {
