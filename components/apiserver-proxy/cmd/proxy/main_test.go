@@ -16,7 +16,7 @@ const (
 	allowHeader = "Content-Type"
 )
 
-func TestDeleteUstreamCORSHeaders(t *testing.T) {
+func TestDeleteUpstreamCORSHeaders(t *testing.T) {
 
 	//GIVEN
 
