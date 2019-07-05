@@ -1,0 +1,22 @@
+# Gopkg.toml
+
+[prune]
+  go-tests = true
+  non-go = true
+  unused-packages = true
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.12.3"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.12.3"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.12.3"
+
+[[override]]
+  name = "k8s.io/kubernetes"
+  branch = "release-1.12"
