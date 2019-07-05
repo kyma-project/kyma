@@ -303,8 +303,7 @@
 # test-logging tests
 /tests/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
-# api-controller acceptance tests
-/tests/api-controller-acceptance-tests/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+# api-controller integration tests
 /tests/integration/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # apiserver-proxy tests
