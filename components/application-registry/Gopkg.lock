@@ -159,7 +159,6 @@
   version = "v1.0.1"
 
 [[projects]]
-  branch = "fetch-spec-with-authentication"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-gateway/pkg/apperrors",
@@ -174,8 +173,7 @@
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/cms-controller-manager/pkg/apis/cms/v1alpha1"
   ]
-  revision = "d45d2ad263286431838c9a00998931fe285b6048"
-  source = "github.com/akgalwas/kyma"
+  revision = "ba297749ad3c81d2786c3e9acaaa8751d0a2a2db"
 
 [[projects]]
   branch = "master"
@@ -600,6 +598,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "41c6edc474c37064b744c50c4ac50c745e9008b864c580701a9bbf7c4389e093"
+  inputs-digest = "47f09e6ecad470030754ea43da87750d33dcfd458298efd6b9f7f788abdccc53"
   solver-name = "gps-cdcl"
   solver-version = 1
