@@ -144,11 +144,80 @@ See the example of the API part of the request body with specification URL:
     }
 }
 ```
-
-The Application Registry will fetch the specification from provided URL but it will not use any credentials, therefore the endpoint can not be secured by any authentication mechanism.
-
 >**NOTE:** Fetching specification from a URL is supported only for APIs. Fetching specifications for Events or documentation is not supported.
 
+## Register API with secured specification URL
+
+The Application Registry allows you to register an API with secured specification URL. The supported authentication methods are Basic Authentication and OAuth. You can specify only one type of authentication at the same time.
+
+#### Register API with a Basic Authentication-secured specification URL
+
+To register an API with a specification URL secured with Basic Authentication, add a `specificationCredentials.basic` object to the `api` section of the service registration request body. You must include these fields:
+
+| Field   |  Description |
+|----------|------|
+| **username** | Basic Authorization username |
+| **password** | Basic Authorization password |
+
+This is an example of the `api` section of the request body for an API with a specification URL secured with Basic Authentication:
+
+```
+    "api": {
+        "targetUrl": "https://sampleapi.targeturl/v1",
+        "specificationCredentials": {
+            "basic": {
+                "username": "{USERNAME}",
+                "password": "{PASSWORD}"
+            },
+        }  
+```
+#### Register API with an OAuth-secured specification URL
+
+To register an API with a specification URL secured with OAuth, add a `specificationCredentials.oauth` object to the `api` section of the service registration request body. You must include these fields:
+
+| Field   |  Description |
+|----------|------|
+| **url** |  OAuth token exchange endpoint of the service |
+| **clientId** | OAuth client ID |
+| **clientSecret** | OAuth client Secret |    
+
+This is an example of the `api` section of the request body for an API secured with OAuth:
+
+```
+    "api": {
+        "targetUrl": "https://sampleapi.targeturl/v1",
+        "specificationCredentials": {
+            "oauth": {
+                "url": "https://sampleapi.targeturl/authorizationserver/oauth/token",
+                "clientId": "{CLIENT_ID}",
+                "clientSecret": "{CLIENT_SECRET}"
+            },
+        }  
+```
+
+#### Use custom headers and query parameters for fetching specification from URL 
+You can specify additional headers and query parameters that will be injected to requests to the specification URL. 
+>**NOTE:** Unlike headers and query parameters used to authenticate requests to target API, these are used only for one time specification fetch and are not stored!
+
+To register an API with a specification URL that requires to specify custom headers and query parameters add a `specificationRequestParameters.headers` and a `specificationRequestParameters.queryParameters` objects to the `api` section of the service registration request body. Example of such body:
+```
+    "api": {
+        "targetUrl": "https://sampleapi.targeturl/v1",
+        "specificationRequestParameters": {
+            "headers": {
+                "custom-header": ["foo"]
+            },
+            "queryParameters": {
+                "param": ["bar"]
+            },
+        }
+        "credentials": {
+            "basic": {
+                "username": "{USERNAME}",
+                "password": "{PASSWORD}"
+            },
+        }
+```
 
 ## Register the OData API
 
