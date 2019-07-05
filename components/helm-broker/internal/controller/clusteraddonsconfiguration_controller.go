@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
+	exerr "github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -11,8 +13,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"github.com/sirupsen/logrus"
-	exerr "github.com/pkg/errors"
 )
 
 type clusterBrokerFacade interface {
@@ -52,7 +52,7 @@ var _ reconcile.Reconciler = &ReconcileClusterAddonsConfiguration{}
 
 // ReconcileClusterAddonsConfiguration reconciles a ClusterAddonsConfiguration object
 type ReconcileClusterAddonsConfiguration struct {
-	log    logrus.FieldLogger
+	log logrus.FieldLogger
 	client.Client
 	scheme *runtime.Scheme
 

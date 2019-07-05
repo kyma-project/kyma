@@ -10,41 +10,57 @@ import (
 
 type AddonController struct {
 	ID     string
+	URL    string
 	Addon  v1alpha1.Addon
-	bundle *internal.Bundle
-	chart  []*chart.Chart
+	Bundle *internal.Bundle
+	Charts []*chart.Chart
 }
 
-func NewAddon(n, v string) *AddonController {
+func NewAddon(n, v, u string) *AddonController {
 	return &AddonController{
-		Addon: v1alpha1.Addon{Name: n, Version: v},
+		URL: u,
+		Addon: v1alpha1.Addon{
+			Name:    n,
+			Version: v,
+			Status:  v1alpha1.AddonStatusReady,
+		},
 	}
 }
 
-func (a *AddonController) SetID(ID string) {
-	a.ID = ID
-}
-
-func (a *AddonController) AddBundle(b *internal.Bundle) {
-	a.bundle = b
-}
-
-func (a *AddonController) AddCharts(ch []*chart.Chart) {
-	a.chart = ch
-}
 func (a *AddonController) IsReady() bool {
 	return a.Addon.Status == v1alpha1.AddonStatusReady
 }
 
-func (a *AddonController) Failed() {
+func (a *AddonController) FetchingError(err error) {
+	a.failed()
+	a.setAddonFailedInfo(v1alpha1.AddonFetchingError, err.Error())
+}
+
+func (a *AddonController) ValidationError(err error) {
+	a.failed()
+	a.setAddonFailedInfo(v1alpha1.AddonValidationError, err.Error())
+}
+
+func (a *AddonController) ConflictInSpecifiedRepositories(err error) {
+	a.failed()
+	a.setAddonFailedInfo(v1alpha1.AddonConflictInSpecifiedRepositories, err.Error())
+}
+
+func (a *AddonController) ConflictWithAlreadyRegisteredAddons(err error) {
+	a.failed()
+	a.setAddonFailedInfo(v1alpha1.AddonConflictWithAlreadyRegisteredAddons, err.Error())
+}
+
+func (a *AddonController) RegisteringError(err error) {
+	a.failed()
+	a.setAddonFailedInfo(v1alpha1.AddonRegisteringError, err.Error())
+}
+
+func (a *AddonController) failed() {
 	a.Addon.Status = v1alpha1.AddonStatusFailed
 }
 
-func (a *AddonController) Ready() {
-	a.Addon.Status = v1alpha1.AddonStatusReady
-}
-
-func (a *AddonController) SetAddonFailedInfo(reason v1alpha1.AddonStatusReason, message string) {
+func (a *AddonController) setAddonFailedInfo(reason v1alpha1.AddonStatusReason, message string) {
 	a.Addon.Reason = reason
 	a.Addon.Message = fmt.Sprintf(reason.Message(), message)
 }

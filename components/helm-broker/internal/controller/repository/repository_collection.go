@@ -7,19 +7,48 @@ import (
 )
 
 type RepositoryCollection struct {
-	repositories []*RepositoryController
+	repositoriesIdConflict bool
+	Repositories           []*RepositoryController
 }
 
 func NewRepositoryCollection() *RepositoryCollection {
-	return &RepositoryCollection{repositories: []*RepositoryController{}}
+	return &RepositoryCollection{
+		repositoriesIdConflict: false,
+		Repositories:           []*RepositoryController{},
+	}
 }
 
 func (rc *RepositoryCollection) AddRepository(repo *RepositoryController) {
-	rc.repositories = append(rc.repositories, repo)
+	rc.Repositories = append(rc.Repositories, repo)
 }
 
-func (rc *RepositoryCollection) Collection() []*RepositoryController {
-	return rc.repositories
+func (rc *RepositoryCollection) Addons() []*AddonController {
+	addons := []*AddonController{}
+
+	for _, repo := range rc.Repositories {
+		for _, addon := range repo.Addons {
+			addons = append(addons, addon)
+		}
+	}
+
+	return addons
+}
+
+func (rc *RepositoryCollection) ReadyAddons() []*AddonController {
+	addons := []*AddonController{}
+
+	for _, addon := range rc.Addons() {
+		if !addon.IsReady() {
+			continue
+		}
+		addons = append(addons, addon)
+	}
+
+	return addons
+}
+
+func (rc *RepositoryCollection) IsRepositoriesIdConflict() bool {
+	return rc.repositoriesIdConflict
 }
 
 type idConflictData struct {
@@ -27,54 +56,33 @@ type idConflictData struct {
 	addonsName    string
 }
 
-func (rc *RepositoryCollection) IsReady() bool {
-	for _, repo := range rc.Collection() {
-		if !repo.IsReady() {
-			return false
-		}
-	}
-
-	return true
-}
-
 func (rc *RepositoryCollection) ReviseBundleDuplicationInRepository() {
 	ids := make(map[string]idConflictData)
 
-	for _, repo := range rc.Collection() {
-		for _, addon := range repo.Addons {
-			if data, ok := ids[addon.ID]; ok {
-				addon.Failed()
-				addon.SetAddonFailedInfo(
-					addonsv1alpha1.AddonConflictInSpecifiedRepositories,
-					fmt.Sprintf("[url: %s, addons: %s]", data.repositoryUrl, data.addonsName),
-				)
-			} else {
-				ids[addon.ID] = idConflictData{
-					repositoryUrl: repo.Repository.URL,
-					addonsName:    fmt.Sprintf("%s:%s", addon.Addon.Name, addon.Addon.Version),
-				}
+	for _, addon := range rc.Addons() {
+		if data, ok := ids[addon.ID]; ok {
+			rc.repositoriesIdConflict = true
+			addon.ConflictInSpecifiedRepositories(fmt.Errorf("[url: %s, addons: %s]", data.repositoryUrl, data.addonsName))
+		} else {
+			ids[addon.ID] = idConflictData{
+				repositoryUrl: addon.URL,
+				addonsName:    fmt.Sprintf("%s:%s", addon.Addon.Name, addon.Addon.Version),
 			}
 		}
 	}
 }
 
 func (rc *RepositoryCollection) ReviseBundleDuplicationInStorage(acList *addonsv1alpha1.AddonsConfigurationList) {
-	for _, repo := range rc.repositories {
-		for _, addon := range repo.Addons {
-			rc.findExistingAddon(addon, acList)
-		}
+	for _, addon := range rc.Addons() {
+		rc.findExistingAddon(addon, acList)
 	}
 }
 
 func (rc *RepositoryCollection) findExistingAddon(addon *AddonController, list *addonsv1alpha1.AddonsConfigurationList) {
-	for _, existAc := range list.Items {
-		for _, repo := range existAc.Status.Repositories {
+	for _, existAddonConfiguration := range list.Items {
+		for _, repo := range existAddonConfiguration.Status.Repositories {
 			if rc.addonAlreadyRegistered(*addon, rc.filterReadyAddons(repo)) {
-				addon.Failed()
-				addon.SetAddonFailedInfo(
-					addonsv1alpha1.AddonConflictWithAlreadyRegisteredAddons,
-					fmt.Sprintf("[ConfigurationName: %s, url: %s, addons: %s:%s]", existAc.Name, repo.URL, addon.Addon.Name, addon.Addon.Version),
-				)
+				addon.ConflictWithAlreadyRegisteredAddons(fmt.Errorf("[ConfigurationName: %s, url: %s, addons: %s:%s]", existAddonConfiguration.Name, repo.URL, addon.Addon.Name, addon.Addon.Version))
 			}
 		}
 	}

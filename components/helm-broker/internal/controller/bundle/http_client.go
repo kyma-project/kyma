@@ -12,10 +12,9 @@ import (
 )
 
 // NewHTTPClient creates new instance of HTTPClient.
-func NewHTTPClient(URL string) *HTTPClient {
+func NewHTTPClient() *HTTPClient {
 	return &HTTPClient{
-		RepositoryURL: URL,
-		Client:        http.DefaultClient,
+		Client: http.DefaultClient,
 	}
 }
 
@@ -27,32 +26,37 @@ type HTTPClient struct {
 	}
 }
 
+// Set url to bundle repository wich will be fetched
+func (c *HTTPClient) SetURL(URL string) {
+	c.RepositoryURL = URL
+}
+
 // IndexReader acquire repository index.
-func (p *HTTPClient) IndexReader() (r io.ReadCloser, err error) {
-	return p.doGetCall(p.RepositoryURL)
+func (c *HTTPClient) IndexReader() (r io.ReadCloser, err error) {
+	return c.doGetCall(c.RepositoryURL)
 }
 
 // BundleReader calls repository for a specific bundle and returns means to read bundle content.
-func (p *HTTPClient) BundleReader(name, version string) (r io.ReadCloser, err error) {
-	return p.doGetCall(p.URLForBundle(name, version))
+func (c *HTTPClient) BundleReader(name, version string) (r io.ReadCloser, err error) {
+	return c.doGetCall(c.URLForBundle(name, version))
 }
 
 // URLForBundle returns direct URL for getting the bundle
-func (p *HTTPClient) URLForBundle(name, version string) string {
-	return fmt.Sprintf("%s%s-%s.tgz", p.baseOfURL(p.RepositoryURL), name, version)
+func (c *HTTPClient) URLForBundle(name, version string) string {
+	return fmt.Sprintf("%s%s-%s.tgz", c.baseOfURL(c.RepositoryURL), name, version)
 }
 
-func (p *HTTPClient) baseOfURL(fullURL string) string {
+func (c *HTTPClient) baseOfURL(fullURL string) string {
 	return strings.TrimRight(fullURL, path.Base(fullURL))
 }
 
-func (p *HTTPClient) doGetCall(url string) (io.ReadCloser, error) {
+func (c *HTTPClient) doGetCall(url string) (io.ReadCloser, error) {
 	req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
 	if err != nil {
 		return nil, errors.Wrap(err, "while preparing request")
 	}
 
-	resp, err := p.Client.Do(req)
+	resp, err := c.Client.Do(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "while calling")
 	}

@@ -12,25 +12,12 @@ type RepositoryController struct {
 func NewAddonsRepository(url string) *RepositoryController {
 	return &RepositoryController{
 		Repository: addonsv1alpha1.StatusRepository{
-			URL: url,
+			URL:    url,
+			Status: addonsv1alpha1.RepositoryStatusReady,
 		},
 	}
 }
 
-func (ar *RepositoryController) IsReady() bool {
-	for _, addon := range ar.Addons {
-		if !addon.IsReady() {
-			return false
-		}
-	}
-
-	return true
-}
-
 func (ar *RepositoryController) Failed() {
 	ar.Repository.Status = addonsv1alpha1.RepositoryStatusFailed
-}
-
-func (ar *RepositoryController) Ready() {
-	ar.Repository.Status = addonsv1alpha1.RepositoryStatusReady
 }

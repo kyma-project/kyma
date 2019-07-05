@@ -12,6 +12,7 @@ import (
 )
 
 type BundleReader interface {
+	SetURL(URL string)
 	URLForBundle(string, string) string
 	IndexReader() (io.ReadCloser, error)
 	BundleReader(string, string) (io.ReadCloser, error)
@@ -44,6 +45,10 @@ type BundleProvider struct {
 
 func NewBundleProvider(br BundleReader, bl BundleLoader) *BundleProvider {
 	return &BundleProvider{bundleReader: br, bundleLoader: bl, log: logrus.WithField("service", "bundle:loader")}
+}
+
+func (bp *BundleProvider) SetBundleURL(URL string) {
+	bp.bundleReader.SetURL(URL)
 }
 
 func (bp *BundleProvider) GetIndex() (*BundleIndex, error) {

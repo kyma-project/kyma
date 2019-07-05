@@ -4,20 +4,19 @@ import (
 	"flag"
 	"os"
 
-	"github.com/davecgh/go-spew/spew"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
-
 	scCs "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis"
-
 	//hbConfig "github.com/kyma-project/kyma/components/helm-broker/internal/config"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	ctrlCfg "github.com/kyma-project/kyma/components/helm-broker/internal/controller/config"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
 	"github.com/sirupsen/logrus"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	restclient "k8s.io/client-go/rest"
+	//restclient "k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
@@ -40,7 +39,6 @@ func main() {
 		log.Error(err, "unable to get storage factory")
 		os.Exit(1)
 	}
-	spew.Dump(sFact.Bundle().FindAll("default"))
 
 	// Get a config to talk to the apiserver
 	log.Info("setting up client for manager")
@@ -67,7 +65,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	k8sConfig, err := restclient.InClusterConfig()
+	// TODO: change to InClusterConfig
+	k8sConfig, err := clientcmd.BuildConfigFromFlags("", "/Users/i355812/.kube/config")
+	//k8sConfig, err := restclient.InClusterConfig()
 	fatalOnError(err)
 
 	scClientSet, err := scCs.NewForConfig(k8sConfig)
@@ -77,9 +77,13 @@ func main() {
 	sbFacade := broker.NewBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrlCfg.Namespace, ctrlCfg.ServiceName)
 	csbFacade := broker.NewClusterBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrlCfg.Namespace, ctrlCfg.ServiceName)
 
+	// TODO: when it will be ready change to bunldeProvider from `github.com/kyma-project/kyma/components/helm-broker/internal/controller/bundle` package
+	//provider := bundle.NewProvider(ctrlBundle.NewHTTPClient(URL), bundle.NewLoader("/tmp"))
+	provider := bundle.NewBundleProvider(bundle.NewHTTPClient(), bundle.NewLoader("/tmp"))
+
 	// Setup all Controllers
 	log.Info("Setting up controller")
-	acReconcile := controller.NewReconcileAddonsConfiguration(mgr, sbFacade, sFact)
+	acReconcile := controller.NewReconcileAddonsConfiguration(mgr, provider, sbFacade, sFact, ctrlCfg.DevelopMode)
 	acController := controller.NewAddonsConfigurationController(acReconcile)
 	err = acController.Start(mgr)
 	if err != nil {
