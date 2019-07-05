@@ -26,7 +26,7 @@ type (
 		CleanProviders()
 	}
 	brokerSyncer interface {
-		Sync(name string, maxSyncRetries int) error
+		SyncServiceBroker(name string) error
 	}
 )
 
@@ -199,7 +199,7 @@ func (c *RepositoryController) syncBundlesRepos(name string, namespace string) e
 	if err := c.bundleSyncer.Execute(); err != nil {
 		return errors.Wrap(err, "while syncing bundles")
 	}
-	if err := c.brokerSyncer.Sync(c.brokerName, 5); err != nil {
+	if err := c.brokerSyncer.SyncServiceBroker(c.brokerName); err != nil {
 		return errors.Wrapf(err, "while syncing %s broker", c.brokerName)
 	}
 

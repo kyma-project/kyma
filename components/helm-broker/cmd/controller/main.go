@@ -74,19 +74,19 @@ func main() {
 	fatalOnError(err)
 
 	brokerSyncer := broker.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1(), log)
-	sbFacade := broker.NewBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrlCfg.Namespace, ctrlCfg.ServiceName, log)
-	csbFacade := broker.NewClusterBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrlCfg.Namespace, ctrlCfg.ServiceName, log)
+	sbFacade := broker.NewBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrlCfg.Namespace, ctrlCfg.ServiceName)
+	csbFacade := broker.NewClusterBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrlCfg.Namespace, ctrlCfg.ServiceName)
 
 	// Setup all Controllers
 	log.Info("Setting up controller")
-	acReconcile := controller.NewReconcileAddonsConfiguration(mgr, sFact, sbFacade, log)
+	acReconcile := controller.NewReconcileAddonsConfiguration(mgr, sbFacade, sFact)
 	acController := controller.NewAddonsConfigurationController(acReconcile)
 	err = acController.Start(mgr)
 	if err != nil {
 		log.Error(err, "unable to start AddonsConfigurationController")
 	}
 
-	cacReconcile := controller.NewReconcileClusterAddonsConfiguration(mgr, csbFacade, log)
+	cacReconcile := controller.NewReconcileClusterAddonsConfiguration(mgr, csbFacade)
 	cacController := controller.NewClusterAddonsConfigurationController(cacReconcile)
 	err = cacController.Start(mgr)
 	if err != nil {

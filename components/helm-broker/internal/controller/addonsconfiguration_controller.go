@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/repository"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	exerr "github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -21,7 +20,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	"github.com/sirupsen/logrus"
 )
+
+type brokerFacade interface {
+	Create(ns string) error
+	Exist(ns string) (bool, error)
+	Delete(ns string) error
+}
 
 //
 type AddonsConfigurationController struct {
@@ -54,19 +60,22 @@ var _ reconcile.Reconciler = &ReconcileAddonsConfiguration{}
 
 // ReconcileAddonsConfiguration reconciles a AddonsConfiguration object
 type ReconcileAddonsConfiguration struct {
-	log logr.Logger
+	log logrus.FieldLogger
 	client.Client
 	scheme *runtime.Scheme
 	strg   storage.Factory
+	brokerFacade brokerFacade
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func NewReconcileAddonsConfiguration(mgr manager.Manager, s storage.Factory, log logr.Logger) reconcile.Reconciler {
+func NewReconcileAddonsConfiguration(mgr manager.Manager, brokerFacade brokerFacade, s storage.Factory) reconcile.Reconciler {
 	return &ReconcileAddonsConfiguration{
-		log:    log,
+		log: logrus.WithField("controller", "addons-configuration"),
 		Client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
 		strg:   s,
+
+		brokerFacade: brokerFacade,
 	}
 }
 
@@ -96,6 +105,17 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 		err = r.addAddonsProcess(instance)
 		if err != nil {
 			return reconcile.Result{}, exerr.Wrapf(err, "while creating AddonsConfiguration %q", request.NamespacedName)
+		}
+	}
+
+	exist, err := r.brokerFacade.Exist(instance.Namespace)
+	if err != nil {
+		return reconcile.Result{}, exerr.Wrap(err, "while checking if ServiceBroker exists")
+	}
+	if !exist {
+		// status
+		if err := r.brokerFacade.Create(instance.Namespace); err != nil {
+			return reconcile.Result{}, exerr.Wrapf(err, "while creating ServiceBroker for addon %s in namespace %s", instance.Name, instance.Namespace)
 		}
 	}
 
@@ -163,7 +183,7 @@ func (r *ReconcileAddonsConfiguration) filterAddonsConfigurationList(addonName s
 
 func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*repository.AddonController, error) {
 	addons := []*repository.AddonController{}
-	provider := bundle.NewBundleProvider(bundle.NewHTTPClient(URL), bundle.NewLoader("/tmp", r.log), r.log)
+	provider := bundle.NewBundleProvider(bundle.NewHTTPClient(URL), bundle.NewLoader("/tmp"))
 
 	// fetch repository index
 	index, err := provider.GetIndex()

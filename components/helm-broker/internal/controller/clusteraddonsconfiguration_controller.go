@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"github.com/go-logr/logr"
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -12,7 +11,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	"github.com/sirupsen/logrus"
+	exerr "github.com/pkg/errors"
 )
+
+type clusterBrokerFacade interface {
+	Create() error
+	Exist() (bool, error)
+	Delete() error
+}
 
 //
 type ClusterAddonsConfigurationController struct {
@@ -45,17 +52,21 @@ var _ reconcile.Reconciler = &ReconcileClusterAddonsConfiguration{}
 
 // ReconcileClusterAddonsConfiguration reconciles a ClusterAddonsConfiguration object
 type ReconcileClusterAddonsConfiguration struct {
-	log logr.Logger
+	log    logrus.FieldLogger
 	client.Client
 	scheme *runtime.Scheme
+
+	clusterBrokerFacade clusterBrokerFacade
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func NewReconcileClusterAddonsConfiguration(mgr manager.Manager, log logr.Logger) reconcile.Reconciler {
+func NewReconcileClusterAddonsConfiguration(mgr manager.Manager, clusterBrokerFacade clusterBrokerFacade) reconcile.Reconciler {
 	return &ReconcileClusterAddonsConfiguration{
-		log:    log,
+		log:    logrus.WithField("controller", "cluster-addons-configuration"),
 		Client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
+
+		clusterBrokerFacade: clusterBrokerFacade,
 	}
 }
 
@@ -73,6 +84,17 @@ func (r *ReconcileClusterAddonsConfiguration) Reconcile(request reconcile.Reques
 		}
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
+	}
+
+	exist, err := r.clusterBrokerFacade.Exist()
+	if err != nil {
+		return reconcile.Result{}, exerr.Wrap(err, "while checking if ServiceBroker exists")
+	}
+	if !exist {
+		// status
+		if err := r.clusterBrokerFacade.Create(); err != nil {
+			return reconcile.Result{}, exerr.Wrapf(err, "while creating ServiceBroker for addon %s in namespace %s", instance.Name, instance.Namespace)
+		}
 	}
 
 	return reconcile.Result{}, nil

@@ -28,13 +28,13 @@ type ClusterBrokersFacade struct {
 
 // NewClusterBrokersFacade returns facade
 func NewClusterBrokersFacade(clusterBrokerGetter scbeta.ClusterServiceBrokersGetter, clusterBrokerSyncer clusterBrokerSyncer,
-	workingNamespace, serviceName string, log logrus.FieldLogger) *ClusterBrokersFacade {
+	workingNamespace, serviceName string) *ClusterBrokersFacade {
 	return &ClusterBrokersFacade{
 		clusterBrokerGetter: clusterBrokerGetter,
 		workingNamespace:    workingNamespace,
 		clusterBrokerSyncer: clusterBrokerSyncer,
 		serviceName:         serviceName,
-		log:                 log.WithField("service", "cluster-broker-facade"),
+		log:                 logrus.WithField("service", "cluster-broker-facade"),
 	}
 }
 

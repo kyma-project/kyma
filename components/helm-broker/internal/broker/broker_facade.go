@@ -38,13 +38,13 @@ type BrokersFacade struct {
 
 // NewBrokersFacade returns facade
 func NewBrokersFacade(brokerGetter scbeta.ServiceBrokersGetter, brokerSyncer brokerSyncer,
-	workingNamespace, serviceName string, log logrus.FieldLogger) *BrokersFacade {
+	workingNamespace, serviceName string) *BrokersFacade {
 	return &BrokersFacade{
 		brokerGetter:     brokerGetter,
 		workingNamespace: workingNamespace,
 		brokerSyncer:     brokerSyncer,
 		serviceName:      serviceName,
-		log:              log.WithField("service", "nsbroker-facade"),
+		log:              logrus.WithField("service", "nsbroker-facade"),
 	}
 }
 
