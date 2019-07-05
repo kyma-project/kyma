@@ -31,8 +31,7 @@ spec:
           serviceAccountName: "test-{{ template "fullname" . }}-ui-acceptance"
           containers:
             - name: "test-{{ template "fullname" . }}-ui-acceptance"
-              image: "eu.gcr.io/kyma-project/pr/ui-tests:PR-1017"
-#              image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_acceptance_tests.dir }}ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
+              image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_acceptance_tests.dir }}ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
               imagePullPolicy: IfNotPresent
               resources:
                  requests:
