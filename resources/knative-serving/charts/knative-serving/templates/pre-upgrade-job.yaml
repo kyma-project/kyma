@@ -15,7 +15,6 @@ data:
     #!/usr/bin/env bash
     set -eu
     echo "*** Pre upgrade job starts ***"
-    kubectl scale -n knative-system deploy/activator--replicas=0
     kubectl delete crd \
       services.serving.knative.dev  \
       routes.serving.knative.dev  \
