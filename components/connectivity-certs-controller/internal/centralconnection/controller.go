@@ -198,7 +198,7 @@ func (c *Controller) getCertificateCredentials() (connectorservice.CertificateCr
 
 	certificateChain, err := c.certificateProvider.GetCertificateChain()
 	if err != nil {
-		return connectorservice.CertificateCredentials{}, errors.Wrap(err, "Failed to get CA certificate")
+		return connectorservice.CertificateCredentials{}, errors.Wrap(err, "Failed to get certificate chain")
 	}
 
 	return connectorservice.CertificateCredentials{
@@ -292,6 +292,7 @@ func (c *Controller) updateCentralConnectionCR(connection *v1alpha1.CentralConne
 		return c.centralConnectionClient.Update(context.Background(), existingConnection)
 	})
 	if err != nil {
+		c.logger.Errorf("Failed to update Central Connection: %s", err.Error())
 		return errors.Wrap(err, "Failed to update Central Connection")
 	}
 

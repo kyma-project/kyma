@@ -50,7 +50,7 @@ func (cp *certificatePreserver) saveClusterCertificateAndKey(clientKey, clientCe
 
 	err := cp.secretsRepository.UpsertWithMerge(cp.clusterCertSecretName, clusterSecretData)
 	if err != nil {
-		return errors.Wrap(err, "Failed to preserve client certificate in secret")
+		return errors.Wrap(err, "Failed to preserve client certificate and key in secret")
 	}
 
 	return nil
