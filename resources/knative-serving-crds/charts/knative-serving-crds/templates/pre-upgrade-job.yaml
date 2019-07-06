@@ -60,7 +60,7 @@ metadata:
     "helm.sh/hook-weight": "-3"
   labels:
     job: pre-upgrade-knative-serving-crds
-  name: pre-upgrade-knative-serving
+  name: pre-upgrade-knative-serving-crds
 spec:
   completions: 1
   parallelism: 1
@@ -69,21 +69,21 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        job: pre-upgrade-knative-serving
+        job: pre-upgrade-knative-serving-crds
     spec:
       restartPolicy: OnFailure
       containers:
       - command: ["sh", "/scripts/pre-upgrade.sh"]
         image: docker.io/istio/kubectl:1.1.6
         imagePullPolicy: IfNotPresent
-        name: pre-upgrade-knative-serving
+        name: pre-upgrade-knative-serving-crds
         volumeMounts:
         - mountPath: /scripts
           name: scripts
           readOnly: true
-      serviceAccountName: pre-upgrade-knative-serving
+      serviceAccountName: pre-upgrade-knative-serving-crds
       volumes:
       - configMap:
           defaultMode: 420
-          name: pre-upgrade-knative-serving
+          name: pre-upgrade-knative-serving-crds
         name: scripts
