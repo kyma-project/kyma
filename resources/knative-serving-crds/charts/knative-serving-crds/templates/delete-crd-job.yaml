@@ -4,7 +4,7 @@ metadata:
   name: pre-upgrade-knative-serving-crds
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "-5"
   labels:
     job: pre-upgrade-knative-serving-crds
@@ -28,7 +28,7 @@ kind: ConfigMap
 metadata:
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "-5"
   labels:
     job: pre-upgrade-knative-serving-crds
@@ -40,7 +40,7 @@ metadata:
   name: pre-upgrade-knative-serving-crds
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "-4"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -56,7 +56,7 @@ kind: Job
 metadata:
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "-3"
   labels:
     job: pre-upgrade-knative-serving-crds
