@@ -48,13 +48,13 @@ global:
     version: d7092530
   application_gateway:
     dir: develop/
-    version: 1412b233
+    version: ba297749
   application_gateway_tests:
     dir: develop/
     version: 1412b233
   application_registry:
     dir: develop/
-    version: 1412b233
+    version: f36180e8
   application_registry_tests:
     dir: develop/
     version: 4c614be5
