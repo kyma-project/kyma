@@ -27,6 +27,7 @@ metadata:
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
     "helm.sh/hook": "pre-install"
+    "helm.sh/hook-weight": "-4"
   labels:
     job: pre-upgrade-knative-serving-crds
   name: pre-upgrade-knative-serving-crds
@@ -250,7 +251,7 @@ kind: Job
 metadata:
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-weight": "-1"
     "helm.sh/hook": "pre-install"
   labels:
     job: pre-upgrade-knative-serving-crds
