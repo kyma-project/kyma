@@ -181,9 +181,9 @@ func (repo *repository) makeDenierObject(application string, appUID types.UID, s
 			OwnerReferences: []v1.OwnerReference{
 				{
 					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-					Kind: "Application",
-					Name: application,
-					UID: appUID,
+					Kind:       "Application",
+					Name:       application,
+					UID:        appUID,
 				},
 			},
 		},
@@ -207,9 +207,9 @@ func (repo *repository) makeCheckNothingObject(application string, appUID types.
 			OwnerReferences: []v1.OwnerReference{
 				{
 					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-					Kind: "Application",
-					Name: application,
-					UID: appUID,
+					Kind:       "Application",
+					Name:       application,
+					UID:        appUID,
 				},
 			},
 		},
@@ -231,9 +231,9 @@ func (repo *repository) makeRuleObject(application string, appUID types.UID, ser
 			OwnerReferences: []v1.OwnerReference{
 				{
 					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-					Kind: "Application",
-					Name: application,
-					UID: appUID,
+					Kind:       "Application",
+					Name:       application,
+					UID:        appUID,
 				},
 			},
 		},

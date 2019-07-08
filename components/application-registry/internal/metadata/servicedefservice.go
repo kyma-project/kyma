@@ -50,7 +50,7 @@ type serviceDefinitionService struct {
 	serviceAPIService     serviceapi.Service
 	applicationRepository applications.ServiceRepository
 	specService           specification.Service
-	applicationManager ApplicationGetter
+	applicationManager    ApplicationGetter
 }
 
 // NewServiceDefinitionService creates new ServiceDefinitionService with provided dependencies.
@@ -60,7 +60,7 @@ func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService
 		serviceAPIService:     serviceAPIService,
 		applicationRepository: applicationRepository,
 		specService:           specService,
-		applicationManager: applicationManager,
+		applicationManager:    applicationManager,
 	}
 }
 

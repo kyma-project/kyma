@@ -184,9 +184,9 @@ func mockService(application, serviceId, serviceName string, targetPort int32) *
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-					Kind: "Application",
-					Name: application,
-					UID: applicationUID,
+					Kind:       "Application",
+					Name:       application,
+					UID:        applicationUID,
 				},
 			},
 		},

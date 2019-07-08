@@ -33,9 +33,9 @@ func TestRepository_Create(t *testing.T) {
 				OwnerReferences: []v1.OwnerReference{
 					{
 						APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-						Kind: "Application",
-						Name: "app",
-						UID: applicationUID,
+						Kind:       "Application",
+						Name:       "app",
+						UID:        applicationUID,
 					},
 				},
 			},
@@ -88,9 +88,9 @@ func TestRepository_Create(t *testing.T) {
 				OwnerReferences: []v1.OwnerReference{
 					{
 						APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-						Kind: "Application",
-						Name: "app",
-						UID: applicationUID,
+						Kind:       "Application",
+						Name:       "app",
+						UID:        applicationUID,
 					},
 				},
 			},
@@ -137,9 +137,9 @@ func TestRepository_Create(t *testing.T) {
 				OwnerReferences: []v1.OwnerReference{
 					{
 						APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-						Kind: "Application",
-						Name: "app",
-						UID: applicationUID,
+						Kind:       "Application",
+						Name:       "app",
+						UID:        applicationUID,
 					},
 				},
 			},
@@ -196,9 +196,9 @@ func TestRepository_Upsert(t *testing.T) {
 				OwnerReferences: []v1.OwnerReference{
 					{
 						APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-						Kind: "Application",
-						Name: "app",
-						UID: applicationUID,
+						Kind:       "Application",
+						Name:       "app",
+						UID:        applicationUID,
 					},
 				},
 			},
@@ -267,9 +267,9 @@ func TestRepository_Upsert(t *testing.T) {
 				OwnerReferences: []v1.OwnerReference{
 					{
 						APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-						Kind: "Application",
-						Name: "app",
-						UID: applicationUID,
+						Kind:       "Application",
+						Name:       "app",
+						UID:        applicationUID,
 					},
 				},
 			},
@@ -332,9 +332,9 @@ func TestRepository_Upsert(t *testing.T) {
 				OwnerReferences: []v1.OwnerReference{
 					{
 						APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-						Kind: "Application",
-						Name: "app",
-						UID: applicationUID,
+						Kind:       "Application",
+						Name:       "app",
+						UID:        applicationUID,
 					},
 				},
 			},

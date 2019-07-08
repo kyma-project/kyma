@@ -84,9 +84,9 @@ func (m *accessServiceManager) create(application string, appUID types.UID, serv
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-					Kind: "Application",
-					Name: application,
-					UID: appUID,
+					Kind:       "Application",
+					Name:       application,
+					UID:        appUID,
 				},
 			},
 		},

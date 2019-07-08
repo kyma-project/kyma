@@ -20,7 +20,7 @@ const (
 	gatewayUrl   = "url-uuid-1"
 
 	appName   = "app"
-	appUID = types.UID("appUID")
+	appUID    = types.UID("appUID")
 	serviceId = "uuid-1"
 )
 

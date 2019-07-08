@@ -23,7 +23,7 @@ import (
 
 const (
 	appName    = "app"
-	appUID = types.UID("appUID")
+	appUID     = types.UID("appUID")
 	serviceId  = "serviceID"
 	secretName = "secretName"
 )
