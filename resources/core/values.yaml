@@ -33,8 +33,8 @@ global:
     version: "PR-4752"
     testNamespace: api-controller-tests
   apiserver_proxy:
-    dir: develop/
-    version: "985c9b59"
+    dir: pr/
+    version: "PR-4831"
   iam_kubeconfig_service:
     dir: develop/
     version: 2a1a064b
