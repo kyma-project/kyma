@@ -607,7 +607,7 @@ func (componentTestContext) virtualServiceFor(testID string, domainName string, 
 				CorsPolicy: &istioNetApi.CorsPolicy{ //Default policy
 					AllowOrigin:  []string{"*"},
 					AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
-					AllowHeaders: []string{"Authorizatio", "Content-Type" ,"*"},
+					AllowHeaders: []string{"Authorization", "Content-Type" ,"*"},
 				},
 			},
 		},
