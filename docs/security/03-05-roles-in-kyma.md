@@ -24,6 +24,6 @@ The predefined roles, arranged in the order of increasing access level, are:
 | **kyma-developer** | The role created for developers who build implementations using Kyma. It allows you to list and edit Kubernetes and Kyma-specific resources. |
 | **kyma-admin** | The role with the highest permission level which gives access to all Kubernetes and Kyma resources and components with administrative rights. |
 
->**CAUTION:** To give a user **kyma-developer** role permissions in a Namespace, you must create a RoleBinding to the **kyma-developer** role and a ClusterRoleBinding to the **kyma-essentials** role. 
+>**CAUTION:** To give a user the **kyma-developer** role permissions in a Namespace, create a RoleBinding to the **kyma-developer** role and a ClusterRoleBinding to the **kyma-essentials** role. 
 
 To learn more about the default roles and how they are constructed, see [this](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/cluster-users/templates/rbac-roles.yaml) file.
