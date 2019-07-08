@@ -71,6 +71,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		ts := NewTestServer(func(req *http.Request) {
 			assert.Equal(t, req.Method, http.MethodGet)
 			assert.Equal(t, req.RequestURI, "/orders/123")
+			assert.Equal(t, "token", req.Header.Get("CSRFToken"))
 		})
 		defer ts.Close()
 
@@ -82,6 +83,10 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 
 		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
 		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
+			Run(func(args mock.Arguments) {
+				req := args[0].(*http.Request)
+				req.Header.Add("CSRFToken", "token")
+			}).
 			Return(nil)
 		csrfTokenStrategyMock.On("Invalidate").Return()
 

@@ -32,7 +32,7 @@ Valid certificate signed by the Kyma Certificate Authority.
         },
         "headers": {
           "custom-header": ["foo"]
-        },
+        }
       },
       "credentials": {
         "basic": {

@@ -36,6 +36,10 @@ func NewAppMockServer(port int32) *AppMockServer {
 	router.Path("/queryparams/{param}/{value}").HandlerFunc(queryParams.QueryParamsHandler)
 	router.Path("/spec/queryparams/{param}/{value}").HandlerFunc(queryParams.QueryParamsHandlerSpec)
 
+	csrf := NewCsrfHandler()
+	router.Path("/csrftoken").HandlerFunc(csrf.CsrfToken)
+	router.Path("/target").HandlerFunc(csrf.Target)
+
 	router.NotFoundHandler = NewErrorHandler(404, "Requested resource could not be found.")
 	router.MethodNotAllowedHandler = NewErrorHandler(405, "Method not allowed.")
 
