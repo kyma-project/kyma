@@ -1,6 +1,7 @@
 package metadata
 
 import (
+	"fmt"
 	v1a "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/mocks"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -607,6 +608,78 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		assert.Empty(t, serviceID)
 
 		serviceRepository.AssertExpectations(t)
+	})
+
+	t.Run("should return an error when failed to get application UID", func(t *testing.T) {
+		// given
+		serviceAPI := &model.API{
+			TargetUrl: "http://target.com",
+			Credentials: &model.CredentialsWithCSRF{
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com/token",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
+				},
+			},
+			Spec: []byte("{\"api\":\"spec\"}"),
+		}
+
+		serviceDefinition := model.ServiceDefinition{
+			Name:        "Some service",
+			Description: "Some cool service",
+			Provider:    "Service Provider",
+			Api:         serviceAPI,
+			Labels:      &map[string]string{"connected-app": "app"},
+			Identifier:  "Some cool external identifier",
+			Events: &model.Events{
+				Spec: []byte("events spec"),
+			},
+			Documentation: []byte("documentation"),
+		}
+		applicationServiceAPI := &applications.ServiceAPI{
+			TargetUrl:   "http://target.com",
+			AccessLabel: "access-label",
+			GatewayURL:  "gateway-url",
+			Credentials: applications.Credentials{
+				AuthenticationUrl: "http://oauth.com/token",
+				SecretName:        "secret-name",
+			},
+		}
+		applicationService := applications.Service{
+			ID:                  "uuid-1",
+			DisplayName:         "Some service",
+			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
+			ProviderDisplayName: "Service Provider",
+			Identifier:          "Some cool external identifier",
+			Labels:              map[string]string{"connected-app": "app"},
+			Tags:                make([]string, 0),
+			API:                 applicationServiceAPI,
+			Events:              true,
+		}
+
+		uuidGenerator := new(uuidmocks.Generator)
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
+		serviceAPIService := new(serviceapimocks.Service)
+		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
+		serviceRepository.On("Create", "app", applicationService).Return(nil)
+		serviceRepository.On("GetAll", "app").Return(nil, nil)
+		specService := new(specmocks.Service)
+		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		applicationGetter := new(mocks.ApplicationGetter)
+		applicationGetter.On("Get", "app", v1.GetOptions{}).Return(nil, fmt.Errorf("Getting Application failed"))
+
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService, applicationGetter)
+
+		// when
+		serviceID, err := service.Create("app", &serviceDefinition)
+
+		// then
+		require.Error(t, err)
+		assert.Empty(t, serviceID)
+
+		uuidGenerator.AssertExpectations(t)
 	})
 }
 
