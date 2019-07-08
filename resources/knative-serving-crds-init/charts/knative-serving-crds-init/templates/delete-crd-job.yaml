@@ -34,9 +34,171 @@ metadata:
   labels:
     networking.knative.dev/certificate-provider: cert-manager
     serving.knative.dev/controller: "true"
-    serving.knative.dev/release: "v0.7.1"
   name: pre-upgrade-knative-serving-crds-cr
 rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - namespaces
+  - secrets
+  - configmaps
+  - endpoints
+  - services
+  - events
+  - serviceaccounts
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+  - patch
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  - deployments
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+  - patch
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - deployments/scale
+  - statefulsets
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+  - patch
+  - watch
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+  - patch
+  - watch
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+  - patch
+  - watch
+- apiGroups:
+  - serving.knative.dev
+  resources:
+  - configurations
+  - routes
+  - revisions
+  - services
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+  - patch
+  - watch
+- apiGroups:
+  - serving.knative.dev
+  resources:
+  - configurations/status
+  - routes/status
+  - revisions/status
+  - services/status
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+  - patch
+  - watch
+- apiGroups:
+  - autoscaling.internal.knative.dev
+  resources:
+  - podautoscalers
+  - podautoscalers/status
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+  - patch
+  - watch
+- apiGroups:
+  - autoscaling
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+  - patch
+  - watch
+- apiGroups:
+  - caching.internal.knative.dev
+  resources:
+  - images
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+  - patch
+  - watch
+- apiGroups:
+  - networking.internal.knative.dev
+  resources:
+  - clusteringresses
+  - clusteringresses/status
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+  - deletecollection
+  - patch
+  - watch
+- apiGroups:
+  - networking.istio.io
+  resources:
+  - virtualservices
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - delete
+  - patch
+  - watch
 - apiGroups: ["serving.knative.dev"]
   resources: ["services"]
   verbs: ["*"]
