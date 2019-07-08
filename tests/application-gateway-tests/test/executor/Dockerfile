@@ -11,6 +11,7 @@ FROM alpine:3.8
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
+COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-gateway-tests/spec.json .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-gateway-tests/scripts/executor-entrypoint.sh .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-gateway-tests/proxytestsexecutor.test .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-gateway-tests/licenses ./licenses
