@@ -3,6 +3,8 @@ package mock
 import (
 	"net/http"
 
+	"github.com/pkg/errors"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/mux"
@@ -18,7 +20,29 @@ func NewHeadersHandler() *headersHandler {
 	}
 }
 
-func (h *headersHandler) RequestHandler(w http.ResponseWriter, r *http.Request) {
+func (h *headersHandler) HeadersHandler(w http.ResponseWriter, r *http.Request) {
+	err := h.checkCustomHeaders(r)
+	if err != nil {
+		h.logger.Errorf(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *headersHandler) HeadersHandlerSpec(w http.ResponseWriter, r *http.Request) {
+	err := h.checkCustomHeaders(r)
+	if err != nil {
+		h.logger.Errorf(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	http.ServeFile(w, r, "spec.json")
+}
+
+func (h *headersHandler) checkCustomHeaders(r *http.Request) error {
 	vars := mux.Vars(r)
 	expectedHeader := vars["header"]
 	expectedHeaderValue := vars["value"]
@@ -27,10 +51,8 @@ func (h *headersHandler) RequestHandler(w http.ResponseWriter, r *http.Request) 
 	headerValue := r.Header.Get(expectedHeader)
 
 	if expectedHeaderValue != headerValue {
-		h.logger.Errorf("Invalid header value provided")
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return errors.New("Invalid header value provided")
 	}
 
-	successResponse(w)
+	return nil
 }
