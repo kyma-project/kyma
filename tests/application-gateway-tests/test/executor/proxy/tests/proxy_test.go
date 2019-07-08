@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
@@ -131,7 +132,8 @@ func TestProxyService(t *testing.T) {
 		spec, err := client.GetApiSpecWithRetries(t, apiID)
 		require.NoError(t, err)
 
-		assert.NotEmpty(t, spec)
+		assertAPISpec(t, spec)
+
 		t.Log("Successfully fetched api spec")
 	})
 
@@ -154,6 +156,8 @@ func TestProxyService(t *testing.T) {
 
 		spec, err := client.GetApiSpecWithRetries(t, apiID)
 		require.NoError(t, err)
+
+		assertAPISpec(t, spec)
 
 		assert.NotEmpty(t, spec)
 		t.Log("Successfully fetched api spec")
@@ -182,6 +186,8 @@ func TestProxyService(t *testing.T) {
 		spec, err := client.GetApiSpecWithRetries(t, apiID)
 		require.NoError(t, err)
 
+		assertAPISpec(t, spec)
+
 		assert.NotEmpty(t, spec)
 		t.Log("Successfully fetched api spec")
 	})
@@ -209,7 +215,18 @@ func TestProxyService(t *testing.T) {
 		spec, err := client.GetApiSpecWithRetries(t, apiID)
 		require.NoError(t, err)
 
+		assertAPISpec(t, spec)
+
 		assert.NotEmpty(t, spec)
 		t.Log("Successfully fetched api spec")
 	})
+}
+
+func assertAPISpec(t *testing.T, spec json.RawMessage) {
+	var swaggerAPISpec map[string]interface{}
+	err := json.Unmarshal(spec, &swaggerAPISpec)
+	require.NoError(t, err)
+
+	require.NotEmpty(t, swaggerAPISpec)
+	assert.Equal(t, "2.0", swaggerAPISpec["swagger"])
 }

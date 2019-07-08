@@ -21,27 +21,28 @@ func NewHeadersHandler() *headersHandler {
 }
 
 func (h *headersHandler) HeadersHandler(w http.ResponseWriter, r *http.Request) {
-	httpCode, err := h.checkCustomHeaders(r)
+	err := h.checkCustomHeaders(r)
 	if err != nil {
 		h.logger.Errorf(err.Error())
-		w.WriteHeader(httpCode)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	w.WriteHeader(httpCode)
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *headersHandler) HeadersHandlerSpec(w http.ResponseWriter, r *http.Request) {
-	httpCode, err := h.checkCustomHeaders(r)
+	err := h.checkCustomHeaders(r)
 	if err != nil {
 		h.logger.Errorf(err.Error())
-		w.WriteHeader(httpCode)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	w.WriteHeader(httpCode)
+
 	http.ServeFile(w, r, "spec.json")
 }
 
-func (h *headersHandler) checkCustomHeaders(r *http.Request) (httpCode int, err error) {
+func (h *headersHandler) checkCustomHeaders(r *http.Request) error {
 	vars := mux.Vars(r)
 	expectedHeader := vars["header"]
 	expectedHeaderValue := vars["value"]
@@ -50,8 +51,8 @@ func (h *headersHandler) checkCustomHeaders(r *http.Request) (httpCode int, err 
 	headerValue := r.Header.Get(expectedHeader)
 
 	if expectedHeaderValue != headerValue {
-		return http.StatusBadRequest, errors.New("Invalid header value provided")
+		return errors.New("Invalid header value provided")
 	}
 
-	return http.StatusOK, nil
+	return nil
 }

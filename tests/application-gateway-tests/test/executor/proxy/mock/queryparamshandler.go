@@ -16,32 +16,32 @@ type queryParamsHandler struct {
 
 func NewQueryParamsHandler() *queryParamsHandler {
 	return &queryParamsHandler{
-		logger: log.WithField("Handler", "Headers"),
+		logger: log.WithField("Handler", "QueryParams"),
 	}
 }
 
 func (qph *queryParamsHandler) QueryParamsHandler(w http.ResponseWriter, r *http.Request) {
-	httpCode, err := qph.checkQueryParams(r)
+	err := qph.checkQueryParams(r)
 	if err != nil {
 		qph.logger.Errorf(err.Error())
-		w.WriteHeader(httpCode)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	w.WriteHeader(httpCode)
+	w.WriteHeader(http.StatusOK)
 }
 
 func (qph *queryParamsHandler) QueryParamsHandlerSpec(w http.ResponseWriter, r *http.Request) {
-	httpCode, err := qph.checkQueryParams(r)
+	err := qph.checkQueryParams(r)
 	if err != nil {
 		qph.logger.Errorf(err.Error())
-		w.WriteHeader(httpCode)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	w.WriteHeader(httpCode)
+
 	http.ServeFile(w, r, "spec.json")
 }
 
-func (qph *queryParamsHandler) checkQueryParams(r *http.Request) (httpCode int, err error) {
+func (qph *queryParamsHandler) checkQueryParams(r *http.Request) error {
 	vars := mux.Vars(r)
 	expectedParam := vars["param"]
 	expectedParamValue := vars["value"]
@@ -50,9 +50,8 @@ func (qph *queryParamsHandler) checkQueryParams(r *http.Request) (httpCode int, 
 	paramValue := r.URL.Query().Get(expectedParam)
 
 	if expectedParamValue != paramValue {
-
-		return http.StatusBadRequest, errors.New("Invalid query parameter value provided")
+		return errors.New("Invalid query parameter value provided")
 	}
 
-	return http.StatusOK, nil
+	return nil
 }
