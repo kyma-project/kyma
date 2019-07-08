@@ -27,7 +27,7 @@ const (
 )
 
 var (
-	credentials = &model.Credentials{
+	credentials = &model.CredentialsWithCSRF{
 		Oauth: &model.Oauth{
 			ClientID:     "clientID",
 			ClientSecret: "clientSecret",

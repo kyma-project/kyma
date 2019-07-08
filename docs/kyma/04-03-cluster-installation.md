@@ -58,6 +58,8 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 - [wget](https://www.gnu.org/software/wget/)
 
+>**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). You create these machines when you complete the **Prepare the GKE cluster** step.
+
 ## Choose the release to install
 
 1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to install.
@@ -187,6 +189,8 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 - [Docker Hub](https://hub.docker.com/) account
 - [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
+>**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general#dv3-series-1). You create these machines when you complete the **Prepare the AKS cluster** step.
+
 
 ## Choose the release to install
 
@@ -220,8 +224,8 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
     az aks create \
       --resource-group $RS_GROUP \
       --name $CLUSTER_NAME \
-      --node-vm-size "Standard_DS2_v2" \
-      --kubernetes-version 1.10.9 \
+      --node-vm-size "Standard_D4_v3" \
+      --kubernetes-version 1.12 \
       --enable-addons "monitoring,http_application_routing" \
       --generate-ssh-keys
     ```

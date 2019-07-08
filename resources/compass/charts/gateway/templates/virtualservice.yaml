@@ -28,6 +28,7 @@ spec:
         allowHeaders:
           - "authorization"
           - "content-type"
+          - "tenant"
         allowMethods:
           - "GET"
           - "POST"

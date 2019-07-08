@@ -32,13 +32,13 @@ global:
     path: eu.gcr.io/kyma-project
   helm_broker:
     dir: develop/
-    version: e844d536
+    version: "82505335"
   alpine_net:
     dir: develop/
     version: 149967d0
   add_ons_ui:
     dir: ""
-    version: 23b3d5a1
+    version: a181964f
   istio:
     gateway:
       name: kyma-gateway

@@ -8,6 +8,7 @@ ADD . $SRC_DIR
 ADD client.bin /go/bin/client.bin
 ADD gateway.bin /go/bin/gateway.bin
 ADD env-tester.bin /go/bin/env-tester.bin
+COPY ./licenses/ /app/licenses
 
 WORKDIR $SRC_DIR
 

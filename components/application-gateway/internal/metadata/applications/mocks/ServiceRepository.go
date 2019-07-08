@@ -2,7 +2,7 @@
 
 package mocks
 
-import apperrors "github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
+import apperrors "github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 import applications "github.com/kyma-project/kyma/components/application-gateway/internal/metadata/applications"
 import mock "github.com/stretchr/testify/mock"
 

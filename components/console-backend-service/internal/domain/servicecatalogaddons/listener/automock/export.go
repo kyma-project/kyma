@@ -4,6 +4,9 @@ func NewGQLBindingUsageConverter() *gqlBindingUsageConverter {
 	return new(gqlBindingUsageConverter)
 }
 
-func NewGQLAddonsConfigurationConverter() *gqlAddonsConfigurationConverter {
-	return new(gqlAddonsConfigurationConverter)
+func NewGQLClusterAddonsConfigurationConverter() *gqlClusterAddonsConfigurationConverter {
+	return new(gqlClusterAddonsConfigurationConverter)
+}
+func NewGQLConfigMapAddonsConfigurationConverter() *gqlConfigMapAddonsConfigurationConverter {
+	return new(gqlConfigMapAddonsConfigurationConverter)
 }

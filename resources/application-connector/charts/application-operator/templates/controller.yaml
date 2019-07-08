@@ -35,7 +35,7 @@ spec:
         - "--applicationGatewayImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway.dir }}application-gateway:{{ .Values.global.application_gateway.version }}"
         - "--applicationGatewayTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway_tests.dir }}application-gateway-tests:{{ .Values.global.application_gateway_tests.version }}"
         - "--eventServiceImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service.dir }}event-service:{{ .Values.global.event_service.version }}"
-        - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.gateway_tests.dir }}gateway-tests:{{ .Values.global.gateway_tests.version }}"
+        - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service_integration_tests.dir }}event-service-integration-tests:{{ .Values.global.event_service_integration_tests.version }}"
         - "--applicationConnectivityValidatorImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_connectivity_validator.dir }}application-connectivity-validator:{{ .Values.global.application_connectivity_validator.version }}"
         - "--syncPeriod={{ .Values.controller.args.syncPeriod }}"
         - "--installationTimeout={{ .Values.controller.args.installationTimeout }}"

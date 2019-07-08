@@ -1,8 +1,10 @@
 package specification
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/download"
@@ -33,12 +35,15 @@ type specService struct {
 	downloadClient    download.Client
 }
 
-func NewSpecService(assetStoreService assetstore.Service, specRequestTimeout int) Service {
+func NewSpecService(assetStoreService assetstore.Service, specRequestTimeout int, insecureSpecDownload bool) Service {
 	return &specService{
 		assetStoreService: assetStoreService,
 		downloadClient: download.NewClient(&http.Client{
 			Timeout: time.Duration(specRequestTimeout) * time.Second,
-		}),
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSpecDownload},
+			},
+		}, authorization.NewStrategyFactory(authorization.FactoryConfiguration{OAuthClientTimeout: specRequestTimeout})),
 	}
 }
 
@@ -127,13 +132,44 @@ func toApiSpecType(api *model.API) docstopic.ApiType {
 	return docstopic.OpenApiType
 }
 
+func toSpecAuthorizationCredentials(api *model.API) *authorization.Credentials {
+	if api.SpecificationCredentials != nil {
+		basicCredentials := api.SpecificationCredentials.Basic
+
+		if api.SpecificationCredentials.Basic != nil {
+			return &authorization.Credentials{
+				BasicAuth: &authorization.BasicAuth{
+					Username: basicCredentials.Username,
+					Password: basicCredentials.Password,
+				},
+			}
+		}
+
+		if api.SpecificationCredentials.Oauth != nil {
+			oauth := api.SpecificationCredentials.Oauth
+
+			return &authorization.Credentials{
+				OAuth: &authorization.OAuth{
+					ClientID:     oauth.ClientID,
+					ClientSecret: oauth.ClientSecret,
+					URL:          oauth.URL,
+				},
+			}
+		}
+	}
+
+	return nil
+}
+
 func (svc *specService) fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
 	specUrl, apperr := determineSpecUrl(api)
 	if apperr != nil {
 		return nil, apperr
 	}
 
-	return svc.downloadClient.Fetch(specUrl)
+	specificationCredentials := toSpecAuthorizationCredentials(api)
+
+	return svc.downloadClient.Fetch(specUrl, specificationCredentials, api.SpecificationRequestParameters)
 }
 
 func determineSpecUrl(api *model.API) (string, apperrors.AppError) {

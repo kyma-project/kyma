@@ -14,7 +14,7 @@ import (
 type ServiceBrokerConfig struct {
 	Name      string `envconfig:"default=ns-helm-broker"`
 	Namespace string `envconfig:"default=default"`
-	URL       string `envconfig:"default=http://helm-broker.kyma-system.svc.cluster.local"`
+	URL       string `envconfig:"default=http://helm-broker.kyma-system.svc.cluster.local/cluster"`
 
 	ServiceClassExternalName string   `envconfig:"default=testing"`
 	ServicePlanExternalNames []string `envconfig:"default=full,minimal"`

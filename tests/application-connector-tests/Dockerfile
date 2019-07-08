@@ -13,5 +13,6 @@ LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-connector-tests/scripts/entrypoint.sh .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-connector-tests/applicationaccess.test .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-connector-tests/licenses ./licenses
 
 ENTRYPOINT ./entrypoint.sh

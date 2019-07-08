@@ -14,6 +14,7 @@ LABEL source = git@github.com:kyma-project/kyma.git
 RUN mkdir -p /root/.kube && touch /root/.kube/config
 
 COPY --from=builder /restore.test /restore.test
+COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/licenses /licenses
 
 COPY entrypoint.sh /entrypoint.sh
 

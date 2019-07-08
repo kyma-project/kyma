@@ -144,12 +144,8 @@ func (s *ApiStatus) IsTargetServiceOccupied() bool {
 
 func (s *ApiStatus) SetInProgress() {
 	s.ValidationStatus = kymaMeta.InProgress
-	s.AuthenticationStatus = kymaMeta.GatewayResourceStatus{
-		Code: kymaMeta.InProgress,
-	}
-	s.VirtualServiceStatus = kymaMeta.GatewayResourceStatus{
-		Code: kymaMeta.InProgress,
-	}
+	s.AuthenticationStatus.Code = kymaMeta.InProgress
+	s.VirtualServiceStatus.Code = kymaMeta.InProgress
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -159,4 +155,22 @@ type ApiList struct {
 	k8sMeta.ListMeta `json:"metadata,omitempty"`
 
 	Items []Api `json:"items"`
+}
+
+func (s ApiSpec) String() string {
+	disableIstioAuthPolicyMTLS := "<nil>"
+	authenticationEnabled := "<nil>"
+	authentication := "<nil slice>"
+
+	if s.DisableIstioAuthPolicyMTLS != nil {
+		disableIstioAuthPolicyMTLS = fmt.Sprintf("&%t", *s.DisableIstioAuthPolicyMTLS)
+	}
+	if s.AuthenticationEnabled != nil {
+		authenticationEnabled = fmt.Sprintf("&%t", *s.AuthenticationEnabled)
+	}
+	if s.Authentication != nil {
+		authentication = fmt.Sprintf("%+v", s.Authentication)
+	}
+
+	return fmt.Sprintf("{Service:%+v Hostname:%s DisableIstioAuthPolicyMTLS:%s AuthenticationEnabled:%s Authentication:%+v}", s.Service, s.Hostname, disableIstioAuthPolicyMTLS, authenticationEnabled, authentication)
 }

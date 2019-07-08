@@ -127,19 +127,8 @@ func (srv *Server) createHandler() http.Handler {
 		fmt.Fprint(w, "OK")
 	}).Methods("GET")
 
-	// sync operations
-	rtr.HandleFunc("/v2/catalog", srv.catalogAction).Methods("GET")
-	rtr.HandleFunc("/v2/service_instances/{instance_id}/last_operation", srv.getServiceInstanceLastOperationAction).Methods("GET")
-	rtr.HandleFunc("/v2/service_instances/{instance_id}/service_bindings/{binding_id}", srv.bindAction).Methods("PUT")
-	rtr.HandleFunc("/v2/service_instances/{instance_id}/service_bindings/{binding_id}", srv.unBindAction).Methods("DELETE")
-
-	// async operations
-	rtr.Path("/v2/service_instances/{instance_id}").Methods(http.MethodPut).Handler(
-		negroni.New(&RequireAsyncMiddleware{}, negroni.WrapFunc(srv.provisionAction)),
-	)
-	rtr.Path("/v2/service_instances/{instance_id}").Methods(http.MethodDelete).Handler(
-		negroni.New(&RequireAsyncMiddleware{}, negroni.WrapFunc(srv.deprovisionAction)),
-	)
+	srv.handleRouter(rtr.PathPrefix("/cluster").Subrouter())
+	srv.handleRouter(rtr.PathPrefix("/ns/{namespace}").Subrouter())
 
 	logMiddleware := negronilogrus.NewMiddlewareFromLogger(srv.logger.Logger, "")
 	logMiddleware.After = func(in *logrus.Entry, rw negroni.ResponseWriter, latency time.Duration, s string) *logrus.Entry {
@@ -154,6 +143,29 @@ func (srv *Server) createHandler() http.Handler {
 	n.Use(&OSBContextMiddleware{})
 	n.UseHandler(rtr)
 	return n
+}
+
+func (srv *Server) handleRouter(router *mux.Router) {
+	osbContextMiddleware := &OSBContextMiddleware{}
+	reqAsyncMiddleware := &RequireAsyncMiddleware{}
+
+	// sync operations
+	router.Path("/v2/catalog").Methods(http.MethodGet).
+		Handler(negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.catalogAction)))
+	router.Path("/v2/service_instances/{instance_id}/last_operation").Methods(http.MethodGet).
+		Handler(negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.getServiceInstanceLastOperationAction)))
+	router.Path("/v2/service_instances/{instance_id}/service_bindings/{binding_id}").Methods(http.MethodPut).
+		Handler(negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.bindAction)))
+	router.Path("/v2/service_instances/{instance_id}/service_bindings/{binding_id}").Methods(http.MethodDelete).
+		Handler(negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.unBindAction)))
+
+	// async operations
+	router.Path("/v2/service_instances/{instance_id}").Methods(http.MethodPut).Handler(
+		negroni.New(osbContextMiddleware, reqAsyncMiddleware, negroni.WrapFunc(srv.provisionAction)),
+	)
+	router.Path("/v2/service_instances/{instance_id}").Methods(http.MethodDelete).Handler(
+		negroni.New(osbContextMiddleware, reqAsyncMiddleware, negroni.WrapFunc(srv.deprovisionAction)),
+	)
 }
 
 func (srv *Server) catalogAction(w http.ResponseWriter, r *http.Request) {

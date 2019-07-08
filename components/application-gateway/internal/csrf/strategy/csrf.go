@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	log "github.com/sirupsen/logrus"
 )
 

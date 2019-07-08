@@ -6,6 +6,7 @@ ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/integration/dex
 ADD . $SRC_DIR
 
 WORKDIR $SRC_DIR
+COPY ./licenses/ ./licenses
 
 RUN go test -c ./dex
 

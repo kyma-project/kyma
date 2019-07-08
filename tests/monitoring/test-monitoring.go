@@ -83,13 +83,9 @@ func main() {
 }
 
 func testGrafanaIsReady(url string) {
-	respBody, statusCode := doGet(url)
-	expectedContent := "<title>Grafana</title>"
-	if statusCode != 200 {
-		log.Fatalf("Test grafana: Expected HTTP response code 200 but got %v", statusCode)
-	}
-	if !strings.Contains(respBody, expectedContent) {
-		log.Fatalf("Test grafana: Expected content in response: %s but got %s", expectedContent, respBody)
+	_, statusCode := doGet(url)
+	if statusCode != 302 {
+		log.Fatalf("Test grafana: Expected HTTP response code 302 but got %v", statusCode)
 	}
 	log.Printf("Test grafana UI: Success")
 }
@@ -252,7 +248,10 @@ func doGet(url string) (string, int) {
 	if err != nil {
 		log.Fatal("NewRequest: ", err)
 	}
-	client := &http.Client{}
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}}
 
 	resp, err := client.Do(req)
 	if err != nil {
