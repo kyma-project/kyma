@@ -164,6 +164,7 @@ This is an example of the `api` section of the request body for an API with a sp
 ```
     "api": {
         "targetUrl": "https://sampleapi.targeturl/v1",
+        "specificationUrl": "https://sampleapi.spec/v1",
         "specificationCredentials": {
             "basic": {
                 "username": "{USERNAME}",
@@ -186,6 +187,7 @@ This is an example of the `api` section of the request body for an API secured w
 ```
     "api": {
         "targetUrl": "https://sampleapi.targeturl/v1",
+        "specificationUrl": "https://sampleapi.spec/v1",
         "specificationCredentials": {
             "oauth": {
                 "url": "https://sampleapi.targeturl/authorizationserver/oauth/token",
@@ -203,6 +205,7 @@ To register an API with a specification URL that requires to specify custom head
 ```
     "api": {
         "targetUrl": "https://sampleapi.targeturl/v1",
+        "specificationUrl": "https://sampleapi.spec/v1",
         "specificationRequestParameters": {
             "headers": {
                 "custom-header": ["foo"]
