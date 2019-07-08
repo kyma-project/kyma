@@ -380,7 +380,7 @@ components:
         clientSecret:
           type: 'string'
       required:
-        url
+      - url
       - clientId
       - clientSecret
     Basic:
