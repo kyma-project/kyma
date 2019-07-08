@@ -32,12 +32,13 @@ import (
 )
 
 const (
-	corsAllowOriginHeader  = "Access-Control-Allow-Origin"
-	corsAllowMethodsHeader = "Access-Control-Allow-Methods"
-	corsAllowHeadersHeader = "Access-Control-Allow-Headers"
+	corsAllowOriginHeader      = "Access-Control-Allow-Origin"
+	corsAllowMethodsHeader     = "Access-Control-Allow-Methods"
+	corsAllowHeadersHeader     = "Access-Control-Allow-Headers"
+	corsAllowCredentialsHeader = "Access-Control-Allow-Credentials"
 )
 
-var corsHeaders = []string{corsAllowOriginHeader, corsAllowMethodsHeader, corsAllowHeadersHeader}
+var corsHeaders = []string{corsAllowOriginHeader, corsAllowMethodsHeader, corsAllowHeadersHeader, corsAllowCredentialsHeader}
 
 type config struct {
 	insecureListenAddress string
