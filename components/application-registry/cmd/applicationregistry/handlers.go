@@ -62,17 +62,14 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 
 	specificationService := NewSpecificationService(dynamicClient, opt)
 
-	applicationServiceRepository, apperror := newApplicationRepository(k8sConfig)
+	applicationManager, apperror := newApplicationManager(k8sConfig)
 	if apperror != nil {
 		return nil, apperror
 	}
+
+	applicationServiceRepository := applications.NewServiceRepository(applicationManager)
 
 	istioService, apperror := newIstioService(k8sConfig, opt.namespace)
-	if apperror != nil {
-		return nil, apperror
-	}
-
-	applicationManager, apperror := newApplicationManager(k8sConfig)
 	if apperror != nil {
 		return nil, apperror
 	}
@@ -110,15 +107,6 @@ func NewSpecificationService(dynamicClient dynamic.Interface, opt *options) spec
 	assetStoreService := assetstore.NewService(docsTopicRepository, uploadClient, opt.insecureAssetDownload, opt.assetstoreRequestTimeout)
 
 	return specification.NewSpecService(assetStoreService, opt.specRequestTimeout, opt.insecureSpecDownload)
-}
-
-func newApplicationRepository(config *restclient.Config) (applications.ServiceRepository, apperrors.AppError) {
-	applicationManager, err := newApplicationManager(config)
-	if err != nil {
-		return nil, err
-	}
-
-	return applications.NewServiceRepository(applicationManager), nil
 }
 
 func newApplicationManager(config *restclient.Config) (v1alpha12.ApplicationInterface, apperrors.AppError) {

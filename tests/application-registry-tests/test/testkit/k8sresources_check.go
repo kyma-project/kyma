@@ -11,6 +11,11 @@ import (
 	v1core "k8s.io/api/core/v1"
 )
 
+const (
+	requestParametersHeadersKey         = "headers"
+	requestParametersQueryParametersKey = "queryParameters"
+)
+
 type Labels map[string]string
 
 type ServiceData struct {
@@ -76,11 +81,6 @@ func CheckK8sCertificateGenSecret(t *testing.T, secret *v1core.Secret, name stri
 
 func CheckK8sParamsSecret(t *testing.T, secret *v1core.Secret, name string, labels Labels, headerKey, headerValue, queryParameterKey, queryParameterValue string) {
 	require.Equal(t, name, secret.Name)
-
-	const (
-		requestParametersHeadersKey         = "headers"
-		requestParametersQueryParametersKey = "queryParameters"
-	)
 
 	secretData := secret.Data
 	var requestParameters RequestParameters
