@@ -5,7 +5,7 @@ metadata:
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
     "helm.sh/hook": "pre-install"
-     "helm.sh/hook-weight": "-4"
+    "helm.sh/hook-weight": "-4"
   labels:
     job: pre-upgrade-knative-serving-crds
 ---
@@ -235,7 +235,7 @@ metadata:
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
     "helm.sh/hook": "pre-install"
-     "helm.sh/hook-weight": "-3"
+    "helm.sh/hook-weight": "-3"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
