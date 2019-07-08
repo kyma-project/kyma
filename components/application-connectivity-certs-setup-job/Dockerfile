@@ -11,5 +11,6 @@ FROM scratch
 LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-connectivity-certs-setup-job/appconnectivitycertssetupjob .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-connectivity-certs-setup-job/licenses ./licenses
 
 CMD ["/appconnectivitycertssetupjob"]
