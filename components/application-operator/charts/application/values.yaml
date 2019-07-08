@@ -14,14 +14,13 @@ service:
   externalapi:
     port: *externalAPIPort
 
-
 applicationConnectivityValidator:
   image:
     pullPolicy: IfNotPresent
   args:
     proxyPort: 8081
     appRegistryHost: application-registry-external-api:8081
-
+    externalAPIPort: 8080
 
 istio:
   gateway:
