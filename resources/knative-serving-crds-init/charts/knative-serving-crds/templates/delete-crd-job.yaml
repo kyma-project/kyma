@@ -4,8 +4,6 @@ metadata:
   name: pre-upgrade-knative-serving-crds
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "-5"
   labels:
     job: pre-upgrade-knative-serving-crds
 ---
@@ -13,26 +11,53 @@ apiVersion: v1
 data:
   pre-upgrade.sh: |
     #!/usr/bin/env bash
-    set -eu
     echo "*** Pre upgrade job starts ***"
-    kubectl delete crd \
-      services.serving.knative.dev  \
-      routes.serving.knative.dev  \
-      revisions.serving.knative.dev  \
-      configurations.serving.knative.dev  \
-      clusteringresses.networking.internal.knative.dev  \
-      podautoscalers.autoscaling.internal.knative.dev \
-      images.caching.internal.knative.dev
+    kubectl delete crd services.serving.knative.dev  || echo "services CRD not present"
+    kubectl delete crd routes.serving.knative.dev   || echo "routes CRD not present"
+    kubectl delete crd revisions.serving.knative.dev  || echo "revisions CRD not present"
+    kubectl delete crd configurations.serving.knative.dev  || echo "configurations CRD not present"
+    kubectl delete crd clusteringresses.networking.internal.knative.dev  || echo "clusteringress CRD not present"
+    kubectl delete crd podautoscalers.autoscaling.internal.knative.dev  || echo "podautoscalers CRD not present"
+    kubectl delete crd images.caching.internal.knative.dev  || echo "images CRD not present"
     echo "*** Pre upgrade job executed ***"
 kind: ConfigMap
 metadata:
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "-5"
   labels:
     job: pre-upgrade-knative-serving-crds
   name: pre-upgrade-knative-serving-crds
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    networking.knative.dev/certificate-provider: cert-manager
+    serving.knative.dev/controller: "true"
+    serving.knative.dev/release: "v0.7.1"
+  name: pre-upgrade-knative-serving-crds-cr
+rules:
+- apiGroups: ["serving.knative.dev"]
+  resources: ["services"]
+  verbs: ["*"]
+- apiGroups: ["serving.knative.dev"]
+  resources: ["routes"]
+  verbs: ["*"]
+- apiGroups: ["serving.knative.dev"]
+  resources: ["revisions"]
+  verbs: ["*"]
+- apiGroups: ["serving.knative.dev"]
+  resources: ["configurations"]
+  verbs: ["*"]
+- apiGroups: ["networking.internal.knative.dev"]
+  resources: ["clusteringresses"]
+  verbs: ["*"]
+- apiGroups: ["autoscaling.internal.knative.dev"]
+  resources: ["podautoscalers"]
+  verbs: ["*"]
+- apiGroups: ["caching.internal.knative.dev"]
+  resources: ["images"]
+  verbs: ["*"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -40,12 +65,10 @@ metadata:
   name: pre-upgrade-knative-serving-crds
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "-4"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: kyma-admin
+  name: pre-upgrade-knative-serving-crds-cr
 subjects:
 - kind: ServiceAccount
   name: pre-upgrade-knative-serving-crds
@@ -56,7 +79,6 @@ kind: Job
 metadata:
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "-3"
   labels:
     job: pre-upgrade-knative-serving-crds
