@@ -96,14 +96,7 @@ func makeSecret(name, serviceID, application string, appUID types.UID, data stra
 				k8sconsts.LabelApplication: application,
 				k8sconsts.LabelServiceId:   serviceID,
 			},
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-					Kind:       "Application",
-					Name:       application,
-					UID:        appUID,
-				},
-			},
+			OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication(application, appUID),
 		},
 		Data: data,
 	}

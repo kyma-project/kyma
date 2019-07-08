@@ -181,14 +181,7 @@ func mockService(application, serviceId, serviceName string, targetPort int32) *
 				k8sconsts.LabelApplication: application,
 				k8sconsts.LabelServiceId:   serviceId,
 			},
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-					Kind:       "Application",
-					Name:       application,
-					UID:        applicationUID,
-				},
-			},
+			OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication(application, applicationUID),
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: map[string]string{

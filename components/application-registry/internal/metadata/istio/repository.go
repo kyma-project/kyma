@@ -178,14 +178,7 @@ func (repo *repository) makeDenierObject(application string, appUID types.UID, s
 				k8sconsts.LabelApplication: application,
 				k8sconsts.LabelServiceId:   serviceId,
 			},
-			OwnerReferences: []v1.OwnerReference{
-				{
-					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-					Kind:       "Application",
-					Name:       application,
-					UID:        appUID,
-				},
-			},
+			OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication(application, appUID),
 		},
 		Spec: &v1alpha2.DenierSpec{
 			Status: &v1alpha2.DenierStatus{
@@ -204,14 +197,7 @@ func (repo *repository) makeCheckNothingObject(application string, appUID types.
 				k8sconsts.LabelApplication: application,
 				k8sconsts.LabelServiceId:   serviceId,
 			},
-			OwnerReferences: []v1.OwnerReference{
-				{
-					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-					Kind:       "Application",
-					Name:       application,
-					UID:        appUID,
-				},
-			},
+			OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication(application, appUID),
 		},
 	}
 }
@@ -228,14 +214,7 @@ func (repo *repository) makeRuleObject(application string, appUID types.UID, ser
 				k8sconsts.LabelApplication: application,
 				k8sconsts.LabelServiceId:   serviceId,
 			},
-			OwnerReferences: []v1.OwnerReference{
-				{
-					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-					Kind:       "Application",
-					Name:       application,
-					UID:        appUID,
-				},
-			},
+			OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication(application, appUID),
 		},
 		Spec: &v1alpha2.RuleSpec{
 			Match: match,

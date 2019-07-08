@@ -17,7 +17,17 @@ import (
 const (
 	crPropagationWaitTime              = 10
 	deleteApplicationResourcesWaitTime = 10
+)
 
+var (
+	requestParameters = testkit.RequestParameters{
+		Headers: &map[string][]string{
+			"headerKey": []string{"headerValue"},
+		},
+		QueryParameters: &map[string][]string{
+			"queryParameterKey": []string{"queryParameterValue"},
+		},
+	}
 )
 
 func TestK8sResources(t *testing.T) {
@@ -30,6 +40,8 @@ func TestK8sResources(t *testing.T) {
 
 	dummyApp, err := k8sResourcesClient.CreateDummyApplication("appk8srestest0", v1.GetOptions{}, true)
 	require.NoError(t, err)
+
+	defer k8sResourcesClient.DeleteApplication(dummyApp.Name, &v1.DeleteOptions{})
 
 	metadataServiceClient := testkit.NewMetadataServiceClient(config.MetadataServiceUrl + "/" + dummyApp.Name + "/v1/metadata/services")
 
@@ -50,14 +62,7 @@ func TestK8sResources(t *testing.T) {
 						CSRFInfo:     csrf,
 					},
 				},
-				RequestParameters: &testkit.RequestParameters{
-					Headers: &map[string][]string{
-						"headerKey": []string{"headerValue"},
-					},
-					QueryParameters: &map[string][]string{
-						"queryParameterKey": []string{"queryParameterValue"},
-					},
-				},
+				RequestParameters: &requestParameters,
 				Spec: testkit.ApiRawSpec,
 			},
 		}
@@ -173,14 +178,7 @@ func TestK8sResources(t *testing.T) {
 						CSRFInfo: csrf,
 					},
 				},
-				RequestParameters: &testkit.RequestParameters{
-					Headers: &map[string][]string{
-						"headerKey": []string{"headerValue"},
-					},
-					QueryParameters: &map[string][]string{
-						"queryParameterKey": []string{"queryParameterValue"},
-					},
-				},
+				RequestParameters: &requestParameters,
 				Spec: testkit.ApiRawSpec,
 			},
 		}
@@ -295,14 +293,7 @@ func TestK8sResources(t *testing.T) {
 						CSRFInfo:   csrf,
 					},
 				},
-				RequestParameters: &testkit.RequestParameters{
-					Headers: &map[string][]string{
-						"headerKey": []string{"headerValue"},
-					},
-					QueryParameters: &map[string][]string{
-						"queryParameterKey": []string{"queryParameterValue"},
-					},
-				},
+				RequestParameters: &requestParameters,
 				Spec: testkit.ApiRawSpec,
 			},
 		}
@@ -1187,12 +1178,25 @@ func TestK8sResources(t *testing.T) {
 
 	err = k8sResourcesClient.DeleteApplication(dummyApp.Name, &v1.DeleteOptions{})
 	require.NoError(t, err)
+}
+
+func TestK8sApplicationDeletion(t *testing.T) {
+
+	config, err := testkit.ReadConfig()
+	require.NoError(t, err)
+
+	k8sResourcesClient, err := testkit.NewK8sInClusterResourcesClient(config.Namespace)
+	require.NoError(t, err)
+
+	dummyApp, err := k8sResourcesClient.CreateDummyApplication("appk8srestest1", v1.GetOptions{}, true)
+	require.NoError(t, err)
+
+	defer k8sResourcesClient.DeleteApplication(dummyApp.Name, &v1.DeleteOptions{})
+
+	metadataServiceClient := testkit.NewMetadataServiceClient(config.MetadataServiceUrl + "/" + dummyApp.Name + "/v1/metadata/services")
 
 	t.Run("when deleting application", func(t *testing.T) {
 		//given
-		dummyApp, err := k8sResourcesClient.CreateDummyApplication("appk8srestest1", v1.GetOptions{}, true)
-		require.NoError(t, err)
-
 		initialServiceDefinition := testkit.ServiceDetails{
 			Name:        "test service",
 			Provider:    "service provider",
@@ -1206,14 +1210,7 @@ func TestK8sResources(t *testing.T) {
 						ClientSecret: "clientSecret",
 					},
 				},
-				RequestParameters: &testkit.RequestParameters{
-					Headers: &map[string][]string{
-						"headerKey": []string{"headerValue"},
-					},
-					QueryParameters: &map[string][]string{
-						"queryParameterKey": []string{"queryParameterValue"},
-					},
-				},
+				RequestParameters: &requestParameters,
 				Spec: testkit.ApiRawSpec,
 			},
 			Events: &testkit.Events{
@@ -1226,6 +1223,8 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
+		defer metadataServiceClient.DeleteService(t, serviceId)
+
 		resourceName := "app-" + dummyApp.Name + "-" + serviceId
 		paramsSecretName := testkit.CreateParamsSecretName(resourceName)
 

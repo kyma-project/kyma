@@ -30,14 +30,7 @@ func TestRepository_Create(t *testing.T) {
 					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
-				OwnerReferences: []v1.OwnerReference{
-					{
-						APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-						Kind:       "Application",
-						Name:       "app",
-						UID:        applicationUID,
-					},
-				},
+				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
 			Spec: &v1alpha2.DenierSpec{
 				Status: &v1alpha2.DenierStatus{
@@ -85,14 +78,7 @@ func TestRepository_Create(t *testing.T) {
 					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
-				OwnerReferences: []v1.OwnerReference{
-					{
-						APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-						Kind:       "Application",
-						Name:       "app",
-						UID:        applicationUID,
-					},
-				},
+				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
 		}
 
@@ -134,14 +120,7 @@ func TestRepository_Create(t *testing.T) {
 					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
-				OwnerReferences: []v1.OwnerReference{
-					{
-						APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-						Kind:       "Application",
-						Name:       "app",
-						UID:        applicationUID,
-					},
-				},
+				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
 			Spec: &v1alpha2.RuleSpec{
 				Match: `(destination.service.host == "app-test-uuid1.testns.svc.cluster.local") && (source.labels["app-test-uuid1"] != "true")`,
@@ -193,14 +172,7 @@ func TestRepository_Upsert(t *testing.T) {
 					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
-				OwnerReferences: []v1.OwnerReference{
-					{
-						APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-						Kind:       "Application",
-						Name:       "app",
-						UID:        applicationUID,
-					},
-				},
+				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
 			Spec: &v1alpha2.DenierSpec{
 				Status: &v1alpha2.DenierStatus{
@@ -264,14 +236,7 @@ func TestRepository_Upsert(t *testing.T) {
 					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
-				OwnerReferences: []v1.OwnerReference{
-					{
-						APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-						Kind:       "Application",
-						Name:       "app",
-						UID:        applicationUID,
-					},
-				},
+				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
 		}
 
@@ -329,14 +294,7 @@ func TestRepository_Upsert(t *testing.T) {
 					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
-				OwnerReferences: []v1.OwnerReference{
-					{
-						APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-						Kind:       "Application",
-						Name:       "app",
-						UID:        applicationUID,
-					},
-				},
+				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
 			Spec: &v1alpha2.RuleSpec{
 				Match: `(destination.service.host == "app-test-uuid1.testns.svc.cluster.local") && (source.labels["app-test-uuid1"] != "true")`,

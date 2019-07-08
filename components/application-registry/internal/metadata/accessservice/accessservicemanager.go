@@ -81,14 +81,7 @@ func (m *accessServiceManager) create(application string, appUID types.UID, serv
 				k8sconsts.LabelApplication: application,
 				k8sconsts.LabelServiceId:   serviceId,
 			},
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-					Kind:       "Application",
-					Name:       application,
-					UID:        appUID,
-				},
-			},
+			OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication(application, appUID),
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: map[string]string{k8sconsts.LabelApp: appName},
