@@ -38,24 +38,24 @@ type oauthResponse struct {
 }
 
 func (oh *oauthHandler) OAuthSpecHandler(w http.ResponseWriter, r *http.Request) {
-	statusCode, e := oh.checkOauth(r)
-	if e != nil {
-		oh.logger.Error(e.Error())
-		w.WriteHeader(statusCode)
+	err := oh.checkOauth(r)
+	if err != nil {
+		oh.logger.Error(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	w.WriteHeader(statusCode)
+
 	http.ServeFile(w, r, "spec.json")
 }
 
-func (oh *oauthHandler) checkOauth(r *http.Request) (int, error) {
+func (oh *oauthHandler) checkOauth(r *http.Request) error {
 	headerAuthorization := r.Header.Get(AuthorizationHeader)
 	oAuthToken := strings.TrimPrefix(headerAuthorization, "Bearer ")
 
 	if oAuthToken != bearerToken {
-		return http.StatusBadRequest, errors.New("Invalid token provided")
+		return errors.New("Invalid token provided")
 	}
-	return http.StatusOK, nil
+	return nil
 }
 
 func (oh *oauthHandler) OAuthTokenHandler(w http.ResponseWriter, r *http.Request) {
