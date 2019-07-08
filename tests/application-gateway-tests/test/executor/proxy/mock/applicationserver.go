@@ -22,12 +22,19 @@ func NewAppMockServer(port int32) *AppMockServer {
 
 	basicAuth := NewBasicAuthHandler()
 	router.Path("/auth/basic/{username}/{password}").HandlerFunc(basicAuth.BasicAuth)
+	router.Path("/spec/auth/basic/{username}/{password}").HandlerFunc(basicAuth.BasicAuthSpec)
+
+	oAuth := NewOauthHandler()
+	router.Path("/auth/oauth/token/{clientid}/{clientsecret}").HandlerFunc(oAuth.OAuthTokenHandler)
+	router.Path("/spec/auth/oauth").HandlerFunc(oAuth.OAuthSpecHandler)
 
 	headers := NewHeadersHandler()
-	router.Path("/headers/{header}/{value}").HandlerFunc(headers.RequestHandler)
+	router.Path("/headers/{header}/{value}").HandlerFunc(headers.HeadersHandler)
+	router.Path("/spec/headers/{header}/{value}").HandlerFunc(headers.HeadersHandlerSpec)
 
 	queryParams := NewQueryParamsHandler()
-	router.Path("/queryparams/{param}/{value}").HandlerFunc(queryParams.RequestHandler)
+	router.Path("/queryparams/{param}/{value}").HandlerFunc(queryParams.QueryParamsHandler)
+	router.Path("/spec/queryparams/{param}/{value}").HandlerFunc(queryParams.QueryParamsHandlerSpec)
 
 	router.NotFoundHandler = NewErrorHandler(404, "Requested resource could not be found.")
 	router.MethodNotAllowedHandler = NewErrorHandler(405, "Method not allowed.")
