@@ -21,3 +21,7 @@ func NewAddonsRepository(url string) *RepositoryController {
 func (ar *RepositoryController) Failed() {
 	ar.Repository.Status = addonsv1alpha1.RepositoryStatusFailed
 }
+
+func (ar *RepositoryController) IsFailed() bool {
+	return ar.Repository.Status == addonsv1alpha1.RepositoryStatusFailed
+}

@@ -109,11 +109,11 @@ func TestSyncerWithTwoLoaders(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 			// given
 			providerA := &automock.Provider{}
-			providerA.On("ProvideBundles").Return(tc.loadedA, nil)
+			providerA.On("ProvideBundles", urlA).Return(tc.loadedA, nil)
 			defer providerA.AssertExpectations(t)
 
 			providerB := &automock.Provider{}
-			providerB.On("ProvideBundles").Return(tc.loadedB, nil)
+			providerB.On("ProvideBundles", urlB).Return(tc.loadedB, nil)
 			defer providerB.AssertExpectations(t)
 
 			docsTopicsSvc := &automock.DocsTopicsService{}
@@ -152,7 +152,7 @@ func TestSyncer_CreateDocs(t *testing.T) {
 	expectedBundle := fixBundleWithDocsURL(bundleID, "Name-A", urlA, docsURL)
 
 	provider := &automock.Provider{}
-	provider.On("ProvideBundles").Return([]bundle.CompleteBundle{fetchedBundle}, nil)
+	provider.On("ProvideBundles", urlA).Return([]bundle.CompleteBundle{fetchedBundle}, nil)
 	defer provider.AssertExpectations(t)
 
 	docsTopicsSvc := &automock.DocsTopicsService{}

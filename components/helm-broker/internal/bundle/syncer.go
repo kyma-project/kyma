@@ -183,7 +183,7 @@ func (s *Syncer) upsertBundle(bundleWithCharts CompleteBundle) error {
 }
 
 func (s *Syncer) generateBundlesChange(repo Provider, url string) bundlesChange {
-	items, err := repo.ProvideBundles()
+	items, err := repo.ProvideBundles(url)
 	if err != nil {
 		s.log.Errorf("Could not load bundles from the repository %s, error: %s", url, err.Error())
 		return newBundlesChangeForError(err)

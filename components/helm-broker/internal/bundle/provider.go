@@ -14,7 +14,7 @@ import (
 
 // Provider contains method which provides CompleteBundle items.
 type Provider interface {
-	ProvideBundles() ([]CompleteBundle, error)
+	ProvideBundles(URL string) ([]CompleteBundle, error)
 }
 
 // CompleteBundleProvider provides CompleteBundles from a repository.
@@ -46,8 +46,8 @@ func NewProvider(repo repository, bundleLoader bundleLoader, log logrus.FieldLog
 
 // ProvideBundles returns a list of bundles with his charts as CompleteBundle instances.
 // In case of bundle processing errors, the won't be stopped - next bundle is processed.
-func (l *CompleteBundleProvider) ProvideBundles() ([]CompleteBundle, error) {
-	idx, err := l.GetIndex()
+func (l *CompleteBundleProvider) ProvideBundles(URL string) ([]CompleteBundle, error) {
+	idx, err := l.GetIndex(URL)
 	if err != nil {
 		return nil, err
 	}
@@ -90,8 +90,8 @@ func (l *CompleteBundleProvider) LoadCompleteBundle(entry EntryDTO) (CompleteBun
 }
 
 // GetIndex returns all entries from given repo index
-func (l *CompleteBundleProvider) GetIndex() (*IndexDTO, error) {
-	idxReader, err := l.repo.IndexReader()
+func (l *CompleteBundleProvider) GetIndex(URL string) (*IndexDTO, error) {
+	idxReader, err := l.repo.IndexReader(URL)
 	if err != nil {
 		return nil, errors.Wrap(err, "while getting index file")
 	}

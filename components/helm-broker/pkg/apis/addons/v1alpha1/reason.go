@@ -3,7 +3,7 @@ package v1alpha1
 type AddonStatusReason string
 
 const (
-	AddonLoadingError                       AddonStatusReason = "LoadingError"
+	AddonLoadingError                        AddonStatusReason = "LoadingError"
 	AddonFetchingError                       AddonStatusReason = "FetchingError"
 	AddonConflictInSpecifiedRepositories     AddonStatusReason = "ConflictInSpecifiedRepositories"
 	AddonConflictWithAlreadyRegisteredAddons AddonStatusReason = "ConflictWithAlreadyRegisteredAddon"

@@ -7,14 +7,12 @@ import (
 )
 
 type RepositoryCollection struct {
-	repositoriesIdConflict bool
-	Repositories           []*RepositoryController
+	Repositories []*RepositoryController
 }
 
 func NewRepositoryCollection() *RepositoryCollection {
 	return &RepositoryCollection{
-		repositoriesIdConflict: false,
-		Repositories:           []*RepositoryController{},
+		Repositories: []*RepositoryController{},
 	}
 }
 
@@ -48,7 +46,13 @@ func (rc *RepositoryCollection) ReadyAddons() []*AddonController {
 }
 
 func (rc *RepositoryCollection) IsRepositoriesIdConflict() bool {
-	return rc.repositoriesIdConflict
+	for _, repository := range rc.Repositories {
+		if repository.IsFailed() {
+			return true
+		}
+	}
+
+	return false
 }
 
 type idConflictData struct {
@@ -61,7 +65,6 @@ func (rc *RepositoryCollection) ReviseBundleDuplicationInRepository() {
 
 	for _, addon := range rc.Addons() {
 		if data, ok := ids[addon.ID]; ok {
-			rc.repositoriesIdConflict = true
 			addon.ConflictInSpecifiedRepositories(fmt.Errorf("[url: %s, addons: %s]", data.repositoryUrl, data.addonsName))
 		} else {
 			ids[addon.ID] = idConflictData{

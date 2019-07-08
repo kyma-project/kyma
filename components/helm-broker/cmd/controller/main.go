@@ -5,8 +5,8 @@ import (
 	"os"
 
 	scCs "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis"
 	//hbConfig "github.com/kyma-project/kyma/components/helm-broker/internal/config"
@@ -77,13 +77,11 @@ func main() {
 	sbFacade := broker.NewBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrlCfg.Namespace, ctrlCfg.ServiceName)
 	csbFacade := broker.NewClusterBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrlCfg.Namespace, ctrlCfg.ServiceName)
 
-	// TODO: when it will be ready change to bunldeProvider from `github.com/kyma-project/kyma/components/helm-broker/internal/controller/bundle` package
-	//provider := bundle.NewProvider(ctrlBundle.NewHTTPClient(URL), bundle.NewLoader("/tmp"))
-	provider := bundle.NewBundleProvider(bundle.NewHTTPClient(), bundle.NewLoader("/tmp"))
+	bundleProvider := bundle.NewProvider(bundle.NewHTTPRepository(), bundle.NewLoader(ctrlCfg.TmpDir, log), log)
 
 	// Setup all Controllers
 	log.Info("Setting up controller")
-	acReconcile := controller.NewReconcileAddonsConfiguration(mgr, provider, sbFacade, sFact, ctrlCfg.DevelopMode)
+	acReconcile := controller.NewReconcileAddonsConfiguration(mgr, bundleProvider, sbFacade, sFact, ctrlCfg.DevelopMode)
 	acController := controller.NewAddonsConfigurationController(acReconcile)
 	err = acController.Start(mgr)
 	if err != nil {

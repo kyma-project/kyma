@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/repository"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
@@ -31,9 +31,8 @@ type brokerFacade interface {
 }
 
 type bundleProvider interface {
-	SetBundleURL(string)
-	GetIndex() (*bundle.BundleIndex, error)
-	ProvideBundle(bundle.BundleEntry) (bundle.CompleteBundle, error)
+	GetIndex(string) (*bundle.IndexDTO, error)
+	LoadCompleteBundle(bundle.EntryDTO) (bundle.CompleteBundle, error)
 }
 
 //
@@ -216,10 +215,9 @@ func (r *ReconcileAddonsConfiguration) addonsConfigurationList(addon *addonsv1al
 
 func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*repository.AddonController, error) {
 	addons := []*repository.AddonController{}
-	r.provider.SetBundleURL(URL)
 
 	// fetch repository index
-	index, err := r.provider.GetIndex()
+	index, err := r.provider.GetIndex(URL)
 	if err != nil {
 		return addons, exerr.Wrap(err, "while reading repository index")
 	}
@@ -227,15 +225,15 @@ func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*repository.A
 	// for each repository entry create addon
 	for _, entries := range index.Entries {
 		for _, entry := range entries {
-			addon := repository.NewAddon(entry.Name, entry.Version, URL)
+			addon := repository.NewAddon(string(entry.Name), string(entry.Version), URL)
 
-			completeBundle, err := r.provider.ProvideBundle(entry)
+			completeBundle, err := r.provider.LoadCompleteBundle(entry)
 			if bundle.IsFetchingError(err) {
 				addon.FetchingError(err)
 				continue
 			}
-			if bundle.IsValidationError(err) {
-				addon.ValidationError(err)
+			if bundle.IsLoadingError(err) {
+				addon.LoadingError(err)
 				continue
 			}
 

@@ -36,9 +36,9 @@ func (a *AddonController) FetchingError(err error) {
 	a.setAddonFailedInfo(v1alpha1.AddonFetchingError, err.Error())
 }
 
-func (a *AddonController) ValidationError(err error) {
+func (a *AddonController) LoadingError(err error) {
 	a.failed()
-	a.setAddonFailedInfo(v1alpha1.AddonValidationError, err.Error())
+	a.setAddonFailedInfo(v1alpha1.AddonLoadingError, err.Error())
 }
 
 func (a *AddonController) ConflictInSpecifiedRepositories(err error) {

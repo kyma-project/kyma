@@ -4,14 +4,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
-	scCs "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
@@ -22,19 +18,11 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
 	"github.com/sirupsen/logrus"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
-)
-
-const (
-	mapLabelKey   = "helm-broker-repo"
-	mapLabelValue = "true"
 )
 
 func main() {
@@ -57,15 +45,6 @@ func main() {
 	sFact, err := storage.NewFactory(&storageConfig)
 	fatalOnError(err)
 
-	// ServiceCatalog
-	scClientSet, err := scCs.NewForConfig(k8sConfig)
-	fatalOnError(err)
-	csbInterface := scClientSet.ServicecatalogV1beta1()
-
-	// broker sync
-	stopCh := make(chan struct{})
-	bLoader := bundle.NewLoader(cfg.TmpDir, log)
-
 	sch, err := v1alpha1.SchemeBuilder.Build()
 	fatalOnError(err)
 
@@ -74,18 +53,10 @@ func main() {
 
 	docsProvider := bundle.NewDocsProvider(dynamicClient)
 	bundleSyncer := bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), docsProvider, log)
-	brokerSyncer := broker.NewServiceBrokerSyncer(csbInterface, log)
-	cfgMapInformer := v1.NewFilteredConfigMapInformer(clientset, cfg.Namespace, 10*time.Minute, cache.Indexers{}, func(options *metav1.ListOptions) {
-		options.LabelSelector = fmt.Sprintf("%s=%s", mapLabelKey, mapLabelValue)
-	})
-
-	repositoryWatcher := bundle.NewRepositoryController(bundleSyncer, bLoader, brokerSyncer, cfg.ClusterServiceBrokerName, cfgMapInformer, log, cfg.DevelopMode)
-	go repositoryWatcher.Run(stopCh)
-	go cfgMapInformer.Run(stopCh)
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
-	cancelOnChanInterrupt(ctx, stopCh, cancelFunc)
+	cancelOnInterrupt(ctx, cancelFunc)
 
 	helmClient := helm.NewClient(cfg.Helm, log)
 
@@ -94,52 +65,9 @@ func main() {
 	cancelOnInterrupt(ctx, cancelFunc)
 
 	startedCh := make(chan struct{})
-	go func() {
-		// wait for server HTTP to be ready
-		<-startedCh
-		log.Infof("Waiting for service %s to be ready", cfg.HelmBrokerURL)
-
-		// Running Helm Broker does not mean it is visible to the service catalog
-		// This is the reason of the check cfg.HelmBrokerURL
-		waitForHelmBrokerIsReady(cfg.HelmBrokerURL, 15*time.Second, log)
-		log.Infof("%s service ready", cfg.HelmBrokerURL)
-
-		err := brokerSyncer.Sync(cfg.ClusterServiceBrokerName)
-		if err != nil {
-			log.Errorf("Could not synchronize Service Catalog with the broker: %s", err)
-		}
-	}()
 
 	err = srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port), startedCh)
 	fatalOnError(err)
-}
-
-func waitForHelmBrokerIsReady(url string, timeout time.Duration, log logrus.FieldLogger) {
-	timeoutCh := time.After(timeout)
-	for {
-		r, err := http.Get(fmt.Sprintf("%s/statusz", url))
-		if err == nil {
-			// no need to read the response
-			ioutil.ReadAll(r.Body)
-			r.Body.Close()
-		}
-		if err == nil && r.StatusCode == http.StatusOK {
-			break
-		}
-
-		select {
-		case <-timeoutCh:
-			log.Errorf("Waiting for service %s to be ready timeout %s exceeded.", url, timeout.String())
-			if err != nil {
-				log.Errorf("Last call error: %s", err.Error())
-			} else {
-				log.Errorf("Last call response status: %s", r.StatusCode)
-			}
-			return
-		default:
-			time.Sleep(time.Second)
-		}
-	}
 }
 
 func fatalOnError(err error) {
@@ -156,21 +84,6 @@ func cancelOnInterrupt(ctx context.Context, cancel context.CancelFunc) {
 		select {
 		case <-ctx.Done():
 		case <-c:
-			cancel()
-		}
-	}()
-}
-
-// cancelOnInterrupt closes given channel and also calls cancel func when os.Interrupt or SIGTERM is received
-func cancelOnChanInterrupt(ctx context.Context, ch chan<- struct{}, cancel context.CancelFunc) {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		select {
-		case <-ctx.Done():
-			close(ch)
-		case <-c:
-			close(ch)
 			cancel()
 		}
 	}()

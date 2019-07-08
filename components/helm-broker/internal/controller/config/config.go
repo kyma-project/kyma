@@ -24,6 +24,7 @@ import (
 // Example of valid tag: `valid:"alphanum,required"`
 // Combining many tags: tags have to be separated by WHITESPACE: `json:"port" default:"8080" valid:"required"`
 type Config struct {
+	TmpDir         string
 	Logger         logger.Config
 	KubeconfigPath string `envconfig:"optional"`
 	Namespace      string
