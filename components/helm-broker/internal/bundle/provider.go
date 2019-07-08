@@ -47,32 +47,50 @@ func NewProvider(repo repository, bundleLoader bundleLoader, log logrus.FieldLog
 // ProvideBundles returns a list of bundles with his charts as CompleteBundle instances.
 // In case of bundle processing errors, the won't be stopped - next bundle is processed.
 func (l *CompleteBundleProvider) ProvideBundles() ([]CompleteBundle, error) {
-	idx, err := l.getIndex()
+	idx, err := l.GetIndex()
 	if err != nil {
 		return nil, err
 	}
 
 	var items []CompleteBundle
-	for entryName, versions := range idx.Entries {
+	for _, versions := range idx.Entries {
 		for _, v := range versions {
-			bundle, charts, err := l.loadBundleAndCharts(entryName, v.Version)
-			if err != nil {
-				l.log.Warnf("Could not load bundle: %s", err.Error())
+			completeBundle, err := l.LoadCompleteBundle(v)
+			switch {
+			case err == nil:
+			case IsFetchingError(err):
+				l.log.Warnf("detected fetching problem: %v", err)
+				continue
+			case IsLoadingError(err):
+				l.log.Warnf("detected loading problem: %v", err)
+				continue
+			default:
+				l.log.Warnf("detected internal problem: %v", err)
 				continue
 			}
-			bundle.RepositoryURL = l.repo.URLForBundle(entryName, v.Version)
-
-			items = append(items, CompleteBundle{
-				Bundle: bundle,
-				Charts: charts,
-			})
+			items = append(items, completeBundle)
 		}
 	}
 	l.log.Debug("Loading bundles completed.")
 	return items, nil
 }
 
-func (l *CompleteBundleProvider) getIndex() (*indexDTO, error) {
+// LoadCompleteBundle returns a bundle with his charts as CompleteBundle instances.
+func (l *CompleteBundleProvider) LoadCompleteBundle(entry EntryDTO) (CompleteBundle, error) {
+	bundle, charts, err := l.loadBundleAndCharts(entry.Name, entry.Version)
+	if err != nil {
+		return CompleteBundle{}, errors.Wrapf(err, "while loading bundle %v", entry.Name)
+	}
+	bundle.RepositoryURL = l.repo.URLForBundle(entry.Name, entry.Version)
+
+	return CompleteBundle{
+		Bundle: bundle,
+		Charts: charts,
+	}, nil
+}
+
+// GetIndex returns all entries from given repo index
+func (l *CompleteBundleProvider) GetIndex() (*IndexDTO, error) {
 	idxReader, err := l.repo.IndexReader()
 	if err != nil {
 		return nil, errors.Wrap(err, "while getting index file")
@@ -83,7 +101,7 @@ func (l *CompleteBundleProvider) getIndex() (*indexDTO, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "while reading all index file")
 	}
-	idx := indexDTO{}
+	idx := IndexDTO{}
 	if err = yaml.Unmarshal(bytes, &idx); err != nil {
 		return nil, errors.Wrap(err, "while unmarshaling index file")
 	}
@@ -93,14 +111,13 @@ func (l *CompleteBundleProvider) getIndex() (*indexDTO, error) {
 func (l *CompleteBundleProvider) loadBundleAndCharts(entryName Name, version Version) (*internal.Bundle, []*chart.Chart, error) {
 	bundleReader, err := l.repo.BundleReader(entryName, version)
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "while reading bundle archive for name [%s] and version [%v]", entryName, version)
+		return nil, nil, NewFetchingError(errors.Wrapf(err, "while reading bundle archive for name [%s] and version [%v]", entryName, version))
 	}
 	defer bundleReader.Close()
 
 	bundle, charts, err := l.bundleLoader.Load(bundleReader)
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "while loading bundle and charts for bundle [%s] and version [%s]", entryName, version)
+		return nil, nil, NewLoadingError(errors.Wrapf(err, "while loading bundle and charts for bundle [%s] and version [%s]", entryName, version))
 	}
-
 	return bundle, charts, nil
 }
