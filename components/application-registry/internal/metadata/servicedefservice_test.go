@@ -677,6 +677,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		// then
 		require.Error(t, err)
+		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		assert.Empty(t, serviceID)
 
 		uuidGenerator.AssertExpectations(t)
@@ -1466,6 +1467,80 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
 		specService.AssertExpectations(t)
+	})
+
+	t.Run("should return an error when failed to get application UID", func(t *testing.T) {
+		// given
+		serviceAPI := &model.API{
+			TargetUrl: "http://target.com",
+			Credentials: &model.CredentialsWithCSRF{
+				Oauth: &model.Oauth{
+					URL:          "http://oauth.com/token",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
+				},
+			},
+			Spec: []byte("{\"api\":\"spec\"}"),
+		}
+
+		serviceDefinition := model.ServiceDefinition{
+			ID:          "uuid-1",
+			Name:        "Some service",
+			Description: "Some cool service",
+			Provider:    "Service Provider",
+			Identifier:  "Identifier",
+			Api:         serviceAPI,
+			Events: &model.Events{
+				Spec: []byte("events spec"),
+			},
+			Documentation: []byte("documentation"),
+		}
+
+		applicationServiceAPI := &applications.ServiceAPI{
+			TargetUrl:   "http://target.com",
+			AccessLabel: "access-label",
+			GatewayURL:  "gateway-url",
+
+			Credentials: applications.Credentials{
+				SecretName: "secret-name",
+			},
+		}
+
+		applicationService := applications.Service{
+			ID:                  "uuid-1",
+			Identifier:          "Identifier",
+			DisplayName:         "Some service",
+			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
+			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "app"},
+			Tags:                make([]string, 0),
+			API:                 applicationServiceAPI,
+			Events:              true,
+		}
+
+		serviceAPIService := new(serviceapimocks.Service)
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("Read", "app", applicationServiceAPI).Return(serviceAPI, nil)
+
+		serviceRepository := new(applicationsmocks.ServiceRepository)
+		serviceRepository.On("Get", "app", "uuid-1").Return(applicationService, nil)
+		serviceRepository.On("Update", "app", applicationService).Return(nil)
+
+		specService := new(specmocks.Service)
+		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
+		applicationGetter := new(mocks.ApplicationGetter)
+		applicationGetter.On("Get", "app", v1.GetOptions{}).Return(nil, fmt.Errorf("Getting Application failed"))
+
+		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService, applicationGetter)
+
+		// when
+		_, err := service.Update("app", &serviceDefinition)
+
+		// then
+		require.Error(t, err)
+		assert.Equal(t, apperrors.CodeInternal, err.Code())
 	})
 }
 
