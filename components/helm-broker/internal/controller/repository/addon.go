@@ -9,6 +9,7 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
+// AddonController is a wraper for Addon element with extra fields like URL, bunlde or charts
 type AddonController struct {
 	ID     string
 	URL    string
@@ -17,6 +18,7 @@ type AddonController struct {
 	Charts []*chart.Chart
 }
 
+// NewAddon returns pointer to new AddonController based on name, version and url
 func NewAddon(n, v, u string) *AddonController {
 	return &AddonController{
 		URL: u,
@@ -28,6 +30,7 @@ func NewAddon(n, v, u string) *AddonController {
 	}
 }
 
+// IsReady informs addon is in ready status
 func (a *AddonController) IsReady() bool {
 	return a.Addon.Status == v1alpha1.AddonStatusReady
 }
@@ -37,26 +40,31 @@ func (a *AddonController) IsComplete() bool {
 	return a.ID != ""
 }
 
+// FetchingError sets addons as failed, sets addon reason as FetchingError
 func (a *AddonController) FetchingError(err error) {
 	a.failed()
 	a.setAddonFailedInfo(v1alpha1.AddonFetchingError, a.limitMessage(err.Error()))
 }
 
+// LoadingError sets addons as failed, sets addon reason as LoadingError
 func (a *AddonController) LoadingError(err error) {
 	a.failed()
 	a.setAddonFailedInfo(v1alpha1.AddonLoadingError, err.Error())
 }
 
+// ConflictInSpecifiedRepositories sets addons as failed, sets addon reason as ConflictInSpecifiedRepositories
 func (a *AddonController) ConflictInSpecifiedRepositories(err error) {
 	a.failed()
 	a.setAddonFailedInfo(v1alpha1.AddonConflictInSpecifiedRepositories, err.Error())
 }
 
+// ConflictWithAlreadyRegisteredAddons sets addons as failed, sets addon reason as ConflictWithAlreadyRegisteredAddons
 func (a *AddonController) ConflictWithAlreadyRegisteredAddons(err error) {
 	a.failed()
 	a.setAddonFailedInfo(v1alpha1.AddonConflictWithAlreadyRegisteredAddons, err.Error())
 }
 
+// RegisteringError sets addons as failed, sets addon reason as RegisteringError
 func (a *AddonController) RegisteringError(err error) {
 	a.failed()
 	a.setAddonFailedInfo(v1alpha1.AddonRegisteringError, err.Error())

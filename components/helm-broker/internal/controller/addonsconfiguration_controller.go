@@ -129,6 +129,7 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 		return reconcile.Result{}, err
 	}
 
+	// if `Status.ObservedGeneration` is equal 0 it means AddonsConfiguration is processed first time (create process)
 	if foundAddon.Status.ObservedGeneration == 0 {
 		err = r.addAddonsProcess(instance)
 		if err != nil {

@@ -6,16 +6,19 @@ import (
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 )
 
+// RepositoryCollection keeps and process collection of RepositoryController
 type RepositoryCollection struct {
 	Repositories []*RepositoryController
 }
 
+// NewRepositoryCollection returns pointer to RepositoryCollection
 func NewRepositoryCollection() *RepositoryCollection {
 	return &RepositoryCollection{
 		Repositories: []*RepositoryController{},
 	}
 }
 
+// AddRepository adds new RepositoryController to RepositoryCollection
 func (rc *RepositoryCollection) AddRepository(repo *RepositoryController) {
 	rc.Repositories = append(rc.Repositories, repo)
 }
@@ -45,6 +48,7 @@ func (rc *RepositoryCollection) completeAddons() []*AddonController {
 	return addons
 }
 
+// ReadyAddons returns all addons from all repositories which ready status
 func (rc *RepositoryCollection) ReadyAddons() []*AddonController {
 	addons := []*AddonController{}
 
@@ -58,6 +62,7 @@ func (rc *RepositoryCollection) ReadyAddons() []*AddonController {
 	return addons
 }
 
+// IsRepositoriesIdConflict informs if any of repositories in collection is in failed status
 func (rc *RepositoryCollection) IsRepositoriesIdConflict() bool {
 	for _, repository := range rc.Repositories {
 		if repository.IsFailed() {
@@ -73,6 +78,8 @@ type idConflictData struct {
 	addonsName    string
 }
 
+// ReviseBundleDuplicationInRepository checks all completed addons (addons without fetch/load error)
+// they have no ID conflict with other addons in other or the same repository
 func (rc *RepositoryCollection) ReviseBundleDuplicationInRepository() {
 	ids := make(map[string]idConflictData)
 
@@ -88,6 +95,8 @@ func (rc *RepositoryCollection) ReviseBundleDuplicationInRepository() {
 	}
 }
 
+// ReviseBundleDuplicationInStorage checks all completed addons (addons without fetch/load error)
+// they have no name:version conflict with other AddonConfiguration
 func (rc *RepositoryCollection) ReviseBundleDuplicationInStorage(acList *addonsv1alpha1.AddonsConfigurationList) {
 	for _, addon := range rc.completeAddons() {
 		rc.findExistingAddon(addon, acList)
