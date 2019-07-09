@@ -59,7 +59,7 @@ func LoadControllerConfig(verbose bool) (*ControllerConfig, error) {
 		}
 	}
 
-	envConf := Config{}
+	envConf := ControllerConfig{}
 	if err := envconfig.InitWithOptions(&envConf, envconfig.Options{Prefix: "APP", AllOptional: true, AllowUnexported: true}); err != nil {
 		return nil, errors.Wrap(err, "while reading configuration from environment variables")
 	}
