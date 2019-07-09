@@ -20,7 +20,7 @@ func (rc *RepositoryCollection) AddRepository(repo *RepositoryController) {
 	rc.Repositories = append(rc.Repositories, repo)
 }
 
-func (rc *RepositoryCollection) Addons() []*AddonController {
+func (rc *RepositoryCollection) addons() []*AddonController {
 	addons := []*AddonController{}
 
 	for _, repo := range rc.Repositories {
@@ -32,10 +32,23 @@ func (rc *RepositoryCollection) Addons() []*AddonController {
 	return addons
 }
 
+func (rc *RepositoryCollection) completeAddons() []*AddonController {
+	addons := []*AddonController{}
+
+	for _, addon := range rc.addons() {
+		if !addon.IsComplete() {
+			continue
+		}
+		addons = append(addons, addon)
+	}
+
+	return addons
+}
+
 func (rc *RepositoryCollection) ReadyAddons() []*AddonController {
 	addons := []*AddonController{}
 
-	for _, addon := range rc.Addons() {
+	for _, addon := range rc.addons() {
 		if !addon.IsReady() {
 			continue
 		}
@@ -63,7 +76,7 @@ type idConflictData struct {
 func (rc *RepositoryCollection) ReviseBundleDuplicationInRepository() {
 	ids := make(map[string]idConflictData)
 
-	for _, addon := range rc.Addons() {
+	for _, addon := range rc.completeAddons() {
 		if data, ok := ids[addon.ID]; ok {
 			addon.ConflictInSpecifiedRepositories(fmt.Errorf("[url: %s, addons: %s]", data.repositoryUrl, data.addonsName))
 		} else {
@@ -76,7 +89,7 @@ func (rc *RepositoryCollection) ReviseBundleDuplicationInRepository() {
 }
 
 func (rc *RepositoryCollection) ReviseBundleDuplicationInStorage(acList *addonsv1alpha1.AddonsConfigurationList) {
-	for _, addon := range rc.Addons() {
+	for _, addon := range rc.completeAddons() {
 		rc.findExistingAddon(addon, acList)
 	}
 }

@@ -283,10 +283,14 @@ func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*repository.A
 			completeBundle, err := r.provider.LoadCompleteBundle(entry)
 			if bundle.IsFetchingError(err) {
 				addon.FetchingError(err)
+				addons = append(addons, addon)
+				logrus.Errorf("while fetching addon: %s", err)
 				continue
 			}
 			if bundle.IsLoadingError(err) {
 				addon.LoadingError(err)
+				addons = append(addons, addon)
+				logrus.Errorf("while loading addon: %s", err)
 				continue
 			}
 
