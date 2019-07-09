@@ -54,19 +54,9 @@ const (
 )
 
 var (
-	// 	subscriberNamespace           *string
-	// 	subscriberEventEndpointURL    *string
-	// 	subscriberResultsEndpointURL  *string
-	// 	subscriberStatusEndpointURL   *string
-	// 	subscriberShutdownEndpointURL *string
-	// 	subscriber3EventEndpointURL   *string
-	// 	subscriber3ResultsEndpointURL *string
-	// 	subscriber3StatusEndpointURL  *string
 	clientK8S *kubernetes.Clientset
 	eaClient  *eaClientSet.Clientset
 	subClient *subscriptionClientSet.Clientset
-	// 	publishEventEndpointURL       *string
-	// 	publishStatusEndpointURL      *string
 )
 
 //Unexportable struct, encapsulates subscriber resource parameters
