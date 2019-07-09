@@ -172,7 +172,7 @@ This is an example of the `api` section of the request body for an API with a sp
             },
         }  
 ```
-#### Register API with an OAuth-secured specification URL
+### Register an API with an OAuth-secured specification URL
 
 To register an API with a specification URL secured with OAuth, add a `specificationCredentials.oauth` object to the `api` section of the service registration request body. You must include these fields:
 
