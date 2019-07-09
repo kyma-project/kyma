@@ -8,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis"
+
 	//hbConfig "github.com/kyma-project/kyma/components/helm-broker/internal/config"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	ctrlCfg "github.com/kyma-project/kyma/components/helm-broker/internal/config"
@@ -75,15 +76,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	scClientSet, err := scCs.NewForConfig(mgr.GetConfig())
+	scClientSet, err := scCs.NewForConfig(cfg)
 	fatalOnError(err)
 
-	dynamicClient, err := client.New(mgr.GetConfig(), client.Options{Scheme: mgr.GetScheme()})
+	dynamicClient, err := client.New(cfg, client.Options{Scheme: mgr.GetScheme()})
 	fatalOnError(err)
 
 	docsProvider := bundle.NewDocsProvider(dynamicClient)
 	// TODO: change SC client to generic client
-	brokerSyncer := broker.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1(), ctrCfg.ClusterServiceBrokerName, log)
+	brokerSyncer := broker.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1(), scClientSet.ServicecatalogV1beta1(), ctrCfg.ClusterServiceBrokerName, log)
 	sbFacade := broker.NewBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName)
 	csbFacade := broker.NewClusterBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, ctrCfg.ClusterServiceBrokerName)
 

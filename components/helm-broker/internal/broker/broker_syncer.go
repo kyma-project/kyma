@@ -20,10 +20,11 @@ type serviceBrokerSync struct {
 }
 
 // NewServiceBrokerSyncer allows to sync the ServiceBroker.
-func NewServiceBrokerSyncer(clusterServiceBrokersGetter v1beta12.ClusterServiceBrokersGetter, clusterBrokerName string, log logrus.FieldLogger) *serviceBrokerSync {
+func NewServiceBrokerSyncer(clusterServiceBrokersGetter v1beta12.ClusterServiceBrokersGetter, serviceBrokerGetter v1beta12.ServiceBrokersGetter, clusterBrokerName string, log logrus.FieldLogger) *serviceBrokerSync {
 	return &serviceBrokerSync{
 		clusterServiceBrokersGetter: clusterServiceBrokersGetter,
 		clusterBrokerName:           clusterBrokerName,
+		serviceBrokerGetter:         serviceBrokerGetter,
 		log:                         log.WithField("service", "clusterservicebroker-syncer"),
 	}
 }
@@ -62,7 +63,7 @@ func (r *serviceBrokerSync) Sync() error {
 	return fmt.Errorf("could not sync cluster service broker (%s) after %d retries", r.clusterBrokerName, maxSyncRetries)
 }
 
-// SyncBroker syncing the helm-broker ns-broker in the given namespace
+// SyncServiceBroker syncing the helm-broker ns-broker in the given namespace
 func (r *serviceBrokerSync) SyncServiceBroker(namespace string) error {
 	brokerClient := r.serviceBrokerGetter.ServiceBrokers(namespace)
 
@@ -85,7 +86,7 @@ func (r *serviceBrokerSync) SyncServiceBroker(namespace string) error {
 	return fmt.Errorf("could not sync service broker (%s) after %d retries", NamespacedBrokerName, maxSyncRetries)
 }
 
-// Sync syncs the ServiceBrokers
+// SyncServiceBrokers syncs the ServiceBrokers
 func (r *serviceBrokerSync) SyncServiceBrokers() error {
 	labelSelector := fmt.Sprintf("%s=%s", BrokerLabelKey, BrokerLabelValue)
 	brokersList, err := r.serviceBrokerGetter.ServiceBrokers(v1.NamespaceAll).List(v1.ListOptions{

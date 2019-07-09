@@ -15,7 +15,7 @@ import (
 	"github.com/vrischmann/envconfig"
 )
 
-// Config provide helm broker configuration
+// ControllerConfig provide helm broker configuration
 // Supported tags:
 //	- json: 		github.com/ghodss/yaml
 //	- envconfig: 	github.com/vrischmann/envconfig
@@ -34,7 +34,7 @@ type ControllerConfig struct {
 	DevelopMode              bool
 }
 
-// Load method has following strategy:
+// LoadControllerConfig method has following strategy:
 // 1. Check env variable 'APP_CONFIG_FILE_NAME', if exists load configuration from specified file
 // 2. Read configuration from environment variables (will override configuration from file)
 // 3. Apply defaults

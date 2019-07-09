@@ -12,7 +12,7 @@ import (
 	exerr "github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/helm/pkg/proto/hapi/chart"
@@ -44,17 +44,17 @@ type brokerSyncer interface {
 	SyncServiceBroker(namespace string) error
 }
 
-//
+// AddonsConfigurationController holds a controller logic
 type AddonsConfigurationController struct {
 	reconciler reconcile.Reconciler
 }
 
-//
+// NewAddonsConfigurationController creates a controller with a given reconciler
 func NewAddonsConfigurationController(reconciler reconcile.Reconciler) *AddonsConfigurationController {
 	return &AddonsConfigurationController{reconciler: reconciler}
 }
 
-//
+// Start starts a controller
 func (acc *AddonsConfigurationController) Start(mgr manager.Manager) error {
 	// Create a new controller
 	c, err := controller.New("addonsconfiguration-controller", mgr, controller.Options{Reconciler: acc.reconciler})
@@ -90,7 +90,7 @@ type ReconcileAddonsConfiguration struct {
 	syncBroker bool
 }
 
-// newReconciler returns a new reconcile.Reconciler
+// NewReconcileAddonsConfiguration returns a new reconcile.Reconciler
 func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, brokerFacade brokerFacade, s storage.Factory, dev bool, docsTopicProvider docsProvider, brokerSyncer brokerSyncer) reconcile.Reconciler {
 	return &ReconcileAddonsConfiguration{
 		log:      logrus.WithField("controller", "addons-configuration"),
@@ -220,7 +220,7 @@ func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(namespace string) err
 	for _, addon := range addonsCfgs.Items {
 		if addon.Status.Phase != addonsv1alpha1.AddonsConfigurationReady {
 			// reprocess AddonConfig again if it was failed
-			addon.Spec.ReprocessRequest += 1
+			addon.Spec.ReprocessRequest++
 			if err := r.Client.Update(context.Background(), &addon); err != nil {
 				return exerr.Wrapf(err, "while incrementing a reprocess requests for AddonConfiguration %s/%s", addon.Name, addon.Namespace)
 			}

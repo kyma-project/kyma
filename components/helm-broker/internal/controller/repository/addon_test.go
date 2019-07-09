@@ -2,9 +2,10 @@ package repository
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestAddonController_IsReady(t *testing.T) {

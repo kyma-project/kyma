@@ -70,7 +70,7 @@ func (d *DocsProvider) EnsureClusterDocsTopicRemoved(id string) error {
 	return nil
 }
 
-// EnsureClusterDocsTopic creates ClusterDocsTopic for a given bundle or updates it in case it already exists
+// EnsureDocsTopic creates ClusterDocsTopic for a given bundle or updates it in case it already exists
 func (d *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle) error {
 	bundle.Docs[0].Template.Sources = d.defaultDocsSourcesURLs(bundle)
 	cdt := &v1alpha1.DocsTopic{
@@ -98,7 +98,7 @@ func (d *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle) error {
 	return nil
 }
 
-// EnsureClusterDocsTopicRemoved removes ClusterDocsTopic for a given bundle
+// EnsureDocsTopicRemoved removes ClusterDocsTopic for a given bundle
 func (d *DocsProvider) EnsureDocsTopicRemoved(id string) error {
 	cdt := &v1alpha1.DocsTopic{
 		ObjectMeta: v1.ObjectMeta{

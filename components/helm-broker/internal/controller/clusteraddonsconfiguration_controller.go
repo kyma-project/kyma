@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	exerr "github.com/pkg/errors"
@@ -31,17 +32,17 @@ type clusterBrokerSyncer interface {
 	Sync() error
 }
 
-//
+// ClusterAddonsConfigurationController holds controller logic
 type ClusterAddonsConfigurationController struct {
 	reconciler reconcile.Reconciler
 }
 
-//
+// NewClusterAddonsConfigurationController creates new controller with a given reconciler
 func NewClusterAddonsConfigurationController(reconciler reconcile.Reconciler) *ClusterAddonsConfigurationController {
 	return &ClusterAddonsConfigurationController{reconciler: reconciler}
 }
 
-//
+// Start starts a controller
 func (cacc *ClusterAddonsConfigurationController) Start(mgr manager.Manager) error {
 	// Create a new controller
 	c, err := controller.New("clusteraddonsconfiguration-controller", mgr, controller.Options{Reconciler: cacc.reconciler})
@@ -75,7 +76,7 @@ type ReconcileClusterAddonsConfiguration struct {
 	syncBroker bool
 }
 
-// newReconciler returns a new reconcile.Reconciler
+// NewReconcileClusterAddonsConfiguration returns a new reconcile.Reconciler
 func NewReconcileClusterAddonsConfiguration(mgr manager.Manager, clusterBrokerFacade clusterBrokerFacade, clusterDocsProvider clusterDocsProvider, clusterBrokerSyncer clusterBrokerSyncer) reconcile.Reconciler {
 	return &ReconcileClusterAddonsConfiguration{
 		log:    logrus.WithField("controller", "cluster-addons-configuration"),
@@ -134,8 +135,8 @@ func (r *ReconcileClusterAddonsConfiguration) deleteAddonsProcess(namespace stri
 	deleteBroker := true
 	for _, addon := range addonsCfgs.Items {
 		if addon.Status.Phase != addonsv1alpha1.AddonsConfigurationReady {
-			// reprocess AddonConfig again if it was failed
-			addon.Spec.ReprocessRequest += 1
+			// reprocess ClusterAddonConfig again if it was failed
+			addon.Spec.ReprocessRequest++
 			if err := r.Client.Update(context.Background(), &addon); err != nil {
 				return exerr.Wrapf(err, "while incrementing a reprocess requests for AddonConfiguration %s/%s", addon.Name, addon.Namespace)
 			}
