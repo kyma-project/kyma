@@ -20,4 +20,4 @@ This table lists the configurable parameters, their descriptions, and default va
 | **deployment.args.specRequestTimeout** | Specifies a time-out after which a request fetching specifications provided by the user fails to be sent. It is provided in seconds. | `5` |
 | **deployment.args.assetstoreRequestTimeout** | Specifies a time-out after which a request fetching specifications from the Asset Store fails to be sent. It is provided in seconds. | `5` |
 | **deployment.args.insecureAssetDownload** | Disables verifying certificates when downloading data from the Asset Store. | `true` | 
-| **deployment.args.insecureSpecDownload** | Disables verifying certificates when fetching api spec from specification URL | `true` |
+| **deployment.args.insecureSpecDownload** | Disables verifying certificates when fetching API specification from specification URL. | `true` |
