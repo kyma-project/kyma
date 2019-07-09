@@ -365,7 +365,7 @@
   version = "v0.1.36"
 
 [[projects]]
-  digest = "1:2dd5dda2c8deebd0155afad9e5aa3409440a1164839d4810a25439fb1e899e0c"
+  digest = "1:7c84dbe098180946652c15b6990fd9a9227301c0ca7ed029426d22e98412caf9"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -416,6 +416,17 @@
     "components/application-operator/pkg/client/listers/applicationconnector/v1alpha1",
     "components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
     "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
+    "components/helm-broker/pkg/apis/addons/v1alpha1",
+    "components/helm-broker/pkg/client/clientset/versioned",
+    "components/helm-broker/pkg/client/clientset/versioned/fake",
+    "components/helm-broker/pkg/client/clientset/versioned/scheme",
+    "components/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1",
+    "components/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1/fake",
+    "components/helm-broker/pkg/client/informers/externalversions",
+    "components/helm-broker/pkg/client/informers/externalversions/addons",
+    "components/helm-broker/pkg/client/informers/externalversions/addons/v1alpha1",
+    "components/helm-broker/pkg/client/informers/externalversions/internalinterfaces",
+    "components/helm-broker/pkg/client/listers/addons/v1alpha1",
     "components/idppreset/pkg/apis/authentication/v1alpha1",
     "components/idppreset/pkg/client/clientset/versioned",
     "components/idppreset/pkg/client/clientset/versioned/fake",
@@ -447,7 +458,7 @@
     "tools/failery",
   ]
   pruneopts = "NUT"
-  revision = "0ad464e54adb7986337508e82284a6e2f1ba12e5"
+  revision = "0291cf0cd19b7171d19ec2b4664bfa1f978032f8"
 
 [[projects]]
   branch = "master"
@@ -1214,6 +1225,11 @@
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
     "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
+    "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1",
+    "github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned/fake",
+    "github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1",
+    "github.com/kyma-project/kyma/components/helm-broker/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1",
     "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/fake",
@@ -1283,6 +1299,7 @@
     "k8s.io/client-go/tools/cache",
     "k8s.io/client-go/tools/clientcmd",
     "k8s.io/client-go/util/flowcontrol",
+    "k8s.io/client-go/util/retry",
     "k8s.io/code-generator/cmd/client-gen",
     "k8s.io/code-generator/cmd/conversion-gen",
     "k8s.io/code-generator/cmd/deepcopy-gen",

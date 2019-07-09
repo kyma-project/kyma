@@ -9,9 +9,9 @@ import (
 )
 
 type CertificateCredentials struct {
-	ClientKey  *rsa.PrivateKey
-	ClientCert *x509.Certificate
-	CACerts    []*x509.Certificate
+	ClientKey        *rsa.PrivateKey
+	ClientCert       *x509.Certificate
+	CertificateChain []*x509.Certificate
 }
 
 type EstablishedConnectionClientProvider interface {
@@ -29,10 +29,9 @@ func NewEstablishedConnectionClientProvider(csrProvider certificates.CSRProvider
 }
 
 func (cp *establishedConnectionClientProvider) CreateClient(credentials CertificateCredentials) EstablishedConnectionClient {
+	var rawCerts [][]byte
 
-	rawCerts := [][]byte{credentials.ClientCert.Raw}
-
-	for _, cert := range credentials.CACerts {
+	for _, cert := range credentials.CertificateChain {
 		rawCerts = append(rawCerts, cert.Raw)
 	}
 

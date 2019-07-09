@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
+
+	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools"
 
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/testkit/util"
 
@@ -15,8 +18,10 @@ import (
 )
 
 const (
-	urlFormat       = "%s/%s/v1/metadata/services"
-	deleteURLFormat = "%s/%s/v1/metadata/services/%s"
+	urlFormat          = "%s/%s/v1/metadata/services"
+	getDeleteURLFormat = "%s/%s/v1/metadata/services/%s"
+	specFetchInterval  = 3 * time.Second
+	specFetchTimeout   = 60 * time.Second
 )
 
 type AppRegistryClient struct {
@@ -61,6 +66,30 @@ func (arc *AppRegistryClient) CreateNotSecuredAPICustomQueryParams(t *testing.T,
 	return arc.createAPI(t, api)
 }
 
+func (arc *AppRegistryClient) CreateAPIWithBasicAuthSecuredSpec(t *testing.T, targetURL, specURL, username, password string) string {
+	api := arc.baseAPI(targetURL).WithAPISpecURL(specURL).WithBasicAuthSecuredSpec(username, password)
+
+	return arc.createAPI(t, api)
+}
+
+func (arc *AppRegistryClient) CreateAPIWithOAuthSecuredSpec(t *testing.T, targetURL, specURL, authURL, clientID, clientSecret string) string {
+	api := arc.baseAPI(targetURL).WithAPISpecURL(specURL).WithOAuthSecuredSpec(authURL, clientID, clientSecret)
+
+	return arc.createAPI(t, api)
+}
+
+func (arc *AppRegistryClient) CreateAPIWithCustomQueryParamsSpec(t *testing.T, targetURL, specURL string, queryParams map[string][]string) string {
+	api := arc.baseAPI(targetURL).WithAPISpecURL(specURL).WithCustomQueryParamsSpec(&queryParams)
+
+	return arc.createAPI(t, api)
+}
+
+func (arc *AppRegistryClient) CreateAPIWithCustomHeadersSpec(t *testing.T, targetURL, specURL string, headers map[string][]string) string {
+	api := arc.baseAPI(targetURL).WithAPISpecURL(specURL).WithCustomHeadersSpec(&headers)
+
+	return arc.createAPI(t, api)
+}
+
 func (arc *AppRegistryClient) baseAPI(targetURL string) *API {
 	return &API{
 		TargetUrl: targetURL,
@@ -98,8 +127,38 @@ func (arc *AppRegistryClient) createAPI(t *testing.T, api *API) string {
 	return idResponse.ID
 }
 
+func (arc *AppRegistryClient) GetApiSpecWithRetries(t *testing.T, serviceId string) (json.RawMessage, error) {
+	var response *http.Response
+	var serviceDetails ServiceDetails
+
+	url := fmt.Sprintf(getDeleteURLFormat, arc.appRegistryURL, arc.application, serviceId)
+
+	err := tools.WaitForFunction(specFetchInterval, specFetchTimeout, func() bool {
+		t.Logf("Fetching registered service at: %s", url)
+		var err error
+
+		response, err = arc.httpClient.Get(url)
+		require.NoError(t, err)
+		defer response.Body.Close()
+		util.RequireStatus(t, http.StatusOK, response)
+
+		err = json.NewDecoder(response.Body).Decode(&serviceDetails)
+		require.NoError(t, err)
+
+		if len(serviceDetails.Api.Spec) == 0 {
+			t.Logf("API spec length is 0, retrying in %d seconds", specFetchInterval)
+			return false
+		}
+
+		return true
+	})
+	require.NoError(t, err)
+
+	return serviceDetails.Api.Spec, nil
+}
+
 func (arc *AppRegistryClient) CleanupService(t *testing.T, serviceId string) {
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf(deleteURLFormat, arc.appRegistryURL, arc.application, serviceId), nil)
+	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf(getDeleteURLFormat, arc.appRegistryURL, arc.application, serviceId), nil)
 	require.NoError(t, err)
 
 	response, err := arc.httpClient.Do(req)

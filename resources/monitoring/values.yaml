@@ -3,8 +3,8 @@
 test:
   image:
     name: monitoring
-    dir: develop/tests/
-    version: 64feb986
+    dir: pr/tests/
+    version: PR-4785
 global:
   isLocalEnv: false
   serviceCatalogApiserver:

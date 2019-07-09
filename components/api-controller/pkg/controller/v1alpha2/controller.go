@@ -361,14 +361,19 @@ func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 
 	log.Infof("Updating: %s/%s ver: %s", oldApi.Namespace, oldApi.Name, oldApi.ResourceVersion)
 
+	// `authentication` is an optional field, so the cases when it is not set vs when it is set to empty slice should be treated as equal
+	if newApi.Spec.Authentication == nil {
+		newApi.Spec.Authentication = []kymaApi.AuthenticationRule{}
+	}
+	// in the second (automatic) update an oldApi object is equal to the newApi object from the previous update (not to the object saved after performing first update), that leads to problems with fields that change during update (slice set to nil vs empty)
+	if oldApi.Spec.Authentication == nil {
+		oldApi.Spec.Authentication = []kymaApi.AuthenticationRule{}
+	}
+
 	// if update is done (so it is not in progress; it is not a retry)
 	if newApi.ResourceVersion == oldApi.ResourceVersion || reflect.DeepEqual(newApi.Spec, oldApi.Spec) {
 		log.Info("Skipped: all changes has been already applied to the API (both specs are equal).")
 		return nil
-	}
-
-	if newApi.Spec.Authentication == nil {
-		newApi.Spec.Authentication = []kymaApi.AuthenticationRule{}
 	}
 
 	apiStatusHelper := c.apiStatusHelperFor(newApi)
@@ -555,6 +560,9 @@ func toAuthenticationDto(metaDto meta.Dto, api *kymaApi.Api) *authentication.Dto
 	// authentication disabled explicitly with authenticationEnabled
 	if api.Spec.AuthenticationEnabled != nil && !*api.Spec.AuthenticationEnabled {
 		return &authentication.Dto{
+			MetaDto:               metaDto,
+			ServiceName:           api.Spec.Service.Name,
+			Status:                api.Status.AuthenticationStatus,
 			AuthenticationEnabled: false,
 		}
 	}
@@ -562,6 +570,9 @@ func toAuthenticationDto(metaDto meta.Dto, api *kymaApi.Api) *authentication.Dto
 	// authentication disabled because authenticationEnabled flag is not provided and authentication rules are empty
 	if api.Spec.AuthenticationEnabled == nil && len(api.Spec.Authentication) == 0 {
 		return &authentication.Dto{
+			MetaDto:               metaDto,
+			ServiceName:           api.Spec.Service.Name,
+			Status:                api.Status.AuthenticationStatus,
 			AuthenticationEnabled: false,
 		}
 	}

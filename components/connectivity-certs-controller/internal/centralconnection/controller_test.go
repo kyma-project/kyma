@@ -180,9 +180,9 @@ func TestController_Reconcile(t *testing.T) {
 	}
 
 	certificateCredentials := connectorservice.CertificateCredentials{
-		ClientKey:  clientKey,
-		ClientCert: clientCert,
-		CACerts:    caCert,
+		ClientKey:        clientKey,
+		ClientCert:       clientCert,
+		CertificateChain: caCert,
 	}
 
 	t.Run("should check connection and renew certificate", func(t *testing.T) {
@@ -207,7 +207,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificates").Return(caCert, nil)
+		certProvider.On("GetCertificateChain").Return(caCert, nil)
 
 		mutualTLSClient := &connectorMocks.EstablishedConnectionClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
@@ -255,7 +255,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificates").Return(caCert, nil)
+		certProvider.On("GetCertificateChain").Return(caCert, nil)
 
 		mutualTLSClient := &connectorMocks.EstablishedConnectionClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
@@ -295,7 +295,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificates").Return(caCert, nil)
+		certProvider.On("GetCertificateChain").Return(caCert, nil)
 
 		mutualTLSClient := &connectorMocks.EstablishedConnectionClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
@@ -388,7 +388,7 @@ func TestController_Reconcile(t *testing.T) {
 		certPreserver := &certMocks.Preserver{}
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificates").Return(nil, errors.New("error"))
+		certProvider.On("GetCertificateChain").Return(nil, errors.New("error"))
 
 		mTLSClientProvider := &connectorMocks.EstablishedConnectionClientProvider{}
 
@@ -414,7 +414,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificates").Return(caCert, nil)
+		certProvider.On("GetCertificateChain").Return(caCert, nil)
 
 		mutualTLSClient := &connectorMocks.EstablishedConnectionClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).
@@ -445,7 +445,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificates").Return(caCert, nil)
+		certProvider.On("GetCertificateChain").Return(caCert, nil)
 
 		mutualTLSClient := &connectorMocks.EstablishedConnectionClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
@@ -477,7 +477,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificates").Return(caCert, nil)
+		certProvider.On("GetCertificateChain").Return(caCert, nil)
 
 		mutualTLSClient := &connectorMocks.EstablishedConnectionClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
@@ -513,7 +513,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificates").Return(caCert, nil)
+		certProvider.On("GetCertificateChain").Return(caCert, nil)
 
 		mutualTLSClient := &connectorMocks.EstablishedConnectionClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)

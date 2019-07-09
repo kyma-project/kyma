@@ -9,6 +9,6 @@ mtls:
 cors:
   allow_origin: "*"
   allow_methods: "GET,POST,PUT,DELETE" # no possibility to use "*"
-  allow_headers: "*"
+  allow_headers: "Authorization,Content-Type,*" # "*" is not yet supported by all browsers
 
 blacklisted_services: "kubernetes.default,istio-citadel.istio-system,istio-galley.istio-system,istio-ingressgateway.istio-system,istio-pilot.istio-system,istio-policy.istio-system,istio-sidecar-injector.istio-system,istio-telemetry.istio-system,apiserver-proxy.kyma-system, apiserver-proxy-ssl.kyma-system"

@@ -3,8 +3,8 @@ package v1alpha1
 type AddonStatusReason string
 
 const (
+	AddonLoadingError                       AddonStatusReason = "LoadingError"
 	AddonFetchingError                       AddonStatusReason = "FetchingError"
-	AddonValidationError                     AddonStatusReason = "ValidationError"
 	AddonConflictInSpecifiedRepositories     AddonStatusReason = "ConflictInSpecifiedRepositories"
 	AddonConflictWithAlreadyRegisteredAddons AddonStatusReason = "ConflictWithAlreadyRegisteredAddon"
 	AddonUnregisteringError                  AddonStatusReason = "UnregisteringError"
@@ -23,12 +23,12 @@ func (r AddonStatusReason) Message() string {
 		return "An addon with the same ID is already registered: %v"
 	case AddonFetchingError:
 		return "Fetching failed due to error: '%v'"
+	case AddonLoadingError:
+		return "Loading failed due to error: '%v'"
 	case AddonRegisteringError:
 		return "Registering failed due to error: '%v'"
 	case AddonUnregisteringError:
 		return "Unregistering failed due to error: '%v'"
-	case AddonValidationError:
-		return "Addon validation failed due to error: '%v'"
 	default:
 		return ""
 	}

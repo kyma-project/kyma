@@ -13,11 +13,11 @@ type ModificationStrategy struct {
 }
 
 // CreateSecretData provides a mock function with given fields: credentials
-func (_m *ModificationStrategy) CreateSecretData(credentials *model.Credentials) (strategy.SecretData, apperrors.AppError) {
+func (_m *ModificationStrategy) CreateSecretData(credentials *model.CredentialsWithCSRF) (strategy.SecretData, apperrors.AppError) {
 	ret := _m.Called(credentials)
 
 	var r0 strategy.SecretData
-	if rf, ok := ret.Get(0).(func(*model.Credentials) strategy.SecretData); ok {
+	if rf, ok := ret.Get(0).(func(*model.CredentialsWithCSRF) strategy.SecretData); ok {
 		r0 = rf(credentials)
 	} else {
 		if ret.Get(0) != nil {
@@ -26,7 +26,7 @@ func (_m *ModificationStrategy) CreateSecretData(credentials *model.Credentials)
 	}
 
 	var r1 apperrors.AppError
-	if rf, ok := ret.Get(1).(func(*model.Credentials) apperrors.AppError); ok {
+	if rf, ok := ret.Get(1).(func(*model.CredentialsWithCSRF) apperrors.AppError); ok {
 		r1 = rf(credentials)
 	} else {
 		if ret.Get(1) != nil {
@@ -38,11 +38,11 @@ func (_m *ModificationStrategy) CreateSecretData(credentials *model.Credentials)
 }
 
 // CredentialsProvided provides a mock function with given fields: credentials
-func (_m *ModificationStrategy) CredentialsProvided(credentials *model.Credentials) bool {
+func (_m *ModificationStrategy) CredentialsProvided(credentials *model.CredentialsWithCSRF) bool {
 	ret := _m.Called(credentials)
 
 	var r0 bool
-	if rf, ok := ret.Get(0).(func(*model.Credentials) bool); ok {
+	if rf, ok := ret.Get(0).(func(*model.CredentialsWithCSRF) bool); ok {
 		r0 = rf(credentials)
 	} else {
 		r0 = ret.Get(0).(bool)
@@ -66,11 +66,11 @@ func (_m *ModificationStrategy) ShouldUpdate(currentData strategy.SecretData, ne
 }
 
 // ToCredentialsInfo provides a mock function with given fields: credentials, secretName
-func (_m *ModificationStrategy) ToCredentialsInfo(credentials *model.Credentials, secretName string) applications.Credentials {
+func (_m *ModificationStrategy) ToCredentialsInfo(credentials *model.CredentialsWithCSRF, secretName string) applications.Credentials {
 	ret := _m.Called(credentials, secretName)
 
 	var r0 applications.Credentials
-	if rf, ok := ret.Get(0).(func(*model.Credentials, string) applications.Credentials); ok {
+	if rf, ok := ret.Get(0).(func(*model.CredentialsWithCSRF, string) applications.Credentials); ok {
 		r0 = rf(credentials, secretName)
 	} else {
 		r0 = ret.Get(0).(applications.Credentials)

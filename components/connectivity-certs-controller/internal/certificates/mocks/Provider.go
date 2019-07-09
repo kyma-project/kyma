@@ -10,8 +10,8 @@ type Provider struct {
 	mock.Mock
 }
 
-// GetCACertificates provides a mock function with given fields:
-func (_m *Provider) GetCACertificates() ([]*x509.Certificate, error) {
+// GetCertificateChain provides a mock function with given fields:
+func (_m *Provider) GetCertificateChain() ([]*x509.Certificate, error) {
 	ret := _m.Called()
 
 	var r0 []*x509.Certificate
