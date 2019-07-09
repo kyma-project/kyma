@@ -260,6 +260,12 @@ components:
         ApiType:
           type: 'string'
           description: 'API type, for example OData'
+        requestParameters:
+          $ref: '#/components/schemas/RequestParameters'
+        specificationCredentials:
+          $ref: '#/components/schemas/SpecificationCredentials'
+        specificationRequestParameters:
+          $ref: '#/components/schemas/RequestParameters'
       required:
       - targetUrl
     ApiUpdate:
@@ -330,6 +336,13 @@ components:
           $ref: '#/components/schemas/Basic'
         certificateGen:
           $ref: '#/components/schemas/CertificateGen'
+    SpecificationCredentials:
+      type: 'object'
+      properties:
+        oauth:
+          $ref: '#/components/schemas/OAuth'
+        basic:
+          $ref: '#/components/schemas/Basic'
     ApiCredentialsUpdate:
       type: 'object'
       properties:
@@ -339,6 +352,23 @@ components:
           $ref: '#/components/schemas/Basic'
         certificateGen:
           $ref: '#/components/schemas/CertificateGenUpdate'
+    RequestParameters:
+      type: 'object'
+      properties:
+        headers:
+          type: 'object'
+          description: 'Additional headers to be injected during auth requests'
+          additionalProperties:
+            type: 'array'
+            items:
+              type: 'string'
+        queryParameters:
+          type: 'object'
+          description: 'Additional query parameters to be injected during auth requests'
+          additionalProperties:
+            type: 'array'
+            items:
+              type: 'string'
     OAuth:
       type: 'object'
       properties:
