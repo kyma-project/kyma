@@ -1,5 +1,6 @@
 ---
-title: Architecture
+title: Basic architecture
+type: Architecture
 ---
 
 The Helm Broker is installed alongside other Kyma components and it automatically registers itself in the Service Catalog as a ClusterServiceBroker. The installation provides the default [ClusterAddonsConfiguration](#custom-resource-clusteraddonsconfiguration) (CAC) custom resource (CR). It contains URLs from which Helm Broker will fetch bundles.
