@@ -1,8 +1,0 @@
-{
-	"author": "Michal Kempski",
-	"commit": "e62e39d019f8b214cdd19ec5521b14f8d1b86177",
-	"branch": "expose-usage-kind-ui-api-follow-up",
-	"commitDate":"Tue Aug 14 11:39:29 2018 +0200",
-	"commitMessage":"Improve tests and create acceptance test for UsageKind",
-	"deployDate": "Tue Aug 14 14:14:03 CEST 2018"
-}
