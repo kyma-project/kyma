@@ -4,7 +4,7 @@ kind: TestDefinition
 metadata:
   name: test-{{ .Release.Name }}-api-controller
 spec:
-  disableConcurrency: true
+  disableConcurrency: false
   template:
     metadata:
       annotations:
