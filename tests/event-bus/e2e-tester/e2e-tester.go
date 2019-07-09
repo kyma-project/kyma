@@ -51,6 +51,8 @@ const (
 	contentTypeHeaderValue        = "application/json"
 	ceEventTypeVersionHeaderValue = "override-event-type-version"
 	customHeaderValue             = "Ce-X-custom-header-value"
+
+	defaultNamespace = "default"
 )
 
 var (
@@ -107,6 +109,14 @@ func main() {
 		"http://"+util.SubscriberName+"."+subscriber.subscriberNamespace+":9000/v3/status", "subscriber 3 service status endpoint `URL`")
 
 	flags.Parse(os.Args[1:])
+
+	//after flags.Parse is invoked all the subscriber related urls are not refreshed with namespace
+	//for example if we run this program with flag --subscriber-ns=test the "flag" has already set the default value to
+	// "http://test-core-event-bus-subscribe.default:9000/v1/events" for the variable subscriberEventEndpointURL
+	//instead of "http://test-core-event-bus-subscribe.test:9000/v1/events", therefore, after parsing, we have to refresh the urls
+	if subscriber.subscriberNamespace != defaultNamespace {
+		refreshSubscriberUrls(&subscriber)
+	}
 
 	if flags.NFlag() == 0 || subscriber.subscriberImage == "" {
 
@@ -245,6 +255,17 @@ func main() {
 
 	log.Println("Successfully finished")
 	shutdown(success, &subscriber)
+}
+
+// Dirty Refreshing of subscriber urls
+func refreshSubscriberUrls(subscriber *subscriberDetails) {
+	subscriber.subscriberEventEndpointURL = "http://" + util.SubscriberName + "." + subscriber.subscriberNamespace + ":9000/v1/events"
+	subscriber.subscriberResultsEndpointURL = "http://" + util.SubscriberName + "." + subscriber.subscriberNamespace + ":9000/v1/results"
+	subscriber.subscriberStatusEndpointURL = "http://" + util.SubscriberName + "." + subscriber.subscriberNamespace + ":9000/v1/status"
+	subscriber.subscriberShutdownEndpointURL = "http://" + util.SubscriberName + "." + subscriber.subscriberNamespace + ":9000/shutdown"
+	subscriber.subscriber3EventEndpointURL = "http://" + util.SubscriberName + "." + subscriber.subscriberNamespace + ":9000/v3/events"
+	subscriber.subscriber3ResultsEndpointURL = "http://" + util.SubscriberName + "." + subscriber.subscriberNamespace + ":9000/v3/results"
+	subscriber.subscriber3StatusEndpointURL = "http://" + util.SubscriberName + "." + subscriber.subscriberNamespace + ":9000/v3/status"
 }
 
 func shutdown(code int, subscriber *subscriberDetails) {
