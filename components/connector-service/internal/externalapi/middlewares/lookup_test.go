@@ -1,29 +1,31 @@
 package middlewares
 
 import (
+	"bytes"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/graphql"
+	"github.com/kyma-project/kyma/components/connector-service/internal/graphql/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"io/ioutil"
+	"net/http"
 	"testing"
 )
 
-func TestGraphQLLookupService(t *testing.T) {
-	t.Run("Should parse json file to config struct", func(t *testing.T) {
-		//given
-		headers := Headers{}
-		headers["faros-xf-user"] = "connector-service"
-		headers["faros-xf-groups"] = "kyma-admins"
-
-		expectedConfig := LookUpConfig{
-			URL:     "https://faros.test.graph.ql",
-			Headers: headers,
-		}
-
-		config, _ := readConfig("testdata/config.json")
-
-		assert.Equal(t, expectedConfig, config)
-	})
-
+func TestLookupService_Fetch(t *testing.T) {
 	t.Run("Should get gatewayUrl from external service", func(t *testing.T) {
 		//given
+		service := &mocks.GraphQLService{}
+		qlLookupService := NewGraphQLLookupService(service)
+		appCtx := clientcontext.ApplicationContext{
+			Application: "exampleApp",
+			ClusterContext: clientcontext.ClusterContext{
+				Group:  "exampleGroup",
+				Tenant: "exampleTenant",
+			},
+		}
+
 		expectedGatewayURL := "https://gateway.cool-cluster.cluster.extend.sap.cx"
 		exampleResponse := `{
     "data": {
@@ -52,10 +54,17 @@ func TestGraphQLLookupService(t *testing.T) {
         ]
     }
 }`
+		body := ioutil.NopCloser(bytes.NewReader([]byte(exampleResponse)))
+		response := &http.Response{Body: body}
+
+		service.On("ReadConfig", mock.Anything).Return(graphql.Config{}, nil)
+		service.On("SendRequest", mock.Anything, mock.Anything, mock.Anything).Return(response, nil)
+
 		//when
-		gatewayURL := getGatewayUrl([]byte(exampleResponse))
+		gatewayURL, e := qlLookupService.Fetch(appCtx, "testdata/")
+		require.NoError(t, e)
 
 		//then
-		assert.Equal(t, expectedGatewayURL, gatewayURL.String())
+		assert.Equal(t, expectedGatewayURL, gatewayURL)
 	})
 }

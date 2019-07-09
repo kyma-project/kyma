@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/connector-service/internal/graphql"
 	"net/http"
 	"time"
 
@@ -71,7 +72,9 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 
 	lookupEnabled := clientcontext.LookupEnabledType(opts.lookupEnabled)
 
-	lookupService := middlewares.NewGraphQLLookupService()
+	graphQLService := graphql.NewGraphQLService()
+
+	lookupService := middlewares.NewGraphQLLookupService(graphQLService)
 
 	headerParser := certificates.NewHeaderParser(env.country, env.locality, env.province, env.organization, env.organizationalUnit, opts.central)
 
