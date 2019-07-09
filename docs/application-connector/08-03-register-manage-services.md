@@ -201,7 +201,7 @@ This is an example of the `api` section of the request body for an API with a sp
 You can specify additional headers and query parameters that will be injected to requests to the specification URL. 
 >**NOTE:** These headers and query parameters are used only for requests for fetching an API specification and are not stored in the system. 
 
-To register an API with a specification URL that requires to specify custom headers and query parameters add a `specificationRequestParameters.headers` and a `specificationRequestParameters.queryParameters` objects to the `api` section of the service registration request body. Example of such body:
+To register an API with a specification URL that requires specific custom headers and query parameters, add the `specificationRequestParameters.headers` and `specificationRequestParameters.queryParameters` objects to the `api` section of the service registration request body.
 ```
     "api": {
         "targetUrl": "https://sampleapi.targeturl/v1",
