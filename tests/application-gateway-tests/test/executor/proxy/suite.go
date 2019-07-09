@@ -174,7 +174,7 @@ func (ts *TestSuite) proxyURL() string {
 }
 
 func (ts *TestSuite) GetMockServiceURL() string {
-	return fmt.Sprintf("http://%s:%d/", ts.mockServiceName, ts.config.MockServicePort)
+	return fmt.Sprintf("http://%s:%d", ts.mockServiceName, ts.config.MockServicePort)
 }
 
 func (ts *TestSuite) createMockService(t *testing.T) {

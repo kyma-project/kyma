@@ -4,11 +4,12 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
-	authmocks "github.com/kyma-project/kyma/components/application-gateway/internal/authorization/mocks"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf/mocks"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
+
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
+	authmocks "github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/mocks"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

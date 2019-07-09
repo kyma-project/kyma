@@ -24,7 +24,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		// given
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
@@ -671,7 +671,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		// given
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
@@ -837,7 +837,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		// given
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
@@ -912,7 +912,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		// given
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
@@ -1069,7 +1069,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		// given
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
@@ -1131,7 +1131,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		// given
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
@@ -1193,7 +1193,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		// given
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
@@ -1257,7 +1257,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		// given
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &model.Credentials{
+			Credentials: &model.CredentialsWithCSRF{
 				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",

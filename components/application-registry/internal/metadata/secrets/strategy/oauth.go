@@ -13,28 +13,27 @@ const (
 
 type oauth struct{}
 
-func (svc *oauth) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.Credentials {
+func (svc *oauth) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.CredentialsWithCSRF {
 	clientId, clientSecret := svc.readOauthMap(secretData)
 
-	return model.Credentials{
+	return model.CredentialsWithCSRF{
 		Oauth: &model.Oauth{
 			ClientID:     clientId,
 			ClientSecret: clientSecret,
 			URL:          appCredentials.AuthenticationUrl,
-			CSRFInfo:     convertToModelCSRInfo(appCredentials),
-		},
+		}, CSRFInfo: convertToModelCSRInfo(appCredentials),
 	}
 }
 
-func (svc *oauth) CredentialsProvided(credentials *model.Credentials) bool {
+func (svc *oauth) CredentialsProvided(credentials *model.CredentialsWithCSRF) bool {
 	return svc.oauthCredentialsProvided(credentials)
 }
 
-func (svc *oauth) CreateSecretData(credentials *model.Credentials) (SecretData, apperrors.AppError) {
+func (svc *oauth) CreateSecretData(credentials *model.CredentialsWithCSRF) (SecretData, apperrors.AppError) {
 	return svc.makeOauthMap(credentials.Oauth.ClientID, credentials.Oauth.ClientSecret), nil
 }
 
-func (svc *oauth) ToCredentialsInfo(credentials *model.Credentials, secretName string) applications.Credentials {
+func (svc *oauth) ToCredentialsInfo(credentials *model.CredentialsWithCSRF, secretName string) applications.Credentials {
 
 	applicationCredentials := applications.Credentials{
 		AuthenticationUrl: credentials.Oauth.URL,
@@ -51,7 +50,7 @@ func (svc *oauth) ShouldUpdate(currentData SecretData, newData SecretData) bool 
 		string(currentData[OauthClientSecretKey]) != string(newData[OauthClientSecretKey])
 }
 
-func (svc *oauth) oauthCredentialsProvided(credentials *model.Credentials) bool {
+func (svc *oauth) oauthCredentialsProvided(credentials *model.CredentialsWithCSRF) bool {
 	return credentials != nil && credentials.Oauth != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
 }
 

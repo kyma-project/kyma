@@ -14,7 +14,7 @@ import (
 func TestFactory_NewSecretModificationStrategy(t *testing.T) {
 
 	testCases := []struct {
-		credentials *model.Credentials
+		credentials *model.CredentialsWithCSRF
 		strategy    ModificationStrategy
 	}{
 		{
@@ -50,7 +50,7 @@ func TestFactory_NewSecretModificationStrategy(t *testing.T) {
 		factory := &factory{}
 
 		// when
-		_, err := factory.NewSecretModificationStrategy(&model.Credentials{})
+		_, err := factory.NewSecretModificationStrategy(&model.CredentialsWithCSRF{})
 
 		// then
 		require.Error(t, err)

@@ -453,6 +453,7 @@ type ComplexityRoot struct {
 		UpdateService                 func(childComplexity int, name string, namespace string, service JSON) int
 		DeleteService                 func(childComplexity int, name string, namespace string) int
 		CreateNamespace               func(childComplexity int, name string, labels *Labels) int
+		UpdateNamespace               func(childComplexity int, name string, labels Labels) int
 		DeleteNamespace               func(childComplexity int, name string) int
 		CreateApi                     func(childComplexity int, name string, namespace string, params APIInput) int
 		UpdateApi                     func(childComplexity int, name string, namespace string, params APIInput) int
@@ -466,7 +467,7 @@ type ComplexityRoot struct {
 		Applications func(childComplexity int) int
 	}
 
-	NamespaceCreationOutput struct {
+	NamespaceMutationOutput struct {
 		Name   func(childComplexity int) int
 		Labels func(childComplexity int) int
 	}
@@ -876,7 +877,8 @@ type MutationResolver interface {
 	DeleteIDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	UpdateService(ctx context.Context, name string, namespace string, service JSON) (*Service, error)
 	DeleteService(ctx context.Context, name string, namespace string) (*Service, error)
-	CreateNamespace(ctx context.Context, name string, labels *Labels) (NamespaceCreationOutput, error)
+	CreateNamespace(ctx context.Context, name string, labels *Labels) (NamespaceMutationOutput, error)
+	UpdateNamespace(ctx context.Context, name string, labels Labels) (NamespaceMutationOutput, error)
 	DeleteNamespace(ctx context.Context, name string) (*Namespace, error)
 	CreateAPI(ctx context.Context, name string, namespace string, params APIInput) (API, error)
 	UpdateAPI(ctx context.Context, name string, namespace string, params APIInput) (API, error)
@@ -2136,6 +2138,30 @@ func field_Mutation_createNamespace_args(rawArgs map[string]interface{}) (map[st
 			arg1 = &ptr1
 		}
 
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["labels"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_updateNamespace_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 Labels
+	if tmp, ok := rawArgs["labels"]; ok {
+		var err error
+		err = (&arg1).UnmarshalGQL(tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5543,6 +5569,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateNamespace(childComplexity, args["name"].(string), args["labels"].(*Labels)), true
 
+	case "Mutation.updateNamespace":
+		if e.complexity.Mutation.UpdateNamespace == nil {
+			break
+		}
+
+		args, err := field_Mutation_updateNamespace_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateNamespace(childComplexity, args["name"].(string), args["labels"].(Labels)), true
+
 	case "Mutation.deleteNamespace":
 		if e.complexity.Mutation.DeleteNamespace == nil {
 			break
@@ -5624,19 +5662,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Namespace.Applications(childComplexity), true
 
-	case "NamespaceCreationOutput.name":
-		if e.complexity.NamespaceCreationOutput.Name == nil {
+	case "NamespaceMutationOutput.name":
+		if e.complexity.NamespaceMutationOutput.Name == nil {
 			break
 		}
 
-		return e.complexity.NamespaceCreationOutput.Name(childComplexity), true
+		return e.complexity.NamespaceMutationOutput.Name(childComplexity), true
 
-	case "NamespaceCreationOutput.labels":
-		if e.complexity.NamespaceCreationOutput.Labels == nil {
+	case "NamespaceMutationOutput.labels":
+		if e.complexity.NamespaceMutationOutput.Labels == nil {
 			break
 		}
 
-		return e.complexity.NamespaceCreationOutput.Labels(childComplexity), true
+		return e.complexity.NamespaceMutationOutput.Labels(childComplexity), true
 
 	case "NavigationNode.label":
 		if e.complexity.NavigationNode.Label == nil {
@@ -16154,6 +16192,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "updateNamespace":
+			out.Values[i] = ec._Mutation_updateNamespace(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "deleteNamespace":
 			out.Values[i] = ec._Mutation_deleteNamespace(ctx, field)
 		case "createAPI":
@@ -17289,11 +17332,45 @@ func (ec *executionContext) _Mutation_createNamespace(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(NamespaceCreationOutput)
+	res := resTmp.(NamespaceMutationOutput)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._NamespaceCreationOutput(ctx, field.Selections, &res)
+	return ec._NamespaceMutationOutput(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_updateNamespace(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_updateNamespace_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateNamespace(rctx, args["name"].(string), args["labels"].(Labels))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(NamespaceMutationOutput)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._NamespaceMutationOutput(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
@@ -17592,11 +17669,11 @@ func (ec *executionContext) _Namespace_applications(ctx context.Context, field g
 	return arr1
 }
 
-var namespaceCreationOutputImplementors = []string{"NamespaceCreationOutput"}
+var namespaceMutationOutputImplementors = []string{"NamespaceMutationOutput"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _NamespaceCreationOutput(ctx context.Context, sel ast.SelectionSet, obj *NamespaceCreationOutput) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, namespaceCreationOutputImplementors)
+func (ec *executionContext) _NamespaceMutationOutput(ctx context.Context, sel ast.SelectionSet, obj *NamespaceMutationOutput) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, namespaceMutationOutputImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -17605,14 +17682,14 @@ func (ec *executionContext) _NamespaceCreationOutput(ctx context.Context, sel as
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("NamespaceCreationOutput")
+			out.Values[i] = graphql.MarshalString("NamespaceMutationOutput")
 		case "name":
-			out.Values[i] = ec._NamespaceCreationOutput_name(ctx, field, obj)
+			out.Values[i] = ec._NamespaceMutationOutput_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "labels":
-			out.Values[i] = ec._NamespaceCreationOutput_labels(ctx, field, obj)
+			out.Values[i] = ec._NamespaceMutationOutput_labels(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -17628,11 +17705,11 @@ func (ec *executionContext) _NamespaceCreationOutput(ctx context.Context, sel as
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _NamespaceCreationOutput_name(ctx context.Context, field graphql.CollectedField, obj *NamespaceCreationOutput) graphql.Marshaler {
+func (ec *executionContext) _NamespaceMutationOutput_name(ctx context.Context, field graphql.CollectedField, obj *NamespaceMutationOutput) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "NamespaceCreationOutput",
+		Object: "NamespaceMutationOutput",
 		Args:   nil,
 		Field:  field,
 	}
@@ -17655,11 +17732,11 @@ func (ec *executionContext) _NamespaceCreationOutput_name(ctx context.Context, f
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _NamespaceCreationOutput_labels(ctx context.Context, field graphql.CollectedField, obj *NamespaceCreationOutput) graphql.Marshaler {
+func (ec *executionContext) _NamespaceMutationOutput_labels(ctx context.Context, field graphql.CollectedField, obj *NamespaceMutationOutput) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "NamespaceCreationOutput",
+		Object: "NamespaceMutationOutput",
 		Args:   nil,
 		Field:  field,
 	}
@@ -30226,7 +30303,7 @@ type Namespace {
     applications: [String!]
 }
 
-type NamespaceCreationOutput {
+type NamespaceMutationOutput {
     name: String!
     labels: Labels!
 }
@@ -30573,7 +30650,8 @@ type Mutation {
     updateService(name: String!, namespace: String!, service: JSON!): Service @HasAccess(attributes: {resource: "services", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
-    createNamespace(name: String!, labels: Labels): NamespaceCreationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
+    createNamespace(name: String!, labels: Labels): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
+    updateNamespace(name: String!, labels: Labels!): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1"})
     deleteNamespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "delete", apiGroup: "", apiVersion: "v1"})
 
     createAPI(name: String!, namespace: String!, params: APIInput!): API! @HasAccess(attributes: {resource: "apis", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})

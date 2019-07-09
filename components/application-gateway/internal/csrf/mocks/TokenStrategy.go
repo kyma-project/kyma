@@ -2,7 +2,7 @@
 
 package mocks
 
-import apperrors "github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
+import apperrors "github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 
 import http "net/http"
 import mock "github.com/stretchr/testify/mock"
