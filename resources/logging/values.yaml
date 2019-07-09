@@ -303,7 +303,7 @@ global:
   logging_integration_tests:
     name: logging-integration-tests
     dir: pr/
-    version: XXX
+    version: PR-4849
   logging:
     promtail:
       config:

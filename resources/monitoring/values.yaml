@@ -15,4 +15,4 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir: pr/
-    version: XXX
+    version: PR-4849
