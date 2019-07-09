@@ -13,16 +13,14 @@ const (
 )
 
 type csrfHandler struct {
-	logger            *log.Entry
-	provideFirstToken bool
-	expectFirstToken  bool
+	logger       *log.Entry
+	isFirstToken bool
 }
 
 func NewCsrfHandler() *csrfHandler {
 	return &csrfHandler{
-		logger:            log.WithField("Handler", "CSRF"),
-		provideFirstToken: true,
-		expectFirstToken:  true,
+		logger:       log.WithField("Handler", "CSRF"),
+		isFirstToken: true,
 	}
 }
 
@@ -30,26 +28,24 @@ func (ch *csrfHandler) CsrfToken(w http.ResponseWriter, r *http.Request) {
 	ch.logger.Infof("Handling CSRF request")
 
 	var token string
-	if ch.provideFirstToken {
-		ch.logger.Infof("Providing correct token: %s", firstToken)
+	if ch.isFirstToken {
+		ch.logger.Infof("Providing first token: %s", firstToken)
 		token = firstToken
 	} else {
-		ch.logger.Infof("Providing incorrect token: %s", secondToken)
+		ch.logger.Infof("Providing second token: %s", secondToken)
 		token = secondToken
 	}
 
 	w.Header().Set(HeaderCSRFToken, token)
 	http.SetCookie(w, nil)
 
-	ch.provideFirstToken = false
 	successResponse(w)
 }
 
 func (ch *csrfHandler) Target(w http.ResponseWriter, r *http.Request) {
 	var expectedToken string
-	if ch.expectFirstToken {
+	if ch.isFirstToken {
 		expectedToken = firstToken
-		ch.provideFirstToken = true
 	} else {
 		expectedToken = secondToken
 	}
@@ -63,6 +59,6 @@ func (ch *csrfHandler) Target(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ch.expectFirstToken = false
+	ch.isFirstToken = false
 	successResponse(w)
 }
