@@ -14,6 +14,9 @@ spec:
     kind: ClusterAddonsConfiguration
     plural: clusteraddonsconfigurations
   scope: Cluster
+  subresources:
+    # status enables the status subresource.
+    status: {}
   validation:
     openAPIV3Schema:
       properties:

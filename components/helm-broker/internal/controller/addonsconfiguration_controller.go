@@ -11,10 +11,8 @@ import (
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	exerr "github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -75,11 +73,12 @@ var _ reconcile.Reconciler = &ReconcileAddonsConfiguration{}
 
 // ReconcileAddonsConfiguration reconciles a AddonsConfiguration object
 type ReconcileAddonsConfiguration struct {
-	log logrus.FieldLogger
+	log               logrus.FieldLogger
 	client.Client
 	scheme            *runtime.Scheme
 	provider          bundleProvider
 	strg              storage.Factory
+	protection        protection
 	brokerFacade      brokerFacade
 	brokerSyncer      brokerSyncer
 	docsTopicProvider docsProvider
@@ -109,31 +108,31 @@ func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, bro
 // Reconcile reads that state of the cluster for a AddonsConfiguration object and makes changes based on the state read
 // and what is in the AddonsConfiguration.Spec
 func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	// Fetch the AddonsConfiguration instance
 	instance := &addonsv1alpha1.AddonsConfiguration{}
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			if err := r.deleteAddonsProcess(request.Namespace); err != nil {
-				return reconcile.Result{}, exerr.Wrapf(err, "while deleting Addon Configuration from namespace %s", request.Namespace)
-			}
-			return reconcile.Result{}, nil
+		return reconcile.Result{}, err
+	}
+
+	if instance.DeletionTimestamp != nil {
+		if err := r.deleteAddonsProcess(instance); err != nil {
+			return reconcile.Result{}, exerr.Wrapf(err, "while deleting AddonConfiguration %d", request.NamespacedName)
 		}
-		// Error reading the object - requeue the request.
-		return reconcile.Result{}, err
 	}
 
-	foundAddon := &addonsv1alpha1.AddonsConfiguration{}
-	err = r.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, foundAddon)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	// if `Status.ObservedGeneration` is equal 0 it means AddonsConfiguration is processed first time (create process)
-	if foundAddon.Status.ObservedGeneration == 0 {
+	if instance.Status.ObservedGeneration == 0 {
+		if err := r.addFinalizer(instance); err != nil {
+			return reconcile.Result{}, exerr.Wrapf(err, "while adding a finalizer to AddonsConfiguration %q", request.NamespacedName)
+		}
 		err = r.addAddonsProcess(instance)
 		if err != nil {
 			return reconcile.Result{}, exerr.Wrapf(err, "while creating AddonsConfiguration %q", request.NamespacedName)
+		}
+	} else if instance.Generation > instance.Status.ObservedGeneration {
+		instance.Status = addonsv1alpha1.AddonsConfigurationStatus{}
+		err = r.addAddonsProcess(instance)
+		if err != nil {
+			return reconcile.Result{}, exerr.Wrapf(err, "while updating AddonsConfiguration %q", request.NamespacedName)
 		}
 	}
 
@@ -144,15 +143,15 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 	if !exist {
 		// status
 		if err := r.brokerFacade.Create(instance.Namespace); err != nil {
-			return reconcile.Result{}, exerr.Wrapf(err, "while creating ServiceBroker for addon %s in namespace %s", instance.Name, instance.Namespace)
+			return reconcile.Result{}, exerr.Wrapf(err, "while creating ServiceBroker for AddonConfiguration %q", request.NamespacedName)
 		}
 	} else if r.syncBroker {
 		if err := r.brokerSyncer.SyncServiceBroker(instance.Namespace); err != nil {
-			return reconcile.Result{}, exerr.Wrapf(err, "while syncing ServiceBroker for addon %s in namespace %s", instance.Name, instance.Namespace)
+			return reconcile.Result{}, exerr.Wrapf(err, "while syncing ServiceBroker for AddonConfiguration %q", request.NamespacedName)
 		}
 	}
 
-	return reconcile.Result{}, nil
+	return reconcile.Result{Requeue: false}, nil
 }
 
 func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.AddonsConfiguration) error {
@@ -209,12 +208,12 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 	return nil
 }
 
-func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(namespace string) error {
-	r.log.Infof("Start delete AddonsConfiguration from namespace %s", namespace)
+func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1.AddonsConfiguration) error {
+	r.log.Infof("Start delete AddonsConfiguration %s from namespace %s", addon.Name, addon.Namespace)
 
-	addonsCfgs, err := r.addonsConfigurationList(namespace)
+	addonsCfgs, err := r.addonsConfigurationList(addon.Namespace)
 	if err != nil {
-		return exerr.Wrapf(err, "while listing AddonsConfigurations in namespace %s", namespace)
+		return exerr.Wrapf(err, "while listing AddonsConfigurations in namespace %s", addon.Namespace)
 	}
 
 	deleteBroker := true
@@ -230,9 +229,13 @@ func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(namespace string) err
 		}
 	}
 	if deleteBroker {
-		if err := r.brokerFacade.Delete(namespace); err != nil {
-			return exerr.Wrapf(err, "while deleting ServiceBroker from namespace %s", namespace)
+		if err := r.brokerFacade.Delete(addon.Namespace); err != nil {
+			return exerr.Wrapf(err, "while deleting ServiceBroker from namespace %s", addon.Namespace)
 		}
+	}
+
+	if err := r.deleteFinalizer(addon); err != nil {
+		return exerr.Wrapf(err, "while deleting finalizer for AddonConfiguration %s %s", addon.Name, addon.Namespace)
 	}
 
 	r.log.Info("Delete AddonsConfiguration process completed")
@@ -369,6 +372,34 @@ func (r *ReconcileAddonsConfiguration) updateAddonStatus(addon *addonsv1alpha1.A
 	err := r.Update(context.TODO(), addon)
 	if err != nil {
 		return exerr.Wrap(err, "while update AddonsConfiguration")
+	}
+
+	return nil
+}
+
+func (r *ReconcileAddonsConfiguration) addFinalizer(addon *addonsv1alpha1.AddonsConfiguration) error {
+	obj := addon.DeepCopy()
+	if r.protection.hasFinalizer(obj.Finalizers) {
+		return nil
+	}
+	obj.Finalizers = r.protection.addFinalizer(obj.Finalizers)
+
+	if err := r.Client.Update(context.Background(), obj); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ReconcileAddonsConfiguration) deleteFinalizer(addon *addonsv1alpha1.AddonsConfiguration) error {
+	obj := addon.DeepCopy()
+	if !r.protection.hasFinalizer(obj.Finalizers) {
+		return nil
+	}
+	obj.Finalizers = r.protection.removeFinalizer(obj.Finalizers)
+
+	if err := r.Client.Update(context.Background(), obj); err != nil {
+		return err
 	}
 
 	return nil
