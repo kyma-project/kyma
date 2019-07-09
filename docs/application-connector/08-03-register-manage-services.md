@@ -182,7 +182,7 @@ To register an API with a specification URL secured with OAuth, add a `specifica
 | **clientId** | OAuth client ID |
 | **clientSecret** | OAuth client Secret |    
 
-This is an example of the `api` section of the request body for an API secured with OAuth:
+This is an example of the `api` section of the request body for an API with a specification URL secured with OAuth:
 
 ```
     "api": {
