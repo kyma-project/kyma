@@ -1,8 +1,9 @@
 package externalapi
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func NewHandler() http.Handler {

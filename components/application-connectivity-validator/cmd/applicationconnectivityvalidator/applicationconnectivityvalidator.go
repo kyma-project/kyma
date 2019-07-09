@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/externalapi"
 	"net/http"
 	"sync"
+
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/externalapi"
 
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy"
 	log "github.com/sirupsen/logrus"
