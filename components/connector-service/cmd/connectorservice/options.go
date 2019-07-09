@@ -40,6 +40,8 @@ type options struct {
 	revocationConfigMapName        string
 	lookupEnabled                  bool
 	lookupConfigMapPath            string
+	runtimeRegistryEnabled         bool
+	runtimeRegistryConfigMapPath   string
 }
 
 type environment struct {
@@ -72,6 +74,8 @@ func parseArgs() *options {
 	revocationConfigMapName := flag.String("revocationConfigMapName", "revocations-config", "Name of the config map containing revoked certificates")
 	lookupEnabled := flag.Bool("lookupEnabled", false, "Determines whether connector should make a call to get gateway endpoint")
 	lookupConfigMapPath := flag.String("lookupConfigMapPath", "/etc/config/config.json", "Path in the pod where Config Map for cluster lookup is stored")
+	runtimeRegistryEnabled := flag.Bool("runtimeRegistryEnabled", false, "Determines whether connector should make a call to Runtime Registry to report status of runtimes")
+	runtimeRegistryConfigMapPath := flag.String("runtimeRegistryConfigMapPath", "/etc/config/runtimeregistry.json", "Path in the pod where Config Map for Runtime Registry is stored")
 
 	flag.Parse()
 
@@ -107,6 +111,8 @@ func parseArgs() *options {
 		revocationConfigMapName:        *revocationConfigMapName,
 		lookupEnabled:                  *lookupEnabled,
 		lookupConfigMapPath:            *lookupConfigMapPath,
+		runtimeRegistryEnabled:         *runtimeRegistryEnabled,
+		runtimeRegistryConfigMapPath:   *runtimeRegistryConfigMapPath,
 	}
 }
 
@@ -115,12 +121,12 @@ func (o *options) String() string {
 		"--appTokenExpirationMinutes=%d --runtimeTokenExpirationMinutes=%d --caSecretName=%s --rootCACertificateSecretName=%s --requestLogging=%t "+
 		"--connectorServiceHost=%s --certificateProtectedHost=%s --gatewayBaseURL=%s "+
 		"--appsInfoURL=%s --runtimesInfoURL=%s --central=%t --appCertificateValidityTime=%s --runtimeCertificateValidityTime=%s "+
-		"--revocationConfigMapName=%s --lookupEnabled=%t --lookupConfigMapPath=%s",
+		"--revocationConfigMapName=%s --lookupEnabled=%t --lookupConfigMapPath=%s --runtimeRegistryEnabled=%t --runtimeRegistryConfigMapPath=%s",
 		o.appName, o.externalAPIPort, o.internalAPIPort, o.namespace, o.tokenLength,
 		o.appTokenExpirationMinutes, o.runtimeTokenExpirationMinutes, o.caSecretName, o.rootCACertificateSecretName, o.requestLogging,
 		o.connectorServiceHost, o.certificateProtectedHost, o.gatewayBaseURL,
 		o.appsInfoURL, o.runtimesInfoURL, o.central, o.appCertificateValidityTime, o.runtimeCertificateValidityTime,
-		o.revocationConfigMapName, o.lookupEnabled, o.lookupConfigMapPath)
+		o.revocationConfigMapName, o.lookupEnabled, o.lookupConfigMapPath, o.runtimeRegistryEnabled, o.runtimeRegistryConfigMapPath)
 }
 
 func parseEnv() *environment {
