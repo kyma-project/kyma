@@ -12,7 +12,7 @@ spec:
       shareProcessNamespace: true
       containers:
       - name: test-{{ template "fullname" . }}-integration
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.dex_integration_tests.dir }}integration-dex:{{ .Values.global.dex_integration_tests.version }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.dex_integration_tests.dir }}dex-integration-tests:{{ .Values.global.dex_integration_tests.version }}
         env:
         - name: DOMAIN_NAME
           value: {{ .Values.global.ingress.domainName }}
