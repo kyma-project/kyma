@@ -199,7 +199,7 @@ This is an example of the `api` section of the request body for an API with a sp
 
 ## Use custom headers and query parameters for fetching API specification from URL 
 You can specify additional headers and query parameters that will be injected to requests to the specification URL. 
->**NOTE:** Unlike headers and query parameters used to authenticate requests to target API, these are used only for one time specification fetch and are not stored!
+>**NOTE:** These headers and query parameters are used only for requests for fetching an API specification and are not stored in the system. 
 
 To register an API with a specification URL that requires to specify custom headers and query parameters add a `specificationRequestParameters.headers` and a `specificationRequestParameters.queryParameters` objects to the `api` section of the service registration request body. Example of such body:
 ```
