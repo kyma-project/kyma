@@ -222,7 +222,7 @@ To register an API with a specification URL that requires to specify custom head
         }
 ```
 
-## Register the OData API
+## Register an OData API
 
 If the **api.spec** or **api.specificationUrl** parameters are not specified and the **api.type** parameter is set to `OData`, the Application Registry will try to fetch specification from the target URL with the `$metadata` path.
 
