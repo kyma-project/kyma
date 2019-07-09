@@ -29,10 +29,10 @@ func parseArgs() *options {
 	flag.Parse()
 
 	return &options{
-		proxyPort:              *proxyPort,
-		externalAPIPort:        *externalAPIPort,
-		tenant:                 *tenant,
-		group:                  *group,
+		proxyPort:       *proxyPort,
+		externalAPIPort: *externalAPIPort,
+		tenant:          *tenant,
+		group:           *group,
 		eventServicePathPrefix: *eventServicePathPrefix,
 		eventServiceHost:       *eventServiceHost,
 		appRegistryPathPrefix:  *appRegistryPathPrefix,
