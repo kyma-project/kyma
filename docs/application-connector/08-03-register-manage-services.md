@@ -150,7 +150,7 @@ See the example of the API part of the request body with specification URL:
 
 The Application Registry allows you to register an API with a secured specification URL. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617) and [OAuth](https://tools.ietf.org/html/rfc6750). You can specify only one type of authentication for an API.
 
-#### Register API with a Basic Authentication-secured specification URL
+### Register an API with a Basic Authentication-secured specification URL
 
 To register an API with a specification URL secured with Basic Authentication, add a `specificationCredentials.basic` object to the `api` section of the service registration request body. You must include these fields:
 
