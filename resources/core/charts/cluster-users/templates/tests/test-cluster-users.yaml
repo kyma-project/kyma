@@ -20,7 +20,7 @@ spec:
       serviceAccount: cluster-users-test
       containers:
         - name: test-cluster-users
-          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.cluster_users_test.dir }}cluster-users-test:{{ .Values.global.cluster_users_test.version }}
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.cluster_users_integration_tests.dir }}cluster-users-integration-tests:{{ .Values.global.cluster_users_integration_tests.version }}
           command: 
             - /bin/bash
             - -c
