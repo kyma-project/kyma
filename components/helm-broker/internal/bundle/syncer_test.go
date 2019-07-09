@@ -305,8 +305,8 @@ func fixBundleWithEmptyDocs(id, name, url string) bundle.CompleteBundle {
 			Docs: []internal.BundleDocs{
 				{
 					Template: v1alpha1.CommonDocsTopicSpec{
-							Sources: []v1alpha1.Source{
-								{},
+						Sources: []v1alpha1.Source{
+							{},
 						},
 					},
 				},

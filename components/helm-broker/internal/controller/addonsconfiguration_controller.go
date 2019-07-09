@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/repository"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
@@ -21,7 +22,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
 
 type brokerFacade interface {
@@ -75,7 +75,7 @@ var _ reconcile.Reconciler = &ReconcileAddonsConfiguration{}
 
 // ReconcileAddonsConfiguration reconciles a AddonsConfiguration object
 type ReconcileAddonsConfiguration struct {
-	log               logrus.FieldLogger
+	log logrus.FieldLogger
 	client.Client
 	scheme            *runtime.Scheme
 	provider          bundleProvider

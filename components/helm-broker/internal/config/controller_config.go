@@ -24,14 +24,14 @@ import (
 // Example of valid tag: `valid:"alphanum,required"`
 // Combining many tags: tags have to be separated by WHITESPACE: `json:"port" default:"8080" valid:"required"`
 type ControllerConfig struct {
-	TmpDir         string
-	Logger         logger.Config
-	KubeconfigPath string `envconfig:"optional"`
-	Namespace      string
-	ServiceName    string
+	TmpDir                   string
+	Logger                   logger.Config
+	KubeconfigPath           string `envconfig:"optional"`
+	Namespace                string
+	ServiceName              string
 	ClusterServiceBrokerName string
-	Storage        []storage.Config `valid:"required"`
-	DevelopMode    bool
+	Storage                  []storage.Config `valid:"required"`
+	DevelopMode              bool
 }
 
 // Load method has following strategy:
