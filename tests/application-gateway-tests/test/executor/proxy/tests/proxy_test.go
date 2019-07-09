@@ -128,8 +128,12 @@ func TestProxyService(t *testing.T) {
 		t.Log("Labeling tests pod with denier label")
 		testSuit.AddDenierLabel(t, apiID)
 
-		t.Log("Calling Access Service with incorrect CSRF token and retry with the correct one")
+		t.Log("Calling Access Service with correct CSRF token")
 		resp := testSuit.CallAccessService(t, apiID, "target")
+		util.RequireStatus(t, http.StatusOK, resp)
+
+		t.Log("Calling Access Service with incorrect CSRF token and retry with the correct one")
+		resp = testSuit.CallAccessService(t, apiID, "target")
 		util.RequireStatus(t, http.StatusOK, resp)
 
 		t.Log("Successfully accessed application")
