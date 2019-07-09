@@ -146,7 +146,7 @@ See the example of the API part of the request body with specification URL:
 ```
 >**NOTE:** Fetching specification from a URL is supported only for APIs. Fetching specifications for Events or documentation is not supported.
 
-## Register API with secured specification URL
+## Register an API with a secured specification URL
 
 The Application Registry allows you to register an API with secured specification URL. The supported authentication methods are Basic Authentication and OAuth. You can specify only one type of authentication at the same time.
 
