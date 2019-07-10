@@ -426,29 +426,29 @@ func checkSubscriberReceivedEventHeaders(subscriber *subscriberDetails) error {
 			lowerResponseHeaders[strings.ToLower(k)] = resp[k]
 		}
 
-		if lowerResponseHeaders[sourceHeader][0] != srcID {
-			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[sourceHeader][0], srcID)
+		var testDataSets = []struct {
+			headerKey           string
+			headerExpectedValue string
+		}{
+			{headerKey: sourceHeader, headerExpectedValue: srcID},
+			{headerKey: eventTypeHeader, headerExpectedValue: eventType},
+			{headerKey: eventTypeVersionHeader, headerExpectedValue: eventTypeVersion},
+			{headerKey: contentTypeHeader, headerExpectedValue: contentTypeHeaderValue},
+			{headerKey: specVersionHeader, headerExpectedValue: ceSpecVersionHeaderValue},
+			{headerKey: customHeader, headerExpectedValue: customHeaderValue},
 		}
-		if lowerResponseHeaders[eventTypeHeader][0] != eventType {
-			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[eventTypeHeader][0], eventType)
+
+		for _, testData := range testDataSets {
+			if lowerResponseHeaders[testData.headerKey][0] != testData.headerExpectedValue {
+				return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[testData.headerKey][0], testData.headerExpectedValue)
+			}
 		}
-		if lowerResponseHeaders[eventTypeVersionHeader][0] != eventTypeVersion {
-			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[eventTypeVersionHeader][0], eventTypeVersion)
-		}
+
 		if lowerResponseHeaders[idHeader][0] == "" {
 			return fmt.Errorf("wrong response: %s, can't be empty", lowerResponseHeaders[idHeader][0])
 		}
 		if lowerResponseHeaders[timeHeader][0] == "" {
 			return fmt.Errorf("wrong response: %s, can't be empty", lowerResponseHeaders[timeHeader][0])
-		}
-		if lowerResponseHeaders[contentTypeHeader][0] != contentTypeHeaderValue {
-			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[contentTypeHeader][0], contentTypeHeaderValue)
-		}
-		if lowerResponseHeaders[specVersionHeader][0] != ceSpecVersionHeaderValue {
-			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[specVersionHeader][0], ceSpecVersionHeaderValue)
-		}
-		if lowerResponseHeaders[customHeader][0] != customHeaderValue {
-			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[customHeader][0], customHeaderValue)
 		}
 		return nil
 	}
