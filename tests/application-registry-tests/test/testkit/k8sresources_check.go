@@ -2,12 +2,18 @@ package testkit
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"testing"
 
 	application "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	istio "github.com/kyma-project/kyma/components/application-registry/pkg/apis/istio/v1alpha2"
 	"github.com/stretchr/testify/require"
 	v1core "k8s.io/api/core/v1"
+)
+
+const (
+	requestParametersHeadersKey         = "headers"
+	requestParametersQueryParametersKey = "queryParameters"
 )
 
 type Labels map[string]string
@@ -69,6 +75,28 @@ func CheckK8sCertificateGenSecret(t *testing.T, secret *v1core.Secret, name stri
 	cert, err := tls.X509KeyPair(crt, key)
 	require.NoError(t, err)
 	require.Nil(t, cert.Leaf)
+
+	checkLabels(t, labels, secret.Labels)
+}
+
+func CheckK8sParamsSecret(t *testing.T, secret *v1core.Secret, name string, labels Labels, headerKey, headerValue, queryParameterKey, queryParameterValue string) {
+	require.Equal(t, name, secret.Name)
+
+	secretData := secret.Data
+	var requestParameters RequestParameters
+
+	rawHeaders := secretData[requestParametersHeadersKey]
+	err := json.Unmarshal(rawHeaders, &requestParameters.Headers)
+	require.NoError(t, err)
+	headers := *requestParameters.Headers
+
+	rawQueryParameters := secretData[requestParametersQueryParametersKey]
+	err = json.Unmarshal(rawQueryParameters, &requestParameters.QueryParameters)
+	require.NoError(t, err)
+	queryParameters := *requestParameters.QueryParameters
+
+	require.Equal(t, headerValue, headers[headerKey][0])
+	require.Equal(t, queryParameterValue, queryParameters[queryParameterKey][0])
 
 	checkLabels(t, labels, secret.Labels)
 }
