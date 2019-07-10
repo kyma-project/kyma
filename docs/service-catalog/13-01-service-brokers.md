@@ -18,7 +18,6 @@ The Kyma Service Catalog is currently integrated with the following Service Brok
 
 You can also install these brokers using the Helm Broker's bundles:
 
-* [Google Cloud Platform (GCP) Broker](#service-brokers-gcp-broker)
 * [Azure Service Broker](#service-brokers-azure-service-broker)
 * [AWS Service Broker](#service-brokers-aws-broker)
 
