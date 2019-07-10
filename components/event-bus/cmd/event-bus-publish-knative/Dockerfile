@@ -17,6 +17,7 @@ COPY httpserver  ./httpserver
 COPY metrics     ./metrics
 COPY publisher   ./publisher
 COPY validators  ./validators
+COPY util        ./util
 
 RUN CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o event-bus-publish-knative .
 

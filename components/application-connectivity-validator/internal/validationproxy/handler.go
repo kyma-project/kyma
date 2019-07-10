@@ -25,25 +25,27 @@ type ProxyHandler interface {
 }
 
 type proxyHandler struct {
-	group                  string
-	tenant                 string
-	eventServicePathPrefix string
-	eventServiceHost       string
-	appRegistryPathPrefix  string
-	appRegistryHost        string
+	group                    string
+	tenant                   string
+	eventServicePathPrefixV1 string
+	eventServicePathPrefixV2 string
+	eventServiceHost         string
+	appRegistryPathPrefix    string
+	appRegistryHost          string
 
 	eventsProxy      *httputil.ReverseProxy
 	appRegistryProxy *httputil.ReverseProxy
 }
 
-func NewProxyHandler(group, tenant, eventServicePathPrefix, eventServiceHost, appRegistryPathPrefix, appRegistryHost string) *proxyHandler {
+func NewProxyHandler(group, tenant, eventServicePathPrefixV1, eventServicePathPrefixV2, eventServiceHost, appRegistryPathPrefix, appRegistryHost string) *proxyHandler {
 	return &proxyHandler{
-		group:                  group,
-		tenant:                 tenant,
-		eventServicePathPrefix: eventServicePathPrefix,
-		eventServiceHost:       eventServiceHost,
-		appRegistryPathPrefix:  appRegistryPathPrefix,
-		appRegistryHost:        appRegistryHost,
+		group:  group,
+		tenant: tenant,
+		eventServicePathPrefixV1: eventServicePathPrefixV1,
+		eventServicePathPrefixV2: eventServicePathPrefixV2,
+		eventServiceHost:         eventServiceHost,
+		appRegistryPathPrefix:    appRegistryPathPrefix,
+		appRegistryHost:          appRegistryHost,
 
 		eventsProxy:      createReverseProxy(eventServiceHost),
 		appRegistryProxy: createReverseProxy(appRegistryHost),
@@ -82,7 +84,11 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 
 func (ph *proxyHandler) mapRequestToProxy(path string) (*httputil.ReverseProxy, apperrors.AppError) {
 
-	if strings.HasPrefix(path, ph.eventServicePathPrefix) {
+	if strings.HasPrefix(path, ph.eventServicePathPrefixV1) {
+		return ph.eventsProxy, nil
+	}
+
+	if strings.HasPrefix(path, ph.eventServicePathPrefixV2) {
 		return ph.eventsProxy, nil
 	}
 

@@ -3,15 +3,16 @@ package istio
 
 import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // Service is responsible for creating Istio resources associated with deniers.
 type Service interface {
 	// Create creates Istio resources associated with deniers.
-	Create(application, serviceId, resourceName string) apperrors.AppError
+	Create(application string, appUID types.UID, serviceId, resourceName string) apperrors.AppError
 
 	// Upsert updates or creates Istio resources associated with deniers.
-	Upsert(application, serviceId, resourceName string) apperrors.AppError
+	Upsert(application string, appUID types.UID, serviceId, resourceName string) apperrors.AppError
 
 	// Delete removes Istio resources associated with deniers.
 	Delete(resourceName string) apperrors.AppError
@@ -27,18 +28,18 @@ func NewService(repository Repository) Service {
 }
 
 // Create creates Istio resources associated with deniers.
-func (s *service) Create(application, serviceId, resourceName string) apperrors.AppError {
-	err := s.repository.CreateDenier(application, serviceId, resourceName)
+func (s *service) Create(application string, appUID types.UID, serviceId, resourceName string) apperrors.AppError {
+	err := s.repository.CreateDenier(application, appUID, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
 
-	err = s.repository.CreateCheckNothing(application, serviceId, resourceName)
+	err = s.repository.CreateCheckNothing(application, appUID, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
 
-	err = s.repository.CreateRule(application, serviceId, resourceName)
+	err = s.repository.CreateRule(application, appUID, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
@@ -47,18 +48,18 @@ func (s *service) Create(application, serviceId, resourceName string) apperrors.
 }
 
 // Upsert updates or creates Istio resources associated with deniers.
-func (s *service) Upsert(application, serviceId, resourceName string) apperrors.AppError {
-	err := s.repository.UpsertDenier(application, serviceId, resourceName)
+func (s *service) Upsert(application string, appUID types.UID, serviceId, resourceName string) apperrors.AppError {
+	err := s.repository.UpsertDenier(application, appUID, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
 
-	err = s.repository.UpsertCheckNothing(application, serviceId, resourceName)
+	err = s.repository.UpsertCheckNothing(application, appUID, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
 
-	err = s.repository.UpsertRule(application, serviceId, resourceName)
+	err = s.repository.UpsertRule(application, appUID, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
