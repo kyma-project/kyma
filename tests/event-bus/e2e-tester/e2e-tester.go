@@ -51,8 +51,6 @@ const (
 	contentTypeHeaderValue        = "application/json"
 	ceEventTypeVersionHeaderValue = "override-event-type-version"
 	customHeaderValue             = "Ce-X-custom-header-value"
-
-	defaultNamespace = "default"
 )
 
 var (
