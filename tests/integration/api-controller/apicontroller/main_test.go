@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	log "github.com/sirupsen/logrus"
-	"k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -18,7 +17,7 @@ var k8sClient *kubernetes.Clientset
 var namespace string
 
 func TestMain(m *testing.M) {
-	namespace = os.Getenv(namespaceEnv)
+	namespace = namespaceNameRoot + "-" + generateRandomString(testIDLength)
 	if namespace == "" {
 		log.Error("Namespace not set.")
 		os.Exit(2)

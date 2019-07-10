@@ -22,7 +22,5 @@ spec:
           value: {{ .Values.global.ingress.domainName }}
         - name: INGRESSGATEWAY_ADDRESS
           value: istio-ingressgateway.istio-system.svc.cluster.local
-        - name: NAMESPACE
-          value: {{ .Values.global.api_controller_integration_tests.testNamespace }}
       restartPolicy: Never
 {{- end }}
