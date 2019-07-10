@@ -36,9 +36,9 @@ Follow these installation guides to install Kyma locally or on a cluster:
 - [Install Kyma on a cluster](#installation-install-kyma-on-a-cluster)
 
 Read rest of the installation documents to learn how to:
-- [Disable the selected components' installation or install them separately](#installation-custom-component-installation)
+- [Disable the selected components' installation or install them separately](#configuration-custom-component-installation)
+- [Upgrade Kyma to a new version](#installation-upgrade-kyma)
 - [Update Kyma](#installation-update-kyma)
 - [Reinstall Kyma](#installation-reinstall-kyma)
-- [Get in-depth knowledge about the installation scripts](#installation-local-installation-scripts-deep-dive)
 
 >**NOTE:** Make sure to check whether the version of the documentation in the left pane of the `kyma-project.io` is compatible with your Kyma version.
