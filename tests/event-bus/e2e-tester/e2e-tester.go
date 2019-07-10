@@ -81,11 +81,11 @@ type publisherDetails struct {
 func main() {
 	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	var subDetails subscriberDetails
-	var publisher publisherDetails
+	var pubDetails publisherDetails
 
 	//Initialise publisher struct
-	flags.StringVar(&publisher.publishEventEndpointURL, "publish-event-uri", "http://event-bus-publish:8080/v1/events", "publish service events endpoint `URL`")
-	flags.StringVar(&publisher.publishStatusEndpointURL, "publish-status-uri", "http://event-bus-publish:8080/v1/status/ready", "publish service status endpoint `URL`")
+	flags.StringVar(&pubDetails.publishEventEndpointURL, "publish-event-uri", "http://event-bus-publish:8080/v1/events", "publish service events endpoint `URL`")
+	flags.StringVar(&pubDetails.publishStatusEndpointURL, "publish-status-uri", "http://event-bus-publish:8080/v1/status/ready", "publish service status endpoint `URL`")
 
 	//Initialise subscriber
 	flags.StringVar(&subDetails.subscriberImage, "subscriber-image", "", "subscriber Docker `image` name")
@@ -168,7 +168,7 @@ func main() {
 	}
 
 	log.Println("Check Publisher Status")
-	if !publisher.checkPublisherStatus(retries) {
+	if !pubDetails.checkPublisherStatus(retries) {
 		log.Println("Error: Cannot connect to Publisher")
 		shutdown(fail, &subDetails)
 	}
@@ -188,7 +188,7 @@ func main() {
 	log.Println("Publish an event")
 	var eventSent bool
 	for i := 0; i < retries; i++ {
-		if _, err := publishTestEvent(publisher.publishEventEndpointURL); err != nil {
+		if _, err := publishTestEvent(pubDetails.publishEventEndpointURL); err != nil {
 			log.Printf("Publish event failed: %v; Retrying (%d/%d)", err, i, retries)
 			time.Sleep(time.Duration(i) * time.Second)
 		} else {
@@ -210,7 +210,7 @@ func main() {
 	log.Println("Publish headers event")
 	var headersEventSent bool
 	for i := 0; i < retries; i++ {
-		if _, err := publishHeadersTestEvent(publisher.publishEventEndpointURL); err != nil {
+		if _, err := publishHeadersTestEvent(pubDetails.publishEventEndpointURL); err != nil {
 			log.Printf("Publish headers event failed: %v; Retrying (%d/%d)", err, i, retries)
 			time.Sleep(time.Duration(i) * time.Second)
 		} else {
