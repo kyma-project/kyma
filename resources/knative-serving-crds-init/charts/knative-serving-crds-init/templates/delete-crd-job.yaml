@@ -1,17 +1,17 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: pre-upgrade-knative-serving-crds
+  name: delete-crd-knative-serving-crds
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
     "helm.sh/hook": "pre-install"
     "helm.sh/hook-weight": "-4"
   labels:
-    job: pre-upgrade-knative-serving-crds
+    job: delete-crd-knative-serving-crds
 ---
 apiVersion: v1
 data:
-  pre-upgrade.sh: |
+  delete-crd.sh: |
     #!/usr/bin/env bash
     echo "*** Pre upgrade job starts ***"
     kubectl delete crd services.serving.knative.dev  || echo "services CRD not present"
@@ -29,8 +29,8 @@ metadata:
     "helm.sh/hook": "pre-install"
     "helm.sh/hook-weight": "-4"
   labels:
-    job: pre-upgrade-knative-serving-crds
-  name: pre-upgrade-knative-serving-crds
+    job: delete-crd-knative-serving-crds
+  name: delete-crd-knative-serving-crds
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -38,7 +38,7 @@ metadata:
   labels:
     networking.knative.dev/certificate-provider: cert-manager
     serving.knative.dev/controller: "true"
-  name: pre-upgrade-knative-serving-crds-cr
+  name: delete-crd-knative-serving-crds-cr
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
     "helm.sh/hook": "pre-install"
@@ -264,21 +264,21 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        job: pre-upgrade-knative-serving-crds
+        job: delete-crd-knative-serving-crds
     spec:
       restartPolicy: OnFailure
       containers:
-      - command: ["sh", "/scripts/pre-upgrade.sh"]
+      - command: ["sh", "/scripts/delete-crd.sh"]
         image: docker.io/istio/kubectl:1.1.6
         imagePullPolicy: IfNotPresent
-        name: pre-upgrade-knative-serving-crds
+        name: delete-crd-knative-serving-crds
         volumeMounts:
         - mountPath: /scripts
           name: scripts
           readOnly: true
-      serviceAccountName: pre-upgrade-knative-serving-crds
+      serviceAccountName: delete-crd-knative-serving-crds
       volumes:
       - configMap:
           defaultMode: 420
-          name: pre-upgrade-knative-serving-crds
+          name: delete-crd-knative-serving-crds
         name: scripts
