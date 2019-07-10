@@ -7,6 +7,7 @@ import (
 
 type options struct {
 	proxyPort              int
+	externalAPIPort        int
 	tenant                 string
 	group                  string
 	eventServicePathPrefix string
@@ -16,7 +17,8 @@ type options struct {
 }
 
 func parseArgs() *options {
-	proxyPort := flag.Int("proxyPort", 8080, "Proxy port.")
+	proxyPort := flag.Int("proxyPort", 8081, "Proxy port.")
+	externalAPIPort := flag.Int("externalAPIPort", 8080, "External API port.")
 	tenant := flag.String("tenant", "", "Name of the application tenant")
 	group := flag.String("group", "", "Name of the application group")
 	eventServicePathPrefix := flag.String("eventServicePathPrefix", "/v1/events", "Prefix of paths that will be directed to the Event Service")
@@ -27,9 +29,10 @@ func parseArgs() *options {
 	flag.Parse()
 
 	return &options{
-		proxyPort: *proxyPort,
-		tenant:    *tenant,
-		group:     *group,
+		proxyPort:       *proxyPort,
+		externalAPIPort: *externalAPIPort,
+		tenant:          *tenant,
+		group:           *group,
 		eventServicePathPrefix: *eventServicePathPrefix,
 		eventServiceHost:       *eventServiceHost,
 		appRegistryPathPrefix:  *appRegistryPathPrefix,
@@ -38,10 +41,10 @@ func parseArgs() *options {
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--proxyPort=%d --tenant=%s --group=%s "+
+	return fmt.Sprintf("--proxyPort=%d --externalAPIPort=%d --tenant=%s --group=%s "+
 		"--eventServicePathPrefix=%s --eventServiceHost=%s "+
 		"--appRegistryPathPrefix=%s --appRegistryHost=%s",
-		o.proxyPort, o.tenant, o.group,
+		o.proxyPort, o.externalAPIPort, o.tenant, o.group,
 		o.eventServicePathPrefix, o.eventServiceHost,
 		o.appRegistryPathPrefix, o.appRegistryHost)
 }
