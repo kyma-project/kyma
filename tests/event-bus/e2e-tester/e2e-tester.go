@@ -92,31 +92,9 @@ func main() {
 	//Initialise subscriber
 	flags.StringVar(&subscriber.subscriberImage, "subscriber-image", "", "subscriber Docker `image` name")
 	flags.StringVar(&subscriber.subscriberNamespace, "subscriber-ns", "default", "k8s `namespace` in which subscriber test app is running")
-	flags.StringVar(&subscriber.subscriberEventEndpointURL, "subscriber-events-uri",
-		"http://"+util.SubscriberName+"."+subscriber.subscriberNamespace+":9000/v1/events", "subscriber service events endpoint `URL`")
-	flags.StringVar(&subscriber.subscriberResultsEndpointURL, "subscriber-results-uri",
-		"http://"+util.SubscriberName+"."+subscriber.subscriberNamespace+":9000/v1/results", "subscriber service results endpoint `URL`")
-	flags.StringVar(&subscriber.subscriberStatusEndpointURL, "subscriber-status-uri",
-		"http://"+util.SubscriberName+"."+subscriber.subscriberNamespace+":9000/v1/status", "subscriber service status endpoint `URL`")
-	flags.StringVar(&subscriber.subscriberShutdownEndpointURL, "subscriber-shutdown-uri",
-		"http://"+util.SubscriberName+"."+subscriber.subscriberNamespace+":9000/shutdown", "subscriber service shutdown endpoint `URL`")
-
-	flags.StringVar(&subscriber.subscriber3EventEndpointURL, "subscriber3-events-uri",
-		"http://"+util.SubscriberName+"."+subscriber.subscriberNamespace+":9000/v3/events", "subscriber 3 service events endpoint `URL`")
-	flags.StringVar(&subscriber.subscriber3ResultsEndpointURL, "subscriber3-results-uri",
-		"http://"+util.SubscriberName+"."+subscriber.subscriberNamespace+":9000/v3/results", "subscriber 3 service results endpoint `URL`")
-	flags.StringVar(&subscriber.subscriber3StatusEndpointURL, "subscriber3-status-uri",
-		"http://"+util.SubscriberName+"."+subscriber.subscriberNamespace+":9000/v3/status", "subscriber 3 service status endpoint `URL`")
-
 	flags.Parse(os.Args[1:])
 
-	//after flags.Parse is invoked all the subscriber related urls are not refreshed with namespace
-	//for example if we run this program with flag --subscriber-ns=test the "flag" has already set the default value to
-	// "http://test-core-event-bus-subscribe.default:9000/v1/events" for the variable subscriberEventEndpointURL
-	//instead of "http://test-core-event-bus-subscribe.test:9000/v1/events", therefore, after parsing, we have to refresh the urls
-	if subscriber.subscriberNamespace != defaultNamespace {
-		refreshSubscriberUrls(&subscriber)
-	}
+	initSubscriberUrls(&subscriber)
 
 	if flags.NFlag() == 0 || subscriber.subscriberImage == "" {
 
@@ -257,8 +235,8 @@ func main() {
 	shutdown(success, &subscriber)
 }
 
-// Dirty Refreshing of subscriber urls
-func refreshSubscriberUrls(subscriber *subscriberDetails) {
+// Initialize subscriber urls
+func initSubscriberUrls(subscriber *subscriberDetails) {
 	subscriber.subscriberEventEndpointURL = "http://" + util.SubscriberName + "." + subscriber.subscriberNamespace + ":9000/v1/events"
 	subscriber.subscriberResultsEndpointURL = "http://" + util.SubscriberName + "." + subscriber.subscriberNamespace + ":9000/v1/results"
 	subscriber.subscriberStatusEndpointURL = "http://" + util.SubscriberName + "." + subscriber.subscriberNamespace + ":9000/v1/status"
