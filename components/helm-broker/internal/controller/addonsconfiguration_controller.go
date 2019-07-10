@@ -101,6 +101,8 @@ func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, bro
 		strg:     s,
 		provider: bp,
 
+		protection: protection{},
+
 		brokerSyncer:      brokerSyncer,
 		brokerFacade:      brokerFacade,
 		developMode:       dev,
@@ -228,7 +230,7 @@ func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1
 	}
 
 	if err := r.deleteFinalizer(addon); err != nil {
-		return exerr.Wrapf(err, "while deleting finalizer for AddonConfiguration %s %s", addon.Name, addon.Namespace)
+		return exerr.Wrapf(err, "while deleting finalizer for AddonConfiguration %s/%s", addon.Name, addon.Namespace)
 	}
 
 	r.log.Info("Delete AddonsConfiguration process completed")
@@ -252,15 +254,14 @@ func (r *ReconcileAddonsConfiguration) existingAddonsConfigurationList(addon *ad
 }
 
 func (r *ReconcileAddonsConfiguration) addonsConfigurationList(namespace string) (*addonsv1alpha1.AddonsConfigurationList, error) {
-	addonsList := &addonsv1alpha1.AddonsConfigurationList{}
 	addonsConfigurationList := &addonsv1alpha1.AddonsConfigurationList{}
 
 	err := r.Client.List(context.TODO(), &client.ListOptions{Namespace: namespace}, addonsConfigurationList)
 	if err != nil {
-		return addonsList, exerr.Wrap(err, "during fetching AddonConfiguration list by client")
+		return addonsConfigurationList, exerr.Wrap(err, "during fetching AddonConfiguration list by client")
 	}
 
-	return addonsList, nil
+	return addonsConfigurationList, nil
 }
 
 func (r *ReconcileAddonsConfiguration) ensureBroker(addon *addonsv1alpha1.AddonsConfiguration) error {
@@ -383,7 +384,7 @@ func (r *ReconcileAddonsConfiguration) updateAddonStatus(addon *addonsv1alpha1.A
 		return exerr.Wrap(err, "while getting AddonsConfiguration")
 	}
 
-	addon.Status.ObservedGeneration = instance.Status.ObservedGeneration + 1
+	addon.Status.ObservedGeneration = instance.Generation
 	addon.Status.LastProcessedTime = instance.Status.LastProcessedTime
 
 	err = r.Status().Update(context.TODO(), addon)

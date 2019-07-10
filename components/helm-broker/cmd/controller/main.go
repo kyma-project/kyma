@@ -96,10 +96,10 @@ func main() {
 	acController := controller.NewAddonsConfigurationController(acReconcile)
 	err = acController.Start(mgr)
 	if err != nil {
-		log.Error(err, "unable to start AddonsConfigurationController")
+		log.Error(err, "unable to start ClusterAddonsConfigurationController")
 	}
 
-	cacReconcile := controller.NewReconcileClusterAddonsConfiguration(mgr, csbFacade, docsProvider, brokerSyncer)
+	cacReconcile := controller.NewReconcileClusterAddonsConfiguration(mgr, bundleProvider, sFact, csbFacade, docsProvider, brokerSyncer, ctrCfg.DevelopMode)
 	cacController := controller.NewClusterAddonsConfigurationController(cacReconcile)
 	err = cacController.Start(mgr)
 	if err != nil {

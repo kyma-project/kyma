@@ -103,7 +103,25 @@ func (rc *RepositoryCollection) ReviseBundleDuplicationInStorage(acList *addonsv
 	}
 }
 
+// ReviseBundleDuplicationInClusterStorage checks all completed addons (addons without fetch/load error)
+// they have no name:version conflict with other AddonConfiguration
+func (rc *RepositoryCollection) ReviseBundleDuplicationInClusterStorage(acList *addonsv1alpha1.ClusterAddonsConfigurationList) {
+	for _, addon := range rc.completeAddons() {
+		rc.findExistingClusterAddon(addon, acList)
+	}
+}
+
 func (rc *RepositoryCollection) findExistingAddon(addon *AddonController, list *addonsv1alpha1.AddonsConfigurationList) {
+	for _, existAddonConfiguration := range list.Items {
+		for _, repo := range existAddonConfiguration.Status.Repositories {
+			if rc.addonAlreadyRegistered(*addon, rc.filterReadyAddons(repo)) {
+				addon.ConflictWithAlreadyRegisteredAddons(fmt.Errorf("[ConfigurationName: %s, url: %s, addons: %s:%s]", existAddonConfiguration.Name, repo.URL, addon.Addon.Name, addon.Addon.Version))
+			}
+		}
+	}
+}
+
+func (rc *RepositoryCollection) findExistingClusterAddon(addon *AddonController, list *addonsv1alpha1.ClusterAddonsConfigurationList) {
 	for _, existAddonConfiguration := range list.Items {
 		for _, repo := range existAddonConfiguration.Status.Repositories {
 			if rc.addonAlreadyRegistered(*addon, rc.filterReadyAddons(repo)) {

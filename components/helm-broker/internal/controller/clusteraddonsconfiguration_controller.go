@@ -4,11 +4,15 @@ import (
 	"context"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/addons"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	exerr "github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/helm/pkg/proto/hapi/chart"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -69,28 +73,39 @@ type ReconcileClusterAddonsConfiguration struct {
 	log logrus.FieldLogger
 	client.Client
 	scheme *runtime.Scheme
+	strg   storage.Factory
 
 	clusterBrokerFacade clusterBrokerFacade
 	clusterDocsProvider clusterDocsProvider
 	clusterBrokerSyncer clusterBrokerSyncer
 
+	bundleProvider bundleProvider
+	protection     protection
+
 	// syncBroker informs ServiceBroker should be resync, it should be true if
 	// operation insert/delete was made on storage
 	syncBroker bool
+
+	developMode bool
 }
 
 // NewReconcileClusterAddonsConfiguration returns a new reconcile.Reconciler
-func NewReconcileClusterAddonsConfiguration(mgr manager.Manager, clusterBrokerFacade clusterBrokerFacade, clusterDocsProvider clusterDocsProvider, clusterBrokerSyncer clusterBrokerSyncer) reconcile.Reconciler {
+func NewReconcileClusterAddonsConfiguration(mgr manager.Manager, bundleProvider bundleProvider, storage storage.Factory, clusterBrokerFacade clusterBrokerFacade, clusterDocsProvider clusterDocsProvider, clusterBrokerSyncer clusterBrokerSyncer, developMode bool) reconcile.Reconciler {
 	return &ReconcileClusterAddonsConfiguration{
 		log:    logrus.WithField("controller", "cluster-addons-configuration"),
 		Client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
+		strg:   storage,
 
 		clusterBrokerFacade: clusterBrokerFacade,
 		clusterDocsProvider: clusterDocsProvider,
 		clusterBrokerSyncer: clusterBrokerSyncer,
+		bundleProvider:      bundleProvider,
 
-		syncBroker: false,
+		protection: protection{},
+
+		syncBroker:  false,
+		developMode: developMode,
 	}
 }
 
@@ -101,55 +116,117 @@ func (r *ReconcileClusterAddonsConfiguration) Reconcile(request reconcile.Reques
 	instance := &addonsv1alpha1.ClusterAddonsConfiguration{}
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			// Object not found, return.  Created objects are automatically garbage collected.
-			// For additional cleanup logic use finalizers.
-			return reconcile.Result{}, nil
-		}
-		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
 
-	exist, err := r.clusterBrokerFacade.Exist()
-	if err != nil {
-		return reconcile.Result{}, exerr.Wrap(err, "while checking if ClusterServiceBroker exists")
-	}
-	if !exist {
-		if err := r.clusterBrokerFacade.Create(); err != nil {
-			return reconcile.Result{}, exerr.Wrapf(err, "while creating ClusterServiceBroker for addon %s in namespace %s", instance.Name, instance.Namespace)
+	if instance.DeletionTimestamp != nil {
+		if err := r.deleteAddonsProcess(instance.Name); err != nil {
+			return reconcile.Result{}, exerr.Wrapf(err, "while deleting ClusterAddonConfiguration %q", request.NamespacedName)
 		}
-	} else if r.syncBroker {
-		if err := r.clusterBrokerSyncer.Sync(); err != nil {
-			return reconcile.Result{}, exerr.Wrapf(err, "while syncing ClusterServiceBroker for addon %s in namespace %s", instance.Name, instance.Namespace)
+		return reconcile.Result{}, nil
+	}
+
+	if instance.Status.ObservedGeneration == 0 {
+		if err := r.addFinalizer(instance); err != nil {
+			return reconcile.Result{}, exerr.Wrapf(err, "while adding a finalizer to ClusterAddonsConfiguration %q", request.NamespacedName)
+		}
+		err = r.addAddonsProcess(instance)
+		if err != nil {
+			return reconcile.Result{}, exerr.Wrapf(err, "while creating ClusterAddonsConfiguration %q", request.NamespacedName)
+		}
+	} else if instance.Generation > instance.Status.ObservedGeneration {
+		instance.Status = addonsv1alpha1.ClusterAddonsConfigurationStatus{}
+		err = r.addAddonsProcess(instance)
+		if err != nil {
+			return reconcile.Result{}, exerr.Wrapf(err, "while updating ClusterAddonsConfiguration %q", request.NamespacedName)
 		}
 	}
 
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileClusterAddonsConfiguration) deleteAddonsProcess(namespace string) error {
-	r.log.Infof("Start delete AddonsConfiguration from namespace %s", namespace)
+func (r *ReconcileClusterAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.ClusterAddonsConfiguration) error {
+	r.log.Info("Start add AddonsConfiguration process")
+	repositories := addons.NewRepositoryCollection()
 
-	addonsCfgs, err := r.addonsConfigurationList(namespace)
+	r.log.Infof("- load bundles and charts for each addon")
+	for _, specRepository := range addon.Spec.Repositories {
+		if err := specRepository.VerifyURL(r.developMode); err != nil {
+			r.log.Errorf("url %q address is not valid: %s", specRepository.URL, err)
+			continue
+		}
+		r.log.Infof("create adds for %q repository", specRepository.URL)
+		repo := addons.NewAddonsRepository(specRepository.URL)
+
+		adds, err := r.createAddons(specRepository.URL)
+		if err != nil {
+			repo.Failed()
+			repo.Repository.Reason = addonsv1alpha1.RepositoryURLFetchingError
+			repo.Repository.Message = err.Error()
+			repositories.AddRepository(repo)
+
+			r.log.Errorf("while creating adds for repository from %q: %s", specRepository.URL, err)
+			continue
+		}
+
+		repo.Addons = adds
+		repositories.AddRepository(repo)
+	}
+
+	r.log.Info("- check duplicate ID addons alongside repositories")
+	repositories.ReviseBundleDuplicationInRepository()
+
+	r.log.Info("- check duplicates ID addons in existing addons configuration")
+	list, err := r.existingAddonsConfigurationList(addon.Name)
 	if err != nil {
-		return exerr.Wrapf(err, "while listing AddonsConfigurations in namespace %s", namespace)
+		r.log.Errorf("cannot fetch AddonsConfiguration list: %s", err)
+		return exerr.Wrap(err, "while fetching addons configuration list")
+	}
+	repositories.ReviseBundleDuplicationInClusterStorage(list)
+
+	r.log.Info("- save ready bundles and charts in storage")
+	r.saveBundle(internal.Namespace(addon.Namespace), repositories)
+
+	r.log.Info("- update AddonsConfiguration status")
+	r.statusSnapshot(addon, repositories)
+	err = r.updateAddonStatus(addon)
+	if err != nil {
+		r.log.Errorf("cannot update AddonsConfiguration %s: %v", addon.Name, err)
+		return exerr.Wrap(err, "while update AddonsConfiguration status")
+	}
+
+	if err := r.ensureBroker(addon); err != nil {
+		return exerr.Wrap(err, "while ensuring ServiceBroker")
+	}
+
+	r.log.Info("Add AddonsConfiguration process completed")
+	return nil
+}
+
+func (r *ReconcileClusterAddonsConfiguration) deleteAddonsProcess(addonName string) error {
+	r.log.Infof("Start delete ClusterAddonsConfiguration %s", addonName)
+
+	addonsCfgs, err := r.existingAddonsConfigurationList(addonName)
+	if err != nil {
+		return exerr.Wrap(err, "while listing ClusterAddonsConfigurations")
 	}
 
 	deleteBroker := true
 	for _, addon := range addonsCfgs.Items {
 		if addon.Status.Phase != addonsv1alpha1.AddonsConfigurationReady {
-			// reprocess ClusterAddonConfig again if it was failed
+			// reprocess ClusterAddonConfig again if was failed
 			addon.Spec.ReprocessRequest++
 			if err := r.Client.Update(context.Background(), &addon); err != nil {
-				return exerr.Wrapf(err, "while incrementing a reprocess requests for AddonConfiguration %s/%s", addon.Name, addon.Namespace)
+				return exerr.Wrapf(err, "while incrementing a reprocess requests for ClusterAddonConfiguration %s", addon.Name)
 			}
 		} else {
 			deleteBroker = false
 		}
 	}
 	if deleteBroker {
+		r.log.Info("- deleting ClusterServiceBroker")
 		if err := r.clusterBrokerFacade.Delete(); err != nil {
-			return exerr.Wrapf(err, "while deleting ServiceBroker from namespace %s", namespace)
+			return exerr.Wrap(err, "while deleting ClusterServiceBroker")
 		}
 	}
 
@@ -157,14 +234,179 @@ func (r *ReconcileClusterAddonsConfiguration) deleteAddonsProcess(namespace stri
 	return nil
 }
 
-func (r *ReconcileClusterAddonsConfiguration) addonsConfigurationList(namespace string) (*addonsv1alpha1.AddonsConfigurationList, error) {
-	addonsList := &addonsv1alpha1.AddonsConfigurationList{}
+func (r *ReconcileClusterAddonsConfiguration) ensureBroker(addon *addonsv1alpha1.ClusterAddonsConfiguration) error {
+	exist, err := r.clusterBrokerFacade.Exist()
+	if err != nil {
+		return exerr.Wrap(err, "while checking if ClusterServiceBroker exists")
+	}
+	if !exist {
+		r.log.Info("- creating ClusterServiceBroker")
+		if err := r.clusterBrokerFacade.Create(); err != nil {
+			return exerr.Wrapf(err, "while creating ClusterServiceBroker for addon %s", addon.Name)
+		}
+	} else if r.syncBroker {
+		if err := r.clusterBrokerSyncer.Sync(); err != nil {
+			return exerr.Wrapf(err, "while syncing ClusterServiceBroker for addon %s", addon.Name)
+		}
+	}
+	return nil
+}
+
+func (r *ReconcileClusterAddonsConfiguration) createAddons(URL string) ([]*addons.AddonController, error) {
+	adds := []*addons.AddonController{}
+
+	// fetch repository index
+	index, err := r.bundleProvider.GetIndex(URL)
+	if err != nil {
+		return adds, exerr.Wrap(err, "while reading repository index")
+	}
+
+	// for each repository entry create addon
+	for _, entries := range index.Entries {
+		for _, entry := range entries {
+			addon := addons.NewAddon(string(entry.Name), string(entry.Version), URL)
+
+			completeBundle, err := r.bundleProvider.LoadCompleteBundle(entry)
+			if bundle.IsFetchingError(err) {
+				addon.FetchingError(err)
+				adds = append(adds, addon)
+				logrus.Errorf("while fetching addon: %s", err)
+				continue
+			}
+			if bundle.IsLoadingError(err) {
+				addon.LoadingError(err)
+				adds = append(adds, addon)
+				logrus.Errorf("while loading addon: %s", err)
+				continue
+			}
+
+			addon.ID = string(completeBundle.Bundle.ID)
+			addon.Bundle = completeBundle.Bundle
+			addon.Charts = completeBundle.Charts
+
+			adds = append(adds, addon)
+		}
+	}
+
+	return adds, nil
+}
+
+func (r *ReconcileClusterAddonsConfiguration) existingAddonsConfigurationList(addonName string) (*addonsv1alpha1.ClusterAddonsConfigurationList, error) {
+	addonsList := &addonsv1alpha1.ClusterAddonsConfigurationList{}
+	addonsConfigurationList, err := r.addonsConfigurationList()
+	if err != nil {
+		return nil, exerr.Wrap(err, "while listing ClusterAddonsConfigurations")
+	}
+
+	for _, existAddon := range addonsConfigurationList.Items {
+		if existAddon.Name != addonName {
+			addonsList.Items = append(addonsList.Items, existAddon)
+		}
+	}
+
+	return addonsList, nil
+}
+
+func (r *ReconcileClusterAddonsConfiguration) addonsConfigurationList() (*addonsv1alpha1.ClusterAddonsConfigurationList, error) {
 	addonsConfigurationList := &addonsv1alpha1.ClusterAddonsConfigurationList{}
 
 	err := r.Client.List(context.TODO(), &client.ListOptions{}, addonsConfigurationList)
 	if err != nil {
-		return addonsList, exerr.Wrap(err, "during fetching AddonConfiguration list by client")
+		return addonsConfigurationList, exerr.Wrap(err, "during fetching ClusterAddonConfiguration list by client")
 	}
 
-	return addonsList, nil
+	return addonsConfigurationList, nil
+}
+
+func (r *ReconcileClusterAddonsConfiguration) saveBundle(namespace internal.Namespace, repositories *addons.RepositoryCollection) {
+	for _, addon := range repositories.ReadyAddons() {
+		exist, err := r.strg.Bundle().Upsert(namespace, addon.Bundle)
+		if err != nil {
+			addon.RegisteringError(err)
+			r.log.Errorf("cannot upsert bundle %v:%v into storage", addon.Bundle.Name, addon.Bundle.Version)
+			continue
+		}
+		if exist {
+			r.log.Infof("bundle %v:%v already existed in storage, bundle was replaced", addon.Bundle.Name, addon.Bundle.Version)
+		}
+		err = r.saveCharts(namespace, addon.Charts)
+		if err != nil {
+			addon.RegisteringError(err)
+			r.log.Errorf("cannot upsert charts of %v:%v bundle", addon.Bundle.Name, addon.Bundle.Version)
+			continue
+		}
+
+		r.syncBroker = true
+	}
+}
+
+func (r *ReconcileClusterAddonsConfiguration) saveCharts(namespace internal.Namespace, charts []*chart.Chart) error {
+	for _, bundleChart := range charts {
+		exist, err := r.strg.Chart().Upsert(namespace, bundleChart)
+		if err != nil {
+			r.log.Errorf("cannot upsert %s chart: %s", bundleChart.Metadata.Name, err)
+			return err
+		}
+		if exist {
+			r.log.Infof("chart %s already existed in storage, chart was replaced", bundleChart.Metadata.Name)
+		}
+	}
+
+	return nil
+}
+
+func (r *ReconcileClusterAddonsConfiguration) statusSnapshot(addon *addonsv1alpha1.ClusterAddonsConfiguration, repositories *addons.RepositoryCollection) {
+	addon.Status.Repositories = nil
+
+	for _, repo := range repositories.Repositories {
+		addonsRepository := repo.Repository
+		addonsRepository.Addons = []addonsv1alpha1.Addon{}
+		for _, addon := range repo.Addons {
+			addonsRepository.Addons = append(addonsRepository.Addons, addon.Addon)
+		}
+		addon.Status.Repositories = append(addon.Status.Repositories, addonsRepository)
+	}
+
+	if repositories.IsRepositoriesIDConflict() {
+		addon.Status.Phase = addonsv1alpha1.AddonsConfigurationFailed
+	} else {
+		addon.Status.Phase = addonsv1alpha1.AddonsConfigurationReady
+	}
+}
+
+func (r *ReconcileClusterAddonsConfiguration) updateAddonStatus(addon *addonsv1alpha1.ClusterAddonsConfiguration) error {
+	instance := &addonsv1alpha1.ClusterAddonsConfiguration{}
+	err := r.Get(context.TODO(), types.NamespacedName{Name: addon.Name}, instance)
+	if err != nil {
+		return exerr.Wrap(err, "while getting ClusterAddonsConfiguration")
+	}
+
+	addon.Status.ObservedGeneration = instance.Generation
+	addon.Status.LastProcessedTime = instance.Status.LastProcessedTime
+
+	err = r.Status().Update(context.TODO(), addon)
+	if err != nil {
+		return exerr.Wrap(err, "while update ClusterAddonsConfiguration")
+	}
+	return nil
+}
+
+func (r *ReconcileClusterAddonsConfiguration) addFinalizer(addon *addonsv1alpha1.ClusterAddonsConfiguration) error {
+	obj := addon.DeepCopy()
+	if r.protection.hasFinalizer(obj.Finalizers) {
+		return nil
+	}
+	obj.Finalizers = r.protection.addFinalizer(obj.Finalizers)
+
+	return r.Client.Update(context.Background(), obj)
+}
+
+func (r *ReconcileClusterAddonsConfiguration) deleteFinalizer(addon *addonsv1alpha1.ClusterAddonsConfiguration) error {
+	obj := addon.DeepCopy()
+	if !r.protection.hasFinalizer(obj.Finalizers) {
+		return nil
+	}
+	obj.Finalizers = r.protection.removeFinalizer(obj.Finalizers)
+
+	return r.Client.Update(context.Background(), obj)
 }
