@@ -42,7 +42,7 @@ func (p *HTTPRepository) URLForBundle(name Name, version Version) string {
 	return fmt.Sprintf("%s%s-%s.tgz", p.baseOfURL(p.RepositoryURL), name, version)
 }
 
-func (c *HTTPRepository) baseOfURL(fullURL string) string {
+func (p *HTTPRepository) baseOfURL(fullURL string) string {
 	return strings.TrimRight(fullURL, path.Base(fullURL))
 }
 

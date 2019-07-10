@@ -2,14 +2,16 @@ package controller
 
 import (
 	"context"
+
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/repository"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/addons"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	exerr "github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -17,25 +19,28 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"k8s.io/apimachinery/pkg/types"
 )
 
+//go:generate mockery -name=bundleProvider -output=automock -outpkg=automock -case=underscore
+type bundleProvider interface {
+	GetIndex(string) (*bundle.IndexDTO, error)
+	LoadCompleteBundle(bundle.EntryDTO) (bundle.CompleteBundle, error)
+}
+
+//go:generate mockery -name=brokerFacade -output=automock -outpkg=automock -case=underscore
 type brokerFacade interface {
 	Create(ns string) error
 	Exist(ns string) (bool, error)
 	Delete(ns string) error
 }
 
-type bundleProvider interface {
-	GetIndex(string) (*bundle.IndexDTO, error)
-	LoadCompleteBundle(bundle.EntryDTO) (bundle.CompleteBundle, error)
-}
-
+//go:generate mockery -name=docsProvider -output=automock -outpkg=automock -case=underscore
 type docsProvider interface {
 	EnsureDocsTopic(bundle *internal.Bundle) error
 	EnsureDocsTopicRemoved(id string) error
 }
 
+//go:generate mockery -name=brokerSyncer -output=automock -outpkg=automock -case=underscore
 type brokerSyncer interface {
 	SyncServiceBroker(namespace string) error
 }
@@ -71,7 +76,7 @@ var _ reconcile.Reconciler = &ReconcileAddonsConfiguration{}
 
 // ReconcileAddonsConfiguration reconciles a AddonsConfiguration object
 type ReconcileAddonsConfiguration struct {
-	log               logrus.FieldLogger
+	log logrus.FieldLogger
 	client.Client
 	scheme            *runtime.Scheme
 	provider          bundleProvider
@@ -114,7 +119,7 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 
 	if instance.DeletionTimestamp != nil {
 		if err := r.deleteAddonsProcess(instance); err != nil {
-			return reconcile.Result{}, exerr.Wrapf(err, "while deleting AddonConfiguration %d", request.NamespacedName)
+			return reconcile.Result{}, exerr.Wrapf(err, "while deleting AddonConfiguration %q", request.NamespacedName)
 		}
 		return reconcile.Result{}, nil
 	}
@@ -140,7 +145,7 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 
 func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.AddonsConfiguration) error {
 	r.log.Info("Start add AddonsConfiguration process")
-	repositories := repository.NewRepositoryCollection()
+	repositories := addons.NewRepositoryCollection()
 
 	r.log.Infof("- load bundles and charts for each addon")
 	for _, specRepository := range addon.Spec.Repositories {
@@ -149,7 +154,7 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 			continue
 		}
 		r.log.Infof("create addons for %q repository", specRepository.URL)
-		repo := repository.NewAddonsRepository(specRepository.URL)
+		repo := addons.NewAddonsRepository(specRepository.URL)
 
 		addons, err := r.createAddons(specRepository.URL)
 		if err != nil {
@@ -276,30 +281,30 @@ func (r *ReconcileAddonsConfiguration) ensureBroker(addon *addonsv1alpha1.Addons
 	return nil
 }
 
-func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*repository.AddonController, error) {
-	addons := []*repository.AddonController{}
+func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*addons.AddonController, error) {
+	adds := []*addons.AddonController{}
 
 	// fetch repository index
 	index, err := r.provider.GetIndex(URL)
 	if err != nil {
-		return addons, exerr.Wrap(err, "while reading repository index")
+		return adds, exerr.Wrap(err, "while reading repository index")
 	}
 
 	// for each repository entry create addon
 	for _, entries := range index.Entries {
 		for _, entry := range entries {
-			addon := repository.NewAddon(string(entry.Name), string(entry.Version), URL)
+			addon := addons.NewAddon(string(entry.Name), string(entry.Version), URL)
 
 			completeBundle, err := r.provider.LoadCompleteBundle(entry)
 			if bundle.IsFetchingError(err) {
 				addon.FetchingError(err)
-				addons = append(addons, addon)
+				adds = append(adds, addon)
 				logrus.Errorf("while fetching addon: %s", err)
 				continue
 			}
 			if bundle.IsLoadingError(err) {
 				addon.LoadingError(err)
-				addons = append(addons, addon)
+				adds = append(adds, addon)
 				logrus.Errorf("while loading addon: %s", err)
 				continue
 			}
@@ -308,14 +313,14 @@ func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*repository.A
 			addon.Bundle = completeBundle.Bundle
 			addon.Charts = completeBundle.Charts
 
-			addons = append(addons, addon)
+			adds = append(adds, addon)
 		}
 	}
 
-	return addons, nil
+	return adds, nil
 }
 
-func (r *ReconcileAddonsConfiguration) saveBundle(namespace internal.Namespace, repositories *repository.RepositoryCollection) {
+func (r *ReconcileAddonsConfiguration) saveBundle(namespace internal.Namespace, repositories *addons.RepositoryCollection) {
 	for _, addon := range repositories.ReadyAddons() {
 		exist, err := r.strg.Bundle().Upsert(namespace, addon.Bundle)
 		if err != nil {
@@ -352,7 +357,7 @@ func (r *ReconcileAddonsConfiguration) saveCharts(namespace internal.Namespace, 
 	return nil
 }
 
-func (r *ReconcileAddonsConfiguration) statusSnapshot(addon *addonsv1alpha1.AddonsConfiguration, repositories *repository.RepositoryCollection) {
+func (r *ReconcileAddonsConfiguration) statusSnapshot(addon *addonsv1alpha1.AddonsConfiguration, repositories *addons.RepositoryCollection) {
 	addon.Status.Repositories = nil
 
 	for _, repo := range repositories.Repositories {
@@ -364,7 +369,7 @@ func (r *ReconcileAddonsConfiguration) statusSnapshot(addon *addonsv1alpha1.Addo
 		addon.Status.Repositories = append(addon.Status.Repositories, addonsRepository)
 	}
 
-	if repositories.IsRepositoriesIdConflict() {
+	if repositories.IsRepositoriesIDConflict() {
 		addon.Status.Phase = addonsv1alpha1.AddonsConfigurationFailed
 	} else {
 		addon.Status.Phase = addonsv1alpha1.AddonsConfigurationReady
@@ -373,7 +378,7 @@ func (r *ReconcileAddonsConfiguration) statusSnapshot(addon *addonsv1alpha1.Addo
 
 func (r *ReconcileAddonsConfiguration) updateAddonStatus(addon *addonsv1alpha1.AddonsConfiguration) error {
 	instance := &addonsv1alpha1.AddonsConfiguration{}
-	err := r.Get(context.TODO(), types.NamespacedName{Name:addon.Name, Namespace:addon.Namespace}, instance)
+	err := r.Get(context.TODO(), types.NamespacedName{Name: addon.Name, Namespace: addon.Namespace}, instance)
 	if err != nil {
 		return exerr.Wrap(err, "while getting AddonsConfiguration")
 	}
@@ -395,11 +400,7 @@ func (r *ReconcileAddonsConfiguration) addFinalizer(addon *addonsv1alpha1.Addons
 	}
 	obj.Finalizers = r.protection.addFinalizer(obj.Finalizers)
 
-	if err := r.Client.Update(context.Background(), obj); err != nil {
-		return err
-	}
-
-	return nil
+	return r.Client.Update(context.Background(), obj)
 }
 
 func (r *ReconcileAddonsConfiguration) deleteFinalizer(addon *addonsv1alpha1.AddonsConfiguration) error {
@@ -409,9 +410,5 @@ func (r *ReconcileAddonsConfiguration) deleteFinalizer(addon *addonsv1alpha1.Add
 	}
 	obj.Finalizers = r.protection.removeFinalizer(obj.Finalizers)
 
-	if err := r.Client.Update(context.Background(), obj); err != nil {
-		return err
-	}
-
-	return nil
+	return r.Client.Update(context.Background(), obj)
 }

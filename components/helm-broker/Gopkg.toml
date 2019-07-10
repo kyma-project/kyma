@@ -83,7 +83,7 @@ required= [
 
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
-  version = "=v0.1.39"
+  version = "=v0.1.42"
 
 [[constraint]]
   name="sigs.k8s.io/controller-runtime"

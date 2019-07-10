@@ -14,9 +14,6 @@ spec:
     kind: AddonsConfiguration
     plural: addonsconfigurations
   scope: Namespaced
-  subresources:
-    # status enables the status subresource.
-    status: {}
   validation:
     openAPIV3Schema:
       properties:

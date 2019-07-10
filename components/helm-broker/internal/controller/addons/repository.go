@@ -1,4 +1,4 @@
-package repository
+package addons
 
 import (
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"

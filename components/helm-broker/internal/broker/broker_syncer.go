@@ -11,8 +11,8 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// serviceBrokerSync provide services to sync the ClusterServiceBroker
-type serviceBrokerSync struct {
+// ServiceBrokerSyncer provide services to sync the ClusterServiceBroker
+type ServiceBrokerSyncer struct {
 	clusterServiceBrokersGetter v1beta12.ClusterServiceBrokersGetter
 	serviceBrokerGetter         v1beta12.ServiceBrokersGetter
 	clusterBrokerName           string
@@ -20,8 +20,8 @@ type serviceBrokerSync struct {
 }
 
 // NewServiceBrokerSyncer allows to sync the ServiceBroker.
-func NewServiceBrokerSyncer(clusterServiceBrokersGetter v1beta12.ClusterServiceBrokersGetter, serviceBrokerGetter v1beta12.ServiceBrokersGetter, clusterBrokerName string, log logrus.FieldLogger) *serviceBrokerSync {
-	return &serviceBrokerSync{
+func NewServiceBrokerSyncer(clusterServiceBrokersGetter v1beta12.ClusterServiceBrokersGetter, serviceBrokerGetter v1beta12.ServiceBrokersGetter, clusterBrokerName string, log logrus.FieldLogger) *ServiceBrokerSyncer {
+	return &ServiceBrokerSyncer{
 		clusterServiceBrokersGetter: clusterServiceBrokersGetter,
 		clusterBrokerName:           clusterBrokerName,
 		serviceBrokerGetter:         serviceBrokerGetter,
@@ -32,7 +32,7 @@ func NewServiceBrokerSyncer(clusterServiceBrokersGetter v1beta12.ClusterServiceB
 const maxSyncRetries = 5
 
 // Sync syncs the ServiceBrokers, does not fail if the broker does not exists
-func (r *serviceBrokerSync) Sync() error {
+func (r *ServiceBrokerSyncer) Sync() error {
 	r.log.Infof("Trigger Service Catalog to refresh ClusterServiceBroker %s", r.clusterBrokerName)
 	for i := 0; i < maxSyncRetries; i++ {
 		broker, err := r.clusterServiceBrokersGetter.ClusterServiceBrokers().Get(r.clusterBrokerName, v1.GetOptions{})
@@ -64,7 +64,7 @@ func (r *serviceBrokerSync) Sync() error {
 }
 
 // SyncServiceBroker syncing the helm-broker ns-broker in the given namespace
-func (r *serviceBrokerSync) SyncServiceBroker(namespace string) error {
+func (r *ServiceBrokerSyncer) SyncServiceBroker(namespace string) error {
 	brokerClient := r.serviceBrokerGetter.ServiceBrokers(namespace)
 
 	for i := 0; i < maxSyncRetries; i++ {
@@ -87,7 +87,7 @@ func (r *serviceBrokerSync) SyncServiceBroker(namespace string) error {
 }
 
 // SyncServiceBrokers syncs the ServiceBrokers
-func (r *serviceBrokerSync) SyncServiceBrokers() error {
+func (r *ServiceBrokerSyncer) SyncServiceBrokers() error {
 	labelSelector := fmt.Sprintf("%s=%s", BrokerLabelKey, BrokerLabelValue)
 	brokersList, err := r.serviceBrokerGetter.ServiceBrokers(v1.NamespaceAll).List(v1.ListOptions{
 		LabelSelector: labelSelector,

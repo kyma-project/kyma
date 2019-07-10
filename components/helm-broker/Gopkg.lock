@@ -585,7 +585,7 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:ebeb7f1edc72a76b8d550c7b32478119ba666db041bb815ccb1fcaa658f6aad5"
+  digest = "1:68ac2b3da20245ec388ade8ca4d2d61c10742d533097190cc9ad4899131656cd"
   name = "github.com/kubernetes-incubator/service-catalog"
   packages = [
     "pkg/apis/servicecatalog",
@@ -602,8 +602,8 @@
     "pkg/filter",
   ]
   pruneopts = "UT"
-  revision = "5620be911e9372103600e656593409b1baf4c0dd"
-  version = "v0.1.39"
+  revision = "49e5cc4f90c6794d490eea4256061797223d9564"
+  version = "v0.1.42"
 
 [[projects]]
   digest = "1:8f927aa6bddebb48270271aceb1cef1d1ea567b5e63fa372021c77dfb100d0b8"
@@ -1214,7 +1214,7 @@
   version = "kubernetes-1.13.4"
 
 [[projects]]
-  digest = "1:51ab4e2706ef5cde1f05a4d5e13d6ff258f5861bb4edf6143a4b4052884f86d7"
+  digest = "1:624e30badeaacfc1631c6cd241d023df84a9db5c91bb0b7ad8cf9dcefd8b4016"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -1248,6 +1248,7 @@
     "pkg/util/mergepatch",
     "pkg/util/naming",
     "pkg/util/net",
+    "pkg/util/rand",
     "pkg/util/runtime",
     "pkg/util/sets",
     "pkg/util/strategicpatch",

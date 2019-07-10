@@ -2,7 +2,7 @@ package controller
 
 import "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 
-type protection struct {}
+type protection struct{}
 
 func (protection) removeFinalizer(slice []string) []string {
 	newSlice := make([]string, 0)

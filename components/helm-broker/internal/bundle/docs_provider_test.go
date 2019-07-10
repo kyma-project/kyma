@@ -39,7 +39,7 @@ func TestDocsProvider_EnsureClusterDocsTopic(t *testing.T) {
 			// then
 			err = c.Get(context.Background(), client.ObjectKey{Namespace: cdt.Namespace, Name: cdt.Name}, cdt)
 			require.NoError(t, err)
-			assert.Equal(t, tc.givenBundle.Bundle.Docs[0].Template, cdt.Spec)
+			assert.Equal(t, tc.givenBundle.Bundle.Docs[0].Template, cdt.Spec.CommonDocsTopicSpec)
 		})
 	}
 }
@@ -64,7 +64,7 @@ func TestDocsProvider_EnsureClusterDocsTopic_UpdateIfExist(t *testing.T) {
 	// then
 	err = c.Get(context.Background(), client.ObjectKey{Namespace: cdt.Namespace, Name: cdt.Name}, cdt)
 	require.NoError(t, err)
-	assert.Equal(t, bundleWithEmptyDocsURL.Bundle.Docs[0].Template, cdt.Spec)
+	assert.Equal(t, bundleWithEmptyDocsURL.Bundle.Docs[0].Template, cdt.Spec.CommonDocsTopicSpec)
 }
 
 func TestDocsProvider_EnsureClusterDocsTopicRemoved(t *testing.T) {

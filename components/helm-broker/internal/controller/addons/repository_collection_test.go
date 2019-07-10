@@ -1,4 +1,4 @@
-package repository
+package addons
 
 import (
 	"testing"
@@ -92,7 +92,7 @@ func TestRepositoryCollection_IsRepositoriesIdConflict(t *testing.T) {
 		})
 
 	// Then
-	assert.False(t, trc.IsRepositoriesIdConflict())
+	assert.False(t, trc.IsRepositoriesIDConflict())
 
 	// When
 	trc.AddRepository(
@@ -101,7 +101,7 @@ func TestRepositoryCollection_IsRepositoriesIdConflict(t *testing.T) {
 		})
 
 	// Then
-	assert.True(t, trc.IsRepositoriesIdConflict())
+	assert.True(t, trc.IsRepositoriesIDConflict())
 }
 
 func TestRepositoryCollection_ReviseBundleDuplicationInRepository(t *testing.T) {
@@ -180,7 +180,7 @@ func TestRepositoryCollection_ReviseBundleDuplicationInStorage(t *testing.T) {
 					Name: "addon-testing",
 				},
 				Status: v1alpha1.AddonsConfigurationStatus{
-					v1alpha1.CommonAddonsConfigurationStatus{
+					CommonAddonsConfigurationStatus: v1alpha1.CommonAddonsConfigurationStatus{
 						Repositories: []v1alpha1.StatusRepository{
 							{
 								URL: "http://example.com/index.yaml",

@@ -21,10 +21,10 @@ import (
 func TestServiceBrokerSync_Success(t *testing.T) {
 	// given
 	client := fake.NewSimpleClientset(fixClusterServiceBroker())
-	csbSyncer := broker.NewClusterServiceBrokerSyncer(client.ServicecatalogV1beta1().ClusterServiceBrokers(), spy.NewLogDummy())
+	csbSyncer := broker.NewServiceBrokerSyncer(client.ServicecatalogV1beta1(), client.ServicecatalogV1beta1(), fixClusterServiceBroker().Name, spy.NewLogDummy())
 
 	// when
-	err := csbSyncer.Sync(fixClusterServiceBroker().Name, 2)
+	err := csbSyncer.Sync()
 
 	// then
 	sb, err := client.ServicecatalogV1beta1().ClusterServiceBrokers().Get(fixClusterServiceBroker().Name, v1.GetOptions{})
@@ -37,10 +37,10 @@ func TestServiceBrokerSync_Success(t *testing.T) {
 func TestServiceBrokerSync_NotExistingBroker(t *testing.T) {
 	// given
 	client := fake.NewSimpleClientset()
-	csbSyncer := broker.NewClusterServiceBrokerSyncer(client.ServicecatalogV1beta1().ClusterServiceBrokers(), spy.NewLogDummy())
+	csbSyncer := broker.NewServiceBrokerSyncer(client.ServicecatalogV1beta1(), client.ServicecatalogV1beta1(), fixClusterServiceBroker().Name, spy.NewLogDummy())
 
 	// when
-	err := csbSyncer.Sync(fixClusterServiceBroker().Name, 2)
+	err := csbSyncer.Sync()
 
 	// then
 	require.NoError(t, err)
@@ -58,10 +58,10 @@ func TestServiceBrokerSync_SuccessAfterConflictAndRetry(t *testing.T) {
 		return false, fixClusterServiceBroker(), nil
 	})
 
-	csbSyncer := broker.NewClusterServiceBrokerSyncer(client.Servicecatalog().ClusterServiceBrokers(), spy.NewLogDummy())
+	csbSyncer := broker.NewServiceBrokerSyncer(client.ServicecatalogV1beta1(), client.ServicecatalogV1beta1(), fixClusterServiceBroker().Name, spy.NewLogDummy())
 
 	// when
-	err := csbSyncer.Sync(fixClusterServiceBroker().Name, 2)
+	err := csbSyncer.Sync()
 
 	// then
 	sb, err := client.ServicecatalogV1beta1().ClusterServiceBrokers().Get(fixClusterServiceBroker().Name, v1.GetOptions{})

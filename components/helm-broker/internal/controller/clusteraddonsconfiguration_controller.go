@@ -17,17 +17,20 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
+//go:generate mockery -name=clusterBrokerFacade -output=automock -outpkg=automock -case=underscore
 type clusterBrokerFacade interface {
 	Create() error
 	Exist() (bool, error)
 	Delete() error
 }
 
+//go:generate mockery -name=clusterDocsProvider -output=automock -outpkg=automock -case=underscore
 type clusterDocsProvider interface {
 	EnsureClusterDocsTopic(bundle *internal.Bundle) error
 	EnsureClusterDocsTopicRemoved(id string) error
 }
 
+//go:generate mockery -name=clusterBrokerSyncer -output=automock -outpkg=automock -case=underscore
 type clusterBrokerSyncer interface {
 	Sync() error
 }

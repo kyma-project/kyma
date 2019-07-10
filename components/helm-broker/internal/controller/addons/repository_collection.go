@@ -1,4 +1,4 @@
-package repository
+package addons
 
 import (
 	"fmt"
@@ -62,8 +62,8 @@ func (rc *RepositoryCollection) ReadyAddons() []*AddonController {
 	return addons
 }
 
-// IsRepositoriesIdConflict informs if any of repositories in collection is in failed status
-func (rc *RepositoryCollection) IsRepositoriesIdConflict() bool {
+// IsRepositoriesIDConflict informs if any of repositories in collection is in failed status
+func (rc *RepositoryCollection) IsRepositoriesIDConflict() bool {
 	for _, repository := range rc.Repositories {
 		if repository.IsFailed() {
 			return true
@@ -74,7 +74,7 @@ func (rc *RepositoryCollection) IsRepositoriesIdConflict() bool {
 }
 
 type idConflictData struct {
-	repositoryUrl string
+	repositoryURL string
 	addonsName    string
 }
 
@@ -85,10 +85,10 @@ func (rc *RepositoryCollection) ReviseBundleDuplicationInRepository() {
 
 	for _, addon := range rc.completeAddons() {
 		if data, ok := ids[addon.ID]; ok {
-			addon.ConflictInSpecifiedRepositories(fmt.Errorf("[url: %s, addons: %s]", data.repositoryUrl, data.addonsName))
+			addon.ConflictInSpecifiedRepositories(fmt.Errorf("[url: %s, addons: %s]", data.repositoryURL, data.addonsName))
 		} else {
 			ids[addon.ID] = idConflictData{
-				repositoryUrl: addon.URL,
+				repositoryURL: addon.URL,
 				addonsName:    fmt.Sprintf("%s:%s", addon.Addon.Name, addon.Addon.Version),
 			}
 		}
