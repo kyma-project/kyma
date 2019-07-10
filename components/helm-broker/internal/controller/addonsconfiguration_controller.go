@@ -2,8 +2,6 @@ package controller
 
 import (
 	"context"
-	"time"
-
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/repository"
@@ -11,7 +9,6 @@ import (
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	exerr "github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -20,6 +17,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 type brokerFacade interface {
@@ -118,6 +116,7 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 		if err := r.deleteAddonsProcess(instance); err != nil {
 			return reconcile.Result{}, exerr.Wrapf(err, "while deleting AddonConfiguration %d", request.NamespacedName)
 		}
+		return reconcile.Result{}, nil
 	}
 
 	if instance.Status.ObservedGeneration == 0 {
@@ -136,22 +135,7 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 		}
 	}
 
-	exist, err := r.brokerFacade.Exist(instance.Namespace)
-	if err != nil {
-		return reconcile.Result{}, exerr.Wrapf(err, "while checking if ServiceBroker exist in namespace %s", instance.Namespace)
-	}
-	if !exist {
-		// status
-		if err := r.brokerFacade.Create(instance.Namespace); err != nil {
-			return reconcile.Result{}, exerr.Wrapf(err, "while creating ServiceBroker for AddonConfiguration %q", request.NamespacedName)
-		}
-	} else if r.syncBroker {
-		if err := r.brokerSyncer.SyncServiceBroker(instance.Namespace); err != nil {
-			return reconcile.Result{}, exerr.Wrapf(err, "while syncing ServiceBroker for AddonConfiguration %q", request.NamespacedName)
-		}
-	}
-
-	return reconcile.Result{Requeue: false}, nil
+	return reconcile.Result{}, nil
 }
 
 func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.AddonsConfiguration) error {
@@ -200,8 +184,12 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 	r.statusSnapshot(addon, repositories)
 	err = r.updateAddonStatus(addon)
 	if err != nil {
-		r.log.Errorf("cannot update AddonsConfiguration %q: %s", addon.Name, err)
+		r.log.Errorf("cannot update AddonsConfiguration %s: %v", addon.Name, err)
 		return exerr.Wrap(err, "while update AddonsConfiguration status")
+	}
+
+	if err := r.ensureBroker(addon); err != nil {
+		return exerr.Wrap(err, "while ensuring ServiceBroker")
 	}
 
 	r.log.Info("Add AddonsConfiguration process completed")
@@ -211,7 +199,7 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1.AddonsConfiguration) error {
 	r.log.Infof("Start delete AddonsConfiguration %s from namespace %s", addon.Name, addon.Namespace)
 
-	addonsCfgs, err := r.addonsConfigurationList(addon.Namespace)
+	addonsCfgs, err := r.existingAddonsConfigurationList(addon)
 	if err != nil {
 		return exerr.Wrapf(err, "while listing AddonsConfigurations in namespace %s", addon.Namespace)
 	}
@@ -270,6 +258,24 @@ func (r *ReconcileAddonsConfiguration) addonsConfigurationList(namespace string)
 	return addonsList, nil
 }
 
+func (r *ReconcileAddonsConfiguration) ensureBroker(addon *addonsv1alpha1.AddonsConfiguration) error {
+	exist, err := r.brokerFacade.Exist(addon.Namespace)
+	if err != nil {
+		return exerr.Wrapf(err, "while checking if ServiceBroker exist in namespace %s", addon.Namespace)
+	}
+	if !exist {
+		// status
+		if err := r.brokerFacade.Create(addon.Namespace); err != nil {
+			return exerr.Wrapf(err, "while creating ServiceBroker for AddonConfiguration %s/%s", addon.Name, addon.Namespace)
+		}
+	} else if r.syncBroker {
+		if err := r.brokerSyncer.SyncServiceBroker(addon.Namespace); err != nil {
+			return exerr.Wrapf(err, "while syncing ServiceBroker for AddonConfiguration %s/%s", addon.Name, addon.Namespace)
+		}
+	}
+	return nil
+}
+
 func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*repository.AddonController, error) {
 	addons := []*repository.AddonController{}
 
@@ -314,16 +320,16 @@ func (r *ReconcileAddonsConfiguration) saveBundle(namespace internal.Namespace, 
 		exist, err := r.strg.Bundle().Upsert(namespace, addon.Bundle)
 		if err != nil {
 			addon.RegisteringError(err)
-			r.log.Errorf("cannot upsert bundle %s:%s into storage", addon.Bundle.Name, addon.Bundle.Version)
+			r.log.Errorf("cannot upsert bundle %v:%v into storage", addon.Bundle.Name, addon.Bundle.Version)
 			continue
 		}
 		if exist {
-			r.log.Infof("bundle %s:%s already existed in storage, bundle was replaced", addon.Bundle.Name, addon.Bundle.Version)
+			r.log.Infof("bundle %v:%v already existed in storage, bundle was replaced", addon.Bundle.Name, addon.Bundle.Version)
 		}
 		err = r.saveCharts(namespace, addon.Charts)
 		if err != nil {
 			addon.RegisteringError(err)
-			r.log.Errorf("cannot upsert charts of %s:%s bunlde", addon.Bundle.Name, addon.Bundle.Version)
+			r.log.Errorf("cannot upsert charts of %v:%v bunlde", addon.Bundle.Name, addon.Bundle.Version)
 			continue
 		}
 
@@ -366,14 +372,19 @@ func (r *ReconcileAddonsConfiguration) statusSnapshot(addon *addonsv1alpha1.Addo
 }
 
 func (r *ReconcileAddonsConfiguration) updateAddonStatus(addon *addonsv1alpha1.AddonsConfiguration) error {
-	addon.Status.ObservedGeneration = addon.Status.ObservedGeneration + 1
-	addon.Status.LastProcessedTime = &v1.Time{time.Now()}
+	instance := &addonsv1alpha1.AddonsConfiguration{}
+	err := r.Get(context.TODO(), types.NamespacedName{Name:addon.Name, Namespace:addon.Namespace}, instance)
+	if err != nil {
+		return exerr.Wrap(err, "while getting AddonsConfiguration")
+	}
 
-	err := r.Update(context.TODO(), addon)
+	addon.Status.ObservedGeneration = instance.Status.ObservedGeneration + 1
+	addon.Status.LastProcessedTime = instance.Status.LastProcessedTime
+
+	err = r.Status().Update(context.TODO(), addon)
 	if err != nil {
 		return exerr.Wrap(err, "while update AddonsConfiguration")
 	}
-
 	return nil
 }
 
