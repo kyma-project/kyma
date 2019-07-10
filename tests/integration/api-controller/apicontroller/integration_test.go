@@ -140,8 +140,8 @@ func (integrationTestContext) setCustomJwtAuthenticationConfig(api *kymaApi.Api)
 
 	triggerRule := kymaApi.TriggerRule{
 		ExcludedPaths: []kymaApi.MatchExpression{
-			kymaApi.MatchExpression{ExprType: kymaApi.ExactMatch, Value: "/api.yaml"},
-			kymaApi.MatchExpression{ExprType: kymaApi.SuffixMatch, Value: "/orders"},
+			{ExprType: kymaApi.ExactMatch, Value: "/api.yaml"},
+			{ExprType: kymaApi.SuffixMatch, Value: "/orders"},
 		},
 	}
 
