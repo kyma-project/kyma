@@ -27,15 +27,30 @@ spec:
           args:
             - "/applicationconnectivityvalidator"
             - "--proxyPort={{ .Values.applicationConnectivityValidator.args.proxyPort }}"
+            - "--externalAPIPort={{ .Values.applicationConnectivityValidator.args.externalAPIPort }}"
             - "--tenant={{ .Values.global.tenant }}"
             - "--group={{ .Values.global.group }}"
             - "--eventServicePathPrefix=/{{ .Release.Name }}/v1/events"
             - "--eventServiceHost={{ .Release.Name }}-event-service-external-api:{{ .Values.eventService.service.externalapi.port }}"
             - "--appRegistryPathPrefix=/{{ .Release.Name }}/v1/metadata"
             - "--appRegistryHost={{ .Values.applicationConnectivityValidator.args.appRegistryHost }}"
+          readinessProbe:
+            httpGet:
+              path: /v1/health
+              port: {{ .Values.applicationConnectivityValidator.args.externalAPIPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /v1/health
+              port: {{ .Values.applicationConnectivityValidator.args.externalAPIPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
           ports:
             - containerPort: {{ .Values.applicationConnectivityValidator.args.proxyPort }}
               name: http-proxy
+            - containerPort: {{ .Values.applicationConnectivityValidator.args.externalAPIPort }}
+              name: http-api-port
 ---
 apiVersion: v1
 kind: Service
@@ -49,6 +64,9 @@ metadata:
 spec:
   type: ClusterIP
   ports:
+    - port: {{ .Values.applicationConnectivityValidator.args.externalAPIPort }}
+      protocol: TCP
+      name: http-api-port
     - port: {{ .Values.applicationConnectivityValidator.args.proxyPort }}
       protocol: TCP
       name: http-proxy
