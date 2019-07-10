@@ -7,6 +7,7 @@ WORKDIR ${BASE_APP_DIR}
 
 COPY ./cmd/quantity/main.go ${BASE_APP_DIR}/cmd/quantity/
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
+COPY ./licenses ${BASE_APP_DIR}/licenses
 
 # Build app
 
@@ -29,5 +30,6 @@ RUN chmod +x /usr/local/bin/kubectl
 COPY ./test-namespace-controller.sh /test-namespace-controller.sh
 COPY ./sample-namespace.yaml /sample-namespace.yaml
 COPY --from=builder /quantity-to-int /quantity-to-int
+COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/test-namespace-controller/licenses /licenses
 
 CMD ["/test-namespace-controller.sh"]

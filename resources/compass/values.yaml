@@ -4,20 +4,20 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir: pr/
-      version: "PR-59"
+      version: "PR-99"
     director:
       dir: pr/
-      version: "PR-79"
+      version: "PR-100"
     gateway:
       dir: pr/
-      version: "PR-59"
+      version: "PR-100"
     healthchecker:
-      dir: develop/
-      version: "6d888e37"
+      dir: pr/
+      version: "PR-99"
     tests:
       e2e:
-        dir: develop/
-        version: "ec80b7e4"
+        dir: pr/
+        version: "PR-99"
 
   director:
     port: 3000

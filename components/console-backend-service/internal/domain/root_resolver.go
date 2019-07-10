@@ -60,7 +60,7 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 	}
 	makePluggable(scContainer)
 
-	scaContainer, err := servicecatalogaddons.New(restConfig, informerResyncPeriod, scContainer.ServiceCatalogRetriever)
+	scaContainer, err := servicecatalogaddons.New(restConfig, informerResyncPeriod, scContainer.ServiceCatalogRetriever, featureToggles)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
 	}
@@ -320,8 +320,12 @@ func (r *mutationResolver) RemoveAddonsConfigurationURLs(ctx context.Context, na
 	return r.sca.Resolver.RemoveAddonsConfigurationURLs(ctx, name, urls)
 }
 
-func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) {
+func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceMutationOutput, error) {
 	return r.k8s.CreateNamespace(ctx, name, labels)
+}
+
+func (r *mutationResolver) UpdateNamespace(ctx context.Context, name string, labels gqlschema.Labels) (gqlschema.NamespaceMutationOutput, error) {
+	return r.k8s.UpdateNamespace(ctx, name, labels)
 }
 
 func (r *mutationResolver) DeleteNamespace(ctx context.Context, name string) (*gqlschema.Namespace, error) {

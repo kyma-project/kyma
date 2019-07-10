@@ -5,7 +5,7 @@ type: Configuration
 
 By default, you install Kyma with a set of components provided in the [**Kyma Lite**](#installation-overview) package.
 
-During installation, the Installer applies the content of the local or cluster installation file that includes the list of component names and Namespaces in which the components are installed. The Installer skips the lines starting with a hash character (#):
+During installation, the Kyma Installer applies the content of the local or cluster installation file that includes the list of component names and Namespaces in which the components are installed. The Installer skips the lines starting with a hash character (#):
 
 ```
 #- name: "velero"
@@ -18,9 +18,9 @@ You can modify the component list as follows:
 - Add components to the installation file after the installation
 - Remove components from the installation file before the installation
 
->**NOTE:** Currently, it is not possible to remove a component that is already installed. If you remove it from the installation file or precede its entries with a hash character (#) when Kyma is already installed, the Installer simply does not update this component during the update process but the component is not removed.
+>**NOTE:** Currently, it is not possible to remove a component that is already installed. If you remove it from the installation file or precede its entries with a hash character (#) when Kyma is already installed, the Kyma Installer simply does not update this component during the update process but the component is not removed.
 
-Each modification requires an action from the Installer for the changes to take place:
+Each modification requires an action from the Kyma Installer for the changes to take place:
 - If you make changes before the installation, proceed with the standard installation process to finish Kyma setup.
 - If you make changes after the installation, follow the [update process](#installation-update-kyma) to refresh the current setup.
 

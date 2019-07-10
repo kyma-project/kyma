@@ -18,6 +18,7 @@ import (
 //go:generate mockery -name=namespaceSvc -output=automock -outpkg=automock -case=underscore
 type namespaceSvc interface {
 	Create(name string, labels gqlschema.Labels) (*v1.Namespace, error)
+	Update(name string, labels gqlschema.Labels) (*v1.Namespace, error)
 	List() ([]*v1.Namespace, error)
 	Find(name string) (*v1.Namespace, error)
 	Delete(name string) error
@@ -122,14 +123,27 @@ func (r *namespaceResolver) NamespaceQuery(ctx context.Context, name string) (*g
 	return converted, nil
 }
 
-func (r *namespaceResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) {
+func (r *namespaceResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceMutationOutput, error) {
 	gqlLabels := r.populateLabels(labels)
 	ns, err := r.namespaceSvc.Create(name, gqlLabels)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.Namespace, name))
-		return gqlschema.NamespaceCreationOutput{}, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
+		return gqlschema.NamespaceMutationOutput{}, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
 	}
-	return gqlschema.NamespaceCreationOutput{
+	return gqlschema.NamespaceMutationOutput{
+		Name:   name,
+		Labels: ns.Labels,
+	}, nil
+}
+
+func (r *namespaceResolver) UpdateNamespace(ctx context.Context, name string, labels gqlschema.Labels) (gqlschema.NamespaceMutationOutput, error) {
+	gqlLabels := r.populateLabels(&labels)
+	ns, err := r.namespaceSvc.Update(name, gqlLabels)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while editing %s `%s`", pretty.Namespace, name))
+		return gqlschema.NamespaceMutationOutput{}, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
+	}
+	return gqlschema.NamespaceMutationOutput{
 		Name:   name,
 		Labels: ns.Labels,
 	}, nil

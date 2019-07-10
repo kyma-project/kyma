@@ -10,4 +10,6 @@ RUN apk update &&\
 
 ADD ./fetch-token/bin/app ./app
 ADD ./test.sh ./test.sh
+COPY ./licenses/ ./licenses
+
 ENTRYPOINT ["/bin/bash", "-c", "/root/test.sh"]

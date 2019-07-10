@@ -27,4 +27,4 @@ global:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:
     dir: pr/
-    version: "PR-4615"
+    version: PR-4837

@@ -11,6 +11,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
+	"github.com/stretchr/testify/require"
 )
 
 func TestChartGet(t *testing.T) {
@@ -21,7 +22,7 @@ func TestChartGet(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
-		got, err := ts.s.Get(internal.ChartName(exp.Metadata.Name), *semver.MustParse(exp.Metadata.Version))
+		got, err := ts.s.Get(internal.ClusterWide, internal.ChartName(exp.Metadata.Name), *semver.MustParse(exp.Metadata.Version))
 
 		// THEN:
 		assert.NoError(t, err)
@@ -34,7 +35,7 @@ func TestChartGet(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
-		got, err := ts.s.Get(internal.ChartName(exp.Metadata.Name), *semver.MustParse(exp.Metadata.Version))
+		got, err := ts.s.Get(internal.ClusterWide, internal.ChartName(exp.Metadata.Name), *semver.MustParse(exp.Metadata.Version))
 
 		// THEN:
 		ts.AssertNotFoundError(err)
@@ -49,7 +50,7 @@ func TestChartUpsert(t *testing.T) {
 		fix := ts.MustGetFixture("A1")
 
 		// WHEN:
-		replace, err := ts.s.Upsert(fix)
+		replace, err := ts.s.Upsert(internal.ClusterWide, fix)
 
 		// THEN:
 		assert.NoError(t, err)
@@ -61,18 +62,18 @@ func TestChartUpsert(t *testing.T) {
 		expDesc := "updated description"
 		ts := newChartTestSuite(t, sf)
 		fix := ts.MustGetFixture("A1")
-		ts.s.Upsert(fix)
+		ts.s.Upsert(internal.ClusterWide, fix)
 
 		// WHEN:
 		fixNew := ts.MustCopyFixture(fix)
 		fixNew.Metadata.Description = expDesc
-		replace, err := ts.s.Upsert(fixNew)
+		replace, err := ts.s.Upsert(internal.ClusterWide, fixNew)
 
 		// THEN:
 		assert.NoError(t, err)
 		assert.True(t, replace)
 
-		got, err := ts.s.Get(internal.ChartName(fixNew.Metadata.Name), *semver.MustParse(fixNew.Metadata.Version))
+		got, err := ts.s.Get(internal.ClusterWide, internal.ChartName(fixNew.Metadata.Name), *semver.MustParse(fixNew.Metadata.Version))
 		assert.NoError(t, err)
 		ts.AssertChartEqual(fixNew, got)
 	})
@@ -84,7 +85,7 @@ func TestChartUpsert(t *testing.T) {
 		fix.Metadata.Version = ""
 
 		// WHEN:
-		_, err := ts.s.Upsert(fix)
+		_, err := ts.s.Upsert(internal.ClusterWide, fix)
 
 		// THEN:
 		assert.EqualError(t, err, "both name and version must be set")
@@ -99,7 +100,7 @@ func TestChartRemove(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
-		err := ts.s.Remove(internal.ChartName(exp.Metadata.Name), *semver.MustParse(exp.Metadata.Version))
+		err := ts.s.Remove(internal.ClusterWide, internal.ChartName(exp.Metadata.Name), *semver.MustParse(exp.Metadata.Version))
 
 		// THEN:
 		assert.NoError(t, err)
@@ -112,11 +113,89 @@ func TestChartRemove(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
-		err := ts.s.Remove(internal.ChartName(exp.Metadata.Name), *semver.MustParse(exp.Metadata.Version))
+		err := ts.s.Remove(internal.ClusterWide, internal.ChartName(exp.Metadata.Name), *semver.MustParse(exp.Metadata.Version))
 
 		// THEN:
 		ts.AssertNotFoundError(err)
 	})
+}
+
+func TestMultipleNamespaces(t *testing.T) {
+	tRunDrivers(t, "Upsert", func(t *testing.T, sf storage.Factory) {
+		// GIVEN
+		ts := newChartTestSuite(t, sf)
+		ns1 := internal.Namespace("stage")
+
+		// define charts with the same name and version but different description
+		chartForNS := chart.Chart{
+			Metadata: &chart.Metadata{
+				Name:        "redis",
+				Version:     "1.0",
+				Description: "description for NS",
+			},
+		}
+		chartForCluster := chart.Chart{
+			Metadata: &chart.Metadata{
+				Name:        "redis",
+				Version:     "1.0",
+				Description: "description for Cluster",
+			},
+		}
+
+		// WHEN
+		r, err := ts.s.Upsert(ns1, &chartForNS)
+		require.NoError(t, err)
+		require.False(t, r)
+
+		r, err = ts.s.Upsert(internal.ClusterWide, &chartForCluster)
+		require.NoError(t, err)
+
+		// THEN
+		assert.False(t, r, "upsert must not replace a chart stored in other namespace")
+	})
+
+	tRunDrivers(t, "Get", func(t *testing.T, sf storage.Factory) {
+		// GIVEN
+		ts := newChartTestSuite(t, sf)
+		ns1 := internal.Namespace("stage")
+		ns2 := internal.Namespace("prod")
+
+		// define charts with the same name and version but different description
+		chartForNS := chart.Chart{
+			Metadata: &chart.Metadata{
+				Name:        "redis",
+				Version:     "1.0",
+				Description: "description for NS",
+			},
+		}
+		chartForCluster := chart.Chart{
+			Metadata: &chart.Metadata{
+				Name:        "redis",
+				Version:     "1.0",
+				Description: "description for Cluster",
+			},
+		}
+
+		// populate storage
+		_, err := ts.s.Upsert(ns1, &chartForNS)
+		require.NoError(t, err)
+		_, err = ts.s.Upsert(internal.ClusterWide, &chartForCluster)
+		require.NoError(t, err)
+
+		// WHEN
+		cCh, err := ts.s.Get(internal.ClusterWide, "redis", *semver.MustParse("1.0"))
+		require.NoError(t, err)
+		nCh, err := ts.s.Get(ns1, "redis", *semver.MustParse("1.0"))
+		require.NoError(t, err)
+		_, prodErr := ts.s.Get(ns2, "redis", *semver.MustParse("1.0"))
+
+		// THEN
+		assert.Equal(t, chartForCluster, *cCh)
+		assert.Equal(t, chartForNS, *nCh)
+		ts.AssertNotFoundError(prodErr)
+
+	})
+
 }
 
 func newChartTestSuite(t *testing.T, sf storage.Factory) *chartTestSuite {
@@ -176,7 +255,7 @@ func (ts *chartTestSuite) generateFixtures() {
 
 func (ts *chartTestSuite) PopulateStorage() {
 	for _, b := range ts.fixtures {
-		ts.s.Upsert(ts.MustCopyFixture(b))
+		ts.s.Upsert(internal.ClusterWide, ts.MustCopyFixture(b))
 	}
 }
 
@@ -245,6 +324,6 @@ func (ts *chartTestSuite) AssertNotFoundError(err error) bool {
 
 func (ts *chartTestSuite) AssertChartDoesNotExist(exp *chart.Chart) bool {
 	ts.t.Helper()
-	_, err := ts.s.Get(internal.ChartName(exp.Metadata.Name), *semver.MustParse(exp.Metadata.Version))
+	_, err := ts.s.Get(internal.ClusterWide, internal.ChartName(exp.Metadata.Name), *semver.MustParse(exp.Metadata.Version))
 	return assert.True(ts.t, storage.IsNotFoundError(err), "NotFound error expected")
 }

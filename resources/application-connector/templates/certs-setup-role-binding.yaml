@@ -1,0 +1,63 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Chart.Name }}-certs-setup-job-ca-cert-role
+  namespace: {{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.namespace | default "default" }}
+  labels:
+    app: {{ .Chart.Name }}-certs-setup-job
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+rules:
+  - apiGroups: ["*"]
+    resources: ["secrets"]
+    verbs: ["create", "get", "update"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}-certs-setup-job-ca-cert-rolebinding
+  namespace: {{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.namespace | default "default" }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}-certs-setup-job
+    namespace: {{ .Values.global.namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Chart.Name }}-certs-setup-job-ca-cert-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Chart.Name }}-certs-setup-job-connector-cert-role
+  namespace: {{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.namespace | default "default" }}
+  labels:
+    app: {{ .Chart.Name }}-certs-setup-job
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+rules:
+  - apiGroups: ["*"]
+    resources: ["secrets"]
+    verbs: ["create", "get", "update"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}-certs-setup-job-connector-cert-rolebinding
+  namespace: {{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.namespace | default "default" }}
+  labels:
+    app: {{ .Chart.Name }}-certs-setup-job
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}-certs-setup-job
+    namespace: {{ .Values.global.namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Chart.Name }}-certs-setup-job-connector-cert-role
+  apiGroup: rbac.authorization.k8s.io

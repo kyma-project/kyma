@@ -134,7 +134,7 @@ func TestSyncerWithTwoLoaders(t *testing.T) {
 			// then
 			require.NoError(t, err)
 
-			gotBundles, err := bStorage.FindAll()
+			gotBundles, err := bStorage.FindAll(internal.ClusterWide)
 			require.NoError(t, err)
 
 			assertBundlesAndCharts(t, tc.expected, gotBundles, chStorage)
@@ -170,7 +170,7 @@ func TestSyncer_CreateDocs(t *testing.T) {
 	// then
 	require.NoError(t, err)
 
-	gotBundles, err := bStorage.FindAll()
+	gotBundles, err := bStorage.FindAll(internal.ClusterWide)
 	require.NoError(t, err)
 
 	assertBundlesAndCharts(t, []bundle.CompleteBundle{expectedBundle}, gotBundles, chStorage)
@@ -187,7 +187,7 @@ func assertBundlesAndCharts(t *testing.T, expected []bundle.CompleteBundle, gotB
 	var gotCharts []*chart.Chart
 	for _, b := range gotBundles {
 		for _, plan := range b.Plans {
-			gotChart, err := chStorage.Get(plan.ChartRef.Name, plan.ChartRef.Version)
+			gotChart, err := chStorage.Get(internal.ClusterWide, plan.ChartRef.Name, plan.ChartRef.Version)
 			require.NoError(t, err)
 			gotCharts = append(gotCharts, gotChart)
 		}
@@ -202,12 +202,12 @@ func assertBundlesAndCharts(t *testing.T, expected []bundle.CompleteBundle, gotB
 func populatedInMemoryStorage(items []bundle.CompleteBundle) (storage.Bundle, storage.Chart) {
 	bStorage := memory.NewBundle()
 	for _, item := range items {
-		bStorage.Upsert(item.Bundle)
+		bStorage.Upsert(internal.ClusterWide, item.Bundle)
 	}
 	chStorage := memory.NewChart()
 	for _, item := range items {
 		for _, ch := range item.Charts {
-			chStorage.Upsert(ch)
+			chStorage.Upsert(internal.ClusterWide, ch)
 		}
 	}
 	return bStorage, chStorage

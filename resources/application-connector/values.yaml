@@ -35,34 +35,48 @@ global:
     dir: develop/
     version: 00d7f520
   connectivity_certs_controller:
-    dir: develop/
-    version: f1454344
+    dir: pr/
+    version: PR-4789
   event_service:
     dir: develop/
     version: 42e65688
-  gateway_tests:
+  event_service_integration_tests:
     dir: develop/
-    version: 42e65688
+    version: fc7361ac
   application_connectivity_validator:
     dir: develop/
     version: d7092530
   application_gateway:
     dir: develop/
-    version: 1412b233
+    version: ba297749
   application_gateway_tests:
-    dir: develop/
-    version: 1412b233
+    dir: pr/
+    version: PR-4779
   application_registry:
-    dir: develop/
-    version: 1412b233
+    dir: pr/
+    version: PR-4681
   application_registry_tests:
-    dir: develop/
-    version: 4c614be5
+    dir: pr/
+    version: PR-4681
   application_broker:
     dir: develop/
     version: d999e831
+  application_connectivity_certs_setup_job:
+    dir: pr/
+    version: PR-4724
 connectivity_certs_controller:
   enabled: false
+
+application_connectivity_certs_setup_job:
+  secrets:
+    connectorCertificateSecret:
+      name: connector-service-app-ca
+      namespace: kyma-integration
+    caCertificateSecret:
+      name: application-connector-certs
+      namespace: istio-system
+  certificate:
+    validityTime: 92d
 
 tests:
   application_connector_tests:

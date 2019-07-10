@@ -3,7 +3,7 @@ title: Testing Kyma
 type: Details
 ---
 
-Kyma components use [Octopus](http://github.com/kyma-incubator/octopus) for testing. 
+Kyma components use [Octopus](http://github.com/kyma-incubator/octopus) for testing.
 Octopus is a testing framework that allows you to run tests defined as Docker images on a running cluster.
 Octopus uses two CustomResourceDefinitions (CRDs):
 - TestDefinition, which defines your test as a Pod specification.
@@ -63,7 +63,7 @@ spec:
 ```
 
 ## Tests execution
-To run all tests, use the `testing.sh` script located in the `/installation/scripts/` directory. 
+To run all tests, use the `testing.sh` script located in the `/installation/scripts/` directory.
 Internally, the ClusterTestSuite resource is defined. It fetches all TestDefinitions and executes them.
 
 
@@ -87,7 +87,7 @@ Creation of the suite triggers tests execution. See the current tests progress i
 ```bash
  kubectl get cts {my-suite} -oyaml
  ```
- 
+
 The sample output looks as follows:
 ```
 apiVersion: testing.kyma-project.io/v1alpha1
@@ -119,7 +119,7 @@ status:
     namespace: kyma-system
     status: Running
   - executions: []
-    name: test-api-controller-acceptance
+    name: test-core-api-controller-0
     namespace: kyma-system
     status: NotYetScheduled
   startTime: 2019-04-05T12:22:53Z

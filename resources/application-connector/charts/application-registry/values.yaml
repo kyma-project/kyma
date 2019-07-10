@@ -10,6 +10,7 @@ deployment:
     specRequestTimeout: 5
     assetstoreRequestTimeout: 5
     insecureAssetDownload: true
+    insecureSpecDownload: false
 
 service:
   externalapi:

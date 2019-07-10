@@ -13,27 +13,27 @@ const (
 
 type basicAuth struct{}
 
-func (svc *basicAuth) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.Credentials {
+func (svc *basicAuth) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.CredentialsWithCSRF {
 	username, password := svc.readBasicAuthMap(secretData)
 
-	return model.Credentials{
+	return model.CredentialsWithCSRF{
 		Basic: &model.Basic{
 			Username: username,
 			Password: password,
-			CSRFInfo: convertToModelCSRInfo(appCredentials),
 		},
+		CSRFInfo: convertToModelCSRInfo(appCredentials),
 	}
 }
 
-func (svc *basicAuth) CredentialsProvided(credentials *model.Credentials) bool {
+func (svc *basicAuth) CredentialsProvided(credentials *model.CredentialsWithCSRF) bool {
 	return svc.basicCredentialsProvided(credentials)
 }
 
-func (svc *basicAuth) CreateSecretData(credentials *model.Credentials) (SecretData, apperrors.AppError) {
+func (svc *basicAuth) CreateSecretData(credentials *model.CredentialsWithCSRF) (SecretData, apperrors.AppError) {
 	return svc.makeBasicAuthMap(credentials.Basic.Username, credentials.Basic.Password), nil
 }
 
-func (svc *basicAuth) ToCredentialsInfo(credentials *model.Credentials, secretName string) applications.Credentials {
+func (svc *basicAuth) ToCredentialsInfo(credentials *model.CredentialsWithCSRF, secretName string) applications.Credentials {
 	applicationCredentials := applications.Credentials{
 		Type:       applications.CredentialsBasicType,
 		SecretName: secretName,
@@ -59,6 +59,6 @@ func (svc *basicAuth) readBasicAuthMap(data map[string][]byte) (username, passwo
 	return string(data[BasicAuthUsernameKey]), string(data[BasicAuthPasswordKey])
 }
 
-func (svc *basicAuth) basicCredentialsProvided(credentials *model.Credentials) bool {
+func (svc *basicAuth) basicCredentialsProvided(credentials *model.CredentialsWithCSRF) bool {
 	return credentials != nil && credentials.Basic != nil && credentials.Basic.Username != "" && credentials.Basic.Password != ""
 }

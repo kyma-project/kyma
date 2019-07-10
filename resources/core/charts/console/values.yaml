@@ -3,8 +3,8 @@
 # Declare variables to be passed into your templates.
 replicaCount: 1
 image:
-  dir: ''
-  tag: '5399d51b'
+  dir: 
+  tag: 'b4ed3dcf'
   pullPolicy: IfNotPresent
 service:
   name: nginx
@@ -34,3 +34,5 @@ cluster:
   faviconUrl: 'favicon.ico'
   # Provide custom title for the UI application that will be shown in the header component
   headerTitle: ''
+  # Provide a list of navigation nodes that should be hidden. For example 'namespace.operation.secrets settings foo.bar'
+  disabledNavigationNodes: ''

@@ -34,3 +34,7 @@ Return the appropriate apiVersion value to use for the prometheus-operator manag
 {{- printf "%s" "monitoring.coreos.com/v1alpha1" -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "filter.system-namespaces" -}}
+{{- printf "{namespace=\"%s\"}" .Values.systemNamespaceFilter -}}
+{{- end -}}

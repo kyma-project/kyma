@@ -59,3 +59,8 @@ rules:
   - apiGroups: ["*"]
     resources: ["*"]
     verbs: ["create"]
+# Add when FEATURE_TOGGLES_CLUSTER_ADDONS_CONFIGURATION_CRD_ENABLED is set to true
+# https://github.com/kyma-project/kyma/issues/4492
+#  - apiGroups: ["addons.kyma-project.io"]
+#    resources: ["clusteraddonsconfigurations"]
+#    verbs: ["*"]

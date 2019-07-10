@@ -9,10 +9,21 @@ all: test manager
 resolve:
 	dep ensure -v -vendor-only
 
+pull-licenses:
+ifdef LICENSE_PULLER_PATH
+	bash $(LICENSE_PULLER_PATH)
+else
+	mkdir -p licenses
+endif
+
 setup:
 	go get github.com/vektra/mockery/.../
 
 # Run tests
+# Default is 20s - available since controller-runtime 0.1.5
+test: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
+# Default is 20s - available since controller-runtime 0.1.5
+test: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
 test: generate fmt vet manifests
 	go test ./pkg/... ./cmd/... -coverprofile cover.out
 
@@ -49,7 +60,7 @@ generate:
 	go generate ./pkg/... ./cmd/...
 
 # Build the docker image
-docker-build: resolve test
+docker-build: resolve pull-licenses test
 	docker build . -t ${IMG}
 	@echo "updating kustomize image patch file for manager resource"
 	sed -i'' -e 's@image: .*@image: '"${IMG}"'@' ./config/default/manager_image_patch.yaml

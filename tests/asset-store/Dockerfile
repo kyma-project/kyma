@@ -12,6 +12,7 @@ COPY ./testdata/ ${BASE_APP_DIR}/testdata/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./main_test.go ${BASE_APP_DIR}
+COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 #
 # Build tests
@@ -38,6 +39,7 @@ RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 RUN mkdir -p /app/tests
 COPY --from=builder ${TEST_DIR}/main.test /app/
 COPY --from=builder ${TEST_DIR}/testdata/ /app/testdata/
+COPY --from=builder ${TEST_DIR}/licenses/ /app/licenses/
 
 #
 # Run tests

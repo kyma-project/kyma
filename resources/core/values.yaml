@@ -24,17 +24,17 @@ global:
     version: "PR-4615"
   ui_acceptance_tests:
     dir:
-    version: "a68ac924"
+    version: "34b9d204"
   api_controller:
-    dir: develop/
-    version: "b8c31ef4"
-  api_controller_acceptance_tests:
     dir: pr/
-    version: "PR-4656"
+    version: "PR-4582"
+  api_controller_integration_tests:
+    dir: pr/
+    version: "PR-4822"
     testNamespace: api-controller-tests
   apiserver_proxy:
-    dir: develop/
-    version: "962ad9b6"
+    dir: pr/
+    version: "PR-4831"
   iam_kubeconfig_service:
     dir: develop/
     version: 2a1a064b
@@ -53,20 +53,20 @@ global:
     dir: develop/
     version: a9bfa9fc
   apiserver_proxy_integration_tests:
-    dir: develop/
-    version: 0cca016f
+    dir: pr/
+    version: PR-4837
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    dir: pr/
-    version: PR-4386
-  console_backend_service_test:
-    dir: pr/
-    version: PR-4386
-  cluster_users_test:
     dir: develop/
-    version: 3d94e9d8
+    version: b3441db9
+  console_backend_service_test:
+    dir: develop/
+    version: b3441db9
+  cluster_users_integration_tests:
+    dir: pr/
+    version: PR-4837
   xip_patch:
     dir: develop/
     version: "d20b1c29"
