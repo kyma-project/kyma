@@ -55,8 +55,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    "auth.istio.io/{{ .Values.applicationConnectivityValidator.args.externalAPIPort }}": NONE
   name: {{ .Release.Name }}-connectivity-validator
   labels:
     application: {{ .Release.Name }}
