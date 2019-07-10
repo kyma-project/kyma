@@ -34,7 +34,7 @@ spec:
           limits:
             memory: 256Mi
           requests:
-            memory: 128Mi
+            memory: 96Mi
         {{ end }}
         imagePullPolicy: IfNotPresent
         args:
