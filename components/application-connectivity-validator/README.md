@@ -6,7 +6,8 @@ The Application Connectivity Validator validates client certificate subjects.
 It proxies the requests to the Event Service and the Application Registry.
 
 A single instance of the component is deployed for an Application and uses these parameters:
-- **proxyPort** - The port on which the reverse proxy is exposed. The default port is `8080`.
+- **proxyPort** - The port on which the reverse proxy is exposed. The default port is `8081`.
+- **externalAPIPort** - The port on which the external API is exposed. The default port is `8080`.
 - **tenant** - The tenant of the Application for which the proxy is deployed. Omitted if empty.
 - **group** - The group of the Application for which the proxy is deployed. Omitted if empty.
 - **eventServicePathPrefix** - Path prefix for which requests will be forwarded to the Event Service. The default value is `/v1/events`.
