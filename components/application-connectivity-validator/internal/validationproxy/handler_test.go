@@ -21,8 +21,9 @@ const (
 	group  = "group"
 	tenant = "tenant"
 
-	eventServicePathPrefix = "/test-application/v1/events"
-	appRegistryPathPrefix  = "/test-application/v1/metadata"
+	eventServicePathPrefixV1 = "/test-application/v1/events"
+	eventServicePathPrefixV2 = "/test-application/v2/events"
+	appRegistryPathPrefix    = "/test-application/v1/metadata"
 )
 
 type event struct {
@@ -116,13 +117,14 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			proxyHandler := NewProxyHandler(
 				testCase.group,
 				testCase.tenant,
-				eventServicePathPrefix,
+				eventServicePathPrefixV1,
+				eventServicePathPrefixV2,
 				eventServiceHost,
 				appRegistryPathPrefix,
 				appRegistryHost)
 
-			t.Run("should proxy event service request when "+testCase.caseDescription, func(t *testing.T) {
-				eventTitle := "my-event"
+			t.Run("should proxy event service V1 request when "+testCase.caseDescription, func(t *testing.T) {
+				eventTitle := "my-event-1"
 
 				eventServiceHandler.PathPrefix("/{application}/v1/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					appName := mux.Vars(r)["application"]
@@ -141,6 +143,38 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				require.NoError(t, err)
 
 				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/v1/events", applicationName), bytes.NewReader(body))
+				require.NoError(t, err)
+				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
+				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+				recorder := httptest.NewRecorder()
+
+				// when
+				proxyHandler.ProxyAppConnectorRequests(recorder, req)
+
+				// then
+				assert.Equal(t, testCase.expectedStatus, recorder.Code)
+			})
+
+			t.Run("should proxy event service V2 request when "+testCase.caseDescription, func(t *testing.T) {
+				eventTitle := "my-event-2"
+
+				eventServiceHandler.PathPrefix("/{application}/v2/events").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					appName := mux.Vars(r)["application"]
+					assert.Equal(t, applicationName, appName)
+
+					var receivedEvent event
+
+					err := json.NewDecoder(r.Body).Decode(&receivedEvent)
+					require.NoError(t, err)
+					assert.Equal(t, eventTitle, receivedEvent.Title)
+
+					w.WriteHeader(http.StatusOK)
+				})
+
+				body, err := json.Marshal(event{Title: eventTitle})
+				require.NoError(t, err)
+
+				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/v2/events", applicationName), bytes.NewReader(body))
 				require.NoError(t, err)
 				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
 				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
@@ -183,7 +217,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		proxyHandler := NewProxyHandler(
 			group,
 			tenant,
-			eventServicePathPrefix,
+			eventServicePathPrefixV1,
+			eventServicePathPrefixV2,
 			eventServiceHost,
 			appRegistryPathPrefix,
 			appRegistryHost)
@@ -211,7 +246,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		proxyHandler := NewProxyHandler(
 			"",
 			"",
-			eventServicePathPrefix,
+			eventServicePathPrefixV1,
+			eventServicePathPrefixV2,
 			eventServiceHost,
 			appRegistryPathPrefix,
 			appRegistryHost)

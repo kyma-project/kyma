@@ -1,4 +1,4 @@
-package externalapi
+package v1
 
 import (
 	"encoding/json"
@@ -14,7 +14,7 @@ import (
 )
 
 func TestErrorNoContent(t *testing.T) {
-	req, err := http.NewRequest("POST", shared.EventsPath, nil)
+	req, err := http.NewRequest("POST", shared.EventsV1Path, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +105,7 @@ func TestErrorWrongEventId(t *testing.T) {
 }
 
 func sendAndReceiveError(t *testing.T, s *string) (result *api.Error, err error) {
-	req, err := http.NewRequest("POST", shared.EventsPath, strings.NewReader(*s))
+	req, err := http.NewRequest("POST", shared.EventsV1Path, strings.NewReader(*s))
 	if err != nil {
 		t.Fatal(err)
 	}
