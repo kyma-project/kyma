@@ -7,17 +7,17 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"time"
 
-	apiV1 "k8s.io/api/core/v1"
-	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
+	"github.com/avast/retry-go"
 	publishApi "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eaClientSet "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned"
 	subscriptionClientSet "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	"github.com/kyma-project/kyma/components/event-bus/test/util"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
+	"github.com/sirupsen/logrus"
+	apiV1 "k8s.io/api/core/v1"
+	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sClientSet "k8s.io/client-go/kubernetes"
 
 	"github.com/smartystreets/goconvey/convey"
@@ -29,13 +29,18 @@ const (
 	eventActivationName = "test-ea"
 	srcID               = "test.local"
 
-	noOfRetries = 20
-
 	subscriberName           = "test-core-event-bus-subscriber"
-	subscriberImage          = "eu.gcr.io/kyma-project/event-bus-e2e-subscriber:0.9.0"
+	subscriberImage          = "eu.gcr.io/kyma-project/pr/event-bus-e2e-subscriber:PR-4893"
 	publishEventEndpointURL  = "http://event-bus-publish.kyma-system:8080/v1/events"
 	publishStatusEndpointURL = "http://event-bus-publish.kyma-system:8080/v1/status/ready"
 )
+
+var retryOptions = []retry.Option{
+	retry.Attempts(13), // at max (100 * (1 << 13)) / 1000 = 819,2 sec
+	retry.OnRetry(func(n uint, err error) {
+		fmt.Printf(".")
+	}),
+}
 
 // EventBusTest tests the Event Bus business logic after restoring Kyma from a backup
 type EventBusTest struct {
@@ -46,6 +51,7 @@ type EventBusTest struct {
 
 type eventBusFlow struct {
 	namespace string
+	log       logrus.FieldLogger
 
 	k8sInterface  k8sClientSet.Interface
 	eaInterface   eaClientSet.Interface
@@ -94,12 +100,20 @@ func (eb *EventBusTest) TestResources(namespace string) {
 }
 
 func (eb *EventBusTest) newFlow(namespace string) *eventBusFlow {
-	return &eventBusFlow{
+
+	logger := logrus.New()
+	// configure logger with text instead of json for easier reading in CI logs
+	logger.Formatter = &logrus.TextFormatter{}
+	// show file and line number
+	logger.SetReportCaller(true)
+	res := &eventBusFlow{
 		namespace:     namespace,
 		k8sInterface:  eb.K8sInterface,
 		eaInterface:   eb.EaInterface,
 		subsInterface: eb.SubsInterface,
+		log:           logger,
 	}
+	return res
 }
 
 func (f *eventBusFlow) createResources() error {
@@ -146,85 +160,68 @@ func (f *eventBusFlow) createSubscriber() error {
 		if _, err := f.k8sInterface.CoreV1().Services(f.namespace).Create(util.NewSubscriberService()); err != nil {
 			return fmt.Errorf("create Subscriber service failed: %v", err)
 		}
-		time.Sleep(30 * time.Second)
-
-		for i := 0; i < 60; i++ {
-			var podReady bool
-			if pods, err := f.k8sInterface.CoreV1().Pods(f.namespace).List(metaV1.ListOptions{LabelSelector: "app=" + subscriberName}); err == nil {
-				for _, pod := range pods.Items {
-					if podReady = isPodReady(&pod); !podReady {
-						break
-					}
+		return retry.Do(func() error {
+			pods, err := f.k8sInterface.CoreV1().Pods(f.namespace).List(metaV1.ListOptions{LabelSelector: "app=" + subscriberName})
+			if err != nil {
+				return err
+			}
+			for _, pod := range pods.Items {
+				if !isPodReady(&pod) {
+					return fmt.Errorf("pod is not ready: %v", pod)
 				}
 			}
-			if podReady {
-				break
-			} else {
-				time.Sleep(1 * time.Second)
-			}
-		}
+			return nil
+		}, retryOptions...)
 	}
 	return nil
 }
 
+// Create an EventActivation
+// Retry in case of any error except resource already exists
 func (f *eventBusFlow) createEventActivation() error {
-	var err error
-	for i := 0; i < noOfRetries; i++ {
-		_, err = f.eaInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Create(util.NewEventActivation(eventActivationName, f.namespace, srcID))
+	eventActivation := util.NewEventActivation(eventActivationName, f.namespace, srcID)
+
+	return retry.Do(func() error {
+		_, err := f.eaInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Create(eventActivation)
 		if err == nil {
-			break
+			return nil
 		}
 		if !strings.Contains(err.Error(), "already exists") {
-			time.Sleep(1 * time.Second)
-		} else {
-			break
+			return fmt.Errorf("waiting for event activation %v to exist", eventActivation)
 		}
-	}
-	return err
+		return nil
+	}, retryOptions...)
 }
 
 func (f *eventBusFlow) createSubscription() error {
 	subscriberEventEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/v1/events"
-	_, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Create(util.NewSubscription(subscriptionName, f.namespace, subscriberEventEndpointURL, eventType, "v1", srcID))
-	if err != nil {
-		if !strings.Contains(err.Error(), "already exists") {
-			return fmt.Errorf("error in creating subscription: %v", err)
+	return retry.Do(func() error {
+		if _, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Create(util.NewSubscription(subscriptionName, f.namespace, subscriberEventEndpointURL, eventType, "v1", srcID)); err != nil {
+			if !strings.Contains(err.Error(), "already exists") {
+				return fmt.Errorf("error in creating subscription: %v", err)
+			}
 		}
-	}
-	return err
+		return nil
+	}, retryOptions...)
 }
 
+// Check the subscriber status until the http get call succeeds and until status code is 200
 func (f *eventBusFlow) checkSubscriberStatus() error {
 	subscriberStatusEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/v1/status"
-	var err error
-	for i := 0; i < noOfRetries; i++ {
-		if res, err := http.Get(subscriberStatusEndpointURL); err != nil {
-			time.Sleep(time.Duration(i) * time.Second)
-		} else if !checkStatusCode(res, http.StatusOK) {
-			time.Sleep(time.Duration(i) * time.Second)
-		} else {
-			break
-		}
-	}
-	return err
+	return retry.Do(func() error {
+		return checkStatus(subscriberStatusEndpointURL)
+	}, retryOptions...)
 }
 
 func (f *eventBusFlow) checkPublisherStatus() error {
-	var err error
-	for i := 0; i < noOfRetries; i++ {
-		if err = checkStatus(publishStatusEndpointURL); err != nil {
-			time.Sleep(time.Duration(i) * time.Second)
-		} else {
-			break
-		}
-	}
-	return err
+	return retry.Do(func() error {
+		return checkStatus(publishStatusEndpointURL)
+	}, retryOptions...)
 }
 
 func (f *eventBusFlow) checkSubscriptionReady() error {
-	var err error
 	activatedCondition := subApis.SubscriptionCondition{Type: subApis.Ready, Status: subApis.ConditionTrue}
-	for i := 0; i < noOfRetries; i++ {
+	return retry.Do(func() error {
 		kySub, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Get(subscriptionName, metaV1.GetOptions{})
 		if err != nil {
 			return fmt.Errorf("cannot get Kyma subscription, name: %v; namespace: %v", subscriptionName, f.namespace)
@@ -232,28 +229,15 @@ func (f *eventBusFlow) checkSubscriptionReady() error {
 		if kySub.HasCondition(activatedCondition) {
 			return nil
 		}
-
-		time.Sleep(time.Duration(i) * time.Second)
-	}
-	return err
+		return fmt.Errorf("subscription %v does not have condition %+v", kySub, activatedCondition)
+	}, retryOptions...)
 }
 
 func (f *eventBusFlow) publishTestEvent() error {
-	var eventSent bool
-	var err error
-	for i := 0; i < noOfRetries; i++ {
-		if _, err = f.publish(publishEventEndpointURL); err != nil {
-			time.Sleep(time.Duration(i) * time.Second)
-		} else {
-			eventSent = true
-			break
-		}
-	}
-
-	if !eventSent {
-		return fmt.Errorf("cannot send test event: %v", err)
-	}
-	return nil
+	return retry.Do(func() error {
+		_, err := f.publish(publishEventEndpointURL)
+		return err
+	}, retryOptions...)
 }
 
 func (f *eventBusFlow) publish(publishEventURL string) (*publishApi.PublishResponse, error) {
@@ -272,7 +256,11 @@ func (f *eventBusFlow) publish(publishEventURL string) (*publishApi.PublishRespo
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			f.log.Error(err)
+		}
+	}()
 	err = json.Unmarshal(body, &respObj)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal error: %v", err)
@@ -286,8 +274,7 @@ func (f *eventBusFlow) publish(publishEventURL string) (*publishApi.PublishRespo
 
 func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 	subscriberResultsEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/v1/results"
-	for i := 0; i < noOfRetries; i++ {
-		time.Sleep(time.Duration(i) * time.Second)
+	return retry.Do(func() error {
 		res, err := http.Get(subscriberResultsEndpointURL)
 		if err != nil {
 			return fmt.Errorf("get request failed: %v", err)
@@ -297,6 +284,9 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 			return fmt.Errorf("get request failed: %v", err)
 		}
 		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
 		var resp string
 		err = json.Unmarshal(body, &resp)
 		if err != nil {
@@ -308,15 +298,14 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 			return err
 		}
 
-		if len(resp) == 0 { // no event received by subscriber
-			continue
+		if len(resp) == 0 {
+			return errors.New("no event received by subscriber")
 		}
 		if resp != "test-event-1" {
 			return fmt.Errorf("wrong response: %s, want: %s", resp, "test-event-1")
 		}
 		return nil
-	}
-	return errors.New("timeout for subscriber response")
+	}, retryOptions...)
 }
 
 func checkStatus(statusEndpointURL string) error {
@@ -327,13 +316,7 @@ func checkStatus(statusEndpointURL string) error {
 	return verifyStatusCode(res, http.StatusOK)
 }
 
-func checkStatusCode(res *http.Response, expectedStatusCode int) bool {
-	if res.StatusCode != expectedStatusCode {
-		return false
-	}
-	return true
-}
-
+// Verify that the http response has the given status code and return an error if not
 func verifyStatusCode(res *http.Response, expectedStatusCode int) error {
 	if res.StatusCode != expectedStatusCode {
 		return fmt.Errorf("status code is wrong, have: %d, want: %d", res.StatusCode, expectedStatusCode)

@@ -50,3 +50,7 @@ required = [
 [[constraint]]
   name = "github.com/gofrs/uuid"
   version = "3.2.0"
+
+[[constraint]]
+  name = "github.com/avast/retry-go"
+  version = "2.2.0"
