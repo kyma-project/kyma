@@ -11,20 +11,20 @@ type LookupService struct {
 	mock.Mock
 }
 
-// Fetch provides a mock function with given fields: context, configFilePath
-func (_m LookupService) Fetch(context clientcontext.ApplicationContext, configFilePath string) (string, error) {
-	ret := _m.Called(context, configFilePath)
+// Fetch provides a mock function with given fields: context
+func (_m *LookupService) Fetch(context clientcontext.ApplicationContext) (string, error) {
+	ret := _m.Called(context)
 
 	var r0 string
-	if rf, ok := ret.Get(0).(func(clientcontext.ApplicationContext, string) string); ok {
-		r0 = rf(context, configFilePath)
+	if rf, ok := ret.Get(0).(func(clientcontext.ApplicationContext) string); ok {
+		r0 = rf(context)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(clientcontext.ApplicationContext, string) error); ok {
-		r1 = rf(context, configFilePath)
+	if rf, ok := ret.Get(1).(func(clientcontext.ApplicationContext) error); ok {
+		r1 = rf(context)
 	} else {
 		r1 = ret.Error(1)
 	}

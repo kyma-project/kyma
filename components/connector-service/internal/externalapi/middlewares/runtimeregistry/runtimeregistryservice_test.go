@@ -10,10 +10,10 @@ import (
 )
 
 func TestRuntimeRegistryService_ReportState(t *testing.T) {
-	t.Run("should send updated state", func(t *testing.T) {
+	t.Run("should send updated State", func(t *testing.T) {
 		//given
 		service := &mocks.GraphQLService{}
-		registryService := NewRuntimeRegistryService(service)
+		registryService := NewRuntimeRegistryService(service, "testdata/")
 
 		response := &http.Response{StatusCode: http.StatusOK}
 
@@ -21,12 +21,12 @@ func TestRuntimeRegistryService_ReportState(t *testing.T) {
 		service.On("SendRequest", mock.Anything, mock.Anything, mock.Anything).Return(response, nil)
 
 		state := RuntimeState{
-			identifier: "ff0aad1d-c602-446d-8852-bc35508d0d52",
-			state:      EstablishedState,
+			Identifier: "ff0aad1d-c602-446d-8852-bc35508d0d52",
+			State:      EstablishedState,
 		}
 
 		//when
-		e := registryService.ReportState(state, "testdata/")
+		e := registryService.ReportState(state)
 
 		//then
 		assert.NoError(t, e)

@@ -21,19 +21,20 @@ const (
 )
 
 type LookupService interface {
-	Fetch(context clientcontext.ApplicationContext, configFilePath string) (string, error)
+	Fetch(context clientcontext.ApplicationContext) (string, error)
 }
 
 type lookupService struct {
 	graphQLService graphql.GraphQLService
+	configFilePath string
 }
 
-func NewGraphQLLookupService(graphQLService graphql.GraphQLService) LookupService {
-	return &lookupService{graphQLService: graphQLService}
+func NewGraphQLLookupService(graphQLService graphql.GraphQLService, configFilePath string) LookupService {
+	return &lookupService{graphQLService: graphQLService, configFilePath: configFilePath}
 }
 
-func (ls lookupService) Fetch(context clientcontext.ApplicationContext, configFilePath string) (string, error) {
-	file, e := os.Open(configFilePath + filename)
+func (ls lookupService) Fetch(context clientcontext.ApplicationContext) (string, error) {
+	file, e := os.Open(ls.configFilePath + filename)
 
 	if e != nil {
 		return "", apperrors.Internal("Error while reading config file: %s", e)

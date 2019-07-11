@@ -17,24 +17,25 @@ const (
 )
 
 type RuntimeRegistryService interface {
-	ReportState(state RuntimeState, configFilePath string) error
+	ReportState(state RuntimeState) error
 }
 
 type RuntimeState struct {
-	identifier string
-	state      string
+	Identifier string
+	State      string
 }
 
 type runtimeRegistryService struct {
-	graphQL graphql.GraphQLService
+	graphQL        graphql.GraphQLService
+	configFilePath string
 }
 
-func NewRuntimeRegistryService(graphQL graphql.GraphQLService) RuntimeRegistryService {
-	return &runtimeRegistryService{graphQL: graphQL}
+func NewRuntimeRegistryService(graphQL graphql.GraphQLService, configFilePath string) RuntimeRegistryService {
+	return &runtimeRegistryService{graphQL: graphQL, configFilePath: configFilePath}
 }
 
-func (rrs runtimeRegistryService) ReportState(state RuntimeState, configFilePath string) error {
-	file, e := os.Open(configFilePath + filename)
+func (rrs runtimeRegistryService) ReportState(state RuntimeState) error {
+	file, e := os.Open(rrs.configFilePath + filename)
 
 	if e != nil {
 		return apperrors.Internal("Error while reading config file: %s", e)
@@ -57,12 +58,12 @@ func (rrs runtimeRegistryService) ReportState(state RuntimeState, configFilePath
 	statusCode := response.StatusCode
 
 	if statusCode != 200 {
-		return apperrors.Internal("Unexpected status code during runtime state update: %d", statusCode)
+		return apperrors.Internal("Unexpected status code during runtime State update: %d", statusCode)
 	}
 
 	return nil
 }
 
 func prepareQuery(runtimeState RuntimeState) string {
-	return fmt.Sprintf(query, runtimeState.identifier, runtimeState.state)
+	return fmt.Sprintf(query, runtimeState.Identifier, runtimeState.State)
 }

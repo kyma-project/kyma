@@ -17,7 +17,7 @@ func TestLookupService_Fetch(t *testing.T) {
 	t.Run("Should get gatewayUrl from external service", func(t *testing.T) {
 		//given
 		service := &mocks.GraphQLService{}
-		qlLookupService := NewGraphQLLookupService(service)
+		qlLookupService := NewGraphQLLookupService(service, "testdata/")
 		appCtx := clientcontext.ApplicationContext{
 			Application: "exampleApp",
 			ClusterContext: clientcontext.ClusterContext{
@@ -61,7 +61,7 @@ func TestLookupService_Fetch(t *testing.T) {
 		service.On("SendRequest", mock.Anything, mock.Anything, mock.Anything).Return(response, nil)
 
 		//when
-		gatewayURL, e := qlLookupService.Fetch(appCtx, "testdata/")
+		gatewayURL, e := qlLookupService.Fetch(appCtx)
 		require.NoError(t, e)
 
 		//then

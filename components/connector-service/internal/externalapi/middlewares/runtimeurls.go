@@ -13,16 +13,14 @@ import (
 type runtimeURLsMiddleware struct {
 	gatewayBaseURL              string
 	lookupEnabled               clientcontext.LookupEnabledType
-	lookupConfigPath            string
 	applicationContextExtractor clientcontext.ApplicationContextExtractor
 	lookupService               lookup.LookupService
 }
 
-func NewRuntimeURLsMiddleware(gatewayBaseURL, lookupConfigPath string, lookupEnabled clientcontext.LookupEnabledType, extractor clientcontext.ApplicationContextExtractor, lookupService lookup.LookupService) *runtimeURLsMiddleware {
+func NewRuntimeURLsMiddleware(gatewayBaseURL string, lookupEnabled clientcontext.LookupEnabledType, extractor clientcontext.ApplicationContextExtractor, lookupService lookup.LookupService) *runtimeURLsMiddleware {
 	return &runtimeURLsMiddleware{
 		gatewayBaseURL:              gatewayBaseURL,
 		lookupEnabled:               lookupEnabled,
-		lookupConfigPath:            lookupConfigPath,
 		applicationContextExtractor: extractor,
 		lookupService:               lookupService,
 	}
@@ -41,10 +39,11 @@ func (cc *runtimeURLsMiddleware) Middleware(handler http.Handler) http.Handler {
 				httphelpers.RespondWithErrorAndLog(w, apperrors.Internal("Could not read Application Context. %s", appError))
 				return
 			}
-			fetchedGatewayHost, appErr := cc.lookupService.Fetch(appCtx, cc.lookupConfigPath)
+			fetchedGatewayHost, appErr := cc.lookupService.Fetch(appCtx)
 
 			if appErr != nil {
 				httphelpers.RespondWithErrorAndLog(w, apperrors.Internal("Could not fetch gateway URL. %s", appErr))
+				return
 			}
 			runtimeURLs.EventsBaseURL = fetchedGatewayHost
 			runtimeURLs.MetadataBaseURL = fetchedGatewayHost
