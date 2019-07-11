@@ -1,25 +1,43 @@
 {{ if eq .Values.provider "zipkin" }}
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-zipkin
+  name: istio-tracing
   namespace: {{ .Release.Namespace }}
   labels:
     app: zipkin
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
+    chart: {{ template "tracing.chart" . }}
     heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
 spec:
+  selector:
+    matchLabels:
+      app: zipkin
   template:
     metadata:
       labels:
         app: zipkin
+        chart: {{ template "tracing.chart" . }}
+        heritage: {{ .Release.Service }}
         release: {{ .Release.Name }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+        scheduler.alpha.kubernetes.io/critical-pod: ""
     spec:
+{{- if .Values.global.priorityClassName }}
+      priorityClassName: "{{ .Values.global.priorityClassName }}"
+{{- end }}
+{{- if .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+{{- range .Values.global.imagePullSecrets }}
+        - name: {{ . }}
+{{- end }}
+{{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: zipkin
           image: "{{ .Values.zipkin.hub }}/zipkin:{{ .Values.zipkin.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           ports:
             - containerPort: {{ .Values.zipkin.queryPort }}
           livenessProbe:
@@ -54,4 +72,11 @@ spec:
       affinity:
       {{- include "nodeaffinity" . | indent 6 }}
       {{- include "podAntiAffinity" . | indent 6 }}
+      {{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 6 }}
+      {{- else if .Values.global.defaultTolerations }}
+      tolerations:
+{{ toYaml .Values.global.defaultTolerations | indent 6 }}
+      {{- end }}
 {{ end }}

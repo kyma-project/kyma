@@ -1,7 +1,6 @@
 #
 # mixer configuration
 #
-enabled: true
 image: mixer
 
 env:
@@ -39,6 +38,7 @@ telemetry:
 
 podAnnotations: {}
 nodeSelector: {}
+tolerations: []
 
 # Specify the pod anti-affinity that allows you to constrain which nodes
 # your pod is eligible to be scheduled based on labels on pods that are
@@ -61,6 +61,9 @@ nodeSelector: {}
 podAntiAffinityLabelSelector: []
 podAntiAffinityTermLabelSelector: []
 
+templates:
+  useTemplateCRDs: false
+
 adapters:
   kubernetesenv:
     enabled: true
@@ -73,4 +76,4 @@ adapters:
     enabled: true
     metricsExpiryDuration: 10m
   # Setting this to false sets the useAdapterCRDs mixer startup argument to false
-  useAdapterCRDs: true
+  useAdapterCRDs: false
