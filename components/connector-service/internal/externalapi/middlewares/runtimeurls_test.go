@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/middlewares/mocks"
+	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/middlewares/lookup/mocks"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/stretchr/testify/assert"

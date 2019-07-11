@@ -1,4 +1,4 @@
-package middlewares
+package lookup
 
 import (
 	"fmt"
@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	timeout  = 30 * time.Second
 	filename = "config.json"
+	timeout  = 30 * time.Second
 	query    = `{"query":"{ applications(where: {accountId: \"%s\", groupName: \"%s\", appName: \"%s\"}) {name account { id } groups { id name clusters { id name endpoints { gateway } } } } }"}`
 )
 
@@ -32,7 +32,7 @@ func NewGraphQLLookupService(graphQLService graphql.GraphQLService) LookupServic
 	return &lookupService{graphQLService: graphQLService}
 }
 
-func (ls *lookupService) Fetch(context clientcontext.ApplicationContext, configFilePath string) (string, error) {
+func (ls lookupService) Fetch(context clientcontext.ApplicationContext, configFilePath string) (string, error) {
 	file, e := os.Open(configFilePath + filename)
 
 	if e != nil {

@@ -73,9 +73,9 @@ func parseArgs() *options {
 	central := flag.Bool("central", false, "Determines whether connector works as the central")
 	revocationConfigMapName := flag.String("revocationConfigMapName", "revocations-config", "Name of the config map containing revoked certificates")
 	lookupEnabled := flag.Bool("lookupEnabled", false, "Determines whether connector should make a call to get gateway endpoint")
-	lookupConfigMapPath := flag.String("lookupConfigMapPath", "/etc/config/config.json", "Path in the pod where Config Map for cluster lookup is stored")
+	lookupConfigMapPath := flag.String("lookupConfigMapPath", "/etc/config/clusterlookup/", "Path in the pod where Config Map for cluster lookup is stored")
 	runtimeRegistryEnabled := flag.Bool("runtimeRegistryEnabled", false, "Determines whether connector should make a call to Runtime Registry to report status of runtimes")
-	runtimeRegistryConfigMapPath := flag.String("runtimeRegistryConfigMapPath", "/etc/config/runtimeregistry.json", "Path in the pod where Config Map for Runtime Registry is stored")
+	runtimeRegistryConfigMapPath := flag.String("runtimeRegistryConfigMapPath", "/etc/config/runtimeregistry/", "Path in the pod where Config Map for Runtime Registry is stored")
 
 	flag.Parse()
 

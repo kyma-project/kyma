@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/middlewares/lookup"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
@@ -14,10 +15,10 @@ type runtimeURLsMiddleware struct {
 	lookupEnabled               clientcontext.LookupEnabledType
 	lookupConfigPath            string
 	applicationContextExtractor clientcontext.ApplicationContextExtractor
-	lookupService               LookupService
+	lookupService               lookup.LookupService
 }
 
-func NewRuntimeURLsMiddleware(gatewayBaseURL, lookupConfigPath string, lookupEnabled clientcontext.LookupEnabledType, extractor clientcontext.ApplicationContextExtractor, lookupService LookupService) *runtimeURLsMiddleware {
+func NewRuntimeURLsMiddleware(gatewayBaseURL, lookupConfigPath string, lookupEnabled clientcontext.LookupEnabledType, extractor clientcontext.ApplicationContextExtractor, lookupService lookup.LookupService) *runtimeURLsMiddleware {
 	return &runtimeURLsMiddleware{
 		gatewayBaseURL:              gatewayBaseURL,
 		lookupEnabled:               lookupEnabled,

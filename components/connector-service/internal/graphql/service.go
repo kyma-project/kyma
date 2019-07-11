@@ -29,7 +29,7 @@ func NewGraphQLService() GraphQLService {
 	return &graphQLService{}
 }
 
-func (gs *graphQLService) ReadConfig(configStream io.Reader) (Config, error) {
+func (gs graphQLService) ReadConfig(configStream io.Reader) (Config, error) {
 	bytesValue, err := ioutil.ReadAll(configStream)
 
 	if err != nil {
@@ -47,7 +47,7 @@ func (gs *graphQLService) ReadConfig(configStream io.Reader) (Config, error) {
 	return config, nil
 }
 
-func (gs *graphQLService) SendRequest(query string, config Config, timeout time.Duration) (*http.Response, error) {
+func (gs graphQLService) SendRequest(query string, config Config, timeout time.Duration) (*http.Response, error) {
 	byteBody := []byte(query)
 
 	request, e := http.NewRequest("POST", config.URL, bytes.NewBuffer(byteBody))

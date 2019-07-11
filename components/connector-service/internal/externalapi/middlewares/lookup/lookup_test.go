@@ -1,4 +1,4 @@
-package middlewares
+package lookup
 
 import (
 	"bytes"
