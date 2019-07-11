@@ -56,25 +56,26 @@ var _ reconcile.Reconciler = &ReconcileAddonsConfiguration{}
 type ReconcileAddonsConfiguration struct {
 	log logrus.FieldLogger
 	client.Client
-	scheme   *runtime.Scheme
-	provider bundleProvider
+	scheme *runtime.Scheme
 
 	chartStorage  chartStorage
 	bundleStorage bundleStorage
 
-	protection        protection
 	brokerFacade      brokerFacade
 	brokerSyncer      brokerSyncer
 	docsTopicProvider docsProvider
-	developMode       bool
+
+	protection protection
+	provider   bundleProvider
 
 	// syncBroker informs ServiceBroker should be resync, it should be true if
 	// operation insert/delete was made on storage
-	syncBroker bool
+	syncBroker  bool
+	developMode bool
 }
 
 // NewReconcileAddonsConfiguration returns a new reconcile.Reconciler
-func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, brokerFacade brokerFacade, chartStorage chartStorage, bundleStorage bundleStorage, dev bool, docsTopicProvider docsProvider, brokerSyncer brokerSyncer) reconcile.Reconciler {
+func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, brokerFacade brokerFacade, chartStorage chartStorage, bundleStorage bundleStorage, developMode bool, docsTopicProvider docsProvider, brokerSyncer brokerSyncer) reconcile.Reconciler {
 	return &ReconcileAddonsConfiguration{
 		log:           logrus.WithField("controller", "addons-configuration"),
 		Client:        mgr.GetClient(),
@@ -87,8 +88,10 @@ func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, bro
 
 		brokerSyncer:      brokerSyncer,
 		brokerFacade:      brokerFacade,
-		developMode:       dev,
 		docsTopicProvider: docsTopicProvider,
+
+		developMode: developMode,
+		syncBroker:  false,
 	}
 }
 
@@ -171,6 +174,8 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 	if err != nil {
 		return exerr.Wrapf(err, "while getting bundles from namespace %s", addon.Namespace)
 	}
+
+	r.log.Info("- deleting unused DocsTopics")
 	if err := r.deleteUnusedDocsTopics(existingBundles, repositories.ReadyAddons(), addon.Namespace); err != nil {
 		return exerr.Wrapf(err, "while deleting unused docs topics in namespace %s", addon.Namespace)
 	}
@@ -186,6 +191,7 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 		return exerr.Wrap(err, "while update AddonsConfiguration status")
 	}
 
+	r.log.Info("- ensuring ServiceBroker")
 	if err := r.ensureBroker(addon); err != nil {
 		return exerr.Wrap(err, "while ensuring ServiceBroker")
 	}

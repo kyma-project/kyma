@@ -69,8 +69,7 @@ type ReconcileClusterAddonsConfiguration struct {
 
 	// syncBroker informs ServiceBroker should be resync, it should be true if
 	// operation insert/delete was made on storage
-	syncBroker bool
-
+	syncBroker  bool
 	developMode bool
 }
 
@@ -91,8 +90,8 @@ func NewReconcileClusterAddonsConfiguration(mgr manager.Manager, bundleProvider 
 
 		protection: protection{},
 
-		syncBroker:  false,
 		developMode: developMode,
+		syncBroker:  false,
 	}
 }
 
@@ -177,6 +176,7 @@ func (r *ReconcileClusterAddonsConfiguration) addAddonsProcess(addon *addonsv1al
 		return exerr.Wrap(err, "while getting existing cluster-wide bundles from storage")
 	}
 
+	r.log.Info("- deleting unused ClusterDocsTopics")
 	if err := r.deleteUnusedDocsTopics(existingBundles, repositories.ReadyAddons()); err != nil {
 		return exerr.Wrap(err, "while deleting unused DocsTopics")
 	}
@@ -192,6 +192,7 @@ func (r *ReconcileClusterAddonsConfiguration) addAddonsProcess(addon *addonsv1al
 		return exerr.Wrap(err, "while update AddonsConfiguration status")
 	}
 
+	r.log.Info("- ensuring ClusterServiceBroker")
 	if err := r.ensureBroker(addon); err != nil {
 		return exerr.Wrap(err, "while ensuring ServiceBroker")
 	}
