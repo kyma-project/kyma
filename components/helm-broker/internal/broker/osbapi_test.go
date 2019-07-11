@@ -23,13 +23,11 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker/automock"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
-	bundle_automock "github.com/kyma-project/kyma/components/helm-broker/internal/bundle/automock"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/platform/logger/spy"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 )
 
-func newOSBAPITestSuite(t *testing.T, docsTopicsService *bundle_automock.DocsTopicsService) *osbapiTestSuite {
+func newOSBAPITestSuite(t *testing.T) *osbapiTestSuite {
 	logSink := spy.NewLogSink()
 	logSink.RawLogger.Out = ioutil.Discard
 
@@ -58,7 +56,6 @@ func newOSBAPITestSuite(t *testing.T, docsTopicsService *bundle_automock.DocsTop
 		&fakeBindTmplRenderer{},
 		&fakeBindTmplResolver{},
 		ts.HelmClient,
-		bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), docsTopicsService, logSink.Logger),
 		logSink.Logger, ts.OperationIDProvider)
 
 	return ts
@@ -169,7 +166,7 @@ Polling:
 
 func TestOSBAPIStatusSuccess(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
@@ -188,11 +185,7 @@ func TestOSBAPIStatusSuccess(t *testing.T) {
 
 func TestOSBAPICatalogSuccess(t *testing.T) {
 	// GIVEN
-	docsTopicsSvc := &bundle_automock.DocsTopicsService{}
-	docsTopicsSvc.On("EnsureClusterDocsTopicRemoved", "fix-B-ID").Return(nil)
-	defer docsTopicsSvc.AssertExpectations(t)
-
-	ts := newOSBAPITestSuite(t, docsTopicsSvc)
+	ts := newOSBAPITestSuite(t)
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
@@ -208,7 +201,7 @@ func TestOSBAPICatalogSuccess(t *testing.T) {
 
 func TestOSBAPIProvisionSuccess(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	ts.HelmClient.On("Install", mock.Anything, mock.Anything, ts.Exp.ReleaseName, ts.Exp.Namespace).Return(&rls.InstallReleaseResponse{}, nil).Once()
 	defer ts.HelmClient.AssertExpectations(t)
@@ -250,7 +243,7 @@ func TestOSBAPIProvisionSuccess(t *testing.T) {
 
 func TestOSBAPIProvisionRepeatedOnAlreadyFullyProvisionedInstance(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	fixInstance := ts.Exp.NewInstance()
 	fixInstance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
@@ -291,7 +284,7 @@ func TestOSBAPIProvisionRepeatedOnAlreadyFullyProvisionedInstance(t *testing.T) 
 
 func TestOSBAPIProvisionRepeatedOnProvisioningInProgress(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	fixInstance := ts.Exp.NewInstance()
 	fixInstance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
@@ -334,7 +327,7 @@ func TestOSBAPIProvisionRepeatedOnProvisioningInProgress(t *testing.T) {
 
 func TestOSBAPIProvisionConflictErrorOnAlreadyFullyProvisionedInstance(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	fixInstance := ts.Exp.NewInstance()
 	ts.StorageFactory.Instance().Insert(fixInstance)
@@ -372,7 +365,7 @@ func TestOSBAPIProvisionConflictErrorOnAlreadyFullyProvisionedInstance(t *testin
 
 func TestOSBAPIProvisionConflictErrorOnProvisioningInProgress(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	fixInstance := ts.Exp.NewInstance()
 	ts.StorageFactory.Instance().Insert(fixInstance)
@@ -412,7 +405,7 @@ func TestOSBAPIProvisionConflictErrorOnProvisioningInProgress(t *testing.T) {
 
 func TestOSBAPIDeprovisionOnAlreadyDeprovisionedInstance(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	fixInstance := ts.Exp.NewInstance()
 	ts.StorageFactory.Instance().Insert(fixInstance)
@@ -446,7 +439,7 @@ func TestOSBAPIDeprovisionOnAlreadyDeprovisionedInstance(t *testing.T) {
 
 func TestOSBAPIDeprovisionOnAlreadyDeprovisionedAndRemovedInstance(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 	// storage does not contain any data
 
 	ts.ServerRun()
@@ -475,7 +468,7 @@ func TestOSBAPIDeprovisionOnAlreadyDeprovisionedAndRemovedInstance(t *testing.T)
 
 func TestOSBAPIDeprovisionRepeatedOnDeprovisioningInProgress(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	fixInstance := ts.Exp.NewInstance()
 	ts.StorageFactory.Instance().Insert(fixInstance)
@@ -511,7 +504,7 @@ func TestOSBAPIDeprovisionRepeatedOnDeprovisioningInProgress(t *testing.T) {
 
 func TestOSBAPIDeprovisionSuccess(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	fixOperation := ts.Exp.NewInstanceOperation(internal.OperationTypeCreate, internal.OperationStateSucceeded)
 	expOpID := internal.OperationID("fix-op-id")
@@ -549,7 +542,7 @@ func TestOSBAPIDeprovisionSuccess(t *testing.T) {
 
 func TestOSBAPILastOperationSuccess(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
@@ -581,7 +574,7 @@ func TestOSBAPILastOperationSuccess(t *testing.T) {
 
 func TestOSBAPILastOperationForNonExistingInstance(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
@@ -605,7 +598,7 @@ func TestOSBAPILastOperationForNonExistingInstance(t *testing.T) {
 
 func TestOSBAPIBindFailureWithDisallowedParametersFieldInReq(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
@@ -634,7 +627,7 @@ func TestOSBAPIBindFailureWithDisallowedParametersFieldInReq(t *testing.T) {
 
 func TestOSBAPICatalogSuccessNS(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
@@ -650,7 +643,7 @@ func TestOSBAPICatalogSuccessNS(t *testing.T) {
 
 func TestOSBAPIProvisionSuccessNS(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	ts.HelmClient.On("Install", mock.Anything, mock.Anything, ts.Exp.ReleaseName, ts.Exp.Namespace).Return(&rls.InstallReleaseResponse{}, nil).Once()
 	defer ts.HelmClient.AssertExpectations(t)
@@ -692,7 +685,7 @@ func TestOSBAPIProvisionSuccessNS(t *testing.T) {
 
 func TestOSBAPIProvisionRepeatedOnAlreadyFullyProvisionedInstanceNS(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	fixInstance := ts.Exp.NewInstance()
 	fixInstance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
@@ -733,7 +726,7 @@ func TestOSBAPIProvisionRepeatedOnAlreadyFullyProvisionedInstanceNS(t *testing.T
 
 func TestOSBAPIProvisionRepeatedOnProvisioningInProgressNS(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	fixInstance := ts.Exp.NewInstance()
 	fixInstance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
@@ -776,7 +769,7 @@ func TestOSBAPIProvisionRepeatedOnProvisioningInProgressNS(t *testing.T) {
 
 func TestOSBAPIProvisionConflictErrorOnAlreadyFullyProvisionedInstanceNS(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	fixInstance := ts.Exp.NewInstance()
 	ts.StorageFactory.Instance().Insert(fixInstance)
@@ -814,7 +807,7 @@ func TestOSBAPIProvisionConflictErrorOnAlreadyFullyProvisionedInstanceNS(t *test
 
 func TestOSBAPIProvisionConflictErrorOnProvisioningInProgressNS(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	fixInstance := ts.Exp.NewInstance()
 	ts.StorageFactory.Instance().Insert(fixInstance)
@@ -854,7 +847,7 @@ func TestOSBAPIProvisionConflictErrorOnProvisioningInProgressNS(t *testing.T) {
 
 func TestOSBAPIDeprovisionOnAlreadyDeprovisionedInstanceNS(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	fixInstance := ts.Exp.NewInstance()
 	ts.StorageFactory.Instance().Insert(fixInstance)
@@ -888,7 +881,7 @@ func TestOSBAPIDeprovisionOnAlreadyDeprovisionedInstanceNS(t *testing.T) {
 
 func TestOSBAPIDeprovisionOnAlreadyDeprovisionedAndRemovedInstanceNS(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 	// storage does not contain any data
 
 	ts.ServerRun()
@@ -917,7 +910,7 @@ func TestOSBAPIDeprovisionOnAlreadyDeprovisionedAndRemovedInstanceNS(t *testing.
 
 func TestOSBAPIDeprovisionRepeatedOnDeprovisioningInProgressNS(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	fixInstance := ts.Exp.NewInstance()
 	ts.StorageFactory.Instance().Insert(fixInstance)
@@ -953,7 +946,7 @@ func TestOSBAPIDeprovisionRepeatedOnDeprovisioningInProgressNS(t *testing.T) {
 
 func TestOSBAPIDeprovisionSuccessNS(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 
 	fixOperation := ts.Exp.NewInstanceOperation(internal.OperationTypeCreate, internal.OperationStateSucceeded)
 	expOpID := internal.OperationID("fix-op-id")
@@ -991,7 +984,7 @@ func TestOSBAPIDeprovisionSuccessNS(t *testing.T) {
 
 func TestOSBAPILastOperationSuccessNS(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
@@ -1023,7 +1016,7 @@ func TestOSBAPILastOperationSuccessNS(t *testing.T) {
 
 func TestOSBAPILastOperationForNonExistingInstanceNS(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
@@ -1047,7 +1040,7 @@ func TestOSBAPILastOperationForNonExistingInstanceNS(t *testing.T) {
 
 func TestOSBAPIBindFailureWithDisallowedParametersFieldInReqNS(t *testing.T) {
 	// GIVEN
-	ts := newOSBAPITestSuite(t, nil)
+	ts := newOSBAPITestSuite(t)
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 

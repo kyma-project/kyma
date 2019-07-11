@@ -73,7 +73,7 @@ func (d *DocsProvider) EnsureClusterDocsTopicRemoved(id string) error {
 // EnsureDocsTopic creates ClusterDocsTopic for a given bundle or updates it in case it already exists
 func (d *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle, namespace string) error {
 	bundle.Docs[0].Template.Sources = d.defaultDocsSourcesURLs(bundle)
-	cdt := &v1alpha1.DocsTopic{
+	dt := &v1alpha1.DocsTopic{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      string(bundle.ID),
 			Namespace: namespace,
@@ -85,7 +85,7 @@ func (d *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle, namespace string
 		Spec: v1alpha1.DocsTopicSpec{CommonDocsTopicSpec: bundle.Docs[0].Template},
 	}
 
-	err := d.dynamicClient.Create(context.Background(), cdt)
+	err := d.dynamicClient.Create(context.Background(), dt)
 	switch {
 	case err == nil:
 	case apiErrors.IsAlreadyExists(err):
@@ -101,13 +101,13 @@ func (d *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle, namespace string
 
 // EnsureDocsTopicRemoved removes ClusterDocsTopic for a given bundle
 func (d *DocsProvider) EnsureDocsTopicRemoved(id string, namespace string) error {
-	cdt := &v1alpha1.DocsTopic{
+	dt := &v1alpha1.DocsTopic{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      id,
 			Namespace: namespace,
 		},
 	}
-	err := d.dynamicClient.Delete(context.Background(), cdt)
+	err := d.dynamicClient.Delete(context.Background(), dt)
 	if err != nil && !apiErrors.IsNotFound(err) {
 		return errors.Wrapf(err, "while deleting DocsTopic %s", id)
 	}
