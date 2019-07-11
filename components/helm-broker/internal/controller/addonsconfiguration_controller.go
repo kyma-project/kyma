@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 
+	"time"
+
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/addons"
@@ -10,6 +12,7 @@ import (
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	exerr "github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/helm/pkg/proto/hapi/chart"
@@ -127,10 +130,11 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 	}
 
 	if instance.Status.ObservedGeneration == 0 {
-		if err := r.addFinalizer(instance); err != nil {
+		updatedInstance, err := r.addFinalizer(instance)
+		if err != nil {
 			return reconcile.Result{}, exerr.Wrapf(err, "while adding a finalizer to AddonsConfiguration %q", request.NamespacedName)
 		}
-		err = r.addAddonsProcess(instance)
+		err = r.addAddonsProcess(updatedInstance)
 		if err != nil {
 			return reconcile.Result{}, exerr.Wrapf(err, "while creating AddonsConfiguration %q", request.NamespacedName)
 		}
@@ -384,24 +388,28 @@ func (r *ReconcileAddonsConfiguration) updateAddonStatus(addon *addonsv1alpha1.A
 		return exerr.Wrap(err, "while getting AddonsConfiguration")
 	}
 
-	addon.Status.ObservedGeneration = instance.Generation
-	addon.Status.LastProcessedTime = instance.Status.LastProcessedTime
+	instance.Status.ObservedGeneration = instance.Generation
+	instance.Status.LastProcessedTime = &v1.Time{Time: time.Now()}
 
-	err = r.Status().Update(context.TODO(), addon)
+	err = r.Status().Update(context.TODO(), instance)
 	if err != nil {
 		return exerr.Wrap(err, "while update AddonsConfiguration")
 	}
 	return nil
 }
 
-func (r *ReconcileAddonsConfiguration) addFinalizer(addon *addonsv1alpha1.AddonsConfiguration) error {
+func (r *ReconcileAddonsConfiguration) addFinalizer(addon *addonsv1alpha1.AddonsConfiguration) (*addonsv1alpha1.AddonsConfiguration, error) {
 	obj := addon.DeepCopy()
 	if r.protection.hasFinalizer(obj.Finalizers) {
-		return nil
+		return obj, nil
 	}
 	obj.Finalizers = r.protection.addFinalizer(obj.Finalizers)
 
-	return r.Client.Update(context.Background(), obj)
+	err := r.Client.Update(context.Background(), obj)
+	if err != nil {
+		return nil, err
+	}
+	return obj, nil
 }
 
 func (r *ReconcileAddonsConfiguration) deleteFinalizer(addon *addonsv1alpha1.AddonsConfiguration) error {
