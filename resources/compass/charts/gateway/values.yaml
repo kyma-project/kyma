@@ -8,4 +8,4 @@ service:
   port: *port
 
 gateway:
-  enabled: true
+  enabled: false
