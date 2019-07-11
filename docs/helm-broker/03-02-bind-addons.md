@@ -1,5 +1,5 @@
 ---
-title: Bind bundles
+title: Bind addons
 type: Details
 ---
 

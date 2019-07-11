@@ -3,7 +3,7 @@ title: AddonsConfiguration
 type: Custom Resource
 ---
 
-The `addonsconfiguration.addons.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to define define Namespace-scoped bundles fetched by the Helm Broker. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `addonsconfiguration.addons.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to define define Namespace-scoped addons fetched by the Helm Broker. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```
 kubectl get crd addonsconfiguration.addons.kyma-project.io -o yaml
@@ -11,7 +11,7 @@ kubectl get crd addonsconfiguration.addons.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample AddonsConfiguration which provides Namespace-scoped bundles. If any status of AddonsConfiguration is marked as `Failed`, all of its bundles are not available in the Service Catalog.
+This is a sample AddonsConfiguration which provides Namespace-scoped addons. If any status of AddonsConfiguration is marked as `Failed`, all of its addons are not available in the Service Catalog.
 
 ```yaml
 apiVersion: addons.kyma-project.io/v1alpha1
@@ -99,4 +99,4 @@ These components use this CR:
 
 | Component   |   Description |
 |-------------|---------------|
-| Helm Broker |  Fetches Namespace-scoped bundles provided by this CR. |
+| Helm Broker |  Fetches Namespace-scoped addons provided by this CR. |

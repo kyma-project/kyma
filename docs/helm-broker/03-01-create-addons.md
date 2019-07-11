@@ -1,9 +1,9 @@
 ---
-title: Create a bundle
+title: Create addons
 type: Details
 ---
 
-Bundles which the Helm Broker uses must have a specific structure. These are all possible files that you can include in your bundle:
+Addons which the Helm Broker uses must have a specific structure. These are all possible files that you can include in your addons:
 
 ```
 sample-bundle/
@@ -21,29 +21,29 @@ sample-bundle/
    │    │   └── values.yaml                  # Default configuration values in this plan for a chart defined in the `chart` directory
    │    └── ....
    │
-   └── docs/                                 # A directory which contains documentation for this bundle
-        ├── meta.yaml                        # [REQUIRED] A file which contains metadata information about documentation for this bundle
+   └── docs/                                 # A directory which contains documentation for this addon
+        ├── meta.yaml                        # [REQUIRED] A file which contains metadata information about documentation for this addon
         ├── {assets}                         # Files with documentation and assets
         └── ....
 ```
 
-> **NOTE:** All file names in a bundle repository are case-sensitive.
+> **NOTE:** All file names in an addon repository are case-sensitive.
 
 For details about particular files, read the following sections.
 
 ## meta.yaml file
 
-The `meta.yaml` file contains information about the bundle. Define the following fields to create a service object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#service-object).
+The `meta.yaml` file contains information about the addon. Define the following fields to create a service object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#service-object).
 
 |      Field Name     | Required |                   Description             |
 |-------------------|:--------:|----------------------------------------------|
-|         **name**        |   YES   | The name of the bundle.  |
-|       **version**       |   YES   | The version of the bundle. It is a broker service identifier.  |
+|         **name**        |   YES   | The name of the addon.  |
+|       **version**       |   YES   | The version of the addon. It is a broker service identifier.  |
 |          **id**         |   YES   | The broker service identifier.  |
 |     **description**     |   YES   | The short description of the service. |
-|     **displayName**     |   YES   | The display name of the bundle.    |
+|     **displayName**     |   YES   | The display name of the addon.    |
 |         **tags**        |   NO  | Keywords describing the provided service, separated by commas.     |
-|       **bindable**      |   NO  | The field that specifies whether you can bind a given bundle. |
+|       **bindable**      |   NO  | The field that specifies whether you can bind a given addon. |
 | **providerDisplayName** |   NO  | The name of the upstream entity providing the actual service.  |
 |   **longDescription**   |   NO  | The long description of the service.     |
 |   **documentationURL**  |   NO  | The link to the documentation page for the service.        |
@@ -53,7 +53,7 @@ The `meta.yaml` file contains information about the bundle. Define the following
 | **bindingsRetrievable** |   NO  | The field that specifies whether fetching a ServiceBinding using a GET request on the resource's endpoint is supported for all plans. The default value is `false`.   |
 |   **planUpdatable**     |   NO  |  The field that specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
 |       **requires**      |   NO  | The list of permissions the user must grant to the instances of this service. |
-| **provisionOnlyOnce**   |   NO  | The field that specifies whether the bundle can be provisioned only once in a given Namespace. The default value is `false`. |
+| **provisionOnlyOnce**   |   NO  | The field that specifies whether the addon can be provisioned only once in a given Namespace. The default value is `false`. |
 
 > **NOTE**: The **provisionOnlyOnce** and **local** keys are reserved and cannot be added to the **labels** entry, since the Helm Broker overrides them at runtime. The Helm Broker always adds the `local:true` label and it adds the `provisionOnlyOnce:true` label only if **provisionOnlyOnce** is set to `true`.
 
@@ -92,8 +92,8 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 
 ## docs directory
 
-In the `docs` directory, provide documentation for your bundle. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` which provides information on how documentation for the bundle is uploaded.
-As the Helm Broker is installed as a ClusterServiceBroker, documentation for bundles is provided using [ClusterDocsTopics](/components/headless-cms/#custom-resource-clusterdocstopic).
+In the `docs` directory, provide documentation for your addon. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` which provides information on how documentation for the addon is uploaded.
+As the Helm Broker is installed as a ClusterServiceBroker, documentation for addons is provided using [ClusterDocsTopics](/components/headless-cms/#custom-resource-clusterdocstopic).
 
 The `meta.yaml` file contains the specification of the ClusterDocsTopic. The example structure of the `meta.yaml` file looks as follows:
 
@@ -103,7 +103,7 @@ The `meta.yaml` file contains the specification of the ClusterDocsTopic. The exa
 | **docs[].template**                    |   YES   | Contains the specification of the ClusterDocsTopic. |
 | **docs[].template.displayName**        |   YES   | Specifies the display name of the ClusterDocsTopic. |
 | **docs[].template.description**        |   YES   | Provides the description of the ClusterDocsTopic. |
-| **docs[].template.sources[]**          |   YES   | Contains the definitions of assets for a bundle. |
+| **docs[].template.sources[]**          |   YES   | Contains the definitions of assets for an addon. |
 | **docs[].template.sources[].type**     |   YES   | Defines the type of the asset. |
 | **docs[].template.sources[].name**     |   YES   | Defines the name of the asset. |
 | **docs[].template.sources[].mode**     |   YES   | Defines the type of the asset file. |
@@ -112,7 +112,7 @@ The `meta.yaml` file contains the specification of the ClusterDocsTopic. The exa
 
 >**NOTE:** Currently you can provide only one entry in the `docs` array.
 
-See [this](https://github.com/kyma-project/bundles/tree/release-0.6/bundles/testing-0.0.1/docs) example of the `docs` directory with documentation for the testing bundle.
+See [this](https://github.com/kyma-project/bundles/tree/release-0.6/bundles/testing-0.0.1/docs) example of the `docs` directory with documentation for the testing addon.
 
 Using the Helm Broker, you can provision a broker which provides its own Service Classes. To learn how to upload documentation for those classes, read [this](#details-provide-service-classes-documentation) document.
 

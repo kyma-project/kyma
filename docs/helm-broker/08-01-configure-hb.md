@@ -2,11 +2,11 @@
 title: Tutorials
 ---
 
-By default, the Helm Broker fetches bundles listed in the `index.yaml` file from the `bundles` repository [release](https://github.com/kyma-project/bundles/releases). This tutorial shows how to configure the Helm Broker to fetch cluster-wide and Namespace-scoped bundle definitions from other remote HTTPS servers.
+By default, the Helm Broker fetches addons listed in the `index.yaml` file from the `bundles` repository [release](https://github.com/kyma-project/bundles/releases). This tutorial shows how to configure the Helm Broker to fetch cluster-wide and Namespace-scoped addon definitions from other remote HTTPS servers.
 
 ## Steps
 
-Follow these steps to configure the Helm Broker to fetch bundle definitions from other remote HTTPS servers.
+Follow these steps to configure the Helm Broker to fetch addon definitions from other remote HTTPS servers.
 
 <div tabs>
   <details>
@@ -14,9 +14,9 @@ Follow these steps to configure the Helm Broker to fetch bundle definitions from
   Cluster-wide bundles
   </summary>
 
-  1. [Create a repository](#details-create-a-bundles-repository) with your bundles. To complete this tutorial step by step, use the existing [bundles](https://github.com/kyma-project/bundles/tree/master/bundles) repository.
+  1. [Create a repository](#details-create-addons-repository) with your addons. To complete this tutorial step by step, use the existing [bundles](https://github.com/kyma-project/bundles/tree/master/bundles) repository.
   2. [Install Kyma](/root/kyma/#installation-installation) locally or on a cluster.
-  3. Create the [ClusterAddonsConfiguration](#custom-resource-clusteraddonsconfiguration) CR which contains URLs to your bundles.
+  3. Create the [ClusterAddonsConfiguration](#custom-resource-clusteraddonsconfiguration) CR which contains URLs to your addons.
 
   ```yaml
   kubectl create -f https://kyma-project.io/assets/docs/master/helm-broker/docs/assets/cluster-addon.yaml
@@ -29,14 +29,14 @@ Follow these steps to configure the Helm Broker to fetch bundle definitions from
   Namespace-scoped bundles
   </summary>
 
-  1. [Create a repository](#details-create-a-bundles-repository) with your bundles. To complete this tutorial step by step, use the existing [bundles](https://github.com/kyma-project/bundles/tree/master/bundles) repository.
+  1. [Create a repository](#details-create-addons-repository) with your addons. To complete this tutorial step by step, use the existing [bundles](https://github.com/kyma-project/bundles/tree/master/bundles) repository.
   2. [Install Kyma](/root/kyma/#installation-installation) locally or on a cluster.
   3. Create the `hodor` Namespace where you want to enable the Helm Broker:
   ```
   kubectl create namespace hodor
   ```
 
-  4. Create the [AddonsConfiguration](#custom-resource-addonsconfiguration) CR which contains URLs to your bundles:
+  4. Create the [AddonsConfiguration](#custom-resource-addonsconfiguration) CR which contains URLs to your addons:
 
   ```yaml
   kubectl create -f https://kyma-project.io/assets/docs/master/helm-broker/docs/assets/namespaced-addon.yaml
