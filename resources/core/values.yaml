@@ -21,23 +21,23 @@ global:
       name: kyma-gateway
   acceptance_tests:
     dir:
-    version: 1.3.0-rc1
+    version: 1.3.0-rc2
   ui_acceptance_tests:
     dir:
     version: "34b9d204"
   api_controller:
     dir:
-    version: "1.3.0-rc1"
+    version: "1.3.0-rc2"
   api_controller_integration_tests:
     dir:
-    version: 1.3.0-rc1
+    version: 1.3.0-rc2
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir:
-    version: 1.3.0-rc1
+    version: 1.3.0-rc2
   iam_kubeconfig_service:
     dir:
-    version: 1.3.0-rc1
+    version: 1.3.0-rc2
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
@@ -45,39 +45,39 @@ global:
     clusterDocsTopicsVersion: release-1.3
   namespace_controller:
     dir:
-    version: 1.3.0-rc1
+    version: 1.3.0-rc2
   kubeless_integration_tests:
     dir: tests/
-    version: 1.3.0-rc1
+    version: 1.3.0-rc2
   kubeless_tests:
     dir:
-    version: 1.3.0-rc1
+    version: 1.3.0-rc2
   apiserver_proxy_integration_tests:
     dir:
-    version: 1.3.0-rc1
+    version: 1.3.0-rc2
   test_namespace_controller:
     dir:
-    version: 1.3.0-rc1
+    version: 1.3.0-rc2
   console_backend_service:
     dir:
-    version: 1.3.0-rc1
+    version: 1.3.0-rc2
   console_backend_service_test:
     dir:
-    version: 1.3.0-rc1
+    version: 1.3.0-rc2
   cluster_users_test:
     dir:
-    version: "1.3.0-rc1"
+    version: "1.3.0-rc2"
   xip_patch:
     dir:
-    version: "1.3.0-rc1"
+    version: "1.3.0-rc2"
   kubeless_images:
     runtime:
       node6:
         dir:
-        version: "1.3.0-rc1"
+        version: "1.3.0-rc2"
       node8:
         dir:
-        version: "1.3.0-rc1"
+        version: "1.3.0-rc2"
     installation:
       node6:
         image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"

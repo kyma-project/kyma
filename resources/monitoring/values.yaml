@@ -4,7 +4,7 @@ test:
   image:
     name: monitoring
     dir: tests/
-    version: 1.3.0-rc1
+    version: 1.3.0-rc2
 global:
   isLocalEnv: false
   serviceCatalogApiserver:
