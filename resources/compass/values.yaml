@@ -4,20 +4,20 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir:
-      version: "1.3.0-rc1"
+      version: "1.3.0-rc2"
     director:
       dir:
-      version: "1.3.0-rc1"
+      version: "1.3.0-rc2"
     gateway:
       dir:
-      version: "1.3.0-rc1"
+      version: "1.3.0-rc2"
     healthchecker:
       dir:
-      version: "1.3.0-rc1"
+      version: "1.3.0-rc2"
     tests:
       e2e:
         dir:
-        version: "1.3.0-rc1"
+        version: "1.3.0-rc2"
 
   director:
     port: 3000
