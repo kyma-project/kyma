@@ -33,10 +33,17 @@ deployment:
     province: Waldorf
   externalClusterLookup:
     enabled: false
-    path: "/etc/config/"
+    path: "/etc/config/clusterlookup/"
     lookupConfigMapName: "lookup-config"
     lookupConfig: |
       { "url": "http://example.com/graphql", "headers": { } }
+  runtimeStateReport:
+    enabled: false
+    path: "/etc/config/runtimestatusreport/"
+    runtimeStateConfigMapName: "runtimestate-config"
+    runtimeStateConfig: |
+      { "url": "http://example.com/graphql", "headers": { } }
+
 
 service:
   externalapi:
