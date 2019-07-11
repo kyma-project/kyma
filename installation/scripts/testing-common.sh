@@ -181,16 +181,24 @@ function printImagesWithLatestTag() {
     return 0
 }
 
-TESTING_BUNDLES_MAP_NAME="testing-bundles-repos"
+TESTING_ADDONS_CFG_NAME="testing-addons"
 
 function injectTestingBundles() {
-    kubectl create configmap ${TESTING_BUNDLES_MAP_NAME} -n kyma-system --from-literal=URLs=https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml
-    kubectl label configmap ${TESTING_BUNDLES_MAP_NAME} -n kyma-system helm-broker-repo=true
-
-    log "Testing bundles injected" green
+    cat <<EOF | kubectl apply -f -
+apiVersion: addons.kyma-project.io/v1alpha1
+kind: ClusterAddonsConfiguration
+metadata:
+  labels:
+    addons.kyma-project.io/managed: "true"
+  name: ${TESTING_ADDONS_CFG_NAME}
+spec:
+  repositories:
+  - url: "https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml"
+EOF
+    log "Testing addons injected" green
 }
 
 function removeTestingBundles() {
-    kubectl delete configmap ${TESTING_BUNDLES_MAP_NAME} -n kyma-system
-    log "Testing bundles removed" green
+    kubectl delete clusteraddonsconfiguration ${TESTING_ADDONS_CFG_NAME}
+    log "Testing addons removed" green
 }
