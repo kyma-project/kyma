@@ -36,8 +36,8 @@ const (
 	fail    = 1
 	retries = 20
 
-	idHeader               = "ce-event-id"
-	timeHeader             = "ce-event-time"
+	idHeader               = "ce-id"
+	timeHeader             = "ce-time"
 	contentTypeHeader      = "content-type"
 	sourceHeader           = "ce-source"
 	eventTypeHeader        = "ce-type"
