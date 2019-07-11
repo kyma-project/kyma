@@ -52,45 +52,45 @@ spec:
           - "--runtimeRegistryConfigMapPath={{ .Values.deployment.runtimeStateReport.path }}"
         {{- if .Values.deployment.externalClusterLookup.enabled or .Values.deployment.runtimeStateReport.enabled }}
         volumeMounts:
-            {{- end }}
-              {{- if .Values.deployment.externalClusterLookup.enabled }}
-                  - name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
-                    mountPath: {{ .Values.deployment.externalClusterLookup.path }}
-                    {{- end }}
-                      {{- if .Values.deployment.runtimeStateReport.enabled }}
-                          - name: {{ .Values.deployment.runtimeStateReport.runtimeStateConfigMapName }}
-                            mountPath: {{ .Values.deployment.runtimeStateReport.path }}
-                            {{- end }}
-                                env:
-                                    - name: COUNTRY
-                                      value: "{{ .Values.deployment.envvars.country }}"
-                                      - name: ORGANIZATION
-                                      value: "{{ .Values.deployment.envvars.organization }}"
-                                      - name: ORGANIZATIONALUNIT
-                                      value: "{{ .Values.deployment.envvars.organizationalunit }}"
-                                      - name: LOCALITY
-                                      value: "{{ .Values.deployment.envvars.locality }}"
-                                      - name: PROVINCE
-                                      value: "{{ .Values.deployment.envvars.province }}"
-                                ports:
-                                - containerPort: {{ .Values.deployment.args.internalAPIPort }}
-                                name: http-int
-                                - containerPort: {{ .Values.deployment.args.externalAPIPort }}
-                                name: http-ext
-                                - containerPort: 9090
-                                name: metrics-port
-                                securityContext:
-                                runAsUser: {{ .Values.deployment.runAsUser }}
-                                {{- if .Values.deployment.externalClusterLookup.enabled or .Values.deployment.runtimeStateReport.enabled }}
-                                    volumes:
-                                    {{- end }}
-                                      {{- if .Values.deployment.externalClusterLookup.enabled }}
-                                          - name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
-                                            configMap:
-                                                name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
-                                            {{- end }}
-                                              {{- if .Values.deployment.runtimeStateReport.enabled }}
-                                                  - name: {{ .Values.deployment.runtimeStateReport.runtimeStateConfigMapName }}
-                                                    configMap:
-                                                        name: {{ .Values.deployment.runtimeStateReport.runtimeStateConfigMapName }}
-                                                    {{- end }}
+        {{- end }}
+        {{- if .Values.deployment.externalClusterLookup.enabled }}
+        - name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
+          mountPath: {{ .Values.deployment.externalClusterLookup.path }}
+        {{- end }}
+        {{- if .Values.deployment.runtimeStateReport.enabled }}
+        - name: {{ .Values.deployment.runtimeStateReport.runtimeStateConfigMapName }}
+          mountPath: {{ .Values.deployment.runtimeStateReport.path }}
+        {{- end }}
+        env:
+          - name: COUNTRY
+            value: "{{ .Values.deployment.envvars.country }}"
+          - name: ORGANIZATION
+            value: "{{ .Values.deployment.envvars.organization }}"
+          - name: ORGANIZATIONALUNIT
+            value: "{{ .Values.deployment.envvars.organizationalunit }}"
+          - name: LOCALITY
+            value: "{{ .Values.deployment.envvars.locality }}"
+          - name: PROVINCE
+            value: "{{ .Values.deployment.envvars.province }}"
+        ports:
+          - containerPort: {{ .Values.deployment.args.internalAPIPort }}
+            name: http-int
+          - containerPort: {{ .Values.deployment.args.externalAPIPort }}
+            name: http-ext
+          - containerPort: 9090
+            name: metrics-port
+        securityContext:
+          runAsUser: {{ .Values.deployment.runAsUser }}
+      {{- if .Values.deployment.externalClusterLookup.enabled or .Values.deployment.runtimeStateReport.enabled }}
+      volumes:
+      {{- end }}
+      {{- if .Values.deployment.externalClusterLookup.enabled }}
+        - name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
+          configMap:
+            name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
+      {{- end }}
+      {{- if .Values.deployment.runtimeStateReport.enabled }}
+        - name: {{ .Values.deployment.runtimeStateReport.runtimeStateConfigMapName }}
+          configMap:
+            name: {{ .Values.deployment.runtimeStateReport.runtimeStateConfigMapName }}
+      {{- end }}
