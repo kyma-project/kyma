@@ -101,7 +101,7 @@ func (ext *ContextExtractor) CreateClusterClientContextService(ctx context.Conte
 		return nil, apperrors.Internal("Failed to extract ClusterContext from request")
 	}
 
-	subject := ext.prepareSubject(clusterCtx.Tenant, clusterCtx.Group, RuntimeDefaultCommonName)
+	subject := ext.prepareSubject(clusterCtx.Tenant, clusterCtx.Group, clusterCtx.RuntimeID)
 
 	return newClientCertificateContext(clusterCtx, subject), nil
 }

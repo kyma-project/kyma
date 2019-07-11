@@ -17,7 +17,7 @@ type contextFromSubjMiddleware struct {
 	headerParser       certificates.HeaderParser
 }
 
-func NewContextFromSubjMiddleware(headerParser certificates.HeaderParser, extractFullContext bool) *contextFromSubjMiddleware {
+func NewContextFromSubjMiddleware(headerParser certificates.HeaderParser, extractFullContext bool, fullContextFromSubject func(string) (clientcontext.ContextExtender, apperrors.AppError)) *contextFromSubjMiddleware {
 	var contextFromSubjectExtractor contextFromSubjectExtractor
 
 	if extractFullContext {
@@ -46,6 +46,42 @@ func (cc *contextFromSubjMiddleware) Middleware(handler http.Handler) http.Handl
 	})
 }
 
+func FullApplicationContextFromSubject(subject string) (clientcontext.ContextExtender, apperrors.AppError) {
+	tenant := certificates.GetOrganization(subject)
+	group := certificates.GetOrganizationalUnit(subject)
+	applicationName := certificates.GetCommonName(subject)
+
+	if isAnyEmpty(tenant, group, applicationName) {
+		return nil, apperrors.BadRequest("Invalid certificate header, one of the values not provided")
+	}
+
+	clusterContext := clientcontext.ClusterContext{
+		Group:  group,
+		Tenant: tenant,
+	}
+
+	return clientcontext.ApplicationContext{
+		Application:    applicationName,
+		ClusterContext: clusterContext,
+	}, nil
+}
+
+func FullRuntimeContextFromSubject(subject string) (clientcontext.ContextExtender, apperrors.AppError) {
+	tenant := certificates.GetOrganization(subject)
+	group := certificates.GetOrganizationalUnit(subject)
+	runtimeID := certificates.GetCommonName(subject)
+
+	if isAnyEmpty(tenant, group, runtimeID) {
+		return nil, apperrors.BadRequest("Invalid certificate header, one of the values not provided")
+	}
+
+	return clientcontext.ClusterContext{
+		Group:     group,
+		Tenant:    tenant,
+		RuntimeID: runtimeID,
+	}, nil
+}
+
 func (cc *contextFromSubjMiddleware) parseContextFromSubject(r *http.Request) (clientcontext.ContextExtender, apperrors.AppError) {
 
 	certInfo, e := cc.headerParser.ParseCertificateHeader(*r)
@@ -72,30 +108,6 @@ func applicationContextFromSubject(subject string) (clientcontext.ContextExtende
 	return clientcontext.ApplicationContext{
 		Application:    appName,
 		ClusterContext: clientcontext.ClusterContext{},
-	}, nil
-}
-
-func fullContextFromSubject(subject string) (clientcontext.ContextExtender, apperrors.AppError) {
-	tenant := certificates.GetOrganization(subject)
-	group := certificates.GetOrganizationalUnit(subject)
-	commonName := certificates.GetCommonName(subject)
-
-	if isAnyEmpty(tenant, group, commonName) {
-		return nil, apperrors.BadRequest("Invalid certificate header, one of the values not provided")
-	}
-
-	clusterContext := clientcontext.ClusterContext{
-		Group:  group,
-		Tenant: tenant,
-	}
-
-	if commonName == clientcontext.RuntimeDefaultCommonName {
-		return clusterContext, nil
-	}
-
-	return clientcontext.ApplicationContext{
-		Application:    commonName,
-		ClusterContext: clusterContext,
 	}, nil
 }
 

@@ -25,8 +25,9 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 			require.True(t, ok)
 
 			assert.Equal(t, testApplication, applicationCtx.Application)
-			assert.Equal(t, testTenant, applicationCtx.ClusterContext.Tenant)
-			assert.Equal(t, testGroup, applicationCtx.ClusterContext.Group)
+			assert.Equal(t, testTenant, applicationCtx.ClientContext.Tenant)
+			assert.Equal(t, testGroup, applicationCtx.ClientContext.Group)
+			assert.Equal(t, testRuntimeID, applicationCtx.ClientContext.ID)
 
 			w.WriteHeader(http.StatusOK)
 		})
@@ -36,6 +37,7 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 		req.Header.Set(clientcontext.ApplicationHeader, testApplication)
 		req.Header.Set(clientcontext.TenantHeader, testTenant)
 		req.Header.Set(clientcontext.GroupHeader, testGroup)
+		req.Header.Set(clientcontext.RuntimeIDHeader, testRuntimeID)
 
 		rr := httptest.NewRecorder()
 
@@ -59,7 +61,7 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 			require.True(t, ok)
 
 			assert.Equal(t, testApplication, applicationCtx.Application)
-			assert.Empty(t, applicationCtx.ClusterContext)
+			assert.Empty(t, applicationCtx.ClientContext)
 
 			w.WriteHeader(http.StatusOK)
 		})
@@ -94,6 +96,7 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 		require.NoError(t, err)
 		req.Header.Set(clientcontext.TenantHeader, testTenant)
 		req.Header.Set(clientcontext.GroupHeader, testGroup)
+		req.Header.Set(clientcontext.RuntimeIDHeader, testRuntimeID)
 
 		rr := httptest.NewRecorder()
 

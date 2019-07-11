@@ -12,10 +12,6 @@ type appContextMiddleware struct {
 	contextHandler clientcontext.ClusterContextStrategy
 }
 
-func (cc appContextMiddleware) isValidCtx(appCtx clientcontext.ApplicationContext) bool {
-	return !appCtx.IsEmpty() && cc.contextHandler.IsValidContext(appCtx.ClusterContext)
-}
-
 func NewApplicationContextMiddleware(contextHandler clientcontext.ClusterContextStrategy) *appContextMiddleware {
 	return &appContextMiddleware{
 		contextHandler: contextHandler,
@@ -24,12 +20,10 @@ func NewApplicationContextMiddleware(contextHandler clientcontext.ClusterContext
 
 func (cc *appContextMiddleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		appContext := clientcontext.ApplicationContext{
-			Application:    r.Header.Get(clientcontext.ApplicationHeader),
-			ClusterContext: cc.contextHandler.ReadClusterContextFromRequest(r),
-		}
-
-		if !cc.isValidCtx(appContext) {
+		appContext := cc.contextHandler.ReadClusterContextFromRequest(r)
+		appContext.ID = r.Header.Get(clientcontext.ApplicationHeader)
+		
+		if !cc.contextHandler.IsValidContext(appContext) {
 			httphelpers.RespondWithErrorAndLog(w, apperrors.BadRequest("Required headers for ApplicationContext not specified."))
 			return
 		}

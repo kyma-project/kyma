@@ -10,8 +10,6 @@ eval $(minikube docker-env)
 
 buildImage connector-service-tests
 
-NODE_PORT=$(kubectl -n kyma-system get svc application-connector-ingress-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}')
-
 echo ""
 echo "------------------------"
 echo "Creating test pod"
@@ -42,7 +40,7 @@ spec:
     - name: EXTERNAL_API_URL
       value: http://connector-service-external-api:8081
     - name: GATEWAY_URL
-      value: https://gateway.kyma.local:$NODE_PORT
+      value: https://gateway.kyma.local
     - name: SKIP_SSL_VERIFY
       value: "true"
     - name: CENTRAL

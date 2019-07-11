@@ -17,6 +17,7 @@ func TestClusterContextEnabledStrategy_ReadClusterContextFromRequest(t *testing.
 
 		req.Header.Set(TenantHeader, tenant)
 		req.Header.Set(GroupHeader, group)
+		req.Header.Set(RuntimeIDHeader, runtimeID)
 
 		strategy := NewClusterContextStrategy(true)
 
@@ -26,6 +27,7 @@ func TestClusterContextEnabledStrategy_ReadClusterContextFromRequest(t *testing.
 		// then
 		assert.Equal(t, tenant, clusterCtx.Tenant)
 		assert.Equal(t, group, clusterCtx.Group)
+		assert.Equal(t, runtimeID, clusterCtx.RuntimeID)
 	})
 
 }
@@ -33,21 +35,26 @@ func TestClusterContextEnabledStrategy_ReadClusterContextFromRequest(t *testing.
 func TestClusterContextEnabledStrategy_IsValidContext(t *testing.T) {
 
 	testCases := []struct {
-		tenant string
-		group  string
-		valid  bool
+		tenant    string
+		group     string
+		runtimeID string
+		valid     bool
 	}{
-		{tenant: tenant, group: group, valid: true},
-		{tenant: tenant, group: "", valid: false},
-		{tenant: "", group: group, valid: false},
-		{tenant: "", group: "", valid: false},
+		{tenant: tenant, group: group, runtimeID: runtimeID, valid: true},
+		{tenant: tenant, group: "", runtimeID: runtimeID, valid: false},
+		{tenant: "", group: group, runtimeID: runtimeID, valid: false},
+		{tenant: "", group: "", runtimeID: runtimeID, valid: false},
+		{tenant: tenant, group: group, runtimeID: "", valid: false},
+		{tenant: tenant, group: "", runtimeID: "", valid: false},
+		{tenant: "", group: group, runtimeID: "", valid: false},
+		{tenant: "", group: "", runtimeID: "", valid: false},
 	}
 
 	t.Run("should validate context", func(t *testing.T) {
 		strategy := NewClusterContextStrategy(true)
 
 		for _, test := range testCases {
-			valid := strategy.IsValidContext(ClusterContext{Tenant: test.tenant, Group: test.group})
+			valid := strategy.IsValidContext(ClusterContext{Tenant: test.tenant, Group: test.group, RuntimeID: test.runtimeID})
 			assert.Equal(t, test.valid, valid)
 		}
 	})
@@ -56,21 +63,26 @@ func TestClusterContextEnabledStrategy_IsValidContext(t *testing.T) {
 func TestClusterContextDisabledStrategy_IsValidContext(t *testing.T) {
 
 	testCases := []struct {
-		tenant string
-		group  string
-		valid  bool
+		tenant    string
+		group     string
+		runtimeID string
+		valid     bool
 	}{
-		{tenant: tenant, group: group, valid: false},
-		{tenant: tenant, group: "", valid: false},
-		{tenant: "", group: group, valid: false},
-		{tenant: "", group: "", valid: true},
+		{tenant: tenant, group: group, runtimeID: runtimeID, valid: false},
+		{tenant: tenant, group: "", runtimeID: runtimeID, valid: false},
+		{tenant: "", group: group, runtimeID: runtimeID, valid: false},
+		{tenant: "", group: "", runtimeID: runtimeID, valid: false},
+		{tenant: tenant, group: group, runtimeID: "", valid: false},
+		{tenant: tenant, group: "", runtimeID: "", valid: false},
+		{tenant: "", group: group, runtimeID: "", valid: false},
+		{tenant: "", group: "", runtimeID: "", valid: true},
 	}
 
 	t.Run("should validate context", func(t *testing.T) {
 		strategy := NewClusterContextStrategy(false)
 
 		for _, test := range testCases {
-			valid := strategy.IsValidContext(ClusterContext{Tenant: test.tenant, Group: test.group})
+			valid := strategy.IsValidContext(ClusterContext{Tenant: test.tenant, Group: test.group, RuntimeID: test.runtimeID})
 			assert.Equal(t, test.valid, valid)
 		}
 	})
@@ -85,6 +97,7 @@ func TestClusterContextDisabledStrategy_ReadClusterContextFromRequest(t *testing
 
 		req.Header.Set(TenantHeader, tenant)
 		req.Header.Set(GroupHeader, group)
+		req.Header.Set(RuntimeIDHeader, runtimeID)
 
 		strategy := NewClusterContextStrategy(false)
 

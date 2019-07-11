@@ -42,7 +42,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(hp, true)
+		middleware := NewContextFromSubjMiddleware(hp, true, FullApplicationContextFromSubject)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -72,7 +72,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(hp, false)
+		middleware := NewContextFromSubjMiddleware(hp, false, FullApplicationContextFromSubject)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -102,7 +102,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(hp, true)
+		middleware := NewContextFromSubjMiddleware(hp, true, FullRuntimeContextFromSubject)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -126,7 +126,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(hp, false)
+		middleware := NewContextFromSubjMiddleware(hp, false, FullApplicationContextFromSubject)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -150,7 +150,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(hp, true)
+		middleware := NewContextFromSubjMiddleware(hp, true, FullApplicationContextFromSubject)
 
 		// when
 		resultHandler := middleware.Middleware(handler)

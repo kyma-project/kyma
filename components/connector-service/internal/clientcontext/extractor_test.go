@@ -13,9 +13,10 @@ import (
 )
 
 const (
-	appName = "appName"
-	tenant  = "tenant"
-	group   = "group"
+	appName   = "appName"
+	tenant    = "tenant"
+	group     = "group"
+	runtimeID = "runtimeID"
 )
 
 var (
@@ -144,10 +145,10 @@ func Test_ExtractSerializableClusterContext(t *testing.T) {
 			OrganizationalUnit: group,
 			Province:           "Province",
 			Locality:           "Gliwice",
-			CommonName:         RuntimeDefaultCommonName,
+			CommonName:         runtimeID,
 		}
 
-		clusterCtxPayload := ClusterContext{Group: group, Tenant: tenant}
+		clusterCtxPayload := ClusterContext{Group: group, Tenant: tenant, RuntimeID: runtimeID}
 
 		ctx := clusterCtxPayload.ExtendContext(context.Background())
 

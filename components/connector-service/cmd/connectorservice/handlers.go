@@ -84,15 +84,17 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewApplicationContextExtender)
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
 	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayBaseURL, lookupEnabled, clientcontext.ExtractApplicationContext, lookupService)
-	contextFromSubjMiddleware := clientcontextmiddlewares.NewContextFromSubjMiddleware(headerParser, opts.central)
+	applicationContextFromSubjMiddleware := clientcontextmiddlewares.NewContextFromSubjMiddleware(headerParser, opts.central, clientcontextmiddlewares.FullApplicationContextFromSubject)
+	runtimeContextFromSubjMiddleware := clientcontextmiddlewares.NewContextFromSubjMiddleware(headerParser, opts.central, clientcontextmiddlewares.FullRuntimeContextFromSubject)
 	checkForRevokedCertMiddleware := certificateMiddlewares.NewRevocationCheckMiddleware(revocationListRepository, headerParser)
 
 	functionalMiddlewares := externalapi.FunctionalMiddlewares{
-		AppTokenResolverMiddleware:      appTokenResolverMiddleware.Middleware,
-		RuntimeTokenResolverMiddleware:  clusterTokenResolverMiddleware.Middleware,
-		RuntimeURLsMiddleware:           runtimeURLsMiddleware.Middleware,
-		AppContextFromSubjectMiddleware: contextFromSubjMiddleware.Middleware,
-		CheckForRevokedCertMiddleware:   checkForRevokedCertMiddleware.Middleware,
+		AppTokenResolverMiddleware:          appTokenResolverMiddleware.Middleware,
+		RuntimeTokenResolverMiddleware:      clusterTokenResolverMiddleware.Middleware,
+		RuntimeURLsMiddleware:               runtimeURLsMiddleware.Middleware,
+		AppContextFromSubjectMiddleware:     applicationContextFromSubjMiddleware.Middleware,
+		RuntimeContextFromSubjectMiddleware: runtimeContextFromSubjMiddleware.Middleware,
+		CheckForRevokedCertMiddleware:       checkForRevokedCertMiddleware.Middleware,
 	}
 
 	handlerBuilder := externalapi.NewHandlerBuilder(functionalMiddlewares, globalMiddlewares)

@@ -19,8 +19,9 @@ type clusterContextEnabledStrategy struct{}
 
 func (cc *clusterContextEnabledStrategy) ReadClusterContextFromRequest(r *http.Request) ClusterContext {
 	clusterContext := ClusterContext{
-		Tenant: r.Header.Get(TenantHeader),
-		Group:  r.Header.Get(GroupHeader),
+		Tenant:    r.Header.Get(TenantHeader),
+		Group:     r.Header.Get(GroupHeader),
+		RuntimeID: r.Header.Get(RuntimeIDHeader),
 	}
 
 	return clusterContext
@@ -37,5 +38,5 @@ func (cc *clusterContextDisabledStrategy) ReadClusterContextFromRequest(r *http.
 }
 
 func (cc *clusterContextDisabledStrategy) IsValidContext(clusterCtx ClusterContext) bool {
-	return clusterCtx.Group == GroupEmpty && clusterCtx.Tenant == TenantEmpty
+	return clusterCtx.Group == GroupEmpty && clusterCtx.Tenant == TenantEmpty && clusterCtx.RuntimeID == RuntimeIDEmpty
 }

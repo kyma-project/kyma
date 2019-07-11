@@ -34,11 +34,17 @@ const (
 	// GroupHeader is key representing Group in headers
 	GroupHeader = "Group"
 
+	// RuntimeIDHeader is key representing RuntimeID in headers
+	RuntimeIDHeader = "RuntimeID"
+
 	// GroupEmpty represents empty value for Group
 	GroupEmpty = ""
 
 	// TenantEmpty represents empty value for Tenant
 	TenantEmpty = ""
+
+	// RuntimeIDEmpty represents empty value for RuntimeID
+	RuntimeIDEmpty = ""
 
 	// ApplicationEmpty represents empty value for Application
 	ApplicationEmpty = ""
@@ -51,6 +57,7 @@ const (
 )
 
 type ClientContextService interface {
+	GetRuntimeID() *string
 	GetRuntimeUrls() *RuntimeURLs
 	GetLogger() *logrus.Entry
 }
