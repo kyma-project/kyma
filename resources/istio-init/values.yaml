@@ -5,7 +5,7 @@ global:
   hub: docker.io/istio
 
   # Default tag for Istio images.
-  tag: 1.1.6
+  tag: 1.2.2
 
   # imagePullPolicy is applied to istio control plane components.
   # local tests require IfNotPresent, to avoid uploading to dockerhub.
