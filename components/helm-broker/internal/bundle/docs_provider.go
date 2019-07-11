@@ -71,11 +71,12 @@ func (d *DocsProvider) EnsureClusterDocsTopicRemoved(id string) error {
 }
 
 // EnsureDocsTopic creates ClusterDocsTopic for a given bundle or updates it in case it already exists
-func (d *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle) error {
+func (d *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle, namespace string) error {
 	bundle.Docs[0].Template.Sources = d.defaultDocsSourcesURLs(bundle)
 	cdt := &v1alpha1.DocsTopic{
 		ObjectMeta: v1.ObjectMeta{
-			Name: string(bundle.ID),
+			Name:      string(bundle.ID),
+			Namespace: namespace,
 			Labels: map[string]string{
 				cmsLabelKey: "service-catalog",
 				hbLabelKey:  "true",
@@ -99,10 +100,11 @@ func (d *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle) error {
 }
 
 // EnsureDocsTopicRemoved removes ClusterDocsTopic for a given bundle
-func (d *DocsProvider) EnsureDocsTopicRemoved(id string) error {
+func (d *DocsProvider) EnsureDocsTopicRemoved(id string, namespace string) error {
 	cdt := &v1alpha1.DocsTopic{
 		ObjectMeta: v1.ObjectMeta{
-			Name: id,
+			Name:      id,
+			Namespace: namespace,
 		},
 	}
 	err := d.dynamicClient.Delete(context.Background(), cdt)

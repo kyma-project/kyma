@@ -11,7 +11,7 @@ import (
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	exerr "github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/helm/pkg/proto/hapi/chart"
@@ -21,7 +21,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"fmt"
 )
 
 // AddonsConfigurationController holds a controller logic
@@ -55,7 +54,7 @@ var _ reconcile.Reconciler = &ReconcileAddonsConfiguration{}
 
 // ReconcileAddonsConfiguration reconciles a AddonsConfiguration object
 type ReconcileAddonsConfiguration struct {
-	log      logrus.FieldLogger
+	log logrus.FieldLogger
 	client.Client
 	scheme   *runtime.Scheme
 	provider bundleProvider
@@ -77,6 +76,7 @@ type ReconcileAddonsConfiguration struct {
 // NewReconcileAddonsConfiguration returns a new reconcile.Reconciler
 func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, brokerFacade brokerFacade, chartStorage chartStorage, bundleStorage bundleStorage, dev bool, docsTopicProvider docsProvider, brokerSyncer brokerSyncer) reconcile.Reconciler {
 	return &ReconcileAddonsConfiguration{
+		log:           logrus.WithField("controller", "addons-configuration"),
 		Client:        mgr.GetClient(),
 		scheme:        mgr.GetScheme(),
 		chartStorage:  chartStorage,
@@ -95,7 +95,6 @@ func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, bro
 // Reconcile reads that state of the cluster for a AddonsConfiguration object and makes changes based on the state read
 // and what is in the AddonsConfiguration.Spec
 func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	fmt.Println("XD")
 	instance := &addonsv1alpha1.AddonsConfiguration{}
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
@@ -167,6 +166,14 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 		return exerr.Wrap(err, "while fetching addons configuration list")
 	}
 	repositories.ReviseBundleDuplicationInStorage(list)
+
+	existingBundles, err := r.bundleStorage.FindAll(internal.Namespace(addon.Namespace))
+	if err != nil {
+		return exerr.Wrapf(err, "while getting bundles from namespace %s", addon.Namespace)
+	}
+	if err := r.deleteUnusedDocsTopics(existingBundles, repositories.ReadyAddons(), addon.Namespace); err != nil {
+		return exerr.Wrapf(err, "while deleting unused docs topics in namespace %s", addon.Namespace)
+	}
 
 	r.log.Info("- save ready bundles and charts in storage")
 	r.saveBundle(internal.Namespace(addon.Namespace), repositories)
@@ -305,8 +312,13 @@ func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*addons.Addon
 	return adds, nil
 }
 
-func (r *ReconcileAddonsConfiguration) saveBundle(namespace internal.Namespace, repositories *addons.RepositoryCollection) {
+func (r *ReconcileAddonsConfiguration) saveBundle(namespace internal.Namespace, repositories *addons.RepositoryCollection) error {
 	for _, addon := range repositories.ReadyAddons() {
+		if len(addon.Bundle.Docs) == 1 {
+			if err := r.docsTopicProvider.EnsureDocsTopic(addon.Bundle, string(namespace)); err != nil {
+				return exerr.Wrapf(err, "While ensuring DocsTopic for bundle %s/%s: %v", addon.Bundle.ID, namespace, err)
+			}
+		}
 		exist, err := r.bundleStorage.Upsert(namespace, addon.Bundle)
 		if err != nil {
 			addon.RegisteringError(err)
@@ -325,6 +337,7 @@ func (r *ReconcileAddonsConfiguration) saveBundle(namespace internal.Namespace, 
 
 		r.syncBroker = true
 	}
+	return nil
 }
 
 func (r *ReconcileAddonsConfiguration) saveCharts(namespace internal.Namespace, charts []*chart.Chart) error {
@@ -338,7 +351,24 @@ func (r *ReconcileAddonsConfiguration) saveCharts(namespace internal.Namespace, 
 			r.log.Infof("chart %s already existed in storage, chart was replaced", bundleChart.Metadata.Name)
 		}
 	}
+	return nil
+}
 
+func (r *ReconcileAddonsConfiguration) deleteUnusedDocsTopics(existingBundles []*internal.Bundle, newBundles []*addons.AddonController, namespace string) error {
+	for _, v := range existingBundles {
+		deleteDocsTopic := true
+		for _, b := range newBundles {
+			// don't delete docs topics if bundle exists in the new collection
+			if b.Bundle.ID == v.ID {
+				deleteDocsTopic = false
+			}
+		}
+		if deleteDocsTopic {
+			if err := r.docsTopicProvider.EnsureDocsTopicRemoved(string(v.ID), namespace); err != nil {
+				return exerr.Wrapf(err, "while ensuring ClusterDocsTopic for bundle %s is removed", v.ID)
+			}
+		}
+	}
 	return nil
 }
 

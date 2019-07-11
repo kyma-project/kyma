@@ -9,13 +9,13 @@ type DocsProvider struct {
 	mock.Mock
 }
 
-// EnsureDocsTopic provides a mock function with given fields: bundle
-func (_m *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle) error {
-	ret := _m.Called(bundle)
+// EnsureDocsTopic provides a mock function with given fields: bundle, namespace
+func (_m *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle, namespace string) error {
+	ret := _m.Called(bundle, namespace)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*internal.Bundle) error); ok {
-		r0 = rf(bundle)
+	if rf, ok := ret.Get(0).(func(*internal.Bundle, string) error); ok {
+		r0 = rf(bundle, namespace)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -23,13 +23,13 @@ func (_m *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle) error {
 	return r0
 }
 
-// EnsureDocsTopicRemoved provides a mock function with given fields: id
-func (_m *DocsProvider) EnsureDocsTopicRemoved(id string) error {
-	ret := _m.Called(id)
+// EnsureDocsTopicRemoved provides a mock function with given fields: id, namespace
+func (_m *DocsProvider) EnsureDocsTopicRemoved(id string, namespace string) error {
+	ret := _m.Called(id, namespace)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string) error); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = rf(id, namespace)
 	} else {
 		r0 = ret.Error(0)
 	}

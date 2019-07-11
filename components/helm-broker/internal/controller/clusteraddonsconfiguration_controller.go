@@ -20,7 +20,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"fmt"
 )
 
 // ClusterAddonsConfigurationController holds controller logic
@@ -54,7 +53,7 @@ var _ reconcile.Reconciler = &ReconcileClusterAddonsConfiguration{}
 
 // ReconcileClusterAddonsConfiguration reconciles a ClusterAddonsConfiguration object
 type ReconcileClusterAddonsConfiguration struct {
-	log    logrus.FieldLogger
+	log logrus.FieldLogger
 	client.Client
 	scheme *runtime.Scheme
 
@@ -100,7 +99,6 @@ func NewReconcileClusterAddonsConfiguration(mgr manager.Manager, bundleProvider 
 // Reconcile reads that state of the cluster for a ClusterAddonsConfiguration object and makes changes based on the state read
 // and what is in the ClusterAddonsConfiguration.Spec
 func (r *ReconcileClusterAddonsConfiguration) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	fmt.Println("XD")
 	// Fetch the ClusterAddonsConfiguration instance
 	instance := &addonsv1alpha1.ClusterAddonsConfiguration{}
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
@@ -173,6 +171,15 @@ func (r *ReconcileClusterAddonsConfiguration) addAddonsProcess(addon *addonsv1al
 		return exerr.Wrap(err, "while fetching addons configuration list")
 	}
 	repositories.ReviseBundleDuplicationInClusterStorage(list)
+
+	existingBundles, err := r.bundleStorage.FindAll(internal.ClusterWide)
+	if err != nil {
+		return exerr.Wrap(err, "while getting existing cluster-wide bundles from storage")
+	}
+
+	if err := r.deleteUnusedDocsTopics(existingBundles, repositories.ReadyAddons()); err != nil {
+		return exerr.Wrap(err, "while deleting unused DocsTopics")
+	}
 
 	r.log.Info("- save ready bundles and charts in storage")
 	r.saveBundle(repositories)
@@ -312,8 +319,13 @@ func (r *ReconcileClusterAddonsConfiguration) addonsConfigurationList() (*addons
 	return addonsConfigurationList, nil
 }
 
-func (r *ReconcileClusterAddonsConfiguration) saveBundle(repositories *addons.RepositoryCollection) {
+func (r *ReconcileClusterAddonsConfiguration) saveBundle(repositories *addons.RepositoryCollection) error {
 	for _, addon := range repositories.ReadyAddons() {
+		if len(addon.Bundle.Docs) == 1 {
+			if err := r.clusterDocsProvider.EnsureClusterDocsTopic(addon.Bundle); err != nil {
+				return exerr.Wrapf(err, "While ensuring ClusterDocsTopic for bundle %s: %v", addon.Bundle.ID, err)
+			}
+		}
 		exist, err := r.bundleStorage.Upsert(internal.ClusterWide, addon.Bundle)
 		if err != nil {
 			addon.RegisteringError(err)
@@ -332,6 +344,7 @@ func (r *ReconcileClusterAddonsConfiguration) saveBundle(repositories *addons.Re
 
 		r.syncBroker = true
 	}
+	return nil
 }
 
 func (r *ReconcileClusterAddonsConfiguration) saveCharts(charts []*chart.Chart) error {
@@ -343,6 +356,24 @@ func (r *ReconcileClusterAddonsConfiguration) saveCharts(charts []*chart.Chart) 
 		}
 		if exist {
 			r.log.Infof("chart %s already existed in storage, chart was replaced", bundleChart.Metadata.Name)
+		}
+	}
+	return nil
+}
+
+func (r *ReconcileClusterAddonsConfiguration) deleteUnusedDocsTopics(existingBundles []*internal.Bundle, newBundles []*addons.AddonController) error {
+	for _, v := range existingBundles {
+		deleteDocsTopic := true
+		for _, b := range newBundles {
+			// don't delete docs topics if bundle exists in the new collection
+			if b.Bundle.ID == v.ID {
+				deleteDocsTopic = false
+			}
+		}
+		if deleteDocsTopic {
+			if err := r.clusterDocsProvider.EnsureClusterDocsTopicRemoved(string(v.ID)); err != nil {
+				return exerr.Wrapf(err, "while ensuring ClusterDocsTopic %s is removed", v.ID)
+			}
 		}
 	}
 

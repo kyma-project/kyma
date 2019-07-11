@@ -2,12 +2,13 @@ package controller
 
 import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	"k8s.io/helm/pkg/proto/hapi/chart"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
 //go:generate mockery -name=bundleStorage -output=automock -outpkg=automock -case=underscore
 type bundleStorage interface {
+	FindAll(internal.Namespace) ([]*internal.Bundle, error)
 	Upsert(internal.Namespace, *internal.Bundle) (replace bool, err error)
 }
 
@@ -31,8 +32,8 @@ type brokerFacade interface {
 
 //go:generate mockery -name=docsProvider -output=automock -outpkg=automock -case=underscore
 type docsProvider interface {
-	EnsureDocsTopic(bundle *internal.Bundle) error
-	EnsureDocsTopicRemoved(id string) error
+	EnsureDocsTopic(bundle *internal.Bundle, namespace string) error
+	EnsureDocsTopicRemoved(id string, namespace string) error
 }
 
 //go:generate mockery -name=brokerSyncer -output=automock -outpkg=automock -case=underscore
