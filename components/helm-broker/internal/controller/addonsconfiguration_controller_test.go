@@ -17,6 +17,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	runtimeTypes "sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
 
+	"time"
+
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/stretchr/testify/assert"
@@ -28,51 +30,83 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-func TestReconcileAddonsConfiguration_ReconcileAddAddonsProcess(t *testing.T) {
+func TestReconcileAddonsConfiguration_AddAddonsProcess(t *testing.T) {
 	// Given
-	mgr := getFakeManager(t)
-	bp := automock.BundleProvider{}
-	bf := automock.BrokerFacade{}
-	dp := automock.DocsProvider{}
-	bs := automock.BrokerSyncer{}
-	bundleStorage := automock.BundleStorage{}
-	chartStorage := automock.ChartStorage{}
-
 	fixAddonsCfg := fixAddonsConfiguration()
+	ts := getTestSuite(t, fixAddonsCfg)
 	indexDTO := fixIndexDTO()
 
-	bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
-	bundleStorage.On("FindAll", internal.Namespace(fixAddonsCfg.Namespace)).Return([]*internal.Bundle{}, nil)
+	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
+	ts.bundleStorage.On("FindAll", internal.Namespace(fixAddonsCfg.Namespace)).Return([]*internal.Bundle{}, nil)
 
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {
-			bp.On("LoadCompleteBundle", e).Return(bundle.CompleteBundle{Bundle: &internal.Bundle{Name: internal.BundleName(e.Name)}, Charts: []*chart.Chart{
-				{
-					Metadata: &chart.Metadata{
-						Name: string(e.Name),
-					},
-				},
-			}}, nil)
-			bundleStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), &internal.Bundle{Name: internal.BundleName(e.Name)}).Return(false, nil)
-			chartStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), &chart.Chart{Metadata: &chart.Metadata{Name: string(e.Name)}}).Return(false, nil)
+			ts.bp.On("LoadCompleteBundle", e).
+				Return(bundle.CompleteBundle{Bundle: &internal.Bundle{Name: internal.BundleName(e.Name)}, Charts: []*chart.Chart{{Metadata: &chart.Metadata{Name: string(e.Name)}}}}, nil)
+
+			ts.bundleStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), &internal.Bundle{Name: internal.BundleName(e.Name)}).Return(false, nil)
+			ts.chartStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), &chart.Chart{Metadata: &chart.Metadata{Name: string(e.Name)}}).Return(false, nil)
 		}
 	}
-	bf.On("Exist", fixAddonsCfg.Namespace).Return(false, nil).Once()
-	bf.On("Create", fixAddonsCfg.Namespace).Return(nil).Once()
+	ts.bf.On("Exist", fixAddonsCfg.Namespace).Return(false, nil).Once()
+	ts.bf.On("Create", fixAddonsCfg.Namespace).Return(nil).Once()
 
-	defer func() {
-		bp.AssertExpectations(t)
-		bf.AssertExpectations(t)
-		dp.AssertExpectations(t)
-		bs.AssertExpectations(t)
-		bundleStorage.AssertExpectations(t)
-		chartStorage.AssertExpectations(t)
-	}()
+	defer ts.assertExpectations()
 
-	reconciler := NewReconcileAddonsConfiguration(mgr, &bp, &bf, &chartStorage, &bundleStorage, true, &dp, &bs)
+	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.bf, &ts.chartStorage, &ts.bundleStorage, true, &ts.dp, &ts.bs)
 
-	_, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}})
+	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}})
 	assert.NoError(t, err)
+	assert.False(t, result.Requeue)
+}
+
+func TestReconcileAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
+	// Given
+	fixAddonsCfg := fixAddonsConfiguration()
+	fixAddonsCfg.Generation = 1
+	ts := getTestSuite(t, fixAddonsCfg)
+	indexDTO := fixIndexDTO()
+
+	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
+	ts.bundleStorage.On("FindAll", internal.Namespace(fixAddonsCfg.Namespace)).Return([]*internal.Bundle{}, nil)
+
+	for _, entry := range indexDTO.Entries {
+		for _, e := range entry {
+			ts.bp.On("LoadCompleteBundle", e).
+				Return(bundle.CompleteBundle{Bundle: &internal.Bundle{Name: internal.BundleName(e.Name)}, Charts: []*chart.Chart{{Metadata: &chart.Metadata{Name: string(e.Name)}}}}, nil)
+
+			ts.bundleStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), &internal.Bundle{Name: internal.BundleName(e.Name)}).
+				Return(false, nil)
+			ts.chartStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), &chart.Chart{Metadata: &chart.Metadata{Name: string(e.Name)}}).
+				Return(false, nil)
+		}
+	}
+	ts.bf.On("Exist", fixAddonsCfg.Namespace).Return(false, nil).Once()
+	ts.bf.On("Create", fixAddonsCfg.Namespace).Return(nil).Once()
+
+	defer ts.assertExpectations()
+
+	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.bf, &ts.chartStorage, &ts.bundleStorage, true, &ts.dp, &ts.bs)
+
+	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}})
+	assert.NoError(t, err)
+	assert.False(t, result.Requeue)
+}
+
+func TestReconcileAddonsConfiguration_DeleteAddonsProcess(t *testing.T) {
+	// Given
+	fixAddonsCfg := fixDeletedAddonsConfiguration()
+	ts := getTestSuite(t, fixAddonsCfg)
+
+	ts.bf.On("Delete", fixAddonsCfg.Namespace).Return(nil).Once()
+
+	defer ts.assertExpectations()
+
+	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.bf, &ts.chartStorage, &ts.bundleStorage, true, &ts.dp, &ts.bs)
+
+	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}})
+	assert.NoError(t, err)
+	assert.False(t, result.Requeue)
 }
 
 func fixAddonsConfiguration() *v1alpha1.AddonsConfiguration {
@@ -80,6 +114,27 @@ func fixAddonsConfiguration() *v1alpha1.AddonsConfiguration {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test",
 			Namespace: "test",
+		},
+		Spec: v1alpha1.AddonsConfigurationSpec{
+			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
+				ReprocessRequest: 0,
+				Repositories: []v1alpha1.SpecRepository{
+					{
+						URL: "http://example.com/index.yaml",
+					},
+				},
+			},
+		},
+	}
+}
+
+func fixDeletedAddonsConfiguration() *v1alpha1.AddonsConfiguration {
+	return &v1alpha1.AddonsConfiguration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:              "deleted",
+			Namespace:         "deleted",
+			DeletionTimestamp: &metav1.Time{Time: time.Now()},
+			Finalizers:        []string{v1alpha1.FinalizerAddonsConfiguration},
 		},
 		Spec: v1alpha1.AddonsConfigurationSpec{
 			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
@@ -113,8 +168,51 @@ func fixIndexDTO() *bundle.IndexDTO {
 	}
 }
 
+type testSuite struct {
+	t             *testing.T
+	client        client.Client
+	mgr           manager.Manager
+	bp            automock.BundleProvider
+	bf            automock.BrokerFacade
+	dp            automock.DocsProvider
+	bs            automock.BrokerSyncer
+	bundleStorage automock.BundleStorage
+	chartStorage  automock.ChartStorage
+}
+
+func getTestSuite(t *testing.T, objects ...runtime.Object) *testSuite {
+	sch, err := v1alpha1.SchemeBuilder.Build()
+	require.NoError(t, err)
+	require.NoError(t, apis.AddToScheme(sch))
+	require.NoError(t, v1beta1.AddToScheme(sch))
+	require.NoError(t, v1.AddToScheme(sch))
+
+	return &testSuite{
+		t:   t,
+		mgr: getFakeManager(t, fake.NewFakeClientWithScheme(sch, objects...), sch),
+		bf:  automock.BrokerFacade{},
+		bp:  automock.BundleProvider{},
+		bs:  automock.BrokerSyncer{},
+		dp:  automock.DocsProvider{},
+
+		bundleStorage: automock.BundleStorage{},
+		chartStorage:  automock.ChartStorage{},
+	}
+}
+
 type fakeManager struct {
-	t *testing.T
+	t      *testing.T
+	client client.Client
+	sch    *runtime.Scheme
+}
+
+func (ts *testSuite) assertExpectations() {
+	ts.bp.AssertExpectations(ts.t)
+	ts.bf.AssertExpectations(ts.t)
+	ts.dp.AssertExpectations(ts.t)
+	ts.bs.AssertExpectations(ts.t)
+	ts.bundleStorage.AssertExpectations(ts.t)
+	ts.chartStorage.AssertExpectations(ts.t)
 }
 
 func (fakeManager) Add(manager.Runnable) error {
@@ -135,12 +233,7 @@ func (fakeManager) GetConfig() *rest.Config {
 
 func (f *fakeManager) GetScheme() *runtime.Scheme {
 	// Setup schemes for all resources
-	sch, err := v1alpha1.SchemeBuilder.Build()
-	require.NoError(f.t, err)
-	require.NoError(f.t, apis.AddToScheme(sch))
-	require.NoError(f.t, v1beta1.AddToScheme(sch))
-	require.NoError(f.t, v1.AddToScheme(sch))
-	return sch
+	return f.sch
 }
 
 func (fakeManager) GetAdmissionDecoder() runtimeTypes.Decoder {
@@ -148,7 +241,7 @@ func (fakeManager) GetAdmissionDecoder() runtimeTypes.Decoder {
 }
 
 func (f *fakeManager) GetClient() client.Client {
-	return fake.NewFakeClientWithScheme(f.GetScheme(), fixAddonsConfiguration(), fixClusterAddonsConfiguration())
+	return f.client
 }
 
 func (fakeManager) GetFieldIndexer() client.FieldIndexer {
@@ -167,6 +260,10 @@ func (fakeManager) GetRESTMapper() meta.RESTMapper {
 	return nil
 }
 
-func getFakeManager(t *testing.T) manager.Manager {
-	return &fakeManager{t: t}
+func getFakeManager(t *testing.T, cli client.Client, sch *runtime.Scheme) manager.Manager {
+	return &fakeManager{
+		t:      t,
+		client: cli,
+		sch:    sch,
+	}
 }

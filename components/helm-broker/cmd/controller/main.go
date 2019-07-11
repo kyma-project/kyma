@@ -11,7 +11,7 @@ import (
 
 	//hbConfig "github.com/kyma-project/kyma/components/helm-broker/internal/config"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
-	ctrlCfg "github.com/kyma-project/kyma/components/helm-broker/internal/config"
+	envs "github.com/kyma-project/kyma/components/helm-broker/internal/config"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
 	"github.com/sirupsen/logrus"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -31,7 +31,7 @@ func main() {
 	verbose := flag.Bool("verbose", false, "specify if log verbosely loading configuration")
 	flag.Parse()
 
-	ctrCfg, err := ctrlCfg.LoadControllerConfig(*verbose)
+	ctrCfg, err := envs.LoadControllerConfig(*verbose)
 	fatalOnError(err)
 
 	log := logger.New(&ctrCfg.Logger)
@@ -76,6 +76,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	// TODO: use generic client
 	scClientSet, err := scCs.NewForConfig(cfg)
 	fatalOnError(err)
 
@@ -83,20 +84,18 @@ func main() {
 	fatalOnError(err)
 
 	docsProvider := bundle.NewDocsProvider(dynamicClient)
-	// TODO: change SC client to generic client
 	brokerSyncer := broker.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1(), scClientSet.ServicecatalogV1beta1(), ctrCfg.ClusterServiceBrokerName, log)
 	sbFacade := broker.NewBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName)
 	csbFacade := broker.NewClusterBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, ctrCfg.ClusterServiceBrokerName)
 
 	bundleProvider := bundle.NewProvider(bundle.NewHTTPRepository(), bundle.NewLoader(ctrCfg.TmpDir, log), log)
 
-	// Setup all Controllers
 	log.Info("Setting up controller")
 	acReconcile := controller.NewReconcileAddonsConfiguration(mgr, bundleProvider, sbFacade, sFact.Chart(), sFact.Bundle(), ctrCfg.DevelopMode, docsProvider, brokerSyncer)
 	acController := controller.NewAddonsConfigurationController(acReconcile)
 	err = acController.Start(mgr)
 	if err != nil {
-		log.Error(err, "unable to start ClusterAddonsConfigurationController")
+		log.Error(err, "unable to start AddonsConfigurationController")
 	}
 
 	cacReconcile := controller.NewReconcileClusterAddonsConfiguration(mgr, bundleProvider, sFact.Chart(), sFact.Bundle(), csbFacade, docsProvider, brokerSyncer, ctrCfg.DevelopMode)
@@ -106,8 +105,7 @@ func main() {
 		log.Error(err, "unable to start ClusterAddonsConfigurationController")
 	}
 
-	// Start the Cmd
-	log.Info("Starting the Cmd.")
+	log.Info("Starting the Controller.")
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
 		log.Error(err, "unable to run the manager")
 		os.Exit(1)

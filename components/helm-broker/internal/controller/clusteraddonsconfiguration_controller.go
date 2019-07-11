@@ -113,6 +113,8 @@ func (r *ReconcileClusterAddonsConfiguration) Reconcile(request reconcile.Reques
 	}
 
 	if instance.Status.ObservedGeneration == 0 {
+		r.log.Infof("Start add ClusterAddonsConfiguration %s process", instance.Name)
+
 		updatedInstance, err := r.addFinalizer(instance)
 		if err != nil {
 			return reconcile.Result{}, exerr.Wrapf(err, "while adding a finalizer to ClusterAddonsConfiguration %q", request.NamespacedName)
@@ -121,19 +123,23 @@ func (r *ReconcileClusterAddonsConfiguration) Reconcile(request reconcile.Reques
 		if err != nil {
 			return reconcile.Result{}, exerr.Wrapf(err, "while creating ClusterAddonsConfiguration %q", request.NamespacedName)
 		}
+		r.log.Infof("Add ClusterAddonsConfiguration process completed")
+
 	} else if instance.Generation > instance.Status.ObservedGeneration {
+		r.log.Infof("Start update ClusterAddonsConfiguration %s process", instance.Name)
+
 		instance.Status = addonsv1alpha1.ClusterAddonsConfigurationStatus{}
 		err = r.addAddonsProcess(instance)
 		if err != nil {
 			return reconcile.Result{}, exerr.Wrapf(err, "while updating ClusterAddonsConfiguration %q", request.NamespacedName)
 		}
+		r.log.Infof("Update ClusterAddonsConfiguration %s process completed", instance.Name)
 	}
 
 	return reconcile.Result{}, nil
 }
 
 func (r *ReconcileClusterAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.ClusterAddonsConfiguration) error {
-	r.log.Info("Start add AddonsConfiguration process")
 	repositories := addons.NewRepositoryCollection()
 
 	r.log.Infof("- load bundles and charts for each addon")
@@ -188,16 +194,15 @@ func (r *ReconcileClusterAddonsConfiguration) addAddonsProcess(addon *addonsv1al
 	r.statusSnapshot(addon, repositories)
 	err = r.updateAddonStatus(addon)
 	if err != nil {
-		r.log.Errorf("cannot update AddonsConfiguration %s: %v", addon.Name, err)
+		r.log.Errorf("cannot update ClusterAddonsConfiguration %s: %v", addon.Name, err)
 		return exerr.Wrap(err, "while update AddonsConfiguration status")
 	}
 
 	r.log.Info("- ensuring ClusterServiceBroker")
 	if err := r.ensureBroker(addon); err != nil {
-		return exerr.Wrap(err, "while ensuring ServiceBroker")
+		return exerr.Wrap(err, "while ensuring ClusterServiceBroker")
 	}
 
-	r.log.Info("Add AddonsConfiguration process completed")
 	return nil
 }
 
@@ -232,7 +237,7 @@ func (r *ReconcileClusterAddonsConfiguration) deleteAddonsProcess(addon *addonsv
 		return exerr.Wrapf(err, "while deleting finalizer from ClusterAddonsConfiguration %s", addon.Name)
 	}
 
-	r.log.Info("Delete AddonsConfiguration process completed")
+	r.log.Info("Delete ClusterAddonsConfiguration process completed")
 	return nil
 }
 
@@ -323,6 +328,7 @@ func (r *ReconcileClusterAddonsConfiguration) addonsConfigurationList() (*addons
 func (r *ReconcileClusterAddonsConfiguration) saveBundle(repositories *addons.RepositoryCollection) error {
 	for _, addon := range repositories.ReadyAddons() {
 		if len(addon.Bundle.Docs) == 1 {
+			r.log.Infof("- creating ClusterDocsTopic for bundle %s", addon.Bundle.ID)
 			if err := r.clusterDocsProvider.EnsureClusterDocsTopic(addon.Bundle); err != nil {
 				return exerr.Wrapf(err, "While ensuring ClusterDocsTopic for bundle %s: %v", addon.Bundle.ID, err)
 			}

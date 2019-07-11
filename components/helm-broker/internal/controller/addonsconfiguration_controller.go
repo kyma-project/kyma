@@ -65,8 +65,8 @@ type ReconcileAddonsConfiguration struct {
 	brokerSyncer      brokerSyncer
 	docsTopicProvider docsProvider
 
-	protection protection
-	provider   bundleProvider
+	protection     protection
+	bundleProvider bundleProvider
 
 	// syncBroker informs ServiceBroker should be resync, it should be true if
 	// operation insert/delete was made on storage
@@ -77,14 +77,15 @@ type ReconcileAddonsConfiguration struct {
 // NewReconcileAddonsConfiguration returns a new reconcile.Reconciler
 func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, brokerFacade brokerFacade, chartStorage chartStorage, bundleStorage bundleStorage, developMode bool, docsTopicProvider docsProvider, brokerSyncer brokerSyncer) reconcile.Reconciler {
 	return &ReconcileAddonsConfiguration{
-		log:           logrus.WithField("controller", "addons-configuration"),
-		Client:        mgr.GetClient(),
-		scheme:        mgr.GetScheme(),
+		log:    logrus.WithField("controller", "addons-configuration"),
+		Client: mgr.GetClient(),
+		scheme: mgr.GetScheme(),
+
 		chartStorage:  chartStorage,
 		bundleStorage: bundleStorage,
-		provider:      bp,
 
-		protection: protection{},
+		bundleProvider: bp,
+		protection:     protection{},
 
 		brokerSyncer:      brokerSyncer,
 		brokerFacade:      brokerFacade,
@@ -112,6 +113,7 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 	}
 
 	if instance.Status.ObservedGeneration == 0 {
+		r.log.Infof("Start add AddonsConfiguration %s/%s process", instance.Name, instance.Namespace)
 		updatedInstance, err := r.addFinalizer(instance)
 		if err != nil {
 			return reconcile.Result{}, exerr.Wrapf(err, "while adding a finalizer to AddonsConfiguration %q", request.NamespacedName)
@@ -120,19 +122,23 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 		if err != nil {
 			return reconcile.Result{}, exerr.Wrapf(err, "while creating AddonsConfiguration %q", request.NamespacedName)
 		}
+		r.log.Info("Add AddonsConfiguration process completed")
+
 	} else if instance.Generation > instance.Status.ObservedGeneration {
+		r.log.Infof("Start update AddonsConfiguration %s/%s process", instance.Name, instance.Namespace)
+
 		instance.Status = addonsv1alpha1.AddonsConfigurationStatus{}
 		err = r.addAddonsProcess(instance)
 		if err != nil {
 			return reconcile.Result{}, exerr.Wrapf(err, "while updating AddonsConfiguration %q", request.NamespacedName)
 		}
+		r.log.Info("Update AddonsConfiguration process completed")
 	}
 
 	return reconcile.Result{}, nil
 }
 
 func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.AddonsConfiguration) error {
-	r.log.Info("Start add AddonsConfiguration process")
 	repositories := addons.NewRepositoryCollection()
 
 	r.log.Infof("- load bundles and charts for each addon")
@@ -196,12 +202,11 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 		return exerr.Wrap(err, "while ensuring ServiceBroker")
 	}
 
-	r.log.Info("Add AddonsConfiguration process completed")
 	return nil
 }
 
 func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1.AddonsConfiguration) error {
-	r.log.Infof("Start delete AddonsConfiguration %s from namespace %s", addon.Name, addon.Namespace)
+	r.log.Infof("Start delete AddonsConfiguration %s/%s process", addon.Name, addon.Namespace)
 
 	addonsCfgs, err := r.existingAddonsConfigurationList(addon)
 	if err != nil {
@@ -283,7 +288,7 @@ func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*addons.Addon
 	adds := []*addons.AddonController{}
 
 	// fetch repository index
-	index, err := r.provider.GetIndex(URL)
+	index, err := r.bundleProvider.GetIndex(URL)
 	if err != nil {
 		return adds, exerr.Wrap(err, "while reading repository index")
 	}
@@ -293,7 +298,7 @@ func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*addons.Addon
 		for _, entry := range entries {
 			addon := addons.NewAddon(string(entry.Name), string(entry.Version), URL)
 
-			completeBundle, err := r.provider.LoadCompleteBundle(entry)
+			completeBundle, err := r.bundleProvider.LoadCompleteBundle(entry)
 			if bundle.IsFetchingError(err) {
 				addon.FetchingError(err)
 				adds = append(adds, addon)
@@ -321,6 +326,7 @@ func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*addons.Addon
 func (r *ReconcileAddonsConfiguration) saveBundle(namespace internal.Namespace, repositories *addons.RepositoryCollection) error {
 	for _, addon := range repositories.ReadyAddons() {
 		if len(addon.Bundle.Docs) == 1 {
+			r.log.Infof("- creating DocsTopic for bundle %s", addon.Bundle.ID)
 			if err := r.docsTopicProvider.EnsureDocsTopic(addon.Bundle, string(namespace)); err != nil {
 				return exerr.Wrapf(err, "While ensuring DocsTopic for bundle %s/%s: %v", addon.Bundle.ID, namespace, err)
 			}
@@ -419,6 +425,7 @@ func (r *ReconcileAddonsConfiguration) addFinalizer(addon *addonsv1alpha1.Addons
 	if r.protection.hasFinalizer(obj.Finalizers) {
 		return obj, nil
 	}
+	r.log.Info("- adding a finalizer")
 	obj.Finalizers = r.protection.addFinalizer(obj.Finalizers)
 
 	err := r.Client.Update(context.Background(), obj)
@@ -433,6 +440,7 @@ func (r *ReconcileAddonsConfiguration) deleteFinalizer(addon *addonsv1alpha1.Add
 	if !r.protection.hasFinalizer(obj.Finalizers) {
 		return nil
 	}
+	r.log.Info("- deleting a finalizer")
 	obj.Finalizers = r.protection.removeFinalizer(obj.Finalizers)
 
 	return r.Client.Update(context.Background(), obj)
