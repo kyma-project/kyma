@@ -76,15 +76,6 @@ func LoadControllerConfig(verbose bool) (*ControllerConfig, error) {
 	if verbose {
 		fmt.Printf("Config after applying defaults: %+v\n", outCfg)
 	}
-	// TODO: remove outCfg.Storage assigning
-	outCfg.Storage = []storage.Config{
-		{
-			Driver: storage.DriverMemory,
-			Provide: storage.ProviderConfigMap{
-				storage.EntityAll: storage.ProviderConfig{},
-			},
-		},
-	}
 	if _, err := govalidator.ValidateStruct(outCfg); err != nil {
 		return nil, errors.Wrap(err, "while validating configuration object")
 	}
