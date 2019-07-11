@@ -8,7 +8,4 @@ service:
   port: *port
 
 gateway:
-  enabled: false
-
-virtualService:
-  host: compass-gateway
+  enabled: true

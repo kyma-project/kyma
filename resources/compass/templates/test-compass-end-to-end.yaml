@@ -6,9 +6,22 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/inject: "false"
+        sidecar.istio.io/inject: "true"
     spec:
+    {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.minikubeIP }}
+          hostnames:
+          - "{{ .Values.global.gateway.host }}.{{ .Values.global.ingress.domainName }}"
+    {{ end }}
+      shareProcessNamespace: true
       containers:
         - name: "test-{{ .Release.Name }}-end-to-end"
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.tests.e2e.dir }}compass-end-to-end-test:{{ .Values.global.images.tests.e2e.version }}
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh"]
+          args: ["-c", "sleep 10; /director.test -test.v; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+          env:
+          - name: "DIRECTOR_GRAPHQL_API"
+            value: "https://{{ .Values.global.gateway.host }}.{{ .Values.global.ingress.domainName }}/director/graphql"
       restartPolicy: Never
