@@ -8,7 +8,6 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/addons"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	exerr "github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -21,25 +20,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	"fmt"
 )
-
-//go:generate mockery -name=clusterBrokerFacade -output=automock -outpkg=automock -case=underscore
-type clusterBrokerFacade interface {
-	Create() error
-	Exist() (bool, error)
-	Delete() error
-}
-
-//go:generate mockery -name=clusterDocsProvider -output=automock -outpkg=automock -case=underscore
-type clusterDocsProvider interface {
-	EnsureClusterDocsTopic(bundle *internal.Bundle) error
-	EnsureClusterDocsTopicRemoved(id string) error
-}
-
-//go:generate mockery -name=clusterBrokerSyncer -output=automock -outpkg=automock -case=underscore
-type clusterBrokerSyncer interface {
-	Sync() error
-}
 
 // ClusterAddonsConfigurationController holds controller logic
 type ClusterAddonsConfigurationController struct {
@@ -72,10 +54,12 @@ var _ reconcile.Reconciler = &ReconcileClusterAddonsConfiguration{}
 
 // ReconcileClusterAddonsConfiguration reconciles a ClusterAddonsConfiguration object
 type ReconcileClusterAddonsConfiguration struct {
-	log logrus.FieldLogger
+	log    logrus.FieldLogger
 	client.Client
 	scheme *runtime.Scheme
-	strg   storage.Factory
+
+	chartStorage  chartStorage
+	bundleStorage bundleStorage
 
 	clusterBrokerFacade clusterBrokerFacade
 	clusterDocsProvider clusterDocsProvider
@@ -92,12 +76,14 @@ type ReconcileClusterAddonsConfiguration struct {
 }
 
 // NewReconcileClusterAddonsConfiguration returns a new reconcile.Reconciler
-func NewReconcileClusterAddonsConfiguration(mgr manager.Manager, bundleProvider bundleProvider, storage storage.Factory, clusterBrokerFacade clusterBrokerFacade, clusterDocsProvider clusterDocsProvider, clusterBrokerSyncer clusterBrokerSyncer, developMode bool) reconcile.Reconciler {
+func NewReconcileClusterAddonsConfiguration(mgr manager.Manager, bundleProvider bundleProvider, chartStorage chartStorage, bundleStorage bundleStorage, clusterBrokerFacade clusterBrokerFacade, clusterDocsProvider clusterDocsProvider, clusterBrokerSyncer clusterBrokerSyncer, developMode bool) reconcile.Reconciler {
 	return &ReconcileClusterAddonsConfiguration{
 		log:    logrus.WithField("controller", "cluster-addons-configuration"),
 		Client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
-		strg:   storage,
+
+		bundleStorage: bundleStorage,
+		chartStorage:  chartStorage,
 
 		clusterBrokerFacade: clusterBrokerFacade,
 		clusterDocsProvider: clusterDocsProvider,
@@ -114,6 +100,7 @@ func NewReconcileClusterAddonsConfiguration(mgr manager.Manager, bundleProvider 
 // Reconcile reads that state of the cluster for a ClusterAddonsConfiguration object and makes changes based on the state read
 // and what is in the ClusterAddonsConfiguration.Spec
 func (r *ReconcileClusterAddonsConfiguration) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+	fmt.Println("XD")
 	// Fetch the ClusterAddonsConfiguration instance
 	instance := &addonsv1alpha1.ClusterAddonsConfiguration{}
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
@@ -327,7 +314,7 @@ func (r *ReconcileClusterAddonsConfiguration) addonsConfigurationList() (*addons
 
 func (r *ReconcileClusterAddonsConfiguration) saveBundle(repositories *addons.RepositoryCollection) {
 	for _, addon := range repositories.ReadyAddons() {
-		exist, err := r.strg.Bundle().Upsert(internal.ClusterWide, addon.Bundle)
+		exist, err := r.bundleStorage.Upsert(internal.ClusterWide, addon.Bundle)
 		if err != nil {
 			addon.RegisteringError(err)
 			r.log.Errorf("cannot upsert bundle %v:%v into storage", addon.Bundle.Name, addon.Bundle.Version)
@@ -349,7 +336,7 @@ func (r *ReconcileClusterAddonsConfiguration) saveBundle(repositories *addons.Re
 
 func (r *ReconcileClusterAddonsConfiguration) saveCharts(charts []*chart.Chart) error {
 	for _, bundleChart := range charts {
-		exist, err := r.strg.Chart().Upsert(internal.ClusterWide, bundleChart)
+		exist, err := r.chartStorage.Upsert(internal.ClusterWide, bundleChart)
 		if err != nil {
 			r.log.Errorf("cannot upsert %s chart: %s", bundleChart.Metadata.Name, err)
 			return err

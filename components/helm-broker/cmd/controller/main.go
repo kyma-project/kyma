@@ -92,14 +92,14 @@ func main() {
 
 	// Setup all Controllers
 	log.Info("Setting up controller")
-	acReconcile := controller.NewReconcileAddonsConfiguration(mgr, bundleProvider, sbFacade, sFact, ctrCfg.DevelopMode, docsProvider, brokerSyncer)
+	acReconcile := controller.NewReconcileAddonsConfiguration(mgr, bundleProvider, sbFacade, sFact.Chart(), sFact.Bundle(), ctrCfg.DevelopMode, docsProvider, brokerSyncer)
 	acController := controller.NewAddonsConfigurationController(acReconcile)
 	err = acController.Start(mgr)
 	if err != nil {
 		log.Error(err, "unable to start ClusterAddonsConfigurationController")
 	}
 
-	cacReconcile := controller.NewReconcileClusterAddonsConfiguration(mgr, bundleProvider, sFact, csbFacade, docsProvider, brokerSyncer, ctrCfg.DevelopMode)
+	cacReconcile := controller.NewReconcileClusterAddonsConfiguration(mgr, bundleProvider, sFact.Chart(), sFact.Bundle(), csbFacade, docsProvider, brokerSyncer, ctrCfg.DevelopMode)
 	cacController := controller.NewClusterAddonsConfigurationController(cacReconcile)
 	err = cacController.Start(mgr)
 	if err != nil {

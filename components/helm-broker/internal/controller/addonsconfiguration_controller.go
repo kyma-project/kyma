@@ -8,11 +8,10 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/addons"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	exerr "github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/helm/pkg/proto/hapi/chart"
@@ -22,31 +21,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	"fmt"
 )
-
-//go:generate mockery -name=bundleProvider -output=automock -outpkg=automock -case=underscore
-type bundleProvider interface {
-	GetIndex(string) (*bundle.IndexDTO, error)
-	LoadCompleteBundle(bundle.EntryDTO) (bundle.CompleteBundle, error)
-}
-
-//go:generate mockery -name=brokerFacade -output=automock -outpkg=automock -case=underscore
-type brokerFacade interface {
-	Create(ns string) error
-	Exist(ns string) (bool, error)
-	Delete(ns string) error
-}
-
-//go:generate mockery -name=docsProvider -output=automock -outpkg=automock -case=underscore
-type docsProvider interface {
-	EnsureDocsTopic(bundle *internal.Bundle) error
-	EnsureDocsTopicRemoved(id string) error
-}
-
-//go:generate mockery -name=brokerSyncer -output=automock -outpkg=automock -case=underscore
-type brokerSyncer interface {
-	SyncServiceBroker(namespace string) error
-}
 
 // AddonsConfigurationController holds a controller logic
 type AddonsConfigurationController struct {
@@ -79,11 +55,14 @@ var _ reconcile.Reconciler = &ReconcileAddonsConfiguration{}
 
 // ReconcileAddonsConfiguration reconciles a AddonsConfiguration object
 type ReconcileAddonsConfiguration struct {
-	log logrus.FieldLogger
+	log      logrus.FieldLogger
 	client.Client
-	scheme            *runtime.Scheme
-	provider          bundleProvider
-	strg              storage.Factory
+	scheme   *runtime.Scheme
+	provider bundleProvider
+
+	chartStorage  chartStorage
+	bundleStorage bundleStorage
+
 	protection        protection
 	brokerFacade      brokerFacade
 	brokerSyncer      brokerSyncer
@@ -96,13 +75,13 @@ type ReconcileAddonsConfiguration struct {
 }
 
 // NewReconcileAddonsConfiguration returns a new reconcile.Reconciler
-func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, brokerFacade brokerFacade, s storage.Factory, dev bool, docsTopicProvider docsProvider, brokerSyncer brokerSyncer) reconcile.Reconciler {
+func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, brokerFacade brokerFacade, chartStorage chartStorage, bundleStorage bundleStorage, dev bool, docsTopicProvider docsProvider, brokerSyncer brokerSyncer) reconcile.Reconciler {
 	return &ReconcileAddonsConfiguration{
-		log:      logrus.WithField("controller", "addons-configuration"),
-		Client:   mgr.GetClient(),
-		scheme:   mgr.GetScheme(),
-		strg:     s,
-		provider: bp,
+		Client:        mgr.GetClient(),
+		scheme:        mgr.GetScheme(),
+		chartStorage:  chartStorage,
+		bundleStorage: bundleStorage,
+		provider:      bp,
 
 		protection: protection{},
 
@@ -116,6 +95,7 @@ func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, bro
 // Reconcile reads that state of the cluster for a AddonsConfiguration object and makes changes based on the state read
 // and what is in the AddonsConfiguration.Spec
 func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+	fmt.Println("XD")
 	instance := &addonsv1alpha1.AddonsConfiguration{}
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
@@ -327,7 +307,7 @@ func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*addons.Addon
 
 func (r *ReconcileAddonsConfiguration) saveBundle(namespace internal.Namespace, repositories *addons.RepositoryCollection) {
 	for _, addon := range repositories.ReadyAddons() {
-		exist, err := r.strg.Bundle().Upsert(namespace, addon.Bundle)
+		exist, err := r.bundleStorage.Upsert(namespace, addon.Bundle)
 		if err != nil {
 			addon.RegisteringError(err)
 			r.log.Errorf("cannot upsert bundle %v:%v into storage", addon.Bundle.Name, addon.Bundle.Version)
@@ -349,7 +329,7 @@ func (r *ReconcileAddonsConfiguration) saveBundle(namespace internal.Namespace, 
 
 func (r *ReconcileAddonsConfiguration) saveCharts(namespace internal.Namespace, charts []*chart.Chart) error {
 	for _, bundleChart := range charts {
-		exist, err := r.strg.Chart().Upsert(namespace, bundleChart)
+		exist, err := r.chartStorage.Upsert(namespace, bundleChart)
 		if err != nil {
 			r.log.Errorf("cannot upsert %s chart: %s", bundleChart.Metadata.Name, err)
 			return err
