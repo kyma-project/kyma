@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/knative/pkg/apis"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"testing"
-	"time"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -20,6 +21,7 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	eventBusUtil "github.com/kyma-project/kyma/components/event-bus/pkg/util"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,10 +38,10 @@ const (
 	eventTypeVersion = "v1"
 	sourceID         = "testsourceid"
 
-	subUid        = "sub-uid"
-	chanUid       = "channel-uid"
+	subUID        = "sub-uid"
+	chanUID       = "channel-uid"
 	provisioner   = "natss"
-	subscriberUri = "URL-test-susbscriber"
+	subscriberURI = "URL-test-susbscriber"
 
 	testErrorMessage = "test induced error"
 )
@@ -64,8 +66,8 @@ var (
 
 func init() {
 	// Add types to scheme
-	eventingv1alpha1.AddToScheme(scheme.Scheme)
-	evapisv1alpha1.AddToScheme(scheme.Scheme)
+	_ = eventingv1alpha1.AddToScheme(scheme.Scheme)
+	_ = evapisv1alpha1.AddToScheme(scheme.Scheme)
 }
 
 func TestInjectClient(t *testing.T) {
@@ -210,7 +212,7 @@ func TestAllCases(t *testing.T) {
 	//recorder := record.NewBroadcaster().NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 	for _, tc := range testCases {
 		c := tc.GetClient()
-		opts := opts.Options{
+		options := opts.Options{
 			Port:           8080,
 			ResyncPeriod:   10 * time.Second,
 			ChannelTimeout: 10 * time.Second,
@@ -221,7 +223,7 @@ func TestAllCases(t *testing.T) {
 			client:     c,
 			recorder:   recorder,
 			knativeLib: knativeLib,
-			opts:       &opts,
+			opts:       &options,
 			time:       NewMockCurrentTime(),
 		}
 		t.Logf("Running test %s", tc.Name)
@@ -242,7 +244,7 @@ func makeKySubscription() *eventingv1alpha1.Subscription {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      kySubName,
 			Namespace: kyNamespace,
-			UID:       subUid,
+			UID:       subUID,
 		},
 		SubscriptionSpec: eventingv1alpha1.SubscriptionSpec{
 			EventType:        eventType,
@@ -375,7 +377,7 @@ func (k *MockKnativeLib) GetSubscription(name string, namespace string) (*evapis
 func (k *MockKnativeLib) UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error) {
 	return nil, nil
 }
-func (k *MockKnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[string]string, message *string) error {
+func (k *MockKnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[string][]string, message *string) error {
 	return nil
 }
 func (k *MockKnativeLib) InjectClient(c eventingclientset.EventingV1alpha1Interface) error {
@@ -393,11 +395,13 @@ func makeKnChannel(provisioner string, namespace string, name string, labels *ma
 			Namespace: namespace,
 			Name:      name,
 			Labels:    *labels,
-			UID:       chanUid,
+			UID:       chanUID,
 		},
 		Spec: evapisv1alpha1.ChannelSpec{
 			Provisioner: &corev1.ObjectReference{
-				Name: provisioner,
+				Name:       provisioner,
+				APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
+				Kind:       "ClusterChannelProvisioner",
 			},
 		},
 		Status: evapisv1alpha1.ChannelStatus{
@@ -413,7 +417,7 @@ func makeKnChannel(provisioner string, namespace string, name string, labels *ma
 }
 
 func makeKnChannelName(kySub *eventingv1alpha1.Subscription) string {
-	return util.GetChannelName(&kySub.SourceID, &kySub.EventType, &kySub.EventTypeVersion)
+	return eventBusUtil.GetChannelName(&kySub.SourceID, &kySub.EventType, &kySub.EventTypeVersion)
 }
 
 func makeKnSubscriptionName(kySub *eventingv1alpha1.Subscription) string {
@@ -430,8 +434,8 @@ func makeKnativeLibChannel() *evapisv1alpha1.Channel {
 func makeKnSubscription(kySub *eventingv1alpha1.Subscription) *evapisv1alpha1.Subscription {
 	knSubName := util.GetKnSubscriptionName(&kySub.Name, &kySub.Namespace)
 	knChannelName := makeKnChannelName(kySub)
-	subscriberUrl := subscriberUri
-	return util.Subscription(knSubName, "kyma-system").ToChannel(knChannelName).ToUri(&subscriberUrl).EmptyReply().Build()
+	subscriberURL := subscriberURI
+	return util.Subscription(knSubName, "kyma-system").ToChannel(knChannelName).ToURI(&subscriberURL).EmptyReply().Build()
 }
 
 func dumpKnativeLibObjects(t *testing.T) {

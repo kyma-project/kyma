@@ -5,11 +5,20 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/handlers"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/publisher"
+	constants "github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
 )
 
+const (
+	//APIV1 API V1 pattern
+	APIV1 = "/v1/events"
+	//APIV2 API V2 pattern
+	APIV2 = "/v2/events"
+)
+
+// KnativePublishApplication represents a Knative PublishApplication
 type KnativePublishApplication struct {
 	started          bool
 	options          *opts.Options
@@ -19,6 +28,7 @@ type KnativePublishApplication struct {
 	knativeLib       *knative.KnativeLib
 }
 
+// StartKnativePublishApplication starts a new KnativePublishApplication instance.
 func StartKnativePublishApplication(options *opts.Options, knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher, tracer *trace.Tracer) *KnativePublishApplication {
 	// init and start the knative publish application
 	application := newKnativePublishApplication(options, knativeLib, knativePublisher, tracer)
@@ -47,9 +57,11 @@ func (app *KnativePublishApplication) start() {
 	// mark the app as started and register the readiness and the publish handlers
 	app.started = true
 	app.registerReadinessProbe()
-	app.registerPublishHandler()
+	app.registerPublishV1Handler()
+	app.registerPublishV2Handler()
 }
 
+// ServeMux encapsulates an http.ServeMux
 func (app *KnativePublishApplication) ServeMux() *http.ServeMux {
 	return app.serveMux
 }
@@ -58,8 +70,14 @@ func (app *KnativePublishApplication) registerReadinessProbe() {
 	app.serveMux.HandleFunc("/v1/status/ready", handlers.ReadinessProbeHandler())
 }
 
-func (app *KnativePublishApplication) registerPublishHandler() {
-	knativePublishHandler := handlers.KnativePublishHandler(app.knativeLib, app.knativePublisher, app.tracer, app.options)
+func (app *KnativePublishApplication) registerPublishV1Handler() {
+	knativePublishHandler := handlers.KnativePublishHandler(constants.EventAPIV1, app.knativeLib, app.knativePublisher, app.tracer, app.options)
 	requestSizeLimitHandler := handlers.WithRequestSizeLimiting(knativePublishHandler, app.options.MaxRequestSize)
-	app.serveMux.HandleFunc("/v1/events", requestSizeLimitHandler)
+	app.serveMux.HandleFunc(APIV1, requestSizeLimitHandler)
+}
+
+func (app *KnativePublishApplication) registerPublishV2Handler() {
+	knativePublishHandler := handlers.KnativePublishHandler(constants.EventAPIV2, app.knativeLib, app.knativePublisher, app.tracer, app.options)
+	requestSizeLimitHandler := handlers.WithRequestSizeLimiting(knativePublishHandler, app.options.MaxRequestSize)
+	app.serveMux.HandleFunc(APIV2, requestSizeLimitHandler)
 }

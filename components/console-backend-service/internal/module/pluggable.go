@@ -41,6 +41,22 @@ func (p *Pluggable) EnableAndSyncCache(sync func(stopCh chan struct{})) {
 	}(p.stopCh, p.SyncCh)
 }
 
+func (p *Pluggable) EnableAndSyncInformerFactories(onSync func(), informerFactories ...SharedInformerFactory) {
+	p.Enable()
+
+	go func(onSyncFn func(), syncCh chan bool, informerFactories ...SharedInformerFactory) {
+		for _, i := range informerFactories {
+			i.Start(p.stopCh)
+		}
+		for _, i := range informerFactories {
+			i.WaitForCacheSync(p.stopCh)
+		}
+
+		onSyncFn()
+		syncCh <- true
+	}(onSync, p.SyncCh, informerFactories...)
+}
+
 func (p *Pluggable) EnableAndSyncInformerFactory(informerFactory SharedInformerFactory, onSync func()) {
 	p.Enable()
 

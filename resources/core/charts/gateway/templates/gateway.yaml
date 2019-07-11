@@ -13,10 +13,18 @@ spec:
       protocol: HTTPS
     tls:
       mode: SIMPLE
-      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
-      privateKey: /etc/istio/ingressgateway-certs/tls.key
+      credentialName: {{ .Values.global.istio.gateway.name }}-certs
     hosts:
     - "*.{{.Values.global.ingress.domainName}}"
+  - port:
+      name: https-app-connector
+      number: 443
+      protocol: HTTPS
+    tls:
+      mode: MUTUAL
+      credentialName: application-connector-certs
+    hosts:
+      - "gateway.{{.Values.global.ingress.domainName}}"
   - port:
       number: 80
       name: http

@@ -12,7 +12,7 @@ rules:
     resources: ["*"]
     verbs: ["get", "list", "watch"]
   - apiGroups: [""]
-    resources: ["pods","services", "configmaps", "secrets"]
+    resources: ["pods", "services", "configmaps", "secrets", "namespaces"]
     verbs: ["get", "list", "watch", "update", "delete"]
   - apiGroups: [""]
     resources: ["users", "groups"]
@@ -43,7 +43,7 @@ rules:
     verbs: ["get", "list", "watch"]
   - apiGroups: ["gateway.kyma-project.io"]
     resources: ["apis"]
-    verbs: ["get", "list", "watch"]
+    verbs: ["get", "list", "watch", "create", "update", "delete"]
   - apiGroups: ["authentication.kyma-project.io"]
     resources: ["idppresets"]
     verbs: ["get", "list", "watch", "create", "delete"]
@@ -59,3 +59,8 @@ rules:
   - apiGroups: ["*"]
     resources: ["*"]
     verbs: ["create"]
+# Add when FEATURE_TOGGLES_CLUSTER_ADDONS_CONFIGURATION_CRD_ENABLED is set to true
+# https://github.com/kyma-project/kyma/issues/4492
+#  - apiGroups: ["addons.kyma-project.io"]
+#    resources: ["clusteraddonsconfigurations"]
+#    verbs: ["*"]

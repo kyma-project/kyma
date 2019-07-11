@@ -61,8 +61,8 @@ required = [
   version = "v1.13.1"
 
 [[constraint]]
-  name = "github.com/kyma-project/kyma"
-  revision = "48aaeb726182c971b1c557276159142e3d73f551"
+  name="github.com/kyma-project/kyma"
+  revision = "0291cf0cd19b7171d19ec2b4664bfa1f978032f8"
 
 [[override]]
   name = "k8s.io/api"
@@ -84,6 +84,10 @@ required = [
   name = "github.com/vrischmann/envconfig"
   # revision with support of slices default values
   revision = "d647766a494a7182c05fa4ddd1702c2c307a770d"
+
+[[constraint]]
+  name = "github.com/openzipkin/zipkin-go-opentracing"
+  version = "v0.3.5"
 
 [prune]
   go-tests = true

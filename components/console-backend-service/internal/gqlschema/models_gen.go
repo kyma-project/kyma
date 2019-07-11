@@ -14,6 +14,17 @@ type API struct {
 	Hostname               string                 `json:"hostname"`
 	Service                ApiService             `json:"service"`
 	AuthenticationPolicies []AuthenticationPolicy `json:"authenticationPolicies"`
+	CreationTimestamp      time.Time              `json:"creationTimestamp"`
+}
+
+type APIInput struct {
+	Hostname                   string `json:"hostname"`
+	ServiceName                string `json:"serviceName"`
+	ServicePort                int    `json:"servicePort"`
+	JwksURI                    string `json:"jwksUri"`
+	Issuer                     string `json:"issuer"`
+	DisableIstioAuthPolicyMTLS *bool  `json:"disableIstioAuthPolicyMTLS"`
+	AuthenticationEnabled      *bool  `json:"authenticationEnabled"`
 }
 
 type AddonsConfiguration struct {
@@ -25,6 +36,11 @@ type AddonsConfiguration struct {
 type AddonsConfigurationEvent struct {
 	Type                SubscriptionEventType `json:"type"`
 	AddonsConfiguration AddonsConfiguration   `json:"addonsConfiguration"`
+}
+
+type ApiEvent struct {
+	Type SubscriptionEventType `json:"type"`
+	API  API                   `json:"api"`
 }
 
 type ApiService struct {
@@ -44,8 +60,10 @@ type ApplicationEvent struct {
 }
 
 type ApplicationMapping struct {
-	Namespace   string `json:"namespace"`
-	Application string `json:"application"`
+	Namespace   string                       `json:"namespace"`
+	Application string                       `json:"application"`
+	AllServices *bool                        `json:"allServices"`
+	Services    []*ApplicationMappingService `json:"services"`
 }
 
 type ApplicationMutationOutput struct {
@@ -225,6 +243,12 @@ type DocsTopicStatus struct {
 	Message string             `json:"message"`
 }
 
+type EnabledApplicationService struct {
+	ID          string `json:"id"`
+	DisplayName string `json:"displayName"`
+	Exist       bool   `json:"exist"`
+}
+
 type EnvPrefix struct {
 	Name string `json:"name"`
 }
@@ -237,6 +261,7 @@ type EventActivationEvent struct {
 	EventType   string `json:"eventType"`
 	Version     string `json:"version"`
 	Description string `json:"description"`
+	Schema      JSON   `json:"schema"`
 }
 
 type ExceededQuota struct {
@@ -274,6 +299,13 @@ type LimitRange struct {
 	Limits []LimitRangeItem `json:"limits"`
 }
 
+type LimitRangeInput struct {
+	Default        ResourceValuesInput `json:"default"`
+	DefaultRequest ResourceValuesInput `json:"defaultRequest"`
+	Max            ResourceValuesInput `json:"max"`
+	Type           string              `json:"type"`
+}
+
 type LimitRangeItem struct {
 	LimitType      LimitType    `json:"limitType"`
 	Max            ResourceType `json:"max"`
@@ -306,6 +338,11 @@ type MicroFrontend struct {
 	Category        string           `json:"category"`
 	ViewBaseURL     string           `json:"viewBaseUrl"`
 	NavigationNodes []NavigationNode `json:"navigationNodes"`
+}
+
+type NamespaceMutationOutput struct {
+	Name   string `json:"name"`
+	Labels Labels `json:"labels"`
 }
 
 type NavigationNode struct {
@@ -371,6 +408,11 @@ type ResourceQuota struct {
 	Requests ResourceValues `json:"requests"`
 }
 
+type ResourceQuotaInput struct {
+	Limits   ResourceValuesInput `json:"limits"`
+	Requests ResourceValuesInput `json:"requests"`
+}
+
 type ResourceQuotasStatus struct {
 	Exceeded       bool            `json:"exceeded"`
 	ExceededQuotas []ExceededQuota `json:"exceededQuotas"`
@@ -388,6 +430,11 @@ type ResourceType struct {
 }
 
 type ResourceValues struct {
+	Memory *string `json:"memory"`
+	CPU    *string `json:"cpu"`
+}
+
+type ResourceValuesInput struct {
 	Memory *string `json:"memory"`
 	CPU    *string `json:"cpu"`
 }
@@ -553,6 +600,12 @@ type UsageKind struct {
 type UsageKindResource struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
+}
+
+type EnabledMappingService struct {
+	Namespace   string                       `json:"namespace"`
+	AllServices bool                         `json:"allServices"`
+	Services    []*EnabledApplicationService `json:"services"`
 }
 
 type ApplicationStatus string

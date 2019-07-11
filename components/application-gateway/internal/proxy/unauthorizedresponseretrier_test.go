@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
-	authMock "github.com/kyma-project/kyma/components/application-gateway/internal/authorization/mocks"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 	csrfMock "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/mocks"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+	authMock "github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -259,7 +259,7 @@ func newUpdateCacheEntryFunction(t *testing.T, url string, strategy authorizatio
 	return func(id string) (*CacheEntry, apperrors.AppError) {
 		assert.Equal(t, "id1", id)
 
-		proxy, err := makeProxy(url, nil, nil, "id1", true)
+		proxy, err := makeProxy(url, nil, "id1", true)
 		require.NoError(t, err)
 
 		return &CacheEntry{

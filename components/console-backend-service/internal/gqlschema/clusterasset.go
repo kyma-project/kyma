@@ -1,7 +1,8 @@
 package gqlschema
 
 type ClusterAsset struct {
-	Name   string      `json:"name"`
-	Type   string      `json:"type"`
-	Status AssetStatus `json:"status"`
+	Name     string      `json:"name"`
+	Type     string      `json:"type"`
+	Status   AssetStatus `json:"status"`
+	Metadata JSON        `json:"metadata"`
 }

@@ -16,7 +16,8 @@ data:
     external_services:
       istio:
         url_service_version: http://istio-pilot:8080/version
+      prometheus_service_url: {{ .Values.prometheusAddr }}
       jaeger:
-        url: {{ .Values.dashboard.jaegerURL }}
+        url: {{ .Values.jaegerURL }}
       grafana:
-        url: {{ .Values.dashboard.grafanaURL }}
+        url: {{ .Values.grafanaURL }}

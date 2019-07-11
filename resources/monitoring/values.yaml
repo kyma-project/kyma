@@ -3,10 +3,14 @@
 test:
   image:
     name: monitoring
-    dir: develop/tests/
-    version: 06b8d357
+    dir: pr/tests/
+    version: PR-4785
 global:
   isLocalEnv: false
+  serviceCatalogApiserver:
+    enabled: true
+  serviceCatalogCrds:
+    enabled: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:

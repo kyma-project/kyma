@@ -6,20 +6,21 @@ import (
 	"net/http"
 	"time"
 
-	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
+	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
 type statefulSetTest struct {
 	statefulSetName, uuid, output string
 	coreClient                    *kubernetes.Clientset
+	log                           logrus.FieldLogger
 }
 
 func NewStatefulSetTest() (*statefulSetTest, error) {
@@ -37,22 +38,23 @@ func NewStatefulSetTest() (*statefulSetTest, error) {
 		coreClient:      coreClient,
 		statefulSetName: "hello",
 		uuid:            uuid.New().String(),
+		log:             logrus.WithField("test", "statefulset"),
 	}, nil
 }
 
 func (t *statefulSetTest) CreateResources(namespace string) {
-	replicas := int32(2)
-	err := t.createService(namespace, replicas)
+	replicas := int32(1)
+	err := t.createService(namespace)
 	So(err, ShouldBeNil)
 	err = t.createStatefulSet(namespace, replicas)
 	So(err, ShouldBeNil)
 }
 
 func (t *statefulSetTest) TestResources(namespace string) {
-	replicas := int32(2)
-	err := t.waitForPodDeployment(namespace, replicas, 2*time.Minute)
+	err := t.waitForPodDeployment(namespace, 2*time.Minute)
 	So(err, ShouldBeNil)
-	host := fmt.Sprintf("http://%s-%v.%s.%s/date", t.statefulSetName, replicas-1, t.statefulSetName, namespace)
+	host := fmt.Sprintf("http://%s.%s/date", t.statefulSetName, namespace)
+	t.log.Infof("HTTP GET to: %s", host)
 	value, err := t.getOutput(host, 2*time.Minute)
 	So(err, ShouldBeNil)
 	if t.output == "" {
@@ -121,8 +123,9 @@ func (t *statefulSetTest) createStatefulSet(namespace string, replicas int32) er
 							Name:  "busybox",
 							Image: "busybox",
 							Command: []string{
-								"sh", "-c",
-								"cat /usr/share/nginx/html/date ; test -e /usr/share/nginx/html/date || date > /usr/share/nginx/html/date",
+								"sh",
+								"-c",
+								"test -e /usr/share/nginx/html/date || date > /usr/share/nginx/html/date; cat /usr/share/nginx/html/date",
 							},
 							VolumeMounts: []corev1.VolumeMount{
 								corev1.VolumeMount{
@@ -174,7 +177,7 @@ func (t *statefulSetTest) createStatefulSet(namespace string, replicas int32) er
 	return err
 }
 
-func (t *statefulSetTest) createService(namespace string, replicas int32) error {
+func (t *statefulSetTest) createService(namespace string) error {
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: t.statefulSetName,
@@ -189,14 +192,13 @@ func (t *statefulSetTest) createService(namespace string, replicas int32) error 
 					Protocol: corev1.ProtocolTCP,
 				},
 			},
-			ClusterIP: "None",
 		},
 	}
 	_, err := t.coreClient.CoreV1().Services(namespace).Create(service)
 	return err
 }
 
-func (t *statefulSetTest) waitForPodDeployment(namespace string, replicas int32, waitmax time.Duration) error {
+func (t *statefulSetTest) waitForPodDeployment(namespace string, waitmax time.Duration) error {
 	timeout := time.After(waitmax)
 	tick := time.Tick(2 * time.Second)
 
@@ -209,11 +211,8 @@ func (t *statefulSetTest) waitForPodDeployment(namespace string, replicas int32,
 			if err != nil {
 				return err
 			}
-			if len(pods.Items) < int(replicas) {
+			if len(pods.Items) != 1 {
 				break
-			}
-			if len(pods.Items) > int(replicas) {
-				return fmt.Errorf("Deployed %v pod, got %v: %+v", replicas, len(pods.Items), pods)
 			}
 
 			stillStarting := false

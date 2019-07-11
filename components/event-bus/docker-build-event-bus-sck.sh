@@ -14,6 +14,8 @@ cp -R ./generated ./cmd/event-bus-subscription-controller-knative/docker/image/
 cp -R ./internal ./cmd/event-bus-subscription-controller-knative/docker/image/
 cp -R ./vendor ./cmd/event-bus-subscription-controller-knative/docker/image/
 cp -R ./api ./cmd/event-bus-subscription-controller-knative/docker/image/
+cp -R ./pkg ./cmd/event-bus-subscription-controller-knative/docker/image/
+cp -R ./licenses ./cmd/event-bus-subscription-controller-knative/docker/image/
 tagName="${NAME}:${VERSION}"
 docker build --build-arg version=${VERSION} -t ${tagName} --label version=${VERSION} --label component=${COMPONENT} --rm ./cmd/event-bus-subscription-controller-knative/docker/image
 rm -rf ./cmd/event-bus-subscription-controller-knative/docker

@@ -15,11 +15,13 @@ type (
 	Version string
 )
 
-type indexDTO struct {
-	Entries map[Name][]entryDTO `yaml:"entries"`
+// IndexDTO contains collection of all bundles from the given repository
+type IndexDTO struct {
+	Entries map[Name][]EntryDTO `yaml:"entries"`
 }
 
-type entryDTO struct {
+// EntryDTO contains information about single bundle entry
+type EntryDTO struct {
 	Name        Name    `yaml:"name"`
 	Description string  `yaml:"description"`
 	Version     Version `yaml:"version"`

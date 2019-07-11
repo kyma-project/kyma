@@ -28,10 +28,10 @@ import (
 
 type (
 	bundleIDGetter interface {
-		GetByID(id internal.BundleID) (*internal.Bundle, error)
+		GetByID(namespace internal.Namespace, id internal.BundleID) (*internal.Bundle, error)
 	}
 	bundleFinder interface {
-		FindAll() ([]*internal.Bundle, error)
+		FindAll(namespace internal.Namespace) ([]*internal.Bundle, error)
 	}
 	bundleStorage interface {
 		bundleIDGetter
@@ -39,7 +39,7 @@ type (
 	}
 
 	chartGetter interface {
-		Get(name internal.ChartName, ver semver.Version) (*chart.Chart, error)
+		Get(namespace internal.Namespace, name internal.ChartName, ver semver.Version) (*chart.Chart, error)
 	}
 	chartStorage interface {
 		chartGetter
@@ -189,6 +189,7 @@ func newWithIDProvider(bs bundleStorage, cs chartStorage, os operationStorage, i
 			instanceBindDataRemover: ibd,
 			operationIDProvider:     idp,
 			helmDeleter:             hc,
+			log:                     log.WithField("service", "deprovisioner"),
 		},
 		binder: &bindService{
 			instanceBindDataGetter: ibd,

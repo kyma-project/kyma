@@ -44,7 +44,7 @@ spec:
   - name: pvc-90-percent-full-rule
     rules:
     - alert: PVC90PercentFull
-      expr: kubelet_volume_stats_used_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|heptio-ark|natss" } / kubelet_volume_stats_capacity_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|heptio-ark|natss"} * 100 > 90
+      expr: kubelet_volume_stats_used_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|kyma-backup|natss" } / kubelet_volume_stats_capacity_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|kyma-backup|natss"} * 100 > 90
       for: 10m
       labels:
         severity: critical

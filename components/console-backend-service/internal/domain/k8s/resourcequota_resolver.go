@@ -14,6 +14,13 @@ import (
 //go:generate mockery -name=resourceQuotaLister -output=automock -outpkg=automock -case=underscore
 type resourceQuotaLister interface {
 	ListResourceQuotas(namespace string) ([]*v1.ResourceQuota, error)
+	CreateResourceQuota(namespace string, name string, ResourceQuotaInput gqlschema.ResourceQuotaInput) (*v1.ResourceQuota, error)
+}
+
+//go:generate mockery -name=gqlResourceQuotaConverter -output=automock -outpkg=automock -case=underscore
+type gqlResourceQuotaConverter interface {
+	ToGQLs(in []*v1.ResourceQuota) []gqlschema.ResourceQuota
+	ToGQL(in *v1.ResourceQuota) *gqlschema.ResourceQuota
 }
 
 func newResourceQuotaResolver(resourceQuotaLister resourceQuotaLister) *resourceQuotaResolver {
@@ -25,7 +32,7 @@ func newResourceQuotaResolver(resourceQuotaLister resourceQuotaLister) *resource
 
 type resourceQuotaResolver struct {
 	rqLister  resourceQuotaLister
-	converter *resourceQuotaConverter
+	converter gqlResourceQuotaConverter
 }
 
 func (r *resourceQuotaResolver) ResourceQuotasQuery(ctx context.Context, namespace string) ([]gqlschema.ResourceQuota, error) {
@@ -37,4 +44,15 @@ func (r *resourceQuotaResolver) ResourceQuotasQuery(ctx context.Context, namespa
 	}
 
 	return r.converter.ToGQLs(items), nil
+}
+
+func (r *resourceQuotaResolver) CreateResourceQuota(ctx context.Context, namespace string, name string, resourceQuotaInput gqlschema.ResourceQuotaInput) (*gqlschema.ResourceQuota, error) {
+	item, err := r.rqLister.CreateResourceQuota(namespace, name, resourceQuotaInput)
+	if err != nil {
+		newError := errors.Wrapf(err, "while creating %s [namespace: %s]", pretty.ResourceQuotas, namespace)
+		glog.Error(newError)
+		return nil, gqlerror.New(newError, pretty.ResourceQuotas, gqlerror.WithDetails(newError.Error()), gqlerror.WithNamespace(namespace))
+	}
+
+	return r.converter.ToGQL(item), nil
 }

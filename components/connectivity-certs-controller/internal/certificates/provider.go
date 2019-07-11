@@ -6,6 +6,8 @@ import (
 	"encoding/pem"
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/types"
+
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/secrets"
 
 	"github.com/pkg/errors"
@@ -13,16 +15,16 @@ import (
 
 type Provider interface {
 	GetClientCredentials() (*rsa.PrivateKey, *x509.Certificate, error)
-	GetCACertificates() ([]*x509.Certificate, error)
+	GetCertificateChain() ([]*x509.Certificate, error)
 }
 
 type certificateProvider struct {
-	clusterCertSecretName string
-	caCertSecretName      string
+	clusterCertSecretName types.NamespacedName
+	caCertSecretName      types.NamespacedName
 	secretsRepository     secrets.Repository
 }
 
-func NewCertificateProvider(clusterCertSecretName string, caCertSecretName string, secretsRepository secrets.Repository) Provider {
+func NewCertificateProvider(clusterCertSecretName types.NamespacedName, caCertSecretName types.NamespacedName, secretsRepository secrets.Repository) Provider {
 	return &certificateProvider{
 		secretsRepository:     secretsRepository,
 		caCertSecretName:      caCertSecretName,
@@ -30,13 +32,13 @@ func NewCertificateProvider(clusterCertSecretName string, caCertSecretName strin
 	}
 }
 
-func (cp *certificateProvider) GetCACertificates() ([]*x509.Certificate, error) {
-	secretData, err := cp.secretsRepository.Get(cp.caCertSecretName)
+func (cp *certificateProvider) GetCertificateChain() ([]*x509.Certificate, error) {
+	secretData, err := cp.secretsRepository.Get(cp.clusterCertSecretName)
 	if err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("Failed to read %s secret with certificates", cp.clusterCertSecretName))
 	}
 
-	caCerts, err := decodeCertificates(secretData[caCertificateSecretKey])
+	caCerts, err := decodeCertificates(secretData[certificateChainSecretKey])
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to read client certificate")
 	}

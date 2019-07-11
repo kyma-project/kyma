@@ -19,14 +19,12 @@ type Subscription struct {
 type SubscriptionSpec struct {
 	Endpoint                      string `json:"endpoint"`
 	IncludeSubscriptionNameHeader bool   `json:"include_subscription_name_header"`
-	MaxInflight                   int    `json:"max_inflight"`
-	PushRequestTimeoutMS          int64  `json:"push_request_timeout_ms"`
 	EventType                     string `json:"event_type"`
 	EventTypeVersion              string `json:"event_type_version"`
 	SourceID                      string `json:"source_id"`
 }
 
-//SubscriptionList
+// SubscriptionList of Kyma subscriptions.
 type SubscriptionList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
@@ -34,14 +32,17 @@ type SubscriptionList struct {
 	Items []Subscription `json:"items"`
 }
 
+// SubscriptionStatus of Kyma subscriptions.
 type SubscriptionStatus struct {
 	Status `json:",inline"`
 }
 
+// Status of Kyma subscriptions.
 type Status struct {
 	Conditions Conditions `json:"conditions"`
 }
 
+// SubscriptionCondition of Kyma subscriptions.
 type SubscriptionCondition struct {
 	Type               SubscriptionConditionType `json:"type"`
 	Status             ConditionStatus           `json:"status"`
@@ -50,16 +51,23 @@ type SubscriptionCondition struct {
 	Message            string                    `json:"message"`
 }
 
+// ConditionStatus type
 type ConditionStatus string
+
+// SubscriptionConditionType type
 type SubscriptionConditionType string
+
+// Conditions type
 type Conditions []SubscriptionCondition
 
 const (
-	// condition status values
-	ConditionTrue  ConditionStatus = "True"
+	// ConditionTrue value for the Kyma subscription condition status.
+	ConditionTrue ConditionStatus = "True"
+	// ConditionFalse value for the Kyma subscription condition status.
 	ConditionFalse ConditionStatus = "False"
 
-	// subscription condition type values
-	Ready           SubscriptionConditionType = "is-ready"
+	// Ready label for the Kyma subscription condition type.
+	Ready SubscriptionConditionType = "is-ready"
+	// EventsActivated label for the Kyma subscription condition type.
 	EventsActivated SubscriptionConditionType = "events-activated"
 )

@@ -26,11 +26,13 @@ Valid certificate signed by the Kyma Certificate Authority.
     "api": {
       "targetUrl": "https://httpbin.org/",
       "spec": {},
-      "queryParameters": {
-        "param": ["bar"]
-      },
-      "headers": {
-        "custom-header": ["foo"]
+      "requestParameters": {
+        "queryParameters": {
+          "param": ["bar"]
+        },
+        "headers": {
+          "custom-header": ["foo"]
+        },
       },
       "credentials": {
         "basic": {
@@ -108,16 +110,9 @@ Valid certificate signed by the Kyma Certificate Authority.
   ```
 
 2. Include the request body you prepared in the following call to register a service:
-
-  - For a cluster deployment:
-    ```
-    curl -X POST -d '{YOUR_REQUEST_BODY}' https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-    ```
-
-  - For a local deployment:
-    ```
-    curl -X POST -d '{YOUR_REQUEST_BODY}' https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-    ```
+   ```
+   curl -X POST -d '{YOUR_REQUEST_BODY}' https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+   ```
 
 A successful response returns the ID of the registered service:
 ```
@@ -125,17 +120,9 @@ A successful response returns the ID of the registered service:
 ```
 
 ### Check the details of a registered service
-
-  - For a cluster deployment:
-    ```
-    curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-    ```
-
-  - For a local deployment:
-    ```
-    curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-    ```
-
+   ```
+   curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+   ```
 
 ## Register API with a specification URL
 
@@ -157,13 +144,85 @@ See the example of the API part of the request body with specification URL:
     }
 }
 ```
-
-The Application Registry will fetch the specification from provided URL but it will not use any credentials, therefore the endpoint can not be secured by any authentication mechanism.
-
 >**NOTE:** Fetching specification from a URL is supported only for APIs. Fetching specifications for Events or documentation is not supported.
 
+## Register an API with a secured specification URL
 
-## Register the OData API
+The Application Registry allows you to register an API with a secured specification URL. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617) and [OAuth](https://tools.ietf.org/html/rfc6750). You can specify only one type of authentication for an API.
+
+### Register an API with a Basic Authentication-secured specification URL
+
+To register an API with a specification URL secured with Basic Authentication, add a `specificationCredentials.basic` object to the `api` section of the service registration request body. You must include these fields:
+
+| Field   |  Description |
+|----------|------|
+| **username** | Basic Authorization username |
+| **password** | Basic Authorization password |
+
+This is an example of the `api` section of the request body for an API with a specification URL secured with Basic Authentication:
+
+```
+    "api": {
+        "targetUrl": "https://sampleapi.targeturl/v1",
+        "specificationUrl": "https://sampleapi.spec/v1",
+        "specificationCredentials": {
+            "basic": {
+                "username": "{USERNAME}",
+                "password": "{PASSWORD}"
+            },
+        }  
+```
+### Register an API with an OAuth-secured specification URL
+
+To register an API with a specification URL secured with OAuth, add a `specificationCredentials.oauth` object to the `api` section of the service registration request body. You must include these fields:
+
+| Field   |  Description |
+|----------|------|
+| **url** |  OAuth token exchange endpoint of the service |
+| **clientId** | OAuth client ID |
+| **clientSecret** | OAuth client Secret |    
+
+This is an example of the `api` section of the request body for an API with a specification URL secured with OAuth:
+
+```
+    "api": {
+        "targetUrl": "https://sampleapi.targeturl/v1",
+        "specificationUrl": "https://sampleapi.spec/v1",
+        "specificationCredentials": {
+            "oauth": {
+                "url": "https://sampleapi.targeturl/authorizationserver/oauth/token",
+                "clientId": "{CLIENT_ID}",
+                "clientSecret": "{CLIENT_SECRET}"
+            },
+        }  
+```
+
+## Use custom headers and query parameters for fetching API specification from URL 
+You can specify additional headers and query parameters that will be injected to requests to the specification URL. 
+>**NOTE:** These headers and query parameters are used only for requests for fetching an API specification and are not stored in the system. 
+
+To register an API with a specification URL that requires specific custom headers and query parameters, add the `specificationRequestParameters.headers` and `specificationRequestParameters.queryParameters` objects to the `api` section of the service registration request body.
+```
+    "api": {
+        "targetUrl": "https://sampleapi.targeturl/v1",
+        "specificationUrl": "https://sampleapi.spec/v1",
+        "specificationRequestParameters": {
+            "headers": {
+                "custom-header": ["foo"]
+            },
+            "queryParameters": {
+                "param": ["bar"]
+            },
+        }
+        "credentials": {
+            "basic": {
+                "username": "{USERNAME}",
+                "password": "{PASSWORD}"
+            },
+        }
+```
+
+## Register an OData API
 
 If the **api.spec** or **api.specificationUrl** parameters are not specified and the **api.type** parameter is set to `OData`, the Application Registry will try to fetch specification from the target URL with the `$metadata` path.
 

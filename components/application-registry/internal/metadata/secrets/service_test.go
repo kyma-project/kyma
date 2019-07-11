@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"k8s.io/apimachinery/pkg/types"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/strategy"
@@ -22,12 +23,13 @@ import (
 
 const (
 	appName    = "app"
+	appUID     = types.UID("appUID")
 	serviceId  = "serviceID"
 	secretName = "secretName"
 )
 
 var (
-	credentials = &model.Credentials{
+	credentials = &model.CredentialsWithCSRF{
 		Oauth: &model.Oauth{
 			ClientID:     "clientID",
 			ClientSecret: "clientSecret",
@@ -62,12 +64,12 @@ func TestService_Create(t *testing.T) {
 		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Create", appName, secretName, serviceId, secretData).Return(nil)
+		secretsRepository.On("Create", appName, appUID, secretName, serviceId, secretData).Return(nil)
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
-		createdCredentials, err := service.Create(appName, serviceId, credentials)
+		createdCredentials, err := service.Create(appName, appUID, serviceId, credentials)
 
 		// then
 		require.NoError(t, err)
@@ -86,7 +88,7 @@ func TestService_Create(t *testing.T) {
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
-		createdCredentials, err := service.Create(appName, serviceId, nil)
+		createdCredentials, err := service.Create(appName, appUID, serviceId, nil)
 
 		// then
 		assert.NoError(t, err)
@@ -106,7 +108,7 @@ func TestService_Create(t *testing.T) {
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
-		createdCredentials, err := service.Create(appName, serviceId, credentials)
+		createdCredentials, err := service.Create(appName, appUID, serviceId, credentials)
 
 		// then
 		require.Error(t, err)
@@ -127,7 +129,7 @@ func TestService_Create(t *testing.T) {
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
-		createdCredentials, err := service.Create(appName, serviceId, credentials)
+		createdCredentials, err := service.Create(appName, appUID, serviceId, credentials)
 
 		// then
 		require.NoError(t, err)
@@ -152,7 +154,7 @@ func TestService_Create(t *testing.T) {
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
-		createdCredentials, err := service.Create(appName, serviceId, credentials)
+		createdCredentials, err := service.Create(appName, appUID, serviceId, credentials)
 
 		// then
 		require.Error(t, err)
@@ -173,12 +175,12 @@ func TestService_Create(t *testing.T) {
 		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Create", appName, secretName, serviceId, secretData).Return(apperrors.Internal("error"))
+		secretsRepository.On("Create", appName, appUID, secretName, serviceId, secretData).Return(apperrors.Internal("error"))
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
-		createdCredentials, err := service.Create(appName, serviceId, credentials)
+		createdCredentials, err := service.Create(appName, appUID, serviceId, credentials)
 
 		// then
 		require.Error(t, err)
@@ -197,7 +199,7 @@ func TestService_Get(t *testing.T) {
 		strategyFactory := &strategyMocks.Factory{}
 		strategyFactory.On("NewSecretAccessStrategy", &appCredentials).Return(modStrategy, nil)
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, secretName).Return(secretData, nil)
+		secretsRepository.On("Get", secretName).Return(secretData, nil)
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
@@ -238,7 +240,7 @@ func TestService_Get(t *testing.T) {
 		strategyFactory := &strategyMocks.Factory{}
 		strategyFactory.On("NewSecretAccessStrategy", &appCredentials).Return(modStrategy, nil)
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, secretName).Return(nil, apperrors.Internal(""))
+		secretsRepository.On("Get", secretName).Return(nil, apperrors.Internal(""))
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
@@ -268,13 +270,13 @@ func TestService_Update(t *testing.T) {
 		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, secretName).Return(strategy.SecretData{}, nil)
-		secretsRepository.On("Upsert", appName, secretName, serviceId, secretData).Return(nil)
+		secretsRepository.On("Get", secretName).Return(strategy.SecretData{}, nil)
+		secretsRepository.On("Upsert", appName, appUID, secretName, serviceId, secretData).Return(nil)
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
-		createdCredentials, err := service.Upsert(appName, serviceId, credentials)
+		createdCredentials, err := service.Upsert(appName, appUID, serviceId, credentials)
 
 		// then
 		require.NoError(t, err)
@@ -298,12 +300,12 @@ func TestService_Update(t *testing.T) {
 		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, secretName).Return(secretData, nil)
+		secretsRepository.On("Get", secretName).Return(secretData, nil)
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
-		createdCredentials, err := service.Upsert(appName, serviceId, credentials)
+		createdCredentials, err := service.Upsert(appName, appUID, serviceId, credentials)
 
 		// then
 		require.NoError(t, err)
@@ -326,13 +328,13 @@ func TestService_Update(t *testing.T) {
 		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, secretName).Return(strategy.SecretData{}, apperrors.NotFound("error"))
-		secretsRepository.On("Create", appName, secretName, serviceId, secretData).Return(nil)
+		secretsRepository.On("Get", secretName).Return(strategy.SecretData{}, apperrors.NotFound("error"))
+		secretsRepository.On("Create", appName, appUID, secretName, serviceId, secretData).Return(nil)
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
-		createdCredentials, err := service.Upsert(appName, serviceId, credentials)
+		createdCredentials, err := service.Upsert(appName, appUID, serviceId, credentials)
 
 		// then
 		require.NoError(t, err)
@@ -354,12 +356,12 @@ func TestService_Update(t *testing.T) {
 		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, secretName).Return(nil, apperrors.Internal(""))
+		secretsRepository.On("Get", secretName).Return(nil, apperrors.Internal(""))
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
-		createdCredentials, err := service.Upsert(appName, serviceId, credentials)
+		createdCredentials, err := service.Upsert(appName, appUID, serviceId, credentials)
 
 		// then
 		require.Error(t, err)
@@ -381,13 +383,13 @@ func TestService_Update(t *testing.T) {
 		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Get", appName, secretName).Return(strategy.SecretData{}, nil)
-		secretsRepository.On("Upsert", appName, secretName, serviceId, secretData).Return(apperrors.Internal("error"))
+		secretsRepository.On("Get", secretName).Return(strategy.SecretData{}, nil)
+		secretsRepository.On("Upsert", appName, appUID, secretName, serviceId, secretData).Return(apperrors.Internal("error"))
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
-		createdCredentials, err := service.Upsert(appName, serviceId, credentials)
+		createdCredentials, err := service.Upsert(appName, appUID, serviceId, credentials)
 
 		// then
 		require.Error(t, err)

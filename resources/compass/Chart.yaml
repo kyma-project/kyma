@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Compass
+name: compass
+version: 0.1.0

@@ -30,5 +30,13 @@ spec:
         - name: GATEWAY_FQDN
           value: {{ .Values.global.istio.gateway.name }}.{{ .Release.Namespace }}.svc.cluster.local
         - name: ENABLE_MTLS
-          value: "true"
+          value: '{{ .Values.mtls.enabled }}'
+        - name: CORS_ALLOW_ORIGIN
+          value: '{{ .Values.cors.allow_origin }}'
+        - name: CORS_ALLOW_METHODS
+          value: '{{ .Values.cors.allow_methods }}'
+        - name: CORS_ALLOW_HEADERS
+          value: '{{ .Values.cors.allow_headers }}'
+        - name: BLACKLISTED_SERVICES
+          value: '{{ .Values.blacklisted_services }}'
 

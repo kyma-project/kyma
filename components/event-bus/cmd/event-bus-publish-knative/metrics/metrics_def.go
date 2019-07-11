@@ -6,14 +6,20 @@ import (
 )
 
 const (
-	Namespace        = "namespace"
-	Status           = "status"
-	SourceID         = "source_id"
-	EventType        = "event_type"
+	// Namespace metric label
+	Namespace = "namespace"
+	// Status metric label
+	Status = "status"
+	// SourceID metric label
+	SourceID = "source_id"
+	// EventType metric label
+	EventType = "event_type"
+	// EventTypeVersion metric label
 	EventTypeVersion = "event_type_version"
 )
 
 var (
+	// TotalPublishedMessages metric
 	TotalPublishedMessages = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "total_published_messages",
 		Help: "The total number of published messages",

@@ -3,8 +3,8 @@ required = [
 ]
 
 [[constraint]]
-  name = "github.com/heptio/ark"
-  version = "v0.10.1"
+  name = "github.com/heptio/velero"
+  version = "v0.11.0"
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
@@ -53,6 +53,10 @@ required = [
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
   version = "=v0.1.34"
+
+[[constraint]]
+  name = "github.com/coreos/prometheus-operator"
+  version = "v0.29.0"
 
 [prune]
   go-tests = true

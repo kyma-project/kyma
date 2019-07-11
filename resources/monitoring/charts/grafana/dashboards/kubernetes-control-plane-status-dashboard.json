@@ -592,7 +592,7 @@
         "list": []
     },
     "time": {
-        "from": "now-6h",
+        "from": "now-2h",
         "to": "now"
     },
     "timepicker": {

@@ -49,3 +49,5 @@ additionalServiceMonitorLabels: {}
 ##Custom Labels to be added to Prometheus Rules ConfigMap
 ##
 additionalRulesConfigMapLabels: {}
+
+systemNamespaceFilter: "kyma-.*|knative-.*|kube-.*|istio-.*"

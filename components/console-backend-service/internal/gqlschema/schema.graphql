@@ -8,6 +8,8 @@ scalar Timestamp
 
 scalar Settings
 
+scalar ApplicationMappingService
+
 # Directives
 
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
@@ -34,6 +36,7 @@ type File {
 type Asset {
     name: String!
     namespace: String!
+    metadata: JSON!
     type: String!
     files(filterExtensions: [String!]): [File!]!
     status: AssetStatus!
@@ -46,6 +49,7 @@ type AssetEvent {
 
 type ClusterAsset {
     name: String!
+    metadata: JSON!
     type: String!
     files(filterExtensions: [String!]): [File!]!
     status: AssetStatus!
@@ -406,6 +410,13 @@ type LimitRangeItem {
     defaultRequest: ResourceType!
 }
 
+input LimitRangeInput {
+    default: ResourceValuesInput!,
+    defaultRequest: ResourceValuesInput!
+    max: ResourceValuesInput!
+    type: String!
+}
+
 enum LimitType {
     Container
     Pod
@@ -556,6 +567,11 @@ type SecretEvent {
     secret: Secret!
 }
 
+type ApiEvent {
+    type: SubscriptionEventType!
+    api: API!
+}
+
 type ContainerState {
     state: ContainerStateType!
     reason: String!
@@ -580,6 +596,16 @@ type ResourceQuota {
     requests: ResourceValues!
 }
 
+input ResourceValuesInput {
+    memory: String
+    cpu: String
+}
+
+input ResourceQuotaInput {
+    limits: ResourceValuesInput!
+    requests: ResourceValuesInput!
+}
+
 type ResourceQuotasStatus {
     exceeded: Boolean!
     exceededQuotas: [ExceededQuota!]!
@@ -595,9 +621,15 @@ type ExceededQuota {
 
 type Namespace {
     name: String!
+    labels: Labels
 
     # Depends on application module
     applications: [String!]
+}
+
+type NamespaceMutationOutput {
+    name: String!
+    labels: Labels!
 }
 
 type Application {
@@ -606,7 +638,20 @@ type Application {
     labels: Labels!
     services: [ApplicationService!]!
     enabledInNamespaces: [String!]!
+    enabledMappingServices: [enabledMappingService]
     status: ApplicationStatus!
+}
+
+type enabledMappingService {
+    namespace: String!
+    allServices: Boolean!
+    services: [EnabledApplicationService]
+}
+
+type EnabledApplicationService {
+    id: String!
+    displayName: String!
+    exist: Boolean!
 }
 
 type ConnectorService {
@@ -616,6 +661,8 @@ type ConnectorService {
 type ApplicationMapping {
     namespace: String!
     application: String!
+    allServices: Boolean
+    services: [ApplicationMappingService]
 }
 
 type ApplicationService {
@@ -658,6 +705,7 @@ type EventActivationEvent {
     eventType: String!
     version: String!
     description: String!
+    schema: JSON!
 }
 
 type EventActivation {
@@ -731,6 +779,17 @@ type API {
     hostname: String!
     service: ApiService!
     authenticationPolicies: [AuthenticationPolicy!]!
+    creationTimestamp: Timestamp!
+}
+
+input APIInput {
+    hostname: String!
+    serviceName: String!
+    servicePort: Int!
+    jwksUri: String!
+    issuer: String!
+    disableIstioAuthPolicyMTLS: Boolean
+    authenticationEnabled: Boolean
 }
 
 # Backend Module
@@ -825,6 +884,7 @@ type Query {
     bindableResources(namespace: String!): [BindableResourcesOutputItem!]! @HasAccess(attributes: {resource: "usagekinds", verb: "list", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
     apis(namespace: String!, serviceName: String, hostname: String): [API!]! @HasAccess(attributes: {resource: "apis", verb: "list", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
+    api(name: String!, namespace: String!): API @HasAccess(attributes: {resource: "apis", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
 
     application(name: String!): Application @HasAccess(attributes: {resource: "applications", verb: "get", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     applications(namespace: String, first: Int, offset: Int): [Application!]! @HasAccess(attributes: {resource: "applicationmappings", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"}) @HasAccess(attributes: {resource: "applications", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
@@ -832,6 +892,7 @@ type Query {
 
     # Depends on 'application'
     namespaces(application: String): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
+    namespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "get", apiGroup: "", apiVersion: "v1"})
 
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]! @HasAccess(attributes: {resource: "deployments", verb: "list", apiGroup: "apps", apiVersion: "v1beta2", namespaceArg: "namespace"})
     pod(name: String!, namespace: String!): Pod @HasAccess(attributes: {resource: "pods", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
@@ -879,6 +940,7 @@ type Mutation {
     createServiceBindingUsage(namespace: String!, createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage @HasAccess(attributes: {resource: "servicebindingusages", verb: "create", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     deleteServiceBindingUsage(serviceBindingUsageName: String!, namespace: String!): DeleteServiceBindingUsageOutput @HasAccess(attributes: {resource: "servicebindingusages", verb: "delete", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "serviceBindingUsageName"})
 
+    # TODO: change the HasAccess when the ClusterAddonsConfiguration will be enabled by default
     createAddonsConfiguration(name: String!, urls: [String!]!, labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "configmaps", verb: "create", apiGroup: "", apiVersion: "v1", nameArg: "name"})
     updateAddonsConfiguration(name: String!, urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "configmaps", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name"})
     deleteAddonsConfiguration(name: String!): AddonsConfiguration @HasAccess(attributes: {resource: "configmaps", verb: "delete", apiGroup: "", apiVersion: "v1", nameArg: "name"})
@@ -889,7 +951,8 @@ type Mutation {
     updateApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput! @HasAccess(attributes: {resource: "applications", verb: "update", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     deleteApplication(name: String!): DeleteApplicationOutput! @HasAccess(attributes: {resource: "applications", verb: "delete", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 
-    enableApplication(application: String!, namespace: String!): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    enableApplication(application: String!, namespace: String!, allServices: Boolean, services: [ApplicationMappingService]): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    overloadApplication(application: String!, namespace: String!, allServices: Boolean, services: [ApplicationMappingService]): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "update", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     disableApplication(application: String!, namespace: String!): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "delete", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "application", namespaceArg: "namespace"})
 
     updatePod(name: String!, namespace: String!, pod: JSON!): Pod @HasAccess(attributes: {resource: "pods", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
@@ -901,6 +964,8 @@ type Mutation {
     updateReplicaSet(name: String!, namespace: String!, replicaSet: JSON!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "update", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     deleteReplicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "delete", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
+    createResourceQuota(namespace: String!, name: String!, resourceQuota: ResourceQuotaInput!): ResourceQuota @HasAccess(attributes: {resource: "resourcequotas", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+
     updateConfigMap(name: String!, namespace: String!, configMap: JSON!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
     deleteConfigMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "delete", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
 
@@ -909,6 +974,16 @@ type Mutation {
 
     updateService(name: String!, namespace: String!, service: JSON!): Service @HasAccess(attributes: {resource: "services", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
+
+    createNamespace(name: String!, labels: Labels): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
+    updateNamespace(name: String!, labels: Labels!): NamespaceMutationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "update", apiGroup: "", apiVersion: "v1"})
+    deleteNamespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "delete", apiGroup: "", apiVersion: "v1"})
+
+    createAPI(name: String!, namespace: String!, params: APIInput!): API! @HasAccess(attributes: {resource: "apis", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
+    updateAPI(name: String!, namespace: String!, params: APIInput!): API! @HasAccess(attributes: {resource: "apis", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
+    deleteAPI(name: String!, namespace: String!): API @HasAccess(attributes: {resource: "apis", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
+
+    createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1"})
 }
 
 # Subscriptions
@@ -929,6 +1004,8 @@ type Subscription {
     configMapEvent(namespace: String!): ConfigMapEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     addonsConfigurationEvent: AddonsConfigurationEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1"})
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
+    apiEvent(namespace: String!, serviceName: String): ApiEvent! @HasAccess(attributes: {resource: "apis", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
+
 }
 
 # Schema

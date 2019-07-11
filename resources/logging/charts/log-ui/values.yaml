@@ -4,7 +4,8 @@
 replicaCount: 1
 image:
   name: log-ui
-  tag: 65e42b2a
+  tag: 8b5be1fd
+  dir:
   pullPolicy: Always
 service:
   name: nginx
@@ -12,4 +13,3 @@ service:
   externalPort: 80
   internalPort: 80
 resources: {}
-

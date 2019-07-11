@@ -10,8 +10,8 @@ knative-provisioner-natss:
   controller:
     image:
       pullPolicy: IfNotPresent
-      location: eu.gcr.io/kyma-project/event-bus/knative/natss/controller:1d23a08
+      location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/pkg/controller@sha256:8c76a24ec9d342d55a43042fbcd6c0038989d40f031b92c07c42c824677cfb10
   dispatcher:
     image:
       pullPolicy: IfNotPresent
-      location: eu.gcr.io/kyma-project/event-bus/knative/natss/dispatcher:1d23a08
+      location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/pkg/dispatcher@sha256:0d21e3387fbd400d1af75233a77a317e3957fa157e0c33dc2fc57bebada30cc7

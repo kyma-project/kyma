@@ -3,8 +3,9 @@
 # Declare variables to be passed into your templates.
 replicaCount: 1
 image:
+  dir: ''
   name: lambda
-  tag: 05bf2438
+  tag: e6cfe4a7
   pullPolicy: IfNotPresent
 service:
   name: nginx

@@ -31,15 +31,16 @@ import (
 )
 
 type Controller struct {
-	kymaInterface      kyma.Interface
-	apisLister         kymaListers.ApiLister
-	apisSynced         cache.InformerSynced
-	queue              workqueue.RateLimitingInterface
-	recorder           record.EventRecorder
-	virtualServiceCtrl networking.Interface
-	services           service.Interface
-	authentication     authentication.Interface
-	domainName         string
+	kymaInterface       kyma.Interface
+	apisLister          kymaListers.ApiLister
+	apisSynced          cache.InformerSynced
+	queue               workqueue.RateLimitingInterface
+	recorder            record.EventRecorder
+	virtualServiceCtrl  networking.Interface
+	services            service.Interface
+	authentication      authentication.Interface
+	domainName          string
+	blacklistedServices []string
 }
 
 func NewController(
@@ -48,20 +49,22 @@ func NewController(
 	services service.Interface,
 	authentication authentication.Interface,
 	internalInformerFactory kymaInformers.SharedInformerFactory,
-	domainName string) *Controller {
+	domainName string,
+	blacklistedServices []string) *Controller {
 
 	apisInformer := internalInformerFactory.Gateway().V1alpha2().Apis()
 
 	c := &Controller{
 
-		kymaInterface:      kymaInterface,
-		virtualServiceCtrl: virtualServiceCtrl,
-		services:           services,
-		authentication:     authentication,
-		apisLister:         apisInformer.Lister(),
-		apisSynced:         apisInformer.Informer().HasSynced,
-		queue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "apis"),
-		domainName:         domainName,
+		kymaInterface:       kymaInterface,
+		virtualServiceCtrl:  virtualServiceCtrl,
+		services:            services,
+		authentication:      authentication,
+		apisLister:          apisInformer.Lister(),
+		apisSynced:          apisInformer.Informer().HasSynced,
+		queue:               workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "apis"),
+		domainName:          domainName,
+		blacklistedServices: blacklistedServices,
 	}
 
 	apisInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -231,11 +234,17 @@ func (c *Controller) validateAPI(newAPI *kymaApi.Api, apiStatusHelper *ApiStatus
 			return status
 		}
 
-		apiStatusHelper.SetAuthenticationStatusCode(kymaMeta.Error)
-		apiStatusHelper.SetVirtualServiceStatusCode(kymaMeta.Error)
+		apiStatusHelper.SetAuthenticationStatusCode(kymaMeta.Empty)
+		apiStatusHelper.SetVirtualServiceStatusCode(kymaMeta.Empty)
 		apiStatusHelper.SetValidationStatus(status)
 
 		return status
+	}
+
+	err := c.validateVirtualService(newAPI)
+	if err != nil {
+		log.Errorf("Error while validating API %s/%s ver: %s. Root cause: %s", newAPI.Namespace, newAPI.Name, newAPI.ResourceVersion, err)
+		return setStatus(kymaMeta.Error)
 	}
 
 	targetServiceName := newAPI.Spec.Service.Name
@@ -254,6 +263,18 @@ func (c *Controller) validateAPI(newAPI *kymaApi.Api, apiStatusHelper *ApiStatus
 	}
 
 	return setStatus(kymaMeta.Successful)
+}
+
+func (c *Controller) validateVirtualService(newAPI *kymaApi.Api) error {
+	newApiServiceFullName := fmt.Sprintf("%s.%s", newAPI.Spec.Service.Name, newAPI.GetNamespace())
+
+	for _, svc := range c.blacklistedServices {
+
+		if newApiServiceFullName == svc {
+			return fmt.Errorf("service %s has been blacklisted by BLACKLISTED_SERVICES env", newApiServiceFullName)
+		}
+	}
+	return nil
 }
 
 func (c *Controller) createVirtualService(metaDto meta.Dto, api *kymaApi.Api, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
@@ -340,14 +361,19 @@ func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 
 	log.Infof("Updating: %s/%s ver: %s", oldApi.Namespace, oldApi.Name, oldApi.ResourceVersion)
 
+	// `authentication` is an optional field, so the cases when it is not set vs when it is set to empty slice should be treated as equal
+	if newApi.Spec.Authentication == nil {
+		newApi.Spec.Authentication = []kymaApi.AuthenticationRule{}
+	}
+	// in the second (automatic) update an oldApi object is equal to the newApi object from the previous update (not to the object saved after performing first update), that leads to problems with fields that change during update (slice set to nil vs empty)
+	if oldApi.Spec.Authentication == nil {
+		oldApi.Spec.Authentication = []kymaApi.AuthenticationRule{}
+	}
+
 	// if update is done (so it is not in progress; it is not a retry)
 	if newApi.ResourceVersion == oldApi.ResourceVersion || reflect.DeepEqual(newApi.Spec, oldApi.Spec) {
 		log.Info("Skipped: all changes has been already applied to the API (both specs are equal).")
 		return nil
-	}
-
-	if newApi.Spec.Authentication == nil {
-		newApi.Spec.Authentication = []kymaApi.AuthenticationRule{}
 	}
 
 	apiStatusHelper := c.apiStatusHelperFor(newApi)
@@ -534,6 +560,9 @@ func toAuthenticationDto(metaDto meta.Dto, api *kymaApi.Api) *authentication.Dto
 	// authentication disabled explicitly with authenticationEnabled
 	if api.Spec.AuthenticationEnabled != nil && !*api.Spec.AuthenticationEnabled {
 		return &authentication.Dto{
+			MetaDto:               metaDto,
+			ServiceName:           api.Spec.Service.Name,
+			Status:                api.Status.AuthenticationStatus,
 			AuthenticationEnabled: false,
 		}
 	}
@@ -541,6 +570,9 @@ func toAuthenticationDto(metaDto meta.Dto, api *kymaApi.Api) *authentication.Dto
 	// authentication disabled because authenticationEnabled flag is not provided and authentication rules are empty
 	if api.Spec.AuthenticationEnabled == nil && len(api.Spec.Authentication) == 0 {
 		return &authentication.Dto{
+			MetaDto:               metaDto,
+			ServiceName:           api.Spec.Service.Name,
+			Status:                api.Status.AuthenticationStatus,
 			AuthenticationEnabled: false,
 		}
 	}
@@ -566,8 +598,9 @@ func toAuthenticationDto(metaDto meta.Dto, api *kymaApi.Api) *authentication.Dto
 			dtoRule := authentication.Rule{
 				Type: authentication.JwtType,
 				Jwt: authentication.Jwt{
-					Issuer:  authRule.Jwt.Issuer,
-					JwksUri: authRule.Jwt.JwksUri,
+					Issuer:      authRule.Jwt.Issuer,
+					JwksUri:     authRule.Jwt.JwksUri,
+					TriggerRule: toAuthTriggerRule(authRule.Jwt.TriggerRule),
 				},
 			}
 			dtoRules = append(dtoRules, dtoRule)
@@ -576,6 +609,20 @@ func toAuthenticationDto(metaDto meta.Dto, api *kymaApi.Api) *authentication.Dto
 	dto.Rules = dtoRules
 
 	return dto
+}
+
+func toAuthTriggerRule(src *kymaApi.TriggerRule) authentication.TriggerRule {
+	res := authentication.TriggerRule{}
+
+	if src != nil && len(src.ExcludedPaths) > 0 {
+		excludedPaths := make([]authentication.MatchExpression, len(src.ExcludedPaths))
+		for i := 0; i < len(src.ExcludedPaths); i++ {
+			excludedPaths[i] = authentication.MatchExpression{ExprType: string(src.ExcludedPaths[i].ExprType), Value: src.ExcludedPaths[i].Value}
+		}
+		res.ExcludedPaths = excludedPaths
+	}
+
+	return res
 }
 
 func toMetaDto(api *kymaApi.Api) meta.Dto {

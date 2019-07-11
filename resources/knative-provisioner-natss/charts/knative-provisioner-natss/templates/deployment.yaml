@@ -19,38 +19,28 @@ kind: ClusterRole
 metadata:
   name: natss-controller
 rules:
-  - apiGroups:
-      - eventing.knative.dev
-    resources:
-      - channels
-      - channels/status
-      - clusterchannelprovisioners
-      - clusterchannelprovisioners/status
-    verbs:
-      - get
-      - list
-      - watch
-      - update
-  - apiGroups:
-      - "" # Core API group.
-    resources:
-      - services
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-  - apiGroups:
-      - networking.istio.io
-    resources:
-      - virtualservices
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
+- apiGroups:
+  - eventing.knative.dev
+  resources:
+  - channels
+  - channels/status
+  - clusterchannelprovisioners
+  - clusterchannelprovisioners/status
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
 
 ---
 
@@ -59,14 +49,14 @@ kind: ClusterRoleBinding
 metadata:
   name: natss-channel-controller
   namespace: knative-eventing
-subjects:
-  - kind: ServiceAccount
-    name: natss-controller
-    namespace: knative-eventing
 roleRef:
+  apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: natss-controller
-  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: natss-controller
+  namespace: knative-eventing
 
 ---
 
@@ -79,39 +69,41 @@ spec:
   replicas: 1
   selector:
     matchLabels: &labels
+      app: natss-controller
       clusterChannelProvisioner: natss
       role: controller
-      app: natss-controller
   template:
     metadata:
-      labels: 
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
         <<: *labels
         rand: {{ randAlpha 6 }}
     spec:
-      serviceAccountName: natss-controller
       containers:
-        - name: controller
-          image: {{ .Values.controller.image.location }}
-          imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
-          env:
-          - name: SYSTEM_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: EB_USER
-            valueFrom:
-              secretKeyRef:
-                name: nats-user-eventbus
-                key: username
-          - name: EB_PASS
-            valueFrom:
-              secretKeyRef:
-                name: nats-user-eventbus
-                key: password
-          - name: DEFAULT_CLUSTER_ID
-            value: kyma-nats-streaming
-          - name: DEFAULT_NATSS_URL
-            value: nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
+      - image: {{ .Values.controller.image.location }}
+        imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+        name: controller
+        env:
+        - name: EB_USER
+          valueFrom:
+            secretKeyRef:
+              name: nats-user-eventbus
+              key: username
+        - name: EB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: nats-user-eventbus
+              key: password
+        - name: DEFAULT_CLUSTER_ID
+          value: kyma-nats-streaming
+        - name: DEFAULT_NATSS_URL
+          value: nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
+        - name: SYSTEM_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+      serviceAccountName: natss-controller
 
 ---
 
@@ -129,21 +121,21 @@ metadata:
   name: natss-dispatcher
   namespace: knative-eventing
 rules:
-  - apiGroups:
-      - eventing.knative.dev
-    resources:
-      - channels
-    verbs:
-      - get
-      - list
-      - watch
-      - update
-  - apiGroups:
-    - eventing.knative.dev
-    resources:
-    - channels/finalizers
-    verbs:
-    - update
+- apiGroups:
+  - eventing.knative.dev
+  resources:
+  - channels
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+- apiGroups:
+  - eventing.knative.dev
+  resources:
+  - channels/finalizers
+  verbs:
+  - update
 
 ---
 
@@ -152,14 +144,47 @@ kind: ClusterRoleBinding
 metadata:
   name: natss-dispatcher
   namespace: knative-eventing
-subjects:
-  - kind: ServiceAccount
-    name: natss-dispatcher
-    namespace: knative-eventing
 roleRef:
+  apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: natss-dispatcher
+subjects:
+- kind: ServiceAccount
+  name: natss-dispatcher
+  namespace: knative-eventing
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: natss-dispatcher
+  namespace: knative-eventing
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: natss-channel-dispatcher
+  namespace: knative-eventing
+roleRef:
   apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: natss-dispatcher
+subjects:
+- kind: ServiceAccount
+  name: natss-dispatcher
+  namespace: knative-eventing
 
 ---
 
@@ -179,7 +204,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
-      labels: 
+      labels:
         <<: *labels
         rand: {{ randAlpha 6 }}
     spec:
@@ -207,4 +232,3 @@ spec:
             value: kyma-nats-streaming
           - name: DEFAULT_NATSS_URL
             value: nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
-          

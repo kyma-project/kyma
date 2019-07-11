@@ -3,6 +3,7 @@ package assetstore
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload"
@@ -15,7 +16,6 @@ import (
 const (
 	docTopicDisplayNameFormat = "Documentation topic for service class id=%s"
 	docTopicDescriptionFormat = "Documentation topic for service class id=%s"
-	specRequestTimeout        = time.Duration(5 * time.Second)
 )
 
 const (
@@ -40,11 +40,11 @@ type service struct {
 	downloadClient      download.Client
 }
 
-func NewService(repository DocsTopicRepository, uploadClient upload.Client, insecureAssetDownload bool) Service {
+func NewService(repository DocsTopicRepository, uploadClient upload.Client, insecureAssetDownload bool, assetstoreRequestTimeout int) Service {
 	downloadClient := download.NewClient(&http.Client{
-		Timeout:   specRequestTimeout,
+		Timeout:   time.Duration(assetstoreRequestTimeout) * time.Second,
 		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureAssetDownload}},
-	})
+	}, authorization.NewStrategyFactory(authorization.FactoryConfiguration{OAuthClientTimeout: assetstoreRequestTimeout}))
 
 	return &service{
 		docsTopicRepository: repository,
@@ -172,12 +172,12 @@ func (s service) processSpec(content []byte, filename, fileKey string, docsTopic
 func (s service) getApiSpec(entry docstopic.Entry) ([]byte, apperrors.AppError) {
 	url, found := entry.Urls[docstopic.KeyOpenApiSpec]
 	if found {
-		return s.downloadClient.Fetch(url)
+		return s.downloadClient.Fetch(url, nil, nil)
 	}
 
 	url, found = entry.Urls[docstopic.KeyODataSpec]
 	if found {
-		return s.downloadClient.Fetch(url)
+		return s.downloadClient.Fetch(url, nil, nil)
 	}
 
 	return nil, nil
@@ -186,7 +186,7 @@ func (s service) getApiSpec(entry docstopic.Entry) ([]byte, apperrors.AppError) 
 func (s service) getSpec(entry docstopic.Entry, key string) ([]byte, apperrors.AppError) {
 	url, found := entry.Urls[key]
 	if found {
-		return s.downloadClient.Fetch(url)
+		return s.downloadClient.Fetch(url, nil, nil)
 	}
 
 	return nil, nil

@@ -24,7 +24,8 @@ func InitEventSender(clientProvider httptools.HTTPClientProvider, requestProvide
 }
 
 // SendEvent sends the incoming request to the Sender
-func SendEvent(req *api.SendEventParameters, traceHeaders *map[string]string) (*api.SendEventResponse, error) {
+func SendEvent(apiVersion string, req interface{}, traceHeaders *map[string]string,
+	forwardHeaders *map[string][]string) (*api.SendEventResponse, error) {
 	body := new(bytes.Buffer)
 	json.NewEncoder(body).Encode(req)
 	httpReq, err := httpRequestProvider(http.MethodPost, "", body)
@@ -32,16 +33,24 @@ func SendEvent(req *api.SendEventParameters, traceHeaders *map[string]string) (*
 		return nil, err
 	}
 
-	headers := make(http.Header)
-	headers.Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJSONWithCharset)
-	httpReq.Header = headers
+	var reqURL *url.URL
 
-	reqURL, err := url.ParseRequestURI(eventsTargetURL)
+	switch apiVersion {
+	case "v1":
+		reqURL, err = url.ParseRequestURI(eventsTargetURLV1)
+	case "v2":
+		reqURL, err = url.ParseRequestURI(eventsTargetURLV2)
+	}
+
 	if err != nil {
 		return nil, err
 	}
-
 	httpReq.URL = reqURL
+
+	headers := make(http.Header)
+	headers = *forwardHeaders
+	headers.Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJSONWithCharset)
+	httpReq.Header = headers
 	httpReq.Header.Add(httpconsts.HeaderXForwardedFor, httpReq.Host)
 	httpReq.Header.Del(httpconsts.HeaderConnection)
 
@@ -51,6 +60,7 @@ func SendEvent(req *api.SendEventParameters, traceHeaders *map[string]string) (*
 	if err != nil {
 		return nil, err
 	}
+
 	defer resp.Body.Close()
 
 	response := api.SendEventResponse{}
@@ -60,7 +70,6 @@ func SendEvent(req *api.SendEventParameters, traceHeaders *map[string]string) (*
 		if err != nil {
 			return nil, err
 		}
-
 		result := &api.PublishResponse{}
 
 		err = json.Unmarshal(body, result)

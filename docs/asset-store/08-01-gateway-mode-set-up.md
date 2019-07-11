@@ -88,8 +88,10 @@ metadata:
 data:
   minio.persistence.enabled: "false"
   minio.gcsgateway.enabled: "true"
-  minio.defaultBucket.enabled: "false"
   minio.gcsgateway.projectId: "$PROJECT"
+  minio.DeploymentUpdate.type: RollingUpdate
+  minio.DeploymentUpdate.maxSurge: "0"
+  minio.DeploymentUpdate.maxUnavailable: "50%"
 EOF
 ```
 >**CAUTION:** When you install Kyma locally from sources, you need to manually add the ConfigMap and the Secret to the `installer-config-local.yaml.tpl` template located under the `installation/resources` subfolder before you run the installation script.

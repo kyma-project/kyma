@@ -18,7 +18,7 @@ entries:
       description: Redis service
       version: 0.0.1
 `
-	dto := indexDTO{}
+	dto := IndexDTO{}
 	// WHEN
 	err := yaml.Unmarshal([]byte(data), &dto)
 

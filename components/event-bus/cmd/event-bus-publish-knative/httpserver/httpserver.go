@@ -11,11 +11,13 @@ import (
 	"time"
 )
 
-type HttpServer struct {
+// HTTPServer encapsulates an http.Server.
+type HTTPServer struct {
 	server *http.Server
 }
 
-func NewHttpServer(port *int, handler *http.Handler) *HttpServer {
+// NewHTTPServer creates a new HTTPServer instance.
+func NewHTTPServer(port *int, handler *http.Handler) *HTTPServer {
 	if port == nil {
 		log.Println("cannot create HTTP server the port is missing")
 		return nil
@@ -30,11 +32,12 @@ func NewHttpServer(port *int, handler *http.Handler) *HttpServer {
 		Handler: *handler,
 	}
 
-	httpServer := HttpServer{server: server}
+	httpServer := HTTPServer{server: server}
 	return &httpServer
 }
 
-func (h *HttpServer) Start() {
+// Start HTTPServer
+func (h *HTTPServer) Start() {
 	if h.server == nil {
 		log.Println("cannot start a nil HTTP server")
 		return
@@ -45,7 +48,8 @@ func (h *HttpServer) Start() {
 	}
 }
 
-func (h *HttpServer) Shutdown(timeout time.Duration) {
+// Shutdown HTTPServer
+func (h *HTTPServer) Shutdown(timeout time.Duration) {
 	if h.server == nil {
 		log.Println("cannot shutdown a nil HTTP server")
 		return

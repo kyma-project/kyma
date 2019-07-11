@@ -19,32 +19,29 @@ global:
   istio:
     gateway:
       name: kyma-gateway
-  etcdBackup:
-    enabled: false
-    secretName: etcd-backup-abs-credentials
   acceptance_tests:
-    dir: develop/
-    version: "cb16ab4c"
+    dir: pr/
+    version: "PR-4615"
   ui_acceptance_tests:
     dir:
-    version: "d1e8904d"
+    version: "34b9d204"
   api_controller:
-    dir: develop/
-    version: "1323f962"
-  api_controller_acceptance_tests:
-    dir: develop/
-    version: 736988df
+    dir: pr/
+    version: "PR-4582"
+  api_controller_integration_tests:
+    dir: pr/
+    version: "PR-4822"
     testNamespace: api-controller-tests
   apiserver_proxy:
+    dir: pr/
+    version: "PR-4831"
+  iam_kubeconfig_service:
     dir: develop/
-    version: "962ad9b6"
-  configurations_generator:
-    dir: develop/
-    version: aabedc33
+    version: 2a1a064b
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
-    # Example: clusterDocsTopicsVersion: "0.9.0"
+    # Example: clusterDocsTopicsVersion: "release-0.9"
     clusterDocsTopicsVersion: master
   namespace_controller:
     dir: develop/
@@ -55,21 +52,21 @@ global:
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
-  test_apiserver_proxy:
-    dir: develop/
-    version: 5c4376db
+  apiserver_proxy_integration_tests:
+    dir: pr/
+    version: PR-4837
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
     dir: develop/
-    version: 48aaeb72
+    version: b3441db9
   console_backend_service_test:
     dir: develop/
-    version: 48aaeb72
-  cluster_users_test:
-    dir: develop/
-    version: 3d94e9d8
+    version: b3441db9
+  cluster_users_integration_tests:
+    dir: pr/
+    version: PR-4837
   xip_patch:
     dir: develop/
     version: "d20b1c29"

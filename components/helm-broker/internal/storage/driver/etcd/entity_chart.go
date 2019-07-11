@@ -40,7 +40,7 @@ type Chart struct {
 // If chart already exists in storage than full replace is performed.
 //
 // Replace is set to true if chart already existed in storage and was replaced.
-func (s *Chart) Upsert(c *chart.Chart) (replaced bool, err error) {
+func (s *Chart) Upsert(namespace internal.Namespace, c *chart.Chart) (replaced bool, err error) {
 	nv, err := s.nameVersionFromChart(c)
 	if err != nil {
 		return false, err
@@ -51,7 +51,7 @@ func (s *Chart) Upsert(c *chart.Chart) (replaced bool, err error) {
 		return false, errors.Wrap(err, "while encoding DSO")
 	}
 
-	resp, err := s.kv.Put(context.TODO(), s.key(nv), string(data), clientv3.WithPrevKV())
+	resp, err := s.kv.Put(context.TODO(), s.key(namespace, nv), string(data), clientv3.WithPrevKV())
 	if err != nil {
 		return false, errors.Wrap(err, "while calling database")
 	}
@@ -64,13 +64,13 @@ func (s *Chart) Upsert(c *chart.Chart) (replaced bool, err error) {
 }
 
 // Get returns chart with given name and version from storage
-func (s *Chart) Get(name internal.ChartName, ver semver.Version) (*chart.Chart, error) {
+func (s *Chart) Get(namespace internal.Namespace, name internal.ChartName, ver semver.Version) (*chart.Chart, error) {
 	nv, err := s.nameVersion(name, ver)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := s.kv.Get(context.TODO(), s.key(nv))
+	resp, err := s.kv.Get(context.TODO(), s.key(namespace, nv))
 	if err != nil {
 		return nil, errors.Wrap(err, "while calling database")
 	}
@@ -92,13 +92,13 @@ func (s *Chart) Get(name internal.ChartName, ver semver.Version) (*chart.Chart, 
 }
 
 // Remove is removing chart with given name and version from storage
-func (s *Chart) Remove(name internal.ChartName, ver semver.Version) error {
+func (s *Chart) Remove(namespace internal.Namespace, name internal.ChartName, ver semver.Version) error {
 	nv, err := s.nameVersion(name, ver)
 	if err != nil {
 		return errors.Wrap(err, "while getting nameVersion from deleted entity")
 	}
 
-	resp, err := s.kv.Delete(context.TODO(), s.key(nv))
+	resp, err := s.kv.Delete(context.TODO(), s.key(namespace, nv))
 	if err != nil {
 		return errors.Wrap(err, "while calling database")
 	}
@@ -142,9 +142,15 @@ func (*Chart) nameVersion(name internal.ChartName, ver semver.Version) (k chartN
 		return k, errors.New("both name and version must be set")
 	}
 
-	return chartNameVersion(fmt.Sprintf("%s|%s", name, ver.String())), nil
+	return chartNameVersion(fmt.Sprintf("%s|%s", name, ver.Original())), nil
 }
 
-func (*Chart) key(nv chartNameVersion) string {
-	return string(nv)
+func (*Chart) key(namespace internal.Namespace, nv chartNameVersion) string {
+	prefix := ""
+	if namespace == internal.ClusterWide {
+		prefix = "cluster"
+	} else {
+		prefix = fmt.Sprintf("ns|%s", string(namespace))
+	}
+	return fmt.Sprintf("%s|%s", prefix, string(nv))
 }

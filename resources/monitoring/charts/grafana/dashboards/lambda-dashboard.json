@@ -959,7 +959,7 @@
                 "multi": false,
                 "name": "environment",
                 "options": [],
-                "query": "label_values(kube_namespace_labels{label_env=\"true\"},namespace)",
+                "query": "label_values(kube_namespace_labels{label_istio_injection=\"enabled\"},namespace)",
                 "refresh": 1,
                 "regex": "",
                 "sort": 1,

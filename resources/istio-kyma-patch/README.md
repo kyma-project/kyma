@@ -1,13 +1,10 @@
 # Istio Kyma patch
 
-## Overview
-
 This chart packs the [patch script](../../components/istio-kyma-patch/README.md) as a Kubernetes job.
 
-By default, following changes are applied:
- * The `policies.authentication.istio.io` CRD is required. This means that security in Istio must be enabled.
- * Configuration of the [sidecar injector](../../components/istio-kyma-patch/README.md).
- * The Egressgateway, Ingressgateway, policy, and telemetry are configured to use Zipkin from the `kyma-system` Namespace.
- * Monitoring and tracing related resources are deleted.
- * Sidecar injection is enabled in all Namespaces, except those labeled with `istio-injection: disabled`.
- * A DestinationRule CR disabling mTLS for requests to Helm Tiller.
+The Istio Kyma patch job runs and checks if the detected Istio deployment meets the following criteria:
+  - A specific version of Istio is installed. The required version is defined in the [`values` file](https://github.com/kyma-project/kyma/blob/master/resources/istio-kyma-patch/values.yaml#L11) of the patch.
+  - Mutual TLS (mTLS) policy is enabled and set to `strict`.
+  - [Istio policy enforcement](https://istio.io/docs/tasks/policy-enforcement/enabling-policy/) is enabled. 
+  - Automatic sidecar injection is enabled.
+  - Istio `policies.authentication.istio.io` CustomResourceDefinition (CRD) is present in the system.

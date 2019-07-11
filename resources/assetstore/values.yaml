@@ -5,8 +5,8 @@ global:
     gateway:
       name: kyma-gateway
   asset_store_controller_manager:
-    dir: develop/
-    version: '826f42db'
+    dir: pr/
+    version: 'PR-4713'
   asset_upload_service:
     dir: develop/
     version: '826f42db'
@@ -25,6 +25,9 @@ global:
     version: 'v20190325-ff66a3a'
 
 minio:
+  image:
+    tag: RELEASE.2019-06-04T01-15-58Z
+
   persistence:
     enabled: true
     size: 10Gi
@@ -43,10 +46,7 @@ minio:
     MINIO_BROWSER: "off"
   
   defaultBucket:
-    enabled: true
-    name: content
-    policy: download
-    pruge: false
+    enabled: false
   
   resources:
     requests:
@@ -55,3 +55,6 @@ minio:
     limits:
       memory: 128Mi
       cpu: 100m
+
+  gcsgateway:
+    replicas: 2

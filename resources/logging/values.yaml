@@ -9,7 +9,12 @@ serviceAccount:
   create: true
   name:
 
+# enable tracing for debug, need install jaeger and specify right jaeger_agent_host
+tracing:
+  jaegerAgentHost:
+
 loki:
+  podManagementPolicy: OrderedReady
   nameOverride: loki
   replicas: 1
   minReadySeconds: 0
@@ -18,13 +23,32 @@ loki:
   port: 3100
   fullnameOverride: logging
 
+  updateStrategy:
+    type: RollingUpdate
+
+  podLabels: {}
+
+  securityContext:
+    fsGroup: 10001
+    runAsGroup: 10001
+    runAsNonRoot: true
+    runAsUser: 10001
+
+  extraArgs: {}
+    # log.level: debug
+
   image:
     repository: grafana/loki
-    tag: master-ed94502
+    tag: v0.1.0
     pullPolicy: Always # Always pull while in BETA
 
+  # user: user
+  # password: pass
   service:
     port: 3100
+    scheme: http
+    #user: user
+    #password: pass
     annotations:
       auth.istio.io/3100: NONE
     #  prometheus.io/scrape: "true"
@@ -103,24 +127,48 @@ loki:
   config:
     auth_enabled: false
     ingester:
+      chunk_idle_period: 15m
+      chunk_block_size: 262144
       lifecycler:
         address: 127.0.0.1
         ring:
-          store: inmemory
+          kvstore:
+            store: inmemory
           replication_factor: 1
-    schema_configs:
-      - from: 0
-        store: boltdb
-        object_store: filesystem
-        schema: v9
-        index:
-          prefix: index_
-          period: 168h
+        ## Different ring configs can be used. E.g. Consul
+        # ring:
+        #   store: consul
+        #   replication_factor: 1
+        #   consul:
+        #     host: "consul:8500"
+        #     prefix: ""
+        #     httpclienttimeout: "20s"
+        #     consistentreads: true
+    limits_config:
+      enforce_metric_name: false
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h
+    schema_config:
+      configs:
+        - from: 2018-04-15
+          store: boltdb
+          object_store: filesystem
+          schema: v9
+          index:
+            prefix: index_
+            period: 168h
+    server:
+      http_listen_port: 3100
     storage_config:
       boltdb:
         directory: /data/loki/index
       filesystem:
         directory: /data/loki/chunks
+    chunk_store_config:
+      max_look_back_period: 0
+    table_manager:
+      retention_deletes_enabled: false
+      retention_period: 0
 
 promtail:
 
@@ -131,7 +179,7 @@ promtail:
 
   image:
     repository: grafana/promtail
-    tag: master-0d4131c
+    tag: v0.1.0
     pullPolicy: Always # Always pull while in BETA
 
   volumes:
@@ -149,9 +197,17 @@ promtail:
       mountPath: /var/lib/docker/containers
       readOnly: true
 
-  readinessProbe: null
+  readinessProbe:
+    failureThreshold: 5
+    httpGet:
+      path: /ready
+      port: http-metrics
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 1
 
-  livenessProbe: null
+  livenessProbe: {}
 
   resources:
     limits:
@@ -161,14 +217,28 @@ promtail:
       cpu: 100m
       memory: 128Mi
 
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsGroup: 0
+    runAsUser: 0
+
+  # This should match config.server.http_listen_port
+  port: 3101
+
+  ## Pod Labels
+  podLabels: {}
+
+  ## Assign a PriorityClassName to pods if set
+  # priorityClassName:
+
   ## Pod Annotations
   podAnnotations:
-  #  prometheus.io/scrape: "true"
-  #  prometheus.io/port: "http-metrics"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "http-metrics"
   #For pods running sidecars w/o service there's a problem with envoy readiness probe.
   #Details https://github.com/istio/istio/issues/9504#issuecomment-439432130
-    status.sidecar.istio.io/port: "0"
-    
+    readiness.status.sidecar.istio.io/applicationPorts: ""
+
   ## Deployment annotations
   annotations: {}
 
@@ -192,7 +262,40 @@ promtail:
   ##
   affinity: {}
 
+  pipelineStages:
+  - docker: {}
 
+  # Custom scrape_configs to override the default ones in the configmap
+  scrapeConfigs: []
+
+  config:
+    client:
+      # Maximum wait period before sending batch
+      batchwait: 1s
+      # Maximum batch size to accrue before sending, unit is byte
+      batchsize: 102400
+
+      # Maximum time to wait for server to respond to a request
+      timeout: 10s
+
+      backoff_config:
+        # Initial backoff time between retries
+        minbackoff: 100ms
+        # Maximum backoff time between retries
+        maxbackoff: 5s
+        # Maximum number of retires when sending batches, 0 means infinite retries
+        maxretries: 5
+
+      # The labels to add to any time series or alerts when communicating with loki
+      external_labels: {}
+
+    server:
+      http_listen_port: 3101
+    positions:
+      filename: /run/promtail/positions.yaml
+    target_config:
+      # Period to resync directories being watched and files being tailed
+      sync_period: 10s
 
 global:
   containerRegistry:
@@ -203,8 +306,8 @@ global:
   logging:
     promtail:
       config:
-        name:
+        name: promtail-k8s-1-14.yaml
 test:
   image:
     name: test-logging
-    
+

@@ -4,17 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"sync"
 
+	jsonhash "github.com/komkom/go-jsonhash"
+	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
-
-	"net/http"
-
-	jsonhash "github.com/komkom/go-jsonhash"
-	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
 
 const addonsRepositoryURLName = "addonsRepositoryURL"
@@ -81,7 +79,7 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 	// bundleID is in 1:1 match with serviceID (from service catalog)
 	svcID := internal.ServiceID(req.ServiceID)
 	bundleID := internal.BundleID(svcID)
-	bundle, err := svc.bundleIDGetter.GetByID(bundleID)
+	bundle, err := svc.bundleIDGetter.GetByID(osbCtx.BrokerNamespace, bundleID)
 	if err != nil {
 		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting bundle: %v", err))}
 	}
@@ -141,6 +139,7 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 		instanceID:          iID,
 		operationID:         opID,
 		namespace:           namespace,
+		brokerNamespace:     osbCtx.BrokerNamespace,
 		releaseName:         releaseName,
 		bundlePlan:          bundlePlan,
 		isBundleBindable:    bundle.Bindable,
@@ -163,6 +162,7 @@ type provisioningInput struct {
 	instanceID          internal.InstanceID
 	operationID         internal.OperationID
 	namespace           internal.Namespace
+	brokerNamespace     internal.Namespace
 	releaseName         internal.ReleaseName
 	bundlePlan          internal.BundlePlan
 	isBundleBindable    bool
@@ -181,7 +181,7 @@ func (svc *provisionService) doAsync(ctx context.Context, input provisioningInpu
 func (svc *provisionService) do(ctx context.Context, input provisioningInput) {
 
 	fDo := func() (*rls.InstallReleaseResponse, error) {
-		c, err := svc.chartGetter.Get(input.bundlePlan.ChartRef.Name, input.bundlePlan.ChartRef.Version)
+		c, err := svc.chartGetter.Get(input.brokerNamespace, input.bundlePlan.ChartRef.Name, input.bundlePlan.ChartRef.Version)
 		if err != nil {
 			return nil, errors.Wrap(err, "while getting chart from storage")
 		}

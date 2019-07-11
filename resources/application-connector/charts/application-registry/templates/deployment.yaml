@@ -34,7 +34,10 @@ spec:
           - "--namespace={{ .Values.global.namespace }}"
           - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
           - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
+          - "--specRequestTimeout={{ .Values.deployment.args.specRequestTimeout }}"
+          - "--assetstoreRequestTimeout={{ .Values.deployment.args.assetstoreRequestTimeout }}"
           - "--insecureAssetDownload={{ .Values.deployment.args.insecureAssetDownload }}"
+          - "--insecureSpecDownload={{ .Values.deployment.args.insecureSpecDownload }}"
         ports:
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port

@@ -34,21 +34,30 @@ type ErrorResponse struct {
 }
 
 type API struct {
-	TargetUrl        string               `json:"targetUrl"`
-	Credentials      *Credentials         `json:"credentials,omitempty"`
-	Spec             json.RawMessage      `json:"spec,omitempty"`
-	SpecificationUrl string               `json:"specificationUrl,omitempty"`
-	ApiType          string               `json:"apiType"`
-	Headers          *map[string][]string `json:"headers,omitempty"`
-	QueryParameters  *map[string][]string `json:"queryParameters,omitempty"`
+	TargetUrl                      string               `json:"targetUrl"`
+	Credentials                    *CredentialsWithCSRF `json:"credentials,omitempty"`
+	Spec                           json.RawMessage      `json:"spec,omitempty"`
+	SpecificationUrl               string               `json:"specificationUrl,omitempty"`
+	ApiType                        string               `json:"apiType"`
+	RequestParameters              *RequestParameters   `json:"requestParameters"`
+	SpecificationCredentials       *Credentials         `json:"specificationCredentials"`
+	SpecificationRequestParameters *RequestParameters   `json:"specificationRequestParameters"`
+}
+
+type RequestParameters struct {
+	Headers         *map[string][]string `json:"headers,omitempty"`
+	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
+}
+
+type CredentialsWithCSRF struct {
+	Oauth          *Oauth          `json:"oauth,omitempty"`
+	Basic          *Basic          `json:"basic,omitempty"`
+	CertificateGen *CertificateGen `json:"certificateGen,omitempty"`
 }
 
 type Credentials struct {
-	Oauth           *Oauth               `json:"oauth,omitempty"`
-	Basic           *Basic               `json:"basic,omitempty"`
-	CertificateGen  *CertificateGen      `json:"certificateGen,omitempty"`
-	Headers         *map[string][]string `json:"headers,omitempty"`
-	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
+	Oauth *Oauth `json:"oauth,omitempty"`
+	Basic *Basic `json:"basic,omitempty"`
 }
 
 type Oauth struct {
@@ -84,9 +93,15 @@ type DocsObject struct {
 	Source string `json:"source"`
 }
 
+func (api *API) WithAPISpecURL(specURL string) *API {
+	api.SpecificationUrl = specURL
+
+	return api
+}
+
 func (api *API) WithBasicAuth(username, password string) *API {
 	if api.Credentials == nil {
-		api.Credentials = &Credentials{}
+		api.Credentials = &CredentialsWithCSRF{}
 	}
 
 	api.Credentials.Basic = &Basic{
@@ -99,7 +114,7 @@ func (api *API) WithBasicAuth(username, password string) *API {
 
 func (api *API) WithOAuth(url, clientID, clientSecret string) *API {
 	if api.Credentials == nil {
-		api.Credentials = &Credentials{}
+		api.Credentials = &CredentialsWithCSRF{}
 	}
 
 	api.Credentials.Oauth = &Oauth{
@@ -112,13 +127,60 @@ func (api *API) WithOAuth(url, clientID, clientSecret string) *API {
 }
 
 func (api *API) WithCustomHeaders(headers *map[string][]string) *API {
-	api.Headers = headers
+	api.RequestParameters = &RequestParameters{
+		Headers: headers,
+	}
+
+	return api
+}
+
+func (api *API) WithOAuthSecuredSpec(oauthURL, clientID, clientSecret string) *API {
+	if api.SpecificationCredentials == nil {
+		api.SpecificationCredentials = &Credentials{}
+	}
+
+	api.SpecificationCredentials.Oauth = &Oauth{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		URL:          oauthURL,
+	}
+
+	return api
+}
+
+func (api *API) WithCustomHeadersSpec(headers *map[string][]string) *API {
+	api.SpecificationRequestParameters = &RequestParameters{
+		Headers: headers,
+	}
 
 	return api
 }
 
 func (api *API) WithCustomQueryParams(queryParams *map[string][]string) *API {
-	api.QueryParameters = queryParams
+	api.RequestParameters = &RequestParameters{
+		QueryParameters: queryParams,
+	}
+
+	return api
+}
+
+func (api *API) WithCustomQueryParamsSpec(queryParams *map[string][]string) *API {
+	api.SpecificationRequestParameters = &RequestParameters{
+		QueryParameters: queryParams,
+	}
+
+	return api
+}
+
+func (api *API) WithBasicAuthSecuredSpec(username, password string) *API {
+	if api.SpecificationCredentials == nil {
+		api.SpecificationCredentials = &Credentials{}
+	}
+
+	api.SpecificationCredentials.Basic = &Basic{
+		Username: username,
+		Password: password,
+	}
 
 	return api
 }

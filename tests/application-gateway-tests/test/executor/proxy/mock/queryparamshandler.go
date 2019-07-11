@@ -3,34 +3,55 @@ package mock
 import (
 	"net/http"
 
+	"github.com/pkg/errors"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/mux"
 )
 
-type headersHandler struct {
+type queryParamsHandler struct {
 	logger *log.Entry
 }
 
-func NewHeadersHandler() *headersHandler {
-	return &headersHandler{
-		logger: log.WithField("Handler", "Headers"),
+func NewQueryParamsHandler() *queryParamsHandler {
+	return &queryParamsHandler{
+		logger: log.WithField("Handler", "QueryParams"),
 	}
 }
 
-func (h *headersHandler) RequestHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	expectedHeader := vars["header"]
-	expectedHeaderValue := vars["value"]
-	h.logger.Infof("Handling request. Expected: param: %s, with value: %s", expectedHeader, expectedHeaderValue)
+func (qph *queryParamsHandler) QueryParamsHandler(w http.ResponseWriter, r *http.Request) {
+	err := qph.checkQueryParams(r)
+	if err != nil {
+		qph.logger.Errorf(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
 
-	headerValue := r.Header.Get(expectedHeader)
-
-	if expectedHeaderValue != headerValue {
-		h.logger.Errorf("Invalid header value provided")
+func (qph *queryParamsHandler) QueryParamsHandlerSpec(w http.ResponseWriter, r *http.Request) {
+	err := qph.checkQueryParams(r)
+	if err != nil {
+		qph.logger.Errorf(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	successResponse(w)
+	http.ServeFile(w, r, "spec.json")
+}
+
+func (qph *queryParamsHandler) checkQueryParams(r *http.Request) error {
+	vars := mux.Vars(r)
+	expectedParam := vars["param"]
+	expectedParamValue := vars["value"]
+	qph.logger.Infof("Handling request. Expected: param: %s, with value: %s", expectedParam, expectedParamValue)
+
+	paramValue := r.URL.Query().Get(expectedParam)
+
+	if expectedParamValue != paramValue {
+		return errors.New("Invalid query parameter value provided")
+	}
+
+	return nil
 }

@@ -7,13 +7,15 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/httptools"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/httptools"
 	log "github.com/sirupsen/logrus"
 )
 
-func makeProxy(targetUrl string, headers *map[string][]string, queryParameters *map[string][]string, id string, skipVerify bool) (*httputil.ReverseProxy, apperrors.AppError) {
+func makeProxy(targetUrl string, requestParameters *authorization.RequestParameters, id string, skipVerify bool) (*httputil.ReverseProxy, apperrors.AppError) {
 	target, err := url.Parse(targetUrl)
 	if err != nil {
 		log.Errorf("failed to parse target url '%s': '%s'", targetUrl, err.Error())
@@ -35,8 +37,12 @@ func makeProxy(targetUrl string, headers *map[string][]string, queryParameters *
 			req.URL.RawQuery = targetQuery + "&" + req.URL.RawQuery
 		}
 
-		setCustomQueryParameters(req.URL, queryParameters)
-		setCustomHeaders(req.Header, headers)
+		if requestParameters != nil {
+			setCustomQueryParameters(req.URL, requestParameters.QueryParameters)
+			setCustomHeaders(req.Header, requestParameters.Headers)
+		}
+
+		removeForbiddenHeaders(req.Header)
 
 		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
 	}
@@ -66,6 +72,13 @@ func setCustomQueryParameters(reqURL *url.URL, customQueryParams *map[string][]s
 	httptools.SetQueryParameters(reqURL, customQueryParams)
 }
 
+func removeForbiddenHeaders(reqHeaders http.Header) {
+	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedProto)
+	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedFor)
+	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedHost)
+	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedClientCert)
+}
+
 func setCustomHeaders(reqHeaders http.Header, customHeaders *map[string][]string) {
 	if _, ok := reqHeaders[httpconsts.HeaderUserAgent]; !ok {
 		// explicitly disable User-Agent so it's not set to default value
@@ -73,9 +86,4 @@ func setCustomHeaders(reqHeaders http.Header, customHeaders *map[string][]string
 	}
 
 	httptools.SetHeaders(reqHeaders, customHeaders)
-
-	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedProto)
-	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedFor)
-	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedHost)
-	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedClientCert)
 }

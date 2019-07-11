@@ -12,7 +12,7 @@ import (
 )
 
 type SecuredConnectorClient interface {
-	GetMgmInfo(t *testing.T, url string, headers map[string]string) (*ManagementInfoResponse, *Error)
+	GetMgmInfo(t *testing.T, url string) (*ManagementInfoResponse, *Error)
 	RenewCertificate(t *testing.T, url string, csr string) (*CrtResponse, *Error)
 	RevokeCertificate(t *testing.T, url string) *Error
 }
@@ -51,8 +51,8 @@ func NewTLSClientWithCert(skipVerify bool, key *rsa.PrivateKey, certificate ...[
 	}
 }
 
-func (cc securedConnectorClient) GetMgmInfo(t *testing.T, url string, headers map[string]string) (*ManagementInfoResponse, *Error) {
-	request := getRequestWithHeaders(t, url, headers)
+func (cc securedConnectorClient) GetMgmInfo(t *testing.T, url string) (*ManagementInfoResponse, *Error) {
+	request := getRequestWithHeaders(t, url)
 
 	var mgmInfoResponse ManagementInfoResponse
 	errorResp := cc.secureConnectorRequest(t, request, &mgmInfoResponse, http.StatusOK)
@@ -99,4 +99,3 @@ func (cc securedConnectorClient) secureConnectorRequest(t *testing.T, request *h
 
 	return nil
 }
-

@@ -11,13 +11,11 @@ import (
 )
 
 type ServiceCatalogConfigurerConfig struct {
-	TestBundle    configurer.TestBundleConfig
 	ServiceBroker configurer.ServiceBrokerConfig
 }
 
 type ServiceCatalogConfigurer struct {
 	nsConfigurer     *configurer.NamespaceConfigurer
-	bundleConfigurer *configurer.TestBundleConfigurer
 	brokerConfigurer *configurer.ServiceBrokerConfigurer
 }
 
@@ -40,8 +38,6 @@ func NewServiceCatalogConfigurer(namespace string, registerServiceBroker bool) (
 
 	nsConfigurer := configurer.NewNamespace(namespace, coreCli)
 
-	bundleConfigurer := configurer.NewTestBundle(cfg.TestBundle, coreCli, svcatCli)
-
 	var brokerConfigurer *configurer.ServiceBrokerConfigurer
 	if registerServiceBroker {
 		cfg.ServiceBroker.Namespace = namespace
@@ -49,7 +45,6 @@ func NewServiceCatalogConfigurer(namespace string, registerServiceBroker bool) (
 	}
 
 	return &ServiceCatalogConfigurer{
-		bundleConfigurer: bundleConfigurer,
 		nsConfigurer:     nsConfigurer,
 		brokerConfigurer: brokerConfigurer,
 	}, nil
@@ -61,16 +56,6 @@ func (c *ServiceCatalogConfigurer) Setup() error {
 	err := c.nsConfigurer.Create()
 	if err != nil {
 		return errors.Wrap(err, "while creating namespace")
-	}
-
-	err = c.bundleConfigurer.Configure()
-	if err != nil {
-		return errors.Wrap(err, "while configuring test bundle")
-	}
-
-	err = c.bundleConfigurer.WaitForTestBundleReady()
-	if err != nil {
-		return errors.Wrap(err, "while waiting for test bundle ready")
 	}
 
 	if c.brokerConfigurer != nil {
@@ -91,20 +76,13 @@ func (c *ServiceCatalogConfigurer) Setup() error {
 func (c *ServiceCatalogConfigurer) Cleanup() error {
 	log.Println("Cleaning up...")
 
-	err := c.bundleConfigurer.Cleanup()
-	if err != nil {
-		return errors.Wrap(err, "while cleaning up test bundle configuration")
-	}
-
 	if c.brokerConfigurer != nil {
-		err = c.brokerConfigurer.Delete()
-		if err != nil {
+		if err := c.brokerConfigurer.Delete(); err != nil {
 			return errors.Wrap(err, "while deleting ServiceBroker")
 		}
 	}
 
-	err = c.nsConfigurer.Delete()
-	if err != nil {
+	if err := c.nsConfigurer.Delete(); err != nil {
 		return errors.Wrap(err, "while deleting namespace")
 	}
 

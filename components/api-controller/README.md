@@ -33,11 +33,28 @@ Use these environment variables to configure the application:
 | Name | Required | Default | Description | Possible values |
 |------|----------|---------|-------------|-----------------|
 | **API_CONTROLLER_LOG_LEVEL** | No | `info` | Show detailed logs in the application. | `info`, `debug`
-| **DEFAULT_ISSUER** | Yes | - | Used to set default issuer in NetworkPolicy. | any string |
-| **DEFAULT_JWKS_URI** | Yes | - | Used to set default jwksUri in NetworkPolicy. | any string |
-| **GATEWAY_FQDN** | Yes | - | Used to set gateway in the VirtualServices specification. | any string |
-| **DOMAIN_NAME** | Yes | - | Used to set a hostname in the VirtualServices specification if a short version of the hostname is provided. | any string |
+| **DEFAULT_ISSUER** | Yes | - | Used to set default issuer in the Policy. | any string |
+| **DEFAULT_JWKS_URI** | Yes | - | Used to set default jwksUri in the Policy. | any string |
+| **GATEWAY_FQDN** | Yes | - | Used to set gateway in the Virtual Service specification. | any string |
+| **DOMAIN_NAME** | Yes | - | Used to set a hostname in the Virtual Service specification if a short version of the hostname is provided. | any string |
+| **CORS_ALLOW_ORIGIN** | No | `""` | Used to set the `corsPolicy.allowOrigin` field in the specification of the Virtual Service. | `"*"` or comma-separated list of origins |
+| **CORS_ALLOW_METHODS** | No | `""` | Used to set the `corsPolicy.allowMethods` field in the specification of the Virtual Service. | comma-separated list of methods |
+| **CORS_ALLOW_HEADERS** | No | `""` | Used to set the `corsPolicy.allowHeaders` field in the specification of the Virtual Service. | `"*"` or comma-separated list of headers |
+| **BLACKLISTED_SERVICES** | No | `""` | Used to defined a list of services for which the API Controller doesn't create Virtual Services or Policies. | Comma-separated list of services and their source Namespace in the `{SERVICE_NAME}.{NAMESPACE}` format.
 
+### Blacklisted services
+
+The API Controller doesn't create a Virtual Service or Authentication Policies for these services: 
+- `kubernetes.default`
+- `istio-citadel.istio-system`
+- `istio-galley.istio-system`
+- `istio-ingressgateway.istio-system`
+- `istio-pilot.istio-system`
+- `istio-policy.istio-system`
+- `istio-sidecar-injector.istio-system`
+- `istio-telemetry.istio-system`
+- `apiserver-proxy.kyma-system`
+- `apiserver-proxy-ssl.kyma-system`
 
 ### Test
 

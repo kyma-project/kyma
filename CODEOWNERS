@@ -5,12 +5,12 @@
 # For more details, read the following article on GitHub: https://help.github.com/articles/about-codeowners/.
 
 # These are the default owners for the whole content of the `kyma` repository. The default owners are automatically added as reviewers when you open a pull request, unless different owners are specified in the file.
-* @derberg @pbochynski @PK85 @a-thaler @lszymik @piotrmsc
+* @derberg @pbochynski @PK85 @a-thaler @piotrmsc
 
 /common/ @mszostok @aszecowka @piotrmiskiewicz @sjanota @Tomasz-Smelcerz-SAP @strekm @crabtree @akgalwas @janmedrek @Szymongib @sayanh @radufa @suleymanakbas91
 
 # Microfrontend k8s client
-/common/microfrontend-client/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
+/common/microfrontend-client/ @kwiatekus @dariadomagala @y-kkamil @parostatkiem @akucharska @sjanota
 
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
@@ -24,15 +24,18 @@
 # The `pod-preset` subchart
 /resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# The Microfrontend CRDs 
+# The Microfrontend CRDs
 /resources/cluster-essentials/templates/microfrontend.crd.yaml @kwiatekus @dariadomagala @y-kkamil @akucharska @sjanota @parostatkiem
 /resources/cluster-essentials/templates/clustermicrofrontend.crd.yaml @kwiatekus @dariadomagala @y-kkamil @akucharska @sjanota @parostatkiem
 
 # The `values.yaml` file for `core` chart
 /resources/core/values.yaml @kyma-project/developers
 
-# The `heptio ark` chart
-/resources/ark/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
+# The `heptio velero essentials` chart
+/resources/velero-essentials/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+
+# The `heptio velero` chart
+/resources/velero/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -43,44 +46,44 @@
 # The `cluster-users` subchart
 /resources/core/charts/cluster-users/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# The `configurations-generator` subchart
-/resources/core/charts/configurations-generator @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+# The `iam-kubeconfig-service` subchart
+/resources/core/charts/iam-kubeconfig-service @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `assetstore` chart
-/resources/assetstore/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/resources/assetstore/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `cms` chart
-/resources/cms/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/resources/cms/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `application-connector` chart
-/resources/application-connector/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `values.yaml` file for `application-connector` chart
 /resources/application-connector/values.yaml @kyma-project/developers
 
 # The `connector-service` subchart
-/resources/application-connector/charts/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector/charts/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `connection-token-handler` subchart
-/resources/application-connector/charts/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector/charts/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `connectivity-certs-controller` subchart
-/resources/application-connector/charts/connectivity-certs-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector/charts/connectivity-certs-controller/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `application-registry` subchart
-/resources/application-connector/charts/application-registry/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector/charts/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `application-operator` subchart
-/resources/application-connector/charts/application-operator/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector/charts/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `application-connector-helper` chart
-/resources/application-connector-helper/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector-helper/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `application-connector-ingress` chart
-/resources/application-connector-ingress/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/resources/application-connector-ingress/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `console` subchart
-/resources/core/charts/console/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
+/resources/core/charts/console/ @kwiatekus @dariadomagala @y-kkamil @parostatkiem @akucharska @sjanota
 
 # The `dex` subchart
 /resources/dex/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -91,9 +94,6 @@
 # The `namespace-controller` subchart
 /resources/core/charts/namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
 
-# The `etcd-operator` subchart
-/resources/core/charts/etcd-operator/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
-
 # The 'gateway' subchart
 /resources/core/charts/gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
@@ -101,28 +101,31 @@
 /resources/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `monitoring` subchart
-/resources/monitoring/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
+/resources/monitoring/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `kubeless` subchart
-/resources/core/charts/kubeless/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
+/resources/core/charts/kubeless/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+
+# The `lambda-ui` subchart
+/resources/core/charts/kubeless/charts/lambdas-ui @kwiatekus @dariadomagala @y-kkamil @parostatkiem @akucharska @sjanota
 
 # The `logging` subchart
-/resources/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/resources/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `log-ui` subchart
 /resources/logging/charts/log-ui/ @rakesh-garimella @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @hisarbalik @a-thaler @igor-karpukhin
 
 # The `event-bus` chart
-/resources/event-bus/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/resources/event-bus/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # The `nats-streaming` chart
-/resources/nats-streaming/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/resources/nats-streaming/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # The `knative-provisioner-natss` chart
-/resources/knative-provisioner-natss/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/resources/knative-provisioner-natss/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # The `k8s-dashboard-proxy` subchart
-/resources/core/charts/k8s-dashboard-proxy/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/resources/core/charts/k8s-dashboard-proxy/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # The `application-broker` subchart
 /resources/application-connector/charts/application-broker @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -134,25 +137,25 @@
 /resources/service-catalog-addons/charts/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `brokers-ui` subchart
-/resources/service-catalog-addons/charts/brokers-ui/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/resources/service-catalog-addons/charts/brokers-ui/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @akucharska @michal-hudy @m00g3n @aerfio @magicmatatjahu @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota
 
 # The `catalog-ui` subchart
-/resources/service-catalog-addons/charts/catalog-ui/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/resources/service-catalog-addons/charts/catalog-ui/ @akucharska @michal-hudy @m00g3n @aerfio @magicmatatjahu @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota
 
 # The `instances-ui` subchart
-/resources/service-catalog-addons/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/resources/service-catalog-addons/charts/instances-ui/ @akucharska @michal-hudy @m00g3n @aerfio @magicmatatjahu @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota
 
 # The `docs` subchart
-/resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/resources/core/charts/docs/ @michal-hudy @m00g3n @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `console-backend-service` subchart
-/resources/core/charts/console-backend-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/resources/core/charts/console-backend-service/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota
 
 # The `templates` chart
 /resources/core/templates/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `templates` chart
-/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld @jasiu001 @adamwalach
+/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @tgorgol @magicmatatjahu @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld @jasiu001 @adamwalach
 
 # The `messaging` subdirectory
 /resources/examples/lambda-messages/ @pbochynski @PK85
@@ -173,16 +176,16 @@
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `knative-serving` chart
-/resources/knative-serving/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/resources/knative-serving/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # The `knative-eventing` chart
-/resources/knative-eventing/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/resources/knative-eventing/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # The `jaeger` charts
-/resources/jaeger/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/resources/jaeger/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `prometheus-operator` chart
-/resources/prometheus-operator/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
+/resources/prometheus-operator/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `service-catalog` chart
 /resources/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -193,6 +196,9 @@
 # The `ory` chart
 /resources/ory/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# The `compass` chart
+/resources/compass/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol
+
 # Components
 #API server proxy Component
 /components/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -201,25 +207,25 @@
 /components/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Asset Store Controller Manager Component
-/components/asset-store-controller-manager/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/components/asset-store-controller-manager/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Asset Upload Service
-/components/asset-upload-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/components/asset-upload-service/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Asset Metadata Service
-/components/asset-metadata-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/components/asset-metadata-service/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # CMS Controller Manager Component
-/components/cms-controller-manager/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/components/cms-controller-manager/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Binding usage controller Component
 /components/service-binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# Installer Component
-/components/installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @Demonsthere
+# Kyma Operator Component
+/components/kyma-operator/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
 
-# Configurations Generator Component
-/components/configurations-generator/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+# IAM Kubeconfig Service Component
+/components/iam-kubeconfig-service/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Namespace controller Component
 /components/namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
@@ -234,91 +240,103 @@
 /components/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # Console Backend Service Component
-/components/console-backend-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/components/console-backend-service/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @sjanota
 
 # IDPPreset Component
 /components/idppreset/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
 
 # Connector Service Component
-/components/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/components/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Connection Token Handler Component
-/components/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/components/connection-token-handler/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Connectivity Certs Controller Component
-/components/connectivity-certs-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/components/connectivity-certs-controller/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Registry Component
-/components/application-registry/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/components/application-registry/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Operator Component
-/components/application-operator/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/components/application-operator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Gateway Component
-/components/application-gateway/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/components/application-gateway/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
+# Application Connectivity Validator Component
+/components/application-connectivity-validator/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
+# Application Connectivity Certs Setup Job Component
+/components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Event Bus Component
-/components/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/components/event-bus/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # K8s Dashboard Proxy Component
-/components/k8s-dashboard-proxy/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/components/k8s-dashboard-proxy/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh
 
 # Event Service Component
-/components/event-service/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/components/event-service/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # Xip Patch Component
 /components/xip-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Kubeless Images
-/components/kubeless-images @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/components/kubeless-images @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
+
+# Dex Static User Configurer
+/components/dex-static-user-configurer/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Tests
 # acceptance tests
 /tests/acceptance/ @mszostok @polskikiel @piotrmiskiewicz @aszecowka @PK85 @jasiu001 @adamwalach
-/tests/acceptance/dex @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+
+# Dex integration tests
+/tests/integration/dex @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Knative Serving Acceptance
-/tests/knative-serving/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/knative-serving/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # test-namespace-controller
 /tests/test-namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
 
 # monitoring tests
-/tests/monitoring/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/monitoring/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # test-logging tests
-/tests/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
-# api-controller acceptance tests
-/tests/api-controller-acceptance-tests/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+# api-controller integration tests
+/tests/integration/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # apiserver-proxy tests
-/tests/apiserver-proxy-tests/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+/tests/integration/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Console Backend Service tests
-/tests/console-backend-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/tests/console-backend-service/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # Asset Store tests
-/tests/asset-store/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/tests/asset-store/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # Connector Service Tests
-/tests/connector-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/tests/connector-service-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Registry Tests
-/tests/application-registry-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/tests/application-registry-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Gateway Tests
-/tests/application-gateway-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/tests/application-gateway-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Operator Tests
-/tests/application-operator-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/tests/application-operator-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
+# Application Connector Tests
+/tests/application-connector-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Tools
-# Etcd backup Component
-/components/etcd-backup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The alpine-net directory
-/tools/alpine-net/ @suleymanakbas91 @clebs @a-thaler @lilitgh
+/tools/alpine-net/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The etcd-tls-setup directory
 /tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
@@ -326,44 +344,38 @@
 # The gcp-broker-provider directory
 /tools/gcp-broker-provider/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# The docsbuilder directory
-/tools/docsbuilder/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
-
 # The failery directory
-/tools/failery/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/tools/failery/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
 
-# The static-users-generator directory
-/tools/static-users-generator/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
-
-# The tools/ark-plugins directory
-/tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
+# The tools/velero-plugins directory
+/tools/velero-plugins/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The tools/kyma-installer directory
 /tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
 
 # The tools/load-test directory
-/tools/load-test/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
+/tools/load-test/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # kubeless-integration tests directory
-/tests/end-to-end/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/end-to-end/kubeless-integration/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # kubeless tests
-/tests/kubeless/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/kubeless/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # Event Bus Tests
-/tests/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/tests/event-bus/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # Event Service Tests
-/tests/gateway-tests/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
+/tests/integration/event-service/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
 # E2E Backup Tests
-/tests/end-to-end/backup-restore-test @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/end-to-end/backup-restore-test @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # E2E Upgrade Tests
 /tests/end-to-end/upgrade @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # Cluster Users Test
-/tests/cluster-users-test @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+/tests/integration/cluster-users @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # All .md files
 *.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj
@@ -372,4 +384,7 @@
 /docs/ @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+milv.config.yaml @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
+
+# performance tests
+/tests/perf/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs

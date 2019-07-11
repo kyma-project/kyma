@@ -33,21 +33,30 @@ type CreateServiceResponse struct {
 }
 
 type API struct {
-	TargetUrl        string               `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
-	Credentials      *Credentials         `json:"credentials,omitempty"`
-	Spec             json.RawMessage      `json:"spec,omitempty"`
-	SpecificationUrl string               `json:"specificationUrl,omitempty"`
-	ApiType          string               `json:"apiType,omitempty"`
-	Headers          *map[string][]string `json:"headers,omitempty"`
-	QueryParameters  *map[string][]string `json:"queryParameters,omitempty"`
+	TargetUrl                      string               `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
+	Credentials                    *CredentialsWithCSRF `json:"credentials,omitempty"`
+	Spec                           json.RawMessage      `json:"spec,omitempty"`
+	SpecificationUrl               string               `json:"specificationUrl,omitempty"`
+	ApiType                        string               `json:"apiType,omitempty"`
+	RequestParameters              *RequestParameters   `json:"requestParameters,omitempty"`
+	SpecificationCredentials       *Credentials         `json:"specificationCredentials,omitempty"`
+	SpecificationRequestParameters *RequestParameters   `json:"specificationRequestParameters,omitempty"`
+}
+
+type RequestParameters struct {
+	Headers         *map[string][]string `json:"headers,omitempty"`
+	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
 }
 
 type Credentials struct {
-	Oauth           *Oauth               `json:"oauth,omitempty"`
-	Basic           *BasicAuth           `json:"basic,omitempty"`
-	CertificateGen  *CertificateGen      `json:"certificateGen,omitempty"`
-	Headers         *map[string][]string `json:"headers,omitempty"`
-	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
+	Oauth *Oauth     `json:"oauth,omitempty"`
+	Basic *BasicAuth `json:"basic,omitempty"`
+}
+
+type CredentialsWithCSRF struct {
+	OauthWithCSRF          *OauthWithCSRF          `json:"oauth,omitempty"`
+	BasicWithCSRF          *BasicAuthWithCSRF      `json:"basic,omitempty"`
+	CertificateGenWithCSRF *CertificateGenWithCSRF `json:"certificateGen,omitempty"`
 }
 
 type CSRFInfo struct {
@@ -55,22 +64,34 @@ type CSRFInfo struct {
 }
 
 type Oauth struct {
-	URL          string    `json:"url" valid:"url,required~oauth url field cannot be empty"`
-	ClientID     string    `json:"clientId" valid:"required~oauth clientId field cannot be empty"`
-	ClientSecret string    `json:"clientSecret" valid:"required~oauth clientSecret cannot be empty"`
-	CSRFInfo     *CSRFInfo `json:"csrfInfo,omitempty"`
+	URL          string `json:"url" valid:"url,required~oauth url field cannot be empty"`
+	ClientID     string `json:"clientId" valid:"required~oauth clientId field cannot be empty"`
+	ClientSecret string `json:"clientSecret" valid:"required~oauth clientSecret cannot be empty"`
+}
+
+type OauthWithCSRF struct {
+	Oauth
+	CSRFInfo *CSRFInfo `json:"csrfInfo,omitempty"`
 }
 
 type BasicAuth struct {
-	Username string    `json:"username" valid:"required~basic auth username field cannot be empty"`
-	Password string    `json:"password" valid:"required~basic auth password field cannot be empty"`
+	Username string `json:"username" valid:"required~basic auth username field cannot be empty"`
+	Password string `json:"password" valid:"required~basic auth password field cannot be empty"`
+}
+
+type BasicAuthWithCSRF struct {
+	BasicAuth
 	CSRFInfo *CSRFInfo `json:"csrfInfo,omitempty"`
 }
 
 type CertificateGen struct {
-	CommonName  string    `json:"commonName"`
-	Certificate string    `json:"certificate"`
-	CSRFInfo    *CSRFInfo `json:"csrfInfo,omitempty"`
+	CommonName  string `json:"commonName"`
+	Certificate string `json:"certificate"`
+}
+
+type CertificateGenWithCSRF struct {
+	CertificateGen
+	CSRFInfo *CSRFInfo `json:"csrfInfo,omitempty"`
 }
 
 type Events struct {
@@ -123,12 +144,13 @@ func serviceDefinitionToServiceDetails(serviceDefinition model.ServiceDefinition
 			Spec:             serviceDefinition.Api.Spec,
 			SpecificationUrl: serviceDefinition.Api.SpecificationUrl,
 			ApiType:          serviceDefinition.Api.ApiType,
-			Headers:          serviceDefinition.Api.Headers,
-			QueryParameters:  serviceDefinition.Api.QueryParameters,
 		}
 
 		if serviceDefinition.Api.Credentials != nil {
 			serviceDetails.Api.Credentials = serviceDefinitionCredentialsToServiceDetailsCredentials(serviceDefinition.Api.Credentials)
+		}
+		if serviceDefinition.Api.RequestParameters != nil {
+			serviceDetails.Api.RequestParameters = serviceDefinitionRequestParametersToServiceDetailsRequestParameters(serviceDefinition.Api.RequestParameters)
 		}
 	}
 
@@ -149,7 +171,7 @@ func serviceDefinitionToServiceDetails(serviceDefinition model.ServiceDefinition
 	return serviceDetails, nil
 }
 
-func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.Credentials) *Credentials {
+func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.CredentialsWithCSRF) *CredentialsWithCSRF {
 
 	csrfInfoFromModel := func(model *model.CSRFInfo) *CSRFInfo {
 		if model == nil {
@@ -161,43 +183,52 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 	}
 
 	if credentials.Oauth != nil {
-		return &Credentials{
-			Oauth: &Oauth{
-				ClientID:     stars,
-				ClientSecret: stars,
-				URL:          credentials.Oauth.URL,
-				CSRFInfo:     csrfInfoFromModel(credentials.Oauth.CSRFInfo),
+		return &CredentialsWithCSRF{
+			OauthWithCSRF: &OauthWithCSRF{
+				Oauth: Oauth{ClientID: stars,
+					ClientSecret: stars,
+					URL:          credentials.Oauth.URL,
+				},
+				CSRFInfo: csrfInfoFromModel(credentials.CSRFInfo),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
 	if credentials.Basic != nil {
-		return &Credentials{
-			Basic: &BasicAuth{
-				Username: stars,
-				Password: stars,
-				CSRFInfo: csrfInfoFromModel(credentials.Basic.CSRFInfo),
+		return &CredentialsWithCSRF{
+			BasicWithCSRF: &BasicAuthWithCSRF{
+				BasicAuth: BasicAuth{
+					Username: stars,
+					Password: stars,
+				},
+				CSRFInfo: csrfInfoFromModel(credentials.CSRFInfo),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
 	if credentials.CertificateGen != nil {
-		return &Credentials{
-			CertificateGen: &CertificateGen{
-				CommonName:  credentials.CertificateGen.CommonName,
-				Certificate: credentials.CertificateGen.Certificate,
-				CSRFInfo:    csrfInfoFromModel(credentials.CertificateGen.CSRFInfo),
+		return &CredentialsWithCSRF{
+			CertificateGenWithCSRF: &CertificateGenWithCSRF{
+				CertificateGen: CertificateGen{
+					CommonName:  credentials.CertificateGen.CommonName,
+					Certificate: credentials.CertificateGen.Certificate,
+				},
+				CSRFInfo: csrfInfoFromModel(credentials.CSRFInfo),
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
 		}
 	}
 
 	return nil
+}
+
+func serviceDefinitionRequestParametersToServiceDetailsRequestParameters(requestParameters *model.RequestParameters) *RequestParameters {
+	if requestParameters == nil {
+		return nil
+	}
+	return &RequestParameters{
+		Headers:         requestParameters.Headers,
+		QueryParameters: requestParameters.QueryParameters,
+	}
 }
 
 func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.ServiceDefinition, apperrors.AppError) {
@@ -218,14 +249,26 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 			TargetUrl:        serviceDetails.Api.TargetUrl,
 			SpecificationUrl: serviceDetails.Api.SpecificationUrl,
 			ApiType:          serviceDetails.Api.ApiType,
-			Headers:          serviceDetails.Api.Headers,
-			QueryParameters:  serviceDetails.Api.QueryParameters,
 		}
+
 		if serviceDetails.Api.Credentials != nil {
-			serviceDefinition.Api.Credentials = serviceDetailsCredentialsToServiceDefinitionCredentials(serviceDetails.Api.Credentials)
+			serviceDefinition.Api.Credentials = serviceDetailsCredentialsToServiceDefinitionCredentialsWithCSRF(serviceDetails.Api.Credentials)
 		}
+
+		if serviceDetails.Api.SpecificationCredentials != nil {
+			serviceDefinition.Api.SpecificationCredentials = serviceDetailsCredentialsToServiceDefinitionCredentials(serviceDetails.Api.SpecificationCredentials)
+		}
+
 		if serviceDetails.Api.Spec != nil {
 			serviceDefinition.Api.Spec = compact(serviceDetails.Api.Spec)
+		}
+
+		if serviceDetails.Api.RequestParameters != nil {
+			serviceDefinition.Api.RequestParameters = serviceDetailsRequestParametersToServiceDefinitionRequestParameters(serviceDetails.Api.RequestParameters)
+		}
+
+		if serviceDetails.Api.SpecificationRequestParameters != nil {
+			serviceDefinition.Api.SpecificationRequestParameters = serviceDetailsRequestParametersToServiceDefinitionRequestParameters(serviceDetails.Api.SpecificationRequestParameters)
 		}
 	}
 
@@ -246,7 +289,35 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 	return serviceDefinition, nil
 }
 
+func serviceDetailsRequestParametersToServiceDefinitionRequestParameters(requestParameters *RequestParameters) *model.RequestParameters {
+	if requestParameters == nil {
+		return nil
+	}
+
+	return &model.RequestParameters{
+		Headers:         requestParameters.Headers,
+		QueryParameters: requestParameters.QueryParameters,
+	}
+}
+
 func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Credentials) *model.Credentials {
+
+	if credentials.Oauth != nil {
+		return &model.Credentials{
+			Oauth: serviceDetailsOauthToServiceDefinitionOauth(*credentials.Oauth),
+		}
+	}
+
+	if credentials.Basic != nil {
+		return &model.Credentials{
+			Basic: serviceDetailsToServiceDefinitionBasic(*credentials.Basic),
+		}
+	}
+
+	return nil
+}
+
+func serviceDetailsCredentialsToServiceDefinitionCredentialsWithCSRF(credentials *CredentialsWithCSRF) *model.CredentialsWithCSRF {
 
 	csrfInfoToModel := func(api *CSRFInfo) *model.CSRFInfo {
 		if api == nil {
@@ -257,43 +328,45 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 		}
 	}
 
-	if credentials.Oauth != nil {
-		return &model.Credentials{
-			Oauth: &model.Oauth{
-				ClientID:     credentials.Oauth.ClientID,
-				ClientSecret: credentials.Oauth.ClientSecret,
-				URL:          credentials.Oauth.URL,
-				CSRFInfo:     csrfInfoToModel(credentials.Oauth.CSRFInfo),
-			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
+	if credentials.OauthWithCSRF != nil {
+		return &model.CredentialsWithCSRF{
+			Oauth:    serviceDetailsOauthToServiceDefinitionOauth(credentials.OauthWithCSRF.Oauth),
+			CSRFInfo: csrfInfoToModel(credentials.OauthWithCSRF.CSRFInfo),
 		}
 	}
 
-	if credentials.Basic != nil {
-		return &model.Credentials{
-			Basic: &model.Basic{
-				Username: credentials.Basic.Username,
-				Password: credentials.Basic.Password,
-				CSRFInfo: csrfInfoToModel(credentials.Basic.CSRFInfo),
-			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
+	if credentials.BasicWithCSRF != nil {
+		return &model.CredentialsWithCSRF{
+			Basic:    serviceDetailsToServiceDefinitionBasic(credentials.BasicWithCSRF.BasicAuth),
+			CSRFInfo: csrfInfoToModel(credentials.BasicWithCSRF.CSRFInfo),
 		}
 	}
 
-	if credentials.CertificateGen != nil {
-		return &model.Credentials{
+	if credentials.CertificateGenWithCSRF != nil {
+		return &model.CredentialsWithCSRF{
 			CertificateGen: &model.CertificateGen{
-				CommonName: credentials.CertificateGen.CommonName,
-				CSRFInfo:   csrfInfoToModel(credentials.CertificateGen.CSRFInfo),
+				CommonName: credentials.CertificateGenWithCSRF.CommonName,
 			},
-			Headers:         credentials.Headers,
-			QueryParameters: credentials.QueryParameters,
+			CSRFInfo: csrfInfoToModel(credentials.CertificateGenWithCSRF.CSRFInfo),
 		}
 	}
 
 	return nil
+}
+
+func serviceDetailsOauthToServiceDefinitionOauth(oauth Oauth) *model.Oauth {
+	return &model.Oauth{
+		ClientID:     oauth.ClientID,
+		ClientSecret: oauth.ClientSecret,
+		URL:          oauth.URL,
+	}
+}
+
+func serviceDetailsToServiceDefinitionBasic(basic BasicAuth) *model.Basic {
+	return &model.Basic{
+		Username: basic.Username,
+		Password: basic.Password,
+	}
 }
 
 func (api API) MarshalJSON() ([]byte, error) {
@@ -312,40 +385,36 @@ func (api API) MarshalJSON() ([]byte, error) {
 
 func (api API) marshalWithJSONSpec() ([]byte, error) {
 	return json.Marshal(&struct {
-		TargetUrl        string               `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
-		Credentials      *Credentials         `json:"credentials,omitempty"`
-		Spec             json.RawMessage      `json:"spec,omitempty"`
-		SpecificationUrl string               `json:"specificationUrl,omitempty"`
-		ApiType          string               `json:"apiType,omitempty"`
-		Headers          *map[string][]string `json:"headers,omitempty"`
-		QueryParameters  *map[string][]string `json:"queryParameters,omitempty"`
+		TargetUrl         string               `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
+		Credentials       *CredentialsWithCSRF `json:"credentials,omitempty"`
+		Spec              json.RawMessage      `json:"spec,omitempty"`
+		SpecificationUrl  string               `json:"specificationUrl,omitempty"`
+		ApiType           string               `json:"apiType,omitempty"`
+		RequestParameters *RequestParameters   `json:"requestParameters,omitempty"`
 	}{
 		api.TargetUrl,
 		api.Credentials,
 		api.Spec,
 		api.SpecificationUrl,
 		api.ApiType,
-		api.Headers,
-		api.QueryParameters,
+		api.RequestParameters,
 	})
 }
 
 func (api API) marshalWithNonJSONSpec() ([]byte, error) {
 	return json.Marshal(&struct {
-		TargetUrl        string               `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
-		Credentials      *Credentials         `json:"credentials,omitempty"`
-		Spec             string               `json:"spec,omitempty"`
-		SpecificationUrl string               `json:"specificationUrl,omitempty"`
-		ApiType          string               `json:"apiType,omitempty"`
-		Headers          *map[string][]string `json:"headers,omitempty"`
-		QueryParameters  *map[string][]string `json:"queryParameters,omitempty"`
+		TargetUrl         string               `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
+		Credentials       *CredentialsWithCSRF `json:"credentials,omitempty"`
+		Spec              string               `json:"spec,omitempty"`
+		SpecificationUrl  string               `json:"specificationUrl,omitempty"`
+		ApiType           string               `json:"apiType,omitempty"`
+		RequestParameters *RequestParameters   `json:"requestParameters,omitempty"`
 	}{
 		api.TargetUrl,
 		api.Credentials,
 		string(api.Spec),
 		api.SpecificationUrl,
 		api.ApiType,
-		api.Headers,
-		api.QueryParameters,
+		api.RequestParameters,
 	})
 }

@@ -1,6 +1,44 @@
 #!/usr/bin/env bash
 ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
+CONCURRENCY=1
+
+POSITIONAL=()
+
+function validateConcurrency() {
+  if [[ -z "$1" ]]; then
+    echo "Error: --concurency requres a value"
+    exit 1
+  fi
+
+  if ! [[ "$1" =~ ^[1-9][0-9]?$ ]]; then
+    echo "Error: value passed to --concurrency must be a number"
+    exit 1
+  fi
+}
+
+while [[ $# -gt 0 ]]
+do
+    key="$1"
+    shift
+    case ${key} in
+        --concurrency|-c)
+            validateConcurrency "$1"
+            CONCURRENCY="$1"
+            shift
+            ;;
+        -*)
+            echo "Unknown flag ${key}"
+            exit 1
+            ;;
+        *) # unknown option
+            POSITIONAL+=("$key") # save it in an array for later
+            ;;
+    esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+
 source ${ROOT_PATH}/testing-common.sh
 
 suiteName="testsuite-all-$(date '+%Y-%m-%d-%H-%M')"
@@ -33,6 +71,10 @@ then
   echo "$(${kc} get testdefinitions --all-namespaces -l 'require-static-users=true' -o=go-template --template='{{- range .items}}{{printf " - %s\n" .metadata.name}}{{- end}}')"
 fi
 
+# creates a config map which provides the testing bundles
+injectTestingBundles
+trap removeTestingBundles ERR EXIT
+
 cat <<EOF | ${kc} apply -f -
 apiVersion: testing.kyma-project.io/v1alpha1
 kind: ClusterTestSuite
@@ -42,7 +84,7 @@ metadata:
   name: ${suiteName}
 spec:
   maxRetries: 1
-  concurrency: 1
+  concurrency: ${CONCURRENCY}
 ${matchTests}
 EOF
 

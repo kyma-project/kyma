@@ -50,6 +50,7 @@ func (c *eventActivationConverter) ToGQLEvents(in *spec.AsyncAPISpec) []gqlschem
 			EventType:   eventType,
 			Version:     version,
 			Description: c.getSummary(topic),
+			Schema:      c.getPayload(topic),
 		})
 	}
 
@@ -90,6 +91,20 @@ func (c *eventActivationConverter) getSummary(in interface{}) string {
 	}
 
 	return result
+}
+
+func (c *eventActivationConverter) getPayload(in interface{}) map[string]interface{} {
+	subscribe, exists := c.convertToMap(in)["subscribe"]
+	if !exists {
+		return nil
+	}
+
+	payload, exists := c.convertToMap(subscribe)["payload"]
+	if !exists {
+		return nil
+	}
+
+	return c.convertToMap(payload)
 }
 
 func (c *eventActivationConverter) convertToMap(in interface{}) map[string]interface{} {

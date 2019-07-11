@@ -130,20 +130,14 @@ func (f functionTest) getFunctionPodStatus(namespace string, waitmax time.Durati
 			if err != nil {
 				return err
 			}
-			if len(pods.Items) == 0 {
-				break
-			}
-
-			if len(pods.Items) > 1 {
-				return fmt.Errorf("Deployed 1 pod, got %v: %+v", len(pods.Items), pods)
-			}
-
-			pod := pods.Items[0]
-			if pod.Status.Phase == corev1.PodRunning {
-				return nil
-			}
-			if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed || pod.Status.Phase == corev1.PodUnknown {
-				return fmt.Errorf("Function in state %v: \n%+v", pod.Status.Phase, pod)
+			if len(pods.Items) == 1 {
+				pod := pods.Items[0]
+				if pod.Status.Phase == corev1.PodRunning {
+					return nil
+				}
+				if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed || pod.Status.Phase == corev1.PodUnknown {
+					return fmt.Errorf("Function in state %v: \n%+v", pod.Status.Phase, pod)
+				}
 			}
 		}
 	}

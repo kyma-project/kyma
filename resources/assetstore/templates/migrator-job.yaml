@@ -29,7 +29,7 @@ metadata:
     "helm.sh/hook-weight": "0"
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: {{ .Values.minio.persistence.size | quote }}

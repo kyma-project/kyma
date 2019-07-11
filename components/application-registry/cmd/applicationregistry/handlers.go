@@ -1,10 +1,12 @@
 package main
 
 import (
+	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"net/http"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/certificates"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/strategy"
@@ -60,18 +62,24 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 
 	specificationService := NewSpecificationService(dynamicClient, opt)
 
-	applicationServiceRepository, apperror := newApplicationRepository(k8sConfig)
+	applicationManager, apperror := newApplicationManager(k8sConfig)
 	if apperror != nil {
 		return nil, apperror
 	}
+
+	applicationServiceRepository := applications.NewServiceRepository(applicationManager)
 
 	istioService, apperror := newIstioService(k8sConfig, opt.namespace)
 	if apperror != nil {
 		return nil, apperror
 	}
 
+	sei := coreClientset.CoreV1().Secrets(opt.namespace)
+	secretsRepository := secrets.NewRepository(sei)
+
 	accessServiceManager := newAccessServiceManager(coreClientset, opt.namespace, opt.proxyPort)
-	secretsService := newSecretsRepository(coreClientset, nameResolver, opt.namespace)
+	credentialsSecretsService := newSecretsService(secretsRepository, nameResolver)
+	requestParametersSecretsService := secrets.NewRequestParametersService(secretsRepository, nameResolver)
 
 	uuidGenerator := metauuid.GeneratorFunc(func() (string, error) {
 		uuidInstance, err := uuid.NewV4()
@@ -81,9 +89,9 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 		return uuidInstance.String(), nil
 	})
 
-	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, secretsService, istioService)
+	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, credentialsSecretsService, requestParametersSecretsService, istioService)
 
-	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, applicationServiceRepository, specificationService), nil
+	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, applicationServiceRepository, specificationService, applicationManager), nil
 }
 
 func NewSpecificationService(dynamicClient dynamic.Interface, opt *options) specification.Service {
@@ -96,20 +104,18 @@ func NewSpecificationService(dynamicClient dynamic.Interface, opt *options) spec
 
 	docsTopicRepository := assetstore.NewDocsTopicRepository(resourceInterface)
 	uploadClient := upload.NewClient(opt.uploadServiceURL)
-	assetStoreService := assetstore.NewService(docsTopicRepository, uploadClient, opt.insecureAssetDownload)
+	assetStoreService := assetstore.NewService(docsTopicRepository, uploadClient, opt.insecureAssetDownload, opt.assetstoreRequestTimeout)
 
-	return specification.NewSpecService(assetStoreService)
+	return specification.NewSpecService(assetStoreService, opt.specRequestTimeout, opt.insecureSpecDownload)
 }
 
-func newApplicationRepository(config *restclient.Config) (applications.ServiceRepository, apperrors.AppError) {
+func newApplicationManager(config *restclient.Config) (v1alpha12.ApplicationInterface, apperrors.AppError) {
 	applicationEnvironmentClientset, err := versioned.NewForConfig(config)
 	if err != nil {
 		return nil, apperrors.Internal("Failed to create k8s application client, %s", err)
 	}
 
-	rei := applicationEnvironmentClientset.ApplicationconnectorV1alpha1().Applications()
-
-	return applications.NewServiceRepository(rei), nil
+	return applicationEnvironmentClientset.ApplicationconnectorV1alpha1().Applications(), nil
 }
 
 func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace string, proxyPort int) accessservice.AccessServiceManager {
@@ -122,10 +128,8 @@ func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace stri
 	return accessservice.NewAccessServiceManager(si, config)
 }
 
-func newSecretsRepository(coreClientset *kubernetes.Clientset, nameResolver k8sconsts.NameResolver, namespace string) secrets.Service {
-	sei := coreClientset.CoreV1().Secrets(namespace)
+func newSecretsService(repository secrets.Repository, nameResolver k8sconsts.NameResolver) secrets.Service {
 	strategyFactory := strategy.NewSecretsStrategyFactory(certificates.GenerateKeyAndCertificate)
-	repository := secrets.NewRepository(sei)
 
 	return secrets.NewService(repository, nameResolver, strategyFactory)
 }

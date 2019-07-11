@@ -4,13 +4,14 @@ kind: TestDefinition
 metadata:
   name: "test-{{ template "fullname" . }}-connection-dex"
 spec:
+  disableConcurrency: true
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
       containers:
-      - name: "test-{{ template "fullname" . }}-connection-dex"
+      - name: "test-dex-connection"
         image: tutum/curl:alpine
         command: ["/usr/bin/curl"]
         args: [

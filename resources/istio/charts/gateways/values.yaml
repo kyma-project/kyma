@@ -54,9 +54,11 @@ istio-ingressgateway:
     targetPort: 80
     name: http2
     nodePort: 31380
+    hostPort: 80
   - port: 443
     name: https
     nodePort: 31390
+    hostPort: 443
   # Example of a port to add. Remove if not needed
   - port: 31400
     name: tcp
@@ -100,13 +102,7 @@ istio-ingressgateway:
     name: tcp-dns-tls
   ####### end MESH EXPANSION PORTS ######
   ##############
-  secretVolumes:
-  - name: ingressgateway-certs
-    secretName: istio-ingressgateway-certs
-    mountPath: /etc/istio/ingressgateway-certs
-  - name: ingressgateway-ca-certs
-    secretName: istio-ingressgateway-ca-certs
-    mountPath: /etc/istio/ingressgateway-ca-certs
+  secretVolumes: {}
   ### Advanced options ############
   env:
     # A gateway with this mode ensures that pilot generates an additional
@@ -189,7 +185,7 @@ istio-egressgateway:
     # enable cross cluster routing.
     ISTIO_META_ROUTER_MODE: "sni-dnat"
   nodeSelector: {}
-  
+
   # Specify the pod anti-affinity that allows you to constrain which nodes
   # your pod is eligible to be scheduled based on labels on pods that are
   # already running on the node rather than based on labels on nodes.

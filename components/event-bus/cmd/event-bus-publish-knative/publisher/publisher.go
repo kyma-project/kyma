@@ -1,33 +1,43 @@
 package publisher
 
 import (
+	"log"
+
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/metrics"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/prometheus/client_golang/prometheus"
-	"log"
 )
 
 const (
-	FAILED    = "failed"
-	IGNORED   = "ignored"
+	// FAILED status label
+	FAILED = "failed"
+	// IGNORED status label
+	IGNORED = "ignored"
+	// PUBLISHED status label
 	PUBLISHED = "published"
 )
 
+// KnativePublisher encapsulates the publish behaviour.
 type KnativePublisher interface {
-	Publish(knativeLib *knative.KnativeLib, channelName *string, namespace *string, headers *map[string]string,
-		payload *[]byte, publishRequest *api.PublishRequest) (*api.Error, string)
+	Publish(knativeLib *knative.KnativeLib, channelName *string, namespace *string, headers *map[string][]string,
+		payload *[]byte, source string,
+		eventType string, eventTypeVersion string) (*api.Error, string)
 }
 
+// DefaultKnativePublisher is the default KnativePublisher instance.
 type DefaultKnativePublisher struct{}
 
+// NewKnativePublisher creates a new KnativePublisher instance.
 func NewKnativePublisher() KnativePublisher {
 	publisher := new(DefaultKnativePublisher)
 	return publisher
 }
 
+// Publish events using the KnativeLib
 func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib, channelName *string,
-	namespace *string, headers *map[string]string, payload *[]byte, publishRequest *api.PublishRequest) (*api.Error,
+	namespace *string, headers *map[string][]string, payload *[]byte, source string,
+	eventType string, eventTypeVersion string) (*api.Error,
 	string) {
 	// knativelib should not be nil
 	if knativeLib == nil {
@@ -65,11 +75,11 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 		log.Printf("cannot find the knative channel '%v' in namespace '%v'", *channelName, *namespace)
 		log.Println("incrementing ignored messages counter")
 		metrics.TotalPublishedMessages.With(prometheus.Labels{
-			metrics.Namespace:		  *namespace,
+			metrics.Namespace:        *namespace,
 			metrics.Status:           IGNORED,
-			metrics.SourceID:         publishRequest.SourceID,
-			metrics.EventType:        publishRequest.EventType,
-			metrics.EventTypeVersion: publishRequest.EventTypeVersion}).Inc()
+			metrics.SourceID:         source,
+			metrics.EventType:        eventType,
+			metrics.EventTypeVersion: eventTypeVersion}).Inc()
 		return nil, IGNORED
 	}
 

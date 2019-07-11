@@ -3,6 +3,7 @@ kind: Installation
 metadata:
   name: kyma-installation
   labels:
+    action: install
     kyma-project.io/installation: ""
   finalizers:
     - finalizer.installer.kyma-project.io
@@ -26,7 +27,7 @@ spec:
       namespace: "knative-serving"
     - name: "knative-eventing"
       namespace: "knative-eventing"
-    # - name: "prometheus-operator"
+    #- name: "prometheus-operator"
     # namespace: "kyma-system"
     - name: "dex"
       namespace: "kyma-system"
@@ -56,11 +57,15 @@ spec:
       namespace: "kyma-integration"
     - name: "application-connector"
       namespace: "kyma-integration"
-    #- name: "ark"
-    #  namespace: "heptio-ark"
+    #- name: "velero-essentials"
+    #  namespace: "kyma-backup"
+    #- name: "velero"
+    #  namespace: "kyma-backup"
     #- name: "logging"
     #  namespace: "kyma-system"
     #- name: "jaeger"
     #  namespace: "kyma-system"
     #- name: "monitoring"
     #  namespace: "kyma-system"
+    #- name: "compass"
+    #  namespace: "compass-system"

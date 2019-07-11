@@ -15,22 +15,32 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// TODO: Write tests
+//go:generate mockery -name=namespaceSvc -output=automock -outpkg=automock -case=underscore
+type namespaceSvc interface {
+	Create(name string, labels gqlschema.Labels) (*v1.Namespace, error)
+	Update(name string, labels gqlschema.Labels) (*v1.Namespace, error)
+	List() ([]*v1.Namespace, error)
+	Find(name string) (*v1.Namespace, error)
+	Delete(name string) error
+}
 
-//go:generate mockery -name=nsLister -output=automock -outpkg=automock -case=underscore
-type nsLister interface {
-	List() ([]v1.Namespace, error)
+//go:generate mockery -name=gqlNamespaceConverter -output=automock -outpkg=automock -case=underscore
+type gqlNamespaceConverter interface {
+	ToGQLs(in []*v1.Namespace) ([]gqlschema.Namespace, error)
+	ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error)
 }
 
 type namespaceResolver struct {
-	nsLister     nsLister
-	appRetriever shared.ApplicationRetriever
+	namespaceSvc       namespaceSvc
+	appRetriever       shared.ApplicationRetriever
+	namespaceConverter gqlNamespaceConverter
 }
 
-func newNamespaceResolver(nsLister nsLister, appRetriever shared.ApplicationRetriever) *namespaceResolver {
+func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever) *namespaceResolver {
 	return &namespaceResolver{
-		nsLister:     nsLister,
-		appRetriever: appRetriever,
+		namespaceSvc:       namespaceSvc,
+		appRetriever:       appRetriever,
+		namespaceConverter: &namespaceConverter{},
 	}
 }
 
@@ -38,16 +48,18 @@ func newNamespaceResolver(nsLister nsLister, appRetriever shared.ApplicationRetr
 func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName *string) ([]gqlschema.Namespace, error) {
 	var err error
 
-	var namespaces []v1.Namespace
+	var namespaces []*v1.Namespace
 	if applicationName == nil {
-		namespaces, err = r.nsLister.List()
+		namespaces, err = r.namespaceSvc.List()
 	} else {
+
+		// TODO: Investigate if we still need the query for namespaces bound to an application
 		var namespaceNames []string
 		namespaceNames, err = r.appRetriever.Application().ListNamespacesFor(*applicationName)
 
 		//TODO: Refactor 'ListNamespacesFor' to return []v1.Namespace and remove this workaround
 		for _, nsName := range namespaceNames {
-			namespaces = append(namespaces, v1.Namespace{
+			namespaces = append(namespaces, &v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: nsName,
 				},
@@ -63,15 +75,13 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName
 		glog.Error(errors.Wrapf(err, "while listing %s", pretty.Namespaces))
 		return nil, gqlerror.New(err, pretty.Namespaces)
 	}
-
-	var ns []gqlschema.Namespace
-	for _, n := range namespaces {
-		ns = append(ns, gqlschema.Namespace{
-			Name: n.Name,
-		})
+	converted, err := r.namespaceConverter.ToGQLs(namespaces)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespaces))
+		return nil, gqlerror.New(err, pretty.Namespaces)
 	}
 
-	return ns, nil
+	return converted, nil
 }
 
 func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschema.Namespace) ([]string, error) {
@@ -94,4 +104,80 @@ func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschem
 	}
 
 	return appNames, nil
+}
+
+func (r *namespaceResolver) NamespaceQuery(ctx context.Context, name string) (*gqlschema.Namespace, error) {
+	namespace, err := r.namespaceSvc.Find(name)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while getting %s with name %s", pretty.Namespace, name))
+		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
+	}
+
+	converted, err := r.namespaceConverter.ToGQL(namespace)
+
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespace))
+		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
+	}
+
+	return converted, nil
+}
+
+func (r *namespaceResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceMutationOutput, error) {
+	gqlLabels := r.populateLabels(labels)
+	ns, err := r.namespaceSvc.Create(name, gqlLabels)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.Namespace, name))
+		return gqlschema.NamespaceMutationOutput{}, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
+	}
+	return gqlschema.NamespaceMutationOutput{
+		Name:   name,
+		Labels: ns.Labels,
+	}, nil
+}
+
+func (r *namespaceResolver) UpdateNamespace(ctx context.Context, name string, labels gqlschema.Labels) (gqlschema.NamespaceMutationOutput, error) {
+	gqlLabels := r.populateLabels(&labels)
+	ns, err := r.namespaceSvc.Update(name, gqlLabels)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while editing %s `%s`", pretty.Namespace, name))
+		return gqlschema.NamespaceMutationOutput{}, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
+	}
+	return gqlschema.NamespaceMutationOutput{
+		Name:   name,
+		Labels: ns.Labels,
+	}, nil
+}
+
+func (r *namespaceResolver) DeleteNamespace(ctx context.Context, name string) (*gqlschema.Namespace, error) {
+	namespace, err := r.namespaceSvc.Find(name)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while getting %s with name %s", pretty.Namespace, name))
+		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
+	}
+
+	namespaceCopy := namespace.DeepCopy()
+	deletedNamespace, err := r.namespaceConverter.ToGQL(namespaceCopy)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespace))
+		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
+	}
+
+	err = r.namespaceSvc.Delete(name)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.Namespace, name))
+		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
+	}
+
+	return deletedNamespace, nil
+}
+
+func (r *namespaceResolver) populateLabels(givenLabels *gqlschema.Labels) map[string]string {
+	labels := map[string]string{}
+	if givenLabels != nil {
+		for k, v := range *givenLabels {
+			labels[k] = v
+		}
+	}
+	return labels
 }

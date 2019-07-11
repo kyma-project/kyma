@@ -1,0 +1,112 @@
+image:
+  repository: gcr.io/heptio-images/velero
+  tag: v0.11.0
+  pullPolicy: IfNotPresent
+
+# Only kube2iam/kiam: change the AWS_ACCOUNT_ID and VELERO_ROLE_NAME
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8085"
+  prometheus.io/path: "/metrics"
+  sidecar.istio.io/inject: "false"
+#  iam.amazonaws.com/role: arn:aws:iam::<AWS_ACCOUNT_ID>:role/<VELERO_ROLE_NAME>
+
+# This is needed to create the servicemonitor in the same ns as that of prometheus
+prometheus:
+  serviceMonitorNamespace: kyma-system
+
+rbac:
+  create: true
+
+initContainers:
+  - name: velero-plugins
+    image: eu.gcr.io/kyma-project/develop/velero-plugins:c6cb7939
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
+serviceAccount:
+  server:
+    create: true
+    name:
+
+tolerations: []
+
+nodeSelector: {}
+
+## Parameters for the ' default' Config resource
+## See https://github.com/helm/charts/tree/master/stable/velero#configuration
+# configuration:
+#   provider:
+
+global:
+  isLocalEnv: false
+
+  volumeSnapshotLocation: {}
+  #  name:
+  #  bucket:
+  #  config:
+  #    region:
+  #    apiTimeout:
+
+  backupStorageLocation: {}
+    # name:
+    # bucket:
+    # prefix:
+    # config:
+    #   resourceGroup:  # Only for Azure
+    #   storageAccount: # Only for Azure
+    #  region:
+    #  s3ForcePathStyle:
+    #  s3Url:
+    #  kmsKeyId:
+    #  publicUrl:
+
+  backupSyncPeriod: 60m
+  resticTimeout: 1h
+  restoreResourcePriorities: namespaces,persistentvolumes,persistentvolumeclaims,applications,applicationmappings,servicebrokers,serviceclasses,serviceinstances,servicebindings,secrets,configmaps,serviceaccounts,limitranges,podpresets,pods,replicaset
+  restoreOnlyMode: false
+  # additional key/value pairs to be used as environment variables such as "AWS_CLUSTER_NAME: 'yourcluster.domain.tld'"
+  extraEnvVars: {}
+
+# Eg:
+# schedules:
+#   mybackup:
+#     schedule: "0 0 * * *"
+#     template:
+#       ttl: "240h"
+#       includedNamespaces:
+#        - foo
+
+schedules: {}
+
+# Credentials for different cloud providers
+credentials:
+  useSecret: true
+  secretContents: {}
+    ## For Azure please set:
+    # AZURE_SUBSCRIPTION_ID:
+    # AZURE_TENANT_ID:
+    # AZURE_RESOURCE_GROUP:
+    # AZURE_CLIENT_ID:
+    # AZURE_CLIENT_SECRET:
+    # AZURE_STORAGE_ACCOUNT_ID:
+    # AZURE_STORAGE_KEY:
+    ###
+    ## For GCP/GKE please set:
+    # cloud:
+
+deployRestic: true
+
+volumeSnapshotLocation:
+  provider:
+  config:
+    apiTimeout: # Only for Azure
+    resourceGroup: # Only for Azure
+
+metrics:
+  enabled: true
+  scrapeInterval: 30s
+  serviceMonitor:
+    enabled: true
+    additionalLabels: {}

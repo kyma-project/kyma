@@ -2,10 +2,12 @@ package subscription
 
 import (
 	"context"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/metrics"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	eventBusUtil "github.com/kyma-project/kyma/components/event-bus/pkg/util"
 	"github.com/prometheus/client_golang/prometheus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -73,7 +75,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	requeue, reconcileErr := r.reconcile(ctx, subscription, KymaSubscriptionsGauge)
 	if reconcileErr != nil {
 		log.Error(reconcileErr, "Reconciling Subscription")
-		if err := util.SetNotReadySubscription(ctx, r.client, subscription, reconcileErr.Error(), r.time); err != nil {
+		if err := util.SetNotReadySubscription(ctx, r.client, subscription, r.time); err != nil {
 			log.Error(err, "SetNotReadySubscription() failed for the subscription:", "subscription", subscription)
 		}
 		r.recorder.Eventf(subscription, corev1.EventTypeWarning, subReconcileFailed, "Subscription reconciliation failed: %v", err)
@@ -100,7 +102,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 			}
 		} else {
 			// reconcile finished with no errors, but subscription is not activated
-			if err := util.SetNotReadySubscription(ctx, r.client, subscription, "", r.time); err != nil {
+			if err := util.SetNotReadySubscription(ctx, r.client, subscription, r.time); err != nil {
 				log.Error(err, "SetNotReadySubscription() failed for the subscription:", "subscription", subscription)
 				reconcileErr = err
 			} else {
@@ -128,7 +130,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	knativeSubsName := util.GetKnSubscriptionName(&subscription.Name, &subscription.Namespace)
 	knativeSubsNamespace := util.GetDefaultChannelNamespace()
 	knativeSubsURI := subscription.Endpoint
-	knativeChannelName := util.GetChannelName(&subscription.SourceID, &subscription.EventType, &subscription.EventTypeVersion)
+	knativeChannelName := eventBusUtil.GetChannelName(&subscription.SourceID, &subscription.EventType, &subscription.EventTypeVersion)
 	knativeChannelProvisioner := "natss"
 	timeout := r.opts.ChannelTimeout
 
@@ -137,11 +139,11 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		// then lets add the finalizer and update the object.
 		if !util.ContainsString(&subscription.ObjectMeta.Finalizers, finalizerName) {
 			subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, finalizerName)
-			if err := util.WriteSubscription(context.Background(), r.client, subscription); err == nil {
+			err := util.WriteSubscription(context.Background(), r.client, subscription)
+			if err == nil {
 				return true, nil
-			} else {
-				return false, err
 			}
+			return false, err
 		}
 	} else {
 		// The object is being deleted

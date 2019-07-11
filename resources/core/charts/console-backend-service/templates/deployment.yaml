@@ -75,8 +75,18 @@ spec:
             value: "kyma-client"
           - name: APP_OIDC_CA_FILE
             value: "/etc/ingress-tls-cert/tls.crt"
+          - name: APP_TRACING_COLLECTOR_URL
+            value: {{ .Values.tracing.collectorUrl }}
+          - name: APP_TRACING_DEBUG
+            value: "{{ .Values.tracing.debug }}"
+          - name: APP_TRACING_SERVICE_SPAN_NAME
+            value: {{ .Values.tracing.serviceSpanName }}
+          - name: APP_FEATURE_TOGGLES_CLUSTER_ADDONS_CONFIGURATION_CRD_ENABLED
+            # When enabled then RBAC needs to be adjusted:  https://github.com/kyma-project/kyma/issues/4492
+            value: "false"
         ports:
           - containerPort: {{ .Values.service.internalPort }}
+            name: {{ .Values.service.internalPortName }}
         volumeMounts:
           - name: ingress-tls-cert
             mountPath: /etc/ingress-tls-cert/

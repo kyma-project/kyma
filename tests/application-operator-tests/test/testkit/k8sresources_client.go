@@ -1,6 +1,7 @@
 package testkit
 
 import (
+	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	corev1 "k8s.io/api/core/v1"
@@ -12,7 +13,7 @@ import (
 type K8sResourcesClient interface {
 	GetDeployment(name string, options v1.GetOptions) (interface{}, error)
 	GetService(name string, options v1.GetOptions) (interface{}, error)
-	GetIngress(name string, options v1.GetOptions) (interface{}, error)
+	GetVirtualService(name string, options v1.GetOptions) (interface{}, error)
 	GetRole(name string, options v1.GetOptions) (interface{}, error)
 	GetRoleBinding(name string, options v1.GetOptions) (interface{}, error)
 	GetClusterRole(name string, options v1.GetOptions) (interface{}, error)
@@ -29,6 +30,7 @@ type K8sResourcesClient interface {
 type k8sResourcesClient struct {
 	coreClient        *kubernetes.Clientset
 	applicationClient *versioned.Clientset
+	istioClient       *v1alpha3.NetworkingV1alpha3Client
 	namespace         string
 }
 
@@ -52,9 +54,15 @@ func initClient(k8sConfig *restclient.Config, namespace string) (K8sResourcesCli
 		return nil, err
 	}
 
+	istioClientset, err := v1alpha3.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
 	return &k8sResourcesClient{
 		coreClient:        coreClientset,
 		applicationClient: applicationClientset,
+		istioClient:       istioClientset,
 		namespace:         namespace,
 	}, nil
 }
@@ -63,8 +71,8 @@ func (c *k8sResourcesClient) GetDeployment(name string, options v1.GetOptions) (
 	return c.coreClient.AppsV1().Deployments(c.namespace).Get(name, options)
 }
 
-func (c *k8sResourcesClient) GetIngress(name string, options v1.GetOptions) (interface{}, error) {
-	return c.coreClient.ExtensionsV1beta1().Ingresses(c.namespace).Get(name, options)
+func (c *k8sResourcesClient) GetVirtualService(name string, options v1.GetOptions) (interface{}, error) {
+	return c.istioClient.VirtualServices(c.namespace).Get(name, options)
 }
 
 func (c *k8sResourcesClient) GetRole(name string, options v1.GetOptions) (interface{}, error) {

@@ -25,14 +25,32 @@ import (
 )
 
 const (
-	eventType           = "test-e2e"
-	subscriptionName    = "test-sub"
-	eventActivationName = "test-ea"
-	srcID               = "test.local"
+	eventType               = "test-e2e"
+	eventTypeVersion        = "v1"
+	subscriptionName        = "test-sub"
+	headersSubscriptionName = "headers-test-sub"
+	eventActivationName     = "test-ea"
+	srcID                   = "test.local"
 
 	success = 0
 	fail    = 1
 	retries = 20
+
+	idHeader               = "ce-id"
+	timeHeader             = "ce-time"
+	contentTypeHeader      = "content-type"
+	sourceHeader           = "ce-source"
+	eventTypeHeader        = "ce-type"
+	eventTypeVersionHeader = "ce-eventtypeversion"
+	customHeader           = "ce-xcustomheader"
+	specVersionHeader      = "ce-specversion"
+
+	ceSourceIDHeaderValue         = "override-source-ID"
+	ceEventTypeHeaderValue        = "override-event-type"
+	ceSpecVersionHeaderValue      = "0.3"
+	contentTypeHeaderValue        = "application/json"
+	ceEventTypeVersionHeaderValue = "override-event-type-version"
+	customHeaderValue             = "Ce-X-custom-header-value"
 )
 
 var (
@@ -41,10 +59,12 @@ var (
 	subscriberResultsEndpointURL  *string
 	subscriberStatusEndpointURL   *string
 	subscriberShutdownEndpointURL *string
+	subscriber3EventEndpointURL   *string
+	subscriber3ResultsEndpointURL *string
+	subscriber3StatusEndpointURL  *string
 	clientK8S                     *kubernetes.Clientset
 	eaClient                      *eaClientSet.Clientset
 	subClient                     *subscriptionClientSet.Clientset
-	namespace                     *string
 	publishEventEndpointURL       *string
 	publishStatusEndpointURL      *string
 )
@@ -54,7 +74,6 @@ func main() {
 
 	publishEventEndpointURL = flags.String("publish-event-uri", "http://event-bus-publish:8080/v1/events", "publish service events endpoint `URL`")
 	publishStatusEndpointURL = flags.String("publish-status-uri", "http://event-bus-publish:8080/v1/status/ready", "publish service status endpoint `URL`")
-	namespace = flags.String("ns", "kyma-system", "k8s `namespace` in which test app is running")
 	subscriberImage := flags.String("subscriber-image", "", "subscriber Docker `image` name")
 	subscriberNamespace = flags.String("subscriber-ns", "default", "k8s `namespace` in which subscriber test app is running")
 	subscriberEventEndpointURL = flags.String("subscriber-events-uri",
@@ -64,7 +83,14 @@ func main() {
 	subscriberStatusEndpointURL = flags.String("subscriber-status-uri",
 		"http://"+util.SubscriberName+"."+*subscriberNamespace+":9000/v1/status", "subscriber service status endpoint `URL`")
 	subscriberShutdownEndpointURL = flags.String("subscriber-shutdown-uri",
-		"http://"+util.SubscriberName+"."+*subscriberNamespace+":9000/v1/shutdown", "subscriber service shutdown endpoint `URL`")
+		"http://"+util.SubscriberName+"."+*subscriberNamespace+":9000/shutdown", "subscriber service shutdown endpoint `URL`")
+
+	subscriber3EventEndpointURL = flags.String("subscriber3-events-uri",
+		"http://"+util.SubscriberName+"."+*subscriberNamespace+":9000/v3/events", "subscriber 3 service events endpoint `URL`")
+	subscriber3ResultsEndpointURL = flags.String("subscriber3-results-uri",
+		"http://"+util.SubscriberName+"."+*subscriberNamespace+":9000/v3/results", "subscriber 3 service results endpoint `URL`")
+	subscriber3StatusEndpointURL = flags.String("subscriber3-status-uri",
+		"http://"+util.SubscriberName+"."+*subscriberNamespace+":9000/v3/status", "subscriber 3 service status endpoint `URL`")
 
 	flags.Parse(os.Args[1:])
 
@@ -100,14 +126,26 @@ func main() {
 	}
 	time.Sleep(5 * time.Second)
 
-	log.Println("Create a test subscription")
+	log.Println("Create a test subscriptions")
 	subClient, err = subscriptionClientSet.NewForConfig(config)
 	if err != nil {
 		log.Printf("Error in creating subscription client: %v\n", err)
 		shutdown(fail)
 	}
-	if !createSubscription(*subscriberNamespace) {
+	if !createSubscription(*subscriberNamespace, subscriptionName, *subscriberEventEndpointURL) {
 		log.Println("Error: Cannot create Kyma subscription")
+		shutdown(fail)
+	}
+	time.Sleep(5 * time.Second)
+
+	log.Println("Create a headers test subscription")
+	subClient, err = subscriptionClientSet.NewForConfig(config)
+	if err != nil {
+		log.Printf("Error in creating headers subscription client: %v\n", err)
+		shutdown(fail)
+	}
+	if !createSubscription(*subscriberNamespace, headersSubscriptionName, *subscriber3EventEndpointURL) {
+		log.Println("Error: Cannot create Kyma headers subscription")
 		shutdown(fail)
 	}
 	time.Sleep(5 * time.Second)
@@ -116,9 +154,16 @@ func main() {
 	if err := createSubscriber(util.SubscriberName, *subscriberNamespace, *subscriberImage); err != nil {
 		log.Printf("Create Subscriber failed: %v\n", err)
 	}
+
 	log.Println("Check Subscriber Status")
 	if !checkSubscriberStatus(retries) {
 		log.Println("Error: Cannot connect to Subscriber")
+		shutdown(fail)
+	}
+
+	log.Println("Check Subscriber 3 Status")
+	if !checkSubscriber3Status(retries) {
+		log.Println("Error: Cannot connect to Subscriber 3")
 		shutdown(fail)
 	}
 
@@ -129,13 +174,18 @@ func main() {
 	}
 
 	log.Println("Check Kyma subscription ready Status")
-	if !checkSubscriptionReady(*subscriberNamespace, retries) {
+	if !checkSubscriptionReady(*subscriberNamespace, subscriptionName, retries) {
+		log.Println("Error: Kyma Subscription not ready")
+		shutdown(fail)
+	}
+
+	log.Println("Check Kyma headers subscription ready Status")
+	if !checkSubscriptionReady(*subscriberNamespace, headersSubscriptionName, retries) {
 		log.Println("Error: Kyma Subscription not ready")
 		shutdown(fail)
 	}
 
 	log.Println("Publish an event")
-
 	var eventSent bool
 	for i := 0; i < retries; i++ {
 		if _, err := publishTestEvent(*publishEventEndpointURL); err != nil {
@@ -154,6 +204,28 @@ func main() {
 	log.Println("Try to read the response from subscriber server")
 	if err := checkSubscriberReceivedEvent(); err != nil {
 		log.Printf("Error: Cannot get the test event from subscriber: %v\n", err)
+		shutdown(fail)
+	}
+
+	log.Println("Publish headers event")
+	var headersEventSent bool
+	for i := 0; i < retries; i++ {
+		if _, err := publishHeadersTestEvent(*publishEventEndpointURL); err != nil {
+			log.Printf("Publish headers event failed: %v; Retrying (%d/%d)", err, i, retries)
+			time.Sleep(time.Duration(i) * time.Second)
+		} else {
+			headersEventSent = true
+			break
+		}
+	}
+	if !headersEventSent {
+		log.Println("Error: Cannot send test event")
+		shutdown(fail)
+	}
+
+	log.Println("Try to read the response from subscriber 3 server")
+	if err := checkSubscriberReceivedEventHeaders(); err != nil {
+		log.Printf("Error: Cannot get the test event from subscriber 3: %v\n", err)
 		shutdown(fail)
 	}
 
@@ -180,7 +252,15 @@ func shutdown(code int) {
 	}
 	if subClient != nil {
 		log.Printf("Delete test subscription: %v\n", subscriptionName)
-		if err := subClient.EventingV1alpha1().Subscriptions(*subscriberNamespace).Delete(subscriptionName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
+		if err := subClient.EventingV1alpha1().Subscriptions(*subscriberNamespace).Delete(subscriptionName,
+			&metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
+			log.Printf("Warning: Delete Subscription falied: %v", err)
+		}
+	}
+	if subClient != nil {
+		log.Printf("Delete headers test subscription: %v\n", subscriptionName)
+		if err := subClient.EventingV1alpha1().Subscriptions(*subscriberNamespace).Delete(headersSubscriptionName,
+			&metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
 			log.Printf("Warning: Delete Subscription falied: %v", err)
 		}
 	}
@@ -210,9 +290,9 @@ func shutdown(code int) {
 	os.Exit(code)
 }
 
-func publishTestEvent(publishEventURL string) (*api.PublishResponse, error) {
+func publishTestEvent(publishEventURL string) (*api.Response, error) {
 	payload := fmt.Sprintf(
-		`{"source-id": "%s","event-type":"%s","event-type-version":"v1","event-time":"2018-11-02T22:08:41+00:00","data":"test-event-1"}`, srcID, eventType)
+		`{"source-id": "%s","event-type":"%s","event-type-version":"%s","event-time":"2018-11-02T22:08:41+00:00","data":"test-event-1"}`, srcID, eventType, eventTypeVersion)
 	log.Printf("event to be published: %v\n", payload)
 	res, err := http.Post(publishEventURL, "application/json", strings.NewReader(payload))
 	if err != nil {
@@ -223,7 +303,43 @@ func publishTestEvent(publishEventURL string) (*api.PublishResponse, error) {
 	if err := verifyStatusCode(res, 200); err != nil {
 		return nil, err
 	}
-	respObj := &api.PublishResponse{}
+	respObj := &api.Response{}
+	body, err := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
+	err = json.Unmarshal(body, &respObj)
+	if err != nil {
+		log.Printf("Unmarshal error: %v", err)
+		return nil, err
+	}
+	log.Printf("Publish response object: %+v", respObj)
+	if len(respObj.EventID) == 0 {
+		return nil, fmt.Errorf("empty respObj.EventID")
+	}
+	return respObj, err
+}
+
+func publishHeadersTestEvent(publishEventURL string) (*api.Response, error) {
+	payload := fmt.Sprintf(
+		`{"source-id": "%s","event-type":"%s","event-type-version":"%s","event-time":"2018-11-02T22:08:41+00:00","data":"headers-test-event"}`, srcID, eventType, eventTypeVersion)
+	log.Printf("event to be published: %v\n", payload)
+
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", publishEventURL, strings.NewReader(payload))
+	req.Header.Add(sourceHeader, ceSourceIDHeaderValue)
+	req.Header.Add(eventTypeHeader, ceEventTypeHeaderValue)
+	req.Header.Add(eventTypeVersionHeader, ceEventTypeVersionHeaderValue)
+	req.Header.Add(customHeader, customHeaderValue)
+	res, err := client.Do(req)
+
+	if err != nil {
+		log.Printf("Post request failed: %v\n", err)
+		return nil, err
+	}
+	dumpResponse(res)
+	if err := verifyStatusCode(res, 200); err != nil {
+		return nil, err
+	}
+	respObj := &api.Response{}
 	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 	err = json.Unmarshal(body, &respObj)
@@ -239,7 +355,6 @@ func publishTestEvent(publishEventURL string) (*api.PublishResponse, error) {
 }
 
 func checkSubscriberReceivedEvent() error {
-
 	for i := 0; i < retries; i++ {
 		time.Sleep(time.Duration(i) * time.Second)
 		log.Printf("Get subscriber response (%d/%d)\n", i, retries)
@@ -269,13 +384,69 @@ func checkSubscriberReceivedEvent() error {
 	return errors.New("timeout for subscriber response")
 }
 
+func checkSubscriberReceivedEventHeaders() error {
+	for i := 0; i < retries; i++ {
+		time.Sleep(time.Duration(i) * time.Second)
+		log.Printf("Get subscriber 3 response (%d/%d)\n", i, retries)
+		res, err := http.Get(*subscriber3ResultsEndpointURL)
+		if err != nil {
+			log.Printf("Get request failed: %v\n", err)
+			return err
+		}
+		dumpResponse(res)
+		if err := verifyStatusCode(res, 200); err != nil {
+			log.Printf("Get request failed: %v", err)
+			return err
+		}
+		body, err := ioutil.ReadAll(res.Body)
+		var resp map[string][]string
+		json.Unmarshal(body, &resp)
+		log.Printf("Subscriber 3 response: %v\n", resp)
+		res.Body.Close()
+		if len(resp) == 0 { // no event received by subscriber
+			continue
+		}
+
+		lowerResponseHeaders := make(map[string][]string)
+		for k := range resp {
+			lowerResponseHeaders[strings.ToLower(k)] = resp[k]
+		}
+
+		if lowerResponseHeaders[sourceHeader][0] != srcID {
+			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[sourceHeader][0], srcID)
+		}
+		if lowerResponseHeaders[eventTypeHeader][0] != eventType {
+			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[eventTypeHeader][0], eventType)
+		}
+		if lowerResponseHeaders[eventTypeVersionHeader][0] != eventTypeVersion {
+			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[eventTypeVersionHeader][0], eventTypeVersion)
+		}
+		if lowerResponseHeaders[idHeader][0] == "" {
+			return fmt.Errorf("wrong response: %s, can't be empty", lowerResponseHeaders[idHeader][0])
+		}
+		if lowerResponseHeaders[timeHeader][0] == "" {
+			return fmt.Errorf("wrong response: %s, can't be empty", lowerResponseHeaders[timeHeader][0])
+		}
+		if lowerResponseHeaders[contentTypeHeader][0] != contentTypeHeaderValue {
+			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[contentTypeHeader][0], contentTypeHeaderValue)
+		}
+		if lowerResponseHeaders[specVersionHeader][0] != ceSpecVersionHeaderValue {
+			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[specVersionHeader][0], ceSpecVersionHeaderValue)
+		}
+		if lowerResponseHeaders[customHeader][0] != customHeaderValue {
+			return fmt.Errorf("wrong response: %s, want: %s", lowerResponseHeaders[customHeader][0], customHeaderValue)
+		}
+		return nil
+	}
+	return errors.New("timeout for subscriber response")
+}
+
 func dumpResponse(resp *http.Response) {
 	defer resp.Body.Close()
-	dump, err := httputil.DumpResponse(resp, true)
+	_, err := httputil.DumpResponse(resp, true)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("%q", dump)
 }
 
 func checkStatusCode(res *http.Response, expectedStatusCode int) bool {
@@ -320,6 +491,7 @@ func createSubscriber(subscriberName string, subscriberNamespace string, sbscrIm
 		log.Println("Create Subscriber service")
 		if _, err := clientK8S.CoreV1().Services(subscriberNamespace).Create(util.NewSubscriberService()); err != nil {
 			log.Printf("Create Subscriber service failed: %v\n", err)
+			return err
 		}
 		time.Sleep(30 * time.Second)
 
@@ -367,8 +539,8 @@ func createEventActivation(subscriberNamespace string, noOfRetries int) bool {
 	return eventActivationOK
 }
 
-func createSubscription(subscriberNamespace string) bool {
-	_, err := subClient.EventingV1alpha1().Subscriptions(subscriberNamespace).Create(util.NewSubscription(subscriptionName, subscriberNamespace, *subscriberEventEndpointURL, eventType, "v1", srcID))
+func createSubscription(subscriberNamespace string, subName string, subscriberEventEndpointURL string) bool {
+	_, err := subClient.EventingV1alpha1().Subscriptions(subscriberNamespace).Create(util.NewSubscription(subName, subscriberNamespace, subscriberEventEndpointURL, eventType, "v1", srcID))
 	if err != nil {
 		if !strings.Contains(err.Error(), "already exists") {
 			log.Printf("Error in creating subscription: %v\n", err)
@@ -395,6 +567,23 @@ func checkSubscriberStatus(noOfRetries int) bool {
 	return subscriberOK
 }
 
+func checkSubscriber3Status(noOfRetries int) bool {
+	var subscriberOK bool
+	for i := 0; i < noOfRetries; i++ {
+		if res, err := http.Get(*subscriber3StatusEndpointURL); err != nil {
+			log.Printf("Subscriber 3 Status request failed: %v; Retrying (%d/%d)", err, i, noOfRetries)
+			time.Sleep(time.Duration(i) * time.Second)
+		} else if !checkStatusCode(res, http.StatusOK) {
+			log.Printf("Subscriber 3 Server Status request returns: %v; Retrying (%d/%d)\n", res, i, noOfRetries)
+			time.Sleep(time.Duration(i) * time.Second)
+		} else {
+			subscriberOK = true
+			break
+		}
+	}
+	return subscriberOK
+}
+
 func checkPublisherStatus(noOfRetries int) bool {
 	var publishOK bool
 	for i := 0; i < noOfRetries; i++ {
@@ -409,7 +598,7 @@ func checkPublisherStatus(noOfRetries int) bool {
 	return publishOK
 }
 
-func checkSubscriptionReady(subscriberNamespace string, noOfRetries int) bool {
+func checkSubscriptionReady(subscriberNamespace string, subscriptionName string, noOfRetries int) bool {
 	var isReady bool
 	activatedCondition := subApis.SubscriptionCondition{Type: subApis.Ready, Status: subApis.ConditionTrue}
 	for i := 0; i < noOfRetries && !isReady; i++ {

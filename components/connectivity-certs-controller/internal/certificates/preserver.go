@@ -3,11 +3,15 @@ package certificates
 import (
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/secrets"
 	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 const (
 	clusterCertificateSecretKey = "crt"
-	caCertificateSecretKey      = "ca.crt"
+	clusterKeySecretKey         = "key"
+	certificateChainSecretKey   = "crtChain"
+
+	caCertificateSecretKey = "cacert"
 )
 
 type Preserver interface {
@@ -15,21 +19,21 @@ type Preserver interface {
 }
 
 type certificatePreserver struct {
-	clusterCertSecretName string
-	caCertSecretName      string
+	clusterCertSecretName types.NamespacedName
+	caCertSecretName      types.NamespacedName
 	secretsRepository     secrets.Repository
 }
 
-func NewCertificatePreserver(clusterCertSecretName string, caCertSecretName string, secretsRepository secrets.Repository) *certificatePreserver {
+func NewCertificatePreserver(clusterCertSecret types.NamespacedName, caCertSecret types.NamespacedName, secretsRepository secrets.Repository) *certificatePreserver {
 	return &certificatePreserver{
-		clusterCertSecretName: clusterCertSecretName,
-		caCertSecretName:      caCertSecretName,
+		clusterCertSecretName: clusterCertSecret,
+		caCertSecretName:      caCertSecret,
 		secretsRepository:     secretsRepository,
 	}
 }
 
 func (cp *certificatePreserver) PreserveCertificates(certificates Certificates) error {
-	err := cp.saveClusterCertificateAndKey(certificates.ClientKey, certificates.ClientCRT)
+	err := cp.saveClusterCertificateAndKey(certificates.ClientKey, certificates.ClientCRT, certificates.CRTChain)
 	if err != nil {
 		return err
 	}
@@ -37,15 +41,16 @@ func (cp *certificatePreserver) PreserveCertificates(certificates Certificates) 
 	return cp.saveCACertificate(certificates.CaCRT)
 }
 
-func (cp *certificatePreserver) saveClusterCertificateAndKey(clientKey, certificateChain []byte) error {
+func (cp *certificatePreserver) saveClusterCertificateAndKey(clientKey, clientCert, certificateChain []byte) error {
 	clusterSecretData := map[string][]byte{
-		clusterCertificateSecretKey: certificateChain,
+		clusterCertificateSecretKey: clientCert,
 		clusterKeySecretKey:         clientKey,
+		certificateChainSecretKey:   certificateChain,
 	}
 
 	err := cp.secretsRepository.UpsertWithMerge(cp.clusterCertSecretName, clusterSecretData)
 	if err != nil {
-		return errors.Wrap(err, "Failed to preserve client certificate in secret")
+		return errors.Wrap(err, "Failed to preserve client certificate and key in secret")
 	}
 
 	return nil

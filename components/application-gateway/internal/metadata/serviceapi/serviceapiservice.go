@@ -1,10 +1,14 @@
 package serviceapi
 
 import (
-	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
+	"encoding/json"
+
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/secrets"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 )
 
 const (
@@ -18,6 +22,9 @@ const (
 	PrivateKeyKey      = "key"
 	CertificateKey     = "crt"
 	CommonNameKey      = "commonName"
+
+	HeadersKey         = "headers"
+	QueryParametersKey = "queryParameters"
 )
 
 // Service manages API definition of a service
@@ -39,64 +46,110 @@ func NewService(secretsRepository secrets.Repository) Service {
 
 func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.API, apperrors.AppError) {
 	api := &model.API{
-		TargetUrl:       applicationAPI.TargetUrl,
-		Headers:         applicationAPI.Headers,
-		QueryParameters: applicationAPI.QueryParameters,
+		TargetUrl: applicationAPI.TargetUrl,
 	}
 
 	if applicationAPI.Credentials != nil {
 		credentialsSecretName := applicationAPI.Credentials.SecretName
-		credentialsType := applicationAPI.Credentials.Type
 
 		secret, err := sas.secretsRepository.Get(credentialsSecretName)
-
 		if err != nil {
 			return nil, err
 		}
 
-		if credentialsType == TypeOAuth {
-			api.Credentials = &model.Credentials{
-				OAuth: getOAuthCredentials(secret, applicationAPI.Credentials.Url),
-			}
-		} else if credentialsType == TypeBasic {
-			api.Credentials = &model.Credentials{
-				BasicAuth: getBasicAuthCredentials(secret),
-			}
-		} else if credentialsType == TypeCertificateGen {
-			api.Credentials = &model.Credentials{
-				CertificateGen: getCertificateGenCredentials(secret),
-			}
-		} else {
-			api.Credentials = nil
+		api.Credentials = sas.readCredentials(secret, applicationAPI)
+	}
+
+	if applicationAPI.RequestParametersSecretName != "" {
+		secret, err := sas.secretsRepository.Get(applicationAPI.RequestParametersSecretName)
+		if err != nil {
+			return nil, err
 		}
 
-		if api.Credentials != nil {
-			api.Credentials.CSRFTokenEndpointURL = applicationAPI.Credentials.CSRFTokenEndpointURL
-			api.Credentials.Headers = applicationAPI.Credentials.Headers
-			api.Credentials.QueryParameters = applicationAPI.Credentials.QueryParameters
+		requestParameters, err := getRequestParameters(secret)
+		if err != nil {
+			return nil, err
 		}
+
+		api.RequestParameters = requestParameters
 	}
 
 	return api, nil
 }
 
-func getOAuthCredentials(secret map[string][]byte, url string) *model.OAuth {
-	return &model.OAuth{
+func (sas defaultService) readCredentials(secret map[string][]byte, applicationAPI *applications.ServiceAPI) *authorization.Credentials {
+	var credentials *authorization.Credentials
+
+	credentialsType := applicationAPI.Credentials.Type
+
+	if credentialsType == TypeOAuth {
+		credentials = &authorization.Credentials{
+			OAuth: getOAuthCredentials(secret, applicationAPI.Credentials.Url),
+		}
+	} else if credentialsType == TypeBasic {
+		credentials = &authorization.Credentials{
+			BasicAuth: getBasicAuthCredentials(secret),
+		}
+	} else if credentialsType == TypeCertificateGen {
+		credentials = &authorization.Credentials{
+			CertificateGen: getCertificateGenCredentials(secret),
+		}
+	} else {
+		credentials = nil
+	}
+
+	if credentials != nil {
+		credentials.CSRFTokenEndpointURL = applicationAPI.Credentials.CSRFTokenEndpointURL
+	}
+
+	return credentials
+}
+
+func getRequestParameters(secret map[string][]byte) (*authorization.RequestParameters, apperrors.AppError) {
+	requestParameters := &authorization.RequestParameters{}
+
+	headersData := secret[HeadersKey]
+	if headersData != nil {
+		var headers = &map[string][]string{}
+		err := json.Unmarshal(headersData, headers)
+		if err != nil {
+			return nil, apperrors.Internal("Failed to unmarshal headers, %s", err.Error())
+		}
+
+		requestParameters.Headers = headers
+	}
+
+	queryParamsData := secret[QueryParametersKey]
+	if queryParamsData != nil {
+		var queryParameters = &map[string][]string{}
+		err := json.Unmarshal(queryParamsData, queryParameters)
+		if err != nil {
+			return nil, apperrors.Internal("Failed to unmarshal query parameters, %s", err.Error())
+		}
+
+		requestParameters.QueryParameters = queryParameters
+	}
+
+	return requestParameters, nil
+}
+
+func getOAuthCredentials(secret map[string][]byte, url string) *authorization.OAuth {
+	return &authorization.OAuth{
 		ClientID:     string(secret[ClientIDKey]),
 		ClientSecret: string(secret[ClientSecretKey]),
 		URL:          url,
 	}
 }
 
-func getBasicAuthCredentials(secret map[string][]byte) *model.BasicAuth {
-	return &model.BasicAuth{
+func getBasicAuthCredentials(secret map[string][]byte) *authorization.BasicAuth {
+	return &authorization.BasicAuth{
 		Username: string(secret[UsernameKey]),
 		Password: string(secret[PasswordKey]),
 	}
 }
 
-func getCertificateGenCredentials(secret map[string][]byte) *model.CertificateGen {
-	return &model.CertificateGen{
+func getCertificateGenCredentials(secret map[string][]byte) *authorization.CertificateGen {
+	return &authorization.CertificateGen{
 		CommonName:  string(secret[CommonNameKey]),
 		Certificate: secret[CertificateKey],
 		PrivateKey:  secret[PrivateKeyKey],

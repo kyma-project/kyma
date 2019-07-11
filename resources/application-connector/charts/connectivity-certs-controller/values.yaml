@@ -2,7 +2,13 @@ deployment:
   image:
     pullPolicy: IfNotPresent
   args:
-    clusterCertificatesSecret: cluster-client-certificates
-    caCertificatesSecret: nginx-auth-ca
     controllerSyncPeriod: 300
     minimalConnectionSyncPeriod: 300
+
+secrets:
+  caCertificate:
+    name: application-connector-certs
+    namespace: istio-system
+  clientCertificate:
+    name: cluster-client-certificates
+    namespace: kyma-integration
