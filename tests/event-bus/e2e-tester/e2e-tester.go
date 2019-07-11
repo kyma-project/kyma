@@ -428,9 +428,9 @@ func (subDetails *subscriberDetails) checkSubscriberReceivedEventHeaders() error
 			headerKey           string
 			headerExpectedValue string
 		}{
-			{headerKey: sourceHeader, headerExpectedValue: ceSourceIDHeaderValue},
-			{headerKey: eventTypeHeader, headerExpectedValue: ceEventTypeHeaderValue},
-			{headerKey: eventTypeVersionHeader, headerExpectedValue: ceEventTypeVersionHeaderValue},
+			{headerKey: sourceHeader, headerExpectedValue: srcID},
+			{headerKey: eventTypeHeader, headerExpectedValue: eventType},
+			{headerKey: eventTypeVersionHeader, headerExpectedValue: eventTypeVersion},
 			{headerKey: contentTypeHeader, headerExpectedValue: contentTypeHeaderValue},
 			{headerKey: customHeader, headerExpectedValue: customHeaderValue},
 		}
