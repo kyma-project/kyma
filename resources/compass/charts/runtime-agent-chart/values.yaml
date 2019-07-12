@@ -1,4 +1,0 @@
-deployment:
-  image:
-    pullPolicy: IfNotPresent
-
