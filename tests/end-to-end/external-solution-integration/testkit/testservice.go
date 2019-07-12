@@ -2,52 +2,54 @@ package testkit
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"net/http"
-	"strings"
-
+	"github.com/kyma-project/kyma/common/ingressgateway"
+	gatewayApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
+	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
-	log "github.com/sirupsen/logrus"
 	model "k8s.io/api/apps/v1"
 	core "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"net/http"
+	"strconv"
 )
 
 const (
-	testServiceName       = "counter-service"
-	testServicePort       = 8090
-	testServiceImage      = "maladie/counterservice:latest"
-	labelKey              = "component"
-	healthEndpointFormat  = "http://%s.%s:%v/health"
-	counterEndpointFormat = "http://%s.%s:%v"
+	testServiceName            = "counter-service"
+	testServicePort            = 8090
+	testServiceImage           = "maladie/counterservice:latest"
+	labelKey                   = "component"
+	healthEndpointFormat       = "http://%s.%s:%v/health"
+	healthEndpointFormatLocal  = "https://counter-service.%s/health"
+	counterEndpointFormat      = "http://%s.%s:%v/counter"
+	counterEndpointFormatLocal = "https://counter-service.%s/counter"
 )
 
-type TestService interface {
-	CreateTestService() error
-	DeleteTestService() error
-	checkValue() (int, error)
-	IsReady() (bool, error)
-	GetTestServiceURL() string
-	WaitForCounterPodToUpdateValue(val int) (bool, error)
-}
-
-type testService struct {
+type TestService struct {
 	K8sResourcesClient resourceskit.K8sResourcesClient
-	HttpClient         http.Client
+	apis               gatewayClient.ApisGetter
+	HttpClient         *http.Client
+	domain             string
 }
 
-func NewTestService(k8sClient resourceskit.K8sResourcesClient) TestService {
+func NewTestService(k8sClient resourceskit.K8sResourcesClient, apis gatewayClient.ApisGetter, domain string) (*TestService, error) {
 
-	httpClient := newHttpClient(true)
-
-	return &testService{
-		K8sResourcesClient: k8sClient,
-		HttpClient:         *httpClient,
+	httpClient, err := ingressgateway.FromEnv().Client()
+	if err != nil {
+		return nil, err
 	}
+
+	return &TestService{
+		K8sResourcesClient: k8sClient,
+		HttpClient:         httpClient,
+		domain:             domain,
+		apis:               apis,
+	}, nil
 }
 
-func (ts *testService) CreateTestService() error {
+func (ts *TestService) CreateTestService() error {
 	err := ts.createDeployment()
 	if err != nil {
 		return err
@@ -56,13 +58,12 @@ func (ts *testService) CreateTestService() error {
 	if err != nil {
 		return err
 	}
-	return nil
+	return ts.createAPI()
 }
 
-func (ts *testService) checkValue() (int, error) {
+func (ts *TestService) checkValue() (int, error) {
 
-	url := ts.GetTestServiceURL() + "/counter"
-
+	url := ts.GetTestServiceURL()
 	resp, err := ts.HttpClient.Get(url)
 
 	if err != nil {
@@ -84,75 +85,61 @@ func (ts *testService) checkValue() (int, error) {
 	return response.Counter, nil
 }
 
-func (ts *testService) IsReady() (bool, error) {
+func (ts *TestService) IsReady() error {
 
 	url := ts.getHealthEndpointURL()
-	log.WithFields(log.Fields{"url": url}).Debug("IsReady?")
-
 	resp, err := ts.HttpClient.Get(url)
 
 	if err != nil {
-		if strings.Contains(err.Error(), "connection reset by peer") {
-			log.WithFields(log.Fields{"err": err}).Debug("IsReady?")
-			return false, nil
-		}
-		log.WithFields(log.Fields{"err not caught": err.Error()}).Debug("IsReady?")
-		return false, err
+		return err
 	}
 
-	if resp != nil {
-		if resp.StatusCode == http.StatusOK {
-			return true, nil
-		}
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("Unexpected status code; " + resp.Status)
 	}
 
-	return false, nil
+	return nil
 }
-func (ts *testService) WaitForCounterPodToUpdateValue(val int) (bool, error) {
+func (ts *TestService) WaitForCounterPodToUpdateValue(val int) error {
 	count, err := ts.checkValue()
 	if err != nil {
-		log.Error(err)
-		return false, err
+		return err
 	}
 
 	if count != val {
-		return false, nil
+		return errors.New("counter different then expected value: " + strconv.Itoa(count))
 	}
-	return true, nil
+	return nil
 }
 
-func (ts *testService) DeleteTestService() error {
-	log.WithFields(log.Fields{"name": testServiceName}).Debug("Deleting Deployment")
-	err := ts.K8sResourcesClient.DeleteDeployment(testServiceName, &v1.DeleteOptions{})
-
-	if err != nil {
-		log.Error(err)
-		return err
+func (ts *TestService) DeleteTestService() error {
+	errDeployment := ts.K8sResourcesClient.DeleteDeployment(testServiceName, &v1.DeleteOptions{})
+	errService := ts.K8sResourcesClient.DeleteService(testServiceName, &v1.DeleteOptions{})
+	errApi := ts.apis.Apis(ts.K8sResourcesClient.GetNamespace()).Delete(testServiceName, &v1.DeleteOptions{})
+	if errDeployment != nil {
+		return errDeployment
 	}
 
-	log.WithFields(log.Fields{"name": testServiceName}).Debug("Deleting Service")
-	err = ts.K8sResourcesClient.DeleteService(testServiceName, &v1.DeleteOptions{})
+	if errService != nil {
+		return errService
+	}
 
-	if err != nil {
-		log.Error(err)
-		return err
+	if errApi != nil {
+		return errApi
 	}
 
 	return nil
 }
 
-func (ts *testService) GetTestServiceURL() string {
-	namespace := ts.K8sResourcesClient.GetNamespace()
-	return fmt.Sprintf(counterEndpointFormat, testServiceName, namespace, testServicePort)
+func (ts *TestService) GetTestServiceURL() string {
+	return fmt.Sprintf(counterEndpointFormatLocal, ts.domain)
 }
 
-func (ts *testService) getHealthEndpointURL() string {
-	namespace := ts.K8sResourcesClient.GetNamespace()
-	return fmt.Sprintf(healthEndpointFormat, testServiceName, namespace, testServicePort)
+func (ts *TestService) getHealthEndpointURL() string {
+	return fmt.Sprintf(healthEndpointFormatLocal, ts.domain)
 }
 
-func (ts *testService) createDeployment() error {
-	log.WithFields(log.Fields{"name": testServiceName}).Debug("Creating Deployment")
+func (ts *TestService) createDeployment() error {
 	rs := int32(1)
 	deployment := &model.Deployment{
 		TypeMeta: v1.TypeMeta{
@@ -197,8 +184,7 @@ func (ts *testService) createDeployment() error {
 	return err
 }
 
-func (ts *testService) createService() error {
-	log.WithFields(log.Fields{"name": testServiceName}).Debug("Creating Service")
+func (ts *TestService) createService() error {
 	service := &core.Service{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "Service",
@@ -222,5 +208,24 @@ func (ts *testService) createService() error {
 		},
 	}
 	_, err := ts.K8sResourcesClient.CreateService(service)
+	return err
+}
+
+func (ts *TestService) createAPI() error {
+	api := &gatewayApi.Api{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      testServiceName,
+			Namespace: ts.K8sResourcesClient.GetNamespace(),
+		},
+		Spec: gatewayApi.ApiSpec{
+			Service: gatewayApi.Service{
+				Name: testServiceName,
+				Port: testServicePort,
+			},
+			Hostname:                   fmt.Sprintf("%s.%s", testServiceName, ts.domain),
+			Authentication:             []gatewayApi.AuthenticationRule{},
+		},
+	}
+	_, err := ts.apis.Apis(ts.K8sResourcesClient.GetNamespace()).Create(api)
 	return err
 }

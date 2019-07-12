@@ -6,7 +6,6 @@ import (
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
-	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )
@@ -32,7 +31,6 @@ func NewTokenRequestClient(config *rest.Config, namespace string) (TokenRequestC
 }
 
 func (t *tokenRequestClient) CreateTokenRequest() (*v1alpha1.TokenRequest, error) {
-	log.WithFields(log.Fields{"name": consts.AppName}).Debug("Creating TokenRequest")
 	tokenRequest := &v1alpha1.TokenRequest{
 		TypeMeta:   v1.TypeMeta{Kind: "Application", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: consts.AppName, Namespace: t.namespace},
@@ -49,6 +47,5 @@ func (t *tokenRequestClient) GetTokenRequest() (*v1alpha1.TokenRequest, error) {
 }
 
 func (t *tokenRequestClient) DeleteTokenRequest() error {
-	log.WithFields(log.Fields{"name": consts.AppName}).Debug("Deleting TokenRequest")
 	return t.client.ApplicationconnectorV1alpha1().TokenRequests(t.namespace).Delete(consts.AppName, &v1.DeleteOptions{})
 }

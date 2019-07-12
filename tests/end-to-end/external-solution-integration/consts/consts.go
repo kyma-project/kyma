@@ -5,11 +5,10 @@ const (
 	AccessLabel = "e2e-test-app-label"
 
 	IntegrationNamespace = "kyma-integration"
-	ProductionNamespace  = "production"
 
-	LambdaEndpoint = "http://e2e-test-app.production:8080"
-	EventType      = "exampleEvent"
-	EventVersion   = "v1"
+	LambdaEndpointPattern = "http://e2e-test-app.%s:8080"
+	EventType             = "exampleEvent"
+	EventVersion          = "v1"
 
 	ServiceInstanceName = "e2e-test-app-si"
 	ServiceInstanceID   = "e2e-test-app-si-id"

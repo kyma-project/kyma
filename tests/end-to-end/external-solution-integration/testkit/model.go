@@ -3,7 +3,7 @@ package testkit
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -127,7 +127,11 @@ type DocsObject struct {
 
 type ErrorResponse struct {
 	Code  int    `json:"code"`
-	Error string `json:"error"`
+	ErrorMsg string `json:"error"`
+}
+
+func (e *ErrorResponse) Error() string {
+	return fmt.Sprintf("%v: %s", e.Code, e.ErrorMsg)
 }
 
 type ExampleEvent struct {
@@ -139,13 +143,13 @@ type ExampleEvent struct {
 }
 
 func parseErrorResponse(response *http.Response) error {
-	errorResponse := ErrorResponse{}
-	err := json.NewDecoder(response.Body).Decode(&errorResponse)
+	errorResponse := &ErrorResponse{}
+	err := json.NewDecoder(response.Body).Decode(errorResponse)
 	if err != nil {
 		return err
 	}
 
-	return errors.New(errorResponse.Error)
+	return errorResponse
 }
 
 func compact(src []byte) []byte {

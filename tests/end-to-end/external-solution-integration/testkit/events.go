@@ -7,12 +7,25 @@ import (
 	"net/http"
 )
 
-func SendEvent(url string, event *ExampleEvent) error {
+type EventSender struct {
+	httpClient *http.Client
+	domain     string
+}
+
+func NewEventSender(httpClient *http.Client, domain string) *EventSender {
+	return &EventSender{
+		httpClient: httpClient,
+		domain:     domain,
+	}
+}
+
+func (s *EventSender) SendEvent(appName string, event *ExampleEvent) error {
 	body, err := json.Marshal(event)
 	if err != nil {
 		return err
 	}
 
+	url := fmt.Sprintf("https://gateway.%s/%s/v1/events", s.domain, appName)
 	request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
 		return err
@@ -20,9 +33,7 @@ func SendEvent(url string, event *ExampleEvent) error {
 
 	request.Header.Add("Content-Type", "application/json")
 
-	httpClient := newHttpClient(true)
-
-	response, err := httpClient.Do(request)
+	response, err := s.httpClient.Do(request)
 	if err != nil {
 		return err
 	}

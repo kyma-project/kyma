@@ -1,94 +1,144 @@
 package main
 
 import (
+	"fmt"
+	kubelessClient "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
+	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	appBrokerClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	appOperatorClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	eventingClient "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
+	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/step"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
+	"github.com/spf13/pflag"
+	coreClient "k8s.io/client-go/kubernetes"
+	"net/http"
+	"os"
 	"time"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testsuite"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
+
+type scenario struct {
+	Domain         string
+	serviceID      string
+	registryClient *testkit.RegistryClient
+	eventSender    *testkit.EventSender
+}
+
+func (s *scenario) SetServiceID(serviceID string) {
+	s.serviceID = serviceID
+}
+
+func (s *scenario) GetServiceID() string {
+	return s.serviceID
+}
+
+func (s *scenario) SetGatewayHttpClient(httpClient *http.Client) {
+	gatewayUrl := fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", s.Domain, consts.AppName)
+	s.registryClient = testkit.NewRegistryClient(gatewayUrl, httpClient)
+	s.eventSender = testkit.NewEventSender(httpClient, s.Domain)
+}
+
+func (s *scenario) GetRegistryClient() *testkit.RegistryClient {
+	return s.registryClient
+}
+
+func (s *scenario) GetEventSender() *testkit.EventSender {
+	return s.eventSender
+}
 
 func main() {
 	time.Sleep(10 * time.Second)
 	log.SetReportCaller(true)
 	log.SetLevel(log.TraceLevel)
+	testNamespace := pflag.String("testNamespace", "default", "Namespace where test should create resources")
+	domain := pflag.String("domain", "kyma.local", "Domain")
+	cleanupOnly := pflag.Bool("cleanupOnly", false, "Only cleanup resources")
+	skipCleanup := pflag.Bool("skipCleanup", false, "Do not cleanup resources")
+	pflag.Parse()
 
-	config, err := rest.InClusterConfig()
+	config, err := loadKubeConfigOrDie()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ts, err := testsuite.NewTestSuite(config, log.New())
+	runner := step.NewRunner()
+
+	k8sResourceClient, err := resourceskit.NewK8sResourcesClient(config, *testNamespace)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.RegisterExitHandler(func() {
-		log.Error("Starting cleanup")
-		err := ts.CleanUp()
-		if err != nil {
-			log.Error(err)
-		}
-	})
-
-	defer func() {
-		log.Info("Starting cleanup")
-		err := ts.CleanUp()
-		if err != nil {
-			log.Error(err)
-		}
-	}()
-
-	log.Trace("creating resources")
-	err = ts.CreateResources()
+	appOperatorClientset := appOperatorClient.NewForConfigOrDie(config)
+	appBrokerClientset := appBrokerClient.NewForConfigOrDie(config)
+	kubelessClientset := kubelessClient.NewForConfigOrDie(config)
+	coreClientset := coreClient.NewForConfigOrDie(config)
+	eventingClientset := eventingClient.NewForConfigOrDie(config)
+	serviceCatalogClientset := serviceCatalogClient.NewForConfigOrDie(config)
+	serviceBindingUsageClientset := serviceBindingUsageClient.NewForConfigOrDie(config)
+	gatewayClientset := gatewayClient.NewForConfigOrDie(config)
+	tokenRequestClient, err := resourceskit.NewTokenRequestClient(config, *testNamespace)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = ts.StartTestServer()
+	connector := testkit.NewConnectorClient(tokenRequestClient, true, log.New())
+
+	s := &scenario{Domain: *domain}
+
+	testService, err := testkit.NewTestService(k8sResourceClient, gatewayClientset.GatewayV1alpha2(), *domain)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	url := ts.GetTestServiceURL()
+	pods := coreClientset.CoreV1().Pods(*testNamespace)
 
-	log.Trace("registering Service")
-	id, err := ts.RegisterService(url)
-	if err != nil {
-		log.Fatal(err)
+	var steps = []step.Step{
+		testsuite.NewCreateApplication(appOperatorClientset.ApplicationconnectorV1alpha1(), false),
+		testsuite.NewCreateMapping(appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(*testNamespace)),
+		testsuite.NewCreateEventActivation(appBrokerClientset.ApplicationconnectorV1alpha1().EventActivations(*testNamespace)),
+		testsuite.NewDeployLambda(kubelessClientset.KubelessV1beta1().Functions(*testNamespace), pods),
+		testsuite.NewStartTestServer(testService),
+		testsuite.NewConnectApplication(connector, s),
+		testsuite.NewRegisterTestService(testService, s),
+		testsuite.NewCreateServiceInstance(serviceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(*testNamespace), s),
+		testsuite.NewCreateServiceBinding(serviceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(*testNamespace), *testNamespace),
+		testsuite.NewCreateServiceBindingUsage(serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(*testNamespace), pods, s),
+		testsuite.NewCreateSubscription(eventingClientset.EventingV1alpha1().Subscriptions(*testNamespace), *testNamespace),
+		testsuite.NewSendEvent(s),
+		testsuite.NewCheckCounterPod(testService),
 	}
 
-	log.Debug("Service ID:", id)
-
-	log.Trace("Creating Instance")
-	_, err = ts.CreateInstance(id)
-	if err != nil {
-		log.Fatal(err)
+	if *cleanupOnly {
+		runner.Cleanup(steps)
+		return
 	}
 
-	log.Trace("Creating Service Binding")
-	err = ts.CreateServiceBinding()
-	if err != nil {
-		log.Fatal(err)
-	}
+	err = runner.Run(steps, *skipCleanup)
 
-	log.Trace("Creating Service Binding Usage")
-	err = ts.CreateServiceBindingUsage()
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Trace("Sending Event")
-	err = ts.SendEvent()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Trace("Checking counter pod for the count.")
-	err = ts.CheckCounterPod()
-	if err != nil {
-		log.Fatal(err)
+		os.Exit(1)
 	}
 
 	log.Info("Successfully Finished the e2e test!!")
+}
+
+func loadKubeConfigOrDie() (*rest.Config, error) {
+	var cfg *rest.Config
+	var err error
+
+	if _, err = os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
+		cfg, err = rest.InClusterConfig()
+	} else {
+		cfg, err = clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
+	}
+
+	return cfg, err
 }

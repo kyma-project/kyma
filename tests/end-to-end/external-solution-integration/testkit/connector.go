@@ -6,30 +6,25 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
+	"github.com/avast/retry-go"
 	"net/http"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/wait"
 	"github.com/sirupsen/logrus"
 )
 
-type ConnectorClient interface {
-	GetToken() (string, error)
-	GetInfo(url string) (*InfoResponse, error)
-	GetCertificate(url string, csr []byte) ([]*x509.Certificate, error)
+type ConnectorClient struct {
+	TokenRequestClient resourceskit.TokenRequestClient
+	httpClient         *http.Client
+	logger             logrus.FieldLogger
 }
 
-type connectorClient struct {
-	trClient   resourceskit.TokenRequestClient
-	httpClient *http.Client
-	logger     logrus.FieldLogger
-}
-
-func NewConnectorClient(trClient resourceskit.TokenRequestClient, skipVerify bool, logger logrus.FieldLogger) ConnectorClient {
-	return &connectorClient{
-		trClient:   trClient,
-		httpClient: newHttpClient(skipVerify),
-		logger:     logger,
+func NewConnectorClient(trClient resourceskit.TokenRequestClient, skipVerify bool, logger logrus.FieldLogger) *ConnectorClient {
+	return &ConnectorClient{
+		TokenRequestClient: trClient,
+		httpClient:         newHttpClient(skipVerify),
+		logger:             logger,
 	}
 }
 
@@ -41,20 +36,20 @@ func newHttpClient(skipVerify bool) *http.Client {
 	return client
 }
 
-func (cc *connectorClient) GetToken() (string, error) {
-	_, err := cc.trClient.CreateTokenRequest()
+func (cc *ConnectorClient) GetToken() (string, error) {
+	_, err := cc.TokenRequestClient.CreateTokenRequest()
 	if err != nil {
 		cc.logger.Error(err)
 		return "", err
 	}
 
-	err = wait.Until(5, 10, cc.isTokenRequestReady)
+	err = retry.Do(cc.isTokenRequestReady)
 	if err != nil {
 		cc.logger.Error(err)
 		return "", err
 	}
 
-	tr, err := cc.trClient.GetTokenRequest()
+	tr, err := cc.TokenRequestClient.GetTokenRequest()
 	if err != nil {
 		cc.logger.Error(err)
 		return "", err
@@ -63,16 +58,20 @@ func (cc *connectorClient) GetToken() (string, error) {
 	return tr.Status.URL, nil
 }
 
-func (cc *connectorClient) isTokenRequestReady() (bool, error) {
-	tokenRequest, e := cc.trClient.GetTokenRequest()
+func (cc *ConnectorClient) isTokenRequestReady() error {
+	tokenRequest, e := cc.TokenRequestClient.GetTokenRequest()
 	if e != nil {
-		return false, e
+		return e
 	}
 
-	return &tokenRequest.Status != nil && &tokenRequest.Status.URL != nil && tokenRequest.Status.URL != "", nil
+	if &tokenRequest.Status == nil || &tokenRequest.Status.URL == nil || tokenRequest.Status.URL == "" {
+		return errors.New("token not ready yet")
+	}
+
+	return nil
 }
 
-func (cc *connectorClient) GetInfo(url string) (*InfoResponse, error) {
+func (cc *ConnectorClient) GetInfo(url string) (*InfoResponse, error) {
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		cc.logger.Error(err)
@@ -103,7 +102,7 @@ func (cc *connectorClient) GetInfo(url string) (*InfoResponse, error) {
 	return infoResponse, nil
 }
 
-func (cc *connectorClient) GetCertificate(url string, csr []byte) ([]*x509.Certificate, error) {
+func (cc *ConnectorClient) GetCertificate(url string, csr []byte) ([]*x509.Certificate, error) {
 	b64CSR := base64.StdEncoding.EncodeToString(csr)
 
 	body, err := json.Marshal(CsrRequest{Csr: b64CSR})
