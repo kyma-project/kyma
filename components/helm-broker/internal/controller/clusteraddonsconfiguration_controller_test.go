@@ -5,6 +5,10 @@ import (
 
 	"time"
 
+	"context"
+	"errors"
+
+	"github.com/Masterminds/semver"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/automock"
@@ -12,16 +16,13 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"context"
-	"github.com/Masterminds/semver"
-	"errors"
 )
 
 func TestReconcileClusterAddonsConfiguration_AddAddonsProcess(t *testing.T) {
@@ -217,7 +218,7 @@ func TestReconcileClusterAddonsConfiguration_DeleteAddonsProcess_Error(t *testin
 	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Name: fixAddonsCfg.Name}})
 	assert.Error(t, err)
 	assert.False(t, result.Requeue)
-	assert.Equal(t, result.RequeueAfter, time.Second * 15)
+	assert.Equal(t, result.RequeueAfter, time.Second*15)
 
 	res := v1alpha1.ClusterAddonsConfiguration{}
 	err = ts.mgr.GetClient().Get(context.Background(), types.NamespacedName{Name: fixAddonsCfg.Name}, &res)
@@ -286,7 +287,7 @@ func fixClusterAddonsConfiguration() *v1alpha1.ClusterAddonsConfiguration {
 func fixFailedClusterAddonsConfiguration() *v1alpha1.ClusterAddonsConfiguration {
 	return &v1alpha1.ClusterAddonsConfiguration{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "failed",
+			Name: "failed",
 		},
 		Spec: v1alpha1.ClusterAddonsConfigurationSpec{
 			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
@@ -305,8 +306,8 @@ func fixFailedClusterAddonsConfiguration() *v1alpha1.ClusterAddonsConfiguration 
 						Status: v1alpha1.RepositoryStatusFailed,
 						Addons: []v1alpha1.Addon{
 							{
-								Status: v1alpha1.AddonStatusFailed,
-								Name: "redis",
+								Status:  v1alpha1.AddonStatusFailed,
+								Name:    "redis",
 								Version: "0.0.1",
 							},
 						},
@@ -341,8 +342,8 @@ func fixDeletedClusterAddonsConfiguration() *v1alpha1.ClusterAddonsConfiguration
 						Status: v1alpha1.RepositoryStatusReady,
 						Addons: []v1alpha1.Addon{
 							{
-								Status: v1alpha1.AddonStatusReady,
-								Name: "redis",
+								Status:  v1alpha1.AddonStatusReady,
+								Name:    "redis",
 								Version: "0.0.1",
 							},
 						},

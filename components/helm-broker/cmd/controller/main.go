@@ -9,9 +9,8 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis"
 
-	//hbConfig "github.com/kyma-project/kyma/components/helm-broker/internal/config"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	envs "github.com/kyma-project/kyma/components/helm-broker/internal/config"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
 	"github.com/sirupsen/logrus"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -83,7 +82,7 @@ func main() {
 	dynamicClient, err := client.New(cfg, client.Options{Scheme: mgr.GetScheme()})
 	fatalOnError(err)
 
-	docsProvider := bundle.NewDocsProvider(dynamicClient)
+	docsProvider := controller.NewDocsProvider(dynamicClient)
 	brokerSyncer := broker.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1(), scClientSet.ServicecatalogV1beta1(), ctrCfg.ClusterServiceBrokerName, log)
 	sbFacade := broker.NewBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName)
 	csbFacade := broker.NewClusterBrokersFacade(scClientSet.ServicecatalogV1beta1(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, ctrCfg.ClusterServiceBrokerName)

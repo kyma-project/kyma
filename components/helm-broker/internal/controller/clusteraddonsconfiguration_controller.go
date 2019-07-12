@@ -54,7 +54,7 @@ var _ reconcile.Reconciler = &ReconcileClusterAddonsConfiguration{}
 
 // ReconcileClusterAddonsConfiguration reconciles a ClusterAddonsConfiguration object
 type ReconcileClusterAddonsConfiguration struct {
-	log    logrus.FieldLogger
+	log logrus.FieldLogger
 	client.Client
 	scheme *runtime.Scheme
 

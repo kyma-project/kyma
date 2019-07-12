@@ -19,17 +19,18 @@ import (
 
 	"time"
 
+	"context"
+	"errors"
+
+	"github.com/Masterminds/semver"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"context"
-	"github.com/Masterminds/semver"
-	"errors"
 )
 
 func TestReconcileAddonsConfiguration_AddAddonsProcess(t *testing.T) {
@@ -225,7 +226,7 @@ func TestReconcileAddonsConfiguration_DeleteAddonsProcess_Error(t *testing.T) {
 	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}})
 	assert.Error(t, err)
 	assert.False(t, result.Requeue)
-	assert.Equal(t, result.RequeueAfter, time.Second * 15)
+	assert.Equal(t, result.RequeueAfter, time.Second*15)
 
 	res := v1alpha1.AddonsConfiguration{}
 	err = ts.mgr.GetClient().Get(context.Background(), types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}, &res)
@@ -275,8 +276,8 @@ func fixFailedAddonsConfiguration() *v1alpha1.AddonsConfiguration {
 						Status: v1alpha1.RepositoryStatusFailed,
 						Addons: []v1alpha1.Addon{
 							{
-								Status: v1alpha1.AddonStatusFailed,
-								Name: "redis",
+								Status:  v1alpha1.AddonStatusFailed,
+								Name:    "redis",
 								Version: "0.0.1",
 							},
 						},
@@ -312,8 +313,8 @@ func fixDeletedAddonsConfiguration() *v1alpha1.AddonsConfiguration {
 						Status: v1alpha1.RepositoryStatusReady,
 						Addons: []v1alpha1.Addon{
 							{
-								Status: v1alpha1.AddonStatusReady,
-								Name: "redis",
+								Status:  v1alpha1.AddonStatusReady,
+								Name:    "redis",
 								Version: "0.0.1",
 							},
 						},
