@@ -38,12 +38,12 @@ telemetry:
     latencyThreshold: 100ms
   resources:
     requests:
-      cpu: 1000m
-      memory: 1G
+      cpu: 300m
+      memory: 512Mi
     limits:
       # It is best to do horizontal scaling of mixer using moderate cpu allocation.
       # We have experimentally found that these values work well.
-      cpu: 4800m
+      cpu: 2000m
       memory: 4G
 
 podAnnotations: {}
