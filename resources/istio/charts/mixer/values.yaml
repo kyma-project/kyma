@@ -18,6 +18,15 @@ policy:
   autoscaleMax: 5
   cpu:
     targetAverageUtilization: 80
+  resources:
+    requests:
+      cpu: 10m
+      memory: 96Mi
+    limits:
+      # It is best to do horizontal scaling of mixer using moderate cpu allocation.
+      # We have experimentally found that these values work well.
+      cpu: 500m
+      memory: 512Mi
 
 telemetry:
   enabled: true
