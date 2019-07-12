@@ -3,22 +3,25 @@ title: Architecture deep dive
 type: Architecture
 ---
 
-## Controller logic
+The diagram and steps describe the Helm Broker workflow in details, including the logic of its inner components, namely the Controller and Broker.
 
-This document describes briefly the raw algorithm of the AddonsConfiguration/ClusterAddonsConfiguration controllers.
+![Architecture deep dive](./assets/hb-deep-dive.svg)
 
-### Add CR
+1. The Controller watches ClusterAddonsConfiguration (CAC) and AddonsConfiguration (AC) custom resources.
+2. The user creates, updates, or deletes CAC or AC custom resources.
+3. The Controller fetches and parses the data of all addon repositories defined in these custom resources.
+4. The Controller saves (?) addon in the internal addons storage.
+5. The Controller creates ClusterServiceBroker or ServiceBroker, depending on whether the
 
-This section describes the add action of new addons configuration.
 
-Steps:
-  1. Fetch bundles
   2. Linting fetched bundles
   3. Checking for ID duplication under **repositories** field
   4. Checking for ID conflicts with already registered addons.
   5. Persist
 
-  > **NOTE:** There is no fast return in case of error. All bundles are fetched and processed. Thanks to under the status entry user can read information about all detected problems with given addons configuration_
+  >**NOTE:** There is no fast return in case of error. All addons are fetched and processed. Thanks to the **status** entry, the user can read information about all detected problems with a given custom resource.
+
+
 ### Update/Relist CR
 
 This section describes the situation when:
@@ -45,7 +48,4 @@ We need to execute clean-up logic, so all CRs need to have the `addons.kyma-proj
 
 ### Manual reprocessing
 
-If Configuration was processed successfully then is not updated automatically. In such a case, user can always
-increment **reprocessRequest** to explicitly request reprocessing of already registered and processed Configuration, e.g. for re-fetching addons from a remote server.
-
-![Architecture deep dive](./assets/hb-deep-dive.svg)
+If Configuration was processed successfully then is not updated automatically. In such a case, user can always increment **reprocessRequest** to explicitly request reprocessing of already registered and processed Configuration, e.g. for re-fetching addons from a remote server.
