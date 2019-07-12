@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/Masterminds/semver"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"k8s.io/helm/pkg/proto/hapi/chart"
@@ -8,13 +9,16 @@ import (
 
 //go:generate mockery -name=bundleStorage -output=automock -outpkg=automock -case=underscore
 type bundleStorage interface {
+	Get(internal.Namespace, internal.BundleName, semver.Version) (*internal.Bundle, error)
 	FindAll(internal.Namespace) ([]*internal.Bundle, error)
 	Upsert(internal.Namespace, *internal.Bundle) (replace bool, err error)
+	Remove(internal.Namespace, internal.BundleName, semver.Version) error
 }
 
 //go:generate mockery -name=chartStorage -output=automock -outpkg=automock -case=underscore
 type chartStorage interface {
 	Upsert(internal.Namespace, *chart.Chart) (replace bool, err error)
+	Remove(internal.Namespace, internal.ChartName, semver.Version) error
 }
 
 //go:generate mockery -name=bundleProvider -output=automock -outpkg=automock -case=underscore

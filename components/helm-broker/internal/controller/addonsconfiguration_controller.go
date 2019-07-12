@@ -5,6 +5,7 @@ import (
 
 	"time"
 
+	"github.com/Masterminds/semver"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/addons"
@@ -231,6 +232,29 @@ func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1
 		}
 	}
 
+	for _, repo := range addon.Status.Repositories {
+		if repo.Status == addonsv1alpha1.RepositoryStatusReady {
+			for _, add := range repo.Addons {
+				if add.Status == addonsv1alpha1.AddonStatusReady {
+
+					r.log.Infof("- deleting DocsTopic for bundle %s", add)
+					b, err := r.bundleStorage.Get(internal.Namespace(addon.Namespace), internal.BundleName(add.Name), *semver.MustParse(add.Version))
+					if err != nil {
+						return exerr.Wrapf(err, "while getting bundle %s from namespace %s", add.Name, addon.Namespace)
+					}
+					if err := r.docsTopicProvider.EnsureDocsTopicRemoved(string(b.ID), addon.Namespace); err != nil {
+						return exerr.Wrapf(err, "while ensuring ClusterDocsTopic for bundle %s is removed", b.ID)
+					}
+
+					r.log.Infof("- deleting bundle %s from namespace %s", add, addon.Namespace)
+					if err := r.bundleStorage.Remove(internal.Namespace(addon.Namespace), internal.BundleName(add.Name), *semver.MustParse(add.Version)); err != nil {
+						return exerr.Wrapf(err, "while deleting bundle %s from storage", add.Name)
+					}
+				}
+			}
+		}
+	}
+
 	if err := r.deleteFinalizer(addon); err != nil {
 		return exerr.Wrapf(err, "while deleting finalizer for AddonConfiguration %s/%s", addon.Name, addon.Namespace)
 	}
@@ -376,6 +400,7 @@ func (r *ReconcileAddonsConfiguration) deleteUnusedDocsTopics(existingBundles []
 			}
 		}
 		if deleteDocsTopic {
+			r.log.Infof("- deleting ClusterDocsTopic for bundle %s", v.ID)
 			if err := r.docsTopicProvider.EnsureDocsTopicRemoved(string(v.ID), namespace); err != nil {
 				return exerr.Wrapf(err, "while ensuring ClusterDocsTopic for bundle %s is removed", v.ID)
 			}
