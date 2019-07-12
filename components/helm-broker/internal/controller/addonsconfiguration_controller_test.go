@@ -37,7 +37,6 @@ func TestReconcileAddonsConfiguration_AddAddonsProcess(t *testing.T) {
 	indexDTO := fixIndexDTO()
 
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
-	ts.bundleStorage.On("FindAll", internal.Namespace(fixAddonsCfg.Namespace)).Return([]*internal.Bundle{}, nil)
 
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {
@@ -68,7 +67,6 @@ func TestReconcileAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
 	indexDTO := fixIndexDTO()
 
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
-	ts.bundleStorage.On("FindAll", internal.Namespace(fixAddonsCfg.Namespace)).Return([]*internal.Bundle{}, nil)
 
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {

@@ -177,16 +177,6 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 	}
 	repositories.ReviseBundleDuplicationInStorage(list)
 
-	existingBundles, err := r.bundleStorage.FindAll(internal.Namespace(addon.Namespace))
-	if err != nil {
-		return exerr.Wrapf(err, "while getting bundles from namespace %s", addon.Namespace)
-	}
-
-	r.log.Info("- deleting unused DocsTopics")
-	if err := r.deleteUnusedDocsTopics(existingBundles, repositories.ReadyAddons(), addon.Namespace); err != nil {
-		return exerr.Wrapf(err, "while deleting unused docs topics in namespace %s", addon.Namespace)
-	}
-
 	r.log.Info("- save ready bundles and charts in storage")
 	r.saveBundle(internal.Namespace(addon.Namespace), repositories)
 
@@ -385,25 +375,6 @@ func (r *ReconcileAddonsConfiguration) saveCharts(namespace internal.Namespace, 
 		}
 		if exist {
 			r.log.Infof("chart %s already existed in storage, chart was replaced", bundleChart.Metadata.Name)
-		}
-	}
-	return nil
-}
-
-func (r *ReconcileAddonsConfiguration) deleteUnusedDocsTopics(existingBundles []*internal.Bundle, newBundles []*addons.AddonController, namespace string) error {
-	for _, v := range existingBundles {
-		deleteDocsTopic := true
-		for _, b := range newBundles {
-			// don't delete docs topics if bundle exists in the new collection
-			if b.Bundle.ID == v.ID {
-				deleteDocsTopic = false
-			}
-		}
-		if deleteDocsTopic {
-			r.log.Infof("- deleting ClusterDocsTopic for bundle %s", v.ID)
-			if err := r.docsTopicProvider.EnsureDocsTopicRemoved(string(v.ID), namespace); err != nil {
-				return exerr.Wrapf(err, "while ensuring ClusterDocsTopic for bundle %s is removed", v.ID)
-			}
 		}
 	}
 	return nil
