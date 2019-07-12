@@ -79,6 +79,8 @@ type publisherDetails struct {
 }
 
 func main() {
+	log.Println("Premature exit!")
+	os.Exit(1)
 	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	var subDetails subscriberDetails
 	var pubDetails publisherDetails
