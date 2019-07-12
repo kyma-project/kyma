@@ -1,4 +1,4 @@
-package bundle_test
+package controller
 
 import (
 	"context"
@@ -35,7 +35,7 @@ func TestDocsProvider_EnsureClusterDocsTopic(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 			c := fake.NewFakeClient()
 			cdt := fixClusterDocsTopic(id)
-			docsProvider := bundle.NewDocsProvider(c)
+			docsProvider := NewDocsProvider(c)
 
 			// when
 			err = docsProvider.EnsureClusterDocsTopic(tc.givenBundle.Bundle)
@@ -60,7 +60,7 @@ func TestDocsProvider_EnsureClusterDocsTopic_UpdateIfExist(t *testing.T) {
 	bundleWithEmptyDocsURL.Bundle.Docs[0].Template.Description = "new description"
 
 	c := fake.NewFakeClient(cdt)
-	docsProvider := bundle.NewDocsProvider(c)
+	docsProvider := NewDocsProvider(c)
 
 	// when
 	err = docsProvider.EnsureClusterDocsTopic(bundleWithEmptyDocsURL.Bundle)
@@ -80,7 +80,7 @@ func TestDocsProvider_EnsureClusterDocsTopicRemoved(t *testing.T) {
 	const id = "123"
 	cdt := fixClusterDocsTopic(id)
 	c := fake.NewFakeClient(cdt)
-	docsProvider := bundle.NewDocsProvider(c)
+	docsProvider := NewDocsProvider(c)
 
 	// when
 	err = docsProvider.EnsureClusterDocsTopicRemoved(id)
@@ -99,7 +99,7 @@ func TestDocsProvider_EnsureClusterDocsTopicRemoved_NotExists(t *testing.T) {
 	const id = "123"
 	cdt := fixClusterDocsTopic(id)
 	c := fake.NewFakeClient()
-	docsProvider := bundle.NewDocsProvider(c)
+	docsProvider := NewDocsProvider(c)
 
 	// when
 	err = docsProvider.EnsureClusterDocsTopicRemoved(id)
@@ -124,7 +124,7 @@ func TestDocsProvider_EnsureDocsTopic(t *testing.T) {
 	} {
 		t.Run(tn, func(t *testing.T) {
 			c := fake.NewFakeClient(dt)
-			docsProvider := bundle.NewDocsProvider(c)
+			docsProvider := NewDocsProvider(c)
 
 			// when
 			err = docsProvider.EnsureDocsTopic(tc.givenBundle.Bundle, dt.Namespace)
@@ -150,7 +150,7 @@ func TestDocsProvider_EnsureDocsTopic_UpdateIfExist(t *testing.T) {
 	bundleWithEmptyDocsURL.Bundle.Docs[0].Template.Description = "new description"
 
 	c := fake.NewFakeClient(dt)
-	docsProvider := bundle.NewDocsProvider(c)
+	docsProvider := NewDocsProvider(c)
 
 	// when
 	err = docsProvider.EnsureDocsTopic(bundleWithEmptyDocsURL.Bundle, dt.Namespace)
@@ -170,7 +170,7 @@ func TestDocsProvider_EnsureDocsTopicRemoved(t *testing.T) {
 
 	dt := fixDocsTopic()
 	c := fake.NewFakeClient(dt)
-	docsProvider := bundle.NewDocsProvider(c)
+	docsProvider := NewDocsProvider(c)
 
 	// when
 	err = docsProvider.EnsureDocsTopicRemoved(dt.Name, dt.Namespace)
@@ -189,7 +189,7 @@ func TestDocsProvider_EnsureDocsTopicRemoved_NotExists(t *testing.T) {
 
 	dt := fixDocsTopic()
 	c := fake.NewFakeClient()
-	docsProvider := bundle.NewDocsProvider(c)
+	docsProvider := NewDocsProvider(c)
 
 	// when
 	err = docsProvider.EnsureDocsTopicRemoved(dt.Name, dt.Namespace)

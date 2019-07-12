@@ -182,8 +182,7 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 
 	r.log.Info("- update AddonsConfiguration status")
 	r.statusSnapshot(addon, repositories)
-	err = r.updateAddonStatus(addon)
-	if err != nil {
+	if err = r.updateAddonStatus(addon); err != nil {
 		r.log.Errorf("cannot update AddonsConfiguration %s: %v", addon.Name, err)
 		return exerr.Wrap(err, "while update AddonsConfiguration status")
 	}

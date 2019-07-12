@@ -23,10 +23,9 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/helm/pkg/proto/hapi/chart"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -40,11 +39,16 @@ func TestReconcileAddonsConfiguration_AddAddonsProcess(t *testing.T) {
 
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {
-			ts.bp.On("LoadCompleteBundle", e).
-				Return(bundle.CompleteBundle{Bundle: &internal.Bundle{Name: internal.BundleName(e.Name)}, Charts: []*chart.Chart{{Metadata: &chart.Metadata{Name: string(e.Name)}}}}, nil)
+			completeBundle := fixBundleWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
 
-			ts.bundleStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), &internal.Bundle{Name: internal.BundleName(e.Name)}).Return(false, nil)
-			ts.chartStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), &chart.Chart{Metadata: &chart.Metadata{Name: string(e.Name)}}).Return(false, nil)
+			ts.bp.On("LoadCompleteBundle", e).
+				Return(completeBundle, nil)
+
+			ts.bundleStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeBundle.Bundle).
+				Return(false, nil)
+			ts.chartStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeBundle.Charts[0]).
+				Return(false, nil)
+			ts.dp.On("EnsureDocsTopic", completeBundle.Bundle, fixAddonsCfg.Namespace).Return(nil)
 		}
 	}
 	ts.bf.On("Exist", fixAddonsCfg.Namespace).Return(false, nil).Once()
@@ -70,13 +74,16 @@ func TestReconcileAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
 
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {
-			ts.bp.On("LoadCompleteBundle", e).
-				Return(bundle.CompleteBundle{Bundle: &internal.Bundle{Name: internal.BundleName(e.Name)}, Charts: []*chart.Chart{{Metadata: &chart.Metadata{Name: string(e.Name)}}}}, nil)
+			completeBundle := fixBundleWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
 
-			ts.bundleStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), &internal.Bundle{Name: internal.BundleName(e.Name)}).
+			ts.bp.On("LoadCompleteBundle", e).
+				Return(completeBundle, nil)
+
+			ts.bundleStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeBundle.Bundle).
 				Return(false, nil)
-			ts.chartStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), &chart.Chart{Metadata: &chart.Metadata{Name: string(e.Name)}}).
+			ts.chartStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeBundle.Charts[0]).
 				Return(false, nil)
+			ts.dp.On("EnsureDocsTopic", completeBundle.Bundle, fixAddonsCfg.Namespace).Return(nil)
 		}
 	}
 	ts.bf.On("Exist", fixAddonsCfg.Namespace).Return(false, nil).Once()

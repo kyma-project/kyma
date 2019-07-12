@@ -7,17 +7,15 @@ import (
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/automock"
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis"
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/helm/pkg/proto/hapi/chart"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -33,13 +31,16 @@ func TestReconcileClusterAddonsConfiguration_AddAddonsProcess(t *testing.T) {
 
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {
-			ts.bp.On("LoadCompleteBundle", e).
-				Return(bundle.CompleteBundle{Bundle: &internal.Bundle{Name: internal.BundleName(e.Name)}, Charts: []*chart.Chart{{Metadata: &chart.Metadata{Name: string(e.Name)}}}}, nil)
+			completeBundle := fixBundleWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
 
-			ts.bundleStorage.On("Upsert", internal.ClusterWide, &internal.Bundle{Name: internal.BundleName(e.Name)}).
+			ts.bp.On("LoadCompleteBundle", e).
+				Return(completeBundle, nil)
+
+			ts.bundleStorage.On("Upsert", internal.ClusterWide, completeBundle.Bundle).
 				Return(false, nil)
-			ts.chartStorage.On("Upsert", internal.ClusterWide, &chart.Chart{Metadata: &chart.Metadata{Name: string(e.Name)}}).
+			ts.chartStorage.On("Upsert", internal.ClusterWide, completeBundle.Charts[0]).
 				Return(false, nil)
+			ts.dp.On("EnsureClusterDocsTopic", completeBundle.Bundle).Return(nil)
 		}
 	}
 	ts.bf.On("Exist").Return(false, nil).Once()
@@ -65,13 +66,15 @@ func TestReconcileClusterAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
 
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {
-			ts.bp.On("LoadCompleteBundle", e).
-				Return(bundle.CompleteBundle{Bundle: &internal.Bundle{Name: internal.BundleName(e.Name)}, Charts: []*chart.Chart{{Metadata: &chart.Metadata{Name: string(e.Name)}}}}, nil)
+			completeBundle := fixBundleWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
 
-			ts.bundleStorage.On("Upsert", internal.ClusterWide, &internal.Bundle{Name: internal.BundleName(e.Name)}).
+			ts.bp.On("LoadCompleteBundle", e).Return(completeBundle, nil)
+
+			ts.bundleStorage.On("Upsert", internal.ClusterWide, completeBundle.Bundle).
 				Return(false, nil)
-			ts.chartStorage.On("Upsert", internal.ClusterWide, &chart.Chart{Metadata: &chart.Metadata{Name: string(e.Name)}}).
+			ts.chartStorage.On("Upsert", internal.ClusterWide, completeBundle.Charts[0]).
 				Return(false, nil)
+			ts.dp.On("EnsureClusterDocsTopic", completeBundle.Bundle).Return(nil)
 		}
 	}
 	ts.bf.On("Exist").Return(false, nil).Once()
