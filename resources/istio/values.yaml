@@ -17,8 +17,22 @@ customization:
 gateways:
   enabled: true
   istio-ingressgateway:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 96Mi
+      limits:
+        cpu: 2000m
+        memory: 256Mi
     sds:
       enabled: true
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits:
+          cpu: 50m
+          memory: 64Mi
 
 #
 # sidecar-injector webhook configuration, refer to the
@@ -45,15 +59,40 @@ mixer:
   policy:
     # if policy is enabled the global.disablePolicyChecks has affect.
     enabled: true
+    resources:
+      requests:
+        cpu: 10m
+        memory: 96Mi
+      limits:
+        # It is best to do horizontal scaling of mixer using moderate cpu allocation.
+        # We have experimentally found that these values work well.
+        cpu: 500m
+        memory: 512Mi
 
   telemetry:
     enabled: true
+    resources:
+      requests:
+        cpu: 300m
+        memory: 512Mi
+      limits:
+        # It is best to do horizontal scaling of mixer using moderate cpu allocation.
+        # We have experimentally found that these values work well.
+        cpu: 2000m
+        memory: 4G
 #
 # pilot configuration
 #
 # @see charts/pilot/values.yaml
 pilot:
   enabled: true
+  resources:
+    limits:
+      cpu: 500m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
 #
 # security configuration

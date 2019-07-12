@@ -11,13 +11,6 @@ image: pilot
 sidecar: true
 traceSampling: 1.0
 # Resources for a small pilot install
-resources:
-  limits:
-    cpu: 500m
-    memory: 2048Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
 env:
   PILOT_PUSH_THROTTLE: 100
   GODEBUG: gctrace=1
