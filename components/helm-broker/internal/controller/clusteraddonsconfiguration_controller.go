@@ -54,7 +54,7 @@ var _ reconcile.Reconciler = &ReconcileClusterAddonsConfiguration{}
 
 // ReconcileClusterAddonsConfiguration reconciles a ClusterAddonsConfiguration object
 type ReconcileClusterAddonsConfiguration struct {
-	log logrus.FieldLogger
+	log    logrus.FieldLogger
 	client.Client
 	scheme *runtime.Scheme
 
@@ -108,7 +108,7 @@ func (r *ReconcileClusterAddonsConfiguration) Reconcile(request reconcile.Reques
 
 	if instance.DeletionTimestamp != nil {
 		if err := r.deleteAddonsProcess(instance); err != nil {
-			return reconcile.Result{}, exerr.Wrapf(err, "while deleting ClusterAddonConfiguration %q", request.NamespacedName)
+			return reconcile.Result{RequeueAfter: time.Second * 15}, exerr.Wrapf(err, "while deleting ClusterAddonConfiguration %q", request.NamespacedName)
 		}
 		return reconcile.Result{}, nil
 	}
@@ -118,7 +118,7 @@ func (r *ReconcileClusterAddonsConfiguration) Reconcile(request reconcile.Reques
 
 		updatedInstance, err := r.addFinalizer(instance)
 		if err != nil {
-			return reconcile.Result{}, exerr.Wrapf(err, "while adding a finalizer to ClusterAddonsConfiguration %q", request.NamespacedName)
+			return reconcile.Result{Requeue: true}, exerr.Wrapf(err, "while adding a finalizer to ClusterAddonsConfiguration %q", request.NamespacedName)
 		}
 		err = r.addAddonsProcess(updatedInstance)
 		if err != nil {
