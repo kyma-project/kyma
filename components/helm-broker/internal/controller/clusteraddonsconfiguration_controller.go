@@ -116,9 +116,13 @@ func (r *ReconcileClusterAddonsConfiguration) Reconcile(request reconcile.Reques
 	if instance.Status.ObservedGeneration == 0 {
 		r.log.Infof("Start add ClusterAddonsConfiguration %s process", instance.Name)
 
-		updatedInstance, err := r.addFinalizer(instance)
+		pendingInstance, err := r.setPendingStatus(instance)
 		if err != nil {
-			return reconcile.Result{Requeue: true}, exerr.Wrapf(err, "while adding a finalizer to ClusterAddonsConfiguration %q", request.NamespacedName)
+			return reconcile.Result{}, err
+		}
+		updatedInstance, err := r.addFinalizer(pendingInstance)
+		if err != nil {
+			return reconcile.Result{Requeue: true}, exerr.Wrapf(err, "while adding a finalizer to AddonsConfiguration %q", request.NamespacedName)
 		}
 		err = r.addAddonsProcess(updatedInstance)
 		if err != nil {
@@ -149,7 +153,7 @@ func (r *ReconcileClusterAddonsConfiguration) addAddonsProcess(addon *addonsv1al
 			r.log.Errorf("url %q address is not valid: %s", specRepository.URL, err)
 			continue
 		}
-		r.log.Infof("create adds for %q repository", specRepository.URL)
+		r.log.Infof("- create addons for %q repository", specRepository.URL)
 		repo := addons.NewAddonsRepository(specRepository.URL)
 
 		adds, err := r.createAddons(specRepository.URL)
@@ -186,6 +190,10 @@ func (r *ReconcileClusterAddonsConfiguration) addAddonsProcess(addon *addonsv1al
 	if err = r.updateAddonStatus(addon); err != nil {
 		r.log.Errorf("cannot update ClusterAddonsConfiguration %s: %v", addon.Name, err)
 		return exerr.Wrap(err, "while update AddonsConfiguration status")
+	}
+
+	if err := r.deleteOrphanBundles(); err != nil {
+		return exerr.Wrap(err, "while deleting orphan bundles from storage")
 	}
 
 	r.log.Info("- ensure ClusterServiceBroker")
@@ -273,7 +281,7 @@ func (r *ReconcileClusterAddonsConfiguration) ensureBroker(addon *addonsv1alpha1
 }
 
 func (r *ReconcileClusterAddonsConfiguration) createAddons(URL string) ([]*addons.AddonController, error) {
-	adds := []*addons.AddonController{}
+	var adds []*addons.AddonController
 
 	// fetch repository index
 	index, err := r.bundleProvider.GetIndex(URL)
@@ -336,6 +344,48 @@ func (r *ReconcileClusterAddonsConfiguration) addonsConfigurationList() (*addons
 	}
 
 	return addonsConfigurationList, nil
+}
+
+func (r *ReconcileClusterAddonsConfiguration) deleteOrphanBundles() error {
+	existingBundles, err := r.bundleStorage.FindAll(internal.ClusterWide)
+	if err != nil {
+		return exerr.Wrap(err, "while listing bundles from storage")
+	}
+	if len(existingBundles) == 0 {
+		return nil
+	}
+	addonsList, err := r.addonsConfigurationList()
+	if err != nil {
+		return exerr.Wrap(err, "while listing bundles")
+	}
+
+	for _, b := range existingBundles {
+		if r.hasBundleDeleted(b, addonsList) {
+			r.log.Infof("- delete bundle %s from storage", b.Name)
+			err := r.bundleStorage.Remove(internal.ClusterWide, internal.BundleName(b.Name), b.Version)
+			if err != nil {
+				return exerr.Wrapf(err, "while removing bundle %s/%q", b.Name, b.Version)
+			}
+			err = r.chartStorage.Remove(internal.ClusterWide, internal.ChartName(b.Name), b.Version)
+			if err != nil {
+				return exerr.Wrapf(err, "while removing chart %s/%q", b.Name, b.Version)
+			}
+		}
+	}
+	return nil
+}
+
+func (r *ReconcileClusterAddonsConfiguration) hasBundleDeleted(b *internal.Bundle, list *addonsv1alpha1.ClusterAddonsConfigurationList) bool {
+	for _, cfgs := range list.Items {
+		for _, repo := range cfgs.Status.Repositories {
+			for _, add := range repo.Addons {
+				if string(b.Name) == add.Name && b.Version.Original() == add.Version {
+					return false
+				}
+			}
+		}
+	}
+	return true
 }
 
 func (r *ReconcileClusterAddonsConfiguration) saveBundle(repositories *addons.RepositoryCollection) error {
@@ -409,6 +459,17 @@ func (r *ReconcileClusterAddonsConfiguration) updateAddonStatus(addon *addonsv1a
 		return exerr.Wrap(err, "while update ClusterAddonsConfiguration")
 	}
 	return nil
+}
+
+func (r *ReconcileClusterAddonsConfiguration) setPendingStatus(addon *addonsv1alpha1.ClusterAddonsConfiguration) (*addonsv1alpha1.ClusterAddonsConfiguration, error) {
+	addon.Status.Phase = addonsv1alpha1.AddonsConfigurationPending
+	addon.Status.LastProcessedTime = &v1.Time{Time: time.Now()}
+
+	err := r.Status().Update(context.TODO(), addon)
+	if err != nil {
+		return nil, exerr.Wrap(err, "while update ClusterAddonsConfiguration")
+	}
+	return addon, nil
 }
 
 func (r *ReconcileClusterAddonsConfiguration) addFinalizer(addon *addonsv1alpha1.ClusterAddonsConfiguration) (*addonsv1alpha1.ClusterAddonsConfiguration, error) {

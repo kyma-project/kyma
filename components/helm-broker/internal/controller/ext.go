@@ -12,6 +12,7 @@ type bundleStorage interface {
 	Get(internal.Namespace, internal.BundleName, semver.Version) (*internal.Bundle, error)
 	Upsert(internal.Namespace, *internal.Bundle) (replace bool, err error)
 	Remove(internal.Namespace, internal.BundleName, semver.Version) error
+	FindAll(internal.Namespace) ([]*internal.Bundle, error)
 }
 
 //go:generate mockery -name=chartStorage -output=automock -outpkg=automock -case=underscore

@@ -39,6 +39,7 @@ func TestReconcileAddonsConfiguration_AddAddonsProcess(t *testing.T) {
 	ts := getTestSuite(t, fixAddonsCfg)
 	indexDTO := fixIndexDTO()
 
+	ts.bundleStorage.On("FindAll", internal.Namespace(fixAddonsCfg.Namespace)).Return([]*internal.Bundle{}, nil)
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
 
 	for _, entry := range indexDTO.Entries {
@@ -73,12 +74,13 @@ func TestReconcileAddonsConfiguration_AddAddonsProcess(t *testing.T) {
 	assert.Contains(t, res.Finalizers, v1alpha1.FinalizerAddonsConfiguration)
 }
 
-func TestReconcileAddonsConfiguration_AddAddonsProcess_Error(t *testing.T) {
+func TestReconcileAddonsConfiguration_AddAddonsProcess_ErrorIfBrokerExist(t *testing.T) {
 	// GIVEN
 	fixAddonsCfg := fixAddonsConfiguration()
 	ts := getTestSuite(t, fixAddonsCfg)
 	indexDTO := fixIndexDTO()
 
+	ts.bundleStorage.On("FindAll", internal.Namespace(fixAddonsCfg.Namespace)).Return([]*internal.Bundle{}, nil)
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
 
 	for _, entry := range indexDTO.Entries {
@@ -119,6 +121,7 @@ func TestReconcileAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
 	ts := getTestSuite(t, fixAddonsCfg)
 	indexDTO := fixIndexDTO()
 
+	ts.bundleStorage.On("FindAll", internal.Namespace(fixAddonsCfg.Namespace)).Return([]*internal.Bundle{}, nil)
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
 
 	for _, entry := range indexDTO.Entries {
