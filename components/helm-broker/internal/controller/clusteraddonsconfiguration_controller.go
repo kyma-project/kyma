@@ -188,7 +188,7 @@ func (r *ReconcileClusterAddonsConfiguration) addAddonsProcess(addon *addonsv1al
 		return exerr.Wrap(err, "while update AddonsConfiguration status")
 	}
 
-	r.log.Info("- ensuring ClusterServiceBroker")
+	r.log.Info("- ensure ClusterServiceBroker")
 	if err := r.ensureBroker(addon); err != nil {
 		return exerr.Wrap(err, "while ensuring ClusterServiceBroker")
 	}
@@ -217,7 +217,7 @@ func (r *ReconcileClusterAddonsConfiguration) deleteAddonsProcess(addon *addonsv
 		}
 	}
 	if deleteBroker {
-		r.log.Info("- deleting ClusterServiceBroker")
+		r.log.Info("- delete ClusterServiceBroker")
 		if err := r.clusterBrokerFacade.Delete(); err != nil {
 			return exerr.Wrap(err, "while deleting ClusterServiceBroker")
 		}
@@ -227,7 +227,7 @@ func (r *ReconcileClusterAddonsConfiguration) deleteAddonsProcess(addon *addonsv
 		if repo.Status == addonsv1alpha1.RepositoryStatusReady {
 			for _, add := range repo.Addons {
 				if add.Status == addonsv1alpha1.AddonStatusReady {
-					r.log.Infof("- deleting DocsTopic for bundle %s", add)
+					r.log.Infof("- delete DocsTopic for bundle %s", add.Name)
 
 					b, err := r.bundleStorage.Get(internal.Namespace(addon.Namespace), internal.BundleName(add.Name), *semver.MustParse(add.Version))
 					if err != nil {
@@ -236,7 +236,7 @@ func (r *ReconcileClusterAddonsConfiguration) deleteAddonsProcess(addon *addonsv
 					if err := r.clusterDocsProvider.EnsureClusterDocsTopicRemoved(string(b.ID)); err != nil {
 						return exerr.Wrapf(err, "while ensuring ClusterDocsTopic for bundle %s is removed", b.ID)
 					}
-					r.log.Infof("- deleting bundle %s", add)
+					r.log.Infof("- delete bundle %s", add)
 
 					if err := r.bundleStorage.Remove(internal.Namespace(addon.Namespace), internal.BundleName(add.Name), *semver.MustParse(add.Version)); err != nil {
 						return exerr.Wrapf(err, "while deleting bundle %s from storage", add.Name)
@@ -341,7 +341,7 @@ func (r *ReconcileClusterAddonsConfiguration) addonsConfigurationList() (*addons
 func (r *ReconcileClusterAddonsConfiguration) saveBundle(repositories *addons.RepositoryCollection) error {
 	for _, addon := range repositories.ReadyAddons() {
 		if len(addon.Bundle.Docs) == 1 {
-			r.log.Infof("- creating ClusterDocsTopic for bundle %s", addon.Bundle.ID)
+			r.log.Infof("- ensure ClusterDocsTopic for bundle %s", addon.Bundle.ID)
 			if err := r.clusterDocsProvider.EnsureClusterDocsTopic(addon.Bundle); err != nil {
 				return exerr.Wrapf(err, "While ensuring ClusterDocsTopic for bundle %s: %v", addon.Bundle.ID, err)
 			}
@@ -416,6 +416,7 @@ func (r *ReconcileClusterAddonsConfiguration) addFinalizer(addon *addonsv1alpha1
 	if r.protection.hasFinalizer(obj.Finalizers) {
 		return obj, nil
 	}
+	r.log.Info("- add a finalizer")
 	obj.Finalizers = r.protection.addFinalizer(obj.Finalizers)
 
 	err := r.Client.Update(context.Background(), obj)
@@ -430,6 +431,7 @@ func (r *ReconcileClusterAddonsConfiguration) deleteFinalizer(addon *addonsv1alp
 	if !r.protection.hasFinalizer(obj.Finalizers) {
 		return nil
 	}
+	r.log.Info("- delete a finalizer")
 	obj.Finalizers = r.protection.removeFinalizer(obj.Finalizers)
 
 	return r.Client.Update(context.Background(), obj)

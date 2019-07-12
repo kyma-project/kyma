@@ -188,7 +188,7 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 		return exerr.Wrap(err, "while update AddonsConfiguration status")
 	}
 
-	r.log.Info("- ensuring ServiceBroker")
+	r.log.Info("- ensure ServiceBroker")
 	if err := r.ensureBroker(addon); err != nil {
 		return exerr.Wrap(err, "while ensuring ServiceBroker")
 	}
@@ -217,6 +217,7 @@ func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1
 		}
 	}
 	if deleteBroker {
+		r.log.Info("- delete ServiceBroker from namespace %s", addon.Namespace)
 		if err := r.brokerFacade.Delete(addon.Namespace); err != nil {
 			return exerr.Wrapf(err, "while deleting ServiceBroker from namespace %s", addon.Namespace)
 		}
@@ -227,7 +228,7 @@ func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1
 			for _, add := range repo.Addons {
 				if add.Status == addonsv1alpha1.AddonStatusReady {
 
-					r.log.Infof("- deleting DocsTopic for bundle %s", add)
+					r.log.Infof("- delete DocsTopic for bundle %s", add)
 					b, err := r.bundleStorage.Get(internal.Namespace(addon.Namespace), internal.BundleName(add.Name), *semver.MustParse(add.Version))
 					if err != nil {
 						return exerr.Wrapf(err, "while getting bundle %s from namespace %s", add.Name, addon.Namespace)
@@ -236,7 +237,7 @@ func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1
 						return exerr.Wrapf(err, "while ensuring ClusterDocsTopic for bundle %s is removed", b.ID)
 					}
 
-					r.log.Infof("- deleting bundle %s from namespace %s", add, addon.Namespace)
+					r.log.Infof("- delete bundle %s from namespace %s", add, addon.Namespace)
 					if err := r.bundleStorage.Remove(internal.Namespace(addon.Namespace), internal.BundleName(add.Name), *semver.MustParse(add.Version)); err != nil {
 						return exerr.Wrapf(err, "while deleting bundle %s from storage", add.Name)
 					}
@@ -340,7 +341,7 @@ func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*addons.Addon
 func (r *ReconcileAddonsConfiguration) saveBundle(namespace internal.Namespace, repositories *addons.RepositoryCollection) error {
 	for _, addon := range repositories.ReadyAddons() {
 		if len(addon.Bundle.Docs) == 1 {
-			r.log.Infof("- creating DocsTopic for bundle %s", addon.Bundle.ID)
+			r.log.Infof("- ensure DocsTopic for bundle %s in namespace %s", addon.Bundle.ID, namespace)
 			if err := r.docsTopicProvider.EnsureDocsTopic(addon.Bundle, string(namespace)); err != nil {
 				return exerr.Wrapf(err, "While ensuring DocsTopic for bundle %s/%s: %v", addon.Bundle.ID, namespace, err)
 			}
@@ -421,7 +422,7 @@ func (r *ReconcileAddonsConfiguration) addFinalizer(addon *addonsv1alpha1.Addons
 	if r.protection.hasFinalizer(obj.Finalizers) {
 		return obj, nil
 	}
-	r.log.Info("- adding a finalizer")
+	r.log.Info("- add a finalizer")
 	obj.Finalizers = r.protection.addFinalizer(obj.Finalizers)
 
 	err := r.Client.Update(context.Background(), obj)
@@ -436,7 +437,7 @@ func (r *ReconcileAddonsConfiguration) deleteFinalizer(addon *addonsv1alpha1.Add
 	if !r.protection.hasFinalizer(obj.Finalizers) {
 		return nil
 	}
-	r.log.Info("- deleting a finalizer")
+	r.log.Info("- delete a finalizer")
 	obj.Finalizers = r.protection.removeFinalizer(obj.Finalizers)
 
 	return r.Client.Update(context.Background(), obj)

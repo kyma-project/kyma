@@ -3,11 +3,14 @@ package controller
 import (
 	"context"
 
+	"reflect"
+
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/pkg/errors"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -127,22 +130,16 @@ func (d *DocsProvider) defaultDocsSourcesURLs(bundle *internal.Bundle) []v1alpha
 }
 
 func (d *DocsProvider) updateClusterDocsTopic(bundle *internal.Bundle) error {
-	cdt := &v1alpha1.ClusterDocsTopic{
-		ObjectMeta: v1.ObjectMeta{
-			Name: string(bundle.ID),
-		},
-	}
-	key, err := client.ObjectKeyFromObject(cdt)
-	if err != nil {
-		return errors.Wrap(err, "while getting object key for ClusterDocsTopic")
-	}
-
-	if err = d.dynamicClient.Get(context.Background(), key, cdt); err != nil {
+	cdt := &v1alpha1.ClusterDocsTopic{}
+	if err := d.dynamicClient.Get(context.Background(), types.NamespacedName{Name: string(bundle.ID)}, cdt); err != nil {
 		return errors.Wrapf(err, "while getting ClusterDocsTopic %s", bundle.ID)
+	}
+	if reflect.DeepEqual(cdt.Spec.CommonDocsTopicSpec, bundle.Docs[0].Template) {
+		return nil
 	}
 	cdt.Spec = v1alpha1.ClusterDocsTopicSpec{CommonDocsTopicSpec: bundle.Docs[0].Template}
 
-	if err = d.dynamicClient.Update(context.Background(), cdt); err != nil {
+	if err := d.dynamicClient.Update(context.Background(), cdt); err != nil {
 		return errors.Wrapf(err, "while updating ClusterDocsTopic %s", bundle.ID)
 	}
 
@@ -150,23 +147,17 @@ func (d *DocsProvider) updateClusterDocsTopic(bundle *internal.Bundle) error {
 }
 
 func (d *DocsProvider) updateDocsTopic(bundle *internal.Bundle) error {
-	dt := &v1alpha1.DocsTopic{
-		ObjectMeta: v1.ObjectMeta{
-			Name: string(bundle.ID),
-		},
+	dt := &v1alpha1.DocsTopic{}
+	if err := d.dynamicClient.Get(context.Background(), types.NamespacedName{Name: string(bundle.ID)}, dt); err != nil {
+		return errors.Wrapf(err, "while getting DocsTopic %s", bundle.ID)
 	}
-	key, err := client.ObjectKeyFromObject(dt)
-	if err != nil {
-		return errors.Wrap(err, "while getting object key for ClusterDocsTopic")
-	}
-
-	if err = d.dynamicClient.Get(context.Background(), key, dt); err != nil {
-		return errors.Wrapf(err, "while getting ClusterDocsTopic %s", bundle.ID)
+	if reflect.DeepEqual(dt.Spec.CommonDocsTopicSpec, bundle.Docs[0].Template) {
+		return nil
 	}
 	dt.Spec = v1alpha1.DocsTopicSpec{CommonDocsTopicSpec: bundle.Docs[0].Template}
 
-	if err = d.dynamicClient.Update(context.Background(), dt); err != nil {
-		return errors.Wrapf(err, "while updating ClusterDocsTopic %s", bundle.ID)
+	if err := d.dynamicClient.Update(context.Background(), dt); err != nil {
+		return errors.Wrapf(err, "while updating DocsTopic %s", bundle.ID)
 	}
 
 	return nil
