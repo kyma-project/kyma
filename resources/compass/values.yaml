@@ -14,9 +14,6 @@ global:
     healthchecker:
       dir: pr/
       version: "PR-99"
-    runtimeAgent:
-      dir: pr/
-      version: "PR-127"
     tests:
       e2e:
         dir: pr/
