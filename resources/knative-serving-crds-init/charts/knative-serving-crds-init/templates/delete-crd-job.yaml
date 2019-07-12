@@ -13,7 +13,7 @@ apiVersion: v1
 data:
   delete-crd.sh: |
     #!/usr/bin/env bash
-    echo "*** Pre upgrade job starts ***"
+    echo "*** Pre Install job starts ***"
     kubectl delete crd services.serving.knative.dev  || echo "services CRD not present"
     kubectl delete crd routes.serving.knative.dev   || echo "routes CRD not present"
     kubectl delete crd revisions.serving.knative.dev  || echo "revisions CRD not present"
@@ -21,7 +21,7 @@ data:
     kubectl delete crd clusteringresses.networking.internal.knative.dev  || echo "clusteringress CRD not present"
     kubectl delete crd podautoscalers.autoscaling.internal.knative.dev  || echo "podautoscalers CRD not present"
     kubectl delete crd images.caching.internal.knative.dev  || echo "images CRD not present"
-    echo "*** Pre upgrade job executed ***"
+    echo "*** Pre Install job executed ***"
 kind: ConfigMap
 metadata:
   annotations:
@@ -232,7 +232,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: pre-upgrade-knative-serving-crds
+  name: delete-crd-knative-serving-crds
   annotations:
     "helm.sh/hook-delete-policy": before-hook-creation
     "helm.sh/hook": "pre-install"
@@ -240,10 +240,10 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: pre-upgrade-knative-serving-crds-cr
+  name: delete-crd-knative-serving-crds-cr
 subjects:
 - kind: ServiceAccount
-  name: pre-upgrade-knative-serving-crds
+  name: delete-crd-knative-serving-crds
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: batch/v1
@@ -254,8 +254,8 @@ metadata:
     "helm.sh/hook-weight": "-1"
     "helm.sh/hook": "pre-install"
   labels:
-    job: pre-upgrade-knative-serving-crds
-  name: pre-upgrade-knative-serving-crds
+    job: delete-crd-knative-serving-crds
+  name: delete-crd-knative-serving-crds
 spec:
   completions: 1
   parallelism: 1
