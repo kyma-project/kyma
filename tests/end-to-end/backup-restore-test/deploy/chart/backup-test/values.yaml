@@ -5,4 +5,4 @@ nameOverride: backup-test
 
 image:
   dir:
-  tag: 1.3.0-rc2
+  tag: 1.3.0
