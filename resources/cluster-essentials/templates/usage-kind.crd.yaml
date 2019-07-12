@@ -6,8 +6,6 @@ spec:
   group: servicecatalog.kyma-project.io
   version: v1alpha1
   scope: Cluster
-  subresources:
-    status: {}
   names:
     plural: usagekinds
     singular: usagekind

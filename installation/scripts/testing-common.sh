@@ -181,113 +181,21 @@ function printImagesWithLatestTag() {
     return 0
 }
 
-TESTING_ADDONS_CFG_NAME="testing-addons"
-
+TESTING_BUNDLES_MAP_NAME="testing-bundles-repos"
 function injectTestingBundles() {
-    cat <<EOF | kubectl apply -f -
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  creationTimestamp: null
-  labels:
-    controller-tools.k8s.io: "1.0"
-  name: clusteraddonsconfigurations.addons.kyma-project.io
-spec:
-  group: addons.kyma-project.io
-  names:
-    categories:
-    - all
-    - addons
-    kind: ClusterAddonsConfiguration
-    plural: clusteraddonsconfigurations
-  scope: Cluster
-  subresources:
-    status: {}
-  validation:
-    openAPIV3Schema:
-      properties:
-        apiVersion:
-          type: string
-        kind:
-          type: string
-        metadata:
-          type: object
-        spec:
-          properties:
-            repositories:
-              items:
-                properties:
-                  url:
-                    type: string
-                required:
-                - url
-                type: object
-              type: array
-            reprocessRequest:
-              format: int64
-              type: integer
-          required:
-          - repositories
-          type: object
-        status:
-          properties:
-            lastProcessedTime:
-              format: date-time
-              type: string
-            observedGeneration:
-              format: int64
-              type: integer
-            phase:
-              type: string
-            repositories:
-              items:
-                properties:
-                  addons:
-                    items:
-                      properties:
-                        message:
-                          type: string
-                        name:
-                          type: string
-                        reason:
-                          type: string
-                        status:
-                          enum:
-                          - Ready
-                          - Failed
-                          type: string
-                        version:
-                          type: string
-                      required:
-                      - name
-                      - version
-                      type: object
-                    type: array
-                  message:
-                    type: string
-                  reason:
-                    type: string
-                  status:
-                    type: string
-                  url:
-                    type: string
-                required:
-                - url
-                - addons
-                type: object
-              type: array
-          required:
-          - phase
-          type: object
-  version: v1alpha1
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
-EOF
+    kubectl create configmap ${TESTING_BUNDLES_MAP_NAME} -n kyma-system --from-literal=URLs=https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml
+    kubectl label configmap ${TESTING_BUNDLES_MAP_NAME} -n kyma-system helm-broker-repo=true
 
+    log "Testing bundles injected" green
+}
+
+function removeTestingBundles() {
+    kubectl delete configmap ${TESTING_BUNDLES_MAP_NAME} -n kyma-system
+    log "Testing bundles removed" green
+}
+
+TESTING_ADDONS_CFG_NAME="testing-addons"
+function injectTestingAddons() {
     cat <<EOF | kubectl apply -f -
 apiVersion: addons.kyma-project.io/v1alpha1
 kind: ClusterAddonsConfiguration
@@ -302,7 +210,7 @@ EOF
     log "Testing addons injected" green
 }
 
-function removeTestingBundles() {
+function removeTestingAddons() {
     kubectl delete clusteraddonsconfiguration ${TESTING_ADDONS_CFG_NAME}
     log "Testing addons removed" green
 }

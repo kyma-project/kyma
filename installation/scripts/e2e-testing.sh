@@ -24,7 +24,7 @@ cleanupHelmE2ERelease () {
 }
 
 # creates a config map which provides the testing bundles	
-injectTestingBundles
+injectTestingAddons
 
 testcase="${ROOT_PATH}"/../../tests/end-to-end/backup-restore-test/deploy/chart/backup-test
 release=$(basename "$testcase")
