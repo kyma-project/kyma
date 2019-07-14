@@ -4,7 +4,7 @@
 enabled: false 
 replicaCount: 1
 hub: docker.io/kiali
-tag: v0.16
+tag: v1.1.0
 contextPath: /
 nodeSelector: {}
 
