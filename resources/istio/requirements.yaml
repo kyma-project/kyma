@@ -33,7 +33,7 @@ dependencies:
     version: 1.2.2
     condition: galley.enabled
   - name: kiali
-    version: 1.2.2
+    version: 1.1.0
     condition: kiali.enabled
   - name: istiocoredns
     version: 1.2.2
