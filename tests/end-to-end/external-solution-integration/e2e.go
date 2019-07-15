@@ -21,8 +21,7 @@ import (
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testsuite"
 	log "github.com/sirupsen/logrus"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
 
 type scenario struct {
@@ -62,9 +61,11 @@ func main() {
 	domain := pflag.String("domain", "kyma.local", "Domain")
 	cleanupOnly := pflag.Bool("cleanupOnly", false, "Only cleanup resources")
 	skipCleanup := pflag.Bool("skipCleanup", false, "Do not cleanup resources")
+	kubeconfigFlags := genericclioptions.NewConfigFlags()
+	kubeconfigFlags.AddFlags(pflag.CommandLine)
 	pflag.Parse()
 
-	config, err := loadKubeConfigOrDie()
+	config, err := kubeconfigFlags.ToRESTConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -130,15 +131,15 @@ func main() {
 	log.Info("Successfully Finished the e2e test!!")
 }
 
-func loadKubeConfigOrDie() (*rest.Config, error) {
-	var cfg *rest.Config
-	var err error
+func waitForApiSerer() {
+	time.Sleep(10 * time.Second)
+}
 
-	if _, err = os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
-		cfg, err = rest.InClusterConfig()
-	} else {
-		cfg, err = clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
-	}
+func setupLogging() {
+	log.SetReportCaller(true)
+	log.SetLevel(log.TraceLevel)
+}
 
-	return cfg, err
+func setupFlags() {
+
 }

@@ -14,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"net/http"
 	"strconv"
+	"github.com/hashicorp/go-multierror"
 )
 
 const (
@@ -116,19 +117,8 @@ func (ts *TestService) DeleteTestService() error {
 	errDeployment := ts.K8sResourcesClient.DeleteDeployment(testServiceName, &v1.DeleteOptions{})
 	errService := ts.K8sResourcesClient.DeleteService(testServiceName, &v1.DeleteOptions{})
 	errApi := ts.apis.Apis(ts.K8sResourcesClient.GetNamespace()).Delete(testServiceName, &v1.DeleteOptions{})
-	if errDeployment != nil {
-		return errDeployment
-	}
-
-	if errService != nil {
-		return errService
-	}
-
-	if errApi != nil {
-		return errApi
-	}
-
-	return nil
+	err := multierror.Append(errDeployment, errService, errApi)
+	return err.ErrorOrNil()
 }
 
 func (ts *TestService) GetTestServiceURL() string {
