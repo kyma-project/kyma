@@ -1,5 +1,5 @@
 ---
-title: General troubleshooting guidelines
+title: Basic troubleshooting
 type: Troubleshooting
 ---
 
