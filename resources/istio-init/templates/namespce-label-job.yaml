@@ -53,7 +53,7 @@ spec:
           - -c
           - |
             set -e
-            {{- range .Values.namespaces2Label }}
+            {{- range .Values.kyma.namespaces2Label }}
             echo "---> Setting label to {{ . }}"
             kubectl label namespace {{ . | quote }} "istio-injection=disabled" --overwrite
             {{- end }}
