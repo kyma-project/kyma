@@ -27,8 +27,8 @@ func (_ notSerializable) MarshalJSON() ([]byte, error) {
 }
 
 func TestManager_Save(t *testing.T) {
-	serializable := &clientcontext.ApplicationContext{
-		Application: "app",
+	serializable := &clientcontext.ClientContext{
+		ID: "app",
 	}
 	t.Run("should trigger Put method on token store", func(t *testing.T) {
 

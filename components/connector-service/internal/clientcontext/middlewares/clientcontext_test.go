@@ -13,6 +13,8 @@ import (
 
 const (
 	testApplication = "test-app"
+	testTenant      = "test-tenant"
+	testGroup       = "test-group"
 )
 
 func TestApplicationContextMiddleware_Middleware(t *testing.T) {
@@ -21,13 +23,12 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			applicationCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
+			applicationCtx, ok := ctx.Value(clientcontext.ClientContextKey).(clientcontext.ClientContext)
 			require.True(t, ok)
 
-			assert.Equal(t, testApplication, applicationCtx.Application)
-			assert.Equal(t, testTenant, applicationCtx.ClientContext.Tenant)
-			assert.Equal(t, testGroup, applicationCtx.ClientContext.Group)
-			assert.Equal(t, testRuntimeID, applicationCtx.ClientContext.ID)
+			assert.Equal(t, testApplication, applicationCtx.ID)
+			assert.Equal(t, testTenant, applicationCtx.Tenant)
+			assert.Equal(t, testGroup, applicationCtx.Group)
 
 			w.WriteHeader(http.StatusOK)
 		})
@@ -37,13 +38,12 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 		req.Header.Set(clientcontext.ApplicationHeader, testApplication)
 		req.Header.Set(clientcontext.TenantHeader, testTenant)
 		req.Header.Set(clientcontext.GroupHeader, testGroup)
-		req.Header.Set(clientcontext.RuntimeIDHeader, testRuntimeID)
 
 		rr := httptest.NewRecorder()
 
 		clusterContextStrategy := clientcontext.NewClusterContextStrategy(true)
 
-		middleware := NewApplicationContextMiddleware(clusterContextStrategy)
+		middleware := NewContextMiddleware(clusterContextStrategy, clientcontext.ApplicationHeader)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -57,11 +57,12 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			applicationCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
+			applicationCtx, ok := ctx.Value(clientcontext.ClientContextKey).(clientcontext.ClientContext)
 			require.True(t, ok)
 
-			assert.Equal(t, testApplication, applicationCtx.Application)
-			assert.Empty(t, applicationCtx.ClientContext)
+			assert.Equal(t, testApplication, applicationCtx.ID)
+			assert.Empty(t, applicationCtx.Tenant)
+			assert.Empty(t, applicationCtx.Group)
 
 			w.WriteHeader(http.StatusOK)
 		})
@@ -76,7 +77,7 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 
 		clusterContextStrategy := clientcontext.NewClusterContextStrategy(false)
 
-		middleware := NewApplicationContextMiddleware(clusterContextStrategy)
+		middleware := NewContextMiddleware(clusterContextStrategy, clientcontext.ApplicationHeader)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -96,13 +97,35 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 		require.NoError(t, err)
 		req.Header.Set(clientcontext.TenantHeader, testTenant)
 		req.Header.Set(clientcontext.GroupHeader, testGroup)
-		req.Header.Set(clientcontext.RuntimeIDHeader, testRuntimeID)
 
 		rr := httptest.NewRecorder()
 
 		clusterContextStrategy := clientcontext.NewClusterContextStrategy(true)
 
-		middleware := NewApplicationContextMiddleware(clusterContextStrategy)
+		middleware := NewContextMiddleware(clusterContextStrategy, clientcontext.ApplicationHeader)
+
+		// when
+		resultHandler := middleware.Middleware(handler)
+		resultHandler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+	})
+
+	t.Run("should return 400 if no application header provided and ctx is disabled", func(t *testing.T) {
+		// given
+		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		})
+
+		req, err := http.NewRequest("GET", "/", nil)
+		require.NoError(t, err)
+
+		rr := httptest.NewRecorder()
+
+		clusterContextStrategy := clientcontext.NewClusterContextStrategy(false)
+
+		middleware := NewContextMiddleware(clusterContextStrategy, clientcontext.RuntimeIDHeader)
 
 		// when
 		resultHandler := middleware.Middleware(handler)

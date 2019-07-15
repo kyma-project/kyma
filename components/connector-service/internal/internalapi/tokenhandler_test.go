@@ -44,23 +44,17 @@ func (ctx dummyClientCertsContext) ClientContext() clientcontext.ClientContextSe
 
 func TestTokenHandler_CreateToken(t *testing.T) {
 
-	clusterContext := clientcontext.ClusterContext{
+	clusterContext := clientcontext.ClientContext{
 		Tenant: tenant,
 		Group:  group,
+		ID:     appName,
 	}
 
 	clusterClientContext := dummyClientCertsContext{clusterContext}
 
-	applicationContext := clientcontext.ApplicationContext{
-		ClusterContext: clusterContext,
-		Application:    appName,
-	}
-
-	applicationClientContext := dummyClientCertsContext{applicationContext}
-
 	connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
 		assert.Equal(t, dummyCtxValue, ctx.Value(dummyCtxKey))
-		return applicationClientContext, nil
+		return clusterClientContext, nil
 	}
 
 	ctx := context.WithValue(context.Background(), dummyCtxKey, dummyCtxValue)
@@ -74,7 +68,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		}
 
 		tokenCreator := &mocks.Creator{}
-		tokenCreator.On("Save", applicationContext).Return(token, nil)
+		tokenCreator.On("Save", clusterContext).Return(token, nil)
 
 		tokenHandler := NewTokenHandler(tokenCreator, csrURL, connectorClientExtractor)
 
@@ -169,7 +163,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 	t.Run("should return 500 when failed to save", func(t *testing.T) {
 		// given
 		tokenCreator := &mocks.Creator{}
-		tokenCreator.On("Save", applicationContext).Return("", apperrors.Internal("error"))
+		tokenCreator.On("Save", clusterContext).Return("", apperrors.Internal("error"))
 
 		tokenHandler := NewTokenHandler(tokenCreator, "", connectorClientExtractor)
 

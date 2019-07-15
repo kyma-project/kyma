@@ -266,7 +266,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		expectedEventsUrl := "https://events.base.path/application/v1/events"
 
 		extendedCtx := &clientcontext.ExtendedApplicationContext{
-			ApplicationContext: clientcontext.ApplicationContext{},
+			ClientContext: clientcontext.ClientContext{},
 			RuntimeURLs: clientcontext.RuntimeURLs{
 				MetadataURL: "https://metadata.base.path/application/v1/metadata/services",
 				EventsURL:   "https://events.base.path/application/v1/events",

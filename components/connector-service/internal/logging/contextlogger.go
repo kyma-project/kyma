@@ -4,14 +4,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func GetClusterLogger(tenant, group, runtimeID string) *log.Entry {
+func GetLogger(tenant, group, id string) *log.Entry {
 	return log.WithFields(log.Fields{
-		"Group":     group,
-		"Tenant":    tenant,
-		"RuntimeID": runtimeID,
+		"Group":  group,
+		"Tenant": tenant,
+		"ID":     id,
 	})
-}
-
-func GetApplicationLogger(application, tenant, group, runtimeID string) *log.Entry {
-	return GetClusterLogger(tenant, group, runtimeID).WithField("Application", application)
 }

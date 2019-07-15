@@ -3,8 +3,8 @@ package clientcontext
 import "net/http"
 
 type ClusterContextStrategy interface {
-	ReadClusterContextFromRequest(r *http.Request) ClusterContext
-	IsValidContext(clusterCtx ClusterContext) bool
+	ReadClusterContextFromRequest(r *http.Request) ClientContext
+	IsValidContext(clusterCtx ClientContext) bool
 }
 
 func NewClusterContextStrategy(clusterContextEnabled CtxEnabledType) ClusterContextStrategy {
@@ -17,26 +17,25 @@ func NewClusterContextStrategy(clusterContextEnabled CtxEnabledType) ClusterCont
 
 type clusterContextEnabledStrategy struct{}
 
-func (cc *clusterContextEnabledStrategy) ReadClusterContextFromRequest(r *http.Request) ClusterContext {
-	clusterContext := ClusterContext{
-		Tenant:    r.Header.Get(TenantHeader),
-		Group:     r.Header.Get(GroupHeader),
-		RuntimeID: r.Header.Get(RuntimeIDHeader),
+func (cc *clusterContextEnabledStrategy) ReadClusterContextFromRequest(r *http.Request) ClientContext {
+	clusterContext := ClientContext{
+		Tenant: r.Header.Get(TenantHeader),
+		Group:  r.Header.Get(GroupHeader),
 	}
 
 	return clusterContext
 }
 
-func (cc *clusterContextEnabledStrategy) IsValidContext(clusterCtx ClusterContext) bool {
-	return !clusterCtx.IsEmpty()
+func (cc *clusterContextEnabledStrategy) IsValidContext(clientContext ClientContext) bool {
+	return !clientContext.IsEmpty()
 }
 
 type clusterContextDisabledStrategy struct{}
 
-func (cc *clusterContextDisabledStrategy) ReadClusterContextFromRequest(r *http.Request) ClusterContext {
-	return ClusterContext{}
+func (cc *clusterContextDisabledStrategy) ReadClusterContextFromRequest(r *http.Request) ClientContext {
+	return ClientContext{}
 }
 
-func (cc *clusterContextDisabledStrategy) IsValidContext(clusterCtx ClusterContext) bool {
-	return clusterCtx.Group == GroupEmpty && clusterCtx.Tenant == TenantEmpty && clusterCtx.RuntimeID == RuntimeIDEmpty
+func (cc *clusterContextDisabledStrategy) IsValidContext(clientContext ClientContext) bool {
+	return clientContext.ID != IDEmpty && clientContext.Group == GroupEmpty && clientContext.Tenant == TenantEmpty
 }

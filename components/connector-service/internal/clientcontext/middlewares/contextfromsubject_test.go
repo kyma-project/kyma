@@ -27,12 +27,12 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			appCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
+			appCtx, ok := ctx.Value(clientcontext.ClientContextKey).(clientcontext.ClientContext)
 			require.True(t, ok)
 
-			assert.Equal(t, subjAppName, appCtx.Application)
-			assert.Equal(t, subjGroup, appCtx.ClusterContext.Group)
-			assert.Equal(t, subjTenant, appCtx.ClusterContext.Tenant)
+			assert.Equal(t, subjAppName, appCtx.ID)
+			assert.Equal(t, subjGroup, appCtx.Group)
+			assert.Equal(t, subjTenant, appCtx.Tenant)
 			w.WriteHeader(http.StatusOK)
 		})
 
@@ -42,7 +42,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(hp, true, FullApplicationContextFromSubject)
+		middleware := NewContextFromSubjMiddleware(hp, true)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -52,15 +52,16 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
-	t.Run("should create ApplicationContext with empty ClusterContext if CN only with app", func(t *testing.T) {
+	t.Run("should create ClientContext with empty Tenant and Group if CN only with app", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			appCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
+			appCtx, ok := ctx.Value(clientcontext.ClientContextKey).(clientcontext.ClientContext)
 			require.True(t, ok)
 
-			assert.Equal(t, subjAppName, appCtx.Application)
-			assert.Empty(t, appCtx.ClusterContext)
+			assert.Equal(t, subjAppName, appCtx.ID)
+			assert.Empty(t, appCtx.Tenant)
+			assert.Empty(t, appCtx.Group)
 			w.WriteHeader(http.StatusOK)
 		})
 
@@ -72,7 +73,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(hp, false, FullApplicationContextFromSubject)
+		middleware := NewContextFromSubjMiddleware(hp, false)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -82,11 +83,11 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
-	t.Run("should create ClusterContext when CN equal *Runtime*", func(t *testing.T) {
+	t.Run("should create ClientContext when CN equal *Runtime*", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			clusterCtx, ok := ctx.Value(clientcontext.ClusterContextKey).(clientcontext.ClusterContext)
+			clusterCtx, ok := ctx.Value(clientcontext.ClientContextKey).(clientcontext.ClientContext)
 			require.True(t, ok)
 
 			assert.Equal(t, subjGroup, clusterCtx.Group)
@@ -102,7 +103,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(hp, true, FullRuntimeContextFromSubject)
+		middleware := NewContextFromSubjMiddleware(hp, true)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -126,7 +127,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(hp, false, FullApplicationContextFromSubject)
+		middleware := NewContextFromSubjMiddleware(hp, false)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -150,7 +151,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(hp, true, FullApplicationContextFromSubject)
+		middleware := NewContextFromSubjMiddleware(hp, true)
 
 		// when
 		resultHandler := middleware.Middleware(handler)

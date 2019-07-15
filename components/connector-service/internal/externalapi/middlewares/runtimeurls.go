@@ -13,11 +13,11 @@ import (
 type runtimeURLsMiddleware struct {
 	gatewayBaseURL              string
 	lookupEnabled               clientcontext.LookupEnabledType
-	applicationContextExtractor clientcontext.ApplicationContextExtractor
+	applicationContextExtractor clientcontext.ClientContextExtractor
 	lookupService               lookup.LookupService
 }
 
-func NewRuntimeURLsMiddleware(gatewayBaseURL string, lookupEnabled clientcontext.LookupEnabledType, extractor clientcontext.ApplicationContextExtractor, lookupService lookup.LookupService) *runtimeURLsMiddleware {
+func NewRuntimeURLsMiddleware(gatewayBaseURL string, lookupEnabled clientcontext.LookupEnabledType, extractor clientcontext.ClientContextExtractor, lookupService lookup.LookupService) *runtimeURLsMiddleware {
 	return &runtimeURLsMiddleware{
 		gatewayBaseURL:              gatewayBaseURL,
 		lookupEnabled:               lookupEnabled,

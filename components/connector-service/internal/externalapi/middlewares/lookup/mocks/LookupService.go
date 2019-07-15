@@ -12,18 +12,18 @@ type LookupService struct {
 }
 
 // Fetch provides a mock function with given fields: context
-func (_m *LookupService) Fetch(context clientcontext.ApplicationContext) (string, error) {
+func (_m *LookupService) Fetch(context clientcontext.ClientContext) (string, error) {
 	ret := _m.Called(context)
 
 	var r0 string
-	if rf, ok := ret.Get(0).(func(clientcontext.ApplicationContext) string); ok {
+	if rf, ok := ret.Get(0).(func(clientcontext.ClientContext) string); ok {
 		r0 = rf(context)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(clientcontext.ApplicationContext) error); ok {
+	if rf, ok := ret.Get(1).(func(clientcontext.ClientContext) error); ok {
 		r1 = rf(context)
 	} else {
 		r1 = ret.Error(1)

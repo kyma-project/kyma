@@ -2,43 +2,59 @@ package clientcontext
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/logging"
 	"github.com/sirupsen/logrus"
 )
 
-type ClusterContext struct {
-	Group     string `json:"group,omitempty"`
-	Tenant    string `json:"tenant,omitempty"`
-	RuntimeID string `json:"runtimeId,omitempty"`
+type ClientContext struct {
+	Group  string
+	Tenant string
+	ID     string
 }
 
-// NewClusterContextExtender creates empty ClusterContext
+// NewClusterContextExtender creates empty ClientContext
 func NewClusterContextExtender() ContextExtender {
-	return &ClusterContext{}
+	return &ClientContext{}
 }
 
-// IsEmpty returns false if Group, Tenant and RuntimeID are set
-func (clsCtx ClusterContext) IsEmpty() bool {
-	return clsCtx.Group == GroupEmpty || clsCtx.Tenant == TenantEmpty || clsCtx.RuntimeID == RuntimeIDEmpty
+// IsEmpty returns false if Group, Tenant and ID are set
+func (clsCtx ClientContext) IsEmpty() bool {
+	return clsCtx.Group == GroupEmpty || clsCtx.Tenant == TenantEmpty || clsCtx.ID == IDEmpty
 }
 
-// ExtendContext extends provided context with ClusterContext
-func (clsCtx ClusterContext) ExtendContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, ClusterContextKey, clsCtx)
+// ExtendContext extends provided context with ClientContext
+func (clsCtx ClientContext) ExtendContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, ClientContextKey, clsCtx)
 }
 
-// GetLogger returns context logger with embedded context data (Group, Tenant and RuntimeID)
-func (clsCtx ClusterContext) GetLogger() *logrus.Entry {
-	return logging.GetClusterLogger(clsCtx.Tenant, clsCtx.Group, clsCtx.RuntimeID)
+// GetLogger returns context logger with embedded context data (Group, Tenant and ID)
+func (clsCtx ClientContext) GetLogger() *logrus.Entry {
+	return logging.GetLogger(clsCtx.Tenant, clsCtx.Group, clsCtx.ID)
 }
 
-// GetRuntimeID returns RuntimeID
-func (clsCtx ClusterContext) GetRuntimeID() *string {
-	return &clsCtx.RuntimeID
+// GetRuntimeID returns ID
+func (clsCtx ClientContext) GetRuntimeID() *string {
+	return &clsCtx.ID
 }
 
-// GetRuntimeUrls returns nil as ClusterContext does not contain RuntimeURLs
-func (clsCtx ClusterContext) GetRuntimeUrls() *RuntimeURLs {
+// GetRuntimeUrls returns nil as ClientContext does not contain RuntimeURLs
+func (clsCtx ClientContext) GetRuntimeUrls() *RuntimeURLs {
 	return nil
+}
+
+type ExtendedApplicationContext struct {
+	ClientContext
+	RuntimeURLs
+}
+
+// MarshalJSON marshals ExtendedApplicationContext to JSON as ApplicationContext
+func (extAppCtx ExtendedApplicationContext) MarshalJSON() ([]byte, error) {
+	return json.Marshal(extAppCtx.ClientContext)
+}
+
+// GetRuntimeUrls returns pointer to RuntimeURLs
+func (extAppCtx ExtendedApplicationContext) GetRuntimeUrls() *RuntimeURLs {
+	return &extAppCtx.RuntimeURLs
 }

@@ -22,18 +22,16 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 	defaultGatewayBaseURL := "https://gateway.kyma.local"
 
 	lookupService := &mocks.LookupService{}
-	extractor := clientcontext.ExtractApplicationContext
+	extractor := clientcontext.ExtractClientContext
 
 	t.Run("should set fetched gateway URL value in context when lookup is enabled", func(t *testing.T) {
 		//given
 		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(defaultGatewayBaseURL, clientcontext.LookupEnabled, extractor, lookupService)
 
-		appCtx := clientcontext.ApplicationContext{
-			Application: "testApp",
-			ClusterContext: clientcontext.ClusterContext{
-				Group:  "testGroup",
-				Tenant: "testTenant",
-			},
+		appCtx := clientcontext.ClientContext{
+			Group:  "testGroup",
+			Tenant: "testTenant",
+			ID:     "testApp",
 		}
 
 		lookupService.On("Fetch", appCtx).Return(fetchedGatewayBaseURL, nil)
@@ -108,12 +106,10 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 		//given
 		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(defaultGatewayBaseURL, clientcontext.LookupEnabled, extractor, lookupService)
 
-		appCtx := clientcontext.ApplicationContext{
-			Application: "test-app",
-			ClusterContext: clientcontext.ClusterContext{
-				Group:  "testGroup",
-				Tenant: "testTenant",
-			},
+		appCtx := clientcontext.ClientContext{
+			Group:  "testGroup",
+			Tenant: "testTenant",
+			ID:     "testApp",
 		}
 
 		lookupService.On("Fetch", appCtx).Return(nil, apperrors.Internal("some error"))

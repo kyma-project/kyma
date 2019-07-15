@@ -43,17 +43,14 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 			CommonName:         appName,
 		}
 
-		appCtxPayload := ApplicationContext{
-			Application:    appName,
-			ClusterContext: ClusterContext{Group: group, Tenant: tenant},
-		}
+		appCtxPayload := ClientContext{Group: group, Tenant: tenant, ID: appName}
 
 		ctx := appCtxPayload.ExtendContext(context.Background())
 
 		extractor := NewContextExtractor(subjectDefaults)
 
 		// when
-		clientCtx, err := extractor.CreateApplicationClientContextService(ctx)
+		clientCtx, err := extractor.CreateExtendedClientContextService(ctx)
 		require.NoError(t, err)
 
 		// then
@@ -62,7 +59,7 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 
 		assert.Equal(t, expectedSubject, certContext.GetSubject())
 
-		extractedAppCtx, ok := certContext.ClientContextService.(ApplicationContext)
+		extractedAppCtx, ok := certContext.ClientContextService.(ClientContext)
 		require.True(t, ok)
 
 		assert.Equal(t, appCtxPayload, extractedAppCtx)
@@ -82,10 +79,7 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 		eventsBasedURL := "https://gateway.cool-cluster.cluster.extend.events.cx"
 		metadataBasedURL := "https://gateway.cool-cluster.cluster.extend.metadata.cx"
 
-		appCtxPayload := ApplicationContext{
-			Application:    appName,
-			ClusterContext: ClusterContext{Group: group, Tenant: tenant},
-		}
+		appCtxPayload := ClientContext{Group: group, Tenant: tenant, ID: appName}
 
 		ctx := appCtxPayload.ExtendContext(context.Background())
 
@@ -97,7 +91,7 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 		ctx = apiUrls.ExtendContext(ctx)
 
 		expectedApplicationContext := ExtendedApplicationContext{
-			ApplicationContext: appCtxPayload,
+			ClientContext: appCtxPayload,
 			RuntimeURLs: RuntimeURLs{
 				MetadataURL:   metadataBasedURL + "/" + appName + "/v1/metadata/services",
 				EventsURL:     eventsBasedURL + "/" + appName + "/v1/events",
@@ -108,7 +102,7 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 		extractor := NewContextExtractor(subjectDefaults)
 
 		// when
-		clientCtx, err := extractor.CreateApplicationClientContextService(ctx)
+		clientCtx, err := extractor.CreateExtendedClientContextService(ctx)
 		require.NoError(t, err)
 
 		// then
@@ -128,7 +122,7 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 		extractor := NewContextExtractor(subjectDefaults)
 
 		// when
-		_, err := extractor.CreateApplicationClientContextService(context.Background())
+		_, err := extractor.CreateExtendedClientContextService(context.Background())
 		require.Error(t, err)
 
 		// then
@@ -148,7 +142,7 @@ func Test_ExtractSerializableClusterContext(t *testing.T) {
 			CommonName:         runtimeID,
 		}
 
-		clusterCtxPayload := ClusterContext{Group: group, Tenant: tenant, RuntimeID: runtimeID}
+		clusterCtxPayload := ClientContext{Group: group, Tenant: tenant, ID: runtimeID}
 
 		ctx := clusterCtxPayload.ExtendContext(context.Background())
 
@@ -164,13 +158,13 @@ func Test_ExtractSerializableClusterContext(t *testing.T) {
 
 		assert.Equal(t, expectedSubject, certContext.GetSubject())
 
-		extractedClusterCtx, ok := certContext.ClientContextService.(ClusterContext)
+		extractedClusterCtx, ok := certContext.ClientContextService.(ClientContext)
 		require.True(t, ok)
 
 		assert.Equal(t, clusterCtxPayload, extractedClusterCtx)
 	})
 
-	t.Run("should fail when there is no ClusterContext", func(t *testing.T) {
+	t.Run("should fail when there is no ClientContext", func(t *testing.T) {
 		// given
 		extractor := NewContextExtractor(subjectDefaults)
 

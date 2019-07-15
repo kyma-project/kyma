@@ -81,20 +81,18 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 
 	appCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.appCertificateValidityTime), opts.caSecretName, opts.rootCACertificateSecretName)
 
-	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewApplicationContextExtender)
+	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
-	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayBaseURL, lookupEnabled, clientcontext.ExtractApplicationContext, lookupService)
-	applicationContextFromSubjMiddleware := clientcontextmiddlewares.NewContextFromSubjMiddleware(headerParser, opts.central, clientcontextmiddlewares.FullApplicationContextFromSubject)
-	runtimeContextFromSubjMiddleware := clientcontextmiddlewares.NewContextFromSubjMiddleware(headerParser, opts.central, clientcontextmiddlewares.FullRuntimeContextFromSubject)
+	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayBaseURL, lookupEnabled, clientcontext.ExtractClientContext, lookupService)
+	contextFromSubjMiddleware := clientcontextmiddlewares.NewContextFromSubjMiddleware(headerParser, opts.central)
 	checkForRevokedCertMiddleware := certificateMiddlewares.NewRevocationCheckMiddleware(revocationListRepository, headerParser)
 
 	functionalMiddlewares := externalapi.FunctionalMiddlewares{
-		AppTokenResolverMiddleware:          appTokenResolverMiddleware.Middleware,
-		RuntimeTokenResolverMiddleware:      clusterTokenResolverMiddleware.Middleware,
-		RuntimeURLsMiddleware:               runtimeURLsMiddleware.Middleware,
-		AppContextFromSubjectMiddleware:     applicationContextFromSubjMiddleware.Middleware,
-		RuntimeContextFromSubjectMiddleware: runtimeContextFromSubjMiddleware.Middleware,
-		CheckForRevokedCertMiddleware:       checkForRevokedCertMiddleware.Middleware,
+		AppTokenResolverMiddleware:     appTokenResolverMiddleware.Middleware,
+		RuntimeTokenResolverMiddleware: clusterTokenResolverMiddleware.Middleware,
+		RuntimeURLsMiddleware:          runtimeURLsMiddleware.Middleware,
+		ContextFromSubjectMiddleware:   contextFromSubjMiddleware.Middleware,
+		CheckForRevokedCertMiddleware:  checkForRevokedCertMiddleware.Middleware,
 	}
 
 	handlerBuilder := externalapi.NewHandlerBuilder(functionalMiddlewares, globalMiddlewares)
@@ -106,7 +104,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 		ManagementInfoURL:           opts.appsInfoURL,
 		ConnectorServiceBaseURL:     fmt.Sprintf(AppURLFormat, opts.connectorServiceHost),
 		CertificateProtectedBaseURL: fmt.Sprintf(AppURLFormat, opts.certificateProtectedHost),
-		ContextExtractor:            contextExtractor.CreateApplicationClientContextService,
+		ContextExtractor:            contextExtractor.CreateExtendedClientContextService,
 		CertService:                 appCertificateService,
 		RevokedCertsRepo:            revocationListRepository,
 		HeaderParser:                headerParser,
@@ -141,14 +139,14 @@ func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *
 	clusterCtxEnabled := clientcontext.CtxEnabledType(opts.central)
 	clusterContextStrategy := clientcontext.NewClusterContextStrategy(clusterCtxEnabled)
 
-	clusterCtxMiddleware := clientcontextmiddlewares.NewClusterContextMiddleware(clusterContextStrategy)
-	applicationCtxMiddleware := clientcontextmiddlewares.NewApplicationContextMiddleware(clusterContextStrategy)
+	clusterCtxMiddleware := clientcontextmiddlewares.NewContextMiddleware(clusterContextStrategy, clientcontext.RuntimeIDHeader)
+	applicationCtxMiddleware := clientcontextmiddlewares.NewContextMiddleware(clusterContextStrategy, clientcontext.ApplicationHeader)
 
 	appTokenTTLMinutes := time.Duration(opts.appTokenExpirationMinutes) * time.Minute
 	appHandlerConfig := internalapi.Config{
 		TokenManager:     tokenManagerProvider.WithTTL(appTokenTTLMinutes),
 		CSRInfoURL:       fmt.Sprintf(appCSRInfoFmt, opts.connectorServiceHost),
-		ContextExtractor: contextExtractor.CreateApplicationClientContextService,
+		ContextExtractor: contextExtractor.CreateExtendedClientContextService,
 		RevokedCertsRepo: revocationListRepository,
 	}
 

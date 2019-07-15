@@ -27,10 +27,10 @@ func TestClusterContext_IsEmpty(t *testing.T) {
 
 	t.Run("should check if empty", func(t *testing.T) {
 		for _, test := range testCases {
-			cc := ClusterContext{
-				Tenant:    test.tenant,
-				Group:     test.group,
-				RuntimeID: test.runtimeID,
+			cc := ClientContext{
+				Tenant: test.tenant,
+				Group:  test.group,
+				ID:     test.runtimeID,
 			}
 
 			assert.Equal(t, test.result, cc.IsEmpty())
@@ -42,16 +42,16 @@ func TestClusterContext_ExtendContext(t *testing.T) {
 
 	t.Run("should extend context with cluster context", func(t *testing.T) {
 		// given
-		clusterContext := ClusterContext{
-			Group:     "group",
-			Tenant:    "tenant",
-			RuntimeID: "runtimeID",
+		clusterContext := ClientContext{
+			Group:  "group",
+			Tenant: "tenant",
+			ID:     "runtimeID",
 		}
 
 		// when
 		extended := clusterContext.ExtendContext(context.Background())
 
 		// then
-		assert.Equal(t, clusterContext, extended.Value(ClusterContextKey))
+		assert.Equal(t, clusterContext, extended.Value(ClientContextKey))
 	})
 }

@@ -19,7 +19,7 @@ const (
 
 type ConnectorClientExtractor func(ctx context.Context) (ClientCertContextService, apperrors.AppError)
 
-type ApplicationContextExtractor func(ctx context.Context) (ApplicationContext, apperrors.AppError)
+type ClientContextExtractor func(ctx context.Context) (ClientContext, apperrors.AppError)
 
 type ContextExtractor struct {
 	subjectDefaults certificates.CSRSubject
@@ -31,13 +31,13 @@ func NewContextExtractor(subjectDefaults certificates.CSRSubject) *ContextExtrac
 	}
 }
 
-func (ext *ContextExtractor) CreateApplicationClientContextService(ctx context.Context) (ClientCertContextService, apperrors.AppError) {
-	appCtx, err := ExtractApplicationContext(ctx)
+func (ext *ContextExtractor) CreateExtendedClientContextService(ctx context.Context) (ClientCertContextService, apperrors.AppError) {
+	appCtx, err := ExtractClientContext(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	subject := ext.prepareSubject(appCtx.Tenant, appCtx.Group, appCtx.Application)
+	subject := ext.prepareSubject(appCtx.Tenant, appCtx.Group, appCtx.ID)
 
 	apiHosts, ok := ctx.Value(ApiURLsKey).(ApiURLs)
 	if !ok {
@@ -45,25 +45,25 @@ func (ext *ContextExtractor) CreateApplicationClientContextService(ctx context.C
 	}
 
 	extendedCtx := ExtendedApplicationContext{
-		ApplicationContext: appCtx,
-		RuntimeURLs:        prepareRuntimeURLs(appCtx, apiHosts),
+		ClientContext: appCtx,
+		RuntimeURLs:   prepareRuntimeURLs(appCtx, apiHosts),
 	}
 
 	return newClientCertificateContext(extendedCtx, subject), nil
 }
 
-func prepareRuntimeURLs(appCtx ApplicationContext, apiHosts ApiURLs) RuntimeURLs {
+func prepareRuntimeURLs(appCtx ClientContext, apiHosts ApiURLs) RuntimeURLs {
 	metadataURL := ""
 	eventsURL := ""
 	eventsInfoURL := ""
 
 	if apiHosts.MetadataBaseURL != "" {
-		metadataURL = fmt.Sprintf(MetadataURLFormat, apiHosts.MetadataBaseURL, appCtx.GetApplication())
+		metadataURL = fmt.Sprintf(MetadataURLFormat, apiHosts.MetadataBaseURL, appCtx.ID)
 	}
 
 	if apiHosts.EventsBaseURL != "" {
-		eventsURL = fmt.Sprintf(EventsURLFormat, apiHosts.EventsBaseURL, appCtx.GetApplication())
-		eventsInfoURL = fmt.Sprintf(EventsInfoURLFormat, apiHosts.EventsBaseURL, appCtx.GetApplication())
+		eventsURL = fmt.Sprintf(EventsURLFormat, apiHosts.EventsBaseURL, appCtx.ID)
+		eventsInfoURL = fmt.Sprintf(EventsInfoURLFormat, apiHosts.EventsBaseURL, appCtx.ID)
 	}
 
 	return RuntimeURLs{
@@ -96,20 +96,20 @@ func (ext *ContextExtractor) prepareSubject(org, orgUnit, commonName string) cer
 }
 
 func (ext *ContextExtractor) CreateClusterClientContextService(ctx context.Context) (ClientCertContextService, apperrors.AppError) {
-	clusterCtx, ok := ctx.Value(ClusterContextKey).(ClusterContext)
+	clusterCtx, ok := ctx.Value(ClientContextKey).(ClientContext)
 	if !ok {
-		return nil, apperrors.Internal("Failed to extract ClusterContext from request")
+		return nil, apperrors.Internal("Failed to extract ClientContext from request")
 	}
 
-	subject := ext.prepareSubject(clusterCtx.Tenant, clusterCtx.Group, clusterCtx.RuntimeID)
+	subject := ext.prepareSubject(clusterCtx.Tenant, clusterCtx.Group, clusterCtx.ID)
 
 	return newClientCertificateContext(clusterCtx, subject), nil
 }
 
-func ExtractApplicationContext(ctx context.Context) (ApplicationContext, apperrors.AppError) {
-	appCtx, ok := ctx.Value(ApplicationContextKey).(ApplicationContext)
+func ExtractClientContext(ctx context.Context) (ClientContext, apperrors.AppError) {
+	appCtx, ok := ctx.Value(ClientContextKey).(ClientContext)
 	if !ok {
-		return ApplicationContext{}, apperrors.Internal("Failed to extract ApplicationContext from request")
+		return ClientContext{}, apperrors.Internal("Failed to extract ApplicationContext from request")
 	}
 	return appCtx, nil
 }

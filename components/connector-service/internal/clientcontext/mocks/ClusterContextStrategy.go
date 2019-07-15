@@ -11,11 +11,11 @@ type ClusterContextStrategy struct {
 }
 
 // IsValidContext provides a mock function with given fields: clusterCtx
-func (_m *ClusterContextStrategy) IsValidContext(clusterCtx clientcontext.ClusterContext) bool {
+func (_m *ClusterContextStrategy) IsValidContext(clusterCtx clientcontext.ClientContext) bool {
 	ret := _m.Called(clusterCtx)
 
 	var r0 bool
-	if rf, ok := ret.Get(0).(func(clientcontext.ClusterContext) bool); ok {
+	if rf, ok := ret.Get(0).(func(clientcontext.ClientContext) bool); ok {
 		r0 = rf(clusterCtx)
 	} else {
 		r0 = ret.Get(0).(bool)
@@ -25,14 +25,14 @@ func (_m *ClusterContextStrategy) IsValidContext(clusterCtx clientcontext.Cluste
 }
 
 // ReadClusterContextFromRequest provides a mock function with given fields: r
-func (_m *ClusterContextStrategy) ReadClusterContextFromRequest(r *http.Request) clientcontext.ClusterContext {
+func (_m *ClusterContextStrategy) ReadClusterContextFromRequest(r *http.Request) clientcontext.ClientContext {
 	ret := _m.Called(r)
 
-	var r0 clientcontext.ClusterContext
-	if rf, ok := ret.Get(0).(func(*http.Request) clientcontext.ClusterContext); ok {
+	var r0 clientcontext.ClientContext
+	if rf, ok := ret.Get(0).(func(*http.Request) clientcontext.ClientContext); ok {
 		r0 = rf(r)
 	} else {
-		r0 = ret.Get(0).(clientcontext.ClusterContext)
+		r0 = ret.Get(0).(clientcontext.ClientContext)
 	}
 
 	return r0

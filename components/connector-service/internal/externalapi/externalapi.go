@@ -29,12 +29,11 @@ type Config struct {
 }
 
 type FunctionalMiddlewares struct {
-	AppTokenResolverMiddleware          mux.MiddlewareFunc
-	RuntimeTokenResolverMiddleware      mux.MiddlewareFunc
-	RuntimeURLsMiddleware               mux.MiddlewareFunc
-	AppContextFromSubjectMiddleware     mux.MiddlewareFunc
-	RuntimeContextFromSubjectMiddleware mux.MiddlewareFunc
-	CheckForRevokedCertMiddleware       mux.MiddlewareFunc
+	AppTokenResolverMiddleware     mux.MiddlewareFunc
+	RuntimeTokenResolverMiddleware mux.MiddlewareFunc
+	RuntimeURLsMiddleware          mux.MiddlewareFunc
+	ContextFromSubjectMiddleware   mux.MiddlewareFunc
+	CheckForRevokedCertMiddleware  mux.MiddlewareFunc
 }
 
 type SignatureHandler interface {
@@ -92,7 +91,7 @@ func (hb *handlerBuilder) WithApps(appHandlerCfg Config) {
 	renewalAuditLoggingMiddleware := hb.createRenewalAuditLogMiddleware(appHandlerCfg.ContextExtractor)
 	httphelpers.WithMiddlewares(
 		appRenewalRouter,
-		hb.funcMiddlwares.AppContextFromSubjectMiddleware,
+		hb.funcMiddlwares.ContextFromSubjectMiddleware,
 		renewalAuditLoggingMiddleware,
 		hb.funcMiddlwares.CheckForRevokedCertMiddleware)
 
@@ -101,7 +100,7 @@ func (hb *handlerBuilder) WithApps(appHandlerCfg Config) {
 	revocationAuditLoggingMiddleware := hb.createCertificateRevocationAuditLogMiddleware(appHandlerCfg.ContextExtractor)
 	httphelpers.WithMiddlewares(
 		appRevocationRouter,
-		hb.funcMiddlwares.AppContextFromSubjectMiddleware,
+		hb.funcMiddlwares.ContextFromSubjectMiddleware,
 		revocationAuditLoggingMiddleware)
 
 	certApplicationRouter := hb.router.PathPrefix("/v1/applications/certificates").Subrouter()
@@ -116,7 +115,7 @@ func (hb *handlerBuilder) WithApps(appHandlerCfg Config) {
 	mngmtApplicationRouter.HandleFunc("/info", applicationManagementInfoHandler.GetManagementInfo).Methods(http.MethodGet)
 	httphelpers.WithMiddlewares(
 		mngmtApplicationRouter,
-		hb.funcMiddlwares.AppContextFromSubjectMiddleware,
+		hb.funcMiddlwares.ContextFromSubjectMiddleware,
 		hb.funcMiddlwares.RuntimeURLsMiddleware)
 }
 
@@ -138,7 +137,7 @@ func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
 	renewalAuditLoggingMiddleware := hb.createRenewalAuditLogMiddleware(runtimeHandlerCfg.ContextExtractor)
 	httphelpers.WithMiddlewares(
 		runtimeRenewalRouter,
-		hb.funcMiddlwares.RuntimeContextFromSubjectMiddleware,
+		hb.funcMiddlwares.ContextFromSubjectMiddleware,
 		renewalAuditLoggingMiddleware,
 		hb.funcMiddlwares.CheckForRevokedCertMiddleware)
 
@@ -147,7 +146,7 @@ func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
 	runtimeRevocationRouter.HandleFunc("", runtimeRevocationHandler.Revoke).Methods(http.MethodPost)
 	httphelpers.WithMiddlewares(
 		runtimeRevocationRouter,
-		hb.funcMiddlwares.RuntimeContextFromSubjectMiddleware,
+		hb.funcMiddlwares.ContextFromSubjectMiddleware,
 		revocationAuditLoggingMiddleware)
 
 	certRuntimesRouter := hb.router.PathPrefix("/v1/runtimes/certificates").Subrouter()
@@ -162,7 +161,7 @@ func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
 	mngmtRuntimeRouter.HandleFunc("/info", runtimeManagementInfoHandler.GetManagementInfo).Methods(http.MethodGet)
 	httphelpers.WithMiddlewares(
 		mngmtRuntimeRouter,
-		hb.funcMiddlwares.RuntimeContextFromSubjectMiddleware)
+		hb.funcMiddlwares.ContextFromSubjectMiddleware)
 
 }
 

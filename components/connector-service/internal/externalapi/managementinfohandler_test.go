@@ -38,16 +38,14 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		expectedMetadataURL := "https://metadata.base.path/application/v1/metadata/services"
 		expectedEventsURL := "https://events.base.path/application/v1/events"
 
-		applicationContext := clientcontext.ApplicationContext{
-			Application: appName,
-			ClusterContext: clientcontext.ClusterContext{
-				Tenant: tenant,
-				Group:  group,
-			},
+		applicationContext := clientcontext.ClientContext{
+			Tenant: tenant,
+			Group:  group,
+			ID:     appName,
 		}
 
 		extApplicationCtx := &clientcontext.ExtendedApplicationContext{
-			ApplicationContext: applicationContext,
+			ClientContext: applicationContext,
 			RuntimeURLs: clientcontext.RuntimeURLs{
 				MetadataURL: "https://metadata.base.path/application/v1/metadata/services",
 				EventsURL:   "https://events.base.path/application/v1/events",
@@ -95,7 +93,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 
 	t.Run("should successfully get management info response for runtime", func(t *testing.T) {
 		//given
-		clusterContext := &clientcontext.ClusterContext{
+		clusterContext := &clientcontext.ClientContext{
 			Tenant: tenant,
 			Group:  group,
 		}

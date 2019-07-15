@@ -21,7 +21,7 @@ const (
 )
 
 type LookupService interface {
-	Fetch(context clientcontext.ApplicationContext) (string, error)
+	Fetch(context clientcontext.ClientContext) (string, error)
 }
 
 type lookupService struct {
@@ -33,7 +33,7 @@ func NewGraphQLLookupService(graphQLService graphql.GraphQLService, configFilePa
 	return &lookupService{graphQLService: graphQLService, configFilePath: configFilePath}
 }
 
-func (ls lookupService) Fetch(context clientcontext.ApplicationContext) (string, error) {
+func (ls lookupService) Fetch(context clientcontext.ClientContext) (string, error) {
 	file, e := os.Open(ls.configFilePath + filename)
 
 	if e != nil {
@@ -65,8 +65,8 @@ func (ls lookupService) Fetch(context clientcontext.ApplicationContext) (string,
 	return getGatewayUrl(body), nil
 }
 
-func createQuery(context clientcontext.ApplicationContext) string {
-	return fmt.Sprintf(query, context.Tenant, context.Group, context.Application)
+func createQuery(context clientcontext.ClientContext) string {
+	return fmt.Sprintf(query, context.Tenant, context.Group, context.ID)
 }
 
 func getGatewayUrl(body []byte) string {

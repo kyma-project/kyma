@@ -19,14 +19,11 @@ const (
 	// ApplicationHeader is key representing Application in headers
 	ApplicationHeader = "Application"
 
-	// ApplicationContextKey is the key value for storing Application in context
-	ApplicationContextKey clientContextKey = "ApplicationContext"
-
 	// ApiURLsKey is the key value for storing API hosts in context
 	ApiURLsKey clientContextKey = "ApiURLs"
 
-	// ClusterContextKey is the key value for storing cluster data in context
-	ClusterContextKey clientContextKey = "ClusterContext"
+	// ClientContextKey is the key value for storing cluster data in context
+	ClientContextKey clientContextKey = "ClientContext"
 
 	// TenantHeader is key representing Tenant in headers
 	TenantHeader = "Tenant"
@@ -34,7 +31,7 @@ const (
 	// GroupHeader is key representing Group in headers
 	GroupHeader = "Group"
 
-	// RuntimeIDHeader is key representing RuntimeID in headers
+	// RuntimeIDHeader is key representing ID in headers
 	RuntimeIDHeader = "RuntimeID"
 
 	// GroupEmpty represents empty value for Group
@@ -43,11 +40,8 @@ const (
 	// TenantEmpty represents empty value for Tenant
 	TenantEmpty = ""
 
-	// RuntimeIDEmpty represents empty value for RuntimeID
-	RuntimeIDEmpty = ""
-
-	// ApplicationEmpty represents empty value for Application
-	ApplicationEmpty = ""
+	// IDEmpty represents empty value for ID
+	IDEmpty = ""
 
 	// LookupEnabled represents value for required fetch from Runtime
 	LookupEnabled LookupEnabledType = true
