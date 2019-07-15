@@ -13,7 +13,7 @@ rules:
   resources: ["namespaces"]
   verbs: ["get", "list", "watch", "patch"]
   resourceNames:
-{{ .Values.namespaces2Label | toYaml | trim | indent 4 }}
+{{ .Values.kyma.namespaces2Label | toYaml | trim | indent 4 }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -32,17 +32,21 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: kyma-ns-label
+  annotations:
+    "helm.sh/hook-delete-policy": "before-hook-creation"
 spec:
   backoffLimit: 1
   template:
     metadata:
       name: kyma-ns-label
+      annotations:
+        sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: kyma-ns-label
       restartPolicy: Never
       containers:
       - name: kyma-ns-label
-        image: {{ .Values.image }}
+        image: {{ .Values.kyma.image }}
         terminationMessagePolicy: "FallbackToLogsOnError"
         command:
           - /bin/bash
