@@ -34,14 +34,14 @@ func (clsCtx ClientContext) GetLogger() *logrus.Entry {
 	return logging.GetLogger(clsCtx.Tenant, clsCtx.Group, clsCtx.ID)
 }
 
-// GetRuntimeID returns ID
-func (clsCtx ClientContext) GetRuntimeID() *string {
-	return &clsCtx.ID
-}
-
 // GetRuntimeUrls returns nil as ClientContext does not contain RuntimeURLs
 func (clsCtx ClientContext) GetRuntimeUrls() *RuntimeURLs {
 	return nil
+}
+
+// GetClientContext returns ClientContext
+func (clsCtx ClientContext) GetClientContext() ClientContext {
+	return clsCtx
 }
 
 type ExtendedApplicationContext struct {

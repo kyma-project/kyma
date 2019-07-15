@@ -50,8 +50,8 @@ func (dc dummyClientContextService) GetLogger() *logrus.Entry {
 	return logrus.WithFields(logrus.Fields{})
 }
 
-func (dc dummyClientContextService) GetRuntimeID() *string {
-	return nil
+func (dc dummyClientContextService) GetClientContext() clientcontext.ClientContext {
+	return clientcontext.ClientContext{}
 }
 
 type dummyClientContextServiceWithEmptyURLs struct {

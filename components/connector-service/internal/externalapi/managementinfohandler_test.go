@@ -3,6 +3,7 @@ package externalapi
 import (
 	"context"
 	"encoding/json"
+	"github.com/kyma-project/kyma/components/connector-service/internal/identitymapper"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -19,9 +20,11 @@ const (
 	applicationKey = "application"
 	tenantKey      = "tenant"
 	groupKey       = "group"
+	runtimeIDKey   = "runtimeID"
 
-	tenant = "test-tenant"
-	group  = "test-group"
+	runtimeID = "b45e3a4d-1213-4b7b-a0d0-8fbc580074cf"
+	tenant    = "test-tenant"
+	group     = "test-group"
 
 	protectedBaseURL      = "https://gateway.kyma.local/v1/applications"
 	expectedRenewalsURL   = "https://gateway.kyma.local/v1/applications/certificates/renewals"
@@ -59,7 +62,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/v1/applications/management/info", nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL)
+		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL, identitymapper.ToApplicationIdentity)
 
 		rr := httptest.NewRecorder()
 
@@ -93,19 +96,20 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 
 	t.Run("should successfully get management info response for runtime", func(t *testing.T) {
 		//given
-		clusterContext := &clientcontext.ClientContext{
+		runtimeContext := &clientcontext.ClientContext{
 			Tenant: tenant,
 			Group:  group,
+			ID:     runtimeID,
 		}
 
 		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
-			return dummyClientCertCtx{clusterContext}, nil
+			return dummyClientCertCtx{runtimeContext}, nil
 		}
 
 		req, err := http.NewRequest(http.MethodGet, "/v1/runtimes/management/info", nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL)
+		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL, identitymapper.ToRuntimeIdentity)
 
 		rr := httptest.NewRecorder()
 
@@ -127,6 +131,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 
 		assert.Equal(t, expectedRevocationURL, urls.RevokeCertURL)
 		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
+		assert.Equal(t, runtimeID, receivedContext[runtimeIDKey])
 		assert.Equal(t, group, receivedContext[groupKey])
 		assert.Equal(t, tenant, receivedContext[tenantKey])
 		assert.Equal(t, strSubject, certificateInfo.Subject)
@@ -143,7 +148,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/v1/applications/management/info", nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(clientContextService, protectedBaseURL)
+		infoHandler := NewManagementInfoHandler(clientContextService, protectedBaseURL, identitymapper.ToApplicationIdentity)
 
 		rr := httptest.NewRecorder()
 

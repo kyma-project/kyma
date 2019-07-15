@@ -1,6 +1,7 @@
 package externalapi
 
 import (
+	"github.com/kyma-project/kyma/components/connector-service/internal/identitymapper"
 	"net/http"
 
 	loggingMiddlewares "github.com/kyma-project/kyma/components/connector-service/internal/logging/middlewares"
@@ -76,7 +77,7 @@ func (hb *handlerBuilder) WithApps(appHandlerCfg Config) {
 	applicationInfoHandler := NewCSRInfoHandler(appHandlerCfg.TokenCreator, appHandlerCfg.ContextExtractor, appHandlerCfg.ManagementInfoURL, appHandlerCfg.ConnectorServiceBaseURL)
 	applicationRenewalHandler := NewSignatureHandler(appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
 	applicationSignatureHandler := NewSignatureHandler(appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
-	applicationManagementInfoHandler := NewManagementInfoHandler(appHandlerCfg.ContextExtractor, appHandlerCfg.CertificateProtectedBaseURL)
+	applicationManagementInfoHandler := NewManagementInfoHandler(appHandlerCfg.ContextExtractor, appHandlerCfg.CertificateProtectedBaseURL, identitymapper.ToApplicationIdentity)
 	applicationRevocationHandler := NewRevocationHandler(appHandlerCfg.RevokedCertsRepo, appHandlerCfg.HeaderParser)
 
 	csrApplicationRouter := hb.router.PathPrefix("/v1/applications/signingRequests").Subrouter()
@@ -123,7 +124,7 @@ func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
 	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenCreator, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.ManagementInfoURL, runtimeHandlerCfg.ConnectorServiceBaseURL)
 	runtimeRenewalHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
-	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.CertificateProtectedBaseURL)
+	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.CertificateProtectedBaseURL, identitymapper.ToRuntimeIdentity)
 	runtimeRevocationHandler := NewRevocationHandler(runtimeHandlerCfg.RevokedCertsRepo, runtimeHandlerCfg.HeaderParser)
 
 	csrRuntimesRouter := hb.router.PathPrefix("/v1/runtimes/signingRequests").Subrouter()

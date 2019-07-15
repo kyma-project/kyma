@@ -96,9 +96,9 @@ func (ext *ContextExtractor) prepareSubject(org, orgUnit, commonName string) cer
 }
 
 func (ext *ContextExtractor) CreateClusterClientContextService(ctx context.Context) (ClientCertContextService, apperrors.AppError) {
-	clusterCtx, ok := ctx.Value(ClientContextKey).(ClientContext)
-	if !ok {
-		return nil, apperrors.Internal("Failed to extract ClientContext from request")
+	clusterCtx, err := ExtractClientContext(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	subject := ext.prepareSubject(clusterCtx.Tenant, clusterCtx.Group, clusterCtx.ID)
@@ -109,7 +109,7 @@ func (ext *ContextExtractor) CreateClusterClientContextService(ctx context.Conte
 func ExtractClientContext(ctx context.Context) (ClientContext, apperrors.AppError) {
 	appCtx, ok := ctx.Value(ClientContextKey).(ClientContext)
 	if !ok {
-		return ClientContext{}, apperrors.Internal("Failed to extract ApplicationContext from request")
+		return ClientContext{}, apperrors.Internal("Failed to extract ClientContext from request")
 	}
 	return appCtx, nil
 }

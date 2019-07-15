@@ -1,4 +1,4 @@
-package externalapi
+package identitymapper
 
 import "github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
@@ -11,12 +11,12 @@ type ApplicationIdentity struct {
 }
 
 type RuntimeIdentity struct {
-	RuntimeID string `json:"runtimeid,omitempty"`
+	RuntimeID string `json:"runtimeID,omitempty"`
 	Group     string `json:"group,omitempty"`
 	Tenant    string `json:"tenant,omitempty"`
 }
 
-func MapToApplicationIdentity(ctx clientcontext.ClientContext) interface{} {
+func ToApplicationIdentity(ctx clientcontext.ClientContext) interface{} {
 	return ApplicationIdentity{
 		Application: ctx.ID,
 		Group:       ctx.Group,
@@ -24,7 +24,7 @@ func MapToApplicationIdentity(ctx clientcontext.ClientContext) interface{} {
 	}
 }
 
-func MapToRuntimeIdentity(ctx clientcontext.ClientContext) interface{} {
+func ToRuntimeIdentity(ctx clientcontext.ClientContext) interface{} {
 	return RuntimeIdentity{
 		RuntimeID: ctx.ID,
 		Group:     ctx.Group,

@@ -51,9 +51,9 @@ const (
 )
 
 type ClientContextService interface {
-	GetRuntimeID() *string
 	GetRuntimeUrls() *RuntimeURLs
 	GetLogger() *logrus.Entry
+	GetClientContext() ClientContext
 }
 
 type ClientCertContextService interface {
