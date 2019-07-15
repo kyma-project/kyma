@@ -1,7 +1,6 @@
 package testsuite
 
 import (
-	"github.com/pkg/errors"
 	"fmt"
 	"github.com/avast/retry-go"
 	serviceBindingUsageApi "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
@@ -9,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
 	"time"

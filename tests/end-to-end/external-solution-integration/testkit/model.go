@@ -126,7 +126,7 @@ type DocsObject struct {
 }
 
 type ErrorResponse struct {
-	Code  int    `json:"code"`
+	Code     int    `json:"code"`
 	ErrorMsg string `json:"error"`
 }
 

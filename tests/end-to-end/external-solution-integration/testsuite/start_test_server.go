@@ -31,7 +31,7 @@ func (s *StartTestServer) Run() error {
 		return err
 	}
 
-	err = retry.Do(s.testService.IsReady, retry.Delay(200 * time.Millisecond))
+	err = retry.Do(s.testService.IsReady, retry.Delay(200*time.Millisecond))
 
 	if err != nil {
 		return fmt.Errorf("test service not started: %s", err)

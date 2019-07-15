@@ -10,16 +10,16 @@ metadata:
 spec:
   restartPolicy: Never
   containers:
-  - name: e2e
-    image: k15r/e2e:bla
-    imagePullPolicy: Always
-    args:
-    - "/e2e"
-    env:
-    - name: KUBERNETES_SERVICE_HOST
-      value: "kubernetes.default.svc.cluster.local"
-    - name: KUBERNETES_SERVICE_PORT
-      value: "443"
+    - name: e2e
+      image: k15r/e2e:bla
+      imagePullPolicy: Always
+      args:
+        - "/e2e"
+      env:
+        - name: KUBERNETES_SERVICE_HOST
+          value: "kubernetes.default.svc.cluster.local"
+        - name: KUBERNETES_SERVICE_PORT
+          value: "443"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -29,30 +29,30 @@ metadata:
   labels:
     app: e2e
 rules:
-- apiGroups: ["*"]
-  resources: ["services", "deployments", "pods"]
-  verbs: ["create", "get", "delete", "list"]
-- apiGroups: ["*"]
-  resources: ["secrets"]
-  verbs: ["create", "get", "update", "delete"]
-- apiGroups: ["applicationconnector.kyma-project.io"]
-  resources: ["applications", "applicationmappings", "eventactivations"]
-  verbs: ["get", "update", "list", "create", "delete"]
-- apiGroups: ["extensions"]
-  resources: ["ingresses"]
-  verbs: ["get", "update", "list", "create", "delete"]
-- apiGroups: ["eventing.kyma-project.io"]
-  resources: ["subscriptions"]
-  verbs: ["create", "get", "update", "delete"]
-- apiGroups: ["kubeless.io"]
-  resources: ["functions"]
-  verbs: ["create", "get", "update", "delete"]
-- apiGroups: ["servicecatalog.k8s.io"]
-  resources: ["serviceinstances", "servicebindings"]
-  verbs: ["create", "get", "update", "delete"]
-- apiGroups: ["servicecatalog.kyma-project.io"]
-  resources: ["servicebindingusages"]
-  verbs: ["create", "get", "update", "delete"]
+  - apiGroups: ["*"]
+    resources: ["services", "deployments", "pods"]
+    verbs: ["create", "get", "delete", "list"]
+  - apiGroups: ["*"]
+    resources: ["secrets"]
+    verbs: ["create", "get", "update", "delete"]
+  - apiGroups: ["applicationconnector.kyma-project.io"]
+    resources: ["applications", "applicationmappings", "eventactivations"]
+    verbs: ["get", "update", "list", "create", "delete"]
+  - apiGroups: ["extensions"]
+    resources: ["ingresses"]
+    verbs: ["get", "update", "list", "create", "delete"]
+  - apiGroups: ["eventing.kyma-project.io"]
+    resources: ["subscriptions"]
+    verbs: ["create", "get", "update", "delete"]
+  - apiGroups: ["kubeless.io"]
+    resources: ["functions"]
+    verbs: ["create", "get", "update", "delete"]
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["serviceinstances", "servicebindings"]
+    verbs: ["create", "get", "update", "delete"]
+  - apiGroups: ["servicecatalog.kyma-project.io"]
+    resources: ["servicebindingusages"]
+    verbs: ["create", "get", "update", "delete"]
 
 ---
 kind: ClusterRoleBinding
@@ -63,9 +63,9 @@ metadata:
   labels:
     app: e2e
 subjects:
-- kind: User
-  name: system:serviceaccount:production:default
-  apiGroup: rbac.authorization.k8s.io
+  - kind: User
+    name: system:serviceaccount:production:default
+    apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
   name: e2e-role

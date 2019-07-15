@@ -8,8 +8,8 @@ import (
 )
 
 type RegisterTestService struct {
-	testService    *testkit.TestService
-	state          RegisterTestServiceState
+	testService *testkit.TestService
+	state       RegisterTestServiceState
 }
 
 type RegisterTestServiceState interface {
@@ -22,8 +22,8 @@ var _ step.Step = &RegisterTestService{}
 
 func NewRegisterTestService(testService *testkit.TestService, state RegisterTestServiceState) *RegisterTestService {
 	return &RegisterTestService{
-		testService:    testService,
-		state:          state,
+		testService: testService,
+		state:       state,
 	}
 }
 

@@ -1,13 +1,13 @@
 package testsuite
 
 import (
-	"github.com/pkg/errors"
 	"fmt"
 	"github.com/avast/retry-go"
 	eventingApi "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eventingClient "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/step"
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -42,7 +42,7 @@ func (s *CreateSubscription) Run() error {
 
 	sub := &eventingApi.Subscription{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: consts.AppName,
+			Name:   consts.AppName,
 			Labels: map[string]string{"Function": consts.AppName},
 		},
 

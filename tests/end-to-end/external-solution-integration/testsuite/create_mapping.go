@@ -9,14 +9,14 @@ import (
 )
 
 type CreateMapping struct {
-	mappings  acClient.ApplicationMappingInterface
+	mappings acClient.ApplicationMappingInterface
 }
 
 var _ step.Step = &CreateMapping{}
 
 func NewCreateMapping(mappings acClient.ApplicationMappingInterface) *CreateMapping {
 	return &CreateMapping{
-		mappings:  mappings,
+		mappings: mappings,
 	}
 }
 

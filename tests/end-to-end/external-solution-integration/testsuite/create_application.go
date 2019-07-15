@@ -1,12 +1,12 @@
 package testsuite
 
 import (
-	"github.com/pkg/errors"
 	"github.com/avast/retry-go"
 	acApi "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	acClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/step"
+	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

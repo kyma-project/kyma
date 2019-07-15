@@ -1,7 +1,6 @@
 package testsuite
 
 import (
-	"github.com/pkg/errors"
 	"fmt"
 	"github.com/avast/retry-go"
 	kubelessApi "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
@@ -9,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
+	"github.com/pkg/errors"
 	coreApi "k8s.io/api/core/v1"
 	extensionsApi "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -59,7 +59,7 @@ var _ step.Step = &DeployLambda{}
 func NewDeployLambda(functions kubelessClient.FunctionInterface, pods coreClient.PodInterface) *DeployLambda {
 	return &DeployLambda{
 		LambdaHelper: testkit.NewLambdaHelper(pods),
-		functions: functions,
+		functions:    functions,
 	}
 }
 

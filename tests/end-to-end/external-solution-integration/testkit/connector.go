@@ -6,8 +6,8 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/pkg/errors"
 	"github.com/avast/retry-go"
+	"github.com/pkg/errors"
 	"net/http"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"

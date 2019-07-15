@@ -53,7 +53,7 @@ func (r *Runner) runStep(step Step) (err error) {
 }
 
 func (r *Runner) Cleanup(steps []Step) {
-	for i := len(steps)-1; i >= 0; i-- {
+	for i := len(steps) - 1; i >= 0; i-- {
 		r.log.Infof("Cleanup: '%s'", steps[i].Name())
 		if err := steps[i].Cleanup(); err != nil && !k8s_errors.IsNotFound(err) {
 			r.log.Warnf("Error during '%s' cleanup: %s", steps[i].Name(), err)

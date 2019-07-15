@@ -2,19 +2,19 @@ package testkit
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
 	"fmt"
+	"github.com/hashicorp/go-multierror"
 	"github.com/kyma-project/kyma/common/ingressgateway"
 	gatewayApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
+	"github.com/pkg/errors"
 	model "k8s.io/api/apps/v1"
 	core "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"net/http"
 	"strconv"
-	"github.com/hashicorp/go-multierror"
 )
 
 const (
@@ -212,8 +212,8 @@ func (ts *TestService) createAPI() error {
 				Name: testServiceName,
 				Port: testServicePort,
 			},
-			Hostname:                   fmt.Sprintf("%s.%s", testServiceName, ts.domain),
-			Authentication:             []gatewayApi.AuthenticationRule{},
+			Hostname:       fmt.Sprintf("%s.%s", testServiceName, ts.domain),
+			Authentication: []gatewayApi.AuthenticationRule{},
 		},
 	}
 	_, err := ts.apis.Apis(ts.K8sResourcesClient.GetNamespace()).Create(api)
