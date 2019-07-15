@@ -1,10 +1,9 @@
 package consts
 
+// All constants used by this test
 const (
 	AppName     = "e2e-test-app"
 	AccessLabel = "e2e-test-app-label"
-
-	IntegrationNamespace = "kyma-integration"
 
 	LambdaEndpointPattern = "http://e2e-test-app.%s:8080"
 	EventType             = "exampleEvent"

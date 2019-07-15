@@ -5,15 +5,16 @@ import (
 	"github.com/avast/retry-go"
 	serviceBindingUsageApi "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/step"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
 	"time"
 )
 
+// CreateServiceBindingUsage is a step which creates new ServiceBindingUsage
 type CreateServiceBindingUsage struct {
 	*testkit.LambdaHelper
 	testkit.PodHelper
@@ -67,7 +68,7 @@ func (s *CreateServiceBindingUsage) Run() error {
 		return err
 	}
 
-	err = retry.Do(s.isLambdaBound, retry.Delay(300*time.Millisecond))
+	err = retry.Do(s.isLambdaBound, retry.Delay(500*time.Millisecond))
 	if err != nil {
 		return err
 	}

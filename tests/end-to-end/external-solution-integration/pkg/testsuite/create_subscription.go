@@ -5,8 +5,8 @@ import (
 	"github.com/avast/retry-go"
 	eventingApi "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eventingClient "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/step"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

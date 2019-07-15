@@ -2,8 +2,8 @@ package testsuite
 
 import (
 	"github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/step"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/pkg/errors"
 	"time"
 )

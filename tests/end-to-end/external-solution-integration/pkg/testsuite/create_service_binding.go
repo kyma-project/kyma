@@ -4,11 +4,12 @@ import (
 	"fmt"
 	serviceCatalogApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/step"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// CreateServiceBinding is a step which creates new ServiceBinding
 type CreateServiceBinding struct {
 	serviceBindings serviceCatalogClient.ServiceBindingInterface
 	endpoint        string
@@ -16,6 +17,7 @@ type CreateServiceBinding struct {
 
 var _ step.Step = &CreateServiceBinding{}
 
+// NewCreateServiceBinding returns new CreateServiceBinding
 func NewCreateServiceBinding(serviceBindings serviceCatalogClient.ServiceBindingInterface, namespace string) *CreateServiceBinding {
 	return &CreateServiceBinding{
 		serviceBindings: serviceBindings,
@@ -23,10 +25,12 @@ func NewCreateServiceBinding(serviceBindings serviceCatalogClient.ServiceBinding
 	}
 }
 
+// Name returns name name of the step
 func (s *CreateServiceBinding) Name() string {
 	return "Create service binding"
 }
 
+// Run executes the step
 func (s *CreateServiceBinding) Run() error {
 	serviceBinding := &serviceCatalogApi.ServiceBinding{
 		ObjectMeta: metav1.ObjectMeta{Name: consts.ServiceBindingName},
@@ -50,6 +54,7 @@ func (s *CreateServiceBinding) Run() error {
 	return err
 }
 
+// Cleanup removes all resources that may possibly created by the step
 func (s *CreateServiceBinding) Cleanup() error {
 	return s.serviceBindings.Delete(consts.ServiceBindingName, &metav1.DeleteOptions{})
 }

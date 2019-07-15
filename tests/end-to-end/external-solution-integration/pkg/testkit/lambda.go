@@ -1,7 +1,7 @@
 package testkit
 
 import (
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
 	coreApi "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"

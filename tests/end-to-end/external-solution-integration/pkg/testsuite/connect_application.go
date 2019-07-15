@@ -3,19 +3,22 @@ package testsuite
 import (
 	"crypto/tls"
 	"github.com/kyma-project/kyma/common/ingressgateway"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"net/http"
 )
 
+// ConnectApplication is a step which connects application with client certificates and saves connected httpClient in the state
 type ConnectApplication struct {
 	connector *testkit.ConnectorClient
 	state     ConnectApplicationState
 }
 
+// ConnectApplicationState allows ConnectApplication to save connected http.Client for further use by other steps
 type ConnectApplicationState interface {
-	SetGatewayHttpClient(httpClient *http.Client)
+	SetGatewayHTTPClient(httpClient *http.Client)
 }
 
+// NewConnectApplication returns new ConnectApplication
 func NewConnectApplication(connector *testkit.ConnectorClient, state ConnectApplicationState) *ConnectApplication {
 	return &ConnectApplication{
 		connector: connector,
@@ -23,10 +26,12 @@ func NewConnectApplication(connector *testkit.ConnectorClient, state ConnectAppl
 	}
 }
 
+// Name returns name name of the step
 func (s ConnectApplication) Name() string {
 	return "Connect application"
 }
 
+// Run executes the step
 func (s ConnectApplication) Run() error {
 	infoURL, err := s.connector.GetToken()
 	if err != nil {
@@ -64,10 +69,11 @@ func (s ConnectApplication) Run() error {
 	}
 	cert := tls.Certificate{Certificate: rawChain, PrivateKey: privateKey}
 	httpClient.Transport.(*http.Transport).TLSClientConfig.Certificates = []tls.Certificate{cert}
-	s.state.SetGatewayHttpClient(httpClient)
+	s.state.SetGatewayHTTPClient(httpClient)
 	return nil
 }
 
+// Cleanup removes all resources that may possibly created by the step
 func (s ConnectApplication) Cleanup() error {
 	return s.connector.TokenRequestClient.DeleteTokenRequest()
 }

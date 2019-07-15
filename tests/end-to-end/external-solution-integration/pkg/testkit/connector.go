@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"net/http"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/resourceskit"
 	"github.com/sirupsen/logrus"
 )
 

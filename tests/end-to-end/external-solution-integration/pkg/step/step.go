@@ -5,22 +5,30 @@ import (
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 )
 
+// Step represents a single action in test scenario
 type Step interface {
+	// Name returns name name of the step
 	Name() string
+	// Run executes the step
 	Run() error
+	// Cleanup removes all resources that may possibly created by the step
 	Cleanup() error
 }
 
+// Runner executes steps in safe manner
 type Runner struct {
-	log *logrus.Logger
+	log     *logrus.Logger
+	cleanup CleanupMode
 }
 
+// NewRunner returns new runner
 func NewRunner() *Runner {
 	log := logrus.New()
 	log.SetReportCaller(false)
-	return &Runner{log: log}
+	return &Runner{log: log, cleanup: CleanupMode_Yes}
 }
 
+// Run executes steps in specified order. If skipCleanup is false it also executes Step.Cleanup in reverse order starting from last executed step
 func (r *Runner) Run(steps []Step, skipCleanup bool) error {
 	var startedStep int
 	var step Step
@@ -43,6 +51,7 @@ func (r *Runner) Run(steps []Step, skipCleanup bool) error {
 	return err
 }
 
+// runStep allows to recover in case of panic in step
 func (r *Runner) runStep(step Step) (err error) {
 	defer func() {
 		if e := recover(); e != nil {
@@ -52,6 +61,7 @@ func (r *Runner) runStep(step Step) (err error) {
 	return step.Run()
 }
 
+// Cleanup cleans up given steps in reverse order
 func (r *Runner) Cleanup(steps []Step) {
 	for i := len(steps) - 1; i >= 0; i-- {
 		r.log.Infof("Cleanup: '%s'", steps[i].Name())
@@ -60,3 +70,4 @@ func (r *Runner) Cleanup(steps []Step) {
 		}
 	}
 }
+

@@ -2,9 +2,9 @@ package testsuite
 
 import (
 	"encoding/json"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/step"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )
 
 type RegisterTestService struct {

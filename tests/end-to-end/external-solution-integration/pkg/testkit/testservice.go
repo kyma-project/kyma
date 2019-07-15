@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	gatewayApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/resourceskit"
 	"github.com/pkg/errors"
 	model "k8s.io/api/apps/v1"
 	core "k8s.io/api/core/v1"

@@ -5,7 +5,7 @@ import (
 
 	connectionTokenHandlerApi "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

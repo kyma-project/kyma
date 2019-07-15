@@ -12,15 +12,6 @@ var (
 	ApiRawSpec = compact([]byte("{\"name\":\"api\"}"))
 )
 
-type Subject struct {
-	CommonName         string
-	Country            string
-	Organization       string
-	OrganizationalUnit string
-	Locality           string
-	Province           string
-}
-
 type InfoResponse struct {
 	CertUrl     string   `json:"csrUrl"`
 	Api         ApiInfo  `json:"api"`

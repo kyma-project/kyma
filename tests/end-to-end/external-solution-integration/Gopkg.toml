@@ -1,3 +1,8 @@
+required = [
+  "github.com/golang/lint/golint",
+  "golang.org/x/tools/cmd/goimports",
+]
+
 [prune]
   go-tests = true
   unused-packages = true
