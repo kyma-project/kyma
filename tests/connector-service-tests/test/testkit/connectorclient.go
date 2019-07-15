@@ -15,6 +15,8 @@ const (
 	ApplicationHeader = "Application"
 	GroupHeader       = "Group"
 	TenantHeader      = "Tenant"
+	RuntimeIDHeader   = "RuntimeID"
+	RuntimeID         = "testkit-runtimeid"
 	Tenant            = "testkit-tenant"
 	Group             = "testkit-group"
 	Extensions        = ""

@@ -58,6 +58,7 @@ func createRuntimeTokenRequest(t *testing.T, config testkit.TestConfig) *http.Re
 	tokenURL := config.InternalAPIUrl + "/v1/runtimes/tokens"
 
 	request := createTokenRequest(t, tokenURL, true)
+	request.Header.Set(testkit.RuntimeIDHeader, testkit.RuntimeID)
 
 	return request
 }

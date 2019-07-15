@@ -36,7 +36,8 @@ fi
 #
 # GO FMT
 #
-goFmtResult=$(echo "${filesToCheck}" | xargs -L1 go fmt)
+goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/|_*/testdata/|/pkg\/|_*export_test.go")
+goFmtResult=$(echo "${goFilesToCheck}" | xargs -L1 go fmt)
 if [ $(echo ${#goFmtResult}) != 0 ]
 	then
     	echo -e "${RED}✗ go fmt${NC}\n$goFmtResult${NC}"
