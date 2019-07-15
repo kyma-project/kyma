@@ -200,7 +200,7 @@
 /resources/compass/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol
 
 # The `compass-runtime-agent` chart
-/resources/compass/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+/resources/compass-runtime-agent/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
 
 # Components
 #API server proxy Component
