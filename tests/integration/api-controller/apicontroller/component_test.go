@@ -607,7 +607,7 @@ func (componentTestContext) virtualServiceFor(testID string, domainName string, 
 				CorsPolicy: &istioNetApi.CorsPolicy{ //Default policy
 					AllowOrigin:  []string{"*"},
 					AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
-					AllowHeaders: []string{"*"},
+					AllowHeaders: []string{"Authorization", "Content-Type", "*"},
 				},
 			},
 		},
@@ -617,10 +617,10 @@ func (componentTestContext) virtualServiceFor(testID string, domainName string, 
 func sampleTriggerRule() *istioAuthApi.TriggerRule {
 	return &istioAuthApi.TriggerRule{
 		ExcludedPaths: []*istioAuthApi.StringMatch{
-			&istioAuthApi.StringMatch{MatchType: "exact", Value: "/do/not/use/in/production"},
-			&istioAuthApi.StringMatch{MatchType: "prefix", Value: "/web"},
-			&istioAuthApi.StringMatch{MatchType: "suffix", Value: "/favicon.ico"},
-			&istioAuthApi.StringMatch{MatchType: "regex", Value: "^/api/orders/(.*?)?"},
+			{MatchType: "exact", Value: "/do/not/use/in/production"},
+			{MatchType: "prefix", Value: "/web"},
+			{MatchType: "suffix", Value: "/favicon.ico"},
+			{MatchType: "regex", Value: "^/api/orders/(.*?)?"},
 		},
 	}
 }
@@ -678,10 +678,10 @@ func (componentTestContext) setCustomJwtAuthenticationConfig(api *kymaApi.Api) {
 				JwksUri: jwksURI,
 				TriggerRule: &kymaApi.TriggerRule{
 					ExcludedPaths: []kymaApi.MatchExpression{
-						kymaApi.MatchExpression{ExprType: kymaApi.ExactMatch, Value: "/do/not/use/in/production"},
-						kymaApi.MatchExpression{ExprType: kymaApi.PrefixMatch, Value: "/web"},
-						kymaApi.MatchExpression{ExprType: kymaApi.SuffixMatch, Value: "/favicon.ico"},
-						kymaApi.MatchExpression{ExprType: kymaApi.RegexMatch, Value: "^/api/orders/(.*?)?"},
+						{ExprType: kymaApi.ExactMatch, Value: "/do/not/use/in/production"},
+						{ExprType: kymaApi.PrefixMatch, Value: "/web"},
+						{ExprType: kymaApi.SuffixMatch, Value: "/favicon.ico"},
+						{ExprType: kymaApi.RegexMatch, Value: "^/api/orders/(.*?)?"},
 					},
 				},
 			},

@@ -1,6 +1,7 @@
 package serviceapi
 
 import (
+	"k8s.io/apimachinery/pkg/types"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
@@ -19,6 +20,7 @@ const (
 	gatewayUrl   = "url-uuid-1"
 
 	appName   = "app"
+	appUID    = types.UID("appUID")
 	serviceId = "uuid-1"
 )
 
@@ -47,23 +49,24 @@ func TestNewService(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
 			"Create",
 			appName,
+			appUID,
 			serviceId,
 			api.Credentials,
 		).Return(applicationCredentials, nil)
 
 		istioService := new(istiomocks.Service)
-		istioService.On("Create", appName, serviceId, resourceName).Return(nil)
+		istioService.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil, istioService)
 
 		// when
-		applicationServiceAPI, err := service.New(appName, serviceId, api)
+		applicationServiceAPI, err := service.New(appName, appUID, serviceId, api)
 
 		// then
 		require.NoError(t, err)
@@ -101,23 +104,24 @@ func TestNewService(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
 			"Create",
 			appName,
+			appUID,
 			serviceId,
 			api.Credentials,
 		).Return(applicationCredentials, nil)
 
 		istioService := new(istiomocks.Service)
-		istioService.On("Create", appName, serviceId, resourceName).Return(nil)
+		istioService.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil, istioService)
 
 		// when
-		applicationServiceAPI, err := service.New(appName, serviceId, api)
+		applicationServiceAPI, err := service.New(appName, appUID, serviceId, api)
 
 		// then
 		require.NoError(t, err)
@@ -143,15 +147,15 @@ func TestNewService(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
 
 		istioService := new(istiomocks.Service)
-		istioService.On("Create", appName, serviceId, resourceName).Return(nil)
+		istioService.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
 
 		service := NewService(nameResolver, accessServiceManager, nil, nil, istioService)
 
 		// when
-		applicationServiceAPI, err := service.New(appName, serviceId, api)
+		applicationServiceAPI, err := service.New(appName, appUID, serviceId, api)
 
 		// then
 		require.NoError(t, err)
@@ -183,12 +187,12 @@ func TestNewService(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, serviceId, resourceName).Return(apperrors.Internal("some error"))
+		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, nil, nil, nil)
 
 		// when
-		result, err := service.New(appName, serviceId, api)
+		result, err := service.New(appName, appUID, serviceId, api)
 
 		// then
 		assert.Nil(t, result)
@@ -216,12 +220,13 @@ func TestNewService(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
 			"Create",
 			appName,
+			appUID,
 			serviceId,
 			api.Credentials,
 		).Return(applications.Credentials{}, apperrors.Internal("some error"))
@@ -229,7 +234,7 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil, nil)
 
 		// when
-		result, err := service.New(appName, serviceId, api)
+		result, err := service.New(appName, appUID, serviceId, api)
 
 		// then
 		assert.Nil(t, result)
@@ -257,12 +262,13 @@ func TestNewService(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
 			"Create",
 			appName,
+			appUID,
 			serviceId,
 			api.Credentials,
 		).Return(applications.Credentials{}, apperrors.Internal("some error"))
@@ -270,7 +276,7 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil, nil)
 
 		// when
-		result, err := service.New(appName, serviceId, api)
+		result, err := service.New(appName, appUID, serviceId, api)
 
 		// then
 		assert.Nil(t, result)
@@ -299,23 +305,24 @@ func TestNewService(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
 			"Create",
 			appName,
+			appUID,
 			serviceId,
 			api.Credentials,
 		).Return(applications.Credentials{}, nil)
 
 		istioService := new(istiomocks.Service)
-		istioService.On("Create", appName, serviceId, resourceName).Return(apperrors.Internal("some error"))
+		istioService.On("Create", appName, appUID, serviceId, resourceName).Return(apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil, istioService)
 
 		// when
-		result, err := service.New(appName, serviceId, api)
+		result, err := service.New(appName, appUID, serviceId, api)
 
 		// then
 		assert.Nil(t, result)
@@ -350,20 +357,20 @@ func TestNewService(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
 
 		requestParamsService := new(secretsmocks.RequestParametersService)
-		requestParamsService.On("Create", appName, serviceId, requestParams).Return(requestParamsSecretName, nil)
+		requestParamsService.On("Create", appName, appUID, serviceId, requestParams).Return(requestParamsSecretName, nil)
 
 		istioService := new(istiomocks.Service)
-		istioService.On("Create", appName, serviceId, resourceName).Return(nil)
+		istioService.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService, istioService)
 
 		// when
-		applicationServiceAPI, err := service.New(appName, serviceId, api)
+		applicationServiceAPI, err := service.New(appName, appUID, serviceId, api)
 
 		// then
 		require.NoError(t, err)
@@ -737,21 +744,21 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On("Upsert", appName, serviceId, api.Credentials).Return(applicationCredentials, nil)
+		secretsService.On("Upsert", appName, appUID, serviceId, api.Credentials).Return(applicationCredentials, nil)
 
 		requestParamsService := &secretsmocks.RequestParametersService{}
 		requestParamsService.On("Delete", appName, serviceId).Return(nil)
 
 		istioService := new(istiomocks.Service)
-		istioService.On("Upsert", appName, serviceId, resourceName).Return(nil)
+		istioService.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService, istioService)
 
 		// when
-		applicationServiceAPI, err := service.Update(appName, serviceId, api)
+		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, api)
 
 		// then
 		require.NoError(t, err)
@@ -790,21 +797,21 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On("Upsert", appName, serviceId, api.Credentials).Return(applicationCredentials, nil)
+		secretsService.On("Upsert", appName, appUID, serviceId, api.Credentials).Return(applicationCredentials, nil)
 
 		requestParamsService := &secretsmocks.RequestParametersService{}
 		requestParamsService.On("Delete", appName, serviceId).Return(nil)
 
 		istioService := new(istiomocks.Service)
-		istioService.On("Upsert", appName, serviceId, resourceName).Return(nil)
+		istioService.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService, istioService)
 
 		// when
-		applicationServiceAPI, err := service.Update(appName, serviceId, api)
+		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, api)
 
 		// then
 		require.NoError(t, err)
@@ -832,7 +839,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Delete", resourceName).Return(nil)
@@ -841,12 +848,12 @@ func TestDefaultService_Update(t *testing.T) {
 		requestParamsService.On("Delete", appName, serviceId).Return(nil)
 
 		istioService := new(istiomocks.Service)
-		istioService.On("Upsert", appName, serviceId, resourceName).Return(nil)
+		istioService.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService, istioService)
 
 		// when
-		applicationServiceAPI, err := service.Update(appName, serviceId, api)
+		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, api)
 
 		// then
 		require.NoError(t, err)
@@ -880,13 +887,13 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, serviceId, resourceName).
+		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).
 			Return(apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, nil, nil, nil)
 
 		// when
-		result, err := service.Update(appName, serviceId, api)
+		result, err := service.Update(appName, appUID, serviceId, api)
 
 		// then
 		assert.Nil(t, result)
@@ -916,15 +923,15 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On("Upsert", appName, serviceId, api.Credentials).Return(applications.Credentials{}, apperrors.Internal("some error"))
+		secretsService.On("Upsert", appName, appUID, serviceId, api.Credentials).Return(applications.Credentials{}, apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil, nil)
 
 		// when
-		result, err := service.Update(appName, serviceId, api)
+		result, err := service.Update(appName, appUID, serviceId, api)
 
 		// then
 		assert.Nil(t, result)
@@ -954,15 +961,15 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On("Upsert", appName, serviceId, api.Credentials).Return(applications.Credentials{}, apperrors.Internal("some error"))
+		secretsService.On("Upsert", appName, appUID, serviceId, api.Credentials).Return(applications.Credentials{}, apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil, nil)
 
 		// when
-		result, err := service.Update(appName, serviceId, api)
+		result, err := service.Update(appName, appUID, serviceId, api)
 
 		// then
 		assert.Nil(t, result)
@@ -987,7 +994,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Delete", resourceName).Return(apperrors.Internal("some error"))
@@ -995,7 +1002,7 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil, nil)
 
 		// when
-		result, err := service.Update(appName, serviceId, api)
+		result, err := service.Update(appName, appUID, serviceId, api)
 
 		// then
 		assert.Nil(t, result)
@@ -1026,21 +1033,21 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On("Upsert", appName, serviceId, api.Credentials).Return(applications.Credentials{}, nil)
+		secretsService.On("Upsert", appName, appUID, serviceId, api.Credentials).Return(applications.Credentials{}, nil)
 
 		requestParamsService := &secretsmocks.RequestParametersService{}
 		requestParamsService.On("Delete", appName, serviceId).Return(nil)
 
 		istioService := new(istiomocks.Service)
-		istioService.On("Upsert", appName, serviceId, resourceName).Return(apperrors.Internal("some error"))
+		istioService.On("Upsert", appName, appUID, serviceId, resourceName).Return(apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService, istioService)
 
 		// when
-		result, err := service.Update(appName, serviceId, api)
+		result, err := service.Update(appName, appUID, serviceId, api)
 
 		// then
 		assert.Nil(t, result)
@@ -1077,21 +1084,21 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, serviceId, resourceName).Return(nil)
+		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Delete", resourceName).Return(nil)
 
 		requestParamsService := &secretsmocks.RequestParametersService{}
-		requestParamsService.On("Upsert", appName, serviceId, requestParams).Return(requestParamsSecretName, nil)
+		requestParamsService.On("Upsert", appName, appUID, serviceId, requestParams).Return(requestParamsSecretName, nil)
 
 		istioService := new(istiomocks.Service)
-		istioService.On("Upsert", appName, serviceId, resourceName).Return(nil)
+		istioService.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService, istioService)
 
 		// when
-		applicationServiceAPI, err := service.Update(appName, serviceId, api)
+		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, api)
 
 		// then
 		require.NoError(t, err)

@@ -46,12 +46,12 @@ func TestRequestParametersService_Create(t *testing.T) {
 		nameResolver.On("GetResourceName", appName, serviceId).Return(baseResourceName)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Create", appName, requestParametersSecretName, serviceId, requestParamsSecretData).Return(nil)
+		secretsRepository.On("Create", appName, appUID, requestParametersSecretName, serviceId, requestParamsSecretData).Return(nil)
 
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
 		// when
-		createdSecret, err := service.Create(appName, serviceId, requestParameters)
+		createdSecret, err := service.Create(appName, appUID, serviceId, requestParameters)
 
 		// then
 		require.NoError(t, err)
@@ -67,7 +67,7 @@ func TestRequestParametersService_Create(t *testing.T) {
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
 		// when
-		createdRequestParameters, err := service.Create(appName, serviceId, nil)
+		createdRequestParameters, err := service.Create(appName, appUID, serviceId, nil)
 
 		// then
 		assert.NoError(t, err)
@@ -81,12 +81,12 @@ func TestRequestParametersService_Create(t *testing.T) {
 		nameResolver.On("GetResourceName", appName, serviceId).Return(baseResourceName)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Create", appName, requestParametersSecretName, serviceId, requestParamsSecretData).Return(apperrors.Internal("error"))
+		secretsRepository.On("Create", appName, appUID, requestParametersSecretName, serviceId, requestParamsSecretData).Return(apperrors.Internal("error"))
 
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
 		// when
-		createdRequestParameters, err := service.Create(appName, serviceId, requestParameters)
+		createdRequestParameters, err := service.Create(appName, appUID, serviceId, requestParameters)
 
 		// then
 		require.Error(t, err)
@@ -142,12 +142,12 @@ func TestRequestParametersService_Upsert(t *testing.T) {
 		nameResolver.On("GetResourceName", appName, serviceId).Return(baseResourceName)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Upsert", appName, requestParametersSecretName, serviceId, requestParamsSecretData).Return(nil)
+		secretsRepository.On("Upsert", appName, appUID, requestParametersSecretName, serviceId, requestParamsSecretData).Return(nil)
 
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
 		// when
-		createdSecret, err := service.Upsert(appName, serviceId, requestParameters)
+		createdSecret, err := service.Upsert(appName, appUID, serviceId, requestParameters)
 
 		// then
 		require.NoError(t, err)
@@ -161,12 +161,12 @@ func TestRequestParametersService_Upsert(t *testing.T) {
 		nameResolver.On("GetResourceName", appName, serviceId).Return(baseResourceName)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Upsert", appName, requestParametersSecretName, serviceId, requestParamsSecretData).Return(nil)
+		secretsRepository.On("Upsert", appName, appUID, requestParametersSecretName, serviceId, requestParamsSecretData).Return(nil)
 
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
 		// when
-		createdSecret, err := service.Upsert(appName, serviceId, requestParameters)
+		createdSecret, err := service.Upsert(appName, appUID, serviceId, requestParameters)
 
 		// then
 		require.NoError(t, err)
@@ -180,12 +180,12 @@ func TestRequestParametersService_Upsert(t *testing.T) {
 		nameResolver.On("GetResourceName", appName, serviceId).Return(baseResourceName)
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("Upsert", appName, requestParametersSecretName, serviceId, requestParamsSecretData).Return(apperrors.Internal("error"))
+		secretsRepository.On("Upsert", appName, appUID, requestParametersSecretName, serviceId, requestParamsSecretData).Return(apperrors.Internal("error"))
 
 		service := NewRequestParametersService(secretsRepository, nameResolver)
 
 		// when
-		createdRequestParameters, err := service.Upsert(appName, serviceId, requestParameters)
+		createdRequestParameters, err := service.Upsert(appName, appUID, serviceId, requestParameters)
 
 		// then
 		require.Error(t, err)

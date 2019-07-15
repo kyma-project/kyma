@@ -1,4 +1,4 @@
-APP_NAME = test-logging
+APP_NAME = monitoring-integration-tests
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 
@@ -39,6 +39,3 @@ ci-master: resolve validate build build-image push-image
 .PHONY: ci-release
 ci-release: resolve validate build build-image push-image
 
-#.PHONY: path-to-referenced-charts
-#path-to-referenced-charts:
-#	@echo "resources/logging"

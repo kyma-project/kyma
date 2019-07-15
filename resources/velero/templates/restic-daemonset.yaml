@@ -1,10 +1,6 @@
-{{- if .Values.configuration -}}
-{{- if .Values.configuration.provider -}}
-{{- if (not (eq "" .Values.configuration.provider )) -}}
 {{- if .Values.deployRestic }}
-{{- $provider := .Values.configuration.provider }}
----
-apiVersion: extensions/v1beta1
+{{- $provider := .Values.configuration.provider -}}
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: restic
@@ -13,6 +9,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "velero.chart" . }}
+    
 spec:
   selector:
     matchLabels:
@@ -25,6 +22,7 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         helm.sh/chart: {{ include "velero.chart" . }}
+        app: restic
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
@@ -43,7 +41,7 @@ spec:
         {{- end }}
         - name: host-pods
           hostPath:
-            path: /var/lib/kubelet/pods
+            path: {{ .Values.restic.podVolumePath }}
         - name: scratch
           emptyDir: {}
       containers:
@@ -93,11 +91,10 @@ spec:
             - name: AWS_SHARED_CREDENTIALS_FILE
               value: /credentials/cloud
             {{- end }}
-          {{- with .Values.resources }}
+          securityContext:
+            privileged: {{ .Values.restic.privileged }}
+          {{- with .Values.restic.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
 {{- end }}

@@ -197,7 +197,10 @@
 /resources/ory/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `compass` chart
-/resources/compass/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol
+/resources/compass/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+
+# The `compass-runtime-agent` chart
+/resources/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
 
 # Components
 #API server proxy Component
@@ -301,10 +304,10 @@
 /tests/test-namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
 
 # monitoring tests
-/tests/monitoring/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/tests/integration/monitoring/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # test-logging tests
-/tests/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/tests/integration/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # api-controller integration tests
 /tests/integration/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
