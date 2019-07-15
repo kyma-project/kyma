@@ -10,7 +10,7 @@ The tracing functionality available in Kyma can help you to pinpoint the root ca
 In this case, an external system sends the Event, but
 a lambda or microservice with an Event trigger does not exist.
 
-As a result, you can see traces for `publish` only, and the trace details only show you tags for `event-publish-knative-service`.
+As a result, you can see traces for `publish` only. When you access the trace details, they only show you tags for `event-publish-knative-service`.
 
 ![](./assets/troubleshoot-only-publish-detail.png)
 
