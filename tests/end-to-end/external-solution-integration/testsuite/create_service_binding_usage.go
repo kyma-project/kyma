@@ -1,7 +1,7 @@
 package testsuite
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"fmt"
 	"github.com/avast/retry-go"
 	serviceBindingUsageApi "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
@@ -9,7 +9,6 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
-	coreApi "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
 	"time"
@@ -17,6 +16,7 @@ import (
 
 type CreateServiceBindingUsage struct {
 	*testkit.LambdaHelper
+	testkit.PodHelper
 	serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface
 	state                CreateServiceBindingUsageState
 }
@@ -91,10 +91,8 @@ func (s *CreateServiceBindingUsage) isLambdaBound() error {
 			return errors.New("not bound pod exists: " + pod.Name)
 		}
 
-		for _, condition := range pod.Status.Conditions {
-			if condition.Type == coreApi.PodReady && condition.Status != coreApi.ConditionTrue {
-				return errors.New("pod not ready")
-			}
+		if !s.IsPodReady(pod) {
+			return errors.New("pod is not ready yet")
 		}
 	}
 

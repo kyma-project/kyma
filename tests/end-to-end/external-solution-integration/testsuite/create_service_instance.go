@@ -1,7 +1,7 @@
 package testsuite
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"github.com/avast/retry-go"
 	serviceCatalogApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"

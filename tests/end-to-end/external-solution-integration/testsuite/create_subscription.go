@@ -1,7 +1,7 @@
 package testsuite
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"fmt"
 	"github.com/avast/retry-go"
 	eventingApi "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"

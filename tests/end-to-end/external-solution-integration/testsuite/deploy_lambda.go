@@ -1,7 +1,7 @@
 package testsuite
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"fmt"
 	"github.com/avast/retry-go"
 	kubelessApi "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
@@ -50,6 +50,7 @@ module.exports = { main: function (event, context) {
 
 type DeployLambda struct {
 	*testkit.LambdaHelper
+	testkit.PodHelper
 	functions kubelessClient.FunctionInterface
 }
 
@@ -144,12 +145,8 @@ func (s *DeployLambda) isLambdaReady() error {
 		return errors.New("no function pods found")
 	}
 
-	for _, pod := range pods {
-		for _, condition := range pod.Status.Conditions {
-			if condition.Type == coreApi.PodReady && condition.Status != coreApi.ConditionTrue {
-				return errors.New("pod not ready")
-			}
-		}
+	if !s.IsPodReady(pod) {
+		return errors.New("pod is not ready yet")
 	}
 
 	return nil

@@ -7,7 +7,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/base64"
 	"encoding/pem"
-	"errors"
+	"github.com/pkg/errors"
 	"strings"
 )
 

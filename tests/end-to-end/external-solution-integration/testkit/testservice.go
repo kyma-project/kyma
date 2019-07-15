@@ -2,7 +2,7 @@ package testkit
 
 import (
 	"encoding/json"
-	"errors"
+	"github.com/pkg/errors"
 	"fmt"
 	"github.com/kyma-project/kyma/common/ingressgateway"
 	gatewayApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"

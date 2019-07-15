@@ -6,7 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
+	"github.com/pkg/errors"
 	"github.com/avast/retry-go"
 	"net/http"
 
