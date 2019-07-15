@@ -1,7 +1,6 @@
 package testsuite
 
 import (
-	"fmt"
 	"github.com/avast/retry-go"
 	kubelessApi "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubelessClient "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1"
@@ -77,7 +76,7 @@ func (s *DeployLambda) Run() error {
 
 	err = retry.Do(s.isLambdaReady, retry.Delay(200*time.Millisecond))
 	if err != nil {
-		return fmt.Errorf("lambda function not ready, %s", err)
+		return errors.Wrap(err, "lambda function not ready")
 	}
 
 	return nil
@@ -145,8 +144,10 @@ func (s *DeployLambda) isLambdaReady() error {
 		return errors.New("no function pods found")
 	}
 
-	if !s.IsPodReady(pod) {
-		return errors.New("pod is not ready yet")
+	for _, pod := range pods {
+		if !s.IsPodReady(pod) {
+			return errors.New("pod is not ready yet")
+		}
 	}
 
 	return nil

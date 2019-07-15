@@ -1,10 +1,10 @@
 package testsuite
 
 import (
-	"fmt"
 	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
+	"github.com/pkg/errors"
 )
 
 type CheckCounterPod struct {
@@ -28,7 +28,7 @@ func (s *CheckCounterPod) Run() error {
 		return s.testService.WaitForCounterPodToUpdateValue(1)
 	})
 	if err != nil {
-		return fmt.Errorf("the counter pod is not updated: %v", err)
+		return errors.Wrapf(err, "the counter pod is not updated")
 	}
 	return nil
 }

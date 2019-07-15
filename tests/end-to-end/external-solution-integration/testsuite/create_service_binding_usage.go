@@ -88,7 +88,7 @@ func (s *CreateServiceBindingUsage) isLambdaBound() error {
 
 	for _, pod := range pods {
 		if _, ok := pod.Labels[sbuLabel]; !ok {
-			return errors.New("not bound pod exists: " + pod.Name)
+			return errors.Errorf("not bound pod exists: %s", pod.Name)
 		}
 
 		if !s.IsPodReady(pod) {

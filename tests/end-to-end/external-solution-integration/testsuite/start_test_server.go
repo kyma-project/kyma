@@ -1,10 +1,10 @@
 package testsuite
 
 import (
-	"fmt"
 	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
+	"github.com/pkg/errors"
 	"time"
 )
 
@@ -34,7 +34,7 @@ func (s *StartTestServer) Run() error {
 	err = retry.Do(s.testService.IsReady, retry.Delay(200*time.Millisecond))
 
 	if err != nil {
-		return fmt.Errorf("test service not started: %s", err)
+		return errors.Wrap(err, "test service not started")
 	}
 
 	return nil

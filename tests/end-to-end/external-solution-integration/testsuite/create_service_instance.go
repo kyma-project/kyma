@@ -72,7 +72,7 @@ func (s *CreateServiceInstance) isServiceInstanceCreated() error {
 	svcInstance, _ := s.serviceInstances.Get(consts.ServiceInstanceName, v1.GetOptions{})
 
 	if svcInstance.Status.ProvisionStatus != "Provisioned" {
-		return errors.New("Unexpected provision status: " + string(svcInstance.Status.ProvisionStatus))
+		return errors.Errorf("unexpected provision status: %s", svcInstance.Status.ProvisionStatus)
 	}
 	return nil
 }

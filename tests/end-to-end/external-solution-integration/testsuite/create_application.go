@@ -57,7 +57,7 @@ func (s *CreateApplication) isApplicationReady() error {
 	}
 
 	if application.Status.InstallationStatus.Status == "DEPLOYED" {
-		return errors.New("Unexpected installation status: " + application.Status.InstallationStatus.Status)
+		return errors.Errorf("unexpected installation status: %s", application.Status.InstallationStatus.Status)
 	}
 
 	return nil

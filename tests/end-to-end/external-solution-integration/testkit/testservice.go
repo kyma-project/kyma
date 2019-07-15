@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/go-multierror"
-	"github.com/kyma-project/kyma/common/ingressgateway"
 	gatewayApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
@@ -14,7 +13,6 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"net/http"
-	"strconv"
 )
 
 const (
@@ -35,19 +33,13 @@ type TestService struct {
 	domain             string
 }
 
-func NewTestService(k8sClient resourceskit.K8sResourcesClient, apis gatewayClient.ApisGetter, domain string) (*TestService, error) {
-
-	httpClient, err := ingressgateway.FromEnv().Client()
-	if err != nil {
-		return nil, err
-	}
-
+func NewTestService(k8sClient resourceskit.K8sResourcesClient, httpClient *http.Client, apis gatewayClient.ApisGetter, domain string) *TestService {
 	return &TestService{
 		K8sResourcesClient: k8sClient,
 		HttpClient:         httpClient,
 		domain:             domain,
 		apis:               apis,
-	}, nil
+	}
 }
 
 func (ts *TestService) CreateTestService() error {
@@ -96,7 +88,7 @@ func (ts *TestService) IsReady() error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New("Unexpected status code; " + resp.Status)
+		return errors.Errorf("unexpected status code: %s", resp.Status)
 	}
 
 	return nil
@@ -108,7 +100,7 @@ func (ts *TestService) WaitForCounterPodToUpdateValue(val int) error {
 	}
 
 	if count != val {
-		return errors.New("counter different then expected value: " + strconv.Itoa(count))
+		return errors.Errorf("counter different then expected value: %v", count)
 	}
 	return nil
 }
