@@ -36,3 +36,4 @@ cluster:
   headerTitle: ''
   # Provide a list of navigation nodes that should be hidden. For example 'namespace.operation.secrets settings foo.bar'
   disabledNavigationNodes: ''
+  systemNamespaces: 'istio-system knative-eventing knative-serving kube-public kube-system kyma-backup kyma-installer kyma-integration kyma-system natss'

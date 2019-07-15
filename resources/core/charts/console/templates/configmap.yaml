@@ -19,7 +19,8 @@ data:
       headerTitle: '{{ js .Values.cluster.headerTitle }}',
       faviconUrl: '{{ js .Values.cluster.faviconUrl }}',
       gateway_kyma_cx_api_version: 'v1alpha2',
-      disabledNavigationNodes: '{{ js .Values.cluster.disabledNavigationNodes }}'
+      disabledNavigationNodes: '{{ js .Values.cluster.disabledNavigationNodes }}',
+      systemNamespaces: '{{ js .Values.cluster.systemNamespaces }}'
     };
 
   nginx-extended.conf: |
