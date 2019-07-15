@@ -4,7 +4,6 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/middlewares/runtimeregistry/mocks"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -82,36 +81,5 @@ func TestNewRuntimeHealthCheckMiddlewaret(t *testing.T) {
 		//then
 		assert.Equal(t, http.StatusOK, rr.Code)
 		runtimeRegistryService.AssertNumberOfCalls(t, "ReportState", 0)
-	})
-
-	t.Run("should return status code 500 when Runtime Registry Service returns error", func(t *testing.T) {
-		//given
-		runtimeRegistryService := &mocks.RuntimeRegistryService{}
-		runtimeRegistryService.On("ReportState", mock.Anything).Return(errors.New("example error"))
-
-		runtimeHealthCheckMiddleware := NewRuntimeHealthCheckMiddleware(contextExtractor, runtimeRegistryService)
-
-		clusterContext := clientcontext.ClientContext{
-			Group:  "testGroup",
-			Tenant: "testTenant",
-			ID:     "testID",
-		}
-
-		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusOK)
-		})
-
-		request, err := http.NewRequest(http.MethodGet, url, nil)
-		require.NoError(t, err)
-		request = request.WithContext(clusterContext.ExtendContext(request.Context()))
-
-		rr := httptest.NewRecorder()
-
-		//when
-		resultHandler := runtimeHealthCheckMiddleware.Middleware(handler)
-		resultHandler.ServeHTTP(rr, request)
-
-		//then
-		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})
 }

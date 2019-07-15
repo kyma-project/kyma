@@ -5,6 +5,7 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/middlewares/runtimeregistry"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -40,8 +41,7 @@ func (cc *runtimeHealthCheckMiddleware) Middleware(handler http.Handler) http.Ha
 		e := cc.runtimeRegistryService.ReportState(state)
 
 		if e != nil {
-			httphelpers.RespondWithErrorAndLog(w, apperrors.Internal("Unable to report runtime state: %s", e.Error()))
-			return
+			log.Error(apperrors.Internal("Unable to report runtime state: %s", e.Error()))
 		}
 
 		handler.ServeHTTP(w, r)
