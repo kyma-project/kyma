@@ -3,23 +3,20 @@ title: Troubleshooting using tracing
 type: Troubleshooting
 ---
 
-
-Tracing allows you to troubleshoot problems that you might encounter
-while using Kyma. Understanding the common scenarios and what the expected traces
-look like helps you to use Kyma tracing capabilities to pinpoint the root cause.
+The tracing functionality available in Kyma can help you to pinpoint the error's root cause and solve the problem. See [this](docs/components/tracing/#overview-overview) document to learn more about tracing.
 
 ## No microservice or lambda configured to receive an Event
 
-In this case, an external system sends the Event but
+In this case, an external system sends the Event, but
 a lambda or microservice with an Event trigger does not exist.
 
-As a result, you can see only the trace for `publish` and the trace details show you the tags for the `event-publish-knative-service`.
+As a result, you can see traces for `publish` only, and the trace details show you only the tags for the `event-publish-knative-service`.
 
 ![](./assets/troubleshoot-only-publish-detail.png)
 
 ## Configured microservice or lambda returns an error
 
-In this case, a microservice or lambda existis and reacts on
+In this case, a microservice or lambda exists and reacts on
 the Event trigger. However, due to a code issue, the microservice or lambda 
 fails to process the Event.
 
