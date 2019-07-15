@@ -50,7 +50,7 @@ spec:
           - "--lookupConfigMapPath={{ .Values.deployment.externalClusterLookup.path }}"
           - "--runtimeRegistryEnabled={{ .Values.deployment.runtimeStateReport.enabled }}"
           - "--runtimeRegistryConfigMapPath={{ .Values.deployment.runtimeStateReport.path }}"
-        {{- if .Values.deployment.externalClusterLookup.enabled or .Values.deployment.runtimeStateReport.enabled }}
+        {{- if or .Values.deployment.externalClusterLookup.enabled .Values.deployment.runtimeStateReport.enabled }}
         volumeMounts:
         {{- end }}
         {{- if .Values.deployment.externalClusterLookup.enabled }}
@@ -81,7 +81,7 @@ spec:
             name: metrics-port
         securityContext:
           runAsUser: {{ .Values.deployment.runAsUser }}
-      {{- if .Values.deployment.externalClusterLookup.enabled or .Values.deployment.runtimeStateReport.enabled }}
+      {{- if or .Values.deployment.externalClusterLookup.enabled .Values.deployment.runtimeStateReport.enabled }}
       volumes:
       {{- end }}
       {{- if .Values.deployment.externalClusterLookup.enabled }}
