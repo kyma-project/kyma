@@ -12,7 +12,7 @@ metadata:
 # namespace-lifecycle admission-controller
 rules:
 - apiGroups: [""]
-  resources: ["namespaces"]
+  resources: ["namespaces", "configmaps"]
   verbs:     ["get", "list", "watch"]
 - apiGroups: ["admissionregistration.k8s.io"]
   resources: ["validatingwebhookconfigurations"]
