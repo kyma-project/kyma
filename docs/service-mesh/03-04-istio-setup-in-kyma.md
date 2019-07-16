@@ -7,7 +7,7 @@ Istio is installed using the official charts from the currently supported releas
 
 ## Istio components
 
-This list shows the available Istio components and the component enabled by default:
+This list shows the available Istio components and the components enabled by default:
 
 | Component | Enabled? |
 | :--- | :---: |
