@@ -16,6 +16,13 @@ dex:
     signingKeys: "720h"
     idTokens: "8h"
 
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 16Mi
 global:
   isLocalEnv: false
   gateway:
