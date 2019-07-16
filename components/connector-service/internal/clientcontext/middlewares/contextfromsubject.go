@@ -56,9 +56,11 @@ func fullContextFromSubject(subject string) (clientcontext.ContextExtender, appe
 	}
 
 	return clientcontext.ClientContext{
-		Group:  group,
-		Tenant: tenant,
-		ID:     id,
+		ClusterContext: clientcontext.ClusterContext{
+			Group:  group,
+			Tenant: tenant,
+		},
+		ID: id,
 	}, nil
 }
 

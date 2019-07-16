@@ -45,9 +45,11 @@ func (ctx dummyClientCertsContext) ClientContext() clientcontext.ClientContextSe
 func TestTokenHandler_CreateToken(t *testing.T) {
 
 	clusterContext := clientcontext.ClientContext{
-		Tenant: tenant,
-		Group:  group,
-		ID:     appName,
+		ClusterContext: clientcontext.ClusterContext{
+			Tenant: tenant,
+			Group:  group,
+		},
+		ID: appName,
 	}
 
 	clusterClientContext := dummyClientCertsContext{clusterContext}

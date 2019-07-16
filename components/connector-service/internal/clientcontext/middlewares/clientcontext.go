@@ -22,15 +22,17 @@ func NewContextMiddleware(contextHandler clientcontext.ClusterContextStrategy, i
 
 func (cc *contextMiddleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		appContext := cc.contextHandler.ReadClusterContextFromRequest(r)
-		appContext.ID = r.Header.Get(cc.idHeader)
-
-		if !cc.contextHandler.IsValidContext(appContext) {
+		clusterCtx := cc.contextHandler.ReadClusterContextFromRequest(r)
+		clientCtx := clientcontext.ClientContext{
+			ID:             r.Header.Get(cc.idHeader),
+			ClusterContext: clusterCtx,
+		}
+		if !cc.contextHandler.IsValidContext(clientCtx) {
 			httphelpers.RespondWithErrorAndLog(w, apperrors.BadRequest("Required headers for ClientContext not specified."))
 			return
 		}
 
-		reqWithCtx := r.WithContext(appContext.ExtendContext(r.Context()))
+		reqWithCtx := r.WithContext(clientCtx.ExtendContext(r.Context()))
 
 		handler.ServeHTTP(w, reqWithCtx)
 	})

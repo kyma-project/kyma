@@ -42,9 +42,11 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		expectedEventsURL := "https://events.base.path/application/v1/events"
 
 		applicationContext := clientcontext.ClientContext{
-			Tenant: tenant,
-			Group:  group,
-			ID:     appName,
+			ClusterContext: clientcontext.ClusterContext{
+				Tenant: tenant,
+				Group:  group,
+			},
+			ID: appName,
 		}
 
 		extApplicationCtx := &clientcontext.ExtendedApplicationContext{
@@ -97,9 +99,11 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 	t.Run("should successfully get management info response for runtime", func(t *testing.T) {
 		//given
 		runtimeContext := &clientcontext.ClientContext{
-			Tenant: tenant,
-			Group:  group,
-			ID:     runtimeID,
+			ClusterContext: clientcontext.ClusterContext{
+				Tenant: tenant,
+				Group:  group,
+			},
+			ID: runtimeID,
 		}
 
 		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {

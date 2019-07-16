@@ -89,7 +89,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayBaseURL, lookupEnabled, clientcontext.ExtractClientContext, lookupService)
 	contextFromSubjMiddleware := clientcontextmiddlewares.NewContextFromSubjMiddleware(headerParser, opts.central)
 	checkForRevokedCertMiddleware := certificateMiddlewares.NewRevocationCheckMiddleware(revocationListRepository, headerParser)
-	runtimeHealthCheckMiddleware := middlewares.NewRuntimeHealthCheckMiddleware(contextExtractor.CreateClusterClientContextService, runtimeRegService, opts.runtimeRegistryEnabled)
+	runtimeHealthCheckMiddleware := middlewares.NewRuntimeHealthReportMiddleware(contextExtractor.CreateClusterClientContextService, runtimeRegService, opts.runtimeRegistryEnabled)
 
 	functionalMiddlewares := externalapi.FunctionalMiddlewares{
 		AppTokenResolverMiddleware:     appTokenResolverMiddleware.Middleware,
@@ -97,7 +97,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 		RuntimeURLsMiddleware:          runtimeURLsMiddleware.Middleware,
 		ContextFromSubjectMiddleware:   contextFromSubjMiddleware.Middleware,
 		CheckForRevokedCertMiddleware:  checkForRevokedCertMiddleware.Middleware,
-		RuntimeHealthCheckMiddleware:   runtimeHealthCheckMiddleware.Middleware,
+		RuntimeHealthReportkMiddleware: runtimeHealthCheckMiddleware.Middleware,
 	}
 
 	handlerBuilder := externalapi.NewHandlerBuilder(functionalMiddlewares, globalMiddlewares)

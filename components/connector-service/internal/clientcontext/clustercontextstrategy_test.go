@@ -53,7 +53,7 @@ func TestClusterContextEnabledStrategy_IsValidContext(t *testing.T) {
 		strategy := NewClusterContextStrategy(true)
 
 		for _, test := range testCases {
-			valid := strategy.IsValidContext(ClientContext{Tenant: test.tenant, Group: test.group, ID: test.runtimeID})
+			valid := strategy.IsValidContext(ClientContext{ClusterContext: ClusterContext{Tenant: test.tenant, Group: test.group}, ID: test.runtimeID})
 			assert.Equal(t, test.valid, valid)
 		}
 	})
@@ -81,7 +81,7 @@ func TestClusterContextDisabledStrategy_IsValidContext(t *testing.T) {
 		strategy := NewClusterContextStrategy(false)
 
 		for _, test := range testCases {
-			valid := strategy.IsValidContext(ClientContext{Tenant: test.tenant, Group: test.group, ID: test.runtimeID})
+			valid := strategy.IsValidContext(ClientContext{ClusterContext: ClusterContext{Tenant: test.tenant, Group: test.group}, ID: test.runtimeID})
 			assert.Equal(t, test.valid, valid)
 		}
 	})

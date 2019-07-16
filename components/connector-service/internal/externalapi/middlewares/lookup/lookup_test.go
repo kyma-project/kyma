@@ -19,9 +19,11 @@ func TestLookupService_Fetch(t *testing.T) {
 		service := &mocks.GraphQLService{}
 		qlLookupService := NewGraphQLLookupService(service, "testdata/")
 		appCtx := clientcontext.ClientContext{
-			Group:  "exampleGroup",
-			Tenant: "exampleTenant",
-			ID:     "exampleApp",
+			ClusterContext: clientcontext.ClusterContext{
+				Group:  "exampleGroup",
+				Tenant: "exampleTenant",
+			},
+			ID: "exampleApp",
 		}
 
 		expectedGatewayURL := "https://gateway.cool-cluster.cluster.extend.sap.cx"

@@ -29,9 +29,11 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(defaultGatewayBaseURL, clientcontext.LookupEnabled, extractor, lookupService)
 
 		appCtx := clientcontext.ClientContext{
-			Group:  "testGroup",
-			Tenant: "testTenant",
-			ID:     "testApp",
+			ClusterContext: clientcontext.ClusterContext{
+				Group:  "testGroup",
+				Tenant: "testTenant",
+			},
+			ID: "testApp",
 		}
 
 		lookupService.On("Fetch", appCtx).Return(fetchedGatewayBaseURL, nil)
@@ -107,9 +109,11 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(defaultGatewayBaseURL, clientcontext.LookupEnabled, extractor, lookupService)
 
 		appCtx := clientcontext.ClientContext{
-			Group:  "testGroup",
-			Tenant: "testTenant",
-			ID:     "testApp",
+			ClusterContext: clientcontext.ClusterContext{
+				Group:  "testGroup",
+				Tenant: "testTenant",
+			},
+			ID: "testApp",
 		}
 
 		lookupService.On("Fetch", appCtx).Return(nil, apperrors.Internal("some error"))

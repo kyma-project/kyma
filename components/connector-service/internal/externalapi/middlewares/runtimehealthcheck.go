@@ -9,21 +9,21 @@ import (
 	"net/http"
 )
 
-type runtimeHealthCheckMiddleware struct {
+type runtimeHealthReportMiddleware struct {
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
 	runtimeRegistryService   runtimeregistry.RuntimeRegistryService
 	runtimeRegistryEnabled   bool
 }
 
-func NewRuntimeHealthCheckMiddleware(connectorClientExtractor clientcontext.ConnectorClientExtractor, runtimeRegistryService runtimeregistry.RuntimeRegistryService, runtimeRegistryEnabled bool) *runtimeHealthCheckMiddleware {
-	return &runtimeHealthCheckMiddleware{
+func NewRuntimeHealthReportMiddleware(connectorClientExtractor clientcontext.ConnectorClientExtractor, runtimeRegistryService runtimeregistry.RuntimeRegistryService, runtimeRegistryEnabled bool) *runtimeHealthReportMiddleware {
+	return &runtimeHealthReportMiddleware{
 		connectorClientExtractor: connectorClientExtractor,
 		runtimeRegistryService:   runtimeRegistryService,
 		runtimeRegistryEnabled:   runtimeRegistryEnabled,
 	}
 }
 
-func (cc *runtimeHealthCheckMiddleware) Middleware(handler http.Handler) http.Handler {
+func (cc *runtimeHealthReportMiddleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if cc.runtimeRegistryEnabled {
 			contextService, err := cc.connectorClientExtractor(r.Context())

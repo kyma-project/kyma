@@ -43,7 +43,7 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 			CommonName:         appName,
 		}
 
-		appCtxPayload := ClientContext{Group: group, Tenant: tenant, ID: appName}
+		appCtxPayload := ClientContext{ClusterContext: ClusterContext{Group: group, Tenant: tenant}, ID: appName}
 
 		ctx := appCtxPayload.ExtendContext(context.Background())
 
@@ -79,7 +79,7 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 		eventsBasedURL := "https://gateway.cool-cluster.cluster.extend.events.cx"
 		metadataBasedURL := "https://gateway.cool-cluster.cluster.extend.metadata.cx"
 
-		appCtxPayload := ClientContext{Group: group, Tenant: tenant, ID: appName}
+		appCtxPayload := ClientContext{ClusterContext: ClusterContext{Group: group, Tenant: tenant}, ID: appName}
 
 		ctx := appCtxPayload.ExtendContext(context.Background())
 
@@ -142,7 +142,7 @@ func Test_ExtractSerializableClusterContext(t *testing.T) {
 			CommonName:         runtimeID,
 		}
 
-		clusterCtxPayload := ClientContext{Group: group, Tenant: tenant, ID: runtimeID}
+		clusterCtxPayload := ClientContext{ClusterContext: ClusterContext{Group: group, Tenant: tenant}, ID: runtimeID}
 
 		ctx := clusterCtxPayload.ExtendContext(context.Background())
 

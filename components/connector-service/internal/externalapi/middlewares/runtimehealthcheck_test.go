@@ -24,12 +24,14 @@ func TestNewRuntimeHealthCheckMiddlewaret(t *testing.T) {
 		runtimeRegistryService := &mocks.RuntimeRegistryService{}
 		runtimeRegistryService.On("ReportState", mock.Anything).Return(nil)
 
-		runtimeHealthCheckMiddleware := NewRuntimeHealthCheckMiddleware(contextExtractor, runtimeRegistryService, true)
+		runtimeHealthCheckMiddleware := NewRuntimeHealthReportMiddleware(contextExtractor, runtimeRegistryService, true)
 
 		clusterContext := clientcontext.ClientContext{
-			Group:  "testGroup",
-			Tenant: "testTenant",
-			ID:     "testID",
+			ClusterContext: clientcontext.ClusterContext{
+				Group:  "testGroup",
+				Tenant: "testTenant",
+			},
+			ID: "testID",
 		}
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -56,12 +58,14 @@ func TestNewRuntimeHealthCheckMiddlewaret(t *testing.T) {
 		runtimeRegistryService := &mocks.RuntimeRegistryService{}
 		runtimeRegistryService.On("ReportState", mock.Anything).Return(nil)
 
-		runtimeHealthCheckMiddleware := NewRuntimeHealthCheckMiddleware(contextExtractor, runtimeRegistryService, true)
+		runtimeHealthCheckMiddleware := NewRuntimeHealthReportMiddleware(contextExtractor, runtimeRegistryService, true)
 
 		clusterContext := clientcontext.ClientContext{
-			Group:  "testGroup",
-			Tenant: "testTenant",
-			ID:     clientcontext.RuntimeDefaultCommonName,
+			ClusterContext: clientcontext.ClusterContext{
+				Group:  "testGroup",
+				Tenant: "testTenant",
+			},
+			ID: clientcontext.RuntimeDefaultCommonName,
 		}
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

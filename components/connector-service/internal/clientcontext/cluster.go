@@ -9,9 +9,13 @@ import (
 )
 
 type ClientContext struct {
+	ClusterContext
+	ID string
+}
+
+type ClusterContext struct {
 	Group  string
 	Tenant string
-	ID     string
 }
 
 // NewClusterContextExtender creates empty ClientContext
