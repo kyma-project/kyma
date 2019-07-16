@@ -29,3 +29,10 @@ func (ar *RepositoryController) Failed() {
 func (ar *RepositoryController) IsFailed() bool {
 	return ar.Repository.Status == addonsv1alpha1.RepositoryStatusFailed
 }
+
+// FetchingError sets StatusRepository as failed with URLFetchingError as a reason
+func (ar *RepositoryController) FetchingError(err error) {
+	ar.Repository.Status = addonsv1alpha1.RepositoryStatusFailed
+	ar.Repository.Reason = addonsv1alpha1.RepositoryURLFetchingError
+	ar.Repository.Message = err.Error()
+}
