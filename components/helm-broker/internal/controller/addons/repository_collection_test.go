@@ -77,7 +77,7 @@ func TestRepositoryCollection_ReadyAddons(t *testing.T) {
 	assert.Len(t, trc.ReadyAddons(), 3)
 }
 
-func TestRepositoryCollection_IsRepositoriesIdConflict(t *testing.T) {
+func TestRepositoryCollection_IsRepositoriesFailed(t *testing.T) {
 	// Given
 	trc := NewRepositoryCollection()
 
@@ -92,16 +92,21 @@ func TestRepositoryCollection_IsRepositoriesIdConflict(t *testing.T) {
 		})
 
 	// Then
-	assert.False(t, trc.IsRepositoriesIDConflict())
+	assert.False(t, trc.IsRepositoriesFailed())
 
 	// When
-	trc.AddRepository(
-		&RepositoryController{
-			Repository: v1alpha1.StatusRepository{Status: v1alpha1.RepositoryStatusFailed},
-		})
+	trc.AddRepository(&RepositoryController{
+		Addons: []*AddonController{
+			{
+				Addon: v1alpha1.Addon{
+					Status: v1alpha1.AddonStatusFailed,
+				},
+			},
+		},
+	})
 
 	// Then
-	assert.True(t, trc.IsRepositoriesIDConflict())
+	assert.True(t, trc.IsRepositoriesFailed())
 }
 
 func TestRepositoryCollection_ReviseBundleDuplicationInRepository(t *testing.T) {

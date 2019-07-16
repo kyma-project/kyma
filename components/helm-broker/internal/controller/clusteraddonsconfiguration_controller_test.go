@@ -8,6 +8,8 @@ import (
 	"context"
 	"errors"
 
+	"fmt"
+
 	"github.com/Masterminds/semver"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
@@ -32,7 +34,6 @@ func TestReconcileClusterAddonsConfiguration_AddAddonsProcess(t *testing.T) {
 	indexDTO := fixIndexDTO()
 
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
-
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {
 			completeBundle := fixBundleWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
@@ -107,13 +108,13 @@ func TestReconcileClusterAddonsConfiguration_AddAddonsProcess_Error(t *testing.T
 func TestReconcileClusterAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
 	// GIVEN
 	fixAddonsCfg := fixClusterAddonsConfiguration()
-	fixAddonsCfg.Generation = 1
+	fixAddonsCfg.Generation = 2
+	fixAddonsCfg.Status.ObservedGeneration = 1
 
 	ts := getClusterTestSuite(t, fixAddonsCfg)
 	indexDTO := fixIndexDTO()
 
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
-
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {
 			completeBundle := fixBundleWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
@@ -140,9 +141,43 @@ func TestReconcileClusterAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
 	assert.NoError(t, err)
 
 	res := v1alpha1.ClusterAddonsConfiguration{}
-	err = ts.mgr.GetClient().Get(context.Background(), types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}, &res)
+	err = ts.mgr.GetClient().Get(context.Background(), types.NamespacedName{Name: fixAddonsCfg.Name}, &res)
 	assert.NoError(t, err)
-	assert.Contains(t, res.Finalizers, v1alpha1.FinalizerAddonsConfiguration)
+	assert.Equal(t, res.Status.ObservedGeneration, int64(2))
+}
+
+func TestReconcileClusterAddonsConfiguration_UpdateAddonsProcess_ConflictingBundles(t *testing.T) {
+	// GIVEN
+	fixAddonsCfg := fixClusterAddonsConfiguration()
+	fixAddonsCfg.Generation = 2
+	fixAddonsCfg.Status.ObservedGeneration = 1
+
+	ts := getClusterTestSuite(t, fixAddonsCfg, fixReadyClusterAddonsConfiguration())
+	indexDTO := fixIndexDTO()
+
+	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
+	for _, entry := range indexDTO.Entries {
+		for _, e := range entry {
+			completeBundle := fixBundleWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
+			ts.bp.On("LoadCompleteBundle", e).Return(completeBundle, nil)
+		}
+	}
+	ts.bf.On("Exist").Return(true, nil).Once()
+	defer ts.assertExpectations()
+
+	// WHEN
+	reconciler := NewReconcileClusterAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.bundleStorage, &ts.bf, &ts.dp, &ts.bs, true)
+
+	// THEN
+	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Name: fixAddonsCfg.Name}})
+	assert.NoError(t, err)
+	assert.False(t, result.Requeue)
+
+	res := v1alpha1.ClusterAddonsConfiguration{}
+	err = ts.mgr.GetClient().Get(context.Background(), types.NamespacedName{Name: fixAddonsCfg.Name}, &res)
+	assert.NoError(t, err)
+	assert.Equal(t, res.Status.ObservedGeneration, int64(2))
+	assert.Equal(t, res.Status.Phase, v1alpha1.AddonsConfigurationFailed)
 }
 
 func TestReconcileClusterAddonsConfiguration_DeleteAddonsProcess(t *testing.T) {
@@ -158,6 +193,7 @@ func TestReconcileClusterAddonsConfiguration_DeleteAddonsProcess(t *testing.T) {
 		On("Get", internal.ClusterWide, internal.BundleName(fixAddonsCfg.Status.Repositories[0].Addons[0].Name), bundleVer).
 		Return(fixBundle, nil)
 	ts.bundleStorage.On("Remove", internal.ClusterWide, fixBundle.Name, bundleVer).Return(nil)
+	ts.chartStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixBundle.Plans[internal.BundlePlanID(fmt.Sprintf("plan-%s", fixBundle.Name))].ChartRef.Name, fixBundle.Plans[internal.BundlePlanID(fmt.Sprintf("plan-%s", fixBundle.Name))].ChartRef.Version).Return(nil)
 
 	ts.dp.On("EnsureClusterDocsTopicRemoved", string(fixBundle.ID)).Return(nil)
 	defer ts.assertExpectations()
@@ -190,6 +226,7 @@ func TestReconcileClusterAddonsConfiguration_DeleteAddonsProcess_ReconcileOtherA
 		On("Get", internal.ClusterWide, internal.BundleName(fixAddonsCfg.Status.Repositories[0].Addons[0].Name), bundleVer).
 		Return(fixBundle, nil)
 	ts.bundleStorage.On("Remove", internal.ClusterWide, fixBundle.Name, bundleVer).Return(nil)
+	ts.chartStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixBundle.Plans[internal.BundlePlanID(fmt.Sprintf("plan-%s", fixBundle.Name))].ChartRef.Name, fixBundle.Plans[internal.BundlePlanID(fmt.Sprintf("plan-%s", fixBundle.Name))].ChartRef.Version).Return(nil)
 
 	ts.dp.On("EnsureClusterDocsTopicRemoved", string(fixBundle.ID)).Return(nil)
 	defer ts.assertExpectations()
@@ -317,6 +354,40 @@ func fixFailedClusterAddonsConfiguration() *v1alpha1.ClusterAddonsConfiguration 
 						Addons: []v1alpha1.Addon{
 							{
 								Status:  v1alpha1.AddonStatusFailed,
+								Name:    "redis",
+								Version: "0.0.1",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func fixReadyClusterAddonsConfiguration() *v1alpha1.ClusterAddonsConfiguration {
+	return &v1alpha1.ClusterAddonsConfiguration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "ready",
+		},
+		Spec: v1alpha1.ClusterAddonsConfigurationSpec{
+			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
+				ReprocessRequest: 0,
+				Repositories: []v1alpha1.SpecRepository{
+					{
+						URL: "http://example.com/index.yaml",
+					},
+				},
+			},
+		},
+		Status: v1alpha1.ClusterAddonsConfigurationStatus{
+			CommonAddonsConfigurationStatus: v1alpha1.CommonAddonsConfigurationStatus{
+				Repositories: []v1alpha1.StatusRepository{
+					{
+						Status: v1alpha1.RepositoryStatusReady,
+						Addons: []v1alpha1.Addon{
+							{
+								Status:  v1alpha1.AddonStatusReady,
 								Name:    "redis",
 								Version: "0.0.1",
 							},

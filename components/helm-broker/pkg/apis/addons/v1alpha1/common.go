@@ -98,6 +98,11 @@ type Addon struct {
 	Message string            `json:"message,omitempty"`
 }
 
+// Key returns a key for an addon
+func (a *Addon) Key() string {
+	return a.Name + "/" + a.Version
+}
+
 // StatusRepository define the addon repository
 type StatusRepository struct {
 	URL     string                 `json:"url"`

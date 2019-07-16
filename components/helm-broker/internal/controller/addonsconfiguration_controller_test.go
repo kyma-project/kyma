@@ -22,6 +22,8 @@ import (
 	"context"
 	"errors"
 
+	"fmt"
+
 	"github.com/Masterminds/semver"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
@@ -115,7 +117,8 @@ func TestReconcileAddonsConfiguration_AddAddonsProcess_ErrorIfBrokerExist(t *tes
 func TestReconcileAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
 	// GIVEN
 	fixAddonsCfg := fixAddonsConfiguration()
-	fixAddonsCfg.Generation = 1
+	fixAddonsCfg.Generation = 2
+	fixAddonsCfg.Status.ObservedGeneration = 1
 	ts := getTestSuite(t, fixAddonsCfg)
 	indexDTO := fixIndexDTO()
 
@@ -147,11 +150,41 @@ func TestReconcileAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
 	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}})
 	assert.NoError(t, err)
 	assert.False(t, result.Requeue)
+}
+
+func TestReconcileAddonsConfiguration_UpdateAddonsProcess_ConflictingBundles(t *testing.T) {
+	// GIVEN
+	fixAddonsCfg := fixAddonsConfiguration()
+	fixAddonsCfg.Generation = 2
+	fixAddonsCfg.Status.ObservedGeneration = 1
+
+	ts := getTestSuite(t, fixAddonsCfg, fixReadyAddonsConfiguration())
+	indexDTO := fixIndexDTO()
+
+	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
+	for _, entry := range indexDTO.Entries {
+		for _, e := range entry {
+			completeBundle := fixBundleWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
+			ts.bp.On("LoadCompleteBundle", e).
+				Return(completeBundle, nil)
+		}
+	}
+	ts.bf.On("Exist", fixAddonsCfg.Namespace).Return(true, nil).Once()
+	defer ts.assertExpectations()
+
+	// WHEN
+	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.bundleStorage, &ts.bf, &ts.dp, &ts.bs, true)
+
+	// THEN
+	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}})
+	assert.NoError(t, err)
+	assert.False(t, result.Requeue)
 
 	res := v1alpha1.AddonsConfiguration{}
 	err = ts.mgr.GetClient().Get(context.Background(), types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}, &res)
 	assert.NoError(t, err)
-	assert.Contains(t, res.Finalizers, v1alpha1.FinalizerAddonsConfiguration)
+	assert.Equal(t, res.Status.ObservedGeneration, int64(2))
+	assert.Equal(t, res.Status.Phase, v1alpha1.AddonsConfigurationFailed)
 }
 
 func TestReconcileAddonsConfiguration_DeleteAddonsProcess(t *testing.T) {
@@ -166,6 +199,7 @@ func TestReconcileAddonsConfiguration_DeleteAddonsProcess(t *testing.T) {
 		On("Get", internal.Namespace(fixAddonsCfg.Namespace), internal.BundleName(fixAddonsCfg.Status.Repositories[0].Addons[0].Name), bundleVer).
 		Return(fixBundle, nil)
 	ts.bundleStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixBundle.Name, bundleVer).Return(nil)
+	ts.chartStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixBundle.Plans[internal.BundlePlanID(fmt.Sprintf("plan-%s", fixBundle.Name))].ChartRef.Name, fixBundle.Plans[internal.BundlePlanID(fmt.Sprintf("plan-%s", fixBundle.Name))].ChartRef.Version).Return(nil)
 
 	ts.dp.On("EnsureDocsTopicRemoved", string(fixBundle.ID), fixAddonsCfg.Namespace).Return(nil)
 	defer ts.assertExpectations()
@@ -197,6 +231,7 @@ func TestReconcileAddonsConfiguration_DeleteAddonsProcess_ReconcileOtherAddons(t
 		On("Get", internal.Namespace(fixAddonsCfg.Namespace), internal.BundleName(fixAddonsCfg.Status.Repositories[0].Addons[0].Name), bundleVer).
 		Return(fixBundle, nil)
 	ts.bundleStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixBundle.Name, bundleVer).Return(nil)
+	ts.chartStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixBundle.Plans[internal.BundlePlanID(fmt.Sprintf("plan-%s", fixBundle.Name))].ChartRef.Name, fixBundle.Plans[internal.BundlePlanID(fmt.Sprintf("plan-%s", fixBundle.Name))].ChartRef.Version).Return(nil)
 
 	ts.dp.On("EnsureDocsTopicRemoved", string(fixBundle.ID), fixAddonsCfg.Namespace).Return(nil)
 	defer ts.assertExpectations()
@@ -280,12 +315,49 @@ func fixFailedAddonsConfiguration() *v1alpha1.AddonsConfiguration {
 		},
 		Status: v1alpha1.AddonsConfigurationStatus{
 			CommonAddonsConfigurationStatus: v1alpha1.CommonAddonsConfigurationStatus{
+				Phase: v1alpha1.AddonsConfigurationFailed,
 				Repositories: []v1alpha1.StatusRepository{
 					{
 						Status: v1alpha1.RepositoryStatusFailed,
 						Addons: []v1alpha1.Addon{
 							{
 								Status:  v1alpha1.AddonStatusFailed,
+								Name:    "redis",
+								Version: "0.0.1",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func fixReadyAddonsConfiguration() *v1alpha1.AddonsConfiguration {
+	return &v1alpha1.AddonsConfiguration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "ready",
+			Namespace: "test",
+		},
+		Spec: v1alpha1.AddonsConfigurationSpec{
+			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
+				ReprocessRequest: 0,
+				Repositories: []v1alpha1.SpecRepository{
+					{
+						URL: "http://example.com/index.yaml",
+					},
+				},
+			},
+		},
+		Status: v1alpha1.AddonsConfigurationStatus{
+			CommonAddonsConfigurationStatus: v1alpha1.CommonAddonsConfigurationStatus{
+				Phase: v1alpha1.AddonsConfigurationReady,
+				Repositories: []v1alpha1.StatusRepository{
+					{
+						Status: v1alpha1.RepositoryStatusReady,
+						Addons: []v1alpha1.Addon{
+							{
+								Status:  v1alpha1.AddonStatusReady,
 								Name:    "redis",
 								Version: "0.0.1",
 							},
@@ -341,12 +413,12 @@ func fixIndexDTO() *bundle.IndexDTO {
 			"index": {
 				{
 					Name:        "redis",
-					Version:     "0.1.0",
+					Version:     "0.0.1",
 					Description: "desc",
 				},
 				{
 					Name:        "testing",
-					Version:     "0.1.0",
+					Version:     "0.0.1",
 					Description: "desc",
 				},
 			},

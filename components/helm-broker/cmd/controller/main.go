@@ -49,12 +49,9 @@ func main() {
 
 	// Setup Scheme for all resources
 	log.Info("Setting up schemes")
-	err = apis.AddToScheme(mgr.GetScheme())
-	fatalOnError(err, "while adding AC scheme")
-	err = v1beta1.AddToScheme(mgr.GetScheme())
-	fatalOnError(err, "while adding SC scheme")
-	err = v1alpha1.AddToScheme(mgr.GetScheme())
-	fatalOnError(err, "while adding CMS scheme")
+	fatalOnError(apis.AddToScheme(mgr.GetScheme()), "while adding AC scheme")
+	fatalOnError(v1beta1.AddToScheme(mgr.GetScheme()), "while adding SC scheme")
+	fatalOnError(v1alpha1.AddToScheme(mgr.GetScheme()), "while adding CMS scheme")
 
 	docsProvider := controller.NewDocsProvider(mgr.GetClient())
 	brokerSyncer := broker.NewServiceBrokerSyncer(mgr.GetClient(), ctrCfg.ClusterServiceBrokerName, log)

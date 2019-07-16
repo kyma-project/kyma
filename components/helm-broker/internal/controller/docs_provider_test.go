@@ -226,7 +226,7 @@ func fixBundleWithDocsURL(id, name, url, docsURL string) bundle.CompleteBundle {
 			ID:            internal.BundleID(id),
 			Name:          internal.BundleName(name),
 			Description:   "simple description",
-			Version:       *semver.MustParse("0.2.3"),
+			Version:       *semver.MustParse("0.0.1"),
 			RepositoryURL: url,
 			Plans: map[internal.BundlePlanID]internal.BundlePlan{
 				internal.BundlePlanID(fmt.Sprintf("plan-%s", name)): {
@@ -267,7 +267,7 @@ func fixBundleWithEmptyDocs(id, name, url string) bundle.CompleteBundle {
 			ID:            internal.BundleID(id),
 			Name:          internal.BundleName(name),
 			Description:   "simple description",
-			Version:       *semver.MustParse("0.2.3"),
+			Version:       *semver.MustParse("0.0.1"),
 			RepositoryURL: url,
 			Plans: map[internal.BundlePlanID]internal.BundlePlan{
 				internal.BundlePlanID(fmt.Sprintf("plan-%s", name)): {

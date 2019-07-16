@@ -62,10 +62,11 @@ func (rc *RepositoryCollection) ReadyAddons() []*AddonController {
 	return addons
 }
 
-// IsRepositoriesIDConflict informs if any of repositories in collection is in failed status
-func (rc *RepositoryCollection) IsRepositoriesIDConflict() bool {
+// IsRepositoriesFailed informs if any of repositories in collection is in failed status
+func (rc *RepositoryCollection) IsRepositoriesFailed() bool {
 	for _, repository := range rc.Repositories {
-		if repository.IsFailed() {
+		if repository.HasFailedAddons() {
+			repository.Failed()
 			return true
 		}
 	}

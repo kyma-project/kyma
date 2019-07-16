@@ -33,7 +33,6 @@ const maxSyncRetries = 5
 
 // Sync syncs the ServiceBrokers, does not fail if the broker does not exists
 func (r *ServiceBrokerSyncer) Sync() error {
-	r.log.Infof("Trigger Service Catalog to refresh ClusterServiceBroker %s", r.clusterBrokerName)
 	for i := 0; i < maxSyncRetries; i++ {
 		broker := &v1beta1.ClusterServiceBroker{}
 		err := r.client.Get(context.Background(), types.NamespacedName{Name: r.clusterBrokerName}, broker)
