@@ -41,6 +41,7 @@ kind: TestDefinition
 metadata:
   name: test-{{ template "fullname" . }}
 spec:
+  disableConcurrency: true
   template:
     metadata:
       annotations:
@@ -50,7 +51,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: test-{{ template "fullname" . }}
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_logging.dir }}{{ .Values.test.image.name }}:{{ .Values.global.test_logging.version }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.logging_integration_tests.dir }}{{ .Values.global.logging_integration_tests.name }}:{{ .Values.global.logging_integration_tests.version }}
         imagePullPolicy: Always
         command:
           - "/bin/sh"

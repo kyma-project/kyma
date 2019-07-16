@@ -60,6 +60,9 @@ istio:
       - user: cluster.local/ns/kyma-integration/sa/connection-token-handler
       - user: cluster.local/ns/kyma-integration/sa/{{ .Chart.Name }}-tests
       - user: cluster.local/ns/kyma-system/sa/core-console-backend-service
+  mtlsDestinationRule:
+    required: false
+
 tests:
   enabled: true
   skipSslVerify: true

@@ -41,7 +41,7 @@ type Bundle struct {
 // If bundle already exists in storage than full replace is performed.
 //
 // True is returned if object already existed in storage and was replaced.
-func (s *Bundle) Upsert(b *internal.Bundle) (bool, error) {
+func (s *Bundle) Upsert(namespace internal.Namespace, b *internal.Bundle) (bool, error) {
 	nv, err := s.nameVersionFromBundle(b)
 	if err != nil {
 		return false, err
@@ -53,13 +53,13 @@ func (s *Bundle) Upsert(b *internal.Bundle) (bool, error) {
 	}
 
 	// TODO: switch to transaction wrapping writes to both spaces
-	idSpaceResp, err := s.kv.Put(context.TODO(), s.idKey(b.ID), dso, clientv3.WithPrevKV())
+	idSpaceResp, err := s.kv.Put(context.TODO(), s.idKey(namespace, b.ID), dso, clientv3.WithPrevKV())
 	if err != nil {
 		return false, errors.Wrap(err, "while calling database in ID space")
 	}
 
 	// Bundle is immutable so for simplicity we are duplicating write into Name/Version namespace
-	if _, err := s.kv.Put(context.TODO(), s.nameVersionKey(nv), dso, clientv3.WithPrevKV()); err != nil {
+	if _, err := s.kv.Put(context.TODO(), s.nameVersionKey(namespace, nv), dso, clientv3.WithPrevKV()); err != nil {
 		return false, errors.Wrap(err, "while calling database in NameVersion space")
 	}
 
@@ -71,13 +71,13 @@ func (s *Bundle) Upsert(b *internal.Bundle) (bool, error) {
 }
 
 // Get returns object from storage.
-func (s *Bundle) Get(name internal.BundleName, ver semver.Version) (*internal.Bundle, error) {
+func (s *Bundle) Get(namespace internal.Namespace, name internal.BundleName, ver semver.Version) (*internal.Bundle, error) {
 	nv, err := s.nameVersion(name, ver)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := s.kv.Get(context.TODO(), s.nameVersionKey(nv))
+	resp, err := s.kv.Get(context.TODO(), s.nameVersionKey(namespace, nv))
 	if err != nil {
 		return nil, errors.Wrap(err, "while calling database")
 	}
@@ -86,8 +86,8 @@ func (s *Bundle) Get(name internal.BundleName, ver semver.Version) (*internal.Bu
 }
 
 // GetByID returns object by primary ID from storage.
-func (s *Bundle) GetByID(id internal.BundleID) (*internal.Bundle, error) {
-	resp, err := s.kv.Get(context.TODO(), s.idKey(id))
+func (s *Bundle) GetByID(namespace internal.Namespace, id internal.BundleID) (*internal.Bundle, error) {
+	resp, err := s.kv.Get(context.TODO(), s.idKey(namespace, id))
 	if err != nil {
 		return nil, errors.Wrap(err, "while calling database")
 	}
@@ -135,10 +135,10 @@ func (*Bundle) decodeDSOToDM(dsoEnc []byte) (*internal.Bundle, error) {
 }
 
 // FindAll returns all objects from storage.
-func (s *Bundle) FindAll() ([]*internal.Bundle, error) {
+func (s *Bundle) FindAll(namespace internal.Namespace) ([]*internal.Bundle, error) {
 	out := []*internal.Bundle{}
 
-	resp, err := s.kv.Get(context.TODO(), entityNamespaceBundleMappingID, clientv3.WithPrefix())
+	resp, err := s.kv.Get(context.TODO(), s.idPrefixForNamespace(namespace), clientv3.WithPrefix())
 	if err != nil {
 		return nil, errors.Wrap(err, "while calling database")
 	}
@@ -155,13 +155,13 @@ func (s *Bundle) FindAll() ([]*internal.Bundle, error) {
 }
 
 // Remove removes object from storage.
-func (s *Bundle) Remove(name internal.BundleName, ver semver.Version) error {
+func (s *Bundle) Remove(namespace internal.Namespace, name internal.BundleName, ver semver.Version) error {
 	nv, err := s.nameVersion(name, ver)
 	if err != nil {
 		return errors.Wrap(err, "while getting nameVersion from deleted entity")
 	}
 
-	resp, err := s.kv.Delete(context.TODO(), s.nameVersionKey(nv), clientv3.WithPrevKV())
+	resp, err := s.kv.Delete(context.TODO(), s.nameVersionKey(namespace, nv), clientv3.WithPrevKV())
 	if err != nil {
 		return errors.Wrap(err, "while calling database on NV namespace")
 	}
@@ -171,7 +171,7 @@ func (s *Bundle) Remove(name internal.BundleName, ver semver.Version) error {
 		return err
 	}
 
-	if _, err := s.kv.Delete(context.TODO(), s.idKey(b.ID)); err != nil {
+	if _, err := s.kv.Delete(context.TODO(), s.idKey(namespace, b.ID)); err != nil {
 		return errors.Wrap(err, "while calling database on ID namespace")
 	}
 
@@ -179,8 +179,8 @@ func (s *Bundle) Remove(name internal.BundleName, ver semver.Version) error {
 }
 
 // RemoveByID is removing object by primary ID from storage.
-func (s *Bundle) RemoveByID(id internal.BundleID) error {
-	resp, err := s.kv.Delete(context.TODO(), s.idKey(id), clientv3.WithPrevKV())
+func (s *Bundle) RemoveByID(namespace internal.Namespace, id internal.BundleID) error {
+	resp, err := s.kv.Delete(context.TODO(), s.idKey(namespace, id), clientv3.WithPrevKV())
 	if err != nil {
 		return errors.Wrap(err, "while calling database on ID namespace")
 	}
@@ -195,21 +195,21 @@ func (s *Bundle) RemoveByID(id internal.BundleID) error {
 		return errors.Wrap(err, "while getting nameVersion from deleted entity")
 	}
 
-	if _, err := s.kv.Delete(context.TODO(), s.nameVersionKey(nv)); err != nil {
+	if _, err := s.kv.Delete(context.TODO(), s.nameVersionKey(namespace, nv)); err != nil {
 		return errors.Wrap(err, "while calling database on NV namespace")
 	}
 
 	return nil
 }
 
-// RemoveAll removes all bundles from storage.
-func (s *Bundle) RemoveAll() error {
-	bundles, err := s.FindAll()
+// RemoveAll removes all bundles from storage for a given namespace.
+func (s *Bundle) RemoveAll(namespace internal.Namespace) error {
+	bundles, err := s.FindAll(namespace)
 	if err != nil {
 		return errors.Wrap(err, "while getting bundles")
 	}
 	for _, bundle := range bundles {
-		if err := s.RemoveByID(bundle.ID); err != nil {
+		if err := s.RemoveByID(namespace, bundle.ID); err != nil {
 			return errors.Wrapf(err, "while removing bundle with ID: %v", bundle.ID)
 		}
 	}
@@ -257,12 +257,22 @@ func (*Bundle) nameVersion(name internal.BundleName, ver semver.Version) (k bund
 	return bundleNameVersion(fmt.Sprintf("%s|%s", name, ver.String())), nil
 }
 
-func (*Bundle) idKey(id internal.BundleID) string {
-	return strings.Join([]string{entityNamespaceBundleMappingID, string(id)}, entityNamespaceSeparator)
+func (s *Bundle) idKey(namespace internal.Namespace, id internal.BundleID) string {
+	return strings.Join([]string{s.idPrefixForNamespace(namespace), string(id)}, entityNamespaceSeparator)
 }
 
-func (*Bundle) nameVersionKey(nv bundleNameVersion) string {
-	return strings.Join([]string{entityNamespaceBundleMappingNV, string(nv)}, entityNamespaceSeparator)
+func (*Bundle) idPrefixForNamespace(namespace internal.Namespace) string {
+	if namespace == internal.ClusterWide {
+		return strings.Join([]string{entityNamespaceBundleMappingID, "cluster"}, entityNamespaceSeparator)
+	}
+	return strings.Join([]string{entityNamespaceBundleMappingID, "ns", string(namespace)}, entityNamespaceSeparator)
+}
+
+func (*Bundle) nameVersionKey(namespace internal.Namespace, nv bundleNameVersion) string {
+	if namespace == internal.ClusterWide {
+		return strings.Join([]string{entityNamespaceBundleMappingNV, "cluster", string(nv)}, entityNamespaceSeparator)
+	}
+	return strings.Join([]string{entityNamespaceBundleMappingNV, "ns", string(namespace), string(nv)}, entityNamespaceSeparator)
 }
 
 func newBundleDSO(in *internal.Bundle) (*bundleDSO, error) {

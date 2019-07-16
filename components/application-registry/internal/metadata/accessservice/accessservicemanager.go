@@ -2,6 +2,7 @@ package accessservice
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
@@ -20,8 +21,8 @@ type ServiceInterface interface {
 }
 
 type AccessServiceManager interface {
-	Create(application, serviceId, serviceName string) apperrors.AppError
-	Upsert(application, serviceId, serviceName string) apperrors.AppError
+	Create(application string, appUID types.UID, serviceId, serviceName string) apperrors.AppError
+	Upsert(application string, appUID types.UID, serviceId, serviceName string) apperrors.AppError
 	Delete(serviceName string) apperrors.AppError
 }
 
@@ -41,16 +42,16 @@ func NewAccessServiceManager(serviceInterface ServiceInterface, config AccessSer
 	}
 }
 
-func (m *accessServiceManager) Create(application, serviceId, serviceName string) apperrors.AppError {
-	_, err := m.create(application, serviceId, serviceName)
+func (m *accessServiceManager) Create(application string, appUID types.UID, serviceId, serviceName string) apperrors.AppError {
+	_, err := m.create(application, appUID, serviceId, serviceName)
 	if err != nil {
 		return apperrors.Internal("Creating service failed, %s", err.Error())
 	}
 	return nil
 }
 
-func (m *accessServiceManager) Upsert(application, serviceId, serviceName string) apperrors.AppError {
-	_, err := m.create(application, serviceId, serviceName)
+func (m *accessServiceManager) Upsert(application string, appUID types.UID, serviceId, serviceName string) apperrors.AppError {
+	_, err := m.create(application, appUID, serviceId, serviceName)
 	if err != nil {
 		if k8serrors.IsAlreadyExists(err) {
 			return nil
@@ -70,7 +71,7 @@ func (m *accessServiceManager) Delete(serviceName string) apperrors.AppError {
 	return nil
 }
 
-func (m *accessServiceManager) create(application, serviceId, serviceName string) (*corev1.Service, error) {
+func (m *accessServiceManager) create(application string, appUID types.UID, serviceId, serviceName string) (*corev1.Service, error) {
 	appName := fmt.Sprintf(appNameLabelFormat, application)
 
 	service := corev1.Service{
@@ -80,6 +81,7 @@ func (m *accessServiceManager) create(application, serviceId, serviceName string
 				k8sconsts.LabelApplication: application,
 				k8sconsts.LabelServiceId:   serviceId,
 			},
+			OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication(application, appUID),
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: map[string]string{k8sconsts.LabelApp: appName},

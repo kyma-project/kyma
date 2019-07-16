@@ -6,8 +6,16 @@ TAG = $(DOCKER_TAG)
 build:
 	./before-commit.sh
 
+.PHONY: pull-licenses
+pull-licenses:
+ifdef LICENSE_PULLER_PATH
+	bash $(LICENSE_PULLER_PATH)
+else
+	mkdir -p licenses
+endif
+
 .PHONY: build-image
-build-image:
+build-image: pull-licenses
 	mkdir -p build-temp
 	cp ../../../docs/backup/assets/all-backup.yaml build-temp
 	cp ../../../docs/backup/assets/system-backup.yaml build-temp

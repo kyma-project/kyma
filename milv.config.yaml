@@ -23,7 +23,7 @@ files:
   - path: "./kyma/docs/application-connector/012-details-serviceclass-documentation.md"
     config:
       white-list-external: ["https://www.orders.com/v1/orders"]
-  - path: "./kyma/docs/security/03-01-kubecofig-generator.md"
+  - path: "./kyma/docs/security/03-01-iam-kubeconfig-service.md"
     config:
       white-list-external: ["https://configurations-generator.{YOUR_CLUSTER_DOMAIN"]
   - path: "./kyma/docs/helm-broker/05-01-helm-broker.md"

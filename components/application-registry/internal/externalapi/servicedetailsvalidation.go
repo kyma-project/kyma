@@ -29,14 +29,23 @@ func NewServiceDetailsValidator() ServiceDetailsValidator {
 				"At least one of service definition attributes: 'api', 'events' have to be provided")
 		}
 
-		apperr := validateApiSpec(details.Api)
-		if apperr != nil {
-			return apperr
-		}
+		var apperr apperrors.AppError
 
-		apperr = validateApiCredentials(details.Api)
-		if apperr != nil {
-			return apperr
+		if details.Api != nil {
+			apperr := validateApiSpec(details.Api.Spec)
+			if apperr != nil {
+				return apperr
+			}
+
+			apperr = validateApiCredentials(details.Api.Credentials)
+			if apperr != nil {
+				return apperr
+			}
+
+			apperr = validateSpecificationCredentials(details.Api.SpecificationCredentials)
+			if apperr != nil {
+				return apperr
+			}
 		}
 
 		apperr = validateEventsSpec(details.Events)
@@ -48,9 +57,9 @@ func NewServiceDetailsValidator() ServiceDetailsValidator {
 	})
 }
 
-func validateApiSpec(api *API) apperrors.AppError {
-	if api != nil && api.Spec != nil {
-		err := validateSpec(api.Spec)
+func validateApiSpec(spec json.RawMessage) apperrors.AppError {
+	if spec != nil {
+		err := validateSpec(spec)
 		if err != nil {
 			return apperrors.WrongInput("api.Spec is not a proper json object, %s", err.Error())
 		}
@@ -70,10 +79,39 @@ func validateEventsSpec(events *Events) apperrors.AppError {
 	return nil
 }
 
-func validateApiCredentials(api *API) apperrors.AppError {
-	if api != nil && api.Credentials != nil {
-		if validateToManyCredentials(api.Credentials) {
-			return apperrors.WrongInput("api.Credentials is invalid: to many authentication methods provided")
+func validateApiCredentials(credentials *CredentialsWithCSRF) apperrors.AppError {
+	if credentials != nil {
+		var basic *BasicAuth
+		var oauth *Oauth
+		var cert *CertificateGen
+
+		if credentials.BasicWithCSRF != nil {
+			basic = &credentials.BasicWithCSRF.BasicAuth
+		}
+
+		if credentials.OauthWithCSRF != nil {
+			oauth = &credentials.OauthWithCSRF.Oauth
+		}
+
+		if credentials.CertificateGenWithCSRF != nil {
+			cert = &credentials.CertificateGenWithCSRF.CertificateGen
+		}
+
+		if validateCredentials(basic, oauth, cert) {
+			return apperrors.WrongInput("api.CredentialsWithCSRF is invalid: to many authentication methods provided")
+		}
+	}
+
+	return nil
+}
+
+func validateSpecificationCredentials(credentials *Credentials) apperrors.AppError {
+	if credentials != nil {
+		basic := credentials.Basic
+		oauth := credentials.Oauth
+
+		if validateCredentials(basic, oauth, nil) {
+			return apperrors.WrongInput("api.CredentialsWithCSRF is invalid: to many authentication methods provided")
 		}
 	}
 
@@ -85,18 +123,18 @@ func validateSpec(rawMessage json.RawMessage) error {
 	return json.Unmarshal(rawMessage, &m)
 }
 
-func validateToManyCredentials(credentials *Credentials) bool {
+func validateCredentials(basic *BasicAuth, oauth *Oauth, cert *CertificateGen) bool {
 	credentialsCount := 0
 
-	if credentials.Basic != nil {
+	if basic != nil {
 		credentialsCount++
 	}
 
-	if credentials.Oauth != nil {
+	if oauth != nil {
 		credentialsCount++
 	}
 
-	if credentials.CertificateGen != nil {
+	if cert != nil {
 		credentialsCount++
 	}
 

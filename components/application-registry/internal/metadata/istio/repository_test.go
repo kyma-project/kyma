@@ -2,6 +2,7 @@ package istio
 
 import (
 	"errors"
+	"k8s.io/apimachinery/pkg/types"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
@@ -13,6 +14,8 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
+
+const applicationUID = types.UID("appUID")
 
 var config = RepositoryConfig{Namespace: "testns"}
 
@@ -27,6 +30,7 @@ func TestRepository_Create(t *testing.T) {
 					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
+				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
 			Spec: &v1alpha2.DenierSpec{
 				Status: &v1alpha2.DenierStatus{
@@ -42,7 +46,7 @@ func TestRepository_Create(t *testing.T) {
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.CreateDenier("app", "sid", "app-test-uuid1")
+		err := repository.CreateDenier("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -58,7 +62,7 @@ func TestRepository_Create(t *testing.T) {
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.CreateDenier("app", "sid", "app-test-uuid1")
+		err := repository.CreateDenier("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -74,6 +78,7 @@ func TestRepository_Create(t *testing.T) {
 					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
+				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
 		}
 
@@ -83,7 +88,7 @@ func TestRepository_Create(t *testing.T) {
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.CreateCheckNothing("app", "sid", "app-test-uuid1")
+		err := repository.CreateCheckNothing("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -99,7 +104,7 @@ func TestRepository_Create(t *testing.T) {
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.CreateCheckNothing("app", "sid", "app-test-uuid1")
+		err := repository.CreateCheckNothing("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -115,6 +120,7 @@ func TestRepository_Create(t *testing.T) {
 					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
+				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
 			Spec: &v1alpha2.RuleSpec{
 				Match: `(destination.service.host == "app-test-uuid1.testns.svc.cluster.local") && (source.labels["app-test-uuid1"] != "true")`,
@@ -131,7 +137,7 @@ func TestRepository_Create(t *testing.T) {
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
 		// when
-		err := repository.CreateRule("app", "sid", "app-test-uuid1")
+		err := repository.CreateRule("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -147,7 +153,7 @@ func TestRepository_Create(t *testing.T) {
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
 		// when
-		err := repository.CreateRule("app", "sid", "app-test-uuid1")
+		err := repository.CreateRule("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -166,6 +172,7 @@ func TestRepository_Upsert(t *testing.T) {
 					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
+				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
 			Spec: &v1alpha2.DenierSpec{
 				Status: &v1alpha2.DenierStatus{
@@ -181,7 +188,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.UpsertDenier("app", "sid", "app-test-uuid1")
+		err := repository.UpsertDenier("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -197,7 +204,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.UpsertDenier("app", "sid", "app-test-uuid1")
+		err := repository.UpsertDenier("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -213,7 +220,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.UpsertDenier("app", "sid", "app-test-uuid1")
+		err := repository.UpsertDenier("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -229,6 +236,7 @@ func TestRepository_Upsert(t *testing.T) {
 					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
+				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
 		}
 
@@ -238,7 +246,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.UpsertCheckNothing("app", "sid", "app-test-uuid1")
+		err := repository.UpsertCheckNothing("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -254,7 +262,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.UpsertCheckNothing("app", "sid", "app-test-uuid1")
+		err := repository.UpsertCheckNothing("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -270,7 +278,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.UpsertCheckNothing("app", "sid", "app-test-uuid1")
+		err := repository.UpsertCheckNothing("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -286,6 +294,7 @@ func TestRepository_Upsert(t *testing.T) {
 					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
+				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
 			Spec: &v1alpha2.RuleSpec{
 				Match: `(destination.service.host == "app-test-uuid1.testns.svc.cluster.local") && (source.labels["app-test-uuid1"] != "true")`,
@@ -302,7 +311,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
 		// when
-		err := repository.UpsertRule("app", "sid", "app-test-uuid1")
+		err := repository.UpsertRule("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -318,7 +327,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
 		// when
-		err := repository.UpsertRule("app", "sid", "app-test-uuid1")
+		err := repository.UpsertRule("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -334,7 +343,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
 		// when
-		err := repository.UpsertRule("app", "sid", "app-test-uuid1")
+		err := repository.UpsertRule("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)

@@ -97,15 +97,18 @@ func ErrorResponseRequestBodyTooLarge() (response *Error) {
 	return apiError
 }
 
-func errorInvalidSourceIDLength(sourceIDMaxLength int) *Error {
+// ErrorInvalidSourceIDLength creates an API Error response in case Source ID length exceeded the maximum
+func ErrorInvalidSourceIDLength(sourceIDMaxLength int) *Error {
 	return ErrorInvalidFieldLength(FieldSourceID, sourceIDMaxLength)
 }
 
-func errorInvalidEventTypeLength(eventTypeMaxLength int) *Error {
+// ErrorInvalidEventTypeLength creates an API Error response in case Event Type length exceeded the maximum
+func ErrorInvalidEventTypeLength(eventTypeMaxLength int) *Error {
 	return ErrorInvalidFieldLength(FieldEventType, eventTypeMaxLength)
 }
 
-func errorInvalidEventTypeVersionLength(eventTypeVersionMaxLength int) *Error {
+// ErrorInvalidEventTypeVersionLength creates an API Error response in case Event Type Version length exceeded the maximum
+func ErrorInvalidEventTypeVersionLength(eventTypeVersionMaxLength int) *Error {
 	return ErrorInvalidFieldLength(FieldEventTypeVersion, eventTypeVersionMaxLength)
 }
 
@@ -166,42 +169,42 @@ func ErrorResponseMissingFieldSourceID() (response *Error) {
 
 // ErrorResponseMissingFieldData returns an API error instance for the missing field data error.
 func ErrorResponseMissingFieldData() (response *Error) {
-	return createMissingFieldError(FieldData)
+	return CreateMissingFieldError(FieldData)
 }
 
 // ErrorResponseMissingFieldEventType returns an API error instance for the missing field event type error.
 func ErrorResponseMissingFieldEventType() (response *Error) {
-	return createMissingFieldError(FieldEventType)
+	return CreateMissingFieldError(FieldEventType)
 }
 
 // ErrorResponseMissingFieldEventTypeVersion returns an API error instance for the missing field event type version error.
 func ErrorResponseMissingFieldEventTypeVersion() (response *Error) {
-	return createMissingFieldError(FieldEventTypeVersion)
+	return CreateMissingFieldError(FieldEventTypeVersion)
 }
 
 // ErrorResponseMissingFieldEventTime returns an API error instance for the missing field event time error.
 func ErrorResponseMissingFieldEventTime() (response *Error) {
-	return createMissingFieldError(FieldEventTime)
+	return CreateMissingFieldError(FieldEventTime)
 }
 
 // ErrorResponseWrongEventType returns an API error instance for the wrong event type error.
 func ErrorResponseWrongEventType() (response *Error) {
-	return createInvalidFieldError(FieldEventType)
+	return CreateInvalidFieldError(FieldEventType)
 }
 
 // ErrorResponseWrongEventTypeVersion returns an API error instance for the wrong event type version error.
 func ErrorResponseWrongEventTypeVersion() (response *Error) {
-	return createInvalidFieldError(FieldEventTypeVersion)
+	return CreateInvalidFieldError(FieldEventTypeVersion)
 }
 
 // ErrorResponseWrongEventTime returns an API error instance for the wrong event time error.
 func ErrorResponseWrongEventTime() (response *Error) {
-	return createInvalidFieldError(FieldEventTime)
+	return CreateInvalidFieldError(FieldEventTime)
 }
 
 // ErrorResponseWrongEventID returns an API error instance for the wrong event ID error.
 func ErrorResponseWrongEventID() (response *Error) {
-	return createInvalidFieldError(FieldEventID)
+	return CreateInvalidFieldError(FieldEventID)
 }
 
 // ErrorResponseWrongSourceID returns an API error instance for the wrong source ID error.
@@ -209,10 +212,11 @@ func ErrorResponseWrongSourceID(sourceIDFromHeader bool) (response *Error) {
 	if sourceIDFromHeader {
 		return createInvalidFieldErrorWithType(HeaderSourceID, ErrorTypeInvalidHeader)
 	}
-	return createInvalidFieldError(FieldSourceID)
+	return CreateInvalidFieldError(FieldSourceID)
 }
 
-func createMissingFieldError(field interface{}) (response *Error) {
+// CreateMissingFieldError creates an Error for a missing field
+func CreateMissingFieldError(field interface{}) (response *Error) {
 	apiErrorDetail := ErrorDetail{
 		Field:    field.(string),
 		Type:     ErrorTypeMissingField,
@@ -224,7 +228,8 @@ func createMissingFieldError(field interface{}) (response *Error) {
 	return &apiError
 }
 
-func createInvalidFieldError(field interface{}) (response *Error) {
+// CreateInvalidFieldError creates an Error for an invalid field
+func CreateInvalidFieldError(field interface{}) (response *Error) {
 	return createInvalidFieldErrorWithType(field, ErrorTypeInvalidField)
 }
 

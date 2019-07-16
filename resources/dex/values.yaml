@@ -16,6 +16,13 @@ dex:
     signingKeys: "720h"
     idTokens: "8h"
 
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 16Mi
 global:
   isLocalEnv: false
   gateway:
@@ -25,3 +32,6 @@ global:
     version: "af2672c2"
   containerRegistry:
     path: eu.gcr.io/kyma-project
+  dex_integration_tests:
+    dir: pr/
+    version: PR-4837

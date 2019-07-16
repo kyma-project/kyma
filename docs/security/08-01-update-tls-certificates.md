@@ -22,7 +22,7 @@ period of time.
     export KYMA_TLS_KEY=$(cat {NEW_KEY_PATH})
     ```
 
-2. Update the Ingress Gateway certificate. Run:
+2. Update the Istio Ingress Gateway certificate. Run:
 
     ```bash
     cat <<EOF | kubectl apply -f -
@@ -68,7 +68,7 @@ period of time.
     EOF
     ```
 
-5. Restart the Ingress Gateway Pod to apply the new certificate:
+5. Restart the Istio Ingress Gateway Pod to apply the new certificate:
 
     ```bash
     kubectl delete pod -l app=istio-ingressgateway -n istio-system

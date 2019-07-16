@@ -13,6 +13,7 @@ LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-gateway-tests/scripts/helm-test-entrypoint.sh .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-gateway-tests/proxyhelmtests.test .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-gateway-tests/licenses ./licenses
 
 ARG TEST_EXECUTOR_IMAGE
 ENV TEST_EXECUTOR_IMAGE=$TEST_EXECUTOR_IMAGE

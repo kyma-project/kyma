@@ -29,6 +29,7 @@ rules:
     - "*" #give access to all non resource urls
   verbs:
     - "list"
+    - "get"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -123,6 +124,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-monitoring-view: "true"
 rules: []
 
 ---
@@ -176,6 +179,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-monitoring-edit: "true"
 rules: []
 
 ---
@@ -238,6 +243,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-serving-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-monitoring-admin: "true"
 rules: []
 
 ---

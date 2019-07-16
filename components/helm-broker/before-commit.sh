@@ -27,7 +27,7 @@ fi
 ##
 # GO BUILD
 ##
-binaries=("broker" "indexbuilder" "targz" "preupgrade")
+binaries=("broker" "indexbuilder" "targz" "cm2cac")
 buildEnv=""
 if [ "$1" == "$CI_FLAG" ]; then
 	# build binary statically for linux architecture
@@ -56,10 +56,22 @@ else echo -e "${GREEN}√ dep status${NC}"
 fi
 
 ##
+# REGENERATE FILES
+##
+echo "? make generates"
+make generates
+if [ $? != 0 ]; then
+	echo -e "${RED}✗ make generates\n${NC}"
+	exit 1
+else echo -e "${GREEN}√ make generates${NC}"
+fi
+
+
+##
 # GO TEST
 ##
 echo "? go test"
-go test ./...
+go test ./internal/... ./platform/...
 # Check if tests passed
 if [ $? != 0 ]; then
 	echo -e "${RED}✗ go test\n${NC}"

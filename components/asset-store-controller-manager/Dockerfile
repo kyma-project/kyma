@@ -6,6 +6,7 @@ WORKDIR /go/src/github.com/kyma-project/kyma/components/asset-store-controller-m
 COPY pkg/    pkg/
 COPY cmd/    cmd/
 COPY vendor/ vendor/
+COPY licenses/ licenses/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager github.com/kyma-project/kyma/components/asset-store-controller-manager/cmd/manager
@@ -27,6 +28,7 @@ RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
 
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/asset-store-controller-manager/manager .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/components/asset-store-controller-manager/licenses/ licenses/
 
 #
 # Run app

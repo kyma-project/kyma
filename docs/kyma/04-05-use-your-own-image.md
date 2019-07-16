@@ -3,7 +3,7 @@ title: Use your own Kyma Installer image
 type: Installation
 ---
 
-When you install Kyma from a release, you use the release artifacts that already contain the Kyma Installer - a Docker image containing the combined binary of the Installer and the component charts from the `/resources` folder.
+When you install Kyma from a release, you use the release artifacts that already contain the Kyma Installer - a Docker image containing the combined binary of the Kyma Operator and the component charts from the `/resources` folder.
 If you install Kyma from sources and use the latest `master` branch, you must build the image yourself to prepare the configuration file for Kyma installation on a GKE or AKS cluster. You also require a new image if you add components and custom Helm charts that are not included in the `/resources` folder to the installation.
 
 In addition to the tools required to install Kyma on a cluster, you also need:
@@ -32,7 +32,7 @@ In addition to the tools required to install Kyma on a cluster, you also need:
       </details>
     </div>
 
-2. Build a Kyma-Installer image that is based on the current Installer binary and includes the current installation configurations and resources charts. Run:
+2. Build a Kyma-Installer image that is based on the current Kyma Operator binary and includes the current installation configurations and resources charts. Run:
     ```
     docker build -t kyma-installer -f tools/kyma-installer/kyma.Dockerfile .
     ```

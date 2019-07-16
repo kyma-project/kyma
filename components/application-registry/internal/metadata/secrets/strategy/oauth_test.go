@@ -19,7 +19,7 @@ const (
 )
 
 var (
-	oauthCredentials = &model.Credentials{
+	oauthCredentials = &model.CredentialsWithCSRF{
 		Oauth: &model.Oauth{
 			ClientID:     clientId,
 			ClientSecret: clientSecret,
@@ -67,31 +67,40 @@ func TestOauth_ToCredentials(t *testing.T) {
 		assert.Equal(t, clientId, credentials.Oauth.ClientID)
 		assert.Equal(t, clientSecret, credentials.Oauth.ClientSecret)
 		assert.Equal(t, oauthUrl, credentials.Oauth.URL)
-		assert.Equal(t, "https://test.it", credentials.Oauth.CSRFInfo.TokenEndpointURL)
+		assert.Equal(t, "https://test.it", credentials.CSRFInfo.TokenEndpointURL)
 	})
 }
 
 func TestOauth_CredentialsProvided(t *testing.T) {
 
 	testCases := []struct {
-		credentials *model.Credentials
+		credentials *model.CredentialsWithCSRF
 		result      bool
 	}{
 		{
-			credentials: &model.Credentials{
-				Oauth: &model.Oauth{ClientID: clientId, ClientSecret: clientSecret},
+			credentials: &model.CredentialsWithCSRF{
+				Oauth: &model.Oauth{
+					ClientID:     clientId,
+					ClientSecret: clientSecret,
+				},
 			},
 			result: true,
 		},
 		{
-			credentials: &model.Credentials{
-				Oauth: &model.Oauth{ClientID: "", ClientSecret: clientSecret},
+			credentials: &model.CredentialsWithCSRF{
+				Oauth: &model.Oauth{
+					ClientID:     "",
+					ClientSecret: clientSecret,
+				},
 			},
 			result: false,
 		},
 		{
-			credentials: &model.Credentials{
-				Oauth: &model.Oauth{ClientID: clientId, ClientSecret: ""},
+			credentials: &model.CredentialsWithCSRF{
+				Oauth: &model.Oauth{
+					ClientID:     clientId,
+					ClientSecret: "",
+				},
 			},
 			result: false,
 		},

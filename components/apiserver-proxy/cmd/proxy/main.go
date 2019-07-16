@@ -31,6 +31,15 @@ import (
 	certutil "k8s.io/client-go/util/cert"
 )
 
+const (
+	corsAllowOriginHeader      = "Access-Control-Allow-Origin"
+	corsAllowMethodsHeader     = "Access-Control-Allow-Methods"
+	corsAllowHeadersHeader     = "Access-Control-Allow-Headers"
+	corsAllowCredentialsHeader = "Access-Control-Allow-Credentials"
+)
+
+var corsHeaders = []string{corsAllowOriginHeader, corsAllowMethodsHeader, corsAllowHeadersHeader, corsAllowCredentialsHeader}
+
 type config struct {
 	insecureListenAddress string
 	secureListenAddress   string
@@ -171,14 +180,9 @@ func main() {
 
 	proxyForApiserver := strings.Contains(cfg.upstream, proxy.KUBERNETES_SERVICE)
 
-	rp := httputil.NewSingleHostReverseProxy(upstreamURL)
-
-	if proxyForApiserver {
-		t, err := rest.TransportFor(kcfg)
-		if err != nil {
-			glog.Fatalf("unable to set HTTP Transport for the upstream. Details : %s", err.Error())
-		}
-		rp.Transport = t
+	rp, err := newReverseProxy(upstreamURL, kcfg, proxyForApiserver)
+	if err != nil {
+		glog.Fatalf("Unable to create reverse proxy, %s", err)
 	}
 
 	mux := http.NewServeMux()
@@ -196,12 +200,7 @@ func main() {
 	}))
 
 	if cfg.secureListenAddress != "" {
-		srv := &http.Server{Handler: handlers.CORS(
-			handlers.AllowedOrigins(cfg.cors.allowOrigin),
-			handlers.AllowedMethods(cfg.cors.allowMethods),
-			handlers.AllowedHeaders(cfg.cors.allowHeaders),
-		)(mux)}
-
+		srv := &http.Server{Handler: getCORSHandler(mux, cfg.cors)}
 		if cfg.tls.certFile == "" && cfg.tls.keyFile == "" {
 			glog.Info("Generating self signed cert as no cert is provided")
 			certBytes, keyBytes, err := certutil.GenerateSelfSignedCertKey("", nil, nil)
@@ -324,4 +323,34 @@ func initKubeConfig(kcLocation string) *rest.Config {
 	}
 
 	return kubeConfig
+}
+
+func newReverseProxy(target *url.URL, kcfg *rest.Config, proxyForApiserver bool) (*httputil.ReverseProxy, error) {
+	rp := httputil.NewSingleHostReverseProxy(target)
+	rp.ModifyResponse = deleteUpstreamCORSHeaders
+
+	if proxyForApiserver {
+		t, err := rest.TransportFor(kcfg)
+		if err != nil {
+			return nil, fmt.Errorf("unable to set HTTP Transport for the upstream. Details : %s", err.Error())
+		}
+		rp.Transport = t
+	}
+
+	return rp, nil
+}
+
+func getCORSHandler(handler http.Handler, corsCfg corsConfig) http.Handler {
+	return handlers.CORS(
+		handlers.AllowedOrigins(corsCfg.allowOrigin),
+		handlers.AllowedMethods(corsCfg.allowMethods),
+		handlers.AllowedHeaders(corsCfg.allowHeaders),
+	)(handler)
+}
+
+func deleteUpstreamCORSHeaders(r *http.Response) error {
+	for _, h := range corsHeaders {
+		r.Header.Del(h)
+	}
+	return nil
 }

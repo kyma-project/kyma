@@ -7,6 +7,7 @@ COPY pkg              ./pkg
 COPY internal/trace   ./internal/trace
 COPY internal/knative ./internal/knative
 COPY internal/ea      ./internal/ea
+COPY licenses         ./licenses
 
 WORKDIR /go/src/github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/
 COPY main.go     .
@@ -16,6 +17,7 @@ COPY httpserver  ./httpserver
 COPY metrics     ./metrics
 COPY publisher   ./publisher
 COPY validators  ./validators
+COPY util        ./util
 
 RUN CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o event-bus-publish-knative .
 
@@ -29,6 +31,7 @@ WORKDIR /root/
 RUN apk --no-cache upgrade && apk --no-cache add curl
 
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/event-bus-publish-knative .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/components/event-bus/licenses ./licenses
 
 EXPOSE 8080
 

@@ -139,6 +139,32 @@ func TestNamespacesService_Delete(t *testing.T) {
 	})
 }
 
+func TestNamespacesService_Update(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "namespace"
+		labels := map[string]string{
+			"test": "test",
+			"env":  "true",
+		}
+		newLabels := map[string]string{
+			"test": "test2",
+		}
+
+		namespace1 := fixNamespace(name, labels)
+		fixedInformer, client := fixNamespaceInformer(namespace1)
+		svc, err := k8s.NewNamespaceService(fixedInformer, client)
+		require.NoError(t, err)
+
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
+
+		namespace, err := svc.Update(name, newLabels)
+		require.NoError(t, err)
+
+		assert.Equal(t, name, namespace.Name)
+		assert.Equal(t, newLabels["test"], namespace.Labels["test"])
+	})
+}
+
 func fixNamespace(name string, labels map[string]string) *v1.Namespace {
 	namespace := fixNamespaceWithoutTypeMeta(name, labels)
 	namespace.TypeMeta = metav1.TypeMeta{

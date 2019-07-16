@@ -11,6 +11,7 @@ mkdir -p ./e2e-tester/docker/image
 cp ./e2e-tester/Dockerfile ./e2e-tester/docker/image/
 cp -R ./e2e-tester/e2e-tester.go ./e2e-tester/docker/image/
 cp -R ./vendor ./e2e-tester/docker/image/
+cp -R ./licenses ./e2e-tester/docker/image/
 	
 tagName="${NAME}:${VERSION}"
 docker build --no-cache --build-arg version=${VERSION} -t ${tagName} --label version=${VERSION} --label component=${COMPONENT} --rm ./e2e-tester/docker/image

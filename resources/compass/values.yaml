@@ -1,0 +1,36 @@
+global:
+  images:
+    containerRegistry:
+      path: eu.gcr.io/kyma-project/incubator
+    connector:
+      dir: pr/
+      version: "PR-99"
+    director:
+      dir: pr/
+      version: "PR-128"
+    gateway:
+      dir: pr/
+      version: "PR-100"
+    healthchecker:
+      dir: pr/
+      version: "PR-99"
+    tests:
+      e2e:
+        dir: pr/
+        version: "PR-121"
+
+  isLocalEnv: false
+  
+  director:
+    port: 3000
+  
+  connector:
+    port: 3000
+
+  gateway:
+    host: compass-gateway
+    
+  istio:
+    gateway:
+      name: compass-istio-gateway
+      namespace: compass-system

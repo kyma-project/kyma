@@ -1,10 +1,3 @@
-# test monitoring configuration
-
-test:
-  image:
-    name: monitoring
-    dir: develop/tests/
-    version: 64feb986
 global:
   isLocalEnv: false
   serviceCatalogApiserver:
@@ -19,3 +12,7 @@ global:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
+  monitoring_integration_tests:
+    name: monitoring-integration-tests
+    dir: pr/
+    version: PR-4849

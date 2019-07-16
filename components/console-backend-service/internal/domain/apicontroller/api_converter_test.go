@@ -80,10 +80,27 @@ func TestApiConverter_ToGQLs(t *testing.T) {
 	})
 }
 
+func TestApiConverter_ToApi(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		expected := fixApi("test")
+
+		converter := apiConverter{}
+		apiInput := fixApiInput()
+		result := converter.ToApi("test", "test", apiInput)
+
+		assert.Equal(t, expected, result)
+	})
+}
+
 func fixApi(name string) *v1alpha2.Api {
 	return &v1alpha2.Api{
+		TypeMeta: v1.TypeMeta{
+			Kind:       "API",
+			APIVersion: "authentication.kyma-project.io/v1alpha2",
+		},
 		ObjectMeta: v1.ObjectMeta{
-			Name: name,
+			Name:      name,
+			Namespace: "test",
 		},
 		Spec: v1alpha2.ApiSpec{
 			Hostname: "test-service.dev.kyma.cx",
@@ -101,5 +118,17 @@ func fixApi(name string) *v1alpha2.Api {
 				},
 			},
 		},
+	}
+}
+
+func fixApiInput() gqlschema.APIInput {
+	return gqlschema.APIInput{
+		Hostname:                   "test-service.dev.kyma.cx",
+		ServiceName:                "test-service",
+		ServicePort:                8080,
+		JwksURI:                    "http://sample-issuer/keys",
+		Issuer:                     "sample-issuer",
+		DisableIstioAuthPolicyMTLS: nil,
+		AuthenticationEnabled:      nil,
 	}
 }

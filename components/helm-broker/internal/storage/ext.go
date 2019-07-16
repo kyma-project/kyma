@@ -10,28 +10,28 @@ import (
 
 // Bundle is an interface that describe storage layer operations for Bundles
 type Bundle interface {
-	Upsert(*internal.Bundle) (replace bool, err error)
-	Get(internal.BundleName, semver.Version) (*internal.Bundle, error)
-	GetByID(internal.BundleID) (*internal.Bundle, error)
-	Remove(internal.BundleName, semver.Version) error
-	RemoveByID(internal.BundleID) error
-	RemoveAll() error
-	FindAll() ([]*internal.Bundle, error)
+	Upsert(internal.Namespace, *internal.Bundle) (replace bool, err error)
+	Get(internal.Namespace, internal.BundleName, semver.Version) (*internal.Bundle, error)
+	GetByID(internal.Namespace, internal.BundleID) (*internal.Bundle, error)
+	Remove(internal.Namespace, internal.BundleName, semver.Version) error
+	RemoveByID(internal.Namespace, internal.BundleID) error
+	RemoveAll(internal.Namespace) error
+	FindAll(internal.Namespace) ([]*internal.Bundle, error)
 }
 
 // Chart is an interface that describe storage layer operations for Charts
 type Chart interface {
-	Upsert(*chart.Chart) (replace bool, err error)
-	Get(name internal.ChartName, ver semver.Version) (*chart.Chart, error)
-	Remove(name internal.ChartName, version semver.Version) error
+	Upsert(internal.Namespace, *chart.Chart) (replace bool, err error)
+	Get(internal.Namespace, internal.ChartName, semver.Version) (*chart.Chart, error)
+	Remove(internal.Namespace, internal.ChartName, semver.Version) error
 }
 
 // Instance is an interface that describe storage layer operations for Instances
 type Instance interface {
 	Insert(*internal.Instance) error
-	Get(id internal.InstanceID) (*internal.Instance, error)
+	Get(internal.InstanceID) (*internal.Instance, error)
 	GetAll() ([]*internal.Instance, error)
-	Remove(id internal.InstanceID) error
+	Remove(internal.InstanceID) error
 }
 
 // InstanceOperation is an interface that describe storage layer operations for InstanceOperations

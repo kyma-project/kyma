@@ -14,6 +14,17 @@ type API struct {
 	Hostname               string                 `json:"hostname"`
 	Service                ApiService             `json:"service"`
 	AuthenticationPolicies []AuthenticationPolicy `json:"authenticationPolicies"`
+	CreationTimestamp      time.Time              `json:"creationTimestamp"`
+}
+
+type APIInput struct {
+	Hostname                   string `json:"hostname"`
+	ServiceName                string `json:"serviceName"`
+	ServicePort                int    `json:"servicePort"`
+	JwksURI                    string `json:"jwksUri"`
+	Issuer                     string `json:"issuer"`
+	DisableIstioAuthPolicyMTLS *bool  `json:"disableIstioAuthPolicyMTLS"`
+	AuthenticationEnabled      *bool  `json:"authenticationEnabled"`
 }
 
 type AddonsConfiguration struct {
@@ -25,6 +36,11 @@ type AddonsConfiguration struct {
 type AddonsConfigurationEvent struct {
 	Type                SubscriptionEventType `json:"type"`
 	AddonsConfiguration AddonsConfiguration   `json:"addonsConfiguration"`
+}
+
+type ApiEvent struct {
+	Type SubscriptionEventType `json:"type"`
+	API  API                   `json:"api"`
 }
 
 type ApiService struct {
@@ -324,7 +340,7 @@ type MicroFrontend struct {
 	NavigationNodes []NavigationNode `json:"navigationNodes"`
 }
 
-type NamespaceCreationOutput struct {
+type NamespaceMutationOutput struct {
 	Name   string `json:"name"`
 	Labels Labels `json:"labels"`
 }

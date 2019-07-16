@@ -18,13 +18,13 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir: develop/
-    version: dd9f72ad
+    version: "36059183"
   application_operator_tests:
     dir: develop/
     version: d7092530
   connector_service:
-    dir: pr/
-    version: "PR-4552"
+    dir: develop/
+    version: f1454344
   connector_service_tests:
     dir: develop/
     version: 29f4d46c
@@ -36,33 +36,47 @@ global:
     version: 00d7f520
   connectivity_certs_controller:
     dir: pr/
-    version: "PR-4552"
+    version: PR-4789
   event_service:
     dir: develop/
-    version: 5d1f50d1
-  gateway_tests:
+    version: "36059183"
+  event_service_integration_tests:
     dir: develop/
-    version: fedca3db
+    version: fc7361ac
   application_connectivity_validator:
     dir: develop/
-    version: d7092530
+    version: "36059183"
   application_gateway:
     dir: develop/
-    version: 1412b233
+    version: ba297749
   application_gateway_tests:
-    dir: develop/
-    version: 1412b233
+    dir: pr/
+    version: PR-4779
   application_registry:
-    dir: develop/
-    version: 1412b233
+    dir: pr/
+    version: PR-4681
   application_registry_tests:
-    dir: develop/
-    version: 4c614be5
+    dir: pr/
+    version: PR-4681
   application_broker:
     dir: develop/
     version: d999e831
+  application_connectivity_certs_setup_job:
+    dir: pr/
+    version: PR-4724
 connectivity_certs_controller:
   enabled: false
+
+application_connectivity_certs_setup_job:
+  secrets:
+    connectorCertificateSecret:
+      name: connector-service-app-ca
+      namespace: kyma-integration
+    caCertificateSecret:
+      name: application-connector-certs
+      namespace: istio-system
+  certificate:
+    validityTime: 92d
 
 tests:
   application_connector_tests:

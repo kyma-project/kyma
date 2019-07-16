@@ -60,7 +60,7 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 	}
 	makePluggable(scContainer)
 
-	scaContainer, err := servicecatalogaddons.New(restConfig, informerResyncPeriod, scContainer.ServiceCatalogRetriever)
+	scaContainer, err := servicecatalogaddons.New(restConfig, informerResyncPeriod, scContainer.ServiceCatalogRetriever, featureToggles)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
 	}
@@ -320,12 +320,28 @@ func (r *mutationResolver) RemoveAddonsConfigurationURLs(ctx context.Context, na
 	return r.sca.Resolver.RemoveAddonsConfigurationURLs(ctx, name, urls)
 }
 
-func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) {
+func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceMutationOutput, error) {
 	return r.k8s.CreateNamespace(ctx, name, labels)
+}
+
+func (r *mutationResolver) UpdateNamespace(ctx context.Context, name string, labels gqlschema.Labels) (gqlschema.NamespaceMutationOutput, error) {
+	return r.k8s.UpdateNamespace(ctx, name, labels)
 }
 
 func (r *mutationResolver) DeleteNamespace(ctx context.Context, name string) (*gqlschema.Namespace, error) {
 	return r.k8s.DeleteNamespace(ctx, name)
+}
+
+func (r *mutationResolver) CreateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
+	return r.ac.CreateAPI(ctx, name, namespace, params)
+}
+
+func (r *mutationResolver) UpdateAPI(ctx context.Context, name string, namespace string, params gqlschema.APIInput) (gqlschema.API, error) {
+	return r.ac.UpdateAPI(ctx, name, namespace, params)
+}
+
+func (r *mutationResolver) DeleteAPI(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
+	return r.ac.DeleteAPI(ctx, name, namespace)
 }
 
 func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace string, name string, limitRange gqlschema.LimitRangeInput) (*gqlschema.LimitRange, error) {
@@ -482,6 +498,10 @@ func (r *queryResolver) Apis(ctx context.Context, namespace string, serviceName 
 	return r.ac.APIsQuery(ctx, namespace, serviceName, hostname)
 }
 
+func (r *queryResolver) API(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
+	return r.ac.APIQuery(ctx, name, namespace)
+}
+
 func (r *queryResolver) IDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
 	return r.authentication.IDPPresetQuery(ctx, name)
 }
@@ -578,6 +598,10 @@ func (r *subscriptionResolver) SecretEvent(ctx context.Context, namespace string
 
 func (r *subscriptionResolver) AddonsConfigurationEvent(ctx context.Context) (<-chan gqlschema.AddonsConfigurationEvent, error) {
 	return r.sca.Resolver.AddonsConfigurationEventSubscription(ctx)
+}
+
+func (r *subscriptionResolver) APIEvent(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error) {
+	return r.ac.APIEventSubscription(ctx, namespace, serviceName)
 }
 
 // Service Instance

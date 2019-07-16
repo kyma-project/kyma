@@ -5,10 +5,7 @@ type: Installation
 
 This guide describes how to update Kyma deployed locally or on a cluster.
 
-If you are unsure of what version of Kyma you're running, check the name of the Installer image used for deployment. Run:
-```
-kubectl -n kyma-installer get deploy kyma-installer -o jsonpath='{.spec.template.spec.containers[].image}
-```
+>**NOTE:** Updating Kyma means introducing changes to a running deployment. If you want to upgrade to a newer version, read [this](#installation-upgrade-kyma) document.
 
 ## Prerequisites
 
@@ -22,7 +19,7 @@ Kyma consists of multiple components, installed as [Helm](https://github.com/hel
 Update of an existing deployment can include:
 - Changes in charts
 - Changes in overrides
-- Adding new releases
+- Adding new Helm releases
 
 The update procedure consists of three main steps:
 - Prepare the update
@@ -35,7 +32,7 @@ In case of dependency conflicts or major changes between components versions, so
 
 ## Prepare the update
 
-- If you update an existing component, make all required changes to the Helm charts of the component located in the [`resource`](https://github.com/kyma-project/kyma/tree/master/resources) directory.
+- If you update an existing component, make all required changes to the Helm charts of the component located in the [`resources`](https://github.com/kyma-project/kyma/tree/master/resources) directory.
 
 - If you add a new component to your Kyma deployment, add a top-level Helm chart for that component. Additionally, run this command to edit the Installation custom resource and add the new component to the installed components list:
   ```

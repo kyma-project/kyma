@@ -43,8 +43,6 @@ metadata:
   name: test-event
 spec:
   endpoint: http://test-event.kubeless-test:8080/
-  push_request_timeout_ms: 5000
-  max_inflight: 400
   include_subscription_name_header: true
   event_type: test
   event_type_version: v1

@@ -6,6 +6,7 @@ WORKDIR /go/src/github.com/kyma-project/kyma/components/cms-controller-manager
 COPY pkg/    pkg/
 COPY cmd/    cmd/
 COPY vendor/ vendor/
+COPY licenses/ licenses/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager github.com/kyma-project/kyma/components/cms-controller-manager/cmd/manager
@@ -14,4 +15,5 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager github.com/kyma
 FROM ubuntu:latest
 WORKDIR /
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/cms-controller-manager/manager .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/components/cms-controller-manager/licenses/ licenses/
 ENTRYPOINT ["/manager"]

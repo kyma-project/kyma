@@ -2,12 +2,17 @@
 package metadata
 
 import (
+	"fmt"
+	alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/uuid"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 const (
@@ -35,20 +40,26 @@ type ServiceDefinitionService interface {
 	GetAPI(application, serviceId string) (*model.API, apperrors.AppError)
 }
 
+type ApplicationGetter interface {
+	Get(name string, options v1.GetOptions) (*alpha1.Application, error)
+}
+
 type serviceDefinitionService struct {
 	uuidGenerator         uuid.Generator
 	serviceAPIService     serviceapi.Service
 	applicationRepository applications.ServiceRepository
 	specService           specification.Service
+	applicationManager    ApplicationGetter
 }
 
 // NewServiceDefinitionService creates new ServiceDefinitionService with provided dependencies.
-func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService serviceapi.Service, applicationRepository applications.ServiceRepository, specService specification.Service) ServiceDefinitionService {
+func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService serviceapi.Service, applicationRepository applications.ServiceRepository, specService specification.Service, applicationManager ApplicationGetter) ServiceDefinitionService {
 	return &serviceDefinitionService{
 		uuidGenerator:         uuidGenerator,
 		serviceAPIService:     serviceAPIService,
 		applicationRepository: applicationRepository,
 		specService:           specService,
+		applicationManager:    applicationManager,
 	}
 }
 
@@ -70,8 +81,13 @@ func (sds *serviceDefinitionService) Create(application string, serviceDef *mode
 
 	var gatewayUrl string
 
+	appUID, apperr := sds.getApplicationUID(application)
+	if apperr != nil {
+		return "", apperr.Append("Getting Application UID failed")
+	}
+
 	if apiDefined(serviceDef) {
-		serviceAPI, apperr := sds.serviceAPIService.New(application, serviceDef.ID, serviceDef.Api)
+		serviceAPI, apperr := sds.serviceAPIService.New(application, appUID, serviceDef.ID, serviceDef.Api)
 		if apperr != nil {
 			return "", apperr.Append("Adding new API failed")
 		}
@@ -80,7 +96,7 @@ func (sds *serviceDefinitionService) Create(application string, serviceDef *mode
 		gatewayUrl = serviceAPI.GatewayURL
 	}
 
-	apperr := sds.specService.PutSpec(serviceDef, gatewayUrl)
+	apperr = sds.specService.PutSpec(serviceDef, gatewayUrl)
 	if apperr != nil {
 		return "", apperr.Append("Determining API spec for service with ID %s failed", serviceDef.ID)
 	}
@@ -91,6 +107,21 @@ func (sds *serviceDefinitionService) Create(application string, serviceDef *mode
 	}
 
 	return serviceDef.ID, nil
+}
+
+func (sds *serviceDefinitionService) getApplicationUID(application string) (types.UID, apperrors.AppError) {
+	app, err := sds.applicationManager.Get(application, v1.GetOptions{})
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			message := fmt.Sprintf("Application %s not found", application)
+			return "", apperrors.NotFound(message)
+		}
+
+		message := fmt.Sprintf("Getting Application %s failed, %s", application, err.Error())
+		return "", apperrors.Internal(message)
+	}
+
+	return app.UID, nil
 }
 
 // GetByID returns ServiceDefinition with provided ID.
@@ -129,13 +160,18 @@ func (sds *serviceDefinitionService) Update(application string, serviceDef *mode
 
 	var gatewayUrl string
 
+	appUID, apperr := sds.getApplicationUID(application)
+	if apperr != nil {
+		return model.ServiceDefinition{}, apperr.Append("Getting Application UID failed")
+	}
+
 	if !apiDefined(serviceDef) {
 		apperr = sds.serviceAPIService.Delete(application, serviceDef.ID)
 		if apperr != nil {
 			return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, deleting API failed", serviceDef.ID)
 		}
 	} else {
-		service.API, apperr = sds.serviceAPIService.Update(application, serviceDef.ID, serviceDef.Api)
+		service.API, apperr = sds.serviceAPIService.Update(application, appUID, serviceDef.ID, serviceDef.Api)
 		if apperr != nil {
 			return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, updating API failed", serviceDef.ID)
 		}
