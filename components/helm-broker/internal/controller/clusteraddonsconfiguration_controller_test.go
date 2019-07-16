@@ -31,7 +31,6 @@ func TestReconcileClusterAddonsConfiguration_AddAddonsProcess(t *testing.T) {
 	ts := getClusterTestSuite(t, fixAddonsCfg)
 	indexDTO := fixIndexDTO()
 
-	ts.bundleStorage.On("FindAll", internal.ClusterWide).Return([]*internal.Bundle{}, nil)
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
 
 	for _, entry := range indexDTO.Entries {
@@ -72,7 +71,6 @@ func TestReconcileClusterAddonsConfiguration_AddAddonsProcess_Error(t *testing.T
 	ts := getClusterTestSuite(t, fixAddonsCfg)
 	indexDTO := fixIndexDTO()
 
-	ts.bundleStorage.On("FindAll", internal.ClusterWide).Return([]*internal.Bundle{}, nil)
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
 
 	for _, entry := range indexDTO.Entries {
@@ -114,7 +112,6 @@ func TestReconcileClusterAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
 	ts := getClusterTestSuite(t, fixAddonsCfg)
 	indexDTO := fixIndexDTO()
 
-	ts.bundleStorage.On("FindAll", internal.ClusterWide).Return([]*internal.Bundle{}, nil)
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
 
 	for _, entry := range indexDTO.Entries {
@@ -350,6 +347,7 @@ func fixDeletedClusterAddonsConfiguration() *v1alpha1.ClusterAddonsConfiguration
 		},
 		Status: v1alpha1.ClusterAddonsConfigurationStatus{
 			CommonAddonsConfigurationStatus: v1alpha1.CommonAddonsConfigurationStatus{
+				Phase: v1alpha1.AddonsConfigurationReady,
 				Repositories: []v1alpha1.StatusRepository{
 					{
 						Status: v1alpha1.RepositoryStatusReady,

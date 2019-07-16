@@ -585,20 +585,11 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:68ac2b3da20245ec388ade8ca4d2d61c10742d533097190cc9ad4899131656cd"
+  digest = "1:9de6578e6595c79894a0803cca0b56ca76a55f25615f0dbd959c662aabe10075"
   name = "github.com/kubernetes-incubator/service-catalog"
   packages = [
     "pkg/apis/servicecatalog",
     "pkg/apis/servicecatalog/v1beta1",
-    "pkg/apis/settings",
-    "pkg/apis/settings/v1alpha1",
-    "pkg/client/clientset_generated/clientset",
-    "pkg/client/clientset_generated/clientset/fake",
-    "pkg/client/clientset_generated/clientset/scheme",
-    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
-    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1/fake",
-    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1",
-    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1/fake",
     "pkg/filter",
   ]
   pruneopts = "UT"
@@ -1214,7 +1205,7 @@
   version = "kubernetes-1.13.4"
 
 [[projects]]
-  digest = "1:624e30badeaacfc1631c6cd241d023df84a9db5c91bb0b7ad8cf9dcefd8b4016"
+  digest = "1:51ab4e2706ef5cde1f05a4d5e13d6ff258f5861bb4edf6143a4b4052884f86d7"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -1248,7 +1239,6 @@
     "pkg/util/mergepatch",
     "pkg/util/naming",
     "pkg/util/net",
-    "pkg/util/rand",
     "pkg/util/runtime",
     "pkg/util/sets",
     "pkg/util/strategicpatch",
@@ -1576,9 +1566,6 @@
     "github.com/imdario/mergo",
     "github.com/komkom/go-jsonhash",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
-    "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
-    "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/fake",
-    "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "github.com/mcuadros/go-defaults",
     "github.com/meatballhat/negroni-logrus",

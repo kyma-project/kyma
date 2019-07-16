@@ -3,13 +3,16 @@ package broker
 import (
 	"fmt"
 
+	"context"
+
 	multierror "github.com/hashicorp/go-multierror"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	scbeta "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -28,7 +31,7 @@ type brokerSyncer interface {
 
 // BrokersFacade is responsible for creation k8s objects for namespaced broker
 type BrokersFacade struct {
-	brokerGetter     scbeta.ServiceBrokersGetter
+	client           client.Client
 	workingNamespace string
 	serviceName      string
 	log              logrus.FieldLogger
@@ -37,14 +40,13 @@ type BrokersFacade struct {
 }
 
 // NewBrokersFacade returns facade
-func NewBrokersFacade(brokerGetter scbeta.ServiceBrokersGetter, brokerSyncer brokerSyncer,
-	workingNamespace, serviceName string) *BrokersFacade {
+func NewBrokersFacade(cli client.Client, brokerSyncer brokerSyncer, workingNamespace, serviceName string, log logrus.FieldLogger) *BrokersFacade {
 	return &BrokersFacade{
-		brokerGetter:     brokerGetter,
+		client:           cli,
 		workingNamespace: workingNamespace,
 		brokerSyncer:     brokerSyncer,
 		serviceName:      serviceName,
-		log:              logrus.WithField("service", "nsbroker-facade"),
+		log:              log.WithField("service", "nsbroker-facade"),
 	}
 }
 
@@ -91,19 +93,26 @@ func (f *BrokersFacade) createServiceBroker(svcURL, namespace string) (*v1beta1.
 		},
 	}
 
-	createdBroker, err := f.brokerGetter.ServiceBrokers(namespace).Create(broker)
+	err := f.client.Create(context.Background(), broker)
 	if k8serrors.IsAlreadyExists(err) {
 		f.log.Infof("ServiceBroker for namespace [%s] already exist. Attempt to get resource.", namespace)
-		createdBroker, err = f.brokerGetter.ServiceBrokers(namespace).Get(NamespacedBrokerName, metav1.GetOptions{})
-		return createdBroker, err
+		result := &v1beta1.ServiceBroker{}
+		err := f.client.Get(context.Background(), types.NamespacedName{Namespace: namespace, Name: NamespacedBrokerName}, result)
+		return result, err
 	}
 
-	return createdBroker, err
+	return broker, nil
 }
 
 // Delete removes ServiceBroker and BrokersFacade. Errors don't stop execution of method. NotFound errors are ignored.
 func (f *BrokersFacade) Delete(destinationNs string) error {
-	err := f.brokerGetter.ServiceBrokers(destinationNs).Delete(NamespacedBrokerName, nil)
+	sb := &v1beta1.ServiceBroker{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      NamespacedBrokerName,
+			Namespace: destinationNs,
+		},
+	}
+	err := f.client.Delete(context.Background(), sb)
 	switch {
 	case k8serrors.IsNotFound(err):
 		return nil
@@ -116,7 +125,7 @@ func (f *BrokersFacade) Delete(destinationNs string) error {
 
 // Exist check if ServiceBroker exists.
 func (f *BrokersFacade) Exist(destinationNs string) (bool, error) {
-	_, err := f.brokerGetter.ServiceBrokers(destinationNs).Get(NamespacedBrokerName, metav1.GetOptions{})
+	err := f.client.Get(context.Background(), types.NamespacedName{Namespace: destinationNs, Name: NamespacedBrokerName}, &v1beta1.ServiceBroker{})
 	switch {
 	case k8serrors.IsNotFound(err):
 		return false, nil

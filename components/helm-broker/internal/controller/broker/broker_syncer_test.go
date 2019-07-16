@@ -1,85 +1,68 @@
 package broker
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/fake"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	k8s_testing "k8s.io/client-go/testing"
+
+	"context"
 
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger/spy"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/scheme"
+	k8sigs "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 func TestClusterServiceBrokerSync_Success(t *testing.T) {
 	// given
-	client := fake.NewSimpleClientset(fixClusterServiceBroker())
-	csbSyncer := NewServiceBrokerSyncer(client.ServicecatalogV1beta1(), client.ServicecatalogV1beta1(), fixClusterServiceBroker().Name, spy.NewLogDummy())
+	clusterServiceBroker := fixClusterServiceBroker()
+	require.NoError(t, v1beta1.AddToScheme(scheme.Scheme))
+	cli := k8sigs.NewFakeClientWithScheme(scheme.Scheme, clusterServiceBroker)
+	csbSyncer := NewServiceBrokerSyncer(cli, clusterServiceBroker.Name, spy.NewLogDummy())
 
 	// when
 	err := csbSyncer.Sync()
-
-	// then
-	sb, err := client.ServicecatalogV1beta1().ClusterServiceBrokers().Get(fixClusterServiceBroker().Name, v1.GetOptions{})
 	require.NoError(t, err)
 
-	assert.Equal(t, int64(1), sb.Spec.RelistRequests)
+	// then
+	csb := &v1beta1.ClusterServiceBroker{}
+	err = cli.Get(context.Background(), types.NamespacedName{Name: clusterServiceBroker.Name}, csb)
+	require.NoError(t, err)
+
+	assert.Equal(t, int64(1), csb.Spec.RelistRequests)
 	assert.Nil(t, err)
 }
 
 func TestClusterServiceBrokerSync_NotExistingBroker(t *testing.T) {
 	// given
-	client := fake.NewSimpleClientset()
-	csbSyncer := NewServiceBrokerSyncer(client.ServicecatalogV1beta1(), client.ServicecatalogV1beta1(), fixClusterServiceBroker().Name, spy.NewLogDummy())
+	require.NoError(t, v1beta1.AddToScheme(scheme.Scheme))
+	cli := k8sigs.NewFakeClientWithScheme(scheme.Scheme)
+	csbSyncer := NewServiceBrokerSyncer(cli, fixClusterServiceBroker().Name, spy.NewLogDummy())
 
 	// when
 	err := csbSyncer.Sync()
 
 	// then
 	require.NoError(t, err)
-}
-
-func TestClusterServiceBrokerSync_SuccessAfterConflictAndRetry(t *testing.T) {
-	// given
-	client := fake.NewSimpleClientset(fixClusterServiceBroker())
-	i := 0
-	client.PrependReactor("update", "clusterservicebrokers", func(action k8s_testing.Action) (handled bool, ret runtime.Object, err error) {
-		if i == 0 {
-			i++
-			return true, nil, apiErrors.NewConflict(schema.GroupResource{}, "", fixError())
-		}
-		return false, fixClusterServiceBroker(), nil
-	})
-
-	csbSyncer := NewServiceBrokerSyncer(client.ServicecatalogV1beta1(), client.ServicecatalogV1beta1(), fixClusterServiceBroker().Name, spy.NewLogDummy())
-
-	// when
-	err := csbSyncer.Sync()
-
-	// then
-	sb, err := client.ServicecatalogV1beta1().ClusterServiceBrokers().Get(fixClusterServiceBroker().Name, v1.GetOptions{})
-	require.NoError(t, err)
-
-	assert.Equal(t, int64(1), sb.Spec.RelistRequests)
-	assert.Nil(t, err)
 }
 
 func TestServiceBrokerSync_Success(t *testing.T) {
 	// given
-	client := fake.NewSimpleClientset(fixServiceBroker())
-	csbSyncer := NewServiceBrokerSyncer(client.ServicecatalogV1beta1(), client.ServicecatalogV1beta1(), fixServiceBroker().Name, spy.NewLogDummy())
+	serviceBroker := fixServiceBroker()
+	require.NoError(t, v1beta1.AddToScheme(scheme.Scheme))
+	cli := k8sigs.NewFakeClientWithScheme(scheme.Scheme, serviceBroker)
+	csbSyncer := NewServiceBrokerSyncer(cli, serviceBroker.Name, spy.NewLogDummy())
 
 	// when
 	err := csbSyncer.SyncServiceBroker(fixDestNs())
+	require.NoError(t, err)
 
 	// then
-	sb, err := client.ServicecatalogV1beta1().ServiceBrokers(fixDestNs()).Get(fixServiceBroker().Name, v1.GetOptions{})
+	sb := &v1beta1.ServiceBroker{}
+	err = cli.Get(context.Background(), types.NamespacedName{Namespace: fixDestNs(), Name: serviceBroker.Name}, sb)
 	require.NoError(t, err)
 
 	assert.Equal(t, int64(1), sb.Spec.RelistRequests)
@@ -88,39 +71,15 @@ func TestServiceBrokerSync_Success(t *testing.T) {
 
 func TestServiceBrokerSync_NotExistingBroker(t *testing.T) {
 	// given
-	client := fake.NewSimpleClientset()
-	csbSyncer := NewServiceBrokerSyncer(client.ServicecatalogV1beta1(), client.ServicecatalogV1beta1(), fixServiceBroker().Name, spy.NewLogDummy())
+	require.NoError(t, v1beta1.AddToScheme(scheme.Scheme))
+	cli := k8sigs.NewFakeClientWithScheme(scheme.Scheme)
+	csbSyncer := NewServiceBrokerSyncer(cli, fixServiceBroker().Name, spy.NewLogDummy())
 
 	// when
 	err := csbSyncer.SyncServiceBroker(fixDestNs())
 
 	// then
 	assert.Error(t, err)
-}
-
-func TestServiceBrokerSync_SuccessAfterConflictAndRetry(t *testing.T) {
-	// given
-	client := fake.NewSimpleClientset(fixServiceBroker())
-	i := 0
-	client.PrependReactor("update", "servicebrokers", func(action k8s_testing.Action) (handled bool, ret runtime.Object, err error) {
-		if i == 0 {
-			i++
-			return true, nil, apiErrors.NewConflict(schema.GroupResource{}, "", fixError())
-		}
-		return false, fixServiceBroker(), nil
-	})
-
-	csbSyncer := NewServiceBrokerSyncer(client.ServicecatalogV1beta1(), client.ServicecatalogV1beta1(), fixServiceBroker().Name, spy.NewLogDummy())
-
-	// when
-	err := csbSyncer.SyncServiceBroker(fixDestNs())
-
-	// then
-	sb, err := client.ServicecatalogV1beta1().ServiceBrokers(fixDestNs()).Get(fixServiceBroker().Name, v1.GetOptions{})
-	require.NoError(t, err)
-
-	assert.Equal(t, int64(1), sb.Spec.RelistRequests)
-	assert.Nil(t, err)
 }
 
 func fixClusterServiceBroker() *v1beta1.ClusterServiceBroker {
@@ -144,8 +103,4 @@ func fixServiceBroker() *v1beta1.ServiceBroker {
 			},
 		},
 	}
-}
-
-func fixError() error {
-	return errors.New("some error")
 }

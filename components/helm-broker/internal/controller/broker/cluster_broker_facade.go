@@ -3,13 +3,16 @@ package broker
 import (
 	"fmt"
 
+	"context"
+
 	multierror "github.com/hashicorp/go-multierror"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	scbeta "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type clusterBrokerSyncer interface {
@@ -18,25 +21,24 @@ type clusterBrokerSyncer interface {
 
 // ClusterBrokersFacade is responsible for creation k8s objects for namespaced broker
 type ClusterBrokersFacade struct {
-	clusterBrokerGetter scbeta.ClusterServiceBrokersGetter
-	workingNamespace    string
-	serviceName         string
-	log                 logrus.FieldLogger
-	clusterBrokerName   string
+	client            client.Client
+	workingNamespace  string
+	serviceName       string
+	log               logrus.FieldLogger
+	clusterBrokerName string
 
 	clusterBrokerSyncer clusterBrokerSyncer
 }
 
 // NewClusterBrokersFacade returns facade
-func NewClusterBrokersFacade(clusterBrokerGetter scbeta.ClusterServiceBrokersGetter, clusterBrokerSyncer clusterBrokerSyncer,
-	workingNamespace, serviceName string, clusterBrokerName string) *ClusterBrokersFacade {
+func NewClusterBrokersFacade(client client.Client, clusterBrokerSyncer clusterBrokerSyncer, workingNamespace, serviceName, clusterBrokerName string, log logrus.FieldLogger) *ClusterBrokersFacade {
 	return &ClusterBrokersFacade{
-		clusterBrokerGetter: clusterBrokerGetter,
+		client:              client,
 		workingNamespace:    workingNamespace,
 		clusterBrokerSyncer: clusterBrokerSyncer,
 		clusterBrokerName:   clusterBrokerName,
 		serviceName:         serviceName,
-		log:                 logrus.WithField("service", "cluster-broker-facade"),
+		log:                 log.WithField("service", "cluster-broker-facade"),
 	}
 }
 
@@ -67,7 +69,13 @@ func (f *ClusterBrokersFacade) Create() error {
 
 // Delete removes ClusterServiceBroker and BrokersFacade. Errors don't stop execution of method. NotFound errors are ignored.
 func (f *ClusterBrokersFacade) Delete() error {
-	err := f.clusterBrokerGetter.ClusterServiceBrokers().Delete(f.clusterBrokerName, nil)
+	csb := &v1beta1.ClusterServiceBroker{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: f.clusterBrokerName,
+		},
+	}
+
+	err := f.client.Delete(context.Background(), csb)
 	switch {
 	case k8serrors.IsNotFound(err):
 		return nil
@@ -80,7 +88,7 @@ func (f *ClusterBrokersFacade) Delete() error {
 
 // Exist check if ClusterServiceBroker exists.
 func (f *ClusterBrokersFacade) Exist() (bool, error) {
-	_, err := f.clusterBrokerGetter.ClusterServiceBrokers().Get(f.clusterBrokerName, metav1.GetOptions{})
+	err := f.client.Get(context.Background(), types.NamespacedName{Name: f.clusterBrokerName}, &v1beta1.ClusterServiceBroker{})
 	switch {
 	case k8serrors.IsNotFound(err):
 		return false, nil
@@ -105,12 +113,13 @@ func (f *ClusterBrokersFacade) createClusterServiceBroker(svcURL string) (*v1bet
 		},
 	}
 
-	createdBroker, err := f.clusterBrokerGetter.ClusterServiceBrokers().Create(broker)
+	err := f.client.Create(context.Background(), broker)
 	if k8serrors.IsAlreadyExists(err) {
 		f.log.Infof("ClusterServiceBroker [%s] already exist. Attempt to get resource.", broker.Name)
-		createdBroker, err = f.clusterBrokerGetter.ClusterServiceBrokers().Get(f.clusterBrokerName, metav1.GetOptions{})
+		createdBroker := &v1beta1.ClusterServiceBroker{}
+		err = f.client.Get(context.Background(), types.NamespacedName{Name: f.clusterBrokerName}, createdBroker)
 		return createdBroker, err
 	}
 
-	return createdBroker, err
+	return broker, err
 }
