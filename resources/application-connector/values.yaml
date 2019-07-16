@@ -26,8 +26,8 @@ global:
     dir: pr/
     version: PR-4900
   connector_service_tests:
-    dir: develop/
-    version: 29f4d46c
+    dir: pr/
+    version: PR-4900
   connection_token_handler:
     dir: develop/
     version: 3d922c3d
