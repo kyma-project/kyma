@@ -18,7 +18,7 @@ Follow these steps to configure the Helm Broker to fetch addon definitions from 
   2. [Install Kyma](/root/kyma/#installation-installation) locally or on a cluster.
   3. Create the [ClusterAddonsConfiguration](#custom-resource-clusteraddonsconfiguration) CR which contains URLs to your addons.
 
-  ```yaml
+  ```
   kubectl create -f https://kyma-project.io/assets/docs/master/helm-broker/docs/assets/cluster-addon.yaml
   ```
   4. The Helm Broker triggers the Service Catalog synchronization automatically. New Service Classes appear after a few seconds.
@@ -38,7 +38,7 @@ Follow these steps to configure the Helm Broker to fetch addon definitions from 
 
   4. Create the [AddonsConfiguration](#custom-resource-addonsconfiguration) CR which contains URLs to your addons:
 
-  ```yaml
+  ```
   kubectl create -f https://kyma-project.io/assets/docs/master/helm-broker/docs/assets/namespaced-addon.yaml
   ```
 
