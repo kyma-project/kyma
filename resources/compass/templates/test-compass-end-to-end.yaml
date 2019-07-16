@@ -10,7 +10,7 @@ spec:
     spec:
     {{ if .Values.global.isLocalEnv }}
       hostAliases:
-        - ip: {{ .Values.minikubeIP }}
+        - ip: {{ .Values.compass.integrationtest.minikubeIP }}
           hostnames:
           - "{{ .Values.global.gateway.host }}.{{ .Values.global.ingress.domainName }}"
     {{ end }}
