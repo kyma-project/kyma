@@ -1,35 +1,21 @@
-FROM golang:1.12.5-alpine3.9 as builder
+FROM golang:1.10-alpine as builder
 
-ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/components/compass-runtime-agent
-WORKDIR ${BASE_APP_DIR}
+RUN apk add -U --no-cache ca-certificates
 
-#
-# Copy files
-#
+ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/compass-runtime-agent
 
-COPY ./vendor/ ${BASE_APP_DIR}/vendor/
-COPY ./cmd/ ${BASE_APP_DIR}/cmd/
-COPY ./licenses ${BASE_APP_DIR}/licenses
+WORKDIR $DOCK_PKG_DIR
+COPY . $DOCK_PKG_DIR
+COPY ./licenses/ /app/licenses
 
-#
-# Build app
-#
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o compass-runtime-agent ./cmd/compass-runtime-agent
 
-RUN go build -v -o compass-runtime-agent ./cmd/main.go
-RUN mkdir /app && mv ./compass-runtime-agent /app/compass-runtime-agent && mv ./licenses /app/licenses
+FROM scratch
+LABEL source=git@github.com:kyma-project/kyma.git
 
-FROM alpine:3.9
-LABEL source = git@github.com:kyma-project/kyma.git
-WORKDIR /app
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-#
-# Copy binary
-#
+COPY --from=builder /go/src/github.com/kyma-project/kyma/components/compass-runtime-agent/compass-runtime-agent .
+COPY --from=builder /app/licenses /app/licenses
 
-COPY --from=builder /app /app
-
-#
-# Run app
-#
-
-CMD ["/app/compass-runtime-agent"]
+CMD ["/compass-runtime-agent"]
