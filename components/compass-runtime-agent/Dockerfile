@@ -19,7 +19,7 @@ RUN go build -v -o compass-runtime-agent ./cmd/main.go
 RUN mkdir /app && mv ./compass-runtime-agent /app/compass-runtime-agent && mv ./licenses /app/licenses
 
 FROM alpine:3.9
-LABEL source = git@github.com:kyma-incubator/compass.git
+LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 
 #
