@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: velero-credentials-overrides
+  namespace: kyma-installer
+  labels:
+    kyma-project.io/installation: ""
+    installer: overrides
+    component: velero
+type: Opaque
+data:
+  configuration.provider: "__PROVIDER__"
+  configuration.volumeSnapshotLocation.name: "__PROVIDER__"
+  configuration.volumeSnapshotLocation.bucket: "__BUCKET__"
+  configuration.backupStorageLocation.name: "__PROVIDER__"
+  configuration.backupStorageLocation.bucket: "__BUCKET__"
+  credentials.secretContents.cloud: __CREDENTIALS__
+
+---
+apiVersion: "installer.kyma-project.io/v1alpha1"
+kind: Installation
+metadata:
+  name: kyma-installation
+  namespace: kyma-installer
+  labels:
+    action: install
+    kyma-project.io/installation: ""
+  finalizers:
+    - finalizer.installer.kyma-project.io
+spec:
+  version: "__VERSION__"
+  url: "__URL__"
+  components:
+    - name: "cluster-essentials"
+      namespace: "kyma-system"
+    - name: "testing"
+      namespace: "kyma-system"
+    - name: "istio-init"
+      namespace: "istio-system"
+    - name: "istio"
+      namespace: "istio-system"
+    - name: "xip-patch"
+      namespace: "kyma-installer"
+    - name: "istio-kyma-patch"
+      namespace: "istio-system"
+    - name: "knative-serving"
+      namespace: "knative-serving"
+    - name: "knative-eventing"
+      namespace: "knative-eventing"
+    - name: "dex"
+      namespace: "kyma-system"
+    - name: "service-catalog"
+      namespace: "kyma-system"
+    - name: "service-catalog-addons"
+      namespace: "kyma-system"
+    - name: "helm-broker"
+      namespace: "kyma-system"
+    - name: "nats-streaming"
+      namespace: "natss"
+    - name: "assetstore"
+      namespace: "kyma-system"
+    - name: "cms"
+      namespace: "kyma-system"
+    - name: "core"
+      namespace: "kyma-system"
+    - name: "knative-provisioner-natss"
+      namespace: "knative-eventing"
+    - name: "event-bus"
+      namespace: "kyma-system"
+    - name: "application-connector-ingress"
+      namespace: "kyma-system"
+    - name: "application-connector-helper"
+      namespace: "kyma-integration"
+    - name: "application-connector"
+      namespace: "kyma-integration"
+    - name: "velero-essentials"
+      namespace: "kyma-backup"
+    - name: "velero"
+      namespace: "kyma-backup"
