@@ -13,8 +13,8 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `cms` | ✅ | ✅ |
 | `cluster-essentials` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
-| `velero-essentials` | ✅ | ⛔️ |
-| `velero` | ✅ | ⛔️ |
+| `velero-essentials` | ⛔️ | ⛔️ |
+| `velero` | ⛔️ | ⛔️ |
 | `assetstore` | ✅ | ✅ |
 | `dex` | ✅ | ✅ |
 | `helm-broker` | ✅ | ✅ |
@@ -35,10 +35,11 @@ Follow these installation guides to install Kyma locally or on a cluster:
 - [Install Kyma locally](#installation-install-kyma-locally)
 - [Install Kyma on a cluster](#installation-install-kyma-on-a-cluster)
 
-Read rest of the installation documents to learn how to:
+Read the rest of the installation documents to learn how to:
 - [Disable the selected components' installation or install them separately](#configuration-custom-component-installation)
 - [Upgrade Kyma to a new version](#installation-upgrade-kyma)
 - [Update Kyma](#installation-update-kyma)
 - [Reinstall Kyma](#installation-reinstall-kyma)
+- [Setup Kyma Backups](/components/backup)
 
 >**NOTE:** Make sure to check whether the version of the documentation in the left pane of the `kyma-project.io` is compatible with your Kyma version.

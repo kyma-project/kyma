@@ -1,12 +1,12 @@
 ---
-title: Install velero into Kyma
+title: Install velero
 type: Details
 ---
 In order to be able to backup and restore your Kyma cluster, [Velero](https://github.com/heptio/velero/) needs to be configured and installed.
 
-## Velero configuration
+## Velero setup
 
-To sucessfully configure velero, you need to provide a supported storage location and credentials to access it. Please follow the instructions below for the provider of your choosing:
+To sucessfully set up velero, you need to provide a supported storage location and credentials to access it. Please follow the instructions below for the provider of your choosing:
   <div tabs>
   <details>
   <summary>
@@ -31,11 +31,39 @@ To sucessfully configure velero, you need to provide a supported storage locatio
       ```
 
   3. Run the kyma installation with the velero overrides:
-      ```bash
-        kyma install -o velero-overrides.yaml
-      ```
+      <div tabs>
+      <details>
+      <summary>
+      Local installation
+      </summary>
 
-  >**NOTE:** For more information visit https://velero.io/docs/v1.0.0/gcp-config/
+      ```bash
+      kyma install -o velero-overrides.yaml
+      ```
+      
+      </details>
+      <details>
+      <summary>
+      Cluster Installation
+      </summary>
+      
+      1. Install Kyma following the [installation guide](/root/kyma/#installation-installation)
+      
+      2. Apply the overrides
+          ```bash
+          kubectl apply -f velero-overrides.yaml
+          ```
+      3. Trigger the installer to apply the overrides
+          ```bash
+          kubectl label installation/kyma-installation action=install
+          ```
+      
+      </details>
+      </div>
+
+  >**NOTE:** For more information on Kyma overrides visit the [Installation Overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation) section.
+
+  >**NOTE:** For more information on configuring and installing velero in GCP visit https://velero.io/docs/v1.0.0/gcp-config/
 
   </details>
   <details>
@@ -45,7 +73,9 @@ To sucessfully configure velero, you need to provide a supported storage locatio
 
   Coming soon...
 
-  >**NOTE:** For more information visit https://velero.io/docs/v1.0.0/azure-config/
+  >**NOTE:** For more information on Kyma overrides visit the [Installation Overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation) section.
+
+  >**NOTE:** For more information on configuring and installing velero in Azure visit https://velero.io/docs/v1.0.0/azure-config/
   
   </details>
   <details>
@@ -55,7 +85,9 @@ To sucessfully configure velero, you need to provide a supported storage locatio
 
   AWS is currently not officially supported.
 
-  >**NOTE:** For more information visit https://velero.io/docs/v1.0.0/aws-config/
+  >**NOTE:** For more information on Kyma overrides visit the [Installation Overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation) section.
+
+  >**NOTE:** For more information on configuring and installing velero in AWS visit https://velero.io/docs/v1.0.0/aws-config/
 
   </details>
   </div>
