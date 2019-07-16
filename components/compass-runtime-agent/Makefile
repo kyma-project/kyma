@@ -2,28 +2,36 @@ IMG_NAME = compass-runtime-agent
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(IMG_NAME)
 TAG = $(DOCKER_TAG)
 
-.PHONY: ci-pr ci-master ci-release resolve build-and-test build-image push-image pull-licenses
+.PHONY: build
+build:
+	./before-commit.sh ci
 
-ci-pr: resolve build-and-test build-image push-image
-ci-master: resolve build-and-test build-image push-image
-ci-release: resolve build-and-test build-image push-image
-
-resolve:
-	dep ensure -v -vendor-only
+.PHONY: pull-licenses
 pull-licenses:
 ifdef LICENSE_PULLER_PATH
 	bash $(LICENSE_PULLER_PATH)
 else
 	mkdir -p licenses
 endif
-build-and-test:
-ifndef PROW_JOB_ID
-	./before-commit.sh
-else
-	./before-commit.sh ci
-endif
+
+.PHONY: build-image
 build-image: pull-licenses
-	docker build -t $(IMG_NAME) .
+	docker build -t $(APP_NAME):latest .
+
+.PHONY: push-image
 push-image:
-	docker tag $(IMG_NAME) $(IMG):$(TAG)
+	docker tag $(APP_NAME) $(IMG):$(TAG)
 	docker push $(IMG):$(TAG)
+
+.PHONY: ci-pr
+ci-pr: build build-image push-image
+
+.PHONY: ci-master
+ci-master: build build-image push-image
+
+.PHONY: ci-release
+ci-release: build build-image push-image
+
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
+	@echo "resources/compass-runtime-agent"
