@@ -1,4 +1,4 @@
-FROM golang:1.10-alpine as builder
+FROM golang:1.12.5-alpine3.9 as builder
 
 RUN apk add -U --no-cache ca-certificates
 
@@ -8,7 +8,7 @@ WORKDIR $DOCK_PKG_DIR
 COPY . $DOCK_PKG_DIR
 COPY ./licenses/ /app/licenses
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o compass-runtime-agent ./cmd/compass-runtime-agent
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o compass-runtime-agent ./cmd
 
 FROM scratch
 LABEL source=git@github.com:kyma-project/kyma.git
