@@ -18,7 +18,7 @@ var k8sClient *kubernetes.Clientset
 var namespace string
 
 func TestMain(m *testing.M) {
-	namespace = os.Getenv(namespaceEnv)
+	namespace = namespaceNameRoot + "-" + generateRandomString(testIDLength)
 	if namespace == "" {
 		log.Error("Namespace not set.")
 		os.Exit(2)

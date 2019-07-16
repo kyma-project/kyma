@@ -8,223 +8,236 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
 rules:
-- apiGroups: [""]
-  resources:
-  - configmaps
-  - endpoints
-  - namespaces
-  - nodes
-  - pods
-  - services
-  - replicationcontrollers
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["extensions", "apps"]
-  resources:
-  - deployments
-  - statefulsets
-  - replicasets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["autoscaling"]
-  resources:
-  - horizontalpodautoscalers
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["batch"]
-  resources:
-  - cronjobs
-  - jobs
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["config.istio.io"]
-  resources:
-  - apikeys
-  - authorizations
-  - checknothings
-  - circonuses
-  - deniers
-  - fluentds
-  - handlers
-  - kubernetesenvs
-  - kuberneteses
-  - listcheckers
-  - listentries
-  - logentries
-  - memquotas
-  - metrics
-  - opas
-  - prometheuses
-  - quotas
-  - quotaspecbindings
-  - quotaspecs
-  - rbacs
-  - reportnothings
-  - rules
-  - solarwindses
-  - stackdrivers
-  - statsds
-  - stdios
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["networking.istio.io"]
-  resources:
-  - destinationrules
-  - gateways
-  - serviceentries
-  - virtualservices
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["authentication.istio.io"]
-  resources:
-  - policies
-  - meshpolicies
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["rbac.istio.io"]
-  resources:
-  - clusterrbacconfigs
-  - rbacconfigs
-  - serviceroles
-  - servicerolebindings
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - watch
-- apiGroups: ["monitoring.kiali.io"]
-  resources:
-  - monitoringdashboards
-  verbs:
-  - get
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: kiali-viewer
-  labels:
-    app: {{ template "kiali.name" . }}
-    chart: {{ template "kiali.chart" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
-rules:
-- apiGroups: [""]
-  resources:
-  - configmaps
-  - endpoints
-  - namespaces
-  - nodes
-  - pods
-  - services
-  - replicationcontrollers
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["extensions", "apps"]
-  resources:
-  - deployments
-  - statefulsets
-  - replicasets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["autoscaling"]
-  resources:
-  - horizontalpodautoscalers
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["batch"]
-  resources:
-  - cronjobs
-  - jobs
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["config.istio.io"]
-  resources:
-  - apikeys
-  - authorizations
-  - checknothings
-  - circonuses
-  - deniers
-  - fluentds
-  - handlers
-  - kubernetesenvs
-  - kuberneteses
-  - listcheckers
-  - listentries
-  - logentries
-  - memquotas
-  - metrics
-  - opas
-  - prometheuses
-  - quotas
-  - quotaspecbindings
-  - quotaspecs
-  - rbacs
-  - reportnothings
-  - rules
-  - servicecontrolreports
-  - servicecontrols
-  - solarwindses
-  - stackdrivers
-  - statsds
-  - stdios
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["networking.istio.io"]
-  resources:
-  - destinationrules
-  - gateways
-  - serviceentries
-  - virtualservices
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["authentication.istio.io"]
-  resources:
-  - policies
-  - meshpolicies
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["rbac.istio.io"]
-  resources:
-  - clusterrbacconfigs
-  - rbacconfigs
-  - serviceroles
-  - servicerolebindings
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups: ["monitoring.kiali.io"]
-  resources:
-  - monitoringdashboards
-  verbs:
-  - get
+  - apiGroups: [""]
+    resources:
+      - configmaps
+      - endpoints
+      - events
+      - persistentvolumeclaims
+      - pods
+      - serviceaccounts
+      - services
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups: [""]
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - patch
+  - apiGroups: ["apps"]
+    resources:
+      - deployments
+      - replicasets
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups: ["monitoring.coreos.com"]
+    resources:
+      - servicemonitors
+    verbs:
+      - create
+      - get
+  - apiGroups: ["apps"]
+    resourceNames:
+      - kiali-operator
+    resources:
+      - deployments/finalizers
+    verbs:
+      - update
+  - apiGroups: ["kiali.io"]
+    resources:
+      - '*'
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources:
+      - clusterrolebindings
+      - clusterroles
+      - rolebindings
+      - roles
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups: ["extensions"]
+    resources:
+      - ingresses
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups: ["monitoring.kiali.io"]
+    resources:
+      - monitoringdashboards
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  # The permissions below are for Kiali itself; operator needs these so it can escalate when creating Kiali's roles
+  - apiGroups: [""]
+    resources:
+      - configmaps
+      - endpoints
+      - namespaces
+      - nodes
+      - pods
+      - pods/log
+      - replicationcontrollers
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups: ["extensions", "apps"]
+    resources:
+      - deployments
+      - replicasets
+      - statefulsets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups: ["autoscaling"]
+    resources:
+      - horizontalpodautoscalers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups: ["batch"]
+    resources:
+      - cronjobs
+      - jobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups: ["config.istio.io"]
+    resources:
+      - adapters
+      - apikeys
+      - bypasses
+      - authorizations
+      - checknothings
+      - circonuses
+      - cloudwatches
+      - deniers
+      - dogstatsds
+      - edges
+      - fluentds
+      - handlers
+      - instances
+      - kubernetesenvs
+      - kuberneteses
+      - listcheckers
+      - listentries
+      - logentries
+      - memquotas
+      - metrics
+      - noops
+      - opas
+      - prometheuses
+      - quotas
+      - quotaspecbindings
+      - quotaspecs
+      - rbacs
+      - redisquotas
+      - reportnothings
+      - rules
+      - signalfxs
+      - solarwindses
+      - stackdrivers
+      - statsds
+      - stdios
+      - templates
+      - tracespans
+      - zipkins
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+  - apiGroups: ["networking.istio.io"]
+    resources:
+      - destinationrules
+      - gateways
+      - serviceentries
+      - sidecars
+      - virtualservices
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+  - apiGroups: ["authentication.istio.io"]
+    resources:
+      - meshpolicies
+      - policies
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+  - apiGroups: ["rbac.istio.io"]
+    resources:
+      - clusterrbacconfigs
+      - rbacconfigs
+      - servicerolebindings
+      - serviceroles
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+  - apiGroups: ["monitoring.kiali.io"]
+    resources:
+      - monitoringdashboards
+    verbs:
+      - get
+      - list
