@@ -233,12 +233,17 @@ paths:
         schema:
           type: string
           format: uuid
-        required: false
+        required: true
       - in: header
         name: Tenant
         schema:
           type: string
-        required: false
+        required: true
+      - in: header
+        name: RuntimeID
+        schema:
+          type: string
+        required: true
       tags:
       - runtimes internal API
       summary: 'Creates a token used for certificate signing flow.'
