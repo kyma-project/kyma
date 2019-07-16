@@ -14,8 +14,6 @@ RUN go test -c ./ -o /knative_build.test
 FROM alpine:3.8
 
 LABEL source = git@github.com:kyma-project/kyma.git
-RUN apk add --no-cache curl
-RUN curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.11.0/bin/linux/amd64/kubectl && chmod +x /usr/bin/kubectl
 
 COPY --from=builder /knative_build.test /knative_build.test
 

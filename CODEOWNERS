@@ -176,10 +176,10 @@
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `knative-build` chart
-/resources/knative-build/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
+/resources/knative-build/ @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi
 
 # The `knative-serving` chart
-/resources/knative-serving/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
+/resources/knative-serving/ @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi
 
 # The `knative-eventing` chart
 /resources/knative-eventing/ @montaro @abbi-gaurav @marcobebway @radufa @sayanh

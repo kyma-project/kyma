@@ -1,16 +1,18 @@
 package knative_build_acceptance
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
-	"os/exec"
 	"testing"
 
 	"github.com/avast/retry-go"
 	build_api "github.com/knative/build/pkg/apis/build/v1alpha1"
 	build "github.com/knative/build/pkg/client/clientset/versioned/typed/build/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
 
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -22,8 +24,11 @@ const (
 	cpuLimits = "50m"
 )
 
+var kubeConfig *rest.Config
+var k8sClient *kubernetes.Clientset
+
 func TestKnativeBuild_Acceptance(t *testing.T) {
-	kubeConfig := loadKubeConfigOrDie()
+	kubeConfig = loadKubeConfigOrDie()
 	buildClient := build.NewForConfigOrDie(kubeConfig).Builds("knative-build")
 	labels := make(map[string]string)
 	labels["test-build-func"] = "test-build"
@@ -48,16 +53,39 @@ func TestKnativeBuild_Acceptance(t *testing.T) {
 
 	defer deleteBuild(buildClient, build)
 
+	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
+	if err != nil {
+		log.Fatalf("Unable to get access to kubernetes: %v", err)
+	}
+
 	err = retry.Do(func() error {
 		log.Printf("Checking build logs")
-		cmd := exec.Command("kubectl", "-n", "knative-build", "logs", "-l", "test-build-func=test-build", "-c", "build-step-test-build")
-		stdoutStderr, err := cmd.CombinedOutput()
+		podList, err := k8sClient.CoreV1().Pods("knative-build").List(meta.ListOptions{LabelSelector: "test-build-func=test-build"})
 		if err != nil {
-			log.Printf("[Error] Checking build logs: %v", string(stdoutStderr))
 			return err
 		}
-		if string(stdoutStderr) != "hello build" {
-			return fmt.Errorf("unexpected response: '%s'", string(stdoutStderr))
+
+		log.Printf("Number of pods: %v", len(podList.Items))
+
+		if len(podList.Items) != 1 {
+			return fmt.Errorf("unexpected number of test pods: we have more than one test pod: %v", podList)
+		}
+
+		req := k8sClient.CoreV1().Pods("knative-build").GetLogs(podList.Items[0].Name, &corev1.PodLogOptions{Container: "build-step-test-build"})
+		podLogs, err := req.Stream()
+		if err != nil {
+			return fmt.Errorf("Error fetching logs: %v", err)
+		}
+		defer podLogs.Close()
+
+		buf := new(bytes.Buffer)
+		_, err = io.Copy(buf, podLogs)
+		if err != nil {
+			return fmt.Errorf("Error in copying information from podLogs to buf")
+		}
+
+		if buf.String() != "hello build" {
+			return fmt.Errorf("unexpected response: '%s'", buf.String())
 		}
 
 		return nil

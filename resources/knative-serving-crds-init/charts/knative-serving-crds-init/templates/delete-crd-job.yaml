@@ -14,13 +14,13 @@ data:
   delete-crd.sh: |
     #!/usr/bin/env bash
     echo "*** Pre Install job starts ***"
-    kubectl delete crd services.serving.knative.dev  || echo "services CRD not present"
-    kubectl delete crd routes.serving.knative.dev   || echo "routes CRD not present"
-    kubectl delete crd revisions.serving.knative.dev  || echo "revisions CRD not present"
-    kubectl delete crd configurations.serving.knative.dev  || echo "configurations CRD not present"
-    kubectl delete crd clusteringresses.networking.internal.knative.dev  || echo "clusteringress CRD not present"
-    kubectl delete crd podautoscalers.autoscaling.internal.knative.dev  || echo "podautoscalers CRD not present"
-    kubectl delete crd images.caching.internal.knative.dev  || echo "images CRD not present"
+    kubectl delete crd services.serving.knative.dev --force || echo "services CRD not present"
+    kubectl delete crd routes.serving.knative.dev --force  || echo "routes CRD not present"
+    kubectl delete crd revisions.serving.knative.dev --force || echo "revisions CRD not present"
+    kubectl delete crd configurations.serving.knative.dev --force || echo "configurations CRD not present"
+    kubectl delete crd clusteringresses.networking.internal.knative.dev --force || echo "clusteringress CRD not present"
+    kubectl delete crd podautoscalers.autoscaling.internal.knative.dev --force || echo "podautoscalers CRD not present"
+    kubectl delete crd images.caching.internal.knative.dev --force || echo "images CRD not present"
     echo "*** Pre Install job executed ***"
 kind: ConfigMap
 metadata:
