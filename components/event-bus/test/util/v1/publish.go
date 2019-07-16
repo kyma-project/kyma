@@ -169,8 +169,8 @@ func BuildDefaultTestPayloadWithEmptyData() string {
 	return payload
 }
 
-// PerformPublishRequest performs a test publish request.
-func PerformPublishRequest(t *testing.T, publishURL string, payload string) ([]byte, int) {
+// PerformPublishV1Request performs a test publish request.
+func PerformPublishV1Request(t *testing.T, publishURL string, payload string) ([]byte, int) {
 	res, err := http.Post(publishURL+"/v1/events", "application/json", strings.NewReader(payload))
 
 	if err != nil {
@@ -186,8 +186,8 @@ func PerformPublishRequest(t *testing.T, publishURL string, payload string) ([]b
 	return body, res.StatusCode
 }
 
-// PerformPublishRequestWithHeaders performs a test publish request with HTTP headers.
-func PerformPublishRequestWithHeaders(t *testing.T, publishURL string, payload string, headers map[string]string) ([]byte, int) {
+// PerformPublishV1RequestWithHeaders performs a test publish request with HTTP headers.
+func PerformPublishV1RequestWithHeaders(t *testing.T, publishURL string, payload string, headers map[string]string) ([]byte, int) {
 	req, _ := http.NewRequest("POST", publishURL+"/v1/events", strings.NewReader(payload))
 
 	req.Header.Set("Content-Type", "application/json")
@@ -225,4 +225,29 @@ func AssertExpectedError(t *testing.T, body []byte, actualStatusCode int, expect
 		assert.NotEqual(t, len(responseError.Details), 0)
 		assert.Equal(t, errorField, responseError.Details[0].Field)
 	}
+}
+
+// PerformPublishV2RequestWithHeaders performs a test publish request with HTTP headers.
+func PerformPublishV2RequestWithHeaders(t *testing.T, publishURL string, payload string, headers map[string]string) ([]byte, int) {
+	req, _ := http.NewRequest("POST", publishURL+"/v2/events", strings.NewReader(payload))
+
+	req.Header.Set("Content-Type", "application/json")
+
+	for header, value := range headers {
+		req.Header.Set(header, value)
+	}
+
+	res, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = res.Body.Close() }()
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return body, res.StatusCode
 }

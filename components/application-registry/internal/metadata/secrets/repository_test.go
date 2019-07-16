@@ -21,14 +21,14 @@ func TestRepository_Create(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "secretId", "app", map[string][]byte{
+		secret := makeSecret("new-secret", "secretId", "app", "appUID", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
 		secretsManagerMock.On("Create", secret).Return(secret, nil)
 
 		// when
-		err := repository.Create("app", "new-secret", "secretId", map[string][]byte{
+		err := repository.Create("app", "appUID", "new-secret", "secretId", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
@@ -43,14 +43,14 @@ func TestRepository_Create(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "secretId", "app", map[string][]byte{
+		secret := makeSecret("new-secret", "secretId", "app", "appUID", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
 		secretsManagerMock.On("Create", secret).Return(nil, errors.New("some error"))
 
 		// when
-		err := repository.Create("app", "new-secret", "secretId", map[string][]byte{
+		err := repository.Create("app", "appUID", "new-secret", "secretId", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
@@ -66,14 +66,14 @@ func TestRepository_Create(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "secretId", "app", map[string][]byte{
+		secret := makeSecret("new-secret", "secretId", "app", "appUID", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
 		secretsManagerMock.On("Create", secret).Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, ""))
 
 		// when
-		err := repository.Create("app", "new-secret", "secretId", map[string][]byte{
+		err := repository.Create("app", "appUID", "new-secret", "secretId", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
@@ -91,7 +91,7 @@ func TestRepository_Get(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "secretId", "app", map[string][]byte{
+		secret := makeSecret("new-secret", "secretId", "app", "appUID", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
@@ -218,7 +218,7 @@ func TestRepository_Upsert(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "secretId", "app", map[string][]byte{
+		secret := makeSecret("new-secret", "secretId", "app", "appUID", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
@@ -226,7 +226,7 @@ func TestRepository_Upsert(t *testing.T) {
 			secret, nil)
 
 		// when
-		err := repository.Upsert("app", "new-secret", "secretId", map[string][]byte{
+		err := repository.Upsert("app", "appUID", "new-secret", "secretId", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
@@ -241,7 +241,7 @@ func TestRepository_Upsert(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "secretId", "app", map[string][]byte{
+		secret := makeSecret("new-secret", "secretId", "app", "appUID", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
@@ -250,7 +250,7 @@ func TestRepository_Upsert(t *testing.T) {
 		secretsManagerMock.On("Create", secret).Return(secret, nil)
 
 		// when
-		err := repository.Upsert("app", "new-secret", "secretId", map[string][]byte{
+		err := repository.Upsert("app", "appUID", "new-secret", "secretId", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
@@ -265,14 +265,14 @@ func TestRepository_Upsert(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "secretId", "app", map[string][]byte{
+		secret := makeSecret("new-secret", "secretId", "app", "appUID", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
 		secretsManagerMock.On("Update", secret).Return(nil, errors.New("some error"))
 
 		// when
-		err := repository.Upsert("app", "new-secret", "secretId", map[string][]byte{
+		err := repository.Upsert("app", "appUID", "new-secret", "secretId", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
@@ -291,7 +291,7 @@ func TestRepository_Upsert(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "secretId", "app", map[string][]byte{
+		secret := makeSecret("new-secret", "secretId", "app", "appUID", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})
@@ -300,7 +300,7 @@ func TestRepository_Upsert(t *testing.T) {
 		secretsManagerMock.On("Create", secret).Return(secret, errors.New("some error"))
 
 		// when
-		err := repository.Upsert("app", "new-secret", "secretId", map[string][]byte{
+		err := repository.Upsert("app", "appUID", "new-secret", "secretId", map[string][]byte{
 			"testKey1": []byte("testValue1"),
 			"testKey2": []byte("testValue2"),
 		})

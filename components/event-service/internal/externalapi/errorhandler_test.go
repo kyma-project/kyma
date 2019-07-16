@@ -11,6 +11,8 @@ import (
 	"github.com/kyma-project/kyma/components/event-service/internal/httperrors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	v2 "github.com/kyma-project/kyma/components/event-service/internal/externalapi/v2"
 )
 
 func TestErrorHandler_ServeHTTP(t *testing.T) {
@@ -50,16 +52,16 @@ func Test_filterCEHeaders(t *testing.T) {
 	request := http.Request{
 		Header: headers,
 	}
-	result := filterCEHeaders(&request)
+	result := v2.FilterCEHeaders(&request)
 	assert.Len(t, result, 0)
 
 	headers["ce-test-header"] = []string{"test-value"}
-	result = filterCEHeaders(&request)
+	result = v2.FilterCEHeaders(&request)
 	assert.Len(t, result, 1)
 	assert.Equal(t, headers["ce-test-header"][0], "test-value")
 
 	headers["NO-ce-test-header"] = []string{"NO-test-value"}
-	result = filterCEHeaders(&request)
+	result = v2.FilterCEHeaders(&request)
 	assert.Len(t, result, 1)
 	assert.Equal(t, headers["ce-test-header"][0], "test-value")
 }

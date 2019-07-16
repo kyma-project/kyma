@@ -11,7 +11,7 @@ paths:
       summary: 'Returns health of a service'
       operationId: 'getHealth'
       tags:
-        - 'health'
+      - 'health'
       responses:
         '200':
           description: 'The service is in a good health'
@@ -195,9 +195,9 @@ components:
         documentation:
           $ref: '#/components/schemas/Documentation'
       required:
-        - provider
-        - name
-        - description
+      - provider
+      - name
+      - description
     ServiceUpdate:
       type: 'object'
       properties:
@@ -254,26 +254,18 @@ components:
         spec:
           type: 'object'
           description: 'OpenApi v2 swagger file: https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json'
-        headers:
-          type: 'object'
-          description: 'Additional headers to be injected during proxying requests'
-          additionalProperties:
-            type: 'array'
-            items:
-              type: 'string'
-        queryParameters:
-          type: 'object'
-          description: 'Additional query parameters to be injected during proxying requests'
-          additionalProperties:
-            type: 'array'
-            items: 
-              type: 'string'
         SpecificationUrl:
           type: 'string'
           format: 'uri'
         ApiType:
           type: 'string'
           description: 'API type, for example OData'
+        requestParameters:
+          $ref: '#/components/schemas/RequestParameters'
+        specificationCredentials:
+          $ref: '#/components/schemas/SpecificationCredentials'
+        specificationRequestParameters:
+          $ref: '#/components/schemas/RequestParameters'
       required:
       - targetUrl
     ApiUpdate:
@@ -304,24 +296,24 @@ components:
     Documentation:
       type: 'object'
       properties:
-        displayName: 
+        displayName:
           type: 'string'
-        description: 
+        description:
           type: 'string'
         type:
           type: 'string'
         tags:
           type: 'array'
-          items: 
+          items:
             type: 'string'
         docs:
           type: 'array'
           items:
             $ref: '#/components/schemas/Document'
       required:
-        - displayName
-        - description
-        - type
+      - displayName
+      - description
+      - type
     Document:
       type: 'object'
       properties:
@@ -332,9 +324,9 @@ components:
         source:
           type: 'string'
       required:
-        - title
-        - type
-        - source
+      - title
+      - type
+      - source
     ApiCredentials:
       type: 'object'
       properties:
@@ -344,20 +336,13 @@ components:
           $ref: '#/components/schemas/Basic'
         certificateGen:
           $ref: '#/components/schemas/CertificateGen'
-        headers:
-          type: 'object'
-          description: 'Additional headers to be injected during auth requests'
-          additionalProperties:
-            type: 'array'
-            items: 
-              type: 'string'
-        queryParameters:
-          type: 'object'
-          description: 'Additional query parameters to be injected during auth requests'
-          additionalProperties:
-            type: 'array'
-            items: 
-              type: 'string'
+    SpecificationCredentials:
+      type: 'object'
+      properties:
+        oauth:
+          $ref: '#/components/schemas/OAuth'
+        basic:
+          $ref: '#/components/schemas/Basic'
     ApiCredentialsUpdate:
       type: 'object'
       properties:
@@ -367,19 +352,22 @@ components:
           $ref: '#/components/schemas/Basic'
         certificateGen:
           $ref: '#/components/schemas/CertificateGenUpdate'
+    RequestParameters:
+      type: 'object'
+      properties:
         headers:
           type: 'object'
           description: 'Additional headers to be injected during auth requests'
           additionalProperties:
             type: 'array'
-            items: 
+            items:
               type: 'string'
         queryParameters:
           type: 'object'
           description: 'Additional query parameters to be injected during auth requests'
           additionalProperties:
             type: 'array'
-            items: 
+            items:
               type: 'string'
     OAuth:
       type: 'object'
@@ -392,9 +380,9 @@ components:
         clientSecret:
           type: 'string'
       required:
-        - url
-        - clientId
-        - clientSecret
+      - url
+      - clientId
+      - clientSecret
     Basic:
       type: 'object'
       properties:

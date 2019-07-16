@@ -1,0 +1,12 @@
+global:
+  images:
+    containerRegistry:
+      path: eu.gcr.io/kyma-project/incubator
+    runtimeAgent:
+      dir: pr/
+      version: "PR-127"
+
+deployment:
+  image:
+    pullPolicy: IfNotPresent
+

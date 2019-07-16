@@ -7,7 +7,7 @@ global:
       version: "PR-99"
     director:
       dir: pr/
-      version: "PR-100"
+      version: "PR-128"
     gateway:
       dir: pr/
       version: "PR-100"
@@ -17,15 +17,20 @@ global:
     tests:
       e2e:
         dir: pr/
-        version: "PR-99"
+        version: "PR-121"
 
+  isLocalEnv: false
+  
   director:
     port: 3000
   
   connector:
     port: 3000
 
+  gateway:
+    host: compass-gateway
+    
   istio:
     gateway:
-      name: kyma-gateway
-      namespace: kyma-system
+      name: compass-istio-gateway
+      namespace: compass-system

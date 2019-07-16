@@ -36,7 +36,7 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
-	bus.Init(options.sourceID, options.eventsTargetURL)
+	bus.Init(options.sourceID, options.eventsTargetURLV1, options.eventsTargetURLV2)
 
 	subscriptionsClient, namespacesClient, e := initK8sResourcesClients()
 

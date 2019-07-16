@@ -1,4 +1,4 @@
-package externalapi
+package v1
 
 import (
 	"net/http"
