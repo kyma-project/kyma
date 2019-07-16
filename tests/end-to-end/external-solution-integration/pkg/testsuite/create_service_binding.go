@@ -1,27 +1,32 @@
 package testsuite
 
 import (
-	"fmt"
 	serviceCatalogApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // CreateServiceBinding is a step which creates new ServiceBinding
 type CreateServiceBinding struct {
+	testkit.K8sHelper
 	serviceBindings serviceCatalogClient.ServiceBindingInterface
-	endpoint        string
+	state           CreateServiceBindingState
+}
+
+type CreateServiceBindingState interface {
+	GetServiceInstanceName() string
 }
 
 var _ step.Step = &CreateServiceBinding{}
 
 // NewCreateServiceBinding returns new CreateServiceBinding
-func NewCreateServiceBinding(serviceBindings serviceCatalogClient.ServiceBindingInterface, namespace string) *CreateServiceBinding {
+func NewCreateServiceBinding(serviceBindings serviceCatalogClient.ServiceBindingInterface, state CreateServiceBindingState) *CreateServiceBinding {
 	return &CreateServiceBinding{
 		serviceBindings: serviceBindings,
-		endpoint:        fmt.Sprintf(consts.LambdaEndpointPattern, namespace),
+		state:           state,
 	}
 }
 
@@ -35,18 +40,10 @@ func (s *CreateServiceBinding) Run() error {
 	serviceBinding := &serviceCatalogApi.ServiceBinding{
 		ObjectMeta: metav1.ObjectMeta{Name: consts.ServiceBindingName},
 		Spec: serviceCatalogApi.ServiceBindingSpec{
-			ExternalID: consts.ServiceBindingID,
 			InstanceRef: serviceCatalogApi.LocalObjectReference{
-				Name: consts.ServiceInstanceName,
+				Name: s.state.GetServiceInstanceName(),
 			},
 			SecretName: consts.ServiceBindingSecret,
-			UserInfo: &serviceCatalogApi.UserInfo{
-				Groups: []string{
-					"system:authenticated",
-				},
-				UID:      "",
-				Username: "adimn@kyma.cx",
-			},
 		},
 	}
 
@@ -56,5 +53,12 @@ func (s *CreateServiceBinding) Run() error {
 
 // Cleanup removes all resources that may possibly created by the step
 func (s *CreateServiceBinding) Cleanup() error {
-	return s.serviceBindings.Delete(consts.ServiceBindingName, &metav1.DeleteOptions{})
+	err := s.serviceBindings.Delete(consts.ServiceBindingName, &metav1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+
+	return s.AwaitResourceDeleted(func() (interface{}, error) {
+		return s.serviceBindings.Get(consts.ServiceBindingName, metav1.GetOptions{})
+	})
 }

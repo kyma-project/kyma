@@ -33,8 +33,6 @@ func (s *CreateSubscription) Run() error {
 	subSpec := eventingApi.SubscriptionSpec{
 		Endpoint:                      s.endpoint,
 		IncludeSubscriptionNameHeader: true,
-		MaxInflight:                   400,
-		PushRequestTimeoutMS:          2000,
 		EventType:                     consts.EventType,
 		EventTypeVersion:              consts.EventVersion,
 		SourceID:                      consts.AppName,
@@ -68,9 +66,9 @@ func (s *CreateSubscription) isSubscriptionReady() error {
 	}
 
 	for _, condition := range subscription.Status.Conditions {
-		if condition.Type == eventingApi.Ready && condition.Status != eventingApi.ConditionTrue {
-			return errors.New("subscription not ready")
+		if condition.Status != eventingApi.ConditionTrue {
+			return errors.Errorf("subscription condition not true: %s", condition.Type)
 		}
 	}
-	return err
+	return nil
 }

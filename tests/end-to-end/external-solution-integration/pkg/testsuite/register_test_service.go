@@ -13,8 +13,8 @@ type RegisterTestService struct {
 }
 
 type RegisterTestServiceState interface {
-	SetServiceID(serviceID string)
-	GetServiceID() string
+	SetServiceClassID(serviceID string)
+	GetServiceClassID() string
 	GetRegistryClient() *testkit.RegistryClient
 }
 
@@ -40,7 +40,7 @@ func (s *RegisterTestService) Run() error {
 		return err
 	}
 
-	s.state.SetServiceID(id)
+	s.state.SetServiceClassID(id)
 	return nil
 }
 
@@ -61,7 +61,7 @@ func (s *RegisterTestService) prepareService(targetURL string) *testkit.ServiceD
 }
 
 func (s *RegisterTestService) Cleanup() error {
-	if serviceID := s.state.GetServiceID(); serviceID != "" {
+	if serviceID := s.state.GetServiceClassID(); serviceID != "" {
 		return s.state.GetRegistryClient().DeleteService(serviceID)
 	}
 	return nil

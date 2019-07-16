@@ -7,14 +7,15 @@ import (
 
 // Execute behavior is based on chose cleanup method. It is intended to be used with AddFlags
 func (r *Runner) Execute(steps []Step) error {
+	r.log.Infof("Cleanup mode: %s", r.cleanup)
 	var err error
 	switch r.cleanup {
 	case CleanupMode_No:
 		err = r.Run(steps, true)
-	case CleanupMode_Yes:
-		err = r.Run(steps, false)
 	case CleanupMode_Only:
 		r.Cleanup(steps)
+	default:
+		err = r.Run(steps, false)
 	}
 	return err
 }
@@ -29,11 +30,11 @@ type CleanupMode string
 
 const (
 	// Don't execute cleanup
-	CleanupMode_No   CleanupMode = "no"
+	CleanupMode_No CleanupMode = "no"
 	// Don't run steps, only cleanup
 	CleanupMode_Only CleanupMode = "only"
 	// Execute both steps and cleanup
-	CleanupMode_Yes  CleanupMode = "yes"
+	CleanupMode_Yes CleanupMode = "yes"
 )
 
 // String implements pflag.Value.String
@@ -43,18 +44,12 @@ func (m CleanupMode) String() string {
 
 // Set implements pflag.Value.Set
 func (m *CleanupMode) Set(v string) error {
-	var result CleanupMode
 	switch CleanupMode(v) {
-	case CleanupMode_No:
-		result = CleanupMode_No
-	case CleanupMode_Yes:
-		result = CleanupMode_Yes
-	case CleanupMode_Only:
-		result = CleanupMode_Only
+	case CleanupMode_No, CleanupMode_Yes, CleanupMode_Only:
 	default:
 		return errors.Errorf("invalid cleanup value: %s", v)
 	}
-	m = &result
+	*m = CleanupMode(v)
 	return nil
 }
 

@@ -2,29 +2,36 @@ package testsuite
 
 import (
 	"github.com/avast/retry-go"
+	"github.com/hashicorp/go-multierror"
 	serviceCatalogApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/pkg/errors"
-	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"time"
 )
 
 type CreateServiceInstance struct {
+	testkit.K8sHelper
 	serviceInstances serviceCatalogClient.ServiceInstanceInterface
 	state            CreateServiceInstanceState
+	runID            string
 }
 
 type CreateServiceInstanceState interface {
-	GetServiceID() string
+	GetServiceClassID() string
+	SetServiceInstanceName(string)
+	GetServiceInstanceName() string
 }
 
 var _ step.Step = &CreateServiceInstance{}
 
-func NewCreateServiceInstance(serviceInstances serviceCatalogClient.ServiceInstanceInterface, state CreateServiceInstanceState) *CreateServiceInstance {
+func NewCreateServiceInstance(runID string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, state CreateServiceInstanceState) *CreateServiceInstance {
 	return &CreateServiceInstance{
+		runID:            runID,
 		serviceInstances: serviceInstances,
 		state:            state,
 	}
@@ -35,41 +42,31 @@ func (s *CreateServiceInstance) Name() string {
 }
 
 func (s *CreateServiceInstance) Run() error {
-	siName := consts.ServiceInstanceName
-	siID := consts.ServiceInstanceID
-	_, err := s.serviceInstances.Create(&serviceCatalogApi.ServiceInstance{
+	si, err := s.serviceInstances.Create(&serviceCatalogApi.ServiceInstance{
 		ObjectMeta: v1.ObjectMeta{
-			Name:       siName,
-			Finalizers: []string{"kubernetes-incubator/service-catalog"},
+			GenerateName: consts.ServiceInstanceName,
+			Finalizers:   []string{"kubernetes-incubator/service-catalog"},
+			Labels: map[string]string{"runID": s.runID},
 		},
 		Spec: serviceCatalogApi.ServiceInstanceSpec{
-			ExternalID: siID,
 			Parameters: &runtime.RawExtension{},
 			PlanReference: serviceCatalogApi.PlanReference{
-				ServiceClassName: s.state.GetServiceID(),
-				ServicePlanName:  s.state.GetServiceID() + "-plan",
+				ServiceClassName: s.state.GetServiceClassID(),
+				ServicePlanName:  s.state.GetServiceClassID() + "-plan",
 			},
 			UpdateRequests: 0,
-			UserInfo: &serviceCatalogApi.UserInfo{
-				Groups: []string{
-					"system:serviceaccounts",
-					"system:serviceaccounts:kyma-system",
-					"system:authenticated",
-				},
-				UID:      "",
-				Username: "system:serviceaccount:kyma-system:core-console-backend-service",
-			},
 		},
 	})
 	if err != nil {
 		return err
 	}
+	s.state.SetServiceInstanceName(si.Name)
 
 	return retry.Do(s.isServiceInstanceCreated)
 }
 
 func (s *CreateServiceInstance) isServiceInstanceCreated() error {
-	svcInstance, _ := s.serviceInstances.Get(consts.ServiceInstanceName, v1.GetOptions{})
+	svcInstance, _ := s.serviceInstances.Get(s.state.GetServiceInstanceName(), v1.GetOptions{})
 
 	if svcInstance.Status.ProvisionStatus != "Provisioned" {
 		return errors.Errorf("unexpected provision status: %s", svcInstance.Status.ProvisionStatus)
@@ -78,26 +75,23 @@ func (s *CreateServiceInstance) isServiceInstanceCreated() error {
 }
 
 func (s *CreateServiceInstance) Cleanup() error {
-	siName := consts.ServiceInstanceName
-
-	err := s.serviceInstances.Delete(siName, &v1.DeleteOptions{})
+	instances, err := s.serviceInstances.List(v1.ListOptions{LabelSelector: "runID="+s.runID})
 	if err != nil {
 		return err
 	}
 
-	return retry.Do(s.isServiceInstanceDeleted)
+	var errMulti *multierror.Error
+	for _, instance := range instances.Items {
+		errDelete := s.serviceInstances.Delete(instance.Name, &v1.DeleteOptions{})
+		errWait := s.awaitServiceInstanceDeleted(instance.Name)
+		errMulti = multierror.Append(err, errDelete, errWait)
+	}
+
+	return errMulti.ErrorOrNil()
 }
 
-func (s *CreateServiceInstance) isServiceInstanceDeleted() error {
-	_, err := s.serviceInstances.Get(consts.ServiceInstanceName, v1.GetOptions{})
-
-	if err == nil {
-		return errors.New("service instance still exists")
-	}
-
-	if !k8s_errors.IsNotFound(err) {
-		return err
-	}
-
-	return nil
+func (s *CreateServiceInstance) awaitServiceInstanceDeleted(name string) error {
+	return s.AwaitResourceDeleted(func() (interface{}, error) {
+		return s.serviceInstances.Get(name, v1.GetOptions{})
+	}, retry.Delay(500 * time.Millisecond))
 }

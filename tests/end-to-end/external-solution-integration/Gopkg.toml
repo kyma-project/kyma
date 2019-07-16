@@ -8,10 +8,6 @@ required = [
   unused-packages = true
 
 [[constraint]]
-  name = "github.com/kyma-project/kyma"
-  revision = "9f6c537ffd0f042e88296201fb1d0c4c6d3f77b3"
-
-[[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
   version = "v0.1.41"
 

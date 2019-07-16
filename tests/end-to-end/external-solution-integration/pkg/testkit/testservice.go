@@ -8,6 +8,7 @@ import (
 	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/resourceskit"
 	"github.com/pkg/errors"
+	"io/ioutil"
 	model "k8s.io/api/apps/v1"
 	core "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,7 +24,7 @@ const (
 	healthEndpointFormat       = "http://%s.%s:%v/health"
 	healthEndpointFormatLocal  = "https://counter-service.%s/health"
 	counterEndpointFormat      = "http://%s.%s:%v/counter"
-	counterEndpointFormatLocal = "https://counter-service.%s/counter"
+	endpointFormatLocal = "https://counter-service.%s"
 )
 
 type TestService struct {
@@ -57,13 +58,22 @@ func (ts *TestService) CreateTestService() error {
 func (ts *TestService) checkValue() (int, error) {
 
 	url := ts.GetTestServiceURL()
-	resp, err := ts.HttpClient.Get(url)
+	resp, err := ts.HttpClient.Get(url + "/counter")
 
 	if err != nil {
 		return 0, err
 	}
-
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return 0, err
+		}
+
+		return 0, errors.Errorf("error response: %s", body)
+	}
+
 
 	var response struct {
 		Counter int `json:"counter"`
@@ -114,7 +124,7 @@ func (ts *TestService) DeleteTestService() error {
 }
 
 func (ts *TestService) GetTestServiceURL() string {
-	return fmt.Sprintf(counterEndpointFormatLocal, ts.domain)
+	return fmt.Sprintf(endpointFormatLocal, ts.domain)
 }
 
 func (ts *TestService) getHealthEndpointURL() string {

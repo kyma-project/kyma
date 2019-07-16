@@ -1,6 +1,7 @@
 package step
 
 import (
+	"github.com/hashicorp/errwrap"
 	"github.com/sirupsen/logrus"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 )
@@ -25,10 +26,11 @@ type Runner struct {
 func NewRunner() *Runner {
 	log := logrus.New()
 	log.SetReportCaller(false)
-	return &Runner{log: log, cleanup: CleanupMode_Yes}
+	return &Runner{log: log}
 }
 
-// Run executes steps in specified order. If skipCleanup is false it also executes Step.Cleanup in reverse order starting from last executed step
+// Run executes steps in specified order. If skipCleanup is false it also executes Step.Cleanup in reverse order
+// starting from last executed step
 func (r *Runner) Run(steps []Step, skipCleanup bool) error {
 	var startedStep int
 	var step Step
@@ -65,9 +67,19 @@ func (r *Runner) runStep(step Step) (err error) {
 func (r *Runner) Cleanup(steps []Step) {
 	for i := len(steps) - 1; i >= 0; i-- {
 		r.log.Infof("Cleanup: '%s'", steps[i].Name())
-		if err := steps[i].Cleanup(); err != nil && !k8s_errors.IsNotFound(err) {
+		if err := steps[i].Cleanup(); err != nil && !isNotFound(err) {
 			r.log.Warnf("Error during '%s' cleanup: %s", steps[i].Name(), err)
 		}
 	}
+}
+
+func isNotFound(err error) bool {
+	isNotFound := true
+	errwrap.Walk(err, func(e error) {
+		if isNotFound && !k8s_errors.IsNotFound(e) {
+			isNotFound = false
+		}
+	})
+	return isNotFound
 }
 

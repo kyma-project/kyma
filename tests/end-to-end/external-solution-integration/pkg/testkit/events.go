@@ -4,16 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/kyma-project/kyma/common/resilient"
 	"github.com/pkg/errors"
 	"net/http"
 )
 
 type EventSender struct {
-	httpClient *http.Client
+	httpClient resilient.HttpClient
 	domain     string
 }
 
-func NewEventSender(httpClient *http.Client, domain string) *EventSender {
+func NewEventSender(httpClient resilient.HttpClient, domain string) *EventSender {
 	return &EventSender{
 		httpClient: httpClient,
 		domain:     domain,

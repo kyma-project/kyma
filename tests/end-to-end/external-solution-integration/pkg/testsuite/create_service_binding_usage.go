@@ -18,12 +18,13 @@ import (
 type CreateServiceBindingUsage struct {
 	*testkit.LambdaHelper
 	testkit.PodHelper
+	testkit.K8sHelper
 	serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface
 	state                CreateServiceBindingUsageState
 }
 
 type CreateServiceBindingUsageState interface {
-	GetServiceID() string
+	GetServiceClassID() string
 }
 
 var _ step.Step = &CreateServiceBindingUsage{}
@@ -77,7 +78,7 @@ func (s *CreateServiceBindingUsage) Run() error {
 }
 
 func (s *CreateServiceBindingUsage) isLambdaBound() error {
-	sbuLabel := fmt.Sprintf("app-%s-%s", consts.AppName, s.state.GetServiceID())
+	sbuLabel := fmt.Sprintf("app-%s-%s", consts.AppName, s.state.GetServiceClassID())
 	pods, err := s.ListLambdaPods()
 	if err != nil {
 		return err
@@ -101,5 +102,12 @@ func (s *CreateServiceBindingUsage) isLambdaBound() error {
 }
 
 func (s *CreateServiceBindingUsage) Cleanup() error {
-	return s.serviceBindingUsages.Delete(consts.ServiceBindingUsageName, &metav1.DeleteOptions{})
+	err := s.serviceBindingUsages.Delete(consts.ServiceBindingUsageName, &metav1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+
+	return s.AwaitResourceDeleted(func() (interface{}, error) {
+		return s.serviceBindingUsages.Get(consts.ServiceBindingName, metav1.GetOptions{})
+	})
 }

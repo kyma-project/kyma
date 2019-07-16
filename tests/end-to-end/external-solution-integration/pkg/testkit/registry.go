@@ -4,15 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/kyma-project/kyma/common/resilient"
+	"github.com/pkg/errors"
 	"net/http"
 )
 
 type RegistryClient struct {
 	url        string
-	httpClient *http.Client
+	httpClient resilient.HttpClient
 }
 
-func NewRegistryClient(url string, httpClient *http.Client) *RegistryClient {
+func NewRegistryClient(url string, httpClient resilient.HttpClient) *RegistryClient {
 	return &RegistryClient{
 		url:        url,
 		httpClient: httpClient,
@@ -22,32 +24,32 @@ func NewRegistryClient(url string, httpClient *http.Client) *RegistryClient {
 func (rc *RegistryClient) RegisterService(service *ServiceDetails) (string, error) {
 	body, err := json.Marshal(service)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "while marshaling service details")
 	}
 
 	request, err := http.NewRequest(http.MethodPost, rc.url, bytes.NewReader(body))
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "while creating register request")
 	}
 
 	request.Header.Add("Content-Type", "application/json")
 
 	response, err := rc.httpClient.Do(request)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "while posting service details")
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		err := parseErrorResponse(response)
-		return "", err
+		return "", errors.Wrap(err, "error response")
 	}
 
 	registerServiceResponse := &RegisterServiceResponse{}
 
 	err = json.NewDecoder(response.Body).Decode(registerServiceResponse)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "while decoding response body")
 	}
 
 	return registerServiceResponse.ID, nil

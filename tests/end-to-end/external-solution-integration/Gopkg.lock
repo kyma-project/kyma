@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:80004fcc5cf64e591486b3e11b406f1e0d17bf85d475d64203c8494f5da4fcd1"
+  name = "cloud.google.com/go"
+  packages = ["compute/metadata"]
+  pruneopts = "UT"
+  revision = "cf81fad90a1a1de334c4fc27e23eb9a4224b627a"
+  version = "v0.41.0"
+
+[[projects]]
   digest = "1:7c51a593e7593dbbaec61e209bdd04095995362834e4399aaa5a9227c25bb403"
   name = "github.com/avast/retry-go"
   packages = ["."]
@@ -189,10 +197,11 @@
   version = "v0.1.43"
 
 [[projects]]
-  digest = "1:4a6baad454cd10fcaff621a3efbf4e17148f295a6d66a92cda86e0043d9fcfb0"
+  digest = "1:b3c71e573bd3ced343fe049987be5c89f31c87c63df17b013b889cd266ab9ece"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/ingressgateway",
+    "common/resilient",
     "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
     "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
@@ -223,7 +232,8 @@
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "9f6c537ffd0f042e88296201fb1d0c4c6d3f77b3"
+  revision = "2a490d54e3f07391f8563321e2b2f7c3dc0a28b7"
+  version = "1.3.0"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
@@ -314,11 +324,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9927d6aceb89d188e21485f42a7a254e67e6fdcf4260aba375fe18e3c300dfb4"
+  digest = "1:645cb780e4f3177111b40588f0a7f5950efcfb473e7ff41d8d81b2ba5eaa6ed5"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
+    "google",
     "internal",
+    "jws",
+    "jwt",
   ]
   pruneopts = "UT"
   revision = "9f3314589c9a9136388751d9adae6b0ed400978a"
@@ -393,13 +406,16 @@
   revision = "607ca053a1376e059c47e49108c4656de7934535"
 
 [[projects]]
-  digest = "1:6eb6e3b6d9fffb62958cf7f7d88dbbe1dd6839436b0802e194c590667a40412a"
+  digest = "1:04f2ff15fc59e1ddaf9900ad0e19e5b19586b31f9dafd4d592b617642b239d8f"
   name = "google.golang.org/appengine"
   packages = [
+    ".",
     "internal",
+    "internal/app_identity",
     "internal/base",
     "internal/datastore",
     "internal/log",
+    "internal/modules",
     "internal/remote_api",
     "internal/urlfetch",
     "urlfetch",
@@ -522,7 +538,7 @@
   revision = "1d4f3e836fd24e95c1457ce8d096f5ab5107054a"
 
 [[projects]]
-  digest = "1:4169347fd1bf84132a35a441c3e38fff7ea54d24a4119277f4254123891a8471"
+  digest = "1:ad1a7f2e04a42fd34380740aec978a29f2a05b230ad4c2870a66c26293b56afc"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -564,6 +580,7 @@
     "pkg/apis/clientauthentication/v1beta1",
     "pkg/version",
     "plugin/pkg/client/auth/exec",
+    "plugin/pkg/client/auth/gcp",
     "rest",
     "rest/watch",
     "restmapper",
@@ -601,6 +618,7 @@
   input-imports = [
     "github.com/avast/retry-go",
     "github.com/golang/lint/golint",
+    "github.com/hashicorp/errwrap",
     "github.com/hashicorp/go-multierror",
     "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
@@ -609,6 +627,7 @@
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/kyma-project/kyma/common/ingressgateway",
+    "github.com/kyma-project/kyma/common/resilient",
     "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
     "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
     "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
@@ -642,6 +661,7 @@
     "k8s.io/cli-runtime/pkg/genericclioptions",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/typed/core/v1",
+    "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
   ]
   solver-name = "gps-cdcl"
