@@ -80,6 +80,12 @@ mixer:
         # We have experimentally found that these values work well.
         cpu: 2000m
         memory: 4G
+
+  templates:
+    useTemplateCRDs: true
+
+  adapters:
+    useAdapterCRDs: true
 #
 # pilot configuration
 #
