@@ -2,7 +2,7 @@
 title: Back up a Kyma cluster
 type: Details
 ---
-Kyma provides two validated sample backup specification file:
+Kyma provides a validated sample backup specification file:
 
 - [Backup.yaml](./assets/backup.yaml)
 
