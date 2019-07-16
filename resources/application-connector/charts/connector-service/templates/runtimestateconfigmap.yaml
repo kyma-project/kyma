@@ -1,15 +1,15 @@
 {{- if .Values.deployment.runtimeStateReport.enabled }}
-  apiVersion: v1
-   kind: ConfigMap
-   metadata:
-   name: {{ .Values.deployment.runtimeStateReport.runtimeStateConfigMapName }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.deployment.runtimeStateReport.runtimeStateConfigMapName }}
   namespace: {{ .Values.global.namespace }}
-    labels:
-        app: {{ template "name" . }}
-          chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-          release: {{ .Release.Name }}
-          heritage: {{ .Release.Service }}
-  data:
-      config.json: |
-        {{ .Values.deployment.runtimeStateReport.runtimeStateConfig }}
-  {{- end }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  config.json: |
+    {{ .Values.deployment.runtimeStateReport.runtimeStateConfig }}
+{{- end }}
