@@ -35,6 +35,7 @@ type FunctionalMiddlewares struct {
 	RuntimeURLsMiddleware          mux.MiddlewareFunc
 	ContextFromSubjectMiddleware   mux.MiddlewareFunc
 	CheckForRevokedCertMiddleware  mux.MiddlewareFunc
+	RuntimeHealthCheckMiddleware   mux.MiddlewareFunc
 }
 
 type SignatureHandler interface {
@@ -162,7 +163,8 @@ func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
 	mngmtRuntimeRouter.HandleFunc("/info", runtimeManagementInfoHandler.GetManagementInfo).Methods(http.MethodGet)
 	httphelpers.WithMiddlewares(
 		mngmtRuntimeRouter,
-		hb.funcMiddlwares.ContextFromSubjectMiddleware)
+		hb.funcMiddlwares.ContextFromSubjectMiddleware,
+		hb.funcMiddlwares.RuntimeHealthCheckMiddleware)
 
 }
 

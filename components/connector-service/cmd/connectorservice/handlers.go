@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/middlewares/lookup"
+	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/middlewares/runtimeregistry"
 	"github.com/kyma-project/kyma/components/connector-service/internal/graphql"
 	"net/http"
 	"time"
@@ -77,6 +78,8 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 
 	lookupService := lookup.NewGraphQLLookupService(graphQLService, opts.lookupConfigMapPath)
 
+	runtimeRegService := runtimeregistry.NewRuntimeRegistryService(graphQLService, opts.runtimeRegistryConfigMapPath)
+
 	headerParser := certificates.NewHeaderParser(env.country, env.locality, env.province, env.organization, env.organizationalUnit, opts.central)
 
 	appCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.appCertificateValidityTime), opts.caSecretName, opts.rootCACertificateSecretName)
@@ -86,6 +89,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayBaseURL, lookupEnabled, clientcontext.ExtractClientContext, lookupService)
 	contextFromSubjMiddleware := clientcontextmiddlewares.NewContextFromSubjMiddleware(headerParser, opts.central)
 	checkForRevokedCertMiddleware := certificateMiddlewares.NewRevocationCheckMiddleware(revocationListRepository, headerParser)
+	runtimeHealthCheckMiddleware := middlewares.NewRuntimeHealthCheckMiddleware(contextExtractor.CreateClusterClientContextService, runtimeRegService, opts.runtimeRegistryEnabled)
 
 	functionalMiddlewares := externalapi.FunctionalMiddlewares{
 		AppTokenResolverMiddleware:     appTokenResolverMiddleware.Middleware,
@@ -93,6 +97,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 		RuntimeURLsMiddleware:          runtimeURLsMiddleware.Middleware,
 		ContextFromSubjectMiddleware:   contextFromSubjMiddleware.Middleware,
 		CheckForRevokedCertMiddleware:  checkForRevokedCertMiddleware.Middleware,
+		RuntimeHealthCheckMiddleware:   runtimeHealthCheckMiddleware.Middleware,
 	}
 
 	handlerBuilder := externalapi.NewHandlerBuilder(functionalMiddlewares, globalMiddlewares)

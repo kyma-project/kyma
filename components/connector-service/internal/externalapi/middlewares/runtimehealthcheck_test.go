@@ -24,7 +24,7 @@ func TestNewRuntimeHealthCheckMiddlewaret(t *testing.T) {
 		runtimeRegistryService := &mocks.RuntimeRegistryService{}
 		runtimeRegistryService.On("ReportState", mock.Anything).Return(nil)
 
-		runtimeHealthCheckMiddleware := NewRuntimeHealthCheckMiddleware(contextExtractor, runtimeRegistryService)
+		runtimeHealthCheckMiddleware := NewRuntimeHealthCheckMiddleware(contextExtractor, runtimeRegistryService, true)
 
 		clusterContext := clientcontext.ClientContext{
 			Group:  "testGroup",
@@ -56,7 +56,7 @@ func TestNewRuntimeHealthCheckMiddlewaret(t *testing.T) {
 		runtimeRegistryService := &mocks.RuntimeRegistryService{}
 		runtimeRegistryService.On("ReportState", mock.Anything).Return(nil)
 
-		runtimeHealthCheckMiddleware := NewRuntimeHealthCheckMiddleware(contextExtractor, runtimeRegistryService)
+		runtimeHealthCheckMiddleware := NewRuntimeHealthCheckMiddleware(contextExtractor, runtimeRegistryService, true)
 
 		clusterContext := clientcontext.ClientContext{
 			Group:  "testGroup",
