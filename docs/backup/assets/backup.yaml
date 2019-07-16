@@ -1,0 +1,8 @@
+includedNamespaces:
+- '*'
+includedResources:
+- '*'
+includeClusterResources: true
+storageLocation: default
+volumeSnapshotLocations:
+- default
