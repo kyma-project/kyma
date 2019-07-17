@@ -99,14 +99,6 @@ func TestKnativeBuild_Acceptance(t *testing.T) {
 	}
 }
 
-func MustGetenv(t *testing.T, name string) string {
-	env := os.Getenv(name)
-	if env == "" {
-		t.Fatalf("Missing '%s' variable", name)
-	}
-	return env
-}
-
 func loadKubeConfigOrDie() *rest.Config {
 	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
 		cfg, err := rest.InClusterConfig()
