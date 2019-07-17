@@ -1,9 +1,12 @@
 package main
 
 import (
+	"cloud.google.com/go/profiler"
 	"fmt"
 	"log"
 	"net/http"
+	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -14,13 +17,52 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
+	_ "net/http/pprof"
+
+	"runtime/debug"
+	"runtime/pprof"
 )
 
 const (
 	shutdownTimeout = time.Minute
 )
 
+// get the count of number of go routines in the system.
+func countGoRoutines() int {
+	return runtime.NumGoroutine()
+}
+
+func getStackTraceHandler(w http.ResponseWriter, r *http.Request) {
+	stack := debug.Stack()
+	w.Write(stack)
+	pprof.Lookup("goroutine").WriteTo(w, 2)
+}
+
+func getGoroutinesCountHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the count of number of go routines running.
+	count := countGoRoutines()
+	w.Write([]byte(strconv.Itoa(count)))
+}
+
 func main() {
+
+	// Profiler initialization, best done as early as possible.
+	if err := profiler.Start(profiler.Config{
+		Service:        "kyma-event-bus-publish",
+		ServiceVersion: "0.1.18",
+		// ProjectID must be set if not running on GCP.
+		// ProjectID: "my-project",
+	}); err != nil {
+		log.Fatalf("Couldn't start profiler")
+	}
+
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
+
+	http.HandleFunc("/_count", getGoroutinesCountHandler)
+	http.HandleFunc("/_stack", getStackTraceHandler)
+
 	// read application options from the cli args
 	options := opts.ParseFlags()
 
