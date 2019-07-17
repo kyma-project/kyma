@@ -17,7 +17,7 @@ test(){
     local retry=$1
 
     set +e
-    OUT=$(kubectl exec "${POD_NAME}" cat /etc/os-release 2>&1)
+    OUT=$(kubectl exec "${POD_NAME}" -- /bin/bash -c 'sleep 10 && cat /etc/os-release' 2>&1)
     STATUS=$?
     set -e
 
