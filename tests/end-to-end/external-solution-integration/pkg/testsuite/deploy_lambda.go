@@ -73,7 +73,7 @@ func (s *DeployLambda) Run() error {
 		return err
 	}
 
-	err = retry.Do(s.isLambdaReady, retry.Delay(200*time.Millisecond))
+	err = retry.Do(s.isLambdaReady, retry.Delay(500*time.Millisecond))
 	if err != nil {
 		return errors.Wrap(err, "lambda function not ready")
 	}
