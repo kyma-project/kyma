@@ -13,6 +13,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
+	coreClient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"net/http"
 )
@@ -37,22 +38,24 @@ func (s *SendEventAndCheckCounter) AddFlags(set *pflag.FlagSet) {
 }
 
 func (s *SendEventAndCheckCounter) Steps(config *rest.Config) ([]step.Step, error) {
-	k8sResourceClient, err := resourceskit.NewK8sResourcesClient(config, s.testNamespace)
-	if err != nil {
-		return nil, err
-	}
-
 	ingressHTTPClient, err := ingressgateway.FromEnv().Client()
 	if err != nil {
 		return nil, err
 	}
 
+	coreClientset := coreClient.NewForConfigOrDie(config)
 	gatewayClientset := gatewayClient.NewForConfigOrDie(config)
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
 	tokenRequestClient := resourceskit.NewTokenRequestClient(connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testNamespace))
 	connector := testkit.NewConnectorClient(tokenRequestClient, true, log.New())
-	testService := testkit.NewTestService(k8sResourceClient, ingressHTTPClient, gatewayClientset.GatewayV1alpha2(), s.domain, s.testNamespace)
-
+	testService := testkit.NewTestService(
+		ingressHTTPClient,
+		coreClientset.AppsV1().Deployments(s.testNamespace),
+		coreClientset.CoreV1().Services(s.testNamespace),
+		gatewayClientset.GatewayV1alpha2().Apis(s.testNamespace),
+		s.domain,
+		s.testNamespace,
+	)
 	state := &sendEventAndCheckCounterState{domain: s.domain}
 
 	return []step.Step{
