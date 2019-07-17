@@ -30,6 +30,7 @@ cp -R ./cmd/event-bus-publish-knative/httpserver  ./cmd/event-bus-publish-knativ
 cp -R ./cmd/event-bus-publish-knative/publisher   ./cmd/event-bus-publish-knative/docker/image/
 cp -R ./cmd/event-bus-publish-knative/validators  ./cmd/event-bus-publish-knative/docker/image/
 cp -R ./cmd/event-bus-publish-knative/metrics     ./cmd/event-bus-publish-knative/docker/image/
+cp -R ./cmd/event-bus-publish-knative/util        ./cmd/event-bus-publish-knative/docker/image/
 cp    ./cmd/event-bus-publish-knative/Dockerfile  ./cmd/event-bus-publish-knative/docker/image/
 
 tagName="${NAME}:${VERSION}"

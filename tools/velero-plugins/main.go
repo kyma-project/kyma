@@ -1,15 +1,15 @@
 package main
 
 import (
-	veleroplugin "github.com/heptio/velero/pkg/plugin"
+	veleroplugin "github.com/heptio/velero/pkg/plugin/framework"
 	"github.com/kyma-project/kyma/tools/velero-plugins/internal/plugins"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	veleroplugin.NewServer(veleroplugin.NewLogger()).
-		RegisterRestoreItemAction("si-restore-plugin", newRemoveServiceInstanceFields).
-		RegisterRestoreItemAction("or-restore-plugin", newSetOwnerReference).
+	veleroplugin.NewServer().
+		RegisterRestoreItemAction("kyma-project.io/si-restore-plugin", newRemoveServiceInstanceFields).
+		RegisterRestoreItemAction("kyma-project.io/or-restore-plugin", newSetOwnerReference).
 		Serve()
 }
 

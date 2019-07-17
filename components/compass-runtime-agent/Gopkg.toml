@@ -1,0 +1,16 @@
+required = [
+    "golang.org/x/tools/cmd/goimports",
+    "github.com/kisielk/errcheck",
+]
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "1.0.5"
+
+[[constraint]]
+  name = "github.com/kisielk/errcheck"
+  revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
+
+[prune]
+  go-tests = true
+  unused-packages = true

@@ -2,6 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+
+	"github.com/kyma-project/kyma/components/event-bus/api/publish/v1"
+	publishv2 "github.com/kyma-project/kyma/components/event-bus/api/publish/v2"
+
 	"log"
 	"net/http"
 	"strings"
@@ -9,6 +13,7 @@ import (
 	"github.com/gofrs/uuid"
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/publisher"
+	constants "github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/validators"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
@@ -37,17 +42,29 @@ func WithRequestSizeLimiting(next http.HandlerFunc, limit int64) http.HandlerFun
 }
 
 // KnativePublishHandler returns an http.HandlerFunc instance to handle publish requests
-func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher,
+func KnativePublishHandler(version string, knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher,
 	tracer *trace.Tracer, opts *opts.Options) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// init the trace span and context
 		traceSpan, traceContext := initTrace(r, tracer)
 		defer trace.FinishSpan(traceSpan)
 
-		// handle the knativeLib publish request
-		message, channelName, namespace, err, status := handleKnativePublishRequest(w, r, knativeLib, knativePublisher,
-			traceContext, opts)
+		var message *Message
+		var channelName *string
+		var namespace *string
+		var err *api.Error
+		var status string
 
+		switch version {
+		case constants.EventAPIV1:
+			// handle the knativeLib publish request
+			message, channelName, namespace, err, status = handleKnativePublishRequestV1(w, r, knativeLib,
+				knativePublisher, traceContext, opts)
+		case constants.EventAPIV2:
+			// handle the knativeLib publish request
+			message, channelName, namespace, err, status = handleKnativePublishRequestV2(w, r, knativeLib, knativePublisher,
+				traceContext, opts)
+		}
 		// check if the publish request was successful
 		if err != nil {
 			// add an error span for the failure
@@ -87,11 +104,11 @@ func filterCEHeaders(req *http.Request) map[string][]string {
 	return headers
 }
 
-func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knativeLib *knative.KnativeLib,
+func handleKnativePublishRequestV1(w http.ResponseWriter, r *http.Request, knativeLib *knative.KnativeLib,
 	knativePublisher *publisher.KnativePublisher, context *api.TraceContext, opts *opts.Options) (*Message,
 	*string, *string, *api.Error, string) {
 	// validate the http request
-	publishRequest, err := validators.ValidateRequest(r)
+	publishRequest, err := validators.ValidateRequestV1(r)
 	if err != nil {
 		log.Printf("validate request failed: %v", err)
 		_ = sendJSONError(w, err)
@@ -107,7 +124,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 	}
 
 	// validate the publish request
-	if err = api.ValidatePublish(publishRequest, opts.EventOptions); err != nil {
+	if err = v1.ValidatePublish(publishRequest, opts.EventOptions); err != nil {
 		log.Printf("validate publish failed: %v", err)
 		_ = sendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED
@@ -150,7 +167,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 
 	// publish the message
 	err, status := (*knativePublisher).Publish(knativeLib, &channelName, &defaultChannelNamespace, &message.Headers,
-		&messagePayload, publishRequest)
+		&messagePayload, publishRequest.SourceID, publishRequest.EventType, publishRequest.EventTypeVersion)
 	if err != nil {
 		_ = sendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED
@@ -215,6 +232,28 @@ func buildMessage(publishRequest *api.Request, traceContext *api.TraceContext,
 
 	return message
 }
+func buildCEMessage(event *publishv2.EventRequestV2, traceContext *api.TraceContext,
+	headers map[string][]string) *Message {
+
+	headers[trace.HeaderSourceID] = []string{event.Source}
+	headers[trace.HeaderEventType] = []string{event.Type}
+	headers[trace.HeaderEventTypeVersion] = []string{event.TypeVersion}
+	headers[trace.HeaderEventID] = []string{event.ID}
+	headers[trace.HeaderEventTime] = []string{event.Time}
+	headers[trace.HeaderSpecVersion] = []string{trace.SpecVersion}
+	if traceContext != nil {
+		for k, v := range *traceContext {
+			headers[k] = []string{v}
+		}
+	}
+
+	message := &Message{
+		Headers: headers,
+		Payload: event.Data,
+	}
+
+	return message
+}
 
 func getPublishStatusReason(status *string) string {
 	var reason string
@@ -238,4 +277,56 @@ func sendJSONError(w http.ResponseWriter, err *api.Error) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader((*err).Status)
 	return json.NewEncoder(w).Encode(*err)
+}
+
+func handleKnativePublishRequestV2(w http.ResponseWriter, r *http.Request, knativeLib *knative.KnativeLib,
+	knativePublisher *publisher.KnativePublisher, context *api.TraceContext, opts *opts.Options) (*Message,
+	*string, *string, *api.Error, string) {
+	// validate the http request
+	event, err := validators.ValidateRequestV2(r)
+	if err != nil {
+		log.Printf("validate request failed: %v", err)
+		_ = sendJSONError(w, err)
+		return nil, nil, nil, err, publisher.FAILED
+	}
+
+	// validate the publish request
+	if err = publishv2.ValidatePublish(event, opts.EventOptions); err != nil {
+		log.Printf("validate publish failed: %v", err)
+		_ = sendJSONError(w, err)
+		return nil, nil, nil, err, publisher.FAILED
+	}
+
+	headers := filterCEHeaders(r)
+
+	// build the message from the publish-request and the trace-context
+	message := buildCEMessage(event, context, headers)
+
+	// marshal the message
+	messagePayload, errMarshal := json.Marshal(message.Payload)
+	if errMarshal != nil {
+		log.Printf("marshal message failed: %v", errMarshal.Error())
+		err = api.ErrorResponseInternalServer()
+		_ = sendJSONError(w, err)
+		return nil, nil, nil, err, publisher.FAILED
+	}
+
+	// get the channel name and validate its length
+	channelName := eventBusUtil.GetChannelName(&event.Source, &event.Type,
+		&event.TypeVersion)
+	if err = validators.ValidateChannelNameLength(&channelName, opts.MaxChannelNameLength); err != nil {
+		log.Printf("publish message failed: %v", err)
+		_ = sendJSONError(w, err)
+		return nil, nil, nil, err, publisher.FAILED
+	}
+
+	// publish the message
+	err, status := (*knativePublisher).Publish(knativeLib, &channelName, &defaultChannelNamespace, &message.Headers,
+		&messagePayload, event.Source, event.Type, event.TypeVersion)
+	if err != nil {
+		_ = sendJSONError(w, err)
+		return nil, nil, nil, err, publisher.FAILED
+	}
+	// Succeed if the Status is IGNORED | PUBLISHED
+	return message, &channelName, &defaultChannelNamespace, nil, status
 }

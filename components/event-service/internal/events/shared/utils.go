@@ -22,47 +22,49 @@ func ErrorResponseRequestBodyTooLarge(moreInfo string) (response *api.PublishEve
 
 // ErrorResponseMissingFieldEventType returns an error of type PublishEventResponses for missing EventType field
 func ErrorResponseMissingFieldEventType() (response *api.PublishEventResponses) {
-	return createMissingFieldError(FieldEventType)
+	return CreateMissingFieldError(FieldEventType)
 }
 
 // ErrorResponseMissingFieldEventTypeVersion returns an error of type PublishEventResponses for missing EventTypeVersion field
 func ErrorResponseMissingFieldEventTypeVersion() (response *api.PublishEventResponses) {
-	return createMissingFieldError(FieldEventTypeVersion)
+	return CreateMissingFieldError(FieldEventTypeVersion)
 }
 
 // ErrorResponseWrongEventTypeVersion returns an error of type PublishEventResponses for wrong EventTypeVersion field
 func ErrorResponseWrongEventTypeVersion() (response *api.PublishEventResponses) {
-	return createInvalidFieldError(FieldEventTypeVersion)
+	return CreateInvalidFieldError(FieldEventTypeVersion)
 }
 
 // ErrorResponseMissingFieldEventTime returns an error of type PublishEventResponses for missing EventTime field
 func ErrorResponseMissingFieldEventTime() (response *api.PublishEventResponses) {
-	return createMissingFieldError(FieldEventTime)
+	return CreateMissingFieldError(FieldEventTime)
 }
 
 // ErrorResponseWrongEventTime returns an error of type PublishEventResponses for wrong EventTime field
 func ErrorResponseWrongEventTime(err error) (response *api.PublishEventResponses) {
-	return createInvalidFieldError(FieldEventTime)
+	return CreateInvalidFieldError(FieldEventTime)
 }
 
 // ErrorResponseWrongEventID returns an error of type PublishEventResponses for wrong EventID field
 func ErrorResponseWrongEventID() (response *api.PublishEventResponses) {
-	return createInvalidFieldError(FieldEventID)
+	return CreateInvalidFieldError(FieldEventID)
 }
 
 // ErrorResponseMissingFieldData returns an error of type PublishEventResponses for missing Data field
 func ErrorResponseMissingFieldData() (response *api.PublishEventResponses) {
-	return createMissingFieldError(FieldData)
+	return CreateMissingFieldError(FieldData)
 }
 
-func createMissingFieldError(field interface{}) (response *api.PublishEventResponses) {
+//CreateMissingFieldError create an error for a missing field
+func CreateMissingFieldError(field interface{}) (response *api.PublishEventResponses) {
 	apiErrorDetail := api.ErrorDetail{Field: field.(string), Type: ErrorTypeMissingField, Message: ErrorMessageMissingField, MoreInfo: ""}
 	details := []api.ErrorDetail{apiErrorDetail}
 	apiError := api.Error{Status: http.StatusBadRequest, Type: ErrorTypeValidationViolation, Message: ErrorMessageMissingField, MoreInfo: "", Details: details}
 	return &api.PublishEventResponses{Ok: nil, Error: &apiError}
 }
 
-func createInvalidFieldError(field interface{}) (response *api.PublishEventResponses) {
+//CreateInvalidFieldError creates an error for an invalid field
+func CreateInvalidFieldError(field interface{}) (response *api.PublishEventResponses) {
 	apiErrorDetail := api.ErrorDetail{Field: field.(string), Type: ErrorTypeInvalidField, Message: ErrorMessageInvalidField, MoreInfo: ""}
 	details := []api.ErrorDetail{apiErrorDetail}
 	apiError := api.Error{Status: http.StatusBadRequest, Type: ErrorTypeValidationViolation, Message: ErrorMessageInvalidField, MoreInfo: "", Details: details}

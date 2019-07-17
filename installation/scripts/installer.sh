@@ -84,7 +84,7 @@ COMBO_YAML=$(bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG
 rm -rf ${AZURE_BROKER_CONFIG}
 
 if [ ${ADMIN_PASSWORD} ]; then
-    ADMIN_PASSWORD=$(echo ${ADMIN_PASSWORD} | base64)
+    ADMIN_PASSWORD=$(echo ${ADMIN_PASSWORD} | tr -d '\n' | base64)
     COMBO_YAML=$(sed 's/global\.adminPassword: .*/global.adminPassword: '"${ADMIN_PASSWORD}"'/g' <<<"$COMBO_YAML")
 fi
 

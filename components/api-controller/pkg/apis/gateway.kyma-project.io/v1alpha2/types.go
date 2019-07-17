@@ -157,6 +157,7 @@ type ApiList struct {
 	Items []Api `json:"items"`
 }
 
+// String method makes ApiSpec satisfy the Stringer interface and defines how the textual representation of the structure will look
 func (s ApiSpec) String() string {
 	disableIstioAuthPolicyMTLS := "<nil>"
 	authenticationEnabled := "<nil>"

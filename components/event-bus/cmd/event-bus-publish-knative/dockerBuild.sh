@@ -9,7 +9,7 @@ COMPONENT=$3
 echo -e "Start building docker image...."
 mkdir -p docker/image
 cp Dockerfile docker/image/
-cp -R main.go application httpserver handlers metrics publisher validators docker/image/
+cp -R main.go application httpserver handlers metrics publisher validators util docker/image/
 cp -R ../../internal docker/image/
 cp -R ../../vendor docker/image/
 cp -R ../../api docker/image/
