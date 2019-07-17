@@ -1,5 +1,6 @@
 ---
-title: Tutorials
+title: Fetch addons from remote servers
+type: Tutorials
 ---
 
 By default, the Helm Broker fetches addons listed in the `index.yaml` file from the `bundles` repository [release](https://github.com/kyma-project/bundles/releases). This tutorial shows how to configure the Helm Broker to fetch cluster-wide and Namespace-scoped addon definitions from other remote HTTPS servers.
@@ -11,7 +12,7 @@ Follow these steps to configure the Helm Broker to fetch addon definitions from 
 <div tabs>
   <details>
   <summary>
-  Cluster-wide bundles
+  Cluster-wide addons
   </summary>
 
   1. [Create a repository](#details-create-addons-repository) with your addons. To complete this tutorial step by step, use the existing [bundles](https://github.com/kyma-project/bundles/tree/master/bundles) repository.
@@ -26,7 +27,7 @@ Follow these steps to configure the Helm Broker to fetch addon definitions from 
   </details>
   <details>
   <summary>
-  Namespace-scoped bundles
+  Namespace-scoped addons
   </summary>
 
   1. [Create a repository](#details-create-addons-repository) with your addons. To complete this tutorial step by step, use the existing [bundles](https://github.com/kyma-project/bundles/tree/master/bundles) repository.
