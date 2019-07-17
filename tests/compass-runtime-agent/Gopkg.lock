@@ -10,6 +10,16 @@
   version = "v1.1.1"
 
 [[projects]]
+  digest = "1:b472339040c571f1085e429ad08d94218bc3fc7a635c99fd95e3f80382413317"
+  name = "github.com/kisielk/errcheck"
+  packages = [
+    ".",
+    "internal/errcheck",
+  ]
+  pruneopts = "UT"
+  revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
+
+[[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
@@ -28,9 +38,34 @@
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
   version = "v1.3.0"
 
+[[projects]]
+  branch = "master"
+  digest = "1:2cd04a27bb5b21c1c1a740477112d312280112a96d9948e91ae9fbaf122f7baa"
+  name = "golang.org/x/tools"
+  packages = [
+    "cmd/goimports",
+    "go/ast/astutil",
+    "go/gcexportdata",
+    "go/internal/gcimporter",
+    "go/internal/packagesdriver",
+    "go/packages",
+    "go/types/typeutil",
+    "internal/fastwalk",
+    "internal/gopathwalk",
+    "internal/imports",
+    "internal/module",
+    "internal/semver",
+  ]
+  pruneopts = "UT"
+  revision = "e98af230987614b97d20a34f8062bf3fa0fe2376"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/stretchr/testify/require"]
+  input-imports = [
+    "github.com/kisielk/errcheck",
+    "github.com/stretchr/testify/require",
+    "golang.org/x/tools/cmd/goimports",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
