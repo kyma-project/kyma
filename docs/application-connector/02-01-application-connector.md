@@ -11,7 +11,7 @@ type: Architecture
 The Istio Ingress Gateway exposes the Application Connector and other Kyma components.
 The DNS name of the Ingress is cluster-dependant and follows the `gateway.{cluster-dns}` format, for example `gateway.servicemanager.cluster.kyma.cx`.
 Istio Ingress Gateway secures the endpoints with certificate validation. Each call must include a valid client certificate.
-You can access every exposed Application (App) using the assigned path. For example, to reach the gateway for the `user-custom` App, use `gateway.servicemanager.cluster.kyma.cx/user-custom`. 
+You can access every exposed Application (App) using the assigned path. For example, to reach the Gateway for the `user-custom` App, use `gateway.servicemanager.cluster.kyma.cx/user-custom`. 
 
 ## Application Connectivity Validator
 
@@ -61,7 +61,7 @@ The Application Gateway is an intermediary component between a lambda function o
 - OAuth
 - Client certificates
 
-Additionally, the Application Gateway supports cross-site request forgery (CSRF) tokens as an optional layer of API protection. 
+Additionally, the Application Gateway supports cross-site request forgery (CSRF) tokens as an optional layer of API protection.
 
 ## Access Service
 

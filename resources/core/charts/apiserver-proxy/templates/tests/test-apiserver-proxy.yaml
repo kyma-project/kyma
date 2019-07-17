@@ -51,5 +51,7 @@ spec:
               value: "iam-kubeconfig-service.{{ .Release.Namespace }}.svc.cluster.local"
             - name: IAM_KUBECONFIG_SVC_PORT
               value: "8000"
+            - name: MAX_TEST_RETRIES
+              value: "10"
       restartPolicy: Never
 {{- end}}

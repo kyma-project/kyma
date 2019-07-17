@@ -67,6 +67,8 @@ spec:
           image: "{{ $.Values.global.hub }}/{{ $spec.sds.image }}:{{ $.Values.global.tag }}"
 {{- end }}
           imagePullPolicy: {{ $.Values.global.imagePullPolicy }}
+          resources:
+{{ toYaml $spec.sds.resources | indent 12 }}
           env:
           - name: "ENABLE_WORKLOAD_SDS"
             value: "false"
