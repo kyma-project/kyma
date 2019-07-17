@@ -70,7 +70,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
 	tokenRequestClient := resourceskit.NewTokenRequestClient(connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testNamespace))
 	connector := testkit.NewConnectorClient(tokenRequestClient, true, log.New())
-	testService := testkit.NewTestService(k8sResourceClient, ingressHTTPClient, gatewayClientset.GatewayV1alpha2(), s.domain)
+	testService := testkit.NewTestService(k8sResourceClient, ingressHTTPClient, gatewayClientset.GatewayV1alpha2(), s.domain, s.testNamespace)
 
 	state := &e2EState{domain: s.domain}
 

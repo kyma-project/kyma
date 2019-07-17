@@ -17,14 +17,13 @@ import (
 )
 
 const (
-	testServiceName            = "counter-service"
-	testServicePort            = 8090
-	testServiceImage           = "maladie/counterservice:latest"
-	labelKey                   = "component"
-	healthEndpointFormat       = "http://%s.%s:%v/health"
-	healthEndpointFormatLocal  = "https://counter-service.%s/health"
-	counterEndpointFormat      = "http://%s.%s:%v/counter"
-	endpointFormatLocal = "https://counter-service.%s"
+	testServiceName         = "counter-service"
+	testServicePort         = 8090
+	testServiceImage        = "maladie/counterservice:latest"
+	labelKey                = "component"
+	healthEndpointFormat    = "https://counter-service.%s/health"
+	endpointFormat          = "https://counter-service.%s"
+	inClusterEndpointFormat = "http://counter-service.%s..svc.cluster.local"
 )
 
 type TestService struct {
@@ -32,14 +31,16 @@ type TestService struct {
 	apis               gatewayClient.ApisGetter
 	HttpClient         *http.Client
 	domain             string
+	namespace          string
 }
 
-func NewTestService(k8sClient resourceskit.K8sResourcesClient, httpClient *http.Client, apis gatewayClient.ApisGetter, domain string) *TestService {
+func NewTestService(k8sClient resourceskit.K8sResourcesClient, httpClient *http.Client, apis gatewayClient.ApisGetter, domain, namespace string) *TestService {
 	return &TestService{
 		K8sResourcesClient: k8sClient,
 		HttpClient:         httpClient,
 		domain:             domain,
 		apis:               apis,
+		namespace:          namespace,
 	}
 }
 
@@ -124,11 +125,15 @@ func (ts *TestService) DeleteTestService() error {
 }
 
 func (ts *TestService) GetTestServiceURL() string {
-	return fmt.Sprintf(endpointFormatLocal, ts.domain)
+	return fmt.Sprintf(endpointFormat, ts.domain)
+}
+
+func (ts *TestService) GetInClusterTestServiceURL() string {
+	return fmt.Sprintf(inClusterEndpointFormat, ts.namespace)
 }
 
 func (ts *TestService) getHealthEndpointURL() string {
-	return fmt.Sprintf(healthEndpointFormatLocal, ts.domain)
+	return fmt.Sprintf(healthEndpointFormat, ts.domain)
 }
 
 func (ts *TestService) createDeployment() error {
