@@ -37,7 +37,7 @@ items:
     namespace: runtime-system
 - apiVersion: v1
   data:
-    dockerRegistry: venturasr ### put your github name here e.g. k15r
+    dockerRegistry: ### put your github name here e.g. k15r
     runtimes: |
       - ID: nodejs8
         dockerFileName: dockerfile-nodejs-8
@@ -64,10 +64,10 @@ data:
   # your docker.io username goes here
   # username NOT the email
   # echo -n $USERNAME | base64
-  username: dmVudHVyYXNy
+  username:
   # password for the account
   # echo -n $PASSWORD | base64
-  password: X0RhbmllbDIwMDk=
+  password: 
 ---
 apiVersion: v1
 kind: ServiceAccount
