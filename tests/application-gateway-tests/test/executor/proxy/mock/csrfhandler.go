@@ -10,6 +10,7 @@ const (
 	firstToken      = "firstToken"
 	secondToken     = "secondToken"
 	HeaderCSRFToken = "X-csrf-token"
+	cookieName      = "cookieToken"
 )
 
 type csrfHandler struct {
@@ -37,7 +38,10 @@ func (ch *csrfHandler) CsrfToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set(HeaderCSRFToken, token)
-	http.SetCookie(w, nil)
+	http.SetCookie(w, &http.Cookie{
+		Name:  cookieName,
+		Value: token,
+	})
 
 	successResponse(w)
 }
@@ -50,11 +54,23 @@ func (ch *csrfHandler) Target(w http.ResponseWriter, r *http.Request) {
 		expectedToken = secondToken
 	}
 
-	ch.logger.Infof("Handling request. Expected: header: %s, with value: %s", HeaderCSRFToken, expectedToken)
+	ch.logger.Infof("Handling request. Expected: header: %s, with value: %s, cookie: %s, with value: %s", HeaderCSRFToken, expectedToken, cookieName, expectedToken)
 
-	token := r.Header.Get(HeaderCSRFToken)
-	if token != expectedToken {
-		ch.logger.Errorf("Invalid CSRF token: %s", token)
+	headerToken := r.Header.Get(HeaderCSRFToken)
+	if headerToken != expectedToken {
+		ch.logger.Errorf("Invalid header: %s with CSRF token value: %s", HeaderCSRFToken, headerToken)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	cookieToken, err := r.Cookie(cookieName)
+	if err != nil {
+		ch.logger.Errorf("No cookie: %s", cookieName)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	if cookieToken.Value != expectedToken {
+		ch.logger.Errorf("Invalid cookie: %s with CSRF token value: %s", cookieName, cookieToken)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
