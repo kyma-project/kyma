@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
-  disableConcurrency: true
+  disableConcurrency: false
   template:
     metadata:
       annotations:
