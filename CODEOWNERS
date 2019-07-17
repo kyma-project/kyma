@@ -287,6 +287,9 @@
 # Dex Static User Configurer
 /components/dex-static-user-configurer/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# Knative Function Controller
+/components/knative-function-controller/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+
 # Tests
 # acceptance tests
 /tests/acceptance/ @mszostok @polskikiel @piotrmiskiewicz @aszecowka @PK85 @jasiu001 @adamwalach
