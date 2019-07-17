@@ -44,7 +44,7 @@ if [[ "$1" == "$CI_FLAG" ]]; then
 	buildEnv="env CGO_ENABLED=0"
 fi
 echo "? go build"
-${buildEnv} go build -o external-solution-integration ./e2e.go
+${buildEnv} go build -o e2e-external-integration-test ./e2e.go
 goBuildResult=$?
 if [[ ${goBuildResult} != 0 ]]; then
     echo -e "${RED}✗ go build ${NC}\n $goBuildResult${NC}"

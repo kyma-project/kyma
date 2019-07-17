@@ -1,34 +1,22 @@
+---
+kind: ServiceAccount
 apiVersion: v1
-kind: Pod
 metadata:
   name: e2e
-  namespace: production
+  namespace: kyma-system
   labels:
     app: e2e
-  annotations:
-    sidecar.istio.io/inject: "true"
-spec:
-  restartPolicy: Never
-  containers:
-    - name: e2e
-      image: k15r/e2e:bla
-      imagePullPolicy: Always
-      args:
-        - "/e2e"
-      env:
-        - name: KUBERNETES_SERVICE_HOST
-          value: "kubernetes.default.svc.cluster.local"
-        - name: KUBERNETES_SERVICE_PORT
-          value: "443"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: e2e-role
-  namespace: production
+  name: e2e
   labels:
     app: e2e
 rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["list"]
   - apiGroups: ["*"]
     resources: ["services", "deployments", "pods"]
     verbs: ["create", "get", "delete", "list"]
@@ -36,7 +24,7 @@ rules:
     resources: ["secrets"]
     verbs: ["create", "get", "update", "delete"]
   - apiGroups: ["applicationconnector.kyma-project.io"]
-    resources: ["applications", "applicationmappings", "eventactivations"]
+    resources: ["applications", "applicationmappings", "tokenrequests"]
     verbs: ["get", "update", "list", "create", "delete"]
   - apiGroups: ["extensions"]
     resources: ["ingresses"]
@@ -49,24 +37,55 @@ rules:
     verbs: ["create", "get", "update", "delete"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["serviceinstances", "servicebindings"]
-    verbs: ["create", "get", "update", "delete"]
+    verbs: ["create", "get", "update", "delete", "list"]
   - apiGroups: ["servicecatalog.kyma-project.io"]
     resources: ["servicebindingusages"]
     verbs: ["create", "get", "update", "delete"]
+  - apiGroups: ["gateway.kyma-project.io"]
+    resources: ["apis"]
+    verbs: ["create", "delete"]
 
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: e2e-rolebinding
-  namespace: production
+  name: e2e
   labels:
     app: e2e
 subjects:
-  - kind: User
-    name: system:serviceaccount:production:default
-    apiGroup: rbac.authorization.k8s.io
+  - kind: ServiceAccount
+    name: e2e
+    namespace: kyma-system
 roleRef:
   kind: ClusterRole
-  name: e2e-role
+  name: e2e
   apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: e2e
+  namespace: kyma-system
+  labels:
+    app: e2e
+  annotations:
+    sidecar.istio.io/inject: "true"
+spec:
+  restartPolicy: Never
+  serviceAccountName: e2e
+  containers:
+    - name: e2e
+      image: sjanota/e2e-external-integration-test:latest
+      imagePullPolicy: Always
+      env:
+        - name: INGRESSGATEWAY_ADDRESS
+          value: console.hasselhoff.cluster.stage.faros.kyma.cx
+      args:
+        - "/e2e"
+        - e2e
+        - --testNamespace
+        - ddd
+        - --domain
+        - hasselhoff.cluster.stage.faros.kyma.cx
+        - --runID
+        - kyma

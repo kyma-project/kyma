@@ -1,4 +1,4 @@
-package testkit
+package helpers
 
 import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"

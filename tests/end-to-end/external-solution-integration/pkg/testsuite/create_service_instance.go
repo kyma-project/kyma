@@ -1,13 +1,12 @@
 package testsuite
 
 import (
+	"fmt"
 	"github.com/avast/retry-go"
-	"github.com/hashicorp/go-multierror"
 	serviceCatalogApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -15,7 +14,6 @@ import (
 )
 
 type CreateServiceInstance struct {
-	testkit.K8sHelper
 	serviceInstances serviceCatalogClient.ServiceInstanceInterface
 	state            CreateServiceInstanceState
 	runID            string
@@ -46,7 +44,7 @@ func (s *CreateServiceInstance) Run() error {
 		ObjectMeta: v1.ObjectMeta{
 			GenerateName: consts.ServiceInstanceName,
 			Finalizers:   []string{"kubernetes-incubator/service-catalog"},
-			Labels: map[string]string{"runID": s.runID},
+			Labels:       map[string]string{"runID": s.runID},
 		},
 		Spec: serviceCatalogApi.ServiceInstanceSpec{
 			Parameters: &runtime.RawExtension{},
@@ -66,7 +64,10 @@ func (s *CreateServiceInstance) Run() error {
 }
 
 func (s *CreateServiceInstance) isServiceInstanceCreated() error {
-	svcInstance, _ := s.serviceInstances.Get(s.state.GetServiceInstanceName(), v1.GetOptions{})
+	svcInstance, err := s.serviceInstances.Get(s.state.GetServiceInstanceName(), v1.GetOptions{})
+	if err != nil {
+		return err
+	}
 
 	if svcInstance.Status.ProvisionStatus != "Provisioned" {
 		return errors.Errorf("unexpected provision status: %s", svcInstance.Status.ProvisionStatus)
@@ -75,23 +76,23 @@ func (s *CreateServiceInstance) isServiceInstanceCreated() error {
 }
 
 func (s *CreateServiceInstance) Cleanup() error {
-	instances, err := s.serviceInstances.List(v1.ListOptions{LabelSelector: "runID="+s.runID})
+	selector := v1.ListOptions{
+		LabelSelector: fmt.Sprintf("runID=%s", s.runID),
+	}
+	err := s.serviceInstances.DeleteCollection(&v1.DeleteOptions{}, selector)
 	if err != nil {
 		return err
 	}
+	return retry.Do(func() error {
+		list, err := s.serviceInstances.List(selector)
+		if err != nil {
+			return err
+		}
 
-	var errMulti *multierror.Error
-	for _, instance := range instances.Items {
-		errDelete := s.serviceInstances.Delete(instance.Name, &v1.DeleteOptions{})
-		errWait := s.awaitServiceInstanceDeleted(instance.Name)
-		errMulti = multierror.Append(err, errDelete, errWait)
-	}
+		if len(list.Items) != 0 {
+			return errors.New("service instance still exists")
+		}
 
-	return errMulti.ErrorOrNil()
-}
-
-func (s *CreateServiceInstance) awaitServiceInstanceDeleted(name string) error {
-	return s.AwaitResourceDeleted(func() (interface{}, error) {
-		return s.serviceInstances.Get(name, v1.GetOptions{})
-	}, retry.Delay(500 * time.Millisecond))
+		return nil
+	}, retry.Delay(time.Second))
 }

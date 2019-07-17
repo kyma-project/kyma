@@ -75,7 +75,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	state := &e2EState{domain: s.domain}
 
 	return []step.Step{
-		testsuite.NewCreateApplication(appOperatorClientset.ApplicationconnectorV1alpha1(), false),
+		testsuite.NewCreateApplication(appOperatorClientset.ApplicationconnectorV1alpha1().Applications(), false),
 		testsuite.NewCreateMapping(appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testNamespace)),
 		testsuite.NewDeployLambda(kubelessClientset.KubelessV1beta1().Functions(s.testNamespace), pods),
 		testsuite.NewStartTestServer(testService),
@@ -85,7 +85,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewCreateServiceBinding(serviceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testNamespace), state),
 		testsuite.NewCreateServiceBindingUsage(serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testNamespace), pods, state),
 		testsuite.NewCreateSubscription(eventingClientset.EventingV1alpha1().Subscriptions(s.testNamespace), s.testNamespace),
-		testsuite.NewSleep(10*time.Second),
+		testsuite.NewSleep(20 * time.Second),
 		testsuite.NewSendEvent(state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil

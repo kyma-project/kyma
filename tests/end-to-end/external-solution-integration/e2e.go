@@ -1,16 +1,18 @@
 package main
 
 import (
+	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
+	coreClient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"os"
-	"time"
-
-	log "github.com/sirupsen/logrus"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
@@ -28,7 +30,7 @@ var (
 func main() {
 	scenarioName := os.Args[1]
 	os.Args = os.Args[1:]
-	scenario, exists := scenarios[scenarioName]
+	s, exists := scenarios[scenarioName]
 	if !exists {
 		log.Errorf("Scenario '%s' does not exist. Use one of the following: ")
 		for name := range scenarios {
@@ -37,11 +39,11 @@ func main() {
 	}
 
 	runner = step.NewRunner()
-	//waitForAPIServer()
 	setupLogging()
-	setupFlags(scenario)
+	setupFlags(s)
+	waitForAPIServer()
 
-	steps, err := scenario.Steps(kubeConfig)
+	steps, err := s.Steps(kubeConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -56,7 +58,14 @@ func main() {
 }
 
 func waitForAPIServer() {
-	time.Sleep(10 * time.Second)
+	coreClientset := coreClient.NewForConfigOrDie(kubeConfig)
+	err := retry.Do(func() error {
+		_, err := coreClientset.CoreV1().Nodes().List(metav1.ListOptions{})
+		return err
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func setupLogging() {
@@ -70,6 +79,7 @@ func setupFlags(s scenario.Scenario) {
 	kubeconfigFlags.AddFlags(pflag.CommandLine)
 	runner.AddFlags(pflag.CommandLine)
 	s.AddFlags(pflag.CommandLine)
+	helpers.AddFlags(pflag.CommandLine)
 	pflag.Parse()
 
 	kubeConfig, err = kubeconfigFlags.ToRESTConfig()

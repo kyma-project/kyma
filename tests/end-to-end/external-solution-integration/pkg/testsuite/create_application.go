@@ -5,23 +5,22 @@ import (
 	acApi "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	acClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // CreateApplication is a step which creates new Application
 type CreateApplication struct {
-	testkit.K8sHelper
-	applications     acClient.ApplicationsGetter
+	applications     acClient.ApplicationInterface
 	skipInstallation bool
 }
 
 var _ step.Step = &CreateApplication{}
 
 // NewCreateApplication returns new CreateApplication
-func NewCreateApplication(applications acClient.ApplicationsGetter, skipInstallation bool) *CreateApplication {
+func NewCreateApplication(applications acClient.ApplicationInterface, skipInstallation bool) *CreateApplication {
 	return &CreateApplication{
 		applications:     applications,
 		skipInstallation: skipInstallation,
@@ -47,7 +46,7 @@ func (s *CreateApplication) Run() error {
 		Spec:       spec,
 	}
 
-	_, err := s.applications.Applications().Create(dummyApp)
+	_, err := s.applications.Create(dummyApp)
 	if err != nil {
 		return err
 	}
@@ -56,8 +55,7 @@ func (s *CreateApplication) Run() error {
 }
 
 func (s *CreateApplication) isApplicationReady() error {
-	application, err := s.applications.Applications().Get(consts.AppName, v1.GetOptions{})
-
+	application, err := s.applications.Get(consts.AppName, v1.GetOptions{})
 	if err != nil {
 		return err
 	}
@@ -71,12 +69,12 @@ func (s *CreateApplication) isApplicationReady() error {
 
 // Cleanup removes all resources that may possibly created by the step
 func (s *CreateApplication) Cleanup() error {
-	err := s.applications.Applications().Delete(consts.AppName, &v1.DeleteOptions{})
+	err := s.applications.Delete(consts.AppName, &v1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
 
-	return s.AwaitResourceDeleted(func() (interface{}, error) {
-		return s.applications.Applications().Get(consts.AppName, v1.GetOptions{})
+	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
+		return s.applications.Get(consts.AppName, v1.GetOptions{})
 	})
 }

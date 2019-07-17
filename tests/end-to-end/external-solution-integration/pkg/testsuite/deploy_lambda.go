@@ -5,8 +5,8 @@ import (
 	kubelessApi "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubelessClient "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/pkg/errors"
 	coreApi "k8s.io/api/core/v1"
 	extensionsApi "k8s.io/api/extensions/v1beta1"
@@ -48,8 +48,7 @@ module.exports = { main: function (event, context) {
 `
 
 type DeployLambda struct {
-	*testkit.LambdaHelper
-	testkit.PodHelper
+	*helpers.LambdaHelper
 	functions kubelessClient.FunctionInterface
 }
 
@@ -57,7 +56,7 @@ var _ step.Step = &DeployLambda{}
 
 func NewDeployLambda(functions kubelessClient.FunctionInterface, pods coreClient.PodInterface) *DeployLambda {
 	return &DeployLambda{
-		LambdaHelper: testkit.NewLambdaHelper(pods),
+		LambdaHelper: helpers.NewLambdaHelper(pods),
 		functions:    functions,
 	}
 }
@@ -125,6 +124,7 @@ func (s *DeployLambda) createLambda() *kubelessApi.Function {
 	}
 }
 
+// Cleanup removes all resources that may possibly created by the step
 func (s *DeployLambda) Cleanup() error {
 	err := s.functions.Delete(consts.AppName, &metav1.DeleteOptions{})
 	if err != nil {
@@ -145,7 +145,7 @@ func (s *DeployLambda) isLambdaReady() error {
 	}
 
 	for _, pod := range pods {
-		if !s.IsPodReady(pod) {
+		if !helpers.IsPodReady(pod) {
 			return errors.New("pod is not ready yet")
 		}
 	}
