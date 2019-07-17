@@ -1,4 +1,6 @@
-# Knative Function Controller
+# knative-function-controller
+
+> Provide the name of your chart. Use Heading 1 (H1).
 
 ## Overview
 
@@ -6,8 +8,27 @@ This project contains the chart for the Function Controller.
 
 ## Prerequisites
 
-For more details, see the [Istio documentation](https://istio.io/docs/).
+- Istio
+- Knative Serving
+- Knative Build
 
-## Details
+## Installation
 
-Configure these options for each business requirement:
+Run the following script to install the chart:
+
+  # your docker.io username goes here
+  # username NOT the email
+  # echo -n $USERNAME | base64
+
+```bash
+
+REGISTRY_ADDRESS=<e.g. https://eu.gcr.io>
+REGISTRY_USER_NAME=<eu.gcr.io username goes here. Not Email>
+REGISTRY_PASSWORD=<password of the registry. e.g. echo -n $PASSWORD | base64>
+helm install knative-function-controller --set secret.registryAddress="${REGISTRY_ADDRESS}" \
+             --set secret.registryUserName="${REGISTRY_USER_NAME}" \
+             --set secret.registryPassword="${REGISTRY_PASSWORD}" \
+             --namespace=kyma-system \
+             --name=knative-function-controller
+```
+
