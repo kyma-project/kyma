@@ -48,11 +48,6 @@ func (s *E2E) AddFlags(set *pflag.FlagSet) {
 }
 
 func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
-	k8sResourceClient, err := resourceskit.NewK8sResourcesClient(config, s.testNamespace)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	ingressHTTPClient, err := ingressgateway.FromEnv().Client()
 	if err != nil {
 		log.Fatal(err)
@@ -70,7 +65,14 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
 	tokenRequestClient := resourceskit.NewTokenRequestClient(connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testNamespace))
 	connector := testkit.NewConnectorClient(tokenRequestClient, true, log.New())
-	testService := testkit.NewTestService(k8sResourceClient, ingressHTTPClient, gatewayClientset.GatewayV1alpha2(), s.domain, s.testNamespace)
+	testService := testkit.NewTestService(
+		ingressHTTPClient,
+		coreClientset.AppsV1().Deployments(s.testNamespace),
+		coreClientset.CoreV1().Services(s.testNamespace),
+		gatewayClientset.GatewayV1alpha2().Apis(s.testNamespace),
+		s.domain,
+		s.testNamespace,
+	)
 
 	state := &e2EState{domain: s.domain}
 

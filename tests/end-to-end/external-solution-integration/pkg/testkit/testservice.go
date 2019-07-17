@@ -6,13 +6,14 @@ import (
 	"github.com/hashicorp/go-multierror"
 	gatewayApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	gatewayClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/resourceskit"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	model "k8s.io/api/apps/v1"
 	core "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	appsClient "k8s.io/client-go/kubernetes/typed/apps/v1"
+	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
 	"net/http"
 )
 
@@ -27,20 +28,22 @@ const (
 )
 
 type TestService struct {
-	K8sResourcesClient resourceskit.K8sResourcesClient
-	apis               gatewayClient.ApisGetter
-	HttpClient         *http.Client
-	domain             string
-	namespace          string
+	apis        gatewayClient.ApiInterface
+	deployments appsClient.DeploymentInterface
+	services    coreClient.ServiceInterface
+	HttpClient  *http.Client
+	domain      string
+	namespace   string
 }
 
-func NewTestService(k8sClient resourceskit.K8sResourcesClient, httpClient *http.Client, apis gatewayClient.ApisGetter, domain, namespace string) *TestService {
+func NewTestService(httpClient *http.Client, deployments appsClient.DeploymentInterface, services coreClient.ServiceInterface, apis gatewayClient.ApiInterface, domain, namespace string) *TestService {
 	return &TestService{
-		K8sResourcesClient: k8sClient,
-		HttpClient:         httpClient,
-		domain:             domain,
-		apis:               apis,
-		namespace:          namespace,
+		HttpClient:  httpClient,
+		domain:      domain,
+		apis:        apis,
+		deployments: deployments,
+		services:    services,
+		namespace:   namespace,
 	}
 }
 
@@ -117,9 +120,9 @@ func (ts *TestService) WaitForCounterPodToUpdateValue(val int) error {
 }
 
 func (ts *TestService) DeleteTestService() error {
-	errDeployment := ts.K8sResourcesClient.DeleteDeployment(testServiceName, &v1.DeleteOptions{})
-	errService := ts.K8sResourcesClient.DeleteService(testServiceName, &v1.DeleteOptions{})
-	errApi := ts.apis.Apis(ts.K8sResourcesClient.GetNamespace()).Delete(testServiceName, &v1.DeleteOptions{})
+	errDeployment := ts.deployments.Delete(testServiceName, &v1.DeleteOptions{})
+	errService := ts.services.Delete(testServiceName, &v1.DeleteOptions{})
+	errApi := ts.apis.Delete(testServiceName, &v1.DeleteOptions{})
 	err := multierror.Append(errDeployment, errService, errApi)
 	return err.ErrorOrNil()
 }
@@ -139,13 +142,8 @@ func (ts *TestService) getHealthEndpointURL() string {
 func (ts *TestService) createDeployment() error {
 	rs := int32(1)
 	deployment := &model.Deployment{
-		TypeMeta: v1.TypeMeta{
-			Kind:       "Deployment",
-			APIVersion: "apps/v1",
-		},
 		ObjectMeta: v1.ObjectMeta{
 			Name:      testServiceName,
-			Namespace: ts.K8sResourcesClient.GetNamespace(),
 			Labels: map[string]string{
 				labelKey: testServiceName,
 			},
@@ -177,19 +175,15 @@ func (ts *TestService) createDeployment() error {
 			},
 		},
 	}
-	_, err := ts.K8sResourcesClient.CreateDeployment(deployment)
+	_, err := ts.deployments.Create(deployment)
 	return err
 }
 
 func (ts *TestService) createService() error {
 	service := &core.Service{
-		TypeMeta: v1.TypeMeta{
-			Kind:       "Service",
-			APIVersion: "v1",
-		},
+
 		ObjectMeta: v1.ObjectMeta{
 			Name:      testServiceName,
-			Namespace: ts.K8sResourcesClient.GetNamespace(),
 		},
 		Spec: core.ServiceSpec{
 			Type: "ClusterIP",
@@ -204,7 +198,7 @@ func (ts *TestService) createService() error {
 			},
 		},
 	}
-	_, err := ts.K8sResourcesClient.CreateService(service)
+	_, err := ts.services.Create(service)
 	return err
 }
 
@@ -212,7 +206,6 @@ func (ts *TestService) createAPI() error {
 	api := &gatewayApi.Api{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      testServiceName,
-			Namespace: ts.K8sResourcesClient.GetNamespace(),
 		},
 		Spec: gatewayApi.ApiSpec{
 			Service: gatewayApi.Service{
@@ -223,6 +216,6 @@ func (ts *TestService) createAPI() error {
 			Authentication: []gatewayApi.AuthenticationRule{},
 		},
 	}
-	_, err := ts.apis.Apis(ts.K8sResourcesClient.GetNamespace()).Create(api)
+	_, err := ts.apis.Create(api)
 	return err
 }

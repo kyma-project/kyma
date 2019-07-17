@@ -32,7 +32,7 @@ func (s *RegisterTestService) Name() string {
 }
 
 func (s *RegisterTestService) Run() error {
-	url := s.testService.GetTestServiceURL()
+	url := s.testService.GetInClusterTestServiceURL()
 	service := s.prepareService(url)
 
 	id, err := s.state.GetRegistryClient().RegisterService(service)
