@@ -1,0 +1,26 @@
+apiVersion: runtime.kyma-project.io/v1alpha1
+kind: Function
+metadata:
+  name: sample-with-dep
+  labels:
+    foo: bar
+spec:
+  function: |
+    module.exports = {
+        main: function(event, context) {
+          return 'Hello World'
+        }
+      }
+  deps: |
+    {
+      "name": "hellowithdeps",
+      "version": "0.0.1",
+      "dependencies": {
+        "end-of-stream": "^1.4.1",
+        "from2": "^2.3.0",
+        "lodash": "^4.17.5"
+      }
+    }
+  functionContentType: "plaintext"
+  size: "L"
+  runtime: "nodejs8"

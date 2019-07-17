@@ -1,0 +1,3 @@
+version: "1"
+domain: kyma-project.io
+repo: github.com/kyma-incubator/runtime

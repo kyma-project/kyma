@@ -1,0 +1,78 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  data:
+    Dockerfile: |-
+      FROM kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7
+      USER root
+      RUN export KUBELESS_INSTALL_VOLUME='/kubeless' && \
+          mkdir /kubeless && \
+          cp /src/handler.js /kubeless && \
+          cp /src/package.json /kubeless && \
+          /kubeless-npm-install.sh
+      USER 1000
+  kind: ConfigMap
+  metadata:
+    annotations:
+    labels:
+      function: runtime-function-controller
+    name: dockerfile-nodejs-6
+    namespace: runtime-system
+- apiVersion: v1
+  data:
+    Dockerfile: |-
+      FROM kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7
+      USER root
+      RUN export KUBELESS_INSTALL_VOLUME='/kubeless' && \
+          mkdir /kubeless && \
+          cp /src/handler.js /kubeless && \
+          cp /src/package.json /kubeless && \
+          /kubeless-npm-install.sh
+      USER 1000
+  kind: ConfigMap
+  metadata:
+    labels:
+      function: runtime-function-controller
+    name: dockerfile-nodejs-8
+    namespace: runtime-system
+- apiVersion: v1
+  data:
+    dockerRegistry: venturasr ### put your github name here e.g. k15r
+    runtimes: |
+      - ID: nodejs8
+        dockerFileName: dockerfile-nodejs-8
+      - ID: nodejs6
+        dockerFileName: dockerfile-nodejs-6
+    serviceAccountName: runtime-controller
+  kind: ConfigMap
+  metadata:
+    labels:
+      app: kubeless
+    name: fn-config
+    namespace: runtime-system
+kind: List
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: docker-reg-credential
+  namespace: runtime-system
+  annotations:
+    build.knative.dev/docker-0: https://index.docker.io/v1/
+type: kubernetes.io/basic-auth
+data:
+  # your docker.io username goes here
+  # username NOT the email
+  # echo -n $USERNAME | base64
+  username: dmVudHVyYXNy
+  # password for the account
+  # echo -n $PASSWORD | base64
+  password: X0RhbmllbDIwMDk=
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: runtime-controller
+  namespace: runtime-system
+secrets:
+- name: docker-reg-credential
