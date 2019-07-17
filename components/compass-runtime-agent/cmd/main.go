@@ -4,14 +4,17 @@ import (
 	"flag"
 	"os"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compassconnection"
+
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/controller"
-	apis "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass"
+	apis "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	log "github.com/sirupsen/logrus"
 )
+
+// TODO - add sync period and sync time
 
 func main() {
 	var metricsAddr string
@@ -45,10 +48,12 @@ func main() {
 
 	// Setup all Controllers
 	log.Info("Setting up controller")
-	if err := controller.AddToManager(mgr); err != nil {
+	if err := compassconnection.InitCompassConnectionController(mgr); err != nil {
 		log.Error(err, "unable to register controllers to the manager")
 		os.Exit(1)
 	}
+
+	// TODO - read configmap and create CR if it does not exist
 
 	// Start the Cmd
 	log.Info("Starting the Cmd.")

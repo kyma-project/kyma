@@ -58,8 +58,8 @@ func newReconciler(client Client) reconcile.Reconciler {
 // Reconcile reads that state of the cluster for a CompassConnection object and makes changes based on the state read
 func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the CompassConnection instance
-	compassConnection := &v1alpha1.CompassConnection{}
-	err := r.client.Get(context.TODO(), request.NamespacedName, compassConnection)
+	instance := &v1alpha1.CompassConnection{}
+	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			r.log.Infof("Compass Connection %s deleted.", request.Name)
@@ -70,6 +70,8 @@ func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 		r.log.Infof("Failed to read %s Compass Connection.", request.Name)
 		return reconcile.Result{}, err
 	}
+
+	r.log.Infof("Processing %s Compass Connection, current status: %s", instance.Name, "TODO")
 
 	// TODO - fetch certificate
 	// TODO - fetch config

@@ -1,0 +1,26 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    helm.sh/hook: crd-install
+  name: compassconnections.compass.kyma-project.io
+spec:
+  group: compass.kyma-project.io
+  version: v1alpha1
+  names:
+    kind: CompassConnection
+    listKind: CompassConnectionList
+    plural: compassconnections
+    singular: compassconnection
+  scope: Cluster
+{{/*  TODO - Add validation after determining the spec */}}
+{{/*  validation:*/}}
+{{/*    openAPIV3Schema:*/}}
+{{/*      properties:*/}}
+{{/*        spec:*/}}
+{{/*          properties:*/}}
+{{/*            name:*/}}
+{{/*              type: string*/}}
+{{/*          required:*/}}
+{{/*            - name*/}}
+{{/*          type: object*/}}

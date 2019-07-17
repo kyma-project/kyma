@@ -240,23 +240,6 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:cebd3beb92aa00ed35a32c1895b3defde7fac134f65520e196d5b138e684dd45"
-  name = "github.com/kyma-project/kyma"
-  packages = [
-    "components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
-    "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
-    "components/cms-controller-manager/pkg/controller",
-    "components/cms-controller-manager/pkg/controller/clusterdocstopic",
-    "components/cms-controller-manager/pkg/controller/docstopic",
-    "components/cms-controller-manager/pkg/handler/docstopic",
-    "components/cms-controller-manager/pkg/handler/docstopic/pretty",
-    "components/cms-controller-manager/pkg/webhookconfig",
-  ]
-  pruneopts = "UT"
-  revision = "2a490d54e3f07391f8563321e2b2f7c3dc0a28b7"
-  version = "1.3.0"
-
-[[projects]]
   digest = "1:3804a3a02964db8e6db3e5e7960ac1c1a9b12835642dd4f4ac4e56c749ec73eb"
   name = "github.com/markbates/inflect"
   packages = ["."]
@@ -478,14 +461,6 @@
   pruneopts = "UT"
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
   version = "v1.3.0"
-
-[[projects]]
-  digest = "1:bb32a7e267540d9f2d26753426d5e360c5bd858b9b78e26b9f0c99219024d8f5"
-  name = "github.com/vrischmann/envconfig"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "cf601e2565a0a7c7418ed014d28a507be6cb1e45"
-  version = "v1.2.0"
 
 [[projects]]
   digest = "1:a5158647b553c61877aa9ae74f4015000294e47981e6b8b07525edcbb0747c81"
@@ -731,14 +706,11 @@
   version = "kubernetes-1.13.4"
 
 [[projects]]
-  digest = "1:db0e48e58e92eddc9ae08e9efb3dfaa1d61e32de690fff0dae5bccf4b45ebcce"
+  digest = "1:46e3296eec0a6e864c2ef813ccfdb0b83d144fcc23414d97dd4894e9464cf4d5"
   name = "k8s.io/apiextensions-apiserver"
   packages = [
     "pkg/apis/apiextensions",
     "pkg/apis/apiextensions/v1beta1",
-    "pkg/client/clientset/clientset",
-    "pkg/client/clientset/clientset/scheme",
-    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
   ]
   pruneopts = "UT"
   revision = "d002e88f6236312f0289d9d1deab106751718ff0"
@@ -940,7 +912,7 @@
   revision = "33be087ad058f99c78e067996202b60230737e49"
 
 [[projects]]
-  digest = "1:e483302ed5721c117a7beb9e91adf05011af7cea15ee3fd9265c61aa2840ea5e"
+  digest = "1:d6fb155bb8b4cd4e55f797c1ad5418b8bf72183f072fb1aebb2ab8717a581cfc"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
     "pkg/cache",
@@ -949,9 +921,6 @@
     "pkg/client/apiutil",
     "pkg/client/config",
     "pkg/controller",
-    "pkg/controller/controllerutil",
-    "pkg/envtest",
-    "pkg/envtest/printer",
     "pkg/event",
     "pkg/handler",
     "pkg/internal/controller",
@@ -967,7 +936,6 @@
     "pkg/recorder",
     "pkg/runtime/inject",
     "pkg/runtime/log",
-    "pkg/runtime/scheme",
     "pkg/runtime/signals",
     "pkg/source",
     "pkg/source/internal",
@@ -1024,7 +992,6 @@
   input-imports = [
     "github.com/emicklei/go-restful",
     "github.com/kisielk/errcheck",
-    "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/controller",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/sirupsen/logrus",
@@ -1042,7 +1009,6 @@
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
-    "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
@@ -1057,11 +1023,9 @@
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
     "sigs.k8s.io/controller-runtime/pkg/controller",
-    "sigs.k8s.io/controller-runtime/pkg/envtest",
     "sigs.k8s.io/controller-runtime/pkg/handler",
     "sigs.k8s.io/controller-runtime/pkg/manager",
     "sigs.k8s.io/controller-runtime/pkg/reconcile",
-    "sigs.k8s.io/controller-runtime/pkg/runtime/scheme",
     "sigs.k8s.io/controller-runtime/pkg/runtime/signals",
     "sigs.k8s.io/controller-runtime/pkg/source",
     "sigs.k8s.io/controller-tools/cmd/controller-gen",

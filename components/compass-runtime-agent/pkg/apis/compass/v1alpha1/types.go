@@ -4,10 +4,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func init() {
-	SchemeBuilder.Register(&CompassConnection{}, &CompassConnectionList{})
-}
-
 // TODO - what should be full CRD domain? compassconnection.compass.kyma-project.io ?
 
 // +genclient
