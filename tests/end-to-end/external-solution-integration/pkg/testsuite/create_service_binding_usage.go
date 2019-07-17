@@ -6,8 +6,8 @@ import (
 	serviceBindingUsageApi "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -16,9 +16,7 @@ import (
 
 // CreateServiceBindingUsage is a step which creates new ServiceBindingUsage
 type CreateServiceBindingUsage struct {
-	*testkit.LambdaHelper
-	testkit.PodHelper
-	testkit.K8sHelper
+	*helpers.LambdaHelper
 	serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface
 	state                CreateServiceBindingUsageState
 }
@@ -31,7 +29,7 @@ var _ step.Step = &CreateServiceBindingUsage{}
 
 func NewCreateServiceBindingUsage(serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface, pods coreClient.PodInterface, state CreateServiceBindingUsageState) *CreateServiceBindingUsage {
 	return &CreateServiceBindingUsage{
-		LambdaHelper:         testkit.NewLambdaHelper(pods),
+		LambdaHelper:         helpers.NewLambdaHelper(pods),
 		serviceBindingUsages: serviceBindingUsages,
 		state:                state,
 	}
@@ -93,7 +91,7 @@ func (s *CreateServiceBindingUsage) isLambdaBound() error {
 			return errors.Errorf("not bound pod exists: %s", pod.Name)
 		}
 
-		if !s.IsPodReady(pod) {
+		if !helpers.IsPodReady(pod) {
 			return errors.New("pod is not ready yet")
 		}
 	}
@@ -107,7 +105,7 @@ func (s *CreateServiceBindingUsage) Cleanup() error {
 		return err
 	}
 
-	return s.AwaitResourceDeleted(func() (interface{}, error) {
+	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
 		return s.serviceBindingUsages.Get(consts.ServiceBindingName, metav1.GetOptions{})
 	})
 }
