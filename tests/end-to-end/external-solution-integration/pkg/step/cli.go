@@ -14,7 +14,7 @@ func (r *Runner) Execute(steps []Step) error {
 		err = r.Run(steps, true)
 	case CleanupMode_Only:
 		r.Cleanup(steps)
-	default:
+	case CleanupMode_Yes:
 		err = r.Run(steps, false)
 	}
 	return err

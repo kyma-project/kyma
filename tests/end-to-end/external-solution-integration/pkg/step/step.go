@@ -26,7 +26,10 @@ type Runner struct {
 func NewRunner() *Runner {
 	log := logrus.New()
 	log.SetReportCaller(false)
-	return &Runner{log: log}
+	return &Runner{
+		log:     log,
+		cleanup: CleanupMode_Yes,
+	}
 }
 
 // Run executes steps in specified order. If skipCleanup is false it also executes Step.Cleanup in reverse order
@@ -82,4 +85,3 @@ func isNotFound(err error) bool {
 	})
 	return isNotFound
 }
-
