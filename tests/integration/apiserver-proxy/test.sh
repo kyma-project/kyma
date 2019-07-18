@@ -8,42 +8,39 @@ if [[ -z "${POD_NAME}" ]]; then
     exit 1
 fi
 
-AUTH_TOKEN=$(/root/app)
-
 getConfigFile() {
+    AUTH_TOKEN=$(/root/app)
 	curl -s -H "Authorization: Bearer ${AUTH_TOKEN}" "${IAM_KUBECONFIG_SVC_FQDN}:${IAM_KUBECONFIG_SVC_PORT}/kube-config" -o "${PWD}/kubeconfig"
 }
 
 test(){
     local retry=$1
-    local maxRetries=$2
-    if [[ "$retry" -ge "$maxRetries" ]]; then
-    	echo "TEST FAILED"
-    	exit 1
-    fi
-    echo "Try $retry/$maxRetries"
 
-    UUID=$(cat /proc/sys/kernel/random/uuid)
-    echo "${UUID}" > "${PWD}/uuid"
-
-    local out
-    local status
     set +e
-    out=$(kubectl exec "${POD_NAME}" cat ${PWD}/uuid 2>&1)
-    status=$?
+    OUT=$(kubectl exec "${POD_NAME}" -- /bin/bash -c 'sleep 10 && cat /etc/os-release' 2>&1)
+    STATUS=$?
     set -e
 
-    if [[ "$status" -ne 0 ]] || [[ "${UUID}" != $(echo "${out}" | tail -n 1) ]]; then
-        echo "kubectl exec error ($status):"
-        echo "${out}"
-        echo "---"
-        echo "UUID: $(cat ${PWD}/uuid)"
-        test "$((retry+1))" "${maxRetries}"
-    else
-        echo "TEST SUCCEEDED"
+    if [[ "$status" -ne 0 ]] || [[ -z "$OUT" ]]; then
+        echo "Kubectl exec error!:"
+        echo "Status: ${STATUS}"
+        echo "Output: ${OUT} should NOT be an empty string!"
+        echo "Execution ${retry}: Failure"
+        exit 1
     fi
+
+    echo "Execution ${retry}: Success"
+    echo "${OUT}"
 }
 
+echo "---> Get kubeconfig from ${IAM_KUBECONFIG_SVC_FQDN}"
 getConfigFile
+
 export KUBECONFIG="${PWD}/kubeconfig"
-test 0 2
+
+for (( i = 1; i < (($MAX_TEST_RETRIES + 1)); i++ )); do
+    echo "===> Try: ${i}/${MAX_TEST_RETRIES}"
+    test ${i}
+done
+
+echo "---> All executions completed successfully"

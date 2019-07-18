@@ -1,10 +1,10 @@
 global:
   images:
     containerRegistry:
-      path: eu.gcr.io/kyma-project/incubator
+      path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir: pr/
-      version: "PR-127"
+      version: "PR-4910"
 
 deployment:
   image:

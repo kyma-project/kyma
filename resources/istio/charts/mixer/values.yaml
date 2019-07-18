@@ -36,15 +36,6 @@ telemetry:
     mode: enforce
     # based on measurements 100ms p50 translates to p99 of under 1s. This is ok for telemetry which is inherently async.
     latencyThreshold: 100ms
-  resources:
-    requests:
-      cpu: 1000m
-      memory: 1G
-    limits:
-      # It is best to do horizontal scaling of mixer using moderate cpu allocation.
-      # We have experimentally found that these values work well.
-      cpu: 4800m
-      memory: 4G
 
 podAnnotations: {}
 nodeSelector: {}
