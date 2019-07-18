@@ -21,11 +21,16 @@ Application Operator performs different operations as a result of the following 
  - **domainName** - Domain name of the cluster. The default domain name is `kyma.local`.
  - **namespace** - Namespace where the Application charts will be deployed. The default namespace is `kyma-integration`.
  - **tillerUrl** - Tiller release server URL. The default is `tiller-deploy.kube-system.svc.cluster.local:44134`.
+ - **helmTLSKeyFile** - Path to TLS key used for Tiller communication. The default is `/etc/certs/tls.key`.
+ - **helmTLSCertificateFile** - Path to TLS certificate used for Tiller communication. The default is `/etc/certs/tls.crt`.
+ - **tillerTLSSkipVerify** - Disables TLS verification in communication with Tiller. The default is `true`.
  - **syncPeriod** - Time period between resyncing existing resources. The default value is `30` seconds.
  - **installationTimeout** - Time after the release installation will time out. The default value is `240` seconds.
  - **applicationGatewayImage** - Application Gateway image version to be used in the Application chart.
+ - **applicationGatewayTestsImage** - Application Gateway Tests image version to be used in the Application chart.
  - **eventServiceImage** - Event Service image version to be used in the Application chart.
  - **eventServiceTestsImage** - Event Service Tests image version to be used in the Application chart.
+ - **applicationConnectivityValidatorImage** - Application Connectivity Validator image version to be used in the Application chart.
 
 ## Testing on a local deployment
 

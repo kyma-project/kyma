@@ -16,3 +16,4 @@ This table lists the configurable parameters, their descriptions, and default va
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
 | **controller.args.installationTimeout** | Specifies a period of time provided for the Application Gateway, Application Connectivity Validator and Event Service installation. The Application requires these services to be operational. The value is provided in seconds.| `240` |
+| **controller.args.tillerTLSSkipVerify** | Disables TLS verification in Tiller. | `true` 
