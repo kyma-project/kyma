@@ -1,54 +1,49 @@
 {
+    "$id": "https://example.com/address.schema.json",
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "description": "Schema definition for alertmanager helm subchart values",
+    "description": "Alert manager parameters",
     "type": "object",
     "properties": {
-        "global": {
-            "description": "Configuration of  the global properties for alertmanager component",
+      "global": {
+        "type": "object",
+        "properties": {
+          "alertTools": {
             "type": "object",
             "properties": {
-                "alertTools": {
-                    "description": "Defining the properties for the alert tools.",
+              "credentials": {
+                "type": "object",
+                "properties": {
+                  "slack": {
                     "type": "object",
                     "properties": {
-                        "credentials": {
-                            "description": "Defining the credentials for the alert tools.",
-                            "type": "object",
-                            "properties": {
-                                "slack": {
-                                    "description": "Defining the properties for the slack alert tool.",
-                                    "type": "object",
-                                    "properties": {
-                                        "apiurl": {
-                                            "description": "Specifies the URL endpoint which sends alerts triggered by Prometheus rules.",
-                                            "type": "string"
-                                        },
-                                        "channel": {
-                                            "description": "Refers to the Slack channel which receives notifications on new alerts.",
-                                            "type": "string",
-                                            "example": "organization.slack.com"
-                                        }
-                                    }
-                                },
-                                "victorOps": {
-                                    "description": "Defining the properties for the victorOps alert tool.",
-                                    "type": "object",
-                                    "properties": {
-                                        "routingkey": {
-                                            "description": "Defines the team routing key in VictorOps.",
-                                            "type": "string"
-                                        },
-                                        "apikey": {
-                                            "description": "Defines the team API key in VictorOps.",
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                      "apiurl": {
+                        "type": "string",
+                        "desciption": "Specifies the URL endpoint which sends alerts triggered by Prometheus rules."
+                      },
+                      "channel": {
+                        "type": "string",
+                        "description": "Refers to the Slack channel which receives notifications on new alerts."
+                      }
                     }
+                  },
+                  "victorOps": {
+                    "type": "object",
+                    "properties": {
+                      "routingKey": {
+                        "type": "string",
+                        "description": "Defines the team routing key in VictorOps."
+                      },
+                      "apiKey": {
+                        "type": "string",
+                        "description": "Defines the team API key in VictorOps."
+                      }
+                    }
+                  }
                 }
+              }
             }
+          }
         }
+      }
     }
 }
