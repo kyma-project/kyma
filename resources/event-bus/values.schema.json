@@ -1,0 +1,69 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema definition for event-bus helm chart values",
+    "type": "object",
+    "properties": {
+        "global": {
+            "description": "Configuration properties for the global component",
+            "type": "object",
+            "properties": {
+                "publishKnative": {
+                    "description": "Defining the properties to publish Knative.",
+                    "type": "object",
+                    "properties": {
+                        "maxRequests": {
+                            "description": "Specifies the maximum number of parallel Event requests that publishKnative can process. If you raise this value, you may also have to increase memory resources for the Event Bus to handle the higher load.",
+                            "default": 16,
+                            "type": "number"
+                        },
+                        "maxRequestSize": {
+                            "description": "Specifies the maximum size of one Event. If you raise this value, you may also have to increase memory resources for the Event Bus to handle the higher load.",
+                            "default": 65536,
+                            "type": "number"
+                        },
+                        "resources": {
+                            "description": "Defines the resources properties for Knative",
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "description": "Defines the resources properties for Knative",
+                                    "type": "object",
+                                    "properties": {
+                                        "memory": {
+                                            "description": "Specifies memory limits set for publishKnative.",
+                                            "default": "32M",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "subscriptionControllerKnative": {
+                    "description": "Defining the properties for Knative subscription controller.",
+                    "type": "object",
+                    "properties": {
+                        "resources": {
+                            "description": "Defines the resources properties for Knative",
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "description": "Defines the resources properties for Knative",
+                                    "type": "object",
+                                    "properties": {
+                                        "memory": {
+                                            "description": "Specifies memory limits set for subscriptionControllerKnative.",
+                                            "default": "32M",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
