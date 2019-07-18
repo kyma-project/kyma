@@ -53,9 +53,10 @@ spec:
               description: Decide which tests to execute. If not provided execute
                 all tests
               properties:
-                matchLabels:
-                  description: Find test definitions by it's labels. TestDefinition
-                    should have AT LEAST one label listed here to be executed.
+                matchLabelExpressions:
+                  description: 'Find test definitions by their labels. TestDefinition
+                    must match AT LEAST one expression listed here to be executed.
+                    For the complete grammar see: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels'
                   items:
                     type: string
                   type: array
