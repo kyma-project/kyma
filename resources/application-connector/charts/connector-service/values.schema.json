@@ -1,0 +1,80 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema definition for connector-service helm subchart values",
+    "type": "object",
+    "properties": {
+        "deployment": {
+            "description": "Configuration properties for the deployment component",
+            "type": "object",
+            "properties": {
+                "args": {
+                    "description": "Defining the arguments for the deployment component.",
+                    "type": "object",
+                    "properties": {
+                        "tokenLength": {
+                            "description": "Specifies a number of characters in a registration token.",
+                            "default": 64,
+                            "type": "number"
+                        },
+                        "appTokenExpirationMinutes": {
+                            "description": "Specifies a period of time after which a token for an Application expires. It is provided in minutes.",
+                            "default": 5,
+                            "type": "number"
+                        },
+                        "runtimeTokenExpirationMinutes": {
+                            "description": "Specifies a period of time after which a token for a runtime expires. It is provided in minutes.",
+                            "default": 10,
+                            "type": "number"
+                        },
+                        "appValidityTime": {
+                            "description": "Specifies a period of time during which certificates that the service issues for an Application are valid. It is provided in days.",
+                            "default": "92d",
+                            "type": "string"
+                        },
+                        "runtimeValidityTime": {
+                            "description": "Specifies a period of time during which certificates that the service issues for a runtime are valid. It is provided in days.",
+                            "default": "92d",
+                            "type": "string"
+                        },
+                        "central": {
+                            "description": "Determines whether the Connector Service works in the central mode.",
+                            "default": false,
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "envvars": {
+                    "description": "Defining the environmental variables for the deployment component.",
+                    "type": "object",
+                    "properties": {
+                        "country": {
+                            "description": "Specifies a country which is required generate a Certificate Signing Request. It is provided as a two-letter country code.",
+                            "default": "DE",
+                            "type": "string"
+                        },
+                        "organization": {
+                            "description": "Specifies an organization which is required to generate a Certificate Signing Request.",
+                            "default": "Organization",
+                            "type": "string"
+                        },
+                        "organizationalunit": {
+                            "description": "Specifies an organizational unit which is required to generate a Certificate Signing Request.",
+                            "default": "OrgUnit",
+                            "type": "string"
+                        },
+                        "locality": {
+                            "description": "Specifies a locality which is required to generate a Certificate Signing Request.",
+                            "default": "Waldorf",
+                            "type": "string"
+                        },
+                        "province": {
+                            "description": "Specifies a province which is required to generate a Certificate Signing Request.",
+                            "default": "Waldorf",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

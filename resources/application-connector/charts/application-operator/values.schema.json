@@ -1,0 +1,24 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema definition for application-operator helm subchart values",
+    "type": "object",
+    "properties": {
+        "controller": {
+            "description": "Configuration properties for the controller component",
+            "type": "object",
+            "properties": {
+                "args": {
+                    "description": "Defining the arguments for the controller component.",
+                    "type": "object",
+                    "properties": {
+                        "installationTimeout": {
+                            "description": "Specifies a period of time provided for the Application Gateway, Application Connectivity Validator and Event Service installation. The Application requires these services to be operational. The value is provided in seconds.",
+                            "default": 240,
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
