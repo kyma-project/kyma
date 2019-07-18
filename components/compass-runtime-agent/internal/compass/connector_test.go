@@ -19,7 +19,10 @@ func TestCompassConnector_EstablishConnection(t *testing.T) {
 
 	file, err := ioutil.TempFile(".", "tokenFile")
 	require.NoError(t, err)
-	defer os.Remove(file.Name())
+	defer func() {
+		err := os.Remove(file.Name())
+		require.NoError(t, err)
+	}()
 
 	_, err = file.Write([]byte(tokenURLData))
 	require.NoError(t, err)
@@ -50,7 +53,10 @@ func TestCompassConnector_EstablishConnection(t *testing.T) {
 		// given
 		invalidFile, err := ioutil.TempFile(".", "invalidFile")
 		require.NoError(t, err)
-		defer os.Remove(invalidFile.Name())
+		defer func() {
+			err := os.Remove(invalidFile.Name())
+			require.NoError(t, err)
+		}()
 
 		_, err = invalidFile.Write([]byte("invalid data"))
 		require.NoError(t, err)
