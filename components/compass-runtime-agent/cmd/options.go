@@ -28,6 +28,6 @@ func parseArgs() *options {
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--controllerSyncPeriod=%s --minimalConfigFetchTime=%s --tokenURLConfigFile=%s",
+	return fmt.Sprintf("--controllerSyncPeriod=%d --minimalConfigFetchTime=%d --tokenURLConfigFile=%s",
 		o.controllerSyncPeriod, o.minimalConfigFetchTime, o.tokenURLConfigFile)
 }

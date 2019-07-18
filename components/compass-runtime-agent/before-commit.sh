@@ -33,7 +33,7 @@ if [[ "$1" == "$CI_FLAG" ]]; then
 	buildEnv="env CGO_ENABLED=0 GOOS=linux GOARCH=amd64"
 fi
 
-${buildEnv} go build -o compass-runtime-agent ./cmd/main.go
+${buildEnv} go build -o compass-runtime-agent ./cmd
 goBuildResult=$?
 rm compass-runtime-agent
 

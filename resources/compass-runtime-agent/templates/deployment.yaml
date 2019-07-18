@@ -22,3 +22,10 @@ spec:
         - name: {{ .Chart.Name }}
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.runtimeAgent.dir }}compass-runtime-agent:{{ .Values.global.images.runtimeAgent.version }}
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+          volumeMounts:
+            - mountPath: {{ .Values.deployment.tokenConfig.tokenURLConfigFile }}
+              name: {{ .Values.deployment.tokenConfig.volumeName }}
+      volumes:
+        - name: {{ .Values.deployment.tokenConfig.volumeName }}
+          configMap:
+            name: {{ .Values.config.tokenConfigMap.name }}
