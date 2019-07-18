@@ -55,15 +55,14 @@ metadata:
   namespace: kyma-backup
 spec:
   template:
-    spec:
-      includedNamespaces:
-      - '*'
-      includedResources:
-      - '*'
-      includeClusterResources: true
-      storageLocation: default
-      volumeSnapshotLocations:
-      - default
+    includedNamespaces:
+    - '*'
+    includedResources:
+    - '*'
+    includeClusterResources: true
+    storageLocation: default
+    volumeSnapshotLocations:
+    - default
   schedule: 0 1 * * *
 ```
 
