@@ -61,7 +61,6 @@ func (f *BrokersFacade) Create(destinationNs string) error {
 		f.log.Warnf("Creation of namespaced-broker for namespace [%s] results in error: [%s]. AlreadyExist errors will be ignored.", destinationNs, err)
 	}
 
-	f.log.Infof("Triggering Service Catalog to do a sync with a broker in %s namespace", destinationNs)
 	err = f.brokerSyncer.SyncServiceBroker(destinationNs)
 	if err != nil {
 		f.log.Warnf("Failed to sync a broker in the namespace %s: %s", destinationNs, err.Error())

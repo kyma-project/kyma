@@ -53,7 +53,6 @@ func (f *ClusterBrokersFacade) Create() error {
 		f.log.Warnf("Creation of ClusterServiceBroker %s results in error: [%s]. AlreadyExist errors will be ignored.", f.clusterBrokerName, err)
 	}
 
-	f.log.Infof("Triggering Service Catalog to do a sync with a ClusterServiceBroker %s", f.clusterBrokerName)
 	err = f.clusterBrokerSyncer.Sync()
 	if err != nil {
 		f.log.Warnf("Failed to sync a broker %s : %v", f.clusterBrokerName, err.Error())
