@@ -2,7 +2,7 @@
 
 ## Overview
 
-Velero is a tool used to back up and restore Kubernetes resources and persistent volumes. It can create on-demand or cheduled backups, filter objects which should be backed up, and set TTL (time to live) for stored backups. For more details, see the official [Velero documentation](https://velero.io/docs/v1.0.0/).
+Velero is a tool used to back up and restore Kubernetes resources and persistent volumes. It can create on-demand or scheduled backups, filter objects which should be backed up, and set TTL (time to live) for stored backups. For more details, see the official [Velero documentation](https://velero.io/docs/v1.0.0/).
 
 ## Required parameters
 
@@ -21,7 +21,7 @@ Parameter | Description | Default | Required
 **configuration.volumeSnapshotLocation.config.apitimeout** | Defines the amount of time after which an API request returns a timeout status. It only applies to Azure. | none | yes, if using Azure
 **credentials.useSecret** | Specifies if a secret is required for IAM credentials. Set this to `false` when using `kube2iam`. | `true` | yes
 **credentials.existingSecret** | If specified and `useSecret` is `true`, uses an existing secret with this name instead of creating one. | none | yes, if `useSecret` is `true` and `secretContents` is empty
-`credentials.secretContents` | If specified and `useSecret` is `true`, contents for the credentials secret | none | yes, if `useSecret` is `true` and `existingSecret` is empty
+**credentials.secretContents** | If specified and `useSecret` is `true`, provides the content for the credentials secret | none | yes, if `useSecret` is `true` and `existingSecret` is empty
 
 ## Details
 

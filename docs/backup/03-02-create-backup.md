@@ -2,7 +2,7 @@
 title: Back up a Kyma cluster
 type: Details
 ---
-Kyma provides a validated sample backup specification file:
+Kyma provides a validated sample Backup specification file:
 
 - [Backup.yaml](./assets/backup.yaml)
 
@@ -24,7 +24,14 @@ metadata:
   name: kyma-backup
   namespace: kyma-backup
 spec:
-    {INCLUDE CONTENT OF BACKUP FILE HERE} ### E.g. docs/backup/assets/backup.yaml
+  includedNamespaces:
+  - '*'
+  includedResources:
+  - '*'
+  includeClusterResources: true
+  storageLocation: default
+  volumeSnapshotLocations:
+  - default
 ```
 
 To trigger the backup process, run the following command:
@@ -47,14 +54,22 @@ metadata:
   name: kyma-backup
   namespace: kyma-backup
 spec:
-    template:
-        {INCLUDE CONTENT OF BACKUP SPEC HERE} ### E.g. docs/backup/assets/backup.yaml
-    schedule: 0 1 * * *
+  template:
+    spec:
+      includedNamespaces:
+      - '*'
+      includedResources:
+      - '*'
+      includeClusterResources: true
+      storageLocation: default
+      volumeSnapshotLocations:
+      - default
+  schedule: 0 1 * * *
 ```
 
 To schedule a backup, run the following command:
 
-```
+```bash
 kubectl apply -f {filename}
 ```
 
@@ -62,6 +77,7 @@ kubectl apply -f {filename}
 
 To set the retention period of a backup, define the **ttl** parameter in the Backup specification [definition](https://velero.io/docs/v1.0.0/api-types/backup/):
 
-```  The amount of time before this backup is eligible for garbage collection.
-  ttl: 24h0m0s
-  ```
+```yaml  
+# The amount of time before this backup is eligible for garbage collection.
+ttl: 24h0m0s
+```
