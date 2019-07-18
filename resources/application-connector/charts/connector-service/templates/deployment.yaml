@@ -37,6 +37,7 @@ spec:
           - "--runtimeTokenExpirationMinutes={{ .Values.deployment.args.runtimeTokenExpirationMinutes }}"
           - "--caSecretName={{ .Values.deployment.args.caSecretNamespace }}/{{ .Values.deployment.args.caSecretName }}"
           - "--rootCACertificateSecretName={{ .Values.deployment.args.rootCACertificateSecretNamespace }}/{{ .Values.deployment.args.rootCACertificateSecretName }}"
+          - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
           - "--connectorServiceHost=connector-service.{{ .Values.global.ingress.domainName }}"
           - "--gatewayBaseURL=https://gateway.{{ .Values.global.ingress.domainName }}"
           - "--certificateProtectedHost=gateway.{{ .Values.global.ingress.domainName }}"
