@@ -11,6 +11,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// CreateSubscription is a step which creates new Subscription
 type CreateSubscription struct {
 	subscriptions eventingClient.SubscriptionInterface
 	endpoint      string
@@ -18,6 +19,7 @@ type CreateSubscription struct {
 
 var _ step.Step = &CreateSubscription{}
 
+// NewCreateSubscription returns new CreateSubscription
 func NewCreateSubscription(subscriptions eventingClient.SubscriptionInterface, namespace string) *CreateSubscription {
 	return &CreateSubscription{
 		subscriptions: subscriptions,
@@ -25,10 +27,12 @@ func NewCreateSubscription(subscriptions eventingClient.SubscriptionInterface, n
 	}
 }
 
+// Name returns name name of the step
 func (s *CreateSubscription) Name() string {
 	return "Create subscription"
 }
 
+// Run executes the step
 func (s *CreateSubscription) Run() error {
 	subSpec := eventingApi.SubscriptionSpec{
 		Endpoint:                      s.endpoint,
@@ -55,6 +59,7 @@ func (s *CreateSubscription) Run() error {
 	return retry.Do(s.isSubscriptionReady)
 }
 
+// Cleanup removes all resources that may possibly created by the step
 func (s *CreateSubscription) Cleanup() error {
 	return s.subscriptions.Delete(consts.AppName, &metav1.DeleteOptions{})
 }

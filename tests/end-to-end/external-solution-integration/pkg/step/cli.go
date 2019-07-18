@@ -10,11 +10,11 @@ func (r *Runner) Execute(steps []Step) error {
 	r.log.Infof("Cleanup mode: %s", r.cleanup)
 	var err error
 	switch r.cleanup {
-	case CleanupMode_No:
+	case CleanupModeNo:
 		err = r.Run(steps, true)
-	case CleanupMode_Only:
+	case CleanupModeOnly:
 		r.Cleanup(steps)
-	case CleanupMode_Yes:
+	case CleanupModeYes:
 		err = r.Run(steps, false)
 	}
 	return err
@@ -29,12 +29,12 @@ func (r *Runner) AddFlags(set *pflag.FlagSet) {
 type CleanupMode string
 
 const (
-	// Don't execute cleanup
-	CleanupMode_No CleanupMode = "no"
-	// Don't run steps, only cleanup
-	CleanupMode_Only CleanupMode = "only"
+	// CleanupModeNo - Don't execute cleanup
+	CleanupModeNo CleanupMode = "no"
+	// CleanupModeOnly - Don't run steps, only cleanup
+	CleanupModeOnly CleanupMode = "only"
 	// Execute both steps and cleanup
-	CleanupMode_Yes CleanupMode = "yes"
+	CleanupModeYes CleanupMode = "yes"
 )
 
 // String implements pflag.Value.String
@@ -45,7 +45,7 @@ func (m CleanupMode) String() string {
 // Set implements pflag.Value.Set
 func (m *CleanupMode) Set(v string) error {
 	switch CleanupMode(v) {
-	case CleanupMode_No, CleanupMode_Yes, CleanupMode_Only:
+	case CleanupModeNo, CleanupModeYes, CleanupModeOnly:
 	default:
 		return errors.Errorf("invalid cleanup value: %s", v)
 	}

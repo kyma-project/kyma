@@ -53,17 +53,6 @@
   revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
-  branch = "travis-1.9"
-  digest = "1:e8f5d9c09a7209c740e769713376abda388c41b777ba8e9ed52767e21acf379f"
-  name = "github.com/golang/lint"
-  packages = [
-    ".",
-    "golint",
-  ]
-  pruneopts = "UT"
-  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
-
-[[projects]]
   digest = "1:4c0989ca0bcd10799064318923b9bc2db6b4d6338dd75f3f2d86c3511aaaf5cf"
   name = "github.com/golang/protobuf"
   packages = [
@@ -197,10 +186,9 @@
   version = "v0.1.43"
 
 [[projects]]
-  digest = "1:b3c71e573bd3ced343fe049987be5c89f31c87c63df17b013b889cd266ab9ece"
+  digest = "1:833b0dcce87aa06e7f42fbfde09e4bd8dd741f994c722250fc649c3ab68c4cd1"
   name = "github.com/kyma-project/kyma"
   packages = [
-    "common/ingressgateway",
     "common/resilient",
     "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
     "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
@@ -617,7 +605,6 @@
   analyzer-version = 1
   input-imports = [
     "github.com/avast/retry-go",
-    "github.com/golang/lint/golint",
     "github.com/hashicorp/errwrap",
     "github.com/hashicorp/go-multierror",
     "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
@@ -626,7 +613,6 @@
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
-    "github.com/kyma-project/kyma/common/ingressgateway",
     "github.com/kyma-project/kyma/common/resilient",
     "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
     "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
@@ -660,6 +646,7 @@
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/cli-runtime/pkg/genericclioptions",
     "k8s.io/client-go/kubernetes",
+    "k8s.io/client-go/kubernetes/typed/apps/v1",
     "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",

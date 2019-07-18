@@ -21,12 +21,14 @@ type CreateServiceBindingUsage struct {
 	state                CreateServiceBindingUsageState
 }
 
+// CreateServiceBindingUsageState represents CreateServiceBindingUsage dependencies
 type CreateServiceBindingUsageState interface {
 	GetServiceClassID() string
 }
 
 var _ step.Step = &CreateServiceBindingUsage{}
 
+// NewCreateServiceBindingUsage returns new CreateServiceBindingUsage
 func NewCreateServiceBindingUsage(serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface, pods coreClient.PodInterface, state CreateServiceBindingUsageState) *CreateServiceBindingUsage {
 	return &CreateServiceBindingUsage{
 		LambdaHelper:         helpers.NewLambdaHelper(pods),
@@ -35,10 +37,12 @@ func NewCreateServiceBindingUsage(serviceBindingUsages serviceBindingUsageClient
 	}
 }
 
+// Name returns name name of the step
 func (s *CreateServiceBindingUsage) Name() string {
 	return "Create service binding usage"
 }
 
+// Run executes the step
 func (s *CreateServiceBindingUsage) Run() error {
 	serviceBindingUsage := &serviceBindingUsageApi.ServiceBindingUsage{
 		TypeMeta: metav1.TypeMeta{Kind: "ServiceBindingUsage", APIVersion: serviceBindingUsageApi.SchemeGroupVersion.String()},
@@ -99,6 +103,7 @@ func (s *CreateServiceBindingUsage) isLambdaBound() error {
 	return nil
 }
 
+// Cleanup removes all resources that may possibly created by the step
 func (s *CreateServiceBindingUsage) Cleanup() error {
 	err := s.serviceBindingUsages.Delete(consts.ServiceBindingUsageName, &metav1.DeleteOptions{})
 	if err != nil {

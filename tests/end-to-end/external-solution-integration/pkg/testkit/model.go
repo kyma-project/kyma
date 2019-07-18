@@ -8,10 +8,6 @@ import (
 	"time"
 )
 
-var (
-	ApiRawSpec = compact([]byte("{\"name\":\"api\"}"))
-)
-
 type InfoResponse struct {
 	CertUrl     string   `json:"csrUrl"`
 	Api         ApiInfo  `json:"api"`

@@ -33,7 +33,6 @@ func (s *EventSender) SendEvent(appName string, event *ExampleEvent) error {
 		return err
 	}
 
-
 	request.Header.Add("Content-Type", "application/json")
 
 	response, err := s.httpClient.Do(request)

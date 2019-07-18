@@ -3,10 +3,11 @@ package scenario
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/kyma-project/kyma/common/resilient"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 	"net/http"
 	"time"
+
+	"github.com/kyma-project/kyma/common/resilient"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
 
 	kubelessClient "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
@@ -18,7 +19,6 @@ import (
 	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/resourceskit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
@@ -28,6 +28,7 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+// E2E executes complete external solution integration test scenario
 type E2E struct {
 	domain        string
 	runID         string
@@ -39,13 +40,13 @@ type e2EState struct {
 	domain        string
 	skipSSLVerify bool
 
-
 	serviceClassID      string
 	serviceInstanceName string
 	registryClient      *testkit.RegistryClient
 	eventSender         *testkit.EventSender
 }
 
+// AddFlags adds CLI flags to given FlagSet
 func (s *E2E) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.testNamespace, "testNamespace", "default", "Namespace where test should create resources")
 	pflag.StringVar(&s.domain, "domain", "kyma.local", "domain")
@@ -53,6 +54,7 @@ func (s *E2E) AddFlags(set *pflag.FlagSet) {
 	pflag.BoolVar(&s.skipSSLVerify, "skip-ssl-verify", false, "Skip verification of service SSL certificates")
 }
 
+// Steps return scenario steps
 func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	appOperatorClientset := appOperatorClient.NewForConfigOrDie(config)
 	appBrokerClientset := appBrokerClient.NewForConfigOrDie(config)
@@ -64,10 +66,13 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	serviceBindingUsageClientset := serviceBindingUsageClient.NewForConfigOrDie(config)
 	gatewayClientset := gatewayClient.NewForConfigOrDie(config)
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
-	tokenRequestClient := resourceskit.NewTokenRequestClient(connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testNamespace))
-	connector := testkit.NewConnectorClient(tokenRequestClient, internal.NewHttpClient(s.skipSSLVerify), log.New())
+	connector := testkit.NewConnectorClient(
+		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testNamespace),
+		internal.NewHTTPClient(s.skipSSLVerify),
+		log.New(),
+	)
 	testService := testkit.NewTestService(
-		internal.NewHttpClient(s.skipSSLVerify),
+		internal.NewHTTPClient(s.skipSSLVerify),
 		coreClientset.AppsV1().Deployments(s.testNamespace),
 		coreClientset.CoreV1().Services(s.testNamespace),
 		gatewayClientset.GatewayV1alpha2().Apis(s.testNamespace),
@@ -98,35 +103,42 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	}, nil
 }
 
+// SetServiceClassID allows to set ServiceClassID so it can be shared between steps
 func (s *e2EState) SetServiceClassID(serviceID string) {
 	s.serviceClassID = serviceID
 }
 
+// GetServiceClassID allows to get ServiceClassID so it can be shared between steps
 func (s *e2EState) GetServiceClassID() string {
 	return s.serviceClassID
 }
 
+// SetServiceInstanceName allows to set ServiceInstanceName so it can be shared between steps
 func (s *e2EState) SetServiceInstanceName(serviceID string) {
 	s.serviceInstanceName = serviceID
 }
 
+// GetServiceInstanceName allows to get ServiceInstanceName so it can be shared between steps
 func (s *e2EState) GetServiceInstanceName() string {
 	return s.serviceInstanceName
 }
 
+// SetGatewayClientCerts allows to set application gateway client certificates so they can be used by later steps
 func (s *e2EState) SetGatewayClientCerts(certs []tls.Certificate) {
-	httpClient := internal.NewHttpClient(s.skipSSLVerify)
+	httpClient := internal.NewHTTPClient(s.skipSSLVerify)
 	httpClient.Transport.(*http.Transport).TLSClientConfig.Certificates = certs
-	resilientHttpClient := resilient.WrapHttpClient(httpClient)
+	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
 	gatewayURL := fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", s.domain, consts.AppName)
-	s.registryClient = testkit.NewRegistryClient(gatewayURL, resilientHttpClient)
-	s.eventSender = testkit.NewEventSender(resilientHttpClient, s.domain)
+	s.registryClient = testkit.NewRegistryClient(gatewayURL, resilientHTTPClient)
+	s.eventSender = testkit.NewEventSender(resilientHTTPClient, s.domain)
 }
 
+// GetRegistryClient returns connected RegistryClient
 func (s *e2EState) GetRegistryClient() *testkit.RegistryClient {
 	return s.registryClient
 }
 
+// GetEventSender returns connected EventSender
 func (s *e2EState) GetEventSender() *testkit.EventSender {
 	return s.eventSender
 }

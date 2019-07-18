@@ -1,6 +1,5 @@
 required = [
-  "github.com/golang/lint/golint",
-  "golang.org/x/tools/cmd/goimports",
+      "golang.org/x/tools/cmd/goimports",
 ]
 
 [prune]

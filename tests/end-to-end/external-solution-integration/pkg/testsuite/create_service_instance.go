@@ -13,12 +13,14 @@ import (
 	"time"
 )
 
+// CreateServiceInstance is a step which creates new ServiceInstance
 type CreateServiceInstance struct {
 	serviceInstances serviceCatalogClient.ServiceInstanceInterface
 	state            CreateServiceInstanceState
 	runID            string
 }
 
+// CreateServiceInstanceState represents CreateServiceInstance dependencies
 type CreateServiceInstanceState interface {
 	GetServiceClassID() string
 	SetServiceInstanceName(string)
@@ -27,6 +29,7 @@ type CreateServiceInstanceState interface {
 
 var _ step.Step = &CreateServiceInstance{}
 
+// NewCreateServiceInstance returns new CreateServiceInstance
 func NewCreateServiceInstance(runID string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, state CreateServiceInstanceState) *CreateServiceInstance {
 	return &CreateServiceInstance{
 		runID:            runID,
@@ -35,10 +38,12 @@ func NewCreateServiceInstance(runID string, serviceInstances serviceCatalogClien
 	}
 }
 
+// Name returns name name of the step
 func (s *CreateServiceInstance) Name() string {
 	return "Create service instance"
 }
 
+// Run executes the step
 func (s *CreateServiceInstance) Run() error {
 	si, err := s.serviceInstances.Create(&serviceCatalogApi.ServiceInstance{
 		ObjectMeta: v1.ObjectMeta{
@@ -75,6 +80,7 @@ func (s *CreateServiceInstance) isServiceInstanceCreated() error {
 	return nil
 }
 
+// Cleanup removes all resources that may possibly created by the step
 func (s *CreateServiceInstance) Cleanup() error {
 	selector := v1.ListOptions{
 		LabelSelector: fmt.Sprintf("runID=%s", s.runID),

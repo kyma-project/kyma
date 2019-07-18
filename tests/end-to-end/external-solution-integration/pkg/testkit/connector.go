@@ -6,29 +6,41 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"github.com/avast/retry-go"
-	"github.com/pkg/errors"
-	"net/http"
+	connectionTokenHandlerApi "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/resourceskit"
+	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
+	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"net/http"
+	"time"
+
 	"github.com/sirupsen/logrus"
 )
 
 type ConnectorClient struct {
-	TokenRequestClient resourceskit.TokenRequestClient
-	httpClient         *http.Client
-	logger             logrus.FieldLogger
+	tokenRequests connectionTokenHandlerClient.TokenRequestInterface
+	httpClient    *http.Client
+	logger        logrus.FieldLogger
 }
 
-func NewConnectorClient(trClient resourceskit.TokenRequestClient, httpClient *http.Client, logger logrus.FieldLogger) *ConnectorClient {
+func NewConnectorClient(tokenRequests connectionTokenHandlerClient.TokenRequestInterface, httpClient *http.Client, logger logrus.FieldLogger) *ConnectorClient {
 	return &ConnectorClient{
-		TokenRequestClient: trClient,
-		httpClient:         httpClient,
-		logger:             logger,
+		tokenRequests: tokenRequests,
+		httpClient:    httpClient,
+		logger:        logger,
 	}
 }
 
 func (cc *ConnectorClient) GetToken() (string, error) {
-	_, err := cc.TokenRequestClient.CreateTokenRequest()
+	tokenRequest := &connectionTokenHandlerApi.TokenRequest{
+		ObjectMeta: metav1.ObjectMeta{Name: consts.AppName},
+		Status: connectionTokenHandlerApi.TokenRequestStatus{
+			ExpireAfter: metav1.NewTime(time.Now().Add(1 * time.Minute)),
+		},
+	}
+
+	_, err := cc.tokenRequests.Create(tokenRequest)
 	if err != nil {
 		cc.logger.Error(err)
 		return "", err
@@ -40,7 +52,7 @@ func (cc *ConnectorClient) GetToken() (string, error) {
 		return "", err
 	}
 
-	tr, err := cc.TokenRequestClient.GetTokenRequest()
+	tr, err := cc.tokenRequests.Get(consts.AppName, metav1.GetOptions{})
 	if err != nil {
 		cc.logger.Error(err)
 		return "", err
@@ -50,7 +62,7 @@ func (cc *ConnectorClient) GetToken() (string, error) {
 }
 
 func (cc *ConnectorClient) isTokenRequestReady() error {
-	tokenRequest, e := cc.TokenRequestClient.GetTokenRequest()
+	tokenRequest, e := cc.tokenRequests.Get(consts.AppName, metav1.GetOptions{})
 	if e != nil {
 		return e
 	}

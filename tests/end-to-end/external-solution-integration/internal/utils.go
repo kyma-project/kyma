@@ -5,7 +5,8 @@ import (
 	"net/http"
 )
 
-func NewHttpClient(skipVerify bool) *http.Client {
+// NewHTTPClient returns new *http.Client with optional insecure SSL mode
+func NewHTTPClient(skipVerify bool) *http.Client {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
 	}

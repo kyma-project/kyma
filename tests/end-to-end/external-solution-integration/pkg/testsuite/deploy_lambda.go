@@ -47,6 +47,8 @@ module.exports = { main: function (event, context) {
 } };
 `
 
+// DeployLambda deploys lambda to the cluster. The lambda will do PUT /counter to connected application upon receiving
+// an event
 type DeployLambda struct {
 	*helpers.LambdaHelper
 	functions kubelessClient.FunctionInterface
@@ -54,6 +56,7 @@ type DeployLambda struct {
 
 var _ step.Step = &DeployLambda{}
 
+// NewDeployLambda returns new DeployLambda
 func NewDeployLambda(functions kubelessClient.FunctionInterface, pods coreClient.PodInterface) *DeployLambda {
 	return &DeployLambda{
 		LambdaHelper: helpers.NewLambdaHelper(pods),
@@ -61,10 +64,12 @@ func NewDeployLambda(functions kubelessClient.FunctionInterface, pods coreClient
 	}
 }
 
+// Name returns name name of the step
 func (s *DeployLambda) Name() string {
 	return "Deploy lambda"
 }
 
+// Run executes the step
 func (s *DeployLambda) Run() error {
 	lambda := s.createLambda()
 

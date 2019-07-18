@@ -67,5 +67,5 @@ func (s ConnectApplication) Run() error {
 
 // Cleanup removes all resources that may possibly created by the step
 func (s ConnectApplication) Cleanup() error {
-	return s.connector.TokenRequestClient.DeleteTokenRequest()
+	return nil
 }

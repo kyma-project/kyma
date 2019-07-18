@@ -78,7 +78,6 @@ func (ts *TestService) checkValue() (int, error) {
 		return 0, errors.Errorf("error response: %s", body)
 	}
 
-
 	var response struct {
 		Counter int `json:"counter"`
 	}
@@ -143,7 +142,7 @@ func (ts *TestService) createDeployment() error {
 	rs := int32(1)
 	deployment := &model.Deployment{
 		ObjectMeta: v1.ObjectMeta{
-			Name:      testServiceName,
+			Name: testServiceName,
 			Labels: map[string]string{
 				labelKey: testServiceName,
 			},
@@ -183,7 +182,7 @@ func (ts *TestService) createService() error {
 	service := &core.Service{
 
 		ObjectMeta: v1.ObjectMeta{
-			Name:      testServiceName,
+			Name: testServiceName,
 		},
 		Spec: core.ServiceSpec{
 			Type: "ClusterIP",
@@ -205,7 +204,7 @@ func (ts *TestService) createService() error {
 func (ts *TestService) createAPI() error {
 	api := &gatewayApi.Api{
 		ObjectMeta: v1.ObjectMeta{
-			Name:      testServiceName,
+			Name: testServiceName,
 		},
 		Spec: gatewayApi.ApiSpec{
 			Service: gatewayApi.Service{

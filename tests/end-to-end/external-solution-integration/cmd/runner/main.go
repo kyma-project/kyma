@@ -3,8 +3,9 @@ package main
 import (
 	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/scenario"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"os"
 
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	log "github.com/sirupsen/logrus"
@@ -12,7 +13,6 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	coreClient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"os"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
@@ -32,7 +32,7 @@ func main() {
 	os.Args = os.Args[1:]
 	s, exists := scenarios[scenarioName]
 	if !exists {
-		log.Errorf("Scenario '%s' does not exist. Use one of the following: ")
+		log.Errorf("Scenario '%s' does not exist. Use one of the following: ", scenarioName)
 		for name := range scenarios {
 			log.Infof(" - %s", name)
 		}
@@ -79,7 +79,6 @@ func setupFlags(s scenario.Scenario) {
 	kubeconfigFlags.AddFlags(pflag.CommandLine)
 	runner.AddFlags(pflag.CommandLine)
 	s.AddFlags(pflag.CommandLine)
-	helpers.AddFlags(pflag.CommandLine)
 	pflag.Parse()
 
 	kubeConfig, err = kubeconfigFlags.ToRESTConfig()

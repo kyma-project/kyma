@@ -12,6 +12,7 @@ import (
 type CreateMapping struct {
 	mappings acClient.ApplicationMappingInterface
 }
+
 var _ step.Step = &CreateMapping{}
 
 // NewCreateMapping returns new CreateMapping

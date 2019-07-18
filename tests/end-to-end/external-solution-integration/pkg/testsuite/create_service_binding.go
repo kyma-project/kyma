@@ -15,6 +15,7 @@ type CreateServiceBinding struct {
 	state           CreateServiceBindingState
 }
 
+// CreateServiceBindingState represents CreateServiceBinding dependencies
 type CreateServiceBindingState interface {
 	GetServiceInstanceName() string
 }
