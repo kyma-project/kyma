@@ -1,7 +1,0 @@
-apiVersion: addons.kyma-project.io/v1alpha1
-kind: ClusterAddonsConfiguration
-metadata:
-  name: addons-cfg-sample
-spec:
-  repositories:
-    - url: https://github.com/kyma-project/bundles/releases/download/latest/index-testing.yaml

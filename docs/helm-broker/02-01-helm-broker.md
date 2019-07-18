@@ -3,11 +3,11 @@ title: Basic architecture
 type: Architecture
 ---
 
-The Helm Broker is installed alongside other Kyma components and it automatically registers itself in the Service Catalog as a ClusterServiceBroker. The installation provides the default [ClusterAddonsConfiguration](#custom-resource-clusteraddonsconfiguration) (CAC) custom resource (CR). It contains URLs from which Helm Broker will fetch addons.
+The Helm Broker is installed alongside other Kyma components and it automatically registers itself in the Service Catalog as a ClusterServiceBroker. The installation provides the default [helm-repos-urls](#link) ClusterAddonsConfiguration (CAC) custom resource (CR). It contains URLs from which Helm Broker fetches addons. You can also [add your own addons](#details-fetch-addons-from-https-servers) with URLs that point to any remote HTTPS server.
 
-If you want the Helm Broker to act as a Namespace-scoped ServiceBroker, create the [AddonsConfiguration](#custom-resource-addonsconfiguration) (AC) custom resource. In such a case, the Helm Broker creates Service and registers itself in the Service Catalog as a ServiceBroker inside the Namespace in which the CR is created.
+If you want the Helm Broker to act as a Namespace-scoped ServiceBroker, create the [AddonsConfiguration](#custom-resource-addonsconfiguration) (AC) custom resource. In such a case, the Helm Broker creates a service and registers itself in the Service Catalog as a ServiceBroker inside the Namespace in which the CR is created.
 
-The Helm Broker workflow starts with the registration process, during which the Helm Broker fetches addons from URLs provided in the ClusterAddonsConfiguration or AddonsConfiguration CRs, and registers them as Service Classes in the Service Catalog. These URLs point to the the Kyma [`bundles`](https://github.com/kyma-project/bundles) repository, but you can also add URLs to a remote HTTPS server.
+The Helm Broker workflow starts with the registration process, during which the Helm Broker fetches addons from URLs provided in the ClusterAddonsConfiguration or AddonsConfiguration CRs, and registers them as Service Classes in the Service Catalog.
 
 ## Cluster-wide addons flow
 
@@ -35,7 +35,7 @@ The Helm Broker workflow starts with the registration process, during which the 
 
 After you register your addons in the Service Catalog, you can provision and bind Service Classes that your addons provide.
 
-1. Select a given bundle Service Class from the Service Catalog.
+1. Select a given addon Service Class from the Service Catalog.
 2. Provision this Service Class by creating its ServiceInstance in a given Namespace.
 3. Bind your ServiceInstance to a service or lambda.
 4. The service or lambda calls a given addon.

@@ -6,8 +6,8 @@ type: Details
 Addons which the Helm Broker uses must have a specific structure. These are all possible files that you can include in your addons:
 
 ```
-sample-bundle/
-   ├── meta.yaml                             # [REQUIRED] A file which contains metadata information about this bundle
+sample-addon/
+   ├── meta.yaml                             # [REQUIRED] A file which contains metadata information about this addon
    ├── chart/                                # [REQUIRED] A directory which contains a Helm chart that installs your Kubernetes resources
    │    └── {chart-name}/                    # [REQUIRED] A Helm chart directory
    │         └── ....                        # [REQUIRED] Helm chart files   
@@ -78,7 +78,7 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 |  **bindable**   |   NO  | The field that specifies whether you can bind an instance of the plan or not. The default value is `false`. |
 |     **free**    |   NO  | The attribute which specifies whether an instance of the plan is free or not. The default value is `false`.    |
 
-* `bind.yaml` file - contains information about binding in a specific plan. If you define in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file. For more information about this file, see [this](#details-bind-bundles) document.
+* `bind.yaml` file - contains information about binding in a specific plan. If you define in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file. For more information about this file, see [this](#details-bind-addons) document.
 
 * `values.yaml` file - provides the default configuration values in a given plan for the chart definition located in the `chart` directory. For more information, see the [values files](https://github.com/kubernetes/helm/blob/release-2.6/docs/chart_template_guide/values_files.md) specification.
 

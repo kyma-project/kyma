@@ -13,7 +13,7 @@ kubectl get crd clusteraddonsconfiguration.addons.kyma-project.io -o yaml
 
 This is a sample ClusterAddonsConfiguration which provides cluster-wide addons. If any status of ClusterAddonsConfiguration is marked as `Failed`, all of its addons are not available in the Service Catalog.
 
->**NOTE:** All CRs must have the `addons.kyma-project.io` finalizer which is used during the deletion process to fully remove a given CR from the storage. If you do not set a finalizer, the Controller sets it automatically.
+>**NOTE:** All CRs must have the `addons.kyma-project.io` finalizer which prevents the CR from deletion until the Controller completes the deletion logic successfully. If you do not set a finalizer, the Controller sets it automatically.
 
 ```yaml
 apiVersion: addons.kyma-project.io/v1alpha1
@@ -22,6 +22,7 @@ metadata:
   name: addons-cfg-sample
   finalizers:
   - addons.kyma-project.io
+  labels:
 spec:
   reprocessRequest: 0
   repositories:
@@ -68,7 +69,7 @@ status:
       message: "Fetching repository failed due to error: the index file was not found"
 ```
 
->**NOTE:** There is no fast return in case of an error, which means that the Controller fetches and processes all addons, even if any of them fails. Thanks to that, at the end of the process you can see a list of all failed addons. You can read information about all detected problems in the **status** entry of a given custom resource.
+>**NOTE:** There is no fast return in case of an error, which means that the Controller fetches and processes all addons, even if any of them fails. Thanks to that, at the end of the process you can see the status of all processed addons. You can read information about all detected problems in the **status** entry of a given CR.
 
 ## Custom resource parameters
 
@@ -77,12 +78,14 @@ This table lists all possible parameters of a given resource together with their
 | Parameter                 | Mandatory          | Description                   |
 |---------------------------|:------------------:|-------------------------------|
 | **metadata.name**                      | **YES**            | Specifies the name of the CR.    |
+| **metadata.finalizers**                 | **YES**            | Specifies the finalizer which prevents the CR from deletion until the Controller completes the deletion logic. The default finalizer is `addons.kyma-project.io`.       |
+| **metadata.labels**                   | **NO**            | Specifies a key-value pair that helps you to organize and filter your CRs. The label indicating the default addon configuration is `addons.kyma-project.io/managed: "true"`.       |
 | **spec.reprocessRequest**              | **NO**             | Allows you to manually trigger the reprocessing action of this CR. It is a strictly increasing, non-negative integer counter.    |
 | **spec.repositories.url**              | **YES**            | Provides the full URL to the index file of addons repositories.    |
 | **status.phase**                       | **Not applicable** | Describes the status of processing the CR by the Helm Broker Controller. It can be `Ready`, `Failed`, or `Pending`.       |
 | **status.lastProcessedTime**           | **Not applicable** | Specifies the last time when the Helm Broker Controller processed the CR.     |
 | **status.observedGeneration**          | **Not applicable** | Specifies the most recent generation that the Helm Broker Controller observed.               |
-| **status.repositories.url**            | **Not applicable** | Provides the full URL to the index file of addons repositories.         |
+| **status.repositories.url**            | **Not applicable** | Provides the full URL to the index file with addons definitions.         |
 | **status.repositories.status**         | **Not applicable** | Describes the status of processing a given repository by the Helm Broker Controller.     |
 | **status.repositories.reason**         | **Not applicable** | Provides the reason why the repository processing failed. [Here](https://github.com/kyma-project/kyma/blob/master/components/helm-broker/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of reasons.     |
 | **status.repositories.message**        | **Not applicable** | Provides a human-readable message why the repository processing failed. [Here](https://github.com/kyma-project/kyma/blob/master/components/helm-broker/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of messages.     |
