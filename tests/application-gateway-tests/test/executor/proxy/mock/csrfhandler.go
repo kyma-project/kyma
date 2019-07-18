@@ -70,7 +70,7 @@ func (ch *csrfHandler) Target(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if cookieToken.Value != expectedToken {
-		ch.logger.Errorf("Invalid cookie: %s with CSRF token value: %s", cookieName, cookieToken)
+		ch.logger.Errorf("Invalid cookie: %s with CSRF token value: %s", cookieName, cookieToken.Value)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
