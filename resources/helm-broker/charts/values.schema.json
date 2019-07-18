@@ -1,0 +1,23 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema definition for helm-broker helm chart values",
+    "type": "object",
+    "properties": {
+        "global": {
+            "description": "Configuration properties for the global component",
+            "type": "object",
+            "properties": {
+                "cfgReposUrlName": {
+                    "description": "Specifies the name of the default ConfigMap which provides the URLs of bundles repositories.",
+                    "default": "helm-repos-urls",
+                    "type": "string"
+                },
+                "isDevelopMode": {
+                    "description": "Defines that each repository URL must be an HTTPS server. If set to true, HTTP servers are also acceptable.",
+                    "default": false,
+                    "type": "boolean"
+                }
+            }
+        }
+    }
+}
