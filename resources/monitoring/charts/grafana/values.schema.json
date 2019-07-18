@@ -12,7 +12,9 @@
             "properties": {
               "theme": {
                 "type": "string",
-                "description": "Specifies the background colour of the Grafana UI. You can change it to 'dark' or 'light'"
+                "description": "Specifies the background colour of the Grafana UI. You can change it to 'dark' or 'light'",
+                "default": "light",
+                "examples": ["light", "dark"]
               }
             }
           }
