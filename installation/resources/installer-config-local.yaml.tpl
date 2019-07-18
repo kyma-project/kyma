@@ -120,12 +120,6 @@ metadata:
     component: assetstore
     kyma-project.io/installation: ""
 data:
-  asset-store-controller-manager.resources.limits.cpu: 100m
-  asset-store-controller-manager.resources.limits.memory: 128Mi
-  asset-store-controller-manager.resources.requests.cpu: 100m
-  asset-store-controller-manager.resources.requests.memory: 64Mi
-  asset-store-controller-manager.maxAssetConcurrentReconciles: "1"
-  asset-store-controller-manager.maxClusterAssetConcurrentReconciles: "1"
   asset-store-controller-manager.minikubeIP: ""
   test.integration.minikubeIP: ""
 ---

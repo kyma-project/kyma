@@ -10,7 +10,7 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   hosts:
-    - '{{ .Values.virtualService.host }}.{{ .Values.global.ingress.domainName }}'
+    - '{{ .Values.global.gateway.host }}.{{ .Values.global.ingress.domainName }}'
   gateways:
     - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}.svc.cluster.local
   http:
@@ -19,7 +19,7 @@ spec:
             regex: /.*
       route:
         - destination:
-            host: {{ .Values.virtualService.host }}
+            host: {{ .Values.global.gateway.host }}
             port:
               number: {{ .Values.service.port }}
       corsPolicy:

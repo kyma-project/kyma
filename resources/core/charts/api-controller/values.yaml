@@ -12,3 +12,11 @@ cors:
   allow_headers: "Authorization,Content-Type,*" # "*" is not yet supported by all browsers
 
 blacklisted_services: "kubernetes.default,istio-citadel.istio-system,istio-galley.istio-system,istio-ingressgateway.istio-system,istio-pilot.istio-system,istio-policy.istio-system,istio-sidecar-injector.istio-system,istio-telemetry.istio-system,apiserver-proxy.kyma-system, apiserver-proxy-ssl.kyma-system"
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 96Mi
+  requests:
+    cpu: 10m
+    memory: 16Mi
