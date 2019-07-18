@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/avast/retry-go"
@@ -71,7 +72,7 @@ func TestKnativeBuild_Acceptance(t *testing.T) {
 			return fmt.Errorf("unexpected number of test pods: we have more than one test pod: %v", podList)
 		}
 
-		req := k8sClient.CoreV1().Pods("knative-build").GetLogs(podList.Items[0].Name, &corev1.PodLogOptions{Container: "build-step-test-build"})
+		req := k8sClient.CoreV1().Pods("knative-build").GetLogs(podList.Items[0].Name, &corev1.PodLogOptions{Container: "nop"})
 		podLogs, err := req.Stream()
 		if err != nil {
 			return fmt.Errorf("Error fetching logs: %v", err)
@@ -84,7 +85,7 @@ func TestKnativeBuild_Acceptance(t *testing.T) {
 			return fmt.Errorf("Error in copying information from podLogs to buf")
 		}
 
-		if buf.String() != "hello build" {
+		if strings.TrimSuffix(buf.String(), "\n") != "Build successful" {
 			return fmt.Errorf("unexpected response: '%s'", buf.String())
 		}
 
