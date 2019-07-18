@@ -147,33 +147,9 @@ func (r *ReconcileClusterAddonsConfiguration) Reconcile(request reconcile.Reques
 }
 
 func (r *ReconcileClusterAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.ClusterAddonsConfiguration, lastStatus addonsv1alpha1.ClusterAddonsConfigurationStatus) error {
-	repositories := addons.NewRepositoryCollection()
 
 	r.log.Infof("- load bundles and charts for each addon")
-	for _, specRepository := range addon.Spec.Repositories {
-		r.log.Infof("- create addons for %q repository", specRepository.URL)
-		repo := addons.NewAddonsRepository(specRepository.URL)
-
-		if err := specRepository.VerifyURL(r.developMode); err != nil {
-			repo.FetchingError(err)
-			repositories.AddRepository(repo)
-
-			r.log.Errorf("url %q address is not valid: %s", specRepository.URL, err)
-			continue
-		}
-
-		adds, err := r.createAddons(specRepository.URL)
-		if err != nil {
-			repo.FetchingError(err)
-			repositories.AddRepository(repo)
-
-			r.log.Errorf("while creating addons for repository from %q: %s", specRepository.URL, err)
-			continue
-		}
-
-		repo.Addons = adds
-		repositories.AddRepository(repo)
-	}
+	repositories := r.loadAddons(addon)
 
 	r.log.Info("- check duplicate ID addons alongside repositories")
 	repositories.ReviseBundleDuplicationInRepository()
@@ -233,6 +209,35 @@ func (r *ReconcileClusterAddonsConfiguration) addAddonsProcess(addon *addonsv1al
 		}
 	}
 	return nil
+}
+
+func (r *ReconcileClusterAddonsConfiguration) loadAddons(addon *addonsv1alpha1.ClusterAddonsConfiguration) *addons.RepositoryCollection {
+	repositories := addons.NewRepositoryCollection()
+	for _, specRepository := range addon.Spec.Repositories {
+		r.log.Infof("- create addons for %q repository", specRepository.URL)
+		repo := addons.NewAddonsRepository(specRepository.URL)
+
+		if err := specRepository.VerifyURL(r.developMode); err != nil {
+			repo.FetchingError(err)
+			repositories.AddRepository(repo)
+
+			r.log.Errorf("url %q address is not valid: %s", specRepository.URL, err)
+			continue
+		}
+
+		adds, err := r.createAddons(specRepository.URL)
+		if err != nil {
+			repo.FetchingError(err)
+			repositories.AddRepository(repo)
+
+			r.log.Errorf("while creating addons for repository from %q: %s", specRepository.URL, err)
+			continue
+		}
+
+		repo.Addons = adds
+		repositories.AddRepository(repo)
+	}
+	return repositories
 }
 
 func (r *ReconcileClusterAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1.ClusterAddonsConfiguration) error {
