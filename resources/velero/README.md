@@ -2,7 +2,7 @@
 
 ## Overview
 
-Velero is a tool to back up and restore Kubernetes resources and persistent volumes. It can create backups on demand or on schedule, filter objects which should be backed up, and set TTL (time to live) for stored backups. For more details, see the official [Velero documentation](https://velero.io/docs/v1.0.0/).
+Velero is a tool used to back up and restore Kubernetes resources and persistent volumes. It can create on-demand or cheduled backups, filter objects which should be backed up, and set TTL (time to live) for stored backups. For more details, see the official [Velero documentation](https://velero.io/docs/v1.0.0/).
 
 ## Required parameters
 
@@ -10,22 +10,22 @@ This table lists the required parameters of this chart, their descriptions, and 
 
 Parameter | Description | Default | Required
 --- | --- | --- | ---
-`configuration.provider` | The name of the cloud provider where you are deploying velero to (`aws`, `azure`, `gcp`) | none | yes
-`configuration.backupStorageLocation.name` | The name of the cloud provider that will be used to actually store the backups (`aws`, `azure`, `gcp`) | none | yes
-`configuration.backupStorageLocation.bucket` | The storage bucket where backups are to be uploaded | none | yes
-`configuration.backupStorageLocation.config.region` | The cloud provider region (AWS only) | none | yes, if using AWS
-`configuration.backupStorageLocation.config.resourceGroup` | The resource group containing the storage account (Azure only) | none | yes, if using Azure
-`configuration.backupStorageLocation.config.storageAccount` | The storage account containing the blob container (Azure only) | none | yes, if using Azure
-`configuration.volumeSnapshotLocation.name` | The name of the cloud provider the cluster is using for persistent volumes, if any | none | yes, if using PV snapshots
-`configuration.volumeSnapshotLocation.config.region` | The cloud provider region (AWS only) | none | yes, if using AWS
-`configuration.volumeSnapshotLocation.config.apitimeout` | The API timeout (Azure only) | none | yes, if using Azure
-`credentials.useSecret` | Whether a secret should be used for IAM credentials. Set this to `false` when using `kube2iam` | `true` | yes
-`credentials.existingSecret` | If specified and `useSecret` is `true`, uses an existing secret with this name instead of creating one | none | yes, if `useSecret` is `true` and `secretContents` is empty
+**configuration.provider** | Specifies the name of the cloud provider where you are deploying Velero to, such as `aws`, `azure`, `gcp`.| none | yes
+**configuration.backupStorageLocation.name** | Specifies the name of the cloud provider used to store backups, such as `aws`, `gcp`, or `azure`. | none | yes
+**configuration.backupStorageLocation.bucket** | Specifies the storage bucket where backups are uploaded. | none | yes
+**configuration.backupStorageLocation.config.region** | Provides the region in which the bucket is created. It only applies to AWS. | none | yes, if using AWS
+**configuration.backupStorageLocation.config.resourceGroup** | Specifies the name of the resource group which contains the storage account for the backup storage location. It only applies to Azure. | none | yes, if using Azure
+**configuration.backupStorageLocation.config.storageAccount** | Provides the name of the storage account for the backup storage location. It only applies to Azure.| none | yes, if using Azure
+**configuration.volumeSnapshotLocation.name** | Specifies the name of the cloud provider the cluster is using for persistent volumes. | none | yes, if using PV snapshots
+**configuration.volumeSnapshotLocation.config.region** | Provides the region in which the bucket is created. It only applies to AWS.| none | yes, if using AWS
+**configuration.volumeSnapshotLocation.config.apitimeout** | Defines the amount of time after which an API request returns a timeout status. It only applies to Azure. | none | yes, if using Azure
+**credentials.useSecret** | Specifies if a secret is required for IAM credentials. Set this to `false` when using `kube2iam`. | `true` | yes
+**credentials.existingSecret** | If specified and `useSecret` is `true`, uses an existing secret with this name instead of creating one. | none | yes, if `useSecret` is `true` and `secretContents` is empty
 `credentials.secretContents` | If specified and `useSecret` is `true`, contents for the credentials secret | none | yes, if `useSecret` is `true` and `existingSecret` is empty
 
 ## Details
 
-The Velero installation contains the configuration for storage. To define the backup content and the scope, Backup custom resources are used. Kyma delivers a tested sample file you can use to run the [backup process](https://github.com/kyma-project/kyma/blob/master/docs/backup/01-01-backup.md). This sample file includes all the Kubernetes resources by default. Modify this file according to your backup needs to allow administrators to set up a proper backup process.
+The Velero installation contains storage configuration. You can use the Backup custom resources to define the backup content and the scope. Kyma comes with a tested sample file you can use to run the [backup process](https://github.com/kyma-project/kyma/blob/master/docs/backup/01-01-backup.md). This sample file includes all the Kubernetes resources by default. Modify this file according to your backup needs to allow the administrators to set up a proper backup process.
 
 ### Velero CLI
 Once the Velero server is up and running, you can use the client to interact with it.
@@ -37,7 +37,7 @@ tar -xvf velero-v<version>-darwin-amd64.tar.gz -C velero-client
 
 ### Extending Velero
 
-Velero's functionalities can also be extended by using [plugins](https://velero.io/docs/v1.0.0/plugins/) and [hooks](https://velero.io/docs/v1.0.0/hooks/). Velero plugins are added to the Velero server Pod as init containers, and extend Velero without being a part of the binary. Hooks are commands executed inside containers and Pods during the backup process.
+You can extend Velero functionality using [plugins](https://velero.io/docs/v1.0.0/plugins/) and [hooks](https://velero.io/docs/v1.0.0/hooks/). Velero plugins are added to the Velero server Pod as init containers and extend Velero without being a part of the binary. Hooks are commands executed inside containers and Pods during the backup process.
 
 ### End-to-end tests
 

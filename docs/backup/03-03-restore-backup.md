@@ -3,7 +3,7 @@ title: Restore a Kyma cluster
 type: Details
 ---
 
-Restoring a Kyma cluster requires installing Velero. Velero CLI can be downloaded and used to install Velero server. Then, using the client, instruct Velero to start the restore process. Restore first the CRDs, Services, and Endpoints followed by the rest of resources.
+Restoring a Kyma cluster requires installing Velero. Download Velero CLI and use it to install the Velero server. Then, using the client, instruct Velero to start the restore process. Restore the CRDs, Services, and Endpoints first, and then the rest of the resources.
 
 Download and install [Velero CLI v1.0.0](https://github.com/heptio/velero/releases/tag/v1.0.0).
 
@@ -39,7 +39,7 @@ Once the status of the restore is `COMPLETED`, verify the health of Kyma by chec
 kubectl get pods --all-namespaces
 ```
 
-> **NOTE:** Because of [this bug](https://github.com/heptio/velero/issues/1633) in Velero, sometimes the Custom Resources are not properly restored. In this case, you can run the second restore command again and check if the Custom Resources are restored. For example, this should print several VirtualService Custom Resources:
+> **NOTE:** Because of [this issue](https://github.com/heptio/velero/issues/1633) in Velero, Custom Resources are sometimes not properly restored. In this case, you can rerun the second restore command and check if the Custom Resources are restored. For example, run the following command to print several VirtualService Custom Resources:
 
 ```
 kubectl get virtualservices --all-namespaces
