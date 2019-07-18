@@ -44,44 +44,61 @@ type Config struct {
 // 3. Apply defaults
 // 4. Validate
 func Load(verbose bool) (*Config, error) {
-	outCfg := Config{}
+	storageConfig, err := loadStorageConfig(Config{}, verbose)
+	if err != nil {
+		return nil, errors.Wrap(err, "while loading storage config")
+	}
 
+	cfg, err := initConfig(storageConfig, Config{}, verbose)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initiating config")
+	}
+
+	outConfig, ok := cfg.(*Config)
+	if !ok {
+		return nil, fmt.Errorf("unexpected type %T, should be *Config", outConfig)
+	}
+
+	return outConfig, nil
+}
+
+func initConfig(storageConfig interface{}, config interface{}, verbose bool) (interface{}, error) {
+	if err := envconfig.InitWithOptions(&config, envconfig.Options{Prefix: "APP", AllOptional: true, AllowUnexported: true}); err != nil {
+		return nil, errors.Wrap(err, "while reading configuration from environment variables")
+	}
+
+	if err := mergo.MergeWithOverwrite(&storageConfig, &config); err != nil {
+		return nil, errors.Wrap(err, "while merging config from environment variables")
+	}
+	if verbose {
+		fmt.Printf("Config after applying values from environment variables: %+v\n", storageConfig)
+	}
+
+	defaults.SetDefaults(&storageConfig)
+
+	if verbose {
+		fmt.Printf("Config after applying defaults: %+v\n", config)
+	}
+	if _, err := govalidator.ValidateStruct(config); err != nil {
+		return nil, errors.Wrap(err, "while validating configuration object")
+	}
+	return config, nil
+}
+
+func loadStorageConfig(cfg interface{}, verbose bool) (interface{}, error) {
 	cfgFile := os.Getenv("APP_CONFIG_FILE_NAME")
+	fileConfig := Config{}
 	if cfgFile != "" {
 		b, err := ioutil.ReadFile(cfgFile)
 		if err != nil {
 			return nil, errors.Wrapf(err, "while opening config file [%s]", cfgFile)
 		}
-		fileConfig := Config{}
 		if err := yaml.Unmarshal(b, &fileConfig); err != nil {
 			return nil, errors.Wrap(err, "while unmarshalling config from file")
 		}
-		outCfg = fileConfig
-		// fmt.Printf used, because logger will be created after reading configuration
 		if verbose {
-			fmt.Printf("Config after applying values from file: %+v\n", outCfg)
+			fmt.Printf("Config after applying values from file: %+v\n", cfg)
 		}
 	}
-
-	envConf := Config{}
-	if err := envconfig.InitWithOptions(&envConf, envconfig.Options{Prefix: "APP", AllOptional: true, AllowUnexported: true}); err != nil {
-		return nil, errors.Wrap(err, "while reading configuration from environment variables")
-	}
-
-	if err := mergo.MergeWithOverwrite(&outCfg, &envConf); err != nil {
-		return nil, errors.Wrap(err, "while merging config from environment variables")
-	}
-	if verbose {
-		fmt.Printf("Config after applying values from environment variables: %+v\n", outCfg)
-	}
-
-	defaults.SetDefaults(&outCfg)
-
-	if verbose {
-		fmt.Printf("Config after applying defaults: %+v\n", outCfg)
-	}
-	if _, err := govalidator.ValidateStruct(outCfg); err != nil {
-		return nil, errors.Wrap(err, "while validating configuration object")
-	}
-	return &outCfg, nil
+	return fileConfig, nil
 }

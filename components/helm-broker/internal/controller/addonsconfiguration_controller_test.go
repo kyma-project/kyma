@@ -169,7 +169,6 @@ func TestReconcileAddonsConfiguration_UpdateAddonsProcess_ConflictingBundles(t *
 				Return(completeBundle, nil)
 		}
 	}
-	ts.bf.On("Exist", fixAddonsCfg.Namespace).Return(true, nil).Once()
 	defer ts.assertExpectations()
 
 	// WHEN

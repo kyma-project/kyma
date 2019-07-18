@@ -162,7 +162,6 @@ func TestReconcileClusterAddonsConfiguration_UpdateAddonsProcess_ConflictingBund
 			ts.bp.On("LoadCompleteBundle", e).Return(completeBundle, nil)
 		}
 	}
-	ts.bf.On("Exist").Return(true, nil).Once()
 	defer ts.assertExpectations()
 
 	// WHEN

@@ -1,6 +1,8 @@
 package addons
 
 import (
+	"fmt"
+
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 )
 
@@ -42,7 +44,8 @@ func (ar *RepositoryController) HasFailedAddons() bool {
 
 // FetchingError sets StatusRepository as failed with URLFetchingError as a reason
 func (ar *RepositoryController) FetchingError(err error) {
-	ar.Repository.Status = addonsv1alpha1.RepositoryStatusFailed
-	ar.Repository.Reason = addonsv1alpha1.RepositoryURLFetchingError
-	ar.Repository.Message = err.Error()
+	reason := addonsv1alpha1.RepositoryURLFetchingError
+	ar.Failed()
+	ar.Repository.Reason = reason
+	ar.Repository.Message = fmt.Sprintf(reason.Message(), err.Error())
 }

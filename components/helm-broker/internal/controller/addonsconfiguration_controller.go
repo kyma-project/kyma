@@ -179,7 +179,7 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 	r.log.Info("- check duplicates ID addons in existing AddonsConfiguration")
 	list, err := r.existingAddonsConfigurationList(addon)
 	if err != nil {
-		return exerr.Wrap(err, "while fetching addons configuration list")
+		return exerr.Wrap(err, "while fetching AddonsConfiguration list")
 	}
 	repositories.ReviseBundleDuplicationInStorage(list)
 
@@ -219,47 +219,48 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 			for _, key := range deletedBundles {
 				// reprocess ClusterAddonsConfiguration again if it contains a conflicting addons
 				if err := r.reprocessConflictingAddonsConfiguration(key, list); err != nil {
-					return exerr.Wrap(err, "while requesting processing of conflicting ClusterAddonsConfigurations")
+					return exerr.Wrap(err, "while requesting processing of conflicting AddonsConfigurations")
 				}
 			}
 		}
 	}
-	r.log.Info("- ensure ServiceBroker")
-	if err := r.ensureBroker(addon); err != nil {
-		return exerr.Wrap(err, "while ensuring ServiceBroker")
+	if addon.Status.Phase == addonsv1alpha1.AddonsConfigurationReady {
+		r.log.Info("- ensure ServiceBroker")
+		if err := r.ensureBroker(addon); err != nil {
+			return exerr.Wrap(err, "while ensuring ServiceBroker")
+		}
 	}
-
 	return nil
 }
 
 func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1.AddonsConfiguration) error {
 	r.log.Infof("Start delete AddonsConfiguration %s/%s process", addon.Name, addon.Namespace)
 
-	addonsCfgs, err := r.existingAddonsConfigurationList(addon)
-	if err != nil {
-		return exerr.Wrapf(err, "while listing AddonsConfigurations in namespace %s", addon.Namespace)
-	}
-
-	deleteBroker := true
-	for _, addon := range addonsCfgs.Items {
-		if addon.Status.Phase != addonsv1alpha1.AddonsConfigurationReady {
-			// reprocess AddonConfig again if it was failed
-			if err := r.reprocessAddonsConfiguration(&addon); err != nil {
-				return exerr.Wrapf(err, "while requesting reprocess for AddonsConfiguration %s", addon.Name)
-
-			}
-		} else {
-			deleteBroker = false
-		}
-	}
-	if deleteBroker {
-		r.log.Info("- delete ServiceBroker from namespace %s", addon.Namespace)
-		if err := r.brokerFacade.Delete(addon.Namespace); err != nil {
-			return exerr.Wrapf(err, "while deleting ServiceBroker from namespace %s", addon.Namespace)
-		}
-	}
-
 	if addon.Status.Phase == addonsv1alpha1.AddonsConfigurationReady {
+		addonsCfgs, err := r.existingAddonsConfigurationList(addon)
+		if err != nil {
+			return exerr.Wrapf(err, "while listing AddonsConfigurations in namespace %s", addon.Namespace)
+		}
+
+		deleteBroker := true
+		for _, addon := range addonsCfgs.Items {
+			if addon.Status.Phase != addonsv1alpha1.AddonsConfigurationReady {
+				// reprocess AddonConfig again if it was failed
+				if err := r.reprocessAddonsConfiguration(&addon); err != nil {
+					return exerr.Wrapf(err, "while requesting reprocess for AddonsConfiguration %s", addon.Name)
+
+				}
+			} else {
+				deleteBroker = false
+			}
+		}
+		if deleteBroker {
+			r.log.Info("- delete ServiceBroker from namespace %s", addon.Namespace)
+			if err := r.brokerFacade.Delete(addon.Namespace); err != nil {
+				return exerr.Wrapf(err, "while deleting ServiceBroker from namespace %s", addon.Namespace)
+			}
+		}
+
 		for _, repo := range addon.Status.Repositories {
 			for _, add := range repo.Addons {
 				id, err := r.removeBundlesWithCharts(add, internal.Namespace(addon.Namespace))

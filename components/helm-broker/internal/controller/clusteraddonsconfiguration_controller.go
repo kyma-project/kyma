@@ -226,41 +226,42 @@ func (r *ReconcileClusterAddonsConfiguration) addAddonsProcess(addon *addonsv1al
 			}
 		}
 	}
-	r.log.Info("- ensure ClusterServiceBroker")
-	if err := r.ensureBroker(addon); err != nil {
-		return exerr.Wrap(err, "while ensuring ClusterServiceBroker")
+	if addon.Status.Phase == addonsv1alpha1.AddonsConfigurationReady {
+		r.log.Info("- ensure ClusterServiceBroker")
+		if err := r.ensureBroker(addon); err != nil {
+			return exerr.Wrap(err, "while ensuring ClusterServiceBroker")
+		}
 	}
-
 	return nil
 }
 
 func (r *ReconcileClusterAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1.ClusterAddonsConfiguration) error {
 	r.log.Infof("Start delete ClusterAddonsConfiguration %s", addon.Name)
 
-	addonsCfgs, err := r.existingAddonsConfigurationList(addon.Name)
-	if err != nil {
-		return exerr.Wrap(err, "while listing ClusterAddonsConfigurations")
-	}
-
-	deleteBroker := true
-	for _, addon := range addonsCfgs.Items {
-		if addon.Status.Phase != addonsv1alpha1.AddonsConfigurationReady {
-			// reprocess ClusterAddonsConfiguration again if was failed
-			if err := r.reprocessAddonsConfiguration(&addon); err != nil {
-				return exerr.Wrapf(err, "while requesting reprocess for ClusterAddonsConfiguration %s", addon.Name)
-			}
-		} else {
-			deleteBroker = false
-		}
-	}
-	if deleteBroker {
-		r.log.Info("- delete ClusterServiceBroker")
-		if err := r.clusterBrokerFacade.Delete(); err != nil {
-			return exerr.Wrap(err, "while deleting ClusterServiceBroker")
-		}
-	}
-
 	if addon.Status.Phase == addonsv1alpha1.AddonsConfigurationReady {
+		addonsCfgs, err := r.existingAddonsConfigurationList(addon.Name)
+		if err != nil {
+			return exerr.Wrap(err, "while listing ClusterAddonsConfigurations")
+		}
+
+		deleteBroker := true
+		for _, addon := range addonsCfgs.Items {
+			if addon.Status.Phase != addonsv1alpha1.AddonsConfigurationReady {
+				// reprocess ClusterAddonsConfiguration again if was failed
+				if err := r.reprocessAddonsConfiguration(&addon); err != nil {
+					return exerr.Wrapf(err, "while requesting reprocess for ClusterAddonsConfiguration %s", addon.Name)
+				}
+			} else {
+				deleteBroker = false
+			}
+		}
+		if deleteBroker {
+			r.log.Info("- delete ClusterServiceBroker")
+			if err := r.clusterBrokerFacade.Delete(); err != nil {
+				return exerr.Wrap(err, "while deleting ClusterServiceBroker")
+			}
+		}
+
 		for _, repo := range addon.Status.Repositories {
 			for _, add := range repo.Addons {
 				id, err := r.removeBundlesWithCharts(add)
