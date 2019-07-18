@@ -2,7 +2,6 @@ package testkit
 
 import (
 	"bytes"
-	"crypto/tls"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
@@ -20,20 +19,12 @@ type ConnectorClient struct {
 	logger             logrus.FieldLogger
 }
 
-func NewConnectorClient(trClient resourceskit.TokenRequestClient, skipVerify bool, logger logrus.FieldLogger) *ConnectorClient {
+func NewConnectorClient(trClient resourceskit.TokenRequestClient, httpClient *http.Client, logger logrus.FieldLogger) *ConnectorClient {
 	return &ConnectorClient{
 		TokenRequestClient: trClient,
-		httpClient:         newHttpClient(skipVerify),
+		httpClient:         httpClient,
 		logger:             logger,
 	}
-}
-
-func newHttpClient(skipVerify bool) *http.Client {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
-	}
-	client := &http.Client{Transport: tr}
-	return client
 }
 
 func (cc *ConnectorClient) GetToken() (string, error) {

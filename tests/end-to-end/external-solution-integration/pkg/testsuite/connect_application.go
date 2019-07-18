@@ -2,9 +2,7 @@ package testsuite
 
 import (
 	"crypto/tls"
-	"github.com/kyma-project/kyma/common/ingressgateway"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
-	"net/http"
 )
 
 // ConnectApplication is a step which connects application with client certificates and saves connected httpClient in the state
@@ -15,7 +13,7 @@ type ConnectApplication struct {
 
 // ConnectApplicationState allows ConnectApplication to save connected http.Client for further use by other steps
 type ConnectApplicationState interface {
-	SetGatewayHTTPClient(httpClient *http.Client)
+	SetGatewayClientCerts(certs []tls.Certificate)
 }
 
 // NewConnectApplication returns new ConnectApplication
@@ -58,18 +56,12 @@ func (s ConnectApplication) Run() error {
 		return err
 	}
 
-	httpClient, err := ingressgateway.FromEnv().Client()
-	if err != nil {
-		return err
-	}
-
 	rawChain := make([][]byte, 0, len(chain))
 	for _, cert := range chain {
 		rawChain = append(rawChain, cert.Raw)
 	}
 	cert := tls.Certificate{Certificate: rawChain, PrivateKey: privateKey}
-	httpClient.Transport.(*http.Transport).TLSClientConfig.Certificates = []tls.Certificate{cert}
-	s.state.SetGatewayHTTPClient(httpClient)
+	s.state.SetGatewayClientCerts([]tls.Certificate{cert})
 	return nil
 }
 

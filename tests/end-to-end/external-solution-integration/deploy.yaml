@@ -37,7 +37,7 @@ rules:
     verbs: ["create", "get", "update", "delete"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["serviceinstances", "servicebindings"]
-    verbs: ["create", "get", "update", "delete", "list"]
+    verbs: ["create", "get", "update", "delete", "list", "deletecollection"]
   - apiGroups: ["servicecatalog.kyma-project.io"]
     resources: ["servicebindingusages"]
     verbs: ["create", "get", "update", "delete"]
@@ -73,19 +73,27 @@ metadata:
 spec:
   restartPolicy: Never
   serviceAccountName: e2e
+  hostAliases:
+    - ip: 192.168.64.2
+      hostnames:
+        - "connector-service.kyma.local"
+        - "counter-service.kyma.local"
+        - "gateway.kyma.local"
   containers:
     - name: e2e
       image: sjanota/e2e-external-integration-test:latest
       imagePullPolicy: Always
       env:
         - name: INGRESSGATEWAY_ADDRESS
-          value: console.hasselhoff.cluster.stage.faros.kyma.cx
+          value: istio-ingressgateway.istio-system.svc.cluster.local
       args:
-        - "/e2e"
         - e2e
         - --testNamespace
         - ddd
         - --domain
-        - hasselhoff.cluster.stage.faros.kyma.cx
+        - kyma.local
         - --runID
         - kyma
+        - --cleanup
+        - "no"
+        - --skip-ssl-verify

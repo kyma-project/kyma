@@ -24,7 +24,7 @@ const (
 	labelKey                = "component"
 	healthEndpointFormat    = "https://counter-service.%s/health"
 	endpointFormat          = "https://counter-service.%s"
-	inClusterEndpointFormat = "http://counter-service.%s..svc.cluster.local"
+	inClusterEndpointFormat = "http://counter-service.%s.svc.cluster.local:8090"
 )
 
 type TestService struct {

@@ -10,7 +10,7 @@
 6. Register test service in application registry. This service exposes event API.
 7. Create ServiceInstance for registered ServiceClass
 8. Create ServiceBinding for that instance
-9. Create ServiceBindingUsage of this ServiceInstance for deployed lambda
+9. Create ServiceBindingUsage of that binding for deployed lambda
 10. Create Subscription for lambda, so it is subscribed to events exposed by application
 11. Send event to application gateway
 12. Verify that test service has been called by lambda
@@ -19,6 +19,8 @@
 
 * running kyma cluster
 
-## Running
+## Run locally
 
-kubectl apply -f deploy.yaml
+```
+go run ./cmd/runner --testNamespace {NAMESPACE} --domain {CLUSTER_DOMAIN}
+```
