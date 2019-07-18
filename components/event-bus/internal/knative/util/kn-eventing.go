@@ -215,7 +215,10 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[s
 	}
 	defer func() {
 		_ = res.Body.Close()
-		tran, _ := k.httpClient.Transport.(*http.Transport)
+		tran, ok := k.httpClient.Transport.(*http.Transport)
+		if !ok {
+			return
+		}
 		tran.CloseIdleConnections()
 	}()
 
