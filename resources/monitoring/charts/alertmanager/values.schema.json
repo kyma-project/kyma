@@ -1,16 +1,16 @@
 {
     "$id": "https://example.com/address.schema.json",
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "description": "Example of JSON schema",
+    "description": "Alert manager parameters",
     "type": "object",
     "properties": {
       "global": {
         "type": "object",
         "properties": {
-          "alerTools": {
+          "alertTools": {
             "type": "object",
             "properties": {
-              "credentians": "object",
+              "credentials": "object",
               "properties": {
                 "slack": {
                   "type": "object",

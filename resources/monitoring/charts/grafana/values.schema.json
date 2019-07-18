@@ -1,7 +1,7 @@
 {
     "$id": "https://example.com/address.schema.json",
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "description": "Example of JSON schema",
+    "description": "Grafana parameters",
     "type": "object",
     "properties": {
       "users": {
@@ -10,8 +10,10 @@
           "default": {
             "type": "object",
             "properties": {
-              "theme": "string",
-              "description": "Specifies the background colour of the Grafana UI. You can change it to 'dark' or 'light'"
+              "theme": {
+                "type": "string",
+                "description": "Specifies the background colour of the Grafana UI. You can change it to 'dark' or 'light'"
+              }
             }
           }
         }
