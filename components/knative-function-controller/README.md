@@ -1,12 +1,10 @@
 # Knative Function Controller
 
-Modify the project title and insert the name of your project. Use Heading 1 (H1).
-
 ## Overview
 
-The Knative Function Controller is a Kubernetes Controller that enable Kyma to manage Function resources.
+The Knative Function controller is a Kubernetes Controller that enables Kyma to manage Function resources.
 
-It defines and handles a function Custom Resource Definition with the help of Knative Build and Knative Serving. Basically it is the serverless implementation based on knative.
+It defines and handles a Function Custom Resource Definition with the help of Knative Build and Knative Serving. Basically it is the serverless implementation based on Knative.
 
 ## Prerequisites
 
@@ -18,9 +16,9 @@ It defines and handles a function Custom Resource Definition with the help of Kn
 
 ### Local Deployment
 
-The Manager running locally.
+#### Manager running locally.
 
-modify config/config.yaml to include your docker.io credentials (base64 encoded) and update the docker registry value to your docker.io username
+Modify config/config.yaml to include your docker.io credentials (base64 encoded) and update the Docker registry value to your docker.io username.
 
 Apply the configuration
 
@@ -42,7 +40,7 @@ make run
 
 #### Manager running inside k8s cluster
 
-This workflow needs to be used until [Come up with webhook developer workflow to test it locally #400](https://github.com/kubernetes-sigs/kubebuilder/issues/400) is fixed.
+This workflow needs to be used until kubernetes-sigs/kubebuilder#40 is fixed.
 
 ```bash
 eval $(minikube docker-env)
@@ -51,16 +49,16 @@ make install
 make deploy
 ```
 
-#### Prod Deployment
+#### Production Deployment
 
 Uncomment `manager_image_patch_dev` in `kustomization.yaml`
 Then run the following commands:
 
 ```bash
 make install
-APP_NAME = knative-function-controller
-IMG = {DOCKER_PUSH_REPOSITORY}/{DOCKER_PUSH_DIRECTORY}/{APP_NAME}
-TAG = {DOCKER_TAG}
+APP_NAME=knative-function-controller
+IMG={DOCKER_PUSH_REPOSITORY}/{DOCKER_PUSH_DIRECTORY}/{APP_NAME}
+TAG={DOCKER_TAG}
 make docker-push
 make deploy
 ```
@@ -72,3 +70,33 @@ make test
 ```
 
 #### Examples
+
+Run the examples
+
+Create sample function
+
+```bash
+kubectl apply -f config/samples/runtime_v1alpha1_function.yaml -n {NAMESPACE}
+```
+
+Search for function
+
+```bash
+kubectl get functions -n {NAMESPACE}
+```
+
+```bash
+kubectl get function -n {NAMESPACE}
+```
+
+```bash
+kubectl get fcn -n {NAMESPACE}
+```
+
+Access the function
+
+```bash
+export INGRESSGATEWAY=istio-ingressgateway
+export IP_ADDRESS=$(kubectl get svc $INGRESSGATEWAY --namespace istio-system --output 'jsonpath={.status.loadBalancer.ingress[0].ip}')
+curl -v -H "Host: $(kubectl get ksvc sample --output 'jsonpath={.status.domain}' -n {NAMESPACE}" http://$(minikube ip):$(kubectl get svc istio-ingressgateway --namespace istio-system --output 'jsonpath={.spec.ports[?(@.port==80)].nodePort}')
+```

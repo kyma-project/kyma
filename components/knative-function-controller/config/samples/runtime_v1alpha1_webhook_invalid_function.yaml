@@ -1,4 +1,4 @@
-apiVersion: runtime.kyma-project.io/v1alpha1
+apiVersion: functions.runtime.kyma-project.io/v1alpha1
 kind: Function
 metadata:
   labels:

@@ -67,7 +67,7 @@ data:
   username:
   # password for the account
   # echo -n $PASSWORD | base64
-  password: 
+  password:
 ---
 apiVersion: v1
 kind: ServiceAccount
