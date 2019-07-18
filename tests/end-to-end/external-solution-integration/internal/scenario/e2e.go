@@ -80,6 +80,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	}
 
 	return []step.Step{
+		testsuite.NewCreateNamespace(coreClientset.CoreV1().Namespaces(), s.testNamespace),
 		testsuite.NewCreateApplication(appOperatorClientset.ApplicationconnectorV1alpha1().Applications(), false),
 		testsuite.NewCreateMapping(appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testNamespace)),
 		testsuite.NewDeployLambda(kubelessClientset.KubelessV1beta1().Functions(s.testNamespace), pods),
