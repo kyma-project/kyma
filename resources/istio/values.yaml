@@ -33,6 +33,7 @@ gateways:
         limits:
           cpu: 50m
           memory: 64Mi
+    secretVolumes: {}
 
 #
 # sidecar-injector webhook configuration, refer to the
@@ -99,6 +100,8 @@ pilot:
     requests:
       cpu: 100m
       memory: 128Mi
+  env:
+    PILOT_HTTP10: 1
 
 #
 # security configuration
