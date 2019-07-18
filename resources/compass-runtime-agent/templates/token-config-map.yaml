@@ -7,4 +7,5 @@ metadata:
     app: {{ .Chart.Name }}
     chart: {{ .Chart.Name }}
     release: {{ .Release.Name }}
-data: {{ .Values.config.tokenConfigMap.data }}
+data:
+  token.json: {{ .Values.config.tokenConfigMap.data }}

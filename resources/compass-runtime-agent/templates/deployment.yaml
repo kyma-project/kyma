@@ -13,6 +13,8 @@ spec:
       release: {{ .Release.Name }}
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
@@ -22,8 +24,13 @@ spec:
         - name: {{ .Chart.Name }}
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.runtimeAgent.dir }}compass-runtime-agent:{{ .Values.global.images.runtimeAgent.version }}
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+          args:
+            - "/compass-runtime-agent"
+            - "--controllerSyncPeriod={{ .Values.deployment.sync.controllerSyncPeriod }}"
+            - "--minimalConfigFetchTime={{ .Values.deployment.sync.minimalConfigFetchTime }}"
+            - "--tokenURLConfigFile={{.Values.deployment.tokenConfig.mountPath}}/{{ .Values.deployment.tokenConfig.tokenURLConfigFile }}"
           volumeMounts:
-            - mountPath: {{ .Values.deployment.tokenConfig.tokenURLConfigFile }}
+            - mountPath: {{ .Values.deployment.tokenConfig.mountPath }}
               name: {{ .Values.deployment.tokenConfig.volumeName }}
       volumes:
         - name: {{ .Values.deployment.tokenConfig.volumeName }}

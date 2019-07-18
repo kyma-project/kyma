@@ -11,7 +11,8 @@ deployment:
     pullPolicy: IfNotPresent
   tokenConfig:
     volumeName: token-config
-    tokenURLConfigFile: "/config/token.json"
+    mountPath: "/config"
+    tokenURLConfigFile: "token.json"
   sync:
     controllerSyncPeriod: 30
     minimalConfigFetchTime: 300
