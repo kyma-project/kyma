@@ -1,0 +1,41 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema definition for jaeger helm chart values",
+    "type": "object",
+    "properties": {
+        "jaeger": {
+            "description": "Configuration properties for jaeger",
+            "type": "object",
+            "properties": {
+                "memory": {
+                    "description": "Defining the properties for the memory used.",
+                    "type": "object",
+                    "properties": {
+                        "maxTraces": {
+                            "description": "Defines the maximum number of traces that Jaeger can store.",
+                            "default": 40000,
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        },
+        "resources": {
+            "description": "Configuration the resources of jaeger",
+            "type": "object",
+            "properties": {
+                "limits": {
+                    "description": "Defining the limits for the resources.",
+                    "type": "object",
+                    "properties": {
+                        "memory": {
+                            "description": "Defines the maximum amount of memory that is available for storing traces in Jaeger.",
+                            "default": "512M",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
