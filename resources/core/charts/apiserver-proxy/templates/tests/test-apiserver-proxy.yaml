@@ -17,7 +17,7 @@ spec:
     spec:
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
-      - ip: {{ .Values.minikubeIP }}
+      - ip: {{ .Values.global.minikubeIP }}
         hostnames:
             - "configurations-generator.{{ .Values.global.ingress.domainName }}"
             - "dex.{{ .Values.global.ingress.domainName }}"

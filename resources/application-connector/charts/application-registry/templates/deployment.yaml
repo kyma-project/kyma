@@ -45,7 +45,7 @@ spec:
             name: metrics-port
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
-        - ip: {{ .Values.minikubeIP }}
+        - ip: {{ .Values.global.minikubeIP }}
           hostnames:
             - "minio.{{ .Values.global.ingress.domainName }}"
       {{ end }}
