@@ -34,6 +34,7 @@ type E2E struct {
 	testNamespace string
 	skipSSLVerify bool
 }
+
 type e2EState struct {
 	domain        string
 	skipSSLVerify bool

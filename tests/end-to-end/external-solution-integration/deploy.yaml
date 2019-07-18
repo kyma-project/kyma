@@ -17,6 +17,9 @@ rules:
   - apiGroups: [""]
     resources: ["nodes"]
     verbs: ["list"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["create", "get", "delete"]
   - apiGroups: ["*"]
     resources: ["services", "deployments", "pods"]
     verbs: ["create", "get", "delete", "list"]
@@ -89,11 +92,10 @@ spec:
       args:
         - e2e
         - --testNamespace
-        - ddd
+        - ziuta
         - --domain
-        - kyma.local
+        - hasselhoff.cluster.stage.faros.kyma.cx
         - --runID
-        - kyma
+        - kyma2
         - --cleanup
-        - "no"
-        - --skip-ssl-verify
+        - "yes"
