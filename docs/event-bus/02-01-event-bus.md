@@ -16,7 +16,7 @@ For example, whenever the `order-created` Event comes in, the Event Bus stores i
     >**NOTE**: When creating a service, the user must create a Kyma Subscription resource manually. If the user uses Kyma Console UI to create a lambda, the Subscription resource is created automatically. In any other case, Kyma Subscription must be created manually.
     
 2. **subscription-controller-knative** reacts to the creation of Kyma Subscription.  It [verifies](#event-validation) if the Event type from the application can be consumed in the Namespace where the Kyma Subscription has been created.  If so, it creates the Knative Channel and Knative Subscription resources.
-3. **nats-controller** reacts to the creation of a Knative Channel and creates the required Kubernetes and Istio services.
+3. **nats-controller** reacts to the creation of a Knative Channel and creates the required Kubernetes services.
 4. **nats-dispatcher** reacts to the creation of a Knative Subscription and creates the NATS Streaming Subscription.
 5. **nats-dispatcher** picks the Event and dispatches it to the configured lambda or the service URL as an HTTP POST request. The lambda reacts to the received Event.
 
@@ -31,7 +31,7 @@ For example, whenever the `order-created` Event comes in, the Event Bus stores i
 
 3. The Application Connector makes a REST API call to **publish-knative** and sends the enriched Event.
 4. **publish-knative** makes the HTTP payload compatible with Knative and sends the Event to the relevant **knative-channel** service URL which is inferred based on **source id**, **event type**, and **event type version** parameters.
-5. Istio Virtual Service forwards the Event to the **nats-dispatcher** service served by the **nats-dispatcher** Pod.
+5. Kubernetes service forwards the Event to the **nats-dispatcher** service served by the **nats-dispatcher** Pod.
 6. **nats-dispatcher** saves the Event in NATS Streaming which stores the Event details in the Persistence storage volume.
 
 

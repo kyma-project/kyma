@@ -8,7 +8,7 @@ metadata:
   labels:
     require-static-users: "true"
 spec:
-  disableConcurrency: true
+  disableConcurrency: false
   template:
     metadata:
     spec:
