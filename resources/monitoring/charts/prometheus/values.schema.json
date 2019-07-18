@@ -1,0 +1,47 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema definition for Prometheus helm subchart values",
+    "type": "object",
+    "properties": {
+        "storageSpec": {
+            "description": "Configuration properties for the storageSpec component",
+            "type": "object",
+            "properties": {
+                "volumeClaimTemplate": {
+                    "description": "Defining the properties for the volume Claim Template.",
+                    "type": "object",
+                    "properties": {
+                        "spec": {
+                            "description": "Defining the specs for the volumeClaimTemplate.",
+                            "type": "object",
+                            "properties": {
+                                "resources": {
+                                    "description": "Defining the resources for the volumeClaimTemplate.",
+                                    "type": "object",
+                                    "properties": {
+                                        "requests": {
+                                            "description": "Defining the resource requests.",
+                                            "type": "object",
+                                            "properties": {
+                                                "storage": {
+                                                    "description": "Specifies the size of a Persistent Volume Claim (PVC).",
+                                                    "default": "4Gi",
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "retention": {
+            "description": "Specifies a period of time for which Prometheus stores the metrics in-memory. This retention time applies to in-memory storage only. Prometheus stores the recent data in-memory for the specified amount of time to avoid reading the entire data from disk.",
+            "default": "2h",
+            "type": "string"
+        }
+    }
+}

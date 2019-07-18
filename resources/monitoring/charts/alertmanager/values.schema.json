@@ -1,0 +1,54 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema definition for alertmanager helm subchart values",
+    "type": "object",
+    "properties": {
+        "global": {
+            "description": "Configuration of  the global properties for alertmanager component",
+            "type": "object",
+            "properties": {
+                "alertTools": {
+                    "description": "Defining the properties for the alert tools.",
+                    "type": "object",
+                    "properties": {
+                        "credentials": {
+                            "description": "Defining the credentials for the alert tools.",
+                            "type": "object",
+                            "properties": {
+                                "slack": {
+                                    "description": "Defining the properties for the slack alert tool.",
+                                    "type": "object",
+                                    "properties": {
+                                        "apiurl": {
+                                            "description": "Specifies the URL endpoint which sends alerts triggered by Prometheus rules.",
+                                            "type": "string"
+                                        },
+                                        "channel": {
+                                            "description": "Refers to the Slack channel which receives notifications on new alerts.",
+                                            "type": "string",
+                                            "example": "organization.slack.com"
+                                        }
+                                    }
+                                },
+                                "victorOps": {
+                                    "description": "Defining the properties for the victorOps alert tool.",
+                                    "type": "object",
+                                    "properties": {
+                                        "routingkey": {
+                                            "description": "Defines the team routing key in VictorOps.",
+                                            "type": "string"
+                                        },
+                                        "apikey": {
+                                            "description": "Defines the team API key in VictorOps.",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

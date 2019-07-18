@@ -1,0 +1,24 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema definition for grafana helm subchart values",
+    "type": "object",
+    "properties": {
+        "users": {
+            "description": "Configuration properties for the monitoring user",
+            "type": "object",
+            "properties": {
+                "default": {
+                    "description": "Defining the default values.",
+                    "type": "object",
+                    "properties": {
+                        "theme": {
+                            "description": "Specifies the background colour of the Grafana UI. You can change it to dark.",
+                            "default": "light",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
