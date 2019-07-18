@@ -71,7 +71,12 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		ts := NewTestServer(func(req *http.Request) {
 			assert.Equal(t, req.Method, http.MethodGet)
 			assert.Equal(t, req.RequestURI, "/orders/123")
+
 			assert.Equal(t, "token", req.Header.Get("CSRFToken"))
+
+			cookie, err := req.Cookie("CSRFToken")
+			require.NoError(t, err)
+			assert.Equal(t, "token", cookie.Value)
 		})
 		defer ts.Close()
 
@@ -85,7 +90,11 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
 			Run(func(args mock.Arguments) {
 				req := args[0].(*http.Request)
-				req.Header.Add("CSRFToken", "token")
+				req.Header.Set("CSRFToken", "token")
+				req.AddCookie(&http.Cookie{
+					Name:  "CSRFToken",
+					Value: "token",
+				})
 			}).
 			Return(nil)
 		csrfTokenStrategyMock.On("Invalidate").Return()
@@ -268,7 +277,7 @@ func newUpdateCacheEntryFunction(t *testing.T, url string, strategy authorizatio
 		require.NoError(t, err)
 
 		return &CacheEntry{
-			Proxy: proxy,
+			Proxy:                 proxy,
 			AuthorizationStrategy: &authorizationStrategyWrapper{strategy, proxy},
 			CSRFTokenStrategy:     csrfTokenStrategy,
 		}, nil
