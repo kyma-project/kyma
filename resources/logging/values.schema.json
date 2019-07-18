@@ -1,0 +1,137 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema definition for logging helm chart values",
+    "type": "object",
+    "properties": {
+        "persistence": {
+            "description": "Persistence properties for the logging component",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Specifies whether you store logs on a persistent volume instead of a volatile mounted volume.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "size": {
+                    "description": "Defines the size of the persistent volume.",
+                    "type": "string",
+                    "default": "10Gi"
+                }
+            }
+        },
+        "config": {
+            "description": "Configuration properties for the logging component",
+            "type": "object",
+            "properties": {
+                "auth_enabled": {
+                    "description": "Specifies the authentication mechanism you use to access the logging service. Set it to false to use built-in Istio authentication, or to true to use the basic HTTP authentication instead.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "ingester": {
+                    "description": "Defining the properties for the ingester.",
+                    "type": "object",
+                    "properties": {
+                        "lifecycler": {
+                            "description": "Defining the lifecycler properties of the ingester.",
+                            "type": "object",
+                            "properties": {
+                                "address": {
+                                    "description": "Specifies the address of the lifecycler that coordinates distributed logging services.",
+                                    "type": "string",
+                                    "default": "127.0.0.1"
+                                },
+                                "ring": {
+                                    "description": "Defining the ring properties of the lifecycler.",
+                                    "type": "object",
+                                    "properties": {
+                                        "store": {
+                                            "description": "Specifies the storage for information on logging data and their copies.",
+                                            "type": "string",
+                                            "default": "inmemory"
+                                        },
+                                        "replication_factor": {
+                                            "description": "Specifies the number of data copies on separate storages.",
+                                            "type": "number",
+                                            "default": 1
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "schema_configs": {
+                    "description": "Configuration properties for the logging schema",
+                    "type": "object",
+                    "properties": {
+                        "form": {
+                            "description": "Specifies the date from which index data is stored.",
+                            "type": "number",
+                            "default": 0
+                        },
+                        "store": {
+                            "description": "Specifies the storage type. boltdb is an embedded key-value storage that stores the index data.",
+                            "type": "string",
+                            "default": "boltdb"
+                        },
+                        "object_store": {
+                            "description": "Specifies if you use local or cloud storages for data.",
+                            "type": "string",
+                            "default": "filesystem"
+                        },
+                        "schema": {
+                            "description": "Defines the schema version that Loki provides.",
+                            "type": "string",
+                            "default": "v9"
+                        },
+                        "index": {
+                            "description": "Defining the index properties",
+                            "type": "object",
+                            "properties": {
+                                "prefix": {
+                                    "description": "Specifies the prefix added to all index file names to distinguish them from log chunks.",
+                                    "type": "string",
+                                    "default": "index_"
+                                },
+                                "period": {
+                                    "description": "Defines how long indexes and log chunks are retained.",
+                                    "type": "string",
+                                    "default": "168h"
+                                }
+                            }
+                        }
+                    }
+                },
+                "storage_config": {
+                    "description": "Configuration properties for the logging storage.",
+                    "type": "object",
+                    "properties": {
+                        "boltdb": {
+                            "description": "Defining properties for the boltdb.",
+                            "type": "object",
+                            "properties": {
+                                "directory": {
+                                    "description": "Specifies the physical location of indexes in boltdb.",
+                                    "type": "string",
+                                    "default": "/data/loki/index"
+                                }
+                            }
+                        },
+                        "filesystem": {
+                            "description": "Defining the filesystem for the storage",
+                            "type": "object",
+                            "properties": {
+                                "directory": {
+                                    "description": "Specifies the physical location of log chunks in filesystem.",
+                                    "type": "string",
+                                    "default": "/data/loki/chunks"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
