@@ -39,4 +39,6 @@ spec:
           value: '{{ .Values.cors.allow_headers }}'
         - name: BLACKLISTED_SERVICES
           value: '{{ .Values.blacklisted_services }}'
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
 

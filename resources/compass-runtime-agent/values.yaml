@@ -1,0 +1,12 @@
+global:
+  images:
+    containerRegistry:
+      path: eu.gcr.io/kyma-project
+    runtimeAgent:
+      dir: pr/
+      version: "PR-4910"
+
+deployment:
+  image:
+    pullPolicy: IfNotPresent
+
