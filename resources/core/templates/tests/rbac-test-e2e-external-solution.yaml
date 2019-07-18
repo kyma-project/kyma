@@ -1,0 +1,58 @@
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: test-e2e-external-solution
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: test-e2e-external-solution
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["list"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["create", "get", "delete"]
+  - apiGroups: ["*"]
+    resources: ["services", "deployments", "pods"]
+    verbs: ["create", "get", "delete", "list"]
+  - apiGroups: ["*"]
+    resources: ["secrets"]
+    verbs: ["create", "get", "update", "delete"]
+  - apiGroups: ["applicationconnector.kyma-project.io"]
+    resources: ["applications", "applicationmappings", "tokenrequests"]
+    verbs: ["get", "update", "list", "create", "delete"]
+  - apiGroups: ["extensions"]
+    resources: ["ingresses"]
+    verbs: ["get", "update", "list", "create", "delete"]
+  - apiGroups: ["eventing.kyma-project.io"]
+    resources: ["subscriptions"]
+    verbs: ["create", "get", "update", "delete"]
+  - apiGroups: ["kubeless.io"]
+    resources: ["functions"]
+    verbs: ["create", "get", "update", "delete"]
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["serviceinstances", "servicebindings"]
+    verbs: ["create", "get", "update", "delete", "list", "deletecollection"]
+  - apiGroups: ["servicecatalog.kyma-project.io"]
+    resources: ["servicebindingusages"]
+    verbs: ["create", "get", "update", "delete"]
+  - apiGroups: ["gateway.kyma-project.io"]
+    resources: ["apis"]
+    verbs: ["create", "delete"]
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: test-e2e-external-solution
+subjects:
+  - kind: ServiceAccount
+    name: test-e2e-external-solution
+    namespace: kyma-system
+roleRef:
+  kind: ClusterRole
+  name: test-e2e-external-solution
+  apiGroup: rbac.authorization.k8s.io

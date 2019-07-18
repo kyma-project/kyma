@@ -1,0 +1,60 @@
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: test-e2e-external-solution
+  labels:
+    kyma-project.io/test-kind: e2e
+spec:
+  disableConcurrency: true
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      restartPolicy: Never
+      serviceAccountName: test-e2e-external-solution
+      shareProcessNamespace: true
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.test.acceptance.ui.minikubeIP }}
+          hostnames:
+            - "connector-service.{{ .Values.global.ingress.domainName }}"
+            - "counter-service.{{ .Values.global.ingress.domainName }}"
+            - "gateway.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
+      containers:
+        - name: test
+          image: sjanota/e2e-external-integration-test:latest
+          imagePullPolicy: Always
+          env:
+            - name: INGRESSGATEWAY_ADDRESS
+              value: istio-ingressgateway.istio-system.svc.cluster.local
+          args:
+            - e2e
+            - --testNamespace
+            - test-e2e-external-solution
+            - --domain
+            - {{ .Values.global.ingress.domainName }}
+            {{ if .Values.global.isLocalEnv }}
+            - --skip-ssl-verify
+            {{ end }}
+        - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+          name: manager
+          command:
+            - bin/sh
+            - -c
+            - |
+              SERVICE="/e2e"
+              sleep 10
+              while true; do
+                if pgrep -x "${SERVICE}"; then
+                  echo "---> ${SERVICE} is running."
+                  sleep 10
+                else
+                  echo "---> ${SERVICE} has stopped, stopping istio"
+                  pkill -TERM pilot-agent
+                  break
+                fi
+              done
+{{- end}}
