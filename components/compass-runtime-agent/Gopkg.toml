@@ -11,6 +11,14 @@ required = [
   name = "github.com/kisielk/errcheck"
   revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
 
+[[constraint]]
+  name = "github.com/kyma-incubator/compass"
+  revision = "83c17229028ffe2d604be4f8ea1f2f633141a965"
+
+[[constraint]]
+  name = "github.com/kyma-project/kyma"
+  revision = "2ac7f3a71a873d0594f15c2309c032f4d42d6cdd"
+
 [prune]
   go-tests = true
   unused-packages = true
