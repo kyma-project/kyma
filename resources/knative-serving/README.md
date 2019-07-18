@@ -2,7 +2,7 @@
 
 ## Overview
 
-This module is still experimental.
+>**NOTE**: This is an experimental module.
 This chart includes [knative-serving CRDs](https://github.com/knative/docs/tree/master/docs/serving) release files.
 
 Included releases:
