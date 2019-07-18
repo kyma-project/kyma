@@ -1,0 +1,59 @@
+{
+    "$id": "https://example.com/address.schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Monitoring global parameters",
+    "type": "object",
+    "properties": {
+	    "global": {
+		    "type": "object",
+		    "description": "Global values for monitoring component",
+		    "properties": {
+			    "isLocalEnv": {
+				    "type": "boolean",
+				    "description": "Specifies if environment is local",
+				    "default": false
+			    },
+			    "serviceCatalogApiserver": {
+				    "type": "object",
+				    "properties": {
+					    "enabled": {
+						    "type": "boolean",
+						    "description": "Enable/Disable service catalog API server",
+						    "default": true
+					    }
+				    }
+			    },
+			    "serviceCatalogCrds": {
+				    "type": "object",
+				    "properties": {
+					    "enabled": {
+						    "type": "boolean",
+						    "description": "Enable/Disabled service catalog custom resource defintion",
+						    "default": false
+					    }
+				    }
+			    },
+			    "istio": {
+				    "type": "object",
+				    "properties": {
+					    "gateway": {
+						    "type": "object",
+						    "properties": {
+							    "name": {
+								    "type": "string",
+								    "description": "Name for the istio gateway",
+								    "default": "kyma-gateway"
+							    },
+							    "namespace": {
+								    "type": "string",
+								    "description": "Namespace for the istio gateway",
+								    "default": "kyma-system"
+							    }
+						    }
+					    }
+				    }
+			    }
+		    }
+	    }
+    }
+}
