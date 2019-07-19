@@ -1,12 +1,12 @@
 TAG = $(DOCKER_TAG)
 
-# event-bus-publish-knative
-APP_NAME_PUBLISH_KN = event-bus-publish-knative
+# event-publish-service
+APP_NAME_PUBLISH_KN = event-publish-service
 IMG_PUBLISH_KN = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME_PUBLISH_KN)
 BINARY_PUBLISH_KN = $(APP_NAME_PUBLISH_KN)
 
-# event-bus-subscription-controller-knative
-APP_NAME_SCK = event-bus-subscription-controller-knative
+# subscription-controller
+APP_NAME_SCK = subscription-controller
 IMG_SCK = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME_SCK)
 BINARY_SCK = $(APP_NAME_SCK)
 
@@ -29,7 +29,7 @@ endif
 
 .PHONY: build-image
 build-image: pull-licenses
-	./docker-build-event-bus-publish-knative.sh $(APP_NAME_PUBLISH_KN) latest event-bus
+	./docker-build-event-publish-service.sh $(APP_NAME_PUBLISH_KN) latest event-bus
 	./docker-build-event-bus-sck.sh $(APP_NAME_SCK) latest event-bus
 	./docker-build-nats-init.sh $(APP_NAME_NI) latest event-bus
 
@@ -63,8 +63,8 @@ test:
 
 .PHONY: clean
 clean:
-	rm -rf ./cmd/event-bus-publish-knative/$(BINARY_PUBLISH_KN) ./cmd/event-bus-publish-knative/docker
-	rm -rf ./cmd/event-bus-subscription-controller-knative/$(BINARY_SCK) ./cmd/event-bus-subscription-controller-knative/docker
+	rm -rf ./cmd/event-publish-service/$(BINARY_PUBLISH_KN) ./cmd/event-publish-service/docker
+	rm -rf ./cmd/subscription-controller/$(BINARY_SCK) ./cmd/subscription-controller/docker
 	rm -rf ./cmd/nats-streaming-init/$(BINARY_NI) ./cmd/nats-streaming-init/docker
 
 .PHONY: path-to-referenced-charts

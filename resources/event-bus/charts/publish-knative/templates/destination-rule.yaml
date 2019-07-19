@@ -2,9 +2,9 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: 'event-bus-publish-knative-metrics-destination-rule'
+  name: 'event-publish-service-metrics-destination-rule'
 spec:
-  host: event-bus-publish-knative-metrics-service.event-bus.svc.cluster.local
+  host: event-publish-service-metrics-service.event-bus.svc.cluster.local
   trafficPolicy:
     tls:
       mode: DISABLE
