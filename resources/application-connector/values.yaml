@@ -48,7 +48,7 @@ global:
     version: "36059183"
   application_gateway:
     dir: pr/
-    version: PR-4948
+    version: PR-4546
   application_gateway_tests:
     dir: pr/
     version: PR-4546
