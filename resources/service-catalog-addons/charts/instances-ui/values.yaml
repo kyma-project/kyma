@@ -1,7 +1,7 @@
 name: instances
 replicaCount: 1
 image:
-  dir: /pr
+  dir: ""
   pullPolicy: IfNotPresent
 service:
   internalPort: 80
