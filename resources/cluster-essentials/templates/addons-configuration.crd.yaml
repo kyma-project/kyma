@@ -6,6 +6,13 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: addonsconfigurations.addons.kyma-project.io
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.phase
+    name: Phase
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
   group: addons.kyma-project.io
   names:
     categories:
