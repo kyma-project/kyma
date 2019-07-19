@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/avast/retry-go"
+	log "github.com/sirupsen/logrus"
 )
 
 func deployK8s(yamlFile string) {
@@ -237,9 +237,9 @@ func randomString(n int) string {
 	return string(b)
 }
 
-func cleanup(namespace, functionName string) error{
+func cleanup(namespace, functionName string) error {
 	log.Info("Cleaning up")
-	err:=deleteFun(namespace, functionName)
+	err := deleteFun(namespace, functionName)
 	if err != nil {
 		return err
 	}
@@ -258,9 +258,9 @@ func main() {
 	testID := randomString(8)
 
 	log.Info("Pre Test Cleanup")
-	err:=retry.Do(func() error {
+	err := retry.Do(func() error {
 		return cleanup(namespace, functionName)
-	}, retry.Attempts(5), retry.Delay(5 * time.Second))
+	}, retry.Attempts(5), retry.Delay(5*time.Second))
 	if err != nil {
 		log.Fatal("Cleanup failed: ", err)
 	}
