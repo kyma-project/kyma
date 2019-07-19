@@ -1,0 +1,24 @@
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}-tests
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Chart.Name }}-tests
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  disableConcurrency: false
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      shareProcessNamespace: true
+      containers:
+        - name: {{ .Chart.Name }}-tests
+          image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.runtimeAgentTests.dir }}compass-runtime-agent-test:{{ .Values.global.images.runtimeAgentTests.version }}
+          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+    restartPolicy: Never
+  {{- end }}
