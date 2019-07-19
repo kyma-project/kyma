@@ -56,18 +56,6 @@ else echo -e "${GREEN}√ dep status${NC}"
 fi
 
 ##
-# REGENERATE FILES
-##
-echo "? make generates"
-make generates
-if [ $? != 0 ]; then
-	echo -e "${RED}✗ make generates\n${NC}"
-	exit 1
-else echo -e "${GREEN}√ make generates${NC}"
-fi
-
-
-##
 # GO TEST
 ##
 echo "? go test"
