@@ -3,7 +3,7 @@ apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
   name: {{ .Chart.Name }}-tests
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}-tests
     release: {{ .Release.Name }}
@@ -13,9 +13,8 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/inject: "true"
+        sidecar.istio.io/inject: "false"
     spec:
-      shareProcessNamespace: true
       containers:
         - name: {{ .Chart.Name }}-tests
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.runtimeAgentTests.dir }}compass-runtime-agent-test:{{ .Values.global.images.runtimeAgentTests.version }}
