@@ -3,7 +3,7 @@ title: Basic architecture
 type: Architecture
 ---
 
-The Helm Broker is installed alongside other Kyma components and it automatically registers itself in the Service Catalog as a ClusterServiceBroker. The installation provides the default [helm-repos-urls](#link) ClusterAddonsConfiguration (CAC) custom resource (CR). It contains URLs from which Helm Broker fetches addons. You can also [add your own addons](#details-fetch-addons-from-https-servers) with URLs that point to any remote HTTPS server.
+The Helm Broker is installed alongside other Kyma components and it automatically registers itself in the Service Catalog as a ClusterServiceBroker. The installation provides the default [helm-repos-urls](https://github.com/kyma-project/kyma/blob/master/resources/helm-broker/templates/default-addons-cfg.yaml) ClusterAddonsConfiguration (CAC) custom resource (CR). It contains URLs from which Helm Broker fetches addons. You can also [add your own addons](#details-fetch-addons-from-https-servers) with URLs that point to any remote HTTPS server.
 
 If you want the Helm Broker to act as a Namespace-scoped ServiceBroker, create the [AddonsConfiguration](#custom-resource-addonsconfiguration) (AC) CR. In such a case, the Helm Broker creates a service and registers itself in the Service Catalog as a ServiceBroker inside the Namespace in which the CR is created.
 
@@ -12,7 +12,7 @@ The Helm Broker workflow starts with the registration process, during which the 
 ## Cluster-wide addons flow
 
 1. The Helm Broker watches for ClusterAddonsConfiguration CRs in a given cluster.
-2. The user creates a ClusterAddonsConfiguration custom resource.
+2. The user creates a ClusterAddonsConfiguration CR.
 3. The Helm Broker fetches and parses the data of all addon repositories defined in the ClusterAddonsConfiguration CR.
 4. The Helm Broker creates a ClusterServiceBroker. There is always only one ClusterServiceBroker, even if there are multiple ClusterAddonsConfiguration CRs.
 5. The Service Catalog fetches services that the ClusterServiceBroker exposes.
