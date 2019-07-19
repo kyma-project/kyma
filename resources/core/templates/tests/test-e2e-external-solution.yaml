@@ -25,7 +25,7 @@ spec:
       {{ end }}
       containers:
         - name: test
-          image: sjanota/e2e-external-integration-test:latest
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.e2e_external_solution.dir }}e2e-external-integration-test:{{ .Values.global.e2e_external_solution.version }}
           imagePullPolicy: Always
           env:
             - name: INGRESSGATEWAY_ADDRESS

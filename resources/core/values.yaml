@@ -70,6 +70,9 @@ global:
   xip_patch:
     dir: develop/
     version: "d20b1c29"
+  e2e_external_solution:
+    dir: pr/
+    version: PR-3706
   kubeless_images:
     runtime:
       node6:
