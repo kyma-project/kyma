@@ -3,20 +3,20 @@ title: Architecture deep dive
 type: Architecture
 ---
 
-The diagram and steps describe the Helm Broker workflow in details, including the logic of its inner components, namely the Controller and Broker.
+This document describes the Helm Broker workflow in details, including the logic of its inner components, namely the Controller and Broker.
 
 ![Architecture deep dive](./assets/hb-deep-dive.svg)
 
 1. The Controller watches for ClusterAddonsConfiguration (CAC) and AddonsConfiguration (AC) custom resources (CRs).
 2. The user creates, updates, or deletes CAC or AC custom resources.
-3. The Controller fetches and parses the data of all addon repositories defined under the **spec.repositories** field in a given CR. During this step, the Controller does the following:
-  - Analyze fetched addons against errors.
+3. The Controller fetches and parses the data of all addon repositories defined under the **spec.repositories** field in a given CR. During this step the Controller:
+  - Analyzes fetched addons against errors.
   - Check for ID duplications under the **repositories** field.
-  - Check for ID conflicts with already registered addons.
-4. The Controller persists fetched addons in the storage.
-5. When the first CR appears, the Controller creates ClusterServiceBroker or ServiceBroker, depending on the type of the CR. The ClusterServiceBroker/ServiceBroker provides information about Broker's proper endpoint to the Service Catalog. This endpoint returns the list of available services. There is always only one ClusterServiceBroker per cluster and one ServiceBroker per Namespace, no matter the number of existing CRs. Whenever the list of offered services changes, the Controller triggers the Service Catalog to fetch services from the ClusterServiceBroker/ServiceBroker.
+  - Checks for ID conflicts with already registered addons.
+4. The Controller saves the fetched addons to the storage.
+5. When the first CR appears, the Controller creates a ClusterServiceBroker or a ServiceBroker, depending on the type of the CR. The ClusterServiceBroker or the ServiceBroker provides information about the Broker's endpoint which returns the list of all available services to the Service Catalog. There is always only one ClusterServiceBroker per cluster and one ServiceBroker per Namespace, no matter the number of existing CRs. Whenever the list of offered services changes, the Controller triggers the Service Catalog to fetch a new list of services from the ClusterServiceBroker or the ServiceBroker.
 6. The Broker component fetches addons from the storage and exposes them to the Service Catalog.
-7. The Service Catalog calls the catalog endpoint of the ClusterServiceBroker/ServiceBroker and creates the Service Classes.
+7. The Service Catalog calls the catalog endpoint of the ClusterServiceBroker or the ServiceBroker and creates Service Classes based on the list of registered services.
 
 ## Update CRs
 

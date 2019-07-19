@@ -11,9 +11,9 @@ kubectl get crd clusteraddonsconfiguration.addons.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample ClusterAddonsConfiguration which provides cluster-wide addons. If any status of ClusterAddonsConfiguration is marked as `Failed`, all of its addons are not available in the Service Catalog.
+This is a sample ClusterAddonsConfiguration which provides cluster-wide addons. If any of the **status** fields of the CR is marked as `Failed`, none of the addons registered with the CR is available in the Service Catalog.
 
->**NOTE:** All CRs must have the `addons.kyma-project.io` finalizer which prevents the CR from deletion until the Controller completes the deletion logic successfully. If you do not set a finalizer, the Controller sets it automatically.
+>**NOTE:** All CRs must have the `addons.kyma-project.io` finalizer which prevents the CR from deletion until the Controller completes the deletion logic successfully. If you don't set a finalizer, the Controller sets it automatically.
 
 ```yaml
 apiVersion: addons.kyma-project.io/v1alpha1
@@ -69,7 +69,7 @@ status:
       message: "Fetching repository failed due to error: the index file was not found"
 ```
 
->**NOTE:** There is no fast return in case of an error, which means that the Controller fetches and processes all addons, even if any of them fails. Thanks to that, at the end of the process you can see the status of all processed addons. You can read information about all detected problems in the **status** entry of a given CR.
+>**NOTE:** The Controller fetches and processes all addons, even if any of them fails. Thanks to that, at the end of the process you can see the status of all processed addons. You can read information about all detected problems in the **status** entry of a given CR.
 
 ## Custom resource parameters
 

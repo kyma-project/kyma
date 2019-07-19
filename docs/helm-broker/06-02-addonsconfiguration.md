@@ -13,7 +13,7 @@ kubectl get crd addonsconfiguration.addons.kyma-project.io -o yaml
 
 This is a sample AddonsConfiguration which provides Namespace-scoped addons. If any status of AddonsConfiguration is marked as `Failed`, all of its addons are not available in the Service Catalog.
 
->**NOTE:** All CRs must have the `addons.kyma-project.io` finalizer which prevents the CR from deletion until the Controller completes the deletion logic successfully. If you do not set a finalizer, the Controller sets it automatically.
+>**NOTE:** All CRs must have the `addons.kyma-project.io` finalizer which prevents the CR from deletion until the Controller completes the deletion logic successfully. If you don't set a finalizer, the Controller sets it automatically.
 
 ```yaml
 apiVersion: addons.kyma-project.io/v1alpha1
