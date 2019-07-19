@@ -161,7 +161,7 @@ func (ts *TestSuite) CallAccessService(t *testing.T, apiId, path string) *http.R
 
 			if resp.StatusCode == http.StatusForbidden {
 				t.Logf("Access service is ready but responded with status forbidden. Failing.")
-				t.Fail()
+				t.FailNow()
 			}
 			t.Logf("Access service is not ready. Retrying.")
 
