@@ -257,7 +257,10 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 	}
 	defer func() {
 		_ = res.Body.Close()
-		tran, _ := httpClient.Transport.(*http.Transport)
+		tran, ok := httpClient.Transport.(*http.Transport)
+		if !ok {
+			return
+		}
 		tran.CloseIdleConnections()
 	}()
 	//dumpResponse(res)
@@ -280,7 +283,10 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 			}
 			defer func() {
 				_ = res.Body.Close()
-				tran, _ := httpClient.Transport.(*http.Transport)
+				tran, ok := httpClient.Transport.(*http.Transport)
+				if !ok {
+					return
+				}
 				tran.CloseIdleConnections()
 			}()
 			dumpResponse(res)
