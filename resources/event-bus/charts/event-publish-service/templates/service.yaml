@@ -3,11 +3,11 @@ kind: Service
 metadata:
   name: "event-bus-publish"
   labels:
-{{ include "publish-knative.labels.standard" . | indent 4 }}
+{{ include "event-publish-service.labels.standard" . | indent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.port }}
   selector:
-    app: {{ template "publish-knative.fullname" . }}
+    app: {{ template "event-publish-service.fullname" . }}
     release: {{ .Release.Name }}

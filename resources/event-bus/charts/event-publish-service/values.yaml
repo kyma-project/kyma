@@ -1,4 +1,4 @@
-# Default values for publish-knative.
+# Default values for event-publish-service.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 2
@@ -8,7 +8,7 @@ port: 8080
 service:
   type: ClusterIP
 trace:
-  serviceName: event-publish-knative-service
+  serviceName: event-publish-service
   operationName: publish-the-event
 monitoring:
   grafana: enabled

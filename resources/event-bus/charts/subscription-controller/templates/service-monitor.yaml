@@ -3,17 +3,17 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
     namespace: kyma-system
-    name: '{{ template "publish-knative.fullname" . }}-service-monitor'
+    name: {{ template "subscription-controller-metrics.name" . }}
     labels:
         prometheus: monitoring
-        app: {{ template "publish-knative.fullname" . }}
+        app: {{ template "subscription-controller.fullname" . }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
 spec:
     selector:
         matchLabels:
-            app: {{ template "publish-knative.fullname" . }}
+            app: {{ template "subscription-controller.name" . }}
     endpoints:
         - port: metrics-port
           interval: {{ .Values.monitoring.interval }}

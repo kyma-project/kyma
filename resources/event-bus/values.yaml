@@ -6,8 +6,10 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
-    dir: pr/
-    version: "PR-4943"
+    dir: develop/
+    version: "392b7a76"
+    publisherImage: "event-publish-service"
+    subscriptionControllerImage: "subscription-controller"
   event_bus_tests:
     dir: pr/
     version: PR-4893
@@ -20,7 +22,7 @@ global:
     resources:
       limits:
         memory: "32M"
-  publishKnative:
+  eventPublishService:
     maxRequests: 200
     maxRequestSize: 65536
     maxChannelNameLength: 33
@@ -41,7 +43,7 @@ global:
     resources:
       limits:
         memory: "32M"
-  subscriptionControllerKnative:
+  subscriptionController:
     resyncPeriod: "10s"
     channelTimeout: "10s"
     resources:
@@ -53,4 +55,4 @@ global:
   isLocalEnv: false
 e2eTests:
   nameTester: "test-event-bus-tester"
-  nameSubscriber: "test-event-bus-subscriber"    
+  nameSubscriber: "test-event-bus-subscriber"

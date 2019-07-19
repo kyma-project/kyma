@@ -1,4 +1,4 @@
-# Default values for subscription-controller-knative.
+# Default values for subscription-controller.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 port: 8080
