@@ -104,7 +104,7 @@ Please follow the instructions below to setup velero.
           ```bash
           kubectl apply -f velero-overrides.yaml
           ```
-      2. Install Kyma following the [installation guide](/root/kyma/#installation-installation) or update kyma if it is already installed in your cluster following the [update guide](/root/kyma/#installation-update-kyma)
+      2. Install Kyma following the [installation guide](/root/kyma/#installation-installation) or update kyma if it is already installed in your cluster following the [update guide](/root/kyma/#installation-update-kyma).
       
       </details>
       </div>
