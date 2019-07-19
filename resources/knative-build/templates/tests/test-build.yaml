@@ -41,7 +41,6 @@ subjects:
 - kind: ServiceAccount
   name: {{ .Chart.Name }}-tests
   namespace: knative-build
-{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 ---
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -76,4 +75,3 @@ spec:
   - name: {{ .Chart.Name }}-tests
     image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_knative_build_acceptance.dir }}knative-serving-acceptance-tests:{{ .Values.global.test_knative_serving_acceptance.version }}"
   restartPolicy: Never
-{{- end }}
