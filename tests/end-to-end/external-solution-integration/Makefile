@@ -25,14 +25,18 @@ push-image:
 	docker push $(IMG):$(TAG)
 
 .PHONY: ci-pr
-ci-pr: build build-image push-image
+ci-pr: resolve build build-image push-image
 
 .PHONY: ci-master
-ci-master: build build-image push-image
+ci-master: resolve build build-image push-image
 
 .PHONY: ci-release
-ci-release: build build-image push-image
+ci-release: resolve build build-image push-image
 
 .PHONY: clean
 clean:
 	rm -f $(binary)
+
+.PHONY: resolve
+resolve:
+	dep ensure -v -vendor-only
