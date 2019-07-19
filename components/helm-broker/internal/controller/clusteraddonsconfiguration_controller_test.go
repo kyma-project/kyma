@@ -154,7 +154,6 @@ func TestReconcileClusterAddonsConfiguration_UpdateAddonsProcess_ConflictingBund
 
 	ts := getClusterTestSuite(t, fixAddonsCfg, fixReadyClusterAddonsConfiguration())
 	indexDTO := fixIndexDTO()
-
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {
