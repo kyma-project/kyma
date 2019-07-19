@@ -2,17 +2,16 @@
 title: Back up a Kyma cluster
 type: Details
 ---
-Kyma provides a validated sample Backup specification file:
+Kyma provides a validated sample [Backup.yaml](./assets/backup.yaml) specification file.
 
-- [Backup.yaml](./assets/backup.yaml)
 
-Integrate this file with your scheduled or on-demand configurations to back up Kyma.
+Integrate it with your scheduled or on-demand configurations to back up Kyma.
 
 Modify the file to adjust the backup scope. For details about the file format, see this [documentation](https://velero.io/docs/v1.0.0/api-types/backup/).
 
 ## Create manual backups
 
-If you want to create manual backups, you can use Backup custom resources. Deploy the following CR to the `kyma-backup` Namespace to instruct the Velero server to create a backup. Make sure the indentation is correct.
+To create manual backups, use Backup custom resources. Deploy the following CR to the `kyma-backup` Namespace to instruct the Velero server to create a backup. Make sure the indentation is correct.
 
 A sample backup configuration looks like this:
 
@@ -42,7 +41,7 @@ kubectl apply -f {filename}
 
 ## Schedule periodic backups
 
-If you want to set up periodic backups, use Schedule custom resources. Deploy the Schedule custom resources in the `kyma-backup` Namespace to instruct the Velero Server to schedule a cluster backup. Make sure the indentation is correct.
+To set up periodic backups, use Schedule custom resources. Deploy Schedule custom resources in the `kyma-backup` Namespace to instruct the Velero Server to schedule a cluster backup. Make sure the indentation is correct.
 
 A sample scheduled backup configuration looks like this:
 
