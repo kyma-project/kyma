@@ -33,7 +33,7 @@ spec:
         command: ['sh', '-c', 'until $(curl --output /dev/null --silent --fail http://helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379/health); do echo waiting for etcd service; sleep 2; done;']
 
       containers:
-      - name: {{ .Chart.Name }}
+      - name: broker
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
@@ -89,8 +89,8 @@ spec:
           timeoutSeconds: 2
           successThreshold: 1
 
-      - name: helm-controller
-        image: "eu.gcr.io/kyma-project/pr/helm-controller:PR-4813"
+      - name: ctrl
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-controller:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
           - name: APP_TMP_DIR
