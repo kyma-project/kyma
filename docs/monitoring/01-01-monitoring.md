@@ -2,10 +2,13 @@
 title: Overview
 ---
 
-To enrich Kyma with monitoring functionality, third-party resources come by default as packaged tools. The `kube-prometheus` package is a Prometheus operator from CoreOS responsible for delivering these tools. Monitoring in Kyma includes three primary elements:
+Kyma comes bundled with third-party applications like Prometheus, Alertmanager, and Grafana, that offer a monitoring functionality for all Kyma resources. These applications are deployed during the Kyma cluster installation, along with a set of pre-defined alerts rules, dashboards, and CRDS.
 
-* Prometheus, an open-source system monitoring toolkit.
-* Grafana, a user interface that allows you to query and visualize statistics and metrics.  
-* AlertManager, a Prometheus component that handles alerts that originate from Prometheus. AlertManager performs needed deduplicating, grouping, and routing based on rules defined by the Prometheus server.
+The whole installation package provides the end-to-end Kubernetes cluster monitoring that allows you to:
 
-Convenience and efficiency are the main advantages to using the `kube-prometheus` package. `kube-prometheus` delivers a level of monitoring options that would otherwise involve extensive development effort to acquire. Prometheus, Grafana, and AlertManager installed on their own would require the developer to perform customization to achieve the same results as the operator alone. `kube-prometheus` is configured to run on Kubernetes and monitor clusters without additional configuration.
+- View metrics exposed by the Pods.
+- Use the metrics to create descriptive dashboards that monitor any Pod anomalies.
+- Manage the default alert rules and create new ones.
+- Set up channels for notifications informing of any detected alerts.
+
+> **NOTE:** The monitoring functionality is available by default in the cluster installation, but it is disabled in the **Kyma Lite** local installation on Minikube. Read [here](https://kyma-project.io/docs/root/kyma/#configuration-custom-component-installation) how to enable monitoring for the local installation.
