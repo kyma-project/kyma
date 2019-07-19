@@ -11,7 +11,7 @@ This document describes the Helm Broker workflow in details, including the logic
 2. The user creates, updates, or deletes CAC or AC custom resources.
 3. The Controller fetches and parses the data of all addon repositories defined under the **spec.repositories** field in a given CR. During this step the Controller:
   - Analyzes fetched addons against errors.
-  - Check for ID duplications under the **repositories** field.
+  - Checks for ID duplications under the **repositories** field.
   - Checks for ID conflicts with already registered addons.
 4. The Controller saves the fetched addons to the storage.
 5. When the first CR appears, the Controller creates a ClusterServiceBroker or a ServiceBroker, depending on the type of the CR. The ClusterServiceBroker or the ServiceBroker provides information about the Broker's endpoint which returns the list of all available services to the Service Catalog. There is always only one ClusterServiceBroker per cluster and one ServiceBroker per Namespace, no matter the number of existing CRs. Whenever the list of offered services changes, the Controller triggers the Service Catalog to fetch a new list of services from the ClusterServiceBroker or the ServiceBroker.
