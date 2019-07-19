@@ -2,12 +2,7 @@
 title: Back up a Kyma cluster
 type: Details
 ---
-Kyma provides a validated sample [Backup.yaml](./assets/backup.yaml) specification file.
-
-
-Integrate it with your scheduled or on-demand configurations to back up Kyma.
-
-Modify the file to adjust the backup scope. For details about the file format, see this [documentation](https://velero.io/docs/v1.0.0/api-types/backup/).
+Kyma provides a validated sample [Backup.yaml](./assets/backup.yaml) specification file. Integrate it with your scheduled or on-demand configurations to back up Kyma. Modify the file to adjust the backup scope. For details about the file format, see this [documentation](https://velero.io/docs/v1.0.0/api-types/backup/).
 
 ## Create manual backups
 
