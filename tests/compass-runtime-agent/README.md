@@ -11,4 +11,4 @@ This section provides information on versioning of the Docker image, as well as 
 
 ### Configure Kyma
 
-After building and pushing the Docker image, set the proper values in the `resources/compass-runtime-agent/values.yaml` file, in the `global.images.runtimeAgentTests` property for your newly created image.
+After building and pushing the Docker image, set the proper values in the `resources/compass-runtime-agent/values.yaml` file under the **global.images.runtimeAgentTests** property for your newly created image.
