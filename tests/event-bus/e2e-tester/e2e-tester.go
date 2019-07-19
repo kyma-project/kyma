@@ -64,16 +64,16 @@ var (
 )
 
 //Unexportable struct, encapsulates subscriber resource parameters
-type subscriberDetails struct {
-	subscriberImage               string
-	subscriberNamespace           string
-	subscriberEventEndpointURL    string
-	subscriberResultsEndpointURL  string
-	subscriberStatusEndpointURL   string
-	subscriberShutdownEndpointURL string
-	subscriber3EventEndpointURL   string
-	subscriber3ResultsEndpointURL string
-	subscriber3StatusEndpointURL  string
+type testSubscriber struct {
+	image                 string
+	namespace             string
+	eventEndpointV1URL    string
+	resultsEndpointV1URL  string
+	statusEndpointV1URL   string
+	shutdownEndpointV1URL string
+	eventEndpointV3URL    string
+	resultsEndpointV3URL  string
+	statusEndpointV3URL   string
 }
 
 //Unexportable struct, encapsulates publisher details
@@ -89,7 +89,7 @@ func main() {
 	log.SetReportCaller(true)
 
 	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	var subDetails subscriberDetails
+	var subscriber testSubscriber
 	var pubDetails publisherDetails
 	var logLevelString string
 	var logLevel log.Level
@@ -99,8 +99,8 @@ func main() {
 	flags.StringVar(&pubDetails.publishStatusEndpointURL, "publish-status-uri", "http://event-publish-service:8080/v1/status/ready", "publish service status endpoint `URL`")
 
 	//Initialise subscriber
-	flags.StringVar(&subDetails.subscriberImage, "subscriber-image", "", "subscriber Docker `image` name")
-	flags.StringVar(&subDetails.subscriberNamespace, "subscriber-ns", "default", "k8s `namespace` in which subscriber test app is running")
+	flags.StringVar(&subscriber.image, "subscriber-image", "", "subscriber Docker `image` name")
+	flags.StringVar(&subscriber.namespace, "subscriber-ns", "default", "k8s `namespace` in which subscriber test app is running")
 	flags.StringVar(&logLevelString, "log-level", "info", "logrus log level")
 
 	if err := flags.Parse(os.Args[1:]); err != nil {
@@ -114,9 +114,9 @@ func main() {
 	}
 	log.SetLevel(logLevel)
 
-	initSubscriberUrls(&subDetails)
+	initSubscriberUrls(&subscriber)
 
-	if flags.NFlag() == 0 || subDetails.subscriberImage == "" {
+	if flags.NFlag() == 0 || subscriber.image == "" {
 
 		if _, err := fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0]); err != nil {
 			panic(err)
@@ -128,25 +128,31 @@ func main() {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		log.WithField("error", err).Error("error in getting cluster config")
-		shutdown(fail, &subDetails)
+		shutdown(fail, &subscriber)
 	}
 
 	log.Info("create the clientK8S")
 	clientK8S, err = kubernetes.NewForConfig(config)
 	if err != nil {
 		log.WithField("error", err).Error("failed to create a ClientSet")
-		shutdown(fail, &subDetails)
+		shutdown(fail, &subscriber)
+	}
+
+	err = createNamespace(subscriber.namespace)
+	if err != nil {
+		log.Printf("error in creating namespace: %v", err)
+		shutdown(fail, &subscriber)
 	}
 
 	log.Info("create a test event activation")
 	eaClient, err = eaClientSet.NewForConfig(config)
 	if err != nil {
 		log.WithField("error", err).Error("error in creating EventActivation client")
-		shutdown(fail, &subDetails)
+		shutdown(fail, &subscriber)
 	}
-	if err := createEventActivation(subDetails.subscriberNamespace); err != nil {
+	if err := createEventActivation(subscriber.namespace); err != nil {
 		log.WithField("error", err).Error("cannot create the event activation")
-		shutdown(fail, &subDetails)
+		shutdown(fail, &subscriber)
 	}
 
 	log.Info("create a test Subscription")
@@ -243,14 +249,14 @@ func main() {
 }
 
 // Initialize subscriber urls
-func initSubscriberUrls(subDetails *subscriberDetails) {
-	subDetails.subscriberEventEndpointURL = "http://" + util.SubscriberName + "." + subDetails.subscriberNamespace + ":9000/v1/events"
-	subDetails.subscriberResultsEndpointURL = "http://" + util.SubscriberName + "." + subDetails.subscriberNamespace + ":9000/v1/results"
-	subDetails.subscriberStatusEndpointURL = "http://" + util.SubscriberName + "." + subDetails.subscriberNamespace + ":9000/v1/status"
-	subDetails.subscriberShutdownEndpointURL = "http://" + util.SubscriberName + "." + subDetails.subscriberNamespace + ":9000/shutdown"
-	subDetails.subscriber3EventEndpointURL = "http://" + util.SubscriberName + "." + subDetails.subscriberNamespace + ":9000/v3/events"
-	subDetails.subscriber3ResultsEndpointURL = "http://" + util.SubscriberName + "." + subDetails.subscriberNamespace + ":9000/v3/results"
-	subDetails.subscriber3StatusEndpointURL = "http://" + util.SubscriberName + "." + subDetails.subscriberNamespace + ":9000/v3/status"
+func initSubscriberUrls(subscriber *testSubscriber) {
+	subscriber.eventEndpointV1URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v1/events"
+	subscriber.resultsEndpointV1URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v1/results"
+	subscriber.statusEndpointV1URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v1/status"
+	subscriber.shutdownEndpointV1URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/shutdown"
+	subscriber.eventEndpointV3URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v3/events"
+	subscriber.resultsEndpointV3URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v3/results"
+	subscriber.statusEndpointV3URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v3/status"
 }
 
 func shutdown(code int, subscriber *subscriberDetails) {
@@ -262,7 +268,7 @@ func shutdown(code int, subscriber *subscriberDetails) {
 	deletePolicy := metav1.DeletePropagationForeground
 	gracePeriodSeconds := int64(0)
 
-	if err := clientK8S.AppsV1().Deployments(subscriber.subscriberNamespace).Delete(util.SubscriberName,
+	if err := clientK8S.AppsV1().Deployments(subscriber.namespace).Delete(util.SubscriberName,
 		&metav1.DeleteOptions{GracePeriodSeconds: &gracePeriodSeconds, PropagationPolicy: &deletePolicy}); err != nil {
 		log.WithField("error", err).Warn("delete Subscriber Deployment failed")
 	}
@@ -543,6 +549,38 @@ func createEventActivation(subscriberNamespace string) error {
 		}
 		return nil
 	})
+}
+
+func createNamespace(subscriberNamespace string) error {
+
+	ns := &apiv1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: subscriberNamespace,
+			Labels: map[string]string{
+				"test": "test-event-bus",
+			},
+		},
+	}
+	err := retry.Do(func() error {
+		log.Printf("creating namespace: %s", subscriberNamespace)
+		_, err := clientK8S.Core().Namespaces().Create(ns)
+		return err
+	}, retry.Attempts(retries))
+
+	if err != nil {
+		return fmt.Errorf("Namespace: %s could not be created: %v", subscriberNamespace, err)
+	}
+
+	err = retry.Do(func() error {
+		_, err = clientK8S.Core().Namespaces().Get(subscriberNamespace, metav1.GetOptions{})
+		return err
+	}, retry.Attempts(retries))
+
+	if err != nil {
+		return fmt.Errorf("Namespace: %s could not be fetched: %v", subscriberNamespace, err)
+	}
+	log.Printf("Namespace: %s is created", subscriberNamespace)
+	return nil
 }
 
 // Create Subscription and wait for successful creation
