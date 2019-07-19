@@ -68,7 +68,7 @@ rules:
   resources: ["deployments"]
   verbs: ["*"]
 - apiGroups: [""]
-  resources: ["pods", "pods/status", "services"]
+  resources: ["namespaces", "pods", "pods/status", "services"]
   verbs: ["*"]
 ---
 kind: ClusterRoleBinding
