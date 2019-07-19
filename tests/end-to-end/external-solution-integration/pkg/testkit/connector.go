@@ -37,7 +37,7 @@ func NewConnectorClient(appName string, tokenRequests connectionTokenHandlerClie
 
 func (cc *ConnectorClient) GetToken() (string, error) {
 	tokenRequest := &connectionTokenHandlerApi.TokenRequest{
-		ObjectMeta: metav1.ObjectMeta{GenerateName: cc.appName},
+		ObjectMeta: metav1.ObjectMeta{Name: cc.appName},
 		Status: connectionTokenHandlerApi.TokenRequestStatus{
 			ExpireAfter: metav1.NewTime(time.Now().Add(1 * time.Minute)),
 		},

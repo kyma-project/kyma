@@ -21,7 +21,7 @@ type CreateSubscription struct {
 var _ step.Step = &CreateSubscription{}
 
 // NewCreateSubscription returns new CreateSubscription
-func NewCreateSubscription(name, sourceID, endpoint string, subscriptions eventingClient.SubscriptionInterface, namespace string) *CreateSubscription {
+func NewCreateSubscription(name, sourceID, endpoint string, subscriptions eventingClient.SubscriptionInterface) *CreateSubscription {
 	return &CreateSubscription{
 		subscriptions: subscriptions,
 		endpoint:      endpoint,

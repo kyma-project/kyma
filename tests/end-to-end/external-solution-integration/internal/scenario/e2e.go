@@ -46,7 +46,7 @@ func (s *E2E) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.testNamespace, "testNamespace", "default", "Namespace where test should create resources")
 	pflag.StringVar(&s.domain, "domain", "kyma.local", "domain")
 	pflag.StringVar(&s.testID, "testID", "e2e-test", "domain")
-	pflag.BoolVar(&s.skipSSLVerify, "skip-ssl-verify", false, "Skip verification of service SSL certificates")
+	pflag.BoolVar(&s.skipSSLVerify, "skipSSLVerify", false, "Skip verification of service SSL certificates")
 }
 
 // Steps return scenario steps
@@ -90,7 +90,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewCreateServiceInstance(s.testID, serviceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testNamespace), state),
 		testsuite.NewCreateServiceBinding(s.testID, s.testID, serviceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testNamespace), state),
 		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID, serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testNamespace), pods, state),
-		testsuite.NewCreateSubscription(s.testID, s.testID, lambdaEndpoint, eventingClientset.EventingV1alpha1().Subscriptions(s.testNamespace), s.testNamespace),
+		testsuite.NewCreateSubscription(s.testID, s.testID, lambdaEndpoint, eventingClientset.EventingV1alpha1().Subscriptions(s.testNamespace)),
 		testsuite.NewSleep(20 * time.Second),
 		testsuite.NewSendEvent(s.testID, state),
 		testsuite.NewCheckCounterPod(testService),
