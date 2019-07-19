@@ -404,8 +404,8 @@ spec:
     plural: bypasses
     singular: bypass
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -429,8 +429,8 @@ spec:
     plural: circonuses
     singular: circonus
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -454,8 +454,8 @@ spec:
     plural: deniers
     singular: denier
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -479,8 +479,8 @@ spec:
     plural: fluentds
     singular: fluentd
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -504,8 +504,8 @@ spec:
     plural: kubernetesenvs
     singular: kubernetesenv
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -529,8 +529,8 @@ spec:
     plural: listcheckers
     singular: listchecker
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -554,8 +554,8 @@ spec:
     plural: memquotas
     singular: memquota
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -579,8 +579,8 @@ spec:
     plural: noops
     singular: noop
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -604,8 +604,8 @@ spec:
     plural: opas
     singular: opa
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -629,8 +629,8 @@ spec:
     plural: prometheuses
     singular: prometheus
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -654,8 +654,8 @@ spec:
     plural: rbacs
     singular: rbac
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -701,8 +701,8 @@ spec:
     plural: signalfxs
     singular: signalfx
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -726,8 +726,8 @@ spec:
     plural: solarwindses
     singular: solarwinds
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -751,8 +751,8 @@ spec:
     plural: stackdrivers
     singular: stackdriver
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -776,8 +776,8 @@ spec:
     plural: statsds
     singular: statsd
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -801,8 +801,8 @@ spec:
     plural: stdios
     singular: stdio
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -826,8 +826,8 @@ spec:
     plural: apikeys
     singular: apikey
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -851,8 +851,8 @@ spec:
     plural: authorizations
     singular: authorization
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -876,8 +876,8 @@ spec:
     plural: checknothings
     singular: checknothing
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -901,8 +901,8 @@ spec:
     plural: kuberneteses
     singular: kubernetes
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -926,8 +926,8 @@ spec:
     plural: listentries
     singular: listentry
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -951,30 +951,29 @@ spec:
     plural: logentries
     singular: logentry
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
   additionalPrinterColumns:
-  - JSONPath: .spec.severity
-    description: The importance of the log entry
-    name: Severity
-    type: string
-  - JSONPath: .spec.timestamp
-    description: The time value for the log entry
-    name: Timestamp
-    type: string
-  - JSONPath: .spec.monitored_resource_type
-    description: Optional expression to compute the type of the monitored resource this log entry is being recorded on
-    name: Res Type
-    type: string
-  - JSONPath: .metadata.creationTimestamp
-    description: |-
-      CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
-
-      Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
-    name: Age
-    type: date
+    - JSONPath: .spec.severity
+      description: The importance of the log entry
+      name: Severity
+      type: string
+    - JSONPath: .spec.timestamp
+      description: The time value for the log entry
+      name: Timestamp
+      type: string
+    - JSONPath: .spec.monitored_resource_type
+      description: Optional expression to compute the type of the monitored resource this log entry is being recorded on
+      name: Res Type
+      type: string
+    - JSONPath: .metadata.creationTimestamp
+      description: |-
+        CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
+        Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+      name: Age
+      type: date
 ---
 kind: CustomResourceDefinition
 apiVersion: apiextensions.k8s.io/v1beta1
@@ -996,8 +995,8 @@ spec:
     plural: edges
     singular: edge
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -1021,8 +1020,8 @@ spec:
     plural: metrics
     singular: metric
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -1046,8 +1045,8 @@ spec:
     plural: quotas
     singular: quota
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -1071,8 +1070,8 @@ spec:
     plural: reportnothings
     singular: reportnothing
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -1096,8 +1095,8 @@ spec:
     plural: tracespans
     singular: tracespan
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
