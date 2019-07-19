@@ -8,7 +8,7 @@ In order to be able to backup and restore your Kyma cluster, [Velero](https://gi
 
 To sucessfully set up velero, you need to provide a supported storage location in the cloud provider of your choosing and credentials to access it.
 Please follow the instructions below to setup velero.
-1. Enable the installation of the velero components on the kyma installer. To do that follow [this guide](/root/kyma/#configuration-custom-component-installation)<br/>
+1. Enable the installation of the velero components on the kyma installer. To do that follow [this guide](/root/kyma/#configuration-custom-component-installation).<br/>
     The components to add are:
     ```yaml
     - name: "velero-essentials"
