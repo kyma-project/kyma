@@ -1,6 +1,7 @@
 package testsuite
 
 import (
+	"fmt"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	core "k8s.io/api/core/v1"
@@ -17,7 +18,7 @@ type CreateNamespace struct {
 var _ step.Step = &CreateNamespace{}
 
 // NewCreateApplication returns new CreateApplication
-func NewCreateNamespace(namespaces coreClient.NamespaceInterface, name string) *CreateNamespace {
+func NewCreateNamespace(name string, namespaces coreClient.NamespaceInterface) *CreateNamespace {
 	return &CreateNamespace{
 		namespaces: namespaces,
 		name:       name,
@@ -26,7 +27,7 @@ func NewCreateNamespace(namespaces coreClient.NamespaceInterface, name string) *
 
 // Name returns name name of the step
 func (s *CreateNamespace) Name() string {
-	return "Create namespace"
+	return fmt.Sprintf("Create namespace %s", s.name)
 }
 
 // Run executes the step

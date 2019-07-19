@@ -3,6 +3,7 @@ package scenario
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"net/http"
 	"time"
 
@@ -31,7 +32,7 @@ import (
 // E2E executes complete external solution integration test scenario
 type E2E struct {
 	domain        string
-	runID         string
+	testID        string
 	testNamespace string
 	skipSSLVerify bool
 }
@@ -39,6 +40,7 @@ type E2E struct {
 type e2EState struct {
 	domain        string
 	skipSSLVerify bool
+	appName       string
 
 	serviceClassID      string
 	serviceInstanceName string
@@ -46,11 +48,15 @@ type e2EState struct {
 	eventSender         *testkit.EventSender
 }
 
+const (
+	lambdaPort = 8080
+)
+
 // AddFlags adds CLI flags to given FlagSet
 func (s *E2E) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.testNamespace, "testNamespace", "default", "Namespace where test should create resources")
 	pflag.StringVar(&s.domain, "domain", "kyma.local", "domain")
-	pflag.StringVar(&s.runID, "runID", "e2e-test", "domain")
+	pflag.StringVar(&s.testID, "testID", "e2e-test", "domain")
 	pflag.BoolVar(&s.skipSSLVerify, "skip-ssl-verify", false, "Skip verification of service SSL certificates")
 }
 
@@ -80,25 +86,24 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 		s.testNamespace,
 	)
 
-	state := &e2EState{
-		domain:        s.domain,
-		skipSSLVerify: s.skipSSLVerify,
-	}
+	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testNamespace, lambdaPort)
+	state := &e2EState{domain: s.domain, skipSSLVerify: s.skipSSLVerify, appName: s.testID}
+
 
 	return []step.Step{
-		testsuite.NewCreateNamespace(coreClientset.CoreV1().Namespaces(), s.testNamespace),
-		testsuite.NewCreateApplication(appOperatorClientset.ApplicationconnectorV1alpha1().Applications(), false),
-		testsuite.NewCreateMapping(appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testNamespace)),
-		testsuite.NewDeployLambda(kubelessClientset.KubelessV1beta1().Functions(s.testNamespace), pods),
+		testsuite.NewCreateNamespace(s.testNamespace, coreClientset.CoreV1().Namespaces()),
+		testsuite.NewCreateApplication(s.testID, s.testID, false, appOperatorClientset.ApplicationconnectorV1alpha1().Applications()),
+		testsuite.NewCreateMapping(s.testID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testNamespace)),
+		testsuite.NewDeployLambda(s.testID, lambdaPort, kubelessClientset.KubelessV1beta1().Functions(s.testNamespace), pods),
 		testsuite.NewStartTestServer(testService),
 		testsuite.NewConnectApplication(connector, state),
 		testsuite.NewRegisterTestService(testService, state),
-		testsuite.NewCreateServiceInstance(s.runID, serviceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testNamespace), state),
-		testsuite.NewCreateServiceBinding(serviceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testNamespace), state),
-		testsuite.NewCreateServiceBindingUsage(serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testNamespace), pods, state),
-		testsuite.NewCreateSubscription(eventingClientset.EventingV1alpha1().Subscriptions(s.testNamespace), s.testNamespace),
+		testsuite.NewCreateServiceInstance(s.testID, serviceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testNamespace), state),
+		testsuite.NewCreateServiceBinding(s.testID, s.testID, serviceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testNamespace), state),
+		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID, serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testNamespace), pods, state),
+		testsuite.NewCreateSubscription(s.testID, s.testID, lambdaEndpoint, eventingClientset.EventingV1alpha1().Subscriptions(s.testNamespace), s.testNamespace),
 		testsuite.NewSleep(20 * time.Second),
-		testsuite.NewSendEvent(state),
+		testsuite.NewSendEvent(s.testID, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil
 }
@@ -128,7 +133,7 @@ func (s *e2EState) SetGatewayClientCerts(certs []tls.Certificate) {
 	httpClient := internal.NewHTTPClient(s.skipSSLVerify)
 	httpClient.Transport.(*http.Transport).TLSClientConfig.Certificates = certs
 	resilientHTTPClient := resilient.WrapHttpClient(httpClient)
-	gatewayURL := fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", s.domain, consts.AppName)
+	gatewayURL := fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", s.domain, s.appName)
 	s.registryClient = testkit.NewRegistryClient(gatewayURL, resilientHTTPClient)
 	s.eventSender = testkit.NewEventSender(resilientHTTPClient, s.domain)
 }

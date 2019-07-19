@@ -7,6 +7,51 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )
 
+const (
+serviceProvider         = "e2e"
+serviceName             = "e2e-test-app-svc"
+serviceDescription      = "e2e testing app"
+serviceShortDescription = "e2e testing app"
+serviceIdentifier       = "e2e-test-app-svc-id"
+serviceEventsSpec       = `{
+   "asyncapi":"1.0.0",
+   "info":{
+      "title":"Example Events",
+      "version":"1.0.0",
+      "description":"Description of all the example events"
+   },
+   "baseTopic":"example.events.com",
+   "topics":{
+      "exampleEvent.v1":{
+         "subscribe":{
+            "summary":"Example event",
+            "payload":{
+               "type":"object",
+               "properties":{
+                  "myObject":{
+                     "type":"object",
+                     "required":[
+                        "id"
+                     ],
+                     "example":{
+                        "id":"4caad296-e0c5-491e-98ac-0ed118f9474e"
+                     },
+                     "properties":{
+                        "id":{
+                           "title":"Id",
+                           "description":"Resource identifier",
+                           "type":"string"
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+}`
+)
+
 type RegisterTestService struct {
 	testService *testkit.TestService
 	state       RegisterTestServiceState
@@ -46,13 +91,13 @@ func (s *RegisterTestService) Run() error {
 
 func (s *RegisterTestService) prepareService(targetURL string) *testkit.ServiceDetails {
 	return &testkit.ServiceDetails{
-		Provider:         consts.ServiceProvider,
-		Name:             consts.ServiceName,
-		Description:      consts.ServiceDescription,
-		ShortDescription: consts.ServiceShortDescription,
-		Identifier:       consts.ServiceIdentifier,
+		Provider:         serviceProvider,
+		Name:             serviceName,
+		Description:      serviceDescription,
+		ShortDescription: serviceShortDescription,
+		Identifier:       serviceIdentifier,
 		Events: &testkit.Events{
-			Spec: json.RawMessage(consts.ServiceEventsSpec),
+			Spec: json.RawMessage(serviceEventsSpec),
 		},
 		Api: &testkit.API{
 			TargetUrl: targetURL,

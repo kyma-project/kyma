@@ -10,6 +10,7 @@ import (
 // SendEvent is a step which sends example event to the application gateway
 type SendEvent struct {
 	state SendEventState
+	appName string
 }
 
 // SendEventState represents SendEvent dependencies
@@ -20,8 +21,8 @@ type SendEventState interface {
 var _ step.Step = &SendEvent{}
 
 // NewSendEvent returns new SendEvent
-func NewSendEvent(state SendEventState) *SendEvent {
-	return &SendEvent{state: state}
+func NewSendEvent(appName string, state SendEventState) *SendEvent {
+	return &SendEvent{state: state, appName: appName}
 }
 
 // Name returns name name of the step
@@ -32,7 +33,7 @@ func (s *SendEvent) Name() string {
 // Run executes the step
 func (s *SendEvent) Run() error {
 	event := s.prepareEvent()
-	return s.state.GetEventSender().SendEvent(consts.AppName, event)
+	return s.state.GetEventSender().SendEvent(s.appName, event)
 }
 
 func (s *SendEvent) prepareEvent() *testkit.ExampleEvent {

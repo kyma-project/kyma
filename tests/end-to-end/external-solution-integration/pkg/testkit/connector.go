@@ -9,7 +9,6 @@ import (
 	connectionTokenHandlerApi "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 
 	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
@@ -22,29 +21,34 @@ type ConnectorClient struct {
 	tokenRequests connectionTokenHandlerClient.TokenRequestInterface
 	httpClient    *http.Client
 	logger        logrus.FieldLogger
+	appName       string
+
+	trName string
 }
 
-func NewConnectorClient(tokenRequests connectionTokenHandlerClient.TokenRequestInterface, httpClient *http.Client, logger logrus.FieldLogger) *ConnectorClient {
+func NewConnectorClient(appName string, tokenRequests connectionTokenHandlerClient.TokenRequestInterface, httpClient *http.Client, logger logrus.FieldLogger) *ConnectorClient {
 	return &ConnectorClient{
 		tokenRequests: tokenRequests,
 		httpClient:    httpClient,
 		logger:        logger,
+		appName:       appName,
 	}
 }
 
 func (cc *ConnectorClient) GetToken() (string, error) {
 	tokenRequest := &connectionTokenHandlerApi.TokenRequest{
-		ObjectMeta: metav1.ObjectMeta{Name: consts.AppName},
+		ObjectMeta: metav1.ObjectMeta{GenerateName: cc.appName},
 		Status: connectionTokenHandlerApi.TokenRequestStatus{
 			ExpireAfter: metav1.NewTime(time.Now().Add(1 * time.Minute)),
 		},
 	}
 
-	_, err := cc.tokenRequests.Create(tokenRequest)
+	created, err := cc.tokenRequests.Create(tokenRequest)
 	if err != nil {
 		cc.logger.Error(err)
 		return "", err
 	}
+	cc.trName = created.Name
 
 	err = retry.Do(cc.isTokenRequestReady)
 	if err != nil {
@@ -52,7 +56,7 @@ func (cc *ConnectorClient) GetToken() (string, error) {
 		return "", err
 	}
 
-	tr, err := cc.tokenRequests.Get(consts.AppName, metav1.GetOptions{})
+	tr, err := cc.tokenRequests.Get(cc.trName, metav1.GetOptions{})
 	if err != nil {
 		cc.logger.Error(err)
 		return "", err
@@ -62,7 +66,7 @@ func (cc *ConnectorClient) GetToken() (string, error) {
 }
 
 func (cc *ConnectorClient) isTokenRequestReady() error {
-	tokenRequest, e := cc.tokenRequests.Get(consts.AppName, metav1.GetOptions{})
+	tokenRequest, e := cc.tokenRequests.Get(cc.trName, metav1.GetOptions{})
 	if e != nil {
 		return e
 	}

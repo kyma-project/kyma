@@ -1,10 +1,10 @@
 package testsuite
 
 import (
+	"fmt"
 	"github.com/avast/retry-go"
 	kubelessApi "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubelessClient "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"
@@ -52,21 +52,25 @@ module.exports = { main: function (event, context) {
 type DeployLambda struct {
 	*helpers.LambdaHelper
 	functions kubelessClient.FunctionInterface
+	name      string
+	port      int
 }
 
 var _ step.Step = &DeployLambda{}
 
 // NewDeployLambda returns new DeployLambda
-func NewDeployLambda(functions kubelessClient.FunctionInterface, pods coreClient.PodInterface) *DeployLambda {
+func NewDeployLambda(name string, port int, functions kubelessClient.FunctionInterface, pods coreClient.PodInterface) *DeployLambda {
 	return &DeployLambda{
 		LambdaHelper: helpers.NewLambdaHelper(pods),
 		functions:    functions,
+		name:         name,
+		port:         port,
 	}
 }
 
 // Name returns name name of the step
 func (s *DeployLambda) Name() string {
-	return "Deploy lambda"
+	return fmt.Sprintf("Deploy lambda %s", s.name)
 }
 
 // Run executes the step
@@ -95,15 +99,15 @@ func (s *DeployLambda) createLambda() *kubelessApi.Function {
 		Deps:                `{"dependencies":{"request": "^2.88.0"}}`,
 		Deployment: extensionsApi.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:   consts.AppName,
-				Labels: map[string]string{"function": consts.AppName},
+				Name:   s.name,
+				Labels: map[string]string{"function": s.name},
 			},
 			Spec: extensionsApi.DeploymentSpec{
 				Template: coreApi.PodTemplateSpec{
 					Spec: coreApi.PodSpec{
 						Containers: []coreApi.Container{
 							{
-								Name: consts.AppName,
+								Name: s.name,
 							},
 						},
 					},
@@ -116,22 +120,22 @@ func (s *DeployLambda) createLambda() *kubelessApi.Function {
 					Name:       "http-function-port",
 					Port:       8080,
 					Protocol:   "TCP",
-					TargetPort: intstr.FromInt(8080),
+					TargetPort: intstr.FromInt(s.port),
 				},
 			},
-			Selector: map[string]string{"created-by": "kubeless", "function": consts.AppName},
+			Selector: map[string]string{"created-by": "kubeless", "function": s.name},
 		},
 	}
 
 	return &kubelessApi.Function{
-		ObjectMeta: metav1.ObjectMeta{Name: consts.AppName},
+		ObjectMeta: metav1.ObjectMeta{Name: s.name},
 		Spec:       lambdaSpec,
 	}
 }
 
 // Cleanup removes all resources that may possibly created by the step
 func (s *DeployLambda) Cleanup() error {
-	err := s.functions.Delete(consts.AppName, &metav1.DeleteOptions{})
+	err := s.functions.Delete(s.name, &metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
@@ -140,7 +144,7 @@ func (s *DeployLambda) Cleanup() error {
 }
 
 func (s *DeployLambda) isLambdaReady() error {
-	pods, err := s.ListLambdaPods()
+	pods, err := s.ListLambdaPods(s.name)
 	if err != nil {
 		return err
 	}
@@ -159,7 +163,7 @@ func (s *DeployLambda) isLambdaReady() error {
 }
 
 func (s *DeployLambda) isLambdaTerminated() error {
-	pods, err := s.ListLambdaPods()
+	pods, err := s.ListLambdaPods(s.name)
 	if err != nil {
 		return err
 	}

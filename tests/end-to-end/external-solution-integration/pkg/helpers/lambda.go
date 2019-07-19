@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
+	"fmt"
 	coreApi "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -19,9 +19,9 @@ func NewLambdaHelper(pods coreClient.PodInterface) *LambdaHelper {
 }
 
 // ListLambdaPods returns all pods for lambda
-func (h *LambdaHelper) ListLambdaPods() ([]coreApi.Pod, error) {
+func (h *LambdaHelper) ListLambdaPods(name string) ([]coreApi.Pod, error) {
 	labelSelector := map[string]string{
-		"function":   consts.AppName,
+		"function": name,
 		"created-by": "kubeless",
 	}
 	listOptions := metav1.ListOptions{LabelSelector: labels.SelectorFromSet(labelSelector).String()}
@@ -31,4 +31,8 @@ func (h *LambdaHelper) ListLambdaPods() ([]coreApi.Pod, error) {
 	}
 
 	return podList.Items, nil
+}
+
+func LambdaInClusterEndpoint(name, namespace string, port int) string {
+	return fmt.Sprintf("http://%s.%s:%v", name, namespace, port)
 }

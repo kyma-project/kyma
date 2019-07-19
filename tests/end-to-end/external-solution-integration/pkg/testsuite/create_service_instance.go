@@ -1,11 +1,10 @@
 package testsuite
 
 import (
-	"fmt"
 	"github.com/avast/retry-go"
 	serviceCatalogApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,7 +16,7 @@ import (
 type CreateServiceInstance struct {
 	serviceInstances serviceCatalogClient.ServiceInstanceInterface
 	state            CreateServiceInstanceState
-	runID            string
+	name             string
 }
 
 // CreateServiceInstanceState represents CreateServiceInstance dependencies
@@ -30,9 +29,9 @@ type CreateServiceInstanceState interface {
 var _ step.Step = &CreateServiceInstance{}
 
 // NewCreateServiceInstance returns new CreateServiceInstance
-func NewCreateServiceInstance(runID string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, state CreateServiceInstanceState) *CreateServiceInstance {
+func NewCreateServiceInstance(name string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, state CreateServiceInstanceState) *CreateServiceInstance {
 	return &CreateServiceInstance{
-		runID:            runID,
+		name:             name,
 		serviceInstances: serviceInstances,
 		state:            state,
 	}
@@ -47,9 +46,8 @@ func (s *CreateServiceInstance) Name() string {
 func (s *CreateServiceInstance) Run() error {
 	si, err := s.serviceInstances.Create(&serviceCatalogApi.ServiceInstance{
 		ObjectMeta: v1.ObjectMeta{
-			GenerateName: consts.ServiceInstanceName,
-			Finalizers:   []string{"kubernetes-incubator/service-catalog"},
-			Labels:       map[string]string{"runID": s.runID},
+			Name:       s.name,
+			Finalizers: []string{"kubernetes-incubator/service-catalog"},
 		},
 		Spec: serviceCatalogApi.ServiceInstanceSpec{
 			Parameters: &runtime.RawExtension{},
@@ -82,23 +80,11 @@ func (s *CreateServiceInstance) isServiceInstanceCreated() error {
 
 // Cleanup removes all resources that may possibly created by the step
 func (s *CreateServiceInstance) Cleanup() error {
-	selector := v1.ListOptions{
-		LabelSelector: fmt.Sprintf("runID=%s", s.runID),
-	}
-	err := s.serviceInstances.DeleteCollection(&v1.DeleteOptions{}, selector)
+	err := s.serviceInstances.Delete(s.name, &v1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
-	return retry.Do(func() error {
-		list, err := s.serviceInstances.List(selector)
-		if err != nil {
-			return err
-		}
-
-		if len(list.Items) != 0 {
-			return errors.New("service instance still exists")
-		}
-
-		return nil
+	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
+		return s.serviceInstances.Get(s.name, v1.GetOptions{})
 	}, retry.Delay(time.Second))
 }

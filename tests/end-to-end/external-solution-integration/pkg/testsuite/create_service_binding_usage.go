@@ -14,41 +14,47 @@ import (
 	"time"
 )
 
-// CreateServiceBindingUsage is a step which creates new ServiceBindingUsage
-type CreateServiceBindingUsage struct {
+// CreateLambdaServiceBindingUsage is a step which creates new ServiceBindingUsage
+type CreateLambdaServiceBindingUsage struct {
 	*helpers.LambdaHelper
 	serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface
 	state                CreateServiceBindingUsageState
+	name                 string
+	serviceBindingName   string
+	lambdaName           string
 }
 
-// CreateServiceBindingUsageState represents CreateServiceBindingUsage dependencies
+// CreateServiceBindingUsageState represents CreateLambdaServiceBindingUsage dependencies
 type CreateServiceBindingUsageState interface {
 	GetServiceClassID() string
 }
 
-var _ step.Step = &CreateServiceBindingUsage{}
+var _ step.Step = &CreateLambdaServiceBindingUsage{}
 
-// NewCreateServiceBindingUsage returns new CreateServiceBindingUsage
-func NewCreateServiceBindingUsage(serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface, pods coreClient.PodInterface, state CreateServiceBindingUsageState) *CreateServiceBindingUsage {
-	return &CreateServiceBindingUsage{
+// NewCreateServiceBindingUsage returns new CreateLambdaServiceBindingUsage
+func NewCreateServiceBindingUsage(name, serviceBindingName, lambdaName string, serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface, pods coreClient.PodInterface, state CreateServiceBindingUsageState) *CreateLambdaServiceBindingUsage {
+	return &CreateLambdaServiceBindingUsage{
 		LambdaHelper:         helpers.NewLambdaHelper(pods),
 		serviceBindingUsages: serviceBindingUsages,
 		state:                state,
+		name:                 name,
+		serviceBindingName:   serviceBindingName,
+		lambdaName:           lambdaName,
 	}
 }
 
 // Name returns name name of the step
-func (s *CreateServiceBindingUsage) Name() string {
+func (s *CreateLambdaServiceBindingUsage) Name() string {
 	return "Create service binding usage"
 }
 
 // Run executes the step
-func (s *CreateServiceBindingUsage) Run() error {
+func (s *CreateLambdaServiceBindingUsage) Run() error {
 	serviceBindingUsage := &serviceBindingUsageApi.ServiceBindingUsage{
 		TypeMeta: metav1.TypeMeta{Kind: "ServiceBindingUsage", APIVersion: serviceBindingUsageApi.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   consts.ServiceBindingUsageName,
-			Labels: map[string]string{"Function": consts.AppName, "ServiceBinding": consts.ServiceBindingName},
+			Name:   s.name,
+			Labels: map[string]string{"Function": s.lambdaName, "ServiceBinding": s.serviceBindingName},
 		},
 		Spec: serviceBindingUsageApi.ServiceBindingUsageSpec{
 			Parameters: &serviceBindingUsageApi.Parameters{
@@ -57,11 +63,11 @@ func (s *CreateServiceBindingUsage) Run() error {
 				},
 			},
 			ServiceBindingRef: serviceBindingUsageApi.LocalReferenceByName{
-				Name: consts.ServiceBindingName,
+				Name: s.serviceBindingName,
 			},
 			UsedBy: serviceBindingUsageApi.LocalReferenceByKindAndName{
 				Kind: "function",
-				Name: consts.AppName,
+				Name: s.lambdaName,
 			},
 		},
 	}
@@ -79,9 +85,9 @@ func (s *CreateServiceBindingUsage) Run() error {
 	return nil
 }
 
-func (s *CreateServiceBindingUsage) isLambdaBound() error {
-	sbuLabel := fmt.Sprintf("app-%s-%s", consts.AppName, s.state.GetServiceClassID())
-	pods, err := s.ListLambdaPods()
+func (s *CreateLambdaServiceBindingUsage) isLambdaBound() error {
+	sbuLabel := fmt.Sprintf("app-%s-%s", s.lambdaName, s.state.GetServiceClassID())
+	pods, err := s.ListLambdaPods(s.lambdaName)
 	if err != nil {
 		return err
 	}
@@ -104,13 +110,13 @@ func (s *CreateServiceBindingUsage) isLambdaBound() error {
 }
 
 // Cleanup removes all resources that may possibly created by the step
-func (s *CreateServiceBindingUsage) Cleanup() error {
-	err := s.serviceBindingUsages.Delete(consts.ServiceBindingUsageName, &metav1.DeleteOptions{})
+func (s *CreateLambdaServiceBindingUsage) Cleanup() error {
+	err := s.serviceBindingUsages.Delete(s.name, &metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
 
 	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
-		return s.serviceBindingUsages.Get(consts.ServiceBindingName, metav1.GetOptions{})
+		return s.serviceBindingUsages.Get(s.serviceBindingName, metav1.GetOptions{})
 	})
 }

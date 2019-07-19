@@ -15,15 +15,19 @@ import (
 type CreateSubscription struct {
 	subscriptions eventingClient.SubscriptionInterface
 	endpoint      string
+	name          string
+	sourceID      string
 }
 
 var _ step.Step = &CreateSubscription{}
 
 // NewCreateSubscription returns new CreateSubscription
-func NewCreateSubscription(subscriptions eventingClient.SubscriptionInterface, namespace string) *CreateSubscription {
+func NewCreateSubscription(name, sourceID, endpoint string, subscriptions eventingClient.SubscriptionInterface, namespace string) *CreateSubscription {
 	return &CreateSubscription{
 		subscriptions: subscriptions,
-		endpoint:      fmt.Sprintf(consts.LambdaEndpointPattern, namespace),
+		endpoint:      endpoint,
+		name:          name,
+		sourceID:      sourceID,
 	}
 }
 
@@ -39,13 +43,12 @@ func (s *CreateSubscription) Run() error {
 		IncludeSubscriptionNameHeader: true,
 		EventType:                     consts.EventType,
 		EventTypeVersion:              consts.EventVersion,
-		SourceID:                      consts.AppName,
+		SourceID:                      s.sourceID,
 	}
 
 	sub := &eventingApi.Subscription{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   consts.AppName,
-			Labels: map[string]string{"Function": consts.AppName},
+			Name:   s.name,
 		},
 
 		SubscriptionSpec: subSpec,
@@ -61,11 +64,11 @@ func (s *CreateSubscription) Run() error {
 
 // Cleanup removes all resources that may possibly created by the step
 func (s *CreateSubscription) Cleanup() error {
-	return s.subscriptions.Delete(consts.AppName, &metav1.DeleteOptions{})
+	return s.subscriptions.Delete(s.name, &metav1.DeleteOptions{})
 }
 
 func (s *CreateSubscription) isSubscriptionReady() error {
-	subscription, err := s.subscriptions.Get(consts.AppName, metav1.GetOptions{})
+	subscription, err := s.subscriptions.Get(s.name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
