@@ -1,7 +1,7 @@
 package testsuite
 
 import (
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"time"
@@ -38,8 +38,8 @@ func (s *SendEvent) Run() error {
 
 func (s *SendEvent) prepareEvent() *testkit.ExampleEvent {
 	return &testkit.ExampleEvent{
-		EventType:        consts.EventType,
-		EventTypeVersion: consts.EventVersion,
+		EventType:        example_schema.EventType,
+		EventTypeVersion: example_schema.EventVersion,
 		EventID:          "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
 		EventTime:        time.Now(),
 		Data:             "some data",

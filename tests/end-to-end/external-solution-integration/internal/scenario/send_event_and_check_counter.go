@@ -23,6 +23,7 @@ func (s *SendEventAndCheckCounter) Steps(config *rest.Config) ([]step.Step, erro
 	gatewayClientset := gatewayClient.NewForConfigOrDie(config)
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
 	connector := testkit.NewConnectorClient(
+		s.testID,
 		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testNamespace),
 		internal.NewHTTPClient(s.skipSSLVerify),
 		log.New(),
@@ -35,11 +36,11 @@ func (s *SendEventAndCheckCounter) Steps(config *rest.Config) ([]step.Step, erro
 		s.domain,
 		s.testNamespace,
 	)
-	state := &e2EState{domain: s.domain, skipSSLVerify: s.skipSSLVerify}
+	state := s.NewState()
 
 	return []step.Step{
 		testsuite.NewConnectApplication(connector, state),
-		testsuite.NewSendEvent(state),
+		testsuite.NewSendEvent(s.testID, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil
 }

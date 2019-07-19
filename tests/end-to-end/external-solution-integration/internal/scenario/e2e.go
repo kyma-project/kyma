@@ -3,9 +3,10 @@ package scenario
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"net/http"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 
 	"github.com/kyma-project/kyma/common/resilient"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
@@ -19,7 +20,6 @@ import (
 	eventingClient "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testsuite"
@@ -35,17 +35,6 @@ type E2E struct {
 	testID        string
 	testNamespace string
 	skipSSLVerify bool
-}
-
-type e2EState struct {
-	domain        string
-	skipSSLVerify bool
-	appName       string
-
-	serviceClassID      string
-	serviceInstanceName string
-	registryClient      *testkit.RegistryClient
-	eventSender         *testkit.EventSender
 }
 
 const (
@@ -73,6 +62,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	gatewayClientset := gatewayClient.NewForConfigOrDie(config)
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
 	connector := testkit.NewConnectorClient(
+		s.testID,
 		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testNamespace),
 		internal.NewHTTPClient(s.skipSSLVerify),
 		log.New(),
@@ -87,8 +77,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	)
 
 	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testNamespace, lambdaPort)
-	state := &e2EState{domain: s.domain, skipSSLVerify: s.skipSSLVerify, appName: s.testID}
-
+	state := s.NewState()
 
 	return []step.Step{
 		testsuite.NewCreateNamespace(s.testNamespace, coreClientset.CoreV1().Namespaces()),
@@ -97,7 +86,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewDeployLambda(s.testID, lambdaPort, kubelessClientset.KubelessV1beta1().Functions(s.testNamespace), pods),
 		testsuite.NewStartTestServer(testService),
 		testsuite.NewConnectApplication(connector, state),
-		testsuite.NewRegisterTestService(testService, state),
+		testsuite.NewRegisterTestService(s.testID, testService, state),
 		testsuite.NewCreateServiceInstance(s.testID, serviceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testNamespace), state),
 		testsuite.NewCreateServiceBinding(s.testID, s.testID, serviceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testNamespace), state),
 		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID, serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testNamespace), pods, state),
@@ -106,6 +95,21 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewSendEvent(s.testID, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil
+}
+
+type e2EState struct {
+	domain        string
+	skipSSLVerify bool
+	appName       string
+
+	serviceClassID      string
+	serviceInstanceName string
+	registryClient      *testkit.RegistryClient
+	eventSender         *testkit.EventSender
+}
+
+func (s *E2E) NewState() *e2EState {
+	return &e2EState{domain: s.domain, skipSSLVerify: s.skipSSLVerify, appName: s.testID}
 }
 
 // SetServiceClassID allows to set ServiceClassID so it can be shared between steps

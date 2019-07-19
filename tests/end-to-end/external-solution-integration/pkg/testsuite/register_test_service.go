@@ -2,59 +2,15 @@ package testsuite
 
 import (
 	"encoding/json"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
-)
-
-const (
-serviceProvider         = "e2e"
-serviceName             = "e2e-test-app-svc"
-serviceDescription      = "e2e testing app"
-serviceShortDescription = "e2e testing app"
-serviceIdentifier       = "e2e-test-app-svc-id"
-serviceEventsSpec       = `{
-   "asyncapi":"1.0.0",
-   "info":{
-      "title":"Example Events",
-      "version":"1.0.0",
-      "description":"Description of all the example events"
-   },
-   "baseTopic":"example.events.com",
-   "topics":{
-      "exampleEvent.v1":{
-         "subscribe":{
-            "summary":"Example event",
-            "payload":{
-               "type":"object",
-               "properties":{
-                  "myObject":{
-                     "type":"object",
-                     "required":[
-                        "id"
-                     ],
-                     "example":{
-                        "id":"4caad296-e0c5-491e-98ac-0ed118f9474e"
-                     },
-                     "properties":{
-                        "id":{
-                           "title":"Id",
-                           "description":"Resource identifier",
-                           "type":"string"
-                        }
-                     }
-                  }
-               }
-            }
-         }
-      }
-   }
-}`
 )
 
 type RegisterTestService struct {
 	testService *testkit.TestService
 	state       RegisterTestServiceState
+	name        string
 }
 
 type RegisterTestServiceState interface {
@@ -65,10 +21,11 @@ type RegisterTestServiceState interface {
 
 var _ step.Step = &RegisterTestService{}
 
-func NewRegisterTestService(testService *testkit.TestService, state RegisterTestServiceState) *RegisterTestService {
+func NewRegisterTestService(name string, testService *testkit.TestService, state RegisterTestServiceState) *RegisterTestService {
 	return &RegisterTestService{
 		testService: testService,
 		state:       state,
+		name:        name,
 	}
 }
 
@@ -91,13 +48,13 @@ func (s *RegisterTestService) Run() error {
 
 func (s *RegisterTestService) prepareService(targetURL string) *testkit.ServiceDetails {
 	return &testkit.ServiceDetails{
-		Provider:         serviceProvider,
-		Name:             serviceName,
-		Description:      serviceDescription,
-		ShortDescription: serviceShortDescription,
-		Identifier:       serviceIdentifier,
+		Provider:         s.name,
+		Name:             s.name,
+		Description:      s.name,
+		ShortDescription: s.name,
+		Identifier:       s.name,
 		Events: &testkit.Events{
-			Spec: json.RawMessage(serviceEventsSpec),
+			Spec: json.RawMessage(example_schema.EventsSpec),
 		},
 		Api: &testkit.API{
 			TargetUrl: targetURL,

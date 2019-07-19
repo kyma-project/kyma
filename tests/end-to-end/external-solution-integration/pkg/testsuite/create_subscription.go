@@ -1,11 +1,10 @@
 package testsuite
 
 import (
-	"fmt"
 	"github.com/avast/retry-go"
 	eventingApi "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eventingClient "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/consts"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,8 +40,8 @@ func (s *CreateSubscription) Run() error {
 	subSpec := eventingApi.SubscriptionSpec{
 		Endpoint:                      s.endpoint,
 		IncludeSubscriptionNameHeader: true,
-		EventType:                     consts.EventType,
-		EventTypeVersion:              consts.EventVersion,
+		EventType:                     example_schema.EventType,
+		EventTypeVersion:              example_schema.EventVersion,
 		SourceID:                      s.sourceID,
 	}
 
