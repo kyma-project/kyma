@@ -146,9 +146,9 @@ func (d *DocsProvider) updateClusterDocsTopic(bundle *internal.Bundle) error {
 	return nil
 }
 
-func (d *DocsProvider) updateDocsTopic(bundle *internal.Bundle) error {
+func (d *DocsProvider) updateDocsTopic(bundle *internal.Bundle, namespace string) error {
 	dt := &v1alpha1.DocsTopic{}
-	if err := d.dynamicClient.Get(context.Background(), types.NamespacedName{Name: string(bundle.ID)}, dt); err != nil {
+	if err := d.dynamicClient.Get(context.Background(), types.NamespacedName{Name: string(bundle.ID), Namespace: namespace}, dt); err != nil {
 		return errors.Wrapf(err, "while getting DocsTopic %s", bundle.ID)
 	}
 	if reflect.DeepEqual(dt.Spec.CommonDocsTopicSpec, bundle.Docs[0].Template) {
