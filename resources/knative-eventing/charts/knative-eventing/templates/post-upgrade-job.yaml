@@ -15,7 +15,7 @@ data:
     #!/usr/bin/env bash
     set -eu
     echo "*** Post upgrade job starts ***"
-    kubectl scale -n kyma-system deploy/subscription-controller --replicas=1
+    kubectl scale -n kyma-system deploy/event-bus-subscription-controller-knative --replicas=1
     echo "*** Post upgrade job executed ***"
 kind: ConfigMap
 metadata:
