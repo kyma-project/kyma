@@ -12,7 +12,7 @@ spec:
     - all
     - addons
     kind: ClusterAddonsConfiguration
-    plural: clusteraddonsconfiguragitions
+    plural: clusteraddonsconfigurations
   scope: Cluster
   subresources:
     status: {}
