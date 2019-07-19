@@ -59,7 +59,6 @@ func TestStrategy_AddCSRFToken(t *testing.T) {
 		authStrategy := &authmocks.Strategy{}
 
 		t.Run("Should set CSRF header and copy all Cookies into the request if it is possible to fetch the CSRF token", func(t *testing.T) {
-
 			// given
 			req := getNewEmptyRequest()
 
@@ -71,7 +70,38 @@ func TestStrategy_AddCSRFToken(t *testing.T) {
 			cachedItem := &csrf.Response{
 				CSRFToken: cachedToken,
 				Cookies: []*http.Cookie{
-					{Name: cachedCookieName},
+					{Name: cachedCookieName, Value: cachedToken},
+				},
+			}
+
+			c.On("GetTokenEndpointResponse", testCSRFTokenEndpointURL, authStrategy).Return(cachedItem, nil)
+
+			// when
+			err := s.AddCSRFToken(req)
+
+			//then
+			require.Nil(t, err)
+			cachedCookie, cookieErr := req.Cookie(cachedCookieName)
+			require.NoError(t, cookieErr)
+			assert.Equal(t, cachedToken, cachedCookie.Value)
+
+		})
+
+		t.Run("Should set CSRF header and merge new Cookies into the request overriding existing cookies", func(t *testing.T) {
+			// given
+			req := getNewEmptyRequest()
+			req.AddCookie(&http.Cookie{Name: cachedCookieName, Value: "oldInvalidCookie"})
+			req.AddCookie(&http.Cookie{Name: "custom-user-cookie", Value: "customValue"})
+
+			c := &mocks.Client{}
+			sf := NewTokenStrategyFactory(c)
+
+			s := sf.Create(authStrategy, testCSRFTokenEndpointURL)
+
+			cachedItem := &csrf.Response{
+				CSRFToken: cachedToken,
+				Cookies: []*http.Cookie{
+					{Name: cachedCookieName, Value: cachedToken},
 				},
 			}
 
@@ -83,7 +113,14 @@ func TestStrategy_AddCSRFToken(t *testing.T) {
 			//then
 			require.Nil(t, err)
 			assert.Equal(t, cachedToken, req.Header.Get(httpconsts.HeaderCSRFToken))
-			assert.Equal(t, cachedCookieName, req.Cookies()[0].Name)
+
+			cachedCookie, cookieErr := req.Cookie(cachedCookieName)
+			require.NoError(t, cookieErr)
+			assert.Equal(t, cachedToken, cachedCookie.Value)
+
+			customUserCookie, cookieErr := req.Cookie("custom-user-cookie")
+			require.NoError(t, cookieErr)
+			assert.Equal(t, "customValue", customUserCookie.Value)
 
 		})
 

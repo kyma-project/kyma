@@ -26,7 +26,7 @@ func TestProxy(t *testing.T) {
 
 	proxyTimeout := 10
 
-	t.Run("should proxy and add addidtional query parameters", func(t *testing.T) {
+	t.Run("should proxy and add additional query parameters", func(t *testing.T) {
 		// given
 		ts := NewTestServer(func(req *http.Request) {
 			assert.Equal(t, "param-value-1", req.URL.Query().Get("param1"))
@@ -444,6 +444,7 @@ func TestProxy(t *testing.T) {
 	testRetryOnAuthFailure := func(testServerConstructor func(check func(req *http.Request)) *httptest.Server, requestBody io.Reader, expectedStatusCode int, t *testing.T) {
 		// given
 		tsf := testServerConstructor(func(req *http.Request) {
+			assertCookie(t, req, "user-cookie", "user-cookie-value")
 			assert.Equal(t, req.Method, http.MethodGet)
 			assert.Equal(t, req.RequestURI, "/orders/123")
 		})
@@ -451,6 +452,7 @@ func TestProxy(t *testing.T) {
 
 		req, _ := http.NewRequest(http.MethodGet, "/orders/123", requestBody)
 		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		req.AddCookie(&http.Cookie{Name: "user-cookie", Value: "user-cookie-value"})
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
@@ -515,6 +517,13 @@ func TestProxy(t *testing.T) {
 
 		}, requestBody, http.StatusForbidden, t)
 	})
+}
+
+func assertCookie(t *testing.T, r *http.Request, name, value string) {
+	cookie, err := r.Cookie(name)
+	require.NoError(t, err)
+
+	assert.Equal(t, value, cookie.Value)
 }
 
 func TestInvalidStateHandler(t *testing.T) {
