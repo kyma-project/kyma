@@ -562,7 +562,7 @@ func createNamespace(subscriberNamespace string) error {
 		},
 	}
 	err := retry.Do(func() error {
-		log.Printf("creating namespace: %s", subscriberNamespace)
+		log.Printf("create test namespace: %s", subscriberNamespace)
 		_, err := clientK8S.Core().Namespaces().Create(ns)
 		return err
 	}, retry.Attempts(retries))
