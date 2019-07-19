@@ -92,7 +92,7 @@ func (d *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle, namespace string
 	switch {
 	case err == nil:
 	case apiErrors.IsAlreadyExists(err):
-		if err := d.updateDocsTopic(bundle); err != nil {
+		if err := d.updateDocsTopic(bundle, namespace); err != nil {
 			return errors.Wrapf(err, "while DocsTopic %s already exists", bundle.ID)
 		}
 	default:
