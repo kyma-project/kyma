@@ -3,7 +3,7 @@ title: Create addons repository
 type: Details
 ---
 
-The repository in which you create your own addons must be an HTTPS server with a specific structure so that the Helm Broker can fetch addons from it. Your remote addons repository can contain many addons, each one compressed to the `.tgz` format and defined in `index.yaml` files. Depending on your needs and preferences, you can create one or more `index.yaml` files to categorize your addons. The repository structure looks as follows:
+The repository in which you create your own addons must have a specific structure and be exposed as an HTTPS server so that the Helm Broker can fetch addons from it. Your remote addons repository can contain many addons, each one compressed to the `.tgz` format and defined in `index.yaml` files. Depending on your needs and preferences, you can create one or more `index.yaml` files to categorize your addons. The repository structure looks as follows:
 
 ```
 sample-addon-repository
@@ -17,13 +17,13 @@ sample-addon-repository
 
 Read [this](https://github.com/kyma-project/bundles/blob/master/docs/getting-started.md) document to learn how to set up your own addons repository which generates `.tgz` and `index.yaml` files, and expose them using an HTTPS server. See the example of the Kyma `addons` repository [here](https://github.com/kyma-project/bundles/releases).
 
-### {addon_name}-{addon_version}.tgz file
+## The addon .tgz file
 
 The `{addon_name}-{addon_version}.tgz` file is a compressed version of your addon. To learn how to create your own addon, read [this](#details-create-addons) document.
 
 >**TIP:** If you contribute to the [addons](https://github.com/kyma-project/bundles/tree/master/bundles) repository, you do not have to compress your addons as the system does it automatically.
 
-### index.yaml file
+## The index.yaml file
 
 In the `index.yaml` file, provide an entry for every single addon from your addons repository. The `index.yaml` file must have the following structure:
 

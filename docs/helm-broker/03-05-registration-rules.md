@@ -5,11 +5,11 @@ type: Details
 
 This document presents the rules you must follow when you configure the Helm Broker. It also describes the Helm Broker's behavior in case of conflicts.
 
-### Using unsecured URLs
+## Using unsecured URLs
 
 On your non-local clusters, you can use only servers with TLS enabled. All incorrect or unsecured URLs will be omitted. Find the information about the rejected URLs in the Helm Broker logs. You can use unsecured URLs only on your local cluster. To use URLs without TLS enabled, set the **global.isDevelopMode** environment variable in the [values.yaml](https://github.com/kyma-project/kyma/blob/master/resources/helm-broker/values.yaml) file to `true`.
 
-### Registering the same ID multiple times
+## Registering the same ID multiple times
 
 >**NOTE:** This section does not cover global problems with conflicting IDs between ClusterServiceClasses or ServiceClasses. There can still be a situation where few different brokers register ClusterServiceClasses or ServiceClasses with the same ID. In such a case, those classes are visible in the Service Catalog but provisioning action is blocked with the `Found more that one class` message.
 

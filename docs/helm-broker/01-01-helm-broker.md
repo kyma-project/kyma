@@ -12,7 +12,7 @@ In Kyma, you can use addons to install the following Service Brokers:
 * [Azure Service Broker](/components/service-catalog/#service-brokers-azure-service-broker)
 * [AWS Service Broker](/components/service-catalog/#service-brokers-aws-service-broker)
 
-To get all addons that the Helm Broker provides, go to the [`addons`](https://github.com/kyma-project/bundles) repository.
+To see all addons that the Helm Broker provides, go to the [`addons`](https://github.com/kyma-project/bundles) repository.
 
 The Helm Broker implements the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/profile.md#service-metadata) (OSB API).
 To be compliant with the Service Catalog version used in Kyma, the Helm Broker supports only the following OSB API versions:
