@@ -8,13 +8,13 @@ type BrokerSyncer struct {
 	mock.Mock
 }
 
-// Sync provides a mock function with given fields: name, maxSyncRetries
-func (_m *BrokerSyncer) Sync(name string, maxSyncRetries int) error {
-	ret := _m.Called(name, maxSyncRetries)
+// SyncServiceBroker provides a mock function with given fields: namespace
+func (_m *BrokerSyncer) SyncServiceBroker(namespace string) error {
+	ret := _m.Called(namespace)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, int) error); ok {
-		r0 = rf(name, maxSyncRetries)
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(namespace)
 	} else {
 		r0 = ret.Error(0)
 	}

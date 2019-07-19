@@ -28,7 +28,7 @@ type EntryDTO struct {
 }
 
 type repository interface {
-	IndexReader() (io.ReadCloser, error)
+	IndexReader(string) (io.ReadCloser, error)
 	BundleReader(name Name, version Version) (io.ReadCloser, error)
 	URLForBundle(name Name, version Version) string
 }
