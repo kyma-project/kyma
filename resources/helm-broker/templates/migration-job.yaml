@@ -3,7 +3,8 @@ kind: Job
 metadata:
   name: {{ template "fullname" . }}-cm2cac-migration
   annotations:
-    helm.sh/hook: pre-upgrade
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1"
     "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
   labels:
     app: {{ template "fullname" . }}
@@ -23,6 +24,9 @@ spec:
           image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker-tools:{{ .Values.global.helm_broker.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/usr/local/bin/cm2cac"]
+          env:
+            - name: NAMESPACE
+              value: {{ .Release.Namespace }}
       restartPolicy: OnFailure
       serviceAccountName: {{ template "fullname" . }}-cm2cac-migration
 
@@ -58,8 +62,10 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["configmaps"]
-  verbs: ["create","delete","list"]
-
+  verbs: ["delete","list"]
+- apiGroups: ["addons.kyma-project.io"]
+  resources: ["clusteraddonsconfigurations"]
+  verbs: ["create"]
 ---
 
 kind: ClusterRoleBinding
