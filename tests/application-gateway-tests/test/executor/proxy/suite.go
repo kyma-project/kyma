@@ -154,10 +154,16 @@ func (ts *TestSuite) CallAccessService(t *testing.T, apiId, path string) *http.R
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			t.Logf("Access service not ready: Invalid response from access service, status: %d.", resp.StatusCode)
+			t.Logf("Invalid response from access service, status: %d.", resp.StatusCode)
 			bytes, err := ioutil.ReadAll(resp.Body)
 			require.NoError(t, err)
 			t.Log(string(bytes))
+
+			if resp.StatusCode == http.StatusForbidden {
+				t.Logf("Access service is ready but responded with status forbidden. Failing.")
+				t.FailNow()
+			}
+			t.Logf("Access service is not ready. Retrying.")
 
 			return false
 		}
