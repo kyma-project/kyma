@@ -8,10 +8,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/publisher"
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
 
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/test/fake"
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/test/fake"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
