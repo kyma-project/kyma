@@ -122,3 +122,4 @@ done
 
 rm ./cmd/event-publish-service/event-publish-service
 rm ./cmd/subscription-controller/subscription-controller
+
