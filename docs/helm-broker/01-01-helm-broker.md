@@ -8,7 +8,6 @@ The Helm Broker fetches bundles which contain a set of specific [files](#details
 
 In Kyma, you can use bundles to install the following Service Brokers:
 
-* [Google Cloud Platform (GCP) Broker](/components/service-catalog/#service-brokers-gcp-broker)
 * [Azure Service Broker](/components/service-catalog/#service-brokers-azure-service-broker)
 * [AWS Service Broker](/components/service-catalog/#service-brokers-aws-service-broker)
 
