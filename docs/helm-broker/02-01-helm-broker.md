@@ -11,7 +11,7 @@ The Helm Broker workflow starts with the registration process, during which the 
 
 ## Cluster-wide addons flow
 
-1. The Helm Broker watches for ClusterAddonsConfigurations in a given cluster.
+1. The Helm Broker watches for ClusterAddonsConfiguration CRs in a given cluster.
 2. The user creates a ClusterAddonsConfiguration custom resource.
 3. The Helm Broker fetches and parses the data of all addon repositories defined in the ClusterAddonsConfiguration CR.
 4. The Helm Broker creates a ClusterServiceBroker. There is always only one ClusterServiceBroker, even if there are multiple ClusterAddonsConfiguration CRs.
