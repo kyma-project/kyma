@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-CONCURRENCY=1
+CONCURRENCY=10
 
 POSITIONAL=()
 
