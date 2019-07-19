@@ -37,9 +37,6 @@ func (r *ServiceBrokerSyncer) Sync() error {
 		broker := &v1beta1.ClusterServiceBroker{}
 		err := r.client.Get(context.Background(), types.NamespacedName{Name: r.clusterBrokerName}, broker)
 		switch {
-		// do not return error if the broker does not exists, the method is dedicated to update
-		// ClusterServiceBroker resource if exists. If it is not created yet
-		// - it will be created in the future and Service Catalog will call the 'catalog' endpoint soon.
 		case apiErrors.IsNotFound(err):
 			return nil
 		case err != nil:
@@ -68,8 +65,11 @@ func (r *ServiceBrokerSyncer) SyncServiceBroker(namespace string) error {
 	for i := 0; i < maxSyncRetries; i++ {
 		broker := &v1beta1.ServiceBroker{}
 		err := r.client.Get(context.Background(), types.NamespacedName{Name: NamespacedBrokerName, Namespace: namespace}, broker)
-		if err != nil {
-			return errors.Wrapf(err, "while getting ServiceBroker %q [namespace: %s]", NamespacedBrokerName, namespace)
+		switch {
+		case apiErrors.IsNotFound(err):
+			return nil
+		case err != nil:
+			return errors.Wrapf(err, "while getting ClusterServiceBrokers %s", r.clusterBrokerName)
 		}
 
 		broker.Spec.RelistRequests = broker.Spec.RelistRequests + 1

@@ -79,7 +79,7 @@ func TestServiceBrokerSync_NotExistingBroker(t *testing.T) {
 	err := csbSyncer.SyncServiceBroker(fixDestNs())
 
 	// then
-	assert.Error(t, err)
+	assert.NoError(t, err)
 }
 
 func fixClusterServiceBroker() *v1beta1.ClusterServiceBroker {
