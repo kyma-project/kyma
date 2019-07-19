@@ -12,7 +12,7 @@ The Compass consists of the following sub-charts:
 
 ## Details
 
-To learn more about the Compass, see the [Overview](https://github.com/kyma-incubator/compass#Overview) document.
+To learn more about the Compass, see the [Overview](https://github.com/kyma-incubator/compass#overview) document.
 
 ## Configuration
 
