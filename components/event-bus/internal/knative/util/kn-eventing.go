@@ -209,17 +209,19 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[s
 	}
 
 	res, err := k.httpClient.Do(req)
+	defer func() {
+		tran, ok := k.httpClient.Transport.(*http.Transport)
+		if !ok {
+			return
+		}
+		tran.CloseIdleConnections()
+	}()
 	if err != nil {
 		log.Printf("ERROR: SendMessage(): could not send HTTP request: %v", err)
 		return err
 	}
 	defer func() {
 		_ = res.Body.Close()
-		tran, ok := k.httpClient.Transport.(*http.Transport)
-		if !ok {
-			return
-		}
-		tran.CloseIdleConnections()
 	}()
 
 	if res.StatusCode == http.StatusNotFound {
@@ -251,17 +253,19 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 		return err
 	}
 	res, err := httpClient.Do(req)
+	defer func() {
+		tran, ok := httpClient.Transport.(*http.Transport)
+		if !ok {
+			return
+		}
+		tran.CloseIdleConnections()
+	}()
 	if err != nil {
 		log.Printf("ERROR: resendMessage(): could not send HTTP request: %v", err)
 		return err
 	}
 	defer func() {
 		_ = res.Body.Close()
-		tran, ok := httpClient.Transport.(*http.Transport)
-		if !ok {
-			return
-		}
-		tran.CloseIdleConnections()
 	}()
 	//dumpResponse(res)
 	sc := res.StatusCode
@@ -277,17 +281,19 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 				return err
 			}
 			res, err := httpClient.Do(req)
+			defer func() {
+				tran, ok := httpClient.Transport.(*http.Transport)
+				if !ok {
+					return
+				}
+				tran.CloseIdleConnections()
+			}()
 			if err != nil {
 				log.Printf("ERROR: resendMessage(): could not resend HTTP request: %v", err)
 				return err
 			}
 			defer func() {
 				_ = res.Body.Close()
-				tran, ok := httpClient.Transport.(*http.Transport)
-				if !ok {
-					return
-				}
-				tran.CloseIdleConnections()
 			}()
 			dumpResponse(res)
 			sc = res.StatusCode
