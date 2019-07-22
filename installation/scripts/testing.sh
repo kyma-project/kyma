@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-CONCURRENCY=10
+CONCURRENCY=1
 
 POSITIONAL=()
 
 function validateConcurrency() {
   if [[ -z "$1" ]]; then
-    echo "Error: --concurrency requres a value"
+    echo "Error: --concurrency requires a value"
     exit 1
   fi
 
