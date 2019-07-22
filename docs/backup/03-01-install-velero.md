@@ -88,7 +88,7 @@ Follow the instructions below:
       </details>
       <details>
       <summary>
-      Cluster Installation
+      Cluster installation
       </summary>
       
       1. Apply the overrides to your cluster:
