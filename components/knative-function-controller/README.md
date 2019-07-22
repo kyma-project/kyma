@@ -16,7 +16,7 @@ This Knative-based serverless implementation defines and handles the Function Cu
 
 
 ### Run locally
-
+Follow these steps to run the Knative Function controller locally:
 1. Modify the `config/config.yaml` file to include your base64-encoded `docker.io` credentials. 
 2. Update the Docker registry value to your `docker.io` username.
 
