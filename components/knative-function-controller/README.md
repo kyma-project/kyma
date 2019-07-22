@@ -71,7 +71,7 @@ make test
 
 #### Examples
 
-Run the examples
+Run the following examples to learn how to create and manage a function. 
 
 Create a sample function:
 
