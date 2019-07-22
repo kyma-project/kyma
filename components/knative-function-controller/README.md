@@ -18,7 +18,8 @@ It defines and handles a Function Custom Resource Definition with the help of Kn
 
 #### Manager running locally.
 
-Modify config/config.yaml to include your docker.io credentials (base64 encoded) and update the Docker registry value to your docker.io username.
+1. Modify the `config/config.yaml` file to include your base64-encoded `docker.io` credentials. 
+2. Update the Docker registry value to your `docker.io` username.
 
 Apply the configuration
 
