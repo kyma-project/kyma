@@ -28,7 +28,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `service-catalog-addons` | ✅ | ✅ |
 | `nats-streaming` | ✅ | ✅ |
 
-> \* In order to install velero, it needs to be set up first. Please follow the Kyma Backups setup instructions below.
+> \* To install Velero, you need to set it up first. To do so, use the Kyma backup [setup instructions](/components/backup#overview-overview).
 
 ## Installation guides
 
@@ -42,6 +42,6 @@ Read the rest of the installation documents to learn how to:
 - [Upgrade Kyma to a new version](#installation-upgrade-kyma)
 - [Update Kyma](#installation-update-kyma)
 - [Reinstall Kyma](#installation-reinstall-kyma)
-- [Setup Kyma Backups](/components/backup)
+- [Set up the Kyma backup](/components/backup#overview-overview)
 
 >**NOTE:** Make sure to check whether the version of the documentation in the left pane of the `kyma-project.io` is compatible with your Kyma version.
