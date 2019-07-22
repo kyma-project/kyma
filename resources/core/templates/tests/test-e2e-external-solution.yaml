@@ -6,7 +6,7 @@ metadata:
   labels:
     kyma-project.io/test-kind: e2e
 spec:
-  disableConcurrency: true
+  disableConcurrency: false
   template:
     metadata:
       annotations:
