@@ -20,7 +20,7 @@ This Knative-based serverless implementation defines and handles the Function Cu
 1. Modify the `config/config.yaml` file to include your base64-encoded `docker.io` credentials. 
 2. Update the Docker registry value to your `docker.io` username.
 
-Apply the configuration
+3. Apply the configuration:
 
 ```bash
 kubectl apply -f config/config.yaml
