@@ -246,9 +246,11 @@ func TestReconcile(t *testing.T) {
 	ksvcUpdated := &servingv1alpha1.Service{}
 	g.Expect(c.Get(context.TODO(), depKey, ksvcUpdated)).NotTo(gomega.HaveOccurred())
 	hash = sha256.New()
-	print("cmUpdated: %v", cmUpdated)
+	fmt.Printf("cmUpdated: %v \n", cmUpdated)
 	hash.Write([]byte(cmUpdated.Data["handler.js"] + cmUpdated.Data["package.json"]))
 	functionSha = fmt.Sprintf("%x", hash.Sum(nil))
+	fmt.Printf("functionSha: %s \n", functionSha)
+	fmt.Printf("ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image: %s \n", ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image)
 	g.Expect(ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image).
 		To(gomega.Equal(fmt.Sprintf("test/%s-%s:%s", "default", "foo", functionSha)))
 
