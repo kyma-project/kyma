@@ -49,7 +49,7 @@ make install
 make deploy
 ```
 
-#### Production Deployment
+### Run on production
 
 To use the controller on the production environment, uncomment `manager_image_patch_dev` in the `kustomization.yaml` file and run the following:
 
