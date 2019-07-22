@@ -14,7 +14,6 @@ This Knative-based serverless implementation defines and handles the Function Cu
 
 ## Installation
 
-### Local Deployment
 
 #### Manager running locally.
 
