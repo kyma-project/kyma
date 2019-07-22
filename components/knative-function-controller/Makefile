@@ -1,8 +1,7 @@
 # Image URL to use all building/pushing image targets
 APP_NAME ?= knative-function-controller
-IMG_NAME = $(APP_NAME)
-IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
-TAG = $(DOCKER_TAG)
+IMG ?= $(APP_NAME):latest
+IMG-CI = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME):$(DOCKER_TAG)
 
 all: test manager
 
@@ -63,15 +62,15 @@ deploy: manifests install
 # Build the docker image
 .PHONY: docker-build
 docker-build: resolve pull-licenses test manifests
-	docker build . -t ${IMG}
+	docker build . -t $(IMG)
 	@echo "updating kustomize image patch file for manager resource"
-	sed -i'' -e 's@image: .*@image: '"${IMG}:${TAG}"'@' ./config/default/manager_image_patch_remote_dev.yaml ./config/default/manager_image_patch_local_dev.yaml
+	sed -i'' -e 's@image: .*@image: '"${IMG}"'@' ./config/default/manager_image_patch_remote_dev.yaml ./config/default/manager_image_patch_local_dev.yaml
 
 # Push the docker image
 .PHONY: docker-push
 docker-push:
-	docker tag $(APP_NAME) $(IMG):$(TAG)
-	docker push $(IMG):$(TAG)
+	docker tag $(IMG) $(IMG-CI)
+	docker push $(IMG-CI)
 
 .PHONY: ci-pr
 ci-pr: docker-build docker-push
