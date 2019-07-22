@@ -40,8 +40,8 @@ global:
   
   istio:
     gateway:
-      name: compass-istio-gateway
-      namespace: compass-system
+      name: "kyma-gateway" # Modified
+      namespace: "kyma-system" # Modified
 
   database:
     useEmbedded: true

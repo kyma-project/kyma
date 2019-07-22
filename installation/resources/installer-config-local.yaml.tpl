@@ -98,17 +98,6 @@ metadata:
     kyma-project.io/installation: ""
 data:
   global.isDevelopMode: "true" # global, because subcharts also use it
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: compass-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: compass
-    kyma-project.io/installation: ""
-data:
-  gateway.gateway.enabled: "false"
-  global.istio.gateway.name: "kyma-gateway"
-  global.istio.gateway.namespace: "kyma-system"
+
+
+
