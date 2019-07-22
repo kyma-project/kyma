@@ -15,7 +15,7 @@ This Knative-based serverless implementation defines and handles the Function Cu
 ## Installation
 
 
-#### Manager running locally.
+### Run locally
 
 1. Modify the `config/config.yaml` file to include your base64-encoded `docker.io` credentials. 
 2. Update the Docker registry value to your `docker.io` username.
