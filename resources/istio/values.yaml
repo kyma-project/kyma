@@ -45,12 +45,10 @@ gateways:
       - port: 80
         targetPort: 80
         name: http2
-        nodePort: 31380
         # Kyma specific value, do not remove!
         hostPort: 80
       - port: 443
         name: https
-        nodePort: 31390
         # Kyma specific value, do not remove!
         hostPort: 443
       ### PORTS FOR UI/metrics #####

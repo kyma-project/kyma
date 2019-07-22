@@ -63,9 +63,6 @@ istio-ingressgateway:
     name: http2
   - port: 443
     name: https
-  # Example of a port to add. Remove if not needed
-  - port: 31400
-    name: tcp
   ### PORTS FOR UI/metrics #####
   ## Disable if not needed
   - port: 15029
