@@ -25,8 +25,8 @@ This table lists the required parameters for velero to work, their descriptions,
 **configuration.volumeSnapshotLocation.config.region** | Provides the region in which the bucket is created. It only applies to AWS.| none | yes, if using AWS
 **configuration.volumeSnapshotLocation.config.apitimeout** | Defines the amount of time after which an API request returns a timeout status. It only applies to Azure. | none | yes, if using Azure
 **credentials.useSecret** | Specifies if a secret is required for IAM credentials. Set this to `false` when using `kube2iam`. | `true` | yes
-**credentials.existingSecret** | If specified and `useSecret` is `true`, uses an existing secret with this name instead of creating one. | none | yes, if `useSecret` is `true` and `secretContents` is empty
-**credentials.secretContents** | If specified and `useSecret` is `true`, provides the content for the credentials secret. | none | yes, if `useSecret` is `true` and `existingSecret` is empty
+**credentials.existingSecret** | If specified and **useSecret** is `true`, uses an existing secret with this name instead of creating one. | none | yes, if **useSecret** is `true` and **secretContents** is empty
+**credentials.secretContents** | If specified and **useSecret** is `true`, provides the content for the credentials secret. | none | yes, if **useSecret** is `true` and **existingSecret** is empty
 
 
 ## Configurable parameters

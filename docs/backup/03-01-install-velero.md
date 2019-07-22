@@ -2,15 +2,17 @@
 title: Install Velero
 type: Details
 ---
-Install and configure [Velero](https://github.com/heptio/velero/) to be able to back up and restore your Kyma cluster.
+Install and configure [Velero](https://github.com/heptio/velero/) to back up and restore your Kyma cluster.
 
 ## Velero setup
 
-To successfully set up Velero, provide a supported storage location and credentials to access it. Currently, you can install Velero on GCP and Azure. AWS is not supported.
+To successfully set up Velero, provide a supported storage location and credentials to access it. 
+
+>**NOTE**: Currently, you can install Velero on GCP and Azure. AWS is not supported.
 
 Follow the instructions below:
-1. Enable the installation of the velero components on the kyma installer. To do that follow [this guide](/root/kyma/#configuration-custom-component-installation).<br/>
-    The components to add are:
+1. Enable Velero components in the Kyma Installer configuration file. To do that follow [this guide](/root/kyma/#configuration-custom-component-installation).<br/>
+    Add the following components:
     ```yaml
     - name: "velero-essentials"
       namespace: "kyma-backup"
@@ -18,8 +20,9 @@ Follow the instructions below:
       namespace: "kyma-backup"
     ```
 
-2. Create an override secret containing the velero [required parameters](/components/backup/#configuration-configuration) for the provider of your choosing **encoded in base 64**.<br/>
-    See the examples below for reference (_values are in plain text for illustrative purposes, remember to set them as base64 encoded strings_):
+2. Create an override secret containing the Velero [required parameters](/components/backup/#configuration-configuration) for a chosen provider. Remember to base64-encode the parameters.<br/>
+    See the installation examples:
+    >**NOTE**: Values are provided in plain text only for illustrative purposes. Remember to set them as base64-encoded strings.
 
     <div tabs>
     <details>
