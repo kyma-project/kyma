@@ -82,7 +82,7 @@ Follow the instructions below:
       </summary>
 
       ```bash
-      kyma install -o velero-overrides.yaml
+      kyma install -o {overrides_file_path}
       ```
       
       </details>
@@ -93,7 +93,7 @@ Follow the instructions below:
       
       1. Apply the overrides to your cluster:
           ```bash
-          kubectl apply -f velero-overrides.yaml
+          kubectl apply -f {overrides_file_path}
           ```
       2. [Install](/root/kyma/#installation-installation) Kyma or [update](/root/kyma/#installation-update-kyma) Kyma if it is already installed in your cluster.
       
