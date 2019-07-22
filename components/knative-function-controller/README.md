@@ -64,7 +64,7 @@ make deploy
 ```
 
 ### Test
-
+To test the controller, run:
 ```bash
 make test
 ```
