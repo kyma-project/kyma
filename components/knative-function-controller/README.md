@@ -52,7 +52,6 @@ make deploy
 #### Production Deployment
 
 Uncomment `manager_image_patch_dev` in `kustomization.yaml`
-Then run the following commands:
 
 ```bash
 make install
