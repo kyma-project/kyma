@@ -210,11 +210,9 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[s
 
 	res, err := k.httpClient.Do(req)
 	defer func() {
-		tran, ok := k.httpClient.Transport.(*http.Transport)
-		if !ok {
-			return
+		if tran, ok := k.httpClient.Transport.(*http.Transport); ok {
+			tran.CloseIdleConnections()
 		}
-		tran.CloseIdleConnections()
 	}()
 	if err != nil {
 		log.Printf("ERROR: SendMessage(): could not send HTTP request: %v", err)
@@ -254,11 +252,9 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 	}
 	res, err := httpClient.Do(req)
 	defer func() {
-		tran, ok := httpClient.Transport.(*http.Transport)
-		if !ok {
-			return
+		if tran, ok := httpClient.Transport.(*http.Transport); ok {
+			tran.CloseIdleConnections()
 		}
-		tran.CloseIdleConnections()
 	}()
 	if err != nil {
 		log.Printf("ERROR: resendMessage(): could not send HTTP request: %v", err)
@@ -282,11 +278,9 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 			}
 			res, err := httpClient.Do(req)
 			defer func() {
-				tran, ok := httpClient.Transport.(*http.Transport)
-				if !ok {
-					return
+				if tran, ok := httpClient.Transport.(*http.Transport); ok {
+					tran.CloseIdleConnections()
 				}
-				tran.CloseIdleConnections()
 			}()
 			if err != nil {
 				log.Printf("ERROR: resendMessage(): could not resend HTTP request: %v", err)
