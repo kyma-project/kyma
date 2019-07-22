@@ -73,7 +73,7 @@ make test
 
 Run the examples
 
-Create sample function
+Create a sample function:
 
 ```bash
 kubectl apply -f config/samples/runtime_v1alpha1_function.yaml -n {NAMESPACE}
