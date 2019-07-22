@@ -432,6 +432,7 @@ func (r *ReconcileAddonsConfiguration) removeBundle(ad addonsv1alpha1.Addon, nam
 	if err != nil {
 		return nil, err
 	}
+	r.syncBroker = true
 
 	for _, plan := range b.Plans {
 		err = r.chartStorage.Remove(namespace, plan.ChartRef.Name, plan.ChartRef.Version)
@@ -439,7 +440,6 @@ func (r *ReconcileAddonsConfiguration) removeBundle(ad addonsv1alpha1.Addon, nam
 			return nil, err
 		}
 	}
-	r.syncBroker = true
 	return &b.ID, nil
 }
 
