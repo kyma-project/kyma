@@ -655,6 +655,13 @@ func (r *ReconcileFunction) getFunctionCondition(fn *runtimev1alpha1.Function) {
 
 }
 
+func ignoreNotFound(err error) error {
+	if errors.IsNotFound(err) {
+		return nil
+	}
+	return err
+}
+
 // Update the status of the function JSONPath: .status.condition
 func (r *ReconcileFunction) updateFunctionStatus(fn *runtimev1alpha1.Function, condition runtimev1alpha1.FunctionCondition) error {
 
@@ -665,11 +672,4 @@ func (r *ReconcileFunction) updateFunctionStatus(fn *runtimev1alpha1.Function, c
 	}
 
 	return nil
-}
-
-func ignoreNotFound(err error) error {
-	if errors.IsNotFound(err) {
-		return nil
-	}
-	return err
 }
