@@ -431,6 +431,7 @@ func (r *ReconcileClusterAddonsConfiguration) removeBundle(ad addonsv1alpha1.Add
 	if err != nil {
 		return nil, err
 	}
+	r.syncBroker = true
 
 	for _, plan := range b.Plans {
 		err = r.chartStorage.Remove(internal.ClusterWide, plan.ChartRef.Name, plan.ChartRef.Version)
@@ -438,7 +439,6 @@ func (r *ReconcileClusterAddonsConfiguration) removeBundle(ad addonsv1alpha1.Add
 			return nil, err
 		}
 	}
-	r.syncBroker = true
 	return &b.ID, nil
 }
 
