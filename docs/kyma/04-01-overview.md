@@ -13,8 +13,8 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `cms` | ✅ | ✅ |
 | `cluster-essentials` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
-| `velero-essentials` * | ⛔️ | ⛔️ |
-| `velero` * | ⛔️ | ⛔️ |
+| `velero-essentials` | ⛔️ | ⛔️ |
+| `velero`  | ⛔️ | ⛔️ |
 | `assetstore` | ✅ | ✅ |
 | `dex` | ✅ | ✅ |
 | `helm-broker` | ✅ | ✅ |
@@ -28,7 +28,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `service-catalog-addons` | ✅ | ✅ |
 | `nats-streaming` | ✅ | ✅ |
 
-> \* To install Velero, you need to set it up first. To do so, use the Kyma backup [setup instructions](/components/backup#overview-overview).
+>**NOTE**: To include Velero in the installation process, you need to set it up first. Use the Kyma backup [setup instructions](/components/backup#overview-overview) to do so.
 
 ## Installation guides
 
