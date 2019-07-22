@@ -10,7 +10,6 @@ metadata:
     app: dex
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 spec:
-  type: NodePort
   ports:
   - name: http
     port: {{.Values.containerPort}}
