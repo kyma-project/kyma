@@ -26,7 +26,7 @@ Follow these steps to run the Knative Function controller locally:
 kubectl apply -f config/config.yaml
 ```
 
-Install the CRD to a local Kubernetes cluster:
+4. Install the CRD to a local Kubernetes cluster:
 
 ```bash
 make install
