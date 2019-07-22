@@ -9,11 +9,15 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
-	pkgPath "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/path"
 	"github.com/pkg/errors"
 )
+
+type matcher interface {
+	MatchString(s string) bool
+}
 
 func (l *loader) loadPackage(src, name, filter string) (string, []string, error) {
 	basePath, err := ioutil.TempDir(l.temporaryDir, name)
@@ -29,6 +33,10 @@ func (l *loader) loadPackage(src, name, filter string) (string, []string, error)
 
 	fileName := l.fileName(src)
 	archivePath := filepath.Join(archiveDir, fileName)
+	filterRegexp, err := regexp.Compile(filter)
+	if err != nil {
+		return "", nil, errors.Wrapf(err, "while compiling filter")
+	}
 
 	unpack, err := l.selectEngine(fileName)
 	if err != nil {
@@ -39,12 +47,7 @@ func (l *loader) loadPackage(src, name, filter string) (string, []string, error)
 		return "", nil, err
 	}
 
-	files, err := unpack(archivePath, basePath)
-	if err != nil {
-		return "", nil, err
-	}
-
-	files, err = pkgPath.Filter(files, filter)
+	files, err := unpack(archivePath, basePath, filterRegexp)
 	if err != nil {
 		return "", nil, err
 	}
@@ -52,7 +55,7 @@ func (l *loader) loadPackage(src, name, filter string) (string, []string, error)
 	return basePath, files, nil
 }
 
-func (l *loader) selectEngine(filename string) (func(src, dst string) ([]string, error), error) {
+func (l *loader) selectEngine(filename string) (func(src, dst string, filter matcher) ([]string, error), error) {
 	extension := strings.ToLower(filepath.Ext(filename))
 
 	switch {
@@ -65,7 +68,7 @@ func (l *loader) selectEngine(filename string) (func(src, dst string) ([]string,
 	return nil, fmt.Errorf("not supported file type %s", extension)
 }
 
-func (l *loader) unpackTAR(src, dst string) ([]string, error) {
+func (l *loader) unpackTAR(src, dst string, filter matcher) ([]string, error) {
 	var filenames []string
 	file, err := os.Open(src)
 	if err != nil {
@@ -98,12 +101,14 @@ unpack:
 
 		target := filepath.Join(dst, header.Name)
 
-		switch header.Typeflag {
-		case tar.TypeDir:
+		switch {
+		case !filter.MatchString(header.Name):
+			continue
+		case header.Typeflag == tar.TypeDir:
 			if err := l.createDir(target); err != nil {
 				return nil, errors.Wrap(err, "while creating directory")
 			}
-		case tar.TypeReg:
+		case header.Typeflag == tar.TypeReg:
 			filenames = append(filenames, header.Name)
 
 			if err := l.createFile(tarReader, target, header.Mode); err != nil {
@@ -115,7 +120,7 @@ unpack:
 	return filenames, nil
 }
 
-func (l *loader) unpackZIP(src, dest string) ([]string, error) {
+func (l *loader) unpackZIP(src, dest string, filter matcher) ([]string, error) {
 	var filenames []string
 
 	zipReader, err := zip.OpenReader(src)
@@ -125,6 +130,10 @@ func (l *loader) unpackZIP(src, dest string) ([]string, error) {
 	defer zipReader.Close()
 
 	for _, file := range zipReader.File {
+		if !filter.MatchString(file.Name) {
+			continue
+		}
+
 		path, isDir, err := l.handleZIPEntry(file, dest)
 		if err != nil {
 			return nil, errors.Wrap(err, "while handling ZIP entry")

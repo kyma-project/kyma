@@ -6,7 +6,7 @@ global:
       name: kyma-gateway
   asset_store_controller_manager:
     dir: pr/
-    version: 'PR-4713'
+    version: 'PR-4830'
   asset_upload_service:
     dir: develop/
     version: '826f42db'

@@ -4,6 +4,7 @@ kind: TestDefinition
 metadata:
   name: test-dex-integration
 spec:
+  disableConcurrency: false
   template:
     metadata:
       annotations:

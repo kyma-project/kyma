@@ -7,7 +7,7 @@ POSITIONAL=()
 
 function validateConcurrency() {
   if [[ -z "$1" ]]; then
-    echo "Error: --concurency requres a value"
+    echo "Error: --concurrency requres a value"
     exit 1
   fi
 

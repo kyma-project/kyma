@@ -9,6 +9,3 @@ service:
 
 gateway:
   enabled: false
-
-virtualService:
-  host: compass-gateway

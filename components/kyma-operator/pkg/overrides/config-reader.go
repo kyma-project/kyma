@@ -19,7 +19,7 @@ var commonListOpts = metav1.ListOptions{LabelSelector: concatLabels(overridesLab
 var componentListOpts = metav1.ListOptions{LabelSelector: concatLabels(overridesLabelSelector, componentLabelSelector)}
 
 type reader struct {
-	client *kubernetes.Clientset
+	client kubernetes.Interface
 }
 
 //Input overrides data (from ConfigMaps/Secrets)

@@ -11,12 +11,16 @@ Each subdirectory in the tests directory defines sources for one test suite, usu
 
 Every Kyma test resides in a dedicated folder which contains its sources and a `README.md ` file. This file provides instructions on how to build and develop the test suite.
 
-The test name, which is also the folder name,  is the component's name without any prefix or suffix. For example,  `monitoring`.
+The test name, which is also the folder name, is the component's name without any prefix or suffix, such as `apiserver-proxy`.
 
-The Docker image resulting from the sources of a test suite resides in the dedicated `tests` subfolder.
-Example: The Event Bus component has its acceptance tests in the `tests/event-bus` folder and produces the `XX/tests/event-bus:0.5.1` Docker image.
+The Docker image created from the sources of a test suite resides in a component folder marked with a suffix indicating the testing nature, such as `-integration-tests`.
+Example: The apiserver-proxy component has its integration tests in `tests/integration/apiserver-proxy` folder and produces the `XX/apiserver-proxy-inetrgation-tests:0.5.1` Docker image.
 
-Bundle the real e2e scenarios, such as **kubeless-integration** into one end-to-end subfolder. This folder contains one test project which executes all end-to-end tests divided into different packages by scenarios.
+Bundle the real e2e scenarios, such as **kubeless-integration** into one `end-to-end` subfolder. This folder contains one test project which executes all end-to-end tests divided into different packages by scenarios.
+
+Bundle integration tests, such as **apiserver-proxy** into one `integration` subfolder.
+
+Bundle performance tests into one `perf` subfolder.
 
 ## Development
 

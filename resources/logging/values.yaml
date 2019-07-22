@@ -300,14 +300,13 @@ promtail:
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
-  test_logging:
-    dir: develop/
-    version: 9013db49
+  logging_integration_tests:
+    name: logging-integration-tests
+    dir: pr/
+    version: PR-4849
   logging:
     promtail:
       config:
         name: promtail-k8s-1-14.yaml
-test:
-  image:
-    name: test-logging
+    
 

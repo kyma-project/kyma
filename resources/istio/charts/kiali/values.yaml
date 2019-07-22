@@ -4,7 +4,7 @@
 enabled: false 
 replicaCount: 1
 hub: docker.io/kiali
-tag: v0.16
+tag: v1.1.0
 contextPath: /
 nodeSelector: {}
 
@@ -57,3 +57,7 @@ credentials:
   # Override the automatically detected Jaeger URL, useful when Jaeger service has no ExternalIPs
   # jaegerURL:
 prometheusAddr: http://monitoring-prometheus.kyma-system:9090
+global:
+  istio:
+    gateway:
+      name: kyma-system/kyma-gateway

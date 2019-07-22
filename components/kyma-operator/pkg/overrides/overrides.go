@@ -29,7 +29,7 @@ func (o *Provider) ForRelease(releaseName string) (string, error) {
 }
 
 //New returns new Data instance.
-func New(client *kubernetes.Clientset) OverrideData {
+func New(client kubernetes.Interface) OverrideData {
 
 	configReader := &reader{
 		client: client,

@@ -2,6 +2,8 @@ package apicontroller
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	appv1 "k8s.io/api/apps/v1"
@@ -13,7 +15,7 @@ import (
 )
 
 const (
-	namespaceEnv                    = "NAMESPACE"
+	namespaceNameRoot               = "api-controller-tests"
 	domainNameEnv                   = "DOMAIN_NAME"
 	testIDLength                    = 8
 	apiSecurityDisabled APISecurity = false
@@ -201,4 +203,14 @@ func labels(testID string) map[string]string {
 	labels["app"] = fmt.Sprintf("sample-app-%s", testID)
 	labels["test"] = "true"
 	return labels
+}
+
+func generateRandomString(n int) string {
+	rand.Seed(time.Now().UnixNano())
+	letterRunes := []rune("abcdefghijklmnopqrstuvwxyz1234567890")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
 }
