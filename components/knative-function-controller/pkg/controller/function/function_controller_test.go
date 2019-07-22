@@ -224,7 +224,9 @@ func TestReconcile(t *testing.T) {
 	// get the updated function and compare spec
 	fnUpdatedFetched = &runtimev1alpha1.Function{}
 	g.Expect(c.Get(context.TODO(), depKey, fnUpdatedFetched)).NotTo(gomega.HaveOccurred())
-	g.Expect(fnUpdatedFetched.Spec).To(gomega.Equal(fnUpdated.Spec))
+	fnUpdatedFetchedSpec:=fnUpdatedFetched.Spec
+	fnUpdatedSpec:=fnUpdated.Spec
+	g.Expect(fnUpdatedFetchedSpec).To(gomega.Equal(fnUpdatedSpec))
 	// call reconcile function
 	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: "foo", Namespace: "default"}})))
 
@@ -245,14 +247,18 @@ func TestReconcile(t *testing.T) {
 	// ensure updated knative service has updated image
 	ksvcUpdated := &servingv1alpha1.Service{}
 	g.Expect(c.Get(context.TODO(), depKey, ksvcUpdated)).NotTo(gomega.HaveOccurred())
-	hash = sha256.New()
+
 	fmt.Printf("cmUpdated: %v \n", cmUpdated)
+	hash = sha256.New()
 	hash.Write([]byte(cmUpdated.Data["handler.js"] + cmUpdated.Data["package.json"]))
 	functionSha = fmt.Sprintf("%x", hash.Sum(nil))
 	fmt.Printf("functionSha: %s \n", functionSha)
+	fmt.Printf("ksvcUpdated: %v \n", ksvcUpdated)
 	fmt.Printf("ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image: %s \n", ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image)
-	g.Expect(ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image).
-		To(gomega.Equal(fmt.Sprintf("test/%s-%s:%s", "default", "foo", functionSha)))
+	ksvcUpdatedImage := ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image
+	functionShaImage := fmt.Sprintf("test/%s-%s:%s", "default", "foo", functionSha)
+
+	g.Expect(ksvcUpdatedImage).To(gomega.Equal(functionShaImage))
 
 	g.Expect(fnUpdatedFetched.Status.Condition).To(gomega.Equal(runtimev1alpha1.FunctionConditionDeploying))
 
