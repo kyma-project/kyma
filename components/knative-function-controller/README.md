@@ -79,7 +79,7 @@ Create sample function
 kubectl apply -f config/samples/runtime_v1alpha1_function.yaml -n {NAMESPACE}
 ```
 
-Search for function
+Search for a function
 
 ```bash
 kubectl get functions -n {NAMESPACE}
