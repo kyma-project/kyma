@@ -69,7 +69,7 @@ make deploy
 make test
 ```
 
-#### Examples
+## Examples
 
 Run the following examples to learn how to create and manage a function. 
 
