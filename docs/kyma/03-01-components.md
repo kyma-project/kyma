@@ -35,7 +35,7 @@ Kyma Event Bus receives Events from external solutions and triggers the business
 ## Serverless
 
 The Kyma Serverless component allows you to reduce the implementation and operation effort of an application to the absolute minimum. Kyma Serverless provides a platform to run lightweight functions in a cost-efficient and scalable way using JavaScript and Node.js. Kyma Serverless is built on the [Kubeless](http://kubeless.io/) framework, which allows you to deploy lambda functions,
-and uses the [NATS](https://nats.io/) messaging system that monitors business events and triggers functions accordingly.  
+and uses the [NATS](https://nats.io/) messaging system that monitors business events and triggers functions accordingly.
 
 ## Monitoring
 
