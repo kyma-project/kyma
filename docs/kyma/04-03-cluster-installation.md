@@ -41,7 +41,7 @@ Choose the installation type and get started:
 
 8. Access the cluster using the link and login details provided in the **Kyma info** section on the **Application details** page.
 
-> **TIP:** Watch [this](https://www.youtube.com/watch?v=hxVhQqI1B5A) video for the installation demo.
+> **TIP:** Watch [this](https://www.youtube.com/watch?v=hxVhQqI1B5A) video for a walkthrough of the installation process.
 
   </details>
   <details>
@@ -57,6 +57,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.0
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 - [wget](https://www.gnu.org/software/wget/)
+
 
 >**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). You create these machines when you complete the **Prepare the GKE cluster** step.
 
@@ -189,8 +190,10 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 - [Docker Hub](https://hub.docker.com/) account
 - [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
+
 >**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general#dv3-series-1). You create these machines when you complete the **Prepare the AKS cluster** step.
 
+>**CAUTION:** Due to a known Istio-related issue, Kubernetes jobs run endlessly on AKS deployments of Kyma. Read [this](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) document to learn more.
 
 ## Choose the release to install
 

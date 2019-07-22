@@ -29,3 +29,18 @@ Traces are stored in Jaeger in the following way:
 3. The Zipkin service forwards the tracing information to Jaeger Deployment, allowing it to process them.
 
 ![Store traces](./assets/store-traces.svg)
+
+## Search traces by tags
+
+You can search traces using tags. Tags are key-value pairs configured for each service.
+
+See the full list of tags for a service from the details of that service's span.
+
+For example, use these tags for `event-publish-knative-service`:
+
+* `event-type`
+* `event-type-ver`
+* `event-id`
+* `source-id`
+
+To search the traces, you can use either a single tag, such as `event-type="order.created"`, or multiple tags, such as `event-type="order.created" event-type-ver="v1"`.

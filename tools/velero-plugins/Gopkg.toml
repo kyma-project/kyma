@@ -32,37 +32,17 @@ required = [
 
 [[constraint]]
   name = "github.com/heptio/velero"
-  version = "v0.11.0"
+  version = "1.0.0"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
-  version = "1.0.3"
+  version = "1.4.0"
 
 # Match Velero dependency versions
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.11.0"
-
-[[override]]
-  name = "github.com/spf13/cobra"
-  version = "0.0.3"
-
-[[override]]
-  name = "github.com/spf13/pflag"
-  version = "1.0.2"
-
-[[override]]
-  name = "github.com/json-iterator/go"
-  revision = "f2b4162afba35581b6d4a50d3b8f34e33c144682"
-
-[[override]]
-  name = "github.com/Azure/go-autorest"
-  revision = "1ff28809256a84bb6966640ff3d0371af82ccba4"
-
-[[override]]
-  name = "github.com/Azure/azure-sdk-for-go"
-  version = "~11.3.0-beta"
+  version = "kubernetes-1.12.0"
 
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
-  version = "=v0.1.34"
+  version = "=v0.1.43"

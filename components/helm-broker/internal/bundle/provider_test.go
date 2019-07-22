@@ -23,7 +23,7 @@ func TestRepositoryLoaderSuccess(t *testing.T) {
 	bundleLoader := bundle.NewProvider(fakeRepo, bundle.NewLoader(tmpDir, log), log)
 
 	// when
-	result, err := bundleLoader.ProvideBundles()
+	result, err := bundleLoader.ProvideBundles(fakeRepo.path)
 
 	// then
 	require.NoError(t, err)
@@ -42,7 +42,7 @@ func TestRepositoryLoader(t *testing.T) {
 	bundleLoader := bundle.NewProvider(fakeRepo, bundle.NewLoader(tmpDir, log), log)
 
 	// when
-	result, err := bundleLoader.ProvideBundles()
+	result, err := bundleLoader.ProvideBundles(fakeRepo.path)
 
 	// then
 	require.NoError(t, err)

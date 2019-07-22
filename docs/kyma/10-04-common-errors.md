@@ -20,7 +20,9 @@ The `Job failed: DeadlineExceeded` error indicates that a job object didn't fini
 
 As this error is caused by a time-out, restart the installation.
 
-If the problem repeats, find the job that causes the error and reach out to the ["installation"](https://kyma-community.slack.com/messages/CD2HJ0E78) Slack channel or create a [GitHub issue](https://github.com/kyma-project/kyma/issues). Follow these steps to identify the failing job:
+If the problem repeats, find the job that causes the error and reach out to the **#installation** [Slack channel](https://kyma-community.slack.com/join/shared_invite/enQtNDAwNzE4Mjk2NDE3LTJhOTlmZjM5YzkwNmEzNmY3ZjE2MTU2OTMxOGE4ZDM0MmU4ZWRkZGJiODgzNmRmMTYxMDYwNjZiMDAwMTA2OWM) or create a [GitHub issue](https://github.com/kyma-project/kyma/issues).
+
+Follow these steps to identify the failing job:
 
 1. Get the installed Helm releases which correspond to components:
   ```

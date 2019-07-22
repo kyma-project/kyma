@@ -236,7 +236,10 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 - [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 - A domain for your AKS cluster
 
+
 >**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general#dv3-series-1). You create these machines when you complete the **Prepare the AKS cluster** step.
+
+>**CAUTION:** Due to a known Istio-related issue, Kubernetes jobs run endlessly on AKS deployments of Kyma. Read [this](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) document to learn more.
 
 ## Choose the release to install
 
