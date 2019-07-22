@@ -40,7 +40,7 @@ make run
 
 #### Manager running inside k8s cluster
 
-This workflow needs to be used until kubernetes-sigs/kubebuilder#40 is fixed.
+This workflow needs to be used until kubernetes-sigs/kubebuilder#400 is fixed.
 
 ```bash
 eval $(minikube docker-env)
