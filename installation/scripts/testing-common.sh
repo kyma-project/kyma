@@ -189,11 +189,6 @@ function injectTestingBundles() {
     log "Testing bundles injected" green
 }
 
-function removeTestingBundles() {
-    kubectl delete configmap ${TESTING_BUNDLES_MAP_NAME} -n kyma-system
-    log "Testing bundles removed" green
-}
-
 TESTING_ADDONS_CFG_NAME="testing-addons"
 function injectTestingAddons() {
     cat <<EOF | kubectl apply -f -

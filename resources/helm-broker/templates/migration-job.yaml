@@ -27,6 +27,8 @@ spec:
           env:
             - name: NAMESPACE
               value: {{ .Release.Namespace }}
+            - name: DEFAULT_CONFIGMAP
+              value: {{ .Values.global.cfgReposUrlName }}
       restartPolicy: OnFailure
       serviceAccountName: {{ template "fullname" . }}-cm2cac-migration
 
