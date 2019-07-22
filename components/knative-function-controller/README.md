@@ -93,7 +93,7 @@ kubectl get function -n {NAMESPACE}
 kubectl get fcn -n {NAMESPACE}
 ```
 
-Access the function
+Access the function:
 
 ```bash
 export INGRESSGATEWAY=istio-ingressgateway
