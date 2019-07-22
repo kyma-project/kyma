@@ -1,4 +1,4 @@
-# Knative Function Controller
+# Knative Function controller
 
 ## Overview
 
