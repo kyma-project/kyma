@@ -51,7 +51,7 @@ make deploy
 
 #### Production Deployment
 
-Uncomment `manager_image_patch_dev` in `kustomization.yaml`
+To use the controller on the production environment, uncomment `manager_image_patch_dev` in the `kustomization.yaml` file and run the following:
 
 ```bash
 make install
