@@ -43,7 +43,7 @@ import (
 
 var c client.Client
 
-const timeout = time.Second * 20
+const timeout = time.Second * 60
 
 func TestReconcile(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
