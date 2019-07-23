@@ -56,7 +56,7 @@ The chart deploys pods that consume minimum resources as specified in the resour
     $ kubectl create ns $NAMESPACE
     ```
 
-2. If you are using security mode for Grafana, create the secret first as follows:
+1. If you are using security mode for Grafana, create the secret first as follows:
 
     - Encode username, you can change the username to the name as you want:
     ```
@@ -87,7 +87,7 @@ The chart deploys pods that consume minimum resources as specified in the resour
     EOF
     ```
 
-3. To install the chart with the release name `istio` in namespace $NAMESPACE you defined above:
+1. To install the chart with the release name `istio` in namespace $NAMESPACE you defined above:
 
     - With [automatic sidecar injection](https://istio.io/docs/setup/kubernetes/sidecar-injection/#automatic-sidecar-injection) (requires Kubernetes >=1.9.0):
     ```
