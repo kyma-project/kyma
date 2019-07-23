@@ -11,7 +11,7 @@
 
 ## Details
 
-## Configuration
+### Configuration
 
 The following tables lists the configurable parameters of the PostgreSQL chart and their default values.
 
