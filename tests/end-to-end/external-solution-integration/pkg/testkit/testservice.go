@@ -99,6 +99,7 @@ func (ts *TestService) IsReady() error {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return errors.Errorf("unexpected status code: %s", resp.Status)
