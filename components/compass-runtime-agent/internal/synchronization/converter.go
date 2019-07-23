@@ -5,6 +5,14 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 )
 
+const (
+	specAPIType                   = "API"
+	specEventsType                = "Events"
+	CredentialsOAuthType          = "OAuth"
+	CredentialsBasicType          = "Basic"
+	CredentialsCertificateGenType = "CertificateGen"
+)
+
 type Converter interface {
 	Do(application compass.Application) v1alpha1.Application
 }

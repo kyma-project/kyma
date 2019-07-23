@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization/assetstore/docstopic"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization/assetstore/upload"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization/apiresources/assetstore/docstopic"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization/apiresources/assetstore/upload"
 )
 
 const (
