@@ -58,7 +58,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	certManager := certificates.NewCerdentialsManager()
+	certManager := certificates.NewCredentialsManager()
 	compassConfigClient := compass.NewConfigurationClient()
 	syncService := synchronization.Service{}
 

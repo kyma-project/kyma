@@ -1,11 +1,12 @@
 package certificates
 
+//go:generate mockery -name=Manager
 type Manager interface {
 	GetCredentials() (Credentials, error)
 	PreserveCredentials(credentials Credentials) error
 }
 
-func NewCerdentialsManager() *credentialsManager {
+func NewCredentialsManager() *credentialsManager {
 	return &credentialsManager{}
 }
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compassconnection/mocks"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -40,8 +42,9 @@ func TestReconcile(t *testing.T) {
 		}
 
 		objClient := NewFakeClient(compassConnection)
+		supervisor := &mocks.Supervisor{}
 
-		reconciler := newReconciler(objClient)
+		reconciler := newReconciler(objClient, supervisor)
 
 		request := reconcile.Request{
 			NamespacedName: compassConnectionNamespacedName,
@@ -59,8 +62,9 @@ func TestReconcile(t *testing.T) {
 	t.Run("should reconcile delete request", func(t *testing.T) {
 		// given
 		objClient := NewFakeClient()
+		supervisor := &mocks.Supervisor{}
 
-		reconciler := newReconciler(objClient)
+		reconciler := newReconciler(objClient, supervisor)
 
 		request := reconcile.Request{
 			NamespacedName: compassConnectionNamespacedName,

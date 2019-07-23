@@ -5,7 +5,12 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 )
 
-type Service struct {
+//go:generate mockery -name=Service
+type Service interface {
+	Apply(applications []compass.Application) ([]Result, apperrors.AppError)
+}
+
+type service struct {
 }
 
 type Result struct {
@@ -13,6 +18,6 @@ type Result struct {
 	Error     apperrors.AppError
 }
 
-func (s Service) Apply(applications []compass.Application) ([]Result, apperrors.AppError) {
+func (s *service) Apply(applications []compass.Application) ([]Result, apperrors.AppError) {
 	return nil, nil
 }

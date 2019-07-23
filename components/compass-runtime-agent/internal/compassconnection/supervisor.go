@@ -181,6 +181,7 @@ func (s *crSupervisor) saveCredentials(connectionCR *v1alpha1.CompassConnection,
 
 	connectionTime := metav1.Now()
 
+	// TODO: set certificate status when we will have full flow
 	connectionCR.Status.State = v1alpha1.Connected
 	connectionCR.Status.ConnectionStatus = &v1alpha1.ConnectionStatus{
 		Established: connectionTime,
