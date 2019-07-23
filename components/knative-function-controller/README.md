@@ -15,9 +15,9 @@ This Knative-based serverless implementation defines and handles the Function Cu
 ## Installation
 
 
-### Run locally
+### Run the controller
 Follow these steps to run the Knative Function controller locally:
-1. Modify the `config/config.yaml` file to include your base64-encoded `docker.io` credentials. 
+1. Modify the `config/config.yaml` file to include your base64-encoded `gcr.io` or `docker.io` credentials. 
 2. Update the Docker registry value to your `docker.io` username.
 
 3. Apply the configuration:
@@ -32,37 +32,25 @@ kubectl apply -f config/config.yaml
 make install
 ```
 
-Run the controller on your machine:
+5. Deploy the controller:
 
 ```bash
-make run
-```
-
-#### Manager running inside k8s cluster
-
-This workflow needs to be used until [kubernetes-sigs/kubebuilder#400](https://github.com/kubernetes-sigs/kubebuilder/issues/400) is fixed.
-
-```bash
+# Execute this command for local minikube
 eval $(minikube docker-env)
-make docker-build
-make install
-make deploy
 ```
 
-### Run on production
-
-To use the controller on the production environment, uncomment `manager_image_patch_remote_dev` in the `kustomization.yaml` file and run the following:
-
 ```bash
-DOCKER_TAG=<some tag e.g. latest>
-APP_NAME=knative-function-controller
-DOCKER_PUSH_REPOSITORY=<e.g. eu.gcr.io or index.docker.io>
-DOCKER_PUSH_DIRECTORY<e.g. pr or develop>
+export DOCKER_TAG=<some tag e.g. latest>
+export APP_NAME=knative-function-controller
+export DOCKER_PUSH_REPOSITORY=<e.g. eu.gcr.io or index.docker.io>
+export DOCKER_PUSH_DIRECTORY<e.g. pr or develop>
 make install
 make docker-build
 make docker-push
 make deploy
 ```
+
+> To use the controller on the production environment, uncomment `manager_image_patch_remote_dev` in the `kustomization.yaml` file and execute the instructions above.
 
 ### Test
 To test the controller, run:
