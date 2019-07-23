@@ -32,8 +32,6 @@ spec:
               value: istio-ingressgateway.istio-system.svc.cluster.local
           args:
             - e2e
-            - --testNamespace
-            - test-e2e-external-solution
             - --domain
             - {{ .Values.global.ingress.domainName }}
             - --skipSSLVerify
