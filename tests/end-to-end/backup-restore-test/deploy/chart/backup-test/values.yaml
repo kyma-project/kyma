@@ -5,5 +5,5 @@ nameOverride: backup-test
 
 image:
   name: backup-test 
-  dir: pr/tests
-  tag: PR-4957
+  dir: snapshot/test
+  tag: test15
