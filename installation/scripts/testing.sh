@@ -7,7 +7,7 @@ POSITIONAL=()
 
 function validateConcurrency() {
   if [[ -z "$1" ]]; then
-    echo "Error: --concurrency requres a value"
+    echo "Error: --concurrency requires a value"
     exit 1
   fi
 
@@ -72,8 +72,8 @@ then
 fi
 
 # creates a config map which provides the testing bundles
-injectTestingBundles
-trap removeTestingBundles ERR EXIT
+injectTestingAddons
+trap removeTestingAddons ERR EXIT
 
 cat <<EOF | ${kc} apply -f -
 apiVersion: testing.kyma-project.io/v1alpha1

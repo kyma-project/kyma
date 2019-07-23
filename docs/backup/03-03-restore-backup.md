@@ -3,69 +3,44 @@ title: Restore a Kyma cluster
 type: Details
 ---
 
-Restoring a Kyma cluster requires a fresh Kyma installation with the same version you want to restore with. As soon as the cluster is up and running, instruct Velero to start the restore process. Restore the system [backup](assets/system-backup.yaml) followed by user Namespaces [backup](assets/all-backup.yaml).
+Restoring a Kyma cluster requires installing Velero. Download Velero CLI and use it to install the Velero server. Then, using the client, instruct Velero to start the restore process. Restore the CRDs, services, and endpoints first, and then the rest of the resources. Follow these steps to restore the resources: 
 
-Use this command to list available backups:
+1. Download and install [Velero CLI v1.0.0](https://github.com/heptio/velero/releases/tag/v1.0.0).
 
-```
-kubectl get backups -n kyma-backup
-```
+2. Install the Velero server. Use the same bucket as for the backups:
 
-Sample restore configuration:
+    ```bash
+    velero install --bucket <BUCKET> --provider <CLOUD_PROVIDER> --secret-file <CREDENTIALS_FILE> --restore-only --wait
+    ```
 
-```yaml
----
-apiVersion: velero.io/v1
-kind: Restore
-metadata:
-  name: kyma-restore
-  namespace: kyma-backup
-spec:
-    backupName: kyma-backup # specify to restore a specific backup
-    scheduleName: kyma-backup # Applies only if no backup is specified.
-    restorePVs: true
-    includeClusterResources: true
----
-apiVersion: velero.io/v1
-kind: Restore
-metadata:
-  name: kyma-system-restore
-  namespace: kyma-backup
-spec:
-    backupName: kyma-backup # specify to restore a specific backup
-    scheduleName: kyma-system-backup # Applies only if no backup is specified.
-    restorePVs: true
-    includeClusterResources: true
-```
+3. List available backups:
 
-To trigger the restore process, run this command:
+    ```bash
+    velero get backups
+    ```
 
-```
-kubectl apply -f {filename}
+4. Restore Kyma CRDs, services, and endpoints:
+
+    ```bash
+    velero restore create --from-backup <BACKUP_NAME> --include-resources customresourcedefinitions.apiextensions.k8s.io,services,endpoints --include-cluster-resources --wait
+    ```
+
+5. Restore the rest of Kyma resources:
+
+    ```bash
+    velero restore create --from-backup <BACKUP_NAME> --exclude-resources customresourcedefinitions.apiextensions.k8s.io,services,endpoints --include-cluster-resources --restore-volumes --wait
+    ```
+
+Once the status of the restore is `COMPLETED`, verify the health of Kyma by checking the Pods:
+
+```bash
+kubectl get pods --all-namespaces
 ```
 
+Even if the restore process is complete, it may take some time for the resources to become available again.
 
-To check the restore progress, run this command:
+> **NOTE:** Because of [this issue](https://github.com/heptio/velero/issues/1633) in Velero, Custom Resources are sometimes not properly restored. In this case, you can rerun the second restore command and check if the Custom Resources are restored. For example, run the following command to print several VirtualService Custom Resources:
 
-```
-kubectl describe restore -n kyma-backup {restore name}
-```
-
-To validate the result of the restore, use the `kubectl get` command.
-
-> **NOTE:** Even if the restore process is complete, it may take some time for the resources to become available again.
-
-> **NOTE:** In order to make Prometheus work after restore following steps need to be done:
-
-
-```
-### Save the prometheus resource in a file
-kubectl get Prometheus -n kyma-system monitoring -oyaml --export > prom.yaml
-
-### Delete metadata.generation and metadata.annotation["kubectl.kubernetes.io/last-applied-configuration"]
-sed -i prom.yaml '/last-applied-configuration/d;/generation/d;/selfLink/d' prom.yaml
-
-### Reapply the prometheus resource using the file
-kubectl -n kyma-system apply -f prom.yaml
-
+```bash
+kubectl get virtualservices --all-namespaces
 ```

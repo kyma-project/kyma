@@ -14,7 +14,7 @@ spec:
           shareProcessNamespace: true
           {{ if .Values.global.isLocalEnv }}
           hostAliases:
-           - ip: {{ .Values.test.acceptance.ui.minikubeIP }}
+           - ip: {{ .Values.global.minikubeIP }}
              hostnames:
               - "apiserver.{{ .Values.global.ingress.domainName }}"
               - "console.{{ .Values.global.ingress.domainName }}"

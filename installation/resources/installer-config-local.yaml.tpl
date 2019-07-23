@@ -35,6 +35,7 @@ data:
   global.isLocalEnv: "true"
   global.domainName: "kyma.local"
   global.adminPassword: ""
+  global.minikubeIP: ""
   nginx-ingress.controller.service.loadBalancerIP: ""
   global.serviceCatalogApiserver.enabled: "true"
   global.serviceCatalogCrds.enabled: "false"
@@ -97,71 +98,6 @@ metadata:
     kyma-project.io/installation: ""
 data:
   global.isDevelopMode: "true" # global, because subcharts also use it
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: knative-serving-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: knative-serving
-    kyma-project.io/installation: ""
-data:
-  knative-serving.domainName: "kyma.local"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: assetstore-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: assetstore
-    kyma-project.io/installation: ""
-data:
-  asset-store-controller-manager.minikubeIP: ""
-  test.integration.minikubeIP: ""
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: core-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: core
-    kyma-project.io/installation: ""
-data:
-  test.acceptance.ui.minikubeIP: ""
-  test.acceptance.ui.logging.enabled: ""
-  test.acceptance.cbs.minikubeIP: ""
-  apiserver-proxy.minikubeIP: ""
-  iam-kubeconfig-service.minikubeIP: ""
-  console-backend-service.minikubeIP: ""
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-connector-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: application-connector
-    kyma-project.io/installation: ""
-data:
-   application-registry.minikubeIP: ""
-   tests.application_connector_tests.minikubeIP: ""
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: intallation-logging-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: logging
-    kyma-project.io/installation: ""
-data:
-  global.logging.promtail.config.name: ""
+
+
 

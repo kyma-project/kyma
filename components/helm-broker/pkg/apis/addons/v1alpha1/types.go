@@ -55,7 +55,7 @@ type ClusterAddonsConfiguration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ClusterAddonsConfigurationSpec   `json:"spec,omitempty"`
+	Spec ClusterAddonsConfigurationSpec `json:"spec,omitempty"`
 	// +optional
 	Status ClusterAddonsConfigurationStatus `json:"status,omitempty"`
 }

@@ -1,6 +1,13 @@
 package v1alpha1
 
 import (
+	"fmt"
+	"net/url"
+	"path"
+	"path/filepath"
+	"strings"
+
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -34,15 +41,43 @@ type RepositoryStatus string
 
 const (
 	// RepositoryStatusFailed means that there is some problem with the given repository
-	RepositoryStatusFailed AddonStatus = "Failed"
+	RepositoryStatusFailed RepositoryStatus = "Failed"
 
 	// RepositoryStatusFailed means that given repository is correct
-	RepositoryStatusReady AddonStatus = "Ready"
+	RepositoryStatusReady RepositoryStatus = "Ready"
 )
 
 // SpecRepository define the addon repository
 type SpecRepository struct {
 	URL string `json:"url"`
+}
+
+// VerifyURL verifies the correctness of the url and completes the url if last parameter is not specified
+func (sr *SpecRepository) VerifyURL(developMode bool) error {
+	u, err := url.ParseRequestURI(sr.URL)
+	if err != nil {
+		return errors.Wrap(err, "while parsing URL")
+	}
+	repositoryURL := u.String()
+
+	// check if yaml file at the end of url exists if not add default 'index.yaml'
+	extension := filepath.Ext(path.Base(repositoryURL))
+	if extension != ".yaml" {
+		repositoryURL = strings.TrimRight(repositoryURL, "/") + "/index.yaml"
+	}
+
+	// check working mode if production, check security of url
+	if developMode {
+		sr.URL = repositoryURL
+		return nil
+	}
+
+	if u.Scheme != "https" {
+		return fmt.Errorf("Repository URL %s is unsecured", repositoryURL)
+	}
+
+	sr.URL = repositoryURL
+	return nil
 }
 
 // CommonAddonsConfigurationSpec defines the desired state of (Cluster)AddonsConfiguration
@@ -61,6 +96,11 @@ type Addon struct {
 	Status  AddonStatus       `json:"status,omitempty"`
 	Reason  AddonStatusReason `json:"reason,omitempty"`
 	Message string            `json:"message,omitempty"`
+}
+
+// Key returns a key for an addon
+func (a *Addon) Key() string {
+	return a.Name + "/" + a.Version
 }
 
 // StatusRepository define the addon repository
