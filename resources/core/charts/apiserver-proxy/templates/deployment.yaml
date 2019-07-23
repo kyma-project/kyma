@@ -22,7 +22,7 @@ spec:
       serviceAccountName: {{ template "name" . }}
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
-        - ip: {{ .Values.minikubeIP }}
+        - ip: {{ .Values.global.minikubeIP }}
           hostnames:
             - "dex.{{ .Values.global.ingress.domainName }}"
       {{ end }}

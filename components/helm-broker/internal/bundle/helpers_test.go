@@ -146,7 +146,8 @@ type fakeRepository struct {
 }
 
 // IndexReader returns index.yaml file from fake repository
-func (p *fakeRepository) IndexReader() (io.ReadCloser, error) {
+func (p *fakeRepository) IndexReader(URL string) (io.ReadCloser, error) {
+	p.path = URL
 	fName := fmt.Sprintf("%s/%s", p.path, "index.yaml")
 	return os.Open(fName)
 }

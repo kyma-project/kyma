@@ -1,10 +1,11 @@
 #
-# addon jeager tracing configuration
+# addon jaeger tracing configuration
 #
 enabled: false
 
 provider: jaeger
 nodeSelector: {}
+tolerations: []
 
 # Specify the pod anti-affinity that allows you to constrain which nodes
 # your pod is eligible to be scheduled based on labels on pods that are

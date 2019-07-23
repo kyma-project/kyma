@@ -13,7 +13,7 @@ spec:
       shareProcessNamespace: true
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
-        - ip: {{ .Values.test.acceptance.cbs.minikubeIP }}
+        - ip: {{ .Values.global.minikubeIP }}
           hostnames:
             - "console-backend.{{ .Values.global.ingress.domainName }}"
             - "dex.{{ .Values.global.ingress.domainName }}"

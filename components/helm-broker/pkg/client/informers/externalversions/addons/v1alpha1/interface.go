@@ -31,8 +31,6 @@ func (v *version) AddonsConfigurations() AddonsConfigurationInformer {
 }
 
 // ClusterAddonsConfigurations returns a ClusterAddonsConfigurationInformer.
-// TODO: the `namespace: v.namespace,` param was removed manually. We need to investigate why this additional
-// param is generated.
 func (v *version) ClusterAddonsConfigurations() ClusterAddonsConfigurationInformer {
-	return &clusterAddonsConfigurationInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
+	return &clusterAddonsConfigurationInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

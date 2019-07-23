@@ -15,6 +15,7 @@ const (
 	HeaderAcceptVal            = "*/*"
 	HeaderCacheControl         = "cache-control"
 	HeaderCacheControlVal      = "no-cache"
+	HeaderCookie               = "Cookie"
 )
 
 const (

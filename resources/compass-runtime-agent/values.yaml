@@ -4,9 +4,21 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir: pr/
-      version: "PR-4910"
+      version: "PR-4936"
 
 deployment:
   image:
     pullPolicy: IfNotPresent
+  tokenConfig:
+    volumeName: token-config
+    mountPath: "/config"
+    tokenURLConfigFile: "token.json"
+  sync:
+    controllerSyncPeriod: 30
+    minimalConfigFetchTime: 300
 
+
+config:
+  tokenConfigMap:
+    name: token-config-map
+    data: ""
