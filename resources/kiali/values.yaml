@@ -1,0 +1,79 @@
+
+server:
+  # The port that the server will bind to in order to receive console and API requests.
+  port: 20001
+  metrics:
+    # When true, the metrics endpoint will be available for Prometheus to scrape.
+    enabled: true
+    # The port that the server will bind to in order to receive metric requests.
+    # This is the port Prometheus will need to scrape when collecting metrics from Kiali.
+    port: 9090
+  # Defines the context root path for the Kiali console and API endpoints and readiness probes.
+  # When providing a context root path that is not "/", do not add a trailing slash.
+  # For example, use "/kiali" not "/kiali/".
+  webRoot: /
+
+deployment:
+  # Version of Kiali
+  imageTag: v1.1.0
+  replicaCount: 1
+  # When true, Kiali will be in "view only" mode, allowing the user to view and retrieve
+  # management and monitoring data for the service mesh, but not allow the user to
+  # modify the service mesh.
+  viewOnlyMode: true
+  # A list of namespaces Kiali is to be given access to.
+  # These namespaces have service mesh components that are to be observed by Kiali.
+  # You can provide names using regex expressions matched against all namespaces the operator can see.
+  # The default makes all namespaces accessible except for some internal namespaces that typically should be ignored.
+  # NOTE! If this has an entry with the special value of "**" (two asterisks), that will denote you want
+  # Kiali to be given access to all namespaces via a single cluster role (if using this special value of "**",
+  # you are required to have already granted the operator permissions to create cluster roles and cluster role bindings).
+  accessibleNamespaces: "**"
+  resources:
+    limits:
+      memory: 70Mi
+      cpu: 100m
+    requests:
+      memory: 32Mi
+      cpu: 10m
+
+auth:
+  # Determines what authentication strategy to use when users log into Kiali.
+  # Options are "login", "anonymous".
+  # Choose "login" to use a username and password that will be stored in a secret.
+  # Choose "anonymous" to allow full access to Kiali without requiring any credentials.
+  strategy: anonymous
+  kcproxy:
+    # Whether to enable authentication via dex using aditional proxy container
+    # Should only be enabled when auth_strategy is "anonymous".
+    enabled: true
+    # Port of the additional proxy container
+    port: 3000
+    resources:
+      limits:
+        memory: 20Mi
+        cpu: 50m
+      requests:
+        memory: 10Mi
+        cpu: 10m
+  login:
+    # The name of the secret where the Kiali credentials are found.
+    # These credentials will be required when logging into Kiali.
+    # Only used when auth_strategy is "login".
+    secretName: kiali
+    # username to use in generated secret
+    username: admin
+    # password to use in generated secret, will be generated if empty
+    passphrase: ""
+
+global:
+  isLocalEnv: false
+  istio:
+    gateway:
+      name: kyma-gateway
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  alpine_net:
+    name: alpine-net
+    dir: develop
+    version: "149967d0"

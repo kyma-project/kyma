@@ -1,0 +1,34 @@
+
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: kiali
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kiali-test
+    chart: {{ template "kiali.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  disableConcurrency: false
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+{{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+          - "kiali.{{ .Values.global.ingress.domainName }}"
+{{ end }}
+      restartPolicy: Never
+      containers:
+      - name: "{{ template "kiali.fullname" . }}-test"
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.alpine_net.dir }}/{{ .Values.global.alpine_net.name }}:{{ .Values.global.alpine_net.version }}
+        imagePullPolicy: "{{ .Values.global.imagePullPolicy }}"
+        command: ['curl']
+        args: ['-k', 'https://kiali.{{ .Values.global.ingress.domainName }}']
+
+{{- end}}
