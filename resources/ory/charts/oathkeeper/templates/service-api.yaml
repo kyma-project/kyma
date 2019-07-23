@@ -1,0 +1,21 @@
+{{- if .Values.service.api.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "oathkeeper.fullname" . }}-api
+  {{- if .Release.Namespace }}
+  namespace: {{ .Release.Namespace }}
+  {{- end }}
+  labels:
+{{ include "oathkeeper.labels" . | indent 4 }}
+spec:
+  type: {{ .Values.service.api.type }}
+  ports:
+    - port: {{ .Values.service.api.port }}
+      targetPort: http-api
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
