@@ -1,17 +1,118 @@
-hydraServer:
-  port: 4444
-  adminPort: 4445
-  image:
-    repository: oryd/hydra
-    tag: v1.0.0-rc.8
+# Number of ORY Hydra members
+replicaCount: 1
+
+image:
+  # ORY Hydra image
+  repository: oryd/hydra
+  # ORY Hydra version
+  tag: v1.0.0
+  # Image pull policy
+  pullPolicy: IfNotPresent
+
+# Image pull secrets
+imagePullSecrets: []
+# Chart name override
+nameOverride: ""
+# Full chart name override
+fullnameOverride: ""
+
+# Configures the Kubernetes service
+service:
+  # Configures the Kubernetes service for the proxy port.
+  public:
+    # En-/disable the service
+    enabled: true
+    # The service type
+    type: ClusterIP
+    # The service port
+    port: 4444
+  # Configures the Kubernetes service for the api port.
+  admin:
+    # En-/disable the service
+    enabled: true
+    # The service type
+    type: ClusterIP
+    # The service port
+    port: 4445
+
+# Configure ingress
+ingress:
+  # Configure ingress for the proxy port.
+  public:
+    # En-/Disable the proxy ingress.
+    enabled: false
+    annotations: {}
+    #     kubernetes.io/ingress.class: nginx
+    #     kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: public.hydra.localhost
+        paths: ["/"]
+  #    tls: []
+  #        hosts:
+  #          - proxy.hydra.local
+  #      - secretName: hydra-proxy-example-tls
+
+  admin:
+    # En-/Disable the api ingress.
+    enabled: false
+
+    annotations: {}
+    #      If you do want to specify annotations, uncomment the following
+    #      lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
+    #      kubernetes.io/ingress.class: nginx
+    #      kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: admin.hydra.localhost
+        paths: ["/"]
+#    tls: []
+#      hosts:
+#        - api.hydra.local
+#      - secretName: hydra-api-example-tls
+
+
+# Configure ORY Hydra itself
+hydra:
+  # The ORY Hydra configuration. For a full list of available settings, check:
+  #   https://github.com/ory/hydra/blob/master/docs/config.yaml
   config:
-    oauth2:
-      shareErrorDebug: "1"
-    databaseUrl: memory
-    oidc:
-      subjectTypesSupported: "public,pairwise"
-  service:
-    port: 80
-    adminPort: 4445
-loginConsent:
-  name: non-existing-application
+    serve:
+      public:
+        port: 4444
+      admin:
+        port: 4445
+      tls:
+        allow_termination_from:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+    secrets: {}
+    urls:
+      self: {}
+
+  autoMigrate: false
+  dangerousForceHttp: false
+  dangerousAllowInsecureRedirectUrls: false
+
+resources: {}
+#  We usually recommend not to specify default resources and to leave this as a conscious
+#  choice for the user. This also increases chances charts run on environments with little
+#  resources, such as Minikube. If you do want to specify resources, uncomment the following
+#  lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+#  limits:
+#    cpu: 100m
+#    memory: 128Mi
+#  requests:
+#    cpu: 100m
+#  memory: 128Mi
+
+# Node labels for pod assignment.
+nodeSelector: {}
+# If you do want to specify node labels, uncomment the following
+# lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
+#   foo: bar
+
+# Configure node tolerations.
+tolerations: []
+
+# Configure node affinity
+affinity: {}
