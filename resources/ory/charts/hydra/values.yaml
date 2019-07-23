@@ -85,12 +85,14 @@ hydra:
           - 10.0.0.0/8
           - 172.16.0.0/12
           - 192.168.0.0/16
-    secrets: {}
+    secrets:
+      system: a3m0kCx6f87n332sPw1
     urls:
       self: {}
+    dsn: memory
 
   autoMigrate: false
-  dangerousForceHttp: false
+  dangerousForceHttp: true
   dangerousAllowInsecureRedirectUrls: false
 
 resources: {}

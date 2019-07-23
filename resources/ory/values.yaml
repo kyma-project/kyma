@@ -1,2 +1,4 @@
 global:
   gateway: kyma-gateway
+  ingress:
+    domainName: kyma.local
