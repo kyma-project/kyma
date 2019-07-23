@@ -1,35 +1,37 @@
 # Kiali
 
-[Kiali](http://kiali.io) is a spyglass for the istio service mesh and provides answers to the questions:
-What microservices are part of my Istio service mesh? How are they connected? How are they performing?
+[Kiali](http://kiali.io) is a spyglass for the Istio Service Mesh. It provides the information on which microservices are a part of the specific Istio Service Mesh, how they are connected, and what is their performance status.
 
-## Introduction
+## Overview
 
 This chart installs Kiali on a Kyma cluster.
 
 ## Prerequisites
 
-- The `monitoring` chart must be installed in order to have Kiali functional
-- The `jaeger` chart should be installed to have the Jaeger integration of Kiali functional
-- The `logging` chart should be installed to have the Grafana integration of Kiali functional
+
+-  Install the Monitoring chart to make Kiali work.
+- Install the Jaeger chart to integrate Jaeger with Kiali. 
+- Install the Logging chart to integrate Grafana with Kiali.
 
 
-## Installing the Chart
+## Details
 
-To install the chart with the release name `kiali` in namespace kyma-system call:
+### Installation
+
+To install the chart with the release name `kiali` in the `kyma-system` Namespace, run:
 
     ```
     $ helm install kiali --name kiali --namespace kyma-system
     ```
 
-## Uninstalling the Chart
+### Unistallation
 
-To uninstall/delete the `kiali` release but continue to track the release:
+To uninstall/delete the `kiali` release but continue tracking the release, run:
     ```
     $ helm delete kiali
     ```
 
-To uninstall/delete the `kiali` release completely and make its name free for later use:
+To uninstall/delete the `kiali` release completely and make its name free for further use, run:
     ```
     $ helm delete kiali --purge
     ```
