@@ -1,2 +1,2 @@
 dependencies:
-  - name: function-controller
+  - name: knative-function-controller

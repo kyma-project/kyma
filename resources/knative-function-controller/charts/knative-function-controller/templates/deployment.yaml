@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.knative-function-controller.dir }}knative-function-controller:{{ .Values.global.knative-function-controller.version }}"
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.knative-function-controller.dir }}knative-function-controller:{{ .Values.global.knative-function-controller.version }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}

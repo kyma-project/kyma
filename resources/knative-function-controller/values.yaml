@@ -6,6 +6,6 @@ global:
     path: eu.gcr.io/kyma-project
   knative-function-controller:
     dir: pr/
-    version: ''
+    version: 'PR-4925'
 #    dir: develop/
 #    version: ""
