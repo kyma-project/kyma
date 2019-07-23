@@ -8,11 +8,7 @@ This chart installs Kiali on a Kyma cluster.
 
 ## Prerequisites
 
-
--  Install the Monitoring chart to make Kiali work.
-- Install the Jaeger chart to integrate Jaeger with Kiali. 
-- Install the Logging chart to integrate Grafana with Kiali.
-
+- Install the Monitoring chart to make Kiali work.
 
 ## Details
 
