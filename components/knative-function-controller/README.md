@@ -51,13 +51,15 @@ make deploy
 
 ### Run on production
 
-To use the controller on the production environment, uncomment `manager_image_patch_dev` in the `kustomization.yaml` file and run the following:
+To use the controller on the production environment, uncomment `manager_image_patch_remote_dev` in the `kustomization.yaml` file and run the following:
 
 ```bash
-make install
+DOCKER_TAG=<some tag e.g. latest>
 APP_NAME=knative-function-controller
-IMG={DOCKER_PUSH_REPOSITORY}/{DOCKER_PUSH_DIRECTORY}/{APP_NAME}
-TAG={DOCKER_TAG}
+DOCKER_PUSH_REPOSITORY=<e.g. eu.gcr.io or index.docker.io>
+DOCKER_PUSH_DIRECTORY<e.g. pr or develop>
+make install
+make docker-build
 make docker-push
 make deploy
 ```
