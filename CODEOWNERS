@@ -362,6 +362,9 @@
 # kubeless-integration tests directory
 /tests/end-to-end/kubeless-integration/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
+# external-solution-integraiton test directory
+/tests/end-to-end/external-solution-integration @sjanota @janmedrek @rakesh-garimella
+
 # kubeless tests
 /tests/kubeless/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh
 
