@@ -1,10 +1,12 @@
 package testsuite
 
 import (
+	"github.com/avast/retry-go"
 	serviceCatalogApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -13,7 +15,6 @@ type CreateServiceBinding struct {
 	serviceBindings serviceCatalogClient.ServiceBindingInterface
 	state           CreateServiceBindingState
 	name            string
-	secretName      string
 }
 
 // CreateServiceBindingState represents CreateServiceBinding dependencies
@@ -24,12 +25,11 @@ type CreateServiceBindingState interface {
 var _ step.Step = &CreateServiceBinding{}
 
 // NewCreateServiceBinding returns new CreateServiceBinding
-func NewCreateServiceBinding(name, secretName string, serviceBindings serviceCatalogClient.ServiceBindingInterface, state CreateServiceBindingState) *CreateServiceBinding {
+func NewCreateServiceBinding(name string, serviceBindings serviceCatalogClient.ServiceBindingInterface, state CreateServiceBindingState) *CreateServiceBinding {
 	return &CreateServiceBinding{
 		serviceBindings: serviceBindings,
 		state:           state,
 		name:            name,
-		secretName:      secretName,
 	}
 }
 
@@ -46,12 +46,15 @@ func (s *CreateServiceBinding) Run() error {
 			InstanceRef: serviceCatalogApi.LocalObjectReference{
 				Name: s.state.GetServiceInstanceName(),
 			},
-			SecretName: s.secretName,
 		},
 	}
 
 	_, err := s.serviceBindings.Create(serviceBinding)
-	return err
+	if err != nil {
+		return err
+	}
+
+	return retry.Do(s.isServiceBindingReady)
 }
 
 // Cleanup removes all resources that may possibly created by the step
@@ -64,4 +67,20 @@ func (s *CreateServiceBinding) Cleanup() error {
 	return helpers.AwaitResourceDeleted(func() (interface{}, error) {
 		return s.serviceBindings.Get(s.name, metav1.GetOptions{})
 	})
+}
+func (s *CreateServiceBinding) isServiceBindingReady() error {
+	sb, err := s.serviceBindings.Get(s.name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	for _, condition := range sb.Status.Conditions {
+		if condition.Type == serviceCatalogApi.ServiceBindingConditionReady {
+			if condition.Status != serviceCatalogApi.ConditionTrue {
+				return errors.New("ServiceBinding is not ready")
+			}
+			break
+		}
+	}
+	return nil
 }

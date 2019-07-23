@@ -3,10 +3,8 @@ package scenario
 import (
 	"crypto/tls"
 	"fmt"
-	"net/http"
-	"time"
-
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
+	"net/http"
 
 	"github.com/kyma-project/kyma/common/resilient"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
@@ -33,7 +31,6 @@ import (
 type E2E struct {
 	domain        string
 	testID        string
-	testNamespace string
 	skipSSLVerify bool
 }
 
@@ -43,7 +40,6 @@ const (
 
 // AddFlags adds CLI flags to given FlagSet
 func (s *E2E) AddFlags(set *pflag.FlagSet) {
-	pflag.StringVar(&s.testNamespace, "testNamespace", "default", "Namespace where test should create resources")
 	pflag.StringVar(&s.domain, "domain", "kyma.local", "domain")
 	pflag.StringVar(&s.testID, "testID", "e2e-test", "domain")
 	pflag.BoolVar(&s.skipSSLVerify, "skipSSLVerify", false, "Skip verification of service SSL certificates")
@@ -55,7 +51,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	appBrokerClientset := appBrokerClient.NewForConfigOrDie(config)
 	kubelessClientset := kubelessClient.NewForConfigOrDie(config)
 	coreClientset := coreClient.NewForConfigOrDie(config)
-	pods := coreClientset.CoreV1().Pods(s.testNamespace)
+	pods := coreClientset.CoreV1().Pods(s.testID)
 	eventingClientset := eventingClient.NewForConfigOrDie(config)
 	serviceCatalogClientset := serviceCatalogClient.NewForConfigOrDie(config)
 	serviceBindingUsageClientset := serviceBindingUsageClient.NewForConfigOrDie(config)
@@ -63,37 +59,46 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
 	connector := testkit.NewConnectorClient(
 		s.testID,
-		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testNamespace),
+		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testID),
 		internal.NewHTTPClient(s.skipSSLVerify),
 		log.New(),
 	)
 	testService := testkit.NewTestService(
 		internal.NewHTTPClient(s.skipSSLVerify),
-		coreClientset.AppsV1().Deployments(s.testNamespace),
-		coreClientset.CoreV1().Services(s.testNamespace),
-		gatewayClientset.GatewayV1alpha2().Apis(s.testNamespace),
+		coreClientset.AppsV1().Deployments(s.testID),
+		coreClientset.CoreV1().Services(s.testID),
+		gatewayClientset.GatewayV1alpha2().Apis(s.testID),
 		s.domain,
-		s.testNamespace,
+		s.testID,
 	)
 
-	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testNamespace, lambdaPort)
+	lambdaEndpoint := helpers.LambdaInClusterEndpoint(s.testID, s.testID, lambdaPort)
 	state := s.NewState()
 
 	return []step.Step{
-		testsuite.NewCreateNamespace(s.testNamespace, coreClientset.CoreV1().Namespaces()),
-		testsuite.NewCreateApplication(s.testID, s.testID, false, appOperatorClientset.ApplicationconnectorV1alpha1().Applications()),
-		testsuite.NewCreateMapping(s.testID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testNamespace)),
-		testsuite.NewDeployLambda(s.testID, lambdaPort, kubelessClientset.KubelessV1beta1().Functions(s.testNamespace), pods),
-		testsuite.NewStartTestServer(testService),
-		testsuite.NewConnectApplication(connector, state),
+		step.Parallel(
+			testsuite.NewCreateNamespace(s.testID, coreClientset.CoreV1().Namespaces()),
+			testsuite.NewCreateApplication(s.testID, s.testID, false, appOperatorClientset.ApplicationconnectorV1alpha1().Applications()),
+		),
+		step.Parallel(
+			testsuite.NewCreateMapping(s.testID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
+			testsuite.NewDeployLambda(s.testID, lambdaPort, kubelessClientset.KubelessV1beta1().Functions(s.testID), pods),
+			testsuite.NewStartTestServer(testService),
+			testsuite.NewConnectApplication(connector, state),
+		),
 		testsuite.NewRegisterTestService(s.testID, testService, state),
-		testsuite.NewCreateServiceInstance(s.testID, serviceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testNamespace), state),
-		testsuite.NewCreateServiceBinding(s.testID, s.testID, serviceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testNamespace), state),
-		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID, serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testNamespace), pods, state),
-		testsuite.NewCreateSubscription(s.testID, s.testID, lambdaEndpoint, eventingClientset.EventingV1alpha1().Subscriptions(s.testNamespace)),
-		testsuite.NewSleep(20 * time.Second),
-		testsuite.NewSendEvent(s.testID, state),
-		testsuite.NewCheckCounterPod(testService),
+		testsuite.NewCreateServiceInstance(s.testID,
+			serviceCatalogClientset.ServicecatalogV1beta1().ServiceInstances(s.testID),
+			serviceCatalogClientset.ServicecatalogV1beta1().ServiceClasses(s.testID),
+			state,
+		),
+		testsuite.NewCreateServiceBinding(s.testID, serviceCatalogClientset.ServicecatalogV1beta1().ServiceBindings(s.testID), state),
+		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID, serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID), state),
+		testsuite.NewCreateSubscription(s.testID, s.testID, lambdaEndpoint, eventingClientset.EventingV1alpha1().Subscriptions(s.testID)),
+		step.Retry(
+			testsuite.NewSendEvent(s.testID, state),
+			testsuite.NewCheckCounterPod(testService),
+		),
 	}, nil
 }
 

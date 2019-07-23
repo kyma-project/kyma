@@ -5,6 +5,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 	"github.com/pkg/errors"
+	"time"
 )
 
 // CheckCounterPod is a step which checks if counter has been updated in test pod
@@ -30,7 +31,7 @@ func (s *CheckCounterPod) Name() string {
 func (s *CheckCounterPod) Run() error {
 	err := retry.Do(func() error {
 		return s.testService.WaitForCounterPodToUpdateValue(1)
-	})
+	}, retry.Attempts(2), retry.Delay(time.Second), retry.DelayType(retry.FixedDelay))
 	if err != nil {
 		return errors.Wrapf(err, "the counter pod is not updated")
 	}

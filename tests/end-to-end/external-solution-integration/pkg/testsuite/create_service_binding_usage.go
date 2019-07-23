@@ -1,7 +1,6 @@
 package testsuite
 
 import (
-	"fmt"
 	"github.com/avast/retry-go"
 	serviceBindingUsageApi "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	serviceBindingUsageClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
@@ -9,13 +8,10 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
-	"time"
 )
 
 // CreateLambdaServiceBindingUsage is a step which creates new ServiceBindingUsage
 type CreateLambdaServiceBindingUsage struct {
-	*helpers.LambdaHelper
 	serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface
 	state                CreateServiceBindingUsageState
 	name                 string
@@ -31,9 +27,8 @@ type CreateServiceBindingUsageState interface {
 var _ step.Step = &CreateLambdaServiceBindingUsage{}
 
 // NewCreateServiceBindingUsage returns new CreateLambdaServiceBindingUsage
-func NewCreateServiceBindingUsage(name, serviceBindingName, lambdaName string, serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface, pods coreClient.PodInterface, state CreateServiceBindingUsageState) *CreateLambdaServiceBindingUsage {
+func NewCreateServiceBindingUsage(name, serviceBindingName, lambdaName string, serviceBindingUsages serviceBindingUsageClient.ServiceBindingUsageInterface, state CreateServiceBindingUsageState) *CreateLambdaServiceBindingUsage {
 	return &CreateLambdaServiceBindingUsage{
-		LambdaHelper:         helpers.NewLambdaHelper(pods),
 		serviceBindingUsages: serviceBindingUsages,
 		state:                state,
 		name:                 name,
@@ -76,35 +71,23 @@ func (s *CreateLambdaServiceBindingUsage) Run() error {
 		return err
 	}
 
-	err = retry.Do(s.isLambdaBound, retry.Delay(500*time.Millisecond))
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return retry.Do(s.isServiceBindingUsageReady)
 }
 
-func (s *CreateLambdaServiceBindingUsage) isLambdaBound() error {
-	sbuLabel := fmt.Sprintf("app-%s-%s", s.lambdaName, s.state.GetServiceClassID())
-	pods, err := s.ListLambdaPods(s.lambdaName)
+func (s *CreateLambdaServiceBindingUsage) isServiceBindingUsageReady() error {
+	sbu, err := s.serviceBindingUsages.Get(s.name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
 
-	if len(pods) == 0 {
-		return errors.New("no function pods found")
-	}
-
-	for _, pod := range pods {
-		if _, ok := pod.Labels[sbuLabel]; !ok {
-			return errors.Errorf("not bound pod exists: %s", pod.Name)
-		}
-
-		if !helpers.IsPodReady(pod) {
-			return errors.New("pod is not ready yet")
+	for _, condition := range sbu.Status.Conditions {
+		if condition.Type == serviceBindingUsageApi.ServiceBindingUsageReady {
+			if condition.Status != serviceBindingUsageApi.ConditionTrue {
+				return errors.New("ServiceBinding is not ready")
+			}
+			break
 		}
 	}
-
 	return nil
 }
 

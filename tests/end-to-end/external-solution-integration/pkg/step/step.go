@@ -2,6 +2,7 @@ package step
 
 import (
 	"github.com/hashicorp/errwrap"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
 )
@@ -60,7 +61,7 @@ func (r *Runner) Run(steps []Step, skipCleanup bool) error {
 func (r *Runner) runStep(step Step) (err error) {
 	defer func() {
 		if e := recover(); e != nil {
-			err = e.(error)
+			err = errors.WithStack(e.(error))
 		}
 	}()
 	return step.Run()

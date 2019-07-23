@@ -15,6 +15,7 @@ import (
 // CreateServiceInstance is a step which creates new ServiceInstance
 type CreateServiceInstance struct {
 	serviceInstances serviceCatalogClient.ServiceInstanceInterface
+	serviceClasses   serviceCatalogClient.ServiceClassInterface
 	state            CreateServiceInstanceState
 	name             string
 }
@@ -29,10 +30,11 @@ type CreateServiceInstanceState interface {
 var _ step.Step = &CreateServiceInstance{}
 
 // NewCreateServiceInstance returns new CreateServiceInstance
-func NewCreateServiceInstance(name string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, state CreateServiceInstanceState) *CreateServiceInstance {
+func NewCreateServiceInstance(name string, serviceInstances serviceCatalogClient.ServiceInstanceInterface, serviceClasses serviceCatalogClient.ServiceClassInterface, state CreateServiceInstanceState) *CreateServiceInstance {
 	return &CreateServiceInstance{
 		name:             name,
 		serviceInstances: serviceInstances,
+		serviceClasses:   serviceClasses,
 		state:            state,
 	}
 }
@@ -44,6 +46,11 @@ func (s *CreateServiceInstance) Name() string {
 
 // Run executes the step
 func (s *CreateServiceInstance) Run() error {
+	scExternalName, err := s.findServiceClassExternalName()
+	if err != nil {
+		return err
+	}
+
 	si, err := s.serviceInstances.Create(&serviceCatalogApi.ServiceInstance{
 		ObjectMeta: v1.ObjectMeta{
 			Name:       s.name,
@@ -52,8 +59,8 @@ func (s *CreateServiceInstance) Run() error {
 		Spec: serviceCatalogApi.ServiceInstanceSpec{
 			Parameters: &runtime.RawExtension{},
 			PlanReference: serviceCatalogApi.PlanReference{
-				ServiceClassName: s.state.GetServiceClassID(),
-				ServicePlanName:  s.state.GetServiceClassID() + "-plan",
+				ServiceClassExternalName: scExternalName,
+				ServicePlanExternalName:  "default",
 			},
 			UpdateRequests: 0,
 		},
@@ -64,6 +71,19 @@ func (s *CreateServiceInstance) Run() error {
 	s.state.SetServiceInstanceName(si.Name)
 
 	return retry.Do(s.isServiceInstanceCreated)
+}
+
+func (s *CreateServiceInstance) findServiceClassExternalName() (string, error) {
+	var name string
+	err := retry.Do(func() error {
+		sc, err := s.serviceClasses.Get(s.state.GetServiceClassID(), v1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		name = sc.Spec.ExternalName
+		return nil
+	})
+	return name, err
 }
 
 func (s *CreateServiceInstance) isServiceInstanceCreated() error {

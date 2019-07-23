@@ -24,17 +24,17 @@ func (s *SendEventAndCheckCounter) Steps(config *rest.Config) ([]step.Step, erro
 	connectionTokenHandlerClientset := connectionTokenHandlerClient.NewForConfigOrDie(config)
 	connector := testkit.NewConnectorClient(
 		s.testID,
-		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testNamespace),
+		connectionTokenHandlerClientset.ApplicationconnectorV1alpha1().TokenRequests(s.testID),
 		internal.NewHTTPClient(s.skipSSLVerify),
 		log.New(),
 	)
 	testService := testkit.NewTestService(
 		internal.NewHTTPClient(s.skipSSLVerify),
-		coreClientset.AppsV1().Deployments(s.testNamespace),
-		coreClientset.CoreV1().Services(s.testNamespace),
-		gatewayClientset.GatewayV1alpha2().Apis(s.testNamespace),
+		coreClientset.AppsV1().Deployments(s.testID),
+		coreClientset.CoreV1().Services(s.testID),
+		gatewayClientset.GatewayV1alpha2().Apis(s.testID),
 		s.domain,
-		s.testNamespace,
+		s.testID,
 	)
 	state := s.NewState()
 
