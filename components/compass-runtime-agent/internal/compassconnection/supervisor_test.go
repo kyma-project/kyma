@@ -42,13 +42,13 @@ func TestCrSupervisor_InitializeCompassConnectionCR(t *testing.T) {
 			description:        "CR does not exist and connection failed",
 			existingConnection: nil,
 			connectorMock:      failingConnector(),
-			expectedState:      v1alpha1.NotConnected,
+			expectedState:      v1alpha1.ConnectionFailed,
 		},
 		{
 			description: "CR exists",
 			existingConnection: &v1alpha1.CompassConnection{
 				ObjectMeta: v1.ObjectMeta{Name: DefaultCompassConnectionName},
-				Status:     v1alpha1.CompassConnectionStatus{ConnectionState: v1alpha1.Connected},
+				Status:     v1alpha1.CompassConnectionStatus{State: v1alpha1.Connected},
 			},
 			connectorMock: nil,
 			expectedState: v1alpha1.Connected,
@@ -65,14 +65,14 @@ func TestCrSupervisor_InitializeCompassConnectionCR(t *testing.T) {
 			supervisor := NewSupervisor(testCase.connectorMock, fakeCRDClient)
 
 			// when
-			err := supervisor.InitializeCompassConnectionCR()
+			err := supervisor.InitializeCompassConnection()
 
 			// then
 			require.NoError(t, err)
 			createdConnection, err := fakeCRDClient.Get(DefaultCompassConnectionName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			assert.Equal(t, testCase.expectedState, createdConnection.Status.ConnectionState)
+			assert.Equal(t, testCase.expectedState, createdConnection.Status.State)
 		})
 
 	}
@@ -107,7 +107,7 @@ func TestCrSupervisor_InitializeCompassConnectionCR_Error(t *testing.T) {
 		supervisor := NewSupervisor(connector, mockCRDClient)
 
 		// when
-		err := supervisor.InitializeCompassConnectionCR()
+		err := supervisor.InitializeCompassConnection()
 
 		// then
 		require.Error(t, err)
@@ -122,7 +122,7 @@ func TestCrSupervisor_InitializeCompassConnectionCR_Error(t *testing.T) {
 		supervisor := NewSupervisor(nil, mockCRDClient)
 
 		// when
-		err := supervisor.InitializeCompassConnectionCR()
+		err := supervisor.InitializeCompassConnection()
 
 		// then
 		require.Error(t, err)

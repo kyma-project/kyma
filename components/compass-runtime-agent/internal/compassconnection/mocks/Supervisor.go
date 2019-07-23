@@ -8,8 +8,8 @@ type Supervisor struct {
 	mock.Mock
 }
 
-// InitializeCompassConnectionCR provides a mock function with given fields:
-func (_m *Supervisor) InitializeCompassConnectionCR() error {
+// InitializeCompassConnection provides a mock function with given fields:
+func (_m *Supervisor) InitializeCompassConnection() error {
 	ret := _m.Called()
 
 	var r0 error
