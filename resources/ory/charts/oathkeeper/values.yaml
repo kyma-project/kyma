@@ -78,6 +78,20 @@ oathkeeper:
   # The ORY Oathkeeper configuration. For a full list of available settings, check:
   #   https://github.com/ory/oathkeeper/blob/master/docs/config.yaml
   config:
+    authenticators:
+      oauth2_introspection:
+        # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to false.
+        enabled: true
+
+        # REQUIRED IF ENABLED - The OAuth 2.0 Token Introspection endpoint.
+        introspection_url: https://my-website.com/oauth2/introspection
+
+        # Sets the strategy to be used to validate/match the token scope. Supports "hierarchic", "exact", "wildcard", "none". Defaults
+        # to "none".
+        scope_strategy: exact
+    authorizers:
+      allow:
+        enabled: true
     serve:
       proxy:
         port: 4455
