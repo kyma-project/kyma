@@ -5,31 +5,31 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"path"
+	"strings"
 
 	"github.com/pkg/errors"
 )
 
 // NewHTTPRepository creates new instance of HTTPRepository.
-func NewHTTPRepository(cfg RepositoryConfig) *HTTPRepository {
+func NewHTTPRepository() *HTTPRepository {
 	return &HTTPRepository{
-		IndexFile: cfg.IndexFileName(),
-		BaseURL:   cfg.BaseURL(),
-		Client:    http.DefaultClient,
+		Client: http.DefaultClient,
 	}
 }
 
 // HTTPRepository represents remote bundle repository which is accessed via HTTP.
 type HTTPRepository struct {
-	IndexFile string
-	BaseURL   string
-	Client    interface {
+	RepositoryURL string
+	Client        interface {
 		Do(req *http.Request) (*http.Response, error)
 	}
 }
 
 // IndexReader acquire repository index.
-func (p *HTTPRepository) IndexReader() (r io.ReadCloser, err error) {
-	return p.doGetCall(p.BaseURL + p.IndexFile)
+func (p *HTTPRepository) IndexReader(URL string) (r io.ReadCloser, err error) {
+	p.RepositoryURL = URL
+	return p.doGetCall(p.RepositoryURL)
 }
 
 // BundleReader calls repository for a specific bundle and returns means to read bundle content.
@@ -39,7 +39,11 @@ func (p *HTTPRepository) BundleReader(name Name, version Version) (r io.ReadClos
 
 // URLForBundle returns direct URL for getting the bundle
 func (p *HTTPRepository) URLForBundle(name Name, version Version) string {
-	return fmt.Sprintf("%s%s-%s.tgz", p.BaseURL, name, version)
+	return fmt.Sprintf("%s%s-%s.tgz", p.baseOfURL(p.RepositoryURL), name, version)
+}
+
+func (p *HTTPRepository) baseOfURL(fullURL string) string {
+	return strings.TrimRight(fullURL, path.Base(fullURL))
 }
 
 func (p *HTTPRepository) doGetCall(url string) (io.ReadCloser, error) {

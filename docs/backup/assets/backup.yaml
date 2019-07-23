@@ -1,0 +1,14 @@
+apiVersion: velero.io/v1
+kind: Backup
+metadata:
+  name: kyma-backup
+  namespace: kyma-backup
+spec:
+  includedNamespaces:
+  - '*'
+  includedResources:
+  - '*'
+  includeClusterResources: true
+  storageLocation: default
+  volumeSnapshotLocations: 
+  - default

@@ -33,6 +33,38 @@ gateways:
         limits:
           cpu: 50m
           memory: 64Mi
+    secretVolumes: {}
+    ports:
+      ## You can add custom gateway ports
+      # Note that AWS ELB will by default perform health checks on the first port
+      # on this list. Setting this to the health check port will ensure that health
+      # checks always work. https://github.com/istio/istio/issues/12503
+      - port: 15020
+        targetPort: 15020
+        name: status-port
+      - port: 80
+        targetPort: 80
+        name: http2
+        nodePort: 31380
+        # Kyma specific value, do not remove!
+        hostPort: 80
+      - port: 443
+        name: https
+        nodePort: 31390
+        # Kyma specific value, do not remove!
+        hostPort: 443
+      ### PORTS FOR UI/metrics #####
+      ## Disable if not needed
+      - port: 15029
+        targetPort: 15029
+        name: https-kiali
+      - port: 15032
+        targetPort: 15032
+        name: https-tracing
+        # This is the port where sni routing happens
+      - port: 15443
+        targetPort: 15443
+        name: tls
 
 #
 # sidecar-injector webhook configuration, refer to the
@@ -80,6 +112,12 @@ mixer:
         # We have experimentally found that these values work well.
         cpu: 2000m
         memory: 4G
+
+  templates:
+    useTemplateCRDs: true
+
+  adapters:
+    useAdapterCRDs: true
 #
 # pilot configuration
 #
@@ -93,6 +131,8 @@ pilot:
     requests:
       cpu: 100m
       memory: 128Mi
+  env:
+    PILOT_HTTP10: 1
 
 #
 # security configuration
@@ -137,6 +177,12 @@ kiali:
   enabled: false 
 
 #
+# addon certmanager configuration
+#
+certmanager:
+  enabled: false
+  
+#
 # Istio CNI plugin enabled
 #   This must be enabled to use the CNI plugin in Istio.  The CNI plugin is installed separately.
 #   If true, the privileged initContainer istio-init is not needed to perform the traffic redirect
@@ -158,7 +204,7 @@ global:
   hub: docker.io/istio
 
   # Default tag for Istio images.
-  tag: 1.1.6
+  tag: 1.2.2
 
   # Comma-separated minimum per-scope logging level of messages to output, in the form of <scope>:<level>,<scope>:<level>
   # The control plane has different scopes depending on component, but can configure default log level across all components
@@ -218,9 +264,13 @@ global:
     # Expected values are: trace|debug|info|warning|error|critical|off
     logLevel: ""
 
+    # Per Component log level for proxy, applies to gateways and sidecars. If a component level is
+    # not set, then the global "logLevel" will be used. If left empty, "misc:error" is used.
+    componentLogLevel: ""
+
     # Configure the DNS refresh rate for Envoy cluster of type STRICT_DNS
-    # 5 seconds is the default refresh rate used by Envoy
-    dnsRefreshRate: 5s
+    # This must be given it terms of seconds. For example, 300s is valid but 5m is invalid.
+    dnsRefreshRate: 300s
 
     #If set to true, istio-proxy container will have privileged securityContext
     privileged: false
@@ -247,6 +297,7 @@ global:
     # be allowed by the sidecar
     includeIPRanges: "10.0.0.1/8"
     excludeIPRanges: ""
+    excludeOutboundPorts: ""
 
     # pod internal interfaces
     kubevirtInterfaces: ""
@@ -298,7 +349,7 @@ global:
   # TODO: Switch to Always as default, and override in the local tests.
   imagePullPolicy: IfNotPresent
 
-  # controlPlaneMtls enabled. Will result in delays starting the pods while secrets are
+  # controlPlaneSecurityEnabled enabled. Will result in delays starting the pods while secrets are
   # propagated, not recommended for tests.
   controlPlaneSecurityEnabled: false
 
@@ -348,7 +399,7 @@ global:
   # to use for pulling any images in pods that reference this ServiceAccount.
   # For components that don't use ServiceAccounts (i.e. grafana, servicegraph, tracing)
   # ImagePullSecrets will be added to the corresponding Deployment(StatefulSet) objects.
-  # Must be set for any clustser configured with private docker registry.
+  # Must be set for any cluster configured with private docker registry.
   imagePullSecrets:
     # - private-registry-key
 
@@ -366,11 +417,19 @@ global:
   # If not set, controller watches all namespaces
   oneNamespace: false
 
-  # Default node selector to be applied to all deployments so that all pods can be 
-  # constrained to run a particular nodes. Each component can overwrite these default 
-  # values by adding its node selector block in the relevant section below and setting 
+  # Default node selector to be applied to all deployments so that all pods can be
+  # constrained to run a particular nodes. Each component can overwrite these default
+  # values by adding its node selector block in the relevant section below and setting
   # the desired values.
   defaultNodeSelector: {}
+
+  # Default node tolerations to be applied to all deployments so that all pods can be
+  # scheduled to a particular nodes with matching taints. Each component can overwrite
+  # these default values by adding its tolerations block in the relevant section below
+  # and setting the desired values.
+  # Configure this field in case that all pods of Istio control plane are expected to
+  # be scheduled to particular nodes with specified taints.
+  defaultTolerations: []
 
   # Whether to perform server-side validation of configuration.
   configValidation: true
@@ -481,8 +540,9 @@ global:
   # The second network, `network2`, in this example is defined differently with all endpoints
   # retrieved through the specified Multi-Cluster registry being mapped to network2. The
   # gateway is also defined differently with the name of the gateway service on the remote
-  # cluster. The public IP for the gateway will be determined from that remote service (not
-  # supported yet).
+  # cluster. The public IP for the gateway will be determined from that remote service (only
+  # LoadBalancer gateway service type is currently supported, for a NodePort type gateway service,
+  # it still need to be configured manually).
   #
   # meshNetworks:
   #   network1:
@@ -495,10 +555,11 @@ global:
   #     endpoints:
   #     - fromRegistry: reg1
   #     gateways:
-  #     - registryServiceName: istio-ingressgateway
+  #     - registryServiceName: istio-ingressgateway.istio-system.svc.cluster.local
   #       port: 443
   #
   meshNetworks: {}
+
   # Specifies the global locality load balancing settings.
   # Locality-weighted load balancing allows administrators to control the distribution of traffic to
   # endpoints based on the localities of where the traffic originates and where it will terminate.

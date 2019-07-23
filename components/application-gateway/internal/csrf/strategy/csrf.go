@@ -41,9 +41,8 @@ func (s *strategy) AddCSRFToken(apiRequest *http.Request) apperrors.AppError {
 	}
 
 	apiRequest.Header.Set(httpconsts.HeaderCSRFToken, tokenResponse.CSRFToken)
-	for _, cookie := range tokenResponse.Cookies {
-		apiRequest.AddCookie(cookie)
-	}
+
+	mergeCookiesWithOverride(apiRequest, tokenResponse.Cookies)
 
 	return nil
 }
@@ -59,4 +58,31 @@ func (nts *noTokenStrategy) AddCSRFToken(apiRequest *http.Request) apperrors.App
 }
 
 func (nts *noTokenStrategy) Invalidate() {
+}
+
+// Adds newCookies to the request. If the cookie is already present, overrides it.
+func mergeCookiesWithOverride(request *http.Request, newCookies []*http.Cookie) {
+	existingCookies := request.Cookies()
+
+	for _, exCookie := range existingCookies {
+		if !containsCookie(exCookie.Name, newCookies) {
+			newCookies = append(newCookies, exCookie)
+		}
+	}
+
+	request.Header.Del(httpconsts.HeaderCookie)
+
+	for _, c := range newCookies {
+		request.AddCookie(c)
+	}
+}
+
+func containsCookie(name string, cookies []*http.Cookie) bool {
+	for _, c := range cookies {
+		if c.Name == name {
+			return true
+		}
+	}
+
+	return false
 }
