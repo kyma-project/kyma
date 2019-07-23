@@ -219,6 +219,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-rbac-admin: "true"
 rules: []
 
 ---
