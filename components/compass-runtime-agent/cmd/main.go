@@ -60,7 +60,7 @@ func main() {
 
 	certManager := certificates.NewCredentialsManager()
 	compassConfigClient := compass.NewConfigurationClient()
-	syncService := synchronization.Service{}
+	syncService := synchronization.NewSynchronizationService()
 
 	compassConnector := compass.NewCompassConnector(options.tokenURLConfigFile)
 	connectionSupervisor := compassconnection.NewSupervisor(

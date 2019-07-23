@@ -33,38 +33,38 @@ func (in CompassConnection) ShouldReconnect() bool {
 	return in.Status.State == ConnectionFailed
 }
 
-//func (s CompassConnectionStatus) String() string {
-//	connectionState := State(s.State)
-//
-//	var certificateError string
-//	if s.CertificateStatus != nil {
-//		certificateError = s.CertificateStatus.SynchronizationFailed
-//	}
-//
-//	var connectionError string
-//	if s.ConnectionStatus != nil {
-//		connectionError = s.ConnectionStatus.SynchronizationFailed
-//	}
-//
-//	var configurationError string
-//	if s.SynchronizationStatus != nil {
-//		configurationError = s.SynchronizationStatus.SynchronizationFailed
-//	}
-//
-//	if certificateError != "" {
-//		certificateError = fmt.Sprintf("Certificate error: %s \n", certificateError)
-//	}
-//
-//	if connectionError != "" {
-//		connectionError = fmt.Sprintf("Connection error: %s \n", connectionError)
-//	}
-//
-//	if configurationError != "" {
-//		configurationError = fmt.Sprintf("Configuration error: %s \n", configurationError)
-//	}
-//
-//	return fmt.Sprintf()
-//}
+func (s CompassConnectionStatus) String() string {
+	//	connectionState := State(s.State)
+	//
+	//	var certificateError string
+	//	if s.CertificateStatus != nil {
+	//		certificateError = s.CertificateStatus.SynchronizationFailed
+	//	}
+	//
+	//	var connectionError string
+	//	if s.ConnectionStatus != nil {
+	//		connectionError = s.ConnectionStatus.SynchronizationFailed
+	//	}
+	//
+	//	var configurationError string
+	//	if s.SynchronizationStatus != nil {
+	//		configurationError = s.SynchronizationStatus.SynchronizationFailed
+	//	}
+	//
+	//	if certificateError != "" {
+	//		certificateError = fmt.Sprintf("Certificate error: %s \n", certificateError)
+	//	}
+	//
+	//	if connectionError != "" {
+	//		connectionError = fmt.Sprintf("Connection error: %s \n", connectionError)
+	//	}
+	//
+	//	if configurationError != "" {
+	//		configurationError = fmt.Sprintf("Configuration error: %s \n", configurationError)
+	//	}
+	//
+	return ""
+}
 
 type ConnectionState string
 

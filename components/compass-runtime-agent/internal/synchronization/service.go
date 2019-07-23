@@ -10,6 +10,10 @@ type Service interface {
 	Apply(applications []compass.Application) ([]Result, apperrors.AppError)
 }
 
+func NewSynchronizationService() Service {
+	return &service{}
+}
+
 type service struct {
 }
 

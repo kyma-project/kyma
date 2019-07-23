@@ -68,57 +68,59 @@ func newReconciler(client Client, supervisior Supervisor) reconcile.Reconciler {
 
 // Reconcile reads that state of the cluster for a CompassConnection object and makes changes based on the state read
 func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+	log := r.log.WithField("CompassConnection", request.Name)
+
 	// Fetch the CompassConnection instance
 	instance := &v1alpha1.CompassConnection{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			r.log.Infof("Compass Connection %s deleted.", request.Name)
+			log.Info("Compass Connection deleted.")
 
 			// Try to establish new connection
 			instance, err := r.supervisor.InitializeCompassConnection()
 			if err != nil {
-				r.log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
+				log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
 				return reconcile.Result{}, err
 			}
 
 			// TODO: log some human readable status
-			r.log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
+			log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
 
 			return reconcile.Result{}, nil
 		}
 
 		// SynchronizationFailed reading the object - requeue the request.
-		r.log.Infof("Failed to read %s Compass Connection.", request.Name)
+		log.Info("Failed to read Compass Connection.")
 		return reconcile.Result{}, err
 	}
 
 	// TODO: human readable status
-	r.log.Infof("Processing %s Compass Connection, current status: %s", instance.Name, "TODO")
+	log.Infof("Processing %s Compass Connection, current status: %s", instance.Name, "TODO")
 
 	// If connection is not established read Config Map and try to fetch Certificate
 	if instance.ShouldReconnect() {
 		instance, err := r.supervisor.InitializeCompassConnection()
 		if err != nil {
-			r.log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
+			log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
 			return reconcile.Result{}, err
 		}
 
-		r.log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
+		log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
 		return reconcile.Result{}, nil
 	}
 
 	// TODO: check last synchronization time and if it passed
 
-	r.log.Infof("Trying to connect to Compass and apply Runtime configuration...", instance.Name)
+	log.Info("Trying to connect to Compass and apply Runtime configuration...")
 
 	synchronized, err := r.supervisor.SynchronizeWithCompass(instance)
 	if err != nil {
-		r.log.Errorf("Failed to synchronize with Compass for %s Compass Connection: %s", instance.Name, err.Error())
+		log.Errorf("Failed to synchronize with Compass: %s", err.Error())
 		return reconcile.Result{}, err
 	}
 
-	r.log.Infof("Synchronization finished. %s Compass Connection status: %s", synchronized.Name, synchronized.Status)
+	log.Infof("Synchronization finished. Compass Connection status: %s", synchronized.Status)
 
 	return reconcile.Result{}, nil
 }
