@@ -8,6 +8,6 @@ import (
 
 func NewWithIDProvider(bs bundleStorage, cs chartStorage, os operationStorage, is instanceStorage, ibd instanceBindDataStorage,
 	bindTmplRenderer bindTemplateRenderer, bindTmplResolver bindTemplateResolver,
-	hc helmClient, syncer syncer, log *logrus.Entry, idp func() (internal.OperationID, error)) *Server {
-	return newWithIDProvider(bs, cs, os, is, ibd, bindTmplRenderer, bindTmplResolver, hc, syncer, log, idp)
+	hc helmClient, log *logrus.Entry, idp func() (internal.OperationID, error)) *Server {
+	return newWithIDProvider(bs, cs, os, is, ibd, bindTmplRenderer, bindTmplResolver, hc, log, idp)
 }
