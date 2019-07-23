@@ -3,8 +3,9 @@ package scenario
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 	"net/http"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
 
 	"github.com/kyma-project/kyma/common/resilient"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal"
