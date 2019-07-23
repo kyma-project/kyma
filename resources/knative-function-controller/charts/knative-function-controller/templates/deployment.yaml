@@ -15,19 +15,19 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: {{ template "knative-function-controller.name" . }}
-      release: {{ .Release.Name }}
+      app.kubernetes.io/name: {{ template "knative-function-controller.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
+      labels:
+        app.kubernetes.io/name: {{ template "knative-function-controller.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
       annotations:
         sidecar.istio.io/inject: "false"
-      labels:
-        app: {{ template "knative-function-controller.name" . }}
-        release: {{ .Release.Name }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.knative-function-controller.dir }}knative-function-controller:{{ .Values.global.knative-function-controller.version }}
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.knative-function-controller.dir }}knative-function-controller:{{ .Values.global.knative-function-controller.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}

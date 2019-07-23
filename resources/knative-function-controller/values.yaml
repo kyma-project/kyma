@@ -1,11 +1,13 @@
 # Default values for knative-function-controller.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+
 global:
+  isLocalEnv: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   knative-function-controller:
     dir: pr/
-    version: 'PR-4925'
+    version: "PR-4925"
 #    dir: develop/
 #    version: ""
