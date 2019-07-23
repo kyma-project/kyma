@@ -3,7 +3,7 @@
     "description": "Schema definition for velero helm chart values",
     "type": "object",
     "properties": {
-        "global": {
+        "configuration": {
             "description": "Configuration of the global properties for velero component",
             "type": "object",
             "properties": {
@@ -68,26 +68,29 @@
                                 "storageAccount": {
                                     "description": "Provides the name of the storage account for the backup storage location. It only applies to Azure.",
                                     "type": "string"
-                                },
-                                "s3ForcePathStyle": {
-                                    "description": "Specifies whether to force path style URLs for S3 objects. Set it to true if you use a local storage service like Minio. It only applies to AWS.",
-                                    "type": "string"
-                                },
-                                "s3Url": {
-                                    "description": "Specifies the AWS S3 URL. If not provided, Velero generates it from region and bucket. Use this field for local storage services like Minio.",
-                                    "type": "string"
-                                },
-                                "kmsKeyId": {
-                                    "description": "Specifies the AWS KMS key ID or alias to enable encryption of the backups stored in S3. It only works with AWS S3 and may require explicitly granting key usage rights.",
-                                    "type": "string"
-                                },
-                                "publicUrl": {
-                                    "description": "Specifies the parameter used instead of 3Url when generating download URLs, for example for logs. Use this field for local storage services like Minio.",
-                                    "type": "string"
                                 }
                             }
                         }
                     }
+                }
+            }
+        },
+        "credentials": {
+            "description": "Configuration of the credentials properties for velero component",
+            "type": "object",
+            "properties": {
+                "useSecret": {
+                    "description": "Specifies if a secret is required for IAM credentials. Set this to false when using kube2iam.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "existingSecret": {
+                    "description": "If specified and useSecret is true, uses an existing secret with this name instead of creating one.",
+                    "type": "boolean"
+                },
+                "secretContents": {
+                    "description": "If specified and useSecret is true, provides the content for the credentials secret.",
+                    "type": "object"
                 }
             }
         }
