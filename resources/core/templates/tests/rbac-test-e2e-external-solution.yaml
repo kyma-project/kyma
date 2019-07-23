@@ -34,7 +34,7 @@ rules:
     resources: ["functions"]
     verbs: ["create", "get", "update", "delete"]
   - apiGroups: ["servicecatalog.k8s.io"]
-    resources: ["serviceinstances", "servicebindings"]
+    resources: ["serviceinstances", "servicebindings", "serviceclasses"]
     verbs: ["create", "get", "update", "delete", "list", "deletecollection"]
   - apiGroups: ["servicecatalog.kyma-project.io"]
     resources: ["servicebindingusages"]
