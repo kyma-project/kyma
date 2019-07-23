@@ -91,6 +91,8 @@ func main() {
 	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	var subDetails subscriberDetails
 	var pubDetails publisherDetails
+	var logLevelString string
+	var logLevel log.Level
 
 	//Initialise publisher struct
 	flags.StringVar(&pubDetails.publishEventEndpointURL, "publish-event-uri", "http://event-bus-publish:8080/v1/events", "publish service events endpoint `URL`")
@@ -99,9 +101,18 @@ func main() {
 	//Initialise subscriber
 	flags.StringVar(&subDetails.subscriberImage, "subscriber-image", "", "subscriber Docker `image` name")
 	flags.StringVar(&subDetails.subscriberNamespace, "subscriber-ns", "default", "k8s `namespace` in which subscriber test app is running")
+	flags.StringVar(&logLevelString, "log-level", "info", "logrus log level")
+
 	if err := flags.Parse(os.Args[1:]); err != nil {
 		panic(err)
 	}
+
+	// set log level
+	var err error
+	if logLevel, err = log.ParseLevel(logLevelString); err != nil {
+		panic(err)
+	}
+	log.SetLevel(logLevel)
 
 	initSubscriberUrls(&subDetails)
 
