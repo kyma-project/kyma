@@ -238,11 +238,11 @@ func TestReconcile(t *testing.T) {
 	g.Eventually(func() string {
 		c.Get(context.TODO(), depKey, cmUpdated)
 		return cmUpdated.Data["handler.js"]
-	}, timeout, 1*time.Second).Should(gomega.Equal(fnUpdated.Spec.Function))
+	}, timeout, 10*time.Second).Should(gomega.Equal(fnUpdated.Spec.Function))
 	g.Eventually(func() string {
 		c.Get(context.TODO(), depKey, cmUpdated)
 		return cmUpdated.Data["package.json"]
-	}, timeout, 1*time.Second).Should(gomega.Equal(`dependencies`))
+	}, timeout, 10*time.Second).Should(gomega.Equal(`dependencies`))
 
 	// ensure updated knative service has updated image
 	ksvcUpdated := &servingv1alpha1.Service{}
