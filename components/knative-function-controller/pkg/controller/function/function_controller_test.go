@@ -224,6 +224,12 @@ func TestReconcile(t *testing.T) {
 	// get the updated function and compare spec
 	fnUpdatedFetched = &runtimev1alpha1.Function{}
 	g.Expect(c.Get(context.TODO(), depKey, fnUpdatedFetched)).NotTo(gomega.HaveOccurred())
+
+	g.Eventually(func() string {
+		c.Get(context.TODO(), depKey, fnUpdatedFetched)
+		return fnUpdatedFetched.Spec.Function
+	}, timeout, 10*time.Second).Should(gomega.Equal(fnUpdated.Spec.Function))
+
 	fnUpdatedFetchedSpec:=fnUpdatedFetched.Spec
 	fnUpdatedSpec:=fnUpdated.Spec
 	g.Expect(fnUpdatedFetchedSpec).To(gomega.Equal(fnUpdatedSpec))
