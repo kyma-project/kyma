@@ -194,7 +194,7 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       </summary>
 
     ```
-    >**TIP:** If you contribute to the [bundles](https://github.com/kyma-project/bundles/tree/master/bundles) repository, you do not have to compress your bundles as the system does it automatically.
+    >**TIP:** If you contribute to the [addons](https://github.com/kyma-project/addons/tree/master/addons) repository, you do not have to compress your addons as the system does it automatically.
     ```
       </details>
       <details>

@@ -71,7 +71,7 @@ then
   echo "$(${kc} get testdefinitions --all-namespaces -l 'require-static-users=true' -o=go-template --template='{{- range .items}}{{printf " - %s\n" .metadata.name}}{{- end}}')"
 fi
 
-# creates a config map which provides the testing bundles
+# creates a config map which provides the testing addons
 injectTestingAddons
 trap removeTestingAddons ERR EXIT
 

@@ -33,8 +33,8 @@ func (ts *provisionServiceTestSuite) SetUp() {
 	ts.Exp.Populate()
 }
 
-func (ts *provisionServiceTestSuite) FixBundle() internal.Bundle {
-	return *ts.Exp.NewBundle()
+func (ts *provisionServiceTestSuite) FixAddon() internal.Addon {
+	return *ts.Exp.NewAddon()
 }
 
 func (ts *provisionServiceTestSuite) FixChart() chart.Chart {
@@ -76,10 +76,10 @@ func TestProvisionServiceProvisionSuccessAsyncInstall(t *testing.T) {
 	isgMock.On("IsProvisioned", ts.Exp.InstanceID).Return(false, nil).Once()
 	isgMock.On("IsProvisioningInProgress", ts.Exp.InstanceID).Return(internal.OperationID(""), false, nil).Once()
 
-	bgMock := &automock.BundleStorage{}
+	bgMock := &automock.AddonStorage{}
 	defer bgMock.AssertExpectations(t)
-	expBundle := ts.FixBundle()
-	bgMock.On("GetByID", internal.ClusterWide, ts.Exp.Bundle.ID).Return(&expBundle, nil).Once()
+	expAddon := ts.FixAddon()
+	bgMock.On("GetByID", internal.ClusterWide, ts.Exp.Addon.ID).Return(&expAddon, nil).Once()
 
 	cgMock := &automock.ChartGetter{}
 	defer cgMock.AssertExpectations(t)
@@ -108,14 +108,14 @@ func TestProvisionServiceProvisionSuccessAsyncInstall(t *testing.T) {
 	defer hiMock.AssertExpectations(t)
 	releaseResp := &rls.InstallReleaseResponse{}
 	expChartOverrides := internal.ChartValues{
-		"addonsRepositoryURL": expBundle.RepositoryURL,
+		"addonsRepositoryURL": expAddon.RepositoryURL,
 	}
 	hiMock.On("Install", &expChart, expChartOverrides, ts.Exp.ReleaseName, ts.Exp.Namespace).Return(releaseResp, nil).Once()
 
 	renderedYAML := bind.RenderedBindYAML(`rendered-template`)
 	rendererMock := &automock.BindTemplateRenderer{}
 	defer rendererMock.AssertExpectations(t)
-	rendererMock.On("Render", ts.Exp.BundlePlan.BindTemplate, releaseResp).Return(renderedYAML, nil)
+	rendererMock.On("Render", ts.Exp.AddonPlan.BindTemplate, releaseResp).Return(renderedYAML, nil)
 
 	expCreds := internal.InstanceCredentials{
 		"test-param": "test-value",
@@ -178,10 +178,10 @@ func TestProvisionServiceProvisionFailureAsync(t *testing.T) {
 	isgMock.On("IsProvisioned", ts.Exp.InstanceID).Return(false, nil).Once()
 	isgMock.On("IsProvisioningInProgress", ts.Exp.InstanceID).Return(internal.OperationID(""), false, nil).Once()
 
-	bgMock := &automock.BundleStorage{}
+	bgMock := &automock.AddonStorage{}
 	defer bgMock.AssertExpectations(t)
-	expBundle := ts.FixBundle()
-	bgMock.On("GetByID", internal.ClusterWide, ts.Exp.Bundle.ID).Return(&expBundle, nil).Once()
+	expAddon := ts.FixAddon()
+	bgMock.On("GetByID", internal.ClusterWide, ts.Exp.Addon.ID).Return(&expAddon, nil).Once()
 	iiMock := &automock.InstanceStorage{}
 	defer iiMock.AssertExpectations(t)
 	expInstance := ts.FixInstance()
@@ -255,7 +255,7 @@ func TestProvisionServiceProvisionSuccessRepeatedOnAlreadyFullyProvisionedInstan
 	defer isgMock.AssertExpectations(t)
 	isgMock.On("IsProvisioned", ts.Exp.InstanceID).Return(true, nil).Once()
 
-	bgMock := &automock.BundleStorage{}
+	bgMock := &automock.AddonStorage{}
 	defer bgMock.AssertExpectations(t)
 
 	cgMock := &automock.ChartGetter{}
@@ -313,7 +313,7 @@ func TestProvisionServiceProvisionSuccessRepeatedOnProvisioningInProgress(t *tes
 	expOpID := internal.OperationID("exp-op-id")
 	isgMock.On("IsProvisioningInProgress", ts.Exp.InstanceID).Return(expOpID, true, nil).Once()
 
-	bgMock := &automock.BundleStorage{}
+	bgMock := &automock.AddonStorage{}
 	defer bgMock.AssertExpectations(t)
 
 	cgMock := &automock.ChartGetter{}

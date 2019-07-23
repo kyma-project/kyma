@@ -1,6 +1,6 @@
 package bind
 
-// YAML represents a bundle plan bind.yaml structure
+// YAML represents a addon plan bind.yaml structure
 type YAML struct {
 	Credential     []CredentialVar        `json:"credential"`
 	CredentialFrom []CredentialFromSource `json:"credentialFrom"`

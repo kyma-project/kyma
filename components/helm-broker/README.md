@@ -2,9 +2,9 @@
 
 ## Overview
 
-The Helm Broker is an implementation of a Service Broker which runs on the Kyma cluster and deploys applications into the Kubernetes cluster using Kyma bundles, and the [Helm](https://github.com/kubernetes/helm) client. A bundle is an abstraction layer over a Helm chart which allows you to represent it as a ClusterServiceClass in the Service Catalog. For example, a bundle can provide plan definitions or binding details. The Helm Broker fetches bundles definitions from an HTTP servers. A list of HTTP bundles repositories is defined in the ConfigMap and can be changed in the runtime.
+The Helm Broker is an implementation of a Service Broker which runs on the Kyma cluster and deploys applications into the Kubernetes cluster using Kyma addons, and the [Helm](https://github.com/kubernetes/helm) client. A addon is an abstraction layer over a Helm chart which allows you to represent it as a ClusterServiceClass in the Service Catalog. For example, a addon can provide plan definitions or binding details. The Helm Broker fetches addons definitions from an HTTP servers. A list of HTTP addons repositories is defined in the ConfigMap and can be changed in the runtime.
 
-For the details about Helm Broker configuration, see [this](../../docs/helm-broker/03-04-fetch-addons-from-https-servers.md) document. See the [Create a bundle](../../docs/helm-broker/03-01-create-bundles.md) and [Bind bundles](../../docs/helm-broker/03-02-bind-bundles.md) documents to learn more about bundles.
+For the details about Helm Broker configuration, see [this](../../docs/helm-broker/03-04-fetch-addons-from-https-servers.md) document. See the [Create a addon](../../docs/helm-broker/03-01-create-addons.md) and [Bind addons](../../docs/helm-broker/03-02-bind-addons.md) documents to learn more about addons.
 The Helm Broker implements the Service Broker API. For more information about the Service Brokers, see the [Service Brokers](../../docs/service-catalog/13-01-service-brokers.md) overview document.
 
 ## Prerequisites

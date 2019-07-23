@@ -48,7 +48,7 @@ func newOSBAPITestSuite(t *testing.T) *osbapiTestSuite {
 	}
 
 	ts.BrokerServer = broker.NewWithIDProvider(
-		sFact.Bundle(),
+		sFact.Addon(),
 		sFact.Chart(),
 		sFact.InstanceOperation(),
 		sFact.Instance(),
@@ -189,8 +189,8 @@ func TestOSBAPICatalogSuccess(t *testing.T) {
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
-	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(internal.ClusterWide, fixBundle)
+	fixAddon := ts.Exp.NewAddon()
+	ts.StorageFactory.Addon().Upsert(internal.ClusterWide, fixAddon)
 
 	// WHEN
 	_, err := ts.OSBClient().GetCatalog()
@@ -209,8 +209,8 @@ func TestOSBAPIProvisionSuccess(t *testing.T) {
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
-	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(internal.ClusterWide, fixBundle)
+	fixAddon := ts.Exp.NewAddon()
+	ts.StorageFactory.Addon().Upsert(internal.ClusterWide, fixAddon)
 
 	fixChart := ts.Exp.NewChart()
 	ts.StorageFactory.Chart().Upsert(internal.ClusterWide, fixChart)
@@ -546,8 +546,8 @@ func TestOSBAPILastOperationSuccess(t *testing.T) {
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
-	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(internal.ClusterWide, fixBundle)
+	fixAddon := ts.Exp.NewAddon()
+	ts.StorageFactory.Addon().Upsert(internal.ClusterWide, fixAddon)
 
 	fixInstance := ts.Exp.NewInstance()
 	ts.StorageFactory.Instance().Insert(fixInstance)
@@ -578,8 +578,8 @@ func TestOSBAPILastOperationForNonExistingInstance(t *testing.T) {
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
-	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(internal.ClusterWide, fixBundle)
+	fixAddon := ts.Exp.NewAddon()
+	ts.StorageFactory.Addon().Upsert(internal.ClusterWide, fixAddon)
 
 	// WHEN
 	opKey := osb.OperationKey(ts.Exp.OperationID)
@@ -602,8 +602,8 @@ func TestOSBAPIBindFailureWithDisallowedParametersFieldInReq(t *testing.T) {
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
-	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(internal.ClusterWide, fixBundle)
+	fixAddon := ts.Exp.NewAddon()
+	ts.StorageFactory.Addon().Upsert(internal.ClusterWide, fixAddon)
 
 	// WHEN
 	req := &osb.BindRequest{
@@ -631,8 +631,8 @@ func TestOSBAPICatalogSuccessNS(t *testing.T) {
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
-	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(testNs, fixBundle)
+	fixAddon := ts.Exp.NewAddon()
+	ts.StorageFactory.Addon().Upsert(testNs, fixAddon)
 
 	// WHEN
 	_, err := ts.OSBClientNS().GetCatalog()
@@ -651,8 +651,8 @@ func TestOSBAPIProvisionSuccessNS(t *testing.T) {
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
-	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(testNs, fixBundle)
+	fixAddon := ts.Exp.NewAddon()
+	ts.StorageFactory.Addon().Upsert(testNs, fixAddon)
 
 	fixChart := ts.Exp.NewChart()
 	ts.StorageFactory.Chart().Upsert(testNs, fixChart)
@@ -988,8 +988,8 @@ func TestOSBAPILastOperationSuccessNS(t *testing.T) {
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
-	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(testNs, fixBundle)
+	fixAddon := ts.Exp.NewAddon()
+	ts.StorageFactory.Addon().Upsert(testNs, fixAddon)
 
 	fixInstance := ts.Exp.NewInstance()
 	ts.StorageFactory.Instance().Insert(fixInstance)
@@ -1020,8 +1020,8 @@ func TestOSBAPILastOperationForNonExistingInstanceNS(t *testing.T) {
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
-	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(testNs, fixBundle)
+	fixAddon := ts.Exp.NewAddon()
+	ts.StorageFactory.Addon().Upsert(testNs, fixAddon)
 
 	// WHEN
 	opKey := osb.OperationKey(ts.Exp.OperationID)
@@ -1044,8 +1044,8 @@ func TestOSBAPIBindFailureWithDisallowedParametersFieldInReqNS(t *testing.T) {
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
-	fixBundle := ts.Exp.NewBundle()
-	ts.StorageFactory.Bundle().Upsert(testNs, fixBundle)
+	fixAddon := ts.Exp.NewAddon()
+	ts.StorageFactory.Addon().Upsert(testNs, fixAddon)
 
 	// WHEN
 	req := &osb.BindRequest{
@@ -1069,7 +1069,7 @@ func TestOSBAPIBindFailureWithDisallowedParametersFieldInReqNS(t *testing.T) {
 
 type fakeBindTmplRenderer struct{}
 
-func (fakeBindTmplRenderer) Render(bindTemplate internal.BundlePlanBindTemplate, resp *rls.InstallReleaseResponse) (bind.RenderedBindYAML, error) {
+func (fakeBindTmplRenderer) Render(bindTemplate internal.AddonPlanBindTemplate, resp *rls.InstallReleaseResponse) (bind.RenderedBindYAML, error) {
 	return []byte(`fake`), nil
 }
 

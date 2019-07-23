@@ -1,11 +1,11 @@
-package bundle_test
+package addon_test
 
 import (
 	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger/spy"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -20,10 +20,10 @@ func TestRepositoryLoaderSuccess(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
-	bundleLoader := bundle.NewProvider(fakeRepo, bundle.NewLoader(tmpDir, log), log)
+	addonLoader := addon.NewProvider(fakeRepo, addon.NewLoader(tmpDir, log), log)
 
 	// when
-	result, err := bundleLoader.ProvideBundles(fakeRepo.path)
+	result, err := addonLoader.ProvideAddons(fakeRepo.path)
 
 	// then
 	require.NoError(t, err)
@@ -39,10 +39,10 @@ func TestRepositoryLoader(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
-	bundleLoader := bundle.NewProvider(fakeRepo, bundle.NewLoader(tmpDir, log), log)
+	addonLoader := addon.NewProvider(fakeRepo, addon.NewLoader(tmpDir, log), log)
 
 	// when
-	result, err := bundleLoader.ProvideBundles(fakeRepo.path)
+	result, err := addonLoader.ProvideAddons(fakeRepo.path)
 
 	// then
 	require.NoError(t, err)

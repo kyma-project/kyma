@@ -32,7 +32,7 @@ const (
 )
 
 // EnsureClusterDocsTopic creates ClusterDocsTopic for a given bundle or updates it in case it already exists
-func (d *DocsProvider) EnsureClusterDocsTopic(bundle *internal.Bundle) error {
+func (d *DocsProvider) EnsureClusterDocsTopic(bundle *internal.Addon) error {
 	bundle.Docs[0].Template.Sources = d.defaultDocsSourcesURLs(bundle)
 	cdt := &v1alpha1.ClusterDocsTopic{
 		ObjectMeta: v1.ObjectMeta{
@@ -74,7 +74,7 @@ func (d *DocsProvider) EnsureClusterDocsTopicRemoved(id string) error {
 }
 
 // EnsureDocsTopic creates ClusterDocsTopic for a given bundle or updates it in case it already exists
-func (d *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle, namespace string) error {
+func (d *DocsProvider) EnsureDocsTopic(bundle *internal.Addon, namespace string) error {
 	bundle.Docs[0].Template.Sources = d.defaultDocsSourcesURLs(bundle)
 	dt := &v1alpha1.DocsTopic{
 		ObjectMeta: v1.ObjectMeta{
@@ -117,7 +117,7 @@ func (d *DocsProvider) EnsureDocsTopicRemoved(id string, namespace string) error
 	return nil
 }
 
-func (d *DocsProvider) defaultDocsSourcesURLs(bundle *internal.Bundle) []v1alpha1.Source {
+func (d *DocsProvider) defaultDocsSourcesURLs(bundle *internal.Addon) []v1alpha1.Source {
 	// we use repositoryURL as the default sourceURL if its not provided
 	var sources []v1alpha1.Source
 	for _, source := range bundle.Docs[0].Template.Sources {
@@ -129,7 +129,7 @@ func (d *DocsProvider) defaultDocsSourcesURLs(bundle *internal.Bundle) []v1alpha
 	return sources
 }
 
-func (d *DocsProvider) updateClusterDocsTopic(bundle *internal.Bundle) error {
+func (d *DocsProvider) updateClusterDocsTopic(bundle *internal.Addon) error {
 	cdt := &v1alpha1.ClusterDocsTopic{}
 	if err := d.dynamicClient.Get(context.Background(), types.NamespacedName{Name: string(bundle.ID)}, cdt); err != nil {
 		return errors.Wrapf(err, "while getting ClusterDocsTopic %s", bundle.ID)
@@ -146,7 +146,7 @@ func (d *DocsProvider) updateClusterDocsTopic(bundle *internal.Bundle) error {
 	return nil
 }
 
-func (d *DocsProvider) updateDocsTopic(bundle *internal.Bundle, namespace string) error {
+func (d *DocsProvider) updateDocsTopic(bundle *internal.Addon, namespace string) error {
 	dt := &v1alpha1.DocsTopic{}
 	if err := d.dynamicClient.Get(context.Background(), types.NamespacedName{Name: string(bundle.ID), Namespace: namespace}, dt); err != nil {
 		return errors.Wrapf(err, "while getting DocsTopic %s", bundle.ID)

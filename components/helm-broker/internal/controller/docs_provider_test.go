@@ -9,7 +9,7 @@ import (
 	"github.com/Masterminds/semver"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -27,10 +27,10 @@ func TestDocsProvider_EnsureClusterDocsTopic(t *testing.T) {
 	const id = "123"
 
 	for tn, tc := range map[string]struct {
-		givenBundle bundle.CompleteBundle
+		givenBundle addon.CompleteAddon
 	}{
-		"URL set":   {fixBundleWithDocsURL(id, "test", "url", "url2")},
-		"empty URL": {fixBundleWithEmptyDocs(id, "test", "url")},
+		"URL set":   {fixAddonWithDocsURL(id, "test", "url", "url2")},
+		"empty URL": {fixAddonWithEmptyDocs(id, "test", "url")},
 	} {
 		t.Run(tn, func(t *testing.T) {
 			c := fake.NewFakeClient()
@@ -38,13 +38,13 @@ func TestDocsProvider_EnsureClusterDocsTopic(t *testing.T) {
 			docsProvider := NewDocsProvider(c)
 
 			// when
-			err = docsProvider.EnsureClusterDocsTopic(tc.givenBundle.Bundle)
+			err = docsProvider.EnsureClusterDocsTopic(tc.givenBundle.Addon)
 			require.NoError(t, err)
 
 			// then
 			err = c.Get(context.Background(), client.ObjectKey{Namespace: cdt.Namespace, Name: cdt.Name}, cdt)
 			require.NoError(t, err)
-			assert.Equal(t, tc.givenBundle.Bundle.Docs[0].Template, cdt.Spec.CommonDocsTopicSpec)
+			assert.Equal(t, tc.givenBundle.Addon.Docs[0].Template, cdt.Spec.CommonDocsTopicSpec)
 		})
 	}
 }
@@ -56,20 +56,20 @@ func TestDocsProvider_EnsureClusterDocsTopic_UpdateIfExist(t *testing.T) {
 
 	const id = "123"
 	cdt := fixClusterDocsTopic(id)
-	bundleWithEmptyDocsURL := fixBundleWithEmptyDocs(id, "test", "url")
-	bundleWithEmptyDocsURL.Bundle.Docs[0].Template.Description = "new description"
+	bundleWithEmptyDocsURL := fixAddonWithEmptyDocs(id, "test", "url")
+	bundleWithEmptyDocsURL.Addon.Docs[0].Template.Description = "new description"
 
 	c := fake.NewFakeClient(cdt)
 	docsProvider := NewDocsProvider(c)
 
 	// when
-	err = docsProvider.EnsureClusterDocsTopic(bundleWithEmptyDocsURL.Bundle)
+	err = docsProvider.EnsureClusterDocsTopic(bundleWithEmptyDocsURL.Addon)
 	require.NoError(t, err)
 
 	// then
 	err = c.Get(context.Background(), client.ObjectKey{Namespace: cdt.Namespace, Name: cdt.Name}, cdt)
 	require.NoError(t, err)
-	assert.Equal(t, bundleWithEmptyDocsURL.Bundle.Docs[0].Template, cdt.Spec.CommonDocsTopicSpec)
+	assert.Equal(t, bundleWithEmptyDocsURL.Addon.Docs[0].Template, cdt.Spec.CommonDocsTopicSpec)
 }
 
 func TestDocsProvider_EnsureClusterDocsTopicRemoved(t *testing.T) {
@@ -117,24 +117,24 @@ func TestDocsProvider_EnsureDocsTopic(t *testing.T) {
 	dt := fixDocsTopic()
 
 	for tn, tc := range map[string]struct {
-		givenBundle bundle.CompleteBundle
+		givenBundle addon.CompleteAddon
 	}{
-		"URL set":   {fixBundleWithDocsURL(dt.Name, "test", "url", "url2")},
-		"empty URL": {fixBundleWithEmptyDocs(dt.Name, "test", "url")},
+		"URL set":   {fixAddonWithDocsURL(dt.Name, "test", "url", "url2")},
+		"empty URL": {fixAddonWithEmptyDocs(dt.Name, "test", "url")},
 	} {
 		t.Run(tn, func(t *testing.T) {
 			c := fake.NewFakeClient(dt)
 			docsProvider := NewDocsProvider(c)
 
 			// when
-			err = docsProvider.EnsureDocsTopic(tc.givenBundle.Bundle, dt.Namespace)
+			err = docsProvider.EnsureDocsTopic(tc.givenBundle.Addon, dt.Namespace)
 			require.NoError(t, err)
 
 			// then
 			result := v1alpha1.DocsTopic{}
 			err = c.Get(context.Background(), client.ObjectKey{Namespace: dt.Namespace, Name: dt.Name}, &result)
 			require.NoError(t, err)
-			assert.Equal(t, tc.givenBundle.Bundle.Docs[0].Template, result.Spec.CommonDocsTopicSpec)
+			assert.Equal(t, tc.givenBundle.Addon.Docs[0].Template, result.Spec.CommonDocsTopicSpec)
 		})
 	}
 }
@@ -146,21 +146,21 @@ func TestDocsProvider_EnsureDocsTopic_UpdateIfExist(t *testing.T) {
 
 	dt := fixDocsTopic()
 
-	bundleWithEmptyDocsURL := fixBundleWithEmptyDocs(dt.Name, "test", "url")
-	bundleWithEmptyDocsURL.Bundle.Docs[0].Template.Description = "new description"
+	bundleWithEmptyDocsURL := fixAddonWithEmptyDocs(dt.Name, "test", "url")
+	bundleWithEmptyDocsURL.Addon.Docs[0].Template.Description = "new description"
 
 	c := fake.NewFakeClient(dt)
 	docsProvider := NewDocsProvider(c)
 
 	// when
-	err = docsProvider.EnsureDocsTopic(bundleWithEmptyDocsURL.Bundle, dt.Namespace)
+	err = docsProvider.EnsureDocsTopic(bundleWithEmptyDocsURL.Addon, dt.Namespace)
 	require.NoError(t, err)
 
 	// then
 	result := v1alpha1.DocsTopic{}
 	err = c.Get(context.Background(), client.ObjectKey{Namespace: dt.Namespace, Name: dt.Name}, &result)
 	require.NoError(t, err)
-	assert.Equal(t, bundleWithEmptyDocsURL.Bundle.Docs[0].Template, result.Spec.CommonDocsTopicSpec)
+	assert.Equal(t, bundleWithEmptyDocsURL.Addon.Docs[0].Template, result.Spec.CommonDocsTopicSpec)
 }
 
 func TestDocsProvider_EnsureDocsTopicRemoved(t *testing.T) {
@@ -218,25 +218,25 @@ func fixDocsTopic() *v1alpha1.ClusterDocsTopic {
 	}
 }
 
-func fixBundleWithDocsURL(id, name, url, docsURL string) bundle.CompleteBundle {
+func fixAddonWithDocsURL(id, name, url, docsURL string) addon.CompleteAddon {
 	chartName := fmt.Sprintf("chart-%s", name)
 	chartVersion := semver.MustParse("1.0.0")
-	return bundle.CompleteBundle{
-		Bundle: &internal.Bundle{
-			ID:            internal.BundleID(id),
-			Name:          internal.BundleName(name),
+	return addon.CompleteAddon{
+		Addon: &internal.Addon{
+			ID:            internal.AddonID(id),
+			Name:          internal.AddonName(name),
 			Description:   "simple description",
 			Version:       *semver.MustParse("0.0.1"),
 			RepositoryURL: url,
-			Plans: map[internal.BundlePlanID]internal.BundlePlan{
-				internal.BundlePlanID(fmt.Sprintf("plan-%s", name)): {
+			Plans: map[internal.AddonPlanID]internal.AddonPlan{
+				internal.AddonPlanID(fmt.Sprintf("plan-%s", name)): {
 					ChartRef: internal.ChartRef{
 						Name:    internal.ChartName(chartName),
 						Version: *chartVersion,
 					},
 				},
 			},
-			Docs: []internal.BundleDocs{
+			Docs: []internal.AddonDocs{
 				{
 					Template: v1alpha1.CommonDocsTopicSpec{
 						Sources: []v1alpha1.Source{
@@ -259,25 +259,25 @@ func fixBundleWithDocsURL(id, name, url, docsURL string) bundle.CompleteBundle {
 	}
 }
 
-func fixBundleWithEmptyDocs(id, name, url string) bundle.CompleteBundle {
+func fixAddonWithEmptyDocs(id, name, url string) addon.CompleteAddon {
 	chartName := fmt.Sprintf("chart-%s", name)
 	chartVersion := semver.MustParse("1.0.0")
-	return bundle.CompleteBundle{
-		Bundle: &internal.Bundle{
-			ID:            internal.BundleID(id),
-			Name:          internal.BundleName(name),
+	return addon.CompleteAddon{
+		Addon: &internal.Addon{
+			ID:            internal.AddonID(id),
+			Name:          internal.AddonName(name),
 			Description:   "simple description",
 			Version:       *semver.MustParse("0.0.1"),
 			RepositoryURL: url,
-			Plans: map[internal.BundlePlanID]internal.BundlePlan{
-				internal.BundlePlanID(fmt.Sprintf("plan-%s", name)): {
+			Plans: map[internal.AddonPlanID]internal.AddonPlan{
+				internal.AddonPlanID(fmt.Sprintf("plan-%s", name)): {
 					ChartRef: internal.ChartRef{
 						Name:    internal.ChartName(chartName),
 						Version: *chartVersion,
 					},
 				},
 			},
-			Docs: []internal.BundleDocs{
+			Docs: []internal.AddonDocs{
 				{
 					Template: v1alpha1.CommonDocsTopicSpec{
 						Sources: []v1alpha1.Source{

@@ -27,8 +27,8 @@ func TestGetCatalog(t *testing.T) {
 	// GIVEN
 	tc := newCatalogTC()
 	defer tc.AssertExpectations(t)
-	tc.finderMock.On("FindAll", internal.ClusterWide).Return(tc.fixBundles(), nil).Once()
-	tc.converterMock.On("Convert", tc.fixBundle()).Return(tc.fixService(), nil)
+	tc.finderMock.On("FindAll", internal.ClusterWide).Return(tc.fixAddons(), nil).Once()
+	tc.converterMock.On("Convert", tc.fixAddon()).Return(tc.fixService(), nil)
 
 	svc := broker.NewCatalogService(tc.finderMock, tc.converterMock)
 	osbCtx := broker.NewOSBContext("not", "important")
@@ -52,7 +52,7 @@ func TestGetCatalogOnFindError(t *testing.T) {
 	// WHEN
 	_, err := svc.GetCatalog(context.Background(), *osbCtx)
 	// THEN
-	assert.EqualError(t, err, fmt.Sprintf("while finding all bundles: %v", tc.fixError()))
+	assert.EqualError(t, err, fmt.Sprintf("while finding all addons: %v", tc.fixError()))
 
 }
 
@@ -61,19 +61,19 @@ func TestGetCatalogOnConversionError(t *testing.T) {
 	tc := newCatalogTC()
 	defer tc.AssertExpectations(t)
 
-	tc.finderMock.On("FindAll", internal.ClusterWide).Return(tc.fixBundles(), nil).Once()
-	tc.converterMock.On("Convert", tc.fixBundle()).Return(osb.Service{}, tc.fixError())
+	tc.finderMock.On("FindAll", internal.ClusterWide).Return(tc.fixAddons(), nil).Once()
+	tc.converterMock.On("Convert", tc.fixAddon()).Return(osb.Service{}, tc.fixError())
 
 	svc := broker.NewCatalogService(tc.finderMock, tc.converterMock)
 	osbCtx := broker.NewOSBContext("not", "important")
 	// WHEN
 	_, err := svc.GetCatalog(context.Background(), *osbCtx)
 	// THEN
-	assert.EqualError(t, err, fmt.Sprintf("while converting bundle to service: %v", tc.fixError()))
+	assert.EqualError(t, err, fmt.Sprintf("while converting addon to service: %v", tc.fixError()))
 
 }
 
-func TestBundleConversion(t *testing.T) {
+func TestAddonConversion(t *testing.T) {
 	tests := map[string]struct {
 		fixSchemas map[internal.PlanSchemaType]internal.PlanSchema
 
@@ -82,7 +82,7 @@ func TestBundleConversion(t *testing.T) {
 		"empty schemas": {
 			fixSchemas: nil,
 
-			expGoldenName: "TestBundleConversion-without-schemas.golden.json",
+			expGoldenName: "TestAddonConversion-without-schemas.golden.json",
 		},
 		"schemas provided": {
 			fixSchemas: map[internal.PlanSchemaType]internal.PlanSchema{
@@ -91,7 +91,7 @@ func TestBundleConversion(t *testing.T) {
 				internal.SchemaTypeBind:      fixBindSchema(),
 			},
 
-			expGoldenName: "TestBundleConversion-with-schemas.golden.json",
+			expGoldenName: "TestAddonConversion-with-schemas.golden.json",
 		},
 	}
 	for name, test := range tests {
@@ -103,7 +103,7 @@ func TestBundleConversion(t *testing.T) {
 			conv := broker.NewConverter()
 
 			// WHEN
-			convertedSvc, err := conv.Convert(tc.fixBundleWithSchemas(test.fixSchemas))
+			convertedSvc, err := conv.Convert(tc.fixAddonWithSchemas(test.fixSchemas))
 
 			// THEN
 			require.NoError(t, err)
@@ -118,15 +118,15 @@ func TestBundleConversion(t *testing.T) {
 	}
 }
 
-func TestBundleConversionOverridesLocalLabel(t *testing.T) {
+func TestAddonConversionOverridesLocalLabel(t *testing.T) {
 	// GIVEN
 	tc := newCatalogTC()
 	conv := broker.NewConverter()
-	fixBundle := tc.fixBundle()
-	fixBundle.Metadata.Labels["local"] = "false"
+	fixAddon := tc.fixAddon()
+	fixAddon.Metadata.Labels["local"] = "false"
 
 	// WHEN
-	convertedSvc, err := conv.Convert(fixBundle)
+	convertedSvc, err := conv.Convert(fixAddon)
 
 	// THEN
 	require.NoError(t, err)
@@ -137,13 +137,13 @@ func TestBundleConversionOverridesLocalLabel(t *testing.T) {
 }
 
 type catalogTestCase struct {
-	finderMock    *automock.BundleStorage
+	finderMock    *automock.AddonStorage
 	converterMock *automock.Converter
 }
 
 func newCatalogTC() *catalogTestCase {
 	return &catalogTestCase{
-		finderMock:    &automock.BundleStorage{},
+		finderMock:    &automock.AddonStorage{},
 		converterMock: &automock.Converter{},
 	}
 }
@@ -153,22 +153,22 @@ func (tc catalogTestCase) AssertExpectations(t *testing.T) {
 	tc.converterMock.AssertExpectations(t)
 }
 
-func (tc catalogTestCase) fixBundles() []*internal.Bundle {
-	return []*internal.Bundle{tc.fixBundle()}
+func (tc catalogTestCase) fixAddons() []*internal.Addon {
+	return []*internal.Addon{tc.fixAddon()}
 }
 
-func (tc catalogTestCase) fixBundle() *internal.Bundle {
-	return tc.fixBundleWithSchemas(tc.fixPlanSchemas())
+func (tc catalogTestCase) fixAddon() *internal.Addon {
+	return tc.fixAddonWithSchemas(tc.fixPlanSchemas())
 }
 
-func (tc catalogTestCase) fixBundleWithSchemas(schemas map[internal.PlanSchemaType]internal.PlanSchema) *internal.Bundle {
-	return &internal.Bundle{
-		Name:        "bundleName",
-		ID:          "bundleID",
-		Description: "bundleDescription",
+func (tc catalogTestCase) fixAddonWithSchemas(schemas map[internal.PlanSchemaType]internal.PlanSchema) *internal.Addon {
+	return &internal.Addon{
+		Name:        "addonName",
+		ID:          "addonID",
+		Description: "addonDescription",
 		Bindable:    true,
 		Version:     *semver.MustParse("1.2.3"),
-		Metadata: internal.BundleMetadata{
+		Metadata: internal.AddonMetadata{
 			DisplayName:         "DisplayName",
 			ProviderDisplayName: "ProviderDisplayName",
 			LongDescription:     "LongDescription",
@@ -181,13 +181,13 @@ func (tc catalogTestCase) fixBundleWithSchemas(schemas map[internal.PlanSchemaTy
 				"provisionOnlyOnce": "true",
 			},
 		},
-		Tags: []internal.BundleTag{"awesome-tag"},
-		Plans: map[internal.BundlePlanID]internal.BundlePlan{
+		Tags: []internal.AddonTag{"awesome-tag"},
+		Plans: map[internal.AddonPlanID]internal.AddonPlan{
 			"planID": {
 				ID:          "planID",
 				Description: "planDescription",
 				Name:        "planName",
-				Metadata: internal.BundlePlanMetadata{
+				Metadata: internal.AddonPlanMetadata{
 					DisplayName: "displayName-1",
 				},
 				Bindable: ptr.Bool(true),
@@ -236,7 +236,7 @@ func fixBindSchema() internal.PlanSchema {
 }
 
 func (tc catalogTestCase) fixService() osb.Service {
-	return osb.Service{ID: "bundleID"}
+	return osb.Service{ID: "addonID"}
 }
 
 func (tc catalogTestCase) fixError() error {

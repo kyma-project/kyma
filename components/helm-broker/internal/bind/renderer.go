@@ -39,7 +39,7 @@ func NewRenderer() *Renderer {
 }
 
 // Render renders given bindTemplate in context of helm Chart by e.g. replacing directives like: {{ .Release.Namespace }}
-func (r *Renderer) Render(bindTemplate internal.BundlePlanBindTemplate, resp *rls.InstallReleaseResponse) (RenderedBindYAML, error) {
+func (r *Renderer) Render(bindTemplate internal.AddonPlanBindTemplate, resp *rls.InstallReleaseResponse) (RenderedBindYAML, error) {
 	if err := r.validateInstallReleaseResponse(resp); err != nil {
 		return nil, errors.Wrap(err, "while validating input")
 	}

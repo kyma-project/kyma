@@ -1,4 +1,4 @@
-package bundle
+package addon
 
 import (
 	"testing"

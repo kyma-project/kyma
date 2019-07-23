@@ -1,7 +1,7 @@
 {
-  "id": "bundleID",
-  "name": "bundleName",
-  "description": "bundleDescription",
+  "id": "addonID",
+  "name": "addonName",
+  "description": "addonDescription",
   "tags": [
     "awesome-tag"
   ],

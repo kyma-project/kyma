@@ -24,7 +24,7 @@ func TestRenderSuccess(t *testing.T) {
 	fixRenderOutFiles := map[string]string{
 		fmt.Sprintf("%s/%s", fixChart().Metadata.Name, "bindTmpl"): "rendered-content",
 	}
-	tplToRender := internal.BundlePlanBindTemplate("template-body-to-render")
+	tplToRender := internal.AddonPlanBindTemplate("template-body-to-render")
 
 	engineRenderMock := &automock.ChartGoTemplateRenderer{}
 	defer engineRenderMock.AssertExpectations(t)
@@ -78,7 +78,7 @@ func TestRenderFailureOnInputParamValidation(t *testing.T) {
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			tplToRender := internal.BundlePlanBindTemplate("template-body-to-render")
+			tplToRender := internal.AddonPlanBindTemplate("template-body-to-render")
 			renderer := bind.NewRendererWithDeps(nil, nil)
 
 			// when
@@ -95,7 +95,7 @@ func TestRenderFailureOnCreatingToRenderValues(t *testing.T) {
 	// given
 	fixErr := errors.New("fix err")
 	fixResp := fixInstallReleaseResponse(fixChart())
-	tplToRender := internal.BundlePlanBindTemplate("template-body-to-render")
+	tplToRender := internal.AddonPlanBindTemplate("template-body-to-render")
 
 	toRenderFake := toRenderValuesFake{t}.WithForcedError(fixErr)
 	renderer := bind.NewRendererWithDeps(nil, toRenderFake)
@@ -112,7 +112,7 @@ func TestRenderFailureOnEngineRender(t *testing.T) {
 	// given
 	fixResp := fixInstallReleaseResponse(fixChart())
 	fixErr := errors.New("fix err")
-	tplToRender := internal.BundlePlanBindTemplate("template-body-to-render")
+	tplToRender := internal.AddonPlanBindTemplate("template-body-to-render")
 
 	toRenderFake := toRenderValuesFake{t}.WithInputAssertion(fixChart(), fixResp)
 
@@ -134,7 +134,7 @@ func TestRenderFailureOnEngineRender(t *testing.T) {
 func TestRenderFailureOnExtractingResolveBindFile(t *testing.T) {
 	// given
 	fixResp := fixInstallReleaseResponse(fixChart())
-	tplToRender := internal.BundlePlanBindTemplate("template-body-to-render")
+	tplToRender := internal.AddonPlanBindTemplate("template-body-to-render")
 
 	engineRenderMock := &automock.ChartGoTemplateRenderer{}
 	defer engineRenderMock.AssertExpectations(t)
@@ -152,7 +152,7 @@ func TestRenderFailureOnExtractingResolveBindFile(t *testing.T) {
 	assert.Nil(t, out)
 }
 
-func chartWithTpl(t *testing.T, expTpl internal.BundlePlanBindTemplate) func(*chart.Chart) bool {
+func chartWithTpl(t *testing.T, expTpl internal.AddonPlanBindTemplate) func(*chart.Chart) bool {
 	return func(ch *chart.Chart) bool {
 		assert.Contains(t, ch.Templates, &chart.Template{Name: "bindTmpl", Data: expTpl})
 		return true

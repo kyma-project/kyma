@@ -10,11 +10,11 @@ type DocsProvider struct {
 }
 
 // EnsureDocsTopic provides a mock function with given fields: bundle, namespace
-func (_m *DocsProvider) EnsureDocsTopic(bundle *internal.Bundle, namespace string) error {
+func (_m *DocsProvider) EnsureDocsTopic(bundle *internal.Addon, namespace string) error {
 	ret := _m.Called(bundle, namespace)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*internal.Bundle, string) error); ok {
+	if rf, ok := ret.Get(0).(func(*internal.Addon, string) error); ok {
 		r0 = rf(bundle, namespace)
 	} else {
 		r0 = ret.Error(0)

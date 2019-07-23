@@ -70,7 +70,7 @@ func newTestSuite(t *testing.T) *testSuite {
 	require.NoError(t, err)
 	logger := logrus.New()
 
-	brokerServer := broker.New(sFact.Bundle(), sFact.Chart(), sFact.InstanceOperation(), sFact.Instance(), sFact.InstanceBindData(),
+	brokerServer := broker.New(sFact.Addon(), sFact.Chart(), sFact.InstanceOperation(), sFact.Instance(), sFact.InstanceBindData(),
 		bind.NewRenderer(), bind.NewResolver(k8sClientset.CoreV1()), nil, logger.WithField("svc", "broker"))
 
 	// OSB API Server

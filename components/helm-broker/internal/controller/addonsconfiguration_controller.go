@@ -7,7 +7,7 @@ import (
 
 	"github.com/Masterminds/semver"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	add "github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/addons"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
@@ -61,13 +61,13 @@ type ReconcileAddonsConfiguration struct {
 	scheme *runtime.Scheme
 
 	chartStorage  chartStorage
-	bundleStorage bundleStorage
+	bundleStorage addonStorage
 
 	docsProvider docsProvider
 	brokerFacade brokerFacade
 	brokerSyncer brokerSyncer
 
-	bundleProvider bundleProvider
+	bundleProvider addonProvider
 	protection     protection
 
 	// syncBroker informs ServiceBroker should be resync, it should be true if
@@ -77,7 +77,7 @@ type ReconcileAddonsConfiguration struct {
 }
 
 // NewReconcileAddonsConfiguration returns a new reconcile.Reconciler
-func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, chartStorage chartStorage, bundleStorage bundleStorage, brokerFacade brokerFacade, docsProvider docsProvider, brokerSyncer brokerSyncer, developMode bool) reconcile.Reconciler {
+func NewReconcileAddonsConfiguration(mgr manager.Manager, bp addonProvider, chartStorage chartStorage, bundleStorage addonStorage, brokerFacade brokerFacade, docsProvider docsProvider, brokerSyncer brokerSyncer, developMode bool) reconcile.Reconciler {
 	return &ReconcileAddonsConfiguration{
 		log:    logrus.WithField("controller", "addons-configuration"),
 		Client: mgr.GetClient(),
@@ -335,22 +335,22 @@ func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*addons.Addon
 		for _, entry := range entries {
 			addon := addons.NewAddon(string(entry.Name), string(entry.Version), URL)
 
-			completeBundle, err := r.bundleProvider.LoadCompleteBundle(entry)
-			if bundle.IsFetchingError(err) {
+			completeBundle, err := r.bundleProvider.LoadCompleteAddon(entry)
+			if add.IsFetchingError(err) {
 				addon.FetchingError(err)
 				adds = append(adds, addon)
 				r.log.Errorf("while fetching addon: %s", err)
 				continue
 			}
-			if bundle.IsLoadingError(err) {
+			if add.IsLoadingError(err) {
 				addon.LoadingError(err)
 				adds = append(adds, addon)
 				r.log.Errorf("while loading addon: %s", err)
 				continue
 			}
 
-			addon.ID = string(completeBundle.Bundle.ID)
-			addon.Bundle = completeBundle.Bundle
+			addon.ID = string(completeBundle.Addon.ID)
+			addon.Bundle = completeBundle.Addon
 			addon.Charts = completeBundle.Charts
 
 			adds = append(adds, addon)
@@ -421,14 +421,14 @@ func (r *ReconcileAddonsConfiguration) deleteBundlesFromRepository(namespace str
 	return deletedBundlesKeys, nil
 }
 
-func (r *ReconcileAddonsConfiguration) removeBundle(ad addonsv1alpha1.Addon, namespace internal.Namespace) (*internal.BundleID, error) {
+func (r *ReconcileAddonsConfiguration) removeBundle(ad addonsv1alpha1.Addon, namespace internal.Namespace) (*internal.AddonID, error) {
 	r.log.Infof("- delete bundle %s from storage", ad.Name)
-	b, err := r.bundleStorage.Get(namespace, internal.BundleName(ad.Name), *semver.MustParse(ad.Version))
+	b, err := r.bundleStorage.Get(namespace, internal.AddonName(ad.Name), *semver.MustParse(ad.Version))
 	if err != nil {
 		return nil, err
 	}
 
-	err = r.bundleStorage.Remove(namespace, internal.BundleName(ad.Name), *semver.MustParse(ad.Version))
+	err = r.bundleStorage.Remove(namespace, internal.AddonName(ad.Name), *semver.MustParse(ad.Version))
 	if err != nil {
 		return nil, err
 	}

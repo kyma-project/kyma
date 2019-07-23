@@ -1,4 +1,4 @@
-package bundle_test
+package addon_test
 
 import (
 	"encoding/json"
@@ -9,15 +9,15 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 
 	"github.com/Masterminds/semver"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/require"
 )
 
-func fixtureBundle(t *testing.T, testdataBasePath string) internal.Bundle {
-	meta := bundle.FormMeta{}
+func fixtureAddon(t *testing.T, testdataBasePath string) internal.Addon {
+	meta := addon.FormMeta{}
 	unmarshalYamlTestdata(t, testdataBasePath+"meta.yaml", &meta)
 	bVer, err := semver.NewVersion(meta.Version)
 	require.NoError(t, err)
@@ -26,13 +26,13 @@ func fixtureBundle(t *testing.T, testdataBasePath string) internal.Bundle {
 	micro := fixturePlan(t, testdataBasePath, "micro", charRef)
 	enterprise := fixturePlan(t, testdataBasePath, "enterprise", charRef)
 
-	return internal.Bundle{
-		ID:          internal.BundleID(meta.ID),
+	return internal.Addon{
+		ID:          internal.AddonID(meta.ID),
 		Version:     *bVer,
-		Name:        internal.BundleName(meta.Name),
+		Name:        internal.AddonName(meta.Name),
 		Description: meta.Description,
 		Bindable:    meta.Bindable,
-		Metadata: internal.BundleMetadata{
+		Metadata: internal.AddonMetadata{
 			DisplayName:         meta.DisplayName,
 			DocumentationURL:    meta.DocumentationURL,
 			ImageURL:            meta.ImageURL,
@@ -42,7 +42,7 @@ func fixtureBundle(t *testing.T, testdataBasePath string) internal.Bundle {
 			Labels:              meta.MapLabelsToModel(),
 		},
 		Tags: meta.MapTagsToModel(),
-		Plans: map[internal.BundlePlanID]internal.BundlePlan{
+		Plans: map[internal.AddonPlanID]internal.AddonPlan{
 			micro.ID:      micro,
 			enterprise.ID: enterprise,
 		},
@@ -67,7 +67,7 @@ func fixChartRef(t *testing.T, testdataBasePath string) internal.ChartRef {
 	}
 }
 
-func fixturePlan(t *testing.T, testdataBasePath string, planName string, cRef internal.ChartRef) internal.BundlePlan {
+func fixturePlan(t *testing.T, testdataBasePath string, planName string, cRef internal.ChartRef) internal.AddonPlan {
 	fullbasePath := fmt.Sprintf("%s/plans/%s/", testdataBasePath, planName)
 	var meta struct {
 		ID          string `yaml:"id"`
@@ -90,14 +90,14 @@ func fixturePlan(t *testing.T, testdataBasePath string, planName string, cRef in
 
 	bindTemplate := loadRawTestdata(t, fullbasePath+"bind.yaml")
 
-	return internal.BundlePlan{
-		ID:          internal.BundlePlanID(meta.ID),
+	return internal.AddonPlan{
+		ID:          internal.AddonPlanID(meta.ID),
 		Description: meta.Description,
-		Metadata: internal.BundlePlanMetadata{
+		Metadata: internal.AddonPlanMetadata{
 			DisplayName: meta.DisplayName,
 		},
 		Bindable: meta.Bindable,
-		Name:     internal.BundlePlanName(meta.Name),
+		Name:     internal.AddonPlanName(meta.Name),
 		ChartRef: cRef,
 		Schemas: map[internal.PlanSchemaType]internal.PlanSchema{
 			internal.SchemaTypeProvision: schemaCreate,
@@ -140,7 +140,7 @@ func assertDirNotExits(t *testing.T, path string) {
 	}
 }
 
-// fakeRepository provide access to bundles repository
+// fakeRepository provide access to addons repository
 type fakeRepository struct {
 	path string
 }
@@ -152,12 +152,12 @@ func (p *fakeRepository) IndexReader(URL string) (io.ReadCloser, error) {
 	return os.Open(fName)
 }
 
-// BundleReader returns body reader for the given bundle
-func (p *fakeRepository) BundleReader(name bundle.Name, version bundle.Version) (io.ReadCloser, error) {
-	return os.Open(p.URLForBundle(name, version))
+// AddonReader returns body reader for the given addon
+func (p *fakeRepository) AddonReader(name addon.Name, version addon.Version) (io.ReadCloser, error) {
+	return os.Open(p.URLForAddon(name, version))
 }
 
-// URLForBundle returns download url for given bundle
-func (p *fakeRepository) URLForBundle(name bundle.Name, version bundle.Version) string {
+// URLForAddon returns download url for given addon
+func (p *fakeRepository) URLForAddon(name addon.Name, version addon.Version) string {
 	return fmt.Sprintf("%s/%s-%s.tgz", p.path, name, version)
 }

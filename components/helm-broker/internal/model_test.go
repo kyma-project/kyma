@@ -41,37 +41,37 @@ func TestChartRefGobEncodeDecode(t *testing.T) {
 
 func TestCanBeProvision(t *testing.T) {
 	// Given
-	namespace := internal.Namespace("test-bundle-namespace")
+	namespace := internal.Namespace("test-addon-namespace")
 	collection := []*internal.Instance{
-		{ServiceID: "a1", Namespace: "test-bundle-namespace"},
-		{ServiceID: "a2", Namespace: "test-bundle-namespace"},
-		{ServiceID: "a3", Namespace: "test-bundle-namespace"},
-		{ServiceID: "a2", Namespace: "other-bundle-namespace"},
+		{ServiceID: "a1", Namespace: "test-addon-namespace"},
+		{ServiceID: "a2", Namespace: "test-addon-namespace"},
+		{ServiceID: "a3", Namespace: "test-addon-namespace"},
+		{ServiceID: "a2", Namespace: "other-addon-namespace"},
 	}
 
-	bundleExist := internal.Bundle{
-		Metadata: internal.BundleMetadata{
+	addonExist := internal.Addon{
+		Metadata: internal.AddonMetadata{
 			ProvisionOnlyOnce: true,
 		},
 		ID: "a1",
 	}
-	bundleNotExist := internal.Bundle{
-		Metadata: internal.BundleMetadata{
+	addonNotExist := internal.Addon{
+		Metadata: internal.AddonMetadata{
 			ProvisionOnlyOnce: true,
 		},
 		ID: "a5",
 	}
-	bundleManyProvision := internal.Bundle{
-		Metadata: internal.BundleMetadata{
+	addonManyProvision := internal.Addon{
+		Metadata: internal.AddonMetadata{
 			ProvisionOnlyOnce: false,
 		},
 		ID: "a1",
 	}
 
 	// WHEN/THEN
-	assert.False(t, bundleExist.IsProvisioningAllowed(namespace, collection))
-	assert.True(t, bundleExist.IsProvisioningAllowed("other-bundle-namespace", collection))
-	assert.True(t, bundleExist.IsProvisioningAllowed("other-ns", collection))
-	assert.True(t, bundleNotExist.IsProvisioningAllowed(namespace, collection))
-	assert.True(t, bundleManyProvision.IsProvisioningAllowed(namespace, collection))
+	assert.False(t, addonExist.IsProvisioningAllowed(namespace, collection))
+	assert.True(t, addonExist.IsProvisioningAllowed("other-addon-namespace", collection))
+	assert.True(t, addonExist.IsProvisioningAllowed("other-ns", collection))
+	assert.True(t, addonNotExist.IsProvisioningAllowed(namespace, collection))
+	assert.True(t, addonManyProvision.IsProvisioningAllowed(namespace, collection))
 }

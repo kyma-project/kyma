@@ -10,7 +10,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/config"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
@@ -43,15 +43,15 @@ func SetupAndStartController(cfg *rest.Config, ctrCfg *config.ControllerConfig, 
 	brokerSyncer := broker.NewServiceBrokerSyncer(mgr.GetClient(), ctrCfg.ClusterServiceBrokerName, lg)
 	sbFacade := broker.NewBrokersFacade(mgr.GetClient(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, lg)
 	csbFacade := broker.NewClusterBrokersFacade(mgr.GetClient(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, ctrCfg.ClusterServiceBrokerName, lg)
-	bundleProvider := bundle.NewProvider(bundle.NewHTTPRepository(), bundle.NewLoader(ctrCfg.TmpDir, lg), lg)
+	bundleProvider := addon.NewProvider(addon.NewHTTPRepository(), addon.NewLoader(ctrCfg.TmpDir, lg), lg)
 
 	lg.Info("Setting up controller")
-	acReconcile := NewReconcileAddonsConfiguration(mgr, bundleProvider, sFact.Chart(), sFact.Bundle(), sbFacade, docsProvider, brokerSyncer, ctrCfg.DevelopMode)
+	acReconcile := NewReconcileAddonsConfiguration(mgr, bundleProvider, sFact.Chart(), sFact.Addon(), sbFacade, docsProvider, brokerSyncer, ctrCfg.DevelopMode)
 	acController := NewAddonsConfigurationController(acReconcile)
 	err := acController.Start(mgr)
 	fatalOnError(err, "unable to start AddonsConfigurationController")
 
-	cacReconcile := NewReconcileClusterAddonsConfiguration(mgr, bundleProvider, sFact.Chart(), sFact.Bundle(), csbFacade, docsProvider, brokerSyncer, ctrCfg.DevelopMode)
+	cacReconcile := NewReconcileClusterAddonsConfiguration(mgr, bundleProvider, sFact.Chart(), sFact.Addon(), csbFacade, docsProvider, brokerSyncer, ctrCfg.DevelopMode)
 	cacController := NewClusterAddonsConfigurationController(cacReconcile)
 	err = cacController.Start(mgr)
 	fatalOnError(err, "unable to start ClusterAddonsConfigurationController")

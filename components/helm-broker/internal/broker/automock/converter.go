@@ -10,18 +10,18 @@ type Converter struct {
 }
 
 // Convert provides a mock function with given fields: b
-func (_m *Converter) Convert(b *internal.Bundle) (v2.Service, error) {
+func (_m *Converter) Convert(b *internal.Addon) (v2.Service, error) {
 	ret := _m.Called(b)
 
 	var r0 v2.Service
-	if rf, ok := ret.Get(0).(func(*internal.Bundle) v2.Service); ok {
+	if rf, ok := ret.Get(0).(func(*internal.Addon) v2.Service); ok {
 		r0 = rf(b)
 	} else {
 		r0 = ret.Get(0).(v2.Service)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*internal.Bundle) error); ok {
+	if rf, ok := ret.Get(1).(func(*internal.Addon) error); ok {
 		r1 = rf(b)
 	} else {
 		r1 = ret.Error(1)
