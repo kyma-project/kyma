@@ -44,6 +44,7 @@ type APIDefinition struct {
 	Name              string
 	Description       string
 	TargetUrl         string
+	APIType           APISpecType
 	RequestParameters RequestParameters
 	Credentials       *Credentials
 	APISpec           *APISpec
