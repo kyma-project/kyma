@@ -34,6 +34,8 @@ clusterRoles:
 #      - "addons.kyma-project.io"
     monitoring:
       - "monitoring.coreos.com"
+    dex:
+      - "dex.coreos.com"
   verbs:
     edit:
       - "create"

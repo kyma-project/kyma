@@ -7,7 +7,7 @@ Kyma allows you to connect applications and third-party services in a cloud-nati
 
 Focus purely on coding with these out-of-the-box functionalities at hand:
 - Service-to-service communication and proxying (Istio Service Mesh)
-- In-built monitoring, tracing, and logging (Grafana, Prometheus, Jaeger, Loki)
+- In-built monitoring, tracing, and logging (Grafana, Prometheus, Jaeger, Loki, Kiali)
 - Secure authentication and authorization (Dex, Service Identity, TLS, Role Based Access Control)
 - The catalog of services to choose from (Service Catalog, Service Brokers)
 - The development platform to run lightweight functions in a cost-efficient and scalable way (Serverless, Kubeless)

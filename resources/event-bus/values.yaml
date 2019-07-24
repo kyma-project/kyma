@@ -21,7 +21,7 @@ global:
       limits:
         memory: "32M"
   publishKnative:
-    maxRequests: 16
+    maxRequests: 200
     maxRequestSize: 65536
     maxChannelNameLength: 33
     maxSourceIDLength: 253

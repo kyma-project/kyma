@@ -16,7 +16,6 @@ import (
 	scc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
 	corev1 "github.com/kubernetes/client-go/kubernetes/typed/core/v1"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	v1alpha12 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
 	"github.com/pkg/errors"
@@ -32,6 +31,9 @@ import (
 const (
 	helmBrokerURLEnvName        = "HELM_BROKER_URL"
 	applicationBrokerURLEnvName = "APPLICATION_BROKER_URL"
+
+	addonId       = "a54abe18-0a84-22e9-ab34-d663bbce3d88"
+	addonsRepoURL = "https://github.com/kyma-project/bundles/releases/download/latest/index-acc-testing.yaml"
 )
 
 func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
@@ -57,9 +59,7 @@ func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
 
 func TestHelmBrokerAddonsConfiguration(t *testing.T) {
 	// given
-	const bundleId = "e54abe18-0a84-22e9-ab34-d663bbce3d88"
 	namespace := fmt.Sprintf("test-acc-addonsconfig-%s", rand.String(4))
-	const repoURL = "https://github.com/piotrmiskiewicz/bundles/releases/download/latest/index-acc-testing.yaml"
 	addonsConfig := &v1alpha12.AddonsConfiguration{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "testing-addons-config",
@@ -67,7 +67,7 @@ func TestHelmBrokerAddonsConfiguration(t *testing.T) {
 		},
 		Spec: v1alpha12.AddonsConfigurationSpec{
 			CommonAddonsConfigurationSpec: v1alpha12.CommonAddonsConfigurationSpec{
-				Repositories: []v1alpha12.SpecRepository{{URL: repoURL}},
+				Repositories: []v1alpha12.SpecRepository{{URL: addonsRepoURL}},
 			},
 		},
 	}
@@ -75,7 +75,7 @@ func TestHelmBrokerAddonsConfiguration(t *testing.T) {
 	k8sConfig, err := restclient.InClusterConfig()
 	require.NoError(t, err)
 
-	sch, err := v1alpha1.SchemeBuilder.Build()
+	sch, err := v1alpha12.SchemeBuilder.Build()
 	require.NoError(t, err)
 
 	dynamicClient, err := client.New(k8sConfig, client.Options{Scheme: sch})
@@ -106,23 +106,21 @@ func TestHelmBrokerAddonsConfiguration(t *testing.T) {
 
 	// then
 	repeat.FuncAtMost(t, func() error {
-		_, err := scClient.ServicecatalogV1beta1().ServiceClasses(namespace).Get(bundleId, metav1.GetOptions{})
+		_, err := scClient.ServicecatalogV1beta1().ServiceClasses(namespace).Get(addonId, metav1.GetOptions{})
 		return err
 	}, time.Second*10)
 }
 
 func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
 	// given
-	const bundleId = "e54abe18-0a84-22e9-ab34-d663bbce3d88"
 	randomID := rand.String(4)
-	const repoURL = "https://github.com/piotrmiskiewicz/bundles/releases/download/latest/index-acc-testing.yaml"
 	addonsConfig := &v1alpha12.ClusterAddonsConfiguration{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: fmt.Sprintf("acceptance-test-addonsconfig-%s", randomID),
 		},
 		Spec: v1alpha12.ClusterAddonsConfigurationSpec{
 			CommonAddonsConfigurationSpec: v1alpha12.CommonAddonsConfigurationSpec{
-				Repositories: []v1alpha12.SpecRepository{{URL: repoURL}},
+				Repositories: []v1alpha12.SpecRepository{{URL: addonsRepoURL}},
 			},
 		},
 	}
@@ -130,7 +128,7 @@ func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
 	k8sConfig, err := restclient.InClusterConfig()
 	require.NoError(t, err)
 
-	sch, err := v1alpha1.SchemeBuilder.Build()
+	sch, err := v1alpha12.SchemeBuilder.Build()
 	require.NoError(t, err)
 
 	dynamicClient, err := client.New(k8sConfig, client.Options{Scheme: sch})
@@ -149,7 +147,7 @@ func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
 
 	// then
 	repeat.FuncAtMost(t, func() error {
-		_, err := scClient.ServicecatalogV1beta1().ClusterServiceClasses().Get(bundleId, metav1.GetOptions{})
+		_, err := scClient.ServicecatalogV1beta1().ClusterServiceClasses().Get(addonId, metav1.GetOptions{})
 		return err
 	}, time.Second*10)
 }
