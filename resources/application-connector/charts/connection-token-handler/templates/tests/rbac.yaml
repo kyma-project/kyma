@@ -1,4 +1,3 @@
-{{ if and ( .Values.tests.enabled ) ( not .Values.global.isLocalEnv ) }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -11,11 +10,11 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 ---
-
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
 metadata:
   name: {{ .Chart.Name }}-tests
+  namespace: default
   labels:
     app: {{ .Chart.Name }}-tests
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
@@ -23,26 +22,26 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
-  - apiGroups: ["applicationconnector.kyma-project.io"]
-    resources: ["applications"]
-    verbs: ["create", "delete"]
+- apiGroups: ["applicationconnector.kyma-project.io"]
+  resources: ["tokenrequests"]
+  verbs: ["get", "create", "list", "update", "delete", "watch"]
 ---
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
 metadata:
   name: {{ .Chart.Name }}-tests
+  namespace: default
   labels:
     app: {{ .Chart.Name }}-tests
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-subjects:
-  - kind: ServiceAccount
-    name: {{ .Chart.Name }}-tests
-    namespace: {{ .Values.global.namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
+  kind: Role
   name: {{ .Chart.Name }}-tests
-{{ end }}
+subjects:
+- kind: ServiceAccount
+  name: {{ .Chart.Name }}-tests
+  namespace: {{ .Values.global.namespace }}
