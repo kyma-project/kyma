@@ -1,9 +1,9 @@
-{{ if and ( .Values.tests.enabled ) ( not .Values.global.isLocalEnv ) }}
+{{ if .Values.tests.enabled }}
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .Chart.Name }}-tests
-  namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ .Chart.Name }}-tests
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
@@ -11,7 +11,6 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 ---
-
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -23,9 +22,9 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
-  - apiGroups: ["applicationconnector.kyma-project.io"]
-    resources: ["applications"]
-    verbs: ["create", "delete"]
+  - apiGroups: [ "", "apps", "gateway.kyma-project.io", "networking.istio.io", "authentication.istio.io"]
+    resources: ["deployments", "services", "apis", "virtualservices", "policies", "namespaces"]
+    verbs: ["*"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -40,7 +39,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: {{ .Chart.Name }}-tests
-    namespace: {{ .Values.global.namespace }}
+    namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

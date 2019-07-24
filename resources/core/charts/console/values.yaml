@@ -36,3 +36,16 @@ cluster:
   headerTitle: ''
   # Provide a list of navigation nodes that should be hidden. For example 'namespace.operation.secrets settings foo.bar'
   disabledNavigationNodes: ''
+
+test:
+  acceptance:
+    ui:
+      # tests uses chromium that require more memory
+      requests:
+        memory: 300Mi
+        cpu: 200m
+      limits:
+        memory: 1.5Gi
+        cpu: 300m
+      logging:
+        enabled: false

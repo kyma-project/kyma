@@ -1,9 +1,7 @@
-{{ if and ( .Values.tests.enabled ) ( not .Values.global.isLocalEnv ) }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Chart.Name }}-tests
-  namespace: {{ .Values.global.namespace }}
+  name:  {{ .Chart.Name }}-tests
   labels:
     app: {{ .Chart.Name }}-tests
     app.kubernetes.io/name: {{ .Chart.Name }}-tests
@@ -11,9 +9,8 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 ---
-
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Chart.Name }}-tests
   labels:
@@ -23,12 +20,21 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
-  - apiGroups: ["applicationconnector.kyma-project.io"]
-    resources: ["applications"]
-    verbs: ["create", "delete"]
+- apiGroups: ["eventing.kyma-project.io"]
+  resources: ["subscriptions"]
+  verbs: ["create","get", "watch", "list", "delete"]
+- apiGroups: ["applicationconnector.kyma-project.io"]
+  resources: ["eventactivations"]
+  verbs: ["create", "get", "watch", "list", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["pods", "pods/status", "services"]
+  verbs: ["*"]
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Chart.Name }}-tests
   labels:
@@ -38,11 +44,10 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 subjects:
-  - kind: ServiceAccount
-    name: {{ .Chart.Name }}-tests
-    namespace: {{ .Values.global.namespace }}
+- kind: ServiceAccount
+  name: {{ .Chart.Name }}-tests
+  namespace: {{ .Release.Namespace }}
 roleRef:
-  apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: {{ .Chart.Name }}-tests
-{{ end }}
+  apiGroup: rbac.authorization.k8s.io
