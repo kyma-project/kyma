@@ -16,11 +16,11 @@ The main monitoring components include:
 
   For more details, [read](https://prometheus.io/docs/introduction) the official documentation.
 
-- **Grafana** that provides a dashboard and graph editor to visualize metrics collected from the Prometheus API. Grafana uses the a query language called [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/) to select and aggregate the metrics data from the Prometheus database. To access the Grafana UI, use the `https://grafana.{DOMAIN}` address, where {DOMAIN} is the domain of your Kyma cluster.
+- **Grafana** that provides a dashboard and graph editor to visualize metrics collected from the Prometheus API. Grafana uses the query language called [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/) to select and aggregate the metrics data from the Prometheus database. To access the Grafana UI, use the `https://grafana.{DOMAIN}` address, where {DOMAIN} is the domain of your Kyma cluster.
 
   For more details, [read](https://grafana.com/docs/guides/getting_started/) the official documentation.
 
-- **Alertmanager** that receives alerts from Prometheus and forwards this data onto configured Slack or Victor Ops channels.
+- **Alertmanager** that receives alerts from Prometheus and forwards this data to configured Slack or Victor Ops channels.
 
   > **NOTE:** There are no notification channels configured in the default monitoring installation. The current configuration allows you to add either Slack or Victor Ops channels.
 
@@ -30,7 +30,7 @@ The main monitoring components include:
 
 Monitoring in Kyma also relies heavily on these custom resources:
 
-- **Alert rules** define alert conditions for metrics. They are configured in Prometheus as PrometheusRule custom resource definitions (CRDs). Kyma provides a set of out-of-the-box alert rules that are passed from Prometheus to the Alertmanager. The definitions of such rules specify the alert logic, value at which alerts are triggered, alerts' severity, and more. If you pre-define specific Slack or Victor Ops channels, the Alertmanager fires the alerts onto the channel each time the alerts are triggered.
+- **Alert rules** define alert conditions for metrics. They are configured in Prometheus as PrometheusRule custom resource definitions (CRDs). Kyma provides a set of out-of-the-box alert rules that are passed from Prometheus to the Alertmanager. The definitions of such rules specify the alert logic, the value at which alerts are triggered, the alerts' severity, and more. If you pre-define specific Slack or Victor Ops channels, the Alertmanager fires the alerts onto the channel each time the alerts are triggered.
 
 - **Service Monitors** are custom resource definitions that specify the endpoints from which Prometheus should poll the metrics. Even if you expose a handful of metrics in your application, Prometheus polls only those from the endpoints specified in a Service Monitor custom resource definitions.
 
