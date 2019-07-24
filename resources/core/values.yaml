@@ -21,7 +21,7 @@ global:
       name: kyma-gateway
   acceptance_tests:
     dir: pr/
-    version: "PR-4615"
+    version: "PR-4959"
   ui_acceptance_tests:
     dir: 
     version: fa5dfcc6
@@ -59,7 +59,7 @@ global:
     version: 6b4c356f
   console_backend_service:
     dir: pr/
-    version: PR-4776
+    version: PR-4791
   console_backend_service_test:
     dir: develop/
     version: b3441db9

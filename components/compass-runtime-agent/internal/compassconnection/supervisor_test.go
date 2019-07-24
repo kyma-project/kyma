@@ -210,7 +210,7 @@ func TestCrSupervisor_SynchronizeWithCompass(t *testing.T) {
 	}
 
 	credentials := certificates.Credentials{}
-	applicationsConfig := []compass.Application{}
+	applicationsConfig := []synchronization.Application{}
 	syncResults := []synchronization.Result{}
 
 	for _, testCase := range []struct {

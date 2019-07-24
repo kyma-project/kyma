@@ -2,12 +2,10 @@ package servicecatalogaddons
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/disabled"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/name"
@@ -17,10 +15,7 @@ import (
 	bindingUsageClientset "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	bindingUsageInformers "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions"
 	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
-	v1 "k8s.io/client-go/informers"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
 
@@ -32,7 +27,6 @@ type PluggableContainer struct {
 	ServiceCatalogAddonsRetriever *serviceCatalogAddonsRetriever
 	sbuInformerFactory            bindingUsageInformers.SharedInformerFactory
 	addonsInformerFactory         addonsInformers.SharedInformerFactory
-	cmInformerFactory             v1.SharedInformerFactory
 }
 
 type serviceCatalogAddonsRetriever struct {
@@ -48,12 +42,7 @@ type ServiceBindingUsageLister interface {
 	ListForDeployment(namespace, kind, deploymentName string) ([]*bindingUsageApi.ServiceBindingUsage, error)
 }
 
-func New(restConfig *rest.Config, informerResyncPeriod time.Duration, scRetriever shared.ServiceCatalogRetriever, featureToggles experimental.FeatureToggles) (*PluggableContainer, error) {
-	k8sCli, err := kubernetes.NewForConfig(restConfig)
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing k8s Clientset")
-	}
-
+func New(restConfig *rest.Config, informerResyncPeriod time.Duration, scRetriever shared.ServiceCatalogRetriever) (*PluggableContainer, error) {
 	serviceBindingUsageClient, err := bindingUsageClientset.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Binding Usage Clientset")
@@ -64,23 +53,18 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, scRetrieve
 		return nil, errors.Wrap(err, "while initializing Dynamic Clientset")
 	}
 
-	var addonsCfgCli addonsClientset.Interface
-	if featureToggles.ClusterAddonsConfigurationCRDEnabled {
-		addonsCfgCli, err = addonsClientset.NewForConfig(restConfig)
-		if err != nil {
-			return nil, errors.Wrap(err, "while initializing Addons Configuration Clientset")
-		}
+	addonsCfgCli, err := addonsClientset.NewForConfig(restConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing Addons Configuration Clientset")
 	}
 
 	container := &PluggableContainer{
 		cfg: &resolverConfig{
-			addonsCfgCli:                      addonsCfgCli,
-			k8sClient:                         k8sCli,
-			serviceBindingUsageClient:         serviceBindingUsageClient,
-			dynamicClient:                     dynamicClient,
-			informerResyncPeriod:              informerResyncPeriod,
-			scRetriever:                       scRetriever,
-			addonsConfigurationFeatureEnabled: featureToggles.ClusterAddonsConfigurationCRDEnabled,
+			addonsCfgCli:              addonsCfgCli,
+			serviceBindingUsageClient: serviceBindingUsageClient,
+			dynamicClient:             dynamicClient,
+			informerResyncPeriod:      informerResyncPeriod,
+			scRetriever:               scRetriever,
 		},
 		ServiceCatalogAddonsRetriever: &serviceCatalogAddonsRetriever{},
 		Pluggable:                     module.NewPluggable("servicecatalogaddons"),
@@ -96,7 +80,6 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, scRetrieve
 func (r *PluggableContainer) Enable() error {
 	informerResyncPeriod := r.cfg.informerResyncPeriod
 	serviceBindingUsageClient := r.cfg.serviceBindingUsageClient
-	k8sCli := r.cfg.k8sClient
 
 	r.sbuInformerFactory = bindingUsageInformers.NewSharedInformerFactory(serviceBindingUsageClient, informerResyncPeriod)
 	usageKindService := newUsageKindService(serviceBindingUsageClient.ServicecatalogV1alpha1(), r.cfg.dynamicClient, r.sbuInformerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer())
@@ -105,35 +88,22 @@ func (r *PluggableContainer) Enable() error {
 		return errors.Wrap(err, "while creating service binding usage service")
 	}
 
-	informersToSync := []module.SharedInformerFactory{r.sbuInformerFactory}
-
-	var addonsConfigurationService *clusterAddonsConfigurationService
-	if r.cfg.addonsConfigurationFeatureEnabled {
-		r.addonsInformerFactory = addonsInformers.NewSharedInformerFactory(r.cfg.addonsCfgCli, informerResyncPeriod)
-		informersToSync = append(informersToSync, r.addonsInformerFactory)
-		clusterAddonsInformer := r.addonsInformerFactory.Addons().V1alpha1().ClusterAddonsConfigurations().Informer()
-		addonsConfigurationService = newClusterAddonsConfigurationService(nil, clusterAddonsInformer, nil, r.cfg.addonsCfgCli.AddonsV1alpha1())
-	} else {
-		r.cmInformerFactory = v1.NewSharedInformerFactoryWithOptions(k8sCli, informerResyncPeriod, v1.WithNamespace(systemNs), v1.WithTweakListOptions(func(options *metav1.ListOptions) {
-			options.LabelSelector = fmt.Sprintf("%s=%s", addonsCfgLabelKey, addonsCfgLabelValue)
-		}))
-		informersToSync = append(informersToSync, r.cmInformerFactory)
-		cmInformer := r.cmInformerFactory.Core().V1().ConfigMaps().Informer()
-		addonsConfigurationService = newClusterAddonsConfigurationService(cmInformer, nil, k8sCli.CoreV1().ConfigMaps(systemNs), nil)
-	}
+	r.addonsInformerFactory = addonsInformers.NewSharedInformerFactory(r.cfg.addonsCfgCli, informerResyncPeriod)
+	clusterAddonsInformer := r.addonsInformerFactory.Addons().V1alpha1().ClusterAddonsConfigurations().Informer()
+	addonsConfigurationService := newClusterAddonsConfigurationService(clusterAddonsInformer, r.cfg.addonsCfgCli.AddonsV1alpha1())
 
 	onSyncHook := func() {
 		r.Resolver = &domainResolver{
 			serviceBindingUsageResolver: newServiceBindingUsageResolver(serviceBindingUsageService),
 			usageKindResolver:           newUsageKindResolver(usageKindService),
 			bindableResourcesResolver:   newBindableResourcesResolver(usageKindService),
-			addonsConfigurationResolver: newAddonsRepoResolver(addonsConfigurationService, r.cfg.addonsConfigurationFeatureEnabled),
+			addonsConfigurationResolver: newAddonsRepoResolver(addonsConfigurationService),
 		}
 		r.ServiceCatalogAddonsRetriever.ServiceBindingUsageLister = serviceBindingUsageService
 
 	}
 
-	r.Pluggable.EnableAndSyncInformerFactories(onSyncHook, informersToSync...)
+	r.Pluggable.EnableAndSyncInformerFactories(onSyncHook, r.sbuInformerFactory, r.addonsInformerFactory)
 
 	return nil
 }
@@ -144,20 +114,17 @@ func (r *PluggableContainer) Disable() error {
 		r.ServiceCatalogAddonsRetriever.ServiceBindingUsageLister = disabled.NewServiceBindingUsageLister(disabledErr)
 		r.sbuInformerFactory = nil
 		r.addonsInformerFactory = nil
-
 	})
 
 	return nil
 }
 
 type resolverConfig struct {
-	k8sClient                         kubernetes.Interface
-	serviceBindingUsageClient         bindingUsageClientset.Interface
-	dynamicClient                     dynamic.Interface
-	scRetriever                       shared.ServiceCatalogRetriever
-	informerResyncPeriod              time.Duration
-	addonsCfgCli                      addonsClientset.Interface
-	addonsConfigurationFeatureEnabled bool
+	serviceBindingUsageClient bindingUsageClientset.Interface
+	dynamicClient             dynamic.Interface
+	scRetriever               shared.ServiceCatalogRetriever
+	informerResyncPeriod      time.Duration
+	addonsCfgCli              addonsClientset.Interface
 }
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
