@@ -1,7 +1,6 @@
 package synchronization
 
 import (
-	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 )
@@ -19,12 +18,12 @@ const (
 
 type APIAction struct {
 	Operation Operation
-	API       graphql.APIDefinition
+	API       compass.APIDefinition
 }
 
 type EventAPIAction struct {
 	Operation Operation
-	EventAPI  graphql.EventAPIDefinition
+	EventAPI  compass.EventAPIDefinition
 }
 
 type ApplicationAction struct {

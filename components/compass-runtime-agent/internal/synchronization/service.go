@@ -1,7 +1,6 @@
 package synchronization
 
 import (
-	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
@@ -41,17 +40,17 @@ type ApplicationRepository interface {
 type ApiIDToSecretNameMap map[string]string
 
 type ResourcesService interface {
-	CreateApiResources(application compass.Application, apiDefinition graphql.APIDefinition) apperrors.AppError
-	CreateEventApiResources(application compass.Application, eventApiDefinition graphql.EventAPIDefinition) apperrors.AppError
-	CreateSecrets(application compass.Application, apiDefinition graphql.APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
+	CreateApiResources(application compass.Application, apiDefinition compass.APIDefinition) apperrors.AppError
+	CreateEventApiResources(application compass.Application, eventApiDefinition compass.EventAPIDefinition) apperrors.AppError
+	CreateSecrets(application compass.Application, apiDefinition compass.APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
 
-	UpdateApiResources(application compass.Application, apiDefinition graphql.APIDefinition) apperrors.AppError
-	UpdateEventApiResources(application compass.Application, eventApiDefinition graphql.EventAPIDefinition) apperrors.AppError
-	UpdateSecrets(application compass.Application, apiDefinition graphql.APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
+	UpdateApiResources(application compass.Application, apiDefinition compass.APIDefinition) apperrors.AppError
+	UpdateEventApiResources(application compass.Application, eventApiDefinition compass.EventAPIDefinition) apperrors.AppError
+	UpdateSecrets(application compass.Application, apiDefinition compass.APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
 
-	DeleteApiResources(application compass.Application, apiDefinition graphql.APIDefinition) apperrors.AppError
-	DeleteEventApiResources(application compass.Application, eventApiDefinition graphql.EventAPIDefinition) apperrors.AppError
-	DeleteSecrets(application compass.Application, apiDefinition graphql.APIDefinition) apperrors.AppError
+	DeleteApiResources(application compass.Application, apiDefinition compass.APIDefinition) apperrors.AppError
+	DeleteEventApiResources(application compass.Application, eventApiDefinition compass.EventAPIDefinition) apperrors.AppError
+	DeleteSecrets(application compass.Application, apiDefinition compass.APIDefinition) apperrors.AppError
 }
 
 func NewService(reconciler Reconciler, applicationRepository ApplicationRepository, converter Converter, resourcesService ResourcesService) Service {
