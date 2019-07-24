@@ -55,7 +55,7 @@ type ResourcesService interface {
 }
 
 func NewService(reconciler Reconciler, applicationRepository ApplicationRepository, converter Converter, resourcesService ResourcesService) Service {
-	return Service{
+	return &service{
 		reconciler:            reconciler,
 		applicationRepository: applicationRepository,
 		converter:             converter,
@@ -79,7 +79,7 @@ func (s *service) Apply(applications []compass.Application) ([]Result, apperrors
 	return results, nil
 }
 
-func (s Service) apply(action ApplicationAction) Result {
+func (s *service) apply(action ApplicationAction) Result {
 
 	app := action.Application
 	operation := action.Operation
@@ -100,7 +100,7 @@ func (s Service) apply(action ApplicationAction) Result {
 	return newResult(app, operation, err)
 }
 
-func (s Service) applyCreateOperation(application compass.Application, apiActions []APIAction, eventAPIActions []EventAPIAction) apperrors.AppError {
+func (s *service) applyCreateOperation(application compass.Application, apiActions []APIAction, eventAPIActions []EventAPIAction) apperrors.AppError {
 
 	var err apperrors.AppError
 	credentialSecretNames, paramsSecretNames, e := s.applyApiAndEventActions(application, apiActions, eventAPIActions)
@@ -117,7 +117,7 @@ func (s Service) applyCreateOperation(application compass.Application, apiAction
 	return err
 }
 
-func (s Service) applyUpdateOperation(application compass.Application, apiActions []APIAction, eventAPIActions []EventAPIAction) apperrors.AppError {
+func (s *service) applyUpdateOperation(application compass.Application, apiActions []APIAction, eventAPIActions []EventAPIAction) apperrors.AppError {
 	var err apperrors.AppError
 
 	credentialSecretNames, paramsSecretNames, e := s.applyApiAndEventActions(application, apiActions, eventAPIActions)
@@ -132,7 +132,7 @@ func (s Service) applyUpdateOperation(application compass.Application, apiAction
 	return err
 }
 
-func (s Service) applyDeleteOperation(application compass.Application, apiActions []APIAction, eventAPIActions []EventAPIAction) apperrors.AppError {
+func (s *service) applyDeleteOperation(application compass.Application, apiActions []APIAction, eventAPIActions []EventAPIAction) apperrors.AppError {
 	var err apperrors.AppError
 
 	_, _, e := s.applyApiAndEventActions(application, apiActions, eventAPIActions)
@@ -148,7 +148,7 @@ func (s Service) applyDeleteOperation(application compass.Application, apiAction
 	return err
 }
 
-func (s Service) applyApiAndEventActions(application compass.Application, apiActions []APIAction, eventAPIActions []EventAPIAction) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError) {
+func (s *service) applyApiAndEventActions(application compass.Application, apiActions []APIAction, eventAPIActions []EventAPIAction) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError) {
 	err = s.applyApiResources(application, apiActions)
 
 	e := s.applyEventResources(application, eventAPIActions)
@@ -164,7 +164,7 @@ func (s Service) applyApiAndEventActions(application compass.Application, apiAct
 	return credentials, params, err
 }
 
-func (s Service) applyApiResources(application compass.Application, apiActions []APIAction) apperrors.AppError {
+func (s *service) applyApiResources(application compass.Application, apiActions []APIAction) apperrors.AppError {
 
 	var err apperrors.AppError
 	for _, apiAction := range apiActions {
@@ -184,7 +184,7 @@ func (s Service) applyApiResources(application compass.Application, apiActions [
 	return err
 }
 
-func (s Service) applyEventResources(application compass.Application, eventAPIActions []EventAPIAction) apperrors.AppError {
+func (s *service) applyEventResources(application compass.Application, eventAPIActions []EventAPIAction) apperrors.AppError {
 	var err apperrors.AppError
 	for _, eventApiAction := range eventAPIActions {
 		switch eventApiAction.Operation {
@@ -203,7 +203,7 @@ func (s Service) applyEventResources(application compass.Application, eventAPIAc
 	return err
 }
 
-func (s Service) applyApiSecrets(application compass.Application, APIActions []APIAction) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError) {
+func (s *service) applyApiSecrets(application compass.Application, APIActions []APIAction) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError) {
 
 	credentials = make(map[string]string)
 	params = make(map[string]string)
@@ -244,7 +244,7 @@ func newResult(application compass.Application, operation Operation, appError ap
 }
 
 // TODO: consider getting rid of this function and passing secrets data to converter instead
-func (s Service) updateSecrets(application *v1alpha1.Application, credentialSecretNames ApiIDToSecretNameMap, paramsSecretNames ApiIDToSecretNameMap) {
+func (s *service) updateSecrets(application *v1alpha1.Application, credentialSecretNames ApiIDToSecretNameMap, paramsSecretNames ApiIDToSecretNameMap) {
 	for _, service := range application.Spec.Services {
 		for _, entry := range service.Entries {
 			if entry.ApiType == specAPIType {
