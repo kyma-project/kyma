@@ -67,7 +67,7 @@ spec:
         - name: example-secret-name # Specify your Namespace Secret, named `example-secret-name`.
 
 ```
-3. Submit you deployment file using this command:
+3. Submit your deployment file using this command:
 
 ```bash
 kubectl apply -f deployment.yml
