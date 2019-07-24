@@ -15,8 +15,9 @@ This Knative-based serverless implementation defines and handles the Function Cu
 ## Installation
 
 
-### Run the controller
+### Run locally
 Follow these steps to run the Knative Function controller locally:
+
 1. Modify the `config/config.yaml` file to include your base64-encoded `gcr.io` or `docker.io` credentials. 
 2. Update the Docker registry value to your `docker.io` username.
 
@@ -49,16 +50,16 @@ make docker-build
 make docker-push
 make deploy
 ```
-
-> To use the controller on the production environment, uncomment `manager_image_patch_remote_dev` in the `kustomization.yaml` file and execute the instructions above.
-
+### Run on production
+To use the controller on the production environment, uncomment the `manager_image_patch_remote_dev.yaml` line  in the `kustomization.yaml` file and follow the instructions for the local installation.
+## Usage
 ### Test
 To test the controller, run:
 ```bash
 make test
 ```
 
-## Examples
+### Examples
 
 Run the following examples to learn how to create and manage a function. 
 
@@ -68,7 +69,7 @@ Create a sample function:
 kubectl apply -f config/samples/runtime_v1alpha1_function.yaml -n {NAMESPACE}
 ```
 
-Search for a function
+Search for a function:
 
 ```bash
 kubectl get functions -n {NAMESPACE}
