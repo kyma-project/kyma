@@ -18,8 +18,19 @@ else
 endif
 
 # Run tests
-test: generate fmt vet
+test: generate fmt vet symlinks
 	go test -v ./pkg/... ./cmd/... -coverprofile cover.out
+
+.ONESHELL:
+symlinks:
+	cd config/crds
+	-rm 300*.yaml
+	ln -s ../../vendor/github.com/knative/build/config/300-build.yaml 300-build.yaml
+	ln -s ../../vendor/github.com/knative/build/config/300-buildtemplate.yaml 300-buildtemplate.yaml
+	ln -s ../../vendor/github.com/knative/serving/config/300-revision.yaml 300-revision.yaml
+	ln -s ../../vendor/github.com/knative/serving/config/300-route.yaml 300-route.yaml
+	ln -s ../../vendor/github.com/knative/serving/config/300-service.yaml 300-service.yaml
+	ln -s ../../vendor/github.com/knative/serving/config/300-configuration.yaml 300-configuration.yaml
 
 # Generate code
 generate: resolve
