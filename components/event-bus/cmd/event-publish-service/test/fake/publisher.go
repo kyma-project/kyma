@@ -2,7 +2,7 @@ package fake
 
 import (
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/publisher"
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 

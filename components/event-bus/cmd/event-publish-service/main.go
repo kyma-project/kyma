@@ -8,9 +8,9 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/application"
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/httpserver"
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/publisher"
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/application"
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/httpserver"
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"

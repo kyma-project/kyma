@@ -1,5 +1,5 @@
 
-NAME = kyma-project/event-bus-subscription-controller-knative
+NAME = kyma-project/subscription-controller
 VERSION = 0.1.0
 COMPONENT = event-bus
 REGISTRY = eu.gcr.io
@@ -16,7 +16,7 @@ test: generate fmt vet
 
 # Build manager binary
 compile: generate fmt vet
-	go build -o bin/event-bus-subscription-controller-knative github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-subscription-controller-knative/cmd/manager
+	go build -o bin/subscription-controller github.com/kyma-project/kyma/components/event-bus/cmd/subscription-controller/cmd/manager
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet

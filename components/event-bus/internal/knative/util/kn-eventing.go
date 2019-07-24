@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
-	"sync"
 	"time"
 
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
@@ -55,8 +54,6 @@ if err := k.CreateSubscription("my-sub", namespace, channelName, &uri); err != n
 return
 */
 
-var once sync.Once
-
 // KnativeAccessLib encapsulates the Knative access lib behaviours.
 type KnativeAccessLib interface {
 	GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error)
@@ -78,8 +75,7 @@ func NewKnativeLib() (KnativeAccessLib, error) {
 
 // KnativeLib represents the knative lib.
 type KnativeLib struct {
-	evClient   eventingv1alpha1.EventingV1alpha1Interface
-	httpClient http.Client
+	evClient eventingv1alpha1.EventingV1alpha1Interface
 }
 
 // Verify the struct KnativeLib implements KnativeLibIntf
@@ -100,11 +96,6 @@ func GetKnativeLib() (*KnativeLib, error) {
 	k := &KnativeLib{
 		evClient: evClient.EventingV1alpha1(),
 	}
-	once.Do(func() {
-		k.httpClient = http.Client{
-			Transport: initHTTPTransport(),
-		}
-	})
 	return k, nil
 }
 
@@ -201,19 +192,16 @@ func (k *KnativeLib) UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evap
 
 // SendMessage sends a message to a channel
 func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[string][]string, payload *string) error {
-
+	httpClient := &http.Client{
+		Transport: initHTTPTransport(),
+	}
 	req, err := makeHTTPRequest(channel, headers, payload)
 	if err != nil {
 		log.Printf("ERROR: SendMessage(): makeHTTPRequest() failed: %v", err)
 		return err
 	}
 
-	res, err := k.httpClient.Do(req)
-	defer func() {
-		if tran, ok := k.httpClient.Transport.(*http.Transport); ok {
-			tran.CloseIdleConnections()
-		}
-	}()
+	res, err := httpClient.Do(req)
 	if err != nil {
 		log.Printf("ERROR: SendMessage(): could not send HTTP request: %v", err)
 		return err
@@ -224,7 +212,7 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[s
 
 	if res.StatusCode == http.StatusNotFound {
 		// try to resend the message only once
-		if err := resendMessage(&k.httpClient, channel, headers, payload); err != nil {
+		if err := resendMessage(httpClient, channel, headers, payload); err != nil {
 			log.Printf("ERROR: SendMessage(): resendMessage() failed: %v", err)
 			return err
 		}
@@ -251,11 +239,6 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 		return err
 	}
 	res, err := httpClient.Do(req)
-	defer func() {
-		if tran, ok := httpClient.Transport.(*http.Transport); ok {
-			tran.CloseIdleConnections()
-		}
-	}()
 	if err != nil {
 		log.Printf("ERROR: resendMessage(): could not send HTTP request: %v", err)
 		return err
@@ -277,18 +260,11 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 				return err
 			}
 			res, err := httpClient.Do(req)
-			defer func() {
-				if tran, ok := httpClient.Transport.(*http.Transport); ok {
-					tran.CloseIdleConnections()
-				}
-			}()
 			if err != nil {
 				log.Printf("ERROR: resendMessage(): could not resend HTTP request: %v", err)
 				return err
 			}
-			defer func() {
-				_ = res.Body.Close()
-			}()
+			defer func() { _ = res.Body.Close() }()
 			dumpResponse(res)
 			sc = res.StatusCode
 		}

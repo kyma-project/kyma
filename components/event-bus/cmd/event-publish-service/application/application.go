@@ -3,9 +3,9 @@ package application
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/handlers"
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/publisher"
-	constants "github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/util"
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/handlers"
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
+	constants "github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"

@@ -4,7 +4,7 @@ import (
 	"log"
 
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/metrics"
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/metrics"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/prometheus/client_golang/prometheus"
 )
