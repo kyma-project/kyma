@@ -34,9 +34,8 @@ make install
 ```
 
 5. Deploy the controller:
-
+>**NOTE**: Run this command only when you want to deploy the controller locally. It is not necessary for production use.
 ```bash
-# Execute this command for local minikube
 eval $(minikube docker-env)
 ```
 
@@ -53,15 +52,15 @@ make deploy
 ### Run on production
 To use the controller on the production environment, uncomment the `manager_image_patch_remote_dev.yaml` line  in the `kustomization.yaml` file and follow the instructions for the local installation.
 ## Usage
-### Test
+### Test the controller
 To test the controller, run:
 ```bash
 make test
 ```
 
-### Examples
+### Manage functions
 
-Run the following examples to learn how to create and manage a function. 
+Use the following examples to learn how to create and manage a function. 
 
 Create a sample function:
 
