@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "velero.name" -}}
+{{- define "backup.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "velero.fullname" -}}
+{{- define "backup.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,6 +27,28 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "velero.chart" -}}
+{{- define "backup.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Create the name of the service account to use for creating or deleting the velero server
+*/}}
+{{- define "backup.serverServiceAccount" -}}
+{{- if .Values.serviceAccount.server.create -}}
+    {{ default (printf "%s-%s" (include "backup.fullname" .) "server") .Values.serviceAccount.server.name }}
+{{- else -}}
+    {{ default "default" .Values.serviceAccount.server.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the name for the credentials secret.
+*/}}
+{{- define "backup.secretName" -}}
+{{- if .Values.credentials.existingSecret -}}
+  {{- .Values.credentials.existingSecret -}}
+{{- else -}}
+  {{- template "backup.fullname" . -}}
+{{- end -}}
 {{- end -}}

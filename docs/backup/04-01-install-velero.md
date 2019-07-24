@@ -12,10 +12,10 @@ Follow the instructions to set up Velero:
 1. [Enable](/root/kyma/#configuration-custom-component-installation) Velero components in the Kyma Installer configuration file:
 
     ```yaml
-    - name: "velero-essentials"
-      namespace: "kyma-backup"
-    - name: "velero"
-      namespace: "kyma-backup"
+    - name: "backup-init"
+      namespace: "kyma-system"
+    - name: "backup"
+      namespace: "kyma-system"
     ```
 
 2. Override the default configuration by creating a Secret containing the [required parameters](/components/backup/#configuration-configuration) for a chosen provider. 

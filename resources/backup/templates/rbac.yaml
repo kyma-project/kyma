@@ -2,17 +2,17 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "velero.fullname" . }}-server
+  name: {{ include "backup.fullname" . }}-server
   labels:
     app.kubernetes.io/component: server
-    app.kubernetes.io/name: {{ include "velero.name" . }}
+    app.kubernetes.io/name: {{ include "backup.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    helm.sh/chart: {{ include "velero.chart" . }}
+    helm.sh/chart: {{ include "backup.chart" . }}
 subjects:
   - kind: ServiceAccount
     namespace: {{ .Release.Namespace }}
-    name: {{ include "velero.serverServiceAccount" . }}
+    name: {{ include "backup.serverServiceAccount" . }}
 roleRef:
   kind: ClusterRole
   name: cluster-admin
