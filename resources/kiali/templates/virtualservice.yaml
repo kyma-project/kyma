@@ -1,11 +1,13 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: kiali-virtualservice
+  name: {{ template "kiali.name" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "kiali.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    chart: {{ template "kiali.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
 spec:
   gateways:
   - {{ .Values.global.istio.gateway.name }}
@@ -18,5 +20,5 @@ spec:
     route:
     - destination:
         port:
-          number: 20001
+          number: {{ .Values.server.port }}
         host: kiali
