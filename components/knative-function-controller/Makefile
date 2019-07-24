@@ -72,7 +72,7 @@ deploy: manifests install
 
 # Build the docker image
 .PHONY: docker-build
-docker-build: resolve pull-licenses test manifests
+docker-build: resolve pull-licenses manifests
 	docker build . -t $(IMG)
 	@echo "updating kustomize image patch file for manager resource"
 	sed -i'' -e 's@image: .*@image: '"${IMG}"'@' ./config/default/manager_image_patch_remote_dev.yaml ./config/default/manager_image_patch_local_dev.yaml
