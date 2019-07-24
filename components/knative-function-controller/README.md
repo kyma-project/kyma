@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Knative Function controller is a Kubernetes Controller that enables Kyma to manage Function resources.
+The Knative Function controller is a Kubernetes controller that enables Kyma to manage Function resources.
 
 This Knative-based serverless implementation defines and handles the Function Custom Resource Definition with the help of Knative Build and Knative Serving.
 
