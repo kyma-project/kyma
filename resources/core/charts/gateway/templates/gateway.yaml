@@ -25,6 +25,7 @@ spec:
       credentialName: application-connector-certs
     hosts:
       - "gateway.{{.Values.global.ingress.domainName}}"
+  {{- if $.Values.global.isLocalEnv }}
   - port:
       number: 80
       name: http
@@ -33,3 +34,4 @@ spec:
       httpsRedirect: true # automatic 301 redirect from http to https
     hosts:
     - "*.{{.Values.global.ingress.domainName}}"
+  {{- end }}
