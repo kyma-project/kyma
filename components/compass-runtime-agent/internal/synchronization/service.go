@@ -1,15 +1,13 @@
 package synchronization
 
 import (
-	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 )
 
 //go:generate mockery -name=Service
 type Service interface {
-	Apply(applications []compass.Application) ([]Result, apperrors.AppError)
+	Apply(applications []Application) ([]Result, apperrors.AppError)
 }
 
 func NewSynchronizationService() Service {
@@ -30,7 +28,7 @@ type Result struct {
 }
 
 type Reconciler interface {
-	Do(applications []compass.Application) ([]ApplicationAction, apperrors.AppError)
+	Do(applications []Application) ([]ApplicationAction, apperrors.AppError)
 }
 
 type ApplicationRepository interface {
@@ -41,17 +39,17 @@ type ApplicationRepository interface {
 type ApiIDToSecretNameMap map[string]string
 
 type ResourcesService interface {
-	CreateApiResources(application compass.Application, apiDefinition graphql.APIDefinition) apperrors.AppError
-	CreateEventApiResources(application compass.Application, eventApiDefinition graphql.EventAPIDefinition) apperrors.AppError
-	CreateSecrets(application compass.Application, apiDefinition graphql.APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
+	CreateApiResources(application Application, apiDefinition APIDefinition) apperrors.AppError
+	CreateEventApiResources(application Application, eventApiDefinition EventAPIDefinition) apperrors.AppError
+	CreateSecrets(application Application, apiDefinition APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
 
-	UpdateApiResources(application compass.Application, apiDefinition graphql.APIDefinition) apperrors.AppError
-	UpdateEventApiResources(application compass.Application, eventApiDefinition graphql.EventAPIDefinition) apperrors.AppError
-	UpdateSecrets(application compass.Application, apiDefinition graphql.APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
+	UpdateApiResources(application Application, apiDefinition APIDefinition) apperrors.AppError
+	UpdateEventApiResources(application Application, eventApiDefinition EventAPIDefinition) apperrors.AppError
+	UpdateSecrets(application Application, apiDefinition APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
 
-	DeleteApiResources(application compass.Application, apiDefinition graphql.APIDefinition) apperrors.AppError
-	DeleteEventApiResources(application compass.Application, eventApiDefinition graphql.EventAPIDefinition) apperrors.AppError
-	DeleteSecrets(application compass.Application, apiDefinition graphql.APIDefinition) apperrors.AppError
+	DeleteApiResources(application Application, apiDefinition APIDefinition) apperrors.AppError
+	DeleteEventApiResources(application Application, eventApiDefinition EventAPIDefinition) apperrors.AppError
+	DeleteSecrets(application Application, apiDefinition APIDefinition) apperrors.AppError
 }
 
 func NewService(reconciler Reconciler, applicationRepository ApplicationRepository, converter Converter, resourcesService ResourcesService) Service {
@@ -63,7 +61,7 @@ func NewService(reconciler Reconciler, applicationRepository ApplicationReposito
 	}
 }
 
-func (s *service) Apply(applications []compass.Application) ([]Result, apperrors.AppError) {
+func (s *service) Apply(applications []Application) ([]Result, apperrors.AppError) {
 
 	actions, err := s.reconciler.Do(applications)
 	if err != nil {
@@ -100,7 +98,7 @@ func (s *service) apply(action ApplicationAction) Result {
 	return newResult(app, operation, err)
 }
 
-func (s *service) applyCreateOperation(application compass.Application, apiActions []APIAction, eventAPIActions []EventAPIAction) apperrors.AppError {
+func (s *service) applyCreateOperation(application Application, apiActions []APIAction, eventAPIActions []EventAPIAction) apperrors.AppError {
 
 	var err apperrors.AppError
 	credentialSecretNames, paramsSecretNames, e := s.applyApiAndEventActions(application, apiActions, eventAPIActions)
@@ -117,7 +115,7 @@ func (s *service) applyCreateOperation(application compass.Application, apiActio
 	return err
 }
 
-func (s *service) applyUpdateOperation(application compass.Application, apiActions []APIAction, eventAPIActions []EventAPIAction) apperrors.AppError {
+func (s *service) applyUpdateOperation(application Application, apiActions []APIAction, eventAPIActions []EventAPIAction) apperrors.AppError {
 	var err apperrors.AppError
 
 	credentialSecretNames, paramsSecretNames, e := s.applyApiAndEventActions(application, apiActions, eventAPIActions)
@@ -132,7 +130,7 @@ func (s *service) applyUpdateOperation(application compass.Application, apiActio
 	return err
 }
 
-func (s *service) applyDeleteOperation(application compass.Application, apiActions []APIAction, eventAPIActions []EventAPIAction) apperrors.AppError {
+func (s *service) applyDeleteOperation(application Application, apiActions []APIAction, eventAPIActions []EventAPIAction) apperrors.AppError {
 	var err apperrors.AppError
 
 	_, _, e := s.applyApiAndEventActions(application, apiActions, eventAPIActions)
@@ -148,7 +146,7 @@ func (s *service) applyDeleteOperation(application compass.Application, apiActio
 	return err
 }
 
-func (s *service) applyApiAndEventActions(application compass.Application, apiActions []APIAction, eventAPIActions []EventAPIAction) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError) {
+func (s *service) applyApiAndEventActions(application Application, apiActions []APIAction, eventAPIActions []EventAPIAction) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError) {
 	err = s.applyApiResources(application, apiActions)
 
 	e := s.applyEventResources(application, eventAPIActions)
@@ -164,7 +162,7 @@ func (s *service) applyApiAndEventActions(application compass.Application, apiAc
 	return credentials, params, err
 }
 
-func (s *service) applyApiResources(application compass.Application, apiActions []APIAction) apperrors.AppError {
+func (s *service) applyApiResources(application Application, apiActions []APIAction) apperrors.AppError {
 
 	var err apperrors.AppError
 	for _, apiAction := range apiActions {
@@ -184,7 +182,7 @@ func (s *service) applyApiResources(application compass.Application, apiActions 
 	return err
 }
 
-func (s *service) applyEventResources(application compass.Application, eventAPIActions []EventAPIAction) apperrors.AppError {
+func (s *service) applyEventResources(application Application, eventAPIActions []EventAPIAction) apperrors.AppError {
 	var err apperrors.AppError
 	for _, eventApiAction := range eventAPIActions {
 		switch eventApiAction.Operation {
@@ -203,7 +201,7 @@ func (s *service) applyEventResources(application compass.Application, eventAPIA
 	return err
 }
 
-func (s *service) applyApiSecrets(application compass.Application, APIActions []APIAction) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError) {
+func (s *service) applyApiSecrets(application Application, APIActions []APIAction) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError) {
 
 	credentials = make(map[string]string)
 	params = make(map[string]string)
@@ -235,7 +233,7 @@ func appendMap(target map[string]string, source map[string]string) {
 	}
 }
 
-func newResult(application compass.Application, operation Operation, appError apperrors.AppError) Result {
+func newResult(application Application, operation Operation, appError apperrors.AppError) Result {
 	return Result{
 		ApplicationID: application.ID,
 		Operation:     operation,

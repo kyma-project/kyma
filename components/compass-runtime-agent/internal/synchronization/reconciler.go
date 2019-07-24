@@ -1,9 +1,7 @@
 package synchronization
 
 import (
-	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 )
 
 type reconciler struct {
@@ -19,21 +17,21 @@ const (
 
 type APIAction struct {
 	Operation Operation
-	API       graphql.APIDefinition
+	API       APIDefinition
 }
 
 type EventAPIAction struct {
 	Operation Operation
-	EventAPI  graphql.EventAPIDefinition
+	EventAPI  EventAPIDefinition
 }
 
 type ApplicationAction struct {
 	Operation       Operation
-	Application     compass.Application
+	Application     Application
 	APIActions      []APIAction
 	EventAPIActions []EventAPIAction
 }
 
-func (r reconciler) Do(applications []compass.Application) ([]ApplicationAction, apperrors.AppError) {
+func (r reconciler) Do(applications []Application) ([]ApplicationAction, apperrors.AppError) {
 	return nil, nil
 }
