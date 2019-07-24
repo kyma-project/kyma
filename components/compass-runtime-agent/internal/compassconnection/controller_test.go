@@ -4,6 +4,10 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compassconnection/mocks"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -39,9 +43,12 @@ func TestReconcile(t *testing.T) {
 			},
 		}
 
-		objClient := NewFakeClient(compassConnection)
+		fakeClientset := fake.NewSimpleClientset(compassConnection).Compass().CompassConnections()
+		objClient := NewObjectClientWrapper(fakeClientset)
+		supervisor := &mocks.Supervisor{}
+		supervisor.On("SynchronizeWithCompass", compassConnection).Return(compassConnection, nil)
 
-		reconciler := newReconciler(objClient)
+		reconciler := newReconciler(objClient, supervisor)
 
 		request := reconcile.Request{
 			NamespacedName: compassConnectionNamespacedName,
@@ -58,9 +65,26 @@ func TestReconcile(t *testing.T) {
 
 	t.Run("should reconcile delete request", func(t *testing.T) {
 		// given
-		objClient := NewFakeClient()
+		compassConnection := &v1alpha1.CompassConnection{
+			ObjectMeta: v1.ObjectMeta{
+				Name: compassConnectionName,
+			},
+			Status: v1alpha1.CompassConnectionStatus{
+				State: v1alpha1.Connected,
+			},
+		}
 
-		reconciler := newReconciler(objClient)
+		fakeClientset := fake.NewSimpleClientset().Compass().CompassConnections()
+		objClient := NewObjectClientWrapper(fakeClientset)
+		supervisor := &mocks.Supervisor{}
+		supervisor.On("InitializeCompassConnection").
+			Run(func(args mock.Arguments) {
+				_, err := fakeClientset.Create(compassConnection)
+				require.NoError(t, err)
+			}).
+			Return(compassConnection, nil)
+
+		reconciler := newReconciler(objClient, supervisor)
 
 		request := reconcile.Request{
 			NamespacedName: compassConnectionNamespacedName,
@@ -76,17 +100,17 @@ func TestReconcile(t *testing.T) {
 	})
 }
 
-func NewFakeClient(objects ...runtime.Object) Client {
-	return &fakeClientWrapper{
-		fakeClient: fake.NewSimpleClientset(objects...).CompassV1alpha1().CompassConnections(),
+func NewObjectClientWrapper(client clientset.CompassConnectionInterface) Client {
+	return &objectClientWrapper{
+		fakeClient: client,
 	}
 }
 
-type fakeClientWrapper struct {
+type objectClientWrapper struct {
 	fakeClient clientset.CompassConnectionInterface
 }
 
-func (f *fakeClientWrapper) Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error {
+func (f *objectClientWrapper) Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error {
 	compassConnection, ok := obj.(*v1alpha1.CompassConnection)
 	if !ok {
 		return errors.New("object is not Compass Connection")
@@ -101,10 +125,10 @@ func (f *fakeClientWrapper) Get(ctx context.Context, key client.ObjectKey, obj r
 	return nil
 }
 
-func (f *fakeClientWrapper) Update(ctx context.Context, obj runtime.Object) error {
+func (f *objectClientWrapper) Update(ctx context.Context, obj runtime.Object) error {
 	panic("implement me")
 }
 
-func (f *fakeClientWrapper) Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOptionFunc) error {
+func (f *objectClientWrapper) Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOptionFunc) error {
 	panic("implement me")
 }
