@@ -16,10 +16,6 @@ This project contains the chart for the Function Controller.
 
 Run the following script to install the chart:
 
-  # your docker.io username goes here
-  # username NOT the email
-  # echo -n $USERNAME | base64
-
 ```bash
 export NAME=knative-function-controller
 export NAMESPACE=kyma-system
