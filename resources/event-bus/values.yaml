@@ -7,7 +7,7 @@ global:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir: pr/
-    version: PR-4893
+    version: "PR-4943"
   event_bus_tests:
     dir: pr/
     version: PR-4893
