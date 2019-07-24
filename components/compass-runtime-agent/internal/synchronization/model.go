@@ -1,4 +1,4 @@
-package compass
+package synchronization
 
 type Labels map[string][]string
 

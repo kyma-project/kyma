@@ -1,9 +1,8 @@
 package apiresources
 
 import (
-	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization/apiresources/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization/apiresources/secrets/model"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization/applications"
@@ -13,17 +12,17 @@ import (
 type ApiIDToSecretNameMap map[string]string
 
 type ResourcesService interface {
-	CreateApiResources(application compass.Application, apiDefinition graphql.APIDefinition) apperrors.AppError
-	CreateEventApiResources(application compass.Application, eventApiDefinition graphql.EventAPIDefinition) apperrors.AppError
-	CreateSecrets(application compass.Application, apiDefinition graphql.APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
+	CreateApiResources(application synchronization.Application, apiDefinition synchronization.APIDefinition) apperrors.AppError
+	CreateEventApiResources(application synchronization.Application, eventApiDefinition synchronization.EventAPIDefinition) apperrors.AppError
+	CreateSecrets(application synchronization.Application, apiDefinition synchronization.APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
 
-	UpdateApiResources(application compass.Application, apiDefinition graphql.APIDefinition) apperrors.AppError
-	UpdateEventApiResources(application compass.Application, eventApiDefinition graphql.EventAPIDefinition) apperrors.AppError
-	UpdateSecrets(application compass.Application, apiDefinition graphql.APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
+	UpdateApiResources(application synchronization.Application, apiDefinition synchronization.APIDefinition) apperrors.AppError
+	UpdateEventApiResources(application synchronization.Application, eventApiDefinition synchronization.EventAPIDefinition) apperrors.AppError
+	UpdateSecrets(application synchronization.Application, apiDefinition synchronization.APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
 
-	DeleteApiResources(application compass.Application, apiDefinition graphql.APIDefinition) apperrors.AppError
-	DeleteEventApiResources(application compass.Application, eventApiDefinition graphql.EventAPIDefinition) apperrors.AppError
-	DeleteSecrets(application compass.Application, apiDefinition graphql.APIDefinition) apperrors.AppError
+	DeleteApiResources(application synchronization.Application, apiDefinition synchronization.APIDefinition) apperrors.AppError
+	DeleteEventApiResources(application synchronization.Application, eventApiDefinition synchronization.EventAPIDefinition) apperrors.AppError
+	DeleteSecrets(application synchronization.Application, apiDefinition synchronization.APIDefinition) apperrors.AppError
 }
 
 type AssetStore interface {
