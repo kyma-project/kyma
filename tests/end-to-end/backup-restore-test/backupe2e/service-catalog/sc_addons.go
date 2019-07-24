@@ -56,6 +56,10 @@ func (t ServiceCatalogAddonsTest) TestResources(namespace string) {
 	t.serviceCatalogAddonsFlow.testResources(namespace)
 }
 
+func (t ServiceCatalogAddonsTest) DeleteResources(namespace string) {
+	t.serviceCatalogAddonsFlow.deleteResources()
+}
+
 func (f *serviceCatalogAddonsFlow) createResources(namespace string) {
 	err := f.createUsageKind()
 	So(err, ShouldBeNil)
@@ -63,6 +67,11 @@ func (f *serviceCatalogAddonsFlow) createResources(namespace string) {
 
 func (f *serviceCatalogAddonsFlow) testResources(namespace string) {
 	err := f.verifyUsageKind()
+	So(err, ShouldBeNil)
+}
+
+func (f *serviceCatalogAddonsFlow) deleteResources() {
+	err := f.deleteUsageKind()
 	So(err, ShouldBeNil)
 }
 
@@ -87,6 +96,11 @@ func (f *serviceCatalogAddonsFlow) createUsageKind() error {
 		},
 	})
 	return err
+}
+
+func (f *serviceCatalogAddonsFlow) deleteUsageKind() error {
+	f.log.Infof("Deleting UsageKind %s", usageKindName)
+	return f.buInterface.ServicecatalogV1alpha1().UsageKinds().Delete(usageKindName, &metav1.DeleteOptions{})
 }
 
 func (f *serviceCatalogAddonsFlow) verifyUsageKind() error {

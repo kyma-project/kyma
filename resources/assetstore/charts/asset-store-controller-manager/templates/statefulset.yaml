@@ -24,7 +24,7 @@ spec:
     spec:
      {{ if .Values.global.isLocalEnv }}
       hostAliases:
-       - ip: {{ .Values.global.minikubeIP }}
+       - ip: {{ .Values.minikubeIP }}
          hostnames:
           - "minio.{{ .Values.global.ingress.domainName }}"
       {{ end }}

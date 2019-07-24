@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	. "github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,9 +19,9 @@ import (
 )
 
 type functionTest struct {
-	functionName, testData string
-	kubelessClient         *kubeless.Clientset
-	coreClient             *kubernetes.Clientset
+	functionName, uuid string
+	kubelessClient     *kubeless.Clientset
+	coreClient         *kubernetes.Clientset
 }
 
 func NewFunctionTest() (functionTest, error) {
@@ -43,7 +44,7 @@ func NewFunctionTest() (functionTest, error) {
 		kubelessClient: kubelessClient,
 		coreClient:     coreClient,
 		functionName:   "hello",
-		testData:       "test",
+		uuid:           uuid.New().String(),
 	}, nil
 }
 
@@ -59,7 +60,11 @@ func (f functionTest) TestResources(namespace string) {
 	host := fmt.Sprintf("http://%s.%s:8080", f.functionName, namespace)
 	value, err := f.getFunctionOutput(host, 2*time.Minute)
 	So(err, ShouldBeNil)
-	So(value, ShouldContainSubstring, f.testData)
+	So(value, ShouldContainSubstring, f.uuid)
+}
+
+func (f functionTest) DeleteResources(namespace string) {
+	// There is not need to be implemented for this test.
 }
 
 func (f *functionTest) getFunctionOutput(host string, waitmax time.Duration) (string, error) {
@@ -70,7 +75,7 @@ func (f *functionTest) getFunctionOutput(host string, waitmax time.Duration) (st
 	for {
 		select {
 		case <-tick:
-			resp, err := http.Post(host, "text/plain", bytes.NewBufferString(f.testData))
+			resp, err := http.Post(host, "text/plain", bytes.NewBufferString(f.uuid))
 			if err != nil {
 				messages += fmt.Sprintf("%+v\n", err)
 				break

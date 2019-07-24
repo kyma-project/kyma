@@ -6,8 +6,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
-    dir: pr/
-    version: "PR-4943"
+    dir: develop/
+    version: "36059183"
   event_bus_tests:
     dir: develop/
     version: d72e2c1f
@@ -21,7 +21,7 @@ global:
       limits:
         memory: "32M"
   publishKnative:
-    maxRequests: 200
+    maxRequests: 16
     maxRequestSize: 65536
     maxChannelNameLength: 33
     maxSourceIDLength: 253

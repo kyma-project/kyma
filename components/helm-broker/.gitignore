@@ -104,10 +104,5 @@ fabric.properties
 /broker
 /helm-broker
 /vendor
-/controller
-/cm2cac
-/deploy/tools/targz
-/deploy/tools/cm2cac
-/deploy/tools/indexbuilder
-/deploy/broker/helm-broker
-/deploy/controller/controller
+/preupgrade
+cm2cac

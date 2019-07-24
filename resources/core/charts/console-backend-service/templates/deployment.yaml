@@ -27,7 +27,7 @@ spec:
       serviceAccountName: {{ template "fullname" . }}
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
+        - ip: {{ .Values.minikubeIP }}
           hostnames:
             - "dex.{{ .Values.global.ingress.domainName }}"
             - "minio.{{ .Values.global.ingress.domainName }}"
@@ -82,7 +82,8 @@ spec:
           - name: APP_TRACING_SERVICE_SPAN_NAME
             value: {{ .Values.tracing.serviceSpanName }}
           - name: APP_FEATURE_TOGGLES_CLUSTER_ADDONS_CONFIGURATION_CRD_ENABLED
-            value: "true"
+            # When enabled then RBAC needs to be adjusted:  https://github.com/kyma-project/kyma/issues/4492
+            value: "false"
         ports:
           - containerPort: {{ .Values.service.internalPort }}
             name: {{ .Values.service.internalPortName }}

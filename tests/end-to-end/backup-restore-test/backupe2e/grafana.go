@@ -29,6 +29,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
@@ -54,6 +55,7 @@ var (
 
 type grafanaTest struct {
 	grafanaName  string
+	uuid         string
 	coreClient   *kubernetes.Clientset
 	beforeBackup bool
 	grafana
@@ -85,6 +87,7 @@ func NewGrafanaTest() (*grafanaTest, error) {
 	return &grafanaTest{
 		coreClient:   coreClient,
 		grafanaName:  "grafana",
+		uuid:         uuid.New().String(),
 		beforeBackup: true,
 		grafana:      grafana{loginForm: url.Values{}},
 	}, nil
@@ -92,6 +95,28 @@ func NewGrafanaTest() (*grafanaTest, error) {
 
 func (t *grafanaTest) CreateResources(namespace string) {
 	// There is not need to be implemented for this test.
+}
+
+func (t *grafanaTest) DeleteResources(namespace string) {
+	// It needs to be implemented for this test.
+	err := t.waitForPodGrafana(1 * time.Minute)
+	So(err, ShouldBeNil)
+
+	err = t.deleteServices(grafanaNS, grafanaServiceName, grafanaLabelSelector)
+	So(err, ShouldBeNil)
+
+	err = t.deleteStatefulset(grafanaNS, grafanaStatefulsetName)
+	So(err, ShouldBeNil)
+
+	err = t.deletePod(grafanaNS, grafanaPodName, grafanaLabelSelector)
+	So(err, ShouldBeNil)
+
+	err = t.deletePVC(grafanaNS, grafanaPvcName, grafanaLabelSelector)
+	So(err, ShouldBeNil)
+
+	//err1 := t.waitForPodGrafana(2 * time.Minute)
+	//So(err1, ShouldBeError) // An error is expected.
+
 }
 
 func (t *grafanaTest) TestResources(namespace string) {
@@ -146,6 +171,81 @@ func (t *grafanaTest) TestResources(namespace string) {
 			So(resp.StatusCode, ShouldEqual, http.StatusOK)
 		}
 	}
+
+}
+
+func (t *grafanaTest) deleteServices(namespace, serviceName, labelSelector string) error {
+	deletePolicy := metav1.DeletePropagationForeground
+
+	serviceList, err := t.coreClient.CoreV1().Services(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
+	if err != nil {
+		return err
+	}
+
+	for _, service := range serviceList.Items {
+		if service.Name == serviceName {
+			err := t.coreClient.CoreV1().Services(namespace).Delete(serviceName, &metav1.DeleteOptions{
+				PropagationPolicy: &deletePolicy,
+			})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+
+}
+
+func (t *grafanaTest) deleteStatefulset(namespace, statefulsetName string) error {
+	deletePolicy := metav1.DeletePropagationForeground
+
+	collection := t.coreClient.AppsV1().StatefulSets(namespace)
+	err := collection.Delete(statefulsetName, &metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (t *grafanaTest) deletePod(namespace, podName, labelSelector string) error {
+	podList, err := t.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
+	if err != nil {
+		return err
+	}
+
+	for _, pod := range podList.Items {
+		if pod.Name == podName {
+			err = t.coreClient.CoreV1().Pods(namespace).Delete(podName, &metav1.DeleteOptions{})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+
+}
+
+func (t *grafanaTest) deletePVC(namespace, pvcName, labelSelector string) error {
+	pvcList, err := t.coreClient.CoreV1().PersistentVolumeClaims(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
+	if err != nil {
+		return err
+	}
+
+	for _, pvc := range pvcList.Items {
+		if pvc.Name == pvcName {
+			err = t.coreClient.CoreV1().PersistentVolumeClaims(namespace).Delete(pvcName, &metav1.DeleteOptions{})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 
 }
 

@@ -79,6 +79,10 @@ func (t HelmBrokerTest) TestResources(namespace string) {
 	t.newFlow(namespace).testResources()
 }
 
+func (t HelmBrokerTest) DeleteResources(namespace string) {
+	t.newFlow(namespace).deleteResources()
+}
+
 func (t *HelmBrokerTest) newFlow(namespace string) *helmBrokerFlow {
 	return &helmBrokerFlow{
 		brokersFlow: brokersFlow{
@@ -123,6 +127,21 @@ func (f *helmBrokerFlow) testResources() {
 
 		// we create again RedisBindingUsage to restore it after the tests
 		f.createRedisBindingUsage,
+	} {
+		err := fn()
+		if err != nil {
+			f.logReport()
+		}
+		So(err, ShouldBeNil)
+	}
+}
+
+func (f *helmBrokerFlow) deleteResources() {
+	for _, fn := range []func() error{
+		f.deleteRedisBinding,
+		f.deleteRedisInstance,
+		f.verifyRedisInstanceRemoved,
+		f.removeHelmBrokerEtcd,
 	} {
 		err := fn()
 		if err != nil {
@@ -274,6 +293,14 @@ func (f *helmBrokerFlow) deleteRedisBindingUsage() error {
 }
 func (f *helmBrokerFlow) verifyDeploymentDoesNotContainRedisEnvs() error {
 	return f.waitForEnvNotInjected("REDIS_PASSWORD")
+}
+
+func (f *helmBrokerFlow) deleteRedisBinding() error {
+	return f.deleteServiceBinding(redisBindingName)
+}
+
+func (f *helmBrokerFlow) deleteRedisInstance() error {
+	return f.deleteServiceInstance(redisInstanceName)
 }
 
 // that is necessary to restore correctly the etcd data

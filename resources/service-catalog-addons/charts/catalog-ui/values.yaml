@@ -1,7 +1,6 @@
 name: catalog
 replicaCount: 1
 image:
-  dir: ""
   pullPolicy: IfNotPresent
 service:
   internalPort: 80

@@ -6,18 +6,24 @@ image:
 service:
   type: NodePort
   externalPort: 80
-  internalPort: 8081
+  internalPort: 8080
 
 config:
   tillerTLSInsecure: true
   storage:
     - driver: etcd
       provide:
-        all: ~
+        instance: ~
+        instanceOperation: ~
+        entityInstanceBindData: ~
 
       etcd:
         endpoints:
           - http://helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379
+    - driver: memory
+      provide:
+        chart: ~
+        bundle: ~
 
 global:
   cfgReposUrlName: "helm-repos-urls"
@@ -25,14 +31,14 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   helm_broker:
-    dir: pr/
-    version: PR-4776
+    dir: develop/
+    version: "82505335"
   alpine_net:
     dir: develop/
     version: 149967d0
   add_ons_ui:
     dir: ""
-    version: 09babb28
+    version: a181964f
   istio:
     gateway:
       name: kyma-gateway

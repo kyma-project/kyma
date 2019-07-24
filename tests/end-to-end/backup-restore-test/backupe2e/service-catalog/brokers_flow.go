@@ -187,6 +187,16 @@ func (f *brokersFlow) createBindingUsageAndWaitForReadiness(usageName, bindingNa
 	})
 }
 
+func (f *brokersFlow) deleteServiceBinding(name string) error {
+	f.log.Infof("Deleting ServiceBinding %s", name)
+	return f.scInterface.ServicecatalogV1beta1().ServiceBindings(f.namespace).Delete(name, &metav1.DeleteOptions{})
+}
+
+func (f *brokersFlow) deleteServiceInstance(name string) error {
+	f.log.Infof("Deleting ServiceInstance %s", name)
+	return f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Delete(name, &metav1.DeleteOptions{})
+}
+
 func (f *brokersFlow) deleteBindingUsage(name string) error {
 	f.log.Infof("Deleting ServiceBindingUsage %s", name)
 	return f.buInterface.ServicecatalogV1alpha1().ServiceBindingUsages(f.namespace).Delete(name, &metav1.DeleteOptions{})

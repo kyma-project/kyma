@@ -124,14 +124,14 @@ spec:
               sleep 1
           done
 
-          /restore.test -test.v -action={{ .Values.action }}
+          /restore.test -test.v
           exit_code=$?
 
           pkill -TERM pilot-agent
           sleep 4
 
           exit $exit_code
-        image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}tests/backup-restore-test:{{ .Values.image.tag }}"
         imagePullPolicy: Always
         env:
         - name: DOMAIN
@@ -140,6 +140,10 @@ spec:
           value: {{ .Values.global.adminEmail }}
         - name: USER_PASSWORD
           value: {{ .Values.global.adminPassword }}
+        - name: ALL_BACKUP_CONFIGURATION_FILE
+          value: "/all-backup.yaml"
+        - name: SYSTEM_BACKUP_CONFIGURATION_FILE
+          value: /system-backup.yaml
       restartPolicy: Never
 ---
 {{- end }}

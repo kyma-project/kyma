@@ -16,15 +16,13 @@ import (
 type MigrationService struct {
 	cli       client.Client
 	namespace string
-	defaultCm string
 }
 
 // NewMigrationService creates a new instance of MigrationService
-func NewMigrationService(cli client.Client, namespace string, defaultCm string) *MigrationService {
+func NewMigrationService(cli client.Client, namespace string) *MigrationService {
 	return &MigrationService{
 		cli:       cli,
 		namespace: namespace,
-		defaultCm: defaultCm,
 	}
 }
 
@@ -43,9 +41,6 @@ func (s *MigrationService) Migrate() error {
 	}
 
 	for _, cm := range configMaps.Items {
-		if cm.Name == s.defaultCm {
-			continue
-		}
 		logrus.Infof("Migrating ConfigMap %s/%s", cm.Namespace, cm.Name)
 		err := s.migrateConfigMap(&cm)
 		if err != nil {

@@ -22,10 +22,6 @@ func main() {
 	if namespace == "" {
 		logrus.Fatal("Environment variable NAMESPACE must be set")
 	}
-	defaultCm := os.Getenv("DEFAULT_CONFIGMAP")
-	if defaultCm == "" {
-		logrus.Fatal("Environment variable DEFAULT_CONFIGMAP must be set")
-	}
 	k8sConfig, err := newRestClientConfig(os.Getenv("KUBECONFIG"))
 	fatalOnError(err)
 
@@ -36,7 +32,7 @@ func main() {
 
 	logrus.Info("Start ConfigMap to ClusterAddonsConfiguration migration process")
 
-	migrationService := NewMigrationService(cli, namespace, defaultCm)
+	migrationService := NewMigrationService(cli, namespace)
 	err = migrationService.Migrate()
 	fatalOnError(err)
 

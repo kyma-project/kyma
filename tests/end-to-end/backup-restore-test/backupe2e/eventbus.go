@@ -93,6 +93,12 @@ func (eb *EventBusTest) TestResources(namespace string) {
 	convey.So(err, convey.ShouldBeNil)
 }
 
+// DeleteResources deletes resources before restoring from a backup
+func (eb *EventBusTest) DeleteResources(namespace string) {
+	err := eb.newFlow(namespace).deleteResources()
+	convey.So(err, convey.ShouldBeNil)
+}
+
 func (eb *EventBusTest) newFlow(namespace string) *eventBusFlow {
 	return &eventBusFlow{
 		namespace:     namespace,
@@ -133,6 +139,14 @@ func (f *eventBusFlow) testResources() error {
 		if err := fn(); err != nil {
 			return fmt.Errorf("TestResources() failed with: %v", err)
 		}
+	}
+	return nil
+}
+
+func (f *eventBusFlow) deleteResources() error {
+	err := f.cleanup()
+	if err != nil {
+		return fmt.Errorf("DeleteResources() failed with: %v", err)
 	}
 	return nil
 }
@@ -317,6 +331,41 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 		return nil
 	}
 	return errors.New("timeout for subscriber response")
+}
+
+func (f *eventBusFlow) cleanup() error {
+	subscriberShutdownEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/v1/shutdown"
+
+	_, err := http.Post(subscriberShutdownEndpointURL, "application/json", strings.NewReader(`{"shutdown": "true"}`))
+	if err != nil {
+		return err
+	}
+
+	deletePolicy := metaV1.DeletePropagationForeground
+	gracePeriodSeconds := int64(0)
+	err = f.k8sInterface.AppsV1().Deployments(f.namespace).Delete(subscriberName,
+		&metaV1.DeleteOptions{GracePeriodSeconds: &gracePeriodSeconds, PropagationPolicy: &deletePolicy})
+	if err != nil {
+		return err
+	}
+
+	err = f.k8sInterface.CoreV1().Services(f.namespace).Delete(subscriberName,
+		&metaV1.DeleteOptions{GracePeriodSeconds: &gracePeriodSeconds})
+	if err != nil {
+		return err
+	}
+
+	err = f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Delete(subscriptionName, &metaV1.DeleteOptions{PropagationPolicy: &deletePolicy})
+	if err != nil {
+		return err
+	}
+
+	err = f.eaInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Delete(eventActivationName, &metaV1.DeleteOptions{PropagationPolicy: &deletePolicy})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func checkStatus(statusEndpointURL string) error {

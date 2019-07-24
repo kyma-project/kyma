@@ -93,6 +93,10 @@ func (t AppBrokerTest) TestResources(namespace string) {
 	t.newFlow(namespace).testResources()
 }
 
+func (t AppBrokerTest) DeleteResources(namespace string) {
+	t.newFlow(namespace).deleteResources()
+}
+
 func (t *AppBrokerTest) newFlow(namespace string) *appBrokerFlow {
 	return &appBrokerFlow{
 		brokersFlow: brokersFlow{
@@ -151,8 +155,30 @@ func (f *appBrokerFlow) testResources() {
 	}
 }
 
+func (f *appBrokerFlow) deleteResources() {
+	for _, fn := range []func() error{
+		f.deleteAPIServiceBindingUsage,
+		f.deleteAPIServiceBinding,
+		f.deleteEventsServiceInstance,
+		f.deleteAPIServiceInstance,
+		f.waitForInstanceDeleted,
+		f.deleteApplicationMapping,
+		f.deleteApplication,
+	} {
+		err := fn()
+		if err != nil {
+			f.logReport()
+		}
+		So(err, ShouldBeNil)
+	}
+}
+
 func (f *appBrokerFlow) deployEnvTester() error {
 	return f.createEnvTester("GATEWAY_URL")
+}
+
+func (f *appBrokerFlow) deleteApplication() error {
+	return f.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().Delete(applicationName, &metav1.DeleteOptions{})
 }
 
 func (f *appBrokerFlow) createApplication() error {
@@ -306,6 +332,22 @@ func (f *appBrokerFlow) verifyEnvTesterHasGatewayNotInjected() error {
 
 func (f *appBrokerFlow) deleteAPIServiceBindingUsage() error {
 	return f.deleteBindingUsage(apiBindingUsageName)
+}
+
+func (f *appBrokerFlow) deleteAPIServiceBinding() error {
+	return f.deleteServiceBinding(apiBindingName)
+}
+
+func (f *appBrokerFlow) deleteAPIServiceInstance() error {
+	return f.deleteServiceInstance(apiServiceId)
+}
+
+func (f *appBrokerFlow) deleteEventsServiceInstance() error {
+	return f.deleteServiceInstance(eventsServiceId)
+}
+
+func (f *appBrokerFlow) deleteApplicationMapping() error {
+	return f.appBrokerInterface.ApplicationconnectorV1alpha1().ApplicationMappings(f.namespace).Delete(applicationName, &metav1.DeleteOptions{})
 }
 
 func (f *appBrokerFlow) waitForAppInstances() error {

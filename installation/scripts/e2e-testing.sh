@@ -7,12 +7,6 @@ if [ -z "${DOMAIN}" ] ; then
   exit 1
 fi
 
-# ACTION must be one of the following: testBeforeBackup, testAfterRestore
-if [ -z "${ACTION}" ] ; then
-  echo "ERROR: ACTION is not set"
-  exit 1
-fi
-
 cleanupHelmE2ERelease () {
     local release=$1
     log 'Running cleanup'
@@ -30,9 +24,7 @@ cleanupHelmE2ERelease () {
 }
 
 # creates a config map which provides the testing bundles	
-if [[ "${ACTION}" == "testBeforeBackup" ]]; then
-  injectTestingAddons
-fi  
+injectTestingBundles	
 
 testcase="${ROOT_PATH}"/../../tests/end-to-end/backup-restore-test/deploy/chart/backup-test
 release=$(basename "$testcase")
@@ -40,12 +32,12 @@ release=$(basename "$testcase")
 ADMIN_EMAIL=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode)
 ADMIN_PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode)
 
-helm install "$testcase" --name "${release}" --namespace backup-test --set global.ingress.domainName="${DOMAIN}" --set action="${ACTION}" --set-file global.adminEmail=<(echo -n "${ADMIN_EMAIL}") --set-file global.adminPassword=<(echo -n "${ADMIN_PASSWORD}") --tls
+helm install "$testcase" --name "${release}" --namespace end-to-end --set global.ingress.domainName="${DOMAIN}" --set-file global.adminEmail=<(echo -n "${ADMIN_EMAIL}") --set-file global.adminPassword=<(echo -n "${ADMIN_PASSWORD}") --tls
 
 suiteName="testsuite-backup-$(date '+%Y-%m-%d-%H-%M')"
-echo "---------------------------------------------------"
-echo "- Running backup restore tests with action set to ${ACTION}..."
-echo "---------------------------------------------------"
+echo "----------------------------"
+echo "- Testing Kyma Backup and Restore functionality..."
+echo "----------------------------"
 
 kc="kubectl $(context_arg)"
 

@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: istio-galley
@@ -11,9 +11,6 @@ metadata:
     istio: galley
 spec:
   replicas: {{ .Values.replicaCount }}
-  selector:
-    matchLabels:
-      istio: galley
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -35,11 +32,7 @@ spec:
 {{- end }}
       containers:
         - name: galley
-{{- if contains "/" .Values.image }}
-          image: "{{ .Values.image }}"
-{{- else }}
           image: "{{ .Values.global.hub }}/{{ .Values.image }}:{{ .Values.global.tag }}"
-{{- end }}
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           ports:
           - containerPort: 443
@@ -115,10 +108,3 @@ spec:
       affinity:
       {{- include "nodeaffinity" . | indent 6 }}
       {{- include "podAntiAffinity" . | indent 6 }}
-      {{- if .Values.tolerations }}
-      tolerations:
-{{ toYaml .Values.tolerations | indent 6 }}
-      {{- else if .Values.global.defaultTolerations }}
-      tolerations:
-{{ toYaml .Values.global.defaultTolerations | indent 6 }}
-      {{- end }}

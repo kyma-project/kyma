@@ -24,10 +24,10 @@ func TestHTTPRepository_IndexReader(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	rep := bundle.NewHTTPRepository()
+	rep := bundle.NewHTTPRepository(bundle.RepositoryConfig{URL: ts.URL})
 
 	// when
-	r, err := rep.IndexReader(ts.URL + "/index.yaml")
+	r, err := rep.IndexReader()
 
 	// then
 	require.NoError(t, err)
@@ -54,11 +54,9 @@ func TestHTTPRepository_BundleReader(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	rep := bundle.NewHTTPRepository()
+	rep := bundle.NewHTTPRepository(bundle.RepositoryConfig{URL: ts.URL})
 
 	// when
-	_, err := rep.IndexReader(ts.URL + fmt.Sprintf("/%s-%s.tgz", expBundleName, expBundleVer))
-	require.NoError(t, err)
 	r, err := rep.BundleReader(expBundleName, expBundleVer)
 
 	// then
@@ -76,22 +74,14 @@ func TestHTTPRepository_URLForBundle(t *testing.T) {
 	const (
 		bundleName bundle.Name    = "bundle_name"
 		bundleVer  bundle.Version = "1.2.3"
+		url        string         = "http://bundle.io"
 	)
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/index.yaml", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "OK")
-	})
-	ts := httptest.NewServer(mux)
-	defer ts.Close()
-
-	rep := bundle.NewHTTPRepository()
+	rep := bundle.NewHTTPRepository(bundle.RepositoryConfig{URL: "http://bundle.io"})
 
 	// when
-	_, err := rep.IndexReader(ts.URL + "/index.yaml")
-	require.NoError(t, err)
 	gotURL := rep.URLForBundle(bundleName, bundleVer)
 
 	// then
-	assert.Equal(t, fmt.Sprintf("%s/%s-%s.tgz", ts.URL, bundleName, bundleVer), gotURL)
+	assert.Equal(t, fmt.Sprintf("%s/%s-%s.tgz", url, bundleName, bundleVer), gotURL)
 }

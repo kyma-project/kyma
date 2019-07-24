@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: istiocoredns
@@ -10,9 +10,6 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
-  selector:
-    matchLabels:
-      app: istiocoredns
   template:
     metadata:
       name: istiocoredns
@@ -31,7 +28,7 @@ spec:
       containers:
       - name: coredns
         image: {{ .Values.coreDNSImage }}
-        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        imagePullPolicy: IfNotPresent
         args: [ "-conf", "/etc/coredns/Corefile" ]
         volumeMounts:
         - name: config-volume
@@ -65,7 +62,7 @@ spec:
         command:
         - /usr/local/bin/plugin
         image: {{ .Values.coreDNSPluginImage }}
-        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8053
           name: dns-grpc
@@ -87,10 +84,3 @@ spec:
       affinity:
       {{- include "nodeaffinity" . | indent 6 }}
       {{- include "podAntiAffinity" . | indent 6 }}
-      {{- if .Values.tolerations }}
-      tolerations:
-{{ toYaml .Values.tolerations | indent 6 }}
-      {{- else if .Values.global.defaultTolerations }}
-      tolerations:
-{{ toYaml .Values.global.defaultTolerations | indent 6 }}
-      {{- end }}

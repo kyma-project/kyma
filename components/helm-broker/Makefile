@@ -1,17 +1,11 @@
 APP_NAME = helm-broker
 TOOLS_NAME = helm-broker-tools
-CONTROLLER_NAME=helm-controller
-
 REPO = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/
 TAG = $(DOCKER_TAG)
 
 .PHONY: build
 build:
 	./before-commit.sh ci
-
-.PHONY: integration-test
-integration-test:
-	go test -tags=integration ./test/integration/
 
 .PHONY: pull-licenses
 pull-licenses:
@@ -41,10 +35,8 @@ build-image: pull-licenses
 	cp targz deploy/tools/targz
 	cp indexbuilder deploy/tools/indexbuilder
 	cp cm2cac deploy/tools/cm2cac
-	cp controller deploy/controller/controller
 
 	docker build -t $(APP_NAME) deploy/broker
-	docker build -t $(CONTROLLER_NAME) deploy/controller
 	docker build -t $(TOOLS_NAME) deploy/tools
 
 .PHONY: push-image
@@ -52,20 +44,17 @@ push-image:
 	docker tag $(APP_NAME) $(REPO)$(APP_NAME):$(TAG)
 	docker push $(REPO)$(APP_NAME):$(TAG)
 
-	docker tag $(CONTROLLER_NAME) $(REPO)$(CONTROLLER_NAME):$(TAG)
-	docker push $(REPO)$(CONTROLLER_NAME):$(TAG)
-
 	docker tag $(TOOLS_NAME) $(REPO)$(TOOLS_NAME):$(TAG)
 	docker push $(REPO)$(TOOLS_NAME):$(TAG)
 
 .PHONY: ci-pr
-ci-pr: build integration-test build-image push-image
+ci-pr: build build-image push-image
 
 .PHONY: ci-master
-ci-master: build integration-test build-image push-image
+ci-master: build build-image push-image
 
 .PHONY: ci-release
-ci-release: build integration-test build-image push-image
+ci-release: build build-image push-image
 
 .PHONY: clean
 clean:

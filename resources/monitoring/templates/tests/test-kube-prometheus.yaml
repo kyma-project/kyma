@@ -40,7 +40,7 @@ kind: TestDefinition
 metadata:
   name: test-{{ template "fullname" . }}
 spec:
-  disableConcurrency: false
+  disableConcurrency: true
   template:
     metadata:
       annotations:

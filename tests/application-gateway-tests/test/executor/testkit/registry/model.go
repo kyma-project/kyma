@@ -60,26 +60,19 @@ type Credentials struct {
 	Basic *Basic `json:"basic,omitempty"`
 }
 
-type CSRFInfo struct {
-	TokenEndpointURL string `json:"tokenEndpointURL" valid:"url,required~tokenEndpointURL field cannot be empty"`
-}
-
 type Oauth struct {
-	URL          string    `json:"url"`
-	ClientID     string    `json:"clientId"`
-	ClientSecret string    `json:"clientSecret"`
-	CSRFInfo     *CSRFInfo `json:"csrfInfo,omitempty"`
+	URL          string `json:"url"`
+	ClientID     string `json:"clientId"`
+	ClientSecret string `json:"clientSecret"`
 }
 
 type Basic struct {
-	Username string    `json:"username"`
-	Password string    `json:"password"`
-	CSRFInfo *CSRFInfo `json:"csrfInfo,omitempty"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type CertificateGen struct {
-	CommonName string    `json:"commonName"`
-	CSRFInfo   *CSRFInfo `json:"csrfInfo,omitempty"`
+	CommonName string `json:"commonName"`
 }
 
 type Events struct {
@@ -114,22 +107,6 @@ func (api *API) WithBasicAuth(username, password string) *API {
 	api.Credentials.Basic = &Basic{
 		Username: username,
 		Password: password,
-	}
-
-	return api
-}
-
-func (api *API) WithBasicAndCSRFAuth(username, password, csrfUrl string) *API {
-	if api.Credentials == nil {
-		api.Credentials = &CredentialsWithCSRF{}
-	}
-
-	api.Credentials.Basic = &Basic{
-		Username: username,
-		Password: password,
-		CSRFInfo: &CSRFInfo{
-			TokenEndpointURL: csrfUrl,
-		},
 	}
 
 	return api

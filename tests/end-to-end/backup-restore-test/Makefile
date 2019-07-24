@@ -16,7 +16,11 @@ endif
 
 .PHONY: build-image
 build-image: pull-licenses
+	mkdir -p build-temp
+	cp ../../../docs/backup/assets/all-backup.yaml build-temp
+	cp ../../../docs/backup/assets/system-backup.yaml build-temp
 	docker build -t $(APP_NAME):latest .
+	rm -rf build-temp
 
 .PHONY: push-image
 push-image:

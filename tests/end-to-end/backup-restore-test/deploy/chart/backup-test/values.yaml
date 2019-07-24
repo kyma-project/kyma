@@ -4,5 +4,5 @@ containerRegistry:
 nameOverride: backup-test
 
 image:
-  dir: pr/tests/backup-restore-test
-  tag: PR-4957
+  dir: develop/
+  tag: 164eb8ac

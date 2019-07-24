@@ -64,20 +64,24 @@ func (ts *TestSuite) createIstioResources() {
 	checkNothingTmpl := template.Must(template.New("checknothing").Parse(checkNothingDefinition))
 	ruleTmpl := template.Must(template.New("rule").Parse(ruleDefinition))
 
-	cp, err := dynamic.NewForConfig(ts.config)
-	require.NoError(ts.t, err)
+	cp := dynamic.NewDynamicClientPool(ts.config)
 
 	for _, tmpl := range []*template.Template{denierTmpl, checkNothingTmpl, ruleTmpl} {
 		obj := ts.unmarshal(data, tmpl)
 		kind := obj["kind"].(string)
 
-		dcl := cp.Resource(schema.GroupVersionResource{
-			Resource: kind + "s",
-			Version:  "v1alpha2",
-			Group:    "config.istio.io",
-		}).Namespace(ts.namespace)
+		denierInterface, _ := cp.ClientForGroupVersionKind(schema.GroupVersionKind{
+			Version: "v1alpha2",
+			Group:   "config.istio.io",
+			Kind:    kind,
+		})
+		dcl := denierInterface.Resource(&metav1.APIResource{
+			Namespaced: true,
+			Name:       kind + "s",
+		}, ts.namespace)
 
-		dcl.Create(&unstructured.Unstructured{Object: obj}, metav1.CreateOptions{})
+		dcl.Create(&unstructured.Unstructured{Object: obj})
+
 	}
 }
 

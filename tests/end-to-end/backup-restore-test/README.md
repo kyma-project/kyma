@@ -2,7 +2,8 @@
 
 ## Overview
 
-This project contains end-to-end backup and restore tests for Kyma. The tests run daily on Prow to validate if the backup and restore process works for all components.
+This project contains end-to-end backup and restore tests for the Kyma installation. The tests run weekly on Prow to validate if the backup and restore process works for all components.
+
 
 ## Prerequisites
 
@@ -13,11 +14,12 @@ To set up the project, use these tools:
 * The latest version of [Docker](https://www.docker.com/)
 * [Velero](../../../resources/velero/README.md#details)
 
->**NOTE:** Use [these](https://kyma-project.io/docs/master/components/backup) guidelines to configure Velero for a specific storage provider.
+>**NOTE:** Use [these](https://kyma-project.io/docs/master/components/backup/#configuration-velero-chart) guidelines to configure Velero for a specific storage provider.
+
 
 ## Usage
 
-The backup and restore [continuous integration flow](https://github.com/kyma-project/test-infra/blob/master/prow/scripts/cluster-integration/kyma-gke-backup-test.sh) looks as follows:
+The backup and restore [continuous integration flow](https://github.com/kyma-project/test-infra/blob/master/prow/scripts/cluster-integration/kyma-gke-end-to-end-test.sh) looks as follows:
 
 1. Create a new Namespace.
 2. Create new resources in the Namespace. The resources can be Namespace-scoped or cluster-wide.
@@ -37,20 +39,9 @@ Use the following environment variables to configure the tests:
 | **USER_EMAIL** | YES | - | The email address for authentication in Dex. |
 | **USER_PASSWORD** | YES | - | The password for authentication in Dex. |
 | **KUBECONFIG** | NO | - | The path to the `kubeconfig` file needed to run tests outside the cluster. |
+| **ALL_BACKUP_CONFIGURATION_FILE** | NO | `/all-backup.yaml` | The path to the `all-backup` configuration file. |
+| **SYSTEM_BACKUP_CONFIGURATION_FILE** | NO | `/system-backup.yaml` | The path to the `system-backup` configuration file. |
 
-### Use flags
-
-Use the following flags to configure the application:
-
-| Name | Required | Description |
-|-----|:---------:|------------|
-| **action** | YES | Defines what kind of action to execute. The possible values are `testBeforeBackup` and `testAfterRestore`. |
-
-See the example:
-
-```bash
-go test restore_cluster_backup_test.go -test.v -action=testBeforeBackup
-```
 
 ## Development
 
@@ -64,42 +55,41 @@ Add a new test under the `backupe2e/{domain-name}` directory and implement the f
 type BackupTest interface {
     CreateResources(namespace string)
     TestResources(namespace string)
+    DeleteResources(namespace string)
 }
 ```
-
 The functions work as follows:
 
-* The `CreateResources` function installs the required test data before the backup process starts.
-* The `TestResources` function validates if the test data works as expected.
+- The `TestResources` function validates if the test data works as expected.
+- The `CreateResources` function installs the required test data before the backup process starts.
+- The `DeleteResources` function deletes the resources that are a part of the cluster before executing the test. The resources need to be deleted to test the restore process.
 
-After the pipeline executes the backup and restore process, the `TestResources` function validates if the restore worked as expected.
+After the pipeline executes the backup and restore processes on the cluster, the `TestResources` function validates if the restore worked as expected.
 
 The test creates a new Namespace called `{TestName}-{UUID}`. This Namespace should contain all resources created during the test. If required, the resources can be created in other Namespaces as well.
 
 ### Run end-to-end tests locally
 
-> **NOTE:** Before running the test, configure Velero using [these](https://kyma-project.io/docs/master/components/backup) guidelines.
+> **NOTE:** Before running the test, configure Velero using [these](https://kyma-project.io/docs/master/components/backup/#configuration-velero-chart) guidelines.
 
 Run tests:
-
 ```bash
-env KUBECONFIG={KUBECONFIG} go test ./... -count=1 -timeout=0
+env KUBECONFIG={KUBECONFIG} ALL_BACKUP_CONFIGURATION_FILE={ALL_BACKUP_PATH} SYSTEM_BACKUP_CONFIGURATION_FILE={SYSTEM_BACKUP_PATH} go test ./... -count=1 -timeout=0
 ```
-
 where:
-
 * `{KUBECONFIG}` is the path to the `kubeconfig` file.
+* `{ALL_BACKUP_PATH}` is the path to the `all-backup.yaml` file.
+* `{SYSTEM_BACKUP_PATH}` is the path to the `system-backup.yaml` file.
 
-### Run tests using the Helm chart
+### Run tests using a Helm chart
 
 Run the tests using Helm:
 
 1. Prepare the data:
 
 ```bash
-helm install deploy/chart/backup-test/ --name "backup-test" --namespace backup-test --set global.ingress.domainName="$CLUSTER_DOMAIN" --set-file global.adminEmail=<(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode) --set-file global.adminPassword=<(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode)
+helm install deploy/chart/backup-test/ --name "backup-test" --namespace end-to-end --set global.ingress.domainName="$CLUSTER_DOMAIN" --set-file global.adminEmail=<(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode) --set-file global.adminPassword=<(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode)
 ```
-
 2. Run tests:
 
 ```bash
@@ -107,20 +97,17 @@ helm test backup-test --timeout=0
 ```
 
 ### Run tests using Telepresence
-
 [Telepresence](https://www.telepresence.io/) allows you to run tests locally while connecting a service to a remote Kubernetes cluster. It is helpful when the test needs access to other services in a cluster.
 
 1. [Install Telepresence](https://www.telepresence.io/reference/install).
-
 2. Run tests:
-
 ```bash
-env KUBECONFIG={KUBECONFIG} telepresence --run go test ./... -count=1 -timeout=0
+env KUBECONFIG={KUBECONFIG} ALL_BACKUP_CONFIGURATION_FILE={ALL_BACKUP_PATH} SYSTEM_BACKUP_CONFIGURATION_FILE={SYSTEM_BACKUP_PATH} telepresence --run go test ./... -count=1 -timeout=0
 ```
-
 where:
-
 * `{KUBECONFIG}` is the path to the `kubeconfig` file.
+* `{ALL_BACKUP_PATH}` is the path to the `all-backup.yaml` file.
+* `{SYSTEM_BACKUP_PATH}` is the path to the `system-backup.yaml` file.
 
 ### Verify the code
 

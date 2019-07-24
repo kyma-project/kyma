@@ -1,5 +1,5 @@
 # istio CA watching all namespaces
-apiVersion: apps/v1
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: istio-citadel
@@ -11,10 +11,7 @@ metadata:
     release: {{ .Release.Name }}
     istio: citadel
 spec:
-  replicas: {{ .Values.replicaCount }}
-  selector:
-    matchLabels:
-      istio: citadel
+  replicas: 1
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -36,15 +33,12 @@ spec:
 {{- end }}
       containers:
         - name: citadel
-{{- if contains "/" .Values.image }}
-          image: "{{ .Values.image }}"
-{{- else }}
           image: "{{ .Values.global.hub }}/{{ .Values.image }}:{{ .Values.global.tag }}"
-{{- end }}
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           args:
             - --append-dns-names=true
             - --grpc-port=8060
+            - --grpc-hostname=citadel
             - --citadel-storage-namespace={{ .Release.Namespace }}
             - --custom-dns-names=istio-pilot-service-account.{{ .Release.Namespace }}:istio-pilot.{{ .Release.Namespace }}
             - --monitoring-port={{ .Values.global.monitoringPort }}
@@ -60,25 +54,12 @@ spec:
           {{- if .Values.global.trustDomain }}
             - --trust-domain={{ .Values.global.trustDomain }}
           {{- end }}
-          {{- if .Values.workloadCertTtl }}
-            - --workload-cert-ttl={{ .Values.workloadCertTtl }}
-          {{- end }}
-          {{- if .Values.citadelHealthCheck }}
-            - --liveness-probe-path=/tmp/ca.liveness # path to the liveness health check status file
-            - --liveness-probe-interval=60s # interval for health check file update
-            - --probe-check-interval=15s    # interval for health status check
-          {{- end }}
-          {{- if .Values.citadelHealthCheck }}
           livenessProbe:
-            exec:
-              command:
-              - /usr/local/bin/istio_ca
-              - probe
-              - --probe-path=/tmp/ca.liveness # path to the liveness health check status file
-              - --interval=125s # the maximum time gap allowed between the file mtime and the current sys clock
-            initialDelaySeconds: 60
-            periodSeconds: 60
-          {{- end }}
+            httpGet:
+              path: /version
+              port: {{ .Values.global.monitoringPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
           resources:
 {{- if .Values.resources }}
 {{ toYaml .Values.resources | indent 12 }}
@@ -99,10 +80,3 @@ spec:
       affinity:
       {{- include "nodeaffinity" . | indent 6 }}
       {{- include "podAntiAffinity" . | indent 6 }}
-      {{- if .Values.tolerations }}
-      tolerations:
-{{ toYaml .Values.tolerations | indent 6 }}
-      {{- else if .Values.global.defaultTolerations }}
-      tolerations:
-{{ toYaml .Values.global.defaultTolerations | indent 6 }}
-      {{- end }}

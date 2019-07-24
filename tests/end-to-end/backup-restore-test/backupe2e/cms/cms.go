@@ -3,6 +3,7 @@ package cms
 import (
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/cms/testsuite"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	. "github.com/smartystreets/goconvey/convey"
@@ -10,6 +11,7 @@ import (
 )
 
 type cmsTest struct {
+	uuid       string
 	restConfig *restclient.Config
 	testSuite  *testsuite.TestSuite
 	t          *testing.T
@@ -24,6 +26,7 @@ func NewCmsTest(t *testing.T) (*cmsTest, error) {
 	return &cmsTest{
 		restConfig: restConfig,
 		testSuite:  nil,
+		uuid:       uuid.New().String(),
 		t:          t,
 	}, nil
 }
@@ -38,13 +41,15 @@ func (a *cmsTest) CreateResources(namespace string) {
 }
 
 func (a *cmsTest) TestResources(namespace string) {
-	if a.testSuite == nil {
-		testSuite, err := testsuite.New(a.restConfig, namespace, a.t)
-		So(err, ShouldBeNil)
-		a.setTestSuite(testSuite)
-	}
-
 	err := a.testSuite.WaitForDocsTopicsReady()
+	So(err, ShouldBeNil)
+}
+
+func (a *cmsTest) DeleteResources(namespace string) {
+	err := a.testSuite.DeleteClusterDocsTopic()
+	So(err, ShouldBeNil)
+
+	err = a.testSuite.WaitForClusterDocsTopicDeleted()
 	So(err, ShouldBeNil)
 }
 
