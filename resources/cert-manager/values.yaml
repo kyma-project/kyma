@@ -72,7 +72,8 @@ securityContext:
   fsGroup: 1001
   runAsUser: 1001
 
-podAnnotations: {}
+podAnnotations:
+  sidecar.istio.io/inject: "false"
 
 podLabels: {}
 # Optional DNS settings, useful if you have a public and private DNS zone for
