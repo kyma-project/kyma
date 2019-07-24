@@ -6,12 +6,13 @@ The Event Bus enables Kyma to integrate with various other external solutions. T
 
 ## Docker Images
 
-Currently, Event Bus makes the following three Docker images available to the `kyma core` Helm chart:
+Currently, Event Bus makes the following three Docker images available to the `event-bus` Helm chart:
 
 - event-publish-service
 - subscription-controller
+- nats-streaming-init
 
-There are also end-to-end test Docker images to use as `helm tests`. See [the tests in the `event-bus` directory](https://github.com/kyma-project/kyma/tree/master/tests/event-bus) for more details.
+There is also end-to-end test Docker image which is used in TestDefinition executed by [Octopus](https://github.com/kyma-incubator/octopus).
 
 ## Development
 
