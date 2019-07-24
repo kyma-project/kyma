@@ -230,8 +230,8 @@ func TestReconcile(t *testing.T) {
 		return fnUpdatedFetched.Spec.Function
 	}, timeout, 10*time.Second).Should(gomega.Equal(fnUpdated.Spec.Function))
 
-	fnUpdatedFetchedSpec:=fnUpdatedFetched.Spec
-	fnUpdatedSpec:=fnUpdated.Spec
+	fnUpdatedFetchedSpec := fnUpdatedFetched.Spec
+	fnUpdatedSpec := fnUpdated.Spec
 	g.Expect(fnUpdatedFetchedSpec).To(gomega.Equal(fnUpdatedSpec))
 	// call reconcile function
 	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: "foo", Namespace: "default"}})))
