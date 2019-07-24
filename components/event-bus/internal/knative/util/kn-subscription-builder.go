@@ -27,6 +27,16 @@ func (s *SubscriptionBuilder) ToChannel(name string) *SubscriptionBuilder {
 	return s
 }
 
+// ToNatssChannel todo
+func (s *SubscriptionBuilder) ToNatssChannel(name string) *SubscriptionBuilder {
+	s.Spec.Channel = corev1.ObjectReference{
+		Name:       name,
+		Kind:       "NatssChannel",
+		APIVersion: "messaging.knative.dev/v1alpha1",
+	}
+	return s
+}
+
 // EmptyReply sets the SubscriptionBuilder Reply.
 func (s *SubscriptionBuilder) EmptyReply() *SubscriptionBuilder {
 	s.Spec.Reply = &eventingv1alpha1.ReplyStrategy{}
@@ -60,7 +70,7 @@ func (s *SubscriptionBuilder) ToKNService(knServiceName string) *SubscriptionBui
 // ToURI sets the SubscriptionBuilder Subscriber URI.
 func (s *SubscriptionBuilder) ToURI(uri *string) *SubscriptionBuilder {
 	s.Spec.Subscriber = &eventingv1alpha1.SubscriberSpec{
-		DNSName: uri,
+		URI: uri,
 	}
 	return s
 }
@@ -92,13 +102,52 @@ func Subscription(name string, namespace string) *SubscriptionBuilder {
 					Kind:       "Service",
 					APIVersion: "serving.knative.dev/v1alpha1",
 				},
-				DNSName: &emptyString,
+				URI: &emptyString,
 			},
 			Reply: &eventingv1alpha1.ReplyStrategy{
 				Channel: &corev1.ObjectReference{
 					Name:       "",
 					Kind:       "Channel",
 					APIVersion: "serving.knative.dev/v1alpha1",
+				},
+			},
+		},
+	}
+	return &SubscriptionBuilder{
+		Subscription: subscription,
+	}
+}
+
+// NatssChannelSubscription todo
+func NatssChannelSubscription(name string, namespace string) *SubscriptionBuilder {
+	subscription := &eventingv1alpha1.Subscription{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "Subscription",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+		Spec: eventingv1alpha1.SubscriptionSpec{
+			Channel: corev1.ObjectReference{
+				Name:       "",
+				Kind:       "NatssChannel",
+				APIVersion: "messaging.knative.dev/v1alpha1",
+			},
+			Subscriber: &eventingv1alpha1.SubscriberSpec{
+				Ref: &corev1.ObjectReference{
+					Name:       "",
+					Kind:       "Service",
+					APIVersion: "serving.knative.dev/v1beta1",
+				},
+				URI: &emptyString,
+			},
+			Reply: &eventingv1alpha1.ReplyStrategy{
+				Channel: &corev1.ObjectReference{
+					Name:       "",
+					Kind:       "NatssChannel",
+					APIVersion: "messaging.knative.dev/v1alpha1",
 				},
 			},
 		},

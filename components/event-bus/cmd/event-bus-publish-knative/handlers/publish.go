@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 
-	"github.com/kyma-project/kyma/components/event-bus/api/publish/v1"
+	v1 "github.com/kyma-project/kyma/components/event-bus/api/publish/v1"
 	publishv2 "github.com/kyma-project/kyma/components/event-bus/api/publish/v2"
 
 	"log"

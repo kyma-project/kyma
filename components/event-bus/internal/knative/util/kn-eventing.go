@@ -10,12 +10,17 @@ import (
 	"net/http/httputil"
 	"time"
 
+	"github.com/knative/eventing/contrib/natss/pkg/apis/messaging/v1alpha1"
+	clientsetNatss "github.com/knative/eventing/contrib/natss/pkg/client/clientset/versioned"
+	informersNatss "github.com/knative/eventing/contrib/natss/pkg/client/informers/externalversions"
+	v1alpha1Natss "github.com/knative/eventing/contrib/natss/pkg/client/informers/externalversions/messaging/v1alpha1"
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	evclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
 	eventingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/cache"
 )
 
 /*
@@ -61,11 +66,14 @@ type KnativeAccessLib interface {
 		timeout time.Duration) (*evapisv1alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string) error
+	CreateNatssChannelSubscription(name string, namespace string, channelName string, uri *string) error
 	DeleteSubscription(name string, namespace string) error
 	GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error)
 	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
 	SendMessage(channel *evapisv1alpha1.Channel, headers *map[string][]string, message *string) error
+	SendMessageToNatssChannel(channel *v1alpha1.NatssChannel, headers *map[string][]string, payload *string) error
 	InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) error
+	GetNatssChannel(name string, namespace string) (*v1alpha1.NatssChannel, error)
 }
 
 // NewKnativeLib returns an interface to KnativeLib, which can be mocked
@@ -75,7 +83,8 @@ func NewKnativeLib() (KnativeAccessLib, error) {
 
 // KnativeLib represents the knative lib.
 type KnativeLib struct {
-	evClient eventingv1alpha1.EventingV1alpha1Interface
+	natssChannelInformer v1alpha1Natss.NatssChannelInformer
+	evClient             eventingv1alpha1.EventingV1alpha1Interface
 }
 
 // Verify the struct KnativeLib implements KnativeLibIntf
@@ -93,8 +102,23 @@ func GetKnativeLib() (*KnativeLib, error) {
 		log.Printf("ERROR: GetChannel(): creating eventing client: %v", err)
 		return nil, err
 	}
+	// todo refactor
+	// init natssChannelInformer ///////////////////////////////////////////////////////////////////////////////////////
+	stopCh := make(<-chan struct{})
+	resyncPeriod := 30 * time.Second
+	var natssChannelInformer v1alpha1Natss.NatssChannelInformer
+	if natssClient := clientsetNatss.NewForConfigOrDie(config); natssClient != nil {
+		messagingInformerFactory := informersNatss.NewSharedInformerFactory(natssClient, resyncPeriod)
+		natssChannelInformer = messagingInformerFactory.Messaging().V1alpha1().NatssChannels()
+		if err := startInformers(stopCh, natssChannelInformer.Informer()); err != nil {
+			log.Printf("failed to start natssChannelInformer %v", err)
+			return nil, err
+		}
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	k := &KnativeLib{
-		evClient: evClient.EventingV1alpha1(),
+		natssChannelInformer: natssChannelInformer,
+		evClient:             evClient.EventingV1alpha1(),
 	}
 	return k, nil
 }
@@ -110,6 +134,19 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.
 	}
 	if !channel.Status.IsReady() {
 		return nil, fmt.Errorf("ERROR: GetChannel():channel NotReady")
+	}
+	return channel, nil
+}
+
+// GetNatssChannel todo
+func (k *KnativeLib) GetNatssChannel(name string, namespace string) (*v1alpha1.NatssChannel, error) {
+	channel, err := k.natssChannelInformer.Lister().NatssChannels(namespace).Get(name)
+	if err != nil {
+		log.Printf("error: GetNatssChannel(): getting channel: %v", err)
+		return nil, err
+	}
+	if !channel.Status.IsReady() {
+		return nil, fmt.Errorf("error: GetNatssChannel():channel NotReady")
 	}
 	return channel, nil
 }
@@ -156,6 +193,16 @@ func (k *KnativeLib) CreateSubscription(name string, namespace string, channelNa
 	sub := Subscription(name, namespace).ToChannel(channelName).ToURI(uri).EmptyReply().Build()
 	if _, err := k.evClient.Subscriptions(namespace).Create(sub); err != nil {
 		log.Printf("ERROR: CreateSubscription(): creating subscription: %v", err)
+		return err
+	}
+	return nil
+}
+
+// CreateNatssChannelSubscription todo
+func (k *KnativeLib) CreateNatssChannelSubscription(name string, namespace string, channelName string, uri *string) error {
+	sub := NatssChannelSubscription(name, namespace).ToNatssChannel(channelName).ToURI(uri).EmptyReply().Build()
+	if _, err := k.evClient.Subscriptions(namespace).Create(sub); err != nil {
+		log.Printf("ERROR: CreateNatssChannelSubscription(): creating subscription: %v", err)
 		return err
 	}
 	return nil
@@ -224,9 +271,62 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[s
 	return nil
 }
 
+// SendMessageToNatssChannel todo
+func (k *KnativeLib) SendMessageToNatssChannel(channel *v1alpha1.NatssChannel, headers *map[string][]string, payload *string) error {
+	httpClient := &http.Client{
+		Transport: initHTTPTransport(),
+	}
+	req, err := makeHTTPRequestToNatssChannel(channel, headers, payload)
+	if err != nil {
+		log.Printf("ERROR: SendMessage(): makeHTTPRequest() failed: %v", err)
+		return err
+	}
+
+	res, err := httpClient.Do(req)
+	if err != nil {
+		log.Printf("ERROR: SendMessage(): could not send HTTP request: %v", err)
+		return err
+	}
+	defer func() {
+		_ = res.Body.Close()
+	}()
+
+	if res.StatusCode == http.StatusNotFound {
+		// try to resend the message only once
+		if err := resendMessageToNatssChannel(httpClient, channel, headers, payload); err != nil {
+			log.Printf("ERROR: SendMessage(): resendMessage() failed: %v", err)
+			return err
+		}
+	} else if res.StatusCode != http.StatusAccepted {
+		log.Printf("ERROR: SendMessage(): %s", res.Status)
+		return errors.New(res.Status)
+	}
+	// ok
+	return nil
+}
+
 // InjectClient injects a client, useful for running tests.
 func (k *KnativeLib) InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) error {
 	k.evClient = c
+	return nil
+}
+
+type informer interface {
+	Run(<-chan struct{})
+	HasSynced() bool
+}
+
+func startInformers(stopCh <-chan struct{}, informers ...informer) error {
+	for _, informer := range informers {
+		informer := informer
+		go informer.Run(stopCh)
+	}
+
+	for i, informer := range informers {
+		if ok := cache.WaitForCacheSync(stopCh, informer.HasSynced); !ok {
+			return fmt.Errorf("failed to wait for cache at index %d to sync", i)
+		}
+	}
 	return nil
 }
 
@@ -276,6 +376,52 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 	return nil
 }
 
+func resendMessageToNatssChannel(httpClient *http.Client, channel *v1alpha1.NatssChannel, headers *map[string][]string, message *string) error {
+	timeout := time.After(10 * time.Second)
+	tick := time.Tick(200 * time.Millisecond)
+	req, err := makeHTTPRequestToNatssChannel(channel, headers, message)
+	if err != nil {
+		log.Printf("ERROR: resendMessage(): makeHTTPRequest() failed: %v", err)
+		return err
+	}
+	res, err := httpClient.Do(req)
+	if err != nil {
+		log.Printf("ERROR: resendMessage(): could not send HTTP request: %v", err)
+		return err
+	}
+	defer func() {
+		_ = res.Body.Close()
+	}()
+	//dumpResponse(res)
+	sc := res.StatusCode
+	for sc == http.StatusNotFound {
+		select {
+		case <-timeout:
+			log.Printf("ERROR: resendMessage(): timed out")
+			return errors.New("ERROR: timed out")
+		case <-tick:
+			req, err := makeHTTPRequestToNatssChannel(channel, headers, message)
+			if err != nil {
+				log.Printf("ERROR: resendMessage(): makeHTTPRequest() failed: %v", err)
+				return err
+			}
+			res, err := httpClient.Do(req)
+			if err != nil {
+				log.Printf("ERROR: resendMessage(): could not resend HTTP request: %v", err)
+				return err
+			}
+			defer func() { _ = res.Body.Close() }()
+			dumpResponse(res)
+			sc = res.StatusCode
+		}
+	}
+	if sc != http.StatusAccepted {
+		log.Printf("ERROR: resendMessage(): %v", sc)
+		return errors.New(string(sc))
+	}
+	return nil
+}
+
 func makeChannel(name string, namespace string, labels *map[string]string) *evapisv1alpha1.Channel {
 	c := &evapisv1alpha1.Channel{
 		TypeMeta: metav1.TypeMeta{
@@ -292,6 +438,21 @@ func makeChannel(name string, namespace string, labels *map[string]string) *evap
 }
 
 func makeHTTPRequest(channel *evapisv1alpha1.Channel, headers *map[string][]string, payload *string) (*http.Request, error) {
+	var jsonStr = []byte(*payload)
+
+	channelURI := "http://" + channel.Status.Address.Hostname
+	req, err := http.NewRequest(http.MethodPost, channelURI, bytes.NewBuffer(jsonStr))
+	if err != nil {
+		log.Printf("ERROR: makeHTTPRequest(): could not create HTTP request: %v", err)
+		return nil, err
+	}
+	req.Header = *headers
+	req.Header.Set("Content-Type", "application/json")
+
+	return req, nil
+}
+
+func makeHTTPRequestToNatssChannel(channel *v1alpha1.NatssChannel, headers *map[string][]string, payload *string) (*http.Request, error) {
 	var jsonStr = []byte(*payload)
 
 	channelURI := "http://" + channel.Status.Address.Hostname

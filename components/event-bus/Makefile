@@ -31,7 +31,7 @@ endif
 build-image: pull-licenses
 	./docker-build-event-bus-publish-knative.sh $(APP_NAME_PUBLISH_KN) latest event-bus
 	./docker-build-event-bus-sck.sh $(APP_NAME_SCK) latest event-bus
-	./docker-build-nats-init.sh $(APP_NAME_NI) latest event-bus
+#	./docker-build-nats-init.sh $(APP_NAME_NI) latest event-bus # todo uncomment
 
 .PHONY: push-image
 push-image:
