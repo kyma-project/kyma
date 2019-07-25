@@ -63,6 +63,8 @@ func NewService(reconciler Reconciler, applicationRepository ApplicationReposito
 
 func (s *service) Apply(applications []Application) ([]Result, apperrors.AppError) {
 
+	return nil, nil
+
 	actions, err := s.reconciler.Do(applications)
 	if err != nil {
 		return nil, err

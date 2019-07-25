@@ -2,10 +2,7 @@ package compassconnection
 
 import (
 	"context"
-
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
-
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
+	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -32,19 +29,20 @@ type Client interface {
 
 // Reconciler reconciles a CompassConnection object
 type Reconciler struct {
-	client       Client
-	supervisor   Supervisor
-	synchronizer synchronization.Service
-	configClient compass.ConfigClient
+	client     Client
+	supervisor Supervisor
+
+	minimalConfigSyncTime time.Duration
 
 	log *logrus.Entry
 }
 
 func InitCompassConnectionController(
 	mgr manager.Manager,
-	supervisior Supervisor) error {
+	supervisior Supervisor,
+	minimalConfigSyncTime time.Duration) error {
 
-	reconciler := newReconciler(mgr.GetClient(), supervisior)
+	reconciler := newReconciler(mgr.GetClient(), supervisior, minimalConfigSyncTime)
 
 	return startController(mgr, reconciler)
 }
@@ -58,11 +56,12 @@ func startController(mgr manager.Manager, reconciler reconcile.Reconciler) error
 	return c.Watch(&source.Kind{Type: &v1alpha1.CompassConnection{}}, &handler.EnqueueRequestForObject{})
 }
 
-func newReconciler(client Client, supervisior Supervisor) reconcile.Reconciler {
+func newReconciler(client Client, supervisior Supervisor, minimalConfigSyncTime time.Duration) reconcile.Reconciler {
 	return &Reconciler{
-		client:     client,
-		supervisor: supervisior,
-		log:        logrus.WithField("Controller", "CompassConnection"),
+		client:                client,
+		supervisor:            supervisior,
+		minimalConfigSyncTime: minimalConfigSyncTime,
+		log:                   logrus.WithField("Controller", "CompassConnection"),
 	}
 }
 
@@ -75,7 +74,7 @@ func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Info("Compass Connection deleted.")
+			log.Info("Compass Connection deleted. Trying to initialize new connection...")
 
 			// Try to establish new connection
 			instance, err := r.supervisor.InitializeCompassConnection()
@@ -110,10 +109,15 @@ func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 		return reconcile.Result{}, nil
 	}
 
-	// TODO: check last synchronization time and if it passed
+	// If minimalConfigSyncTime did not pass, skip synchronization
+	if !shouldResyncConfig(instance, r.minimalConfigSyncTime) {
+		log.Infof("Skipping config synchronization. Minimal resync time not passed. Last attempt: %v", instance.Status.SynchronizationStatus.LastAttempt)
+		return reconcile.Result{}, nil
+	}
 
 	log.Info("Trying to connect to Compass and apply Runtime configuration...")
 
+	// Fetch and apply configuration
 	synchronized, err := r.supervisor.SynchronizeWithCompass(instance)
 	if err != nil {
 		log.Errorf("Failed to synchronize with Compass: %s", err.Error())
@@ -123,4 +127,20 @@ func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	log.Infof("Synchronization finished. Compass Connection status: %s", synchronized.Status)
 
 	return reconcile.Result{}, nil
+}
+
+// Configuration resync is performed not more frequent that minimalConfigSyncTime,
+// unless deliberately requested by spec.ResyncConfig set to true
+func shouldResyncConfig(connection *v1alpha1.CompassConnection, minimalConfigSyncTime time.Duration) bool {
+	// TODO - add such option
+	//if connection.Spec.ResyncNow {
+	//	return true
+	//}
+	if connection.Status.SynchronizationStatus == nil {
+		return true
+	}
+
+	timeSinceLastSyncAttempt := time.Now().Unix() - connection.Status.SynchronizationStatus.LastAttempt.Unix()
+
+	return timeSinceLastSyncAttempt >= int64(minimalConfigSyncTime.Seconds())
 }

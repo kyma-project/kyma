@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
 
@@ -59,7 +60,7 @@ func main() {
 	}
 
 	certManager := certificates.NewCredentialsManager()
-	compassConfigClient := compass.NewConfigurationClient()
+	compassConfigClient := compass.NewConfigurationClient(options.tenant, options.runtimeId, graphql.New)
 	syncService := synchronization.NewSynchronizationService()
 
 	compassConnector := compass.NewCompassConnector(options.tokenURLConfigFile)
@@ -70,9 +71,11 @@ func main() {
 		compassConfigClient,
 		syncService)
 
+	minimalConfigSyncTime := time.Duration(options.minimalConfigSyncTime) * time.Second
+
 	// Setup all Controllers
 	log.Info("Setting up controller")
-	if err := compassconnection.InitCompassConnectionController(mgr, connectionSupervisor); err != nil {
+	if err := compassconnection.InitCompassConnectionController(mgr, connectionSupervisor, minimalConfigSyncTime); err != nil {
 		log.Error(err, "Unable to register controllers to the manager")
 		os.Exit(1)
 	}
