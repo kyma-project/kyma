@@ -40,6 +40,9 @@ type RootResolver struct {
 
 func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles) (*RootResolver, error) {
 	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
+	if err != nil {
+		return nil, err
+	}
 	makePluggable := module.MakePluggableFunc(uiContainer.BackendModuleInformer)
 
 	assetStoreContainer, err := assetstore.New(restConfig, assetstoreCfg, informerResyncPeriod)
