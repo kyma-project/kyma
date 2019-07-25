@@ -28,6 +28,8 @@ spec:
         control-plane: controller-manager
         app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+      {{ toYaml .Values.annotations | indent 2 }}
     spec:
       containers:
         - name: {{ .Chart.Name }}-controller
