@@ -10,6 +10,8 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -24,7 +26,15 @@ type Converter interface {
 }
 
 type converter struct {
+	namespace    string
 	nameResolver k8sconsts.NameResolver
+}
+
+func NewConverter(namespace string) Converter {
+	return converter{
+		namespace:    namespace,
+		nameResolver: k8sconsts.NewNameResolver("kyma-integration"),
+	}
 }
 
 func (c converter) Do(application Application) v1alpha1.Application {
@@ -33,12 +43,30 @@ func (c converter) Do(application Application) v1alpha1.Application {
 		description = *application.Description
 	}
 
+	convertLabels := func(directorLabels Labels) map[string]string {
+		labels := make(map[string]string)
+
+		for key, value := range directorLabels {
+			newVal := strings.Join(value, ",")
+			labels[key] = newVal
+		}
+
+		return labels
+	}
+
 	return v1alpha1.Application{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Application",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: application.Name,
+		},
 		Spec: v1alpha1.ApplicationSpec{
 			Description:      description,
 			SkipInstallation: false,
-			AccessLabel:      "",  // TODO: what should be put here?
-			Labels:           nil, // How to apply labels? Type is incompatible with the Director's api
+			AccessLabel:      application.Name,
+			Labels:           convertLabels(application.Labels),
 			Services:         c.toServices(application.Name, application.APIs, application.EventAPIs),
 		},
 	}
@@ -69,9 +97,9 @@ func (c converter) toAPIService(application string, definition APIDefinition) v1
 		Identifier:          "", // not available in the Director's API
 		Name:                createServiceName(definition.Name, definition.ID),
 		DisplayName:         definition.Name,
-		Description:         definition.Description,                       // Application Registry adds here ShortDescription from the payload
-		Labels:              map[string]string{connectedApp: application}, // Application Registry adds here an union of two things: labels specified in the payload and connectedApp label
-		LongDescription:     "",                                           // not available in the Director's API ; Application Registry adds here Description from the payload
+		Description:         definition.Description,
+		Labels:              map[string]string{connectedApp: application}, // not available in the Director's API
+		LongDescription:     "",                                           // not available in the Director's API
 		ProviderDisplayName: "",                                           // not available in the Director's API
 		Tags:                make([]string, 0),
 		Entries: []v1alpha1.Entry{
@@ -96,8 +124,7 @@ func (c converter) toServiceEntry(application string, definition APIDefinition) 
 		Type:                        specAPIType,
 		AccessLabel:                 c.nameResolver.GetResourceName(application, definition.ID),
 		TargetUrl:                   definition.TargetUrl,
-		SpecificationUrl:            "",                         // Director returns BLOB here
-		ApiType:                     string(definition.APIType), // TODO: this is stored in the Application CRD but seems to not be used ; check what should be stored here
+		SpecificationUrl:            "", // Director returns BLOB here
 		Credentials:                 c.toCredentials(application, definition.ID, definition.Credentials),
 		RequestParametersSecretName: getRequestParamsSecretName(),
 	}
