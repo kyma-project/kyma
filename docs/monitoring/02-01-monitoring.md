@@ -2,7 +2,7 @@
 title: Architecture
 ---
 
-Before you learn how the complete metric flow looks in Kyma, read about component and resources that are crucial elements of the monitoring flow in Kyma.
+Before you learn how the complete metric flow looks in Kyma, read about components and resources that are crucial elements of the monitoring flow in Kyma.
 
 ## Components
 
@@ -16,7 +16,7 @@ The main monitoring components include:
 
   For more details, read the [Prometheus documentation](https://prometheus.io/docs/introduction).
 
-- **Grafana** that provides a dashboard and a graph editor to visualize metrics collected from the Prometheus API. Grafana uses the query language called [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/) to select and aggregate the metrics data from the Prometheus database. To access the Grafana UI, use the `https://grafana.{DOMAIN}` address, where {DOMAIN} is the domain of your Kyma cluster.
+- **Grafana** that provides a dashboard and a graph editor to visualize metrics collected from the Prometheus API. Grafana uses the query language called [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/) to select and aggregate metrics data from the Prometheus database. To access the Grafana UI, use the `https://grafana.{DOMAIN}` address, where `{DOMAIN}` is the domain of your Kyma cluster.
 
   For more details, read the [Grafana documentation](https://grafana.com/docs/guides/getting_started/).
 
@@ -40,8 +40,8 @@ The complete monitoring flow in Kyma comes down to these components and steps:
 
 ![](./assets/monitoring-architecture.svg)
 
-1. Upon Kyma installation on a cluster, Prometheus Operator creates a Prometheus instance with the default configuration.
+1. Upon Kyma installation on a cluster, Prometheus Operator creates a Prometheus instance with default configuration.
 2. The Prometheus server periodically polls all metrics exposed on endpoints of services specified in Service Monitors. Prometheus stores these metrics in a time-series database.
-3. If Prometheus detects any anomalies in metrics that are covered by the alert rules, it triggers the alerts and passes them to the Alertmanager.
+3. If Prometheus detects any anomalies in metrics that are covered by alert rules, it triggers the alerts and passes them to Alertmanager.
 4. If you manually configure a notification channel, you can instantly receive detailed information on the metric alerts detected by Prometheus.
 5. You can visualize metrics and track their historical data on Grafana dashboards.
