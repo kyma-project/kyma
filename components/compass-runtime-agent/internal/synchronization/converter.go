@@ -36,6 +36,13 @@ func NewConverter(nameResolver k8sconsts.NameResolver) Converter {
 	}
 }
 
+// TODO: consider differences in Director's and Application CRD
+// 1. Director provides Application Name and Application ID but we cannot store both. Application ID is used as application name in the CRD.
+// 2. Director provides application labels in a form of map[string]string[] whereas application CRD expects map[string]string
+// 3. Service object being a part of Application CRD contains some fields which are not returned by the Director:
+// 	 1) ProviderDisplayName field ; Application Registry takes this value from the payload passed on service registration. Question: where should it be
+//	 2) LongDescription field ; Application Registry takes this value from the payload passed on service registration.
+//   3) Labels for api definition ; Application Registry allows to specify labels to be added to Service object
 func (c converter) Do(application Application) v1alpha1.Application {
 	description := ""
 	if application.Description != nil {
