@@ -4,11 +4,12 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
 	"regexp"
 	"strings"
 	"unicode"
+
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
 )
 
 const (
