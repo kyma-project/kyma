@@ -28,6 +28,7 @@ const (
 	DocumentFormatMarkdown DocumentFormat = "MARKDOWN"
 )
 
+// Application contains all associated APIs, EventAPIs and Document
 type Application struct {
 	ID          string
 	Name        string
@@ -81,7 +82,7 @@ type EventAPISpec struct {
 	Type EventAPISpecType
 }
 
-// Credentials contains OAuth, BasicAuth or Certificates configuration along with optional CSRF data.
+// Credentials contains OAuth or BasicAuth configuration along with optional CSRF data.
 type Credentials struct {
 	// OAuth configuration
 	Oauth *Oauth
