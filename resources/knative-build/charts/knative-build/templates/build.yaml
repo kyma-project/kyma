@@ -134,7 +134,6 @@ rules:
   - podsecuritypolicies
   verbs:
   - use
-
 ---
 apiVersion: v1
 kind: ServiceAccount
