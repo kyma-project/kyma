@@ -3,7 +3,7 @@ kind: "DestinationRule"
 metadata:
   name: {{ template "fullname" . }}
 spec:
-  host: lambdas-ui.{{ .Release.Namespace }}.svc.cluster.local
+  host: {{ template "fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
       mode: DISABLE
