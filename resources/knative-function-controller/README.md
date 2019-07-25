@@ -1,7 +1,5 @@
 # knative-function-controller
 
-> Provide the name of your chart. Use Heading 1 (H1).
-
 ## Overview
 
 This project contains the chart for the Function Controller.
