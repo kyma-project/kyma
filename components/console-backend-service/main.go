@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
@@ -23,7 +24,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/origin"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/signal"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/tracing"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go"
 	zipkin "github.com/openzipkin/zipkin-go-opentracing"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
@@ -42,6 +43,7 @@ type config struct {
 	KubeconfigPath       string        `envconfig:"optional"`
 	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
+	AuthEnabled          bool          `envconfig:"default=true"`
 	Application          application.Config
 	AssetStore           assetstore.Config
 	OIDC                 authn.OIDCConfig
@@ -51,50 +53,34 @@ type config struct {
 }
 
 func main() {
-	cfg, developmentMode, err := loadConfig("APP")
+	cfg, err := loadConfig("APP")
 	exitOnError(err, "Error while loading app config")
 	parseFlags(cfg)
 
 	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	exitOnError(err, "Error while initializing REST client config")
 
-	resolvers, err := domain.New(k8sConfig, cfg.Application, cfg.AssetStore, cfg.InformerResyncPeriod, cfg.FeatureToggles)
-	exitOnError(err, "Error while creating resolvers")
-
-	kubeClient, err := kubernetes.NewForConfig(k8sConfig)
-	exitOnError(err, "Failed to instantiate Kubernetes client")
-
-	gqlCfg := gqlschema.Config{Resolvers: resolvers}
-
-	var authenticator authenticatorpkg.Request
-	if !developmentMode {
-		authenticator, err = authn.NewOIDCAuthenticator(&cfg.OIDC)
-		exitOnError(err, "Error while creating OIDC authenticator")
-		sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
-		authorizer, err := authz.NewAuthorizer(sarClient, cfg.SARCacheConfig)
-		exitOnError(err, "Failed to create authorizer")
-
-		gqlCfg.Directives.HasAccess = authz.NewRBACDirective(authorizer, kubeClient.Discovery())
-	}
-
 	stopCh := signal.SetupChannel()
-	resolvers.WaitForCacheSync(stopCh)
 
-	executableSchema := gqlschema.NewExecutableSchema(gqlCfg)
+	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	listener, err := net.Listen("tcp", addr)
+	exitOnError(err, "Error while binding listener")
+	glog.Infof("Listening on %s", addr)
 
-	runServer(stopCh, cfg, executableSchema, authenticator)
+	err = run(listener, stopCh, cfg, k8sConfig)
+	if err != nil {
+		glog.Fatal(err)
+	}
 }
 
-func loadConfig(prefix string) (config, bool, error) {
+func loadConfig(prefix string) (config, error) {
 	cfg := config{}
 	err := envconfig.InitWithPrefix(&cfg, prefix)
 	if err != nil {
-		return cfg, false, err
+		return cfg, err
 	}
 
-	developmentMode := cfg.KubeconfigPath != ""
-
-	return cfg, developmentMode, nil
+	return cfg, nil
 }
 
 func exitOnError(err error, context string) {
@@ -129,7 +115,36 @@ func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
 	return config, nil
 }
 
-func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema, authenticator authenticatorpkg.Request) {
+func run(listener net.Listener, stopCh <-chan struct{}, cfg config, k8sConfig *restclient.Config) error {
+	resolvers, err := domain.New(k8sConfig, cfg.Application, cfg.AssetStore, cfg.InformerResyncPeriod, cfg.FeatureToggles)
+	if err != nil {
+		return errors.Wrap(err, "Error while creating resolvers")
+	}
+
+	kubeClient, err := kubernetes.NewForConfig(k8sConfig)
+	if err != nil {
+		return errors.Wrap(err, "Failed to instantiate Kubernetes client")
+	}
+
+	gqlCfg := gqlschema.Config{Resolvers: resolvers}
+	var authenticator authenticatorpkg.Request
+	if cfg.AuthEnabled {
+		authenticator, err = authn.NewOIDCAuthenticator(&cfg.OIDC)
+		exitOnError(err, "Error while creating OIDC authenticator")
+		sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
+		authorizer, err := authz.NewAuthorizer(sarClient, cfg.SARCacheConfig)
+		exitOnError(err, "Failed to create authorizer")
+
+		gqlCfg.Directives.HasAccess = authz.NewRBACDirective(authorizer, kubeClient.Discovery())
+	}
+
+	resolvers.WaitForCacheSync(stopCh)
+	executableSchema := gqlschema.NewExecutableSchema(gqlCfg)
+	runServer(listener, stopCh, cfg, executableSchema, authenticator)
+	return nil
+}
+
+func runServer(listener net.Listener, stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema, authenticator authenticatorpkg.Request) {
 	setupTracing(cfg.Tracing, cfg.Port)
 	var allowedOrigins []string
 	if len(cfg.AllowedOrigins) == 0 {
@@ -161,10 +176,7 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 		OptionsPassthrough: false,
 	}).Handler(router)
 
-	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	srv := &http.Server{Addr: addr, Handler: serverHandler}
-
-	glog.Infof("Listening on %s", addr)
+	srv := &http.Server{Handler: serverHandler}
 
 	go func() {
 		<-stop
@@ -174,7 +186,7 @@ func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema
 		}
 	}()
 
-	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+	if err := srv.Serve(listener); err != http.ErrServerClosed {
 		glog.Errorf("HTTP server ListenAndServe: %v", err)
 	}
 }
