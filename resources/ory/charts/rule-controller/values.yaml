@@ -1,0 +1,31 @@
+replicaCount: 1
+
+configMapName: ory-oathkeeper-rules
+
+image:
+  # ORY Oathkeeper Rule Controller image
+  repository: tsmsap/ory-rule-controller
+  # ORY Oathkeeper Rule Controller version
+  tag: 0.0.1
+  # Image pull policy
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 30Mi
+  requests:
+    cpu: 100m
+    memory: 20Mi
+
+# Node labels for pod assignment.
+nodeSelector: {}
+# If you do want to specify node labels, uncomment the following
+# lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
+#   foo: bar
+
+# Configure node tolerations.
+tolerations: []
+
+# Configure node affinity
+affinity: {}
