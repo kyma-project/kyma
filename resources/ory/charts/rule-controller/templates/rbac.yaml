@@ -5,11 +5,11 @@ metadata:
   name: rule-controller-account
   namespace:  {{ .Release.Namespace }}
 ---
-kind: Role
+kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: rule-controller-role
-  namespace:  {{ .Release.Namespace }}
+  # namespace:  {{ .Release.Namespace }}
 rules:
   - apiGroups: ["oathkeeper.ory.sh"]
     resources: ["rules"]
@@ -17,10 +17,11 @@ rules:
   - apiGroups: [""]
     resources: ["configmaps"]
     verbs: ["get", "list", "watch", "create", "patch", "update"]
-    resourceNames:
-      - {{ .Values.configMapName | default "ory-oathkeeper-rules" }}
+    # TODO, fix controller call from all namespaces to single namespace
+    # resourceNames:
+    #   - {{ .Values.configMapName | default "ory-oathkeeper-rules" }}
 ---
-kind: RoleBinding
+kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: rule-controller-role-binding
@@ -31,5 +32,5 @@ subjects:
     namespace:  {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
   name: rule-controller-role
