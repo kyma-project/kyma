@@ -84,13 +84,16 @@ oathkeeper:
         enabled: true
 
         # REQUIRED IF ENABLED - The OAuth 2.0 Token Introspection endpoint.
-        introspection_url: https://my-website.com/oauth2/introspection
+        introspection_url: http://ory-hydra-admin:4445/oauth2/introspect
 
         # Sets the strategy to be used to validate/match the token scope. Supports "hierarchic", "exact", "wildcard", "none". Defaults
         # to "none".
         scope_strategy: exact
     authorizers:
       allow:
+        enabled: true
+    mutators:
+      noop:
         enabled: true
     serve:
       proxy:
