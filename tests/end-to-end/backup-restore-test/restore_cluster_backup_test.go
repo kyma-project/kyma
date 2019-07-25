@@ -9,7 +9,7 @@ import (
 
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
 
-	//. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/asset-store"
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/asset-store"
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/cms"
 
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
@@ -61,8 +61,8 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	apiControllerTest, err := NewApiControllerTestFromEnv()
 	fatalOnError(t, err, "while creating structure for ApiController test")
 
-	// myAssetStoreTest, err := NewAssetStoreTest(t)
-	// fatalOnError(t, err, "while creating structure for AssetStore test")
+	myAssetStoreTest, err := NewAssetStoreTest(t)
+	fatalOnError(t, err, "while creating structure for AssetStore test")
 
 	myMicroFrontendTest, err := NewMicrofrontendTest()
 	fatalOnError(t, err, "while creating structure for MicroFrontend test")
@@ -87,7 +87,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		myGrafanaTest,
 		scAddonsTest,
 		myCmsTest,
-		// myAssetStoreTest,
+		myAssetStoreTest,
 		apiControllerTest,
 		myMicroFrontendTest,
 		appBrokerTest,

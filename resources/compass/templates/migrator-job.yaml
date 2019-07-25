@@ -1,0 +1,60 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: compass-migration
+    labels:
+        app: {{ .Chart.Name }}
+        release: {{ .Release.Name }}
+    annotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-weight": "0"
+        "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+    template:
+        metadata:
+            labels:
+                app: {{ .Chart.Name }}
+                release: {{ .Release.Name }}
+        spec:
+            shareProcessNamespace: true
+            restartPolicy: Never
+            containers:
+                - name: migrator
+                  image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.schema_migrator.dir }}compass-schema-migrator:{{ .Values.global.images.schema_migrator.version }}
+                  imagePullPolicy: IfNotPresent
+                  env:
+                      - name: DB_USER
+                        valueFrom:
+                            secretKeyRef:
+                                name: compass-postgresql
+                                key: postgresql-username
+                      - name: DB_PASSWORD
+                        valueFrom:
+                            secretKeyRef:
+                                name: compass-postgresql
+                                key: postgresql-password
+                      - name: DB_HOST
+                        valueFrom:
+                            secretKeyRef:
+                                name: compass-postgresql
+                                key: postgresql-serviceName
+                      - name: DB_PORT
+                        valueFrom:
+                            secretKeyRef:
+                                name: compass-postgresql
+                                key: postgresql-servicePort
+                      - name: DB_NAME
+                        valueFrom:
+                            secretKeyRef:
+                                name: compass-postgresql
+                                key: postgresql-databaseName
+                      - name: DB_SSL
+                        valueFrom:
+                            secretKeyRef:
+                                name: compass-postgresql
+                                key: postgresql-sslMode
+                  command:
+                    - "/bin/bash"
+                  args:
+                    - "-c"
+                    - "./run.sh; exit_code=$?; echo '# KILLING PILOT-AGENT #'; pkill -TERM pilot-agent; exit $exit_code;"

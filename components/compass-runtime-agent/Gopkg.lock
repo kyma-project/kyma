@@ -10,25 +10,6 @@
   version = "v0.41.0"
 
 [[projects]]
-  digest = "1:b8158599e492595cd2ee70033a6e0e348907fd6bbf9a7fa138e15c8d6a73ff1f"
-  name = "github.com/99designs/gqlgen"
-  packages = [
-    "graphql",
-    "graphql/introspection",
-  ]
-  pruneopts = "UT"
-  revision = "b128a29122e8ca8ada5f34cc18338fa7c10fc5b4"
-  version = "v0.9.1"
-
-[[projects]]
-  digest = "1:786e862ec180708b60ee670723e3edd969fd4309e7b1c315cd7de058ac62a011"
-  name = "github.com/agnivade/levenshtein"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "51b298ff305e72cfd29166dccc3f9878e82f9fdc"
-  version = "v1.0.2"
-
-[[projects]]
   digest = "1:464aef731a5f82ded547c62e249a2e9ec59fbbc9ddab53cda7b9857852630a61"
   name = "github.com/appscode/jsonpatch"
   packages = ["."]
@@ -257,16 +238,6 @@
   pruneopts = "UT"
   revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
   version = "v1.0.2"
-
-[[projects]]
-  digest = "1:ef7b78e97c9c1cda2cce074638521c81d2ed83515c9d55831a1d420d7db5ead8"
-  name = "github.com/kyma-incubator/compass"
-  packages = [
-    "components/director/pkg/graphql",
-    "components/director/pkg/scalar",
-  ]
-  pruneopts = "UT"
-  revision = "83c17229028ffe2d604be4f8ea1f2f633141a965"
 
 [[projects]]
   digest = "1:f74d45933c45d3f86b0169d84aced8412db6adf1f37375eed17b61199f8b176b"
@@ -517,22 +488,6 @@
   pruneopts = "UT"
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
   version = "v1.3.0"
-
-[[projects]]
-  digest = "1:b4e8aaca88f799355f4ac560bce4293fb85ff21003dd0d5741ca503f7a788e91"
-  name = "github.com/vektah/gqlparser"
-  packages = [
-    ".",
-    "ast",
-    "gqlerror",
-    "lexer",
-    "parser",
-    "validator",
-    "validator/rules",
-  ]
-  pruneopts = "UT"
-  revision = "05741cdb0871330d8bc980d4afd21ab34eceee83"
-  version = "v1.1.2"
 
 [[projects]]
   digest = "1:a5158647b553c61877aa9ae74f4015000294e47981e6b8b07525edcbb0747c81"
@@ -1065,7 +1020,6 @@
   input-imports = [
     "github.com/emicklei/go-restful",
     "github.com/kisielk/errcheck",
-    "github.com/kyma-incubator/compass/components/director/pkg/graphql",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "github.com/machinebox/graphql",
