@@ -12,6 +12,8 @@ This project contains the chart for the Function Controller.
 
 ## Installation
 
+### Install helm chart
+
 Run the following script to install the chart:
 
 ```bash
