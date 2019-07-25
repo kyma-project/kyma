@@ -57,12 +57,6 @@ type EventAPIDefinition struct {
 	EventAPISpec *EventAPISpec
 }
 
-// EventAPISpec contains event API spec BLOB and its type
-type EventAPISpec struct {
-	Data []byte
-	Type EventAPISpecType
-}
-
 // Document contains data of document stored in the Asset Store
 type Document struct {
 	ID            string
@@ -79,6 +73,12 @@ type Document struct {
 type APISpec struct {
 	Data []byte
 	Type APISpecType
+}
+
+// EventAPISpec contains event API spec BLOB and its type
+type EventAPISpec struct {
+	Data []byte
+	Type EventAPISpecType
 }
 
 // Credentials contains OAuth, BasicAuth or Certificates configuration along with optional CSRF data.
