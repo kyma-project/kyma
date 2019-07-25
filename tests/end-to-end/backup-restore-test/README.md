@@ -12,7 +12,7 @@ To set up the project, use these tools:
 * Version 1.11 or higher of [Go](https://golang.org/dl/)
 * Version 0.5 or higher of [Dep](https://github.com/golang/dep)
 * The latest version of [Docker](https://www.docker.com/)
-* [Velero](../../../resources/velero/README.md#details)
+* [Velero](../../../resources/backup/README.md#details)
 
 >**NOTE:** Use [these](https://kyma-project.io/docs/master/components/backup/#configuration-velero-chart) guidelines to configure Velero for a specific storage provider.
 
