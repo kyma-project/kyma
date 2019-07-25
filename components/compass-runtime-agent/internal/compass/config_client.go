@@ -2,7 +2,6 @@ package compass
 
 import (
 	"crypto/tls"
-	"fmt"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
 	"github.com/machinebox/graphql"
@@ -38,11 +37,6 @@ type configClient struct {
 }
 
 // TODO - move to queries
-const applicationQueryFormat = `query {
-	result: applications {
-		%s
-	}
-}`
 
 func (cc *configClient) FetchConfiguration(directorURL string, credentials certificates.Credentials) ([]synchronization.Application, error) {
 	client, err := cc.gqlClientConstructor(credentials.AsTLSCertificate(), directorURL, true)
@@ -50,15 +44,13 @@ func (cc *configClient) FetchConfiguration(directorURL string, credentials certi
 		return nil, errors.Wrap(err, "Failed to create GraphQL client")
 	}
 
-	gqlFieldsProvider := gqlFieldsProvider{}
-
 	applicationPage := ApplicationPage{}
 	response := ApplicationsForRuntimeResponse{Result: &applicationPage}
 
 	// TODO: use proper query when it is ready
 	//result: applicationsForRuntime(runtimeId: %s) { ... }
 
-	applicationsQuery := fmt.Sprintf(applicationQueryFormat, gqlFieldsProvider.Page(gqlFieldsProvider.ForApplication()))
+	applicationsQuery := ApplicationsQuery()
 
 	req := graphql.NewRequest(applicationsQuery)
 	req.Header.Add(HeaderTenant, cc.tenant)

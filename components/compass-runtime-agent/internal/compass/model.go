@@ -27,16 +27,4 @@ type Application struct {
 	HealthCheckURL *string                         `json:"healthCheckURL"`
 }
 
-type ApplicationData struct {
-	ID             string
-	Name           string
-	Description    *string
-	Labels         Labels
-	Webhooks       []*graphql.Webhook
-	APIs           []graphql.APIDefinition
-	EventAPIs      []graphql.EventAPIDefinition
-	Documents      []graphql.Document
-	HealthCheckURL *string
-}
-
 type Labels map[string][]string

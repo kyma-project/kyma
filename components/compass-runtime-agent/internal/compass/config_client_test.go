@@ -362,7 +362,7 @@ func newMockClientConstructor(t *testing.T, shouldFail bool) GraphQLClientConstr
 	}
 }
 
-func failingGQLClientContructor(certificate tls.Certificate, graphqlEndpoint string, enableLogging bool) (client gql.Client, e error) {
+func failingGQLClientConstructor(_ tls.Certificate, _ string, _ bool) (client gql.Client, e error) {
 	return nil, errors.New("error")
 }
 
@@ -391,7 +391,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 		{
 			description:       "return error when failed to create graphql client",
 			expectedApps:      nil,
-			clientConstructor: failingGQLClientContructor,
+			clientConstructor: failingGQLClientConstructor,
 			shouldFail:        true,
 		},
 	} {
