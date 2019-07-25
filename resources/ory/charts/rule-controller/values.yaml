@@ -29,3 +29,6 @@ tolerations: []
 
 # Configure node affinity
 affinity: {}
+
+annotations:
+  sidecar.istio.io/inject: "false"
