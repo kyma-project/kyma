@@ -20,4 +20,4 @@ The following table lists the configurable parameters of the Compass chart and t
 | --- | --- | --- | --- |
 | **database.useEmbedded** | Specifies whether `postgresql` chart should be installed. | true/false | `true` |
 
-To learn how to use managed GCP database, read [this](https://github.com/kyma-incubator/compass/blob/master/docs/configure-managed-gcp-postgresql.md) document.
+To learn how to use managed GCP database, see the [Configure Managed GCP PostgreSQL](./configure-managed-gcp-postgresql.md) document.
