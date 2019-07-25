@@ -1,0 +1,39 @@
+{{- if .Values.ingress.admin.enabled -}}
+{{- $fullName := include "hydra.fullname" . -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-admin
+  {{- if .Release.Namespace }}
+  namespace: {{ .Release.Namespace }}
+  {{- end }}
+  labels:
+{{ include "hydra.labels" . | indent 4 }}
+  {{- with .Values.ingress.admin.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+{{- if .Values.ingress.admin.tls }}
+  tls:
+  {{- range .Values.ingress.admin.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.admin.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ . }}
+            backend:
+              serviceName: {{ $fullName }}-admin
+              servicePort: http
+        {{- end }}
+  {{- end }}
+{{- end }}
