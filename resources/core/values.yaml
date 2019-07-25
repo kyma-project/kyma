@@ -24,7 +24,7 @@ global:
     version: "PR-4959"
   ui_acceptance_tests:
     dir: 
-    version: fa5dfcc6
+    version: 5150bbd3
   api_controller:
     dir: pr/
     version: "PR-4582"
