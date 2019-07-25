@@ -28,7 +28,7 @@ const (
 	DocumentFormatMarkdown DocumentFormat = "MARKDOWN"
 )
 
-// Application contains all associated APIs, EventAPIs and Document
+// Application contains all associated APIs, EventAPIs and Documents
 type Application struct {
 	ID          string
 	Name        string
