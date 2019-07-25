@@ -132,7 +132,7 @@ func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
 func runServer(stop <-chan struct{}, cfg config, schema graphql.ExecutableSchema, authenticator authenticatorpkg.Request) {
 	setupTracing(cfg.Tracing, cfg.Port)
 	var allowedOrigins []string
-	if len(allowedOrigins) == 0 {
+	if len(cfg.AllowedOrigins) == 0 {
 		allowedOrigins = []string{"*"}
 	} else {
 		allowedOrigins = cfg.AllowedOrigins
