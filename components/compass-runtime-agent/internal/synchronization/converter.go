@@ -30,10 +30,9 @@ type converter struct {
 	nameResolver k8sconsts.NameResolver
 }
 
-func NewConverter(namespace string) Converter {
+func NewConverter(nameResolver k8sconsts.NameResolver) Converter {
 	return converter{
-		namespace:    namespace,
-		nameResolver: k8sconsts.NewNameResolver("kyma-integration"),
+		nameResolver: nameResolver,
 	}
 }
 
@@ -124,6 +123,7 @@ func (c converter) toServiceEntry(application string, definition APIDefinition) 
 		Type:                        specAPIType,
 		AccessLabel:                 c.nameResolver.GetResourceName(application, definition.ID),
 		TargetUrl:                   definition.TargetUrl,
+		GatewayUrl:                  c.nameResolver.GetGatewayUrl(application, definition.ID),
 		SpecificationUrl:            "", // Director returns BLOB here
 		Credentials:                 c.toCredentials(application, definition.ID, definition.Credentials),
 		RequestParametersSecretName: getRequestParamsSecretName(),
@@ -143,7 +143,7 @@ func (c converter) toCredentials(application string, serviceID string, credentia
 			}
 		}
 
-		return &v1alpha1.CSRFInfo{}
+		return nil
 	}
 
 	if credentials != nil {
@@ -180,7 +180,7 @@ func (c converter) toEventAPIService(application string, definition EventAPIDefi
 		Labels:              map[string]string{connectedApp: application}, // Application Registry adds here an union of two things: labels specified in the payload and connectedApp label
 		LongDescription:     "",                                           // not available in the Director's API
 		ProviderDisplayName: "",                                           // not available in the Director's API
-		Tags:                nil,
+		Tags:                make([]string, 0),
 		Entries:             []v1alpha1.Entry{c.toEventServiceEntry(application, definition)},
 	}
 
