@@ -191,8 +191,6 @@ function deprecatedInjectTestingAddons() {
     log "Testing addons injected" green
 }
 
-#
-
 function injectTestingAddons() {
     cat <<EOF | kubectl apply -f -
 apiVersion: addons.kyma-project.io/v1alpha1
