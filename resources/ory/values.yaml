@@ -25,7 +25,7 @@ hydra:
             - 10.0.0.0/8
             - 172.16.0.0/12
             - 192.168.0.0/16
-      secrets: 
+      secrets:
         system: a3m0kCx6f87n332sPw1
       urls:
         self: {}
@@ -34,13 +34,7 @@ hydra:
     autoMigrate: false
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
-  resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
+  resources: {}
 
 # Overrides for the Oathkeeper chart
 oathkeeper:
@@ -68,10 +62,5 @@ oathkeeper:
           port: 4455
         api:
           port: 4456
-  resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
+  resources: {}
+
