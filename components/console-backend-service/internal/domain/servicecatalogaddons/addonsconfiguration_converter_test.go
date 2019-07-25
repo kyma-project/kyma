@@ -1,27 +1,26 @@
-package servicecatalogaddons_test
+package servicecatalogaddons
 
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
-	converter := servicecatalogaddons.NewClusterAddonsConfigurationConverter()
+func TestAddonsConfigurationConverter_ToGQL(t *testing.T) {
+	converter := NewAddonsConfigurationConverter()
 	for tn, tc := range map[string]struct {
-		givenAddon           *v1alpha1.ClusterAddonsConfiguration
+		givenAddon           *v1alpha1.AddonsConfiguration
 		expectedAddonsConfig *gqlschema.AddonsConfiguration
 	}{
 		"empty": {
-			givenAddon:           &v1alpha1.ClusterAddonsConfiguration{},
+			givenAddon:           &v1alpha1.AddonsConfiguration{},
 			expectedAddonsConfig: &gqlschema.AddonsConfiguration{},
 		},
 		"full": {
-			givenAddon: &v1alpha1.ClusterAddonsConfiguration{
+			givenAddon: &v1alpha1.AddonsConfiguration{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test",
 					Labels: map[string]string{
@@ -29,7 +28,7 @@ func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 						"ion": "al",
 					},
 				},
-				Spec: v1alpha1.ClusterAddonsConfigurationSpec{
+				Spec: v1alpha1.AddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
 							{URL: "ww.fix.k"},
@@ -53,19 +52,19 @@ func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 	}
 }
 
-func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
-	converter := servicecatalogaddons.NewClusterAddonsConfigurationConverter()
+func TestAddonsConfigurationConverter_ToGQLs(t *testing.T) {
+	converter := NewAddonsConfigurationConverter()
 
 	for tn, tc := range map[string]struct {
-		givenAddons          []*v1alpha1.ClusterAddonsConfiguration
+		givenAddons          []*v1alpha1.AddonsConfiguration
 		expectedAddonsConfig []gqlschema.AddonsConfiguration
 	}{
 		"empty": {
-			givenAddons:          []*v1alpha1.ClusterAddonsConfiguration{},
+			givenAddons:          []*v1alpha1.AddonsConfiguration{},
 			expectedAddonsConfig: []gqlschema.AddonsConfiguration(nil),
 		},
 		"full": {
-			givenAddons: []*v1alpha1.ClusterAddonsConfiguration{
+			givenAddons: []*v1alpha1.AddonsConfiguration{
 				{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "test",
@@ -73,7 +72,7 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 							"test": "test",
 						},
 					},
-					Spec: v1alpha1.ClusterAddonsConfigurationSpec{
+					Spec: v1alpha1.AddonsConfigurationSpec{
 						CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 							Repositories: []v1alpha1.SpecRepository{
 								{URL: "www.example.com"},
@@ -88,7 +87,7 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 							"test2": "test2",
 						},
 					},
-					Spec: v1alpha1.ClusterAddonsConfigurationSpec{
+					Spec: v1alpha1.AddonsConfigurationSpec{
 						CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 							Repositories: []v1alpha1.SpecRepository{
 								{URL: "www.next.com"},

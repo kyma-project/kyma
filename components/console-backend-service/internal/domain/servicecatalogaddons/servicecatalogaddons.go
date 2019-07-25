@@ -90,14 +90,17 @@ func (r *PluggableContainer) Enable() error {
 
 	r.addonsInformerFactory = addonsInformers.NewSharedInformerFactory(r.cfg.addonsCfgCli, informerResyncPeriod)
 	clusterAddonsInformer := r.addonsInformerFactory.Addons().V1alpha1().ClusterAddonsConfigurations().Informer()
-	addonsConfigurationService := newClusterAddonsConfigurationService(clusterAddonsInformer, r.cfg.addonsCfgCli.AddonsV1alpha1())
+	clusterAddonsConfigurationService := newClusterAddonsConfigurationService(clusterAddonsInformer, r.cfg.addonsCfgCli.AddonsV1alpha1())
+	addonsInformer := r.addonsInformerFactory.Addons().V1alpha1().AddonsConfigurations().Informer()
+	addonsConfigurationService := newAddonsConfigurationService(addonsInformer, r.cfg.addonsCfgCli.AddonsV1alpha1())
 
 	onSyncHook := func() {
 		r.Resolver = &domainResolver{
-			serviceBindingUsageResolver: newServiceBindingUsageResolver(serviceBindingUsageService),
-			usageKindResolver:           newUsageKindResolver(usageKindService),
-			bindableResourcesResolver:   newBindableResourcesResolver(usageKindService),
-			addonsConfigurationResolver: newAddonsRepoResolver(addonsConfigurationService),
+			serviceBindingUsageResolver:        newServiceBindingUsageResolver(serviceBindingUsageService),
+			usageKindResolver:                  newUsageKindResolver(usageKindService),
+			bindableResourcesResolver:          newBindableResourcesResolver(usageKindService),
+			addonsConfigurationResolver:        newAddonsConfigurationResolver(addonsConfigurationService),
+			clusterAddonsConfigurationResolver: newClusterAddonsConfigurationResolver(clusterAddonsConfigurationService),
 		}
 		r.ServiceCatalogAddonsRetriever.ServiceBindingUsageLister = serviceBindingUsageService
 
@@ -138,18 +141,27 @@ type Resolver interface {
 	ListUsageKinds(ctx context.Context, first *int, offset *int) ([]gqlschema.UsageKind, error)
 	ListBindableResources(ctx context.Context, namespace string) ([]gqlschema.BindableResourcesOutputItem, error)
 
-	AddonsConfigurationsQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.AddonsConfiguration, error)
-	CreateAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error)
-	UpdateAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error)
-	DeleteAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error)
-	AddAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error)
-	RemoveAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error)
-	AddonsConfigurationEventSubscription(ctx context.Context) (<-chan gqlschema.AddonsConfigurationEvent, error)
+	AddonsConfigurationsQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.AddonsConfiguration, error)
+	CreateAddonsConfiguration(ctx context.Context, name, namespace string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error)
+	UpdateAddonsConfiguration(ctx context.Context, name, namespace string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error)
+	DeleteAddonsConfiguration(ctx context.Context, name, namespace string) (*gqlschema.AddonsConfiguration, error)
+	AddAddonsConfigurationURLs(ctx context.Context, name, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error)
+	RemoveAddonsConfigurationURLs(ctx context.Context, name, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error)
+	AddonsConfigurationEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.AddonsConfigurationEvent, error)
+
+	ClusterAddonsConfigurationsQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.AddonsConfiguration, error)
+	CreateClusterAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error)
+	UpdateClusterAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error)
+	DeleteClusterAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error)
+	AddClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error)
+	RemoveClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error)
+	ClusterAddonsConfigurationEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterAddonsConfigurationEvent, error)
 }
 
 type domainResolver struct {
 	*serviceBindingUsageResolver
 	*usageKindResolver
 	*bindableResourcesResolver
+	*clusterAddonsConfigurationResolver
 	*addonsConfigurationResolver
 }

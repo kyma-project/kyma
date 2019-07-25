@@ -14,6 +14,18 @@ func NewAddonsCfgUpdater() *addonsCfgUpdater {
 	return new(addonsCfgUpdater)
 }
 
+func NewClusterAddonsCfgLister() *clusterAddonsCfgLister {
+	return new(clusterAddonsCfgLister)
+}
+
+func NewClusterAddonsCfgMutations() *clusterAddonsCfgMutations {
+	return new(clusterAddonsCfgMutations)
+}
+
+func NewClusterAddonsCfgUpdater() *clusterAddonsCfgUpdater {
+	return new(clusterAddonsCfgUpdater)
+}
+
 // Service Binding Usage
 
 func NewServiceBindingUsageOperations() *serviceBindingUsageOperations {

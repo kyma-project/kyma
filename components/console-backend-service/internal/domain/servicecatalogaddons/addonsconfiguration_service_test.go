@@ -20,7 +20,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-func TestClusterAddonsConfigurationService_AddRepos_Success(t *testing.T) {
+func TestAddonsConfigurationService_AddRepos_Success(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name string
 		urls []string
@@ -42,19 +42,19 @@ func TestClusterAddonsConfigurationService_AddRepos_Success(t *testing.T) {
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			fixAddonCfg := fixClusterAddonsConfiguration("test")
+			fixAddonCfg := fixAddonsConfiguration(tc.name)
 			fixAddonCfg.Spec.Repositories = []v1alpha1.SpecRepository{
 				{URL: "www.already.present.url"},
 			}
 			expURLs := append(tc.urls, "www.already.present.url")
 
-			informer, client := fixClusterAddonsConfigurationInformer(fixAddonCfg)
+			informer, client := fixAddonsConfigurationInformer(fixAddonCfg)
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-			svc := servicecatalogaddons.NewClusterAddonsConfigurationService(informer, client)
+			svc := servicecatalogaddons.NewAddonsConfigurationService(informer, client)
 
 			// when
-			result, err := svc.AddRepos(tc.name, tc.urls)
+			result, err := svc.AddRepos(tc.name, "test", tc.urls)
 
 			// then
 			require.NoError(t, err)
@@ -69,26 +69,26 @@ func TestClusterAddonsConfigurationService_AddRepos_Success(t *testing.T) {
 	}
 }
 
-func TestClusterAddonsConfigurationService_AddRepos_Failure(t *testing.T) {
+func TestAddonsConfigurationService_AddRepos_Failure(t *testing.T) {
 	// given
 	fixAddonCfgName := "not-existing-cfg"
 	fixURLs := []string{"www.www"}
 	expErrMsg := fmt.Sprintf("%s doesn't exists", fixAddonCfgName)
 
-	informer, client := fixClusterAddonsConfigurationInformer()
+	informer, client := fixAddonsConfigurationInformer()
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(informer, client)
+	svc := servicecatalogaddons.NewAddonsConfigurationService(informer, client)
 
 	// when
-	result, err := svc.AddRepos(fixAddonCfgName, fixURLs)
+	result, err := svc.AddRepos(fixAddonCfgName, "test", fixURLs)
 
 	// then
 	assert.EqualError(t, err, expErrMsg)
 	assert.Nil(t, result)
 }
 
-func TestClusterAddonsConfigurationService_DeleteRepos(t *testing.T) {
+func TestAddonsConfigurationService_DeleteRepos(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name         string
 		repos        []v1alpha1.SpecRepository
@@ -119,16 +119,16 @@ func TestClusterAddonsConfigurationService_DeleteRepos(t *testing.T) {
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			cfg := fixClusterAddonsConfiguration(tc.name)
+			cfg := fixAddonsConfiguration(tc.name)
 			cfg.Spec.Repositories = tc.repos
 
-			inf, client := fixClusterAddonsConfigurationInformer(cfg)
+			inf, client := fixAddonsConfigurationInformer(cfg)
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-			svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
+			svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client)
 
 			// when
-			result, err := svc.RemoveRepos(tc.name, tc.urlsToRemove)
+			result, err := svc.RemoveRepos(tc.name, "test", tc.urlsToRemove)
 
 			// then
 			require.NoError(t, err)
@@ -143,32 +143,32 @@ func TestClusterAddonsConfigurationService_DeleteRepos(t *testing.T) {
 	}
 }
 
-func TestClusterAddonsConfigurationService_DeleteRepos_Failure(t *testing.T) {
+func TestAddonsConfigurationService_DeleteRepos_Failure(t *testing.T) {
 	// given
 	fixAddonCfgName := "not-existing-cfg"
 	fixURLs := []string{"www.www"}
 	expErrMsg := fmt.Sprintf("%s doesn't exists", fixAddonCfgName)
 
-	inf, client := fixClusterAddonsConfigurationInformer()
+	inf, client := fixAddonsConfigurationInformer()
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
+	svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client)
 
 	// when
-	result, err := svc.RemoveRepos(fixAddonCfgName, fixURLs)
+	result, err := svc.RemoveRepos(fixAddonCfgName, "test", fixURLs)
 
 	// then
 	assert.EqualError(t, err, expErrMsg)
 	assert.Nil(t, result)
 }
 
-func TestClusterAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
+func TestAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name   string
 		urls   []string
 		labels *gqlschema.Labels
 
-		expectedResult *v1alpha1.ClusterAddonsConfiguration
+		expectedResult *v1alpha1.AddonsConfiguration
 	}{
 		"successWithLabels": {
 			name: "test",
@@ -179,15 +179,16 @@ func TestClusterAddonsConfigurationService_CreateAddonsConfiguration(t *testing.
 			urls: []string{
 				"ww.fix.k",
 			},
-			expectedResult: &v1alpha1.ClusterAddonsConfiguration{
+			expectedResult: &v1alpha1.AddonsConfiguration{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "test",
+					Name:      "test",
+					Namespace: "test",
 					Labels: map[string]string{
 						"add": "it",
 						"ion": "al",
 					},
 				},
-				Spec: v1alpha1.ClusterAddonsConfigurationSpec{
+				Spec: v1alpha1.AddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
 							{URL: "ww.fix.k"},
@@ -201,11 +202,12 @@ func TestClusterAddonsConfigurationService_CreateAddonsConfiguration(t *testing.
 			urls: []string{
 				"ww.fix.k",
 			},
-			expectedResult: &v1alpha1.ClusterAddonsConfiguration{
+			expectedResult: &v1alpha1.AddonsConfiguration{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "test",
+					Name:      "test",
+					Namespace: "test",
 				},
-				Spec: v1alpha1.ClusterAddonsConfigurationSpec{
+				Spec: v1alpha1.AddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
 							{URL: "ww.fix.k"},
@@ -217,13 +219,13 @@ func TestClusterAddonsConfigurationService_CreateAddonsConfiguration(t *testing.
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			inf, client := fixClusterAddonsConfigurationInformer()
+			inf, client := fixAddonsConfigurationInformer()
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-			svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
+			svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client)
 
 			// when
-			result, err := svc.Create(tc.name, tc.urls, tc.labels)
+			result, err := svc.Create(tc.name, "test", tc.urls, tc.labels)
 
 			// then
 			require.NoError(t, err)
@@ -232,13 +234,13 @@ func TestClusterAddonsConfigurationService_CreateAddonsConfiguration(t *testing.
 	}
 }
 
-func TestClusterAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
+func TestAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name   string
 		urls   []string
 		labels *gqlschema.Labels
 
-		expectedResult *v1alpha1.ClusterAddonsConfiguration
+		expectedResult *v1alpha1.AddonsConfiguration
 	}{
 		"successWithLabels": {
 			name: "test",
@@ -249,15 +251,16 @@ func TestClusterAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.
 			urls: []string{
 				"ww.fix.k",
 			},
-			expectedResult: &v1alpha1.ClusterAddonsConfiguration{
+			expectedResult: &v1alpha1.AddonsConfiguration{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "test",
+					Name:      "test",
+					Namespace: "test",
 					Labels: map[string]string{
 						"add": "it",
 						"ion": "al",
 					},
 				},
-				Spec: v1alpha1.ClusterAddonsConfigurationSpec{
+				Spec: v1alpha1.AddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
 							{URL: "ww.fix.k"},
@@ -271,11 +274,12 @@ func TestClusterAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.
 			urls: []string{
 				"ww.fix.k",
 			},
-			expectedResult: &v1alpha1.ClusterAddonsConfiguration{
+			expectedResult: &v1alpha1.AddonsConfiguration{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "test",
+					Name:      "test",
+					Namespace: "test",
 				},
-				Spec: v1alpha1.ClusterAddonsConfigurationSpec{
+				Spec: v1alpha1.AddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
 							{URL: "ww.fix.k"},
@@ -287,13 +291,13 @@ func TestClusterAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			inf, client := fixClusterAddonsConfigurationInformer(fixClusterAddonsConfiguration(tc.name))
+			inf, client := fixAddonsConfigurationInformer(fixAddonsConfiguration(tc.name))
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-			svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
+			svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client)
 
 			// when
-			result, err := svc.Update(tc.name, tc.urls, tc.labels)
+			result, err := svc.Update(tc.name, "test", tc.urls, tc.labels)
 
 			// then
 			require.NoError(t, err)
@@ -302,69 +306,80 @@ func TestClusterAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.
 	}
 }
 
-func TestClusterAddonsConfigurationService_DeleteAddonsConfiguration(t *testing.T) {
+func TestAddonsConfigurationService_DeleteAddonsConfiguration(t *testing.T) {
 	// given
 	fixAddonCfgName := "test"
-	expectedCfg := fixClusterAddonsConfiguration(fixAddonCfgName)
-	inf, client := fixClusterAddonsConfigurationInformer(expectedCfg)
+	expectedCfg := fixAddonsConfiguration(fixAddonCfgName)
+	inf, client := fixAddonsConfigurationInformer(expectedCfg)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
+	svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client)
 
 	// when
-	cfg, err := svc.Delete(fixAddonCfgName)
+	cfg, err := svc.Delete(fixAddonCfgName, "test")
 
 	// then
 	require.NoError(t, err)
 	assert.Equal(t, expectedCfg, cfg)
 }
 
-func TestClusterAddonsConfigurationService_DeleteAddonsConfiguration_Error(t *testing.T) {
+func TestAddonsConfigurationService_DeleteAddonsConfiguration_Error(t *testing.T) {
 	// given
 	fixAddonCfgName := "not-existing-cfg"
 	expErrMsg := fmt.Sprintf("%s doesn't exists", fixAddonCfgName)
-	inf, client := fixClusterAddonsConfigurationInformer()
+	inf, client := fixAddonsConfigurationInformer()
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
+	svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client)
 
 	// when
-	cfg, err := svc.Delete(fixAddonCfgName)
+	cfg, err := svc.Delete(fixAddonCfgName, "test")
 
 	// then
 	assert.EqualError(t, err, expErrMsg)
 	assert.Nil(t, cfg)
 }
 
-func TestClusterAddonsConfigurationService_ListAddonsConfigurations(t *testing.T) {
+func TestAddonsConfigurationService_ListAddonsConfigurations(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		alreadyExitedCfgs  []runtime.Object
-		expectedAddonsCfgs []*v1alpha1.ClusterAddonsConfiguration
+		expectedAddonsCfgs []*v1alpha1.AddonsConfiguration
 	}{
 		"empty": {
 			alreadyExitedCfgs:  []runtime.Object{},
-			expectedAddonsCfgs: []*v1alpha1.ClusterAddonsConfiguration(nil),
+			expectedAddonsCfgs: []*v1alpha1.AddonsConfiguration(nil),
 		},
 		"few addons configurations": {
 			alreadyExitedCfgs: []runtime.Object{
-				fixClusterAddonsConfiguration("test"),
-				fixClusterAddonsConfiguration("test2"),
+				fixAddonsConfiguration("test"),
+				fixAddonsConfiguration("test2"),
 			},
-			expectedAddonsCfgs: []*v1alpha1.ClusterAddonsConfiguration{
-				fixClusterAddonsConfiguration("test"),
-				fixClusterAddonsConfiguration("test2"),
+			expectedAddonsCfgs: []*v1alpha1.AddonsConfiguration{
+				fixAddonsConfiguration("test"),
+				fixAddonsConfiguration("test2"),
 			},
+		},
+		"wrong namespace": {
+			alreadyExitedCfgs: []runtime.Object{
+				&v1alpha1.AddonsConfiguration{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "test",
+						Namespace: "wrong",
+					},
+				},
+			},
+			expectedAddonsCfgs: nil,
 		},
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			inf, _ := fixClusterAddonsConfigurationInformer(tc.alreadyExitedCfgs...)
+			inf, _ := fixAddonsConfigurationInformer(tc.alreadyExitedCfgs...)
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-			svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, nil)
+			svc := servicecatalogaddons.NewAddonsConfigurationService(inf, nil)
 
 			// when
-			result, err := svc.List(pager.PagingParams{})
+			result, err := svc.List("test", pager.PagingParams{})
 
 			// then
 			require.NoError(t, err)
@@ -373,12 +388,13 @@ func TestClusterAddonsConfigurationService_ListAddonsConfigurations(t *testing.T
 	}
 }
 
-func fixClusterAddonsConfiguration(name string) *v1alpha1.ClusterAddonsConfiguration {
-	return &v1alpha1.ClusterAddonsConfiguration{
+func fixAddonsConfiguration(name string) *v1alpha1.AddonsConfiguration {
+	return &v1alpha1.AddonsConfiguration{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name:      name,
+			Namespace: "test",
 		},
-		Spec: v1alpha1.ClusterAddonsConfigurationSpec{
+		Spec: v1alpha1.AddonsConfigurationSpec{
 			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 				Repositories: []v1alpha1.SpecRepository{
 					{URL: "www.piko.bello"},
@@ -388,9 +404,9 @@ func fixClusterAddonsConfiguration(name string) *v1alpha1.ClusterAddonsConfigura
 	}
 }
 
-func fixClusterAddonsConfigurationInformer(objects ...runtime.Object) (cache.SharedIndexInformer, addonsClientset.AddonsV1alpha1Interface) {
+func fixAddonsConfigurationInformer(objects ...runtime.Object) (cache.SharedIndexInformer, addonsClientset.AddonsV1alpha1Interface) {
 	fakeCli := addonsFakeCli.NewSimpleClientset(objects...)
 	addonsInformerFactory := addonsInformers.NewSharedInformerFactory(fakeCli, informerResyncPeriod)
 
-	return addonsInformerFactory.Addons().V1alpha1().ClusterAddonsConfigurations().Informer(), fakeCli.AddonsV1alpha1()
+	return addonsInformerFactory.Addons().V1alpha1().AddonsConfigurations().Informer(), fakeCli.AddonsV1alpha1()
 }

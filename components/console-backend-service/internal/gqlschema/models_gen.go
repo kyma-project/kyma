@@ -108,6 +108,11 @@ type BindableResourcesOutputItem struct {
 	Resources   []UsageKindResource `json:"resources"`
 }
 
+type ClusterAddonsConfigurationEvent struct {
+	Type                SubscriptionEventType `json:"type"`
+	AddonsConfiguration AddonsConfiguration   `json:"addonsConfiguration"`
+}
+
 type ClusterAssetEvent struct {
 	Type         SubscriptionEventType `json:"type"`
 	ClusterAsset ClusterAsset          `json:"clusterAsset"`

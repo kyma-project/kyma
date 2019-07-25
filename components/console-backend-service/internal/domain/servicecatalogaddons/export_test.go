@@ -13,17 +13,34 @@ import (
 
 // Addons Configurations
 
-func NewAddonsConfigurationService(addonsCfgInformer cache.SharedIndexInformer, addonsCfgClient addonsClientset.AddonsV1alpha1Interface) *clusterAddonsConfigurationService {
+func NewAddonsConfigurationService(addonsCfgInformer cache.SharedIndexInformer, addonsCfgClient addonsClientset.AddonsV1alpha1Interface) *addonsConfigurationService {
+	return newAddonsConfigurationService(addonsCfgInformer, addonsCfgClient)
+}
+
+func NewClusterAddonsConfigurationService(addonsCfgInformer cache.SharedIndexInformer, addonsCfgClient addonsClientset.AddonsV1alpha1Interface) *clusterAddonsConfigurationService {
 	return newClusterAddonsConfigurationService(addonsCfgInformer, addonsCfgClient)
 }
 
-func NewAddonsConfigurationConverter() *clusterAddonsConfigurationConverter {
+func NewAddonsConfigurationConverter() *addonsConfigurationConverter {
+	return &addonsConfigurationConverter{}
+}
+
+func NewClusterAddonsConfigurationConverter() *clusterAddonsConfigurationConverter {
 	return &clusterAddonsConfigurationConverter{}
+}
+
+func NewClusterAddonsConfigurationResolver(addonsCfgUpdater clusterAddonsCfgUpdater, addonsCfgMutations clusterAddonsCfgMutations, addonsCfgLister clusterAddonsCfgLister) *clusterAddonsConfigurationResolver {
+	return &clusterAddonsConfigurationResolver{
+		addonsCfgConverter:                clusterAddonsConfigurationConverter{},
+		addonsCfgUpdater:                  addonsCfgUpdater,
+		addonsCfgMutations:                addonsCfgMutations,
+		addonsCfgLister:                   addonsCfgLister,
+	}
 }
 
 func NewAddonsConfigurationResolver(addonsCfgUpdater addonsCfgUpdater, addonsCfgMutations addonsCfgMutations, addonsCfgLister addonsCfgLister) *addonsConfigurationResolver {
 	return &addonsConfigurationResolver{
-		addonsCfgConverter:                clusterAddonsConfigurationConverter{},
+		addonsCfgConverter:                addonsConfigurationConverter{},
 		addonsCfgUpdater:                  addonsCfgUpdater,
 		addonsCfgMutations:                addonsCfgMutations,
 		addonsCfgLister:                   addonsCfgLister,

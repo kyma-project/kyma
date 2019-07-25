@@ -13,121 +13,112 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAddonsConfigurationResolver_AddonsConfigurationsQuery(t *testing.T) {
+func TestClusterAddonsConfigurationResolver_AddonsConfigurationsQuery(t *testing.T) {
 	// given
-	addonsCfgLister := automock.NewAddonsCfgLister()
+	addonsCfgLister := automock.NewClusterAddonsCfgLister()
 	defer addonsCfgLister.AssertExpectations(t)
 
 	listedAddons := []*v1alpha1.ClusterAddonsConfiguration{fixClusterAddonsConfiguration("test")}
 	addonsCfgLister.On("List", pager.PagingParams{}).
 		Return(listedAddons, nil).Once()
 
-	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(nil, nil, addonsCfgLister)
+	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(nil, nil, addonsCfgLister)
 
 	// when
-	res, err := resolver.AddonsConfigurationsQuery(context.Background(), nil, nil)
+	res, err := resolver.ClusterAddonsConfigurationsQuery(context.Background(), nil, nil)
 
 	// then
 	require.NoError(t, err)
 	assert.Equal(t, []gqlschema.AddonsConfiguration{*fixGQLAddonsConfiguration("test")}, res)
 }
 
-func TestAddonsConfigurationResolver_CreateAddonsConfiguration(t *testing.T) {
+func TestClusterAddonsConfigurationResolver_CreateAddonsConfiguration(t *testing.T) {
 	// given
 	const addonName = "test"
-	addonsCfgMutation := automock.NewAddonsCfgMutations()
+	addonsCfgMutation := automock.NewClusterAddonsCfgMutations()
 	defer addonsCfgMutation.AssertExpectations(t)
 
 	addonsCfgMutation.On("Create", addonName, []string{}, &gqlschema.Labels{}).
 		Return(fixClusterAddonsConfiguration(addonName), nil).Once()
 
-	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
+	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
 
 	// when
-	res, err := resolver.CreateAddonsConfiguration(context.Background(), addonName, []string{}, &gqlschema.Labels{})
+	res, err := resolver.CreateClusterAddonsConfiguration(context.Background(), addonName, []string{}, &gqlschema.Labels{})
 
 	// then
 	require.NoError(t, err)
 	assert.Equal(t, fixGQLAddonsConfiguration(addonName), res)
 }
 
-func TestAddonsConfigurationResolver_UpdateAddonsConfiguration(t *testing.T) {
+func TestClusterAddonsConfigurationResolver_UpdateAddonsConfiguration(t *testing.T) {
 	// given
 	const addonName = "test"
-	addonsCfgMutation := automock.NewAddonsCfgMutations()
+	addonsCfgMutation := automock.NewClusterAddonsCfgMutations()
 	defer addonsCfgMutation.AssertExpectations(t)
 	addonsCfgMutation.On("Update", addonName, []string{}, &gqlschema.Labels{}).
 		Return(fixClusterAddonsConfiguration(addonName), nil).Once()
 
-	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
+	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
 
 	// when
-	cfgs, err := resolver.UpdateAddonsConfiguration(context.Background(), addonName, []string{}, &gqlschema.Labels{})
+	cfgs, err := resolver.UpdateClusterAddonsConfiguration(context.Background(), addonName, []string{}, &gqlschema.Labels{})
 
 	// then
 	require.NoError(t, err)
 	assert.Equal(t, fixGQLAddonsConfiguration(addonName), cfgs)
 }
 
-func TestAddonsConfigurationResolver_DeleteAddonsConfiguration(t *testing.T) {
+func TestClusterAddonsConfigurationResolver_DeleteAddonsConfiguration(t *testing.T) {
 	// given
 	const addonName = "test"
-	addonsCfgMutation := automock.NewAddonsCfgMutations()
+	addonsCfgMutation := automock.NewClusterAddonsCfgMutations()
 	defer addonsCfgMutation.AssertExpectations(t)
 	addonsCfgMutation.On("Delete", addonName).
 		Return(fixClusterAddonsConfiguration(addonName), nil).Once()
 
-	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
+	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
 
 	// when
-	cfgs, err := resolver.DeleteAddonsConfiguration(context.Background(), addonName)
+	cfgs, err := resolver.DeleteClusterAddonsConfiguration(context.Background(), addonName)
 
 	// then
 	require.NoError(t, err)
 	assert.Equal(t, fixGQLAddonsConfiguration(addonName), cfgs)
 }
 
-func TestAddonsConfigurationResolver_AddAddonsConfigurationURLs(t *testing.T) {
+func TestClusterAddonsConfigurationResolver_AddAddonsConfigurationURLs(t *testing.T) {
 	// given
 	const addonName = "test"
-	addonsCfgUpdater := automock.NewAddonsCfgUpdater()
+	addonsCfgUpdater := automock.NewClusterAddonsCfgUpdater()
 	defer addonsCfgUpdater.AssertExpectations(t)
 	addonsCfgUpdater.On("AddRepos", addonName, []string{"app.gg"}).
 		Return(fixClusterAddonsConfiguration(addonName), nil).Once()
 
-	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
+	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
 
 	// when
-	cfgs, err := resolver.AddAddonsConfigurationURLs(context.Background(), addonName, []string{"app.gg"})
+	cfgs, err := resolver.AddClusterAddonsConfigurationURLs(context.Background(), addonName, []string{"app.gg"})
 
 	// then
 	require.NoError(t, err)
 	assert.Equal(t, fixGQLAddonsConfiguration(addonName), cfgs)
 }
 
-func TestAddonsConfigurationResolver_RemoveAddonsConfigurationURLs(t *testing.T) {
+func TestClusterAddonsConfigurationResolver_RemoveAddonsConfigurationURLs(t *testing.T) {
 	// given
 	const addonName = "test"
-	addonsCfgUpdater := automock.NewAddonsCfgUpdater()
+	addonsCfgUpdater := automock.NewClusterAddonsCfgUpdater()
 	defer addonsCfgUpdater.AssertExpectations(t)
 	addonsCfgUpdater.On("RemoveRepos", addonName, []string{"www.piko.bo"}).
 		Return(fixClusterAddonsConfiguration(addonName), nil).Once()
 
-	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
+	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
 
 	// when
-	cfgs, err := resolver.RemoveAddonsConfigurationURLs(context.Background(), addonName, []string{"www.piko.bo"})
+	cfgs, err := resolver.RemoveClusterAddonsConfigurationURLs(context.Background(), addonName, []string{"www.piko.bo"})
 
 	// then
 	require.NoError(t, err)
 	assert.Equal(t, fixGQLAddonsConfiguration(addonName), cfgs)
-}
-
-func fixGQLAddonsConfiguration(name string) *gqlschema.AddonsConfiguration {
-	return &gqlschema.AddonsConfiguration{
-		Name: name,
-		Urls: []string{
-			"www.piko.bello",
-		},
-	}
 }
