@@ -44,7 +44,6 @@ type APIDefinition struct {
 	Name              string
 	Description       string
 	TargetUrl         string
-	APIType           APISpecType
 	RequestParameters RequestParameters
 	Credentials       *Credentials
 	APISpec           *APISpec
@@ -52,10 +51,16 @@ type APIDefinition struct {
 
 // EventAPIDefinition contains Event API details such
 type EventAPIDefinition struct {
-	ID          string
-	Name        string
-	Description string
-	APISpec     *APISpec
+	ID           string
+	Name         string
+	Description  string
+	EventAPISpec *EventAPISpec
+}
+
+// EventAPISpec contains event API spec BLOB and its type
+type EventAPISpec struct {
+	Data []byte
+	Type EventAPISpecType
 }
 
 // Document contains data of document stored in the Asset Store
@@ -70,7 +75,7 @@ type Document struct {
 	Data          []byte
 }
 
-// APISpec contains spec BLOB and
+// APISpec contains API spec BLOB and its type
 type APISpec struct {
 	Data []byte
 	Type APISpecType
