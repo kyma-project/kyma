@@ -64,3 +64,6 @@ oathkeeper:
           port: 4456
   resources: {}
 
+oathkeeper-rule-controller:
+  annotations: 
+    sidecar.istio.io/inject: "false"
