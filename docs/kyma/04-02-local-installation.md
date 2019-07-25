@@ -14,8 +14,6 @@ This Installation guide shows you how to quickly deploy Kyma locally on the MacO
 - [Minikube](https://github.com/kubernetes/minikube) 1.0
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12
 - [Helm](https://github.com/kubernetes/helm) 2.10
-- [jq](https://stedolan.github.io/jq/)
-- [wget](https://www.gnu.org/software/wget/)
 
 Virtualization:
 
@@ -76,27 +74,7 @@ Follow these instructions to install Kyma from a release or from sources:
 </div>
 
  ## Post-installation steps
-  1. Kyma comes with a local wildcard self-signed `server.crt` certificate. Download the certificate from Kyma GitHub and add it to your OS trusted certificates to access the Console UI. Run:
-      <div tabs>
-      <details>
-      <summary>
-      MacOS
-      </summary>
-
-      ```bash
-      wget https://raw.githubusercontent.com/kyma-project/kyma/master/installation/certs/workspace/raw/server.crt ; sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain server.crt
-      ```
-      </details>
-      <details>
-      <summary>
-      Linux
-      </summary>
-
-      ```bash
-      wget https://raw.githubusercontent.com/kyma-project/kyma/master/installation/certs/workspace/raw/server.crt ; certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n {CERT_DISPLAYNAME} -i server.crt
-      ```
-      </details>
-      </div>
+  1. Kyma comes with a local wildcard self-signed `server.crt` certificate. The `kyma install` command already downloaded and added to your OS trusted certificates to access the Console UI.
 
       >**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
 
