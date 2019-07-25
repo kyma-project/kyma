@@ -1,4 +1,4 @@
-APP_NAME = backup-restore-test
+APP_NAME = backup-test
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/tests/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 

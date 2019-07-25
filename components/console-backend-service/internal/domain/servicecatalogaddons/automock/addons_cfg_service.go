@@ -10,16 +10,6 @@ type addonsCfgService struct {
 	mock.Mock
 }
 
-// ConfigMapSubscribe provides a mock function with given fields: listener
-func (_m *addonsCfgService) ConfigMapSubscribe(listener resource.Listener) {
-	_m.Called(listener)
-}
-
-// ConfigMapUnsubscribe provides a mock function with given fields: listener
-func (_m *addonsCfgService) ConfigMapUnsubscribe(listener resource.Listener) {
-	_m.Called(listener)
-}
-
 // Subscribe provides a mock function with given fields: listener
 func (_m *addonsCfgService) Subscribe(listener resource.Listener) {
 	_m.Called(listener)

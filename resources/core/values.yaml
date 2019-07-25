@@ -21,7 +21,7 @@ global:
       name: kyma-gateway
   acceptance_tests:
     dir: pr/
-    version: "PR-4615"
+    version: "PR-4959"
   ui_acceptance_tests:
     dir: 
     version: 5150bbd3
@@ -59,7 +59,7 @@ global:
     version: 6b4c356f
   console_backend_service:
     dir: pr/
-    version: PR-4776
+    version: PR-4791
   console_backend_service_test:
     dir: develop/
     version: b3441db9
@@ -95,13 +95,3 @@ test:
         # Currently Pods with istio sidecar they have a long termination time, because of that we need to have
         # such log timeout for teardown (waiting until namespace will be terminated)
         tearDownTimeoutPerStep: 3m
-    ui:
-      # tests uses chromium that require more memory
-      requests:
-        memory: 300Mi
-        cpu: 200m
-      limits:
-        memory: 1.5Gi
-        cpu: 300m
-      logging:
-        enabled:

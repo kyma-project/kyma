@@ -56,7 +56,7 @@ then
    exit 1
 fi
 
-matchTests=$(${kc} get testdefinitions --all-namespaces -l 'app=backup-test' -o=go-template='  selectors:
+matchTests=$(${kc} get testdefinitions --all-namespaces -l 'app=e2e-backup-test' -o=go-template='  selectors:
     matchNames:
 {{- range .items}}
       - name: {{.metadata.name}}

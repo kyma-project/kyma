@@ -1,7 +1,9 @@
 package main
 
 import (
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
 
 	"os"
@@ -56,28 +58,36 @@ func main() {
 		os.Exit(1)
 	}
 
+	certManager := certificates.NewCredentialsManager()
+	compassConfigClient := compass.NewConfigurationClient()
+	syncService := synchronization.NewSynchronizationService()
+
 	compassConnector := compass.NewCompassConnector(options.tokenURLConfigFile)
-	connectionCRSupervisor := compassconnection.NewSupervisor(compassConnector, compassConnectionCRClient.CompassConnections())
+	connectionSupervisor := compassconnection.NewSupervisor(
+		compassConnector,
+		compassConnectionCRClient.CompassConnections(),
+		certManager,
+		compassConfigClient,
+		syncService)
 
 	// Setup all Controllers
 	log.Info("Setting up controller")
-	if err := compassconnection.InitCompassConnectionController(mgr); err != nil {
+	if err := compassconnection.InitCompassConnectionController(mgr, connectionSupervisor); err != nil {
 		log.Error(err, "Unable to register controllers to the manager")
 		os.Exit(1)
 	}
 
 	// Initialize Compass Connection CR
 	log.Infoln("Initializing Compass Connection CR")
-	err = connectionCRSupervisor.InitializeCompassConnectionCR()
+	_, err = connectionSupervisor.InitializeCompassConnection()
 	if err != nil {
 		log.Error("Unable to initialize Compass Connection CR")
-		os.Exit(1)
 	}
 
 	// Start the Cmd
 	log.Info("Starting the Cmd.")
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-		log.Error(err, "unable to run the manager")
+		log.Error(err, "Unable to run the manager")
 		os.Exit(1)
 	}
 }
