@@ -53,15 +53,12 @@ func (cc *configClient) FetchConfiguration(directorURL string, credentials certi
 	gqlFieldsProvider := gqlFieldsProvider{}
 
 	applicationPage := ApplicationPage{}
-
 	response := ApplicationsForRuntimeResponse{Result: &applicationPage}
 
 	// TODO: use proper query when it is ready
 	//result: applicationsForRuntime(runtimeId: %s) { ... }
 
 	applicationsQuery := fmt.Sprintf(applicationQueryFormat, gqlFieldsProvider.Page(gqlFieldsProvider.ForApplication()))
-
-	//fmt.Println(applicationsQuery)
 
 	req := graphql.NewRequest(applicationsQuery)
 	req.Header.Add(HeaderTenant, cc.tenant)
@@ -71,18 +68,12 @@ func (cc *configClient) FetchConfiguration(directorURL string, credentials certi
 		return nil, errors.Wrap(err, "Failed to fetch Applications")
 	}
 
-	fmt.Println("Applications Count: ", len(applicationPage.Data))
-	fmt.Println("Page Info start: ", applicationPage.PageInfo.StartCursor)
-	fmt.Println("Page Info end: ", applicationPage.PageInfo.EndCursor)
-	fmt.Println("Page Info has next: ", applicationPage.PageInfo.HasNextPage)
+	// TODO: After implementation of paging modify the fetching logic
 
-	for _, app := range applicationPage.Data {
-		fmt.Println("App ", app.ID, " apis count: ", len(app.APIs.Data))
+	applications := make([]synchronization.Application, len(applicationPage.Data))
+	for i, app := range applicationPage.Data {
+		applications[i] = app.ToApplication()
 	}
 
-	// TODO - fetch all API pages and EventAPI pages for this Application
-
-	// TODO - repeat for all ApplicationPages
-
-	return nil, nil
+	return applications, nil
 }

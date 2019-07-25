@@ -3,9 +3,13 @@ package compass
 import (
 	"crypto/tls"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
 
-	"github.com/stretchr/testify/require"
+	"github.com/pkg/errors"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
+
+	"github.com/stretchr/testify/assert"
 
 	gql "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
 	"github.com/machinebox/graphql"
@@ -18,47 +22,7 @@ const (
 	runtimeId = "runtimeId"
 
 	directorURL = "https://director.com/graphql"
-)
 
-type mockGQLClient struct {
-	t               *testing.T
-	expectedRequest *graphql.Request
-	//requestAssert   func(t *testing.T, req *graphql.Request)
-}
-
-func (c *mockGQLClient) Do(req *graphql.Request, res interface{}) error {
-	assert.Equal(c.t, c.expectedRequest, req)
-
-	appForRuntimesResp, ok := res.(*ApplicationsForRuntimeResponse)
-	require.True(c.t, ok)
-
-	appForRuntimesResp.Result.Data = []*Application{
-		{
-			Name: "App",
-		},
-	}
-
-	return nil
-}
-
-func (c *mockGQLClient) DisableLogging() {
-	panic("implement me")
-}
-
-func newMockClientConstructor(t *testing.T,
-	//assertRequestFunc func(t *testing.T, req *graphql.Request)
-	expectedRequest *graphql.Request,
-) GraphQLClientConstructor {
-	return func(certificate tls.Certificate, graphqlEndpoint string, enableLogging bool) (client gql.Client, e error) {
-		return &mockGQLClient{
-			t: t,
-			//requestAssert: assertRequestFunc,
-			expectedRequest: expectedRequest,
-		}, nil
-	}
-}
-
-const (
 	expectedQuery = `query {
 	result: applications {
 		data {
@@ -358,66 +322,92 @@ const (
 }`
 )
 
+type mockGQLClient struct {
+	t               *testing.T
+	expectedRequest *graphql.Request
+	shouldFail      bool
+}
+
+func (c *mockGQLClient) Do(req *graphql.Request, res interface{}) error {
+	assert.Equal(c.t, c.expectedRequest, req)
+
+	if !c.shouldFail {
+		appForRuntimesResp, ok := res.(*ApplicationsForRuntimeResponse)
+		if !ok {
+			return errors.New("invalid response type expected")
+		}
+
+		appForRuntimesResp.Result.Data = []*Application{
+			{Name: "App"},
+		}
+
+		return nil
+	}
+
+	return errors.New("error")
+}
+
+func (c *mockGQLClient) DisableLogging() {}
+
+func newMockClientConstructor(t *testing.T, shouldFail bool) GraphQLClientConstructor {
+	return func(certificate tls.Certificate, graphqlEndpoint string, enableLogging bool) (client gql.Client, e error) {
+		expectedReq := graphql.NewRequest(expectedQuery)
+		expectedReq.Header.Set("Tenant", tenant)
+
+		return &mockGQLClient{
+			expectedRequest: expectedReq,
+			t:               t,
+			shouldFail:      shouldFail,
+		}, nil
+	}
+}
+
+func failingGQLClientContructor(certificate tls.Certificate, graphqlEndpoint string, enableLogging bool) (client gql.Client, e error) {
+	return nil, errors.New("error")
+}
+
 func TestConfigClient_FetchConfiguration(t *testing.T) {
 
-	//for _, testCase := range []struct {
-	//	description         string
-	//	expectedRequestFunc func() *graphql.Request
-	//	//expectedApps        []*Application // TODO - use it instead of asserts after implementation
-	//}{
-	//	{
-	//		description: "fetch applications",
-	//		expectedRequestFunc: func() *graphql.Request {
-	//			expectedReq := graphql.NewRequest(expectedQuery)
-	//			expectedReq.Header.Set("Tenant", tenant)
-	//			return expectedReq
-	//		},
-	//		//expectedApps: []*Application{},
-	//	},
-	//} {
-	//	t.Run("should "+testCase.description, func(t *testing.T) {
-	//		mockClientConstructor := newMockClientConstructor(t, testCase.expectedRequestFunc())
-	//
-	//		configClient := NewConfigurationClient(tenant, runtimeId, mockClientConstructor)
-	//
-	//		// when
-	//		config, err := configClient.FetchConfiguration(directorURL, certificates.Credentials{})
-	//
-	//		// then
-	//		require.NoError(t, err)
-	//
-	//		// TODO - assert after implementation
-	//		//assert.Equal(t, "App", config[0].Name)
-	//		assert.Nil(t, config)
-	//	})
-	//}
+	for _, testCase := range []struct {
+		description       string
+		expectedApps      []synchronization.Application
+		clientConstructor GraphQLClientConstructor
+		shouldFail        bool
+	}{
+		{
+			description: "fetch applications",
+			expectedApps: []synchronization.Application{
+				{Name: "App"},
+			},
+			clientConstructor: newMockClientConstructor(t, false),
+			shouldFail:        false,
+		},
+		{
+			description:       "return error when failed to fetch config",
+			expectedApps:      nil,
+			clientConstructor: newMockClientConstructor(t, true),
+			shouldFail:        true,
+		},
+		{
+			description:       "return error when failed to create graphql client",
+			expectedApps:      nil,
+			clientConstructor: failingGQLClientContructor,
+			shouldFail:        true,
+		},
+	} {
+		t.Run("should "+testCase.description, func(t *testing.T) {
+			// given
+			configClient := NewConfigurationClient(tenant, runtimeId, testCase.clientConstructor)
 
-	//t.Run("should fetch applications", func(t *testing.T) {
-	//	// given
-	//
-	//	expectedReq := graphql.NewRequest(expectedQuery)
-	//	expectedReq.Header.Set("Tenant", tenant)
-	//
-	//	mockClientConstructor := newMockClientConstructor(t, expectedReq) //	func(t *testing.T, req *graphql.Request) {
-	//	//	// TODO - test specific asserts
-	//	//	expectedReq := graphql.NewRequest(expectedQuery) // TODO - pass only request?
-	//	//	expectedReq.Header.Set("Tenant", tenant)
-	//	//
-	//	//	assert.EqualValues(t, expectedReq, req)
-	//	//	assert.Equal(t, tenant, req.Header.Get("Tenant"))
-	//	//}
-	//
-	//	configClient := NewConfigurationClient(tenant, runtimeId, mockClientConstructor)
-	//
-	//	// when
-	//	config, err := configClient.FetchConfiguration(directorURL, certificates.Credentials{})
-	//
-	//	// then
-	//	require.NoError(t, err)
-	//
-	//	// TODO - assert after implementation
-	//	//assert.Equal(t, "App", config[0].Name)
-	//	assert.Nil(t, config)
-	//})
+			// when
+			apps, err := configClient.FetchConfiguration(directorURL, certificates.Credentials{})
+
+			// then
+			assert.Equal(t, testCase.expectedApps, apps)
+
+			isError := err != nil
+			assert.Equal(t, testCase.shouldFail, isError)
+		})
+	}
 
 }

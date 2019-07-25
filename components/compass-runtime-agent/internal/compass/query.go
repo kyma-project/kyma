@@ -2,6 +2,8 @@ package compass
 
 import "fmt"
 
+// TODO: improve and cleanup - best would be to rewrite
+
 const (
 	applicationsForRuntimeQuery = `query {
 			result: applications {
