@@ -2,7 +2,6 @@ package authz
 
 import (
 	"context"
-
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/authn"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 

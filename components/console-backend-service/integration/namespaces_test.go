@@ -1,63 +1,29 @@
-package main
+package integration
 
 import (
 	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/components/console-backend-service/integration/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/vrischmann/envconfig"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
-	"net"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sync"
 	"testing"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
-func TestIntegration(t *testing.T) {
-	// setup and start kube-apiserver
-	environment := &envtest.Environment{}
-	restConfig, err := environment.Start()
+const (
+	canAccess    = "canaccess"
+	cannotAccess = "cannotaccess"
+)
+
+func TestNamespaces(t *testing.T) {
+	suite := givenNewTestNamespaceSuite(t, canAccess, restConfig)
+
+	err := givenUserCanAccessResource(canAccess, "", "namespaces", []string{"create", "get", "delete", "update"})
 	require.NoError(t, err)
-
-	_, err = envtest.InstallCRDs(restConfig, envtest.CRDInstallOptions{
-		Paths:              []string{"../../resources/cluster-essentials/templates/crds"},
-		ErrorIfPathMissing: true,
-	})
-	require.NoError(t, err)
-
-	appConfig := config{}
-	err = envconfig.InitWithOptions(&appConfig, envconfig.Options{Prefix: "CBS_TEST", AllOptional: true})
-	require.NoError(t, err)
-	appConfig.OIDC.IssuerURL = "https://dex.kyma.local"
-	appConfig.AuthEnabled = false
-
-	listener, err := net.Listen("tcp", ":0")
-	require.NoError(t, err)
-	port := listener.Addr().(*net.TCPAddr).Port
-
-	wg := &sync.WaitGroup{}
-	stopCh := make(chan struct{})
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		err = run(listener, stopCh, appConfig, restConfig)
-		require.NoError(t, err)
-	}()
-
-	test(t, restConfig, port)
-
-	close(stopCh)
-	wg.Wait()
-}
-
-func test(t *testing.T, restConfig *rest.Config, port int) {
-	suite := givenNewTestNamespaceSuite(t, restConfig, port)
 
 	t.Log("Creating namespace...")
 	createRsp, err := suite.whenNamespaceIsCreated()
@@ -66,7 +32,7 @@ func test(t *testing.T, restConfig *rest.Config, port int) {
 	suite.thenCreateNamespaceResponseIsAsExpected(t, createRsp)
 	suite.thenNamespaceExistsInK8s(t)
 
-	t.Log("Quering for namespace...")
+	t.Log("Querying for namespace...")
 	queryRsp, err := suite.whenNamespaceIsQueried()
 	suite.thenThereIsNoError(t, err)
 	suite.thenThereIsNoGqlError(t, queryRsp.GqlErrors)
@@ -87,24 +53,39 @@ func test(t *testing.T, restConfig *rest.Config, port int) {
 	suite.thenNamespaceIsTerminating(t)
 }
 
+func TestNamespacesForbidden(t *testing.T) {
+	suite := givenNewTestNamespaceSuite(t, cannotAccess, restConfig)
+
+	err := givenUserCannotAccessResource(cannotAccess, "", "namespaces")
+	require.NoError(t, err)
+
+	thenRequestsShouldBeDenied(t, suite.gqlClient,
+		suite.fixNamespaceCreate(),
+		suite.fixNamespaceUpdate(),
+		suite.fixNamespaceQuery(),
+		suite.fixNamespaceDelete(),
+	)
+
+}
+
 type testNamespaceSuite struct {
-	gqlClient     *graphql.Client
 	k8sClient     *corev1.CoreV1Client
+	gqlClient     *graphql.Client
 	namespaceName string
 	labels        map[string]string
 	updatedLabels map[string]string
 }
 
-func givenNewTestNamespaceSuite(t *testing.T, restConfig *rest.Config, port int) testNamespaceSuite {
-	c, err := graphql.New(port)
-	require.NoError(t, err)
-
+func givenNewTestNamespaceSuite(t *testing.T, user string, restConfig *rest.Config) testNamespaceSuite {
 	k8s, err := corev1.NewForConfig(restConfig)
 	require.NoError(t, err)
 
+	gqlClient, err := graphql.New(gqlEndpoint, user)
+	require.NoError(t, err)
+
 	suite := testNamespaceSuite{
-		gqlClient:     c,
 		k8sClient:     k8s,
+		gqlClient:     gqlClient,
 		namespaceName: "test-namespace",
 		labels: map[string]string{
 			"aaa": "bbb",

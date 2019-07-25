@@ -2,13 +2,9 @@ package graphql
 
 import (
 	"context"
-	"fmt"
-	"github.com/avast/retry-go"
 	"net/http"
 	"strings"
 	"time"
-
-	"log"
 
 	"github.com/machinebox/graphql"
 	"github.com/pkg/errors"
@@ -19,25 +15,20 @@ const (
 )
 
 type Client struct {
-	gqlClient    *graphql.Client
-	endpoint     string
-	logs         []string
-	logging      bool
+	gqlClient *graphql.Client
+	endpoint  string
+	user      string
 }
 
-func New(port int) (*Client, error) {
+func New(endpoint, user string) (*Client, error) {
 	httpClient := &http.Client{Timeout: 30 * time.Second}
-	endpoint := fmt.Sprintf("http://127.0.0.1:%v/graphql", port)
 	gqlClient := graphql.NewClient(endpoint, graphql.WithHTTPClient(httpClient))
 
 	client := &Client{
 		gqlClient: gqlClient,
 		endpoint:  endpoint,
-		logging:   true,
-		logs:      []string{},
+		user:      user,
 	}
-
-	client.gqlClient.Log = client.addLog
 
 	return client, nil
 }
@@ -48,20 +39,11 @@ func (c *Client) DoQuery(q string, res interface{}) error {
 }
 
 func (c *Client) Do(req *Request, res interface{}) error {
+	req.AddHeader("user", c.user)
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	c.clearLogs()
-	err := retry.Do(func() error {
-		return c.gqlClient.Run(ctx, req.req, res)
-	})
-	if err != nil {
-		for _, l := range c.logs {
-			if l != "" {
-				log.Println(l)
-			}
-		}
-	}
+	err := c.gqlClient.Run(ctx, req.req, res)
 	return err
 }
 
@@ -94,20 +76,4 @@ func (c *Client) Subscribe(req *Request) *Subscription {
 	}
 
 	return newSubscription(connection)
-}
-
-func (c *Client) DisableLogging() {
-	c.logging = false
-}
-
-func (c *Client) addLog(log string) {
-	if !c.logging {
-		return
-	}
-
-	c.logs = append(c.logs, log)
-}
-
-func (c *Client) clearLogs() {
-	c.logs = []string{}
 }
