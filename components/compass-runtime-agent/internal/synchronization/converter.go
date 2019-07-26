@@ -26,7 +26,6 @@ type Converter interface {
 }
 
 type converter struct {
-	namespace    string
 	nameResolver k8sconsts.NameResolver
 }
 
@@ -40,9 +39,10 @@ func NewConverter(nameResolver k8sconsts.NameResolver) Converter {
 // 1. Director provides Application Name and Application ID but we cannot store both. Application ID is used as application name in the CRD.
 // 2. Director provides application labels in a form of map[string]string[] whereas application CRD expects map[string]string
 // 3. Service object being a part of Application CRD contains some fields which are not returned by the Director:
-// 	 1) ProviderDisplayName field ; Application Registry takes this value from the payload passed on service registration. Question: where should it be
+// 	 1) ProviderDisplayName field ; Application Registry takes this value from the payload passed on service registration.
 //	 2) LongDescription field ; Application Registry takes this value from the payload passed on service registration.
-//   3) Labels for api definition ; Application Registry allows to specify labels to be added to Service object
+//   3) Identifier field ; Application Registry takes this value from the payload passed on service registration. The field represent an external identifier defined in the system exposing API/Events.
+//   4) Labels for api definition ; Application Registry allows to specify labels to be added to Service object
 func (c converter) Do(application Application) v1alpha1.Application {
 	description := ""
 	if application.Description != nil {
@@ -66,14 +66,14 @@ func (c converter) Do(application Application) v1alpha1.Application {
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: application.Name,
+			Name: application.ID,
 		},
 		Spec: v1alpha1.ApplicationSpec{
 			Description:      description,
 			SkipInstallation: false,
-			AccessLabel:      application.Name,
+			AccessLabel:      application.ID,
 			Labels:           convertLabels(application.Labels),
-			Services:         c.toServices(application.Name, application.APIs, application.EventAPIs),
+			Services:         c.toServices(application.ID, application.APIs, application.EventAPIs),
 		},
 	}
 }
@@ -82,45 +82,53 @@ const (
 	connectedApp = "connected-app"
 )
 
-func (c converter) toServices(application string, apis []APIDefinition, eventAPIs []EventAPIDefinition) []v1alpha1.Service {
+func (c converter) toServices(applicationID string, apis []APIDefinition, eventAPIs []EventAPIDefinition) []v1alpha1.Service {
 	services := make([]v1alpha1.Service, 0, len(apis)+len(eventAPIs))
 
 	for _, apiDefinition := range apis {
-		services = append(services, c.toAPIService(application, apiDefinition))
+		services = append(services, c.toAPIService(applicationID, apiDefinition))
 	}
 
-	for _, eventDefinition := range eventAPIs {
-		services = append(services, c.toEventAPIService(application, eventDefinition))
+	for _, eventsDefinition := range eventAPIs {
+		services = append(services, c.toEventAPIService(applicationID, eventsDefinition))
 	}
 
 	return services
 }
 
-func (c converter) toAPIService(application string, definition APIDefinition) v1alpha1.Service {
+func (c converter) toAPIService(applicationID string, apiDefinition APIDefinition) v1alpha1.Service {
 
 	newService := v1alpha1.Service{
-		ID:                  definition.ID,
+		ID:                  apiDefinition.ID,
 		Identifier:          "", // not available in the Director's API
-		Name:                createServiceName(definition.Name, definition.ID),
-		DisplayName:         definition.Name,
-		Description:         definition.Description,
-		Labels:              map[string]string{connectedApp: application}, // not available in the Director's API
-		LongDescription:     "",                                           // not available in the Director's API
-		ProviderDisplayName: "",                                           // not available in the Director's API
+		Name:                createServiceName(apiDefinition.Name, apiDefinition.ID),
+		DisplayName:         apiDefinition.Name,
+		Description:         apiDefinition.Description,
+		Labels:              map[string]string{connectedApp: applicationID}, // not available in the Director's API
+		LongDescription:     "",                                             // not available in the Director's API
+		ProviderDisplayName: "",                                             // not available in the Director's API
 		Tags:                make([]string, 0),
 		Entries: []v1alpha1.Entry{
-			c.toServiceEntry(application, definition),
+			c.toServiceEntry(applicationID, apiDefinition),
 		},
 	}
 
 	return newService
 }
 
-func (c converter) toServiceEntry(application string, definition APIDefinition) v1alpha1.Entry {
+func (c converter) toServiceEntry(applicationID string, apiDefinition APIDefinition) v1alpha1.Entry {
 
 	getRequestParamsSecretName := func() string {
-		if definition.RequestParameters.Headers != nil || definition.RequestParameters.QueryParameters != nil {
-			return c.nameResolver.GetRequestParamsSecretName(application, definition.ID)
+		if apiDefinition.RequestParameters.Headers != nil || apiDefinition.RequestParameters.QueryParameters != nil {
+			return c.nameResolver.GetRequestParamsSecretName(applicationID, apiDefinition.ID)
+		}
+
+		return ""
+	}
+
+	getApiType := func() string {
+		if apiDefinition.APISpec != nil {
+			return string(apiDefinition.APISpec.Type)
 		}
 
 		return ""
@@ -128,11 +136,12 @@ func (c converter) toServiceEntry(application string, definition APIDefinition) 
 
 	entry := v1alpha1.Entry{
 		Type:                        specAPIType,
-		AccessLabel:                 c.nameResolver.GetResourceName(application, definition.ID),
-		TargetUrl:                   definition.TargetUrl,
-		GatewayUrl:                  c.nameResolver.GetGatewayUrl(application, definition.ID),
+		AccessLabel:                 c.nameResolver.GetResourceName(applicationID, apiDefinition.ID),
+		ApiType:                     getApiType(),
+		TargetUrl:                   apiDefinition.TargetUrl,
+		GatewayUrl:                  c.nameResolver.GetGatewayUrl(applicationID, apiDefinition.ID),
 		SpecificationUrl:            "", // Director returns BLOB here
-		Credentials:                 c.toCredentials(application, definition.ID, definition.Credentials),
+		Credentials:                 c.toCredentials(applicationID, apiDefinition.ID, apiDefinition.Credentials),
 		RequestParametersSecretName: getRequestParamsSecretName(),
 	}
 
@@ -141,7 +150,7 @@ func (c converter) toServiceEntry(application string, definition APIDefinition) 
 
 var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
 
-func (c converter) toCredentials(application string, serviceID string, credentials *Credentials) v1alpha1.Credentials {
+func (c converter) toCredentials(applicationID string, apiDefinitionID string, credentials *Credentials) v1alpha1.Credentials {
 
 	toCSRF := func(csrf *CSRFInfo) *v1alpha1.CSRFInfo {
 		if csrf != nil {
@@ -158,7 +167,7 @@ func (c converter) toCredentials(application string, serviceID string, credentia
 			return v1alpha1.Credentials{
 				Type:              CredentialsOAuthType,
 				AuthenticationUrl: credentials.Oauth.URL,
-				SecretName:        c.nameResolver.GetCredentialsSecretName(application, serviceID),
+				SecretName:        c.nameResolver.GetCredentialsSecretName(applicationID, apiDefinitionID),
 				CSRFInfo:          toCSRF(credentials.CSRFInfo),
 			}
 		}
@@ -166,38 +175,37 @@ func (c converter) toCredentials(application string, serviceID string, credentia
 		if credentials.Basic != nil {
 			return v1alpha1.Credentials{
 				Type:       CredentialsBasicType,
-				SecretName: c.nameResolver.GetCredentialsSecretName(application, serviceID),
+				SecretName: c.nameResolver.GetCredentialsSecretName(applicationID, apiDefinitionID),
 				CSRFInfo:   toCSRF(credentials.CSRFInfo),
 			}
 		}
-		return v1alpha1.Credentials{}
 	}
 
 	return v1alpha1.Credentials{}
 }
 
-func (c converter) toEventAPIService(application string, definition EventAPIDefinition) v1alpha1.Service {
+func (c converter) toEventAPIService(applicationID string, eventsDefinition EventAPIDefinition) v1alpha1.Service {
 
 	newService := v1alpha1.Service{
-		ID:                  definition.ID,
+		ID:                  eventsDefinition.ID,
 		Identifier:          "", // not available in the Director's API
-		Name:                createServiceName(definition.Name, definition.ID),
-		DisplayName:         definition.Name,
-		Description:         definition.Description,
-		Labels:              map[string]string{connectedApp: application}, // Application Registry adds here an union of two things: labels specified in the payload and connectedApp label
-		LongDescription:     "",                                           // not available in the Director's API
-		ProviderDisplayName: "",                                           // not available in the Director's API
+		Name:                createServiceName(eventsDefinition.Name, eventsDefinition.ID),
+		DisplayName:         eventsDefinition.Name,
+		Description:         eventsDefinition.Description,
+		Labels:              map[string]string{connectedApp: applicationID}, // Application Registry adds here an union of two things: labels specified in the payload and connectedApp label
+		LongDescription:     "",                                             // not available in the Director's API
+		ProviderDisplayName: "",                                             // not available in the Director's API
 		Tags:                make([]string, 0),
-		Entries:             []v1alpha1.Entry{c.toEventServiceEntry(application, definition)},
+		Entries:             []v1alpha1.Entry{c.toEventServiceEntry(applicationID, eventsDefinition)},
 	}
 
 	return newService
 }
 
-func (c converter) toEventServiceEntry(application string, definition EventAPIDefinition) v1alpha1.Entry {
+func (c converter) toEventServiceEntry(applicationID string, eventsDefinition EventAPIDefinition) v1alpha1.Entry {
 	entry := v1alpha1.Entry{
 		Type:             specEventsType,
-		AccessLabel:      c.nameResolver.GetResourceName(application, definition.ID),
+		AccessLabel:      c.nameResolver.GetResourceName(applicationID, eventsDefinition.ID),
 		SpecificationUrl: "", // Director returns BLOB here
 	}
 

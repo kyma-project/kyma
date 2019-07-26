@@ -19,13 +19,15 @@ func TestConverter(t *testing.T) {
 		description := "Description"
 
 		directorApp := Application{
-			ID:          "id1",
-			Name:        "App1",
+			ID:          "App1",
+			Name:        "App name 1",
 			Description: &description,
-			Labels:      nil, // TODO: convert case with not nil
-			APIs:        []APIDefinition{},
-			EventAPIs:   []EventAPIDefinition{},
-			Documents:   []Document{},
+			Labels: map[string][]string{
+				"key": {"value1", "value2"},
+			},
+			APIs:      []APIDefinition{},
+			EventAPIs: []EventAPIDefinition{},
+			Documents: []Document{},
 		}
 
 		expected := v1alpha1.Application{
@@ -41,7 +43,9 @@ func TestConverter(t *testing.T) {
 				SkipInstallation: false,
 				Services:         []v1alpha1.Service{},
 				AccessLabel:      "App1",
-				Labels:           map[string]string{},
+				Labels: map[string]string{
+					"key": "value1,value2",
+				},
 			},
 		}
 
@@ -59,38 +63,29 @@ func TestConverter(t *testing.T) {
 
 		mockNameResolver.On("GetResourceName", "App1", "serviceId1").Return("resourceName1")
 		mockNameResolver.On("GetResourceName", "App1", "serviceId2").Return("resourceName2")
-		mockNameResolver.On("GetResourceName", "App1", "serviceId3").Return("resourceName3")
 
 		mockNameResolver.On("GetGatewayUrl", "App1", "serviceId1").Return("application-gateway.kyma-integration.svc.cluster.local")
 		mockNameResolver.On("GetGatewayUrl", "App1", "serviceId2").Return("application-gateway.kyma-integration.svc.cluster.local")
-		mockNameResolver.On("GetGatewayUrl", "App1", "serviceId3").Return("application-gateway.kyma-integration.svc.cluster.local")
+
+		mockNameResolver.On("GetCredentialsSecretName", "App1", "serviceId1").Return("credentialsSecretName1")
+		mockNameResolver.On("GetRequestParamsSecretName", "App1", "serviceId1").Return("paramatersSecretName1")
 
 		mockNameResolver.On("GetCredentialsSecretName", "App1", "serviceId2").Return("credentialsSecretName2")
 		mockNameResolver.On("GetRequestParamsSecretName", "App1", "serviceId2").Return("paramatersSecretName2")
 
-		mockNameResolver.On("GetCredentialsSecretName", "App1", "serviceId3").Return("credentialsSecretName3")
-		mockNameResolver.On("GetRequestParamsSecretName", "App1", "serviceId3").Return("paramatersSecretName3")
-
 		description := "Description"
 
 		directorApp := Application{
-			ID:          "id1",
-			Name:        "App1",
+			ID:          "App1",
+			Name:        "App name 1",
 			Description: &description,
-			Labels:      nil, // TODO? Figure out what to do with labels
+			Labels:      nil,
 			APIs: []APIDefinition{
 				{
-					ID:                "serviceId1",
-					Name:              "serviceName1",
-					Description:       "API 1 description",
-					TargetUrl:         "www.example.com/1",
-					RequestParameters: RequestParameters{},
-				},
-				{
-					ID:          "serviceId2",
-					Name:        "serviceName2",
-					Description: "API 2 description",
-					TargetUrl:   "www.example.com/2",
+					ID:          "serviceId1",
+					Name:        "serviceName1",
+					Description: "API 1 description",
+					TargetUrl:   "www.example.com/1",
 					RequestParameters: RequestParameters{
 						Headers: &map[string][]string{
 							"key": {"value"},
@@ -104,10 +99,10 @@ func TestConverter(t *testing.T) {
 					},
 				},
 				{
-					ID:          "serviceId3",
-					Name:        "serviceName3",
-					Description: "API 3 description",
-					TargetUrl:   "www.example.com/3",
+					ID:          "serviceId2",
+					Name:        "serviceName2",
+					Description: "API 2 description",
+					TargetUrl:   "www.example.com/2",
 					RequestParameters: RequestParameters{
 						QueryParameters: &map[string][]string{
 							"key": {"value"},
@@ -115,12 +110,12 @@ func TestConverter(t *testing.T) {
 					},
 					Credentials: &Credentials{
 						Oauth: &Oauth{
-							URL:          "www.oauth.com/3",
+							URL:          "www.oauth.com/2",
 							ClientID:     "client_id",
 							ClientSecret: "client_secret",
 						},
 						CSRFInfo: &CSRFInfo{
-							TokenEndpointURL: "www.csrf.com/3",
+							TokenEndpointURL: "www.csrf.com/2",
 						},
 					},
 				},
@@ -157,12 +152,17 @@ func TestConverter(t *testing.T) {
 						Tags:                []string{},
 						Entries: []v1alpha1.Entry{
 							{
-								Type:                        specAPIType,
-								GatewayUrl:                  "application-gateway.kyma-integration.svc.cluster.local",
-								AccessLabel:                 "resourceName1",
-								TargetUrl:                   "www.example.com/1",
-								SpecificationUrl:            "",
-								RequestParametersSecretName: "",
+								Type:             specAPIType,
+								GatewayUrl:       "application-gateway.kyma-integration.svc.cluster.local",
+								AccessLabel:      "resourceName1",
+								TargetUrl:        "www.example.com/1",
+								SpecificationUrl: "",
+								Credentials: v1alpha1.Credentials{
+									Type:              CredentialsBasicType,
+									SecretName:        "credentialsSecretName1",
+									AuthenticationUrl: "",
+								},
+								RequestParametersSecretName: "paramatersSecretName1",
 							},
 						},
 					},
@@ -186,42 +186,14 @@ func TestConverter(t *testing.T) {
 								TargetUrl:        "www.example.com/2",
 								SpecificationUrl: "",
 								Credentials: v1alpha1.Credentials{
-									Type:              CredentialsBasicType,
-									SecretName:        "credentialsSecretName2",
-									AuthenticationUrl: "",
-								},
-								RequestParametersSecretName: "paramatersSecretName2",
-							},
-						},
-					},
-					{
-						ID:          "serviceId3",
-						Identifier:  "",
-						Name:        "servicename3-1836d",
-						DisplayName: "serviceName3",
-						Description: "API 3 description",
-						Labels: map[string]string{
-							"connected-app": "App1",
-						},
-						LongDescription:     "",
-						ProviderDisplayName: "",
-						Tags:                []string{},
-						Entries: []v1alpha1.Entry{
-							{
-								Type:             specAPIType,
-								GatewayUrl:       "application-gateway.kyma-integration.svc.cluster.local",
-								AccessLabel:      "resourceName3",
-								TargetUrl:        "www.example.com/3",
-								SpecificationUrl: "",
-								Credentials: v1alpha1.Credentials{
 									Type:              CredentialsOAuthType,
-									SecretName:        "credentialsSecretName3",
-									AuthenticationUrl: "www.oauth.com/3",
+									SecretName:        "credentialsSecretName2",
+									AuthenticationUrl: "www.oauth.com/2",
 									CSRFInfo: &v1alpha1.CSRFInfo{
-										TokenEndpointURL: "www.csrf.com/3",
+										TokenEndpointURL: "www.csrf.com/2",
 									},
 								},
-								RequestParametersSecretName: "paramatersSecretName3",
+								RequestParametersSecretName: "paramatersSecretName2",
 							},
 						},
 					},
@@ -236,25 +208,39 @@ func TestConverter(t *testing.T) {
 		assert.Equal(t, expected, application)
 	})
 
-	t.Run("should convert application with services containing events", func(t *testing.T) {
+	t.Run("should convert application with services containing events and API", func(t *testing.T) {
 		// given
 		mockNameResolver := &k8smocks.NameResolver{}
 		converter := NewConverter(mockNameResolver)
 
 		mockNameResolver.On("GetResourceName", "App1", "serviceId1").Return("resourceName1")
+		mockNameResolver.On("GetResourceName", "App1", "serviceId2").Return("resourceName2")
+
+		mockNameResolver.On("GetGatewayUrl", "App1", "serviceId1").Return("application-gateway.kyma-integration.svc.cluster.local")
 
 		description := "Description"
 
 		directorApp := Application{
-			ID:          "id1",
-			Name:        "App1",
+			ID:          "App1",
+			Name:        "App name 1",
 			Description: &description,
-			Labels:      nil, // TODO: convert case with not nil
-			APIs:        []APIDefinition{},
-			EventAPIs: []EventAPIDefinition{
+			Labels:      nil,
+			APIs: []APIDefinition{
 				{
 					ID:          "serviceId1",
-					Name:        "serviceName1",
+					Name:        "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
+					Description: "API 1 description",
+					TargetUrl:   "www.example.com/1",
+					APISpec: &APISpec{
+						Type: APISpecTypeOpenAPI,
+					},
+					RequestParameters: RequestParameters{},
+				},
+			},
+			EventAPIs: []EventAPIDefinition{
+				{
+					ID:          "serviceId2",
+					Name:        "serviceName2",
 					Description: "Events 1 description",
 				},
 			},
@@ -276,8 +262,31 @@ func TestConverter(t *testing.T) {
 					{
 						ID:          "serviceId1",
 						Identifier:  "",
-						Name:        "servicename1-cb830",
-						DisplayName: "serviceName1",
+						Name:        "veryveryveryveryveryveryveryveryveryveryveryveryveryveryv-cb830",
+						DisplayName: "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
+						Description: "API 1 description",
+						Labels: map[string]string{
+							"connected-app": "App1",
+						},
+						LongDescription:     "",
+						ProviderDisplayName: "",
+						Tags:                []string{},
+						Entries: []v1alpha1.Entry{
+							{
+								Type:                        specAPIType,
+								GatewayUrl:                  "application-gateway.kyma-integration.svc.cluster.local",
+								AccessLabel:                 "resourceName1",
+								TargetUrl:                   "www.example.com/1",
+								SpecificationUrl:            "",
+								RequestParametersSecretName: "",
+							},
+						},
+					},
+					{
+						ID:          "serviceId2",
+						Identifier:  "",
+						Name:        "servicename2-b25a8",
+						DisplayName: "serviceName2",
 						Description: "Events 1 description",
 						Labels: map[string]string{
 							"connected-app": "App1",
@@ -288,7 +297,7 @@ func TestConverter(t *testing.T) {
 						Entries: []v1alpha1.Entry{
 							{
 								Type:             specEventsType,
-								AccessLabel:      "resourceName1",
+								AccessLabel:      "resourceName2",
 								SpecificationUrl: "",
 							},
 						},
@@ -304,9 +313,5 @@ func TestConverter(t *testing.T) {
 
 		// then
 		assert.Equal(t, expected, application)
-	})
-
-	t.Run("should convert application with services containing API without credentials and events", func(t *testing.T) {
-
 	})
 }
