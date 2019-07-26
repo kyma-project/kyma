@@ -425,7 +425,7 @@ func (subscriber *testSubscriber) checkReceivedEvent() error {
 
 func (subscriber *testSubscriber) checkReceivedEventHeaders() error {
 	return retry.Do(func() error {
-		res, err := http.Get(subscriber.eventEndpointV3URL)
+		res, err := http.Get(subscriber.resultsEndpointV3URL)
 		if err != nil {
 			return err
 		}
