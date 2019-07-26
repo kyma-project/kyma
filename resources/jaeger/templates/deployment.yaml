@@ -24,6 +24,10 @@ spec:
     spec:
       {{- if .Values.global.isLocalEnv }}
       hostNetwork: true   #only for minikube
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+          - "dex.{{ .Values.global.ingress.domainName }}"
       {{- end }}
       containers:
       -   env:

@@ -28,7 +28,7 @@ func TestMigrationService_MigrateOneURL(t *testing.T) {
 	repoConfigMap := fixConfigMapWithRepoURLs("main", []string{repoURL})
 
 	cli := fake.NewFakeClientWithScheme(sch, repoConfigMap)
-	svc := NewMigrationService(cli, namespace)
+	svc := NewMigrationService(cli, namespace, "default-repo-url")
 
 	// WHEN
 	err = svc.Migrate()
@@ -54,7 +54,7 @@ func TestMigrationService_MigrateTwoURLs(t *testing.T) {
 	repoConfigMap := fixConfigMapWithRepoURLs("main", []string{repoURL})
 
 	cli := fake.NewFakeClientWithScheme(sch, repoConfigMap)
-	svc := NewMigrationService(cli, namespace)
+	svc := NewMigrationService(cli, namespace, "default-repo-url")
 
 	// WHEN
 	err = svc.Migrate()
@@ -85,7 +85,7 @@ func TestMigrationService_MigrateTwoConfigMaps(t *testing.T) {
 	otherCM := &v1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "other"}}
 
 	cli := fake.NewFakeClientWithScheme(sch, firstCM, secondCM, otherCM)
-	svc := NewMigrationService(cli, namespace)
+	svc := NewMigrationService(cli, namespace, "default-repo-url")
 
 	// WHEN
 	err = svc.Migrate()
@@ -102,6 +102,30 @@ func TestMigrationService_MigrateTwoConfigMaps(t *testing.T) {
 		assert.True(t, found)
 		assert.Equal(t, expected, cac.Spec.Repositories[0].URL)
 	}
+	assertNumberOfConfigMaps(t, cli, 1)
+}
+
+func TestMigrationService_NotMigrateDefaultConfiguration(t *testing.T) {
+	// GIVEN
+	sch, err := v1alpha1.SchemeBuilder.Build()
+	v1.AddToScheme(sch)
+	require.NoError(t, err)
+
+	repoURL := "http://url.to.repo.com/"
+	repoConfigMap := fixConfigMapWithRepoURLs("main", []string{repoURL})
+
+	cli := fake.NewFakeClientWithScheme(sch, repoConfigMap)
+	svc := NewMigrationService(cli, namespace, "main")
+
+	// WHEN
+	err = svc.Migrate()
+	require.NoError(t, err)
+
+	// THEN
+	expCAC := &v1alpha1.ClusterAddonsConfiguration{}
+	err = cli.Get(context.TODO(), types.NamespacedName{Name: "main", Namespace: ""}, expCAC)
+	require.Error(t, err)
+
 	assertNumberOfConfigMaps(t, cli, 1)
 }
 

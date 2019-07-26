@@ -34,6 +34,9 @@ rules:
   - apiGroups: [""]
     resources: ["secrets"]
     verbs:     ["get", "update"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs:     ["delete"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources:
     - "clusterserviceclasses"
@@ -132,6 +135,8 @@ spec:
           - --webhook-service-port
           - "{{ .Values.webhook.service.port }}"
           - --storage-path=data/
+          - --pvc-name
+          - {{ template "fullname" . }}-migration-storage
           volumeMounts:
           - name: storage
             mountPath: /data

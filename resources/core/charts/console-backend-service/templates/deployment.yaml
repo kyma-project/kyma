@@ -81,8 +81,6 @@ spec:
             value: "{{ .Values.tracing.debug }}"
           - name: APP_TRACING_SERVICE_SPAN_NAME
             value: {{ .Values.tracing.serviceSpanName }}
-          - name: APP_FEATURE_TOGGLES_CLUSTER_ADDONS_CONFIGURATION_CRD_ENABLED
-            value: "true"
         ports:
           - containerPort: {{ .Values.service.internalPort }}
             name: {{ .Values.service.internalPortName }}

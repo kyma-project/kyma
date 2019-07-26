@@ -16,7 +16,6 @@ import (
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	"github.com/google/uuid"
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	apiv1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
@@ -32,7 +31,6 @@ import (
 
 type ApiControllerTest struct {
 	functionName      string
-	uuid              string
 	domainName        string
 	hostName          string
 	kubelessInterface kubeless.Interface
@@ -82,7 +80,6 @@ func NewApiControllerTest(gatewayInterface gateway.Interface, coreInterface kube
 		functionName:      functionName,
 		domainName:        domainName,
 		hostName:          functionName + "." + domainName,
-		uuid:              uuid.New().String(),
 		idpConfig:         dexConfig,
 	}
 }
@@ -133,10 +130,6 @@ func (t ApiControllerTest) TestResourcesError(namespace string) error {
 	}
 
 	return nil
-}
-
-func (t ApiControllerTest) DeleteResources(namespace string) {
-	// There is not need to be implemented for this test.
 }
 
 func (t ApiControllerTest) callFunctionWithoutToken() error {

@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -18,9 +17,9 @@ import (
 )
 
 type statefulSetTest struct {
-	statefulSetName, uuid, output string
-	coreClient                    *kubernetes.Clientset
-	log                           logrus.FieldLogger
+	statefulSetName, output string
+	coreClient              *kubernetes.Clientset
+	log                     logrus.FieldLogger
 }
 
 func NewStatefulSetTest() (*statefulSetTest, error) {
@@ -37,7 +36,6 @@ func NewStatefulSetTest() (*statefulSetTest, error) {
 	return &statefulSetTest{
 		coreClient:      coreClient,
 		statefulSetName: "hello",
-		uuid:            uuid.New().String(),
 		log:             logrus.WithField("test", "statefulset"),
 	}, nil
 }
@@ -63,10 +61,6 @@ func (t *statefulSetTest) TestResources(namespace string) {
 	} else {
 		So(value, ShouldEqual, t.output)
 	}
-}
-
-func (t statefulSetTest) DeleteResources(namespace string) {
-	// There is not need to be implemented for this test.
 }
 
 func (t *statefulSetTest) getOutput(host string, waitmax time.Duration) (string, error) {
@@ -108,13 +102,13 @@ func (t *statefulSetTest) createStatefulSet(namespace string, replicas int32) er
 			Replicas:    int32Ptr(replicas),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"app": "statefulSet" + t.uuid,
+					"app": "statefulSet",
 				},
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"app": "statefulSet" + t.uuid,
+						"app": "statefulSet",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -184,7 +178,7 @@ func (t *statefulSetTest) createService(namespace string) error {
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: map[string]string{
-				"app": "statefulSet" + t.uuid,
+				"app": "statefulSet",
 			},
 			Ports: []corev1.ServicePort{
 				corev1.ServicePort{
@@ -207,7 +201,7 @@ func (t *statefulSetTest) waitForPodDeployment(namespace string, waitmax time.Du
 		case <-timeout:
 			return fmt.Errorf("statefulSet %v could not be created within given time  %v", t.statefulSetName, waitmax)
 		case <-tick:
-			pods, err := t.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app=statefulSet" + t.uuid})
+			pods, err := t.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app=statefulSet"})
 			if err != nil {
 				return err
 			}

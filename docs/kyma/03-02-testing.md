@@ -40,7 +40,13 @@ The following example presents TestDefinition with a container that calls the De
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: "test-{{ template "fullname" . }}-connection-dex"
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}-tests
+    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   template:
     metadata:
@@ -48,7 +54,7 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       containers:
-      - name: "test-{{ template "fullname" . }}-connection-dex"
+      - name: tests
         image: tutum/curl:alpine
         command: ["/usr/bin/curl"]
         args: [
@@ -65,7 +71,6 @@ spec:
 ## Tests execution
 To run all tests, use the `testing.sh` script located in the `/installation/scripts/` directory.
 Internally, the ClusterTestSuite resource is defined. It fetches all TestDefinitions and executes them.
-
 
 ### Run tests manually
 To run tests manually, create your own ClusterTestSuite resource. See the following example:
