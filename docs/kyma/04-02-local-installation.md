@@ -14,8 +14,6 @@ This Installation guide shows you how to quickly deploy Kyma locally on the MacO
 - [Minikube](https://github.com/kubernetes/minikube) 1.0
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12
 - [Helm](https://github.com/kubernetes/helm) 2.10
-- [jq](https://stedolan.github.io/jq/)
-- [wget](https://www.gnu.org/software/wget/)
 
 Virtualization:
 
@@ -75,34 +73,15 @@ Follow these instructions to install Kyma from a release or from sources:
    </details>
 </div>
 
- ## Post-installation steps
-  1. Kyma comes with a local wildcard self-signed `server.crt` certificate. Download the certificate from Kyma GitHub and add it to your OS trusted certificates to access the Console UI. Run:
-      <div tabs>
-      <details>
-      <summary>
-      MacOS
-      </summary>
+## Post-installation steps
 
-      ```bash
-      wget https://raw.githubusercontent.com/kyma-project/kyma/master/installation/certs/workspace/raw/server.crt ; sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain server.crt
-      ```
-      </details>
-      <details>
-      <summary>
-      Linux
-      </summary>
+Kyma comes with a local wildcard self-signed `server.crt` certificate. The `kyma install` command already downloads and adds trusted certificates to your OS so you can access the Console UI.
 
-      ```bash
-      wget https://raw.githubusercontent.com/kyma-project/kyma/master/installation/certs/workspace/raw/server.crt ; certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n {CERT_DISPLAYNAME} -i server.crt
-      ```
-      </details>
-      </div>
+>**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
 
-      >**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
+1. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal once the installation process is completed.
 
-  2. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal once the installation process is completed.
-
-  3. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
+2. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
 
 Read [this](#installation-reinstall-kyma) document to learn how to reinstall Kyma without deleting the cluster from Minikube.
 To learn how to test Kyma, see [this](#details-testing-kyma) document.
