@@ -10,7 +10,7 @@ Helm Broker fetches addons listed in the `index.yaml` file and exposed as remote
 
 ## Accepted solution
 
-You can specify Git repositories by adding the special `git::` prefix to the URL address. After this prefix, you can provide any valid Git URL with one of the protocols supported by Git. This solution is inspired by the [Terraform implementation](https://www.terraform.io/docs/modules/sources.html#github). Using the [hashicorp go-getter](https://github.com/hashicorp/go-getter) allows us to easily add new supported protocols such as Mercurial, S3, GCS etc.
+You can specify Git repositories by adding the special `git::` prefix to the URL address. After this prefix, you can provide any valid Git URL with one of the protocols supported by Git. This solution is inspired by the [Terraform implementation](https://www.terraform.io/docs/modules/sources.html#github). Using the [hashicorp go-getter](https://github.com/hashicorp/go-getter) allows us to easily add new supported protocols, such as Mercurial, S3, GCS, etc.
 
 ```yaml
 apiVersion: addons.kyma-project.io/v1alpha1
