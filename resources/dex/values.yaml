@@ -10,6 +10,8 @@ oidc:
   grafanaClientName: 'Grafana UI'
   jaegerClientId: jaeger
   jaegerClientName: 'Jaeger UI'
+  kialiClientId: kiali
+  kialiClientName: 'Kiali UI'
 
 dex:
   expiry:

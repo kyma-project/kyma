@@ -30,3 +30,21 @@ spec:
               value: "0.0.0.0:{{ .Values.deployment.args.containerPort }}"
             - name: APP_PLAYGROUND_API_ENDPOINT
               value: "/director/graphql"
+        {{if eq .Values.global.database.useEmbedded false}}
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.11
+          command: ["/cloud_sql_proxy",
+                    "-instances={{ .Values.global.database.managedGCP.instanceConnectionName }}=tcp:5432",
+                    "-credential_file=/secrets/cloudsql-instance-credentials/credentials.json"]
+          securityContext:
+            runAsUser: 2  # non-root user
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql-instance-credentials
+              readOnly: true
+      volumes:
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
+        {{end}}

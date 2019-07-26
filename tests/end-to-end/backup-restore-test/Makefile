@@ -1,4 +1,4 @@
-APP_NAME = backup-restore-test
+APP_NAME = backup-test
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/tests/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 
@@ -16,11 +16,7 @@ endif
 
 .PHONY: build-image
 build-image: pull-licenses
-	mkdir -p build-temp
-	cp ../../../docs/backup/assets/all-backup.yaml build-temp
-	cp ../../../docs/backup/assets/system-backup.yaml build-temp
 	docker build -t $(APP_NAME):latest .
-	rm -rf build-temp
 
 .PHONY: push-image
 push-image:

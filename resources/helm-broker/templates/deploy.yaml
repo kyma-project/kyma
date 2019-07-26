@@ -33,7 +33,7 @@ spec:
         command: ['sh', '-c', 'until $(curl --output /dev/null --silent --fail http://helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379/health); do echo waiting for etcd service; sleep 2; done;']
 
       containers:
-      - name: {{ .Chart.Name }}
+      - name: broker
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
@@ -53,6 +53,56 @@ spec:
             value: {{ template "fullname" . }}
           - name: APP_HELM_BROKER_URL
             value: http://{{ template "fullname" . }}
+          - name: APP_DEVELOP_MODE
+            value: "{{ .Values.global.isDevelopMode }}"
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-empty-dir
+
+        - mountPath: /etc/config/helm-broker
+          name: config-volume
+
+        - mountPath: /etc/certs
+          name: helm-certs
+          readOnly: true
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+        # Temporary solution for readiness probe
+        # Ref: https://github.com/istio/istio/issues/2628
+        readinessProbe:
+          exec:
+            command:
+              - curl
+              - localhost:{{ .Values.service.internalPort }}/statusz
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 2
+        livenessProbe:
+          exec:
+            command:
+              - curl
+              - localhost:{{ .Values.service.internalPort }}/statusz
+          periodSeconds: 10
+          initialDelaySeconds: 30
+          timeoutSeconds: 2
+          successThreshold: 1
+
+      - name: ctrl
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-controller:{{ .Values.global.helm_broker.version }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          - name: APP_TMP_DIR
+            value: /tmp
+          - name: APP_NAMESPACE
+            value: {{ .Release.Namespace }}
+          - name: APP_SERVICE_NAME
+            value: {{ template "fullname" . }}
+          - name: APP_CONFIG_FILE_NAME
+            value: /etc/config/helm-broker/config.yaml
+          - name: APP_CLUSTER_SERVICE_BROKER_NAME
+            value: {{ template "fullname" . }}
           - name: APP_DEVELOP_MODE
             value: "{{ .Values.global.isDevelopMode }}"
 
@@ -76,7 +126,7 @@ spec:
               - curl
               - localhost:{{ .Values.service.internalPort }}/statusz
           failureThreshold: 3
-          initialDelaySeconds: 10
+          initialDelaySeconds: 30
           periodSeconds: 3
           successThreshold: 1
           timeoutSeconds: 2
@@ -86,6 +136,7 @@ spec:
               - curl
               - localhost:{{ .Values.service.internalPort }}/statusz
           periodSeconds: 10
+          initialDelaySeconds: 30
           timeoutSeconds: 2
           successThreshold: 1
 

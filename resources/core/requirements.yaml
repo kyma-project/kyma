@@ -3,8 +3,6 @@ dependencies:
     condition: apiserver-proxy.enabled
   - name: console
     condition: console.enabled
-  - name: namespace-controller
-    condition: namespace-controller.enabled
   - name: cluster-users
     condition: cluster-users.enabled
   - name: kubeless

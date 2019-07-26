@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/client-go/rest"
@@ -16,7 +15,7 @@ const testTimes = 3
 const informerResyncPeriod = 10 * time.Second
 
 func TestPluggableContainer(t *testing.T) {
-	pluggable, err := servicecatalogaddons.New(&rest.Config{}, informerResyncPeriod, nil, experimental.FeatureToggles{})
+	pluggable, err := servicecatalogaddons.New(&rest.Config{}, informerResyncPeriod, nil)
 	require.NoError(t, err)
 
 	pluggable.SetFakeClient()
