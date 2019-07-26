@@ -2,32 +2,46 @@
 title: Architecture
 ---
 
-This document outlines the monitoring architecture of Kyma, highlighting information sources that Prometheus polls for data to process.
+Before you learn how the complete metric flow looks in Kyma, read about components and resources that are crucial elements of the monitoring flow in Kyma.
 
+## Components
 
-![Monitoring architecture in Kyma](./assets/monitoring.png)
+The main monitoring components include:
 
+- **Prometheus Operator** that creates a Prometheus instance, manages its deployment, and provides configuration for it. It also operates ServiceMonitor custom resources that specify monitoring definitions for groups of services. Prometheus Operator is a prerequisite for installing other core monitoring components, such as Alertmanager and Grafana.
 
-## The Prometheus Operator
+  For more details, read the [Prometheus Operator documentation](https://github.com/coreos/prometheus-operator).
 
-The Prometheus Operator is a CoreOS component integrated into Kyma that enables Prometheus deployments to be decoupled from the configuration of the entities they monitor. The task of the Operator is to ensure that Prometheus servers with the specified configuration are always running. If the developer does not specify a configuration for Prometheus instances, the Operator is able to generate and deploy one. The Prometheus instance is responsible for the monitoring of services.
+- **Prometheus** that collects metrics from Pods. The metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more. Pods can also contain applications with custom metrics, such as the total storage space available in the Minio server. Prometheus stores this polled data in a time-series database (TSDB) and runs rules over them to generate alerts if it detects any metric anomalies.
 
-## The Service Monitor
+  For more details, read the [Prometheus documentation](https://prometheus.io/docs/introduction).
 
-The Service Monitor works in orchestration with the Prometheus resource that the Operator watches. It dictates to a Prometheus resource how to retrieve metrics and enables exposure of those metrics in a standard manner. It also specifies services the Prometheus instance should monitor. Using labels, the Prometheus resource includes a Service Monitor.  
+- **Grafana** that provides a dashboard and a graph editor to visualize metrics collected from the Prometheus API. Grafana uses the query language called [PromQL](https://prometheus.io/docs/prometheus/latest/querying/basics/) to select and aggregate metrics data from the Prometheus database. To access the Grafana UI, use the `https://grafana.{DOMAIN}` address, where `{DOMAIN}` is the domain of your Kyma cluster.
 
-## Monitored Data sources
+  For more details, read the [Grafana documentation](https://grafana.com/docs/guides/getting_started/).
 
-Prometheus contains the flexibility to poll data from a variety of sources. Virtual machines on which Kubernetes runs make time-stamped data available, reporting on jobs started, workload, CPU performance, capacity, and more. In this case, the Service Monitor watches the Kubernetes API master to detect any job creation. The job produces time-stamped data that Prometheus consumes.
+- **Alertmanager** that receives alerts from Prometheus and forwards this data to configured Slack or Victor Ops channels.
 
-Pods may contain applications with custom metrics that Prometheus can poll through the Prometheus exporter.
+  > **NOTE:** There are no notification channels configured in the default monitoring installation. The current configuration allows you to add either Slack or Victor Ops channels.
 
-## Grafana
+  For more details, read the [Alertmanager documentation](https://prometheus.io/docs/alerting/alertmanager/).
 
-Kyma employs Grafana as a third-party resource in `kube-prometheus` to deliver a feature-rich metrics dashboard and graph editor.
+## Related resources
 
-To access the Grafana UI, use the following URL: `https://grafana.{DOMAIN}`. Replace DOMAIN with the domain of your Kyma cluster.
+Monitoring in Kyma also relies heavily on these custom resources:
 
-## Alertmanager
+- **Alert rules** define alert conditions for metrics. They are configured in Prometheus as PrometheusRule custom resource definitions (CRDs). Kyma provides a set of out-of-the-box alert rules that are passed from Prometheus to Alertmanager. The definitions of such rules specify the alert logic, the value at which alerts are triggered, the alerts' severity, and more. If you pre-define specific Slack or Victor Ops channels, Alertmanager displays the alerts in the channel each time the alerts are triggered.
 
-Alertmanager receives harvested metrics from Prometheus and forwards this data on to the configured channels, such as email or incident management systems.
+- **Service Monitors** are CRDs that specify the endpoints from which Prometheus should poll the metrics. Even if you expose a handful of metrics in your application, Prometheus polls only those from the endpoints specified in Service Monitor CRDs.
+
+## End-to-end monitoring flow
+
+The complete monitoring flow in Kyma comes down to these components and steps:
+
+![](./assets/monitoring-architecture.svg)
+
+1. Upon Kyma installation on a cluster, Prometheus Operator creates a Prometheus instance with default configuration.
+2. The Prometheus server periodically polls all metrics exposed on endpoints of services specified in Service Monitors. Prometheus stores these metrics in a time-series database.
+3. If Prometheus detects any anomalies in metrics that are covered by alert rules, it triggers the alerts and passes them to Alertmanager.
+4. If you manually configure a notification channel, you can instantly receive detailed information on metric alerts detected by Prometheus.
+5. You can visualize metrics and track their historical data on Grafana dashboards.

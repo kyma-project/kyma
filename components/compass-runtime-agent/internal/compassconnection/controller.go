@@ -3,6 +3,10 @@ package compassconnection
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
@@ -28,13 +32,19 @@ type Client interface {
 
 // Reconciler reconciles a CompassConnection object
 type Reconciler struct {
-	client Client
-	scheme *runtime.Scheme
-	log    *logrus.Entry
+	client       Client
+	supervisor   Supervisor
+	synchronizer synchronization.Service
+	configClient compass.ConfigClient
+
+	log *logrus.Entry
 }
 
-func InitCompassConnectionController(mgr manager.Manager) error {
-	reconciler := newReconciler(mgr.GetClient())
+func InitCompassConnectionController(
+	mgr manager.Manager,
+	supervisior Supervisor) error {
+
+	reconciler := newReconciler(mgr.GetClient(), supervisior)
 
 	return startController(mgr, reconciler)
 }
@@ -48,33 +58,69 @@ func startController(mgr manager.Manager, reconciler reconcile.Reconciler) error
 	return c.Watch(&source.Kind{Type: &v1alpha1.CompassConnection{}}, &handler.EnqueueRequestForObject{})
 }
 
-func newReconciler(client Client) reconcile.Reconciler {
+func newReconciler(client Client, supervisior Supervisor) reconcile.Reconciler {
 	return &Reconciler{
-		client: client,
-		log:    logrus.WithField("Controller", "CompassConnection"),
+		client:     client,
+		supervisor: supervisior,
+		log:        logrus.WithField("Controller", "CompassConnection"),
 	}
 }
 
 // Reconcile reads that state of the cluster for a CompassConnection object and makes changes based on the state read
 func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+	log := r.log.WithField("CompassConnection", request.Name)
+
 	// Fetch the CompassConnection instance
 	instance := &v1alpha1.CompassConnection{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			r.log.Infof("Compass Connection %s deleted.", request.Name)
-			// TODO - read config map
+			log.Info("Compass Connection deleted.")
+
+			// Try to establish new connection
+			instance, err := r.supervisor.InitializeCompassConnection()
+			if err != nil {
+				log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
+				return reconcile.Result{}, err
+			}
+
+			// TODO: log some human readable status
+			log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
+
 			return reconcile.Result{}, nil
 		}
-		// Error reading the object - requeue the request.
-		r.log.Infof("Failed to read %s Compass Connection.", request.Name)
+
+		// SynchronizationFailed reading the object - requeue the request.
+		log.Info("Failed to read Compass Connection.")
 		return reconcile.Result{}, err
 	}
 
-	r.log.Infof("Processing %s Compass Connection, current status: %s", instance.Name, "TODO")
+	// TODO: human readable status
+	log.Infof("Processing %s Compass Connection, current status: %s", instance.Name, "TODO")
 
-	// TODO - fetch certificate
-	// TODO - fetch config
+	// If connection is not established read Config Map and try to fetch Certificate
+	if instance.ShouldReconnect() {
+		instance, err := r.supervisor.InitializeCompassConnection()
+		if err != nil {
+			log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
+			return reconcile.Result{}, err
+		}
+
+		log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
+		return reconcile.Result{}, nil
+	}
+
+	// TODO: check last synchronization time and if it passed
+
+	log.Info("Trying to connect to Compass and apply Runtime configuration...")
+
+	synchronized, err := r.supervisor.SynchronizeWithCompass(instance)
+	if err != nil {
+		log.Errorf("Failed to synchronize with Compass: %s", err.Error())
+		return reconcile.Result{}, err
+	}
+
+	log.Infof("Synchronization finished. Compass Connection status: %s", synchronized.Status)
 
 	return reconcile.Result{}, nil
 }

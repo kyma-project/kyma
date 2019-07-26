@@ -68,7 +68,33 @@ Follow the instructions below:
     Azure
     </summary>
 
-    Coming soon...
+    ```yaml
+    apiVersion: v1
+    kind: Secret
+    metadata:
+    name: velero-credentials-overrides
+    namespace: kyma-installer
+    labels:
+        kyma-project.io/installation: ""
+        installer: overrides
+        component: velero
+    type: Opaque
+    data:
+    configuration.provider: "azure"
+    configuration.volumeSnapshotLocation.name: "azure"
+    configuration.volumeSnapshotLocation.bucket: "my-storage-container"
+    configuration.volumeSnapshotLocation.config.apitimeout: "3m0s"
+    configuration.backupStorageLocation.name: "azure"
+    configuration.backupStorageLocation.bucket: "my-storage-container"
+    configuration.backupStorageLocation.config.resourceGroup: "my-resource-group"
+    configuration.backupStorageLocation.config.storageAccount: "my-storage-account"
+    credentials.secretContents.cloud: |
+                    AZURE_SUBSCRIPTION_ID=my-subscription-ID
+                    AZURE_TENANT_ID=my-tenant-ID
+                    AZURE_CLIENT_ID=my-client-ID
+                    AZURE_CLIENT_SECRET=my-client-secret
+                    AZURE_RESOURCE_GROUP=my-resource-group
+    ```
 
     >**NOTE:** For details on configuring and installing Velero in Azure,  see [this](https://velero.io/docs/v1.0.0/azure-config/) document.
     

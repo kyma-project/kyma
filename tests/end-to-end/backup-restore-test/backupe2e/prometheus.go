@@ -35,7 +35,6 @@ import (
 	prometheusClient "github.com/coreos/prometheus-operator/pkg/client/versioned"
 	"github.com/sirupsen/logrus"
 
-	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	. "github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
@@ -74,7 +73,7 @@ type dataResult struct {
 }
 
 type prometheusTest struct {
-	metricName, uuid string
+	metricName       string
 	coreClient       *kubernetes.Clientset
 	prometheusClient *prometheusClient.Clientset
 	response         queryResponse
@@ -124,7 +123,6 @@ func NewPrometheusTest() (*prometheusTest, error) {
 		coreClient:       coreClient,
 		prometheusClient: pClient,
 		metricName:       metricName,
-		uuid:             uuid.New().String(),
 		apiQuery:         queryToApi,
 		beforeBackup:     true,
 		log:              logrus.WithField("test", "prometheus"),
@@ -278,25 +276,6 @@ func (pt *prometheusTest) TestResources(namespace string) {
 	So(strings.TrimSpace(pt.finalResult), ShouldEqual, strings.TrimSpace(pt.expectedResult))
 }
 
-func (pt *prometheusTest) DeleteResources(namespace string) {
-	// It needs to be implemented for this test.
-	err := pt.waitForPodPrometheus(1 * time.Minute)
-	So(err, ShouldBeNil)
-
-	err = pt.deleteServices(prometheusNS, prometheusServiceName, prometheusLabelSelector)
-	So(err, ShouldBeNil)
-
-	err = pt.deletePrometheus(prometheusNS, prometheusName)
-	So(err, ShouldBeNil)
-
-	err = pt.deletePod(prometheusNS, prometheusPodName, prometheusLabelSelector)
-	So(err, ShouldBeNil)
-
-	err = pt.deletePVC(prometheusNS, prometheusPvcName, prometheusLabelSelector)
-	So(err, ShouldBeNil)
-
-}
-
 func (pt *prometheusTest) waitForPodPrometheus(waitmax time.Duration) error {
 	timeout := time.After(waitmax)
 	tick := time.Tick(2 * time.Second)
@@ -329,37 +308,12 @@ func (pt *prometheusTest) waitForPodPrometheus(waitmax time.Duration) error {
 				}
 			}
 
-			// Succeeded or Failed or Unknoen are taken as a error
+			// Succeeded or Failed or Unknown are taken as a error
 			if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed || pod.Status.Phase == corev1.PodUnknown {
 				return fmt.Errorf("Prometheus in state %v: \n%+v", pod.Status.Phase, pod)
 			}
 		}
 	}
-}
-
-func (pt *prometheusTest) deleteServices(namespace, serviceName, labelSelector string) error {
-	deletePolicy := metav1.DeletePropagationForeground
-
-	serviceList, err := pt.coreClient.CoreV1().Services(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
-	if err != nil {
-		pt.log.Errorf("Error while listing SVC for Prometheus: %v", err)
-		return err
-	}
-
-	for _, service := range serviceList.Items {
-		if service.Name == serviceName {
-			err := pt.coreClient.CoreV1().Services(namespace).Delete(serviceName, &metav1.DeleteOptions{
-				PropagationPolicy: &deletePolicy,
-			})
-			if err != nil {
-				pt.log.Errorf("Error while deleting SVC for Prometheus: %v", err)
-				return err
-			}
-		}
-	}
-
-	return nil
-
 }
 
 func (pt *prometheusTest) savePrometheusResource(namespace, name string) error {
@@ -423,21 +377,6 @@ func (pt *prometheusTest) deletePrometheus(namespace, name string) error {
 	return nil
 }
 
-func (pt *prometheusTest) deleteStatefulset(namespace, statefulsetName string) error {
-	deletePolicy := metav1.DeletePropagationForeground
-
-	collection := pt.coreClient.AppsV1().StatefulSets(namespace)
-	err := collection.Delete(statefulsetName, &metav1.DeleteOptions{
-		PropagationPolicy: &deletePolicy,
-	})
-	if err != nil {
-		pt.log.Errorf("Error while deleting monitoring sts: %v", err)
-		return err
-	}
-	pt.log.Info("Deletion of sts: monitoring is successful!")
-	return nil
-}
-
 func (pt *prometheusTest) deletePod(namespace, podName, labelSelector string) error {
 	podList, err := pt.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
 	if err != nil {
@@ -458,24 +397,4 @@ func (pt *prometheusTest) deletePod(namespace, podName, labelSelector string) er
 
 	return nil
 
-}
-
-func (pt *prometheusTest) deletePVC(namespace, pvcName, labelSelector string) error {
-	pvcList, err := pt.coreClient.CoreV1().PersistentVolumeClaims(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
-	if err != nil {
-		pt.log.Errorf("Error while listing PVC for prometheus: %v", err)
-		return err
-	}
-
-	for _, pvc := range pvcList.Items {
-		if pvc.Name == pvcName {
-			err = pt.coreClient.CoreV1().PersistentVolumeClaims(namespace).Delete(pvcName, &metav1.DeleteOptions{})
-			if err != nil {
-				pt.log.Errorf("Error while deleting PVC for prometheus: %v", err)
-				return err
-			}
-			pt.log.Infof("Deletion of pvc: %v is successful!", pvcName)
-		}
-	}
-	return nil
 }

@@ -59,7 +59,7 @@ fi
 # GO TEST
 ##
 echo "? go test"
-go test ./internal/... ./platform/...
+go test ./internal/... ./platform/... ./cmd/...
 # Check if tests passed
 if [ $? != 0 ]; then
 	echo -e "${RED}✗ go test\n${NC}"

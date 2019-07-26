@@ -73,6 +73,8 @@ spec:
       namespace: "kyma-system"
     - name: "monitoring"
       namespace: "kyma-system"
+    - name: "kiali"
+      namespace: "kyma-system"
     #- name: "compass"
     #  namespace: "compass-system"
     #- name: "compass-runtime-agent"
