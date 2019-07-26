@@ -18,7 +18,7 @@ import (
 
 const (
 	prometheusURL               = "http://monitoring-prometheus.kyma-system"
-	namespace                   = "kyma-system"
+	prometheusNamespace         = "kyma-system"
 	expectedAlertManagers       = 1
 	expectedPrometheusInstances = 1
 	expectedKubeStateMetrics    = 1
@@ -85,14 +85,14 @@ func (pt *prometheusTest) testPodsAreReady() {
 		actualKubeStateMetrics := 0
 		select {
 		case <-timeout:
-			pt.log.Println("Timed out: pods are still unready!!")
+			pt.log.Println("Timed out: pods are still not ready!")
 
 			So(actualAlertManagers, ShouldEqual, expectedAlertManagers)
 			So(actualNodeExporter, ShouldEqual, expectedNodeExporter)
 			So(actualPrometheusInstances, ShouldEqual, expectedPrometheusInstances)
 			So(actualKubeStateMetrics, ShouldEqual, expectedKubeStateMetrics)
 		case <-tick:
-			pods, err := pt.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "app in (alertmanager,prometheus,monitoring-exporter-node,monitoring-exporter-kube-state)"})
+			pods, err := pt.coreClient.CoreV1().Pods(prometheusNamespace).List(metav1.ListOptions{LabelSelector: "app in (alertmanager,prometheus,monitoring-exporter-node,monitoring-exporter-kube-state)"})
 			So(err, ShouldBeNil)
 
 			for _, pod := range pods.Items {
@@ -116,10 +116,10 @@ func (pt *prometheusTest) testPodsAreReady() {
 			}
 
 			if expectedAlertManagers == actualAlertManagers && expectedNodeExporter == actualNodeExporter && expectedPrometheusInstances == actualPrometheusInstances && expectedKubeStateMetrics == actualKubeStateMetrics {
-				pt.log.Println("Test pods status: All pods are ready!!")
+				pt.log.Println("Test pods status: All pods are ready!")
 				return
 			}
-			pt.log.Println("Waiting for the pods to be READY!!")
+			pt.log.Println("Waiting for the pods to be ready")
 		}
 	}
 }
@@ -128,7 +128,7 @@ func (pt *prometheusTest) getNumberofNodeExporter() int {
 	nodes, err := pt.coreClient.CoreV1().Nodes().List(metav1.ListOptions{})
 	So(err, ShouldBeNil)
 
-	return len(nodes.Items) - 2
+	return len(nodes.Items)
 }
 
 func getPodStatus(pod corev1.Pod) bool {
