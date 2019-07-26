@@ -24,7 +24,7 @@ global:
     version: "PR-4959"
   ui_acceptance_tests:
     dir: 
-    version: fa5dfcc6
+    version: 5150bbd3
   api_controller:
     dir: pr/
     version: "PR-4582"
@@ -95,13 +95,3 @@ test:
         # Currently Pods with istio sidecar they have a long termination time, because of that we need to have
         # such log timeout for teardown (waiting until namespace will be terminated)
         tearDownTimeoutPerStep: 3m
-    ui:
-      # tests uses chromium that require more memory
-      requests:
-        memory: 300Mi
-        cpu: 200m
-      limits:
-        memory: 1.5Gi
-        cpu: 300m
-      logging:
-        enabled:

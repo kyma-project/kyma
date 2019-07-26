@@ -200,7 +200,7 @@ metadata:
   name: ${TESTING_ADDONS_CFG_NAME}
 spec:
   repositories:
-  - url: "https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml"
+  - url: "https://github.com/kyma-project/bundles/releases/download/latest/index-testing.yaml"
 EOF
     log "Testing addons injected" green
 }

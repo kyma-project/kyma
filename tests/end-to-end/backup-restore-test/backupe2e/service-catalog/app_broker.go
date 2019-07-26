@@ -371,14 +371,6 @@ func (f *appBrokerFlow) waitForClassAndPlans() error {
 	})
 }
 
-func (f *appBrokerFlow) waitForInstanceDeleted() error {
-	err := f.waitForInstanceRemoved(apiServiceId)
-	if err != nil {
-		return err
-	}
-	return f.waitForInstanceRemoved(eventsServiceId)
-}
-
 func (f *appBrokerFlow) logReport() {
 	f.logK8SReport()
 	f.logServiceCatalogAndBindingUsageReport()
