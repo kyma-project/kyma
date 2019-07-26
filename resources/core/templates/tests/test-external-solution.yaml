@@ -2,9 +2,14 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: test-e2e-external-solution
+  name: {{ .Chart.Name }}-test-external-solution
   labels:
     kyma-project.io/test-kind: e2e
+    app: {{ .Chart.Name }}-test-external-solution
+    app.kubernetes.io/name: {{ .Chart.Name }}-test-external-solution
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   disableConcurrency: false
   template:
