@@ -57,6 +57,8 @@ spec:
       namespace: "kyma-integration"
     - name: "application-connector"
       namespace: "kyma-integration"
+    - name: "backup-init"
+      namespace: "kyma-system"
     #- name: "backup"
     #  namespace: "kyma-backup"
     #- name: "logging"
