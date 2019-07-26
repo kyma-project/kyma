@@ -48,7 +48,7 @@ spec:
 <details><summary>Cons</summary>
 <p>
 
-- User must know the new pattern, which is not obvious
+- User must know the new pattern, which is not obvious.
 - Link is not clickable. You cannot click the link directly in UI and go to a given repository. 
 
 </p>
@@ -127,7 +127,7 @@ spec:
 <details><summary>Pros</summary>
 <p>
 
-- Support all git repositories
+- Support all Git repositories
 - API is self-describing
 
 </p>
@@ -137,8 +137,8 @@ spec:
 <p>
 
 - Migration job needed
-- Changes in UI and console-backend-service needed
-- Link is not "clickable". In UI you are not able to click directly the link and go to a given repository.
+- Changes in UI and Console Backend Service needed
+- Link is not clickable. You cannot click the link directly in UI and go to a given repository.
 
 </p>
 </details>
@@ -150,7 +150,7 @@ We consider adding support for authorization in the future.
 
 ### Support for authorization
 
-In the future, we want to allow you to specify the reference to a Secret in which you store credentials. In URL, you must specify query parameters with key-value pairs. As a value, set the name of the key from a Secret which constrains token data. Helm Broker is reading ClusterAddonsConfiguration and renders the URL by replacing the **{KEY_NAME_FROM_SECRET_PLACEHOLDER}** with proper values extracted from Secret referenced by the **authSecretRef` field.
+In the future, we want to allow you to specify the reference to a Secret in which you store credentials. In URL, you must specify query parameters with key-value pairs. As a value, set the name of the key from a Secret which contains token data. Helm Broker fetches ClusterAddonsConfigurations and renders URLs by replacing the **{KEY_NAME_FROM_SECRET_PLACEHOLDER}** with proper values extracted from Secrets referenced by the **authSecretRef** field.
 
 ```yaml
 apiVersion: addons.kyma-project.io/v1alpha1
