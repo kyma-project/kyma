@@ -18,7 +18,7 @@ Follow the steps to back up Kyma.
     Manual backup
     </summary>
 
-To create manual backups, use the Backup custom resource. Deploy the following CR to the `kyma-backup` Namespace to instruct the Velero server to create a backup. Make sure the indentation is correct.
+To create a manual backup, use the Backup custom resource. Deploy the following CR to the `kyma-backup` Namespace to instruct the Velero server to create a backup. Make sure the indentation is correct.
 
 A sample backup configuration looks like this:
 

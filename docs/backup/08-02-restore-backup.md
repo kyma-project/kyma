@@ -3,18 +3,18 @@ title: Restore a Kyma cluster
 type: Tutorial
 ---
 
-Follow this tutorial to restore a backed up Kyma cluster. Restore the CRDs, services, and endpoints first, and then the rest of the resources.
+Follow this tutorial to restore a backed up Kyma cluster. Start with restoring CRDs, services, and endpoints, then restore other resources.
 
 ## Prerequisites
 
-To use the restore functionality, dowwnload and install the [Velero CLI](https://github.com/heptio/velero/releases/tag/v1.0.0).
+To use the restore functionality, download and install the [Velero CLI](https://github.com/heptio/velero/releases/tag/v1.0.0).
 
 
 ## Steps
 
-Follow these steps to restore the resources: 
+Follow these steps to restore resources: 
 
-1. Install the Velero server. Use the same bucket as for the backups:
+1. Install the Velero server. Use the same bucket as for backups:
 
     ```bash
     velero install --bucket <BUCKET> --provider <CLOUD_PROVIDER> --secret-file <CREDENTIALS_FILE> --restore-only --wait
@@ -38,7 +38,7 @@ Follow these steps to restore the resources:
     velero restore create --from-backup <BACKUP_NAME> --exclude-resources customresourcedefinitions.apiextensions.k8s.io,services,endpoints --include-cluster-resources --restore-volumes --wait
     ```
 
-    Once the status of the restore is `COMPLETED`, verify the health of Kyma by checking the Pods:
+    Once the status of the restore is `COMPLETED`, perform a Kyma health check by verifying the Pods:
 
     ```bash
     kubectl get pods --all-namespaces
@@ -46,8 +46,7 @@ Follow these steps to restore the resources:
 
     Even if the restore process is complete, it may take some time for the resources to become available again.
 
-    > **NOTE:** Because of [this issue](https://github.com/heptio/velero/issues/1633) in Velero, Custom Resources may not be properly restored. In this case, run the second restore command again and check if the Custom Resources are restored. For example, run the following command to print several VirtualService Custom Resources:
-
-    ```bash
-    kubectl get virtualservices --all-namespaces
-    ```
+    > **NOTE:** Because of [this issue](https://github.com/heptio/velero/issues/1633) in Velero, custom resources may not be properly restored. In this case, run the second restore command again and check if the custom resources are restored. For example, run the following command to print several VirtualService custom resources:
+    >```bash
+    > kubectl get virtualservices --all-namespaces
+    > ```

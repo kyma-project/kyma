@@ -5,7 +5,7 @@ type: Installation
 Install and configure [Velero](https://github.com/heptio/velero/) to back up and restore your Kyma cluster.
 
 
->**NOTE**: To successfully set up Velero, you must define a supported storage location and credentials to access it. Currently, you can install Velero on GCP and Azure. AWS is not supported.
+>**NOTE**: To successfully set up Velero, define a supported storage location and credentials to access it. Currently, you can install Velero on GCP and Azure. AWS is not supported.
 
 Follow the instructions to set up Velero: 
 
@@ -18,9 +18,9 @@ Follow the instructions to set up Velero:
       namespace: "kyma-backup"
     ```
 
-2. Create an override secret containing the [required parameters](/components/backup/#configuration-configuration) for a chosen provider. 
+2. Override the default configuration by creating a Secret containing the [required parameters](/components/backup/#configuration-configuration) for a chosen provider. 
 
-    See the examples of override secrets:
+    See the examples of such Secrets:
     >**NOTE**: The values are provided in plain text only for illustrative purposes. Remember to set them as base64-encoded strings. For details on Kyma overrides, see the [this](/root/kyma/#configuration-helm-overrides-for-kyma-installation) document.
 
     <div tabs>
@@ -100,7 +100,7 @@ Follow the instructions to set up Velero:
     </details>
     </div>
 
-2. Run the Kyma installation with the Velero overrides:
+2. Run the Kyma installation with Velero overrides:
     <div tabs>
     <details>
     <summary>
@@ -124,7 +124,7 @@ Follow the instructions to set up Velero:
         ```bash
         kubectl apply -f {overrides_file_path}
         ```
-     2. [Install](/root/kyma/#installation-installation) Kyma or [update](/root/kyma/#installation-update-kyma) it if it is already installed in your cluster.
+     2. [Install](/root/kyma/#installation-installation) Kyma or [update](/root/kyma/#installation-update-kyma) it if it is already installed on your cluster.
       
      </details>
      </div>
