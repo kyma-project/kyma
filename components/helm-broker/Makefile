@@ -9,6 +9,10 @@ TAG = $(DOCKER_TAG)
 build:
 	./before-commit.sh ci
 
+# Default is 20s - available since controller-runtime 0.1.5
+integration-test: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
+# Default is 20s - available since controller-runtime 0.1.5
+integration-test: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
 .PHONY: integration-test
 integration-test:
 	go test -tags=integration ./test/integration/
