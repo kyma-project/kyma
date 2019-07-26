@@ -1,12 +1,13 @@
 #
 # addon kiali
 #
-enabled: false 
+enabled: false # Note that if using the demo or demo-auth yaml when installing via Helm, this default will be `true`.
 replicaCount: 1
-hub: docker.io/kiali
-tag: v1.1.0
-contextPath: /
+hub: quay.io/kiali
+tag: v0.20
+contextPath: /kiali # The root context path to access the Kiali UI.
 nodeSelector: {}
+tolerations: []
 
 # Specify the pod anti-affinity that allows you to constrain which nodes
 # your pod is eligible to be scheduled based on labels on pods that are
@@ -30,7 +31,7 @@ podAntiAffinityLabelSelector: []
 podAntiAffinityTermLabelSelector: []
 
 ingress:
-  enabled: false 
+  enabled: false
   ## Used to create an Ingress record.
   hosts:
     - kiali.local
@@ -44,20 +45,11 @@ ingress:
     #     - kiali.local
 
 dashboard:
-  secretName: kiali
-  usernameKey: username
-  passphraseKey: passphrase
+  secretName: kiali # You must create a secret with this name - one is not provided out-of-box.
+  viewOnlyMode: false # Bind the service account to a role with only read access
+  grafanaURL:  # If you have Grafana installed and it is accessible to client browsers, then set this to its external URL. Kiali will redirect users to this URL when Grafana metrics are to be shown.
+  jaegerURL:  # If you have Jaeger installed and it is accessible to client browsers, then set this property to its external URL. Kiali will redirect users to this URL when Jaeger tracing is to be shown.
+prometheusAddr: http://prometheus:9090
 
-credentials:
-  username: admin
-  passphrase: ""
-  # Override the automatically detected Grafana URL, useful when Grafana service has no ExternalIPs
-  # grafanaURL:
-
-  # Override the automatically detected Jaeger URL, useful when Jaeger service has no ExternalIPs
-  # jaegerURL:
-prometheusAddr: http://monitoring-prometheus.kyma-system:9090
-global:
-  istio:
-    gateway:
-      name: kyma-system/kyma-gateway
+# When true, a secret will be created with a default username and password. Useful for demos.
+createDemoSecret: false

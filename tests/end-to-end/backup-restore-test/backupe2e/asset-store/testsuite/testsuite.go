@@ -34,12 +34,14 @@ func New(restConfig *rest.Config, namespace string, t *testing.T) (*TestSuite, e
 	cb := newClusterBucket(dynamicCli, ClusterBucketName, WaitTimeout)
 	a := newAsset(dynamicCli, BucketName, namespace, WaitTimeout)
 	ca := newClusterAsset(dynamicCli, ClusterBucketName, WaitTimeout)
+	ad := fixSimpleAssetData(CommonAssetPrefix)
 
 	return &TestSuite{
 		bucket:        b,
 		clusterBucket: cb,
 		asset:         a,
 		clusterAsset:  ca,
+		assetDetails:  ad,
 	}, nil
 }
 
@@ -90,8 +92,6 @@ func (t *TestSuite) WaitForClusterBucketDeleted() error {
 }
 
 func (t *TestSuite) CreateAssets() error {
-	t.assetDetails = fixSimpleAssetData(CommonAssetPrefix)
-
 	err := t.asset.Create(t.assetDetails)
 	if err != nil {
 		return err

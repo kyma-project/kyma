@@ -1,22 +1,27 @@
 ---
-#Admin access to K8s resources
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  name: kyma-k8s-admin
-  labels:
-    app: kyma
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-k8s-admin: "true"
-  annotations:
-    "helm.sh/hook-weight": "0"
-rules:
-- apiGroups:
+# Admin access to native k8s resources
+apiVersion: rbac.authorization.k8s.io/v1beta1 
+kind: ClusterRole 
+metadata: 
+  name: kyma-admin-base 
+  labels: 
+    app: kyma 
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }} 
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true" 
+  annotations:  
+    "helm.sh/hook-weight": "0"  
+rules:  
+- apiGroups:  
+    - ""  
+    - "apps"  
+    - "extensions"  
+    - "batch" 
+    - "autoscaling" 
 {{ toYaml .Values.clusterRoles.apiGroups.k8s | indent 4 }}
-  resources:
-    - "*"
-  verbs:
-    - "*"
+  resources:  
+    - "*" 
+  verbs:  
+{{ toYaml .Values.clusterRoles.verbs.edit | indent 4 }}
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1

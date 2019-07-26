@@ -1,8 +1,10 @@
 package synchronization
 
-import "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
+import (
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+)
 
-type Reconciler struct {
+type reconciler struct {
 }
 
 type Operation int
@@ -13,11 +15,23 @@ const (
 	Delete
 )
 
-type Action struct {
-	Operation        Operation
-	ApplicationEntry compass.Application
+type APIAction struct {
+	Operation Operation
+	API       APIDefinition
 }
 
-func (r Reconciler) Do(applications []compass.Application) (error, []Action) {
+type EventAPIAction struct {
+	Operation Operation
+	EventAPI  EventAPIDefinition
+}
+
+type ApplicationAction struct {
+	Operation       Operation
+	Application     Application
+	APIActions      []APIAction
+	EventAPIActions []EventAPIAction
+}
+
+func (r reconciler) Do(applications []Application) ([]ApplicationAction, apperrors.AppError) {
 	return nil, nil
 }

@@ -68,10 +68,6 @@ func (t microfrontendTest) TestResources(namespace string) {
 	So(navNode.ShowInNavigation, ShouldEqual, true)
 }
 
-func (t microfrontendTest) DeleteResources(namespace string) {
-	// There is not need to be implemented for this test.
-}
-
 func (t microfrontendTest) createMicrofrontend(namespace string) (*uiV1alpha1v.MicroFrontend, error) {
 	microfrontend := &uiV1alpha1v.MicroFrontend{
 		TypeMeta: metav1.TypeMeta{

@@ -1,0 +1,11 @@
+apiVersion: addons.kyma-project.io/v1alpha1
+kind: ClusterAddonsConfiguration
+metadata:
+  name: {{ .Values.global.cfgReposUrlName }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    addons.kyma-project.io/managed: "true"
+spec:
+  repositories:
+  - url: "https://github.com/kyma-project/bundles/releases/download/latest/index.yaml"

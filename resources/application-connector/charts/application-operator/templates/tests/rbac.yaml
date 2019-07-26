@@ -6,18 +6,22 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ .Chart.Name }}-tests
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 ---
-
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ .Chart.Name }}-tests
   namespace: {{ .Values.global.namespace }}
   labels:
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app: {{ .Chart.Name }}-tests
+    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
   - apiGroups: ["*"]
     resources: ["services", "deployments", "roles", "rolebindings", "ingresses", "serviceaccounts"]
@@ -38,8 +42,11 @@ metadata:
   name: {{ .Chart.Name }}-tests
   namespace: {{ .Values.global.namespace }}
   labels:
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app: {{ .Chart.Name }}-tests
+    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -56,8 +63,10 @@ metadata:
   name: {{ .Chart.Name }}-tests
   labels:
     app: {{ .Chart.Name }}-tests
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
@@ -71,8 +80,11 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .Chart.Name }}-tests
   labels:
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app: {{ .Chart.Name }}-tests
+    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 subjects:
   - kind: User
     name: system:serviceaccount:{{ .Values.global.namespace }}:{{ .Chart.Name }}-tests
