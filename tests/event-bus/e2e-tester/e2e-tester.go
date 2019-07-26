@@ -441,6 +441,7 @@ func (subscriber *testSubscriber) checkReceivedEventHeaders() error {
 			return err
 		}
 		body, err := ioutil.ReadAll(res.Body)
+		log.WithField("response body", string(body)).Info("checkReceivedEventHeaders body")
 		if err != nil {
 			return err
 		}
