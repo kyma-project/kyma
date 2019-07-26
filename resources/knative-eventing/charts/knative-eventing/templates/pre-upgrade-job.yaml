@@ -16,7 +16,7 @@ data:
     set -eu
     echo "*** Pre upgrade job starts ***"
 
-    kubectl delete deploy -l app=publish-knative -n kyma-system --ignore-not-found
+    kubectl delete svc,deploy -l app=publish-knative -n kyma-system --ignore-not-found
     kubectl delete svc,deploy -l app=subscription-controller-knative -n kyma-system --ignore-not-found
     kubectl delete svc event-bus-publish-knative-metrics-service -n kyma-system --ignore-not-found
   
