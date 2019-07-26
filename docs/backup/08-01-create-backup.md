@@ -6,7 +6,7 @@ Follow this tutorial to learn how to use the [backup.yaml](./assets/backup.yaml)
 
 ## Prerequisites
 
-[Install](/components/backup/#installation-install-velero) Velero. 
+Install Velero using [these](/components/backup/#installation-install-velero) instructions. 
 
 ## Steps
 
