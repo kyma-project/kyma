@@ -27,7 +27,7 @@ spec:
     - url: "git::https://github.com/kyma-project/addons.git//addons/index.yaml?ref=1.2.0"
     # Use unprefixed github.com URLs. They are automatically interpreted as Git repository sources. 
     - url: "github.com/kyma-project/addons//addons/index.yaml?ref=1.2.0"
-    # Use HTTPS protocol (server which serves static content), should be defined as previously. Nothing changed.
+    # Use HTTPS protocol (server which serves static content) defined the way it was implemented so far.
     - url: "https://github.com/kyma-project/addons/releases/download/latest/index.yaml"
 ``` 
 
