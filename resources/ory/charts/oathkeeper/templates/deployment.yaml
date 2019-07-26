@@ -44,13 +44,13 @@ spec:
               value: "file:///etc/secrets/mutator.id_token.jwks.json"
             {{- end }}
             - name: ACCESS_RULES_REPOSITORIES
-              value: "file:///etc/rules/access-rules.json"
+              value: file://{{ .Values.ruleFile.dir }}/{{ .Values.ruleFile.name }}
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-config-volume
               mountPath: /etc/config
               readOnly: true
             - name: {{ include "oathkeeper.name" . }}-rules-volume
-              mountPath: /etc/rules
+              mountPath: {{ .Values.ruleFile.dir }}
               readOnly: true
             - name: {{ include "oathkeeper.name" . }}-secrets-volume
               mountPath: /etc/secrets

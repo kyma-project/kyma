@@ -88,6 +88,11 @@ oathkeeper:
 #  If set, uses the given access rules.
 #  accessRules: {}
 
+# Path of JSON file with rule definitions
+ruleFile:
+  dir: /etc/rules
+  name: access-rules.json
+
 resources: {}
 #  We usually recommend not to specify default resources and to leave this as a conscious
 #  choice for the user. This also increases chances charts run on environments with little
