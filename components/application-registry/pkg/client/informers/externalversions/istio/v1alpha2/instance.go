@@ -15,59 +15,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// DenierInformer provides access to a shared informer and lister for
-// Deniers.
-type DenierInformer interface {
+// InstanceInformer provides access to a shared informer and lister for
+// Instances.
+type InstanceInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha2.DenierLister
+	Lister() v1alpha2.InstanceLister
 }
 
-type denierInformer struct {
+type instanceInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewDenierInformer constructs a new informer for Denier type.
+// NewInstanceInformer constructs a new informer for Instance type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewDenierInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredDenierInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewInstanceInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredInstanceInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredDenierInformer constructs a new informer for Denier type.
+// NewFilteredInstanceInformer constructs a new informer for Instance type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredDenierInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredInstanceInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.IstioV1alpha2().Deniers(namespace).List(options)
+				return client.IstioV1alpha2().Instances(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.IstioV1alpha2().Deniers(namespace).Watch(options)
+				return client.IstioV1alpha2().Instances(namespace).Watch(options)
 			},
 		},
-		&istio_v1alpha2.Denier{},
+		&istio_v1alpha2.Instance{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *denierInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredDenierInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *instanceInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredInstanceInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *denierInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&istio_v1alpha2.Denier{}, f.defaultInformer)
+func (f *instanceInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&istio_v1alpha2.Instance{}, f.defaultInformer)
 }
 
-func (f *denierInformer) Lister() v1alpha2.DenierLister {
-	return v1alpha2.NewDenierLister(f.Informer().GetIndexer())
+func (f *instanceInformer) Lister() v1alpha2.InstanceLister {
+	return v1alpha2.NewInstanceLister(f.Informer().GetIndexer())
 }
