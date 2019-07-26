@@ -18,7 +18,7 @@ spec:
         sidecar.istio.io/inject: "true"
     spec:
       restartPolicy: Never
-      serviceAccountName: test-e2e-external-solution
+      serviceAccountName: {{ .Chart.Name }}-test-external-solution
       shareProcessNamespace: true
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
