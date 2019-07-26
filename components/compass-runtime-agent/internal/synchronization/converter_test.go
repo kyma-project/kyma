@@ -56,7 +56,7 @@ func TestConverter(t *testing.T) {
 		assert.Equal(t, expected, application)
 	})
 
-	t.Run("should convert application with services containing APIs", func(t *testing.T) {
+	t.Run("should convert application with services containing protected APIs", func(t *testing.T) {
 		// given
 		mockNameResolver := &k8smocks.NameResolver{}
 		converter := NewConverter(mockNameResolver)
@@ -277,8 +277,10 @@ func TestConverter(t *testing.T) {
 								GatewayUrl:                  "application-gateway.kyma-integration.svc.cluster.local",
 								AccessLabel:                 "resourceName1",
 								TargetUrl:                   "www.example.com/1",
+								ApiType:                     string(APISpecTypeOpenAPI),
 								SpecificationUrl:            "",
 								RequestParametersSecretName: "",
+								Credentials:                 v1alpha1.Credentials{},
 							},
 						},
 					},
@@ -299,6 +301,7 @@ func TestConverter(t *testing.T) {
 								Type:             specEventsType,
 								AccessLabel:      "resourceName2",
 								SpecificationUrl: "",
+								Credentials:      v1alpha1.Credentials{},
 							},
 						},
 					},

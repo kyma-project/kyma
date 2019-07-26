@@ -148,8 +148,6 @@ func (c converter) toServiceEntry(applicationID string, apiDefinition APIDefinit
 	return entry
 }
 
-var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
-
 func (c converter) toCredentials(applicationID string, apiDefinitionID string, credentials *Credentials) v1alpha1.Credentials {
 
 	toCSRF := func(csrf *CSRFInfo) *v1alpha1.CSRFInfo {
@@ -211,6 +209,8 @@ func (c converter) toEventServiceEntry(applicationID string, eventsDefinition Ev
 
 	return entry
 }
+
+var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
 
 // createServiceName creates the OSB Service Name for given Application Service.
 // The OSB Service Name is used in the Service Catalog as the clusterServiceClassExternalName, so it need to be normalized.
