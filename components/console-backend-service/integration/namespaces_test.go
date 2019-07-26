@@ -14,15 +14,10 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
-const (
-	canAccess    = "canaccess"
-	cannotAccess = "cannotaccess"
-)
-
 func TestNamespaces(t *testing.T) {
-	suite := givenNewTestNamespaceSuite(t, canAccess, restConfig)
+	suite := givenNewTestNamespaceSuite(t, restConfig)
 
-	err := givenUserCanAccessResource(canAccess, "", "namespaces", []string{"create", "get", "delete", "update"})
+	err := givenUserCanAccessResource("", "namespaces", []string{"create", "get", "delete", "update"})
 	require.NoError(t, err)
 
 	t.Log("Creating namespace...")
@@ -54,9 +49,9 @@ func TestNamespaces(t *testing.T) {
 }
 
 func TestNamespacesForbidden(t *testing.T) {
-	suite := givenNewTestNamespaceSuite(t, cannotAccess, restConfig)
+	suite := givenNewTestNamespaceSuite(t, restConfig)
 
-	err := givenUserCannotAccessResource(cannotAccess, "", "namespaces")
+	err := givenUserCannotAccessResource("", "namespaces")
 	require.NoError(t, err)
 
 	thenRequestsShouldBeDenied(t, suite.gqlClient,
@@ -65,7 +60,6 @@ func TestNamespacesForbidden(t *testing.T) {
 		suite.fixNamespaceQuery(),
 		suite.fixNamespaceDelete(),
 	)
-
 }
 
 type testNamespaceSuite struct {
@@ -76,16 +70,13 @@ type testNamespaceSuite struct {
 	updatedLabels map[string]string
 }
 
-func givenNewTestNamespaceSuite(t *testing.T, user string, restConfig *rest.Config) testNamespaceSuite {
+func givenNewTestNamespaceSuite(t *testing.T, restConfig *rest.Config) testNamespaceSuite {
 	k8s, err := corev1.NewForConfig(restConfig)
 	require.NoError(t, err)
 
-	gqlClient, err := graphql.New(gqlEndpoint, user)
-	require.NoError(t, err)
-
-	suite := testNamespaceSuite{
+	return testNamespaceSuite{
 		k8sClient:     k8s,
-		gqlClient:     gqlClient,
+		gqlClient:     graphql.New(gqlEndpoint),
 		namespaceName: "test-namespace",
 		labels: map[string]string{
 			"aaa": "bbb",
@@ -94,7 +85,6 @@ func givenNewTestNamespaceSuite(t *testing.T, user string, restConfig *rest.Conf
 			"ccc": "ddd",
 		},
 	}
-	return suite
 }
 
 func (s testNamespaceSuite) whenNamespaceIsCreated() (createNamespaceResponse, error) {

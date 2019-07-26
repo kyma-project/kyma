@@ -17,20 +17,18 @@ const (
 type Client struct {
 	gqlClient *graphql.Client
 	endpoint  string
-	user      string
 }
 
-func New(endpoint, user string) (*Client, error) {
+func New(endpoint string) *Client {
 	httpClient := &http.Client{Timeout: 30 * time.Second}
 	gqlClient := graphql.NewClient(endpoint, graphql.WithHTTPClient(httpClient))
 
 	client := &Client{
 		gqlClient: gqlClient,
 		endpoint:  endpoint,
-		user:      user,
 	}
 
-	return client, nil
+	return client
 }
 
 func (c *Client) DoQuery(q string, res interface{}) error {
@@ -39,7 +37,6 @@ func (c *Client) DoQuery(q string, res interface{}) error {
 }
 
 func (c *Client) Do(req *Request, res interface{}) error {
-	req.AddHeader("user", c.user)
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 

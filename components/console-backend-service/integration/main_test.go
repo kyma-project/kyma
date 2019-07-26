@@ -19,6 +19,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sync"
 	"testing"
+	"time"
 )
 
 var (
@@ -56,6 +57,8 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(err)
 	}
+	appConfig.SARCacheConfig.AllowCacheTTL = 0 * time.Second
+	appConfig.SARCacheConfig.DenyCacheTTL = 0 * time.Second
 
 	listener, err := net.Listen("tcp", ":0")
 	if err != nil {
@@ -85,17 +88,17 @@ func TestMain(m *testing.M) {
 	os.Exit(status)
 }
 
-func AuthAlwaysSuccess(req *http.Request) (*authenticator.Response, bool, error) {
+func AuthAlwaysSuccess(_ *http.Request) (*authenticator.Response, bool, error) {
 	return &authenticator.Response{
 		User: &user.DefaultInfo{
-			Name: req.Header.Get("user"),
+			Name: "user",
 			UID:  "uid",
 		},
 	}, true, nil
 }
 
-func givenUserCanAccessResource(user, group, name string, verbs []string) error {
-	roleName := fmt.Sprintf("%s-%s-%s", user, group, name)
+func givenUserCanAccessResource(group, name string, verbs []string) error {
+	roleName := fmt.Sprintf("%s-%s", group, name)
 	_, err := rbacClientset.ClusterRoles().Create(&rbacv1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: roleName,
@@ -120,7 +123,7 @@ func givenUserCanAccessResource(user, group, name string, verbs []string) error 
 			{
 				Kind:     "User",
 				APIGroup: "rbac.authorization.k8s.io",
-				Name:     user,
+				Name:     "user",
 			},
 		},
 		RoleRef: rbacv1.RoleRef{
@@ -132,8 +135,8 @@ func givenUserCanAccessResource(user, group, name string, verbs []string) error 
 	return err
 }
 
-func givenUserCannotAccessResource(user, group, name string) error {
-	roleName := fmt.Sprintf("%s-%s-%s", user, group, name)
+func givenUserCannotAccessResource(group, name string) error {
+	roleName := fmt.Sprintf("%s-%s", group, name)
 	err := rbacClientset.ClusterRoleBindings().Delete(roleName, &metav1.DeleteOptions{})
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return err
