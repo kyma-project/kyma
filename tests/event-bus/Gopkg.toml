@@ -18,3 +18,11 @@ required = [
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  name = "github.com/avast/retry-go"
+  version = "2.3.0"
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "1.4.2"
