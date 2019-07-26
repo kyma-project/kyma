@@ -63,7 +63,11 @@ oathkeeper:
         api:
           port: 4456
   resources: {}
+  #TODO: change to "access-rules.json" once we can configure it in the maester controller
+  ruleFile:
+    dir: /etc/rules
+    name: rules
 
 oathkeeper-rule-controller:
-  annotations: 
+  annotations:
     sidecar.istio.io/inject: "false"
