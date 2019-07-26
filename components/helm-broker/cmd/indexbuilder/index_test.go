@@ -13,7 +13,7 @@ import (
 
 func TestYAMLRender_Render(t *testing.T) {
 	// GIVEN
-	fix := []*internal.Bundle{
+	fix := []*internal.Addon{
 		{Name: "A", Description: "Desc A 1", Version: *semver.MustParse("1.2.3")},
 		{Name: "A", Description: "Desc A 2", Version: *semver.MustParse("1.2.4")},
 		{Name: "B", Description: "Desc B", Version: *semver.MustParse("4.5.6")},

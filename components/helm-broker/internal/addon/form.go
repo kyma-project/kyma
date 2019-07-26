@@ -1,4 +1,4 @@
-package bundle
+package addon
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ type form struct {
 	Plans    map[string]*formPlan
 }
 
-// FormMeta describes the metdata information about the bundle.
+// FormMeta describes the metdata information about the addon.
 type FormMeta struct {
 	ID                  string            `yaml:"id"`
 	Name                string            `yaml:"name"`
@@ -37,9 +37,9 @@ type FormMeta struct {
 	PlanUpdatable       *bool             `yaml:"planUpdatable"`
 }
 
-// DocsMeta contains data about bundle's docs fetched from docs/meta.yaml file
+// DocsMeta contains data about addon's docs fetched from docs/meta.yaml file
 type DocsMeta struct {
-	Docs []internal.BundleDocs `yaml:"docs"`
+	Docs []internal.AddonDocs `yaml:"docs"`
 }
 
 // MapLabelsToModel maps the FormMeta.Labels to the model internal.Labels
@@ -51,12 +51,12 @@ func (m *FormMeta) MapLabelsToModel() internal.Labels {
 	return mapped
 }
 
-// MapTagsToModel maps the FormMeta.Tags to the model internal.BundleTag slice
-func (m *FormMeta) MapTagsToModel() []internal.BundleTag {
+// MapTagsToModel maps the FormMeta.Tags to the model internal.AddonTag slice
+func (m *FormMeta) MapTagsToModel() []internal.AddonTag {
 	splittedTags := strings.Split(m.Tags, ",")
-	mapped := make([]internal.BundleTag, 0, len(splittedTags))
+	mapped := make([]internal.AddonTag, 0, len(splittedTags))
 	for i := range splittedTags {
-		mapped = append(mapped, internal.BundleTag(strings.TrimSpace(splittedTags[i])))
+		mapped = append(mapped, internal.AddonTag(strings.TrimSpace(splittedTags[i])))
 	}
 	return mapped
 }
@@ -107,10 +107,10 @@ func (f *form) Validate() error {
 	var messages []string
 
 	if f.Meta == nil {
-		messages = append(messages, fmt.Sprintf("missing metadata information about bundle. Please check if bundle contains %q file", bundleMetaName))
+		messages = append(messages, fmt.Sprintf("missing metadata information about addon. Please check if addon contains %q file", addonMetaName))
 	}
 	if len(f.Plans) == 0 {
-		messages = append(messages, "bundle does not contains any plans")
+		messages = append(messages, "addon does not contains any plans")
 	}
 	for name, plan := range f.Plans {
 		if err := plan.Validate(); err != nil {
@@ -120,13 +120,13 @@ func (f *form) Validate() error {
 
 	if f.Meta != nil {
 		if err := f.Meta.Validate(); err != nil {
-			messages = append(messages, fmt.Sprintf("while validating bundle meta: %s", err.Error()))
+			messages = append(messages, fmt.Sprintf("while validating addon meta: %s", err.Error()))
 		}
 	}
 
 	if f.DocsMeta != nil {
 		if err := f.DocsMeta.Validate(); err != nil {
-			messages = append(messages, fmt.Sprintf("while validating bundle docs meta: %s", err.Error()))
+			messages = append(messages, fmt.Sprintf("while validating addon docs meta: %s", err.Error()))
 		}
 	}
 
@@ -137,32 +137,32 @@ func (f *form) Validate() error {
 	return nil
 }
 
-func (f *form) ToModel(c *chart.Chart) (internal.Bundle, error) {
+func (f *form) ToModel(c *chart.Chart) (internal.Addon, error) {
 	ybVer, err := semver.NewVersion(f.Meta.Version)
 	if err != nil {
-		return internal.Bundle{}, errors.Wrap(err, "while converting form string version to semver type")
+		return internal.Addon{}, errors.Wrap(err, "while converting form string version to semver type")
 	}
 
-	mappedPlans := make(map[internal.BundlePlanID]internal.BundlePlan)
+	mappedPlans := make(map[internal.AddonPlanID]internal.AddonPlan)
 	for name, plan := range f.Plans {
 		dm, err := plan.ToModel(c)
 		if err != nil {
-			return internal.Bundle{}, errors.Wrapf(err, "while mapping to model %q plan", name)
+			return internal.Addon{}, errors.Wrapf(err, "while mapping to model %q plan", name)
 		}
-		mappedPlans[internal.BundlePlanID(plan.Meta.ID)] = dm
+		mappedPlans[internal.AddonPlanID(plan.Meta.ID)] = dm
 	}
 
-	var bundleDocs []internal.BundleDocs
+	var addonDocs []internal.AddonDocs
 	if f.DocsMeta != nil {
-		bundleDocs = f.DocsMeta.Docs
+		addonDocs = f.DocsMeta.Docs
 	}
 
-	return internal.Bundle{
-		ID:          internal.BundleID(f.Meta.ID),
-		Name:        internal.BundleName(f.Meta.Name),
+	return internal.Addon{
+		ID:          internal.AddonID(f.Meta.ID),
+		Name:        internal.AddonName(f.Meta.Name),
 		Description: f.Meta.Description,
 		Bindable:    f.Meta.Bindable,
-		Metadata: internal.BundleMetadata{
+		Metadata: internal.AddonMetadata{
 			DisplayName:         f.Meta.DisplayName,
 			DocumentationURL:    f.Meta.DocumentationURL,
 			ImageURL:            f.Meta.ImageURL,
@@ -178,7 +178,7 @@ func (f *form) ToModel(c *chart.Chart) (internal.Bundle, error) {
 		Requires:            f.Meta.Requires,
 		BindingsRetrievable: f.Meta.BindingsRetrievable,
 		PlanUpdatable:       f.Meta.PlanUpdatable,
-		Docs:                bundleDocs,
+		Docs:                addonDocs,
 	}, nil
 }
 
@@ -193,11 +193,11 @@ type formPlan struct {
 
 func (p *formPlan) Validate() error {
 	if p.Meta == nil {
-		return fmt.Errorf("missing metadata information about plan. Please check if plan contains %q file", bundlePlanMetaName)
+		return fmt.Errorf("missing metadata information about plan. Please check if plan contains %q file", addonPlanMetaName)
 	}
 
 	if p.Meta.Bindable != nil && *p.Meta.Bindable == true && p.BindTemplate == nil {
-		return fmt.Errorf("plans is marked as bindable but %s file was not found in plan %s", bundlePlanBindTemplateFileName, p.Meta.Name)
+		return fmt.Errorf("plans is marked as bindable but %s file was not found in plan %s", addonPlanBindTemplateFileName, p.Meta.Name)
 	}
 
 	if err := p.Meta.Validate(); err != nil {
@@ -207,17 +207,17 @@ func (p *formPlan) Validate() error {
 	return nil
 }
 
-func (p *formPlan) ToModel(c *chart.Chart) (internal.BundlePlan, error) {
+func (p *formPlan) ToModel(c *chart.Chart) (internal.AddonPlan, error) {
 	if c == nil {
-		return internal.BundlePlan{}, errors.New("missing input param chart")
+		return internal.AddonPlan{}, errors.New("missing input param chart")
 	}
 	if c.Metadata == nil {
-		return internal.BundlePlan{}, errors.New("missing Metadata field in input param chart")
+		return internal.AddonPlan{}, errors.New("missing Metadata field in input param chart")
 	}
 
 	cVer, err := semver.NewVersion(c.Metadata.Version)
 	if err != nil {
-		return internal.BundlePlan{}, errors.Wrap(err, "while converting chart string version to semver type")
+		return internal.AddonPlan{}, errors.Wrap(err, "while converting chart string version to semver type")
 	}
 
 	cRef := internal.ChartRef{
@@ -237,11 +237,11 @@ func (p *formPlan) ToModel(c *chart.Chart) (internal.BundlePlan, error) {
 		mappedSchemas[internal.SchemaTypeBind] = *p.SchemasBind
 	}
 
-	return internal.BundlePlan{
-		ID:          internal.BundlePlanID(p.Meta.ID),
-		Name:        internal.BundlePlanName(p.Meta.Name),
+	return internal.AddonPlan{
+		ID:          internal.AddonPlanID(p.Meta.ID),
+		Name:        internal.AddonPlanName(p.Meta.Name),
 		Description: p.Meta.Description,
-		Metadata: internal.BundlePlanMetadata{
+		Metadata: internal.AddonPlanMetadata{
 			DisplayName: p.Meta.DisplayName,
 		},
 		ChartValues:  internal.ChartValues(p.Values),

@@ -15,13 +15,13 @@ sample-addon-repository
   └── ...                                                    
 ```
 
-Read [this](https://github.com/kyma-project/bundles/blob/master/docs/getting-started.md) document to learn how to set up your own addons repository which generates `.tgz` and `index.yaml` files, and expose them using an HTTPS server. See the example of the Kyma `addons` repository [here](https://github.com/kyma-project/bundles/releases).
+Read [this](https://github.com/kyma-project/addons/blob/master/docs/getting-started.md) document to learn how to set up your own addons repository which generates `.tgz` and `index.yaml` files, and expose them using an HTTPS server. See the example of the Kyma `addons` repository [here](https://github.com/kyma-project/addons/releases).
 
 ## The addon .tgz file
 
 The `{addon_name}-{addon_version}.tgz` file is a compressed version of your addon. To learn how to create your own addon, read [this](#details-create-addons) document.
 
->**TIP:** If you contribute to the [addons](https://github.com/kyma-project/bundles/tree/master/bundles) repository, you do not have to compress your addons as the system does it automatically.
+>**TIP:** If you contribute to the [addons](https://github.com/kyma-project/addons/tree/master/addons) repository, you do not have to compress your addons as the system does it automatically.
 
 ## The index.yaml file
 

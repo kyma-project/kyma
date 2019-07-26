@@ -1,4 +1,4 @@
-package bundle
+package addon
 
 import (
 	"testing"
@@ -20,11 +20,11 @@ func TestFormToModelSuccess(t *testing.T) {
 	ver, err := semver.NewVersion(fixForm.Meta.Version)
 	require.NoError(t, err)
 
-	expBundle := internal.Bundle{
-		ID:          internal.BundleID(fixForm.Meta.ID),
-		Name:        internal.BundleName(fixForm.Meta.Name),
+	expAddon := internal.Addon{
+		ID:          internal.AddonID(fixForm.Meta.ID),
+		Name:        internal.AddonName(fixForm.Meta.Name),
 		Description: fixForm.Meta.Description,
-		Metadata: internal.BundleMetadata{
+		Metadata: internal.AddonMetadata{
 			DisplayName:         fixForm.Meta.DisplayName,
 			DocumentationURL:    fixForm.Meta.DocumentationURL,
 			ImageURL:            fixForm.Meta.ImageURL,
@@ -35,17 +35,17 @@ func TestFormToModelSuccess(t *testing.T) {
 				"pico": "bello",
 			},
 		},
-		Tags:     []internal.BundleTag{"go", "golang"},
+		Tags:     []internal.AddonTag{"go", "golang"},
 		Bindable: fixForm.Meta.Bindable,
 		Version:  *ver,
-		Plans:    make(map[internal.BundlePlanID]internal.BundlePlan),
+		Plans:    make(map[internal.AddonPlanID]internal.AddonPlan),
 	}
 	// when
-	gotBundle, err := fixForm.ToModel(&fixChart)
+	gotAddon, err := fixForm.ToModel(&fixChart)
 
 	// then
 	require.NoError(t, err)
-	assert.Equal(t, expBundle, gotBundle)
+	assert.Equal(t, expAddon, gotAddon)
 }
 
 func TestFormToModelFailure(t *testing.T) {
@@ -56,11 +56,11 @@ func TestFormToModelFailure(t *testing.T) {
 	fixForm.Meta.Version = "abc"
 
 	// when
-	gotBundle, err := fixForm.ToModel(&fixChart)
+	gotAddon, err := fixForm.ToModel(&fixChart)
 
 	// then
 	require.EqualError(t, err, "while converting form string version to semver type: Invalid Semantic Version")
-	assert.Zero(t, gotBundle)
+	assert.Zero(t, gotAddon)
 }
 
 func TestFormValidateSuccess(t *testing.T) {
@@ -106,7 +106,7 @@ func TestFormValidateFailure(t *testing.T) {
 				fix.Meta = nil
 				return fix
 			}(),
-			errMsgs: []string{"missing metadata information about bundle. Please check if bundle contains \"meta.yaml\" file"},
+			errMsgs: []string{"missing metadata information about addon. Please check if addon contains \"meta.yaml\" file"},
 		},
 		"missing form ID field": {
 			fixForm: func() form {
@@ -114,7 +114,7 @@ func TestFormValidateFailure(t *testing.T) {
 				fix.Meta.ID = ""
 				return fix
 			}(),
-			errMsgs: []string{"while validating bundle meta: missing ID field"},
+			errMsgs: []string{"while validating addon meta: missing ID field"},
 		},
 		"missing form Name field": {
 			fixForm: func() form {
@@ -122,7 +122,7 @@ func TestFormValidateFailure(t *testing.T) {
 				fix.Meta.Name = ""
 				return fix
 			}(),
-			errMsgs: []string{"while validating bundle meta: missing Name field"},
+			errMsgs: []string{"while validating addon meta: missing Name field"},
 		},
 		"missing form Version field": {
 			fixForm: func() form {
@@ -130,7 +130,7 @@ func TestFormValidateFailure(t *testing.T) {
 				fix.Meta.Version = ""
 				return fix
 			}(),
-			errMsgs: []string{"while validating bundle meta: missing Version field"},
+			errMsgs: []string{"while validating addon meta: missing Version field"},
 		},
 		"missing form Description field": {
 			fixForm: func() form {
@@ -138,7 +138,7 @@ func TestFormValidateFailure(t *testing.T) {
 				fix.Meta.Description = ""
 				return fix
 			}(),
-			errMsgs: []string{"while validating bundle meta: missing Description field"},
+			errMsgs: []string{"while validating addon meta: missing Description field"},
 		},
 		"missing form displayName field": {
 			fixForm: func() form {
@@ -146,7 +146,7 @@ func TestFormValidateFailure(t *testing.T) {
 				fix.Meta.DisplayName = ""
 				return fix
 			}(),
-			errMsgs: []string{"while validating bundle meta: missing displayName field"},
+			errMsgs: []string{"while validating addon meta: missing displayName field"},
 		},
 		"invalid form plan entry": {
 			fixForm: func() form {
@@ -180,11 +180,11 @@ func TestFormPlanToModelSuccess(t *testing.T) {
 	charVer, err := semver.NewVersion(fixValidChart().Metadata.Version)
 	require.NoError(t, err)
 
-	expBundlePlan := internal.BundlePlan{
-		ID:          internal.BundlePlanID(fixPlan.Meta.ID),
-		Name:        internal.BundlePlanName(fixPlan.Meta.Name),
+	expAddonPlan := internal.AddonPlan{
+		ID:          internal.AddonPlanID(fixPlan.Meta.ID),
+		Name:        internal.AddonPlanName(fixPlan.Meta.Name),
 		Description: fixPlan.Meta.Description,
-		Metadata: internal.BundlePlanMetadata{
+		Metadata: internal.AddonPlanMetadata{
 			DisplayName: fixPlan.Meta.DisplayName,
 		},
 		Schemas: map[internal.PlanSchemaType]internal.PlanSchema{
@@ -202,11 +202,11 @@ func TestFormPlanToModelSuccess(t *testing.T) {
 	}
 
 	// when
-	gotBundlePlan, err := fixPlan.ToModel(&fixChart)
+	gotAddonPlan, err := fixPlan.ToModel(&fixChart)
 
 	// then
 	require.NoError(t, err)
-	assert.Equal(t, expBundlePlan, gotBundlePlan)
+	assert.Equal(t, expAddonPlan, gotAddonPlan)
 }
 
 func TestFormPlanToModelFailure(t *testing.T) {
@@ -241,11 +241,11 @@ func TestFormPlanToModelFailure(t *testing.T) {
 				fixPlan := fixValidFormPlan("test-to-model-success")
 
 				// when
-				gotBundlePlan, err := fixPlan.ToModel(tc.fixChart)
+				gotAddonPlan, err := fixPlan.ToModel(tc.fixChart)
 
 				// then
 				require.EqualError(t, err, tc.errMsg)
-				assert.Zero(t, gotBundlePlan)
+				assert.Zero(t, gotAddonPlan)
 			})
 		}
 	})

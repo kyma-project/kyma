@@ -1,4 +1,4 @@
-package bundle_test
+package addon_test
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 )
 
 func TestHTTPRepository_IndexReader(t *testing.T) {
@@ -24,7 +24,7 @@ func TestHTTPRepository_IndexReader(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	rep := bundle.NewHTTPRepository()
+	rep := addon.NewHTTPRepository()
 
 	// when
 	r, err := rep.IndexReader(ts.URL + "/index.yaml")
@@ -39,27 +39,27 @@ func TestHTTPRepository_IndexReader(t *testing.T) {
 	assert.EqualValues(t, expContentGen, string(got))
 }
 
-func TestHTTPRepository_BundleReader(t *testing.T) {
+func TestHTTPRepository_AddonReader(t *testing.T) {
 	// given
 	const (
-		expBundleName bundle.Name    = "bundle_name"
-		expBundleVer  bundle.Version = "1.2.3"
-		expContentGen string         = "expected content - bundle"
+		expAddonName  addon.Name    = "addon_name"
+		expAddonVer   addon.Version = "1.2.3"
+		expContentGen string        = "expected content - addon"
 	)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc(fmt.Sprintf("/%s-%s.tgz", expBundleName, expBundleVer), func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(fmt.Sprintf("/%s-%s.tgz", expAddonName, expAddonVer), func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, expContentGen)
 	})
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	rep := bundle.NewHTTPRepository()
+	rep := addon.NewHTTPRepository()
 
 	// when
-	_, err := rep.IndexReader(ts.URL + fmt.Sprintf("/%s-%s.tgz", expBundleName, expBundleVer))
+	_, err := rep.IndexReader(ts.URL + fmt.Sprintf("/%s-%s.tgz", expAddonName, expAddonVer))
 	require.NoError(t, err)
-	r, err := rep.BundleReader(expBundleName, expBundleVer)
+	r, err := rep.AddonReader(expAddonName, expAddonVer)
 
 	// then
 	require.NoError(t, err)
@@ -71,11 +71,11 @@ func TestHTTPRepository_BundleReader(t *testing.T) {
 	assert.EqualValues(t, expContentGen, string(got))
 }
 
-func TestHTTPRepository_URLForBundle(t *testing.T) {
+func TestHTTPRepository_URLForAddon(t *testing.T) {
 	// given
 	const (
-		bundleName bundle.Name    = "bundle_name"
-		bundleVer  bundle.Version = "1.2.3"
+		addonName addon.Name    = "addon_name"
+		addonVer  addon.Version = "1.2.3"
 	)
 
 	mux := http.NewServeMux()
@@ -85,13 +85,13 @@ func TestHTTPRepository_URLForBundle(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	rep := bundle.NewHTTPRepository()
+	rep := addon.NewHTTPRepository()
 
 	// when
 	_, err := rep.IndexReader(ts.URL + "/index.yaml")
 	require.NoError(t, err)
-	gotURL := rep.URLForBundle(bundleName, bundleVer)
+	gotURL := rep.URLForAddon(addonName, addonVer)
 
 	// then
-	assert.Equal(t, fmt.Sprintf("%s/%s-%s.tgz", ts.URL, bundleName, bundleVer), gotURL)
+	assert.Equal(t, fmt.Sprintf("%s/%s-%s.tgz", ts.URL, addonName, addonVer), gotURL)
 }

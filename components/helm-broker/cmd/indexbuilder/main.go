@@ -11,7 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 )
 
 func main() {
@@ -33,8 +33,8 @@ func main() {
 		l.Panicln(errors.Wrap(err, "while listing source dir"))
 	}
 
-	var loader *bundle.Loader
-	yLog := l.WithField("service", "bundle checker")
+	var loader *addon.Loader
+	yLog := l.WithField("service", "addon checker")
 
 	removeTempDir := func(path string) {
 		if err := os.RemoveAll(path); err != nil {
@@ -42,23 +42,23 @@ func main() {
 		}
 	}
 
-	processSingleBundle := func(fullPath string) *internal.Bundle {
+	processSingleAddon := func(fullPath string) *internal.Addon {
 		tmpDir, err := ioutil.TempDir("", "indexbuilder")
 		if err != nil {
 			l.Panicln(errors.Wrap(err, "while creating temp dir"))
 		}
 		defer removeTempDir(tmpDir)
 
-		loader = bundle.NewLoader(tmpDir, yLog)
+		loader = addon.NewLoader(tmpDir, yLog)
 		b, _, err := loader.LoadDir(fullPath)
 		if err != nil {
-			l.Panicln(errors.Wrap(err, "while loading bundle"))
+			l.Panicln(errors.Wrap(err, "while loading addon"))
 		}
 
 		return b
 	}
 
-	var allBundles []*internal.Bundle
+	var allAddons []*internal.Addon
 
 	for _, oi := range srcObjs {
 		if !oi.IsDir() {
@@ -66,8 +66,8 @@ func main() {
 		}
 
 		fPath := path.Join(*srcDir, oi.Name())
-		b := processSingleBundle(fPath)
-		allBundles = append(allBundles, b)
+		b := processSingleAddon(fPath)
+		allAddons = append(allAddons, b)
 	}
 
 	var dst io.Writer
@@ -82,7 +82,7 @@ func main() {
 		dst = f
 	}
 
-	if err := render(allBundles, dst); err != nil {
+	if err := render(allAddons, dst); err != nil {
 		l.Panicln(errors.Wrap(err, "while rendering index"))
 	}
 }

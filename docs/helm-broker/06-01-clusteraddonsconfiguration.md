@@ -26,38 +26,38 @@ metadata:
 spec:
   reprocessRequest: 0
   repositories:
-    - url: https://github.com/kyma-project/bundles/releases/download/0.6.0/index.yaml
-    - url: https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml
+    - url: https://github.com/kyma-project/addons/releases/download/0.6.0/index.yaml
+    - url: https://github.com/kyma-project/addons/releases/download/0.6.0/index-testing.yaml
     - url: https://broker.url
 status:
   phase: Failed
   lastProcessedTime: "2018-01-03T07:38:24Z"
   observedGeneration: 1
   repositories:
-    - url: https://github.com/kyma-project/bundles/releases/download/0.6.0/index.yaml
+    - url: https://github.com/kyma-project/addons/releases/download/0.6.0/index.yaml
       status: Ready
       addons:
         - name: gcp-service-broker
           version: 0.0.2
           status: Failed
           reason: ConflictInSpecifiedRepositories
-          message: "Specified repositories have addons with the same ID: [url: https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml, addons: testing:0.0.1]"
+          message: "Specified repositories have addons with the same ID: [url: https://github.com/kyma-project/addons/releases/download/0.6.0/index-testing.yaml, addons: testing:0.0.1]"
         - name: aws-service-broker
           version: 0.0.2
           status: Failed
           reason: ConflictWithAlreadyRegisteredAddons
-          message: "An addon with the same ID is already registered: [ConfigurationName: addons-cfg, url: https://github.com/kyma-project/bundles/releases/download/0.4.0/index.yaml, addons: aws-service-broker:0.0.1]"
+          message: "An addon with the same ID is already registered: [ConfigurationName: addons-cfg, url: https://github.com/kyma-project/addons/releases/download/0.4.0/index.yaml, addons: aws-service-broker:0.0.1]"
         - name: azure-service-broker
           version: 0.0.1
           status: Ready
-    - url: https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml
+    - url: https://github.com/kyma-project/addons/releases/download/0.6.0/index-testing.yaml
       status: Ready
       addons:
         - name: testing
           version: 0.0.1
           status: Failed
           reason: ConflictInSpecifiedRepositories
-          message: "Specified repositories have addons with the same ID: [url: https://github.com/kyma-project/bundles/releases/download/0.6.0/index.yaml, addons: gcp-service-broker:0.0.2]"
+          message: "Specified repositories have addons with the same ID: [url: https://github.com/kyma-project/addons/releases/download/0.6.0/index.yaml, addons: gcp-service-broker:0.0.2]"
         - name: redis
           version: 0.0.3
           status: Failed

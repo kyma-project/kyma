@@ -2,7 +2,7 @@ storage:
   - driver: memory
     provide:
       chart: ~
-      bundle: ~
+      addon: ~
       instance: ~
       instanceOperation: ~
       entityInstanceBindData: ~

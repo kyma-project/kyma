@@ -14,7 +14,7 @@ type AddonController struct {
 	ID     string
 	URL    string
 	Addon  v1alpha1.Addon
-	Bundle *internal.Bundle
+	Bundle *internal.Addon
 	Charts []*chart.Chart
 }
 

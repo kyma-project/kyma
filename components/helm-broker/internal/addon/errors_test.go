@@ -1,10 +1,10 @@
-package bundle_test
+package addon_test
 
 import (
 	"errors"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,7 +14,7 @@ func TestLoadingError(t *testing.T) {
 		expToBeLoadingErr bool
 	}{
 		"Should report true for Loading error": {
-			givenErr:          bundle.NewLoadingError(errors.New("fix err")),
+			givenErr:          addon.NewLoadingError(errors.New("fix err")),
 			expToBeLoadingErr: true,
 		},
 		"Should report false for generic error": {
@@ -22,13 +22,13 @@ func TestLoadingError(t *testing.T) {
 			expToBeLoadingErr: false,
 		},
 		"Should report false for Fetching error": {
-			givenErr:          bundle.NewFetchingError(errors.New("fix err")),
+			givenErr:          addon.NewFetchingError(errors.New("fix err")),
 			expToBeLoadingErr: false,
 		},
 	}
 	for tn, tc := range tests {
 		t.Run(tn, func(t *testing.T) {
-			assert.Equal(t, tc.expToBeLoadingErr, bundle.IsLoadingError(tc.givenErr))
+			assert.Equal(t, tc.expToBeLoadingErr, addon.IsLoadingError(tc.givenErr))
 		})
 	}
 }
@@ -39,7 +39,7 @@ func TestFetchingError(t *testing.T) {
 		expToBeLoadingErr bool
 	}{
 		"Should report true for Fetching error": {
-			givenErr:          bundle.NewFetchingError(errors.New("fix err")),
+			givenErr:          addon.NewFetchingError(errors.New("fix err")),
 			expToBeLoadingErr: true,
 		},
 		"Should report false for generic error": {
@@ -47,13 +47,13 @@ func TestFetchingError(t *testing.T) {
 			expToBeLoadingErr: false,
 		},
 		"Should report false for Loading error": {
-			givenErr:          bundle.NewLoadingError(errors.New("fix err")),
+			givenErr:          addon.NewLoadingError(errors.New("fix err")),
 			expToBeLoadingErr: false,
 		},
 	}
 	for tn, tc := range tests {
 		t.Run(tn, func(t *testing.T) {
-			assert.Equal(t, tc.expToBeLoadingErr, bundle.IsFetchingError(tc.givenErr))
+			assert.Equal(t, tc.expToBeLoadingErr, addon.IsFetchingError(tc.givenErr))
 		})
 	}
 }

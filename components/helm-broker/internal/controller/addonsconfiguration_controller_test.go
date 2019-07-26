@@ -26,7 +26,7 @@ import (
 
 	"github.com/Masterminds/semver"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
@@ -45,16 +45,16 @@ func TestReconcileAddonsConfiguration_AddAddonsProcess(t *testing.T) {
 
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {
-			completeBundle := fixBundleWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
+			completeAddon := fixAddonWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
 
-			ts.bp.On("LoadCompleteBundle", e).
-				Return(completeBundle, nil)
+			ts.bp.On("LoadCompleteAddon", e).
+				Return(completeAddon, nil)
 
-			ts.bundleStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeBundle.Bundle).
+			ts.addonStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeAddon.Addon).
 				Return(false, nil)
-			ts.chartStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeBundle.Charts[0]).
+			ts.chartStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeAddon.Charts[0]).
 				Return(false, nil)
-			ts.dp.On("EnsureDocsTopic", completeBundle.Bundle, fixAddonsCfg.Namespace).Return(nil)
+			ts.dp.On("EnsureDocsTopic", completeAddon.Addon, fixAddonsCfg.Namespace).Return(nil)
 		}
 	}
 	ts.bf.On("Exist", fixAddonsCfg.Namespace).Return(false, nil).Once()
@@ -62,7 +62,7 @@ func TestReconcileAddonsConfiguration_AddAddonsProcess(t *testing.T) {
 	defer ts.assertExpectations()
 
 	// WHEN
-	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.bundleStorage, &ts.bf, &ts.dp, &ts.bs, true)
+	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.addonStorage, &ts.bf, &ts.dp, &ts.bs, true)
 
 	// THEN
 	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}})
@@ -85,23 +85,23 @@ func TestReconcileAddonsConfiguration_AddAddonsProcess_ErrorIfBrokerExist(t *tes
 
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {
-			completeBundle := fixBundleWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
+			completeAddon := fixAddonWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
 
-			ts.bp.On("LoadCompleteBundle", e).
-				Return(completeBundle, nil)
+			ts.bp.On("LoadCompleteAddon", e).
+				Return(completeAddon, nil)
 
-			ts.bundleStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeBundle.Bundle).
+			ts.addonStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeAddon.Addon).
 				Return(false, nil)
-			ts.chartStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeBundle.Charts[0]).
+			ts.chartStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeAddon.Charts[0]).
 				Return(false, nil)
-			ts.dp.On("EnsureDocsTopic", completeBundle.Bundle, fixAddonsCfg.Namespace).Return(nil)
+			ts.dp.On("EnsureDocsTopic", completeAddon.Addon, fixAddonsCfg.Namespace).Return(nil)
 		}
 	}
 	ts.bf.On("Exist", fixAddonsCfg.Namespace).Return(false, errors.New("")).Once()
 	defer ts.assertExpectations()
 
 	// WHEN
-	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.bundleStorage, &ts.bf, &ts.dp, &ts.bs, true)
+	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.addonStorage, &ts.bf, &ts.dp, &ts.bs, true)
 
 	// THEN
 	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}})
@@ -126,16 +126,16 @@ func TestReconcileAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
 
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {
-			completeBundle := fixBundleWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
+			completeAddon := fixAddonWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
 
-			ts.bp.On("LoadCompleteBundle", e).
-				Return(completeBundle, nil)
+			ts.bp.On("LoadCompleteAddon", e).
+				Return(completeAddon, nil)
 
-			ts.bundleStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeBundle.Bundle).
+			ts.addonStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeAddon.Addon).
 				Return(false, nil)
-			ts.chartStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeBundle.Charts[0]).
+			ts.chartStorage.On("Upsert", internal.Namespace(fixAddonsCfg.Namespace), completeAddon.Charts[0]).
 				Return(false, nil)
-			ts.dp.On("EnsureDocsTopic", completeBundle.Bundle, fixAddonsCfg.Namespace).Return(nil)
+			ts.dp.On("EnsureDocsTopic", completeAddon.Addon, fixAddonsCfg.Namespace).Return(nil)
 		}
 	}
 	ts.bf.On("Exist", fixAddonsCfg.Namespace).Return(false, nil).Once()
@@ -144,7 +144,7 @@ func TestReconcileAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
 	defer ts.assertExpectations()
 
 	// WHEN
-	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.bundleStorage, &ts.bf, &ts.dp, &ts.bs, true)
+	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.addonStorage, &ts.bf, &ts.dp, &ts.bs, true)
 
 	// THEN
 	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}})
@@ -164,15 +164,15 @@ func TestReconcileAddonsConfiguration_UpdateAddonsProcess_ConflictingBundles(t *
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {
-			completeBundle := fixBundleWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
-			ts.bp.On("LoadCompleteBundle", e).
-				Return(completeBundle, nil)
+			completeAddon := fixAddonWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
+			ts.bp.On("LoadCompleteAddon", e).
+				Return(completeAddon, nil)
 		}
 	}
 	defer ts.assertExpectations()
 
 	// WHEN
-	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.bundleStorage, &ts.bf, &ts.dp, &ts.bs, true)
+	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.addonStorage, &ts.bf, &ts.dp, &ts.bs, true)
 
 	// THEN
 	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}})
@@ -189,22 +189,22 @@ func TestReconcileAddonsConfiguration_UpdateAddonsProcess_ConflictingBundles(t *
 func TestReconcileAddonsConfiguration_DeleteAddonsProcess(t *testing.T) {
 	// GIVEN
 	fixAddonsCfg := fixDeletedAddonsConfiguration()
-	fixBundle := fixBundleWithEmptyDocs("id", fixAddonsCfg.Status.Repositories[0].Addons[0].Name, "example.com").Bundle
+	fixAddon := fixAddonWithEmptyDocs("id", fixAddonsCfg.Status.Repositories[0].Addons[0].Name, "example.com").Addon
 	bundleVer := *semver.MustParse(fixAddonsCfg.Status.Repositories[0].Addons[0].Version)
 	ts := getTestSuite(t, fixAddonsCfg)
 
 	ts.bf.On("Delete", fixAddonsCfg.Namespace).Return(nil).Once()
-	ts.bundleStorage.
-		On("Get", internal.Namespace(fixAddonsCfg.Namespace), internal.BundleName(fixAddonsCfg.Status.Repositories[0].Addons[0].Name), bundleVer).
-		Return(fixBundle, nil)
-	ts.bundleStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixBundle.Name, bundleVer).Return(nil)
-	ts.chartStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixBundle.Plans[internal.BundlePlanID(fmt.Sprintf("plan-%s", fixBundle.Name))].ChartRef.Name, fixBundle.Plans[internal.BundlePlanID(fmt.Sprintf("plan-%s", fixBundle.Name))].ChartRef.Version).Return(nil)
+	ts.addonStorage.
+		On("Get", internal.Namespace(fixAddonsCfg.Namespace), internal.AddonName(fixAddonsCfg.Status.Repositories[0].Addons[0].Name), bundleVer).
+		Return(fixAddon, nil)
+	ts.addonStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixAddon.Name, bundleVer).Return(nil)
+	ts.chartStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixAddon.Plans[internal.AddonPlanID(fmt.Sprintf("plan-%s", fixAddon.Name))].ChartRef.Name, fixAddon.Plans[internal.AddonPlanID(fmt.Sprintf("plan-%s", fixAddon.Name))].ChartRef.Version).Return(nil)
 
-	ts.dp.On("EnsureDocsTopicRemoved", string(fixBundle.ID), fixAddonsCfg.Namespace).Return(nil)
+	ts.dp.On("EnsureDocsTopicRemoved", string(fixAddon.ID), fixAddonsCfg.Namespace).Return(nil)
 	defer ts.assertExpectations()
 
 	// WHEN
-	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.bundleStorage, &ts.bf, &ts.dp, &ts.bs, true)
+	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.addonStorage, &ts.bf, &ts.dp, &ts.bs, true)
 
 	// THEN
 	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}})
@@ -221,22 +221,22 @@ func TestReconcileAddonsConfiguration_DeleteAddonsProcess_ReconcileOtherAddons(t
 	// GIVEN
 	failedAddCfg := fixFailedAddonsConfiguration()
 	fixAddonsCfg := fixDeletedAddonsConfiguration()
-	fixBundle := fixBundleWithEmptyDocs("id", fixAddonsCfg.Status.Repositories[0].Addons[0].Name, "example.com").Bundle
+	fixAddon := fixAddonWithEmptyDocs("id", fixAddonsCfg.Status.Repositories[0].Addons[0].Name, "example.com").Addon
 	bundleVer := *semver.MustParse(fixAddonsCfg.Status.Repositories[0].Addons[0].Version)
 	ts := getTestSuite(t, fixAddonsCfg, failedAddCfg)
 
 	ts.bf.On("Delete", fixAddonsCfg.Namespace).Return(nil).Once()
-	ts.bundleStorage.
-		On("Get", internal.Namespace(fixAddonsCfg.Namespace), internal.BundleName(fixAddonsCfg.Status.Repositories[0].Addons[0].Name), bundleVer).
-		Return(fixBundle, nil)
-	ts.bundleStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixBundle.Name, bundleVer).Return(nil)
-	ts.chartStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixBundle.Plans[internal.BundlePlanID(fmt.Sprintf("plan-%s", fixBundle.Name))].ChartRef.Name, fixBundle.Plans[internal.BundlePlanID(fmt.Sprintf("plan-%s", fixBundle.Name))].ChartRef.Version).Return(nil)
+	ts.addonStorage.
+		On("Get", internal.Namespace(fixAddonsCfg.Namespace), internal.AddonName(fixAddonsCfg.Status.Repositories[0].Addons[0].Name), bundleVer).
+		Return(fixAddon, nil)
+	ts.addonStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixAddon.Name, bundleVer).Return(nil)
+	ts.chartStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixAddon.Plans[internal.AddonPlanID(fmt.Sprintf("plan-%s", fixAddon.Name))].ChartRef.Name, fixAddon.Plans[internal.AddonPlanID(fmt.Sprintf("plan-%s", fixAddon.Name))].ChartRef.Version).Return(nil)
 
-	ts.dp.On("EnsureDocsTopicRemoved", string(fixBundle.ID), fixAddonsCfg.Namespace).Return(nil)
+	ts.dp.On("EnsureDocsTopicRemoved", string(fixAddon.ID), fixAddonsCfg.Namespace).Return(nil)
 	defer ts.assertExpectations()
 
 	// WHEN
-	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.bundleStorage, &ts.bf, &ts.dp, &ts.bs, true)
+	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.addonStorage, &ts.bf, &ts.dp, &ts.bs, true)
 
 	// THEN
 	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}})
@@ -263,7 +263,7 @@ func TestReconcileAddonsConfiguration_DeleteAddonsProcess_Error(t *testing.T) {
 	defer ts.assertExpectations()
 
 	// WHEN
-	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.bundleStorage, &ts.bf, &ts.dp, &ts.bs, true)
+	reconciler := NewReconcileAddonsConfiguration(ts.mgr, &ts.bp, &ts.chartStorage, &ts.addonStorage, &ts.bf, &ts.dp, &ts.bs, true)
 
 	// THEN
 	result, err := reconciler.Reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Namespace: fixAddonsCfg.Namespace, Name: fixAddonsCfg.Name}})
@@ -406,9 +406,9 @@ func fixDeletedAddonsConfiguration() *v1alpha1.AddonsConfiguration {
 	}
 }
 
-func fixIndexDTO() *bundle.IndexDTO {
-	return &bundle.IndexDTO{
-		Entries: map[bundle.Name][]bundle.EntryDTO{
+func fixIndexDTO() *addon.IndexDTO {
+	return &addon.IndexDTO{
+		Entries: map[addon.Name][]addon.EntryDTO{
 			"index": {
 				{
 					Name:        "redis",
@@ -426,14 +426,14 @@ func fixIndexDTO() *bundle.IndexDTO {
 }
 
 type testSuite struct {
-	t             *testing.T
-	mgr           manager.Manager
-	bp            automock.BundleProvider
-	bf            automock.BrokerFacade
-	dp            automock.DocsProvider
-	bs            automock.BrokerSyncer
-	bundleStorage automock.BundleStorage
-	chartStorage  automock.ChartStorage
+	t            *testing.T
+	mgr          manager.Manager
+	bp           automock.AddonProvider
+	bf           automock.BrokerFacade
+	dp           automock.DocsProvider
+	bs           automock.BrokerSyncer
+	addonStorage automock.AddonStorage
+	chartStorage automock.ChartStorage
 }
 
 func getTestSuite(t *testing.T, objects ...runtime.Object) *testSuite {
@@ -447,12 +447,12 @@ func getTestSuite(t *testing.T, objects ...runtime.Object) *testSuite {
 		t:   t,
 		mgr: getFakeManager(t, fake.NewFakeClientWithScheme(sch, objects...), sch),
 		bf:  automock.BrokerFacade{},
-		bp:  automock.BundleProvider{},
+		bp:  automock.AddonProvider{},
 		bs:  automock.BrokerSyncer{},
 		dp:  automock.DocsProvider{},
 
-		bundleStorage: automock.BundleStorage{},
-		chartStorage:  automock.ChartStorage{},
+		addonStorage: automock.AddonStorage{},
+		chartStorage: automock.ChartStorage{},
 	}
 }
 
@@ -467,7 +467,7 @@ func (ts *testSuite) assertExpectations() {
 	ts.bf.AssertExpectations(ts.t)
 	ts.dp.AssertExpectations(ts.t)
 	ts.bs.AssertExpectations(ts.t)
-	ts.bundleStorage.AssertExpectations(ts.t)
+	ts.addonStorage.AssertExpectations(ts.t)
 	ts.chartStorage.AssertExpectations(ts.t)
 }
 

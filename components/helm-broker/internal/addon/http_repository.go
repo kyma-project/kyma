@@ -1,4 +1,4 @@
-package bundle
+package addon
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ func NewHTTPRepository() *HTTPRepository {
 	}
 }
 
-// HTTPRepository represents remote bundle repository which is accessed via HTTP.
+// HTTPRepository represents remote addon repository which is accessed via HTTP.
 type HTTPRepository struct {
 	RepositoryURL string
 	Client        interface {
@@ -32,13 +32,13 @@ func (p *HTTPRepository) IndexReader(URL string) (r io.ReadCloser, err error) {
 	return p.doGetCall(p.RepositoryURL)
 }
 
-// BundleReader calls repository for a specific bundle and returns means to read bundle content.
-func (p *HTTPRepository) BundleReader(name Name, version Version) (r io.ReadCloser, err error) {
-	return p.doGetCall(p.URLForBundle(name, version))
+// AddonReader calls repository for a specific addon and returns means to read addon content.
+func (p *HTTPRepository) AddonReader(name Name, version Version) (r io.ReadCloser, err error) {
+	return p.doGetCall(p.URLForAddon(name, version))
 }
 
-// URLForBundle returns direct URL for getting the bundle
-func (p *HTTPRepository) URLForBundle(name Name, version Version) string {
+// URLForAddon returns direct URL for getting the addon
+func (p *HTTPRepository) URLForAddon(name Name, version Version) string {
 	return fmt.Sprintf("%s%s-%s.tgz", p.baseOfURL(p.RepositoryURL), name, version)
 }
 

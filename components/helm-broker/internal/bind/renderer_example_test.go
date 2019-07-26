@@ -38,7 +38,7 @@ func ExampleNewRenderer() {
 	defer hClient.Delete(releaseName)
 	fatalOnErr(err)
 
-	rendered, err := bindTmplRenderer.Render(internal.BundlePlanBindTemplate(b), resp)
+	rendered, err := bindTmplRenderer.Render(internal.AddonPlanBindTemplate(b), resp)
 	fatalOnErr(err)
 
 	fmt.Println(string(rendered))
