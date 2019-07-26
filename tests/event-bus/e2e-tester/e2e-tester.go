@@ -95,8 +95,8 @@ func main() {
 	var logLevel log.Level
 
 	//Initialise publisher struct
-	flags.StringVar(&pubDetails.publishEventEndpointURL, "publish-event-uri", "http://event-bus-publish:8080/v1/events", "publish service events endpoint `URL`")
-	flags.StringVar(&pubDetails.publishStatusEndpointURL, "publish-status-uri", "http://event-bus-publish:8080/v1/status/ready", "publish service status endpoint `URL`")
+	flags.StringVar(&pubDetails.publishEventEndpointURL, "publish-event-uri", "http://event-publish-service:8080/v1/events", "publish service events endpoint `URL`")
+	flags.StringVar(&pubDetails.publishStatusEndpointURL, "publish-status-uri", "http://event-publish-service:8080/v1/status/ready", "publish service status endpoint `URL`")
 
 	//Initialise subscriber
 	flags.StringVar(&subDetails.subscriberImage, "subscriber-image", "", "subscriber Docker `image` name")
