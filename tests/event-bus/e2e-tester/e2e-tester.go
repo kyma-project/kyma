@@ -100,7 +100,7 @@ func main() {
 
 	//Initialise subscriber
 	flags.StringVar(&subscriber.image, "subscriber-image", "", "subscriber Docker `image` name")
-	flags.StringVar(&subscriber.namespace, "subscriber-ns", "default", "k8s `namespace` in which subscriber test app is running")
+	flags.StringVar(&subscriber.namespace, "subscriber-ns", "test-event-bus", "k8s `namespace` in which subscriber test app is running")
 	flags.StringVar(&logLevelString, "log-level", "info", "logrus log level")
 
 	if err := flags.Parse(os.Args[1:]); err != nil {
