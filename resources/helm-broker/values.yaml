@@ -10,6 +10,7 @@ service:
 
 config:
   tillerTLSInsecure: true
+  tmpDirSizeLimit: 2Gi
   storage:
     - driver: etcd
       provide:

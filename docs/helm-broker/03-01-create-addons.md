@@ -28,6 +28,7 @@ sample-addon/
 ```
 
 > **NOTE:** All file names in an addon repository are case-sensitive.
+> **NOTE:** Maximum size of an single Addon cannot exceed 2GB - this limit is set in the Helm Broker chart (variable name: tmpDirSizeLimit)
 
 For details about particular files, read the following sections.
 
