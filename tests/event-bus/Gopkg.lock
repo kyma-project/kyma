@@ -2,7 +2,6 @@
 
 
 [[projects]]
-<<<<<<< HEAD
   digest = "1:04457f9f6f3ffc5fea48e71d62f2ca256637dee0a04d710288e27e05c8b41976"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
@@ -17,14 +16,6 @@
   pruneopts = "UT"
   revision = "88ef2130df9642aa2849152b2985af9ba3676ee9"
   version = "v2.3.0"
-=======
-  digest = "1:7c51a593e7593dbbaec61e209bdd04095995362834e4399aaa5a9227c25bb403"
-  name = "github.com/avast/retry-go"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "101acd3290b786bf437607d874596e3996484d8d"
-  version = "v2.4.1"
->>>>>>> Refactor event-bus
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -460,10 +451,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-<<<<<<< HEAD
     "github.com/sirupsen/logrus",
-=======
->>>>>>> Refactor event-bus
     "github.com/avast/retry-go",
     "github.com/golang/lint/golint",
     "github.com/kyma-project/kyma/components/event-bus/api/publish",
