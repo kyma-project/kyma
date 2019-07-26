@@ -182,15 +182,15 @@ func main() {
 		log.WithField("error", err).Error("create Subscriber failed")
 	}
 
-	log.Info("check Subscriber Status")
-	if err := subscriber.checkSubscriberStatus(); err != nil {
-		log.WithField("error", err).Error("cannot connect to Subscriber")
+	log.Info("check Subscriber's v1 endpoint Status")
+	if err := subscriber.checkSubscriberV1EndpointStatus(); err != nil {
+		log.WithField("error", err).Error("cannot connect to Subscriber v1 endpoint")
 		shutdown(fail, &subscriber)
 	}
 
-	log.Info("check Subscriber 3 Status")
+	log.Info("check Subscriber's v3 endpoint Status")
 	if err := subscriber.checkSubscriberV3EndpointStatus(); err != nil {
-		log.WithField("error", err).Info("cannot connect to Subscriber 3")
+		log.WithField("error", err).Info("cannot connect to Subscriber v3 endpoint")
 		shutdown(fail, &subscriber)
 	}
 
@@ -240,7 +240,7 @@ func main() {
 
 	log.Info("try to read the response from v3 endpoint of the subscriber")
 	if err := subscriber.checkReceivedEventHeaders(); err != nil {
-		log.WithField("error", err).Error("cannot get the test event from subscriber 3")
+		log.WithField("error", err).Error("cannot get the test event from subscriber v3 endpoint")
 		shutdown(fail, &subscriber)
 	}
 
@@ -296,6 +296,11 @@ func shutdown(code int, subscriber *testSubscriber) {
 		if err := eaClient.ApplicationconnectorV1alpha1().EventActivations(subscriber.namespace).Delete(eventActivationName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
 			log.WithField("error", err).Warn("delete Event Activation failed")
 		}
+	}
+
+	log.WithField("namespace", subscriber.namespace).Info("delete test namespace")
+	if err := clientK8S.Core().Namespaces().Delete(subscriber.namespace, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
+		log.WithField("error", err).Warn("delete Namespace failed")
 	}
 	os.Exit(code)
 }
@@ -598,7 +603,7 @@ func createSubscription(subscriberNamespace string, subName string, subscriberEv
 }
 
 // Check that the subscriber endpoint is reachable and returns a 200
-func (subscriber *testSubscriber) checkSubscriberStatus() error {
+func (subscriber *testSubscriber) checkSubscriberV1EndpointStatus() error {
 	return retry.Do(func() error {
 		res, err := http.Get(subscriber.eventEndpointV1URL)
 		if err != nil {
@@ -611,7 +616,7 @@ func (subscriber *testSubscriber) checkSubscriberStatus() error {
 // Check that the subscriber3 endpoint is reachable and returns a 200
 func (subscriber *testSubscriber) checkSubscriberV3EndpointStatus() error {
 	return retry.Do(func() error {
-		res, err := http.Get(subscriber.resultsEndpointV1URL)
+		res, err := http.Get(subscriber.resultsEndpointV3URL)
 		if err != nil {
 			return err
 		}
