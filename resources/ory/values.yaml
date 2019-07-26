@@ -68,6 +68,12 @@ oathkeeper:
     dir: /etc/rules
     name: rules
 
+<<<<<<< HEAD
 oathkeeper-rule-controller:
   annotations:
     sidecar.istio.io/inject: "false"
+=======
+maester:
+  annotations: 
+    sidecar.istio.io/inject: "false"
+>>>>>>> Rename controller to maester
