@@ -1,18 +1,17 @@
 ---
 title: Install Velero
-type: Details
+type: Installation
 ---
 Install and configure [Velero](https://github.com/heptio/velero/) to back up and restore your Kyma cluster.
 
-## Velero setup
-
-To successfully set up Velero, provide a supported storage location and credentials to access it. 
+To successfully set up Velero, you must define a supported storage location and credentials to access it. 
 
 >**NOTE**: Currently, you can install Velero on GCP and Azure. AWS is not supported.
 
-Follow the instructions below:
-1. Enable Velero components in the Kyma Installer configuration file. To do that follow [this guide](/root/kyma/#configuration-custom-component-installation).<br/>
-    Add the following components:
+Follow the instructions to set up Velero: 
+
+1. [Enable](/root/kyma/#configuration-custom-component-installation) Velero components in the Kyma Installer configuration file:
+
     ```yaml
     - name: "velero-essentials"
       namespace: "kyma-backup"
@@ -20,9 +19,10 @@ Follow the instructions below:
       namespace: "kyma-backup"
     ```
 
-2. Create an override secret containing the Velero [required parameters](/components/backup/#configuration-configuration) for a chosen provider. Remember to base64-encode the parameters.<br/>
-    See the installation examples:
-    >**NOTE**: Values are provided in plain text only for illustrative purposes. Remember to set them as base64-encoded strings.
+2. Create an override secret containing the [required parameters](/components/backup/#configuration-configuration) for a chosen provider. 
+
+    See the examples of override secrets:
+    >**NOTE**: The values are provided in plain text only for illustrative purposes. Remember to set them as base64-encoded strings. For details on Kyma overrides, see the [this](/root/kyma/#configuration-helm-overrides-for-kyma-installation) document.
 
     <div tabs>
     <details>
@@ -61,7 +61,7 @@ Follow the instructions below:
                         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sample%40fake.iam.gserviceaccount.com"
                     }
     ```
-    >**NOTE:** For details on configuring and installing Velero in GCP,  see [this](https://velero.io/docs/v1.0.0/gcp-config/) document.
+    >**NOTE:** For details on configuring and installing Velero on GCP, see [this](https://velero.io/docs/v1.0.0/gcp-config/) document. 
     </details>
     <details>
     <summary>
@@ -101,30 +101,31 @@ Follow the instructions below:
     </details>
     </div>
 
-    >**NOTE:** For details on Kyma overrides visit the [Installation Overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation) section.
+2. Run the Kyma installation with the Velero overrides:
+    <div tabs>
+    <details>
+    <summary>
+    Local installation
+    </summary>
 
-2. Run the Kyma installation providing the Velero overrides:
-      <div tabs>
-      <details>
-      <summary>
-      Local installation
-      </summary>
+    To apply overrides to your local installation, run:
 
-      ```bash
-      kyma install -o {overrides_file_path}
-      ```
+    ```bash
+    kyma install -o {overrides_file_path}
+    ```
       
-      </details>
-      <details>
-      <summary>
-      Cluster installation
-      </summary>
+    </details>
+    <details>
+    <summary>
+    Cluster installation
+    </summary>
       
-      1. Apply the overrides to your cluster:
-          ```bash
-          kubectl apply -f {overrides_file_path}
-          ```
-      2. [Install](/root/kyma/#installation-installation) Kyma or [update](/root/kyma/#installation-update-kyma) Kyma if it is already installed in your cluster.
+     1. Apply the overrides to your cluster:
+
+        ```bash
+        kubectl apply -f {overrides_file_path}
+        ```
+     2. [Install](/root/kyma/#installation-installation) Kyma or [update](/root/kyma/#installation-update-kyma) it if it is already installed in your cluster.
       
-      </details>
-      </div>
+     </details>
+     </div>
