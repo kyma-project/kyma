@@ -6,11 +6,11 @@ This document describes options to extend the ClusterAddonsConfiguration and Add
 
 ## Motivation
 
-Helm Broker fetches addons listed in the `index.yaml` file and exposed as remote HTTPS servers, which means that only zipped addons can be fetched. This solution generates problems for end-users, as it's not always easy to have a dedicated HTTPS server that serves zipped addons. The most common scenario is to have a Git repository with unzipped addons and yaml files. This document describes all possible solutions for achieving that goal.
+Helm Broker fetches addons listed in the `index.yaml` file and exposed as remote HTTPS servers, which means that only zipped addons can be fetched. This solution generates problems for end-users, as it's not always easy to have a dedicated HTTPS server that serves zipped addons. The most common scenario is to have a Git repository with unzipped addons and index yaml files. This document describes all possible solutions for achieving that goal.
 
 ## Accepted solution
 
-You can specify Git repositories by adding the special `git::` prefix to the URL address. After this prefix, you can provide any valid Git URL with one of the protocols supported by Git. This solution is inspired by the [Terraform implementation](https://www.terraform.io/docs/modules/sources.html#github).
+You can specify Git repositories by adding the special `git::` prefix to the URL address. After this prefix, you can provide any valid Git URL with one of the protocols supported by Git. This solution is inspired by the [Terraform implementation](https://www.terraform.io/docs/modules/sources.html#github). Using the [hashicorp go-getter](https://github.com/hashicorp/go-getter) allows us to easily add new supported protocols such as Mercurial, S3, GCS etc.
 
 ```yaml
 apiVersion: addons.kyma-project.io/v1alpha1
@@ -19,12 +19,16 @@ metadata:
   name: addons-cfg-sample
 spec:
   repositories:
-    # Use SSH protocol with a path to index.yaml
+    # Use Git SSH protocol with a path to index.yaml
     - url: "git::git@github.com:kyma-project/addons.git//index.yaml"
-    # Use HTTPS protocol with path to index YAML 
+    # Use Git HTTPS protocol with a path to index.yaml 
     - url: "git::https://github.com/kyma-project/addons.git//addons/index.yaml"
-    # Use HTTPS protocol with a path to index.yaml and branch/tag version 
+    # Use Git HTTPS protocol with a path to index.yaml and branch/tag version 
     - url: "git::https://github.com/kyma-project/addons.git//addons/index.yaml?ref=1.2.0"
+    # Use unprefixed github.com URLs. They are automatically interpreted as Git repository sources. 
+    - url: "github.com/kyma-project/addons//addons/index.yaml?ref=1.2.0"
+    # Use HTTPS protocol (server which serves static content), should be defined as previously. Nothing changed.
+    - url: "https://github.com/kyma-project/addons/releases/download/latest/index.yaml"
 ``` 
 
 

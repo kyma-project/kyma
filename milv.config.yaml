@@ -16,7 +16,7 @@ files:
       white-list-external: ["https://github.com/kyma-project/stability-checker/raw/{branchName}/deploy/chart/stability-checker-0.1.0.tgz"]
   - path: "./kyma/components/helm-broker/docs/proposals/addon-git-support.md"
     config:
-      white-list-external: ["https://gitlab.com/kyma-project/bundles/blob/master/bundles/index.yaml", "https://bitbucket.org/kyma-project/bundles/src/master/bundles/index.yaml"]
+      white-list-external: ["https://github.com/kyma-project/addons/blob/master/addons/index.yaml", "https://gitlab.com/kyma-project/addons/blob/master/addons/index.yaml", "https://bitbucket.org/kyma-project/addons/src/master/addons/index.yaml"]
   - path: "./kyma/docs/monitoring/02-01-monitoring.md"
     config:
       white-list-external: ["https://grafana.{DOMAIN"]
