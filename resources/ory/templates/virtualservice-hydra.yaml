@@ -1,8 +1,10 @@
 {{- if .Capabilities.APIVersions.Has "networking.istio.io/v1alpha3" }}
+{{- if .Values.hydra.service.public.enabled -}}
+---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ include "hydra.fullname" . }}-public
+  name: {{ include "hydra.fullname" . }}-hydra-public
   namespace: {{ .Release.Namespace }}
 spec:
   gateways:
@@ -15,15 +17,16 @@ spec:
             regex: /.*
       route:
         - destination:
-            host: {{ include "hydra.fullname" . }}-public
+            host: {{ include "hydra.fullname" . }}-hydra-public
             port:
-              number: {{ .Values.hydra.config.serve.public.port }}
-
+              number: {{ .Values.hydra.hydra.config.serve.public.port }}
+{{ end }}
+{{- if .Values.hydra.service.admin.enabled -}}
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ include "hydra.fullname" . }}-admin
+  name: {{ include "hydra.fullname" . }}-hydra-admin
   namespace: {{ .Release.Namespace }}
 spec:
   gateways:
@@ -36,7 +39,8 @@ spec:
             regex: /.*
       route:
         - destination:
-            host: {{ include "hydra.fullname" . }}-admin
+            host: {{ include "hydra.fullname" . }}-hydra-admin
             port:
-              number: {{ .Values.hydra.config.serve.admin.port }}
+              number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+{{ end }}
 {{ end }}

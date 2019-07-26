@@ -1,0 +1,46 @@
+{{- if .Capabilities.APIVersions.Has "networking.istio.io/v1alpha3" }}
+{{- if .Values.oathkeeper.service.api.enabled -}}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "oathkeeper.fullname" . }}-oathkeeper-api
+  namespace: {{ .Release.Namespace }}
+spec:
+  gateways:
+    - {{ .Values.global.gateway }}
+  hosts:
+    - oathkeeper-api.{{ .Values.global.ingress.domainName }}
+  http:
+    - match:
+        - uri:
+            regex: /.*
+      route:
+        - destination:
+            host: {{ include "oathkeeper.fullname" . }}-oathkeeper-api
+            port:
+              number: {{ .Values.oathkeeper.service.api.port }}
+{{ end }}
+{{- if .Values.oathkeeper.service.proxy.enabled -}}
+{{ end }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "oathkeeper.fullname" . }}-oathkeeper-proxy
+  namespace: {{ .Release.Namespace }}
+spec:
+  gateways:
+    - {{ .Values.global.gateway }}
+  hosts:
+    - oathkeeper-proxy.{{ .Values.global.ingress.domainName }}
+  http:
+    - match:
+        - uri:
+            regex: /.*
+      route:
+        - destination:
+            host: {{ include "oathkeeper.fullname" . }}-oathkeeper-proxy
+            port:
+              number: {{ .Values.oathkeeper.service.proxy.port }}
+{{ end }}
