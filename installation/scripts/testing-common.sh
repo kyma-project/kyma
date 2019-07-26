@@ -152,6 +152,28 @@ function waitForTestPodsTermination() {
     return 1
 }
 
+function deleteCTS() {
+  local retry=0
+  local suiteName=$1
+
+  log "Deleting ClusterTestSuite ${suiteName}" nc bold
+  while [[ ${retry} -lt 20 ]]; do
+        msg=$(kubectl delete cts ${suiteName} 2>&1)
+        status=$?
+        if [[ ${status} -ne 0 ]]; then
+            echo "Unable to delete ClusterTestSuite: ${msg}"
+            echo "waiting 5s..."
+            sleep 5
+        else
+            log "OK" green bold
+            return 0
+        fi
+        retry=$[retry + 1]
+  done
+  log "FAILED" red
+  return 1
+}
+
 function waitForTerminationAndPrintLogs() {
     local suiteName=$1
 
