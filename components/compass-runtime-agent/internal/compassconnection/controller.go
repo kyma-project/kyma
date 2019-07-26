@@ -83,9 +83,7 @@ func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 				return reconcile.Result{}, err
 			}
 
-			// TODO: log some human readable status
 			log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
-
 			return reconcile.Result{}, nil
 		}
 
@@ -94,8 +92,7 @@ func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 		return reconcile.Result{}, err
 	}
 
-	// TODO: human readable status
-	log.Infof("Processing %s Compass Connection, current status: %s", instance.Name, "TODO")
+	log.Infof("Processing Compass Connection, current status: %s", instance.Status)
 
 	// If connection is not established read Config Map and try to fetch Certificate
 	if instance.ShouldReconnect() {

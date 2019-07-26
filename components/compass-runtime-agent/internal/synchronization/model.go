@@ -32,7 +32,7 @@ const (
 type Application struct {
 	ID          string
 	Name        string
-	Description *string // TODO - what is the point of this pointer
+	Description *string
 	Labels      Labels
 	APIs        []APIDefinition
 	EventAPIs   []EventAPIDefinition
@@ -66,7 +66,7 @@ type Document struct {
 	DisplayName   string
 	Description   string
 	Format        DocumentFormat
-	Kind          *string // TODO - does it need to be pointer>?
+	Kind          *string
 	Data          []byte
 }
 

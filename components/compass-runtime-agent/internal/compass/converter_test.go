@@ -111,6 +111,43 @@ func TestApplication_ToApplication(t *testing.T) {
 				Name:        appName,
 				Description: &appDesc,
 				APIs: &graphql.APIDefinitionPage{
+					Data: []*graphql.APIDefinition{
+						{},
+					},
+				},
+				EventAPIs: &graphql.EventAPIDefinitionPage{
+					Data: []*graphql.EventAPIDefinition{
+						{},
+					},
+				},
+				Documents: &graphql.DocumentPage{
+					Data: []*graphql.Document{
+						{},
+					},
+				},
+			},
+			expectedApp: synchronization.Application{
+				ID:          appId,
+				Name:        appName,
+				Description: &appDesc,
+				APIs: []synchronization.APIDefinition{
+					{},
+				},
+				EventAPIs: []synchronization.EventAPIDefinition{
+					{},
+				},
+				Documents: []synchronization.Document{
+					{},
+				},
+			},
+		},
+		{
+			description: "convert Compass App with empty apis",
+			compassApp: Application{
+				ID:          appId,
+				Name:        appName,
+				Description: &appDesc,
+				APIs: &graphql.APIDefinitionPage{
 					Data: nil,
 				},
 				EventAPIs: &graphql.EventAPIDefinitionPage{

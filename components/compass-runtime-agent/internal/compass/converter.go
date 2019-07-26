@@ -68,10 +68,15 @@ func convertDocuments(compassDocuments []*graphql.Document) []synchronization.Do
 }
 
 func convertAPI(compassAPI *graphql.APIDefinition) synchronization.APIDefinition {
+	description := ""
+	if compassAPI.Description != nil {
+		description = *compassAPI.Description
+	}
+
 	api := synchronization.APIDefinition{
 		ID:          compassAPI.ID,
 		Name:        compassAPI.Name,
-		Description: *compassAPI.Description,
+		Description: description,
 		TargetUrl:   compassAPI.TargetURL,
 	}
 
@@ -125,10 +130,15 @@ func convertAuth(compassAuth *graphql.Auth) (*synchronization.Credentials, error
 }
 
 func convertEventAPI(compassEventAPI *graphql.EventAPIDefinition) synchronization.EventAPIDefinition {
+	description := ""
+	if compassEventAPI.Description != nil {
+		description = *compassEventAPI.Description
+	}
+
 	eventAPI := synchronization.EventAPIDefinition{
 		ID:          compassEventAPI.ID,
 		Name:        compassEventAPI.Name,
-		Description: *compassEventAPI.Description,
+		Description: description,
 	}
 
 	if compassEventAPI.Spec != nil {
