@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "oathkeeper.fullname" . }}-controller
+  name: {{ include "maester.fullname" . }}
   {{- if .Release.Namespace }}
   namespace: {{ .Release.Namespace }}
   {{- end }}
   labels:
-{{ include "oathkeeper.labels" . | indent 4 }}
+{{ include "maester.labels" . | indent 4 }}
 spec:
   automountServiceAccountToken: false
   progressDeadlineSeconds: 600
@@ -15,7 +15,7 @@ spec:
   selector:
     matchLabels:
       control-plane: controller-manager
-      app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
+      app.kubernetes.io/name: {{ include "maester.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   strategy:
     rollingUpdate:
@@ -26,7 +26,7 @@ spec:
     metadata:
       labels:
         control-plane: controller-manager
-        app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
+        app.kubernetes.io/name: {{ include "maester.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
       {{- with .Values.annotations }}
       annotations:
