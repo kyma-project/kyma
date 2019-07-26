@@ -3,6 +3,7 @@ package synchronization
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	"github.com/sirupsen/logrus"
 )
 
 //go:generate mockery -name=Service
@@ -62,6 +63,10 @@ func NewService(reconciler Reconciler, applicationRepository ApplicationReposito
 }
 
 func (s *service) Apply(applications []Application) ([]Result, apperrors.AppError) {
+
+	logrus.Info("Application passed to Sync service: ", len(applications))
+
+	return nil, nil
 
 	actions, err := s.reconciler.Do(applications)
 	if err != nil {
