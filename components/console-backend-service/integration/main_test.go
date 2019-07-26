@@ -15,6 +15,7 @@ import (
 	"k8s.io/client-go/rest"
 	"net"
 	"net/http"
+	"os"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sync"
 	"testing"
@@ -76,10 +77,12 @@ func TestMain(m *testing.M) {
 		}
 	}()
 
-	m.Run()
+	status := m.Run()
 
 	close(stopCh)
 	wg.Wait()
+
+	os.Exit(status)
 }
 
 func AuthAlwaysSuccess(req *http.Request) (*authenticator.Response, bool, error) {
