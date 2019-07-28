@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	prometheusURL               = "http://monitoring-prometheus.kyma-system"
+	prometheusURL               = "http://monitoring-prometheus.kyma-system:9090"
 	prometheusNamespace         = "kyma-system"
 	expectedAlertManagers       = 1
 	expectedPrometheusInstances = 1
@@ -158,7 +158,7 @@ func (pt *prometheusTest) testQueryTargets(url string) {
 		actualKubeStateMetrics := 0
 		select {
 		case <-timeout:
-			pt.log.Printf("Test prometheus API %v: result: Timed out!!", url)
+			pt.log.Printf("Timed out: test prometheus API %v", url)
 			So(actualAlertManagers, ShouldEqual, expectedAlertManagers)
 			So(actualNodeExporter, ShouldEqual, expectedNodeExporter)
 			So(actualPrometheusInstances, ShouldEqual, expectedPrometheusInstances)
@@ -193,10 +193,10 @@ func (pt *prometheusTest) testQueryTargets(url string) {
 				}
 			}
 			if expectedAlertManagers == actualAlertManagers && expectedNodeExporter == actualNodeExporter && expectedPrometheusInstances == actualPrometheusInstances && expectedKubeStateMetrics == actualKubeStateMetrics {
-				pt.log.Printf("Test prometheus API %v: result: All pods are healthy!!", url)
+				pt.log.Printf("Test prometheus API %v: result: All pods are healthy!", url)
 				return
 			}
-			pt.log.Printf("Waiting for all instances to be healthy!!")
+			pt.log.Printf("Waiting for all instances to be healthy")
 		}
 	}
 }
