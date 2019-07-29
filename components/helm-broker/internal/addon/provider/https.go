@@ -74,7 +74,7 @@ func (h *HTTPGetter) BundleLoadInfo(name addon.Name, version addon.Version) (Loa
 		return UnknownLoadType, "", err
 	}
 
-	savePath := path.Join(h.dst, "bundle")
+	savePath := path.Join(h.dst, rand.String(10))
 	if err := h.underlying.GetFile(savePath, u); err != nil {
 		return UnknownLoadType, "", err
 	}

@@ -15,17 +15,17 @@ type (
 
 // IndexDTO contains collection of all addons from the given repository
 type IndexDTO struct {
-	Entries map[Name][]EntryDTO `yaml:"entries"`
+	Entries map[Name][]EntryDTO `json:"entries"`
 }
 
 // EntryDTO contains information about single addon entry
 type EntryDTO struct {
 	// Name is set to index entry key name
-	Name Name
+	Name Name `json:"-"`
 	// DisplayName is the entry name, currently treated by us as DisplayName
-	DisplayName string  `yaml:"name"`
-	Description string  `yaml:"description"`
-	Version     Version `yaml:"version"`
+	DisplayName string  `json:"name"`
+	Description string  `json:"description"`
+	Version     Version `json:"version"`
 }
 
 // CompleteAddon aggregates a bundle with his chart(s)

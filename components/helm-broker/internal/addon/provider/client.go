@@ -75,8 +75,8 @@ func (d *Client) GetIndex() (*addon.IndexDTO, error) {
 
 	// Fill the proper entry name
 	for name, entries := range idx.Entries {
-		for _, entry := range entries {
-			entry.Name = name
+		for idx := range entries {
+			entries[idx].Name = name
 		}
 	}
 

@@ -66,17 +66,7 @@ func (g *GitGetter) BundleLoadInfo(name addon.Name, version addon.Version) (Load
 		pathToBundle  = path.Join(g.dst, g.bundleDirPath, bundleDirName)
 	)
 
-	fi, err := os.Stat(pathToBundle)
-	if err != nil {
-		return UnknownLoadType, "", err
-	}
-
-	switch mode := fi.Mode(); {
-	case mode.IsDir():
-		return DirectoryLoadType, path.Join(g.dst, g.bundleDirPath, bundleDirName), nil
-	default:
-		return ArchiveLoadType, path.Join(g.dst, g.bundleDirPath, bundleDirName), nil
-	}
+	return DirectoryLoadType, pathToBundle, nil
 }
 
 // BundleDocURL returns url for bundle documentation
