@@ -29,8 +29,8 @@ const (
 
 	subscriberName           = "test-core-event-bus-subscriber"
 	subscriberImage          = "eu.gcr.io/kyma-project/pr/event-bus-e2e-subscriber:PR-4893"
-	publishEventEndpointURL  = "http://event-bus-publish.kyma-system:8080/v1/events"
-	publishStatusEndpointURL = "http://event-bus-publish.kyma-system:8080/v1/status/ready"
+	publishEventEndpointURL  = "http://event-publish-service.kyma-system:8080/v1/events"
+	publishStatusEndpointURL = "http://event-publish-service.kyma-system:8080/v1/status/ready"
 )
 
 var (
@@ -98,10 +98,6 @@ func (f *eventBusFlow) createResources() error {
 		f.createSubscription,
 		f.createSubscriber,
 		f.checkSubscriberStatus,
-		f.checkPublisherStatus,
-		f.checkSubscriptionReady,
-		f.publishTestEvent,
-		f.checkSubscriberReceivedEvent,
 	} {
 		err := fn()
 		if err != nil {
