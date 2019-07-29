@@ -118,8 +118,8 @@ func CheckK8sIstioRule(t *testing.T, rule *istio.Rule, name, namespace string, l
 	require.Equal(t, expectedMatchExpression, rule.Spec.Match)
 
 	ruleAction := rule.Spec.Actions[0]
-	require.Equal(t, name+".denier", ruleAction.Handler)
-	require.Equal(t, name+".checknothing", ruleAction.Instances[0])
+	require.Equal(t, name, ruleAction.Handler)
+	require.Equal(t, name, ruleAction.Instances[0])
 
 	checkLabels(t, labels, rule.Labels)
 }
