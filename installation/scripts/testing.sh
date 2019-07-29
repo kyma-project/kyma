@@ -140,7 +140,7 @@ cleanupExitCode=$?
 echo "ClusterTestSuite details:"
 kubectl get cts ${suiteName} -oyaml
 
-kubectl delete cts ${suiteName}
+deleteCTS ${suiteName}
 
 printImagesWithLatestTag
 latestTagExitCode=$?
