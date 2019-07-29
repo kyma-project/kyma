@@ -269,7 +269,7 @@ func TestConverter(t *testing.T) {
 						Tags:                []string{},
 						Entries: []v1alpha1.Entry{
 							{
-								Type:                        specAPIType,
+								Type:                        SpecAPIType,
 								GatewayUrl:                  "application-gateway.kyma-integration.svc.cluster.local",
 								AccessLabel:                 "resourceName1",
 								TargetUrl:                   "www.example.com/1",
@@ -294,7 +294,7 @@ func TestConverter(t *testing.T) {
 						Tags:                []string{},
 						Entries: []v1alpha1.Entry{
 							{
-								Type:             specEventsType,
+								Type:             SpecEventsType,
 								AccessLabel:      "resourceName2",
 								SpecificationUrl: "",
 								Credentials:      v1alpha1.Credentials{},
