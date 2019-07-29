@@ -20,7 +20,7 @@ func NewSynchronizationService() Service {
 
 type service struct {
 	reconciler            sync.Reconciler
-	applicationRepository applications.Applications
+	applicationRepository applications.Manager
 	converter             applications.Converter
 	resourcesService      ResourcesService
 }
@@ -47,7 +47,7 @@ type ResourcesService interface {
 	DeleteSecrets(application model.Application, apiDefinition model.APIDefinition) apperrors.AppError
 }
 
-func NewService(reconciler sync.Reconciler, applicationRepository applications.Applications, converter applications.Converter, resourcesService ResourcesService) Service {
+func NewService(reconciler sync.Reconciler, applicationRepository applications.Manager, converter applications.Converter, resourcesService ResourcesService) Service {
 	return &service{
 		reconciler:            reconciler,
 		applicationRepository: applicationRepository,

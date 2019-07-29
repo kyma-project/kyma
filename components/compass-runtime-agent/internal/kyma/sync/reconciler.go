@@ -9,7 +9,7 @@ import (
 )
 
 type reconciler struct {
-	applicationsInterface applications.Applications
+	applicationsInterface applications.Manager
 }
 
 type Operation int
@@ -42,7 +42,7 @@ type ApplicationAction struct {
 	EventAPIActions []EventAPIAction
 }
 
-func NewReconciler(applicationsInterface applications.Applications) Reconciler {
+func NewReconciler(applicationsInterface applications.Manager) Reconciler {
 	return reconciler{
 		applicationsInterface: applicationsInterface,
 	}
