@@ -22,7 +22,8 @@ spec:
       - image: {{ .Values.imageRegistry }}/dex:{{ .Chart.AppVersion }}
         name: dex
         command: ["/usr/local/bin/dex", "serve", "/etc/dex/cfg/config.yaml"]
-
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
         ports:
         - name: http
           containerPort: {{ .Values.containerPort }}

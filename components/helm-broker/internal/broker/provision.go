@@ -18,7 +18,7 @@ import (
 const addonsRepositoryURLName = "addonsRepositoryURL"
 
 type provisionService struct {
-	bundleIDGetter           bundleIDGetter
+	addonIDGetter            addonIDGetter
 	chartGetter              chartGetter
 	instanceInserter         instanceInserter
 	instanceGetter           instanceGetter
@@ -76,20 +76,20 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting namespace from context: %v", err))}
 	}
 
-	// bundleID is in 1:1 match with serviceID (from service catalog)
+	// addonID is in 1:1 match with serviceID (from service catalog)
 	svcID := internal.ServiceID(req.ServiceID)
-	bundleID := internal.BundleID(svcID)
-	bundle, err := svc.bundleIDGetter.GetByID(osbCtx.BrokerNamespace, bundleID)
+	addonID := internal.AddonID(svcID)
+	addon, err := svc.addonIDGetter.GetByID(osbCtx.BrokerNamespace, addonID)
 	if err != nil {
-		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting bundle: %v", err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting addon: %v", err))}
 	}
 	instances, err := svc.instanceGetter.GetAll()
 	if err != nil {
 		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting instance collection: %v", err))}
 	}
-	if !bundle.IsProvisioningAllowed(namespace, instances) {
-		svc.log.Infof("bundle with name: %q (id: %s) and flag 'provisionOnlyOnce' in namespace %q will be not provisioned because his instance already exist", bundle.Name, bundle.ID, namespace)
-		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("bundle with name: %q (id: %s) and flag 'provisionOnlyOnce' in namespace %q will be not provisioned because his instance already exist", bundle.Name, bundle.ID, namespace))}
+	if !addon.IsProvisioningAllowed(namespace, instances) {
+		svc.log.Infof("addon with name: %q (id: %s) and flag 'provisionOnlyOnce' in namespace %q will be not provisioned because his instance already exist", addon.Name, addon.ID, namespace)
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("addon with name: %q (id: %s) and flag 'provisionOnlyOnce' in namespace %q will be not provisioned because his instance already exist", addon.Name, addon.ID, namespace))}
 	}
 
 	id, err := svc.operationIDProvider()
@@ -112,13 +112,13 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 
 	svcPlanID := internal.ServicePlanID(req.PlanID)
 
-	// bundlePlanID is in 1:1 match with servicePlanID (from service catalog)
-	bundlePlanID := internal.BundlePlanID(svcPlanID)
-	bundlePlan, found := bundle.Plans[bundlePlanID]
+	// addonPlanID is in 1:1 match with servicePlanID (from service catalog)
+	addonPlanID := internal.AddonPlanID(svcPlanID)
+	addonPlan, found := addon.Plans[addonPlanID]
 	if !found {
-		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("bundle does not contain requested plan (planID: %s): %v", err, bundlePlanID))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("addon does not contain requested plan (planID: %s): %v", err, addonPlanID))}
 	}
-	releaseName := createReleaseName(bundle.Name, bundlePlan.Name, iID)
+	releaseName := createReleaseName(addon.Name, addonPlan.Name, iID)
 
 	i := internal.Instance{
 		ID:            iID,
@@ -141,9 +141,9 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 		namespace:           namespace,
 		brokerNamespace:     osbCtx.BrokerNamespace,
 		releaseName:         releaseName,
-		bundlePlan:          bundlePlan,
-		isBundleBindable:    bundle.Bindable,
-		addonsRepositoryURL: bundle.RepositoryURL,
+		addonPlan:           addonPlan,
+		isAddonBindable:     addon.Bindable,
+		addonsRepositoryURL: addon.RepositoryURL,
 		chartOverrides:      chartOverrides,
 	}
 	svc.doAsync(ctx, provisionInput)
@@ -164,8 +164,8 @@ type provisioningInput struct {
 	namespace           internal.Namespace
 	brokerNamespace     internal.Namespace
 	releaseName         internal.ReleaseName
-	bundlePlan          internal.BundlePlan
-	isBundleBindable    bool
+	addonPlan           internal.AddonPlan
+	isAddonBindable     bool
 	chartOverrides      internal.ChartValues
 	addonsRepositoryURL string
 }
@@ -181,12 +181,12 @@ func (svc *provisionService) doAsync(ctx context.Context, input provisioningInpu
 func (svc *provisionService) do(ctx context.Context, input provisioningInput) {
 
 	fDo := func() (*rls.InstallReleaseResponse, error) {
-		c, err := svc.chartGetter.Get(input.brokerNamespace, input.bundlePlan.ChartRef.Name, input.bundlePlan.ChartRef.Version)
+		c, err := svc.chartGetter.Get(input.brokerNamespace, input.addonPlan.ChartRef.Name, input.addonPlan.ChartRef.Version)
 		if err != nil {
 			return nil, errors.Wrap(err, "while getting chart from storage")
 		}
 
-		out, err := deepCopy(input.bundlePlan.ChartValues)
+		out, err := deepCopy(input.addonPlan.ChartValues)
 		if err != nil {
 			return nil, errors.Wrap(err, "while coping plan values")
 		}
@@ -195,8 +195,8 @@ func (svc *provisionService) do(ctx context.Context, input provisioningInput) {
 
 		out[addonsRepositoryURLName] = input.addonsRepositoryURL
 
-		svc.log.Infof("Merging values for operation [%s], releaseName [%s], namespace [%s], bundlePlan [%s]. Plan values are: [%v], overrides: [%v], merged: [%v] ",
-			input.operationID, input.releaseName, input.namespace, input.bundlePlan.Name, input.bundlePlan.ChartValues, input.chartOverrides, out)
+		svc.log.Infof("Merging values for operation [%s], releaseName [%s], namespace [%s], addonPlan [%s]. Plan values are: [%v], overrides: [%v], merged: [%v] ",
+			input.operationID, input.releaseName, input.namespace, input.addonPlan.Name, input.addonPlan.ChartValues, input.chartOverrides, out)
 
 		resp, err := svc.helmInstaller.Install(c, internal.ChartValues(out), input.releaseName, input.namespace)
 		if err != nil {
@@ -215,8 +215,8 @@ func (svc *provisionService) do(ctx context.Context, input provisioningInput) {
 		opDesc = fmt.Sprintf("provisioning failed on error: %s", err.Error())
 	}
 
-	if err == nil && svc.isBindable(input.bundlePlan, input.isBundleBindable) {
-		if resolveErr := svc.resolveAndSaveBindData(input.instanceID, input.namespace, input.bundlePlan, resp); resolveErr != nil {
+	if err == nil && svc.isBindable(input.addonPlan, input.isAddonBindable) {
+		if resolveErr := svc.resolveAndSaveBindData(input.instanceID, input.namespace, input.addonPlan, resp); resolveErr != nil {
 			opState = internal.OperationStateFailed
 			opDesc = fmt.Sprintf("resolving bind data failed with error: %s", resolveErr.Error())
 		}
@@ -227,13 +227,13 @@ func (svc *provisionService) do(ctx context.Context, input provisioningInput) {
 	}
 }
 
-func (*provisionService) isBindable(plan internal.BundlePlan, isBundleBindable bool) bool {
-	return (plan.Bindable != nil && *plan.Bindable) || // if bindable field is set on plan it's override bindalbe field on bundle
-		(plan.Bindable == nil && isBundleBindable) // if bindable field is NOT set on plan thet bindalbe field on bundle is important
+func (*provisionService) isBindable(plan internal.AddonPlan, isAddonBindable bool) bool {
+	return (plan.Bindable != nil && *plan.Bindable) || // if bindable field is set on plan it's override bindalbe field on addon
+		(plan.Bindable == nil && isAddonBindable) // if bindable field is NOT set on plan that bindable field on addon is important
 }
 
-func (svc *provisionService) resolveAndSaveBindData(iID internal.InstanceID, namespace internal.Namespace, bundlePlan internal.BundlePlan, resp *rls.InstallReleaseResponse) error {
-	rendered, err := svc.bindTemplateRenderer.Render(bundlePlan.BindTemplate, resp)
+func (svc *provisionService) resolveAndSaveBindData(iID internal.InstanceID, namespace internal.Namespace, addonPlan internal.AddonPlan, resp *rls.InstallReleaseResponse) error {
+	rendered, err := svc.bindTemplateRenderer.Render(addonPlan.BindTemplate, resp)
 	if err != nil {
 		return errors.Wrap(err, "while rendering bind yaml template")
 	}
@@ -275,7 +275,7 @@ func getNamespaceFromContext(contextProfile map[string]interface{}) (internal.Na
 	return internal.Namespace(contextProfile["namespace"].(string)), nil
 }
 
-func createReleaseName(name internal.BundleName, planName internal.BundlePlanName, iID internal.InstanceID) internal.ReleaseName {
+func createReleaseName(name internal.AddonName, planName internal.AddonPlanName, iID internal.InstanceID) internal.ReleaseName {
 	maxLen := 53
 	relName := fmt.Sprintf("hb-%s-%s-%s", name, planName, iID)
 	if len(relName) <= maxLen {

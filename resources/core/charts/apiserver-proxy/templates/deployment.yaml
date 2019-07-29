@@ -22,7 +22,7 @@ spec:
       serviceAccountName: {{ template "name" . }}
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
-        - ip: {{ .Values.minikubeIP }}
+        - ip: {{ .Values.global.minikubeIP }}
           hostnames:
             - "dex.{{ .Values.global.ingress.domainName }}"
       {{ end }}
@@ -34,7 +34,7 @@ spec:
           limits:
             memory: 256Mi
           requests:
-            memory: 128Mi
+            memory: 96Mi
         {{ end }}
         imagePullPolicy: IfNotPresent
         args:

@@ -11,7 +11,7 @@ import (
 // Factory provides access to concrete storage.
 // Multiple calls should to specific storage return the same storage instance.
 type Factory interface {
-	Bundle() Bundle
+	Addon() Addon
 	Chart() Chart
 	Instance() Instance
 	InstanceOperation() InstanceOperation
@@ -36,8 +36,8 @@ const (
 	EntityAll EntityName = "all"
 	// EntityChart represents name of chart entities
 	EntityChart EntityName = "chart"
-	// EntityBundle represents name of bundle entities
-	EntityBundle EntityName = "bundle"
+	// EntityAddon represents name of addon entities
+	EntityAddon EntityName = "addon"
 	// EntityInstance represents name of services instances entities
 	EntityInstance EntityName = "instance"
 	// EntityInstanceOperation represents name of instances operations entities
@@ -87,7 +87,7 @@ func NewFactory(cl *ConfigList) (Factory, error) {
 	for _, cfg := range *cl {
 
 		var (
-			bundleFact            func() (Bundle, error)
+			addonFact             func() (Addon, error)
 			chartFact             func() (Chart, error)
 			instanceFact          func() (Instance, error)
 			instanceOperationFact func() (InstanceOperation, error)
@@ -96,8 +96,8 @@ func NewFactory(cl *ConfigList) (Factory, error) {
 
 		switch cfg.Driver {
 		case DriverMemory:
-			bundleFact = func() (Bundle, error) {
-				return memory.NewBundle(), nil
+			addonFact = func() (Addon, error) {
+				return memory.NewAddon(), nil
 			}
 			chartFact = func() (Chart, error) {
 				return memory.NewChart(), nil
@@ -119,8 +119,8 @@ func NewFactory(cl *ConfigList) (Factory, error) {
 				cli, _ = etcd.NewClient(cfg.Etcd)
 			}
 
-			bundleFact = func() (Bundle, error) {
-				return etcd.NewBundle(cli)
+			addonFact = func() (Addon, error) {
+				return etcd.NewAddon(cli)
 			}
 			chartFact = func() (Chart, error) {
 				return etcd.NewChart(cli)
@@ -142,8 +142,8 @@ func NewFactory(cl *ConfigList) (Factory, error) {
 			switch em {
 			case EntityChart:
 				fact.chart, _ = chartFact()
-			case EntityBundle:
-				fact.bundle, _ = bundleFact()
+			case EntityAddon:
+				fact.addon, _ = addonFact()
 			case EntityInstance:
 				fact.instance, _ = instanceFact()
 			case EntityInstanceOperation:
@@ -152,7 +152,7 @@ func NewFactory(cl *ConfigList) (Factory, error) {
 				fact.instanceBindData, _ = instanceBindDataFact()
 			case EntityAll:
 				fact.chart, _ = chartFact()
-				fact.bundle, _ = bundleFact()
+				fact.addon, _ = addonFact()
 				fact.instance, _ = instanceFact()
 				fact.instanceOperation, _ = instanceOperationFact()
 				fact.instanceBindData, _ = instanceBindDataFact()
@@ -165,15 +165,15 @@ func NewFactory(cl *ConfigList) (Factory, error) {
 }
 
 type concreteFactory struct {
-	bundle            Bundle
+	addon             Addon
 	chart             Chart
 	instance          Instance
 	instanceOperation InstanceOperation
 	instanceBindData  InstanceBindData
 }
 
-func (f *concreteFactory) Bundle() Bundle {
-	return f.bundle
+func (f *concreteFactory) Addon() Addon {
+	return f.addon
 }
 func (f *concreteFactory) Chart() Chart {
 	return f.chart

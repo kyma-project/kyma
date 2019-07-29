@@ -38,7 +38,7 @@ func main() {
 		Spec: v1alpha1.AddonsConfigurationSpec{
 			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 				Repositories: []v1alpha1.SpecRepository{
-					{URL: "https://github.com/kyma-project/bundles/releases/download/0.6.0/index.yaml"},
+					{URL: "https://github.com/kyma-project/addons/releases/download/0.6.0/index.yaml"},
 				},
 			},
 		},
@@ -59,7 +59,7 @@ func main() {
 		Spec: v1alpha1.ClusterAddonsConfigurationSpec{
 			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 				Repositories: []v1alpha1.SpecRepository{
-					{URL: "https://github.com/kyma-project/bundles/releases/download/0.6.0/index.yaml"},
+					{URL: "https://github.com/kyma-project/addons/releases/download/0.6.0/index.yaml"},
 				},
 			},
 		},

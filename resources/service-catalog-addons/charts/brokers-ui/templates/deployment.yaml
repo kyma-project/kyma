@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/brokers-ui:{{ .Chart.AppVersion }}"
+          image: "{{ .Values.global.containerRegistry.path }}{{ .Values.image.dir }}/brokers-ui:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}

@@ -15,8 +15,8 @@ spec:
     plural: cloudwatches
     singular: cloudwatch
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -37,8 +37,8 @@ spec:
     plural: dogstatsds
     singular: dogstatsd
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---
@@ -82,8 +82,8 @@ spec:
     plural: zipkins
     singular: zipkin
     categories:
-    - istio-io
-    - policy-istio-io
+      - istio-io
+      - policy-istio-io
   scope: Namespaced
   version: v1alpha2
 ---

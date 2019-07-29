@@ -13,7 +13,7 @@ import (
 )
 
 // be aware that after regenerating mocks, manual steps are required
-//go:generate mockery -name=bundleStorage -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=addonStorage -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=chartGetter -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=chartStorage -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=operationStorage -output=automock -outpkg=automock -case=underscore
@@ -27,15 +27,15 @@ import (
 //go:generate mockery -name=bindTemplateResolver -output=automock -outpkg=automock -case=underscore
 
 type (
-	bundleIDGetter interface {
-		GetByID(namespace internal.Namespace, id internal.BundleID) (*internal.Bundle, error)
+	addonIDGetter interface {
+		GetByID(namespace internal.Namespace, id internal.AddonID) (*internal.Addon, error)
 	}
-	bundleFinder interface {
-		FindAll(namespace internal.Namespace) ([]*internal.Bundle, error)
+	addonFinder interface {
+		FindAll(namespace internal.Namespace) ([]*internal.Addon, error)
 	}
-	bundleStorage interface {
-		bundleIDGetter
-		bundleFinder
+	addonStorage interface {
+		addonIDGetter
+		addonFinder
 	}
 
 	chartGetter interface {
@@ -130,7 +130,7 @@ type (
 	}
 
 	bindTemplateRenderer interface {
-		Render(bindTemplate internal.BundlePlanBindTemplate, resp *rls.InstallReleaseResponse) (bind.RenderedBindYAML, error)
+		Render(bindTemplate internal.AddonPlanBindTemplate, resp *rls.InstallReleaseResponse) (bind.RenderedBindYAML, error)
 	}
 
 	bindTemplateResolver interface {
@@ -139,8 +139,8 @@ type (
 )
 
 // New creates instance of broker.
-func New(bs bundleStorage, cs chartStorage, os operationStorage, is instanceStorage, ibd instanceBindDataStorage,
-	bindTmplRenderer bindTemplateRenderer, bindTmplResolver bindTemplateResolver, hc helmClient, syncer syncer, log *logrus.Entry) *Server {
+func New(bs addonStorage, cs chartStorage, os operationStorage, is instanceStorage, ibd instanceBindDataStorage,
+	bindTmplRenderer bindTemplateRenderer, bindTmplResolver bindTemplateResolver, hc helmClient, log *logrus.Entry) *Server {
 	idpRaw := idprovider.New()
 	idp := func() (internal.OperationID, error) {
 		idRaw, err := idpRaw()
@@ -150,19 +150,19 @@ func New(bs bundleStorage, cs chartStorage, os operationStorage, is instanceStor
 		return internal.OperationID(idRaw), nil
 	}
 
-	return newWithIDProvider(bs, cs, os, is, ibd, bindTmplRenderer, bindTmplResolver, hc, syncer, log, idp)
+	return newWithIDProvider(bs, cs, os, is, ibd, bindTmplRenderer, bindTmplResolver, hc, log, idp)
 }
 
-func newWithIDProvider(bs bundleStorage, cs chartStorage, os operationStorage, is instanceStorage, ibd instanceBindDataStorage,
-	bindTmplRenderer bindTemplateRenderer, bindTmplResolver bindTemplateResolver, hc helmClient, syncer syncer,
+func newWithIDProvider(bs addonStorage, cs chartStorage, os operationStorage, is instanceStorage, ibd instanceBindDataStorage,
+	bindTmplRenderer bindTemplateRenderer, bindTmplResolver bindTemplateResolver, hc helmClient,
 	log *logrus.Entry, idp func() (internal.OperationID, error)) *Server {
 	return &Server{
-		catalogGetter: newCatalogSyncerService(&catalogService{
+		catalogGetter: &catalogService{
 			finder: bs,
-			conv:   &bundleToServiceConverter{},
-		}, syncer),
+			conv:   &addonToServiceConverter{},
+		},
 		provisioner: &provisionService{
-			bundleIDGetter:   bs,
+			addonIDGetter:    bs,
 			chartGetter:      cs,
 			instanceInserter: is,
 			instanceGetter:   is,

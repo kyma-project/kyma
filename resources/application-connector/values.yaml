@@ -47,11 +47,11 @@ global:
     dir: develop/
     version: "36059183"
   application_gateway:
-    dir: develop/
-    version: ba297749
+    dir: pr/
+    version: PR-4546
   application_gateway_tests:
     dir: pr/
-    version: PR-4779
+    version: PR-4546
   application_registry:
     dir: pr/
     version: PR-4681

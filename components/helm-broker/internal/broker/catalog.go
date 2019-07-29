@@ -10,39 +10,39 @@ import (
 )
 
 type catalogService struct {
-	finder bundleFinder
+	finder addonFinder
 	conv   converter
 }
 
 //go:generate mockery -name=converter -output=automock -outpkg=automock -case=underscore
 type converter interface {
-	Convert(b *internal.Bundle) (osb.Service, error)
+	Convert(b *internal.Addon) (osb.Service, error)
 }
 
 // TODO: switch from osb.CatalogResponse to CatalogSuccessResponseDTO
 func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx OsbContext) (*osb.CatalogResponse, error) {
-	bundles, err := svc.finder.FindAll(osbCtx.BrokerNamespace)
+	addons, err := svc.finder.FindAll(osbCtx.BrokerNamespace)
 	if err != nil {
-		return nil, errors.Wrap(err, "while finding all bundles")
+		return nil, errors.Wrap(err, "while finding all addons")
 	}
 
 	resp := osb.CatalogResponse{}
-	resp.Services = make([]osb.Service, len(bundles))
-	for idx, b := range bundles {
+	resp.Services = make([]osb.Service, len(addons))
+	for idx, b := range addons {
 		s, err := svc.conv.Convert(b)
 		if err != nil {
-			return nil, errors.Wrap(err, "while converting bundle to service")
+			return nil, errors.Wrap(err, "while converting addon to service")
 		}
 		resp.Services[idx] = s
 	}
 	return &resp, nil
 }
 
-type bundleToServiceConverter struct{}
+type addonToServiceConverter struct{}
 
-func (f *bundleToServiceConverter) Convert(b *internal.Bundle) (osb.Service, error) {
+func (f *addonToServiceConverter) Convert(addon *internal.Addon) (osb.Service, error) {
 	var sPlans []osb.Plan
-	for _, bPlan := range b.Plans {
+	for _, bPlan := range addon.Plans {
 		sPlan := osb.Plan{
 			ID:          string(bPlan.ID),
 			Name:        string(bPlan.Name),
@@ -60,27 +60,27 @@ func (f *bundleToServiceConverter) Convert(b *internal.Bundle) (osb.Service, err
 	}
 
 	var sTags []string
-	for _, tag := range b.Tags {
+	for _, tag := range addon.Tags {
 		sTags = append(sTags, string(tag))
 	}
 
-	meta := f.applyOverridesOnBundleMetadata(b.Metadata)
+	meta := f.applyOverridesOnAddonMetadata(addon.Metadata)
 
 	return osb.Service{
-		ID:                  string(b.ID),
-		Name:                string(b.Name),
-		Description:         b.Description,
-		Bindable:            b.Bindable,
-		BindingsRetrievable: b.BindingsRetrievable,
-		Requires:            b.Requires,
-		PlanUpdatable:       b.PlanUpdatable,
+		ID:                  string(addon.ID),
+		Name:                string(addon.Name),
+		Description:         addon.Description,
+		Bindable:            addon.Bindable,
+		BindingsRetrievable: addon.BindingsRetrievable,
+		Requires:            addon.Requires,
+		PlanUpdatable:       addon.PlanUpdatable,
 		Plans:               sPlans,
 		Metadata:            meta.ToMap(),
 		Tags:                sTags,
 	}, nil
 }
 
-func (f *bundleToServiceConverter) mapToParametersSchemas(planSchemas map[internal.PlanSchemaType]internal.PlanSchema) *osb.Schemas {
+func (f *addonToServiceConverter) mapToParametersSchemas(planSchemas map[internal.PlanSchemaType]internal.PlanSchema) *osb.Schemas {
 	ensureServiceInstancesInit := func(in *osb.ServiceInstanceSchema) *osb.ServiceInstanceSchema {
 		if in == nil {
 			return &osb.ServiceInstanceSchema{}
@@ -115,13 +115,13 @@ func (f *bundleToServiceConverter) mapToParametersSchemas(planSchemas map[intern
 	return out
 }
 
-func (f *bundleToServiceConverter) applyOverridesOnBundleMetadata(m internal.BundleMetadata) internal.BundleMetadata {
+func (f *addonToServiceConverter) applyOverridesOnAddonMetadata(m internal.AddonMetadata) internal.AddonMetadata {
 	metaCopy := m.DeepCopy()
 
 	if metaCopy.Labels == nil {
 		metaCopy.Labels = map[string]string{}
 	}
-	// Business requirement that helm bundles are always treated as local
+	// Business requirement that helm addons are always treated as local
 	metaCopy.Labels["local"] = "true"
 	if m.ProvisionOnlyOnce {
 		metaCopy.Labels["provisionOnlyOnce"] = "true"

@@ -12,11 +12,11 @@ type BindTemplateRenderer struct {
 }
 
 // Render provides a mock function with given fields: bindTemplate, resp
-func (_m *BindTemplateRenderer) Render(bindTemplate internal.BundlePlanBindTemplate, resp *services.InstallReleaseResponse) (bind.RenderedBindYAML, error) {
+func (_m *BindTemplateRenderer) Render(bindTemplate internal.AddonPlanBindTemplate, resp *services.InstallReleaseResponse) (bind.RenderedBindYAML, error) {
 	ret := _m.Called(bindTemplate, resp)
 
 	var r0 bind.RenderedBindYAML
-	if rf, ok := ret.Get(0).(func(internal.BundlePlanBindTemplate, *services.InstallReleaseResponse) bind.RenderedBindYAML); ok {
+	if rf, ok := ret.Get(0).(func(internal.AddonPlanBindTemplate, *services.InstallReleaseResponse) bind.RenderedBindYAML); ok {
 		r0 = rf(bindTemplate, resp)
 	} else {
 		if ret.Get(0) != nil {
@@ -25,7 +25,7 @@ func (_m *BindTemplateRenderer) Render(bindTemplate internal.BundlePlanBindTempl
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(internal.BundlePlanBindTemplate, *services.InstallReleaseResponse) error); ok {
+	if rf, ok := ret.Get(1).(func(internal.AddonPlanBindTemplate, *services.InstallReleaseResponse) error); ok {
 		r1 = rf(bindTemplate, resp)
 	} else {
 		r1 = ret.Error(1)

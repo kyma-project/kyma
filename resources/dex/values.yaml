@@ -10,12 +10,21 @@ oidc:
   grafanaClientName: 'Grafana UI'
   jaegerClientId: jaeger
   jaegerClientName: 'Jaeger UI'
+  kialiClientId: kiali
+  kialiClientName: 'Kiali UI'
 
 dex:
   expiry:
     signingKeys: "720h"
     idTokens: "8h"
 
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 16Mi
 global:
   isLocalEnv: false
   gateway:

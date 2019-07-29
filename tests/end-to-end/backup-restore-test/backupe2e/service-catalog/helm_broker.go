@@ -79,10 +79,6 @@ func (t HelmBrokerTest) TestResources(namespace string) {
 	t.newFlow(namespace).testResources()
 }
 
-func (t HelmBrokerTest) DeleteResources(namespace string) {
-	t.newFlow(namespace).deleteResources()
-}
-
 func (t *HelmBrokerTest) newFlow(namespace string) *helmBrokerFlow {
 	return &helmBrokerFlow{
 		brokersFlow: brokersFlow{
@@ -127,21 +123,6 @@ func (f *helmBrokerFlow) testResources() {
 
 		// we create again RedisBindingUsage to restore it after the tests
 		f.createRedisBindingUsage,
-	} {
-		err := fn()
-		if err != nil {
-			f.logReport()
-		}
-		So(err, ShouldBeNil)
-	}
-}
-
-func (f *helmBrokerFlow) deleteResources() {
-	for _, fn := range []func() error{
-		f.deleteRedisBinding,
-		f.deleteRedisInstance,
-		f.verifyRedisInstanceRemoved,
-		f.removeHelmBrokerEtcd,
 	} {
 		err := fn()
 		if err != nil {
@@ -293,42 +274,6 @@ func (f *helmBrokerFlow) deleteRedisBindingUsage() error {
 }
 func (f *helmBrokerFlow) verifyDeploymentDoesNotContainRedisEnvs() error {
 	return f.waitForEnvNotInjected("REDIS_PASSWORD")
-}
-
-func (f *helmBrokerFlow) deleteRedisBinding() error {
-	return f.deleteServiceBinding(redisBindingName)
-}
-
-func (f *helmBrokerFlow) deleteRedisInstance() error {
-	return f.deleteServiceInstance(redisInstanceName)
-}
-
-// that is necessary to restore correctly the etcd data
-// works only for single-member etcd cluster
-func (f *helmBrokerFlow) removeHelmBrokerEtcd() error {
-	statefulSets := f.k8sInterface.AppsV1().StatefulSets(systemNsName)
-
-	etcd, err := statefulSets.Get(etcdName, metav1.GetOptions{})
-	if err != nil {
-		return errors.Wrap(err, "while getting HB etcd stateful set")
-	}
-	if etcd.Spec.Replicas == nil || *etcd.Spec.Replicas > 1 {
-		return errors.Errorf("etcd has many members")
-	}
-	if len(etcd.Spec.VolumeClaimTemplates) == 0 {
-		return errors.Errorf("etcd doesn't provide volumes")
-	}
-	if err := statefulSets.Delete(etcdName, &metav1.DeleteOptions{}); err != nil {
-		return errors.Wrapf(err, "while deleting etcd statefulset")
-	}
-
-	pvcName := fmt.Sprintf("%s-%s-0", etcd.Spec.VolumeClaimTemplates[0].Name, etcdName)
-
-	return f.k8sInterface.CoreV1().PersistentVolumeClaims(systemNsName).Delete(pvcName, &metav1.DeleteOptions{})
-}
-
-func (f *helmBrokerFlow) verifyRedisInstanceRemoved() error {
-	return f.waitForInstanceRemoved(redisInstanceName)
 }
 
 func (f *helmBrokerFlow) waitForRedisInstance() error {

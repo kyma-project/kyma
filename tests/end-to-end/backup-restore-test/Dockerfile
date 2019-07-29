@@ -18,7 +18,4 @@ COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/end-to-end/backup
 
 COPY entrypoint.sh /entrypoint.sh
 
-COPY build-temp/all-backup.yaml /all-backup.yaml
-COPY build-temp/system-backup.yaml /system-backup.yaml
-
 ENTRYPOINT [ "/entrypoint.sh" ]

@@ -8,15 +8,15 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
 
-// Bundle is an interface that describe storage layer operations for Bundles
-type Bundle interface {
-	Upsert(internal.Namespace, *internal.Bundle) (replace bool, err error)
-	Get(internal.Namespace, internal.BundleName, semver.Version) (*internal.Bundle, error)
-	GetByID(internal.Namespace, internal.BundleID) (*internal.Bundle, error)
-	Remove(internal.Namespace, internal.BundleName, semver.Version) error
-	RemoveByID(internal.Namespace, internal.BundleID) error
+// Addon is an interface that describe storage layer operations for Addons
+type Addon interface {
+	Upsert(internal.Namespace, *internal.Addon) (replace bool, err error)
+	Get(internal.Namespace, internal.AddonName, semver.Version) (*internal.Addon, error)
+	GetByID(internal.Namespace, internal.AddonID) (*internal.Addon, error)
+	Remove(internal.Namespace, internal.AddonName, semver.Version) error
+	RemoveByID(internal.Namespace, internal.AddonID) error
 	RemoveAll(internal.Namespace) error
-	FindAll(internal.Namespace) ([]*internal.Bundle, error)
+	FindAll(internal.Namespace) ([]*internal.Addon, error)
 }
 
 // Chart is an interface that describe storage layer operations for Charts

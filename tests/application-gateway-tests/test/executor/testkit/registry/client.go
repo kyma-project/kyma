@@ -43,8 +43,15 @@ func (arc *AppRegistryClient) CreateNotSecuredAPI(t *testing.T, targetURL string
 	return arc.createAPI(t, arc.baseAPI(targetURL))
 }
 
+func (arc *AppRegistryClient) CreateCSRFAndBasicSecuredAPI(t *testing.T, targetURL, username, password, csrfURL string) string {
+	api := arc.baseAPI(targetURL).WithBasicAndCSRFAuth(username, password, csrfURL)
+
+	return arc.createAPI(t, api)
+}
+
 func (arc *AppRegistryClient) CreateBasicAuthSecuredAPI(t *testing.T, targetURL, username, password string) string {
 	api := arc.baseAPI(targetURL).WithBasicAuth(username, password)
+
 	return arc.createAPI(t, api)
 }
 

@@ -9,9 +9,9 @@ import "github.com/coreos/etcd/clientv3"
 const (
 	entityNamespaceSeparator = "/"
 
-	entityNamespaceBundle          = "bundle"
-	entityNamespaceBundleMappingID = "id"
-	entityNamespaceBundleMappingNV = "nv"
+	entityNamespaceAddon          = "addon"
+	entityNamespaceAddonMappingID = "id"
+	entityNamespaceAddonMappingNV = "nv"
 
 	entityNamespaceChart             = "chart"
 	entityNamespaceInstance          = "instance/"

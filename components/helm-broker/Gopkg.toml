@@ -35,6 +35,16 @@ required= [
     "k8s.io/code-generator/cmd/openapi-gen",
 
     "sigs.k8s.io/controller-tools/cmd/controller-gen", # for crd/rbac generation
+
+    "github.com/emicklei/go-restful",
+    "sigs.k8s.io/controller-runtime/pkg/client/config",
+    "sigs.k8s.io/controller-runtime/pkg/controller",
+    "sigs.k8s.io/controller-runtime/pkg/handler",
+    "sigs.k8s.io/controller-runtime/pkg/manager",
+    "sigs.k8s.io/controller-runtime/pkg/runtime/signals",
+    "sigs.k8s.io/controller-runtime/pkg/source",
+    "sigs.k8s.io/testing_frameworks/integration", # for integration testing
+    "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
 ]
 
 [prune]
@@ -68,16 +78,16 @@ required= [
 
 [[constraint]]
   name = "k8s.io/helm"
-  # If you change that version be aware that you need to align it in the kyma/docs/helm-broker/03-05-bundles-validation.md
+  # If you change that version be aware that you need to align it in the kyma/docs/helm-broker/03-05-addons-validation.md
   version = "2.8.2"
 
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
-  version = "=v0.1.39"
+  version = "=v0.1.42"
 
 [[constraint]]
   name="sigs.k8s.io/controller-runtime"
-  version = "=v0.1.8"
+  version = "=v0.1.12"
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
@@ -99,17 +109,22 @@ required= [
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.12.3"
+  version = "kubernetes-1.13.4"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.12.3"
+  version = "kubernetes-1.13.4"
 
 [[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.12.3"
+  version = "kubernetes-1.13.4"
 
 [[override]]
   name = "k8s.io/code-generator"
   version = "kubernetes-1.12.3"
 
+# For dependency below: Refer to issue https://github.com/golang/dep/issues/1799
+[[override]]
+name = "gopkg.in/fsnotify.v1"
+source = "https://github.com/fsnotify/fsnotify.git"
+version="v1.4.7"

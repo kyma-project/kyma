@@ -113,6 +113,32 @@ func TestProxyService(t *testing.T) {
 		t.Log("Successfully accessed application")
 	})
 
+	t.Run("retry with new CSRF token for basic auth test", func(t *testing.T) {
+		username := "username"
+		password := "password"
+		csrfURL := fmt.Sprintf("%s%s", testSuit.GetMockServiceURL(), "/csrftoken")
+
+		apiID := client.CreateCSRFAndBasicSecuredAPI(t, testSuit.GetMockServiceURL(), username, password, csrfURL)
+		t.Logf("Created service with apiID: %s", apiID)
+		defer func() {
+			t.Logf("Cleaning up service %s", apiID)
+			client.CleanupService(t, apiID)
+		}()
+
+		t.Log("Labeling tests pod with denier label")
+		testSuit.AddDenierLabel(t, apiID)
+
+		t.Log("Calling Access Service with correct CSRF token")
+		resp := testSuit.CallAccessService(t, apiID, "target")
+		util.RequireStatus(t, http.StatusOK, resp)
+
+		t.Log("Calling Access Service with incorrect CSRF token and retry with the correct one")
+		resp = testSuit.CallAccessService(t, apiID, "target")
+		util.RequireStatus(t, http.StatusOK, resp)
+
+		t.Log("Successfully accessed application")
+	})
+
 	//Protected spec fetching tests
 	t.Run("basic auth spec url test", func(t *testing.T) {
 		userName := "myUser"

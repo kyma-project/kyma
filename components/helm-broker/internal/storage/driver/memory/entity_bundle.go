@@ -9,55 +9,55 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
 
-type bundleKey string
+type addonKey string
 
-// NewBundle creates new storage for Bundles
-func NewBundle() *Bundle {
-	return &Bundle{
-		ketToID: make(map[bundleKey]internal.BundleID),
-		storage: make(map[internal.Namespace]map[internal.BundleID]*internal.Bundle),
+// NewAddon creates new storage for Addons
+func NewAddon() *Addon {
+	return &Addon{
+		ketToID: make(map[addonKey]internal.AddonID),
+		storage: make(map[internal.Namespace]map[internal.AddonID]*internal.Addon),
 	}
 }
 
-// Bundle implements in-memory storage for Bundle entities.
-type Bundle struct {
+// Addon implements in-memory storage for Addon entities.
+type Addon struct {
 	threadSafeStorage
-	ketToID map[bundleKey]internal.BundleID
-	storage map[internal.Namespace]map[internal.BundleID]*internal.Bundle
+	ketToID map[addonKey]internal.AddonID
+	storage map[internal.Namespace]map[internal.AddonID]*internal.Addon
 }
 
 // Upsert persists object in storage.
 //
-// If bundle already exists in storage than full replace is performed.
+// If addon already exists in storage than full replace is performed.
 //
 // True is returned if object already existed in storage and was replaced.
-func (s *Bundle) Upsert(namespace internal.Namespace, b *internal.Bundle) (replaced bool, err error) {
+func (s *Addon) Upsert(namespace internal.Namespace, addon *internal.Addon) (replaced bool, err error) {
 	defer unlock(s.lockW())
 
-	if b == nil {
+	if addon == nil {
 		return replaced, errors.New("entity may not be nil")
 	}
 
-	nvk, err := s.keyFromBundle(namespace, b)
+	nvk, err := s.keyFromAddon(namespace, addon)
 	if err != nil {
 		return replaced, err
 	}
 	replaced = true
 
 	if _, found := s.ketToID[nvk]; !found {
-		s.ketToID[nvk] = b.ID
+		s.ketToID[nvk] = addon.ID
 		replaced = false
 	}
 
 	if _, exists := s.storage[namespace]; !exists {
-		s.storage[namespace] = make(map[internal.BundleID]*internal.Bundle)
+		s.storage[namespace] = make(map[internal.AddonID]*internal.Addon)
 	}
-	s.storage[namespace][b.ID] = b
+	s.storage[namespace][addon.ID] = addon
 	return replaced, nil
 }
 
 // Get returns object from storage.
-func (s *Bundle) Get(namespace internal.Namespace, name internal.BundleName, ver semver.Version) (*internal.Bundle, error) {
+func (s *Addon) Get(namespace internal.Namespace, name internal.AddonName, ver semver.Version) (*internal.Addon, error) {
 	defer unlock(s.lockR())
 
 	id, err := s.id(namespace, name, ver)
@@ -83,7 +83,7 @@ func (s *Bundle) Get(namespace internal.Namespace, name internal.BundleName, ver
 }
 
 // GetByID returns object by primary ID from storage.
-func (s *Bundle) GetByID(namespace internal.Namespace, id internal.BundleID) (*internal.Bundle, error) {
+func (s *Addon) GetByID(namespace internal.Namespace, id internal.AddonID) (*internal.Addon, error) {
 	defer unlock(s.lockR())
 
 	nsStorage, found := s.storage[namespace]
@@ -99,10 +99,10 @@ func (s *Bundle) GetByID(namespace internal.Namespace, id internal.BundleID) (*i
 }
 
 // FindAll returns all objects from storage for a given Namespace.
-func (s *Bundle) FindAll(namespace internal.Namespace) ([]*internal.Bundle, error) {
+func (s *Addon) FindAll(namespace internal.Namespace) ([]*internal.Addon, error) {
 	defer unlock(s.lockR())
 
-	out := []*internal.Bundle{}
+	out := []*internal.Addon{}
 	nsStorage, found := s.storage[namespace]
 	if !found {
 		return out, nil
@@ -116,7 +116,7 @@ func (s *Bundle) FindAll(namespace internal.Namespace) ([]*internal.Bundle, erro
 }
 
 // Remove removes object from storage.
-func (s *Bundle) Remove(namespace internal.Namespace, name internal.BundleName, ver semver.Version) error {
+func (s *Addon) Remove(namespace internal.Namespace, name internal.AddonName, ver semver.Version) error {
 	defer unlock(s.lockW())
 
 	id, err := s.id(namespace, name, ver)
@@ -128,27 +128,27 @@ func (s *Bundle) Remove(namespace internal.Namespace, name internal.BundleName, 
 }
 
 // RemoveByID is removing object by primary ID from storage.
-func (s *Bundle) RemoveByID(namespace internal.Namespace, id internal.BundleID) error {
+func (s *Addon) RemoveByID(namespace internal.Namespace, id internal.AddonID) error {
 	defer unlock(s.lockW())
 
 	return s.removeByID(namespace, id)
 }
 
-// RemoveAll removes all bundles from storage.
-func (s *Bundle) RemoveAll(namespace internal.Namespace) error {
-	bundles, err := s.FindAll(namespace)
+// RemoveAll removes all addons from storage.
+func (s *Addon) RemoveAll(namespace internal.Namespace) error {
+	addons, err := s.FindAll(namespace)
 	if err != nil {
-		return errors.Wrap(err, "while getting bundles")
+		return errors.Wrap(err, "while getting addons")
 	}
-	for _, bundle := range bundles {
-		if err := s.RemoveByID(namespace, bundle.ID); err != nil {
-			return errors.Wrapf(err, "while removing bundle with ID: %v", bundle.ID)
+	for _, addon := range addons {
+		if err := s.RemoveByID(namespace, addon.ID); err != nil {
+			return errors.Wrapf(err, "while removing addon with ID: %v", addon.ID)
 		}
 	}
 	return nil
 }
 
-func (s *Bundle) removeByID(namespace internal.Namespace, id internal.BundleID) error {
+func (s *Addon) removeByID(namespace internal.Namespace, id internal.AddonID) error {
 	nsStorage, found := s.storage[namespace]
 	if !found {
 		return notFoundError{}
@@ -165,7 +165,7 @@ func (s *Bundle) removeByID(namespace internal.Namespace, id internal.BundleID) 
 	return nil
 }
 
-func (s *Bundle) keyFromBundle(namespace internal.Namespace, b *internal.Bundle) (k bundleKey, err error) {
+func (s *Addon) keyFromAddon(namespace internal.Namespace, b *internal.Addon) (k addonKey, err error) {
 	if b == nil {
 		return k, errors.New("entity may not be nil")
 	}
@@ -177,15 +177,15 @@ func (s *Bundle) keyFromBundle(namespace internal.Namespace, b *internal.Bundle)
 	return s.key(namespace, b.Name, b.Version)
 }
 
-func (*Bundle) key(namespace internal.Namespace, name internal.BundleName, ver semver.Version) (k bundleKey, err error) {
+func (*Addon) key(namespace internal.Namespace, name internal.AddonName, ver semver.Version) (k addonKey, err error) {
 	if name == "" || ver.Original() == "" {
 		return k, errors.New("both name and version must be set")
 	}
 
-	return bundleKey(fmt.Sprintf("%s|%s|%s", namespace, name, ver.String())), nil
+	return addonKey(fmt.Sprintf("%s|%s|%s", namespace, name, ver.String())), nil
 }
 
-func (s *Bundle) id(namespace internal.Namespace, name internal.BundleName, ver semver.Version) (id internal.BundleID, err error) {
+func (s *Addon) id(namespace internal.Namespace, name internal.AddonName, ver semver.Version) (id internal.AddonID, err error) {
 	nvk, err := s.key(namespace, name, ver)
 	if err != nil {
 		return id, err
