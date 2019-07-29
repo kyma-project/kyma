@@ -11,29 +11,13 @@ type Service struct {
 	mock.Mock
 }
 
-// CreateApiResources provides a mock function with given fields: application, apiDefinition
-func (_m *Service) CreateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError {
-	ret := _m.Called(application, apiDefinition)
+// CreateApiResources provides a mock function with given fields: application, apiDefinition, spec
+func (_m *Service) CreateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service, spec []byte) apperrors.AppError {
+	ret := _m.Called(application, apiDefinition, spec)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(v1alpha1.Application, v1alpha1.Service) apperrors.AppError); ok {
-		r0 = rf(application, apiDefinition)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(apperrors.AppError)
-		}
-	}
-
-	return r0
-}
-
-// CreateSecrets provides a mock function with given fields: application, apiDefinition
-func (_m *Service) CreateSecrets(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError {
-	ret := _m.Called(application, apiDefinition)
-
-	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(v1alpha1.Application, v1alpha1.Service) apperrors.AppError); ok {
-		r0 = rf(application, apiDefinition)
+	if rf, ok := ret.Get(0).(func(v1alpha1.Application, v1alpha1.Service, []byte) apperrors.AppError); ok {
+		r0 = rf(application, apiDefinition, spec)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)
@@ -59,45 +43,13 @@ func (_m *Service) DeleteApiResources(application v1alpha1.Application, apiDefin
 	return r0
 }
 
-// DeleteSecrets provides a mock function with given fields: application, apiDefinition
-func (_m *Service) DeleteSecrets(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError {
-	ret := _m.Called(application, apiDefinition)
+// UpdateApiResources provides a mock function with given fields: application, apiDefinition, spec
+func (_m *Service) UpdateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service, spec []byte) apperrors.AppError {
+	ret := _m.Called(application, apiDefinition, spec)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(v1alpha1.Application, v1alpha1.Service) apperrors.AppError); ok {
-		r0 = rf(application, apiDefinition)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(apperrors.AppError)
-		}
-	}
-
-	return r0
-}
-
-// UpdateApiResources provides a mock function with given fields: application, apiDefinition
-func (_m *Service) UpdateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError {
-	ret := _m.Called(application, apiDefinition)
-
-	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(v1alpha1.Application, v1alpha1.Service) apperrors.AppError); ok {
-		r0 = rf(application, apiDefinition)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(apperrors.AppError)
-		}
-	}
-
-	return r0
-}
-
-// UpdateSecrets provides a mock function with given fields: application, apiDefinition
-func (_m *Service) UpdateSecrets(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError {
-	ret := _m.Called(application, apiDefinition)
-
-	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(v1alpha1.Application, v1alpha1.Service) apperrors.AppError); ok {
-		r0 = rf(application, apiDefinition)
+	if rf, ok := ret.Get(0).(func(v1alpha1.Application, v1alpha1.Service, []byte) apperrors.AppError); ok {
+		r0 = rf(application, apiDefinition, spec)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)

@@ -15,6 +15,16 @@ func ServiceExists(id string, application v1alpha1.Application) bool {
 	return getServiceIndex(id, application) != -1
 }
 
+func GetService(id string, application v1alpha1.Application) v1alpha1.Service {
+	for _, service := range application.Spec.Services {
+		if service.ID == id {
+			return service
+		}
+	}
+
+	return v1alpha1.Service{}
+}
+
 func getServiceIndex(id string, application v1alpha1.Application) int {
 	for i, service := range application.Spec.Services {
 		if service.ID == id {
@@ -25,12 +35,12 @@ func getServiceIndex(id string, application v1alpha1.Application) int {
 	return -1
 }
 
-func ApplicationExists(applicationName string, applicationList *v1alpha1.ApplicationList) bool {
+func ApplicationExists(applicationName string, applicationList []v1alpha1.Application) bool {
 	if applicationList == nil {
 		return false
 	}
 
-	for _, runtimeApplication := range applicationList.Items {
+	for _, runtimeApplication := range applicationList {
 		if runtimeApplication.Name == applicationName {
 			return true
 		}

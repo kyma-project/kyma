@@ -13,14 +13,9 @@ type ApiIDToSecretNameMap map[string]string
 
 //go:generate mockery -name=Service
 type Service interface {
-	CreateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
-	CreateSecrets(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
-
-	UpdateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
-	UpdateSecrets(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
-
+	CreateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service, spec []byte) apperrors.AppError
+	UpdateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service, spec []byte) apperrors.AppError
 	DeleteApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
-	DeleteSecrets(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
 }
 
 //go:generate mockery -name=AssetStore
