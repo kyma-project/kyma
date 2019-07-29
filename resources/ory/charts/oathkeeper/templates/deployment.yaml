@@ -43,8 +43,10 @@ spec:
             - name: MUTATORS_ID_TOKEN_JWKS_URL
               value: "file:///etc/secrets/mutator.id_token.jwks.json"
             {{- end }}
+            {{- if not .Values.demo }}
             - name: ACCESS_RULES_REPOSITORIES
               value: file://{{ .Values.ruleFile.dir }}/{{ .Values.ruleFile.name }}
+            {{- end }}
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-config-volume
               mountPath: /etc/config
