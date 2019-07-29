@@ -356,9 +356,6 @@
 # The failery directory
 /tools/failery/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
 
-# The tools/velero-plugins directory
-/tools/velero-plugins/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
-
 # The tools/kyma-installer directory
 /tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
 
