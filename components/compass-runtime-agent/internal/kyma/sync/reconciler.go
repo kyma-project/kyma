@@ -20,6 +20,7 @@ const (
 	Delete
 )
 
+//go:generate mockery -name=Reconciler
 type Reconciler interface {
 	Do(applications []model.Application) ([]ApplicationAction, apperrors.AppError)
 }

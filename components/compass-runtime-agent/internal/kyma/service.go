@@ -2,6 +2,7 @@ package kyma
 
 import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/sync"
@@ -22,7 +23,7 @@ type service struct {
 	reconciler            sync.Reconciler
 	applicationRepository applications.Manager
 	converter             applications.Converter
-	resourcesService      ResourcesService
+	resourcesService      apiresources.Service
 }
 
 type Result struct {
@@ -33,21 +34,7 @@ type Result struct {
 
 type ApiIDToSecretNameMap map[string]string
 
-type ResourcesService interface {
-	CreateApiResources(application model.Application, apiDefinition model.APIDefinition) apperrors.AppError
-	CreateEventApiResources(application model.Application, eventApiDefinition model.EventAPIDefinition) apperrors.AppError
-	CreateSecrets(application model.Application, apiDefinition model.APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
-
-	UpdateApiResources(application model.Application, apiDefinition model.APIDefinition) apperrors.AppError
-	UpdateEventApiResources(application model.Application, eventApiDefinition model.EventAPIDefinition) apperrors.AppError
-	UpdateSecrets(application model.Application, apiDefinition model.APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
-
-	DeleteApiResources(application model.Application, apiDefinition model.APIDefinition) apperrors.AppError
-	DeleteEventApiResources(application model.Application, eventApiDefinition model.EventAPIDefinition) apperrors.AppError
-	DeleteSecrets(application model.Application, apiDefinition model.APIDefinition) apperrors.AppError
-}
-
-func NewService(reconciler sync.Reconciler, applicationRepository applications.Manager, converter applications.Converter, resourcesService ResourcesService) Service {
+func NewService(reconciler sync.Reconciler, applicationRepository applications.Manager, converter applications.Converter, resourcesService apiresources.Service) Service {
 	return &service{
 		reconciler:            reconciler,
 		applicationRepository: applicationRepository,
@@ -211,15 +198,15 @@ func (s *service) applyApiSecrets(application model.Application, APIActions []sy
 	for _, apiAction := range APIActions {
 		switch apiAction.Operation {
 		case sync.Create:
-			credSecretNames, paramsSecretNames, e := s.resourcesService.CreateSecrets(application, apiAction.API)
-			appendMap(credentials, credSecretNames)
-			appendMap(params, paramsSecretNames)
-			err = appendError(err, e)
+			e := s.resourcesService.CreateSecrets(application, apiAction.API)
+			if err != nil {
+				err = appendError(err, e)
+			}
 		case sync.Update:
-			secretNames, paramsSecretNames, e := s.resourcesService.UpdateSecrets(application, apiAction.API)
-			appendMap(credentials, secretNames)
-			appendMap(params, paramsSecretNames)
-			err = appendError(err, e)
+			e := s.resourcesService.UpdateSecrets(application, apiAction.API)
+			if err != nil {
+				err = appendError(err, e)
+			}
 		case sync.Delete:
 			e := s.resourcesService.DeleteSecrets(application, apiAction.API)
 			err = appendError(err, e)
@@ -227,12 +214,6 @@ func (s *service) applyApiSecrets(application model.Application, APIActions []sy
 	}
 
 	return credentials, params, err
-}
-
-func appendMap(target map[string]string, source map[string]string) {
-	for key, value := range source {
-		target[key] = value
-	}
 }
 
 func newResult(application model.Application, operation sync.Operation, appError apperrors.AppError) Result {

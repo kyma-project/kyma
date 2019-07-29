@@ -17,6 +17,7 @@ const (
 	CredentialsBasicType = "Basic"
 )
 
+//go:generate mockery -name=Converter
 type Converter interface {
 	Do(application model.Application) v1alpha1.Application
 }

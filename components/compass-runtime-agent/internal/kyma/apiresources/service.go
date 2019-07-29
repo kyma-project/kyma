@@ -11,15 +11,15 @@ import (
 
 type ApiIDToSecretNameMap map[string]string
 
-//go:generate mockery -name=ResourcesService
-type ResourcesService interface {
+//go:generate mockery -name=Service
+type Service interface {
 	CreateApiResources(application syncmodel.Application, apiDefinition syncmodel.APIDefinition) apperrors.AppError
 	CreateEventApiResources(application syncmodel.Application, eventApiDefinition syncmodel.EventAPIDefinition) apperrors.AppError
-	CreateSecrets(application syncmodel.Application, apiDefinition syncmodel.APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
+	CreateSecrets(application syncmodel.Application, apiDefinition syncmodel.APIDefinition) apperrors.AppError
 
 	UpdateApiResources(application syncmodel.Application, apiDefinition syncmodel.APIDefinition) apperrors.AppError
 	UpdateEventApiResources(application syncmodel.Application, eventApiDefinition syncmodel.EventAPIDefinition) apperrors.AppError
-	UpdateSecrets(application syncmodel.Application, apiDefinition syncmodel.APIDefinition) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError)
+	UpdateSecrets(application syncmodel.Application, apiDefinition syncmodel.APIDefinition) apperrors.AppError
 
 	DeleteApiResources(application syncmodel.Application, apiDefinition syncmodel.APIDefinition) apperrors.AppError
 	DeleteEventApiResources(application syncmodel.Application, eventApiDefinition syncmodel.EventAPIDefinition) apperrors.AppError
