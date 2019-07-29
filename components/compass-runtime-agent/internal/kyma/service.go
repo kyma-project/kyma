@@ -153,7 +153,48 @@ func getEventSpec(eventApiSpec *model.EventAPISpec) []byte {
 
 func (s *service) deleteApplications(currentApplications []v1alpha1.Application, directorApplications []model.Application) []Result {
 
-	return nil
+	results := make([]Result, 0)
+
+	for _, runtimeApplication := range currentApplications {
+		found := false
+		for _, directorApp := range directorApplications {
+			if directorApp.ID == runtimeApplication.Name {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			results = append(results, s.deleteApplication(runtimeApplication))
+		}
+	}
+	return results
+}
+
+func (s *service) deleteApplication(runtimeApplication v1alpha1.Application) Result {
+	err := s.deleteAPIResources(runtimeApplication)
+
+	e := s.applicationRepository.Delete(runtimeApplication.Name, &v1.DeleteOptions{})
+	if e != nil {
+		err = appendError(err, apperrors.Internal("Failed to create application: %s", e))
+	}
+
+	return newResult(runtimeApplication, Delete, err)
+}
+
+func (s *service) deleteAPIResources(runtimeApplication v1alpha1.Application) apperrors.AppError {
+	var err apperrors.AppError
+
+	for _, runtimeService := range runtimeApplication.Spec.Services {
+		service := applications.GetService(runtimeService.ID, runtimeApplication)
+
+		e := s.resourcesService.DeleteApiResources(runtimeApplication, service)
+		if e != nil {
+			err = appendError(err, e)
+		}
+	}
+
+	return err
 }
 
 func (s *service) updateApplications(currentApplications []v1alpha1.Application, directorApplications []model.Application) []Result {

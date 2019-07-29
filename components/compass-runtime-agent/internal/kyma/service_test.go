@@ -27,33 +27,17 @@ func TestService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
-		api := model.APIDefinition{
-			ID:          "API1",
-			Description: "API",
-			TargetUrl:   "www.examle.com",
-			APISpec: &model.APISpec{
-				Data: []byte("spec"),
-			},
-		}
+		api := getTestDirectorAPiDefinition("API1")
 
 		eventAPI := model.EventAPIDefinition{
-			ID:          "eventApi1",
+			ID:          "EventAPI1",
 			Description: "Event API 1",
 		}
 
-		directorApplication := model.Application{
-			ID:   "id1",
-			Name: "First App",
-			APIs: []model.APIDefinition{
-				api,
-			},
-			EventAPIs: []model.EventAPIDefinition{
-				eventAPI,
-			},
-		}
+		directorApplication := getTestDirectorApplication("id1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
 
 		runtimeService1 := getTestServiceWithApi("API1")
-		runtimeService2 := getTestServiceWithApi("eventApi1")
+		runtimeService2 := getTestServiceWithApi("EventAPI1")
 
 		runtimeApplication := getTestApplication("id1", []v1alpha1.Service{runtimeService1, runtimeService2})
 
@@ -62,9 +46,7 @@ func TestService(t *testing.T) {
 		}
 
 		existingRuntimeApplications := v1alpha1.ApplicationList{
-			Items: []v1alpha1.Application{
-				getTestApplication("id2", []v1alpha1.Service{}),
-			},
+			Items: []v1alpha1.Application{},
 		}
 
 		converterMock.On("Do", directorApplication).Return(runtimeApplication)
@@ -98,8 +80,70 @@ func TestService(t *testing.T) {
 	})
 
 	t.Run("should apply Delete operation", func(t *testing.T) {
+		// given
+		applicationsManagerMock := &appMocks.Manager{}
+		converterMock := &appMocks.Converter{}
+		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
+		runtimeService := getTestServiceWithApi("API1")
+		runtimeApplication := getTestApplication("id1", []v1alpha1.Service{runtimeService})
+
+		existingRuntimeApplications := v1alpha1.ApplicationList{
+			Items: []v1alpha1.Application{
+				runtimeApplication,
+			},
+		}
+
+		applicationsManagerMock.On("Delete", runtimeApplication.Name, &metav1.DeleteOptions{}).Return(nil)
+		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
+		resourcesServiceMocks.On("DeleteApiResources", runtimeApplication, runtimeService).Return(nil)
+
+		expectedResult := []Result{
+			{
+				ApplicationID: "id1",
+				Operation:     Delete,
+				Error:         nil,
+			},
+		}
+
+		// when
+		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		result, err := kymaService.Apply([]model.Application{})
+
+		// then
+		assert.NoError(t, err)
+		assert.Equal(t, expectedResult, result)
+		converterMock.AssertExpectations(t)
+		applicationsManagerMock.AssertExpectations(t)
+		resourcesServiceMocks.AssertExpectations(t)
 	})
+}
+
+func getTestDirectorApplication(id string, apiDefinitions []model.APIDefinition, eventApiDefinitions []model.EventAPIDefinition) model.Application {
+	return model.Application{
+		ID:        id,
+		Name:      "First App",
+		APIs:      apiDefinitions,
+		EventAPIs: eventApiDefinitions,
+	}
+}
+
+func getTestDirectorAPiDefinition(id string) model.APIDefinition {
+	return model.APIDefinition{
+		ID:          id,
+		Description: "API",
+		TargetUrl:   "www.examle.com",
+		APISpec: &model.APISpec{
+			Data: []byte("spec"),
+		},
+	}
+}
+
+func getTestDirectorEventAPIDefinition(id string) model.EventAPIDefinition {
+	return model.EventAPIDefinition{
+		ID:          id,
+		Description: "Event API 1",
+	}
 }
 
 func getTestServiceWithApi(serviceID string) v1alpha1.Service {
