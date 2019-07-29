@@ -8,5 +8,5 @@ metadata:
   labels:
 {{ include "oathkeeper.labels" . | indent 4 }}
 data:
-  {{ .Values.ruleFile.name }}: "[]"
+  {{ .Values.ruleFile.name }}: {{ .Values.oathkeeper.accessRules | default "[]" | quote }}
 
