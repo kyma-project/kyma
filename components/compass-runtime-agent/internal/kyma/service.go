@@ -47,8 +47,6 @@ func (s *service) Apply(applications []model.Application) ([]Result, apperrors.A
 
 	logrus.Info("Application passed to Sync service: ", len(applications))
 
-	return nil, nil
-
 	actions, err := s.reconciler.Do(applications)
 	if err != nil {
 		return nil, err
@@ -87,14 +85,29 @@ func (s *service) apply(action sync.ApplicationAction) Result {
 func (s *service) applyCreateOperation(application model.Application, apiActions []sync.APIAction, eventAPIActions []sync.EventAPIAction) apperrors.AppError {
 
 	var err apperrors.AppError
-	s.applyApiAndEventActions(application, apiActions, eventAPIActions)
-
 	newApp := s.converter.Do(application)
 
-	{
-		_, e := s.applicationRepository.Create(&newApp)
+	_, e := s.applicationRepository.Create(&newApp)
+	if e != nil {
+		err = appendError(err, apperrors.Internal("Failed to create Application: %s", e))
+	}
+
+	for _, apiDefinition := range application.APIs {
+		e := s.resourcesService.CreateApiResources(application, apiDefinition)
+		if err != nil {
+			err = appendError(err, e)
+		}
+
+		e = s.resourcesService.CreateSecrets(application, apiDefinition)
+		if err != nil {
+			err = appendError(err, e)
+		}
+	}
+
+	for _, eventApiDefinition := range application.EventAPIs {
+		e := s.resourcesService.CreateEventApiResources(application, eventApiDefinition)
 		if e != nil {
-			err = appendError(err, apperrors.Internal("Failed to create Application: %s", e))
+			err = appendError(err, e)
 		}
 	}
 

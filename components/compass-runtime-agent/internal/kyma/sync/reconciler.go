@@ -57,7 +57,7 @@ func (r reconciler) Do(directorApplications []model.Application) ([]ApplicationA
 		apperrors.Internal("Failed tp get applications list: %s", err)
 	}
 
-	new := r.getNew(directorApplications, existingApplications)
+	new := r.getNewApps(directorApplications, existingApplications)
 	deleted := r.getDeleted(directorApplications, existingApplications)
 	updated := r.getUpdated(directorApplications, existingApplications)
 
@@ -68,35 +68,56 @@ func (r reconciler) Do(directorApplications []model.Application) ([]ApplicationA
 	return actions, nil
 }
 
-func (r reconciler) getNew(directorApplications []model.Application, runtimeApplications *v1alpha1.ApplicationList) []ApplicationAction {
+func (r reconciler) getNewApps(directorApplications []model.Application, runtimeApplications *v1alpha1.ApplicationList) []ApplicationAction {
 
 	actions := make([]ApplicationAction, 0)
 
-	find := func(applicationName string) bool {
-		if runtimeApplications == nil {
-			return false
-		}
-
-		for _, runtimeApplication := range runtimeApplications.Items {
-			if runtimeApplication.Name == applicationName {
-				return true
-			}
-		}
-
-		return false
-	}
-
 	for _, directorApp := range directorApplications {
-		found := find(directorApp.Name)
-		if found {
+		found := applications.ApplicationExists(directorApp.Name, runtimeApplications)
+		if !found {
 			actions = append(actions, ApplicationAction{
-				Operation:   Create,
-				Application: directorApp,
+				Operation:       Create,
+				Application:     directorApp,
+				APIActions:      r.getNewApis(directorApp.APIs, v1alpha1.Application{}),
+				EventAPIActions: r.getNewEventApis(directorApp.EventAPIs, v1alpha1.Application{}),
 			})
 		}
 	}
 
-	return nil
+	return actions
+}
+
+func (r reconciler) getNewApis(directorAPIs []model.APIDefinition, application v1alpha1.Application) []APIAction {
+
+	actions := make([]APIAction, 0)
+
+	for _, directorAPI := range directorAPIs {
+		found := applications.ServiceExists(directorAPI.ID, application)
+		if !found {
+			actions = append(actions, APIAction{
+				Operation: Create,
+				API:       directorAPI,
+			})
+		}
+	}
+
+	return actions
+}
+
+func (r reconciler) getNewEventApis(directorEventAPIs []model.EventAPIDefinition, application v1alpha1.Application) []EventAPIAction {
+	actions := make([]EventAPIAction, 0)
+
+	for _, directorEventAPI := range directorEventAPIs {
+		found := applications.ServiceExists(directorEventAPI.ID, application)
+		if !found {
+			actions = append(actions, EventAPIAction{
+				Operation: Create,
+				EventAPI:  directorEventAPI,
+			})
+		}
+	}
+
+	return actions
 }
 
 func (r reconciler) getDeleted(directorApplications []model.Application, runtimeApplications *v1alpha1.ApplicationList) []ApplicationAction {
