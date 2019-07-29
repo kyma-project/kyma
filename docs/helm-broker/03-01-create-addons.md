@@ -28,7 +28,8 @@ sample-addon/
 ```
 
 > **NOTE:** All file names in an addon repository are case-sensitive.
-> **NOTE:** Maximum size of an single Addon cannot exceed 2GB - this limit is set in the Helm Broker chart.
+
+>**NOTE:** The maximum size of a single addon cannot exceed 2GB. This limit is set in the [Helm Broker chart](https://kyma-project.io/docs/components/helm-broker/#configuration-helm-broker-chart).
 
 For details about particular files, read the following sections.
 
