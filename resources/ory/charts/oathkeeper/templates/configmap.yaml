@@ -8,10 +8,6 @@ metadata:
   labels:
 {{ include "oathkeeper.labels" . | indent 4 }}
 data:
-{{- if .Values.oathkeeper.accessRules}}
-  "access-rules.json": |
-    {{- .Values.oathkeeper.accessRules | nindent 4 }}
-{{- end}}
   "config.yaml": |
 {{- if .Values.demo }}
     access_rules:
