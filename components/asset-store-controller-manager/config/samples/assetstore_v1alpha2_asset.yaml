@@ -9,11 +9,13 @@ spec:
   bucketRef:
     name: test-sample
   source:
-    url: https://github.com/kyma-project/kyma/archive/0.8.1.zip
-    filter: /docs/service-catalog/docs/
-    mode: package
-    metadataWebhookService:
-    - name: assetstore-asset-metadata-service
+    url: https://raw.githubusercontent.com/asyncapi/converter/master/test/input/1.0.0/streetlights.yml
+    mode: single
+    mutationWebhookService:
+    - name: test
       namespace: kyma-system
-      endpoint: /v1/extract
-      filter: .md$
+      endpoint: /v1/convert
+    validationWebhookService:
+    - name: test
+      namespace: kyma-system
+      endpoint: /v1/validate
