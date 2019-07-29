@@ -47,7 +47,7 @@ global:
     version: 8a10f0ed
   kubeless_integration_tests:
     dir: pr/tests/
-    version: "PR-5044"
+    version: PR-5044
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc

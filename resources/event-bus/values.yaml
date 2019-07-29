@@ -54,5 +54,5 @@ global:
   eventBusVersion: "0.2.34"
   isLocalEnv: false
 e2eTests:
-  nameTester: "test-event-bus-tester"
-  nameSubscriber: "test-event-bus-subscriber"
+  nameTester: test-event-bus-tester
+  nameSubscriber: test-event-bus-subscriber
