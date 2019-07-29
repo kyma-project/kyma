@@ -206,7 +206,7 @@ function printImagesWithLatestTag() {
 TESTING_ADDONS_CFG_NAME="testing-addons"
 
 # That function is deprecated and will be deleted after 1.4 release. Used only in the upgrade plan.
-function injectTestingBundles() {
+function deprecatedInjectTestingAddons() {
     kubectl create configmap ${TESTING_ADDONS_CFG_NAME} -n kyma-system --from-literal=URLs=https://github.com/kyma-project/addons/releases/download/latest/index-testing.yaml
     kubectl label configmap ${TESTING_ADDONS_CFG_NAME} -n kyma-system helm-broker-repo=true
 
