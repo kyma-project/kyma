@@ -11,11 +11,11 @@ import (
 
 // AddonController is a wraper for Addon element with extra fields like URL, bunlde or charts
 type AddonController struct {
-	ID     string
-	URL    string
-	Addon  v1alpha1.Addon
-	Bundle *internal.Addon
-	Charts []*chart.Chart
+	ID            string
+	URL           string
+	Addon         v1alpha1.Addon
+	CompleteAddon *internal.Addon
+	Charts        []*chart.Chart
 }
 
 // NewAddon returns pointer to new AddonController based on name, version and url
@@ -35,7 +35,7 @@ func (a *AddonController) IsReady() bool {
 	return a.Addon.Status == v1alpha1.AddonStatusReady
 }
 
-// IsComplete informs AddonController has no fetching/loading error, what means own ID (from bundle)
+// IsComplete informs AddonController has no fetching/loading error, what means own ID (from addon)
 func (a *AddonController) IsComplete() bool {
 	return a.ID != ""
 }

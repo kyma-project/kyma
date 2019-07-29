@@ -43,15 +43,15 @@ func SetupAndStartController(cfg *rest.Config, ctrCfg *config.ControllerConfig, 
 	brokerSyncer := broker.NewServiceBrokerSyncer(mgr.GetClient(), ctrCfg.ClusterServiceBrokerName, lg)
 	sbFacade := broker.NewBrokersFacade(mgr.GetClient(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, lg)
 	csbFacade := broker.NewClusterBrokersFacade(mgr.GetClient(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, ctrCfg.ClusterServiceBrokerName, lg)
-	bundleProvider := addon.NewProvider(addon.NewHTTPRepository(), addon.NewLoader(ctrCfg.TmpDir, lg), lg)
+	addonProvider := addon.NewProvider(addon.NewHTTPRepository(), addon.NewLoader(ctrCfg.TmpDir, lg), lg)
 
 	lg.Info("Setting up controller")
-	acReconcile := NewReconcileAddonsConfiguration(mgr, bundleProvider, sFact.Chart(), sFact.Addon(), sbFacade, docsProvider, brokerSyncer, ctrCfg.DevelopMode)
+	acReconcile := NewReconcileAddonsConfiguration(mgr, addonProvider, sFact.Chart(), sFact.Addon(), sbFacade, docsProvider, brokerSyncer, ctrCfg.DevelopMode)
 	acController := NewAddonsConfigurationController(acReconcile)
 	err := acController.Start(mgr)
 	fatalOnError(err, "unable to start AddonsConfigurationController")
 
-	cacReconcile := NewReconcileClusterAddonsConfiguration(mgr, bundleProvider, sFact.Chart(), sFact.Addon(), csbFacade, docsProvider, brokerSyncer, ctrCfg.DevelopMode)
+	cacReconcile := NewReconcileClusterAddonsConfiguration(mgr, addonProvider, sFact.Chart(), sFact.Addon(), csbFacade, docsProvider, brokerSyncer, ctrCfg.DevelopMode)
 	cacController := NewClusterAddonsConfigurationController(cacReconcile)
 	err = cacController.Start(mgr)
 	fatalOnError(err, "unable to start ClusterAddonsConfigurationController")

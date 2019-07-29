@@ -34,11 +34,11 @@ func TestReconcileClusterAddonsConfiguration_AddAddonsProcess(t *testing.T) {
 	indexDTO := fixIndexDTO()
 
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
-	for _, entry := range indexDTO.Entries {
+	for entryName, entry := range indexDTO.Entries {
 		for _, e := range entry {
 			completeAddon := fixAddonWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
 
-			ts.bp.On("LoadCompleteAddon", e).
+			ts.bp.On("LoadCompleteAddon", e, entryName).
 				Return(completeAddon, nil)
 
 			ts.addonStorage.On("Upsert", internal.ClusterWide, completeAddon.Addon).
@@ -74,11 +74,11 @@ func TestReconcileClusterAddonsConfiguration_AddAddonsProcess_Error(t *testing.T
 
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
 
-	for _, entry := range indexDTO.Entries {
+	for entryName, entry := range indexDTO.Entries {
 		for _, e := range entry {
 			completeAddon := fixAddonWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
 
-			ts.bp.On("LoadCompleteAddon", e).
+			ts.bp.On("LoadCompleteAddon", e, entryName).
 				Return(completeAddon, nil)
 
 			ts.addonStorage.On("Upsert", internal.ClusterWide, completeAddon.Addon).
@@ -115,11 +115,11 @@ func TestReconcileClusterAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
 	indexDTO := fixIndexDTO()
 
 	ts.bp.On("GetIndex", fixAddonsCfg.Spec.Repositories[0].URL).Return(indexDTO, nil)
-	for _, entry := range indexDTO.Entries {
+	for entryName, entry := range indexDTO.Entries {
 		for _, e := range entry {
 			completeAddon := fixAddonWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
 
-			ts.bp.On("LoadCompleteAddon", e).Return(completeAddon, nil)
+			ts.bp.On("LoadCompleteAddon", e, entryName).Return(completeAddon, nil)
 
 			ts.addonStorage.On("Upsert", internal.ClusterWide, completeAddon.Addon).
 				Return(false, nil)
@@ -146,7 +146,7 @@ func TestReconcileClusterAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
 	assert.Equal(t, res.Status.ObservedGeneration, int64(2))
 }
 
-func TestReconcileClusterAddonsConfiguration_UpdateAddonsProcess_ConflictingBundles(t *testing.T) {
+func TestReconcileClusterAddonsConfiguration_UpdateAddonsProcess_ConflictingAddons(t *testing.T) {
 	// GIVEN
 	fixAddonsCfg := fixClusterAddonsConfiguration()
 	fixAddonsCfg.Generation = 2
@@ -158,7 +158,7 @@ func TestReconcileClusterAddonsConfiguration_UpdateAddonsProcess_ConflictingBund
 	for _, entry := range indexDTO.Entries {
 		for _, e := range entry {
 			completeAddon := fixAddonWithDocsURL(string(e.Name), string(e.Name), "example.com", "example.com")
-			ts.bp.On("LoadCompleteAddon", e).Return(completeAddon, nil)
+			ts.bp.On("LoadCompleteAddon", e, e.Name).Return(completeAddon, nil)
 		}
 	}
 	defer ts.assertExpectations()
@@ -182,15 +182,15 @@ func TestReconcileClusterAddonsConfiguration_DeleteAddonsProcess(t *testing.T) {
 	// GIVEN
 	fixAddonsCfg := fixDeletedClusterAddonsConfiguration()
 	fixAddon := fixAddonWithEmptyDocs("id", fixAddonsCfg.Status.Repositories[0].Addons[0].Name, "example.com").Addon
-	bundleVer := *semver.MustParse(fixAddonsCfg.Status.Repositories[0].Addons[0].Version)
+	addonVer := *semver.MustParse(fixAddonsCfg.Status.Repositories[0].Addons[0].Version)
 
 	ts := getClusterTestSuite(t, fixAddonsCfg)
 
 	ts.bf.On("Delete").Return(nil).Once()
 	ts.addonStorage.
-		On("Get", internal.ClusterWide, internal.AddonName(fixAddonsCfg.Status.Repositories[0].Addons[0].Name), bundleVer).
+		On("Get", internal.ClusterWide, internal.AddonName(fixAddonsCfg.Status.Repositories[0].Addons[0].Name), addonVer).
 		Return(fixAddon, nil)
-	ts.addonStorage.On("Remove", internal.ClusterWide, fixAddon.Name, bundleVer).Return(nil)
+	ts.addonStorage.On("Remove", internal.ClusterWide, fixAddon.Name, addonVer).Return(nil)
 	ts.chartStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixAddon.Plans[internal.AddonPlanID(fmt.Sprintf("plan-%s", fixAddon.Name))].ChartRef.Name, fixAddon.Plans[internal.AddonPlanID(fmt.Sprintf("plan-%s", fixAddon.Name))].ChartRef.Version).Return(nil)
 
 	ts.dp.On("EnsureClusterDocsTopicRemoved", string(fixAddon.ID)).Return(nil)
@@ -215,15 +215,15 @@ func TestReconcileClusterAddonsConfiguration_DeleteAddonsProcess_ReconcileOtherA
 	failedAddCfg := fixFailedClusterAddonsConfiguration()
 	fixAddonsCfg := fixDeletedClusterAddonsConfiguration()
 	fixAddon := fixAddonWithEmptyDocs("id", fixAddonsCfg.Status.Repositories[0].Addons[0].Name, "example.com").Addon
-	bundleVer := *semver.MustParse(fixAddonsCfg.Status.Repositories[0].Addons[0].Version)
+	addonVer := *semver.MustParse(fixAddonsCfg.Status.Repositories[0].Addons[0].Version)
 
 	ts := getClusterTestSuite(t, fixAddonsCfg, failedAddCfg)
 
 	ts.bf.On("Delete").Return(nil).Once()
 	ts.addonStorage.
-		On("Get", internal.ClusterWide, internal.AddonName(fixAddonsCfg.Status.Repositories[0].Addons[0].Name), bundleVer).
+		On("Get", internal.ClusterWide, internal.AddonName(fixAddonsCfg.Status.Repositories[0].Addons[0].Name), addonVer).
 		Return(fixAddon, nil)
-	ts.addonStorage.On("Remove", internal.ClusterWide, fixAddon.Name, bundleVer).Return(nil)
+	ts.addonStorage.On("Remove", internal.ClusterWide, fixAddon.Name, addonVer).Return(nil)
 	ts.chartStorage.On("Remove", internal.Namespace(fixAddonsCfg.Namespace), fixAddon.Plans[internal.AddonPlanID(fmt.Sprintf("plan-%s", fixAddon.Name))].ChartRef.Name, fixAddon.Plans[internal.AddonPlanID(fmt.Sprintf("plan-%s", fixAddon.Name))].ChartRef.Version).Return(nil)
 
 	ts.dp.On("EnsureClusterDocsTopicRemoved", string(fixAddon.ID)).Return(nil)

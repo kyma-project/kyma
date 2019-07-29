@@ -24,7 +24,7 @@ type chartStorage interface {
 //go:generate mockery -name=addonProvider -output=automock -outpkg=automock -case=underscore
 type addonProvider interface {
 	GetIndex(string) (*addon.IndexDTO, error)
-	LoadCompleteAddon(addon.EntryDTO) (addon.CompleteAddon, error)
+	LoadCompleteAddon(addon.EntryDTO, addon.Name) (addon.CompleteAddon, error)
 }
 
 //go:generate mockery -name=brokerFacade -output=automock -outpkg=automock -case=underscore
@@ -36,7 +36,7 @@ type brokerFacade interface {
 
 //go:generate mockery -name=docsProvider -output=automock -outpkg=automock -case=underscore
 type docsProvider interface {
-	EnsureDocsTopic(bundle *internal.Addon, namespace string) error
+	EnsureDocsTopic(addon *internal.Addon, namespace string) error
 	EnsureDocsTopicRemoved(id string, namespace string) error
 }
 
@@ -54,7 +54,7 @@ type clusterBrokerFacade interface {
 
 //go:generate mockery -name=clusterDocsProvider -output=automock -outpkg=automock -case=underscore
 type clusterDocsProvider interface {
-	EnsureClusterDocsTopic(bundle *internal.Addon) error
+	EnsureClusterDocsTopic(addon *internal.Addon) error
 	EnsureClusterDocsTopicRemoved(id string) error
 }
 
