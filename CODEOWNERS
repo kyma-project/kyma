@@ -113,7 +113,7 @@
 /resources/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `log-ui` subchart
-/resources/logging/charts/log-ui/ @rakesh-garimella @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @hisarbalik @a-thaler @igor-karpukhin
+/resources/logging/charts/log-ui/ @rakesh-garimella @kwiatekus @dariadomagala @y-kkamil @hisarbalik @a-thaler @igor-karpukhin @akucharska @parostatkiem @sjanota
 
 # The `event-bus` chart
 /resources/event-bus/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
@@ -155,7 +155,7 @@
 /resources/core/templates/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `templates` chart
-/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @tgorgol @magicmatatjahu @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld @jasiu001 @adamwalach
+/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @tgorgol @magicmatatjahu @kwiatekus @dariadomagala @y-kkamil @antiheld @jasiu001 @adamwalach @parostatkiem @sjanota
 
 # The `messaging` subdirectory
 /resources/examples/lambda-messages/ @pbochynski @PK85
@@ -249,7 +249,7 @@
 /components/console-backend-service/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @sjanota
 
 # IDPPreset Component
-/components/idppreset/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
+/components/idppreset/ @kwiatekus @dariadomagala @y-kkamil @akucharska @parostatkiem @sjanota
 
 # Connector Service Component
 /components/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
