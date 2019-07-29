@@ -70,6 +70,6 @@ oathkeeper:
   image:
     tag: v0.17.1-beta.1
 
-oathkeeper-rule-controller:
-  annotations:
+maester:
+  annotations: 
     sidecar.istio.io/inject: "false"
