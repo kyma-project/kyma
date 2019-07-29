@@ -6,10 +6,10 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 )
 
-// AddonClient defines abstraction to get and unmarshal index and addon into Models
+// AddonClient defines abstraction to get and unmarshal raw index and addon into Models
 type AddonClient interface {
-	GetCompleteAddon(entry addon.EntryDTO) (addon.CompleteAddon, error)
 	Cleanup() error
+	GetCompleteAddon(entry addon.EntryDTO) (addon.CompleteAddon, error)
 	GetIndex() (*addon.IndexDTO, error)
 }
 

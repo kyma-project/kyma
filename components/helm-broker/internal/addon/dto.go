@@ -21,7 +21,8 @@ type IndexDTO struct {
 // EntryDTO contains information about single addon entry
 type EntryDTO struct {
 	// Name is set to index entry key name
-	Name        Name
+	Name Name
+	// DisplayName is the entry name, currently treated by us as DisplayName
 	DisplayName string  `yaml:"name"`
 	Description string  `yaml:"description"`
 	Version     Version `yaml:"version"`

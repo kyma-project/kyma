@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"testing"
 	"time"
 
@@ -58,7 +59,7 @@ func TestReconcileAddonsConfiguration_AddAddonsProcess(t *testing.T) {
 	}
 	ts.brokerFacade.On("Exist", fixAddonsCfg.Namespace).Return(false, nil).Once()
 	ts.brokerFacade.On("Create", fixAddonsCfg.Namespace).Return(nil).Once()
-	ts.addonGetterFactory.On("NewGetter", fixAddonsCfg.Spec.Repositories[0].URL, tmpDir+"addon-loader-dst").Return(ts.concreteGetter, nil).Once()
+	ts.addonGetterFactory.On("NewGetter", fixAddonsCfg.Spec.Repositories[0].URL, path.Join(tmpDir, "addon-loader-dst")).Return(ts.concreteGetter, nil).Once()
 	defer ts.assertExpectations()
 
 	// WHEN
@@ -99,7 +100,7 @@ func TestReconcileAddonsConfiguration_AddAddonsProcess_ErrorIfBrokerExist(t *tes
 		}
 	}
 	ts.brokerFacade.On("Exist", fixAddonsCfg.Namespace).Return(false, errors.New("")).Once()
-	ts.addonGetterFactory.On("NewGetter", fixAddonsCfg.Spec.Repositories[0].URL, tmpDir+"addon-loader-dst").Return(ts.concreteGetter, nil).Once()
+	ts.addonGetterFactory.On("NewGetter", fixAddonsCfg.Spec.Repositories[0].URL, path.Join(tmpDir, "addon-loader-dst")).Return(ts.concreteGetter, nil).Once()
 	defer ts.assertExpectations()
 
 	// WHEN
@@ -143,7 +144,7 @@ func TestReconcileAddonsConfiguration_UpdateAddonsProcess(t *testing.T) {
 	}
 	ts.brokerFacade.On("Exist", fixAddonsCfg.Namespace).Return(false, nil).Once()
 	ts.brokerFacade.On("Create", fixAddonsCfg.Namespace).Return(nil).Once()
-	ts.addonGetterFactory.On("NewGetter", fixAddonsCfg.Spec.Repositories[0].URL, tmpDir+"addon-loader-dst").Return(ts.concreteGetter, nil).Once()
+	ts.addonGetterFactory.On("NewGetter", fixAddonsCfg.Spec.Repositories[0].URL, path.Join(tmpDir, "addon-loader-dst")).Return(ts.concreteGetter, nil).Once()
 	defer ts.assertExpectations()
 
 	// WHEN
@@ -174,7 +175,7 @@ func TestReconcileAddonsConfiguration_UpdateAddonsProcess_ConflictingAddons(t *t
 				Return(completeAddon, nil)
 		}
 	}
-	ts.addonGetterFactory.On("NewGetter", fixAddonsCfg.Spec.Repositories[0].URL, tmpDir+"addon-loader-dst").Return(ts.concreteGetter, nil).Once()
+	ts.addonGetterFactory.On("NewGetter", fixAddonsCfg.Spec.Repositories[0].URL, path.Join(tmpDir, "addon-loader-dst")).Return(ts.concreteGetter, nil).Once()
 	defer ts.assertExpectations()
 
 	// WHEN
