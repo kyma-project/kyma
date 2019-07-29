@@ -28,6 +28,8 @@ tolerations: []
 
 affinity: {}
 
+config:
+  dockerRegistry:
 
 secret:
   # registryAddress specifies which the web address (URL) of the registry to use the credentials

@@ -37,7 +37,7 @@ items:
     namespace: {{ .Release.Namespace }}
 - apiVersion: v1
   data:
-    dockerRegistry: venturasr ### put your github name here e.g. k15r
+    dockerRegistry: {{ .Values.config.dockerRegistry }}
     runtimes: |
       - ID: nodejs8
         dockerFileName: dockerfile-nodejs-8
