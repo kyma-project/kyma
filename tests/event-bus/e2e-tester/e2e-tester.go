@@ -572,7 +572,7 @@ func createNamespace(name string) error {
 	}, retryOptions...)
 
 	if err != nil && !strings.Contains(err.Error(), "already exists") {
-		return fmt.Errorf("Namespace: %s could not be created: %v", name, err)
+		return fmt.Errorf("namespace: %s could not be created: %v", name, err)
 	}
 
 	err = retry.Do(func() error {
@@ -581,9 +581,9 @@ func createNamespace(name string) error {
 	}, retryOptions...)
 
 	if err != nil {
-		return fmt.Errorf("Namespace: %s could not be fetched: %v", name, err)
+		return fmt.Errorf("namespace: %s could not be fetched: %v", name, err)
 	}
-	log.Infof("Namespace: %s is created", name)
+	log.WithField("namespace", name).Info("namespace is created", name)
 	return nil
 }
 
