@@ -1,11 +1,11 @@
 package apiresources
 
 import (
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
-	syncmodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -13,17 +13,14 @@ type ApiIDToSecretNameMap map[string]string
 
 //go:generate mockery -name=Service
 type Service interface {
-	CreateApiResources(application syncmodel.Application, apiDefinition syncmodel.APIDefinition) apperrors.AppError
-	CreateEventApiResources(application syncmodel.Application, eventApiDefinition syncmodel.EventAPIDefinition) apperrors.AppError
-	CreateSecrets(application syncmodel.Application, apiDefinition syncmodel.APIDefinition) apperrors.AppError
+	CreateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
+	CreateSecrets(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
 
-	UpdateApiResources(application syncmodel.Application, apiDefinition syncmodel.APIDefinition) apperrors.AppError
-	UpdateEventApiResources(application syncmodel.Application, eventApiDefinition syncmodel.EventAPIDefinition) apperrors.AppError
-	UpdateSecrets(application syncmodel.Application, apiDefinition syncmodel.APIDefinition) apperrors.AppError
+	UpdateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
+	UpdateSecrets(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
 
-	DeleteApiResources(application syncmodel.Application, apiDefinition syncmodel.APIDefinition) apperrors.AppError
-	DeleteEventApiResources(application syncmodel.Application, eventApiDefinition syncmodel.EventAPIDefinition) apperrors.AppError
-	DeleteSecrets(application syncmodel.Application, apiDefinition syncmodel.APIDefinition) apperrors.AppError
+	DeleteApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
+	DeleteSecrets(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
 }
 
 //go:generate mockery -name=AssetStore

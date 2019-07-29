@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	specAPIType          = "API"
-	specEventsType       = "Events"
+	SpecAPIType          = "API"
+	SpecEventsType       = "Events"
 	CredentialsOAuthType = "OAuth"
 	CredentialsBasicType = "Basic"
 )
@@ -126,7 +126,7 @@ func (c converter) toServiceEntry(applicationID string, apiDefinition model.APID
 	}
 
 	entry := v1alpha1.Entry{
-		Type:                        specAPIType,
+		Type:                        SpecAPIType,
 		AccessLabel:                 c.nameResolver.GetResourceName(applicationID, apiDefinition.ID),
 		ApiType:                     getApiType(),
 		TargetUrl:                   apiDefinition.TargetUrl,
@@ -191,7 +191,7 @@ func (c converter) toEventAPIService(applicationID string, eventsDefinition mode
 
 func (c converter) toEventServiceEntry(applicationID string, eventsDefinition model.EventAPIDefinition) v1alpha1.Entry {
 	return v1alpha1.Entry{
-		Type:             specEventsType,
+		Type:             SpecEventsType,
 		AccessLabel:      c.nameResolver.GetResourceName(applicationID, eventsDefinition.ID),
 		SpecificationUrl: "", // Director returns BLOB here
 	}

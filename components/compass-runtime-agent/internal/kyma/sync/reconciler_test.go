@@ -2,8 +2,8 @@ package sync
 
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications/mocks"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
@@ -16,6 +16,54 @@ func TestReconciler(t *testing.T) {
 		mockApplicationsInterface := &mocks.Manager{}
 		reconciler := NewReconciler(mockApplicationsInterface)
 
+		services := []v1alpha1.Service{
+			{
+				ID:          "serviceId1",
+				Identifier:  "",
+				Name:        "servicename1-cb830",
+				DisplayName: "serviceName1",
+				Description: "API 1 description",
+				Labels: map[string]string{
+					"connected-app": "App1",
+				},
+				LongDescription:     "",
+				ProviderDisplayName: "",
+				Tags:                []string{},
+				Entries: []v1alpha1.Entry{
+					{
+						Type:             applications.SpecAPIType,
+						GatewayUrl:       "application-gateway.kyma-integration.svc.cluster.local",
+						AccessLabel:      "resourceName1",
+						TargetUrl:        "www.example.com/1",
+						SpecificationUrl: "",
+						Credentials: v1alpha1.Credentials{
+							Type:              applications.CredentialsBasicType,
+							SecretName:        "credentialsSecretName1",
+							AuthenticationUrl: "",
+						},
+						RequestParametersSecretName: "paramatersSecretName1",
+					},
+				},
+			},
+		}
+
+		application := v1alpha1.Application{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Application",
+				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "App1",
+			},
+			Spec: v1alpha1.ApplicationSpec{
+				Description:      "Description",
+				SkipInstallation: false,
+				AccessLabel:      "App1",
+				Labels:           map[string]string{},
+				Services:         services,
+			},
+		}
+
 		mockApplicationsInterface.On("List", metav1.ListOptions{}).Return(&v1alpha1.ApplicationList{
 			Items: []v1alpha1.Application{
 				{
@@ -24,59 +72,29 @@ func TestReconciler(t *testing.T) {
 						APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 					},
 					ObjectMeta: metav1.ObjectMeta{
-						Name: "id2",
+						Name: "App2",
 					},
 				},
 			},
 		}, nil)
 
-		api := model.APIDefinition{
-			ID:          "api1",
-			Description: "API",
-			TargetUrl:   "www.examle.com",
-		}
-
-		eventAPI := model.EventAPIDefinition{
-			ID:          "eventApi1",
-			Description: "Event API 1",
-		}
-
-		application1 := model.Application{
-			ID:   "id1",
-			Name: "First App",
-			APIs: []model.APIDefinition{
-				api,
-			},
-			EventAPIs: []model.EventAPIDefinition{
-				eventAPI,
-			},
-		}
-
-		directorApplications := []model.Application{
-			application1,
-		}
-
 		expectedResult := []ApplicationAction{
 			{
 				Operation:   Create,
-				Application: application1,
-				APIActions: []APIAction{
+				Application: application,
+				ServiceActions: []ServiceAction{
 					{
 						Operation: Create,
-						API:       api,
-					},
-				},
-				EventAPIActions: []EventAPIAction{
-					{
-						Operation: Create,
-						EventAPI:  eventAPI,
+						Service:   services[0],
 					},
 				},
 			},
 		}
 
 		// when
-		actions, err := reconciler.Do(directorApplications)
+		actions, err := reconciler.Do([]v1alpha1.Application{
+			application,
+		})
 
 		// then
 		assert.NoError(t, err)

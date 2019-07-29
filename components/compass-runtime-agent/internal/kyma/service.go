@@ -1,6 +1,7 @@
 package kyma
 
 import (
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
@@ -43,16 +44,21 @@ func NewService(reconciler sync.Reconciler, applicationRepository applications.M
 	}
 }
 
-func (s *service) Apply(applications []model.Application) ([]Result, apperrors.AppError) {
+func (s *service) Apply(directorApplications []model.Application) ([]Result, apperrors.AppError) {
 
-	logrus.Info("Application passed to Sync service: ", len(applications))
+	logrus.Info("Application passed to Sync service: ", len(directorApplications))
 
+	applications := make([]v1alpha1.Application, 0, len(directorApplications))
+
+	for _, directorApplication := range directorApplications {
+		applications = append(applications, s.converter.Do(directorApplication))
+	}
+
+	results := make([]Result, len(directorApplications))
 	actions, err := s.reconciler.Do(applications)
 	if err != nil {
 		return nil, err
 	}
-
-	results := make([]Result, len(actions))
 
 	for i, action := range actions {
 		results[i] = s.apply(action)
@@ -65,34 +71,32 @@ func (s *service) apply(action sync.ApplicationAction) Result {
 
 	app := action.Application
 	operation := action.Operation
-	apiActions := action.APIActions
-	eventActions := action.EventAPIActions
+	serviceActions := action.ServiceActions
 
 	var err apperrors.AppError
 
 	switch action.Operation {
 	case sync.Create:
-		err = s.applyCreateOperation(app, apiActions, eventActions)
+		err = s.applyCreateOperation(app, serviceActions)
 	case sync.Delete:
-		err = s.applyDeleteOperation(app, apiActions, eventActions)
+		err = s.applyDeleteOperation(app, serviceActions)
 	case sync.Update:
-		err = s.applyUpdateOperation(app, apiActions, eventActions)
+		err = s.applyUpdateOperation(app, serviceActions)
 	}
 
 	return newResult(app, operation, err)
 }
 
-func (s *service) applyCreateOperation(application model.Application, apiActions []sync.APIAction, eventAPIActions []sync.EventAPIAction) apperrors.AppError {
+func (s *service) applyCreateOperation(application v1alpha1.Application, serviceActionActions []sync.ServiceAction) apperrors.AppError {
 
 	var err apperrors.AppError
-	newApp := s.converter.Do(application)
 
-	_, e := s.applicationRepository.Create(&newApp)
+	_, e := s.applicationRepository.Create(&application)
 	if e != nil {
 		err = appendError(err, apperrors.Internal("Failed to create Application: %s", e))
 	}
 
-	for _, apiDefinition := range application.APIs {
+	for _, apiDefinition := range application.Spec.Services {
 		e := s.resourcesService.CreateApiResources(application, apiDefinition)
 		if err != nil {
 			err = appendError(err, e)
@@ -104,24 +108,16 @@ func (s *service) applyCreateOperation(application model.Application, apiActions
 		}
 	}
 
-	for _, eventApiDefinition := range application.EventAPIs {
-		e := s.resourcesService.CreateEventApiResources(application, eventApiDefinition)
-		if e != nil {
-			err = appendError(err, e)
-		}
-	}
-
 	return err
 }
 
-func (s *service) applyUpdateOperation(application model.Application, apiActions []sync.APIAction, eventAPIActions []sync.EventAPIAction) apperrors.AppError {
+func (s *service) applyUpdateOperation(application v1alpha1.Application, apiActions []sync.ServiceAction) apperrors.AppError {
 	var err apperrors.AppError
 
-	s.applyApiAndEventActions(application, apiActions, eventAPIActions)
-	newApp := s.converter.Do(application)
+	s.applyApiAndEventActions(application, apiActions)
 
 	{
-		_, e := s.applicationRepository.Update(&newApp)
+		_, e := s.applicationRepository.Update(&application)
 		if e != nil {
 			err = appendError(err, apperrors.Internal("Failed to update application: %s", e))
 		}
@@ -130,10 +126,10 @@ func (s *service) applyUpdateOperation(application model.Application, apiActions
 	return err
 }
 
-func (s *service) applyDeleteOperation(application model.Application, apiActions []sync.APIAction, eventAPIActions []sync.EventAPIAction) apperrors.AppError {
+func (s *service) applyDeleteOperation(application v1alpha1.Application, apiActions []sync.ServiceAction) apperrors.AppError {
 	var err apperrors.AppError
 
-	_, _, e := s.applyApiAndEventActions(application, apiActions, eventAPIActions)
+	_, _, e := s.applyApiAndEventActions(application, apiActions)
 	if e != nil {
 		err = appendError(err, e)
 	}
@@ -148,15 +144,10 @@ func (s *service) applyDeleteOperation(application model.Application, apiActions
 	return err
 }
 
-func (s *service) applyApiAndEventActions(application model.Application, apiActions []sync.APIAction, eventAPIActions []sync.EventAPIAction) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError) {
+func (s *service) applyApiAndEventActions(application v1alpha1.Application, apiActions []sync.ServiceAction) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError) {
 	err = s.applyApiResources(application, apiActions)
 
-	e := s.applyEventResources(application, eventAPIActions)
-	if e != nil {
-		err = appendError(err, e)
-	}
-
-	credentials, params, e = s.applyApiSecrets(application, apiActions)
+	credentials, params, e := s.applyApiSecrets(application, apiActions)
 	if e != nil {
 		err = appendError(err, e)
 	}
@@ -164,19 +155,19 @@ func (s *service) applyApiAndEventActions(application model.Application, apiActi
 	return credentials, params, err
 }
 
-func (s *service) applyApiResources(application model.Application, apiActions []sync.APIAction) apperrors.AppError {
+func (s *service) applyApiResources(application v1alpha1.Application, apiActions []sync.ServiceAction) apperrors.AppError {
 
 	var err apperrors.AppError
 	for _, apiAction := range apiActions {
 		switch apiAction.Operation {
 		case sync.Create:
-			e := s.resourcesService.CreateApiResources(application, apiAction.API)
+			e := s.resourcesService.CreateApiResources(application, apiAction.Service)
 			err = appendError(err, e)
 		case sync.Update:
-			e := s.resourcesService.UpdateApiResources(application, apiAction.API)
+			e := s.resourcesService.UpdateApiResources(application, apiAction.Service)
 			err = appendError(err, e)
 		case sync.Delete:
-			e := s.resourcesService.DeleteApiResources(application, apiAction.API)
+			e := s.resourcesService.DeleteApiResources(application, apiAction.Service)
 			err = appendError(err, e)
 		}
 	}
@@ -184,26 +175,7 @@ func (s *service) applyApiResources(application model.Application, apiActions []
 	return err
 }
 
-func (s *service) applyEventResources(application model.Application, eventAPIActions []sync.EventAPIAction) apperrors.AppError {
-	var err apperrors.AppError
-	for _, eventApiAction := range eventAPIActions {
-		switch eventApiAction.Operation {
-		case sync.Create:
-			e := s.resourcesService.CreateEventApiResources(application, eventApiAction.EventAPI)
-			err = appendError(err, e)
-		case sync.Update:
-			e := s.resourcesService.UpdateEventApiResources(application, eventApiAction.EventAPI)
-			err = appendError(err, e)
-		case sync.Delete:
-			e := s.resourcesService.DeleteEventApiResources(application, eventApiAction.EventAPI)
-			err = appendError(err, e)
-		}
-	}
-
-	return err
-}
-
-func (s *service) applyApiSecrets(application model.Application, APIActions []sync.APIAction) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError) {
+func (s *service) applyApiSecrets(application v1alpha1.Application, APIActions []sync.ServiceAction) (credentials ApiIDToSecretNameMap, params ApiIDToSecretNameMap, err apperrors.AppError) {
 
 	credentials = make(map[string]string)
 	params = make(map[string]string)
@@ -211,17 +183,17 @@ func (s *service) applyApiSecrets(application model.Application, APIActions []sy
 	for _, apiAction := range APIActions {
 		switch apiAction.Operation {
 		case sync.Create:
-			e := s.resourcesService.CreateSecrets(application, apiAction.API)
+			e := s.resourcesService.CreateSecrets(application, apiAction.Service)
 			if err != nil {
 				err = appendError(err, e)
 			}
 		case sync.Update:
-			e := s.resourcesService.UpdateSecrets(application, apiAction.API)
+			e := s.resourcesService.UpdateSecrets(application, apiAction.Service)
 			if err != nil {
 				err = appendError(err, e)
 			}
 		case sync.Delete:
-			e := s.resourcesService.DeleteSecrets(application, apiAction.API)
+			e := s.resourcesService.DeleteSecrets(application, apiAction.Service)
 			err = appendError(err, e)
 		}
 	}
@@ -229,9 +201,9 @@ func (s *service) applyApiSecrets(application model.Application, APIActions []sy
 	return credentials, params, err
 }
 
-func newResult(application model.Application, operation sync.Operation, appError apperrors.AppError) Result {
+func newResult(application v1alpha1.Application, operation sync.Operation, appError apperrors.AppError) Result {
 	return Result{
-		ApplicationID: application.ID,
+		ApplicationID: application.Name,
 		Operation:     operation,
 		Error:         appError,
 	}
