@@ -27,7 +27,7 @@ func TestDocsProvider_EnsureClusterDocsTopic(t *testing.T) {
 	const id = "123"
 
 	for tn, tc := range map[string]struct {
-		givenBundle addon.CompleteAddon
+		givenAddon addon.CompleteAddon
 	}{
 		"URL set":   {fixAddonWithDocsURL(id, "test", "url", "url2")},
 		"empty URL": {fixAddonWithEmptyDocs(id, "test", "url")},
@@ -38,13 +38,13 @@ func TestDocsProvider_EnsureClusterDocsTopic(t *testing.T) {
 			docsProvider := NewDocsProvider(c)
 
 			// when
-			err = docsProvider.EnsureClusterDocsTopic(tc.givenBundle.Addon)
+			err = docsProvider.EnsureClusterDocsTopic(tc.givenAddon.Addon)
 			require.NoError(t, err)
 
 			// then
 			err = c.Get(context.Background(), client.ObjectKey{Namespace: cdt.Namespace, Name: cdt.Name}, cdt)
 			require.NoError(t, err)
-			assert.Equal(t, tc.givenBundle.Addon.Docs[0].Template, cdt.Spec.CommonDocsTopicSpec)
+			assert.Equal(t, tc.givenAddon.Addon.Docs[0].Template, cdt.Spec.CommonDocsTopicSpec)
 		})
 	}
 }
@@ -56,20 +56,20 @@ func TestDocsProvider_EnsureClusterDocsTopic_UpdateIfExist(t *testing.T) {
 
 	const id = "123"
 	cdt := fixClusterDocsTopic(id)
-	bundleWithEmptyDocsURL := fixAddonWithEmptyDocs(id, "test", "url")
-	bundleWithEmptyDocsURL.Addon.Docs[0].Template.Description = "new description"
+	addonWithEmptyDocsURL := fixAddonWithEmptyDocs(id, "test", "url")
+	addonWithEmptyDocsURL.Addon.Docs[0].Template.Description = "new description"
 
 	c := fake.NewFakeClient(cdt)
 	docsProvider := NewDocsProvider(c)
 
 	// when
-	err = docsProvider.EnsureClusterDocsTopic(bundleWithEmptyDocsURL.Addon)
+	err = docsProvider.EnsureClusterDocsTopic(addonWithEmptyDocsURL.Addon)
 	require.NoError(t, err)
 
 	// then
 	err = c.Get(context.Background(), client.ObjectKey{Namespace: cdt.Namespace, Name: cdt.Name}, cdt)
 	require.NoError(t, err)
-	assert.Equal(t, bundleWithEmptyDocsURL.Addon.Docs[0].Template, cdt.Spec.CommonDocsTopicSpec)
+	assert.Equal(t, addonWithEmptyDocsURL.Addon.Docs[0].Template, cdt.Spec.CommonDocsTopicSpec)
 }
 
 func TestDocsProvider_EnsureClusterDocsTopicRemoved(t *testing.T) {
@@ -117,7 +117,7 @@ func TestDocsProvider_EnsureDocsTopic(t *testing.T) {
 	dt := fixDocsTopic()
 
 	for tn, tc := range map[string]struct {
-		givenBundle addon.CompleteAddon
+		givenAddon addon.CompleteAddon
 	}{
 		"URL set":   {fixAddonWithDocsURL(dt.Name, "test", "url", "url2")},
 		"empty URL": {fixAddonWithEmptyDocs(dt.Name, "test", "url")},
@@ -127,14 +127,14 @@ func TestDocsProvider_EnsureDocsTopic(t *testing.T) {
 			docsProvider := NewDocsProvider(c)
 
 			// when
-			err = docsProvider.EnsureDocsTopic(tc.givenBundle.Addon, dt.Namespace)
+			err = docsProvider.EnsureDocsTopic(tc.givenAddon.Addon, dt.Namespace)
 			require.NoError(t, err)
 
 			// then
 			result := v1alpha1.DocsTopic{}
 			err = c.Get(context.Background(), client.ObjectKey{Namespace: dt.Namespace, Name: dt.Name}, &result)
 			require.NoError(t, err)
-			assert.Equal(t, tc.givenBundle.Addon.Docs[0].Template, result.Spec.CommonDocsTopicSpec)
+			assert.Equal(t, tc.givenAddon.Addon.Docs[0].Template, result.Spec.CommonDocsTopicSpec)
 		})
 	}
 }
@@ -146,21 +146,21 @@ func TestDocsProvider_EnsureDocsTopic_UpdateIfExist(t *testing.T) {
 
 	dt := fixDocsTopic()
 
-	bundleWithEmptyDocsURL := fixAddonWithEmptyDocs(dt.Name, "test", "url")
-	bundleWithEmptyDocsURL.Addon.Docs[0].Template.Description = "new description"
+	addonWithEmptyDocsURL := fixAddonWithEmptyDocs(dt.Name, "test", "url")
+	addonWithEmptyDocsURL.Addon.Docs[0].Template.Description = "new description"
 
 	c := fake.NewFakeClient(dt)
 	docsProvider := NewDocsProvider(c)
 
 	// when
-	err = docsProvider.EnsureDocsTopic(bundleWithEmptyDocsURL.Addon, dt.Namespace)
+	err = docsProvider.EnsureDocsTopic(addonWithEmptyDocsURL.Addon, dt.Namespace)
 	require.NoError(t, err)
 
 	// then
 	result := v1alpha1.DocsTopic{}
 	err = c.Get(context.Background(), client.ObjectKey{Namespace: dt.Namespace, Name: dt.Name}, &result)
 	require.NoError(t, err)
-	assert.Equal(t, bundleWithEmptyDocsURL.Addon.Docs[0].Template, result.Spec.CommonDocsTopicSpec)
+	assert.Equal(t, addonWithEmptyDocsURL.Addon.Docs[0].Template, result.Spec.CommonDocsTopicSpec)
 }
 
 func TestDocsProvider_EnsureDocsTopicRemoved(t *testing.T) {

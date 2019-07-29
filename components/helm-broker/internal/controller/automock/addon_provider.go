@@ -33,20 +33,20 @@ func (_m *AddonProvider) GetIndex(_a0 string) (*addon.IndexDTO, error) {
 	return r0, r1
 }
 
-// LoadCompleteAddon provides a mock function with given fields: _a0
-func (_m *AddonProvider) LoadCompleteAddon(_a0 addon.EntryDTO) (addon.CompleteAddon, error) {
-	ret := _m.Called(_a0)
+// LoadCompleteAddon provides a mock function with given fields: _a0, _a1
+func (_m *AddonProvider) LoadCompleteAddon(_a0 addon.EntryDTO, _a1 addon.Name) (addon.CompleteAddon, error) {
+	ret := _m.Called(_a0, _a1)
 
 	var r0 addon.CompleteAddon
-	if rf, ok := ret.Get(0).(func(addon.EntryDTO) addon.CompleteAddon); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(addon.EntryDTO, addon.Name) addon.CompleteAddon); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Get(0).(addon.CompleteAddon)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(addon.EntryDTO) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(addon.EntryDTO, addon.Name) error); ok {
+		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}

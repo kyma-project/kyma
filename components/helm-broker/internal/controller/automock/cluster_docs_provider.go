@@ -9,13 +9,13 @@ type ClusterDocsProvider struct {
 	mock.Mock
 }
 
-// EnsureClusterDocsTopic provides a mock function with given fields: bundle
-func (_m *ClusterDocsProvider) EnsureClusterDocsTopic(bundle *internal.Addon) error {
-	ret := _m.Called(bundle)
+// EnsureClusterDocsTopic provides a mock function with given fields: addon
+func (_m *ClusterDocsProvider) EnsureClusterDocsTopic(addon *internal.Addon) error {
+	ret := _m.Called(addon)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*internal.Addon) error); ok {
-		r0 = rf(bundle)
+		r0 = rf(addon)
 	} else {
 		r0 = ret.Error(0)
 	}

@@ -109,7 +109,7 @@ func TestRepositoryCollection_IsRepositoriesFailed(t *testing.T) {
 	assert.True(t, trc.IsRepositoriesFailed())
 }
 
-func TestRepositoryCollection_ReviseBundleDuplicationInRepository(t *testing.T) {
+func TestRepositoryCollection_ReviseAddonDuplicationInRepository(t *testing.T) {
 	// Given
 	trc := NewRepositoryCollection()
 
@@ -160,7 +160,7 @@ func TestRepositoryCollection_ReviseBundleDuplicationInRepository(t *testing.T) 
 				},
 			},
 		})
-	trc.ReviseBundleDuplicationInRepository()
+	trc.ReviseAddonDuplicationInRepository()
 
 	// Then
 	assert.Equal(t, string(v1alpha1.AddonStatusReady), string(findAddon(trc, "test", "0.1").Addon.Status))
@@ -175,7 +175,7 @@ func TestRepositoryCollection_ReviseBundleDuplicationInRepository(t *testing.T) 
 		string(findAddon(trc, "test", "0.4").Addon.Message))
 }
 
-func TestRepositoryCollection_ReviseBundleDuplicationInStorage(t *testing.T) {
+func TestRepositoryCollection_ReviseAddonDuplicationInStorage(t *testing.T) {
 	// Given
 	trc := NewRepositoryCollection()
 	list := &v1alpha1.AddonsConfigurationList{
@@ -228,7 +228,7 @@ func TestRepositoryCollection_ReviseBundleDuplicationInStorage(t *testing.T) {
 				},
 			},
 		})
-	trc.ReviseBundleDuplicationInStorage(list)
+	trc.ReviseAddonDuplicationInStorage(list)
 
 	// Then
 	assert.Equal(t, string(v1alpha1.AddonStatusReady), string(findAddon(trc, "test", "0.1").Addon.Status))

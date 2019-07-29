@@ -53,9 +53,9 @@ func (l *CompleteAddonProvider) ProvideAddons(URL string) ([]CompleteAddon, erro
 	}
 
 	var items []CompleteAddon
-	for _, versions := range idx.Entries {
+	for entryKey, versions := range idx.Entries {
 		for _, v := range versions {
-			completeAddon, err := l.LoadCompleteAddon(v)
+			completeAddon, err := l.LoadCompleteAddon(v, entryKey)
 			switch {
 			case err == nil:
 			case IsFetchingError(err):
@@ -76,12 +76,12 @@ func (l *CompleteAddonProvider) ProvideAddons(URL string) ([]CompleteAddon, erro
 }
 
 // LoadCompleteAddon returns a addon with his charts as CompleteAddon instances.
-func (l *CompleteAddonProvider) LoadCompleteAddon(entry EntryDTO) (CompleteAddon, error) {
-	addon, charts, err := l.loadAddonAndCharts(entry.Name, entry.Version)
+func (l *CompleteAddonProvider) LoadCompleteAddon(entry EntryDTO, entryKey Name) (CompleteAddon, error) {
+	addon, charts, err := l.loadAddonAndCharts(entryKey, entry.Version)
 	if err != nil {
-		return CompleteAddon{}, errors.Wrapf(err, "while loading addon %v", entry.Name)
+		return CompleteAddon{}, errors.Wrapf(err, "while loading addon %v", entryKey)
 	}
-	addon.RepositoryURL = l.repo.URLForAddon(entry.Name, entry.Version)
+	addon.RepositoryURL = l.repo.URLForAddon(entryKey, entry.Version)
 
 	return CompleteAddon{
 		Addon:  addon,
