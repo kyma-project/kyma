@@ -24,7 +24,8 @@ type GitGetter struct {
 }
 
 // NewGit returns new instance of GitGetter
-func NewGit(addr, dst string) (RepositoryGetter, error) {
+func NewGit(addr, src string) (RepositoryGetter, error) {
+	finalDst := path.Join(src, rand.String(10))
 	gitAddr, indexPath := getter.SourceDirSubdir(addr)
 	if indexPath == "" {
 		return nil, errors.New("index path needs to be provided! Check documentation")
@@ -36,13 +37,13 @@ func NewGit(addr, dst string) (RepositoryGetter, error) {
 	}
 
 	hashicorpGitGetter := &getter.GitGetter{}
-	if err = hashicorpGitGetter.Get(dst, ru); err != nil {
+	if err = hashicorpGitGetter.Get(finalDst, ru); err != nil {
 		return nil, err
 	}
 
 	return &GitGetter{
 		underlying:    hashicorpGitGetter,
-		dst:           path.Join(dst, rand.String(10)),
+		dst:           finalDst,
 		idxPath:       indexPath,
 		bundleDirPath: strings.TrimRight(indexPath, path.Base(indexPath)),
 	}, nil
