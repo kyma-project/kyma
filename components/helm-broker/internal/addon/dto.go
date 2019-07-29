@@ -1,8 +1,6 @@
 package addon
 
 import (
-	"io"
-
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
@@ -22,18 +20,15 @@ type IndexDTO struct {
 
 // EntryDTO contains information about single addon entry
 type EntryDTO struct {
-	Name        Name    `yaml:"name"`
+	// Name is set to index entry key name
+	Name        Name
+	DisplayName string  `yaml:"name"`
 	Description string  `yaml:"description"`
 	Version     Version `yaml:"version"`
 }
 
-type repository interface {
-	IndexReader(string) (io.ReadCloser, error)
-	AddonReader(name Name, version Version) (io.ReadCloser, error)
-	URLForAddon(name Name, version Version) string
-}
-
-//go:generate mockery -name=addonLoader -output=automock -outpkg=automock -case=underscore
-type addonLoader interface {
-	Load(io.Reader) (*internal.Addon, []*chart.Chart, error)
+// CompleteAddon aggregates a bundle with his chart(s)
+type CompleteAddon struct {
+	Addon  *internal.Addon
+	Charts []*chart.Chart
 }

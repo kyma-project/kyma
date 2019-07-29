@@ -2,12 +2,11 @@ package controller
 
 import (
 	"context"
-
+	"path"
 	"time"
 
 	"github.com/Masterminds/semver"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	add "github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/addons"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
@@ -67,34 +66,36 @@ type ReconcileAddonsConfiguration struct {
 	brokerFacade brokerFacade
 	brokerSyncer brokerSyncer
 
-	addonProvider addonProvider
-	protection    protection
+	addonLoader *addonLoader
+	protection  protection
 
 	// syncBroker informs ServiceBroker should be resync, it should be true if
 	// operation insert/delete was made on storage
-	syncBroker  bool
-	developMode bool
+	syncBroker bool
 }
 
 // NewReconcileAddonsConfiguration returns a new reconcile.Reconciler
-func NewReconcileAddonsConfiguration(mgr manager.Manager, bp addonProvider, chartStorage chartStorage, addonStorage addonStorage, brokerFacade brokerFacade, docsProvider docsProvider, brokerSyncer brokerSyncer, developMode bool) reconcile.Reconciler {
+func NewReconcileAddonsConfiguration(mgr manager.Manager, addonGetterFactory addonGetterFactory, chartStorage chartStorage, addonStorage addonStorage, brokerFacade brokerFacade, docsProvider docsProvider, brokerSyncer brokerSyncer, tmpDir string, log logrus.FieldLogger) reconcile.Reconciler {
 	return &ReconcileAddonsConfiguration{
-		log:    logrus.WithField("controller", "addons-configuration"),
+		log:    log.WithField("controller", "addons-configuration"),
 		Client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
 
 		chartStorage: chartStorage,
 		addonStorage: addonStorage,
 
-		addonProvider: bp,
-		protection:    protection{},
+		addonLoader: &addonLoader{
+			addonGetterFactory: addonGetterFactory,
+			log:                log.WithField("service", "addons::configuration::addon-creator"),
+			dstPath:            path.Join(tmpDir, "addon-loader-dst"),
+		},
+		protection: protection{},
 
 		brokerSyncer: brokerSyncer,
 		brokerFacade: brokerFacade,
 		docsProvider: docsProvider,
 
-		developMode: developMode,
-		syncBroker:  false,
+		syncBroker: false,
 	}
 }
 
@@ -149,7 +150,7 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 
 func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.AddonsConfiguration, lastStatus addonsv1alpha1.AddonsConfigurationStatus) error {
 	r.log.Infof("- load addons and charts for each addon")
-	repositories := r.loadAddons(addon)
+	repositories := r.addonLoader.Load(addon.Spec.Repositories)
 
 	r.log.Info("- check duplicate ID addons alongside repositories")
 	repositories.ReviseAddonDuplicationInRepository()
@@ -274,35 +275,6 @@ func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1
 	return nil
 }
 
-func (r *ReconcileAddonsConfiguration) loadAddons(addon *addonsv1alpha1.AddonsConfiguration) *addons.RepositoryCollection {
-	repositories := addons.NewRepositoryCollection()
-	for _, specRepository := range addon.Spec.Repositories {
-		r.log.Infof("- create addons for %q repository", specRepository.URL)
-		repo := addons.NewAddonsRepository(specRepository.URL)
-
-		if err := specRepository.VerifyURL(r.developMode); err != nil {
-			repo.FetchingError(err)
-			repositories.AddRepository(repo)
-
-			r.log.Errorf("url %q address is not valid: %s", specRepository.URL, err)
-			continue
-		}
-
-		adds, err := r.createAddons(specRepository.URL)
-		if err != nil {
-			repo.FetchingError(err)
-			repositories.AddRepository(repo)
-
-			r.log.Errorf("while creating addons for repository from %q: %s", specRepository.URL, err)
-			continue
-		}
-
-		repo.Addons = adds
-		repositories.AddRepository(repo)
-	}
-	return repositories
-}
-
 func (r *ReconcileAddonsConfiguration) ensureBroker(addon *addonsv1alpha1.AddonsConfiguration) error {
 	exist, err := r.brokerFacade.Exist(addon.Namespace)
 	if err != nil {
@@ -319,45 +291,6 @@ func (r *ReconcileAddonsConfiguration) ensureBroker(addon *addonsv1alpha1.Addons
 		}
 	}
 	return nil
-}
-
-func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*addons.AddonController, error) {
-	adds := []*addons.AddonController{}
-
-	// fetch repository index
-	index, err := r.addonProvider.GetIndex(URL)
-	if err != nil {
-		return adds, exerr.Wrap(err, "while reading repository index")
-	}
-
-	// for each repository entry create addon
-	for entryKey, entries := range index.Entries {
-		for _, entry := range entries {
-			addon := addons.NewAddon(string(entry.Name), string(entry.Version), URL)
-
-			completeAddon, err := r.addonProvider.LoadCompleteAddon(entry, entryKey)
-			if add.IsFetchingError(err) {
-				addon.FetchingError(err)
-				adds = append(adds, addon)
-				r.log.Errorf("while fetching addon: %s", err)
-				continue
-			}
-			if add.IsLoadingError(err) {
-				addon.LoadingError(err)
-				adds = append(adds, addon)
-				r.log.Errorf("while loading addon: %s", err)
-				continue
-			}
-
-			addon.ID = string(completeAddon.Addon.ID)
-			addon.CompleteAddon = completeAddon.Addon
-			addon.Charts = completeAddon.Charts
-
-			adds = append(adds, addon)
-		}
-	}
-
-	return adds, nil
 }
 
 func (r *ReconcileAddonsConfiguration) existingAddonsConfigurations(addon *addonsv1alpha1.AddonsConfiguration) (*addonsv1alpha1.AddonsConfigurationList, error) {
