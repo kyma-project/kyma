@@ -123,6 +123,26 @@ type AddonsConfiguration {
     name: String!
     urls: [String!]
     labels: Labels!
+    status: AddonsConfigurationStatus!
+}
+
+type AddonsConfigurationStatus {
+    phase: String!
+    repositories: [AddonsConfigurationStatusRepository!]
+}
+
+type AddonsConfigurationStatusRepository {
+    url: String!
+    status: String!
+    addons: [AddonsConfigurationStatusAddons!]
+}
+
+type AddonsConfigurationStatusAddons {
+    name: String!
+    version: String!
+    status: String!
+    reason: String!
+    message: String!
 }
 
 type AddonsConfigurationEvent {

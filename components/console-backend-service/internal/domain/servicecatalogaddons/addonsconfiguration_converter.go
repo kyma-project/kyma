@@ -21,6 +21,7 @@ func (c *addonsConfigurationConverter) ToGQL(item *v1alpha1.AddonsConfiguration)
 		Name:   item.Name,
 		Labels: item.Labels,
 		Urls:   urls,
+		Status: parseStatus(item.Status.CommonAddonsConfigurationStatus),
 	}
 
 	return &addonsCfg
@@ -35,4 +36,29 @@ func (c *addonsConfigurationConverter) ToGQLs(in []*v1alpha1.AddonsConfiguration
 		}
 	}
 	return result
+}
+
+func parseStatus(status v1alpha1.CommonAddonsConfigurationStatus) gqlschema.AddonsConfigurationStatus {
+	var repositories []gqlschema.AddonsConfigurationStatusRepository
+	for _, repo := range status.Repositories {
+		var addons []gqlschema.AddonsConfigurationStatusAddons
+		for _, addon := range repo.Addons {
+			addons = append(addons, gqlschema.AddonsConfigurationStatusAddons{
+				Status:  string(addon.Status),
+				Name:    addon.Name,
+				Version: addon.Version,
+				Message: addon.Message,
+				Reason:  string(addon.Reason),
+			})
+		}
+		repositories = append(repositories, gqlschema.AddonsConfigurationStatusRepository{
+			Status: string(repo.Status),
+			URL:    repo.URL,
+			Addons: addons,
+		})
+	}
+	return gqlschema.AddonsConfigurationStatus{
+		Phase:        string(status.Phase),
+		Repositories: repositories,
+	}
 }

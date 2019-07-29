@@ -67,11 +67,31 @@ type ComplexityRoot struct {
 		Name   func(childComplexity int) int
 		Urls   func(childComplexity int) int
 		Labels func(childComplexity int) int
+		Status func(childComplexity int) int
 	}
 
 	AddonsConfigurationEvent struct {
 		Type                func(childComplexity int) int
 		AddonsConfiguration func(childComplexity int) int
+	}
+
+	AddonsConfigurationStatus struct {
+		Phase        func(childComplexity int) int
+		Repositories func(childComplexity int) int
+	}
+
+	AddonsConfigurationStatusAddons struct {
+		Name    func(childComplexity int) int
+		Version func(childComplexity int) int
+		Status  func(childComplexity int) int
+		Reason  func(childComplexity int) int
+		Message func(childComplexity int) int
+	}
+
+	AddonsConfigurationStatusRepository struct {
+		Url    func(childComplexity int) int
+		Status func(childComplexity int) int
+		Addons func(childComplexity int) int
 	}
 
 	ApiEvent struct {
@@ -4116,6 +4136,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AddonsConfiguration.Labels(childComplexity), true
 
+	case "AddonsConfiguration.status":
+		if e.complexity.AddonsConfiguration.Status == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfiguration.Status(childComplexity), true
+
 	case "AddonsConfigurationEvent.type":
 		if e.complexity.AddonsConfigurationEvent.Type == nil {
 			break
@@ -4129,6 +4156,76 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AddonsConfigurationEvent.AddonsConfiguration(childComplexity), true
+
+	case "AddonsConfigurationStatus.phase":
+		if e.complexity.AddonsConfigurationStatus.Phase == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfigurationStatus.Phase(childComplexity), true
+
+	case "AddonsConfigurationStatus.repositories":
+		if e.complexity.AddonsConfigurationStatus.Repositories == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfigurationStatus.Repositories(childComplexity), true
+
+	case "AddonsConfigurationStatusAddons.name":
+		if e.complexity.AddonsConfigurationStatusAddons.Name == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfigurationStatusAddons.Name(childComplexity), true
+
+	case "AddonsConfigurationStatusAddons.version":
+		if e.complexity.AddonsConfigurationStatusAddons.Version == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfigurationStatusAddons.Version(childComplexity), true
+
+	case "AddonsConfigurationStatusAddons.status":
+		if e.complexity.AddonsConfigurationStatusAddons.Status == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfigurationStatusAddons.Status(childComplexity), true
+
+	case "AddonsConfigurationStatusAddons.reason":
+		if e.complexity.AddonsConfigurationStatusAddons.Reason == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfigurationStatusAddons.Reason(childComplexity), true
+
+	case "AddonsConfigurationStatusAddons.message":
+		if e.complexity.AddonsConfigurationStatusAddons.Message == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfigurationStatusAddons.Message(childComplexity), true
+
+	case "AddonsConfigurationStatusRepository.url":
+		if e.complexity.AddonsConfigurationStatusRepository.Url == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfigurationStatusRepository.Url(childComplexity), true
+
+	case "AddonsConfigurationStatusRepository.status":
+		if e.complexity.AddonsConfigurationStatusRepository.Status == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfigurationStatusRepository.Status(childComplexity), true
+
+	case "AddonsConfigurationStatusRepository.addons":
+		if e.complexity.AddonsConfigurationStatusRepository.Addons == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfigurationStatusRepository.Addons(childComplexity), true
 
 	case "ApiEvent.type":
 		if e.complexity.ApiEvent.Type == nil {
@@ -8246,6 +8343,11 @@ func (ec *executionContext) _AddonsConfiguration(ctx context.Context, sel ast.Se
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "status":
+			out.Values[i] = ec._AddonsConfiguration_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8344,6 +8446,34 @@ func (ec *executionContext) _AddonsConfiguration_labels(ctx context.Context, fie
 	return res
 }
 
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfiguration_status(ctx context.Context, field graphql.CollectedField, obj *AddonsConfiguration) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfiguration",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(AddonsConfigurationStatus)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._AddonsConfigurationStatus(ctx, field.Selections, &res)
+}
+
 var addonsConfigurationEventImplementors = []string{"AddonsConfigurationEvent"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -8432,6 +8562,455 @@ func (ec *executionContext) _AddonsConfigurationEvent_addonsConfiguration(ctx co
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._AddonsConfiguration(ctx, field.Selections, &res)
+}
+
+var addonsConfigurationStatusImplementors = []string{"AddonsConfigurationStatus"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _AddonsConfigurationStatus(ctx context.Context, sel ast.SelectionSet, obj *AddonsConfigurationStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, addonsConfigurationStatusImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AddonsConfigurationStatus")
+		case "phase":
+			out.Values[i] = ec._AddonsConfigurationStatus_phase(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "repositories":
+			out.Values[i] = ec._AddonsConfigurationStatus_repositories(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfigurationStatus_phase(ctx context.Context, field graphql.CollectedField, obj *AddonsConfigurationStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfigurationStatus",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Phase, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfigurationStatus_repositories(ctx context.Context, field graphql.CollectedField, obj *AddonsConfigurationStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfigurationStatus",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Repositories, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]AddonsConfigurationStatusRepository)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._AddonsConfigurationStatusRepository(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+var addonsConfigurationStatusAddonsImplementors = []string{"AddonsConfigurationStatusAddons"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _AddonsConfigurationStatusAddons(ctx context.Context, sel ast.SelectionSet, obj *AddonsConfigurationStatusAddons) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, addonsConfigurationStatusAddonsImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AddonsConfigurationStatusAddons")
+		case "name":
+			out.Values[i] = ec._AddonsConfigurationStatusAddons_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "version":
+			out.Values[i] = ec._AddonsConfigurationStatusAddons_version(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "status":
+			out.Values[i] = ec._AddonsConfigurationStatusAddons_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "reason":
+			out.Values[i] = ec._AddonsConfigurationStatusAddons_reason(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "message":
+			out.Values[i] = ec._AddonsConfigurationStatusAddons_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfigurationStatusAddons_name(ctx context.Context, field graphql.CollectedField, obj *AddonsConfigurationStatusAddons) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfigurationStatusAddons",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfigurationStatusAddons_version(ctx context.Context, field graphql.CollectedField, obj *AddonsConfigurationStatusAddons) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfigurationStatusAddons",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Version, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfigurationStatusAddons_status(ctx context.Context, field graphql.CollectedField, obj *AddonsConfigurationStatusAddons) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfigurationStatusAddons",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfigurationStatusAddons_reason(ctx context.Context, field graphql.CollectedField, obj *AddonsConfigurationStatusAddons) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfigurationStatusAddons",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reason, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfigurationStatusAddons_message(ctx context.Context, field graphql.CollectedField, obj *AddonsConfigurationStatusAddons) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfigurationStatusAddons",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+var addonsConfigurationStatusRepositoryImplementors = []string{"AddonsConfigurationStatusRepository"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _AddonsConfigurationStatusRepository(ctx context.Context, sel ast.SelectionSet, obj *AddonsConfigurationStatusRepository) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, addonsConfigurationStatusRepositoryImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AddonsConfigurationStatusRepository")
+		case "url":
+			out.Values[i] = ec._AddonsConfigurationStatusRepository_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "status":
+			out.Values[i] = ec._AddonsConfigurationStatusRepository_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "addons":
+			out.Values[i] = ec._AddonsConfigurationStatusRepository_addons(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfigurationStatusRepository_url(ctx context.Context, field graphql.CollectedField, obj *AddonsConfigurationStatusRepository) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfigurationStatusRepository",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfigurationStatusRepository_status(ctx context.Context, field graphql.CollectedField, obj *AddonsConfigurationStatusRepository) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfigurationStatusRepository",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfigurationStatusRepository_addons(ctx context.Context, field graphql.CollectedField, obj *AddonsConfigurationStatusRepository) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfigurationStatusRepository",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Addons, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]AddonsConfigurationStatusAddons)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._AddonsConfigurationStatusAddons(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
 }
 
 var apiEventImplementors = []string{"ApiEvent"}
@@ -30583,6 +31162,26 @@ type AddonsConfiguration {
     name: String!
     urls: [String!]
     labels: Labels!
+    status: AddonsConfigurationStatus!
+}
+
+type AddonsConfigurationStatus {
+    phase: String!
+    repositories: [AddonsConfigurationStatusRepository!]
+}
+
+type AddonsConfigurationStatusRepository {
+    url: String!
+    status: String!
+    addons: [AddonsConfigurationStatusAddons!]
+}
+
+type AddonsConfigurationStatusAddons {
+    name: String!
+    version: String!
+    status: String!
+    reason: String!
+    message: String!
 }
 
 type AddonsConfigurationEvent {
