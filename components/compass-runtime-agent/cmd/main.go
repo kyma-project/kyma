@@ -4,7 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
 
 	"os"
@@ -61,7 +61,7 @@ func main() {
 
 	certManager := certificates.NewCredentialsManager()
 	compassConfigClient := compass.NewConfigurationClient(options.tenant, options.runtimeId, graphql.New)
-	syncService := synchronization.NewSynchronizationService()
+	syncService := kyma.NewSynchronizationService()
 
 	compassConnector := compass.NewCompassConnector(options.tokenURLConfigFile)
 	connectionSupervisor := compassconnection.NewSupervisor(

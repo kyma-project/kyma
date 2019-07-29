@@ -1,13 +1,14 @@
 package compassconnection
 
 import (
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
+	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 
-	syncMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization/mocks"
+	syncMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/mocks"
 
 	mocks2 "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compassconnection/mocks"
 
@@ -210,8 +211,8 @@ func TestCrSupervisor_SynchronizeWithCompass(t *testing.T) {
 	}
 
 	credentials := certificates.Credentials{}
-	applicationsConfig := []synchronization.Application{}
-	syncResults := []synchronization.Result{}
+	applicationsConfig := []kymamodel.Application{}
+	syncResults := []kyma.Result{}
 
 	for _, testCase := range []struct {
 		description             string

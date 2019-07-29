@@ -2,10 +2,9 @@ package compassconnection
 
 import (
 	"fmt"
-
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -40,7 +39,7 @@ func NewSupervisor(
 	crManager CRManager,
 	credManager certificates.Manager,
 	compassClient compass.ConfigClient,
-	syncService synchronization.Service,
+	syncService kyma.Service,
 ) Supervisor {
 	return &crSupervisor{
 		compassConnector:   connector,
@@ -57,7 +56,7 @@ type crSupervisor struct {
 	crManager          CRManager
 	credentialsManager certificates.Manager
 	compassClient      compass.ConfigClient
-	syncService        synchronization.Service
+	syncService        kyma.Service
 	log                *logrus.Entry
 }
 
