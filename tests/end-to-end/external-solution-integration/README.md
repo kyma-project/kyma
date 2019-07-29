@@ -37,3 +37,5 @@ Run the test using following command:
 ```
 go run ./cmd/runner e2e --domain {DOMAIN}
 ```
+
+If you are running the test against cluster with invalid SSL certificates (e.g. self-signed), add `--skipSSLVerify` flag.
