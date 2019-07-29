@@ -6,9 +6,9 @@ This project contains the chart for the Function Controller.
 
 ## Prerequisites
 
-- Istio
-- Knative Serving
-- Knative Build
+- Knative Build (v0.6.0)
+- Knative Serving (v0.6.1)
+- Istio (istio-1.0.7)
 
 ## Installation
 
