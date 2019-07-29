@@ -67,6 +67,8 @@ oathkeeper:
   ruleFile:
     dir: /etc/rules
     name: rules
+  image:
+    tag: v0.17.1-beta.1
 
 <<<<<<< HEAD
 oathkeeper-rule-controller:
