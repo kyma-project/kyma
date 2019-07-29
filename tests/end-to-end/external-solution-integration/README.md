@@ -1,5 +1,9 @@
 # E2E Test: External Solution Integration
 
+## Overview
+
+This test verifies if the user can connect an external application to Kyma and use lambdas to interact with it using both API and events. Test behaves like a real-world scenario. This means no internal APIs are used and every request from test to cluster is made through the ingress-gateway. Also, the test application is connected using client certificates as a production application would be.
+
 ## Scenario
 
 1. Create an Application
@@ -15,12 +19,21 @@
 11. Send event to application gateway
 12. Verify that test service has been called by lambda
 
-## Requirements
+## Requirements for running localy
 
 * running kyma cluster
 
-## Run locally
+## Run test locally
 
+### Run against Kyma cluster on minikube 
+1. In your `/etc/hosts` find entry with Kyma domains. Add `counter-service.kyma.local` at the end. 
+2. Run the test using following command:
+    ```
+    go run ./cmd/runner e2e
+    ```
+   
+### Run against Kyma cluster in the cloud
+Run the test using following command:
 ```
-go run ./cmd/runner --testNamespace {NAMESPACE} --domain {CLUSTER_DOMAIN}
+go run ./cmd/runner e2e --domain {DOMAIN}
 ```
