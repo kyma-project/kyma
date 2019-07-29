@@ -583,7 +583,7 @@ func createNamespace(name string) error {
 	if err != nil {
 		return fmt.Errorf("namespace: %s could not be fetched: %v", name, err)
 	}
-	log.WithField("namespace", name).Info("namespace is created", name)
+	log.WithField("namespace", name).Info("namespace is created")
 	return nil
 }
 
