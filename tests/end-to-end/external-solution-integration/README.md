@@ -19,13 +19,13 @@ This test verifies if the user can connect an external application to Kyma and u
 11. Send event to application gateway
 12. Verify that test service has been called by lambda
 
-## Requirements for running localy
+## Requirements for running locally
 
 * running kyma cluster
 
 ## Run test locally
 
-### Run against Kyma cluster on minikube 
+### Run against Kyma cluster on Minikube 
 1. In your `/etc/hosts` find entry with Kyma domains. Add `counter-service.kyma.local` at the end. 
 2. Run the test using following command:
     ```
