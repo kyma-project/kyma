@@ -5,6 +5,9 @@ global:
     runtimeAgent:
       dir: pr/
       version: "PR-4936"
+    runtimeAgentTests:
+      dir: pr/
+      version: "PR-4927"
 
 deployment:
   image:
