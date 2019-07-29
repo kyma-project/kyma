@@ -21,14 +21,10 @@ When you run the test, these actions are performed in the order listed:
 11. Send an event to the Application Gateway. 
 12. Verify if the call from the lambda reached the test service.
 
-## Requirements for running locally
-
-* running kyma cluster
-
-## Run test locally
+## Run the test locally
 
 ### Run against Kyma cluster on Minikube 
-1. In your `/etc/hosts` find entry with Kyma domains. Add `counter-service.kyma.local` at the end. 
+1. Add an entry to your system's `/etc/hosts` that maps the `counter-service.kyma.local` to `127.0.0.1` 
 2. Run the test using the following command:
     ```
     go run ./cmd/runner e2e
