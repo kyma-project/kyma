@@ -140,7 +140,7 @@ func main() {
 
 	err = createNamespace(subscriber.namespace)
 	if err != nil {
-		log.Printf("error in creating namespace: %v", err)
+		log.WithField("error", err).Error("cannot create namespace")
 		shutdown(fail, &subscriber)
 	}
 
