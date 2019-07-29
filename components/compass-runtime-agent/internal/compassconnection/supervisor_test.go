@@ -1,8 +1,9 @@
 package compassconnection
 
 import (
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 

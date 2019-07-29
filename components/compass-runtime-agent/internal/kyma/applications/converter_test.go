@@ -1,8 +1,9 @@
 package applications
 
 import (
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	k8smocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts/mocks"
