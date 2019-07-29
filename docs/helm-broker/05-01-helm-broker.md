@@ -15,5 +15,6 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
+| **config.tmpDirSizeLimit:** | Sets a size limit on `/tmp` directory in the Helm pod. This directory is used to store processed Addons. The disk space used by pod is monitored by eviction manager - it will evict pods when the usage exceeds the limit (sets status to 'Evicted'). This limit is enforced with a certain time delay, usually ~10s. | `2Gi` |
 | **global.cfgReposUrlName** | Specifies the name of the default ConfigMap which provides the URLs of addons repositories. | `helm-repos-urls` |
 | **global.isDevelopMode** | Defines that each repository URL must be an HTTPS server. If set to `true`, HTTP servers are also acceptable.  | `false` |
