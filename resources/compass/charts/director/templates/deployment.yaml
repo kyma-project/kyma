@@ -30,6 +30,36 @@ spec:
               value: "0.0.0.0:{{ .Values.deployment.args.containerPort }}"
             - name: APP_PLAYGROUND_API_ENDPOINT
               value: "/director/graphql"
+            - name: APP_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-username
+            - name: APP_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-password
+            - name: APP_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-serviceName
+            - name: APP_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-servicePort
+            - name: APP_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-databaseName
+            - name: APP_DB_SSL
+              valueFrom:
+                secretKeyRef:
+                  name: compass-postgresql
+                  key: postgresql-sslMode
         {{if eq .Values.global.database.useEmbedded false}}
         - name: cloudsql-proxy
           image: gcr.io/cloudsql-docker/gce-proxy:1.11
