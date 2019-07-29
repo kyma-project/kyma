@@ -556,35 +556,34 @@ func createEventActivation(subscriberNamespace string) error {
 	})
 }
 
-func createNamespace(subscriberNamespace string) error {
+func createNamespace(name string) error {
 
 	ns := &apiv1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: subscriberNamespace,
+			Name: name,
 			Labels: map[string]string{
 				"test": "test-event-bus",
 			},
 		},
 	}
 	err := retry.Do(func() error {
-		log.Printf("create test namespace: %s", subscriberNamespace)
 		_, err := clientK8S.Core().Namespaces().Create(ns)
 		return err
 	}, retryOptions...)
 
-	if err != nil {
-		return fmt.Errorf("Namespace: %s could not be created: %v", subscriberNamespace, err)
+	if err != nil && !strings.Contains(err.Error(), "already exists") {
+		return fmt.Errorf("Namespace: %s could not be created: %v", name, err)
 	}
 
 	err = retry.Do(func() error {
-		_, err = clientK8S.Core().Namespaces().Get(subscriberNamespace, metav1.GetOptions{})
+		_, err = clientK8S.Core().Namespaces().Get(name, metav1.GetOptions{})
 		return err
 	}, retryOptions...)
 
 	if err != nil {
-		return fmt.Errorf("Namespace: %s could not be fetched: %v", subscriberNamespace, err)
+		return fmt.Errorf("Namespace: %s could not be fetched: %v", name, err)
 	}
-	log.Printf("Namespace: %s is created", subscriberNamespace)
+	log.Infof("Namespace: %s is created", name)
 	return nil
 }
 
