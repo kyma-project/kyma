@@ -8,9 +8,18 @@ service:
   externalPort: 80
   internalPort: 8081
 
+ctrl:
+  tmpDirSizeLimit: 1Gi
+  resources:
+    limits:
+      memory: 76Mi
+      cpu: 100m
+    requests:
+      memory: 32Mi
+      cpu: 80m
+
 config:
   tillerTLSInsecure: true
-  tmpDirSizeLimit: 2Gi
   storage:
     - driver: etcd
       provide:
