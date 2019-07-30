@@ -28,7 +28,7 @@ func NewGit(addr, src string) (RepositoryGetter, error) {
 	finalDst := path.Join(src, rand.String(10))
 	gitAddr, indexPath := getter.SourceDirSubdir(addr)
 	if indexPath == "" {
-		return nil, errors.New("index path needs to be provided! Check documentation")
+		return nil, errors.New("index path needs to be provided. Check documentation about using git protocol")
 	}
 
 	ru, err := url.Parse(gitAddr)
