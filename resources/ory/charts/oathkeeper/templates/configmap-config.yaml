@@ -1,3 +1,4 @@
+{{ if not .Values.demo }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -13,3 +14,4 @@ data:
 {{- with .Values.oathkeeper.config -}}  
   {{- toYaml . | nindent 4 }} 
 {{- end -}}
+{{ end }}
