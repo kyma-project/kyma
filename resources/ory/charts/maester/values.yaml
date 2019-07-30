@@ -1,23 +1,28 @@
 replicaCount: 1
 
 configMapName: ory-oathkeeper-rules
-rulesConfigmapNamespace: true
+# rulesConfigmapNamespace: some-namespace
+# rulesFileName: access_rules.json
 
 image:
   # ORY Oathkeeper Rule Controller image
-  repository: tsmsap/ory-rule-controller
+  repository: oryd/oathkeeper-k8s-controller
   # ORY Oathkeeper Rule Controller version
-  tag: 0.0.1
+  tag: "v0.0.1"
   # Image pull policy
   pullPolicy: IfNotPresent
 
-resources:
-  limits:
-    cpu: 100m
-    memory: 30Mi
-  requests:
-    cpu: 100m
-    memory: 20Mi
+resources: {}
+  #  We usually recommend not to specify default resources and to leave this as a conscious
+  #  choice for the user. This also increases chances charts run on environments with little
+  #  resources, such as Minikube. If you do want to specify resources, uncomment the following
+  #  lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 30Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 20Mi
 
 # Node labels for pod assignment.
 nodeSelector: {}

@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,6 +19,10 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- with .Values.deployment.annotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
     spec:
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -26,7 +31,11 @@ spec:
       volumes:
         - name: {{ include "oathkeeper.name" . }}-config-volume
           configMap:
-            name: {{ include "oathkeeper.fullname" . }}
+            {{- if .Values.demo }}
+            name: {{ include "oathkeeper.fullname" . }}-config-demo
+            {{- else }}
+            name: {{ include "oathkeeper.fullname" . }}-config
+            {{- end }}
         - name: {{ include "oathkeeper.name" . }}-rules-volume
           configMap:
             name: {{ include "oathkeeper.fullname" . }}-rules
@@ -43,17 +52,21 @@ spec:
             - name: MUTATORS_ID_TOKEN_JWKS_URL
               value: "file:///etc/secrets/mutator.id_token.jwks.json"
             {{- end }}
-            {{- if not .Values.demo }}
             - name: ACCESS_RULES_REPOSITORIES
-              value: file://{{ .Values.ruleFile.dir }}/{{ .Values.ruleFile.name }}
-            {{- end }}
+              {{- if .Values.demo }}
+              value: "https://raw.githubusercontent.com/ory/k8s/master/helm/charts/oathkeeper/demo/access-rules.json"
+              {{- else }}
+              value: "file:///etc/config/access-rules.json"
+              {{- end }}
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-config-volume
-              mountPath: /etc/config
+              mountPath: /etc/config/config.yaml
               readOnly: true
+              subPath: config.yaml
             - name: {{ include "oathkeeper.name" . }}-rules-volume
-              mountPath: {{ .Values.ruleFile.dir }}
+              mountPath: /etc/config/access-rules.json
               readOnly: true
+              subPath: access-rules.json
             - name: {{ include "oathkeeper.name" . }}-secrets-volume
               mountPath: /etc/secrets
               readOnly: true
@@ -73,8 +86,8 @@ spec:
               path: /health/ready
               port: http-api
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
+      {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -82,7 +95,7 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.tolerations }}
+    {{- with .Values.deployment.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
