@@ -34,7 +34,13 @@ hydra:
     autoMigrate: false
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
-  resources: {}
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
 # Overrides for the Oathkeeper chart
 oathkeeper:
@@ -62,10 +68,23 @@ oathkeeper:
           port: 4455
         api:
           port: 4456
-  resources: {}
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
   image:
     tag: v0.17.1-beta.1
 
 maester:
   annotations: 
     sidecar.istio.io/inject: "false"
+  resources:
+    limits:
+      cpu: 100m
+      memory: 50Mi
+    requests:
+      cpu: 100m
+      memory: 20Mi
