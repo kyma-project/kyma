@@ -3,7 +3,6 @@ package addon_test
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -138,26 +137,4 @@ func assertDirNotExits(t *testing.T, path string) {
 	if !os.IsNotExist(err) {
 		t.Errorf("Got error while checking if dir %q exits: %v", path, err)
 	}
-}
-
-// fakeRepository provide access to addons repository
-type fakeRepository struct {
-	path string
-}
-
-// IndexReader returns index.yaml file from fake repository
-func (p *fakeRepository) IndexReader(URL string) (io.ReadCloser, error) {
-	p.path = URL
-	fName := fmt.Sprintf("%s/%s", p.path, "index.yaml")
-	return os.Open(fName)
-}
-
-// AddonReader returns body reader for the given addon
-func (p *fakeRepository) AddonReader(name addon.Name, version addon.Version) (io.ReadCloser, error) {
-	return os.Open(p.URLForAddon(name, version))
-}
-
-// URLForAddon returns download url for given addon
-func (p *fakeRepository) URLForAddon(name addon.Name, version addon.Version) string {
-	return fmt.Sprintf("%s/%s-%s.tgz", p.path, name, version)
 }

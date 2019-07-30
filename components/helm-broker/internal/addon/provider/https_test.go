@@ -1,19 +1,22 @@
-package addon_test
+package provider_test
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/addon/provider"
 )
 
-func TestHTTPRepository_IndexReader(t *testing.T) {
+func TestHTTPRepositoryIndexReader(t *testing.T) {
 	// given
 	const expContentGen = "expected content - index"
 
@@ -24,22 +27,31 @@ func TestHTTPRepository_IndexReader(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	rep := addon.NewHTTPRepository()
+	idxURL := ts.URL + "/index.yaml"
+	dst := "../../../tmp/TestHTTPRepositoryIndexReader"
+	httpGetter, err := provider.NewHTTP(idxURL, dst)
+	require.NoError(t, err)
 
 	// when
-	r, err := rep.IndexReader(ts.URL + "/index.yaml")
+	idxReader, err := httpGetter.IndexReader()
 
 	// then
 	require.NoError(t, err)
-	defer r.Close()
+	defer idxReader.Close()
 
-	got, err := ioutil.ReadAll(r)
+	got, err := ioutil.ReadAll(idxReader)
 	require.NoError(t, err)
 
 	assert.EqualValues(t, expContentGen, string(got))
+
+	// when
+	err = httpGetter.Cleanup()
+
+	// then
+	assertDirIsEmpty(t, dst)
 }
 
-func TestHTTPRepository_AddonReader(t *testing.T) {
+func TestHTTPRepositoryAddonLoadInfo(t *testing.T) {
 	// given
 	const (
 		expAddonName  addon.Name    = "addon_name"
@@ -54,24 +66,31 @@ func TestHTTPRepository_AddonReader(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	rep := addon.NewHTTPRepository()
+	idxURL := ts.URL + "/index.yaml"
+	dst := "../../../tmp/TestHTTPRepositoryAddonLoadInfo"
+	httpGetter, err := provider.NewHTTP(idxURL, dst)
+	require.NoError(t, err)
 
 	// when
-	_, err := rep.IndexReader(ts.URL + fmt.Sprintf("/%s-%s.tgz", expAddonName, expAddonVer))
-	require.NoError(t, err)
-	r, err := rep.AddonReader(expAddonName, expAddonVer)
+	loadType, path, err := httpGetter.AddonLoadInfo(expAddonName, expAddonVer)
 
 	// then
 	require.NoError(t, err)
-	defer r.Close()
+	require.Equal(t, provider.ArchiveLoadType, loadType)
 
-	got, err := ioutil.ReadAll(r)
+	got, err := ioutil.ReadFile(path)
 	require.NoError(t, err)
 
 	assert.EqualValues(t, expContentGen, string(got))
+
+	// when
+	err = httpGetter.Cleanup()
+
+	// then
+	assertDirIsEmpty(t, dst)
 }
 
-func TestHTTPRepository_URLForAddon(t *testing.T) {
+func TestHTTPRepositoryAddonDocURL(t *testing.T) {
 	// given
 	const (
 		addonName addon.Name    = "addon_name"
@@ -85,13 +104,24 @@ func TestHTTPRepository_URLForAddon(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	rep := addon.NewHTTPRepository()
+	idxURL := ts.URL + "/index.yaml"
+	httpGetter, err := provider.NewHTTP(idxURL, "../../../tmp")
+	require.NoError(t, err)
 
 	// when
-	_, err := rep.IndexReader(ts.URL + "/index.yaml")
-	require.NoError(t, err)
-	gotURL := rep.URLForAddon(addonName, addonVer)
+	gotURL := httpGetter.AddonDocURL(addonName, addonVer)
 
 	// then
 	assert.Equal(t, fmt.Sprintf("%s/%s-%s.tgz", ts.URL, addonName, addonVer), gotURL)
+}
+
+func assertDirIsEmpty(t *testing.T, name string) {
+	f, err := os.Open(name)
+	require.NoError(t, err)
+	defer f.Close()
+
+	_, err = f.Readdirnames(1)
+	if err != io.EOF {
+		t.Fatalf("Directory %s is not empty, got error: %v", name, err)
+	}
 }

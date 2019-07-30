@@ -29,7 +29,7 @@ entries:
 	assert.True(t, ex)
 	assert.Len(t, redis, 1)
 	v001 := redis[0]
-	assert.Equal(t, Name("redis"), v001.Name)
+	assert.Equal(t, "redis", v001.DisplayName)
 	assert.Equal(t, Version("0.0.1"), v001.Version)
 	assert.Equal(t, "Redis service", v001.Description)
 

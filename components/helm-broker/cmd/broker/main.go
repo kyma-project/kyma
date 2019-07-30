@@ -21,11 +21,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-const (
-	mapLabelKey   = "helm-broker-repo"
-	mapLabelValue = "true"
-)
-
 func main() {
 	verbose := flag.Bool("verbose", false, "specify if log verbosely loading configuration")
 	flag.Parse()

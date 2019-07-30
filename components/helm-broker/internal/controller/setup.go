@@ -5,16 +5,16 @@ import (
 	"time"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/sirupsen/logrus"
-	"k8s.io/client-go/rest"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/addon/provider"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/config"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis"
+	"github.com/sirupsen/logrus"
+	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
 // SetupAndStartController creates and starts the controller
@@ -39,19 +39,34 @@ func SetupAndStartController(cfg *rest.Config, ctrCfg *config.ControllerConfig, 
 	fatalOnError(v1beta1.AddToScheme(mgr.GetScheme()), "while adding SC scheme")
 	fatalOnError(v1alpha1.AddToScheme(mgr.GetScheme()), "while adding CMS scheme")
 
+	// Setup dependencies
 	docsProvider := NewDocsProvider(mgr.GetClient())
 	brokerSyncer := broker.NewServiceBrokerSyncer(mgr.GetClient(), ctrCfg.ClusterServiceBrokerName, lg)
 	sbFacade := broker.NewBrokersFacade(mgr.GetClient(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, lg)
 	csbFacade := broker.NewClusterBrokersFacade(mgr.GetClient(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, ctrCfg.ClusterServiceBrokerName, lg)
-	addonProvider := addon.NewProvider(addon.NewHTTPRepository(), addon.NewLoader(ctrCfg.TmpDir, lg), lg)
 
+	allowedGetters := map[string]provider.Provider{
+		"git":   provider.NewGit,
+		"https": provider.NewHTTP,
+	}
+	if ctrCfg.DevelopMode {
+		lg.Infof("Enabling support for HTTP protocol because DevelopMode is set to true.")
+		allowedGetters["http"] = provider.NewHTTP
+	} else {
+		lg.Infof("Disabling support for HTTP protocol because DevelopMode is set to false.")
+	}
+
+	addonGetterFactory, err := provider.NewClientFactory(allowedGetters, addon.NewLoader(ctrCfg.TmpDir, lg), lg)
+	fatalOnError(err, "cannot setup addon getter")
+
+	// Creating controllers
 	lg.Info("Setting up controller")
-	acReconcile := NewReconcileAddonsConfiguration(mgr, addonProvider, sFact.Chart(), sFact.Addon(), sbFacade, docsProvider, brokerSyncer, ctrCfg.DevelopMode)
+	acReconcile := NewReconcileAddonsConfiguration(mgr, addonGetterFactory, sFact.Chart(), sFact.Addon(), sbFacade, docsProvider, brokerSyncer, ctrCfg.TmpDir, lg)
 	acController := NewAddonsConfigurationController(acReconcile)
-	err := acController.Start(mgr)
+	err = acController.Start(mgr)
 	fatalOnError(err, "unable to start AddonsConfigurationController")
 
-	cacReconcile := NewReconcileClusterAddonsConfiguration(mgr, addonProvider, sFact.Chart(), sFact.Addon(), csbFacade, docsProvider, brokerSyncer, ctrCfg.DevelopMode)
+	cacReconcile := NewReconcileClusterAddonsConfiguration(mgr, addonGetterFactory, sFact.Chart(), sFact.Addon(), csbFacade, docsProvider, brokerSyncer, ctrCfg.TmpDir, lg)
 	cacController := NewClusterAddonsConfigurationController(cacReconcile)
 	err = cacController.Start(mgr)
 	fatalOnError(err, "unable to start ClusterAddonsConfigurationController")
