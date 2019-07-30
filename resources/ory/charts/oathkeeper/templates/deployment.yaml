@@ -62,11 +62,9 @@ spec:
             - name: {{ include "oathkeeper.name" . }}-config-volume
               mountPath: /etc/config/config.yaml
               readOnly: true
-              subPath: config.yaml
             - name: {{ include "oathkeeper.name" . }}-rules-volume
               mountPath: /etc/rules/access-rules.json
               readOnly: true
-              subPath: access-rules.json
             - name: {{ include "oathkeeper.name" . }}-secrets-volume
               mountPath: /etc/secrets
               readOnly: true
