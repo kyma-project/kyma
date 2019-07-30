@@ -16,9 +16,9 @@ This table lists the configurable parameters, their descriptions, and default va
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
 | **ctrl.resources.limits.cpu** | Defines limits for CPU resources. | `100m` |
-| **ctrl.resources.limits.memory** | Defines limits for memory resources. During clone action, the Git binary loads whole repository into memory. You may need to adjust this value if you want to clone a bigger repository.| `76Mi` |
+| **ctrl.resources.limits.memory** | Defines limits for memory resources. During the clone action, the Git binary loads the whole repository into memory. You may need to adjust this value if you want to clone a bigger repository.| `76Mi` |
 | **ctrl.resources.requests.cpu** | Defines requests for CPU resources. | `80m` |
 | **ctrl.resources.requests.memory** | Defines requests for memory resources. | `32Mi` |
-| **ctrl.tmpDirSizeLimit** | Specifies a size limit on the `tmp` directory in the Helm Pod. This directory is used to store processed addons. Eviction manager monitors the disk space used by the Pod and evicts it when the usage exceeds the limit. Then, the Pod is marked as `Evicted`. The limit is enforced with a time delay, usually about 10s. | `1GB` |
+| **ctrl.tmpDirSizeLimit** | Specifies a size limit on the `tmp` directory in the Helm Pod. This directory is used to store processed addons. Eviction manager monitors the disk space used by the Pod and evicts it when the usage exceeds the limit. Then, the Pod is marked as `Evicted`. The limit is enforced with a time delay, usually about 10s. | `1Gi` |
 | **global.cfgReposUrlName** | Specifies the name of the default ConfigMap which provides the URLs of addons repositories. | `helm-repos-urls` |
 | **global.isDevelopMode** | Defines that each repository URL must be an HTTPS server. If set to `true`, HTTP servers are also acceptable.  | `false` |

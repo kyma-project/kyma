@@ -100,7 +100,7 @@ spec:
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-controller:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
-{{ toYaml .Values.crds.resources | indent 10 }}
+{{ toYaml .Values.ctrl.resources | indent 10 }}
         env:
           - name: APP_TMP_DIR
             value: /tmp
