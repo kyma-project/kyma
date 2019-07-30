@@ -2,11 +2,14 @@ package kyma
 
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	resourcesServiceMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/mocks"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	appMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications/mocks"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
 )
@@ -14,10 +17,28 @@ import (
 func TestService(t *testing.T) {
 
 	t.Run("should return error in case failed to determine differences between current and desired runtime state", func(t *testing.T) {
+		// given
+		applicationsManagerMock := &appMocks.Manager{}
+		converterMock := &appMocks.Converter{}
+		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
-	})
+		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(nil, errors.New("some error"))
 
-	t.Run("should not break execution when error occurred", func(t *testing.T) {
+		directorApplication := getTestDirectorApplication("id1", []model.APIDefinition{}, []model.EventAPIDefinition{})
+
+		directorApplications := []model.Application{
+			directorApplication,
+		}
+
+		// when
+		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		_, err := kymaService.Apply(directorApplications)
+
+		// then
+		assert.Error(t, err)
+		converterMock.AssertExpectations(t)
+		applicationsManagerMock.AssertExpectations(t)
+		resourcesServiceMocks.AssertExpectations(t)
 
 	})
 
@@ -27,12 +48,11 @@ func TestService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
-		api := getTestDirectorAPiDefinition("API1")
+		api := getTestDirectorAPiDefinition("API1", &model.APISpec{
+			Data: []byte("spec"),
+		})
 
-		eventAPI := model.EventAPIDefinition{
-			ID:          "EventAPI1",
-			Description: "Event API 1",
-		}
+		eventAPI := getTestDirectorEventAPIDefinition("EventAPI1", nil)
 
 		directorApplication := getTestDirectorApplication("id1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
 
@@ -81,12 +101,10 @@ func TestService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
-		api := getTestDirectorAPiDefinition("API1")
-
-		eventAPI := model.EventAPIDefinition{
-			ID:          "EventAPI1",
-			Description: "Event API 1",
-		}
+		api := getTestDirectorAPiDefinition("API1", nil)
+		eventAPI := getTestDirectorEventAPIDefinition("EventAPI1", &model.EventAPISpec{
+			Data: []byte("spec"),
+		})
 
 		directorApplication := getTestDirectorApplication("id1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
 
@@ -107,8 +125,8 @@ func TestService(t *testing.T) {
 		converterMock.On("Do", directorApplication).Return(runtimeApplication)
 		applicationsManagerMock.On("Update", &runtimeApplication).Return(&runtimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		resourcesServiceMocks.On("UpdateApiResources", runtimeApplication, runtimeService1, []byte("spec")).Return(nil)
-		resourcesServiceMocks.On("CreateApiResources", runtimeApplication, runtimeService2, []byte(nil)).Return(nil)
+		resourcesServiceMocks.On("UpdateApiResources", runtimeApplication, runtimeService1, []byte(nil)).Return(nil)
+		resourcesServiceMocks.On("CreateApiResources", runtimeApplication, runtimeService2, []byte("spec")).Return(nil)
 		resourcesServiceMocks.On("DeleteApiResources", runtimeApplication, runtimeService3).Return(nil)
 
 		expectedResult := []Result{
@@ -169,6 +187,78 @@ func TestService(t *testing.T) {
 		applicationsManagerMock.AssertExpectations(t)
 		resourcesServiceMocks.AssertExpectations(t)
 	})
+
+	t.Run("should not break execution when error occurred when applying Application CR", func(t *testing.T) {
+		// given
+		applicationsManagerMock := &appMocks.Manager{}
+		converterMock := &appMocks.Converter{}
+		resourcesServiceMocks := &resourcesServiceMocks.Service{}
+
+		newRuntimeService1 := getTestServiceWithApi("API1")
+		newRuntimeService2 := getTestServiceWithApi("EventAPI1")
+
+		existingRuntimeService1 := getTestServiceWithApi("API2")
+		existingRuntimeService2 := getTestServiceWithApi("EventAPI2")
+
+		runtimeServiceToBeDeleted1 := getTestServiceWithApi("API3")
+		runtimeServiceToBeDeleted2 := getTestServiceWithApi("EventAPI3")
+
+		newDirectorApi := getTestDirectorAPiDefinition("API1", nil)
+		newDirectorEventApi := getTestDirectorEventAPIDefinition("EventAPI1", nil)
+
+		newDirectorApplication := getTestDirectorApplication("id1",
+			[]model.APIDefinition{newDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi})
+		newRuntimeApplication := getTestApplication("id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2})
+
+		existingDirectorApi := getTestDirectorAPiDefinition("API2", nil)
+		existingDirectorEventApi := getTestDirectorEventAPIDefinition("EventAPI2", nil)
+
+		existingDirectorApplication := getTestDirectorApplication("id2", []model.APIDefinition{newDirectorApi, existingDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi, existingDirectorEventApi})
+		existingRuntimeApplication := getTestApplication("id2", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, existingRuntimeService1, existingRuntimeService2, runtimeServiceToBeDeleted1, runtimeServiceToBeDeleted2})
+
+		runtimeApplicationToBeDeleted := getTestApplication("id3", []v1alpha1.Service{runtimeServiceToBeDeleted1, runtimeServiceToBeDeleted2})
+
+		directorApplications := []model.Application{
+			newDirectorApplication,
+			existingDirectorApplication,
+		}
+
+		existingRuntimeApplications := v1alpha1.ApplicationList{
+			Items: []v1alpha1.Application{getTestApplication("id2", []v1alpha1.Service{existingRuntimeService1, existingRuntimeService2, runtimeServiceToBeDeleted1, runtimeServiceToBeDeleted2}),
+				runtimeApplicationToBeDeleted},
+		}
+
+		converterMock.On("Do", newDirectorApplication).Return(newRuntimeApplication)
+		converterMock.On("Do", existingDirectorApplication).Return(existingRuntimeApplication)
+		applicationsManagerMock.On("Create", &newRuntimeApplication).Return(nil, errors.New("some error"))
+		applicationsManagerMock.On("Update", &existingRuntimeApplication).Return(nil, errors.New("some error"))
+		applicationsManagerMock.On("Delete", runtimeApplicationToBeDeleted.Name, &metav1.DeleteOptions{}).Return(errors.New("some error"))
+		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
+		resourcesServiceMocks.On("CreateApiResources", newRuntimeApplication, newRuntimeService1, []byte(nil)).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("CreateApiResources", newRuntimeApplication, newRuntimeService2, []byte(nil)).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("UpdateApiResources", existingRuntimeApplication, existingRuntimeService1, []byte(nil)).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("UpdateApiResources", existingRuntimeApplication, existingRuntimeService2, []byte(nil)).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("DeleteApiResources", runtimeApplicationToBeDeleted, runtimeServiceToBeDeleted1).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("DeleteApiResources", runtimeApplicationToBeDeleted, runtimeServiceToBeDeleted2).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("DeleteApiResources", existingRuntimeApplication, runtimeServiceToBeDeleted1).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("DeleteApiResources", existingRuntimeApplication, runtimeServiceToBeDeleted2).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("CreateApiResources", existingRuntimeApplication, newRuntimeService1, []byte(nil)).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("CreateApiResources", existingRuntimeApplication, newRuntimeService2, []byte(nil)).Return(apperrors.Internal("some error"))
+
+		// when
+		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		result, err := kymaService.Apply(directorApplications)
+
+		// then
+		require.NoError(t, err)
+		require.Equal(t, 3, len(result))
+		assert.NotNil(t, result[0].Error)
+		assert.NotNil(t, result[1].Error)
+		assert.NotNil(t, result[2].Error)
+		converterMock.AssertExpectations(t)
+		applicationsManagerMock.AssertExpectations(t)
+		resourcesServiceMocks.AssertExpectations(t)
+	})
 }
 
 func getTestDirectorApplication(id string, apiDefinitions []model.APIDefinition, eventApiDefinitions []model.EventAPIDefinition) model.Application {
@@ -180,21 +270,20 @@ func getTestDirectorApplication(id string, apiDefinitions []model.APIDefinition,
 	}
 }
 
-func getTestDirectorAPiDefinition(id string) model.APIDefinition {
+func getTestDirectorAPiDefinition(id string, spec *model.APISpec) model.APIDefinition {
 	return model.APIDefinition{
 		ID:          id,
 		Description: "API",
 		TargetUrl:   "www.examle.com",
-		APISpec: &model.APISpec{
-			Data: []byte("spec"),
-		},
+		APISpec:     spec,
 	}
 }
 
-func getTestDirectorEventAPIDefinition(id string) model.EventAPIDefinition {
+func getTestDirectorEventAPIDefinition(id string, spec *model.EventAPISpec) model.EventAPIDefinition {
 	return model.EventAPIDefinition{
-		ID:          id,
-		Description: "Event API 1",
+		ID:           id,
+		Description:  "Event API 1",
+		EventAPISpec: spec,
 	}
 }
 

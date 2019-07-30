@@ -15,10 +15,6 @@ type Service interface {
 	Apply(applications []model.Application) ([]Result, apperrors.AppError)
 }
 
-func NewSynchronizationService() Service {
-	return &service{}
-}
-
 type service struct {
 	applicationRepository applications.Manager
 	converter             applications.Converter
@@ -106,7 +102,7 @@ func (s *service) createApplication(directorApplication model.Application, runti
 		err = appendError(err, apperrors.Internal("Failed to create application: %s", e))
 	}
 
-	return newResult(runtimeApplication, Create, nil)
+	return newResult(runtimeApplication, Create, err)
 }
 
 func (s *service) createAPIResources(directorApplication model.Application, runtimeApplication v1alpha1.Application) apperrors.AppError {
@@ -221,7 +217,7 @@ func (s *service) updateApplication(directorApplication model.Application, exist
 		err = appendError(err, apperrors.Internal("Failed to update application: %s", e))
 	}
 
-	return newResult(existentRuntimeApplication, Update, nil)
+	return newResult(existentRuntimeApplication, Update, err)
 }
 
 func (s *service) updateAPIResources(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {
@@ -229,13 +225,15 @@ func (s *service) updateAPIResources(directorApplication model.Application, exis
 
 	for _, apiDefinition := range directorApplication.APIs {
 		found := applications.ServiceExists(apiDefinition.ID, existentRuntimeApplication)
-		service := applications.GetService(apiDefinition.ID, existentRuntimeApplication)
+
 		if found {
+			service := applications.GetService(apiDefinition.ID, existentRuntimeApplication)
 			e := s.resourcesService.UpdateApiResources(newRuntimeApplication, service, getSpec(apiDefinition.APISpec))
 			if e != nil {
 				err = appendError(err, e)
 			}
 		} else {
+			service := applications.GetService(apiDefinition.ID, newRuntimeApplication)
 			e := s.resourcesService.CreateApiResources(newRuntimeApplication, service, getSpec(apiDefinition.APISpec))
 			if e != nil {
 				err = appendError(err, e)
