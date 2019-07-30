@@ -50,3 +50,27 @@ Follow these steps to restore resources:
     >```bash
     > kubectl get virtualservices --all-namespaces
     > ```
+
+5. Once the restore succeeds, remove the `velero` namespace:
+
+```bash
+kubectl delete ns velero
+```
+
+## Troubleshooting
+
+### Pod stuck in `Init` phase
+
+In case the Pod `service-catalog-addons-service-binding-usage-controller` gets stuck in `Init` phase, try deleting the Pod:
+
+```bash
+kubectl delete $(kubectl get pod -l app=service-catalog-addons-service-binding-usage-controller -n kyma-system -o name) -n kyma-system
+```
+
+### Different DNS and Gateway IP Address
+
+This tutorial assumes that DNS and Gateway IP address will stay the same as the backed up cluster. If they change in the new cluster, update the `net-global-overrides` ConfigMap in `kyma-installer` namespace with the proper values and re-run the installer to propagate the new values:
+
+```bash
+kubectl label installation/kyma-installation action=install
+```
