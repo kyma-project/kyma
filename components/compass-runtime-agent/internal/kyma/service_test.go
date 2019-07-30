@@ -76,7 +76,59 @@ func TestService(t *testing.T) {
 	})
 
 	t.Run("should apply Update operation", func(t *testing.T) {
+		// given
+		applicationsManagerMock := &appMocks.Manager{}
+		converterMock := &appMocks.Converter{}
+		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
+		api := getTestDirectorAPiDefinition("API1")
+
+		eventAPI := model.EventAPIDefinition{
+			ID:          "EventAPI1",
+			Description: "Event API 1",
+		}
+
+		directorApplication := getTestDirectorApplication("id1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
+
+		runtimeService1 := getTestServiceWithApi("API1")
+		runtimeService2 := getTestServiceWithApi("EventAPI1")
+		runtimeService3 := getTestServiceWithApi("API2")
+
+		runtimeApplication := getTestApplication("id1", []v1alpha1.Service{runtimeService1, runtimeService2})
+
+		directorApplications := []model.Application{
+			directorApplication,
+		}
+
+		existingRuntimeApplications := v1alpha1.ApplicationList{
+			Items: []v1alpha1.Application{getTestApplication("id1", []v1alpha1.Service{runtimeService1, runtimeService3})},
+		}
+
+		converterMock.On("Do", directorApplication).Return(runtimeApplication)
+		applicationsManagerMock.On("Update", &runtimeApplication).Return(&runtimeApplication, nil)
+		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
+		resourcesServiceMocks.On("UpdateApiResources", runtimeApplication, runtimeService1, []byte("spec")).Return(nil)
+		resourcesServiceMocks.On("CreateApiResources", runtimeApplication, runtimeService2, []byte(nil)).Return(nil)
+		resourcesServiceMocks.On("DeleteApiResources", runtimeApplication, runtimeService3).Return(nil)
+
+		expectedResult := []Result{
+			{
+				ApplicationID: "id1",
+				Operation:     Update,
+				Error:         nil,
+			},
+		}
+
+		// when
+		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		result, err := kymaService.Apply(directorApplications)
+
+		// then
+		assert.NoError(t, err)
+		assert.Equal(t, expectedResult, result)
+		converterMock.AssertExpectations(t)
+		applicationsManagerMock.AssertExpectations(t)
+		resourcesServiceMocks.AssertExpectations(t)
 	})
 
 	t.Run("should apply Delete operation", func(t *testing.T) {

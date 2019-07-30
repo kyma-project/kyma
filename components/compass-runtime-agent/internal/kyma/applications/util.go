@@ -49,12 +49,12 @@ func ApplicationExists(applicationName string, applicationList []v1alpha1.Applic
 	return false
 }
 
-func FindApplication(applicationName string, applicationList *v1alpha1.ApplicationList) v1alpha1.Application {
+func GetApplication(applicationName string, applicationList []v1alpha1.Application) v1alpha1.Application {
 	if applicationList == nil {
 		return v1alpha1.Application{}
 	}
 
-	for _, runtimeApplication := range applicationList.Items {
+	for _, runtimeApplication := range applicationList {
 		if runtimeApplication.Name == applicationName {
 			return runtimeApplication
 		}

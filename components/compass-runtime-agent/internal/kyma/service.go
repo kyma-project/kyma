@@ -199,7 +199,89 @@ func (s *service) deleteAPIResources(runtimeApplication v1alpha1.Application) ap
 
 func (s *service) updateApplications(currentApplications []v1alpha1.Application, directorApplications []model.Application) []Result {
 
-	return nil
+	results := make([]Result, 0)
+
+	for _, directorApplication := range directorApplications {
+		if applications.ApplicationExists(directorApplication.ID, currentApplications) {
+			existentApplication := applications.GetApplication(directorApplication.ID, currentApplications)
+			r := s.updateApplication(directorApplication, existentApplication, s.converter.Do(directorApplication))
+			results = append(results, r)
+		}
+	}
+
+	return results
+}
+
+func (s *service) updateApplication(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) Result {
+
+	err := s.updateAPIResources(directorApplication, existentRuntimeApplication, newRuntimeApplication)
+
+	_, e := s.applicationRepository.Update(&newRuntimeApplication)
+	if e != nil {
+		err = appendError(err, apperrors.Internal("Failed to update application: %s", e))
+	}
+
+	return newResult(existentRuntimeApplication, Update, nil)
+}
+
+func (s *service) updateAPIResources(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {
+	var err apperrors.AppError
+
+	for _, apiDefinition := range directorApplication.APIs {
+		found := applications.ServiceExists(apiDefinition.ID, existentRuntimeApplication)
+		service := applications.GetService(apiDefinition.ID, existentRuntimeApplication)
+		if found {
+			e := s.resourcesService.UpdateApiResources(newRuntimeApplication, service, getSpec(apiDefinition.APISpec))
+			if e != nil {
+				err = appendError(err, e)
+			}
+		} else {
+			e := s.resourcesService.CreateApiResources(newRuntimeApplication, service, getSpec(apiDefinition.APISpec))
+			if e != nil {
+				err = appendError(err, e)
+			}
+		}
+	}
+
+	for _, eventAPIDefinition := range directorApplication.EventAPIs {
+		found := applications.ServiceExists(eventAPIDefinition.ID, existentRuntimeApplication)
+		service := applications.GetService(eventAPIDefinition.ID, newRuntimeApplication)
+		if found {
+			e := s.resourcesService.UpdateApiResources(newRuntimeApplication, service, getEventSpec(eventAPIDefinition.EventAPISpec))
+			if e != nil {
+				err = appendError(err, e)
+			}
+		} else {
+			e := s.resourcesService.CreateApiResources(newRuntimeApplication, service, getEventSpec(eventAPIDefinition.EventAPISpec))
+			if e != nil {
+				err = appendError(err, e)
+			}
+		}
+	}
+
+	for _, service := range existentRuntimeApplication.Spec.Services {
+		found := false
+		for _, apiDefinition := range directorApplication.APIs {
+			if apiDefinition.ID == service.ID {
+				found = true
+			}
+		}
+
+		for _, eventAPIDefinition := range directorApplication.EventAPIs {
+			if eventAPIDefinition.ID == service.ID {
+				found = true
+			}
+		}
+
+		if !found {
+			e := s.resourcesService.DeleteApiResources(newRuntimeApplication, service)
+			if e != nil {
+				err = appendError(err, e)
+			}
+		}
+	}
+
+	return err
 }
 
 func newResult(application v1alpha1.Application, operation Operation, appError apperrors.AppError) Result {
