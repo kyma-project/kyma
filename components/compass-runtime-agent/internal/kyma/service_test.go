@@ -118,8 +118,9 @@ func TestService(t *testing.T) {
 			directorApplication,
 		}
 
+		existingRuntimeApplication := getTestApplication("id1", []v1alpha1.Service{runtimeService1, runtimeService3})
 		existingRuntimeApplications := v1alpha1.ApplicationList{
-			Items: []v1alpha1.Application{getTestApplication("id1", []v1alpha1.Service{runtimeService1, runtimeService3})},
+			Items: []v1alpha1.Application{existingRuntimeApplication},
 		}
 
 		converterMock.On("Do", directorApplication).Return(runtimeApplication)
@@ -127,7 +128,7 @@ func TestService(t *testing.T) {
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 		resourcesServiceMocks.On("UpdateApiResources", runtimeApplication, runtimeService1, []byte(nil)).Return(nil)
 		resourcesServiceMocks.On("CreateApiResources", runtimeApplication, runtimeService2, []byte("spec")).Return(nil)
-		resourcesServiceMocks.On("DeleteApiResources", runtimeApplication, runtimeService3).Return(nil)
+		resourcesServiceMocks.On("DeleteApiResources", existingRuntimeApplication, runtimeService3).Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -208,13 +209,13 @@ func TestService(t *testing.T) {
 
 		newDirectorApplication := getTestDirectorApplication("id1",
 			[]model.APIDefinition{newDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi})
-		newRuntimeApplication := getTestApplication("id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2})
+		convertedNewRuntimeApplication := getTestApplication("id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2})
 
 		existingDirectorApi := getTestDirectorAPiDefinition("API2", nil)
 		existingDirectorEventApi := getTestDirectorEventAPIDefinition("EventAPI2", nil)
 
 		existingDirectorApplication := getTestDirectorApplication("id2", []model.APIDefinition{newDirectorApi, existingDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi, existingDirectorEventApi})
-		existingRuntimeApplication := getTestApplication("id2", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, existingRuntimeService1, existingRuntimeService2, runtimeServiceToBeDeleted1, runtimeServiceToBeDeleted2})
+		convertedExistingRuntimeApplication := getTestApplication("id2", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, existingRuntimeService1, existingRuntimeService2})
 
 		runtimeApplicationToBeDeleted := getTestApplication("id3", []v1alpha1.Service{runtimeServiceToBeDeleted1, runtimeServiceToBeDeleted2})
 
@@ -223,27 +224,29 @@ func TestService(t *testing.T) {
 			existingDirectorApplication,
 		}
 
+		existingRuntimeApplication := getTestApplication("id2", []v1alpha1.Service{existingRuntimeService1, existingRuntimeService2, runtimeServiceToBeDeleted1, runtimeServiceToBeDeleted2})
+
 		existingRuntimeApplications := v1alpha1.ApplicationList{
-			Items: []v1alpha1.Application{getTestApplication("id2", []v1alpha1.Service{existingRuntimeService1, existingRuntimeService2, runtimeServiceToBeDeleted1, runtimeServiceToBeDeleted2}),
+			Items: []v1alpha1.Application{existingRuntimeApplication,
 				runtimeApplicationToBeDeleted},
 		}
 
-		converterMock.On("Do", newDirectorApplication).Return(newRuntimeApplication)
-		converterMock.On("Do", existingDirectorApplication).Return(existingRuntimeApplication)
-		applicationsManagerMock.On("Create", &newRuntimeApplication).Return(nil, errors.New("some error"))
-		applicationsManagerMock.On("Update", &existingRuntimeApplication).Return(nil, errors.New("some error"))
+		converterMock.On("Do", newDirectorApplication).Return(convertedNewRuntimeApplication)
+		converterMock.On("Do", existingDirectorApplication).Return(convertedExistingRuntimeApplication)
+		applicationsManagerMock.On("Create", &convertedNewRuntimeApplication).Return(nil, errors.New("some error"))
+		applicationsManagerMock.On("Update", &convertedExistingRuntimeApplication).Return(nil, errors.New("some error"))
 		applicationsManagerMock.On("Delete", runtimeApplicationToBeDeleted.Name, &metav1.DeleteOptions{}).Return(errors.New("some error"))
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		resourcesServiceMocks.On("CreateApiResources", newRuntimeApplication, newRuntimeService1, []byte(nil)).Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("CreateApiResources", newRuntimeApplication, newRuntimeService2, []byte(nil)).Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("UpdateApiResources", existingRuntimeApplication, existingRuntimeService1, []byte(nil)).Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("UpdateApiResources", existingRuntimeApplication, existingRuntimeService2, []byte(nil)).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("CreateApiResources", convertedNewRuntimeApplication, newRuntimeService1, []byte(nil)).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("CreateApiResources", convertedNewRuntimeApplication, newRuntimeService2, []byte(nil)).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("UpdateApiResources", convertedExistingRuntimeApplication, existingRuntimeService1, []byte(nil)).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("UpdateApiResources", convertedExistingRuntimeApplication, existingRuntimeService2, []byte(nil)).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("CreateApiResources", convertedExistingRuntimeApplication, newRuntimeService1, []byte(nil)).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("CreateApiResources", convertedExistingRuntimeApplication, newRuntimeService2, []byte(nil)).Return(apperrors.Internal("some error"))
 		resourcesServiceMocks.On("DeleteApiResources", runtimeApplicationToBeDeleted, runtimeServiceToBeDeleted1).Return(apperrors.Internal("some error"))
 		resourcesServiceMocks.On("DeleteApiResources", runtimeApplicationToBeDeleted, runtimeServiceToBeDeleted2).Return(apperrors.Internal("some error"))
 		resourcesServiceMocks.On("DeleteApiResources", existingRuntimeApplication, runtimeServiceToBeDeleted1).Return(apperrors.Internal("some error"))
 		resourcesServiceMocks.On("DeleteApiResources", existingRuntimeApplication, runtimeServiceToBeDeleted2).Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("CreateApiResources", existingRuntimeApplication, newRuntimeService1, []byte(nil)).Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("CreateApiResources", existingRuntimeApplication, newRuntimeService2, []byte(nil)).Return(apperrors.Internal("some error"))
 
 		// when
 		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
