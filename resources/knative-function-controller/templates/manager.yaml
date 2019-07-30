@@ -37,6 +37,8 @@ spec:
   serviceName: controller-manager-service
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "{{ .Values.manager.inMesh  }}"
       labels:
         control-plane: controller-manager
         controller-tools.k8s.io: "1.0"
@@ -44,8 +46,8 @@ spec:
       containers:
       - command:
         - /manager
-        image: ""
-        imagePullPolicy: Always
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.knative_function_controller.dir }}knative-function-controller:{{ .Values.global.knative_function_controller.version }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: manager
         env:
           - name: POD_NAMESPACE
