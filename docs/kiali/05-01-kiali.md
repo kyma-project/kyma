@@ -15,10 +15,10 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **server.metrics.enabled** | Specifies whether the metrics endpoint will be available for Prometheus to scrape. | `true` |
+| **server.metrics.enabled** | Specifies if the metrics endpoint is available for Prometheus to scrape. | `true` |
 | **server.webRoot** | Defines the context root path for Kiali console, API endpoints, and readiness probes. | `/` |
-| **deployment.viewOnlyMode** | When true, Kiali will be in "view only" mode, allowind the user to view and retrieve management data for the service mesh, but not allowed the user to modify the service mesh.  | `true` |
-| **deployment.accessibleNamespaces** | A list of namespaces, Kiali allowed access to service mesh components deployed on those namespaces. You can provide names using regex expressions. Default value is a special value of "**" (two asterisks), which mean Kiali allowed access any namespace. | `**` |
+| **deployment.viewOnlyMode** | When set to `true`, Kiali is available in view-only mode, allowing you to view and retrieve management data for the Service Mesh. You cannot modify the Service Mesh.  | `true` |
+| **deployment.accessibleNamespaces** | Specifies the Namespaces Kiali can access to monitor the Service Mesh components deployed there. You can provide the names using regex expressions. The default value is `**`(two asterisks) meaning Kiali can access any Namespace. | `**` |
 
 
-For more about Kiali configuration and customization you can find in [Kiali getting started](https://www.kiali.io/documentation/getting-started/) documentation.
+For details on Kiali configuration and customization, see [this](https://www.kiali.io/documentation/getting-started/) documentation.
