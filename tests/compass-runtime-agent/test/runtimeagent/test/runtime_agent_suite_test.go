@@ -26,8 +26,17 @@ func TestMain(m *testing.M) {
 
 	testSuite, err = runtimeagent.NewTestSuite(config)
 	if err != nil {
-		logrus.Fatalf("Failed to create test suite: %s", err.Error())
+		logrus.Errorf("Failed to create test suite: %s", err.Error())
+		os.Exit(1)
 	}
+
+	logrus.Info("Setting up...")
+	err = testSuite.Setup()
+	if err != nil {
+		logrus.Errorf("Error while setting up tests: %s", err.Error())
+		os.Exit(1)
+	}
+	defer testSuite.Cleanup()
 
 	// run tests
 	logrus.Info("Running tests...")
@@ -35,4 +44,5 @@ func TestMain(m *testing.M) {
 	defer os.Exit(exCode)
 
 	// cleanup
+	logrus.Info("Tests finished. Exit code: ", exCode)
 }

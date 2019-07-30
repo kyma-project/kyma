@@ -43,10 +43,11 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		noAuthAPIInput, basicAuthAPIInput, oauthAPIInput,
 	})
 
+	logrus.Info("Creating Application...")
 	response, err := client.CreateApplication(application.ToCompassInput())
 	require.NoError(t, err)
 	defer func() {
-		logrus.Infof("Cleaning up %s Application", response.Id)
+		logrus.Infof("Cleaning up %s Application...", response.Id)
 		removedId, err := client.DeleteApplication(response.Id)
 		require.NoError(t, err)
 		assert.Equal(t, response.Id, removedId)
@@ -61,7 +62,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 
 	// TODO: consider checking CompassConnection CR to decide when to start checks
 	logrus.Info("Waiting for Runtime Agent to apply configuration...")
-	time.Sleep(25 * time.Second)
+	time.Sleep(45 * time.Second)
 
 	// TODO - assertions
 

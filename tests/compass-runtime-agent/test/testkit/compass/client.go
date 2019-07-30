@@ -26,6 +26,11 @@ type Client struct {
 
 // TODO: pass options with authenticated client
 func NewCompassClient(endpoint, tenant, runtimeId string) *Client {
+	client := gcli.NewClient(endpoint)
+	client.Log = func(s string) {
+		logrus.Info(s)
+	}
+
 	return &Client{
 		client:        gcli.NewClient(endpoint),
 		graphqlizer:   gqltools.Graphqlizer{},
@@ -122,10 +127,6 @@ func (c *Client) CreateApplication(input graphql.ApplicationInput) (AppIdsRespon
 
 func (c *Client) DeleteApplication(id string) (string, error) {
 	query := c.queryProvider.deleteApplication(id)
-
-	c.client.Log = func(s string) {
-		logrus.Info(s)
-	}
 
 	req := gcli.NewRequest(query)
 	req.Header.Set(TenantHeader, c.tenant)
