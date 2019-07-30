@@ -42,8 +42,13 @@ spec:
           args:
             - --metrics-addr=127.0.0.1:8080
             - --rulesConfigmapName={{ .Values.configMapName }}
-            {{- if .Release.Namespace }}
+            {{- if .Values.rulesConfigmapNamespace }}
+            - --rulesConfigmapNamespace={{ .Values.rulesConfigmapNamespace }}
+            {{- else }}
             - --rulesConfigmapNamespace={{ .Release.Namespace }}
+            {{- end }}
+            {{- if .Values.rulesFileName }}
+            - --rulesFileName={{ .Values.rulesFileName }}
             {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

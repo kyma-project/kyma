@@ -4,9 +4,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-public
-  {{- if .Release.Namespace }}
   namespace: {{ .Release.Namespace }}
-  {{- end }}
   labels:
 {{ include "hydra.labels" . | indent 4 }}
   {{- with .Values.ingress.public.annotations }}
