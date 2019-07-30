@@ -121,7 +121,7 @@ func TestProxyService(t *testing.T) {
 			client.CleanupService(t, apiID)
 		}()
 
-		t.Log("Skipp labeling tests pod with denier label")
+		t.Log("Skip labeling tests pod with denier label")
 
 		t.Log("Calling Access Service")
 		resp := testSuit.CallAccessService(t, apiID, "status/ok")
