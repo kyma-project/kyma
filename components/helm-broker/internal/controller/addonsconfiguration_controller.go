@@ -248,16 +248,9 @@ func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1
 
 		for _, repo := range addon.Status.Repositories {
 			for _, a := range repo.Addons {
-				id, err := r.removeAddon(a, internal.Namespace(addon.Namespace))
+				err := r.removeAddon(a, internal.Namespace(addon.Namespace))
 				if err != nil && !storage.IsNotFoundError(err) {
 					return exerr.Wrapf(err, "while deleting addon with charts for addon %s", a.Name)
-				}
-
-				if id != nil {
-					r.log.Infof("- delete DocsTopic for addon %s", a)
-					if err := r.docsProvider.EnsureDocsTopicRemoved(string(*id), addon.Namespace); err != nil {
-						return exerr.Wrapf(err, "while ensuring DocsTopic for addon %s is removed", *id)
-					}
 				}
 			}
 		}
@@ -331,7 +324,7 @@ func (r *ReconcileAddonsConfiguration) deleteOrphanAddons(namespace string, repo
 	for _, repo := range lastRepos {
 		for _, ad := range repo.Addons {
 			if _, exist := addonsToStay[ad.Key()]; !exist {
-				if _, err := r.removeAddon(ad, internal.Namespace(namespace)); err != nil && !storage.IsNotFoundError(err) {
+				if err := r.removeAddon(ad, internal.Namespace(namespace)); err != nil && !storage.IsNotFoundError(err) {
 					return nil, exerr.Wrapf(err, "while deleting addons and charts for addon %s", ad.Name)
 				}
 				deletedAddonsIDs = append(deletedAddonsIDs, ad.Key())
@@ -345,7 +338,7 @@ func (r *ReconcileAddonsConfiguration) deleteAddonsFromRepository(namespace stri
 	var deletedAddonsKeys []string
 	for _, repo := range repos {
 		for _, ad := range repo.Addons {
-			if _, err := r.removeAddon(ad, internal.Namespace(namespace)); err != nil && !storage.IsNotFoundError(err) {
+			if err := r.removeAddon(ad, internal.Namespace(namespace)); err != nil && !storage.IsNotFoundError(err) {
 				return nil, exerr.Wrapf(err, "while deleting addons and charts for addon %s", ad.Name)
 			}
 			deletedAddonsKeys = append(deletedAddonsKeys, ad.Key())
@@ -354,26 +347,30 @@ func (r *ReconcileAddonsConfiguration) deleteAddonsFromRepository(namespace stri
 	return deletedAddonsKeys, nil
 }
 
-func (r *ReconcileAddonsConfiguration) removeAddon(ad addonsv1alpha1.Addon, namespace internal.Namespace) (*internal.AddonID, error) {
+func (r *ReconcileAddonsConfiguration) removeAddon(ad addonsv1alpha1.Addon, namespace internal.Namespace) error {
 	r.log.Infof("- delete addon %s from storage", ad.Name)
-	b, err := r.addonStorage.Get(namespace, internal.AddonName(ad.Name), *semver.MustParse(ad.Version))
+	addon, err := r.addonStorage.Get(namespace, internal.AddonName(ad.Name), *semver.MustParse(ad.Version))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	err = r.addonStorage.Remove(namespace, internal.AddonName(ad.Name), *semver.MustParse(ad.Version))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	r.syncBroker = true
+	r.log.Infof("- delete DocsTopic for addon %s", addon)
+	if err := r.docsProvider.EnsureDocsTopicRemoved(string(addon.ID), string(namespace)); err != nil {
+		return exerr.Wrapf(err, "while ensuring DocsTopic for addon %s is removed", addon.ID)
+	}
 
-	for _, plan := range b.Plans {
+	for _, plan := range addon.Plans {
 		err = r.chartStorage.Remove(namespace, plan.ChartRef.Name, plan.ChartRef.Version)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
-	return &b.ID, nil
+	return nil
 }
 
 func (r *ReconcileAddonsConfiguration) reprocessConflictingAddonsConfiguration(key string, list *addonsv1alpha1.AddonsConfigurationList) error {
