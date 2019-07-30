@@ -52,12 +52,10 @@ spec:
             - name: MUTATORS_ID_TOKEN_JWKS_URL
               value: "file:///etc/secrets/mutator.id_token.jwks.json"
             {{- end }}
+            {{- if not .Values.demo }}
             - name: ACCESS_RULES_REPOSITORIES
-              {{- if .Values.demo }}
-              value: "https://raw.githubusercontent.com/ory/k8s/master/helm/charts/oathkeeper/demo/access-rules.json"
-              {{- else }}
               value: "file:///etc/rules/access-rules.json"
-              {{- end }}
+            {{- end }}
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-config-volume
               mountPath: /etc/config
