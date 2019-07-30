@@ -1,9 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "subscription-controller-knative.fullname" . }}
+  name: {{ template "subscription-controller.fullname" . }}
   labels:
-{{ include "subscription-controller-knative.labels.standard" . | indent 4 }}
+{{ include "subscription-controller.labels.standard" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
@@ -15,19 +15,19 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        app: {{ template "subscription-controller-knative.fullname" . }}
+        app: {{ template "subscription-controller.fullname" . }}
         release: {{ .Release.Name }}
         kyma-grafana: {{ .Values.monitoring.grafana}}
         kyma-alerts: {{ .Values.monitoring.alerts}}
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}event-bus-subscription-controller-knative:{{ .Values.global.event_bus.version }}"
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}{{ .Values.global.event_bus.subscriptionControllerImage }}:{{ .Values.global.event_bus.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --port={{ .Values.port }}
-            - --resyncPeriod={{ .Values.global.subscriptionControllerKnative.resyncPeriod }}
-            - --channelTimeout={{ .Values.global.subscriptionControllerKnative.channelTimeout }}
+            - --resyncPeriod={{ .Values.global.subscriptionController.resyncPeriod }}
+            - --channelTimeout={{ .Values.global.subscriptionController.channelTimeout }}
           ports:
             - name: http
               containerPort: {{ .Values.port }}
@@ -44,5 +44,5 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 5
           resources:
-{{ toYaml .Values.global.subscriptionControllerKnative.resources | indent 12 }}
-      serviceAccount:  {{ .Release.Name }}-subscription-controller-knative-sa
+{{ toYaml .Values.global.subscriptionController.resources | indent 12 }}
+      serviceAccount:  {{ template "subscription-controller.fullname" .}}

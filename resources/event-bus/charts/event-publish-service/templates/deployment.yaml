@@ -1,9 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "publish-knative.fullname" . }}
+  name: {{ template "event-publish-service.fullname" . }}
   labels:
-{{ include "publish-knative.labels.standard" . | indent 4 }}
+{{ include "event-publish-service.labels.standard" . | indent 4 }}
 spec:
   {{ if .Values.global.isLocalEnv }}
   replicas: 1
@@ -12,7 +12,7 @@ spec:
   {{ end }}
   selector:
     matchLabels:
-      app: {{ template "publish-knative.fullname" . }}
+      app: {{ template "event-publish-service.fullname" . }}
       release: {{ .Release.Name }}
   strategy:
     type: RollingUpdate
@@ -23,26 +23,26 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
-        app: {{ template "publish-knative.fullname" . }}
+        app: {{ template "event-publish-service.fullname" . }}
         release: {{ .Release.Name }}
         kyma-grafana: {{ .Values.monitoring.grafana}}
         kyma-alerts: {{ .Values.monitoring.alerts}}
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}event-bus-publish-knative:{{ .Values.global.event_bus.version }}"
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}{{ .Values.global.event_bus.publisherImage }}:{{ .Values.global.event_bus.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --port={{ .Values.port }}
-            - --max_requests={{ .Values.global.publishKnative.maxRequests }}
-            - --max_request_size={{ .Values.global.publishKnative.maxRequestSize }}
-            - --max_channel_name_length={{ .Values.global.publishKnative.maxChannelNameLength }}
+            - --max_requests={{ .Values.global.eventPublishService.maxRequests }}
+            - --max_request_size={{ .Values.global.eventPublishService.maxRequestSize }}
+            - --max_channel_name_length={{ .Values.global.eventPublishService.maxChannelNameLength }}
             - --trace_api_url={{ .Values.global.trace.apiURL }}
             - --trace_service_name={{ .Values.trace.serviceName }}
             - --trace_operation_name={{ .Values.trace.operationName }}
-            - --max_source_id_length={{ .Values.global.publishKnative.maxSourceIDLength }}
-            - --max_event_type_length={{ .Values.global.publishKnative.maxEventTypeLength }}
-            - --max_event_type_version_length={{ .Values.global.publishKnative.maxEventTypeVersionLength }}
+            - --max_source_id_length={{ .Values.global.eventPublishService.maxSourceIDLength }}
+            - --max_event_type_length={{ .Values.global.eventPublishService.maxEventTypeLength }}
+            - --max_event_type_version_length={{ .Values.global.eventPublishService.maxEventTypeVersionLength }}
             - --monitoring_port={{ .Values.monitoring.port }}
           ports:
             - name: http
@@ -56,5 +56,5 @@ spec:
             initialDelaySeconds: 60
             timeoutSeconds: 10
           resources:
-{{ toYaml .Values.global.publishKnative.resources | indent 12 }}
-      serviceAccount:  {{ .Release.Name }}-publish
+{{ toYaml .Values.global.eventPublishService.resources | indent 12 }}
+      serviceAccount:  {{ template "event-publish-service.fullname" . }}

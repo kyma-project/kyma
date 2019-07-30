@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-    name: '{{ template "publish-knative.fullname" . }}-metrics-service'
+    name: {{ template "event-publish-service-metrics.name" . }}
     labels:
-        app: {{ template "publish-knative.fullname" . }}
+        app: {{ template "event-publish-service.fullname" . }}
         heritage: {{ .Release.Service | quote }}
         release: {{ .Release.Name | quote }}
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -14,5 +14,5 @@ spec:
         - name: metrics-port
           port: {{ .Values.monitoring.port }}
     selector:
-        app: {{ template "publish-knative.fullname" . }}
+        app: {{ template "event-publish-service.fullname" . }}
         release: {{ .Release.Name }}
