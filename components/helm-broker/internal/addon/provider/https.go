@@ -68,7 +68,10 @@ func (h *HTTPGetter) IndexReader() (io.ReadCloser, error) {
 
 // AddonLoadInfo returns information how to load addon
 func (h *HTTPGetter) AddonLoadInfo(name addon.Name, version addon.Version) (LoadType, string, error) {
-	rawURL := h.AddonDocURL(name, version)
+	rawURL, err := h.AddonDocURL(name, version)
+	if err != nil {
+		return UnknownLoadType, "", err
+	}
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		return UnknownLoadType, "", err
@@ -83,8 +86,8 @@ func (h *HTTPGetter) AddonLoadInfo(name addon.Name, version addon.Version) (Load
 }
 
 // AddonDocURL returns url for addon documentation
-func (h *HTTPGetter) AddonDocURL(name addon.Name, version addon.Version) string {
-	return fmt.Sprintf("%s%s-%s.tgz", h.repoURL, name, version)
+func (h *HTTPGetter) AddonDocURL(name addon.Name, version addon.Version) (string, error) {
+	return fmt.Sprintf("%s%s-%s.tgz", h.repoURL, name, version), nil
 }
 
 func baseOfURL(fullURL string) string {
