@@ -11,24 +11,9 @@ type queryProvider struct{}
 func (qp queryProvider) createApplication(input string) string {
 	return fmt.Sprintf(`mutation {
 	result: createApplication(in: %s) {
-		id
-		apis {
-			data {
-				id
-			}
-		}
-		eventAPIs {
-			data {
-				id
-			}
-		}
-		documents {
-			data {
-				id
-			}
-		}
+		%s
 	}
-}`, input)
+}`, input, applicationData())
 }
 
 func (qp queryProvider) deleteApplication(id string) string {
@@ -37,4 +22,175 @@ func (qp queryProvider) deleteApplication(id string) string {
 		id
 	}
 }`, id)
+}
+
+func (qp queryProvider) createAPI(applicationId string, input string) string {
+	return fmt.Sprintf(`mutation {
+	result: addAPI(applicationID: %s, in: %s) {
+		%s
+	}
+}`, applicationId, input, apiDefinitionData())
+}
+
+func (qp queryProvider) updateAPI(applicationId string, input string) string {
+	return fmt.Sprintf(`mutation {
+	result: updateAPI(applicationID: %s, in: %s) {
+		%s
+	}
+}`, applicationId, input, apiDefinitionData())
+}
+
+func (qp queryProvider) deleteAPI(applicationId string) string {
+	return fmt.Sprintf(`mutation {
+	result: deleteAPI(applicationID: %s) {
+		id
+	}
+}`, applicationId)
+}
+
+func (qp queryProvider) createEventAPI(applicationId string, input string) string {
+	return fmt.Sprintf(`mutation {
+	result: addEventAPI(applicationID: %s, in: %s) {
+		%s
+	}
+}`, applicationId, input, apiDefinitionData())
+}
+
+func (qp queryProvider) updateEventAPI(applicationId string, input string) string {
+	return fmt.Sprintf(`mutation {
+	result: updateEventAPI(applicationID: %s, in: %s) {
+		%s
+	}
+}`, applicationId, input, apiDefinitionData())
+}
+
+func (qp queryProvider) deleteEventAPI(applicationId string) string {
+	return fmt.Sprintf(`mutation {
+	result: deleteEventAPI(applicationID: %s) {
+		id
+	}
+}`, applicationId)
+}
+
+func pageData(item string) string {
+	return fmt.Sprintf(`data {
+		%s
+	}
+	pageInfo {%s}
+	totalCount
+	`, item, pageInfoData())
+}
+
+func pageInfoData() string {
+	return `startCursor
+		endCursor
+		hasNextPage`
+}
+
+func applicationData() string {
+	return fmt.Sprintf(`id
+		name
+		description
+		labels
+		apis {%s}
+		eventAPIs {%s}
+		documents {%s}
+	`, pageData(apiDefinitionData()), pageData(eventAPIData()), pageData(documentData()))
+}
+
+func authData() string {
+	return fmt.Sprintf(`credential {
+				... on BasicCredentialData {
+					username
+					password
+				}
+				...  on OAuthCredentialData {
+					clientId
+					clientSecret
+					url
+					
+				}
+			}
+			additionalHeaders
+			additionalQueryParams
+			requestAuth { 
+			  csrf {
+				tokenEndpointURL
+				credential {
+				  ... on BasicCredentialData {
+				  	username
+					password
+				  }
+				  ...  on OAuthCredentialData {
+					clientId
+					clientSecret
+					url
+					
+				  }
+			    }
+				additionalHeaders
+				additionalQueryParams
+			}
+			}
+		`)
+}
+
+func apiDefinitionData() string {
+	return fmt.Sprintf(`		id
+		name
+		description
+		spec {%s}
+		targetURL
+		group
+		auths {%s}
+		defaultAuth {%s}
+		version {%s}`, apiSpecData(), runtimeAuthData(), authData(), versionData())
+}
+
+func apiSpecData() string {
+	return `data
+		format
+		type`
+}
+
+func runtimeAuthData() string {
+	return fmt.Sprintf(`runtimeID
+		auth {%s}`, authData())
+}
+
+func versionData() string {
+	return `value
+		deprecated
+		deprecatedSince
+		forRemoval`
+}
+
+func eventAPIData() string {
+	return fmt.Sprintf(`
+			id
+			applicationID
+			name
+			description
+			group 
+			spec {%s}
+			version {%s}
+		`, eventSpecData(), versionData())
+}
+
+func eventSpecData() string {
+	return `data
+		type
+		format`
+}
+
+func documentData() string {
+	return `
+		id
+		applicationID
+		title
+		displayName
+		description
+		format
+		kind
+		data`
 }

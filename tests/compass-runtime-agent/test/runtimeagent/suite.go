@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions"
+
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
+
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools"
 	"github.com/stretchr/testify/require"
 
@@ -42,6 +46,10 @@ const (
 )
 
 type TestSuite struct {
+	CompassClient      *compass.Client
+	K8sResourceChecker *assertions.K8sResourceChecker
+	APIAccessChecker   *assertions.APIAccessChecker
+
 	k8sClient     *kubernetes.Clientset
 	serviceClient corev1.ServiceInterface
 
@@ -72,6 +80,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 	return &TestSuite{
 		k8sClient:         k8sClient,
 		serviceClient:     k8sClient.Core().Services(config.Namespace),
+		CompassClient:     compass.NewCompassClient(config.DirectorURL, config.Tenant, ""), //TODO - runtime Id
 		mockServiceServer: mock.NewAppMockServer(config.MockServicePort),
 		config:            config,
 		mockServiceName:   fmt.Sprintf(mockServiceNameFormat, rand.String(4)),
