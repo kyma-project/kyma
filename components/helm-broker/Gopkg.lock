@@ -1924,6 +1924,7 @@
     "github.com/gorilla/mux",
     "github.com/hashicorp/go-cleanhttp",
     "github.com/hashicorp/go-getter",
+    "github.com/hashicorp/go-getter/helper/url",
     "github.com/hashicorp/go-multierror",
     "github.com/imdario/mergo",
     "github.com/komkom/go-jsonhash",
