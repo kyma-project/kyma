@@ -26,7 +26,7 @@ credential:
 In this example, the system renders the `bind.yaml` file. The system resolves all the directives enclosed in the double curly braces in the same way as in the files located in the `templates` directory in your Helm chart.
 
 
-### File specification
+## File specification
 
 Define the following fields to create a valid `bind.yaml` file:
 
@@ -89,7 +89,7 @@ In this example, the Helm Broker returns the following values:
 - All the key-value pairs fetched from the `redis-v2-secrets` Secrets.
 
 
-### Credential name conflicts policy
+## Credential name conflicts policy
 
 The following rules apply in case of credential name conflicts:
 - If the **credential** and **credentialFrom** fields have duplicate values, the system uses the values from the **credential** field.
