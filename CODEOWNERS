@@ -113,7 +113,7 @@
 /resources/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `log-ui` subchart
-/resources/logging/charts/log-ui/ @rakesh-garimella @kwiatekus @dariadomagala @y-kkamil @hisarbalik @a-thaler @igor-karpukhin @akucharska @parostatkiem @sjanota
+/resources/logging/charts/log-ui/ @kwiatekus @dariadomagala @y-kkamil @akucharska @parostatkiem @sjanota
 
 # The `event-bus` chart
 /resources/event-bus/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
@@ -140,10 +140,10 @@
 /resources/service-catalog-addons/charts/brokers-ui/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @akucharska @michal-hudy @m00g3n @aerfio @magicmatatjahu @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota
 
 # The `catalog-ui` subchart
-/resources/service-catalog-addons/charts/catalog-ui/ @akucharska @michal-hudy @m00g3n @aerfio @magicmatatjahu @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota
+/resources/service-catalog-addons/charts/catalog-ui/ @akucharska @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota
 
 # The `instances-ui` subchart
-/resources/service-catalog-addons/charts/instances-ui/ @akucharska @michal-hudy @m00g3n @aerfio @magicmatatjahu @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota
+/resources/service-catalog-addons/charts/instances-ui/ @akucharska @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota
 
 # The `docs` subchart
 /resources/core/charts/docs/ @michal-hudy @m00g3n @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
