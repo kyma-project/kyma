@@ -63,10 +63,6 @@ oathkeeper:
         api:
           port: 4456
   resources: {}
-  #TODO: change to "access-rules.json" once we can configure it in the maester controller
-  ruleFile:
-    dir: /etc/rules
-    name: rules
   image:
     tag: v0.17.1-beta.1
 
