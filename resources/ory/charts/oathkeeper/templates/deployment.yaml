@@ -56,7 +56,7 @@ spec:
               {{- if .Values.demo }}
               value: "https://raw.githubusercontent.com/ory/k8s/master/helm/charts/oathkeeper/demo/access-rules.json"
               {{- else }}
-              value: "file:///etc/config/access-rules.json"
+              value: "file:///etc/rules/access-rules.json"
               {{- end }}
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-config-volume
@@ -64,7 +64,7 @@ spec:
               readOnly: true
               subPath: config.yaml
             - name: {{ include "oathkeeper.name" . }}-rules-volume
-              mountPath: /etc/config/access-rules.json
+              mountPath: /etc/rules/access-rules.json
               readOnly: true
               subPath: access-rules.json
             - name: {{ include "oathkeeper.name" . }}-secrets-volume
