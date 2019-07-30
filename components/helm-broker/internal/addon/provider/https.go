@@ -18,7 +18,7 @@ import (
 // same as in core library http.DefaultClient.
 var defaultClient = cleanhttp.DefaultClient()
 
-// HTTPGetter provides functionality for loading bundle from any HTTP/HTTPS repository serving static files.
+// HTTPGetter provides functionality for loading addon from any HTTP/HTTPS repository serving static files.
 type HTTPGetter struct {
 	underlying *getter.HttpGetter
 
@@ -66,9 +66,9 @@ func (h *HTTPGetter) IndexReader() (io.ReadCloser, error) {
 	return os.Open(savePath)
 }
 
-// BundleLoadInfo returns information how to load bundle
-func (h *HTTPGetter) BundleLoadInfo(name addon.Name, version addon.Version) (LoadType, string, error) {
-	rawURL := h.BundleDocURL(name, version)
+// AddonLoadInfo returns information how to load addon
+func (h *HTTPGetter) AddonLoadInfo(name addon.Name, version addon.Version) (LoadType, string, error) {
+	rawURL := h.AddonDocURL(name, version)
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		return UnknownLoadType, "", err
@@ -82,8 +82,8 @@ func (h *HTTPGetter) BundleLoadInfo(name addon.Name, version addon.Version) (Loa
 	return ArchiveLoadType, savePath, nil
 }
 
-// BundleDocURL returns url for bundle documentation
-func (h *HTTPGetter) BundleDocURL(name addon.Name, version addon.Version) string {
+// AddonDocURL returns url for addon documentation
+func (h *HTTPGetter) AddonDocURL(name addon.Name, version addon.Version) string {
 	return fmt.Sprintf("%s%s-%s.tgz", h.repoURL, name, version)
 }
 

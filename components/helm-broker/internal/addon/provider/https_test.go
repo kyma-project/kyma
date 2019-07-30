@@ -51,28 +51,28 @@ func TestHTTPRepositoryIndexReader(t *testing.T) {
 	assertDirIsEmpty(t, dst)
 }
 
-func TestHTTPRepositoryBundleLoadInfo(t *testing.T) {
+func TestHTTPRepositoryAddonLoadInfo(t *testing.T) {
 	// given
 	const (
-		expBundleName addon.Name    = "bundle_name"
-		expBundleVer  addon.Version = "1.2.3"
-		expContentGen string        = "expected content - bundle"
+		expAddonName  addon.Name    = "addon_name"
+		expAddonVer   addon.Version = "1.2.3"
+		expContentGen string        = "expected content - addon"
 	)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc(fmt.Sprintf("/%s-%s.tgz", expBundleName, expBundleVer), func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(fmt.Sprintf("/%s-%s.tgz", expAddonName, expAddonVer), func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, expContentGen)
 	})
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
 	idxURL := ts.URL + "/index.yaml"
-	dst := "../../../tmp/TestHTTPRepositoryBundleLoadInfo"
+	dst := "../../../tmp/TestHTTPRepositoryAddonLoadInfo"
 	httpGetter, err := provider.NewHTTP(idxURL, dst)
 	require.NoError(t, err)
 
 	// when
-	loadType, path, err := httpGetter.BundleLoadInfo(expBundleName, expBundleVer)
+	loadType, path, err := httpGetter.AddonLoadInfo(expAddonName, expAddonVer)
 
 	// then
 	require.NoError(t, err)
@@ -90,11 +90,11 @@ func TestHTTPRepositoryBundleLoadInfo(t *testing.T) {
 	assertDirIsEmpty(t, dst)
 }
 
-func TestHTTPRepositoryBundleDocURL(t *testing.T) {
+func TestHTTPRepositoryAddonDocURL(t *testing.T) {
 	// given
 	const (
-		bundleName addon.Name    = "bundle_name"
-		bundleVer  addon.Version = "1.2.3"
+		addonName addon.Name    = "addon_name"
+		addonVer  addon.Version = "1.2.3"
 	)
 
 	mux := http.NewServeMux()
@@ -109,10 +109,10 @@ func TestHTTPRepositoryBundleDocURL(t *testing.T) {
 	require.NoError(t, err)
 
 	// when
-	gotURL := httpGetter.BundleDocURL(bundleName, bundleVer)
+	gotURL := httpGetter.AddonDocURL(addonName, addonVer)
 
 	// then
-	assert.Equal(t, fmt.Sprintf("%s/%s-%s.tgz", ts.URL, bundleName, bundleVer), gotURL)
+	assert.Equal(t, fmt.Sprintf("%s/%s-%s.tgz", ts.URL, addonName, addonVer), gotURL)
 }
 
 func assertDirIsEmpty(t *testing.T, name string) {

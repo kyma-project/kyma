@@ -6,12 +6,12 @@ import "github.com/pkg/errors"
 type Kind int
 
 const (
-	// Unknown represents unknown error about loading bundle entry
+	// Unknown represents unknown error about loading addon entry
 	Unknown Kind = iota
-	// LoadingErrorKind represents error occurred when bundle
+	// LoadingErrorKind represents error occurred when addon
 	// was successfully fetched from external repository but processing/loading phase failed
 	LoadingErrorKind
-	// FetchingErrorKind represents error occurred when bundle cannot be fetched from external repository
+	// FetchingErrorKind represents error occurred when addon cannot be fetched from external repository
 	FetchingErrorKind
 )
 
@@ -31,7 +31,7 @@ func (r Kind) String() string {
 
 var _ error = &Error{}
 
-// Error holds information about the bundle error
+// Error holds information about the addon error
 type Error struct {
 	kind Kind
 	err  error

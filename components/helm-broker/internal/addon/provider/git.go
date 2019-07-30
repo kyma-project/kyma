@@ -14,13 +14,13 @@ import (
 	"k8s.io/apimachinery/pkg/util/rand"
 )
 
-// GitGetter provides functionality for loading bundle from any Git repository.
+// GitGetter provides functionality for loading addon from any Git repository.
 type GitGetter struct {
 	underlying *getter.GitGetter
 
-	dst           string
-	idxPath       string
-	bundleDirPath string
+	dst          string
+	idxPath      string
+	addonDirPath string
 }
 
 // NewGit returns new instance of GitGetter
@@ -42,10 +42,10 @@ func NewGit(addr, src string) (RepositoryGetter, error) {
 	}
 
 	return &GitGetter{
-		underlying:    hashicorpGitGetter,
-		dst:           finalDst,
-		idxPath:       indexPath,
-		bundleDirPath: strings.TrimRight(indexPath, path.Base(indexPath)),
+		underlying:   hashicorpGitGetter,
+		dst:          finalDst,
+		idxPath:      indexPath,
+		addonDirPath: strings.TrimRight(indexPath, path.Base(indexPath)),
 	}, nil
 }
 
@@ -59,19 +59,19 @@ func (g *GitGetter) IndexReader() (io.ReadCloser, error) {
 	return os.Open(path.Join(g.dst, g.idxPath))
 }
 
-// BundleLoadInfo returns information how to load bundle
+// AddonLoadInfo returns information how to load addon
 // TODO: add feature for uploading documentation: https://github.com/kyma-project/kyma/issues/5040
-func (g *GitGetter) BundleLoadInfo(name addon.Name, version addon.Version) (LoadType, string, error) {
+func (g *GitGetter) AddonLoadInfo(name addon.Name, version addon.Version) (LoadType, string, error) {
 	var (
-		bundleDirName = fmt.Sprintf("%s-%s", name, version)
-		pathToBundle  = path.Join(g.dst, g.bundleDirPath, bundleDirName)
+		addonDirName = fmt.Sprintf("%s-%s", name, version)
+		pathToAddon  = path.Join(g.dst, g.addonDirPath, addonDirName)
 	)
 
-	return DirectoryLoadType, pathToBundle, nil
+	return DirectoryLoadType, pathToAddon, nil
 }
 
-// BundleDocURL returns url for bundle documentation
+// AddonDocURL returns url for addon documentation
 // TODO: will be implemented in: https://github.com/kyma-project/kyma/issues/5040
-func (g *GitGetter) BundleDocURL(name addon.Name, version addon.Version) string {
+func (g *GitGetter) AddonDocURL(name addon.Name, version addon.Version) string {
 	return ""
 }

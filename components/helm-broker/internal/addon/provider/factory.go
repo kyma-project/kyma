@@ -74,12 +74,12 @@ func (cli *ClientFactory) NewGetter(rawURL, instPath string) (AddonClient, error
 		return nil, err
 	}
 
-	bundleClient, err := NewClient(concreteGetter, cli.addonLoader, cli.log)
+	addonClient, err := NewClient(concreteGetter, cli.addonLoader, cli.log)
 	if err != nil {
 		return nil, err
 	}
 
-	return bundleClient, nil
+	return addonClient, nil
 }
 
 // forcedRegexp is the regular expression that finds forced gettersProviders. This

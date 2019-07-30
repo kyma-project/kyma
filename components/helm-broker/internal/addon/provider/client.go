@@ -14,25 +14,25 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
-// Client wraps the concrete getters and provide common functionality for converting the raw bundles into models.
+// Client wraps the concrete getters and provide common functionality for converting the raw addon into models.
 type Client struct {
 	getters             map[string]RepositoryGetter
 	specifiedSchemRegex *regexp.Regexp
 	log                 *logrus.Entry
-	bundleLoader        addonLoader
+	addonLoader         addonLoader
 	concreteGetter      RepositoryGetter
 }
 
 // NewClient returns new instance of Client
-func NewClient(concreteGetter RepositoryGetter, bundleLoader addonLoader, log logrus.FieldLogger) (*Client, error) {
+func NewClient(concreteGetter RepositoryGetter, addonLoader addonLoader, log logrus.FieldLogger) (*Client, error) {
 	specifiedSchemRegex, err := regexp.Compile(`^([A-Za-z0-9]+)::(.+)$`)
 	if err != nil {
 		return nil, err
 	}
 	return &Client{
 		specifiedSchemRegex: specifiedSchemRegex,
-		bundleLoader:        bundleLoader,
-		log:                 log.WithField("service", "RepositoryGetter:CompleteBundleProvider"),
+		addonLoader:         addonLoader,
+		log:                 log.WithField("service", "RepositoryGetter:CompleteAddonProvider"),
 		concreteGetter:      concreteGetter,
 	}, nil
 }
@@ -44,11 +44,11 @@ func (d *Client) Cleanup() error {
 
 // GetCompleteAddon returns a addon with his charts as CompleteAddon instance.
 func (d *Client) GetCompleteAddon(entry addon.EntryDTO) (addon.CompleteAddon, error) {
-	b, c, err := d.loadBundleAndCharts(entry.Name, entry.Version)
+	b, c, err := d.loadAddonAndCharts(entry.Name, entry.Version)
 	if err != nil {
-		return addon.CompleteAddon{}, errors.Wrapf(err, "while loading bundle %v", entry.Name)
+		return addon.CompleteAddon{}, errors.Wrapf(err, "while loading addon %v", entry.Name)
 	}
-	b.RepositoryURL = d.concreteGetter.BundleDocURL(entry.Name, entry.Version)
+	b.RepositoryURL = d.concreteGetter.AddonDocURL(entry.Name, entry.Version)
 
 	return addon.CompleteAddon{
 		Addon:  b,
@@ -83,42 +83,42 @@ func (d *Client) GetIndex() (*addon.IndexDTO, error) {
 	return &idx, nil
 }
 
-func (d *Client) loadBundleAndCharts(entryName addon.Name, version addon.Version) (*internal.Addon, []*chart.Chart, error) {
-	lType, path, err := d.concreteGetter.BundleLoadInfo(entryName, version)
+func (d *Client) loadAddonAndCharts(entryName addon.Name, version addon.Version) (*internal.Addon, []*chart.Chart, error) {
+	lType, path, err := d.concreteGetter.AddonLoadInfo(entryName, version)
 	if err != nil {
-		return nil, nil, addon.NewFetchingError(errors.Wrapf(err, "while reading bundle archive for name [%s] and version [%v]", entryName, version))
+		return nil, nil, addon.NewFetchingError(errors.Wrapf(err, "while reading addon archive for name [%s] and version [%v]", entryName, version))
 	}
 
 	b, charts, err := d.loadByType(lType, path)
 	if err != nil {
-		return nil, nil, addon.NewLoadingError(errors.Wrapf(err, "while loading bundle and charts for bundle [%s] and version [%s]", entryName, version))
+		return nil, nil, addon.NewLoadingError(errors.Wrapf(err, "while loading addon and charts for addon [%s] and version [%s]", entryName, version))
 	}
 	return b, charts, nil
 }
 
-// LoadType define the load type of bundle located in file system
+// LoadType define the load type of addon located in file system
 type LoadType int
 
 const (
-	// DirectoryLoadType defines that bundle should be loaded as directory
+	// DirectoryLoadType defines that addon should be loaded as directory
 	DirectoryLoadType LoadType = iota
-	// ArchiveLoadType defines that bundle should be loaded as archive (e.g. tgz)
+	// ArchiveLoadType defines that addon should be loaded as archive (e.g. tgz)
 	ArchiveLoadType LoadType = iota
-	// UnknownLoadType define that bundle cannot be loaded because type is unknown
+	// UnknownLoadType define that addon cannot be loaded because type is unknown
 	UnknownLoadType LoadType = iota
 )
 
 func (d *Client) loadByType(loadType LoadType, path string) (*internal.Addon, []*chart.Chart, error) {
 	switch loadType {
 	case DirectoryLoadType:
-		return d.bundleLoader.LoadDir(path)
+		return d.addonLoader.LoadDir(path)
 	case ArchiveLoadType:
 		reader, err := os.Open(path)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "while opening archive from path: %v", path)
 		}
 
-		b, c, err := d.bundleLoader.Load(reader)
+		b, c, err := d.addonLoader.Load(reader)
 		reader.Close()
 
 		return b, c, err

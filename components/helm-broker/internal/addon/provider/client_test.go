@@ -23,27 +23,27 @@ func TestRepositoryClientSuccess(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
-	bundleLoader, err := provider.NewClient(fakeRepo, addon.NewLoader(tmpDir, log), log)
+	addonLoader, err := provider.NewClient(fakeRepo, addon.NewLoader(tmpDir, log), log)
 	require.NoError(t, err)
 
-	bundleEntry := addon.EntryDTO{
+	entry := addon.EntryDTO{
 		Name:    "redis",
 		Version: "0.0.1",
 	}
 
 	// when
-	gotIdx, gotIdxErr := bundleLoader.GetIndex()
-	gotBundle, gotBundleErr := bundleLoader.GetCompleteAddon(bundleEntry)
+	gotIdx, gotIdxErr := addonLoader.GetIndex()
+	gotAddon, gotAddonErr := addonLoader.GetCompleteAddon(entry)
 
 	// then
 	require.NoError(t, gotIdxErr)
 	assert.NotEmpty(t, gotIdx)
 
-	require.NoError(t, gotBundleErr)
-	assert.NotEmpty(t, gotBundle)
+	require.NoError(t, gotAddonErr)
+	assert.NotEmpty(t, gotAddon)
 }
 
-// fakeRepository provide access to bundles repository
+// fakeRepository provide access to addons repository
 type fakeRepository struct {
 	path string
 }
@@ -54,13 +54,13 @@ func (p *fakeRepository) IndexReader() (io.ReadCloser, error) {
 	return os.Open(fName)
 }
 
-// BundleLoadInfo returns info how to load bundle
-func (p *fakeRepository) BundleLoadInfo(name addon.Name, version addon.Version) (provider.LoadType, string, error) {
-	return provider.ArchiveLoadType, p.BundleDocURL(name, version), nil
+// AddonLoadInfo returns info how to load addon
+func (p *fakeRepository) AddonLoadInfo(name addon.Name, version addon.Version) (provider.LoadType, string, error) {
+	return provider.ArchiveLoadType, p.AddonDocURL(name, version), nil
 }
 
-// BundleDocURL returns download url for given bundle
-func (p *fakeRepository) BundleDocURL(name addon.Name, version addon.Version) string {
+// AddonDocURL returns download url for given addon
+func (p *fakeRepository) AddonDocURL(name addon.Name, version addon.Version) string {
 	return fmt.Sprintf("%s/%s-%s.tgz", p.path, name, version)
 }
 

@@ -417,16 +417,16 @@ func (r *ReconcileClusterAddonsConfiguration) saveAddon(repositories *addons.Rep
 		exist, err := r.addonStorage.Upsert(internal.ClusterWide, addon.CompleteAddon)
 		if err != nil {
 			addon.RegisteringError(err)
-			r.log.Errorf("cannot upsert bundle %v:%v into storage", addon.CompleteAddon.Name, addon.CompleteAddon.Version)
+			r.log.Errorf("cannot upsert addon %v:%v into storage", addon.CompleteAddon.Name, addon.CompleteAddon.Version)
 			continue
 		}
 		if exist {
-			r.log.Infof("bundle %v:%v already existed in storage, bundle was replaced", addon.CompleteAddon.Name, addon.CompleteAddon.Version)
+			r.log.Infof("addon %v:%v already existed in storage, addon was replaced", addon.CompleteAddon.Name, addon.CompleteAddon.Version)
 		}
 		err = r.saveCharts(addon.Charts)
 		if err != nil {
 			addon.RegisteringError(err)
-			r.log.Errorf("cannot upsert charts of %v:%v bundle", addon.CompleteAddon.Name, addon.CompleteAddon.Version)
+			r.log.Errorf("cannot upsert charts of %v:%v addon", addon.CompleteAddon.Name, addon.CompleteAddon.Version)
 			continue
 		}
 

@@ -28,7 +28,7 @@ type EntryDTO struct {
 	Version     Version `json:"version"`
 }
 
-// CompleteAddon aggregates a bundle with his chart(s)
+// CompleteAddon aggregates a addon with his chart(s)
 type CompleteAddon struct {
 	Addon  *internal.Addon
 	Charts []*chart.Chart

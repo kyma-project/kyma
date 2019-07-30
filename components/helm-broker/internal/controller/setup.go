@@ -56,17 +56,17 @@ func SetupAndStartController(cfg *rest.Config, ctrCfg *config.ControllerConfig, 
 		lg.Infof("Disabling support for HTTP protocol because DevelopMode is set to false.")
 	}
 
-	bundleGetterFactory, err := provider.NewClientFactory(allowedGetters, addon.NewLoader(ctrCfg.TmpDir, lg), lg)
+	addonGetterFactory, err := provider.NewClientFactory(allowedGetters, addon.NewLoader(ctrCfg.TmpDir, lg), lg)
 	fatalOnError(err, "cannot setup addon getter")
 
 	// Creating controllers
 	lg.Info("Setting up controller")
-	acReconcile := NewReconcileAddonsConfiguration(mgr, bundleGetterFactory, sFact.Chart(), sFact.Addon(), sbFacade, docsProvider, brokerSyncer, ctrCfg.TmpDir, lg)
+	acReconcile := NewReconcileAddonsConfiguration(mgr, addonGetterFactory, sFact.Chart(), sFact.Addon(), sbFacade, docsProvider, brokerSyncer, ctrCfg.TmpDir, lg)
 	acController := NewAddonsConfigurationController(acReconcile)
 	err = acController.Start(mgr)
 	fatalOnError(err, "unable to start AddonsConfigurationController")
 
-	cacReconcile := NewReconcileClusterAddonsConfiguration(mgr, bundleGetterFactory, sFact.Chart(), sFact.Addon(), csbFacade, docsProvider, brokerSyncer, ctrCfg.TmpDir, lg)
+	cacReconcile := NewReconcileClusterAddonsConfiguration(mgr, addonGetterFactory, sFact.Chart(), sFact.Addon(), csbFacade, docsProvider, brokerSyncer, ctrCfg.TmpDir, lg)
 	cacController := NewClusterAddonsConfigurationController(cacReconcile)
 	err = cacController.Start(mgr)
 	fatalOnError(err, "unable to start ClusterAddonsConfigurationController")
