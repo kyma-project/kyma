@@ -4,7 +4,7 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir: pr/
-      version: "PR-4936"
+      version: "PR-5060"
     runtimeAgentTests:
       dir: pr/
       version: "PR-4927"
@@ -18,10 +18,12 @@ deployment:
     tokenURLConfigFile: "token.json"
   sync:
     controllerSyncPeriod: 30
-    minimalConfigFetchTime: 300
+    minimalConfigSyncTime: 300
 
 
 config:
   tokenConfigMap:
     name: token-config-map
-    data: ""
+    data:
+      token: |
+        { "token": "", "url":"" }

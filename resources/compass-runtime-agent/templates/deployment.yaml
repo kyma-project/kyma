@@ -27,8 +27,9 @@ spec:
           args:
             - "/compass-runtime-agent"
             - "--controllerSyncPeriod={{ .Values.deployment.sync.controllerSyncPeriod }}"
-            - "--minimalConfigFetchTime={{ .Values.deployment.sync.minimalConfigFetchTime }}"
+            - "--minimalConfigSyncTime={{ .Values.deployment.sync.minimalConfigSyncTime }}"
             - "--tokenURLConfigFile={{.Values.deployment.tokenConfig.mountPath}}/{{ .Values.deployment.tokenConfig.tokenURLConfigFile }}"
+            - "--tenant=tenant" # TODO: will be removed
           volumeMounts:
             - mountPath: {{ .Values.deployment.tokenConfig.mountPath }}
               name: {{ .Values.deployment.tokenConfig.volumeName }}
