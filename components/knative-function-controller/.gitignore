@@ -23,3 +23,5 @@ vendor/
 *.swp
 *.swo
 *~
+
+300*.yaml

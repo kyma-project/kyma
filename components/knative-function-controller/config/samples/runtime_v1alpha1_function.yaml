@@ -1,4 +1,4 @@
-apiVersion: functions.runtime.kyma-project.io/v1alpha1
+apiVersion: runtime.kyma-project.io/v1alpha1
 kind: Function
 metadata:
   name: sample
@@ -13,4 +13,4 @@ spec:
       }
   functionContentType: "plaintext"
   size: "L"
-  runtime: "nodejs8"
+  runtime: "nodejs9"
