@@ -37,10 +37,6 @@ type Result struct {
 
 type ApiIDToSecretNameMap map[string]string
 
-func NewSynchronizationService() Service {
-	return &service{}
-}
-
 func NewService(applicationRepository applications.Manager, converter applications.Converter, resourcesService apiresources.Service) Service {
 	return &service{
 		applicationRepository: applicationRepository,

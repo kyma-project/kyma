@@ -45,3 +45,22 @@ type RequestParameters interface {
 	Upsert(application string, appUID types.UID, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError)
 	Delete(application, serviceId string) apperrors.AppError
 }
+
+type service struct {
+}
+
+func (s service) CreateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service, spec []byte) apperrors.AppError {
+	return nil
+}
+
+func (s service) UpdateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service, spec []byte) apperrors.AppError {
+	return nil
+}
+
+func (s service) DeleteApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError {
+	return nil
+}
+
+func NewService() Service {
+	return service{}
+}

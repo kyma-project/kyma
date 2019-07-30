@@ -1,10 +1,14 @@
 package main
 
 import (
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
 
 	"os"
@@ -16,8 +20,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	apis "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	log "github.com/sirupsen/logrus"
+	restclient "k8s.io/client-go/rest"
 )
 
 func main() {
@@ -61,7 +67,10 @@ func main() {
 
 	certManager := certificates.NewCredentialsManager()
 	compassConfigClient := compass.NewConfigurationClient(options.tenant, options.runtimeId, graphql.New)
-	syncService := kyma.NewSynchronizationService()
+	syncService, err := createNewSynchronizationService()
+	if err != nil {
+		log.Error("Unable to initialize Kyma synchronization service")
+	}
 
 	compassConnector := compass.NewCompassConnector(options.tokenURLConfigFile)
 	connectionSupervisor := compassconnection.NewSupervisor(
@@ -93,4 +102,34 @@ func main() {
 		log.Error(err, "Unable to run the manager")
 		os.Exit(1)
 	}
+}
+
+func createNewSynchronizationService() (kyma.Service, apperrors.AppError) {
+	k8sConfig, err := restclient.InClusterConfig()
+	if err != nil {
+		return nil, apperrors.Internal("Failed to read k8s in-cluster configuration, %s", err)
+	}
+
+	applicationManager, err := newApplicationManager(k8sConfig)
+	if err != nil {
+		return nil, apperrors.Internal("Failed to initialize Applications manager, %s", err)
+	}
+
+	resourcesService := apiresources.NewService()
+	// TODO: pass the namespace name in parameters
+	nameResolver := k8sconsts.NewNameResolver("kyma-integration")
+	converter := applications.NewConverter(nameResolver)
+
+	return kyma.NewService(applicationManager, converter, resourcesService), nil
+}
+
+func newApplicationManager(config *restclient.Config) (applications.Manager, apperrors.AppError) {
+	applicationEnvironmentClientset, err := versioned.NewForConfig(config)
+	if err != nil {
+		return nil, apperrors.Internal("Failed to create k8s application client, %s", err)
+	}
+
+	appInterface := applicationEnvironmentClientset.ApplicationconnectorV1alpha1().Applications()
+
+	return applications.NewManager(appInterface), nil
 }
