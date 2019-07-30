@@ -9,6 +9,7 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
 
 	"os"
@@ -67,10 +68,7 @@ func main() {
 
 	certManager := certificates.NewCredentialsManager()
 	compassConfigClient := compass.NewConfigurationClient(options.tenant, options.runtimeId, graphql.New)
-	syncService, err := createNewSynchronizationService()
-	if err != nil {
-		log.Error("Unable to initialize Kyma synchronization service")
-	}
+	syncService := createNewSynchronizationService()
 
 	compassConnector := compass.NewCompassConnector(options.tokenURLConfigFile)
 	connectionSupervisor := compassconnection.NewSupervisor(
@@ -104,15 +102,18 @@ func main() {
 	}
 }
 
-func createNewSynchronizationService() (kyma.Service, apperrors.AppError) {
+func createNewSynchronizationService() kyma.Service {
 	k8sConfig, err := restclient.InClusterConfig()
 	if err != nil {
-		return nil, apperrors.Internal("Failed to read k8s in-cluster configuration, %s", err)
+		log.Errorf("Failed to read k8s in-cluster configuration, %s", err)
+
+		return uninitializedKymaService{}
 	}
 
 	applicationManager, err := newApplicationManager(k8sConfig)
 	if err != nil {
-		return nil, apperrors.Internal("Failed to initialize Applications manager, %s", err)
+		log.Errorf("Failed to initialize Applications manager, %s", err)
+		return uninitializedKymaService{}
 	}
 
 	resourcesService := apiresources.NewService()
@@ -120,7 +121,7 @@ func createNewSynchronizationService() (kyma.Service, apperrors.AppError) {
 	nameResolver := k8sconsts.NewNameResolver("kyma-integration")
 	converter := applications.NewConverter(nameResolver)
 
-	return kyma.NewService(applicationManager, converter, resourcesService), nil
+	return kyma.NewService(applicationManager, converter, resourcesService)
 }
 
 func newApplicationManager(config *restclient.Config) (applications.Manager, apperrors.AppError) {
@@ -132,4 +133,11 @@ func newApplicationManager(config *restclient.Config) (applications.Manager, app
 	appInterface := applicationEnvironmentClientset.ApplicationconnectorV1alpha1().Applications()
 
 	return applications.NewManager(appInterface), nil
+}
+
+type uninitializedKymaService struct {
+}
+
+func (u uninitializedKymaService) Apply(applications []model.Application) ([]kyma.Result, apperrors.AppError) {
+	return nil, apperrors.Internal("Service not initialized")
 }
