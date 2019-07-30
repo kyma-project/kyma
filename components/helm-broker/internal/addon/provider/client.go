@@ -16,7 +16,6 @@ import (
 
 // Client wraps the concrete getters and provide common functionality for converting the raw addon into models.
 type Client struct {
-	getters             map[string]RepositoryGetter
 	specifiedSchemRegex *regexp.Regexp
 	log                 *logrus.Entry
 	addonLoader         addonLoader
@@ -32,7 +31,7 @@ func NewClient(concreteGetter RepositoryGetter, addonLoader addonLoader, log log
 	return &Client{
 		specifiedSchemRegex: specifiedSchemRegex,
 		addonLoader:         addonLoader,
-		log:                 log.WithField("service", "RepositoryGetter:CompleteAddonProvider"),
+		log:                 log.WithField("service", "addonClient"),
 		concreteGetter:      concreteGetter,
 	}, nil
 }

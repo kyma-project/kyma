@@ -39,7 +39,7 @@ func NewClientFactory(allowedGetters map[string]Provider, addonLoader addonLoade
 		specifiedSchemRegex: specifiedSchemRegex,
 		gettersProviders:    allowedGetters,
 		addonLoader:         addonLoader,
-		log:                 log.WithField("service", "addon:CompleteAddonProvider"),
+		log:                 log.WithField("service", "addonClientFactory"),
 	}, nil
 }
 
@@ -65,7 +65,7 @@ func (cli *ClientFactory) NewGetter(rawURL, instPath string) (AddonClient, error
 	scheme, realAddr := cli.getSchemaAndSrc(fullRealAddrURL)
 	getterProvider, ok := cli.gettersProviders[scheme]
 	if !ok {
-		return nil, fmt.Errorf("addons RepositoryGetter not supported for scheme '%s'", scheme)
+		return nil, fmt.Errorf("not supported scheme '%s' for addons repository", scheme)
 	}
 
 	// create concrete RepositoryGetter
@@ -74,7 +74,7 @@ func (cli *ClientFactory) NewGetter(rawURL, instPath string) (AddonClient, error
 		return nil, err
 	}
 
-	addonClient, err := NewClient(concreteGetter, cli.addonLoader, cli.log)
+	addonClient, err := NewClient(concreteGetter, cli.addonLoader, cli.log.WithField("getterScheme", scheme))
 	if err != nil {
 		return nil, err
 	}
