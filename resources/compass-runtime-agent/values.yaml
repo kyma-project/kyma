@@ -18,7 +18,7 @@ deployment:
     tokenURLConfigFile: "token.json"
   sync:
     controllerSyncPeriod: 30
-    minimalConfigSyncTime: 300
+    minimalConfigSyncTime: 30
 
 
 config:
