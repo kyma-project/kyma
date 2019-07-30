@@ -66,12 +66,6 @@ oathkeeper:
   image:
     tag: v0.17.1-beta.1
 
-<<<<<<< HEAD
-oathkeeper-rule-controller:
-  annotations:
-    sidecar.istio.io/inject: "false"
-=======
 maester:
   annotations: 
     sidecar.istio.io/inject: "false"
->>>>>>> Rename controller to maester
