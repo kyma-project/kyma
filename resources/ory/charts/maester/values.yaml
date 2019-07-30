@@ -2,6 +2,7 @@ replicaCount: 1
 
 configMapName: ory-oathkeeper-rules
 # rulesConfigmapNamespace: some-namespace
+# ToDo: Fix the default value
 rulesFileName: access-rules.json
 
 image:

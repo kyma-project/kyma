@@ -101,3 +101,8 @@ http{{ if $.Values.ingress.public.tls }}s{{ end }}://{{ $host.host }}
 http://127.0.0.1:{{ .Values.service.public.port }}/
 {{- end -}}
 {{- end -}}
+
+{{- define "hydra.utils.joinListWithComma" -}}
+{{- $local := dict "first" true -}}
+{{- range $k, $v := . -}}{{- if not $local.first -}},{{- end -}}{{- $v -}}{{- $_ := set $local "first" false -}}{{- end -}}
+{{- end -}}
