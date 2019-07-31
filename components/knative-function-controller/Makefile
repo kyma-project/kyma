@@ -21,16 +21,14 @@ endif
 test: generate fmt vet symlinks
 	go test -v ./pkg/... ./cmd/... -coverprofile cover.out
 
-.ONESHELL:
 symlinks:
-	cd config/crds
-	-rm 300*.yaml
-	ln -s ../../vendor/github.com/knative/build/config/300-build.yaml 300-build.yaml
-	ln -s ../../vendor/github.com/knative/build/config/300-buildtemplate.yaml 300-buildtemplate.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-revision.yaml 300-revision.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-route.yaml 300-route.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-service.yaml 300-service.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-configuration.yaml 300-configuration.yaml
+	-rm config/crds/300*.yaml
+	ln -s ../../vendor/github.com/knative/build/config/300-build.yaml config/crds/300-build.yaml
+	ln -s ../../vendor/github.com/knative/build/config/300-buildtemplate.yaml config/crds/300-buildtemplate.yaml
+	ln -s ../../vendor/github.com/knative/serving/config/300-revision.yaml config/crds/300-revision.yaml
+	ln -s ../../vendor/github.com/knative/serving/config/300-route.yaml config/crds/300-route.yaml
+	ln -s ../../vendor/github.com/knative/serving/config/300-service.yaml config/crds/300-service.yaml
+	ln -s ../../vendor/github.com/knative/serving/config/300-configuration.yaml config/crds/300-configuration.yaml
 
 # Generate code
 generate: resolve
@@ -59,6 +57,9 @@ run: generate fmt vet
 # Install CRDs into a cluster
 install:
 	kubectl apply -f config/crds/runtime_v1alpha1_function.yaml
+# UnInstall CRDs from cluster
+uninstall:
+	kubectl apply -f config/crds/runtime_v1alpha1_function.yaml
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests:
@@ -67,8 +68,13 @@ manifests:
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: manifests install
 	kubectl apply -f config/crds
-	kustomize build config/default | kubectl apply -f -
+	kustomize1 build config/default | kubectl apply -f -
 	kubectl apply -f config/config.yaml
+
+undeploy: manifests uninstall
+	kubectl delete -f config/crds
+	kustomize1 build config/default | kubectl delete  -f -
+	kubectl delete -f config/config.yaml
 
 # Build the docker image
 .PHONY: docker-build
