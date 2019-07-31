@@ -77,13 +77,17 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		return nil, err
 	}
 
+	serviceClient := k8sClient.Core().Services(config.Namespace)
+
 	return &TestSuite{
-		k8sClient:         k8sClient,
-		serviceClient:     k8sClient.Core().Services(config.Namespace),
-		CompassClient:     compass.NewCompassClient(config.DirectorURL, config.Tenant, ""), //TODO - runtime Id
-		mockServiceServer: mock.NewAppMockServer(config.MockServicePort),
-		config:            config,
-		mockServiceName:   fmt.Sprintf(mockServiceNameFormat, rand.String(4)),
+		k8sClient:          k8sClient,
+		serviceClient:      serviceClient,
+		CompassClient:      compass.NewCompassClient(config.DirectorURL, config.Tenant, ""), //TODO - runtime Id
+		APIAccessChecker:   assertions.NewAPIAccessChecker(),
+		K8sResourceChecker: assertions.NewK8sResourceChecker(serviceClient),
+		mockServiceServer:  mock.NewAppMockServer(config.MockServicePort),
+		config:             config,
+		mockServiceName:    fmt.Sprintf(mockServiceNameFormat, rand.String(4)),
 	}, nil
 }
 

@@ -59,8 +59,8 @@ type testCase struct {
 	initialPhaseInput  func() *applications.ApplicationInput
 	initialPhaseResult compass.Application
 
-	secondPhaseSetup  func(t *testing.T, testSuite *runtimeagent.TestSuite, this testCase)
-	secondPhaseAssert func(t *testing.T, testSuite *runtimeagent.TestSuite, this testCase)
+	secondPhaseSetup  func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase)
+	secondPhaseAssert func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase)
 }
 
 type initialPhase struct {
@@ -105,6 +105,9 @@ const (
 	oauthURLPath = ""
 )
 
+// TODO - check how it can be done in e2e?
+// TODO - can I levrage steps here?
+
 func TestCompassRuntimeAgentSynchronization_TestCases(t *testing.T) {
 
 	noAuthAPIInput := applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL())
@@ -113,7 +116,7 @@ func TestCompassRuntimeAgentSynchronization_TestCases(t *testing.T) {
 	oauthAPIInput := applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).
 		WithAuth(applications.NewAuth().WithOAuth(validClientId, validClientSecret, testSuite.GetMockServiceURL()+oauthURLPath))
 
-	testCases := []testCase{
+	testCases := []*testCase{
 		{
 			description: "test case 1",
 			initialPhaseInput: func() *applications.ApplicationInput {
@@ -125,22 +128,22 @@ func TestCompassRuntimeAgentSynchronization_TestCases(t *testing.T) {
 							oauthAPIInput,
 						})
 			},
-			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this testCase) {
+			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 				// when
-				application := this.initialPhaseResult
-
-				newNoAuthAPI := applications.NewAPI("new-no-auth-api", "", testSuite.GetMockServiceURL())
-				newOauthAPI := applications.NewAPI("new-oauth-api", "", testSuite.GetMockServiceURL()).
-					WithAuth(applications.NewAuth().WithOAuth(validClientId, validClientSecret, oauthURLPath))
-				newBasicAuthAPI := applications.NewAPI("new-basic-auth-api", "", testSuite.GetMockServiceURL()).
-					WithAuth(applications.NewAuth().WithBasicAuth(validUsername, validPassword))
-
-				api, err := testSuite.CompassClient.CreateAPI(application.ID, newNoAuthAPI.ToCompassInput())
+				//application := this.initialPhaseResult
+				//
+				//newNoAuthAPI := applications.NewAPI("new-no-auth-api", "", testSuite.GetMockServiceURL())
+				//newOauthAPI := applications.NewAPI("new-oauth-api", "", testSuite.GetMockServiceURL()).
+				//	WithAuth(applications.NewAuth().WithOAuth(validClientId, validClientSecret, oauthURLPath))
+				//newBasicAuthAPI := applications.NewAPI("new-basic-auth-api", "", testSuite.GetMockServiceURL()).
+				//	WithAuth(applications.NewAuth().WithBasicAuth(validUsername, validPassword))
+				//
+				//api, err := testSuite.CompassClient.CreateAPI(application.ID, newNoAuthAPI.ToCompassInput())
 
 			},
-			secondPhaseAssert: func(t *testing.T, testSuite *runtimeagent.TestSuite, this testCase) {
+			secondPhaseAssert: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 				// when
-				application := this.initialPhaseResult
+				//application := this.initialPhaseResult
 
 			},
 		},
@@ -351,70 +354,71 @@ func TestCompassRuntimeAgentSynchronization_Simple(t *testing.T) {
 
 }
 
-func TestCompassRuntimeAgentSynchronization(t *testing.T) {
-
-	tenant := "acc-tests"
-
-	client := compass.NewCompassClient("http://localhost:3000/graphql", tenant, "")
-
-	// TODO - create 3 APIs of each kind
-	//// One should remain the same after update
-	//// One should be deleted
-	//// One should be updated to something else
-
-	noAuthAPIInput := applications.NewAPI("no-auth-1", "no auth api for app 1", "") // TODO - mock service URL
-
-	basicAuthAPIInput := applications.NewAPI("no-auth-1", "no auth api for app 1", ""). // TODO - mock service URL
-												WithAuth(applications.NewAuth().WithBasicAuth("", "")) // TODO - user pswd
-
-	oauthAPIInput := applications.NewAPI("no-auth-1", "no auth api for app 1", ""). // TODO - mock service URL
-											WithAuth(applications.NewAuth().WithOAuth("", "", "")) // TODO - clientId secret url
-
-	application := applications.NewApplication("test-app1", "testApp1", map[string][]string{})
-	application = application.WithAPIs([]*applications.APIDefinitionInput{
-		noAuthAPIInput, basicAuthAPIInput, oauthAPIInput,
-	})
-
-	logrus.Info("Creating Application...")
-	response, err := client.CreateApplication(application.ToCompassInput())
-	require.NoError(t, err)
-	defer func() {
-		logrus.Infof("Cleaning up %s Application...", response.ID)
-		removedId, err := client.DeleteApplication(response.ID)
-		require.NoError(t, err)
-		assert.Equal(t, response.ID, removedId)
-	}()
-
-	assert.NotEmpty(t, response.ID)
-	assert.Equal(t, 3, len(response.APIs.Data))
-
-	// Create application 1
-	//// With BasicAuth, Oauth, NoAuth APIs
-	//// With Events
-
-	// TODO: consider checking CompassConnection CR to decide when to start checks
-	logrus.Info("Waiting for Runtime Agent to apply configuration...")
-	time.Sleep(45 * time.Second)
-
-	// TODO - assertions
-
-	// Verify that resources were created
-
-	// Create application 2 and update application 1
-
-	//for i, testCase := range testCases {
-	//	// Perform first operation for all test cases
-	//}
-	//
-	//for i, testCase := range testCases {
-	//	// Perform assertions for first operation
-	//}
-	//
-	//for i, testCase := range testCases {
-	//	// Perform second operation for all test cases
-	//}
-	//
-	//for i, testCase := range testCases {
-	//	// Perform assertions for second operation
-	//}
-}
+//
+//func TestCompassRuntimeAgentSynchronization(t *testing.T) {
+//
+//	tenant := "acc-tests"
+//
+//	client := compass.NewCompassClient("http://localhost:3000/graphql", tenant, "")
+//
+//	// TODO - create 3 APIs of each kind
+//	//// One should remain the same after update
+//	//// One should be deleted
+//	//// One should be updated to something else
+//
+//	noAuthAPIInput := applications.NewAPI("no-auth-1", "no auth api for app 1", "") // TODO - mock service URL
+//
+//	basicAuthAPIInput := applications.NewAPI("no-auth-1", "no auth api for app 1", ""). // TODO - mock service URL
+//												WithAuth(applications.NewAuth().WithBasicAuth("", "")) // TODO - user pswd
+//
+//	oauthAPIInput := applications.NewAPI("no-auth-1", "no auth api for app 1", ""). // TODO - mock service URL
+//											WithAuth(applications.NewAuth().WithOAuth("", "", "")) // TODO - clientId secret url
+//
+//	application := applications.NewApplication("test-app1", "testApp1", map[string][]string{})
+//	application = application.WithAPIs([]*applications.APIDefinitionInput{
+//		noAuthAPIInput, basicAuthAPIInput, oauthAPIInput,
+//	})
+//
+//	logrus.Info("Creating Application...")
+//	response, err := client.CreateApplication(application.ToCompassInput())
+//	require.NoError(t, err)
+//	defer func() {
+//		logrus.Infof("Cleaning up %s Application...", response.ID)
+//		removedId, err := client.DeleteApplication(response.ID)
+//		require.NoError(t, err)
+//		assert.Equal(t, response.ID, removedId)
+//	}()
+//
+//	assert.NotEmpty(t, response.ID)
+//	assert.Equal(t, 3, len(response.APIs.Data))
+//
+//	// Create application 1
+//	//// With BasicAuth, Oauth, NoAuth APIs
+//	//// With Events
+//
+//	// TODO: consider checking CompassConnection CR to decide when to start checks
+//	logrus.Info("Waiting for Runtime Agent to apply configuration...")
+//	time.Sleep(45 * time.Second)
+//
+//	// TODO - assertions
+//
+//	// Verify that resources were created
+//
+//	// Create application 2 and update application 1
+//
+//	//for i, testCase := range testCases {
+//	//	// Perform first operation for all test cases
+//	//}
+//	//
+//	//for i, testCase := range testCases {
+//	//	// Perform assertions for first operation
+//	//}
+//	//
+//	//for i, testCase := range testCases {
+//	//	// Perform second operation for all test cases
+//	//}
+//	//
+//	//for i, testCase := range testCases {
+//	//	// Perform assertions for second operation
+//	//}
+//}

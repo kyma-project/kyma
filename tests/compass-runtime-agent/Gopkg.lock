@@ -193,6 +193,13 @@
   revision = "83c17229028ffe2d604be4f8ea1f2f633141a965"
 
 [[projects]]
+  digest = "1:ddb3d967d07a2f0e6cfbf49e52182bcf0e70fc0725f1ba66012196ab5b7a4dce"
+  name = "github.com/kyma-project/kyma"
+  packages = ["tests/application-gateway-tests/test/tools"]
+  pruneopts = "UT"
+  revision = "2ac7f3a71a873d0594f15c2309c032f4d42d6cdd"
+
+[[projects]]
   digest = "1:d86c8eb7189141c0e902fd8dcf6e79b8feea523978018e20f2ac794626ad0f63"
   name = "github.com/machinebox/graphql"
   packages = ["."]
@@ -474,7 +481,7 @@
   version = "kubernetes-1.13.4"
 
 [[projects]]
-  digest = "1:f7b5be884005454ed66a2baf43f799c81f36655fe68fb12503174212e3d1d3ec"
+  digest = "1:dc6cf2a2d1855db56484cca1c45b7a1ddc8fce0545389d9acac2d0a6a4b8791f"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -504,6 +511,7 @@
     "pkg/util/json",
     "pkg/util/naming",
     "pkg/util/net",
+    "pkg/util/rand",
     "pkg/util/runtime",
     "pkg/util/sets",
     "pkg/util/validation",
@@ -608,6 +616,7 @@
     "github.com/gorilla/mux",
     "github.com/kisielk/errcheck",
     "github.com/kyma-incubator/compass/components/director/pkg/graphql",
+    "github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools",
     "github.com/machinebox/graphql",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
@@ -616,6 +625,7 @@
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/util/rand",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
