@@ -55,9 +55,9 @@ Follow these steps to restore resources:
 
 5. Once the restore succeeds, remove the `velero` namespace:
 
-```bash
-kubectl delete ns velero
-```
+    ```bash
+    kubectl delete ns velero
+    ```
 
 ## Troubleshooting
 
