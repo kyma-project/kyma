@@ -218,11 +218,15 @@ func (s *service) deleteAPIResources(runtimeApplication v1alpha1.Application) ap
 
 	for _, runtimeService := range runtimeApplication.Spec.Services {
 		log.Infof("Deleting resources for API '%s' and application '%s'", runtimeService.ID, runtimeApplication.Name)
-
-		err := s.resourcesService.DeleteApiResources(runtimeApplication, runtimeService)
-		if err != nil {
-			log.Warningf("Failed to delete resources for API '%s' and application '%s': %s", runtimeService.ID, runtimeApplication.Name, err)
-			appendedErr = appendError(appendedErr, err)
+		for _, entry := range runtimeService.Entries {
+			// TODO: consider separate function
+			if entry.Credentials.SecretName != "" {
+				err := s.resourcesService.DeleteApiResources(runtimeApplication.Name, runtimeService.ID, entry.Credentials.SecretName)
+				if err != nil {
+					log.Warningf("Failed to delete resources for API '%s' and application '%s': %s", runtimeService.ID, runtimeApplication.Name, err)
+					appendedErr = appendError(appendedErr, err)
+				}
+			}
 		}
 	}
 
@@ -287,10 +291,15 @@ func (s *service) updateAPIResources(directorApplication model.Application, exis
 
 		if !found {
 			log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.ID)
-			e := s.resourcesService.DeleteApiResources(existentRuntimeApplication, service)
-			if e != nil {
-				log.Warningf("Failed to delete API '%s': %s.", service.ID, e)
-				err = appendError(err, e)
+			for _, entry := range service.Entries {
+				// TODO: consider separate function
+				if entry.Credentials.SecretName != "" {
+					e := s.resourcesService.DeleteApiResources(existentRuntimeApplication.Name, service.ID, entry.Credentials.SecretName)
+					if e != nil {
+						log.Warningf("Failed to delete API '%s': %s.", service.ID, e)
+						err = appendError(err, e)
+					}
+				}
 			}
 		}
 	}

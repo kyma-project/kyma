@@ -1,6 +1,8 @@
 package apiresources
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	accessservicemock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/accessservice/mocks"
 	secretmock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/mocks"
@@ -9,7 +11,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/types"
-	"testing"
 )
 
 func TestService(t *testing.T) {

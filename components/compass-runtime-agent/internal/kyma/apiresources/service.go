@@ -1,8 +1,8 @@
 package apiresources
 
 import (
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/accessservice"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets"
@@ -17,7 +17,7 @@ type ApiIDToSecretNameMap map[string]string
 type Service interface {
 	CreateApiResources(applicationName string, applicationUID types.UID, serviceID, serviceName string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError
 	UpdateApiResources(applicationName string, applicationUID types.UID, serviceID, serviceName string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError
-	DeleteApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
+	DeleteApiResources(applicationName string, serviceID string, secretName string) apperrors.AppError
 }
 
 //go:generate mockery -name=AssetStore
@@ -45,6 +45,7 @@ type service struct {
 	accessServiceManager      accessservice.AccessServiceManager
 	secretsService            secrets.Service
 	requestParameteresService secrets.RequestParametersService
+	nameResolver              k8sconsts.NameResolver
 }
 
 // TODO: change secrets.Service interface so that it doesn't return applications.Credentials
@@ -86,8 +87,18 @@ func (s service) UpdateApiResources(applicationName string, applicationUID types
 	return appendedErr
 }
 
-func (s service) DeleteApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError {
-	return nil
+func (s service) DeleteApiResources(applicationName string, serviceID string, secretName string) apperrors.AppError {
+
+	appendedErr := s.accessServiceManager.Delete(s.nameResolver.GetResourceName(applicationName, serviceID))
+
+	if secretName != "" {
+		err := s.secretsService.Delete(secretName)
+		if err != nil {
+			appendedErr = appendError(appendedErr, err)
+		}
+	}
+
+	return appendedErr
 }
 
 func appendError(wrapped apperrors.AppError, new apperrors.AppError) apperrors.AppError {

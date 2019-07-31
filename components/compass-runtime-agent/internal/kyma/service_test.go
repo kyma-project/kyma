@@ -1,9 +1,10 @@
 package kyma
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/types"
-	"testing"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
@@ -138,7 +139,7 @@ func TestService(t *testing.T) {
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 		resourcesServiceMocks.On("UpdateApiResources", "id1", types.UID(""), "API1", "", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), nilSpec).Return(nil)
 		resourcesServiceMocks.On("CreateApiResources", "id1", runtimeApplication.UID, "EventAPI1", "", nilCredentials, []byte("spec")).Return(nil)
-		resourcesServiceMocks.On("DeleteApiResources", existingRuntimeApplication, runtimeService3).Return(nil)
+		resourcesServiceMocks.On("DeleteApiResources", "id1", "API2", "credentialsSecretName1").Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -256,10 +257,10 @@ func TestService(t *testing.T) {
 		resourcesServiceMocks.On("CreateApiResources", "id2", types.UID(""), "API1", "", nilCredentials, nilSpec).Return(apperrors.Internal("some error"))
 		resourcesServiceMocks.On("CreateApiResources", "id2", types.UID(""), "EventAPI1", "", nilCredentials, nilSpec).Return(apperrors.Internal("some error"))
 
-		resourcesServiceMocks.On("DeleteApiResources", runtimeApplicationToBeDeleted, runtimeServiceToBeDeleted1).Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("DeleteApiResources", runtimeApplicationToBeDeleted, runtimeServiceToBeDeleted2).Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("DeleteApiResources", existingRuntimeApplication, runtimeServiceToBeDeleted1).Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("DeleteApiResources", existingRuntimeApplication, runtimeServiceToBeDeleted2).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("DeleteApiResources", "id3", "API3", "credentialsSecretName1").Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("DeleteApiResources", "id3", "EventAPI3", "credentialsSecretName1").Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("DeleteApiResources", "id2", "API3", "credentialsSecretName1").Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("DeleteApiResources", "id2", "EventAPI3", "credentialsSecretName1").Return(apperrors.Internal("some error"))
 
 		// when
 		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
