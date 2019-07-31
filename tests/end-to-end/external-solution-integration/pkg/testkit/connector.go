@@ -5,14 +5,16 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/avast/retry-go"
+
+	"github.com/istio/istio/pkg/test/util/retry"
 	connectionTokenHandlerApi "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
+
+	"net/http"
+	"time"
 
 	connectionTokenHandlerClient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"net/http"
-	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -35,9 +37,13 @@ func NewConnectorClient(appName string, tokenRequests connectionTokenHandlerClie
 	}
 }
 
-func (cc *ConnectorClient) GetToken() (string, error) {
+func (cc *ConnectorClient) GetToken(tenant, group string) (string, error) {
 	tokenRequest := &connectionTokenHandlerApi.TokenRequest{
 		ObjectMeta: metav1.ObjectMeta{Name: cc.appName},
+		Context: connectionTokenHandlerApi.ClusterContext{
+			Tenant: tenant,
+			Group:  group,
+		},
 		Status: connectionTokenHandlerApi.TokenRequestStatus{
 			ExpireAfter: metav1.NewTime(time.Now().Add(1 * time.Minute)),
 		},

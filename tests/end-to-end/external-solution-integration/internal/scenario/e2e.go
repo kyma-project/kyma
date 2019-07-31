@@ -79,7 +79,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	return []step.Step{
 		step.Parallel(
 			testsuite.NewCreateNamespace(s.testID, coreClientset.CoreV1().Namespaces()),
-			testsuite.NewCreateApplication(s.testID, s.testID, false, appOperatorClientset.ApplicationconnectorV1alpha1().Applications()),
+			testsuite.NewCreateApplication(s.testID, s.testID, false, s.testID, s.testID, appOperatorClientset.ApplicationconnectorV1alpha1().Applications()),
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),

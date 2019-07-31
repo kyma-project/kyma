@@ -2,7 +2,8 @@ package testsuite
 
 import (
 	"fmt"
-	"github.com/avast/retry-go"
+
+	"github.com/istio/istio/pkg/test/util/retry"
 	acApi "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	acClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"
@@ -17,17 +18,21 @@ type CreateApplication struct {
 	skipInstallation bool
 	name             string
 	accessLabel      string
+	tenant           string
+	group            string
 }
 
 var _ step.Step = &CreateApplication{}
 
 // NewCreateApplication returns new CreateApplication
-func NewCreateApplication(name, accessLabel string, skipInstallation bool, applications acClient.ApplicationInterface, ) *CreateApplication {
+func NewCreateApplication(name, accessLabel string, skipInstallation bool, tenant, group string, applications acClient.ApplicationInterface) *CreateApplication {
 	return &CreateApplication{
 		name:             name,
 		applications:     applications,
 		skipInstallation: skipInstallation,
 		accessLabel:      accessLabel,
+		tenant:           tenant,
+		group:            group,
 	}
 }
 
@@ -42,6 +47,8 @@ func (s *CreateApplication) Run() error {
 		Services:         []acApi.Service{},
 		AccessLabel:      s.accessLabel,
 		SkipInstallation: s.skipInstallation,
+		Tenant:           s.tenant,
+		Group:            s.group,
 	}
 
 	dummyApp := &acApi.Application{
