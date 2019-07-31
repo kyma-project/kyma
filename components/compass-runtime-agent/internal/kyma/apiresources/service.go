@@ -49,10 +49,11 @@ type service struct {
 }
 
 // TODO: change secrets.Service interface so that it doesn't return applications.Credentials
-func NewService(accessServiceManager accessservice.AccessServiceManager, secretsService secrets.Service) Service {
+func NewService(accessServiceManager accessservice.AccessServiceManager, secretsService secrets.Service, nameResolver k8sconsts.NameResolver) Service {
 	return service{
 		accessServiceManager: accessServiceManager,
 		secretsService:       secretsService,
+		nameResolver:         nameResolver,
 	}
 }
 

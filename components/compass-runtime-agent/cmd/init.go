@@ -53,7 +53,7 @@ func newResourcesService(coreClientset *kubernetes.Clientset, nameResolver k8sco
 	secretsRepository := secrets.NewRepository(sei)
 
 	secretsService := newSecretsService(secretsRepository, nameResolver)
-	return apiresources.NewService(accessServiceManager, secretsService)
+	return apiresources.NewService(accessServiceManager, secretsService, nameResolver)
 }
 
 func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace string, proxyPort int) accessservice.AccessServiceManager {

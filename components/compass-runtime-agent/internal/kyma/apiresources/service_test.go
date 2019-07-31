@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	k8sconstsmocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts/mocks"
 	accessservicemock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/accessservice/mocks"
 	secretmock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/mocks"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
@@ -19,6 +20,7 @@ func TestService(t *testing.T) {
 		// given
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
+		nameResolver := &k8sconstsmocks.NameResolver{}
 
 		credentials := model.CredentialsWithCSRF{
 			Basic: &model.Basic{
@@ -31,7 +33,7 @@ func TestService(t *testing.T) {
 		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(applications.Credentials{}, nil)
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
 
 		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", &credentials, nil)
 
@@ -45,11 +47,12 @@ func TestService(t *testing.T) {
 		// given
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
+		nameResolver := &k8sconstsmocks.NameResolver{}
 
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "serviceName").Return(nil)
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
 
 		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", nil, nil)
 
@@ -63,6 +66,7 @@ func TestService(t *testing.T) {
 		// given
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
+		nameResolver := &k8sconstsmocks.NameResolver{}
 
 		credentials := model.CredentialsWithCSRF{
 			Basic: &model.Basic{
@@ -74,7 +78,7 @@ func TestService(t *testing.T) {
 		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, nil)
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
 
 		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", &credentials, nil)
 
@@ -88,6 +92,7 @@ func TestService(t *testing.T) {
 		// given
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
+		nameResolver := &k8sconstsmocks.NameResolver{}
 
 		credentials := model.CredentialsWithCSRF{
 			Basic: &model.Basic{
@@ -100,7 +105,7 @@ func TestService(t *testing.T) {
 		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(applications.Credentials{}, nil)
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
 
 		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", &credentials, nil)
 
@@ -114,11 +119,12 @@ func TestService(t *testing.T) {
 		// given
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
+		nameResolver := &k8sconstsmocks.NameResolver{}
 
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "serviceName").Return(nil)
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
 
 		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", nil, nil)
 
@@ -132,6 +138,7 @@ func TestService(t *testing.T) {
 		// given
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
+		nameResolver := &k8sconstsmocks.NameResolver{}
 
 		credentials := model.CredentialsWithCSRF{
 			Basic: &model.Basic{
@@ -143,7 +150,7 @@ func TestService(t *testing.T) {
 		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, nil)
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
 
 		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", &credentials, nil)
 

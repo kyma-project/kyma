@@ -50,7 +50,7 @@ func (m manager) Update(application *v1alpha1.Application) (*v1alpha1.Applicatio
 	currentApp.Spec.Labels = application.Spec.Labels
 	currentApp.Spec.Services = application.Spec.Services
 
-	newApp, err := m.applicationsInterface.Update(application)
+	newApp, err := m.applicationsInterface.Update(currentApp)
 	if err != nil {
 		return nil, apperrors.Internal("Failed to update application: %s", err)
 	}
