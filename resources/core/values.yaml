@@ -21,10 +21,10 @@ global:
       name: kyma-gateway
   acceptance_tests:
     dir: pr/
-    version: "PR-4615"
+    version: "PR-4959"
   ui_acceptance_tests:
     dir:
-    version: "34b9d204"
+    version: 72772df2
   api_controller:
     dir: pr/
     version: "PR-4582"
@@ -47,7 +47,7 @@ global:
     version: 8a10f0ed
   kubeless_integration_tests:
     dir: develop/tests/
-    version: 3c2c6431
+    version: 94f6cfef
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
@@ -59,7 +59,7 @@ global:
     version: 6b4c356f
   console_backend_service:
     dir: pr/
-    version: PR-4776
+    version: PR-4791
   console_backend_service_test:
     dir: develop/
     version: b3441db9
@@ -69,6 +69,9 @@ global:
   xip_patch:
     dir: develop/
     version: "d20b1c29"
+  e2e_external_solution:
+    dir: pr/
+    version: PR-5087
   kubeless_images:
     runtime:
       node6:
@@ -95,13 +98,3 @@ test:
         # Currently Pods with istio sidecar they have a long termination time, because of that we need to have
         # such log timeout for teardown (waiting until namespace will be terminated)
         tearDownTimeoutPerStep: 3m
-    ui:
-      # tests uses chromium that require more memory
-      requests:
-        memory: 300Mi
-        cpu: 200m
-      limits:
-        memory: 1.5Gi
-        cpu: 300m
-      logging:
-        enabled:

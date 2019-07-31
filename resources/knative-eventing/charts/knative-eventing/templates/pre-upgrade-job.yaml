@@ -15,10 +15,29 @@ data:
     #!/usr/bin/env bash
     set -eu
     echo "*** Pre upgrade job starts ***"
-    kubectl scale -n kyma-system deploy/event-bus-subscription-controller-knative --replicas=0
+
+    kubectl delete svc,deploy -l app=publish-knative -n kyma-system --ignore-not-found
+    kubectl delete svc,deploy -l app=subscription-controller-knative -n kyma-system --ignore-not-found
+    kubectl delete svc event-bus-publish-knative-metrics-service -n kyma-system --ignore-not-found
+  
+    kubectl delete destinationrules.networking.istio.io event-bus-subscription-controller-knative-metrics-destination-r -n kyma-system --ignore-not-found
+    kubectl delete servicemonitors.monitoring.coreos.com event-bus-subscription-controller-knative-metrics-service-monit -n kyma-system --ignore-not-found
+
+    kubectl delete destinationrules.networking.istio.io event-bus-publish-knative-metrics-destination-rule -n kyma-system --ignore-not-found
+    kubectl delete servicemonitors.monitoring.coreos.com event-bus-publish-knative-service-monitor -n kyma-system --ignore-not-found
+
+    kubectl delete clusterrolebindings.rbac.authorization.k8s.io event-bus-publish-knative -n kyma-system --ignore-not-found
+    kubectl delete clusterrolebindings.rbac.authorization.k8s.io event-bus-kyma-subscriptions-controller -n kyma-system --ignore-not-found
+    
+    kubectl delete clusterroles.rbac.authorization.k8s.io event-bus-publish-knative -n kyma-system --ignore-not-found
+    kubectl delete clusterroles.rbac.authorization.k8s.io event-bus-kyma-subscriptions-controller -n kyma-system --ignore-not-found
+
+    kubectl delete serviceaccounts event-bus-publish -n kyma-system --ignore-not-found
+    kubectl delete serviceaccounts event-bus-subscription-controller-knative-sa -n kyma-system --ignore-not-found
+
     kubectl delete subscriptions.eventing.knative.dev --all -n kyma-system --ignore-not-found
     kubectl delete channels.eventing.knative.dev --all -n kyma-system --ignore-not-found
-    kubectl delete clusterchannelprovisioners.eventing.knative.dev --all --ignore-not-found
+    
     kubectl delete crd \
       subscriptions.eventing.knative.dev \
       clusterchannelprovisioners.eventing.knative.dev \

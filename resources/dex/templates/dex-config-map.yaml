@@ -53,6 +53,12 @@ data:
       - 'http://jaeger.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
       - 'https://jaeger.{{ .Values.global.ingress.domainName }}/oauth/callback'
       secret: oiEWUWOIEwedfgg
+    - id: {{ .Values.oidc.kialiClientId }}
+      name: {{ .Values.oidc.kialiClientName }}
+      redirectURIs:
+      - 'http://kiali.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
+      - 'https://kiali.{{ .Values.global.ingress.domainName }}/oauth/callback'
+      secret: hiFWLWqIxw5d3gl
 
     enablePasswordDB: true
     #__STATIC_PASSWORDS__

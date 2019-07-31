@@ -20,32 +20,32 @@ func main() {
 	inDir := os.Args[1]
 	outDir := os.Args[2]
 
-	if err := archiveBundles(inDir, outDir); err != nil {
+	if err := archiveAddons(inDir, outDir); err != nil {
 		panic(err)
 	}
 }
 
-func archiveBundles(inDir, outDir string) error {
-	bundles, err := ioutil.ReadDir(inDir)
+func archiveAddons(inDir, outDir string) error {
+	addons, err := ioutil.ReadDir(inDir)
 	if err != nil {
 		return errors.Wrap(err, "while reading input directory")
 	}
 
-	for _, bundleInfo := range bundles {
-		if bundleInfo.IsDir() {
-			bundlePath := filepath.Join(inDir, bundleInfo.Name())
-			bundleContent, err := ioutil.ReadDir(bundlePath)
+	for _, addonInfo := range addons {
+		if addonInfo.IsDir() {
+			addonPath := filepath.Join(inDir, addonInfo.Name())
+			addonContent, err := ioutil.ReadDir(addonPath)
 			if err != nil {
-				return errors.Wrapf(err, "while reading bundle '%s'", bundlePath)
+				return errors.Wrapf(err, "while reading addon '%s'", addonPath)
 			}
-			bundleFileNames := make([]string, len(bundleContent))
+			addonFileNames := make([]string, len(addonContent))
 
-			for i, elem := range bundleContent {
-				bundleFileNames[i] = filepath.Join(bundlePath, elem.Name())
+			for i, elem := range addonContent {
+				addonFileNames[i] = filepath.Join(addonPath, elem.Name())
 			}
 
-			tarGzFile := filepath.Join(outDir, bundleInfo.Name()+".tgz")
-			err = archiver.TarGz.Make(tarGzFile, bundleFileNames)
+			tarGzFile := filepath.Join(outDir, addonInfo.Name()+".tgz")
+			err = archiver.TarGz.Make(tarGzFile, addonFileNames)
 			if err != nil {
 				return errors.Wrapf(err, "while creating archive '%s'", tarGzFile)
 			}

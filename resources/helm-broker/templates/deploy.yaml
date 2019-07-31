@@ -36,6 +36,13 @@ spec:
       - name: broker
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        resources:
+          limits:
+            memory: 76Mi
+            cpu: 60m
+          requests:
+            memory: 32Mi
+            cpu: 30m
         env:
           - name: APP_TMP_DIR
             value: /tmp
@@ -92,6 +99,13 @@ spec:
       - name: ctrl
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-controller:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        resources:
+          limits:
+            memory: 76Mi
+            cpu: 100m
+          requests:
+            memory: 32Mi
+            cpu: 80m
         env:
           - name: APP_TMP_DIR
             value: /tmp

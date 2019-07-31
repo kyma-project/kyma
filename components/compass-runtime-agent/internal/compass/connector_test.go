@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,6 +15,8 @@ const (
 	"url":"https://token.url/applications/info?token=abcd",
 	"token":"abcd"
 }`
+
+	tokenURL = "https://token.url/applications/info?token=abcd"
 )
 
 func TestCompassConnector_EstablishConnection(t *testing.T) {
@@ -32,10 +36,11 @@ func TestCompassConnector_EstablishConnection(t *testing.T) {
 		connector := NewCompassConnector(file.Name())
 
 		// when
-		err = connector.EstablishConnection()
+		connection, err := connector.EstablishConnection()
 
 		// then
 		require.NoError(t, err)
+		assert.Equal(t, tokenURL, connection.DirectorURL)
 	})
 
 	t.Run("should return error when failed to read file", func(t *testing.T) {
@@ -43,7 +48,7 @@ func TestCompassConnector_EstablishConnection(t *testing.T) {
 		connector := NewCompassConnector("non-existing")
 
 		// when
-		err = connector.EstablishConnection()
+		_, err := connector.EstablishConnection()
 
 		// then
 		require.Error(t, err)
@@ -64,7 +69,7 @@ func TestCompassConnector_EstablishConnection(t *testing.T) {
 		connector := NewCompassConnector(invalidFile.Name())
 
 		// when
-		err = connector.EstablishConnection()
+		_, err = connector.EstablishConnection()
 
 		// then
 		require.Error(t, err)

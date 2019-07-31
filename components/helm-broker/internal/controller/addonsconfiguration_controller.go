@@ -2,12 +2,11 @@ package controller
 
 import (
 	"context"
-
+	"path"
 	"time"
 
 	"github.com/Masterminds/semver"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/addons"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	addonsv1alpha1 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
@@ -60,41 +59,43 @@ type ReconcileAddonsConfiguration struct {
 	client.Client
 	scheme *runtime.Scheme
 
-	chartStorage  chartStorage
-	bundleStorage bundleStorage
+	chartStorage chartStorage
+	addonStorage addonStorage
 
 	docsProvider docsProvider
 	brokerFacade brokerFacade
 	brokerSyncer brokerSyncer
 
-	bundleProvider bundleProvider
-	protection     protection
+	addonLoader *addonLoader
+	protection  protection
 
 	// syncBroker informs ServiceBroker should be resync, it should be true if
 	// operation insert/delete was made on storage
-	syncBroker  bool
-	developMode bool
+	syncBroker bool
 }
 
 // NewReconcileAddonsConfiguration returns a new reconcile.Reconciler
-func NewReconcileAddonsConfiguration(mgr manager.Manager, bp bundleProvider, chartStorage chartStorage, bundleStorage bundleStorage, brokerFacade brokerFacade, docsProvider docsProvider, brokerSyncer brokerSyncer, developMode bool) reconcile.Reconciler {
+func NewReconcileAddonsConfiguration(mgr manager.Manager, addonGetterFactory addonGetterFactory, chartStorage chartStorage, addonStorage addonStorage, brokerFacade brokerFacade, docsProvider docsProvider, brokerSyncer brokerSyncer, tmpDir string, log logrus.FieldLogger) reconcile.Reconciler {
 	return &ReconcileAddonsConfiguration{
-		log:    logrus.WithField("controller", "addons-configuration"),
+		log:    log.WithField("controller", "addons-configuration"),
 		Client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
 
-		chartStorage:  chartStorage,
-		bundleStorage: bundleStorage,
+		chartStorage: chartStorage,
+		addonStorage: addonStorage,
 
-		bundleProvider: bp,
-		protection:     protection{},
+		addonLoader: &addonLoader{
+			addonGetterFactory: addonGetterFactory,
+			log:                log.WithField("service", "addons::configuration::addon-creator"),
+			dstPath:            path.Join(tmpDir, "addon-loader-dst"),
+		},
+		protection: protection{},
 
 		brokerSyncer: brokerSyncer,
 		brokerFacade: brokerFacade,
 		docsProvider: docsProvider,
 
-		developMode: developMode,
-		syncBroker:  false,
+		syncBroker: false,
 	}
 }
 
@@ -148,18 +149,18 @@ func (r *ReconcileAddonsConfiguration) Reconcile(request reconcile.Request) (rec
 }
 
 func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.AddonsConfiguration, lastStatus addonsv1alpha1.AddonsConfigurationStatus) error {
-	r.log.Infof("- load bundles and charts for each addon")
-	repositories := r.loadAddons(addon)
+	r.log.Infof("- load addons and charts for each addon")
+	repositories := r.addonLoader.Load(addon.Spec.Repositories)
 
 	r.log.Info("- check duplicate ID addons alongside repositories")
-	repositories.ReviseBundleDuplicationInRepository()
+	repositories.ReviseAddonDuplicationInRepository()
 
 	r.log.Info("- check duplicates ID addons in existing AddonsConfiguration")
 	list, err := r.existingAddonsConfigurations(addon)
 	if err != nil {
 		return exerr.Wrap(err, "while fetching AddonsConfiguration list")
 	}
-	repositories.ReviseBundleDuplicationInStorage(list)
+	repositories.ReviseAddonDuplicationInStorage(list)
 
 	if repositories.IsRepositoriesFailed() {
 		addon.Status.Phase = addonsv1alpha1.AddonsConfigurationFailed
@@ -168,7 +169,7 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 	}
 	r.log.Infof("- status: %s", addon.Status.Phase)
 
-	var deletedBundles []string
+	var deletedAddons []string
 
 	switch addon.Status.Phase {
 	case addonsv1alpha1.AddonsConfigurationFailed:
@@ -176,23 +177,23 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 			return exerr.Wrap(err, "while updating AddonsConfiguration status")
 		}
 		if lastStatus.Phase == addonsv1alpha1.AddonsConfigurationReady {
-			deletedBundles, err = r.deleteBundlesFromRepository(addon.Namespace, lastStatus.Repositories)
+			deletedAddons, err = r.deleteAddonsFromRepository(addon.Namespace, lastStatus.Repositories)
 			if err != nil {
-				return exerr.Wrap(err, "while deleting bundles from repository")
+				return exerr.Wrap(err, "while deleting addons from repository")
 			}
 		}
 	case addonsv1alpha1.AddonsConfigurationReady:
-		r.log.Info("- save ready bundles and charts in storage")
-		if err := r.saveBundle(internal.Namespace(addon.Namespace), repositories); err != nil {
-			return exerr.Wrap(err, "while saving ready bundles and charts in storage")
+		r.log.Info("- save ready addons and charts in storage")
+		if err := r.saveAddon(internal.Namespace(addon.Namespace), repositories); err != nil {
+			return exerr.Wrap(err, "while saving ready addons and charts in storage")
 		}
 		if _, err = r.updateAddonStatus(r.statusSnapshot(addon, repositories)); err != nil {
 			return exerr.Wrap(err, "while updating AddonsConfiguration status")
 		}
 		if lastStatus.Phase == addonsv1alpha1.AddonsConfigurationReady {
-			deletedBundles, err = r.deleteOrphanBundles(addon.Namespace, addon.Status.Repositories, lastStatus.Repositories)
+			deletedAddons, err = r.deleteOrphanAddons(addon.Namespace, addon.Status.Repositories, lastStatus.Repositories)
 			if err != nil {
-				return exerr.Wrap(err, "while deleting orphan bundles from storage")
+				return exerr.Wrap(err, "while deleting orphan addons from storage")
 			}
 		}
 
@@ -205,9 +206,9 @@ func (r *ReconcileAddonsConfiguration) addAddonsProcess(addon *addonsv1alpha1.Ad
 		}
 	}
 
-	if len(deletedBundles) > 0 {
+	if len(deletedAddons) > 0 {
 		r.log.Info("- reprocessing conflicting addons configurations")
-		for _, key := range deletedBundles {
+		for _, key := range deletedAddons {
 			// reprocess ClusterAddonsConfiguration again if it contains a conflicting addons
 			if err := r.reprocessConflictingAddonsConfiguration(key, list); err != nil {
 				return exerr.Wrap(err, "while requesting processing of conflicting AddonsConfigurations")
@@ -246,16 +247,16 @@ func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1
 		}
 
 		for _, repo := range addon.Status.Repositories {
-			for _, add := range repo.Addons {
-				id, err := r.removeBundle(add, internal.Namespace(addon.Namespace))
+			for _, a := range repo.Addons {
+				id, err := r.removeAddon(a, internal.Namespace(addon.Namespace))
 				if err != nil && !storage.IsNotFoundError(err) {
-					return exerr.Wrapf(err, "while deleting bundle with charts for addon %s", add.Name)
+					return exerr.Wrapf(err, "while deleting addon with charts for addon %s", a.Name)
 				}
 
 				if id != nil {
-					r.log.Infof("- delete DocsTopic for bundle %s", add)
+					r.log.Infof("- delete DocsTopic for addon %s", a)
 					if err := r.docsProvider.EnsureDocsTopicRemoved(string(*id), addon.Namespace); err != nil {
-						return exerr.Wrapf(err, "while ensuring DocsTopic for bundle %s is removed", *id)
+						return exerr.Wrapf(err, "while ensuring DocsTopic for addon %s is removed", *id)
 					}
 				}
 			}
@@ -274,35 +275,6 @@ func (r *ReconcileAddonsConfiguration) deleteAddonsProcess(addon *addonsv1alpha1
 	return nil
 }
 
-func (r *ReconcileAddonsConfiguration) loadAddons(addon *addonsv1alpha1.AddonsConfiguration) *addons.RepositoryCollection {
-	repositories := addons.NewRepositoryCollection()
-	for _, specRepository := range addon.Spec.Repositories {
-		r.log.Infof("- create addons for %q repository", specRepository.URL)
-		repo := addons.NewAddonsRepository(specRepository.URL)
-
-		if err := specRepository.VerifyURL(r.developMode); err != nil {
-			repo.FetchingError(err)
-			repositories.AddRepository(repo)
-
-			r.log.Errorf("url %q address is not valid: %s", specRepository.URL, err)
-			continue
-		}
-
-		adds, err := r.createAddons(specRepository.URL)
-		if err != nil {
-			repo.FetchingError(err)
-			repositories.AddRepository(repo)
-
-			r.log.Errorf("while creating addons for repository from %q: %s", specRepository.URL, err)
-			continue
-		}
-
-		repo.Addons = adds
-		repositories.AddRepository(repo)
-	}
-	return repositories
-}
-
 func (r *ReconcileAddonsConfiguration) ensureBroker(addon *addonsv1alpha1.AddonsConfiguration) error {
 	exist, err := r.brokerFacade.Exist(addon.Namespace)
 	if err != nil {
@@ -319,45 +291,6 @@ func (r *ReconcileAddonsConfiguration) ensureBroker(addon *addonsv1alpha1.Addons
 		}
 	}
 	return nil
-}
-
-func (r *ReconcileAddonsConfiguration) createAddons(URL string) ([]*addons.AddonController, error) {
-	adds := []*addons.AddonController{}
-
-	// fetch repository index
-	index, err := r.bundleProvider.GetIndex(URL)
-	if err != nil {
-		return adds, exerr.Wrap(err, "while reading repository index")
-	}
-
-	// for each repository entry create addon
-	for _, entries := range index.Entries {
-		for _, entry := range entries {
-			addon := addons.NewAddon(string(entry.Name), string(entry.Version), URL)
-
-			completeBundle, err := r.bundleProvider.LoadCompleteBundle(entry)
-			if bundle.IsFetchingError(err) {
-				addon.FetchingError(err)
-				adds = append(adds, addon)
-				r.log.Errorf("while fetching addon: %s", err)
-				continue
-			}
-			if bundle.IsLoadingError(err) {
-				addon.LoadingError(err)
-				adds = append(adds, addon)
-				r.log.Errorf("while loading addon: %s", err)
-				continue
-			}
-
-			addon.ID = string(completeBundle.Bundle.ID)
-			addon.Bundle = completeBundle.Bundle
-			addon.Charts = completeBundle.Charts
-
-			adds = append(adds, addon)
-		}
-	}
-
-	return adds, nil
 }
 
 func (r *ReconcileAddonsConfiguration) existingAddonsConfigurations(addon *addonsv1alpha1.AddonsConfiguration) (*addonsv1alpha1.AddonsConfigurationList, error) {
@@ -387,48 +320,48 @@ func (r *ReconcileAddonsConfiguration) addonsConfigurationList(namespace string)
 	return addonsConfigurationList, nil
 }
 
-func (r *ReconcileAddonsConfiguration) deleteOrphanBundles(namespace string, repos []addonsv1alpha1.StatusRepository, lastRepos []addonsv1alpha1.StatusRepository) ([]string, error) {
+func (r *ReconcileAddonsConfiguration) deleteOrphanAddons(namespace string, repos []addonsv1alpha1.StatusRepository, lastRepos []addonsv1alpha1.StatusRepository) ([]string, error) {
 	addonsToStay := map[string]addonsv1alpha1.Addon{}
 	for _, repo := range repos {
 		for _, ad := range repo.Addons {
 			addonsToStay[ad.Key()] = ad
 		}
 	}
-	var deletedBundlesIDs []string
+	var deletedAddonsIDs []string
 	for _, repo := range lastRepos {
 		for _, ad := range repo.Addons {
 			if _, exist := addonsToStay[ad.Key()]; !exist {
-				if _, err := r.removeBundle(ad, internal.Namespace(namespace)); err != nil && !storage.IsNotFoundError(err) {
-					return nil, exerr.Wrapf(err, "while deleting bundles and charts for addon %s", ad.Name)
+				if _, err := r.removeAddon(ad, internal.Namespace(namespace)); err != nil && !storage.IsNotFoundError(err) {
+					return nil, exerr.Wrapf(err, "while deleting addons and charts for addon %s", ad.Name)
 				}
-				deletedBundlesIDs = append(deletedBundlesIDs, ad.Key())
+				deletedAddonsIDs = append(deletedAddonsIDs, ad.Key())
 			}
 		}
 	}
-	return deletedBundlesIDs, nil
+	return deletedAddonsIDs, nil
 }
 
-func (r *ReconcileAddonsConfiguration) deleteBundlesFromRepository(namespace string, repos []addonsv1alpha1.StatusRepository) ([]string, error) {
-	var deletedBundlesKeys []string
+func (r *ReconcileAddonsConfiguration) deleteAddonsFromRepository(namespace string, repos []addonsv1alpha1.StatusRepository) ([]string, error) {
+	var deletedAddonsKeys []string
 	for _, repo := range repos {
 		for _, ad := range repo.Addons {
-			if _, err := r.removeBundle(ad, internal.Namespace(namespace)); err != nil && !storage.IsNotFoundError(err) {
-				return nil, exerr.Wrapf(err, "while deleting bundles and charts for addon %s", ad.Name)
+			if _, err := r.removeAddon(ad, internal.Namespace(namespace)); err != nil && !storage.IsNotFoundError(err) {
+				return nil, exerr.Wrapf(err, "while deleting addons and charts for addon %s", ad.Name)
 			}
-			deletedBundlesKeys = append(deletedBundlesKeys, ad.Key())
+			deletedAddonsKeys = append(deletedAddonsKeys, ad.Key())
 		}
 	}
-	return deletedBundlesKeys, nil
+	return deletedAddonsKeys, nil
 }
 
-func (r *ReconcileAddonsConfiguration) removeBundle(ad addonsv1alpha1.Addon, namespace internal.Namespace) (*internal.BundleID, error) {
-	r.log.Infof("- delete bundle %s from storage", ad.Name)
-	b, err := r.bundleStorage.Get(namespace, internal.BundleName(ad.Name), *semver.MustParse(ad.Version))
+func (r *ReconcileAddonsConfiguration) removeAddon(ad addonsv1alpha1.Addon, namespace internal.Namespace) (*internal.AddonID, error) {
+	r.log.Infof("- delete addon %s from storage", ad.Name)
+	b, err := r.addonStorage.Get(namespace, internal.AddonName(ad.Name), *semver.MustParse(ad.Version))
 	if err != nil {
 		return nil, err
 	}
 
-	err = r.bundleStorage.Remove(namespace, internal.BundleName(ad.Name), *semver.MustParse(ad.Version))
+	err = r.addonStorage.Remove(namespace, internal.AddonName(ad.Name), *semver.MustParse(ad.Version))
 	if err != nil {
 		return nil, err
 	}
@@ -448,8 +381,8 @@ func (r *ReconcileAddonsConfiguration) reprocessConflictingAddonsConfiguration(k
 		if addonsCfg.Status.Phase != addonsv1alpha1.AddonsConfigurationReady {
 			for _, repo := range addonsCfg.Status.Repositories {
 				if repo.Status != addonsv1alpha1.RepositoryStatusReady {
-					for _, add := range repo.Addons {
-						if add.Key() == key {
+					for _, a := range repo.Addons {
+						if a.Key() == key {
 							return r.reprocessAddonsConfiguration(&addonsCfg)
 						}
 					}
@@ -472,27 +405,27 @@ func (r *ReconcileAddonsConfiguration) reprocessAddonsConfiguration(addon *addon
 	return nil
 }
 
-func (r *ReconcileAddonsConfiguration) saveBundle(namespace internal.Namespace, repositories *addons.RepositoryCollection) error {
+func (r *ReconcileAddonsConfiguration) saveAddon(namespace internal.Namespace, repositories *addons.RepositoryCollection) error {
 	for _, addon := range repositories.ReadyAddons() {
-		if len(addon.Bundle.Docs) == 1 {
-			r.log.Infof("- ensure DocsTopic for bundle %s in namespace %s", addon.Bundle.ID, namespace)
-			if err := r.docsProvider.EnsureDocsTopic(addon.Bundle, string(namespace)); err != nil {
-				return exerr.Wrapf(err, "While ensuring DocsTopic for bundle %s/%s: %v", addon.Bundle.ID, namespace, err)
+		if len(addon.CompleteAddon.Docs) == 1 {
+			r.log.Infof("- ensure DocsTopic for addon %s in namespace %s", addon.CompleteAddon.ID, namespace)
+			if err := r.docsProvider.EnsureDocsTopic(addon.CompleteAddon, string(namespace)); err != nil {
+				return exerr.Wrapf(err, "While ensuring DocsTopic for addon %s/%s: %v", addon.CompleteAddon.ID, namespace, err)
 			}
 		}
-		exist, err := r.bundleStorage.Upsert(namespace, addon.Bundle)
+		exist, err := r.addonStorage.Upsert(namespace, addon.CompleteAddon)
 		if err != nil {
 			addon.RegisteringError(err)
-			r.log.Errorf("cannot upsert bundle %v:%v into storage", addon.Bundle.Name, addon.Bundle.Version)
+			r.log.Errorf("cannot upsert addon %v:%v into storage", addon.CompleteAddon.Name, addon.CompleteAddon.Version)
 			continue
 		}
 		if exist {
-			r.log.Infof("bundle %v:%v already existed in storage, bundle was replaced", addon.Bundle.Name, addon.Bundle.Version)
+			r.log.Infof("addon %v:%v already existed in storage, addon was replaced", addon.CompleteAddon.Name, addon.CompleteAddon.Version)
 		}
 		err = r.saveCharts(namespace, addon.Charts)
 		if err != nil {
 			addon.RegisteringError(err)
-			r.log.Errorf("cannot upsert charts of %v:%v bunlde", addon.Bundle.Name, addon.Bundle.Version)
+			r.log.Errorf("cannot upsert charts of %v:%v addon", addon.CompleteAddon.Name, addon.CompleteAddon.Version)
 			continue
 		}
 
@@ -502,13 +435,13 @@ func (r *ReconcileAddonsConfiguration) saveBundle(namespace internal.Namespace, 
 }
 
 func (r *ReconcileAddonsConfiguration) saveCharts(namespace internal.Namespace, charts []*chart.Chart) error {
-	for _, bundleChart := range charts {
-		exist, err := r.chartStorage.Upsert(namespace, bundleChart)
+	for _, addonChart := range charts {
+		exist, err := r.chartStorage.Upsert(namespace, addonChart)
 		if err != nil {
 			return err
 		}
 		if exist {
-			r.log.Infof("chart %s already existed in storage, chart was replaced", bundleChart.Metadata.Name)
+			r.log.Infof("chart %s already existed in storage, chart was replaced", addonChart.Metadata.Name)
 		}
 	}
 	return nil
@@ -524,12 +457,6 @@ func (r *ReconcileAddonsConfiguration) statusSnapshot(addon *addonsv1alpha1.Addo
 			addonsRepository.Addons = append(addonsRepository.Addons, addon.Addon)
 		}
 		addon.Status.Repositories = append(addon.Status.Repositories, addonsRepository)
-	}
-
-	if repositories.IsRepositoriesFailed() {
-		addon.Status.Phase = addonsv1alpha1.AddonsConfigurationFailed
-	} else {
-		addon.Status.Phase = addonsv1alpha1.AddonsConfigurationReady
 	}
 
 	return addon

@@ -7,10 +7,12 @@ global:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir: develop/
-    version: "36059183"
+    version: 392b7a76
+    publisherImage: event-publish-service
+    subscriptionControllerImage: subscription-controller
   event_bus_tests:
     dir: develop/
-    version: d72e2c1f
+    version: 94f6cfef
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
@@ -20,8 +22,8 @@ global:
     resources:
       limits:
         memory: "32M"
-  publishKnative:
-    maxRequests: 16
+  eventPublishService:
+    maxRequests: 200
     maxRequestSize: 65536
     maxChannelNameLength: 33
     maxSourceIDLength: 253
@@ -41,7 +43,7 @@ global:
     resources:
       limits:
         memory: "32M"
-  subscriptionControllerKnative:
+  subscriptionController:
     resyncPeriod: "10s"
     channelTimeout: "10s"
     resources:
@@ -52,5 +54,5 @@ global:
   eventBusVersion: "0.2.34"
   isLocalEnv: false
 e2eTests:
-  nameTester: "test-event-bus-tester"
-  nameSubscriber: "test-event-bus-subscriber"    
+  nameTester: test-event-bus-tester
+  nameSubscriber: test-event-bus-subscriber

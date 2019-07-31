@@ -7,17 +7,20 @@ global:
       version: "PR-99"
     director:
       dir: pr/
-      version: "PR-128"
+      version: "PR-144"
     gateway:
       dir: pr/
       version: "PR-100"
     healthchecker:
       dir: pr/
       version: "PR-99"
+    schema_migrator:
+      dir: pr/
+      version: "PR-161"
     tests:
       e2e:
         dir: pr/
-        version: "PR-121"
+        version: "PR-170"
 
   isLocalEnv: false
   
@@ -29,8 +32,21 @@ global:
 
   gateway:
     host: compass-gateway
-    
+  
   istio:
     gateway:
-      name: compass-istio-gateway
-      namespace: compass-system
+      name: "kyma-gateway"
+      namespace: "kyma-system"
+
+  database:
+    useEmbedded: true
+    # Values for GCP managed PostgreSQL database
+    managedGCP:
+      serviceAccountKey: ""
+      instanceConnectionName: ""
+      dbUser: ""
+      dbPassword: ""
+      dbName: ""
+      host: "localhost"
+      hostPort: "5432"
+      sslMode: ""

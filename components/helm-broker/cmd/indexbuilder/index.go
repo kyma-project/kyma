@@ -10,20 +10,20 @@ import (
 )
 
 type index struct {
-	APIVersion string                               `json:"apiVersion"`
-	Entries    map[internal.BundleName][]indexEntry `json:"entries"`
+	APIVersion string                              `json:"apiVersion"`
+	Entries    map[internal.AddonName][]indexEntry `json:"entries"`
 }
 
 type indexEntry struct {
-	Name        internal.BundleName `json:"name"`
-	Description string              `json:"description"`
-	Version     string              `json:"version"`
+	Name        internal.AddonName `json:"name"`
+	Description string             `json:"description"`
+	Version     string             `json:"version"`
 }
 
-func render(in []*internal.Bundle, w io.Writer) error {
+func render(in []*internal.Addon, w io.Writer) error {
 	dto := &index{
 		APIVersion: "v1",
-		Entries:    make(map[internal.BundleName][]indexEntry),
+		Entries:    make(map[internal.AddonName][]indexEntry),
 	}
 
 	for _, b := range in {

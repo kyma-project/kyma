@@ -11,6 +11,10 @@ const (
 
 	maxResourceNameLength = 63 // Kubernetes limit for services
 	uuidLength            = 36 // UUID has 36 characters
+
+	k8sResourceNameMaxLength = 64
+
+	requestParamsNameFormat = "params-%s"
 )
 
 // NameResolver provides names for Kubernetes resources
@@ -21,6 +25,10 @@ type NameResolver interface {
 	GetGatewayUrl(applicaton, id string) string
 	// ExtractServiceId extracts service ID from given host
 	ExtractServiceId(applicaton, host string) string
+	// GetCredentialsSecretName returns secret name with given ID
+	GetCredentialsSecretName(applicaton, id string) string
+	// GetRequestParamsSecretName returns secret name with given ID
+	GetRequestParamsSecretName(applicaton, id string) string
 }
 
 type nameResolver struct {
@@ -37,6 +45,21 @@ func NewNameResolver(namespace string) NameResolver {
 // GetResourceName returns resource name with given ID
 func (resolver nameResolver) GetResourceName(applicaton, id string) string {
 	return getResourceNamePrefix(applicaton) + id
+}
+
+func (resolver nameResolver) GetCredentialsSecretName(application, id string) string {
+	return resolver.GetResourceName(application, id)
+}
+
+func (resolver nameResolver) GetRequestParamsSecretName(application, id string) string {
+	name := resolver.GetResourceName(application, id)
+
+	resourceName := fmt.Sprintf(requestParamsNameFormat, name)
+	if len(resourceName) > k8sResourceNameMaxLength {
+		return resourceName[0 : k8sResourceNameMaxLength-1]
+	}
+
+	return resourceName
 }
 
 // GetGatewayUrl return gateway url with given ID

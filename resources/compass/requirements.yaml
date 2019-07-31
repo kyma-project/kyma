@@ -1,0 +1,3 @@
+dependencies:
+- name: postgresql
+  condition: global.database.useEmbedded

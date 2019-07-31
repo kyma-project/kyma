@@ -1,0 +1,4 @@
+apiVersion: v1
+description: event-publish-service Helm chart.
+name: event-publish-service
+version: 0.1.0
