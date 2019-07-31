@@ -68,12 +68,12 @@ manifests:
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
 deploy: manifests install
 	kubectl apply -f config/crds
-	kustomize1 build config/default | kubectl apply -f -
+	kustomize build config/default | kubectl apply -f -
 	kubectl apply -f config/config.yaml
 
 undeploy: manifests uninstall
 	kubectl delete -f config/crds
-	kustomize1 build config/default | kubectl delete  -f -
+	kustomize build config/default | kubectl delete  -f -
 	kubectl delete -f config/config.yaml
 
 # Build the docker image
