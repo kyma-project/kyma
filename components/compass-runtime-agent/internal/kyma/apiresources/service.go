@@ -3,7 +3,9 @@ package apiresources
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/accessservice"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	"k8s.io/apimachinery/pkg/types"
@@ -13,7 +15,7 @@ type ApiIDToSecretNameMap map[string]string
 
 //go:generate mockery -name=Service
 type Service interface {
-	CreateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service, spec []byte) apperrors.AppError
+	CreateApiResources(applicationName string, applicationUID types.UID, serviceID, serviceName string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError
 	UpdateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service, spec []byte) apperrors.AppError
 	DeleteApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
 }
@@ -47,10 +49,35 @@ type RequestParameters interface {
 }
 
 type service struct {
+	accessServiceManager      accessservice.AccessServiceManager
+	secretsService            secrets.Service
+	requestParameteresService secrets.RequestParametersService
 }
 
-func (s service) CreateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service, spec []byte) apperrors.AppError {
-	return nil
+// TODO: change secrets.Service interface so that it doesn't return applications.Credentials
+func NewService(accessServiceManager accessservice.AccessServiceManager, secretsService secrets.Service) Service {
+	return service{
+		accessServiceManager: accessServiceManager,
+		secretsService:       secretsService,
+	}
+}
+
+type AccessServiceManager interface {
+	Create(application string, appUID types.UID, serviceId, serviceName string) apperrors.AppError
+	Upsert(application string, appUID types.UID, serviceId, serviceName string) apperrors.AppError
+	Delete(serviceName string) apperrors.AppError
+}
+
+func (s service) CreateApiResources(applicationName string, applicationUID types.UID, serviceID, serviceName string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
+	appendedErr := s.accessServiceManager.Create(applicationName, applicationUID, serviceID, serviceName)
+	if credentials != nil {
+		_, err := s.secretsService.Create(applicationName, applicationUID, serviceID, credentials)
+		if err != nil {
+			appendedErr = appendError(appendedErr, err)
+		}
+	}
+
+	return appendedErr
 }
 
 func (s service) UpdateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service, spec []byte) apperrors.AppError {
@@ -61,6 +88,10 @@ func (s service) DeleteApiResources(application v1alpha1.Application, apiDefinit
 	return nil
 }
 
-func NewService() Service {
-	return service{}
+func appendError(wrapped apperrors.AppError, new apperrors.AppError) apperrors.AppError {
+	if wrapped == nil {
+		return new
+	}
+
+	return wrapped.Append("", new)
 }
