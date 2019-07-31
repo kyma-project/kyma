@@ -45,13 +45,13 @@ func (_m *Service) DeleteApiResources(application v1alpha1.Application, apiDefin
 	return r0
 }
 
-// UpdateApiResources provides a mock function with given fields: application, apiDefinition, spec
-func (_m *Service) UpdateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service, spec []byte) apperrors.AppError {
-	ret := _m.Called(application, apiDefinition, spec)
+// UpdateApiResources provides a mock function with given fields: applicationName, applicationUID, serviceID, serviceName, credentials, spec
+func (_m *Service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, serviceName string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
+	ret := _m.Called(applicationName, applicationUID, serviceID, serviceName, credentials, spec)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(v1alpha1.Application, v1alpha1.Service, []byte) apperrors.AppError); ok {
-		r0 = rf(application, apiDefinition, spec)
+	if rf, ok := ret.Get(0).(func(string, types.UID, string, string, *model.CredentialsWithCSRF, []byte) apperrors.AppError); ok {
+		r0 = rf(applicationName, applicationUID, serviceID, serviceName, credentials, spec)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)

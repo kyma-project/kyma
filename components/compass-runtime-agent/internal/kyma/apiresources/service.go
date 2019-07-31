@@ -16,7 +16,7 @@ type ApiIDToSecretNameMap map[string]string
 //go:generate mockery -name=Service
 type Service interface {
 	CreateApiResources(applicationName string, applicationUID types.UID, serviceID, serviceName string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError
-	UpdateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service, spec []byte) apperrors.AppError
+	UpdateApiResources(applicationName string, applicationUID types.UID, serviceID, serviceName string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError
 	DeleteApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError
 }
 
@@ -80,8 +80,17 @@ func (s service) CreateApiResources(applicationName string, applicationUID types
 	return appendedErr
 }
 
-func (s service) UpdateApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service, spec []byte) apperrors.AppError {
-	return nil
+func (s service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID, serviceName string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
+
+	appendedErr := s.accessServiceManager.Upsert(applicationName, applicationUID, serviceID, serviceName)
+	if credentials != nil {
+		_, err := s.secretsService.Upsert(applicationName, applicationUID, serviceID, credentials)
+		if err != nil {
+			appendedErr = appendError(appendedErr, err)
+		}
+	}
+
+	return appendedErr
 }
 
 func (s service) DeleteApiResources(application v1alpha1.Application, apiDefinition v1alpha1.Service) apperrors.AppError {

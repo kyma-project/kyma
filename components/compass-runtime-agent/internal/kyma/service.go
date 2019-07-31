@@ -307,7 +307,7 @@ func (s *service) updateOrCreateRESTAPIResources(directorApplication model.Appli
 		if existsInRuntime {
 			log.Infof("Updating resources for API '%s' and application '%s'", apiDefinition.ID, directorApplication.ID)
 			service := applications.GetService(apiDefinition.ID, existentRuntimeApplication)
-			err := s.resourcesService.UpdateApiResources(newRuntimeApplication, service, getSpec(apiDefinition.APISpec))
+			err := s.resourcesService.UpdateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, service.Name, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec))
 			if err != nil {
 				log.Warningf("Failed to update API '%s': %s.", apiDefinition.ID, err)
 				appendedErr = appendError(appendedErr, err)
@@ -334,7 +334,7 @@ func (s *service) updateOrCreateEventAPIResources(directorApplication model.Appl
 		service := applications.GetService(eventAPIDefinition.ID, newRuntimeApplication)
 		if existsInRuntime {
 			log.Infof("Updating resources for API '%s' and application '%s'", eventAPIDefinition.ID, directorApplication.ID)
-			err := s.resourcesService.UpdateApiResources(newRuntimeApplication, service, getEventSpec(eventAPIDefinition.EventAPISpec))
+			err := s.resourcesService.UpdateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, service.Name, nil, getEventSpec(eventAPIDefinition.EventAPISpec))
 			if err != nil {
 				log.Warningf("Failed to update Event API '%s': %s.", eventAPIDefinition.ID, err)
 				appendedErr = appendError(appendedErr, err)

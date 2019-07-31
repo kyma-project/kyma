@@ -38,6 +38,32 @@ func TestService(t *testing.T) {
 		accessServiceMock.AssertExpectations(t)
 		secretServiceMock.AssertExpectations(t)
 	})
+
+	t.Run("should update API resources", func(t *testing.T) {
+		// given
+		accessServiceMock := &accessservicemock.AccessServiceManager{}
+		secretServiceMock := &secretmock.Service{}
+
+		credentials := model.CredentialsWithCSRF{
+			Basic: &model.Basic{
+				Username: "admin",
+				Password: "nimda",
+			},
+		}
+
+		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "serviceName").Return(nil)
+		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(applications.Credentials{}, nil)
+
+		// when
+		service := NewService(accessServiceMock, secretServiceMock)
+
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", &credentials, nil)
+
+		// then
+		require.NoError(t, err)
+		accessServiceMock.AssertExpectations(t)
+		secretServiceMock.AssertExpectations(t)
+	})
 }
 
 func getCredentialsMatcher(expected *model.CredentialsWithCSRF) func(*model.CredentialsWithCSRF) bool {
