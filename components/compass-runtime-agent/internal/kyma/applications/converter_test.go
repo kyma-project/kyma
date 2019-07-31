@@ -82,7 +82,7 @@ func TestConverter(t *testing.T) {
 				{
 					ID:          "serviceId1",
 					Name:        "serviceName1",
-					Description: "API 1 description",
+					Description: "",
 					TargetUrl:   "www.example.com/1",
 					RequestParameters: model.RequestParameters{
 						Headers: &map[string][]string{
@@ -141,7 +141,7 @@ func TestConverter(t *testing.T) {
 						Identifier:  "",
 						Name:        "servicename1-cb830",
 						DisplayName: "serviceName1",
-						Description: "API 1 description",
+						Description: "Description not provided",
 						Labels: map[string]string{
 							"connected-app": "App1",
 						},

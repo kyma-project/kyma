@@ -91,12 +91,17 @@ func (c converter) toServices(applicationID string, apis []model.APIDefinition, 
 
 func (c converter) toAPIService(applicationID string, apiDefinition model.APIDefinition) v1alpha1.Service {
 
+	description := apiDefinition.Description
+	if description == "" {
+		description = "Description not provided"
+	}
+
 	return v1alpha1.Service{
 		ID:                  apiDefinition.ID,
 		Identifier:          "", // not available in the Director's API
 		Name:                createServiceName(apiDefinition.Name, apiDefinition.ID),
 		DisplayName:         apiDefinition.Name,
-		Description:         apiDefinition.Description,
+		Description:         description,
 		Labels:              map[string]string{connectedApp: applicationID}, // not available in the Director's API
 		LongDescription:     "",                                             // not available in the Director's API
 		ProviderDisplayName: "",                                             // not available in the Director's API
