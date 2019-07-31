@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Helm chart for Compass UI
+name: compass-ui
+version: 0.1.0

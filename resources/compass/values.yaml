@@ -1,4 +1,7 @@
 global:
+  defaultTenant : pkjowy
+  tenants: tenant2 tenant3
+
   images:
     containerRegistry:
       path: eu.gcr.io/kyma-project/incubator
