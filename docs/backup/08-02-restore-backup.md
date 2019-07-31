@@ -71,7 +71,7 @@ kubectl delete $(kubectl get pod -l app=service-catalog-addons-service-binding-u
 
 ### Different DNS and Gateway IP Address
 
-This tutorial assumes that DNS and Gateway IP address will stay the same as the backed up cluster. If they change in the new cluster, update the `net-global-overrides` ConfigMap in `kyma-installer` namespace with the proper values and re-run the installer to propagate the new values:
+This tutorial assumes that the DNS and the Public IP will stay the same as the backed up cluster. If they change in the new cluster, check and update the relavant fields on the `overrides` Secrets and ConfigMaps in `kyma-installer` namespace with the new values and re-run the installer to propagate them to all the components:
 
 ```bash
 kubectl label installation/kyma-installation action=install
