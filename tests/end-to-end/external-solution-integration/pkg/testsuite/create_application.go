@@ -3,7 +3,7 @@ package testsuite
 import (
 	"fmt"
 
-	"github.com/istio/istio/pkg/test/util/retry"
+	"github.com/avast/retry-go"
 	acApi "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	acClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/helpers"

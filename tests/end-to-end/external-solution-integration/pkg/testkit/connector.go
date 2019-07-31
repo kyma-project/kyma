@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 
-	"github.com/istio/istio/pkg/test/util/retry"
+	"github.com/avast/retry-go"
 	connectionTokenHandlerApi "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 
 	"net/http"
