@@ -66,6 +66,12 @@ oathkeeper:
           # Sets the strategy to be used to validate/match the token scope. Supports "hierarchic", "exact", "wildcard", "none". Defaults
           # to "none".
           scope_strategy: exact
+        # Enable the "jwt" section to allow for jwt authenticator configured for local Dex Id Tokens.
+        #jwt:
+        #  enabled: true
+        #  jwks_urls:
+        #    - http://dex-service.kyma-system.svc.cluster.local:5556/keys
+        #  scope_strategy: wildcard
       authorizers:
         allow:
           enabled: true
@@ -88,7 +94,7 @@ oathkeeper:
     tag: v0.17.1-beta.1
 
 maester:
-  annotations: 
+  annotations:
     sidecar.istio.io/inject: "false"
   resources:
     limits:
