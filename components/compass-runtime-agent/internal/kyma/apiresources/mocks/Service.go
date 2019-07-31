@@ -12,13 +12,13 @@ type Service struct {
 	mock.Mock
 }
 
-// CreateApiResources provides a mock function with given fields: applicationName, applicationUID, serviceID, serviceName, credentials, spec
-func (_m *Service) CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, serviceName string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
-	ret := _m.Called(applicationName, applicationUID, serviceID, serviceName, credentials, spec)
+// CreateApiResources provides a mock function with given fields: applicationName, applicationUID, serviceID, credentials, spec
+func (_m *Service) CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
+	ret := _m.Called(applicationName, applicationUID, serviceID, credentials, spec)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(string, types.UID, string, string, *model.CredentialsWithCSRF, []byte) apperrors.AppError); ok {
-		r0 = rf(applicationName, applicationUID, serviceID, serviceName, credentials, spec)
+	if rf, ok := ret.Get(0).(func(string, types.UID, string, *model.CredentialsWithCSRF, []byte) apperrors.AppError); ok {
+		r0 = rf(applicationName, applicationUID, serviceID, credentials, spec)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)
@@ -44,13 +44,13 @@ func (_m *Service) DeleteApiResources(applicationName string, serviceID string, 
 	return r0
 }
 
-// UpdateApiResources provides a mock function with given fields: applicationName, applicationUID, serviceID, serviceName, credentials, spec
-func (_m *Service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, serviceName string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
-	ret := _m.Called(applicationName, applicationUID, serviceID, serviceName, credentials, spec)
+// UpdateApiResources provides a mock function with given fields: applicationName, applicationUID, serviceID, credentials, spec
+func (_m *Service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
+	ret := _m.Called(applicationName, applicationUID, serviceID, credentials, spec)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(string, types.UID, string, string, *model.CredentialsWithCSRF, []byte) apperrors.AppError); ok {
-		r0 = rf(applicationName, applicationUID, serviceID, serviceName, credentials, spec)
+	if rf, ok := ret.Get(0).(func(string, types.UID, string, *model.CredentialsWithCSRF, []byte) apperrors.AppError); ok {
+		r0 = rf(applicationName, applicationUID, serviceID, credentials, spec)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)

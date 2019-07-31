@@ -84,8 +84,8 @@ func TestService(t *testing.T) {
 		applicationsManagerMock.On("Create", &runtimeApplication).Return(&runtimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		resourcesServiceMocks.On("CreateApiResources", "id1", runtimeApplication.UID, "API1", "", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), []byte("spec")).Return(nil)
-		resourcesServiceMocks.On("CreateApiResources", "id1", runtimeApplication.UID, "EventAPI1", "", nilCredentials, nilSpec).Return(nil)
+		resourcesServiceMocks.On("CreateApiResources", "id1", runtimeApplication.UID, "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), []byte("spec")).Return(nil)
+		resourcesServiceMocks.On("CreateApiResources", "id1", runtimeApplication.UID, "EventAPI1", nilCredentials, nilSpec).Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -138,8 +138,8 @@ func TestService(t *testing.T) {
 		converterMock.On("Do", directorApplication).Return(runtimeApplication)
 		applicationsManagerMock.On("Update", &runtimeApplication).Return(&runtimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		resourcesServiceMocks.On("UpdateApiResources", "id1", types.UID(""), "API1", "", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), nilSpec).Return(nil)
-		resourcesServiceMocks.On("CreateApiResources", "id1", runtimeApplication.UID, "EventAPI1", "", nilCredentials, []byte("spec")).Return(nil)
+		resourcesServiceMocks.On("UpdateApiResources", "id1", types.UID(""), "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), nilSpec).Return(nil)
+		resourcesServiceMocks.On("CreateApiResources", "id1", runtimeApplication.UID, "EventAPI1", nilCredentials, []byte("spec")).Return(nil)
 		resourcesServiceMocks.On("DeleteApiResources", "id1", "API2", "credentialsSecretName1").Return(nil)
 
 		expectedResult := []Result{
@@ -250,8 +250,8 @@ func TestService(t *testing.T) {
 		applicationsManagerMock.On("Delete", runtimeApplicationToBeDeleted.Name, &metav1.DeleteOptions{}).Return(apperrors.Internal("some error"))
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		resourcesServiceMocks.On("UpdateApiResources", "id2", types.UID(""), "API2", "", nilCredentials, nilSpec).Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("UpdateApiResources", "id2", types.UID(""), "EventAPI2", "", nilCredentials, nilSpec).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("UpdateApiResources", "id2", types.UID(""), "API2", nilCredentials, nilSpec).Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("UpdateApiResources", "id2", types.UID(""), "EventAPI2", nilCredentials, nilSpec).Return(apperrors.Internal("some error"))
 
 		resourcesServiceMocks.On("CreateApiResources", "id2", types.UID(""), "API1", "", nilCredentials, nilSpec).Return(apperrors.Internal("some error"))
 		resourcesServiceMocks.On("CreateApiResources", "id2", types.UID(""), "EventAPI1", "", nilCredentials, nilSpec).Return(apperrors.Internal("some error"))

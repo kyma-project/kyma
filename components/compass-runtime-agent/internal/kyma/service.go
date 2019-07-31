@@ -121,7 +121,7 @@ func (s *service) createAPIResources(directorApplication model.Application, runt
 		spec := getSpec(apiDefinition.APISpec)
 		service := applications.GetService(apiDefinition.ID, runtimeApplication)
 
-		err := s.resourcesService.CreateApiResources(runtimeApplication.Name, runtimeApplication.UID, service.ID, service.Name, toSecretsModel(apiDefinition.Credentials), spec)
+		err := s.resourcesService.CreateApiResources(runtimeApplication.Name, runtimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), spec)
 		if err != nil {
 			appendedErr = appendError(appendedErr, err)
 		}
@@ -131,7 +131,7 @@ func (s *service) createAPIResources(directorApplication model.Application, runt
 		spec := getEventSpec(eventApiDefinition.EventAPISpec)
 		service := applications.GetService(eventApiDefinition.ID, runtimeApplication)
 
-		err := s.resourcesService.CreateApiResources(runtimeApplication.Name, runtimeApplication.UID, service.ID, service.Name, nil, spec)
+		err := s.resourcesService.CreateApiResources(runtimeApplication.Name, runtimeApplication.UID, service.ID, nil, spec)
 		if err != nil {
 			appendedErr = appendError(appendedErr, err)
 		}
@@ -317,7 +317,7 @@ func (s *service) updateOrCreateRESTAPIResources(directorApplication model.Appli
 		if existsInRuntime {
 			log.Infof("Updating resources for API '%s' and application '%s'", apiDefinition.ID, directorApplication.ID)
 			service := applications.GetService(apiDefinition.ID, existentRuntimeApplication)
-			err := s.resourcesService.UpdateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, service.Name, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec))
+			err := s.resourcesService.UpdateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec))
 			if err != nil {
 				log.Warningf("Failed to update API '%s': %s.", apiDefinition.ID, err)
 				appendedErr = appendError(appendedErr, err)
@@ -325,7 +325,7 @@ func (s *service) updateOrCreateRESTAPIResources(directorApplication model.Appli
 		} else {
 			log.Infof("Creating resources for API '%s' and application '%s'", apiDefinition.ID, directorApplication.ID)
 			service := applications.GetService(apiDefinition.ID, newRuntimeApplication)
-			err := s.resourcesService.CreateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, service.Name, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec))
+			err := s.resourcesService.CreateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec))
 			if err != nil {
 				log.Warningf("Failed to create API '%s': %s.", apiDefinition.ID, err)
 				appendedErr = appendError(appendedErr, err)
@@ -344,14 +344,14 @@ func (s *service) updateOrCreateEventAPIResources(directorApplication model.Appl
 		service := applications.GetService(eventAPIDefinition.ID, newRuntimeApplication)
 		if existsInRuntime {
 			log.Infof("Updating resources for API '%s' and application '%s'", eventAPIDefinition.ID, directorApplication.ID)
-			err := s.resourcesService.UpdateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, service.Name, nil, getEventSpec(eventAPIDefinition.EventAPISpec))
+			err := s.resourcesService.UpdateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, nil, getEventSpec(eventAPIDefinition.EventAPISpec))
 			if err != nil {
 				log.Warningf("Failed to update Event API '%s': %s.", eventAPIDefinition.ID, err)
 				appendedErr = appendError(appendedErr, err)
 			}
 		} else {
 			log.Infof("Creating resources for API '%s' and application '%s'", eventAPIDefinition.ID, directorApplication.ID)
-			err := s.resourcesService.CreateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, service.Name, nil, getEventSpec(eventAPIDefinition.EventAPISpec))
+			err := s.resourcesService.CreateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, nil, getEventSpec(eventAPIDefinition.EventAPISpec))
 			if err != nil {
 				log.Warningf("Failed to create Event API '%s': %s.", eventAPIDefinition.ID, err)
 				appendedErr = appendError(appendedErr, err)

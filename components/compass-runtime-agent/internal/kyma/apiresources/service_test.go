@@ -29,13 +29,13 @@ func TestService(t *testing.T) {
 			},
 		}
 
-		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "serviceName").Return(nil)
+		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(applications.Credentials{}, nil)
-
+		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
 
-		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", &credentials, nil)
+		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, nil)
 
 		// then
 		require.NoError(t, err)
@@ -49,12 +49,13 @@ func TestService(t *testing.T) {
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
 
-		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "serviceName").Return(nil)
+		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
+		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
 
-		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", nil, nil)
+		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", nil, nil)
 
 		// then
 		require.NoError(t, err)
@@ -74,13 +75,14 @@ func TestService(t *testing.T) {
 				Password: "nimda",
 			},
 		}
-		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "serviceName").Return(apperrors.Internal("some error"))
+		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
 		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, nil)
+		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
 
-		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", &credentials, nil)
+		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, nil)
 
 		// then
 		require.Error(t, err)
@@ -101,13 +103,14 @@ func TestService(t *testing.T) {
 			},
 		}
 
-		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "serviceName").Return(nil)
+		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(applications.Credentials{}, nil)
+		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
 
-		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", &credentials, nil)
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, nil)
 
 		// then
 		require.NoError(t, err)
@@ -121,12 +124,13 @@ func TestService(t *testing.T) {
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
 
-		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "serviceName").Return(nil)
+		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
+		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
 
-		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", nil, nil)
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, nil)
 
 		// then
 		require.NoError(t, err)
@@ -146,13 +150,14 @@ func TestService(t *testing.T) {
 				Password: "nimda",
 			},
 		}
-		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "serviceName").Return(apperrors.Internal("some error"))
+		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
 		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, nil)
+		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
 
-		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", &credentials, nil)
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, nil)
 
 		// then
 		require.Error(t, err)

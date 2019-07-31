@@ -15,8 +15,8 @@ type ApiIDToSecretNameMap map[string]string
 
 //go:generate mockery -name=Service
 type Service interface {
-	CreateApiResources(applicationName string, applicationUID types.UID, serviceID, serviceName string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError
-	UpdateApiResources(applicationName string, applicationUID types.UID, serviceID, serviceName string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError
+	CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError
+	UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError
 	DeleteApiResources(applicationName string, serviceID string, secretName string) apperrors.AppError
 }
 
@@ -63,8 +63,9 @@ type AccessServiceManager interface {
 	Delete(serviceName string) apperrors.AppError
 }
 
-func (s service) CreateApiResources(applicationName string, applicationUID types.UID, serviceID, serviceName string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
-	appendedErr := s.accessServiceManager.Create(applicationName, applicationUID, serviceID, serviceName)
+func (s service) CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
+	k8sResourceName := s.nameResolver.GetResourceName(applicationName, serviceID)
+	appendedErr := s.accessServiceManager.Create(applicationName, applicationUID, serviceID, k8sResourceName)
 	if credentials != nil {
 		_, err := s.secretsService.Create(applicationName, applicationUID, serviceID, credentials)
 		if err != nil {
@@ -75,9 +76,9 @@ func (s service) CreateApiResources(applicationName string, applicationUID types
 	return appendedErr
 }
 
-func (s service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID, serviceName string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
-
-	appendedErr := s.accessServiceManager.Upsert(applicationName, applicationUID, serviceID, serviceName)
+func (s service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
+	k8sResourceName := s.nameResolver.GetResourceName(applicationName, serviceID)
+	appendedErr := s.accessServiceManager.Upsert(applicationName, applicationUID, serviceID, k8sResourceName)
 	if credentials != nil {
 		_, err := s.secretsService.Upsert(applicationName, applicationUID, serviceID, credentials)
 		if err != nil {
