@@ -2,12 +2,11 @@ replicaCount: 1
 
 configMapName: ory-oathkeeper-rules
 # rulesConfigmapNamespace: some-namespace
-# ToDo: Fix the default value
-rulesFileName: access-rules.json
+# rulesFileName: access-rules.json
 
 image:
   # ORY Oathkeeper Rule Controller image
-  repository: oryd/oathkeeper-k8s-controller
+  repository: oryd/oathkeeper-maester
   # ORY Oathkeeper Rule Controller version
   tag: "v0.0.1"
   # Image pull policy
