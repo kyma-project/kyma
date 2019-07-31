@@ -2,12 +2,12 @@
 apiVersion: velero.io/v1
 kind: Schedule
 metadata:
-  name: {{ include "velero.fullname" $ }}-{{ $scheduleName }}
+  name: {{ include "backup.fullname" $ }}-{{ $scheduleName }}
   labels:
-    app.kubernetes.io/name: {{ include "velero.name" $ }}
+    app.kubernetes.io/name: {{ include "backup.name" $ }}
     app.kubernetes.io/instance: {{ $.Release.Name }}
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
-    helm.sh/chart: {{ include "velero.chart" $ }}
+    helm.sh/chart: {{ include "backup.chart" $ }}
 spec:
   schedule: {{ $schedule.schedule | quote }}
 {{- with $schedule.template }}

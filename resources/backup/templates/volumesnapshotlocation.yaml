@@ -3,10 +3,10 @@ kind: VolumeSnapshotLocation
 metadata:
   name: default
   labels:
-    app.kubernetes.io/name: {{ include "velero.name" . }}
+    app.kubernetes.io/name: {{ include "backup.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    helm.sh/chart: {{ include "velero.chart" . }}
+    helm.sh/chart: {{ include "backup.chart" . }}
 spec:
 {{- with .Values.configuration }}
 {{- with .volumeSnapshotLocation }}
