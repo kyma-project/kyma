@@ -3,15 +3,15 @@
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ template "name" . }}-oathkeeper
+  name: {{ include "oathkeeper.fullname" . }}-oathkeeper
   namespace: {{ .Release.Namespace }}
 spec:
   scaleTargetRef:
     apiVersion: extensions/v1beta1
     kind: Deployment
-    name: {{ template "name" . }}-oathkeeper
-  minReplicas: {{ .Values.global.hpa.oathkeeper.minReplicas }}
-  maxReplicas: {{ .Values.global.hpa.oathkeeper.maxReplicas }}
+    name: {{ include "oathkeeper.fullname" . }}-oathkeeper
+  minReplicas: {{ .Values.hpa.oathkeeper.minReplicas }}
+  maxReplicas: {{ .Values.hpa.oathkeeper.maxReplicas }}
   metrics:
-{{ toYaml .Values.global.hpa.oathkeeper.metrics | trim | indent 2 }}
+{{ toYaml .Values.hpa.oathkeeper.metrics | trim | indent 2 }}
 {{ end }}
