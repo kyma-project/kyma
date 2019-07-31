@@ -1,6 +1,6 @@
 global:
   defaultTenant : pkjowy
-  tenants: tenant2 tenant3
+  tenants: foo bar
 
   images:
     containerRegistry:
