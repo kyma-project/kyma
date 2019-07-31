@@ -3,7 +3,11 @@ title: Create addons repository
 type: Details
 ---
 
-The repository in which you create your own addons must have a specific structure and be exposed as a server so that the Helm Broker can fetch addons from it. Your remote addons repository can contain many addons defined in index `.yaml` files. Depending on your needs and preferences, you can create one or more `index.yaml` files to categorize your addons. In the `index.yaml` file, provide an entry for every single addon from your addons repository. The `index.yaml` file must have the following structure:
+The repository in which you create your own addons must contain at least one `index.yaml` file and have a specific structure, depending on the type of server that exposes your addons.
+
+## The index yaml file
+
+Your remote addons repository can contain many addons defined in index `.yaml` files. Depending on your needs and preferences, you can create one or more index yaml files to categorize your addons. In the `index.yaml` file, provide an entry for every single addon from your addons repository. The `index.yaml` file must have the following structure:
 ```
 apiVersion: v1
 entries:
@@ -23,7 +27,11 @@ entries:
       version: 0.0.1
 ```
 
-You must place your addons in the same directory where the `index.yaml` file is stored. The Helm Broker supports the following servers to expose your addons:
+>**NOTE:** You must place your addons in the same directory where the `index.yaml` file is stored.
+
+## Supported servers
+
+Expose your addons directory as a remote server so that you can provide URLs in the [AddonsConfiguration](#custom-resource-addonsconfiguration) (AC) or [ClusterAddonsConfiguration](#custom-resource-clusteraddonsconfiguration) (CAC) custom resources. The Helm Broker supports exposing addons through the following servers:
 
 <div tabs>
   <details>
@@ -33,7 +41,7 @@ You must place your addons in the same directory where the `index.yaml` file is 
 
 >**NOTE:** The HTTP protocol is supported only in `DevelopMode`. To learn more, read [this](#details-registration-rules-using-http-urls) document.
 
-If you want to expose your addons using an HTTPS server, you must compress your addons to `.tgz` files. The repository structure looks as follows:
+If you want to use an HTTP or HTTPS server, you must compress your addons to `.tgz` files. The repository structure looks as follows:
 ```
 sample-addon-repository
   ├── {addon_x_name}-{addon_x_version}.tgz           # An addon compressed to a .tgz file
@@ -44,9 +52,23 @@ sample-addon-repository
   └── ...                                                    
 ```
 
+See the example of the Kyma `addons` repository [here](https://github.com/kyma-project/addons/releases).
+
 >**TIP:** If you contribute to the [addons](https://github.com/kyma-project/addons/tree/master/addons) repository, you do not have to compress your addons as the system does it automatically.
 
-See the example of the Kyma `addons` repository [here](https://github.com/kyma-project/addons/releases).
+These are the allowed addon repository URLs provided in CAC or AC custom resources in case of HTTP or HTTPS servers:
+```yaml
+apiVersion: addons.kyma-project.io/v1alpha1
+kind: ClusterAddonsConfiguration
+metadata:
+  name: addons-cfg-sample
+spec:
+  repositories:
+    # Use HTTPS protocol
+    - url: "https://github.com/kyma-project/addons/releases/download/latest/index.yaml"
+    # Use HTTP protocol
+    - url: "http://github.com/kyma-project/addons/releases/download/latest/index.yaml"
+```
 
   </details>
   <details>
@@ -54,7 +76,7 @@ See the example of the Kyma `addons` repository [here](https://github.com/kyma-p
   Git
   </summary>
 
-If you want to expose your addons using Git, place your addons in addons directories. The repository structure looks as follows:
+If you want to use Git, place your addons directly in addons directories. The repository structure looks as follows:
 ```
 sample-addon-repository
   ├── {addon_x_name}-{addon_x_version}               # An addon directory
@@ -64,14 +86,27 @@ sample-addon-repository
   ├── index-2.yaml                              
   └── ...                                                    
 ```
-You can specify Git repositories by adding the special `git::` prefix to the URL address. After this prefix, you can provide any valid Git URL with one of the protocols supported by Git. These are the allowed git URLs:
-- git::https://github.com/kyma-project/addons.git//addons/index-testing.yaml?ref={branch,commit_sha,tag}
-- github.com/kyma-project/addons//addons/index.yaml?ref={branch,commit_sha,tag}
-- bitbucket.org/kyma-project/addons//addons/index.yaml
-
->**NOTE:** For now, SSH protocol is not supported.
 
 See the example of the Kyma `addons` repository [here](https://github.com/kyma-project/addons/tree/master/addons).
+
+You can specify Git repositories URLs by adding a special `git::` prefix to the URL addresses. After this prefix, provide any valid Git URL with one of the protocols supported by Git. In the URL, you can also specify a branch, commit, or tag version. These are the allowed addon repository URLs provided in CAC or AC custom resources in case of Git:
+```yaml
+apiVersion: addons.kyma-project.io/v1alpha1
+kind: ClusterAddonsConfiguration
+metadata:
+  name: addons-cfg-sample
+spec:
+  repositories:
+    # Use Git HTTPS protocol with a path to index.yaml
+    - url: "git::https://github.com/kyma-project/addons.git//addons/index.yaml"
+    # Use Git HTTPS protocol with a path to index.yaml and branch/tag version
+    - url: "git::https://github.com/kyma-project/addons.git//addons/index.yaml?ref=1.2.0"
+    # Use unprefixed github.com URLs. They are automatically interpreted as Git repository sources.
+    - url: "github.com/kyma-project/addons//addons/index.yaml?ref=1.2.0"
+    - url: "bitbucket.org/kyma-project/addons//addons/index.yaml"
+```
+
+>**NOTE:** For now, SSH protocol is not supported.
 
   </details>
 </div>
