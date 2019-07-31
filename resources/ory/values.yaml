@@ -34,7 +34,13 @@ hydra:
     autoMigrate: false
     dangerousForceHttp: true
     dangerousAllowInsecureRedirectUrls: false
-  resources: {}
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
 
 # Overrides for the Oathkeeper chart
 oathkeeper:
@@ -67,5 +73,5 @@ oathkeeper:
     tag: v0.17.1-beta.1
 
 maester:
-  annotations: 
+  annotations:
     sidecar.istio.io/inject: "false"
