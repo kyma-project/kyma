@@ -12,7 +12,9 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    function: runtime-function-controller
+    app: {{ template "name" . }}
+    control-plane: controller-manager
+    controller-tools.k8s.io: "1.0"
   name: function-controller-dockerfile-nodejs-6
   namespace: {{ .Release.Namespace }}
 ---
@@ -30,7 +32,9 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    function: runtime-function-controller
+    app: {{ template "name" . }}
+    control-plane: controller-manager
+    controller-tools.k8s.io: "1.0"
   name: function-controller-dockerfile-nodejs-8
   namespace: {{ .Release.Namespace }}
 ---
@@ -42,10 +46,12 @@ data:
       dockerFileName: function-controller-dockerfile-nodejs-8
     - ID: nodejs6
       dockerFileName: function-controller-dockerfile-nodejs-6
-  serviceAccountName: runtime-controller
+  serviceAccountName: {{ template "fullname" . }}-build
 kind: ConfigMap
 metadata:
   labels:
-    app: kubeless
+    app: {{ template "name" . }}
+    control-plane: controller-manager
+    controller-tools.k8s.io: "1.0"
   name: fn-config
   namespace: {{ .Release.Namespace }}
