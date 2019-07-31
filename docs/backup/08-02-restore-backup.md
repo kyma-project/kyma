@@ -20,6 +20,8 @@ Follow these steps to restore resources:
     velero install --bucket <BUCKET> --provider <CLOUD_PROVIDER> --secret-file <CREDENTIALS_FILE> --restore-only --wait
     ```
 
+    >**NOTE**: Check out this [guide](https://velero.io/docs/v1.0.0/install-overview/) to correctly fill the parameters of this command corresponding to the cloud provider in use.
+
 2. List available backups:
 
     ```bash
