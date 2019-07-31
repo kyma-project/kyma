@@ -40,6 +40,10 @@ spec:
             - --domain
             - {{ .Values.global.ingress.domainName }}
             - --skipSSLVerify
+            {{ if .Values.tests.application_connector_tests.connector_service.central }}
+            - --applicationTenant=tenant
+            - --applicationGroup=group
+            {{ end }}
         - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
           name: manager
           command:
