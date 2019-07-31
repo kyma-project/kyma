@@ -85,7 +85,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 			testsuite.NewCreateMapping(s.testID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
 			testsuite.NewDeployLambda(s.testID, lambdaPort, kubelessClientset.KubelessV1beta1().Functions(s.testID), pods),
 			testsuite.NewStartTestServer(testService),
-			testsuite.NewConnectApplication(connector, state),
+			testsuite.NewConnectApplication(connector, state, s.testID, s.testID),
 		),
 		testsuite.NewRegisterTestService(s.testID, testService, state),
 		testsuite.NewCreateServiceInstance(s.testID,
