@@ -61,8 +61,6 @@ type testCase struct {
 
 	secondPhaseSetup  func(t *testing.T, testSuite *runtimeagent.TestSuite, this testCase)
 	secondPhaseAssert func(t *testing.T, testSuite *runtimeagent.TestSuite, this testCase)
-
-	secondPhaseCheck func(t *testing.T, testSuite *runtimeagent.TestSuite)
 }
 
 type initialPhase struct {
@@ -145,23 +143,56 @@ func TestCompassRuntimeAgentSynchronization_TestCases(t *testing.T) {
 				application := this.initialPhaseResult
 
 			},
-			//initialPhaseCheck: func(t *testing.T, testSuite runtimeagent.TestSuite, application compass.Application) {
-			//	// Assert resource created for all apis (or even pass application input?)
-			//	// Assert you are able to access all apis
-			//},
-			secondPhase: secondPhase{
-				applicationOperation: resourceOperation{operation: doNothingOperation, input: nil},
-				apiOperations: []resourceOperation{
-					{operation: doNothingOperation},
-					{operation: deleteOperation},
-					{operation: deleteOperation},
-				},
-				eventAPIOperations: nil,
-				documentOperations: nil,
-			},
 		},
 	}
 
+	// Setup initial phase
+	for _, testCase := range testCases {
+		logrus.Infof("Running initial phase setup for test case: %s", testCase.description)
+		appInput := testCase.initialPhaseInput()
+
+		logrus.Info("Creating Application...")
+		response, err := testSuite.CompassClient.CreateApplication(appInput.ToCompassInput())
+		require.NoError(t, err)
+
+		// TODO - assert with input?
+
+		testCase.initialPhaseResult = response
+		logrus.Infof("Initial test case setup finished for %s test case", testCase.description)
+	}
+
+	// Wait for agent to apply config
+	logrus.Info("Waiting for Runtime Agent to apply initial configuration...")
+	time.Sleep(15 * time.Second)
+
+	// Assert initial phase
+	for _, testCase := range testCases {
+		logrus.Infof("Asserting initial phase for test case: %s", testCase.description)
+
+		logrus.Infof("Checking K8s resources")
+		testSuite.K8sResourceChecker.AssertResourcesForApp(t, testCase.initialPhaseResult)
+
+		logrus.Infof("Checking API Access")
+		testSuite.APIAccessChecker.AssertAPIAccess(t, testCase.initialPhaseResult.APIs.Data)
+		// TODO - how to do api check if expected status will be different than 200? Separate test case?
+	}
+
+	// Setup second phase
+	for _, testCase := range testCases {
+		logrus.Infof("Running second phase setup for test case: %s", testCase.description)
+		testCase.secondPhaseSetup(t, testSuite, testCase)
+		logrus.Infof("Initial test case setup finished for %s test case", testCase.description)
+	}
+
+	// Wait for agent to apply config
+	logrus.Info("Waiting for Runtime Agent to apply initial configuration...")
+	time.Sleep(15 * time.Second)
+
+	// Assert second phase
+	for _, testCase := range testCases {
+		logrus.Infof("Asserting second phase for test case: %s", testCase.description)
+		testCase.secondPhaseAssert(t, testSuite, testCase)
+	}
 }
 
 //func TestCompassRuntimeAgentSynchronization_Operations(t *testing.T) {
