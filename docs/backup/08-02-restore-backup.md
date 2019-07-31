@@ -69,7 +69,7 @@ In case the Pod `service-catalog-addons-service-binding-usage-controller` gets s
 kubectl delete $(kubectl get pod -l app=service-catalog-addons-service-binding-usage-controller -n kyma-system -o name) -n kyma-system
 ```
 
-### Different DNS and Gateway IP Address
+### Different DNS and Public IP Address
 
 This tutorial assumes that the DNS and the Public IP will stay the same as the backed up cluster. If they change in the new cluster, check and update the relavant fields on the `overrides` Secrets and ConfigMaps in `kyma-installer` namespace with the new values and re-run the installer to propagate them to all the components:
 
