@@ -72,14 +72,20 @@ spec:
             httpGet:
               path: /health/alive
               port: http-admin
+<<<<<<< HEAD
             initialDelaySeconds: 45
             periodSeconds: 10
+=======
+>>>>>>> dd822b98e64ae963546ee436474bcfe8dbe1bd10
           readinessProbe:
             httpGet:
               path: /health/ready
               port: http-admin
+<<<<<<< HEAD
             initialDelaySeconds: 45
             periodSeconds: 10
+=======
+>>>>>>> dd822b98e64ae963546ee436474bcfe8dbe1bd10
           env:
             {{- $issuer := include "hydra.config.urls.issuer" . -}}
             {{- if $issuer }}
