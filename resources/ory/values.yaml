@@ -3,6 +3,15 @@ global:
   gateway: kyma-gateway
   ingress:
     domainName: kyma.local
+hpa:
+  oathkeeper:
+    minReplicas: 1
+    maxReplicas: 3
+    metrics:
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: 75
 
 # Overrides for the Hydra chart
 hydra:
@@ -68,10 +77,23 @@ oathkeeper:
           port: 4455
         api:
           port: 4456
-  resources: {}
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
   image:
     tag: v0.17.1-beta.1
 
 maester:
-  annotations:
+  annotations: 
     sidecar.istio.io/inject: "false"
+  resources:
+    limits:
+      cpu: 100m
+      memory: 50Mi
+    requests:
+      cpu: 50m
+      memory: 20Mi
