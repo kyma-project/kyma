@@ -46,11 +46,12 @@ func Add(mgr manager.Manager) error {
 		secretName = "webhook-server-secret"
 	}
 
-	svr, err := webhook.NewServer("foo-admission-server", mgr, webhook.ServerOptions{
+	svr, err := webhook.NewServer("knative-function-admission-server", mgr, webhook.ServerOptions{
 		// TODO(user): change the configuration of ServerOptions based on your need.
 		Port:    9876,
 		CertDir: "/tmp/cert",
 		BootstrapOptions: &webhook.BootstrapOptions{
+			MutatingWebhookConfigName: "knative-function-webhook",
 			Secret: &types.NamespacedName{
 				Namespace: ns,
 				Name:      secretName,
@@ -58,10 +59,12 @@ func Add(mgr manager.Manager) error {
 
 			Service: &webhook.Service{
 				Namespace: ns,
-				Name:      "webhook-server-service",
+				Name:      "knative-function-controller-webhook-server-service",
 				// Selectors should select the pods that runs this webhook server.
 				Selectors: map[string]string{
-					"control-plane": "controller-manager",
+					"app":                     "knative-function-controller",
+					"control-plane":           "controller-manager",
+					"controller-tools.k8s.io": "1.0",
 				},
 			},
 		},

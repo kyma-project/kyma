@@ -13,4 +13,4 @@ spec:
       }
   functionContentType: "plaintext"
   size: "L"
-  runtime: "nodejs9"
+  runtime: "nodejs8"
