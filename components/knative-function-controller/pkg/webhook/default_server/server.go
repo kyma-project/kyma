@@ -51,7 +51,7 @@ func Add(mgr manager.Manager) error {
 		Port:    9876,
 		CertDir: "/tmp/cert",
 		BootstrapOptions: &webhook.BootstrapOptions{
-			MutatingWebhookConfigName: "knative-function-webhook",
+			MutatingWebhookConfigName: "function-webhook.runtime.kyma-project.io",
 			Secret: &types.NamespacedName{
 				Namespace: ns,
 				Name:      secretName,
