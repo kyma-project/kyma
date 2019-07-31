@@ -1,8 +1,9 @@
 package kyma
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/types"
