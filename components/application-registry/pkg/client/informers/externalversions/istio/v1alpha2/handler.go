@@ -15,59 +15,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// ChecknothingInformer provides access to a shared informer and lister for
-// Checknothings.
-type ChecknothingInformer interface {
+// HandlerInformer provides access to a shared informer and lister for
+// Handlers.
+type HandlerInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha2.ChecknothingLister
+	Lister() v1alpha2.HandlerLister
 }
 
-type checknothingInformer struct {
+type handlerInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewChecknothingInformer constructs a new informer for Checknothing type.
+// NewHandlerInformer constructs a new informer for Handler type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewChecknothingInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredChecknothingInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewHandlerInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredHandlerInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredChecknothingInformer constructs a new informer for Checknothing type.
+// NewFilteredHandlerInformer constructs a new informer for Handler type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredChecknothingInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredHandlerInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.IstioV1alpha2().Checknothings(namespace).List(options)
+				return client.IstioV1alpha2().Handlers(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.IstioV1alpha2().Checknothings(namespace).Watch(options)
+				return client.IstioV1alpha2().Handlers(namespace).Watch(options)
 			},
 		},
-		&istio_v1alpha2.Checknothing{},
+		&istio_v1alpha2.Handler{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *checknothingInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredChecknothingInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *handlerInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredHandlerInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *checknothingInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&istio_v1alpha2.Checknothing{}, f.defaultInformer)
+func (f *handlerInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&istio_v1alpha2.Handler{}, f.defaultInformer)
 }
 
-func (f *checknothingInformer) Lister() v1alpha2.ChecknothingLister {
-	return v1alpha2.NewChecknothingLister(f.Informer().GetIndexer())
+func (f *handlerInformer) Lister() v1alpha2.HandlerLister {
+	return v1alpha2.NewHandlerLister(f.Informer().GetIndexer())
 }
