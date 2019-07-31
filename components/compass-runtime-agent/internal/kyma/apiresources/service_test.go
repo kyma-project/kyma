@@ -1,6 +1,7 @@
 package apiresources
 
 import (
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	accessservicemock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/accessservice/mocks"
 	secretmock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/mocks"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
@@ -39,6 +40,49 @@ func TestService(t *testing.T) {
 		secretServiceMock.AssertExpectations(t)
 	})
 
+	t.Run("should not create secret if credentials not provided", func(t *testing.T) {
+		// given
+		accessServiceMock := &accessservicemock.AccessServiceManager{}
+		secretServiceMock := &secretmock.Service{}
+
+		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "serviceName").Return(nil)
+
+		// when
+		service := NewService(accessServiceMock, secretServiceMock)
+
+		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", nil, nil)
+
+		// then
+		require.NoError(t, err)
+		accessServiceMock.AssertExpectations(t)
+		secretServiceMock.AssertNotCalled(t, "Create")
+	})
+
+	t.Run("should not interrupt execution when error occurs on creation", func(t *testing.T) {
+		// given
+		accessServiceMock := &accessservicemock.AccessServiceManager{}
+		secretServiceMock := &secretmock.Service{}
+
+		credentials := model.CredentialsWithCSRF{
+			Basic: &model.Basic{
+				Username: "admin",
+				Password: "nimda",
+			},
+		}
+		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "serviceName").Return(apperrors.Internal("some error"))
+		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, nil)
+
+		// when
+		service := NewService(accessServiceMock, secretServiceMock)
+
+		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", &credentials, nil)
+
+		// then
+		require.Error(t, err)
+		accessServiceMock.AssertExpectations(t)
+		secretServiceMock.AssertExpectations(t)
+	})
+
 	t.Run("should update API resources", func(t *testing.T) {
 		// given
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
@@ -61,6 +105,49 @@ func TestService(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
+		accessServiceMock.AssertExpectations(t)
+		secretServiceMock.AssertExpectations(t)
+	})
+
+	t.Run("should not update secret if credentials not provided", func(t *testing.T) {
+		// given
+		accessServiceMock := &accessservicemock.AccessServiceManager{}
+		secretServiceMock := &secretmock.Service{}
+
+		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "serviceName").Return(nil)
+
+		// when
+		service := NewService(accessServiceMock, secretServiceMock)
+
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", nil, nil)
+
+		// then
+		require.NoError(t, err)
+		accessServiceMock.AssertExpectations(t)
+		secretServiceMock.AssertNotCalled(t, "Upsert")
+	})
+
+	t.Run("should not interrupt execution when error occurs on update", func(t *testing.T) {
+		// given
+		accessServiceMock := &accessservicemock.AccessServiceManager{}
+		secretServiceMock := &secretmock.Service{}
+
+		credentials := model.CredentialsWithCSRF{
+			Basic: &model.Basic{
+				Username: "admin",
+				Password: "nimda",
+			},
+		}
+		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "serviceName").Return(apperrors.Internal("some error"))
+		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, nil)
+
+		// when
+		service := NewService(accessServiceMock, secretServiceMock)
+
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", "serviceName", &credentials, nil)
+
+		// then
+		require.Error(t, err)
 		accessServiceMock.AssertExpectations(t)
 		secretServiceMock.AssertExpectations(t)
 	})

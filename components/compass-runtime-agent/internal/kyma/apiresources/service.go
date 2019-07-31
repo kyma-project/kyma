@@ -41,13 +41,6 @@ type Secrets interface {
 	Delete(name string) apperrors.AppError
 }
 
-//go:generate mockery -name=RequestParameters
-type RequestParameters interface {
-	Create(application string, appUID types.UID, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError)
-	Upsert(application string, appUID types.UID, serviceID string, requestParameters *model.RequestParameters) (string, apperrors.AppError)
-	Delete(application, serviceId string) apperrors.AppError
-}
-
 type service struct {
 	accessServiceManager      accessservice.AccessServiceManager
 	secretsService            secrets.Service
