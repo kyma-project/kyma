@@ -3,6 +3,15 @@ global:
   gateway: kyma-gateway
   ingress:
     domainName: kyma.local
+hpa:
+  oathkeeper:
+    minReplicas: 1
+    maxReplicas: 3
+    metrics:
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: 75
 
 # Overrides for the Hydra chart
 hydra:
@@ -36,11 +45,11 @@ hydra:
     dangerousAllowInsecureRedirectUrls: false
   resources:
     limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
       cpu: 100m
       memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
 # Overrides for the Oathkeeper chart
 oathkeeper:
@@ -70,11 +79,11 @@ oathkeeper:
           port: 4456
   resources:
     limits:
-      cpu: 200m
-      memory: 256Mi
-    requests:
       cpu: 100m
       memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
   image:
     tag: v0.17.1-beta.1
 
@@ -86,5 +95,5 @@ maester:
       cpu: 100m
       memory: 50Mi
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 20Mi

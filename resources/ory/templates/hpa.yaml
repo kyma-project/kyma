@@ -1,0 +1,17 @@
+{{ if and (not .Values.global.isLocalEnv) (.Capabilities.APIVersions.Has "autoscaling/v2beta1") }}
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ template "name" . }}-oathkeeper
+  namespace: {{ .Release.Namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    name: {{ template "name" . }}-oathkeeper
+  minReplicas: {{ .Values.global.hpa.oathkeeper.minReplicas }}
+  maxReplicas: {{ .Values.global.hpa.oathkeeper.maxReplicas }}
+  metrics:
+{{ toYaml .Values.global.hpa.oathkeeper.metrics | trim | indent 2 }}
+{{ end }}
