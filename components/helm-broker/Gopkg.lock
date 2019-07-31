@@ -579,15 +579,14 @@
   version = "v0.5.1"
 
 [[projects]]
-  digest = "1:3d262ac70f6f9c970031d83c4decf4027209d58e4b3fea3a90de4461295df848"
+  digest = "1:ce518650d1e1fec7223be3d782e6f532b340f5c56d4cdb0bbe3a807bd3424378"
   name = "github.com/hashicorp/go-getter"
   packages = [
     ".",
     "helper/url",
   ]
   pruneopts = "UT"
-  revision = "f9ec369200fd2163b8f452e5e45696d83ae3f4b6"
-  version = "v1.3.0"
+  revision = "30a49e438715626318447d8ac7166bb425b695dc"
 
 [[projects]]
   digest = "1:f668349b83f7d779567c880550534addeca7ebadfdcf44b0b9c39be61864b4b7"

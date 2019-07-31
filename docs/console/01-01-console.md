@@ -12,4 +12,3 @@ Use the following CRs to modify the Console UI:
 - The MicroFrontend custom resource allows you to plug in micro front-ends for a specific Namespace.
 - The ClusterMicroFrontend custom resource allows you to plug in micro front-ends for the entire Cluster.
 - The BackendModule custom resource allows you to enable Console Backend Service modules.
-  

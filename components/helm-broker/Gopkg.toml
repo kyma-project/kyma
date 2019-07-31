@@ -52,6 +52,10 @@ required= [
   go-tests = true
 
 [[constraint]]
+  name = "github.com/hashicorp/go-getter"
+  revision = "30a49e438715626318447d8ac7166bb425b695dc"
+
+[[constraint]]
   name = "github.com/ugorji/go"
   revision = "bdcc60b419d136a85cdf2e7cbcac34b3f1cd6e57"
 
