@@ -12,7 +12,7 @@ Install Velero using [these](/components/backup/#installation-install-velero) in
 
 Follow the steps to back up Kyma.
 
-<div tabs>
+<div tabs name="backup">
     <details>
     <summary>
     Manual backup
@@ -81,7 +81,7 @@ To schedule a backup, run the following command:
 kubectl apply -f {filename}
 ```
 </details>
-
+</div>
 
 ## Backup retention period
 
