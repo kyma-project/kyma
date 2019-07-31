@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/util/retry"
 )
 
 type clusterAddonsConfigurationService struct {
@@ -141,16 +142,19 @@ func (s *clusterAddonsConfigurationService) Delete(name string) (*v1alpha1.Clust
 }
 
 func (s *clusterAddonsConfigurationService) Resync(name string) (*v1alpha1.ClusterAddonsConfiguration, error) {
-	addon, err := s.getClusterAddonsConfiguration(name)
-	if err != nil {
-		return nil, err
-	}
-	addonCpy := addon.DeepCopy()
-	addonCpy.Spec.ReprocessRequest++
+	var result *v1alpha1.ClusterAddonsConfiguration
+	if err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		addon, err := s.getClusterAddonsConfiguration(name)
+		if err != nil {
+			return err
+		}
+		addonCpy := addon.DeepCopy()
+		addonCpy.Spec.ReprocessRequest++
 
-	result, err := s.addonsCfgClient.ClusterAddonsConfigurations().Update(addonCpy)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while updating %s %s", pretty.ClusterAddonsConfiguration, addon.Name)
+		result, err = s.addonsCfgClient.ClusterAddonsConfigurations().Update(addonCpy)
+		return err
+	}); err != nil {
+		return nil, errors.Wrapf(err, "cannot update ClusterAddonsConfiguration %s", name)
 	}
 
 	return result, nil

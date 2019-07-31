@@ -18,6 +18,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
+	k8s_testing "k8s.io/client-go/testing"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func TestAddonsConfigurationService_AddRepos_Success(t *testing.T) {
@@ -404,6 +407,35 @@ func TestAddonsConfigurationService_ResyncAddonsConfiguration(t *testing.T) {
 
 	// then
 	require.NoError(t, err)
+	assert.Equal(t, expectedCfg, cfg)
+}
+
+func TestAddonsConfigurationService_ResyncAddonsConfiguration_OnRetry(t *testing.T) {
+	// given
+	i := 0
+	fixAddonCfgName := "test"
+	expectedCfg := fixAddonsConfiguration(fixAddonCfgName)
+	client := addonsFakeCli.NewSimpleClientset(expectedCfg)
+	client.PrependReactor("update", "addonsconfigurations", func(action k8s_testing.Action) (handled bool, ret runtime.Object, err error) {
+		if i == 0 {
+			i++
+			return true, nil, errors.NewConflict(schema.GroupResource{}, "", nil)
+		}
+		return false, expectedCfg, nil
+	})
+	addonsInformerFactory := addonsInformers.NewSharedInformerFactory(client, informerResyncPeriod)
+	inf := addonsInformerFactory.Addons().V1alpha1().AddonsConfigurations().Informer()
+	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
+
+	svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client.AddonsV1alpha1())
+
+	expectedCfg.Spec.ReprocessRequest = 1
+
+	// when
+	cfg, err := svc.Resync(fixAddonCfgName, expectedCfg.Namespace)
+
+	// then
+ 	require.NoError(t, err)
 	assert.Equal(t, expectedCfg, cfg)
 }
 

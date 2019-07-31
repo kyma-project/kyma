@@ -16,8 +16,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8s_testing "k8s.io/client-go/testing"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func TestClusterAddonsConfigurationService_AddRepos_Success(t *testing.T) {
@@ -381,6 +384,35 @@ func TestClusterAddonsConfigurationService_ResyncAddonsConfiguration(t *testing.
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
 	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
+
+	expectedCfg.Spec.ReprocessRequest = 1
+
+	// when
+	cfg, err := svc.Resync(fixAddonCfgName)
+
+	// then
+	require.NoError(t, err)
+	assert.Equal(t, expectedCfg, cfg)
+}
+
+func TestClusterAddonsConfigurationService_ResyncAddonsConfiguration_OnRetry(t *testing.T) {
+	// given
+	i := 0
+	fixAddonCfgName := "test"
+	expectedCfg := fixClusterAddonsConfiguration(fixAddonCfgName)
+	client := addonsFakeCli.NewSimpleClientset(expectedCfg)
+	client.PrependReactor("update", "clusteraddonsconfigurations", func(action k8s_testing.Action) (handled bool, ret runtime.Object, err error) {
+		if i == 0 {
+			i++
+			return true, nil, errors.NewConflict(schema.GroupResource{}, "", nil)
+		}
+		return false, expectedCfg, nil
+	})
+	addonsInformerFactory := addonsInformers.NewSharedInformerFactory(client, informerResyncPeriod)
+	inf := addonsInformerFactory.Addons().V1alpha1().ClusterAddonsConfigurations().Informer()
+	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
+
+	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client.AddonsV1alpha1())
 
 	expectedCfg.Spec.ReprocessRequest = 1
 
