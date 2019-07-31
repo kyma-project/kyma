@@ -54,7 +54,7 @@ sample-addon-repository
 
 See the example of the Kyma `addons` repository [here](https://github.com/kyma-project/addons/releases).
 
->**TIP:** If you contribute to the [addons](https://github.com/kyma-project/addons/tree/master/addons) repository, you do not have to compress your addons as the system does it automatically.
+>**TIP:** If you contribute to the Kyma [`addons`](https://github.com/kyma-project/addons/tree/master/addons) repository, you do not have to compress your addons as the system does it automatically.
 
 These are the allowed addon repository URLs provided in CAC or AC custom resources in case of HTTP or HTTPS servers:
 ```yaml
@@ -64,9 +64,9 @@ metadata:
   name: addons-cfg-sample
 spec:
   repositories:
-    # Use HTTPS protocol
+    # HTTPS protocol
     - url: "https://github.com/kyma-project/addons/releases/download/latest/index.yaml"
-    # Use HTTP protocol
+    # HTTP protocol
     - url: "http://github.com/kyma-project/addons/releases/download/latest/index.yaml"
 ```
 
@@ -97,16 +97,17 @@ metadata:
   name: addons-cfg-sample
 spec:
   repositories:
-    # Use Git HTTPS protocol with a path to index.yaml
+    # Git HTTPS protocol with a path to index.yaml
     - url: "git::https://github.com/kyma-project/addons.git//addons/index.yaml"
-    # Use Git HTTPS protocol with a path to index.yaml and branch/tag version
+    # Git HTTPS protocol with a path to index.yaml of a specified version
     - url: "git::https://github.com/kyma-project/addons.git//addons/index.yaml?ref=1.2.0"
-    # Use unprefixed github.com URLs. They are automatically interpreted as Git repository sources.
-    - url: "github.com/kyma-project/addons//addons/index.yaml?ref=1.2.0"
+    # github.com URL with no prefix. It is automatically interpreted as Git repository source.
+    - url: "github.com/kyma-project/addons//addons/index.yaml"
+    # bitbucket.org URL with no prefix. It is automatically interpreted as Git repository source.
     - url: "bitbucket.org/kyma-project/addons//addons/index.yaml"
 ```
 
->**NOTE:** For now, SSH protocol is not supported.
+>**NOTE:** For now, the SSH protocol is not supported.
 
   </details>
 </div>
