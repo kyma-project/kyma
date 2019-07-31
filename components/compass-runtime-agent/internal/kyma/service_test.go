@@ -249,8 +249,6 @@ func TestService(t *testing.T) {
 		applicationsManagerMock.On("Update", &convertedExistingRuntimeApplication).Return(nil, apperrors.Internal("some error"))
 		applicationsManagerMock.On("Delete", runtimeApplicationToBeDeleted.Name, &metav1.DeleteOptions{}).Return(apperrors.Internal("some error"))
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		resourcesServiceMocks.On("CreateApiResources", "id1", types.UID(""), "API1", "", nilCredentials, []byte(nil)).Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("CreateApiResources", "id1", types.UID(""), "EventAPI1", "", nilCredentials, []byte(nil)).Return(apperrors.Internal("some error"))
 
 		resourcesServiceMocks.On("UpdateApiResources", "id2", types.UID(""), "API2", "", nilCredentials, nilSpec).Return(apperrors.Internal("some error"))
 		resourcesServiceMocks.On("UpdateApiResources", "id2", types.UID(""), "EventAPI2", "", nilCredentials, nilSpec).Return(apperrors.Internal("some error"))
@@ -275,7 +273,7 @@ func TestService(t *testing.T) {
 		assert.NotNil(t, result[2].Error)
 		converterMock.AssertExpectations(t)
 		applicationsManagerMock.AssertExpectations(t)
-		resourcesServiceMocks.AssertExpectations(t)
+		resourcesServiceMocks.AssertNotCalled(t, "CreateApiResources")
 	})
 }
 

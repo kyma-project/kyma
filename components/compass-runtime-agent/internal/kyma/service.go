@@ -97,20 +97,21 @@ func (s *service) createApplications(directorApplications []model.Application, r
 }
 
 func (s *service) createApplication(directorApplication model.Application, runtimeApplication v1alpha1.Application) Result {
-	log.Infof("Creating API resources for application '%s'.", directorApplication.ID)
-	appendedErr := s.createAPIResources(directorApplication, runtimeApplication)
-	if appendedErr != nil {
-		log.Warningf("Failed to create API resources for application '%s': %s.", directorApplication.ID, appendedErr)
-	}
-
 	log.Infof("Creating application '%s'.", directorApplication.ID)
-	_, err := s.applicationRepository.Create(&runtimeApplication)
+	newRuntimeApplication, err := s.applicationRepository.Create(&runtimeApplication)
 	if err != nil {
 		log.Warningf("Failed to create application '%s': %s.", directorApplication.ID, err)
-		appendedErr = appendError(appendedErr, err)
+		return newResult(runtimeApplication, Create, err)
 	}
 
-	return newResult(runtimeApplication, Create, appendedErr)
+	log.Infof("Creating API resources for application '%s'.", directorApplication.ID)
+	err = s.createAPIResources(directorApplication, *newRuntimeApplication)
+	if err != nil {
+		log.Warningf("Failed to create API resources for application '%s': %s.", directorApplication.ID, err)
+		return newResult(runtimeApplication, Create, err)
+	}
+
+	return newResult(runtimeApplication, Create, nil)
 }
 
 func (s *service) createAPIResources(directorApplication model.Application, runtimeApplication v1alpha1.Application) apperrors.AppError {
