@@ -19,6 +19,8 @@ deployment:
   sync:
     controllerSyncPeriod: 30
     minimalConfigSyncTime: 30
+  resources:
+    integrationNamespace: "kyma-integration"
 
 
 config:
