@@ -122,3 +122,21 @@ func TestClusterAddonsConfigurationResolver_RemoveAddonsConfigurationURLs(t *tes
 	require.NoError(t, err)
 	assert.Equal(t, fixGQLAddonsConfiguration(addonName), cfgs)
 }
+
+func TestClusterAddonsConfigurationResolver_ResyncAddonsConfiguration(t *testing.T) {
+	// given
+	const addonName = "test"
+	addonsCfgUpdater := automock.NewClusterAddonsCfgUpdater()
+	defer addonsCfgUpdater.AssertExpectations(t)
+	addonsCfgUpdater.On("Resync", addonName).
+		Return(fixClusterAddonsConfiguration(addonName), nil).Once()
+
+	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
+
+	// when
+	cfgs, err := resolver.ResyncClusterAddonsConfiguration(context.Background(), addonName)
+
+	// then
+	require.NoError(t, err)
+	assert.Equal(t, fixGQLAddonsConfiguration(addonName), cfgs)
+}

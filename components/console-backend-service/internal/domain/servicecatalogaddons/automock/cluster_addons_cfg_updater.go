@@ -55,3 +55,26 @@ func (_m *clusterAddonsCfgUpdater) RemoveRepos(name string, urls []string) (*v1a
 
 	return r0, r1
 }
+
+// Resync provides a mock function with given fields: name
+func (_m *clusterAddonsCfgUpdater) Resync(name string) (*v1alpha1.ClusterAddonsConfiguration, error) {
+	ret := _m.Called(name)
+
+	var r0 *v1alpha1.ClusterAddonsConfiguration
+	if rf, ok := ret.Get(0).(func(string) *v1alpha1.ClusterAddonsConfiguration); ok {
+		r0 = rf(name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1alpha1.ClusterAddonsConfiguration)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}

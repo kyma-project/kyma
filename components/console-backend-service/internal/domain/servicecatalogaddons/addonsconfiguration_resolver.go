@@ -30,6 +30,7 @@ type addonsCfgLister interface {
 type addonsCfgUpdater interface {
 	AddRepos(name, namespace string, url []string) (*v1alpha1.AddonsConfiguration, error)
 	RemoveRepos(name, namespace string, urls []string) (*v1alpha1.AddonsConfiguration, error)
+	Resync(name, namespace string) (*v1alpha1.AddonsConfiguration, error)
 }
 
 //go:generate mockery -name=addonsCfgMutations  -output=automock -outpkg=automock -case=underscore
@@ -113,6 +114,16 @@ func (r *addonsConfigurationResolver) RemoveAddonsConfigurationURLs(ctx context.
 	addon, err := r.addonsCfgUpdater.RemoveRepos(name, namespace, urls)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while removing repository from %s %s", pretty.AddonsConfiguration, name))
+		return nil, gqlerror.New(err, pretty.AddonsConfiguration, gqlerror.WithName(name))
+	}
+
+	return r.addonsCfgConverter.ToGQL(addon), nil
+}
+
+func (r *addonsConfigurationResolver) ResyncAddonsConfiguration(ctx context.Context, name, namespace string) (*gqlschema.AddonsConfiguration, error) {
+	addon, err := r.addonsCfgUpdater.Resync(name, namespace)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while resyncing repository from %s %s", pretty.AddonsConfiguration, name))
 		return nil, gqlerror.New(err, pretty.AddonsConfiguration, gqlerror.WithName(name))
 	}
 

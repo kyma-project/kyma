@@ -320,6 +320,10 @@ func (r *mutationResolver) RemoveAddonsConfigurationURLs(ctx context.Context, na
 	return r.sca.Resolver.RemoveAddonsConfigurationURLs(ctx, name, namespace, urls)
 }
 
+func (r *mutationResolver) ResyncAddonsConfiguration(ctx context.Context, name string, namespace string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.ResyncAddonsConfiguration(ctx, name, namespace)
+}
+
 func (r *mutationResolver) CreateClusterAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
 	return r.sca.Resolver.CreateClusterAddonsConfiguration(ctx, name, urls, labels)
 }
@@ -338,6 +342,10 @@ func (r *mutationResolver) AddClusterAddonsConfigurationURLs(ctx context.Context
 
 func (r *mutationResolver) RemoveClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
 	return r.sca.Resolver.RemoveClusterAddonsConfigurationURLs(ctx, name, urls)
+}
+
+func (r *mutationResolver) ResyncClusterAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.ResyncClusterAddonsConfiguration(ctx, name)
 }
 
 func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceMutationOutput, error) {

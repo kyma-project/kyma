@@ -30,6 +30,7 @@ type clusterAddonsCfgLister interface {
 type clusterAddonsCfgUpdater interface {
 	AddRepos(name string, url []string) (*v1alpha1.ClusterAddonsConfiguration, error)
 	RemoveRepos(name string, urls []string) (*v1alpha1.ClusterAddonsConfiguration, error)
+	Resync(name string) (*v1alpha1.ClusterAddonsConfiguration, error)
 }
 
 //go:generate mockery -name=clusterAddonsCfgMutations  -output=automock -outpkg=automock -case=underscore
@@ -113,6 +114,16 @@ func (r *clusterAddonsConfigurationResolver) RemoveClusterAddonsConfigurationURL
 	addon, err := r.addonsCfgUpdater.RemoveRepos(name, urls)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while removing repository from %s %s", pretty.ClusterAddonsConfiguration, name))
+		return nil, gqlerror.New(err, pretty.ClusterAddonsConfiguration, gqlerror.WithName(name))
+	}
+
+	return r.addonsCfgConverter.ToGQL(addon), nil
+}
+
+func (r *clusterAddonsConfigurationResolver) ResyncClusterAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error) {
+	addon, err := r.addonsCfgUpdater.Resync(name)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while resyncing repository from %s %s", pretty.ClusterAddonsConfiguration, name))
 		return nil, gqlerror.New(err, pretty.ClusterAddonsConfiguration, gqlerror.WithName(name))
 	}
 

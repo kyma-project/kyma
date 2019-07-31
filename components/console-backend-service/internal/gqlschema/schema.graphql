@@ -122,6 +122,7 @@ enum DocsTopicPhaseType {
 type AddonsConfiguration {
     name: String!
     urls: [String!]
+    resyncRequests: Int!
     labels: Labels!
     status: AddonsConfigurationStatus!
 }
@@ -973,12 +974,14 @@ type Mutation {
     deleteClusterAddonsConfiguration(name: String!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "delete", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     addClusterAddonsConfigurationURLs(name: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     removeClusterAddonsConfigurationURLs(name: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    resyncClusterAddonsConfiguration(name: String!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 
     createAddonsConfiguration(name: String!, namespace: String!, urls: [String!]!, labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "create", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     updateAddonsConfiguration(name: String!, namespace: String!, urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     deleteAddonsConfiguration(name: String!, namespace: String!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "delete", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     addAddonsConfigurationURLs(name: String!, namespace: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     removeAddonsConfigurationURLs(name: String!, namespace: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    resyncAddonsConfiguration(name: String!, namespace: String!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 
     createApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
     updateApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput! @HasAccess(attributes: {resource: "applications", verb: "update", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})

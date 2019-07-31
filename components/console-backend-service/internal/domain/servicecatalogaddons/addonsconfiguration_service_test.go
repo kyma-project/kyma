@@ -388,6 +388,25 @@ func TestAddonsConfigurationService_ListAddonsConfigurations(t *testing.T) {
 	}
 }
 
+func TestAddonsConfigurationService_ResyncAddonsConfiguration(t *testing.T) {
+	// given
+	fixAddonCfgName := "test"
+	expectedCfg := fixAddonsConfiguration(fixAddonCfgName)
+	inf, client := fixAddonsConfigurationInformer(expectedCfg)
+	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
+
+	svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client)
+
+	expectedCfg.Spec.ReprocessRequest = 1
+
+	// when
+	cfg, err := svc.Resync(fixAddonCfgName, expectedCfg.Namespace)
+
+	// then
+	require.NoError(t, err)
+	assert.Equal(t, expectedCfg, cfg)
+}
+
 func fixAddonsConfiguration(name string) *v1alpha1.AddonsConfiguration {
 	return &v1alpha1.AddonsConfiguration{
 		ObjectMeta: metav1.ObjectMeta{

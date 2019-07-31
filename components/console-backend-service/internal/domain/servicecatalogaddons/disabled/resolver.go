@@ -159,6 +159,24 @@ func (_m *Resolver) RemoveClusterAddonsConfigurationURLs(ctx context.Context, na
 	return r0, r1
 }
 
+// ResyncAddonsConfiguration provides a failing mock function with given fields: ctx, name, namespace
+func (_m *Resolver) ResyncAddonsConfiguration(ctx context.Context, name string, namespace string) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// ResyncClusterAddonsConfiguration provides a failing mock function with given fields: ctx, name
+func (_m *Resolver) ResyncClusterAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // ServiceBindingUsageEventSubscription provides a failing mock function with given fields: ctx, namespace
 func (_m *Resolver) ServiceBindingUsageEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
 	var r0 <-chan gqlschema.ServiceBindingUsageEvent

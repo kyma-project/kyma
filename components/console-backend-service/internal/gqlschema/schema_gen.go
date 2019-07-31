@@ -64,10 +64,11 @@ type ComplexityRoot struct {
 	}
 
 	AddonsConfiguration struct {
-		Name   func(childComplexity int) int
-		Urls   func(childComplexity int) int
-		Labels func(childComplexity int) int
-		Status func(childComplexity int) int
+		Name           func(childComplexity int) int
+		Urls           func(childComplexity int) int
+		ResyncRequests func(childComplexity int) int
+		Labels         func(childComplexity int) int
+		Status         func(childComplexity int) int
 	}
 
 	AddonsConfigurationEvent struct {
@@ -458,11 +459,13 @@ type ComplexityRoot struct {
 		DeleteClusterAddonsConfiguration     func(childComplexity int, name string) int
 		AddClusterAddonsConfigurationUrls    func(childComplexity int, name string, urls []string) int
 		RemoveClusterAddonsConfigurationUrls func(childComplexity int, name string, urls []string) int
+		ResyncClusterAddonsConfiguration     func(childComplexity int, name string) int
 		CreateAddonsConfiguration            func(childComplexity int, name string, namespace string, urls []string, labels *Labels) int
 		UpdateAddonsConfiguration            func(childComplexity int, name string, namespace string, urls []string, labels *Labels) int
 		DeleteAddonsConfiguration            func(childComplexity int, name string, namespace string) int
 		AddAddonsConfigurationUrls           func(childComplexity int, name string, namespace string, urls []string) int
 		RemoveAddonsConfigurationUrls        func(childComplexity int, name string, namespace string, urls []string) int
+		ResyncAddonsConfiguration            func(childComplexity int, name string, namespace string) int
 		CreateApplication                    func(childComplexity int, name string, description *string, labels *Labels) int
 		UpdateApplication                    func(childComplexity int, name string, description *string, labels *Labels) int
 		DeleteApplication                    func(childComplexity int, name string) int
@@ -890,11 +893,13 @@ type MutationResolver interface {
 	DeleteClusterAddonsConfiguration(ctx context.Context, name string) (*AddonsConfiguration, error)
 	AddClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*AddonsConfiguration, error)
 	RemoveClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*AddonsConfiguration, error)
+	ResyncClusterAddonsConfiguration(ctx context.Context, name string) (*AddonsConfiguration, error)
 	CreateAddonsConfiguration(ctx context.Context, name string, namespace string, urls []string, labels *Labels) (*AddonsConfiguration, error)
 	UpdateAddonsConfiguration(ctx context.Context, name string, namespace string, urls []string, labels *Labels) (*AddonsConfiguration, error)
 	DeleteAddonsConfiguration(ctx context.Context, name string, namespace string) (*AddonsConfiguration, error)
 	AddAddonsConfigurationURLs(ctx context.Context, name string, namespace string, urls []string) (*AddonsConfiguration, error)
 	RemoveAddonsConfigurationURLs(ctx context.Context, name string, namespace string, urls []string) (*AddonsConfiguration, error)
+	ResyncAddonsConfiguration(ctx context.Context, name string, namespace string) (*AddonsConfiguration, error)
 	CreateApplication(ctx context.Context, name string, description *string, labels *Labels) (ApplicationMutationOutput, error)
 	UpdateApplication(ctx context.Context, name string, description *string, labels *Labels) (ApplicationMutationOutput, error)
 	DeleteApplication(ctx context.Context, name string) (DeleteApplicationOutput, error)
@@ -1542,6 +1547,21 @@ func field_Mutation_removeClusterAddonsConfigurationURLs_args(rawArgs map[string
 
 }
 
+func field_Mutation_resyncClusterAddonsConfiguration_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+
+}
+
 func field_Mutation_createAddonsConfiguration_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -1766,6 +1786,30 @@ func field_Mutation_removeAddonsConfigurationURLs_args(rawArgs map[string]interf
 		}
 	}
 	args["urls"] = arg2
+	return args, nil
+
+}
+
+func field_Mutation_resyncAddonsConfiguration_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
 	return args, nil
 
 }
@@ -4129,6 +4173,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AddonsConfiguration.Urls(childComplexity), true
 
+	case "AddonsConfiguration.resyncRequests":
+		if e.complexity.AddonsConfiguration.ResyncRequests == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfiguration.ResyncRequests(childComplexity), true
+
 	case "AddonsConfiguration.labels":
 		if e.complexity.AddonsConfiguration.Labels == nil {
 			break
@@ -5745,6 +5796,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.RemoveClusterAddonsConfigurationUrls(childComplexity, args["name"].(string), args["urls"].([]string)), true
 
+	case "Mutation.resyncClusterAddonsConfiguration":
+		if e.complexity.Mutation.ResyncClusterAddonsConfiguration == nil {
+			break
+		}
+
+		args, err := field_Mutation_resyncClusterAddonsConfiguration_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ResyncClusterAddonsConfiguration(childComplexity, args["name"].(string)), true
+
 	case "Mutation.createAddonsConfiguration":
 		if e.complexity.Mutation.CreateAddonsConfiguration == nil {
 			break
@@ -5804,6 +5867,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RemoveAddonsConfigurationUrls(childComplexity, args["name"].(string), args["namespace"].(string), args["urls"].([]string)), true
+
+	case "Mutation.resyncAddonsConfiguration":
+		if e.complexity.Mutation.ResyncAddonsConfiguration == nil {
+			break
+		}
+
+		args, err := field_Mutation_resyncAddonsConfiguration_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ResyncAddonsConfiguration(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
 	case "Mutation.createApplication":
 		if e.complexity.Mutation.CreateApplication == nil {
@@ -8338,6 +8413,11 @@ func (ec *executionContext) _AddonsConfiguration(ctx context.Context, sel ast.Se
 			}
 		case "urls":
 			out.Values[i] = ec._AddonsConfiguration_urls(ctx, field, obj)
+		case "resyncRequests":
+			out.Values[i] = ec._AddonsConfiguration_resyncRequests(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "labels":
 			out.Values[i] = ec._AddonsConfiguration_labels(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -8417,6 +8497,33 @@ func (ec *executionContext) _AddonsConfiguration_urls(ctx context.Context, field
 	}
 
 	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfiguration_resyncRequests(ctx context.Context, field graphql.CollectedField, obj *AddonsConfiguration) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfiguration",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ResyncRequests, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalInt(res)
 }
 
 // nolint: vetshadow
@@ -17212,6 +17319,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_addClusterAddonsConfigurationURLs(ctx, field)
 		case "removeClusterAddonsConfigurationURLs":
 			out.Values[i] = ec._Mutation_removeClusterAddonsConfigurationURLs(ctx, field)
+		case "resyncClusterAddonsConfiguration":
+			out.Values[i] = ec._Mutation_resyncClusterAddonsConfiguration(ctx, field)
 		case "createAddonsConfiguration":
 			out.Values[i] = ec._Mutation_createAddonsConfiguration(ctx, field)
 		case "updateAddonsConfiguration":
@@ -17222,6 +17331,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_addAddonsConfigurationURLs(ctx, field)
 		case "removeAddonsConfigurationURLs":
 			out.Values[i] = ec._Mutation_removeAddonsConfigurationURLs(ctx, field)
+		case "resyncAddonsConfiguration":
+			out.Values[i] = ec._Mutation_resyncAddonsConfiguration(ctx, field)
 		case "createApplication":
 			out.Values[i] = ec._Mutation_createApplication(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -17726,6 +17837,41 @@ func (ec *executionContext) _Mutation_removeClusterAddonsConfigurationURLs(ctx c
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Mutation_resyncClusterAddonsConfiguration(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_resyncClusterAddonsConfiguration_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ResyncClusterAddonsConfiguration(rctx, args["name"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*AddonsConfiguration)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._AddonsConfiguration(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Mutation_createAddonsConfiguration(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -17885,6 +18031,41 @@ func (ec *executionContext) _Mutation_removeAddonsConfigurationURLs(ctx context.
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().RemoveAddonsConfigurationURLs(rctx, args["name"].(string), args["namespace"].(string), args["urls"].([]string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*AddonsConfiguration)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._AddonsConfiguration(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_resyncAddonsConfiguration(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_resyncAddonsConfiguration_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ResyncAddonsConfiguration(rctx, args["name"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -31161,6 +31342,7 @@ enum DocsTopicPhaseType {
 type AddonsConfiguration {
     name: String!
     urls: [String!]
+    resyncRequests: Int!
     labels: Labels!
     status: AddonsConfigurationStatus!
 }
@@ -32012,12 +32194,14 @@ type Mutation {
     deleteClusterAddonsConfiguration(name: String!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "delete", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     addClusterAddonsConfigurationURLs(name: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     removeClusterAddonsConfigurationURLs(name: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    resyncClusterAddonsConfiguration(name: String!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 
     createAddonsConfiguration(name: String!, namespace: String!, urls: [String!]!, labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "create", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     updateAddonsConfiguration(name: String!, namespace: String!, urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     deleteAddonsConfiguration(name: String!, namespace: String!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "delete", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     addAddonsConfigurationURLs(name: String!, namespace: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     removeAddonsConfigurationURLs(name: String!, namespace: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    resyncAddonsConfiguration(name: String!, namespace: String!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 
     createApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
     updateApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput! @HasAccess(attributes: {resource: "applications", verb: "update", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})

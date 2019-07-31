@@ -55,3 +55,26 @@ func (_m *addonsCfgUpdater) RemoveRepos(name string, namespace string, urls []st
 
 	return r0, r1
 }
+
+// Resync provides a mock function with given fields: name, namespace
+func (_m *addonsCfgUpdater) Resync(name string, namespace string) (*v1alpha1.AddonsConfiguration, error) {
+	ret := _m.Called(name, namespace)
+
+	var r0 *v1alpha1.AddonsConfiguration
+	if rf, ok := ret.Get(0).(func(string, string) *v1alpha1.AddonsConfiguration); ok {
+		r0 = rf(name, namespace)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*v1alpha1.AddonsConfiguration)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(name, namespace)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}

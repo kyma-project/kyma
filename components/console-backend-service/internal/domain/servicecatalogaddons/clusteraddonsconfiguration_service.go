@@ -140,6 +140,22 @@ func (s *clusterAddonsConfigurationService) Delete(name string) (*v1alpha1.Clust
 	return addon, nil
 }
 
+func (s *clusterAddonsConfigurationService) Resync(name string) (*v1alpha1.ClusterAddonsConfiguration, error) {
+	addon, err := s.getClusterAddonsConfiguration(name)
+	if err != nil {
+		return nil, err
+	}
+	addonCpy := addon.DeepCopy()
+	addonCpy.Spec.ReprocessRequest++
+
+	result, err := s.addonsCfgClient.ClusterAddonsConfigurations().Update(addonCpy)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while updating %s %s", pretty.ClusterAddonsConfiguration, addon.Name)
+	}
+
+	return result, nil
+}
+
 func (s *clusterAddonsConfigurationService) getClusterAddonsConfiguration(name string) (*v1alpha1.ClusterAddonsConfiguration, error) {
 	item, exists, err := s.addonsCfgInformer.GetStore().GetByKey(name)
 	if err != nil {

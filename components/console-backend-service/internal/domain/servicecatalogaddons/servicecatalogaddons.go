@@ -147,6 +147,7 @@ type Resolver interface {
 	DeleteAddonsConfiguration(ctx context.Context, name, namespace string) (*gqlschema.AddonsConfiguration, error)
 	AddAddonsConfigurationURLs(ctx context.Context, name, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error)
 	RemoveAddonsConfigurationURLs(ctx context.Context, name, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error)
+	ResyncAddonsConfiguration(ctx context.Context, name, namespace string) (*gqlschema.AddonsConfiguration, error)
 	AddonsConfigurationEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.AddonsConfigurationEvent, error)
 
 	ClusterAddonsConfigurationsQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.AddonsConfiguration, error)
@@ -155,6 +156,7 @@ type Resolver interface {
 	DeleteClusterAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error)
 	AddClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error)
 	RemoveClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error)
+	ResyncClusterAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error)
 	ClusterAddonsConfigurationEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterAddonsConfigurationEvent, error)
 }
 

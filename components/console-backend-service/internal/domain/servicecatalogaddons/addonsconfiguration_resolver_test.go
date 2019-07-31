@@ -124,6 +124,24 @@ func TestAddonsConfigurationResolver_RemoveAddonsConfigurationURLs(t *testing.T)
 	assert.Equal(t, fixGQLAddonsConfiguration(addonName), cfgs)
 }
 
+func TestAddonsConfigurationResolver_ResyncAddonsConfigurationURLs(t *testing.T) {
+	// given
+	const addonName = "test"
+	addonsCfgUpdater := automock.NewAddonsCfgUpdater()
+	defer addonsCfgUpdater.AssertExpectations(t)
+	addonsCfgUpdater.On("Resync", addonName, addonName).
+		Return(fixAddonsConfiguration(addonName), nil).Once()
+
+	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
+
+	// when
+	cfgs, err := resolver.ResyncAddonsConfiguration(context.Background(), addonName, addonName)
+
+	// then
+	require.NoError(t, err)
+	assert.Equal(t, fixGQLAddonsConfiguration(addonName), cfgs)
+}
+
 func fixGQLAddonsConfiguration(name string) *gqlschema.AddonsConfiguration {
 	return &gqlschema.AddonsConfiguration{
 		Name: name,

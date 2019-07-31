@@ -140,6 +140,22 @@ func (s *addonsConfigurationService) Delete(name, namespace string) (*v1alpha1.A
 	return addon, nil
 }
 
+func (s *addonsConfigurationService) Resync(name, namespace string) (*v1alpha1.AddonsConfiguration, error) {
+	addon, err := s.getAddonsConfiguration(name, namespace)
+	if err != nil {
+		return nil, err
+	}
+	addonCpy := addon.DeepCopy()
+	addonCpy.Spec.ReprocessRequest++
+
+	result, err := s.addonsCfgClient.AddonsConfigurations(namespace).Update(addonCpy)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while updating %s %s", pretty.ClusterAddonsConfiguration, addon.Name)
+	}
+
+	return result, nil
+}
+
 func (s *addonsConfigurationService) getAddonsConfiguration(name, namespace string) (*v1alpha1.AddonsConfiguration, error) {
 	key := fmt.Sprintf("%s/%s", namespace, name)
 	item, exists, err := s.addonsCfgInformer.GetStore().GetByKey(key)

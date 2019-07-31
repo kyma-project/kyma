@@ -373,6 +373,25 @@ func TestClusterAddonsConfigurationService_ListAddonsConfigurations(t *testing.T
 	}
 }
 
+func TestClusterAddonsConfigurationService_ResyncAddonsConfiguration(t *testing.T) {
+	// given
+	fixAddonCfgName := "test"
+	expectedCfg := fixClusterAddonsConfiguration(fixAddonCfgName)
+	inf, client := fixClusterAddonsConfigurationInformer(expectedCfg)
+	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
+
+	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
+
+	expectedCfg.Spec.ReprocessRequest = 1
+
+	// when
+	cfg, err := svc.Resync(fixAddonCfgName)
+
+	// then
+	require.NoError(t, err)
+	assert.Equal(t, expectedCfg, cfg)
+}
+
 func fixClusterAddonsConfiguration(name string) *v1alpha1.ClusterAddonsConfiguration {
 	return &v1alpha1.ClusterAddonsConfiguration{
 		ObjectMeta: metav1.ObjectMeta{
