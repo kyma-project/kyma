@@ -176,7 +176,7 @@ func (ts *TestSuite) CallAccessService(t *testing.T, apiId, path string) *http.R
 }
 
 func (ts *TestSuite) proxyURL() string {
-	return fmt.Sprintf("http://%s-application-gateway-external-api:8081", ts.config.Application)
+	return fmt.Sprintf("http://app-%s-application-gateway:8081", ts.config.Application)
 }
 
 func (ts *TestSuite) GetMockServiceURL() string {
