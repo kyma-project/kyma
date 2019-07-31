@@ -122,7 +122,6 @@ enum DocsTopicPhaseType {
 type AddonsConfiguration {
     name: String!
     urls: [String!]
-    resyncRequests: Int!
     labels: Labels!
     status: AddonsConfigurationStatus!
 }

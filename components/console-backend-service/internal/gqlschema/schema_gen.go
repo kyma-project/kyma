@@ -64,11 +64,10 @@ type ComplexityRoot struct {
 	}
 
 	AddonsConfiguration struct {
-		Name           func(childComplexity int) int
-		Urls           func(childComplexity int) int
-		ResyncRequests func(childComplexity int) int
-		Labels         func(childComplexity int) int
-		Status         func(childComplexity int) int
+		Name   func(childComplexity int) int
+		Urls   func(childComplexity int) int
+		Labels func(childComplexity int) int
+		Status func(childComplexity int) int
 	}
 
 	AddonsConfigurationEvent struct {
@@ -4172,13 +4171,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AddonsConfiguration.Urls(childComplexity), true
-
-	case "AddonsConfiguration.resyncRequests":
-		if e.complexity.AddonsConfiguration.ResyncRequests == nil {
-			break
-		}
-
-		return e.complexity.AddonsConfiguration.ResyncRequests(childComplexity), true
 
 	case "AddonsConfiguration.labels":
 		if e.complexity.AddonsConfiguration.Labels == nil {
@@ -8413,11 +8405,6 @@ func (ec *executionContext) _AddonsConfiguration(ctx context.Context, sel ast.Se
 			}
 		case "urls":
 			out.Values[i] = ec._AddonsConfiguration_urls(ctx, field, obj)
-		case "resyncRequests":
-			out.Values[i] = ec._AddonsConfiguration_resyncRequests(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		case "labels":
 			out.Values[i] = ec._AddonsConfiguration_labels(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -8497,33 +8484,6 @@ func (ec *executionContext) _AddonsConfiguration_urls(ctx context.Context, field
 	}
 
 	return arr1
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _AddonsConfiguration_resyncRequests(ctx context.Context, field graphql.CollectedField, obj *AddonsConfiguration) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "AddonsConfiguration",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ResyncRequests, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalInt(res)
 }
 
 // nolint: vetshadow
@@ -31342,7 +31302,6 @@ enum DocsTopicPhaseType {
 type AddonsConfiguration {
     name: String!
     urls: [String!]
-    resyncRequests: Int!
     labels: Labels!
     status: AddonsConfigurationStatus!
 }

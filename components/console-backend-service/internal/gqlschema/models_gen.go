@@ -28,11 +28,10 @@ type APIInput struct {
 }
 
 type AddonsConfiguration struct {
-	Name           string                    `json:"name"`
-	Urls           []string                  `json:"urls"`
-	ResyncRequests int                       `json:"resyncRequests"`
-	Labels         Labels                    `json:"labels"`
-	Status         AddonsConfigurationStatus `json:"status"`
+	Name   string                    `json:"name"`
+	Urls   []string                  `json:"urls"`
+	Labels Labels                    `json:"labels"`
+	Status AddonsConfigurationStatus `json:"status"`
 }
 
 type AddonsConfigurationEvent struct {

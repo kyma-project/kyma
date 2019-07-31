@@ -18,10 +18,10 @@ func (c *addonsConfigurationConverter) ToGQL(item *v1alpha1.AddonsConfiguration)
 	}
 
 	addonsCfg := gqlschema.AddonsConfiguration{
-		Name:   item.Name,
-		Labels: item.Labels,
-		Urls:   urls,
-		Status: parseStatus(item.Status.CommonAddonsConfigurationStatus),
+		Name:           item.Name,
+		Labels:         item.Labels,
+		Urls:           urls,
+		Status:         parseStatus(item.Status.CommonAddonsConfigurationStatus),
 	}
 
 	return &addonsCfg
