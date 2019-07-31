@@ -251,16 +251,16 @@ func (s *service) updateApplications(directorApplications []model.Application, r
 
 func (s *service) updateApplication(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) Result {
 	log.Infof("Updating API resources for application '%s'.", directorApplication.ID)
-	appendedErr := s.updateAPIResources(directorApplication, existentRuntimeApplication, newRuntimeApplication)
-	if appendedErr != nil {
-		log.Warningf("Failed to update API resources for application '%s': %s.", directorApplication.ID, appendedErr)
+	updatedRuntimeApplication, err := s.applicationRepository.Update(&newRuntimeApplication)
+	if err != nil {
+		log.Warningf("Failed to update application '%s': %s.", directorApplication.ID, err)
+		return newResult(existentRuntimeApplication, Update, err)
 	}
 
 	log.Infof("Updating API resources for application '%s'.", directorApplication.ID)
-	_, err := s.applicationRepository.Update(&newRuntimeApplication)
-	if err != nil {
-		log.Warningf("Failed to update application '%s': %s.", directorApplication.ID, err)
-		appendedErr = appendError(appendedErr, err)
+	appendedErr := s.updateAPIResources(directorApplication, existentRuntimeApplication, *updatedRuntimeApplication)
+	if appendedErr != nil {
+		log.Warningf("Failed to update API resources for application '%s': %s.", directorApplication.ID, appendedErr)
 	}
 
 	return newResult(existentRuntimeApplication, Update, appendedErr)
