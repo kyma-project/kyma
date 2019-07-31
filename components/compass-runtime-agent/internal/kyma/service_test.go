@@ -9,7 +9,6 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	appMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications/mocks"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,11 +18,11 @@ func TestService(t *testing.T) {
 
 	t.Run("should return error in case failed to determine differences between current and desired runtime state", func(t *testing.T) {
 		// given
-		applicationsManagerMock := &appMocks.Manager{}
+		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
-		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(nil, errors.New("some error"))
+		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(nil, apperrors.Internal("some error"))
 
 		directorApplication := getTestDirectorApplication("id1", []model.APIDefinition{}, []model.EventAPIDefinition{})
 
@@ -45,7 +44,7 @@ func TestService(t *testing.T) {
 
 	t.Run("should apply Create operation", func(t *testing.T) {
 		// given
-		applicationsManagerMock := &appMocks.Manager{}
+		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
@@ -98,7 +97,7 @@ func TestService(t *testing.T) {
 
 	t.Run("should apply Update operation", func(t *testing.T) {
 		// given
-		applicationsManagerMock := &appMocks.Manager{}
+		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
@@ -153,7 +152,7 @@ func TestService(t *testing.T) {
 
 	t.Run("should apply Delete operation", func(t *testing.T) {
 		// given
-		applicationsManagerMock := &appMocks.Manager{}
+		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
@@ -192,7 +191,7 @@ func TestService(t *testing.T) {
 
 	t.Run("should not break execution when error occurred when applying Application CR", func(t *testing.T) {
 		// given
-		applicationsManagerMock := &appMocks.Manager{}
+		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
@@ -234,9 +233,9 @@ func TestService(t *testing.T) {
 
 		converterMock.On("Do", newDirectorApplication).Return(convertedNewRuntimeApplication)
 		converterMock.On("Do", existingDirectorApplication).Return(convertedExistingRuntimeApplication)
-		applicationsManagerMock.On("Create", &convertedNewRuntimeApplication).Return(nil, errors.New("some error"))
-		applicationsManagerMock.On("Update", &convertedExistingRuntimeApplication).Return(nil, errors.New("some error"))
-		applicationsManagerMock.On("Delete", runtimeApplicationToBeDeleted.Name, &metav1.DeleteOptions{}).Return(errors.New("some error"))
+		applicationsManagerMock.On("Create", &convertedNewRuntimeApplication).Return(nil, apperrors.Internal("some error"))
+		applicationsManagerMock.On("Update", &convertedExistingRuntimeApplication).Return(nil, apperrors.Internal("some error"))
+		applicationsManagerMock.On("Delete", runtimeApplicationToBeDeleted.Name, &metav1.DeleteOptions{}).Return(apperrors.Internal("some error"))
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 		resourcesServiceMocks.On("CreateApiResources", convertedNewRuntimeApplication, newRuntimeService1, []byte(nil)).Return(apperrors.Internal("some error"))
 		resourcesServiceMocks.On("CreateApiResources", convertedNewRuntimeApplication, newRuntimeService2, []byte(nil)).Return(apperrors.Internal("some error"))

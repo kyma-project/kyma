@@ -16,7 +16,7 @@ type Service interface {
 }
 
 type service struct {
-	applicationRepository applications.Manager
+	applicationRepository applications.Repository
 	converter             applications.Converter
 	resourcesService      apiresources.Service
 }
@@ -37,7 +37,7 @@ type Result struct {
 
 type ApiIDToSecretNameMap map[string]string
 
-func NewService(applicationRepository applications.Manager, converter applications.Converter, resourcesService apiresources.Service) Service {
+func NewService(applicationRepository applications.Repository, converter applications.Converter, resourcesService apiresources.Service) Service {
 	return &service{
 		applicationRepository: applicationRepository,
 		converter:             converter,
@@ -106,7 +106,7 @@ func (s *service) createApplication(directorApplication model.Application, runti
 	_, err := s.applicationRepository.Create(&runtimeApplication)
 	if err != nil {
 		log.Warningf("Failed to create application '%s': %s.", directorApplication.ID, err)
-		appendedErr = appendError(appendedErr, apperrors.Internal("Failed to create application: '%s'", err))
+		appendedErr = appendError(appendedErr, err)
 	}
 
 	return newResult(runtimeApplication, Create, appendedErr)
@@ -161,16 +161,16 @@ func (s *service) deleteApplications(directorApplications []model.Application, r
 
 func (s *service) deleteApplication(runtimeApplication v1alpha1.Application) Result {
 	log.Infof("Deleting API resources for application '%s'.", runtimeApplication.Name)
-	err := s.deleteAPIResources(runtimeApplication)
-	if err != nil {
+	appendedErr := s.deleteAPIResources(runtimeApplication)
+	if appendedErr != nil {
 		log.Warningf("Failed to delete API resources for application '%s'.", runtimeApplication.Name)
 	}
 
 	log.Infof("Deleting application '%s'.", runtimeApplication.Name)
-	e := s.applicationRepository.Delete(runtimeApplication.Name, &v1.DeleteOptions{})
-	if e != nil {
+	err := s.applicationRepository.Delete(runtimeApplication.Name, &v1.DeleteOptions{})
+	if err != nil {
 		log.Warningf("Failed to delete application '%s'", runtimeApplication.Name)
-		err = appendError(err, apperrors.Internal("Failed to delete application: %s", e))
+		appendedErr = appendError(appendedErr, err)
 	}
 
 	return newResult(runtimeApplication, Delete, err)
@@ -218,7 +218,7 @@ func (s *service) updateApplication(directorApplication model.Application, exist
 	_, err := s.applicationRepository.Update(&newRuntimeApplication)
 	if err != nil {
 		log.Warningf("Failed to update application '%s': %s.", directorApplication.ID, err)
-		appendedErr = appendError(appendedErr, apperrors.Internal("Failed to update application: %s.", err))
+		appendedErr = appendError(appendedErr, err)
 	}
 
 	return newResult(existentRuntimeApplication, Update, appendedErr)

@@ -124,7 +124,7 @@ func createNewSynchronizationService() kyma.Service {
 	return kyma.NewService(applicationManager, converter, resourcesService)
 }
 
-func newApplicationManager(config *restclient.Config) (applications.Manager, apperrors.AppError) {
+func newApplicationManager(config *restclient.Config) (applications.Repository, apperrors.AppError) {
 	applicationEnvironmentClientset, err := versioned.NewForConfig(config)
 	if err != nil {
 		return nil, apperrors.Internal("Failed to create k8s application client, %s", err)
@@ -132,7 +132,7 @@ func newApplicationManager(config *restclient.Config) (applications.Manager, app
 
 	appInterface := applicationEnvironmentClientset.ApplicationconnectorV1alpha1().Applications()
 
-	return applications.NewManager(appInterface), nil
+	return applications.NewRepository(appInterface), nil
 }
 
 type uninitializedKymaService struct {
