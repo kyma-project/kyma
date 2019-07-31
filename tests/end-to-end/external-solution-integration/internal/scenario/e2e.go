@@ -30,9 +30,11 @@ import (
 
 // E2E executes complete external solution integration test scenario
 type E2E struct {
-	domain        string
-	testID        string
-	skipSSLVerify bool
+	domain            string
+	testID            string
+	skipSSLVerify     bool
+	applicationTenant string
+	applicationGroup  string
 }
 
 const (
@@ -44,6 +46,8 @@ func (s *E2E) AddFlags(set *pflag.FlagSet) {
 	pflag.StringVar(&s.domain, "domain", "kyma.local", "domain")
 	pflag.StringVar(&s.testID, "testID", "e2e-test", "domain")
 	pflag.BoolVar(&s.skipSSLVerify, "skipSSLVerify", false, "Skip verification of service SSL certificates")
+	pflag.StringVar(&s.applicationTenant, "applicationTenant", "", "Application CR Tenant")
+	pflag.StringVar(&s.applicationGroup, "applicationGroup", "", "Application CR Group")
 }
 
 // Steps return scenario steps
@@ -79,13 +83,13 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 	return []step.Step{
 		step.Parallel(
 			testsuite.NewCreateNamespace(s.testID, coreClientset.CoreV1().Namespaces()),
-			testsuite.NewCreateApplication(s.testID, s.testID, false, s.testID, s.testID, appOperatorClientset.ApplicationconnectorV1alpha1().Applications()),
+			testsuite.NewCreateApplication(s.testID, s.testID, false, s.applicationTenant, s.applicationGroup, appOperatorClientset.ApplicationconnectorV1alpha1().Applications()),
 		),
 		step.Parallel(
 			testsuite.NewCreateMapping(s.testID, appBrokerClientset.ApplicationconnectorV1alpha1().ApplicationMappings(s.testID)),
 			testsuite.NewDeployLambda(s.testID, lambdaPort, kubelessClientset.KubelessV1beta1().Functions(s.testID), pods),
 			testsuite.NewStartTestServer(testService),
-			testsuite.NewConnectApplication(connector, state, s.testID, s.testID),
+			testsuite.NewConnectApplication(connector, state, s.applicationTenant, s.applicationGroup),
 		),
 		testsuite.NewRegisterTestService(s.testID, testService, state),
 		testsuite.NewCreateServiceInstance(s.testID,
