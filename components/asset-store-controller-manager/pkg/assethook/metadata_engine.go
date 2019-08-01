@@ -56,7 +56,7 @@ func (e *metadataEngine) Extract(ctx context.Context, basePath string, files []s
 		}
 
 		response := &v1alpha1.MetadataResponse{}
-		err = e.do(ctx, contentType, service, body, response, e.timeout)
+		err = e.do(ctx, contentType, service, body, response)
 		if err != nil {
 			return nil, errors.Wrap(err, "while sending request to metadata webhook")
 		}
@@ -119,19 +119,19 @@ func (e *metadataEngine) buildQueryField(writer *multipart.Writer, filename, pat
 	return nil
 }
 
-func (w *metadataEngine) do(ctx context.Context, contentType string, webhook v1alpha2.WebhookService, body io.Reader, response interface{}, timeout time.Duration) error {
-	context, cancel := context.WithTimeout(ctx, timeout)
+func (e *metadataEngine) do(ctx context.Context, contentType string, webhook v1alpha2.WebhookService, body io.Reader, response interface{}) error {
+	ctx, cancel := context.WithTimeout(ctx, e.timeout)
 	defer cancel()
 
-	req, err := http.NewRequest("POST", w.getWebhookUrl(webhook), body)
+	req, err := http.NewRequest("POST", e.getWebhookUrl(webhook), body)
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Content-Type", contentType)
-	req.WithContext(context)
+	req.WithContext(ctx)
 
-	rsp, err := w.httpClient.Do(req)
+	rsp, err := e.httpClient.Do(req)
 	if err != nil {
 		return errors.Wrapf(err, "while sending request to webhook")
 	}
