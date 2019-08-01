@@ -31,7 +31,7 @@ entries:
 
 ## Supported protocols
 
-Expose your addons repository through a remote server so that you can provide URLs in the [AddonsConfiguration](#custom-resource-addonsconfiguration) (AC) or [ClusterAddonsConfiguration](#custom-resource-clusteraddonsconfiguration) (CAC) custom resources. The Helm Broker supports exposing addons using the following protocols:
+Expose your addons repository so that you can provide URLs in the [AddonsConfiguration](#custom-resource-addonsconfiguration) (AC) and [ClusterAddonsConfiguration](#custom-resource-clusteraddonsconfiguration) (CAC) custom resources. The Helm Broker supports exposing addons using the following protocols:
 
 <div tabs>
   <details>
