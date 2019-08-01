@@ -33,4 +33,6 @@ To interact with the Kyma OAuth2 server, you must register an OAuth2 client. Fol
 
 After you register an OAuth2 client, go to [this](https://github.com/kyma-incubator/examples/tree/master/ory-hydra/scenarios/client-credentials) Kyma Incubator repository to try a Client Credentials Grant example that showcases the integration.
 
+You can also interact with the OAuth2 server using its REST API. Read the ORY [documentation](https://www.ory.sh/docs/hydra/sdk/api) to learn more about the available endpoints.
+
 >**TIP:** If you have any questions about the ORY-Kyma integration, you can ask them on the **#security** [Slack channel](http://slack.kyma-project.io/) and get answers directly from Kyma developers.   
