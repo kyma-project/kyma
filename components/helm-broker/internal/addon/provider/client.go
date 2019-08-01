@@ -47,8 +47,10 @@ func (d *Client) GetCompleteAddon(entry addon.EntryDTO) (addon.CompleteAddon, er
 	if err != nil {
 		return addon.CompleteAddon{}, errors.Wrapf(err, "while loading addon %v", entry.Name)
 	}
-	b.RepositoryURL = d.concreteGetter.AddonDocURL(entry.Name, entry.Version)
-
+	b.RepositoryURL, err = d.concreteGetter.AddonDocURL(entry.Name, entry.Version)
+	if err != nil {
+		return addon.CompleteAddon{}, errors.Wrapf(err, "while getting Docs URL for addon %v", entry.Name)
+	}
 	return addon.CompleteAddon{
 		Addon:  b,
 		Charts: c,

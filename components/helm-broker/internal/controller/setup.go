@@ -8,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/addon/provider"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/assetstore"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/config"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
@@ -45,8 +46,9 @@ func SetupAndStartController(cfg *rest.Config, ctrCfg *config.ControllerConfig, 
 	sbFacade := broker.NewBrokersFacade(mgr.GetClient(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, lg)
 	csbFacade := broker.NewClusterBrokersFacade(mgr.GetClient(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, ctrCfg.ClusterServiceBrokerName, lg)
 
+	gitGetterFactory := provider.GitGetterConfiguration{Cli: assetstore.NewClient(ctrCfg.UploadServiceURL, lg), TmpDir: ctrCfg.TmpDir}
 	allowedGetters := map[string]provider.Provider{
-		"git":   provider.NewGit,
+		"git":   gitGetterFactory.NewGit,
 		"https": provider.NewHTTP,
 	}
 	if ctrCfg.DevelopMode {

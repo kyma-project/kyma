@@ -24,4 +24,4 @@ spec:
         - destination:
             port:
               number: {{ .Values.applicationConnectivityValidator.args.proxyPort }}
-            host: {{ .Release.Name }}-connectivity-validator
+            host: app-{{ .Release.Name }}-validator

@@ -73,6 +73,14 @@
   revision = "f2c93856175a7dd6abe88c5c3900b67ad054adcc"
 
 [[projects]]
+  branch = "master"
+  digest = "1:ef09c94a4b7a61b41034d03a885b1c1e87bf544bcd78a8784c3c0b36e8d00e2e"
+  name = "github.com/andybalholm/brotli"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ed0fd649404dcdcdae403d0e62b555889ee4e6b9"
+
+[[projects]]
   digest = "1:3b10c6fd33854dc41de2cf78b7bae105da94c2789b6fa5b9ac9e593ea43484ac"
   name = "github.com/aokoli/goutils"
   packages = ["."]
@@ -288,6 +296,21 @@
   version = "v3.2.0"
 
 [[projects]]
+  digest = "1:d052bda13fd17bd8cf52ccae57b0a03ffeea80cffc2cffc62741235fa34f92cf"
+  name = "github.com/dsnet/compress"
+  packages = [
+    ".",
+    "bzip2",
+    "bzip2/internal/sais",
+    "internal",
+    "internal/errors",
+    "internal/prefix",
+  ]
+  pruneopts = "UT"
+  revision = "da652975a8eea9fa0735aba8056747a751db0bd3"
+  version = "v0.0.1"
+
+[[projects]]
   digest = "1:b2754ad67d4ed5a0741d69396c6f5cbe1e426a8adc2e8e97e09a1ee5a4621653"
   name = "github.com/emicklei/go-restful"
   packages = [
@@ -410,6 +433,17 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:8f251d09f52a8920bdba202b0c18a24cafb4f70f94b9afd8d02bf7643cfc99a0"
+  name = "github.com/golang/gddo"
+  packages = [
+    "httputil",
+    "httputil/header",
+  ]
+  pruneopts = "UT"
+  revision = "af0f2af80721261f4d211b2c9563f7b46b2aab06"
+
+[[projects]]
+  branch = "master"
   digest = "1:1ba1d79f2810270045c328ae5d674321db34e3aae468eb4233883b473c5c0467"
   name = "github.com/golang/glog"
   packages = ["."]
@@ -454,6 +488,14 @@
   ]
   pruneopts = "UT"
   revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
+
+[[projects]]
+  digest = "1:e4f5819333ac698d294fe04dbf640f84719658d5c7ce195b10060cc37292ce79"
+  name = "github.com/golang/snappy"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "2a8bb927dd31d8daada140a5d09578521ce5c36a"
+  version = "v0.0.1"
 
 [[projects]]
   branch = "master"
@@ -693,6 +735,37 @@
   version = "v1.1.5"
 
 [[projects]]
+  digest = "1:512c580243ca2b7dfeabbd5077189ae15dd4c227941307758e8b741dc7f6c939"
+  name = "github.com/klauspost/compress"
+  packages = [
+    "flate",
+    "fse",
+    "huff0",
+    "snappy",
+    "zstd",
+    "zstd/internal/xxhash",
+  ]
+  pruneopts = "UT"
+  revision = "23256797d1e4ccac36fad828362cdfef5b3aeb90"
+  version = "v1.7.4"
+
+[[projects]]
+  digest = "1:923c4d7194b42e054b2eb8a6c62824ac55e23ececc1c7e48d4da69c971c55954"
+  name = "github.com/klauspost/cpuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "05a8198c0f5a27739aec358908d7e12c64ce6eb7"
+  version = "v1.2.1"
+
+[[projects]]
+  digest = "1:ce7769e1e6c4180a163da92df483369d689c8849eacfdd24a3cdcbcdc47b8b95"
+  name = "github.com/klauspost/pgzip"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "083b1c3f84dd6486588802e5ce295de3a7f41a8b"
+  version = "v1.2.1"
+
+[[projects]]
   branch = "master"
   digest = "1:47c63c4edd0d5c6a8063e51dedf865dc53200efd12f2a82bc86c3c25e636e626"
   name = "github.com/komkom/go-jsonhash"
@@ -721,11 +794,14 @@
   version = "v0.1.42"
 
 [[projects]]
-  digest = "1:8f927aa6bddebb48270271aceb1cef1d1ea567b5e63fa372021c77dfb100d0b8"
+  digest = "1:94693b6f3dede8ae157a0660e785a5f29594bddd5ce08f05e1643a401072cc96"
   name = "github.com/kyma-project/kyma"
-  packages = ["components/cms-controller-manager/pkg/apis/cms/v1alpha1"]
+  packages = [
+    "components/application-gateway/pkg/httpconsts",
+    "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
+  ]
   pruneopts = "UT"
-  revision = "1c4c7390617114ea7b28bcfe5664691e4a6d2384"
+  revision = "eed4ed1c60440b9118f4a97a96d52efdd5a3a336"
 
 [[projects]]
   branch = "master"
@@ -772,6 +848,14 @@
   revision = "31067281800f66f57548a7a32d9c6c5f963fef83"
 
 [[projects]]
+  digest = "1:b6796acb292886d9525ec987cfb10f2771e18aac389350c214a44a565f5c3e1c"
+  name = "github.com/mholt/archiver"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "33320f6f730664f9896b05b777e53ae4c917f572"
+  version = "v3.2.0"
+
+[[projects]]
   digest = "1:5d231480e1c64a726869bc4142d270184c419749d34f167646baa21008eb0a79"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
@@ -802,6 +886,14 @@
   pruneopts = "UT"
   revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
   version = "1.0.1"
+
+[[projects]]
+  digest = "1:b93a939355dc613ca1c23bf39f6d4c207da431a31dd8af001cc334ad24cab9d3"
+  name = "github.com/nwaples/rardecode"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "cc3e4b2381762c56dbcdf9f93be03349a1dc1c14"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:4f5513cb656b73fb4c4f77ccd482c8366d6290278564d2b1d3285f45e45f4a1e"
@@ -884,6 +976,17 @@
   pruneopts = "UT"
   revision = "0be1b92a6df0e4f5cb0a5d15fb7f643d0ad93ce6"
   version = "v3.0.0"
+
+[[projects]]
+  digest = "1:f690a0a27cefae695fa9587aa3ed23652e593be1d98b35f8184d10bccec30444"
+  name = "github.com/pierrec/lz4"
+  packages = [
+    ".",
+    "internal/xxh32",
+  ]
+  pruneopts = "UT"
+  revision = "057d66e894a4e55853274a3bbbf7de02ba639e43"
+  version = "v2.2.4"
 
 [[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
@@ -1080,6 +1183,14 @@
   pruneopts = "UT"
   revision = "7a443243d539c9595dd8aa7f03a6f68707b80e66"
   version = "v1.1.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:0dfba983988bcd90e6dd30b9bfdb9685ff530dbf61db3706e55372e975b1d8bc"
+  name = "github.com/xi2/xz"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "48954b6210f8d154cb5f8484d3a3e1f83489309e"
 
 [[projects]]
   digest = "1:6dff6d02950c110d7d61da0c200eaff9da9f312101291b2d8c07235954eaa19d"
@@ -1817,9 +1928,11 @@
     "github.com/imdario/mergo",
     "github.com/komkom/go-jsonhash",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
+    "github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts",
     "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "github.com/mcuadros/go-defaults",
     "github.com/meatballhat/negroni-logrus",
+    "github.com/mholt/archiver",
     "github.com/oklog/ulid",
     "github.com/pborman/uuid",
     "github.com/pkg/errors",
