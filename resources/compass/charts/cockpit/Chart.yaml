@@ -1,4 +1,4 @@
 apiVersion: v1
 description: A Helm chart for Compass UI
-name: compass-ui
+name: cockpit
 version: 0.1.0
