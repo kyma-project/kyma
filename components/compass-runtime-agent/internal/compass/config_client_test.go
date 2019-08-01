@@ -194,7 +194,7 @@ func (c *mockGQLClient) Do(req *graphql.Request, res interface{}) error {
 func (c *mockGQLClient) DisableLogging() {}
 
 func newMockClientConstructor(t *testing.T, shouldFail bool) GraphQLClientConstructor {
-	return func(certificate tls.Certificate, graphqlEndpoint string, enableLogging bool) (client gql.Client, e error) {
+	return func(certificate tls.Certificate, graphqlEndpoint string, enableLogging, insecureConfigFetch bool) (client gql.Client, e error) {
 		expectedReq := graphql.NewRequest(expectedQuery)
 		expectedReq.Header.Set("Tenant", tenant)
 
@@ -206,7 +206,7 @@ func newMockClientConstructor(t *testing.T, shouldFail bool) GraphQLClientConstr
 	}
 }
 
-func failingGQLClientConstructor(_ tls.Certificate, _ string, _ bool) (client gql.Client, e error) {
+func failingGQLClientConstructor(_ tls.Certificate, _ string, _, _ bool) (client gql.Client, e error) {
 	return nil, errors.New("error")
 }
 
@@ -241,7 +241,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 	} {
 		t.Run("should "+testCase.description, func(t *testing.T) {
 			// given
-			configClient := NewConfigurationClient(tenant, runtimeId, testCase.clientConstructor)
+			configClient := NewConfigurationClient(tenant, runtimeId, testCase.clientConstructor, true)
 
 			// when
 			apps, err := configClient.FetchConfiguration(directorURL, certificates.Credentials{})
