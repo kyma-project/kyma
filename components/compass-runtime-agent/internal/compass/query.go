@@ -2,16 +2,6 @@ package compass
 
 import "fmt"
 
-// TODO: consider adding some tests and exposing as pkg (if it might be useful in tests)
-
-func ApplicationsQuery() string {
-	return fmt.Sprintf(`query {
-	result: applications {
-		%s
-	}
-}`, applicationsQueryData())
-}
-
 func ApplicationsForRuntimeQuery(runtimeID string) string {
 	return fmt.Sprintf(`query {
 	result: applicationsForRuntime(runtimeID: %s) {
@@ -44,13 +34,10 @@ func applicationData() string {
 		name
 		description
 		labels
-		status {condition timestamp}
-		webhooks {%s}
-		healthCheckURL
 		apis {%s}
 		eventAPIs {%s}
 		documents {%s}
-	`, webhookData(), pageData(apiDefinitionData()), pageData(eventAPIData()), pageData(documentData()))
+	`, pageData(apiDefinitionData()), pageData(eventAPIData()), pageData(documentData()))
 }
 
 func authData() string {
@@ -90,17 +77,6 @@ func authData() string {
 		`)
 }
 
-func webhookData() string {
-	return fmt.Sprintf(
-		`id
-		applicationID
-		type
-		url
-		auth {
-		  %s
-		}`, authData())
-}
-
 func apiDefinitionData() string {
 	return fmt.Sprintf(`		id
 		name
@@ -108,7 +84,7 @@ func apiDefinitionData() string {
 		spec {%s}
 		targetURL
 		group
-		auths {%s}
+		auth {%s}
 		defaultAuth {%s}
 		version {%s}`, apiSpecData(), runtimeAuthData(), authData(), versionData())
 }
@@ -116,16 +92,7 @@ func apiDefinitionData() string {
 func apiSpecData() string {
 	return fmt.Sprintf(`data
 		format
-		type
-		fetchRequest {%s}`, fetchRequestData())
-}
-
-func fetchRequestData() string {
-	return fmt.Sprintf(`url
-		auth {%s}
-		mode
-		filter
-		status {condition timestamp}`, authData())
+		type`)
 }
 
 func runtimeAuthData() string {
@@ -155,8 +122,7 @@ func eventAPIData() string {
 func eventSpecData() string {
 	return fmt.Sprintf(`data
 		type
-		format
-		fetchRequest {%s}`, fetchRequestData())
+		format`)
 }
 
 func documentData() string {
@@ -168,15 +134,5 @@ func documentData() string {
 		description
 		format
 		kind
-		data
-		fetchRequest {%s}`, fetchRequestData())
-}
-
-func runtimeData() string {
-	return fmt.Sprintf(`id
-		name
-		description
-		labels 
-		status {condition timestamp}
-		agentAuth {%s}`, authData())
+		data`)
 }

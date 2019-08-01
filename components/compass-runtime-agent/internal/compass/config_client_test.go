@@ -24,102 +24,22 @@ const (
 	directorURL = "https://director.com/graphql"
 
 	expectedQuery = `query {
-	result: applications {
+	result: applicationsForRuntime(runtimeID: runtimeId) {
 		data {
 		id
 		name
 		description
 		labels
-		status {condition timestamp}
-		webhooks {id
-		applicationID
-		type
-		url
-		auth {
-		  credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		
-		}}
-		healthCheckURL
 		apis {data {
 				id
 		name
 		description
 		spec {data
 		format
-		type
-		fetchRequest {url
-		auth {credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		}
-		mode
-		filter
-		status {condition timestamp}}}
+		type}
 		targetURL
 		group
-		auths {runtimeID
+		auth {runtimeID
 		auth {credential {
 				... on BasicCredentialData {
 					username
@@ -207,45 +127,7 @@ const (
 			group 
 			spec {data
 		type
-		format
-		fetchRequest {url
-		auth {credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		}
-		mode
-		filter
-		status {condition timestamp}}}
+		format}
 			version {value
 		deprecated
 		deprecatedSince
@@ -267,44 +149,6 @@ const (
 		format
 		kind
 		data
-		fetchRequest {url
-		auth {credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		}
-		mode
-		filter
-		status {condition timestamp}}
 	}
 	pageInfo {startCursor
 		endCursor

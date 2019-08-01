@@ -36,8 +36,6 @@ type configClient struct {
 	gqlClientConstructor GraphQLClientConstructor
 }
 
-// TODO - move to queries
-
 func (cc *configClient) FetchConfiguration(directorURL string, credentials certificates.Credentials) ([]kymamodel.Application, error) {
 	client, err := cc.gqlClientConstructor(credentials.AsTLSCertificate(), directorURL, true)
 	if err != nil {
@@ -47,11 +45,7 @@ func (cc *configClient) FetchConfiguration(directorURL string, credentials certi
 	applicationPage := ApplicationPage{}
 	response := ApplicationsForRuntimeResponse{Result: &applicationPage}
 
-	// TODO: use proper query when it is ready
-	//result: applicationsForRuntime(runtimeId: %s) { ... }
-
-	applicationsQuery := ApplicationsQuery()
-
+	applicationsQuery := ApplicationsForRuntimeQuery(cc.runtimeId)
 	req := graphql.NewRequest(applicationsQuery)
 	req.Header.Add(HeaderTenant, cc.tenant)
 
@@ -59,6 +53,12 @@ func (cc *configClient) FetchConfiguration(directorURL string, credentials certi
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to fetch Applications")
 	}
+
+	//b, err := json.Marshal(applicationPage.Data)
+	//if err != nil {
+	//	fmt.Println("ERROR: ", err.Error())
+	//}
+	//fmt.Println(string(b))
 
 	// TODO: After implementation of paging modify the fetching logic
 

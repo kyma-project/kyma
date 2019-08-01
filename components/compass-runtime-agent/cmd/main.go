@@ -20,8 +20,6 @@ import (
 )
 
 func main() {
-	// TODO - wait for Istio sidecar or do not inject at all?
-
 	log.Infoln("Starting Runtime Agent")
 	options := parseArgs()
 	log.Infof("Options: %s", options)
@@ -60,7 +58,11 @@ func main() {
 
 	certManager := certificates.NewCredentialsManager()
 	compassConfigClient := compass.NewConfigurationClient(options.tenant, options.runtimeId, graphql.New)
-	syncService := createNewSynchronizationService(options.integrationNamespace, options.gatewayPort)
+	syncService, err := createNewSynchronizationService(options.integrationNamespace, options.gatewayPort)
+	if err != nil {
+		log.Errorf("Failed to create synchronization service, %s", err.Error())
+		os.Exit(1)
+	}
 
 	compassConnector := compass.NewCompassConnector(options.tokenURLConfigFile)
 	connectionSupervisor := compassconnection.NewSupervisor(
