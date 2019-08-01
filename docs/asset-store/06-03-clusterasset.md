@@ -42,7 +42,7 @@ metadata:
 spec:
   source:
     mode: single
-    metadata:
+    parameters:
       disableRelativeLinks: "true"
     url: https://some.domain.com/main.js
     validationWebhookService:
@@ -55,7 +55,7 @@ spec:
       namespace: default
       endpoint: "/mutate"
       filter: \.js$
-      metadata:
+      parameters:
         rewrite: keyvalue
         pattern: \json|yaml
         data:
@@ -90,19 +90,20 @@ This table lists all possible parameters of a given resource together with their
 |----------|:-------------:|------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **spec.source.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR formats. Use `single` for one file and `package` for a set of files. |
-| **spec.source.metadata** |    **NO**   | Specifies a set of metadata for the ClusterAsset. For example, use it to define what to render, disable, or modify in the UI. Define it in a valid YAML or JSON format. |
+| **spec.source.parameters** |    **NO**   | Specifies a set of parameters for the ClusterAsset. For example, use it to define what to render, disable, or modify in the UI. Define it in a valid YAML or JSON format. |
 | **spec.source.url** |    **YES**   | Specifies the location of the file. |
 | **spec.source.filter** |    **NO**   | Specifies the regex pattern used to select files to store from the package. |
 | **spec.source.validationwebhookservice** |    **NO**   | Provides specification of the validation webhook services. |
 | **spec.source.validationwebhookservice.name** |    **YES**   | Provides the name of the validation webhook service. |
 | **spec.source.validationwebhookservice.namespace** |    **YES**   | Provides the Namespace in which the service is available. |
 | **spec.source.validationwebhookservice.endpoint** |    **NO**   | Specifies the endpoint to which the service sends calls. |
+| **spec.source.validationwebhookservice.parameters** |    **NO**   | Provides detailed parameters specific for a given validation service and its functionality. |
 | **spec.source.validationwebhookservice.filter** |    **NO**   | Specifies the regex pattern used to select files sent to the service. |
 | **spec.source.mutationwebhookservice** |    **NO**   | Provides specification of the mutation webhook services. |
 | **spec.source.mutationwebhookservice.name** |    **YES**   | Provides the name of the mutation webhook service. |
 | **spec.source.mutationwebhookservice.namespace** |    **YES**   | Provides the Namespace in which the service is available. |
 | **spec.source.mutationwebhookservice.endpoint** |    **NO**   | Specifies the endpoint to which the service sends calls. |
-| **spec.source.mutationwebhookservice.metadata** |    **NO**   | Provides detailed metadata specific for a given mutation service and its functionality. |
+| **spec.source.mutationwebhookservice.parameters** |    **NO**   | Provides detailed parameters specific for a given mutation service and its functionality. |
 | **spec.source.mutationwebhookservice.filter** |    **NO**   | Specifies the regex pattern used to select files sent to the service. |
 | **spec.source.metadatawebhookservice** |    **NO**   | Provides specification of the metadata webhook services. |
 | **spec.source.metadatawebhookservice.name** |    **YES**   | Provides the name of the metadata webhook service. |

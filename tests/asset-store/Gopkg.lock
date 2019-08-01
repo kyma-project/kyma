@@ -88,11 +88,11 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:409e443e32f784fe4f45844286d60a6c676a94dc4c0f1bcbb5ac16dccfff55ca"
+  digest = "1:321809367e6a213270ff54e2260e4e077562f7481438baef0a1beafb2561e6da"
   name = "github.com/kyma-project/kyma"
   packages = ["components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"]
   pruneopts = "UT"
-  revision = "1c4c7390617114ea7b28bcfe5664691e4a6d2384"
+  revision = "f5d791b218819a0aecde663dedda1905d7c12bb5"
 
 [[projects]]
   digest = "1:523ffd935398ef4979acbf085e52c624a82f49643bc6dadbe5ea824904cd49be"

@@ -200,6 +200,7 @@ func clusterDocsTopicDetailsFields() string {
     	assets {
 			name
 			metadata
+			parameters
 			type
 			files {
 				url
