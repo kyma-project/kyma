@@ -29,6 +29,9 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `service-catalog-addons` | ✅ | ✅ |
 | `nats-streaming` | ✅ | ✅ |
 | `ory` | ✅ | ✅ |
+| `knative-serving` | ✅ | ✅ |
+| `knative-eventing` | ✅ | ✅ |
+| `knative-build` | ⛔ | ⛔ |
 
 >**NOTE**: To include Velero in the installation process, you need to set it up first. Use the Kyma backup [setup instructions](/components/backup#overview-overview) to do so.
 

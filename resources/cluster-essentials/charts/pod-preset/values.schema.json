@@ -1,0 +1,29 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema definition for prod-preset helm subchart values",
+    "type": "object",
+    "properties": {
+        "controller": {
+            "description": "Configuration properties for the controller",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enables the controller-manager which restarts Deployments whenever the PodPreset changes.",
+                    "default": false,
+                    "type": "boolean"
+                }
+            }
+        },
+        "webhook": {
+            "description": "Configuration properties for the webhook",
+            "type": "object",
+            "properties": {
+                "verbosity": {
+                    "description": "Defines log severity level. The possible values range from 0-10.",
+                    "default": 6,
+                    "type": "number"
+                }
+            }
+        }
+    }
+}

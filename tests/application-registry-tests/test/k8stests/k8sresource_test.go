@@ -102,10 +102,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should create istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetDenier(resourceName, v1.GetOptions{})
+			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sIstioDenier(t, denier, resourceName, expectedLabels, 7, "Not allowed")
+			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
 		})
 
 		t.Run("should create istio rule", func(t *testing.T) {
@@ -116,10 +116,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should create istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetChecknothing(resourceName, v1.GetOptions{})
+			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sChecknothing(t, checknothing, resourceName, expectedLabels)
+			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
 		})
 
 		t.Run("should add service to application custom resource", func(t *testing.T) {
@@ -218,10 +218,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should create istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetDenier(resourceName, v1.GetOptions{})
+			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sIstioDenier(t, denier, resourceName, expectedLabels, 7, "Not allowed")
+			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
 		})
 
 		t.Run("should create istio rule", func(t *testing.T) {
@@ -232,10 +232,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should create istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetChecknothing(resourceName, v1.GetOptions{})
+			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sChecknothing(t, checknothing, resourceName, expectedLabels)
+			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
 		})
 
 		t.Run("should add service to application custom resource", func(t *testing.T) {
@@ -333,10 +333,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should create istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetDenier(resourceName, v1.GetOptions{})
+			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sIstioDenier(t, denier, resourceName, expectedLabels, 7, "Not allowed")
+			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
 		})
 
 		t.Run("should create istio rule", func(t *testing.T) {
@@ -347,10 +347,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should create istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetChecknothing(resourceName, v1.GetOptions{})
+			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sChecknothing(t, checknothing, resourceName, expectedLabels)
+			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
 		})
 
 		t.Run("should add service to application custom resource", func(t *testing.T) {
@@ -428,7 +428,7 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should not create istio denier", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetDenier(resourceName, v1.GetOptions{})
+			_, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
 			require.Error(t, err)
 			require.True(t, k8serrors.IsNotFound(err))
 		})
@@ -440,7 +440,7 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should not create istio checknothing", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetChecknothing(resourceName, v1.GetOptions{})
+			_, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.Error(t, err)
 			require.True(t, k8serrors.IsNotFound(err))
 		})
@@ -536,10 +536,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should preserve istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetDenier(resourceName, v1.GetOptions{})
+			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sIstioDenier(t, denier, resourceName, expectedLabels, 7, "Not allowed")
+			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
 		})
 
 		t.Run("should preserve istio rule", func(t *testing.T) {
@@ -550,10 +550,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should preserve istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetChecknothing(resourceName, v1.GetOptions{})
+			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sChecknothing(t, checknothing, resourceName, expectedLabels)
+			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
 		})
 
 		t.Run("should update service inside application custom resource", func(t *testing.T) {
@@ -636,7 +636,7 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should remove istio denier", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetDenier(resourceName, v1.GetOptions{})
+			_, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
 			require.Error(t, err)
 			require.True(t, k8serrors.IsNotFound(err))
 		})
@@ -648,7 +648,7 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should remove istio checknothing", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetChecknothing(resourceName, v1.GetOptions{})
+			_, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.Error(t, err)
 			require.True(t, k8serrors.IsNotFound(err))
 		})
@@ -733,10 +733,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should create istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetDenier(resourceName, v1.GetOptions{})
+			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sIstioDenier(t, denier, resourceName, expectedLabels, 7, "Not allowed")
+			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
 		})
 
 		t.Run("should create istio rule", func(t *testing.T) {
@@ -747,10 +747,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should create istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetChecknothing(resourceName, v1.GetOptions{})
+			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sChecknothing(t, checknothing, resourceName, expectedLabels)
+			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
 		})
 
 		t.Run("should update service inside application custom resource", func(t *testing.T) {
@@ -836,10 +836,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should create istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetDenier(resourceName, v1.GetOptions{})
+			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sIstioDenier(t, denier, resourceName, expectedLabels, 7, "Not allowed")
+			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
 		})
 
 		t.Run("should create istio rule", func(t *testing.T) {
@@ -850,10 +850,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should create istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetChecknothing(resourceName, v1.GetOptions{})
+			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sChecknothing(t, checknothing, resourceName, expectedLabels)
+			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
 		})
 
 		t.Run("should update service inside application custom resource", func(t *testing.T) {
@@ -938,10 +938,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should create istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetDenier(resourceName, v1.GetOptions{})
+			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sIstioDenier(t, denier, resourceName, expectedLabels, 7, "Not allowed")
+			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
 		})
 
 		t.Run("should create istio rule", func(t *testing.T) {
@@ -952,10 +952,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should create istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetChecknothing(resourceName, v1.GetOptions{})
+			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sChecknothing(t, checknothing, resourceName, expectedLabels)
+			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
 		})
 
 		t.Run("should update service inside application custom resource", func(t *testing.T) {
@@ -1058,10 +1058,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should create istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetDenier(resourceName, v1.GetOptions{})
+			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sIstioDenier(t, denier, resourceName, expectedLabels, 7, "Not allowed")
+			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
 		})
 
 		t.Run("should create istio rule", func(t *testing.T) {
@@ -1072,10 +1072,10 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should create istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetChecknothing(resourceName, v1.GetOptions{})
+			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.NoError(t, err)
 
-			testkit.CheckK8sChecknothing(t, checknothing, resourceName, expectedLabels)
+			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
 		})
 
 		t.Run("should update service inside application custom resource", func(t *testing.T) {
@@ -1152,7 +1152,7 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should remove istio denier", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetDenier(resourceName, v1.GetOptions{})
+			_, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
 			require.Error(t, err)
 			require.True(t, k8serrors.IsNotFound(err))
 		})
@@ -1164,7 +1164,7 @@ func TestK8sResources(t *testing.T) {
 		})
 
 		t.Run("should remove istio checknothing", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetChecknothing(resourceName, v1.GetOptions{})
+			_, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.Error(t, err)
 			require.True(t, k8serrors.IsNotFound(err))
 		})
@@ -1254,7 +1254,7 @@ func TestK8sApplicationDeletion(t *testing.T) {
 		})
 
 		t.Run("should remove istio denier", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetDenier(resourceName, v1.GetOptions{})
+			_, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
 			require.Error(t, err)
 			require.True(t, k8serrors.IsNotFound(err))
 		})
@@ -1266,7 +1266,7 @@ func TestK8sApplicationDeletion(t *testing.T) {
 		})
 
 		t.Run("should remove istio checknothing", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetChecknothing(resourceName, v1.GetOptions{})
+			_, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.Error(t, err)
 			require.True(t, k8serrors.IsNotFound(err))
 		})

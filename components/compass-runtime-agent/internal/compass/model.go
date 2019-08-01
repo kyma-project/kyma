@@ -15,12 +15,12 @@ type ApplicationPage struct {
 }
 
 type Application struct {
-	ID             string                          `json:"id"`
-	Name           string                          `json:"name"`
-	Description    *string                         `json:"description"`
-	Labels         Labels                          `json:"labels"`
-	Status         *graphql.ApplicationStatus      `json:"status"`
-	Webhooks       []*graphql.Webhook              `json:"webhooks"`
+	ID          string                     `json:"id"`
+	Name        string                     `json:"name"`
+	Description *string                    `json:"description"`
+	Labels      Labels                     `json:"labels"`
+	Status      *graphql.ApplicationStatus `json:"status"`
+	//Webhooks       []*graphql.ApplicationWebhook    `json:"webhooks"`
 	APIs           *graphql.APIDefinitionPage      `json:"apis"`
 	EventAPIs      *graphql.EventAPIDefinitionPage `json:"eventAPIs"`
 	Documents      *graphql.DocumentPage           `json:"documents"`

@@ -2,21 +2,21 @@
 
 package v1alpha2
 
-// ChecknothingListerExpansion allows custom methods to be added to
-// ChecknothingLister.
-type ChecknothingListerExpansion interface{}
+// HandlerListerExpansion allows custom methods to be added to
+// HandlerLister.
+type HandlerListerExpansion interface{}
 
-// ChecknothingNamespaceListerExpansion allows custom methods to be added to
-// ChecknothingNamespaceLister.
-type ChecknothingNamespaceListerExpansion interface{}
+// HandlerNamespaceListerExpansion allows custom methods to be added to
+// HandlerNamespaceLister.
+type HandlerNamespaceListerExpansion interface{}
 
-// DenierListerExpansion allows custom methods to be added to
-// DenierLister.
-type DenierListerExpansion interface{}
+// InstanceListerExpansion allows custom methods to be added to
+// InstanceLister.
+type InstanceListerExpansion interface{}
 
-// DenierNamespaceListerExpansion allows custom methods to be added to
-// DenierNamespaceLister.
-type DenierNamespaceListerExpansion interface{}
+// InstanceNamespaceListerExpansion allows custom methods to be added to
+// InstanceNamespaceLister.
+type InstanceNamespaceListerExpansion interface{}
 
 // RuleListerExpansion allows custom methods to be added to
 // RuleLister.
