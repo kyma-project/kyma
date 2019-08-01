@@ -27,7 +27,7 @@ import (
 type Config struct {
 	Logger         logger.Config
 	KubeconfigPath string `envconfig:"optional"`
-	// TmpDir defines temporary directory path where bundles .tgz files will be extracted
+	// TmpDir defines temporary directory path where addons .tgz files will be extracted
 	TmpDir                   string
 	Namespace                string
 	Port                     int              `default:"8080"`

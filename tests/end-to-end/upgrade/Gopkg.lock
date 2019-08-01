@@ -703,6 +703,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/avast/retry-go",
     "github.com/go-redis/redis",
     "github.com/gofrs/uuid",
     "github.com/golang/lint/golint",

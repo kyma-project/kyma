@@ -36,6 +36,13 @@ spec:
       - name: broker
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        resources:
+          limits:
+            memory: 76Mi
+            cpu: 60m
+          requests:
+            memory: 32Mi
+            cpu: 30m
         env:
           - name: APP_TMP_DIR
             value: /tmp
@@ -92,6 +99,8 @@ spec:
       - name: ctrl
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-controller:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        resources:
+{{ toYaml .Values.ctrl.resources | indent 10 }}
         env:
           - name: APP_TMP_DIR
             value: /tmp
@@ -143,7 +152,7 @@ spec:
       volumes:
       - name: tmp-empty-dir
         emptyDir:
-          medium: "Memory" # mount a tmpfs (RAM-backed filesystem). Default emptyDir volumes are stored on whatever medium is backing the node - that might be disk or SSD or network storage, depending on your environment.
+          sizeLimit: "{{ .Values.ctrl.tmpDirSizeLimit }}"
       - name: config-volume
         configMap:
           name: helm-config-map

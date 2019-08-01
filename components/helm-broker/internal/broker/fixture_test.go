@@ -13,18 +13,18 @@ import (
 type expAll struct {
 	InstanceID  internal.InstanceID
 	OperationID internal.OperationID
-	Bundle      struct {
-		ID            internal.BundleID
+	Addon       struct {
+		ID            internal.AddonID
 		Version       semver.Version
-		Name          internal.BundleName
+		Name          internal.AddonName
 		Bindable      bool
 		RepositoryURL string
 	}
-	BundlePlan struct {
-		ID           internal.BundlePlanID
-		Name         internal.BundlePlanName
+	AddonPlan struct {
+		ID           internal.AddonPlanID
+		Name         internal.AddonPlanName
 		DisplayName  string
-		BindTemplate internal.BundlePlanBindTemplate
+		BindTemplate internal.AddonPlanBindTemplate
 	}
 	Chart struct {
 		Name    internal.ChartName
@@ -45,25 +45,25 @@ func (exp *expAll) Populate() {
 	exp.InstanceID = internal.InstanceID("fix-I-ID")
 	exp.OperationID = internal.OperationID("fix-OP-ID")
 
-	exp.Bundle.ID = internal.BundleID("fix-B-ID")
-	exp.Bundle.Version = *semver.MustParse("0.1.2")
-	exp.Bundle.Name = internal.BundleName("fix-B-Name")
-	exp.Bundle.Bindable = true
-	exp.Bundle.RepositoryURL = "fix-url"
+	exp.Addon.ID = internal.AddonID("fix-B-ID")
+	exp.Addon.Version = *semver.MustParse("0.1.2")
+	exp.Addon.Name = internal.AddonName("fix-B-Name")
+	exp.Addon.Bindable = true
+	exp.Addon.RepositoryURL = "fix-url"
 
-	exp.BundlePlan.ID = internal.BundlePlanID("fix-P-ID")
-	exp.BundlePlan.Name = internal.BundlePlanName("fix-P-Name")
-	exp.BundlePlan.DisplayName = "fix-P-DisplayName"
-	exp.BundlePlan.BindTemplate = internal.BundlePlanBindTemplate("template")
+	exp.AddonPlan.ID = internal.AddonPlanID("fix-P-ID")
+	exp.AddonPlan.Name = internal.AddonPlanName("fix-P-Name")
+	exp.AddonPlan.DisplayName = "fix-P-DisplayName"
+	exp.AddonPlan.BindTemplate = internal.AddonPlanBindTemplate("template")
 
 	exp.Chart.Name = internal.ChartName("fix-C-Name")
 	exp.Chart.Version = *semver.MustParse("1.2.3")
 
-	exp.Service.ID = internal.ServiceID(exp.Bundle.ID)
-	exp.ServicePlan.ID = internal.ServicePlanID(exp.BundlePlan.ID)
+	exp.Service.ID = internal.ServiceID(exp.Addon.ID)
+	exp.ServicePlan.ID = internal.ServicePlanID(exp.AddonPlan.ID)
 
 	exp.Namespace = internal.Namespace("fix-namespace")
-	exp.ReleaseName = internal.ReleaseName(fmt.Sprintf("hb-%s-%s-%s", exp.Bundle.Name, exp.BundlePlan.Name, exp.InstanceID))
+	exp.ReleaseName = internal.ReleaseName(fmt.Sprintf("hb-%s-%s-%s", exp.Addon.Name, exp.AddonPlan.Name, exp.InstanceID))
 	exp.ParamsHash = "TODO"
 }
 
@@ -93,25 +93,25 @@ func (exp *expAll) NewChart() *chart.Chart {
 	}
 }
 
-func (exp *expAll) NewBundle() *internal.Bundle {
-	return &internal.Bundle{
-		ID:            exp.Bundle.ID,
-		Version:       exp.Bundle.Version,
-		Name:          exp.Bundle.Name,
-		Bindable:      exp.Bundle.Bindable,
-		RepositoryURL: exp.Bundle.RepositoryURL,
-		Plans: map[internal.BundlePlanID]internal.BundlePlan{
-			exp.BundlePlan.ID: {
-				ID:   exp.BundlePlan.ID,
-				Name: exp.BundlePlan.Name,
+func (exp *expAll) NewAddon() *internal.Addon {
+	return &internal.Addon{
+		ID:            exp.Addon.ID,
+		Version:       exp.Addon.Version,
+		Name:          exp.Addon.Name,
+		Bindable:      exp.Addon.Bindable,
+		RepositoryURL: exp.Addon.RepositoryURL,
+		Plans: map[internal.AddonPlanID]internal.AddonPlan{
+			exp.AddonPlan.ID: {
+				ID:   exp.AddonPlan.ID,
+				Name: exp.AddonPlan.Name,
 				ChartRef: internal.ChartRef{
 					Name:    exp.Chart.Name,
 					Version: exp.Chart.Version,
 				},
-				Metadata: internal.BundlePlanMetadata{
-					DisplayName: exp.BundlePlan.DisplayName,
+				Metadata: internal.AddonPlanMetadata{
+					DisplayName: exp.AddonPlan.DisplayName,
 				},
-				BindTemplate: exp.BundlePlan.BindTemplate,
+				BindTemplate: exp.AddonPlan.BindTemplate,
 			},
 		},
 	}

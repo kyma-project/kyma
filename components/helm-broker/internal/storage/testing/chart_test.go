@@ -289,7 +289,7 @@ func (ts *chartTestSuite) MustCopyFixture(in *chart.Chart) *chart.Chart {
 	return &out
 }
 
-// AssertBundleEqual performs partial match for bundle.
+// AssertAddonEqual performs partial match for addon.
 // It's suitable only for tests as match is PARTIAL.
 func (ts *chartTestSuite) AssertChartEqual(exp, got *chart.Chart) bool {
 	ts.t.Helper()

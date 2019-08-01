@@ -11,10 +11,10 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 )
 
-func TestBundleGet(t *testing.T) {
+func TestAddonGet(t *testing.T) {
 	tRunDrivers(t, "Found", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
-		ts := newBundleTestSuite(t, sf)
+		ts := newAddonTestSuite(t, sf)
 		ts.PopulateStorage()
 		exp := ts.MustGetFixture("A1")
 
@@ -23,12 +23,12 @@ func TestBundleGet(t *testing.T) {
 
 		// THEN:
 		assert.NoError(t, err)
-		ts.AssertBundleEqual(exp, got)
+		ts.AssertAddonEqual(exp, got)
 	})
 
 	tRunDrivers(t, "NotFound", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
-		ts := newBundleTestSuite(t, sf)
+		ts := newAddonTestSuite(t, sf)
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
@@ -40,10 +40,10 @@ func TestBundleGet(t *testing.T) {
 	})
 }
 
-func TestBundleGetByID(t *testing.T) {
+func TestAddonGetByID(t *testing.T) {
 	tRunDrivers(t, "Found", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
-		ts := newBundleTestSuite(t, sf)
+		ts := newAddonTestSuite(t, sf)
 		ts.PopulateStorage()
 		exp := ts.MustGetFixture("A1")
 
@@ -52,12 +52,12 @@ func TestBundleGetByID(t *testing.T) {
 
 		// THEN:
 		assert.NoError(t, err)
-		ts.AssertBundleEqual(exp, got)
+		ts.AssertAddonEqual(exp, got)
 	})
 
 	tRunDrivers(t, "NotFound", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
-		ts := newBundleTestSuite(t, sf)
+		ts := newAddonTestSuite(t, sf)
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
@@ -69,10 +69,10 @@ func TestBundleGetByID(t *testing.T) {
 	})
 }
 
-func TestBundleUpsert(t *testing.T) {
+func TestAddonUpsert(t *testing.T) {
 	tRunDrivers(t, "Success/New", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
-		ts := newBundleTestSuite(t, sf)
+		ts := newAddonTestSuite(t, sf)
 		fix := ts.MustGetFixture("A1")
 
 		// WHEN:
@@ -86,7 +86,7 @@ func TestBundleUpsert(t *testing.T) {
 	tRunDrivers(t, "Success/Replace", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
 		expDesc := "updated description"
-		ts := newBundleTestSuite(t, sf)
+		ts := newAddonTestSuite(t, sf)
 		fix := ts.MustGetFixture("A1")
 		ts.s.Upsert(internal.ClusterWide, fix)
 
@@ -101,12 +101,12 @@ func TestBundleUpsert(t *testing.T) {
 
 		got, err := ts.s.GetByID(internal.ClusterWide, fixNew.ID)
 		assert.NoError(t, err)
-		ts.AssertBundleEqual(fixNew, got)
+		ts.AssertAddonEqual(fixNew, got)
 	})
 
 	tRunDrivers(t, "Failure/EmptyVersion", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
-		ts := newBundleTestSuite(t, sf)
+		ts := newAddonTestSuite(t, sf)
 		fix := ts.MustGetFixture("A1")
 		fix.Version = semver.Version{}
 
@@ -118,10 +118,10 @@ func TestBundleUpsert(t *testing.T) {
 	})
 }
 
-func TestBundleRemove(t *testing.T) {
+func TestAddonRemove(t *testing.T) {
 	tRunDrivers(t, "Found", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
-		ts := newBundleTestSuite(t, sf)
+		ts := newAddonTestSuite(t, sf)
 		ts.PopulateStorage()
 		exp := ts.MustGetFixture("A1")
 
@@ -130,12 +130,12 @@ func TestBundleRemove(t *testing.T) {
 
 		// THEN:
 		assert.NoError(t, err)
-		ts.AssertBundleDoesNotExist(exp)
+		ts.AssertAddonDoesNotExist(exp)
 	})
 
 	tRunDrivers(t, "NotFound", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
-		ts := newBundleTestSuite(t, sf)
+		ts := newAddonTestSuite(t, sf)
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
@@ -146,10 +146,10 @@ func TestBundleRemove(t *testing.T) {
 	})
 }
 
-func TestBundleRemoveByID(t *testing.T) {
+func TestAddonRemoveByID(t *testing.T) {
 	tRunDrivers(t, "Found", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
-		ts := newBundleTestSuite(t, sf)
+		ts := newAddonTestSuite(t, sf)
 		ts.PopulateStorage()
 		exp := ts.MustGetFixture("A1")
 
@@ -158,12 +158,12 @@ func TestBundleRemoveByID(t *testing.T) {
 
 		// THEN:
 		assert.NoError(t, err)
-		ts.AssertBundleDoesNotExist(exp)
+		ts.AssertAddonDoesNotExist(exp)
 	})
 
 	tRunDrivers(t, "NotFound", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
-		ts := newBundleTestSuite(t, sf)
+		ts := newAddonTestSuite(t, sf)
 		exp := ts.MustGetFixture("A1")
 
 		// WHEN:
@@ -174,15 +174,15 @@ func TestBundleRemoveByID(t *testing.T) {
 	})
 }
 
-func TestBundleFindAll(t *testing.T) {
+func TestAddonFindAll(t *testing.T) {
 
 	tRunDrivers(t, "NonEmpty", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
-		ts := newBundleTestSuite(t, sf)
+		ts := newAddonTestSuite(t, sf)
 		ts.PopulateStorage()
-		ts.s.Upsert(internal.Namespace("stage"), &internal.Bundle{
-			ID:          internal.BundleID("id-0000"),
-			Name:        internal.BundleName("other-bundle"),
+		ts.s.Upsert(internal.Namespace("stage"), &internal.Addon{
+			ID:          internal.AddonID("id-0000"),
+			Name:        internal.AddonName("other-addon"),
 			Version:     *semver.MustParse("1.1.1"),
 			Description: "",
 		})
@@ -192,12 +192,12 @@ func TestBundleFindAll(t *testing.T) {
 
 		// THEN:
 		assert.NoError(t, err)
-		ts.AssertBundlesReturned(got)
+		ts.AssertAddonsReturned(got)
 	})
 
 	tRunDrivers(t, "Empty", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
-		ts := newBundleTestSuite(t, sf)
+		ts := newAddonTestSuite(t, sf)
 
 		// WHEN:
 		got, err := ts.s.FindAll(internal.ClusterWide)
@@ -208,12 +208,12 @@ func TestBundleFindAll(t *testing.T) {
 	})
 }
 
-func newBundleTestSuite(t *testing.T, sf storage.Factory) *bundleTestSuite {
-	ts := bundleTestSuite{
+func newAddonTestSuite(t *testing.T, sf storage.Factory) *addonTestSuite {
+	ts := addonTestSuite{
 		t:                  t,
-		s:                  sf.Bundle(),
-		fixtures:           make(map[internal.BundleID]*internal.Bundle),
-		fixturesSymToIDMap: make(map[string]internal.BundleID),
+		s:                  sf.Addon(),
+		fixtures:           make(map[internal.AddonID]*internal.Addon),
+		fixturesSymToIDMap: make(map[string]internal.AddonID),
 	}
 
 	ts.generateFixtures()
@@ -221,23 +221,23 @@ func newBundleTestSuite(t *testing.T, sf storage.Factory) *bundleTestSuite {
 	return &ts
 }
 
-type bundleTestSuite struct {
+type addonTestSuite struct {
 	t                  *testing.T
-	s                  storage.Bundle
-	fixtures           map[internal.BundleID]*internal.Bundle
-	fixturesSymToIDMap map[string]internal.BundleID
+	s                  storage.Addon
+	fixtures           map[internal.AddonID]*internal.Addon
+	fixturesSymToIDMap map[string]internal.AddonID
 }
 
-func (ts *bundleTestSuite) generateFixtures() {
+func (ts *addonTestSuite) generateFixtures() {
 	for fs, ft := range map[string]struct{ id, name, version, desc string }{
 		"A1": {"id-A-001", "name-A", "0.0.1", "desc-A-001"},
 		"A2": {"id-A-002", "name-A", "0.0.2", "desc-A-002"},
 		"B1": {"id-B-001", "name-B", "0.0.1", "desc-B-001"},
 		"B2": {"id-B-002", "name-B", "0.0.2", "desc-B-002"},
 	} {
-		b := &internal.Bundle{
-			ID:          internal.BundleID(ft.id),
-			Name:        internal.BundleName(ft.name),
+		b := &internal.Addon{
+			ID:          internal.AddonID(ft.id),
+			Name:        internal.AddonName(ft.name),
 			Version:     *semver.MustParse(ft.version),
 			Description: ft.desc,
 		}
@@ -247,13 +247,13 @@ func (ts *bundleTestSuite) generateFixtures() {
 	}
 }
 
-func (ts *bundleTestSuite) PopulateStorage() {
+func (ts *addonTestSuite) PopulateStorage() {
 	for _, b := range ts.fixtures {
 		ts.s.Upsert(internal.ClusterWide, ts.MustCopyFixture(b))
 	}
 }
 
-func (ts *bundleTestSuite) MustGetFixture(sym string) *internal.Bundle {
+func (ts *addonTestSuite) MustGetFixture(sym string) *internal.Addon {
 	id, found := ts.fixturesSymToIDMap[sym]
 	if !found {
 		panic(fmt.Sprintf("fixture symbol not found, sym: %s", sym))
@@ -269,8 +269,8 @@ func (ts *bundleTestSuite) MustGetFixture(sym string) *internal.Bundle {
 
 // CopyFixture is copying fixture
 // BEWARE: not all fields are copied, only those currently used in this test suite scope
-func (ts *bundleTestSuite) MustCopyFixture(in *internal.Bundle) *internal.Bundle {
-	return &internal.Bundle{
+func (ts *addonTestSuite) MustCopyFixture(in *internal.Addon) *internal.Addon {
+	return &internal.Addon{
 		ID:          in.ID,
 		Name:        in.Name,
 		Version:     *semver.MustParse(in.Version.String()),
@@ -278,9 +278,9 @@ func (ts *bundleTestSuite) MustCopyFixture(in *internal.Bundle) *internal.Bundle
 	}
 }
 
-// AssertBundleEqual performs partial match for bundle.
+// AssertAddonEqual performs partial match for addon.
 // It's suitable only for tests as match is PARTIAL.
-func (ts *bundleTestSuite) AssertBundleEqual(exp, got *internal.Bundle) bool {
+func (ts *addonTestSuite) AssertAddonEqual(exp, got *internal.Addon) bool {
 	ts.t.Helper()
 
 	result := assert.Equal(ts.t, exp.ID, got.ID, "mismatch on ID")
@@ -291,12 +291,12 @@ func (ts *bundleTestSuite) AssertBundleEqual(exp, got *internal.Bundle) bool {
 	return result
 }
 
-func (ts *bundleTestSuite) AssertBundlesReturned(got []*internal.Bundle) bool {
+func (ts *addonTestSuite) AssertAddonsReturned(got []*internal.Addon) bool {
 	ts.t.Helper()
 
 	result := true
 
-	fixturesToMatch := make(map[internal.BundleID]struct{})
+	fixturesToMatch := make(map[internal.AddonID]struct{})
 	for id := range ts.fixtures {
 		fixturesToMatch[id] = struct{}{}
 	}
@@ -310,7 +310,7 @@ func (ts *bundleTestSuite) AssertBundlesReturned(got []*internal.Bundle) bool {
 
 		delete(fixturesToMatch, bGot.ID)
 		bExp, _ := ts.fixtures[bGot.ID]
-		result = result && ts.AssertBundleEqual(bExp, bGot)
+		result = result && ts.AssertAddonEqual(bExp, bGot)
 	}
 
 	result = result && assert.Empty(ts.t, fixturesToMatch, "not all expected fixtures matched")
@@ -318,12 +318,12 @@ func (ts *bundleTestSuite) AssertBundlesReturned(got []*internal.Bundle) bool {
 	return result
 }
 
-func (ts *bundleTestSuite) AssertNotFoundError(err error) bool {
+func (ts *addonTestSuite) AssertNotFoundError(err error) bool {
 	ts.t.Helper()
 	return assert.True(ts.t, storage.IsNotFoundError(err), "NotFound error expected")
 }
 
-func (ts *bundleTestSuite) AssertBundleDoesNotExist(b *internal.Bundle) bool {
+func (ts *addonTestSuite) AssertAddonDoesNotExist(b *internal.Addon) bool {
 	ts.t.Helper()
 
 	_, err := ts.s.GetByID(internal.ClusterWide, b.ID)

@@ -428,8 +428,8 @@ func (ts *deprovisionServiceTestSuite) SetUp() {
 	ts.Exp.Populate()
 }
 
-func (ts *deprovisionServiceTestSuite) FixBundle() internal.Bundle {
-	return *ts.Exp.NewBundle()
+func (ts *deprovisionServiceTestSuite) FixAddon() internal.Addon {
+	return *ts.Exp.NewAddon()
 }
 
 func (ts *deprovisionServiceTestSuite) FixInstance() internal.Instance {

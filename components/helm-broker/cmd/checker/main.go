@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 	"github.com/sirupsen/logrus"
 )
 
@@ -15,20 +15,20 @@ func main() {
 		FullTimestamp: true,
 	}
 
-	dir, err := ioutil.TempDir("", "bundlechecker")
+	dir, err := ioutil.TempDir("", "addonchecker")
 	if err != nil {
 		panic(err)
 	}
-	loader := bundle.NewLoader(dir, logger)
+	loader := addon.NewLoader(dir, logger)
 
 	if len(os.Args) < 2 {
-		fmt.Println("Provide path to a bundle")
+		fmt.Println("Provide path to a addon")
 		os.Exit(1)
 	}
-	bundleName := os.Args[1]
+	addonName := os.Args[1]
 
-	fmt.Printf("==> Checking %s\n", bundleName)
-	_, _, err = loader.LoadDir(bundleName)
+	fmt.Printf("==> Checking %s\n", addonName)
+	_, _, err = loader.LoadDir(addonName)
 	if err != nil {
 		fmt.Printf("[ERROR] %v\n", err)
 		os.Exit(1)

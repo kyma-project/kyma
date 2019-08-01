@@ -417,7 +417,7 @@ func (ts *operationTestSuite) MustCopyFixture(in *internal.InstanceOperation) *i
 	return &out
 }
 
-// AssertInstanceOperationEqualWithoutCreatedAt performs partial match for bundle.
+// AssertInstanceOperationEqualWithoutCreatedAt performs partial match for addon.
 // It's suitable only for tests as match is PARTIAL.
 func (ts *operationTestSuite) AssertInstanceOperationEqualWithoutCreatedAt(exp, got *internal.InstanceOperation) bool {
 	ts.t.Helper()

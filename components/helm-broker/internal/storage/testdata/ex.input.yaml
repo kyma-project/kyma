@@ -1,7 +1,7 @@
 storage:
   - driver: memory
     provide:
-      bundle: ~
+      addon: ~
       chart: ~
     memory:
       max-keys: 4096

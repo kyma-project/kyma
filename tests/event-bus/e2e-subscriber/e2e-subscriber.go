@@ -20,5 +20,7 @@ func main() {
 
 	<-stopSubscriber
 	log.Println("Shutting down server...")
-	subscriberServer.Shutdown(context.Background())
+	if err := subscriberServer.Shutdown(context.Background()); err != nil {
+		panic(err)
+	}
 }

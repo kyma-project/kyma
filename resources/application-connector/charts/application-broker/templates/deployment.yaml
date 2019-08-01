@@ -33,6 +33,13 @@ spec:
       - name: ctrl
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_broker.dir }}application-broker:{{ .Values.global.application_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        resources:
+          limits:
+            memory: 76Mi
+            cpu: 100m
+          requests:
+            memory: 24Mi
+            cpu: 80m
         env:
           - name: APP_PORT
             value: "{{ .Values.service.internalPort }}"

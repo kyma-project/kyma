@@ -23,8 +23,36 @@ func (_m *NameResolver) ExtractServiceId(applicaton string, host string) string 
 	return r0
 }
 
+// GetCredentialsSecretName provides a mock function with given fields: applicaton, id
+func (_m *NameResolver) GetCredentialsSecretName(applicaton string, id string) string {
+	ret := _m.Called(applicaton, id)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string, string) string); ok {
+		r0 = rf(applicaton, id)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
 // GetGatewayUrl provides a mock function with given fields: applicaton, id
 func (_m *NameResolver) GetGatewayUrl(applicaton string, id string) string {
+	ret := _m.Called(applicaton, id)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(string, string) string); ok {
+		r0 = rf(applicaton, id)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
+// GetRequestParamsSecretName provides a mock function with given fields: applicaton, id
+func (_m *NameResolver) GetRequestParamsSecretName(applicaton string, id string) string {
 	ret := _m.Called(applicaton, id)
 
 	var r0 string

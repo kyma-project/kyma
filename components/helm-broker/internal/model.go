@@ -12,17 +12,17 @@ import (
 	"github.com/pkg/errors"
 )
 
-// BundleID is a Bundle identifier as defined by Open Service Broker API.
-type BundleID string
+// AddonID is a Addon identifier as defined by Open Service Broker API.
+type AddonID string
 
-// BundleName is a Bundle name as defined by Open Service Broker API.
-type BundleName string
+// AddonName is a Addon name as defined by Open Service Broker API.
+type AddonName string
 
-// BundlePlanID is an identifier of Bundle plan as defined by Open Service Broker API.
-type BundlePlanID string
+// AddonPlanID is an identifier of Addon plan as defined by Open Service Broker API.
+type AddonPlanID string
 
-// BundlePlanName is the name of the Bundle plan as defined by Open Service Broker API
-type BundlePlanName string
+// AddonPlanName is the name of the Addon plan as defined by Open Service Broker API
+type AddonPlanName string
 
 // PlanSchemaType describes type of the schema file.
 type PlanSchemaType string
@@ -42,7 +42,7 @@ const (
 // ChartName is a type expressing name of the chart
 type ChartName string
 
-// ChartRef provide reference to bundle's chart
+// ChartRef provide reference to addon's chart
 type ChartRef struct {
 	Name    ChartName
 	Version semver.Version
@@ -93,31 +93,31 @@ func (cr ChartRef) GobEncode() ([]byte, error) {
 // TODO: switch to more concrete type
 type ChartValues map[string]interface{}
 
-// BundlePlanBindTemplate represents template used for helm chart installation
-type BundlePlanBindTemplate []byte
+// AddonPlanBindTemplate represents template used for helm chart installation
+type AddonPlanBindTemplate []byte
 
-// BundlePlan is a container for whole data of bundle plan.
-// Each bundle needs to have at least one plan.
-type BundlePlan struct {
-	ID           BundlePlanID
-	Name         BundlePlanName
+// AddonPlan is a container for whole data of addon plan.
+// Each addon needs to have at least one plan.
+type AddonPlan struct {
+	ID           AddonPlanID
+	Name         AddonPlanName
 	Description  string
 	Schemas      map[PlanSchemaType]PlanSchema
 	ChartRef     ChartRef
 	ChartValues  ChartValues
-	Metadata     BundlePlanMetadata
+	Metadata     AddonPlanMetadata
 	Bindable     *bool
 	Free         *bool
-	BindTemplate BundlePlanBindTemplate
+	BindTemplate AddonPlanBindTemplate
 }
 
-// BundlePlanMetadata provides metadata of the bundle.
-type BundlePlanMetadata struct {
+// AddonPlanMetadata provides metadata of the addon.
+type AddonPlanMetadata struct {
 	DisplayName string
 }
 
 // ToMap function is converting Metadata to format compatible with YAML encoder.
-func (b BundlePlanMetadata) ToMap() map[string]interface{} {
+func (b AddonPlanMetadata) ToMap() map[string]interface{} {
 	type mapped struct {
 		DisplayName string `structs:"displayName"`
 	}
@@ -125,34 +125,34 @@ func (b BundlePlanMetadata) ToMap() map[string]interface{} {
 	return structs.Map(mapped(b))
 }
 
-// BundleTag is a Tag attached to Bundle.
-type BundleTag string
+// AddonTag is a Tag attached to Addon.
+type AddonTag string
 
-// BundleDocs contains data to create ClusterDocsTopic for every ClusterServiceClass.
-type BundleDocs struct {
+// AddonDocs contains data to create ClusterDocsTopic for every ClusterServiceClass.
+type AddonDocs struct {
 	Template cms.CommonDocsTopicSpec
 }
 
-// Bundle represents bundle as defined by OSB API.
-type Bundle struct {
-	ID                  BundleID
-	Name                BundleName
+// Addon represents addon as defined by OSB API.
+type Addon struct {
+	ID                  AddonID
+	Name                AddonName
 	Version             semver.Version
 	Description         string
-	Plans               map[BundlePlanID]BundlePlan
-	Metadata            BundleMetadata
+	Plans               map[AddonPlanID]AddonPlan
+	Metadata            AddonMetadata
 	RepositoryURL       string
-	Tags                []BundleTag
+	Tags                []AddonTag
 	Requires            []string
 	Bindable            bool
 	BindingsRetrievable bool
 	PlanUpdatable       *bool
-	Docs                []BundleDocs
+	Docs                []AddonDocs
 }
 
-// IsProvisioningAllowed determines bundle can be provision on indicated namespace
-// if bundle has provisionOnlyOnce flag on true then check if bundle already exist in this namespace
-func (b Bundle) IsProvisioningAllowed(namespace Namespace, collection []*Instance) bool {
+// IsProvisioningAllowed determines addon can be provision on indicated namespace
+// if addon has provisionOnlyOnce flag on true then check if addon already exist in this namespace
+func (b Addon) IsProvisioningAllowed(namespace Namespace, collection []*Instance) bool {
 	if !b.Metadata.ProvisionOnlyOnce {
 		return true
 	}
@@ -169,25 +169,25 @@ func (b Bundle) IsProvisioningAllowed(namespace Namespace, collection []*Instanc
 	return true
 }
 
-// Labels are key-value pairs which add metadata information for bundle.
+// Labels are key-value pairs which add metadata information for addon.
 type Labels map[string]string
 
-// BundleMetadata holds bundle metadata as defined by OSB API.
-type BundleMetadata struct {
+// AddonMetadata holds addon metadata as defined by OSB API.
+type AddonMetadata struct {
 	DisplayName         string
 	ProviderDisplayName string
 	LongDescription     string
 	DocumentationURL    string
 	SupportURL          string
 	ProvisionOnlyOnce   bool
-	// ImageURL is graphical representation of the bundle.
+	// ImageURL is graphical representation of the addon.
 	// Currently SVG is required.
 	ImageURL string
 	Labels   Labels
 }
 
-// ToMap collect data from BundleMetadata to format compatible with YAML encoder.
-func (b BundleMetadata) ToMap() map[string]interface{} {
+// ToMap collect data from AddonMetadata to format compatible with YAML encoder.
+func (b AddonMetadata) ToMap() map[string]interface{} {
 	type mapped struct {
 		DisplayName         string `structs:"displayName"`
 		ProviderDisplayName string `structs:"providerDisplayName"`
@@ -201,8 +201,8 @@ func (b BundleMetadata) ToMap() map[string]interface{} {
 	return structs.Map(mapped(b))
 }
 
-// DeepCopy returns a new BundleMetadata object.
-func (b BundleMetadata) DeepCopy() BundleMetadata {
+// DeepCopy returns a new AddonMetadata object.
+func (b AddonMetadata) DeepCopy() AddonMetadata {
 	out := b
 	if b.Labels != nil {
 		out.Labels = make(Labels, len(b.Labels))

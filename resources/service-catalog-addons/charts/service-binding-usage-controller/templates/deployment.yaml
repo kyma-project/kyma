@@ -29,6 +29,13 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.service_binding_usage_controller.dir }}binding-usage-controller:{{ .Values.global.service_binding_usage_controller.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            limits:
+              memory: 76Mi
+              cpu: 50m
+            requests:
+              memory: 24Mi
+              cpu: 30m
           env:
             - name: APP_LOGGER_LEVEL
               value: "debug"

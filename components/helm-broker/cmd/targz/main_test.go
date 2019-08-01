@@ -6,13 +6,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/platform/logger/spy"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestArchiveBundles(t *testing.T) {
+func TestArchiveAddons(t *testing.T) {
 	// GIVEN
 	loaderTempDir, err := ioutil.TempDir("", "helm-broker-loader")
 	require.NoError(t, err)
@@ -23,11 +23,11 @@ func TestArchiveBundles(t *testing.T) {
 	defer os.RemoveAll(outputDir)
 
 	// WHEN
-	err = archiveBundles("testdata/input", outputDir)
+	err = archiveAddons("testdata/input", outputDir)
 	// THEN
 	require.NoError(t, err)
 
-	loader := bundle.NewLoader(loaderTempDir, spy.NewLogDummy())
+	loader := addon.NewLoader(loaderTempDir, spy.NewLogDummy())
 
 	quote, err := os.Open(filepath.Join(outputDir, "quote-1.0.1.tgz"))
 	assert.NoError(t, err)

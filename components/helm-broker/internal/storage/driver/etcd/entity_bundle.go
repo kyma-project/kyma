@@ -16,13 +16,13 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
 
-// NewBundle creates new storage for Bundles
-func NewBundle(cli clientv3.KV) (*Bundle, error) {
+// NewAddon creates new storage for Addons
+func NewAddon(cli clientv3.KV) (*Addon, error) {
 
-	prefixParts := append(entityNamespacePrefixParts(), string(entityNamespaceBundle))
+	prefixParts := append(entityNamespacePrefixParts(), string(entityNamespaceAddon))
 	kv := namespace.NewKV(cli, strings.Join(prefixParts, entityNamespaceSeparator))
 
-	d := &Bundle{
+	d := &Addon{
 		generic: generic{
 			kv: kv,
 		},
@@ -31,18 +31,18 @@ func NewBundle(cli clientv3.KV) (*Bundle, error) {
 	return d, nil
 }
 
-// Bundle implements etcd storage for Bundle entities.
-type Bundle struct {
+// Addon implements etcd storage for Addon entities.
+type Addon struct {
 	generic
 }
 
 // Upsert persists object in storage.
 //
-// If bundle already exists in storage than full replace is performed.
+// If addon already exists in storage than full replace is performed.
 //
 // True is returned if object already existed in storage and was replaced.
-func (s *Bundle) Upsert(namespace internal.Namespace, b *internal.Bundle) (bool, error) {
-	nv, err := s.nameVersionFromBundle(b)
+func (s *Addon) Upsert(namespace internal.Namespace, b *internal.Addon) (bool, error) {
+	nv, err := s.nameVersionFromAddon(b)
 	if err != nil {
 		return false, err
 	}
@@ -58,7 +58,7 @@ func (s *Bundle) Upsert(namespace internal.Namespace, b *internal.Bundle) (bool,
 		return false, errors.Wrap(err, "while calling database in ID space")
 	}
 
-	// Bundle is immutable so for simplicity we are duplicating write into Name/Version namespace
+	// Addon is immutable so for simplicity we are duplicating write into Name/Version namespace
 	if _, err := s.kv.Put(context.TODO(), s.nameVersionKey(namespace, nv), dso, clientv3.WithPrevKV()); err != nil {
 		return false, errors.Wrap(err, "while calling database in NameVersion space")
 	}
@@ -71,7 +71,7 @@ func (s *Bundle) Upsert(namespace internal.Namespace, b *internal.Bundle) (bool,
 }
 
 // Get returns object from storage.
-func (s *Bundle) Get(namespace internal.Namespace, name internal.BundleName, ver semver.Version) (*internal.Bundle, error) {
+func (s *Addon) Get(namespace internal.Namespace, name internal.AddonName, ver semver.Version) (*internal.Addon, error) {
 	nv, err := s.nameVersion(name, ver)
 	if err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func (s *Bundle) Get(namespace internal.Namespace, name internal.BundleName, ver
 }
 
 // GetByID returns object by primary ID from storage.
-func (s *Bundle) GetByID(namespace internal.Namespace, id internal.BundleID) (*internal.Bundle, error) {
+func (s *Addon) GetByID(namespace internal.Namespace, id internal.AddonID) (*internal.Addon, error) {
 	resp, err := s.kv.Get(context.TODO(), s.idKey(namespace, id))
 	if err != nil {
 		return nil, errors.Wrap(err, "while calling database")
@@ -95,7 +95,7 @@ func (s *Bundle) GetByID(namespace internal.Namespace, id internal.BundleID) (*i
 	return s.handleGetResp(resp)
 }
 
-func (s *Bundle) handleGetResp(resp *clientv3.GetResponse) (*internal.Bundle, error) {
+func (s *Addon) handleGetResp(resp *clientv3.GetResponse) (*internal.Addon, error) {
 	switch resp.Count {
 	case 1:
 	case 0:
@@ -107,11 +107,11 @@ func (s *Bundle) handleGetResp(resp *clientv3.GetResponse) (*internal.Bundle, er
 	return s.decodeDSOToDM(resp.Kvs[0].Value)
 }
 
-func (s *Bundle) encodeDMToDSO(dm *internal.Bundle) (string, error) {
+func (s *Addon) encodeDMToDSO(dm *internal.Addon) (string, error) {
 	buf := bytes.Buffer{}
-	dso, err := newBundleDSO(dm)
+	dso, err := newAddonDSO(dm)
 	if err != nil {
-		return "", errors.Wrap(err, "while encoding Bundle to DSO")
+		return "", errors.Wrap(err, "while encoding Addon to DSO")
 	}
 	enc := gob.NewEncoder(&buf)
 	if err := enc.Encode(dso); err != nil {
@@ -120,9 +120,9 @@ func (s *Bundle) encodeDMToDSO(dm *internal.Bundle) (string, error) {
 	return buf.String(), nil
 }
 
-func (*Bundle) decodeDSOToDM(dsoEnc []byte) (*internal.Bundle, error) {
+func (*Addon) decodeDSOToDM(dsoEnc []byte) (*internal.Addon, error) {
 	dec := gob.NewDecoder(bytes.NewReader(dsoEnc))
-	var dso bundleDSO
+	var dso addonDSO
 	if err := dec.Decode(&dso); err != nil {
 		return nil, errors.Wrap(err, "while decoding DSO")
 	}
@@ -135,8 +135,8 @@ func (*Bundle) decodeDSOToDM(dsoEnc []byte) (*internal.Bundle, error) {
 }
 
 // FindAll returns all objects from storage.
-func (s *Bundle) FindAll(namespace internal.Namespace) ([]*internal.Bundle, error) {
-	out := []*internal.Bundle{}
+func (s *Addon) FindAll(namespace internal.Namespace) ([]*internal.Addon, error) {
+	var out []*internal.Addon
 
 	resp, err := s.kv.Get(context.TODO(), s.idPrefixForNamespace(namespace), clientv3.WithPrefix())
 	if err != nil {
@@ -144,18 +144,18 @@ func (s *Bundle) FindAll(namespace internal.Namespace) ([]*internal.Bundle, erro
 	}
 
 	for _, kv := range resp.Kvs {
-		b, err := s.decodeDSOToDM(kv.Value)
+		a, err := s.decodeDSOToDM(kv.Value)
 		if err != nil {
 			return nil, errors.Wrap(err, "while decoding returned entities")
 		}
-		out = append(out, b)
+		out = append(out, a)
 	}
 
 	return out, nil
 }
 
 // Remove removes object from storage.
-func (s *Bundle) Remove(namespace internal.Namespace, name internal.BundleName, ver semver.Version) error {
+func (s *Addon) Remove(namespace internal.Namespace, name internal.AddonName, ver semver.Version) error {
 	nv, err := s.nameVersion(name, ver)
 	if err != nil {
 		return errors.Wrap(err, "while getting nameVersion from deleted entity")
@@ -179,7 +179,7 @@ func (s *Bundle) Remove(namespace internal.Namespace, name internal.BundleName, 
 }
 
 // RemoveByID is removing object by primary ID from storage.
-func (s *Bundle) RemoveByID(namespace internal.Namespace, id internal.BundleID) error {
+func (s *Addon) RemoveByID(namespace internal.Namespace, id internal.AddonID) error {
 	resp, err := s.kv.Delete(context.TODO(), s.idKey(namespace, id), clientv3.WithPrevKV())
 	if err != nil {
 		return errors.Wrap(err, "while calling database on ID namespace")
@@ -190,7 +190,7 @@ func (s *Bundle) RemoveByID(namespace internal.Namespace, id internal.BundleID) 
 		return err
 	}
 
-	nv, err := s.nameVersionFromBundle(b)
+	nv, err := s.nameVersionFromAddon(b)
 	if err != nil {
 		return errors.Wrap(err, "while getting nameVersion from deleted entity")
 	}
@@ -202,21 +202,21 @@ func (s *Bundle) RemoveByID(namespace internal.Namespace, id internal.BundleID) 
 	return nil
 }
 
-// RemoveAll removes all bundles from storage for a given namespace.
-func (s *Bundle) RemoveAll(namespace internal.Namespace) error {
-	bundles, err := s.FindAll(namespace)
+// RemoveAll removes all addons from storage for a given namespace.
+func (s *Addon) RemoveAll(namespace internal.Namespace) error {
+	addons, err := s.FindAll(namespace)
 	if err != nil {
-		return errors.Wrap(err, "while getting bundles")
+		return errors.Wrap(err, "while getting addons")
 	}
-	for _, bundle := range bundles {
-		if err := s.RemoveByID(namespace, bundle.ID); err != nil {
-			return errors.Wrapf(err, "while removing bundle with ID: %v", bundle.ID)
+	for _, addon := range addons {
+		if err := s.RemoveByID(namespace, addon.ID); err != nil {
+			return errors.Wrapf(err, "while removing addon with ID: %v", addon.ID)
 		}
 	}
 	return nil
 }
 
-func (s *Bundle) handleDeleteResp(resp *clientv3.DeleteResponse) (*internal.Bundle, error) {
+func (s *Addon) handleDeleteResp(resp *clientv3.DeleteResponse) (*internal.Addon, error) {
 	switch resp.Deleted {
 	case 1:
 	case 0:
@@ -235,9 +235,9 @@ func (s *Bundle) handleDeleteResp(resp *clientv3.DeleteResponse) (*internal.Bund
 	return b, nil
 }
 
-type bundleNameVersion string
+type addonNameVersion string
 
-func (s *Bundle) nameVersionFromBundle(b *internal.Bundle) (k bundleNameVersion, err error) {
+func (s *Addon) nameVersionFromAddon(b *internal.Addon) (k addonNameVersion, err error) {
 	if b == nil {
 		return k, errors.New("entity may not be nil")
 	}
@@ -249,41 +249,41 @@ func (s *Bundle) nameVersionFromBundle(b *internal.Bundle) (k bundleNameVersion,
 	return s.nameVersion(b.Name, b.Version)
 }
 
-func (*Bundle) nameVersion(name internal.BundleName, ver semver.Version) (k bundleNameVersion, err error) {
+func (*Addon) nameVersion(name internal.AddonName, ver semver.Version) (k addonNameVersion, err error) {
 	if name == "" || ver.Original() == "" {
 		return k, errors.New("both name and version must be set")
 	}
 
-	return bundleNameVersion(fmt.Sprintf("%s|%s", name, ver.String())), nil
+	return addonNameVersion(fmt.Sprintf("%s|%s", name, ver.String())), nil
 }
 
-func (s *Bundle) idKey(namespace internal.Namespace, id internal.BundleID) string {
+func (s *Addon) idKey(namespace internal.Namespace, id internal.AddonID) string {
 	return strings.Join([]string{s.idPrefixForNamespace(namespace), string(id)}, entityNamespaceSeparator)
 }
 
-func (*Bundle) idPrefixForNamespace(namespace internal.Namespace) string {
+func (*Addon) idPrefixForNamespace(namespace internal.Namespace) string {
 	if namespace == internal.ClusterWide {
-		return strings.Join([]string{entityNamespaceBundleMappingID, "cluster"}, entityNamespaceSeparator)
+		return strings.Join([]string{entityNamespaceAddonMappingID, "cluster"}, entityNamespaceSeparator)
 	}
-	return strings.Join([]string{entityNamespaceBundleMappingID, "ns", string(namespace)}, entityNamespaceSeparator)
+	return strings.Join([]string{entityNamespaceAddonMappingID, "ns", string(namespace)}, entityNamespaceSeparator)
 }
 
-func (*Bundle) nameVersionKey(namespace internal.Namespace, nv bundleNameVersion) string {
+func (*Addon) nameVersionKey(namespace internal.Namespace, nv addonNameVersion) string {
 	if namespace == internal.ClusterWide {
-		return strings.Join([]string{entityNamespaceBundleMappingNV, "cluster", string(nv)}, entityNamespaceSeparator)
+		return strings.Join([]string{entityNamespaceAddonMappingNV, "cluster", string(nv)}, entityNamespaceSeparator)
 	}
-	return strings.Join([]string{entityNamespaceBundleMappingNV, "ns", string(namespace), string(nv)}, entityNamespaceSeparator)
+	return strings.Join([]string{entityNamespaceAddonMappingNV, "ns", string(namespace), string(nv)}, entityNamespaceSeparator)
 }
 
-func newBundleDSO(in *internal.Bundle) (*bundleDSO, error) {
-	dsoPlans := map[internal.BundlePlanID]bundlePlanDSO{}
+func newAddonDSO(in *internal.Addon) (*addonDSO, error) {
+	dsoPlans := map[internal.AddonPlanID]addonPlanDSO{}
 	for k, v := range in.Plans {
 		var err error
-		if dsoPlans[k], err = newBundlePlanDSO(v); err != nil {
-			return nil, errors.Wrap(err, "while converting Bundle to DSO")
+		if dsoPlans[k], err = newAddonPlanDSO(v); err != nil {
+			return nil, errors.Wrap(err, "while converting Addon to DSO")
 		}
 	}
-	return &bundleDSO{
+	return &addonDSO{
 		ID:          in.ID,
 		Name:        in.Name,
 		Version:     in.Version.String(),
@@ -295,27 +295,27 @@ func newBundleDSO(in *internal.Bundle) (*bundleDSO, error) {
 	}, nil
 }
 
-type bundleDSO struct {
-	ID                  internal.BundleID
-	Name                internal.BundleName
+type addonDSO struct {
+	ID                  internal.AddonID
+	Name                internal.AddonName
 	Version             string
 	Description         string
-	Plans               map[internal.BundlePlanID]bundlePlanDSO
-	Metadata            internal.BundleMetadata
-	Tags                []internal.BundleTag
+	Plans               map[internal.AddonPlanID]addonPlanDSO
+	Metadata            internal.AddonMetadata
+	Tags                []internal.AddonTag
 	Requires            []string
 	Bindable            bool
 	BindingsRetrievable bool
 	PlanUpdatable       *bool
 }
 
-func newBundlePlanDSO(plan internal.BundlePlan) (bundlePlanDSO, error) {
+func newAddonPlanDSO(plan internal.AddonPlan) (addonPlanDSO, error) {
 	chartValuesDSO, err := newChartValuesDSO(plan.ChartValues)
 	if err != nil {
-		return bundlePlanDSO{}, errors.Wrap(err, "while converting BundlePlan to DSO")
+		return addonPlanDSO{}, errors.Wrap(err, "while converting AddonPlan to DSO")
 	}
 
-	return bundlePlanDSO{
+	return addonPlanDSO{
 		Schemas:      plan.Schemas,
 		Name:         plan.Name,
 		ChartRef:     plan.ChartRef,
@@ -328,25 +328,25 @@ func newBundlePlanDSO(plan internal.BundlePlan) (bundlePlanDSO, error) {
 	}, nil
 }
 
-type bundlePlanDSO struct {
-	ID           internal.BundlePlanID
-	Name         internal.BundlePlanName
+type addonPlanDSO struct {
+	ID           internal.AddonPlanID
+	Name         internal.AddonPlanName
 	Description  string
 	Schemas      map[internal.PlanSchemaType]internal.PlanSchema
 	ChartRef     internal.ChartRef
 	ChartValues  chartValuesDSO
-	Metadata     internal.BundlePlanMetadata
-	BindTemplate internal.BundlePlanBindTemplate
+	Metadata     internal.AddonPlanMetadata
+	BindTemplate internal.AddonPlanBindTemplate
 	Bindable     *bool
 	Free         *bool
 }
 
-func (dso *bundlePlanDSO) ToModel() (internal.BundlePlan, error) {
+func (dso *addonPlanDSO) ToModel() (internal.AddonPlan, error) {
 	chValues, err := dso.ChartValues.ToModel()
 	if err != nil {
-		return internal.BundlePlan{}, errors.Wrap(err, "while converting BundlePlanDSO to model")
+		return internal.AddonPlan{}, errors.Wrap(err, "while converting addonPlanDSO to model")
 	}
-	return internal.BundlePlan{
+	return internal.AddonPlan{
 		ID:           dso.ID,
 		BindTemplate: dso.BindTemplate,
 		Metadata:     dso.Metadata,
@@ -378,18 +378,18 @@ func (dso chartValuesDSO) ToModel() (internal.ChartValues, error) {
 	return out, nil
 }
 
-func (dto *bundleDSO) NewModel() (*internal.Bundle, error) {
+func (dto *addonDSO) NewModel() (*internal.Addon, error) {
 	// TODO: do deep copy so that we are completely separated from PB entity
 
-	plans := map[internal.BundlePlanID]internal.BundlePlan{}
+	plans := map[internal.AddonPlanID]internal.AddonPlan{}
 	for k, v := range dto.Plans {
 		var err error
 		if plans[k], err = v.ToModel(); err != nil {
-			return nil, errors.Wrap(err, "while converting BundleDSO to model")
+			return nil, errors.Wrap(err, "while converting AddonDSO to model")
 		}
 	}
 
-	out := internal.Bundle{
+	out := internal.Addon{
 		ID:                  dto.ID,
 		Name:                dto.Name,
 		Description:         dto.Description,

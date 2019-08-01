@@ -152,6 +152,28 @@ function waitForTestPodsTermination() {
     return 1
 }
 
+function deleteCTS() {
+  local retry=0
+  local suiteName=$1
+
+  log "Deleting ClusterTestSuite ${suiteName}" nc bold
+  while [[ ${retry} -lt 20 ]]; do
+        msg=$(kubectl delete cts ${suiteName} 2>&1)
+        status=$?
+        if [[ ${status} -ne 0 ]]; then
+            echo "Unable to delete ClusterTestSuite: ${msg}"
+            echo "waiting 5s..."
+            sleep 5
+        else
+            log "OK" green bold
+            return 0
+        fi
+        retry=$[retry + 1]
+  done
+  log "FAILED" red
+  return 1
+}
+
 function waitForTerminationAndPrintLogs() {
     local suiteName=$1
 
@@ -181,15 +203,16 @@ function printImagesWithLatestTag() {
     return 0
 }
 
-TESTING_BUNDLES_MAP_NAME="testing-bundles-repos"
-function injectTestingBundles() {
-    kubectl create configmap ${TESTING_BUNDLES_MAP_NAME} -n kyma-system --from-literal=URLs=https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml
-    kubectl label configmap ${TESTING_BUNDLES_MAP_NAME} -n kyma-system helm-broker-repo=true
+TESTING_ADDONS_CFG_NAME="testing-addons"
 
-    log "Testing bundles injected" green
+# That function is deprecated and will be deleted after 1.4 release. Used only in the upgrade plan.
+function deprecatedInjectTestingAddons() {
+    kubectl create configmap ${TESTING_ADDONS_CFG_NAME} -n kyma-system --from-literal=URLs=https://github.com/kyma-project/addons/releases/download/latest/index-testing.yaml
+    kubectl label configmap ${TESTING_ADDONS_CFG_NAME} -n kyma-system helm-broker-repo=true
+
+    log "Testing addons injected" green
 }
 
-TESTING_ADDONS_CFG_NAME="testing-addons"
 function injectTestingAddons() {
     cat <<EOF | kubectl apply -f -
 apiVersion: addons.kyma-project.io/v1alpha1
@@ -200,7 +223,7 @@ metadata:
   name: ${TESTING_ADDONS_CFG_NAME}
 spec:
   repositories:
-  - url: "https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml"
+  - url: "https://github.com/kyma-project/addons/releases/download/latest/index-testing.yaml"
 EOF
     log "Testing addons injected" green
 }
