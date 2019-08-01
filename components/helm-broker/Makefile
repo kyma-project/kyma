@@ -21,9 +21,9 @@ else
 	mkdir -p licenses
 endif
 
-# Caution! remove "namespace: v.namespace" after regenerate file.
-# (components/helm-broker/pkg/client/informers/externalversions/addons/v1alpha1/interface.go)
-# clusterAddonsConfigurationInformer doesn't have the field
+# Caution! Remove the “namespace: v.namespace” parameter after regeneration of
+# “components/helm-broker/pkg/client/informers/externalversions/addons/v1alpha1/interface.go” file.
+# clusterAddonsConfigurationInformer doesn’t have the “namespace” field
 .PHONY: generates
 # Generate CRD manifests, clients etc.
 generates: crd-manifests client

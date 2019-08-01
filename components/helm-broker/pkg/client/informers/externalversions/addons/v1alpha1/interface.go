@@ -31,7 +31,7 @@ func (v *version) AddonsConfigurations() AddonsConfigurationInformer {
 }
 
 // ClusterAddonsConfigurations returns a ClusterAddonsConfigurationInformer.
-// Caution! remove "namespace: v.namespace" after regenerate file. clusterAddonsConfigurationInformer doesn't have the field
+// Caution! remove "namespace: v.namespace" after file regeneration. clusterAddonsConfigurationInformer doesn't have the “namespace” field
 func (v *version) ClusterAddonsConfigurations() ClusterAddonsConfigurationInformer {
 	return &clusterAddonsConfigurationInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
