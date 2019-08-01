@@ -1,5 +1,5 @@
 global:
-  defaultTenant : pkjowy
+  defaultTenant : xyz
   tenants: foo bar
 
   images:
