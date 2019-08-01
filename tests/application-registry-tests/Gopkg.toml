@@ -30,8 +30,7 @@
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  source = "github.com/Szymongib/kyma"
-  branch = "update-istio-resources-in-app-registry"
+  revision = "521d7260ce0d3baa27ee45945e430895423f5981"
 
 [[constraint]]
   name = "k8s.io/client-go"

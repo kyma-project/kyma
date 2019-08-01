@@ -63,7 +63,7 @@ func TestK8sResources(t *testing.T) {
 					},
 				},
 				RequestParameters: &requestParameters,
-				Spec: testkit.ApiRawSpec,
+				Spec:              testkit.ApiRawSpec,
 			},
 		}
 
@@ -179,7 +179,7 @@ func TestK8sResources(t *testing.T) {
 					},
 				},
 				RequestParameters: &requestParameters,
-				Spec: testkit.ApiRawSpec,
+				Spec:              testkit.ApiRawSpec,
 			},
 		}
 
@@ -294,7 +294,7 @@ func TestK8sResources(t *testing.T) {
 					},
 				},
 				RequestParameters: &requestParameters,
-				Spec: testkit.ApiRawSpec,
+				Spec:              testkit.ApiRawSpec,
 			},
 		}
 
@@ -1211,7 +1211,7 @@ func TestK8sApplicationDeletion(t *testing.T) {
 					},
 				},
 				RequestParameters: &requestParameters,
-				Spec: testkit.ApiRawSpec,
+				Spec:              testkit.ApiRawSpec,
 			},
 			Events: &testkit.Events{
 				Spec: testkit.EventsRawSpec,
