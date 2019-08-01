@@ -132,10 +132,11 @@ oathkeeper:
   oathkeeper-maester:
     annotations:
       sidecar.istio.io/inject: "false"
-    resources:
-      limits:
-        cpu: 100m
-        memory: 50Mi
-      requests:
-        cpu: 50m
-        memory: 20Mi
+    deployment:
+      resources:
+        limits:
+          cpu: 100m
+          memory: 50Mi
+        requests:
+          cpu: 50m
+          memory: 20Mi
