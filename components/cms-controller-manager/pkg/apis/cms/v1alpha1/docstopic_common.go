@@ -30,7 +30,7 @@ type Source struct {
 	Mode   DocsTopicMode `json:"mode"`
 	Filter string        `json:"filter,omitempty"`
 	// +optional
-	Metadata *runtime.RawExtension `json:"metadata,omitempty"`
+	Parameters *runtime.RawExtension `json:"parameters,omitempty"`
 }
 
 type DocsTopicPhase string
