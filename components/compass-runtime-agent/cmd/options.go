@@ -5,6 +5,12 @@ import (
 	"fmt"
 )
 
+type EnvConfig struct {
+	DirectorURL string `envconfig:"DIRECTOR_URL"`
+	RuntimeId   string `envconfig:"RUNTIME_ID"`
+	Tenant      string `envconfig:"TENANT"`
+}
+
 type options struct {
 	controllerSyncPeriod  int
 	minimalConfigSyncTime int
@@ -32,12 +38,6 @@ func (o *options) String() string {
 	return fmt.Sprintf("--controllerSyncPeriod=%d --minimalConfigSyncTime=%d "+
 		"--integrationNamespace=%s gatewayPort=%d",
 		o.controllerSyncPeriod, o.minimalConfigSyncTime, o.integrationNamespace, o.gatewayPort)
-}
-
-type EnvConfig struct {
-	DirectorURL string
-	RuntimeId   string
-	Tenant      string
 }
 
 func (ec EnvConfig) String() string {
