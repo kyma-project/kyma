@@ -45,14 +45,14 @@ func Add(mgr manager.Manager) error {
 		return errors.Wrapf(err, "while initializing Store client")
 	}
 
-	store := store.New(minioClient, cfg.Store.UploadWorkerCount)
+	store := store.New(minioClient, cfg.Store.UploadWorkersCount)
 	loader := loader.New(cfg.Loader.TemporaryDirectory, cfg.Loader.VerifySSL)
 	findBucketFnc := bucketFinder(mgr)
 	deleteFinalizer := finalizer.New(deleteClusterAssetFinalizerName)
 
 	httpClient := &http.Client{}
-	validator := assethook.NewValidator(httpClient, cfg.Webhook.ValidationTimeout, cfg.Webhook.ValidationWorkers)
-	mutator := assethook.NewMutator(httpClient, cfg.Webhook.MutationTimeout, cfg.Webhook.MutationWorkers)
+	validator := assethook.NewValidator(httpClient, cfg.Webhook.ValidationTimeout, cfg.Webhook.ValidationWorkersCount)
+	mutator := assethook.NewMutator(httpClient, cfg.Webhook.MutationTimeout, cfg.Webhook.MutationWorkersCount)
 	metadataExtractor := assethook.NewMetadataExtractor(httpClient, cfg.Webhook.MetadataExtractionTimeout)
 
 	reconciler := &ReconcileClusterAsset{

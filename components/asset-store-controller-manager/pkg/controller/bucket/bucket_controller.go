@@ -41,7 +41,7 @@ func Add(mgr manager.Manager) error {
 		return errors.Wrap(err, "while initializing Store client")
 	}
 
-	store := store.New(minioClient, cfg.Store.UploadWorkerCount)
+	store := store.New(minioClient, cfg.Store.UploadWorkersCount)
 	deletionFinalizer := finalizer.New(deleteBucketFinalizerName)
 
 	reconciler := &ReconcileBucket{
