@@ -30,7 +30,7 @@ spec:
             - "--minimalConfigSyncTime={{ .Values.deployment.sync.minimalConfigSyncTime }}"
             - "--tokenURLConfigFile={{.Values.deployment.tokenConfig.mountPath}}/{{ .Values.deployment.tokenConfig.tokenURLConfigFile }}"
             - "--tenant=tenant" # TODO: will be removed
-            - "--namespace={{ .Values.deployment.resources.integrationNamespace }}"
+            - "--integrationNamespace={{ .Values.deployment.resources.integrationNamespace }}"
             - "--gatewayPort={{ .Values.deployment.resources.gatewayPort }}"
           volumeMounts:
             - mountPath: {{ .Values.deployment.tokenConfig.mountPath }}
