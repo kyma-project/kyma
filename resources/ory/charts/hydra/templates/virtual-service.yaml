@@ -15,104 +15,104 @@ spec:
     # administrative endpoints - https://www.ory.sh/docs/hydra/sdk/api#administrative-endpoints
     {{- if .Values.hydra.service.admin.enabled -}}
     - match:
-      - uri:
-          prefix: "/clients"
+        - uri:
+            prefix: "/clients"
       route:
-      - destination:
-          host: {{ include "hydra.fullname" . }}-hydra-admin
-          port:
-            number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+        - destination:
+            host: {{ include "hydra.fullname" . }}-hydra-admin
+            port:
+              number: {{ .Values.hydra.hydra.config.serve.admin.port }}
     - match:
-      - uri:
-          prefix: "/keys"
+        - uri:
+            prefix: "/keys"
       route:
-      - destination:
-          host: {{ include "hydra.fullname" . }}-hydra-admin
-          port:
-            number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+        - destination:
+            host: {{ include "hydra.fullname" . }}-hydra-admin
+            port:
+              number: {{ .Values.hydra.hydra.config.serve.admin.port }}
     - match:
-      - uri:
-          prefix: "/oauth2/auth/requests"
+        - uri:
+            prefix: "/oauth2/auth/requests"
       route:
-      - destination:
-          host: {{ include "hydra.fullname" . }}-hydra-admin
-          port:
-            number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+        - destination:
+            host: {{ include "hydra.fullname" . }}-hydra-admin
+            port:
+              number: {{ .Values.hydra.hydra.config.serve.admin.port }}
     - match:
-      - uri:
-          prefix: "/oauth2/auth/sessions"
+        - uri:
+            prefix: "/oauth2/auth/sessions"
       route:
-      - destination:
-          host: {{ include "hydra.fullname" . }}-hydra-admin
-          port:
-            number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+        - destination:
+            host: {{ include "hydra.fullname" . }}-hydra-admin
+            port:
+              number: {{ .Values.hydra.hydra.config.serve.admin.port }}
     - match:
-      - uri:
-          exact: "/oauth2/flush"
+        - uri:
+            exact: "/oauth2/flush"
       route:
-      - destination:
-          host: {{ include "hydra.fullname" . }}-hydra-admin
-          port:
-            number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+        - destination:
+            host: {{ include "hydra.fullname" . }}-hydra-admin
+            port:
+              number: {{ .Values.hydra.hydra.config.serve.admin.port }}
     - match:
-      - uri:
-          exact: "/oauth2/introspect"
+        - uri:
+            exact: "/oauth2/introspect"
       route:
-      - destination:
-          host: {{ include "hydra.fullname" . }}-hydra-admin
-          port:
-            number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+        - destination:
+            host: {{ include "hydra.fullname" . }}-hydra-admin
+            port:
+              number: {{ .Values.hydra.hydra.config.serve.admin.port }}
 {{ end }}
     # public endpoints - https://www.ory.sh/docs/hydra/sdk/api#public-endpoints
 {{- if .Values.hydra.service.public.enabled -}}
     - match:
-      - uri:
-          prefix: "/.well-known"
+        - uri:
+            prefix: "/.well-known"
       route:
-      - destination:
-          host: {{ include "hydra.fullname" . }}-hydra-public
-          port:
-            number: {{ .Values.hydra.hydra.config.serve.public.port }}
+        - destination:
+            host: {{ include "hydra.fullname" . }}-hydra-public
+            port:
+              number: {{ .Values.hydra.hydra.config.serve.public.port }}
     - match:
-      - uri:
-          exact: "/oauth2/auth"
+        - uri:
+            exact: "/oauth2/auth"
       route:
-      - destination:
-          host: {{ include "hydra.fullname" . }}-hydra-public
-          port:
-            number: {{ .Values.hydra.hydra.config.serve.public.port }}
+        - destination:
+            host: {{ include "hydra.fullname" . }}-hydra-public
+            port:
+              number: {{ .Values.hydra.hydra.config.serve.public.port }}
     - match:
-      - uri:
-          exact: "/oauth2/revoke"
+        - uri:
+            exact: "/oauth2/revoke"
       route:
-      - destination:
-          host: {{ include "hydra.fullname" . }}-hydra-public
-          port:
-            number: {{ .Values.hydra.hydra.config.serve.public.port }}
+        - destination:
+            host: {{ include "hydra.fullname" . }}-hydra-public
+            port:
+              number: {{ .Values.hydra.hydra.config.serve.public.port }}
     - match:
-      - uri:
-          exact: "/oauth2/sessions/logout"
+        - uri:
+            exact: "/oauth2/sessions/logout"
       route:
-      - destination:
-          host: {{ include "hydra.fullname" . }}-hydra-public
-          port:
-            number: {{ .Values.hydra.hydra.config.serve.public.port }}
+        - destination:
+            host: {{ include "hydra.fullname" . }}-hydra-public
+            port:
+              number: {{ .Values.hydra.hydra.config.serve.public.port }}
     - match:
-      - uri:
-          exact: "/oauth2/token"
+        - uri:
+            exact: "/oauth2/token"
       route:
-      - destination:
-          host: {{ include "hydra.fullname" . }}-hydra-public
-          port:
-            number: {{ .Values.hydra.hydra.config.serve.public.port }}
+        - destination:
+            host: {{ include "hydra.fullname" . }}-hydra-public
+            port:
+              number: {{ .Values.hydra.hydra.config.serve.public.port }}
     - match:
-      - uri:
-          exact: "/userinfo"
+        - uri:
+            exact: "/userinfo"
       route:
-      - destination:
-          host: {{ include "hydra.fullname" . }}-hydra-public
-          port:
-            number: {{ .Values.hydra.hydra.config.serve.public.port }}
+        - destination:
+            host: {{ include "hydra.fullname" . }}-hydra-public
+            port:
+              number: {{ .Values.hydra.hydra.config.serve.public.port }}
 {{ end }}
 {{ end }}
 {{ end }}
