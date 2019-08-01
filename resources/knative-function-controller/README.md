@@ -4,7 +4,7 @@
 
 This project contains the chart for the Function Controller.
 
->**NOTE**: This feature is experimental
+>**NOTE**: This feature is experimental.
 
 ## Prerequisites
 
