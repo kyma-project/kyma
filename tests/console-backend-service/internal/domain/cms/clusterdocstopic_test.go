@@ -261,11 +261,11 @@ func fixCommonClusterDocsTopicSpec() v1alpha1.CommonDocsTopicSpec {
 		Description: fixture.DocsTopicDescription,
 		Sources: []v1alpha1.Source{
 			{
-				Type:     "openapi",
-				Name:     "openapi",
-				Metadata: &runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)},
-				Mode:     v1alpha1.DocsTopicSingle,
-				URL:      "https://petstore.swagger.io/v2/swagger.json",
+				Type:       "openapi",
+				Name:       "openapi",
+				Parameters: &runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)},
+				Mode:       v1alpha1.DocsTopicSingle,
+				URL:        "https://petstore.swagger.io/v2/swagger.json",
 			},
 		},
 	}
