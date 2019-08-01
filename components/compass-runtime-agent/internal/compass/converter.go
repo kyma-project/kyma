@@ -86,9 +86,14 @@ func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinition {
 	}
 
 	if compassAPI.Spec != nil {
+		var data []byte
+		if compassAPI.Spec.Data != nil {
+			data = []byte(*compassAPI.Spec.Data)
+		}
+
 		api.APISpec = &kymamodel.APISpec{
 			Type: kymamodel.APISpecType(string(compassAPI.Spec.Type)),
-			Data: []byte(*compassAPI.Spec.Data),
+			Data: data,
 		}
 	}
 
@@ -147,9 +152,15 @@ func convertEventAPI(compassEventAPI *graphql.EventAPIDefinition) kymamodel.Even
 	}
 
 	if compassEventAPI.Spec != nil {
+
+		var data []byte
+		if compassEventAPI.Spec.Data != nil {
+			data = []byte(*compassEventAPI.Spec.Data)
+		}
+
 		eventAPI.EventAPISpec = &kymamodel.EventAPISpec{
 			Type: kymamodel.EventAPISpecType(string(compassEventAPI.Spec.Type)),
-			Data: []byte(*compassEventAPI.Spec.Data),
+			Data: data,
 		}
 	}
 

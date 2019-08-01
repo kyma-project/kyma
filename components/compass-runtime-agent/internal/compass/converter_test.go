@@ -167,6 +167,43 @@ func TestApplication_ToApplication(t *testing.T) {
 			},
 		},
 		{
+			description: "convert Compass App with empty specs",
+			compassApp: Application{
+				ID:          appId,
+				Name:        appName,
+				Description: &appDesc,
+				APIs: &graphql.APIDefinitionPage{
+					Data: []*graphql.APIDefinition{
+						fixCompassAPIDefinition("1", fixCompassOauthAuth(nil), &graphql.APISpec{Data: nil}),
+					},
+				},
+				EventAPIs: &graphql.EventAPIDefinitionPage{
+					Data: []*graphql.EventAPIDefinition{
+						fixCompassEventAPIDefinition("1", &graphql.EventAPISpec{Data: nil}),
+					},
+				},
+				Documents: &graphql.DocumentPage{
+					Data: []*graphql.Document{
+						fixCompassDocument("1", nil),
+					},
+				},
+			},
+			expectedApp: kymamodel.Application{
+				ID:          appId,
+				Name:        appName,
+				Description: appDesc,
+				APIs: []kymamodel.APIDefinition{
+					fixInternalAPIDefinition("1", fixInternalOauthCredentials(nil), &kymamodel.APISpec{}),
+				},
+				EventAPIs: []kymamodel.EventAPIDefinition{
+					fixInternalEventAPIDefinition("1", &kymamodel.EventAPISpec{}),
+				},
+				Documents: []kymamodel.Document{
+					fixInternalDocument("1", nil),
+				},
+			},
+		},
+		{
 			description: "set empty credentials when unsupported credentials input",
 			compassApp: Application{
 				ID:          appId,

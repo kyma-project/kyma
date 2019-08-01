@@ -54,12 +54,6 @@ func (cc *configClient) FetchConfiguration(directorURL string, credentials certi
 		return nil, errors.Wrap(err, "Failed to fetch Applications")
 	}
 
-	//b, err := json.Marshal(applicationPage.Data)
-	//if err != nil {
-	//	fmt.Println("ERROR: ", err.Error())
-	//}
-	//fmt.Println(string(b))
-
 	// TODO: After implementation of paging modify the fetching logic
 
 	applications := make([]kymamodel.Application, len(applicationPage.Data))
