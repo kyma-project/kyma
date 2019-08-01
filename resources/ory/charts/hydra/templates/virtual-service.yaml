@@ -1,7 +1,10 @@
+{{- if .Capabilities.APIVersions.Has "networking.istio.io/v1alpha3" }}
+{{- if or .Values.hydra.service.public.enabled .Values.hydra.service.admin.enabled -}}
+---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ template "fullname" . }}-oauth2
+  name: {{ include "hydra.fullname" . }}-hydra
   namespace: {{ .Release.Namespace }}
 spec:
   gateways:
@@ -9,32 +12,107 @@ spec:
   hosts:
     - oauth2.{{ .Values.global.ingress.domainName }}
   http:
+    # administrative endpoints - https://www.ory.sh/docs/hydra/sdk/api#administrative-endpoints
+    {{- if .Values.hydra.service.admin.enabled -}}
     - match:
-        - uri:
-            regex: /.*
+      - uri:
+          prefix: "/clients"
       route:
-        - destination:
-            host: {{ template "fullname" . }}-oauth2
-            port:
-              number: {{ .Values.hydraServer.service.port }}
-
----
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: {{ template "fullname" . }}-oauth2-admin
-  namespace: {{ .Release.Namespace }}
-spec:
-  gateways:
-    - {{ .Values.global.gateway }}
-  hosts:
-    - oauth2-admin.{{ .Values.global.ingress.domainName }}
-  http:
+      - destination:
+          host: {{ include "hydra.fullname" . }}-hydra-admin
+          port:
+            number: {{ .Values.hydra.hydra.config.serve.admin.port }}
     - match:
-        - uri:
-            regex: /.*
+      - uri:
+          prefix: "/keys"
       route:
-        - destination:
-            host: {{ template "fullname" . }}-oauth2
-            port:
-              number: {{ .Values.hydraServer.service.adminPort }}
+      - destination:
+          host: {{ include "hydra.fullname" . }}-hydra-admin
+          port:
+            number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+    - match:
+      - uri:
+          prefix: "/oauth2/auth/requests"
+      route:
+      - destination:
+          host: {{ include "hydra.fullname" . }}-hydra-admin
+          port:
+            number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+    - match:
+      - uri:
+          prefix: "/oauth2/auth/sessions"
+      route:
+      - destination:
+          host: {{ include "hydra.fullname" . }}-hydra-admin
+          port:
+            number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+    - match:
+      - uri:
+          exact: "/oauth2/flush"
+      route:
+      - destination:
+          host: {{ include "hydra.fullname" . }}-hydra-admin
+          port:
+            number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+    - match:
+      - uri:
+          exact: "/oauth2/introspect"
+      route:
+      - destination:
+          host: {{ include "hydra.fullname" . }}-hydra-admin
+          port:
+            number: {{ .Values.hydra.hydra.config.serve.admin.port }}
+{{ end }}
+    # public endpoints - https://www.ory.sh/docs/hydra/sdk/api#public-endpoints
+{{- if .Values.hydra.service.public.enabled -}}
+    - match:
+      - uri:
+          prefix: "/.well-known"
+      route:
+      - destination:
+          host: {{ include "hydra.fullname" . }}-hydra-public
+          port:
+            number: {{ .Values.hydra.hydra.config.serve.public.port }}
+    - match:
+      - uri:
+          exact: "/oauth2/auth"
+      route:
+      - destination:
+          host: {{ include "hydra.fullname" . }}-hydra-public
+          port:
+            number: {{ .Values.hydra.hydra.config.serve.public.port }}
+    - match:
+      - uri:
+          exact: "/oauth2/revoke"
+      route:
+      - destination:
+          host: {{ include "hydra.fullname" . }}-hydra-public
+          port:
+            number: {{ .Values.hydra.hydra.config.serve.public.port }}
+    - match:
+      - uri:
+          exact: "/oauth2/sessions/logout"
+      route:
+      - destination:
+          host: {{ include "hydra.fullname" . }}-hydra-public
+          port:
+            number: {{ .Values.hydra.hydra.config.serve.public.port }}
+    - match:
+      - uri:
+          exact: "/oauth2/token"
+      route:
+      - destination:
+          host: {{ include "hydra.fullname" . }}-hydra-public
+          port:
+            number: {{ .Values.hydra.hydra.config.serve.public.port }}
+    - match:
+      - uri:
+          exact: "/userinfo"
+      route:
+      - destination:
+          host: {{ include "hydra.fullname" . }}-hydra-public
+          port:
+            number: {{ .Values.hydra.hydra.config.serve.public.port }}
+{{ end }}
+{{ end }}
+{{ end }}
