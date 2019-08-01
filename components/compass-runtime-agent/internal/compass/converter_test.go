@@ -350,7 +350,7 @@ func fixCompassAPIDefinition(suffix string, auth *graphql.RuntimeAuth, spec *gra
 		Name:        baseAPIName + suffix,
 		Description: &desc,
 		TargetURL:   baseAPIURL + suffix,
-		Auth:        auth,
+		//Auth:        auth,
 		DefaultAuth: defaultAuth, // TODO: can be removed after switching to use Auth
 		Spec:        spec,
 	}
@@ -385,7 +385,7 @@ func fixCompassOauthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.Ru
 	return &graphql.RuntimeAuth{
 		RuntimeID: runtimeId,
 		Auth: &graphql.Auth{
-			Credential: graphql.OAuthCredentialData{
+			Credential: &graphql.OAuthCredentialData{
 				URL:          oauthURL,
 				ClientID:     clientId,
 				ClientSecret: clientSecret,
@@ -399,7 +399,7 @@ func fixCompassBasicAuthAuth(requestAuth *graphql.CredentialRequestAuth) *graphq
 	return &graphql.RuntimeAuth{
 		RuntimeID: runtimeId,
 		Auth: &graphql.Auth{
-			Credential: graphql.BasicCredentialData{
+			Credential: &graphql.BasicCredentialData{
 				Username: username,
 				Password: password,
 			},

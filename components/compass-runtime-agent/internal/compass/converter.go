@@ -126,12 +126,12 @@ func convertAuth(compassAuth *graphql.Auth) (*kymamodel.Credentials, error) {
 	credentials := &kymamodel.Credentials{}
 
 	switch cred := compassAuth.Credential.(type) {
-	case graphql.BasicCredentialData:
+	case *graphql.BasicCredentialData:
 		credentials.Basic = &kymamodel.Basic{
 			Username: cred.Username,
 			Password: cred.Password,
 		}
-	case graphql.OAuthCredentialData:
+	case *graphql.OAuthCredentialData:
 		credentials.Oauth = &kymamodel.Oauth{
 			URL:          cred.URL,
 			ClientID:     cred.ClientID,
