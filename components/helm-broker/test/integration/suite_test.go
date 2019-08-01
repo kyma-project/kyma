@@ -3,20 +3,21 @@
 package integration_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 
-	"context"
-	"os"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/assetstore"
 
-	"github.com/kyma-project/kyma/components/helm-broker/internal/config"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/storage/testdata"
-	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
+	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,13 +28,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/assetstore/automock"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/config"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/storage/testdata"
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis"
-	"github.com/sirupsen/logrus"
+	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 )
 
 const (
@@ -93,10 +96,14 @@ func newTestSuite(t *testing.T) *testSuite {
 	})
 	require.NoError(t, err)
 
+	uploadClient := &automock.Client{}
+	uploadClient.On("Upload", mock.AnythingOfType("string"), mock.Anything).Return(assetstore.UploadedFile{}, nil)
+
 	mgr := controller.SetupAndStartController(restConfig, &config.ControllerConfig{
 		DevelopMode:              true, // DevelopMode allows "http" urls
 		ClusterServiceBrokerName: "helm-broker",
-	}, ":8001", sFact, logger.WithField("svc", "broker"))
+		TmpDir:                   cfg.TmpDir,
+	}, ":8001", sFact, uploadClient, logger.WithField("svc", "broker"))
 
 	stopCh := make(chan struct{})
 	go func() {
