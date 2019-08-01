@@ -14,7 +14,7 @@ import (
 )
 
 type mutationEngine struct {
-	processor processor
+	processor httpProcessor
 }
 
 //go:generate mockery -name=Mutator -output=automock -outpkg=automock -case=underscore
@@ -24,7 +24,7 @@ type Mutator interface {
 
 func NewMutator(httpClient HttpClient, timeout time.Duration, workers int) Mutator {
 	return &mutationEngine{
-		processor: processor{
+		processor: &processor{
 			timeout:        timeout,
 			workers:        workers,
 			onFail:         mutationFailureHandler,

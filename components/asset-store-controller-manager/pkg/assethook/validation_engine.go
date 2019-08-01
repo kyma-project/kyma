@@ -11,7 +11,7 @@ import (
 )
 
 type validationEngine struct {
-	processor processor
+	processor httpProcessor
 }
 
 //go:generate mockery -name=Validator -output=automock -outpkg=automock -case=underscore
@@ -19,9 +19,9 @@ type Validator interface {
 	Validate(ctx context.Context, basePath string, files []string, services []v1alpha2.AssetWebhookService) (Result, error)
 }
 
-func NewValidator(httpClient HttpClient, timeout time.Duration, workers int) Validator {
+func NewValidator(httpClient HttpClient, timeout time.Duration, workers int) *validationEngine {
 	return &validationEngine{
-		processor: processor{
+		processor: &processor{
 			timeout:        timeout,
 			workers:        workers,
 			onFail:         validationFailureHandler,

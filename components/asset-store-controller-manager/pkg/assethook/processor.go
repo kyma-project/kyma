@@ -42,24 +42,17 @@ type HttpClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
+//go:generate mockery -name=httpProcessor -output=automock -outpkg=automock -case=underscore
+type httpProcessor interface {
+	Do(ctx context.Context, basePath string, files []string, services []v1alpha2.AssetWebhookService) (map[string][]Message, error)
+}
+
 func (*processor) parseParameters(metadata *runtime.RawExtension) string {
 	if nil == metadata {
 		return ""
 	}
 
 	return string(metadata.Raw)
-}
-
-func (*processor) writeFiles(basePath string, content map[string]string, writer func(filename string, data []byte, perm os.FileMode) error) error {
-	for key, value := range content {
-		path := filepath.Join(basePath, key)
-		err := writer(path, []byte(value), os.ModePerm)
-		if err != nil {
-			return errors.Wrapf(err, "while writing file %s", path)
-		}
-	}
-
-	return nil
 }
 
 func (p *processor) iterateFiles(files []string, filter string) (chan string, error) {
