@@ -31,11 +31,11 @@
 # The `values.yaml` file for `core` chart
 /resources/core/values.yaml @kyma-project/developers
 
-# The `heptio velero essentials` chart
-/resources/velero-essentials/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+# The `backup-init` chart
+/resources/backup-init/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
-# The `heptio velero` chart
-/resources/velero/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+# The `backup` chart
+/resources/backup/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
