@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 
+	"github.com/kyma-project/kyma/components/helm-broker/internal/assetstore"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 
@@ -34,7 +35,8 @@ func main() {
 	cfg, err := config.GetConfig()
 	fatalOnError(err, "while setting up a client")
 
-	mgr := controller.SetupAndStartController(cfg, ctrCfg, metricsAddr, sFact, lg)
+	uploadClient := assetstore.NewClient(ctrCfg.UploadServiceURL, lg)
+	mgr := controller.SetupAndStartController(cfg, ctrCfg, metricsAddr, sFact, uploadClient, lg)
 
 	lg.Info("Starting the Controller.")
 	err = mgr.Start(signals.SetupSignalHandler())

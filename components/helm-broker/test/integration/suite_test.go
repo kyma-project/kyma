@@ -3,20 +3,21 @@
 package integration_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 
-	"context"
-	"os"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/assetstore"
 
-	"github.com/kyma-project/kyma/components/helm-broker/internal/config"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/storage/testdata"
-	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
+	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,13 +28,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/assetstore/automock"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/config"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/storage/testdata"
 	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis"
-	"github.com/sirupsen/logrus"
+	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 )
 
 const (
@@ -43,6 +46,10 @@ const (
 	redisAddonID     = "id-09834-abcd-234"
 	accTestAddonID   = "a54abe18-0a84-22e9-ab34-d663bbce3d88"
 	addonsConfigName = "addons"
+
+	redisAddonIDGit     = "91c753f0-813b-4bf0-a6b6-f682b1327a21"
+	accTestAddonIDGit   = "6308335c-1ace-48ef-a253-47a5c31dd52c"
+	addonsConfigNameGit = "git-addons"
 
 	redisRepo           = "index-redis.yaml"
 	accTestRepo         = "index-acc-testing.yaml"
@@ -89,10 +96,14 @@ func newTestSuite(t *testing.T) *testSuite {
 	})
 	require.NoError(t, err)
 
+	uploadClient := &automock.Client{}
+	uploadClient.On("Upload", mock.AnythingOfType("string"), mock.Anything).Return(assetstore.UploadedFile{}, nil)
+
 	mgr := controller.SetupAndStartController(restConfig, &config.ControllerConfig{
 		DevelopMode:              true, // DevelopMode allows "http" urls
 		ClusterServiceBrokerName: "helm-broker",
-	}, ":8001", sFact, logger.WithField("svc", "broker"))
+		TmpDir:                   cfg.TmpDir,
+	}, ":8001", sFact, uploadClient, logger.WithField("svc", "broker"))
 
 	stopCh := make(chan struct{})
 	go func() {
@@ -203,9 +214,6 @@ func (ts *testSuite) checkServiceIDs(osbClient osb.Client, ids []string) error {
 	if err != nil {
 		return err
 	}
-	if len(osbResponse.Services) != len(ids) {
-		return fmt.Errorf("unexpected GetCatalogResponse, expected service IDs: %v, got services: %v", ids, osbResponse.Services)
-	}
 
 	idsToCheck := make(map[string]struct{})
 	for _, id := range ids {
@@ -245,7 +253,7 @@ func (ts *testSuite) waitForPhase(obj runtime.Object, status *v1alpha1.CommonAdd
 
 		select {
 		case <-timeoutCh:
-			assert.Fail(ts.t, fmt.Sprintf("The timeout exceeded while waiting for the Phase %s, current phase: %s", expectedPhase, string(status.Phase)))
+			assert.Fail(ts.t, fmt.Sprintf("The timeout exceeded while waiting for the Phase %s (%q), current phase: %s", expectedPhase, nn.String(), string(status.Phase)))
 			return
 		default:
 			time.Sleep(100 * time.Millisecond)
@@ -268,69 +276,53 @@ func (ts *testSuite) deleteClusterAddonsConfiguration(name string) {
 		}}))
 }
 
-func (ts *testSuite) createAddonsConfiguration(namespace, name string, urls []string) {
-	var repositories []v1alpha1.SpecRepository
-	for _, url := range urls {
-		repositories = append(repositories, v1alpha1.SpecRepository{URL: ts.repoServer.URL + "/" + url})
-	}
-
-	ts.dynamicClient.Create(context.TODO(), &v1alpha1.AddonsConfiguration{
+func (ts *testSuite) createAddonsConfiguration(namespace, name string, source *repositorySource) {
+	err := ts.dynamicClient.Create(context.TODO(), &v1alpha1.AddonsConfiguration{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
 		},
 		Spec: v1alpha1.AddonsConfigurationSpec{
 			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
-				Repositories: repositories,
+				Repositories: source.generateAddonRepositories(),
 			},
 		},
 	})
+
+	if err != nil {
+		ts.t.Logf("Failed during creating AddonsConfiguration: %s", err)
+	}
 }
 
-func (ts *testSuite) createClusterAddonsConfiguration(name string, urls []string) {
-	var repositories []v1alpha1.SpecRepository
-	for _, url := range urls {
-		repositories = append(repositories, v1alpha1.SpecRepository{URL: ts.repoServer.URL + "/" + url})
-	}
-
-	ts.dynamicClient.Create(context.TODO(), &v1alpha1.ClusterAddonsConfiguration{
+func (ts *testSuite) createClusterAddonsConfiguration(name string, source *repositorySource) {
+	err := ts.dynamicClient.Create(context.TODO(), &v1alpha1.ClusterAddonsConfiguration{
 		ObjectMeta: v1.ObjectMeta{
 			Name: name,
 		},
 		Spec: v1alpha1.ClusterAddonsConfigurationSpec{
 			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
-				Repositories: repositories,
+				Repositories: source.generateAddonRepositories(),
 			},
 		},
 	})
+
+	if err != nil {
+		ts.t.Logf("Failed during creating ClusterAddonsConfiguration: %s", err)
+	}
 }
 
-func (ts *testSuite) removeRepoFromAddonsConfiguration(namespace, name, url string) {
+func (ts *testSuite) updateAddonsConfigurationRepositories(namespace, name string, source *repositorySource) {
 	var addonsConfiguration v1alpha1.AddonsConfiguration
 	require.NoError(ts.t, ts.dynamicClient.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: namespace}, &addonsConfiguration))
 
-	newRepositories := make([]v1alpha1.SpecRepository, 0)
-	for _, repo := range addonsConfiguration.Spec.Repositories {
-		if repo.URL != (ts.repoServer.URL + "/" + url) {
-			newRepositories = append(newRepositories, repo)
-		}
-	}
-	addonsConfiguration.Spec.Repositories = newRepositories
-
+	addonsConfiguration.Spec.Repositories = source.generateAddonRepositories()
 	require.NoError(ts.t, ts.dynamicClient.Update(context.TODO(), &addonsConfiguration))
 }
 
-func (ts *testSuite) removeRepoFromClusterAddonsConfiguration(name, url string) {
+func (ts *testSuite) updateClusterAddonsConfigurationRepositories(name string, source *repositorySource) {
 	var clusterAddonsConfiguration v1alpha1.ClusterAddonsConfiguration
-
 	require.NoError(ts.t, ts.dynamicClient.Get(context.TODO(), types.NamespacedName{Name: name}, &clusterAddonsConfiguration))
-	newRepositories := make([]v1alpha1.SpecRepository, 0)
-	for _, repo := range clusterAddonsConfiguration.Spec.Repositories {
-		if repo.URL != (ts.repoServer.URL + "/" + url) {
-			newRepositories = append(newRepositories, repo)
-		}
-	}
-	clusterAddonsConfiguration.Spec.Repositories = newRepositories
 
+	clusterAddonsConfiguration.Spec.Repositories = source.generateAddonRepositories()
 	require.NoError(ts.t, ts.dynamicClient.Update(context.TODO(), &clusterAddonsConfiguration))
 }

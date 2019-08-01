@@ -19,7 +19,7 @@ import (
 )
 
 // SetupAndStartController creates and starts the controller
-func SetupAndStartController(cfg *rest.Config, ctrCfg *config.ControllerConfig, metricsAddr string, sFact storage.Factory, lg *logrus.Entry) manager.Manager {
+func SetupAndStartController(cfg *rest.Config, ctrCfg *config.ControllerConfig, metricsAddr string, sFact storage.Factory, uploadClient assetstore.Client, lg *logrus.Entry) manager.Manager {
 	// Create a new Cmd to provide shared dependencies and start components
 	lg.Info("Setting up manager")
 	var mgr manager.Manager
@@ -46,7 +46,7 @@ func SetupAndStartController(cfg *rest.Config, ctrCfg *config.ControllerConfig, 
 	sbFacade := broker.NewBrokersFacade(mgr.GetClient(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, lg)
 	csbFacade := broker.NewClusterBrokersFacade(mgr.GetClient(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, ctrCfg.ClusterServiceBrokerName, lg)
 
-	gitGetterFactory := provider.GitGetterConfiguration{Cli: assetstore.NewClient(ctrCfg.UploadServiceURL, lg), TmpDir: ctrCfg.TmpDir}
+	gitGetterFactory := provider.GitGetterConfiguration{Cli: uploadClient, TmpDir: ctrCfg.TmpDir}
 	allowedGetters := map[string]provider.Provider{
 		"git":   gitGetterFactory.NewGit,
 		"https": provider.NewHTTP,
