@@ -18,13 +18,39 @@ This Knative-based serverless implementation defines and handles the Function Cu
 ### Run locally
 Follow these steps to run the Knative Function controller locally:
 
-1. Modify the `config/config.yaml` file to include your base64-encoded `gcr.io` or `docker.io` credentials. 
-2. Update the Docker registry value to your `docker.io` username.
+1. Create a ServiceAccount to enable knativeBuild docker builds
 
-3. Apply the configuration:
+Currently you cannot run builds in every existing namespace of your cluster. ServiceAccounts with linked docker 
+repository credentials have to be created for each namespace that will be used for the knative-function controller.
 
 ```bash
-kubectl apply -f config/config.yaml
+#set your namespace e.g. default
+export NAMESPACE=<NAMESPACE>
+#set your registry e.g. https://gcr.io
+export REGISTRY=<YOURREGISTRY>
+echo -n 'Username:' ; read username
+echo -n 'Password:' ; read password
+cat <<EOF | sed s/hihihih/hohohoho/
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+    name: knative-function-controller-build
+    labels:
+        app: knative-function-controller
+secrets:
+    - name: knative-function-controller-docker-reg-credential
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/basic-auth
+metadata:
+    name: knative-function-controller-docker-reg-credential
+    annotations:
+        build.knative.dev/docker-0: ${REGISTRY}
+data:
+    username: $(echo $username | base64)
+    password: $(echo $password | base64)
+EOF
 ```
 
 4. Install the CRD to a local Kubernetes cluster:
