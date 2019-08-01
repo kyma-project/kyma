@@ -35,7 +35,8 @@ hydra:
             - 172.16.0.0/12
             - 192.168.0.0/16
       secrets:
-        system: {{ randAlphaNum 18 }}
+        # This can't be upgraded or generated here
+        system: a3m0kCx6f87n332sPw1
       urls:
         self: {}
       dsn: memory
