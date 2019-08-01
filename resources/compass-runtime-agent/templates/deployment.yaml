@@ -32,4 +32,5 @@ spec:
             - "--gatewayPort={{ .Values.compassRuntimeAgent.resources.gatewayPort }}"
           envFrom:
           - configMapRef:
+              optional: true
               name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
