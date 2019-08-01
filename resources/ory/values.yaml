@@ -94,14 +94,13 @@ oathkeeper:
         memory: 64Mi
   image:
     tag: v0.17.1-beta.1
-
-maester:
-  annotations:
-    sidecar.istio.io/inject: "false"
-  resources:
-    limits:
-      cpu: 100m
-      memory: 50Mi
-    requests:
-      cpu: 50m
-      memory: 20Mi
+  oathkeeper-maester:
+    annotations:
+      sidecar.istio.io/inject: "false"
+    resources:
+      limits:
+        cpu: 100m
+        memory: 50Mi
+      requests:
+        cpu: 50m
+        memory: 20Mi

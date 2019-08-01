@@ -72,13 +72,14 @@ spec:
             httpGet:
               path: /health/alive
               port: http-admin
-            initialDelaySeconds: 45
+            initialDelaySeconds: 30
             periodSeconds: 10
+            failureThreshold: 5
           readinessProbe:
             httpGet:
               path: /health/ready
               port: http-admin
-            initialDelaySeconds: 45
+            initialDelaySeconds: 30
             periodSeconds: 10
             failureThreshold: 5
           env:

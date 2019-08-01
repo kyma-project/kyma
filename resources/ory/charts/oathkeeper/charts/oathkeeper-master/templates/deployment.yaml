@@ -1,21 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "maester.fullname" . }}
+  name: {{ include "oathkeeper-maester.name" . }}
   {{- if .Release.Namespace }}
   namespace: {{ .Release.Namespace }}
   {{- end }}
   labels:
-{{ include "maester.labels" . | indent 4 }}
+{{ include "oathkeeper-maester.labels" . | indent 4 }}
 spec:
-  automountServiceAccountToken: false
-  progressDeadlineSeconds: 600
   replicas: {{ .Values.replicaCount }}
   revisionHistoryLimit: 10
   selector:
     matchLabels:
       control-plane: controller-manager
-      app.kubernetes.io/name: {{ include "maester.name" . }}
+      app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   strategy:
     rollingUpdate:
@@ -26,7 +24,7 @@ spec:
     metadata:
       labels:
         control-plane: controller-manager
-        app.kubernetes.io/name: {{ include "maester.name" . }}
+        app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
       {{- with .Values.annotations }}
       annotations:
@@ -41,7 +39,7 @@ spec:
             - /manager
           args:
             - --metrics-addr=127.0.0.1:8080
-            - --rulesConfigmapName={{ .Values.configMapName }}
+            - --rulesConfigmapName={{ include "oathkeeper-maester.getCM" . }}
             {{- if .Values.rulesConfigmapNamespace }}
             - --rulesConfigmapNamespace={{ .Values.rulesConfigmapNamespace }}
             {{- else }}
@@ -54,14 +52,13 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
-      serviceAccountName: maester-account
+      serviceAccountName: {{ include "oathkeeper-maester.name" . }}-account
       dnsPolicy: ClusterFirst
       restartPolicy: Always
-      schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 10
-      {{- with .Values.nodeSelector }}
       nodeSelector:
+      {{- with .Values.nodeSelector }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
     {{- with .Values.affinity }}
