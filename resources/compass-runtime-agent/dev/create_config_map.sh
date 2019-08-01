@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This config map is used by the
+# This config map is used by the Compass Runtime Agent it will be created by job in Compass chart
 
 DOMAIN=$(kubectl -n compass-system get vs compass-gateway -o 'jsonpath={.spec.hosts[0]}')
 
