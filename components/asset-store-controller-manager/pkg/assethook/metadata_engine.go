@@ -1,17 +1,18 @@
-package engine
+package assethook
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/api/v1alpha1"
 	pkgPath "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/path"
 	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -19,7 +20,7 @@ import (
 
 //go:generate mockery -name=MetadataExtractor -output=automock -outpkg=automock -case=underscore
 type MetadataExtractor interface {
-	Extract(ctx context.Context, object Accessor, basePath string, files []string, services []v1alpha2.WebhookService) ([]File, error)
+	Extract(ctx context.Context, basePath string, files []string, services []v1alpha2.WebhookService) ([]File, error)
 }
 
 type File struct {
@@ -28,20 +29,20 @@ type File struct {
 }
 
 type metadataEngine struct {
-	webhook    assethook.Webhook
 	timeout    time.Duration
 	fileReader func(filename string) ([]byte, error)
+	httpClient HttpClient
 }
 
-func NewMetadataExtractor(webhook assethook.Webhook, timeout time.Duration) MetadataExtractor {
+func NewMetadataExtractor(httpClient HttpClient, timeout time.Duration) MetadataExtractor {
 	return &metadataEngine{
-		webhook:    webhook,
+		httpClient: httpClient,
 		timeout:    timeout,
 		fileReader: ioutil.ReadFile,
 	}
 }
 
-func (e *metadataEngine) Extract(ctx context.Context, object Accessor, basePath string, files []string, services []v1alpha2.WebhookService) ([]File, error) {
+func (e *metadataEngine) Extract(ctx context.Context, basePath string, files []string, services []v1alpha2.WebhookService) ([]File, error) {
 	results := make(map[string]*json.RawMessage)
 	for _, service := range services {
 		filtered, err := pkgPath.Filter(files, service.Filter)
@@ -55,7 +56,7 @@ func (e *metadataEngine) Extract(ctx context.Context, object Accessor, basePath 
 		}
 
 		response := &v1alpha1.MetadataResponse{}
-		err = e.webhook.Do(ctx, contentType, service, body, response, e.timeout)
+		err = e.do(ctx, contentType, service, body, response)
 		if err != nil {
 			return nil, errors.Wrap(err, "while sending request to metadata webhook")
 		}
@@ -116,4 +117,43 @@ func (e *metadataEngine) buildQueryField(writer *multipart.Writer, filename, pat
 	}
 
 	return nil
+}
+
+func (e *metadataEngine) do(ctx context.Context, contentType string, webhook v1alpha2.WebhookService, body io.Reader, response interface{}) error {
+	ctx, cancel := context.WithTimeout(ctx, e.timeout)
+	defer cancel()
+
+	req, err := http.NewRequest("POST", e.getWebhookUrl(webhook), body)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", contentType)
+	req.WithContext(ctx)
+
+	rsp, err := e.httpClient.Do(req)
+	if err != nil {
+		return errors.Wrapf(err, "while sending request to webhook")
+	}
+	defer rsp.Body.Close()
+
+	if rsp.StatusCode != http.StatusOK {
+		return fmt.Errorf("invalid response from %s, code: %d", req.URL, rsp.StatusCode)
+	}
+
+	responseBytes, err := ioutil.ReadAll(rsp.Body)
+	if err != nil {
+		return errors.Wrapf(err, "while reading response body")
+	}
+
+	err = json.Unmarshal(responseBytes, response)
+	if err != nil {
+		return errors.Wrapf(err, "while parsing response body")
+	}
+
+	return nil
+}
+
+func (*metadataEngine) getWebhookUrl(service v1alpha2.WebhookService) string {
+	return fmt.Sprintf("http://%s.%s.svc.cluster.local%s", service.Name, service.Namespace, service.Endpoint)
 }
