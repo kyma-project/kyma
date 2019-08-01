@@ -302,8 +302,8 @@ global:
     path: eu.gcr.io/kyma-project
   logging_integration_tests:
     name: logging-integration-tests
-    dir: pr/
-    version: PR-4849
+    dir:
+    version: 1.4.0-rc1
   logging:
     promtail:
       config:

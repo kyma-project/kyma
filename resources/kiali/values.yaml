@@ -75,5 +75,5 @@ global:
     path: eu.gcr.io/kyma-project
   alpine_net:
     name: alpine-net
-    dir: develop
-    version: "149967d0"
+    dir:
+    version: 1.4.0-rc1
