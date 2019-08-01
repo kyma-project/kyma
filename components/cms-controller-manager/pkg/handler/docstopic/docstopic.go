@@ -356,7 +356,7 @@ func (h *docstopicHandler) convertToCommonAssetSpec(spec v1alpha1.Source, bucket
 		BucketRef: v1alpha2.AssetBucketRef{
 			Name: bucketName,
 		},
-		Metadata: spec.Metadata,
+		Parameters: spec.Parameters,
 	}
 }
 
@@ -391,7 +391,7 @@ func convertToAssetWebhookServices(services []webhookconfig.AssetWebhookService)
 				Endpoint:  s.Endpoint,
 				Filter:    s.Filter,
 			},
-			Metadata: s.Metadata,
+			Parameters: s.Parameters,
 		})
 	}
 	return result
