@@ -39,6 +39,8 @@ spec:
             value: {{ template "fullname" . }}-webhook-server-secret
           - name: BUILD_TIMEOUT
             value: "20"
+          - name: CONTROLLER_CONFIGMAP
+            value: {{ template "fullname" . }}-config
           - name: CONTROLLER_CONFIGMAP_NS
             valueFrom:
               fieldRef:
