@@ -1,8 +1,3 @@
-# Global or kyma related overrides
-global:
-  gateway: kyma-gateway
-  ingress:
-    domainName: kyma.local
 hpa:
   oathkeeper:
     minReplicas: 1
