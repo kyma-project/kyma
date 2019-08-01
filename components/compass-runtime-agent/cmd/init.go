@@ -45,7 +45,6 @@ func createNewSynchronizationService(namespace string, gatewayPort int) kyma.Ser
 }
 
 func newResourcesService(coreClientset *kubernetes.Clientset, nameResolver k8sconsts.NameResolver, namespace string, gatewayPort int) apiresources.Service {
-	// TODO: pass proxy port and the namespace in parameters
 	accessServiceManager := newAccessServiceManager(coreClientset, namespace, gatewayPort)
 
 	sei := coreClientset.CoreV1().Secrets(namespace)
