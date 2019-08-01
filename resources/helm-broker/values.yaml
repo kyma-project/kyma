@@ -12,7 +12,7 @@ ctrl:
   tmpDirSizeLimit: 1Gi
   resources:
     limits:
-      memory: 76Mi
+      memory: 96Mi
       cpu: 100m
     requests:
       memory: 32Mi
@@ -35,8 +35,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   helm_broker:
-    dir: pr/
-    version: "PR-4981"
+    dir: develop/
+    version: "d3389498"
   alpine_net:
     dir: develop/
     version: 149967d0
