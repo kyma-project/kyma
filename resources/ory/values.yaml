@@ -35,7 +35,7 @@ hydra:
             - 172.16.0.0/12
             - 192.168.0.0/16
       secrets:
-        system: a3m0kCx6f87n332sPw1
+        system: {{ randAlphaNum 18 }}
       urls:
         self: {}
       dsn: memory
@@ -83,13 +83,14 @@ oathkeeper:
           port: 4455
         api:
           port: 4456
-  resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
+  deployment:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
   image:
     tag: v0.17.1-beta.1
 

@@ -80,6 +80,7 @@ spec:
               port: http-admin
             initialDelaySeconds: 45
             periodSeconds: 10
+            failureThreshold: 5
           env:
             {{- $issuer := include "hydra.config.urls.issuer" . -}}
             {{- if $issuer }}
