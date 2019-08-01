@@ -41,6 +41,6 @@ func parseArgs() *options {
 
 func (o *options) String() string {
 	return fmt.Sprintf("--controllerSyncPeriod=%d --minimalConfigSyncTime=%d "+
-		"--tenant=%s --runtimeId=%s --tokenURLConfigFile=%s --namespace=%s ==gatewayPort=%d",
+		"--tenant=%s --runtimeId=%s --tokenURLConfigFile=%s --namespace=%s gatewayPort=%d",
 		o.controllerSyncPeriod, o.minimalConfigSyncTime, o.tenant, o.runtimeId, o.tokenURLConfigFile, o.namespace, o.gatewayPort)
 }

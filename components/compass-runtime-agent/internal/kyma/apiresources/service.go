@@ -6,6 +6,7 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/accessservice"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
+	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -42,12 +43,17 @@ type AccessServiceManager interface {
 
 func (s service) CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
 	k8sResourceName := s.nameResolver.GetResourceName(applicationName, serviceID)
+	log.Infof("Creating access service '%s' for application '%s' and service '%s'.", k8sResourceName, applicationName, serviceID)
 	appendedErr := s.accessServiceManager.Create(applicationName, applicationUID, serviceID, k8sResourceName)
+
 	if credentials != nil {
+		log.Infof("Creating secret for application '%s' and service '%s'.", applicationName, serviceID)
 		_, err := s.secretsService.Create(applicationName, applicationUID, serviceID, credentials)
 		if err != nil {
 			appendedErr = appendedErr.Append("", err)
 		}
+	} else {
+		log.Infof("Credentials for application '%s' and service '%s' not provided.", applicationName, serviceID)
 	}
 
 	return appendedErr
@@ -55,26 +61,35 @@ func (s service) CreateApiResources(applicationName string, applicationUID types
 
 func (s service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
 	k8sResourceName := s.nameResolver.GetResourceName(applicationName, serviceID)
+	log.Infof("Updating access service '%s' for application '%s' and service '%s'.", k8sResourceName, applicationName, serviceID)
 	appendedErr := s.accessServiceManager.Upsert(applicationName, applicationUID, serviceID, k8sResourceName)
+
 	if credentials != nil {
+		log.Infof("Updating secret for application '%s' and service '%s'.", applicationName, serviceID)
 		_, err := s.secretsService.Upsert(applicationName, applicationUID, serviceID, credentials)
 		if err != nil {
 			appendedErr = appendedErr.Append("", err)
 		}
+	} else {
+		log.Infof("Credentials for application '%s' and service '%s' not provided.", applicationName, serviceID)
 	}
 
 	return appendedErr
 }
 
 func (s service) DeleteApiResources(applicationName string, serviceID string, secretName string) apperrors.AppError {
-
-	appendedErr := s.accessServiceManager.Delete(s.nameResolver.GetResourceName(applicationName, serviceID))
+	k8sResourceName := s.nameResolver.GetResourceName(applicationName, serviceID)
+	log.Infof("Deleting access service '%s' for application '%s' and service '%s'.", k8sResourceName, applicationName, serviceID)
+	appendedErr := s.accessServiceManager.Delete(k8sResourceName)
 
 	if secretName != "" {
+		log.Infof("Deleting secret for application '%s' and service '%s'.", applicationName, serviceID)
 		err := s.secretsService.Delete(secretName)
 		if err != nil {
 			appendedErr = appendedErr.Append("", err)
 		}
+	} else {
+		log.Infof("Credentials for application '%s' and service '%s' not provided.", applicationName, serviceID)
 	}
 
 	return appendedErr
