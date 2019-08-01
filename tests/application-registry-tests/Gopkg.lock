@@ -78,7 +78,6 @@
   version = "v1.1.5"
 
 [[projects]]
-  branch = "update-istio-resources-in-app-registry"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -90,8 +89,7 @@
     "components/application-registry/pkg/client/clientset/versioned/scheme",
     "components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2"
   ]
-  revision = "12b86d52da3e45598f54807a0c25f29d1281aee1"
-  source = "github.com/Szymongib/kyma"
+  revision = "521d7260ce0d3baa27ee45945e430895423f5981"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -362,6 +360,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "abad1d89e7c2e7c838242c9d0950ffee6adea878be5aa7c1073e3e08c65f1367"
+  inputs-digest = "ac4993c974fc5708821e4f5c3dc12a1bf371d1063464520ab96344412531ea55"
   solver-name = "gps-cdcl"
   solver-version = 1
