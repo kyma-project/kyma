@@ -7,7 +7,7 @@ The repository in which you create your own addons must contain at least one `in
 
 ## The index yaml file
 
-Your remote addons repository can contain many addons defined in index `.yaml` files. Depending on your needs and preferences, you can create one or more index yaml files to categorize your addons. In the `index.yaml` file, provide an entry for every single addon from your addons repository. The `index.yaml` file must have the following structure:
+Your remote addons repository can contain many addons defined in index files. Depending on your needs and preferences, you can create one or more index files to categorize your addons. In the index file, provide an entry for every single addon from your addons repository. The index file must have the following structure:
 ```
 apiVersion: v1
 entries:
@@ -56,7 +56,7 @@ See the example of the Kyma `addons` repository [here](https://github.com/kyma-p
 
 >**TIP:** If you contribute to the Kyma [`addons`](https://github.com/kyma-project/addons/tree/master/addons) repository, you do not have to compress your addons as the system does it automatically.
 
-These are the allowed addon repository URLs provided in CAC or AC custom resources in case of HTTP or HTTPS servers:
+These are the allowed addon repository URLs provided in CAC or AC custom resources for HTTP or HTTPS servers:
 ```yaml
 apiVersion: addons.kyma-project.io/v1alpha1
 kind: ClusterAddonsConfiguration
@@ -91,9 +91,9 @@ See the example of the Kyma `addons` repository [here](https://github.com/kyma-p
 
 You can specify a Git repository URL by adding a special `git::` prefix to the URL address. After this prefix, provide any valid Git URL with one of the protocols supported by Git. In the URL, you can specify a branch, commit, or tag version. You can also add the `depth` query parameter with a number that specifies the last revision you want to clone from the repository.
 
->**NOTE:** If you use `depth` together with `ref`, make sure that `depth` number is big enough to clone a proper reference. For example, if you have `depth=1` and `ref` set to a commit from the distant past, the URL will not work as you clone only the first commit from the master and there is no option to do the checkout.
+>**NOTE:** If you use `depth` together with `ref`, make sure that `depth` number is big enough to clone a proper reference. For example, if you have `depth=1` and `ref` set to a commit from the distant past, the URL will not work as you clone only the first commit from the `master` branch and there is no option to do the checkout.
 
-These are the allowed addon repository URLs provided in CAC or AC custom resources in case of Git:
+These are the allowed addon repository URLs provided in CAC or AC custom resources for Git:
 ```yaml
 apiVersion: addons.kyma-project.io/v1alpha1
 kind: ClusterAddonsConfiguration
@@ -103,11 +103,11 @@ spec:
   repositories:
     # Git HTTPS protocol with a path to index.yaml
     - url: "git::https://github.com/kyma-project/addons.git//addons/index.yaml"
-    # Git HTTPS protocol with a path to index.yaml of a specified version and depth query parameter
+    # Git HTTPS protocol with a path to index.yaml of a specified version and a depth query parameter
     - url: "git::https://github.com/kyma-project/addons.git//addons/index.yaml?ref=1.2.0&depth=3"
-    # github.com URL with no prefix. It is automatically interpreted as Git repository source.
+    # github.com URL with no prefix. It is automatically interpreted as a Git repository source.
     - url: "github.com/kyma-project/addons//addons/index.yaml"
-    # bitbucket.org URL with no prefix. It is automatically interpreted as Git repository source.
+    # bitbucket.org URL with no prefix. It is automatically interpreted as a Git repository source.
     - url: "bitbucket.org/kyma-project/addons//addons/index.yaml"
 ```
 
