@@ -76,7 +76,7 @@ func TestService(t *testing.T) {
 			},
 		}
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
-		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, nil)
+		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, apperrors.Internal("some error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
@@ -151,13 +151,74 @@ func TestService(t *testing.T) {
 			},
 		}
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
-		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, nil)
+		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, apperrors.Internal("some error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
 
 		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, nil)
+
+		// then
+		require.Error(t, err)
+		accessServiceMock.AssertExpectations(t)
+		secretServiceMock.AssertExpectations(t)
+	})
+
+	t.Run("should delete API resources with credentials", func(t *testing.T) {
+		// given
+		accessServiceMock := &accessservicemock.AccessServiceManager{}
+		secretServiceMock := &secretmock.Service{}
+		nameResolver := &k8sconstsmocks.NameResolver{}
+
+		accessServiceMock.On("Delete", "resourceName").Return(nil)
+		secretServiceMock.On("Delete", "secretName").Return(nil)
+		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
+
+		// when
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+
+		err := service.DeleteApiResources("appName", "serviceID", "secretName")
+
+		// then
+		require.NoError(t, err)
+		accessServiceMock.AssertExpectations(t)
+		secretServiceMock.AssertExpectations(t)
+	})
+
+	t.Run("should delete API resources without credentials", func(t *testing.T) {
+		// given
+		accessServiceMock := &accessservicemock.AccessServiceManager{}
+		secretServiceMock := &secretmock.Service{}
+		nameResolver := &k8sconstsmocks.NameResolver{}
+
+		accessServiceMock.On("Delete", "resourceName").Return(nil)
+		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
+
+		// when
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+
+		err := service.DeleteApiResources("appName", "serviceID", "")
+
+		// then
+		require.NoError(t, err)
+		accessServiceMock.AssertExpectations(t)
+	})
+
+	t.Run("should not interrupt execution when error occurs on delete", func(t *testing.T) {
+		// given
+		accessServiceMock := &accessservicemock.AccessServiceManager{}
+		secretServiceMock := &secretmock.Service{}
+		nameResolver := &k8sconstsmocks.NameResolver{}
+
+		accessServiceMock.On("Delete", "resourceName").Return(apperrors.Internal("some error"))
+		secretServiceMock.On("Delete", "secretName").Return(apperrors.Internal("some error"))
+		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
+
+		// when
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+
+		err := service.DeleteApiResources("appName", "serviceID", "secretName")
 
 		// then
 		require.Error(t, err)
