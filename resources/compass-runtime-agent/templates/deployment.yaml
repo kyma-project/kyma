@@ -30,7 +30,14 @@ spec:
             - "--minimalConfigSyncTime={{ .Values.compassRuntimeAgent.sync.minimalConfigSyncTime }}"
             - "--integrationNamespace={{ .Values.compassRuntimeAgent.resources.integrationNamespace }}"
             - "--gatewayPort={{ .Values.compassRuntimeAgent.resources.gatewayPort }}"
+            - "--insecureConfigurationFetch={{ .Values.compassRuntimeAgent.config.insecureConfigurationFetch }}"
           envFrom:
           - configMapRef:
               optional: true
               name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "compass-gateway.{{ .Values.global.ingress.domainName }}"
+      {{ end }}

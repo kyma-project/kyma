@@ -19,5 +19,6 @@ compassRuntimeAgent:
     integrationNamespace: "kyma-integration"
     gatewayPort: 8080
   config:
+    insecureConfigurationFetch: true
     configMap:
       name: compass-agent-configuration
