@@ -20,7 +20,7 @@ func TestGetCatalogHappyPath(t *testing.T) {
 		redisID   string
 		testID    string
 	}{
-		"namespaced": {
+		"namespaced-http": {
 			kind:      sourceHTTP,
 			addonName: addonsConfigName,
 			redisID:   redisAddonID,
@@ -82,7 +82,7 @@ func TestGetCatalogHappyPath(t *testing.T) {
 		redisID   string
 		testID    string
 	}{
-		"cluster": {
+		"cluster-http": {
 			kind:      sourceHTTP,
 			addonName: addonsConfigName,
 			redisID:   redisAddonID,
@@ -138,7 +138,7 @@ func TestAddonsConflicts(t *testing.T) {
 		redisID string
 		testID  string
 	}{
-		"namespaced": {
+		"namespaced-http": {
 			kind:    sourceHTTP,
 			redisID: redisAddonID,
 			testID:  accTestAddonID,
@@ -158,25 +158,28 @@ func TestAddonsConflicts(t *testing.T) {
 				defer repo.removeTmpDir()
 				repository = repo
 			}
+			first := "first-" + c.kind
+			second := "second-" + c.kind
+			third := "third-" + c.kind
 
 			// when
 			//  - create an addons configuration with repo with redis addon
 			source := newSource(suite, c.kind, getSourceURLs(c.kind, []string{redisRepo}, repository))
-			suite.createAddonsConfiguration("stage", "first-"+c.kind, source)
+			suite.createAddonsConfiguration("stage", first, source)
 
 			// then
 			//  - wait for readiness and wait for service redis at the catalog endpoint
-			suite.waitForAddonsConfigurationPhase("stage", "first-"+c.kind, v1alpha1.AddonsConfigurationReady)
+			suite.waitForAddonsConfigurationPhase("stage", first, v1alpha1.AddonsConfigurationReady)
 			suite.waitForServicesInCatalogEndpoint("ns/stage", []string{c.redisID})
 
 			// when
 			// - create second addons configuration with a repo with redis and acc-test addons
 			sourceFull := newSource(suite, c.kind, getSourceURLs(c.kind, []string{redisAndAccTestRepo}, repository))
-			suite.createAddonsConfiguration("stage", "second-"+c.kind, sourceFull)
+			suite.createAddonsConfiguration("stage", second, sourceFull)
 
 			// then
 			// - expect phase "failed", still redis service at the catalog endpoint
-			suite.waitForAddonsConfigurationPhase("stage", "second-"+c.kind, v1alpha1.AddonsConfigurationFailed)
+			suite.waitForAddonsConfigurationPhase("stage", second, v1alpha1.AddonsConfigurationFailed)
 			suite.waitForServicesInCatalogEndpoint("ns/stage", []string{c.redisID})
 
 			// when
@@ -187,29 +190,29 @@ func TestAddonsConflicts(t *testing.T) {
 			case sourceGit:
 				source.removeURL(repository.path(redisRepo))
 			}
-			suite.updateAddonsConfigurationRepositories("stage", "first-"+c.kind, source)
+			suite.updateAddonsConfigurationRepositories("stage", first, source)
 
 			// then
 			// - expect for readiness and 2 services at the catalog endpoint
-			suite.waitForAddonsConfigurationPhase("stage", "second-"+c.kind, v1alpha1.AddonsConfigurationReady)
+			suite.waitForAddonsConfigurationPhase("stage", second, v1alpha1.AddonsConfigurationReady)
 			suite.waitForServicesInCatalogEndpoint("ns/stage", []string{c.redisID, c.testID})
 
 			// when
 			// - create third addons configuration with a repo with acc-test addons
 			sourceTesting := newSource(suite, c.kind, getSourceURLs(c.kind, []string{accTestRepo}, repository))
-			suite.createAddonsConfiguration("stage", "third-"+c.kind, sourceTesting)
+			suite.createAddonsConfiguration("stage", third, sourceTesting)
 
 			// then
 			// - expect failed (because of the conflict)
-			suite.waitForAddonsConfigurationPhase("stage", "third-"+c.kind, v1alpha1.AddonsConfigurationFailed)
+			suite.waitForAddonsConfigurationPhase("stage", third, v1alpha1.AddonsConfigurationFailed)
 
 			// when
 			// - delete second (cluster) addons configuration, so the third will be reprocessed
-			suite.deleteAddonsConfiguration("stage", "second-"+c.kind)
+			suite.deleteAddonsConfiguration("stage", second)
 
 			// then
 			// - expect readiness
-			suite.waitForAddonsConfigurationPhase("stage", "third-"+c.kind, v1alpha1.AddonsConfigurationReady)
+			suite.waitForAddonsConfigurationPhase("stage", third, v1alpha1.AddonsConfigurationReady)
 			suite.waitForServicesInCatalogEndpoint("ns/stage", []string{c.testID})
 		})
 	}
@@ -219,7 +222,7 @@ func TestAddonsConflicts(t *testing.T) {
 		redisID string
 		testID  string
 	}{
-		"cluster": {
+		"cluster-http": {
 			kind:    sourceHTTP,
 			redisID: redisAddonID,
 			testID:  accTestAddonID,
@@ -239,25 +242,28 @@ func TestAddonsConflicts(t *testing.T) {
 				defer repo.removeTmpDir()
 				repository = repo
 			}
+			first := "first-" + c.kind
+			second := "second-" + c.kind
+			third := "third-" + c.kind
 
 			// when
 			//  - create an cluster addons configuration with repo with redis addon
 			source := newSource(suite, c.kind, getSourceURLs(c.kind, []string{redisRepo}, repository))
-			suite.createClusterAddonsConfiguration("first-"+c.kind, source)
+			suite.createClusterAddonsConfiguration(first, source)
 
 			// then
 			//  - wait for readiness and wait for service redis at the catalog endpoint
-			suite.waitForClusterAddonsConfigurationPhase("first-"+c.kind, v1alpha1.AddonsConfigurationReady)
+			suite.waitForClusterAddonsConfigurationPhase(first, v1alpha1.AddonsConfigurationReady)
 			suite.waitForServicesInCatalogEndpoint("cluster", []string{c.redisID})
 
 			// when
 			// - create second cluster addons configuration with a repo with redis and acc-test addons
 			sourceFull := newSource(suite, c.kind, getSourceURLs(c.kind, []string{redisAndAccTestRepo}, repository))
-			suite.createClusterAddonsConfiguration("second-"+c.kind, sourceFull)
+			suite.createClusterAddonsConfiguration(second, sourceFull)
 
 			// then
 			// - expect phase "failed", still redis service at the catalog endpoint
-			suite.waitForClusterAddonsConfigurationPhase("second-"+c.kind, v1alpha1.AddonsConfigurationFailed)
+			suite.waitForClusterAddonsConfigurationPhase(second, v1alpha1.AddonsConfigurationFailed)
 			suite.waitForServicesInCatalogEndpoint("cluster", []string{c.redisID})
 
 			// when
@@ -268,29 +274,29 @@ func TestAddonsConflicts(t *testing.T) {
 			case sourceGit:
 				source.removeURL(repository.path(redisRepo))
 			}
-			suite.updateClusterAddonsConfigurationRepositories("first-"+c.kind, source)
+			suite.updateClusterAddonsConfigurationRepositories(first, source)
 
 			// then
 			// - expect for readiness and 2 services at the catalog endpoint
-			suite.waitForClusterAddonsConfigurationPhase("second-"+c.kind, v1alpha1.AddonsConfigurationReady)
+			suite.waitForClusterAddonsConfigurationPhase(second, v1alpha1.AddonsConfigurationReady)
 			suite.waitForServicesInCatalogEndpoint("cluster", []string{c.redisID, c.testID})
 
 			// when
 			// - create third cluster addons configuration with a repo with acc-test addons
 			sourceTesting := newSource(suite, c.kind, getSourceURLs(c.kind, []string{accTestRepo}, repository))
-			suite.createClusterAddonsConfiguration("third-"+c.kind, sourceTesting)
+			suite.createClusterAddonsConfiguration(third, sourceTesting)
 
 			// then
 			// - expect failed (because of the conflict)
-			suite.waitForClusterAddonsConfigurationPhase("third-"+c.kind, v1alpha1.AddonsConfigurationFailed)
+			suite.waitForClusterAddonsConfigurationPhase(third, v1alpha1.AddonsConfigurationFailed)
 
 			// when
 			// - delete second cluster addons configuration, so the third will be reprocessed
-			suite.deleteClusterAddonsConfiguration("second-" + c.kind)
+			suite.deleteClusterAddonsConfiguration(second)
 
 			// then
 			// - expect readiness
-			suite.waitForClusterAddonsConfigurationPhase("third-"+c.kind, v1alpha1.AddonsConfigurationReady)
+			suite.waitForClusterAddonsConfigurationPhase(third, v1alpha1.AddonsConfigurationReady)
 			suite.waitForServicesInCatalogEndpoint("cluster", []string{c.testID})
 		})
 	}
