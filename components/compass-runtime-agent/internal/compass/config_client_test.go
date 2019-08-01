@@ -3,7 +3,7 @@ package compass
 import (
 	"crypto/tls"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
+	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 
 	"github.com/pkg/errors"
 
@@ -370,13 +370,13 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 
 	for _, testCase := range []struct {
 		description       string
-		expectedApps      []synchronization.Application
+		expectedApps      []kymamodel.Application
 		clientConstructor GraphQLClientConstructor
 		shouldFail        bool
 	}{
 		{
 			description: "fetch applications",
-			expectedApps: []synchronization.Application{
+			expectedApps: []kymamodel.Application{
 				{Name: "App"},
 			},
 			clientConstructor: newMockClientConstructor(t, false),

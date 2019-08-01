@@ -11,8 +11,8 @@ import (
 
 type IstioV1alpha2Interface interface {
 	RESTClient() rest.Interface
-	ChecknothingsGetter
-	DeniersGetter
+	HandlersGetter
+	InstancesGetter
 	RulesGetter
 }
 
@@ -21,12 +21,12 @@ type IstioV1alpha2Client struct {
 	restClient rest.Interface
 }
 
-func (c *IstioV1alpha2Client) Checknothings(namespace string) ChecknothingInterface {
-	return newChecknothings(c, namespace)
+func (c *IstioV1alpha2Client) Handlers(namespace string) HandlerInterface {
+	return newHandlers(c, namespace)
 }
 
-func (c *IstioV1alpha2Client) Deniers(namespace string) DenierInterface {
-	return newDeniers(c, namespace)
+func (c *IstioV1alpha2Client) Instances(namespace string) InstanceInterface {
+	return newInstances(c, namespace)
 }
 
 func (c *IstioV1alpha2Client) Rules(namespace string) RuleInterface {

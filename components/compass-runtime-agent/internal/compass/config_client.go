@@ -3,7 +3,7 @@ package compass
 import (
 	"crypto/tls"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
+	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	"github.com/machinebox/graphql"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
@@ -17,7 +17,7 @@ const (
 
 //go:generate mockery -name=ConfigClient
 type ConfigClient interface {
-	FetchConfiguration(directorURL string, credentials certificates.Credentials) ([]synchronization.Application, error)
+	FetchConfiguration(directorURL string, credentials certificates.Credentials) ([]kymamodel.Application, error)
 }
 
 type GraphQLClientConstructor func(certificate tls.Certificate, graphqlEndpoint string, enableLogging bool) (gql.Client, error)
@@ -38,7 +38,7 @@ type configClient struct {
 
 // TODO - move to queries
 
-func (cc *configClient) FetchConfiguration(directorURL string, credentials certificates.Credentials) ([]synchronization.Application, error) {
+func (cc *configClient) FetchConfiguration(directorURL string, credentials certificates.Credentials) ([]kymamodel.Application, error) {
 	client, err := cc.gqlClientConstructor(credentials.AsTLSCertificate(), directorURL, true)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to create GraphQL client")
@@ -62,7 +62,7 @@ func (cc *configClient) FetchConfiguration(directorURL string, credentials certi
 
 	// TODO: After implementation of paging modify the fetching logic
 
-	applications := make([]synchronization.Application, len(applicationPage.Data))
+	applications := make([]kymamodel.Application, len(applicationPage.Data))
 	for i, app := range applicationPage.Data {
 		applications[i] = app.ToApplication()
 	}
