@@ -12,6 +12,8 @@ type options struct {
 	runtimeId             string
 
 	tokenURLConfigFile string
+	namespace          string
+	gatewayPort        int
 }
 
 func parseArgs() *options {
@@ -21,6 +23,8 @@ func parseArgs() *options {
 	runtimeId := flag.String("runtimeId", "", "ID of the Runtime.")
 
 	tokenURLConfigFile := flag.String("tokenURLConfigFile", "/config/token", "File containing URL with token to initialize connection with Compass.")
+	namespace := flag.String("namespace", "kyma-integration", "Namespace the resources will be created in.")
+	gatewayPort := flag.Int("gatewayPort", 8080, "Application Gateway port.")
 
 	flag.Parse()
 
@@ -30,11 +34,13 @@ func parseArgs() *options {
 		tenant:                *tenant,
 		runtimeId:             *runtimeId,
 		tokenURLConfigFile:    *tokenURLConfigFile,
+		namespace:             *namespace,
+		gatewayPort:           *gatewayPort,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--controllerSyncPeriod=%d --minimalConfigSyncTime=%d "+
-		"--tenant=%s --runtimeId=%s --tokenURLConfigFile=%s",
-		o.controllerSyncPeriod, o.minimalConfigSyncTime, o.tenant, o.runtimeId, o.tokenURLConfigFile)
+		"--tenant=%s --runtimeId=%s --tokenURLConfigFile=%s --namespace=%s ==gatewayPort=%d",
+		o.controllerSyncPeriod, o.minimalConfigSyncTime, o.tenant, o.runtimeId, o.tokenURLConfigFile, o.namespace, o.gatewayPort)
 }

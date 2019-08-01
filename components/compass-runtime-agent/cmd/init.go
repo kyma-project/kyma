@@ -16,7 +16,7 @@ import (
 	restclient "k8s.io/client-go/rest"
 )
 
-func createNewSynchronizationService() kyma.Service {
+func createNewSynchronizationService(namespace string, gatewayPort int) kyma.Service {
 	k8sConfig, err := restclient.InClusterConfig()
 	if err != nil {
 		log.Errorf("Failed to read k8s in-cluster configuration, %s", err)
@@ -36,20 +36,19 @@ func createNewSynchronizationService() kyma.Service {
 		return uninitializedKymaService{}
 	}
 
-	// TODO: pass the namespace name in parameters
-	nameResolver := k8sconsts.NewNameResolver("kyma-integration")
+	nameResolver := k8sconsts.NewNameResolver(namespace)
 	converter := applications.NewConverter(nameResolver)
 
-	resourcesService := newResourcesService(coreClientset, nameResolver)
+	resourcesService := newResourcesService(coreClientset, nameResolver, namespace, gatewayPort)
 
 	return kyma.NewService(applicationManager, converter, resourcesService)
 }
 
-func newResourcesService(coreClientset *kubernetes.Clientset, nameResolver k8sconsts.NameResolver) apiresources.Service {
+func newResourcesService(coreClientset *kubernetes.Clientset, nameResolver k8sconsts.NameResolver, namespace string, gatewayPort int) apiresources.Service {
 	// TODO: pass proxy port and the namespace in parameters
-	accessServiceManager := newAccessServiceManager(coreClientset, "kyma-integration", 8080)
+	accessServiceManager := newAccessServiceManager(coreClientset, namespace, gatewayPort)
 
-	sei := coreClientset.CoreV1().Secrets("kyma-integration")
+	sei := coreClientset.CoreV1().Secrets(namespace)
 	secretsRepository := secrets.NewRepository(sei)
 
 	secretsService := newSecretsService(secretsRepository, nameResolver)
