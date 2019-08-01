@@ -5,8 +5,7 @@
 global:
   isLocalEnv: false
   containerRegistry:
-    path:
-    # path: eu.gcr.io/kyma-project/
+    path: eu.gcr.io/kyma-project/
   knative_function_controller:
     dir: pr/
     version: PR-5121

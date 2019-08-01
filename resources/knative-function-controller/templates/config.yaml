@@ -15,7 +15,7 @@ metadata:
     app: {{ template "name" . }}
     control-plane: controller-manager
     controller-tools.k8s.io: "1.0"
-  name: function-controller-dockerfile-nodejs-6
+  name: dockerfile-nodejs-6
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: v1
@@ -35,7 +35,7 @@ metadata:
     app: {{ template "name" . }}
     control-plane: controller-manager
     controller-tools.k8s.io: "1.0"
-  name: function-controller-dockerfile-nodejs-8
+  name: dockerfile-nodejs-8
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: v1
@@ -43,9 +43,9 @@ data:
   dockerRegistry: {{ .Values.config.dockerRegistry }}
   runtimes: |
     - ID: nodejs8
-      dockerFileName: function-controller-dockerfile-nodejs-8
+      dockerFileName: dockerfile-nodejs-8
     - ID: nodejs6
-      dockerFileName: function-controller-dockerfile-nodejs-6
+      dockerFileName: dockerfile-nodejs-6
   serviceAccountName: {{ template "fullname" . }}-build
 kind: ConfigMap
 metadata:
