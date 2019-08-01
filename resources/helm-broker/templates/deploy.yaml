@@ -30,7 +30,7 @@ spec:
       - name: "init-{{ .Chart.Name }}"
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.alpine_net.dir }}alpine-net:{{ .Values.global.alpine_net.version }}"
         imagePullPolicy: {{ .Values.initImage.pullPolicy }}
-        command: ['sh', '-c', 'until $(curl --output /dev/null --silent --fail http://helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379/health); do echo waiting for etcd service; sleep 2; done;']
+        command: ['sh', '-c', 'until $(curl --output /dev/null --silent --fail http://helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379/health); do echo waiting for etcd service; sleep 1; done;']
 
       containers:
       - name: broker
@@ -82,7 +82,6 @@ spec:
               - curl
               - localhost:{{ .Values.service.internalPort }}/statusz
           failureThreshold: 3
-          initialDelaySeconds: 30
           periodSeconds: 3
           successThreshold: 1
           timeoutSeconds: 2
@@ -92,7 +91,6 @@ spec:
               - curl
               - localhost:{{ .Values.service.internalPort }}/statusz
           periodSeconds: 10
-          initialDelaySeconds: 30
           timeoutSeconds: 2
           successThreshold: 1
 
@@ -135,7 +133,6 @@ spec:
               - curl
               - localhost:{{ .Values.service.internalPort }}/statusz
           failureThreshold: 3
-          initialDelaySeconds: 30
           periodSeconds: 3
           successThreshold: 1
           timeoutSeconds: 2
@@ -145,7 +142,6 @@ spec:
               - curl
               - localhost:{{ .Values.service.internalPort }}/statusz
           periodSeconds: 10
-          initialDelaySeconds: 30
           timeoutSeconds: 2
           successThreshold: 1
 

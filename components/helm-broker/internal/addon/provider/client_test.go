@@ -56,12 +56,16 @@ func (p *fakeRepository) IndexReader() (io.ReadCloser, error) {
 
 // AddonLoadInfo returns info how to load addon
 func (p *fakeRepository) AddonLoadInfo(name addon.Name, version addon.Version) (provider.LoadType, string, error) {
-	return provider.ArchiveLoadType, p.AddonDocURL(name, version), nil
+	docsURL, err := p.AddonDocURL(name, version)
+	if err != nil {
+		return 0, "", err
+	}
+	return provider.ArchiveLoadType, docsURL, nil
 }
 
 // AddonDocURL returns download url for given addon
-func (p *fakeRepository) AddonDocURL(name addon.Name, version addon.Version) string {
-	return fmt.Sprintf("%s/%s-%s.tgz", p.path, name, version)
+func (p *fakeRepository) AddonDocURL(name addon.Name, version addon.Version) (string, error) {
+	return fmt.Sprintf("%s/%s-%s.tgz", p.path, name, version), nil
 }
 
 // Cleanup added to fulfil the interface expectation
