@@ -1,3 +1,8 @@
+# Global or kyma related overrides
+global:
+  istio:
+    gateway:
+      name: kyma-gateway
 hpa:
   oathkeeper:
     minReplicas: 1
