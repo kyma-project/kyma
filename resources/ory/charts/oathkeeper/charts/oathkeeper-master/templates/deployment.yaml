@@ -49,7 +49,7 @@ spec:
             - --rulesFileName={{ .Values.rulesFileName }}
             {{- end }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       serviceAccountName: {{ include "oathkeeper-maester.name" . }}-account
@@ -58,14 +58,14 @@ spec:
       securityContext: {}
       terminationGracePeriodSeconds: 10
       nodeSelector:
-      {{- with .Values.nodeSelector }}
+      {{- with .Values.deployment.nodeSelector }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
     {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.tolerations }}
+    {{- with .Values.deployment.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}

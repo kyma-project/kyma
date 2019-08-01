@@ -104,8 +104,8 @@ spec:
                   name: {{ include "hydra.fullname" . }}
                   key: secretsCookie
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
+      {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -113,7 +113,7 @@ spec:
     affinity:
       {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.tolerations }}
+    {{- with .Values.deployment.tolerations }}
     tolerations:
       {{- toYaml . | nindent 8 }}
     {{- end }}
