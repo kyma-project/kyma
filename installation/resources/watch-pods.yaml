@@ -48,7 +48,7 @@ metadata:
 spec:
   containers:
   - name: watch-pods
-    image: eu.gcr.io/kyma-project/develop/watch-pods:c3c08515
+    image: eu.gcr.io/kyma-project/watch-pods:1.4.0-rc1
     imagePullPolicy: Always
     env:
     - name: ARGS

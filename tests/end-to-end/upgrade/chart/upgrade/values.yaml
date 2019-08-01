@@ -2,8 +2,8 @@ containerRegistry:
   path: eu.gcr.io/kyma-project
 
 image:
-  dir: develop/tests/
-  version: 94f6cfef
+  dir: tests/
+  version: 1.4.0-rc1
   pullPolicy: "IfNotPresent"
 
 dex:

@@ -14,5 +14,5 @@ global:
       namespace: kyma-system
   monitoring_integration_tests:
     name: monitoring-integration-tests
-    dir: pr/
-    version: PR-4849
+    dir:
+    version: 1.4.0-rc1
