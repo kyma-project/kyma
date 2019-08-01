@@ -4,14 +4,14 @@ import "fmt"
 
 func ApplicationsForRuntimeQuery(runtimeID string) string {
 	return fmt.Sprintf(`query {
-	result: applicationsForRuntime(runtimeID: %s) {
+	result: applicationsForRuntime(runtimeID: "%s") {
 		%s
 	}
-}`, runtimeID, applicationsQueryData())
+}`, runtimeID, applicationsQueryData(runtimeID))
 }
 
-func applicationsQueryData() string {
-	return pageData(applicationData())
+func applicationsQueryData(runtimeID string) string {
+	return pageData(applicationData(runtimeID))
 }
 
 func pageData(item string) string {
@@ -29,7 +29,7 @@ func pageInfoData() string {
 		hasNextPage`
 }
 
-func applicationData() string {
+func applicationData(runtimeID string) string {
 	return fmt.Sprintf(`id
 		name
 		description
@@ -37,7 +37,7 @@ func applicationData() string {
 		apis {%s}
 		eventAPIs {%s}
 		documents {%s}
-	`, pageData(apiDefinitionData()), pageData(eventAPIData()), pageData(documentData()))
+	`, pageData(apiDefinitionData(runtimeID)), pageData(eventAPIData()), pageData(documentData()))
 }
 
 func authData() string {
@@ -77,16 +77,16 @@ func authData() string {
 		`)
 }
 
-func apiDefinitionData() string {
+func apiDefinitionData(runtimeID string) string {
 	return fmt.Sprintf(`		id
 		name
 		description
 		spec {%s}
 		targetURL
 		group
-		auth {%s}
+		auth(runtimeID: "%s") {%s}
 		defaultAuth {%s}
-		version {%s}`, apiSpecData(), runtimeAuthData(), authData(), versionData())
+		version {%s}`, apiSpecData(), runtimeID, runtimeAuthData(), authData(), versionData())
 }
 
 func apiSpecData() string {

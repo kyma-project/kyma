@@ -22,4 +22,15 @@ func TestCompassConnector_EstablishConnection(t *testing.T) {
 		assert.Equal(t, directorURL, connection.DirectorURL)
 	})
 
+	t.Run("should return error if director URL is empty", func(t *testing.T) {
+		// given
+		connector := NewCompassConnector("")
+
+		// when
+		_, err := connector.EstablishConnection()
+
+		// then
+		require.Error(t, err)
+	})
+
 }

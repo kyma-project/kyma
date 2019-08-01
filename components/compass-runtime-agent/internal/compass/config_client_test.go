@@ -24,7 +24,7 @@ const (
 	directorURL = "https://director.com/graphql"
 
 	expectedQuery = `query {
-	result: applicationsForRuntime(runtimeID: runtimeId) {
+	result: applicationsForRuntime(runtimeID: "runtimeId") {
 		data {
 		id
 		name
@@ -39,7 +39,7 @@ const (
 		type}
 		targetURL
 		group
-		auth {runtimeID
+		auth(runtimeID: "runtimeId") {runtimeID
 		auth {credential {
 				... on BasicCredentialData {
 					username

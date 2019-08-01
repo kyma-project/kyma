@@ -1,6 +1,8 @@
 package compass
 
 import (
+	"errors"
+
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 )
 
@@ -16,19 +18,23 @@ type Connector interface {
 
 func NewCompassConnector(directorURL string) Connector {
 	return &compassConnector{
-		directorULR: directorURL,
+		directorURL: directorURL,
 	}
 }
 
 type compassConnector struct {
-	directorULR string
+	directorURL string
 }
 
 func (cc *compassConnector) EstablishConnection() (EstablishedConnection, error) {
 	// TODO: here we should initialize connection with compass
 
+	if cc.directorURL == "" {
+		return EstablishedConnection{}, errors.New("Failed to establish connection. Director URL is eempty")
+	}
+
 	return EstablishedConnection{
 		// TODO: temporary solution until implementation of Connector
-		DirectorURL: cc.directorULR,
+		DirectorURL: cc.directorURL,
 	}, nil
 }

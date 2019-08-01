@@ -340,12 +340,18 @@ func fixInternalDocumentContent() []byte {
 func fixCompassAPIDefinition(suffix string, auth *graphql.RuntimeAuth, spec *graphql.APISpec) *graphql.APIDefinition {
 	desc := baseAPIDesc + suffix
 
+	var defaultAuth *graphql.Auth
+	if auth != nil {
+		defaultAuth = auth.Auth
+	}
+
 	return &graphql.APIDefinition{
 		ID:          baseAPIId + suffix,
 		Name:        baseAPIName + suffix,
 		Description: &desc,
 		TargetURL:   baseAPIURL + suffix,
 		Auth:        auth,
+		DefaultAuth: defaultAuth, // TODO: can be removed after switching to use Auth
 		Spec:        spec,
 	}
 }

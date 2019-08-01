@@ -3,9 +3,10 @@ package compass
 import (
 	"errors"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
-	"github.com/sirupsen/logrus"
 )
 
 func (app Application) ToApplication() kymamodel.Application {
@@ -99,8 +100,18 @@ func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinition {
 
 	// TODO: implement RequestParameters after update in Compass
 
-	if compassAPI.Auth != nil {
-		credentials, err := convertAuth(compassAPI.Auth.Auth)
+	// TODO: we should use compassAPI.Auth instead of compassAPI.DefaultAuth but it is not working yet in Director
+	//if compassAPI.Auth != nil {
+	//	credentials, err := convertAuth(compassAPI.Auth.Auth)
+	//	if err != nil {
+	//		logrus.Errorf("Failed to convert Compass Authentication to credentials: %s", err.Error())
+	//	} else {
+	//		api.Credentials = credentials
+	//	}
+	//}
+
+	if compassAPI.DefaultAuth != nil {
+		credentials, err := convertAuth(compassAPI.DefaultAuth)
 		if err != nil {
 			logrus.Errorf("Failed to convert Compass Authentication to credentials: %s", err.Error())
 		} else {
