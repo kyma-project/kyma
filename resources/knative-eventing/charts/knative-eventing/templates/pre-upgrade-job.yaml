@@ -3,9 +3,9 @@ kind: ServiceAccount
 metadata:
   name: pre-upgrade-knative-eventing
   annotations:
-    "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "-5"
+    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "-5"
   labels:
     job: pre-upgrade-knative-eventing
 ---
@@ -46,9 +46,9 @@ data:
 kind: ConfigMap
 metadata:
   annotations:
-    "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "-5"
+    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "-5"
   labels:
     job: pre-upgrade-knative-eventing
   name: pre-upgrade-knative-eventing
@@ -58,9 +58,9 @@ kind: ClusterRoleBinding
 metadata:
   name: pre-upgrade
   annotations:
-    "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "-4"
+    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "-4"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -74,9 +74,9 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    "helm.sh/hook-delete-policy": before-hook-creation
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "-3"
+    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "-3"
   labels:
     job: pre-upgrade-knative-eventing
   name: pre-upgrade-knative-eventing

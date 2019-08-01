@@ -7,7 +7,7 @@ metadata:
     package: cloudwatch
     istio: mixer-adapter
   annotations:
-    "helm.sh/resource-policy": keep
+    helm.sh/resource-policy: keep
 spec:
   group: config.istio.io
   names:
@@ -29,7 +29,7 @@ metadata:
     package: dogstatsd
     istio: mixer-adapter
   annotations:
-    "helm.sh/resource-policy": keep
+    helm.sh/resource-policy: keep
 spec:
   group: config.istio.io
   names:
@@ -52,7 +52,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    "helm.sh/resource-policy": keep
+    helm.sh/resource-policy: keep
 spec:
   group: networking.istio.io
   names:
@@ -74,7 +74,7 @@ metadata:
     package: zipkin
     istio: mixer-adapter
   annotations:
-    "helm.sh/resource-policy": keep
+    helm.sh/resource-policy: keep
 spec:
   group: config.istio.io
   names:

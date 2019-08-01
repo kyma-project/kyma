@@ -9,7 +9,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
     - ""
@@ -33,7 +33,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-self: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
     - "authorization.k8s.io"
@@ -53,7 +53,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-subject: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
     - "authorization.k8s.io"
@@ -73,7 +73,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-edit: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
     - "apiextensions.k8s.io"
@@ -109,7 +109,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-k8s-view: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
 {{ toYaml .Values.clusterRoles.apiGroups.k8s | indent 4 }}

@@ -7,9 +7,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: istio-init-cleaner
   annotations:
-    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "10"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "10"
 spec:
   template:
     metadata:
@@ -37,9 +37,9 @@ metadata:
   name: istio-init-cleaner-service-account
   namespace: {{ .Release.Namespace }}
   annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "0"
-    "helm.sh/hook-delete-policy": "before-hook-creation"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
   labels:
     app: istio-init
     istio: init
@@ -52,9 +52,9 @@ metadata:
     app: istio-init
     istio: istio-init
   annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "0"
-    "helm.sh/hook-delete-policy": "before-hook-creation"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
 rules:
 - apiGroups: ["batch", "extensions"]
   resources: ["jobs"]
@@ -68,9 +68,9 @@ metadata:
     app: istio-init
     istio: init
   annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "0"
-    "helm.sh/hook-delete-policy": "before-hook-creation"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role

@@ -28,7 +28,7 @@ metadata:
     app: dex
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
-    "helm.sh/hook-weight": "1"
+    helm.sh/hook-weight: "1"
 subjects:
   - kind: ServiceAccount
     name: dex-account # Service account assigned to the dex pod.

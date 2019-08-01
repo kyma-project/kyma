@@ -9,7 +9,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-monitoring-view: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
 {{ toYaml .Values.clusterRoles.apiGroups.monitoring | indent 4 }}
@@ -28,7 +28,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-monitoring-admin: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
 {{ toYaml .Values.clusterRoles.apiGroups.monitoring | indent 4 }}
@@ -47,7 +47,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-monitoring-edit: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
 {{ toYaml .Values.clusterRoles.apiGroups.monitoring | indent 4 }}
@@ -67,7 +67,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-dex-view: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
 {{ toYaml .Values.clusterRoles.apiGroups.dex | indent 4 }}
@@ -86,7 +86,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-dex-admin: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
 {{ toYaml .Values.clusterRoles.apiGroups.dex | indent 4 }}
@@ -105,7 +105,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-dex-edit: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
 {{ toYaml .Values.clusterRoles.apiGroups.dex | indent 4 }}
