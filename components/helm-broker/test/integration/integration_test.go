@@ -46,7 +46,7 @@ func TestGetCatalogHappyPath(t *testing.T) {
 			suite.assertNoServicesInCatalogEndpoint("ns/stage")
 
 			// when
-			source := newSource(suite, c.kind, getSourceURLs(c.kind, []string{redisAndAccTestRepo}, repository))
+			source := newSource(c.kind, suite, repository, []string{redisAndAccTestRepo})
 			suite.createAddonsConfiguration("stage", c.addonName, source)
 
 			// then
@@ -61,12 +61,7 @@ func TestGetCatalogHappyPath(t *testing.T) {
 			suite.waitForServicesInCatalogEndpoint("ns/prod", []string{c.redisID, c.testID})
 
 			// when
-			switch c.kind {
-			case sourceHTTP:
-				source.removeURL(redisAndAccTestRepo)
-			case sourceGit:
-				source.removeURL(repository.path(redisAndAccTestRepo))
-			}
+			source.removeURL(redisAndAccTestRepo)
 			suite.updateAddonsConfigurationRepositories("stage", c.addonName, source)
 			suite.updateAddonsConfigurationRepositories("prod", c.addonName, source)
 
@@ -106,7 +101,7 @@ func TestGetCatalogHappyPath(t *testing.T) {
 			suite.assertNoServicesInCatalogEndpoint("cluster")
 
 			// when
-			source := newSource(suite, c.kind, getSourceURLs(c.kind, []string{redisRepo}, repository))
+			source := newSource(c.kind, suite, repository, []string{redisRepo})
 			suite.createClusterAddonsConfiguration(c.addonName, source)
 
 			// then
@@ -114,12 +109,7 @@ func TestGetCatalogHappyPath(t *testing.T) {
 			suite.waitForServicesInCatalogEndpoint("cluster", []string{c.redisID})
 
 			// when
-			switch c.kind {
-			case sourceHTTP:
-				source.removeURL(redisRepo)
-			case sourceGit:
-				source.removeURL(repository.path(redisRepo))
-			}
+			source.removeURL(redisRepo)
 			suite.updateClusterAddonsConfigurationRepositories(c.addonName, source)
 
 			// then
@@ -164,7 +154,7 @@ func TestAddonsConflicts(t *testing.T) {
 
 			// when
 			//  - create an addons configuration with repo with redis addon
-			source := newSource(suite, c.kind, getSourceURLs(c.kind, []string{redisRepo}, repository))
+			source := newSource(c.kind, suite, repository, []string{redisRepo})
 			suite.createAddonsConfiguration("stage", first, source)
 
 			// then
@@ -174,7 +164,7 @@ func TestAddonsConflicts(t *testing.T) {
 
 			// when
 			// - create second addons configuration with a repo with redis and acc-test addons
-			sourceFull := newSource(suite, c.kind, getSourceURLs(c.kind, []string{redisAndAccTestRepo}, repository))
+			sourceFull := newSource(c.kind, suite, repository, []string{redisAndAccTestRepo})
 			suite.createAddonsConfiguration("stage", second, sourceFull)
 
 			// then
@@ -184,12 +174,7 @@ func TestAddonsConflicts(t *testing.T) {
 
 			// when
 			// - remove repo with redis from the first (cluster) addon
-			switch c.kind {
-			case sourceHTTP:
-				source.removeURL(redisRepo)
-			case sourceGit:
-				source.removeURL(repository.path(redisRepo))
-			}
+			source.removeURL(redisRepo)
 			suite.updateAddonsConfigurationRepositories("stage", first, source)
 
 			// then
@@ -199,7 +184,7 @@ func TestAddonsConflicts(t *testing.T) {
 
 			// when
 			// - create third addons configuration with a repo with acc-test addons
-			sourceTesting := newSource(suite, c.kind, getSourceURLs(c.kind, []string{accTestRepo}, repository))
+			sourceTesting := newSource(c.kind, suite, repository, []string{accTestRepo})
 			suite.createAddonsConfiguration("stage", third, sourceTesting)
 
 			// then
@@ -248,7 +233,7 @@ func TestAddonsConflicts(t *testing.T) {
 
 			// when
 			//  - create an cluster addons configuration with repo with redis addon
-			source := newSource(suite, c.kind, getSourceURLs(c.kind, []string{redisRepo}, repository))
+			source := newSource(c.kind, suite, repository, []string{redisRepo})
 			suite.createClusterAddonsConfiguration(first, source)
 
 			// then
@@ -258,7 +243,7 @@ func TestAddonsConflicts(t *testing.T) {
 
 			// when
 			// - create second cluster addons configuration with a repo with redis and acc-test addons
-			sourceFull := newSource(suite, c.kind, getSourceURLs(c.kind, []string{redisAndAccTestRepo}, repository))
+			sourceFull := newSource(c.kind, suite, repository, []string{redisAndAccTestRepo})
 			suite.createClusterAddonsConfiguration(second, sourceFull)
 
 			// then
@@ -268,12 +253,7 @@ func TestAddonsConflicts(t *testing.T) {
 
 			// when
 			// - remove repo with redis from the first (cluster) addon
-			switch c.kind {
-			case sourceHTTP:
-				source.removeURL(redisRepo)
-			case sourceGit:
-				source.removeURL(repository.path(redisRepo))
-			}
+			source.removeURL(redisRepo)
 			suite.updateClusterAddonsConfigurationRepositories(first, source)
 
 			// then
@@ -283,7 +263,7 @@ func TestAddonsConflicts(t *testing.T) {
 
 			// when
 			// - create third cluster addons configuration with a repo with acc-test addons
-			sourceTesting := newSource(suite, c.kind, getSourceURLs(c.kind, []string{accTestRepo}, repository))
+			sourceTesting := newSource(c.kind, suite, repository, []string{accTestRepo})
 			suite.createClusterAddonsConfiguration(third, sourceTesting)
 
 			// then
@@ -302,15 +282,94 @@ func TestAddonsConflicts(t *testing.T) {
 	}
 }
 
-func getSourceURLs(kind string, urls []string, repo *gitRepo) []string {
-	if kind == sourceHTTP {
-		return urls
+func TestDocsTopic(t *testing.T) {
+	// given
+	suite := newTestSuite(t)
+	defer suite.tearDown()
+
+	for name, c := range map[string]struct {
+		kind        string
+		addonName   string
+		docsTopicID string
+	}{
+		"namespaced-http": {
+			kind:        sourceHTTP,
+			addonName:   addonsConfigName,
+			docsTopicID: accTestAddonID,
+		},
+		"namespaced-git": {
+			kind:        sourceGit,
+			addonName:   addonsConfigNameGit,
+			docsTopicID: accTestAddonIDGit,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			var repository *gitRepo
+			if c.kind == sourceGit {
+				repo, err := newGitRepository(t, addonSource)
+				assert.NoError(t, err)
+
+				defer repo.removeTmpDir()
+				repository = repo
+			}
+
+			// when
+			source := newSource(c.kind, suite, repository, []string{redisAndAccTestRepo})
+			suite.createAddonsConfiguration("stage", c.addonName, source)
+
+			// then
+			suite.waitForAddonsConfigurationPhase("stage", c.addonName, v1alpha1.AddonsConfigurationReady)
+			suite.assertDocsTopicExist("stage", c.docsTopicID)
+
+			// when
+			source.replaceURL(redisRepo)
+			suite.updateAddonsConfigurationRepositories("stage", c.addonName, source)
+
+			// then
+			suite.assertDocsTopicListIsEmpty()
+		})
 	}
 
-	sourceURLs := []string{}
-	for _, u := range urls {
-		sourceURLs = append(sourceURLs, repo.path(u))
-	}
+	for name, c := range map[string]struct {
+		kind        string
+		addonName   string
+		docsTopicID string
+	}{
+		"cluster-http": {
+			kind:        sourceHTTP,
+			addonName:   addonsConfigName,
+			docsTopicID: accTestAddonID,
+		},
+		"cluster-git": {
+			kind:        sourceGit,
+			addonName:   addonsConfigNameGit,
+			docsTopicID: accTestAddonIDGit,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			var repository *gitRepo
+			if c.kind == sourceGit {
+				repo, err := newGitRepository(t, addonSource)
+				assert.NoError(t, err)
 
-	return sourceURLs
+				defer repo.removeTmpDir()
+				repository = repo
+			}
+
+			// when
+			source := newSource(c.kind, suite, repository, []string{redisAndAccTestRepo})
+			suite.createClusterAddonsConfiguration(c.addonName, source)
+
+			// then
+			suite.waitForClusterAddonsConfigurationPhase(c.addonName, v1alpha1.AddonsConfigurationReady)
+			suite.assertClusterDocsTopicExist(c.docsTopicID)
+
+			// when
+			source.replaceURL(redisRepo)
+			suite.updateClusterAddonsConfigurationRepositories(c.addonName, source)
+
+			// then
+			suite.assertClusterDocsTopicListIsEmpty()
+		})
+	}
 }

@@ -12,15 +12,17 @@ const (
 )
 
 type repositorySource struct {
-	ts   *testSuite
-	kind string
-	urls []string
+	kind    string
+	ts      *testSuite
+	gitRepo *gitRepo
+	urls    []string
 }
 
-func newSource(ts *testSuite, kind string, urls []string) *repositorySource {
+func newSource(kind string, ts *testSuite, repository *gitRepo, urls []string) *repositorySource {
 	rs := &repositorySource{
-		ts:   ts,
-		kind: kind,
+		ts:      ts,
+		gitRepo: repository,
+		kind:    kind,
 	}
 
 	sourceUrls := []string{}
@@ -37,7 +39,7 @@ func (rs *repositorySource) generateURL(url string) string {
 	case sourceHTTP:
 		return rs.ts.repoServer.URL + "/" + url
 	case sourceGit:
-		return "git::" + url
+		return "git::" + rs.gitRepo.path(url)
 	default:
 		rs.ts.t.Fatalf("Unsupported source kind: %s", rs.kind)
 	}
@@ -51,12 +53,17 @@ func (rs *repositorySource) removeURL(url string) {
 
 	for _, u := range rs.urls {
 		if u == path {
+			rs.ts.t.Logf("URL %q was removed from repository source", u)
 			continue
 		}
 		newUrls = append(newUrls, u)
 	}
 
 	rs.urls = newUrls
+}
+
+func (rs *repositorySource) replaceURL(url string) {
+	rs.urls = []string{rs.generateURL(url)}
 }
 
 func (rs *repositorySource) generateAddonRepositories() []v1alpha1.SpecRepository {

@@ -11,8 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/helm-broker/internal/assetstore"
-
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
@@ -20,14 +18,18 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/wait"
 	k8s "k8s.io/client-go/kubernetes"
 	kubernetes "k8s.io/client-go/kubernetes/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
+	dtv1alpha1 "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/assetstore"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/assetstore/automock"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
@@ -62,6 +64,7 @@ func newTestSuite(t *testing.T) *testSuite {
 	require.NoError(t, apis.AddToScheme(sch))
 	require.NoError(t, v1beta1.AddToScheme(sch))
 	require.NoError(t, corev1.AddToScheme(sch))
+	require.NoError(t, dtv1alpha1.AddToScheme(sch))
 
 	k8sClientset := kubernetes.NewSimpleClientset()
 
@@ -325,4 +328,82 @@ func (ts *testSuite) updateClusterAddonsConfigurationRepositories(name string, s
 
 	clusterAddonsConfiguration.Spec.Repositories = source.generateAddonRepositories()
 	require.NoError(ts.t, ts.dynamicClient.Update(context.TODO(), &clusterAddonsConfiguration))
+}
+
+func (ts *testSuite) assertDocsTopicExist(namespace, name string) {
+	var docsTopic dtv1alpha1.DocsTopic
+
+	err := wait.Poll(1*time.Second, 30*time.Second, func() (done bool, err error) {
+		key := types.NamespacedName{Name: name, Namespace: namespace}
+		err = ts.dynamicClient.Get(context.TODO(), key, &docsTopic)
+		if errors.IsNotFound(err) {
+			ts.t.Logf("DocsTopic %q not found. Retry...", key)
+			return false, nil
+		}
+		if err != nil {
+			return false, err
+		}
+
+		return true, nil
+	})
+
+	require.NoError(ts.t, err)
+}
+
+func (ts *testSuite) assertClusterDocsTopicExist(name string) {
+	var clusterDocsTopic dtv1alpha1.ClusterDocsTopic
+
+	err := wait.Poll(1*time.Second, 30*time.Second, func() (done bool, err error) {
+		key := types.NamespacedName{Name: name}
+		err = ts.dynamicClient.Get(context.TODO(), key, &clusterDocsTopic)
+		if errors.IsNotFound(err) {
+			ts.t.Logf("ClusterDocsTopic %q not found. Retry...", key)
+			return false, nil
+		}
+		if err != nil {
+			return false, err
+		}
+
+		return true, nil
+	})
+
+	require.NoError(ts.t, err)
+}
+
+func (ts *testSuite) assertDocsTopicListIsEmpty() {
+	var docsTopicList dtv1alpha1.DocsTopicList
+
+	err := wait.Poll(1*time.Second, 30*time.Second, func() (done bool, err error) {
+		err = ts.dynamicClient.List(context.TODO(), &client.ListOptions{}, &docsTopicList)
+		if err != nil {
+			return false, err
+		}
+		if len(docsTopicList.Items) != 0 {
+			ts.t.Logf("DocsTopicList is not empty, current size %d. Retry...", len(docsTopicList.Items))
+			return false, nil
+		}
+
+		return true, nil
+	})
+
+	require.NoError(ts.t, err)
+}
+
+func (ts *testSuite) assertClusterDocsTopicListIsEmpty() {
+	var clusterDocsTopicList dtv1alpha1.ClusterDocsTopicList
+
+	err := wait.Poll(1*time.Second, 30*time.Second, func() (done bool, err error) {
+		err = ts.dynamicClient.List(context.TODO(), &client.ListOptions{}, &clusterDocsTopicList)
+		if err != nil {
+			return false, err
+		}
+		if len(clusterDocsTopicList.Items) != 0 {
+			ts.t.Logf("ClusterDocsTopicList is not empty, current size %d. Retry...", len(clusterDocsTopicList.Items))
+			return false, nil
+		}
+
+		return true, nil
+	})
+
+	require.NoError(ts.t, err)
 }
