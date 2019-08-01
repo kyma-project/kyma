@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"crypto/tls"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/testkit"
 )
 
@@ -9,6 +10,8 @@ import (
 type ConnectApplication struct {
 	connector *testkit.ConnectorClient
 	state     ConnectApplicationState
+	tenant    string
+	group     string
 }
 
 // ConnectApplicationState allows ConnectApplication to save connected http.Client for further use by other steps
@@ -17,10 +20,12 @@ type ConnectApplicationState interface {
 }
 
 // NewConnectApplication returns new ConnectApplication
-func NewConnectApplication(connector *testkit.ConnectorClient, state ConnectApplicationState) *ConnectApplication {
+func NewConnectApplication(connector *testkit.ConnectorClient, state ConnectApplicationState, tenant, group string) *ConnectApplication {
 	return &ConnectApplication{
 		connector: connector,
 		state:     state,
+		tenant:    tenant,
+		group:     group,
 	}
 }
 
@@ -31,7 +36,7 @@ func (s ConnectApplication) Name() string {
 
 // Run executes the step
 func (s ConnectApplication) Run() error {
-	infoURL, err := s.connector.GetToken()
+	infoURL, err := s.connector.GetToken(s.tenant, s.group)
 	if err != nil {
 		return err
 	}
