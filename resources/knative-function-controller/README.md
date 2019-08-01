@@ -14,7 +14,7 @@ This project contains the chart for the Function Controller.
 
 ## Installation
 
-### Install helm chart
+### Install Helm chart
 
 Run the following script to install the chart:
 
@@ -28,7 +28,8 @@ helm install knative-function-controller \
 ```
 
 
-### Create a ServiceAccount to enable knativeBuild docker builds
+### Create a ServiceAccount to enable knativeBuild Docker builds
+
 
 Currently you cannot run builds in every existing namespace of your cluster. ServiceAccounts with linked docker
 repository credentials have to be created for each namespace that will be used for the knative-function controller.
@@ -63,10 +64,10 @@ data:
 EOF
 ```
 
-## Your first function
+## Running the first function
 
 Currently there is no UI support for the new knative-function-controller.
-please run your first function like this:
+Run your first function in the following way:
 
 ```bash
 export NAMESPACE=<NAMESPACE>
@@ -90,7 +91,7 @@ spec:
 EOF
 ``` 
 
-To get the url of your new service check the output of
+To get the URL of your new service, run:
 ```bash
 kubectl get ksvc -n $NAMESPACE
 ```
