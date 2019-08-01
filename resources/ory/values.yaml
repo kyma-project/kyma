@@ -71,9 +71,9 @@ oathkeeper:
           only:
               - sessionid
         oauth2_client_credentials:
-          enabled: false
+          enabled: true
           # REQUIRED IF ENABLED - The OAuth 2.0 Token Endpoint that will be used to validate the client credentials.
-          token_url: http://some-serivce/oauth2/token
+          token_url: http://ory-hydra-public:4444/oauth2/token
         oauth2_introspection:
           # Set enabled to true if the authenticator should be enabled and false to disable the authenticator. Defaults to false.
           enabled: true
