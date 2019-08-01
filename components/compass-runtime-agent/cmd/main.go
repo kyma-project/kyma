@@ -15,6 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 
+	"github.com/kelseyhightower/envconfig"
 	apis "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	log "github.com/sirupsen/logrus"
 )
@@ -23,6 +24,13 @@ func main() {
 	log.Infoln("Starting Runtime Agent")
 	options := parseArgs()
 	log.Infof("Options: %s", options)
+
+	var envConfig EnvConfig
+	err := envconfig.Process("", &envConfig)
+	if err != nil {
+		log.Error("Failed to process environment variables")
+	}
+	log.Infof("Env config: %s", envConfig)
 
 	// Get a config to talk to the apiserver
 	log.Info("Setting up client for manager")
@@ -57,14 +65,14 @@ func main() {
 	}
 
 	certManager := certificates.NewCredentialsManager()
-	compassConfigClient := compass.NewConfigurationClient(options.tenant, options.runtimeId, graphql.New)
+	compassConfigClient := compass.NewConfigurationClient(envConfig.Tenant, envConfig.RuntimeId, graphql.New)
 	syncService, err := createNewSynchronizationService(options.integrationNamespace, options.gatewayPort)
 	if err != nil {
 		log.Errorf("Failed to create synchronization service, %s", err.Error())
 		os.Exit(1)
 	}
 
-	compassConnector := compass.NewCompassConnector(options.tokenURLConfigFile)
+	compassConnector := compass.NewCompassConnector(envConfig.DirectorURL)
 	connectionSupervisor := compassconnection.NewSupervisor(
 		compassConnector,
 		compassConnectionCRClient.CompassConnections(),
