@@ -168,14 +168,14 @@ func (p *processor) doFile(ctx context.Context, cancel context.CancelFunc, baseP
 		return
 	}
 
-	success, rspBody, err := p.call(ctx, contentType, service.WebhookService, body)
+	success, modified, rspBody, err := p.call(ctx, contentType, service.WebhookService, body)
 	if err != nil {
 		errChan <- errors.Wrap(err, "while sending request to webhook")
 		return
 	}
 	defer rspBody.Close()
 
-	if success && p.onSuccess != nil {
+	if success && modified && p.onSuccess != nil {
 		p.onSuccess(ctx, basePath, path, rspBody, messagesChan, errChan)
 	} else if !success && p.onFail != nil {
 		p.onFail(ctx, basePath, path, rspBody, messagesChan, errChan)
@@ -216,13 +216,13 @@ func (p *processor) buildQuery(basePath, filePath, parameters string) (io.Reader
 	return buffer, formWriter.FormDataContentType(), nil
 }
 
-func (p *processor) call(ctx context.Context, contentType string, webhook v1alpha2.WebhookService, body io.Reader) (bool, io.ReadCloser, error) {
+func (p *processor) call(ctx context.Context, contentType string, webhook v1alpha2.WebhookService, body io.Reader) (bool, bool, io.ReadCloser, error) {
 	context, cancel := context.WithTimeout(ctx, p.timeout)
 	defer cancel()
 
 	req, err := http.NewRequest("POST", p.getWebhookUrl(webhook), body)
 	if err != nil {
-		return false, nil, errors.Wrap(err, "while creating request")
+		return false, false, nil, errors.Wrap(err, "while creating request")
 	}
 
 	req.Header.Set("Content-Type", contentType)
@@ -230,15 +230,17 @@ func (p *processor) call(ctx context.Context, contentType string, webhook v1alph
 
 	rsp, err := p.httpClient.Do(req)
 	if err != nil {
-		return false, nil, errors.Wrapf(err, "while sending request to webhook")
+		return false, false, nil, errors.Wrapf(err, "while sending request to webhook")
 	}
 
 	switch rsp.StatusCode {
 	case http.StatusOK, http.StatusUnprocessableEntity:
 		success := rsp.StatusCode == http.StatusOK
-		return success, rsp.Body, nil
+		return success, success, rsp.Body, nil
+	case http.StatusNotModified:
+		return true, false, rsp.Body, nil
 	default:
-		return false, rsp.Body, fmt.Errorf("invalid response from %s, code: %d", req.URL, rsp.StatusCode)
+		return false, false, rsp.Body, fmt.Errorf("invalid response from %s, code: %d", req.URL, rsp.StatusCode)
 	}
 }
 
