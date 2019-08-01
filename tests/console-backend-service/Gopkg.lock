@@ -150,7 +150,7 @@
   version = "v0.1.36"
 
 [[projects]]
-  digest = "1:803310efa82e589c89cc044342e5f54adbf083826b0274f734de2e6940fbd168"
+  digest = "1:52327ce22e8edaa69bab0502d09395712489ef3e31359942abd063f5ccd480cf"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
@@ -164,6 +164,10 @@
     "components/console-backend-service/pkg/client/clientset/versioned",
     "components/console-backend-service/pkg/client/clientset/versioned/scheme",
     "components/console-backend-service/pkg/client/clientset/versioned/typed/ui/v1alpha1",
+    "components/helm-broker/pkg/apis/addons/v1alpha1",
+    "components/helm-broker/pkg/client/clientset/versioned",
+    "components/helm-broker/pkg/client/clientset/versioned/scheme",
+    "components/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1",
     "components/idppreset/pkg/apis/authentication/v1alpha1",
     "components/idppreset/pkg/client/clientset/versioned",
     "components/idppreset/pkg/client/clientset/versioned/scheme",
@@ -532,6 +536,8 @@
     "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "github.com/kyma-project/kyma/components/console-backend-service/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/components/console-backend-service/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1",
+    "github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned",
     "github.com/machinebox/graphql",
     "github.com/mitchellh/mapstructure",

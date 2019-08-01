@@ -10,6 +10,7 @@ import (
 	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
+	"github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned"
 )
 
 func NewClientWithConfig() (*v1.CoreV1Client, *rest.Config, error) {
@@ -33,6 +34,20 @@ func NewServiceCatalogClientWithConfig() (*scClientset.Clientset, *rest.Config, 
 	}
 
 	scCli, err := scClientset.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "while creating new client with config")
+	}
+
+	return scCli, k8sConfig, nil
+}
+
+func NewAddonsConfigurationsClientWithConfig() (*versioned.Clientset, *rest.Config, error) {
+	k8sConfig, err := NewRestClientConfigFromEnv()
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "while creating new client with config")
+	}
+
+	scCli, err := versioned.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "while creating new client with config")
 	}
