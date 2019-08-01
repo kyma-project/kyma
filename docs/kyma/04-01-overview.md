@@ -49,4 +49,4 @@ Read the rest of the installation documents to learn how to:
 - [Reinstall Kyma](#installation-reinstall-kyma)
 - [Set up the Kyma backup](/components/backup#overview-overview)
 
->**NOTE:** Make that the version of the documentation selected in the left pane of `kyma-project.io` matches the version of your Kyma deployment.
+>**NOTE:** Make sure that the version of the documentation selected in the left pane of `kyma-project.io` matches the version of Kyma you're using.
