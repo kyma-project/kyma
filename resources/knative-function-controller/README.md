@@ -89,3 +89,8 @@ spec:
   runtime: "nodejs8"
 EOF
 ``` 
+
+To get the url of your new service check the output of
+```bash
+kubectl get ksvc -n $NAMESPACE
+```
