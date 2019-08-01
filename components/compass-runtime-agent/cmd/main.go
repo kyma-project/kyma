@@ -66,7 +66,7 @@ func main() {
 
 	certManager := certificates.NewCredentialsManager()
 	compassConfigClient := compass.NewConfigurationClient(envConfig.Tenant, envConfig.RuntimeId, graphql.New)
-	syncService, err := createNewSynchronizationService(options.integrationNamespace, options.gatewayPort)
+	syncService, err := createNewSynchronizationService(cfg, options.integrationNamespace, options.gatewayPort)
 	if err != nil {
 		log.Errorf("Failed to create synchronization service, %s", err.Error())
 		os.Exit(1)

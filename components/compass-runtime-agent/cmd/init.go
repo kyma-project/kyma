@@ -15,12 +15,7 @@ import (
 	restclient "k8s.io/client-go/rest"
 )
 
-func createNewSynchronizationService(namespace string, gatewayPort int) (kyma.Service, error) {
-	k8sConfig, err := restclient.InClusterConfig()
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to read k8s in-cluster configuration")
-	}
-
+func createNewSynchronizationService(k8sConfig *restclient.Config, namespace string, gatewayPort int) (kyma.Service, error) {
 	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to create k8s core client")
