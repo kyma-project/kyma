@@ -12,13 +12,13 @@ Install Velero using [these](/components/backup/#installation-install-velero) in
 
 Follow the steps to back up Kyma.
 
-<div tabs>
+<div tabs name="backup">
     <details>
     <summary>
     Manual backup
     </summary>
 
-To create a manual backup, use the Backup custom resource. Deploy the following CR to the `kyma-backup` Namespace to instruct the Velero server to create a backup. Make sure the indentation is correct.
+To create a manual backup, use the Backup custom resource. Deploy the following CR to the `kyma-system` Namespace to instruct the Velero server to create a backup. Make sure the indentation is correct.
 
 A sample backup configuration looks like this:
 
@@ -28,7 +28,7 @@ apiVersion: velero.io/v1
 kind: Backup
 metadata:
   name: kyma-backup
-  namespace: kyma-backup
+  namespace: kyma-system
 spec:
   includedNamespaces:
   - '*'
@@ -51,7 +51,7 @@ kubectl apply -f {filename}
     Scheduled backup
     </summary>
 
-To set up periodic backups, use Schedule custom resources. Deploy Schedule custom resources in the `kyma-backup` Namespace to instruct the Velero Server to schedule a cluster backup. Make sure the indentation is correct.
+To set up periodic backups, use Schedule custom resources. Deploy Schedule custom resources in the `kyma-system` Namespace to instruct the Velero Server to schedule a cluster backup. Make sure the indentation is correct.
 
 A sample scheduled backup configuration looks like this:
 
@@ -61,7 +61,7 @@ apiVersion: velero.io/v1
 kind: Schedule
 metadata:
   name: kyma-backup
-  namespace: kyma-backup
+  namespace: kyma-system
 spec:
   template:
     includedNamespaces:
@@ -81,7 +81,7 @@ To schedule a backup, run the following command:
 kubectl apply -f {filename}
 ```
 </details>
-
+</div>
 
 ## Backup retention period
 

@@ -29,12 +29,12 @@ func NewService(repository Repository) Service {
 
 // Create creates Istio resources associated with deniers.
 func (s *service) Create(application string, appUID types.UID, serviceId, resourceName string) apperrors.AppError {
-	err := s.repository.CreateDenier(application, appUID, serviceId, resourceName)
+	err := s.repository.CreateHandler(application, appUID, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
 
-	err = s.repository.CreateCheckNothing(application, appUID, serviceId, resourceName)
+	err = s.repository.CreateInstance(application, appUID, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
@@ -49,12 +49,12 @@ func (s *service) Create(application string, appUID types.UID, serviceId, resour
 
 // Upsert updates or creates Istio resources associated with deniers.
 func (s *service) Upsert(application string, appUID types.UID, serviceId, resourceName string) apperrors.AppError {
-	err := s.repository.UpsertDenier(application, appUID, serviceId, resourceName)
+	err := s.repository.UpsertHandler(application, appUID, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
 
-	err = s.repository.UpsertCheckNothing(application, appUID, serviceId, resourceName)
+	err = s.repository.UpsertInstance(application, appUID, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
@@ -69,12 +69,12 @@ func (s *service) Upsert(application string, appUID types.UID, serviceId, resour
 
 // Delete removes Istio resources associated with deniers.
 func (s *service) Delete(resourceName string) apperrors.AppError {
-	err := s.repository.DeleteDenier(resourceName)
+	err := s.repository.DeleteHandler(resourceName)
 	if err != nil {
 		return err
 	}
 
-	err = s.repository.DeleteCheckNothing(resourceName)
+	err = s.repository.DeleteInstance(resourceName)
 	if err != nil {
 		return err
 	}

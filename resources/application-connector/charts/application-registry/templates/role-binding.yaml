@@ -15,7 +15,7 @@ rules:
   resources: ["secrets"]
   verbs: ["create", "get", "update", "delete"]
 - apiGroups: ["config.istio.io"]
-  resources: ["rules", "deniers", "checknothings", "egressrules"]
+  resources: ["rules", "handlers", "instances"]
   verbs: ["get", "update", "list", "create", "delete"]
 ---
 kind: RoleBinding

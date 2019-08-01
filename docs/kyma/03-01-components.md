@@ -18,7 +18,7 @@ The Service Mesh is an infrastructure layer that handles service-to-service comm
 
 ## Security
 
-Kyma security enforces RBAC (Role Based Access Control) in the cluster. [Dex](https://github.com/coreos/dex) handles the identity management and identity provider integration. It allows you to integrate any [OpenID Connect](https://openid.net/connect/) or SAML2-compliant identity provider with Kyma using [connectors](https://github.com/coreos/dex#connectors). Additionally, Dex provides a static user store which gives you more flexibility when managing access to your cluster.   
+Kyma security enforces RBAC (Role Based Access Control) in the cluster. [Dex](https://github.com/dexidp/dex) handles the identity management and identity provider integration. It allows you to integrate any [OpenID Connect](https://openid.net/connect/) or SAML2-compliant identity provider with Kyma using [connectors](https://github.com/dexidp/dex#connectors). Additionally, Dex provides a static user store which gives you more flexibility when managing access to your cluster.
 
 ## Helm Broker
 
@@ -35,7 +35,7 @@ Kyma Event Bus receives Events from external solutions and triggers the business
 ## Serverless
 
 The Kyma Serverless component allows you to reduce the implementation and operation effort of an application to the absolute minimum. Kyma Serverless provides a platform to run lightweight functions in a cost-efficient and scalable way using JavaScript and Node.js. Kyma Serverless is built on the [Kubeless](http://kubeless.io/) framework, which allows you to deploy lambda functions,
-and uses the [NATS](https://nats.io/) messaging system that monitors business events and triggers functions accordingly.  
+and uses the [NATS](https://nats.io/) messaging system that monitors business events and triggers functions accordingly.
 
 ## Monitoring
 

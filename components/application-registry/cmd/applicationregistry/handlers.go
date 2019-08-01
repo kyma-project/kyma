@@ -1,8 +1,9 @@
 package main
 
 import (
-	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"net/http"
+
+	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload"
@@ -142,8 +143,8 @@ func newIstioService(config *restclient.Config, namespace string) (istio.Service
 
 	repository := istio.NewRepository(
 		ic.IstioV1alpha2().Rules(namespace),
-		ic.IstioV1alpha2().Checknothings(namespace),
-		ic.IstioV1alpha2().Deniers(namespace),
+		ic.IstioV1alpha2().Instances(namespace),
+		ic.IstioV1alpha2().Handlers(namespace),
 		istio.RepositoryConfig{Namespace: namespace},
 	)
 

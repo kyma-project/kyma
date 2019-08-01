@@ -72,7 +72,7 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 	defer deleteService(serviceClient, service)
 
 	err = retry.Do(func() error {
-		t.Logf("Calling: %s", testServiceURL)
+		log.Printf("Calling: %s", testServiceURL)
 		resp, err := ingressClient.Get(testServiceURL)
 		if err != nil {
 			return err
