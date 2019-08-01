@@ -39,7 +39,7 @@ func (s *SendEventAndCheckCounter) Steps(config *rest.Config) ([]step.Step, erro
 	state := s.NewState()
 
 	return []step.Step{
-		testsuite.NewConnectApplication(connector, state),
+		testsuite.NewConnectApplication(connector, state, s.applicationTenant, s.applicationGroup),
 		testsuite.NewSendEvent(s.testID, state),
 		testsuite.NewCheckCounterPod(testService),
 	}, nil

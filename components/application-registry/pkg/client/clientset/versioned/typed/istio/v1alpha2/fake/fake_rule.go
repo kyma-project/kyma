@@ -46,7 +46,7 @@ func (c *FakeRules) List(opts v1.ListOptions) (result *v1alpha2.RuleList, err er
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha2.RuleList{}
+	list := &v1alpha2.RuleList{ListMeta: obj.(*v1alpha2.RuleList).ListMeta}
 	for _, item := range obj.(*v1alpha2.RuleList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)

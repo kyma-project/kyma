@@ -153,7 +153,7 @@ func (arc *AppRegistryClient) GetApiSpecWithRetries(t *testing.T, serviceId stri
 		require.NoError(t, err)
 
 		if len(serviceDetails.Api.Spec) == 0 {
-			t.Logf("API spec length is 0, retrying in %d seconds", specFetchInterval)
+			t.Logf("API spec length is 0, retrying in %f seconds", specFetchInterval.Seconds())
 			return false
 		}
 
