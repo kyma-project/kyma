@@ -18,7 +18,7 @@ This Knative-based serverless implementation defines and handles the Function Cu
 ### Run locally
 Follow these steps to run the Knative Function controller locally:
 
-1. Create a ServiceAccount to enable knativeBuild docker builds
+1. Create a ServiceAccount to enable knativeBuild Docker builds.
 
 Currently you cannot run builds in every existing namespace of your cluster. ServiceAccounts with linked docker 
 repository credentials have to be created for each namespace that will be used for the knative-function controller.
