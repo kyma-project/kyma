@@ -5,5 +5,5 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_knative_build_acceptance:
-    dir: pr/
-    version: PR-4606
+    dir: develop/
+    version: 8036a216
