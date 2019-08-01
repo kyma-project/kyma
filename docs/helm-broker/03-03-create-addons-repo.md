@@ -29,9 +29,9 @@ entries:
 
 >**NOTE:** You must place your addons in the same directory where the `index.yaml` file is stored.
 
-## Supported servers
+## Supported protocols
 
-Expose your addons directory as a remote server so that you can provide URLs in the [AddonsConfiguration](#custom-resource-addonsconfiguration) (AC) or [ClusterAddonsConfiguration](#custom-resource-clusteraddonsconfiguration) (CAC) custom resources. The Helm Broker supports exposing addons through the following servers:
+Expose your addons repository through a remote server so that you can provide URLs in the [AddonsConfiguration](#custom-resource-addonsconfiguration) (AC) or [ClusterAddonsConfiguration](#custom-resource-clusteraddonsconfiguration) (CAC) custom resources. The Helm Broker supports exposing addons using the following protocols:
 
 <div tabs>
   <details>
