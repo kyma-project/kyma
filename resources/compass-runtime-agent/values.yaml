@@ -4,29 +4,20 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir: pr/
-      version: "PR-5060"
+      version: "PR-5138"
     runtimeAgentTests:
       dir: pr/
       version: "PR-4927"
 
-deployment:
+compassRuntimeAgent:
   image:
     pullPolicy: IfNotPresent
-  tokenConfig:
-    volumeName: token-config
-    mountPath: "/config"
-    tokenURLConfigFile: "token.json"
   sync:
     controllerSyncPeriod: 30
-    minimalConfigSyncTime: 30
+    minimalConfigSyncTime: 15
   resources:
     integrationNamespace: "kyma-integration"
     gatewayPort: 8080
-
-
-config:
-  tokenConfigMap:
-    name: token-config-map
-    data:
-      token: |
-        { "token": "", "url":"" }
+  config:
+    configMap:
+      name: compass-agent-configuration
