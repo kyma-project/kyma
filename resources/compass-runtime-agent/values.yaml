@@ -21,6 +21,7 @@ deployment:
     minimalConfigSyncTime: 30
   resources:
     integrationNamespace: "kyma-integration"
+    gatewayPort: 8080
 
 
 config:
