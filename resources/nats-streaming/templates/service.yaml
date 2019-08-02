@@ -10,5 +10,4 @@ spec:
     port: {{ .Values.global.natsStreaming.ports.client }}
     targetPort: client
   selector:
-    app: {{ .Values.global.natsStreaming.fullname }}
-    release: {{ .Release.Name }}
+{{ include "nats-streaming.labels.selectors" . | indent 4 }}
