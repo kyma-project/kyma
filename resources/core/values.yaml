@@ -65,7 +65,7 @@ global:
     version: b3441db9
   cluster_users_integration_tests:
     dir: pr/
-    version: PR-4837
+    version: PR-5178
   xip_patch:
     dir: develop/
     version: "d20b1c29"
