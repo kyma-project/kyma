@@ -43,7 +43,7 @@ type: {Document type}
 
 ### Display
 
-In the Documentation view (Docs UI), that is available in the Console UI under the question mark icon on the top navigation panel, the metadata allow you to create the left-side and right-side navigation structures. The left-side navigation displays topics' groups and topics. The right-side navigation displays documents grouped under a common `type` in alphanumeric order as per files names. Under `type` show document's `title` and subsequent headers from the document. The following example shows four documents, their metadata, and corresponding places in the left-side navigation:
+In the Documentation view (Docs UI), that is available in the Console UI under the question mark icon on the top navigation panel, the metadata allow you to create the left-side and right-side navigation structures. The left-side navigation displays topics' groups and topics. The right-side navigation displays documents grouped under a common `type` in alphanumeric order as per files names. Underneath the `type` you can see the document's `title`, and subsequent headers from the document. The following example shows four documents, their metadata, and corresponding places in the left-side and right-side navigation:
 
 <div tabs>
   <details>
@@ -88,7 +88,7 @@ title: Overview
   </details>
 </div>
 
-In the Service Catalog and Instances views, which contain Service Classes documentation, the `title` metadata displays as the name of a particular tab. If you don't provide `title`, these UIs display the file name as a fallback. See the following example:
+In the Service Catalog and Instances views, which contain Service Classes documentation, Markdown documents display in the **Documentation** tab. The `title` and `type` metadata create the right-side navigation. A document with the **Overview** `title` always displays on top. If you don't provide `title` and `type`, these UIs display the file name as a fallback. The right-side document structure is based on the same logic as in the Documentation view. See the following example:
 
 <div tabs>
   <details>
