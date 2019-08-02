@@ -27,6 +27,8 @@ spec:
           volumeMounts:
           - name: config
             mountPath: /var/public/config
+          - name: config
+            mountPath: /var/public-luigi/config  
       volumes:
         - name: config
           configMap:
