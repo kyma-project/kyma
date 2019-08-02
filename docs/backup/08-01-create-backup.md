@@ -51,7 +51,7 @@ kubectl apply -f {filename}
     Scheduled backup
     </summary>
 
-To set up periodic backups, use Schedule custom resources. Deploy Schedule custom resources in the `kyma-system` Namespace to instruct the Velero Server to schedule a cluster backup. Make sure the indentation is correct.
+By default, the backup runs once a day every day from Monday to Friday. To set up a different backup schedule, use Schedule custom resources. Deploy Schedule custom resources in the `kyma-system` Namespace to instruct the Velero Server to schedule a cluster backup. Make sure the indentation is correct.
 
 A sample scheduled backup configuration looks like this:
 
