@@ -1,4 +1,4 @@
-# knative-function-controller
+# function-controller
 
 ## Overview
 
@@ -19,9 +19,9 @@ This project contains the chart for the Function Controller.
 Run the following script to install the chart:
 
 ```bash
-export NAME=knative-function-controller
+export NAME=function-controller
 export NAMESPACE=kyma-system
-helm install knative-function-controller \
+helm install function-controller \
              --namespace="${NAMESPACE}" \
              --name="${NAME}" \
              --tls
@@ -43,17 +43,17 @@ cat <<EOF | kubectl apply -n ${NAMESPACE} -f -
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-    name: knative-function-controller-build
+    name: function-controller-build
     labels:
-        app: knative-function-controller
+        app: function-controller
 secrets:
-    - name: knative-function-controller-docker-reg-credential
+    - name: function-controller-docker-reg-credential
 ---
 apiVersion: v1
 kind: Secret
 type: kubernetes.io/basic-auth
 metadata:
-    name: knative-function-controller-docker-reg-credential
+    name: function-controller-docker-reg-credential
     annotations:
         build.knative.dev/docker-0: ${REGISTRY}
 data:
@@ -64,7 +64,7 @@ EOF
 
 ## Running the first function
 
-Currently there is no UI support for the new knative-function-controller.
+Currently there is no UI support for the new function-controller.
 Run your first function in the following way:
 
 ```bash

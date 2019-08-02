@@ -27,7 +27,7 @@ spec:
       containers:
       - command:
         - /manager
-        image: "{{ .Values.global.containerRegistry.path }}{{ .Values.global.knative_function_controller.dir }}knative-function-controller:{{ .Values.global.knative_function_controller.version }}"
+        image: "{{ .Values.global.containerRegistry.path }}{{ .Values.global.knative_function_controller.dir }}function-controller:{{ .Values.global.knative_function_controller.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: manager
         env:
