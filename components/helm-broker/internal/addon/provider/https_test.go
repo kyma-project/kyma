@@ -109,7 +109,8 @@ func TestHTTPRepositoryAddonDocURL(t *testing.T) {
 	require.NoError(t, err)
 
 	// when
-	gotURL := httpGetter.AddonDocURL(addonName, addonVer)
+	gotURL, err := httpGetter.AddonDocURL(addonName, addonVer)
+	require.NoError(t, err)
 
 	// then
 	assert.Equal(t, fmt.Sprintf("%s/%s-%s.tgz", ts.URL, addonName, addonVer), gotURL)

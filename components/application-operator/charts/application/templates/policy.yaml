@@ -4,7 +4,7 @@ metadata:
   name: {{ .Release.Name }}-event-service-external-api-policy
 spec:
   targets:
-    - name: {{ .Release.Name }}-event-service-external-api
+    - name: app-{{ .Release.Name }}-event-service
   peers:
     - mtls:
         mode: "PERMISSIVE"

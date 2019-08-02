@@ -1,0 +1,63 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema definition for service-catalog helm chart values",
+    "type": "object",
+    "properties": {
+        "etcd-stateful": {
+            "description": "Configuration properties for the etcd-stateful component.",
+            "type": "object",
+            "properties": {
+                "replicaCount": {
+                    "description": "Specifies the number of members in an etcd cluster.",
+                    "default": "3",
+                    "type": "number"
+                },
+                "etcd": {
+                    "description": "Configuration properties for the etcd component.",
+                    "type": "object",
+                    "properties": {
+                        "resources": {
+                            "description": "Defining the resources for the etcd component.",
+                            "type": "object",
+                            "properties": {
+                                "limits": {
+                                    "description": "Defining the limits on resources",
+                                    "type": "object",
+                                    "properties": {
+                                        "memory": {
+                                            "description": "Defines limits for memory resources.",
+                                            "default": "512Mi",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "service-catalog-apiserver": {
+            "description": "Configuration properties for the service-catalog-apiserver component",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enables Service Catalog with the Aggregated API Server.",
+                    "default": true,
+                    "type": "boolean"
+                }
+            }
+        },
+        "service-catalog-crds": {
+            "description": "Configuration properties for the service-catalog-crds component",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enables Service Catalog with the CRDs implementation.",
+                    "default": false,
+                    "type": "boolean"
+                }
+            }
+        }
+    }
+}

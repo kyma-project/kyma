@@ -3,9 +3,10 @@ package compass
 import (
 	"errors"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
-	"github.com/sirupsen/logrus"
 )
 
 func (app Application) ToApplication() kymamodel.Application {
@@ -86,16 +87,31 @@ func convertAPI(compassAPI *graphql.APIDefinition) kymamodel.APIDefinition {
 	}
 
 	if compassAPI.Spec != nil {
+		var data []byte
+		if compassAPI.Spec.Data != nil {
+			data = []byte(*compassAPI.Spec.Data)
+		}
+
 		api.APISpec = &kymamodel.APISpec{
 			Type: kymamodel.APISpecType(string(compassAPI.Spec.Type)),
-			Data: []byte(*compassAPI.Spec.Data),
+			Data: data,
 		}
 	}
 
 	// TODO: implement RequestParameters after update in Compass
 
-	if compassAPI.Auth != nil {
-		credentials, err := convertAuth(compassAPI.Auth.Auth)
+	// TODO: we should use compassAPI.Auth instead of compassAPI.DefaultAuth but it is not working yet in Director
+	//if compassAPI.Auth != nil {
+	//	credentials, err := convertAuth(compassAPI.Auth.Auth)
+	//	if err != nil {
+	//		logrus.Errorf("Failed to convert Compass Authentication to credentials: %s", err.Error())
+	//	} else {
+	//		api.Credentials = credentials
+	//	}
+	//}
+
+	if compassAPI.DefaultAuth != nil {
+		credentials, err := convertAuth(compassAPI.DefaultAuth)
 		if err != nil {
 			logrus.Errorf("Failed to convert Compass Authentication to credentials: %s", err.Error())
 		} else {
@@ -110,12 +126,12 @@ func convertAuth(compassAuth *graphql.Auth) (*kymamodel.Credentials, error) {
 	credentials := &kymamodel.Credentials{}
 
 	switch cred := compassAuth.Credential.(type) {
-	case graphql.BasicCredentialData:
+	case *graphql.BasicCredentialData:
 		credentials.Basic = &kymamodel.Basic{
 			Username: cred.Username,
 			Password: cred.Password,
 		}
-	case graphql.OAuthCredentialData:
+	case *graphql.OAuthCredentialData:
 		credentials.Oauth = &kymamodel.Oauth{
 			URL:          cred.URL,
 			ClientID:     cred.ClientID,
@@ -147,9 +163,15 @@ func convertEventAPI(compassEventAPI *graphql.EventAPIDefinition) kymamodel.Even
 	}
 
 	if compassEventAPI.Spec != nil {
+
+		var data []byte
+		if compassEventAPI.Spec.Data != nil {
+			data = []byte(*compassEventAPI.Spec.Data)
+		}
+
 		eventAPI.EventAPISpec = &kymamodel.EventAPISpec{
 			Type: kymamodel.EventAPISpecType(string(compassEventAPI.Spec.Type)),
-			Data: []byte(*compassEventAPI.Spec.Data),
+			Data: data,
 		}
 	}
 

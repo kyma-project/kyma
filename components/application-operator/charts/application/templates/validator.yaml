@@ -32,7 +32,7 @@ spec:
             - "--group={{ .Values.global.group }}"
             - "--eventServicePathPrefixV1=/{{ .Release.Name }}/v1/events"
             - "--eventServicePathPrefixV2=/{{ .Release.Name }}/v2/events"
-            - "--eventServiceHost={{ .Release.Name }}-event-service-external-api:{{ .Values.eventService.service.externalapi.port }}"
+            - "--eventServiceHost=app-{{ .Release.Name }}-event-service:{{ .Values.eventService.service.externalapi.port }}"
             - "--appRegistryPathPrefix=/{{ .Release.Name }}/v1/metadata"
             - "--appRegistryHost={{ .Values.applicationConnectivityValidator.args.appRegistryHost }}"
           readinessProbe:
@@ -56,7 +56,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-connectivity-validator
+  name: app-{{ .Release.Name }}-validator
   labels:
     application: {{ .Release.Name }}
     app: {{ .Release.Name }}-connectivity-validator

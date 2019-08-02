@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/engine"
-	engineMock "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/engine/automock"
+	engine "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook"
+	engineMock "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/automock"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/handler/asset/pretty"
 	loaderMock "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/loader/automock"
 	storeMock "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/store/automock"
@@ -77,8 +77,8 @@ func TestReconcileClusterAsset_Reconcile(t *testing.T) {
 	mocks.loader.On("Load", testData.asset.Spec.Source.URL, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Load", testData.asset.Spec.Source.URL, testData.assetName, testData.asset.Spec.Source.Mode, newFilter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Twice()
-	mocks.validator.On("Validate", mock.Anything, mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Twice()
-	mocks.mutator.On("Mutate", mock.Anything, mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.MutationWebhookService).Return(nil).Twice()
+	mocks.validator.On("Validate", mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.ValidationWebhookService).Return(engine.Result{Success: true}, nil).Twice()
+	mocks.mutator.On("Mutate", mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.MutationWebhookService).Return(engine.Result{Success: true}, nil).Twice()
 	mocks.store.On("PutObjects", mock.Anything, testData.bucketName, testData.assetName, testData.tmpBaseDir, testData.files).Return(nil).Twice()
 	mocks.store.On("ListObjects", mock.Anything, testData.bucketName, testData.assetName).Return(nil, nil).Times(3)
 	defer mocks.AssertExpetactions(t)

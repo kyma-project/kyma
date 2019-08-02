@@ -2,8 +2,6 @@
 
 ## Overview
 
->**NOTE**: This is an experimental module.
-
 This chart includes [knative-serving resources](https://github.com/knative/docs/tree/master/docs/serving) release files.
 
 Included releases:

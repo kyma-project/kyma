@@ -13,14 +13,3 @@ spec:
     plural: compassconnections
     singular: compassconnection
   scope: Cluster
-{{/*  TODO - Add validation after determining the spec */}}
-{{/*  validation:*/}}
-{{/*    openAPIV3Schema:*/}}
-{{/*      properties:*/}}
-{{/*        spec:*/}}
-{{/*          properties:*/}}
-{{/*            name:*/}}
-{{/*              type: string*/}}
-{{/*          required:*/}}
-{{/*            - name*/}}
-{{/*          type: object*/}}

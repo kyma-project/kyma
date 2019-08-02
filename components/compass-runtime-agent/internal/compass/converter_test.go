@@ -167,6 +167,43 @@ func TestApplication_ToApplication(t *testing.T) {
 			},
 		},
 		{
+			description: "convert Compass App with empty specs",
+			compassApp: Application{
+				ID:          appId,
+				Name:        appName,
+				Description: &appDesc,
+				APIs: &graphql.APIDefinitionPage{
+					Data: []*graphql.APIDefinition{
+						fixCompassAPIDefinition("1", fixCompassOauthAuth(nil), &graphql.APISpec{Data: nil}),
+					},
+				},
+				EventAPIs: &graphql.EventAPIDefinitionPage{
+					Data: []*graphql.EventAPIDefinition{
+						fixCompassEventAPIDefinition("1", &graphql.EventAPISpec{Data: nil}),
+					},
+				},
+				Documents: &graphql.DocumentPage{
+					Data: []*graphql.Document{
+						fixCompassDocument("1", nil),
+					},
+				},
+			},
+			expectedApp: kymamodel.Application{
+				ID:          appId,
+				Name:        appName,
+				Description: appDesc,
+				APIs: []kymamodel.APIDefinition{
+					fixInternalAPIDefinition("1", fixInternalOauthCredentials(nil), &kymamodel.APISpec{}),
+				},
+				EventAPIs: []kymamodel.EventAPIDefinition{
+					fixInternalEventAPIDefinition("1", &kymamodel.EventAPISpec{}),
+				},
+				Documents: []kymamodel.Document{
+					fixInternalDocument("1", nil),
+				},
+			},
+		},
+		{
 			description: "set empty credentials when unsupported credentials input",
 			compassApp: Application{
 				ID:          appId,
@@ -303,12 +340,18 @@ func fixInternalDocumentContent() []byte {
 func fixCompassAPIDefinition(suffix string, auth *graphql.RuntimeAuth, spec *graphql.APISpec) *graphql.APIDefinition {
 	desc := baseAPIDesc + suffix
 
+	var defaultAuth *graphql.Auth
+	if auth != nil {
+		defaultAuth = auth.Auth
+	}
+
 	return &graphql.APIDefinition{
 		ID:          baseAPIId + suffix,
 		Name:        baseAPIName + suffix,
 		Description: &desc,
 		TargetURL:   baseAPIURL + suffix,
-		Auth:        auth,
+		//Auth:        auth,
+		DefaultAuth: defaultAuth, // TODO: can be removed after switching to use Auth
 		Spec:        spec,
 	}
 }
@@ -342,7 +385,7 @@ func fixCompassOauthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.Ru
 	return &graphql.RuntimeAuth{
 		RuntimeID: runtimeId,
 		Auth: &graphql.Auth{
-			Credential: graphql.OAuthCredentialData{
+			Credential: &graphql.OAuthCredentialData{
 				URL:          oauthURL,
 				ClientID:     clientId,
 				ClientSecret: clientSecret,
@@ -356,7 +399,7 @@ func fixCompassBasicAuthAuth(requestAuth *graphql.CredentialRequestAuth) *graphq
 	return &graphql.RuntimeAuth{
 		RuntimeID: runtimeId,
 		Auth: &graphql.Auth{
-			Credential: graphql.BasicCredentialData{
+			Credential: &graphql.BasicCredentialData{
 				Username: username,
 				Password: password,
 			},

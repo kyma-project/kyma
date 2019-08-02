@@ -604,13 +604,13 @@ func fakeRecorder() record.EventRecorder {
 	return record.NewFakeRecorder(20)
 }
 
-func testSource(sourceName string, sourceType string, url string, mode v1alpha1.DocsTopicMode, metadata *runtime.RawExtension) v1alpha1.Source {
+func testSource(sourceName string, sourceType string, url string, mode v1alpha1.DocsTopicMode, parameters *runtime.RawExtension) v1alpha1.Source {
 	return v1alpha1.Source{
-		Name:     sourceName,
-		Type:     sourceType,
-		URL:      url,
-		Mode:     mode,
-		Metadata: metadata,
+		Name:       sourceName,
+		Type:       sourceType,
+		URL:        url,
+		Mode:       mode,
+		Parameters: parameters,
 	}
 }
 

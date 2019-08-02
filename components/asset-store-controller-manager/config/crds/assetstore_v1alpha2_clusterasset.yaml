@@ -47,7 +47,7 @@ spec:
               required:
               - name
               type: object
-            metadata:
+            parameters:
               type: object
             source:
               properties:
@@ -82,12 +82,12 @@ spec:
                         type: string
                       filter:
                         type: string
-                      metadata:
-                        type: object
                       name:
                         type: string
                       namespace:
                         type: string
+                      parameters:
+                        type: object
                     required:
                     - name
                     - namespace
@@ -102,12 +102,12 @@ spec:
                         type: string
                       filter:
                         type: string
-                      metadata:
-                        type: object
                       name:
                         type: string
                       namespace:
                         type: string
+                      parameters:
+                        type: object
                     required:
                     - name
                     - namespace

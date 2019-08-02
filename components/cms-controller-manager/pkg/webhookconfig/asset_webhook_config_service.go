@@ -23,7 +23,7 @@ type WebhookService struct {
 
 type AssetWebhookService struct {
 	WebhookService `json:",inline"`
-	Metadata       *runtime.RawExtension `json:"metadata,omitempty"`
+	Parameters     *runtime.RawExtension `json:"parameters,omitempty"`
 }
 
 type AssetWebhookConfig struct {
