@@ -1,0 +1,37 @@
+{{- if or .Values.ingress.public.enabled .Values.demo -}}
+{{- $fullName := include "hydra.fullname" . -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-public
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "hydra.labels" . | indent 4 }}
+  {{- with .Values.ingress.public.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+{{- if .Values.ingress.public.tls }}
+  tls:
+  {{- range .Values.ingress.public.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.public.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ . }}
+            backend:
+              serviceName: {{ $fullName }}-public
+              servicePort: http
+        {{- end }}
+  {{- end }}
+{{- end }}

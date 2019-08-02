@@ -62,3 +62,6 @@ files:
   - path: "./kyma/components/console-backend-service/docs/configuration.md"
     config:
       white-list-external: ["http://zipkin.kyma-system"]
+  - path: "./kyma/tests/perf/README.md"
+    config:
+      white-list-external: ["https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1"]

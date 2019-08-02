@@ -159,7 +159,7 @@ function addDevDomainsToEtcHosts() {
     log "Minikube IP address: ${minikubeIP}" green
 
     if [[ "$VM_DRIVER" != "none" ]]; then
-        log "Adding ${hostnames} to /etc/hosts on Minikube" yellow 
+        log "Adding ${hostnames} to /etc/hosts on Minikube" yellow
         minikube ssh "echo \"127.0.0.1 ${hostnames}\" | sudo tee -a /etc/hosts"
 
         # Delete old host alias

@@ -128,12 +128,13 @@ type ComplexityRoot struct {
 	}
 
 	Asset struct {
-		Name      func(childComplexity int) int
-		Namespace func(childComplexity int) int
-		Metadata  func(childComplexity int) int
-		Type      func(childComplexity int) int
-		Files     func(childComplexity int, filterExtensions []string) int
-		Status    func(childComplexity int) int
+		Name       func(childComplexity int) int
+		Namespace  func(childComplexity int) int
+		Metadata   func(childComplexity int) int
+		Parameters func(childComplexity int) int
+		Type       func(childComplexity int) int
+		Files      func(childComplexity int, filterExtensions []string) int
+		Status     func(childComplexity int) int
 	}
 
 	AssetEvent struct {
@@ -164,11 +165,12 @@ type ComplexityRoot struct {
 	}
 
 	ClusterAsset struct {
-		Name     func(childComplexity int) int
-		Metadata func(childComplexity int) int
-		Type     func(childComplexity int) int
-		Files    func(childComplexity int, filterExtensions []string) int
-		Status   func(childComplexity int) int
+		Name       func(childComplexity int) int
+		Metadata   func(childComplexity int) int
+		Parameters func(childComplexity int) int
+		Type       func(childComplexity int) int
+		Files      func(childComplexity int, filterExtensions []string) int
+		Status     func(childComplexity int) int
 	}
 
 	ClusterAssetEvent struct {
@@ -4049,6 +4051,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Asset.Metadata(childComplexity), true
 
+	case "Asset.parameters":
+		if e.complexity.Asset.Parameters == nil {
+			break
+		}
+
+		return e.complexity.Asset.Parameters(childComplexity), true
+
 	case "Asset.type":
 		if e.complexity.Asset.Type == nil {
 			break
@@ -4172,6 +4181,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ClusterAsset.Metadata(childComplexity), true
+
+	case "ClusterAsset.parameters":
+		if e.complexity.ClusterAsset.Parameters == nil {
+			break
+		}
+
+		return e.complexity.ClusterAsset.Parameters(childComplexity), true
 
 	case "ClusterAsset.type":
 		if e.complexity.ClusterAsset.Type == nil {
@@ -9320,6 +9336,11 @@ func (ec *executionContext) _Asset(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "parameters":
+			out.Values[i] = ec._Asset_parameters(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "type":
 			out.Values[i] = ec._Asset_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -9418,6 +9439,33 @@ func (ec *executionContext) _Asset_metadata(ctx context.Context, field graphql.C
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Metadata, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Asset_parameters(ctx context.Context, field graphql.CollectedField, obj *Asset) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Asset",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Parameters, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -10120,6 +10168,11 @@ func (ec *executionContext) _ClusterAsset(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "parameters":
+			out.Values[i] = ec._ClusterAsset_parameters(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "type":
 			out.Values[i] = ec._ClusterAsset_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -10191,6 +10244,33 @@ func (ec *executionContext) _ClusterAsset_metadata(ctx context.Context, field gr
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Metadata, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterAsset_parameters(ctx context.Context, field graphql.CollectedField, obj *ClusterAsset) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterAsset",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Parameters, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -29712,7 +29792,8 @@ type File {
 type Asset {
     name: String!
     namespace: String!
-    metadata: JSON!
+    metadata: JSON! @deprecated(reason: "Use parameters")
+    parameters: JSON!
     type: String!
     files(filterExtensions: [String!]): [File!]!
     status: AssetStatus!
@@ -29725,7 +29806,8 @@ type AssetEvent {
 
 type ClusterAsset {
     name: String!
-    metadata: JSON!
+    metadata: JSON! @deprecated(reason: "Use parameters")
+    parameters: JSON!
     type: String!
     files(filterExtensions: [String!]): [File!]!
     status: AssetStatus!
@@ -30616,11 +30698,11 @@ type Mutation {
     createServiceBindingUsage(namespace: String!, createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage @HasAccess(attributes: {resource: "servicebindingusages", verb: "create", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     deleteServiceBindingUsage(serviceBindingUsageName: String!, namespace: String!): DeleteServiceBindingUsageOutput @HasAccess(attributes: {resource: "servicebindingusages", verb: "delete", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "serviceBindingUsageName"})
 
-    createAddonsConfiguration(name: String!, urls: [String!]!, labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "configmaps", verb: "create", apiGroup: "", apiVersion: "v1", nameArg: "name"})
-    updateAddonsConfiguration(name: String!, urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "configmaps", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name"})
-    deleteAddonsConfiguration(name: String!): AddonsConfiguration @HasAccess(attributes: {resource: "configmaps", verb: "delete", apiGroup: "", apiVersion: "v1", nameArg: "name"})
-    addAddonsConfigurationURLs(name: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "configmaps", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name"})
-    removeAddonsConfigurationURLs(name: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "configmaps", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name"})
+    createAddonsConfiguration(name: String!, urls: [String!]!, labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "create", apiGroup: "", apiVersion: "v1", nameArg: "name"})
+    updateAddonsConfiguration(name: String!, urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name"})
+    deleteAddonsConfiguration(name: String!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "delete", apiGroup: "", apiVersion: "v1", nameArg: "name"})
+    addAddonsConfigurationURLs(name: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name"})
+    removeAddonsConfigurationURLs(name: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name"})
 
     createApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
     updateApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput! @HasAccess(attributes: {resource: "applications", verb: "update", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
@@ -30677,7 +30759,7 @@ type Subscription {
     podEvent(namespace: String!): PodEvent! @HasAccess(attributes: {resource: "pods", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     configMapEvent(namespace: String!): ConfigMapEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
-    addonsConfigurationEvent: AddonsConfigurationEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1"})
+    addonsConfigurationEvent: AddonsConfigurationEvent! @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "watch", apiGroup: "", apiVersion: "v1"})
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
     apiEvent(namespace: String!, serviceName: String): ApiEvent! @HasAccess(attributes: {resource: "apis", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
 

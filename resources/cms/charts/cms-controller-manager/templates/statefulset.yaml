@@ -25,7 +25,7 @@ spec:
       containers:
       - command:
         - /manager
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.cms_controller_manager.dir }}cms-controller-manager:{{ .Values.global.cms_controller_manager.version }}"
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.cmsControllerManager.dir }}cms-controller-manager:{{ .Values.global.cmsControllerManager.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: {{ .Chart.Name }}
         env:
