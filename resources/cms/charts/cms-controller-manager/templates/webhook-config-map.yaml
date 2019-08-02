@@ -7,7 +7,7 @@ metadata:
     app: {{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
-  "markdown": |-
+  markdown: |-
     {
       "metadataExtractors":[
           {
@@ -18,3 +18,22 @@ data:
           }
       ]
     }
+{{- if .Values.global.cmsAsyncAPIService.enabled }}
+  asyncapi: |-
+    {
+      "validations":[
+        {
+          "name": "cms-cms-asyncapi-service",
+          "namespace": "kyma-system",
+          "endpoint": "/v1/validate"
+        }
+      ],
+     "mutations":[
+        {
+          "name": "cms-cms-asyncapi-service",
+          "namespace": "kyma-system",
+          "endpoint": "/v1/convert"
+        }
+      ]
+    }
+{{- end }}

@@ -24,17 +24,18 @@ func (c *assetConverter) ToGQL(item *v1alpha2.Asset) (*gqlschema.Asset, error) {
 	}
 
 	status := c.extractor.Status(item.Status.CommonAssetStatus)
-	metadata, err := c.extractor.Metadata(item.Spec.CommonAssetSpec.Metadata)
+	parameters, err := c.extractor.Parameters(item.Spec.CommonAssetSpec.Parameters)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while extracting metadata from Asset [name: %s][namespace: %s]", item.Name, item.Namespace)
 	}
 
 	asset := gqlschema.Asset{
-		Name:      item.Name,
-		Namespace: item.Namespace,
-		Type:      item.Labels[CmsTypeLabel],
-		Status:    status,
-		Metadata:  metadata,
+		Name:       item.Name,
+		Namespace:  item.Namespace,
+		Type:       item.Labels[CmsTypeLabel],
+		Status:     status,
+		Metadata:   parameters,
+		Parameters: parameters,
 	}
 
 	return &asset, nil
