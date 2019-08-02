@@ -1,9 +1,9 @@
-apiVersion: functions.runtime.kyma-project.io/v1alpha1
+apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
 metadata:
+  name: sample
   labels:
-    controller-tools.k8s.io: "1.0"
-  name: function-webhook-defaults
+    foo: bar
 spec:
   function: |
     module.exports = {
@@ -12,7 +12,5 @@ spec:
         }
       }
   functionContentType: "plaintext"
-  # use default values:
-  # size: "L"
-  # runtime: "nodejs8"
-  # timeout: 20
+  size: "L"
+  runtime: "nodejs8"

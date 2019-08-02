@@ -5,7 +5,7 @@ import (
 	"time"
 
 	buildv1alpha1 "github.com/knative/build/pkg/apis/build/v1alpha1"
-	runtimev1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/runtime/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -14,7 +14,7 @@ var buildTimeout = os.Getenv("BUILD_TIMEOUT")
 
 var defaultMode = int32(420)
 
-func GetBuildResource(rnInfo *RuntimeInfo, fn *runtimev1alpha1.Function, imageName string, buildName string) *buildv1alpha1.Build {
+func GetBuildResource(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, imageName string, buildName string) *buildv1alpha1.Build {
 
 	args := []buildv1alpha1.ArgumentSpec{}
 	args = append(args, buildv1alpha1.ArgumentSpec{Name: "IMAGE", Value: imageName})
@@ -75,7 +75,7 @@ func GetBuildResource(rnInfo *RuntimeInfo, fn *runtimev1alpha1.Function, imageNa
 	return &b
 }
 
-func GetBuildTemplateSpec(fn *runtimev1alpha1.Function) buildv1alpha1.BuildTemplateSpec {
+func GetBuildTemplateSpec(fn *serverlessv1alpha1.Function) buildv1alpha1.BuildTemplateSpec {
 
 	parameters := []buildv1alpha1.ParameterSpec{
 		{

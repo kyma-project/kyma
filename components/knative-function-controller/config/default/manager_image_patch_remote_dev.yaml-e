@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       app: serverless-controller
-  serviceName: serverless
+  serviceName: runtime
   template:
     metadata:
       labels:
@@ -17,4 +17,4 @@ spec:
         # gets changed by sed command when running `docker-build`
         - image: knative-function-controller:latest
           name: manager
-          imagePullPolicy: Never
+          imagePullPolicy: Always

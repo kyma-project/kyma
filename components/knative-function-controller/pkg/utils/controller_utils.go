@@ -63,7 +63,7 @@ func (ri *RuntimeInfo) DockerFileConfigMapName(runtime string) string {
 		}
 	}
 	if result == "" {
-		log.Info("Unable to find the docker file for runtime: %v", runtime)
+		log.Info("Unable to find the docker file for serverless: %v", runtime)
 	}
 	return result
 }

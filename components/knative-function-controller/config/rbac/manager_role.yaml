@@ -29,7 +29,7 @@ rules:
   - patch
   - delete
 - apiGroups:
-  - runtime.kyma-project.io
+  - serverless.kyma-project.io
   resources:
   - functions
   verbs:
@@ -41,7 +41,7 @@ rules:
   - patch
   - delete
 - apiGroups:
-  - runtime.kyma-project.io
+  - serverless.kyma-project.io
   resources:
   - functions/status
   verbs:

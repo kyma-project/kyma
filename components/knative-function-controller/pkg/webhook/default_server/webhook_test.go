@@ -101,12 +101,12 @@ func getAdmissionRequest() admissionv1beta1.AdmissionReview {
 		Request: &admissionv1beta1.AdmissionRequest{
 			UID: "e9137d7d-c318-12e8-bbad-025654321111",
 			Kind: metav1.GroupVersionKind{
-				Group:   "runtime.kyma-project.io",
+				Group:   "serverless.kyma-project.io",
 				Kind:    "Function",
 				Version: "v1alpha1",
 			},
 			Resource: metav1.GroupVersionResource{
-				Group:    "runtime.kyma-project.io",
+				Group:    "serverless.kyma-project.io",
 				Resource: "Functions",
 				Version:  "v1alpha1",
 			},

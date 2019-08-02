@@ -17,7 +17,7 @@ limitations under the License.
 package mutating
 
 import (
-	runtimev1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/runtime/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless/v1alpha1"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/builder"
 )
@@ -31,5 +31,5 @@ func init() {
 		Mutating().
 		Operations(admissionregistrationv1beta1.Create).
 		FailurePolicy(admissionregistrationv1beta1.Fail).
-		ForType(&runtimev1alpha1.Function{})
+		ForType(&serverlessv1alpha1.Function{})
 }

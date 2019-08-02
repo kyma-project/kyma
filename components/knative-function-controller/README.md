@@ -90,7 +90,7 @@ Use the following examples to learn how to create and manage a function.
 Create a sample function:
 
 ```bash
-kubectl apply -f config/samples/runtime_v1alpha1_function.yaml -n {NAMESPACE}
+kubectl apply -f config/samples/serverless_v1alpha1_function.yaml -n {NAMESPACE}
 ```
 
 Search for a function:

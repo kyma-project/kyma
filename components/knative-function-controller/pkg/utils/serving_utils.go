@@ -3,12 +3,12 @@ package utils
 import (
 	servingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1beta1"
-	runtimev1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/runtime/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 )
 
 // GetServiceSpec gets ServiceSpec for a function
-func GetServiceSpec(imageName string, fn runtimev1alpha1.Function, rnInfo *RuntimeInfo) servingv1alpha1.ServiceSpec {
+func GetServiceSpec(imageName string, fn serverlessv1alpha1.Function, rnInfo *RuntimeInfo) servingv1alpha1.ServiceSpec {
 
 	// TODO: Make it constant for nodejs8/nodejs6
 	envVarsForRevision := []corev1.EnvVar{

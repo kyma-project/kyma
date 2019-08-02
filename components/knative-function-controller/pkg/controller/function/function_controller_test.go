@@ -28,7 +28,7 @@ import (
 	"github.com/knative/pkg/apis"
 	duckv1beta1 "github.com/knative/pkg/apis/duck/v1beta1"
 	servingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	runtimev1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/runtime/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/gstruct"
 	"golang.org/x/net/context"
@@ -49,12 +49,12 @@ func TestReconcile(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	var depKey = types.NamespacedName{Name: "foo", Namespace: "default"}
 
-	fnCreated := &runtimev1alpha1.Function{
+	fnCreated := &serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "foo",
 			Namespace: "default",
 		},
-		Spec: runtimev1alpha1.FunctionSpec{
+		Spec: serverlessv1alpha1.FunctionSpec{
 			Function:            "main() {asdfasdf}",
 			FunctionContentType: "plaintext",
 			Size:                "L",
@@ -211,7 +211,7 @@ func TestReconcile(t *testing.T) {
 	g.Expect(buildTemplate.Spec.Steps[0].Args[1]).To(gomega.Equal("--destination=${IMAGE}"))
 
 	// ensure fetched function spec corresponds to created function spec
-	fnUpdatedFetched := &runtimev1alpha1.Function{}
+	fnUpdatedFetched := &serverlessv1alpha1.Function{}
 	g.Expect(c.Get(context.TODO(), depKey, fnUpdatedFetched)).NotTo(gomega.HaveOccurred())
 	g.Expect(fnUpdatedFetched.Spec).To(gomega.Equal(fnCreated.Spec))
 
@@ -222,7 +222,7 @@ func TestReconcile(t *testing.T) {
 	g.Expect(c.Update(context.TODO(), fnUpdated)).NotTo(gomega.HaveOccurred())
 
 	// get the updated function and compare spec
-	fnUpdatedFetched = &runtimev1alpha1.Function{}
+	fnUpdatedFetched = &serverlessv1alpha1.Function{}
 	g.Expect(c.Get(context.TODO(), depKey, fnUpdatedFetched)).NotTo(gomega.HaveOccurred())
 
 	g.Eventually(func() string {
@@ -266,7 +266,7 @@ func TestReconcile(t *testing.T) {
 
 	g.Expect(ksvcUpdatedImage).To(gomega.Equal(functionShaImage))
 
-	g.Expect(fnUpdatedFetched.Status.Condition).To(gomega.Equal(runtimev1alpha1.FunctionConditionDeploying))
+	g.Expect(fnUpdatedFetched.Status.Condition).To(gomega.Equal(serverlessv1alpha1.FunctionConditionDeploying))
 
 	// tests use a shared etcd, we need to clean up
 	defer func() {
@@ -284,12 +284,12 @@ func TestReconcileDeleteFunction(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	objectName := "test-reconcile-delete-function"
 
-	fnCreated := &runtimev1alpha1.Function{
+	fnCreated := &serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
 		},
-		Spec: runtimev1alpha1.FunctionSpec{
+		Spec: serverlessv1alpha1.FunctionSpec{
 			Function:            "main() {asdfasdf}",
 			FunctionContentType: "plaintext",
 			Size:                "L",
@@ -359,7 +359,7 @@ func TestFunctionConditionNewFunction(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	c := mgr.GetClient()
 
-	function := runtimev1alpha1.Function{
+	function := serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
@@ -392,7 +392,7 @@ func TestFunctionConditionBuildError(t *testing.T) {
 		mgrStopped.Wait()
 	}()
 
-	function := runtimev1alpha1.Function{
+	function := serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
@@ -437,10 +437,10 @@ func TestFunctionConditionBuildError(t *testing.T) {
 	}
 	g.Expect(c.Status().Update(context.TODO(), &foundBuild)).Should(gomega.Succeed())
 
-	g.Eventually(func() runtimev1alpha1.FunctionCondition {
+	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
 		reconcileFunction.getFunctionCondition(&function)
 		return function.Status.Condition
-	}).Should(gomega.Equal(runtimev1alpha1.FunctionConditionError))
+	}).Should(gomega.Equal(serverlessv1alpha1.FunctionConditionError))
 }
 
 func TestFunctionConditionServiceSuccess(t *testing.T) {
@@ -459,7 +459,7 @@ func TestFunctionConditionServiceSuccess(t *testing.T) {
 		mgrStopped.Wait()
 	}()
 
-	function := runtimev1alpha1.Function{
+	function := serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
@@ -510,10 +510,10 @@ func TestFunctionConditionServiceSuccess(t *testing.T) {
 	}
 	g.Expect(c.Status().Update(context.TODO(), &foundService)).Should(gomega.Succeed())
 
-	g.Eventually(func() runtimev1alpha1.FunctionCondition {
+	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
 		reconcileFunction.getFunctionCondition(&function)
 		return function.Status.Condition
-	}).Should(gomega.Equal(runtimev1alpha1.FunctionConditionRunning))
+	}).Should(gomega.Equal(serverlessv1alpha1.FunctionConditionRunning))
 }
 
 func TestFunctionConditionServiceError(t *testing.T) {
@@ -531,7 +531,7 @@ func TestFunctionConditionServiceError(t *testing.T) {
 		mgrStopped.Wait()
 	}()
 
-	function := runtimev1alpha1.Function{
+	function := serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
@@ -582,17 +582,17 @@ func TestFunctionConditionServiceError(t *testing.T) {
 	}
 	g.Expect(c.Status().Update(context.TODO(), &foundService)).Should(gomega.Succeed())
 
-	g.Eventually(func() runtimev1alpha1.FunctionCondition {
+	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
 		reconcileFunction.getFunctionCondition(&function)
 		return function.Status.Condition
-	}).Should(gomega.Equal(runtimev1alpha1.FunctionConditionDeploying))
+	}).Should(gomega.Equal(serverlessv1alpha1.FunctionConditionDeploying))
 }
 
 func TestCreateFunctionHandlerMap(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	functionCode := "some function code"
 	functionDependecies := "some function dependencies"
-	function := runtimev1alpha1.Function{Spec: runtimev1alpha1.FunctionSpec{
+	function := serverlessv1alpha1.Function{Spec: serverlessv1alpha1.FunctionSpec{
 		Function: functionCode,
 		Deps:     functionDependecies,
 	},
@@ -610,7 +610,7 @@ func TestCreateFunctionHandlerMap(t *testing.T) {
 func TestCreateFunctionHandlerMapNoDependencies(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	functionCode := "some function code"
-	function := runtimev1alpha1.Function{Spec: runtimev1alpha1.FunctionSpec{
+	function := serverlessv1alpha1.Function{Spec: serverlessv1alpha1.FunctionSpec{
 		Function: functionCode,
 	},
 	}

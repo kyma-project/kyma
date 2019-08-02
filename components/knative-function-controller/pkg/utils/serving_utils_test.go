@@ -2,7 +2,7 @@ package utils_test
 
 import (
 	"github.com/ghodss/yaml"
-	runtimev1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/runtime/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/kyma-project/kyma/components/knative-function-controller/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -11,11 +11,11 @@ import (
 
 func TestGetServiceSpec(t *testing.T) {
 	imageName := "foo-image"
-	fn := runtimev1alpha1.Function{
+	fn := serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "foo",
 		},
-		Spec: runtimev1alpha1.FunctionSpec{
+		Spec: serverlessv1alpha1.FunctionSpec{
 			Function:            "main() {}",
 			FunctionContentType: "plaintext",
 			Size:                "L",

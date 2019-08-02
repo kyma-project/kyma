@@ -17,7 +17,7 @@ limitations under the License.
 package apis
 
 import (
-	"github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/runtime/v1alpha1"
+	"github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 func init() {

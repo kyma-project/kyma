@@ -21,7 +21,7 @@ import (
 	"net/http"
 	"strings"
 
-	runtimev1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/runtime/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -54,7 +54,7 @@ type FunctionCreateHandler struct {
 }
 
 // Mutates function values
-func (h *FunctionCreateHandler) mutatingFunctionFn(obj *runtimev1alpha1.Function) {
+func (h *FunctionCreateHandler) mutatingFunctionFn(obj *serverlessv1alpha1.Function) {
 	if obj.Spec.Size == "" {
 		obj.Spec.Size = "S"
 	}
@@ -70,7 +70,7 @@ func (h *FunctionCreateHandler) mutatingFunctionFn(obj *runtimev1alpha1.Function
 }
 
 // Validate function values and return an error if the function is not valid
-func (h *FunctionCreateHandler) validateFunctionFn(obj *runtimev1alpha1.Function) error {
+func (h *FunctionCreateHandler) validateFunctionFn(obj *serverlessv1alpha1.Function) error {
 	// function size
 	isValidFunctionSize := false
 	for _, functionSize := range functionSizes {
@@ -83,7 +83,7 @@ func (h *FunctionCreateHandler) validateFunctionFn(obj *runtimev1alpha1.Function
 		return fmt.Errorf("size should be one of '%v'", strings.Join(functionSizes, ","))
 	}
 
-	// function runtime
+	// function serverless
 	isValidRuntime := false
 	for _, runtime := range runtimes {
 		if obj.Spec.Runtime == runtime {
@@ -116,7 +116,7 @@ var _ admission.Handler = &FunctionCreateHandler{}
 func (h *FunctionCreateHandler) Handle(ctx context.Context, req types.Request) types.Response {
 	log.Info("received admission request", "request", req)
 
-	obj := &runtimev1alpha1.Function{}
+	obj := &serverlessv1alpha1.Function{}
 
 	err := h.Decoder.Decode(req, obj)
 	if err != nil {

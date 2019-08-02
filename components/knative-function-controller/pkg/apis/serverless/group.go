@@ -14,10 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package v1alpha1 contains API Schema definitions for the runtime v1alpha1 API group
-// +k8s:openapi-gen=true
-// +k8s:deepcopy-gen=package,register
-// +k8s:conversion-gen=github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/runtime
-// +k8s:defaulter-gen=TypeMeta
-// +groupName=runtime.kyma-project.io
-package v1alpha1
+// Package serverless contains serverless API versions
+package serverless

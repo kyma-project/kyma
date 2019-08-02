@@ -10,7 +10,7 @@ import (
 
 	"github.com/onsi/gomega/gstruct"
 
-	runtimev1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/runtime/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/gomega"
 
 	"context"
@@ -26,9 +26,9 @@ var functionCreateHandler = FunctionCreateHandler{}
 func TestMutation(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	function := &runtimev1alpha1.Function{
+	function := &serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: "default"},
-		Spec: runtimev1alpha1.FunctionSpec{
+		Spec: serverlessv1alpha1.FunctionSpec{
 			FunctionContentType: "plaintext",
 			Function:            "foo",
 		},
@@ -50,9 +50,9 @@ func TestMutation(t *testing.T) {
 func TestValidation(t *testing.T) {
 	g := gomega.NewWithT(t)
 
-	// wrong runtime
-	function := &runtimev1alpha1.Function{
-		Spec: runtimev1alpha1.FunctionSpec{
+	// wrong serverless
+	function := &serverlessv1alpha1.Function{
+		Spec: serverlessv1alpha1.FunctionSpec{
 			FunctionContentType: "plaintext",
 			Function:            "foo",
 			Size:                "S",
@@ -62,8 +62,8 @@ func TestValidation(t *testing.T) {
 	g.Expect(functionCreateHandler.validateFunctionFn(function)).To(gomega.MatchError("runtime should be one of 'nodejs6,nodejs8'"))
 
 	// wrong size
-	function = &runtimev1alpha1.Function{
-		Spec: runtimev1alpha1.FunctionSpec{
+	function = &serverlessv1alpha1.Function{
+		Spec: serverlessv1alpha1.FunctionSpec{
 			FunctionContentType: "plaintext",
 			Function:            "foo",
 			Size:                "UnknownSize",
@@ -73,8 +73,8 @@ func TestValidation(t *testing.T) {
 	g.Expect(functionCreateHandler.validateFunctionFn(function)).To(gomega.MatchError("size should be one of 'S,M,L,XL'"))
 
 	// wrong functionContentType
-	function = &runtimev1alpha1.Function{
-		Spec: runtimev1alpha1.FunctionSpec{
+	function = &serverlessv1alpha1.Function{
+		Spec: serverlessv1alpha1.FunctionSpec{
 			FunctionContentType: "UnknownFunctionContentType",
 			Function:            "foo",
 			Size:                "S",

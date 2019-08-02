@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       app: serverless-controller
-  serviceName: serverless
+  serviceName: runtime
   template:
     metadata:
       labels:

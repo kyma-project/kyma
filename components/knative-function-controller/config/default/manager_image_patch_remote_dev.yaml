@@ -5,14 +5,14 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: runtime-controller
-  serviceName: runtime
+      app: serverless-controller
+  serviceName: serverless
   template:
     metadata:
       labels:
-        app: runtime-controller
+        app: serverless-controller
     spec:
-      serviceAccount: runtime-controller
+      serviceAccount: serverless-controller
       containers:
         # gets changed by sed command when running `docker-build`
         - image: knative-function-controller:latest

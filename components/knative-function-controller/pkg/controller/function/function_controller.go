@@ -27,7 +27,7 @@ import (
 
 	buildv1alpha1 "github.com/knative/build/pkg/apis/build/v1alpha1"
 	servingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	runtimev1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/runtime/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -69,7 +69,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to Function
-	err = c.Watch(&source.Kind{Type: &runtimev1alpha1.Function{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &serverlessv1alpha1.Function{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch for changes to Build
 	err = c.Watch(&source.Kind{Type: &buildv1alpha1.Build{}}, &handler.EnqueueRequestForOwner{
-		OwnerType:    &runtimev1alpha1.Function{},
+		OwnerType:    &serverlessv1alpha1.Function{},
 		IsController: true,
 	})
 
@@ -90,7 +90,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Uncomment watch a Deployment created by Function - change this for objects you create
 	// err = c.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForOwner{
 	// 	IsController: true,
-	// 	OwnerType:    &runtimev1alpha1.Function{},
+	// 	OwnerType:    &serverlessv1alpha1.Function{},
 	// })
 	// if err != nil {
 	// 	return err
@@ -134,8 +134,8 @@ func getEnvDefault(envName string, defaultValue string) string {
 // and what is in the Function.Spec
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="runtime.kyma-project.io",resources=functions,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups="runtime.kyma-project.io",resources=functions/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups="serverless.kyma-project.io",resources=functions,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="serverless.kyma-project.io",resources=functions/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups="admissionregistration.k8s.io",resources=mutatingwebhookconfigurations;validatingwebhookconfigurations,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="serving.knative.dev",resources=services;routes;configurations;revisions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="build.knative.dev",resources=builds;buildtemplates;clusterbuildtemplates;services,verbs=get;list;create;update;delete;patch;watch
@@ -144,14 +144,14 @@ func getEnvDefault(envName string, defaultValue string) string {
 func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 
 	// Get Function instance
-	fn := &runtimev1alpha1.Function{}
+	fn := &serverlessv1alpha1.Function{}
 	err := r.getFunctionInstance(request, fn)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return reconcile.Result{}, nil
 		}
 		// status of the functon must change to error.
-		r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionError)
+		r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
 
 		log.Error(err, "Error reading Function instance", "namespace", request.Namespace, "name", request.Name)
 		return reconcile.Result{}, err
@@ -178,7 +178,7 @@ func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Resu
 		if errors.IsNotFound(err) {
 			return reconcile.Result{}, nil
 		}
-		r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionError)
+		r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
 
 		log.Error(err, "function configmap can't be created. The function could have been deleted.", "namespace", deployCm.Namespace, "name", deployCm.Name)
 		return reconcile.Result{}, err
@@ -187,7 +187,7 @@ func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Resu
 	// Update Function's ConfigMap
 	if err := r.updateFunctionConfigMap(foundCm, deployCm); err != nil {
 		// status of the functon must change to error.
-		r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionError)
+		r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
 
 		log.Error(err, "Error while trying to update Function's ConfigMap:", "namespace", deployCm.Namespace, "name", deployCm.Name)
 		return reconcile.Result{}, err
@@ -202,7 +202,7 @@ func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	if err := r.getFunctionBuildTemplate(fn); err != nil {
 		// status of the functon must change to error.
-		r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionError)
+		r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
 
 		return reconcile.Result{}, err
 	}
@@ -217,14 +217,14 @@ func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Resu
 	buildName := fmt.Sprintf("%s-%s", fn.Name, shortSha)
 	if err := r.buildFunctionImage(rnInfo, fn, imageName, buildName); err != nil {
 		// status of the functon must change to error.
-		r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionError)
+		r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
 
 		return reconcile.Result{}, err
 	}
 
 	if err := r.serveFunction(rnInfo, foundCm, fn, imageName); err != nil {
 		// status of the functon must change to error.
-		r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionError)
+		r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
 		return reconcile.Result{}, err
 	}
 
@@ -247,7 +247,7 @@ func (r *ReconcileFunction) getFunctionControllerConfiguration(fnConfig *corev1.
 }
 
 // Get the Function instance
-func (r *ReconcileFunction) getFunctionInstance(request reconcile.Request, fn *runtimev1alpha1.Function) error {
+func (r *ReconcileFunction) getFunctionInstance(request reconcile.Request, fn *serverlessv1alpha1.Function) error {
 	// Get the Function instance
 	err := r.Get(context.TODO(), request.NamespacedName, fn)
 	if err != nil {
@@ -259,7 +259,7 @@ func (r *ReconcileFunction) getFunctionInstance(request reconcile.Request, fn *r
 
 	if fn.Status.Condition == "" {
 		// As the instance of the new function was found. It status is updated.
-		err = r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionUnknown)
+		err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionUnknown)
 		if err != nil {
 			return err
 		}
@@ -268,7 +268,7 @@ func (r *ReconcileFunction) getFunctionInstance(request reconcile.Request, fn *r
 	return nil
 }
 
-func createFunctionHandlerMap(fn *runtimev1alpha1.Function) map[string]string {
+func createFunctionHandlerMap(fn *serverlessv1alpha1.Function) map[string]string {
 
 	data := make(map[string]string)
 	data["handler"] = "handler.main"
@@ -284,7 +284,7 @@ func createFunctionHandlerMap(fn *runtimev1alpha1.Function) map[string]string {
 }
 
 // Create Function's ConfigMap
-func (r *ReconcileFunction) createFunctionConfigMap(foundCm *corev1.ConfigMap, deployCm *corev1.ConfigMap, fn *runtimev1alpha1.Function) (reconcile.Result, error) {
+func (r *ReconcileFunction) createFunctionConfigMap(foundCm *corev1.ConfigMap, deployCm *corev1.ConfigMap, fn *serverlessv1alpha1.Function) (reconcile.Result, error) {
 
 	// Create Function Handler
 	deployCm.Data = createFunctionHandlerMap(fn)
@@ -344,7 +344,7 @@ func (r *ReconcileFunction) updateFunctionConfigMap(foundCm *corev1.ConfigMap, d
 
 }
 
-func (r *ReconcileFunction) getFunctionBuildTemplate(fn *runtimev1alpha1.Function) error {
+func (r *ReconcileFunction) getFunctionBuildTemplate(fn *serverlessv1alpha1.Function) error {
 
 	buildTemplateNamespace := fn.Namespace
 
@@ -376,7 +376,7 @@ func (r *ReconcileFunction) getFunctionBuildTemplate(fn *runtimev1alpha1.Functio
 
 		}
 
-		err = r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionBuilding)
+		err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionBuilding)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				return nil
@@ -404,7 +404,7 @@ func (r *ReconcileFunction) getFunctionBuildTemplate(fn *runtimev1alpha1.Functio
 			return err
 		}
 
-		err = r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionBuilding)
+		err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionBuilding)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				return nil
@@ -417,7 +417,7 @@ func (r *ReconcileFunction) getFunctionBuildTemplate(fn *runtimev1alpha1.Functio
 	return nil
 }
 
-func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, fn *runtimev1alpha1.Function, imageName string, buildName string) error {
+func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, fn *serverlessv1alpha1.Function, imageName string, buildName string) error {
 
 	// Create a new Build data structure
 	deployBuild := runtimeUtil.GetBuildResource(rnInfo, fn, imageName, buildName)
@@ -436,7 +436,7 @@ func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, 
 			return err
 		}
 
-		err = r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionBuilding)
+		err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionBuilding)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				return nil
@@ -453,7 +453,7 @@ func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, 
 	// Update Build object
 	if !reflect.DeepEqual(deployBuild.Spec, foundBuild.Spec) && !compareBuildImages(foundBuild, imageName) {
 
-		err := r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionUpdating)
+		err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionUpdating)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				return nil
@@ -492,7 +492,7 @@ func compareBuildImages(foundBuild *buildv1alpha1.Build, imageName string) bool 
 	return false
 }
 
-func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, foundCm *corev1.ConfigMap, fn *runtimev1alpha1.Function, imageName string) error {
+func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, foundCm *corev1.ConfigMap, fn *serverlessv1alpha1.Function, imageName string) error {
 
 	deployService := &servingv1alpha1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -517,7 +517,7 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, found
 			return err
 		}
 
-		err = r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionDeploying)
+		err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionDeploying)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				return nil
@@ -544,7 +544,7 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, found
 
 		log.Info("Updated Knative Service", "namespace", deployService.Namespace, "name", deployService.Name)
 
-		err = r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionDeploying)
+		err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionDeploying)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				return nil
@@ -557,7 +557,7 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, found
 	return nil
 }
 
-func compareServiceImage(foundService *servingv1alpha1.Service, imageName string, fn *runtimev1alpha1.Function) bool {
+func compareServiceImage(foundService *servingv1alpha1.Service, imageName string, fn *serverlessv1alpha1.Function) bool {
 
 	if len(foundService.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers) > 0 {
 		args := foundService.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers
@@ -576,7 +576,7 @@ func compareServiceImage(foundService *servingv1alpha1.Service, imageName string
 // - the conditions service, route and configuration should have status true and type ready.
 // Update the status of the function base on the defined function condition.
 // For a function get the status error either the creation or update of the knative service or build must have failed.
-func (r *ReconcileFunction) getFunctionCondition(fn *runtimev1alpha1.Function) {
+func (r *ReconcileFunction) getFunctionCondition(fn *serverlessv1alpha1.Function) {
 
 	serviceReady := false
 	configurationsReady := false
@@ -592,7 +592,7 @@ func (r *ReconcileFunction) getFunctionCondition(fn *runtimev1alpha1.Function) {
 	// if build show error, set function status to error too
 	for _, condition := range foundBuild.Status.Conditions {
 		if condition.Type == duckv1alpha1.ConditionSucceeded && condition.Status == corev1.ConditionFalse {
-			err := r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionError)
+			err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
 			if err != nil {
 				log.Error(err, "Error while trying to update the function Status", "namespace", fn.Namespace, "name", fn.Name)
 			}
@@ -639,10 +639,10 @@ func (r *ReconcileFunction) getFunctionCondition(fn *runtimev1alpha1.Function) {
 	}
 
 	// Update the function status base on the ksvc status
-	fnCondition := runtimev1alpha1.FunctionConditionDeploying
+	fnCondition := serverlessv1alpha1.FunctionConditionDeploying
 	if configurationsReady && routesReady && serviceReady {
 
-		fnCondition = runtimev1alpha1.FunctionConditionRunning
+		fnCondition = serverlessv1alpha1.FunctionConditionRunning
 
 	}
 	err := r.updateFunctionStatus(fn, fnCondition)
@@ -663,7 +663,7 @@ func ignoreNotFound(err error) error {
 }
 
 // Update the status of the function JSONPath: .status.condition
-func (r *ReconcileFunction) updateFunctionStatus(fn *runtimev1alpha1.Function, condition runtimev1alpha1.FunctionCondition) error {
+func (r *ReconcileFunction) updateFunctionStatus(fn *serverlessv1alpha1.Function, condition serverlessv1alpha1.FunctionCondition) error {
 
 	fn.Status.Condition = condition
 	err := r.Status().Update(context.TODO(), fn)
