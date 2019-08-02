@@ -35,7 +35,7 @@ This table lists the non-required configurable parameters, their descriptions, a
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **schedules** | Sets up a scheduled backup. By default, a scheduled backup runs at 07:00 daily on Monday through Friday. | scheduled-backup |
+| **schedules** | Sets up a scheduled backup. By default, a scheduled backup runs at 07:00 daily on Monday through Friday. | `scheduled-backup` |
 | **configuration.volumeSnapshotLocation.bucket** | Specifies the name of the storage bucket where volume snapshots are uploaded. | None |
 | **configuration.backupStorageLocation.prefix** | Specifies the directory inside a storage bucket where backups are located. | None |
 | **configuration.backupStorageLocation.config.resourceGroup** | Specifies the name of the resource group which contains the storage account for the backup storage location. It only applies to Azure. | None |
