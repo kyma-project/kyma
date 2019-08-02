@@ -18,6 +18,6 @@ spec:
       containers:
         - name: {{ .Chart.Name }}-tests
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.runtimeAgentTests.dir }}compass-runtime-agent-test:{{ .Values.global.images.runtimeAgentTests.version }}
-          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
     restartPolicy: Never
   {{- end }}

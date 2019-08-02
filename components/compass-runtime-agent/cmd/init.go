@@ -10,30 +10,20 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
-	log "github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 )
 
-func createNewSynchronizationService(namespace string, gatewayPort int) kyma.Service {
-	k8sConfig, err := restclient.InClusterConfig()
-	if err != nil {
-		log.Errorf("Failed to read k8s in-cluster configuration, %s", err)
-
-		return uninitializedKymaService{}
-	}
-
+func createNewSynchronizationService(k8sConfig *restclient.Config, namespace string, gatewayPort int) (kyma.Service, error) {
 	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
 	if err != nil {
-		log.Errorf("Failed to create k8s core client, %s", err)
-		return uninitializedKymaService{}
+		return nil, errors.Wrap(err, "Failed to create k8s core client")
 	}
 
 	applicationManager, err := newApplicationManager(k8sConfig)
 	if err != nil {
-		log.Errorf("Failed to initialize Applications manager, %s", err)
-		return uninitializedKymaService{}
+		return nil, errors.Wrap(err, "Failed to initialize Applications manager")
 	}
 
 	nameResolver := k8sconsts.NewNameResolver(namespace)
@@ -41,7 +31,7 @@ func createNewSynchronizationService(namespace string, gatewayPort int) kyma.Ser
 
 	resourcesService := newResourcesService(coreClientset, nameResolver, namespace, gatewayPort)
 
-	return kyma.NewService(applicationManager, converter, resourcesService)
+	return kyma.NewService(applicationManager, converter, resourcesService), nil
 }
 
 func newResourcesService(coreClientset *kubernetes.Clientset, nameResolver k8sconsts.NameResolver, namespace string, gatewayPort int) apiresources.Service {
@@ -79,11 +69,4 @@ func newSecretsService(repository secrets.Repository, nameResolver k8sconsts.Nam
 	strategyFactory := strategy.NewSecretsStrategyFactory()
 
 	return secrets.NewService(repository, nameResolver, strategyFactory)
-}
-
-type uninitializedKymaService struct {
-}
-
-func (u uninitializedKymaService) Apply(applications []model.Application) ([]kyma.Result, apperrors.AppError) {
-	return nil, apperrors.Internal("Service not initialized")
 }

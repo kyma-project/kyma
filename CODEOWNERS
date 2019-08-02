@@ -227,6 +227,9 @@
 # CMS Controller Manager Component
 /components/cms-controller-manager/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
+# CMS Services
+/components/cms-services/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
+
 # Binding usage controller Component
 /components/service-binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 

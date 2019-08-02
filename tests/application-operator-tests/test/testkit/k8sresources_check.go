@@ -17,10 +17,12 @@ const (
 	applicationGatewayRoleBindingFormat        = "%s-application-gateway"
 	applicationGatewayClusterRoleFormat        = "%s-application-gateway"
 	applicationGatewayClusterRoleBindingFormat = "%s-application-gateway"
-	applicationGatewaySvcFormat                = "%s-application-gateway-external-api"
+	applicationGatewaySvcFormat                = "app-%s-application-gateway"
 	applicationGatewayServiceAccountFormat     = "%s-application-gateway"
 	eventServiceDeploymentFormat               = "%s-event-service"
-	eventServiceSvcFormat                      = "%s-event-service-external-api"
+	eventServiceSvcFormat                      = "app-%s-event-service"
+	connectivityValidatorDeploymentFormat      = "%s-connectivity-validator"
+	connectivityValidatorSvcFormat             = "app-%s-validator"
 
 	resourceCheckInterval = 1 * time.Second
 	resourceCheckTimeout  = 10 * time.Second
@@ -59,6 +61,8 @@ func NewK8sChecker(client K8sResourcesClient, appName string) *K8sResourceChecke
 		newResource(fmt.Sprintf(applicationGatewaySvcFormat, appName), "service", client.GetService),
 		newResource(fmt.Sprintf(eventServiceDeploymentFormat, appName), "deployment", client.GetDeployment),
 		newResource(fmt.Sprintf(eventServiceSvcFormat, appName), "service", client.GetService),
+		newResource(fmt.Sprintf(connectivityValidatorDeploymentFormat, appName), "deployment", client.GetDeployment),
+		newResource(fmt.Sprintf(connectivityValidatorSvcFormat, appName), "service", client.GetService),
 	}
 
 	return &K8sResourceChecker{

@@ -248,15 +248,9 @@ func (r *ReconcileClusterAddonsConfiguration) deleteAddonsProcess(addon *addonsv
 
 		for _, repo := range addon.Status.Repositories {
 			for _, a := range repo.Addons {
-				id, err := r.removeAddon(a)
+				err := r.removeAddon(a)
 				if err != nil && !storage.IsNotFoundError(err) {
 					return exerr.Wrapf(err, "while deleting addon with charts for addon %s", a.Name)
-				}
-				if id != nil {
-					r.log.Infof("- delete ClusterDocsTopic for addon %s", a.Name)
-					if err := r.docsProvider.EnsureClusterDocsTopicRemoved(string(*id)); err != nil {
-						return exerr.Wrapf(err, "while ensuring ClusterDocsTopic for addon %s is removed", *id)
-					}
 				}
 			}
 		}
@@ -331,7 +325,7 @@ func (r *ReconcileClusterAddonsConfiguration) deleteOrphanAddons(repos []addonsv
 	for _, repo := range lastRepos {
 		for _, ad := range repo.Addons {
 			if _, exist := addonsToStay[ad.Key()]; !exist {
-				if _, err := r.removeAddon(ad); err != nil && !storage.IsNotFoundError(err) {
+				if err := r.removeAddon(ad); err != nil && !storage.IsNotFoundError(err) {
 					return nil, exerr.Wrapf(err, "while deleting addons and charts for addon %s", ad.Name)
 				}
 				deletedAddonsKeys = append(deletedAddonsKeys, ad.Key())
@@ -345,7 +339,7 @@ func (r *ReconcileClusterAddonsConfiguration) deleteAddonsFromRepository(repos [
 	var deletedAddonsKeys []string
 	for _, repo := range repos {
 		for _, ad := range repo.Addons {
-			if _, err := r.removeAddon(ad); err != nil && !storage.IsNotFoundError(err) {
+			if err := r.removeAddon(ad); err != nil && !storage.IsNotFoundError(err) {
 				return nil, exerr.Wrapf(err, "while deleting addons and charts for addon %s", ad.Name)
 			}
 			deletedAddonsKeys = append(deletedAddonsKeys, ad.Key())
@@ -354,25 +348,29 @@ func (r *ReconcileClusterAddonsConfiguration) deleteAddonsFromRepository(repos [
 	return deletedAddonsKeys, nil
 }
 
-func (r *ReconcileClusterAddonsConfiguration) removeAddon(ad addonsv1alpha1.Addon) (*internal.AddonID, error) {
+func (r *ReconcileClusterAddonsConfiguration) removeAddon(ad addonsv1alpha1.Addon) error {
 	r.log.Infof("- delete addon %s from storage", ad.Name)
-	b, err := r.addonStorage.Get(internal.ClusterWide, internal.AddonName(ad.Name), *semver.MustParse(ad.Version))
+	addon, err := r.addonStorage.Get(internal.ClusterWide, internal.AddonName(ad.Name), *semver.MustParse(ad.Version))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	err = r.addonStorage.Remove(internal.ClusterWide, internal.AddonName(ad.Name), *semver.MustParse(ad.Version))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	r.syncBroker = true
+	r.log.Infof("- delete ClusterDocsTopic for addon %s", addon.Name)
+	if err := r.docsProvider.EnsureClusterDocsTopicRemoved(string(addon.ID)); err != nil {
+		return exerr.Wrapf(err, "while ensuring ClusterDocsTopic for addon %s is removed", addon.ID)
+	}
 
-	for _, plan := range b.Plans {
+	for _, plan := range addon.Plans {
 		err = r.chartStorage.Remove(internal.ClusterWide, plan.ChartRef.Name, plan.ChartRef.Version)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
-	return &b.ID, nil
+	return nil
 }
 
 func (r *ReconcileClusterAddonsConfiguration) reprocessConflictingAddonsConfiguration(key string, list *addonsv1alpha1.ClusterAddonsConfigurationList) error {

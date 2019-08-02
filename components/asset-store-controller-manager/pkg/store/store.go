@@ -18,12 +18,12 @@ import (
 )
 
 type Config struct {
-	Endpoint          string `envconfig:"default=minio.kyma.local"`
-	ExternalEndpoint  string `envconfig:"default=https://minio.kyma.local"`
-	AccessKey         string `envconfig:""`
-	SecretKey         string `envconfig:""`
-	UseSSL            bool   `envconfig:"default=true"`
-	UploadWorkerCount int    `envconfig:"default=10"`
+	Endpoint           string `envconfig:"default=minio.kyma.local"`
+	ExternalEndpoint   string `envconfig:"default=https://minio.kyma.local"`
+	AccessKey          string `envconfig:""`
+	SecretKey          string `envconfig:""`
+	UseSSL             bool   `envconfig:"default=true"`
+	UploadWorkersCount int    `envconfig:"default=10"`
 }
 
 //go:generate mockery -name=MinioClient -output=automock -outpkg=automock -case=underscore

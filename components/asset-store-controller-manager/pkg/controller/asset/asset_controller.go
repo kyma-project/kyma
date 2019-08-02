@@ -3,7 +3,6 @@ package asset
 import (
 	"context"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/engine"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/finalizer"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/handler/asset"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/loader"
@@ -46,15 +45,15 @@ func Add(mgr manager.Manager) error {
 		return errors.Wrapf(err, "while initializing Store client")
 	}
 
-	store := store.New(minioClient, cfg.Store.UploadWorkerCount)
+	store := store.New(minioClient, cfg.Store.UploadWorkersCount)
 	loader := loader.New(cfg.Loader.TemporaryDirectory, cfg.Loader.VerifySSL)
 	findBucketFnc := bucketFinder(mgr)
 	deleteFinalizer := finalizer.New(deleteAssetFinalizerName)
 
-	assethook := assethook.New(&http.Client{})
-	validator := engine.NewValidator(assethook, cfg.Webhook.ValidationTimeout)
-	mutator := engine.NewMutator(assethook, cfg.Webhook.MutationTimeout)
-	metadataExtractor := engine.NewMetadataExtractor(assethook, cfg.Webhook.MetadataExtractionTimeout)
+	httpClient := &http.Client{}
+	validator := assethook.NewValidator(httpClient, cfg.Webhook.ValidationTimeout, cfg.Webhook.ValidationWorkersCount)
+	mutator := assethook.NewMutator(httpClient, cfg.Webhook.MutationTimeout, cfg.Webhook.MutationWorkersCount)
+	metadataExtractor := assethook.NewMetadataExtractor(httpClient, cfg.Webhook.MetadataExtractionTimeout)
 
 	reconciler := &ReconcileAsset{
 		Client:            mgr.GetClient(),
@@ -130,9 +129,9 @@ type ReconcileAsset struct {
 	loader            loader.Loader
 	findBucketFnc     asset.FindBucketStatus
 	finalizer         finalizer.Finalizer
-	validator         engine.Validator
-	mutator           engine.Mutator
-	metadataExtractor engine.MetadataExtractor
+	validator         assethook.Validator
+	mutator           assethook.Mutator
+	metadataExtractor assethook.MetadataExtractor
 }
 
 // Reconcile reads that state of the cluster for a Asset object and makes changes based on the state read

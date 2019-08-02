@@ -20,26 +20,26 @@ type ConfigClient interface {
 	FetchConfiguration(directorURL string, credentials certificates.Credentials) ([]kymamodel.Application, error)
 }
 
-type GraphQLClientConstructor func(certificate tls.Certificate, graphqlEndpoint string, enableLogging bool) (gql.Client, error)
+type GraphQLClientConstructor func(certificate tls.Certificate, graphqlEndpoint string, enableLogging bool, insecureConfigFetch bool) (gql.Client, error)
 
-func NewConfigurationClient(tenant, runtimeId string, gqlClientConstructor GraphQLClientConstructor) ConfigClient {
+func NewConfigurationClient(tenant, runtimeId string, gqlClientConstructor GraphQLClientConstructor, insecureConfigFetch bool) ConfigClient {
 	return &configClient{
-		tenant:               tenant,
-		runtimeId:            runtimeId,
-		gqlClientConstructor: gqlClientConstructor,
+		tenant:                     tenant,
+		runtimeId:                  runtimeId,
+		gqlClientConstructor:       gqlClientConstructor,
+		insecureConfigurationFetch: insecureConfigFetch,
 	}
 }
 
 type configClient struct {
-	tenant               string
-	runtimeId            string
-	gqlClientConstructor GraphQLClientConstructor
+	tenant                     string
+	runtimeId                  string
+	gqlClientConstructor       GraphQLClientConstructor
+	insecureConfigurationFetch bool
 }
 
-// TODO - move to queries
-
 func (cc *configClient) FetchConfiguration(directorURL string, credentials certificates.Credentials) ([]kymamodel.Application, error) {
-	client, err := cc.gqlClientConstructor(credentials.AsTLSCertificate(), directorURL, true)
+	client, err := cc.gqlClientConstructor(credentials.AsTLSCertificate(), directorURL, true, cc.insecureConfigurationFetch)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to create GraphQL client")
 	}
@@ -47,11 +47,7 @@ func (cc *configClient) FetchConfiguration(directorURL string, credentials certi
 	applicationPage := ApplicationPage{}
 	response := ApplicationsForRuntimeResponse{Result: &applicationPage}
 
-	// TODO: use proper query when it is ready
-	//result: applicationsForRuntime(runtimeId: %s) { ... }
-
-	applicationsQuery := ApplicationsQuery()
-
+	applicationsQuery := ApplicationsForRuntimeQuery(cc.runtimeId)
 	req := graphql.NewRequest(applicationsQuery)
 	req.Header.Add(HeaderTenant, cc.tenant)
 

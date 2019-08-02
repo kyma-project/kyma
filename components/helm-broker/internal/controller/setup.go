@@ -8,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/addon"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/addon/provider"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/assetstore"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/config"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/controller/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
@@ -18,7 +19,7 @@ import (
 )
 
 // SetupAndStartController creates and starts the controller
-func SetupAndStartController(cfg *rest.Config, ctrCfg *config.ControllerConfig, metricsAddr string, sFact storage.Factory, lg *logrus.Entry) manager.Manager {
+func SetupAndStartController(cfg *rest.Config, ctrCfg *config.ControllerConfig, metricsAddr string, sFact storage.Factory, uploadClient assetstore.Client, lg *logrus.Entry) manager.Manager {
 	// Create a new Cmd to provide shared dependencies and start components
 	lg.Info("Setting up manager")
 	var mgr manager.Manager
@@ -45,8 +46,9 @@ func SetupAndStartController(cfg *rest.Config, ctrCfg *config.ControllerConfig, 
 	sbFacade := broker.NewBrokersFacade(mgr.GetClient(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, lg)
 	csbFacade := broker.NewClusterBrokersFacade(mgr.GetClient(), brokerSyncer, ctrCfg.Namespace, ctrCfg.ServiceName, ctrCfg.ClusterServiceBrokerName, lg)
 
+	gitGetterFactory := provider.GitGetterConfiguration{Cli: uploadClient, TmpDir: ctrCfg.TmpDir}
 	allowedGetters := map[string]provider.Provider{
-		"git":   provider.NewGit,
+		"git":   gitGetterFactory.NewGit,
 		"https": provider.NewHTTP,
 	}
 	if ctrCfg.DevelopMode {

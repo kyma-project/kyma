@@ -46,8 +46,6 @@ spec:
                 properties:
                   filter:
                     type: string
-                  metadata:
-                    type: object
                   mode:
                     enum:
                     - single
@@ -57,6 +55,8 @@ spec:
                   name:
                     pattern: ^[a-z][a-zA-Z0-9-]*[a-zA-Z0-9]$
                     type: string
+                  parameters:
+                    type: object
                   type:
                     pattern: ^[a-z][a-zA-Z0-9\._-]*[a-zA-Z0-9]$
                     type: string
