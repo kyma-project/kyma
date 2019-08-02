@@ -1,7 +1,7 @@
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
-  cms_controller_manager:
+  cmsControllerManager:
     dir:
     version: 1.4.0-rc1
   cmsAsyncAPIService:
