@@ -4,10 +4,7 @@ images:
   ui:
     dir: "pr/"
     version: "PR-1119"
-  mf:
-    dir:
-    version :  
-
+    
 ui:
   host: compass
 mf: 
