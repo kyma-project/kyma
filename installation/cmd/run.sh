@@ -70,5 +70,5 @@ if [ -z "$CR_PATH" ]; then
 
 fi
 
-bash ${SCRIPTS_DIR}/installer.sh --local --cr "${CR_PATH}" --password "${ADMIN_PASSWORD}"
+bash ${SCRIPTS_DIR}/installer.sh --cr "${CR_PATH}" --password "${ADMIN_PASSWORD}"
 rm -rf $TMPDIR

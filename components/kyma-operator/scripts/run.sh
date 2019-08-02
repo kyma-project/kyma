@@ -3,7 +3,6 @@
 set -o errexit
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-LOCAL_KYMA="--local"
 KYMA_PATH="${CURRENT_DIR}/../../.."
 CR_PATH=""
 
@@ -16,10 +15,6 @@ do
         --skip-minikube-start)
             SKIP_MINIKUBE_START=true
             shift # past argument
-            ;;
-        --local)
-            LOCAL_KYMA="--local"
-            shift
             ;;
         --cr)
             CR_PATH="--cr $2"
@@ -48,7 +43,7 @@ if [[ -z ${CR_PATH} ]]; then
     CR_PATH="--cr $CR_PATH"
 fi
 
-bash ${KYMA_PATH}/installation/scripts/installer.sh ${LOCAL_KYMA} ${CR_PATH}
+bash ${KYMA_PATH}/installation/scripts/installer.sh ${CR_PATH}
 
 if [ -f "${TMPDIR}/installer-cr-local.yaml" ]; then
     rm -rf $TMPDIR
