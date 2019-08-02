@@ -24,7 +24,7 @@ To interact with the Kyma OAuth2 server, you must register an OAuth2 client. Fol
   export DOMAIN={YOUR_CLUSTER_DOMAIN}
   ```
 
-2. Send a CURL request to the `/clients` endpoint of the OAuth2 server to register your client with read and write scopes. Run:
+2. Send a CURL request to the `/clients` endpoint of the OAuth2 server to register your client with the read and write scopes. Run:
   ```
   curl -ik -X POST "https://oauth2-admin.$DOMAIN/clients" -d '{"grant_types":["client_credentials"], "client_id":"'$CLIENT_ID'", "client_secret":"'$CLIENT_SECRET'", "scope":"read write"}'
   ```
