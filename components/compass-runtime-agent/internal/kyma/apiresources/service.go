@@ -45,11 +45,15 @@ func (s service) CreateApiResources(applicationName string, applicationUID types
 	k8sResourceName := s.nameResolver.GetResourceName(applicationName, serviceID)
 	log.Infof("Creating access service '%s' for application '%s' and service '%s'.", k8sResourceName, applicationName, serviceID)
 	appendedErr := s.accessServiceManager.Create(applicationName, applicationUID, serviceID, k8sResourceName)
+	if appendedErr != nil {
+		log.Infof("Failed to create access service for application '%s' and service '%s': %s.", applicationName, serviceID, appendedErr)
+	}
 
 	if credentials != nil {
 		log.Infof("Creating secret for application '%s' and service '%s'.", applicationName, serviceID)
 		_, err := s.secretsService.Create(applicationName, applicationUID, serviceID, credentials)
 		if err != nil {
+			log.Infof("Failed to create secret for application '%s' and service '%s': %s.", applicationName, serviceID, err)
 			appendedErr = appendedErr.Append("", err)
 		}
 	} else {
@@ -63,15 +67,27 @@ func (s service) UpdateApiResources(applicationName string, applicationUID types
 	k8sResourceName := s.nameResolver.GetResourceName(applicationName, serviceID)
 	log.Infof("Updating access service '%s' for application '%s' and service '%s'.", k8sResourceName, applicationName, serviceID)
 	appendedErr := s.accessServiceManager.Upsert(applicationName, applicationUID, serviceID, k8sResourceName)
+	if appendedErr != nil {
+		log.Infof("Failed to update access service for application '%s' and service '%s': %s.", applicationName, serviceID, appendedErr)
+	}
 
 	if credentials != nil {
 		log.Infof("Updating secret for application '%s' and service '%s'.", applicationName, serviceID)
 		_, err := s.secretsService.Upsert(applicationName, applicationUID, serviceID, credentials)
 		if err != nil {
+			log.Infof("Failed to update secret for application '%s' and service '%s': %s.", applicationName, serviceID, err)
 			appendedErr = appendedErr.Append("", err)
 		}
 	} else {
 		log.Infof("Credentials for application '%s' and service '%s' not provided.", applicationName, serviceID)
+		log.Infof("Deleting old secret for application '%s' and service '%s'.", applicationName, serviceID)
+		secretName := s.nameResolver.GetCredentialsSecretName(applicationName, serviceID)
+
+		err := s.secretsService.Delete(secretName)
+		if err != nil {
+			log.Infof("Failed to delete secret for application '%s' and service '%s': %s.", applicationName, serviceID, err)
+			appendedErr = appendedErr.Append("", err)
+		}
 	}
 
 	return appendedErr
@@ -86,6 +102,7 @@ func (s service) DeleteApiResources(applicationName string, serviceID string, se
 		log.Infof("Deleting secret for application '%s' and service '%s'.", applicationName, serviceID)
 		err := s.secretsService.Delete(secretName)
 		if err != nil {
+			log.Infof("Failed to delete secret for application '%s' and service '%s': %s.", applicationName, serviceID, err)
 			appendedErr = appendedErr.Append("", err)
 		}
 	} else {

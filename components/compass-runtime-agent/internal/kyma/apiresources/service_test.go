@@ -76,7 +76,7 @@ func TestService(t *testing.T) {
 			},
 		}
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
-		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, apperrors.Internal("some error"))
+		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
@@ -125,7 +125,9 @@ func TestService(t *testing.T) {
 		nameResolver := &k8sconstsmocks.NameResolver{}
 
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
+		secretServiceMock.On("Delete", "secretName").Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
+		nameResolver.On("GetCredentialsSecretName", "appName", "serviceID").Return("secretName")
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
@@ -138,7 +140,7 @@ func TestService(t *testing.T) {
 		secretServiceMock.AssertNotCalled(t, "Upsert")
 	})
 
-	t.Run("should not interrupt execution when error occurs on update", func(t *testing.T) {
+	t.Run("should not interrupt execution when error occurs on update with credentials", func(t *testing.T) {
 		// given
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
@@ -151,13 +153,35 @@ func TestService(t *testing.T) {
 			},
 		}
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
-		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, apperrors.Internal("some error"))
+		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
 
 		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, nil)
+
+		// then
+		require.Error(t, err)
+		accessServiceMock.AssertExpectations(t)
+		secretServiceMock.AssertExpectations(t)
+	})
+
+	t.Run("should not interrupt execution when error occurs on update without credentials", func(t *testing.T) {
+		// given
+		accessServiceMock := &accessservicemock.AccessServiceManager{}
+		secretServiceMock := &secretmock.Service{}
+		nameResolver := &k8sconstsmocks.NameResolver{}
+
+		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
+		secretServiceMock.On("Delete", "secretName").Return(apperrors.Internal("some other error"))
+		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
+		nameResolver.On("GetCredentialsSecretName", "appName", "serviceID").Return("secretName")
+
+		// when
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, nil)
 
 		// then
 		require.Error(t, err)
