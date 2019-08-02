@@ -10,10 +10,10 @@ spec:
   version: v1
   category: Integration
   placement: cluster
-  viewBaseUrl: https://compass.{{ js .Values.global.ingress.domainName }}
+  viewBaseUrl: https://{{ .Values.ui.host }}.{{ js .Values.global.ingress.domainName }}
   navigationNodes:
     - label: Compass
       navigationPath: ''
       viewUrl: ''
-      externalLink: https://compass.{{ js .Values.global.ingress.domainName }}
+      externalLink: https://{{ .Values.ui.host }}.{{ js .Values.global.ingress.domainName }}
       order: 4
