@@ -24,7 +24,7 @@ global:
     version: 1.4.0-rc1
   ui_acceptance_tests:
     dir:
-    version: 1.4.0-rc1
+    version: 72772df2
   api_controller:
     dir:
     version: 1.4.0-rc1
