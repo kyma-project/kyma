@@ -28,7 +28,7 @@ import (
 	"github.com/knative/pkg/apis"
 	duckv1beta1 "github.com/knative/pkg/apis/duck/v1beta1"
 	servingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/gstruct"
 	"golang.org/x/net/context"

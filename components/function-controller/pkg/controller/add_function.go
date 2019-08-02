@@ -17,7 +17,7 @@ limitations under the License.
 package controller
 
 import (
-	"github.com/kyma-project/kyma/components/knative-function-controller/pkg/controller/function"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/controller/function"
 )
 
 func init() {

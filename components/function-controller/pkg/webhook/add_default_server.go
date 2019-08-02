@@ -17,7 +17,7 @@ limitations under the License.
 package webhook
 
 import (
-	server "github.com/kyma-project/kyma/components/knative-function-controller/pkg/webhook/default_server"
+	server "github.com/kyma-project/kyma/components/function-controller/pkg/webhook/default_server"
 )
 
 func init() {

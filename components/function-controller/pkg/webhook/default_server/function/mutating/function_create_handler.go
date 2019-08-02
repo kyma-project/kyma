@@ -21,7 +21,7 @@ import (
 	"net/http"
 	"strings"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"

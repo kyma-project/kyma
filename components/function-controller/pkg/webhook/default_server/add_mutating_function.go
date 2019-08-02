@@ -19,7 +19,7 @@ package defaultserver
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/knative-function-controller/pkg/webhook/default_server/function/mutating"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/webhook/default_server/function/mutating"
 )
 
 func init() {

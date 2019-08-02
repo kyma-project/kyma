@@ -1,5 +1,5 @@
 # Image URL to use all building/pushing image targets
-APP_NAME ?= knative-function-controller
+APP_NAME ?= function-controller
 IMG ?= $(APP_NAME):latest
 IMG-CI = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME):$(DOCKER_TAG)
 
@@ -47,7 +47,7 @@ qt:
 
 # Build manager binary
 manager: generate fmt vet
-	go build -o bin/manager github.com/kyma-project/kyma/components/knative-function-controller/cmd/manager
+	go build -o bin/manager github.com/kyma-project/kyma/components/function-controller/cmd/manager
 
 # NOTE: does not work anymore until https://github.com/kubernetes-sigs/kubebuilder/issues/400 is implemented
 # Run against the configured Kubernetes cluster in ~/.kube/config
@@ -100,4 +100,4 @@ ci-release: docker-build docker-push
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
-	@echo "resources/knative-function-controller"
+	@echo "resources/function-controller"

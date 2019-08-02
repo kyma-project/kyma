@@ -17,7 +17,7 @@ limitations under the License.
 // Package v1alpha1 contains API Schema definitions for the serverless v1alpha1 API group
 // +k8s:openapi-gen=true
 // +k8s:deepcopy-gen=package,register
-// +k8s:conversion-gen=github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless
+// +k8s:conversion-gen=github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless
 // +k8s:defaulter-gen=TypeMeta
 // +groupName=serverless.kyma-project.io
 package v1alpha1

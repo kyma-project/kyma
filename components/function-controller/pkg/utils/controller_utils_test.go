@@ -5,7 +5,7 @@ import (
 
 	"github.com/onsi/gomega"
 
-	"github.com/kyma-project/kyma/components/knative-function-controller/pkg/utils"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/utils"
 
 	corev1 "k8s.io/api/core/v1"
 )

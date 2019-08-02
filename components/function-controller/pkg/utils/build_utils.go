@@ -5,7 +5,7 @@ import (
 	"time"
 
 	buildv1alpha1 "github.com/knative/build/pkg/apis/build/v1alpha1"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

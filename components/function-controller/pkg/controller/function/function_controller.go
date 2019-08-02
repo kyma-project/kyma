@@ -27,7 +27,7 @@ import (
 
 	buildv1alpha1 "github.com/knative/build/pkg/apis/build/v1alpha1"
 	servingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,7 +44,7 @@ import (
 
 	"crypto/sha256"
 
-	runtimeUtil "github.com/kyma-project/kyma/components/knative-function-controller/pkg/utils"
+	runtimeUtil "github.com/kyma-project/kyma/components/function-controller/pkg/utils"
 )
 
 var log = logf.Log.WithName("function_controller")

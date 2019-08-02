@@ -10,7 +10,7 @@ import (
 
 	"github.com/onsi/gomega/gstruct"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/knative-function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/gomega"
 
 	"context"

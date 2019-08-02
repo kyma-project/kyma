@@ -15,6 +15,6 @@ spec:
       serviceAccount: serverless-controller
       containers:
         # gets changed by sed command when running `docker-build`
-        - image: knative-function-controller:latest
+        - image: function-controller:latest
           name: manager
           imagePullPolicy: Never

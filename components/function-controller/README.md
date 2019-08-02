@@ -20,7 +20,8 @@ Follow these steps to run the Knative Function controller locally:
 
 1. Create a ServiceAccount to enable knativeBuild Docker builds.
 
-To run a build in a Namespace, create ServiceAccounts with linked Docker repository credentials for each Namespace that will be used for the knative-function controller.
+To run a build in a Namespace, create ServiceAccounts with linked Docker repository credentials for each Namespace that
+ will be used for the function-controller.
 
 ```bash
 #set your namespace e.g. default
@@ -33,17 +34,17 @@ cat <<EOF | sed s/hihihih/hohohoho/
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-    name: knative-function-controller-build
+    name: function-controller-build
     labels:
-        app: knative-function-controller
+        app: function-controller
 secrets:
-    - name: knative-function-controller-docker-reg-credential
+    - name: function-controller-docker-reg-credential
 ---
 apiVersion: v1
 kind: Secret
 type: kubernetes.io/basic-auth
 metadata:
-    name: knative-function-controller-docker-reg-credential
+    name: function-controller-docker-reg-credential
     annotations:
         build.knative.dev/docker-0: ${REGISTRY}
 data:
@@ -66,7 +67,7 @@ eval $(minikube docker-env)
 
 ```bash
 export DOCKER_TAG=<some tag e.g. latest>
-export APP_NAME=knative-function-controller
+export APP_NAME=function-controller
 export DOCKER_PUSH_REPOSITORY=<e.g. eu.gcr.io or index.docker.io>
 export DOCKER_PUSH_DIRECTORY<e.g. pr or develop>
 make install
