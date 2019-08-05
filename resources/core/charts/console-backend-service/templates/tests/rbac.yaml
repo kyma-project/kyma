@@ -61,6 +61,9 @@ rules:
   - apiGroups: ["ui.kyma-project.io"]
     resources: ["backendmodules"]
     verbs: ["create", "get", "delete"]
+  - apiGroups: ["addons.kyma-project.io"]
+    resources: ["clusteraddonsconfigurations", "addonsconfigurations"]
+    verbs: ["get"]
 
 ---
 kind: ClusterRoleBinding
