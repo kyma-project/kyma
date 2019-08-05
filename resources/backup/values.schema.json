@@ -1,10 +1,10 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "description": "Schema definition for velero helm chart values",
+    "description": "Schema definition for backup helm chart values",
     "type": "object",
     "properties": {
         "configuration": {
-            "description": "Configuration of the global properties for velero component",
+            "description": "Configuration of the global properties for backup component",
             "type": "object",
             "properties": {
                 "volumeSnapshotLocation": {
