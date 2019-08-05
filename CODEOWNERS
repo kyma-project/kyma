@@ -83,7 +83,7 @@
 /resources/application-connector-ingress/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `console` subchart
-/resources/core/charts/console/ @dariadomagala @y-kkamil @parostatkiem @akucharska
+/resources/core/charts/console/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321
 
 # The `dex` subchart
 /resources/dex/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -107,13 +107,13 @@
 /resources/core/charts/kubeless/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # The `lambda-ui` subchart
-/resources/core/charts/kubeless/charts/lambdas-ui @dariadomagala @y-kkamil @parostatkiem @akucharska
+/resources/core/charts/kubeless/charts/lambdas-ui @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321
 
 # The `logging` subchart
 /resources/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `log-ui` subchart
-/resources/logging/charts/log-ui/ @dariadomagala @y-kkamil @akucharska @parostatkiem
+/resources/logging/charts/log-ui/ @dariadomagala @y-kkamil @akucharska @parostatkiem @Wawrzyn321
 
 # The `event-bus` chart
 /resources/event-bus/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
@@ -137,13 +137,13 @@
 /resources/service-catalog-addons/charts/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `brokers-ui` subchart
-/resources/service-catalog-addons/charts/brokers-ui/ @akucharska @dariadomagala @y-kkamil @parostatkiem
+/resources/service-catalog-addons/charts/brokers-ui/ @akucharska @dariadomagala @y-kkamil @parostatkiem @Wawrzyn321
 
 # The `catalog-ui` subchart
-/resources/service-catalog-addons/charts/catalog-ui/ @akucharska @dariadomagala @y-kkamil @parostatkiem
+/resources/service-catalog-addons/charts/catalog-ui/ @akucharska @dariadomagala @y-kkamil @parostatkiem @Wawrzyn321
 
 # The `instances-ui` subchart
-/resources/service-catalog-addons/charts/instances-ui/ @akucharska @dariadomagala @y-kkamil @parostatkiem
+/resources/service-catalog-addons/charts/instances-ui/ @akucharska @dariadomagala @y-kkamil @parostatkiem @Wawrzyn321
 
 # The `docs` subchart
 /resources/core/charts/docs/ @michal-hudy @m00g3n @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
