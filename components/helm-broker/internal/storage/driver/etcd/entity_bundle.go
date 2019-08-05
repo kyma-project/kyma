@@ -284,14 +284,15 @@ func newAddonDSO(in *internal.Addon) (*addonDSO, error) {
 		}
 	}
 	return &addonDSO{
-		ID:          in.ID,
-		Name:        in.Name,
-		Version:     in.Version.String(),
-		Description: in.Description,
-		Plans:       dsoPlans,
-		Metadata:    in.Metadata,
-		Tags:        in.Tags,
-		Bindable:    in.Bindable,
+		ID:            in.ID,
+		Name:          in.Name,
+		Version:       in.Version.String(),
+		Description:   in.Description,
+		Plans:         dsoPlans,
+		Metadata:      in.Metadata,
+		Tags:          in.Tags,
+		Bindable:      in.Bindable,
+		RepositoryURL: in.RepositoryURL,
 	}, nil
 }
 
@@ -307,6 +308,7 @@ type addonDSO struct {
 	Bindable            bool
 	BindingsRetrievable bool
 	PlanUpdatable       *bool
+	RepositoryURL       string
 }
 
 func newAddonPlanDSO(plan internal.AddonPlan) (addonPlanDSO, error) {
@@ -400,6 +402,7 @@ func (dto *addonDSO) NewModel() (*internal.Addon, error) {
 		PlanUpdatable:       dto.PlanUpdatable,
 		BindingsRetrievable: dto.BindingsRetrievable,
 		Requires:            dto.Requires,
+		RepositoryURL:       dto.RepositoryURL,
 	}
 
 	ver, err := semver.NewVersion(dto.Version)
