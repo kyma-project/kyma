@@ -55,6 +55,13 @@ then
    exit 1
 fi
 
+existingCTSs=$(${kc} get cts -o=name)
+for cts in ${existingCTSs}
+do
+  echo "Removing: ${cts}"
+  ${kc} delete ${cts}
+done
+
 matchTests="" # match all tests
 
 ${kc} get cm dex-config -n kyma-system -ojsonpath="{.data}" | grep --silent "#__STATIC_PASSWORDS__"
