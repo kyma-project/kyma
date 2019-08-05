@@ -1,6 +1,5 @@
 ---
 title: Overview
-type: Overview
 ---
 
 The Console is a web-based administrative UI for Kyma. It allows you to administer the Kyma functionality and manage the basic Kubernetes resources.
