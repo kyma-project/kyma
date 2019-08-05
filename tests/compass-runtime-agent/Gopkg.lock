@@ -193,9 +193,14 @@
   revision = "83c17229028ffe2d604be4f8ea1f2f633141a965"
 
 [[projects]]
-  digest = "1:ddb3d967d07a2f0e6cfbf49e52182bcf0e70fc0725f1ba66012196ab5b7a4dce"
+  digest = "1:b3b608cbcc6caee49ab041634756e513663642788c20ccbd6c51520af4963922"
   name = "github.com/kyma-project/kyma"
-  packages = ["tests/application-gateway-tests/test/tools"]
+  packages = [
+    "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/client/clientset/versioned/scheme",
+    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "tests/application-gateway-tests/test/tools",
+  ]
   pruneopts = "UT"
   revision = "2ac7f3a71a873d0594f15c2309c032f4d42d6cdd"
 
@@ -616,6 +621,7 @@
     "github.com/gorilla/mux",
     "github.com/kisielk/errcheck",
     "github.com/kyma-incubator/compass/components/director/pkg/graphql",
+    "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools",
     "github.com/machinebox/graphql",
     "github.com/pkg/errors",
@@ -624,6 +630,7 @@
     "github.com/stretchr/testify/require",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/core/v1",
+    "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/util/rand",
     "k8s.io/client-go/kubernetes",

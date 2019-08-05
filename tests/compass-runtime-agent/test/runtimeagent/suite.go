@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
+
+	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions"
 
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
@@ -77,14 +81,22 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		return nil, err
 	}
 
+	appClient, err := v1alpha1.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
 	serviceClient := k8sClient.Core().Services(config.Namespace)
+	secretsClient := k8sClient.Core().Secrets(config.Namespace)
+
+	nameResolver := applications.NewNameResolver(config.Namespace)
 
 	return &TestSuite{
 		k8sClient:          k8sClient,
 		serviceClient:      serviceClient,
 		CompassClient:      compass.NewCompassClient(config.DirectorURL, config.Tenant, ""), //TODO - runtime Id
 		APIAccessChecker:   assertions.NewAPIAccessChecker(),
-		K8sResourceChecker: assertions.NewK8sResourceChecker(serviceClient),
+		K8sResourceChecker: assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver),
 		mockServiceServer:  mock.NewAppMockServer(config.MockServicePort),
 		config:             config,
 		mockServiceName:    fmt.Sprintf(mockServiceNameFormat, rand.String(4)),

@@ -26,50 +26,50 @@ func (qp queryProvider) deleteApplication(id string) string {
 
 func (qp queryProvider) createAPI(applicationId string, input string) string {
 	return fmt.Sprintf(`mutation {
-	result: addAPI(applicationID: %s, in: %s) {
+	result: addAPI(applicationID: "%s", in: %s) {
 		%s
 	}
 }`, applicationId, input, apiDefinitionData())
 }
 
-func (qp queryProvider) updateAPI(applicationId string, input string) string {
+func (qp queryProvider) updateAPI(apiId string, input string) string {
 	return fmt.Sprintf(`mutation {
-	result: updateAPI(applicationID: %s, in: %s) {
+	result: updateAPI(id: "%s", in: %s) {
 		%s
 	}
-}`, applicationId, input, apiDefinitionData())
+}`, apiId, input, apiDefinitionData())
 }
 
-func (qp queryProvider) deleteAPI(applicationId string) string {
+func (qp queryProvider) deleteAPI(apiId string) string {
 	return fmt.Sprintf(`mutation {
-	result: deleteAPI(applicationID: %s) {
+	result: deleteAPI(id: "%s") {
 		id
 	}
-}`, applicationId)
+}`, apiId)
 }
 
 func (qp queryProvider) createEventAPI(applicationId string, input string) string {
 	return fmt.Sprintf(`mutation {
-	result: addEventAPI(applicationID: %s, in: %s) {
+	result: addEventAPI(applicationID: "%s", in: %s) {
 		%s
 	}
 }`, applicationId, input, apiDefinitionData())
 }
 
-func (qp queryProvider) updateEventAPI(applicationId string, input string) string {
+func (qp queryProvider) updateEventAPI(apiId string, input string) string {
 	return fmt.Sprintf(`mutation {
-	result: updateEventAPI(applicationID: %s, in: %s) {
+	result: updateEventAPI(id: "%s", in: %s) {
 		%s
 	}
-}`, applicationId, input, apiDefinitionData())
+}`, apiId, input, apiDefinitionData())
 }
 
-func (qp queryProvider) deleteEventAPI(applicationId string) string {
+func (qp queryProvider) deleteEventAPI(apiId string) string {
 	return fmt.Sprintf(`mutation {
-	result: deleteEventAPI(applicationID: %s) {
+	result: deleteEventAPI(id: "%s") {
 		id
 	}
-}`, applicationId)
+}`, apiId)
 }
 
 func pageData(item string) string {
@@ -139,6 +139,7 @@ func apiDefinitionData() string {
 	return fmt.Sprintf(`		id
 		name
 		description
+		applicationID
 		spec {%s}
 		targetURL
 		group

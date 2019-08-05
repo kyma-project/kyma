@@ -12,7 +12,7 @@ const (
 	directorURLEnvName        = "DIRECTOR_URL"
 	runtimeIdConfigMapEnvName = "RUNTIME_ID_CONFIG_MAP"
 	tenantEnvName             = "TENANT"
-	namespaceEnvName          = "NAMESPACE"
+	namespaceEnvName          = "NAMESPACE" // TODO - rename to integration namespace and add namespace to read config map
 	mockSelectorKeyEnvName    = "SELECTOR_KEY"
 	mockSelectorValueEnvName  = "SELECTOR_VALUE"
 	mockServicePortEnvName    = "MOCK_SERVICE_PORT"
