@@ -3,8 +3,8 @@ global:
     path: eu.gcr.io/kyma-project
   cmsControllerManager:
     dir:
-    version: 1.4.0-rc1
+    version: 1.4.0-rc2
   cmsAsyncAPIService:
     dir:
-    version: 1.4.0-rc1
+    version: 1.4.0-rc2
     enabled: false
