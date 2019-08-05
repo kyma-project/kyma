@@ -125,7 +125,7 @@ oathkeeper:
         cpu: 50m
         memory: 64Mi
   image:
-    tag: v0.17.1-beta.1
+    tag: v0.17.3-beta.1
   oathkeeper-maester:
     annotations:
       sidecar.istio.io/inject: "false"
