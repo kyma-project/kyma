@@ -3,14 +3,14 @@ title: Google Cloud Platform Service Broker
 type: Service Brokers
 ---
 
->**NOTE:** This addon is not available by default in Kyma. To enable this addon add proper AddonsConfiguration as describe [here](#enable-gcp-service-broker).
+>**NOTE:** This addon is in the preview mode and is not available in Kyma by default. To enable it, add a proper AddonsConfiguration as described [here](#enable-gcp-service-broker).
 
-The Google Cloud Platform Service Broker is an open-source, [Open Service Broker](https://www.openservicebrokerapi.org/)-compatible API server that provisions managed services in the Google Cloud Platform public cloud. Kyma provides Namespace-scoped Google Cloud Platform Service Broker. In each Namespace, you can configure the Google Cloud Platform Service Broker against different subscriptions. Install the Google Cloud Platform Service Broker by provisioning the **Google Cloud Platform Service Broker** class provided by the Helm Broker.
+The Google Cloud Platform (GCP) Service Broker is an open-source, [Open Service Broker](https://www.openservicebrokerapi.org/)-compatible API server that provisions managed services in the Google Cloud Platform public cloud. Kyma provides Namespace-scoped GCP Service Broker. In each Namespace, you can configure the GCP Service Broker against different subscriptions. Install the GCP Service Broker by provisioning the **Google Cloud Platform Service Broker** class provided by the Helm Broker.
 
 ![gcp broker class](./assets/gcp-class.png)
 
-Once you provision the **Google Cloud Platform Service Broker** class, the Google Cloud Platform Service Broker classes are available in the Service Catalog view in a given Namespace.
-The Google Cloud Platform Service Broker provides these Service Classes to use with the Service Catalog:
+Once you provision the **Google Cloud Platform Service Broker** class, the GCP Service Broker classes are available in the **Service Catalog** view in a given Namespace.
+The GCP Service Broker provides these Service Classes to use with the Service Catalog:
 
 * Google BigQuery
 * Google BigTable
@@ -35,7 +35,7 @@ For more information about the Service Brokers, see [this](#service-brokers-serv
 
 ## Enable GCP Service Broker
 
-Google Cloud Platform Service Broker is a preview implementation and should not be used in a roduction environment. To enable Google Cloud Platform Service Broker please create the following AddonsConfiguration:
+The GCP Service Broker is a preview implementation and should not be used in a production environment. To enable the GCP Service Broker, create the following AddonsConfiguration:
 ```
 apiVersion: addons.kyma-project.io/v1alpha1
 kind: AddonsConfiguration
@@ -47,4 +47,4 @@ spec:
   repositories:
     - url: https://github.com/kyma-project/addons/releases/download/0.7.0/index-gcp.yaml
 ```
-Registering the addons repository url as cluster wide will make a conflict with the next release when the GCP Service Broker will be enabled by default.
+>**NOTE:** If you register this addons repository URL as cluster-wide, there will be a conflict with the next release, after the GCP Service Broker is enabled by default.
