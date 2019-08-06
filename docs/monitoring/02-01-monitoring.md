@@ -30,9 +30,9 @@ The main monitoring components include:
 
 Monitoring in Kyma also relies heavily on these custom resources:
 
-- **Alert rules** define alert conditions for metrics. They are configured in Prometheus as PrometheusRule custom resource definitions (CRDs). Kyma provides a set of out-of-the-box alert rules that are passed from Prometheus to Alertmanager. The definitions of such rules specify the alert logic, the value at which alerts are triggered, the alerts' severity, and more. If you pre-define specific Slack or Victor Ops channels, Alertmanager displays the alerts in the channel each time the alerts are triggered.
+- **PrometheusRules** define alert conditions for metrics. They are configured in Prometheus as PrometheusRule custom resource definitions (CRDs). Kyma provides a set of out-of-the-box alerting rules that are passed from Prometheus to Alertmanager. The definitions of such rules specify the alert logic, the value at which alerts are triggered, the alerts' severity, and more. If you pre-define specific Slack or Victor Ops channels, Alertmanager displays the alerts in the channel each time the alerts are triggered.
 
-- **Service Monitors** are CRDs that specify the endpoints from which Prometheus should poll the metrics. Even if you expose a handful of metrics in your application, Prometheus polls only those from the endpoints specified in Service Monitor CRDs.
+- **ServiceMonitors** are CRDs that specify the endpoints from which Prometheus should poll the metrics. Even if you expose a handful of metrics in your application, Prometheus polls only those from the endpoints specified in ServiceMonitor CRDs.
 
 ## End-to-end monitoring flow
 
@@ -41,7 +41,7 @@ The complete monitoring flow in Kyma comes down to these components and steps:
 ![](./assets/monitoring-architecture.svg)
 
 1. Upon Kyma installation on a cluster, Prometheus Operator creates a Prometheus instance with default configuration.
-2. The Prometheus server periodically polls all metrics exposed on endpoints of services specified in Service Monitors. Prometheus stores these metrics in a time-series database.
-3. If Prometheus detects any anomalies in metrics that are covered by alert rules, it triggers the alerts and passes them to Alertmanager.
+2. The Prometheus server periodically polls all metrics exposed on endpoints of services specified in ServiceMonitors. Prometheus stores these metrics in a time-series database.
+3. If Prometheus detects any anomalies in metrics that are covered by alerting rules, it triggers the alerts and passes them to Alertmanager.
 4. If you manually configure a notification channel, you can instantly receive detailed information on metric alerts detected by Prometheus.
 5. You can visualize metrics and track their historical data on Grafana dashboards.

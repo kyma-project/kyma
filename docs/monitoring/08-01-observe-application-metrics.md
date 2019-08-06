@@ -5,7 +5,7 @@ type: Tutorials
 
 This tutorial shows how you can check the list and changing values of all metrics exposed by a sample Go service by redirecting the metrics to a localhost and the default Prometheus server port.
 
-This tutorial uses the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics-8081`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8081`. You deploy the service (`deployment.yaml`) along with the service monitor (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
+This tutorial uses the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics-8081`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8081`. You deploy the service (`deployment.yaml`) along with the ServiceMonitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
 - From the service with the `k8s-app: metrics` label
 - From the `/metrics` endpoint
 - At `10s` interval
@@ -16,13 +16,13 @@ This tutorial focuses on the `cpu_temperature_celsius` metric that is one of the
 
 To complete the tutorial you must meet one of these prerequisites and have:
 - A cluster with Kyma 1.3 or higher
-- A local Kyma 1.3 or higher installation that includes the Monitoring module
+- A local Kyma 1.3 or higher installation that contains the Monitoring module
 
 > **NOTE:** The Monitoring component is not installed by default as part of the Kyma Lite package.
 
 ## Steps
 
-Follow these steps to:
+Follow this tutorial to:
 - Deploy the sample service with its default configuration.
 - Redirect the metrics to a localhost.
 - Redirect the metrics to the Prometheus server to observe the metrics in the Prometheus UI.
@@ -44,7 +44,7 @@ kubectl create namespace testing-monitoring
 kubectl create -f https://raw.githubusercontent.com/kyma-project/examples/master/monitoring-custom-metrics/deployment/deployment.yaml --namespace=testing-monitoring
 ```
 
-3. Deploy the service monitor in the `kyma-system` Namespace that is a default Namespace for all Service Monitors.
+3. Deploy the ServiceMonitor custom resource definition (CRD) in the `kyma-system` Namespace that is a default Namespace for all ServiceMonitor CRDs.
 
 ```
 
@@ -76,7 +76,7 @@ kubectl port-forward svc/sample-metrics-8081 -n testing-monitoring 8081:8081
 
 2. Open a browser and access [`http://localhost:8081/metrics`](http://localhost:8081/metrics).
 
-You can see the `cpu_temperature_celsius` metric and its current value on the list of all metrics exposed by the `sample-metrics-8081` service.
+You can see the `cpu_temperature_celsius` metric and its current value of `62` on the list of all metrics exposed by the `sample-metrics-8081` service.
 
 ![metrics on port 8081](./assets/sample-metrics-2.png)
 
@@ -84,7 +84,7 @@ Thanks to the example logic, the custom metric value changes each time you refre
 
 ### View metrics on the Prometheus UI
 
-You can also observe the metric on the Prometheus UI and see how its value changes in the pre-defined `10s` interval in which Prometheus scrapes the metric value from the service endpoint.
+You can also observe the `cpu_temperature_celsius` metric on the Prometheus UI and see how its value changes in the pre-defined `10s` interval in which Prometheus scrapes the metric values from the service endpoint.
 
 Follow these steps:
 
@@ -92,10 +92,9 @@ Follow these steps:
 
 ```bash
 kubectl port-forward svc/monitoring-prometheus -n kyma-system 9090:9090
-
 ```
 
-2. Access the the [Prometheus UI](http://localhost:9090/targets#job-sample-metrics-8081) service endpoint and its details on the **Targets** list.
+2. Access the [Prometheus UI](http://localhost:9090/targets#job-sample-metrics-8081) service endpoint and its details on the **Targets** list.
 
 ![Prometheus Dashboard](./assets/pm-dashboard-1.png)
 
@@ -111,7 +110,7 @@ When you finish the tutorial, remove the deployed example and all its resources 
 
 Follow these steps:
 
-1. Remove the deployed Service Monitor from the `kyma-system` Namespace.
+1. Remove the deployed ServiceMonitor CRD from the `kyma-system` Namespace.
 
     ```bash
     kubectl delete servicemonitor -l example=monitoring-custom-metrics -n kyma-system
