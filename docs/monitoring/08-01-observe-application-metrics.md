@@ -23,10 +23,10 @@ To complete the tutorial you must meet one of these prerequisites and have:
 ## Steps
 
 Follow these steps to:
-- Deploy the sample service with its default configuration
-- Redirect the metrics to a localhost
-- Redirect the metrics to the Prometheus server to observe the metrics in the Prometheus UI
-- Clean up the deployed example
+- Deploy the sample service with its default configuration.
+- Redirect the metrics to a localhost.
+- Redirect the metrics to the Prometheus server to observe the metrics in the Prometheus UI.
+- Clean up the deployed example.
 
 ### Deploy the example configuration
 
