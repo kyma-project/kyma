@@ -230,13 +230,11 @@ func (s *service) deleteAllAPIResources(runtimeApplication v1alpha1.Application)
 
 func (s *service) deleteAPIResources(applicationName string, service v1alpha1.Service) apperrors.AppError {
 	for _, entry := range service.Entries {
-		if entry.Credentials.SecretName != "" {
-			err := s.resourcesService.DeleteApiResources(applicationName, service.ID, entry.Credentials.SecretName)
-			if err != nil {
-				log.Warningf("Failed to delete resources for API '%s' and application '%s': %s", service.ID, service.Name, err)
+		err := s.resourcesService.DeleteApiResources(applicationName, service.ID, entry.Credentials.SecretName)
+		if err != nil {
+			log.Warningf("Failed to delete resources for API '%s' and application '%s': %s", service.ID, service.Name, err)
 
-				return err
-			}
+			return err
 		}
 	}
 

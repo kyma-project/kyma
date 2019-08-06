@@ -67,8 +67,8 @@ func TestService(t *testing.T) {
 
 		directorApplication := getTestDirectorApplication("id1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
 
-		runtimeService1 := getTestServiceWithApi("API1")
-		runtimeService2 := getTestServiceWithApi("EventAPI1")
+		runtimeService1 := getTestServiceWithCredentials("API1")
+		runtimeService2 := getTestServiceWithCredentials("EventAPI1")
 
 		runtimeApplication := getTestApplication("id1", []v1alpha1.Service{runtimeService1, runtimeService2})
 
@@ -120,9 +120,9 @@ func TestService(t *testing.T) {
 
 		directorApplication := getTestDirectorApplication("id1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
 
-		runtimeService1 := getTestServiceWithApi("API1")
-		runtimeService2 := getTestServiceWithApi("EventAPI1")
-		runtimeService3 := getTestServiceWithApi("API2")
+		runtimeService1 := getTestServiceWithCredentials("API1")
+		runtimeService2 := getTestServiceWithoutCredentials("EventAPI1")
+		runtimeService3 := getTestServiceWithoutCredentials("API2")
 
 		runtimeApplication := getTestApplication("id1", []v1alpha1.Service{runtimeService1, runtimeService2})
 
@@ -140,7 +140,7 @@ func TestService(t *testing.T) {
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 		resourcesServiceMocks.On("UpdateApiResources", "id1", types.UID(""), "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), nilSpec).Return(nil)
 		resourcesServiceMocks.On("CreateApiResources", "id1", runtimeApplication.UID, "EventAPI1", nilCredentials, []byte("spec")).Return(nil)
-		resourcesServiceMocks.On("DeleteApiResources", "id1", "API2", "credentialsSecretName1").Return(nil)
+		resourcesServiceMocks.On("DeleteApiResources", "id1", "API2", "").Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -168,7 +168,7 @@ func TestService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
-		runtimeService := getTestServiceWithApi("API1")
+		runtimeService := getTestServiceWithCredentials("API1")
 		runtimeApplication := getTestApplication("id1", []v1alpha1.Service{runtimeService})
 
 		existingRuntimeApplications := v1alpha1.ApplicationList{
@@ -207,14 +207,14 @@ func TestService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
-		newRuntimeService1 := getTestServiceWithApi("API1")
-		newRuntimeService2 := getTestServiceWithApi("EventAPI1")
+		newRuntimeService1 := getTestServiceWithCredentials("API1")
+		newRuntimeService2 := getTestServiceWithCredentials("EventAPI1")
 
-		existingRuntimeService1 := getTestServiceWithApi("API2")
-		existingRuntimeService2 := getTestServiceWithApi("EventAPI2")
+		existingRuntimeService1 := getTestServiceWithCredentials("API2")
+		existingRuntimeService2 := getTestServiceWithCredentials("EventAPI2")
 
-		runtimeServiceToBeDeleted1 := getTestServiceWithApi("API3")
-		runtimeServiceToBeDeleted2 := getTestServiceWithApi("EventAPI3")
+		runtimeServiceToBeDeleted1 := getTestServiceWithCredentials("API3")
+		runtimeServiceToBeDeleted2 := getTestServiceWithCredentials("EventAPI3")
 
 		newDirectorApi := getTestDirectorAPiDefinition("API1", nil, nil)
 		newDirectorEventApi := getTestDirectorEventAPIDefinition("EventAPI1", nil)
@@ -250,16 +250,8 @@ func TestService(t *testing.T) {
 		applicationsManagerMock.On("Delete", runtimeApplicationToBeDeleted.Name, &metav1.DeleteOptions{}).Return(apperrors.Internal("some error"))
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		resourcesServiceMocks.On("UpdateApiResources", "id2", types.UID(""), "API2", nilCredentials, nilSpec).Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("UpdateApiResources", "id2", types.UID(""), "EventAPI2", nilCredentials, nilSpec).Return(apperrors.Internal("some error"))
-
-		resourcesServiceMocks.On("CreateApiResources", "id2", types.UID(""), "API1", "", nilCredentials, nilSpec).Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("CreateApiResources", "id2", types.UID(""), "EventAPI1", "", nilCredentials, nilSpec).Return(apperrors.Internal("some error"))
-
 		resourcesServiceMocks.On("DeleteApiResources", "id3", "API3", "credentialsSecretName1").Return(apperrors.Internal("some error"))
 		resourcesServiceMocks.On("DeleteApiResources", "id3", "EventAPI3", "credentialsSecretName1").Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("DeleteApiResources", "id2", "API3", "credentialsSecretName1").Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("DeleteApiResources", "id2", "EventAPI3", "credentialsSecretName1").Return(apperrors.Internal("some error"))
 
 		// when
 		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
@@ -274,6 +266,7 @@ func TestService(t *testing.T) {
 		converterMock.AssertExpectations(t)
 		applicationsManagerMock.AssertExpectations(t)
 		resourcesServiceMocks.AssertNotCalled(t, "CreateApiResources")
+		resourcesServiceMocks.AssertExpectations(t)
 	})
 }
 
@@ -336,7 +329,7 @@ func getTestDirectorEventAPIDefinition(id string, spec *model.EventAPISpec) mode
 	}
 }
 
-func getTestServiceWithApi(serviceID string) v1alpha1.Service {
+func getTestServiceWithCredentials(serviceID string) v1alpha1.Service {
 	return v1alpha1.Service{
 		ID: serviceID,
 		Entries: []v1alpha1.Entry{
@@ -350,6 +343,19 @@ func getTestServiceWithApi(serviceID string) v1alpha1.Service {
 					AuthenticationUrl: "",
 				},
 				RequestParametersSecretName: "paramatersSecretName1",
+			},
+		},
+	}
+}
+
+func getTestServiceWithoutCredentials(serviceID string) v1alpha1.Service {
+	return v1alpha1.Service{
+		ID: serviceID,
+		Entries: []v1alpha1.Entry{
+			{
+				Type:             applications.SpecAPIType,
+				TargetUrl:        "www.example.com/1",
+				SpecificationUrl: "",
 			},
 		},
 	}
