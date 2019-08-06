@@ -230,6 +230,9 @@
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/application-registry/pkg/apis/istio/v1alpha2",
+    "components/application-registry/pkg/client/clientset/versioned",
+    "components/application-registry/pkg/client/clientset/versioned/scheme",
+    "components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2",
     "components/cms-controller-manager/pkg/apis/cms/v1alpha1"
   ]
   revision = "327770ad3ad572e8b7a5d32c25b69fc3033d41b4"
@@ -916,6 +919,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "da278d038aa48fb7c87822dac154ad7e95af5f7ca31372d55d160f019c4563fd"
+  inputs-digest = "fccbd445e846510c09c87d707dcb9267ef97e3c3f7d9db269b1f45243a5db898"
   solver-name = "gps-cdcl"
   solver-version = 1

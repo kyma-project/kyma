@@ -6,6 +6,7 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	k8sconstsmocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts/mocks"
 	accessservicemock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/accessservice/mocks"
+	istiomocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/istio/mocks"
 	secretmock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/mocks"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
@@ -21,6 +22,7 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
 
 		credentials := model.CredentialsWithCSRF{
 			Basic: &model.Basic{
@@ -30,10 +32,11 @@ func TestService(t *testing.T) {
 		}
 
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
+		istioServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(applications.Credentials{}, nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock)
 
 		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, nil)
 
@@ -48,12 +51,14 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
 
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
+		istioServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock)
 
 		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", nil, nil)
 
@@ -68,6 +73,7 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
 
 		credentials := model.CredentialsWithCSRF{
 			Basic: &model.Basic{
@@ -76,11 +82,12 @@ func TestService(t *testing.T) {
 			},
 		}
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
+		istioServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("just another error"))
 		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock)
 
 		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, nil)
 
@@ -95,6 +102,7 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
 
 		credentials := model.CredentialsWithCSRF{
 			Basic: &model.Basic{
@@ -104,11 +112,12 @@ func TestService(t *testing.T) {
 		}
 
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
+		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(applications.Credentials{}, nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock)
 
 		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, nil)
 
@@ -123,14 +132,16 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
 
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
+		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		secretServiceMock.On("Delete", "secretName").Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 		nameResolver.On("GetCredentialsSecretName", "appName", "serviceID").Return("secretName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock)
 
 		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, nil)
 
@@ -145,6 +156,7 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
 
 		credentials := model.CredentialsWithCSRF{
 			Basic: &model.Basic{
@@ -153,11 +165,12 @@ func TestService(t *testing.T) {
 			},
 		}
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
+		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("just another error"))
 		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock)
 
 		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, nil)
 
@@ -172,14 +185,16 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
 
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
+		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("just another error"))
 		secretServiceMock.On("Delete", "secretName").Return(apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 		nameResolver.On("GetCredentialsSecretName", "appName", "serviceID").Return("secretName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock)
 
 		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, nil)
 
@@ -194,13 +209,15 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
 
 		accessServiceMock.On("Delete", "resourceName").Return(nil)
+		istioServiceMock.On("Delete", "resourceName").Return(nil)
 		secretServiceMock.On("Delete", "secretName").Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock)
 
 		err := service.DeleteApiResources("appName", "serviceID", "secretName")
 
@@ -215,12 +232,14 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
 
 		accessServiceMock.On("Delete", "resourceName").Return(nil)
+		istioServiceMock.On("Delete", "resourceName").Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock)
 
 		err := service.DeleteApiResources("appName", "serviceID", "")
 
@@ -234,13 +253,15 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
 
 		accessServiceMock.On("Delete", "resourceName").Return(apperrors.Internal("some error"))
+		istioServiceMock.On("Delete", "resourceName").Return(apperrors.Internal("some error"))
 		secretServiceMock.On("Delete", "secretName").Return(apperrors.Internal("some error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock)
 
 		err := service.DeleteApiResources("appName", "serviceID", "secretName")
 

@@ -4,6 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/accessservice"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/istio"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 	log "github.com/sirupsen/logrus"
@@ -23,15 +24,17 @@ type service struct {
 	accessServiceManager      accessservice.AccessServiceManager
 	secretsService            secrets.Service
 	requestParameteresService secrets.RequestParametersService
+	istioService              istio.Service
 	nameResolver              k8sconsts.NameResolver
 }
 
 // TODO: change secrets.Service interface so that it doesn't return applications.Credentials
-func NewService(accessServiceManager accessservice.AccessServiceManager, secretsService secrets.Service, nameResolver k8sconsts.NameResolver) Service {
+func NewService(accessServiceManager accessservice.AccessServiceManager, secretsService secrets.Service, nameResolver k8sconsts.NameResolver, istioService istio.Service) Service {
 	return service{
 		accessServiceManager: accessServiceManager,
 		secretsService:       secretsService,
 		nameResolver:         nameResolver,
+		istioService:         istioService,
 	}
 }
 
@@ -58,6 +61,14 @@ func (s service) CreateApiResources(applicationName string, applicationUID types
 		}
 	} else {
 		log.Infof("Credentials for application '%s' and service '%s' not provided.", applicationName, serviceID)
+	}
+
+	appError := s.istioService.Create(applicationName, applicationUID, serviceID, k8sResourceName)
+	log.Infof("Creating istio resources for application '%s' and service '%s'.", applicationName, serviceID)
+
+	if appError != nil {
+		log.Infof("Failed to create istio resources for application '%s' and service '%s': %s.", applicationName, serviceID, appError)
+		appendedErr = appendedErr.Append("", appError)
 	}
 
 	return appendedErr
@@ -90,6 +101,14 @@ func (s service) UpdateApiResources(applicationName string, applicationUID types
 		}
 	}
 
+	appError := s.istioService.Upsert(applicationName, applicationUID, serviceID, k8sResourceName)
+	log.Infof("Updating istio resources for application '%s' and service '%s'.", applicationName, serviceID)
+
+	if appError != nil {
+		log.Infof("Failed to update istio resources for application '%s' and service '%s': %s.", applicationName, serviceID, appError)
+		appendedErr = appendedErr.Append("", appError)
+	}
+
 	return appendedErr
 }
 
@@ -107,6 +126,14 @@ func (s service) DeleteApiResources(applicationName string, serviceID string, se
 		}
 	} else {
 		log.Infof("Credentials for application '%s' and service '%s' not provided.", applicationName, serviceID)
+	}
+
+	appError := s.istioService.Delete(k8sResourceName)
+	log.Infof("Updating istio resources for application '%s' and service '%s'.", applicationName, serviceID)
+
+	if appError != nil {
+		log.Infof("Failed to update istio resources for application '%s' and service '%s': %s.", applicationName, serviceID, appError)
+		appendedErr = appendedErr.Append("", appError)
 	}
 
 	return appendedErr
