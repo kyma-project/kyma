@@ -6,8 +6,6 @@ import (
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
 
 	v1alpha1apps "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -95,7 +93,9 @@ func (c *K8sResourceChecker) AssertResourcesForApp(t *testing.T, application com
 		c.assertAPI(t, *api, appCR)
 	}
 
-	// TODO - assert event apis
+	for _, eventAPI := range application.EventAPIs.Data {
+		c.assertEventAPI(t, *eventAPI, appCR)
+	}
 
 	// TODO - assert docs
 }
@@ -105,7 +105,7 @@ func (c *K8sResourceChecker) AssertAppResourcesDeleted(t *testing.T, appId strin
 	require.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
 
-	// TODO - should check all apis and stuff? Probably yes
+	// TODO - should check all apis and stuff? Probably yes, but then it need to take whole Application
 }
 
 func (c *K8sResourceChecker) AssertAPIResources(t *testing.T, compassAPI graphql.APIDefinition) {
@@ -115,40 +115,40 @@ func (c *K8sResourceChecker) AssertAPIResources(t *testing.T, compassAPI graphql
 	c.assertAPI(t, compassAPI, appCR)
 }
 
-// TODO - should take ID or whole API?
 func (c *K8sResourceChecker) AssertAPIResourcesDeleted(t *testing.T, applicationId, apiId string) {
-	logrus.Info("Checking API resources deleted for: ", apiId)
 	appCR, err := c.applicationClient.Get(applicationId, v1meta.GetOptions{})
 	require.NoError(t, err)
 
 	for _, s := range appCR.Spec.Services {
 		assert.NotEqual(t, s.ID, apiId)
 	}
+
+	c.assertServiceDeleted(t, applicationId, apiId, appCR)
 }
 
-func (c *K8sResourceChecker) AssertEventAPIResources(t *testing.T, eventAPIId string) {
+func (c *K8sResourceChecker) AssertEventAPIResources(t *testing.T, compassEventAPI graphql.EventAPIDefinition) {
+	appCR, err := c.applicationClient.Get(compassEventAPI.ApplicationID, v1meta.GetOptions{})
+	require.NoError(t, err)
 
+	c.assertEventAPI(t, compassEventAPI, appCR)
 }
 
-func (c *K8sResourceChecker) AssertEventAPIResourcesDeleted(t *testing.T, eventAPIId string) {
+func (c *K8sResourceChecker) AssertEventAPIResourcesDeleted(t *testing.T, applicationId, eventAPIId string) {
+	appCR, err := c.applicationClient.Get(applicationId, v1meta.GetOptions{})
+	require.NoError(t, err)
 
+	for _, s := range appCR.Spec.Services {
+		assert.NotEqual(t, s.ID, eventAPIId)
+	}
+
+	c.assertServiceDeleted(t, applicationId, eventAPIId, appCR)
 }
 
 // TODO - Assert docs?
 
 func (c *K8sResourceChecker) assertAPI(t *testing.T, compassAPI graphql.APIDefinition, appCR *v1alpha1apps.Application) {
-	svc, found := getService(appCR, compassAPI.ID)
-	assert.True(t, found)
+	svc := c.assertService(t, compassAPI.ID, compassAPI.Name, compassAPI.Description, appCR)
 
-	assert.True(t, strings.HasPrefix(svc.Name, compassAPI.Name))
-
-	expectedDescription := "Description not provided"
-	if compassAPI.Description != nil {
-		expectedDescription = *compassAPI.Description
-	}
-	assert.Equal(t, expectedDescription, svc.Description)
-
-	require.Equal(t, 1, len(svc.Entries))
 	entry := svc.Entries[0]
 	assert.Equal(t, SpecAPIType, entry.Type)
 	assert.Equal(t, compassAPI.TargetURL, entry.TargetUrl)
@@ -169,15 +169,46 @@ func (c *K8sResourceChecker) assertAPI(t *testing.T, compassAPI graphql.APIDefin
 	// TODO - assert Docs
 }
 
-func (c *K8sResourceChecker) assertEventAPI(t *testing.T, compassAPI graphql.APIDefinition, appCR *v1alpha1apps.Application) {
+func (c *K8sResourceChecker) assertServiceDeleted(t *testing.T, applicationId, apiId string, appCR *v1alpha1apps.Application) {
+	resourceName := c.nameResolver.GetResourceName(applicationId, apiId)
+	gatewayURL := c.nameResolver.GetGatewayUrl(applicationId, apiId)
+	c.assertResourcesDoNotExist(t, resourceName, gatewayURL)
+}
+
+func (c *K8sResourceChecker) assertEventAPI(t *testing.T, compassAPI graphql.EventAPIDefinition, appCR *v1alpha1apps.Application) {
+	svc := c.assertService(t, compassAPI.ID, compassAPI.Name, compassAPI.Description, appCR)
+
+	entry := svc.Entries[0]
+	assert.Equal(t, SpecEventsType, entry.Type)
+
+	// TODO - is access label set on event APIs?
+
+	// TODO - check docs
+}
+
+func (c *K8sResourceChecker) assertService(t *testing.T, id, name string, description *string, appCR *v1alpha1apps.Application) *v1alpha1apps.Service {
+	svc, found := getService(appCR, id)
+	assert.True(t, found)
+
+	assert.True(t, strings.HasPrefix(svc.Name, name))
+
+	expectedDescription := "Description not provided"
+	if description != nil {
+		expectedDescription = *description
+	}
+	assert.Equal(t, expectedDescription, svc.Description)
+
+	require.Equal(t, 1, len(svc.Entries))
+
+	return svc
 }
 
 func (c *K8sResourceChecker) assertCredentials(t *testing.T, secretName string, auth *graphql.Auth, service v1alpha1apps.Entry) {
 	switch cred := auth.Credential.(type) {
 	case *graphql.BasicCredentialData:
-		c.assertK8sBasicAuthSecret(t, secretName, cred, service) // TODO
+		c.assertK8sBasicAuthSecret(t, secretName, cred, service)
 	case *graphql.OAuthCredentialData:
-		c.assertK8sOAuthSecret(t, secretName, cred, service) // TODO
+		c.assertK8sOAuthSecret(t, secretName, cred, service)
 	default:
 		t.Fatalf("Unkonw credentials type")
 	}
@@ -224,6 +255,18 @@ func (c *K8sResourceChecker) assertK8sOAuthSecret(t *testing.T, name string, cre
 
 func (c *K8sResourceChecker) assertCSRF(t *testing.T, auth *graphql.CredentialRequestAuth, service v1alpha1apps.Entry) {
 	// TODO - implement
+}
+
+func (c *K8sResourceChecker) assertResourcesDoNotExist(t *testing.T, resourceName, serviceName string) {
+	_, err := c.serviceClient.Get(serviceName, v1meta.GetOptions{})
+	assert.Error(t, err)
+	assert.True(t, k8serrors.IsNotFound(err))
+
+	_, err = c.secretClient.Get(resourceName, v1meta.GetOptions{})
+	assert.Error(t, err)
+	assert.True(t, k8serrors.IsNotFound(err))
+
+	// TODO - check Istio stuff and docs topics
 }
 
 func getService(applicationCR *v1alpha1apps.Application, apiId string) (*v1alpha1apps.Service, bool) {

@@ -68,6 +68,7 @@ func TestCompassRuntimeAgentSynchronization_TestCases(t *testing.T) {
 
 	testCases := []*testCase{
 		{
+			// TODO - event APIs
 			description: "Test case 1: Create all types of APIs and remove them",
 			initialPhaseInput: func() *applications.ApplicationInput {
 				return applications.NewApplication("test-app-1", "testApp1", map[string][]string{}).
@@ -166,5 +167,5 @@ func TestCompassRuntimeAgentSynchronization_TestCases(t *testing.T) {
 func waitForAgentToApplyConfig(t *testing.T) {
 	// TODO - consider some smarter way to wait for it
 	logrus.Info("Waiting for Runtime Agent to apply configuration...")
-	time.Sleep(35 * time.Second)
+	time.Sleep(45 * time.Second)
 }
