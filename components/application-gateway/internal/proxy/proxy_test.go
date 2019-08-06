@@ -118,7 +118,7 @@ func TestProxy(t *testing.T) {
 	t.Run("should proxy without escaping the URL path characters when target URL contains full path", func(t *testing.T) {
 		// given
 		ts := NewTestServer(func(req *http.Request) {
-			assert.Equal(t, "/somepath/Xyz('123')", req.URL.String())
+			assert.Equal(t, "/somepath/Xyz('123')?$search=XXX", req.URL.String())
 		})
 		defer ts.Close()
 
