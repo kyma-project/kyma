@@ -60,5 +60,5 @@ func (svc *basicAuth) readBasicAuthMap(data map[string][]byte) (username, passwo
 }
 
 func (svc *basicAuth) basicCredentialsProvided(credentials *model.CredentialsWithCSRF) bool {
-	return credentials != nil && credentials.Basic != nil && credentials.Basic.Username != "" && credentials.Basic.Password != ""
+	return credentials != nil && credentials.Basic != nil
 }
