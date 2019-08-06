@@ -199,7 +199,7 @@ func (s *service) deleteApplications(directorApplications []model.Application, r
 
 func (s *service) deleteApplication(runtimeApplication v1alpha1.Application) Result {
 	log.Infof("Deleting API resources for application '%s'.", runtimeApplication.Name)
-	appendedErr := s.deleteAPIResources(runtimeApplication)
+	appendedErr := s.deleteAllAPIResources(runtimeApplication)
 	if appendedErr != nil {
 		log.Warningf("Failed to delete API resources for application '%s'.", runtimeApplication.Name)
 	}
@@ -214,24 +214,31 @@ func (s *service) deleteApplication(runtimeApplication v1alpha1.Application) Res
 	return newResult(runtimeApplication, Delete, err)
 }
 
-func (s *service) deleteAPIResources(runtimeApplication v1alpha1.Application) apperrors.AppError {
+func (s *service) deleteAllAPIResources(runtimeApplication v1alpha1.Application) apperrors.AppError {
 	var appendedErr apperrors.AppError
 
 	for _, runtimeService := range runtimeApplication.Spec.Services {
 		log.Infof("Deleting resources for API '%s' and application '%s'", runtimeService.ID, runtimeApplication.Name)
-		for _, entry := range runtimeService.Entries {
-			// TODO: consider separate function
-			if entry.Credentials.SecretName != "" {
-				err := s.resourcesService.DeleteApiResources(runtimeApplication.Name, runtimeService.ID, entry.Credentials.SecretName)
-				if err != nil {
-					log.Warningf("Failed to delete resources for API '%s' and application '%s': %s", runtimeService.ID, runtimeApplication.Name, err)
-					appendedErr = appendError(appendedErr, err)
-				}
-			}
+		err := s.deleteAPIResources(runtimeApplication.Name, runtimeService)
+		if err != nil {
+			appendedErr = appendError(appendedErr, err)
 		}
 	}
 
 	return appendedErr
+}
+
+func (s *service) deleteAPIResources(applicationName string, service v1alpha1.Service) apperrors.AppError {
+	for _, entry := range service.Entries {
+		err := s.resourcesService.DeleteApiResources(applicationName, service.ID, entry.Credentials.SecretName)
+		if err != nil {
+			log.Warningf("Failed to delete resources for API '%s' and application '%s': %s", service.ID, service.Name, err)
+
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *service) updateApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
@@ -275,33 +282,10 @@ func (s *service) updateAPIResources(directorApplication model.Application, exis
 	}
 
 	for _, service := range existentRuntimeApplication.Spec.Services {
-		found := false
-		for _, apiDefinition := range directorApplication.APIs {
-			if apiDefinition.ID == service.ID {
-				found = true
-				break
-			}
-		}
-
-		for _, eventAPIDefinition := range directorApplication.EventAPIs {
-			if eventAPIDefinition.ID == service.ID {
-				found = true
-				break
-			}
-		}
-
-		if !found {
+		if !model.APIExists(service.ID, directorApplication) {
 			log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.ID)
-			for _, entry := range service.Entries {
-				// TODO: consider separate function
-				if entry.Credentials.SecretName != "" {
-					e := s.resourcesService.DeleteApiResources(existentRuntimeApplication.Name, service.ID, entry.Credentials.SecretName)
-					if e != nil {
-						log.Warningf("Failed to delete API '%s': %s.", service.ID, e)
-						err = appendError(err, e)
-					}
-				}
-			}
+			err = s.deleteAPIResources(newRuntimeApplication.Name, service)
+			appendedErr = appendError(appendedErr, err)
 		}
 	}
 
@@ -313,10 +297,10 @@ func (s *service) updateOrCreateRESTAPIResources(directorApplication model.Appli
 
 	for _, apiDefinition := range directorApplication.APIs {
 		existsInRuntime := applications.ServiceExists(apiDefinition.ID, existentRuntimeApplication)
+		service := applications.GetService(apiDefinition.ID, newRuntimeApplication)
 
 		if existsInRuntime {
 			log.Infof("Updating resources for API '%s' and application '%s'", apiDefinition.ID, directorApplication.ID)
-			service := applications.GetService(apiDefinition.ID, existentRuntimeApplication)
 			err := s.resourcesService.UpdateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec))
 			if err != nil {
 				log.Warningf("Failed to update API '%s': %s.", apiDefinition.ID, err)
@@ -324,7 +308,6 @@ func (s *service) updateOrCreateRESTAPIResources(directorApplication model.Appli
 			}
 		} else {
 			log.Infof("Creating resources for API '%s' and application '%s'", apiDefinition.ID, directorApplication.ID)
-			service := applications.GetService(apiDefinition.ID, newRuntimeApplication)
 			err := s.resourcesService.CreateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec))
 			if err != nil {
 				log.Warningf("Failed to create API '%s': %s.", apiDefinition.ID, err)
