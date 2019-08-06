@@ -10,7 +10,7 @@ This tutorial uses the [`monitoring-custom-metrics`](https://github.com/kyma-pro
 - From the `/metrics` endpoint
 - At `10s` interval
 
-This tutorial focuses on the `cpu_temperature_celsius` metric that is one of the custom metrics exposed by the `sample-metrics-8081` service. Using this metric logic implemented in the example, you can observe how the CPU temperature changes from 60 to 90 degrees each time Prometheus calls the `/metrics` endpoint.
+This tutorial focuses on the `cpu_temperature_celsius` metric that is one of the custom metrics exposed by the `sample-metrics-8081` service. Using this metric logic implemented in the example, you can observe how the CPU temperature changes in the range between 60 and 90 celsius degrees when Prometheus calls the `/metrics` endpoint.
 
 ## Prerequisites
 
