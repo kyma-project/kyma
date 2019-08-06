@@ -18,7 +18,7 @@ To complete the tutorial you must meet one of these prerequisites and have:
 - A cluster with Kyma 1.3 or higher
 - A local Kyma 1.3 or higher installation that contains the Monitoring module
 
-> **NOTE:** The Monitoring component is not installed by default as part of the Kyma Lite package.
+> **NOTE:** The Monitoring component is not installed by default as a part of the [Kyma Lite](/root/kyma/#installation-overview) package.
 
 ## Steps
 
@@ -71,7 +71,6 @@ Follow these steps:
 
 ```
 kubectl port-forward svc/sample-metrics-8081 -n testing-monitoring 8081:8081
-
 ```
 
 2. Open a browser and access [`http://localhost:8081/metrics`](http://localhost:8081/metrics).
@@ -86,19 +85,19 @@ Thanks to the example logic, the custom metric value changes each time you refre
 
 You can also observe the `cpu_temperature_celsius` metric on the Prometheus UI and see how its value changes in the pre-defined `10s` interval in which Prometheus scrapes the metric values from the service endpoint.
 
-Follow these steps:
+Follow these steps to redirect the metrics:
 
 1. Run the `port-forward` command on the `monitoring-prometheus` service:
 
-```bash
+```
 kubectl port-forward svc/monitoring-prometheus -n kyma-system 9090:9090
 ```
 
-2. Access the [Prometheus UI](http://localhost:9090/targets#job-sample-metrics-8081) service endpoint and its details on the **Targets** list.
+2. Access the [Prometheus UI](http://localhost:9090/targets#job-sample-metrics-8081) to see the service endpoint and its details on the **Targets** list.
 
 ![Prometheus Dashboard](./assets/pm-dashboard-1.png)
 
-2. Open the **Graph** tab, search for the `cpu_temperature_celsius` metric in the **Expression** search box, and click the **Execute** button to check the last value scraped by Prometheus.
+2. Click the **Graph** tab, search for the `cpu_temperature_celsius` metric in the **Expression** search box, and click the **Execute** button to check the last value scraped by Prometheus.
 
 ![Prometheus Dashboard](./assets/pm-dashboard-2.png)
 
@@ -112,12 +111,12 @@ Follow these steps:
 
 1. Remove the deployed ServiceMonitor CRD from the `kyma-system` Namespace.
 
-    ```bash
+    ```
     kubectl delete servicemonitor -l example=monitoring-custom-metrics -n kyma-system
     ```
 
 2. Remove the example Deployment from the `testing-monitoring` Namespace.
 
-    ```bash
+    ```
     kubectl delete all -l example=monitoring-custom-metrics -n testing-monitoring
     ```
