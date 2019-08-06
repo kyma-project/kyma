@@ -2,7 +2,7 @@ deployment:
   image:
     pullPolicy: IfNotPresent
   args:
-    proxyPort: &proxyPort 8080
+    proxyPort: 8080
     externalAPIPort: &externalAPIPort 8081
     uploadServiceURL:  http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000
     requestTimeout: 10
@@ -11,6 +11,7 @@ deployment:
     assetstoreRequestTimeout: 5
     insecureAssetDownload: true
     insecureSpecDownload: false
+    detailedErrorResponse: false
 
 service:
   externalapi:

@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
+	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 )
 
 const (
@@ -44,7 +44,7 @@ func TestApplication_ToApplication(t *testing.T) {
 	for _, testCase := range []struct {
 		description string
 		compassApp  Application
-		expectedApp synchronization.Application
+		expectedApp kymamodel.Application
 	}{
 		{
 			description: "not fail if Application is empty",
@@ -80,24 +80,24 @@ func TestApplication_ToApplication(t *testing.T) {
 					},
 				},
 			},
-			expectedApp: synchronization.Application{
+			expectedApp: kymamodel.Application{
 				ID:          appId,
 				Name:        appName,
-				Description: &appDesc,
+				Description: appDesc,
 				Labels:      appLabels,
-				APIs: []synchronization.APIDefinition{
+				APIs: []kymamodel.APIDefinition{
 					fixInternalAPIDefinition("1", fixInternalOauthCredentials(nil), fixInternalOpenAPISpec()),
 					fixInternalAPIDefinition("2", fixInternalBasicAuthCredentials(nil), fixInternalODataSpec()),
 					fixInternalAPIDefinition("3", fixInternalBasicAuthCredentials(fixInternalCSRFInfo()), fixInternalODataSpec()),
 					fixInternalAPIDefinition("4", nil, fixInternalODataSpec()),
 					fixInternalAPIDefinition("5", nil, nil),
 				},
-				EventAPIs: []synchronization.EventAPIDefinition{
+				EventAPIs: []kymamodel.EventAPIDefinition{
 					fixInternalEventAPIDefinition("1", fixInternalAsyncAPISpec()),
 					fixInternalEventAPIDefinition("2", fixInternalAsyncAPISpec()),
 					fixInternalEventAPIDefinition("3", nil),
 				},
-				Documents: []synchronization.Document{
+				Documents: []kymamodel.Document{
 					fixInternalDocument("1", fixInternalDocumentContent()),
 					fixInternalDocument("2", fixInternalDocumentContent()),
 					fixInternalDocument("3", nil),
@@ -126,17 +126,17 @@ func TestApplication_ToApplication(t *testing.T) {
 					},
 				},
 			},
-			expectedApp: synchronization.Application{
+			expectedApp: kymamodel.Application{
 				ID:          appId,
 				Name:        appName,
-				Description: &appDesc,
-				APIs: []synchronization.APIDefinition{
+				Description: appDesc,
+				APIs: []kymamodel.APIDefinition{
 					{},
 				},
-				EventAPIs: []synchronization.EventAPIDefinition{
+				EventAPIs: []kymamodel.EventAPIDefinition{
 					{},
 				},
-				Documents: []synchronization.Document{
+				Documents: []kymamodel.Document{
 					{},
 				},
 			},
@@ -157,13 +157,50 @@ func TestApplication_ToApplication(t *testing.T) {
 					Data: nil,
 				},
 			},
-			expectedApp: synchronization.Application{
+			expectedApp: kymamodel.Application{
+				ID:          appId,
+				Name:        appName,
+				Description: appDesc,
+				APIs:        []kymamodel.APIDefinition{},
+				EventAPIs:   []kymamodel.EventAPIDefinition{},
+				Documents:   []kymamodel.Document{},
+			},
+		},
+		{
+			description: "convert Compass App with empty specs",
+			compassApp: Application{
 				ID:          appId,
 				Name:        appName,
 				Description: &appDesc,
-				APIs:        []synchronization.APIDefinition{},
-				EventAPIs:   []synchronization.EventAPIDefinition{},
-				Documents:   []synchronization.Document{},
+				APIs: &graphql.APIDefinitionPage{
+					Data: []*graphql.APIDefinition{
+						fixCompassAPIDefinition("1", fixCompassOauthAuth(nil), &graphql.APISpec{Data: nil}),
+					},
+				},
+				EventAPIs: &graphql.EventAPIDefinitionPage{
+					Data: []*graphql.EventAPIDefinition{
+						fixCompassEventAPIDefinition("1", &graphql.EventAPISpec{Data: nil}),
+					},
+				},
+				Documents: &graphql.DocumentPage{
+					Data: []*graphql.Document{
+						fixCompassDocument("1", nil),
+					},
+				},
+			},
+			expectedApp: kymamodel.Application{
+				ID:          appId,
+				Name:        appName,
+				Description: appDesc,
+				APIs: []kymamodel.APIDefinition{
+					fixInternalAPIDefinition("1", fixInternalOauthCredentials(nil), &kymamodel.APISpec{}),
+				},
+				EventAPIs: []kymamodel.EventAPIDefinition{
+					fixInternalEventAPIDefinition("1", &kymamodel.EventAPISpec{}),
+				},
+				Documents: []kymamodel.Document{
+					fixInternalDocument("1", nil),
+				},
 			},
 		},
 		{
@@ -179,12 +216,12 @@ func TestApplication_ToApplication(t *testing.T) {
 					},
 				},
 			},
-			expectedApp: synchronization.Application{
+			expectedApp: kymamodel.Application{
 				ID:          appId,
 				Name:        appName,
-				Description: &appDesc,
+				Description: appDesc,
 				Labels:      appLabels,
-				APIs: []synchronization.APIDefinition{
+				APIs: []kymamodel.APIDefinition{
 					fixInternalAPIDefinition("1", nil, fixInternalOpenAPISpec()),
 				},
 			},
@@ -214,8 +251,8 @@ func fixCompassUnsupportedCredentialsAuth() *graphql.RuntimeAuth {
 	}
 }
 
-func fixInternalAPIDefinition(suffix string, credentials *synchronization.Credentials, spec *synchronization.APISpec) synchronization.APIDefinition {
-	return synchronization.APIDefinition{
+func fixInternalAPIDefinition(suffix string, credentials *kymamodel.Credentials, spec *kymamodel.APISpec) kymamodel.APIDefinition {
+	return kymamodel.APIDefinition{
 		ID:          baseAPIId + suffix,
 		Name:        baseAPIName + suffix,
 		Description: baseAPIDesc + suffix,
@@ -225,8 +262,8 @@ func fixInternalAPIDefinition(suffix string, credentials *synchronization.Creden
 	}
 }
 
-func fixInternalEventAPIDefinition(suffix string, spec *synchronization.EventAPISpec) synchronization.EventAPIDefinition {
-	return synchronization.EventAPIDefinition{
+func fixInternalEventAPIDefinition(suffix string, spec *kymamodel.EventAPISpec) kymamodel.EventAPIDefinition {
+	return kymamodel.EventAPIDefinition{
 		ID:           baseAPIId + suffix,
 		Name:         baseAPIName + suffix,
 		Description:  baseAPIDesc + suffix,
@@ -234,23 +271,23 @@ func fixInternalEventAPIDefinition(suffix string, spec *synchronization.EventAPI
 	}
 }
 
-func fixInternalDocument(suffix string, data []byte) synchronization.Document {
+func fixInternalDocument(suffix string, data []byte) kymamodel.Document {
 	kind := baseDocKind + suffix
 
-	return synchronization.Document{
+	return kymamodel.Document{
 		ID:          baseAPIId + suffix,
 		Description: baseAPIDesc + suffix,
 		Title:       baseDocTitle + suffix,
 		DisplayName: baseDocDisplayName + suffix,
-		Format:      synchronization.DocumentFormatMarkdown,
+		Format:      kymamodel.DocumentFormatMarkdown,
 		Kind:        &kind,
 		Data:        data,
 	}
 }
 
-func fixInternalOauthCredentials(csrf *synchronization.CSRFInfo) *synchronization.Credentials {
-	return &synchronization.Credentials{
-		Oauth: &synchronization.Oauth{
+func fixInternalOauthCredentials(csrf *kymamodel.CSRFInfo) *kymamodel.Credentials {
+	return &kymamodel.Credentials{
+		Oauth: &kymamodel.Oauth{
 			URL:          oauthURL,
 			ClientID:     clientId,
 			ClientSecret: clientSecret,
@@ -259,9 +296,9 @@ func fixInternalOauthCredentials(csrf *synchronization.CSRFInfo) *synchronizatio
 	}
 }
 
-func fixInternalBasicAuthCredentials(csrf *synchronization.CSRFInfo) *synchronization.Credentials {
-	return &synchronization.Credentials{
-		Basic: &synchronization.Basic{
+func fixInternalBasicAuthCredentials(csrf *kymamodel.CSRFInfo) *kymamodel.Credentials {
+	return &kymamodel.Credentials{
+		Basic: &kymamodel.Basic{
 			Username: username,
 			Password: password,
 		},
@@ -269,30 +306,30 @@ func fixInternalBasicAuthCredentials(csrf *synchronization.CSRFInfo) *synchroniz
 	}
 }
 
-func fixInternalCSRFInfo() *synchronization.CSRFInfo {
-	return &synchronization.CSRFInfo{
+func fixInternalCSRFInfo() *kymamodel.CSRFInfo {
+	return &kymamodel.CSRFInfo{
 		TokenEndpointURL: csrfTokenURL,
 	}
 }
 
-func fixInternalODataSpec() *synchronization.APISpec {
-	return &synchronization.APISpec{
+func fixInternalODataSpec() *kymamodel.APISpec {
+	return &kymamodel.APISpec{
 		Data: []byte(`OData spec`),
-		Type: synchronization.APISpecTypeOdata,
+		Type: kymamodel.APISpecTypeOdata,
 	}
 }
 
-func fixInternalOpenAPISpec() *synchronization.APISpec {
-	return &synchronization.APISpec{
+func fixInternalOpenAPISpec() *kymamodel.APISpec {
+	return &kymamodel.APISpec{
 		Data: []byte(`Open API spec`),
-		Type: synchronization.APISpecTypeOpenAPI,
+		Type: kymamodel.APISpecTypeOpenAPI,
 	}
 }
 
-func fixInternalAsyncAPISpec() *synchronization.EventAPISpec {
-	return &synchronization.EventAPISpec{
+func fixInternalAsyncAPISpec() *kymamodel.EventAPISpec {
+	return &kymamodel.EventAPISpec{
 		Data: []byte(`Async API spec`),
-		Type: synchronization.EventAPISpecTypeAsyncAPI,
+		Type: kymamodel.EventAPISpecTypeAsyncAPI,
 	}
 }
 
@@ -303,12 +340,18 @@ func fixInternalDocumentContent() []byte {
 func fixCompassAPIDefinition(suffix string, auth *graphql.RuntimeAuth, spec *graphql.APISpec) *graphql.APIDefinition {
 	desc := baseAPIDesc + suffix
 
+	var defaultAuth *graphql.Auth
+	if auth != nil {
+		defaultAuth = auth.Auth
+	}
+
 	return &graphql.APIDefinition{
 		ID:          baseAPIId + suffix,
 		Name:        baseAPIName + suffix,
 		Description: &desc,
 		TargetURL:   baseAPIURL + suffix,
-		Auth:        auth,
+		//Auth:        auth,
+		DefaultAuth: defaultAuth, // TODO: can be removed after switching to use Auth
 		Spec:        spec,
 	}
 }
@@ -342,7 +385,7 @@ func fixCompassOauthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.Ru
 	return &graphql.RuntimeAuth{
 		RuntimeID: runtimeId,
 		Auth: &graphql.Auth{
-			Credential: graphql.OAuthCredentialData{
+			Credential: &graphql.OAuthCredentialData{
 				URL:          oauthURL,
 				ClientID:     clientId,
 				ClientSecret: clientSecret,
@@ -356,7 +399,7 @@ func fixCompassBasicAuthAuth(requestAuth *graphql.CredentialRequestAuth) *graphq
 	return &graphql.RuntimeAuth{
 		RuntimeID: runtimeId,
 		Auth: &graphql.Auth{
-			Credential: graphql.BasicCredentialData{
+			Credential: &graphql.BasicCredentialData{
 				Username: username,
 				Password: password,
 			},

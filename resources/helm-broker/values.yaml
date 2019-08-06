@@ -8,6 +8,16 @@ service:
   externalPort: 80
   internalPort: 8081
 
+ctrl:
+  tmpDirSizeLimit: 1Gi
+  resources:
+    limits:
+      memory: 96Mi
+      cpu: 100m
+    requests:
+      memory: 32Mi
+      cpu: 80m
+
 config:
   tillerTLSInsecure: true
   storage:
@@ -25,14 +35,14 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   helm_broker:
-    dir: pr/
-    version: "PR-4981"
+    dir: develop/
+    version: "d3389498"
   alpine_net:
     dir: develop/
     version: 149967d0
   add_ons_ui:
     dir: ""
-    version: 09babb28
+    version: d7df4678
   istio:
     gateway:
       name: kyma-gateway

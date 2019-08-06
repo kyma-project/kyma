@@ -7,15 +7,15 @@ metadata:
   name: assets.assetstore.kyma-project.io
 spec:
   additionalPrinterColumns:
-    - JSONPath: .status.phase
-      name: Phase
-      type: string
-    - JSONPath: .status.assetRef.baseUrl
-      name: Base URL
-      type: string
-    - JSONPath: .metadata.creationTimestamp
-      name: Age
-      type: date
+  - JSONPath: .status.phase
+    name: Phase
+    type: string
+  - JSONPath: .status.assetRef.baseUrl
+    name: Base URL
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
   group: assetstore.kyma-project.io
   names:
     kind: Asset
@@ -45,9 +45,9 @@ spec:
                 name:
                   type: string
               required:
-                - name
+              - name
               type: object
-            metadata:
+            parameters:
               type: object
             source:
               properties:
@@ -65,15 +65,15 @@ spec:
                       namespace:
                         type: string
                     required:
-                      - name
-                      - namespace
+                    - name
+                    - namespace
                     type: object
                   type: array
                 mode:
                   enum:
-                    - single
-                    - package
-                    - index
+                  - single
+                  - package
+                  - index
                   type: string
                 mutationWebhookService:
                   items:
@@ -82,15 +82,15 @@ spec:
                         type: string
                       filter:
                         type: string
-                      metadata:
-                        type: object
                       name:
                         type: string
                       namespace:
                         type: string
+                      parameters:
+                        type: object
                     required:
-                      - name
-                      - namespace
+                    - name
+                    - namespace
                     type: object
                   type: array
                 url:
@@ -102,23 +102,23 @@ spec:
                         type: string
                       filter:
                         type: string
-                      metadata:
-                        type: object
                       name:
                         type: string
                       namespace:
                         type: string
+                      parameters:
+                        type: object
                     required:
-                      - name
-                      - namespace
+                    - name
+                    - namespace
                     type: object
                   type: array
               required:
-                - mode
-                - url
+              - mode
+              - url
               type: object
           required:
-            - source
+          - source
           type: object
         status:
           properties:
@@ -134,11 +134,11 @@ spec:
                       name:
                         type: string
                     required:
-                      - name
+                    - name
                     type: object
                   type: array
               required:
-                - baseUrl
+              - baseUrl
               type: object
             lastHeartbeatTime:
               format: date-time
@@ -153,9 +153,9 @@ spec:
             reason:
               type: string
           required:
-            - phase
-            - lastHeartbeatTime
-            - observedGeneration
+          - phase
+          - lastHeartbeatTime
+          - observedGeneration
           type: object
   version: v1alpha2
 status:

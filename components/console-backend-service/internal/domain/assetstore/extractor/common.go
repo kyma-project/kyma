@@ -19,15 +19,15 @@ func (e *Common) Status(status v1alpha2.CommonAssetStatus) gqlschema.AssetStatus
 	}
 }
 
-func (*Common) Metadata(metadata *runtime.RawExtension) (map[string]interface{}, error) {
+func (*Common) Parameters(parameters *runtime.RawExtension) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
-	if metadata == nil {
+	if parameters == nil {
 		return result, nil
 	}
 
-	err := json.Unmarshal(metadata.Raw, &result)
+	err := json.Unmarshal(parameters.Raw, &result)
 	if err != nil {
-		return nil, errors.Wrap(err, "while unmarshalling metadata")
+		return nil, errors.Wrap(err, "while unmarshalling parameters")
 	}
 
 	return result, nil

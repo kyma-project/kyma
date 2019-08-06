@@ -65,6 +65,9 @@ func (rc *RepositoryCollection) ReadyAddons() []*AddonController {
 // IsRepositoriesFailed informs if any of repositories in collection is in failed status
 func (rc *RepositoryCollection) IsRepositoriesFailed() bool {
 	for _, repository := range rc.Repositories {
+		if repository.IsFailed() {
+			return true
+		}
 		if repository.HasFailedAddons() {
 			repository.Failed()
 			return true
@@ -79,9 +82,9 @@ type idConflictData struct {
 	addonsName    string
 }
 
-// ReviseBundleDuplicationInRepository checks all completed addons (addons without fetch/load error)
+// ReviseAddonDuplicationInRepository checks all completed addons (addons without fetch/load error)
 // they have no ID conflict with other addons in other or the same repository
-func (rc *RepositoryCollection) ReviseBundleDuplicationInRepository() {
+func (rc *RepositoryCollection) ReviseAddonDuplicationInRepository() {
 	ids := make(map[string]idConflictData)
 
 	for _, addon := range rc.completeAddons() {
@@ -96,17 +99,17 @@ func (rc *RepositoryCollection) ReviseBundleDuplicationInRepository() {
 	}
 }
 
-// ReviseBundleDuplicationInStorage checks all completed addons (addons without fetch/load error)
+// ReviseAddonDuplicationInStorage checks all completed addons (addons without fetch/load error)
 // they have no name:version conflict with other AddonConfiguration
-func (rc *RepositoryCollection) ReviseBundleDuplicationInStorage(acList *addonsv1alpha1.AddonsConfigurationList) {
+func (rc *RepositoryCollection) ReviseAddonDuplicationInStorage(acList *addonsv1alpha1.AddonsConfigurationList) {
 	for _, addon := range rc.completeAddons() {
 		rc.findExistingAddon(addon, acList)
 	}
 }
 
-// ReviseBundleDuplicationInClusterStorage checks all completed addons (addons without fetch/load error)
+// ReviseAddonDuplicationInClusterStorage checks all completed addons (addons without fetch/load error)
 // they have no name:version conflict with other AddonConfiguration
-func (rc *RepositoryCollection) ReviseBundleDuplicationInClusterStorage(acList *addonsv1alpha1.ClusterAddonsConfigurationList) {
+func (rc *RepositoryCollection) ReviseAddonDuplicationInClusterStorage(acList *addonsv1alpha1.ClusterAddonsConfigurationList) {
 	for _, addon := range rc.completeAddons() {
 		rc.findExistingClusterAddon(addon, acList)
 	}

@@ -25,6 +25,7 @@ deployment:
     runtimeValidityTime: "92d"
     central: &central false
     revocationConfigMapName: "revocations-config"
+    requestLogging: false
   envvars:
     country: DE
     organization: Organization

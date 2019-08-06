@@ -152,6 +152,28 @@ function waitForTestPodsTermination() {
     return 1
 }
 
+function deleteCTS() {
+  local retry=0
+  local suiteName=$1
+
+  log "Deleting ClusterTestSuite ${suiteName}" nc bold
+  while [[ ${retry} -lt 20 ]]; do
+        msg=$(kubectl delete cts ${suiteName} 2>&1)
+        status=$?
+        if [[ ${status} -ne 0 ]]; then
+            echo "Unable to delete ClusterTestSuite: ${msg}"
+            echo "waiting 5s..."
+            sleep 5
+        else
+            log "OK" green bold
+            return 0
+        fi
+        retry=$[retry + 1]
+  done
+  log "FAILED" red
+  return 1
+}
+
 function waitForTerminationAndPrintLogs() {
     local suiteName=$1
 
@@ -184,8 +206,8 @@ function printImagesWithLatestTag() {
 TESTING_ADDONS_CFG_NAME="testing-addons"
 
 # That function is deprecated and will be deleted after 1.4 release. Used only in the upgrade plan.
-function injectTestingBundles() {
-    kubectl create configmap ${TESTING_ADDONS_CFG_NAME} -n kyma-system --from-literal=URLs=https://github.com/kyma-project/addons/releases/download/latest/index-testing.yaml
+function deprecatedInjectTestingAddons() {
+    kubectl create configmap ${TESTING_ADDONS_CFG_NAME} -n kyma-system --from-literal=URLs=https://github.com/kyma-project/addons/releases/download/0.7.0/index-testing.yaml
     kubectl label configmap ${TESTING_ADDONS_CFG_NAME} -n kyma-system helm-broker-repo=true
 
     log "Testing addons injected" green
@@ -201,7 +223,7 @@ metadata:
   name: ${TESTING_ADDONS_CFG_NAME}
 spec:
   repositories:
-  - url: "https://github.com/kyma-project/addons/releases/download/latest/index-testing.yaml"
+  - url: "https://github.com/kyma-project/addons/releases/download/0.7.0/index-testing.yaml"
 EOF
     log "Testing addons injected" green
 }

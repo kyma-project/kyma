@@ -8,10 +8,10 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// Checknothings returns a ChecknothingInformer.
-	Checknothings() ChecknothingInformer
-	// Deniers returns a DenierInformer.
-	Deniers() DenierInformer
+	// Handlers returns a HandlerInformer.
+	Handlers() HandlerInformer
+	// Instances returns a InstanceInformer.
+	Instances() InstanceInformer
 	// Rules returns a RuleInformer.
 	Rules() RuleInformer
 }
@@ -27,14 +27,14 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// Checknothings returns a ChecknothingInformer.
-func (v *version) Checknothings() ChecknothingInformer {
-	return &checknothingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+// Handlers returns a HandlerInformer.
+func (v *version) Handlers() HandlerInformer {
+	return &handlerInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// Deniers returns a DenierInformer.
-func (v *version) Deniers() DenierInformer {
-	return &denierInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+// Instances returns a InstanceInformer.
+func (v *version) Instances() InstanceInformer {
+	return &instanceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // Rules returns a RuleInformer.

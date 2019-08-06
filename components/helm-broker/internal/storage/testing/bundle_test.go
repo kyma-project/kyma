@@ -236,10 +236,11 @@ func (ts *addonTestSuite) generateFixtures() {
 		"B2": {"id-B-002", "name-B", "0.0.2", "desc-B-002"},
 	} {
 		b := &internal.Addon{
-			ID:          internal.AddonID(ft.id),
-			Name:        internal.AddonName(ft.name),
-			Version:     *semver.MustParse(ft.version),
-			Description: ft.desc,
+			ID:            internal.AddonID(ft.id),
+			Name:          internal.AddonName(ft.name),
+			Version:       *semver.MustParse(ft.version),
+			Description:   ft.desc,
+			RepositoryURL: "https://url.to.repo/repo",
 		}
 
 		ts.fixtures[b.ID] = b
@@ -271,10 +272,11 @@ func (ts *addonTestSuite) MustGetFixture(sym string) *internal.Addon {
 // BEWARE: not all fields are copied, only those currently used in this test suite scope
 func (ts *addonTestSuite) MustCopyFixture(in *internal.Addon) *internal.Addon {
 	return &internal.Addon{
-		ID:          in.ID,
-		Name:        in.Name,
-		Version:     *semver.MustParse(in.Version.String()),
-		Description: in.Description,
+		ID:            in.ID,
+		Name:          in.Name,
+		Version:       *semver.MustParse(in.Version.String()),
+		Description:   in.Description,
+		RepositoryURL: in.RepositoryURL,
 	}
 }
 
@@ -287,6 +289,7 @@ func (ts *addonTestSuite) AssertAddonEqual(exp, got *internal.Addon) bool {
 	result = assert.Equal(ts.t, exp.Name, got.Name, "mismatch on Name") && result
 	result = assert.True(ts.t, exp.Version.Equal(&got.Version), "mismatch on Version") && result
 	result = assert.Equal(ts.t, exp.Description, got.Description, "mismatch on Description") && result
+	result = assert.Equal(ts.t, exp.RepositoryURL, got.RepositoryURL, "mismatch on RepostioryURL") && result
 
 	return result
 }

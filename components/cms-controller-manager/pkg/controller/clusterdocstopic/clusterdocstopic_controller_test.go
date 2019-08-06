@@ -24,7 +24,7 @@ const timeout = time.Second * 5
 var (
 	webhookCfgMapName      = "test"
 	webhookCfgMapNamespace = "test"
-	fixMetadata            = runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)}
+	fixParameters          = runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)}
 )
 
 func TestReconcile(t *testing.T) {
@@ -97,10 +97,10 @@ func TestReconcile(t *testing.T) {
 		g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(request)))
 
 		if asset.Annotations["cms.kyma-project.io/asset-short-name"] == "source-one" {
-			g.Expect(asset.Spec.Metadata).ToNot(gomega.BeNil())
-			g.Expect(asset.Spec.Metadata).To(gomega.Equal(&fixMetadata))
+			g.Expect(asset.Spec.Parameters).ToNot(gomega.BeNil())
+			g.Expect(asset.Spec.Parameters).To(gomega.Equal(&fixParameters))
 		} else {
-			g.Expect(asset.Spec.Metadata).To(gomega.BeNil())
+			g.Expect(asset.Spec.Parameters).To(gomega.BeNil())
 		}
 	}
 
@@ -145,11 +145,11 @@ func fixClusterDocsTopic() *v1alpha1.ClusterDocsTopic {
 				DisplayName: "Test Topic",
 				Sources: []v1alpha1.Source{
 					{
-						Name:     "source-one",
-						Type:     "openapi",
-						Mode:     v1alpha1.DocsTopicSingle,
-						URL:      "https://dummy.url/single",
-						Metadata: &fixMetadata,
+						Name:       "source-one",
+						Type:       "openapi",
+						Mode:       v1alpha1.DocsTopicSingle,
+						URL:        "https://dummy.url/single",
+						Parameters: &fixParameters,
 					},
 					{
 						Name:   "source-two",
