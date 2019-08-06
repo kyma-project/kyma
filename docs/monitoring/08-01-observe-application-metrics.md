@@ -18,7 +18,7 @@ To complete the tutorial you must meet one of these prerequisites and have:
 - A cluster with Kyma 1.3 or higher
 - A local Kyma 1.3 or higher installation that contains the Monitoring module
 
-> **NOTE:** The Monitoring component is not installed by default as a part of the [Kyma Lite](/root/kyma/#installation-overview) package.
+> **NOTE:** The Monitoring module is not installed by default as a part of the [Kyma Lite](/root/kyma/#installation-overview) package.
 
 ## Steps
 
