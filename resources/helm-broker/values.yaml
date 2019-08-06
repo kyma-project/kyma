@@ -41,8 +41,8 @@ global:
     dir: develop/
     version: 149967d0
   add_ons_ui:
-    dir: pr/
-    version: PR-1137
+    dir: develop/
+    version: a9d158d5
   istio:
     gateway:
       name: kyma-gateway
