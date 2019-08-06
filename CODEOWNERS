@@ -215,6 +215,9 @@
 # Api controller Component
 /components/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# Api Gateway controller Component
+/components/api-gateway-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+
 # Asset Store Controller Manager Component
 /components/asset-store-controller-manager/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
