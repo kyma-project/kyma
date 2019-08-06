@@ -24,7 +24,7 @@ RUN apk add --no-cache bash
 
 ## Install kubectl
 
-RUN curl -Lo /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.8.4/bin/linux/amd64/kubectl
+RUN curl -Lo /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.15.2/bin/linux/amd64/kubectl
 RUN chmod +x /usr/local/bin/kubectl
 
 COPY ./test-namespace-controller.sh /test-namespace-controller.sh
