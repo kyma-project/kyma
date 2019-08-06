@@ -1,4 +1,4 @@
 apiVersion: v1
-description: Compass
+description: Compass test
 name: compass
 version: 0.1.0
