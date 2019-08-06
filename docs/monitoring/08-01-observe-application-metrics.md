@@ -5,18 +5,18 @@ type: Tutorials
 
 This tutorial shows how you can check the list and changing values of all metrics exposed by a sample Go service by redirecting the metrics to a localhost and the default Prometheus server port.
 
-This tutorial uses the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics-8081` service. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8081`. You deploy the service `deployment/deployment.yaml` along with the service monitor `deployment/service-monitor.yaml` that instructs Prometheus to pull metrics:
-- Of the service with the `k8s-app: metrics` label
+This tutorial uses the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics-8081`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8081`. You deploy the service (`deployment.yaml`) along with the service monitor (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
+- From the service with the `k8s-app: metrics` label
 - From the `/metrics` endpoint
-- At a `10s` interval
+- At `10s` interval
 
-This tutorial focuses on the `cpu_temperature_celsius` metric that is one of the custom metrics exposed by the `sample-metrics-8081` service. Using this metric logic implemented in the example, you can observe how the CPU temperature changes from 60 to 90 degrees each time the Prometheus makes a call to the `/metrics` endpoint.
+This tutorial focuses on the `cpu_temperature_celsius` metric that is one of the custom metrics exposed by the `sample-metrics-8081` service. Using this metric logic implemented in the example, you can observe how the CPU temperature changes from 60 to 90 degrees each time Prometheus calls the `/metrics` endpoint.
 
 ## Prerequisites
 
 To complete the tutorial you must meet one of these prerequisites and have:
-- Cluster with Kyma 1.3 or higher
-- Local Kyma 1.3 or higher installation, with the Monitoring component installed
+- A cluster with Kyma 1.3 or higher
+- A local Kyma 1.3 or higher installation that includes the Monitoring module
 
 > **NOTE:** The Monitoring component is not installed by default as part of the Kyma Lite package.
 
@@ -84,7 +84,7 @@ Thanks to the example logic, the custom metric value changes each time you refre
 
 ### View metrics on the Prometheus UI
 
-You can also observe the metric on the Prometheus UI and see how its value changes in the pre-defined `10s` interval in which Prometheus pulls the metric value from the service endpoint.
+You can also observe the metric on the Prometheus UI and see how its value changes in the pre-defined `10s` interval in which Prometheus scrapes the metric value from the service endpoint.
 
 Follow these steps:
 
@@ -99,7 +99,7 @@ kubectl port-forward svc/monitoring-prometheus -n kyma-system 9090:9090
 
 ![Prometheus Dashboard](./assets/pm-dashboard-1.png)
 
-2. Open the **Graph** tab, search for the `cpu_temperature_celsius` metric in the **Expression** search box, and click the **Execute** button to check the last value pulled by Prometheus.
+2. Open the **Graph** tab, search for the `cpu_temperature_celsius` metric in the **Expression** search box, and click the **Execute** button to check the last value scraped by Prometheus.
 
 ![Prometheus Dashboard](./assets/pm-dashboard-2.png)
 
