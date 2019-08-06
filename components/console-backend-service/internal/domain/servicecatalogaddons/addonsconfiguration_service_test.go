@@ -15,12 +15,12 @@ import (
 	addonsInformers "github.com/kyma-project/kyma/components/helm-broker/pkg/client/informers/externalversions"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/tools/cache"
-	k8s_testing "k8s.io/client-go/testing"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	k8s_testing "k8s.io/client-go/testing"
+	"k8s.io/client-go/tools/cache"
 )
 
 func TestAddonsConfigurationService_AddRepos_Success(t *testing.T) {
@@ -76,7 +76,6 @@ func TestAddonsConfigurationService_AddRepos_Failure(t *testing.T) {
 	// given
 	fixAddonCfgName := "not-existing-cfg"
 	fixURLs := []string{"www.www"}
-	expErrMsg := fmt.Sprintf("%s doesn't exists", fixAddonCfgName)
 
 	informer, client := fixAddonsConfigurationInformer()
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
@@ -87,7 +86,7 @@ func TestAddonsConfigurationService_AddRepos_Failure(t *testing.T) {
 	result, err := svc.AddRepos(fixAddonCfgName, "test", fixURLs)
 
 	// then
-	assert.EqualError(t, err, expErrMsg)
+	assert.Error(t, err)
 	assert.Nil(t, result)
 }
 
@@ -150,7 +149,6 @@ func TestAddonsConfigurationService_DeleteRepos_Failure(t *testing.T) {
 	// given
 	fixAddonCfgName := "not-existing-cfg"
 	fixURLs := []string{"www.www"}
-	expErrMsg := fmt.Sprintf("%s doesn't exists", fixAddonCfgName)
 
 	inf, client := fixAddonsConfigurationInformer()
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
@@ -161,7 +159,7 @@ func TestAddonsConfigurationService_DeleteRepos_Failure(t *testing.T) {
 	result, err := svc.RemoveRepos(fixAddonCfgName, "test", fixURLs)
 
 	// then
-	assert.EqualError(t, err, expErrMsg)
+	assert.Error(t, err)
 	assert.Nil(t, result)
 }
 
@@ -435,7 +433,7 @@ func TestAddonsConfigurationService_ResyncAddonsConfiguration_OnRetry(t *testing
 	cfg, err := svc.Resync(fixAddonCfgName, expectedCfg.Namespace)
 
 	// then
- 	require.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expectedCfg, cfg)
 }
 

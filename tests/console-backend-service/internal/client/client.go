@@ -4,13 +4,13 @@ import (
 	scClientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	gatewayClientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	uiClientset "github.com/kyma-project/kyma/components/console-backend-service/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned"
 	idpClientset "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
 	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
-	"github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned"
 )
 
 func NewClientWithConfig() (*v1.CoreV1Client, *rest.Config, error) {

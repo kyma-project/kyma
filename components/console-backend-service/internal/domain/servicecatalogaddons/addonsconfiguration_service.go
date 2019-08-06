@@ -52,41 +52,44 @@ func (s *addonsConfigurationService) List(namespace string, pagingParams pager.P
 }
 
 func (s *addonsConfigurationService) AddRepos(name, namespace string, urls []string) (*v1alpha1.AddonsConfiguration, error) {
-	addon, err := s.getAddonsConfiguration(name, namespace)
-	if err != nil {
-		return nil, err
+	var addon *v1alpha1.AddonsConfiguration
+	var err error
+	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		addon, err = s.addonsCfgClient.AddonsConfigurations(namespace).Get(name, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		for _, u := range urls {
+			addon.Spec.Repositories = append(addon.Spec.Repositories, v1alpha1.SpecRepository{URL: u})
+		}
+
+		_, err = s.addonsCfgClient.AddonsConfigurations(namespace).Update(addon)
+		return err
+	}); err != nil {
+		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, name)
 	}
 
-	addonCpy := addon.DeepCopy()
-	for _, u := range urls {
-		addonCpy.Spec.Repositories = append(addonCpy.Spec.Repositories, v1alpha1.SpecRepository{URL: u})
-	}
-
-	result, err := s.addonsCfgClient.AddonsConfigurations(namespace).Update(addonCpy)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, addonCpy.Name)
-	}
-
-	return result, nil
+	return addon, nil
 }
 
 func (s *addonsConfigurationService) RemoveRepos(name, namespace string, urls []string) (*v1alpha1.AddonsConfiguration, error) {
-	addon, err := s.getAddonsConfiguration(name, namespace)
-	if err != nil {
-		return nil, err
+	var addon *v1alpha1.AddonsConfiguration
+	var err error
+	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		addon, err = s.addonsCfgClient.AddonsConfigurations(namespace).Get(name, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		resultRepos := filterOutRepositories(addon.Spec.Repositories, urls)
+		addon.Spec.Repositories = resultRepos
+
+		_, err = s.addonsCfgClient.AddonsConfigurations(namespace).Update(addon)
+		return err
+	}); err != nil {
+		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, name)
 	}
 
-	resultRepos := filterOutRepositories(addon.Spec.Repositories, urls)
-
-	addonCpy := addon.DeepCopy()
-	addonCpy.Spec.Repositories = resultRepos
-
-	updatedAddon, err := s.addonsCfgClient.AddonsConfigurations(namespace).Update(addonCpy)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, addonCpy.Name)
-	}
-
-	return updatedAddon, nil
+	return addon, nil
 }
 
 func (s *addonsConfigurationService) Create(name, namespace string, urls []string, labels *gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error) {

@@ -1,27 +1,27 @@
 package shared
 
 type AddonsConfiguration struct {
-	Name   string
-	Urls   []string
-	Labels map[string]string
-	Status AddonsConfigurationStatus
+	Name   string                    `json:"name"`
+	Urls   []string                  `json:"urls"`
+	Labels map[string]string         `json:"labels"`
+	Status AddonsConfigurationStatus `json:"status"`
 }
 
 type AddonsConfigurationStatus struct {
-	Phase        string
-	Repositories []AddonsConfigurationRepository
+	Phase        string                          `json:"phase"`
+	Repositories []AddonsConfigurationRepository `json:"repositories"`
 }
 
 type AddonsConfigurationRepository struct {
-	Url    string
-	Status string
-	Addons []AddonsConfigurationAddons
+	Url    string                      `json:"url"`
+	Status string                      `json:"status"`
+	Addons []AddonsConfigurationAddons `json:"addons"`
 }
 
 type AddonsConfigurationAddons struct {
-	Name    string
-	Version string
-	Status  string
-	Reason  string
-	Message string
+	Name    string `json:"name"`
+	Version string `json:"version"`
+	Status  string `json:"status"`
+	Reason  string `json:"reason"`
+	Message string `json:"message"`
 }

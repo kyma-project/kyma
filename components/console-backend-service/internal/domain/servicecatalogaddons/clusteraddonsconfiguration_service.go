@@ -52,41 +52,45 @@ func (s *clusterAddonsConfigurationService) List(pagingParams pager.PagingParams
 }
 
 func (s *clusterAddonsConfigurationService) AddRepos(name string, urls []string) (*v1alpha1.ClusterAddonsConfiguration, error) {
-	addon, err := s.getClusterAddonsConfiguration(name)
-	if err != nil {
-		return nil, err
+	var addon *v1alpha1.ClusterAddonsConfiguration
+	var err error
+	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		addon, err = s.addonsCfgClient.ClusterAddonsConfigurations().Get(name, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+
+		for _, u := range urls {
+			addon.Spec.Repositories = append(addon.Spec.Repositories, v1alpha1.SpecRepository{URL: u})
+		}
+
+		_, err = s.addonsCfgClient.ClusterAddonsConfigurations().Update(addon)
+		return err
+	}); err != nil {
+		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, name)
 	}
 
-	addonCpy := addon.DeepCopy()
-	for _, u := range urls {
-		addonCpy.Spec.Repositories = append(addonCpy.Spec.Repositories, v1alpha1.SpecRepository{URL: u})
-	}
-
-	result, err := s.addonsCfgClient.ClusterAddonsConfigurations().Update(addonCpy)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while updating %s %s", pretty.ClusterAddonsConfiguration, addonCpy.Name)
-	}
-
-	return result, nil
+	return addon, nil
 }
 
 func (s *clusterAddonsConfigurationService) RemoveRepos(name string, urls []string) (*v1alpha1.ClusterAddonsConfiguration, error) {
-	addon, err := s.getClusterAddonsConfiguration(name)
-	if err != nil {
-		return nil, err
+	var addon *v1alpha1.ClusterAddonsConfiguration
+	var err error
+	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		addon, err = s.addonsCfgClient.ClusterAddonsConfigurations().Get(name, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		resultRepos := filterOutRepositories(addon.Spec.Repositories, urls)
+		addon.Spec.Repositories = resultRepos
+
+		_, err = s.addonsCfgClient.ClusterAddonsConfigurations().Update(addon)
+		return err
+	}); err != nil {
+		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, name)
 	}
 
-	resultRepos := filterOutRepositories(addon.Spec.Repositories, urls)
-
-	addonCpy := addon.DeepCopy()
-	addonCpy.Spec.Repositories = resultRepos
-
-	updatedAddon, err := s.addonsCfgClient.ClusterAddonsConfigurations().Update(addonCpy)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while updating %s %s", pretty.ClusterAddonsConfiguration, addonCpy.Name)
-	}
-
-	return updatedAddon, nil
+	return addon, nil
 }
 
 func (s *clusterAddonsConfigurationService) Create(name string, urls []string, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
