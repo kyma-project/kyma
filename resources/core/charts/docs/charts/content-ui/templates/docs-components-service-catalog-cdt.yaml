@@ -14,4 +14,4 @@ spec:
       name: docs
       mode: package
       url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterDocsTopicsVersion }}.zip
-      filter: /docs/api-gateway/
+      filter: /docs/service-catalog/
