@@ -31,9 +31,9 @@ global:
     name: kyma-gateway
   dex_static_user_configurer:
     dir:
-    version: 1.4.0-rc2
+    version: 1.4.0
   containerRegistry:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:
     dir:
-    version: 1.4.0-rc2
+    version: 1.4.0
