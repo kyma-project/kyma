@@ -4,7 +4,7 @@ connector_service:
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
-some_test_key: some_test_value
+some_test_key: some_test_value1
 
 global:
   isLocalEnv: false
