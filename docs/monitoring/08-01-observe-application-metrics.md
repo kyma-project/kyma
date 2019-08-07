@@ -3,7 +3,7 @@ title: Observe application metrics
 type: Tutorials
 ---
 
-This tutorial shows how you can check the list and changing values of all metrics exposed by a sample Go service by redirecting the metrics to a localhost and the default Prometheus server port.
+This tutorial shows how you can check the list and changing values of all metrics exposed by a sample Go service by redirecting the metrics port and the default Prometheus server port to a localhost.
 
 This tutorial uses the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics-8081`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8081`. You deploy the service (`deployment.yaml`) along with the ServiceMonitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
 - From the service with the `k8s-app: metrics` label
@@ -47,7 +47,6 @@ kubectl create -f https://raw.githubusercontent.com/kyma-project/examples/master
 3. Deploy the ServiceMonitor custom resource definition (CRD) in the `kyma-system` Namespace that is a default Namespace for all ServiceMonitor CRDs.
 
 ```
-
 kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/monitoring-custom-metrics/deployment/service-monitor.yaml
 ```
 3. Test your deployment.
