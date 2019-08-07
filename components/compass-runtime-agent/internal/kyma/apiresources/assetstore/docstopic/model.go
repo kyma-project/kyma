@@ -5,6 +5,10 @@ const (
 	KeyODataSpec         = "odata"
 	KeyAsyncApiSpec      = "asyncapi"
 	KeyDocumentationSpec = "docs"
+
+	ApiSpec       = "ApiSpec"
+	Documentation = "Documentation"
+	EventsSpec    = "EventsSpec"
 )
 
 type Entry struct {
@@ -13,6 +17,7 @@ type Entry struct {
 	Description string
 	Urls        map[string]string
 	Labels      map[string]string
+	Hashes      map[string]string
 	Status      StatusType
 }
 

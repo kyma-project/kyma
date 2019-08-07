@@ -27,7 +27,8 @@ type ResourceInterface interface {
 
 type DocsTopicRepository interface {
 	Get(id string) (docstopic.Entry, apperrors.AppError)
-	Upsert(documentationTopic docstopic.Entry) apperrors.AppError
+	Create(documentationTopic docstopic.Entry) apperrors.AppError
+	Update(documentationTopic docstopic.Entry) apperrors.AppError
 	Delete(id string) apperrors.AppError
 }
 
@@ -39,21 +40,6 @@ func NewDocsTopicRepository(resourceInterface ResourceInterface) DocsTopicReposi
 	return repository{
 		resourceInterface: resourceInterface,
 	}
-}
-
-func (r repository) Upsert(docsTopicEntry docstopic.Entry) apperrors.AppError {
-	_, err := r.get(docsTopicEntry.Id)
-	if err != nil && err.Code() == apperrors.CodeNotFound {
-		return r.create(toK8sType(docsTopicEntry))
-	}
-
-	if err != nil {
-		return err
-	}
-
-	k8sDocsTopic := toK8sType(docsTopicEntry)
-
-	return r.update(docsTopicEntry.Id, k8sDocsTopic)
 }
 
 func (r repository) Get(id string) (docstopic.Entry, apperrors.AppError) {
@@ -72,6 +58,16 @@ func (r repository) Delete(id string) apperrors.AppError {
 	}
 
 	return nil
+}
+
+func (r repository) Update(docsTopicEntry docstopic.Entry) apperrors.AppError {
+	k8sDocsTopic := toK8sType(docsTopicEntry)
+	return r.update(docsTopicEntry.Id, k8sDocsTopic)
+}
+
+func (r repository) Create(docsTopicEntry docstopic.Entry) apperrors.AppError {
+	k8sDocsTopic := toK8sType(docsTopicEntry)
+	return r.create(k8sDocsTopic)
 }
 
 func (r repository) get(id string) (v1alpha1.ClusterDocsTopic, apperrors.AppError) {
@@ -182,15 +178,22 @@ func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.ClusterDocsTopic {
 		sources = append(sources, source)
 	}
 
+	annotations := map[string]string{
+		docstopic.ApiSpec:       docsTopicEntry.Hashes[docstopic.ApiSpec],
+		docstopic.Documentation: docsTopicEntry.Hashes[docstopic.Documentation],
+		docstopic.EventsSpec:    docsTopicEntry.Hashes[docstopic.EventsSpec],
+	}
+
 	return v1alpha1.ClusterDocsTopic{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterDocsTopic",
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      docsTopicEntry.Id,
-			Namespace: "kyma-integration",
-			Labels:    docsTopicEntry.Labels,
+			Name:        docsTopicEntry.Id,
+			Namespace:   "kyma-integration",
+			Labels:      docsTopicEntry.Labels,
+			Annotations: annotations,
 		},
 		Spec: v1alpha1.ClusterDocsTopicSpec{
 			CommonDocsTopicSpec: v1alpha1.CommonDocsTopicSpec{
@@ -208,12 +211,19 @@ func fromK8sType(k8sDocsTopic v1alpha1.ClusterDocsTopic) docstopic.Entry {
 		urls[source.Type] = source.URL
 	}
 
+	hashes := map[string]string{
+		docstopic.ApiSpec:       k8sDocsTopic.Annotations[docstopic.ApiSpec],
+		docstopic.Documentation: k8sDocsTopic.Annotations[docstopic.Documentation],
+		docstopic.EventsSpec:    k8sDocsTopic.Annotations[docstopic.EventsSpec],
+	}
+
 	return docstopic.Entry{
 		Id:          k8sDocsTopic.Name,
 		Description: k8sDocsTopic.Spec.Description,
 		DisplayName: k8sDocsTopic.Spec.DisplayName,
 		Urls:        urls,
 		Labels:      k8sDocsTopic.Labels,
+		Hashes:      hashes,
 		Status:      docstopic.StatusType(k8sDocsTopic.Status.Phase),
 	}
 }
