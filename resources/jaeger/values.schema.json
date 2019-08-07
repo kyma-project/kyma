@@ -7,14 +7,44 @@
             "description": "Configuration properties for jaeger",
             "type": "object",
             "properties": {
-                "memory": {
-                    "description": "Defining the properties for the memory used.",
+                "persistence": {
+                    "description": "Defines persistence setting for the Jaeger storage",
                     "type": "object",
                     "properties": {
-                        "maxTraces": {
-                            "description": "Defines the maximum number of traces that Jaeger can store.",
-                            "default": 40000,
-                            "type": "number"
+                        "storageType": {
+                            "description": "Defines storage type for span data",
+                            "type": "string",
+                            "default": "badger"
+                        },
+                        "dataPath": {
+                            "description": "Directory path where span data will be stored",
+                            "type": "string",
+                            "default": "/badger/data"
+                        },
+                        "keyPath": {
+                            "description": "Directory path where data keys will be stored",
+                            "type": "string",
+                            "default": "/badger/key"
+                        },
+                        "ephemeral": {
+                            "description": "Defines whether storage using temporary file system or not",
+                            "type": "boolean",
+                            "default": "false"
+                        },
+                        "accessModes": {
+                            "description": "Access mode settings for persistence volume claim (PVC)",
+                            "type": "array",
+                            "default": ["ReadWriteOnce"]
+                        },
+                        "size": {
+                            "description": "Defines disk size will be used from persistence volume claim",
+                            "type": "string",
+                            "default": "1Gi"
+                        },
+                        "storageClassName": {
+                            "description": "Defines persistence volume claim storage class name",
+                            "type": "string",
+                            "default": ""
                         }
                     }
                 }
@@ -30,7 +60,7 @@
                     "properties": {
                         "memory": {
                             "description": "Defines the maximum amount of memory that is available for storing traces in Jaeger.",
-                            "default": "512M",
+                            "default": "128M",
                             "type": "string"
                         }
                     }

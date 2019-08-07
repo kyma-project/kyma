@@ -15,5 +15,13 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **jaeger.memory.maxTraces** | Defines the maximum number of traces that Jaeger can store. | `40000` |
-| **resources.limits.memory** | Defines the maximum amount of memory that is available for storing traces in Jaeger. | `512M` |
+| **resources.limits.memory** | Defines the maximum amount of memory that is available for storing traces in Jaeger. | `128M` |
+| **jaeger.persistence.storageType** | Defines storage type for span data. | `badger` |
+| **jaeger.persistence.dataPath** | Directory path where span data will be stored. | `/badger/data` |
+| **jaeger.persistence.keyPath** | Directory path where data keys will be stored. | `/badger/key` |
+| **jaeger.persistence.ephemeral** | Defines whether storage using temporary file system or not. | `false` |
+| **jaeger.persistence.accessModes** | Access mode settings for persistence volume claim (PVC). | `ReadWriteOnce` |
+| **jaeger.persistence.size** | Defines disk size will be used from persistence volume claim. | `1Gi` |
+| **jaeger.persistence.storageClassName** | Defines persistence volume claim storage class name. | `` |
+
+
