@@ -15,4 +15,4 @@ global:
   monitoring_integration_tests:
     name: monitoring-integration-tests
     dir:
-    version: 1.4.0-rc2
+    version: 1.4.0
