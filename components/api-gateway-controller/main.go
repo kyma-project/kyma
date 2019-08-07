@@ -19,6 +19,8 @@ import (
 	"flag"
 	"os"
 
+	gatewayv1alpha3 "_/Users/i304607/Yaas/go/src/github.com/kyma-project/kyma/components/api-gateway-controller/api/v1alpha3"
+	"_/Users/i304607/Yaas/go/src/github.com/kyma-project/kyma/components/api-gateway-controller/controllers"
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -33,6 +35,7 @@ var (
 
 func init() {
 
+	gatewayv1alpha3.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -56,6 +59,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	err = (&controllers.APIReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("API"),
+	}).SetupWithManager(mgr)
+	if err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "API")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("starting manager")
