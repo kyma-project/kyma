@@ -34,30 +34,31 @@ Follow these steps:
 
 1. Create the `testing-monitoring` Namespace.
 
-```
+```bash
 kubectl create namespace testing-monitoring
 ```
 
 2. Deploy the sample service in the `testing-monitoring` Namespace.
 
-```
+```bash
 kubectl create -f https://raw.githubusercontent.com/kyma-project/examples/master/monitoring-custom-metrics/deployment/deployment.yaml --namespace=testing-monitoring
 ```
 
 3. Deploy the ServiceMonitor custom resource definition (CRD) in the `kyma-system` Namespace that is a default Namespace for all ServiceMonitor CRDs.
 
-```
+```bash
 kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/monitoring-custom-metrics/deployment/service-monitor.yaml
 ```
+
 3. Test your deployment.
 
-```
+```bash
 kubectl get pods -n testing-monitoring
 ```
 
 You should get a result similar to this one:
 
-```
+```bash
 NAME                              READY   STATUS    RESTARTS   AGE
 sample-metrics-6f7c8fcf4b-mlgbx   2/2     Running   0          26m
 ```
@@ -68,7 +69,7 @@ Follow these steps:
 
 1. Run the `port-forward` command on the `sample-metrics-8081` service for port `8081` to check the metrics.
 
-```
+```bash
 kubectl port-forward svc/sample-metrics-8081 -n testing-monitoring 8081:8081
 ```
 
@@ -88,7 +89,7 @@ Follow these steps to redirect the metrics:
 
 1. Run the `port-forward` command on the `monitoring-prometheus` service:
 
-```
+```bash
 kubectl port-forward svc/monitoring-prometheus -n kyma-system 9090:9090
 ```
 
@@ -110,12 +111,12 @@ Follow these steps:
 
 1. Remove the deployed ServiceMonitor CRD from the `kyma-system` Namespace.
 
-    ```
+    ```bash
     kubectl delete servicemonitor -l example=monitoring-custom-metrics -n kyma-system
     ```
 
 2. Remove the example Deployment from the `testing-monitoring` Namespace.
 
-    ```
+    ```bash
     kubectl delete all -l example=monitoring-custom-metrics -n testing-monitoring
     ```
