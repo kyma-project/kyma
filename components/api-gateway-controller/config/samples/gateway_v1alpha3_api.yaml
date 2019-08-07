@@ -1,0 +1,7 @@
+apiVersion: gateway.kyma-project.io/v1alpha3
+kind: API
+metadata:
+  name: api-sample
+spec:
+  # Add fields here
+  foo: bar
