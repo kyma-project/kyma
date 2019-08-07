@@ -16,22 +16,23 @@
   version = "v0.43.0"
 
 [[projects]]
-  digest = "1:43fbf05ea84c860a4e86b557d156b1e72511cd29375d3f71adb522362710aea7"
+  digest = "1:642cf8e80572f9dc0677b0f241c8ab2e715c9dccc215270ea873c86ddca0062c"
+  name = "contrib.go.opencensus.io/exporter/prometheus"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "f4a2c1e53ec45636355d35fb9022b64e4bdd4a91"
+  version = "v0.1.0"
+
+[[projects]]
+  digest = "1:f091d5e3183a972fc45c4279cec2d97e13262bfda5b85cda3280cb41475e1415"
   name = "contrib.go.opencensus.io/exporter/stackdriver"
   packages = [
     ".",
     "monitoredresource",
   ]
   pruneopts = "NUT"
-  revision = "ab5a58af316a529613aadf9f50eeed1b6f044b2f"
-  version = "v0.9.2"
-
-[[projects]]
-  digest = "1:cef70b547ce62d12ea8e5dcb9905bccb57ea1bb253ee6809fd79a17c29ca3cd5"
-  name = "contrib.go.opencensus.io/resource"
-  packages = ["resourcekeys"]
-  pruneopts = "NUT"
-  revision = "d49915945c0f6d4b2f04a34cdf043182e04c443a"
+  revision = "6850d2e00d7dfe4886f7e4773bf9f05e39296d92"
+  version = "v0.12.4"
 
 [[projects]]
   digest = "1:39719354a38d9839773bea2679b0ab60e3beeb3144949e2d0104710de070592e"
@@ -444,7 +445,7 @@
   version = "v1.1.6"
 
 [[projects]]
-  digest = "1:ba1b0892648b096f9ee6931ac892468e36d2631517e5edbef51636277ce73f4b"
+  digest = "1:15e1b7331e6bff460ecfa49c398ebdd31ad84204a47665d08dd214e9a67de34a"
   name = "github.com/knative/eventing"
   packages = [
     "contrib/natss/pkg/apis/messaging",
@@ -457,6 +458,7 @@
     "contrib/natss/pkg/client/informers/externalversions/messaging",
     "contrib/natss/pkg/client/informers/externalversions/messaging/v1alpha1",
     "contrib/natss/pkg/client/listers/messaging/v1alpha1",
+    "pkg/apis/duck",
     "pkg/apis/duck/v1alpha1",
     "pkg/apis/eventing",
     "pkg/apis/eventing/v1alpha1",
@@ -478,56 +480,26 @@
     "pkg/client/listers/eventing/v1alpha1",
     "pkg/client/listers/messaging/v1alpha1",
     "pkg/client/listers/sources/v1alpha1",
+    "pkg/duck",
+    "pkg/logging",
+    "pkg/reconciler/names",
     "pkg/reconciler/testing",
+    "pkg/utils",
   ]
   pruneopts = "NUT"
-  revision = "7df0cc56c28d58223ff25d5ddfb487fa8c29a004"
-  version = "v0.7.1"
+  revision = "a59dae6f326057211f43f7c2d1414a9fd821b8aa"
+  version = "v0.8.0"
 
 [[projects]]
-  branch = "release-0.7"
-  digest = "1:85dc810ce1ec8a58b37fb0e041707aa8259137d7abe5cc045e8584883aa3e19b"
+  branch = "release-0.8"
+  digest = "1:50bb2827cb7630e31c90b5d0808299d09cd13de204f002d634cad18c8a028da2"
   name = "github.com/knative/pkg"
   packages = [
     "apis",
-    "apis/duck",
-    "apis/duck/v1alpha1",
     "apis/duck/v1beta1",
-    "apis/istio",
-    "apis/istio/authentication",
-    "apis/istio/authentication/v1alpha1",
-    "apis/istio/common/v1alpha1",
-    "apis/istio/v1alpha3",
-    "changeset",
-    "client/clientset/versioned",
-    "client/clientset/versioned/fake",
-    "client/clientset/versioned/scheme",
-    "client/clientset/versioned/typed/authentication/v1alpha1",
-    "client/clientset/versioned/typed/authentication/v1alpha1/fake",
-    "client/clientset/versioned/typed/istio/v1alpha3",
-    "client/clientset/versioned/typed/istio/v1alpha3/fake",
-    "configmap",
-    "controller",
-    "injection",
-    "injection/clients/dynamicclient",
-    "injection/clients/dynamicclient/fake",
-    "injection/clients/kubeclient",
-    "injection/clients/kubeclient/fake",
-    "kmeta",
-    "kmp",
-    "logging",
-    "logging/logkey",
-    "logging/testing",
-    "metrics",
-    "metrics/metricskey",
-    "reconciler/testing",
-    "system",
-    "system/testing",
-    "tracker",
-    "webhook",
   ]
   pruneopts = "NUT"
-  revision = "d82505e6c5b4ce46562d6c242be0e706791f35bd"
+  revision = "2b848f71969c997809a2dbea8351eaadb23e9bc9"
 
 [[projects]]
   branch = "master"
@@ -859,19 +831,20 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:69a97603fe8952de86ee1e74a065f7974ec7d7d1d2301d3f5da6d342156363f4"
+  digest = "1:0e3fd52087079d1289983e4fef32268ca965973f5370b69204e2934185527baa"
   name = "go.opencensus.io"
   packages = [
     ".",
-    "exporter/prometheus",
     "internal",
     "internal/tagencoding",
     "metric/metricdata",
+    "metric/metricexport",
     "metric/metricproducer",
     "plugin/ocgrpc",
     "plugin/ochttp",
     "plugin/ochttp/propagation/b3",
     "resource",
+    "resource/resourcekeys",
     "stats",
     "stats/internal",
     "stats/view",
@@ -882,8 +855,8 @@
     "trace/tracestate",
   ]
   pruneopts = "NUT"
-  revision = "75c0cca22312e51bfd4fafdbe9197ae399e18b38"
-  version = "v0.20.2"
+  revision = "9c377598961b706d1542bd2d84d538b5094d596e"
+  version = "v0.22.0"
 
 [[projects]]
   digest = "1:cc9d86ec4e6e3bdf87e3a421273bfeed003cf8e21351c0302fe8b0eb7b10efe6"
@@ -1586,6 +1559,51 @@
   packages = ["pkg/util/proto"]
   pruneopts = "NUT"
   revision = "5e22f3d471e6f24ca20becfdffdc6206c7cecac8"
+
+[[projects]]
+  branch = "release-0.8"
+  digest = "1:d0e2237e7e48a47f77de7bbb684ff360b38825c5d64a40fadfae6e705428021f"
+  name = "knative.dev/pkg"
+  packages = [
+    "apis",
+    "apis/duck",
+    "apis/duck/v1alpha1",
+    "apis/duck/v1beta1",
+    "apis/istio",
+    "apis/istio/authentication",
+    "apis/istio/authentication/v1alpha1",
+    "apis/istio/common/v1alpha1",
+    "apis/istio/v1alpha3",
+    "changeset",
+    "client/clientset/versioned",
+    "client/clientset/versioned/fake",
+    "client/clientset/versioned/scheme",
+    "client/clientset/versioned/typed/authentication/v1alpha1",
+    "client/clientset/versioned/typed/authentication/v1alpha1/fake",
+    "client/clientset/versioned/typed/istio/v1alpha3",
+    "client/clientset/versioned/typed/istio/v1alpha3/fake",
+    "configmap",
+    "controller",
+    "injection",
+    "injection/clients/dynamicclient",
+    "injection/clients/dynamicclient/fake",
+    "injection/clients/kubeclient",
+    "injection/clients/kubeclient/fake",
+    "kmeta",
+    "kmp",
+    "logging",
+    "logging/logkey",
+    "logging/testing",
+    "metrics",
+    "metrics/metricskey",
+    "reconciler/testing",
+    "system",
+    "system/testing",
+    "tracker",
+    "webhook",
+  ]
+  pruneopts = "NUT"
+  revision = "2b848f71969c997809a2dbea8351eaadb23e9bc9"
 
 [[projects]]
   digest = "1:a8495647d9f03401c36b801a0644207a434f76ed9d4fc4ea80c46700f0ccc575"

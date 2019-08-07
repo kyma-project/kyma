@@ -12,11 +12,15 @@ import (
 
 	"github.com/knative/eventing/contrib/natss/pkg/apis/messaging/v1alpha1"
 	clientsetNatss "github.com/knative/eventing/contrib/natss/pkg/client/clientset/versioned"
+
+	// messagingChannel "github.com/knative/eventing/pkg/client/clienset/versioned/typed/messaging/v1alpha1"
 	informersNatss "github.com/knative/eventing/contrib/natss/pkg/client/informers/externalversions"
 	v1alpha1Natss "github.com/knative/eventing/contrib/natss/pkg/client/informers/externalversions/messaging/v1alpha1"
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	evclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
 	eventingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+
+	// messagingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
@@ -51,7 +55,7 @@ if err := k.SendMessage(ch, "&msg); err != nil {
 	return
 }
 // create a subscription
-var uri = "dnsName: hello-00001-service.default"
+var uri = "dnsName: hello-00001-service.CreateChannel"
 if err := k.CreateSubscription("my-sub", namespace, channelName, &uri); err != nil {
 	log.Printf("ERROR: create subscription failed: %v", err)
 	return
@@ -85,6 +89,7 @@ func NewKnativeLib() (KnativeAccessLib, error) {
 type KnativeLib struct {
 	natssChannelInformer v1alpha1Natss.NatssChannelInformer
 	evClient             eventingv1alpha1.EventingV1alpha1Interface
+	// messagingChannel     messagingv1alpha1.ChannelInterface
 }
 
 // Verify the struct KnativeLib implements KnativeLibIntf
@@ -106,10 +111,12 @@ func GetKnativeLib() (*KnativeLib, error) {
 	// init natssChannelInformer ///////////////////////////////////////////////////////////////////////////////////////
 	stopCh := make(<-chan struct{})
 	resyncPeriod := 30 * time.Second
+	// var messagingChannelInformer messagingv1alpha1.ChannelsGetter
 	var natssChannelInformer v1alpha1Natss.NatssChannelInformer
 	if natssClient := clientsetNatss.NewForConfigOrDie(config); natssClient != nil {
 		messagingInformerFactory := informersNatss.NewSharedInformerFactory(natssClient, resyncPeriod)
 		natssChannelInformer = messagingInformerFactory.Messaging().V1alpha1().NatssChannels()
+		// v1alpha1Natss.
 		if err := startInformers(stopCh, natssChannelInformer.Informer()); err != nil {
 			log.Printf("failed to start natssChannelInformer %v", err)
 			return nil, err
