@@ -4,6 +4,8 @@ connector_service:
 connection_token_handler:
   enabled: *connectorServiceEnabled
 
+some_test_key: some_test_value
+
 global:
   isLocalEnv: false
   namespace: kyma-integration
