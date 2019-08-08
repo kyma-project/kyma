@@ -26,8 +26,8 @@ const (
 )
 
 func TestKnativeServing_Acceptance(t *testing.T) {
-	domainName := MustGetenv(t, "DOMAIN_NAME")
-	target := MustGetenv(t, "TARGET")
+	domainName := mustGetenv(t, "DOMAIN_NAME")
+	target := mustGetenv(t, "TARGET")
 
 	testServiceURL := fmt.Sprintf("https://test-service.knative-serving.%s", domainName)
 
@@ -36,7 +36,7 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 		t.Fatalf("Unexpected error when creating ingressgateway client: %s", err)
 	}
 
-	kubeConfig := loadKubeConfigOrDie()
+	kubeConfig := loadKubeConfigOrDie(t)
 	serviceClient := servingtyped.NewForConfigOrDie(kubeConfig).Services("knative-serving")
 	service, err := serviceClient.Create(&serving.Service{
 		ObjectMeta: meta.ObjectMeta{
@@ -105,7 +105,9 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 	}
 }
 
-func MustGetenv(t *testing.T, name string) string {
+func mustGetenv(t *testing.T, name string) string {
+	t.Helper()
+
 	env := os.Getenv(name)
 	if env == "" {
 		t.Fatalf("Missing '%s' variable", name)
@@ -113,7 +115,9 @@ func MustGetenv(t *testing.T, name string) string {
 	return env
 }
 
-func loadKubeConfigOrDie() *rest.Config {
+func loadKubeConfigOrDie(t *testing.T) *rest.Config {
+	t.Helper()
+
 	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
 		cfg, err := rest.InClusterConfig()
 		if err != nil {
