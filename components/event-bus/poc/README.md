@@ -29,10 +29,10 @@ kubectl create clusterrolebinding cluster-admin-binding \
 
 ### Install Istio
 ```bash
-kubectl apply --filename https://raw.githubusercontent.com/knative/serving/v0.7.0/third_party/istio-1.1.7/istio-crds.yaml
+kubectl apply --filename https://raw.githubusercontent.com/knative/serving/v0.8.0/third_party/istio-1.1.7/istio-crds.yaml
 
-curl -L https://raw.githubusercontent.com/knative/serving/v0.7.0/third_party/istio-1.1.7/istio.yaml \
-  | kubectl apply --filename -
+curl -L https://raw.githubusercontent.com/knative/serving/v0.8.0/third_party/istio-1.1.7/istio.yaml \
+  | kubectl apply -f -
 
 # label the default namespace with istio-injection=enabled.
 kubectl label namespace default istio-injection=enabled
