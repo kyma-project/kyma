@@ -77,6 +77,6 @@ Refresh the browser to see how the dashboard changes according to the current va
 
 ![Green dashboard](./assets/green-dashboard.png)
 
-- It turns green if the current metric value ranges from `75` to `90` Celsius degrees:
+- It turns red if the current metric value ranges from `75` to `90` Celsius degrees:
 
 ![Red dashboard](./assets/red-dashboard.png)
