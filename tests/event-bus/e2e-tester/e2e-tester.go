@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"k8s.io/client-go/rest"
 
 	"github.com/avast/retry-go"
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
@@ -22,16 +23,15 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 )
 
 const (
-	eventType               = "test-e2e"
-	eventTypeVersion        = "v1"
-	subscriptionName        = "test-sub"
-	headersSubscriptionName = "headers-test-sub"
-	eventActivationName     = "test-ea"
-	srcID                   = "test.local"
+	port             = 9000
+	eventType        = "test-e2e"
+	eventTypeVersion = "v1"
+
+	eventActivationName = "test-ea"
+	srcID               = "test.local"
 
 	success = 0
 	fail    = 1
@@ -49,263 +49,256 @@ const (
 	contentTypeHeaderValue        = "application/json"
 	ceEventTypeVersionHeaderValue = "override-event-type-version"
 	customHeaderValue             = "Ce-X-custom-header-value"
+
+	// subscribers
+	subscriptionNameV1        = "test-sub-v1"
+	headersSubscriptionNameV1 = "test-sub-with-headers-v1"
 )
 
-var (
-	clientK8S    *kubernetes.Clientset
-	eaClient     *eaClientSet.Clientset
-	subClient    *subscriptionClientSet.Clientset
-	retryOptions = []retry.Option{
-		retry.Attempts(13), // at max (100 * (1 << 13)) / 1000 = 819,2 sec
-		retry.OnRetry(func(n uint, err error) {
-			fmt.Printf(".")
-		}),
-	}
-)
-
-//Unexportable struct, encapsulates subscriber resource parameters
-type testSubscriber struct {
-	image                 string
-	namespace             string
-	eventEndpointV1URL    string
-	resultsEndpointV1URL  string
-	statusEndpointV1URL   string
-	shutdownEndpointV1URL string
-	eventEndpointV3URL    string
-	resultsEndpointV3URL  string
-	statusEndpointV3URL   string
+// Not exported struct, encapsulates the E2E test resources
+type e2eTester struct {
+	publisher1            publisher
+	publisher2            publisher
+	subscriber1           subscriber
+	subscriber2           subscriber
+	retryOts              []retry.Option
+	k8sClient             *kubernetes.Clientset
+	eventActivationClient *eaClientSet.Clientset
+	subscriptionClient    *subscriptionClientSet.Clientset
 }
 
-//Unexportable struct, encapsulates publisher details
-type publisherDetails struct {
-	publishEventEndpointURL  string
-	publishStatusEndpointURL string
+// Not exported struct, encapsulates publisher details
+type publisher struct {
+	publishEventEndpointURLV1  string
+	publishStatusEndpointURLV1 string
+}
+
+// Not exported struct, encapsulates subscriber resource parameters
+type subscriber struct {
+	image       string
+	namespace   string
+	eventsURL   string
+	statusURL   string
+	resultsURL  string
+	shutdownURL string
+}
+
+type options struct {
+	publishEventURLV1  string
+	publishStatusURLV1 string
+	image              string
+	namespace          string
+	logLevel           string
+}
+
+func init() {
+	// configure logger with text instead of json for easier reading in CI logs
+	log.SetFormatter(&log.TextFormatter{})
+
+	// show file and line number
+	log.SetReportCaller(true)
 }
 
 func main() {
-	// configure logger with text instead of json for easier reading in CI logs
-	log.SetFormatter(&log.TextFormatter{})
-	// show file and line number
-	log.SetReportCaller(true)
-
-	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	var subscriber testSubscriber
-	var pubDetails publisherDetails
-	var logLevelString string
-	var logLevel log.Level
-
-	//Initialise publisher struct
-	flags.StringVar(&pubDetails.publishEventEndpointURL, "publish-event-uri", "http://event-publish-service:8080/v1/events", "publish service events endpoint `URL`")
-	flags.StringVar(&pubDetails.publishStatusEndpointURL, "publish-status-uri", "http://event-publish-service:8080/v1/status/ready", "publish service status endpoint `URL`")
-
-	//Initialise subscriber
-	flags.StringVar(&subscriber.image, "subscriber-image", "", "subscriber Docker `image` name")
-	flags.StringVar(&subscriber.namespace, "subscriber-ns", "test-event-bus", "k8s `namespace` in which subscriber test app is running")
-	flags.StringVar(&logLevelString, "log-level", "info", "logrus log level")
-
-	if err := flags.Parse(os.Args[1:]); err != nil {
-		panic(err)
-	}
+	// init cli options
+	opts := getDefaultOptions()
+	opts.parseOrDie()
 
 	// set log level
-	var err error
-	if logLevel, err = log.ParseLevel(logLevelString); err != nil {
-		panic(err)
-	}
-	log.SetLevel(logLevel)
+	setLogLevel(opts.logLevel)
 
-	initSubscriberUrls(&subscriber)
+	// run the E2E test scenarios
+	tester := newE2ETester(opts, defaultRetryOptions())
+	tester.initOrDie()
+	tester.prepareTestResourcesOrDie()
+	tester.checkTestResourcesReadyOrDie()
+	tester.publishEventsOrDie()
+	tester.checkEventsDeliveryOrDie()
 
-	if flags.NFlag() == 0 || subscriber.image == "" {
+	// test finished
+	log.Info("test finished successfully")
+	tester.shutdown(success, &tester.subscriber1)
+}
 
-		if _, err := fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0]); err != nil {
-			panic(err)
-		}
-		flags.PrintDefaults()
-		os.Exit(1)
-	}
-
+// Init the E2E Tester or exit in case of errors
+func (e *e2eTester) initOrDie() {
+	log.Info("init cluster config")
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		log.WithField("error", err).Error("error in getting cluster config")
-		shutdown(fail, &subscriber)
+		log.WithField("error", err).Error("cannot init cluster config")
+		e.shutdown(fail, &e.subscriber1)
 	}
 
-	log.Info("create the clientK8S")
-	clientK8S, err = kubernetes.NewForConfig(config)
+	log.Info("init k8s client")
+	e.k8sClient, err = kubernetes.NewForConfig(config)
 	if err != nil {
-		log.WithField("error", err).Error("failed to create a ClientSet")
-		shutdown(fail, &subscriber)
+		log.WithField("error", err).Error("cannot init k8s ClientSet")
+		e.shutdown(fail, &e.subscriber1)
 	}
 
-	err = createNamespace(subscriber.namespace)
+	log.Info("init EventActivation client")
+	e.eventActivationClient, err = eaClientSet.NewForConfig(config)
 	if err != nil {
-		log.WithField("error", err).Error("cannot create namespace")
-		shutdown(fail, &subscriber)
+		log.WithField("error", err).Error("cannot init EventActivation client")
+		e.shutdown(fail, &e.subscriber1)
 	}
 
-	log.Info("create a test event activation")
-	eaClient, err = eaClientSet.NewForConfig(config)
+	log.Info("init Subscription client")
+	e.subscriptionClient, err = subscriptionClientSet.NewForConfig(config)
 	if err != nil {
-		log.WithField("error", err).Error("error in creating EventActivation client")
-		shutdown(fail, &subscriber)
+		log.WithField("error", err).Error("cannot init Subscription client")
+		e.shutdown(fail, &e.subscriber1)
 	}
-	if err := createEventActivation(subscriber.namespace); err != nil {
-		log.WithField("error", err).Error("cannot create the event activation")
-		shutdown(fail, &subscriber)
+}
+
+func (e *e2eTester) prepareTestResourcesOrDie() {
+	log.Info("create test namespace")
+	err := e.createNamespace(e.subscriber1.namespace)
+	if err != nil {
+		log.WithField("error", err).Error("cannot create test namespace")
+		e.shutdown(fail, &e.subscriber1)
 	}
 
-	log.Info("create a test Subscription")
-	subClient, err = subscriptionClientSet.NewForConfig(config)
-	if err != nil {
-		log.WithField("error", err).Error("error in creating Subscription client")
-		shutdown(fail, &subscriber)
-	}
-	if err := createSubscription(subscriber.namespace, subscriptionName, subscriber.eventEndpointV1URL); err != nil {
-		log.WithField("error", err).Error("cannot create Kyma subscription")
-		shutdown(fail, &subscriber)
+	log.Info("create EventActivation")
+	if err := e.createEventActivation(e.subscriber1.namespace); err != nil {
+		log.WithField("error", err).Error("cannot create EventActivation")
+		e.shutdown(fail, &e.subscriber1)
 	}
 
-	log.Info("create a headers test subscription")
-	subClient, err = subscriptionClientSet.NewForConfig(config)
-	if err != nil {
-		log.WithField("error", err).Error("error in creating headers subscription client")
-		shutdown(fail, &subscriber)
+	log.Info("create Kyma Subscription-1")
+	if err := e.createSubscription(e.subscriber1.namespace, subscriptionNameV1, e.subscriber1.eventsURL); err != nil {
+		log.WithField("error", err).Error("cannot create Kyma subscription-1")
+		e.shutdown(fail, &e.subscriber1)
 	}
-	if err := createSubscription(subscriber.namespace, headersSubscriptionName, subscriber.eventEndpointV3URL); err != nil {
-		log.WithField("error", err).Error("cannot create Kyma headers subscription")
-		shutdown(fail, &subscriber)
+
+	log.Info("create a Kyma subscription-3")
+	if err := e.createSubscription(e.subscriber1.namespace, headersSubscriptionNameV1, e.subscriber1.eventsURL); err != nil {
+		log.WithField("error", err).Error("cannot create Kyma subscription-3")
+		e.shutdown(fail, &e.subscriber1)
 	}
 
 	log.Info("create Subscriber")
-	if err := createSubscriber(util.SubscriberName, subscriber.namespace, subscriber.image); err != nil {
-		log.WithField("error", err).Error("create Subscriber failed")
+	if err := e.createSubscriber(util.SubscriberName, e.subscriber1.namespace, e.subscriber1.image); err != nil {
+		log.WithField("error", err).Error("cannot create Subscriber")
+		e.shutdown(fail, &e.subscriber1)
 	}
+}
 
+func (e *e2eTester) checkTestResourcesReadyOrDie() {
 	log.Info("check Subscriber's v1 endpoint Status")
-	if err := subscriber.checkSubscriberV1EndpointStatus(); err != nil {
+	if err := e.checkSubscriberV1EndpointStatus(); err != nil {
 		log.WithField("error", err).Error("cannot connect to Subscriber v1 endpoint")
-		shutdown(fail, &subscriber)
+		e.shutdown(fail, &e.subscriber1)
 	}
 
 	log.Info("check Subscriber's v3 endpoint Status")
-	if err := subscriber.checkSubscriberV3EndpointStatus(); err != nil {
+	if err := e.checkSubscriberV3EndpointStatus(); err != nil {
 		log.WithField("error", err).Info("cannot connect to Subscriber v3 endpoint")
-		shutdown(fail, &subscriber)
+		e.shutdown(fail, &e.subscriber1)
 	}
 
 	log.Info("check Publisher Status")
-	if err := pubDetails.checkPublisherStatus(); err != nil {
+	if err := e.checkPublisherStatus(); err != nil {
 		log.WithField("error", err).Error("cannot connect to Publisher")
-		shutdown(fail, &subscriber)
+		e.shutdown(fail, &e.subscriber1)
 	}
 
 	log.Info("check Kyma subscription ready Status")
-	if err := subscriber.checkSubscriptionReady(subscriptionName); err != nil {
+	if err := e.checkSubscriptionReady(subscriptionNameV1); err != nil {
 		log.WithField("error", err).Error("kyma Subscription not ready")
-		shutdown(fail, &subscriber)
+		e.shutdown(fail, &e.subscriber1)
 	}
 
 	log.Info("check Kyma headers subscription ready Status")
-	if err := subscriber.checkSubscriptionReady(headersSubscriptionName); err != nil {
+	if err := e.checkSubscriptionReady(headersSubscriptionNameV1); err != nil {
 		log.WithField("error", err).Error("kyma Subscription not ready")
-		shutdown(fail, &subscriber)
+		e.shutdown(fail, &e.subscriber1)
 	}
+}
 
+func (e *e2eTester) publishEventsOrDie() {
 	log.Info("publish an event")
-	err = retry.Do(func() error {
-		_, err := publishTestEvent(pubDetails.publishEventEndpointURL)
+	err := retry.Do(func() error {
+		_, err := e.publishTestEvent(e.publisher1.publishEventEndpointURLV1)
 		return err
-	}, retryOptions...)
+	}, e.retryOts...)
 	if err != nil {
-		log.WithField("error", err).Error("publish event failed")
-		shutdown(fail, &subscriber)
+		log.WithField("error", err).Error("cannot publish event failed")
+		e.shutdown(fail, &e.subscriber1)
 	}
 
-	log.Info("try to read the response from subscriber server")
-	if err := subscriber.checkReceivedEvent(); err != nil {
-		log.WithField("error", err).Error("cannot get the test event from subscriber")
-		shutdown(fail, &subscriber)
-	}
-
-	log.Info("publish headers event")
+	log.Info("publish event with headers")
 	err = retry.Do(func() error {
-		_, err := publishHeadersTestEvent(pubDetails.publishEventEndpointURL)
+		_, err := e.publishHeadersTestEvent(e.publisher1.publishEventEndpointURLV1)
 		return err
-	}, retryOptions...)
+	}, e.retryOts...)
 	if err != nil {
-		log.WithField("error", err).Error("publish for an event with headers failed")
-		shutdown(fail, &subscriber)
+		log.WithField("error", err).Error("cannot publish event with headers")
+		e.shutdown(fail, &e.subscriber1)
 	}
-
-	log.Info("try to read the response from v3 endpoint of the subscriber")
-	if err := subscriber.checkReceivedEventHeaders(); err != nil {
-		log.WithField("error", err).Error("cannot get the test event from subscriber v3 endpoint")
-		shutdown(fail, &subscriber)
-	}
-
-	log.Info("successfully finished")
-	shutdown(success, &subscriber)
 }
 
-// Initialize subscriber urls
-func initSubscriberUrls(subscriber *testSubscriber) {
-	subscriber.eventEndpointV1URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v1/events"
-	subscriber.resultsEndpointV1URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v1/results"
-	subscriber.statusEndpointV1URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v1/status"
-	subscriber.shutdownEndpointV1URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/shutdown"
-	subscriber.eventEndpointV3URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v3/events"
-	subscriber.resultsEndpointV3URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v3/results"
-	subscriber.statusEndpointV3URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v3/status"
+func (e *e2eTester) checkEventsDeliveryOrDie() {
+	log.Info("try to read the response from subscriber1 server")
+	if err := e.checkReceivedEvent(); err != nil {
+		log.WithField("error", err).Error("cannot get the test event from subscriber1")
+		e.shutdown(fail, &e.subscriber1)
+	}
+
+	log.Info("try to read the response from v3 endpoint of the subscriber1")
+	if err := e.checkReceivedEventHeaders(); err != nil {
+		log.WithField("error", err).Error("cannot get the test event from subscriber1 v3 endpoint")
+		e.shutdown(fail, &e.subscriber1)
+	}
 }
 
-func shutdown(code int, subscriber *testSubscriber) {
+func (e *e2eTester) shutdown(code int, subscriber *subscriber) {
 	log.Info("send shutdown request to Subscriber")
-	if _, err := http.Post(subscriber.shutdownEndpointV1URL, "application/json", strings.NewReader(`{"shutdown": "true"}`)); err != nil {
+	if _, err := http.Post(subscriber.shutdownURL, "application/json", strings.NewReader(`{"shutdown": "true"}`)); err != nil {
 		log.WithField("error", err).Warning("shutdown Subscriber failed")
 	}
 	log.Info("delete Subscriber deployment")
 	deletePolicy := metav1.DeletePropagationForeground
 	gracePeriodSeconds := int64(0)
 
-	if err := clientK8S.AppsV1().Deployments(subscriber.namespace).Delete(util.SubscriberName,
+	if err := e.k8sClient.AppsV1().Deployments(subscriber.namespace).Delete(util.SubscriberName,
 		&metav1.DeleteOptions{GracePeriodSeconds: &gracePeriodSeconds, PropagationPolicy: &deletePolicy}); err != nil {
 		log.WithField("error", err).Warn("delete Subscriber Deployment failed")
 	}
 	log.Info("delete Subscriber service")
-	if err := clientK8S.CoreV1().Services(subscriber.namespace).Delete(util.SubscriberName,
+	if err := e.k8sClient.CoreV1().Services(subscriber.namespace).Delete(util.SubscriberName,
 		&metav1.DeleteOptions{GracePeriodSeconds: &gracePeriodSeconds}); err != nil {
 		log.WithField("error", err).Warn("delete Subscriber Service failed")
 	}
-	if subClient != nil {
-		log.WithField("subscription", subscriptionName).Info("delete test subscription")
-		if err := subClient.EventingV1alpha1().Subscriptions(subscriber.namespace).Delete(subscriptionName,
+	if e.subscriptionClient != nil {
+		log.WithField("subscription", subscriptionNameV1).Info("delete test subscription")
+		if err := e.subscriptionClient.EventingV1alpha1().Subscriptions(subscriber.namespace).Delete(subscriptionNameV1,
 			&metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
 			log.WithField("error", err).Warn("delete Subscription failed")
 		}
 	}
-	if subClient != nil {
-		log.WithField("subscription", subscriptionName).Info("delete headers test subscription")
-		if err := subClient.EventingV1alpha1().Subscriptions(subscriber.namespace).Delete(headersSubscriptionName,
+	if e.subscriptionClient != nil {
+		log.WithField("subscription", subscriptionNameV1).Info("delete headers test subscription")
+		if err := e.subscriptionClient.EventingV1alpha1().Subscriptions(subscriber.namespace).Delete(headersSubscriptionNameV1,
 			&metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
 			log.WithField("error", err).Warn("delete Subscription failed")
 		}
 	}
-	if eaClient != nil {
+	if e.eventActivationClient != nil {
 		log.WithField("event_activation", eventActivationName).Info("delete test event activation")
-		if err := eaClient.ApplicationconnectorV1alpha1().EventActivations(subscriber.namespace).Delete(eventActivationName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
+		if err := e.eventActivationClient.ApplicationconnectorV1alpha1().EventActivations(subscriber.namespace).Delete(eventActivationName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
 			log.WithField("error", err).Warn("delete Event Activation failed")
 		}
 	}
 
 	log.WithField("namespace", subscriber.namespace).Info("delete test namespace")
-	if err := clientK8S.Core().Namespaces().Delete(subscriber.namespace, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
+	if err := e.k8sClient.CoreV1().Namespaces().Delete(subscriber.namespace, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
 		log.WithField("error", err).Warn("delete Namespace failed")
 	}
 	os.Exit(code)
 }
 
-func publishTestEvent(publishEventURL string) (*api.Response, error) {
+func (e *e2eTester) publishTestEvent(publishEventURL string) (*api.Response, error) {
 	payload := fmt.Sprintf(
 		`{"source-id": "%s","event-type":"%s","event-type-version":"%s","event-time":"2018-11-02T22:08:41+00:00","data":"test-event-1"}`, srcID, eventType, eventTypeVersion)
 	log.WithField("event", payload).Info("event to be published")
@@ -340,7 +333,7 @@ func publishTestEvent(publishEventURL string) (*api.Response, error) {
 	return respObj, err
 }
 
-func publishHeadersTestEvent(publishEventURL string) (*api.Response, error) {
+func (e *e2eTester) publishHeadersTestEvent(publishEventURL string) (*api.Response, error) {
 	payload := fmt.Sprintf(
 		`{"source-id": "%s","event-type":"%s","event-type-version":"%s","event-time":"2018-11-02T22:08:41+00:00","data":"headers-test-event"}`, srcID, eventType, eventTypeVersion)
 	log.WithField("event", payload).Info("event to be published")
@@ -386,9 +379,9 @@ func publishHeadersTestEvent(publishEventURL string) (*api.Response, error) {
 	return respObj, err
 }
 
-func (subscriber *testSubscriber) checkReceivedEvent() error {
+func (e *e2eTester) checkReceivedEvent() error {
 	return retry.Do(func() error {
-		res, err := http.Get(subscriber.resultsEndpointV1URL)
+		res, err := http.Get(e.subscriber1.resultsURL)
 		if err != nil {
 			return err
 		}
@@ -420,12 +413,12 @@ func (subscriber *testSubscriber) checkReceivedEvent() error {
 			return fmt.Errorf("wrong response: %s, want: %s", resp, "test-event-1")
 		}
 		return nil
-	}, retryOptions...)
+	}, e.retryOts...)
 }
 
-func (subscriber *testSubscriber) checkReceivedEventHeaders() error {
+func (e *e2eTester) checkReceivedEventHeaders() error {
 	return retry.Do(func() error {
-		res, err := http.Get(subscriber.resultsEndpointV3URL)
+		res, err := http.Get(e.subscriber1.resultsURL)
 		if err != nil {
 			return err
 		}
@@ -485,7 +478,7 @@ func (subscriber *testSubscriber) checkReceivedEventHeaders() error {
 			return fmt.Errorf("wrong response: %s, can't be empty", lowerResponseHeaders[timeHeader][0])
 		}
 		return nil
-	}, retryOptions...)
+	}, e.retryOts...)
 }
 
 func verifyStatusCode(res *http.Response, expectedStatusCode int) error {
@@ -504,15 +497,15 @@ func isPodReady(pod *apiv1.Pod) bool {
 	return true
 }
 
-func createSubscriber(subscriberName string, subscriberNamespace string, sbscrImg string) error {
-	if _, err := clientK8S.AppsV1().Deployments(subscriberNamespace).Get(subscriberName, metav1.GetOptions{}); err != nil {
+func (e *e2eTester) createSubscriber(subscriberName string, subscriberNamespace string, subscriberImage string) error {
+	if _, err := e.k8sClient.AppsV1().Deployments(subscriberNamespace).Get(subscriberName, metav1.GetOptions{}); err != nil {
 		log.Info("create Subscriber deployment")
-		if _, err := clientK8S.AppsV1().Deployments(subscriberNamespace).Create(util.NewSubscriberDeployment(sbscrImg)); err != nil {
+		if _, err := e.k8sClient.AppsV1().Deployments(subscriberNamespace).Create(util.NewSubscriberDeploymentWithName(subscriberName, subscriberImage)); err != nil {
 			log.WithField("error", err).Error("create Subscriber deployment failed")
 			return err
 		}
 		log.Info("create Subscriber service")
-		if _, err := clientK8S.CoreV1().Services(subscriberNamespace).Create(util.NewSubscriberService()); err != nil {
+		if _, err := e.k8sClient.CoreV1().Services(subscriberNamespace).Create(util.NewSubscriberServiceWithName(subscriberName)); err != nil {
 			log.WithField("error", err).Error("create Subscriber service failed")
 			return err
 		}
@@ -521,7 +514,7 @@ func createSubscriber(subscriberName string, subscriberNamespace string, sbscrIm
 		return retry.Do(func() error {
 			var podReady bool
 			var podNotReady error
-			pods, err := clientK8S.CoreV1().Pods(subscriberNamespace).List(metav1.ListOptions{LabelSelector: "app=" + util.SubscriberName})
+			pods, err := e.k8sClient.CoreV1().Pods(subscriberNamespace).List(metav1.ListOptions{LabelSelector: "app=" + util.SubscriberName})
 			if err != nil {
 				return err
 			}
@@ -537,15 +530,15 @@ func createSubscriber(subscriberName string, subscriberNamespace string, sbscrIm
 			}
 			log.Info("subscriber created")
 			return nil
-		}, retryOptions...)
+		}, e.retryOts...)
 	}
 	return nil
 }
 
 // Create EventActivation and wait for successful creation
-func createEventActivation(subscriberNamespace string) error {
+func (e *e2eTester) createEventActivation(subscriberNamespace string) error {
 	return retry.Do(func() error {
-		_, err := eaClient.ApplicationconnectorV1alpha1().EventActivations(subscriberNamespace).Create(util.NewEventActivation(eventActivationName, subscriberNamespace, srcID))
+		_, err := e.eventActivationClient.ApplicationconnectorV1alpha1().EventActivations(subscriberNamespace).Create(util.NewEventActivation(eventActivationName, subscriberNamespace, srcID))
 		if err == nil {
 			return nil
 		}
@@ -556,7 +549,7 @@ func createEventActivation(subscriberNamespace string) error {
 	})
 }
 
-func createNamespace(name string) error {
+func (e *e2eTester) createNamespace(name string) error {
 
 	ns := &apiv1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
@@ -567,18 +560,18 @@ func createNamespace(name string) error {
 		},
 	}
 	err := retry.Do(func() error {
-		_, err := clientK8S.Core().Namespaces().Create(ns)
+		_, err := e.k8sClient.CoreV1().Namespaces().Create(ns)
 		return err
-	}, retryOptions...)
+	}, e.retryOts...)
 
 	if err != nil && !strings.Contains(err.Error(), "already exists") {
 		return fmt.Errorf("namespace: %s could not be created: %v", name, err)
 	}
 
 	err = retry.Do(func() error {
-		_, err = clientK8S.Core().Namespaces().Get(name, metav1.GetOptions{})
+		_, err = e.k8sClient.CoreV1().Namespaces().Get(name, metav1.GetOptions{})
 		return err
-	}, retryOptions...)
+	}, e.retryOts...)
 
 	if err != nil {
 		return fmt.Errorf("namespace: %s could not be fetched: %v", name, err)
@@ -588,9 +581,9 @@ func createNamespace(name string) error {
 }
 
 // Create Subscription and wait for successful creation
-func createSubscription(subscriberNamespace string, subName string, subscriberEventEndpointURL string) error {
+func (e *e2eTester) createSubscription(subscriberNamespace string, subName string, subscriberEventEndpointURL string) error {
 	return retry.Do(func() error {
-		_, err := subClient.EventingV1alpha1().Subscriptions(subscriberNamespace).Create(util.NewSubscription(subName, subscriberNamespace, subscriberEventEndpointURL, eventType, "v1", srcID))
+		_, err := e.subscriptionClient.EventingV1alpha1().Subscriptions(subscriberNamespace).Create(util.NewSubscription(subName, subscriberNamespace, subscriberEventEndpointURL, eventType, "v1", srcID))
 		if err == nil {
 			return nil
 		}
@@ -598,48 +591,48 @@ func createSubscription(subscriberNamespace string, subName string, subscriberEv
 			return err
 		}
 		return nil
-	}, retryOptions...)
+	}, e.retryOts...)
 }
 
 // Check that the subscriber endpoint is reachable and returns a 200
-func (subscriber *testSubscriber) checkSubscriberV1EndpointStatus() error {
+func (e *e2eTester) checkSubscriberV1EndpointStatus() error {
 	return retry.Do(func() error {
-		res, err := http.Get(subscriber.eventEndpointV1URL)
+		res, err := http.Get(e.subscriber1.eventsURL)
 		if err != nil {
 			return err
 		}
 		return verifyStatusCode(res, http.StatusOK)
-	}, retryOptions...)
+	}, e.retryOts...)
 }
 
 // Check that the subscriber3 endpoint is reachable and returns a 200
-func (subscriber *testSubscriber) checkSubscriberV3EndpointStatus() error {
+func (e *e2eTester) checkSubscriberV3EndpointStatus() error {
 	return retry.Do(func() error {
-		res, err := http.Get(subscriber.resultsEndpointV3URL)
+		res, err := http.Get(e.subscriber1.resultsURL)
 		if err != nil {
 			return err
 		}
 		return verifyStatusCode(res, http.StatusOK)
-	}, retryOptions...)
+	}, e.retryOts...)
 }
 
 // Check that the publisher endpoint is reachable and returns a 200
-func (pubDetails *publisherDetails) checkPublisherStatus() error {
+func (e *e2eTester) checkPublisherStatus() error {
 	return retry.Do(func() error {
-		res, err := http.Get(pubDetails.publishStatusEndpointURL)
+		res, err := http.Get(e.publisher1.publishStatusEndpointURLV1)
 		if err != nil {
 			return err
 		}
 		return verifyStatusCode(res, http.StatusOK)
-	}, retryOptions...)
+	}, e.retryOts...)
 }
 
 // Check that the subscription exists and has condition ready
-func (subscriber *testSubscriber) checkSubscriptionReady(subscriptionName string) error {
+func (e *e2eTester) checkSubscriptionReady(subscriptionName string) error {
 	return retry.Do(func() error {
 		var isReady bool
 		activatedCondition := subApis.SubscriptionCondition{Type: subApis.Ready, Status: subApis.ConditionTrue}
-		kySub, err := subClient.EventingV1alpha1().Subscriptions(subscriber.namespace).Get(subscriptionName, metav1.GetOptions{})
+		kySub, err := e.subscriptionClient.EventingV1alpha1().Subscriptions(e.subscriber1.namespace).Get(subscriptionName, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
@@ -647,5 +640,80 @@ func (subscriber *testSubscriber) checkSubscriptionReady(subscriptionName string
 			return fmt.Errorf("subscription %v is not ready yet", subscriptionName)
 		}
 		return nil
-	}, retryOptions...)
+	}, e.retryOts...)
+}
+
+func defaultRetryOptions() *[]retry.Option {
+	return &[]retry.Option{
+		retry.Attempts(13), // at max (100 * (1 << 13)) / 1000 = 819,2 sec
+		retry.OnRetry(func(n uint, err error) {
+			fmt.Printf(".")
+		}),
+	}
+}
+
+func newE2ETester(opts *options, retryOptions *[]retry.Option) *e2eTester {
+	e2eTester := &e2eTester{
+		publisher1: publisher{
+			publishEventEndpointURLV1:  opts.publishEventURLV1,
+			publishStatusEndpointURLV1: opts.publishStatusURLV1,
+		},
+		subscriber1: subscriber{
+			namespace:   opts.namespace,
+			eventsURL:   fmt.Sprintf("http://%s.%s:%d/events", util.SubscriberName, opts.namespace, port),
+			resultsURL:  fmt.Sprintf("http://%s.%s:%d/results", util.SubscriberName, opts.namespace, port),
+			statusURL:   fmt.Sprintf("http://%s.%s:%d/status", util.SubscriberName, opts.namespace, port),
+			shutdownURL: fmt.Sprintf("http://%s.%s:%d/shutdown", util.SubscriberName, opts.namespace, port),
+		},
+		retryOts: *retryOptions,
+	}
+	return e2eTester
+}
+
+func getDefaultOptions() *options {
+	options := &options{}
+	return options
+}
+
+func (o *options) parseOrDie() {
+	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+
+	flags.StringVar(&o.publishEventURLV1, "publish-event-uri", "http://event-publish-service:8080/v1/events", "publish service events endpoint `URL`")
+	flags.StringVar(&o.publishStatusURLV1, "publish-status-uri", "http://event-publish-service:8080/v1/status/ready", "publish service status endpoint `URL`")
+	flags.StringVar(&o.image, "subscriber-image", "", "subscriber Docker `image` name")
+	flags.StringVar(&o.namespace, "subscriber-ns", "test-event-bus", "k8s `namespace` in which subscriber test app is running")
+	flags.StringVar(&o.logLevel, "log-level", "info", "logrus log level")
+
+	if err := flags.Parse(os.Args[1:]); err != nil {
+		panic(err)
+	}
+
+	if flags.NFlag() == 0 || len(o.image) == 0 {
+		if _, err := fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0]); err != nil {
+			panic(err)
+		}
+		flags.PrintDefaults()
+		os.Exit(1)
+	}
+
+	// print the effective options
+	o.print()
+}
+
+func (o *options) print() {
+	log.Info(strings.Repeat("-", 100))
+	log.Info("publishEventURLV1: ", o.publishEventURLV1)
+	log.Info("publishStatusURLV1: ", o.publishStatusURLV1)
+	log.Info("image: ", o.image)
+	log.Info("namespace: ", o.namespace)
+	log.Info("logLevel: ", o.logLevel)
+	log.Info(strings.Repeat("-", 100))
+}
+
+func setLogLevel(logLevel string) {
+	if logLevel, err := log.ParseLevel(logLevel); err != nil {
+		panic(err)
+	} else {
+		log.SetLevel(logLevel)
+	}
 }

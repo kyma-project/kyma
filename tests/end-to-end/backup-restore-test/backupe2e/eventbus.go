@@ -194,7 +194,7 @@ func (f *eventBusFlow) createEventActivation() error {
 }
 
 func (f *eventBusFlow) createSubscription() error {
-	subscriberEventEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/v1/events"
+	subscriberEventEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/events" // todo: remove v1
 	return retry.Do(func() error {
 		if _, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Create(util.NewSubscription(subscriptionName, f.namespace, subscriberEventEndpointURL, eventType, "v1", srcID)); err != nil {
 			if !strings.Contains(err.Error(), "already exists") {
@@ -207,7 +207,7 @@ func (f *eventBusFlow) createSubscription() error {
 
 // Check the subscriber status until the http get call succeeds and until status code is 200
 func (f *eventBusFlow) checkSubscriberStatus() error {
-	subscriberStatusEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/v1/status"
+	subscriberStatusEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/status" // todo: remove v1
 	return retry.Do(func() error {
 		return checkStatus(subscriberStatusEndpointURL)
 	}, retryOptions...)
@@ -273,7 +273,7 @@ func (f *eventBusFlow) publish(publishEventURL string) (*publishApi.PublishRespo
 }
 
 func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
-	subscriberResultsEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/v1/results"
+	subscriberResultsEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/results" // todo: remove v1
 	return retry.Do(func() error {
 		res, err := http.Get(subscriberResultsEndpointURL)
 		if err != nil {
