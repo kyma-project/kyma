@@ -62,3 +62,6 @@ files:
   - path: "./kyma/tests/perf/README.md"
     config:
       white-list-external: ["https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1"]
+  - path: "./kyma/docs/monitoring/08-02-create-and-configure-grafana-dashboard.md"
+    config:
+      white-list-external: ["https://grafana.example.com/"]
