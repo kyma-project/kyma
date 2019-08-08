@@ -3,21 +3,22 @@ package knative_serving_acceptance
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
 
 	retry "github.com/avast/retry-go"
-	serving_api "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	serving "github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
-	"github.com/kyma-project/kyma/common/ingressgateway"
-	core_api "k8s.io/api/core/v1"
+	core "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+
+	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	servingtyped "github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
+
+	"github.com/kyma-project/kyma/common/ingressgateway"
 )
 
 const (
@@ -36,27 +37,27 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 	}
 
 	kubeConfig := loadKubeConfigOrDie()
-	serviceClient := serving.NewForConfigOrDie(kubeConfig).Services("knative-serving")
-	service, err := serviceClient.Create(&serving_api.Service{
+	serviceClient := servingtyped.NewForConfigOrDie(kubeConfig).Services("knative-serving")
+	service, err := serviceClient.Create(&serving.Service{
 		ObjectMeta: meta.ObjectMeta{
 			Name: "test-service",
 		},
-		Spec: serving_api.ServiceSpec{
-			RunLatest: &serving_api.RunLatestType{
-				Configuration: serving_api.ConfigurationSpec{
-					RevisionTemplate: serving_api.RevisionTemplateSpec{
-						Spec: serving_api.RevisionSpec{
-							Container: core_api.Container{
+		Spec: serving.ServiceSpec{
+			RunLatest: &serving.RunLatestType{
+				Configuration: serving.ConfigurationSpec{
+					RevisionTemplate: serving.RevisionTemplateSpec{
+						Spec: serving.RevisionSpec{
+							Container: core.Container{
 								Image: "gcr.io/knative-samples/helloworld-go",
-								Env: []core_api.EnvVar{
+								Env: []core.EnvVar{
 									{
 										Name:  "TARGET",
 										Value: target,
 									},
 								},
-								Resources: core_api.ResourceRequirements{
-									Requests: core_api.ResourceList{
-										core_api.ResourceCPU: resource.MustParse(cpuLimits),
+								Resources: core.ResourceRequirements{
+									Requests: core.ResourceList{
+										core.ResourceCPU: resource.MustParse(cpuLimits),
 									},
 								},
 							},
@@ -72,7 +73,7 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 	defer deleteService(serviceClient, service)
 
 	err = retry.Do(func() error {
-		log.Printf("Calling: %s", testServiceURL)
+		t.Logf("Calling: %s", testServiceURL)
 		resp, err := ingressClient.Get(testServiceURL)
 		if err != nil {
 			return err
@@ -84,7 +85,7 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 		}
 		msg := strings.TrimSpace(string(bytes))
 		expectedMsg := fmt.Sprintf("Hello %s!", target)
-		log.Printf("Received %v: '%s'", resp.StatusCode, msg)
+		t.Logf("Received %d: %q", resp.StatusCode, msg)
 
 		if resp.StatusCode != http.StatusOK {
 			return fmt.Errorf("unexpected status code: %v", resp.StatusCode)
@@ -95,7 +96,7 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 
 		return nil
 	}, retry.OnRetry(func(n uint, err error) {
-		log.Printf("[%v] try failed: %s", n, err)
+		t.Logf("[%v] try failed: %s", n, err)
 	}), retry.Attempts(20),
 	)
 
@@ -116,7 +117,7 @@ func loadKubeConfigOrDie() *rest.Config {
 	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
 		cfg, err := rest.InClusterConfig()
 		if err != nil {
-			log.Fatalf("Cannot create in-cluster config: %v", err)
+			t.Fatalf("Cannot create in-cluster config: %v", err)
 		}
 		return cfg
 	}
@@ -124,12 +125,12 @@ func loadKubeConfigOrDie() *rest.Config {
 	var err error
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
 	if err != nil {
-		log.Fatalf("Cannot read kubeconfig: %s", err)
+		t.Fatalf("Cannot read kubeconfig: %s", err)
 	}
 	return kubeConfig
 }
 
-func deleteService(servingClient serving.ServiceInterface, service *serving_api.Service) {
+func deleteService(servingClient servingtyped.ServiceInterface, service *serving.Service) {
 	var deleteImmediately int64
 	_ = servingClient.Delete(service.Name, &meta.DeleteOptions{
 		GracePeriodSeconds: &deleteImmediately,
