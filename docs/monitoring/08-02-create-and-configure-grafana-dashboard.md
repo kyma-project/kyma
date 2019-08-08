@@ -11,7 +11,7 @@ This tutorial is a follow-up of the [**Observe application metrics**](#tutorials
 
 ## Steps
 
-Access the Grafana UI, select the `cpu_temperature_celsius` metric, the  Gauge dashboard type, and start the configuration.
+Access the Grafana UI, select the `cpu_temperature_celsius` metric, the Gauge dashboard type, and start the configuration.
 
 ### Create the dashboard
 
