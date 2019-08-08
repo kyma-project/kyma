@@ -1,0 +1,23 @@
+replicaCount: 1
+image:
+  dir: ""
+  pullPolicy: IfNotPresent
+catalog:
+  service:
+    internalPort: 8080
+    externalPort: 8080
+  hostname: catalog
+instances:
+  service:
+    internalPort: 8081
+    externalPort: 8081
+  hostname: instances
+brokers:
+  service:
+    internalPort: 8082
+    externalPort: 8082
+  hostname: brokers  
+protocol: TCP
+virtualservice:
+  enabled: true
+  annotations: {}
