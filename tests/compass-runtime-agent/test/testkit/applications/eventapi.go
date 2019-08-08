@@ -12,7 +12,7 @@ func NewEventAPI(name, description string) *EventAPIDefinitionInput {
 			Data:          nil,
 			EventSpecType: "ASYNC_API",
 			Format:        "JSON",
-		}, // TODO  - test
+		}, // TODO  - Allow to pass spec when Asset Store is ready
 	})
 
 	return &eventAPI

@@ -24,7 +24,7 @@ type Client struct {
 	runtimeId string // TODO - I might not need it
 }
 
-// TODO: pass options with authenticated client
+// TODO: client will need to be authenticated after implementation of certs
 func NewCompassClient(endpoint, tenant, runtimeId string) *Client {
 	client := gcli.NewClient(endpoint)
 	client.Log = func(s string) {

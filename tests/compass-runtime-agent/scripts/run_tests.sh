@@ -5,6 +5,18 @@ CURRENT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 APP_NAME=compass-runtime-agent-tests
 NAMESPACE=compass-system
 
+discoverUnsetVar=false
+
+for var in DOCKER_TAG DOCKER_PUSH_REPOSITORY; do
+    if [ -z "${!var}" ] ; then
+        echo "ERROR: $var is not set"
+        discoverUnsetVar=true
+    fi
+done
+if [ "${discoverUnsetVar}" = true ] ; then
+    exit 1
+fi
+
 set -e
 
 echo ""
@@ -21,14 +33,7 @@ echo "------------------------"
 echo "Building tests image"
 echo "------------------------"
 
-# TODO: require some envs
-# DOCKER_PUSH_REPOSITORY   DOCKER_TAG
-DOCKER_TAG=tests-0.0.1
-DOCKER_PUSH_REPOSITORY=szymongib
-
 IMAGE=$DOCKER_PUSH_REPOSITORY/$APP_NAME:$DOCKER_TAG
-
-# TODO - different on local use minikube registry
 
 make ci-pr
 
@@ -69,10 +74,10 @@ EOF
 
 echo ""
 echo "------------------------"
-echo "Waiting 10 seconds for pod to start..."
+echo "Waiting 15 seconds for pod to start..."
 echo "------------------------"
 echo ""
 
-sleep 10
+sleep 15
 
 kubectl -n $NAMESPACE logs -l testing.kyma-project.io/def-name=$APP_NAME -c $APP_NAME -f

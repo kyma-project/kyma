@@ -12,7 +12,7 @@ func NewAPI(name, description, targetURL string) *APIDefinitionInput {
 		Name:        name,
 		Description: &description,
 		TargetURL:   targetURL,
-		//Spec:        nil, // TODO
+		//Spec:        nil, // TODO - allow to pass spec when Asset Store will be ready
 	})
 	return &api
 }
@@ -26,8 +26,6 @@ func (in *APIDefinitionInput) WithAuth(auth *AuthInput) *APIDefinitionInput {
 	in.DefaultAuth = auth.ToCompassInput()
 	return in
 }
-
-// TODO - assert functions
 
 // Authentication input
 
@@ -78,6 +76,7 @@ func (in *AuthInput) WithQueryParams(queryParams map[string][]string) *AuthInput
 	return in
 }
 
+// TODO - prepare test case with csrf
 //func (in *AuthInput) WithCSRF(username, password string) *AuthInput {
 //	//if in.DefaultAuth == nil {
 //	//	in.DefaultAuth = &graphql.AuthInput{}

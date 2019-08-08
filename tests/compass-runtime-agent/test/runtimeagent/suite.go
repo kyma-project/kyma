@@ -39,7 +39,6 @@ type TestSuite struct {
 	APIAccessChecker   *assertions.APIAccessChecker
 
 	k8sClient *kubernetes.Clientset
-	//mockServiceClient corev1.ServiceInterface
 
 	mockServiceServer *mock.AppMockServer
 
@@ -77,7 +76,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 
 	return &TestSuite{
 		k8sClient:          k8sClient,
-		CompassClient:      compass.NewCompassClient(config.DirectorURL, config.Tenant, ""), //TODO - runtime Id
+		CompassClient:      compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId),
 		APIAccessChecker:   assertions.NewAPIAccessChecker(nameResolver),
 		K8sResourceChecker: assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver),
 		mockServiceServer:  mock.NewAppMockServer(config.MockServicePort),
@@ -94,12 +93,7 @@ func (ts *TestSuite) Setup() error {
 	logrus.Infof("Successfully accessed API Server")
 
 	ts.mockServiceServer.Start()
-	//err = ts.createMockService()
-	//if err != nil {
-	//	return errors.Wrap(err, "Error while creating service for mock server")
-	//}
 
-	//ts.CheckApplicationGatewayHealth(t) // TODO - might do it while checking if runtime applied config
 	return nil
 }
 
@@ -109,11 +103,6 @@ func (ts *TestSuite) Cleanup() {
 	if err != nil {
 		logrus.Errorf("Failed to kill Mock server: %s", err.Error())
 	}
-
-	//err = ts.deleteMockService()
-	//if err != nil {
-	//	logrus.Errorf("Failed to delete mock service: %s", err.Error())
-	//}
 }
 
 // waitForAccessToAPIServer waits for access to API Server which might be delayed by initialization of Istio sidecar
@@ -131,37 +120,6 @@ func (ts *TestSuite) waitForAccessToAPIServer() error {
 
 	return err
 }
-
-//func (ts *TestSuite) createMockService() error {
-//	selectors := map[string]string{
-//		ts.config.MockServiceSelectorKey: ts.config.MockServiceSelectorValue,
-//	}
-//
-//	service := &v1.Service{
-//		ObjectMeta: metav1.ObjectMeta{
-//			Name:      ts.mockServiceName,
-//			Namespace: ts.config.Namespace,
-//			Labels:    selectors,
-//		},
-//		Spec: v1.ServiceSpec{
-//			Selector: selectors,
-//			Ports: []v1.ServicePort{
-//				{Port: ts.config.MockServicePort, Name: "http-port"},
-//			},
-//		},
-//	}
-//
-//	_, err := ts.mockServiceClient.Create(service)
-//	if err != nil {
-//		return errors.Wrap(err, "Failed to create mock service")
-//	}
-//
-//	return nil
-//}
-//
-//func (ts *TestSuite) deleteMockService() error {
-//	return ts.mockServiceClient.Delete(ts.mockServiceName, &metav1.DeleteOptions{})
-//}
 
 func (ts *TestSuite) GetMockServiceURL() string {
 	return fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", ts.mockServiceName, ts.config.Namespace, ts.config.MockServicePort)
