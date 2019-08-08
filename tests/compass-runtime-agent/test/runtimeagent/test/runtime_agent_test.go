@@ -1,8 +1,11 @@
 package test
 
 import (
+	"fmt"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock"
 
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/runtimeagent"
 
@@ -15,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TODO - mock service to which you call
+// TODO - replace logrus with t.log?
 
 // TODO - consider defining testcase object
 //type testCase struct {
@@ -51,21 +54,19 @@ const (
 	validUsername     = "username"
 	validClientId     = "clientId"
 	validClientSecret = "clientSecret"
-
-	oauthURLPath = "http://oauth.com"
 )
 
-// TODO - check how it can be done in e2e?
-// TODO - can I levrage steps here?
-
 func TestCompassRuntimeAgentSynchronization_TestCases(t *testing.T) {
+
+	oauthTokenURL := fmt.Sprintf("%s/%s/%s/%s", testSuite.GetMockServiceURL(), mock.OAuthToken, validClientId, validClientSecret)
 
 	noAuthAPIInput := applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL())
 	basicAuthAPIInput := applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).
 		WithAuth(applications.NewAuth().WithBasicAuth(validUsername, validPassword))
 	oauthAPIInput := applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).
-		WithAuth(applications.NewAuth().WithOAuth(validClientId, validClientSecret, testSuite.GetMockServiceURL()+oauthURLPath))
+		WithAuth(applications.NewAuth().WithOAuth(validClientId, validClientSecret, oauthTokenURL))
 
+	// Define test cases
 	testCases := []*testCase{
 		{
 			// TODO - event APIs
@@ -143,7 +144,7 @@ func TestCompassRuntimeAgentSynchronization_TestCases(t *testing.T) {
 		testSuite.K8sResourceChecker.AssertResourcesForApp(t, testCase.initialPhaseResult)
 
 		logrus.Infof("Checking API Access")
-		testSuite.APIAccessChecker.AssertAPIAccess(t, testCase.initialPhaseResult.APIs.Data)
+		testSuite.APIAccessChecker.AssertAPIAccess(t, testCase.initialPhaseResult.APIs.Data...)
 		// TODO - how to do api check if expected status will be different than 200? Separate test case?
 	}
 
@@ -167,5 +168,5 @@ func TestCompassRuntimeAgentSynchronization_TestCases(t *testing.T) {
 func waitForAgentToApplyConfig(t *testing.T) {
 	// TODO - consider some smarter way to wait for it
 	logrus.Info("Waiting for Runtime Agent to apply configuration...")
-	time.Sleep(45 * time.Second)
+	time.Sleep(35 * time.Second)
 }

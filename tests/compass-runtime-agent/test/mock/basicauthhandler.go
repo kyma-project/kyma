@@ -1,9 +1,7 @@
 package mock
 
 import (
-	"encoding/base64"
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -35,17 +33,6 @@ func (bah *basicAuthHandler) BasicAuth(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (bah *basicAuthHandler) BasicAuthSpec(w http.ResponseWriter, r *http.Request) {
-	err := bah.checkBasicAuth(r)
-	if err != nil {
-		bah.logger.Error(err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	http.ServeFile(w, r, "spec.json")
-}
-
 func (bah *basicAuthHandler) checkBasicAuth(r *http.Request) error {
 	vars := mux.Vars(r)
 	expectedUserName := vars["username"]
@@ -57,23 +44,12 @@ func (bah *basicAuthHandler) checkBasicAuth(r *http.Request) error {
 		return errors.New("Expected credentials not provided")
 	}
 
-	authorizationHeader := r.Header.Get(AuthorizationHeader)
-
-	encodedCredentials := strings.TrimPrefix(authorizationHeader, "Basic ")
-	decoded, err := base64.StdEncoding.DecodeString(encodedCredentials)
-	if err != nil {
-		return errors.New("Failed to decode credentials")
+	username, password, ok := r.BasicAuth()
+	if !ok {
+		return errors.Errorf("Basic credentials not provided. Authorization header: %s", r.Header.Get(AuthorizationHeader))
 	}
 
-	credentials := strings.Split(string(decoded), ":")
-	if len(credentials) < 2 {
-		return errors.New("Decoded credentials are incomplete")
-	}
-
-	userName := credentials[0]
-	password := credentials[1]
-
-	if userName != expectedUserName || password != expectedPassword {
+	if username != expectedUserName || password != expectedPassword {
 		return errors.New("Invalid credentials provided")
 	}
 

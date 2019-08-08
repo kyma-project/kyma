@@ -165,6 +165,14 @@
   version = "v1.1.7"
 
 [[projects]]
+  digest = "1:fd9bea48bbc5bba66d9891c72af7255fbebecdff845c37c679406174ece5ca1b"
+  name = "github.com/kelseyhightower/envconfig"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0b417c4ec4a8a82eecc22a1459a504aa55163d61"
+  version = "v1.4.0"
+
+[[projects]]
   digest = "1:b472339040c571f1085e429ad08d94218bc3fc7a635c99fd95e3f80382413317"
   name = "github.com/kisielk/errcheck"
   packages = [
@@ -193,13 +201,12 @@
   revision = "83c17229028ffe2d604be4f8ea1f2f633141a965"
 
 [[projects]]
-  digest = "1:b3b608cbcc6caee49ab041634756e513663642788c20ccbd6c51520af4963922"
+  digest = "1:47ed9c138f62ef1b4482c6af7edd09ef49627b861b01fa1181a4bc74b328deeb"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "tests/application-gateway-tests/test/tools",
   ]
   pruneopts = "UT"
   revision = "2ac7f3a71a873d0594f15c2309c032f4d42d6cdd"
@@ -486,7 +493,7 @@
   version = "kubernetes-1.13.4"
 
 [[projects]]
-  digest = "1:dc6cf2a2d1855db56484cca1c45b7a1ddc8fce0545389d9acac2d0a6a4b8791f"
+  digest = "1:f7b5be884005454ed66a2baf43f799c81f36655fe68fb12503174212e3d1d3ec"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -516,7 +523,6 @@
     "pkg/util/json",
     "pkg/util/naming",
     "pkg/util/net",
-    "pkg/util/rand",
     "pkg/util/runtime",
     "pkg/util/sets",
     "pkg/util/validation",
@@ -619,10 +625,11 @@
   input-imports = [
     "github.com/Masterminds/sprig",
     "github.com/gorilla/mux",
+    "github.com/kelseyhightower/envconfig",
     "github.com/kisielk/errcheck",
     "github.com/kyma-incubator/compass/components/director/pkg/graphql",
+    "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools",
     "github.com/machinebox/graphql",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
@@ -632,7 +639,6 @@
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
-    "k8s.io/apimachinery/pkg/util/rand",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",

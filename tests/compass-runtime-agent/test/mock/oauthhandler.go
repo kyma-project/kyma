@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/gorilla/mux"
 
@@ -15,9 +16,10 @@ import (
 )
 
 const (
-	bearerToken                = "1/mZ1edKKACtPAb7zGlwSzvs72PvhAbGmB8K1ZrGxpcNM"
 	headerContentType          = "Content-Type"
 	contentTypeApplicationJson = "application/json;charset=UTF-8"
+
+	accessTokenFormat = "%s:%s"
 )
 
 type oauthHandler struct {
@@ -37,25 +39,27 @@ type oauthResponse struct {
 	Scope       string `json:"scope"`
 }
 
-func (oh *oauthHandler) OAuthSpecHandler(w http.ResponseWriter, r *http.Request) {
-	err := oh.checkOauth(r)
-	if err != nil {
-		oh.logger.Error(err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+func (oh *oauthHandler) OAuthHandler(w http.ResponseWriter, r *http.Request) {
+	oh.logger.Info("Handling Oauth request")
 
-	http.ServeFile(w, r, "spec.json")
-}
-
-func (oh *oauthHandler) checkOauth(r *http.Request) error {
 	headerAuthorization := r.Header.Get(AuthorizationHeader)
 	oAuthToken := strings.TrimPrefix(headerAuthorization, "Bearer ")
 
-	if oAuthToken != bearerToken {
-		return errors.New("Invalid token provided")
+	vars := mux.Vars(r)
+	expectedClientId := vars["clientid"]
+	expectedClientSecret := vars["clientsecret"]
+
+	oh.logger.Infof("Handling OAuth request. Expected: clientID: %s, clientSecret: %s", expectedClientId, expectedClientSecret)
+
+	expectedToken := oh.tokenFromCredentials(expectedClientId, expectedClientSecret)
+
+	if oAuthToken != expectedToken {
+		w.WriteHeader(http.StatusBadRequest)
+		oh.logger.Errorf("Invalid token provided. Expected: %s, Actual: %s", expectedToken, oAuthToken)
+		return
 	}
-	return nil
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (oh *oauthHandler) OAuthTokenHandler(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +69,7 @@ func (oh *oauthHandler) OAuthTokenHandler(w http.ResponseWriter, r *http.Request
 	expectedClientId := vars["clientid"]
 	expectedClientSecret := vars["clientsecret"]
 
-	oh.logger.Infof("Handling OAuth secured spec request. Expected: clientID: %s, clientSecret: %s", expectedClientId, expectedClientSecret)
+	oh.logger.Infof("Handling OAuth token request. Expected: clientID: %s, clientSecret: %s", expectedClientId, expectedClientSecret)
 
 	if expectedClientId == "" || expectedClientSecret == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -73,25 +77,12 @@ func (oh *oauthHandler) OAuthTokenHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	headerAuthorization := r.Header.Get(AuthorizationHeader)
-
-	encodedCredentials := strings.TrimPrefix(headerAuthorization, "Basic ")
-	decoded, err := base64.StdEncoding.DecodeString(encodedCredentials)
-	if err != nil {
+	clientId, clientSecret, ok := r.BasicAuth()
+	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		oh.logger.Errorf("Failed to decode credentials, %s", err.Error())
+		oh.logger.Errorf("Basic credentials (clientId and clientSecret) not provided. Authorization header: %s", r.Header.Get(AuthorizationHeader))
 		return
 	}
-
-	credentials := strings.Split(string(decoded), ":")
-	if len(credentials) < 2 {
-		w.WriteHeader(http.StatusBadRequest)
-		oh.logger.Error("Decoded credentials are incomplete")
-		return
-	}
-
-	clientId := credentials[0]
-	clientSecret := credentials[1]
 
 	if clientId != expectedClientId || clientSecret != expectedClientSecret {
 		w.WriteHeader(http.StatusBadRequest)
@@ -99,18 +90,25 @@ func (oh *oauthHandler) OAuthTokenHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	token := oh.tokenFromCredentials(clientId, clientSecret)
+
 	oauthRes := oauthResponse{
-		AccessToken: bearerToken,
+		AccessToken: token,
 		TokenType:   "Bearer",
 		ExpiresIn:   3600,
 		Scope:       "",
 	}
 
-	err = respondWithBody(w, http.StatusOK, oauthRes)
+	err := respondWithBody(w, http.StatusOK, oauthRes)
 	if err != nil {
 		oh.logger.Error(err.Error())
 		return
 	}
+}
+
+func (oh *oauthHandler) tokenFromCredentials(clientId, clientSecret string) string {
+	tokenString := fmt.Sprintf(accessTokenFormat, clientId, clientSecret)
+	return base64.StdEncoding.EncodeToString([]byte(tokenString))
 }
 
 func respondWithBody(w http.ResponseWriter, statusCode int, responseBody interface{}) error {

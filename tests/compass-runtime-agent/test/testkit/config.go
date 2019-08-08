@@ -1,82 +1,32 @@
 package testkit
 
 import (
-	"errors"
-	"fmt"
 	"log"
-	"os"
-	"strconv"
-)
 
-const (
-	directorURLEnvName        = "DIRECTOR_URL"
-	runtimeIdConfigMapEnvName = "RUNTIME_ID_CONFIG_MAP"
-	tenantEnvName             = "TENANT"
-	namespaceEnvName          = "NAMESPACE" // TODO - rename to integration namespace and add namespace to read config map
-	mockSelectorKeyEnvName    = "SELECTOR_KEY"
-	mockSelectorValueEnvName  = "SELECTOR_VALUE"
-	mockServicePortEnvName    = "MOCK_SERVICE_PORT"
+	"github.com/kelseyhightower/envconfig"
 )
 
 type TestConfig struct {
-	DirectorURL              string
-	RuntimeIdConfigMap       string
-	Tenant                   string
-	Namespace                string
-	MockServicePort          int32
-	MockServiceSelectorKey   string
-	MockServiceSelectorValue string
+	DirectorURL string `envconfig:"DIRECTOR_URL" required:"true"`
+	Tenant      string `envconfig:"TENANT" required:"true"`
+	RuntimeId   string `envconfig:"RUNTIME_ID" required:"true"`
+
+	// TODO - cleanup unused ENV
+
+	// TODO - dafaults not working?
+	Namespace                string `envconfig:"NAMESPACE" default:"compass-system"`
+	IntegrationNamespace     string `envconfig:"INTEGRATION_NAMESPACE" default:"kyma-integration"`
+	MockServicePort          int32  `envconfig:"MOCK_SERVICE_PORT" default:"8080"`
+	MockServiceSelectorKey   string `envconfig:"SELECTOR_KEY" default:"app"`
+	MockServiceSelectorValue string `envconfig:"SELECTOR_VALUE" default:"compass-runtime-agent-tests"`
+	MockServiceName          string `envconfig:"MOCK_SERVICE_NAME" default:"compass-runtime-agent-tests-mock"`
 }
 
 func ReadConfig() (TestConfig, error) {
-	directorUrl, found := os.LookupEnv(directorURLEnvName)
-	if !found {
-		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", directorURLEnvName))
-	}
-
-	runtimeIdConfigMap, found := os.LookupEnv(runtimeIdConfigMapEnvName)
-	if !found {
-		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", runtimeIdConfigMapEnvName))
-	}
-
-	tenant, found := os.LookupEnv(tenantEnvName)
-	if !found {
-		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", tenantEnvName))
-	}
-
-	namespace, found := os.LookupEnv(namespaceEnvName)
-	if !found {
-		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", namespaceEnvName))
-	}
-
-	selectorKey, found := os.LookupEnv(mockSelectorKeyEnvName)
-	if !found {
-		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", mockSelectorKeyEnvName))
-	}
-
-	selectorValue, found := os.LookupEnv(mockSelectorValueEnvName)
-	if !found {
-		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", mockSelectorValueEnvName))
-	}
-
-	mockServicePortStr, found := os.LookupEnv(mockServicePortEnvName)
-	if !found {
-		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", mockServicePortEnvName))
-	}
-
-	mockServicePort, err := strconv.Atoi(mockServicePortStr)
+	var config TestConfig
+	err := envconfig.Process("", &config)
 	if err != nil {
-		return TestConfig{}, errors.New(fmt.Sprintf("failed to parse %s env value to int", mockServicePortEnvName))
-	}
-
-	config := TestConfig{
-		DirectorURL:              directorUrl,
-		RuntimeIdConfigMap:       runtimeIdConfigMap,
-		Tenant:                   tenant,
-		Namespace:                namespace,
-		MockServicePort:          int32(mockServicePort),
-		MockServiceSelectorKey:   selectorKey,
-		MockServiceSelectorValue: selectorValue,
+		log.Fatal(err.Error())
 	}
 
 	log.Printf("Read configuration: %+v", config)

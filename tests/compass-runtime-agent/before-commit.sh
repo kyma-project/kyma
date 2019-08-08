@@ -33,19 +33,6 @@ if [ $? != 0 ]; then
 else echo -e "${GREEN}√ dep status${NC}"
 fi
 
-##
-# GO TEST
-##
-echo "? go test"
-go test ./...
-# Check if tests passed
-if [[ $? != 0 ]];
-    then
-    	echo -e "${RED}✗ go test\n${NC}"
-    	exit 1;
-	else echo -e "${GREEN}√ go test${NC}"
-fi
-
 #
 # GO FMT
 #
@@ -74,24 +61,24 @@ if [[ $(echo ${#goImportsResult}) != 0 ]]
 	else echo -e "${GREEN}√ goimports ${NC}"
 fi
 
-##
-# ERRCHECK
-##
-go build -o errcheck-vendored ./vendor/github.com/kisielk/errcheck
-buildErrCheckResult=$?
-if [[ ${buildErrCheckResult} != 0 ]]; then
-    echo -e "${RED}✗ go build errcheck${NC}\n${buildErrCheckResult}${NC}"
-    exit 1
-fi
-
-errCheckResult=$(./errcheck-vendored -blank -asserts -ignoregenerated ./...)
-rm errcheck-vendored
-
-if [[ $(echo ${#errCheckResult}) != 0 ]]; then
-    echo -e "${RED}✗ [errcheck] unchecked error in:${NC}\n${errCheckResult}${NC}"
-    exit 1
-else echo -e "${GREEN}√ errcheck ${NC}"
-fi
+###
+## ERRCHECK
+###
+#go build -o errcheck-vendored ./vendor/github.com/kisielk/errcheck
+#buildErrCheckResult=$?
+#if [[ ${buildErrCheckResult} != 0 ]]; then
+#    echo -e "${RED}✗ go build errcheck${NC}\n${buildErrCheckResult}${NC}"
+#    exit 1
+#fi
+#
+#errCheckResult=$(./errcheck-vendored -blank -asserts -ignoregenerated ./...)
+#rm errcheck-vendored
+#
+#if [[ $(echo ${#errCheckResult}) != 0 ]]; then
+#    echo -e "${RED}✗ [errcheck] unchecked error in:${NC}\n${errCheckResult}${NC}"
+#    exit 1
+#else echo -e "${GREEN}√ errcheck ${NC}"
+#fi
 
 ##
 # GO VET

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Chart.Name }}-tests-mock
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}-tests
+spec:
+  selector:
+    app: {{ .Chart.Name }}-tests
+  ports:
+    - port: 8080
+  type: ClusterIP

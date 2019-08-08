@@ -36,12 +36,13 @@ func TestMain(m *testing.M) {
 		logrus.Errorf("Error while setting up tests: %s", err.Error())
 		os.Exit(1)
 	}
-	defer testSuite.Cleanup()
 
 	// run tests
 	logrus.Info("Running tests...")
 	exCode := m.Run()
 	defer os.Exit(exCode)
+
+	testSuite.Cleanup()
 
 	// cleanup
 	logrus.Info("Tests finished. Exit code: ", exCode)

@@ -10,6 +10,19 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type Path string
+
+func (p Path) String() string {
+	return string(p)
+}
+
+const (
+	StatusOk   Path = "/v1/status/ok"
+	BasicAuth  Path = "/v1/auth/basic"
+	OAuthToken Path = "/v1/auth/oauth/token"
+	OAuth      Path = "/v1/auth/oauth"
+)
+
 type AppMockServer struct {
 	http.Server
 	port int32
@@ -18,30 +31,28 @@ type AppMockServer struct {
 func NewAppMockServer(port int32) *AppMockServer {
 	router := mux.NewRouter()
 
-	router.Path("/status/ok").HandlerFunc(StatusOK)
+	router.Path(StatusOk.String()).HandlerFunc(StatusOK)
 
 	basicAuth := NewBasicAuthHandler()
-	router.Path("/auth/basic/{username}/{password}").HandlerFunc(basicAuth.BasicAuth)
-	router.Path("/spec/auth/basic/{username}/{password}").HandlerFunc(basicAuth.BasicAuthSpec)
+	router.Path(BasicAuth.String() + "/{username}/{password}").HandlerFunc(basicAuth.BasicAuth)
 
 	oAuth := NewOauthHandler()
-	router.Path("/auth/oauth/token/{clientid}/{clientsecret}").HandlerFunc(oAuth.OAuthTokenHandler)
-	router.Path("/spec/auth/oauth").HandlerFunc(oAuth.OAuthSpecHandler)
+	router.Path(OAuthToken.String() + "/{clientid}/{clientsecret}").HandlerFunc(oAuth.OAuthTokenHandler)
+	router.Path(OAuth.String() + "/{clientid}/{clientsecret}").HandlerFunc(oAuth.OAuthHandler)
 
+	// TODO - the rest of stuff
 	headers := NewHeadersHandler()
 	router.Path("/headers/{header}/{value}").HandlerFunc(headers.HeadersHandler)
-	router.Path("/spec/headers/{header}/{value}").HandlerFunc(headers.HeadersHandlerSpec)
 
 	queryParams := NewQueryParamsHandler()
 	router.Path("/queryparams/{param}/{value}").HandlerFunc(queryParams.QueryParamsHandler)
-	router.Path("/spec/queryparams/{param}/{value}").HandlerFunc(queryParams.QueryParamsHandlerSpec)
 
 	csrf := NewCsrfHandler()
 	router.Path("/csrftoken").HandlerFunc(csrf.CsrfToken)
 	router.Path("/target").HandlerFunc(csrf.Target)
 
-	router.NotFoundHandler = NewErrorHandler(404, "Requested resource could not be found.")
-	router.MethodNotAllowedHandler = NewErrorHandler(405, "Method not allowed.")
+	router.NotFoundHandler = NewErrorHandler(http.StatusNotFound, "Requested resource could not be found.")
+	router.MethodNotAllowedHandler = NewErrorHandler(http.StatusMethodNotAllowed, "Method not allowed.")
 
 	server := http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
