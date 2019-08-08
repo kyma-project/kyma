@@ -71,7 +71,7 @@ To edit the dashboard settings, click the **Panel Title** and select **Edit**.
 
 ### Test the dashboard
 
-Refresh the settings to see how the dashboard changes according to the current value of the `cpu_temperature_celsius` metric.
+Refresh the browser to see how the dashboard changes according to the current value of the `cpu_temperature_celsius` metric.
 
 - It turns green if the current metric value ranges from `60` to `74` Celsius degrees:
 
