@@ -118,6 +118,19 @@ func TestClusterAddonsConfigurationService_DeleteRepos(t *testing.T) {
 				"www.second",
 			},
 		},
+		"delete all URLs": {
+			name: "test",
+			repos: []v1alpha1.SpecRepository{
+				{URL: "www.already.present.url"},
+				{URL: "www.next"},
+				{URL: "www.second"},
+			},
+			urlsToRemove: []string{
+				"www.already.present.url",
+				"www.next",
+				"www.second",
+			},
+		},
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
@@ -134,6 +147,7 @@ func TestClusterAddonsConfigurationService_DeleteRepos(t *testing.T) {
 
 			// then
 			require.NoError(t, err)
+			assert.NotNil(t, result.Spec.Repositories)
 			var normalizedResultURLs []string
 			for _, r := range result.Spec.Repositories {
 				normalizedResultURLs = append(normalizedResultURLs, r.URL)
