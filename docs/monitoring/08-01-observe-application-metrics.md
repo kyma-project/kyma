@@ -6,6 +6,7 @@ type: Tutorials
 This tutorial shows how you can observe your application metrics. Learn how to list all metrics exposed by a sample Go service and watch their changing values by redirecting the metrics port and the default Prometheus server port to a localhost.
 
 This tutorial uses the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics-8081`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8081`. You deploy the service (`deployment.yaml`) along with the ServiceMonitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
+
 - From the service with the `k8s-app: metrics` label
 - From the `/metrics` endpoint
 - At `10s` interval
@@ -15,6 +16,7 @@ This tutorial focuses on the `cpu_temperature_celsius` metric that is one of the
 ## Prerequisites
 
 To complete the tutorial, you must meet one of these prerequisites and have:
+
 - A cluster with Kyma 1.3 or higher
 - Kyma 1.3 or higher installed locally with the Monitoring module
 
@@ -23,6 +25,7 @@ To complete the tutorial, you must meet one of these prerequisites and have:
 ## Steps
 
 Follow this tutorial to:
+
 - Deploy the sample service with its default configuration.
 - Redirect the metrics to a localhost.
 - Redirect the metrics to the Prometheus server to observe the metrics in the Prometheus UI.
