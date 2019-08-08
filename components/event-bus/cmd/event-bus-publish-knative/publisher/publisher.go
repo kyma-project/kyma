@@ -70,10 +70,10 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 	}
 
 	// get the knative channel
-	natssChannelName := "my-test-channel" // todo refactor
-	channel, err := knativeLib.GetNatssChannel(natssChannelName, *namespace)
+
+	channel, err := knativeLib.GetMessagingChannel(*channelName, *namespace)
 	if err != nil {
-		log.Printf("cannot find the knative channel '%v' in namespace '%v'", natssChannelName, *namespace)
+		log.Printf("cannot find the knative channel '%v' in namespace '%v'", channelName, *namespace)
 		log.Println("incrementing ignored messages counter")
 		metrics.TotalPublishedMessages.With(prometheus.Labels{
 			metrics.Namespace:        *namespace,
@@ -86,7 +86,7 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 
 	// send message to the knative channel
 	messagePayload := string(*payload)
-	err = knativeLib.SendMessageToNatssChannel(channel, headers, &messagePayload)
+	err = knativeLib.SendMessageToChannel(channel, headers, &messagePayload)
 	if err != nil {
 		log.Printf("failed to send message to the knative channel '%v' in namespace '%v'", *channelName, *namespace)
 		return api.ErrorResponseInternalServer(), FAILED

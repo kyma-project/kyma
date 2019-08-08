@@ -7,6 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/metrics"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	utilPkg "github.com/kyma-project/kyma/components/event-bus/pkg/util"
 	"github.com/prometheus/client_golang/prometheus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -129,8 +130,9 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	knativeSubsName := util.GetKnSubscriptionName(&subscription.Name, &subscription.Namespace)
 	knativeSubsNamespace := util.GetDefaultChannelNamespace()
 	knativeSubsURI := subscription.Endpoint
-	knativeChannelName := "my-test-channel" // todo refactor
-	knativeChannelProvisioner := "natss"
+	knativeChannelName := utilPkg.GetChannelName(&subscription.SubscriptionSpec.SourceID, &subscription.SubscriptionSpec.EventType, &subscription.SubscriptionSpec.EventTypeVersion)
+
+	// knativeChannelProvisioner := "natss"
 	timeout := r.opts.ChannelTimeout
 
 	if subscription.ObjectMeta.DeletionTimestamp.IsZero() {

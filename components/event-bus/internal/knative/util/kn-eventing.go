@@ -10,7 +10,6 @@ import (
 	"net/http/httputil"
 	"time"
 
-	"github.com/knative/eventing/contrib/natss/pkg/apis/messaging/v1alpha1"
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	clientsetChannel "github.com/knative/eventing/pkg/client/clientset/versioned"
@@ -74,7 +73,6 @@ type KnativeAccessLib interface {
 	GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error)
 	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
 	SendMessage(channel *evapisv1alpha1.Channel, headers *map[string][]string, message *string) error
-	SendMessageToNatssChannel(channel *v1alpha1.NatssChannel, headers *map[string][]string, payload *string) error
 	InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) error
 	// GetNatssChannel(name string, namespace string) (*v1alpha1.NatssChannel, error)
 	GetMessagingChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error)
@@ -329,11 +327,44 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[s
 }
 
 // SendMessageToNatssChannel todo
-func (k *KnativeLib) SendMessageToNatssChannel(channel *v1alpha1.NatssChannel, headers *map[string][]string, payload *string) error {
+// func (k *KnativeLib) SendMessageToNatssChannel(channel *v1alpha1.NatssChannel, headers *map[string][]string, payload *string) error {
+// 	httpClient := &http.Client{
+// 		Transport: initHTTPTransport(),
+// 	}
+// 	req, err := makeHTTPRequestToNatssChannel(channel, headers, payload)
+// 	if err != nil {
+// 		log.Printf("ERROR: SendMessage(): makeHTTPRequest() failed: %v", err)
+// 		return err
+// 	}
+
+// 	res, err := httpClient.Do(req)
+// 	if err != nil {
+// 		log.Printf("ERROR: SendMessage(): could not send HTTP request: %v", err)
+// 		return err
+// 	}
+// 	defer func() {
+// 		_ = res.Body.Close()
+// 	}()
+
+// 	if res.StatusCode == http.StatusNotFound {
+// 		// try to resend the message only once
+// 		if err := resendMessageToNatssChannel(httpClient, channel, headers, payload); err != nil {
+// 			log.Printf("ERROR: SendMessage(): resendMessage() failed: %v", err)
+// 			return err
+// 		}
+// 	} else if res.StatusCode != http.StatusAccepted {
+// 		log.Printf("ERROR: SendMessage(): %s", res.Status)
+// 		return errors.New(res.Status)
+// 	}
+// 	// ok
+// 	return nil
+// }
+
+func (k *KnativeLib) SendMessageToChannel(channel *messagingV1Alpha1.Channel, headers *map[string][]string, payload *string) error {
 	httpClient := &http.Client{
 		Transport: initHTTPTransport(),
 	}
-	req, err := makeHTTPRequestToNatssChannel(channel, headers, payload)
+	req, err := makeHTTPRequestToMessagingChannel(channel, headers, payload)
 	if err != nil {
 		log.Printf("ERROR: SendMessage(): makeHTTPRequest() failed: %v", err)
 		return err
@@ -433,10 +464,10 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 	return nil
 }
 
-func resendMessageToNatssChannel(httpClient *http.Client, channel *v1alpha1.NatssChannel, headers *map[string][]string, message *string) error {
+func resendMessageToNatssChannel(httpClient *http.Client, channel *messagingV1Alpha1.Channel, headers *map[string][]string, message *string) error {
 	timeout := time.After(10 * time.Second)
 	tick := time.Tick(200 * time.Millisecond)
-	req, err := makeHTTPRequestToNatssChannel(channel, headers, message)
+	req, err := makeHTTPRequestToMessagingChannel(channel, headers, message)
 	if err != nil {
 		log.Printf("ERROR: resendMessage(): makeHTTPRequest() failed: %v", err)
 		return err
@@ -457,7 +488,7 @@ func resendMessageToNatssChannel(httpClient *http.Client, channel *v1alpha1.Nats
 			log.Printf("ERROR: resendMessage(): timed out")
 			return errors.New("ERROR: timed out")
 		case <-tick:
-			req, err := makeHTTPRequestToNatssChannel(channel, headers, message)
+			req, err := makeHTTPRequestToMessagingChannel(channel, headers, message)
 			if err != nil {
 				log.Printf("ERROR: resendMessage(): makeHTTPRequest() failed: %v", err)
 				return err
@@ -506,7 +537,7 @@ func makeHTTPRequest(channel *evapisv1alpha1.Channel, headers *map[string][]stri
 	return req, nil
 }
 
-func makeHTTPRequestToNatssChannel(channel *v1alpha1.NatssChannel, headers *map[string][]string, payload *string) (*http.Request, error) {
+func makeHTTPRequestToMessagingChannel(channel *messagingV1Alpha1.Channel, headers *map[string][]string, payload *string) (*http.Request, error) {
 	var jsonStr = []byte(*payload)
 
 	channelURI := "http://" + channel.Status.Address.Hostname
