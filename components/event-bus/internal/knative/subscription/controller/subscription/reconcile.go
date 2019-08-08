@@ -170,7 +170,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	// Check if Kyma Subscription has events-activated condition.
 	if subscription.HasCondition(eventingv1alpha1.SubscriptionCondition{Type: eventingv1alpha1.EventsActivated, Status: eventingv1alpha1.ConditionTrue}) {
 		// Check if Knative Channel already exists, create if not.
-		_, err := r.knativeLib.GetNatssChannel(knativeChannelName, knativeSubsNamespace)
+		_, err := r.knativeLib.GetMessagingChannel(knativeChannelName, knativeSubsNamespace)
 		if err != nil && !errors.IsNotFound(err) {
 			return false, err
 		} else if errors.IsNotFound(err) {
@@ -181,7 +181,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			knativeChannelLabels[subscriptionEventType] = subscription.EventType
 			knativeChannelLabels[subscriptionEventTypeVersion] = subscription.EventTypeVersion
 
-			knativeChannel, err := r.knativeLib.CreateChannel(knativeChannelProvisioner, knativeChannelName,
+			knativeChannel, err := r.knativeLib.CreateMessagingChannel(knativeChannelName,
 				knativeSubsNamespace, &knativeChannelLabels, timeout)
 			if err != nil {
 				return false, err
@@ -252,7 +252,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		}
 
 		// Check if Channel has any other Subscription, if not, delete it.
-		knativeChannel, err := r.knativeLib.GetNatssChannel(knativeChannelName, knativeSubsNamespace)
+		knativeChannel, err := r.knativeLib.GetMessagingChannel(knativeChannelName, knativeSubsNamespace)
 		if err != nil && !errors.IsNotFound(err) {
 			return false, err
 		} else if err == nil && knativeChannel != nil {
@@ -291,7 +291,7 @@ func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 	}
 
 	// Check if Channel has any other Subscription, if not, delete it.
-	knativeChannel, err := r.knativeLib.GetNatssChannel(channelName, namespace)
+	knativeChannel, err := r.knativeLib.GetMessagingChannel(channelName, namespace)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	} else if err == nil {

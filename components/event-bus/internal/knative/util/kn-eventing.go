@@ -11,16 +11,15 @@ import (
 	"time"
 
 	"github.com/knative/eventing/contrib/natss/pkg/apis/messaging/v1alpha1"
-	clientsetNatss "github.com/knative/eventing/contrib/natss/pkg/client/clientset/versioned"
-
-	// messagingChannel "github.com/knative/eventing/pkg/client/clienset/versioned/typed/messaging/v1alpha1"
-	informersNatss "github.com/knative/eventing/contrib/natss/pkg/client/informers/externalversions"
-	v1alpha1Natss "github.com/knative/eventing/contrib/natss/pkg/client/informers/externalversions/messaging/v1alpha1"
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
+	clientsetChannel "github.com/knative/eventing/pkg/client/clientset/versioned"
 	evclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
 	eventingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	informersChannel "github.com/knative/eventing/pkg/client/informers/externalversions"
+	informerChannel "github.com/knative/eventing/pkg/client/informers/externalversions/messaging/v1alpha1"
 
-	// messagingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	messagingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
@@ -67,7 +66,7 @@ return
 type KnativeAccessLib interface {
 	GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error)
 	CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
-		timeout time.Duration) (*evapisv1alpha1.Channel, error)
+		timeout time.Duration) (*messagingV1Alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string) error
 	CreateNatssChannelSubscription(name string, namespace string, channelName string, uri *string) error
@@ -77,7 +76,10 @@ type KnativeAccessLib interface {
 	SendMessage(channel *evapisv1alpha1.Channel, headers *map[string][]string, message *string) error
 	SendMessageToNatssChannel(channel *v1alpha1.NatssChannel, headers *map[string][]string, payload *string) error
 	InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) error
-	GetNatssChannel(name string, namespace string) (*v1alpha1.NatssChannel, error)
+	// GetNatssChannel(name string, namespace string) (*v1alpha1.NatssChannel, error)
+	GetMessagingChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error)
+	CreateMessagingChannel(name string, namespace string, labels *map[string]string,
+		timeout time.Duration) (*messagingV1Alpha1.Channel, error)
 }
 
 // NewKnativeLib returns an interface to KnativeLib, which can be mocked
@@ -87,9 +89,8 @@ func NewKnativeLib() (KnativeAccessLib, error) {
 
 // KnativeLib represents the knative lib.
 type KnativeLib struct {
-	natssChannelInformer v1alpha1Natss.NatssChannelInformer
-	evClient             eventingv1alpha1.EventingV1alpha1Interface
-	// messagingChannel     messagingv1alpha1.ChannelInterface
+	evClient         eventingv1alpha1.EventingV1alpha1Interface
+	messagingChannel messagingv1alpha1.MessagingV1alpha1Interface
 }
 
 // Verify the struct KnativeLib implements KnativeLibIntf
@@ -111,21 +112,31 @@ func GetKnativeLib() (*KnativeLib, error) {
 	// init natssChannelInformer ///////////////////////////////////////////////////////////////////////////////////////
 	stopCh := make(<-chan struct{})
 	resyncPeriod := 30 * time.Second
-	// var messagingChannelInformer messagingv1alpha1.ChannelsGetter
-	var natssChannelInformer v1alpha1Natss.NatssChannelInformer
-	if natssClient := clientsetNatss.NewForConfigOrDie(config); natssClient != nil {
-		messagingInformerFactory := informersNatss.NewSharedInformerFactory(natssClient, resyncPeriod)
-		natssChannelInformer = messagingInformerFactory.Messaging().V1alpha1().NatssChannels()
+	var messagingChannelInformer informerChannel.ChannelInformer
+	// var natssChannelInformer v1alpha1Natss.NatssChannelInformer
+	// if natssClient := clientsetNatss.NewForConfigOrDie(config); natssClient != nil {
+	// 	messagingInformerFactory := informersNatss.NewSharedInformerFactory(natssClient, resyncPeriod)
+	// 	natssChannelInformer = messagingInformerFactory.Messaging().V1alpha1().NatssChannels()
+	// 	// v1alpha1Natss.
+	// 	if err := startInformers(stopCh, natssChannelInformer.Informer()); err != nil {
+	// 		log.Printf("failed to start natssChannelInformer %v", err)
+	// 		return nil, err
+	// 	}
+	// }
+	if channelClientset := clientsetChannel.NewForConfigOrDie(config); channelClientset != nil {
+		messagingInformerFactory := informersChannel.NewSharedInformerFactory(channelClientset, resyncPeriod)
+		messagingChannelInformer = messagingInformerFactory.Messaging().V1alpha1().Channels()
 		// v1alpha1Natss.
-		if err := startInformers(stopCh, natssChannelInformer.Informer()); err != nil {
-			log.Printf("failed to start natssChannelInformer %v", err)
+		if err := startInformers(stopCh, messagingChannelInformer.Informer()); err != nil {
+			log.Printf("failed to start messaging channel informer %v", err)
 			return nil, err
 		}
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	k := &KnativeLib{
-		natssChannelInformer: natssChannelInformer,
-		evClient:             evClient.EventingV1alpha1(),
+		// natssChannelInformer: natssChannelInformer,
+		evClient:         evClient.EventingV1alpha1(),
+		messagingChannel: evClient.MessagingV1alpha1(),
 	}
 	return k, nil
 }
@@ -146,23 +157,35 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.
 }
 
 // GetNatssChannel todo
-func (k *KnativeLib) GetNatssChannel(name string, namespace string) (*v1alpha1.NatssChannel, error) {
-	channel, err := k.natssChannelInformer.Lister().NatssChannels(namespace).Get(name)
+// func (k *KnativeLib) GetNatssChannel(name string, namespace string) (*v1alpha1.NatssChannel, error) {
+// 	channel, err := k.natssChannelInformer.Lister().NatssChannels(namespace).Get(name)
+// 	if err != nil {
+// 		log.Printf("error: GetNatssChannel(): getting channel: %v", err)
+// 		return nil, err
+// 	}
+// 	if !channel.Status.IsReady() {
+// 		return nil, fmt.Errorf("error: GetNatssChannel():channel NotReady")
+// 	}
+// 	return channel, nil
+// }
+
+func (k *KnativeLib) GetMessagingChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error) {
+	channel, err := k.messagingChannel.Channels(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
-		log.Printf("error: GetNatssChannel(): getting channel: %v", err)
+		log.Printf("error: Channel(): getting channel: %v", err)
 		return nil, err
 	}
 	if !channel.Status.IsReady() {
-		return nil, fmt.Errorf("error: GetNatssChannel():channel NotReady")
+		return nil, fmt.Errorf("error: GetMessagingChannel():channel NotReady")
 	}
 	return channel, nil
 }
 
 // CreateChannel creates a Knative/Eventing channel controlled by the specified provisioner
 func (k *KnativeLib) CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
-	timeout time.Duration) (*evapisv1alpha1.Channel, error) {
+	timeout time.Duration) (*messagingV1Alpha1.Channel, error) {
 	c := makeChannel(name, namespace, labels)
-	channel, err := k.evClient.Channels(namespace).Create(c)
+	channel, err := k.messagingChannel.Channels(namespace).Create(c)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		log.Printf("ERROR: CreateChannel(): creating channel: %v", err)
 		return nil, err
@@ -176,7 +199,34 @@ func (k *KnativeLib) CreateChannel(provisioner string, name string, namespace st
 		case <-tout:
 			return nil, errors.New("timed out")
 		case <-tick:
-			if channel, err = k.evClient.Channels(namespace).Get(name, metav1.GetOptions{}); err != nil {
+			if channel, err = k.messagingChannel.Channels(namespace).Get(name, metav1.GetOptions{}); err != nil {
+				log.Printf("ERROR: CreateChannel(): geting channel: %v", err)
+			} else {
+				isReady = channel.Status.IsReady()
+			}
+		}
+	}
+	return channel, nil
+}
+
+func (k *KnativeLib) CreateMessagingChannel(name string, namespace string, labels *map[string]string,
+	timeout time.Duration) (*messagingV1Alpha1.Channel, error) {
+	c := makeChannel(name, namespace, labels)
+	channel, err := k.messagingChannel.Channels(namespace).Create(c)
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
+		log.Printf("ERROR: CreateChannel(): creating channel: %v", err)
+		return nil, err
+	}
+
+	isReady := channel.Status.IsReady()
+	tout := time.After(timeout)
+	tick := time.Tick(100 * time.Millisecond)
+	for !isReady {
+		select {
+		case <-tout:
+			return nil, errors.New("timed out")
+		case <-tick:
+			if channel, err = k.messagingChannel.Channels(namespace).Get(name, metav1.GetOptions{}); err != nil {
 				log.Printf("ERROR: CreateChannel(): geting channel: %v", err)
 			} else {
 				isReady = channel.Status.IsReady()
@@ -429,12 +479,9 @@ func resendMessageToNatssChannel(httpClient *http.Client, channel *v1alpha1.Nats
 	return nil
 }
 
-func makeChannel(name string, namespace string, labels *map[string]string) *evapisv1alpha1.Channel {
-	c := &evapisv1alpha1.Channel{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
-			Kind:       "Channel",
-		},
+func makeChannel(name string, namespace string, labels *map[string]string) *messagingV1Alpha1.Channel {
+	c := &messagingV1Alpha1.Channel{
+		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,

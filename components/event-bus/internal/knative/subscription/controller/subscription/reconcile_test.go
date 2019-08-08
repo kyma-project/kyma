@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/knative/eventing/contrib/natss/pkg/apis/messaging/v1alpha1"
-	"github.com/knative/pkg/apis"
+	"knative.dev/pkg/apis"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -16,7 +16,6 @@ import (
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	eventingclientset "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	controllertesting "github.com/knative/eventing/pkg/reconciler/testing"
-	duckv1beta1 "github.com/knative/pkg/apis/duck/v1beta1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
@@ -27,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/scheme"
+	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 

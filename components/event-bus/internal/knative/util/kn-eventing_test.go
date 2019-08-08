@@ -14,14 +14,14 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	evclientsetfake "github.com/knative/eventing/pkg/client/clientset/versioned/fake"
-	"github.com/knative/pkg/apis"
-	duckv1beta1 "github.com/knative/pkg/apis/duck/v1beta1"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8stesting "k8s.io/client-go/testing"
+	"knative.dev/pkg/apis"
+	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 )
 
 const (

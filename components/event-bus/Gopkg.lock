@@ -445,7 +445,7 @@
   version = "v1.1.6"
 
 [[projects]]
-  digest = "1:15e1b7331e6bff460ecfa49c398ebdd31ad84204a47665d08dd214e9a67de34a"
+  digest = "1:b057c0cc7dd5bad332b933f2fbe3134757c9201c090e707418ca0f93fb1c6649"
   name = "github.com/knative/eventing"
   packages = [
     "contrib/natss/pkg/apis/messaging",
@@ -475,6 +475,14 @@
     "pkg/client/clientset/versioned/typed/messaging/v1alpha1/fake",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1/fake",
+    "pkg/client/informers/externalversions",
+    "pkg/client/informers/externalversions/eventing",
+    "pkg/client/informers/externalversions/eventing/v1alpha1",
+    "pkg/client/informers/externalversions/internalinterfaces",
+    "pkg/client/informers/externalversions/messaging",
+    "pkg/client/informers/externalversions/messaging/v1alpha1",
+    "pkg/client/informers/externalversions/sources",
+    "pkg/client/informers/externalversions/sources/v1alpha1",
     "pkg/client/injection/client",
     "pkg/client/injection/client/fake",
     "pkg/client/listers/eventing/v1alpha1",
@@ -488,18 +496,6 @@
   ]
   pruneopts = "NUT"
   revision = "a59dae6f326057211f43f7c2d1414a9fd821b8aa"
-  version = "v0.8.0"
-
-[[projects]]
-  branch = "release-0.8"
-  digest = "1:50bb2827cb7630e31c90b5d0808299d09cd13de204f002d634cad18c8a028da2"
-  name = "github.com/knative/pkg"
-  packages = [
-    "apis",
-    "apis/duck/v1beta1",
-  ]
-  pruneopts = "NUT"
-  revision = "2b848f71969c997809a2dbea8351eaadb23e9bc9"
 
 [[projects]]
   branch = "master"
@@ -1691,9 +1687,10 @@
     "github.com/knative/eventing/pkg/client/clientset/versioned",
     "github.com/knative/eventing/pkg/client/clientset/versioned/fake",
     "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
+    "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
+    "github.com/knative/eventing/pkg/client/informers/externalversions",
+    "github.com/knative/eventing/pkg/client/informers/externalversions/messaging/v1alpha1",
     "github.com/knative/eventing/pkg/reconciler/testing",
-    "github.com/knative/pkg/apis",
-    "github.com/knative/pkg/apis/duck/v1beta1",
     "github.com/nats-io/go-nats-streaming",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
@@ -1726,6 +1723,8 @@
     "k8s.io/client-go/tools/record",
     "k8s.io/client-go/util/flowcontrol",
     "k8s.io/gengo/args",
+    "knative.dev/pkg/apis",
+    "knative.dev/pkg/apis/duck/v1beta1",
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
     "sigs.k8s.io/controller-runtime/pkg/client/fake",

@@ -55,12 +55,12 @@ required = [
   name = "github.com/apache/thrift"
 
 [[override]]
-  name = "knative.dev/pkg"
+  name = "github.com/knative/pkg"
   branch = "release-0.8"
 
 [[override]]
-  name = "knative.dev/eventing"
-  version = "v0.8.0"
+  name = "github.com/knative/eventing"
+  revision = "a59dae6f326057211f43f7c2d1414a9fd821b8aa"
 
 [prune]
   non-go = true
