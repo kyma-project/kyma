@@ -11,11 +11,11 @@ This tutorial is a follow-up of the [**Observe application metrics**](#tutorials
 
 ## Steps
 
-Access the Grafana UI, select the `cpu_temperature_celsius` metric, the Gauge dashboard type, and start the configuration.
+Follow these sections to create the Gauge dashboard type for the `cpu_temperature_celsius` metric.
 
 ### Create the dashboard
 
-1. Navigate to Grafana. It is available under the `https://grafana.{DOMAIN}` address, where `{DOMAIN}` is the domain of your Kyma cluster, such as `https://grafana.34.63.57.190.xip.io` or `https://grafana.nightly.a.build.kyma-project.io/`. You can also access it by clicking on **Stats & Metrics** on the left navigation menu in the Console UI.
+1. Navigate to Grafana. It is available under the `https://grafana.{DOMAIN}` address, where `{DOMAIN}` is the domain of your Kyma cluster, such as `https://grafana.34.63.57.190.xip.io` or `https://grafana.nightly.a.build.kyma-project.io/`. To access it from the Console UI, click **Stats & Metrics** on the left navigation menu.
 
 ![Stats and Metrics](./assets/stats-and-metrics.png)
 
@@ -27,11 +27,11 @@ Access the Grafana UI, select the `cpu_temperature_celsius` metric, the Gauge da
 
 ![Add Query](./assets/add-query.png)
 
-4. Select Prometheus data source from the **Queries to** drop-down list and choose the `cpu_temperature_celsius` metric.
+4. Select Prometheus data source from the **Queries to** drop-down list and pick the `cpu_temperature_celsius` metric.
 
 ![New dashboard](./assets/new-dashboard.png)
 
-5. Select the **Instant** query to be able to retrieve the last value for each time series.
+5. Toggle the **Instant** query to be able to retrieve the latest metric value on demand.
 
 ![Instant option](./assets/instant.png)
 
@@ -39,13 +39,13 @@ Access the Grafana UI, select the `cpu_temperature_celsius` metric, the Gauge da
 
 ![Gauge dashboard type](./assets/gauge-dashboard-type.png)
 
-7. Save the changes by clicking the disk icon in the top right corner of the page. Provide a name for the dashboard.
+7. Click the disk icon in the top right corner of the page to save the changes. Provide a name for the dashboard.
 
 ![Save the dashboard](./assets/save-dashboard.png)
 
 ### Configure the dashboard
 
-To edit the dashboard settings, click the **Panel Title** and select **Edit**.
+To edit the dashboard settings, go to the **Panel Title** options and select **Edit**.
 
 ![Edit the dashboard](./assets/edit-dashboard.png)
 
@@ -65,11 +65,11 @@ To edit the dashboard settings, click the **Panel Title** and select **Edit**.
 
 ![Panel title](./assets/panel-title.png)
 
-5. Save the changes by clicking the disk icon in the top right corner of the page. Add an optional note to describe the changes made.
+5. Click the disk icon in the top right corner of the page to save the changes. Add an optional note to describe the changes made.
 
 ![Note](./assets/save-note.png)
 
-### Test the dashboard
+### Verify the dashboard
 
 Refresh the browser to see how the dashboard changes according to the current value of the `cpu_temperature_celsius` metric.
 
