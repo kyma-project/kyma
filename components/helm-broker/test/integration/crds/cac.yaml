@@ -7,7 +7,7 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: clusteraddonsconfigurations.addons.kyma-project.io
   annotations:
-    "helm.sh/hook": crd-install
+    helm.sh/hook: crd-install
 spec:
   group: addons.kyma-project.io
   names:

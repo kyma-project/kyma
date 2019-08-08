@@ -22,4 +22,4 @@ spec:
         host: dex-service
     corsPolicy:
       allowOrigin:
-      - "*"        
+      - "*"
