@@ -3,7 +3,7 @@ title: Create a Grafana dashboard
 type: Tutorials
 ---
 
-This tutorial shows how to create and configure a basic Grafana dashboard of a [Gauge](https://grafana.com/docs/features/panels/singlestat/#gauge) type. The dashboard shows how the values of the `cpu_temperature_celsius` metric change in time, representing the current processor temperature ranging from `60` to `90` Celsius degrees. The dashboard shows explicitly when the CPU temperature exceeds the pre-defined threshold of `75` Celsius degrees.
+This tutorial shows how to create and configure a basic Grafana dashboard of a [Gauge](https://grafana.com/docs/features/panels/singlestat/#gauge) type. The dashboard shows how the values of the `cpu_temperature_celsius` metric change in time, representing the current processor temperature ranging from 60 to 90 Celsius degrees. The dashboard shows explicitly when the CPU temperature exceeds the pre-defined threshold of `75` Celsius degrees.
 
 ## Prerequisites
 
@@ -73,10 +73,10 @@ To edit the dashboard settings, go to the **Panel Title** options and select **E
 
 Refresh the browser to see how the dashboard changes according to the current value of the `cpu_temperature_celsius` metric.
 
-- It turns green if the current metric value ranges from `60` to `74` Celsius degrees:
+- It turns green if the current metric value ranges from 60 to 74 Celsius degrees:
 
 ![Green dashboard](./assets/green-dashboard.png)
 
-- It turns red if the current metric value ranges from `75` to `90` Celsius degrees:
+- It turns red if the current metric value ranges from 75 to 90 Celsius degrees:
 
 ![Red dashboard](./assets/red-dashboard.png)
