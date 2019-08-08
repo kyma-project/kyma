@@ -188,7 +188,7 @@ func filterOutRepositories(repos []v1alpha1.SpecRepository, urls []string) []v1a
 		idxURLs[u] = struct{}{}
 	}
 
-	var result []v1alpha1.SpecRepository
+	result := make([]v1alpha1.SpecRepository, 0)
 	for _, r := range repos {
 		if _, found := idxURLs[r.URL]; !found {
 			result = append(result, r)
