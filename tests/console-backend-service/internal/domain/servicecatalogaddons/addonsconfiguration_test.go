@@ -48,13 +48,13 @@ func TestAddonsConfigurationMutationsAndQueries(t *testing.T) {
 	suite := newAddonsConfigurationSuite(t)
 
 	// WHEN
-	t.Log("Create Addons Configuration")
-	var res createAddonsConfigurationResponse
-	err := suite.gqlCli.Do(suite.fixCreateAddonsConfigurationsRequest(), &res)
-
 	t.Log("Subscribe Addons Configuration")
 	subscription := suite.subscribeAddonsConfiguration()
 	defer subscription.Close()
+
+	t.Log("Create Addons Configuration")
+	var res createAddonsConfigurationResponse
+	err := suite.gqlCli.Do(suite.fixCreateAddonsConfigurationsRequest(), &res)
 
 	// THEN
 	assert.NoError(t, err)
