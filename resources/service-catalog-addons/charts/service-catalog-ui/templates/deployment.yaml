@@ -22,9 +22,9 @@ spec:
           image: "{{ .Values.global.containerRegistry.path }}{{ .Values.image.dir }}/service-catalog-ui:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.service.catalog.internalPort }}
-            - containerPort: {{ .Values.service.instances.internalPort }}
-            - containerPort: {{ .Values.service.brokers.internalPort }}
+            - containerPort: {{ .Values.catalog.service.internalPort }}
+            - containerPort: {{ .Values.instances.service.internalPort }}
+            - containerPort: {{ .Values.brokers.service.internalPort }}
           volumeMounts:
           - name: config
             mountPath: /var/catalog-public/config
