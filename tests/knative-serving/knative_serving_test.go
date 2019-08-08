@@ -21,9 +21,19 @@ import (
 	"github.com/kyma-project/kyma/common/ingressgateway"
 )
 
+const (
+	// Domain name used to build the URL tests send HTTP requests to.
+	// `test-service.knative-serving.DOMAIN` is expected to resolve to the IP of the Istio Ingress Gateway.
+	domainNameEnvVar = "DOMAIN_NAME"
+
+	// Message that should be printed by the sample Hello World service.
+	// https://knative.dev/docs/serving/samples/hello-world/helloworld-go/index.html
+	targetEnvVar = "TARGET"
+)
+
 func TestKnativeServingAcceptance(t *testing.T) {
-	domainName := mustGetenv(t, "DOMAIN_NAME")
-	target := mustGetenv(t, "TARGET")
+	domainName := mustGetenv(t, domainNameEnvVar)
+	target := mustGetenv(t, targetEnvVar)
 
 	testServiceURL := fmt.Sprintf("https://test-service.knative-serving.%s", domainName)
 
@@ -47,7 +57,7 @@ func TestKnativeServingAcceptance(t *testing.T) {
 								Image: "gcr.io/knative-samples/helloworld-go",
 								Env: []core.EnvVar{
 									{
-										Name:  "TARGET",
+										Name:  targetEnvVar,
 										Value: target,
 									},
 								},
@@ -75,12 +85,14 @@ func TestKnativeServingAcceptance(t *testing.T) {
 			return err
 		}
 
-		bytes, err := ioutil.ReadAll(resp.Body)
+		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}
-		msg := strings.TrimSpace(string(bytes))
+
+		msg := strings.TrimSpace(string(body))
 		expectedMsg := fmt.Sprintf("Hello %s!", target)
+
 		t.Logf("Received %d: %q", resp.StatusCode, msg)
 
 		if resp.StatusCode != http.StatusOK {
