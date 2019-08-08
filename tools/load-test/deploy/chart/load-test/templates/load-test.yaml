@@ -70,7 +70,7 @@ spec:
   serviceAccount: {{ template "load-test.fullname" . }}
   containers:
   - name: load-test
-    image: {{ .Values.containerRegistry.path }}/develop/load-test:{{ .Values.image.tag }}
+    image: {{ .Values.containerRegistry.path }}/load-test:{{ .Values.image.tag }}
     imagePullPolicy: IfNotPresent
     command: ["/bin/sh"]
     args: ["-c", "sleep 10; /load-test; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
