@@ -16,6 +16,14 @@ func (qp queryProvider) createApplication(input string) string {
 }`, input, applicationData())
 }
 
+func (qp queryProvider) updateApplication(applicationId, input string) string {
+	return fmt.Sprintf(`mutation {
+	result: updateApplication(id: "%s" in: %s) {
+		%s
+	}
+}`, applicationId, input, applicationData())
+}
+
 func (qp queryProvider) deleteApplication(id string) string {
 	return fmt.Sprintf(`mutation {
 	result: deleteApplication(id: "%s") {

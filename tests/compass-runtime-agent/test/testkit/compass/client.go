@@ -51,11 +51,11 @@ type Application struct {
 	Documents   *graphql.DocumentPage           `json:"documents"`
 }
 
-type CreateApplicationResponse struct {
+type ApplicationResponse struct {
 	Result Application `json:"result"`
 }
 
-type CreateAPIResponse struct {
+type APIResponse struct {
 	Result *graphql.APIDefinition `json:"result"`
 }
 
@@ -84,7 +84,7 @@ func (c *Client) CreateApplication(input graphql.ApplicationInput) (Application,
 	query := c.queryProvider.createApplication(appInputGQL)
 	req := c.newRequest(query)
 
-	var response CreateApplicationResponse
+	var response ApplicationResponse
 	err = c.client.Run(context.Background(), req, &response)
 	if err != nil {
 		return Application{}, errors.Wrap(err, "Failed to create Application")
@@ -93,26 +93,22 @@ func (c *Client) CreateApplication(input graphql.ApplicationInput) (Application,
 	return response.Result, nil
 }
 
-func (c *Client) UpdateApplication(input graphql.ApplicationInput) (Application, error) {
-	// TODO - implement
+func (c *Client) UpdateApplication(applicationId string, input graphql.ApplicationInput) (Application, error) {
+	appInputGQL, err := c.graphqlizer.ApplicationInputToGQL(input)
+	if err != nil {
+		return Application{}, errors.Wrap(err, "Failed to convert Application Input to query")
+	}
 
-	//appInputGQL, err := c.graphqlizer.ApplicationInputToGQL(input)
-	//if err != nil {
-	//	return Application{}, errors.Wrap(err, "Failed to convert Application Input to query")
-	//}
-	//
-	//query := c.queryProvider.createApplication(appInputGQL)
-	//
-	//req := gcli.NewRequest(query)
-	//req.Header.Set(TenantHeader, c.tenant)
-	//
-	//var response CreateApplicationResponse
-	//err = c.client.Run(context.Background(), req, &response)
-	//if err != nil {
-	//	return Application{}, errors.Wrap(err, "Failed to create Application")
-	//}
-	//
-	//return response.Result, nil
+	query := c.queryProvider.updateApplication(applicationId, appInputGQL)
+	req := c.newRequest(query)
+
+	var response ApplicationResponse
+	err = c.client.Run(context.Background(), req, &response)
+	if err != nil {
+		return Application{}, errors.Wrap(err, "Failed to update Application")
+	}
+
+	return response.Result, nil
 
 	return Application{}, nil
 }
@@ -143,8 +139,8 @@ func (c *Client) CreateAPI(appId string, input graphql.APIDefinitionInput) (*gra
 	return api, nil
 }
 
-func (c *Client) UpdateAPI(appId string, input graphql.APIDefinitionInput) (*graphql.APIDefinition, error) {
-	api, err := c.modifyAPI(appId, input, c.queryProvider.updateAPI)
+func (c *Client) UpdateAPI(apiId string, input graphql.APIDefinitionInput) (*graphql.APIDefinition, error) {
+	api, err := c.modifyAPI(apiId, input, c.queryProvider.updateAPI)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to update API")
 	}
@@ -152,16 +148,16 @@ func (c *Client) UpdateAPI(appId string, input graphql.APIDefinitionInput) (*gra
 	return api, nil
 }
 
-func (c *Client) modifyAPI(appId string, input graphql.APIDefinitionInput, prepareQuery func(applicationId string, input string) string) (*graphql.APIDefinition, error) {
+func (c *Client) modifyAPI(id string, input graphql.APIDefinitionInput, prepareQuery func(applicationId string, input string) string) (*graphql.APIDefinition, error) {
 	appInputGQL, err := c.graphqlizer.APIDefinitionInputToGQL(input)
 	if err != nil {
 		return nil, err
 	}
 
-	query := prepareQuery(appId, appInputGQL)
+	query := prepareQuery(id, appInputGQL)
 	req := c.newRequest(query)
 
-	var response CreateAPIResponse
+	var response APIResponse
 	err = c.client.Run(context.Background(), req, &response)
 	if err != nil {
 		return nil, err
@@ -194,8 +190,8 @@ func (c *Client) CreateEventAPI(appId string, input graphql.EventAPIDefinitionIn
 	return api, nil
 }
 
-func (c *Client) UpdateEventAPI(appId string, input graphql.EventAPIDefinitionInput) (*graphql.EventAPIDefinition, error) {
-	api, err := c.modifyEventAPI(appId, input, c.queryProvider.updateEventAPI)
+func (c *Client) UpdateEventAPI(apiId string, input graphql.EventAPIDefinitionInput) (*graphql.EventAPIDefinition, error) {
+	api, err := c.modifyEventAPI(apiId, input, c.queryProvider.updateEventAPI)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to update Event API")
 	}
@@ -203,13 +199,13 @@ func (c *Client) UpdateEventAPI(appId string, input graphql.EventAPIDefinitionIn
 	return api, nil
 }
 
-func (c *Client) modifyEventAPI(appId string, input graphql.EventAPIDefinitionInput, prepareQuery func(applicationId string, input string) string) (*graphql.EventAPIDefinition, error) {
+func (c *Client) modifyEventAPI(id string, input graphql.EventAPIDefinitionInput, prepareQuery func(applicationId string, input string) string) (*graphql.EventAPIDefinition, error) {
 	eventAPIInputGQL, err := c.graphqlizer.EventAPIDefinitionInputToGQL(input)
 	if err != nil {
 		return nil, err
 	}
 
-	query := prepareQuery(appId, eventAPIInputGQL)
+	query := prepareQuery(id, eventAPIInputGQL)
 	req := c.newRequest(query)
 
 	var response CreateEventAPIResponse

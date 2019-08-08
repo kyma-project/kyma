@@ -20,24 +20,6 @@ import (
 
 // TODO - replace logrus with t.log?
 
-// TODO - consider defining testcase object
-//type testCase struct {
-//	firstPhase  testPhase
-//	secondPhase testPhase
-//}
-
-//func (tc testCase) ExecuteFirstPhase(t *testing.T, client *compass.Client) {
-//	applicationInput := applications.NewApplication(tc.firstPhase.appName, tc.firstPhase.appDescription, tc.firstPhase.appLabels).
-//		WithAPIs(tc.firstPhase.apisInputs).
-//		WithEventAPIs(tc.firstPhase.eventAPIsInputs)
-//
-//	logrus.Info("Creating Application...")
-//	response, err := client.CreateApplication(applicationInput.ToCompassInput())
-//	require.NoError(t, err)
-//
-//	tc.firstPhase.result = response
-//}
-
 type testCase struct {
 	description string
 
@@ -48,7 +30,6 @@ type testCase struct {
 	secondPhaseAssert func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase)
 }
 
-// TODO
 const (
 	validPassword     = "password"
 	validUsername     = "username"
@@ -69,7 +50,6 @@ func TestCompassRuntimeAgentSynchronization_TestCases(t *testing.T) {
 	// Define test cases
 	testCases := []*testCase{
 		{
-			// TODO - event APIs
 			description: "Test case 1: Create all types of APIs and remove them",
 			initialPhaseInput: func() *applications.ApplicationInput {
 				return applications.NewApplication("test-app-1", "testApp1", map[string][]string{}).
@@ -78,35 +58,100 @@ func TestCompassRuntimeAgentSynchronization_TestCases(t *testing.T) {
 							noAuthAPIInput,
 							basicAuthAPIInput,
 							oauthAPIInput,
-						})
+						}).
+					WithEventAPIs(
+						[]*applications.EventAPIDefinitionInput{
+							applications.NewEventAPI("events-api", "description"),
+							applications.NewEventAPI("no-description-events-api", ""),
+						},
+					)
 			},
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
-				// given
+				// when removing all APIs individually
 				application := this.initialPhaseResult
+				assert.Equal(t, 3, len(application.APIs.Data))
+				assert.Equal(t, 2, len(application.EventAPIs.Data))
 
-				createdNoAuthAPI := application.APIs.Data[0]
-				createdBasicAuthAPI := application.APIs.Data[1]
-				createdOAuthAPI := application.APIs.Data[2]
+				// remove APIs
+				for _, api := range application.APIs.Data {
+					id, err := testSuite.CompassClient.DeleteAPI(api.ID)
+					require.NoError(t, err)
+					require.Equal(t, api.ID, id)
+				}
 
-				// when
-				id, err := testSuite.CompassClient.DeleteAPI(createdNoAuthAPI.ID)
-				require.NoError(t, err)
-				require.Equal(t, createdNoAuthAPI.ID, id)
-				id, err = testSuite.CompassClient.DeleteAPI(createdBasicAuthAPI.ID)
-				require.NoError(t, err)
-				require.Equal(t, createdBasicAuthAPI.ID, id)
-				id, err = testSuite.CompassClient.DeleteAPI(createdOAuthAPI.ID)
-				require.NoError(t, err)
-				require.Equal(t, createdOAuthAPI.ID, id)
-			},
-			secondPhaseAssert: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
+				// remove EventAPIs
+				for _, eventAPI := range application.EventAPIs.Data {
+					id, err := testSuite.CompassClient.DeleteEventAPI(eventAPI.ID)
+					require.NoError(t, err)
+					require.Equal(t, eventAPI.ID, id)
+				}
+
 				// then
-				application := this.initialPhaseResult
-				originalAPIs := application.APIs.Data
+				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
+					// assert APIs deleted
+					for _, api := range application.APIs.Data {
+						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.ID, api.ID)
+					}
 
-				testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.ID, originalAPIs[0].ID)
-				testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.ID, originalAPIs[1].ID)
-				testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.ID, originalAPIs[2].ID)
+					// assert EventAPIs deleted
+					for _, eventAPI := range application.EventAPIs.Data {
+						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.ID, eventAPI.ID)
+					}
+				}
+			},
+		},
+		{
+			description: "Test case 2: Update Application overriding all APIs",
+			initialPhaseInput: func() *applications.ApplicationInput {
+				return applications.NewApplication("test-app-2", "", map[string][]string{}).
+					WithAPIs(
+						[]*applications.APIDefinitionInput{
+							noAuthAPIInput,
+							basicAuthAPIInput,
+							oauthAPIInput,
+						}).
+					WithEventAPIs(
+						[]*applications.EventAPIDefinitionInput{
+							applications.NewEventAPI("events-api", "description"),
+							applications.NewEventAPI("no-description-events-api", ""),
+						},
+					)
+			},
+			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
+				// when removing all APIs individually
+				application := this.initialPhaseResult
+
+				updatedInput := applications.NewApplication("test-app-2-updated", "", map[string][]string{}).
+					WithAPIs(
+						[]*applications.APIDefinitionInput{
+							noAuthAPIInput,
+							basicAuthAPIInput,
+							oauthAPIInput,
+						}).
+					WithEventAPIs(
+						[]*applications.EventAPIDefinitionInput{
+							applications.NewEventAPI("events-api", "description"),
+						},
+					)
+
+				updatedApp, err := testSuite.CompassClient.UpdateApplication(application.ID, updatedInput.ToCompassInput())
+				require.NoError(t, err)
+				assert.Equal(t, 3, len(updatedApp.APIs.Data))
+
+				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
+					// assert previous APIs deleted
+					for _, api := range application.APIs.Data {
+						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.ID, api.ID)
+					}
+					// assert previous EventAPIs deleted
+					for _, eventAPI := range application.EventAPIs.Data {
+						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.ID, eventAPI.ID)
+					}
+
+					// assert updated Application
+					testSuite.K8sResourceChecker.AssertResourcesForApp(t, updatedApp)
+					testSuite.APIAccessChecker.AssertAPIAccess(t, updatedApp.APIs.Data...)
+				}
 			},
 		},
 	}
@@ -145,7 +190,6 @@ func TestCompassRuntimeAgentSynchronization_TestCases(t *testing.T) {
 
 		logrus.Infof("Checking API Access")
 		testSuite.APIAccessChecker.AssertAPIAccess(t, testCase.initialPhaseResult.APIs.Data...)
-		// TODO - how to do api check if expected status will be different than 200? Separate test case?
 	}
 
 	// Setup second phase
@@ -164,6 +208,8 @@ func TestCompassRuntimeAgentSynchronization_TestCases(t *testing.T) {
 		testCase.secondPhaseAssert(t, testSuite, testCase)
 	}
 }
+
+// TODO - test cases for deniers (after implemented)
 
 func waitForAgentToApplyConfig(t *testing.T) {
 	// TODO - consider some smarter way to wait for it

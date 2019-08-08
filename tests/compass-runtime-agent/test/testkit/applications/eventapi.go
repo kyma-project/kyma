@@ -4,12 +4,18 @@ import "github.com/kyma-incubator/compass/components/director/pkg/graphql"
 
 type EventAPIDefinitionInput graphql.EventAPIDefinitionInput
 
-func NewEventAPI(name, description string) EventAPIDefinitionInput {
-	return EventAPIDefinitionInput(graphql.EventAPIDefinitionInput{
+func NewEventAPI(name, description string) *EventAPIDefinitionInput {
+	eventAPI := EventAPIDefinitionInput(graphql.EventAPIDefinitionInput{
 		Name:        name,
 		Description: &description,
-		Spec:        nil, // TODO  - test
+		Spec: &graphql.EventAPISpecInput{
+			Data:          nil,
+			EventSpecType: "ASYNC_API",
+			Format:        "JSON",
+		}, // TODO  - test
 	})
+
+	return &eventAPI
 }
 
 func (input *EventAPIDefinitionInput) ToCompassInput() *graphql.EventAPIDefinitionInput {
