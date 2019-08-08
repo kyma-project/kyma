@@ -8,6 +8,8 @@ const (
 
 	AddonsConfiguration
 	AddonsConfigurations
+	ClusterAddonsConfiguration
+	ClusterAddonsConfigurations
 
 	UsageKind
 	UsageKinds
@@ -20,6 +22,10 @@ func (k Kind) String() string {
 		return "Service Binding Usage"
 	case ServiceBindingUsages:
 		return "Service Binding Usages"
+	case ClusterAddonsConfiguration:
+		return "Cluster Addons Configuration"
+	case ClusterAddonsConfigurations:
+		return "Cluster Addons Configurations"
 	case AddonsConfiguration:
 		return "Addons Configuration"
 	case AddonsConfigurations:

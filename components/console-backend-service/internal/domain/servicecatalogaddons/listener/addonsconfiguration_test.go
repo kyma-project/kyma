@@ -10,18 +10,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestClusterAddonsConfiguration_OnAdd(t *testing.T) {
+func TestAddonsConfiguration_OnAdd(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// given
 		gqlAddonsConfiguration := new(gqlschema.AddonsConfiguration)
-		cfg := new(v1alpha1.ClusterAddonsConfiguration)
-		converter := automock.NewGQLClusterAddonsConfigurationConverter()
+		cfg := new(v1alpha1.AddonsConfiguration)
+		converter := automock.NewGQLAddonsConfigurationConverter()
 
-		channel := make(chan gqlschema.ClusterAddonsConfigurationEvent, 1)
+		channel := make(chan gqlschema.AddonsConfigurationEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", cfg).Return(gqlAddonsConfiguration, nil).Once()
 		defer converter.AssertExpectations(t)
-		serviceBrokerListener := NewClusterAddonsConfiguration(channel, filterClusterAddonsConfigurationTrue, converter)
+		serviceBrokerListener := NewAddonsConfiguration(channel, filterAddonsConfigurationTrue, converter)
 
 		// when
 		serviceBrokerListener.OnAdd(cfg)
@@ -34,15 +34,15 @@ func TestClusterAddonsConfiguration_OnAdd(t *testing.T) {
 
 	t.Run("Filtered out", func(t *testing.T) {
 		// given
-		serviceBrokerListener := NewClusterAddonsConfiguration(nil, filterClusterAddonsConfigurationFalse, nil)
+		serviceBrokerListener := NewAddonsConfiguration(nil, filterAddonsConfigurationFalse, nil)
 
 		// when
-		serviceBrokerListener.OnAdd(new(v1alpha1.ClusterAddonsConfiguration))
+		serviceBrokerListener.OnAdd(new(v1alpha1.AddonsConfiguration))
 	})
 
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		serviceBrokerListener := NewClusterAddonsConfiguration(nil, filterClusterAddonsConfigurationTrue, nil)
+		serviceBrokerListener := NewAddonsConfiguration(nil, filterAddonsConfigurationTrue, nil)
 
 		// when
 		serviceBrokerListener.OnAdd(nil)
@@ -50,12 +50,12 @@ func TestClusterAddonsConfiguration_OnAdd(t *testing.T) {
 
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
-		serviceBroker := new(v1alpha1.ClusterAddonsConfiguration)
-		converter := automock.NewGQLClusterAddonsConfigurationConverter()
+		serviceBroker := new(v1alpha1.AddonsConfiguration)
+		converter := automock.NewGQLAddonsConfigurationConverter()
 
 		converter.On("ToGQL", serviceBroker).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
-		serviceBrokerListener := NewClusterAddonsConfiguration(nil, filterClusterAddonsConfigurationTrue, converter)
+		serviceBrokerListener := NewAddonsConfiguration(nil, filterAddonsConfigurationTrue, converter)
 
 		// when
 		serviceBrokerListener.OnAdd(serviceBroker)
@@ -63,7 +63,7 @@ func TestClusterAddonsConfiguration_OnAdd(t *testing.T) {
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		serviceBrokerListener := NewClusterAddonsConfiguration(nil, filterClusterAddonsConfigurationTrue, nil)
+		serviceBrokerListener := NewAddonsConfiguration(nil, filterAddonsConfigurationTrue, nil)
 
 		// when
 		serviceBrokerListener.OnAdd(new(struct{}))
@@ -71,18 +71,18 @@ func TestClusterAddonsConfiguration_OnAdd(t *testing.T) {
 
 }
 
-func TestClusterAddonsConfiguration_OnDelete(t *testing.T) {
+func TestAddonsConfiguration_OnDelete(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// given
 		gqlClusterServiceBroker := new(gqlschema.AddonsConfiguration)
-		serviceBroker := new(v1alpha1.ClusterAddonsConfiguration)
-		converter := automock.NewGQLClusterAddonsConfigurationConverter()
+		serviceBroker := new(v1alpha1.AddonsConfiguration)
+		converter := automock.NewGQLAddonsConfigurationConverter()
 
-		channel := make(chan gqlschema.ClusterAddonsConfigurationEvent, 1)
+		channel := make(chan gqlschema.AddonsConfigurationEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", serviceBroker).Return(gqlClusterServiceBroker, nil).Once()
 		defer converter.AssertExpectations(t)
-		serviceBrokerListener := NewClusterAddonsConfiguration(channel, filterClusterAddonsConfigurationTrue, converter)
+		serviceBrokerListener := NewAddonsConfiguration(channel, filterAddonsConfigurationTrue, converter)
 
 		// when
 		serviceBrokerListener.OnDelete(serviceBroker)
@@ -96,15 +96,15 @@ func TestClusterAddonsConfiguration_OnDelete(t *testing.T) {
 
 	t.Run("Filtered out", func(t *testing.T) {
 		// given
-		serviceBrokerListener := NewClusterAddonsConfiguration(nil, filterClusterAddonsConfigurationFalse, nil)
+		serviceBrokerListener := NewAddonsConfiguration(nil, filterAddonsConfigurationFalse, nil)
 
 		// when
-		serviceBrokerListener.OnDelete(new(v1alpha1.ClusterAddonsConfiguration))
+		serviceBrokerListener.OnDelete(new(v1alpha1.AddonsConfiguration))
 	})
 
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		serviceBrokerListener := NewClusterAddonsConfiguration(nil, filterClusterAddonsConfigurationTrue, nil)
+		serviceBrokerListener := NewAddonsConfiguration(nil, filterAddonsConfigurationTrue, nil)
 
 		// when
 		serviceBrokerListener.OnDelete(nil)
@@ -112,12 +112,12 @@ func TestClusterAddonsConfiguration_OnDelete(t *testing.T) {
 
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
-		serviceBroker := new(v1alpha1.ClusterAddonsConfiguration)
-		converter := automock.NewGQLClusterAddonsConfigurationConverter()
+		serviceBroker := new(v1alpha1.AddonsConfiguration)
+		converter := automock.NewGQLAddonsConfigurationConverter()
 
 		converter.On("ToGQL", serviceBroker).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
-		serviceBrokerListener := NewClusterAddonsConfiguration(nil, filterClusterAddonsConfigurationTrue, converter)
+		serviceBrokerListener := NewAddonsConfiguration(nil, filterAddonsConfigurationTrue, converter)
 
 		// when
 		serviceBrokerListener.OnDelete(serviceBroker)
@@ -125,7 +125,7 @@ func TestClusterAddonsConfiguration_OnDelete(t *testing.T) {
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		serviceBrokerListener := NewClusterAddonsConfiguration(nil, filterClusterAddonsConfigurationTrue, nil)
+		serviceBrokerListener := NewAddonsConfiguration(nil, filterAddonsConfigurationTrue, nil)
 
 		// when
 		serviceBrokerListener.OnDelete(new(struct{}))
@@ -133,18 +133,18 @@ func TestClusterAddonsConfiguration_OnDelete(t *testing.T) {
 
 }
 
-func TestClusterAddonsConfiguration_OnUpdate(t *testing.T) {
+func TestAddonsConfiguration_OnUpdate(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// given
 		gqlClusterServiceBroker := new(gqlschema.AddonsConfiguration)
-		cfg := new(v1alpha1.ClusterAddonsConfiguration)
-		converter := automock.NewGQLClusterAddonsConfigurationConverter()
+		cfg := new(v1alpha1.AddonsConfiguration)
+		converter := automock.NewGQLAddonsConfigurationConverter()
 
-		channel := make(chan gqlschema.ClusterAddonsConfigurationEvent, 1)
+		channel := make(chan gqlschema.AddonsConfigurationEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", cfg).Return(gqlClusterServiceBroker, nil).Once()
 		defer converter.AssertExpectations(t)
-		serviceBrokerListener := NewClusterAddonsConfiguration(channel, filterClusterAddonsConfigurationTrue, converter)
+		serviceBrokerListener := NewAddonsConfiguration(channel, filterAddonsConfigurationTrue, converter)
 
 		// when
 		serviceBrokerListener.OnUpdate(cfg, cfg)
@@ -158,15 +158,15 @@ func TestClusterAddonsConfiguration_OnUpdate(t *testing.T) {
 
 	t.Run("Filtered out", func(t *testing.T) {
 		// given
-		serviceBrokerListener := NewClusterAddonsConfiguration(nil, filterClusterAddonsConfigurationFalse, nil)
+		serviceBrokerListener := NewAddonsConfiguration(nil, filterAddonsConfigurationFalse, nil)
 
 		// when
-		serviceBrokerListener.OnUpdate(new(v1alpha1.ClusterAddonsConfiguration), new(v1alpha1.ClusterAddonsConfiguration))
+		serviceBrokerListener.OnUpdate(new(v1alpha1.AddonsConfiguration), new(v1alpha1.AddonsConfiguration))
 	})
 
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		serviceBrokerListener := NewClusterAddonsConfiguration(nil, filterClusterAddonsConfigurationTrue, nil)
+		serviceBrokerListener := NewAddonsConfiguration(nil, filterAddonsConfigurationTrue, nil)
 
 		// when
 		serviceBrokerListener.OnUpdate(nil, nil)
@@ -174,12 +174,12 @@ func TestClusterAddonsConfiguration_OnUpdate(t *testing.T) {
 
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
-		serviceBroker := new(v1alpha1.ClusterAddonsConfiguration)
-		converter := automock.NewGQLClusterAddonsConfigurationConverter()
+		serviceBroker := new(v1alpha1.AddonsConfiguration)
+		converter := automock.NewGQLAddonsConfigurationConverter()
 
 		converter.On("ToGQL", serviceBroker).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
-		serviceBrokerListener := NewClusterAddonsConfiguration(nil, filterClusterAddonsConfigurationTrue, converter)
+		serviceBrokerListener := NewAddonsConfiguration(nil, filterAddonsConfigurationTrue, converter)
 
 		// when
 		serviceBrokerListener.OnUpdate(nil, serviceBroker)
@@ -187,7 +187,7 @@ func TestClusterAddonsConfiguration_OnUpdate(t *testing.T) {
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		serviceBrokerListener := NewClusterAddonsConfiguration(nil, filterClusterAddonsConfigurationTrue, nil)
+		serviceBrokerListener := NewAddonsConfiguration(nil, filterAddonsConfigurationTrue, nil)
 
 		// when
 		serviceBrokerListener.OnUpdate(new(struct{}), new(struct{}))
@@ -195,10 +195,10 @@ func TestClusterAddonsConfiguration_OnUpdate(t *testing.T) {
 
 }
 
-func filterClusterAddonsConfigurationTrue(o *v1alpha1.ClusterAddonsConfiguration) bool {
+func filterAddonsConfigurationTrue(o *v1alpha1.AddonsConfiguration) bool {
 	return true
 }
 
-func filterClusterAddonsConfigurationFalse(o *v1alpha1.ClusterAddonsConfiguration) bool {
+func filterAddonsConfigurationFalse(o *v1alpha1.AddonsConfiguration) bool {
 	return false
 }

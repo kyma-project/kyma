@@ -21,6 +21,7 @@ func (c *clusterAddonsConfigurationConverter) ToGQL(item *v1alpha1.ClusterAddons
 		Name:   item.Name,
 		Labels: item.Labels,
 		Urls:   urls,
+		Status: parseStatus(item.Status.CommonAddonsConfigurationStatus),
 	}
 
 	return &addonsCfg
