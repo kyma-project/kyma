@@ -15,6 +15,9 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	// allow client authentication against GKE clusters
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+
 	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	servingtyped "github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
 
