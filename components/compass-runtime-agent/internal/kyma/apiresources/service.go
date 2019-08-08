@@ -4,6 +4,8 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/accessservice"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/istio"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
@@ -15,8 +17,10 @@ type ApiIDToSecretNameMap map[string]string
 
 //go:generate mockery -name=Service
 type Service interface {
-	CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError
-	UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError
+	CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, apiType docstopic.ApiType) apperrors.AppError
+	CreateEventApiResources(applicationName string, serviceID string, spec []byte, apiType docstopic.ApiType) apperrors.AppError
+	UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, apiType docstopic.ApiType) apperrors.AppError
+	UpdateEventApiResources(applicationName string, serviceID string, spec []byte, apiType docstopic.ApiType) apperrors.AppError
 	DeleteApiResources(applicationName string, serviceID string, secretName string) apperrors.AppError
 }
 
@@ -26,15 +30,17 @@ type service struct {
 	requestParameteresService secrets.RequestParametersService
 	istioService              istio.Service
 	nameResolver              k8sconsts.NameResolver
+	assetstore                assetstore.Service
 }
 
 // TODO: change secrets.Service interface so that it doesn't return applications.Credentials
-func NewService(accessServiceManager accessservice.AccessServiceManager, secretsService secrets.Service, nameResolver k8sconsts.NameResolver, istioService istio.Service) Service {
+func NewService(accessServiceManager accessservice.AccessServiceManager, secretsService secrets.Service, nameResolver k8sconsts.NameResolver, istioService istio.Service, assetstore assetstore.Service) Service {
 	return service{
 		accessServiceManager: accessServiceManager,
 		secretsService:       secretsService,
 		nameResolver:         nameResolver,
 		istioService:         istioService,
+		assetstore:           assetstore,
 	}
 }
 
@@ -44,7 +50,7 @@ type AccessServiceManager interface {
 	Delete(serviceName string) apperrors.AppError
 }
 
-func (s service) CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
+func (s service) CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, apiType docstopic.ApiType) apperrors.AppError {
 	k8sResourceName := s.nameResolver.GetResourceName(applicationName, serviceID)
 	log.Infof("Creating access service '%s' for application '%s' and service '%s'.", k8sResourceName, applicationName, serviceID)
 	appendedErr := s.accessServiceManager.Create(applicationName, applicationUID, serviceID, k8sResourceName)
@@ -63,18 +69,38 @@ func (s service) CreateApiResources(applicationName string, applicationUID types
 		log.Infof("Credentials for application '%s' and service '%s' not provided.", applicationName, serviceID)
 	}
 
-	appError := s.istioService.Create(applicationName, applicationUID, serviceID, k8sResourceName)
+	err := s.istioService.Create(applicationName, applicationUID, serviceID, k8sResourceName)
 	log.Infof("Creating istio resources for application '%s' and service '%s'.", applicationName, serviceID)
 
-	if appError != nil {
-		log.Infof("Failed to create istio resources for application '%s' and service '%s': %s.", applicationName, serviceID, appError)
-		appendedErr = appendedErr.Append("", appError)
+	if err != nil {
+		log.Infof("Failed to create istio resources for application '%s' and service '%s': %s.", applicationName, serviceID, err)
+		appendedErr = appendedErr.Append("", err)
+	}
+
+	err = s.assetstore.Put(applicationName, apiType, spec, docstopic.ApiSpec)
+	log.Infof("Uploading Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
+
+	if err != nil {
+		log.Infof("Failed to upload Api Spec for application '%s' and service '%s': %s.", applicationName, serviceID, err)
+		appendedErr = appendedErr.Append("", err)
 	}
 
 	return appendedErr
 }
 
-func (s service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
+func (s service) CreateEventApiResources(applicationName string, serviceID string, spec []byte, apiType docstopic.ApiType) apperrors.AppError {
+	err := s.assetstore.Put(applicationName, apiType, spec, docstopic.EventApiSpec)
+	log.Infof("Uploading Event Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
+
+	if err != nil {
+		log.Infof("Failed to upload Event Api Spec for application '%s' and service '%s': %s.", applicationName, serviceID, err)
+		return err
+	}
+
+	return nil
+}
+
+func (s service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, apiType docstopic.ApiType) apperrors.AppError {
 	k8sResourceName := s.nameResolver.GetResourceName(applicationName, serviceID)
 	log.Infof("Updating access service '%s' for application '%s' and service '%s'.", k8sResourceName, applicationName, serviceID)
 	appendedErr := s.accessServiceManager.Upsert(applicationName, applicationUID, serviceID, k8sResourceName)
@@ -109,7 +135,26 @@ func (s service) UpdateApiResources(applicationName string, applicationUID types
 		appendedErr = appendedErr.Append("", appError)
 	}
 
+	err := s.assetstore.Put(applicationName, apiType, spec, docstopic.ApiSpec)
+	log.Infof("Updating Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
+
+	if err != nil {
+		log.Infof("Failed to update Api Spec for application '%s' and service '%s': %s.", applicationName, serviceID, err)
+		appendedErr = appendedErr.Append("", err)
+	}
+
 	return appendedErr
+}
+
+func (s service) UpdateEventApiResources(applicationName string, serviceID string, spec []byte, apiType docstopic.ApiType) apperrors.AppError {
+	err := s.assetstore.Put(applicationName, apiType, spec, docstopic.EventApiSpec)
+	log.Infof("Updating Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
+
+	if err != nil {
+		log.Infof("Failed to update Api Spec for application '%s' and service '%s': %s.", applicationName, serviceID, err)
+		return err
+	}
+	return nil
 }
 
 func (s service) DeleteApiResources(applicationName string, serviceID string, secretName string) apperrors.AppError {
@@ -134,6 +179,14 @@ func (s service) DeleteApiResources(applicationName string, serviceID string, se
 	if appError != nil {
 		log.Infof("Failed to update istio resources for application '%s' and service '%s': %s.", applicationName, serviceID, appError)
 		appendedErr = appendedErr.Append("", appError)
+	}
+
+	err := s.assetstore.Remove(applicationName)
+	log.Infof("Removing Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
+
+	if err != nil {
+		log.Infof("Failed to remove Api Spec for application '%s' and service '%s': %s.", applicationName, serviceID, err)
+		appendedErr = appendedErr.Append("", err)
 	}
 
 	return appendedErr

@@ -4,6 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
 	secretsmodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
@@ -119,9 +120,10 @@ func (s *service) createAPIResources(directorApplication model.Application, runt
 
 	for _, apiDefinition := range directorApplication.APIs {
 		spec := getSpec(apiDefinition.APISpec)
+		apiType := getApiType(apiDefinition.APISpec)
 		service := applications.GetService(apiDefinition.ID, runtimeApplication)
 
-		err := s.resourcesService.CreateApiResources(runtimeApplication.Name, runtimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), spec)
+		err := s.resourcesService.CreateApiResources(runtimeApplication.Name, runtimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), spec, apiType)
 		if err != nil {
 			appendedErr = appendError(appendedErr, err)
 		}
@@ -129,9 +131,10 @@ func (s *service) createAPIResources(directorApplication model.Application, runt
 
 	for _, eventApiDefinition := range directorApplication.EventAPIs {
 		spec := getEventSpec(eventApiDefinition.EventAPISpec)
+		apiType := getEventApiType(eventApiDefinition.EventAPISpec)
 		service := applications.GetService(eventApiDefinition.ID, runtimeApplication)
 
-		err := s.resourcesService.CreateApiResources(runtimeApplication.Name, runtimeApplication.UID, service.ID, nil, spec)
+		err := s.resourcesService.CreateEventApiResources(runtimeApplication.Name, service.ID, spec, apiType)
 		if err != nil {
 			appendedErr = appendError(appendedErr, err)
 		}
@@ -301,14 +304,14 @@ func (s *service) updateOrCreateRESTAPIResources(directorApplication model.Appli
 
 		if existsInRuntime {
 			log.Infof("Updating resources for API '%s' and application '%s'", apiDefinition.ID, directorApplication.ID)
-			err := s.resourcesService.UpdateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec))
+			err := s.resourcesService.UpdateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec), getApiType(apiDefinition.APISpec))
 			if err != nil {
 				log.Warningf("Failed to update API '%s': %s.", apiDefinition.ID, err)
 				appendedErr = appendError(appendedErr, err)
 			}
 		} else {
 			log.Infof("Creating resources for API '%s' and application '%s'", apiDefinition.ID, directorApplication.ID)
-			err := s.resourcesService.CreateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec))
+			err := s.resourcesService.CreateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec), getApiType(apiDefinition.APISpec))
 			if err != nil {
 				log.Warningf("Failed to create API '%s': %s.", apiDefinition.ID, err)
 				appendedErr = appendError(appendedErr, err)
@@ -327,14 +330,14 @@ func (s *service) updateOrCreateEventAPIResources(directorApplication model.Appl
 		service := applications.GetService(eventAPIDefinition.ID, newRuntimeApplication)
 		if existsInRuntime {
 			log.Infof("Updating resources for API '%s' and application '%s'", eventAPIDefinition.ID, directorApplication.ID)
-			err := s.resourcesService.UpdateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, nil, getEventSpec(eventAPIDefinition.EventAPISpec))
+			err := s.resourcesService.UpdateEventApiResources(newRuntimeApplication.Name, service.ID, getEventSpec(eventAPIDefinition.EventAPISpec), getEventApiType(eventAPIDefinition.EventAPISpec))
 			if err != nil {
 				log.Warningf("Failed to update Event API '%s': %s.", eventAPIDefinition.ID, err)
 				appendedErr = appendError(appendedErr, err)
 			}
 		} else {
 			log.Infof("Creating resources for API '%s' and application '%s'", eventAPIDefinition.ID, directorApplication.ID)
-			err := s.resourcesService.CreateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, nil, getEventSpec(eventAPIDefinition.EventAPISpec))
+			err := s.resourcesService.CreateEventApiResources(newRuntimeApplication.Name, service.ID, getEventSpec(eventAPIDefinition.EventAPISpec), getEventApiType(eventAPIDefinition.EventAPISpec))
 			if err != nil {
 				log.Warningf("Failed to create Event API '%s': %s.", eventAPIDefinition.ID, err)
 				appendedErr = appendError(appendedErr, err)
@@ -359,6 +362,29 @@ func getEventSpec(eventApiSpec *model.EventAPISpec) []byte {
 	}
 
 	return eventApiSpec.Data
+}
+
+func getApiType(apiSpec *model.APISpec) docstopic.ApiType {
+	if apiSpec == nil {
+		return docstopic.Empty
+	}
+	if apiSpec.Type == model.APISpecTypeOdata {
+		return docstopic.ODataApiType
+	}
+	if apiSpec.Type == model.APISpecTypeOpenAPI {
+		return docstopic.OpenApiType
+	}
+	return docstopic.Empty
+}
+
+func getEventApiType(eventApiSpec *model.EventAPISpec) docstopic.ApiType {
+	if eventApiSpec == nil {
+		return docstopic.Empty
+	}
+	if eventApiSpec.Type == model.EventAPISpecTypeAsyncAPI {
+		return docstopic.AsyncApi
+	}
+	return docstopic.Empty
 }
 
 func newResult(application v1alpha1.Application, operation Operation, appError apperrors.AppError) Result {

@@ -1,14 +1,11 @@
 package docstopic
 
 const (
-	KeyOpenApiSpec       = "openapi"
-	KeyODataSpec         = "odata"
-	KeyAsyncApiSpec      = "asyncapi"
-	KeyDocumentationSpec = "docs"
+	KeyOpenApiSpec  = "openapi"
+	KeyODataSpec    = "odata"
+	KeyAsyncApiSpec = "asyncapi"
 
-	ApiSpec       = "ApiSpec"
-	Documentation = "Documentation"
-	EventsSpec    = "EventsSpec"
+	SpecHash = "SpecHash"
 )
 
 type Entry struct {
@@ -17,7 +14,7 @@ type Entry struct {
 	Description string
 	Urls        map[string]string
 	Labels      map[string]string
-	Hashes      map[string]string
+	SpecHash    string
 	Status      StatusType
 }
 
@@ -35,5 +32,13 @@ type ApiType string
 const (
 	OpenApiType  ApiType = "openapi"
 	ODataApiType ApiType = "odata"
-	NoneApiType  ApiType = ""
+	AsyncApi     ApiType = "asyncapi"
+	Empty        ApiType = ""
+)
+
+type SpecCategory string
+
+const (
+	ApiSpec      SpecCategory = "apispec"
+	EventApiSpec SpecCategory = "eventapispec"
 )

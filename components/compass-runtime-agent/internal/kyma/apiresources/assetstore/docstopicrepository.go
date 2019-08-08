@@ -179,9 +179,7 @@ func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.ClusterDocsTopic {
 	}
 
 	annotations := map[string]string{
-		docstopic.ApiSpec:       docsTopicEntry.Hashes[docstopic.ApiSpec],
-		docstopic.Documentation: docsTopicEntry.Hashes[docstopic.Documentation],
-		docstopic.EventsSpec:    docsTopicEntry.Hashes[docstopic.EventsSpec],
+		docstopic.SpecHash: docsTopicEntry.SpecHash,
 	}
 
 	return v1alpha1.ClusterDocsTopic{
@@ -211,19 +209,13 @@ func fromK8sType(k8sDocsTopic v1alpha1.ClusterDocsTopic) docstopic.Entry {
 		urls[source.Type] = source.URL
 	}
 
-	hashes := map[string]string{
-		docstopic.ApiSpec:       k8sDocsTopic.Annotations[docstopic.ApiSpec],
-		docstopic.Documentation: k8sDocsTopic.Annotations[docstopic.Documentation],
-		docstopic.EventsSpec:    k8sDocsTopic.Annotations[docstopic.EventsSpec],
-	}
-
 	return docstopic.Entry{
 		Id:          k8sDocsTopic.Name,
 		Description: k8sDocsTopic.Spec.Description,
 		DisplayName: k8sDocsTopic.Spec.DisplayName,
 		Urls:        urls,
 		Labels:      k8sDocsTopic.Labels,
-		Hashes:      hashes,
+		SpecHash:    k8sDocsTopic.Annotations[docstopic.SpecHash],
 		Status:      docstopic.StatusType(k8sDocsTopic.Status.Phase),
 	}
 }

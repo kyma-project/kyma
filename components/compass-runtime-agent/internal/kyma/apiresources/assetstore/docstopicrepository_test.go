@@ -250,9 +250,7 @@ func createTestDocsTopicEntry() docstopic.Entry {
 		Labels: map[string]string{
 			"key": "value",
 		},
-		Hashes: map[string]string{
-			docstopic.ApiSpec: "39faae9f5e6e58d758bce2c88a247a45",
-		},
+		SpecHash: "39faae9f5e6e58d758bce2c88a247a45",
 	}
 }
 

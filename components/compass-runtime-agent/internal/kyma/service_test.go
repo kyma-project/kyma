@@ -3,6 +3,8 @@ package kyma
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/mock"
@@ -22,7 +24,6 @@ import (
 func TestService(t *testing.T) {
 
 	nilSpec := []byte(nil)
-	nilCredentials := (*secretsmodel.CredentialsWithCSRF)(nil)
 
 	t.Run("should return error in case failed to determine differences between current and desired runtime state", func(t *testing.T) {
 		// given
@@ -56,7 +57,7 @@ func TestService(t *testing.T) {
 		converterMock := &appMocks.Converter{}
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
-		api := getTestDirectorAPiDefinition("API1", &model.APISpec{Data: []byte("spec")}, &model.Credentials{
+		api := getTestDirectorAPiDefinition("API1", &model.APISpec{Data: []byte("spec"), Type: model.APISpecTypeOpenAPI}, &model.Credentials{
 			Basic: &model.Basic{
 				Username: "admin",
 				Password: "nimda",
@@ -84,8 +85,8 @@ func TestService(t *testing.T) {
 		applicationsManagerMock.On("Create", &runtimeApplication).Return(&runtimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		resourcesServiceMocks.On("CreateApiResources", "id1", runtimeApplication.UID, "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), []byte("spec")).Return(nil)
-		resourcesServiceMocks.On("CreateApiResources", "id1", runtimeApplication.UID, "EventAPI1", nilCredentials, nilSpec).Return(nil)
+		resourcesServiceMocks.On("CreateApiResources", "id1", runtimeApplication.UID, "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), []byte("spec"), docstopic.OpenApiType).Return(nil)
+		resourcesServiceMocks.On("CreateEventApiResources", "id1", "EventAPI1", nilSpec, docstopic.Empty).Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -115,7 +116,7 @@ func TestService(t *testing.T) {
 
 		api := getTestDirectorAPiDefinition("API1", nil, nil)
 		eventAPI := getTestDirectorEventAPIDefinition("EventAPI1", &model.EventAPISpec{
-			Data: []byte("spec"),
+			Data: []byte("spec"), Type: model.EventAPISpecTypeAsyncAPI,
 		})
 
 		directorApplication := getTestDirectorApplication("id1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
@@ -138,8 +139,8 @@ func TestService(t *testing.T) {
 		converterMock.On("Do", directorApplication).Return(runtimeApplication)
 		applicationsManagerMock.On("Update", &runtimeApplication).Return(&runtimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		resourcesServiceMocks.On("UpdateApiResources", "id1", types.UID(""), "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), nilSpec).Return(nil)
-		resourcesServiceMocks.On("CreateApiResources", "id1", runtimeApplication.UID, "EventAPI1", nilCredentials, []byte("spec")).Return(nil)
+		resourcesServiceMocks.On("UpdateApiResources", "id1", types.UID(""), "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), nilSpec, docstopic.Empty).Return(nil)
+		resourcesServiceMocks.On("CreateEventApiResources", "id1", "EventAPI1", []byte("spec"), docstopic.AsyncApi).Return(nil)
 		resourcesServiceMocks.On("DeleteApiResources", "id1", "API2", "").Return(nil)
 
 		expectedResult := []Result{
