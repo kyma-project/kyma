@@ -44,7 +44,8 @@ func TestKnativeServingAcceptance(t *testing.T) {
 
 	kubeConfig := loadKubeConfigOrDie(t)
 	serviceClient := servingtyped.NewForConfigOrDie(kubeConfig).Services("knative-serving")
-	service, err := serviceClient.Create(&serving.Service{
+
+	svc := &serving.Service{
 		ObjectMeta: meta.ObjectMeta{
 			Name: "test-service",
 		},
@@ -72,7 +73,9 @@ func TestKnativeServingAcceptance(t *testing.T) {
 				},
 			},
 		},
-	})
+	}
+
+	service, err := serviceClient.Create(svc)
 	if err != nil {
 		t.Fatalf("Cannot create test service: %v", err)
 	}
