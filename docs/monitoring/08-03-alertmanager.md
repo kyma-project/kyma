@@ -7,7 +7,7 @@ This tutorial shows you how to define alerting rules to monitor the health statu
 
 ## Prerequisites
 
-This tutorial is a follow-up of the Observe application metrics tutorial that uses the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric. That configuration is required to complete this tutorial.
+This tutorial is a follow-up of the [Observe application metrics](components/monitoring/#tutorials-expose-custom-metrics-in-kyma) tutorial that uses the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric. That configuration is required to complete this tutorial.
 
 ## Steps
 
@@ -66,6 +66,6 @@ kubectl apply -f test-rules.yaml
 
 ![](./assets/rules-dashboard.png)
 
-6. Go to [`http://localhost:9090/alerts` to see if the alert fires properly.
+6. Go to [`http://localhost:9090/alerts`](http://localhost:9090/alerts) to see if the alert fires properly.
 
 ![](./assets/fired-alert.png)
