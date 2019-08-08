@@ -21,11 +21,7 @@ import (
 	"github.com/kyma-project/kyma/common/ingressgateway"
 )
 
-const (
-	cpuLimits = "50m"
-)
-
-func TestKnativeServing_Acceptance(t *testing.T) {
+func TestKnativeServingAcceptance(t *testing.T) {
 	domainName := mustGetenv(t, "DOMAIN_NAME")
 	target := mustGetenv(t, "TARGET")
 
@@ -57,7 +53,7 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 								},
 								Resources: core.ResourceRequirements{
 									Requests: core.ResourceList{
-										core.ResourceCPU: resource.MustParse(cpuLimits),
+										core.ResourceCPU: *resource.NewMilliQuantity(50, resource.DecimalSI), // 50m
 									},
 								},
 							},
@@ -88,10 +84,10 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 		t.Logf("Received %d: %q", resp.StatusCode, msg)
 
 		if resp.StatusCode != http.StatusOK {
-			return fmt.Errorf("unexpected status code: %v", resp.StatusCode)
+			return fmt.Errorf("expected status code %d, got %d", http.StatusOK, resp.StatusCode)
 		}
 		if msg != expectedMsg {
-			return fmt.Errorf("unexpected response: '%s'", msg)
+			return fmt.Errorf("expected response to be %q, got %q", expectedMsg, msg)
 		}
 
 		return nil
@@ -101,7 +97,7 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 	)
 
 	if err != nil {
-		t.Fatalf("cannot get test service response: %s", err)
+		t.Fatalf("Cannot get test service response: %s", err)
 	}
 }
 
@@ -110,7 +106,7 @@ func mustGetenv(t *testing.T, name string) string {
 
 	env := os.Getenv(name)
 	if env == "" {
-		t.Fatalf("Missing '%s' variable", name)
+		t.Fatalf("Missing %q variable", name)
 	}
 	return env
 }
