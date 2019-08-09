@@ -33,7 +33,6 @@ type service struct {
 	assetstore                assetstore.Service
 }
 
-// TODO: change secrets.Service interface so that it doesn't return applications.Credentials
 func NewService(accessServiceManager accessservice.AccessServiceManager, secretsService secrets.Service, nameResolver k8sconsts.NameResolver, istioService istio.Service, assetstore assetstore.Service) Service {
 	return service{
 		accessServiceManager: accessServiceManager,
