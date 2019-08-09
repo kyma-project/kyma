@@ -7,9 +7,13 @@ Alertmanager receives and manages alerts coming from Prometheus. It can then for
 
 ## Alertmanager configuration
 
-The Alertmanager configuration is located in the `alertmanager.config.yaml`. For details on configuration elements, see [this](https://prometheus.io/docs/alerting/configuration/) document.
+You can configure and manage Alertmanager using the following files:
 
-Alertmanager instances require a [Secret](../../resources/monitoring/charts/alertmanager/templates/secret.yaml) resource, whose name follows the `alertmanager-{ALERTMANAGER_NAME}` format.
+* `alertmanager.yaml` which deploys the Alertmananger Pod. 
+* `alertmanager.config.yaml` which you can use to define core Alertmanager configuration and alerting channels. For detailson configuration elements, see [this](https://prometheus.io/docs/alerting/configuration/) document
+* `alertmanager.rules` which lists alerting rules used to monitor Alertmanager's health
+
+Additionally, Alertmanager instances require a [Secret](../../resources/monitoring/charts/alertmanager/templates/secret.yaml) resource. This resource provides an encoded  `alertmanager.yaml` file which you use to deploy the Pod.
 
 The Secret resource looks as follows:
 
@@ -31,16 +35,15 @@ data:
   {{ $key }}: {{ $val | b64enc | quote }}
 {{- end }}
 ```
-
->**NOTE**: The **data** property contains an encoded `alertmanager.yaml` file which contains all the configuration for alerting notifications.
+To configure the alerts and be able to forward them to different channels, define the parameters: 
+| Parameter | Description |
+|-----------|-------------|
+| **name** | Specifies the name of the Secret. The name nas to follow the the `alertmanager-{ALERTMANAGER_NAME}` format. |
+| **data** | Contains an encoded `alertmanager.yaml` file which contains all the configuration for alerting notifications.|
 
 
 ## Alerting rules
 
-Kyma comes with a set of alerting)rules provided out of the box. You can find them [here](../../resources/monitoring/charts/alert-rules/templates)
-
-The rules include:
-* logging rules
-* rest services rules
-* webapps rules
-* custom Kyma alert rules
+Kyma comes with a set of alerting rules provided out of the box. You can find them [here](../../resources/monitoring/charts/alert-rules/templates).
+These rules provide alerting configuration for logging, webapps, rest services, and custom kyma rules. 
+You can also define your own alerting rule To learn how, see [this](components/monitoring/#tutorials-define-alerting-rules) tutorial.
