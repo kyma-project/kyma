@@ -21,6 +21,12 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.global.containerRegistry.path }}{{ .Values.image.dir }}/service-catalog-ui:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+          - nginx
+          - -c
+          - /nginx-conf/nginx.conf
+          - -g
+          - daemon off;
           ports:
             - containerPort: {{ .Values.catalog.service.internalPort }}
             - containerPort: {{ .Values.instances.service.internalPort }}
@@ -33,7 +39,7 @@ spec:
           - name: config
             mountPath: /var/brokers-public/config
           - name: nginx
-            mountPath: /etc/nginx/nginx.conf
+            mountPath: /nginx-config
       volumes:
       - name: config
         configMap:

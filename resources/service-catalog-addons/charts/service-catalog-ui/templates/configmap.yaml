@@ -21,7 +21,7 @@ data:
 
     http {
       default_type application/octet-stream;
-      include mime.types;
+      include /etc/nginx/mime.types;
       sendfile on;
       tcp_nopush on;
       tcp_nodelay on;
@@ -71,7 +71,7 @@ data:
             add_header Access-Control-Allow-Origin *;
         }
       }
-      
+
       server {
         server_name brokers;
         listen 8082 http2;
