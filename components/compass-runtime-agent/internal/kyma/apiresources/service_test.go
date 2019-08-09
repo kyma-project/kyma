@@ -12,7 +12,6 @@ import (
 	istiomocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/istio/mocks"
 	secretmock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/mocks"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/types"
@@ -40,7 +39,7 @@ func TestService(t *testing.T) {
 
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		istioServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
-		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(applications.Credentials{}, nil)
+		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 		assetStoreMock.On("Put", "appName", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(nil)
 
@@ -119,7 +118,7 @@ func TestService(t *testing.T) {
 		}
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
 		istioServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("just another error"))
-		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, apperrors.Internal("some other error"))
+		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(apperrors.Internal("some other error"))
 		assetStoreMock.On("Put", "appName", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
@@ -153,7 +152,7 @@ func TestService(t *testing.T) {
 
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
-		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(applications.Credentials{}, nil)
+		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(nil)
 		assetStoreMock.On("Put", "appName", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
@@ -234,7 +233,7 @@ func TestService(t *testing.T) {
 		}
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
 		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("just another error"))
-		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, apperrors.Internal("some other error"))
+		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(apperrors.Internal("some other error"))
 		assetStoreMock.On("Put", "appName", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 

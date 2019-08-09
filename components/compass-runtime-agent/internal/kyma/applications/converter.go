@@ -179,6 +179,10 @@ func (c converter) toCredentials(applicationID string, apiDefinitionID string, c
 }
 
 func (c converter) toEventAPIService(applicationID string, eventsDefinition model.EventAPIDefinition) v1alpha1.Service {
+	description := eventsDefinition.Description
+	if description == "" {
+		description = "Description not provided"
+	}
 
 	return v1alpha1.Service{
 		ID:                  eventsDefinition.ID,

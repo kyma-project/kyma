@@ -15,26 +15,19 @@ type Service struct {
 }
 
 // Create provides a mock function with given fields: application, appUID, serviceID, credentials
-func (_m *Service) Create(application string, appUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF) (applications.Credentials, apperrors.AppError) {
+func (_m *Service) Create(application string, appUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF) apperrors.AppError {
 	ret := _m.Called(application, appUID, serviceID, credentials)
 
-	var r0 applications.Credentials
-	if rf, ok := ret.Get(0).(func(string, types.UID, string, *model.CredentialsWithCSRF) applications.Credentials); ok {
+	var r0 apperrors.AppError
+	if rf, ok := ret.Get(0).(func(string, types.UID, string, *model.CredentialsWithCSRF) apperrors.AppError); ok {
 		r0 = rf(application, appUID, serviceID, credentials)
 	} else {
-		r0 = ret.Get(0).(applications.Credentials)
-	}
-
-	var r1 apperrors.AppError
-	if rf, ok := ret.Get(1).(func(string, types.UID, string, *model.CredentialsWithCSRF) apperrors.AppError); ok {
-		r1 = rf(application, appUID, serviceID, credentials)
-	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(apperrors.AppError)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(apperrors.AppError)
 		}
 	}
 
-	return r0, r1
+	return r0
 }
 
 // Delete provides a mock function with given fields: name
@@ -77,24 +70,17 @@ func (_m *Service) Get(application string, credentials applications.Credentials)
 }
 
 // Upsert provides a mock function with given fields: application, appUID, serviceID, credentials
-func (_m *Service) Upsert(application string, appUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF) (applications.Credentials, apperrors.AppError) {
+func (_m *Service) Upsert(application string, appUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF) apperrors.AppError {
 	ret := _m.Called(application, appUID, serviceID, credentials)
 
-	var r0 applications.Credentials
-	if rf, ok := ret.Get(0).(func(string, types.UID, string, *model.CredentialsWithCSRF) applications.Credentials); ok {
+	var r0 apperrors.AppError
+	if rf, ok := ret.Get(0).(func(string, types.UID, string, *model.CredentialsWithCSRF) apperrors.AppError); ok {
 		r0 = rf(application, appUID, serviceID, credentials)
 	} else {
-		r0 = ret.Get(0).(applications.Credentials)
-	}
-
-	var r1 apperrors.AppError
-	if rf, ok := ret.Get(1).(func(string, types.UID, string, *model.CredentialsWithCSRF) apperrors.AppError); ok {
-		r1 = rf(application, appUID, serviceID, credentials)
-	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(apperrors.AppError)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(apperrors.AppError)
 		}
 	}
 
-	return r0, r1
+	return r0
 }

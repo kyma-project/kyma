@@ -60,7 +60,7 @@ func (s service) CreateApiResources(applicationName string, applicationUID types
 
 	if credentials != nil {
 		log.Infof("Creating secret for application '%s' and service '%s'.", applicationName, serviceID)
-		_, err := s.secretsService.Create(applicationName, applicationUID, serviceID, credentials)
+		err := s.secretsService.Create(applicationName, applicationUID, serviceID, credentials)
 		if err != nil {
 			log.Infof("Failed to create secret for application '%s' and service '%s': %s.", applicationName, serviceID, err)
 			appendedErr = appendedErr.Append("", err)
@@ -110,7 +110,7 @@ func (s service) UpdateApiResources(applicationName string, applicationUID types
 
 	if credentials != nil {
 		log.Infof("Updating secret for application '%s' and service '%s'.", applicationName, serviceID)
-		_, err := s.secretsService.Upsert(applicationName, applicationUID, serviceID, credentials)
+		err := s.secretsService.Upsert(applicationName, applicationUID, serviceID, credentials)
 		if err != nil {
 			log.Infof("Failed to update secret for application '%s' and service '%s': %s.", applicationName, serviceID, err)
 			appendedErr = appendedErr.Append("", err)
