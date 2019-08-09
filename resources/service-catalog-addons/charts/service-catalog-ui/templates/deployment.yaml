@@ -24,7 +24,7 @@ spec:
           command:
           - nginx
           - -c
-          - /nginx-conf/nginx.conf
+          - /nginx-config/nginx.conf
           - -g
           - daemon off;
           ports:
