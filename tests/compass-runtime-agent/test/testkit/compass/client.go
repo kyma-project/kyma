@@ -2,6 +2,8 @@ package compass
 
 import (
 	"context"
+	"crypto/tls"
+	"net/http"
 
 	"github.com/sirupsen/logrus"
 
@@ -21,12 +23,20 @@ type Client struct {
 	queryProvider queryProvider
 
 	tenant    string
-	runtimeId string // TODO - I might not need it
+	runtimeId string // TODO: It will be needed soon
 }
 
 // TODO: client will need to be authenticated after implementation of certs
 func NewCompassClient(endpoint, tenant, runtimeId string) *Client {
-	client := gcli.NewClient(endpoint)
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+
+	client := gcli.NewClient(endpoint, gcli.WithHTTPClient(httpClient))
 	client.Log = func(s string) {
 		logrus.Info(s)
 	}
@@ -40,7 +50,6 @@ func NewCompassClient(endpoint, tenant, runtimeId string) *Client {
 	}
 }
 
-// TODO - will it unmarshal correctly if I replace graphql models with my aliases?
 type Application struct {
 	ID          string                          `json:"id"`
 	Name        string                          `json:"name"`
