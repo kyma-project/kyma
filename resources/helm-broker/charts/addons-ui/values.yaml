@@ -1,4 +1,4 @@
-name: add-ons
+name: addons
 replicaCount: 1
 image:
   name: add-ons-ui
