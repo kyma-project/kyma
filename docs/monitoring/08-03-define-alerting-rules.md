@@ -3,7 +3,7 @@ title: Define alerting rules
 type: Tutorials
 ---
 
-This tutorial shows you how to define alerting rules to monitor the health status of your resources. Using the `cpu_temperature_celsius` metric create an alert which fires whenever the CPU temperature rises above 70 degrees Celsius.
+This tutorial shows you how to define alerting rules to monitor the health status of your resources. In this example, you will write an alerting rule based on the `cpu_temperature_celsius` metric. The alert defined in the rule will fire whenever the CPU temperature exceeds 70 degrees Celsius.
 
 ## Prerequisites
 
@@ -13,9 +13,9 @@ This tutorial is a follow-up of the [Observe application metrics](components/mon
 
 Follow these steps to create an alerting rule:
 
-1. Create a PrometheusRule holding the configuration for your alerting rule.
+1. Create a PrometheusRule resource holding the configuration of your alerting rule. 
 
->**NOTE**: Prometheus uses the **spec.ruleSelector** label selector to identify PrometheusRule definitions. Provide values for the **prometheus** and **role** parameters for Prometheus to pick up the rule.
+>**NOTE**: Prometheus uses the **spec.ruleSelector** label selector to identify PrometheusRule definitions. Provide the values for the **prometheus** and **role** parameters as in the example for Prometheus to pick up the rule.
 
 ```yaml
 apiVersion: monitoring.coreos.com/v1
@@ -45,12 +45,12 @@ Configure your alert using the following parameters:
 | Parameter | Description | Example value |
 |-----------|-------------|---------------|
 | **alert** | Specifies the name of the alert. | `CPUTempHigh`  |
-| **expr** | Defines the PromQL expression to evaluate. Specify the expression using Kubernetes [functions](https://prometheus.io/docs/prometheus/latest/querying/functions/) and [metrics](https://github.com/kubernetes/kube-state-metrics/blob/master/Documentation/pod-metrics.md). | `cpu_temperature_celsius > 70`  |
-| **for** | Specifies the time period during which alerts are returned. | `2m` |
+| **expr** | A PromQL expression specifying the conditions that must be met for the alarm to fire. Specify the expression using Kubernetes [functions](https://prometheus.io/docs/prometheus/latest/querying/functions/) and [metrics](https://github.com/kubernetes/kube-state-metrics/blob/master/Documentation/pod-metrics.md). | `cpu_temperature_celsius > 70`  |
+| **for** | Specifies the time period between encountering an active alert for the first time during rule evaluation and firing the alert.  | `60s` |
 | **description** | Provides the alert details. | `CPU temperature exceeds 70 degrees Celsius` |
 | **summary** | Provides a short alert summary. | `CPU temperature is too high` |
 
-For details on defining alerting rules, see [this](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/) document.
+For more details on defining alerting rules, see [this](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/) document.
 
 3. Deploy the alerting rule:
 
