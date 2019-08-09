@@ -5,7 +5,7 @@ set -o pipefail
 
 WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-export NAMESPACE=event-bus-perf-test-tmp2
+export NAMESPACE=event-bus-perf-test
 export CLUSTER_DOMAIN=$(kubectl get gateways.networking.istio.io kyma-gateway \
                         -n kyma-system -ojsonpath="{.spec.servers[0].hosts[0]}" | sed 's/*//g' )
 export SUBSCRIBER_SERVICE_PATH="subscriber-service"
@@ -51,16 +51,13 @@ function wait_for_event_activation() {
 
 function wait_for_subscription_to_be_ready() {
     echo -e "\nChecking for subscription status...\n"
-    local kubectl_result=$(kubectl get subscriptions.eventing.kyma-project.io \
-                            hello-with-data-subscription \
-                                -n $NAMESPACE -oyaml | grep type: is-ready 2>/dev/null)
 
     for i in {1..5}; do
         local kubectl_result=$(kubectl get subscriptions.eventing.kyma-project.io \
                             hello-with-data-subscription \
                                 -n $NAMESPACE -oyaml | grep "type: is-ready" 2>/dev/null)
         if [[ $kubectl_result == *"type: is-ready"* ]]; then
-            echo -e "Subscription status id ready."
+            echo -e "Subscription status is ready."
             return 0
         fi
         echo -n "."
