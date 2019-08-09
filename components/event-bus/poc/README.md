@@ -85,13 +85,6 @@ data:
 EOF
 ```
 
-
-### Checkout the POC branch
-```bash
-cd $GOPATH/src/github.com/kyma-project/kyma/; \
-git remote add sayanh git@github.com:sayanh/kyma.git; \
-```
-
 ### Install EventBus CRD
 ```bash
 # install required CRDs
