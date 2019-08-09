@@ -284,12 +284,9 @@ func (s *service) updateAPIResources(directorApplication model.Application, exis
 		appendedErr = appendError(appendedErr, err)
 	}
 
-	for _, service := range existentRuntimeApplication.Spec.Services {
-		if !model.APIExists(service.ID, directorApplication) {
-			log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.ID)
-			err = s.deleteAPIResources(newRuntimeApplication.Name, service)
-			appendedErr = appendError(appendedErr, err)
-		}
+	err = s.deleteResourcesOfNonExistentAPI(existentRuntimeApplication, directorApplication, newRuntimeApplication.Name)
+	if err != nil {
+		appendedErr = appendError(appendedErr, err)
 	}
 
 	return appendedErr
@@ -328,6 +325,7 @@ func (s *service) updateOrCreateEventAPIResources(directorApplication model.Appl
 	for _, eventAPIDefinition := range directorApplication.EventAPIs {
 		existsInRuntime := applications.ServiceExists(eventAPIDefinition.ID, existentRuntimeApplication)
 		service := applications.GetService(eventAPIDefinition.ID, newRuntimeApplication)
+
 		if existsInRuntime {
 			log.Infof("Updating resources for API '%s' and application '%s'", eventAPIDefinition.ID, directorApplication.ID)
 			err := s.resourcesService.UpdateEventApiResources(newRuntimeApplication.Name, service.ID, getEventSpec(eventAPIDefinition.EventAPISpec), getEventApiType(eventAPIDefinition.EventAPISpec))
@@ -345,6 +343,18 @@ func (s *service) updateOrCreateEventAPIResources(directorApplication model.Appl
 		}
 	}
 
+	return appendedErr
+}
+
+func (s *service) deleteResourcesOfNonExistentAPI(existentRuntimeApplication v1alpha1.Application, directorApplication model.Application, name string) apperrors.AppError {
+	var appendedErr apperrors.AppError
+	for _, service := range existentRuntimeApplication.Spec.Services {
+		if !model.APIExists(service.ID, directorApplication) {
+			log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.ID)
+			err := s.deleteAPIResources(name, service)
+			appendedErr = appendError(appendedErr, err)
+		}
+	}
 	return appendedErr
 }
 
