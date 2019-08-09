@@ -32,6 +32,8 @@ spec:
             mountPath: /var/instances-public/config
           - name: config
             mountPath: /var/brokers-public/config
+          - name: nginx
+            mountPath: /etc/nginx/nginx.conf
       volumes:
       - name: config
         configMap:
@@ -39,3 +41,9 @@ spec:
           items:
           - key: config.js
             path: config.js
+      - name: nginx
+        configMap:
+          name: {{ .Chart.Name }}
+          items:
+          - key: nginx.conf
+            path: nginx.conf
