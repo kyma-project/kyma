@@ -1,5 +1,4 @@
 initImage:
-  # valid values are "IfNotPresent", "Never", and "Always"
   pullPolicy: "IfNotPresent"
 image:
   pullPolicy: "IfNotPresent"
