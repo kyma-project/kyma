@@ -2,12 +2,9 @@ webhook:
   replicaCount: 1
   image:
     repository: eu.gcr.io/kyma-project/incubator/develop/podpreset-webhook
-    tag: b0e22c33
+    tag: 2d684573
     pullPolicy: IfNotPresent
   verbosity: 6
-  service:
-    type: NodePort
-    port: 443
 
 controller:
   enabled: false
