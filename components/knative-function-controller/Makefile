@@ -18,19 +18,8 @@ else
 endif
 
 # Run tests
-test: generate fmt vet symlinks
+test: generate fmt vet
 	go test -v ./pkg/... ./cmd/... -coverprofile cover.out
-
-.ONESHELL:
-symlinks:
-	cd config/crds
-	-rm 300*.yaml
-	ln -s ../../vendor/github.com/knative/build/config/300-build.yaml 300-build.yaml
-	ln -s ../../vendor/github.com/knative/build/config/300-buildtemplate.yaml 300-buildtemplate.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-revision.yaml 300-revision.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-route.yaml 300-route.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-service.yaml 300-service.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-configuration.yaml 300-configuration.yaml
 
 # Generate code
 generate: resolve
@@ -72,7 +61,7 @@ deploy: manifests install
 
 # Build the docker image
 .PHONY: docker-build
-docker-build: resolve pull-licenses manifests
+docker-build: resolve pull-licenses test manifests
 	docker build . -t $(IMG)
 	@echo "updating kustomize image patch file for manager resource"
 	sed -i'' -e 's@image: .*@image: '"${IMG}"'@' ./config/default/manager_image_patch_remote_dev.yaml ./config/default/manager_image_patch_local_dev.yaml
