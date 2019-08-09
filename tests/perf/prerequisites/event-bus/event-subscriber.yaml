@@ -1,49 +1,52 @@
-apiVersion: kubeless.io/v1beta1
-kind: Function
+apiVersion: v1
+kind: Service
 metadata:
+  name: event-subscription-service
+  labels:
+    application: event-subscription-service
+    example: event-subscription-service
   annotations:
-    function-size: S
-  name: callback-function
+    auth.istio.io/8080: NONE
 spec:
-  handler: handler.main
-  runtime: nodejs8
-  type: HTTP
-  deployment:
-    spec:
-      template:
-        spec:
-          containers:
-          - name: size-s
-            resources:
-              limits:
-                cpu: 100m
-                memory: 128Mi
-              requests:
-                cpu: 100m
-                memory: 100Mi
-  function: |
-    module.exports = {
-        main: function (event, context) {
-            return event.data + ": Call to the function load-test was successful!";
-        }
-    }
-  horizontalPodAutoscaler:
+  ports:
+  - name: http
+    port: 9000
+  type: NodePort
+  selector:
+    application: event-subscription-service
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: event-subscription-service
+spec:
+  replicas: 1
+  template:
     metadata:
-      namespace: $NAMESPACE
       labels:
-        function: callback-function
-        app: perf-test-event-bus
-      name: callback-function
+        application: event-subscription-service
+        example: event-subscription-service
+      annotations:
+        sidecar.istio.io/inject: "true"
     spec:
-      maxReplicas: 2
-      metrics:
-      - resource:
-          name: cpu
-          targetAverageUtilization: 50
-        type: Resource
-      minReplicas: 1
-      scaleTargetRef:
-        apiVersion: apps/v1beta1
-        kind: Deployment
-        name: callback-function
-
+      containers:
+      - image: eu.gcr.io/kyma-project/develop/event-bus-e2e-subscriber:859d7e73
+        imagePullPolicy: Always
+        name: event-subscription-service
+        ports:
+        - name: http
+          containerPort: 9000
+---
+apiVersion: gateway.kyma-project.io/v1alpha2
+kind: Api
+metadata:
+  labels:
+    application: event-subscription-service
+    example: event-subscription-service
+  name: event-subscription-service
+spec:
+  authentication: []
+  hostname: subscriber-service
+  service:
+    name: event-subscription-service
+    port: 9000
