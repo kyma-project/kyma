@@ -112,6 +112,8 @@ spec:
             value: {{ template "fullname" . }}
           - name: APP_DEVELOP_MODE
             value: "{{ .Values.global.isDevelopMode }}"
+          - name: APP_DOCUMENTATION_ENABLED
+            value: "true"
 
         volumeMounts:
         - mountPath: /tmp
