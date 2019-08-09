@@ -175,7 +175,7 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should be able to get specific CRD in ${NAMESPACE}"
 	testPermissions "get" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
 
-    echo "--> ${DEVELOPER_EMAIL} should be able to create Access Rules in ${NAMESPACE}"
+	echo "--> ${DEVELOPER_EMAIL} should be able to create Access Rules in ${NAMESPACE}"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "yes"
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to delete ClusterRole in ${NAMESPACE}"
@@ -205,7 +205,7 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to delete ory Access Rule"
 	testPermissions "delete" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "yes"
 
-    echo "--> ${ADMIN_EMAIL} should be able to create ory Access Rule"
+	echo "--> ${ADMIN_EMAIL} should be able to create ory Access Rule"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to delete specific CRD"
@@ -232,7 +232,7 @@ function runTests() {
 	echo "--> ${VIEW_EMAIL} should NOT be able to delete ory Access Rule"
 	testPermissions "delete" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "no"
 
-    echo "--> ${ADMIN_EMAIL} should NOT be able to create ory Access Rule"
+	echo "--> ${ADMIN_EMAIL} should NOT be able to create ory Access Rule"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "no"
 }
 
