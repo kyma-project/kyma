@@ -3,9 +3,9 @@ kind: Job
 metadata:
   name: {{ template "fullname" . }}-cm2cac-migration
   annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "1"
-    "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
   labels:
     app: {{ template "fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -39,8 +39,8 @@ kind: ServiceAccount
 metadata:
   name: {{ template "fullname" . }}-cm2cac-migration
   annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "name" . }}
@@ -55,8 +55,8 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ template "fullname" . }}-cm2cac-migration
   annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
   labels:
     app: {{ template "name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -75,8 +75,8 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ template "fullname" . }}-cm2cac-migration
   annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-delete-policy: "hook-succeeded,before-hook-creation"
   labels:
     app: {{ template "name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"

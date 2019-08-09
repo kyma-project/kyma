@@ -2,17 +2,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-    name: {{ template "event-publish-service-metrics.name" . }}
-    labels:
-        app: {{ template "event-publish-service.fullname" . }}
-        heritage: {{ .Release.Service | quote }}
-        release: {{ .Release.Name | quote }}
-        chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  name: {{ template "event-publish-service-metrics.name" . }}
+  labels:
+{{ include "event-publish-service.labels.standard" . | indent 4 }}
 spec:
-    type: {{ .Values.service.type }}
-    ports:
-        - name: metrics-port
-          port: {{ .Values.monitoring.port }}
-    selector:
-        app: {{ template "event-publish-service.fullname" . }}
-        release: {{ .Release.Name }}
+  type: {{ .Values.service.type }}
+  ports:
+  - name: metrics-port
+    port: {{ .Values.monitoring.port }}
+  selector:
+{{ include "event-publish-service.labels.selectors" . | indent 4 }}

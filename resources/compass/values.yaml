@@ -1,4 +1,7 @@
 global:
+  defaultTenant : 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
+  tenants: foo bar
+
   images:
     containerRegistry:
       path: eu.gcr.io/kyma-project/incubator

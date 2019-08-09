@@ -29,7 +29,9 @@ func makeProxy(targetUrl string, requestParameters *authorization.RequestParamet
 		req.URL.Host = target.Host
 		req.Host = target.Host
 
-		req.URL.Path = joinPaths(target.Path, req.URL.Path)
+		combinedPath := joinPaths(target.Path, req.URL.Path)
+		req.URL.RawPath = combinedPath
+		req.URL.Path = combinedPath
 
 		if targetQuery == "" || req.URL.RawQuery == "" {
 			req.URL.RawQuery = targetQuery + req.URL.RawQuery

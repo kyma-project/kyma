@@ -21,7 +21,8 @@ image:
 # If using kube2iam or kiam, use the following annotation with your AWS_ACCOUNT_ID
 # and VELERO_ROLE_NAME filled in:
 #  iam.amazonaws.com/role: arn:aws:iam::<AWS_ACCOUNT_ID>:role/<VELERO_ROLE_NAME>
-podAnnotations: {}
+podAnnotations:
+  sidecar.istio.io/inject: "false"
 
 # Resource requests/limits to specify for the Velero deployment. Optional.
 resources: {}
@@ -42,7 +43,7 @@ nodeSelector: {}
 
 # Settings for Velero's prometheus metrics. Disabled by default.
 metrics:
-  enabled: false
+  enabled: true
   scrapeInterval: 30s
 
   # Pod annotations for Prometheus
@@ -52,7 +53,7 @@ metrics:
     prometheus.io/path: "/metrics"
 
   serviceMonitor:
-    enabled: false
+    enabled: true
     additionalLabels: {}
 
 ##

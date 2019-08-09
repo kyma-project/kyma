@@ -1,8 +1,8 @@
-# Velero
+# Backup
 
 ## Overview
 
-Velero is a tool used to back up and restore Kubernetes resources and persistent volumes. It can create on-demand or scheduled backups, filter objects which should be backed up, and set TTL (time to live) for stored backups. For more details, see the official [Velero documentation](https://velero.io/docs/v1.0.0/).
+Velero is the tool used to back up and restore Kubernetes resources and persistent volumes. It can create on-demand or scheduled backups, filter objects which should be backed up, and set TTL (time to live) for stored backups. For more details, see the official [Velero documentation](https://velero.io/docs/v1.0.0/).
 
 ## Required parameters
 

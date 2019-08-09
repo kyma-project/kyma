@@ -9,5 +9,4 @@ spec:
   ports:
     - port: {{ .Values.port }}
   selector:
-    app: {{ template "event-publish-service.fullname" . }}
-    release: {{ .Release.Name }}
+{{ include "event-publish-service.labels.selectors" . | indent 4 }}

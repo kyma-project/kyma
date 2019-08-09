@@ -1,10 +1,10 @@
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
 aggregationRule:
   clusterRoleSelectors:
   - matchLabels:
       duck.knative.dev/addressable: "true"
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
 metadata:
   name: addressable-resolver
 rules: []
@@ -947,17 +947,16 @@ spec:
 
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-channel-webhook
+  namespace: knative-eventing
 data:
   default-channel-config: |
     clusterdefault:
       apiversion: eventing.knative.dev/v1alpha1
       kind: ClusterChannelProvisioner
       name: natss
-kind: ConfigMap
-metadata:
-  name: default-channel-webhook
-  namespace: knative-eventing
-
 ---
 apiVersion: v1
 kind: Service
@@ -1155,6 +1154,10 @@ spec:
 
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-logging
+  namespace: knative-eventing
 data:
   loglevel.controller: info
   loglevel.webhook: info
@@ -1179,13 +1182,14 @@ data:
         "callerEncoder": ""
       }
     }
-kind: ConfigMap
-metadata:
-  name: config-logging
-  namespace: knative-eventing
-
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-observability
+  namespace: knative-eventing
+  labels:
+    eventing.knative.dev/release: devel
 data:
   _example: |
     ################################
@@ -1316,12 +1320,6 @@ data:
     # flag to "true" could cause extra Stackdriver charge.
     # If metrics.backend-destination is not Stackdriver, this is ignored.
     metrics.allow-stackdriver-custom-metrics: "false"
-kind: ConfigMap
-metadata:
-  labels:
-    eventing.knative.dev/release: devel
-  name: config-observability
-  namespace: knative-eventing
 
 ---
 apiVersion: v1

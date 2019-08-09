@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+data:
+  config.js: |
+    window.clusterConfig = {
+      microfrontendContentUrl : 'https://{{ .Values.mf.host }}.{{ .Values.global.ingress.domainName }}',
+      graphqlApiUrl: 'https://{{ .Values.global.gateway.host }}.{{ .Values.global.ingress.domainName }}/director/graphql',
+      tenants: '{{ .Values.global.defaultTenant }} {{ .Values.global.tenants }}',
+      defaultTenant: '{{ .Values.global.defaultTenant }}',
+    };

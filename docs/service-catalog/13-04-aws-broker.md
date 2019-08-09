@@ -27,7 +27,14 @@ The AWS Service Broker provides these Service Classes to use with the Service Ca
 * Amazon S3
 * Amazon Lex
 * Amazon Route53
-* Amazon ElastiCache
+* Amazon ElasticCache
+* Amazon ElasticSearch
+* Amazon DocumentDB
+* Amazon RDS for PostgreSQL
+* Amazon RDS for Oracle
+* Amazon RDS for Mssql
+* Amazon Aurora PostgreSQL
+* Amazon Aurora MySQL
 
 Find the documentation for each Service Class [here](https://github.com/awslabs/aws-servicebroker/tree/v1.0.0/templates). You can also see the details and specification of each Service Class in the Service Catalog UI, after provisioning a given class.
 

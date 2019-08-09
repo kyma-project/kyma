@@ -28,14 +28,34 @@ type APIInput struct {
 }
 
 type AddonsConfiguration struct {
-	Name   string   `json:"name"`
-	Urls   []string `json:"urls"`
-	Labels Labels   `json:"labels"`
+	Name   string                    `json:"name"`
+	Urls   []string                  `json:"urls"`
+	Labels Labels                    `json:"labels"`
+	Status AddonsConfigurationStatus `json:"status"`
 }
 
 type AddonsConfigurationEvent struct {
 	Type                SubscriptionEventType `json:"type"`
 	AddonsConfiguration AddonsConfiguration   `json:"addonsConfiguration"`
+}
+
+type AddonsConfigurationStatus struct {
+	Phase        string                                `json:"phase"`
+	Repositories []AddonsConfigurationStatusRepository `json:"repositories"`
+}
+
+type AddonsConfigurationStatusAddons struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+	Status  string `json:"status"`
+	Reason  string `json:"reason"`
+	Message string `json:"message"`
+}
+
+type AddonsConfigurationStatusRepository struct {
+	URL    string                            `json:"url"`
+	Status string                            `json:"status"`
+	Addons []AddonsConfigurationStatusAddons `json:"addons"`
 }
 
 type ApiEvent struct {
@@ -106,6 +126,11 @@ type BindableResourcesOutputItem struct {
 	Kind        string              `json:"kind"`
 	DisplayName string              `json:"displayName"`
 	Resources   []UsageKindResource `json:"resources"`
+}
+
+type ClusterAddonsConfigurationEvent struct {
+	Type                SubscriptionEventType `json:"type"`
+	AddonsConfiguration AddonsConfiguration   `json:"addonsConfiguration"`
 }
 
 type ClusterAssetEvent struct {

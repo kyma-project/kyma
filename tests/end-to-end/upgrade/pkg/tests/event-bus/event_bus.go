@@ -98,6 +98,10 @@ func (f *eventBusFlow) createResources() error {
 		f.createSubscription,
 		f.createSubscriber,
 		f.checkSubscriberStatus,
+		f.checkPublisherStatus,
+		f.checkSubscriptionReady,
+		f.publishTestEvent,
+		f.checkSubscriberReceivedEvent,
 	} {
 		err := fn()
 		if err != nil {
