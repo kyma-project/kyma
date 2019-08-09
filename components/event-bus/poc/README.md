@@ -90,7 +90,7 @@ EOF
 # install required CRDs
 kubectl apply \
    -f https://raw.githubusercontent.com/kyma-project/kyma/release-1.4/resources/cluster-essentials/templates/event-activation.crd.yaml \
-   -f https://raw.githubusercontent.com/kyma-project/kyma/release-1.3/resources/cluster-essentials/templates/eventing-subscription.crd.yaml
+   -f https://raw.githubusercontent.com/kyma-project/kyma/release-1.4/resources/cluster-essentials/templates/eventing-subscription.crd.yaml
 
 ```
 
