@@ -48,21 +48,34 @@ func (s service) Put(id string, apiType docstopic.ApiType, spec []byte, specCate
 		return nil
 	}
 
-	hash := calculateHash(spec)
+	existingHash, err := s.getExistingAssetHash(id)
+	if err != nil {
+		return err
+	}
 
+	newHash := calculateHash(spec)
+
+	if existingHash == emptyHash {
+		return s.create(id, apiType, spec, specCategory, newHash)
+	}
+
+	if newHash != existingHash {
+		return s.update(id, apiType, spec, specCategory, newHash)
+	}
+	return nil
+}
+
+func (s service) getExistingAssetHash(id string) (string, apperrors.AppError) {
 	entry, err := s.docsTopicRepository.Get(id)
+	if err != nil {
+		if err.Code() == apperrors.CodeNotFound {
+			return "", nil
+		}
 
-	if err != nil && err.Code() == apperrors.CodeNotFound {
-		return s.create(id, apiType, spec, specCategory, hash)
-	} else if err != nil {
-		return apperrors.Internal("Failed to retrieve docsTopic, %s.", err.Error())
+		return "", err
 	}
 
-	if isHashMatching(hash, entry.SpecHash) {
-		return nil
-	}
-
-	return s.update(id, apiType, spec, specCategory, hash)
+	return entry.SpecHash, nil
 }
 
 func (s service) Remove(id string) apperrors.AppError {
@@ -155,10 +168,6 @@ func (s service) processSpec(content []byte, filename, fileKey string, docsTopic
 	docsTopicEntry.Urls[fileKey] = outputFile.RemotePath
 
 	return nil
-}
-
-func isHashMatching(hash string, entryHash string) bool {
-	return hash == entryHash
 }
 
 func calculateHash(content []byte) string {

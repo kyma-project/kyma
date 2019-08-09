@@ -13,7 +13,6 @@ import (
 type modificationFunction func(modStrategy strategy.ModificationStrategy, application string, appUID types.UID, name, serviceID string, newData strategy.SecretData) apperrors.AppError
 
 type Service interface {
-	Get(application string, credentials applications.Credentials) (model.CredentialsWithCSRF, apperrors.AppError)
 	Create(application string, appUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF) apperrors.AppError
 	Upsert(application string, appUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF) apperrors.AppError
 	Delete(name string) apperrors.AppError
