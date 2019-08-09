@@ -8,7 +8,7 @@ metadata:
   annotations:
 {{ toYaml .Values.virtualservice.annotations | indent 4 }}
 {{- end }}
-  name: {{ template "fullname" . }}
+  name: {{ template "fullname" . }}-catalog
   labels:
     app: {{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
