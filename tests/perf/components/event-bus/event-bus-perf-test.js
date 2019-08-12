@@ -20,7 +20,7 @@ eventPublishPayload = `{"source-id": "external-application", "event-type": "hell
                         `"event-type-version": "v1", "event-time": "2018-11-02T22:08:41+00:00", "data": "some-event"}`;
 
 export let options = {
-  rps: 2000,
+  rps: 10,
   tags: {
     component: "event-bus",
     revision: `${__ENV.REVISION}`
@@ -34,10 +34,10 @@ export let options = {
   stages: [
     { duration: "1m", target: 1 },
     { duration: "1m", target: 2 },
+    { duration: "1m", target: 10 },
+    { duration: "1m", target: 20 },
     { duration: "1m", target: 100 },
-    { duration: "1m", target: 200 },
-    { duration: "1m", target: 1000 },
-    { duration: "1m", target: 2000 }
+    { duration: "1m", target: 200 }
   ],
   noConnectionReuse: true
 };
