@@ -3,7 +3,7 @@ title: Alertmanager
 type: Details
 ---
 
-Alertmanager receives and manages alerts coming from Prometheus. It can then forward the notifications on fired alerts to specified channels, such as Slack or VictorOps. 
+Alertmanager receives and manages alerts coming from Prometheus. It can then forward the notifications about fired alerts to specific channels, such as Slack or VictorOps. 
 
 ## Alertmanager configuration
 
