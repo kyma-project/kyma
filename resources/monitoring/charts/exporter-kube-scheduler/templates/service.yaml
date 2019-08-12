@@ -7,6 +7,7 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    jobLabel: kube-scheduler
   name: {{ template "exporter-kube-scheduler.fullname" . }}
   namespace: kube-system
 spec:

@@ -4,6 +4,7 @@ metadata:
   labels:
     app: {{ template "exporter-kube-etcd.name" . }}
     component: kube-etcd
+    jobLabel: kube-etcd
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -18,6 +19,6 @@ spec:
       targetPort: {{ .Values.etcdPort }}
 {{- if .Values.endpoints }}{{- else }}
   selector:
-    k8s-app: etcd-server
+    component: etcd
 {{- end }}
   type: ClusterIP

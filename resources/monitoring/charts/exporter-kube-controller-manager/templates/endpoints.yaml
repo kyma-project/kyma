@@ -4,7 +4,7 @@ kind: Endpoints
 metadata:
   labels:
     app: {{ template "exporter-kube-controller-manager.name" . }}
-    component: kube-controller-manager
+    k8s-app: kube-controller-manager
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}

@@ -3,7 +3,7 @@ kind: Service
 metadata:
   labels:
     app: {{ template "exporter-kube-controller-manager.name" . }}
-    component: kube-controller-manager
+    jobLabel: kube-controller-manager
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
