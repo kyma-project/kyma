@@ -7,7 +7,7 @@ Alertmanager receives and manages alerts coming from Prometheus. It can then for
 
 ## Alertmanager configuration
 
-You can configure and manage Alertmanager using the following files:
+Use the following files to configure and manage Alertmanager:
 
 * `alertmanager.yaml` which deploys the Alertmananger Pod. 
 * `alertmanager.config.yaml` which you can use to define core Alertmanager configuration and alerting channels. For details on configuration elements, see [this](https://prometheus.io/docs/alerting/configuration/) document.
@@ -36,6 +36,7 @@ data:
 {{- end }}
 ```
 To configure the alerts and be able to forward them to different channels, define the parameters: 
+
 | Parameter | Description |
 |-----------|-------------|
 | **name** | Specifies the name of the Secret. The name nas to follow the the `alertmanager-{ALERTMANAGER_NAME}` format. |
