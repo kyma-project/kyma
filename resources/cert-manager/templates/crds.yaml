@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  namespace: {{ .Release.Namespace }}
-  name: crds
-data:
-  crds.yaml: |-
-{{.Files.Get "files/00-crds.yaml" | printf "%s" | indent 4}}
