@@ -32,12 +32,12 @@ spec:
               value: kyma-integration
             - name: MOCK_SERVICE_PORT
               value: "8080"
-            - name: SELECTOR_KEY
-              value: app
-            - name: SELECTOR_VALUE
-              value: compass-runtime-agent-tests
             - name: MOCK_SERVICE_NAME
               value: {{ .Chart.Name }}-tests-mock
+            - name: CONFIG_APPLICATION_WAIT_TIME
+              value: "30"
+            - name: PROXY_INVALIDATION_WAIT_TIME
+              value: "150"
           command:
           - "/bin/sh"
           args:
@@ -46,5 +46,11 @@ spec:
           ports:
           - containerPort: 8080
             name: http
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "compass-gateway.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
     restartPolicy: Never
 {{- end }}
