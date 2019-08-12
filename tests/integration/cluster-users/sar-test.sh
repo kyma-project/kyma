@@ -232,7 +232,7 @@ function runTests() {
 	echo "--> ${VIEW_EMAIL} should NOT be able to delete ory Access Rule"
 	testPermissions "delete" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "no"
 
-	echo "--> ${ADMIN_EMAIL} should NOT be able to create ory Access Rule"
+	echo "--> ${VIEW_EMAIL} should NOT be able to create ory Access Rule"
 	testPermissions "create" "rule.oathkeeper.ory.sh" "${NAMESPACE}" "no"
 }
 
