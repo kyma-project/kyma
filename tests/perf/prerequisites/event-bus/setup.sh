@@ -21,7 +21,7 @@ eventing_specs=(
 function wait_for_subscriber_to_be_ready() {
     echo -n "Waiting for subscriber to be ready..."
     for i in {1..15}; do #timeout after 30 seconds
-        local response=$(curl -i --insecure $SUBSCRIBER_STATUS_URL 2>/dev/null)
+        local response=$(curl -i $SUBSCRIBER_STATUS_URL 2>/dev/null)
         if [[ $response == *"200"* ]]; then
             echo -e "\nSubscriber is ready."
             return 0
