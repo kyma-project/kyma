@@ -13,7 +13,7 @@ Use the following files to configure and manage Alertmanager:
 * `alertmanager.config.yaml` which you can use to define core Alertmanager configuration and alerting channels. For details on configuration elements, see [this](https://prometheus.io/docs/alerting/configuration/) document.
 * `alertmanager.rules` which lists alerting rules used to monitor Alertmanager's health.
 
-Additionally, Alertmanager instances require a [Secret](../../resources/monitoring/charts/alertmanager/templates/secret.yaml) resource which contains an encoded `alertmanager.yaml.tpl` file. This Secret is picked up during Pod deployment and mounted as `alertmanager.config.yaml`, allowing you to configure alert settings and notifications.
+Additionally, Alertmanager instances require a [Secret](../../resources/monitoring/charts/alertmanager/templates/secret.yaml) resource which contains the encoded `alertmanager.yaml.tpl` file. This Secret is picked up during Pod deployment and mounted as `alertmanager.config.yaml`, which allows you to configure alert settings and notifications.
 
 The Secret resource looks as follows:
 
@@ -39,8 +39,8 @@ To configure the alerts and be able to forward them to different channels, defin
 
 | Parameter | Description |
 |-----------|-------------|
-| **name** | Specifies the name of the Secret. The name nas to follow the the `alertmanager-{ALERTMANAGER_NAME}` format. |
-| **data** | Contains an encoded `alertmanager.yaml.tpl` file which contains all the configuration for alerting notifications provided in the [`alertmanager.config.yaml`](../../resources/monitoring/charts/alertmanager/templates/alertmanager.config.yaml) file.|
+| **name** | Specifies the name of the Secret. The name must follow the `alertmanager-{ALERTMANAGER_NAME}` format. |
+| **data** | Contains the encoded `alertmanager.yaml.tpl` file which contains all the configuration for alerting notifications provided in the [`alertmanager.config.yaml`](../../resources/monitoring/charts/alertmanager/templates/alertmanager.config.yaml) file.|
 
 
 ## Alerting rules
