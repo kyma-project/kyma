@@ -28,7 +28,7 @@ const (
 
 type Service interface {
 	Put(id string, apiType docstopic.ApiType, spec []byte, specCategory docstopic.SpecCategory) apperrors.AppError
-	Remove(id string) apperrors.AppError
+	Delete(id string) apperrors.AppError
 }
 
 type service struct {
@@ -78,7 +78,7 @@ func (s service) getExistingAssetHash(id string) (string, apperrors.AppError) {
 	return entry.SpecHash, nil
 }
 
-func (s service) Remove(id string) apperrors.AppError {
+func (s service) Delete(id string) apperrors.AppError {
 	return s.docsTopicRepository.Delete(id)
 }
 

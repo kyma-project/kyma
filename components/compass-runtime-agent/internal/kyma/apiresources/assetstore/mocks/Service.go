@@ -12,13 +12,13 @@ type Service struct {
 	mock.Mock
 }
 
-// Put provides a mock function with given fields: id, apiType, spec, specCategory
-func (_m Service) Put(id string, apiType docstopic.ApiType, spec []byte, specCategory docstopic.SpecCategory) apperrors.AppError {
-	ret := _m.Called(id, apiType, spec, specCategory)
+// Delete provides a mock function with given fields: id
+func (_m Service) Delete(id string) apperrors.AppError {
+	ret := _m.Called(id)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(string, docstopic.ApiType, []byte, docstopic.SpecCategory) apperrors.AppError); ok {
-		r0 = rf(id, apiType, spec, specCategory)
+	if rf, ok := ret.Get(0).(func(string) apperrors.AppError); ok {
+		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)
@@ -28,13 +28,13 @@ func (_m Service) Put(id string, apiType docstopic.ApiType, spec []byte, specCat
 	return r0
 }
 
-// Remove provides a mock function with given fields: id
-func (_m Service) Remove(id string) apperrors.AppError {
-	ret := _m.Called(id)
+// Put provides a mock function with given fields: id, apiType, spec, specCategory
+func (_m Service) Put(id string, apiType docstopic.ApiType, spec []byte, specCategory docstopic.SpecCategory) apperrors.AppError {
+	ret := _m.Called(id, apiType, spec, specCategory)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(string) apperrors.AppError); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(string, docstopic.ApiType, []byte, docstopic.SpecCategory) apperrors.AppError); ok {
+		r0 = rf(id, apiType, spec, specCategory)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)

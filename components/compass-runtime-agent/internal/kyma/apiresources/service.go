@@ -76,7 +76,7 @@ func (s service) CreateApiResources(applicationName string, applicationUID types
 		appendedErr = appendedErr.Append("", err)
 	}
 
-	err = s.assetstore.Put(applicationName, apiType, spec, docstopic.ApiSpec)
+	err = s.assetstore.Put(serviceID, apiType, spec, docstopic.ApiSpec)
 	log.Infof("Uploading Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
 
 	if err != nil {
@@ -88,7 +88,7 @@ func (s service) CreateApiResources(applicationName string, applicationUID types
 }
 
 func (s service) CreateEventApiResources(applicationName string, serviceID string, spec []byte, apiType docstopic.ApiType) apperrors.AppError {
-	err := s.assetstore.Put(applicationName, apiType, spec, docstopic.EventApiSpec)
+	err := s.assetstore.Put(serviceID, apiType, spec, docstopic.EventApiSpec)
 	log.Infof("Uploading Event Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
 
 	if err != nil {
@@ -134,7 +134,7 @@ func (s service) UpdateApiResources(applicationName string, applicationUID types
 		appendedErr = appendedErr.Append("", appError)
 	}
 
-	err := s.assetstore.Put(applicationName, apiType, spec, docstopic.ApiSpec)
+	err := s.assetstore.Put(serviceID, apiType, spec, docstopic.ApiSpec)
 	log.Infof("Updating Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
 
 	if err != nil {
@@ -146,7 +146,7 @@ func (s service) UpdateApiResources(applicationName string, applicationUID types
 }
 
 func (s service) UpdateEventApiResources(applicationName string, serviceID string, spec []byte, apiType docstopic.ApiType) apperrors.AppError {
-	err := s.assetstore.Put(applicationName, apiType, spec, docstopic.EventApiSpec)
+	err := s.assetstore.Put(serviceID, apiType, spec, docstopic.EventApiSpec)
 	log.Infof("Updating Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
 
 	if err != nil {
@@ -180,7 +180,7 @@ func (s service) DeleteApiResources(applicationName string, serviceID string, se
 		appendedErr = appendedErr.Append("", appError)
 	}
 
-	err := s.assetstore.Remove(applicationName)
+	err := s.assetstore.Delete(serviceID)
 	log.Infof("Removing Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
 
 	if err != nil {

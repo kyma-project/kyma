@@ -41,7 +41,7 @@ func TestService(t *testing.T) {
 		istioServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
-		assetStoreMock.On("Put", "appName", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(nil)
+		assetStoreMock.On("Put", "serviceID", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(nil)
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
@@ -64,7 +64,7 @@ func TestService(t *testing.T) {
 		istioServiceMock := &istiomocks.Service{}
 		assetStoreMock := assetstoremock.Service{}
 
-		assetStoreMock.On("Put", "appName", docstopic.AsyncApi, eventsSpec, docstopic.EventApiSpec).Return(nil)
+		assetStoreMock.On("Put", "serviceID", docstopic.AsyncApi, eventsSpec, docstopic.EventApiSpec).Return(nil)
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
@@ -87,7 +87,7 @@ func TestService(t *testing.T) {
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		istioServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
-		assetStoreMock.On("Put", "appName", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(nil)
+		assetStoreMock.On("Put", "serviceID", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(nil)
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
@@ -119,7 +119,7 @@ func TestService(t *testing.T) {
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
 		istioServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("just another error"))
 		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(apperrors.Internal("some other error"))
-		assetStoreMock.On("Put", "appName", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(apperrors.Internal("some other error"))
+		assetStoreMock.On("Put", "serviceID", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
@@ -153,7 +153,7 @@ func TestService(t *testing.T) {
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(nil)
-		assetStoreMock.On("Put", "appName", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(nil)
+		assetStoreMock.On("Put", "serviceID", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
@@ -177,7 +177,7 @@ func TestService(t *testing.T) {
 		istioServiceMock := &istiomocks.Service{}
 		assetStoreMock := assetstoremock.Service{}
 
-		assetStoreMock.On("Put", "appName", docstopic.AsyncApi, eventsSpec, docstopic.EventApiSpec).Return(nil)
+		assetStoreMock.On("Put", "serviceID", docstopic.AsyncApi, eventsSpec, docstopic.EventApiSpec).Return(nil)
 
 		// when
 		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
@@ -200,7 +200,7 @@ func TestService(t *testing.T) {
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		secretServiceMock.On("Delete", "secretName").Return(nil)
-		assetStoreMock.On("Put", "appName", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(nil)
+		assetStoreMock.On("Put", "serviceID", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 		nameResolver.On("GetCredentialsSecretName", "appName", "serviceID").Return("secretName")
 
@@ -234,7 +234,7 @@ func TestService(t *testing.T) {
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
 		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("just another error"))
 		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(apperrors.Internal("some other error"))
-		assetStoreMock.On("Put", "appName", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(apperrors.Internal("some other error"))
+		assetStoreMock.On("Put", "serviceID", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
@@ -261,7 +261,7 @@ func TestService(t *testing.T) {
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
 		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("just another error"))
 		secretServiceMock.On("Delete", "secretName").Return(apperrors.Internal("some other error"))
-		assetStoreMock.On("Put", "appName", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(apperrors.Internal("some other error"))
+		assetStoreMock.On("Put", "serviceID", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 		nameResolver.On("GetCredentialsSecretName", "appName", "serviceID").Return("secretName")
 
@@ -289,7 +289,7 @@ func TestService(t *testing.T) {
 		accessServiceMock.On("Delete", "resourceName").Return(nil)
 		istioServiceMock.On("Delete", "resourceName").Return(nil)
 		secretServiceMock.On("Delete", "secretName").Return(nil)
-		assetStoreMock.On("Remove", "appName").Return(nil)
+		assetStoreMock.On("Delete", "serviceID").Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
@@ -315,7 +315,7 @@ func TestService(t *testing.T) {
 
 		accessServiceMock.On("Delete", "resourceName").Return(nil)
 		istioServiceMock.On("Delete", "resourceName").Return(nil)
-		assetStoreMock.On("Remove", "appName").Return(nil)
+		assetStoreMock.On("Delete", "serviceID").Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
@@ -341,7 +341,7 @@ func TestService(t *testing.T) {
 		accessServiceMock.On("Delete", "resourceName").Return(apperrors.Internal("some error"))
 		istioServiceMock.On("Delete", "resourceName").Return(apperrors.Internal("some error"))
 		secretServiceMock.On("Delete", "secretName").Return(apperrors.Internal("some error"))
-		assetStoreMock.On("Remove", "appName").Return(apperrors.Internal("some error"))
+		assetStoreMock.On("Delete", "serviceID").Return(apperrors.Internal("some error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
