@@ -5,6 +5,7 @@ metadata:
   labels:
     app: {{ template "exporter-kube-scheduler.name" . }}
     component: kube-scheduler
+    k8s-app: kube-scheduler
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
