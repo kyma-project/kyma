@@ -3,7 +3,6 @@ package test
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 
@@ -204,9 +203,9 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 
 				// then
 				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
-					// TODO: we need to wait for proxy to invalidate, we should figure out something better
+					// Due to Application Gateway caching the reverse proxy, after changing the authentication method we need to wait for cache to invalidate
 					t.Log("Wait for proxy to invalidate...")
-					time.Sleep(150 * time.Second)
+					testSuite.WaitForProxyInvalidation()
 
 					// assert updated APIs
 					testSuite.K8sResourceChecker.AssertAPIResources(t, application.ID, updatedAPIs...)
@@ -219,7 +218,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	// Setup check if all resources were deleted
 	var createdApplications []*compass.Application
 	defer func() {
-		waitForAgentToApplyConfig(t)
+		waitForAgentToApplyConfig(t, testSuite)
 		for _, app := range createdApplications {
 			t.Logf("Asserting resources for %s application are deleted", app.ID)
 			testSuite.K8sResourceChecker.AssertAppResourcesDeleted(t, app.ID)
@@ -249,7 +248,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	}
 
 	// Wait for agent to apply config
-	waitForAgentToApplyConfig(t)
+	waitForAgentToApplyConfig(t, testSuite)
 
 	// Assert initial phase
 	for _, testCase := range testCases {
@@ -270,7 +269,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	}
 
 	// Wait for agent to apply config
-	waitForAgentToApplyConfig(t)
+	waitForAgentToApplyConfig(t, testSuite)
 
 	// Assert second phase
 	for _, testCase := range testCases {
@@ -281,10 +280,9 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 
 // TODO - test cases for deniers (after Istio resources are implemented)
 
-func waitForAgentToApplyConfig(t *testing.T) {
-	// TODO - consider some smarter way to wait for it
+func waitForAgentToApplyConfig(t *testing.T, testSuite *runtimeagent.TestSuite) {
 	t.Log("Waiting for Runtime Agent to apply configuration...")
-	time.Sleep(30 * time.Second)
+	testSuite.WaitForConfigurationApplication()
 }
 
 func getAPIByName(apis []*graphql.APIDefinition, name string) (*graphql.APIDefinition, bool) {

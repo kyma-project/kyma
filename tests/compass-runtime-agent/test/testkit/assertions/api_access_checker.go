@@ -20,15 +20,11 @@ import (
 )
 
 // TODO: we should consider enhancing test with sending events (also use Mock Service)
-// TODO: should the mock service pod be created separetly?
 
 const (
 	defaultCheckInterval           = 2 * time.Second
 	accessServiceConnectionTimeout = 60 * time.Second
 	dnsWaitTime                    = 15 * time.Second
-
-	// TODO - move to mock service?
-	oauthValidToken = "valid-token"
 )
 
 type APIAccessChecker struct {

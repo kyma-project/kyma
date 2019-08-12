@@ -9,10 +9,10 @@ func NewEventAPI(name, description string) *EventAPIDefinitionInput {
 		Name:        name,
 		Description: &description,
 		Spec: &graphql.EventAPISpecInput{
-			Data:          nil,
+			Data:          nil, // TODO: Allow to pass spec when Asset Store is ready
 			EventSpecType: "ASYNC_API",
 			Format:        "JSON",
-		}, // TODO  - Allow to pass spec when Asset Store is ready
+		},
 	})
 
 	return &eventAPI

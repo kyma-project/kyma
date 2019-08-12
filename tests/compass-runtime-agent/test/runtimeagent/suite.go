@@ -124,3 +124,12 @@ func (ts *TestSuite) waitForAccessToAPIServer() error {
 func (ts *TestSuite) GetMockServiceURL() string {
 	return fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", ts.mockServiceName, ts.config.Namespace, ts.config.MockServicePort)
 }
+
+func (ts *TestSuite) WaitForProxyInvalidation() {
+	// TODO: we should consider introducing some way to invalidate proxy cache
+	time.Sleep(time.Duration(ts.config.ProxyInvalidationWaitTime) * time.Second)
+}
+
+func (ts *TestSuite) WaitForConfigurationApplication() {
+	time.Sleep(time.Duration(ts.config.ConfigApplicationWaitTime) * time.Second)
+}

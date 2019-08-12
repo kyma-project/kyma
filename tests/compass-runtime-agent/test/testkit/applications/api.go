@@ -5,14 +5,12 @@ import "github.com/kyma-incubator/compass/components/director/pkg/graphql"
 type APIDefinitionInput graphql.APIDefinitionInput
 type AuthInput graphql.AuthInput
 
-// API Definition input
-
 func NewAPI(name, description, targetURL string) *APIDefinitionInput {
 	api := APIDefinitionInput(graphql.APIDefinitionInput{
 		Name:        name,
 		Description: &description,
 		TargetURL:   targetURL,
-		//Spec:        nil, // TODO - allow to pass spec when Asset Store will be ready
+		//Spec:        nil, // TODO: allow to pass spec when Asset Store will be ready
 	})
 	return &api
 }
@@ -26,8 +24,6 @@ func (in *APIDefinitionInput) WithAuth(auth *AuthInput) *APIDefinitionInput {
 	in.DefaultAuth = auth.ToCompassInput()
 	return in
 }
-
-// Authentication input
 
 func NewAuth() *AuthInput {
 	auth := AuthInput(graphql.AuthInput{})
@@ -75,19 +71,3 @@ func (in *AuthInput) WithQueryParams(queryParams map[string][]string) *AuthInput
 
 	return in
 }
-
-// TODO - prepare test case with csrf
-//func (in *AuthInput) WithCSRF(username, password string) *AuthInput {
-//	//if in.DefaultAuth == nil {
-//	//	in.DefaultAuth = &graphql.AuthInput{}
-//	//}
-//
-//	in.RequestAuth = &graphql.CredentialRequestAuthInput{
-//		Csrf: &graphql.BasicCredentialDataInput{
-//			Username: username,
-//			Password: password,
-//		},
-//	}
-//
-//	return in
-//}

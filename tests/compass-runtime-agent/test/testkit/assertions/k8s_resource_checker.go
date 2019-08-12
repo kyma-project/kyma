@@ -23,8 +23,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	//istio "github.com/kyma-project/kyma/components/application-registry/pkg/apis/istio/v1alpha2"
-
 	v1core "k8s.io/api/core/v1"
 )
 
@@ -87,7 +85,7 @@ func (c *K8sResourceChecker) AssertResourcesForApp(t *testing.T, application com
 	}
 	assert.Equal(t, expectedDescription, appCR.Spec.Description)
 
-	// TODO - assert labels after proper handling in agent
+	// TODO: assert labels after proper handling in agent
 
 	if len(application.APIs.Data) > 0 {
 		c.assertAPIs(t, application.ID, application.APIs.Data, appCR)
@@ -96,15 +94,13 @@ func (c *K8sResourceChecker) AssertResourcesForApp(t *testing.T, application com
 		c.assertEventAPIs(t, application.ID, application.EventAPIs.Data, appCR)
 	}
 
-	// TODO - assert docs
+	// TODO: assert docs after implementation of Asset Store
 }
 
 func (c *K8sResourceChecker) AssertAppResourcesDeleted(t *testing.T, appId string) {
 	_, err := c.applicationClient.Get(appId, v1meta.GetOptions{})
 	require.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
-
-	// TODO - should check all apis and stuff? Probably yes, but then it need to take whole Application
 }
 
 func (c *K8sResourceChecker) AssertAPIResources(t *testing.T, appId string, compassAPIs ...*graphql.APIDefinition) {
@@ -122,7 +118,7 @@ func (c *K8sResourceChecker) AssertAPIResourcesDeleted(t *testing.T, application
 		assert.NotEqual(t, s.ID, apiId)
 	}
 
-	c.assertServiceDeleted(t, applicationId, apiId, appCR)
+	c.assertServiceDeleted(t, applicationId, apiId)
 }
 
 func (c *K8sResourceChecker) AssertEventAPIResources(t *testing.T, appId string, compassEventAPIs ...*graphql.EventAPIDefinition) {
@@ -140,10 +136,10 @@ func (c *K8sResourceChecker) AssertEventAPIResourcesDeleted(t *testing.T, applic
 		assert.NotEqual(t, s.ID, eventAPIId)
 	}
 
-	c.assertServiceDeleted(t, applicationId, eventAPIId, appCR)
+	c.assertServiceDeleted(t, applicationId, eventAPIId)
 }
 
-// TODO - Assert docs
+// TODO: Assert Documents when implementation is ready
 
 func (c *K8sResourceChecker) assertAPIs(t *testing.T, appId string, compassAPIs []*graphql.APIDefinition, appCR *v1alpha1apps.Application) {
 	for _, api := range compassAPIs {
@@ -170,11 +166,11 @@ func (c *K8sResourceChecker) assertAPI(t *testing.T, appId string, compassAPI gr
 		c.assertCredentials(t, expectedResourceName, compassAPI.DefaultAuth, entry)
 	}
 
-	// TODO - assert Istio resources
-	// TODO - assert Docs
+	// TODO: assert Istio resources
+	// TODO: assert Docs Topics
 }
 
-func (c *K8sResourceChecker) assertServiceDeleted(t *testing.T, applicationId, apiId string, appCR *v1alpha1apps.Application) {
+func (c *K8sResourceChecker) assertServiceDeleted(t *testing.T, applicationId, apiId string) {
 	resourceName := c.nameResolver.GetResourceName(applicationId, apiId)
 	gatewayURL := c.nameResolver.GetGatewayUrl(applicationId, apiId)
 	c.assertResourcesDoNotExist(t, resourceName, gatewayURL)
@@ -195,7 +191,7 @@ func (c *K8sResourceChecker) assertEventAPI(t *testing.T, appId string, compassE
 	expectedResourceName := c.nameResolver.GetResourceName(appId, compassEventAPI.ID)
 	assert.Equal(t, expectedResourceName, entry.AccessLabel)
 
-	// TODO - check docs
+	// TODO: assert Docs Topics
 }
 
 func (c *K8sResourceChecker) assertService(t *testing.T, id, name string, description *string, appCR *v1alpha1apps.Application) *v1alpha1apps.Service {
@@ -208,7 +204,7 @@ func (c *K8sResourceChecker) assertService(t *testing.T, id, name string, descri
 	//if description != nil && *description != "" {
 	//	expectedDescription = *description
 	//}
-	//assert.Equal(t, expectedDescription, svc.Description) // TODO: description for EventAPI is not handled correctly yet
+	//assert.Equal(t, expectedDescription, svc.Description) // TODO: description for EventAPI is not handled correctly yet, uncomment when it is fixed
 
 	require.Equal(t, 1, len(svc.Entries))
 
@@ -270,7 +266,7 @@ func (c *K8sResourceChecker) assertCSRF(t *testing.T, auth *graphql.CredentialRe
 }
 
 func (c *K8sResourceChecker) assertResourcesDoNotExist(t *testing.T, resourceName, serviceName string) {
-	// TODO - there is bug in agent and this is failing now (for not secured API), uncomment when fixed
+	// TODO: there is bug in agent and this is failing now (for not secured API), uncomment when fixed
 	_, err := c.serviceClient.Get(serviceName, v1meta.GetOptions{})
 	//assert.Error(t, err)
 	//assert.True(t, k8serrors.IsNotFound(err))
@@ -279,7 +275,7 @@ func (c *K8sResourceChecker) assertResourcesDoNotExist(t *testing.T, resourceNam
 	assert.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
 
-	// TODO - check Istio stuff and docs topics
+	// TODO: assert that Istio stuff and Docs Topics have been removed
 }
 
 func getService(applicationCR *v1alpha1apps.Application, apiId string) (*v1alpha1apps.Service, bool) {

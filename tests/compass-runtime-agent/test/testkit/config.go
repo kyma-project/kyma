@@ -11,15 +11,12 @@ type TestConfig struct {
 	Tenant      string `envconfig:"TENANT" required:"true"`
 	RuntimeId   string `envconfig:"RUNTIME_ID" required:"true"`
 
-	// TODO - cleanup unused ENV
-
-	// TODO - dafaults not working?
-	Namespace                string `envconfig:"NAMESPACE" default:"compass-system"`
-	IntegrationNamespace     string `envconfig:"INTEGRATION_NAMESPACE" default:"kyma-integration"`
-	MockServicePort          int32  `envconfig:"MOCK_SERVICE_PORT" default:"8080"`
-	MockServiceSelectorKey   string `envconfig:"SELECTOR_KEY" default:"app"`
-	MockServiceSelectorValue string `envconfig:"SELECTOR_VALUE" default:"compass-runtime-agent-tests"`
-	MockServiceName          string `envconfig:"MOCK_SERVICE_NAME" default:"compass-runtime-agent-tests-mock"`
+	Namespace                 string `envconfig:"NAMESPACE" default:"compass-system"`
+	IntegrationNamespace      string `envconfig:"INTEGRATION_NAMESPACE" default:"kyma-integration"`
+	MockServicePort           int32  `envconfig:"MOCK_SERVICE_PORT" default:"8080"`
+	MockServiceName           string `envconfig:"MOCK_SERVICE_NAME" default:"compass-runtime-agent-tests-mock"`
+	ConfigApplicationWaitTime int64  `envconfig:"CONFIG_APPLICATION_WAIT_TIME" default:"30"`
+	ProxyInvalidationWaitTime int64  `envconfig:"PROXY_INVALIDATION_WAIT_TIME" default:"150"`
 }
 
 func ReadConfig() (TestConfig, error) {

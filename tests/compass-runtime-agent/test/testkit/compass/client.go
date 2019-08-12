@@ -23,7 +23,7 @@ type Client struct {
 	queryProvider queryProvider
 
 	tenant    string
-	runtimeId string // TODO: It will be needed soon
+	runtimeId string // TODO: It will be needed after changes on Compass
 }
 
 // TODO: client will need to be authenticated after implementation of certs
@@ -42,7 +42,7 @@ func NewCompassClient(endpoint, tenant, runtimeId string) *Client {
 	}
 
 	return &Client{
-		client:        gcli.NewClient(endpoint),
+		client:        client,
 		graphqlizer:   gqltools.Graphqlizer{},
 		queryProvider: queryProvider{},
 		tenant:        tenant,
@@ -118,8 +118,6 @@ func (c *Client) UpdateApplication(applicationId string, input graphql.Applicati
 	}
 
 	return response.Result, nil
-
-	return Application{}, nil
 }
 
 func (c *Client) DeleteApplication(id string) (string, error) {

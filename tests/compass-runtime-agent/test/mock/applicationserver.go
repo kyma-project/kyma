@@ -21,6 +21,12 @@ const (
 	BasicAuth  Path = "/v1/auth/basic"
 	OAuthToken Path = "/v1/auth/oauth/token"
 	OAuth      Path = "/v1/auth/oauth"
+
+	Headers     Path = "/v1/headers"
+	QueryParams Path = "/v1/queryparams"
+
+	CSRFToken  Path = "/v1/csrf/token"
+	CSERTarget Path = "/v1/csrf/target"
 )
 
 type AppMockServer struct {
@@ -40,16 +46,15 @@ func NewAppMockServer(port int32) *AppMockServer {
 	router.Path(OAuthToken.String() + "/{clientid}/{clientsecret}").HandlerFunc(oAuth.OAuthTokenHandler)
 	router.Path(OAuth.String() + "/{clientid}/{clientsecret}").HandlerFunc(oAuth.OAuthHandler)
 
-	// TODO - the rest of stuff
 	headers := NewHeadersHandler()
-	router.Path("/headers/{header}/{value}").HandlerFunc(headers.HeadersHandler)
+	router.Path(Headers.String() + "/{header}/{value}").HandlerFunc(headers.HeadersHandler)
 
 	queryParams := NewQueryParamsHandler()
-	router.Path("/queryparams/{param}/{value}").HandlerFunc(queryParams.QueryParamsHandler)
+	router.Path(QueryParams.String() + "/{param}/{value}").HandlerFunc(queryParams.QueryParamsHandler)
 
 	csrf := NewCsrfHandler()
-	router.Path("/csrftoken").HandlerFunc(csrf.CsrfToken)
-	router.Path("/target").HandlerFunc(csrf.Target)
+	router.Path(CSRFToken.String()).HandlerFunc(csrf.CsrfToken)
+	router.Path(CSERTarget.String()).HandlerFunc(csrf.Target)
 
 	router.NotFoundHandler = NewErrorHandler(http.StatusNotFound, "Requested resource could not be found.")
 	router.MethodNotAllowedHandler = NewErrorHandler(http.StatusMethodNotAllowed, "Method not allowed.")
