@@ -7,30 +7,30 @@ Application Operator detects changes in Application custom resources and acts ac
 
 ## Performed operations
 
-Application Operator performs different operations as a result of the following events:
+Application Operator (AO) performs different operations as a result of the following events:
 
- - Application created - Controller installs Helm chart containing all the necessary Kubernetes resources required for the Application to work.
- - Application updated - Status of Application release update
- - Application deleted - Controller deletes Helm chart corresponding to the given Application.
+ - Application created - the AO installs Helm chart containing all the necessary Kubernetes resources required for the Application to work.
+ - Application updated - the AO updates the Status of the Application release.
+ - Application deleted - the AO deletes Helm chart corresponding to the given Application.
 
 
 ## Usage
 
  The Application Operator has the following parameters:
- - **appName** - This is the name used in controller registration. The default value is `application-operator`.
- - **domainName** - Domain name of the cluster. The default domain name is `kyma.local`.
- - **namespace** - Namespace where the Application charts will be deployed. The default namespace is `kyma-integration`.
- - **tillerUrl** - Tiller release server URL. The default is `tiller-deploy.kube-system.svc.cluster.local:44134`.
- - **helmTLSKeyFile** - Path to the TLS key used for Tiller communication. The default is `/etc/certs/tls.key`.
- - **helmTLSCertificateFile** - Path to the TLS certificate used for Tiller communication. The default is `/etc/certs/tls.crt`.
- - **tillerTLSSkipVerify** - Disables TLS verification in communication with Tiller. The default is `true`.
- - **syncPeriod** - Time period between resyncing existing resources. The default value is `30` seconds.
- - **installationTimeout** - Time after the release installation will time out. The default value is `240` seconds.
- - **applicationGatewayImage** - Application Gateway image version to be used in the Application chart.
- - **applicationGatewayTestsImage** - Application Gateway Tests image version to be used in the Application chart.
- - **eventServiceImage** - Event Service image version to be used in the Application chart.
- - **eventServiceTestsImage** - Event Service Tests image version to be used in the Application chart.
- - **applicationConnectivityValidatorImage** - Application Connectivity Validator image version to be used in the Application chart.
+ - **appName** is the name used in controller registration. The default value is `application-operator`.
+ - **domainName** is the domain name of the cluster. The default domain name is `kyma.local`.
+ - **namespace** is the namespace where the Application charts will be deployed. The default namespace is `kyma-integration`.
+ - **tillerUrl** is the tiller release server URL. The default is `tiller-deploy.kube-system.svc.cluster.local:44134`.
+ - **helmTLSKeyFile** is the path to the TLS key used for Tiller communication. The default is `/etc/certs/tls.key`.
+ - **helmTLSCertificateFile** is the path to the TLS certificate used for Tiller communication. The default is `/etc/certs/tls.crt`.
+ - **tillerTLSSkipVerify** disables TLS verification in communication with Tiller. The default is `true`.
+ - **syncPeriod** is the time period between resyncing existing resources. The default value is `30` seconds.
+ - **installationTimeout** is the time after which the release installation will time out. The default value is `240` seconds.
+ - **applicationGatewayImage** is the Application Gateway image version to use in the Application chart.
+ - **applicationGatewayTestsImage** is the Application Gateway Tests image version to use in the Application chart.
+ - **eventServiceImage** is the Event Service image version to use in the Application chart.
+ - **eventServiceTestsImage** is the Event Service Tests image version to use in the Application chart.
+ - **applicationConnectivityValidatorImage** is the Application Connectivity Validator image version to use in the Application chart.
 
 ## Testing on a local deployment
 
