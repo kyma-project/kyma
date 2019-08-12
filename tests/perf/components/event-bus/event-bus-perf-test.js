@@ -20,24 +20,33 @@ eventPublishPayload = `{"source-id": "external-application", "event-type": "hell
                         `"event-type-version": "v1", "event-time": "2018-11-02T22:08:41+00:00", "data": "some-event"}`;
 
 export let options = {
-  rps: 10,
+  rps: 0,
   tags: {
     component: "event-bus",
     revision: `${__ENV.REVISION}`
   },
+    
   /**
    * Bursty traffic,
    * Measure the worst case of bursty traffic, when bursting results in scaling
    * Bursts: 0 -> N, and N -> 2N
    * where, N = {1, 100, 1000}
    */
+    
+  /**
+   * Numbers have to be brought down as the Framework kills the test
+   */
   stages: [
-    { duration: "1m", target: 1 },
-    { duration: "1m", target: 2 },
-    { duration: "1m", target: 10 },
-    { duration: "1m", target: 20 },
-    { duration: "1m", target: 100 },
-    { duration: "1m", target: 200 }
+      //Expected
+//     { duration: "1m", target: 1 },
+//     { duration: "1m", target: 2 },
+//     { duration: "1m", target: 10 },
+//     { duration: "1m", target: 20 },
+//     { duration: "1m", target: 100 },
+//     { duration: "1m", target: 200 }
+     { duration: "90s", target: 2 ** 3 },
+     { duration: "90s", target: 2 ** 4 },
+     { duration: "90s", target: 2 ** 5 }
   ],
   noConnectionReuse: true
 };
