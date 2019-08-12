@@ -128,17 +128,6 @@ func (c *K8sResourceChecker) AssertEventAPIResources(t *testing.T, appId string,
 	c.assertEventAPIs(t, appId, compassEventAPIs, appCR)
 }
 
-func (c *K8sResourceChecker) AssertEventAPIResourcesDeleted(t *testing.T, applicationId, eventAPIId string) {
-	appCR, err := c.applicationClient.Get(applicationId, v1meta.GetOptions{})
-	require.NoError(t, err)
-
-	for _, s := range appCR.Spec.Services {
-		assert.NotEqual(t, s.ID, eventAPIId)
-	}
-
-	c.assertServiceDeleted(t, applicationId, eventAPIId)
-}
-
 // TODO: Assert Documents when implementation is ready
 
 func (c *K8sResourceChecker) assertAPIs(t *testing.T, appId string, compassAPIs []*graphql.APIDefinition, appCR *v1alpha1apps.Application) {

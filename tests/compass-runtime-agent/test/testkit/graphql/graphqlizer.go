@@ -64,7 +64,7 @@ func (g Graphqlizer) DocumentInputToGQL(in *graphql.DocumentInput) (string, erro
 		data: "{{.Data}}",
 		{{- end}}
 		{{- if .FetchRequest }}
-		fetchRequest: {{- FetchRequesstInputToGQL .FetchRequest }} 
+		fetchRequest: {{- FetchRequestInputToGQL .FetchRequest }} 
 		{{- end}}
 		
 }`)
