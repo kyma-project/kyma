@@ -125,7 +125,7 @@ func (s *service) createAPIResources(directorApplication model.Application, runt
 
 		err := s.resourcesService.CreateApiResources(runtimeApplication.Name, runtimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), spec, apiType)
 		if err != nil {
-			appendedErr = appendError(appendedErr, err)
+			appendedErr = apperrors.AppendError(appendedErr, err)
 		}
 	}
 
@@ -136,7 +136,7 @@ func (s *service) createAPIResources(directorApplication model.Application, runt
 
 		err := s.resourcesService.CreateEventApiResources(runtimeApplication.Name, service.ID, spec, apiType)
 		if err != nil {
-			appendedErr = appendError(appendedErr, err)
+			appendedErr = apperrors.AppendError(appendedErr, err)
 		}
 	}
 
@@ -211,7 +211,7 @@ func (s *service) deleteApplication(runtimeApplication v1alpha1.Application) Res
 	err := s.applicationRepository.Delete(runtimeApplication.Name, &v1.DeleteOptions{})
 	if err != nil {
 		log.Warningf("Failed to delete application '%s'", runtimeApplication.Name)
-		appendedErr = appendError(appendedErr, err)
+		appendedErr = apperrors.AppendError(appendedErr, err)
 	}
 
 	return newResult(runtimeApplication, Delete, err)
@@ -224,7 +224,7 @@ func (s *service) deleteAllAPIResources(runtimeApplication v1alpha1.Application)
 		log.Infof("Deleting resources for API '%s' and application '%s'", runtimeService.ID, runtimeApplication.Name)
 		err := s.deleteAPIResources(runtimeApplication.Name, runtimeService)
 		if err != nil {
-			appendedErr = appendError(appendedErr, err)
+			appendedErr = apperrors.AppendError(appendedErr, err)
 		}
 	}
 
@@ -281,12 +281,12 @@ func (s *service) updateAPIResources(directorApplication model.Application, exis
 
 	err := s.updateOrCreateEventAPIResources(directorApplication, existentRuntimeApplication, newRuntimeApplication)
 	if err != nil {
-		appendedErr = appendError(appendedErr, err)
+		appendedErr = apperrors.AppendError(appendedErr, err)
 	}
 
 	err = s.deleteResourcesOfNonExistentAPI(existentRuntimeApplication, directorApplication, newRuntimeApplication.Name)
 	if err != nil {
-		appendedErr = appendError(appendedErr, err)
+		appendedErr = apperrors.AppendError(appendedErr, err)
 	}
 
 	return appendedErr
@@ -304,14 +304,14 @@ func (s *service) updateOrCreateRESTAPIResources(directorApplication model.Appli
 			err := s.resourcesService.UpdateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec), getApiType(apiDefinition.APISpec))
 			if err != nil {
 				log.Warningf("Failed to update API '%s': %s.", apiDefinition.ID, err)
-				appendedErr = appendError(appendedErr, err)
+				appendedErr = apperrors.AppendError(appendedErr, err)
 			}
 		} else {
 			log.Infof("Creating resources for API '%s' and application '%s'", apiDefinition.ID, directorApplication.ID)
 			err := s.resourcesService.CreateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec), getApiType(apiDefinition.APISpec))
 			if err != nil {
 				log.Warningf("Failed to create API '%s': %s.", apiDefinition.ID, err)
-				appendedErr = appendError(appendedErr, err)
+				appendedErr = apperrors.AppendError(appendedErr, err)
 			}
 		}
 	}
@@ -331,14 +331,14 @@ func (s *service) updateOrCreateEventAPIResources(directorApplication model.Appl
 			err := s.resourcesService.UpdateEventApiResources(newRuntimeApplication.Name, service.ID, getEventSpec(eventAPIDefinition.EventAPISpec), getEventApiType(eventAPIDefinition.EventAPISpec))
 			if err != nil {
 				log.Warningf("Failed to update Event API '%s': %s.", eventAPIDefinition.ID, err)
-				appendedErr = appendError(appendedErr, err)
+				appendedErr = apperrors.AppendError(appendedErr, err)
 			}
 		} else {
 			log.Infof("Creating resources for API '%s' and application '%s'", eventAPIDefinition.ID, directorApplication.ID)
 			err := s.resourcesService.CreateEventApiResources(newRuntimeApplication.Name, service.ID, getEventSpec(eventAPIDefinition.EventAPISpec), getEventApiType(eventAPIDefinition.EventAPISpec))
 			if err != nil {
 				log.Warningf("Failed to create Event API '%s': %s.", eventAPIDefinition.ID, err)
-				appendedErr = appendError(appendedErr, err)
+				appendedErr = apperrors.AppendError(appendedErr, err)
 			}
 		}
 	}
@@ -352,7 +352,7 @@ func (s *service) deleteResourcesOfNonExistentAPI(existentRuntimeApplication v1a
 		if !model.APIExists(service.ID, directorApplication) {
 			log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.ID)
 			err := s.deleteAPIResources(name, service)
-			appendedErr = appendError(appendedErr, err)
+			appendedErr = apperrors.AppendError(appendedErr, err)
 		}
 	}
 	return appendedErr
@@ -403,12 +403,4 @@ func newResult(application v1alpha1.Application, operation Operation, appError a
 		Operation:     operation,
 		Error:         appError,
 	}
-}
-
-func appendError(wrapped apperrors.AppError, new apperrors.AppError) apperrors.AppError {
-	if wrapped == nil {
-		return new
-	}
-
-	return wrapped.Append("", new)
 }

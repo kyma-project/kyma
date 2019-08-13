@@ -62,7 +62,7 @@ func (s service) CreateApiResources(applicationName string, applicationUID types
 		err := s.secretsService.Create(applicationName, applicationUID, serviceID, credentials)
 		if err != nil {
 			log.Infof("Failed to create secret for application '%s' and service '%s': %s.", applicationName, serviceID, err)
-			appendedErr = appendedErr.Append("", err)
+			appendedErr = apperrors.AppendError(appendedErr, err)
 		}
 	} else {
 		log.Infof("Credentials for application '%s' and service '%s' not provided.", applicationName, serviceID)
@@ -73,7 +73,7 @@ func (s service) CreateApiResources(applicationName string, applicationUID types
 
 	if err != nil {
 		log.Infof("Failed to create istio resources for application '%s' and service '%s': %s.", applicationName, serviceID, err)
-		appendedErr = appendedErr.Append("", err)
+		appendedErr = apperrors.AppendError(appendedErr, err)
 	}
 
 	err = s.assetstore.Put(serviceID, apiType, spec, docstopic.ApiSpec)
@@ -81,7 +81,7 @@ func (s service) CreateApiResources(applicationName string, applicationUID types
 
 	if err != nil {
 		log.Infof("Failed to upload Api Spec for application '%s' and service '%s': %s.", applicationName, serviceID, err)
-		appendedErr = appendedErr.Append("", err)
+		appendedErr = apperrors.AppendError(appendedErr, err)
 	}
 
 	return appendedErr
@@ -112,7 +112,7 @@ func (s service) UpdateApiResources(applicationName string, applicationUID types
 		err := s.secretsService.Upsert(applicationName, applicationUID, serviceID, credentials)
 		if err != nil {
 			log.Infof("Failed to update secret for application '%s' and service '%s': %s.", applicationName, serviceID, err)
-			appendedErr = appendedErr.Append("", err)
+			appendedErr = apperrors.AppendError(appendedErr, err)
 		}
 	} else {
 		log.Infof("Credentials for application '%s' and service '%s' not provided.", applicationName, serviceID)
@@ -122,7 +122,7 @@ func (s service) UpdateApiResources(applicationName string, applicationUID types
 		err := s.secretsService.Delete(secretName)
 		if err != nil {
 			log.Infof("Failed to delete secret for application '%s' and service '%s': %s.", applicationName, serviceID, err)
-			appendedErr = appendedErr.Append("", err)
+			appendedErr = apperrors.AppendError(appendedErr, err)
 		}
 	}
 
@@ -139,7 +139,7 @@ func (s service) UpdateApiResources(applicationName string, applicationUID types
 
 	if err != nil {
 		log.Infof("Failed to update Api Spec for application '%s' and service '%s': %s.", applicationName, serviceID, err)
-		appendedErr = appendedErr.Append("", err)
+		appendedErr = apperrors.AppendError(appendedErr, err)
 	}
 
 	return appendedErr
@@ -166,7 +166,7 @@ func (s service) DeleteApiResources(applicationName string, serviceID string, se
 		err := s.secretsService.Delete(secretName)
 		if err != nil {
 			log.Infof("Failed to delete secret for application '%s' and service '%s': %s.", applicationName, serviceID, err)
-			appendedErr = appendedErr.Append("", err)
+			appendedErr = apperrors.AppendError(appendedErr, err)
 		}
 	} else {
 		log.Infof("Credentials for application '%s' and service '%s' not provided.", applicationName, serviceID)
@@ -185,7 +185,7 @@ func (s service) DeleteApiResources(applicationName string, serviceID string, se
 
 	if err != nil {
 		log.Infof("Failed to remove Api Spec for application '%s' and service '%s': %s.", applicationName, serviceID, err)
-		appendedErr = appendedErr.Append("", err)
+		appendedErr = apperrors.AppendError(appendedErr, err)
 	}
 
 	return appendedErr
