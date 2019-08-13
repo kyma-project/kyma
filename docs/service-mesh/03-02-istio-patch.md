@@ -3,7 +3,7 @@ title: Istio patch
 type: Details
 ---
 
-As a core component, Istio is installed with every Kyma deployment by default. The [Istio Patch](../../components/istio-kyma-patch/README.md) job patches the already existing Istio installation so that Kyma can use it. Considering the above, the installation includes the following steps:
+As a core component, Istio is installed with every Kyma deployment by default. The installation includes the following steps:
 
 1. Istio is installed using the official charts from the currently supported release. The charts reside in the `resources/istio` directory.
 
