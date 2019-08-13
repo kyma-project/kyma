@@ -1,21 +1,7 @@
 apiVersion: assetstore.kyma-project.io/v1alpha2
 kind: Asset
 metadata:
-  labels:
-    controller-tools.k8s.io: "1.0"
   name: asset-sample
-  namespace: default
 spec:
-  bucketRef:
-    name: test-sample
-  source:
-    url: https://raw.githubusercontent.com/asyncapi/converter/master/test/input/1.0.0/streetlights.yml
-    mode: single
-    mutationWebhookService:
-    - name: test
-      namespace: kyma-system
-      endpoint: /v1/convert
-    validationWebhookService:
-    - name: test
-      namespace: kyma-system
-      endpoint: /v1/validate
+  # Add fields here
+  foo: bar
