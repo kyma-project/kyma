@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ .Chart.Name }}-tests-mock
+  name: {{ .Chart.Name }}-tests-pod-update
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}-tests
@@ -13,18 +13,17 @@ rules:
   - apiGroups:
       - '*'
     resources:
-      - services
+      - pods
     verbs:
-      - create
       - get
-      - delete
       - list
+      - update
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ .Chart.Name }}-tests-mock
+  name: {{ .Chart.Name }}-tests-pod-update
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Chart.Name }}-tests
@@ -35,7 +34,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ .Chart.Name }}-tests-mock
+  name: {{ .Chart.Name }}-tests-pod-update
 subjects:
   - kind: ServiceAccount
     name: {{ .Chart.Name }}-tests

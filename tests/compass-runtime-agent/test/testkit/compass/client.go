@@ -5,8 +5,6 @@ import (
 	"crypto/tls"
 	"net/http"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	gqltools "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/graphql"
 	gcli "github.com/machinebox/graphql"
@@ -37,9 +35,10 @@ func NewCompassClient(endpoint, tenant, runtimeId string) *Client {
 	}
 
 	client := gcli.NewClient(endpoint, gcli.WithHTTPClient(httpClient))
-	client.Log = func(s string) {
-		logrus.Info(s)
-	}
+	// Uncomment if need debug info
+	//client.Log = func(s string) {
+	//	logrus.Info(s)
+	//}
 
 	return &Client{
 		client:        client,

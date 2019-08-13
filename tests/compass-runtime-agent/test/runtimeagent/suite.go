@@ -2,6 +2,16 @@ package runtimeagent
 
 import (
 	"fmt"
+	"testing"
+
+	"k8s.io/apimachinery/pkg/labels"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	v1typed "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
 
@@ -26,25 +36,34 @@ import (
 	"k8s.io/client-go/util/homedir"
 
 	restclient "k8s.io/client-go/rest"
+	"k8s.io/client-go/util/retry"
 )
 
 const (
 	defaultCheckInterval   = 2 * time.Second
 	apiServerAccessTimeout = 60 * time.Second
+
+	appLabel         = "app"
+	denierLabelValue = "true"
 )
+
+type updatePodFunc func(pod *v1.Pod)
 
 type TestSuite struct {
 	CompassClient      *compass.Client
 	K8sResourceChecker *assertions.K8sResourceChecker
 	APIAccessChecker   *assertions.APIAccessChecker
 
-	k8sClient *kubernetes.Clientset
+	k8sClient    *kubernetes.Clientset
+	podClient    v1typed.PodInterface
+	nameResolver *applications.NameResolver
 
 	mockServiceServer *mock.AppMockServer
 
 	config testkit.TestConfig
 
 	mockServiceName string
+	testPodsLabels  string
 }
 
 func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
@@ -58,6 +77,9 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 			return nil, err
 		}
 	}
+
+	labelSet := labels.Set{appLabel: config.TestPodAppLabel}
+	testPodLabels := labels.SelectorFromSet(labelSet).String()
 
 	k8sClient, err := kubernetes.NewForConfig(k8sConfig)
 	if err != nil {
@@ -76,12 +98,15 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 
 	return &TestSuite{
 		k8sClient:          k8sClient,
+		podClient:          k8sClient.Core().Pods(config.Namespace),
+		nameResolver:       nameResolver,
 		CompassClient:      compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId),
 		APIAccessChecker:   assertions.NewAPIAccessChecker(nameResolver),
 		K8sResourceChecker: assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver),
 		mockServiceServer:  mock.NewAppMockServer(config.MockServicePort),
 		config:             config,
 		mockServiceName:    config.MockServiceName,
+		testPodsLabels:     testPodLabels,
 	}, nil
 }
 
@@ -125,6 +150,33 @@ func (ts *TestSuite) GetMockServiceURL() string {
 	return fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", ts.mockServiceName, ts.config.Namespace, ts.config.MockServicePort)
 }
 
+func (ts *TestSuite) AddDenierLabels(t *testing.T, appId string, apiIds ...string) {
+	testPods, err := ts.podClient.List(metav1.ListOptions{LabelSelector: ts.testPodsLabels})
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(testPods.Items))
+
+	pod := testPods.Items[0]
+
+	serviceNames := make([]string, len(apiIds))
+
+	for i, apiId := range apiIds {
+		serviceNames[i] = ts.nameResolver.GetResourceName(appId, apiId)
+	}
+
+	updateFunc := func(pod *v1.Pod) {
+		if pod.Labels == nil {
+			pod.Labels = map[string]string{}
+		}
+
+		for _, svcName := range serviceNames {
+			pod.Labels[svcName] = denierLabelValue
+		}
+	}
+
+	err = ts.updatePod(pod.Name, updateFunc)
+	require.NoError(t, err)
+}
+
 func (ts *TestSuite) WaitForProxyInvalidation() {
 	// TODO: we should consider introducing some way to invalidate proxy cache
 	time.Sleep(time.Duration(ts.config.ProxyInvalidationWaitTime) * time.Second)
@@ -132,4 +184,17 @@ func (ts *TestSuite) WaitForProxyInvalidation() {
 
 func (ts *TestSuite) WaitForConfigurationApplication() {
 	time.Sleep(time.Duration(ts.config.ConfigApplicationWaitTime) * time.Second)
+}
+
+func (ts *TestSuite) updatePod(podName string, updateFunc updatePodFunc) error {
+	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		newPod, err := ts.podClient.Get(podName, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+
+		updateFunc(newPod)
+		_, err = ts.podClient.Update(newPod)
+		return err
+	})
 }

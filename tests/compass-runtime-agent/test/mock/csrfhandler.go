@@ -3,14 +3,14 @@ package mock
 import (
 	"net/http"
 
+	"github.com/gorilla/mux"
+
 	log "github.com/sirupsen/logrus"
 )
 
 const (
-	firstToken      = "firstToken"
-	secondToken     = "secondToken"
 	HeaderCSRFToken = "X-csrf-token"
-	cookieName      = "cookieToken"
+	cookieName      = "CSRF-Token"
 )
 
 type csrfHandler struct {
@@ -28,49 +28,41 @@ func NewCsrfHandler() *csrfHandler {
 func (ch *csrfHandler) CsrfToken(w http.ResponseWriter, r *http.Request) {
 	ch.logger.Infof("Handling CSRF request")
 
-	var token string
-	if ch.isFirstToken {
-		ch.logger.Infof("Providing first token: %s", firstToken)
-		token = firstToken
-	} else {
-		ch.logger.Infof("Providing second token: %s", secondToken)
-		token = secondToken
-	}
+	vars := mux.Vars(r)
+	tokenToReturn := vars["token"]
 
-	w.Header().Set(HeaderCSRFToken, token)
+	ch.logger.Infof("Responding with token %s", tokenToReturn)
+
+	w.Header().Set(HeaderCSRFToken, tokenToReturn)
 	http.SetCookie(w, &http.Cookie{
 		Name:  cookieName,
-		Value: token,
+		Value: tokenToReturn,
 	})
 
 	successResponse(w)
 }
 
 func (ch *csrfHandler) Target(w http.ResponseWriter, r *http.Request) {
-	var expectedToken string
-	if ch.isFirstToken {
-		expectedToken = firstToken
-	} else {
-		expectedToken = secondToken
-	}
+	vars := mux.Vars(r)
+	expectedToken := vars["expectedToken"]
 
-	ch.logger.Infof("Handling request. Expected: header: %s, with value: %s, cookie: %s, with value: %s", HeaderCSRFToken, expectedToken, cookieName, expectedToken)
+	ch.logger.Infof("Handling CSRF target request. Expected: header: %s, with value: %s, cookie: %s, with value: %s", HeaderCSRFToken, expectedToken, cookieName, expectedToken)
 
 	headerToken := r.Header.Get(HeaderCSRFToken)
 	if headerToken != expectedToken {
-		ch.logger.Errorf("Invalid header: %s with CSRF token value: %s", HeaderCSRFToken, headerToken)
+		ch.logger.Errorf("Invalid %s header: Expected: %s, Actual: %s", HeaderCSRFToken, expectedToken, headerToken)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 
 	cookieToken, err := r.Cookie(cookieName)
 	if err != nil {
-		ch.logger.Errorf("No cookie: %s", cookieName)
+		ch.logger.Errorf("Cookie %s not provided. Expected value: %s", cookieName, expectedToken)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 	if cookieToken.Value != expectedToken {
-		ch.logger.Errorf("Invalid cookie: %s with CSRF token value: %s", cookieName, cookieToken.Value)
+		ch.logger.Errorf("Invalid %s cookie: Expected: %s, Actual: %s", cookieName, cookieToken.Value, expectedToken)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}

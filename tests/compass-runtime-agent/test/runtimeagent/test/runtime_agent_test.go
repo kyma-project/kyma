@@ -21,6 +21,7 @@ type testCase struct {
 	description string
 
 	initialPhaseInput  func() *applications.ApplicationInput
+	initialPhaseAssert func(t *testing.T, testSuite *runtimeagent.TestSuite, application compass.Application)
 	initialPhaseResult compass.Application
 
 	secondPhaseSetup  func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase)
@@ -64,6 +65,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						},
 					)
 			},
+			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 				// when removing all APIs individually
 				application := this.initialPhaseResult
@@ -115,6 +117,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						},
 					)
 			},
+			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 				// when
 				application := this.initialPhaseResult
@@ -136,6 +139,12 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				updatedApp, err := testSuite.CompassClient.UpdateApplication(application.ID, updatedInput.ToCompassInput())
 				require.NoError(t, err)
 				assert.Equal(t, 3, len(updatedApp.APIs.Data))
+
+				apiIds := getAPIsIds(updatedApp)
+				t.Logf("Updated APIs for %s Application", updatedApp.ID)
+				logIds(t, apiIds)
+				t.Logf("Adding denier labels for %s Application", updatedApp.ID)
+				testSuite.AddDenierLabels(t, updatedApp.ID, apiIds...)
 
 				// then
 				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
@@ -171,6 +180,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						},
 					)
 			},
+			initialPhaseAssert: assertK8sResourcesAndAPIAccess,
 			secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 				// when
 				application := this.initialPhaseResult
@@ -213,6 +223,49 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				}
 			},
 		},
+		// TODO: CSRF Tokens does not work properly with Director (https://github.com/kyma-incubator/compass/issues/207)
+		//{
+		//	description: "Test case 4:Fetch new CSRF token and retry if token expired",
+		//	initialPhaseInput: func() *applications.ApplicationInput {
+		//		csrfAuth := applications.NewAuth().WithBasicAuth(validUsername, validPassword).
+		//			WithCSRF(testSuite.GetMockServiceURL() + mock.CSRFToken.String() + "/valid-csrf-token")
+		//		csrfAPIInput := applications.NewAPI("csrf-api", "csrf", testSuite.GetMockServiceURL()).WithAuth(csrfAuth)
+		//
+		//		app := applications.NewApplication("test-app-4", "testApp4", map[string][]string{}).
+		//			WithAPIs([]*applications.APIDefinitionInput{csrfAPIInput})
+		//
+		//		return app
+		//	},
+		//	initialPhaseAssert: func(t *testing.T, testSuite *runtimeagent.TestSuite, application compass.Application) {
+		//		testSuite.K8sResourceChecker.AssertResourcesForApp(t, application)
+		//
+		//		// call CSRF API
+		//		csrfAPI, found := getAPIByName(application.APIs.Data, "csrf-api")
+		//		require.True(t, found)
+		//		response := testSuite.APIAccessChecker.CallAccessService(t, application.ID, csrfAPI.ID, mock.CSERTarget.String()+"/valid-csrf-token")
+		//		util.RequireStatus(t, http.StatusOK, response)
+		//	},
+		//	secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
+		//		csrfAPI, found := getAPIByName(this.initialPhaseResult.APIs.Data, "csrf-api")
+		//		require.True(t, found)
+		//
+		//		// when updating CSRF API (new token is expected, old token is cached)
+		//		modifiedCSRFAuth := applications.NewAuth().WithCSRF(testSuite.GetMockServiceURL() + mock.CSRFToken.String() + "/new-csrf-token")
+		//		modifiedCSRFAPIInput := applications.NewAPI("csrf-api", "csrf", testSuite.GetMockServiceURL()).WithAuth(modifiedCSRFAuth)
+		//		modifiedCSRFAPI, err := testSuite.CompassClient.UpdateAPI(csrfAPI.ID, *modifiedCSRFAPIInput.ToCompassInput())
+		//		require.NoError(t, err)
+		//
+		//		// then
+		//		this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
+		//			// assert Token URL updated
+		//			testSuite.K8sResourceChecker.AssertAPIResources(t, this.initialPhaseResult.ID, modifiedCSRFAPI)
+		//
+		//			// assert call is made with new token
+		//			response := testSuite.APIAccessChecker.CallAccessService(t, this.initialPhaseResult.ID, csrfAPI.ID, mock.CSERTarget.String()+"/new-csrf-token")
+		//			util.RequireStatus(t, http.StatusOK, response)
+		//		}
+		//	},
+		//},
 	}
 
 	// Setup check if all resources were deleted
@@ -241,10 +294,17 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			assert.Equal(t, response.ID, removedId)
 		}()
 
+		apiIds := getAPIsIds(response)
+		t.Logf("APIs for %s Application", response.ID)
+		logIds(t, apiIds)
+
+		t.Logf("Adding denier labels for %s Application...", response.ID)
+		testSuite.AddDenierLabels(t, response.ID, apiIds...)
+
 		createdApplications = append(createdApplications, &response)
 
 		testCase.initialPhaseResult = response
-		t.Logf("Initial test case setup finished for %s test case", testCase.description)
+		t.Logf("Initial test case setup finished for %s test case. Created Application: %s", testCase.description, response.ID)
 	}
 
 	// Wait for agent to apply config
@@ -253,19 +313,14 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	// Assert initial phase
 	for _, testCase := range testCases {
 		t.Logf("Asserting initial phase for test case: %s", testCase.description)
-
-		t.Logf("Checking K8s resources")
-		testSuite.K8sResourceChecker.AssertResourcesForApp(t, testCase.initialPhaseResult)
-
-		t.Logf("Checking API Access")
-		testSuite.APIAccessChecker.AssertAPIAccess(t, testCase.initialPhaseResult.APIs.Data...)
+		testCase.initialPhaseAssert(t, testSuite, testCase.initialPhaseResult)
 	}
 
 	// Setup second phase
 	for _, testCase := range testCases {
 		t.Logf("Running second phase setup for test case: %s", testCase.description)
 		testCase.secondPhaseSetup(t, testSuite, testCase)
-		t.Logf("Initial test case setup finished for %s test case", testCase.description)
+		t.Logf("Second test case setup finished for %s test case", testCase.description)
 	}
 
 	// Wait for agent to apply config
@@ -276,6 +331,14 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		t.Logf("Asserting second phase for test case: %s", testCase.description)
 		testCase.secondPhaseAssert(t, testSuite, testCase)
 	}
+}
+
+func assertK8sResourcesAndAPIAccess(t *testing.T, testSuite *runtimeagent.TestSuite, application compass.Application) {
+	t.Logf("Checking K8s resources")
+	testSuite.K8sResourceChecker.AssertResourcesForApp(t, application)
+
+	t.Logf("Checking API Access")
+	testSuite.APIAccessChecker.AssertAPIAccess(t, application.APIs.Data...)
 }
 
 // TODO - test cases for deniers (after Istio resources are implemented)
@@ -293,4 +356,19 @@ func getAPIByName(apis []*graphql.APIDefinition, name string) (*graphql.APIDefin
 	}
 
 	return nil, false
+}
+
+func logIds(t *testing.T, ids []string) {
+	for _, id := range ids {
+		t.Log(id)
+	}
+}
+
+func getAPIsIds(application compass.Application) []string {
+	ids := make([]string, len(application.APIs.Data))
+	for i, api := range application.APIs.Data {
+		ids[i] = api.ID
+	}
+
+	return ids
 }

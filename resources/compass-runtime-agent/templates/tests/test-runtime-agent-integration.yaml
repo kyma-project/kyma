@@ -30,12 +30,14 @@ spec:
               value: compass-system
             - name: INTEGRATION_NAMESPACE
               value: kyma-integration
+            - name: TEST_POD_APP_LABEL
+              value: {{ .Chart.Name }}-tests
             - name: MOCK_SERVICE_PORT
               value: "8080"
             - name: MOCK_SERVICE_NAME
               value: {{ .Chart.Name }}-tests-mock
             - name: CONFIG_APPLICATION_WAIT_TIME
-              value: "30"
+              value: "40"
             - name: PROXY_INVALIDATION_WAIT_TIME
               value: "150"
           command:

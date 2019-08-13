@@ -45,10 +45,15 @@ func (c *APIAccessChecker) AssertAPIAccess(t *testing.T, apis ...*graphql.APIDef
 	time.Sleep(dnsWaitTime)
 
 	for _, api := range apis {
-		path := c.getPathBasedOnAuth(t, api.DefaultAuth)
-		response := c.CallAccessService(t, api.ApplicationID, api.ID, path)
-		util.RequireStatus(t, http.StatusOK, response)
+		c.accessAPI(t, api)
 	}
+}
+
+func (c *APIAccessChecker) accessAPI(t *testing.T, api *graphql.APIDefinition) {
+	path := c.getPathBasedOnAuth(t, api.DefaultAuth)
+	response := c.CallAccessService(t, api.ApplicationID, api.ID, path)
+	defer response.Body.Close()
+	util.RequireStatus(t, http.StatusOK, response)
 }
 
 func (c *APIAccessChecker) getPathBasedOnAuth(t *testing.T, auth *graphql.Auth) string {
@@ -83,9 +88,9 @@ func (c *APIAccessChecker) CallAccessService(t *testing.T, applicationId, apiId,
 			t.Logf("Access service not ready: %s", err.Error())
 			return false
 		}
-		defer resp.Body.Close()
 
 		if resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusServiceUnavailable {
+			defer resp.Body.Close()
 			t.Logf("Invalid response from access service, status: %d.", resp.StatusCode)
 			bytes, err := ioutil.ReadAll(resp.Body)
 			require.NoError(t, err)

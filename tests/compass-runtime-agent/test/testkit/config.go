@@ -13,9 +13,10 @@ type TestConfig struct {
 
 	Namespace                 string `envconfig:"NAMESPACE" default:"compass-system"`
 	IntegrationNamespace      string `envconfig:"INTEGRATION_NAMESPACE" default:"kyma-integration"`
+	TestPodAppLabel           string `envconfig:"TEST_POD_APP_LABEL" default:"compass-runtime-agent-tests"`
 	MockServicePort           int32  `envconfig:"MOCK_SERVICE_PORT" default:"8080"`
 	MockServiceName           string `envconfig:"MOCK_SERVICE_NAME" default:"compass-runtime-agent-tests-mock"`
-	ConfigApplicationWaitTime int64  `envconfig:"CONFIG_APPLICATION_WAIT_TIME" default:"30"`
+	ConfigApplicationWaitTime int64  `envconfig:"CONFIG_APPLICATION_WAIT_TIME" default:"40"`
 	ProxyInvalidationWaitTime int64  `envconfig:"PROXY_INVALIDATION_WAIT_TIME" default:"150"`
 }
 

@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"testing"
-	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -14,8 +13,6 @@ func RequireStatus(t *testing.T, expectedStatus int, response *http.Response) {
 		LogResponse(t, response)
 
 		logrus.Infof("Failed to call access service")
-
-		time.Sleep(120 * time.Second)
 
 		t.Fatalf("Invalid response code: %s", response.Status)
 	}

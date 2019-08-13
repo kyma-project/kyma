@@ -26,7 +26,9 @@ func (in *APIDefinitionInput) WithAuth(auth *AuthInput) *APIDefinitionInput {
 }
 
 func NewAuth() *AuthInput {
-	auth := AuthInput(graphql.AuthInput{})
+	auth := AuthInput(graphql.AuthInput{
+		Credential: &graphql.CredentialDataInput{},
+	})
 	return &auth
 }
 
@@ -68,6 +70,17 @@ func (in *AuthInput) WithHeaders(headers map[string][]string) *AuthInput {
 func (in *AuthInput) WithQueryParams(queryParams map[string][]string) *AuthInput {
 	cQuery := graphql.QueryParams(queryParams)
 	in.AdditionalQueryParams = &cQuery
+
+	return in
+}
+
+func (in *AuthInput) WithCSRF(tokenURL string) *AuthInput {
+	in.RequestAuth = &graphql.CredentialRequestAuthInput{
+		Csrf: &graphql.CSRFTokenCredentialRequestAuthInput{
+			TokenEndpointURL: tokenURL,
+			Credential:       in.Credential,
+		},
+	}
 
 	return in
 }
