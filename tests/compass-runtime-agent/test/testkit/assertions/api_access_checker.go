@@ -50,13 +50,13 @@ func (c *APIAccessChecker) AssertAPIAccess(t *testing.T, apis ...*graphql.APIDef
 }
 
 func (c *APIAccessChecker) accessAPI(t *testing.T, api *graphql.APIDefinition) {
-	path := c.getPathBasedOnAuth(t, api.DefaultAuth)
+	path := c.GetPathBasedOnAuth(t, api.DefaultAuth)
 	response := c.CallAccessService(t, api.ApplicationID, api.ID, path)
 	defer response.Body.Close()
 	util.RequireStatus(t, http.StatusOK, response)
 }
 
-func (c *APIAccessChecker) getPathBasedOnAuth(t *testing.T, auth *graphql.Auth) string {
+func (c *APIAccessChecker) GetPathBasedOnAuth(t *testing.T, auth *graphql.Auth) string {
 	if auth == nil {
 		return mock.StatusOk.String()
 	}

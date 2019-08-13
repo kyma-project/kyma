@@ -266,6 +266,38 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		//		}
 		//	},
 		//},
+		//{
+		//	description: "Test case 5: Denier should block access without labels",
+		//	initialPhaseInput: func() *applications.ApplicationInput {
+		//		return applications.NewApplication("test-app-5", "", map[string][]string{}).
+		//			WithAPIs(
+		//				[]*applications.APIDefinitionInput{
+		//					applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()),
+		//					applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth),
+		//					applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth),
+		//				})
+		//	},
+		//	initialPhaseAssert: assertK8sResourcesAndAPIAccess,
+		//	secondPhaseSetup: func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
+		//		// when
+		//		application := this.initialPhaseResult
+		//
+		//		apiIds := getAPIsIds(application)
+		//		t.Logf("Removing denier labels for %s Application, For APIs: ", application.ID)
+		//		logIds(t, apiIds)
+		//		testSuite.RemoveDenierLabels(t, application.ID, apiIds...)
+		//
+		//		// then
+		//		this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
+		//			// assert deniers block requests and the response has status 403
+		//			for _, api := range application.APIs.Data {
+		//				path := testSuite.APIAccessChecker.GetPathBasedOnAuth(t, api.DefaultAuth)
+		//				response := testSuite.APIAccessChecker.CallAccessService(t, application.ID, api.ID, path)
+		//				util.RequireStatus(t, http.StatusForbidden, response)
+		//			}
+		//		}
+		//	},
+		//},
 	}
 
 	// Setup check if all resources were deleted
@@ -340,8 +372,6 @@ func assertK8sResourcesAndAPIAccess(t *testing.T, testSuite *runtimeagent.TestSu
 	t.Logf("Checking API Access")
 	testSuite.APIAccessChecker.AssertAPIAccess(t, application.APIs.Data...)
 }
-
-// TODO - test cases for deniers (after Istio resources are implemented)
 
 func waitForAgentToApplyConfig(t *testing.T, testSuite *runtimeagent.TestSuite) {
 	t.Log("Waiting for Runtime Agent to apply configuration...")

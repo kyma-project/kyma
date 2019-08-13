@@ -151,17 +151,8 @@ func (ts *TestSuite) GetMockServiceURL() string {
 }
 
 func (ts *TestSuite) AddDenierLabels(t *testing.T, appId string, apiIds ...string) {
-	testPods, err := ts.podClient.List(metav1.ListOptions{LabelSelector: ts.testPodsLabels})
-	require.NoError(t, err)
-	assert.Equal(t, 1, len(testPods.Items))
-
-	pod := testPods.Items[0]
-
-	serviceNames := make([]string, len(apiIds))
-
-	for i, apiId := range apiIds {
-		serviceNames[i] = ts.nameResolver.GetResourceName(appId, apiId)
-	}
+	pod := ts.getTestPod(t)
+	serviceNames := ts.getResourceNames(t, appId, apiIds...)
 
 	updateFunc := func(pod *v1.Pod) {
 		if pod.Labels == nil {
@@ -173,8 +164,44 @@ func (ts *TestSuite) AddDenierLabels(t *testing.T, appId string, apiIds ...strin
 		}
 	}
 
-	err = ts.updatePod(pod.Name, updateFunc)
+	err := ts.updatePod(pod.Name, updateFunc)
 	require.NoError(t, err)
+}
+
+func (ts *TestSuite) RemoveDenierLabels(t *testing.T, appId string, apiIds ...string) {
+	pod := ts.getTestPod(t)
+	labelsToRemove := ts.getResourceNames(t, appId, apiIds...)
+
+	updateFunc := func(pod *v1.Pod) {
+		newLabels := map[string]string{}
+
+		for name, label := range pod.Labels {
+			if !contains(labelsToRemove, name) {
+				newLabels[name] = label
+			}
+		}
+	}
+
+	err := ts.updatePod(pod.Name, updateFunc)
+	require.NoError(t, err)
+}
+
+func (ts *TestSuite) getTestPod(t *testing.T) v1.Pod {
+	testPods, err := ts.podClient.List(metav1.ListOptions{LabelSelector: ts.testPodsLabels})
+	require.NoError(t, err)
+	assert.Equal(t, 1, len(testPods.Items))
+
+	return testPods.Items[0]
+}
+
+func (ts *TestSuite) getResourceNames(t *testing.T, appId string, apiIds ...string) []string {
+	serviceNames := make([]string, len(apiIds))
+
+	for i, apiId := range apiIds {
+		serviceNames[i] = ts.nameResolver.GetResourceName(appId, apiId)
+	}
+
+	return serviceNames
 }
 
 func (ts *TestSuite) WaitForProxyInvalidation() {
@@ -197,4 +224,14 @@ func (ts *TestSuite) updatePod(podName string, updateFunc updatePodFunc) error {
 		_, err = ts.podClient.Update(newPod)
 		return err
 	})
+}
+
+func contains(array []string, element string) bool {
+	for _, e := range array {
+		if e == element {
+			return true
+		}
+	}
+
+	return false
 }
