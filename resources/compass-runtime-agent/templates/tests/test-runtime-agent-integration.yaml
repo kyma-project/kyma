@@ -1,3 +1,4 @@
+{{ if and ( .Values.compassRuntimeAgent.tests.enabled ) ( not .Values.global.isLocalEnv ) }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -27,28 +28,28 @@ spec:
               optional: true
           env:
             - name: NAMESPACE
-              value: compass-system
+              value: {{ .Release.Namespace }}
             - name: INTEGRATION_NAMESPACE
-              value: kyma-integration
+              value: {{ .Values.compassRuntimeAgent.resources.integrationNamespace }}
             - name: TEST_POD_APP_LABEL
               value: {{ .Chart.Name }}-tests
             - name: MOCK_SERVICE_PORT
-              value: "8080"
+              value: "{{ .Values.compassRuntimeAgent.tests.mockService.port }}"
             - name: MOCK_SERVICE_NAME
               value: {{ .Chart.Name }}-tests-mock
             - name: CONFIG_APPLICATION_WAIT_TIME
-              value: "40"
+              value: "{{ .Values.compassRuntimeAgent.tests.configApplicationWaitTime }}"
             - name: PROXY_INVALIDATION_WAIT_TIME
-              value: "150"
+              value: "{{ .Values.compassRuntimeAgent.tests.proxyInvalidationWaitTime }}"
             - name: GRAPHQL_LOG
-              value: false
+              value: "{{ .Values.compassRuntimeAgent.tests.graphqlLogs }}"
           command:
           - "/bin/sh"
           args:
           - "-c"
           - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; sleep 4; exit $exit_code;"
           ports:
-          - containerPort: 8080
+          - containerPort: {{ .Values.compassRuntimeAgent.tests.mockService.port }}
             name: http
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
@@ -58,3 +59,4 @@ spec:
       {{ end }}
     restartPolicy: Never
 {{- end }}
+{{ end }}
