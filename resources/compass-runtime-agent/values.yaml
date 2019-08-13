@@ -22,3 +22,10 @@ compassRuntimeAgent:
     insecureConfigurationFetch: true
     configMap:
       name: compass-agent-configuration
+  tests:
+    enabled: true
+    mockService:
+      port: 8080
+    configApplicationWaitTime: 60
+    proxyInvalidationWaitTime: 150
+    graphqlLogs: false

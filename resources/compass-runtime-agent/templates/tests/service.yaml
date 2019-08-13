@@ -9,5 +9,5 @@ spec:
   selector:
     app: {{ .Chart.Name }}-tests
   ports:
-    - port: 8080
+    - port: {{ .Values.compassRuntimeAgent.tests.mockService.port }}
   type: ClusterIP
