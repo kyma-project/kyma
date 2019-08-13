@@ -41,6 +41,7 @@ type CommonMicroFrontendSpec struct {
 	Version         string           `json:"version"`
 	Category        string           `json:"category"`
 	ViewBaseURL     string           `json:"viewBaseUrl"`
+	PreloadURL      string           `json:"preloadUrl"`
 	NavigationNodes []NavigationNode `json:"navigationNodes"`
 }
 
