@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "etcd" | trunc 63 | trimSuffix "-" }}
+  name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "application-registry" | trunc 63 | trimSuffix "-" }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
       {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
