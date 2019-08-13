@@ -5,37 +5,35 @@ type: Troubleshooting
 
 <wstep>
 
-## App Registry - No certificate
-```
-curl -X POST --data @test.json https://gateway.jmedrek-test.cluster.stage.faros.kyma.cx/test-app/v1/metadata/services
-```
+## Application Registry - No certificate
 
+While trying to access the Application Registry, you may get an error like this:
 ```
 error:1401E410:SSL routines:CONNECT_CR_FINISHED:sslv3 alert handshake failure
 ```
+It means that you are trying to access the Application Registry without a client certificate. 
 
-## App Registry - Expired certificate
-```
-curl -X POST --data @test.json --cert ./expired/generated.pem https://gateway.jmedrek-test.cluster.stage.faros.kyma.cx/test-app/v1/metadata/services
-```
+To access Application Registry you need to pass a client certificate with the request.
+To generate a client certificate, see [this tutorial](#tutorials-get-the-client-certificate). 
 
+## Application Registry - Expired certificate
+
+While trying to access the Application Registry, you may also get an error like this:
 ```
 error:1401E415:SSL routines:CONNECT_CR_FINISHED:sslv3 alert certificate expired
 ```
+It means that you are trying to access the Application Registry using an expired client certificate.
 
-## App Registry - Invalid subject
-```
-curl -X POST --data @test.json --cert ./expired/generated.pem https://gateway.jmedrek-test.cluster.stage.faros.kyma.cx/another-test-app/v1/metadata/services
-```
+To access Application Registry you need to pass a valid client certificate with the request.
+To generate a new client certificate, see [this tutorial](#tutorials-get-the-client-certificate).  
 
+## Application Registry - Invalid subject
+
+If you try to access the Application Registry and get the following response:
 ```
 {"code":403,"error":"No valid subject found"}
 ```
+make sure that your certificate is generated for the Application that you are trying to access.
+If it is not, generate a new certificate for your Application. 
 
-## One Click Integration - Invalid Common Name
-
-https://github.wdf.sap.corp/framefrog/on-call-guides/blob/master/on-call-guide/client-side-issues/wrong-usage/invalid-csr.md
-
-## On-Call guides
-
-https://github.wdf.sap.corp/framefrog/on-call-guides/tree/master/on-call-guide/client-side-issues
+To generate a new client certificate, see [this tutorial](#tutorials-get-the-client-certificate).
