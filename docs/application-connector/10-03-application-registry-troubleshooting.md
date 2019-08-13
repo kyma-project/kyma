@@ -3,8 +3,6 @@ title: Application Registry Troubleshooting
 type: Troubleshooting
 ---
 
-<wstep>
-
 ## Application Registry - No certificate
 
 While trying to access the Application Registry, you may get an error like this:
