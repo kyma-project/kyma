@@ -10,4 +10,4 @@ This chart installs [Prometheus](https://prometheus.io/), [Alertmanager](https:/
 
 ## Details
 
-* [Grafana in Kyma](charts/grafana/README.md)
+* [Grafana in Kyma](templates/grafana/README.md)

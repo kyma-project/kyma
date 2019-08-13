@@ -7,5 +7,5 @@ description: Monitoring chart based on kube-prometheus
 engine: gotpl
 version: 0.1.0
 keywords:
-- monitoring
-- kyma
+  - monitoring
+  - kyma
