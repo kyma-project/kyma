@@ -40,6 +40,8 @@ spec:
               value: "40"
             - name: PROXY_INVALIDATION_WAIT_TIME
               value: "150"
+            - name: GRAPHQL_LOG
+              value: false
           command:
           - "/bin/sh"
           args:

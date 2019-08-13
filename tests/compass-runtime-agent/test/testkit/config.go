@@ -18,6 +18,7 @@ type TestConfig struct {
 	MockServiceName           string `envconfig:"MOCK_SERVICE_NAME" default:"compass-runtime-agent-tests-mock"`
 	ConfigApplicationWaitTime int64  `envconfig:"CONFIG_APPLICATION_WAIT_TIME" default:"40"`
 	ProxyInvalidationWaitTime int64  `envconfig:"PROXY_INVALIDATION_WAIT_TIME" default:"150"`
+	GraphQLLog                bool   `envconfig:"GRAPHQL_LOG" default:"false"`
 }
 
 func ReadConfig() (TestConfig, error) {

@@ -5,6 +5,8 @@ import (
 	"crypto/tls"
 	"net/http"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	gqltools "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/graphql"
 	gcli "github.com/machinebox/graphql"
@@ -25,7 +27,7 @@ type Client struct {
 }
 
 // TODO: client will need to be authenticated after implementation of certs
-func NewCompassClient(endpoint, tenant, runtimeId string) *Client {
+func NewCompassClient(endpoint, tenant, runtimeId string, gqlLog bool) *Client {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
@@ -35,10 +37,11 @@ func NewCompassClient(endpoint, tenant, runtimeId string) *Client {
 	}
 
 	client := gcli.NewClient(endpoint, gcli.WithHTTPClient(httpClient))
-	// Uncomment if need debug info
-	//client.Log = func(s string) {
-	//	logrus.Info(s)
-	//}
+	if gqlLog {
+		client.Log = func(s string) {
+			logrus.Info(s)
+		}
+	}
 
 	return &Client{
 		client:        client,

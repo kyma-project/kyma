@@ -100,7 +100,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		k8sClient:          k8sClient,
 		podClient:          k8sClient.Core().Pods(config.Namespace),
 		nameResolver:       nameResolver,
-		CompassClient:      compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId),
+		CompassClient:      compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.GraphQLLog),
 		APIAccessChecker:   assertions.NewAPIAccessChecker(nameResolver),
 		K8sResourceChecker: assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver),
 		mockServiceServer:  mock.NewAppMockServer(config.MockServicePort),
@@ -180,6 +180,8 @@ func (ts *TestSuite) RemoveDenierLabels(t *testing.T, appId string, apiIds ...st
 				newLabels[name] = label
 			}
 		}
+
+		pod.Labels = newLabels
 	}
 
 	err := ts.updatePod(pod.Name, updateFunc)
