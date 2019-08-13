@@ -26,7 +26,7 @@ In case user calls registered service and receives an error:
   	  ```
       curl -X DELETE https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE}
       ```
-       </details>
+      </details>
       <details>
       <summary>
       Without trusted certificate
@@ -52,7 +52,7 @@ In case user calls registered service and receives an error:
   	  ```
       curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE}
       ```
-       </details>
+      </details>
       <details>
       <summary>
       Without trusted certificate
