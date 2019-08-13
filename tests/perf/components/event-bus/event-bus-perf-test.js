@@ -12,7 +12,7 @@ var eventPublishedFailed = new Counter("event_published_failed");
 // var subscriptionResultVerified = new Counter("verified_subscription_results");
 // var subscriptionResultFailed = new Counter("failed_subscription_results");
 
-let eventPublishUrl = "http://event-publish-service.kyma-system:8080/v1/events";
+let eventPublishUrl = `https://event-publish-service.${__ENV.CLUSTER_DOMAIN_NAME}`;
    // eventSubscriberUrl = "http://event-subscription-service.event-bus-perf-test:9000/v1/results";
 
 var params =  { headers: { "Content-Type": "application/json" } },
