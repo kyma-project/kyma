@@ -4,7 +4,12 @@ import (
 	"strings"
 	"testing"
 
+	assets "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/dynamic"
+
+	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
 
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
 
@@ -59,18 +64,25 @@ const (
 )
 
 type K8sResourceChecker struct {
-	serviceClient     v1.ServiceInterface
-	secretClient      v1.SecretInterface
-	applicationClient v1alpha1.ApplicationInterface
-	nameResolver      *applications.NameResolver
+	serviceClient          v1.ServiceInterface
+	secretClient           v1.SecretInterface
+	applicationClient      v1alpha1.ApplicationInterface
+	nameResolver           *applications.NameResolver
+	istioClient            istioclient.Interface
+	clusterDocsTopicClient dynamic.ResourceInterface
+	integrationNamespace   string
 }
 
-func NewK8sResourceChecker(serviceClient v1.ServiceInterface, secretClient v1.SecretInterface, appClient v1alpha1.ApplicationInterface, nameResolver *applications.NameResolver) *K8sResourceChecker {
+func NewK8sResourceChecker(serviceClient v1.ServiceInterface, secretClient v1.SecretInterface, appClient v1alpha1.ApplicationInterface, nameResolver *applications.NameResolver,
+	istioClient istioclient.Interface, clusterDocsTopicClient dynamic.ResourceInterface, integrationNamespace string) *K8sResourceChecker {
 	return &K8sResourceChecker{
-		serviceClient:     serviceClient,
-		secretClient:      secretClient,
-		applicationClient: appClient,
-		nameResolver:      nameResolver,
+		serviceClient:          serviceClient,
+		secretClient:           secretClient,
+		applicationClient:      appClient,
+		nameResolver:           nameResolver,
+		istioClient:            istioClient,
+		clusterDocsTopicClient: clusterDocsTopicClient,
+		integrationNamespace:   integrationNamespace,
 	}
 }
 
@@ -155,14 +167,16 @@ func (c *K8sResourceChecker) assertAPI(t *testing.T, appId string, compassAPI gr
 		c.assertCredentials(t, expectedResourceName, compassAPI.DefaultAuth, entry)
 	}
 
-	// TODO: assert Istio resources
-	// TODO: assert Docs Topics
+	c.assertIstioResources(t, expectedResourceName, c.integrationNamespace)
+
+	if compassAPI.Spec != nil {
+		c.assertDocsTopics(t, compassAPI.ID)
+	}
 }
 
 func (c *K8sResourceChecker) assertServiceDeleted(t *testing.T, applicationId, apiId string) {
 	resourceName := c.nameResolver.GetResourceName(applicationId, apiId)
-	gatewayURL := c.nameResolver.GetGatewayUrl(applicationId, apiId)
-	c.assertResourcesDoNotExist(t, resourceName, gatewayURL)
+	c.assertResourcesDoNotExist(t, resourceName, apiId)
 }
 
 func (c *K8sResourceChecker) assertEventAPIs(t *testing.T, appId string, compassEventAPIs []*graphql.EventAPIDefinition, appCR *v1alpha1apps.Application) {
@@ -180,7 +194,9 @@ func (c *K8sResourceChecker) assertEventAPI(t *testing.T, appId string, compassE
 	expectedResourceName := c.nameResolver.GetResourceName(appId, compassEventAPI.ID)
 	assert.Equal(t, expectedResourceName, entry.AccessLabel)
 
-	// TODO: assert Docs Topics
+	if compassEventAPI.Spec != nil {
+		c.assertDocsTopics(t, compassEventAPI.ID)
+	}
 }
 
 func (c *K8sResourceChecker) assertService(t *testing.T, id, name string, description *string, appCR *v1alpha1apps.Application) *v1alpha1apps.Service {
@@ -189,11 +205,11 @@ func (c *K8sResourceChecker) assertService(t *testing.T, id, name string, descri
 
 	assert.True(t, strings.HasPrefix(svc.Name, name))
 
-	//expectedDescription := "Description not provided"
-	//if description != nil && *description != "" {
-	//	expectedDescription = *description
-	//}
-	//assert.Equal(t, expectedDescription, svc.Description) // TODO: description for EventAPI is not handled correctly yet, uncomment when it is fixed
+	expectedDescription := "Description not provided"
+	if description != nil && *description != "" {
+		expectedDescription = *description
+	}
+	assert.Equal(t, expectedDescription, svc.Description)
 
 	require.Equal(t, 1, len(svc.Entries))
 
@@ -254,9 +270,9 @@ func (c *K8sResourceChecker) assertCSRF(t *testing.T, auth *graphql.CredentialRe
 	// TODO - implement
 }
 
-func (c *K8sResourceChecker) assertResourcesDoNotExist(t *testing.T, resourceName, serviceName string) {
+func (c *K8sResourceChecker) assertResourcesDoNotExist(t *testing.T, resourceName, apiId string) {
 	// TODO: there is bug in agent and this is failing now (for not secured API), uncomment when fixed
-	_, err := c.serviceClient.Get(serviceName, v1meta.GetOptions{})
+	_, err := c.serviceClient.Get(resourceName, v1meta.GetOptions{})
 	//assert.Error(t, err)
 	//assert.True(t, k8serrors.IsNotFound(err))
 
@@ -264,7 +280,46 @@ func (c *K8sResourceChecker) assertResourcesDoNotExist(t *testing.T, resourceNam
 	assert.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
 
-	// TODO: assert that Istio stuff and Docs Topics have been removed
+	//assert that Istio have been removed
+	_, err = c.istioClient.IstioV1alpha2().Rules(c.integrationNamespace).Get(resourceName, v1meta.GetOptions{})
+	assert.Error(t, err)
+	assert.True(t, k8serrors.IsNotFound(err))
+
+	_, err = c.istioClient.IstioV1alpha2().Instances(c.integrationNamespace).Get(resourceName, v1meta.GetOptions{})
+	assert.Error(t, err)
+	assert.True(t, k8serrors.IsNotFound(err))
+
+	_, err = c.istioClient.IstioV1alpha2().Handlers(c.integrationNamespace).Get(resourceName, v1meta.GetOptions{})
+	assert.Error(t, err)
+	assert.True(t, k8serrors.IsNotFound(err))
+
+	//assert Docs Topics have been removed
+
+	_, err = c.clusterDocsTopicClient.Get(apiId, v1meta.GetOptions{})
+	assert.Error(t, err)
+	assert.True(t, k8serrors.IsNotFound(err))
+}
+
+func (c *K8sResourceChecker) assertIstioResources(t *testing.T, resourceName string, namespace string) {
+	alpha2 := c.istioClient.IstioV1alpha2()
+
+	handler, e := alpha2.Handlers(namespace).Get(resourceName, v1meta.GetOptions{})
+	require.NoError(t, e)
+	require.NotEmpty(t, handler)
+
+	instance, e := alpha2.Instances(namespace).Get(resourceName, v1meta.GetOptions{})
+	require.NoError(t, e)
+	require.NotEmpty(t, instance)
+
+	rule, e := alpha2.Rules(namespace).Get(resourceName, v1meta.GetOptions{})
+	require.NoError(t, e)
+	require.NotEmpty(t, rule)
+}
+
+func (c *K8sResourceChecker) assertDocsTopics(t *testing.T, serviceID string) {
+	topic := getClusterDocsTopic(t, serviceID, c.clusterDocsTopicClient)
+	require.NotEmpty(t, topic)
+	require.NotEmpty(t, topic.Spec.Sources)
 }
 
 func getService(applicationCR *v1alpha1apps.Application, apiId string) (*v1alpha1apps.Service, bool) {
@@ -275,4 +330,15 @@ func getService(applicationCR *v1alpha1apps.Application, apiId string) (*v1alpha
 	}
 
 	return nil, false
+}
+
+func getClusterDocsTopic(t *testing.T, id string, resourceInterface dynamic.ResourceInterface) assets.ClusterDocsTopic {
+	u, err := resourceInterface.Get(id, v1meta.GetOptions{})
+	require.NoError(t, err)
+
+	var docsTopic assets.ClusterDocsTopic
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &docsTopic)
+	require.NoError(t, err)
+
+	return docsTopic
 }

@@ -44,7 +44,10 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	basicAuth := applications.NewAuth().WithBasicAuth(validUsername, validPassword)
 	oauth := applications.NewAuth().WithOAuth(validClientId, validClientSecret, oauthTokenURL)
 
-	noAuthAPIInput := applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL())
+	var apiSpecDataCreate graphql.CLOB = `{"productsEndpoint": "Endpoint products returns products."}`
+	var apiEventSpecDataCreate graphql.CLOB = `{"orderCreated": "Published when order is placed."}`
+
+	noAuthAPIInput := applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&apiSpecDataCreate)
 	basicAuthAPIInput := applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth)
 	oauthAPIInput := applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth)
 
@@ -62,7 +65,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						}).
 					WithEventAPIs(
 						[]*applications.EventAPIDefinitionInput{
-							applications.NewEventAPI("events-api", "description"),
+							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiEventSpecDataCreate),
 							applications.NewEventAPI("no-description-events-api", ""),
 						},
 					)
@@ -114,7 +117,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						}).
 					WithEventAPIs(
 						[]*applications.EventAPIDefinitionInput{
-							applications.NewEventAPI("events-api", "description"),
+							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiEventSpecDataCreate),
 							applications.NewEventAPI("no-description-events-api", ""),
 						},
 					)
@@ -134,7 +137,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						}).
 					WithEventAPIs(
 						[]*applications.EventAPIDefinitionInput{
-							applications.NewEventAPI("events-api", "description"),
+							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiEventSpecDataCreate),
 						},
 					)
 
@@ -221,6 +224,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 
 					// assert updated APIs
 					testSuite.K8sResourceChecker.AssertAPIResources(t, application.ID, updatedAPIs...)
+
 					testSuite.APIAccessChecker.AssertAPIAccess(t, updatedAPIs...)
 				}
 			},

@@ -9,13 +9,22 @@ func NewEventAPI(name, description string) *EventAPIDefinitionInput {
 		Name:        name,
 		Description: &description,
 		Spec: &graphql.EventAPISpecInput{
-			Data:          nil, // TODO: Allow to pass spec when Asset Store is ready
-			EventSpecType: "ASYNC_API",
-			Format:        "JSON",
+			Data:          nil,
+			EventSpecType: graphql.EventAPISpecTypeAsyncAPI,
+			Format:        graphql.SpecFormatJSON,
 		},
 	})
 
 	return &eventAPI
+}
+
+func (in *EventAPIDefinitionInput) WithJsonEventApiSpec(data *graphql.CLOB) *EventAPIDefinitionInput {
+	in.Spec = &graphql.EventAPISpecInput{
+		Data:          data,
+		EventSpecType: graphql.EventAPISpecTypeAsyncAPI,
+		Format:        graphql.SpecFormatJSON,
+	}
+	return in
 }
 
 func (input *EventAPIDefinitionInput) ToCompassInput() *graphql.EventAPIDefinitionInput {

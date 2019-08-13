@@ -10,7 +10,6 @@ func NewAPI(name, description, targetURL string) *APIDefinitionInput {
 		Name:        name,
 		Description: &description,
 		TargetURL:   targetURL,
-		//Spec:        nil, // TODO: allow to pass spec when Asset Store will be ready
 	})
 	return &api
 }
@@ -22,6 +21,15 @@ func (in *APIDefinitionInput) ToCompassInput() *graphql.APIDefinitionInput {
 
 func (in *APIDefinitionInput) WithAuth(auth *AuthInput) *APIDefinitionInput {
 	in.DefaultAuth = auth.ToCompassInput()
+	return in
+}
+
+func (in *APIDefinitionInput) WithJsonApiSpec(data *graphql.CLOB) *APIDefinitionInput {
+	in.Spec = &graphql.APISpecInput{
+		Data:   data,
+		Type:   graphql.APISpecTypeOpenAPI,
+		Format: graphql.SpecFormatJSON,
+	}
 	return in
 }
 

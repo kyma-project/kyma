@@ -14,6 +14,12 @@ import (
 	v1typed "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
+
+	scheme "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
+
+	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 
@@ -91,6 +97,16 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		return nil, err
 	}
 
+	istioClient, err := istioclient.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	clusterDocsTopicClient, err := newClusterDocsTopicClient(k8sConfig, config.IntegrationNamespace)
+	if err != nil {
+		return nil, err
+	}
+
 	serviceClient := k8sClient.Core().Services(config.IntegrationNamespace)
 	secretsClient := k8sClient.Core().Secrets(config.IntegrationNamespace)
 
@@ -102,7 +118,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		nameResolver:       nameResolver,
 		CompassClient:      compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.GraphQLLog),
 		APIAccessChecker:   assertions.NewAPIAccessChecker(nameResolver),
-		K8sResourceChecker: assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver),
+		K8sResourceChecker: assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
 		mockServiceServer:  mock.NewAppMockServer(config.MockServicePort),
 		config:             config,
 		mockServiceName:    config.MockServiceName,
@@ -236,4 +252,20 @@ func contains(array []string, element string) bool {
 	}
 
 	return false
+}
+
+func newClusterDocsTopicClient(config *restclient.Config, namespace string) (dynamic.ResourceInterface, error) {
+	groupVersionResource := schema.GroupVersionResource{
+		Version:  scheme.SchemeGroupVersion.Version,
+		Group:    scheme.SchemeGroupVersion.Group,
+		Resource: "clusterdocstopics",
+	}
+
+	dynamicClient, e := dynamic.NewForConfig(config)
+
+	if e != nil {
+		return nil, e
+	}
+
+	return dynamicClient.Resource(groupVersionResource).Namespace(namespace), nil
 }
