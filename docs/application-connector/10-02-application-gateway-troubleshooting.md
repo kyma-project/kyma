@@ -17,33 +17,26 @@ In case user calls registered service and receives an error:
   ```
   If it doesn't, try to deregister the Service using the following command
 
-  <div tabs name="installation">
+  <div tabs name="deregistration">
     <details>
     <summary>
-    From release
+    With trusted certificate
     </summary>
 
-    When you install Kyma locally from a release, follow [this](https://kyma-project.io/docs/master/root/kyma/#installation-install-kyma-locally) guide.
-    Ensure that you created the local Kubernetes cluster with `10240Mb` memory and `30Gb` disk size.
-    ```
-    ./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit" --memory 10240Mb --disk-size 30g
+	  ```
+    curl -X DELETE https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE}
     ```
 
-    Run the following command before triggering the Kyma installation process:
-    ```
-    kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true", "global.kymaEventBus": "false", "global.natsStreaming.clusterID": "knative-nats-streaming"}}'
-    ```
     </details>
     <details>
     <summary>
-    From sources
+    Without trusted certificate
     </summary>
 
-    When you install Kyma locally from sources, add the `--knative` argument to the `run.sh` script. Run this command:
+    ```
+    curl -X DELETE https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE} -k
+    ```
 
-    ```
-    ./run.sh --knative
-    ```
     </details>
   </div>
 
@@ -52,28 +45,28 @@ In case user calls registered service and receives an error:
 - Verify that the target URL is correct. 
   To do that, you can fetch the Service definition from Application Registry:
 
-    <div tabs name="verification">
-      <details>
-      <summary>
-      With trusted certificate
-      </summary>
-  
-  	  ```
-      curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE}
-      ```
+  <div tabs name="verification">
+    <details>
+    <summary>
+    With trusted certificate
+    </summary>
 
-      </details>
-      <details>
-      <summary>
-      Without trusted certificate
-      </summary>
+	  ```
+    curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE}
+    ```
 
-      ```
-      curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE} -k
-      ```
+    </details>
+    <details>
+    <summary>
+    Without trusted certificate
+    </summary>
 
-      </details>
-    </div>
+    ```
+    curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE} -k
+    ```
+
+    </details>
+  </div>
 
   You should receive the `json` response with the service definition.
 
