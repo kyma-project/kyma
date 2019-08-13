@@ -12,7 +12,7 @@ Files starting with `installer-cr-*` contain different component configurations 
 
 ### Available configurations
 
-These are the currently available configurations:
+These are the currently available Installer configurations:
 
 | Configuration | Description | Part of the release |
 |----------------|------|------|
