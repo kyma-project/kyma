@@ -47,12 +47,11 @@ func Add(mgr manager.Manager) error {
 	}
 
 	controlPlane := os.Getenv("CONTROL_PLANE")
-	if len (controlPlane) == 0 {
+	if len(controlPlane) == 0 {
 		controlPlane = "controller-manager"
 	}
 
 	svr, err := webhook.NewServer("function-admission-server", mgr, webhook.ServerOptions{
-		// TODO(user): change the configuration of ServerOptions based on your need.
 		Port:    9876,
 		CertDir: "/tmp/cert",
 		BootstrapOptions: &webhook.BootstrapOptions{
