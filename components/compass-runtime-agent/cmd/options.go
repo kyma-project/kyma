@@ -26,7 +26,7 @@ func parseArgs() *options {
 	integrationNamespace := flag.String("integrationNamespace", "kyma-integration", "Namespace the resources will be created in.")
 	gatewayPort := flag.Int("gatewayPort", 8080, "Application Gateway port.")
 	insecureConfigurationFetch := flag.Bool("insecureConfigurationFetch", false, "Specifies if the configuration should be fetch with disabled TLS verification.")
-	uploadServiceUrl := flag.String("uploadServiceUrl", "", "")
+	uploadServiceUrl := flag.String("uploadServiceUrl", "", "URL of upload service")
 
 	flag.Parse()
 

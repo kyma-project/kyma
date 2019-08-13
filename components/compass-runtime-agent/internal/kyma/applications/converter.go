@@ -189,7 +189,7 @@ func (c converter) toEventAPIService(applicationID string, eventsDefinition mode
 		Identifier:          "", // not available in the Director's API
 		Name:                createServiceName(eventsDefinition.Name, eventsDefinition.ID),
 		DisplayName:         eventsDefinition.Name,
-		Description:         eventsDefinition.Description,
+		Description:         description,
 		Labels:              map[string]string{connectedApp: applicationID}, // Application Registry adds here an union of two things: labels specified in the payload and connectedApp label
 		LongDescription:     "",                                             // not available in the Director's API
 		ProviderDisplayName: "",                                             // not available in the Director's API

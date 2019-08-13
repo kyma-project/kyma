@@ -1,4 +1,4 @@
-// Package istio contains components for managing Istio resources (Deniers, DenyRules, CheckNothings, ...)
+// Package istio contains components for managing Istio resources (Handlers, Instances, Rules)
 package istio
 
 import (

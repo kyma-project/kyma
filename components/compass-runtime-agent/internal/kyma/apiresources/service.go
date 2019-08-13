@@ -126,16 +126,16 @@ func (s service) UpdateApiResources(applicationName string, applicationUID types
 		}
 	}
 
-	appError := s.istioService.Upsert(applicationName, applicationUID, serviceID, k8sResourceName)
 	log.Infof("Updating istio resources for application '%s' and service '%s'.", applicationName, serviceID)
+	appError := s.istioService.Upsert(applicationName, applicationUID, serviceID, k8sResourceName)
 
 	if appError != nil {
 		log.Infof("Failed to update istio resources for application '%s' and service '%s': %s.", applicationName, serviceID, appError)
 		appendedErr = appendedErr.Append("", appError)
 	}
 
-	err := s.assetstore.Put(serviceID, apiType, spec, docstopic.ApiSpec)
 	log.Infof("Updating Api Spec for application '%s' and service '%s'.", applicationName, serviceID)
+	err := s.assetstore.Put(serviceID, apiType, spec, docstopic.ApiSpec)
 
 	if err != nil {
 		log.Infof("Failed to update Api Spec for application '%s' and service '%s': %s.", applicationName, serviceID, err)
