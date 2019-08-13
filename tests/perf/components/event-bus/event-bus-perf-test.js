@@ -33,10 +33,14 @@ export let options = {
      * Measure the worst case of bursty traffic, when bursting results in scaling
      * Bursts: 0 -> N, and N -> 2N
      * where, N = {1, 100, 1000}
+     * 
+     * Note: this is the desired KPI, which is currently not possible due 
+     * to https://github.com/kyma-project/kyma/issues/4370
      */
 
     /**
      * Numbers have to be brought down as the Framework kills the test
+     * w.r.t https://github.com/kyma-project/kyma/issues/4370 
      */
     stages: [
         //Expected
@@ -98,11 +102,6 @@ export default function () {
             }
         }
     }) ? eventPublishedSuccessfully.add(1) : eventPublishedFailed.add(1);
-
-    // var subscriptionResultResponse = http.get(eventSubscriberUrl);
-    // check(subscriptionResultResponse, {
-    //     "response code was 200": (res) => res.status == 200
-    // }) ? subscriptionResultVerified.add(1) : subscriptionResultFailed.add(1);
 
     eventPublishTotalRequests.add(1) //Increment number of events
 };
