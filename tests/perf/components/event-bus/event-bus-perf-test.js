@@ -10,7 +10,7 @@ import {
 var eventPublishTotalRequests = new Counter("event_publish_requests"),
     eventPublishedSuccessfully = new Counter("event_publish_success"),
     eventPublishedFailed = new Counter("event_published_failed"),
-    eventPublishedResponseTime = new Trend("event_publish_response_time")
+    eventPublishedResponseTime = new Trend("event_publish_response_time", true)
 
 /*
     Subscription relevant metrics, TO be enabled once subscriber seems to be thread safe
@@ -86,7 +86,7 @@ export let event_publish_configuration = {
 export default function () {
     var eventPublishResponse = http.post(event_publish_configuration.url, event_publish_configuration.payload, event_publish_configuration.params);
     eventPublishedResponseTime.add(eventPublishResponse.timings.duration);
-    
+
     check(eventPublishResponse, {
         "response code was 200": (res) => res.status == 200,
         "event publish status is 'published'.": (res) => {
