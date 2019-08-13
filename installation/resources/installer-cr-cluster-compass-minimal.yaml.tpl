@@ -26,4 +26,4 @@ spec:
     - name: "dex"
       namespace: "kyma-system"
     - name: "compass"
-      namespace: "compass-system
+      namespace: "compass-system"
