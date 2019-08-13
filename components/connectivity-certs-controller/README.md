@@ -6,7 +6,7 @@ The Connectivity Certs Controller fetches the client certificate and the root CA
 
 ## Fetching certificates
 
-The Controller acts on to CertificateRequest custom resource (CR). It requires the `csrInfoUrl` field.
+The Controller acts on CertificateRequest custom resource (CR). It requires the `csrInfoUrl` field.
 
 To create the CR, run:
 ```
@@ -58,14 +58,14 @@ The Connectivity Certs Controller checks the connection status by calling **Mana
 
 ## Certificate renewal
 
-The Connectivity Certs Controller renews a client certificate when it gets close to the expiration time. A renewed certificate will replace the previous one in the Secret together with a new private key.
+The Connectivity Certs Controller renews a client certificate when it gets close to the expiration time. A renewed certificate replaces the previous one in the Secret together with a new private key.
 
 To renew the certificate, set the **spec.renewNow** field in the CentralConnection CR to `true`. 
 
 
 ## Troubleshooting 
 
-If there's an error in the process of fetching the certificates or saving them to Secrets, the CertificateRequest CR is not deleted. Instead, the controller adds the **error** section that contains a detailed error message to the CR.
+If there is an error in the process of fetching the certificates or saving them to Secrets, the CertificateRequest CR is not deleted. Instead, the controller adds the **error** section that contains a detailed error message to the CR.
 
 To get the error message, run: 
 ```
