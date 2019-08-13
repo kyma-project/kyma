@@ -45,7 +45,7 @@ In case user calls registered service and receives an error:
 - Verify that the target URL is correct. 
   To do that, you can fetch the Service definition from Application Registry:
 
-    <div tabs name="deregistration">
+    <div tabs name="verification">
       <details>
       <summary>
       With trusted certificate
@@ -64,7 +64,7 @@ In case user calls registered service and receives an error:
       ```
       curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE} -k
       ```
-      
+
       </details>
     </div>
 
