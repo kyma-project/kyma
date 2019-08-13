@@ -51,7 +51,7 @@ If you try to renew a certificate and get the following error:
   "error": "Certificate has been revoked."
 }
 ```
-this means that the certificate has been revoked. 
+it means that the certificate has been revoked. 
 
 You cannot renew a certificate that has been revoked.  
 To generate a new certificate, see [this tutorial](#tutorials-get-the-client-certificate).
