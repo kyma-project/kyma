@@ -10,4 +10,4 @@ spec:
   include_subscription_name_header: true
   event_type: hello
   event_type_version: v1
-  source_id: external-application
+  source_id: perf-app

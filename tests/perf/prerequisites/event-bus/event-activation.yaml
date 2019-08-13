@@ -6,4 +6,4 @@ metadata:
     app: perf-test-event-bus
     example: event-subscription-service
 spec:
-  sourceId: external-application
+  sourceId: perf-app

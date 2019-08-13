@@ -67,9 +67,6 @@ function wait_for_subscription_to_be_ready() {
     return 1
 }
 
-# Expose event-publish service
-envsubst <"${WORKING_DIR}/event-publisher.yaml" | kubectl -n kyma-system apply -f -
-
 for specs in "${eventing_specs[@]}"; do
     echo "Deploying spec: $specs"
     envsubst <"${WORKING_DIR}/$specs" | kubectl -n "$NAMESPACE" apply -f -
