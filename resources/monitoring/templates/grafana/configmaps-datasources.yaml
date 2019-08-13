@@ -11,6 +11,11 @@ data:
   datasource.yaml: |-
     apiVersion: 1
     datasources:
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://logging:3100
+      editable: true
 {{- if .Values.grafana.sidecar.datasources.defaultDatasourceEnabled }}
     - name: Prometheus
       type: prometheus
