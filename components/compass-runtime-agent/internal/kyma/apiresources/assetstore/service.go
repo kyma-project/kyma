@@ -44,7 +44,7 @@ func NewService(repository DocsTopicRepository, uploadClient upload.Client) Serv
 }
 
 func (s service) Put(id string, apiType docstopic.ApiType, spec []byte, specCategory docstopic.SpecCategory) apperrors.AppError {
-	if spec == nil {
+	if len(spec) == 0 {
 		return nil
 	}
 
