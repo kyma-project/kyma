@@ -26,6 +26,7 @@ In case user calls registered service and receives an error:
   	  ```
       curl -X DELETE https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE}
       ```
+
       </details>
       <details>
       <summary>
@@ -35,6 +36,7 @@ In case user calls registered service and receives an error:
       ```
       curl -X DELETE https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE} -k
       ```
+
       </details>
     </div>
 
@@ -52,6 +54,7 @@ In case user calls registered service and receives an error:
   	  ```
       curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE}
       ```
+
       </details>
       <details>
       <summary>
@@ -61,6 +64,7 @@ In case user calls registered service and receives an error:
       ```
       curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE} -k
       ```
+      
       </details>
     </div>
 
