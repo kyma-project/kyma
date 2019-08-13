@@ -25,6 +25,7 @@ export let options = {
     rps: 0,
     tags: {
         component: "event-bus",
+        "testName": "event-publish-service",
         revision: `${__ENV.REVISION}`
     },
 
