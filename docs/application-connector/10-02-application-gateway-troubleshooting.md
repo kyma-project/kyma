@@ -4,7 +4,8 @@ type: Troubleshooting
 ---
 
 In case user calls registered service and receives an error:
-- Verify that the call reached Application Gateway. 
+
+- Verify that the call reached Application Gateway.  
   To do that fetch logs from Application Gateway pod:
   ```
   kubectl -n kyma-integration logs -l app={APP_NAME}-application-gateway -c {APP_NAME}-application-gateway
@@ -15,7 +16,7 @@ In case user calls registered service and receives an error:
   ```
   kubectl -n kyma-integration get svc app-{APP_NAME}-{SERVICE_ID}
   ```
-  If it doesn't, try to deregister the Service using the following command
+  If it doesn't, try to deregister the Service using the following command:
 
   <div tabs name="deregistration">
     <details>
