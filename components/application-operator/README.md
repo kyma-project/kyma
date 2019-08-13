@@ -10,7 +10,7 @@ Application Operator detects changes in Application custom resources and acts ac
 Application Operator (AO) performs different operations as a result of the following events:
 
  - Application created - the AO installs the Helm chart that contains all the necessary Kubernetes resources required for the Application to work.
- - Application updated - the AO updates the Status of the Application release.
+ - Application updated - the AO updates the Status of the Application Helm Release.
  - Application deleted - the AO deletes Helm chart corresponding to the given Application.
 
 
