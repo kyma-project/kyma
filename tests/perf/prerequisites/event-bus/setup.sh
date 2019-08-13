@@ -6,10 +6,10 @@ set -o pipefail
 WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 export NAMESPACE=event-bus-perf-test
-export CLUSTER_DOMAIN=$(kubectl get gateways.networking.istio.io kyma-gateway \
+export CLUSTER_DOMAIN_NAME=$(kubectl get gateways.networking.istio.io kyma-gateway \
                         -n kyma-system -ojsonpath="{.spec.servers[0].hosts[0]}" | sed 's/*//g' )
 export SUBSCRIBER_SERVICE_PATH="subscriber-service"
-export SUBSCRIBER_STATUS_URL="https://${SUBSCRIBER_SERVICE_PATH}${CLUSTER_DOMAIN}/v1/status"
+export SUBSCRIBER_STATUS_URL="https://${SUBSCRIBER_SERVICE_PATH}${CLUSTER_DOMAIN_NAME}/v1/status"
 
 eventing_specs=(
     namespace.yaml
@@ -66,6 +66,9 @@ function wait_for_subscription_to_be_ready() {
     echo -e "\n\n ERROR: There was some problem in creating kyma subscription.\n"
     return 1
 }
+
+# Expose event-publish service
+envsubst <"${WORKING_DIR}/event-publisher.yaml" | kubectl -n kyma-system apply -f -
 
 for specs in "${eventing_specs[@]}"; do
     echo "Deploying spec: $specs"

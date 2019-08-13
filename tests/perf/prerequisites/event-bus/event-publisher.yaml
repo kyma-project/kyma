@@ -1,0 +1,15 @@
+apiVersion: gateway.kyma-project.io/v1alpha2
+kind: Api
+metadata:
+  labels:
+    app: event-publish-service
+    chart: event-publish-service-0.1.0
+    heritage: Tiller
+    release: event-bus
+  name: event-publish-service
+spec:
+  authentication: []
+  hostname: event-publish-service.$CLUSTER_DOMAIN_NAME
+  service:
+    name: event-publish-service
+    port: 8080
