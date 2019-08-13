@@ -36,7 +36,7 @@ The Application Gateway has the following parameters:
 - **requestTimeout** is the timeout for requests sent through the Application Gateway, expressed in seconds. The default value is `1`.
 - **skipVerify** is the flag for skipping the verification of certificates for the proxy targets. The default value is `false`.
 - **requestLogging** is the flag for logging incoming requests. The default value is `false`.
-- **proxyTimeout** is the timeout for requests send through the proxy, expressed in seconds. The default is `10`.
+- **proxyTimeout** is the timeout for requests sent through the proxy, expressed in seconds. The default value is `10`.
 - **proxyCacheTTL** is the time to live of Remote API information stored in proxy cache, expressed in seconds. The default value is `120`.
 
 ## Development
