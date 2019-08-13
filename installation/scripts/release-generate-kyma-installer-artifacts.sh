@@ -18,7 +18,7 @@ INSTALLER_YAML_PATH="${RESOURCES_DIR}/installer.yaml"
 INSTALLER_LOCAL_CONFIG_PATH="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
 INSTALLER_LOCAL_CR_PATH="${RESOURCES_DIR}/installer-cr.yaml.tpl"
 INSTALLER_CLUSTER_CR_PATH="${RESOURCES_DIR}/installer-cr-cluster.yaml.tpl"
-INSTALLER_COMPASS_CLUSTER_CR_PATH="${RESOURCES_DIR}/installer-cr-cluster-diet-compass.yaml.tpl"
+INSTALLER_COMPASS_CLUSTER_CR_PATH="${RESOURCES_DIR}/installer-cr-cluster-compass-minimal.yaml.tpl"
 INSTALLER_AGENT_CLUSTER_CR_PATH="${RESOURCES_DIR}/installer-cr-cluster-agent.yaml.tpl"
 
 function generateLocalArtifact() {
@@ -54,7 +54,7 @@ function generateCompassClusterArtifact() {
 
     ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER_YAML_PATH} ${TMP_COMPASS_CLUSTER_CR} \
       | sed -E ";s;image: eu.gcr.io\/kyma-project\/develop\/installer:.+;image: eu.gcr.io/kyma-project/${KYMA_INSTALLER_PUSH_DIR}kyma-installer:${KYMA_INSTALLER_VERSION};" \
-      > ${ARTIFACTS_DIR}/kyma-installer-compass-cluster.yaml
+      > ${ARTIFACTS_DIR}/kyma-installer-cluster-compass.yaml
 
     rm -rf ${TMP_COMPASS_CLUSTER_CR}
 }
@@ -66,7 +66,7 @@ function generateAgentClusterArtifact() {
 
     ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER_YAML_PATH} ${TMP_AGENT_CLUSTER_CR} \
       | sed -E ";s;image: eu.gcr.io\/kyma-project\/develop\/installer:.+;image: eu.gcr.io/kyma-project/${KYMA_INSTALLER_PUSH_DIR}kyma-installer:${KYMA_INSTALLER_VERSION};" \
-      > ${ARTIFACTS_DIR}/kyma-installer-agent-cluster.yaml
+      > ${ARTIFACTS_DIR}/kyma-installer-cluster-agent.yaml
 
     rm -rf ${TMP_AGENT_CLUSTER_CR}
 }
