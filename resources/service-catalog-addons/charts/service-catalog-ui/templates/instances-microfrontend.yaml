@@ -10,6 +10,7 @@ spec:
   category: Service Management
   placement: namespace
   viewBaseUrl: 'https://instances.{{ js .Values.global.ingress.domainName }}'
+  preloadUrl: 'https://instances.{{ js .Values.global.ingress.domainName }}/#preload'
   navigationNodes:
     - label: Instances
       navigationPath: instances
