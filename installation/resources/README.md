@@ -2,20 +2,20 @@
 
 ## Overview
 
-This directory contains resources used by installer.
+This directory contains resources used by the Installer.
 
 ## Installer CRs
 
-Files starting with `installer-cr-*` contain different component configurations that can be provided to installer. Currently available configurations:
+Files starting with `installer-cr-*` contain different component configurations that you can provide to the Installer. These are the currently available configurations:
 
-| Configuration | Description | Officially supported |
+| Configuration | Description | Supported |
 |----------------|------|------|
-| `installer-cr.yaml.tpl` | Complete local Kyma installation | ✅ |
-| `installer-cr-cluster.yaml.tpl` | Complete cluster Kyma installation | ✅ |
-| `installer-cr-cluster-with-compass.yaml.tpl` | Complete cluster Kyma installation with `compass` and `compass-runtime-agent` components | ⛔️ |
-| `installer-cr-cluster-compass-minimal.yaml.tpl` | Cluster Compass installation only with Kyma components used by Compass | ⛔️ |
-| `installer-cr-cluster-agent.yaml.tpl` | Complete cluster Kyma installation with `compass-runtime-agent` component | ⛔️ |
+| `installer-cr.yaml.tpl` | Provides complete local Kyma installation. | ✅ |
+| `installer-cr-cluster.yaml.tpl` | Provides complete cluster Kyma installation. | ✅ |
+| `installer-cr-cluster-with-compass.yaml.tpl` | Provides complete cluster Kyma installation with the `compass` and `compass-runtime-agent` components. | ⛔️ |
+| `installer-cr-cluster-compass-minimal.yaml.tpl` | Provides cluster Compass installation only with the Kyma components that Compass uses. | ⛔️ |
+| `installer-cr-cluster-agent.yaml.tpl` | Provides complete cluster Kyma installation with the `compass-runtime-agent` component. | ⛔️ |
 
-### Adding new components to Kyma
+## Add a new component to Kyma
 
-When adding new components to Kyma remember to update every Installer CR that should use the new component.
+When you add a new component to Kyma, you must update every Installer CR that will use the component.
