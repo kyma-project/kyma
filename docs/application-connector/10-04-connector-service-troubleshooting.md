@@ -13,7 +13,7 @@ If you try to generate a client certificate, you may get the following error:
 }
 ```
 
-This error is caused by applying wrong subject info to your Certificate Signing Request.
+This error is caused by applying wrong subject info to your Certificate Signing Request.  
 To ensure it was generated properly check the values returned by the Connector Service with the call that fetched CSR info:
 ```json
 {
@@ -53,5 +53,5 @@ If you try to renew a certificate and get the following error:
 ```
 this means that the certificate has been revoked. 
 
-You cannot renew a certificate that has been revoked.
+You cannot renew a certificate that has been revoked.  
 To generate a new certificate, see [this tutorial](#tutorials-get-the-client-certificate).
