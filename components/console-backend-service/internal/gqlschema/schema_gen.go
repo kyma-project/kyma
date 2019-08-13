@@ -223,6 +223,7 @@ type ComplexityRoot struct {
 		Category        func(childComplexity int) int
 		ViewBaseUrl     func(childComplexity int) int
 		Placement       func(childComplexity int) int
+		PreloadUrl      func(childComplexity int) int
 		NavigationNodes func(childComplexity int) int
 	}
 
@@ -4783,6 +4784,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ClusterMicroFrontend.Placement(childComplexity), true
+
+	case "ClusterMicroFrontend.preloadUrl":
+		if e.complexity.ClusterMicroFrontend.PreloadUrl == nil {
+			break
+		}
+
+		return e.complexity.ClusterMicroFrontend.PreloadUrl(childComplexity), true
 
 	case "ClusterMicroFrontend.navigationNodes":
 		if e.complexity.ClusterMicroFrontend.NavigationNodes == nil {
@@ -12025,6 +12033,11 @@ func (ec *executionContext) _ClusterMicroFrontend(ctx context.Context, sel ast.S
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "preloadUrl":
+			out.Values[i] = ec._ClusterMicroFrontend_preloadUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "navigationNodes":
 			out.Values[i] = ec._ClusterMicroFrontend_navigationNodes(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -12163,6 +12176,33 @@ func (ec *executionContext) _ClusterMicroFrontend_placement(ctx context.Context,
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Placement, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterMicroFrontend_preloadUrl(ctx context.Context, field graphql.CollectedField, obj *ClusterMicroFrontend) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterMicroFrontend",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PreloadURL, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -32117,6 +32157,7 @@ type ClusterMicroFrontend {
     category: String!
     viewBaseUrl: String!
     placement: String!
+    preloadUrl: String!
     navigationNodes: [NavigationNode!]!
 }
 

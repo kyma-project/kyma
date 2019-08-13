@@ -149,6 +149,7 @@ type ClusterMicroFrontend struct {
 	Category        string           `json:"category"`
 	ViewBaseURL     string           `json:"viewBaseUrl"`
 	Placement       string           `json:"placement"`
+	PreloadURL      string           `json:"preloadUrl"`
 	NavigationNodes []NavigationNode `json:"navigationNodes"`
 }
 
