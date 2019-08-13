@@ -1,11 +1,11 @@
 ---
-title:  Console Backend Service
+title: Console Backend Service
 type: Details
 ---
 
 The Console Backend Service is a backend service which provides an API for all views of the Console UI. This service consumes the Kubernetes API and exposes a simplified GraphQL API to allow frontends to perform Kubernetes resource operations.
 
-> **NOTE:** Read [this](/components/security#details-graphql) security document for more information about the Kyma GraphQL implementation.
+> **NOTE:** Read [this](/components/security#details-graph-ql) security document for more information about the Kyma GraphQL implementation.
 
 ## Cache
 
