@@ -65,7 +65,7 @@ global:
     version: 971b3bca
   cluster_users_integration_tests:
     dir: pr/
-    version: PR-5178
+    version: PR-5277
   xip_patch:
     dir: pr/
     version: "PR-5226"
