@@ -17,26 +17,33 @@ In case user calls registered service and receives an error:
   ```
   If it doesn't, try to deregister the Service using the following command
 
-    <div tabs name="deregistration">
+    <div tabs name="installation">
       <details>
       <summary>
-      With trusted certificate
+      From release
       </summary>
-  
-  	  ```
-      curl -X DELETE https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE}
+
+      When you install Kyma locally from a release, follow [this](https://kyma-project.io/docs/master/root/kyma/#installation-install-kyma-locally) guide.
+      Ensure that you created the local Kubernetes cluster with `10240Mb` memory and `30Gb` disk size.
+      ```
+      ./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit" --memory 10240Mb --disk-size 30g
       ```
 
+      Run the following command before triggering the Kyma installation process:
+      ```
+      kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true", "global.kymaEventBus": "false", "global.natsStreaming.clusterID": "knative-nats-streaming"}}'
+      ```
       </details>
       <details>
       <summary>
-      Without trusted certificate
+      From sources
       </summary>
 
-      ```
-      curl -X DELETE https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE} -k
-      ```
+      When you install Kyma locally from sources, add the `--knative` argument to the `run.sh` script. Run this command:
 
+      ```
+      ./run.sh --knative
+      ```
       </details>
     </div>
 
