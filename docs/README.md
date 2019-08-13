@@ -11,6 +11,7 @@ Start with the overarching [Kyma](./kyma) documentation where you can find the g
 -   [Asset Store](./asset-store/)
 -   [Backup](./backup/)
 -   [Console](./console/)
+-   [Compass](./compass/)
 -   [Event Bus](./event-bus/)
 -   [Headless CMS](./headless-cms/)
 -   [Helm Broker](./helm-broker/)
