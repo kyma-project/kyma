@@ -22,6 +22,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: cpu.temp.rules
+  namespace: kyma-system
   labels:
     app: cpu.temp.rules
     prometheus: monitoring
