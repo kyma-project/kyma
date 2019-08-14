@@ -2,19 +2,19 @@ images:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   ui:
-    dir: /pr
+    dir: pr/
     version: "PR-1151"
-    
+
 ui:
   host: compass
-mf: 
-  host: compass-mf  
+mf:
+  host: compass-mf
 
 service:
-  externalPort : 80
-  internalPort : 80
-  mfExternalPort : 8888
-  mfInternalPort : 8888
+  externalPort: 80
+  internalPort: 80
+  mfExternalPort: 8888
+  mfInternalPort: 8888
 
 deployment:
   image:
