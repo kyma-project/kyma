@@ -12,13 +12,17 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}-connectivity-validator
+      release: {{ .Release.Name }}
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
         app: {{ .Release.Name }}-connectivity-validator
-        release: {{ .Release.Name }}-connectivity-validator
+        release: {{ .Release.Name }}
     spec:
       containers:
         - name: {{ .Release.Name }}-connectivity-validator

@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   replicas: 1
@@ -13,6 +13,10 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      release: {{ .Release.Name }}
   template:
     metadata:
       annotations:
@@ -20,7 +24,7 @@ spec:
         traffic.sidecar.istio.io/includeInboundPorts: "{{ .Values.deployment.args.externalAPIPort }}"
       labels:
         app: {{ .Chart.Name }}
-        release: {{ .Chart.Name }}
+        release: {{ .Release.Name }}
     spec:
       containers:
       - name: {{ .Chart.Name }}

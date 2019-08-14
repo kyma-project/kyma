@@ -4,11 +4,15 @@ metadata:
   name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
   labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
     control-plane: {{ .Chart.Name }}
     controller-tools.k8s.io: "1.0"
 spec:
   selector:
     matchLabels:
+      app: {{ .Chart.Name }}
+      release: {{ .Release.Name }}
       control-plane: {{ .Chart.Name }}
       controller-tools.k8s.io: "1.0"
   serviceName: {{ .Chart.Name }}-service
@@ -17,6 +21,8 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
+        app: {{ .Chart.Name }}
+        release: {{ .Release.Name }}
         control-plane: {{ .Chart.Name }}
         controller-tools.k8s.io: "1.0"
     spec:
