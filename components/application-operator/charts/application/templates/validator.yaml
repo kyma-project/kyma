@@ -14,7 +14,7 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}-connectivity-validator
+      app: {{ .Release.Name }}-connectivity-validator
       release: {{ .Release.Name }}
   template:
     metadata:

@@ -14,7 +14,7 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}-application-gateway
+      app: {{ .Release.Name }}-application-gateway
       release: {{ .Release.Name }}
   template:
     metadata:
@@ -74,7 +74,7 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}-event-service
+      app: {{ .Release.Name }}-event-service
       release: {{ .Release.Name }}
   template:
     metadata:
