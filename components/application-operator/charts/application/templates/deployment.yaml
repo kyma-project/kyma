@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-application-gateway
@@ -54,7 +54,7 @@ spec:
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-event-service
