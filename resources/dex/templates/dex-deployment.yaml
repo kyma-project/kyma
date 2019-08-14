@@ -9,15 +9,19 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: dex
   template:
     metadata:
+      name: dex
       labels:
         app: dex
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/dex-config-map.yaml") . | sha256sum }}
     spec:
-      serviceAccount: dex-account
+      serviceAccountName: dex-account
       containers:
       - image: {{ .Values.imageRegistry }}/dex:{{ .Chart.AppVersion }}
         name: dex
