@@ -10,7 +10,7 @@ global:
       version: "26601526"
     director:
       dir: develop/
-      version: "5a95fe8c"
+      version: "0255ce85"
     gateway:
       dir: develop/
       version: "df629420"
