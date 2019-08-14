@@ -28,6 +28,3 @@ hpa:
     resource:
       name: memory
       targetAverageUtilization: 50
-
-tests:
-  enabled: true
