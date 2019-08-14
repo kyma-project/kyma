@@ -27,17 +27,17 @@ To start the Application Registry, run this command:
 ```
 
 The Application Registry has the following parameters:
-- **externalAPIPort** - This port exposes the Metadata API to an external solution. The default port is `8081`.
-- **proxyPort** - This port acts as a proxy for the calls from services and lambdas to an external solution. The default port is `8080`.
-- **namespace** - Namespace where Application Registry is deployed. The default Namespace is `kyma-system`.
-- **requestTimeout** - A time-out for requests sent through the Application Registry. It is provided in seconds. The default time-out is `1`.
-- **requestLogging** - A flag for logging incoming requests. The default value is `false`.
-- **specRequestTimeout** - A time-out for requests fetching specifications provided by the user. It is provided in seconds. The default time-out is `5`.
-- **assetstoreRequestTimeout** - A time-out for requests fetching specifications from the Asset Store Service. It is provided in seconds. The default time-out is `5`.
-- **detailedErrorResponse** - A flag for showing detailed internal error messages in response bodies. The default value is `false` and all internal server error messages are shortened to `Internal error`, while all other error messages are shown as usual.
-- **uploadServiceURL** - URL of the Upload Service.
-- **insecureAssetDownload** - A flag for skipping certificate verification for asset download. The default value is `false`
-- **insecureSpecDownload** - A flag for skipping certificate verification for API specification download. The default value is `false`
+- **externalAPIPort** is the port that exposes the Metadata API to an external solution. The default port is `8081`.
+- **proxyPort** is the port that acts as a proxy for the calls from services and lambdas to an external solution. The default port is `8080`.
+- **namespace** is the Namespace where Application Registry is deployed. The default Namespace is `kyma-system`.
+- **requestTimeout** is the time-out for requests sent through the Application Registry. It is provided in seconds. The default time-out is `1`.
+- **requestLogging** is the flag for logging incoming requests. The default value is `false`.
+- **specRequestTimeout** is the time-out for requests fetching specifications provided by the user. It is provided in seconds. The default time-out is `5`.
+- **assetstoreRequestTimeout** is the time-out for requests fetching specifications from the Asset Store Service. It is provided in seconds. The default time-out is `5`.
+- **detailedErrorResponse** is the flag for showing detailed internal error messages in response bodies. The default value is `false` and all internal server error messages are shortened to `Internal error`, while all other error messages are shown as usual.
+- **uploadServiceURL** is the URL of the Upload Service.
+- **insecureAssetDownload** is the flag for skipping certificate verification for asset download. The default value is `false`.
+- **insecureSpecDownload** is the flag for skipping certificate verification for API specification download. The default value is `false`.
 
 ### Sample calls
 
@@ -94,7 +94,7 @@ This section explains the development process.
 
 ### Rapid development with Telepresence
 
-The Application Registry stores its state in the Kubernetes custom resource, therefore it's dependent on Kubernetes. You cannot mock the dependency. You cannot develop locally. Manual deployment on every change is a mundane task.
+The Application Registry stores its state in the Kubernetes custom resource, therefore depends on Kubernetes. You cannot mock the dependency. You cannot develop locally. Manual deployment on every change is a mundane task.
 
 You can, however, leverage [Telepresence](https://www.telepresence.io/). This works by replacing a container in a specified Pod, opening up a new local shell or a pre-configured bash, and proxying the network traffic from the local shell through the Pod.
 
@@ -110,9 +110,9 @@ telepresence --namespace kyma-system --swap-deployment metadata:metadata --run-s
  ```bash
 sudo ln -s $TELEPRESENCE_ROOT/var/run/secrets /var/run/secrets
 ```
-5. Run `CGO_ENABLED=0 go build ./cmd/applicationregistry` to build the Application Registry and give all  Kubernetes services that call the Application Registry access to this process. The process runs locally on your machine. Use the same command to run different Application Connector services like Proxy or Events.
+5. Run `CGO_ENABLED=0 go build ./cmd/applicationregistry` to build the Application Registry and give all Kubernetes services that call the Application Registry access to this process. The process runs locally on your machine. Use the same command to run different Application Connector services like Proxy or Events.
 
-You can also run another shell to make calls to this service. To run this shell, swap the Application Broker Deployment, because Istio sidecar is already injected into this Deployment:
+You can also run another shell to make calls to this service. To run this shell, swap the Application Broker Deployment because Istio sidecar is already injected into this Deployment:
 ```bash
 telepresence --namespace kyma-system --swap-deployment kyma-core-application-broker:reb --run-shell
 ```

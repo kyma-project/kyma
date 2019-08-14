@@ -17,7 +17,7 @@ This Installation guide shows you how to quickly deploy Kyma locally on the MacO
 
 Virtualization:
 
-- [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - MacOS only
+- [Hyperkit driver](https://minikube.sigs.k8s.io/docs/reference/drivers/hyperkit/) - MacOS only
 - [VirtualBox](https://www.virtualbox.org/) - Linux only
 
 > **NOTE**: To work with Kyma, use only the provided commands. Kyma requires a specific Minikube configuration and does not work on a basic Minikube cluster that you can start using the `minikube start` command.
