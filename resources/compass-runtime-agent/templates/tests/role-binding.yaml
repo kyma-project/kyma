@@ -63,6 +63,15 @@ rules:
       - get
       - delete
       - list
+  - apiGroups:
+      - config.istio.io
+    resources:
+      - handlers
+      - rules
+      - instances
+    verbs:
+      - get
+      - list
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
