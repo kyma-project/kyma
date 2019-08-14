@@ -12,14 +12,6 @@ var eventPublishTotalRequests = new Counter("event_publish_requests"),
     eventPublishedFailed = new Counter("event_published_failed"),
     eventPublishedResponseTime = new Trend("event_publish_response_time", true)
 
-/*
-    Subscription relevant metrics, TO be enabled once subscriber seems to be thread safe
-*/
-// var subscriptionResultVerified = new Counter("verified_subscription_results");
-// var subscriptionResultFailed = new Counter("failed_subscription_results");
-
-// let eventSubscriberUrl = "http://event-subscription-service.event-bus-perf-test:9000/v1/results";
-
 
 export let options = {
     rps: 0,
