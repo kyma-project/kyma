@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions"
+
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock"
@@ -44,10 +46,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	basicAuth := applications.NewAuth().WithBasicAuth(validUsername, validPassword)
 	oauth := applications.NewAuth().WithOAuth(validClientId, validClientSecret, oauthTokenURL)
 
-	var apiSpecDataCreate graphql.CLOB = `{"productsEndpoint": "Endpoint products returns products."}`
-	var apiEventSpecDataCreate graphql.CLOB = `{"orderCreated": "Published when order is placed."}`
-
-	noAuthAPIInput := applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&apiSpecDataCreate)
+	noAuthAPIInput := applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&assertions.ApiSpecData)
 	basicAuthAPIInput := applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth)
 	oauthAPIInput := applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth)
 
@@ -65,7 +64,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						}).
 					WithEventAPIs(
 						[]*applications.EventAPIDefinitionInput{
-							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiEventSpecDataCreate),
+							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&assertions.ApiSpecData),
 							applications.NewEventAPI("no-description-events-api", ""),
 						},
 					)
@@ -117,7 +116,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						}).
 					WithEventAPIs(
 						[]*applications.EventAPIDefinitionInput{
-							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiEventSpecDataCreate),
+							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&assertions.ApiSpecData),
 							applications.NewEventAPI("no-description-events-api", ""),
 						},
 					)
@@ -137,7 +136,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						}).
 					WithEventAPIs(
 						[]*applications.EventAPIDefinitionInput{
-							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiEventSpecDataCreate),
+							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&assertions.ApiSpecData),
 						},
 					)
 

@@ -1,6 +1,9 @@
 package assertions
 
 import (
+	"fmt"
+	"io/ioutil"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -62,6 +65,8 @@ const (
 	expectedPort       int32           = 80
 	expectedTargetPort int32           = 8080
 )
+
+var ApiSpecData graphql.CLOB = "defaultContent"
 
 type K8sResourceChecker struct {
 	serviceClient          v1.ServiceInterface
@@ -194,7 +199,7 @@ func (c *K8sResourceChecker) assertEventAPI(t *testing.T, appId string, compassE
 	expectedResourceName := c.nameResolver.GetResourceName(appId, compassEventAPI.ID)
 	assert.Equal(t, expectedResourceName, entry.AccessLabel)
 
-	if compassEventAPI.Spec != nil {
+	if compassEventAPI.Spec != nil && compassEventAPI.Spec.Data != nil {
 		c.assertDocsTopics(t, compassEventAPI.ID)
 	}
 }
@@ -280,7 +285,7 @@ func (c *K8sResourceChecker) assertResourcesDoNotExist(t *testing.T, resourceNam
 	assert.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
 
-	//assert that Istio have been removed
+	//assert Istio resources have been removed
 	_, err = c.istioClient.IstioV1alpha2().Rules(c.integrationNamespace).Get(resourceName, v1meta.GetOptions{})
 	assert.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
@@ -320,6 +325,7 @@ func (c *K8sResourceChecker) assertDocsTopics(t *testing.T, serviceID string) {
 	topic := getClusterDocsTopic(t, serviceID, c.clusterDocsTopicClient)
 	require.NotEmpty(t, topic)
 	require.NotEmpty(t, topic.Spec.Sources)
+	checkContent(t, topic)
 }
 
 func getService(applicationCR *v1alpha1apps.Application, apiId string) (*v1alpha1apps.Service, bool) {
@@ -341,4 +347,17 @@ func getClusterDocsTopic(t *testing.T, id string, resourceInterface dynamic.Reso
 	require.NoError(t, err)
 
 	return docsTopic
+}
+
+func checkContent(t *testing.T, topic assets.ClusterDocsTopic) {
+	url := topic.Spec.Sources[0].URL
+	resp, err := http.Get(url)
+	defer resp.Body.Close()
+	require.NoError(t, err)
+
+	bytes, e := ioutil.ReadAll(resp.Body)
+	require.NoError(t, e)
+
+	fmt.Println("Retrieved body:" + string(bytes))
+	assert.Equal(t, string(ApiSpecData), string(bytes))
 }
