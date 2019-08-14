@@ -4,7 +4,7 @@ ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/application-ope
 
 WORKDIR $DOCK_PKG_DIR
 COPY . $DOCK_PKG_DIR
-COPY ./licenses/ /app/licenses
+#COPY ./licenses/ /app/licenses
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -o manager ./cmd/manager
 
