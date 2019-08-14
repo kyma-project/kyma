@@ -47,6 +47,12 @@
   version = "v0.1.0"
 
 [[projects]]
+  name = "github.com/go-logr/zapr"
+  packages = ["."]
+  revision = "03f06a783fbb7dfaf3f629c7825480e43a7105e6"
+  version = "v0.1.1"
+
+[[projects]]
   name = "github.com/gobuffalo/flect"
   packages = ["."]
   revision = "751c52157d8840ef1ebfeb65917fb9680ef51f24"
@@ -151,12 +157,6 @@
   packages = ["."]
   revision = "27518f6661eba504be5a7a9a9f6d9460d892ade3"
   version = "v1.1.7"
-
-[[projects]]
-  name = "github.com/konsorten/go-windows-terminal-sequences"
-  packages = ["."]
-  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
-  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/mattn/go-colorable"
@@ -282,12 +282,6 @@
   version = "v0.0.3"
 
 [[projects]]
-  name = "github.com/sirupsen/logrus"
-  packages = ["."]
-  revision = "839c75faf7f98a33d445d181f3018b5c3409a45e"
-  version = "v1.4.2"
-
-[[projects]]
   name = "github.com/spf13/cobra"
   packages = ["."]
   revision = "f2b07da1e2c38d5f12845a4f607e2e1018cbb1f5"
@@ -304,6 +298,31 @@
   packages = ["assert"]
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
   version = "v1.3.0"
+
+[[projects]]
+  name = "go.uber.org/atomic"
+  packages = ["."]
+  revision = "df976f2515e274675050de7b3f42545de80594fd"
+  version = "v1.4.0"
+
+[[projects]]
+  name = "go.uber.org/multierr"
+  packages = ["."]
+  revision = "3c4937480c32f4c13a875a1829af76c98ca3d40a"
+  version = "v1.1.0"
+
+[[projects]]
+  name = "go.uber.org/zap"
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore"
+  ]
+  revision = "27376062155ad36be76b0f12cf1572a221d3a48c"
+  version = "v1.10.0"
 
 [[projects]]
   branch = "master"
@@ -726,6 +745,7 @@
     "pkg/internal/recorder",
     "pkg/leaderelection",
     "pkg/log",
+    "pkg/log/zap",
     "pkg/manager",
     "pkg/manager/signals",
     "pkg/metrics",
@@ -733,6 +753,7 @@
     "pkg/reconcile",
     "pkg/recorder",
     "pkg/runtime/inject",
+    "pkg/runtime/log",
     "pkg/runtime/scheme",
     "pkg/runtime/signals",
     "pkg/scheme",
@@ -783,6 +804,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8dd4f299418100456d59b0e5721db12fc01bcd78a0b8398d75324cd24a62589f"
+  inputs-digest = "991f315350592fa6e237eae6d552fccf58a5c4b8e85a338bc1b53884809609ad"
   solver-name = "gps-cdcl"
   solver-version = 1
