@@ -172,7 +172,7 @@ func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Resu
 	// Create Function's ConfigMap
 	foundCm := &corev1.ConfigMap{}
 	deployCm := &corev1.ConfigMap{}
-	_, err = r.createFunctionConfigMap(foundCm, deployCm, fn, fn.Namespace)
+	_, err = r.createFunctionConfigMap(foundCm, deployCm, fn)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return reconcile.Result{}, nil
@@ -283,7 +283,7 @@ func createFunctionHandlerMap(fn *runtimev1alpha1.Function) map[string]string {
 }
 
 // Create Function's ConfigMap
-func (r *ReconcileFunction) createFunctionConfigMap(foundCm *corev1.ConfigMap, deployCm *corev1.ConfigMap, fn *runtimev1alpha1.Function, namespace string) (reconcile.Result, error) {
+func (r *ReconcileFunction) createFunctionConfigMap(foundCm *corev1.ConfigMap, deployCm *corev1.ConfigMap, fn *runtimev1alpha1.Function) (reconcile.Result, error) {
 
 	// Create Function Handler
 	deployCm.Data = createFunctionHandlerMap(fn)

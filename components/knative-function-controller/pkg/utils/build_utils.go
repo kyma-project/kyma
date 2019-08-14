@@ -26,6 +26,12 @@ func GetBuildResource(rnInfo *RuntimeInfo, fn *runtimev1alpha1.Function, imageNa
 		timeout = 30 * time.Minute
 	}
 
+	for _, rt := range rnInfo.AvailableRuntimes {
+		if rt.ID == fn.Spec.Runtime {
+			args = append(args, buildv1alpha1.ArgumentSpec{Name: "DOCKERFILE", Value: rt.DockerFileName})
+		}
+	}
+
 	vols := []corev1.Volume{
 		{
 			Name: "source",
