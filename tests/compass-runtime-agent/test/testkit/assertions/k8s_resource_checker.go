@@ -1,7 +1,6 @@
 package assertions
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -358,6 +357,5 @@ func checkContent(t *testing.T, topic assets.ClusterDocsTopic) {
 	bytes, e := ioutil.ReadAll(resp.Body)
 	require.NoError(t, e)
 
-	fmt.Println("Retrieved body:" + string(bytes))
 	assert.Equal(t, string(ApiSpecData), string(bytes))
 }
