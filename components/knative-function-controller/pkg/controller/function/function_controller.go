@@ -142,7 +142,6 @@ func getEnvDefault(envName string, defaultValue string) string {
 // +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;watch;update;list
 // +kubebuilder:rbac:groups=";apps;extensions",resources=deployments,verbs=create;get;watch;update;delete;list;update;patch
 func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-
 	// Get Function instance
 	fn := &runtimev1alpha1.Function{}
 	err := r.getFunctionInstance(request, fn)
@@ -150,7 +149,7 @@ func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Resu
 		if errors.IsNotFound(err) {
 			return reconcile.Result{}, nil
 		}
-		// status of the functon must change to error.
+		// status of the function must change to error.
 		r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionError)
 
 		log.Error(err, "Error reading Function instance", "namespace", request.Namespace, "name", request.Name)
@@ -173,7 +172,7 @@ func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Resu
 	// Create Function's ConfigMap
 	foundCm := &corev1.ConfigMap{}
 	deployCm := &corev1.ConfigMap{}
-	_, err = r.createFunctionConfigMap(foundCm, deployCm, fn)
+	_, err = r.createFunctionConfigMap(foundCm, deployCm, fn, fn.Namespace)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return reconcile.Result{}, nil
@@ -186,7 +185,7 @@ func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Resu
 
 	// Update Function's ConfigMap
 	if err := r.updateFunctionConfigMap(foundCm, deployCm); err != nil {
-		// status of the functon must change to error.
+		// status of the function must change to error.
 		r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionError)
 
 		log.Error(err, "Error while trying to update Function's ConfigMap:", "namespace", deployCm.Namespace, "name", deployCm.Name)
@@ -200,8 +199,8 @@ func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Resu
 	imageName := fmt.Sprintf("%s/%s-%s:%s", rnInfo.RegistryInfo, fn.Namespace, fn.Name, functionSha)
 	log.Info("function image", "namespace:", fn.Namespace, "name:", fn.Name, "imageName:", imageName)
 
-	if err := r.getFunctionBuildTemplate(fn); err != nil {
-		// status of the functon must change to error.
+	if err := r.getFunctionBuildTemplate(fn, rnInfo); err != nil {
+		// status of the function must change to error.
 		r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionError)
 
 		return reconcile.Result{}, err
@@ -216,14 +215,14 @@ func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Resu
 	}
 	buildName := fmt.Sprintf("%s-%s", fn.Name, shortSha)
 	if err := r.buildFunctionImage(rnInfo, fn, imageName, buildName); err != nil {
-		// status of the functon must change to error.
+		// status of the function must change to error.
 		r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionError)
 
 		return reconcile.Result{}, err
 	}
 
 	if err := r.serveFunction(rnInfo, foundCm, fn, imageName); err != nil {
-		// status of the functon must change to error.
+		// status of the function must change to error.
 		r.updateFunctionStatus(fn, runtimev1alpha1.FunctionConditionError)
 		return reconcile.Result{}, err
 	}
@@ -284,7 +283,7 @@ func createFunctionHandlerMap(fn *runtimev1alpha1.Function) map[string]string {
 }
 
 // Create Function's ConfigMap
-func (r *ReconcileFunction) createFunctionConfigMap(foundCm *corev1.ConfigMap, deployCm *corev1.ConfigMap, fn *runtimev1alpha1.Function) (reconcile.Result, error) {
+func (r *ReconcileFunction) createFunctionConfigMap(foundCm *corev1.ConfigMap, deployCm *corev1.ConfigMap, fn *runtimev1alpha1.Function, namespace string) (reconcile.Result, error) {
 
 	// Create Function Handler
 	deployCm.Data = createFunctionHandlerMap(fn)
@@ -344,9 +343,7 @@ func (r *ReconcileFunction) updateFunctionConfigMap(foundCm *corev1.ConfigMap, d
 
 }
 
-func (r *ReconcileFunction) getFunctionBuildTemplate(fn *runtimev1alpha1.Function) error {
-
-	buildTemplateNamespace := fn.Namespace
+func (r *ReconcileFunction) getFunctionBuildTemplate(fn *runtimev1alpha1.Function, ri *runtimeUtil.RuntimeInfo) error {
 
 	deployBuildTemplate := &buildv1alpha1.BuildTemplate{
 		TypeMeta: metav1.TypeMeta{
@@ -355,9 +352,9 @@ func (r *ReconcileFunction) getFunctionBuildTemplate(fn *runtimev1alpha1.Functio
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      buildTemplateName,
-			Namespace: buildTemplateNamespace,
+			Namespace: fnConfigNamespace,
 		},
-		Spec: runtimeUtil.GetBuildTemplateSpec(fn),
+		Spec: runtimeUtil.GetBuildTemplateSpec(ri),
 	}
 
 	if err := controllerutil.SetControllerReference(fn, deployBuildTemplate, r.scheme); err != nil {

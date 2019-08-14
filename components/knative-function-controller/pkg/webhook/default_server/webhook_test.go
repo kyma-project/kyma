@@ -152,22 +152,6 @@ func testHandleDefaults(t *testing.T) {
 	// these are the expected patches for an empty function
 	g.Expect(createCertificates(t)).NotTo(gomega.HaveOccurred())
 
-	//// create manager
-	//mgr, err := manager.New(cfg, manager.Options{})
-	//g.Expect(err).NotTo(gomega.HaveOccurred())
-	//
-	//c = mgr.GetClient()
-	//
-	//// add webhook to manager
-	//g.Expect(Add(mgr)).NotTo(gomega.HaveOccurred())
-	//
-	//// start manager
-	//stopMgr, mgrStopped := StartTestManager(mgr, g)
-	//defer func() {
-	//	close(stopMgr)
-	//	mgrStopped.Wait()
-	//}()
-
 	expectedPatches := []jsonpatch.Operation{
 		{
 			Operation: "replace",
@@ -228,7 +212,6 @@ func testHandleDefaults(t *testing.T) {
 		},
 		Response: &admissionv1beta1.AdmissionResponse{},
 	}
-	//g.Expect(c.Create(context.TODO(), fnConfig)).NotTo(gomega.HaveOccurred())
 
 	jsonRequest, err := json.Marshal(admissionReview)
 	if err != nil {

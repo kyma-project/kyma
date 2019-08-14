@@ -38,7 +38,7 @@ func TestNewRuntimeInfo(t *testing.T) {
 		},
 	}
 	_, err = utils.New(cmBroken)
-	g.Expect(err.Error()).To(gomega.Equal("Error while fetching serviceAccountName"))
+	g.Expect(err.Error()).To(gomega.Equal("Error while fetching Service Account Name"))
 
 	cmBroken = &corev1.ConfigMap{
 		Data: map[string]string{
