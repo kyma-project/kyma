@@ -30,9 +30,6 @@ required = [
   go-tests = true
   unused-packages = true
 
-
-# STANZAS BELOW ARE GENERATED AND MAY BE WRITTEN - DO NOT MODIFY BELOW THIS LINE.
-
 [[override]]
 name="k8s.io/api"
 version="kubernetes-1.15.2"
@@ -49,10 +46,15 @@ version="kubernetes-1.15.2"
 name="k8s.io/code-generator"
 version = "kubernetes-1.15.2"
 
-# TODO: The latest version of 'sigs.k8s.io/controller-runtime' requires 'k8s.io/apiextensions-apiserver' in version 'kubernetes-1.14.1'
-#[[constraint]]
-#  name = "k8s.io/apiextensions-apiserver"
-#  version = "kubernetes-1.15.2"
+[[override]]
+  name = "k8s.io/gengo"
+  revision = "955ffa8fcfc983717cd9de5d2a1e9f5c465f4376"
+
+# The 'v0.2.0-beta.5' version of 'sigs.k8s.io/controller-runtime' requires some 'k8s.io' dependencies in version 'kubernetes-1.14.1'
+
+[[override]]
+  name = "k8s.io/apiextensions-apiserver"
+  version = "kubernetes-1.15.2"
 
 [[constraint]]
 name = "k8s.io/helm"
@@ -75,6 +77,6 @@ version = "v2.10.0"
 
 # For dependency below: Refer to issue https://github.com/golang/dep/issues/1799
 [[override]]
-name = "gopkg.in/fsnotify.v1"
-source = "https://github.com/fsnotify/fsnotify.git"
-version="v1.4.7"
+  name = "gopkg.in/fsnotify.v1"
+  source = "https://github.com/fsnotify/fsnotify.git"
+  version="v1.4.7"
