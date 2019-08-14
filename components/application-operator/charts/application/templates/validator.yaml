@@ -77,4 +77,4 @@ spec:
       name: http-proxy
   selector:
     app: {{ .Release.Name }}-connectivity-validator
-    release: {{ .Release.Name }}-connectivity-validator
+    release: {{ .Release.Name }}
