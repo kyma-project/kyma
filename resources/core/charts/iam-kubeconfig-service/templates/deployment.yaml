@@ -10,6 +10,9 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
   template:
     metadata:
       labels:

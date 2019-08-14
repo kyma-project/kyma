@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: {{ template "name" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "name" . }}
 spec:
   replicas: 1
   strategy:
@@ -10,6 +12,9 @@ spec:
     rollingUpdate:
       maxUnavailable: 1  
       maxSurge: 1
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
   template:
     metadata:
       annotations:

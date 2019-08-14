@@ -8,6 +8,9 @@ metadata:
     app: api-controller
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: api-controller
   template:
     metadata:
       annotations:
@@ -16,7 +19,7 @@ spec:
         app: api-controller
         alertmem: "yes"
     spec:
-      serviceAccount: api-controller-account
+      serviceAccountName: api-controller-account
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.api_controller.dir }}api-controller:{{ .Values.global.api_controller.version }}
         name: api-controller
