@@ -17,12 +17,6 @@
   version = "v1.2.1"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/golang/glog"
-  packages = ["."]
-  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
-
-[[projects]]
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -69,6 +63,7 @@
   version = "v1.0.2"
 
 [[projects]]
+  branch = "update-k8s-app-connector"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -76,7 +71,8 @@
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
   ]
-  revision = "dd9f72adc14c41e129824770011f37722dc5bbff"
+  revision = "af10ba4f2b548c8d60fa0e980e39922cd3f44d28"
+  source = "github.com/Szymongib/kyma"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -401,6 +397,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5a613f4f6586e7da5a6167fc362d5ca9c2356cedbc216092893958fc56c83837"
+  inputs-digest = "6873969764f858f0f82086614078eb0c2be488f0e5e7a897166e8bda0d0d02a2"
   solver-name = "gps-cdcl"
   solver-version = 1

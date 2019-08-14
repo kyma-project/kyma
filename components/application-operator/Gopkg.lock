@@ -626,8 +626,8 @@
     "pkg/apis/apiextensions",
     "pkg/apis/apiextensions/v1beta1"
   ]
-  revision = "727a075fdec8319bf095330e344b3ccc668abc73"
-  version = "kubernetes-1.14.1"
+  revision = "cdb999c96590a9647b48f2c523d3842e44e4d436"
+  version = "kubernetes-1.15.2"
 
 [[projects]]
   name = "k8s.io/apimachinery"
@@ -677,7 +677,7 @@
     "third_party/forked/golang/reflect"
   ]
   revision = "1799e75a07195de9460b8ef7300883499f12127b"
-  version = "kubernetes-1.15.0"
+  version = "kubernetes-1.15.2"
 
 [[projects]]
   name = "k8s.io/client-go"
@@ -761,7 +761,6 @@
   version = "kubernetes-1.15.2"
 
 [[projects]]
-  branch = "release-1.15"
   name = "k8s.io/code-generator"
   packages = [
     "cmd/client-gen",
@@ -789,9 +788,9 @@
     "pkg/util"
   ]
   revision = "18da4a14b22b17d2fa761e50037fabfbacec225b"
+  version = "kubernetes-1.15.2"
 
 [[projects]]
-  branch = "master"
   name = "k8s.io/gengo"
   packages = [
     "args",
@@ -846,6 +845,7 @@
   packages = [
     "buffer",
     "integer",
+    "pointer",
     "trace"
   ]
   revision = "6c36bc71fc4aeb1f49801054e71aebdaef1fbeb4"
@@ -923,6 +923,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "26eababf2cd7c59128c4cf7e0d8134d122076a1878034102dd47b1cda4399396"
+  inputs-digest = "72345be4ce0dfb139027c4d7530e2bf0b08fdf5430c174381c67aab2c5c90358"
   solver-name = "gps-cdcl"
   solver-version = 1
