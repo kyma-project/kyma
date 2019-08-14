@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions"
-
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock"
@@ -41,14 +39,17 @@ const (
 
 func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 
+	var emptySpec graphql.CLOB = ""
+	var apiSpecData graphql.CLOB = "defaultContent"
+
 	oauthTokenURL := fmt.Sprintf("%s/%s/%s/%s", testSuite.GetMockServiceURL(), mock.OAuthToken, validClientId, validClientSecret)
 
 	basicAuth := applications.NewAuth().WithBasicAuth(validUsername, validPassword)
 	oauth := applications.NewAuth().WithOAuth(validClientId, validClientSecret, oauthTokenURL)
 
-	noAuthAPIInput := applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&assertions.ApiSpecData)
+	noAuthAPIInput := applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()).WithJsonApiSpec(&apiSpecData)
 	basicAuthAPIInput := applications.NewAPI("basic-auth-api", "basic auth api", testSuite.GetMockServiceURL()).WithAuth(basicAuth)
-	oauthAPIInput := applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth)
+	oauthAPIInput := applications.NewAPI("oauth-auth-api", "oauth api", testSuite.GetMockServiceURL()).WithAuth(oauth).WithJsonApiSpec(&emptySpec)
 
 	// Define test cases
 	testCases := []*testCase{
@@ -64,7 +65,8 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						}).
 					WithEventAPIs(
 						[]*applications.EventAPIDefinitionInput{
-							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&assertions.ApiSpecData),
+							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiSpecData),
+							applications.NewEventAPI("events-api-with-empty-string-spec", "description").WithJsonEventApiSpec(&emptySpec),
 							applications.NewEventAPI("no-description-events-api", ""),
 						},
 					)
@@ -74,7 +76,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				// when removing all APIs individually
 				application := this.initialPhaseResult
 				assert.Equal(t, 3, len(application.APIs.Data))
-				assert.Equal(t, 2, len(application.EventAPIs.Data))
+				assert.Equal(t, 3, len(application.EventAPIs.Data))
 
 				// remove APIs
 				for _, api := range application.APIs.Data {
@@ -116,7 +118,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						}).
 					WithEventAPIs(
 						[]*applications.EventAPIDefinitionInput{
-							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&assertions.ApiSpecData),
+							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiSpecData),
 							applications.NewEventAPI("no-description-events-api", ""),
 						},
 					)
@@ -136,7 +138,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						}).
 					WithEventAPIs(
 						[]*applications.EventAPIDefinitionInput{
-							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&assertions.ApiSpecData),
+							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiSpecData),
 						},
 					)
 
@@ -194,7 +196,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				// update no auth API to OAuth
 				noAuthAPI, found := getAPIByName(application.APIs.Data, "no-auth-api")
 				require.True(t, found)
-				updatedInput := applications.NewAPI("basic-to-oauth", "", noAuthAPI.TargetURL).WithAuth(oauth)
+				updatedInput := applications.NewAPI("no-auth-to-oauth", "", noAuthAPI.TargetURL).WithAuth(oauth)
 				newOauthAPI, err := testSuite.CompassClient.UpdateAPI(noAuthAPI.ID, *updatedInput.ToCompassInput())
 				require.NoError(t, err)
 				updatedAPIs = append(updatedAPIs, newOauthAPI)
@@ -207,7 +209,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				require.NoError(t, err)
 				updatedAPIs = append(updatedAPIs, newBasicAuthAPI)
 
-				// update OAuth API to Basic Auth
+				// update Basic Auth API to no auth
 				basicAuthAPI, found := getAPIByName(application.APIs.Data, "basic-auth-api")
 				require.True(t, found)
 				updatedInput = applications.NewAPI("basic-to-no-auth", "", basicAuthAPI.TargetURL)

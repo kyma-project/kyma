@@ -65,8 +65,6 @@ const (
 	expectedTargetPort int32           = 8080
 )
 
-var ApiSpecData graphql.CLOB = "defaultContent"
-
 type K8sResourceChecker struct {
 	serviceClient          v1.ServiceInterface
 	secretClient           v1.SecretInterface
@@ -110,7 +108,7 @@ func (c *K8sResourceChecker) AssertResourcesForApp(t *testing.T, application com
 		c.assertEventAPIs(t, application.ID, application.EventAPIs.Data, appCR)
 	}
 
-	// TODO: assert docs after implementation of Asset Store
+	// TODO: assert Document after implementation in Director and Agent
 }
 
 func (c *K8sResourceChecker) AssertAppResourcesDeleted(t *testing.T, appId string) {
@@ -144,8 +142,6 @@ func (c *K8sResourceChecker) AssertEventAPIResources(t *testing.T, appId string,
 	c.assertEventAPIs(t, appId, compassEventAPIs, appCR)
 }
 
-// TODO: Assert Documents when implementation is ready
-
 func (c *K8sResourceChecker) assertAPIs(t *testing.T, appId string, compassAPIs []*graphql.APIDefinition, appCR *v1alpha1apps.Application) {
 	for _, api := range compassAPIs {
 		c.assertAPI(t, appId, *api, appCR)
@@ -173,9 +169,13 @@ func (c *K8sResourceChecker) assertAPI(t *testing.T, appId string, compassAPI gr
 
 	c.assertIstioResources(t, expectedResourceName, c.integrationNamespace)
 
-	if compassAPI.Spec != nil {
-		c.assertDocsTopics(t, compassAPI.ID)
+	if apiSpecProvided(compassAPI) {
+		c.assertDocsTopics(t, compassAPI.ID, string(*compassAPI.Spec.Data))
 	}
+}
+
+func apiSpecProvided(api graphql.APIDefinition) bool {
+	return api.Spec != nil && api.Spec.Data != nil && string(*api.Spec.Data) != ""
 }
 
 func (c *K8sResourceChecker) assertServiceDeleted(t *testing.T, applicationId, apiId string) {
@@ -198,9 +198,13 @@ func (c *K8sResourceChecker) assertEventAPI(t *testing.T, appId string, compassE
 	expectedResourceName := c.nameResolver.GetResourceName(appId, compassEventAPI.ID)
 	assert.Equal(t, expectedResourceName, entry.AccessLabel)
 
-	if compassEventAPI.Spec != nil && compassEventAPI.Spec.Data != nil {
-		c.assertDocsTopics(t, compassEventAPI.ID)
+	if eventAPISpecProvided(compassEventAPI) {
+		c.assertDocsTopics(t, compassEventAPI.ID, string(*compassEventAPI.Spec.Data))
 	}
+}
+
+func eventAPISpecProvided(api graphql.EventAPIDefinition) bool {
+	return api.Spec != nil && api.Spec.Data != nil && string(*api.Spec.Data) != ""
 }
 
 func (c *K8sResourceChecker) assertService(t *testing.T, id, name string, description *string, appCR *v1alpha1apps.Application) *v1alpha1apps.Service {
@@ -227,7 +231,7 @@ func (c *K8sResourceChecker) assertCredentials(t *testing.T, secretName string, 
 	case *graphql.OAuthCredentialData:
 		c.assertK8sOAuthSecret(t, secretName, cred, service)
 	default:
-		t.Fatalf("Unkonw credentials type")
+		t.Fatalf("Unknow credentials type")
 	}
 
 	c.assertCSRF(t, auth.RequestAuth, service)
@@ -320,11 +324,11 @@ func (c *K8sResourceChecker) assertIstioResources(t *testing.T, resourceName str
 	require.NotEmpty(t, rule)
 }
 
-func (c *K8sResourceChecker) assertDocsTopics(t *testing.T, serviceID string) {
+func (c *K8sResourceChecker) assertDocsTopics(t *testing.T, serviceID, expectedSpec string) {
 	topic := getClusterDocsTopic(t, serviceID, c.clusterDocsTopicClient)
 	require.NotEmpty(t, topic)
 	require.NotEmpty(t, topic.Spec.Sources)
-	checkContent(t, topic)
+	checkContent(t, topic, expectedSpec)
 }
 
 func getService(applicationCR *v1alpha1apps.Application, apiId string) (*v1alpha1apps.Service, bool) {
@@ -348,7 +352,7 @@ func getClusterDocsTopic(t *testing.T, id string, resourceInterface dynamic.Reso
 	return docsTopic
 }
 
-func checkContent(t *testing.T, topic assets.ClusterDocsTopic) {
+func checkContent(t *testing.T, topic assets.ClusterDocsTopic, expectedSpec string) {
 	url := topic.Spec.Sources[0].URL
 	resp, err := http.Get(url)
 	defer resp.Body.Close()
@@ -357,5 +361,5 @@ func checkContent(t *testing.T, topic assets.ClusterDocsTopic) {
 	bytes, e := ioutil.ReadAll(resp.Body)
 	require.NoError(t, e)
 
-	assert.Equal(t, string(ApiSpecData), string(bytes))
+	assert.Equal(t, expectedSpec, string(bytes))
 }

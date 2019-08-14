@@ -67,7 +67,7 @@ func (c *APIAccessChecker) GetPathBasedOnAuth(t *testing.T, auth *graphql.Auth) 
 	case *graphql.OAuthCredentialData:
 		return fmt.Sprintf("%s/%s/%s", mock.OAuth, cred.ClientID, cred.ClientSecret)
 	default:
-		t.Fatalf("Failed to get path based on authentication: unkonw credentials type")
+		t.Fatalf("Failed to get path based on authentication: unknow credentials type")
 	}
 
 	return ""
