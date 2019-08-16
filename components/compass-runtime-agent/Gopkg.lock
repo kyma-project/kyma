@@ -256,17 +256,21 @@
   revision = "83c17229028ffe2d604be4f8ea1f2f633141a965"
 
 [[projects]]
-  digest = "1:e4f55728366e19773aaf62807fd047a8861c57827551591189306570de210fac"
+  digest = "1:34d7e9cef1f7db34c625f00228ead1ce8123bd048499201a8396eca49afdc695"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "components/application-registry/pkg/apis/istio/v1alpha2",
+    "components/application-registry/pkg/client/clientset/versioned",
+    "components/application-registry/pkg/client/clientset/versioned/scheme",
+    "components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2",
     "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "2ac7f3a71a873d0594f15c2309c032f4d42d6cdd"
+  revision = "327770ad3ad572e8b7a5d32c25b69fc3033d41b4"
 
 [[projects]]
   digest = "1:d86c8eb7189141c0e902fd8dcf6e79b8feea523978018e20f2ac794626ad0f63"
@@ -1023,6 +1027,8 @@
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "github.com/kyma-project/kyma/components/application-registry/pkg/apis/istio/v1alpha2",
+    "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "github.com/machinebox/graphql",
     "github.com/onsi/ginkgo",
@@ -1048,6 +1054,7 @@
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
+    "k8s.io/client-go/dynamic",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
