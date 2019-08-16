@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: controller-manager
+spec:
+  selector:
+    matchLabels:
+      app: serverless-controller
+  serviceName: serverless
+  template:
+    metadata:
+      labels:
+        app: serverless-controller
+    spec:
+      serviceAccount: serverless-controller
+      containers:
+        # gets changed by sed command when running `docker-build`
+        - image: function-controller:latest
+          name: manager
+          imagePullPolicy: Never
