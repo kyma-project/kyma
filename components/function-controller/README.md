@@ -30,7 +30,7 @@ export NAMESPACE=<NAMESPACE>
 export REGISTRY=<YOURREGISTRY>
 echo -n 'Username:' ; read username
 echo -n 'Password:' ; read password
-cat <<EOF | sed s/hihihih/hohohoho/
+cat <<EOF
 apiVersion: v1
 kind: ServiceAccount
 metadata:

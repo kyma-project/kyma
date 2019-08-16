@@ -71,7 +71,7 @@ deploy: manifests install
 	kustomize build config/default | kubectl apply -f -
 	kubectl apply -f config/config.yaml
 
-undeploy: manifests uninstall
+undeploy: uninstall
 	kubectl delete -f config/crds
 	kustomize build config/default | kubectl delete  -f -
 	kubectl delete -f config/config.yaml
