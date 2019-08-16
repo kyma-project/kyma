@@ -21,7 +21,6 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
-        traffic.sidecar.istio.io/includeInboundPorts: "{{ .Values.deployment.args.externalAPIPort }}"
       labels:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}

@@ -8,6 +8,8 @@ metadata:
     controller-tools.k8s.io: "1.0"
 spec:
   selector:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
     control-plane: {{ .Chart.Name }}
     controller-tools.k8s.io: "1.0"
   ports:
