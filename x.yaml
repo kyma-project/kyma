@@ -1,0 +1,9 @@
+apiVersion: addons.kyma-project.io/v1alpha1
+kind: ClusterAddonsConfiguration
+metadata:
+  labels:
+    addons.kyma-project.io/managed: "true"
+  name: testing-bundle
+spec:
+  repositories:
+  - url: "https://github.com/kyma-project/addons/releases/download/0.7.0/index-testing.yaml"
