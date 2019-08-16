@@ -78,22 +78,6 @@ func TestBasicAuth_CredentialsProvided(t *testing.T) {
 			result: true,
 		},
 		{
-			credentials: &model.CredentialsWithCSRF{
-				Basic: &model.Basic{
-					Username: "",
-					Password: password},
-			},
-			result: false,
-		},
-		{
-			credentials: &model.CredentialsWithCSRF{
-				Basic: &model.Basic{
-					Username: username,
-					Password: ""},
-			},
-			result: false,
-		},
-		{
 			credentials: nil,
 			result:      false,
 		},

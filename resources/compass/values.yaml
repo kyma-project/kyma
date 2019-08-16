@@ -23,7 +23,7 @@ global:
     tests:
       e2e:
         dir: develop/
-        version: "08e98b5d"
+        version: "b625e1b4"
 
   isLocalEnv: false
   
