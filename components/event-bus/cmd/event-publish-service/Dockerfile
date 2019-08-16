@@ -7,7 +7,7 @@ COPY pkg              ./pkg
 COPY internal/trace   ./internal/trace
 COPY internal/knative ./internal/knative
 COPY internal/ea      ./internal/ea
-COPY licenses         ./licenses
+#COPY licenses         ./licenses
 
 WORKDIR /go/src/github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/
 COPY main.go     .
@@ -31,7 +31,7 @@ WORKDIR /root/
 RUN apk --no-cache upgrade && apk --no-cache add curl
 
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/event-publish-service .
-COPY --from=builder /go/src/github.com/kyma-project/kyma/components/event-bus/licenses ./licenses
+#COPY --from=builder /go/src/github.com/kyma-project/kyma/components/event-bus/licenses ./licenses
 
 EXPOSE 8080
 
