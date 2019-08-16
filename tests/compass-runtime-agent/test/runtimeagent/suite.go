@@ -116,7 +116,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		k8sClient:          k8sClient,
 		podClient:          k8sClient.Core().Pods(config.Namespace),
 		nameResolver:       nameResolver,
-		CompassClient:      compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.GraphQLLog),
+		CompassClient:      compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.GraphQLLog),
 		APIAccessChecker:   assertions.NewAPIAccessChecker(nameResolver),
 		K8sResourceChecker: assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
 		mockServiceServer:  mock.NewAppMockServer(config.MockServicePort),
@@ -135,6 +135,11 @@ func (ts *TestSuite) Setup() error {
 
 	ts.mockServiceServer.Start()
 
+	err = ts.CompassClient.SetupTestsScenario()
+	if err != nil {
+		return errors.Wrap(err, "Error while adding tests scenario")
+	}
+
 	return nil
 }
 
@@ -143,6 +148,12 @@ func (ts *TestSuite) Cleanup() {
 	err := ts.mockServiceServer.Kill()
 	if err != nil {
 		logrus.Errorf("Failed to kill Mock server: %s", err.Error())
+	}
+
+	logrus.Infoln("Cleaning up scenarios...")
+	err = ts.CompassClient.CleanupTestsScenario()
+	if err != nil {
+		logrus.Errorf("Failed to remove tests scenario: %s", err.Error())
 	}
 }
 
@@ -207,9 +218,24 @@ func (ts *TestSuite) RemoveDenierLabels(t *testing.T, appId string, apiIds ...st
 func (ts *TestSuite) getTestPod(t *testing.T) v1.Pod {
 	testPods, err := ts.podClient.List(metav1.ListOptions{LabelSelector: ts.testPodsLabels})
 	require.NoError(t, err)
-	assert.Equal(t, 1, len(testPods.Items))
+	assert.True(t, len(testPods.Items) != 0)
+
+	if len(testPods.Items) > 1 {
+		return getYoungestPod(testPods.Items)
+	}
 
 	return testPods.Items[0]
+}
+
+func getYoungestPod(pods []v1.Pod) v1.Pod {
+	youngestPod := pods[0]
+	for _, p := range pods {
+		if p.CreationTimestamp.Unix() > youngestPod.CreationTimestamp.Unix() {
+			youngestPod = p
+		}
+	}
+
+	return youngestPod
 }
 
 func (ts *TestSuite) getResourceNames(t *testing.T, appId string, apiIds ...string) []string {

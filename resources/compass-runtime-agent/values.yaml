@@ -13,7 +13,7 @@ compassRuntimeAgent:
   image:
     pullPolicy: IfNotPresent
   sync:
-    controllerSyncPeriod: 30
+    controllerSyncPeriod: 15
     minimalConfigSyncTime: 15
   resources:
     integrationNamespace: "kyma-integration"
@@ -27,6 +27,6 @@ compassRuntimeAgent:
     enabled: true
     mockService:
       port: 8080
-    configApplicationWaitTime: 60
+    configApplicationWaitTime: 50
     proxyInvalidationWaitTime: 150
     graphqlLogs: false

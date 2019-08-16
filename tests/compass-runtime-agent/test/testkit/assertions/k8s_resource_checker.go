@@ -1,6 +1,7 @@
 package assertions
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -113,7 +114,7 @@ func (c *K8sResourceChecker) AssertResourcesForApp(t *testing.T, application com
 
 func (c *K8sResourceChecker) AssertAppResourcesDeleted(t *testing.T, appId string) {
 	_, err := c.applicationClient.Get(appId, v1meta.GetOptions{})
-	require.Error(t, err)
+	require.Error(t, err, fmt.Sprintf("Application %s not deleted", appId))
 	assert.True(t, k8serrors.IsNotFound(err))
 }
 
@@ -149,6 +150,8 @@ func (c *K8sResourceChecker) assertAPIs(t *testing.T, appId string, compassAPIs 
 }
 
 func (c *K8sResourceChecker) assertAPI(t *testing.T, appId string, compassAPI graphql.APIDefinition, appCR *v1alpha1apps.Application) {
+	t.Logf("Asserting resources for %s API", compassAPI.ID)
+
 	svc := c.assertService(t, compassAPI.ID, compassAPI.Name, compassAPI.Description, appCR)
 
 	entry := svc.Entries[0]
@@ -279,10 +282,9 @@ func (c *K8sResourceChecker) assertCSRF(t *testing.T, auth *graphql.CredentialRe
 }
 
 func (c *K8sResourceChecker) assertResourcesDoNotExist(t *testing.T, resourceName, apiId string) {
-	// TODO: there is bug in agent and this is failing now (for not secured API), uncomment when fixed
 	_, err := c.serviceClient.Get(resourceName, v1meta.GetOptions{})
-	//assert.Error(t, err)
-	//assert.True(t, k8serrors.IsNotFound(err))
+	assert.Error(t, err)
+	assert.True(t, k8serrors.IsNotFound(err))
 
 	_, err = c.secretClient.Get(resourceName, v1meta.GetOptions{})
 	assert.Error(t, err)
@@ -302,7 +304,6 @@ func (c *K8sResourceChecker) assertResourcesDoNotExist(t *testing.T, resourceNam
 	assert.True(t, k8serrors.IsNotFound(err))
 
 	//assert Docs Topics have been removed
-
 	_, err = c.clusterDocsTopicClient.Get(apiId, v1meta.GetOptions{})
 	assert.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
