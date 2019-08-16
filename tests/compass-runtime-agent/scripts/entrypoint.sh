@@ -3,8 +3,8 @@ res=0
 
 echo "Compass Runtime Agent tests"
 
-echo "Run api tests"
-./apitests.test -test.v
+echo "Run tests"
+./test.test -test.v
 res=$((res+$?))
 
 exit ${res}
