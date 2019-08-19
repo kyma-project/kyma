@@ -30,11 +30,11 @@ export NAMESPACE=<NAMESPACE>
 export REGISTRY=<YOURREGISTRY>
 echo -n 'Username:' ; read username
 echo -n 'Password:' ; read password
-cat <<EOF
+cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-    name: function-controller-build
+    name: serverless-controller
     labels:
         app: function-controller
 secrets:
