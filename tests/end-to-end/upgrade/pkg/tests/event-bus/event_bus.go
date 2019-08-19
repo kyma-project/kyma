@@ -314,8 +314,6 @@ func (f *eventBusFlow) publish(publishEventURL, payload string) (*api.PublishRes
 	f.log.WithField("response", string(body)).Info("publish response object")
 	if len(respObj.EventID) == 0 {
 		return nil, fmt.Errorf("empty respObj.EventID")
-	} else if respObj.Status == "ignored" { // todo remove
-		return nil, fmt.Errorf("message was ignored try to publish again to %s", publishEventURL)
 	}
 	return respObj, err
 }
