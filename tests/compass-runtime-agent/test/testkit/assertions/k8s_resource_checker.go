@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
 
 	istioclients "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2"
 
@@ -64,6 +67,9 @@ type ServiceData struct {
 }
 
 const (
+	applicationDeletionTimeout       = 120 * time.Second
+	applicationDeletionCheckInterval = 2 * time.Second
+
 	expectedProtocol   v1core.Protocol = v1core.ProtocolTCP
 	expectedPort       int32           = 80
 	expectedTargetPort int32           = 8080
@@ -125,9 +131,15 @@ func (c *K8sResourceChecker) AssertResourcesForApp(t *testing.T, application com
 }
 
 func (c *K8sResourceChecker) AssertAppResourcesDeleted(t *testing.T, appId string) {
-	_, err := c.applicationClient.Get(appId, v1meta.GetOptions{})
-	require.Error(t, err, fmt.Sprintf("Application %s not deleted", appId))
-	assert.True(t, k8serrors.IsNotFound(err))
+	err := testkit.WaitForFunction(applicationDeletionCheckInterval, applicationDeletionTimeout, func() bool {
+		_, err := c.applicationClient.Get(appId, v1meta.GetOptions{})
+		if err == nil {
+			return false
+		}
+
+		return k8serrors.IsNotFound(err)
+	})
+	require.NoError(t, err, fmt.Sprintf("Application %s not deleted", appId))
 }
 
 func (c *K8sResourceChecker) AssertAPIResources(t *testing.T, appId string, compassAPIs ...*graphql.APIDefinition) {
