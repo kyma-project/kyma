@@ -54,7 +54,7 @@ global:
     version: PR-5109
   application_registry:
     dir: pr/
-    version: PR-5054
+    version: PR-5340
   application_registry_tests:
     dir: pr/
     version: PR-5109
