@@ -10,10 +10,6 @@ These are the available dashboards:
 
 * **Deployment** - Displays metrics on details such as memory, CPU, network and replicas for deployments running in different namespaces. Find the configuration of this dashboard in [this](dashboards/deployment.yaml) file.
 * **Istio** - Displays Istio metrics for services (HTTP and TCP) as well as the Service Mesh. Find the configuration of this dashboard in [this](dashboards/istio-mesh.yaml) file.
-<!-- * **Kubernetes Capacity Planning** - Displays the current memory usage, disk usage, system load, and other system status details. Find the configuration of this dashboard in [this](dashboards/k8s-cluster-rsrc-use.yaml) file.
-* **Kubernetes Cluster Health** - Displays the status of alerts, nodes, pods and control plan components. Find the configuration of this dashboard in [this](dashboards/kubernetes-cluster-health-dashboard.yaml) file.
-* **Kubernetes Cluster Status** - Displays metrics on alerts, API servers, CPU utilitzation, schedulers, and more. Find the configuration of this dashboard in [this](dashboards/kubernetes-cluster-status-dashboard.yaml) file.
-* **Kubernetes Control Plane Status** - Displays metrics on control planes. Find the configuration of this dashboard in [this](dashboards/kubernetes-control-plane-status-dashboard.yaml) file. -->
 * **Kubernetes Resource Requests** - Displays details on CPU core and memory resource usage. Find the configuration of this dashboard in [this](dashboards/k8s-cluster-rsrc-use.yaml) file.
 * **Mixer** -Displays metrics on incoming requests, response durations, connections, cluster membership, server error rate and more. Find the configuration of this dashboard in [this](dashboards/istio-mixer.yaml) file.
 * **Nodes** - Displays information pertaining to Kubernetes nodes utilization. Find the configuration of this dashboard in [this](dashboards/nodes.yaml) file.
@@ -23,7 +19,7 @@ These are the available dashboards:
 
 ## Add a dashboard to Kyma
 
-Grafana dashboards in Kyma are configured through a [ConfigMap](templates/dashboards-configmap.yaml). This dashboard consumes the data configuration of all the JSON files located in the [dashboards directory](dashboards/).
+Grafana dashboards in Kyma are configured through a [ConfigMap](dashboards-configmap.yaml). This dashboard consumes the data configuration of all the JSON files located in the [dashboards directory](dashboards/).
 
 ```yaml
 data:
