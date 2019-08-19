@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 30,
+  "id": 32,
   "links": [],
   "panels": [
     {
@@ -40,7 +40,7 @@
       "fill": 1,
       "gridPos": {
         "h": 8,
-        "w": 8,
+        "w": 12,
         "x": 0,
         "y": 1
       },
@@ -81,7 +81,92 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "GC duration [s]",
+      "title": "GC duration [s] - Broker",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fill": 1,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "id": 22,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "paceLength": 10,
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "go_gc_duration_seconds{service=\"addon-controller-metrics\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{quantile}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "GC duration [s] - Controller",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -128,8 +213,8 @@
       "gridPos": {
         "h": 8,
         "w": 8,
-        "x": 8,
-        "y": 1
+        "x": 0,
+        "y": 9
       },
       "id": 12,
       "legend": {
@@ -169,6 +254,13 @@
           "intervalFactor": 1,
           "legendFormat": "{{service}}",
           "refId": "B"
+        },
+        {
+          "expr": "process_open_fds{service=\"addon-controller-metrics\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{service}}",
+          "refId": "C"
         }
       ],
       "thresholds": [],
@@ -222,8 +314,8 @@
       "gridPos": {
         "h": 8,
         "w": 8,
-        "x": 16,
-        "y": 1
+        "x": 8,
+        "y": 9
       },
       "id": 18,
       "legend": {
@@ -254,8 +346,15 @@
           "expr": "go_threads{service=\"helm-broker-metrics\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{pod}}",
+          "legendFormat": "{{pod}} (Broker)",
           "refId": "A"
+        },
+        {
+          "expr": "go_threads{service=\"addon-controller-metrics\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{pod}} (Controller)",
+          "refId": "B"
         }
       ],
       "thresholds": [],
@@ -308,9 +407,103 @@
       "fill": 1,
       "gridPos": {
         "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 9
+      },
+      "id": 16,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {},
+      "paceLength": 10,
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "go_goroutines{service=\"helm-broker-metrics\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{pod}} (Broker)",
+          "refId": "A"
+        },
+        {
+          "expr": "go_goroutines{service=\"addon-controller-metrics\"}",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{pod}} (Controller)",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Goroutines",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fill": 1,
+      "gridPos": {
+        "h": 8,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 17
       },
       "id": 14,
       "legend": {
@@ -370,7 +563,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Go memstats",
+      "title": "Go memstats - Broker",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -418,9 +611,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 17
       },
-      "id": 16,
+      "id": 24,
       "legend": {
         "avg": false,
         "current": false,
@@ -434,30 +627,49 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
-      "options": {},
       "paceLength": 10,
       "percentage": false,
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
-      "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_goroutines{service=\"helm-broker-metrics\"}",
+          "expr": "go_memstats_alloc_bytes{service=\"addon-controller-metrics\"}",
           "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{pod}}",
+          "intervalFactor": 2,
+          "legendFormat": "bytes allocated",
           "refId": "A"
+        },
+        {
+          "expr": "rate(go_memstats_alloc_bytes_total{service=\"addon-controller-metrics\"}[30s])",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "alloc rate",
+          "refId": "B"
+        },
+        {
+          "expr": "go_memstats_stack_inuse_bytes{service=\"addon-controller-metrics\"}",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "stack inuse",
+          "refId": "C"
+        },
+        {
+          "expr": "go_memstats_heap_inuse_bytes{service=\"addon-controller-metrics\"}",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "heap inuse",
+          "refId": "D"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Goroutines",
+      "title": "Go memstats - Controller",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -500,7 +712,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 25
       },
       "id": 4,
       "panels": [],
@@ -518,113 +730,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 18
-      },
-      "id": 2,
-      "legend": {
-        "alignAsTable": true,
-        "avg": true,
-        "current": true,
-        "max": false,
-        "min": false,
-        "rightSide": true,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {},
-      "paceLength": 10,
-      "percentage": false,
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "sum by(container_name) (container_memory_usage_bytes{pod_name=~\"helm-broker.*\", container_name!=\"POD\"})",
-          "format": "time_series",
-          "interval": "10s",
-          "intervalFactor": 1,
-          "legendFormat": "Current: {{ container_name }}",
-          "refId": "A"
-        },
-        {
-          "expr": "kube_pod_container_resource_requests_memory_bytes{pod=~\"helm-broker.*\"}",
-          "format": "time_series",
-          "interval": "10s",
-          "intervalFactor": 2,
-          "legendFormat": "Requested: {{ container }}",
-          "refId": "B"
-        },
-        {
-          "expr": "kube_pod_container_resource_limits_memory_bytes{pod=~\"helm-broker.*\"}",
-          "format": "time_series",
-          "interval": "10s",
-          "intervalFactor": 2,
-          "legendFormat": "Limit: {{ container }}",
-          "refId": "C"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Memory Usage",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 18
+        "y": 26
       },
       "id": 6,
       "legend": {
@@ -728,9 +834,115 @@
       "fill": 1,
       "gridPos": {
         "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 26
+      },
+      "id": 2,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {},
+      "paceLength": 10,
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by(container_name) (container_memory_usage_bytes{pod_name=~\"helm-broker.*\", container_name!=\"POD\"})",
+          "format": "time_series",
+          "interval": "10s",
+          "intervalFactor": 1,
+          "legendFormat": "Current: {{ container_name }}",
+          "refId": "A"
+        },
+        {
+          "expr": "kube_pod_container_resource_requests_memory_bytes{pod=~\"helm-broker.*\"}",
+          "format": "time_series",
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Requested: {{ container }}",
+          "refId": "B"
+        },
+        {
+          "expr": "kube_pod_container_resource_limits_memory_bytes{pod=~\"helm-broker.*\"}",
+          "format": "time_series",
+          "interval": "10s",
+          "intervalFactor": 2,
+          "legendFormat": "Limit: {{ container }}",
+          "refId": "C"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Memory Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "Prometheus",
+      "fill": 1,
+      "gridPos": {
+        "h": 8,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 34
       },
       "id": 8,
       "legend": {
@@ -846,6 +1058,6 @@
   },
   "timezone": "",
   "title": "Helm Broker",
-  "uid": "sEEsZOOWz",
-  "version": 8
+  "uid": "bqHRCTdZk",
+  "version": 6
 }
