@@ -4,5 +4,5 @@ metadata:
   name: manager-rolebinding
 subjects:
 - kind: ServiceAccount
-  name: serverless-controller
-  namespace: serverless-system
+  name: function-controller
+  namespace: function-system

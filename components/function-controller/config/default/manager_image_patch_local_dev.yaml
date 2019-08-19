@@ -5,16 +5,16 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: serverless-controller
+      app: function-controller
   serviceName: serverless
   template:
     annotation:
       sidecar.istio.io/inject: "false"
     metadata:
       labels:
-        app: serverless-controller
+        app: function-controller
     spec:
-      serviceAccount: serverless-controller
+      serviceAccountName: function-controller
       containers:
         # gets changed by sed command when running `docker-build`
         - image: function-controller:latest

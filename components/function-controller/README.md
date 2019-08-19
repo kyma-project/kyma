@@ -34,7 +34,7 @@ cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-    name: serverless-controller
+    name: function-controller
     labels:
         app: function-controller
 secrets:

@@ -62,7 +62,7 @@ func Add(mgr manager.Manager) error {
 				Name:      "function-controller-webhook-server-service",
 				// Selectors should select the pods that runs this webhook server.
 				Selectors: map[string]string{
-					"app":                     "serverless-controller",
+					"app":                     "function-controller",
 					"control-plane":           "controller-manager",
 					"controller-tools.k8s.io": "1.0",
 				},

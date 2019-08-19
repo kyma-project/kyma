@@ -37,13 +37,13 @@ items:
     namespace: serverless-system
 - apiVersion: v1
   data:
-    dockerRegistry: 
+    dockerRegistry:
     runtimes: |
       - ID: nodejs8
         dockerFileName: dockerfile-nodejs-8
       - ID: nodejs6
         dockerFileName: dockerfile-nodejs-6
-    serviceAccountName: serverless-controller
+    serviceAccountName: function-controller
   kind: ConfigMap
   metadata:
     labels:
@@ -64,15 +64,15 @@ data:
   # your docker.io username goes here
   # username NOT the email
   # echo -n $USERNAME | base64
-  username: 
+  username:
   # password for the account
   # echo -n $PASSWORD | base64
-  password: 
+  password:
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: serverless-controller
+  name: function-controller
   namespace: serverless-system
 secrets:
 - name: docker-reg-credential
