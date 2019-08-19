@@ -2,7 +2,7 @@
 title: Metrics
 ---
 
-This document shows component-specific metrics for the Asset Store collected from Pods by Prometheus. The Asset Store metrics are exposed on the `/metrics` endpoint. The metrics allow you to check the current status of a service. You can use the status for further analysis.
+This document shows component-specific metrics for the Asset Store. The metrics are collected from Pods by Prometheus, and exposed on the `/metrics` endpoint. The metrics allow you to check the current status of the Asset Store services. You can use the status for further analysis.
 
 To learn more about Monitoring in Kyma, read [this](/components/monitoring) document.
 
