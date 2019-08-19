@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock"
@@ -311,7 +309,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	// Setup check if all resources were deleted
 	var createdApplications []*compass.Application
 	defer func() {
-		logrus.Info("Waiting for apps to delete...")
+		t.Log("Checking resources are removed")
 		waitForAgentToApplyConfig(t, testSuite)
 		for _, app := range createdApplications {
 			t.Logf("Asserting resources for %s application are deleted", app.ID)

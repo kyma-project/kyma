@@ -66,7 +66,7 @@ func (g *Graphqlizer) DocumentInputToGQL(in *graphql.DocumentInput) (string, err
 		data: "{{.Data}}",
 		{{- end}}
 		{{- if .FetchRequest }}
-		fetchRequest: {{- FetchRequesstInputToGQL .FetchRequest }} 
+		fetchRequest: {{- FetchRequestInputToGQL .FetchRequest }} 
 		{{- end}}
 }`)
 }
@@ -229,7 +229,7 @@ func (g *Graphqlizer) EventAPISpecInputToGQL(in graphql.EventAPISpecInput) (stri
 		{{- end }}
 		eventSpecType: {{.EventSpecType}},
 		{{- if .FetchRequest }}
-		fetchRequest: {{- FetchRequesstInputToGQL .FetchRequest }},
+		fetchRequest: {{- FetchRequestInputToGQL .FetchRequest }},
 		{{- end }}
 		format: {{.Format}}
 	}`)
@@ -243,7 +243,7 @@ func (g *Graphqlizer) ApiSpecInputToGQL(in graphql.APISpecInput) (string, error)
 		type: {{.Type}},
 		format: {{.Format}},
 		{{- if .FetchRequest }}
-		fetchRequest: {{- FetchRequesstInputToGQL .FetchRequest }},
+		fetchRequest: {{- FetchRequestInputToGQL .FetchRequest }},
 		{{- end }}
 	}`)
 }
@@ -307,7 +307,7 @@ func (g *Graphqlizer) SchemaToGQL(in *interface{}) (string, error) {
 func (g *Graphqlizer) genericToGQL(obj interface{}, tmpl string) (string, error) {
 	fm := sprig.TxtFuncMap()
 	fm["DocumentInputToGQL"] = g.DocumentInputToGQL
-	fm["FetchRequesstInputToGQL"] = g.FetchRequestInputToGQL
+	fm["FetchRequestInputToGQL"] = g.FetchRequestInputToGQL
 	fm["AuthInputToGQL"] = g.AuthInputToGQL
 	fm["LabelsToGQL"] = g.LabelsToGQL
 	fm["WebhookInputToGQL"] = g.WebhookInputToGQL

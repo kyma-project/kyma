@@ -356,8 +356,8 @@ func getClusterDocsTopic(t *testing.T, id string, resourceInterface dynamic.Reso
 func checkContent(t *testing.T, topic assets.ClusterDocsTopic, expectedSpec string) {
 	url := topic.Spec.Sources[0].URL
 	resp, err := http.Get(url)
-	defer resp.Body.Close()
 	require.NoError(t, err)
+	defer resp.Body.Close()
 
 	bytes, e := ioutil.ReadAll(resp.Body)
 	require.NoError(t, e)
