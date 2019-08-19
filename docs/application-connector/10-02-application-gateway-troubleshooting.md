@@ -43,7 +43,7 @@ If you call a registered service and receive an error:
   To register a Service, see [this tutorial](components/application-connector/#tutorials-register-a-service-register-a-service) again.
 
 
-- If you still receive an error, verify that the target URL is correct. 
+- If you still receive an error, check the target URL of the API that you have registered and verify that it is correct. 
   To do that, fetch the Service definition from Application Registry:
 
   <div tabs name="verification">
@@ -67,6 +67,5 @@ If you call a registered service and receive an error:
     </details>
   </div>
 
-  You should receive a `json` response with the Service definition.  
-  The definition contains the target URL of the API you have registered.  
+  You should receive a `json` response with the Service definition that contains the target URL.  
   Access the target URL directly to verify that the value of `api.targetUrl` is correct.
