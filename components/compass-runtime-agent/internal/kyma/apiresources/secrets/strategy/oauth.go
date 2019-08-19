@@ -51,7 +51,7 @@ func (svc *oauth) ShouldUpdate(currentData SecretData, newData SecretData) bool 
 }
 
 func (svc *oauth) oauthCredentialsProvided(credentials *model.CredentialsWithCSRF) bool {
-	return credentials != nil && credentials.Oauth != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
+	return credentials != nil && credentials.Oauth != nil
 }
 
 func (svc *oauth) makeOauthMap(clientID, clientSecret string) map[string][]byte {

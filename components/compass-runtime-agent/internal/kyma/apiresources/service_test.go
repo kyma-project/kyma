@@ -3,12 +3,15 @@ package apiresources
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
+
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	k8sconstsmocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts/mocks"
 	accessservicemock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/accessservice/mocks"
+	assetstoremock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/mocks"
+	istiomocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/istio/mocks"
 	secretmock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/mocks"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/types"
@@ -16,11 +19,16 @@ import (
 
 func TestService(t *testing.T) {
 
+	jsonApiSpec := []byte("{\"productsEndpoint\": \"Endpoint /products returns products.\"}}")
+	eventsSpec := []byte("{\"orderCreated\": \"Published when order is placed.\"}}")
+
 	t.Run("should create API resources", func(t *testing.T) {
 		// given
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
+		assetStoreMock := assetstoremock.Service{}
 
 		credentials := model.CredentialsWithCSRF{
 			Basic: &model.Basic{
@@ -30,17 +38,42 @@ func TestService(t *testing.T) {
 		}
 
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
-		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(applications.Credentials{}, nil)
+		istioServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
+		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
-		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		assetStoreMock.On("Put", "serviceID", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(nil)
 
-		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, nil)
+		// when
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
+
+		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, docstopic.OpenApiType)
 
 		// then
 		require.NoError(t, err)
 		accessServiceMock.AssertExpectations(t)
 		secretServiceMock.AssertExpectations(t)
+		istioServiceMock.AssertExpectations(t)
+		assetStoreMock.AssertExpectations(t)
+	})
+
+	t.Run("should create Event API resources", func(t *testing.T) {
+		// given
+		accessServiceMock := &accessservicemock.AccessServiceManager{}
+		secretServiceMock := &secretmock.Service{}
+		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
+		assetStoreMock := assetstoremock.Service{}
+
+		assetStoreMock.On("Put", "serviceID", docstopic.AsyncApi, eventsSpec, docstopic.EventApiSpec).Return(nil)
+
+		// when
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
+
+		err := service.CreateEventApiResources("appName", "serviceID", eventsSpec, docstopic.AsyncApi)
+
+		// then
+		require.NoError(t, err)
+		assetStoreMock.AssertExpectations(t)
 	})
 
 	t.Run("should not create secret if credentials not provided", func(t *testing.T) {
@@ -48,19 +81,25 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
+		assetStoreMock := assetstoremock.Service{}
 
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
+		istioServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
+		assetStoreMock.On("Put", "serviceID", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(nil)
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
-		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", nil, nil)
+		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", nil, jsonApiSpec, docstopic.OpenApiType)
 
 		// then
 		require.NoError(t, err)
 		accessServiceMock.AssertExpectations(t)
 		secretServiceMock.AssertNotCalled(t, "Create")
+		istioServiceMock.AssertExpectations(t)
+		assetStoreMock.AssertExpectations(t)
 	})
 
 	t.Run("should not interrupt execution when error occurs on creation", func(t *testing.T) {
@@ -68,6 +107,8 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
+		assetStoreMock := assetstoremock.Service{}
 
 		credentials := model.CredentialsWithCSRF{
 			Basic: &model.Basic{
@@ -76,18 +117,22 @@ func TestService(t *testing.T) {
 			},
 		}
 		accessServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
-		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, apperrors.Internal("some error"))
+		istioServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("just another error"))
+		secretServiceMock.On("Create", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(apperrors.Internal("some other error"))
+		assetStoreMock.On("Put", "serviceID", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
-		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, nil)
+		err := service.CreateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, docstopic.OpenApiType)
 
 		// then
 		require.Error(t, err)
 		accessServiceMock.AssertExpectations(t)
 		secretServiceMock.AssertExpectations(t)
+		istioServiceMock.AssertExpectations(t)
+		assetStoreMock.AssertExpectations(t)
 	})
 
 	t.Run("should update API resources", func(t *testing.T) {
@@ -95,6 +140,8 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
+		assetStoreMock := assetstoremock.Service{}
 
 		credentials := model.CredentialsWithCSRF{
 			Basic: &model.Basic{
@@ -104,18 +151,42 @@ func TestService(t *testing.T) {
 		}
 
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
-		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(applications.Credentials{}, nil)
+		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
+		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", mock.MatchedBy(getCredentialsMatcher(&credentials))).Return(nil)
+		assetStoreMock.On("Put", "serviceID", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
-		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, nil)
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, docstopic.OpenApiType)
 
 		// then
 		require.NoError(t, err)
 		accessServiceMock.AssertExpectations(t)
 		secretServiceMock.AssertExpectations(t)
+		istioServiceMock.AssertExpectations(t)
+		assetStoreMock.AssertExpectations(t)
+	})
+
+	t.Run("should update Event API resources", func(t *testing.T) {
+		// given
+		accessServiceMock := &accessservicemock.AccessServiceManager{}
+		secretServiceMock := &secretmock.Service{}
+		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
+		assetStoreMock := assetstoremock.Service{}
+
+		assetStoreMock.On("Put", "serviceID", docstopic.AsyncApi, eventsSpec, docstopic.EventApiSpec).Return(nil)
+
+		// when
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
+
+		err := service.UpdateEventApiResources("appName", "serviceID", eventsSpec, docstopic.AsyncApi)
+
+		// then
+		require.NoError(t, err)
+		assetStoreMock.AssertExpectations(t)
 	})
 
 	t.Run("should not update secret if credentials not provided", func(t *testing.T) {
@@ -123,26 +194,36 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
+		assetStoreMock := assetstoremock.Service{}
 
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
+		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(nil)
+		secretServiceMock.On("Delete", "secretName").Return(nil)
+		assetStoreMock.On("Put", "serviceID", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
+		nameResolver.On("GetCredentialsSecretName", "appName", "serviceID").Return("secretName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
-		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, nil)
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, jsonApiSpec, docstopic.OpenApiType)
 
 		// then
 		require.NoError(t, err)
 		accessServiceMock.AssertExpectations(t)
 		secretServiceMock.AssertNotCalled(t, "Upsert")
+		istioServiceMock.AssertExpectations(t)
+		assetStoreMock.AssertExpectations(t)
 	})
 
-	t.Run("should not interrupt execution when error occurs on update", func(t *testing.T) {
+	t.Run("should not interrupt execution when error occurs on update with credentials", func(t *testing.T) {
 		// given
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
+		assetStoreMock := assetstoremock.Service{}
 
 		credentials := model.CredentialsWithCSRF{
 			Basic: &model.Basic{
@@ -151,18 +232,50 @@ func TestService(t *testing.T) {
 			},
 		}
 		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
-		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(applications.Credentials{}, apperrors.Internal("some error"))
+		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("just another error"))
+		secretServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", &credentials).Return(apperrors.Internal("some other error"))
+		assetStoreMock.On("Put", "serviceID", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(apperrors.Internal("some other error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
-		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, nil)
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", &credentials, jsonApiSpec, docstopic.OpenApiType)
 
 		// then
 		require.Error(t, err)
 		accessServiceMock.AssertExpectations(t)
 		secretServiceMock.AssertExpectations(t)
+		istioServiceMock.AssertExpectations(t)
+		assetStoreMock.AssertExpectations(t)
+	})
+
+	t.Run("should not interrupt execution when error occurs on update without credentials", func(t *testing.T) {
+		// given
+		accessServiceMock := &accessservicemock.AccessServiceManager{}
+		secretServiceMock := &secretmock.Service{}
+		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
+		assetStoreMock := assetstoremock.Service{}
+
+		accessServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("some error"))
+		istioServiceMock.On("Upsert", "appName", types.UID("appUUID"), "serviceID", "resourceName").Return(apperrors.Internal("just another error"))
+		secretServiceMock.On("Delete", "secretName").Return(apperrors.Internal("some other error"))
+		assetStoreMock.On("Put", "serviceID", docstopic.OpenApiType, jsonApiSpec, docstopic.ApiSpec).Return(apperrors.Internal("some other error"))
+		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
+		nameResolver.On("GetCredentialsSecretName", "appName", "serviceID").Return("secretName")
+
+		// when
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
+
+		err := service.UpdateApiResources("appName", types.UID("appUUID"), "serviceID", nil, jsonApiSpec, docstopic.OpenApiType)
+
+		// then
+		require.Error(t, err)
+		accessServiceMock.AssertExpectations(t)
+		secretServiceMock.AssertExpectations(t)
+		istioServiceMock.AssertExpectations(t)
+		assetStoreMock.AssertExpectations(t)
 	})
 
 	t.Run("should delete API resources with credentials", func(t *testing.T) {
@@ -170,13 +283,17 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
+		assetStoreMock := assetstoremock.Service{}
 
 		accessServiceMock.On("Delete", "resourceName").Return(nil)
+		istioServiceMock.On("Delete", "resourceName").Return(nil)
 		secretServiceMock.On("Delete", "secretName").Return(nil)
+		assetStoreMock.On("Delete", "serviceID").Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
 		err := service.DeleteApiResources("appName", "serviceID", "secretName")
 
@@ -184,6 +301,8 @@ func TestService(t *testing.T) {
 		require.NoError(t, err)
 		accessServiceMock.AssertExpectations(t)
 		secretServiceMock.AssertExpectations(t)
+		istioServiceMock.AssertExpectations(t)
+		assetStoreMock.AssertExpectations(t)
 	})
 
 	t.Run("should delete API resources without credentials", func(t *testing.T) {
@@ -191,18 +310,24 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
+		assetStoreMock := assetstoremock.Service{}
 
 		accessServiceMock.On("Delete", "resourceName").Return(nil)
+		istioServiceMock.On("Delete", "resourceName").Return(nil)
+		assetStoreMock.On("Delete", "serviceID").Return(nil)
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
 		err := service.DeleteApiResources("appName", "serviceID", "")
 
 		// then
 		require.NoError(t, err)
 		accessServiceMock.AssertExpectations(t)
+		istioServiceMock.AssertExpectations(t)
+		assetStoreMock.AssertExpectations(t)
 	})
 
 	t.Run("should not interrupt execution when error occurs on delete", func(t *testing.T) {
@@ -210,13 +335,17 @@ func TestService(t *testing.T) {
 		accessServiceMock := &accessservicemock.AccessServiceManager{}
 		secretServiceMock := &secretmock.Service{}
 		nameResolver := &k8sconstsmocks.NameResolver{}
+		istioServiceMock := &istiomocks.Service{}
+		assetStoreMock := assetstoremock.Service{}
 
 		accessServiceMock.On("Delete", "resourceName").Return(apperrors.Internal("some error"))
+		istioServiceMock.On("Delete", "resourceName").Return(apperrors.Internal("some error"))
 		secretServiceMock.On("Delete", "secretName").Return(apperrors.Internal("some error"))
+		assetStoreMock.On("Delete", "serviceID").Return(apperrors.Internal("some error"))
 		nameResolver.On("GetResourceName", "appName", "serviceID").Return("resourceName")
 
 		// when
-		service := NewService(accessServiceMock, secretServiceMock, nameResolver)
+		service := NewService(accessServiceMock, secretServiceMock, nameResolver, istioServiceMock, assetStoreMock)
 
 		err := service.DeleteApiResources("appName", "serviceID", "secretName")
 
@@ -224,6 +353,8 @@ func TestService(t *testing.T) {
 		require.Error(t, err)
 		accessServiceMock.AssertExpectations(t)
 		secretServiceMock.AssertExpectations(t)
+		istioServiceMock.AssertExpectations(t)
+		assetStoreMock.AssertExpectations(t)
 	})
 }
 

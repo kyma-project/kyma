@@ -1,3 +1,4 @@
+{{- if .Values.test.acceptance.external_solution.enabled }}
 ---
 kind: ServiceAccount
 apiVersion: v1
@@ -74,3 +75,4 @@ roleRef:
   kind: ClusterRole
   name: {{ .Chart.Name }}-test-external-solution
   apiGroup: rbac.authorization.k8s.io
+{{- end }}
