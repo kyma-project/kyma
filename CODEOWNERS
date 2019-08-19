@@ -242,9 +242,6 @@
 # Application broker Component
 /components/application-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# Helm broker controller Component
-/components/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
-
 # Console Backend Service Component
 /components/console-backend-service/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @sjanota
 
