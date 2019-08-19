@@ -303,7 +303,7 @@ global:
   logging_integration_tests:
     name: logging-integration-tests
     dir:
-    version: 1.4.0
+    version: 1.4.1
   logging:
     promtail:
       config:
