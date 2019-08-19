@@ -81,10 +81,11 @@ func (t microfrontendTest) createMicrofrontend(namespace string) (*uiV1alpha1v.M
 				ViewBaseURL: "https://test.kyma.cx/mf-test",
 				NavigationNodes: []uiV1alpha1v.NavigationNode{
 					uiV1alpha1v.NavigationNode{
-						Label:            "testMF",
-						NavigationPath:   "path",
-						ViewURL:          "/resourcePath",
-						ShowInNavigation: true,
+						Label:               "testMF",
+						NavigationPath:      "path",
+						ViewURL:             "/resourcePath",
+						ShowInNavigation:    true,
+						RequiredPermissions: []uiV1alpha1v.RequiredPermission{},
 					},
 				},
 			},
