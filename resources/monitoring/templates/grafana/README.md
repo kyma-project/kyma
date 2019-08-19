@@ -8,18 +8,18 @@ In Kyma, you can find these dashboards under [dashboards](dashboards/).
 
 These are the available dashboards:
 
-* **Deployment** - Displays metrics on details such as memory, CPU, network and replicas for deployments running in different namespaces. Find the configuration of this dashboard in [this](dashboards/deployment-dashboard.json) file.
-* **Istio** - Displays Istio metrics for services (HTTP and TCP) as well as the Service Mesh. Find the configuration of this dashboard in [this](dashboards/istio-mesh-dashboard.json) file.
-* **Kubernetes Capacity Planning** - Displays the current memory usage, disk usage, system load, and other system status details. Find the configuration of this dashboard in [this](dashboards/kubernetes-capacity-planning-dashboard.json) file.
-* **Kubernetes Cluster Health** - Displays the status of alerts, nodes, pods and control plan components. Find the configuration of this dashboard in [this](dashboards/kubernetes-cluster-health-dashboard.json) file.
-* **Kubernetes Cluster Status** - Displays metrics on alerts, API servers, CPU utilitzation, schedulers, and more. Find the configuration of this dashboard in [this](dashboards/kubernetes-cluster-status-dashboard.json) file.
-* **Kubernetes Control Plane Status** - Displays metrics on control planes. Find the configuration of this dashboard in [this](dashboards/kubernetes-control-plane-status-dashboard.json) file.
-* **Kubernetes Resource Requests** - Displays details on CPU core and memory resource usage. Find the configuration of this dashboard in [this](dashboards/kubernetes-resource-requests-dashboard.json) file.
-* **Mixer** -Displays metrics on incoming requests, response durations, connections, cluster membership, server error rate and more. Find the configuration of this dashboard in [this](dashboards/istio-mixer-dashboard.json) file.
-* **Nodes** - Displays information pertaining to Kubernetes nodes utilization. Find the configuration of this dashboard in [this](dashboards/nodes-dashboard.json) file.
-* **Pilot** - Displays metrics on request latency, discovery calls and various cache types. Find the configuration of this dashboard in [this](dashboards/istio-pilot-dashboard.json) file.
-* **Pods** - Displays Pod metrics such as CPU and Memory. Find the configuration of this dashboard in [this](dashboards/pods-dashboard.json) file.
-* **StatefulSet** - Displays Kubernetes StatefulSet metrics such as replica count, CPU and Memory. Find the configuration of this dashboard in [this](dashboards/statefulset-dashboard.json) file.
+* **Deployment** - Displays metrics on details such as memory, CPU, network and replicas for deployments running in different namespaces. Find the configuration of this dashboard in [this](dashboards/deployment-dashboard.yaml) file.
+* **Istio** - Displays Istio metrics for services (HTTP and TCP) as well as the Service Mesh. Find the configuration of this dashboard in [this](dashboards/istio-mesh-dashboard.yaml) file.
+* **Kubernetes Capacity Planning** - Displays the current memory usage, disk usage, system load, and other system status details. Find the configuration of this dashboard in [this](dashboards/kubernetes-capacity-planning-dashboard.yaml) file.
+* **Kubernetes Cluster Health** - Displays the status of alerts, nodes, pods and control plan components. Find the configuration of this dashboard in [this](dashboards/kubernetes-cluster-health-dashboard.yaml) file.
+* **Kubernetes Cluster Status** - Displays metrics on alerts, API servers, CPU utilitzation, schedulers, and more. Find the configuration of this dashboard in [this](dashboards/kubernetes-cluster-status-dashboard.yaml) file.
+* **Kubernetes Control Plane Status** - Displays metrics on control planes. Find the configuration of this dashboard in [this](dashboards/kubernetes-control-plane-status-dashboard.yaml) file.
+* **Kubernetes Resource Requests** - Displays details on CPU core and memory resource usage. Find the configuration of this dashboard in [this](dashboards/kubernetes-resource-requests-dashboard.yaml) file.
+* **Mixer** -Displays metrics on incoming requests, response durations, connections, cluster membership, server error rate and more. Find the configuration of this dashboard in [this](dashboards/istio-mixer-dashboard.yaml) file.
+* **Nodes** - Displays information pertaining to Kubernetes nodes utilization. Find the configuration of this dashboard in [this](dashboards/nodes-dashboard.yaml) file.
+* **Pilot** - Displays metrics on request latency, discovery calls and various cache types. Find the configuration of this dashboard in [this](dashboards/istio-pilot-dashboard.yaml) file.
+* **Pods** - Displays Pod metrics such as CPU and Memory. Find the configuration of this dashboard in [this](dashboards/pods-dashboard.yaml) file.
+* **StatefulSet** - Displays Kubernetes StatefulSet metrics such as replica count, CPU and Memory. Find the configuration of this dashboard in [this](dashboards/statefulset-dashboard.yaml) file.
 
 ## Add a dashboard to Kyma
 
