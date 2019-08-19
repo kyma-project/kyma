@@ -102,7 +102,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		return nil, err
 	}
 
-	clusterDocsTopicClient, err := newClusterDocsTopicClient(k8sConfig, config.IntegrationNamespace)
+	clusterDocsTopicClient, err := newClusterDocsTopicClient(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -280,7 +280,7 @@ func contains(array []string, element string) bool {
 	return false
 }
 
-func newClusterDocsTopicClient(config *restclient.Config, namespace string) (dynamic.ResourceInterface, error) {
+func newClusterDocsTopicClient(config *restclient.Config) (dynamic.ResourceInterface, error) {
 	groupVersionResource := schema.GroupVersionResource{
 		Version:  scheme.SchemeGroupVersion.Version,
 		Group:    scheme.SchemeGroupVersion.Group,
@@ -293,5 +293,5 @@ func newClusterDocsTopicClient(config *restclient.Config, namespace string) (dyn
 		return nil, e
 	}
 
-	return dynamicClient.Resource(groupVersionResource).Namespace(namespace), nil
+	return dynamicClient.Resource(groupVersionResource), nil
 }
