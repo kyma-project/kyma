@@ -74,7 +74,7 @@ func newAssetStore(dynamicClient dynamic.Interface, namespace, uploadServiceURL 
 		Group:    v1alpha1.SchemeGroupVersion.Group,
 		Resource: "clusterdocstopics",
 	}
-	resourceInterface := dynamicClient.Resource(groupVersionResource).Namespace(namespace)
+	resourceInterface := dynamicClient.Resource(groupVersionResource)
 
 	docsTopicRepository := assetstore.NewDocsTopicRepository(resourceInterface)
 	uploadClient := upload.NewClient(uploadServiceURL)
