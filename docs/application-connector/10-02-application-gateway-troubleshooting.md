@@ -43,7 +43,7 @@ If you call a registered service and receive an error:
   To register a Service, see [this tutorial](components/application-connector/#tutorials-register-a-service-register-a-service) again.
 
 
-- If you still receive an error, check the target URL of the API that you have registered and verify that it is correct. 
+- If you still receive an error, check the target URL of the API that you have registered and verify that it is correct.  
   To do that, fetch the Service definition from Application Registry:
 
   <div tabs name="verification">
