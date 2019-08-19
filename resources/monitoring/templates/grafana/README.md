@@ -19,7 +19,7 @@ These are the available dashboards:
 
 ## Add a dashboard to Kyma
 
-Grafana dashboards in Kyma are configured through a [ConfigMap](dashboards-configmap.yaml). This dashboard consumes the data configuration of all the JSON files located in the [dashboards directory](dashboards/).
+Grafana dashboards in Kyma are configured through a [ConfigMap](configmap-dashboards.yaml). This dashboard consumes the data configuration of all the JSON files located in the [dashboards directory](dashboards/).
 
 ```yaml
 data:
