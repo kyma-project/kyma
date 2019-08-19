@@ -3,14 +3,14 @@ title: Application Gateway troubleshooting
 type: Troubleshooting
 ---
 
-In case user calls registered service and receives an error:
+If you call a registered service and receive an error:
 
 - Verify that the call reached Application Gateway.  
-  To do that fetch logs from Application Gateway pod:
+  To do that fetch logs from Application Gateway Pod:
   ```
   kubectl -n kyma-integration logs -l app={APP_NAME}-application-gateway -c {APP_NAME}-application-gateway
   ```
-  If the request reached the pod, it should be logged by Application Gateway.
+  If the request reached the Pod, it should be logged by Application Gateway.
   
   If the call is not in the logs, check if Access Service exists.
   ```
@@ -42,7 +42,7 @@ In case user calls registered service and receives an error:
   and register it again.
 
 - Verify that the target URL is correct. 
-  To do that, you can fetch the Service definition from Application Registry:
+  To do that, fetch the Service definition from Application Registry:
 
   <div tabs name="verification">
     <details>
@@ -67,4 +67,4 @@ In case user calls registered service and receives an error:
 
   You should receive the `json` response with the service definition.
 
-  Access the target url directly to verify that the value of `api.targetUrl` is correct.
+  Access the target URL directly to verify that the value of `api.targetUrl` is correct.
