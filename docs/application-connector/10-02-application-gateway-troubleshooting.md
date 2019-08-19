@@ -1,22 +1,22 @@
 ---
-title: Application Gateway troubleshooting
+title: Error when calling a registered Service
 type: Troubleshooting
 ---
 
 If you call a registered service and receive an error:
 
 - Verify that the call reached Application Gateway.  
-  To do that fetch logs from Application Gateway Pod:
+  To do that, fetch logs from Application Gateway Pod:
   ```
   kubectl -n kyma-integration logs -l app={APP_NAME}-application-gateway -c {APP_NAME}-application-gateway
   ```
-  If the request reached the Pod, it should be logged by Application Gateway.
+  If the request reaches the Pod, it is logged by Application Gateway.
   
-  If the call is not in the logs, check if Access Service exists.
+  If the call is not in the logs, check if [Access Service](components/application-connector/#architecture-application-connector-components-access-service) exists.
   ```
   kubectl -n kyma-integration get svc app-{APP_NAME}-{SERVICE_ID}
   ```
-  If it doesn't, try to deregister the Service using the following command:
+  If Access Service does not exist, run this command to deregister the Service:
 
   <div tabs name="deregistration">
     <details>
@@ -39,9 +39,11 @@ If you call a registered service and receive an error:
     </details>
   </div>
 
-  and register it again.
+  Then register the Service.  
+  To register a Service, see [this tutorial](components/application-connector/#tutorials-register-a-service-register-a-service) again.
 
-- Verify that the target URL is correct. 
+
+- If you still receive an error, verify that the target URL is correct. 
   To do that, fetch the Service definition from Application Registry:
 
   <div tabs name="verification">
@@ -65,6 +67,6 @@ If you call a registered service and receive an error:
     </details>
   </div>
 
-  You should receive the `json` response with the service definition.
-
+  You should receive a `json` response with the Service definition.  
+  The definition contains the target URL of the API you have registered.  
   Access the target URL directly to verify that the value of `api.targetUrl` is correct.

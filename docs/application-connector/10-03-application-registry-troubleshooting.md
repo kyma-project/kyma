@@ -27,11 +27,11 @@ To generate a new client certificate, see [this tutorial](#tutorials-get-the-cli
 
 ## Application Registry - Invalid subject
 
-If you try to access the Application Registry and get the following response:
+While trying to access the Application Registry, you may get this response:
 ```
 {"code":403,"error":"No valid subject found"}
 ```
-make sure that your certificate is generated for the Application that you are trying to access.  
+Make sure that your certificate is generated for the Application that you are trying to access.  
 If it is not, generate a new certificate for your Application. 
 
 To generate a new client certificate, see [this tutorial](#tutorials-get-the-client-certificate).
