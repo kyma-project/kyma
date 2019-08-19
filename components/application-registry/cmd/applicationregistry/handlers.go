@@ -101,7 +101,7 @@ func NewSpecificationService(dynamicClient dynamic.Interface, opt *options) spec
 		Group:    v1alpha1.SchemeGroupVersion.Group,
 		Resource: "clusterdocstopics",
 	}
-	resourceInterface := dynamicClient.Resource(groupVersionResource).Namespace(opt.namespace)
+	resourceInterface := dynamicClient.Resource(groupVersionResource)
 
 	docsTopicRepository := assetstore.NewDocsTopicRepository(resourceInterface)
 	uploadClient := upload.NewClient(opt.uploadServiceURL)
