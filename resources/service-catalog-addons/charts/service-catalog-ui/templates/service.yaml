@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}
+  annotations:
+    "auth.istio.io/{{ .Values.catalog.service.externalPort }}": NONE
+    "auth.istio.io/{{ .Values.instances.service.externalPort }}": NONE
+    "auth.istio.io/{{ .Values.brokers.service.externalPort }}": NONE
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+  - port: {{ .Values.catalog.service.externalPort }}
+    targetPort: {{ .Values.catalog.service.internalPort }}
+    protocol: TCP
+    name: http2-catalog
+  - port: {{ .Values.instances.service.externalPort }}
+    targetPort: {{ .Values.instances.service.internalPort }}
+    protocol: TCP
+    name: http2-instances
+  - port: {{ .Values.brokers.service.externalPort }}
+    targetPort: {{ .Values.brokers.service.internalPort }}
+    protocol: TCP
+    name: http2-brokers
+  selector:
+    app: {{ template "name" . }}

@@ -3,6 +3,7 @@
 package mocks
 
 import apperrors "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+import docstopic "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
 import mock "github.com/stretchr/testify/mock"
 import model "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 import types "k8s.io/apimachinery/pkg/types"
@@ -12,13 +13,29 @@ type Service struct {
 	mock.Mock
 }
 
-// CreateApiResources provides a mock function with given fields: applicationName, applicationUID, serviceID, credentials, spec
-func (_m *Service) CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
-	ret := _m.Called(applicationName, applicationUID, serviceID, credentials, spec)
+// CreateApiResources provides a mock function with given fields: applicationName, applicationUID, serviceID, credentials, spec, apiType
+func (_m *Service) CreateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, apiType docstopic.ApiType) apperrors.AppError {
+	ret := _m.Called(applicationName, applicationUID, serviceID, credentials, spec, apiType)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(string, types.UID, string, *model.CredentialsWithCSRF, []byte) apperrors.AppError); ok {
-		r0 = rf(applicationName, applicationUID, serviceID, credentials, spec)
+	if rf, ok := ret.Get(0).(func(string, types.UID, string, *model.CredentialsWithCSRF, []byte, docstopic.ApiType) apperrors.AppError); ok {
+		r0 = rf(applicationName, applicationUID, serviceID, credentials, spec, apiType)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(apperrors.AppError)
+		}
+	}
+
+	return r0
+}
+
+// CreateEventApiResources provides a mock function with given fields: applicationName, serviceID, spec, apiType
+func (_m *Service) CreateEventApiResources(applicationName string, serviceID string, spec []byte, apiType docstopic.ApiType) apperrors.AppError {
+	ret := _m.Called(applicationName, serviceID, spec, apiType)
+
+	var r0 apperrors.AppError
+	if rf, ok := ret.Get(0).(func(string, string, []byte, docstopic.ApiType) apperrors.AppError); ok {
+		r0 = rf(applicationName, serviceID, spec, apiType)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)
@@ -44,13 +61,29 @@ func (_m *Service) DeleteApiResources(applicationName string, serviceID string, 
 	return r0
 }
 
-// UpdateApiResources provides a mock function with given fields: applicationName, applicationUID, serviceID, credentials, spec
-func (_m *Service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte) apperrors.AppError {
-	ret := _m.Called(applicationName, applicationUID, serviceID, credentials, spec)
+// UpdateApiResources provides a mock function with given fields: applicationName, applicationUID, serviceID, credentials, spec, apiType
+func (_m *Service) UpdateApiResources(applicationName string, applicationUID types.UID, serviceID string, credentials *model.CredentialsWithCSRF, spec []byte, apiType docstopic.ApiType) apperrors.AppError {
+	ret := _m.Called(applicationName, applicationUID, serviceID, credentials, spec, apiType)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(string, types.UID, string, *model.CredentialsWithCSRF, []byte) apperrors.AppError); ok {
-		r0 = rf(applicationName, applicationUID, serviceID, credentials, spec)
+	if rf, ok := ret.Get(0).(func(string, types.UID, string, *model.CredentialsWithCSRF, []byte, docstopic.ApiType) apperrors.AppError); ok {
+		r0 = rf(applicationName, applicationUID, serviceID, credentials, spec, apiType)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(apperrors.AppError)
+		}
+	}
+
+	return r0
+}
+
+// UpdateEventApiResources provides a mock function with given fields: applicationName, serviceID, spec, apiType
+func (_m *Service) UpdateEventApiResources(applicationName string, serviceID string, spec []byte, apiType docstopic.ApiType) apperrors.AppError {
+	ret := _m.Called(applicationName, serviceID, spec, apiType)
+
+	var r0 apperrors.AppError
+	if rf, ok := ret.Get(0).(func(string, string, []byte, docstopic.ApiType) apperrors.AppError); ok {
+		r0 = rf(applicationName, serviceID, spec, apiType)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)

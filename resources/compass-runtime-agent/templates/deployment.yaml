@@ -31,6 +31,7 @@ spec:
             - "--integrationNamespace={{ .Values.compassRuntimeAgent.resources.integrationNamespace }}"
             - "--gatewayPort={{ .Values.compassRuntimeAgent.resources.gatewayPort }}"
             - "--insecureConfigurationFetch={{ .Values.compassRuntimeAgent.config.insecureConfigurationFetch }}"
+            - "--uploadServiceUrl={{ .Values.compassRuntimeAgent.resources.uploadServiceUrl }}"
           envFrom:
           - configMapRef:
               optional: true

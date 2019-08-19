@@ -179,13 +179,17 @@ func (c converter) toCredentials(applicationID string, apiDefinitionID string, c
 }
 
 func (c converter) toEventAPIService(applicationID string, eventsDefinition model.EventAPIDefinition) v1alpha1.Service {
+	description := eventsDefinition.Description
+	if description == "" {
+		description = "Description not provided"
+	}
 
 	return v1alpha1.Service{
 		ID:                  eventsDefinition.ID,
 		Identifier:          "", // not available in the Director's API
 		Name:                createServiceName(eventsDefinition.Name, eventsDefinition.ID),
 		DisplayName:         eventsDefinition.Name,
-		Description:         eventsDefinition.Description,
+		Description:         description,
 		Labels:              map[string]string{connectedApp: applicationID}, // Application Registry adds here an union of two things: labels specified in the payload and connectedApp label
 		LongDescription:     "",                                             // not available in the Director's API
 		ProviderDisplayName: "",                                             // not available in the Director's API

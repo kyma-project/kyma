@@ -4,10 +4,10 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir: pr/
-      version: "PR-5138"
+      version: "PR-5340"
     runtimeAgentTests:
       dir: pr/
-      version: "PR-4927"
+      version: "PR-5270"
 
 compassRuntimeAgent:
   image:
@@ -18,7 +18,15 @@ compassRuntimeAgent:
   resources:
     integrationNamespace: "kyma-integration"
     gatewayPort: 8080
+    uploadServiceUrl: http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000
   config:
     insecureConfigurationFetch: true
     configMap:
       name: compass-agent-configuration
+  tests:
+    enabled: true
+    mockService:
+      port: 8080
+    configApplicationWaitTime: 60
+    proxyInvalidationWaitTime: 150
+    graphqlLogs: false

@@ -3,8 +3,8 @@
 # Declare variables to be passed into your templates.
 replicaCount: 1
 image:
-  dir: 
-  tag: a9d158d5
+  dir:
+  tag: 134fc6f0
   pullPolicy: IfNotPresent
 service:
   name: nginx
@@ -41,6 +41,7 @@ cluster:
 
 test:
   acceptance:
+    enabled: true
     ui:
       # tests uses chromium that require more memory
       requests:
