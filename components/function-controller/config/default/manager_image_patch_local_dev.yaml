@@ -8,6 +8,8 @@ spec:
       app: serverless-controller
   serviceName: serverless
   template:
+    annotation:
+      sidecar.istio.io/inject: "false"
     metadata:
       labels:
         app: serverless-controller

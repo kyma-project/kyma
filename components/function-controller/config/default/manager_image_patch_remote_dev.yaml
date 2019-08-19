@@ -9,6 +9,8 @@ spec:
   serviceName: serverless
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: serverless-controller
     spec:
