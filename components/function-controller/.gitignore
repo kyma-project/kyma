@@ -24,4 +24,5 @@ vendor/
 *.swo
 *~
 
-300*.yaml
+# vendored CRD definitions from Knative serving 
+config/crds/300*.yaml
