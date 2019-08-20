@@ -32,7 +32,7 @@ To ensure it was generated properly, check the values returned by the Connector 
 }
 ```
 
-Subject values present in CSR should match the subject in this response.
+Subject values present in CSR should match the subject in the response that you got.
 
 To check the subject of the generated CSR, run the following command:
 ```
