@@ -14,7 +14,7 @@ If you try to generate a client certificate, you may get this error:
 ```
 
 This error is caused by applying wrong subject information to your Certificate Signing Request.  
-To ensure it was generated properly, check the values returned by the Connector Service with the call that fetched CSR info:
+To ensure CSR was generated properly, check the values returned by the Connector Service with the call that fetched CSR information:
 ```json
 {
   "csrUrl":"https://connector-service.name.cluster.extend.cx.cloud.sap/v1/applications/certificates?token=5o7ucwjz9vcpFlBsHJcwnnuL-rU8af1MsfQ6OlWTgauw7aB-xtSkXUn_ts0RtMMKhvlZVPridqmAPbf2mKC8YA==",
