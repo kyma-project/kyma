@@ -37,6 +37,15 @@ func (s *SubscriptionBuilder) ToNatssChannel(name string) *SubscriptionBuilder {
 	return s
 }
 
+func (s *SubscriptionBuilder) ToGPubSubChannel(name string) *SubscriptionBuilder {
+	s.Spec.Channel = corev1.ObjectReference{
+		Name:       name,
+		Kind:       "Channel",
+		APIVersion: "messaging.cloud.run/v1alpha1",
+	}
+	return s
+}
+
 // EmptyReply sets the SubscriptionBuilder Reply.
 func (s *SubscriptionBuilder) EmptyReply() *SubscriptionBuilder {
 	s.Spec.Reply = &eventingv1alpha1.ReplyStrategy{}
@@ -148,6 +157,44 @@ func NatssChannelSubscription(name string, namespace string) *SubscriptionBuilde
 					Name:       "",
 					Kind:       "NatssChannel",
 					APIVersion: "messaging.knative.dev/v1alpha1",
+				},
+			},
+		},
+	}
+	return &SubscriptionBuilder{
+		Subscription: subscription,
+	}
+}
+
+func GPubSubChannelSubscription(name string, namespace string) *SubscriptionBuilder {
+	subscription := &eventingv1alpha1.Subscription{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "Subscription",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+		Spec: eventingv1alpha1.SubscriptionSpec{
+			Channel: corev1.ObjectReference{
+				Name:       "",
+				Kind:       "Channel",
+				APIVersion: "messaging.cloud.run/v1alpha1",
+			},
+			Subscriber: &eventingv1alpha1.SubscriberSpec{
+				Ref: &corev1.ObjectReference{
+					Name:       "",
+					Kind:       "Service",
+					APIVersion: "serving.knative.dev/v1beta1",
+				},
+				URI: &emptyString,
+			},
+			Reply: &eventingv1alpha1.ReplyStrategy{
+				Channel: &corev1.ObjectReference{
+					Name:       "",
+					Kind:       "Channel",
+					APIVersion: "messaging.cloud.run/v1alpha1",
 				},
 			},
 		},

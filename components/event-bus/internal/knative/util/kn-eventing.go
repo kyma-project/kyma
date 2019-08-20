@@ -69,6 +69,7 @@ type KnativeAccessLib interface {
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string) error
 	CreateNatssChannelSubscription(name string, namespace string, channelName string, uri *string) error
+	CreateGPubSubChannelSubscription(name string, namespace string, channelName string, uri *string) error
 	DeleteSubscription(name string, namespace string) error
 	GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error)
 	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
@@ -258,6 +259,16 @@ func (k *KnativeLib) CreateNatssChannelSubscription(name string, namespace strin
 	sub := NatssChannelSubscription(name, namespace).ToNatssChannel(channelName).ToURI(uri).EmptyReply().Build()
 	if _, err := k.evClient.Subscriptions(namespace).Create(sub); err != nil {
 		log.Printf("ERROR: CreateNatssChannelSubscription(): creating subscription: %v", err)
+		return err
+	}
+	return nil
+}
+
+// CreateGPubSubChannelSubscription todo
+func (k *KnativeLib) CreateGPubSubChannelSubscription(name string, namespace string, channelName string, uri *string) error {
+	sub := GPubSubChannelSubscription(name, namespace).ToGPubSubChannel(channelName).ToURI(uri).EmptyReply().Build()
+	if _, err := k.evClient.Subscriptions(namespace).Create(sub); err != nil {
+		log.Printf("ERROR: CreateGPubSubChannelSubscription(): creating subscription: %v", err)
 		return err
 	}
 	return nil
