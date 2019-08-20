@@ -4,10 +4,10 @@ metadata:
   name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "istio-mesh" | trunc 63 | trimSuffix "-" }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
-      {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
-      {{- end }}
-      app: {{ template "prometheus-operator.name" $ }}-grafana
-  {{ include "prometheus-operator.labels" $ | indent 4 }}
+    {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
+    {{- end }}
+    app: {{ template "prometheus-operator.name" $ }}-grafana
+{{ include "prometheus-operator.labels" $ | indent 4 }}
 data:
   istio-mesh.json: |-
     {
@@ -620,7 +620,7 @@ data:
               "hide": false,
               "instant": true,
               "intervalFactor": 1,
-              "legendFormat": "{{ destination_workload}}.{{ destination_workload_namespace }}",
+              "legendFormat": "{{ `{{destination_workload}}`}}.{{ `{{destination_workload_namespace}}` }}",
               "refId": "A"
             },
             {
@@ -629,7 +629,7 @@ data:
               "hide": false,
               "instant": true,
               "intervalFactor": 1,
-              "legendFormat": "{{ destination_workload}}.{{ destination_workload_namespace }}",
+              "legendFormat": "{{ `{{destination_workload}}`}}.{{ `{{destination_workload_namespace}}` }}",
               "refId": "B"
             },
             {
@@ -638,7 +638,7 @@ data:
               "hide": false,
               "instant": true,
               "intervalFactor": 1,
-              "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }}",
+              "legendFormat": "{{ `{{destination_workload}}`}}.{{ `{{destination_workload_namespace}}` }}",
               "refId": "D"
             },
             {
@@ -647,7 +647,7 @@ data:
               "hide": false,
               "instant": true,
               "intervalFactor": 1,
-              "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }}",
+              "legendFormat": "{{ `{{destination_workload}}`}}.{{ `{{destination_workload_namespace}}` }}",
               "refId": "E"
             },
             {
@@ -657,7 +657,7 @@ data:
               "instant": true,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }}",
+              "legendFormat": "{{ `{{destination_workload}}`}}.{{ `{{destination_workload_namespace}}` }}",
               "refId": "F"
             }
           ],
@@ -816,7 +816,7 @@ data:
               "hide": false,
               "instant": true,
               "intervalFactor": 1,
-              "legendFormat": "{{ destination_workload }}",
+              "legendFormat": "{{ `{{ destination_workload }}` }}",
               "refId": "C"
             },
             {
@@ -825,7 +825,7 @@ data:
               "hide": false,
               "instant": true,
               "intervalFactor": 1,
-              "legendFormat": "{{ destination_workload }}",
+              "legendFormat": "{{ `{{ destination_workload }}` }}",
               "refId": "A"
             }
           ],
@@ -877,7 +877,7 @@ data:
               "expr": "sum(istio_build) by (component, tag)",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{ component }}: {{ tag }}",
+              "legendFormat": "{{ `{{ component }}` }}: {{ `{{ tag }}` }}",
               "refId": "A"
             }
           ],

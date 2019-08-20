@@ -4,10 +4,10 @@ metadata:
   name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "istio-performance" | trunc 63 | trimSuffix "-" }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
-      {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
-      {{- end }}
-      app: {{ template "prometheus-operator.name" $ }}-grafana
-  {{ include "prometheus-operator.labels" $ | indent 4 }}
+    {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
+    {{- end }}
+    app: {{ template "prometheus-operator.name" $ }}-grafana
+{{ include "prometheus-operator.labels" $ | indent 4 }}
 data:
   istio-performance.json: |-
     {
@@ -561,7 +561,7 @@ data:
               "expr": "sum(istio_build) by (component, tag)",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{ component }}: {{ tag }}",
+              "legendFormat": "{{ `{{ component }}` }}: {{ `{{ tag }}` }}",
               "refId": "A"
             }
           ],
@@ -660,7 +660,7 @@ data:
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
-              "legendFormat": "{{ container_name }} (k8s)",
+              "legendFormat": "{{ `{{container_name}}` }} (k8s)",
               "refId": "B",
               "step": 2
             }
@@ -833,7 +833,7 @@ data:
               "expr": "sum(container_fs_usage_bytes{container_name=\"istio-proxy\"})",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{ container_name }}",
+              "legendFormat": "{{ `{{container_name}}` }}",
               "refId": "B",
               "step": 2
             }
@@ -1001,7 +1001,7 @@ data:
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
-              "legendFormat": "{{ container_name }} (k8s)",
+              "legendFormat": "{{ `{{container_name}}` }} (k8s)",
               "refId": "B",
               "step": 2
             }
@@ -1097,7 +1097,7 @@ data:
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
-              "legendFormat": "{{ container_name }} (k8s)",
+              "legendFormat": "{{ `{{container_name}}` }} (k8s)",
               "refId": "B",
               "step": 2
             },
@@ -1202,7 +1202,7 @@ data:
               "expr": "container_fs_usage_bytes{container_name=~\"discovery|istio-proxy\", pod_name=~\"istio-pilot-.*\"}",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{ container_name }}",
+              "legendFormat": "{{ `{{container_name}}` }}",
               "refId": "B",
               "step": 2
             }
@@ -1456,7 +1456,7 @@ data:
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
-              "legendFormat": "{{ container_name }} (k8s)",
+              "legendFormat": "{{ `{{container_name}}` }} (k8s)",
               "refId": "B",
               "step": 2
             }
@@ -1552,7 +1552,7 @@ data:
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
-              "legendFormat": "{{ container_name }} (k8s)",
+              "legendFormat": "{{ `{{container_name}}` }} (k8s)",
               "refId": "B",
               "step": 2
             },
@@ -1657,7 +1657,7 @@ data:
               "expr": "container_fs_usage_bytes{container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*\"}",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{ container_name }}",
+              "legendFormat": "{{ `{{container_name}}` }}",
               "refId": "B",
               "step": 2
             }

@@ -1,15 +1,16 @@
-#Taken witout modifications from https://github.com/coreos/prometheus-operator/blob/master/example/prometheus-operator-crd/servicemonitor.crd.yaml
----
+# Source https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/0prometheus-operator-0podmonitorCustomResourceDefinition.yaml
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   creationTimestamp: null
-  name: servicemonitors.monitoring.coreos.com
+  name: podmonitors.monitoring.coreos.com
+  labels:
+    app: prometheus-operator
 spec:
   group: monitoring.coreos.com
   names:
-    kind: ServiceMonitor
-    plural: servicemonitors
+    kind: PodMonitor
+    plural: podmonitors
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -25,54 +26,31 @@ spec:
             submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
           type: string
         spec:
-          description: ServiceMonitorSpec contains specification parameters for a
-            ServiceMonitor.
+          description: PodMonitorSpec contains specification parameters for a PodMonitor.
           properties:
-            endpoints:
-              description: A list of endpoints allowed as part of this ServiceMonitor.
-              items:
-                description: Endpoint defines a scrapeable endpoint serving Prometheus
-                  metrics.
-                properties:
-                  basicAuth:
-                    description: 'BasicAuth allow an endpoint to authenticate over
-                      basic authentication More info: https://prometheus.io/docs/operating/configuration/#endpoints'
-                    properties:
-                      password:
-                        description: SecretKeySelector selects a key of a Secret.
-                        properties:
-                          key:
-                            description: The key of the secret to select from.  Must
-                              be a valid secret key.
-                            type: string
-                          name:
-                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
-                            type: string
-                          optional:
-                            description: Specify whether the Secret or it's key must
-                              be defined
-                            type: boolean
-                        required:
-                        - key
-                      username:
-                        description: SecretKeySelector selects a key of a Secret.
-                        properties:
-                          key:
-                            description: The key of the secret to select from.  Must
-                              be a valid secret key.
-                            type: string
-                          name:
-                            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
-                            type: string
-                          optional:
-                            description: Specify whether the Secret or it's key must
-                              be defined
-                            type: boolean
-                        required:
-                        - key
-                  bearerTokenFile:
-                    description: File to read bearer token for scraping targets.
+            jobLabel:
+              description: The label to use to retrieve the job name from.
+              type: string
+            namespaceSelector:
+              description: NamespaceSelector is a selector for selecting either all
+                namespaces or a list of namespaces.
+              properties:
+                any:
+                  description: Boolean describing whether all namespaces are selected
+                    in contrast to a list restricting them.
+                  type: boolean
+                matchNames:
+                  description: List of namespace names.
+                  items:
                     type: string
+                  type: array
+              type: object
+            podMetricsEndpoints:
+              description: A list of endpoints allowed as part of this PodMonitor.
+              items:
+                description: PodMetricsEndpoint defines a scrapeable endpoint of a
+                  Kubernetes Pod serving Prometheus metrics.
+                properties:
                   honorLabels:
                     description: HonorLabels chooses the metric's labels on collisions
                       with target labels.
@@ -123,6 +101,7 @@ spec:
                             in a replace action. It is mandatory for replace actions.
                             Regex capture groups are available.
                           type: string
+                      type: object
                     type: array
                   params:
                     description: Optional HTTP URL parameters
@@ -131,8 +110,8 @@ spec:
                     description: HTTP path to scrape for metrics.
                     type: string
                   port:
-                    description: Name of the service port this endpoint refers to.
-                      Mutually exclusive with targetPort.
+                    description: Name of the port this endpoint refers to. Mutually
+                      exclusive with targetPort.
                     type: string
                   proxyUrl:
                     description: ProxyURL eg http://proxyserver:2195 Directs scrapes
@@ -140,7 +119,7 @@ spec:
                     type: string
                   relabelings:
                     description: 'RelabelConfigs to apply to samples before ingestion.
-                      More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#<relabel_config>'
+                      More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config'
                     items:
                       description: 'RelabelConfig allows dynamic rewriting of the
                         label set, being applied to samples before ingestion. It defines
@@ -182,6 +161,7 @@ spec:
                             in a replace action. It is mandatory for replace actions.
                             Regex capture groups are available.
                           type: string
+                      type: object
                     type: array
                   scheme:
                     description: HTTP scheme to use for scraping.
@@ -193,41 +173,8 @@ spec:
                     anyOf:
                     - type: string
                     - type: integer
-                  tlsConfig:
-                    description: TLSConfig specifies TLS configuration parameters.
-                    properties:
-                      caFile:
-                        description: The CA cert to use for the targets.
-                        type: string
-                      certFile:
-                        description: The client cert file for the targets.
-                        type: string
-                      insecureSkipVerify:
-                        description: Disable target certificate validation.
-                        type: boolean
-                      keyFile:
-                        description: The client key file for the targets.
-                        type: string
-                      serverName:
-                        description: Used to verify the hostname for the targets.
-                        type: string
+                type: object
               type: array
-            jobLabel:
-              description: The label to use to retrieve the job name from.
-              type: string
-            namespaceSelector:
-              description: NamespaceSelector is a selector for selecting either all
-                namespaces or a list of namespaces.
-              properties:
-                any:
-                  description: Boolean describing whether all namespaces are selected
-                    in contrast to a list restricting them.
-                  type: boolean
-                matchNames:
-                  description: List of namespace names.
-                  items:
-                    type: string
-                  type: array
             podTargetLabels:
               description: PodTargetLabels transfers labels on the Kubernetes Pod
                 onto the target.
@@ -273,6 +220,7 @@ spec:
                     required:
                     - key
                     - operator
+                    type: object
                   type: array
                 matchLabels:
                   description: matchLabels is a map of {key,value} pairs. A single
@@ -281,13 +229,10 @@ spec:
                     "In", and the values array contains only "value". The requirements
                     are ANDed.
                   type: object
-            targetLabels:
-              description: TargetLabels transfers labels on the Kubernetes Service
-                onto the target.
-              items:
-                type: string
-              type: array
+              type: object
           required:
-          - endpoints
+          - podMetricsEndpoints
           - selector
+          type: object
+      type: object
   version: v1
