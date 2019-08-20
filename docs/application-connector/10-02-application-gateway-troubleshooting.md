@@ -12,7 +12,7 @@ If you call a registered service and receive an error:
   ```
   If the request reaches the Pod, it is logged by Application Gateway.
   
-  If the call is not in the logs, check if [Access Service](components/application-connector/#architecture-application-connector-components-access-service) exists.
+  If the call is not in the logs, check if [Access Service](components/application-connector/#architecture-application-connector-components-access-service) for the Service you are trying to call exists.
   ```
   kubectl -n kyma-integration get svc app-{APP_NAME}-{SERVICE_ID}
   ```

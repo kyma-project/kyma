@@ -1,5 +1,5 @@
 ---
-title: Errors while generating or renewing a certificate
+title: Errors when generating or renewing a certificate
 type: Troubleshooting
 ---
 
