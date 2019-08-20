@@ -2,32 +2,43 @@
 
 
 [[projects]]
-  branch = "travis-1.9"
-  name = "github.com/golang/lint"
+  branch = "master"
+  digest = "1:99dc4c94284ccd0d515bc11c906edcc33da407af228c6cf75b6f20e2cd3e6ab6"
+  name = "golang.org/x/lint"
   packages = [
     ".",
-    "golint"
+    "golint",
   ]
-  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
+  pruneopts = ""
+  revision = "959b441ac422379a43da2230f62be024250818b0"
 
 [[projects]]
   branch = "master"
+  digest = "1:cc0790e269ee0a7490143b01b183ffbb10baa65dc836f5bd6cff5a934ffc3ab9"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
     "go/ast/astutil",
     "go/gcexportdata",
     "go/internal/gcimporter",
+    "go/internal/packagesdriver",
+    "go/packages",
     "go/types/typeutil",
-    "imports",
     "internal/fastwalk",
-    "internal/gopathwalk"
+    "internal/gopathwalk",
+    "internal/imports",
+    "internal/module",
+    "internal/semver",
   ]
-  revision = "e5f3ab76ea4b26ebea349e4994ee72d38250c9b0"
+  pruneopts = ""
+  revision = "85edb9ef328312eeb9315a7707cbb661702d17f9"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d7deb4182ebe6c26cc95b9516a7b5ad700ccf16175e1f200ff604d2a7f7a8a47"
+  input-imports = [
+    "golang.org/x/lint/golint",
+    "golang.org/x/tools/cmd/goimports",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
