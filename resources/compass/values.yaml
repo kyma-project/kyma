@@ -19,7 +19,7 @@ global:
       version: "26601526"
     schema_migrator:
       dir: develop/
-      version: "8e8b401f"
+      version: "2cc96dec"
     tests:
       e2e:
         dir: develop/
