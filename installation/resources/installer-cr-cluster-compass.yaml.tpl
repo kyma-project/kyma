@@ -19,8 +19,6 @@ spec:
       namespace: "istio-system"
     - name: "istio"
       namespace: "istio-system"
-    - name: "xip-patch"
-      namespace: "kyma-installer"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
     - name: "dex"
