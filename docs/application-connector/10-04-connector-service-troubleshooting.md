@@ -13,7 +13,7 @@ If you try to generate a client certificate, you may get this error:
 }
 ```
 
-This error is caused by applying wrong subject info to your Certificate Signing Request.  
+This error is caused by applying wrong subject information to your Certificate Signing Request.  
 To ensure it was generated properly, check the values returned by the Connector Service with the call that fetched CSR info:
 ```json
 {
