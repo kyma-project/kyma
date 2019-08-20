@@ -17,13 +17,13 @@ You can register any runtime, providing that it fulfills a contract with Compass
 
 Compass, as a part of Kyma, uses a set of Kyma features, such as Istio, Prometheus, Monitoring, or Tracing. It also contains Compass UI Cockpit that exposes Compass APIs to users.
 
-## Compass in Kyma
+## Run Kyma with Compass
 
-You can run Kyma with Compass in three different ways:
-- Default Kyma installation
-- Kyma as a central Management Plane which allows you to manage your multiple (Kyma) runtimes.
-- Kyma as a runtime
+You can run Kyma in three different ways:
+- Default Kyma installation - this setup provides all Kyma components together with Compass and Agent, which allows you to register external applications 
+- Kyma as a central Management Plane - this setup contains only selected Kyma components and Compass, which allows you to manage your multiple (Kyma) runtimes.
+- Kyma as a runtime - this setup provides all Kyma components and Agent, which allows to connect a given runtime to the central Management Plane
 
 ![Kyma modes](./assets/kyma-modes.svg)
 
-For more details, read the [architecture](#architecture-architecture) documents. 
+For more details, read the [architecture](#architecture-architecture) documents.
