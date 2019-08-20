@@ -15,7 +15,7 @@ else
 endif
 
 validate:
-	go build -o golint-vendored ./vendor/github.com/golang/lint/golint
+	go build -o golint-vendored ./vendor/golang.org/x/lint/golint
 	./golint-vendored
 	rm golint-vendored
 
