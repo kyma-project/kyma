@@ -4,10 +4,10 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir: pr/
-      version: "PR-5198"
+      version: "PR-5340"
     runtimeAgentTests:
       dir: pr/
-      version: "PR-4927"
+      version: "PR-5270"
 
 compassRuntimeAgent:
   image:
@@ -23,3 +23,10 @@ compassRuntimeAgent:
     insecureConfigurationFetch: true
     configMap:
       name: compass-agent-configuration
+  tests:
+    enabled: true
+    mockService:
+      port: 8080
+    configApplicationWaitTime: 60
+    proxyInvalidationWaitTime: 150
+    graphqlLogs: false
