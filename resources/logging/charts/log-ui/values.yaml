@@ -3,9 +3,9 @@
 # Declare variables to be passed into your templates.
 replicaCount: 1
 image:
-  name: log-ui
+  name: PR-1176
   tag: a9d158d5
-  dir: ''
+  dir: pr/
   pullPolicy: Always
 service:
   name: nginx
