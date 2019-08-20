@@ -10,7 +10,7 @@ global:
       version: "26601526"
     director:
       dir: develop/
-      version: "0255ce85"
+      version: "4ab44720"
     gateway:
       dir: develop/
       version: "df629420"
@@ -23,7 +23,7 @@ global:
     tests:
       e2e:
         dir: develop/
-        version: "b625e1b4"
+        version: "3c75146c"
 
   isLocalEnv: false
   
