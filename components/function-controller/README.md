@@ -30,7 +30,7 @@ export NAMESPACE=<NAMESPACE>
 export REGISTRY=<YOURREGISTRY>
 echo -n 'Username:' ; read username
 echo -n 'Password:' ; read password
-cat <<EOF | kubectl apply -f -
+cat <<EOF | kubectl apply -f -n $NAMESPACE -
 apiVersion: v1
 kind: ServiceAccount
 metadata:
