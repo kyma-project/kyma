@@ -1,7 +1,7 @@
 apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
 metadata:
-  name: sample
+  name: demo
   labels:
     foo: bar
 spec:
