@@ -57,7 +57,8 @@ run: generate fmt vet
 # Install CRDs into a cluster
 install:
 	kubectl apply -f config/crds/serverless_v1alpha1_function.yaml
-# UnInstall CRDs from cluster
+
+# Uninstall CRDs from cluster
 uninstall:
 	kubectl apply -f config/crds/serverless_v1alpha1_function.yaml
 
