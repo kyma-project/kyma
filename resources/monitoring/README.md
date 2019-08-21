@@ -10,16 +10,13 @@ This chart installs [Prometheus](https://prometheus.io/), [Alertmanager](https:/
 
 ## Details
 
-* [Grafana in Kyma](templates/grafana/README.md)
-
-
 # Grafana
 
 ## Overview
 
 Kyma comes with a set of dashboards for monitoring Kubernetes clusters. These dashboards display metrics that the Prometheus server collects.
 
-In Kyma, you can find these dashboards under [dashboards](dashboards/).
+In Kyma, you can find these dashboards under [dashboards](templates/grafana/dashboards/).
 
 These are the available dashboards:
 
