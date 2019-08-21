@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   name: log-ui
-  tag: 0ae49716
+  tag: 68ff59ff
   dir:
   pullPolicy: Always
 service:
