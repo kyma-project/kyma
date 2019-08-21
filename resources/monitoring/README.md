@@ -23,18 +23,18 @@ In Kyma, you can find these dashboards under [dashboards](dashboards/).
 
 These are the available dashboards:
 
-* **Deployment** - Displays metrics on details such as memory, CPU, network and replicas for deployments running in different namespaces. Find the configuration of this dashboard in [this](dashboards/deployment.yaml) file.
-* **Istio** - Displays Istio metrics for services (HTTP and TCP) as well as the Service Mesh. Find the configuration of this dashboard in [this](dashboards/istio-mesh.yaml) file.
-* **Kubernetes Resource Requests** - Displays details on CPU core and memory resource usage. Find the configuration of this dashboard in [this](dashboards/k8s-cluster-rsrc-use.yaml) file.
-* **Mixer** -Displays metrics on incoming requests, response durations, connections, cluster membership, server error rate and more. Find the configuration of this dashboard in [this](dashboards/istio-mixer.yaml) file.
-* **Nodes** - Displays information pertaining to Kubernetes nodes utilization. Find the configuration of this dashboard in [this](dashboards/nodes.yaml) file.
-* **Pilot** - Displays metrics on request latency, discovery calls and various cache types. Find the configuration of this dashboard in [this](dashboards/istio-pilot.yaml) file.
-* **Pods** - Displays Pod metrics such as CPU and Memory. Find the configuration of this dashboard in [this](dashboards/pods.yaml) file.
-* **StatefulSet** - Displays Kubernetes StatefulSet metrics such as replica count, CPU and Memory. Find the configuration of this dashboard in [this](dashboards/statefulset.yaml) file.
+* **Deployment** - Displays metrics on details such as memory, CPU, network and replicas for deployments running in different namespaces. Find the configuration of this dashboard in [this](templates/grafana/dashboards/deployment.yaml) file.
+* **Istio** - Displays Istio metrics for services (HTTP and TCP) as well as the Service Mesh. Find the configuration of this dashboard in [this](templates/grafana/dashboards/istio-mesh.yaml) file.
+* **Kubernetes Resource Requests** - Displays details on CPU core and memory resource usage. Find the configuration of this dashboard in [this](templates/grafana/dashboards/k8s-cluster-rsrc-use.yaml) file.
+* **Mixer** -Displays metrics on incoming requests, response durations, connections, cluster membership, server error rate and more. Find the configuration of this dashboard in [this](templates/grafana/dashboards/istio-mixer.yaml) file.
+* **Nodes** - Displays information pertaining to Kubernetes nodes utilization. Find the configuration of this dashboard in [this](templates/grafana/dashboards/nodes.yaml) file.
+* **Pilot** - Displays metrics on request latency, discovery calls and various cache types. Find the configuration of this dashboard in [this](templates/grafana/dashboards/istio-pilot.yaml) file.
+* **Pods** - Displays Pod metrics such as CPU and Memory. Find the configuration of this dashboard in [this](templates/grafana/dashboards/pods.yaml) file.
+* **StatefulSet** - Displays Kubernetes StatefulSet metrics such as replica count, CPU and Memory. Find the configuration of this dashboard in [this](templates/grafana/dashboards/statefulset.yaml) file.
 
 ## Add a dashboard to Kyma
 
-Grafana dashboards in Kyma are configured through a [ConfigMap](configmap-dashboards.yaml). This dashboard consumes the data configuration of all the JSON files located in the [dashboards directory](dashboards/).
+Grafana dashboards in Kyma are configured through a [ConfigMap](templates/grafana/configmap-dashboards.yaml). This dashboard consumes the data configuration of all the JSON files located in the [dashboards directory](templates/grafana/dashboards/).
 
 ```yaml
 data:
@@ -49,7 +49,7 @@ To add a dashboard to Kyma:
 1. Create or modify the dashboard using the Grafana UI.
 2. Export the dashboard to a JSON format file. Name the file following this convention: `{dashboard_name}-dashboard.json`.
 4. Clone the Kyma [master branch](https://github.com/kyma-project/kyma).
-5. Copy the JSON file to the directory **[dashboards](dashboards/)** of your local installation.
+5. Copy the JSON file to the directory **[dashboards](templates/grafana/dashboards/)** of your local installation.
 6. Install Kyma locally and open it in a browser at https://console.kyma.local.
 7. Access the Grafana console from Kyma by clicking **Administration > Diagnostics > Status & Metrics** in the left navigation.  
 8. Sign in and check if the newly added dashboard is deployed.  
