@@ -191,14 +191,14 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:ef7b78e97c9c1cda2cce074638521c81d2ed83515c9d55831a1d420d7db5ead8"
+  digest = "1:bdcf690dbe0400221778efd2009249748ecedf9fdac10fcb5d0dc03eaab78437"
   name = "github.com/kyma-incubator/compass"
   packages = [
     "components/director/pkg/graphql",
     "components/director/pkg/scalar",
   ]
   pruneopts = "UT"
-  revision = "83c17229028ffe2d604be4f8ea1f2f633141a965"
+  revision = "67216042cc8eff1d5352b9d7f8340dce9f40902c"
 
 [[projects]]
   digest = "1:bca259d300baf6a00f5046bda527fcbe4ce8d9b9284565815444814a10d106fe"
@@ -647,6 +647,7 @@
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2",
     "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "github.com/machinebox/graphql",
     "github.com/pkg/errors",

@@ -19,6 +19,7 @@ type TestConfig struct {
 	ConfigApplicationWaitTime int64  `envconfig:"CONFIG_APPLICATION_WAIT_TIME" default:"40"`
 	ProxyInvalidationWaitTime int64  `envconfig:"PROXY_INVALIDATION_WAIT_TIME" default:"150"`
 	GraphQLLog                bool   `envconfig:"GRAPHQL_LOG" default:"false"`
+	ScenarioLabel             string `envconfig:"SCENARIO_LABEL" default:"COMPASS_RUNTIME_AGENT_TESTS"`
 }
 
 func ReadConfig() (TestConfig, error) {
