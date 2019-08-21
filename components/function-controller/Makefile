@@ -1,3 +1,5 @@
+PKG = github.com/kyma-project/kyma/components/function-controller
+
 # Image URL to use all building/pushing image targets
 APP_NAME ?= function-controller
 IMG ?= $(APP_NAME):latest
@@ -47,7 +49,7 @@ qt:
 
 # Build manager binary
 manager: generate fmt vet
-	go build -o bin/manager github.com/kyma-project/kyma/components/function-controller/cmd/manager
+	go build -o bin/manager $(PKG)/cmd/manager
 
 # NOTE: does not work anymore until https://github.com/kubernetes-sigs/kubebuilder/issues/400 is implemented
 # Run against the configured Kubernetes cluster in ~/.kube/config
@@ -67,9 +69,9 @@ manifests:
 	go run vendor/sigs.k8s.io/controller-tools/cmd/controller-gen/main.go all
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-deploy: manifests install
+deploy: manifests install bin/kustomize
 	kubectl apply -f config/crds
-	kustomize build config/default | kubectl apply -f -
+	bin/kustomize build config/default | kubectl apply -f -
 	kubectl apply -f config/config.yaml
 
 undeploy: uninstall
@@ -102,3 +104,10 @@ ci-release: docker-build docker-push
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/function-controller"
+
+# used by 'go install'
+GOPATH ?= $(shell go env GOPATH)
+export GOBIN := $(GOPATH)/src/$(PKG)/bin
+
+bin/kustomize:
+	@go install ./vendor/sigs.k8s.io/kustomize
