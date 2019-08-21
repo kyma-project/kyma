@@ -23,7 +23,7 @@
 required= [
     "google.golang.org/grpc",
     "github.com/ugorji/go/codec",
-    "github.com/golang/lint/golint",
+    "golang.org/x/lint/golint",
     "golang.org/x/tools/cmd/goimports",
 
     "k8s.io/code-generator/cmd/defaulter-gen",

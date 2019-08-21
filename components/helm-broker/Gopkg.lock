@@ -459,17 +459,6 @@
   revision = "c65c006176ff7ff98bb916961c7abbc6b0afc0aa"
 
 [[projects]]
-  branch = "travis-1.9"
-  digest = "1:e8f5d9c09a7209c740e769713376abda388c41b777ba8e9ed52767e21acf379f"
-  name = "github.com/golang/lint"
-  packages = [
-    ".",
-    "golint",
-  ]
-  pruneopts = "UT"
-  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
-
-[[projects]]
   digest = "1:5eae7496bdb74a6c7592bc74ea3da8a6a61a361fd52682820900d755bb144194"
   name = "github.com/golang/protobuf"
   packages = [
@@ -1272,6 +1261,17 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:134674d729e1afbae39eeaa6abcf8e5f3106338f83643394ab5205a020efbd9b"
+  name = "golang.org/x/lint"
+  packages = [
+    ".",
+    "golint",
+  ]
+  pruneopts = "UT"
+  revision = "959b441ac422379a43da2230f62be024250818b0"
+
+[[projects]]
+  branch = "master"
   digest = "1:d33c06a0b2eea55c34afdd5a582797668e8bdb184496fa8e566316ebb336e3ff"
   name = "golang.org/x/net"
   packages = [
@@ -1918,7 +1918,6 @@
     "github.com/emicklei/go-restful",
     "github.com/fatih/structs",
     "github.com/ghodss/yaml",
-    "github.com/golang/lint/golint",
     "github.com/golang/protobuf/proto",
     "github.com/golang/protobuf/ptypes/timestamp",
     "github.com/gorilla/mux",
@@ -1946,6 +1945,7 @@
     "github.com/ugorji/go/codec",
     "github.com/urfave/negroni",
     "github.com/vrischmann/envconfig",
+    "golang.org/x/lint/golint",
     "golang.org/x/tools/cmd/goimports",
     "google.golang.org/grpc",
     "google.golang.org/grpc/credentials",
