@@ -130,17 +130,6 @@
   revision = "66deaeb636dff1ac7d938ce666d090556056a4b0"
 
 [[projects]]
-  branch = "travis-1.9"
-  digest = "1:e67b5c713158288cdf12e9ac3f9548b98dc2dae35fd09b35cb14131e0f5fe7fd"
-  name = "github.com/golang/lint"
-  packages = [
-    ".",
-    "golint",
-  ]
-  pruneopts = "NUT"
-  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
-
-[[projects]]
   digest = "1:d470faddd8d4b027226f9a5ff9d88962c34bb1699dde2acd7e9bfb70a3703d45"
   name = "github.com/golang/protobuf"
   packages = [
@@ -441,6 +430,17 @@
   ]
   pruneopts = "NUT"
   revision = "9de5f2eaf759b4c4550b3db39fed2e9e5f86f45c"
+
+[[projects]]
+  branch = "master"
+  digest = "1:03004f72cd37290aa0cba90b66d418f3a7cfb47220207398b561e6abe7aa8f74"
+  name = "golang.org/x/lint"
+  packages = [
+    ".",
+    "golint",
+  ]
+  pruneopts = "NUT"
+  revision = "959b441ac422379a43da2230f62be024250818b0"
 
 [[projects]]
   branch = "master"
@@ -863,7 +863,6 @@
     "github.com/davecgh/go-spew/spew",
     "github.com/ghodss/yaml",
     "github.com/golang/glog",
-    "github.com/golang/lint/golint",
     "github.com/gorilla/mux",
     "github.com/hashicorp/go-multierror",
     "github.com/imdario/mergo",
@@ -894,6 +893,7 @@
     "github.com/stretchr/testify/require",
     "github.com/urfave/negroni",
     "github.com/vrischmann/envconfig",
+    "golang.org/x/lint/golint",
     "golang.org/x/tools/cmd/goimports",
     "gopkg.in/yaml.v2",
     "k8s.io/api/core/v1",
