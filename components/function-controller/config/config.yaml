@@ -35,44 +35,4 @@ items:
         function: serverless-function-controller
       name: dockerfile-nodejs-8
       namespace: serverless-system
-  - apiVersion: v1
-    data:
-      dockerRegistry: 
-      runtimes: |
-        - ID: nodejs8
-          dockerFileName: dockerfile-nodejs-8
-        - ID: nodejs6
-          dockerFileName: dockerfile-nodejs-6
-      serviceAccountName: function-controller
-    kind: ConfigMap
-    metadata:
-      labels:
-        app: function-controller
-      name: fn-config
-      namespace: serverless-system
 kind: List
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: docker-reg-credential
-  namespace: serverless-system
-  annotations:
-    build.knative.dev/docker-0: https://index.docker.io/v1/
-type: kubernetes.io/basic-auth
-data:
-  # your docker.io username goes here
-  # username NOT the email
-  # echo -n $USERNAME | base64
-  username:
-  # password for the account
-  # echo -n $PASSWORD | base64
-  password:
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: function-controller
-  namespace: serverless-system
-secrets:
-  - name: docker-reg-credential

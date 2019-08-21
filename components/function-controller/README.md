@@ -1,4 +1,4 @@
-# Knative Function controller
+# Function controller
 
 ## Overview
 
@@ -12,25 +12,25 @@ This Knative-based serverless implementation defines and handles the Function Cu
 - Knative Serving (v0.6.1)
 - Istio (istio-1.0.7)
 
-## Installation
+## Installation for Development workflow
 
+Before installing the `function controller` its necessary to create the namespace, serviceaccount and secret. The service account refers to the secret containing the docker credentials. `Knative Build` uses the service account (linked to the docker credentials secret) to build and push the built images.
 
-### Run locally
-Follow these steps to run the Knative Function controller locally:
+### Create Namespace
+```bash
+export NAMESPACE=<serverless-system>
+kubectl create namespace $NAMESPACE
+```
 
-1. Create a ServiceAccount to enable knativeBuild Docker builds.
-
-To run a build in a Namespace, create ServiceAccounts with linked Docker repository credentials for each Namespace that
- will be used for the function-controller.
-
+### Create service account and secret
 ```bash
 #set your namespace e.g. default
 export NAMESPACE=<NAMESPACE>
-#set your registry e.g. https://gcr.io
-export REGISTRY=<YOURREGISTRY>
-echo -n 'Username:' ; read username
-echo -n 'Password:' ; read password
-cat <<EOF | kubectl apply -f -n $NAMESPACE -
+#set your registry e.g. https://gcr.io or https://index.docker.io/v1/ (without the handle)
+export REGISTRY=<YOUR_REGISTRY>
+echo -n 'Docker Username:' ; read username
+echo -n 'Docker Password:' ; read password
+cat <<EOF | kubectl -n $NAMESPACE apply -f -
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -53,13 +53,31 @@ data:
 EOF
 ```
 
-4. Install the CRD to a local Kubernetes cluster:
-
+### Create the config file for the controller
 ```bash
-make install
+export DOCKER_REGISTRY_NAME=<YOUR_REGISTRY_HANDLE>
+cat <<EOF | kubectly -n $NAMESPACE apply -f -
+apiVersion: v1
+    data:
+      dockerRegistry: ${DOCKER_REGISTRY_NAME}
+      runtimes: |
+        - ID: nodejs8
+          dockerFileName: dockerfile-nodejs-8
+        - ID: nodejs6
+          dockerFileName: dockerfile-nodejs-6
+      serviceAccountName: function-controller
+    kind: ConfigMap
+    metadata:
+      labels:
+        app: function-controller
+      name: fn-config
+EOF
 ```
+### Run locally on Minikube
+Follow these steps to run the Knative Function controller locally:
+To use the controller on the locally on minikube, make sure `manager_image_patch_local_dev.yaml` line is uncommented in the [file](config/default/kustomization.yaml)
 
-5. Deploy the controller:
+### Deploy the controller:
 >**NOTE**: Run this command only when you want to deploy the controller locally. It is not necessary for production use.
 ```bash
 eval $(minikube docker-env)
@@ -75,8 +93,9 @@ make docker-build
 make docker-push
 make deploy
 ```
-### Run on production
-To use the controller on the production environment, uncomment the `manager_image_patch_remote_dev.yaml` line  in the `kustomization.yaml` file and follow the instructions for the local installation.
+### Run on remote cluster (eg. GKE)
+To use the controller on the remote cluster(eg. GKE), make sure `manager_image_patch_remote_dev.yaml` line is uncommented in the [file](config/default/kustomization.yaml). Then follow the instructions mentioned [here](#deploy-the-controller)
+
 ## Usage
 ### Test the controller
 To test the controller, run:
@@ -88,30 +107,85 @@ make test
 
 Use the following examples to learn how to create and manage a function. 
 
-Create a sample function:
+>**Note** If you are creating functions outside the `serverless-system` namespace then make sure following steps are followed:
+```bash
+export NAMESPACE=foo
+```
+1. Create the `service accounts` and `secrets` for docker credential in the namespace as mentioned [here](#create-service-account-and-secret)
+2. Create the configmaps with docker templates for `node6` and `node8`
+Create a configmap with node6 docker template:
+```bash
+cat <<EOF | kubectl -n $NAMESPACE apply -f-
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dockerfile-nodejs-6
+  labels:
+    function: function-controller
+data:
+  Dockerfile: |-
+    FROM kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7
+    USER root
+    RUN export KUBELESS_INSTALL_VOLUME='/kubeless' && \
+        mkdir /kubeless && \
+        cp /src/handler.js /kubeless && \
+        cp /src/package.json /kubeless && \
+        /kubeless-npm-install.sh
+    USER 1000
+EOF
+```
 
+Create a configmap with node8 docker template:
+```bash
+cat <<EOF | kubectl -n $NAMESPACE apply -f-
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dockerfile-nodejs-8
+  labels:
+    function: function-controller
+data:
+  Dockerfile: |-
+    FROM kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7
+    USER root
+    RUN export KUBELESS_INSTALL_VOLUME='/kubeless' && \
+        mkdir /kubeless && \
+        cp /src/handler.js /kubeless && \
+        cp /src/package.json /kubeless && \
+        /kubeless-npm-install.sh
+    USER 1000
+EOF
+```
 ```bash
 kubectl apply -f config/samples/serverless_v1alpha1_function.yaml -n {NAMESPACE}
 ```
 
 Search for a function:
-
 ```bash
-kubectl get functions -n {NAMESPACE}
+kubectl get functions -n ${NAMESPACE}
 ```
 
+Check the status of the build
 ```bash
-kubectl get function -n {NAMESPACE}
+kubectl get builds.build.knative.dev -n ${NAMESPACE}
 ```
 
+Check the status of the serving
 ```bash
-kubectl get fcn -n {NAMESPACE}
+kubectl get services.serving.knative.dev -n ${NAMESPACE}
 ```
+
 
 Access the function:
 
+On minikube
 ```bash
 export INGRESSGATEWAY=istio-ingressgateway
 export IP_ADDRESS=$(kubectl get svc $INGRESSGATEWAY --namespace istio-system --output 'jsonpath={.status.loadBalancer.ingress[0].ip}')
-curl -v -H "Host: $(kubectl get ksvc sample --output 'jsonpath={.status.domain}' -n {NAMESPACE}" http://$(minikube ip):$(kubectl get svc istio-ingressgateway --namespace istio-system --output 'jsonpath={.spec.ports[?(@.port==80)].nodePort}')
+curl -v -H "Host: $(kubectl get ksvc sample --output 'jsonpath={.status.domain}' -n ${NAMESPACE}" http://$(minikube ip):$(kubectl get svc istio-ingressgateway --namespace istio-system --output 'jsonpath={.spec.ports[?(@.port==80)].nodePort}')
+```
+
+on Remote Cluster (eg. GKE)
+```bash
+curl -v "https://$(kubectl get ksvc -n ${NAMESPACE} --output 'jsonpath={.items[0].status.domain}')"
 ```
