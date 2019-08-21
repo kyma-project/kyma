@@ -1,8 +1,0 @@
-storage:
-  - driver: memory
-    provide:
-      chart: ~
-      addon: ~
-      instance: ~
-      instanceOperation: ~
-      entityInstanceBindData: ~

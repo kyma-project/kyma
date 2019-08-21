@@ -5,6 +5,7 @@ webhook:
     tag: 47f40a09
     pullPolicy: IfNotPresent
   verbosity: 6
+  securityContext: {}
 
 controller:
   enabled: false

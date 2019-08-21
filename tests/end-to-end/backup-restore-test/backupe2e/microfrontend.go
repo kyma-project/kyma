@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
-
 	. "github.com/smartystreets/goconvey/convey"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -16,9 +14,9 @@ import (
 )
 
 type microfrontendTest struct {
-	microforntendName, uuid string
-	mfClient                *mfClient.Clientset
-	coreClient              *kubernetes.Clientset
+	microforntendName string
+	mfClient          *mfClient.Clientset
+	coreClient        *kubernetes.Clientset
 }
 
 func NewMicrofrontendTest() (microfrontendTest, error) {
@@ -41,7 +39,6 @@ func NewMicrofrontendTest() (microfrontendTest, error) {
 		mfClient:          mfClient,
 		coreClient:        coreClient,
 		microforntendName: "test-mf",
-		uuid:              uuid.New().String(),
 	}, nil
 }
 
@@ -84,10 +81,11 @@ func (t microfrontendTest) createMicrofrontend(namespace string) (*uiV1alpha1v.M
 				ViewBaseURL: "https://test.kyma.cx/mf-test",
 				NavigationNodes: []uiV1alpha1v.NavigationNode{
 					uiV1alpha1v.NavigationNode{
-						Label:            "testMF",
-						NavigationPath:   "path",
-						ViewURL:          "/resourcePath",
-						ShowInNavigation: true,
+						Label:               "testMF",
+						NavigationPath:      "path",
+						ViewURL:             "/resourcePath",
+						ShowInNavigation:    true,
+						RequiredPermissions: []uiV1alpha1v.RequiredPermission{},
 					},
 				},
 			},
