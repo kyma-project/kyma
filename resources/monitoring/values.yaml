@@ -4,6 +4,25 @@
 
 ## Provide a name in place of prometheus-operator for `app:` labels
 ##
+global:
+  isLocalEnv: false
+  serviceCatalogApiserver:
+    enabled: true
+  serviceCatalogCrds:
+    enabled: false
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  istio:
+    tls:
+      secretName: istio-ingress-certs
+    gateway:
+      name: kyma-gateway
+      namespace: kyma-system
+  monitoring_integration_tests:
+    name: monitoring-integration-tests
+    dir: pr/
+    version: PR-5226
+
 nameOverride: ""
 
 ## Provide a name to substitute for the full names of resources
