@@ -19,7 +19,7 @@ The Event delivery workflow is as follows:
 
 ## Event metadata
 
-The following HTTP Headers(compliant to [CloudEvents](https://github.com/cloudevents/spec/blob/v0.3/spec.md)) provide information about the Event metadata.
+The following HTTP headers provide information about the Event metadata. The headers follow the format defined in the [CloudEvents specification](https://github.com/cloudevents/spec/blob/v0.3/spec.md).
 
 |Header| Description|
 |------|--------|
