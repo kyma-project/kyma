@@ -2,40 +2,51 @@
 
 
 [[projects]]
-  branch = "travis-1.9"
-  name = "github.com/golang/lint"
-  packages = [
-    ".",
-    "golint"
-  ]
-  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
-
-[[projects]]
   branch = "master"
+  digest = "1:428a8f2e647672a144e7268b415e52727c835f9086d652c4b60ee7edd256139d"
   name = "github.com/kyma-project/kyma"
   packages = ["common/ingressgateway"]
+  pruneopts = ""
   revision = "e317ebe1138298091cef2f93131311674aa0dd72"
 
 [[projects]]
   branch = "master"
+  digest = "1:99dc4c94284ccd0d515bc11c906edcc33da407af228c6cf75b6f20e2cd3e6ab6"
+  name = "golang.org/x/lint"
+  packages = [
+    ".",
+    "golint",
+  ]
+  pruneopts = ""
+  revision = "959b441ac422379a43da2230f62be024250818b0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:3b4532388bb9dfcc98530527160974cf5ec03120002887777516a98092725ba0"
   name = "golang.org/x/net"
   packages = ["context"]
+  pruneopts = ""
   revision = "e147a9138326bc0e9d4e179541ffd8af41cff8a9"
 
 [[projects]]
   branch = "master"
+  digest = "1:22cbfd03c3fe2e72d86ab0de10eff9442dc3b5ab31f45e7e1691b7245e687e9c"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
     "go/gcexportdata",
     "go/internal/gcimporter",
-    "go/types/typeutil"
+    "go/types/typeutil",
   ]
+  pruneopts = ""
   revision = "92cdcd90bf52150d9c63b7a8432ab7b10fc92385"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "90b41749ec07baa20dfbacc6c73aa20ae7448633f6354ed4a85625cd2721272c"
+  input-imports = [
+    "github.com/kyma-project/kyma/common/ingressgateway",
+    "golang.org/x/lint/golint",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
