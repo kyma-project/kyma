@@ -16,5 +16,3 @@ The following resources are involved in Event transfer and validation in Kyma:
 * **Push** is an application responsible for receiving Events from NATS Streaming in the Event Bus. Additionally, it delivers the validated Events to the lambda or the service, following the trigger from the Subscription custom resource. The Events are delivered to the lambda or the service through the Envoy proxy sidecar with mTLS enabled.
 
 * **Subscription** is a custom resource that the lambda or service creator defines to subscribe a given lambda or a service to particular types of Events.
-
-* **Sub-validator** is a Kubernetes deployment. It updates the status of the Subscription custom resource with the EventActivation status. Depending on the status, `push` starts or stops delivering Events to the lambda or the service webhook.
