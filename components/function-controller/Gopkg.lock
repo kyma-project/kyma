@@ -10,6 +10,22 @@
   version = "v0.39.0"
 
 [[projects]]
+  digest = "1:bd3632deea7c224314b504dc51fbd244a59163e89c0cb730877d51bb13f5f74a"
+  name = "github.com/PuerkitoBio/purell"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "44968752391892e1b0d0b821ee79e9a85fa13049"
+  version = "v1.1.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:c739832d67eb1e9cc478a19cc1a1ccd78df0397bf8a32978b759152e205f644b"
+  name = "github.com/PuerkitoBio/urlesc"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "de5bf2ad457846296e2031421a34e2568e304e35"
+
+[[projects]]
   digest = "1:464aef731a5f82ded547c62e249a2e9ec59fbbc9ddab53cda7b9857852630a61"
   name = "github.com/appscode/jsonpatch"
   packages = ["."]
@@ -45,12 +61,12 @@
   version = "v2.9.6"
 
 [[projects]]
-  digest = "1:2fd7ea1c64915c77ef4649b1b2113f449897d00721383925eca9a1c4b4071910"
+  digest = "1:75c3d1e7907ed7a800afd0569783a99a2b6421b634c404565de537b224826703"
   name = "github.com/evanphx/json-patch"
   packages = ["."]
   pruneopts = "T"
-  revision = "5858425f75500d40c52783dce87d085a483ce135"
-  version = "v4.2.0"
+  revision = "afac545df32f2287a079e2dfb7ba2745a643747e"
+  version = "v3.0.0"
 
 [[projects]]
   digest = "1:2cd7915ab26ede7d95b8749e6b1f933f1c6d5398030684e6505940a10f31cfda"
@@ -75,6 +91,38 @@
   pruneopts = "T"
   revision = "03f06a783fbb7dfaf3f629c7825480e43a7105e6"
   version = "v0.1.1"
+
+[[projects]]
+  digest = "1:deaebdf65d6d8c9fba4e1ec2f04b38739fe63d544ebaeba316ee8281a26c8a0f"
+  name = "github.com/go-openapi/jsonpointer"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "a105a905c5e6ad147f08504784917f3e178e0ba5"
+  version = "v0.19.2"
+
+[[projects]]
+  digest = "1:ace067abf49e9861040c3f33b67ce39602eb491a2532389467e9ca1dd8cb8e5e"
+  name = "github.com/go-openapi/jsonreference"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "2903bfd4bfbaf188694f1edf731f2725a8fa344f"
+  version = "v0.19.2"
+
+[[projects]]
+  digest = "1:9d29c43e2f6fe25d602e5d2347aac8faa2addf0ae99440d146f1f36601869e9d"
+  name = "github.com/go-openapi/spec"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "bdfd7e07daecc404d77868a88b2364d0aed0ee5a"
+  version = "v0.19.2"
+
+[[projects]]
+  digest = "1:4a9843efff2ac03e0b893632d25ba86f3e4cf596a50b269cc6ab5cf6924f4fb9"
+  name = "github.com/go-openapi/swag"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "c3d0f7896d589f3babb99eea24bbc7de98108e72"
+  version = "v0.19.5"
 
 [[projects]]
   digest = "1:92755a73daaa2397bbd4fd7b14d920decd24c0669b1d58db7e4ef986b1934e5f"
@@ -247,13 +295,10 @@
   packages = [
     "pkg/apis/build",
     "pkg/apis/build/v1alpha1",
-    "pkg/client/clientset/versioned",
-    "pkg/client/clientset/versioned/scheme",
-    "pkg/client/clientset/versioned/typed/build/v1alpha1",
   ]
   pruneopts = "T"
   revision = "002a41a30693d0a720ba34476336fc81ba299564"
-  version = "v0.7.0"
+  version = "v0.6.0"
 
 [[projects]]
   branch = "master"
@@ -273,7 +318,7 @@
   revision = "262650b2c0dd6e6bfa2990d55cfc958e16179c59"
 
 [[projects]]
-  digest = "1:6884a7baba208e0bca77dc34be957dbf53ed4c511f54a672280887d02f060d73"
+  digest = "1:696d4ea394c9d92b4df5a39456a58110fd9b45eaa7ddd898d60bb15f17bf3421"
   name = "github.com/knative/serving"
   packages = [
     "pkg/apis/autoscaling",
@@ -285,8 +330,20 @@
     "pkg/apis/serving/v1beta1",
   ]
   pruneopts = "T"
-  revision = "0800b94fd42981b439f6a54b0c0cbedd23e58c32"
-  version = "v0.7.0"
+  revision = "6afdcf3c200cc8cffcfdeaa223a00df150f4026f"
+  version = "v0.6.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:6bda9283afef46e72e78d90580f152df3a7be019a2f425d1441e45e41c103cc1"
+  name = "github.com/mailru/easyjson"
+  packages = [
+    "buffer",
+    "jlexer",
+    "jwriter",
+  ]
+  pruneopts = "T"
+  revision = "b2ccc519800e761ac8000b95e5d57c80a897ff9e"
 
 [[projects]]
   digest = "1:3804a3a02964db8e6db3e5e7960ac1c1a9b12835642dd4f4ac4e56c749ec73eb"
@@ -608,6 +665,7 @@
     "unicode/cldr",
     "unicode/norm",
     "unicode/rangetable",
+    "width",
   ]
   pruneopts = "T"
   revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
@@ -1005,7 +1063,10 @@
   branch = "master"
   digest = "1:03c441cccbde6cd08b76d77cd943a4e03278a6b8b6f0fd72cbdc11c1500709c9"
   name = "k8s.io/kube-openapi"
-  packages = ["pkg/util/proto"]
+  packages = [
+    "pkg/common",
+    "pkg/util/proto",
+  ]
   pruneopts = "T"
   revision = "db7b694dc208eead64d38030265f702db593fcf2"
 
@@ -1075,6 +1136,49 @@
   version = "v0.1.10"
 
 [[projects]]
+  digest = "1:5adcdd7521b074ff155b54d881c990ad837fa27d55ee7e0194dfbaf2cd90c54c"
+  name = "sigs.k8s.io/kustomize"
+  packages = [
+    ".",
+    "k8sdeps",
+    "k8sdeps/configmapandsecret",
+    "k8sdeps/kunstruct",
+    "k8sdeps/transformer",
+    "k8sdeps/transformer/hash",
+    "k8sdeps/transformer/patch",
+    "k8sdeps/validator",
+    "pkg/commands",
+    "pkg/commands/build",
+    "pkg/commands/edit",
+    "pkg/commands/edit/add",
+    "pkg/commands/edit/set",
+    "pkg/commands/kustfile",
+    "pkg/commands/misc",
+    "pkg/constants",
+    "pkg/expansion",
+    "pkg/factory",
+    "pkg/fs",
+    "pkg/gvk",
+    "pkg/ifc",
+    "pkg/ifc/transformer",
+    "pkg/internal/error",
+    "pkg/loader",
+    "pkg/patch",
+    "pkg/patch/transformer",
+    "pkg/resid",
+    "pkg/resmap",
+    "pkg/resource",
+    "pkg/target",
+    "pkg/transformers",
+    "pkg/transformers/config",
+    "pkg/transformers/config/defaultconfig",
+    "pkg/types",
+  ]
+  pruneopts = "T"
+  revision = "8f701a00417a812558a7b785e8354957afa469ae"
+  version = "v1.0.11"
+
+[[projects]]
   digest = "1:290b4da306982122bcdff12dbababbb95c6e4a94a2995db88baf235ef2f6e93e"
   name = "sigs.k8s.io/testing_frameworks"
   packages = [
@@ -1102,7 +1206,9 @@
     "github.com/emicklei/go-restful",
     "github.com/ghodss/yaml",
     "github.com/knative/build/pkg/apis/build/v1alpha1",
-    "github.com/knative/build/pkg/client/clientset/versioned",
+    "github.com/knative/pkg/apis",
+    "github.com/knative/pkg/apis/duck/v1alpha1",
+    "github.com/knative/pkg/apis/duck/v1beta1",
     "github.com/knative/serving/pkg/apis/serving/v1alpha1",
     "github.com/knative/serving/pkg/apis/serving/v1beta1",
     "github.com/onsi/ginkgo",
@@ -1111,6 +1217,7 @@
     "golang.org/x/net/context",
     "k8s.io/api/admission/v1beta1",
     "k8s.io/api/admissionregistration/v1beta1",
+    "k8s.io/api/authentication/v1",
     "k8s.io/api/core/v1",
     "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
     "k8s.io/apimachinery/pkg/api/errors",
@@ -1141,6 +1248,7 @@
     "sigs.k8s.io/controller-runtime/pkg/webhook/admission/builder",
     "sigs.k8s.io/controller-runtime/pkg/webhook/admission/types",
     "sigs.k8s.io/controller-tools/cmd/controller-gen",
+    "sigs.k8s.io/kustomize",
     "sigs.k8s.io/testing_frameworks/integration",
   ]
   solver-name = "gps-cdcl"
