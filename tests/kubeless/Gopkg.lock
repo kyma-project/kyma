@@ -62,7 +62,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/avast/retry-go",
-    "github.com/golang/lint/golint",
+    "golang.org/x/lint/golint",
     "github.com/sirupsen/logrus",
   ]
   solver-name = "gps-cdcl"

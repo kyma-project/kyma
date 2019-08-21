@@ -863,7 +863,7 @@
     "github.com/davecgh/go-spew/spew",
     "github.com/ghodss/yaml",
     "github.com/golang/glog",
-    "github.com/golang/lint/golint",
+    "golang.org/x/lint/golint",
     "github.com/gorilla/mux",
     "github.com/hashicorp/go-multierror",
     "github.com/imdario/mergo",

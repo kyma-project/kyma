@@ -1179,7 +1179,7 @@
     "github.com/go-logr/logr",
     "github.com/gofrs/uuid",
     "github.com/golang/glog",
-    "github.com/golang/lint/golint",
+    "golang.org/x/lint/golint",
     "github.com/google/go-cmp/cmp",
     "github.com/google/go-cmp/cmp/cmpopts",
     "github.com/knative/eventing/pkg/apis/eventing/v1alpha1",

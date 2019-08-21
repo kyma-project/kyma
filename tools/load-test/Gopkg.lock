@@ -65,7 +65,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/go-logr/logr",
-    "github.com/golang/lint/golint",
+    "golang.org/x/lint/golint",
     "github.com/nlopes/slack",
   ]
   solver-name = "gps-cdcl"
