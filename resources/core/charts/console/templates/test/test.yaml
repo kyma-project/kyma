@@ -37,7 +37,8 @@ spec:
           serviceAccountName: {{ .Chart.Name }}-tests
           containers:
             - name: tests
-              image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_acceptance_tests.dir }}ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
+              # image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_acceptance_tests.dir }}ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
+              image: "eu.gcr.io/kyma-project/pr/ui-tests:PR-1164"
               imagePullPolicy: IfNotPresent
               resources:
                  requests:
