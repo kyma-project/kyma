@@ -10,6 +10,7 @@ spec:
   category: Integration
   placement: cluster
   viewBaseUrl: 'https://addons.{{ js .Values.global.ingress.domainName }}'
+  preloadUrl: 'https://addons.{{ js .Values.global.ingress.domainName }}/#preload'
   navigationNodes:
     - label: "Cluster Addons"
       navigationPath: addons-config
