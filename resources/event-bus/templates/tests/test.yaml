@@ -24,7 +24,8 @@ spec:
         imagePullPolicy: IfNotPresent
         name: {{ .Chart.Name }}-tests
         args:
-            - --publish-event-uri=http://event-publish-service:8080/v1/events
+            - --publish-event-v1-uri=http://event-publish-service:8080/v1/events
+            - --publish-event-v2-uri=http://event-publish-service:8080/v2/events
             - --publish-status-uri=http://event-publish-service:8080/v1/status/ready
             - --subscriber-image={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus_tests.dir }}event-bus-e2e-subscriber:{{ .Values.global.event_bus_tests.version }}
             - --subscriber-ns=test-event-bus
