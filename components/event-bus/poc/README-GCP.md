@@ -194,7 +194,7 @@ rules:
   verbs:
     - "*"
 EOF
-```
+```
 
 > Troubleshooting: The Service Account and the eventing-controller need to be recreated
 
