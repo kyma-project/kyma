@@ -17,8 +17,8 @@ Compass does not participate in any business flow. After establishing a trusted 
 
 In order to connect applications and runtimes, assign them to the same scenario.
 A scenario is a simple label with the **scenario** key. If an application or a runtime is not explicitly assigned to any scenario, they belong to the `default` one.
-If you add a scenario to the application or runtime assigned to the `default` scenario, it is automatically removed from the `default` scenario and moved to the new one.
+After you add a scenario, they are automatically removed from the `default` scenario and moved to the new one. You can assign applications and runtimes to many scenarios. See the example:
 
 ![Scenarios](./assets/scenarios.svg)
 
-Application or Runtime can be assigned to many scenarios. For example, `Application 2` belongs to the `production` and `stage` scenarios. Thanks to that, its API or Events can be consumed by both `Runtime 1` and `Runtime 2`. Communication between components that do not belong to the same scenario is forbidden. For example, `Application 3` cannot communicate with `Runtime 1`.
+`Application 2` belongs to the `production` and `stage` scenarios. Thanks to that, its API or Events can be consumed by both `Runtime 1` and `Runtime 2`. Communication between components that do not belong to the same scenario is forbidden. For example, `Application 3` cannot communicate with `Runtime 1`.
