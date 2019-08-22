@@ -10,17 +10,6 @@
   version = "v2.4.1"
 
 [[projects]]
-  branch = "travis-1.9"
-  digest = "1:d45f5fe0f8bf6cd0bc592502e7e8ec647d769e55387fe326eb624d67282a7d15"
-  name = "github.com/golang/lint"
-  packages = [
-    ".",
-    "golint",
-  ]
-  pruneopts = ""
-  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
-
-[[projects]]
   digest = "1:0f51cee70b0d254dbc93c22666ea2abf211af81c1701a96d04e2284b408621db"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
@@ -35,6 +24,17 @@
   pruneopts = ""
   revision = "839c75faf7f98a33d445d181f3018b5c3409a45e"
   version = "v1.4.2"
+
+[[projects]]
+  branch = "master"
+  digest = "1:99dc4c94284ccd0d515bc11c906edcc33da407af228c6cf75b6f20e2cd3e6ab6"
+  name = "golang.org/x/lint"
+  packages = [
+    ".",
+    "golint",
+  ]
+  pruneopts = ""
+  revision = "959b441ac422379a43da2230f62be024250818b0"
 
 [[projects]]
   branch = "master"
@@ -62,8 +62,8 @@
   analyzer-version = 1
   input-imports = [
     "github.com/avast/retry-go",
-    "github.com/golang/lint/golint",
     "github.com/sirupsen/logrus",
+    "golang.org/x/lint/golint",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

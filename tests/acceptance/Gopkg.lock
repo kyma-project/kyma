@@ -48,17 +48,6 @@
   revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
-  branch = "travis-1.9"
-  digest = "1:e67b5c713158288cdf12e9ac3f9548b98dc2dae35fd09b35cb14131e0f5fe7fd"
-  name = "github.com/golang/lint"
-  packages = [
-    ".",
-    "golint",
-  ]
-  pruneopts = "NUT"
-  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
-
-[[projects]]
   branch = "master"
   digest = "1:0d390d7037c2aecc37e78c2cfbe43d020d6f1fa83fd22266b7ec621189447d57"
   name = "github.com/golang/protobuf"
@@ -146,7 +135,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:63669316f477383b5f78f1a11b140ce5f2d4829dade4ac4da2894a79c0ab7d84"
+  digest = "1:9be8cb7e0f7d1165ae514f91ac69e218f226cfdbb2e7b4d72b5a619694e97c4f"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
@@ -157,7 +146,6 @@
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "components/helm-broker/pkg/apis/addons/v1alpha1",
     "components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/apis/settings/v1alpha1",
@@ -268,6 +256,17 @@
   packages = ["ssh/terminal"]
   pruneopts = "NUT"
   revision = "c3a3ad6d03f7a915c0f7e194b7152974bb73d287"
+
+[[projects]]
+  branch = "master"
+  digest = "1:03004f72cd37290aa0cba90b66d418f3a7cfb47220207398b561e6abe7aa8f74"
+  name = "golang.org/x/lint"
+  packages = [
+    ".",
+    "golint",
+  ]
+  pruneopts = "NUT"
+  revision = "959b441ac422379a43da2230f62be024250818b0"
 
 [[projects]]
   branch = "master"
@@ -568,7 +567,6 @@
     "github.com/Bplotka/go-httplog",
     "github.com/Bplotka/go-httplog/logrus",
     "github.com/ghodss/yaml",
-    "github.com/golang/lint/golint",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
@@ -579,7 +577,6 @@
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
@@ -590,6 +587,7 @@
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
     "github.com/vrischmann/envconfig",
+    "golang.org/x/lint/golint",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/apps/v1beta1",
     "k8s.io/api/core/v1",

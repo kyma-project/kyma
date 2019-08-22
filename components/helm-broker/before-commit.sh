@@ -72,7 +72,7 @@ goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/
 ##
 #  GO LINT
 ##
-go build -o golint-vendored ./vendor/github.com/golang/lint/golint
+go build -o golint-vendored ./vendor/golang.org/x/lint/golint
 buildLintResult=$?
 if [ ${buildLintResult} != 0 ]; then
 	echo -e "${RED}✗ go build lint${NC}\n$buildLintResult${NC}"

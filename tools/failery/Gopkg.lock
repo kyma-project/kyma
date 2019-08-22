@@ -8,15 +8,6 @@
   version = "v1.1.1"
 
 [[projects]]
-  branch = "travis-1.9"
-  name = "github.com/golang/lint"
-  packages = [
-    ".",
-    "golint"
-  ]
-  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
-
-[[projects]]
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
@@ -31,6 +22,15 @@
   ]
   revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
   version = "v1.2.2"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/lint"
+  packages = [
+    ".",
+    "golint"
+  ]
+  revision = "959b441ac422379a43da2230f62be024250818b0"
 
 [[projects]]
   branch = "master"
@@ -53,6 +53,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "05b2c8637bd68dfadb11723753be9e7ae5f1c5974058264b13a5f7c76f888140"
+  inputs-digest = "fb39863016686cccc20b32769acf6e7866bd7a1c4648aa0ab3758d2d520b3eb0"
   solver-name = "gps-cdcl"
   solver-version = 1

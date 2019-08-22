@@ -4,23 +4,23 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir:
-      version: 1.4.0
+      version: 1.4.1
     director:
       dir:
-      version: 1.4.0
+      version: 1.4.1
     gateway:
       dir:
-      version: 1.4.0
+      version: 1.4.1
     healthchecker:
       dir:
-      version: 1.4.0
+      version: 1.4.1
     schema_migrator:
       dir:
-      version: 1.4.0
+      version: 1.4.1
     tests:
       e2e:
         dir:
-        version: 1.4.0
+        version: 1.4.1
 
   isLocalEnv: false
   
