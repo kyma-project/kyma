@@ -369,7 +369,7 @@ Install Kyma on a [GKE](https://cloud.google.com/kubernetes-engine/) or [AKS](ht
   ```
 >**NOTE:** On an AKS cluster, make sure to run all commands from steps 5 and 6 of [this](#installation-install-kyma-on-a-cluster--provider-installation--aks--prepare-the-aks-cluster) section.
 
-7. Install Kyma using the respective installation instructions for [GKE](#installation-install-kyma-on-a-cluster--provider-installation--gke--install-kyma) and [AKS](#installation-install-kyma-on-a-cluster--provider-installation--aks--install-kyma).
+7. Install Kyma using the respective installation instructions for [GKE](#installation-install-kyma-on-a-cluster--provider-installation--gke--install-kyma) or [AKS](#installation-install-kyma-on-a-cluster--provider-installation--aks--install-kyma).
 
   </details>
 </div>
