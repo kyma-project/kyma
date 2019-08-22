@@ -10,7 +10,7 @@ spec:
   category: Configuration
   placement: namespace
   viewBaseUrl: 'https://brokers.{{ js .Values.global.ingress.domainName }}'
-  preloadUrl: 'https://brokers.{{ js .Values.global.ingress.domainName }}/#preload'
+  preloadUrl: 'https://brokers.{{ js .Values.global.ingress.domainName }}/preload'
   navigationNodes:
     - label: Brokers
       navigationPath: brokers
