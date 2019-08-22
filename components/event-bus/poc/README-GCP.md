@@ -51,13 +51,7 @@ kubectl apply --filename https://github.com/knative/serving/releases/download/v0
    --filename https://github.com/knative/eventing/releases/download/v0.8.0/release.yaml
 ```
 
-### Remove default configmap for CCP
-
-```bash
-kubectl delete cm default-channel-webhook -n knative-eventing
-```
-
-### Add a default configmap for Channel
+### Create a default configmap for Channel
 ```bash
 cat << EOF | kubectl apply -f -
 apiVersion: v1
@@ -927,7 +921,7 @@ while true; do \
   curl -i \
       -H "Content-Type: application/json" \
       -X POST http://localhost:8080/v1/events \
-      -d '{"source-id": "external-application", "event-type": "test-event-bus", "event-type-version": "v1", "event-time": "2018-11-02T22:08:41+00:00", "data": {"event":{"customer":{"customerID": "'$(date +%s)'", "uid": "rick.sanchez@mail.com"}}}}'; \
+      -d '{"source-id": "external-application", "event-type": "test1-event-bus", "event-type-version": "v1", "event-time": "2018-11-02T22:08:41+00:00", "data": {"event":{"customer":{"customerID": "'$(date +%s)'", "uid": "rick.sanchez@mail.com"}}}}'; \
   sleep 0.3s; \
 done
 ```
