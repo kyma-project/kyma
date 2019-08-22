@@ -1,11 +1,11 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   replicas: 1
@@ -13,13 +13,17 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      release: {{ .Release.Name }}
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
         app: {{ .Chart.Name }}
-        release: {{ .Chart.Name }}
+        release: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ .Chart.Name }}
       containers:

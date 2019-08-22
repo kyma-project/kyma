@@ -5,7 +5,7 @@ package v1alpha2
 import (
 	time "time"
 
-	istio_v1alpha2 "github.com/kyma-project/kyma/components/application-registry/pkg/apis/istio/v1alpha2"
+	istiov1alpha2 "github.com/kyma-project/kyma/components/application-registry/pkg/apis/istio/v1alpha2"
 	versioned "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/kyma-project/kyma/components/application-registry/pkg/client/informers/externalversions/internalinterfaces"
 	v1alpha2 "github.com/kyma-project/kyma/components/application-registry/pkg/client/listers/istio/v1alpha2"
@@ -54,7 +54,7 @@ func NewFilteredRuleInformer(client versioned.Interface, namespace string, resyn
 				return client.IstioV1alpha2().Rules(namespace).Watch(options)
 			},
 		},
-		&istio_v1alpha2.Rule{},
+		&istiov1alpha2.Rule{},
 		resyncPeriod,
 		indexers,
 	)
@@ -65,7 +65,7 @@ func (f *ruleInformer) defaultInformer(client versioned.Interface, resyncPeriod 
 }
 
 func (f *ruleInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&istio_v1alpha2.Rule{}, f.defaultInformer)
+	return f.factory.InformerFor(&istiov1alpha2.Rule{}, f.defaultInformer)
 }
 
 func (f *ruleInformer) Lister() v1alpha2.RuleLister {

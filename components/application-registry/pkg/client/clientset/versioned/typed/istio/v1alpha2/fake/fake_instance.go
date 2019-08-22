@@ -103,7 +103,7 @@ func (c *FakeInstances) DeleteCollection(options *v1.DeleteOptions, listOptions 
 // Patch applies the patch and returns the patched instance.
 func (c *FakeInstances) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha2.Instance, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(instancesResource, c.ns, name, data, subresources...), &v1alpha2.Instance{})
+		Invokes(testing.NewPatchSubresourceAction(instancesResource, c.ns, name, pt, data, subresources...), &v1alpha2.Instance{})
 
 	if obj == nil {
 		return nil, err
