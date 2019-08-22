@@ -25,11 +25,21 @@ spec:
         controller-tools.k8s.io: "1.0"
     spec:
       containers:
-      - command:
+      - name: kube-rbac-proxy
+        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.4.0
+        args:
+        - --secure-listen-address=0.0.0.0:8443
+        - --upstream=http://127.0.0.1:8080/
+        - --logtostderr=true
+        - --v=10
+        ports:
+          - containerPort: 8443
+            name: https
+      - name: manager
+        command:
         - /manager
         image: "{{ .Values.global.containerRegistry.path }}{{ .Values.global.knative_function_controller.dir }}function-controller:{{ .Values.global.knative_function_controller.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        name: manager
         env:
           - name: POD_NAMESPACE
             valueFrom:
