@@ -3,34 +3,30 @@ title: Compass components
 type: Architecture
 ---
 
-Compass is an abstract definition and set of exposed functionality on how users can managed different aspects of their application landscape allowing flexible approaches of extending, customizing and integrating their existing application solutions.
-
-Project Compass is a set of headless services covering all the generic functionality while optionally leveraging different application specific Management Plane Integration Services to configure and instrument the application to be integrated or extended. All communication, whether it comes from a Applications or other external component is flowing through the API-Gateway component. Administrator uses Cockpit to configure Compass.
-
+Compass consists of a set of components that allow you to extend, customize and integrate your applications. Administrator uses Cockpit to configure Compass.
 
 ![Components](./assets/components.svg)
 
-
-## Integration Services
-not oss, musi sobie dopisac zeby moc przylaczac services
-
 ## Cockpit
 
-Cockpit component calls Management Plane APIs (in particular Compass and Runtime Provisioner APIs). This component is interchangeable.
-
-## Connector
-
-Connector component exposes GraphQL API that can be accessed directly, its responsibility is establishing trust among Applications, Management Plane and Runtimes.
+Cockpit is a UI that calls Compass APIs. This component is interchangeable.
 
 ## API-Gateway
 
-API-Gateway component serves as the main Gateway that extracts Tenant from incoming requests and proxies the requests to the Director component.
+API-Gateway serves as the main gateway that proxies tenant's incoming requests to the Director component. All communication, whether it comes from an applications or other external component, flows through API-Gateway.
+
+## Connector
+
+Connector establishes trust between applications, runtimes, and Compass.
 
 ## Director
 
-Director component exposes GraphQL API that can be accessed through the Gateway component. It contains all business logic required to handle Applications and Runtimes registration as well as health checks. It also requests Application Webhook API for credentials. This component has access to storage.
-
+Director exposes GraphQL API that can be accessed through the Gateway component. It contains all business logic required to handle applications and runtimes registration as well as health checks. It also requests application webhook API for credentials. This component has access to storage. It contains the Registry component that serves as the persistent storage interface.
 
 ## Runtime Provisioner
 
-Runtime Provisioner - zewnetrzny kompoennent handles the creation, modification, and deletion of Runtimes. This component is interchangeable. not oss, separate , stawia kluster
+Runtime Provisioner handles creation, modification, and deletion of runtimes. This component is interchangeable.
+
+## Central Integration Services
+
+Central Integration Services provides integration with Compass for the whole class of applications. It manages multiple instances of these applications. You can integrate multiple central services to support different types of applications.
