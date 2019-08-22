@@ -52,7 +52,7 @@ func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
 					return fmt.Errorf("%s catalog response must be forbidden", testName)
 				}
 				return nil
-			}, 30*time.Second)
+			}, time.Minute)
 		})
 	}
 }
