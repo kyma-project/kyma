@@ -12,21 +12,21 @@ required = [
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.15.2"
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.15.2"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.15.2"
 
 [[override]]
   name = "k8s.io/gengo"
-  revision = "01a732e01d00cb9a81bb0ca050d3e6d2b947927b"
+  revision = "955ffa8fcfc983717cd9de5d2a1e9f5c465f4376"
 
 [[override]]
   name = "k8s.io/kubernetes"
-  branch = "release-1.10"
+  version = "kubernetes-1.15.2"
 

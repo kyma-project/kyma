@@ -14,20 +14,22 @@ import (
 )
 
 const (
-	TenantHeader = "Tenant"
+	TenantHeader       = "Tenant"
+	ScenariosLabelName = "scenarios"
 )
 
 type Client struct {
 	client        *gcli.Client
-	graphqlizer   gqltools.Graphqlizer
+	graphqlizer   *gqltools.Graphqlizer
 	queryProvider queryProvider
 
-	tenant    string
-	runtimeId string // TODO: It will be needed after changes on Compass
+	tenant        string
+	runtimeId     string
+	scenarioLabel string
 }
 
 // TODO: client will need to be authenticated after implementation of certs
-func NewCompassClient(endpoint, tenant, runtimeId string, gqlLog bool) *Client {
+func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel string, gqlLog bool) *Client {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
@@ -45,48 +47,102 @@ func NewCompassClient(endpoint, tenant, runtimeId string, gqlLog bool) *Client {
 
 	return &Client{
 		client:        client,
-		graphqlizer:   gqltools.Graphqlizer{},
+		graphqlizer:   &gqltools.Graphqlizer{},
 		queryProvider: queryProvider{},
 		tenant:        tenant,
+		scenarioLabel: scenarioLabel,
 		runtimeId:     runtimeId,
 	}
 }
 
-type Application struct {
-	ID          string                          `json:"id"`
-	Name        string                          `json:"name"`
-	Description *string                         `json:"description"`
-	Labels      map[string][]string             `json:"labels"`
-	APIs        *graphql.APIDefinitionPage      `json:"apis"`
-	EventAPIs   *graphql.EventAPIDefinitionPage `json:"eventAPIs"`
-	Documents   *graphql.DocumentPage           `json:"documents"`
+// Scenario labels
+
+func (c *Client) SetupTestsScenario() error {
+	scenarios, err := c.getScenarios()
+	if err != nil {
+		return errors.Wrap(err, "Failed to setup tests scenario")
+	}
+
+	scenarios.AddScenario(c.scenarioLabel)
+
+	scenarios, err = c.updateScenarios(scenarios)
+	if err != nil {
+		return errors.Wrap(err, "Failed to setup tests scenario")
+	}
+
+	return c.labelRuntime(scenarios.Items.Enum)
 }
 
-type ApplicationResponse struct {
-	Result Application `json:"result"`
+func (c *Client) CleanupTestsScenario() error {
+	scenarios, err := c.getScenarios()
+	if err != nil {
+		return errors.Wrap(err, "Failed to cleanup tests scenario")
+	}
+
+	scenarios.RemoveScenario(c.scenarioLabel)
+
+	err = c.labelRuntime(scenarios.Items.Enum)
+	if err != nil {
+		return errors.Wrap(err, "Failed to label Runtime")
+	}
+
+	scenarios, err = c.updateScenarios(scenarios)
+	if err != nil {
+		return errors.Wrap(err, "Failed to cleanup tests scenario")
+	}
+
+	return nil
 }
 
-type APIResponse struct {
-	Result *graphql.APIDefinition `json:"result"`
+func (c *Client) getScenarios() (ScenariosSchema, error) {
+	query := c.queryProvider.labelDefinition(ScenariosLabelName)
+	req := c.newRequest(query)
+
+	var response ScenarioLabelDefinitionResponse
+	err := c.client.Run(context.Background(), req, &response)
+	if err != nil {
+		return ScenariosSchema{}, errors.Wrap(err, "Failed to get scenarios label definition")
+	}
+
+	return response.Result.Schema, nil
 }
 
-type CreateEventAPIResponse struct {
-	Result *graphql.EventAPIDefinition `json:"result"`
+func (c *Client) updateScenarios(schema ScenariosSchema) (ScenariosSchema, error) {
+	gqlInput, err := c.graphqlizer.LabelDefinitionInputToGQL(schema.ToLabelDefinitionInput(ScenariosLabelName))
+	if err != nil {
+		return ScenariosSchema{}, errors.Wrap(err, "Failed to convert LabelDefinitionInput")
+	}
+	query := c.queryProvider.updateLabelDefinition(gqlInput)
+	req := c.newRequest(query)
+
+	var response ScenarioLabelDefinitionResponse
+	err = c.client.Run(context.Background(), req, &response)
+	if err != nil {
+		return ScenariosSchema{}, errors.Wrap(err, "Failed to update scenarios label definition")
+	}
+
+	return response.Result.Schema, nil
 }
 
-type DeleteResponse struct {
-	Result struct {
-		ID string `json:"id"`
-	} `json:"result"`
-}
+func (c *Client) labelRuntime(values []string) error {
+	query := c.queryProvider.setRuntimeLabel(c.runtimeId, ScenariosLabelName, values)
 
-type IdResponse struct {
-	Id string `json:"id"`
+	req := c.newRequest(query)
+
+	var response SetRuntimeLabelResponse
+	err := c.client.Run(context.Background(), req, &response)
+	if err != nil {
+		return errors.Wrap(err, "Failed to label runtime with scenarios")
+	}
+
+	return nil
 }
 
 // Applications
 
 func (c *Client) CreateApplication(input graphql.ApplicationInput) (Application, error) {
+	c.setScenarioLabel(&input)
+
 	appInputGQL, err := c.graphqlizer.ApplicationInputToGQL(input)
 	if err != nil {
 		return Application{}, errors.Wrap(err, "Failed to convert Application Input to query")
@@ -105,6 +161,8 @@ func (c *Client) CreateApplication(input graphql.ApplicationInput) (Application,
 }
 
 func (c *Client) UpdateApplication(applicationId string, input graphql.ApplicationInput) (Application, error) {
+	c.setScenarioLabel(&input)
+
 	appInputGQL, err := c.graphqlizer.ApplicationInputToGQL(input)
 	if err != nil {
 		return Application{}, errors.Wrap(err, "Failed to convert Application Input to query")
@@ -125,8 +183,7 @@ func (c *Client) UpdateApplication(applicationId string, input graphql.Applicati
 func (c *Client) DeleteApplication(id string) (string, error) {
 	query := c.queryProvider.deleteApplication(id)
 
-	req := gcli.NewRequest(query)
-	req.Header.Set(TenantHeader, c.tenant)
+	req := c.newRequest(query)
 
 	var response DeleteResponse
 	err := c.client.Run(context.Background(), req, &response)
@@ -135,6 +192,15 @@ func (c *Client) DeleteApplication(id string) (string, error) {
 	}
 
 	return response.Result.ID, nil
+}
+
+func (c *Client) setScenarioLabel(input *graphql.ApplicationInput) {
+	var labels = map[string]interface{}{
+		ScenariosLabelName: []string{c.scenarioLabel},
+	}
+
+	gqlLabels := graphql.Labels(labels)
+	input.Labels = &gqlLabels
 }
 
 // APIs
