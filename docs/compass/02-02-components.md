@@ -3,15 +3,15 @@ title: Compass components
 type: Architecture
 ---
 
-The Management Plane is an abstract definition and set of exposed functionality on how users can managed different aspects of their application landscape allowing flexible approaches of extending, customizing and integrating their existing application solutions.
+Compass is an abstract definition and set of exposed functionality on how users can managed different aspects of their application landscape allowing flexible approaches of extending, customizing and integrating their existing application solutions.
 
-The Management Plane consists of the Management Plane Services (Project Compass), Manage Plane Integration Services, Runtime Provisioners and Cockpit components. The Management Plane Services (Project Compass) are a set of headless services covering all the generic functionality while optionally leveraging different application specific Management Plane Integration Services to configure and instrument the application to be integrated or extended. All communication, whether it comes from a Applications or other external component is flowing through the API-Gateway component. Administrator uses Cockpit to configure Management Plane.
-
-
-![Management Plane Components](./assets/mp-components.svg)
+Project Compass is a set of headless services covering all the generic functionality while optionally leveraging different application specific Management Plane Integration Services to configure and instrument the application to be integrated or extended. All communication, whether it comes from a Applications or other external component is flowing through the API-Gateway component. Administrator uses Cockpit to configure Compass.
 
 
-## Management Plane Integration Services
+![Components](./assets/components.svg)
+
+
+## Integration Services
 not oss, musi sobie dopisac zeby moc przylaczac services
 
 ## Cockpit
