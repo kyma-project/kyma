@@ -8,7 +8,7 @@ The documentation here is for developers only, please follow the installation in
 
 ## Introduction
 
-This chart bootstraps all Istio [components](https://istio.io/docs/concepts/what-is-istio/) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart bootstraps all Istio [components](https://istio.io/docs/concepts/what-is-istio/overview.html) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 ## Chart Details
 
@@ -54,6 +54,27 @@ The chart deploys pods that consume minimum resources as specified in the resour
     ```
     $ NAMESPACE=istio-system
     $ kubectl create ns $NAMESPACE
+    ```
+
+1. If you are enabling `kiali`, you need to create the secret that contains the username and passphrase for `kiali` dashboard:
+    ```
+    $ echo -n 'admin' | base64
+    YWRtaW4=
+    $ echo -n '1f2d1e2e67df' | base64
+    MWYyZDFlMmU2N2Rm
+    $ cat <<EOF | kubectl apply -f -
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: kiali
+      namespace: $NAMESPACE
+      labels:
+        app: kiali
+    type: Opaque
+    data:
+      username: YWRtaW4=
+      passphrase: MWYyZDFlMmU2N2Rm
+    EOF
     ```
 
 1. If you are using security mode for Grafana, create the secret first as follows:
