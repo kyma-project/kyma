@@ -15,7 +15,7 @@ spec:
       name: http-api-port
   selector:
     app: {{ .Release.Name }}-application-gateway
-    release: {{ .Release.Name }}-application-gateway
+    release: {{ .Release.Name }}
 ---
 apiVersion: v1
 kind: Service
@@ -24,8 +24,8 @@ metadata:
   labels:
     application: {{ .Release.Name }}
     app: {{ .Release.Name }}-event-service
-    release: {{ .Release.Name }}-event-service
-    heritage: {{ .Release.Service }}-event-service
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   type: ClusterIP
   ports:
@@ -34,4 +34,4 @@ spec:
     name: http-api-port
   selector:
     app: {{ .Release.Name }}-event-service
-    release: {{ .Release.Name }}-event-service
+    release: {{ .Release.Name }}
