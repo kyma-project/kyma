@@ -20,11 +20,9 @@ metadata:
     helm.sh/hook-weight: "0"
     helm.sh/hook-delete-policy: "before-hook-creation"
 rules:
-- apiGroups: [""]
-  resources: ["services"]
-  verbs: ["get", "delete"]
-  resourceNames:
-  - "dex-service"
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "delete", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
