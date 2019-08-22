@@ -204,8 +204,10 @@ kubectl delete sa -n knative-eventing eventing-controller
 kubectl delete deploy -n knative-eventing eventing-controller
 ```
 
-### Recreation of eventing-controller(to reflect new RBAC rules)
+### Recreation of serviceaccount and eventing-controller(to reflect new RBAC rules)
 ```
+kubectl create sa -n knative-eventing eventing-controller
+
 cat <<EOF | kubectl apply -f -
 apiVersion: extensions/v1beta1
 kind: Deployment
