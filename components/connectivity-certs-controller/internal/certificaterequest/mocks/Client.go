@@ -13,7 +13,7 @@ type Client struct {
 }
 
 // Delete provides a mock function with given fields: ctx, obj, opts
-func (_m *Client) Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOptionFunc) error {
+func (_m *Client) Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOption) error {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -24,7 +24,7 @@ func (_m *Client) Delete(ctx context.Context, obj runtime.Object, opts ...client
 	ret := _m.Called(_ca...)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, runtime.Object, ...client.DeleteOptionFunc) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, runtime.Object, ...client.DeleteOption) error); ok {
 		r0 = rf(ctx, obj, opts...)
 	} else {
 		r0 = ret.Error(0)
@@ -47,13 +47,20 @@ func (_m *Client) Get(ctx context.Context, key types.NamespacedName, obj runtime
 	return r0
 }
 
-// Update provides a mock function with given fields: ctx, obj
-func (_m *Client) Update(ctx context.Context, obj runtime.Object) error {
-	ret := _m.Called(ctx, obj)
+// Update provides a mock function with given fields: ctx, obj, opts
+func (_m *Client) Update(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, obj)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, runtime.Object) error); ok {
-		r0 = rf(ctx, obj)
+	if rf, ok := ret.Get(0).(func(context.Context, runtime.Object, ...client.UpdateOption) error); ok {
+		r0 = rf(ctx, obj, opts...)
 	} else {
 		r0 = ret.Error(0)
 	}

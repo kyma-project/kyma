@@ -38,7 +38,6 @@ const (
 )
 
 func TestCompassRuntimeAgentSynchronization(t *testing.T) {
-
 	var emptySpec graphql.CLOB = ""
 	var apiSpecData graphql.CLOB = "defaultContent"
 
@@ -56,7 +55,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		{
 			description: "Test case 1: Create all types of APIs and remove them",
 			initialPhaseInput: func() *applications.ApplicationInput {
-				return applications.NewApplication("test-app-1", "testApp1", map[string][]string{}).
+				return applications.NewApplication("test-app-1", "testApp1", map[string]interface{}{}).
 					WithAPIs(
 						[]*applications.APIDefinitionInput{
 							noAuthAPIInput,
@@ -109,7 +108,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		{
 			description: "Test case 2: Update Application overriding all APIs",
 			initialPhaseInput: func() *applications.ApplicationInput {
-				return applications.NewApplication("test-app-2", "", map[string][]string{}).
+				return applications.NewApplication("test-app-2", "", map[string]interface{}{}).
 					WithAPIs(
 						[]*applications.APIDefinitionInput{
 							noAuthAPIInput,
@@ -129,7 +128,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				application := this.initialPhaseResult
 
 				// updating whole application
-				updatedInput := applications.NewApplication("test-app-2-updated", "", map[string][]string{}).
+				updatedInput := applications.NewApplication("test-app-2-updated", "", map[string]interface{}{}).
 					WithAPIs(
 						[]*applications.APIDefinitionInput{
 							noAuthAPIInput,
@@ -172,7 +171,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		{
 			description: "Test case 3: Change auth in all APIs",
 			initialPhaseInput: func() *applications.ApplicationInput {
-				return applications.NewApplication("test-app-3", "", map[string][]string{}).
+				return applications.NewApplication("test-app-3", "", map[string]interface{}{}).
 					WithAPIs(
 						[]*applications.APIDefinitionInput{
 							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()),
@@ -276,7 +275,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		{
 			description: "Test case 5: Denier should block access without labels",
 			initialPhaseInput: func() *applications.ApplicationInput {
-				return applications.NewApplication("test-app-5", "", map[string][]string{}).
+				return applications.NewApplication("test-app-5", "", map[string]interface{}{}).
 					WithAPIs(
 						[]*applications.APIDefinitionInput{
 							applications.NewAPI("no-auth-api", "no auth api", testSuite.GetMockServiceURL()),
@@ -310,6 +309,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	// Setup check if all resources were deleted
 	var createdApplications []*compass.Application
 	defer func() {
+		t.Log("Checking resources are removed")
 		waitForAgentToApplyConfig(t, testSuite)
 		for _, app := range createdApplications {
 			t.Logf("Asserting resources for %s application are deleted", app.ID)

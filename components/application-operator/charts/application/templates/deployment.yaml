@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-application-gateway
@@ -12,13 +12,17 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-application-gateway
+      release: {{ .Release.Name }}
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
         app: {{ .Release.Name }}-application-gateway
-        release: {{ .Release.Name }}-application-gateway
+        release: {{ .Release.Name }}
     spec:
       serviceAccountName: {{.Release.Name }}-application-gateway
       containers:
@@ -54,7 +58,7 @@ spec:
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-event-service
@@ -68,6 +72,10 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-event-service
+      release: {{ .Release.Name }}
   template:
     metadata:
       annotations:
@@ -76,7 +84,7 @@ spec:
         app: {{ .Release.Name }}-event-service
         kyma-grafana: {{ .Values.eventService.deployment.labels.grafana }}
         kyma-alerts: {{ .Values.eventService.deployment.labels.alerts }}
-        release: {{ .Release.Name }}-event-service
+        release: {{ .Release.Name }}
     spec:
       serviceAccountName: {{.Release.Name }}-event-service
       containers:

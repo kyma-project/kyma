@@ -5,10 +5,9 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/runtimeagent"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
 
 	"github.com/sirupsen/logrus"
-
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
 )
 
 var (
@@ -16,22 +15,30 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	// setup
 	logrus.Info("Starting Compass Runtime Agent Test")
 
+	exitCode := runTests(m)
+
+	logrus.Info("Tests finished. Exit code: ", exitCode)
+}
+
+func runTests(m *testing.M) int {
+	// setup
 	config, err := testkit.ReadConfig()
 	if err != nil {
-		logrus.Fatalf("Failed to read config: %s", err.Error())
+		logrus.Errorf("Failed to read config: %s", err.Error())
+		return 1
 	}
 
 	testSuite, err = runtimeagent.NewTestSuite(config)
 	if err != nil {
 		logrus.Errorf("Failed to create test suite: %s", err.Error())
-		os.Exit(1)
+		return 1
 	}
 
 	logrus.Info("Setting up...")
 	err = testSuite.Setup()
+	defer testSuite.Cleanup()
 	if err != nil {
 		logrus.Errorf("Error while setting up tests: %s", err.Error())
 		os.Exit(1)
@@ -39,11 +46,7 @@ func TestMain(m *testing.M) {
 
 	// run tests
 	logrus.Info("Running tests...")
-	exCode := m.Run()
-	defer os.Exit(exCode)
+	exitCode := m.Run()
 
-	testSuite.Cleanup()
-
-	// cleanup
-	logrus.Info("Tests finished. Exit code: ", exCode)
+	return exitCode
 }
