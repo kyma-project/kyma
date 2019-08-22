@@ -51,7 +51,6 @@
   version = "v1.1.5"
 
 [[projects]]
-  branch = "update-k8s-app-connector"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -63,8 +62,7 @@
     "components/application-registry/pkg/client/clientset/versioned/scheme",
     "components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2"
   ]
-  revision = "9d405aa0001501e4095c79fe72b3e90be4c321c2"
-  source = "github.com/Szymongib/kyma"
+  revision = "70782d1888118ad2c76b978b49505bb5286e264c"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -350,6 +348,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bdd8d4e6399657a2bd155af6135b0783870af848e9248900f14db2223b586bda"
+  inputs-digest = "64affa1ab6f3d7d9fe03fdacc93f8cb96cdcd962b85ec918cc11f4e48f97e621"
   solver-name = "gps-cdcl"
   solver-version = 1
