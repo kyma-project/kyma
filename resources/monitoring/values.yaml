@@ -1063,12 +1063,14 @@ prometheusOperator:
   ## Resource limits & requests
   ##
   resources: {}
-  # limits:
-  #   cpu: 200m
-  #   memory: 200Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 100Mi
+
+
+    # isLocalEnv:
+    #   resources:
+    #     requests:
+    #       memory: 256Mi
+    #     limits:
+    #       memory: 512Mi
 
   ## Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -1148,6 +1150,46 @@ prometheus:
   serviceAccount:
     create: true
     name: ""
+
+  additionalServiceMonitors:	
+  - name: istio-mesh	
+    serviceMonitorSelectorLabels:	
+      prometheus: monitoring	
+    selector:	
+      istio: mixer	
+    namespaceSelector:	
+      matchNames:	
+      - istio-system	
+    endpoints:	
+    - port: prometheus	
+      interval: 30s	
+    - port: statsd-prom	
+      interval: 30s	
+    - port: http-monitoring	
+      interval: 30s
+
+  resources:
+    requests:
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+
+  isLocalEnv:
+    resources:
+      requests:
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+
+  storageSpec:	
+    volumeClaimTemplate:	
+      spec:	
+        accessModes:	
+        - ReadWriteOnce	
+        resources:	
+          requests:	
+            storage: 4Gi
+
 
   ## Configuration for Prometheus service
   ##
