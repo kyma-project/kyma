@@ -922,17 +922,14 @@ kubectl logs -f -n kyma-system $(kubectl get pods -n kyma-system --selector=app=
 # watch subscriber logs
 kubectl logs -f $(kubectl get pods --selector=app=event-email-service -o=jsonpath='{.items[0].metadata.name}')
 
-# watch natss-ch-dispatcher logs
-kubectl logs -f -n knative-eventing $(kubectl get pods -n knative-eventing --selector='messaging.knative.dev/channel=natss-channel,messaging.knative.dev/role=dispatcher' -o=jsonpath='{.items[0].metadata.name}') dispatcher
-
 ### Check the created Knative subscription
 kubectl get subscriptions.eventing.knative.dev -n kyma-system -o yaml
 
-### Check the created messaing channel
+### Check the created messaging channel
 kubectl get channels.messaging.knative.dev -n kyma-system
 
-### Check the created natsschannels.messaging.knative.dev
-kubectl get natsschannels.messaging.knative.dev -n kyma-system
+### Check the created GCPPubSub channel
+kubectl get channels.messaging.cloud.run -n kyma-system
 
 # publish messages
 while true; do \
