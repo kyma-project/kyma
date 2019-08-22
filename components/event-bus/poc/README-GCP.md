@@ -794,6 +794,7 @@ EOF
 
 ```bash
 export PROJECT_ID=kyma-project
+export KO_DOCKER_REPO=“${dockerhub-username}”
 ```
 
 #### Install GCPPubSub controller/webhook
@@ -807,13 +808,13 @@ gcloud services enable pubsub.googleapis.com
 ```
 
 #### Create a new service account named cloudrunevents-pullsub with the following command:
+> Don't panic if this account is already created
 
 ```bash
 gcloud iam service-accounts create cloudrunevents-pullsub
 ```
 
 #### Give that Service Account the Pub/Sub Editor role on your Google Cloud project:
-> Don't panic if this account is already created
 
 ```bash
 gcloud projects add-iam-policy-binding $PROJECT_ID \
