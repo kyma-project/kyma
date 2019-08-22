@@ -350,6 +350,7 @@ Install Kyma on a [GKE](https://cloud.google.com/kubernetes-engine/) or [AKS](ht
 2. Go to the **Secrets** tab of the Gardener UI and add secrets to enable provisioning clusters on GKE or AKS.  
 
 3. Provision a cluster form the **Clusters** tab. Choose the infrastructure you want to provision your cluster in and apply these settings:
+
   | Tab  |  Setting |  Required value |
   |---|---|---|
   | Infrastructure |  Kubernetes | `1.12.10`  |
