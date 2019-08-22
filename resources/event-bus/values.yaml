@@ -11,8 +11,8 @@ global:
     publisherImage: event-publish-service
     subscriptionControllerImage: subscription-controller
   event_bus_tests:
-    dir: develop/
-    version: e233872c
+    dir: pr/
+    version: PR-5408
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
