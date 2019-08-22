@@ -204,7 +204,7 @@ kubectl delete sa -n knative-eventing eventing-controller
 kubectl delete deploy -n knative-eventing eventing-controller
 ```
 
-### Recreation
+### Recreation of eventing-controller(to reflect new RBAC rules)
 ```
 cat <<EOF | kubectl apply -f -
 apiVersion: extensions/v1beta1
@@ -213,6 +213,7 @@ metadata:
   labels:
     eventing.knative.dev/release: v0.8.0
   name: eventing-controller
+  namespace: knative-eventing
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
@@ -292,19 +293,6 @@ kubectl apply \
    -f https://raw.githubusercontent.com/kyma-project/kyma/release-1.3/resources/cluster-essentials/templates/event-activation.crd.yaml \
    -f https://raw.githubusercontent.com/kyma-project/kyma/release-1.3/resources/cluster-essentials/templates/eventing-subscription.crd.yaml
 
-```
-
-
-### (Optional)Create new images for the EventBus apps
-```bash
-# export your docker registry to push images
-export DOCKER_REGISTRY=shazra;
-cd $GOPATH/src/github.com/kyma-project/kyma/components/event-bus/; \
-make clean build-image; \
-docker tag event-bus-publish-knative $DOCKER_REGISTRY/event-bus-publish-knative:1.3; \
-docker push $DOCKER_REGISTRY/event-bus-publish-knative:1.3; \
-docker tag event-bus-subscription-controller-knative $DOCKER_REGISTRY/event-bus-subscription-controller-knative:1.3; \
-docker push $DOCKER_REGISTRY/event-bus-subscription-controller-knative:1.3
 ```
 
 ### Install event-bus
