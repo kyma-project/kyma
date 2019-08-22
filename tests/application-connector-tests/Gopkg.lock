@@ -14,12 +14,6 @@
   version = "v1.1.1"
 
 [[projects]]
-  name = "github.com/ghodss/yaml"
-  packages = ["."]
-  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
-  version = "v1.0.0"
-
-[[projects]]
   name = "github.com/gogo/protobuf"
   packages = [
     "proto",
@@ -27,12 +21,6 @@
   ]
   revision = "ba06b47c162d49f2af050fb4c75bcbc86a159d5c"
   version = "v1.2.1"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/golang/glog"
-  packages = ["."]
-  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -63,12 +51,6 @@
   version = "v0.2.0"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/howeyc/gopass"
-  packages = ["."]
-  revision = "bf9dde6d0d2c004a008c27aaee91170c786f6db8"
-
-[[projects]]
   name = "github.com/imdario/mergo"
   packages = ["."]
   revision = "7c29201646fa3de8506f701213473dd407f19646"
@@ -81,6 +63,7 @@
   version = "v1.1.6"
 
 [[projects]]
+  branch = "update-k8s-app-connector"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -92,8 +75,8 @@
     "components/connection-token-handler/pkg/client/clientset/versioned/scheme",
     "components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
   ]
-  revision = "9d98b4aa00ea3c756aeefa5f112fb878cb13b184"
-  version = "1.1.0"
+  revision = "9d405aa0001501e4095c79fe72b3e90be4c321c2"
+  source = "github.com/Szymongib/kyma"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -233,49 +216,55 @@
   version = "v2.2.2"
 
 [[projects]]
-  branch = "release-1.10"
   name = "k8s.io/api"
   packages = [
-    "admissionregistration/v1alpha1",
     "admissionregistration/v1beta1",
     "apps/v1",
     "apps/v1beta1",
     "apps/v1beta2",
+    "auditregistration/v1alpha1",
     "authentication/v1",
     "authentication/v1beta1",
     "authorization/v1",
     "authorization/v1beta1",
     "autoscaling/v1",
     "autoscaling/v2beta1",
+    "autoscaling/v2beta2",
     "batch/v1",
     "batch/v1beta1",
     "batch/v2alpha1",
     "certificates/v1beta1",
+    "coordination/v1",
+    "coordination/v1beta1",
     "core/v1",
     "events/v1beta1",
     "extensions/v1beta1",
     "networking/v1",
+    "networking/v1beta1",
+    "node/v1alpha1",
+    "node/v1beta1",
     "policy/v1beta1",
     "rbac/v1",
     "rbac/v1alpha1",
     "rbac/v1beta1",
+    "scheduling/v1",
     "scheduling/v1alpha1",
+    "scheduling/v1beta1",
     "settings/v1alpha1",
     "storage/v1",
     "storage/v1alpha1",
     "storage/v1beta1"
   ]
-  revision = "c89978d5f86d7427bef2fc7752732c8c60b1d188"
+  revision = "fdd30b57c827abbc506646ecfd579f6ccb3b80ab"
+  version = "kubernetes-1.15.2"
 
 [[projects]]
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
-    "pkg/api/meta",
     "pkg/api/resource",
     "pkg/apis/meta/v1",
     "pkg/apis/meta/v1/unstructured",
-    "pkg/apis/meta/v1beta1",
     "pkg/conversion",
     "pkg/conversion/queryparams",
     "pkg/fields",
@@ -295,20 +284,20 @@
     "pkg/util/framer",
     "pkg/util/intstr",
     "pkg/util/json",
+    "pkg/util/naming",
     "pkg/util/net",
     "pkg/util/rand",
     "pkg/util/runtime",
     "pkg/util/sets",
     "pkg/util/validation",
     "pkg/util/validation/field",
-    "pkg/util/wait",
     "pkg/util/yaml",
     "pkg/version",
     "pkg/watch",
     "third_party/forked/golang/reflect"
   ]
-  revision = "302974c03f7e50f16561ba237db776ab93594ef6"
-  version = "kubernetes-1.10.0"
+  revision = "1799e75a07195de9460b8ef7300883499f12127b"
+  version = "kubernetes-1.15.0"
 
 [[projects]]
   name = "k8s.io/client-go"
@@ -317,6 +306,7 @@
     "kubernetes/scheme",
     "pkg/apis/clientauthentication",
     "pkg/apis/clientauthentication/v1alpha1",
+    "pkg/apis/clientauthentication/v1beta1",
     "pkg/version",
     "plugin/pkg/client/auth/exec",
     "plugin/pkg/client/auth/gcp",
@@ -331,13 +321,14 @@
     "tools/metrics",
     "transport",
     "util/cert",
+    "util/connrotation",
     "util/flowcontrol",
     "util/homedir",
-    "util/integer",
-    "util/jsonpath"
+    "util/jsonpath",
+    "util/keyutil"
   ]
-  revision = "989be4278f353e42f26c416c53757d16fcff77db"
-  version = "kubernetes-1.10.1"
+  revision = "2fe0317bcee0e1ff48861f77cc1e2791cceba458"
+  version = "kubernetes-1.15.2"
 
 [[projects]]
   name = "k8s.io/helm"
@@ -349,14 +340,35 @@
   version = "v2.14.0"
 
 [[projects]]
+  name = "k8s.io/klog"
+  packages = ["."]
+  revision = "3ca30a56d8a775276f9cdae009ba326fdc05af7f"
+  version = "v0.4.0"
+
+[[projects]]
+  branch = "master"
+  name = "k8s.io/utils"
+  packages = ["integer"]
+  revision = "6c36bc71fc4aeb1f49801054e71aebdaef1fbeb4"
+
+[[projects]]
   name = "sigs.k8s.io/controller-runtime"
-  packages = ["pkg/runtime/scheme"]
-  revision = "67e28744a963c78a34108c3b52aadbc5e02f4384"
-  version = "v0.1.1"
+  packages = [
+    "pkg/runtime/scheme",
+    "pkg/scheme"
+  ]
+  revision = "eb94491f7ac37f163aef146cf3c17f87d21ae184"
+  version = "v0.2.0-beta.5"
+
+[[projects]]
+  name = "sigs.k8s.io/yaml"
+  packages = ["."]
+  revision = "fd68e9863619f6ec2fdd8625fe1f02e7c877e480"
+  version = "v1.1.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b8460276827b4dbdde815b364e3ffd79f4371ece9f2022b523eee5ea977823aa"
+  inputs-digest = "c1022e36076ec0700bf01885e381e95bdb795b62cbd94c273187169ceb3c482a"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -38,17 +38,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "travis-1.9"
-  digest = "1:e8f5d9c09a7209c740e769713376abda388c41b777ba8e9ed52767e21acf379f"
-  name = "github.com/golang/lint"
-  packages = [
-    ".",
-    "golint",
-  ]
-  pruneopts = "UT"
-  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
-
-[[projects]]
   digest = "1:e4f5819333ac698d294fe04dbf640f84719658d5c7ce195b10060cc37292ce79"
   name = "github.com/golang/snappy"
   packages = ["."]
@@ -151,6 +140,17 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:134674d729e1afbae39eeaa6abcf8e5f3106338f83643394ab5205a020efbd9b"
+  name = "golang.org/x/lint"
+  packages = [
+    ".",
+    "golint",
+  ]
+  pruneopts = "UT"
+  revision = "959b441ac422379a43da2230f62be024250818b0"
+
+[[projects]]
+  branch = "master"
   digest = "1:71a3e45347f39ad3b05480f73358ffbd1f842be417ecc37922776a6173972e0f"
   name = "golang.org/x/net"
   packages = [
@@ -245,11 +245,11 @@
     "github.com/asyncapi/converter-go/pkg/error",
     "github.com/asyncapi/parser/pkg",
     "github.com/asyncapi/parser/pkg/errs",
-    "github.com/golang/lint/golint",
     "github.com/onsi/gomega",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
     "github.com/vrischmann/envconfig",
+    "golang.org/x/lint/golint",
     "golang.org/x/net/context",
     "golang.org/x/tools/cmd/goimports",
   ]

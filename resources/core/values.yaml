@@ -21,7 +21,7 @@ global:
       name: kyma-gateway
   acceptance_tests:
     dir: pr/
-    version: "PR-4959"
+    version: "PR-5379"
   ui_acceptance_tests:
     dir:
     version: a9d158d5
@@ -93,7 +93,10 @@ tests:
 
 test:
   acceptance:
+    external_solution:
+      enabled: true
     core:
+      enabled: true
       # environments used in application acceptance test
       application:
         disabled: "true"

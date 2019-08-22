@@ -7,7 +7,7 @@ This tutorial shows you how to define alerting rules to monitor the health statu
 
 ## Prerequisites
 
-This tutorial is a follow-up of the [Observe application metrics](components/monitoring/#tutorials-expose-custom-metrics-in-kyma) tutorial that uses the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric. That configuration is required to complete this tutorial.
+This tutorial is a follow-up of the [observe application metrics](/components/monitoring/#tutorials-observe-application-metrics) tutorial that uses the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric. That configuration is required to complete this tutorial.
 
 ## Steps
 
@@ -22,6 +22,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: cpu.temp.rules
+  namespace: kyma-system
   labels:
     app: cpu.temp.rules
     prometheus: monitoring
@@ -46,7 +47,7 @@ Configure your alert rule using the following parameters:
 |-----------|-------------|---------------|
 | **groups.name** | Specifies the name of the group listing the rules.  | `cpu.temp.rules` |
 | **rules.alert** | Specifies the name of the alert. | `CPUTempHigh`  |
-| **rules.expr** | A PromQL expression which specifies the conditions that must be met for the alarm to fire. Specify the expression using Kubernetes [functions](https://prometheus.io/docs/prometheus/latest/querying/functions/) and [metrics](https://github.com/kubernetes/kube-state-metrics/blob/master/Documentation/pod-metrics.md). | `cpu_temperature_celsius > 70`  |
+| **rules.expr** | A PromQL expression which specifies the conditions that must be met for the alarm to fire. Specify the expression using Kubernetes [functions](https://prometheus.io/docs/prometheus/latest/querying/functions/) and [metrics](https://github.com/kubernetes/kube-state-metrics/blob/master/docs/README.md). | `cpu_temperature_celsius > 70`  |
 | **rules.for** | Specifies the time period between encountering an active alert for the first time during rule evaluation and firing the alert.  | `60s` |
 | **rules.labels.severity** | Specifies the severity of the alert.  | `critical` |
 | **rules.annotations.description** | Provides the alert details. | `CPU temperature exceeds 70 degrees Celsius` |

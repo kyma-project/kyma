@@ -6,12 +6,14 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+//go:generate mockery -name Manager
 type Manager interface {
 	Create(*v1alpha1.CentralConnection) (*v1alpha1.CentralConnection, error)
 	Update(*v1alpha1.CentralConnection) (*v1alpha1.CentralConnection, error)
 	Get(name string, options v1.GetOptions) (*v1alpha1.CentralConnection, error)
 }
 
+//go:generate mockery -name Client
 type Client interface {
 	Upsert(name string, spec v1alpha1.CentralConnectionSpec) (*v1alpha1.CentralConnection, error)
 }

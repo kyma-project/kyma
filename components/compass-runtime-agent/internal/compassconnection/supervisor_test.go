@@ -69,7 +69,7 @@ func TestCrSupervisor_InitializeCompassConnectionCR(t *testing.T) {
 	} {
 		t.Run("should initialize Compass Connection when "+testCase.description, func(t *testing.T) {
 			// given
-			fakeCRDClient := fake.NewSimpleClientset().Compass().CompassConnections()
+			fakeCRDClient := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
 			if testCase.existingConnection != nil {
 				_, err := fakeCRDClient.Create(testCase.existingConnection)
 				require.NoError(t, err)
@@ -104,7 +104,7 @@ func TestCrSupervisor_InitializeCompassConnectionCR(t *testing.T) {
 
 	t.Run("should set Connection error status when failed to preserve certificate", func(t *testing.T) {
 		// given
-		fakeCRDClient := fake.NewSimpleClientset().Compass().CompassConnections()
+		fakeCRDClient := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
 
 		establishedConnection := compass.EstablishedConnection{
 			Credentials: certificates.Credentials{},
@@ -128,7 +128,7 @@ func TestCrSupervisor_InitializeCompassConnectionCR(t *testing.T) {
 
 	t.Run("should set Connection error status when failed to connect to compass", func(t *testing.T) {
 		// given
-		fakeCRDClient := fake.NewSimpleClientset().Compass().CompassConnections()
+		fakeCRDClient := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
 
 		connector := &mocks.Connector{}
 		connector.On("EstablishConnection").Return(compass.EstablishedConnection{}, errors.New("error"))
@@ -283,7 +283,7 @@ func TestCrSupervisor_SynchronizeWithCompass(t *testing.T) {
 	} {
 		t.Run("should "+testCase.description, func(t *testing.T) {
 			// given
-			fakeCRDClient := fake.NewSimpleClientset(existingConnection).Compass().CompassConnections()
+			fakeCRDClient := fake.NewSimpleClientset(existingConnection).CompassV1alpha1().CompassConnections()
 
 			credManager := &certMocks.Manager{}
 			compassClient := &mocks.ConfigClient{}
