@@ -359,14 +359,16 @@ Install Kyma on a [GKE](https://cloud.google.com/kubernetes-engine/) or [AKS](ht
 4. After you provision the cluster, download the kubeconfig file available under the **Show Cluster Access** option in the **Actions** column.
 
 5. Export the downloaded kubeconfig to an environment variable to connect to the cluster you provisioned. Run:
-  ```
-  export KUBECONFIG={PATH_TO_KUBECONFIG_FILE}
-  ```
+
+    ```
+    export KUBECONFIG={PATH_TO_KUBECONFIG_FILE}
+    ```
 
 6. Install Tiller on the cluster you provisioned. Run:
-  ```
-  kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
-  ```
+
+    ```
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
+    ```
 >**NOTE:** On an AKS cluster, make sure to run all commands from steps 5 and 6 of [this](#installation-install-kyma-on-a-cluster--provider-installation--aks--prepare-the-aks-cluster) section.
 
 7. Install Kyma using the respective installation instructions for [GKE](#installation-install-kyma-on-a-cluster--provider-installation--gke--install-kyma) or [AKS](#installation-install-kyma-on-a-cluster--provider-installation--aks--install-kyma).
