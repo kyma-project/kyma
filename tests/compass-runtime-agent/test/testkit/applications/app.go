@@ -4,7 +4,7 @@ import "github.com/kyma-incubator/compass/components/director/pkg/graphql"
 
 type ApplicationInput graphql.ApplicationInput
 
-func NewApplication(name, description string, labels map[string][]string) *ApplicationInput {
+func NewApplication(name, description string, labels map[string]interface{}) *ApplicationInput {
 	appLabels := graphql.Labels(labels)
 
 	app := ApplicationInput(graphql.ApplicationInput{

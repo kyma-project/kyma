@@ -14,8 +14,8 @@ metadata:
   name: {{ .Release.Name }}-application-gateway
   labels:
     app: {{ .Release.Name }}-application-gateway
-    release: {{ .Release.Name }}-application-gateway
-    heritage: {{ .Release.Service }}-application-gateway
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
@@ -27,8 +27,8 @@ metadata:
   name: {{ .Release.Name }}-application-gateway
   labels:
     app: {{ .Release.Name }}-application-gateway
-    release: {{ .Release.Name }}-application-gateway
-    heritage: {{ .Release.Service }}-application-gateway
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 subjects:
 - kind: User
   name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-application-gateway
@@ -43,7 +43,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .Release.Name }}-application-gateway
   labels:
-    app: {{ .Release.Name }}
+    app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 rules:
@@ -56,7 +56,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .Release.Name }}-application-gateway
   labels:
-    app: {{ .Release.Name }}
+    app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 subjects:
@@ -83,7 +83,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .Release.Name }}-event-service
   labels:
-    app: {{ .Release.Name }}
+    app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 rules:
@@ -96,7 +96,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .Release.Name }}-event-service
   labels:
-    app: {{ .Release.Name }}
+    app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 subjects:

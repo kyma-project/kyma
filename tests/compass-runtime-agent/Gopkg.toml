@@ -13,7 +13,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-incubator/compass"
-  revision = "83c17229028ffe2d604be4f8ea1f2f633141a965"
+  revision = "67216042cc8eff1d5352b9d7f8340dce9f40902c"
 
 [[constraint]]
   name = "k8s.io/client-go"

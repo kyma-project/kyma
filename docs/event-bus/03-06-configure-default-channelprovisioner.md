@@ -28,7 +28,7 @@ template:
       labels: *labels
 ```
 
-You can change the default cluster channel provisioner by editing the ClusterChannelProvisioner entry in the `default-channel-webhook` ConfigMap. For an example of the in-memory ClusterChannelProvisioner configuration, see [this file](https://github.com/knative/eventing/blob/master/config/400-default-channel-config.yaml).
+You can change the default cluster channel provisioner by editing the ClusterChannelProvisioner entry in the `default-channel-webhook` ConfigMap. For an example of the in-memory ClusterChannelProvisioner configuration, see [this file](https://github.com/knative/eventing/blob/master/config/400-default-ch-config.yaml).
 
 ## Google PubSub
 

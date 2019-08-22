@@ -12,8 +12,6 @@ import (
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	CompassV1alpha1() compassv1alpha1.CompassV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Compass() compassv1alpha1.CompassV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -25,12 +23,6 @@ type Clientset struct {
 
 // CompassV1alpha1 retrieves the CompassV1alpha1Client
 func (c *Clientset) CompassV1alpha1() compassv1alpha1.CompassV1alpha1Interface {
-	return c.compassV1alpha1
-}
-
-// Deprecated: Compass retrieves the default version of CompassClient.
-// Please explicitly pick a version.
-func (c *Clientset) Compass() compassv1alpha1.CompassV1alpha1Interface {
 	return c.compassV1alpha1
 }
 

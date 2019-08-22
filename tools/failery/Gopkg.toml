@@ -1,6 +1,6 @@
 required = [
     "golang.org/x/tools/cmd/goimports",
-    "github.com/golang/lint/golint"
+    "golang.org/x/lint/golint"
 ]
 
 [[constraint]]
