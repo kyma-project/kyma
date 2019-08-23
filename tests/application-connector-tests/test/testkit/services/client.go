@@ -94,3 +94,7 @@ func handleErrorResponse(t *testing.T, response *http.Response) ErrorResponse {
 	}
 	return errorResponse
 }
+
+func RequireNoError(t *testing.T, errorResponse *ErrorResponse) {
+	require.Nil(t, errorResponse)
+}

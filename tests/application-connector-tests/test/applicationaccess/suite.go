@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/util"
 	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/services"
@@ -197,12 +196,12 @@ func (ts *TestSuite) ShouldAccessApplication(t *testing.T, credentials connector
 	})
 	require.NoError(t, err)
 
-	util.RequireNoError(t, errorResponse)
+	services.RequireNoError(t, errorResponse)
 	require.NotNil(t, apis)
 
 	eventId := "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 	publishResponse, errorResponse := applicationConnectorClient.SendEvent(t, eventId)
-	util.RequireNoError(t, errorResponse)
+	services.RequireNoError(t, errorResponse)
 	require.Equal(t, eventId, publishResponse.EventID)
 }
 
