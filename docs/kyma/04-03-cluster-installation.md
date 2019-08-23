@@ -344,9 +344,9 @@ Install Kyma on a Kubernetes cluster deployed through [Gardener](https://gardene
 
 ## Provision a Kubernetes cluster through Gardener
 
-1. Go to the **Secrets** tab of the Gardener UI and add secrets to enable provisioning clusters on different architectures. To learn about the requirements for each environment, click the question mark buttons.  
+1. Go to the **Secrets** tab of the Gardener UI and add Secrets to enable provisioning clusters on different architectures. To learn about the requirements for each environment, click the question mark buttons.  
 
-2. Provision a cluster form the **Clusters** tab. Choose the infrastructure you want to provision your cluster in and apply these settings:
+2. Provision a cluster form the **Clusters** tab. Choose the infrastructure in which you want to provision your cluster and apply these settings:
 
   | Tab  |  Setting |  Required value |
   |---|---|---|
@@ -356,7 +356,7 @@ Install Kyma on a Kubernetes cluster deployed through [Gardener](https://gardene
 
 3. After you provision the cluster, download the kubeconfig file available under the **Show Cluster Access** option in the **Actions** column.
 
-4. Export the downloaded kubeconfig to an environment variable to connect to the cluster you provisioned. Run:
+4. Export the downloaded kubeconfig as an environment variable to connect to the cluster you provisioned. Run:
 
     ```
     export KUBECONFIG={PATH_TO_KUBECONFIG_FILE}
