@@ -351,7 +351,7 @@ Install Kyma on a Kubernetes cluster deployed through [Gardener](https://gardene
   | Tab  |  Setting |  Required value |
   |---|---|---|
   | Infrastructure |  Kubernetes | `1.12.10`  |
-  | Worker  |  Machine type | `n1-standard-4` (GKE) <br> `Standard_D4_v3` (AWS) |
+  | Worker  |  Machine type | `n1-standard-4` (GCP) <br> `Standard_D4_v3` (Azure) |
   | Worker  | Autoscaler min.  | `3` |
 
 3. After you provision the cluster, download the kubeconfig file available under the **Show Cluster Access** option in the **Actions** column.
@@ -367,9 +367,9 @@ Install Kyma on a Kubernetes cluster deployed through [Gardener](https://gardene
     ```
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
     ```
-    >**NOTE:** On an AKS cluster, make sure to run all commands from steps 5 and 6 of [this](#installation-install-kyma-on-a-cluster--provider-installation--aks--prepare-the-aks-cluster) section.
+    >**NOTE:** On an Azure cluster, make sure to run all commands from steps 5 and 6 of [this](#installation-install-kyma-on-a-cluster--provider-installation--aks--prepare-the-aks-cluster) section.
 
-6. Install Kyma using the respective installation instructions for [GKE](#installation-install-kyma-on-a-cluster--provider-installation--gke--install-kyma) or [AKS](#installation-install-kyma-on-a-cluster--provider-installation--aks--install-kyma).
+6. Install Kyma using the respective installation instructions for [GCP](#installation-install-kyma-on-a-cluster--provider-installation--gke--install-kyma) or [Azure](#installation-install-kyma-on-a-cluster--provider-installation--aks--install-kyma).
 
   </details>
 </div>
