@@ -2,11 +2,9 @@
 title: Metrics
 ---
 
-This document shows component-specific metrics for the Asset Store. The metrics are collected from Pods by Prometheus, and exposed on the `/metrics` endpoint. The metrics allow you to check the current status of the Asset Store services. You can use the status for further analysis.
+This document shows component-specific metrics for the Asset Store.
 
-To learn more about Monitoring in Kyma, read [this](/components/monitoring) document.
-
-> **NOTE:** Standard Go metrics description is not in the scope of the document.
+See the [Monitoring](/components/monitoring) and [metrics](/components/monitoring/[metrics](/components/monitoring/#metrics-metrics) documentation to learn more aboout monitoring and standard mertrics in Kyma.
 
 This table shows the Asset Store custom matrics, their descriptions and types.
 
