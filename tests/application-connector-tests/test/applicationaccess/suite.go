@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/util"
+	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/services"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -184,7 +185,18 @@ func (ts *TestSuite) EstablishMTLSConnection(t *testing.T, application *types.Ap
 
 func (ts *TestSuite) ShouldAccessApplication(t *testing.T, credentials connector.ApplicationCredentials, urls connector.ManagementInfoURLs) {
 	applicationConnectorClient := services.NewApplicationConnectorClient(credentials, urls, ts.skipSSLVerify)
-	apis, errorResponse := applicationConnectorClient.GetAllAPIs(t)
+
+	var apis []services.Service
+	var errorResponse *services.ErrorResponse
+	err := testkit.RetryOnError(testkit.DefaultRetryConfig, func() error {
+		apis, errorResponse = applicationConnectorClient.GetAllAPIs(t)
+		if errorResponse != nil {
+			return errors.Errorf("Failed to get all APIs. Status: %d, Error: %s", errorResponse.Code, errorResponse.Error)
+		}
+		return nil
+	})
+	require.NoError(t, err)
+
 	util.RequireNoError(t, errorResponse)
 	require.NotNil(t, apis)
 
