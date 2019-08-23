@@ -1,8 +1,7 @@
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  source = "github.com/Szymongib/kyma"
-  branch = "update-k8s-app-connector"
+  revision = "70782d1888118ad2c76b978b49505bb5286e264c"
 
 [[constraint]]
   name = "github.com/pkg/errors"
