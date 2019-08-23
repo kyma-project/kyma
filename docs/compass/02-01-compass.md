@@ -11,12 +11,12 @@ Compass is a central place which stores applications and runtimes configurations
 2. Agent, a component that is integrated in every Kyma runtime, continuously fetches the actual configuration from Compass. It also sends information about runtime health checks to Compass.
 3. In case an application has optional webhooks configured, Compass notifies an application about any Events that concern a given application. _tutaj_
 
-Compass does not participate in any business flow. After establishing a trusted connection between application and runtime, they communicate directly with each other.
+Compass does not participate in any business flow. After establishing a trusted connection between an application and a runtime, they communicate directly with each other.
 
 ## Scenarios
 
 In order to connect and group your applications and runtimes, assign them to the same scenario.
-A scenario is a simple label with the **scenario** key. If an application or a runtime is not explicitly assigned to any scenario, they belong to the `default` one. Applications and runtimes are automatically removed from the `default` scenario after you assign them to any other scenario. You can assign applications and runtimes to many scenarios. See the example:
+A scenario is a simple label with the **scenarios** key. If an application or a runtime is not explicitly assigned to any scenario, they belong to the `default` one. Applications and runtimes are automatically removed from the `default` scenario after you assign them to any other scenario. You can assign applications and runtimes to many scenarios. See the example:
 
 ![Scenarios](./assets/scenarios.svg)
 

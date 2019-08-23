@@ -3,7 +3,7 @@ title: Compass components
 type: Architecture
 ---
 
-Compass consists of a set of components that allow you to extend, customize and integrate your applications. Administrator uses Cockpit to configure Compass.
+Compass consists of a set of components that allow you to extend, customize and integrate your applications.
 
 ![Components](./assets/components.svg)
 
