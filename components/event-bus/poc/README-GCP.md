@@ -34,6 +34,11 @@ kubectl apply --filename https://raw.githubusercontent.com/knative/serving/v0.8.
 curl -L https://raw.githubusercontent.com/knative/serving/v0.8.0/third_party/istio-1.1.7/istio.yaml \
   | kubectl apply -f -
 
+# Apply the second time as it some CRDs which don't get registered right away hence creation of CRs fail.
+curl -L https://raw.githubusercontent.com/knative/serving/v0.8.0/third_party/istio-1.1.7/istio.yaml \
+  | kubectl apply -f -
+
+
 # label the default namespace with istio-injection=enabled.
 kubectl label namespace default istio-injection=enabled
 
@@ -200,8 +205,10 @@ kubectl delete deploy -n knative-eventing eventing-controller
 
 ### Recreation of serviceaccount and eventing-controller(to reflect new RBAC rules)
 ```
+### Create serviceaccount
 kubectl create sa -n knative-eventing eventing-controller
 
+### Create deployment for eventing-controller
 cat <<EOF | kubectl apply -f -
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -288,7 +295,6 @@ EOF
 kubectl apply \
    -f https://raw.githubusercontent.com/kyma-project/kyma/release-1.3/resources/cluster-essentials/templates/event-activation.crd.yaml \
    -f https://raw.githubusercontent.com/kyma-project/kyma/release-1.3/resources/cluster-essentials/templates/eventing-subscription.crd.yaml
-
 ```
 
 ### Install event-bus
@@ -924,4 +930,10 @@ while true; do \
       -d '{"source-id": "external-application", "event-type": "test1-event-bus", "event-type-version": "v1", "event-time": "2018-11-02T22:08:41+00:00", "data": {"event":{"customer":{"customerID": "'$(date +%s)'", "uid": "rick.sanchez@mail.com"}}}}'; \
   sleep 0.3s; \
 done
+```
+
+
+### Cleanup
+```
+gcloud container clusters delete $CLUSTER_NAME --zone $GCP_ZONE
 ```
