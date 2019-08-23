@@ -51,6 +51,20 @@
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:1d1cbf539d9ac35eb3148129f96be5537f1a1330cadcc7e3a83b4e72a59672a3"
+  name = "github.com/google/go-cmp"
+  packages = [
+    "cmp",
+    "cmp/internal/diff",
+    "cmp/internal/flags",
+    "cmp/internal/function",
+    "cmp/internal/value",
+  ]
+  pruneopts = "UT"
+  revision = "2d0692c2e9617365a95b295612ac0d4415ba4627"
+  version = "v0.3.1"
+
+[[projects]]
   branch = "master"
   digest = "1:3ee90c0d94da31b442dde97c99635aaafec68d0b8a3c12ee2075c6bdabeec6bb"
   name = "github.com/google/gofuzz"
@@ -287,7 +301,7 @@
   revision = "d651a1528133f00fab57f5bf42fb26500e8aa406"
 
 [[projects]]
-  digest = "1:d0bf8fddebd2921f5eae2b4a15ac648e5e1f1897d1e683aeb97533f2d240cb3b"
+  digest = "1:bd807f8663627580d7c02d95e984bdae8450a4eca3e4213904f49f299fd48781"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -334,11 +348,11 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "UT"
-  revision = "d7deff9243b165ee192f5551710ea4285dcfd615"
-  version = "kubernetes-1.14.0"
+  revision = "f2f3a405f61d6c2cdc0d00687c1b5d90de91e9f0"
+  version = "kubernetes-1.15.3"
 
 [[projects]]
-  digest = "1:e1a0faedec12684a8d04cc35f7df1cdafc0a63453e0ffa2506faef0339f6d6fe"
+  digest = "1:382184177cbac33323463af5805db33964a16618b339405410fd9a17667dde6b"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -364,12 +378,12 @@
     "util/retry",
   ]
   pruneopts = "UT"
-  revision = "6ee68ca5fd8355d024d02f9db0b3b667e8357a0f"
-  version = "kubernetes-1.14.0"
+  revision = "e14f31a72a77f7aa82a95eaf542d1194fb027d04"
+  version = "kubernetes-1.15.3"
 
 [[projects]]
-  branch = "release-1.14"
-  digest = "1:e061a557b60b69310e6c03451a4bdc018d93cc4e69ab735fd92db82aa22de325"
+  branch = "release-1.15"
+  digest = "1:768d6feab7b2e53680141e7dd464f35fc0044443f1a531de4474997319d83f7a"
   name = "k8s.io/code-generator"
   packages = [
     "cmd/client-gen",
@@ -397,7 +411,7 @@
     "pkg/util",
   ]
   pruneopts = "UT"
-  revision = "6c2a4329ac290d921e8616cad41635c87dbb1518"
+  revision = "18da4a14b22b17d2fa761e50037fabfbacec225b"
 
 [[projects]]
   branch = "master"
