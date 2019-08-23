@@ -18,7 +18,7 @@ Before installing the Function controller it is necessary to create the namespac
 ### Create Namespace
 ```bash
  NAMESPACE=<serverless-system>
-kubectl create namespace $NAMESPACE
+kubectl create namespace serverless-system
 ```
 
 ### Create Service Account and Secret
