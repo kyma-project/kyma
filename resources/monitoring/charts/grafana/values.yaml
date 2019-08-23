@@ -76,7 +76,8 @@ downloadDashboardsImage:
   pullPolicy: IfNotPresent
 
 ## Pod Annotations
-# podAnnotations: {}
+podAnnotations: 
+  sidecar.istio.io/inject: '"true"'
 
 ## Deployment annotations
 # annotations: {}
@@ -107,7 +108,10 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-resources: {}
+resources:
+  requests:
+    memory: 200Mi
+
 #  limits:
 #    cpu: 100m
 #    memory: 128Mi
@@ -153,11 +157,11 @@ extraContainers: |
 ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
 ##
 persistence:
-  enabled: false
+  enabled: true
   # storageClassName: default
   accessModes:
     - ReadWriteOnce
-  size: 10Gi
+  size: 1Gi
   # annotations: {}
   finalizers:
     - kubernetes.io/pvc-protection
@@ -188,6 +192,19 @@ initChownData:
   #    cpu: 100m
   #    memory: 128Mi
 
+
+auth:
+  oauthAutoLogin: true
+  disableLoginForm: true
+  basic:
+    enabled: false
+  anonymous:
+    enabled: false
+  genericOauth:
+    enabled: true
+    clientId: grafana
+    clientSecret: apie4eeX6hiC9ainieli
+    scopes: openid email
 
 # Administrator credentials when not using an existing secret (see below)
 adminUser: admin
