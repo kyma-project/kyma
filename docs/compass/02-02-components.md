@@ -17,16 +17,16 @@ API-Gateway serves as the main gateway that proxies tenant's incoming requests t
 
 ## Connector
 
-Connector establishes trust between applications, runtimes, and Compass.
+Connector establishes trust between applications, runtimes, and Compass. Currently, only client certificates are supported.
 
 ## Director
 
-Director exposes GraphQL API that can be accessed through the Gateway component. It contains all business logic required to handle applications and runtimes registration as well as health checks. It also requests application webhook API for credentials. This component has access to storage. It contains the Registry component that serves as the persistent storage interface.
+Director handles the process of applications and runtimes registration. It also requests appliction webhook APIs for credentials and exposes health information about runtimes. This component has access to the storage.
 
 ## Runtime Provisioner
 
 Runtime Provisioner handles creation, modification, and deletion of runtimes. This component is interchangeable.
 
-## Central Integration Services
+## Central Integration Service
 
 Central Integration Services provides integration with Compass for the whole class of applications. It manages multiple instances of these applications. You can integrate multiple central services to support different types of applications.
