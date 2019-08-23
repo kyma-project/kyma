@@ -11,6 +11,8 @@ spec:
       name: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ .Release.Name }}-service-account
+      securityContext:
+        runAsUser: 2000
       restartPolicy: Never
       containers:
       - name: {{ .Release.Name }}

@@ -1,10 +1,17 @@
 package assertions
 
 import (
+	"crypto/tls"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
+
+	istioclients "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2"
 
 	assets "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -60,6 +67,9 @@ type ServiceData struct {
 }
 
 const (
+	applicationDeletionTimeout       = 120 * time.Second
+	applicationDeletionCheckInterval = 2 * time.Second
+
 	expectedProtocol   v1core.Protocol = v1core.ProtocolTCP
 	expectedPort       int32           = 80
 	expectedTargetPort int32           = 8080
@@ -70,9 +80,12 @@ type K8sResourceChecker struct {
 	secretClient           v1.SecretInterface
 	applicationClient      v1alpha1.ApplicationInterface
 	nameResolver           *applications.NameResolver
-	istioClient            istioclient.Interface
 	clusterDocsTopicClient dynamic.ResourceInterface
-	integrationNamespace   string
+	istioHandlersClient    istioclients.HandlerInterface
+	istioInstancesClient   istioclients.InstanceInterface
+	istioRulesClient       istioclients.RuleInterface
+
+	httpClient *http.Client
 }
 
 func NewK8sResourceChecker(serviceClient v1.ServiceInterface, secretClient v1.SecretInterface, appClient v1alpha1.ApplicationInterface, nameResolver *applications.NameResolver,
@@ -82,9 +95,15 @@ func NewK8sResourceChecker(serviceClient v1.ServiceInterface, secretClient v1.Se
 		secretClient:           secretClient,
 		applicationClient:      appClient,
 		nameResolver:           nameResolver,
-		istioClient:            istioClient,
 		clusterDocsTopicClient: clusterDocsTopicClient,
-		integrationNamespace:   integrationNamespace,
+		istioHandlersClient:    istioClient.IstioV1alpha2().Handlers(integrationNamespace),
+		istioInstancesClient:   istioClient.IstioV1alpha2().Instances(integrationNamespace),
+		istioRulesClient:       istioClient.IstioV1alpha2().Rules(integrationNamespace),
+		httpClient: &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		},
 	}
 }
 
@@ -112,9 +131,15 @@ func (c *K8sResourceChecker) AssertResourcesForApp(t *testing.T, application com
 }
 
 func (c *K8sResourceChecker) AssertAppResourcesDeleted(t *testing.T, appId string) {
-	_, err := c.applicationClient.Get(appId, v1meta.GetOptions{})
-	require.Error(t, err)
-	assert.True(t, k8serrors.IsNotFound(err))
+	err := testkit.WaitForFunction(applicationDeletionCheckInterval, applicationDeletionTimeout, func() bool {
+		_, err := c.applicationClient.Get(appId, v1meta.GetOptions{})
+		if err == nil {
+			return false
+		}
+
+		return k8serrors.IsNotFound(err)
+	})
+	require.NoError(t, err, fmt.Sprintf("Application %s not deleted", appId))
 }
 
 func (c *K8sResourceChecker) AssertAPIResources(t *testing.T, appId string, compassAPIs ...*graphql.APIDefinition) {
@@ -149,6 +174,8 @@ func (c *K8sResourceChecker) assertAPIs(t *testing.T, appId string, compassAPIs 
 }
 
 func (c *K8sResourceChecker) assertAPI(t *testing.T, appId string, compassAPI graphql.APIDefinition, appCR *v1alpha1apps.Application) {
+	t.Logf("Asserting resources for %s API", compassAPI.ID)
+
 	svc := c.assertService(t, compassAPI.ID, compassAPI.Name, compassAPI.Description, appCR)
 
 	entry := svc.Entries[0]
@@ -167,7 +194,7 @@ func (c *K8sResourceChecker) assertAPI(t *testing.T, appId string, compassAPI gr
 		c.assertCredentials(t, expectedResourceName, compassAPI.DefaultAuth, entry)
 	}
 
-	c.assertIstioResources(t, expectedResourceName, c.integrationNamespace)
+	c.assertIstioResources(t, expectedResourceName)
 
 	if apiSpecProvided(compassAPI) {
 		c.assertDocsTopics(t, compassAPI.ID, string(*compassAPI.Spec.Data))
@@ -279,47 +306,43 @@ func (c *K8sResourceChecker) assertCSRF(t *testing.T, auth *graphql.CredentialRe
 }
 
 func (c *K8sResourceChecker) assertResourcesDoNotExist(t *testing.T, resourceName, apiId string) {
-	// TODO: there is bug in agent and this is failing now (for not secured API), uncomment when fixed
 	_, err := c.serviceClient.Get(resourceName, v1meta.GetOptions{})
-	//assert.Error(t, err)
-	//assert.True(t, k8serrors.IsNotFound(err))
+	assert.Error(t, err)
+	assert.True(t, k8serrors.IsNotFound(err))
 
 	_, err = c.secretClient.Get(resourceName, v1meta.GetOptions{})
 	assert.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
 
 	//assert Istio resources have been removed
-	_, err = c.istioClient.IstioV1alpha2().Rules(c.integrationNamespace).Get(resourceName, v1meta.GetOptions{})
+	_, err = c.istioHandlersClient.Get(resourceName, v1meta.GetOptions{})
 	assert.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
 
-	_, err = c.istioClient.IstioV1alpha2().Instances(c.integrationNamespace).Get(resourceName, v1meta.GetOptions{})
+	_, err = c.istioInstancesClient.Get(resourceName, v1meta.GetOptions{})
 	assert.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
 
-	_, err = c.istioClient.IstioV1alpha2().Handlers(c.integrationNamespace).Get(resourceName, v1meta.GetOptions{})
+	_, err = c.istioRulesClient.Get(resourceName, v1meta.GetOptions{})
 	assert.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
 
 	//assert Docs Topics have been removed
-
 	_, err = c.clusterDocsTopicClient.Get(apiId, v1meta.GetOptions{})
 	assert.Error(t, err)
 	assert.True(t, k8serrors.IsNotFound(err))
 }
 
-func (c *K8sResourceChecker) assertIstioResources(t *testing.T, resourceName string, namespace string) {
-	alpha2 := c.istioClient.IstioV1alpha2()
-
-	handler, e := alpha2.Handlers(namespace).Get(resourceName, v1meta.GetOptions{})
+func (c *K8sResourceChecker) assertIstioResources(t *testing.T, resourceName string) {
+	handler, e := c.istioHandlersClient.Get(resourceName, v1meta.GetOptions{})
 	require.NoError(t, e)
 	require.NotEmpty(t, handler)
 
-	instance, e := alpha2.Instances(namespace).Get(resourceName, v1meta.GetOptions{})
+	instance, e := c.istioInstancesClient.Get(resourceName, v1meta.GetOptions{})
 	require.NoError(t, e)
 	require.NotEmpty(t, instance)
 
-	rule, e := alpha2.Rules(namespace).Get(resourceName, v1meta.GetOptions{})
+	rule, e := c.istioRulesClient.Get(resourceName, v1meta.GetOptions{})
 	require.NoError(t, e)
 	require.NotEmpty(t, rule)
 }
@@ -328,7 +351,7 @@ func (c *K8sResourceChecker) assertDocsTopics(t *testing.T, serviceID, expectedS
 	topic := getClusterDocsTopic(t, serviceID, c.clusterDocsTopicClient)
 	require.NotEmpty(t, topic)
 	require.NotEmpty(t, topic.Spec.Sources)
-	checkContent(t, topic, expectedSpec)
+	c.checkContent(t, topic, expectedSpec)
 }
 
 func getService(applicationCR *v1alpha1apps.Application, apiId string) (*v1alpha1apps.Service, bool) {
@@ -352,11 +375,12 @@ func getClusterDocsTopic(t *testing.T, id string, resourceInterface dynamic.Reso
 	return docsTopic
 }
 
-func checkContent(t *testing.T, topic assets.ClusterDocsTopic, expectedSpec string) {
+func (c *K8sResourceChecker) checkContent(t *testing.T, topic assets.ClusterDocsTopic, expectedSpec string) {
 	url := topic.Spec.Sources[0].URL
-	resp, err := http.Get(url)
-	defer resp.Body.Close()
+
+	resp, err := c.httpClient.Get(url)
 	require.NoError(t, err)
+	defer resp.Body.Close()
 
 	bytes, e := ioutil.ReadAll(resp.Body)
 	require.NoError(t, e)

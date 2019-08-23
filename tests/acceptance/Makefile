@@ -4,7 +4,7 @@ TAG = $(DOCKER_TAG)
 
 .PHONY: build
 build:
-	./build.sh
+	./before-commit.sh
 
 .PHONY: pull-licenses
 pull-licenses:

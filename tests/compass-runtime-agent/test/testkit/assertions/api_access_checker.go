@@ -23,7 +23,7 @@ import (
 
 const (
 	defaultCheckInterval           = 2 * time.Second
-	accessServiceConnectionTimeout = 60 * time.Second
+	accessServiceConnectionTimeout = 90 * time.Second
 	dnsWaitTime                    = 15 * time.Second
 )
 

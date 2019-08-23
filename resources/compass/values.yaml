@@ -10,7 +10,7 @@ global:
       version: "26601526"
     director:
       dir: develop/
-      version: "5a95fe8c"
+      version: "4ab44720"
     gateway:
       dir: develop/
       version: "df629420"
@@ -19,11 +19,11 @@ global:
       version: "26601526"
     schema_migrator:
       dir: develop/
-      version: "8e8b401f"
+      version: "2cc96dec"
     tests:
       e2e:
         dir: develop/
-        version: "b625e1b4"
+        version: "3c75146c"
 
   isLocalEnv: false
   

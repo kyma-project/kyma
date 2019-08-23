@@ -6,6 +6,34 @@ import (
 
 type queryProvider struct{}
 
+func (qp queryProvider) updateLabelDefinition(input string) string {
+	return fmt.Sprintf(`mutation {
+  result: updateLabelDefinition( in: %s ) {
+    key
+    schema
+  }
+}
+`, input)
+}
+
+func (qp queryProvider) labelDefinition(key string) string {
+	return fmt.Sprintf(`query {
+	result: labelDefinition(key: "%s") {
+		key
+    	schema
+	}
+}`, key)
+}
+
+func (qp queryProvider) setRuntimeLabel(runtimeId, key string, value []string) string {
+	return fmt.Sprintf(`mutation {
+	result: setRuntimeLabel(runtimeID: "%s", key: "%s", value: %s) {
+		key
+		value
+	}
+}`, runtimeId, key, value)
+}
+
 // TODO: createApplication does not support paging
 // it will return only API, EventAPI and Document ids from page one
 func (qp queryProvider) createApplication(input string) string {

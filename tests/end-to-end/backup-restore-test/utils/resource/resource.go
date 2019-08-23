@@ -32,7 +32,7 @@ func (r *Resource) Create(res interface{}) error {
 		Object: u,
 	}
 
-	_, err = r.resCli.Create(unstructuredObj)
+	_, err = r.resCli.Create(unstructuredObj, metav1.CreateOptions{})
 	if err != nil {
 		if apierrors.IsAlreadyExists(err) {
 			return errors.Errorf("Cannot create. Resource %s with name '%s' already exist.", unstructuredObj.GetKind(), unstructuredObj.GetName())

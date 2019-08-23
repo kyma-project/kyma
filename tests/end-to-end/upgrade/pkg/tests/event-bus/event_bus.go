@@ -22,19 +22,25 @@ import (
 )
 
 const (
-	eventType           = "test-e2e"
-	subscriptionName    = "test-sub"
-	eventActivationName = "test-ea"
 	srcID               = "test.local"
+	version1            = "v1"
+	version2            = "v2"
+	eventType1          = "test-e2e-1"
+	eventType2          = "test-e2e-2"
+	eventActivationName = "test-ea"
+	subscriptionNameV1  = "test-sub-v1"
+	subscriptionNameV2  = "test-sub-v2"
 
-	subscriberName           = "test-core-event-bus-subscriber"
-	subscriberImage          = "eu.gcr.io/kyma-project/pr/event-bus-e2e-subscriber:PR-4893"
-	publishEventEndpointURL  = "http://event-publish-service.kyma-system:8080/v1/events"
-	publishStatusEndpointURL = "http://event-publish-service.kyma-system:8080/v1/status/ready"
+	subscriberName            = "test-core-event-bus-subscriber"
+	subscriberImage           = "eu.gcr.io/kyma-project/develop/event-bus-e2e-subscriber:bd34bfe5"
+	publishEventEndpointURLV1 = "http://event-publish-service.kyma-system:8080/v1/events"
+	publishEventEndpointURLV2 = "http://event-publish-service.kyma-system:8080/v2/events"
+	publishStatusEndpointURL  = "http://event-publish-service.kyma-system:8080/v1/status/ready"
 )
 
 var (
-	randomInt    int
+	randomInt1   int
+	randomInt2   int
 	retryOptions = []retry.Option{
 		retry.Attempts(13), // at max (100 * (1 << 13)) / 1000 = 819,2 sec
 		retry.OnRetry(func(n uint, err error) {
@@ -94,14 +100,18 @@ func (ut *UpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldLogger, nam
 func (f *eventBusFlow) createResources() error {
 	// iterate over steps
 	for _, fn := range []func() error{
-		f.createEventActivation,
-		f.createSubscription,
 		f.createSubscriber,
-		f.checkSubscriberStatus,
+		f.createSubscriptionV1,
+		f.createSubscriptionV2,
+		f.createEventActivation,
 		f.checkPublisherStatus,
-		f.checkSubscriptionReady,
-		f.publishTestEvent,
-		f.checkSubscriberReceivedEvent,
+		f.checkSubscriberStatus,
+		f.checkSubscriptionReadyV1,
+		f.checkSubscriptionReadyV2,
+		f.publishTestEventV1,
+		f.publishTestEventV2,
+		f.checkSubscriberReceivedEventV1,
+		f.checkSubscriberReceivedEventV2,
 	} {
 		err := fn()
 		if err != nil {
@@ -115,11 +125,14 @@ func (f *eventBusFlow) createResources() error {
 func (f *eventBusFlow) testResources() error {
 	// iterate over steps
 	for _, fn := range []func() error{
-		f.checkSubscriberStatus,
 		f.checkPublisherStatus,
-		f.checkSubscriptionReady,
-		f.publishTestEvent,
-		f.checkSubscriberReceivedEvent,
+		f.checkSubscriberStatus,
+		f.checkSubscriptionReadyV1,
+		f.checkSubscriptionReadyV2,
+		f.publishTestEventV1,
+		f.publishTestEventV2,
+		f.checkSubscriberReceivedEventV1,
+		f.checkSubscriberReceivedEventV2,
 		f.cleanup,
 	} {
 		err := fn()
@@ -181,10 +194,18 @@ func (f *eventBusFlow) createEventActivation() error {
 	}, retryOptions...)
 }
 
-func (f *eventBusFlow) createSubscription() error {
+func (f *eventBusFlow) createSubscriptionV1() error {
+	return f.createSubscription(subscriptionNameV1, eventType1, version1)
+}
+
+func (f *eventBusFlow) createSubscriptionV2() error {
+	return f.createSubscription(subscriptionNameV2, eventType2, version2)
+}
+
+func (f *eventBusFlow) createSubscription(subscriptionName, eventType, version string) error {
 	f.log.Info("create Subscription")
-	subscriberEventEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/v1/events"
-	_, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Create(util.NewSubscription(subscriptionName, f.namespace, subscriberEventEndpointURL, eventType, "v1", srcID))
+	subscriberEventEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/" + version + "/events"
+	_, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Create(util.NewSubscription(subscriptionName, f.namespace, subscriberEventEndpointURL, eventType, version1, srcID))
 	if err != nil {
 		if !strings.Contains(err.Error(), "already exists") {
 			f.log.WithField("error", err).Error("error in creating subscription")
@@ -219,10 +240,17 @@ func (f *eventBusFlow) checkPublisherStatus() error {
 	}, retryOptions...)
 }
 
-func (f *eventBusFlow) checkSubscriptionReady() error {
-	f.log.Info("check Subscription ready status")
-	activatedCondition := subApis.SubscriptionCondition{Type: subApis.Ready, Status: subApis.ConditionTrue}
+func (f *eventBusFlow) checkSubscriptionReadyV1() error {
+	return f.checkSubscriptionReady(subscriptionNameV1)
+}
 
+func (f *eventBusFlow) checkSubscriptionReadyV2() error {
+	return f.checkSubscriptionReady(subscriptionNameV2)
+}
+
+func (f *eventBusFlow) checkSubscriptionReady(subscriptionName string) error {
+	f.log.Infof("check status of Kyma subscription: %v in namespace: %v", subscriptionName, f.namespace)
+	activatedCondition := subApis.SubscriptionCondition{Type: subApis.Ready, Status: subApis.ConditionTrue}
 	return retry.Do(func() error {
 		kySub, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Get(subscriptionName, metav1.GetOptions{})
 		if err != nil {
@@ -235,22 +263,32 @@ func (f *eventBusFlow) checkSubscriptionReady() error {
 	}, retryOptions...)
 }
 
-func (f *eventBusFlow) publishTestEvent() error {
-	randomInt = rand.Intn(100)
-	f.log.WithField("value", randomInt).Debug("publish random int")
+func (f *eventBusFlow) publishTestEventV1() error {
+	randomInt1 = rand.Intn(100)
+	f.log.WithField("value", randomInt1).Info("publish random int")
+	payload := fmt.Sprintf(`{"source-id": "%s","event-type":"%s","event-type-version":"v1","event-time":"2018-11-02T22:08:41+00:00","data":"%s"}`,
+		srcID, eventType1, composePayloadData("test-event", randomInt1))
+	return f.publishTestEvent(publishEventEndpointURLV1, payload)
+}
 
+func (f *eventBusFlow) publishTestEventV2() error {
+	randomInt2 = rand.Intn(100)
+	f.log.WithField("value", randomInt2).Info("publish random int")
+	payload := fmt.Sprintf(`{"source": "%s","specversion":"0.3","type":"%s","eventtypeversion":"v1","id":"4ea567cf-812b-49d9-a4b2-cb5ddf464094","time":"2018-11-02T22:08:41+00:00","data":"%s"}`,
+		srcID, eventType2, composePayloadData("test-event", randomInt2))
+	return f.publishTestEvent(publishEventEndpointURLV2, payload)
+}
+
+func (f *eventBusFlow) publishTestEvent(publishEventEndpointURL, payload string) error {
 	return retry.Do(func() error {
-		if _, err := f.publish(publishEventEndpointURL); err != nil {
+		if _, err := f.publish(publishEventEndpointURL, payload); err != nil {
 			return fmt.Errorf("publish event failed: %v", err)
 		}
 		return nil
 	}, retryOptions...)
 }
 
-func (f *eventBusFlow) publish(publishEventURL string) (*api.PublishResponse, error) {
-	payload := fmt.Sprintf(
-		`{"source-id": "%s","event-type":"%s","event-type-version":"v1","event-time":"2018-11-02T22:08:41+00:00","data":"%s"}`,
-		srcID, eventType, composePayloadData("test-event", randomInt))
+func (f *eventBusFlow) publish(publishEventURL, payload string) (*api.PublishResponse, error) {
 	f.log.WithField("event", payload).Info("event to be published")
 	res, err := http.Post(publishEventURL, "application/json", strings.NewReader(payload))
 	if err != nil {
@@ -280,8 +318,16 @@ func (f *eventBusFlow) publish(publishEventURL string) (*api.PublishResponse, er
 	return respObj, err
 }
 
-func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
-	subscriberResultsEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/v1/results"
+func (f *eventBusFlow) checkSubscriberReceivedEventV1() error {
+	return f.checkSubscriberReceivedEvent(version1, randomInt1)
+}
+
+func (f *eventBusFlow) checkSubscriberReceivedEventV2() error {
+	return f.checkSubscriberReceivedEvent(version2, randomInt2)
+}
+
+func (f *eventBusFlow) checkSubscriberReceivedEvent(version string, data int) error {
+	subscriberResultsEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/" + version + "/results"
 
 	return retry.Do(func() error {
 		res, err := http.Get(subscriberResultsEndpointURL)
@@ -309,11 +355,11 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 		if len(resp) == 0 { // no event received by subscriber
 			return fmt.Errorf("no event received by subscriber: %v", resp)
 		}
-		expectedResp := composePayloadData("test-event", randomInt)
+		expectedResp := composePayloadData("test-event", data)
 		f.log.WithFields(logrus.Fields{
 			"expected": expectedResp,
 			"actual":   resp,
-		}).Debug("subscriber response")
+		}).Info("subscriber response")
 		if resp != expectedResp {
 			return fmt.Errorf("wrong response: %s, want: %s", resp, expectedResp)
 		}
@@ -340,8 +386,13 @@ func (f *eventBusFlow) cleanup() error {
 		f.log.WithField("error", err).Warn("delete Subscriber Service failed")
 	}
 
-	f.log.WithField("subscription", subscriptionName).Info("delete test Subscription")
-	if err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Delete(subscriptionName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
+	f.log.WithField("subscription", subscriptionNameV1).Info("delete test Subscription")
+	if err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Delete(subscriptionNameV1, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
+		f.log.WithField("error", err).Warn("delete Subscription failed", err)
+	}
+
+	f.log.WithField("subscription", subscriptionNameV2).Info("delete test Subscription")
+	if err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Delete(subscriptionNameV2, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
 		f.log.WithField("error", err).Warn("delete Subscription failed", err)
 	}
 

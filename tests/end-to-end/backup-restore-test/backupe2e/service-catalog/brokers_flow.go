@@ -120,7 +120,7 @@ func (f *brokersFlow) createBindingAndWaitForReadiness(bindingName, instanceName
 			Name: bindingName,
 		},
 		Spec: v1beta1.ServiceBindingSpec{
-			ServiceInstanceRef: v1beta1.LocalObjectReference{
+			InstanceRef: v1beta1.LocalObjectReference{
 				Name: instanceName,
 			},
 		},

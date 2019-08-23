@@ -10,7 +10,7 @@ global:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
     dir: develop/
-    version: adaa993d
+    version: b8027485
 
 test:
   target: "Test Target"

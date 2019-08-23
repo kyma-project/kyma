@@ -45,17 +45,6 @@
   revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
-  branch = "travis-1.9"
-  digest = "1:e8f5d9c09a7209c740e769713376abda388c41b777ba8e9ed52767e21acf379f"
-  name = "github.com/golang/lint"
-  packages = [
-    ".",
-    "golint",
-  ]
-  pruneopts = "UT"
-  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
-
-[[projects]]
   digest = "1:f5ce1529abc1204444ec73779f44f94e2fa8fcdb7aca3c355b0c95947e4005c6"
   name = "github.com/golang/protobuf"
   packages = [
@@ -191,6 +180,17 @@
   packages = ["ssh/terminal"]
   pruneopts = "UT"
   revision = "4def268fd1a49955bfb3dda92fe3db4f924f2285"
+
+[[projects]]
+  branch = "master"
+  digest = "1:134674d729e1afbae39eeaa6abcf8e5f3106338f83643394ab5205a020efbd9b"
+  name = "golang.org/x/lint"
+  packages = [
+    ".",
+    "golint",
+  ]
+  pruneopts = "UT"
+  revision = "959b441ac422379a43da2230f62be024250818b0"
 
 [[projects]]
   branch = "master"
@@ -429,13 +429,13 @@
   analyzer-version = 1
   input-imports = [
     "github.com/avast/retry-go",
-    "github.com/golang/lint/golint",
     "github.com/kyma-project/kyma/components/event-bus/api/publish",
     "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
     "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned",
     "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned",
     "github.com/kyma-project/kyma/components/event-bus/test/util",
     "github.com/sirupsen/logrus",
+    "golang.org/x/lint/golint",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
