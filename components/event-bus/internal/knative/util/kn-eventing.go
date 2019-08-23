@@ -168,6 +168,7 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.
 // 	return channel, nil
 // }
 
+// GetMessagingChannel TODO
 func (k *KnativeLib) GetMessagingChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error) {
 	channel, err := k.messagingChannel.Channels(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
@@ -208,6 +209,7 @@ func (k *KnativeLib) CreateChannel(provisioner string, name string, namespace st
 	return channel, nil
 }
 
+// CreateMessagingChannel TODO
 func (k *KnativeLib) CreateMessagingChannel(name string, namespace string, labels *map[string]string,
 	timeout time.Duration) (*messagingV1Alpha1.Channel, error) {
 	c := makeChannel(name, namespace, labels)
@@ -371,6 +373,7 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[s
 // 	return nil
 // }
 
+// SendMessageToChannel TODO
 func (k *KnativeLib) SendMessageToChannel(channel *messagingV1Alpha1.Channel, headers *map[string][]string, payload *string) error {
 	httpClient := &http.Client{
 		Transport: initHTTPTransport(),

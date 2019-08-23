@@ -5,7 +5,7 @@ required = [
   "github.com/onsi/gomega", # for test matchers
   "sigs.k8s.io/controller-tools/cmd/controller-gen", # for crd/rbac generation
   "sigs.k8s.io/testing_frameworks/integration", # for integration testing
-  "github.com/golang/lint/golint",
+  "golang.org/x/lint/golint",
   "golang.org/x/tools/cmd/goimports",
 ]
 

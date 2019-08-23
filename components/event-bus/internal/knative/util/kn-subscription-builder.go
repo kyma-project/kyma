@@ -37,6 +37,7 @@ func (s *SubscriptionBuilder) ToNatssChannel(name string) *SubscriptionBuilder {
 	return s
 }
 
+// ToGPubSubChannel TODO
 func (s *SubscriptionBuilder) ToGPubSubChannel(name string) *SubscriptionBuilder {
 	s.Spec.Channel = corev1.ObjectReference{
 		Name:       name,
@@ -166,6 +167,7 @@ func NatssChannelSubscription(name string, namespace string) *SubscriptionBuilde
 	}
 }
 
+// GPubSubChannelSubscription TODO
 func GPubSubChannelSubscription(name string, namespace string) *SubscriptionBuilder {
 	subscription := &eventingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{

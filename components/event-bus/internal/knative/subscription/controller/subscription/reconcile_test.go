@@ -11,6 +11,7 @@ import (
 	"knative.dev/pkg/apis"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
@@ -357,11 +358,12 @@ func (k *MockKnativeLib) GetNatssChannel(name string, namespace string) (*v1alph
 	}
 	return natssChannel, nil
 }
-func (k *MockKnativeLib) CreateChannel(provisioner string, name string, namespace string, labels *map[string]string, timeout time.Duration) (*evapisv1alpha1.Channel, error) {
-	channel := makeKnChannel(provisioner, namespace, name, labels)
-	knChannels[channel.Name] = channel
-	return channel, nil
-}
+
+// func (k *MockKnativeLib) CreateChannel(provisioner string, name string, namespace string, labels *map[string]string, timeout time.Duration) (*messagingV1Alpha1.Channel, error) {
+// 	channel := makeKnChannel(provisioner, namespace, name, labels)
+// 	knChannels[channel.Name] = channel
+// 	return channel, nil
+// }
 func (k *MockKnativeLib) DeleteChannel(name string, namespace string) error {
 	delete(knChannels, name)
 	return nil
@@ -387,6 +389,24 @@ func (k *MockKnativeLib) GetSubscription(name string, namespace string) (*evapis
 	}
 	return knSub, nil
 }
+
+func (k *MockKnativeLib) CreateGPubSubChannelSubscription(name string, namespace string, channelName string, uri *string) error {
+	return nil
+}
+
+func (k *MockKnativeLib) CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
+	timeout time.Duration) (*messagingV1Alpha1.Channel, error) {
+	return nil, nil
+}
+
+func (k *MockKnativeLib) CreateMessagingChannel(name string, namespace string, labels *map[string]string,
+	timeout time.Duration) (*messagingV1Alpha1.Channel, error) {
+	return nil, nil
+}
+func (k *MockKnativeLib) GetMessagingChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error) {
+	return nil, nil
+}
+
 func (k *MockKnativeLib) UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error) {
 	return nil, nil
 }
@@ -442,12 +462,12 @@ func makeKnSubscriptionName(kySub *eventingv1alpha1.Subscription) string {
 	return util.GetKnSubscriptionName(&kySub.Name, &kySub.Namespace)
 }
 
-func makeKnativeLibChannel() *evapisv1alpha1.Channel {
-	channel, _ := knativeLib.CreateChannel(provisioner, makeKnChannelName(makeEventsActivatedSubscription()), "kyma-system", &labels, time.Second)
-	channel.SetClusterName("fake-channel") // use it as a marker
-	knChannels[channel.Name] = channel
-	return channel
-}
+// func makeKnativeLibChannel() *evapisv1alpha1.Channel {
+// 	channel, _ := knativeLib.CreateChannel(provisioner, makeKnChannelName(makeEventsActivatedSubscription()), "kyma-system", &labels, time.Second)
+// 	channel.SetClusterName("fake-channel") // use it as a marker
+// 	knChannels[channel.Name] = channel
+// 	return channel
+// }
 
 func makeKnSubscription(kySub *eventingv1alpha1.Subscription) *evapisv1alpha1.Subscription {
 	knSubName := util.GetKnSubscriptionName(&kySub.Name, &kySub.Namespace)
