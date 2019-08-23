@@ -217,7 +217,23 @@ spec:
   repositories:
   - url: "https://github.com/kyma-project/addons/releases/download/0.7.0/index-testing.yaml"
 EOF
-    log "Testing addons injected" green
+    local retry=0
+    while [[ ${retry} -lt 10 ]]; do
+        msg=$(kubectl get clusteraddonsconfiguration ${TESTING_ADDONS_CFG_NAME} -o=jsonpath='{.status.phase}')
+        if [[ "${msg}" = "Ready" ]]; then
+            log "Testing addons injected" green
+            return 0
+        fi
+        if [[ "${msg}" = "Failed" ]]; then
+            log "Testing addons configuration failed" red
+            return 1
+        fi
+        echo "Waiting for ready testing addons ${retry}/10.. status: ${msg}"
+        retry=$[retry + 1]
+        sleep 3
+    done
+    log "Testing addons couldn't be injected" red
+    return 1
 }
 
 function removeTestingAddons() {
