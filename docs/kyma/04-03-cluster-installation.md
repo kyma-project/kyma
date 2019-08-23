@@ -324,14 +324,13 @@ For MacOS, run:
   Gardener
   </summary>
 
-Install Kyma on a [GKE](https://cloud.google.com/kubernetes-engine/) or [AKS](https://azure.microsoft.com/services/kubernetes-service/) cluster deployed through [Gardener](https://gardener.cloud/).
+Install Kyma on a Kubernetes cluster deployed through [Gardener](https://gardener.cloud/).
 
 ## Prerequisites
 
   - [Gardener](https://gardener.cloud/) seed cluster
   - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled or a [Microsoft Azure](https://azure.microsoft.com) account
   - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.0 or higher
-  - [gcloud](https://cloud.google.com/sdk/gcloud/) or [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
 ## Choose the release to install
 
@@ -343,13 +342,11 @@ Install Kyma on a [GKE](https://cloud.google.com/kubernetes-engine/) or [AKS](ht
     export KYMA_VERSION={KYMA_RELEASE_VERSION}
     ```
 
-## Provision a GKE or AKS cluster through Gardener
+## Provision a Kubernetes cluster through Gardener
 
-1. Create a Service Account (SA) with the required permissions in your GKE or AKS project. To learn about the SA requirements for each environment, click the question mark buttons in the **Secrets** tab of your Gardener UI.
+1. Go to the **Secrets** tab of the Gardener UI and add secrets to enable provisioning clusters on different architectures. To learn about the requirements for each environment, click the question mark buttons.  
 
-2. Go to the **Secrets** tab of the Gardener UI and add secrets to enable provisioning clusters on GKE or AKS.  
-
-3. Provision a cluster form the **Clusters** tab. Choose the infrastructure you want to provision your cluster in and apply these settings:
+2. Provision a cluster form the **Clusters** tab. Choose the infrastructure you want to provision your cluster in and apply these settings:
 
   | Tab  |  Setting |  Required value |
   |---|---|---|
@@ -357,22 +354,22 @@ Install Kyma on a [GKE](https://cloud.google.com/kubernetes-engine/) or [AKS](ht
   | Worker  |  Machine type | `n1-standard-4` (GKE) <br> `Standard_D4_v3` (AWS) |
   | Worker  | Autoscaler min.  | `3` |
 
-4. After you provision the cluster, download the kubeconfig file available under the **Show Cluster Access** option in the **Actions** column.
+3. After you provision the cluster, download the kubeconfig file available under the **Show Cluster Access** option in the **Actions** column.
 
-5. Export the downloaded kubeconfig to an environment variable to connect to the cluster you provisioned. Run:
+4. Export the downloaded kubeconfig to an environment variable to connect to the cluster you provisioned. Run:
 
     ```
     export KUBECONFIG={PATH_TO_KUBECONFIG_FILE}
     ```
 
-6. Install Tiller on the cluster you provisioned. Run:
+5. Install Tiller on the cluster you provisioned. Run:
 
     ```
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
     ```
->**NOTE:** On an AKS cluster, make sure to run all commands from steps 5 and 6 of [this](#installation-install-kyma-on-a-cluster--provider-installation--aks--prepare-the-aks-cluster) section.
+    >**NOTE:** On an AKS cluster, make sure to run all commands from steps 5 and 6 of [this](#installation-install-kyma-on-a-cluster--provider-installation--aks--prepare-the-aks-cluster) section.
 
-7. Install Kyma using the respective installation instructions for [GKE](#installation-install-kyma-on-a-cluster--provider-installation--gke--install-kyma) or [AKS](#installation-install-kyma-on-a-cluster--provider-installation--aks--install-kyma).
+6. Install Kyma using the respective installation instructions for [GKE](#installation-install-kyma-on-a-cluster--provider-installation--gke--install-kyma) or [AKS](#installation-install-kyma-on-a-cluster--provider-installation--aks--install-kyma).
 
   </details>
 </div>
