@@ -11,8 +11,8 @@ type RetryConfig struct {
 }
 
 var DefaultRetryConfig RetryConfig = RetryConfig{
-	MaxRetries: 3,
-	Duration:   time.Second,
+	MaxRetries: 5,
+	Duration:   2 * time.Second,
 	Factor:     1.5,
 }
 
