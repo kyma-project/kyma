@@ -69,28 +69,39 @@ manifests:
 	go run vendor/sigs.k8s.io/controller-tools/cmd/controller-gen/main.go all
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-deploy: manifests install bin/kustomize
-	kubectl apply -f config/crds
-	bin/kustomize build config/default | kubectl apply -f -
-	kubectl apply -f config/config.yaml
 
-undeploy: uninstall
+sedbackupflag = -i
+ifeq ($(shell uname -s),Darwin)
+	sedbackupflag +=
+endif
+
+deploy: manifests install bin/kustomize
+	kubectl apply -f config/dockerfiles.yaml
+	@echo "updating kustomize image patch file for manager resource"
+	cp ./config/default/manager_image_patch.yaml{,.bak}
+	sed $(sedbackupflag)'' -e 's@image: .*@image: $(IMG)@' ./config/default/manager_image_patch.yaml
+	bin/kustomize build config/default | kubectl apply -f -
+	mv ./config/default/manager_image_patch.yaml{.bak,}
+
+undeploy: uninstall bin/kustomize
+	kubectl delete -f config/dockerfiles.yaml
 	kubectl delete -f config/crds
-	kustomize build config/default | kubectl delete  -f -
-	kubectl delete -f config/config.yaml
+	bin/kustomize build config/default | kubectl delete  -f -
 
 # Build the docker image
 .PHONY: docker-build
 docker-build: resolve pull-licenses manifests
 	docker build . -t $(IMG)
-	@echo "updating kustomize image patch file for manager resource"
-	sed -i'' -e 's@image: .*@image: '"${IMG}"'@' ./config/default/manager_image_patch_remote_dev.yaml ./config/default/manager_image_patch_local_dev.yaml
 
 # Push the docker image
 .PHONY: docker-push
 docker-push:
+ifdef DOCKER_PUSH_REPOSITORY
 	docker tag $(IMG) $(IMG-CI)
 	docker push $(IMG-CI)
+else
+	docker push $(IMG)
+endif
 
 .PHONY: ci-pr
 ci-pr: docker-build docker-push
@@ -109,5 +120,6 @@ path-to-referenced-charts:
 GOPATH ?= $(shell go env GOPATH)
 export GOBIN := $(GOPATH)/src/$(PKG)/bin
 
+.PHONY: bin/kustomize
 bin/kustomize:
 	@go install ./vendor/sigs.k8s.io/kustomize

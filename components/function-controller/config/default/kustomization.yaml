@@ -17,43 +17,37 @@ namePrefix: function-
 # files that kustomize reads, modifies and emits as a
 # YAML string, with resources separated by document
 # markers ("---").
+  # Comment the following 3 lines if you want to disable
+  # the auth proxy (https://github.com/brancz/kube-rbac-proxy)
+  # which protects your /metrics endpoint.
 resources:
 - ../rbac/manager_role.yaml
 - ../rbac/manager_role_binding.yaml
 - ../manager/manager.yaml
-  # Comment the following 3 lines if you want to disable
-  # the auth proxy (https://github.com/brancz/kube-rbac-proxy)
-  # which protects your /metrics endpoint.
 - ../rbac/auth_proxy_service.yaml
 - ../rbac/auth_proxy_role.yaml
 - ../rbac/auth_proxy_role_binding.yaml
-
-patches:
-# patch for prod:
-- manager_image_patch_remote_dev.yaml
-# patch for dev:
-#- manager_image_patch_local_dev.yaml
-  # Protect the /metrics endpoint by putting it behind auth.
-  # Only one of manager_auth_proxy_patch.yaml and
-  # manager_prometheus_metrics_patch.yaml should be enabled.
-- manager_auth_proxy_patch.yaml
   # If you want your controller-manager to expose the /metrics
   # endpoint w/o any authn/z, uncomment the following line and
   # comment manager_auth_proxy_patch.yaml.
   # Only one of manager_auth_proxy_patch.yaml and
   # manager_prometheus_metrics_patch.yaml should be enabled.
 #- manager_prometheus_metrics_patch.yaml
-- manager_cluster_role_binding_patch.yaml
 
 vars:
-- name: WEBHOOK_SECRET_NAME
+- fieldref: {}
+  name: WEBHOOK_SECRET_NAME
   objref:
+    apiVersion: v1
     kind: Secret
     name: webhook-server-secret
-    apiVersion: v1
 
-- name: NAMESPACE
-  objref:
-    apiVersion: apps/v1beta1
-    kind: Namespace
-    name: somename
+patchesStrategicMerge:
+  # Sets the runtime image of the controller-manager container
+  # and injects a few labels.
+- manager_image_patch.yaml
+- manager_cluster_role_binding_patch.yaml
+  # Protect the /metrics endpoint by putting it behind auth.
+  # Only one of manager_auth_proxy_patch.yaml and
+  # manager_prometheus_metrics_patch.yaml should be enabled.
+- manager_auth_proxy_patch.yaml

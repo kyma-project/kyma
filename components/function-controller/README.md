@@ -2,9 +2,8 @@
 
 ## Overview
 
-The Knative Function controller is a Kubernetes controller that enables Kyma to manage Function resources.
-
-This Knative-based serverless implementation defines and handles the Function Custom Resource Definition with the help of Knative Build and Knative Serving.
+The Knative Function controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses
+Knative Build and Knative Serving under the hood.
 
 ## Prerequisites
 
@@ -14,58 +13,76 @@ This Knative-based serverless implementation defines and handles the Function Cu
 
 ## Installation for development workflow
 
-Before installing the Function controller it is necessary to create the namespace, Service Account and Secret. The Service Account refers to the Secret containing the credentials to the Docker registry. Knative Build uses that Service Account to build and push the built images.
-### Create Namespace
+### Preparation
+
+A few preparation steps must be executed before proceeding with the rest of the instructions from this document.
+
+#### Environment variables
+
+The following environment variables must be exported to the current shell's environment.
+
+| Variable        | Description |
+| --------------- | ----------- |
+| `IMG`           | Full image name the _Function Controller_ will be tagged with. (e.g. `gcr.io/my-project/function-controller` for GCR, `my-user/function-controller` for Docker Hub) |
+| `FN_REGISTRY`   | URL of the container registry _Function_ images will be pushed to. Used for authentication. (e.g. `https://gcr.io/` for GCR, `https://index.docker.io/v1/` for Docker Hub) |
+| `FN_REPOSITORY` | Name of the container repository _Function_ images will be pushed to. (e.g. `gcr.io/my-project` for GCR, `my-user` for Docker Hub) |
+
+Example:
+
 ```bash
- NAMESPACE=<serverless-system>
+export IMG=my-docker-user/function-controller
+export FN_REGISTRY=https://index.docker.io/v1/
+export FN_REPOSITORY=my-docker-user
+```
+
+#### Controller namespace
+
+Create the `serverless-system` Namespace. The controller will be deployed to it.
+
+```bash
 kubectl create namespace serverless-system
 ```
 
-### Create Service Account and Secret
+#### Container registry credentials
+
+Before creating a Function, it is necessary to create the `registry-credentials` Secret, which contains credentials to
+the Docker registry defined by the `FN_REGISTRY` environment variable. Knative Build uses this Secret to push the images
+it builds for the deployed Functions.
+
 ```bash
-#set your namespace e.g. default
-NAMESPACE=<NAMESPACE>
-#set your registry e.g. https://gcr.io or https://index.docker.io/v1/ (without the handle)
-REGISTRY=<YOUR_REGISTRY>
-#set your docker username and password
-username=<docker username>
-password=<docker password>
-cat <<EOF | kubectl -n $NAMESPACE apply -f -
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-    name: function-controller
-    labels:
-        app: function-controller
-secrets:
-    - name: function-controller-docker-reg-credential
+reg_username=<container registry username>
+reg_password=<container registry password>
+
+cat <<EOF | kubectl -n serverless-system apply -f -
 ---
 apiVersion: v1
 kind: Secret
 type: kubernetes.io/basic-auth
 metadata:
-    name: function-controller-docker-reg-credential
-    annotations:
-        build.knative.dev/docker-0: ${REGISTRY}
-data:
-    username: $(echo $username | base64)
-    password: $(echo $password | base64)
+  name: registry-credentials
+  annotations:
+    build.knative.dev/docker-0: ${FN_REGISTRY}
+stringData:
+  username: ${reg_username}
+  password: ${reg_password}
 EOF
 ```
 
-### Create the configuration file for the controller
+#### Controller configuration
+
+Create the following configuration for the controller. It contains a list of supported runtimes as well as the container
+repository referenced by the `FN_REPOSITORY` environment variable, for which we created a Secret above.
+
 ```bash
-DOCKER_REGISTRY_NAME=<YOUR_REGISTRY_HANDLE>
-cat <<EOF | kubectl -n $NAMESPACE apply -f -
+cat <<EOF | kubectl -n serverless-system apply -f -
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: fn-config
-  labels:
-    app: function-controller
 data:
   serviceAccountName: function-controller
-  dockerRegistry: $DOCKER_REGISTRY_NAME
+  dockerRegistry: ${FN_REPOSITORY}
   runtimes: |
     - ID: nodejs8
       dockerFileName: dockerfile-nodejs-8
@@ -73,113 +90,84 @@ data:
       dockerFileName: dockerfile-nodejs-6
 EOF
 ```
-### Run locally on Minikube
-Follow these steps to run the Knative Function controller locally:
-To use the controller locally in minikube, make sure the line `manager_image_patch_local_dev.yaml` is uncommented in the [kustomization file](config/default/kustomization.yaml).
+
 ### Deploy the controller
->**NOTE**: Run this command only when you want to deploy the controller locally. It is not necessary for production use.
-```bash
-eval $(minikube docker-env)
-```
+
+The following `make` targets build the Function Controller image, tag it to the value of the `IMG` environment variable
+defined previously, and push it to the remote container registry.
 
 ```bash
-export DOCKER_TAG=<some tag e.g. latest>
-export APP_NAME=function-controller
-export DOCKER_PUSH_REPOSITORY=<e.g. eu.gcr.io or index.docker.io>
-export DOCKER_PUSH_DIRECTORY=<e.g. pr or develop>
-make install
 make docker-build
 make docker-push
+```
+
+After the image has been successfully pushed, one can deploy the controller to the `serverless-system` namespace created
+in the previous section.
+
+```bash
 make deploy
 ```
-### Run on remote cluster (eg. GKE)
-To use the controller in a remote cluster (eg. GKE), make sure the line `manager_image_patch_remote_dev.yaml` is uncommented in the [kustomization file](config/default/kustomization.yaml). Then follow the instructions [above](#deploy-the-controller).
+
 ## Usage
+
 ### Test the controller
-To test the controller, run:
+
+The following `make` target runs tests against the deployed Function Controller.
+
 ```bash
 make test
 ```
 
-### Manage functions
+### Create a demo Function
 
-Use the following examples to learn how to create and manage a function. 
+> **Note**: In order to be able to create Functions outside of the `serverless-system` namespace (e.g. inside
+> `default`), a few API objects must be copied from the `serverless-system` namespace:
+> ```bash
+> kubectl -n serverless-system get -o yaml \
+>   secret/registry-credentials \
+>   serviceaccount/function-controller \
+>   configmap/fn-config \
+>   configmap/dockerfile-nodejs-6 \
+>   configmap/dockerfile-nodejs-8 \
+> | sed -e '/namespace: /d'  -e '/-token-/d' \
+> | kubectl apply -n my-namespace -f -
+> ```
 
->**Note** If you are creating functions outside the `serverless-system` namespace then make sure following steps are followed:
+Deploy a sample _Hello World_ Function:
+
 ```bash
-NAMESPACE=foo
-```
-1. Create the `ServiceAccount` and `Secret` containing the credentials to the Docker registry in the namespace as [previously described](#create-service-account-and-secret).
-2. Create the configmaps with docker templates for `node6` and `node8`
-```bash
-cat <<EOF | kubectl -n $NAMESPACE apply -f-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dockerfile-nodejs-6
-  labels:
-    function: function-controller
-data:
-  Dockerfile: |-
-    FROM kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7
-    USER root
-    RUN export KUBELESS_INSTALL_VOLUME='/kubeless' && \
-        mkdir /kubeless && \
-        cp /src/handler.js /kubeless && \
-        cp /src/package.json /kubeless && \
-        /kubeless-npm-install.sh
-    USER 1000
-EOF
-```
-```bash
-cat <<EOF | kubectl -n $NAMESPACE apply -f-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dockerfile-nodejs-8
-  labels:
-    function: function-controller
-data:
-  Dockerfile: |-
-    FROM kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7
-    USER root
-    RUN export KUBELESS_INSTALL_VOLUME='/kubeless' && \
-        mkdir /kubeless && \
-        cp /src/handler.js /kubeless && \
-        cp /src/package.json /kubeless && \
-        /kubeless-npm-install.sh
-    USER 1000
-EOF
-```
-```bash
-kubectl apply -f config/samples/serverless_v1alpha1_function.yaml -n {NAMESPACE}
+kubectl apply -f config/samples/serverless_v1alpha1_function.yaml
 ```
 
-Search for a function:
+Ensure the Function was created:
+
 ```bash
-kubectl get functions -n ${NAMESPACE}
+kubectl get functions
 ```
 
-Check the status of the build
+Check the status of the build:
+
 ```bash
-kubectl get builds.build.knative.dev -n ${NAMESPACE}
+kubectl get builds.build.knative.dev
 ```
 
-Check the status of the serving service
+Check the status of the Knative Serving service:
+
 ```bash
-kubectl get services.serving.knative.dev -n ${NAMESPACE}
+kubectl get services.serving.knative.dev
 ```
 
 Access the function:
 
-On minikube
 ```bash
-export INGRESSGATEWAY=istio-ingressgateway
-export IP_ADDRESS=$(kubectl get svc $INGRESSGATEWAY --namespace istio-system --output 'jsonpath={.status.loadBalancer.ingress[0].ip}')
-curl -v -H "Host: $(kubectl get ksvc sample --output 'jsonpath={.status.domain}' -n ${NAMESPACE}" http://$(minikube ip):$(kubectl get svc istio-ingressgateway --namespace istio-system --output 'jsonpath={.spec.ports[?(@.port==80)].nodePort}')
+# minikube
+FN_DOMAIN="$(kubectl get ksvc demo --output 'jsonpath={.status.domain}')"
+FN_PORT="$(kubectl get svc istio-ingressgateway -n istio-system --output 'jsonpath={.spec.ports[?(@.port==80)].nodePort}')"
+curl -v -H "Host: ${FN_DOMAIN}" http://$(minikube ip):${FN_PORT}
 ```
 
-on Remote Cluster (eg. GKE)
 ```bash
-curl -v "https://$(kubectl get ksvc -n ${NAMESPACE} --output 'jsonpath={.items[0].status.domain}')"
+# remote cluster (eg. GKE)
+FN_DOMAIN="$(kubectl get ksvc demo --output 'jsonpath={.status.domain}')"
+curl -kD- "https://${FN_DOMAIN}"
 ```

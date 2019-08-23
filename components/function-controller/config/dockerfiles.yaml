@@ -1,3 +1,8 @@
+# The name of these ConfigMaps is currently hardcoded in Knative build
+# templates by the Function controller, and must therefore not be modified.
+# They are not created by Kustomize to prevent the object's name from being
+# automatically prefixed (e.g. "function-dockerfile-...").
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
