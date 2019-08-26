@@ -16,13 +16,13 @@ rules:
     verbs: ["*"]
   - apiGroups: ["networking.istio.io"]
     resources: ["virtualservices"]
-    verbs: ["create", "delete", "get", "patch", "list", "watch"]
+    verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
   - apiGroups: ["authentication.istio.io"]
     resources: ["policies"]
-    verbs: ["create", "delete", "get", "patch", "list", "watch"]
+    verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
   - apiGroups: ["oathkeeper.ory.sh"]
     resources: ["rules"]
-    verbs: ["create", "delete", "get", "patch", "list", "watch"]
+    verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
