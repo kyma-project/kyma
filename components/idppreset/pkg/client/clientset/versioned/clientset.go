@@ -3,7 +3,6 @@
 package versioned
 
 import (
-	glog "github.com/golang/glog"
 	authenticationv1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
@@ -13,8 +12,6 @@ import (
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	AuthenticationV1alpha1() authenticationv1alpha1.AuthenticationV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Authentication() authenticationv1alpha1.AuthenticationV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -26,12 +23,6 @@ type Clientset struct {
 
 // AuthenticationV1alpha1 retrieves the AuthenticationV1alpha1Client
 func (c *Clientset) AuthenticationV1alpha1() authenticationv1alpha1.AuthenticationV1alpha1Interface {
-	return c.authenticationV1alpha1
-}
-
-// Deprecated: Authentication retrieves the default version of AuthenticationClient.
-// Please explicitly pick a version.
-func (c *Clientset) Authentication() authenticationv1alpha1.AuthenticationV1alpha1Interface {
 	return c.authenticationV1alpha1
 }
 
@@ -58,7 +49,6 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 
 	cs.DiscoveryClient, err = discovery.NewDiscoveryClientForConfig(&configShallowCopy)
 	if err != nil {
-		glog.Errorf("failed to create the DiscoveryClient: %v", err)
 		return nil, err
 	}
 	return &cs, nil
