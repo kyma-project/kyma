@@ -40,7 +40,7 @@ If you call a registered service and receive an error:
   </div>
 
   Then register the Service.  
-  To register a service, see [this tutorial](components/application-connector/#tutorials-register-a-service-register-a-service.
+  To register a service, see [this tutorial](components/application-connector/#tutorials-register-a-service-register-a-service).
 
 
 - If your call reaches Application Gateway and Access Service exists, but you still receive an error, check the target URL of the API that you have registered and verify that it is correct.  
