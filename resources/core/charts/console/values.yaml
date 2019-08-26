@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   dir: 
-  tag: 9800ca27
+  tag: c4316dbc
   pullPolicy: IfNotPresent
 service:
   name: nginx
