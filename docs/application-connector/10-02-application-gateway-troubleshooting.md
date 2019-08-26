@@ -12,16 +12,16 @@ If you call a registered service and receive an error:
   ```
   If the request reaches the Pod, it is logged by Application Gateway.
   
-  If the call is not in the logs, check if [Access Service](components/application-connector/#architecture-application-connector-components-access-service) for the Service you are trying to call exists.
+  If the call is not in the logs, check if [Access Service](components/application-connector/#architecture-application-connector-components-access-service) for the service you are trying to call exists.
   ```
   kubectl -n kyma-integration get svc app-{APP_NAME}-{SERVICE_ID}
   ```
-  If Access Service does not exist, run this command to deregister the Service:
+  If Access Service does not exist, run this command to deregister the service you tried to call:
 
   <div tabs name="deregistration">
     <details>
     <summary>
-    With trusted certificate
+    With a trusted certificate
     </summary>
 
     ```
@@ -30,7 +30,7 @@ If you call a registered service and receive an error:
     </details>
     <details>
     <summary>
-    Without trusted certificate
+    Without a trusted certificate
     </summary>
 
     ```
@@ -40,16 +40,16 @@ If you call a registered service and receive an error:
   </div>
 
   Then register the Service.  
-  To register a Service, see [this tutorial](components/application-connector/#tutorials-register-a-service-register-a-service) again.
+  To register a service, see [this tutorial](components/application-connector/#tutorials-register-a-service-register-a-service.
 
 
-- If you still receive an error, check the target URL of the API that you have registered and verify that it is correct.  
+- If your call reaches Application Gateway and Access Service exists, but you still receive an error, check the target URL of the API that you have registered and verify that it is correct.  
   To do that, fetch the Service definition from Application Registry:
 
   <div tabs name="verification">
     <details>
     <summary>
-    With trusted certificate
+    With a trusted certificate
     </summary>
 
     ```
@@ -58,7 +58,7 @@ If you call a registered service and receive an error:
     </details>
     <details>
     <summary>
-    Without trusted certificate
+    Without a trusted certificate
     </summary>
 
     ```
@@ -67,5 +67,5 @@ If you call a registered service and receive an error:
     </details>
   </div>
 
-  You should receive a `json` response with the Service definition that contains the target URL.  
+  A successful call returns a `json` response with the service definition that contains the target URL.  
   Access the target URL directly to verify that the value of `api.targetUrl` is correct.

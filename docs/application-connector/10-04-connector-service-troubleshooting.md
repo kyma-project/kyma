@@ -28,7 +28,7 @@ To ensure CSR was generated properly, check the values returned by the Connector
 
 Subject values present in CSR should match the subject in the response that you got.
 
-To check the subject of the generated CSR, run the following command:
+To check the subject of the generated CSR, run this command:
 ```
 openssl req -noout -subject -in {PATH_TO_CSR_FILE}
 ```

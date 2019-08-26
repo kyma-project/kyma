@@ -28,7 +28,7 @@ If you try to access Application Registry with the wrong certificate, you get th
 {"code":403,"error":"No valid subject found"}
 ```
 Make sure that your certificate is generated for the Application that you are trying to access.  
-To retrieve the certificate subject, run:
+To get the certificate subject, run:
 ```
 openssl req -noout -subject -in {PATH_TO_CSR_FILE}
 ```
