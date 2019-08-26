@@ -1,19 +1,16 @@
 webhook:
   replicaCount: 1
   image:
-    repository: mszostok/service-catalog-admission-webhook
-    tag: 0.0.2
+    repository: eu.gcr.io/kyma-project/incubator/develop/podpreset-webhook
+    tag: 47f40a09
     pullPolicy: IfNotPresent
   verbosity: 6
-  service:
-    type: NodePort
-    port: 443
+  securityContext:
+    runAsUser: 2000
 
 controller:
   enabled: false
   image:
-    repository: mszostok/service-catalog-podpreset-controller
-    tag: 0.0.2
+    repository: eu.gcr.io/kyma-project/incubator/develop/podpreset-controller
+    tag: 47f40a09
     pullPolicy: IfNotPresent
-
-

@@ -12,44 +12,37 @@ import (
 )
 
 const (
-	timeout = 10 * time.Second
+	timeout = 30 * time.Second
 )
 
-type Client struct {
+type Client interface {
+	Do(req *graphql.Request, res interface{}) error
+	DisableLogging()
+}
+
+type client struct {
 	gqlClient *graphql.Client
-	endpoint  string
 	logs      []string
 	logging   bool
 }
 
-func New(certificate tls.Certificate, graphqlEndpoint string) (*Client, error) {
-	//config, err := loadConfig(AdminUser) // by default create client capable of performing all operations on all resources
-	//if err != nil {
-	//	return nil, errors.Wrap(err, "while loading config")
-	//}
-	//
-	//token, err := authenticate(config.IdProviderConfig)
-	//if err != nil {
-	//	return nil, err
-	//}
-
+func New(certificate tls.Certificate, graphqlEndpoint string, enableLogging, insecureConfigFetch bool) (Client, error) {
 	httpClient := &http.Client{
+		// TODO: enable when the certificates will be ready
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				Certificates: []tls.Certificate{certificate},
+				InsecureSkipVerify: insecureConfigFetch,
+				//Certificates: []tls.Certificate{certificate},
 			},
 		},
 	}
 
 	gqlClient := graphql.NewClient(graphqlEndpoint, graphql.WithHTTPClient(httpClient))
 
-	client := &Client{
+	client := &client{
 		gqlClient: gqlClient,
-		//token:     token,
-		//endpoint:  config.GraphQLEndpoint,
-		logging: true,
-		logs:    []string{},
-		//Config:    config,
+		logging:   enableLogging,
+		logs:      []string{},
 	}
 
 	client.gqlClient.Log = client.addLog
@@ -57,12 +50,7 @@ func New(certificate tls.Certificate, graphqlEndpoint string) (*Client, error) {
 	return client, nil
 }
 
-func (c *Client) DoQuery(q string, res interface{}) error {
-	req := graphql.NewRequest(q)
-	return c.Do(req, res)
-}
-
-func (c *Client) Do(req *graphql.Request, res interface{}) error {
+func (c *client) Do(req *graphql.Request, res interface{}) error {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
@@ -78,11 +66,11 @@ func (c *Client) Do(req *graphql.Request, res interface{}) error {
 	return err
 }
 
-func (c *Client) DisableLogging() {
+func (c *client) DisableLogging() {
 	c.logging = false
 }
 
-func (c *Client) addLog(log string) {
+func (c *client) addLog(log string) {
 	if !c.logging {
 		return
 	}
@@ -90,6 +78,6 @@ func (c *Client) addLog(log string) {
 	c.logs = append(c.logs, log)
 }
 
-func (c *Client) clearLogs() {
+func (c *client) clearLogs() {
 	c.logs = []string{}
 }

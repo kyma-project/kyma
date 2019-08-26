@@ -8,7 +8,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    "helm.sh/resource-policy": keep
+    helm.sh/resource-policy: keep
 spec:
   additionalPrinterColumns:
     - JSONPath: .status.state
@@ -46,7 +46,7 @@ metadata:
     heritage: Tiller
     release: istio
   annotations:
-    "helm.sh/resource-policy": keep
+    helm.sh/resource-policy: keep
 spec:
   additionalPrinterColumns:
     - JSONPath: .status.state

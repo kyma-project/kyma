@@ -5,7 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -40,7 +40,7 @@ func NewSupervisor(
 	crManager CRManager,
 	credManager certificates.Manager,
 	compassClient compass.ConfigClient,
-	syncService synchronization.Service,
+	syncService kyma.Service,
 ) Supervisor {
 	return &crSupervisor{
 		compassConnector:   connector,
@@ -57,7 +57,7 @@ type crSupervisor struct {
 	crManager          CRManager
 	credentialsManager certificates.Manager
 	compassClient      compass.ConfigClient
-	syncService        synchronization.Service
+	syncService        kyma.Service
 	log                *logrus.Entry
 }
 
@@ -85,27 +85,30 @@ func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnectio
 
 // SynchronizeWithCompass synchronizes with Compass
 func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error) {
+	log := s.log.WithField("CompassConnection", connection.Name)
 	syncAttemptTime := metav1.Now()
 
-	s.log.Infof("Getting client credentials...")
+	log.Infof("Getting client credentials...")
 	credentials, err := s.credentialsManager.GetCredentials()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to get credentials: %s", err.Error())
+		log.Error(errorMsg)
 		setSyncFailedStatus(connection, syncAttemptTime, errorMsg)
 		return s.updateCompassConnection(connection)
 	}
 
 	// TODO: Do we want to call Connector ManagementInfo is it still part of the flow?
 
-	s.log.Infof("Fetching configuration from Compass Director...")
+	log.Infof("Fetching configuration from Director, from %s url...", connection.Spec.ManagementInfo.DirectorURL)
 	applicationsConfig, err := s.compassClient.FetchConfiguration(connection.Spec.ManagementInfo.DirectorURL, credentials)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to fetch configuration: %s", err.Error())
+		log.Error(errorMsg)
 		setSyncFailedStatus(connection, syncAttemptTime, errorMsg)
 		return s.updateCompassConnection(connection)
 	}
 
-	s.log.Infof("Applying configuration to the cluster...")
+	log.Infof("Applying configuration to the cluster...")
 	results, err := s.syncService.Apply(applicationsConfig)
 	if err != nil {
 		connection.Status.State = v1alpha1.ResourceApplicationFailed
@@ -118,9 +121,9 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	}
 
 	// TODO: save result to CR and possibly log in better manner
-	s.log.Infof("Config application results: ")
+	log.Infof("Config application results: ")
 	for _, res := range results {
-		s.log.Info(res)
+		log.Info(res)
 	}
 
 	// TODO: report Results to Director
@@ -178,6 +181,8 @@ func (s *crSupervisor) saveCredentials(connectionCR *v1alpha1.CompassConnection,
 
 		return
 	}
+
+	s.log.Infof("Connection established. Director URL: %s", establishedConnection.DirectorURL)
 
 	connectionTime := metav1.Now()
 

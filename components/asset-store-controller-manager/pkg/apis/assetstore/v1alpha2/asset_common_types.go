@@ -10,7 +10,7 @@ type CommonAssetSpec struct {
 	Source    AssetSource    `json:"source"`
 	BucketRef AssetBucketRef `json:"bucketRef,omitempty"`
 	// +optional
-	Metadata *runtime.RawExtension `json:"metadata,omitempty"`
+	Parameters *runtime.RawExtension `json:"parameters,omitempty"`
 }
 
 // CommonAssetStatus defines the observed state of Asset
@@ -53,7 +53,7 @@ type WebhookService struct {
 
 type AssetWebhookService struct {
 	WebhookService `json:",inline"`
-	Metadata       *runtime.RawExtension `json:"metadata,omitempty"`
+	Parameters     *runtime.RawExtension `json:"parameters,omitempty"`
 }
 
 type AssetMode string

@@ -2,12 +2,12 @@
 
 
 [[projects]]
-  digest = "1:853d9a1a7b0d3ee96d855dfa22e268fa646667dfae16d25dc5d137f5e2e1f9c1"
+  digest = "1:06de8fdf0549fc9076a77105b94249d4e26e4cdd8af33365568ff5e3e1bb35c7"
   name = "github.com/avast/retry-go"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "88ef2130df9642aa2849152b2985af9ba3676ee9"
-  version = "v2.3.0"
+  revision = "101acd3290b786bf437607d874596e3996484d8d"
+  version = "v2.4.1"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -150,7 +150,7 @@
   version = "v0.1.36"
 
 [[projects]]
-  digest = "1:007da15ff1e5940151b7ca5b405f69859bdcd52bbd1f99b52a879c8bc36216c7"
+  digest = "1:52327ce22e8edaa69bab0502d09395712489ef3e31359942abd063f5ccd480cf"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
@@ -164,13 +164,17 @@
     "components/console-backend-service/pkg/client/clientset/versioned",
     "components/console-backend-service/pkg/client/clientset/versioned/scheme",
     "components/console-backend-service/pkg/client/clientset/versioned/typed/ui/v1alpha1",
+    "components/helm-broker/pkg/apis/addons/v1alpha1",
+    "components/helm-broker/pkg/client/clientset/versioned",
+    "components/helm-broker/pkg/client/clientset/versioned/scheme",
+    "components/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1",
     "components/idppreset/pkg/apis/authentication/v1alpha1",
     "components/idppreset/pkg/client/clientset/versioned",
     "components/idppreset/pkg/client/clientset/versioned/scheme",
     "components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "0ad464e54adb7986337508e82284a6e2f1ba12e5"
+  revision = "f5d791b218819a0aecde663dedda1905d7c12bb5"
 
 [[projects]]
   digest = "1:d946fa644b263e26091e0ae20cd12ee958ab869926abbc2d111fbd39902f91eb"
@@ -532,6 +536,7 @@
     "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "github.com/kyma-project/kyma/components/console-backend-service/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/components/console-backend-service/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned",
     "github.com/machinebox/graphql",
     "github.com/mitchellh/mapstructure",

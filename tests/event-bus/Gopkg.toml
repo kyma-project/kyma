@@ -1,11 +1,11 @@
 required = [
-  "github.com/golang/lint/golint",
+  "golang.org/x/lint/golint",
   "golang.org/x/tools/cmd/goimports",
 ]
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "b600c91980c2396a6f1d3f5087f94dfa814c0c2e"
+  revision = "90feff1290b208684c0eb05e502db44383cc0648"
 
 [[override]]
   name = "k8s.io/apimachinery"
@@ -18,3 +18,11 @@ required = [
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  name = "github.com/avast/retry-go"
+  version = "2.3.0"
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "1.4.2"

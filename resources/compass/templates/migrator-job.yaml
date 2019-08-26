@@ -53,6 +53,9 @@ spec:
                             secretKeyRef:
                                 name: compass-postgresql
                                 key: postgresql-sslMode
+                      - name: "DIRECTION"
+                        value: "up"
+
                   command:
                     - "/bin/bash"
                   args:

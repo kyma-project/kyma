@@ -6,8 +6,8 @@ echo "The installer.sh script is deprecated and will be removed. Use Kyma CLI in
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RESOURCES_DIR="${CURRENT_DIR}/../resources"
-INSTALLER="${RESOURCES_DIR}/installer.yaml"
-INSTALLER_CONFIG=""
+INSTALLER="${RESOURCES_DIR}/installer-local.yaml"
+INSTALLER_CONFIG="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
 AZURE_BROKER_CONFIG=""
 
 source $CURRENT_DIR/utils.sh
@@ -19,10 +19,6 @@ do
     key="$1"
 
     case ${key} in
-        --local)
-            LOCAL=1
-            shift
-            ;;
         --cr)
             checkInputParameterValue "$2"
             CR_PATH="$2"
@@ -52,17 +48,8 @@ echo "
 ################################################################################
 "
 
-kubectl apply -f ${RESOURCES_DIR}/default-sa-rbac-role.yaml # to be deleted once the script is used in local scenario only
-
 bash ${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
 bash ${CURRENT_DIR}/install-tiller.sh
-
-if [ $LOCAL ]; then
-
-    INSTALLER="${RESOURCES_DIR}/installer-local.yaml"
-    INSTALLER_CONFIG="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
-
-fi
 
 if [ $CR_PATH ]; then
 
@@ -88,10 +75,8 @@ if [ ${ADMIN_PASSWORD} ]; then
     COMBO_YAML=$(sed 's/global\.adminPassword: .*/global.adminPassword: '"${ADMIN_PASSWORD}"'/g' <<<"$COMBO_YAML")
 fi
 
-if [ ${LOCAL} ]; then
-    MINIKUBE_IP=$(minikube ip)
-    COMBO_YAML=$(sed 's/\.minikubeIP: .*/\.minikubeIP: '"${MINIKUBE_IP}"'/g' <<<"$COMBO_YAML")
-fi
+MINIKUBE_IP=$(minikube ip)
+COMBO_YAML=$(sed 's/\.minikubeIP: .*/\.minikubeIP: '"${MINIKUBE_IP}"'/g' <<<"$COMBO_YAML")
 
 echo -e "\nConfiguring sub-components"
 bash ${CURRENT_DIR}/configure-components.sh

@@ -55,6 +55,13 @@ then
    exit 1
 fi
 
+existingCTSs=$(${kc} get cts -o=name)
+for cts in ${existingCTSs}
+do
+  echo "Removing: ${cts}"
+  ${kc} delete ${cts}
+done
+
 matchTests="" # match all tests
 
 ${kc} get cm dex-config -n kyma-system -ojsonpath="{.data}" | grep --silent "#__STATIC_PASSWORDS__"
@@ -71,8 +78,11 @@ then
   echo "$(${kc} get testdefinitions --all-namespaces -l 'require-static-users=true' -o=go-template --template='{{- range .items}}{{printf " - %s\n" .metadata.name}}{{- end}}')"
 fi
 
-# creates a config map which provides the testing bundles
+# creates a config map which provides the testing addons
 injectTestingAddons
+if [[ $? -eq 1 ]]; then
+  exit 1
+fi
 trap removeTestingAddons ERR EXIT
 
 cat <<EOF | ${kc} apply -f -
@@ -140,7 +150,7 @@ cleanupExitCode=$?
 echo "ClusterTestSuite details:"
 kubectl get cts ${suiteName} -oyaml
 
-kubectl delete cts ${suiteName}
+deleteCTS ${suiteName}
 
 printImagesWithLatestTag
 latestTagExitCode=$?

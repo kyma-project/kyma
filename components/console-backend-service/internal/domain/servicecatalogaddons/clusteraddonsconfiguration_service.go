@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/util/retry"
 )
 
 type clusterAddonsConfigurationService struct {
@@ -51,59 +52,63 @@ func (s *clusterAddonsConfigurationService) List(pagingParams pager.PagingParams
 }
 
 func (s *clusterAddonsConfigurationService) AddRepos(name string, urls []string) (*v1alpha1.ClusterAddonsConfiguration, error) {
-	addon, err := s.getClusterAddonsConfiguration(name)
-	if err != nil {
-		return nil, err
+	var addon *v1alpha1.ClusterAddonsConfiguration
+	var err error
+	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		addon, err = s.addonsCfgClient.ClusterAddonsConfigurations().Get(name, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+
+		for _, u := range urls {
+			addon.Spec.Repositories = append(addon.Spec.Repositories, v1alpha1.SpecRepository{URL: u})
+		}
+
+		_, err = s.addonsCfgClient.ClusterAddonsConfigurations().Update(addon)
+		return err
+	}); err != nil {
+		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, name)
 	}
 
-	addonCpy := addon.DeepCopy()
-	for _, u := range urls {
-		addonCpy.Spec.Repositories = append(addonCpy.Spec.Repositories, v1alpha1.SpecRepository{URL: u})
-	}
-
-	result, err := s.addonsCfgClient.ClusterAddonsConfigurations().Update(addonCpy)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, addonCpy.Name)
-	}
-
-	return result, nil
+	return addon, nil
 }
 
 func (s *clusterAddonsConfigurationService) RemoveRepos(name string, urls []string) (*v1alpha1.ClusterAddonsConfiguration, error) {
-	addon, err := s.getClusterAddonsConfiguration(name)
-	if err != nil {
-		return nil, err
+	var addon *v1alpha1.ClusterAddonsConfiguration
+	var err error
+	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		addon, err = s.addonsCfgClient.ClusterAddonsConfigurations().Get(name, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		resultRepos := filterOutRepositories(addon.Spec.Repositories, urls)
+		addon.Spec.Repositories = resultRepos
+
+		_, err = s.addonsCfgClient.ClusterAddonsConfigurations().Update(addon)
+		return err
+	}); err != nil {
+		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, name)
 	}
 
-	resultRepos := s.filterOutRepositories(addon.Spec.Repositories, urls)
-
-	addonCpy := addon.DeepCopy()
-	addonCpy.Spec.Repositories = resultRepos
-
-	updatedAddon, err := s.addonsCfgClient.ClusterAddonsConfigurations().Update(addonCpy)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, addonCpy.Name)
-	}
-
-	return updatedAddon, nil
+	return addon, nil
 }
 
 func (s *clusterAddonsConfigurationService) Create(name string, urls []string, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
 	addon := &v1alpha1.ClusterAddonsConfiguration{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   name,
-			Labels: s.toMapLabels(labels),
+			Labels: toMapLabels(labels),
 		},
 		Spec: v1alpha1.ClusterAddonsConfigurationSpec{
 			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
-				Repositories: s.toSpecRepositories(urls),
+				Repositories: toSpecRepositories(urls),
 			},
 		},
 	}
 
 	result, err := s.addonsCfgClient.ClusterAddonsConfigurations().Create(addon)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while creating %s %s", pretty.AddonsConfiguration, addon.Name)
+		return nil, errors.Wrapf(err, "while creating %s %s", pretty.ClusterAddonsConfiguration, addon.Name)
 	}
 
 	return result, nil
@@ -116,12 +121,12 @@ func (s *clusterAddonsConfigurationService) Update(name string, urls []string, l
 	}
 
 	addonCpy := addon.DeepCopy()
-	addonCpy.Spec.Repositories = s.toSpecRepositories(urls)
-	addonCpy.Labels = s.toMapLabels(labels)
+	addonCpy.Spec.Repositories = toSpecRepositories(urls)
+	addonCpy.Labels = toMapLabels(labels)
 
 	result, err := s.addonsCfgClient.ClusterAddonsConfigurations().Update(addonCpy)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, addon.Name)
+		return nil, errors.Wrapf(err, "while updating %s %s", pretty.ClusterAddonsConfiguration, addon.Name)
 	}
 
 	return result, nil
@@ -134,52 +139,35 @@ func (s *clusterAddonsConfigurationService) Delete(name string) (*v1alpha1.Clust
 	}
 
 	if err := s.addonsCfgClient.ClusterAddonsConfigurations().Delete(name, &metav1.DeleteOptions{}); err != nil {
-		return nil, errors.Wrapf(err, "while deleting %s %s", pretty.AddonsConfiguration, addon.Name)
+		return nil, errors.Wrapf(err, "while deleting %s %s", pretty.ClusterAddonsConfiguration, addon.Name)
 	}
 
 	return addon, nil
 }
 
-func (s *clusterAddonsConfigurationService) filterOutRepositories(repos []v1alpha1.SpecRepository, urls []string) []v1alpha1.SpecRepository {
-	idxURLs := map[string]struct{}{}
-	for _, u := range urls {
-		idxURLs[u] = struct{}{}
-	}
-
-	var result []v1alpha1.SpecRepository
-	for _, r := range repos {
-		if _, found := idxURLs[r.URL]; !found {
-			result = append(result, r)
+func (s *clusterAddonsConfigurationService) Resync(name string) (*v1alpha1.ClusterAddonsConfiguration, error) {
+	var result *v1alpha1.ClusterAddonsConfiguration
+	if err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		addon, err := s.getClusterAddonsConfiguration(name)
+		if err != nil {
+			return err
 		}
-	}
-	return result
-}
+		addonCpy := addon.DeepCopy()
+		addonCpy.Spec.ReprocessRequest++
 
-func (s *clusterAddonsConfigurationService) toMapLabels(givenLabels *gqlschema.Labels) map[string]string {
-	if givenLabels == nil {
-		return nil
-	}
-
-	labels := map[string]string{}
-	for k, v := range *givenLabels {
-		labels[k] = v
-	}
-	return labels
-}
-
-func (s *clusterAddonsConfigurationService) toSpecRepositories(urls []string) []v1alpha1.SpecRepository {
-	var repos []v1alpha1.SpecRepository
-	for _, u := range urls {
-		repos = append(repos, v1alpha1.SpecRepository{URL: u})
+		result, err = s.addonsCfgClient.ClusterAddonsConfigurations().Update(addonCpy)
+		return err
+	}); err != nil {
+		return nil, errors.Wrapf(err, "cannot update ClusterAddonsConfiguration %s", name)
 	}
 
-	return repos
+	return result, nil
 }
 
 func (s *clusterAddonsConfigurationService) getClusterAddonsConfiguration(name string) (*v1alpha1.ClusterAddonsConfiguration, error) {
 	item, exists, err := s.addonsCfgInformer.GetStore().GetByKey(name)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while getting %s %s", pretty.AddonsConfiguration, name)
+		return nil, errors.Wrapf(err, "while getting %s %s", pretty.ClusterAddonsConfiguration, name)
 	}
 
 	if !exists {

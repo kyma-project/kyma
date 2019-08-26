@@ -58,6 +58,7 @@ if [ $? != 0 ];
 fi
 
 filesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/|_*/testdata/|/pkg\/|_*export_test.go")
+
 #
 # GO IMPORTS
 #

@@ -24,16 +24,17 @@ func (c *clusterAssetConverter) ToGQL(item *v1alpha2.ClusterAsset) (*gqlschema.C
 	}
 
 	status := c.extractor.Status(item.Status.CommonAssetStatus)
-	metadata, err := c.extractor.Metadata(item.Spec.CommonAssetSpec.Metadata)
+	parameters, err := c.extractor.Parameters(item.Spec.CommonAssetSpec.Parameters)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while extracting metadata from ClusterAsset [name: %s]", item.Name)
 	}
 
 	clusterAsset := gqlschema.ClusterAsset{
-		Name:     item.Name,
-		Type:     item.Labels[CmsTypeLabel],
-		Status:   status,
-		Metadata: metadata,
+		Name:       item.Name,
+		Type:       item.Labels[CmsTypeLabel],
+		Status:     status,
+		Metadata:   parameters,
+		Parameters: parameters,
 	}
 
 	return &clusterAsset, nil

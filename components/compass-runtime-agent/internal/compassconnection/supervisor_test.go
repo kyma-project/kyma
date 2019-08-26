@@ -3,11 +3,13 @@ package compassconnection
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
+
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
+	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 
-	syncMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization/mocks"
+	syncMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/mocks"
 
 	mocks2 "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compassconnection/mocks"
 
@@ -67,7 +69,7 @@ func TestCrSupervisor_InitializeCompassConnectionCR(t *testing.T) {
 	} {
 		t.Run("should initialize Compass Connection when "+testCase.description, func(t *testing.T) {
 			// given
-			fakeCRDClient := fake.NewSimpleClientset().Compass().CompassConnections()
+			fakeCRDClient := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
 			if testCase.existingConnection != nil {
 				_, err := fakeCRDClient.Create(testCase.existingConnection)
 				require.NoError(t, err)
@@ -102,7 +104,7 @@ func TestCrSupervisor_InitializeCompassConnectionCR(t *testing.T) {
 
 	t.Run("should set Connection error status when failed to preserve certificate", func(t *testing.T) {
 		// given
-		fakeCRDClient := fake.NewSimpleClientset().Compass().CompassConnections()
+		fakeCRDClient := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
 
 		establishedConnection := compass.EstablishedConnection{
 			Credentials: certificates.Credentials{},
@@ -126,7 +128,7 @@ func TestCrSupervisor_InitializeCompassConnectionCR(t *testing.T) {
 
 	t.Run("should set Connection error status when failed to connect to compass", func(t *testing.T) {
 		// given
-		fakeCRDClient := fake.NewSimpleClientset().Compass().CompassConnections()
+		fakeCRDClient := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
 
 		connector := &mocks.Connector{}
 		connector.On("EstablishConnection").Return(compass.EstablishedConnection{}, errors.New("error"))
@@ -210,8 +212,8 @@ func TestCrSupervisor_SynchronizeWithCompass(t *testing.T) {
 	}
 
 	credentials := certificates.Credentials{}
-	applicationsConfig := []synchronization.Application{}
-	syncResults := []synchronization.Result{}
+	applicationsConfig := []kymamodel.Application{}
+	syncResults := []kyma.Result{}
 
 	for _, testCase := range []struct {
 		description             string
@@ -281,7 +283,7 @@ func TestCrSupervisor_SynchronizeWithCompass(t *testing.T) {
 	} {
 		t.Run("should "+testCase.description, func(t *testing.T) {
 			// given
-			fakeCRDClient := fake.NewSimpleClientset(existingConnection).Compass().CompassConnections()
+			fakeCRDClient := fake.NewSimpleClientset(existingConnection).CompassV1alpha1().CompassConnections()
 
 			credManager := &certMocks.Manager{}
 			compassClient := &mocks.ConfigClient{}

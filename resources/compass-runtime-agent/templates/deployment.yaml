@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
@@ -23,16 +23,22 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.runtimeAgent.dir }}compass-runtime-agent:{{ .Values.global.images.runtimeAgent.version }}
-          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
           args:
             - "/compass-runtime-agent"
-            - "--controllerSyncPeriod={{ .Values.deployment.sync.controllerSyncPeriod }}"
-            - "--minimalConfigFetchTime={{ .Values.deployment.sync.minimalConfigFetchTime }}"
-            - "--tokenURLConfigFile={{.Values.deployment.tokenConfig.mountPath}}/{{ .Values.deployment.tokenConfig.tokenURLConfigFile }}"
-          volumeMounts:
-            - mountPath: {{ .Values.deployment.tokenConfig.mountPath }}
-              name: {{ .Values.deployment.tokenConfig.volumeName }}
-      volumes:
-        - name: {{ .Values.deployment.tokenConfig.volumeName }}
-          configMap:
-            name: {{ .Values.config.tokenConfigMap.name }}
+            - "--controllerSyncPeriod={{ .Values.compassRuntimeAgent.sync.controllerSyncPeriod }}"
+            - "--minimalConfigSyncTime={{ .Values.compassRuntimeAgent.sync.minimalConfigSyncTime }}"
+            - "--integrationNamespace={{ .Values.compassRuntimeAgent.resources.integrationNamespace }}"
+            - "--gatewayPort={{ .Values.compassRuntimeAgent.resources.gatewayPort }}"
+            - "--insecureConfigurationFetch={{ .Values.compassRuntimeAgent.config.insecureConfigurationFetch }}"
+            - "--uploadServiceUrl={{ .Values.compassRuntimeAgent.resources.uploadServiceUrl }}"
+          envFrom:
+          - configMapRef:
+              optional: true
+              name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "compass-gateway.{{ .Values.global.ingress.domainName }}"
+      {{ end }}

@@ -29,6 +29,9 @@ sample-addon/
 
 > **NOTE:** All file names in an addon repository are case-sensitive.
 
+> **NOTE:** The maximum size of an addon is determined by the amount of memory and storage size. These limits are set in the 
+[Helm Broker chart](https://kyma-project.io/docs/components/helm-broker/#configuration-helm-broker-chart).
+
 For details about particular files, read the following sections.
 
 ## meta.yaml file
@@ -112,7 +115,7 @@ The `meta.yaml` file contains the specification of the ClusterDocsTopic. The exa
 
 >**NOTE:** Currently you can provide only one entry in the `docs` array.
 
-See [this](https://github.com/kyma-project/bundles/tree/release-0.6/bundles/testing-0.0.1/docs) example of the `docs` directory with documentation for the testing addon.
+See [this](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) example of the `docs` directory with documentation for the testing addon.
 
 Using the Helm Broker, you can provision a broker which provides its own Service Classes. To learn how to upload documentation for those classes, read [this](#details-provide-service-classes-documentation) document.
 

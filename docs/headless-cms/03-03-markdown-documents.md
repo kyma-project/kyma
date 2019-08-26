@@ -43,7 +43,7 @@ type: {Document type}
 
 ### Display
 
-In the Documentation view (Docs UI), that is available in the Console UI under the question mark icon on the top navigation panel, the metadata allow you to create the left-side navigation structure. The Docs UI displays documents grouped under a common `type` in alphanumeric order as per files names. The following example shows four documents, their metadata, and corresponding places in the left-side navigation:
+In the Documentation view (Docs UI), that is available in the Console UI under the question mark icon on the top navigation panel, the metadata allow you to create the left-side and right-side navigation structures. The left-side navigation displays topics' groups and topics. The right-side navigation displays documents grouped under a common `type` in alphanumeric order as per files names. Underneath the `type` you can see the document's `title`, and subsequent headers from the document. The following example shows four documents, their metadata, and corresponding places in the left-side and right-side navigation:
 
 <div tabs>
   <details>
@@ -84,11 +84,11 @@ title: Overview
   Docs UI preview
   </summary>
 
-![](./assets/left-side-nav-docs-ui.png)
+![](./assets/nav-docs-ui.png)
   </details>
 </div>
 
-In the Service Catalog and Instances views, which contain Service Classes documentation, the `title` metadata displays as the name of a particular tab. If you don't provide `title`, these UIs display the file name as a fallback. See the following example:
+In the Service Catalog and Instances views, which contain Service Classes documentation, Markdown documents display in the **Documentation** tab. The `title` and `type` metadata create the right-side navigation. A document with the **Overview** `title` always displays on top. If you don't provide `title` and `type`, these UIs display the file name as a fallback. The right-side document structure is based on the same logic as in the Documentation view. See the following example:
 
 <div tabs>
   <details>
@@ -115,7 +115,7 @@ type: Details
   Service Catalog UI preview
   </summary>
 
-![](./assets/tabs-catalog-ui.png)
+![](./assets/catalog-ui-docs.png)
   </details>
 </div>
 
@@ -127,7 +127,7 @@ Content is the body of your document. Write content in [Markdown](https://daring
 
 In Kyma, to make documentation more reader-friendly, some Markdown features are customized. See the following examples:
 
-1. [Linking](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/links-in-docs.md) - link between documents in the same topic or in different topics using metadata.
+1. [Linking](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/05-links-in-docs.md) - link between documents in the same topic or in different topics using metadata.
 
     <div tabs>
       <details>
@@ -149,7 +149,7 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       </details>
     </div>
 
-2. [Documentation toggles](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/documentation-toggle.md) - render several versions of a given section in one document or have several versions of one document.
+2. [Documentation toggles](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/03-documentation-toggle.md) - render several versions of a given section in one document or have several versions of one document.
 
     <div tabs>
       <details>
@@ -185,7 +185,7 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       </details>
     </div>
 
-3. [Panels](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/formatting.md#panels) - use colorful containers that call out important or additional information within a topic.
+3. [Panels](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/04-formatting.md#panels) - use colorful containers that call out important or additional information within a topic.
 
     <div tabs>
       <details>
@@ -194,7 +194,7 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       </summary>
 
     ```
-    >**TIP:** If you contribute to the [bundles](https://github.com/kyma-project/bundles/tree/master/bundles) repository, you do not have to compress your bundles as the system does it automatically.
+    >**TIP:** If you contribute to the [addons](https://github.com/kyma-project/addons/tree/master/addons) repository, you do not have to compress your addons as the system does it automatically.
     ```
       </details>
       <details>

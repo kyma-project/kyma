@@ -11,7 +11,7 @@ spec:
     - type: redis
       name: redis
       mode: package
-      url: https://github.com/kyma-project/bundles/releases/download/latest/redis-0.0.3.tgz
+      url: https://github.com/kyma-project/addons/releases/download/latest/redis-0.0.3.tgz
     - type: asyncapi
       name: slack
       mode: single

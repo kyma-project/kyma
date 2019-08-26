@@ -43,7 +43,7 @@ func (c *FakeApplications) List(opts v1.ListOptions) (result *v1alpha1.Applicati
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.ApplicationList{}
+	list := &v1alpha1.ApplicationList{ListMeta: obj.(*v1alpha1.ApplicationList).ListMeta}
 	for _, item := range obj.(*v1alpha1.ApplicationList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -107,7 +107,7 @@ func (c *FakeApplications) DeleteCollection(options *v1.DeleteOptions, listOptio
 // Patch applies the patch and returns the patched application.
 func (c *FakeApplications) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Application, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootPatchSubresourceAction(applicationsResource, name, data, subresources...), &v1alpha1.Application{})
+		Invokes(testing.NewRootPatchSubresourceAction(applicationsResource, name, pt, data, subresources...), &v1alpha1.Application{})
 	if obj == nil {
 		return nil, err
 	}

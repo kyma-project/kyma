@@ -2,8 +2,8 @@
 
 package v1alpha2
 
-type ChecknothingExpansion interface{}
+type HandlerExpansion interface{}
 
-type DenierExpansion interface{}
+type InstanceExpansion interface{}
 
 type RuleExpansion interface{}

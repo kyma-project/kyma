@@ -1,0 +1,65 @@
+{{- if and ( .Values.test.acceptance.external_solution.enabled ) ( .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" ) }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}-test-external-solution
+  labels:
+    kyma-project.io/test-kind: e2e
+    app: {{ .Chart.Name }}-test-external-solution
+    app.kubernetes.io/name: {{ .Chart.Name }}-test-external-solution
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  disableConcurrency: false
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ .Chart.Name }}-test-external-solution
+      shareProcessNamespace: true
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "connector-service.{{ .Values.global.ingress.domainName }}"
+            - "counter-service.{{ .Values.global.ingress.domainName }}"
+            - "gateway.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
+      containers:
+        - name: test
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.e2e_external_solution.dir }}e2e-external-integration-test:{{ .Values.global.e2e_external_solution.version }}
+          imagePullPolicy: Always
+          env:
+            - name: INGRESSGATEWAY_ADDRESS
+              value: istio-ingressgateway.istio-system.svc.cluster.local
+          args:
+            - e2e
+            - --domain
+            - {{ .Values.global.ingress.domainName }}
+            - --skipSSLVerify
+            {{ if .Values.tests.application_connector_tests.connector_service.central }}
+            - --applicationTenant=tenant
+            - --applicationGroup=group
+            {{ end }}
+        - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+          name: manager
+          command:
+            - bin/sh
+            - -c
+            - |
+              SERVICE="/e2e"
+              sleep 10
+              while true; do
+                if pgrep -x "${SERVICE}"; then
+                  echo "---> ${SERVICE} is running."
+                  sleep 10
+                else
+                  echo "---> ${SERVICE} has stopped, stopping istio"
+                  pkill -TERM pilot-agent
+                  break
+                fi
+              done
+{{- end}}

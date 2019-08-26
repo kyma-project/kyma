@@ -60,6 +60,10 @@ required = [
   name = "github.com/moby/moby"
   version = "v1.13.1"
 
+[[constraint]]
+  name="github.com/kyma-project/kyma"
+  revision = "7c2360a1ea71ba311c462f98cd9450b617c822ef"
+
 [[override]]
   name = "k8s.io/api"
   version = "kubernetes-1.13.4"

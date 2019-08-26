@@ -3,6 +3,9 @@ package compassconnection
 import (
 	"context"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/stretchr/testify/mock"
 
@@ -21,10 +24,14 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/fake"
 	clientset "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
 	compassConnectionName = "compass-connection"
+
+	minimalConfigSyncTime = 30 * time.Second
 )
 
 var (
@@ -43,12 +50,12 @@ func TestReconcile(t *testing.T) {
 			},
 		}
 
-		fakeClientset := fake.NewSimpleClientset(compassConnection).Compass().CompassConnections()
+		fakeClientset := fake.NewSimpleClientset(compassConnection).CompassV1alpha1().CompassConnections()
 		objClient := NewObjectClientWrapper(fakeClientset)
 		supervisor := &mocks.Supervisor{}
 		supervisor.On("SynchronizeWithCompass", compassConnection).Return(compassConnection, nil)
 
-		reconciler := newReconciler(objClient, supervisor)
+		reconciler := newReconciler(objClient, supervisor, minimalConfigSyncTime)
 
 		request := reconcile.Request{
 			NamespacedName: compassConnectionNamespacedName,
@@ -74,7 +81,7 @@ func TestReconcile(t *testing.T) {
 			},
 		}
 
-		fakeClientset := fake.NewSimpleClientset().Compass().CompassConnections()
+		fakeClientset := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
 		objClient := NewObjectClientWrapper(fakeClientset)
 		supervisor := &mocks.Supervisor{}
 		supervisor.On("InitializeCompassConnection").
@@ -84,7 +91,7 @@ func TestReconcile(t *testing.T) {
 			}).
 			Return(compassConnection, nil)
 
-		reconciler := newReconciler(objClient, supervisor)
+		reconciler := newReconciler(objClient, supervisor, minimalConfigSyncTime)
 
 		request := reconcile.Request{
 			NamespacedName: compassConnectionNamespacedName,
@@ -98,6 +105,54 @@ func TestReconcile(t *testing.T) {
 		require.Empty(t, result)
 
 	})
+}
+
+func Test_shouldResyncConfig(t *testing.T) {
+
+	minimalResyncTime := 300 * time.Second
+
+	for _, testCase := range []struct {
+		description  string
+		syncStatus   *v1alpha1.SynchronizationStatus
+		shouldResync bool
+	}{
+		{
+			description:  "resync if sync status not present",
+			syncStatus:   nil,
+			shouldResync: true,
+		},
+		{
+			description: "resync if sync minimal time passed",
+			syncStatus: &v1alpha1.SynchronizationStatus{
+				LastAttempt: metav1.Unix(time.Now().Unix()-600, 0),
+			},
+			shouldResync: true,
+		},
+		{
+			description: "not resync if sync minimal time did not pass",
+			syncStatus: &v1alpha1.SynchronizationStatus{
+				LastAttempt: metav1.Now(),
+			},
+			shouldResync: false,
+		},
+	} {
+		t.Run("should "+testCase.description, func(t *testing.T) {
+			// given
+			connection := &v1alpha1.CompassConnection{
+				ObjectMeta: v1.ObjectMeta{Name: "connection"},
+				Status: v1alpha1.CompassConnectionStatus{
+					SynchronizationStatus: testCase.syncStatus,
+				},
+			}
+
+			// when
+			resync := shouldResyncConfig(connection, minimalResyncTime)
+
+			// then
+			assert.Equal(t, testCase.shouldResync, resync)
+		})
+	}
+
 }
 
 func NewObjectClientWrapper(client clientset.CompassConnectionInterface) Client {
@@ -125,10 +180,10 @@ func (f *objectClientWrapper) Get(ctx context.Context, key client.ObjectKey, obj
 	return nil
 }
 
-func (f *objectClientWrapper) Update(ctx context.Context, obj runtime.Object) error {
+func (f *objectClientWrapper) Update(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error {
 	panic("implement me")
 }
 
-func (f *objectClientWrapper) Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOptionFunc) error {
+func (f *objectClientWrapper) Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOption) error {
 	panic("implement me")
 }

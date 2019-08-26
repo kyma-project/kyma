@@ -1,7 +1,6 @@
 package istio
 
 import (
-	"k8s.io/apimachinery/pkg/types"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
@@ -9,16 +8,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const applicaitonUID = types.UID("appUID")
-
 func TestService_Create(t *testing.T) {
 
 	t.Run("should create denier, checknothing, rule", func(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("CreateDenier", "app", applicationUID, "sid", "testsvc").Return(nil)
-		repository.On("CreateCheckNothing", "app", applicationUID, "sid", "testsvc").Return(nil)
+		repository.On("CreateHandler", "app", applicationUID, "sid", "testsvc").Return(nil)
+		repository.On("CreateInstance", "app", applicationUID, "sid", "testsvc").Return(nil)
 		repository.On("CreateRule", "app", applicationUID, "sid", "testsvc").Return(nil)
 
 		service := NewService(repository)
@@ -35,7 +32,7 @@ func TestService_Create(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("CreateDenier", "app", applicationUID, "sid", "testsvc").Return(apperrors.Internal(""))
+		repository.On("CreateHandler", "app", applicationUID, "sid", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)
 
@@ -52,8 +49,8 @@ func TestService_Create(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("CreateDenier", "app", applicationUID, "sid", "testsvc").Return(nil)
-		repository.On("CreateCheckNothing", "app", applicationUID, "sid", "testsvc").Return(apperrors.Internal(""))
+		repository.On("CreateHandler", "app", applicationUID, "sid", "testsvc").Return(nil)
+		repository.On("CreateInstance", "app", applicationUID, "sid", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)
 
@@ -70,8 +67,8 @@ func TestService_Create(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("CreateDenier", "app", applicationUID, "sid", "testsvc").Return(nil)
-		repository.On("CreateCheckNothing", "app", applicationUID, "sid", "testsvc").Return(nil)
+		repository.On("CreateHandler", "app", applicationUID, "sid", "testsvc").Return(nil)
+		repository.On("CreateInstance", "app", applicationUID, "sid", "testsvc").Return(nil)
 		repository.On("CreateRule", "app", applicationUID, "sid", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)
@@ -92,8 +89,8 @@ func TestService_Upsert(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("UpsertDenier", "app", applicationUID, "sid", "testsvc").Return(nil)
-		repository.On("UpsertCheckNothing", "app", applicationUID, "sid", "testsvc").Return(nil)
+		repository.On("UpsertHandler", "app", applicationUID, "sid", "testsvc").Return(nil)
+		repository.On("UpsertInstance", "app", applicationUID, "sid", "testsvc").Return(nil)
 		repository.On("UpsertRule", "app", applicationUID, "sid", "testsvc").Return(nil)
 
 		service := NewService(repository)
@@ -110,7 +107,7 @@ func TestService_Upsert(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("UpsertDenier", "app", applicationUID, "sid", "testsvc").Return(apperrors.Internal(""))
+		repository.On("UpsertHandler", "app", applicationUID, "sid", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)
 
@@ -127,8 +124,8 @@ func TestService_Upsert(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("UpsertDenier", "app", applicationUID, "sid", "testsvc").Return(nil)
-		repository.On("UpsertCheckNothing", "app", applicationUID, "sid", "testsvc").Return(apperrors.Internal(""))
+		repository.On("UpsertHandler", "app", applicationUID, "sid", "testsvc").Return(nil)
+		repository.On("UpsertInstance", "app", applicationUID, "sid", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)
 
@@ -145,8 +142,8 @@ func TestService_Upsert(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("UpsertDenier", "app", applicationUID, "sid", "testsvc").Return(nil)
-		repository.On("UpsertCheckNothing", "app", applicationUID, "sid", "testsvc").Return(nil)
+		repository.On("UpsertHandler", "app", applicationUID, "sid", "testsvc").Return(nil)
+		repository.On("UpsertInstance", "app", applicationUID, "sid", "testsvc").Return(nil)
 		repository.On("UpsertRule", "app", applicationUID, "sid", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)
@@ -167,8 +164,8 @@ func TestService_Delete(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("DeleteDenier", "testsvc").Return(nil)
-		repository.On("DeleteCheckNothing", "testsvc").Return(nil)
+		repository.On("DeleteHandler", "testsvc").Return(nil)
+		repository.On("DeleteInstance", "testsvc").Return(nil)
 		repository.On("DeleteRule", "testsvc").Return(nil)
 
 		service := NewService(repository)
@@ -185,7 +182,7 @@ func TestService_Delete(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("DeleteDenier", "testsvc").Return(apperrors.Internal(""))
+		repository.On("DeleteHandler", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)
 
@@ -202,8 +199,8 @@ func TestService_Delete(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("DeleteDenier", "testsvc").Return(nil)
-		repository.On("DeleteCheckNothing", "testsvc").Return(apperrors.Internal(""))
+		repository.On("DeleteHandler", "testsvc").Return(nil)
+		repository.On("DeleteInstance", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)
 
@@ -219,8 +216,8 @@ func TestService_Delete(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("DeleteDenier", "testsvc").Return(nil)
-		repository.On("DeleteCheckNothing", "testsvc").Return(nil)
+		repository.On("DeleteHandler", "testsvc").Return(nil)
+		repository.On("DeleteInstance", "testsvc").Return(nil)
 		repository.On("DeleteRule", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)

@@ -3,14 +3,16 @@ kind: Job
 metadata:
   name: {{ .Release.Name }}
   annotations:  
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
 spec:
   template:
     metadata:
       name: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ .Release.Name }}-service-account
+      securityContext:
+        runAsUser: 2000
       restartPolicy: Never
       containers:
       - name: {{ .Release.Name }}

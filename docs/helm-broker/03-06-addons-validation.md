@@ -3,7 +3,7 @@ title: Addons validation
 type: Details
 ---
 
-Checker is a tool that validates addons in the [`addons`](https://github.com/kyma-project/bundles) repository on every pull request. It checks whether all [required](#details-create-addons) fields are set in your addons.
+Checker is a tool that validates addons in the [`addons`](https://github.com/kyma-project/addons) repository on every pull request. It checks whether all [required](#details-create-addons) fields are set in your addons.
 
 The Checker also triggers the [`helm lint`](https://helm.sh/docs/helm/#helm-lint) command using Helm CLI 2.8.2, which checks your addons' charts.
 Run the Checker locally to test if your addons are valid:

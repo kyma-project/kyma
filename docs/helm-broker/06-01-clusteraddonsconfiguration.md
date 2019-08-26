@@ -26,38 +26,38 @@ metadata:
 spec:
   reprocessRequest: 0
   repositories:
-    - url: https://github.com/kyma-project/bundles/releases/download/0.6.0/index.yaml
-    - url: https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml
+    - url: https://github.com/kyma-project/addons/releases/download/0.6.0/index.yaml
+    - url: https://github.com/kyma-project/addons/releases/download/0.6.0/index-testing.yaml
     - url: https://broker.url
 status:
   phase: Failed
   lastProcessedTime: "2018-01-03T07:38:24Z"
   observedGeneration: 1
   repositories:
-    - url: https://github.com/kyma-project/bundles/releases/download/0.6.0/index.yaml
+    - url: https://github.com/kyma-project/addons/releases/download/0.6.0/index.yaml
       status: Ready
       addons:
         - name: gcp-service-broker
           version: 0.0.2
           status: Failed
           reason: ConflictInSpecifiedRepositories
-          message: "Specified repositories have addons with the same ID: [url: https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml, addons: testing:0.0.1]"
+          message: "Specified repositories have addons with the same ID: [url: https://github.com/kyma-project/addons/releases/download/0.6.0/index-testing.yaml, addons: testing:0.0.1]"
         - name: aws-service-broker
           version: 0.0.2
           status: Failed
           reason: ConflictWithAlreadyRegisteredAddons
-          message: "An addon with the same ID is already registered: [ConfigurationName: addons-cfg, url: https://github.com/kyma-project/bundles/releases/download/0.4.0/index.yaml, addons: aws-service-broker:0.0.1]"
+          message: "An addon with the same ID is already registered: [ConfigurationName: addons-cfg, url: https://github.com/kyma-project/addons/releases/download/0.4.0/index.yaml, addons: aws-service-broker:0.0.1]"
         - name: azure-service-broker
           version: 0.0.1
           status: Ready
-    - url: https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml
+    - url: https://github.com/kyma-project/addons/releases/download/0.6.0/index-testing.yaml
       status: Ready
       addons:
         - name: testing
           version: 0.0.1
           status: Failed
           reason: ConflictInSpecifiedRepositories
-          message: "Specified repositories have addons with the same ID: [url: https://github.com/kyma-project/bundles/releases/download/0.6.0/index.yaml, addons: gcp-service-broker:0.0.2]"
+          message: "Specified repositories have addons with the same ID: [url: https://github.com/kyma-project/addons/releases/download/0.6.0/index.yaml, addons: gcp-service-broker:0.0.2]"
         - name: redis
           version: 0.0.3
           status: Failed
@@ -87,13 +87,13 @@ This table lists all possible parameters of a given resource together with their
 | **status.observedGeneration**          | **Not applicable** | Specifies the most recent generation that the Helm Broker Controller observed.               |
 | **status.repositories.url**            | **Not applicable** | Provides the full URL to the index file with addons definitions.         |
 | **status.repositories.status**         | **Not applicable** | Describes the status of processing a given repository by the Helm Broker Controller.     |
-| **status.repositories.reason**         | **Not applicable** | Provides the reason why the repository processing failed. [Here](https://github.com/kyma-project/kyma/blob/master/components/helm-broker/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of reasons.     |
-| **status.repositories.message**        | **Not applicable** | Provides a human-readable message why the repository processing failed. [Here](https://github.com/kyma-project/kyma/blob/master/components/helm-broker/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of messages.     |
+| **status.repositories.reason**         | **Not applicable** | Provides the reason why the repository processing failed. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of reasons.     |
+| **status.repositories.message**        | **Not applicable** | Provides a human-readable message why the repository processing failed. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of messages.     |
 | **status.repositories.addons.name**    | **Not applicable** | Defines the name of the addon.         |
 | **status.repositories.addons.version** | **Not applicable** | Defines the version of the addon.        |
 | **status.repositories.addons.status**  | **Not applicable** | Describes the status of processing a given addon by the Helm Broker Controller.           |
-| **status.repositories.addons.reason**  | **Not applicable** | Provides the reason why the addon processing failed. [Here](https://github.com/kyma-project/kyma/blob/master/components/helm-broker/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of reasons.      |
-| **status.repositories.addons.message** | **Not applicable** | Provides a human-readable message on processing progress, success, or failure. [Here](https://github.com/kyma-project/kyma/blob/master/components/helm-broker/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of messages. |
+| **status.repositories.addons.reason**  | **Not applicable** | Provides the reason why the addon processing failed. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of reasons.      |
+| **status.repositories.addons.message** | **Not applicable** | Provides a human-readable message on processing progress, success, or failure. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of messages. |
 
 > **NOTE:** The Helm Broker Controller automatically adds all parameters marked as **Not applicable** to the ClusterAddonsConfiguration CR.
 

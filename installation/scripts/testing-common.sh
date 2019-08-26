@@ -152,6 +152,28 @@ function waitForTestPodsTermination() {
     return 1
 }
 
+function deleteCTS() {
+  local retry=0
+  local suiteName=$1
+
+  log "Deleting ClusterTestSuite ${suiteName}" nc bold
+  while [[ ${retry} -lt 20 ]]; do
+        msg=$(kubectl delete cts ${suiteName} 2>&1)
+        status=$?
+        if [[ ${status} -ne 0 ]]; then
+            echo "Unable to delete ClusterTestSuite: ${msg}"
+            echo "waiting 5s..."
+            sleep 5
+        else
+            log "OK" green bold
+            return 0
+        fi
+        retry=$[retry + 1]
+  done
+  log "FAILED" red
+  return 1
+}
+
 function waitForTerminationAndPrintLogs() {
     local suiteName=$1
 
@@ -181,15 +203,8 @@ function printImagesWithLatestTag() {
     return 0
 }
 
-TESTING_BUNDLES_MAP_NAME="testing-bundles-repos"
-function injectTestingBundles() {
-    kubectl create configmap ${TESTING_BUNDLES_MAP_NAME} -n kyma-system --from-literal=URLs=https://github.com/kyma-project/bundles/releases/download/0.6.0/index-testing.yaml
-    kubectl label configmap ${TESTING_BUNDLES_MAP_NAME} -n kyma-system helm-broker-repo=true
-
-    log "Testing bundles injected" green
-}
-
 TESTING_ADDONS_CFG_NAME="testing-addons"
+
 function injectTestingAddons() {
     cat <<EOF | kubectl apply -f -
 apiVersion: addons.kyma-project.io/v1alpha1
@@ -200,9 +215,25 @@ metadata:
   name: ${TESTING_ADDONS_CFG_NAME}
 spec:
   repositories:
-  - url: "https://github.com/kyma-project/bundles/releases/download/latest/index-testing.yaml"
+  - url: "https://github.com/kyma-project/addons/releases/download/0.7.0/index-testing.yaml"
 EOF
-    log "Testing addons injected" green
+    local retry=0
+    while [[ ${retry} -lt 10 ]]; do
+        msg=$(kubectl get clusteraddonsconfiguration ${TESTING_ADDONS_CFG_NAME} -o=jsonpath='{.status.phase}')
+        if [[ "${msg}" = "Ready" ]]; then
+            log "Testing addons injected" green
+            return 0
+        fi
+        if [[ "${msg}" = "Failed" ]]; then
+            log "Testing addons configuration failed" red
+            return 1
+        fi
+        echo "Waiting for ready testing addons ${retry}/10.. status: ${msg}"
+        retry=$[retry + 1]
+        sleep 3
+    done
+    log "Testing addons couldn't be injected" red
+    return 1
 }
 
 function removeTestingAddons() {
