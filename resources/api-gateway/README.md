@@ -1,7 +1,7 @@
 # API-Gateway
 
 ## Overview
-API-Gateway is a component allowing exposure of a service thou the kyma Console. It deploys and manages Istio and Ory/Oathkeeper CRDs.
+API-Gateway is a component allowing exposure of a service through the kyma Console. It deploys and manages Istio and Ory/Oathkeeper CRDs.
 
 This chart installs a controller, which requires and uses the following applications/CRD, which should be installed beforehand:
 - Istio [VirtualService](https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/)
