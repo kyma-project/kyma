@@ -1,5 +1,5 @@
 ---
-title: Error when calling a registered Service
+title: Error when calling a registered service
 type: Troubleshooting
 ---
 
@@ -39,7 +39,7 @@ If you call a registered service and receive an error:
     </details>
   </div>
 
-  Then register the Service.  
+  Then register the service. This recreates Access Service.  
   To register a service, see [this tutorial](components/application-connector/#tutorials-register-a-service-register-a-service).
 
 
