@@ -1,6 +1,7 @@
 package authn
 
 import (
+	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -170,10 +171,10 @@ type mockAuthenticator struct {
 	Called     bool
 }
 
-func (a *mockAuthenticator) AuthenticateRequest(req *http.Request) (user.Info, bool, error) {
+func (a *mockAuthenticator) AuthenticateRequest(req *http.Request) (*authenticator.Response, bool, error) {
 	a.Called = true
 	a.LastReq = req
-	return a.UserInfo, a.Authorised, a.Err
+	return &authenticator.Response{User: a.UserInfo}, a.Authorised, a.Err
 }
 
 type mockHandler struct {
