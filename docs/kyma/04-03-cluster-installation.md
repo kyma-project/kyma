@@ -351,7 +351,7 @@ Install Kyma on a Kubernetes cluster deployed through [Gardener](https://gardene
   | Tab  |  Setting |  Required value |
   |---|---|---|
   | Infrastructure |  Kubernetes | `1.12.10`  |
-  | Worker  |  Machine type | `n1-standard-4` (GCP) <br> `Standard_D4_v3` (Azure) |
+  | Worker  |  Machine type | `n1-standard-4` (GCP) `Standard_D4_v3` (Azure) |
   | Worker  | Autoscaler min.  | `3` |
 
 3. After you provision the cluster, download the kubeconfig file available under the **Show Cluster Access** option in the **Actions** column.
