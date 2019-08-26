@@ -7,4 +7,5 @@ This chart installs the controller, which requires these CRDs to expose services
 - Istio [VirtualService](https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/)
 - Istio [Policy](https://istio.io/docs/reference/config/istio.authentication.v1alpha1/)
 - Oathkeeper [AccessRule](https://www.ory.sh/docs/oathkeeper/)
-  - Oathkeeper CRD resources are available as charts in [this repo](https://github.com/ory/k8s)
+
+>**NOTE:** Oathkeeper CRD resources are available as charts in [this](https://github.com/ory/k8s) repository.
