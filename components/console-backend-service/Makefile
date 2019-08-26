@@ -1,5 +1,5 @@
 APP_NAME = console-backend-service
-APP_NAME = components/$(APP_NAME)
+APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.11
 
 include go.mk
