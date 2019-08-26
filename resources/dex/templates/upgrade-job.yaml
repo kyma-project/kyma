@@ -61,6 +61,8 @@ spec:
     spec:
       serviceAccountName: dex-upgrade-job
       restartPolicy: Never
+      securityContext:
+        runAsUser: 2000
       containers:
       - name: job
         image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a

@@ -3,3 +3,6 @@ deployment:
     pullPolicy: IfNotPresent
   args:
     containerPort: 3000
+  securityContext: # Set on container level
+    runAsUser: 2000
+    allowPrivilegeEscalation: false

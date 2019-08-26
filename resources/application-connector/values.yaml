@@ -21,19 +21,19 @@ global:
     version: PR-5318
   application_operator_tests:
     dir: pr/
-    version: PR-5318
+    version: PR-5397
   connector_service:
     dir: pr/
     version: PR-5318
   connector_service_tests:
     dir: pr/
-    version: PR-5318
+    version: PR-5397
   connection_token_handler:
     dir: pr/
     version: PR-5318
   connection_token_handler_tests:
     dir: pr/
-    version: PR-5318
+    version: PR-5397
   connectivity_certs_controller:
     dir: pr/
     version: PR-5318
@@ -48,7 +48,7 @@ global:
     version: PR-5318
   application_gateway:
     dir: pr/
-    version: PR-5318
+    version: PR-5397
   application_gateway_tests:
     dir: pr/
     version: PR-5318
@@ -57,7 +57,7 @@ global:
     version: PR-5318
   application_registry_tests:
     dir: pr/
-    version: PR-5318
+    version: PR-5397
   application_broker:
     dir: develop/
     version: d999e831
@@ -86,5 +86,5 @@ tests:
     skipSslVerify: true
     image:
       dir: pr/
-      version: PR-5318
+      version: PR-5397
       pullPolicy: IfNotPresent
