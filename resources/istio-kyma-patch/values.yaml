@@ -8,4 +8,4 @@ global:
   istio_kyma_patch:
     dir: pr/
     version: "PR-5226"
-  required_istio_version: 1.2.2
+  required_istio_version: 1.2.4
