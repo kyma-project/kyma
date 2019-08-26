@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-readonly CI_FLAG=ci
-
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 INVERTED='\033[7m'
@@ -16,11 +14,7 @@ echo -e "${NC}"
 ##
 # GO BUILD
 ##
-buildEnv=""
-if [ "$1" == "$CI_FLAG" ]; then
-	# build binary statically
-	buildEnv="env CGO_ENABLED=0"
-fi
+buildEnv="env CGO_ENABLED=0"
 
 ${buildEnv} go build -o console-backend-service
 goBuildResult=$?
