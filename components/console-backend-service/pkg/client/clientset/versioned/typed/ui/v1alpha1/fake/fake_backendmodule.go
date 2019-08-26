@@ -96,7 +96,7 @@ func (c *FakeBackendModules) DeleteCollection(options *v1.DeleteOptions, listOpt
 // Patch applies the patch and returns the patched backendModule.
 func (c *FakeBackendModules) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.BackendModule, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootPatchSubresourceAction(backendmodulesResource, name, data, subresources...), &v1alpha1.BackendModule{})
+		Invokes(testing.NewRootPatchSubresourceAction(backendmodulesResource, name, pt, data, subresources...), &v1alpha1.BackendModule{})
 	if obj == nil {
 		return nil, err
 	}
