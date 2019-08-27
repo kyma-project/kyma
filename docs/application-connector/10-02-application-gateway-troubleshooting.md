@@ -17,7 +17,7 @@ If you call a registered service and receive an error, follow these steps to det
   
 2. Check for Access Service
 
-    If the call you tried to make is not in the logs, check if [Access Service](components/application-connector/#architecture-application-connector-components-access-service) for the service you are trying to call exists.
+    If the call you tried to make is not in the logs, check if an [Access Service](#architecture-application-connector-components-access-service) exists for the service you are trying to call.
     ```
     kubectl -n kyma-integration get svc app-{APP_NAME}-{SERVICE_ID}
     ```
@@ -46,13 +46,13 @@ If you call a registered service and receive an error, follow these steps to det
       </details>
     </div>
 
-    Then, register the service and try calling again. The service re-registration recreates Access Service.  
+    Then, register the service and try calling again. Registering the service again recreates the Access Service.  
     To register a service, see [this tutorial](components/application-connector/#tutorials-register-a-service-register-a-service).
 
 
 4. Check the API URL
 
-    If your call reaches Application Gateway and Access Service exists, but you still receive an error, check if the API URL in the service definition matches the API URL of the actual service you are trying to call.  
+    If your call reaches the Application Gateway and the Access Service exists, but you still receive an error, check if the API URL in the service definition matches the API URL of the actual service you are trying to call.  
     To check the target URL of the API, fetch the Service definition from Application Registry:
 
     <div tabs name="verification">
@@ -77,4 +77,4 @@ If you call a registered service and receive an error, follow these steps to det
     </div>
 
     A successful call returns a `json` response with the service definition that contains the target URL.  
-    Access the target URL directly to verify that the value of `api.targetUrl` is correct.
+    Call the target URL directly to verify that the value of `api.targetUrl` is correct.
