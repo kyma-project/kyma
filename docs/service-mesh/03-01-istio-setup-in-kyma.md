@@ -29,7 +29,7 @@ This list shows the available Istio components and the components enabled by def
 These configuration changes are applied to customize Istio for use with Kyma:
 
 - Only the Ingress Gateway is enabled.
-- The [Secret Discovery Service](https://www.envoyproxy.io/docs/envoy/latest/configuration/secret#config-secret-discovery-service) is enabled in the Ingress Gateway.
+- The [Secret Discovery Service](https://www.envoyproxy.io/docs/envoy/latest/configuration/security/secret.html#secret-discovery-service-sds) is enabled in the Ingress Gateway.
 - Automatic sidecar injection is enabled by default, excluding the `istio-system` and `kube-system` Namespaces.
 - New resource limits for Istio sidecars are introduced: CPU: `100m`, memory: `128Mi`.
 - [Mutual TLS (mTLS)](https://istio.io/docs/concepts/security/#mutual-tls-authentication) is enabled cluster-wide with the exception of the Istio Control Plane.  
