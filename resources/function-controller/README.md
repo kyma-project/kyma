@@ -10,86 +10,51 @@ This project contains the chart for the Function Controller.
 
 - Knative Build (v0.6.0)
 - Knative Serving (v0.6.1)
-- Istio (istio-1.0.7)
+- Istio (v1.0.7)
 
 ## Installation
 
 ### Install Helm chart
 
-Run the following script to install the chart:
+Environment variables:
 
-```bash
-export NAME=function-controller
-export NAMESPACE=kyma-system
-helm install function-controller \
-             --namespace="${NAMESPACE}" \
-             --name="${NAME}" \
-             --tls
-```
+| Variable        | Description |
+| --------------- | ----------- |
+| `FN_REGISTRY`   | URL of the container registry _Function_ images will be pushed to. Used for authentication. (e.g. `https://gcr.io/` for GCR, `https://index.docker.io/v1/` for Docker Hub) |
+| `FN_REPOSITORY` | Name of the container repository _Function_ images will be pushed to. (e.g. `gcr.io/my-project` for GCR, `my-user` for Docker Hub) |
 
-
-### Create a ServiceAccount to enable knativeBuild Docker builds
-
-
-To run a build in a Namespace, create ServiceAccounts with linked Docker repository credentials for each Namespace that will be used for the knative-function controller.
-```bash
-#set your namespace e.g. default
-export NAMESPACE=<NAMESPACE>
-#set your registry e.g. https://gcr.io
-export REGISTRY=<YOURREGISTRY>
-echo -n 'Username:' ; read username
-echo -n 'Password:' ; read password
-cat <<EOF | kubectl apply -n ${NAMESPACE} -f -
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-    name: function-controller-build
-    labels:
-        app: function-controller
-secrets:
-    - name: function-controller-docker-reg-credential
----
-apiVersion: v1
-kind: Secret
-type: kubernetes.io/basic-auth
-metadata:
-    name: function-controller-docker-reg-credential
-    annotations:
-        build.knative.dev/docker-0: ${REGISTRY}
-data:
-    username: $(echo $username | base64)
-    password: $(echo $password | base64)
-EOF
-```
-
+1. Install knative-build
+    ```bash
+    helm install knative-build-init \
+                 --namespace="knative-build" \
+                 --name="knative-build-init" \
+                 --tls
+    
+    helm install knative-build \
+                 --namespace="knative-build" \
+                 --name="knative-build" \
+                 --tls
+    ```
+2. Install the function controller charts
+    ```bash
+    NAME=function-controller
+    NAMESPACE=serverless-system
+    
+    FN_REGISTRY=https://index.docker.io/v1/
+    FN_REPOSITORY=my-docker-user
+    reg_username=<container registry username>
+    reg_password=<container registry password>
+    
+    helm install function-controller \
+                 --namespace="${NAMESPACE}" \
+                 --name="${NAME}" \
+                 --set secret.registryAddress="${FN_REPOSITORY}" \
+                 --set secret.registryUserName="${reg_username}" \
+                 --set secret.registryPassword="${reg_password}" \
+                 --set config.dockerRegistry="${FN_REPOSITORY}" \
+                 --tls
+    ```
 ## Running the first function
 
 Currently there is no UI support for the new function-controller.
-Run your first function in the following way:
-
-```bash
-export NAMESPACE=<NAMESPACE>
-cat <<EOF | kubectl apply -n ${NAMESPACE} -f -
-apiVersion: serverless.kyma-project.io/v1alpha1
-kind: Function
-metadata:
-  name: sample
-  labels:
-    foo: bar
-spec:
-  function: |
-    module.exports = {
-        main: function(event, context) {
-          return 'Hello World'
-        }
-      }
-  functionContentType: "plaintext"
-  size: "L"
-  runtime: "nodejs8"
-EOF
-``` 
-
-To get the URL of your new service, run:
-```bash
-kubectl get ksvc -n $NAMESPACE
-```
+Run your first function in the following way: #Todo link
