@@ -7,10 +7,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/knative/pkg/apis"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	eventingclientset "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
@@ -106,8 +108,7 @@ var testCases = []controllertesting.TestCase{
 			makeSubscriptionWithFinalizer(),
 		},
 	},
-	// todo fix these tests
-	/*{
+	{
 		Name: "Activated kyma subscription doesn't create a new channel if it exists, but will create a new kn subscription",
 		InitialState: []runtime.Object{
 			makeEventsActivatedSubscription(),
@@ -204,7 +205,7 @@ var testCases = []controllertesting.TestCase{
 		WantEvent: []corev1.Event{
 			events[subReconciled],
 		},
-	},*/
+	},
 }
 
 func TestAllCases(t *testing.T) {
