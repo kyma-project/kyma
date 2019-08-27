@@ -46,6 +46,8 @@ patchesStrategicMerge:
   # Sets the runtime image of the controller-manager container
   # and injects a few labels.
 - manager_image_patch.yaml
+  # This patch is necessary because 'make manifests' resets the subject of the
+  # ClusterRoleBinding to an empty value.
 - manager_cluster_role_binding_patch.yaml
   # Protect the /metrics endpoint by putting it behind auth.
   # Only one of manager_auth_proxy_patch.yaml and

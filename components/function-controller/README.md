@@ -26,6 +26,7 @@ The following environment variables must be exported to the current shell's envi
 | `IMG`           | Full image name the _Function Controller_ will be tagged with. (e.g. `gcr.io/my-project/function-controller` for GCR, `my-user/function-controller` for Docker Hub) |
 | `FN_REGISTRY`   | URL of the container registry _Function_ images will be pushed to. Used for authentication. (e.g. `https://gcr.io/` for GCR, `https://index.docker.io/v1/` for Docker Hub) |
 | `FN_REPOSITORY` | Name of the container repository _Function_ images will be pushed to. (e.g. `gcr.io/my-project` for GCR, `my-user` for Docker Hub) |
+| `FN_NAMESPACE`  | Namespace where sample functions are to be deployed. |
 
 Example:
 
@@ -43,17 +44,59 @@ Create the `serverless-system` Namespace. The controller will be deployed to it.
 kubectl create namespace serverless-system
 ```
 
+#### Controller configuration
+
+Create the following configuration for the controller. It contains a list of supported runtimes as well as the container
+repository referenced by the `FN_REPOSITORY` environment variable, which we will create a Secret for in the next steps.
+
+```bash
+cat <<EOF | kubectl -n serverless-system apply -f -
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fn-config
+data:
+  serviceAccountName: function-controller-build
+  dockerRegistry: ${FN_REPOSITORY}
+  runtimes: |
+    - ID: nodejs8
+      dockerFileName: dockerfile-nodejs-8
+    - ID: nodejs6
+      dockerFileName: dockerfile-nodejs-6
+EOF
+```
+
+#### Functions namespace
+
+Create the Namespace defined previously by the `FN_NAMESPACE` environment variable. The demo Function will be deployed
+to it.
+
+```bash
+kubectl create namespace ${FN_NAMESPACE}
+```
+
+#### Funtion runtimes configurations
+
+Functions require Dockerfiles to be created for each supported runtime. The following manifest creates Dockerfiles for
+Node.js runtimes.
+
+```bash
+kubectl apply -n ${FN_NAMESPACE} -f config/dockerfiles.yaml
+```
+
 #### Container registry credentials
 
-Before creating a Function, it is necessary to create the `registry-credentials` Secret, which contains credentials to
+Before creating Functions, it is necessary to create the `registry-credentials` Secret, which contains credentials to
 the Docker registry defined by the `FN_REGISTRY` environment variable. Knative Build uses this Secret to push the images
-it builds for the deployed Functions.
+it builds for the deployed Functions. The corresponding `function-controller-build` ServiceAccount was referenced
+earlier inside the controller configuration.
 
 ```bash
 reg_username=<container registry username>
 reg_password=<container registry password>
 
-cat <<EOF | kubectl -n serverless-system apply -f -
+cat <<EOF | kubectl -n ${FN_NAMESPACE} apply -f -
 ---
 apiVersion: v1
 kind: Secret
@@ -66,29 +109,13 @@ stringData:
   username: ${reg_username}
   password: ${reg_password}
 EOF
-```
-
-#### Controller configuration
-
-Create the following configuration for the controller. It contains a list of supported runtimes as well as the container
-repository referenced by the `FN_REPOSITORY` environment variable, for which we created a Secret above.
-
-```bash
-cat <<EOF | kubectl -n serverless-system apply -f -
 ---
 apiVersion: v1
-kind: ConfigMap
+kind: ServiceAccount
 metadata:
-  name: fn-config
-data:
-  serviceAccountName: function-controller
-  dockerRegistry: ${FN_REPOSITORY}
-  runtimes: |
-    - ID: nodejs8
-      dockerFileName: dockerfile-nodejs-8
-    - ID: nodejs6
-      dockerFileName: dockerfile-nodejs-6
-EOF
+  name: function-controller-build
+secrets:
+- name: registry-credentials
 ```
 
 ### Deploy the controller
@@ -118,22 +145,7 @@ The following `make` target runs tests against the deployed Function Controller.
 make test
 ```
 
-### Create a demo Function
-
-> **Note**: In order to be able to create Functions outside of the `serverless-system` namespace (e.g. inside
-> `default`), a few API objects must be copied from the `serverless-system` namespace:
-> ```bash
-> kubectl -n serverless-system get -o yaml \
->   secret/registry-credentials \
->   serviceaccount/function-controller \
->   configmap/fn-config \
->   configmap/dockerfile-nodejs-6 \
->   configmap/dockerfile-nodejs-8 \
-> | sed -e '/namespace: /d'  -e '/-token-/d' \
-> | kubectl apply -n my-namespace -f -
-> ```
-
-Deploy a sample _Hello World_ Function:
+### Create a sample Hello World Function
 
 ```bash
 kubectl apply -f config/samples/serverless_v1alpha1_function.yaml

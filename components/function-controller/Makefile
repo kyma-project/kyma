@@ -76,7 +76,6 @@ ifeq ($(shell uname -s),Darwin)
 endif
 
 deploy: manifests install bin/kustomize
-	kubectl apply -f config/dockerfiles.yaml
 	@echo "updating kustomize image patch file for manager resource"
 	cp ./config/default/manager_image_patch.yaml{,.bak}
 	sed $(sedbackupflag)'' -e 's@image: .*@image: $(IMG)@' ./config/default/manager_image_patch.yaml
@@ -84,7 +83,6 @@ deploy: manifests install bin/kustomize
 	mv ./config/default/manager_image_patch.yaml{.bak,}
 
 undeploy: uninstall bin/kustomize
-	kubectl delete -f config/dockerfiles.yaml
 	kubectl delete -f config/crds
 	bin/kustomize build config/default | kubectl delete  -f -
 
