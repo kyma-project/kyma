@@ -47,7 +47,7 @@ func New(config Config, authorizer authorizer.Authorizer, authenticator authenti
 // If the authn fails, a 401 error is returned. If the authz fails, a 403 error is returned
 func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 	// Authenticate
-	u, ok, err := h.AuthenticateRequest(req)
+	r, ok, err := h.AuthenticateRequest(req)
 	if err != nil {
 		glog.Errorf("Unable to authenticate the request due to an error: %v", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -59,18 +59,18 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 	}
 
 	// Get authorization attributes
-	attrs := h.GetRequestAttributes(u, req)
+	attrs := h.GetRequestAttributes(r.User, req)
 
 	// Authorize
 	authorized, _, err := h.Authorize(attrs)
 	if err != nil {
-		msg := fmt.Sprintf("Authorization error (user=%s, verb=%s, resource=%s, subresource=%s)", u.GetName(), attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource())
+		msg := fmt.Sprintf("Authorization error (user=%s, verb=%s, resource=%s, subresource=%s)", r.User.GetName(), attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource())
 		glog.Errorf(msg, err)
 		http.Error(w, msg, http.StatusInternalServerError)
 		return false
 	}
 	if authorized != authorizer.DecisionAllow {
-		msg := fmt.Sprintf("Forbidden (user=%s, verb=%s, resource=%s, subresource=%s)", u.GetName(), attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource())
+		msg := fmt.Sprintf("Forbidden (user=%s, verb=%s, resource=%s, subresource=%s)", r.User.GetName(), attrs.GetVerb(), attrs.GetResource(), attrs.GetSubresource())
 		glog.V(2).Info(msg)
 		http.Error(w, msg, http.StatusForbidden)
 		return false
@@ -80,12 +80,12 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 		// Seemingly well-known headers to tell the upstream about user's identity
 		// so that the upstream can achieve the original goal of delegating RBAC authn/authz to kube-rbac-proxy
 		headerCfg := h.Config.Authentication.Header
-		req.Header.Set(headerCfg.UserFieldName, u.GetName())
-		req.Header.Set(headerCfg.GroupsFieldName, strings.Join(u.GetGroups(), headerCfg.GroupSeparator))
+		req.Header.Set(headerCfg.UserFieldName, r.User.GetName())
+		req.Header.Set(headerCfg.GroupsFieldName, strings.Join(r.User.GetGroups(), headerCfg.GroupSeparator))
 	}
 
-	req.Header.Set("Impersonate-User", u.GetName())
-	for _, gr := range u.GetGroups() {
+	req.Header.Set("Impersonate-User", r.User.GetName())
+	for _, gr := range r.User.GetGroups() {
 		req.Header.Add("Impersonate-Group", gr)
 	}
 
