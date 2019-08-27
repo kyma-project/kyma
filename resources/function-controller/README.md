@@ -70,7 +70,7 @@ Run your first function in the following way:
 ```bash
 export NAMESPACE=<NAMESPACE>
 cat <<EOF | kubectl apply -n ${NAMESPACE} -f -
-apiVersion: runtime.kyma-project.io/v1alpha1
+apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
 metadata:
   name: sample
