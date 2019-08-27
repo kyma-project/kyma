@@ -188,7 +188,7 @@ func TestUpdateAuthentication(t *testing.T) {
 			},
 			ServiceName:           "dummy-service",
 			AuthenticationEnabled: true,
-			Rules: Rules{},
+			Rules:                 Rules{},
 		}
 
 		gatewayResource, err := authentication.Update(oldDto, newDto)
