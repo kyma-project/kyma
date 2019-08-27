@@ -68,7 +68,7 @@ global:
     version: PR-5277
   xip_patch:
     dir: pr/
-    version: "PR-5226"
+    version: "PR-5433"
   e2e_external_solution:
     dir: pr/
     version: PR-5108
