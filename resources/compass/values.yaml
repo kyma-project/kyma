@@ -6,20 +6,25 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project/incubator
     connector:
-      dir: develop/
-      version: "26601526"
+      dir: pr/
+      version: "PR-250"
     director:
       dir: develop/
       version: "4ab44720"
     gateway:
-      dir: develop/
-      version: "df629420"
+      dir: pr/
+      version: "PR-251"
     healthchecker:
       dir: develop/
       version: "26601526"
     schema_migrator:
       dir: develop/
       version: "2cc96dec"
+    certs_setup_job:
+      containerRegistry:
+        path: eu.gcr.io/kyma-project
+      dir: pr/
+      version: "PR-5318"
     tests:
       e2e:
         dir: develop/
@@ -29,9 +34,20 @@ global:
   
   director:
     port: 3000
-  
+
   connector:
     port: 3000
+    # If secrets do not exist they will be created
+    secrets:
+      ca:
+        name: connector-service-app-ca
+        namespace: kyma-integration
+      rootCA:
+        name: application-connector-certs
+        namespace: istio-system
+    # If key and certificate are not provided they will be generated
+    caKey: ""
+    caCertificate: ""
 
   gateway:
     host: compass-gateway
