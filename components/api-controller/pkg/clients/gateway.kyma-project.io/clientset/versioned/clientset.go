@@ -3,7 +3,6 @@
 package versioned
 
 import (
-	glog "github.com/golang/glog"
 	gatewayv1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
@@ -13,8 +12,6 @@ import (
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	GatewayV1alpha2() gatewayv1alpha2.GatewayV1alpha2Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Gateway() gatewayv1alpha2.GatewayV1alpha2Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -26,12 +23,6 @@ type Clientset struct {
 
 // GatewayV1alpha2 retrieves the GatewayV1alpha2Client
 func (c *Clientset) GatewayV1alpha2() gatewayv1alpha2.GatewayV1alpha2Interface {
-	return c.gatewayV1alpha2
-}
-
-// Deprecated: Gateway retrieves the default version of GatewayClient.
-// Please explicitly pick a version.
-func (c *Clientset) Gateway() gatewayv1alpha2.GatewayV1alpha2Interface {
 	return c.gatewayV1alpha2
 }
 
@@ -58,7 +49,6 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 
 	cs.DiscoveryClient, err = discovery.NewDiscoveryClientForConfig(&configShallowCopy)
 	if err != nil {
-		glog.Errorf("failed to create the DiscoveryClient: %v", err)
 		return nil, err
 	}
 	return &cs, nil
