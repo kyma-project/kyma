@@ -3,8 +3,6 @@
 package v1alpha1
 
 import (
-	"time"
-
 	v1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1"
 	scheme "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -58,15 +56,10 @@ func (c *iDPPresets) Get(name string, options v1.GetOptions) (result *v1alpha1.I
 
 // List takes label and field selectors, and returns the list of IDPPresets that match those selectors.
 func (c *iDPPresets) List(opts v1.ListOptions) (result *v1alpha1.IDPPresetList, err error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
 	result = &v1alpha1.IDPPresetList{}
 	err = c.client.Get().
 		Resource("idppresets").
 		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
 		Do().
 		Into(result)
 	return
@@ -74,15 +67,10 @@ func (c *iDPPresets) List(opts v1.ListOptions) (result *v1alpha1.IDPPresetList, 
 
 // Watch returns a watch.Interface that watches the requested iDPPresets.
 func (c *iDPPresets) Watch(opts v1.ListOptions) (watch.Interface, error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
 	opts.Watch = true
 	return c.client.Get().
 		Resource("idppresets").
 		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
 		Watch()
 }
 
@@ -121,14 +109,9 @@ func (c *iDPPresets) Delete(name string, options *v1.DeleteOptions) error {
 
 // DeleteCollection deletes a collection of objects.
 func (c *iDPPresets) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	var timeout time.Duration
-	if listOptions.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOptions.TimeoutSeconds) * time.Second
-	}
 	return c.client.Delete().
 		Resource("idppresets").
 		VersionedParams(&listOptions, scheme.ParameterCodec).
-		Timeout(timeout).
 		Body(options).
 		Do().
 		Error()

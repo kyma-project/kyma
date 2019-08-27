@@ -38,17 +38,21 @@ required = [
   name = "k8s.io/gengo"
   revision = "955ffa8fcfc983717cd9de5d2a1e9f5c465f4376"
 
-[[override]]
-  name = "k8s.io/client-go"
-  version = "kubernetes-1.15.2"
-
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.12.5"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.12.5"
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  branch = "release-1.15"
+  branch = "release-1.12"
+
+[[override]]
+  name = "github.com/json-iterator/go"
+  revision = "f2b4162afba35581b6d4a50d3b8f34e33c144682"
 
 [prune]
   go-tests = true
