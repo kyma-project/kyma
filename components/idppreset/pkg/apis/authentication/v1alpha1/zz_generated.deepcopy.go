@@ -39,7 +39,7 @@ func (in *IDPPreset) DeepCopyObject() runtime.Object {
 func (in *IDPPresetList) DeepCopyInto(out *IDPPresetList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	in.ListMeta.DeepCopyInto(&out.ListMeta)
+	out.ListMeta = in.ListMeta
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]IDPPreset, len(*in))

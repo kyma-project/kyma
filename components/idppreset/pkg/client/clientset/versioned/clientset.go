@@ -12,6 +12,8 @@ import (
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	AuthenticationV1alpha1() authenticationv1alpha1.AuthenticationV1alpha1Interface
+	// Deprecated: please explicitly pick a version if possible.
+	Authentication() authenticationv1alpha1.AuthenticationV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -23,6 +25,12 @@ type Clientset struct {
 
 // AuthenticationV1alpha1 retrieves the AuthenticationV1alpha1Client
 func (c *Clientset) AuthenticationV1alpha1() authenticationv1alpha1.AuthenticationV1alpha1Interface {
+	return c.authenticationV1alpha1
+}
+
+// Deprecated: Authentication retrieves the default version of AuthenticationClient.
+// Please explicitly pick a version.
+func (c *Clientset) Authentication() authenticationv1alpha1.AuthenticationV1alpha1Interface {
 	return c.authenticationV1alpha1
 }
 
