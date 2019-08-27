@@ -1,9 +1,17 @@
 # Function controller
 
-## Overview
-
 The Knative Function controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses
 Knative Build and Knative Serving under the hood.
+
+## Contents
+
+1. [Prerequisites](#prerequisites)
+2. [Installation for development workflow](#installation-for-development-workflow)
+   * [Preparation](#preparation)
+   * [Deploying the controller](#deploying-the-controller)
+3. [Usage](#usage)
+   * [Testing the controller](#testing-the-controller)
+   * [Creating a sample Hello World Function](#creating-a-sample-hello-world-function)
 
 ## Prerequisites
 
@@ -118,7 +126,7 @@ secrets:
 - name: registry-credentials
 ```
 
-### Deploy the controller
+### Deploying the controller
 
 The following `make` targets build the Function Controller image, tag it to the value of the `IMG` environment variable
 defined previously, and push it to the remote container registry.
@@ -137,7 +145,7 @@ make deploy
 
 ## Usage
 
-### Test the controller
+### Testing the controller
 
 The following `make` target runs tests against the deployed Function Controller.
 
@@ -145,7 +153,9 @@ The following `make` target runs tests against the deployed Function Controller.
 make test
 ```
 
-### Create a sample Hello World Function
+### Creating a sample Hello World Function
+
+Apply the following Function manifest:
 
 ```bash
 kubectl apply -f config/samples/serverless_v1alpha1_function.yaml
