@@ -2,15 +2,6 @@
 
 The Knative Function Controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses Knative Build and Knative Serving under the hood.
 
-## Contents
-
-1. [Prerequisites](#prerequisites)
-2. [Environment set up](#environment-set-up)
-3. [Deployment](#deployment)
-4. [Usage](#usage)
-   * [Test the controller](#test-the-controller)
-   * [Create a sample Hello World Function](#create-a-sample-hello-world-function)
-
 ## Prerequisites
 
 The Function Controller requires the following components to be installed:
