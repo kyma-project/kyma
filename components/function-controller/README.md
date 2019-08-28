@@ -31,6 +31,7 @@ Follow these steps to prepare the environment you will use to deploy the Control
     export IMG=my-docker-user/function-controller
     export FN_REGISTRY=https://index.docker.io/v1/
     export FN_REPOSITORY=my-docker-user
+    export FN_NAMESPACE=my-functions
     ```
 
 2. Create the `serverless-system` Namespace you will deploy the controller to.
