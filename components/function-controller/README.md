@@ -101,16 +101,16 @@ Follow these steps to prepare the environment you will use to deploy the Control
 
 1. Use the `make` targets to build the Function Controller image, tag it to the value of the **IMG** environment variable, and push it to the remote container registry.
 
-```bash
-make docker-build
-make docker-push
-```
+    ```bash
+    make docker-build
+    make docker-push
+    ```
 
 2. After the image has been successfully pushed, deploy the Function Controller to the `serverless-system` Namespace.
 
-```bash
-make deploy
-```
+    ```bash
+    make deploy
+    ```
 
 ## Usage
 
