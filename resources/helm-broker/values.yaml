@@ -1,5 +1,4 @@
 initImage:
-  # valid values are "IfNotPresent", "Never", and "Always"
   pullPolicy: "IfNotPresent"
 image:
   pullPolicy: "IfNotPresent"
@@ -7,6 +6,7 @@ service:
   type: NodePort
   externalPort: 80
   internalPort: 8081
+  ctrlInternalPort: 8080
 
 ctrl:
   tmpDirSizeLimit: 1Gi
@@ -40,9 +40,9 @@ global:
   alpine_net:
     dir: develop/
     version: 149967d0
-  add_ons_ui:
+  addons_ui:
     dir: ""
-    version: f6a8d460
+    version: 76f15ebf
   istio:
     gateway:
       name: kyma-gateway

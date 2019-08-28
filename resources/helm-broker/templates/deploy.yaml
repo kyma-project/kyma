@@ -126,7 +126,7 @@ spec:
           name: helm-certs
           readOnly: true
         ports:
-        - containerPort: {{ .Values.service.internalPort }}
+        - containerPort: {{ .Values.service.ctrlInternalPort }}
         # Temporary solution for readiness probe
         # Ref: https://github.com/istio/istio/issues/2628
         readinessProbe:

@@ -50,7 +50,7 @@ func TestReconcile(t *testing.T) {
 			},
 		}
 
-		fakeClientset := fake.NewSimpleClientset(compassConnection).Compass().CompassConnections()
+		fakeClientset := fake.NewSimpleClientset(compassConnection).CompassV1alpha1().CompassConnections()
 		objClient := NewObjectClientWrapper(fakeClientset)
 		supervisor := &mocks.Supervisor{}
 		supervisor.On("SynchronizeWithCompass", compassConnection).Return(compassConnection, nil)
@@ -81,7 +81,7 @@ func TestReconcile(t *testing.T) {
 			},
 		}
 
-		fakeClientset := fake.NewSimpleClientset().Compass().CompassConnections()
+		fakeClientset := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
 		objClient := NewObjectClientWrapper(fakeClientset)
 		supervisor := &mocks.Supervisor{}
 		supervisor.On("InitializeCompassConnection").
@@ -180,10 +180,10 @@ func (f *objectClientWrapper) Get(ctx context.Context, key client.ObjectKey, obj
 	return nil
 }
 
-func (f *objectClientWrapper) Update(ctx context.Context, obj runtime.Object) error {
+func (f *objectClientWrapper) Update(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error {
 	panic("implement me")
 }
 
-func (f *objectClientWrapper) Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOptionFunc) error {
+func (f *objectClientWrapper) Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOption) error {
 	panic("implement me")
 }

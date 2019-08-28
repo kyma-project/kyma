@@ -1,11 +1,4 @@
 required = [
-  "k8s.io/code-generator/cmd/defaulter-gen",
-  "k8s.io/code-generator/cmd/deepcopy-gen",
-  "k8s.io/code-generator/cmd/client-gen",
-  "k8s.io/code-generator/cmd/lister-gen",
-  "k8s.io/code-generator/cmd/informer-gen",
-  "k8s.io/apimachinery/pkg/apimachinery/registered",
-
   "golang.org/x/tools/cmd/goimports",
 ]
 
@@ -24,19 +17,15 @@ required = [
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.10.1"
-
-[[constraint]]
-  name = "k8s.io/code-generator"
-  branch = "release-1.10"
+  version = "kubernetes-1.15.2"
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.15.2"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.15.2"
 
 [[override]]
   name = "k8s.io/gengo"
@@ -44,7 +33,7 @@ required = [
 
 [[override]]
   name = "k8s.io/kubernetes"
-  branch = "release-1.10"
+  version = "kubernetes-1.15.2"
 
 
 [[override]]
@@ -56,8 +45,8 @@ required = [
   name = "github.com/patrickmn/go-cache"
   version = "2.1.0"
 
-
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "dd9f72adc14c41e129824770011f37722dc5bbff"
+  revision = "70782d1888118ad2c76b978b49505bb5286e264c"
+
 

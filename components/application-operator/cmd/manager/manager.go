@@ -47,7 +47,10 @@ func main() {
 
 	log.Printf("Setting up scheme.")
 
-	scheme.AddToScheme(mgr.GetScheme())
+	err = scheme.AddToScheme(mgr.GetScheme())
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	log.Printf("Preparing Release Manager.")
 

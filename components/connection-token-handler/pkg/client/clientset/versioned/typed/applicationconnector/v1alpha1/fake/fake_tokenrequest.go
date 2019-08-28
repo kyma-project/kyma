@@ -49,7 +49,7 @@ func (c *FakeTokenRequests) List(opts v1.ListOptions) (result *v1alpha1.TokenReq
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.TokenRequestList{}
+	list := &v1alpha1.TokenRequestList{ListMeta: obj.(*v1alpha1.TokenRequestList).ListMeta}
 	for _, item := range obj.(*v1alpha1.TokenRequestList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -118,7 +118,7 @@ func (c *FakeTokenRequests) DeleteCollection(options *v1.DeleteOptions, listOpti
 // Patch applies the patch and returns the patched tokenRequest.
 func (c *FakeTokenRequests) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.TokenRequest, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(tokenrequestsResource, c.ns, name, data, subresources...), &v1alpha1.TokenRequest{})
+		Invokes(testing.NewPatchSubresourceAction(tokenrequestsResource, c.ns, name, pt, data, subresources...), &v1alpha1.TokenRequest{})
 
 	if obj == nil {
 		return nil, err
