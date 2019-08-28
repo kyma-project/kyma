@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-	runtimeUtil "github.com/kyma-project/kyma/components/knative-function-controller/pkg/utils"
+	runtimeUtil "github.com/kyma-project/kyma/components/function-controller/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	k8sTypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"

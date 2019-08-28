@@ -199,7 +199,7 @@ func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Resu
 	imageName := fmt.Sprintf("%s/%s-%s:%s", rnInfo.RegistryInfo, fn.Namespace, fn.Name, functionSha)
 	log.Info("function image", "namespace:", fn.Namespace, "name:", fn.Name, "imageName:", imageName)
 
-	if err := r.getFunctionBuildTemplate(fn); err != nil {
+	if err := r.getFunctionBuildTemplate(fn, rnInfo); err != nil {
 		// status of the functon must change to error.
 		r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
 
