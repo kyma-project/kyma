@@ -124,14 +124,14 @@ secrets:
 
 ### Deploying the controller
 
-5. Deploy the controller. The `make` targets build the Function Controller image, tag it with the value of the **IMG** environment variable, and push it to the remote container registry.
+Deploy the controller. The `make` targets build the Function Controller image, tag it with the value of the **IMG** environment variable, and push it to the remote container registry.
 
 ```bash
 make docker-build
 make docker-push
 ```
 
-6. After the image has been successfully pushed, deploy the Function Controller to the `serverless-system` Namespace.
+After the image has been successfully pushed, deploy the Function Controller to the `serverless-system` Namespace.
 
 ```bash
 make deploy
@@ -149,41 +149,53 @@ make test
 
 ### Creating a sample Hello World Function
 Follow these steps to create a sample Function:
-Apply the following Function manifest:
 
-```bash
-kubectl apply -f config/samples/serverless_v1alpha1_function.yaml
-```
+1. Apply the following Function manifest:
+
+    ```bash
+    kubectl apply -f config/samples/serverless_v1alpha1_function.yaml
+    ```
 
 2. Ensure the Function was created:
 
-```bash
-kubectl get functions
-```
+    ```bash
+    kubectl get functions
+    ```
 
 3. Check the status of the build:
 
-```bash
-kubectl get builds.build.knative.dev
-```
+    ```bash
+    kubectl get builds.build.knative.dev
+    ```
 
 4. Check the status of the Knative Serving service:
 
-```bash
-kubectl get services.serving.knative.dev
-```
+    ```bash
+    kubectl get services.serving.knative.dev
+    ```
 
 5. Access the Function:
+    <div tabs name="installation">
+      <details>
+      <summary>
+      Minikube
+      </summary>
 
-```bash
-# minikube
-FN_DOMAIN="$(kubectl get ksvc demo --output 'jsonpath={.status.domain}')"
-FN_PORT="$(kubectl get svc istio-ingressgateway -n istio-system --output 'jsonpath={.spec.ports[?(@.port==80)].nodePort}')"
-curl -v -H "Host: ${FN_DOMAIN}" http://$(minikube ip):${FN_PORT}
-```
+      ```bash
+       FN_DOMAIN="$(kubectl get ksvc demo --output 'jsonpath={.status.domain}')"
+       FN_PORT="$(kubectl get svc istio-ingressgateway -n istio-system --output 'jsonpath={.spec.ports[? 
+       (@.port==80)].nodePort}')"
+       curl -v -H "Host: ${FN_DOMAIN}" http://$(minikube ip):${FN_PORT}
+      ```
+     </details>
+     <details>
+     <summary>
+     Remote cluster
+     </summary>
 
-```bash
-# remote cluster (eg. GKE)
-FN_DOMAIN="$(kubectl get ksvc demo --output 'jsonpath={.status.domain}')"
-curl -kD- "https://${FN_DOMAIN}"
-```
+     ```bash
+      FN_DOMAIN="$(kubectl get ksvc demo --output 'jsonpath={.status.domain}')"
+      curl -kD- "https://${FN_DOMAIN}"
+     ```
+      </details>
+    </div>
