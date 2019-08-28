@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ template "fullname" . }}-controller-manager
+  name: {{ template "fullname" . }}-manager
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "name" . }}
