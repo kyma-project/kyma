@@ -3,8 +3,9 @@ kind: Job
 metadata:
   name: {{ template "name" . }}-certs-job
   annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "2"
+    helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
 spec:
   backoffLimit: 1
   template:
@@ -61,17 +62,24 @@ kind: ServiceAccount
 metadata:
   name: {{ template "name" . }}-certs-job
   namespace: {{ .Release.Namespace}}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ template "name" . }}-certs-job
   namespace: {{ .Release.Namespace}}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: {{ template "name" . }}-certs-job
-  namespace: {{ .Release.Namespace}}
 subjects:
 - kind: ServiceAccount
   name: {{ template "name" . }}-certs-job
@@ -82,6 +90,10 @@ kind: Role
 metadata:
   name: {{ template "name" . }}-certs-job
   namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
 rules:
 - apiGroups: [""]
   resources: [configmaps, secrets, services]
