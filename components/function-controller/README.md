@@ -148,7 +148,7 @@ make test
 ```
 
 ### Creating a sample Hello World Function
-
+Follow these steps to create a sample Function:
 Apply the following Function manifest:
 
 ```bash
