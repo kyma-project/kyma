@@ -9,7 +9,9 @@ The Function Controller requires the following components to be installed:
 - Knative Build (v0.6.0)
 - Knative Serving (v0.6.1)
 - Istio (v1.0.7)
+
 ## Installation
+
 ### Set up the environment
 
 Follow these steps to prepare the environment you will use to deploy the Controller.
