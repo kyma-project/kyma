@@ -50,27 +50,27 @@ required = [
 [[constraint]]
   name="github.com/kyma-project/kyma"
   source = "github.com/akucharska/kyma"
-  branch = "idppresets-client-go"
+  revision = "6f43335d798bd7cad6cdee5bce92529f174d3fb2"
 
-[[override]]
+[[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.12.5"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.12.5"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.12.5"
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.12.5"
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  branch = "release-1.15"
+  branch = "release-1.12"
 
 [[constraint]]
   name = "github.com/vrischmann/envconfig"
