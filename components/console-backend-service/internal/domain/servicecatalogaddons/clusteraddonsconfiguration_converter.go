@@ -1,8 +1,8 @@
 package servicecatalogaddons
 
 import (
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
 type clusterAddonsConfigurationConverter struct{}

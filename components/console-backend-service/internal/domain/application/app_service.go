@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"net/http"
 	"regexp"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
@@ -57,7 +58,7 @@ type applicationService struct {
 	httpClient      *http.Client
 	appNameRegex    *regexp.Regexp
 	notifier        notifier
-	extractor		extractor.ApplicationUnstructuredExtractor
+	extractor       extractor.ApplicationUnstructuredExtractor
 
 	appMappingConverter applicationMappingConverter
 }
@@ -98,7 +99,7 @@ func newApplicationService(cfg Config, aCli dynamic.NamespaceableResourceInterfa
 		},
 		notifier:     notifier,
 		appNameRegex: regex,
-		extractor: extractor.ApplicationUnstructuredExtractor{},
+		extractor:    extractor.ApplicationUnstructuredExtractor{},
 
 		appMappingConverter: applicationMappingConverter{},
 	}, nil

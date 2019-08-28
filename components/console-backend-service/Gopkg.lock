@@ -326,7 +326,7 @@
   revision = "082e2dc0ad35dd911872f7dc35fa1401d8fe5887"
 
 [[projects]]
-  digest = "1:2bca154744f6016a18aa03f63522f2f5d77c425cbdc1355e75fb6bb76695bc1e"
+  digest = "1:a3c6c960cd5664aba2c8f4b6f3b4150eb34fe68e445c6583d0d4fe9f36f7fa38"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -365,16 +365,6 @@
     "components/application-broker/pkg/client/informers/externalversions/internalinterfaces",
     "components/application-broker/pkg/client/listers/applicationconnector/v1alpha1",
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
-    "components/application-operator/pkg/client/clientset/versioned",
-    "components/application-operator/pkg/client/clientset/versioned/fake",
-    "components/application-operator/pkg/client/clientset/versioned/scheme",
-    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1/fake",
-    "components/application-operator/pkg/client/informers/externalversions",
-    "components/application-operator/pkg/client/informers/externalversions/applicationconnector",
-    "components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
-    "components/application-operator/pkg/client/informers/externalversions/internalinterfaces",
-    "components/application-operator/pkg/client/listers/applicationconnector/v1alpha1",
     "components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
     "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "components/idppreset/pkg/apis/authentication/v1alpha1",
@@ -1153,10 +1143,6 @@
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake",
-    "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
     "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1",

@@ -3,12 +3,12 @@ package servicecatalogaddons
 import (
 	"fmt"
 
+	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
+	addonsClientset "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
-	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
-	addonsClientset "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"

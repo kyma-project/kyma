@@ -48,4 +48,3 @@ func (ext ApplicationUnstructuredExtractor) FromUnstructured(obj *unstructured.U
 
 	return &application, nil
 }
-

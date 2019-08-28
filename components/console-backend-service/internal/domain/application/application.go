@@ -2,8 +2,9 @@ package application
 
 import (
 	"context"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"time"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 
