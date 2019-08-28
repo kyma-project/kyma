@@ -57,4 +57,4 @@ Environment variables:
 ## Running the first function
 
 Currently there is no UI support for the new function-controller.
-Run your first function in the following way: #Todo link
+Run your first function as mentioned [here](../../components/function-controller/README.md#create-a-sample-hello-world-function)
