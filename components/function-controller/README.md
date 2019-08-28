@@ -9,8 +9,8 @@ The Function Controller requires the following components to be installed:
 - Knative Build (v0.6.0)
 - Knative Serving (v0.6.1)
 - Istio (v1.0.7)
-
-## Set up the environment
+## Installation
+### Set up the environment
 
 Follow these steps to prepare the environment you will use to deploy the Controller.
 
@@ -21,7 +21,7 @@ Follow these steps to prepare the environment you will use to deploy the Control
     | **IMG** | The full image name the Function Controller will be tagged with. | `gcr.io/my-project/function-controller` for GCR, `my-user/function-controller` for Docker Hub |
     | **FN_REGISTRY** | The URL of the container registry Function images will be pushed to. Used for authentication. | `https://gcr.io/` for GCR, `https://index.docker.io/v1/` for Docker Hub |
     | **FN_REPOSITORY** | The name of the container repository Function images will be pushed to. | `gcr.io/my-project` for GCR, `my-user` for Docker Hub |
-    | **FN_NAMESPACE** | The Namespace where Functions are deployed. | |
+    | **FN_NAMESPACE** | The Namespace where Functions are deployed. | `sample-namespace` |
 
     See the example:
 
@@ -97,7 +97,7 @@ Follow these steps to prepare the environment you will use to deploy the Control
     EOF
     ```
 
-## Deploy the Controller
+### Deploy the controller
 
 1. Use the `make` targets to build the Function Controller image, tag it to the value of the **IMG** environment variable, and push it to the remote container registry.
 
