@@ -9,8 +9,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{ .Values.global.natsStreaming.fullname }}
-      release: {{ .Release.Name }}
+{{ include "nats-streaming.labels.selectors" . | indent 6 }}
   serviceName: {{ .Values.global.natsStreaming.fullname }}
   replicas: {{ .Values.replicaCount }}
   updateStrategy:
@@ -20,12 +19,8 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        app: {{ .Values.global.natsStreaming.fullname }}
-        release: {{ .Release.Name }}
-        kyma-grafana: enabled
-        kyma-alerts: enabled
-        alertcpu: "yes"
-        alertmem: "yes"
+{{ include "nats-streaming.labels.standard" . | indent 8 }}
+{{ include "nats-streaming.labels.kyma" . | indent 8 }}
         rand: {{ randAlpha 6 }}
     spec:
       initContainers:

@@ -35,7 +35,7 @@ const (
 
 type ResourceClient interface {
 	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
-	Update(ctx context.Context, obj runtime.Object) error
+	Update(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error
 }
 
 type Controller struct {
@@ -89,7 +89,7 @@ func newCentralConnectionController(
 		certificatePreserver:                certPreserver,
 		certificateProvider:                 certProvider,
 		establishedConnectionClientProvider: connectionClientProvider,
-		logger: log.WithField("Controller", "Central Connection"),
+		logger:                              log.WithField("Controller", "Central Connection"),
 	}
 }
 

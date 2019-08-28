@@ -12,7 +12,7 @@ global:
     subscriptionControllerImage: subscription-controller
   event_bus_tests:
     dir: develop/
-    version: 859d7e73
+    version: 7f7a8031
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
@@ -30,8 +30,11 @@ global:
     maxEventTypeLength: 253
     maxEventTypeVersionLength: 4
     resources:
+      requests:
+        cpu: 20m
+        memory: 32Mi
       limits:
-        memory: "32M"
+        memory: 32Mi
   push:
     http:
       subscriptionNameHeader: "Kyma-Subscription"
@@ -47,8 +50,11 @@ global:
     resyncPeriod: "10s"
     channelTimeout: "10s"
     resources:
+      requests:
+        cpu: 20m
+        memory: 32Mi
       limits:
-        memory: "32M"
+        memory: 32Mi
   trace:
     apiURL: http://zipkin.kyma-system:9411/api/v1/spans
   eventBusVersion: "0.2.34"

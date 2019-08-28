@@ -11,7 +11,7 @@ import (
 )
 
 func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
-	converter := servicecatalogaddons.NewAddonsConfigurationConverter()
+	converter := servicecatalogaddons.NewClusterAddonsConfigurationConverter()
 	for tn, tc := range map[string]struct {
 		givenAddon           *v1alpha1.ClusterAddonsConfiguration
 		expectedAddonsConfig *gqlschema.AddonsConfiguration
@@ -36,6 +36,25 @@ func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 						},
 					},
 				},
+				Status: v1alpha1.ClusterAddonsConfigurationStatus{
+					CommonAddonsConfigurationStatus: v1alpha1.CommonAddonsConfigurationStatus{
+						Phase: v1alpha1.AddonsConfigurationReady,
+						Repositories: []v1alpha1.StatusRepository{
+							{
+								Status:  v1alpha1.RepositoryStatus("Failed"),
+								Message: "fix",
+								URL:     "rul",
+								Addons: []v1alpha1.Addon{
+									{
+										Status:  v1alpha1.AddonStatusFailed,
+										Message: "test",
+										Name:    "addon",
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 			expectedAddonsConfig: &gqlschema.AddonsConfiguration{
 				Name: "test",
@@ -44,6 +63,22 @@ func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 					"ion": "al",
 				},
 				Urls: []string{"ww.fix.k"},
+				Status: gqlschema.AddonsConfigurationStatus{
+					Phase: string(v1alpha1.AddonsConfigurationReady),
+					Repositories: []gqlschema.AddonsConfigurationStatusRepository{
+						{
+							Status: "Failed",
+							URL:    "rul",
+							Addons: []gqlschema.AddonsConfigurationStatusAddons{
+								{
+									Status:  "Failed",
+									Message: "test",
+									Name:    "addon",
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	} {
@@ -54,7 +89,7 @@ func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 }
 
 func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
-	converter := servicecatalogaddons.NewAddonsConfigurationConverter()
+	converter := servicecatalogaddons.NewClusterAddonsConfigurationConverter()
 
 	for tn, tc := range map[string]struct {
 		givenAddons          []*v1alpha1.ClusterAddonsConfiguration

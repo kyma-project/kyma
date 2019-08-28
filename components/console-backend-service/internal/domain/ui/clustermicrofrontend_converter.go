@@ -36,6 +36,7 @@ func (c *clusterMicroFrontendConverter) ToGQL(in *uiV1alpha1v.ClusterMicroFronte
 		Placement:       in.Spec.Placement,
 		Version:         in.Spec.CommonMicroFrontendSpec.Version,
 		Category:        in.Spec.CommonMicroFrontendSpec.Category,
+		PreloadURL:      in.Spec.CommonMicroFrontendSpec.PreloadURL,
 		ViewBaseURL:     in.Spec.CommonMicroFrontendSpec.ViewBaseURL,
 		NavigationNodes: navigationNodes,
 	}

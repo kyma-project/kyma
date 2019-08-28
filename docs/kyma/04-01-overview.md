@@ -13,8 +13,8 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `cms` | ✅ | ✅ |
 | `cluster-essentials` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
-| `velero-essentials` | ⛔️ | ⛔️ |
-| `velero`  | ⛔️ | ⛔️ |
+| `backup-init` | ⛔️ | ⛔️ |
+| `backup`  | ⛔️ | ⛔️ |
 | `assetstore` | ✅ | ✅ |
 | `dex` | ✅ | ✅ |
 | `helm-broker` | ✅ | ✅ |
@@ -28,8 +28,12 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `service-catalog` | ✅ | ✅ |
 | `service-catalog-addons` | ✅ | ✅ |
 | `nats-streaming` | ✅ | ✅ |
+| `ory` | ✅ | ✅ |
+| `knative-serving` | ✅ | ✅ |
+| `knative-eventing` | ✅ | ✅ |
+| `knative-build` | ⛔ | ⛔ |
 
->**NOTE**: To include Velero in the installation process, you need to set it up first. Use the Kyma backup [setup instructions](/components/backup#overview-overview) to do so.
+>**NOTE**: To include backup in the installation process, you need to set it up first. Use the Kyma backup [setup instructions](/components/backup#overview-overview) to do so.
 
 ## Installation guides
 
@@ -45,4 +49,4 @@ Read the rest of the installation documents to learn how to:
 - [Reinstall Kyma](#installation-reinstall-kyma)
 - [Set up the Kyma backup](/components/backup#overview-overview)
 
->**NOTE:** Make sure to check whether the version of the documentation in the left pane of the `kyma-project.io` is compatible with your Kyma version.
+>**NOTE:** Make sure that the version of the documentation selected in the left pane of `kyma-project.io` matches the version of Kyma you're using.

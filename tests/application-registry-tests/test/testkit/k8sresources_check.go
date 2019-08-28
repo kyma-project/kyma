@@ -101,14 +101,14 @@ func CheckK8sParamsSecret(t *testing.T, secret *v1core.Secret, name string, labe
 	checkLabels(t, labels, secret.Labels)
 }
 
-func CheckK8sIstioDenier(t *testing.T, denier *istio.Denier, name string, labels Labels, code int, message string) {
-	require.Equal(t, name, denier.Name)
+func CheckK8sIstioHandler(t *testing.T, handler *istio.Handler, name string, labels Labels, code int, message string) {
+	require.Equal(t, name, handler.Name)
 
-	denierStatus := denier.Spec.Status
+	denierStatus := handler.Spec.Params.Status
 	require.Equal(t, int32(code), denierStatus.Code)
 	require.Equal(t, message, denierStatus.Message)
 
-	checkLabels(t, labels, denier.Labels)
+	checkLabels(t, labels, handler.Labels)
 }
 
 func CheckK8sIstioRule(t *testing.T, rule *istio.Rule, name, namespace string, labels Labels) {
@@ -118,16 +118,16 @@ func CheckK8sIstioRule(t *testing.T, rule *istio.Rule, name, namespace string, l
 	require.Equal(t, expectedMatchExpression, rule.Spec.Match)
 
 	ruleAction := rule.Spec.Actions[0]
-	require.Equal(t, name+".denier", ruleAction.Handler)
-	require.Equal(t, name+".checknothing", ruleAction.Instances[0])
+	require.Equal(t, name, ruleAction.Handler)
+	require.Equal(t, name, ruleAction.Instances[0])
 
 	checkLabels(t, labels, rule.Labels)
 }
 
-func CheckK8sChecknothing(t *testing.T, checknothing *istio.Checknothing, name string, labels Labels) {
-	require.Equal(t, name, checknothing.Name)
+func CheckK8sIstioInstance(t *testing.T, instance *istio.Instance, name string, labels Labels) {
+	require.Equal(t, name, instance.Name)
 
-	checkLabels(t, labels, checknothing.Labels)
+	checkLabels(t, labels, instance.Labels)
 }
 
 func CheckK8sApplication(t *testing.T, app *application.Application, name string, expectedServiceData ServiceData) {

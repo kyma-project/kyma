@@ -3,7 +3,7 @@ package compass
 import (
 	"crypto/tls"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
+	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 
 	"github.com/pkg/errors"
 
@@ -24,102 +24,22 @@ const (
 	directorURL = "https://director.com/graphql"
 
 	expectedQuery = `query {
-	result: applications {
+	result: applicationsForRuntime(runtimeID: "runtimeId") {
 		data {
 		id
 		name
 		description
 		labels
-		status {condition timestamp}
-		webhooks {id
-		applicationID
-		type
-		url
-		auth {
-		  credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		
-		}}
-		healthCheckURL
 		apis {data {
 				id
 		name
 		description
 		spec {data
 		format
-		type
-		fetchRequest {url
-		auth {credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		}
-		mode
-		filter
-		status {condition timestamp}}}
+		type}
 		targetURL
 		group
-		auths {runtimeID
+		auth(runtimeID: "runtimeId") {runtimeID
 		auth {credential {
 				... on BasicCredentialData {
 					username
@@ -207,45 +127,7 @@ const (
 			group 
 			spec {data
 		type
-		format
-		fetchRequest {url
-		auth {credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		}
-		mode
-		filter
-		status {condition timestamp}}}
+		format}
 			version {value
 		deprecated
 		deprecatedSince
@@ -267,44 +149,6 @@ const (
 		format
 		kind
 		data
-		fetchRequest {url
-		auth {credential {
-				... on BasicCredentialData {
-					username
-					password
-				}
-				...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				}
-			}
-			additionalHeaders
-			additionalQueryParams
-			requestAuth { 
-			  csrf {
-				tokenEndpointURL
-				credential {
-				  ... on BasicCredentialData {
-				  	username
-					password
-				  }
-				  ...  on OAuthCredentialData {
-					clientId
-					clientSecret
-					url
-					
-				  }
-			    }
-				additionalHeaders
-				additionalQueryParams
-			}
-			}
-		}
-		mode
-		filter
-		status {condition timestamp}}
 	}
 	pageInfo {startCursor
 		endCursor
@@ -350,7 +194,7 @@ func (c *mockGQLClient) Do(req *graphql.Request, res interface{}) error {
 func (c *mockGQLClient) DisableLogging() {}
 
 func newMockClientConstructor(t *testing.T, shouldFail bool) GraphQLClientConstructor {
-	return func(certificate tls.Certificate, graphqlEndpoint string, enableLogging bool) (client gql.Client, e error) {
+	return func(certificate tls.Certificate, graphqlEndpoint string, enableLogging, insecureConfigFetch bool) (client gql.Client, e error) {
 		expectedReq := graphql.NewRequest(expectedQuery)
 		expectedReq.Header.Set("Tenant", tenant)
 
@@ -362,7 +206,7 @@ func newMockClientConstructor(t *testing.T, shouldFail bool) GraphQLClientConstr
 	}
 }
 
-func failingGQLClientConstructor(_ tls.Certificate, _ string, _ bool) (client gql.Client, e error) {
+func failingGQLClientConstructor(_ tls.Certificate, _ string, _, _ bool) (client gql.Client, e error) {
 	return nil, errors.New("error")
 }
 
@@ -370,13 +214,13 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 
 	for _, testCase := range []struct {
 		description       string
-		expectedApps      []synchronization.Application
+		expectedApps      []kymamodel.Application
 		clientConstructor GraphQLClientConstructor
 		shouldFail        bool
 	}{
 		{
 			description: "fetch applications",
-			expectedApps: []synchronization.Application{
+			expectedApps: []kymamodel.Application{
 				{Name: "App"},
 			},
 			clientConstructor: newMockClientConstructor(t, false),
@@ -397,7 +241,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 	} {
 		t.Run("should "+testCase.description, func(t *testing.T) {
 			// given
-			configClient := NewConfigurationClient(tenant, runtimeId, testCase.clientConstructor)
+			configClient := NewConfigurationClient(tenant, runtimeId, testCase.clientConstructor, true)
 
 			// when
 			apps, err := configClient.FetchConfiguration(directorURL, certificates.Credentials{})

@@ -51,13 +51,15 @@ Use the following environment variables to configure the application:
 | **APP_STORE_SECRET_KEY** | Yes |  | The secret key required to sign in to the content storage server |
 | **APP_STORE_USE_SSL** | No | `true` | The variable that enforces the use of HTTPS for the connection with the content storage server |
 | **APP_WEBHOOK_MUTATION_TIMEOUT** | No | `1m` | The period of time after which mutation is canceled |
+| **APP_WEBHOOK_MUTATION_WORKERS_COUNT** | No | `10` | The number of workers used in parallel to mutate files |
 | **APP_WEBHOOK_METADATA_EXTRACTION_TIMEOUT** | No | `1m` | The period of time after which metadata extraction is canceled |
 | **APP_WEBHOOK_VALIDATION_TIMEOUT** | No | `1m` | The period of time after which validation is canceled |
+| **APP_WEBHOOK_VALIDATION_WORKERS_COUNT** | No | `10` | The number of workers used in parallel to validate files |
 | **APP_LOADER_VERIFY_SSL** | No | `true` | The variable that verifies SSL certificate before downloading source files |
 | **APP_LOADER_TEMPORARY_DIRECTORY** | No | `/tmp` | The path to the directory used to temporarily store data |
 | **APP_MAX_ASSET_CONCURRENT_RECONCILES** | No | `1` | The maximum number of asset reconciles that can run in parallel
 | **APP_MAX_CLUSTER_ASSET_CONCURRENT_RECONCILES** | No | `1` | The maximum number of cluster asset reconciles that can run in parallel |
-| **APP_STORE_UPLOAD_WORKER_COUNT** | No | `10` | The number of workers that will be used to upload files to storage bucket in parallel |
+| **APP_STORE_UPLOAD_WORKERS_COUNT** | No | `10` | The number of workers used in parallel to upload files to the storage bucket |
 
 ## Development
 

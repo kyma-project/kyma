@@ -21,4 +21,6 @@ This table lists the configurable parameters, their descriptions, and default va
 | **resources.requests.memory** | Defines requests for memory resources. | `64Mi` |
 | **maxClusterAssetConcurrentReconciles** | Defines the maximum number of cluster asset concurrent Reconciles which will run. | `3` |
 | **maxAssetConcurrentReconciles** | Defines the maximum number of asset concurrent Reconciles which will run. | `3` |
-| **maxClusterAssetConcurrentReconciles** | Defines the number of workers that will be used to upload files to storage bucket in parallel. | `3` |
+| **storeUploadWorkersCount** | Defines the number of workers used in parallel to upload files to the storage bucket. | `10` |
+| **validationWebhookWorkersCount** | Defines the number of workers used in parallel to validate files. | `10` |
+| **mutationWebhookWorkersCount** | Defines the number of workers used in parallel to mutate files. | `10` |

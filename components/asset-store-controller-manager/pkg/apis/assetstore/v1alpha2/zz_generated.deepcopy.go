@@ -202,8 +202,8 @@ func (in *AssetStatusRef) DeepCopy() *AssetStatusRef {
 func (in *AssetWebhookService) DeepCopyInto(out *AssetWebhookService) {
 	*out = *in
 	out.WebhookService = in.WebhookService
-	if in.Metadata != nil {
-		in, out := &in.Metadata, &out.Metadata
+	if in.Parameters != nil {
+		in, out := &in.Parameters, &out.Parameters
 		*out = new(runtime.RawExtension)
 		(*in).DeepCopyInto(*out)
 	}
@@ -510,8 +510,8 @@ func (in *CommonAssetSpec) DeepCopyInto(out *CommonAssetSpec) {
 	*out = *in
 	in.Source.DeepCopyInto(&out.Source)
 	out.BucketRef = in.BucketRef
-	if in.Metadata != nil {
-		in, out := &in.Metadata, &out.Metadata
+	if in.Parameters != nil {
+		in, out := &in.Parameters, &out.Parameters
 		*out = new(runtime.RawExtension)
 		(*in).DeepCopyInto(*out)
 	}

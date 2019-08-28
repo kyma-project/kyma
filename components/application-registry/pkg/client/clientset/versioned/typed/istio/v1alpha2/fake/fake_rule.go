@@ -46,7 +46,7 @@ func (c *FakeRules) List(opts v1.ListOptions) (result *v1alpha2.RuleList, err er
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha2.RuleList{}
+	list := &v1alpha2.RuleList{ListMeta: obj.(*v1alpha2.RuleList).ListMeta}
 	for _, item := range obj.(*v1alpha2.RuleList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -103,7 +103,7 @@ func (c *FakeRules) DeleteCollection(options *v1.DeleteOptions, listOptions v1.L
 // Patch applies the patch and returns the patched rule.
 func (c *FakeRules) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha2.Rule, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(rulesResource, c.ns, name, data, subresources...), &v1alpha2.Rule{})
+		Invokes(testing.NewPatchSubresourceAction(rulesResource, c.ns, name, pt, data, subresources...), &v1alpha2.Rule{})
 
 	if obj == nil {
 		return nil, err

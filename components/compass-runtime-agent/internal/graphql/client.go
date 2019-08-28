@@ -26,14 +26,15 @@ type client struct {
 	logging   bool
 }
 
-func New(certificate tls.Certificate, graphqlEndpoint string, enableLogging bool) (Client, error) {
+func New(certificate tls.Certificate, graphqlEndpoint string, enableLogging, insecureConfigFetch bool) (Client, error) {
 	httpClient := &http.Client{
 		// TODO: enable when the certificates will be ready
-		//Transport: &http.Transport{
-		//	TLSClientConfig: &tls.Config{
-		//		Certificates: []tls.Certificate{certificate},
-		//	},
-		//},
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: insecureConfigFetch,
+				//Certificates: []tls.Certificate{certificate},
+			},
+		},
 	}
 
 	gqlClient := graphql.NewClient(graphqlEndpoint, graphql.WithHTTPClient(httpClient))

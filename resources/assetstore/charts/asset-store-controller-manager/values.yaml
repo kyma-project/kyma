@@ -16,3 +16,6 @@ resources:
 
 maxAssetConcurrentReconciles: 3
 maxClusterAssetConcurrentReconciles: 3
+storeUploadWorkersCount: 10
+validationWebhookWorkersCount: 10
+mutationWebhookWorkersCount: 10

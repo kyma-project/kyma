@@ -29,15 +29,15 @@ To start the Application Gateway, run this command:
 ```
 
 The Application Gateway has the following parameters:
-- **proxyPort** - This port acts as a proxy for the calls from services and lambdas to an external solution. The default port is `8080`.
-- **externalAPIPort** - This port exposes the API allowing to check component status. The default port is `8081`.
-- **application** - Application name used to write and read information about services. The default Application is `default-ec`.
-- **namespace** - Namespace in which the Application Gateway is deployed. The default Namespace is `kyma-system`.
-- **requestTimeout** - A timeout for requests sent through the Application Gateway, expressed in seconds. The default time-out is `1`.
-- **skipVerify** - A flag for skipping the verification of certificates for the proxy targets. The default value is `false`.
-- **requestLogging** - A flag for logging incoming requests. The default value is `false`.
-- **proxyTimeout** - A timeout for requests send through the proxy, expressed in seconds. The default is `10`.
-- **proxyCacheTTL** - Time to live of Remote API information stored in proxy cache, expressed in seconds. The default value is `120`.
+- **proxyPort** is the port that acts as a proxy for the calls from services and lambdas to an external solution. The default port is `8080`.
+- **externalAPIPort** is the port that exposes the API allowing to check component status. The default port is `8081`.
+- **application** is the Application name used to write and read information about services. The default Application is `default-ec`.
+- **namespace** is the Namespace in which the Application Gateway is deployed. The default Namespace is `kyma-system`.
+- **requestTimeout** is the timeout for requests sent through the Application Gateway, expressed in seconds. The default value is `1`.
+- **skipVerify** is the flag for skipping the verification of certificates for the proxy targets. The default value is `false`.
+- **requestLogging** is the flag for logging incoming requests. The default value is `false`.
+- **proxyTimeout** is the timeout for requests sent through the proxy, expressed in seconds. The default value is `10`.
+- **proxyCacheTTL** is the time to live of the remote API information stored in the proxy cache, expressed in seconds. The default value is `120`.
 
 ## Development
 

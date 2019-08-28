@@ -12,12 +12,12 @@ type FakeIstioV1alpha2 struct {
 	*testing.Fake
 }
 
-func (c *FakeIstioV1alpha2) Checknothings(namespace string) v1alpha2.ChecknothingInterface {
-	return &FakeChecknothings{c, namespace}
+func (c *FakeIstioV1alpha2) Handlers(namespace string) v1alpha2.HandlerInterface {
+	return &FakeHandlers{c, namespace}
 }
 
-func (c *FakeIstioV1alpha2) Deniers(namespace string) v1alpha2.DenierInterface {
-	return &FakeDeniers{c, namespace}
+func (c *FakeIstioV1alpha2) Instances(namespace string) v1alpha2.InstanceInterface {
+	return &FakeInstances{c, namespace}
 }
 
 func (c *FakeIstioV1alpha2) Rules(namespace string) v1alpha2.RuleInterface {

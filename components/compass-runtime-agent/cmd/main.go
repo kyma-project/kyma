@@ -4,7 +4,6 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/synchronization"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
 
 	"os"
@@ -16,16 +15,22 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 
+	"github.com/kelseyhightower/envconfig"
 	apis "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	// TODO - wait for Istio sidecar or do not inject at all?
-
 	log.Infoln("Starting Runtime Agent")
 	options := parseArgs()
 	log.Infof("Options: %s", options)
+
+	var envConfig EnvConfig
+	err := envconfig.Process("", &envConfig)
+	if err != nil {
+		log.Error("Failed to process environment variables")
+	}
+	log.Infof("Env config: %s", envConfig)
 
 	// Get a config to talk to the apiserver
 	log.Info("Setting up client for manager")
@@ -60,10 +65,14 @@ func main() {
 	}
 
 	certManager := certificates.NewCredentialsManager()
-	compassConfigClient := compass.NewConfigurationClient(options.tenant, options.runtimeId, graphql.New)
-	syncService := synchronization.NewSynchronizationService()
+	compassConfigClient := compass.NewConfigurationClient(envConfig.Tenant, envConfig.RuntimeId, graphql.New, options.insecureConfigurationFetch)
+	syncService, err := createNewSynchronizationService(cfg, options.integrationNamespace, options.gatewayPort, options.uploadServiceUrl)
+	if err != nil {
+		log.Errorf("Failed to create synchronization service, %s", err.Error())
+		os.Exit(1)
+	}
 
-	compassConnector := compass.NewCompassConnector(options.tokenURLConfigFile)
+	compassConnector := compass.NewCompassConnector(envConfig.DirectorURL)
 	connectionSupervisor := compassconnection.NewSupervisor(
 		compassConnector,
 		compassConnectionCRClient.CompassConnections(),

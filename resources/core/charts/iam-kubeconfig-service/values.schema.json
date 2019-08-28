@@ -1,0 +1,18 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema definition for iam-kubeconfig-service helm subchart values",
+    "type": "object",
+    "properties": {
+        "service": {
+            "description": "Configuration properties for the service",
+            "type": "object",
+            "properties": {
+                "port": {
+                    "description": "Specifies the port that exposes the IAM Kubeconfig Service service.",
+                    "default": 8000,
+                    "type": "number"
+                }
+            }
+        }
+    }
+}

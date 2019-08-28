@@ -35,6 +35,9 @@ clusterRoles:
       - "monitoring.coreos.com"
     dex:
       - "dex.coreos.com"
+    ory:
+      - "oathkeeper.ory.sh"
+      - "hydra.ory.sh"
   verbs:
     edit:
       - "create"

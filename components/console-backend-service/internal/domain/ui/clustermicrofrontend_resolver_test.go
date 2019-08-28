@@ -20,6 +20,7 @@ func TestClusterMicroFrontendResolver_ClusterMicroFrontendsQuery(t *testing.T) {
 		version := "v1"
 		category := "test-category"
 		viewBaseUrl := "http://test-viewBaseUrl.com"
+		preloadUrl := "http://test-preloadUrl.com/#preload"
 		placement := "cluster"
 
 		item := &v1alpha1.ClusterMicroFrontend{
@@ -32,6 +33,7 @@ func TestClusterMicroFrontendResolver_ClusterMicroFrontendsQuery(t *testing.T) {
 					Version:     version,
 					Category:    category,
 					ViewBaseURL: viewBaseUrl,
+					PreloadURL:  preloadUrl,
 					NavigationNodes: []v1alpha1.NavigationNode{
 						v1alpha1.NavigationNode{
 							Label:            "test-mf",
@@ -53,6 +55,7 @@ func TestClusterMicroFrontendResolver_ClusterMicroFrontendsQuery(t *testing.T) {
 			Version:     version,
 			Category:    category,
 			ViewBaseURL: viewBaseUrl,
+			PreloadURL:  preloadUrl,
 			Placement:   placement,
 			NavigationNodes: []gqlschema.NavigationNode{
 				gqlschema.NavigationNode{

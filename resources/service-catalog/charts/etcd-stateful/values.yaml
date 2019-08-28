@@ -1,6 +1,6 @@
 tlsSetup:
-  image: "eu.gcr.io/kyma-project/etcd-tls-setup"
-  imageTag: "0.3.367"
+  image: "eu.gcr.io/kyma-project/pr/etcd-tls-setup"
+  imageTag: "PR-5226"
 
 etcd:
   image: "quay.io/coreos/etcd"

@@ -4,7 +4,7 @@ metadata:
   name: test-{{ template "fullname" . }}-execute-tests
   annotations:
     sidecar.istio.io/inject: "true"
-    "helm.sh/hook": test-success
+    helm.sh/hook: test-success
   labels:
     "helm-chart-test": "true"
     "kyma-project.io/upgrade-e2e-test": "executeTests"

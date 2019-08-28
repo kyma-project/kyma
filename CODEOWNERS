@@ -31,11 +31,11 @@
 # The `values.yaml` file for `core` chart
 /resources/core/values.yaml @kyma-project/developers
 
-# The `heptio velero essentials` chart
-/resources/velero-essentials/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+# The `backup-init` chart
+/resources/backup-init/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
-# The `heptio velero` chart
-/resources/velero/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+# The `backup` chart
+/resources/backup/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -136,14 +136,8 @@
 # The `binding-usage-controller` subchart
 /resources/service-catalog-addons/charts/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# The `brokers-ui` subchart
-/resources/service-catalog-addons/charts/brokers-ui/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @akucharska @michal-hudy @m00g3n @aerfio @magicmatatjahu @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota
-
-# The `catalog-ui` subchart
-/resources/service-catalog-addons/charts/catalog-ui/ @akucharska @michal-hudy @m00g3n @aerfio @magicmatatjahu @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota
-
-# The `instances-ui` subchart
-/resources/service-catalog-addons/charts/instances-ui/ @akucharska @michal-hudy @m00g3n @aerfio @magicmatatjahu @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota
+# The `service-catalog-ui` subchart
+/resources/service-catalog-addons/charts/service-catalog-ui/ @kwiatekus @dariadomagala @y-kkamil @akucharska @sjanota @parostatkiem
 
 # The `docs` subchart
 /resources/core/charts/docs/ @michal-hudy @m00g3n @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -199,8 +193,14 @@
 # The `ory` chart
 /resources/ory/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# The `api-gateway` chart
+/resources/api-gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+
 # The `compass` chart
 /resources/compass/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+
+# The `compass-cockpit` chart
+/resources/compass/charts/cockpit @kwiatekus @dariadomagala @y-kkamil @akucharska @sjanota @parostatkiem
 
 # The `compass-runtime-agent` chart
 /resources/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
@@ -230,6 +230,9 @@
 # CMS Controller Manager Component
 /components/cms-controller-manager/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
+# CMS Services	
+/components/cms-services/ @michal-hudy @m00g3n @aerfio @magicmatatjahu	
+
 # Binding usage controller Component
 /components/service-binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
@@ -247,9 +250,6 @@
 
 # Application broker Component
 /components/application-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
-
-# Helm broker controller Component
-/components/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # Console Backend Service Component
 /components/console-backend-service/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @sjanota
@@ -351,6 +351,9 @@
 # Application Connector Tests
 /tests/application-connector-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
+# Connection Token Handler Tests
+/tests/connection-token-handler-tests/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
 # Compass Runtime Agent Tests
 /tests/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
 
@@ -396,10 +399,10 @@
 /tests/integration/cluster-users @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # All .md files
-*.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj
+*.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj @majakurcius @alexandra-simeonova
 
 # All files and subdirectories in /docs
-/docs/ @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj
+/docs/ @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj @majakurcius @alexandra-simeonova
 
 # Config file for MILV - milv.config.yaml
 milv.config.yaml @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu

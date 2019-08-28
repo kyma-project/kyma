@@ -14,12 +14,12 @@ import (
 func TestCommon_Metadata(t *testing.T) {
 	t.Run("Filled", func(t *testing.T) {
 		// given
-		metadata := &runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)}
+		parameters := &runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)}
 		expected := map[string]interface{}{"complex": map[string]interface{}{"data": "true"}, "json": "true"}
 		converter := new(extractor.Common)
 
 		// when
-		result, err := converter.Metadata(metadata)
+		result, err := converter.Parameters(parameters)
 
 		// then
 		require.NoError(t, err)
@@ -28,12 +28,12 @@ func TestCommon_Metadata(t *testing.T) {
 
 	t.Run("Empty", func(t *testing.T) {
 		// given
-		metadata := &runtime.RawExtension{Raw: []byte(`{}`)}
+		parameters := &runtime.RawExtension{Raw: []byte(`{}`)}
 		expected := make(map[string]interface{})
 		converter := new(extractor.Common)
 
 		// when
-		result, err := converter.Metadata(metadata)
+		result, err := converter.Parameters(parameters)
 
 		// then
 		require.NoError(t, err)
@@ -46,7 +46,7 @@ func TestCommon_Metadata(t *testing.T) {
 		converter := new(extractor.Common)
 
 		// when
-		result, err := converter.Metadata(nil)
+		result, err := converter.Parameters(nil)
 
 		// then
 		require.NoError(t, err)
@@ -55,11 +55,11 @@ func TestCommon_Metadata(t *testing.T) {
 
 	t.Run("Invalid", func(t *testing.T) {
 		// given
-		metadata := &runtime.RawExtension{Raw: []byte(`{invalid`)}
+		parameters := &runtime.RawExtension{Raw: []byte(`{invalid`)}
 		converter := new(extractor.Common)
 
 		// when
-		_, err := converter.Metadata(metadata)
+		_, err := converter.Parameters(parameters)
 
 		// then
 		require.Error(t, err)

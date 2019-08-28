@@ -10,8 +10,8 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
   annotations:
-    "helm.sh/hook": post-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
 
 ---
 kind: ClusterRole
@@ -25,8 +25,8 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
   annotations:
-    "helm.sh/hook": post-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
 rules:
   - apiGroups: ["apps"]
     resources: ["deployments"]
@@ -73,8 +73,8 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
   annotations:
-    "helm.sh/hook": post-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
 subjects:
   - kind: ServiceAccount
     name: migration-job-account
@@ -95,9 +95,9 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
   annotations:
-    "helm.sh/hook": post-upgrade
-    "helm.sh/hook-weight": "1"
-    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-weight: "1"
+    helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
 spec:
   backoffLimit: 1
   activeDeadlineSeconds: 100

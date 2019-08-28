@@ -1,3 +1,4 @@
+{{- if .Values.tests.enabled }}
 kind: ServiceAccount
 apiVersion: v1
 metadata:
@@ -61,6 +62,9 @@ rules:
   - apiGroups: ["ui.kyma-project.io"]
     resources: ["backendmodules"]
     verbs: ["create", "get", "delete"]
+  - apiGroups: ["addons.kyma-project.io"]
+    resources: ["clusteraddonsconfigurations", "addonsconfigurations"]
+    verbs: ["get"]
 
 ---
 kind: ClusterRoleBinding
@@ -81,3 +85,4 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: {{ .Chart.Name }}-tests
+{{- end }}

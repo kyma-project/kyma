@@ -12,7 +12,7 @@ replicaCount: 1
 
 image:
   repository: jaegertracing/all-in-one
-  tag: 1.7.0
+  tag: 1.13.1
   pullPolicy: IfNotPresent
 
 service:
@@ -30,10 +30,20 @@ jaeger:
   configPort: 5778
   tChannelPort: 14267
   collectorHTTPPort: 14268
-  memory:
-    maxTraces: "40000"
+  persistence:
+    storageType: badger
+    dataPath: /badger/data
+    keyPath: /badger/key
+    ephemeral: false
+    accessModes:
+      - ReadWriteOnce
+    size: 1Gi
+    storageClassName: ""
+    # annotations: {}
+    # subPath: ""
+    # existingClaim:
 resources:
   limits:
-    memory: "512M"
+    memory: "128M"
 kcproxy:
   inPort: 3000

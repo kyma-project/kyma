@@ -8,7 +8,7 @@ import (
 
 const (
 	k8sResourceNameMaxLength = 64
-	requestParamsNameFormat = "params-%s"
+	requestParamsNameFormat  = "params-%s"
 )
 
 func GenerateIdentifier() string {

@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	rsaKeySize          = 4096
+	rsaKeySize = 4096
 )
 
 type CSRProvider interface {
