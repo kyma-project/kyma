@@ -1,12 +1,11 @@
 # Function Controller
 
-The Knative Function Controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses
-Knative Build and Knative Serving under the hood.
+The Knative Function Controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses Knative Build and Knative Serving under the hood.
 
 ## Contents
 
 1. [Prerequisites](#prerequisites)
-2. [Installation for development workflow](#installation-for-development-workflow)
+2. [Installation for development workflow](#installation)
    * [Preparation](#preparation)
    * [Deploying the controller](#deploying-the-controller)
 3. [Usage](#usage)
@@ -21,11 +20,11 @@ Before you set up the project, install:
 
 ## Installation
 
-
 Install the Function Controller to use it for development purposes. Follow these steps to complete the installation:
 
+### Preparation
 
-1. Export the following environment variables:
+Export the following environment variables:
 
 | Variable        | Description | Sample value|
 | --------------- | ----------- |--------------|
@@ -42,8 +41,7 @@ export FN_REGISTRY=https://index.docker.io/v1/
 export FN_REPOSITORY=my-docker-user
 ```
 
-
-2. Create the `serverless-system` Namespace you will deploy the Controller to.
+Create the `serverless-system` Namespace you will deploy the Controller to.
 
 ```bash
 kubectl create namespace serverless-system
