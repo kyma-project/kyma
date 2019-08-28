@@ -40,7 +40,7 @@ metadata:
 ---
 apiVersion: v1
 data:
-  dockerRegistry: {{ .Values.config.dockerRegistry }}
+  dockerRegistry: {{ .Values.config.dockerRegistry | quote }}
   runtimes: |
     - ID: nodejs8
       dockerFileName: dockerfile-nodejs-8
