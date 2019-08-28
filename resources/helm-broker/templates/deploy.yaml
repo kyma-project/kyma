@@ -118,12 +118,13 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-empty-dir
-
         - mountPath: /etc/config/helm-broker
           name: config-volume
-
         - mountPath: /etc/certs
           name: helm-certs
+          readOnly: true
+        - mountPath: /root/.ssh
+          name: ssh-cfg
           readOnly: true
         ports:
         - containerPort: {{ .Values.service.internalPort }}
@@ -154,6 +155,9 @@ spec:
       - name: config-volume
         configMap:
           name: helm-config-map
+      - name: ssh-cfg
+        configMap:
+          name: ssh-cfg
       - name: helm-certs
         secret:
           secretName: helm-secret
