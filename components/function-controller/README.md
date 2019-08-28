@@ -10,9 +10,9 @@ The Function Controller requires the following components to be installed:
 - Knative Serving (v0.6.1)
 - Istio (v1.0.7)
 
-## Environment set up
+## Set up the environment
 
-These steps prepare the environment for the installation of the controller.
+Follow these steps to prepare the environment you will use to deploy the Controller.
 
 1. Export the following environment variables:
 
@@ -97,16 +97,16 @@ These steps prepare the environment for the installation of the controller.
     EOF
     ```
 
-## Deployment
+## Deploy the Controller
 
-The following `make` targets build the Function Controller image, tag it to the value of the **IMG** environment variable, and push it to the remote container registry.
+1. Use the `make` targets to build the Function Controller image, tag it to the value of the **IMG** environment variable, and push it to the remote container registry.
 
 ```bash
 make docker-build
 make docker-push
 ```
 
-After the image has been successfully pushed, deploy the Function Controller to the `serverless-system` Namespace.
+2. After the image has been successfully pushed, deploy the Function Controller to the `serverless-system` Namespace.
 
 ```bash
 make deploy
@@ -114,7 +114,7 @@ make deploy
 
 ## Usage
 
-### Test the controller
+### Run tests
 
 Use the following `make` target to test the deployed Function Controller.
 
