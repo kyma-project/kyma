@@ -5,7 +5,7 @@
 This chart includes [knative eventing](https://github.com/knative/docs/tree/master/docs/eventing) release files.
 
 Included releases:
- * https://github.com/knative/eventing/releases/download/v0.5.0/release.yaml
+ * https://github.com/knative/eventing/releases/download/v0.7.1/release.yaml
 
 Kyma-specific changes:
  * The `knative-eventing` Namespace is no longer created. This happens during the installation process.
