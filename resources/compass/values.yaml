@@ -6,14 +6,14 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project/incubator
     connector:
-      dir: pr/
-      version: "PR-250"
+      dir: develop/
+      version: "e8efc60c"
     director:
       dir: develop/
       version: "4ab44720"
     gateway:
-      dir: pr/
-      version: "PR-251"
+      dir: develop/
+      version: "1ce3b6c3"
     healthchecker:
       dir: develop/
       version: "26601526"
@@ -23,8 +23,8 @@ global:
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
-      dir: pr/
-      version: "PR-5318"
+      dir: develop/
+      version: "70782d18"
     tests:
       e2e:
         dir: develop/
