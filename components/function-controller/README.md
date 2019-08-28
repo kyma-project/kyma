@@ -1,6 +1,6 @@
-# Function controller
+# Function Controller
 
-The Knative Function controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses
+The Knative Function Controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses
 Knative Build and Knative Serving under the hood.
 
 ## Contents
@@ -14,29 +14,27 @@ Knative Build and Knative Serving under the hood.
    * [Creating a sample Hello World Function](#creating-a-sample-hello-world-function)
 
 ## Prerequisites
-
+Before you set up the project, install:
 - Knative Build (v0.6.0)
 - Knative Serving (v0.6.1)
 - Istio (v1.0.7)
 
-## Installation for development workflow
+## Installation
 
-### Preparation
 
-A few preparation steps must be executed before proceeding with the rest of the instructions from this document.
+Install the Function Controller to use it for development purposes. Follow these steps to complete the installation:
 
-#### Environment variables
 
-The following environment variables must be exported to the current shell's environment.
+1. Export the following environment variables:
 
-| Variable        | Description |
-| --------------- | ----------- |
-| `IMG`           | Full image name the _Function Controller_ will be tagged with. (e.g. `gcr.io/my-project/function-controller` for GCR, `my-user/function-controller` for Docker Hub) |
-| `FN_REGISTRY`   | URL of the container registry _Function_ images will be pushed to. Used for authentication. (e.g. `https://gcr.io/` for GCR, `https://index.docker.io/v1/` for Docker Hub) |
-| `FN_REPOSITORY` | Name of the container repository _Function_ images will be pushed to. (e.g. `gcr.io/my-project` for GCR, `my-user` for Docker Hub) |
+| Variable        | Description | Sample value|
+| --------------- | ----------- |--------------|
+| **IMG**   | The full image name the Function Controller will be tagged with.  | `gcr.io/my-project/function-controller` for GCR, `my-user/function-controller` for Docker Hub |
+| **FN_REGISTRY**   | The URL of the container registry Function images will be pushed to. Used for authentication. | `https://gcr.io/` for GCR, `https://index.docker.io/v1/` for Docker Hub |
+| **FN_REPOSITORY** | The name of the container repository Function images will be pushed to.  |`gcr.io/my-project` for GCR, `my-user` for Docker Hub|
 | `FN_NAMESPACE`  | Namespace where sample functions are to be deployed. |
 
-Example:
+See the example:
 
 ```bash
 export IMG=my-docker-user/function-controller
@@ -44,9 +42,8 @@ export FN_REGISTRY=https://index.docker.io/v1/
 export FN_REPOSITORY=my-docker-user
 ```
 
-#### Controller namespace
 
-Create the `serverless-system` Namespace. The controller will be deployed to it.
+2. Create the `serverless-system` Namespace you will deploy the Controller to.
 
 ```bash
 kubectl create namespace serverless-system
@@ -93,10 +90,9 @@ Node.js runtimes.
 kubectl apply -n ${FN_NAMESPACE} -f config/dockerfiles.yaml
 ```
 
-#### Container registry credentials
 
 Before creating Functions, it is necessary to create the `registry-credentials` Secret, which contains credentials to
-the Docker registry defined by the `FN_REGISTRY` environment variable. Knative Build uses this Secret to push the images
+the Docker registry defined by the **FN_REGISTRY** environment variable. Knative Build uses this Secret to push the images it builds for the deployed Functions.
 it builds for the deployed Functions. The corresponding `function-controller-build` ServiceAccount was referenced
 earlier inside the controller configuration.
 
@@ -128,16 +124,14 @@ secrets:
 
 ### Deploying the controller
 
-The following `make` targets build the Function Controller image, tag it to the value of the `IMG` environment variable
-defined previously, and push it to the remote container registry.
+5. Deploy the controller. The `make` targets build the Function Controller image, tag it with the value of the **IMG** environment variable, and push it to the remote container registry.
 
 ```bash
 make docker-build
 make docker-push
 ```
 
-After the image has been successfully pushed, one can deploy the controller to the `serverless-system` namespace created
-in the previous section.
+6. After the image has been successfully pushed, deploy the Function Controller to the `serverless-system` Namespace.
 
 ```bash
 make deploy
@@ -147,7 +141,7 @@ make deploy
 
 ### Testing the controller
 
-The following `make` target runs tests against the deployed Function Controller.
+Use the following `make` target to test the deployed Function Controller.
 
 ```bash
 make test
@@ -161,25 +155,25 @@ Apply the following Function manifest:
 kubectl apply -f config/samples/serverless_v1alpha1_function.yaml
 ```
 
-Ensure the Function was created:
+2. Ensure the Function was created:
 
 ```bash
 kubectl get functions
 ```
 
-Check the status of the build:
+3. Check the status of the build:
 
 ```bash
 kubectl get builds.build.knative.dev
 ```
 
-Check the status of the Knative Serving service:
+4. Check the status of the Knative Serving service:
 
 ```bash
 kubectl get services.serving.knative.dev
 ```
 
-Access the function:
+5. Access the Function:
 
 ```bash
 # minikube
