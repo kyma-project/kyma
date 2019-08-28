@@ -1,7 +1,6 @@
 # Function Controller
 
-The Knative Function Controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses
-Knative Build and Knative Serving under the hood.
+The Knative Function Controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses Knative Build and Knative Serving under the hood.
 
 ## Contents
 
@@ -33,8 +32,8 @@ Export the following environment variables:
 | --------------- | ----------- |--------------|
 | **IMG** | The full image name the Function Controller will be tagged with. | `gcr.io/my-project/function-controller` for GCR, `my-user/function-controller` for Docker Hub |
 | **FN_REGISTRY** | The URL of the container registry Function images will be pushed to. Used for authentication. | `https://gcr.io/` for GCR, `https://index.docker.io/v1/` for Docker Hub |
-| **FN_REPOSITORY** | The name of the container repository Function images will be pushed to.  | `gcr.io/my-project` for GCR, `my-user` for Docker Hub |
-| **FN_NAMESPACE** | Namespace where sample functions are to be deployed. | |
+| **FN_REPOSITORY** | The name of the container repository Function images will be pushed to. | `gcr.io/my-project` for GCR, `my-user` for Docker Hub |
+| **FN_NAMESPACE** | The Namespace where Functions are deployed. | |
 
 See the example:
 
@@ -54,8 +53,7 @@ kubectl create namespace serverless-system
 
 #### Controller configuration
 
-Create the following configuration for the controller. It contains a list of supported runtimes as well as the container
-repository referenced by the **FN_REPOSITORY** environment variable, which we will create a Secret for in the next steps.
+Create the following configuration for the controller. It contains a list of supported runtimes as well as the container repository referenced by the **FN_REPOSITORY** environment variable, which you will create a Secret for in the next steps.
 
 ```bash
 cat <<EOF | kubectl -n serverless-system apply -f -
@@ -77,8 +75,7 @@ EOF
 
 #### Functions namespace
 
-Create the Namespace defined previously by the **FN_NAMESPACE** environment variable. The demo Function will be deployed
-to it.
+Create the Namespace defined previously by the **FN_NAMESPACE** environment variable. The demo Function will be deployed to it.
 
 ```bash
 kubectl create namespace ${FN_NAMESPACE}
@@ -86,17 +83,13 @@ kubectl create namespace ${FN_NAMESPACE}
 
 #### Funtion runtimes configurations
 
-Functions require Dockerfiles to be created for each supported runtime. The following manifest creates Dockerfiles for
-Node.js runtimes.
+Functions require Dockerfiles to be created for each supported runtime. The following manifest creates Dockerfiles for Node.js runtimes.
 
 ```bash
 kubectl apply -n ${FN_NAMESPACE} -f config/dockerfiles.yaml
 ```
 
-Functions require the `registry-credentials` Secret, which contains credentials to the Docker registry defined by the
-**FN_REGISTRY** environment variable. Knative Build uses this Secret to push the images it builds for the deployed
-Functions. The corresponding `function-controller-build` ServiceAccount was referenced earlier inside the controller
-configuration.
+Functions require the `registry-credentials` Secret, which contains credentials to the Docker registry defined by the **FN_REGISTRY** environment variable. Knative Build uses this Secret to push the images it builds for the deployed Functions. The corresponding `function-controller-build` ServiceAccount was referenced earlier inside the controller configuration.
 
 ```bash
 reg_username=<container registry username>
@@ -126,8 +119,7 @@ secrets:
 
 ### Deploying the controller
 
-The following `make` targets build the Function Controller image, tag it to the value of the **IMG** environment
-variable, and push it to the remote container registry.
+The following `make` targets build the Function Controller image, tag it to the value of the **IMG** environment variable, and push it to the remote container registry.
 
 ```bash
 make docker-build
