@@ -49,6 +49,8 @@ func NewReconciler(appMgrClient ApplicationManagerClient, releaseManager appRele
 func (r *applicationReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	instance := &v1alpha1.Application{}
 
+	log.Infof("Processing %s Application...", request.Name)
+
 	err := r.applicationMgrClient.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
 		return r.handleErrorWhileGettingInstance(err, request)
