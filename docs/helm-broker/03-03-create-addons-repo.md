@@ -140,7 +140,9 @@ stringData:
   project: "kyma-project/addons"       
 ```
 The URL will be resolved into: 
-```https://github.com/kyma-project/addons/addons/index.yaml```
+```
+https://github.com/kyma-project/addons/addons/index.yaml
+```
 
 The Helm Broker supports authorization using the following protocols:
  
