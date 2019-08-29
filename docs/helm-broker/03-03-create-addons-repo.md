@@ -192,7 +192,7 @@ spec:
   
   > **NOTE:** Private SSH key should not be secured by a passphrase.
 
-  create a corresponding Secret resource:
+  Create a corresponding Secret resource:
   ```bash
   kubectl create secret generic auth -n stage --from-file=key=id_rsa-encoded
   ```
