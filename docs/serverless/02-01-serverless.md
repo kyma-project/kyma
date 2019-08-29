@@ -49,3 +49,11 @@ The following diagram demonstrates the Event Bus architecture.
 ![Event Bus architecture](./assets/nats.png)
 
 The Event Bus exposes an HTTP endpoint that the system can consume. An external event, such as a subscription, triggers the Event Bus. A lambda function works with a push notification, and the subscription handling of the Event Bus processes the notification.
+
+### Knative
+
+Knative is a platform which manages serverless workloads inside Kubernetes environments. Due to its high versatility, Knative is able to manage the whole lifecycle of a lambda function, from building the source code to serving it to the end user.
+
+Kyma bridges the gap between developers and Knative using its own [Function Controller](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md), which uses the Function custom resource to facilitate the deployment of lambda functions.
+
+For details, see the [Knative project](https://knative.dev/docs/) documentation.
