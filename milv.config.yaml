@@ -67,4 +67,4 @@ files:
       white-list-external: ["https://grafana.example.com/"]
   - path: "./kyma/docs/helm-broker/03-03-create-addons-repo.md"
     config:
-      white-list-external: ["https://repository.addons.com"]
+      white-list-external: ["https://admin:secretPassword@repository.addons.com/index.yaml"]
