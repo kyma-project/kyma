@@ -201,7 +201,7 @@ spec:
   ```bash
   kubectl create secret generic auth -n stage --from-file=key=id_rsa-encoded
   ```
-  You can define an url with the required sshkey option:
+  Define an url with the required sshkey option:
   ```yaml
   apiVersion: addons.kyma-project.io/v1alpha1
   kind: ClusterAddonsConfiguration
