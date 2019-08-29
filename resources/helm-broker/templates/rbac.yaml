@@ -10,7 +10,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["secrets", "configmaps", "services"]
-  verbs: ["get"]
+  verbs: ["get", "list", "watch"]
 - apiGroups: ["servicecatalog.k8s.io"]
   resources: ["servicebrokers", "clusterservicebrokers"]
   verbs: ["create","delete","list","get","update", "watch"]
