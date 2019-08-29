@@ -73,7 +73,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 
 	lookupService := middlewares.NewGraphQLLookupService()
 
-	headerParser := certificates.NewHeaderParser(env.country, env.locality, env.province, env.organization, env.organizationalUnit, opts.central)
+	headerParser := certificates.NewHeaderParser(env.country, env.province, env.locality, env.organization, env.organizationalUnit, opts.central)
 
 	appCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.appCertificateValidityTime), opts.caSecretName, opts.rootCACertificateSecretName)
 
