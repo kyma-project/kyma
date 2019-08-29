@@ -72,6 +72,10 @@ spec:
                     type: object
                   type: array
                 mode:
+                  enum:
+                  - single
+                  - package
+                  - index
                   type: string
                 mutationWebhookService:
                   items:

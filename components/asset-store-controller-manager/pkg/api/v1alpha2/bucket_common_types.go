@@ -6,15 +6,14 @@ import (
 
 // CommonBucketSpec defines the desired state of Bucket
 type CommonBucketSpec struct {
-	// +kubebuilder:validation:Enum=,us-east-1,us-west-1,us-west-2,eu-west-1,eu-central-1,ap-southeast-1,ap-southeast-2,ap-northeast-1,sa-east-1
 	// +optional
 	Region BucketRegion `json:"region,omitempty"`
 
-	// +kubebuilder:validation:Enum=,none,readonly,writeonly,readwrite
 	// +optional
 	Policy BucketPolicy `json:"policy,omitempty"`
 }
 
+// +kubebuilder:validation:Enum=us-east-1;us-west-1;us-west-2;eu-west-1;eu-central-1;ap-southeast-1;ap-southeast-2;ap-northeast-1;sa-east-1;""
 type BucketRegion string
 
 const (
@@ -29,6 +28,7 @@ const (
 	BucketRegionSAEast1                   = "sa-east-1"
 )
 
+// +kubebuilder:validation:Enum=none;readonly;writeonly;readwrite;""
 type BucketPolicy string
 
 const (

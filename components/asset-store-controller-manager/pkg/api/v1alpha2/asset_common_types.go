@@ -56,6 +56,7 @@ type AssetWebhookService struct {
 	Parameters     *runtime.RawExtension `json:"parameters,omitempty"`
 }
 
+// +kubebuilder:validation:Enum=single;package;index
 type AssetMode string
 
 const (
@@ -69,7 +70,6 @@ type AssetBucketRef struct {
 }
 
 type AssetSource struct {
-	// +kubebuilder:validation:Enum=single,package,index
 	Mode AssetMode `json:"mode"`
 	URL  string    `json:"url"`
 	// +optional
