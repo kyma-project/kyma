@@ -51,13 +51,14 @@ func NewClusterDocsTopic(config ClusterDocsTopicConfig, log logr.Logger, mgr ctr
 
 // Reconcile reads that state of the cluster for a DocsTopic object and makes changes based on the state read
 // Automatically generate RBAC rules to allow the Controller to read and write ClusterDocsTopics, ClusterAssets, and ClusterBuckets
-// +kubebuilder:rbac:groups=cms.kyma-project.io,resources=docstopics,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=cms.kyma-project.io,resources=docstopics/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=cms.kyma-project.io,resources=clusterdocstopics,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=cms.kyma-project.io,resources=clusterdocstopics/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=clusterassets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=clusterassets/status,verbs=get;list;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=clusterbuckets,verbs=get;list;watch;create;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=clusterbuckets/status,verbs=get;list;update;patch
 // +kubebuilder:rbac:resources=configmaps,verbs=get;watch
+
 func (r *ClusterDocsTopicReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

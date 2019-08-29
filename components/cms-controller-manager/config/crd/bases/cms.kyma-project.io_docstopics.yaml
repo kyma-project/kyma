@@ -55,10 +55,12 @@ spec:
                     - index
                     type: string
                   name:
+                    pattern: ^[a-z][a-zA-Z0-9-]*[a-zA-Z0-9]$
                     type: string
                   parameters:
                     type: object
                   type:
+                    pattern: ^[a-z][a-zA-Z0-9\._-]*[a-zA-Z0-9]$
                     type: string
                   url:
                     type: string

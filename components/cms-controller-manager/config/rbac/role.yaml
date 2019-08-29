@@ -6,6 +6,93 @@ metadata:
   creationTimestamp: null
   name: manager-role
 rules:
+- resources:
+  - configmaps
+  verbs:
+  - get
+  - watch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - assets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - assets/status
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - buckets
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - buckets/status
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - clusterassets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - clusterassets/status
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - clusterbuckets
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - clusterbuckets/status
+  verbs:
+  - get
+  - list
+  - patch
+  - update
 - apiGroups:
   - cms.kyma-project.io
   resources:

@@ -21,11 +21,15 @@ const (
 	DocsTopicIndex   DocsTopicMode = "index"
 )
 
+// +kubebuilder:validation:Pattern=^[a-z][a-zA-Z0-9-]*[a-zA-Z0-9]$
+type DocsTopicName string
+
+// +kubebuilder:validation:Pattern=^[a-z][a-zA-Z0-9\._-]*[a-zA-Z0-9]$
+type DocsTopicType string
+
 type Source struct {
-	// +kubebuilder:validation:Pattern=^[a-z][a-zA-Z0-9-]*[a-zA-Z0-9]$
-	Name string `json:"name"`
-	// +kubebuilder:validation:Pattern=^[a-z][a-zA-Z0-9\._-]*[a-zA-Z0-9]$
-	Type   string        `json:"type"`
+	Name   DocsTopicName `json:"name"`
+	Type   DocsTopicType `json:"type"`
 	URL    string        `json:"url"`
 	Mode   DocsTopicMode `json:"mode"`
 	Filter string        `json:"filter,omitempty"`
