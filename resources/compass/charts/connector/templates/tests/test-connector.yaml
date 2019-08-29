@@ -19,7 +19,7 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: APP_INTERNAL_CONNECTOR_URL
-          value: 'http://{{ template "fullname" . }}:{{ .Values.deployment.args.containerPort }}/graphql'
+          value: 'http://{{ template "fullname" . }}:{{ .Values.global.connector.port }}/graphql'
         command:
         - "/bin/sh"
         args:
