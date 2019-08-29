@@ -155,7 +155,7 @@ You can prepend a section `username:password@` to the hostname in the URL to def
 https://admin:secretPassword@repository.addons.com/index.yaml
 ```
 
-You can create a Secret resource which contains credentials and reference it in the repository URL definition using templating:
+You can create a Secret resource which contains credentials, and reference it in the repository URL definition using templating:
 
 Create a Secret:
 ```bash
