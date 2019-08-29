@@ -3,5 +3,5 @@ kind: ClusterBucket
 metadata:
   name: clusterbucket-sample
 spec:
-  # Add fields here
-  foo: bar
+  region: "us-east-1"
+  policy: writeonly

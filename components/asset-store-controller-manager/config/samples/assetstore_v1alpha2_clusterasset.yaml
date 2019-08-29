@@ -3,5 +3,8 @@ kind: ClusterAsset
 metadata:
   name: clusterasset-sample
 spec:
-  # Add fields here
-  foo: bar
+  bucketRef:
+    name: clusterbucket-sample
+  source:
+    url: https://raw.githubusercontent.com/kyma-project/kyma/master/README.md
+    mode: single

@@ -1,7 +1,9 @@
 apiVersion: assetstore.kyma-project.io/v1alpha2
 kind: Bucket
 metadata:
-  name: bucket-sample
+  name: test-sample
+  namespace: default
 spec:
-  # Add fields here
-  foo: bar
+  region: "us-east-1"
+  policy: writeonly
+
