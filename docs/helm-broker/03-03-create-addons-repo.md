@@ -183,11 +183,15 @@ spec:
   Git SSH
   </summary>
   
-  The Git SSH protocol requires an sshkey argument which must be base64 encoded SSH private key. You can find more about generating key pair for Github in the [document](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key).
-  Once you created the key pair encode the private one (*id_rsa*):
+  The Git SSH protocol requires an SSH key to authorize with your repository. Setting SSH keys differs between hosting providers. See [this](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key) document to read about GitHub service. The private key must be base64 encoded.
+  
+  To encode your private key, run this command:
   ```bash
-  base64 -b -i id_rsa -o id_rsa-encoded
+    base64 -b -i {path_to_id_rsa} -o id_rsa-encoded
   ```
+  
+  > **NOTE:** Private SSH key should not be secured by a passphrase.
+
   create a corresponding Secret resource:
   ```bash
   kubectl create secret generic auth -n stage --from-file=key=id_rsa-encoded
