@@ -32,7 +32,6 @@ type DocsTopicReconciler struct {
 type DocsTopicConfig struct {
 	RelistInterval time.Duration `envconfig:"default=5m"`
 	BucketRegion   string        `envconfig:"optional"`
-	Webhook        webhookconfig.Config
 }
 
 func NewDocsTopic(config DocsTopicConfig, log logr.Logger, mgr ctrl.Manager, webhookConfigSvc webhookconfig.AssetWebhookConfigService) *DocsTopicReconciler {

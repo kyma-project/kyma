@@ -32,7 +32,6 @@ type ClusterDocsTopicReconciler struct {
 type ClusterDocsTopicConfig struct {
 	RelistInterval time.Duration `envconfig:"default=5m"`
 	BucketRegion   string        `envconfig:"optional"`
-	Webhook        webhookconfig.Config
 }
 
 func NewClusterDocsTopic(config ClusterDocsTopicConfig, log logr.Logger, mgr ctrl.Manager, webhookConfigSvc webhookconfig.AssetWebhookConfigService) *ClusterDocsTopicReconciler {
