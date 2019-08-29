@@ -1,4 +1,4 @@
-# function-controller
+# Function Controller
 
 ## Overview
 
