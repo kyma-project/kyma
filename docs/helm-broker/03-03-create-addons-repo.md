@@ -117,7 +117,7 @@ spec:
 
 ## Authorization
 
-The AddonsConfiguration and ClusterAddonsConfiguration custom resources allows you to define authorization as a part of the URL. For more details please read the [go-getter protocols](https://github.com/hashicorp/go-getter/blob/master/README.md#general-all-protocols) description.
+The AddonsConfiguration and ClusterAddonsConfiguration custom resources allow you to define authorization as part of the URL. For more details, read the [go-getter protocols](https://github.com/hashicorp/go-getter/blob/master/README.md#general-all-protocols) description.
 Using sensitive information, like a password, directly in the URL is a not good approach. This can be solved by putting such data in a Secret resource and take advantage of a templating. You can use placeholders which refers to keys in the Secret. For example:
 ```yaml
 apiVersion: addons.kyma-project.io/v1alpha1
