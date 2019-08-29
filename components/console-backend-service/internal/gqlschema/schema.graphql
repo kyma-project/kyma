@@ -855,6 +855,7 @@ type ClusterMicroFrontend {
     category: String!
     viewBaseUrl: String!
     placement: String!
+    preloadUrl: String!
     navigationNodes: [NavigationNode!]!
 }
 

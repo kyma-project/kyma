@@ -290,16 +290,16 @@ func main() {
 
 // Initialize subscriber urls
 func initSubscriberUrls(subscriber *testSubscriber) {
-	subscriber.eventEndpointV1URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v1/events"
-	subscriber.resultsEndpointV1URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v1/results"
-	subscriber.statusEndpointV1URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v1/status"
-	subscriber.eventEndpointV2URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v2/events"
-	subscriber.resultsEndpointV2URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v2/results"
-	subscriber.statusEndpointV2URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v2/status"
-	subscriber.eventEndpointV3URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v3/events"
-	subscriber.resultsEndpointV3URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v3/results"
-	subscriber.statusEndpointV3URL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/v3/status"
-	subscriber.shutdownEndpointURL = "http://" + util.SubscriberName + "." + subscriber.namespace + ":9000/shutdown"
+	subscriber.eventEndpointV1URL = fmt.Sprint("http://", util.SubscriberName, ".", subscriber.namespace, ":9000/v1/events")
+	subscriber.resultsEndpointV1URL = fmt.Sprint("http://", util.SubscriberName, ".", subscriber.namespace, ":9000/v1/results")
+	subscriber.statusEndpointV1URL = fmt.Sprint("http://", util.SubscriberName, ".", subscriber.namespace, ":9000/v1/status")
+	subscriber.eventEndpointV2URL = fmt.Sprint("http://", util.SubscriberName, ".", subscriber.namespace, ":9000/v2/events")
+	subscriber.resultsEndpointV2URL = fmt.Sprint("http://", util.SubscriberName, ".", subscriber.namespace, ":9000/v2/results")
+	subscriber.statusEndpointV2URL = fmt.Sprint("http://", util.SubscriberName, ".", subscriber.namespace, ":9000/v2/status")
+	subscriber.eventEndpointV3URL = fmt.Sprint("http://", util.SubscriberName, ".", subscriber.namespace, ":9000/v3/events")
+	subscriber.resultsEndpointV3URL = fmt.Sprint("http://", util.SubscriberName, ".", subscriber.namespace, ":9000/v3/results")
+	subscriber.statusEndpointV3URL = fmt.Sprint("http://", util.SubscriberName, ".", subscriber.namespace, ":9000/v3/status")
+	subscriber.shutdownEndpointURL = fmt.Sprint("http://", util.SubscriberName, ".", subscriber.namespace, ":9000/shutdown")
 }
 
 func shutdown(code int, subscriber *testSubscriber) {

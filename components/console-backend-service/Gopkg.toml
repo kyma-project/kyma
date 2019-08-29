@@ -62,7 +62,7 @@ required = [
 
 [[constraint]]
   name="github.com/kyma-project/kyma"
-  revision = "f5d791b218819a0aecde663dedda1905d7c12bb5"
+  revision = "7c2360a1ea71ba311c462f98cd9450b617c822ef"
 
 [[override]]
   name = "k8s.io/api"

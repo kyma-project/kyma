@@ -39,6 +39,8 @@ spec:
       namespace: "kyma-system"
     - name: "ory"
       namespace: "kyma-system"
+    # - name: "api-gateway"
+    #   namespace: "kyma-system"
     - name: "service-catalog"
       namespace: "kyma-system"
     - name: "service-catalog-addons"

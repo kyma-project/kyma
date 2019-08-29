@@ -80,6 +80,9 @@ fi
 
 # creates a config map which provides the testing addons
 injectTestingAddons
+if [[ $? -eq 1 ]]; then
+  exit 1
+fi
 trap removeTestingAddons ERR EXIT
 
 cat <<EOF | ${kc} apply -f -
