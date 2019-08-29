@@ -31,7 +31,15 @@ config:
 
 global:
   cfgReposUrlName: "helm-repos-urls"
-  isDevelopMode: "false"
+  isDevelopMode: false
+  urlRepoPrefixes:
+    default:
+      - "https://"
+      - "git::"
+      - "github.com/"
+      - "bitbucket.org/"
+    additionalDevelopMode:
+      - "http://"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   helm_broker:
