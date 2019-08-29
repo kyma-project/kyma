@@ -12,6 +12,7 @@ type CommonDocsTopicSpec struct {
 	Sources []Source `json:"sources"`
 }
 
+// +kubebuilder:validation:Enum=single;package;index
 type DocsTopicMode string
 
 const (
@@ -24,15 +25,15 @@ type Source struct {
 	// +kubebuilder:validation:Pattern=^[a-z][a-zA-Z0-9-]*[a-zA-Z0-9]$
 	Name string `json:"name"`
 	// +kubebuilder:validation:Pattern=^[a-z][a-zA-Z0-9\._-]*[a-zA-Z0-9]$
-	Type string `json:"type"`
-	URL  string `json:"url"`
-	// +kubebuilder:validation:Enum=single,package,index
+	Type   string        `json:"type"`
+	URL    string        `json:"url"`
 	Mode   DocsTopicMode `json:"mode"`
 	Filter string        `json:"filter,omitempty"`
 	// +optional
 	Parameters *runtime.RawExtension `json:"parameters,omitempty"`
 }
 
+// +kubebuilder:validation:Enum=Pending;Ready;Failed
 type DocsTopicPhase string
 
 const (
@@ -42,7 +43,6 @@ const (
 )
 
 type CommonDocsTopicStatus struct {
-	// +kubebuilder:validation:Enum=Pending,Ready,Failed
 	Phase             DocsTopicPhase  `json:"phase"`
 	Reason            DocsTopicReason `json:"reason,omitempty"`
 	Message           string          `json:"message,omitempty"`

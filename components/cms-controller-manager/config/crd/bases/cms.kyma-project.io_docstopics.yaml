@@ -49,6 +49,10 @@ spec:
                   filter:
                     type: string
                   mode:
+                    enum:
+                    - single
+                    - package
+                    - index
                     type: string
                   name:
                     type: string
@@ -77,6 +81,10 @@ spec:
             message:
               type: string
             phase:
+              enum:
+              - Pending
+              - Ready
+              - Failed
               type: string
             reason:
               type: string
