@@ -183,7 +183,7 @@ spec:
   Git SSH
   </summary>
   
-  The Git SSH protocol requires an SSH key to authorize with your repository. Setting SSH keys differs between hosting providers. See [this](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key) document to read about GitHub service. The private key must be base64 encoded.
+  The Git SSH protocol requires an SSH key to authorize with your repository. Setting SSH keys differs among hosting providers. See [this document](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key) to read about the GitHub service. The private key must be base64 encoded.
   
   To encode your private key, run this command:
   ```bash
