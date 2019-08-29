@@ -57,7 +57,7 @@ func NewDocsTopic(config DocsTopicConfig, log logr.Logger, mgr ctrl.Manager, web
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=assets/status,verbs=get;list;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch;create;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets/status,verbs=get;list;update;patch
-// +kubebuilder:rbac:resources=configmaps,verbs=get;watch
+// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;watch
 
 func (r *DocsTopicReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())

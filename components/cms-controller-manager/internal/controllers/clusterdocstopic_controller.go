@@ -57,7 +57,7 @@ func NewClusterDocsTopic(config ClusterDocsTopicConfig, log logr.Logger, mgr ctr
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=clusterassets/status,verbs=get;list;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=clusterbuckets,verbs=get;list;watch;create;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=clusterbuckets/status,verbs=get;list;update;patch
-// +kubebuilder:rbac:resources=configmaps,verbs=get;watch
+// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;watch
 
 func (r *ClusterDocsTopicReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())

@@ -6,11 +6,6 @@ metadata:
   creationTimestamp: null
   name: manager-role
 rules:
-- resources:
-  - configmaps
-  verbs:
-  - get
-  - watch
 - apiGroups:
   - assetstore.kyma-project.io
   resources:
@@ -133,3 +128,10 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - watch
