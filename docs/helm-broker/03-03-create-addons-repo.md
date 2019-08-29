@@ -144,7 +144,7 @@ The URL resolves into:
 https://github.com/kyma-project/addons/addons/index.yaml
 ```
 
-The Helm Broker supports authorization using the following protocols:
+The Helm Broker supports authorization using these protocols:
  
 <div tabs>
   <details>
