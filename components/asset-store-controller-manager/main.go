@@ -127,5 +127,9 @@ func main() {
 func loadConfig(prefix string) (Config, error) {
 	cfg := Config{}
 	err := envconfig.InitWithPrefix(&cfg, prefix)
+	if err != nil {
+		cfg.Bucket.ExternalEndpoint = cfg.Store.ExternalEndpoint
+		cfg.ClusterBucket.ExternalEndpoint = cfg.Store.ExternalEndpoint
+	}
 	return cfg, err
 }

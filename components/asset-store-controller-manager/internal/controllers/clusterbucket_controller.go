@@ -38,7 +38,7 @@ type ClusterBucketReconciler struct {
 type ClusterBucketConfig struct {
 	MaxConcurrentReconciles int           `envconfig:"default=1"`
 	RelistInterval          time.Duration `envconfig:"default=30s"`
-	ExternalEndpoint        string
+	ExternalEndpoint        string        `envconfig:"-"`
 }
 
 func NewClusterBucket(config ClusterBucketConfig, log logr.Logger, di *Container) *ClusterBucketReconciler {
