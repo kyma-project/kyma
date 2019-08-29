@@ -19,7 +19,7 @@ Use the following tools to set up the project:
 To run the application outside the cluster, run this command:
 
 ```bash
-make run
+GO111MODULE=on make run
 ```
 
 ### Build a production version
