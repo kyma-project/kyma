@@ -139,7 +139,7 @@ stringData:
   host: "github.com"
   project: "kyma-project/addons"       
 ```
-The URL will be resolved into: 
+The URL resolves into: 
 ```
 https://github.com/kyma-project/addons/addons/index.yaml
 ```
