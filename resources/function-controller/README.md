@@ -12,18 +12,19 @@ This project contains the chart for the Function Controller.
 - Knative Serving (v0.6.1)
 - Istio (v1.0.7)
 
-## Installation
+## Details
 
 ### Install Helm chart
+Follow the steps to install the chart:
 
-Environment variables:
+1. Export the environment variables:
 
-| Variable        | Description |
-| --------------- | ----------- |
-| `FN_REGISTRY`   | URL of the container registry _Function_ images will be pushed to. Used for authentication. (e.g. `https://gcr.io/` for GCR, `https://index.docker.io/v1/` for Docker Hub) |
-| `FN_REPOSITORY` | Name of the container repository _Function_ images will be pushed to. (e.g. `gcr.io/my-project` for GCR, `my-user` for Docker Hub) |
+| Variable        | Description | Sample value | 
+| --------------- | ----------- | --------|
+| **FN_REGISTRY**   | The URL of the container registry Function images will be pushed to. Used for authentication.  | `https://gcr.io/` for GCR, `https://index.docker.io/v1/` for Docker Hub|
+| **FN_REPOSITORY** | The name of the container repository Function images will be pushed to. | `gcr.io/my-project` for GCR, `my-user` for Docker Hub |
 
-1. Install knative-build
+2. Install Knative Build:
     ```bash
     helm install knative-build-init \
                  --namespace="knative-build" \
@@ -35,7 +36,7 @@ Environment variables:
                  --name="knative-build" \
                  --tls
     ```
-2. Install the function controller charts
+3. Install the Function Controller charts:
     ```bash
     NAME=function-controller
     NAMESPACE=serverless-system
@@ -54,7 +55,9 @@ Environment variables:
                  --set config.dockerRegistry="${FN_REPOSITORY}" \
                  --tls
     ```
-## Running the first function
+## Run the first function
 
-Currently there is no UI support for the new function-controller.
+Currently, there is no UI support for the new Function Controller. To use it, follow these steps:
+1. Execute steps 4-6 from [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#installation) instructions.
+2. Run your first function using [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#create-a-sample-hello-world-function) steps.
 Run your first function as mentioned [here](../../components/function-controller/README.md#create-a-sample-hello-world-function)
