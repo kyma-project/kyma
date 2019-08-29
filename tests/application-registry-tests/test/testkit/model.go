@@ -50,6 +50,8 @@ type API struct {
 	SpecificationUrl  string             `json:"specificationUrl,omitempty"`
 	ApiType           string             `json:"apiType"`
 	RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
+	Headers         *map[string][]string `json:"headers,omitempty"`
+	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
 }
 
 type RequestParameters struct {
