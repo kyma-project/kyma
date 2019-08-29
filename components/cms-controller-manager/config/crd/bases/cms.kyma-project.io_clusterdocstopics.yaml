@@ -4,28 +4,25 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   creationTimestamp: null
-  name: buckets.assetstore.kyma-project.io
+  name: clusterdocstopics.cms.kyma-project.io
 spec:
   additionalPrinterColumns:
-    - JSONPath: .status.phase
-      name: Phase
-      type: string
-    - JSONPath: .status.url
-      name: URL
-      type: string
-    - JSONPath: .metadata.creationTimestamp
-      name: Age
-      type: date
-  group: assetstore.kyma-project.io
+  - JSONPath: .status.phase
+    name: Phase
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
+  group: cms.kyma-project.io
   names:
-    kind: Bucket
-    plural: buckets
-  scope: ""
+    kind: ClusterDocsTopic
+    plural: clusterdocstopics
+  scope: Cluster
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: Bucket is the Schema for the buckets API
+      description: ClusterDocsTopic is the Schema for the clusterdocstopics API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -40,40 +37,58 @@ spec:
         metadata:
           type: object
         spec:
-          description: BucketSpec defines the desired state of Bucket
+          description: ClusterDocsTopicSpec defines the desired state of ClusterDocsTopic
           properties:
-            policy:
+            description:
               type: string
-            region:
+            displayName:
               type: string
+            sources:
+              items:
+                properties:
+                  filter:
+                    type: string
+                  mode:
+                    type: string
+                  name:
+                    type: string
+                  parameters:
+                    type: object
+                  type:
+                    type: string
+                  url:
+                    type: string
+                required:
+                - mode
+                - name
+                - type
+                - url
+                type: object
+              type: array
+          required:
+          - sources
           type: object
         status:
-          description: BucketStatus defines the observed state of Bucket
+          description: ClusterDocsTopicStatus defines the observed state of ClusterDocsTopic
           properties:
             lastHeartbeatTime:
               format: date-time
               type: string
             message:
               type: string
-            observedGeneration:
-              format: int64
-              type: integer
             phase:
               type: string
             reason:
               type: string
-            remoteName:
-              type: string
-            url:
-              type: string
           required:
-            - observedGeneration
+          - lastHeartbeatTime
+          - phase
           type: object
       type: object
   versions:
-    - name: v1alpha2
-      served: true
-      storage: true
+  - name: v1alpha1
+    served: true
+    storage: true
 status:
   acceptedNames:
     kind: ""
