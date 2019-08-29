@@ -55,7 +55,7 @@ Follow the steps to install the chart:
                  --set config.dockerRegistry="${FN_REPOSITORY}" \
                  --tls
     ```
-## Run the first function
+### Run the first function
 
 Currently, there is no UI support for the new Function Controller. To use it, follow these steps:
 1. Execute steps 4-6 from [these](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md#installation) instructions.
