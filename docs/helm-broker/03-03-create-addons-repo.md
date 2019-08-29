@@ -152,7 +152,7 @@ The Helm Broker supports authorization using the following protocols:
   HTTP/HTTPS
   </summary> 
  
-You can prepend a section `username:password@` to the hostname in the URL to define basic authentication credentials. For example:
+To define basic authentication credentials, prepend a section `username:password@` to the hostname in the URL . For example:
 ```
 https://admin:secretPassword@repository.addons.com/index.yaml
 ```
