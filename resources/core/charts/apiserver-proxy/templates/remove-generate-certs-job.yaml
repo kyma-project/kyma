@@ -4,7 +4,7 @@ metadata:
   name:  {{ template "name" . }}-remove-generate-certs-job
   annotations:
     helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
-    helm.sh/hook: pre-upgrade
+    helm.sh/hook: post-install,post-upgrade
 spec:
   template:
     metadata:
