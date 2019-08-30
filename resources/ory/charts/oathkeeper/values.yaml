@@ -5,7 +5,7 @@ image:
   # ORY Oathkeeper image
   repository: oryd/oathkeeper
   # ORY Oathkeeper version
-  tag: v0.17.3
+  tag: v0.18.0
   # Image pull policy
   pullPolicy: IfNotPresent
 
