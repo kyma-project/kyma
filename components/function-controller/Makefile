@@ -88,7 +88,7 @@ undeploy: uninstall bin/kustomize
 
 # Build the docker image
 .PHONY: docker-build
-docker-build: resolve pull-licenses test manifests
+docker-build: resolve pull-licenses manifests test
 	docker build . -t $(IMG)
 
 # Push the docker image
