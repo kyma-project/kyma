@@ -2,9 +2,6 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ template "name" . }}-certs-job
-  annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
 spec:
   backoffLimit: 1
   template:
@@ -71,7 +68,6 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: {{ template "name" . }}-certs-job
-  namespace: {{ .Release.Namespace}}
 subjects:
 - kind: ServiceAccount
   name: {{ template "name" . }}-certs-job

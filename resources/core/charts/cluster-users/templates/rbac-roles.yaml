@@ -2,7 +2,7 @@
 # kyma-essentials: Minimal cluster view role necessary to render UI
 ################################################################################
 
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-essentials-base
@@ -32,7 +32,7 @@ rules:
     - "get"
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-essentials
@@ -55,7 +55,7 @@ rules: []
 ################################################################################
 
 #View access to core resources
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-view-base
@@ -77,7 +77,7 @@ rules:
 
 ---
 #View access to all non resource urls
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-nonresource-view
@@ -94,7 +94,7 @@ rules:
 {{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-view
@@ -138,7 +138,7 @@ rules: []
 ################################################################################
 
 #Full access to all non resource urls
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-nonresource-admin
@@ -198,7 +198,7 @@ rules: []
 ##########################################################################################
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-admin
@@ -263,7 +263,7 @@ rules: []
 ################################################################################
 
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: kube-system-view
   namespace: {{ .Release.Namespace }}
@@ -282,7 +282,7 @@ roleRef:
   name: view
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: kyma-essentials-binding
@@ -307,7 +307,7 @@ subjects:
 {{- end }}
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: kyma-view-binding
@@ -338,7 +338,7 @@ subjects:
 {{ end }}
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: kyma-admin-binding
