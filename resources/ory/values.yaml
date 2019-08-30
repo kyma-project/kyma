@@ -129,9 +129,9 @@ oathkeeper:
   image:
     tag: v0.18.0-beta.1
   oathkeeper-maester:
-    annotations:
-      sidecar.istio.io/inject: "false"
     deployment:
+      annotations:
+        sidecar.istio.io/inject: "false"
       resources:
         limits:
           cpu: 100m
