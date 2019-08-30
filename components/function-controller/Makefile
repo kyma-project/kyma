@@ -21,7 +21,7 @@ endif
 
 # Run tests
 test: generate fmt vet
-	go test -v ./pkg/... ./cmd/... -coverprofile cover.out
+	go test -race -v ./pkg/... ./cmd/... -coverprofile cover.out
 
 symlinks:
 	-rm config/crds/300*.yaml
