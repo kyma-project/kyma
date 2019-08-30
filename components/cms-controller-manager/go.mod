@@ -16,4 +16,4 @@ require (
 	sigs.k8s.io/controller-runtime v0.2.0
 )
 
-replace github.com/kyma-project/kyma/components/asset-store-controller-manager => github.com/michal-hudy/kyma/components/asset-store-controller-manager v0.0.0-20190829001520-6f02b2fef6e7
+replace github.com/kyma-project/kyma/components/asset-store-controller-manager => github.com/michal-hudy/kyma/components/asset-store-controller-manager v0.0.0-20190829181344-ec36f1dbf108

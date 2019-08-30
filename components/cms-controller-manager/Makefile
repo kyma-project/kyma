@@ -1,6 +1,8 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+APP_NAME ?= cms-controller-manager
+IMG ?= $(APP_NAME):latest
+IMG-CI = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME):$(DOCKER_TAG)
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
@@ -11,7 +13,14 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-all: manager
+all: test manager
+
+pull-licenses:
+ifdef LICENSE_PULLER_PATH
+	bash $(LICENSE_PULLER_PATH)
+else
+	mkdir -p licenses
+endif
 
 # Run tests
 test: generate fmt vet manifests
@@ -51,12 +60,13 @@ generate: controller-gen
 	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
 # Build the docker image
-docker-build: test
+docker-build: test pull-licenses
 	docker build . -t ${IMG}
 
 # Push the docker image
 docker-push:
-	docker push ${IMG}
+	docker tag $(IMG) $(IMG-CI)
+	docker push $(IMG-CI)
 
 # find or download controller-gen
 # download controller-gen if necessary
@@ -67,3 +77,7 @@ CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
 endif
+
+ci-pr: docker-build docker-push
+ci-master: docker-build docker-push
+ci-release: docker-build docker-push

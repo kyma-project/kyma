@@ -48,6 +48,8 @@ github.com/michal-hudy/kyma v0.5.1-0.20190829001520-6f02b2fef6e7 h1:kggexkLF+7qa
 github.com/michal-hudy/kyma v0.5.1-0.20190829001520-6f02b2fef6e7/go.mod h1:7hxycMp4LJC/hQTVIkoODQ5xjNZgVJLXJ+glAfhf7U8=
 github.com/michal-hudy/kyma/components/asset-store-controller-manager v0.0.0-20190829001520-6f02b2fef6e7 h1:YFPiHb7cudHyZPhcjoi2AiC5VXXzKu9dgbsaOh8lJL0=
 github.com/michal-hudy/kyma/components/asset-store-controller-manager v0.0.0-20190829001520-6f02b2fef6e7/go.mod h1:t/O52JxPFGLZmEOe9nV4/vvrwXEqxiTLvkGDAlocbEA=
+github.com/michal-hudy/kyma/components/asset-store-controller-manager v0.0.0-20190829181344-ec36f1dbf108 h1:AJIlrjX01yhGwg1myXO6FvRQZ4+ROcvycYfLx4sSJ3k=
+github.com/michal-hudy/kyma/components/asset-store-controller-manager v0.0.0-20190829181344-ec36f1dbf108/go.mod h1:t/O52JxPFGLZmEOe9nV4/vvrwXEqxiTLvkGDAlocbEA=
 github.com/minio/minio-go v6.0.14+incompatible/go.mod h1:7guKYtitv8dktvNUGrhzmNlA5wrAABTQXCoesZdFQO8=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w8PVh93nsPXa1VrQ6jlwL5oN8l14QlcNfg=
