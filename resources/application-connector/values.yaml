@@ -24,7 +24,7 @@ global:
     version: PR-5397
   connector_service:
     dir: pr/
-    version: PR-5318
+    version: PR-5468
   connector_service_tests:
     dir: pr/
     version: PR-5397

@@ -1,7 +1,7 @@
 {{- $apiserverUrl := .Values.global.isLocalEnv | ternary "https://apiserver.$DOMAIN:9443" "https://apiserver.$DOMAIN" -}}
 
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "name" . }}
@@ -9,6 +9,9 @@ metadata:
     app: {{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 spec:
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
   replicas: 1
   template:
     metadata:
