@@ -33,6 +33,14 @@ spec:
       -   env:
           - name: COLLECTOR_ZIPKIN_HTTP_PORT
             value: "{{ .Values.zipkin.httpPort }}"
+          - name: SPAN_STORAGE_TYPE
+            value: {{ .Values.jaeger.persistence.storageType | quote }}
+          - name: BADGER_DIRECTORY_VALUE
+            value: {{ .Values.jaeger.persistence.dataPath | quote }}
+          - name: BADGER_DIRECTORY_KEY
+            value: {{ .Values.jaeger.persistence.keyPath | quote }}
+          - name: BADGER_EPHEMERAL
+            value: {{ .Values.jaeger.persistence.ephemeral | quote }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           name: {{ .Chart.Name }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -47,14 +55,14 @@ spec:
               protocol: TCP
             - containerPort: {{ .Values.zipkin.httpPort }}
               protocol: TCP
+          volumeMounts:
+          - name: storage
+            mountPath: /badger
           readinessProbe:
             httpGet:
               path: "/"
               port: {{ .Values.jaeger.uiPort }}
             initialDelaySeconds: 10
-        {{- if .Values.jaeger.memory }}
-          args: ["--memory.max-traces={{ .Values.jaeger.memory.maxTraces }}"]
-        {{- end }}
           resources: 
 {{ toYaml .Values.resources | indent 12 }}
       - image: quay.io/gambol99/keycloak-proxy:v2.3.0
@@ -90,4 +98,7 @@ spec:
         - --cookie-access-name=KYMA_TOKEN
         ports:
         - containerPort: {{ .Values.kcproxy.inPort }}
-
+      volumes:
+      - name: storage
+        persistenceVolumeClaim:
+          claimName: {{ template "jaeger.fullname" . }}

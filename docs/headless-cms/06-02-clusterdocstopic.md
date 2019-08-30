@@ -29,7 +29,7 @@ spec:
     - type: markdown
       name: docs
       mode: package
-      metadata:
+      parameters:
         disableRelativeLinks: "true"
       url: https://github.com/kyma-project/kyma/archive/master.zip
       filter: /docs/service-mesh/docs/
@@ -56,7 +56,7 @@ This table lists all possible parameters of a given resource together with their
 | **spec.sources.type** |    **YES**   | Specifies the type of assets included in the ClusterDocsTopic CR. |
 | **spec.sources.name** |    **YES**   | Defines a unique identifier of a given asset. It must be unique if there is more than one asset of a given type in a ClusterDocsTopic CR. |
 | **spec.sources.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR format. Use `single` for one file and `package` for a set of files.  |
-| **spec.sources.metadata** |    **NO**   | Specifies a set of metadata for the ClusterAsset. For example, use it to define what to render, disable, or modify in the UI. Define it in a valid YAML or JSON format. |
+| **spec.sources.parameters** |    **NO**   | Specifies a set of parameters for the ClusterAsset. For example, use it to define what to render, disable, or modify in the UI. Define it in a valid YAML or JSON format. |
 | **spec.sources.url** |    **YES**   | Specifies the location of a single file or a package. |
 | **spec.sources.filter** |    **NO**   | Specifies a set of assets from the package to upload. The regex used in the filter must be [RE2](https://golang.org/s/re2syntax)-compliant. |
 | **status.lastheartbeattime** |    **Not applicable**   | Provides the last time when the DocsTopic Controller processed the ClusterDocsTopic CR. |

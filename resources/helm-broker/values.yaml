@@ -1,5 +1,4 @@
 initImage:
-  # valid values are "IfNotPresent", "Never", and "Always"
   pullPolicy: "IfNotPresent"
 image:
   pullPolicy: "IfNotPresent"
@@ -7,6 +6,17 @@ service:
   type: NodePort
   externalPort: 80
   internalPort: 8081
+  ctrlInternalPort: 8080
+
+ctrl:
+  tmpDirSizeLimit: 1Gi
+  resources:
+    limits:
+      memory: 96Mi
+      cpu: 100m
+    requests:
+      memory: 32Mi
+      cpu: 80m
 
 config:
   tillerTLSInsecure: true
@@ -25,14 +35,14 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   helm_broker:
-    dir: pr/
-    version: "PR-4981"
+    dir: develop/
+    version: "54bb24ad"
   alpine_net:
     dir: develop/
     version: 149967d0
-  add_ons_ui:
+  addons_ui:
     dir: ""
-    version: 09babb28
+    version: 76f15ebf
   istio:
     gateway:
       name: kyma-gateway

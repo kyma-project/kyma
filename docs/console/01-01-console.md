@@ -1,6 +1,5 @@
 ---
 title: Overview
-type: Overview
 ---
 
 The Console is a web-based administrative UI for Kyma. It allows you to administer the Kyma functionality and manage the basic Kubernetes resources.
@@ -12,4 +11,3 @@ Use the following CRs to modify the Console UI:
 - The MicroFrontend custom resource allows you to plug in micro front-ends for a specific Namespace.
 - The ClusterMicroFrontend custom resource allows you to plug in micro front-ends for the entire Cluster.
 - The BackendModule custom resource allows you to enable Console Backend Service modules.
-  

@@ -18,6 +18,7 @@ func TestClusterMicroFrontendConverter_ToGQL(t *testing.T) {
 		version := "v1"
 		category := "test-category"
 		viewBaseUrl := "http://test-viewBaseUrl.com"
+		preloadUrl := "http://test-preloadUrl.com/#preload"
 		placement := "cluster"
 		navigationNode := fixNavigationNode(t)
 
@@ -31,6 +32,7 @@ func TestClusterMicroFrontendConverter_ToGQL(t *testing.T) {
 					Version:     version,
 					Category:    category,
 					ViewBaseURL: viewBaseUrl,
+					PreloadURL:  preloadUrl,
 					NavigationNodes: []v1alpha1.NavigationNode{
 						navigationNode,
 					},
@@ -46,6 +48,7 @@ func TestClusterMicroFrontendConverter_ToGQL(t *testing.T) {
 			Category:    category,
 			ViewBaseURL: viewBaseUrl,
 			Placement:   placement,
+			PreloadURL:  preloadUrl,
 			NavigationNodes: []gqlschema.NavigationNode{
 				expectedNavigationNode,
 			},

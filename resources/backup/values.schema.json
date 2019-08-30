@@ -1,0 +1,110 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "Schema definition for backup helm chart values",
+    "type": "object",
+    "properties": {
+        "configuration": {
+            "description": "Configuration of the global properties for backup component",
+            "type": "object",
+            "properties": {
+                "volumeSnapshotLocation": {
+                    "description": "Defining the properties for the volume Snapshot Location.",
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "description": "Specifies the name of the cloud provider used to store volume snapshots, such as aws, gcp, or azure.",
+                            "type": "string",
+                            "default": ""
+                        },
+                        "bucket": {
+                            "description": "Specifies the name of the storage bucket where volume snapshots are uploaded.",
+                            "type": "string",
+                            "default": ""
+                        },
+                        "config": {
+                            "description": "Configuration of the volumeSnapshotLocation properties",
+                            "type": "object",
+                            "properties": {
+                                "region": {
+                                    "description": "Provides the region in which the bucket is created. It only applies to AWS. See the full list of AWS regions.",
+                                    "type": "string",
+                                    "example": "eu-central-1",
+                                    "default": ""
+                                },
+                                "apiTimeout": {
+                                    "description": "Defines the amount of time after which an API request returns a timeout status. It only applies to Azure.",
+                                    "type": "string",
+                                    "default": ""
+                                }
+                            }
+                        }
+                    }
+                },
+                "backupStorageLocation": {
+                    "description": "Defining the properties for the backup Snapshot Location.",
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "description": "Specifies the name of the cloud provider used to store backups, such as aws, gcp, or azure.",
+                            "type": "string",
+                            "default": ""
+                        },
+                        "bucket": {
+                            "description": "Specifies the storage bucket where backups are uploaded.",
+                            "type": "string",
+                            "default": ""
+                        },
+                        "prefix": {
+                            "description": "Specifies the directory inside a storage bucket where backups are located.",
+                            "type": "string",
+                            "default": ""
+                        },
+                        "config": {
+                            "description": "Configuration of the volumeSnapshotLocation properties",
+                            "type": "object",
+                            "properties": {
+                                "region": {
+                                    "description": "Provides the region in which the bucket is created. It only applies to AWS. See the full list of AWS regions.",
+                                    "type": "string",
+                                    "example": "eu-central-1",
+                                    "default": ""
+                                },
+                                "resourceGroup": {
+                                    "description": "Specifies the name of the resource group which contains the storage account for the backup storage location. It only applies to Azure.",
+                                    "type": "string",
+                                    "default": ""
+                                },
+                                "storageAccount": {
+                                    "description": "Provides the name of the storage account for the backup storage location. It only applies to Azure.",
+                                    "type": "string",
+                                    "default": ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "credentials": {
+            "description": "Configuration of the credentials properties for velero component",
+            "type": "object",
+            "properties": {
+                "useSecret": {
+                    "description": "Specifies if a secret is required for IAM credentials. Set this to false when using kube2iam.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "existingSecret": {
+                    "description": "If specified and useSecret is true, uses an existing secret with this name instead of creating one.",
+                    "type": "boolean",
+                    "default": ""
+                },
+                "secretContents": {
+                    "description": "If specified and useSecret is true, provides the content for the credentials secret.",
+                    "type": "object",
+                    "default": ""
+                }
+            }
+        }
+    }
+}

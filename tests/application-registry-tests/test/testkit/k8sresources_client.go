@@ -18,9 +18,9 @@ import (
 type K8sResourcesClient interface {
 	GetService(name string, options v1.GetOptions) (*v1core.Service, error)
 	GetSecret(name string, options v1.GetOptions) (*v1core.Secret, error)
-	GetDenier(name string, options v1.GetOptions) (*v1alpha2.Denier, error)
+	GetHandler(name string, options v1.GetOptions) (*v1alpha2.Handler, error)
 	GetRule(name string, options v1.GetOptions) (*v1alpha2.Rule, error)
-	GetChecknothing(name string, options v1.GetOptions) (*v1alpha2.Checknothing, error)
+	GetInstance(name string, options v1.GetOptions) (*v1alpha2.Instance, error)
 	GetApplicationServices(name string, options v1.GetOptions) (*v1alpha1.Application, error)
 	CreateDummyApplication(namePrefix string, options v1.GetOptions, skipInstallation bool) (*v1alpha1.Application, error)
 	DeleteApplication(name string, options *v1.DeleteOptions) error
@@ -75,16 +75,16 @@ func (c *k8sResourcesClient) GetSecret(name string, options v1.GetOptions) (*v1c
 	return c.coreClient.CoreV1().Secrets(c.namespace).Get(name, options)
 }
 
-func (c *k8sResourcesClient) GetDenier(name string, options v1.GetOptions) (*v1alpha2.Denier, error) {
-	return c.istioClient.IstioV1alpha2().Deniers(c.namespace).Get(name, options)
+func (c *k8sResourcesClient) GetHandler(name string, options v1.GetOptions) (*v1alpha2.Handler, error) {
+	return c.istioClient.IstioV1alpha2().Handlers(c.namespace).Get(name, options)
 }
 
 func (c *k8sResourcesClient) GetRule(name string, options v1.GetOptions) (*v1alpha2.Rule, error) {
 	return c.istioClient.IstioV1alpha2().Rules(c.namespace).Get(name, options)
 }
 
-func (c *k8sResourcesClient) GetChecknothing(name string, options v1.GetOptions) (*v1alpha2.Checknothing, error) {
-	return c.istioClient.IstioV1alpha2().Checknothings(c.namespace).Get(name, options)
+func (c *k8sResourcesClient) GetInstance(name string, options v1.GetOptions) (*v1alpha2.Instance, error) {
+	return c.istioClient.IstioV1alpha2().Instances(c.namespace).Get(name, options)
 }
 
 func (c *k8sResourcesClient) GetApplicationServices(name string, options v1.GetOptions) (*v1alpha1.Application, error) {

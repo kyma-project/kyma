@@ -5,14 +5,13 @@ package v1alpha2
 import (
 	v1alpha2 "github.com/kyma-project/kyma/components/application-registry/pkg/apis/istio/v1alpha2"
 	"github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned/scheme"
-	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"
 )
 
 type IstioV1alpha2Interface interface {
 	RESTClient() rest.Interface
-	ChecknothingsGetter
-	DeniersGetter
+	HandlersGetter
+	InstancesGetter
 	RulesGetter
 }
 
@@ -21,12 +20,12 @@ type IstioV1alpha2Client struct {
 	restClient rest.Interface
 }
 
-func (c *IstioV1alpha2Client) Checknothings(namespace string) ChecknothingInterface {
-	return newChecknothings(c, namespace)
+func (c *IstioV1alpha2Client) Handlers(namespace string) HandlerInterface {
+	return newHandlers(c, namespace)
 }
 
-func (c *IstioV1alpha2Client) Deniers(namespace string) DenierInterface {
-	return newDeniers(c, namespace)
+func (c *IstioV1alpha2Client) Instances(namespace string) InstanceInterface {
+	return newInstances(c, namespace)
 }
 
 func (c *IstioV1alpha2Client) Rules(namespace string) RuleInterface {
@@ -65,7 +64,7 @@ func setConfigDefaults(config *rest.Config) error {
 	gv := v1alpha2.SchemeGroupVersion
 	config.GroupVersion = &gv
 	config.APIPath = "/apis"
-	config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
+	config.NegotiatedSerializer = scheme.Codecs.WithoutConversion()
 
 	if config.UserAgent == "" {
 		config.UserAgent = rest.DefaultKubernetesUserAgent()

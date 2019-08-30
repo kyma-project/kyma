@@ -1,9 +1,10 @@
 package gqlschema
 
 type Asset struct {
-	Name      string      `json:"name"`
-	Namespace string      `json:"namespace"`
-	Type      string      `json:"type"`
-	Status    AssetStatus `json:"status"`
-	Metadata  JSON        `json:"metadata"`
+	Name       string      `json:"name"`
+	Namespace  string      `json:"namespace"`
+	Type       string      `json:"type"`
+	Status     AssetStatus `json:"status"`
+	Metadata   JSON        `json:"metadata"`
+	Parameters JSON        `json:"parameters"`
 }

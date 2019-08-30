@@ -31,8 +31,8 @@ const (
 
 	subscriberName           = "test-core-event-bus-subscriber"
 	subscriberImage          = "eu.gcr.io/kyma-project/pr/event-bus-e2e-subscriber:PR-4893"
-	publishEventEndpointURL  = "http://event-bus-publish.kyma-system:8080/v1/events"
-	publishStatusEndpointURL = "http://event-bus-publish.kyma-system:8080/v1/status/ready"
+	publishEventEndpointURL  = "http://event-publish-service.kyma-system:8080/v1/events"
+	publishStatusEndpointURL = "http://event-publish-service.kyma-system:8080/v1/status/ready"
 )
 
 var retryOptions = []retry.Option{
@@ -240,7 +240,7 @@ func (f *eventBusFlow) publishTestEvent() error {
 	}, retryOptions...)
 }
 
-func (f *eventBusFlow) publish(publishEventURL string) (*publishApi.PublishResponse, error) {
+func (f *eventBusFlow) publish(publishEventURL string) (*publishApi.Response, error) {
 	payload := fmt.Sprintf(
 		`{"source-id": "%s","event-type":"%s","event-type-version":"v1","event-time":"2018-11-02T22:08:41+00:00","data":"test-event-1"}`, srcID, eventType)
 	res, err := http.Post(publishEventURL, "application/json", strings.NewReader(payload))
@@ -251,7 +251,7 @@ func (f *eventBusFlow) publish(publishEventURL string) (*publishApi.PublishRespo
 	if err := verifyStatusCode(res, 200); err != nil {
 		return nil, err
 	}
-	respObj := &publishApi.PublishResponse{}
+	respObj := &publishApi.Response{}
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return nil, err

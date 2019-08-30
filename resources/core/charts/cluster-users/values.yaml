@@ -30,12 +30,14 @@ clusterRoles:
       - "kyma.cx"
       - "ui.kyma.cx"
       - "testing.kyma-project.io"
-#      Enable when CRD is added https://github.com/kyma-project/kyma/issues/4492
-#      - "addons.kyma-project.io"
+      - "addons.kyma-project.io"
     monitoring:
       - "monitoring.coreos.com"
     dex:
       - "dex.coreos.com"
+    ory:
+      - "oathkeeper.ory.sh"
+      - "hydra.ory.sh"
   verbs:
     edit:
       - "create"

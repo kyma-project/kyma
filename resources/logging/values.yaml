@@ -39,7 +39,7 @@ loki:
 
   image:
     repository: grafana/loki
-    tag: v0.1.0
+    tag: v0.3.0
     pullPolicy: Always # Always pull while in BETA
 
   # user: user
@@ -179,7 +179,7 @@ promtail:
 
   image:
     repository: grafana/promtail
-    tag: v0.1.0
+    tag: v0.3.0
     pullPolicy: Always # Always pull while in BETA
 
   volumes:
@@ -303,7 +303,7 @@ global:
   logging_integration_tests:
     name: logging-integration-tests
     dir: pr/
-    version: PR-4849
+    version: PR-5226
   logging:
     promtail:
       config:

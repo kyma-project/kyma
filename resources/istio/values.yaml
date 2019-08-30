@@ -8,12 +8,15 @@
 #       Check the chart level values file for exhaustive list of configuration options.
 
 #
-# Gateways Configuration, refer to the charts/gateways/values.yaml
-# for detailed configuration
+# custom configuration for Kyma
 #
 customization:
   enabled: true
 
+#
+# Gateways Configuration, refer to the charts/gateways/values.yaml
+# for detailed configuration
+#
 gateways:
   enabled: true
   istio-ingressgateway:
@@ -33,7 +36,7 @@ gateways:
         limits:
           cpu: 50m
           memory: 64Mi
-    secretVolumes: {}
+    secretVolumes: []
     ports:
       ## You can add custom gateway ports
       # Note that AWS ELB will by default perform health checks on the first port
@@ -85,7 +88,6 @@ galley:
 #
 # @see charts/mixer/values.yaml, it takes precedence
 mixer:
-  enabled: true
   policy:
     # if policy is enabled the global.disablePolicyChecks has affect.
     enabled: true
@@ -110,12 +112,6 @@ mixer:
         # We have experimentally found that these values work well.
         cpu: 2000m
         memory: 4G
-
-  templates:
-    useTemplateCRDs: true
-
-  adapters:
-    useAdapterCRDs: true
 #
 # pilot configuration
 #
@@ -157,12 +153,6 @@ prometheus:
   enabled: false
 
 #
-# addon servicegraph configuration
-#
-servicegraph:
-  enabled: false
-
-#
 # addon jaeger tracing configuration
 #
 tracing:
@@ -172,7 +162,7 @@ tracing:
 # addon kiali tracing configuration
 #
 kiali:
-  enabled: false 
+  enabled: false
 
 #
 # addon certmanager configuration
@@ -202,7 +192,7 @@ global:
   hub: docker.io/istio
 
   # Default tag for Istio images.
-  tag: 1.2.2
+  tag: 1.2.4
 
   # Comma-separated minimum per-scope logging level of messages to output, in the form of <scope>:<level>,<scope>:<level>
   # The control plane has different scopes depending on component, but can configure default log level across all components

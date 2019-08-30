@@ -3,8 +3,8 @@ package asset_test
 import (
 	"context"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/engine"
-	engineMock "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/engine/automock"
+	engine "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook"
+	engineMock "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/automock"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/handler/asset"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/handler/asset/pretty"
 	loaderMock "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/loader/automock"
@@ -258,9 +258,9 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.store.On("PutObjects", ctx, remoteBucketName, asset.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
-		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
-		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		mocks.metadataExtractor.On("Extract", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MetadataWebhookService).Return(nil, nil).Once()
+		mocks.mutator.On("Mutate", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(engine.Result{Success: true}, nil).Once()
+		mocks.validator.On("Validate", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.Result{Success: true}, nil).Once()
+		mocks.metadataExtractor.On("Extract", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MetadataWebhookService).Return(nil, nil).Once()
 
 		// When
 		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
@@ -346,7 +346,35 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
-		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(errors.New("nope")).Once()
+		mocks.mutator.On("Mutate", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(engine.Result{Success: false}, nil).Once()
+
+		// When
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+
+		// Then
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetFailed))
+		g.Expect(status.Reason).To(Equal(pretty.MutationFailed.String()))
+	})
+
+	t.Run("MutationError", func(t *testing.T) {
+		// Given
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
+		asset.Status.ObservedGeneration = asset.Generation
+
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+
+		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
+		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
+		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
+		mocks.mutator.On("Mutate", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(engine.Result{Success: false}, errors.New("nope")).Once()
 
 		// When
 		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
@@ -355,7 +383,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		g.Expect(err).To(HaveOccurred())
 		g.Expect(status).ToNot(BeZero())
 		g.Expect(status.Phase).To(Equal(v1alpha2.AssetFailed))
-		g.Expect(status.Reason).To(Equal(pretty.MutationFailed.String()))
+		g.Expect(status.Reason).To(Equal(pretty.MutationError.String()))
 	})
 
 	t.Run("MetadataExtractionFailed", func(t *testing.T) {
@@ -374,9 +402,9 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
-		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
-		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		mocks.metadataExtractor.On("Extract", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MetadataWebhookService).Return(nil, errors.New("nope")).Once()
+		mocks.mutator.On("Mutate", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(engine.Result{Success: true}, nil).Once()
+		mocks.validator.On("Validate", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.Result{Success: true}, nil).Once()
+		mocks.metadataExtractor.On("Extract", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MetadataWebhookService).Return(nil, errors.New("nope")).Once()
 
 		// When
 		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
@@ -404,8 +432,8 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
-		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
-		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: false}, errors.New("nope")).Once()
+		mocks.mutator.On("Mutate", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(engine.Result{Success: true}, nil).Once()
+		mocks.validator.On("Validate", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.Result{Success: false}, errors.New("nope")).Once()
 
 		// When
 		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
@@ -433,8 +461,8 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
-		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
-		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: false}, nil).Once()
+		mocks.mutator.On("Mutate", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(engine.Result{Success: true}, nil).Once()
+		mocks.validator.On("Validate", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.Result{Success: false}, nil).Once()
 
 		// When
 		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
@@ -463,9 +491,9 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.store.On("PutObjects", ctx, remoteBucketName, asset.Name, "/tmp", mock.AnythingOfType("[]string")).Return(errors.New("nope")).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
-		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
-		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		mocks.metadataExtractor.On("Extract", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MetadataWebhookService).Return(nil, nil).Once()
+		mocks.mutator.On("Mutate", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(engine.Result{Success: true}, nil).Once()
+		mocks.validator.On("Validate", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.Result{Success: true}, nil).Once()
+		mocks.metadataExtractor.On("Extract", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MetadataWebhookService).Return(nil, nil).Once()
 
 		// When
 		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
@@ -566,9 +594,9 @@ func TestAssetHandler_Handle_OnFailed(t *testing.T) {
 		mocks.store.On("PutObjects", ctx, remoteBucketName, asset.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
-		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
-		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		mocks.metadataExtractor.On("Extract", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MetadataWebhookService).Return(nil, nil).Once()
+		mocks.mutator.On("Mutate", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(engine.Result{Success: true}, nil).Once()
+		mocks.validator.On("Validate", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.Result{Success: true}, nil).Once()
+		mocks.metadataExtractor.On("Extract", ctx, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MetadataWebhookService).Return(nil, nil).Once()
 
 		// When
 		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)

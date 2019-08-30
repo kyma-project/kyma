@@ -30,23 +30,30 @@ type RuleAction struct {
 
 // RuleList is a list of Rules
 type RuleList struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Items             []Rule `json:"items"`
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata"`
+	Items           []Rule `json:"items"`
 }
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// Denier defines Istio Denier
-type Denier struct {
+// Handler defines Istio Handler CR with Params for "denier" adapter
+type Handler struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              *DenierSpec `json:"spec"`
+	Spec              *HandlerSpec `json:"spec"`
 }
 
-// DenierSpec defines specification for Denier
-type DenierSpec struct {
+// HandlerSpec defines specification for Handler
+type HandlerSpec struct {
+	CompiledAdapter string `json:"compiledAdapter"`
+	// Params have a different form for different adapters
+	Params *DenierHandlerParams `json:"params"`
+}
+
+// DenierHandlerParams defines handler params for "denier" adapter
+type DenierHandlerParams struct {
 	Status *DenierStatus `json:"status"`
 }
 
@@ -58,27 +65,33 @@ type DenierStatus struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// DenierList is a list of Deniers
-type DenierList struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Items             []Denier `json:"items"`
+// HandlerList is a list of Handlers
+type HandlerList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata"`
+	Items           []Handler `json:"items"`
 }
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// Checknothing defines Istio CheckNothing
-type Checknothing struct {
+// Instance defines Istio Instance CR
+type Instance struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              *InstanceSpec `json:"spec"`
+}
+
+// InstanceSpec defines specification for Instance
+type InstanceSpec struct {
+	CompiledTemplate string `json:"compiledTemplate"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// ChecknothingList is a list of CheckNothing
-type ChecknothingList struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Items             []Checknothing `json:"items"`
+// InstanceList is a list of Handlers
+type InstanceList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata"`
+	Items           []Instance `json:"items"`
 }

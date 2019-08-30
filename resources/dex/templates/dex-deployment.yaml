@@ -18,6 +18,8 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/dex-config-map.yaml") . | sha256sum }}
     spec:
       serviceAccount: dex-account
+      securityContext:
+        runAsUSer: 2000
       containers:
       - image: {{ .Values.imageRegistry }}/dex:{{ .Chart.AppVersion }}
         name: dex

@@ -3,3 +3,22 @@ deployment:
     pullPolicy: IfNotPresent
   args:
     containerPort: 3000
+    token:
+      length: 64
+      runtimeExpiration: 60m
+      applicationExpiration: 5m
+    csrSubject:
+      country: "DE"
+      organization: "Org"
+      organizationalUnit: "OrgUnit"
+      locality: "locality"
+      province: "province"
+    certificateValidityTime: "2160h"
+    attachRootCAToChain: false
+
+  securityContext: # Set on container level
+    runAsUser: 2000
+    allowPrivilegeEscalation: false
+
+certsSetupJob:
+  generatedCertificateValidity: 92d

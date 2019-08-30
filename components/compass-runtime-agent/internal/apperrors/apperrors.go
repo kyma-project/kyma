@@ -57,3 +57,10 @@ func (ae appError) Code() int {
 func (ae appError) Error() string {
 	return ae.message
 }
+func AppendError(wrapped AppError, new AppError) AppError {
+	if wrapped == nil {
+		return new
+	}
+
+	return wrapped.Append("", new)
+}

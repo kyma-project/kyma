@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/engine"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/handler/asset/pretty"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/loader"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/store"
@@ -43,14 +43,14 @@ type assetHandler struct {
 	findBucketStatus  FindBucketStatus
 	store             store.Store
 	loader            loader.Loader
-	validator         engine.Validator
-	mutator           engine.Mutator
-	metadataExtractor engine.MetadataExtractor
+	validator         assethook.Validator
+	mutator           assethook.Mutator
+	metadataExtractor assethook.MetadataExtractor
 	log               logr.Logger
 	relistInterval    time.Duration
 }
 
-func New(log logr.Logger, recorder record.EventRecorder, store store.Store, loader loader.Loader, findBucketFnc FindBucketStatus, validator engine.Validator, mutator engine.Mutator, metadataExtractor engine.MetadataExtractor, relistInterval time.Duration) Handler {
+func New(log logr.Logger, recorder record.EventRecorder, store store.Store, loader loader.Loader, findBucketFnc FindBucketStatus, validator assethook.Validator, mutator assethook.Mutator, metadataExtractor assethook.MetadataExtractor, relistInterval time.Duration) Handler {
 	return &assetHandler{
 		recorder:          recorder,
 		store:             store,
@@ -233,9 +233,14 @@ func (h *assetHandler) onPending(ctx context.Context, object MetaAccessor, spec 
 
 	if len(spec.Source.MutationWebhookService) > 0 {
 		h.logInfof("Mutating Asset content")
-		if err := h.mutator.Mutate(ctx, object, basePath, filenames, spec.Source.MutationWebhookService); err != nil {
+		result, err := h.mutator.Mutate(ctx, basePath, filenames, spec.Source.MutationWebhookService)
+		if err != nil {
 			h.recordWarningEventf(object, pretty.MutationFailed, err.Error())
-			return h.getStatus(object, v1alpha2.AssetFailed, pretty.MutationFailed, err.Error()), err
+			return h.getStatus(object, v1alpha2.AssetFailed, pretty.MutationError, err.Error()), err
+		}
+		if !result.Success {
+			h.recordWarningEventf(object, pretty.MutationFailed, result.Messages)
+			return h.getStatus(object, v1alpha2.AssetFailed, pretty.MutationFailed, result.Messages), nil
 		}
 		h.logInfof("Asset content mutated")
 		h.recordNormalEventf(object, pretty.Mutated)
@@ -243,7 +248,7 @@ func (h *assetHandler) onPending(ctx context.Context, object MetaAccessor, spec 
 
 	if len(spec.Source.ValidationWebhookService) > 0 {
 		h.logInfof("Validating Asset content")
-		result, err := h.validator.Validate(ctx, object, basePath, filenames, spec.Source.ValidationWebhookService)
+		result, err := h.validator.Validate(ctx, basePath, filenames, spec.Source.ValidationWebhookService)
 		if err != nil {
 			h.recordWarningEventf(object, pretty.ValidationError, err.Error())
 			return h.getStatus(object, v1alpha2.AssetFailed, pretty.ValidationError, err.Error()), err
@@ -259,7 +264,7 @@ func (h *assetHandler) onPending(ctx context.Context, object MetaAccessor, spec 
 	files := h.populateFiles(filenames)
 	if len(spec.Source.MetadataWebhookService) > 0 {
 		h.logInfof("Extracting metadata from Assets content")
-		result, err := h.metadataExtractor.Extract(ctx, object, basePath, filenames, spec.Source.MetadataWebhookService)
+		result, err := h.metadataExtractor.Extract(ctx, basePath, filenames, spec.Source.MetadataWebhookService)
 		if err != nil {
 			h.recordWarningEventf(object, pretty.MetadataExtractionFailed, err.Error())
 			return h.getStatus(object, v1alpha2.AssetFailed, pretty.MetadataExtractionFailed, err.Error()), err
@@ -292,7 +297,7 @@ func (h *assetHandler) populateFiles(filenames []string) []v1alpha2.AssetFile {
 	return result
 }
 
-func (h *assetHandler) mergeMetadata(files []v1alpha2.AssetFile, metadatas []engine.File) []v1alpha2.AssetFile {
+func (h *assetHandler) mergeMetadata(files []v1alpha2.AssetFile, metadatas []assethook.File) []v1alpha2.AssetFile {
 	metadataMap := make(map[string]*json.RawMessage)
 	for _, metadata := range metadatas {
 		metadataMap[metadata.Name] = metadata.Metadata

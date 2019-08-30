@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "fullname" . }}
@@ -17,6 +17,7 @@ spec:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
     spec:
+      serviceAccountName: {{ template "fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.connector.dir }}compass-connector:{{ .Values.global.images.connector.version }}
@@ -30,3 +31,31 @@ spec:
               value: "0.0.0.0:{{ .Values.deployment.args.containerPort }}"
             - name: APP_PLAYGROUND_API_ENDPOINT
               value: "/connector/graphql"
+            - name: APP_TOKEN_LENGTH
+              value: "{{ .Values.deployment.args.token.length }}"
+            - name: APP_TOKEN_RUNTIME_EXPIRATION
+              value: "{{ .Values.deployment.args.token.runtimeExpiration }}"
+            - name: APP_TOKEN_APPLICATION_EXPIRATION
+              value: "{{ .Values.deployment.args.token.applicationExpiration }}"
+            - name: APP_CERTIFICATE_VALIDITY_TIME
+              value: "{{ .Values.deployment.args.certificateValidityTime }}"
+            - name: APP_CA_SECRET_NAME
+              value: "{{ .Values.global.connector.secrets.ca.namespace }}/{{ .Values.global.connector.secrets.ca.name }}"
+            {{ if .Values.deployment.args.attachRootCAToChain }}
+            - name: APP_ROOT_CA_CERTIFICATE_SECRET_NAME
+              value: "{{ .Values.global.connector.secrets.rootCA.namespace }}/{{ .Values.global.connector.secrets.rootCA.name }}"
+            {{ end }}
+            - name: APP_CSR_SUBJECT_COUNTRY
+              value: "{{ .Values.deployment.args.csrSubject.country }}"
+            - name: APP_CSR_SUBJECT_ORGANIZATION
+              value: "{{ .Values.deployment.args.csrSubject.organization }}"
+            - name: APP_CSR_SUBJECT_ORGANIZATIONAL_UNIT
+              value: "{{ .Values.deployment.args.csrSubject.organizationalUnit }}"
+            - name: APP_CSR_SUBJECT_LOCALITY
+              value: "{{ .Values.deployment.args.csrSubject.locality }}"
+            - name: APP_CSR_SUBJECT_PROVINCE
+              value: "{{ .Values.deployment.args.csrSubject.province }}"
+          {{- with .Values.deployment.securityContext }}
+          securityContext:
+{{ toYaml . | indent 12 }}
+          {{- end }}

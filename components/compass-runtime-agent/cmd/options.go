@@ -5,36 +5,47 @@ import (
 	"fmt"
 )
 
-type options struct {
-	controllerSyncPeriod  int
-	minimalConfigSyncTime int
-	tenant                string
-	runtimeId             string
+type EnvConfig struct {
+	DirectorURL string `envconfig:"DIRECTOR_URL"`
+	RuntimeId   string `envconfig:"RUNTIME_ID"`
+	Tenant      string `envconfig:"TENANT"`
+}
 
-	tokenURLConfigFile string
+type options struct {
+	controllerSyncPeriod       int
+	minimalConfigSyncTime      int
+	integrationNamespace       string
+	gatewayPort                int
+	insecureConfigurationFetch bool
+	uploadServiceUrl           string
 }
 
 func parseArgs() *options {
 	controllerSyncPeriod := flag.Int("controllerSyncPeriod", 60, "Time period between resyncing existing resources.")
 	minimalConfigSyncTime := flag.Int("minimalConfigSyncTime", 300, "Minimal time between synchronizing configuration.")
-	tenant := flag.String("tenant", "", "Tenant for whom runtime is provisioned.")
-	runtimeId := flag.String("runtimeId", "", "ID of the Runtime.")
-
-	tokenURLConfigFile := flag.String("tokenURLConfigFile", "/config/token", "File containing URL with token to initialize connection with Compass.")
+	integrationNamespace := flag.String("integrationNamespace", "kyma-integration", "Namespace the resources will be created in.")
+	gatewayPort := flag.Int("gatewayPort", 8080, "Application Gateway port.")
+	insecureConfigurationFetch := flag.Bool("insecureConfigurationFetch", false, "Specifies if the configuration should be fetch with disabled TLS verification.")
+	uploadServiceUrl := flag.String("uploadServiceUrl", "", "URL of upload service")
 
 	flag.Parse()
 
 	return &options{
-		controllerSyncPeriod:  *controllerSyncPeriod,
-		minimalConfigSyncTime: *minimalConfigSyncTime,
-		tenant:                *tenant,
-		runtimeId:             *runtimeId,
-		tokenURLConfigFile:    *tokenURLConfigFile,
+		controllerSyncPeriod:       *controllerSyncPeriod,
+		minimalConfigSyncTime:      *minimalConfigSyncTime,
+		integrationNamespace:       *integrationNamespace,
+		gatewayPort:                *gatewayPort,
+		insecureConfigurationFetch: *insecureConfigurationFetch,
+		uploadServiceUrl:           *uploadServiceUrl,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--controllerSyncPeriod=%d --minimalConfigSyncTime=%d "+
-		"--tenant=%s --runtimeId=%s --tokenURLConfigFile=%s",
-		o.controllerSyncPeriod, o.minimalConfigSyncTime, o.tenant, o.runtimeId, o.tokenURLConfigFile)
+		"--integrationNamespace=%s gatewayPort=%d --insecureConfigurationFetch=%v --uploadServiceUrl=%s",
+		o.controllerSyncPeriod, o.minimalConfigSyncTime, o.integrationNamespace, o.gatewayPort, o.insecureConfigurationFetch, o.uploadServiceUrl)
+}
+
+func (ec EnvConfig) String() string {
+	return fmt.Sprintf("DIRECTOR_URL=%s, RUNTIME_ID=%s, TENANT=%s", ec.DirectorURL, ec.RuntimeId, ec.Tenant)
 }

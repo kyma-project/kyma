@@ -8,7 +8,7 @@ param (
 Write-Output @"The minikube.ps1 script is deprecated and will be removed. Use Kyma CLI instead."@
 
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
-$KUBERNETES_VERSION = "1.12.5"
+$KUBERNETES_VERSION = "1.13.10"
 
 Write-Output @"
 ################################################################################
@@ -116,5 +116,5 @@ InitializeMinikubeConfig
 StartMinikube
 WaitForMinikubeToBeUp
 ConfigureMinikubeAddons
-AddDevDomainsToEtcHosts "apiserver", "console", "catalog", "instances", "brokers", "dex", "docs", "add-ons", "lambdas-ui", "console-backend", "minio", "jaeger", "grafana", "configurations-generator", "gateway", "connector-service", "compass-gateway"
+AddDevDomainsToEtcHosts "apiserver", "console", "catalog", "instances", "brokers", "dex", "docs", "addons", "lambdas-ui", "console-backend", "minio", "jaeger", "grafana", "configurations-generator", "gateway", "connector-service", "compass-gateway"
 IncreaseFsInotifyMaxUserInstances

@@ -60,5 +60,5 @@ rules:
     resources: ["*"]
     verbs: ["create"]
   - apiGroups: ["addons.kyma-project.io"]
-    resources: ["clusteraddonsconfigurations"]
+    resources: ["clusteraddonsconfigurations", "addonsconfigurations"]
     verbs: ["*"]

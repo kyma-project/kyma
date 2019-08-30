@@ -6,11 +6,13 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
-    dir: pr/
-    version: "PR-4943"
+    dir: develop/
+    version: 392b7a76
+    publisherImage: event-publish-service
+    subscriptionControllerImage: subscription-controller
   event_bus_tests:
-    dir: pr/
-    version: PR-4893
+    dir: develop/
+    version: 7f7a8031
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
@@ -20,7 +22,7 @@ global:
     resources:
       limits:
         memory: "32M"
-  publishKnative:
+  eventPublishService:
     maxRequests: 200
     maxRequestSize: 65536
     maxChannelNameLength: 33
@@ -28,8 +30,11 @@ global:
     maxEventTypeLength: 253
     maxEventTypeVersionLength: 4
     resources:
+      requests:
+        cpu: 20m
+        memory: 32Mi
       limits:
-        memory: "32M"
+        memory: 32Mi
   push:
     http:
       subscriptionNameHeader: "Kyma-Subscription"
@@ -41,16 +46,19 @@ global:
     resources:
       limits:
         memory: "32M"
-  subscriptionControllerKnative:
+  subscriptionController:
     resyncPeriod: "10s"
     channelTimeout: "10s"
     resources:
+      requests:
+        cpu: 20m
+        memory: 32Mi
       limits:
-        memory: "32M"
+        memory: 32Mi
   trace:
     apiURL: http://zipkin.kyma-system:9411/api/v1/spans
   eventBusVersion: "0.2.34"
   isLocalEnv: false
 e2eTests:
-  nameTester: "test-event-bus-tester"
-  nameSubscriber: "test-event-bus-subscriber"    
+  nameTester: test-event-bus-tester
+  nameSubscriber: test-event-bus-subscriber

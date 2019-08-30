@@ -10,7 +10,7 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   hosts:
-    - '{{ .Values.global.gateway.host }}.{{ .Values.global.domainName }}'
+    - '{{ .Values.global.gateway.host }}.{{ .Values.global.ingress.domainName }}'
   gateways:
     - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}.svc.cluster.local
   http:

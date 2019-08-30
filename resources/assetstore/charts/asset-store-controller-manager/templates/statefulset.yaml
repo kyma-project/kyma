@@ -70,6 +70,12 @@ spec:
             value: "{{ .Values.maxAssetConcurrentReconciles }}"
           - name: APP_MAX_CLUSTER_ASSET_CONCURRENT_RECONCILES
             value: "{{ .Values.maxClusterAssetConcurrentReconciles }}"
+          - name: APP_STORE_UPLOAD_WORKERS_COUNT
+            value: "{{ .Values.storeUploadWorkersCount }}"
+          - name: APP_WEBHOOK_VALIDATION_WORKERS_COUNT
+            value: "{{ .Values.validationWebhookWorkersCount }}"
+          - name: APP_WEBHOOK_MUTATION_WORKERS_COUNT
+            value: "{{ .Values.mutationWebhookWorkersCount }}"
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         ports:

@@ -2,8 +2,9 @@ package istio
 
 import (
 	"errors"
-	"k8s.io/apimachinery/pkg/types"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/istio/mocks"
@@ -23,7 +24,7 @@ func TestRepository_Create(t *testing.T) {
 
 	t.Run("should create denier", func(t *testing.T) {
 		// given
-		expected := &v1alpha2.Denier{
+		expected := &v1alpha2.Handler{
 			ObjectMeta: v1.ObjectMeta{
 				Name: "app-test-uuid1",
 				Labels: map[string]string{
@@ -32,21 +33,24 @@ func TestRepository_Create(t *testing.T) {
 				},
 				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
-			Spec: &v1alpha2.DenierSpec{
-				Status: &v1alpha2.DenierStatus{
-					Code:    7,
-					Message: "Not allowed",
+			Spec: &v1alpha2.HandlerSpec{
+				CompiledAdapter: "denier",
+				Params: &v1alpha2.DenierHandlerParams{
+					Status: &v1alpha2.DenierStatus{
+						Code:    7,
+						Message: "Not allowed",
+					},
 				},
 			},
 		}
 
-		denierInterface := new(mocks.DenierInterface)
+		denierInterface := new(mocks.HandlerInterface)
 		denierInterface.On("Create", expected).Return(nil, nil)
 
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.CreateDenier("app", "appUID", "sid", "app-test-uuid1")
+		err := repository.CreateHandler("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -55,14 +59,14 @@ func TestRepository_Create(t *testing.T) {
 
 	t.Run("should handle error when creating denier", func(t *testing.T) {
 		// given
-		denierInterface := new(mocks.DenierInterface)
-		denierInterface.On("Create", mock.AnythingOfType("*v1alpha2.Denier")).
+		denierInterface := new(mocks.HandlerInterface)
+		denierInterface.On("Create", mock.AnythingOfType("*v1alpha2.Handler")).
 			Return(nil, errors.New("some error"))
 
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.CreateDenier("app", "appUID", "sid", "app-test-uuid1")
+		err := repository.CreateHandler("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -71,7 +75,7 @@ func TestRepository_Create(t *testing.T) {
 
 	t.Run("should create checknothing", func(t *testing.T) {
 		// given
-		expected := &v1alpha2.Checknothing{
+		expected := &v1alpha2.Instance{
 			ObjectMeta: v1.ObjectMeta{
 				Name: "app-test-uuid1",
 				Labels: map[string]string{
@@ -80,15 +84,18 @@ func TestRepository_Create(t *testing.T) {
 				},
 				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
+			Spec: &v1alpha2.InstanceSpec{
+				CompiledTemplate: "checknothing",
+			},
 		}
 
-		checknothingInterface := new(mocks.ChecknothingInterface)
+		checknothingInterface := new(mocks.InstanceInterface)
 		checknothingInterface.On("Create", expected).Return(nil, nil)
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.CreateCheckNothing("app", "appUID", "sid", "app-test-uuid1")
+		err := repository.CreateInstance("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -97,14 +104,14 @@ func TestRepository_Create(t *testing.T) {
 
 	t.Run("should handle error when creating checknothing", func(t *testing.T) {
 		// given
-		checknothingInterface := new(mocks.ChecknothingInterface)
-		checknothingInterface.On("Create", mock.AnythingOfType("*v1alpha2.Checknothing")).
+		checknothingInterface := new(mocks.InstanceInterface)
+		checknothingInterface.On("Create", mock.AnythingOfType("*v1alpha2.Instance")).
 			Return(nil, errors.New("some error"))
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.CreateCheckNothing("app", "appUID", "sid", "app-test-uuid1")
+		err := repository.CreateInstance("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -125,8 +132,8 @@ func TestRepository_Create(t *testing.T) {
 			Spec: &v1alpha2.RuleSpec{
 				Match: `(destination.service.host == "app-test-uuid1.testns.svc.cluster.local") && (source.labels["app-test-uuid1"] != "true")`,
 				Actions: []v1alpha2.RuleAction{{
-					Handler:   "app-test-uuid1.denier",
-					Instances: []string{"app-test-uuid1.checknothing"},
+					Handler:   "app-test-uuid1",
+					Instances: []string{"app-test-uuid1"},
 				}},
 			},
 		}
@@ -165,7 +172,7 @@ func TestRepository_Upsert(t *testing.T) {
 
 	t.Run("should upsert denier", func(t *testing.T) {
 		// given
-		expected := &v1alpha2.Denier{
+		expected := &v1alpha2.Handler{
 			ObjectMeta: v1.ObjectMeta{
 				Name: "app-test-uuid1",
 				Labels: map[string]string{
@@ -174,21 +181,24 @@ func TestRepository_Upsert(t *testing.T) {
 				},
 				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
-			Spec: &v1alpha2.DenierSpec{
-				Status: &v1alpha2.DenierStatus{
-					Code:    7,
-					Message: "Not allowed",
+			Spec: &v1alpha2.HandlerSpec{
+				CompiledAdapter: "denier",
+				Params: &v1alpha2.DenierHandlerParams{
+					Status: &v1alpha2.DenierStatus{
+						Code:    7,
+						Message: "Not allowed",
+					},
 				},
 			},
 		}
 
-		denierInterface := new(mocks.DenierInterface)
+		denierInterface := new(mocks.HandlerInterface)
 		denierInterface.On("Create", expected).Return(nil, nil)
 
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.UpsertDenier("app", "appUID", "sid", "app-test-uuid1")
+		err := repository.UpsertHandler("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -197,14 +207,14 @@ func TestRepository_Upsert(t *testing.T) {
 
 	t.Run("should handle already exists error when upserting denier", func(t *testing.T) {
 		// given
-		denierInterface := new(mocks.DenierInterface)
-		denierInterface.On("Create", mock.AnythingOfType("*v1alpha2.Denier")).
+		denierInterface := new(mocks.HandlerInterface)
+		denierInterface.On("Create", mock.AnythingOfType("*v1alpha2.Handler")).
 			Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, ""))
 
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.UpsertDenier("app", "appUID", "sid", "app-test-uuid1")
+		err := repository.UpsertHandler("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -213,14 +223,14 @@ func TestRepository_Upsert(t *testing.T) {
 
 	t.Run("should handle error when upserting denier", func(t *testing.T) {
 		// given
-		denierInterface := new(mocks.DenierInterface)
-		denierInterface.On("Create", mock.AnythingOfType("*v1alpha2.Denier")).
+		denierInterface := new(mocks.HandlerInterface)
+		denierInterface.On("Create", mock.AnythingOfType("*v1alpha2.Handler")).
 			Return(nil, errors.New("some error"))
 
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.UpsertDenier("app", "appUID", "sid", "app-test-uuid1")
+		err := repository.UpsertHandler("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -229,7 +239,7 @@ func TestRepository_Upsert(t *testing.T) {
 
 	t.Run("should upsert checknothing", func(t *testing.T) {
 		// given
-		expected := &v1alpha2.Checknothing{
+		expected := &v1alpha2.Instance{
 			ObjectMeta: v1.ObjectMeta{
 				Name: "app-test-uuid1",
 				Labels: map[string]string{
@@ -238,15 +248,18 @@ func TestRepository_Upsert(t *testing.T) {
 				},
 				OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication("app", applicationUID),
 			},
+			Spec: &v1alpha2.InstanceSpec{
+				CompiledTemplate: "checknothing",
+			},
 		}
 
-		checknothingInterface := new(mocks.ChecknothingInterface)
+		checknothingInterface := new(mocks.InstanceInterface)
 		checknothingInterface.On("Create", expected).Return(nil, nil)
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.UpsertCheckNothing("app", "appUID", "sid", "app-test-uuid1")
+		err := repository.UpsertInstance("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -255,14 +268,14 @@ func TestRepository_Upsert(t *testing.T) {
 
 	t.Run("should handle already exists error when upserting checknothing", func(t *testing.T) {
 		// given
-		checknothingInterface := new(mocks.ChecknothingInterface)
-		checknothingInterface.On("Create", mock.AnythingOfType("*v1alpha2.Checknothing")).
+		checknothingInterface := new(mocks.InstanceInterface)
+		checknothingInterface.On("Create", mock.AnythingOfType("*v1alpha2.Instance")).
 			Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, ""))
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.UpsertCheckNothing("app", "appUID", "sid", "app-test-uuid1")
+		err := repository.UpsertInstance("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -271,14 +284,14 @@ func TestRepository_Upsert(t *testing.T) {
 
 	t.Run("should handle error when upserting checknothing", func(t *testing.T) {
 		// given
-		checknothingInterface := new(mocks.ChecknothingInterface)
-		checknothingInterface.On("Create", mock.AnythingOfType("*v1alpha2.Checknothing")).
+		checknothingInterface := new(mocks.InstanceInterface)
+		checknothingInterface.On("Create", mock.AnythingOfType("*v1alpha2.Instance")).
 			Return(nil, errors.New("some error"))
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.UpsertCheckNothing("app", "appUID", "sid", "app-test-uuid1")
+		err := repository.UpsertInstance("app", "appUID", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -299,8 +312,8 @@ func TestRepository_Upsert(t *testing.T) {
 			Spec: &v1alpha2.RuleSpec{
 				Match: `(destination.service.host == "app-test-uuid1.testns.svc.cluster.local") && (source.labels["app-test-uuid1"] != "true")`,
 				Actions: []v1alpha2.RuleAction{{
-					Handler:   "app-test-uuid1.denier",
-					Instances: []string{"app-test-uuid1.checknothing"},
+					Handler:   "app-test-uuid1",
+					Instances: []string{"app-test-uuid1"},
 				}},
 			},
 		}
@@ -355,13 +368,13 @@ func TestRepository_Delete(t *testing.T) {
 
 	t.Run("should delete denier", func(t *testing.T) {
 		// given
-		denierInterface := new(mocks.DenierInterface)
+		denierInterface := new(mocks.HandlerInterface)
 		denierInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).Return(nil)
 
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.DeleteDenier("app-test-uuid1")
+		err := repository.DeleteHandler("app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -370,14 +383,14 @@ func TestRepository_Delete(t *testing.T) {
 
 	t.Run("should handle error when deleting denier", func(t *testing.T) {
 		// given
-		denierInterface := new(mocks.DenierInterface)
+		denierInterface := new(mocks.HandlerInterface)
 		denierInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
 			Return(errors.New("some error"))
 
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.DeleteDenier("app-test-uuid1")
+		err := repository.DeleteHandler("app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -386,14 +399,14 @@ func TestRepository_Delete(t *testing.T) {
 
 	t.Run("should ignore not found error when deleting denier", func(t *testing.T) {
 		// given
-		denierInterface := new(mocks.DenierInterface)
+		denierInterface := new(mocks.HandlerInterface)
 		denierInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
 			Return(k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.DeleteDenier("app-test-uuid1")
+		err := repository.DeleteHandler("app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -401,13 +414,13 @@ func TestRepository_Delete(t *testing.T) {
 
 	t.Run("should delete checknothing", func(t *testing.T) {
 		// given
-		checknothingInterface := new(mocks.ChecknothingInterface)
+		checknothingInterface := new(mocks.InstanceInterface)
 		checknothingInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).Return(nil)
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.DeleteCheckNothing("app-test-uuid1")
+		err := repository.DeleteInstance("app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -416,14 +429,14 @@ func TestRepository_Delete(t *testing.T) {
 
 	t.Run("should handle error when deleting checknothing", func(t *testing.T) {
 		// given
-		checknothingInterface := new(mocks.ChecknothingInterface)
+		checknothingInterface := new(mocks.InstanceInterface)
 		checknothingInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
 			Return(errors.New("some error"))
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.DeleteCheckNothing("app-test-uuid1")
+		err := repository.DeleteInstance("app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -432,14 +445,14 @@ func TestRepository_Delete(t *testing.T) {
 
 	t.Run("should ignore not found error when deleting checknothing", func(t *testing.T) {
 		// given
-		checknothingInterface := new(mocks.ChecknothingInterface)
+		checknothingInterface := new(mocks.InstanceInterface)
 		checknothingInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
 			Return(k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.DeleteCheckNothing("app-test-uuid1")
+		err := repository.DeleteInstance("app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)

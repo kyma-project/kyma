@@ -13,44 +13,51 @@ import (
 
 const (
 	matchTemplateFormat = `(destination.service.host == "%s.%s.svc.cluster.local") && (source.labels["%s"] != "true")`
+
+	denierAdapterName        = "denier"
+	checkNothingTemplateName = "checknothing"
 )
 
-// RuleInterface allows to perform operations for Rules in kubernetes
+// RuleInterface allows to perform operations for Istio Rules in kubernetes
+//go:generate mockery -name RuleInterface
 type RuleInterface interface {
 	Create(*v1alpha2.Rule) (*v1alpha2.Rule, error)
 	Delete(name string, options *v1.DeleteOptions) error
 }
 
-// ChecknothingInterface allows to perform operations for CheckNothings in kubernetes
-type ChecknothingInterface interface {
-	Create(*v1alpha2.Checknothing) (*v1alpha2.Checknothing, error)
+// InstanceInterface allows to perform operations for Istio Instances in kubernetes
+//go:generate mockery -name InstanceInterface
+type InstanceInterface interface {
+	Create(*v1alpha2.Instance) (*v1alpha2.Instance, error)
 	Delete(name string, options *v1.DeleteOptions) error
 }
 
-// DenierInterface allows to perform operations for Deniers in kubernetes
-type DenierInterface interface {
-	Create(*v1alpha2.Denier) (*v1alpha2.Denier, error)
+// HandlerInterface allows to perform operations for Istio Handlers in kubernetes
+//go:generate mockery -name HandlerInterface
+type HandlerInterface interface {
+	Create(*v1alpha2.Handler) (*v1alpha2.Handler, error)
 	Delete(name string, options *v1.DeleteOptions) error
 }
 
 // Repository allows to perform various operations for Istio resources
+//go:generate mockery -name Repository
 type Repository interface {
-	// CreateDenier creates Denier
-	CreateDenier(application string, appUID types.UID, serviceId, name string) apperrors.AppError
-	// CreateCheckNothing creates CheckNothing
-	CreateCheckNothing(application string, appUID types.UID, serviceId, name string) apperrors.AppError
+	// CreateHandler creates Handler
+	CreateHandler(application string, appUID types.UID, serviceId, name string) apperrors.AppError
+	// CreateInstance creates Instance
+	CreateInstance(application string, appUID types.UID, serviceId, name string) apperrors.AppError
 	// CreateRule creates Rule
 	CreateRule(application string, appUID types.UID, serviceId, name string) apperrors.AppError
-	// UpserDenier creates or updates Denier
-	UpsertDenier(application string, appUID types.UID, serviceId, name string) apperrors.AppError
-	// UpsertCheckNothing creates or updates CheckNothing
-	UpsertCheckNothing(application string, appUID types.UID, serviceId, name string) apperrors.AppError
+	// UpsertHandler creates or updates Handler
+	UpsertHandler(application string, appUID types.UID, serviceId, name string) apperrors.AppError
+	// UpsertInstance creates or updates Instance
+	UpsertInstance(application string, appUID types.UID, serviceId, name string) apperrors.AppError
 	// UpsertRule creates or updates Rule
 	UpsertRule(application string, appUID types.UID, serviceId, name string) apperrors.AppError
-	// DeleteDenier deletes Denier
-	DeleteDenier(name string) apperrors.AppError
-	// DeleteCheckNothing deletes CheckNothing
-	DeleteCheckNothing(name string) apperrors.AppError
+	// DeleteHandler deletes Handler
+	DeleteHandler(name string) apperrors.AppError
+	// DeleteInstance deletes Instance
+	DeleteInstance(name string) apperrors.AppError
 	// DeleteRule deletes Rule
 	DeleteRule(name string) apperrors.AppError
 }
@@ -60,41 +67,41 @@ type RepositoryConfig struct {
 }
 
 type repository struct {
-	ruleInterface         RuleInterface
-	checknothingInterface ChecknothingInterface
-	denierInterface       DenierInterface
-	config                RepositoryConfig
+	ruleInterface     RuleInterface
+	instanceInterface InstanceInterface
+	handlerInterface  HandlerInterface
+	config            RepositoryConfig
 }
 
 // NewRepository creates new repository with provided interfaces
-func NewRepository(ruleInterface RuleInterface, checknothingInterface ChecknothingInterface, denierInterface DenierInterface, config RepositoryConfig) Repository {
+func NewRepository(ruleInterface RuleInterface, instanceInterface InstanceInterface, handlerInterface HandlerInterface, config RepositoryConfig) Repository {
 	return &repository{
-		ruleInterface:         ruleInterface,
-		checknothingInterface: checknothingInterface,
-		denierInterface:       denierInterface,
-		config:                config,
+		ruleInterface:     ruleInterface,
+		instanceInterface: instanceInterface,
+		handlerInterface:  handlerInterface,
+		config:            config,
 	}
 }
 
-// CreateDenier creates Denier
-func (repo *repository) CreateDenier(application string, appUID types.UID, serviceId, name string) apperrors.AppError {
-	denier := repo.makeDenierObject(application, appUID, serviceId, name)
+// CreateHandler creates Handler
+func (repo *repository) CreateHandler(application string, appUID types.UID, serviceId, name string) apperrors.AppError {
+	handler := repo.makeHandlerObject(application, appUID, serviceId, name)
 
-	_, err := repo.denierInterface.Create(denier)
+	_, err := repo.handlerInterface.Create(handler)
 	if err != nil {
-		return apperrors.Internal("Creating %s denier failed, %s", name, err.Error())
+		return apperrors.Internal("Creating %s handler failed, %s", name, err.Error())
 	}
 
 	return nil
 }
 
-// CreateCheckNothing creates CheckNothing
-func (repo *repository) CreateCheckNothing(application string, appUID types.UID, serviceId, name string) apperrors.AppError {
-	checkNothing := repo.makeCheckNothingObject(application, appUID, serviceId, name)
+// CreateInstance creates Instance
+func (repo *repository) CreateInstance(application string, appUID types.UID, serviceId, name string) apperrors.AppError {
+	checkNothing := repo.makeInstanceObject(application, appUID, serviceId, name)
 
-	_, err := repo.checknothingInterface.Create(checkNothing)
+	_, err := repo.instanceInterface.Create(checkNothing)
 	if err != nil {
-		return apperrors.Internal("Creating %s checknothing failed, %s", name, err.Error())
+		return apperrors.Internal("Creating %s instance failed, %s", name, err.Error())
 	}
 	return nil
 }
@@ -110,24 +117,24 @@ func (repo *repository) CreateRule(application string, appUID types.UID, service
 	return nil
 }
 
-// UpserDenier creates or updates Denier
-func (repo *repository) UpsertDenier(application string, appUID types.UID, serviceId, name string) apperrors.AppError {
-	denier := repo.makeDenierObject(application, appUID, serviceId, name)
+// UpserHandler creates or updates Handler
+func (repo *repository) UpsertHandler(application string, appUID types.UID, serviceId, name string) apperrors.AppError {
+	handler := repo.makeHandlerObject(application, appUID, serviceId, name)
 
-	_, err := repo.denierInterface.Create(denier)
+	_, err := repo.handlerInterface.Create(handler)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		return apperrors.Internal("Updating %s denier failed, %s", name, err.Error())
+		return apperrors.Internal("Updating %s handler failed, %s", name, err.Error())
 	}
 	return nil
 }
 
-// UpsertCheckNothing creates or updates CheckNothing
-func (repo *repository) UpsertCheckNothing(application string, appUID types.UID, serviceId, name string) apperrors.AppError {
-	checkNothing := repo.makeCheckNothingObject(application, appUID, serviceId, name)
+// UpsertInstance creates or updates Instance
+func (repo *repository) UpsertInstance(application string, appUID types.UID, serviceId, name string) apperrors.AppError {
+	checkNothing := repo.makeInstanceObject(application, appUID, serviceId, name)
 
-	_, err := repo.checknothingInterface.Create(checkNothing)
+	_, err := repo.instanceInterface.Create(checkNothing)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		return apperrors.Internal("Updating %s checknothing failed, %s", name, err.Error())
+		return apperrors.Internal("Updating %s instance failed, %s", name, err.Error())
 	}
 	return nil
 }
@@ -143,20 +150,20 @@ func (repo *repository) UpsertRule(application string, appUID types.UID, service
 	return nil
 }
 
-// DeleteDenier deletes Denier
-func (repo *repository) DeleteDenier(name string) apperrors.AppError {
-	err := repo.denierInterface.Delete(name, nil)
+// DeleteHandler deletes Handler
+func (repo *repository) DeleteHandler(name string) apperrors.AppError {
+	err := repo.handlerInterface.Delete(name, nil)
 	if err != nil && !k8serrors.IsNotFound(err) {
-		return apperrors.Internal("Deleting %s denier failed, %s", name, err.Error())
+		return apperrors.Internal("Deleting %s handler failed, %s", name, err.Error())
 	}
 	return nil
 }
 
-// DeleteCheckNothing deletes CheckNothing
-func (repo *repository) DeleteCheckNothing(name string) apperrors.AppError {
-	err := repo.checknothingInterface.Delete(name, nil)
+// DeleteInstance deletes Instance
+func (repo *repository) DeleteInstance(name string) apperrors.AppError {
+	err := repo.instanceInterface.Delete(name, nil)
 	if err != nil && !k8serrors.IsNotFound(err) {
-		return apperrors.Internal("Deleting %s checknothing failed, %s", name, err.Error())
+		return apperrors.Internal("Deleting %s instance failed, %s", name, err.Error())
 	}
 	return nil
 }
@@ -170,8 +177,8 @@ func (repo *repository) DeleteRule(name string) apperrors.AppError {
 	return nil
 }
 
-func (repo *repository) makeDenierObject(application string, appUID types.UID, serviceId, name string) *v1alpha2.Denier {
-	return &v1alpha2.Denier{
+func (repo *repository) makeHandlerObject(application string, appUID types.UID, serviceId, name string) *v1alpha2.Handler {
+	return &v1alpha2.Handler{
 		ObjectMeta: v1.ObjectMeta{
 			Name: name,
 			Labels: map[string]string{
@@ -180,17 +187,20 @@ func (repo *repository) makeDenierObject(application string, appUID types.UID, s
 			},
 			OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication(application, appUID),
 		},
-		Spec: &v1alpha2.DenierSpec{
-			Status: &v1alpha2.DenierStatus{
-				Code:    7,
-				Message: "Not allowed",
+		Spec: &v1alpha2.HandlerSpec{
+			CompiledAdapter: denierAdapterName,
+			Params: &v1alpha2.DenierHandlerParams{
+				Status: &v1alpha2.DenierStatus{
+					Code:    7,
+					Message: "Not allowed",
+				},
 			},
 		},
 	}
 }
 
-func (repo *repository) makeCheckNothingObject(application string, appUID types.UID, serviceId, name string) *v1alpha2.Checknothing {
-	return &v1alpha2.Checknothing{
+func (repo *repository) makeInstanceObject(application string, appUID types.UID, serviceId, name string) *v1alpha2.Instance {
+	return &v1alpha2.Instance{
 		ObjectMeta: v1.ObjectMeta{
 			Name: name,
 			Labels: map[string]string{
@@ -198,14 +208,15 @@ func (repo *repository) makeCheckNothingObject(application string, appUID types.
 				k8sconsts.LabelServiceId:   serviceId,
 			},
 			OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication(application, appUID),
+		},
+		Spec: &v1alpha2.InstanceSpec{
+			CompiledTemplate: checkNothingTemplateName,
 		},
 	}
 }
 
 func (repo *repository) makeRuleObject(application string, appUID types.UID, serviceId, name string) *v1alpha2.Rule {
 	match := repo.matchExpression(name, repo.config.Namespace, name)
-	handlerName := name + ".denier"
-	instanceName := name + ".checknothing"
 
 	return &v1alpha2.Rule{
 		ObjectMeta: v1.ObjectMeta{
@@ -219,8 +230,8 @@ func (repo *repository) makeRuleObject(application string, appUID types.UID, ser
 		Spec: &v1alpha2.RuleSpec{
 			Match: match,
 			Actions: []v1alpha2.RuleAction{{
-				Handler:   handlerName,
-				Instances: []string{instanceName},
+				Handler:   name,
+				Instances: []string{name},
 			}},
 		},
 	}

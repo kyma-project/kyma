@@ -37,6 +37,9 @@ const (
 )
 
 func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
+	// TODO: remove skipping the test if issue https://github.com/kyma-project/kyma/issues/5375 will be fixed
+	t.Skip("Test skipped due to istio rbac rules issue.")
+
 	for testName, brokerURL := range map[string]string{
 		"Helm Broker":        os.Getenv(helmBrokerURLEnvName),
 		"Application Broker": os.Getenv(applicationBrokerURLEnvName),
@@ -52,7 +55,7 @@ func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
 					return fmt.Errorf("%s catalog response must be forbidden", testName)
 				}
 				return nil
-			}, 5*time.Second)
+			}, time.Minute)
 		})
 	}
 }

@@ -1,0 +1,64 @@
+{{ if and ( .Values.compassRuntimeAgent.tests.enabled ) ( not .Values.global.isLocalEnv ) }}
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}-tests
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}-tests
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  disableConcurrency: false
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-tests
+    spec:
+      shareProcessNamespace: true
+      serviceAccountName: {{ .Chart.Name }}-tests
+      containers:
+        - name: {{ .Chart.Name }}-tests
+          image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.runtimeAgentTests.dir }}compass-runtime-agent-tests:{{ .Values.global.images.runtimeAgentTests.version }}
+          imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
+              optional: true
+          env:
+            - name: NAMESPACE
+              value: {{ .Release.Namespace }}
+            - name: INTEGRATION_NAMESPACE
+              value: {{ .Values.compassRuntimeAgent.resources.integrationNamespace }}
+            - name: TEST_POD_APP_LABEL
+              value: {{ .Chart.Name }}-tests
+            - name: MOCK_SERVICE_PORT
+              value: "{{ .Values.compassRuntimeAgent.tests.mockService.port }}"
+            - name: MOCK_SERVICE_NAME
+              value: {{ .Chart.Name }}-tests-mock
+            - name: CONFIG_APPLICATION_WAIT_TIME
+              value: "{{ .Values.compassRuntimeAgent.tests.configApplicationWaitTime }}"
+            - name: PROXY_INVALIDATION_WAIT_TIME
+              value: "{{ .Values.compassRuntimeAgent.tests.proxyInvalidationWaitTime }}"
+            - name: GRAPHQL_LOG
+              value: "{{ .Values.compassRuntimeAgent.tests.graphqlLogs }}"
+            - name: SCENARIO_LABEL
+              value: "COMPASS_RUNTIME_AGENT_TESTS"
+          command:
+          - "/bin/sh"
+          args:
+          - "-c"
+          - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; sleep 4; exit $exit_code;"
+          ports:
+          - containerPort: {{ .Values.compassRuntimeAgent.tests.mockService.port }}
+            name: http
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "compass-gateway.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
+    restartPolicy: Never
+{{- end }}
+{{ end }}

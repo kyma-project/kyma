@@ -3,7 +3,6 @@
 package versioned
 
 import (
-	glog "github.com/golang/glog"
 	istiov1alpha2 "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
@@ -13,8 +12,6 @@ import (
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	IstioV1alpha2() istiov1alpha2.IstioV1alpha2Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Istio() istiov1alpha2.IstioV1alpha2Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -26,12 +23,6 @@ type Clientset struct {
 
 // IstioV1alpha2 retrieves the IstioV1alpha2Client
 func (c *Clientset) IstioV1alpha2() istiov1alpha2.IstioV1alpha2Interface {
-	return c.istioV1alpha2
-}
-
-// Deprecated: Istio retrieves the default version of IstioClient.
-// Please explicitly pick a version.
-func (c *Clientset) Istio() istiov1alpha2.IstioV1alpha2Interface {
 	return c.istioV1alpha2
 }
 
@@ -58,7 +49,6 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 
 	cs.DiscoveryClient, err = discovery.NewDiscoveryClientForConfig(&configShallowCopy)
 	if err != nil {
-		glog.Errorf("failed to create the DiscoveryClient: %v", err)
 		return nil, err
 	}
 	return &cs, nil

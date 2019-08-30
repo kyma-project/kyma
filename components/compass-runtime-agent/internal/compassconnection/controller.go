@@ -23,8 +23,8 @@ const (
 
 type Client interface {
 	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
-	Update(ctx context.Context, obj runtime.Object) error
-	Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOptionFunc) error
+	Update(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error
+	Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOption) error
 }
 
 // Reconciler reconciles a CompassConnection object

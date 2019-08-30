@@ -6,15 +6,15 @@ The Application Connectivity Validator validates client certificate subjects.
 It proxies the requests to the Event Service and the Application Registry.
 
 A single instance of the component is deployed for an Application and uses these parameters:
-- **proxyPort** - The port on which the reverse proxy is exposed. The default port is `8081`.
-- **externalAPIPort** - The port on which the external API is exposed. The default port is `8080`.
-- **tenant** - The tenant of the Application for which the proxy is deployed. Omitted if empty.
-- **group** - The group of the Application for which the proxy is deployed. Omitted if empty.
-- **eventServicePathPrefixV1** - Path prefix for which requests will be forwarded to the Event Service V1 API. The default value is `/v1/events`.
-- **eventServicePathPrefixV2** - Path prefix for which requests will be forwarded to the Event Service V2 API. The default value is `/v2/events`.
-- **eventServiceHost** - Host and port of the Event Service. The default value is `events-api:8080`.
-- **appRegistryPathPrefix** - Path prefix for which requests will be forwarded to the Application Registry. The default value is `/v1/metadata`.
-- **appRegistryHost** - Host and port of the Event Service. The default value is `application-registry-external-api:8081`.
+- **proxyPort** is the port on which the reverse proxy is exposed. The default port is `8081`.
+- **externalAPIPort** is the port on which the external API is exposed. The default port is `8080`.
+- **tenant** is the tenant of the Application for which the proxy is deployed. Omitted if empty.
+- **group** is the group of the Application for which the proxy is deployed. Omitted if empty.
+- **eventServicePathPrefixV1** is the path prefix for which requests are forwarded to the Event Service V1 API. The default value is `/v1/events`.
+- **eventServicePathPrefixV2** is the path prefix for which requests are forwarded to the Event Service V2 API. The default value is `/v2/events`.
+- **eventServiceHost** is the host and the port of the Event Service. The default value is `events-api:8080`.
+- **appRegistryPathPrefix** is the path prefix for which requests are forwarded to the Application Registry. The default value is `/v1/metadata`.
+- **appRegistryHost** is the host and the port of the Event Service. The default value is `application-registry-external-api:8081`.
 
 
 ## Details
@@ -29,7 +29,7 @@ Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="C
 
 The header contains information about multiple certificates because of the client certificate used in mTLS-secure communication between sidecars of a service.
 
-The Application Connectivity Validator forwards only the requests that contain the `X-Forwarded-Client-Cert` header that contains `Subject` with the following fields corresponding to the Application custom resource:
-- **CommonName** - Application custom resource name
-- (Optional) **Organization** - Tenant 
-- (Optional) **OrganizationalUnit** - Group
+The Application Connectivity Validator forwards only the requests with the `X-Forwarded-Client-Cert` header that contains `Subject` with the following fields corresponding to the Application custom resource:
+- **CommonName** is the name of the Application custom resource.
+- (Optional) **Organization** is the tenant.
+- (Optional) **OrganizationalUnit** is the group.

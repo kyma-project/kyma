@@ -14,7 +14,7 @@ spec:
     - label: APIs
       navigationPath: apis
       viewUrl: '/home/namespaces/:namespaceId/apis'
-      order: -1
+      order: -3
     - label: API Details
       navigationPath: apis/details
       viewUrl: '/home/namespaces/:namespaceId/apis'

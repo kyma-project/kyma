@@ -61,6 +61,7 @@ func fixClusterMicroFrontend(name string) *v1alpha1.ClusterMicroFrontend {
 	version := "v1"
 	category := "test-category"
 	viewBaseUrl := "http://test-viewBaseUrl.com"
+	preloadUrl := "http://test-preloadUrl.com/#preload"
 	placement := "cluster"
 	navigationNodes := []v1alpha1.NavigationNode{
 		v1alpha1.NavigationNode{
@@ -81,6 +82,7 @@ func fixClusterMicroFrontend(name string) *v1alpha1.ClusterMicroFrontend {
 				Version:         version,
 				Category:        category,
 				ViewBaseURL:     viewBaseUrl,
+				PreloadURL:      preloadUrl,
 				NavigationNodes: navigationNodes,
 			},
 		},

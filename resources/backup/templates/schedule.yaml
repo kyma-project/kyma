@@ -1,0 +1,18 @@
+{{- range $scheduleName, $schedule := .Values.schedules }}
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: {{ include "backup.fullname" $ }}-{{ $scheduleName }}
+  labels:
+    app.kubernetes.io/name: {{ include "backup.name" $ }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    helm.sh/chart: {{ include "backup.chart" $ }}
+spec:
+  schedule: {{ $schedule.schedule | quote }}
+{{- with $schedule.template }}
+  template:
+    {{- toYaml . | nindent 4 }}
+{{- end }}
+---
+{{- end }}

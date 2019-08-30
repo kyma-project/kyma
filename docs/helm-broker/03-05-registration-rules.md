@@ -5,7 +5,7 @@ type: Details
 
 This document presents the rules you must follow when you configure the Helm Broker. It also describes the Helm Broker's behavior in case of conflicts.
 
-## Using unsecured URLs
+## Using HTTP URLs
 
 On your non-local clusters, you can use only servers with TLS enabled. All incorrect or unsecured URLs will be omitted. Find the information about the rejected URLs in the Helm Broker logs. You can use unsecured URLs only on your local cluster. To use URLs without TLS enabled, set the **global.isDevelopMode** environment variable in the [values.yaml](https://github.com/kyma-project/kyma/blob/master/resources/helm-broker/values.yaml) file to `true`.
 
