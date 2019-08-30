@@ -44,14 +44,14 @@ type ErrorResponse struct {
 }
 
 type API struct {
-	TargetUrl         string             `json:"targetUrl"`
-	Credentials       *Credentials       `json:"credentials,omitempty"`
-	Spec              json.RawMessage    `json:"spec,omitempty"`
-	SpecificationUrl  string             `json:"specificationUrl,omitempty"`
-	ApiType           string             `json:"apiType"`
-	RequestParameters *RequestParameters `json:"requestParameters,omitempty"`
-	Headers         *map[string][]string `json:"headers,omitempty"`
-	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
+	TargetUrl         string               `json:"targetUrl"`
+	Credentials       *Credentials         `json:"credentials,omitempty"`
+	Spec              json.RawMessage      `json:"spec,omitempty"`
+	SpecificationUrl  string               `json:"specificationUrl,omitempty"`
+	ApiType           string               `json:"apiType"`
+	RequestParameters *RequestParameters   `json:"requestParameters,omitempty"`
+	Headers           *map[string][]string `json:"headers,omitempty"`
+	QueryParameters   *map[string][]string `json:"queryParameters,omitempty"`
 }
 
 type RequestParameters struct {
@@ -118,4 +118,36 @@ func Compact(src []byte) []byte {
 func (sd ServiceDetails) WithAPI(api *API) ServiceDetails {
 	sd.Api = api
 	return sd
+}
+
+func (api *API) WithCSRFInOAuth(csrfInfo *CSRFInfo) *API {
+	if api.Credentials != nil && api.Credentials.Oauth != nil {
+		api.Credentials.Oauth.CSRFInfo = csrfInfo
+	}
+	return api
+}
+
+func (api *API) WithCSRFInBasic(csrfInfo *CSRFInfo) *API {
+	if api.Credentials != nil && api.Credentials.Basic != nil {
+		api.Credentials.Basic.CSRFInfo = csrfInfo
+	}
+	return api
+}
+
+func (api *API) WithCSRFInCertificateGen(csrfInfo *CSRFInfo) *API {
+	if api.Credentials != nil && api.Credentials.CertificateGen != nil {
+		api.Credentials.CertificateGen.CSRFInfo = csrfInfo
+	}
+	return api
+}
+
+func (api *API) WithRequestParameters(requestParameters *RequestParameters) *API {
+	api.RequestParameters = requestParameters
+	return api
+}
+
+func (api *API) WithHeadersAndQueryParameters(headers, queryParameters *map[string][]string) *API {
+	api.Headers = headers
+	api.QueryParameters = queryParameters
+	return api
 }
