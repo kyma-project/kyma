@@ -40,7 +40,7 @@ Run this command to get the credentials of the registered OAuth2:
 kubectl get secret -n {CLIENT_NAMESPACE} {NAME_OF_CLIENT} -o yaml
 ```
 
-See the ORY Hydra Maester [github page](https://github.com/ory/hydra-maester) to learn more about the `oauth2clients.hydra.ory.sh` custom resource.
+See the ORY Hydra Maester [Github page](https://github.com/ory/hydra-maester) to learn more about the `oauth2clients.hydra.ory.sh` custom resource.
 
 
 ## OAuth2 server in action
