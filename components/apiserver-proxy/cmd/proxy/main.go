@@ -24,11 +24,11 @@ import (
 	flag "github.com/spf13/pflag"
 	"golang.org/x/net/http2"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
-	k8sapiflag "k8s.io/apiserver/pkg/util/flag"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	certutil "k8s.io/client-go/util/cert"
+	cliflag "k8s.io/component-base/cli/flag"
 )
 
 const (
@@ -217,7 +217,7 @@ func main() {
 				glog.Fatalf("TLS version invalid: %v", err)
 			}
 
-			cipherSuiteIDs, err := k8sapiflag.TLSCipherSuites(cfg.tls.cipherSuites)
+			cipherSuiteIDs, err := cliflag.TLSCipherSuites(cfg.tls.cipherSuites)
 			if err != nil {
 				glog.Fatalf("Failed to convert TLS cipher suite name to ID: %v", err)
 			}

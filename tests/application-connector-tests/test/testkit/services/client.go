@@ -3,12 +3,14 @@ package services
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/connector"
+	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/util"
 )
 
 type ApplicationConnectorClient struct {
@@ -32,11 +34,10 @@ func (arc *ApplicationConnectorClient) GetAllAPIs(t *testing.T) ([]Service, *Err
 
 	response, err := arc.httpClient.Do(req)
 	require.NoError(t, err)
+	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		var errorResponse ErrorResponse
-		err = json.NewDecoder(response.Body).Decode(&errorResponse)
-		require.NoError(t, err)
+		errorResponse := handleErrorResponse(t, response)
 		return nil, &errorResponse
 	}
 
@@ -63,11 +64,10 @@ func (arc *ApplicationConnectorClient) SendEvent(t *testing.T, eventId string) (
 
 	response, err := arc.httpClient.Do(req)
 	require.NoError(t, err)
+	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		var errorResponse ErrorResponse
-		err = json.NewDecoder(response.Body).Decode(&errorResponse)
-		require.NoError(t, err)
+		errorResponse := handleErrorResponse(t, response)
 		return PublishResponse{}, &errorResponse
 	}
 
@@ -76,4 +76,25 @@ func (arc *ApplicationConnectorClient) SendEvent(t *testing.T, eventId string) (
 	require.NoError(t, err)
 
 	return publishResponse, nil
+}
+
+func handleErrorResponse(t *testing.T, response *http.Response) ErrorResponse {
+	util.LogResponse(t, response)
+
+	var errorResponse ErrorResponse
+	err := json.NewDecoder(response.Body).Decode(&errorResponse)
+	if err != nil {
+		errData, err := ioutil.ReadAll(response.Body)
+		require.NoError(t, err)
+
+		errorResponse = ErrorResponse{
+			Code:  response.StatusCode,
+			Error: string(errData),
+		}
+	}
+	return errorResponse
+}
+
+func RequireNoError(t *testing.T, errorResponse *ErrorResponse) {
+	require.Nil(t, errorResponse)
 }

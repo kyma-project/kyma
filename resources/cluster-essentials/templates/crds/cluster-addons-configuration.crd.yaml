@@ -37,6 +37,16 @@ spec:
             repositories:
               items:
                 properties:
+                  secretRef:
+                    type: object
+                    required:
+                    - "name"
+                    - "namespace"
+                    properties:
+                      name:
+                        type: string
+                      namespace:
+                        type: string
                   url:
                     type: string
                 required:

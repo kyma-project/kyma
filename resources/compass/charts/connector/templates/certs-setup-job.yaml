@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-certs-setup-job
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: "before-hook-creation"
+spec:
+  template:
+    metadata:
+      name: {{ .Chart.Name }}-certs-setup-job
+      namespace: {{ .Release.Namespace }}
+      annotations:
+        sidecar.istio.io/inject: “false”
+    spec:
+      serviceAccountName: {{ .Chart.Name }}-certs-setup-job
+      restartPolicy: OnFailure
+      containers:
+      - name: {{ .Chart.Name }}-certs-setup-job
+        image: "{{ .Values.global.images.certs_setup_job.containerRegistry.path }}/{{ .Values.global.images.certs_setup_job.dir }}application-connectivity-certs-setup-job:{{ .Values.global.images.certs_setup_job.version }}"
+        args:
+          - "/appconnectivitycertssetupjob"
+          - "--connectorCertificateSecret={{ .Values.global.connector.secrets.ca.namespace }}/{{ .Values.global.connector.secrets.ca.name }}"
+          - "--caCertificateSecret={{ .Values.global.connector.secrets.rootCA.namespace }}/{{ .Values.global.connector.secrets.rootCA.name }}"
+          - "--caCertificate={{ .Values.global.connector.caCertificate }}"
+          - "--caKey={{ .Values.global.connector.caKey }}"
+          - "--generatedValidityTime={{ .Values.certsSetupJob.generatedCertificateValidity }}"
