@@ -5,7 +5,8 @@ rbacJob:
     repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
     tag: "v20190325-ff66a3a"
 
-enabledNamespaces: []
+#The Controller have CREATE and READ access to all Secrets in the namespaces listed below.
+enabledNamespaces: ["default"]
 
 image:
   repository: tsmsap/hydra-maester

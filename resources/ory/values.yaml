@@ -48,7 +48,9 @@ hydra:
     requests:
       cpu: 50m
       memory: 128Mi
-
+#  hydra-maester:
+#    enabledNamespaces:
+#    - default
 # Overrides for the Oathkeeper chart
 oathkeeper:
   oathkeeper:
