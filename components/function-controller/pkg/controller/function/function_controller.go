@@ -352,7 +352,7 @@ func (r *ReconcileFunction) getFunctionBuildTemplate(fn *serverlessv1alpha1.Func
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      buildTemplateName,
-			Namespace: fnConfigNamespace,
+			Namespace: fn.Namespace,
 		},
 		Spec: runtimeUtil.GetBuildTemplateSpec(ri),
 	}
