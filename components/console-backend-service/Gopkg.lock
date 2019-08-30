@@ -315,33 +315,6 @@
   version = "v0.4.0"
 
 [[projects]]
-  name = "github.com/kubernetes-incubator/service-catalog"
-  packages = [
-    "pkg/apis/servicecatalog",
-    "pkg/apis/servicecatalog/v1beta1",
-    "pkg/apis/settings",
-    "pkg/apis/settings/v1alpha1",
-    "pkg/client/clientset_generated/clientset",
-    "pkg/client/clientset_generated/clientset/fake",
-    "pkg/client/clientset_generated/clientset/scheme",
-    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
-    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1/fake",
-    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1",
-    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1/fake",
-    "pkg/client/informers_generated/externalversions",
-    "pkg/client/informers_generated/externalversions/internalinterfaces",
-    "pkg/client/informers_generated/externalversions/servicecatalog",
-    "pkg/client/informers_generated/externalversions/servicecatalog/v1beta1",
-    "pkg/client/informers_generated/externalversions/settings",
-    "pkg/client/informers_generated/externalversions/settings/v1alpha1",
-    "pkg/client/listers_generated/servicecatalog/v1beta1",
-    "pkg/client/listers_generated/settings/v1alpha1",
-    "pkg/filter"
-  ]
-  revision = "2f4d37413ff5ebf816788aa94fa2613682f3b543"
-  version = "v0.1.43"
-
-[[projects]]
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -434,6 +407,35 @@
     "tools/failery"
   ]
   revision = "7c2360a1ea71ba311c462f98cd9450b617c822ef"
+
+[[projects]]
+  digest = "1:1069a7ee451253ba038ab9c1031ff1a3de731b825e573d774284a159639d814a"
+  name = "github.com/kubernetes-incubator/service-catalog"
+  packages = [
+    "pkg/apis/servicecatalog",
+    "pkg/apis/servicecatalog/v1beta1",
+    "pkg/apis/settings",
+    "pkg/apis/settings/v1alpha1",
+    "pkg/client/clientset_generated/clientset",
+    "pkg/client/clientset_generated/clientset/fake",
+    "pkg/client/clientset_generated/clientset/scheme",
+    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
+    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1/fake",
+    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1",
+    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1/fake",
+    "pkg/client/informers_generated/externalversions",
+    "pkg/client/informers_generated/externalversions/internalinterfaces",
+    "pkg/client/informers_generated/externalversions/servicecatalog",
+    "pkg/client/informers_generated/externalversions/servicecatalog/v1beta1",
+    "pkg/client/informers_generated/externalversions/settings",
+    "pkg/client/informers_generated/externalversions/settings/v1alpha1",
+    "pkg/client/listers_generated/servicecatalog/v1beta1",
+    "pkg/client/listers_generated/settings/v1alpha1",
+    "pkg/filter",
+  ]
+  pruneopts = "NUT"
+  revision = "58b88f4d33cb708e4b22c39ccbe498b00738488e"
+  version = "v0.1.36"
 
 [[projects]]
   name = "github.com/machinebox/graphql"
