@@ -416,7 +416,7 @@ func TestK8sResources(t *testing.T) {
 		})
 	})
 
-	t.Run("when creating service only with CertificateGen API", func(t *testing.T) {
+	t.Run("when creating service only with CertificateGen API and CSRF", func(t *testing.T) {
 		csrfInfo := &testkit.CSRFInfo{TokenEndpointURL: "https://csrf.token.endpoint.org"}
 
 		t.Run("when current api with request parameters provided", func(t *testing.T) {
