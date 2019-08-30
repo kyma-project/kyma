@@ -13,26 +13,26 @@ type CommonDocsTopicSpec struct {
 }
 
 // +kubebuilder:validation:Enum=single;package;index
-type DocsTopicMode string
+type DocsTopicSourceMode string
 
 const (
-	DocsTopicSingle  DocsTopicMode = "single"
-	DocsTopicPackage DocsTopicMode = "package"
-	DocsTopicIndex   DocsTopicMode = "index"
+	DocsTopicSingle  DocsTopicSourceMode = "single"
+	DocsTopicPackage DocsTopicSourceMode = "package"
+	DocsTopicIndex   DocsTopicSourceMode = "index"
 )
 
 // +kubebuilder:validation:Pattern=^[a-z][a-zA-Z0-9-]*[a-zA-Z0-9]$
-type DocsTopicName string
+type DocsTopicSourceName string
 
 // +kubebuilder:validation:Pattern=^[a-z][a-zA-Z0-9\._-]*[a-zA-Z0-9]$
-type DocsTopicType string
+type DocsTopicSourceType string
 
 type Source struct {
-	Name   DocsTopicName `json:"name"`
-	Type   DocsTopicType `json:"type"`
-	URL    string        `json:"url"`
-	Mode   DocsTopicMode `json:"mode"`
-	Filter string        `json:"filter,omitempty"`
+	Name   DocsTopicSourceName `json:"name"`
+	Type   DocsTopicSourceType `json:"type"`
+	URL    string              `json:"url"`
+	Mode   DocsTopicSourceMode `json:"mode"`
+	Filter string              `json:"filter,omitempty"`
 	// +optional
 	Parameters *runtime.RawExtension `json:"parameters,omitempty"`
 }

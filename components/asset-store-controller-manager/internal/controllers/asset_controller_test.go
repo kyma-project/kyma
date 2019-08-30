@@ -58,7 +58,7 @@ var _ = Describe("Asset", func() {
 			relistInterval:          60 * time.Hour,
 			store:                   mocks.Store,
 			loader:                  mocks.Loader,
-			finalizer:               finalizer.New(deleteAssetFinalizerName),
+			finalizer:               finalizer.New("test"),
 			validator:               mocks.Validator,
 			mutator:                 mocks.Mutator,
 			metadataExtractor:       mocks.Extractor,

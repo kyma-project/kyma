@@ -2,19 +2,18 @@ package controllers
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/handler/docstopic"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/webhookconfig"
-	"github.com/pkg/errors"
-	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/client-go/tools/record"
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/handler/docstopic"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/webhookconfig"
+	cmsv1alpha1 "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
+	"github.com/pkg/errors"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	cmsv1alpha1 "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/api/v1alpha1"
 )
 
 // ClusterDocsTopicReconciler reconciles a ClusterDocsTopic object

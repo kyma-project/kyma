@@ -4,12 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-type AssetWebhookConfigMap map[string]AssetWebhookConfig
+type Config struct {
+	CfgMapName      string `envconfig:"default=webhook-configmap"`
+	CfgMapNamespace string `envconfig:"default=kyma-system"`
+}
+
+type AssetWebhookConfigMap = map[v1alpha1.DocsTopicSourceType]AssetWebhookConfig
 
 type WebhookService struct {
 	Name      string `json:"name"`
@@ -82,7 +89,7 @@ func toAssetWhsConfig(configMap v1.ConfigMap) (AssetWebhookConfigMap, error) {
 		if err := json.Unmarshal([]byte(v), &assetWhMap); err != nil {
 			return nil, errors.Wrapf(err, "invalid content for source type type: %s", k)
 		}
-		result[k] = assetWhMap
+		result[v1alpha1.DocsTopicSourceType(k)] = assetWhMap
 	}
 	return result, nil
 }

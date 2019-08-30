@@ -17,7 +17,7 @@ package main
 
 import (
 	"flag"
-	assetstore "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
+	assetstore "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/webhookconfig"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
@@ -30,7 +30,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/controllers"
-	cmsv1alpha1 "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/api/v1alpha1"
+	cmsv1alpha1 "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"

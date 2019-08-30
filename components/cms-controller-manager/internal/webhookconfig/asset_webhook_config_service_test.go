@@ -3,13 +3,14 @@ package webhookconfig_test
 import (
 	"context"
 	"errors"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/webhookconfig"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/webhookconfig/automock"
 	"github.com/onsi/gomega"
 	_ "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/api/core/v1"
-	"testing"
 )
 
 var (

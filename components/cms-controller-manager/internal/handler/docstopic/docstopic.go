@@ -9,16 +9,15 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/webhookconfig"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
-
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/webhookconfig"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/api/v1alpha1"
 )
 
 type CommonAsset struct {
@@ -124,7 +123,7 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 
 func (h *docstopicHandler) validateSpec(spec v1alpha1.CommonDocsTopicSpec) error {
 	h.logInfof("validating CommonDocsTopicSpec")
-	names := map[string]map[string]struct{}{}
+	names := map[v1alpha1.DocsTopicSourceName]map[v1alpha1.DocsTopicSourceType]struct{}{}
 	for _, src := range spec.Sources {
 		if nameTypes, exists := names[src.Name]; exists {
 			if _, exists := nameTypes[src.Type]; exists {
@@ -133,7 +132,7 @@ func (h *docstopicHandler) validateSpec(spec v1alpha1.CommonDocsTopicSpec) error
 			names[src.Name][src.Type] = struct{}{}
 			continue
 		}
-		names[src.Name] = map[string]struct{}{}
+		names[src.Name] = map[v1alpha1.DocsTopicSourceType]struct{}{}
 		names[src.Name][src.Type] = struct{}{}
 	}
 	h.logInfof("CommonDocsTopicSpec validated")
@@ -168,15 +167,15 @@ func (h *docstopicHandler) ensureBucketExits(ctx context.Context, namespace stri
 	return name, nil
 }
 
-func (h *docstopicHandler) isOnChange(existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, config webhookconfig.AssetWebhookConfigMap) bool {
+func (h *docstopicHandler) isOnChange(existing map[v1alpha1.DocsTopicSourceName]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, config webhookconfig.AssetWebhookConfigMap) bool {
 	return h.shouldCreateAssets(existing, spec) || h.shouldDeleteAssets(existing, spec) || h.shouldUpdateAssets(existing, spec, bucketName, config)
 }
 
-func (h *docstopicHandler) isOnPhaseChange(existing map[string]CommonAsset, status v1alpha1.CommonDocsTopicStatus) bool {
+func (h *docstopicHandler) isOnPhaseChange(existing map[v1alpha1.DocsTopicSourceName]CommonAsset, status v1alpha1.CommonDocsTopicStatus) bool {
 	return status.Phase != h.calculateAssetPhase(existing)
 }
 
-func (h *docstopicHandler) shouldCreateAssets(existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec) bool {
+func (h *docstopicHandler) shouldCreateAssets(existing map[v1alpha1.DocsTopicSourceName]CommonAsset, spec v1alpha1.CommonDocsTopicSpec) bool {
 	for _, source := range spec.Sources {
 		if _, exists := existing[source.Name]; !exists {
 			return true
@@ -186,9 +185,9 @@ func (h *docstopicHandler) shouldCreateAssets(existing map[string]CommonAsset, s
 	return false
 }
 
-func (h *docstopicHandler) shouldUpdateAssets(existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, config webhookconfig.AssetWebhookConfigMap) bool {
+func (h *docstopicHandler) shouldUpdateAssets(existing map[v1alpha1.DocsTopicSourceName]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, config webhookconfig.AssetWebhookConfigMap) bool {
 	for key, existingAsset := range existing {
-		expectedSpec := findSource(spec.Sources, key, existingAsset.Labels[typeLabel])
+		expectedSpec := findSource(spec.Sources, key, v1alpha1.DocsTopicSourceType(existingAsset.Labels[typeLabel]))
 		if expectedSpec == nil {
 			continue
 		}
@@ -203,9 +202,9 @@ func (h *docstopicHandler) shouldUpdateAssets(existing map[string]CommonAsset, s
 	return false
 }
 
-func (h *docstopicHandler) shouldDeleteAssets(existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec) bool {
+func (h *docstopicHandler) shouldDeleteAssets(existing map[v1alpha1.DocsTopicSourceName]CommonAsset, spec v1alpha1.CommonDocsTopicSpec) bool {
 	for key, existingAsset := range existing {
-		if findSource(spec.Sources, key, existingAsset.Labels[typeLabel]) == nil {
+		if findSource(spec.Sources, key, v1alpha1.DocsTopicSourceType(existingAsset.Labels[typeLabel])) == nil {
 			return true
 		}
 	}
@@ -213,7 +212,7 @@ func (h *docstopicHandler) shouldDeleteAssets(existing map[string]CommonAsset, s
 	return false
 }
 
-func (h *docstopicHandler) onPhaseChange(instance ObjectMetaAccessor, status v1alpha1.CommonDocsTopicStatus, existing map[string]CommonAsset) (*v1alpha1.CommonDocsTopicStatus, error) {
+func (h *docstopicHandler) onPhaseChange(instance ObjectMetaAccessor, status v1alpha1.CommonDocsTopicStatus, existing map[v1alpha1.DocsTopicSourceName]CommonAsset) (*v1alpha1.CommonDocsTopicStatus, error) {
 	phase := h.calculateAssetPhase(existing)
 	h.logInfof("Updating phase to %s", phase)
 
@@ -226,7 +225,7 @@ func (h *docstopicHandler) onPhaseChange(instance ObjectMetaAccessor, status v1a
 	return h.buildStatus(phase, v1alpha1.DocsTopicAssetsReady), nil
 }
 
-func (h *docstopicHandler) onChange(ctx context.Context, instance ObjectMetaAccessor, spec v1alpha1.CommonDocsTopicSpec, status v1alpha1.CommonDocsTopicStatus, existing map[string]CommonAsset, bucketName string, cfg webhookconfig.AssetWebhookConfigMap) (*v1alpha1.CommonDocsTopicStatus, error) {
+func (h *docstopicHandler) onChange(ctx context.Context, instance ObjectMetaAccessor, spec v1alpha1.CommonDocsTopicSpec, status v1alpha1.CommonDocsTopicStatus, existing map[v1alpha1.DocsTopicSourceName]CommonAsset, bucketName string, cfg webhookconfig.AssetWebhookConfigMap) (*v1alpha1.CommonDocsTopicStatus, error) {
 	if err := h.createMissingAssets(ctx, instance, existing, spec, bucketName, cfg); err != nil {
 		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, v1alpha1.DocsTopicAssetsCreationFailed, err.Error()), status), err
 	}
@@ -243,7 +242,7 @@ func (h *docstopicHandler) onChange(ctx context.Context, instance ObjectMetaAcce
 	return h.buildStatus(v1alpha1.DocsTopicPending, v1alpha1.DocsTopicWaitingForAssets), nil
 }
 
-func (h *docstopicHandler) createMissingAssets(ctx context.Context, instance ObjectMetaAccessor, existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, cfg webhookconfig.AssetWebhookConfigMap) error {
+func (h *docstopicHandler) createMissingAssets(ctx context.Context, instance ObjectMetaAccessor, existing map[v1alpha1.DocsTopicSourceName]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, cfg webhookconfig.AssetWebhookConfigMap) error {
 	for _, spec := range spec.Sources {
 		name := spec.Name
 		if _, exists := existing[name]; exists {
@@ -280,9 +279,9 @@ func (h *docstopicHandler) createAsset(ctx context.Context, instance ObjectMetaA
 	return nil
 }
 
-func (h *docstopicHandler) updateOutdatedAssets(ctx context.Context, instance ObjectMetaAccessor, existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, cfg webhookconfig.AssetWebhookConfigMap) error {
+func (h *docstopicHandler) updateOutdatedAssets(ctx context.Context, instance ObjectMetaAccessor, existing map[v1alpha1.DocsTopicSourceName]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, cfg webhookconfig.AssetWebhookConfigMap) error {
 	for key, existingAsset := range existing {
-		expectedSpec := findSource(spec.Sources, key, existingAsset.Labels[typeLabel])
+		expectedSpec := findSource(spec.Sources, key, v1alpha1.DocsTopicSourceType(existingAsset.Labels[typeLabel]))
 		if expectedSpec == nil {
 			continue
 		}
@@ -306,7 +305,7 @@ func (h *docstopicHandler) updateOutdatedAssets(ctx context.Context, instance Ob
 	return nil
 }
 
-func findSource(slice []v1alpha1.Source, sourceName, sourceType string) *v1alpha1.Source {
+func findSource(slice []v1alpha1.Source, sourceName v1alpha1.DocsTopicSourceName, sourceType v1alpha1.DocsTopicSourceType) *v1alpha1.Source {
 	for _, source := range slice {
 		if source.Name == sourceName && source.Type == sourceType {
 			return &source
@@ -315,9 +314,9 @@ func findSource(slice []v1alpha1.Source, sourceName, sourceType string) *v1alpha
 	return nil
 }
 
-func (h *docstopicHandler) deleteNotExisting(ctx context.Context, instance ObjectMetaAccessor, existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec) error {
+func (h *docstopicHandler) deleteNotExisting(ctx context.Context, instance ObjectMetaAccessor, existing map[v1alpha1.DocsTopicSourceName]CommonAsset, spec v1alpha1.CommonDocsTopicSpec) error {
 	for key, commonAsset := range existing {
-		if findSource(spec.Sources, key, commonAsset.Labels[typeLabel]) != nil {
+		if findSource(spec.Sources, key, v1alpha1.DocsTopicSourceType(commonAsset.Labels[typeLabel])) != nil {
 			continue
 		}
 
@@ -333,12 +332,12 @@ func (h *docstopicHandler) deleteNotExisting(ctx context.Context, instance Objec
 	return nil
 }
 
-func (h *docstopicHandler) convertToAssetMap(assets []CommonAsset) map[string]CommonAsset {
-	result := make(map[string]CommonAsset)
+func (h *docstopicHandler) convertToAssetMap(assets []CommonAsset) map[v1alpha1.DocsTopicSourceName]CommonAsset {
+	result := make(map[v1alpha1.DocsTopicSourceName]CommonAsset)
 
 	for _, asset := range assets {
 		assetShortName := asset.Annotations[assetShortNameAnnotation]
-		result[assetShortName] = asset
+		result[v1alpha1.DocsTopicSourceName(assetShortName)] = asset
 	}
 
 	return result
@@ -398,25 +397,25 @@ func convertToAssetWebhookServices(services []webhookconfig.AssetWebhookService)
 	return result
 }
 
-func (h *docstopicHandler) buildLabels(topicName, assetType string) map[string]string {
+func (h *docstopicHandler) buildLabels(topicName string, assetType v1alpha1.DocsTopicSourceType) map[string]string {
 	labels := make(map[string]string)
 
 	labels[docsTopicLabel] = topicName
 	if assetType != "" {
-		labels[typeLabel] = assetType
+		labels[typeLabel] = string(assetType)
 	}
 
 	return labels
 
 }
 
-func (h *docstopicHandler) buildAnnotations(assetShortName string) map[string]string {
+func (h *docstopicHandler) buildAnnotations(assetShortName v1alpha1.DocsTopicSourceName) map[string]string {
 	return map[string]string{
-		assetShortNameAnnotation: assetShortName,
+		assetShortNameAnnotation: string(assetShortName),
 	}
 }
 
-func (h *docstopicHandler) convertToAssetMode(mode v1alpha1.DocsTopicMode) v1alpha2.AssetMode {
+func (h *docstopicHandler) convertToAssetMode(mode v1alpha1.DocsTopicSourceMode) v1alpha2.AssetMode {
 	switch mode {
 	case v1alpha1.DocsTopicIndex:
 		return v1alpha2.AssetIndex
@@ -427,7 +426,7 @@ func (h *docstopicHandler) convertToAssetMode(mode v1alpha1.DocsTopicMode) v1alp
 	}
 }
 
-func (h *docstopicHandler) calculateAssetPhase(existing map[string]CommonAsset) v1alpha1.DocsTopicPhase {
+func (h *docstopicHandler) calculateAssetPhase(existing map[v1alpha1.DocsTopicSourceName]CommonAsset) v1alpha1.DocsTopicPhase {
 	for _, asset := range existing {
 		if asset.Status.Phase != v1alpha2.AssetReady {
 			return v1alpha1.DocsTopicPending
@@ -470,9 +469,9 @@ func (h *docstopicHandler) recordEventf(object ObjectMetaAccessor, eventType str
 	h.recorder.Eventf(object, eventType, reason.String(), reason.Message(), args...)
 }
 
-func (h *docstopicHandler) generateFullAssetName(docsTopicName, assetShortName, assetType string) string {
-	assetTypeLower := strings.ToLower(assetType)
-	assetShortNameLower := strings.ToLower(assetShortName)
+func (h *docstopicHandler) generateFullAssetName(docsTopicName string, assetShortName v1alpha1.DocsTopicSourceName, assetType v1alpha1.DocsTopicSourceType) string {
+	assetTypeLower := strings.ToLower(string(assetType))
+	assetShortNameLower := strings.ToLower(string(assetShortName))
 	return h.appendSuffix(fmt.Sprintf("%s-%s-%s", docsTopicName, assetShortNameLower, assetTypeLower))
 }
 

@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/handler/docstopic"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/handler/docstopic/automock"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/webhookconfig"
 	amcfg "github.com/kyma-project/kyma/components/cms-controller-manager/internal/webhookconfig/automock"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/api/v1alpha1"
-
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
 	"github.com/pkg/errors"
@@ -38,8 +37,8 @@ func Test_findSource(t *testing.T) {
 	tests := []struct {
 		name     string
 		srcSlice []v1alpha1.Source
-		srcName  string
-		srcType  string
+		srcName  v1alpha1.DocsTopicSourceName
+		srcType  v1alpha1.DocsTopicSourceType
 		matcher  types.GomegaMatcher
 	}{
 		{
@@ -96,8 +95,8 @@ func Test_findSource(t *testing.T) {
 }
 
 func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
-	sourceName := "t1"
-	assetType := "swag"
+	sourceName := v1alpha1.DocsTopicSourceName("t1")
+	assetType := v1alpha1.DocsTopicSourceType("swag")
 
 	t.Run("Create", func(t *testing.T) {
 		// Given
@@ -491,8 +490,8 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 }
 
 func TestDocstopicHandler_Handle_Status(t *testing.T) {
-	sourceName := "t1"
-	assetType := "swag"
+	sourceName := v1alpha1.DocsTopicSourceName("t1")
+	assetType := v1alpha1.DocsTopicSourceType("swag")
 
 	t.Run("NotChanged", func(t *testing.T) {
 		// Given
@@ -605,7 +604,7 @@ func fakeRecorder() record.EventRecorder {
 	return record.NewFakeRecorder(20)
 }
 
-func testSource(sourceName string, sourceType string, url string, mode v1alpha1.DocsTopicMode, parameters *runtime.RawExtension) v1alpha1.Source {
+func testSource(sourceName v1alpha1.DocsTopicSourceName, sourceType v1alpha1.DocsTopicSourceType, url string, mode v1alpha1.DocsTopicSourceMode, parameters *runtime.RawExtension) v1alpha1.Source {
 	return v1alpha1.Source{
 		Name:       sourceName,
 		Type:       sourceType,
@@ -631,17 +630,17 @@ func testData(name string, sources []v1alpha1.Source) *v1alpha1.DocsTopic {
 	}
 }
 
-func commonAsset(name, assetType, docsName, bucketName string, source v1alpha1.Source, phase v1alpha2.AssetPhase) docstopic.CommonAsset {
+func commonAsset(name v1alpha1.DocsTopicSourceName, assetType v1alpha1.DocsTopicSourceType, docsName, bucketName string, source v1alpha1.Source, phase v1alpha2.AssetPhase) docstopic.CommonAsset {
 	return docstopic.CommonAsset{
 		ObjectMeta: v1.ObjectMeta{
-			Name:      name,
+			Name:      string(name),
 			Namespace: "test",
 			Labels: map[string]string{
 				"cms.kyma-project.io/docs-topic": docsName,
-				"cms.kyma-project.io/type":       assetType,
+				"cms.kyma-project.io/type":       string(assetType),
 			},
 			Annotations: map[string]string{
-				"cms.kyma-project.io/asset-short-name": name,
+				"cms.kyma-project.io/asset-short-name": string(name),
 			},
 		},
 		Spec: v1alpha2.CommonAssetSpec{
@@ -660,7 +659,7 @@ func commonAsset(name, assetType, docsName, bucketName string, source v1alpha1.S
 	}
 }
 
-func getSourceByType(slice []v1alpha1.Source, sourceName string) (*v1alpha1.Source, bool) {
+func getSourceByType(slice []v1alpha1.Source, sourceName v1alpha1.DocsTopicSourceName) (*v1alpha1.Source, bool) {
 	for _, source := range slice {
 		if source.Name != sourceName {
 			continue
