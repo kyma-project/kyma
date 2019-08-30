@@ -5,7 +5,7 @@ image:
   # ORY Oathkeeper image
   repository: oryd/oathkeeper
   # ORY Oathkeeper version
-  tag: v0.18.0-beta.1
+  tag: v0.17.3
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -78,6 +78,9 @@ oathkeeper:
   # The ORY Oathkeeper configuration. For a full list of available settings, check:
   #   https://github.com/ory/oathkeeper/blob/master/docs/config.yaml
   config:
+    access_rules:
+      repositories:
+        - file:///etc/rules/access-rules.json
     serve:
       proxy:
         port: 4455
@@ -88,7 +91,7 @@ oathkeeper:
 #  If set, uses the given access rules.
 #  accessRules: {}
 
-deployment: 
+deployment:
   resources: {}
   #  We usually recommend not to specify default resources and to leave this as a conscious
   #  choice for the user. This also increases chances charts run on environments with little

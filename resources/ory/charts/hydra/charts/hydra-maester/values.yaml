@@ -1,13 +1,15 @@
 replicaCount: 1
 
-# rulesConfigmapNamespace: some-namespace
-# rulesFileName: access-rules.json
+rbacJob:
+  image:
+    repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
+    tag: "v20190325-ff66a3a"
+
+enabledNamespaces: []
 
 image:
-  # ORY Oathkeeper Rule Controller image
-  repository: oryd/oathkeeper-maester
-  # ORY Oathkeeper Rule Controller version
-  tag: "v0.0.2-beta.1"
+  repository: toBeAdded
+  tag: "toBeAdded"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -33,8 +35,6 @@ deployment:
   # Configure node tolerations.
   tolerations: []
   annotations: {}
-
-  envs: {}
 
 # Configure node affinity
 affinity: {}
