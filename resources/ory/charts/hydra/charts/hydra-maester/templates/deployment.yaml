@@ -33,7 +33,7 @@ spec:
           args:
             - --metrics-addr=127.0.0.1:8080
             - --hydra-url=http://{{ include "hydra-maester.adminService" . }}
-            - --port=4445
+            - --hydra-port=4445
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           terminationMessagePath: /dev/termination-log
