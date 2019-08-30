@@ -13,7 +13,7 @@ import (
 	"time"
 
 	pkgPath "github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/path"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 )

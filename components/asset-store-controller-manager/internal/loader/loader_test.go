@@ -3,11 +3,12 @@ package loader
 import (
 	"bytes"
 	"fmt"
-	"github.com/onsi/gomega"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/onsi/gomega"
 )
 
 func TestLoader_Clean(t *testing.T) {

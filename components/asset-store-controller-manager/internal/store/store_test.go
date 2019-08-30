@@ -8,7 +8,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/store"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/store/automock"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/minio/minio-go"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"

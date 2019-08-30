@@ -36,6 +36,7 @@ spec:
       containers:
       - args:
         - --enable-leader-election
+        - --metrics-addr :{{ .Values.service.internalPort }}
         command:
         - /manager
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.asset_store_controller_manager.dir }}asset-store-controller-manager:{{ .Values.global.asset_store_controller_manager.version }}"
@@ -79,8 +80,8 @@ spec:
         - name: APP_WEBHOOK_MUTATION_WORKERS_COUNT
           value: "{{ .Values.mutationWebhookWorkersCount }}"
         ports:
-        - containerPort: 8080
-          name: metrics
+        - containerPort: {{ .Values.service.internalPort }}
+          name: http-metrics
           protocol: TCP
         volumeMounts:
         - mountPath: /tmp

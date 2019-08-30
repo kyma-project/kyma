@@ -10,7 +10,7 @@ import (
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/assethook"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/loader"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/store"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"

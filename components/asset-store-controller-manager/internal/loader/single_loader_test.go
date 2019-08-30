@@ -1,11 +1,12 @@
 package loader
 
 import (
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
-	"github.com/onsi/gomega"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
+	"github.com/onsi/gomega"
 )
 
 func TestLoader_Load_Single(t *testing.T) {

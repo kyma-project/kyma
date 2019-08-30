@@ -3,7 +3,7 @@
 package automock
 
 import (
-	v1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
+	v1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	mock "github.com/stretchr/testify/mock"
 )
 

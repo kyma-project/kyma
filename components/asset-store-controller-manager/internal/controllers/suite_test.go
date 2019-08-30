@@ -1,25 +1,25 @@
 package controllers
 
 import (
-	assethook "github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/assethook/automock"
-	loader "github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/loader/automock"
-	store "github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/store/automock"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"path/filepath"
-	"sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sync"
 	"testing"
 	"time"
 
-	assetstorev1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
+	assethook "github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/assethook/automock"
+	loader "github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/loader/automock"
+	store "github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/store/automock"
+	assetstorev1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 	// +kubebuilder:scaffold:imports
 )
 

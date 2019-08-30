@@ -3,11 +3,12 @@ package assethook_test
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/assethook"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/assethook/automock"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/onsi/gomega"
-	"testing"
 )
 
 func TestMutationEngine_Mutate(t *testing.T) {

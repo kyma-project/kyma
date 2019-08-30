@@ -26,7 +26,7 @@ import (
 	"os"
 
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/controllers"
-	assetstorev1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
+	assetstorev1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"

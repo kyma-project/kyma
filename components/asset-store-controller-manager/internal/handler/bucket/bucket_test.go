@@ -3,16 +3,17 @@ package bucket_test
 import (
 	"context"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/handler/bucket"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/store/automock"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"testing"
-	"time"
 )
 
 var log = logf.Log.WithName("asset-test")

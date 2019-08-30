@@ -2,24 +2,23 @@ package controllers
 
 import (
 	"context"
+	"time"
+
+	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/assethook"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/finalizer"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/handler/asset"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/loader"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/store"
+	assetstorev1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/pkg/errors"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"time"
-
-	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	assetstorev1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 )
 
 const deleteAssetFinalizerName = "deleteasset.finalizers.assetstore.kyma-project.io"

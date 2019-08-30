@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"context"
+	"time"
+
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/finalizer"
-	assetstorev1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
+	assetstorev1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
@@ -14,7 +16,6 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"time"
 )
 
 var _ = Describe("ClusterBucket", func() {

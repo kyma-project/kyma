@@ -2,21 +2,22 @@ package asset_test
 
 import (
 	"context"
+	"strings"
+	"testing"
+	"time"
+
 	engine "github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/assethook"
 	engineMock "github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/assethook/automock"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/handler/asset"
 	loaderMock "github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/loader/automock"
 	storeMock "github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/store/automock"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"strings"
-	"testing"
-	"time"
 )
 
 var log = logf.Log.WithName("asset-test")

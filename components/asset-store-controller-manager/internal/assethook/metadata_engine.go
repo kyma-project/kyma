@@ -5,10 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/assethook/api/v1alpha1"
-	pkgPath "github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/path"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/api/v1alpha2"
-	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -16,6 +12,11 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/assethook/api/v1alpha1"
+	pkgPath "github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/path"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
+	"github.com/pkg/errors"
 )
 
 //go:generate mockery -name=MetadataExtractor -output=automock -outpkg=automock -case=underscore

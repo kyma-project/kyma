@@ -1,10 +1,11 @@
 package finalizer_test
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/internal/finalizer"
 	"github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
 )
 
 const testFinalizerName = "test.finalizer"

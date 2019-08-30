@@ -1,8 +1,9 @@
 package path
 
 import (
-	"github.com/pkg/errors"
 	"regexp"
+
+	"github.com/pkg/errors"
 )
 
 func Filter(paths []string, filter string) ([]string, error) {
