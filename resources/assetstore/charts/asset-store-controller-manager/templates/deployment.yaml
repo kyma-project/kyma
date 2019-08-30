@@ -36,7 +36,8 @@ spec:
       containers:
       - args:
         - --enable-leader-election
-        - --metrics-addr :{{ .Values.service.internalPort }}
+        - --metrics-addr
+        - :{{ .Values.service.internalPort }}
         command:
         - /manager
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.asset_store_controller_manager.dir }}asset-store-controller-manager:{{ .Values.global.asset_store_controller_manager.version }}"
