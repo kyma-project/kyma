@@ -3,7 +3,7 @@ package steps
 import (
 	"testing"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	internalerrors "github.com/kyma-project/kyma/components/kyma-operator/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -112,7 +112,7 @@ func stubServiceBinding(name, serviceInstanceName, UID string) *v1beta1.ServiceB
 
 	res := v1beta1.ServiceBinding{}
 	res.Name = name
-	res.Spec.ServiceInstanceRef = instanceRef
+	res.Spec.InstanceRef = instanceRef
 
 	return &res
 }
