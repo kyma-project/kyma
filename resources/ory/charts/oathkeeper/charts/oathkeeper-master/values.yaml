@@ -35,5 +35,7 @@ deployment:
   tolerations: []
   annotations: {}
 
+  envs: {}
+
 # Configure node affinity
 affinity: {}

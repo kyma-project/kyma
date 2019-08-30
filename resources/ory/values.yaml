@@ -139,3 +139,6 @@ oathkeeper:
         requests:
           cpu: 50m
           memory: 20Mi
+      envs:
+        - name: "mutatorsAvailable" # TODO: remove after version >v0.0.2-beta.1 is released
+          value: "noop,id_token,header,cookie,hydrator"
