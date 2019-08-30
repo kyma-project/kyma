@@ -2,9 +2,9 @@ package listener
 
 import (
 	"fmt"
-
 	"github.com/golang/glog"
 	api "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
@@ -16,12 +16,14 @@ type appConverter interface {
 type Application struct {
 	channel   chan<- gqlschema.ApplicationEvent
 	converter appConverter
+	extractor extractor.ApplicationUnstructuredExtractor
 }
 
 func NewApplication(channel chan<- gqlschema.ApplicationEvent, converter appConverter) *Application {
 	return &Application{
 		channel:   channel,
 		converter: converter,
+		extractor:    extractor.ApplicationUnstructuredExtractor{},
 	}
 }
 
@@ -38,13 +40,17 @@ func (l *Application) OnDelete(object interface{}) {
 }
 
 func (l *Application) onEvent(eventType gqlschema.SubscriptionEventType, object interface{}) {
-	app, ok := object.(*api.Application)
-	if !ok {
+	convertedApp, err:=l.extractor.Do(object)
+	if err != nil {
 		glog.Error(fmt.Errorf("incorrect object type: %T, should be: *Application", object))
 		return
 	}
+	
+	if convertedApp == nil {
+		return
+	}
 
-	l.notify(eventType, app)
+	l.notify(eventType, convertedApp)
 }
 
 func (l *Application) notify(eventType gqlschema.SubscriptionEventType, application *api.Application) {
