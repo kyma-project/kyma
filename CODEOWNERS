@@ -208,6 +208,9 @@
 # The `kiali`chart
 /resources/kiali/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
+# The `function-controller` chart
+/resources/function-controller/ @Abd4llA @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+
 # Components
 #API server proxy Component
 /components/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -297,7 +300,7 @@
 /components/dex-static-user-configurer/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Knative Function Controller
-/components/knative-function-controller/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/components/function-controller/ @Abd4llA @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # Compass Runtime Agent
 /components/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
