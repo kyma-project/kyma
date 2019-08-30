@@ -16,6 +16,10 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "hydra.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- with .Values.deployment.annotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
