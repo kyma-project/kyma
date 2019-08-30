@@ -29,6 +29,9 @@ global:
       e2e:
         dir: develop/
         version: "3c75146c"
+      connector:
+        dir: pr/
+        version: "PR-246"
 
   isLocalEnv: false
   

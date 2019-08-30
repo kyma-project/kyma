@@ -26,7 +26,7 @@ spec:
         control-plane: controller-manager
         app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-      {{- with .Values.annotations }}
+      {{- with .Values.deployment.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -52,6 +52,10 @@ spec:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
+          {{- with .Values.deployment.envs }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
       serviceAccountName: {{ include "oathkeeper-maester.name" . }}-account
       dnsPolicy: ClusterFirst
       restartPolicy: Always

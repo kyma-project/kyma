@@ -1,5 +1,5 @@
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api-controller
@@ -7,6 +7,9 @@ metadata:
   labels:
     app: api-controller
 spec:
+  selector:
+    matchLabels:
+      app: api-controller
   replicas: 1
   template:
     metadata:
@@ -16,7 +19,7 @@ spec:
         app: api-controller
         alertmem: "yes"
     spec:
-      serviceAccount: api-controller-account
+      serviceAccountName: api-controller-account
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.api_controller.dir }}api-controller:{{ .Values.global.api_controller.version }}
         name: api-controller

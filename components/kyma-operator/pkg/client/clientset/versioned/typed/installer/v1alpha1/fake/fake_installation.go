@@ -46,7 +46,7 @@ func (c *FakeInstallations) List(opts v1.ListOptions) (result *v1alpha1.Installa
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.InstallationList{}
+	list := &v1alpha1.InstallationList{ListMeta: obj.(*v1alpha1.InstallationList).ListMeta}
 	for _, item := range obj.(*v1alpha1.InstallationList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -103,7 +103,7 @@ func (c *FakeInstallations) DeleteCollection(options *v1.DeleteOptions, listOpti
 // Patch applies the patch and returns the patched installation.
 func (c *FakeInstallations) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Installation, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(installationsResource, c.ns, name, data, subresources...), &v1alpha1.Installation{})
+		Invokes(testing.NewPatchSubresourceAction(installationsResource, c.ns, name, pt, data, subresources...), &v1alpha1.Installation{})
 
 	if obj == nil {
 		return nil, err
