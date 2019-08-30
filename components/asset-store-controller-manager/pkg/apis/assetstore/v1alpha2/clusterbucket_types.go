@@ -4,12 +4,23 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// +genclient
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +genclient:nonNamespaced
+// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
+// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+// ClusterBucketSpec defines the desired state of ClusterBucket
+type ClusterBucketSpec struct {
+	CommonBucketSpec `json:",inline"`
+}
+
+// ClusterBucketStatus defines the observed state of ClusterBucket
+type ClusterBucketStatus struct {
+	CommonBucketStatus `json:",inline"`
+}
+
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Cluster
 
 // ClusterBucket is the Schema for the clusterbuckets API
-// +k8s:openapi-gen=true
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type="string",JSONPath=".status.phase"
 // +kubebuilder:printcolumn:name="URL",type="string",JSONPath=".status.url"
@@ -22,18 +33,7 @@ type ClusterBucket struct {
 	Status ClusterBucketStatus `json:"status,omitempty"`
 }
 
-// ClusterBucketSpec defines the desired state of Bucket
-type ClusterBucketSpec struct {
-	CommonBucketSpec `json:",inline"`
-}
-
-// ClusterBucketStatus defines the observed state of Bucket
-type ClusterBucketStatus struct {
-	CommonBucketStatus `json:",inline"`
-}
-
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +genclient:nonNamespaced
+// +kubebuilder:object:root=true
 
 // ClusterBucketList contains a list of ClusterBucket
 type ClusterBucketList struct {
