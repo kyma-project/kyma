@@ -660,14 +660,14 @@ func TestApplicationService_Subscribe(t *testing.T) {
 	t.Run("Simple", func(t *testing.T) {
 		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
-		appListener := listener.NewApplication(nil, nil)
+		appListener := listener.NewApplication(nil, nil, nil)
 		svc.Subscribe(appListener)
 	})
 
 	t.Run("Duplicated", func(t *testing.T) {
 		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
-		appLister := listener.NewApplication(nil, nil)
+		appLister := listener.NewApplication(nil, nil, nil)
 
 		svc.Subscribe(appLister)
 		svc.Subscribe(appLister)
@@ -676,8 +676,8 @@ func TestApplicationService_Subscribe(t *testing.T) {
 	t.Run("Multiple", func(t *testing.T) {
 		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
-		appListerA := listener.NewApplication(nil, nil)
-		appListerB := listener.NewApplication(nil, nil)
+		appListerA := listener.NewApplication(nil, nil, nil)
+		appListerB := listener.NewApplication(nil, nil, nil)
 
 		svc.Subscribe(appListerA)
 		svc.Subscribe(appListerB)
@@ -695,7 +695,7 @@ func TestApplicationService_Unsubscribe(t *testing.T) {
 	t.Run("Existing", func(t *testing.T) {
 		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
-		appLister := listener.NewApplication(nil, nil)
+		appLister := listener.NewApplication(nil, nil, nil)
 		svc.Subscribe(appLister)
 
 		svc.Unsubscribe(appLister)
@@ -704,7 +704,7 @@ func TestApplicationService_Unsubscribe(t *testing.T) {
 	t.Run("Duplicated", func(t *testing.T) {
 		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
-		appLister := listener.NewApplication(nil, nil)
+		appLister := listener.NewApplication(nil, nil, nil)
 		svc.Subscribe(appLister)
 		svc.Subscribe(appLister)
 
@@ -714,8 +714,8 @@ func TestApplicationService_Unsubscribe(t *testing.T) {
 	t.Run("Multiple", func(t *testing.T) {
 		svc, err := application.NewApplicationService(application.Config{}, nil, nil, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
-		appListerA := listener.NewApplication(nil, nil)
-		appListerB := listener.NewApplication(nil, nil)
+		appListerA := listener.NewApplication(nil, nil, nil)
+		appListerB := listener.NewApplication(nil, nil, nil)
 		svc.Subscribe(appListerA)
 		svc.Subscribe(appListerB)
 

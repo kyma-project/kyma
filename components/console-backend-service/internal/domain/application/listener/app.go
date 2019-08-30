@@ -2,9 +2,9 @@ package listener
 
 import (
 	"fmt"
+
 	"github.com/golang/glog"
 	api "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
@@ -13,17 +13,22 @@ type appConverter interface {
 	ToGQL(in *api.Application) gqlschema.Application
 }
 
+//go:generate mockery -name=extractor -output=automock -outpkg=automock -case=underscore
+type extractor interface {
+	Do(interface{}) (*api.Application, error)
+}
+
 type Application struct {
 	channel   chan<- gqlschema.ApplicationEvent
 	converter appConverter
-	extractor extractor.ApplicationUnstructuredExtractor
+	extractor extractor
 }
 
-func NewApplication(channel chan<- gqlschema.ApplicationEvent, converter appConverter) *Application {
+func NewApplication(channel chan<- gqlschema.ApplicationEvent, converter appConverter, extractor extractor) *Application {
 	return &Application{
 		channel:   channel,
 		converter: converter,
-		extractor:    extractor.ApplicationUnstructuredExtractor{},
+		extractor: extractor,
 	}
 }
 
@@ -40,12 +45,12 @@ func (l *Application) OnDelete(object interface{}) {
 }
 
 func (l *Application) onEvent(eventType gqlschema.SubscriptionEventType, object interface{}) {
-	convertedApp, err:=l.extractor.Do(object)
+	convertedApp, err := l.extractor.Do(object)
 	if err != nil {
 		glog.Error(fmt.Errorf("incorrect object type: %T, should be: *Application", object))
 		return
 	}
-	
+
 	if convertedApp == nil {
 		return
 	}
