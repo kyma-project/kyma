@@ -20,7 +20,7 @@ else
 endif
 
 # Run tests
-test: generate fmt vet
+test: generate fmt vet symlinks
 	go test -race -v ./pkg/... ./cmd/... -coverprofile cover.out
 
 symlinks:
