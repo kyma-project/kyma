@@ -8,8 +8,8 @@ rbacJob:
 enabledNamespaces: []
 
 image:
-  repository: toBeAdded
-  tag: "toBeAdded"
+  repository: tsmsap/hydra-maester
+  tag: 0.0.1
   # Image pull policy
   pullPolicy: IfNotPresent
 
