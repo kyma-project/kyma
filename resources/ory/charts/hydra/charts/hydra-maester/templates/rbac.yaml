@@ -54,12 +54,14 @@ roleRef:
   name: {{ include "hydra-maester.name" . }}-role-{{ .Release.Namespace }}
   namespace: {{ .Release.Namespace }}
 
+{{- $name := include "hydra-maester.name" . -}}
+{{- $namespace := .Release.Namespace -}}
 {{- range .Values.enabledNamespaces }}
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: {{ include "hydra-maester.name" . }}-role-{{ . }}
+  name: {{ $name }}-role-{{ . }}
   namespace:  {{ . }}
 rules:
   - apiGroups: [""]
@@ -69,15 +71,15 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: {{ include "hydra-maester.name" . }}-role-binding-{{ . }}
+  name: {{ $name }}-role-binding-{{ . }}
   namespace:  {{ . }}
 subjects:
   - kind: ServiceAccount
-    name: {{ include "hydra-maester.name" . }}-account # Service account assigned to the controller pod.
-    namespace:  {{ .Release.Namespace }}
+    name: {{ $name }}-account # Service account assigned to the controller pod.
+    namespace:  {{ $namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ include "hydra-maester.name" . }}-role-{{ . }}
+  name: {{ $name }}-role-{{ . }}
   namespace: {{ . }}
 {{- end }}
