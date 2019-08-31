@@ -1,0 +1,68 @@
+# Copyright 2019 The Knative Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: natss-ch-controller
+    namespace: knative-eventing
+    labels:
+        eventing.knative.dev/release: devel
+spec:
+    replicas: 1
+    selector:
+        matchLabels: &labels
+            messaging.knative.dev/channel: natss-channel
+            messaging.knative.dev/role: controller
+    template:
+        metadata:
+            annotations:
+                sidecar.istio.io/inject: "false"
+            labels:
+                <<: *labels
+                rand: {{ randAlpha 6 }}
+        spec:
+            serviceAccountName: natss-ch-controller
+            containers:
+                - name: controller
+                  image: {{ .Values.controller.image.location }}
+                  imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+                  env:
+                      - name: EB_USER
+                        valueFrom:
+                            secretKeyRef:
+                                name: nats-user-eventbus
+                                key: username
+                      - name: EB_PASS
+                        valueFrom:
+                            secretKeyRef:
+                                name: nats-user-eventbus
+                                key: password
+                      - name: DEFAULT_CLUSTER_ID
+                        value: kyma-nats-streaming
+                      - name: DEFAULT_NATSS_URL
+                        value: nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
+                      - name: CONFIG_LOGGING_NAME
+                        value: config-logging
+                      - name: SYSTEM_NAMESPACE
+                        valueFrom:
+                            fieldRef:
+                                fieldPath: metadata.namespace
+                  volumeMounts:
+                      - name: config-logging
+                        mountPath: /etc/config-logging
+            volumes:
+                - name: config-logging
+                  configMap:
+                      name: config-logging

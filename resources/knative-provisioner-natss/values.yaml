@@ -10,8 +10,8 @@ knative-provisioner-natss:
   controller:
     image:
       pullPolicy: IfNotPresent
-      location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/pkg/controller@sha256:8c76a24ec9d342d55a43042fbcd6c0038989d40f031b92c07c42c824677cfb10
+      location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/cmd/channel_controller@sha256:943e9ba03f1f7536224f51bfb5181039c773bd4a2209574f44a385d9748ac97f
   dispatcher:
     image:
       pullPolicy: IfNotPresent
-      location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/pkg/dispatcher@sha256:0d21e3387fbd400d1af75233a77a317e3957fa157e0c33dc2fc57bebada30cc7
+      location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/cmd/channel_dispatcher@sha256:4a5b9a5eb2271312cfec1d3808021a82def6b467273c09d7f8d0e762afefed82
