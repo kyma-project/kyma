@@ -102,14 +102,12 @@ metadata:
   name: addons-cfg-sample
 spec:
   repositories:
+    # HTTPS protocol
+    - url: "https://github.com/kyma-project/addons/releases/download/latest/index.yaml"
     # Git HTTPS protocol with a path to index.yaml
     - url: "git::https://github.com/kyma-project/addons.git//addons/index.yaml"
     # Git HTTPS protocol with a path to index.yaml of a specified version and a depth query parameter
     - url: "git::https://github.com/kyma-project/addons.git//addons/index.yaml?ref=1.2.0&depth=3"
-    # github.com URL with no prefix. It is automatically interpreted as a Git repository source.
-    - url: "github.com/kyma-project/addons//addons/index.yaml"
-    # bitbucket.org URL with no prefix. It is automatically interpreted as a Git repository source.
-    - url: "bitbucket.org/kyma-project/addons//addons/index.yaml"
 ```
 
   </details>
