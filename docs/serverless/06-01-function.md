@@ -11,7 +11,7 @@ kubectl get crd functions.serverless.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-The following Function object creates a lambda function which runs on Node.js 8 runtime and responds to HTTP requests with "Hello World". It has low requirements in terms of compute resources and is therefore classified with a size **S**.
+The following Function object creates a lambda function which runs on Node.js 8 runtime and responds to HTTP requests with "Hello World". It has low requirements in terms of compute resources and is therefore classified as size S.
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha1
@@ -39,7 +39,7 @@ This table lists all the possible properties of a given resource together with t
 | **metadata.name** | YES | Specifies the nme of the CR. |
 | **spec.function** | YES | Provides the source code of the lambda function. |
 | **spec.functionContentType** | YES | Specifies the content type of the function's code defined in the **function** property. The content type can be plaintext or base64-encoded. |
-| **spec.runtime** | YES | Specifies the software runtime used to run the function's code |
+| **spec.runtime** | YES | Specifies the software runtime used to run the function's code. |
 | **spec.size** | YES | Specifies the compute requirement of the function expressed in size, such as S, M, L or XL. |
 | **spec.deps** | NO | Specifies the dependencies of the lambda function. |
 | **spec.env** | NO | Specifies environment variables you need to export for the lambda function. |
