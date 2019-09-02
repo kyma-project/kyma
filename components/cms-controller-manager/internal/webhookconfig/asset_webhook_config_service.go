@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/pkg/errors"
@@ -75,11 +76,18 @@ func (r *assetWebhookConfigService) Get(ctx context.Context) (AssetWebhookConfig
 		return nil, nil
 	}
 
-	cfgMap, ok := item.(*v1.ConfigMap)
-	if !ok {
+	//var cfgMap v1.ConfigMap
+
+	switch i := item.(type) {
+	case *v1.ConfigMap:
+		return toAssetWhsConfig(*i)
+	case *unstructured.Unstructured:
+		var cfgMap v1.ConfigMap
+		runtime.DefaultUnstructuredConverter.FromUnstructured(i.UnstructuredContent(), &cfgMap)
+		return toAssetWhsConfig(cfgMap)
+	default:
 		return nil, fmt.Errorf("incorrect item type: %T, should be: *v1.ConfigMap", item)
 	}
-	return toAssetWhsConfig(*cfgMap)
 }
 
 func toAssetWhsConfig(configMap v1.ConfigMap) (AssetWebhookConfigMap, error) {
