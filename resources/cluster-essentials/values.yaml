@@ -4,5 +4,5 @@ global:
 containerRegistry:
   path: eu.gcr.io/kyma-project
 xip_patch:
-  dir: pr/
-  version: "PR-5226"
+  dir: 
+  version: 1.5.0-rc1
