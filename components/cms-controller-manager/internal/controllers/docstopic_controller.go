@@ -30,7 +30,7 @@ type DocsTopicReconciler struct {
 
 type DocsTopicConfig struct {
 	RelistInterval time.Duration `envconfig:"default=5m"`
-	BucketRegion   string        `envconfig:"optional"`
+	BucketRegion   string        `envconfig:"-"`
 }
 
 func NewDocsTopic(config DocsTopicConfig, log logr.Logger, mgr ctrl.Manager, webhookConfigSvc webhookconfig.AssetWebhookConfigService) *DocsTopicReconciler {
@@ -53,9 +53,9 @@ func NewDocsTopic(config DocsTopicConfig, log logr.Logger, mgr ctrl.Manager, web
 // +kubebuilder:rbac:groups=cms.kyma-project.io,resources=docstopics,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=cms.kyma-project.io,resources=docstopics/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=assets,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=assets/status,verbs=get;list;update;patch
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=assets/status,verbs=get;list
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch;create;update;patch
-// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets/status,verbs=get;list;update;patch
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets/status,verbs=get;list
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;watch
 
 func (r *DocsTopicReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {

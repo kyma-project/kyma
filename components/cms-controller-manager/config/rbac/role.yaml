@@ -25,8 +25,6 @@ rules:
   verbs:
   - get
   - list
-  - patch
-  - update
 - apiGroups:
   - assetstore.kyma-project.io
   resources:
@@ -45,8 +43,6 @@ rules:
   verbs:
   - get
   - list
-  - patch
-  - update
 - apiGroups:
   - assetstore.kyma-project.io
   resources:
@@ -66,8 +62,6 @@ rules:
   verbs:
   - get
   - list
-  - patch
-  - update
 - apiGroups:
   - assetstore.kyma-project.io
   resources:
@@ -86,8 +80,6 @@ rules:
   verbs:
   - get
   - list
-  - patch
-  - update
 - apiGroups:
   - cms.kyma-project.io
   resources:

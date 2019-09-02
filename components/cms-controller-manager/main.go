@@ -17,23 +17,23 @@ package main
 
 import (
 	"flag"
-	assetstore "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/webhookconfig"
-	"github.com/pkg/errors"
-	"github.com/vrischmann/envconfig"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/dynamic/dynamicinformer"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/cache"
 	"os"
 	"time"
 
+	assetstore "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/controllers"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/webhookconfig"
 	cmsv1alpha1 "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
+	"github.com/pkg/errors"
+	"github.com/vrischmann/envconfig"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/dynamic/dynamicinformer"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/cache"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	// +kubebuilder:scaffold:imports
@@ -55,9 +55,11 @@ func init() {
 }
 
 type Config struct {
-	DocsTopic        controllers.DocsTopicConfig
-	ClusterDocsTopic controllers.ClusterDocsTopicConfig
-	Webhook          webhookconfig.Config
+	DocsTopic           controllers.DocsTopicConfig
+	ClusterDocsTopic    controllers.ClusterDocsTopicConfig
+	Webhook             webhookconfig.Config
+	BucketRegion        string `envconfig:"optional"`
+	ClusterBucketRegion string `envconfig:"optional"`
 }
 
 func main() {
@@ -116,6 +118,11 @@ func main() {
 func loadConfig(prefix string) (Config, error) {
 	cfg := Config{}
 	err := envconfig.InitWithPrefix(&cfg, prefix)
+	if err != nil {
+		return Config{}, err
+	}
+	cfg.ClusterDocsTopic.BucketRegion = cfg.ClusterBucketRegion
+	cfg.DocsTopic.BucketRegion = cfg.BucketRegion
 	return cfg, err
 }
 
