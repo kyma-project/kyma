@@ -77,12 +77,11 @@ required = [
 
 [[override]]
   name = "github.com/knative/pkg"
-  # HEAD as of 2019-02-14
-  revision = "0183bf9cdc7349e3c76c26e51f84689b411fccea"
+  branch = "release-0.8"
 
 [[override]]
   name = "github.com/knative/eventing"
-  version = "v0.4.1"
+  version = "v0.8.0"
 
 [prune]
   go-tests = true
