@@ -330,13 +330,6 @@ func (r *ReconcileFunction) updateFunctionConfigMap(foundCm *corev1.ConfigMap, d
 			return err
 		}
 
-		log.Info("Updated Function'S ConfigMap", "namespace", deployCm.Namespace, "name", deployCm.Name)
-	}
-
-	err := r.Get(context.TODO(), types.NamespacedName{Name: deployCm.Name, Namespace: deployCm.Namespace}, foundCm)
-	if err != nil && !errors.IsNotFound(err) {
-		log.Error(err, "Unable to read the updated Function ConfigMap", "namespace", deployCm.Namespace, "name", deployCm.Name)
-		return err
 	}
 
 	return nil
