@@ -1,13 +1,15 @@
 approvers:
-  - piotrmsc
-  - kubadz
-  - strekm
-  - jakkab
-  - Tomasz-Smelcerz-SAP
-  - Demonsthere
   - akgalwas 
   - janmedrek 
   - Szymongib 
   - franpog859 
   - Maladie
   - crabtree
+
+reviewers:
+  - piotrmsc
+  - kubadz
+  - strekm
+  - jakkab
+  - Tomasz-Smelcerz-SAP
+  - Demonsthere

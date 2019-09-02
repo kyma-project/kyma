@@ -1,12 +1,14 @@
 approvers:
-  - PK85
-  - aszecowka
-  - crabtree
-  - pkosiec
-  - kfurgol
-  - tgorgol
   - akgalwas 
   - janmedrek 
   - Szymongib 
   - franpog859 
   - Maladie
+  - crabtree
+
+reviewers:
+  - PK85
+  - aszecowka
+  - pkosiec
+  - kfurgol
+  - tgorgol
