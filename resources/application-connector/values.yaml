@@ -57,7 +57,7 @@ global:
     version: PR-5471
   application_registry_tests:
     dir: pr/
-    version: PR-5397
+    version: PR-5478
   application_broker:
     dir: develop/
     version: d999e831

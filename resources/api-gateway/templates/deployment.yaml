@@ -32,6 +32,9 @@ spec:
             - /manager
           args:
             - --metrics-addr=127.0.0.1:8080
+            - --oathkeeper-svc-address={{ .Values.config.oathkeeper.service }}
+            - --oathkeeper-svc-port={{ .Values.config.oathkeeper.port }}
+            - --jwks-uri={{ .Values.config.jwksURI }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           terminationMessagePath: /dev/termination-log
