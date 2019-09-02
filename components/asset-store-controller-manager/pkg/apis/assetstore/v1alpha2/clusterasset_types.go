@@ -4,12 +4,23 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// +genclient
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +genclient:nonNamespaced
+// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
+// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+// ClusterAssetSpec defines the desired state of ClusterAsset
+type ClusterAssetSpec struct {
+	CommonAssetSpec `json:",inline"`
+}
+
+// ClusterAssetStatus defines the observed state of ClusterAsset
+type ClusterAssetStatus struct {
+	CommonAssetStatus `json:",inline"`
+}
+
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Cluster
 
 // ClusterAsset is the Schema for the clusterassets API
-// +k8s:openapi-gen=true
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type="string",JSONPath=".status.phase"
 // +kubebuilder:printcolumn:name="Base URL",type="string",JSONPath=".status.assetRef.baseUrl"
@@ -22,18 +33,7 @@ type ClusterAsset struct {
 	Status ClusterAssetStatus `json:"status,omitempty"`
 }
 
-// ClusterAssetSpec defines the desired state of Cluster Asset
-type ClusterAssetSpec struct {
-	CommonAssetSpec `json:",inline"`
-}
-
-// ClusterAssetStatus defines the observed state of Cluster Asset
-type ClusterAssetStatus struct {
-	CommonAssetStatus `json:",inline"`
-}
-
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +genclient:nonNamespaced
+// +kubebuilder:object:root=true
 
 // ClusterAssetList contains a list of ClusterAsset
 type ClusterAssetList struct {

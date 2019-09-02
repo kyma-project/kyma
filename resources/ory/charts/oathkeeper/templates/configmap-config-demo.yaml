@@ -41,6 +41,8 @@ data:
         jwks_url: https://raw.githubusercontent.com/ory/k8s/master/helm/charts/oathkeeper/demo/mutator.id_token.jwks.json
       noop:
         enabled: true
+      hydrator:
+        enabled: true
     serve:
       proxy:
         cors:

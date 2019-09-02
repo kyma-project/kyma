@@ -1,6 +1,6 @@
 ---
 #View access to kubeless resources
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-kubeless-view
@@ -19,7 +19,7 @@ rules:
 {{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-kubeless-admin

@@ -3,7 +3,6 @@
 package versioned
 
 import (
-	glog "github.com/golang/glog"
 	installerv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned/typed/installer/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
@@ -13,8 +12,6 @@ import (
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	InstallerV1alpha1() installerv1alpha1.InstallerV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Installer() installerv1alpha1.InstallerV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -26,12 +23,6 @@ type Clientset struct {
 
 // InstallerV1alpha1 retrieves the InstallerV1alpha1Client
 func (c *Clientset) InstallerV1alpha1() installerv1alpha1.InstallerV1alpha1Interface {
-	return c.installerV1alpha1
-}
-
-// Deprecated: Installer retrieves the default version of InstallerClient.
-// Please explicitly pick a version.
-func (c *Clientset) Installer() installerv1alpha1.InstallerV1alpha1Interface {
 	return c.installerV1alpha1
 }
 
@@ -58,7 +49,6 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 
 	cs.DiscoveryClient, err = discovery.NewDiscoveryClientForConfig(&configShallowCopy)
 	if err != nil {
-		glog.Errorf("failed to create the DiscoveryClient: %v", err)
 		return nil, err
 	}
 	return &cs, nil
