@@ -35,8 +35,8 @@ type FuncSize struct {
 type DefaultConfig struct {
 	Runtime         string `json:"runtime"`
 	Size            string `json:"size"`
-	TimeOut         int32  `json:"time_out"`
-	FuncContentType string `json:"func_content_type"`
+	TimeOut         int32  `json:"timeOut"`
+	FuncContentType string `json:"funcContentType"`
 }
 type RuntimesSupported struct {
 	ID             string `json:"ID"`
@@ -81,7 +81,7 @@ func New(config *corev1.ConfigMap) (*RuntimeInfo, error) {
 	}
 
 	var funcTypes []FuncType
-	if funcs, ok := config.Data["func_types"]; ok {
+	if funcs, ok := config.Data["funcTypes"]; ok {
 		err := yaml.Unmarshal([]byte(funcs), &funcTypes)
 		if err != nil {
 			log.Error(err, "Error while fetching function types")
@@ -91,7 +91,7 @@ func New(config *corev1.ConfigMap) (*RuntimeInfo, error) {
 	}
 
 	var funcSizes []FuncSize
-	if sizes, ok := config.Data["func_sizes"]; ok {
+	if sizes, ok := config.Data["funcSizes"]; ok {
 		err := yaml.Unmarshal([]byte(sizes), &funcSizes)
 		if err != nil {
 			log.Error(err, "Error while fetching function sizes")

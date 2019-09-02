@@ -2,6 +2,7 @@ package defaultserver
 
 import (
 	"bytes"
+
 	"github.com/appscode/jsonpatch"
 
 	//"k8s.io/apimachinery/pkg/types"
@@ -44,8 +45,8 @@ var fnConfig = &corev1.ConfigMap{
 		"defaults": `{
 			"size": "S",
 			"runtime": "nodejs8",
-			"time_out": 180,
-			"func_content_type": "plaintext",
+			"timeOut": 180,
+			"funcContentType": "plaintext",
 		}`,
 		"runtimes": `[
 			{
@@ -57,12 +58,12 @@ var fnConfig = &corev1.ConfigMap{
 				"DockerFileName": "dockerfile-nodejs6",
 			}
 		]`,
-		"func_sizes": `[
+		"funcSizes": `[
 			{"size": "S"},
 			{"size": "M"},
 			{"size": "L"},
 		]`,
-		"func_types": `[
+		"funcTypes": `[
 			{"type": "plaintext"},
 			{"type": "base64"}
 		]`,

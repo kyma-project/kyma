@@ -29,8 +29,8 @@ var fnConfig = &corev1.ConfigMap{
 		"defaults": `{
 			"size": "S",
 			"runtime": "nodejs8",
-			"time_out": 10,
-			"func_content_type": "plaintext",
+			"timeOut": 10,
+			"funcContentType": "plaintext",
 		}`,
 		"runtimes": `[
 			{
@@ -42,12 +42,12 @@ var fnConfig = &corev1.ConfigMap{
 				"DockerFileName": "dockerfile-nodejs6",
 			}
 		]`,
-		"func_sizes": `[
+		"funcSizes": `[
 			{"size": "S"},
 			{"size": "M"},
 			{"size": "L"},
 		]`,
-		"func_types": `[
+		"funcTypes": `[
 			{"type": "plaintetext"},
 			{"type": "base64"}
 		]`,

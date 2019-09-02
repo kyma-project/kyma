@@ -104,8 +104,8 @@ func TestReconcile(t *testing.T) {
 			"defaults": `{
 			"size": "S",
 			"runtime": "nodejs8",
-			"time_out": 180,
-			"func_content_type": "plaintext",
+			"timeOut": 180,
+			"funcContentType": "plaintext",
 		}`,
 			"runtimes": `[
 			{
@@ -117,12 +117,12 @@ func TestReconcile(t *testing.T) {
 				"DockerFileName": "dockerfile-nodejs6",
 			}
 		]`,
-			"func_sizes": `[
+			"funcSizes": `[
 			{"size": "S"},
 			{"size": "M"},
 			{"size": "L"},
 		]`,
-			"func_types": `[
+			"funcTypes": `[
 			{"type": "plaintext"},
 			{"type": "base64"}
 		]`,
