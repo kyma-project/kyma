@@ -85,7 +85,7 @@ func (r *assetWebhookConfigService) Get(ctx context.Context) (AssetWebhookConfig
 		var cfgMap v1.ConfigMap
 		err := runtime.DefaultUnstructuredConverter.FromUnstructured(i.UnstructuredContent(), &cfgMap)
 		if err != nil {
-			return nil, fmt.Errorf("while converting from *unstructured.Unstructured to *v1.ConfigMap", item)
+			return nil, fmt.Error("while converting from *unstructured.Unstructured to *v1.ConfigMap", item)
 		}
 		return toAssetWhsConfig(cfgMap)
 	default:
