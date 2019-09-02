@@ -13,10 +13,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/cache"
 	"sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -32,8 +30,6 @@ var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
 var webhookConfigSvc webhookconfig.AssetWebhookConfigService
-var informer cache.SharedIndexInformer
-var stop chan struct{}
 var fixParameters = runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)}
 
 func TestAPIs(t *testing.T) {
@@ -72,9 +68,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
 
-	webhookConfigSvc, informer = initWebhookConfigService(webhookconfig.Config{CfgMapName: "test", CfgMapNamespace: "test"}, cfg)
-	stop = make(chan struct{}, 1)
-	go informer.Run(stop)
+	webhookConfigSvc = initWebhookConfigService(webhookconfig.Config{CfgMapName: "test", CfgMapNamespace: "test"}, cfg)
 
 	close(done)
 }, 60)
@@ -83,19 +77,17 @@ var _ = AfterSuite(func() {
 	By("tearing down the test environment")
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
-	close(stop)
 })
 
-func initWebhookConfigService(webhookCfg webhookconfig.Config, config *rest.Config) (webhookconfig.AssetWebhookConfigService, cache.SharedIndexInformer) {
+func initWebhookConfigService(webhookCfg webhookconfig.Config, config *rest.Config) webhookconfig.AssetWebhookConfigService {
 	dc, err := dynamic.NewForConfig(config)
 	Expect(err).To(Succeed())
 
-	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(dc, time.Hour)
 	configmapsResource := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "configmaps"}
-	informer := informerFactory.ForResource(configmapsResource).Informer()
+	resourceGetter := dc.Resource(configmapsResource)
+	webhookCfgService := webhookconfig.New(resourceGetter, webhookCfg.CfgMapName, webhookCfg.CfgMapNamespace)
 
-	webhookCfgService := webhookconfig.New(informer.GetIndexer(), webhookCfg.CfgMapName, webhookCfg.CfgMapNamespace)
-	return webhookCfgService, informer
+	return webhookCfgService
 }
 
 func validateReconcilation(err error, result controllerruntime.Result) {
