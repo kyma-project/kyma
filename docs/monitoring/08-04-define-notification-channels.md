@@ -27,7 +27,7 @@ route:
   routes:
   - receiver: 'null'
     match:
-      alertname: DeadMansSwitch
+      alertname: CPUTempHigh
   - receiver: "victorOps"
     continue: true # If set to `false`, it stops after the first matching.
     match_re:
@@ -58,22 +58,25 @@ receivers:
 
 Configure your alert rule using the following parameters:
 
-| Parameter | Description | Example value |
-|-----------|-------------|---------------|
-| **route** | Specifies the name of the group listing the rules.  | `cpu.temp.rules` |
+| Parameter | Description |
+|-----------|-------------|
+| **route** | A route block defines a node in a routing tree and its children. Its optional configuration parameters are inherited from its parent node if not set. | 
+| **route.routes** | Child routes.  |
+| **routes.receiver** | Receiver is a named configuration of one or more notification integrations.  |
+| **receivers** | A list of configured notification receivers.|
 
-**A Quick explanation**
-* ```route:``` A route block defines a node in a routing tree and its children. Its optional configuration parameters are inherited from its parent node if not set.
-* ```routes:``` Child routes.
-* ```receiver:``` Receiver is a named configuration of one or more notification integrations.
-* ```receiver:``` A list of configured notification receivers.
 
 This configuration enables the **receivers**, VictorOps, and Slack to receive alerts fired by Prometheus rules.
 
-In order to enable alert notifications for the receivers, configure these four parameters:
+In order to enable alert notifications for the receivers, configure these parameters:
+
+VictorOps:
 
 **api_key** defines the team Api key in VictorOps.
 **routing_key** defines the team routing key in VictorOps.
+**api_url** is the URL endpoint which sends the alerts.
+
+Slack: 
 **channel** refers to the Slack channel which receives the alerts notifications.
 **api_url** is the URL endpoint which sends the alerts.
 
