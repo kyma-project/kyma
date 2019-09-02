@@ -1,19 +1,19 @@
 ---
-title: Custom Resources
+title: Kubeless Custom Resources
 type: Details
 ---
 
-Kubeless uses CustomResourceDefinitions (CRD) to:
+Kubeless uses Custom Resource Definitions (CRD) to:
 
-* define the information required for the configuration of custom resources
-* create functions
-* create objects
+* Define the information required for the configuration of custom resources
+* Create functions
+* Create objects
 
-The function CRD ships by default with Kubeless.
+The Function CRD ships by default with Kubeless.
 
 See the content of the `kubeless-crd.yaml` file:
 
-````
+```yaml
 apiVersion: apiextensions.k8s.io/v1beta1
 description: Kubernetes Native Serverless Framework
 kind: CustomResourceDefinition
@@ -30,7 +30,7 @@ spec:
   scope: Namespaced
   version: v1beta1
 
-````
+```
 
 Use the `.yaml` file to create the custom resource using the following command:
 
