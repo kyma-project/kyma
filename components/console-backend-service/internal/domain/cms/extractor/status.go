@@ -10,7 +10,7 @@ type DocsTopicStatusExtractor struct{}
 func (e *DocsTopicStatusExtractor) Status(status v1alpha1.CommonDocsTopicStatus) gqlschema.DocsTopicStatus {
 	return gqlschema.DocsTopicStatus{
 		Phase:   e.phase(status.Phase),
-		Reason:  status.Reason,
+		Reason:  string(status.Reason),
 		Message: status.Message,
 	}
 }

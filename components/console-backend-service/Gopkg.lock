@@ -326,7 +326,7 @@
   revision = "082e2dc0ad35dd911872f7dc35fa1401d8fe5887"
 
 [[projects]]
-  digest = "1:a3c6c960cd5664aba2c8f4b6f3b4150eb34fe68e445c6583d0d4fe9f36f7fa38"
+  digest = "1:8c376d2c2cd5025dd02477296d0e8e004ea3bfb54d2c87ca7277854cd8c94833"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -398,8 +398,7 @@
     "tools/failery",
   ]
   pruneopts = "NUT"
-  revision = "6f43335d798bd7cad6cdee5bce92529f174d3fb2"
-  source = "github.com/akucharska/kyma"
+  revision = "3a0c31e7c33b83912dfb6f39cdf46720254e5b0f"
 
 [[projects]]
   digest = "1:730bb303c6e80807a43c37b546e06de0fa32f9cde76a198e87653ce8859fd028"
@@ -1093,12 +1092,15 @@
   revision = "0317810137be915b9cf888946c6e115c1bfac693"
 
 [[projects]]
-  digest = "1:84a8609383bec11b71d52dd813f33f1d16614b91966940bdc2aa79bea864fa25"
+  digest = "1:68cd93696d4de06936c94bf0c510802140c2d3c956b557f3d001430d58cf676c"
   name = "sigs.k8s.io/controller-runtime"
-  packages = ["pkg/runtime/scheme"]
+  packages = [
+    "pkg/runtime/scheme",
+    "pkg/scheme",
+  ]
   pruneopts = "NUT"
-  revision = "f1eaba5087d69cebb154c6a48193e6667f5b512c"
-  version = "v0.1.12"
+  revision = "e1159d6655b260c4812fd0792cd1344ecc96a57e"
+  version = "v0.2.0"
 
 [solve-meta]
   analyzer-name = "dep"

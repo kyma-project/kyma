@@ -51,6 +51,10 @@ required = [
   name="github.com/kyma-project/kyma"
   revision = "3a0c31e7c33b83912dfb6f39cdf46720254e5b0f"
 
+[[override]]
+  name="sigs.k8s.io/controller-runtime"
+  version = "v0.2.0"
+
 [[constraint]]
   name = "k8s.io/api"
   version = "kubernetes-1.12.5"
