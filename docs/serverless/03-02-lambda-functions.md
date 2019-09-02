@@ -25,7 +25,7 @@ In Kyma, you can address the following scenarios:
 
 Kubernetes provides Kyma with labels that allow you to arrange lambda functions and group them. Labeling also makes it possible to filter lambdas functions. This functionality is particularly useful when a developer needs to manage a large set of lambda functions.
 
-Behind the scenes, labeling takes place in the form of key value pairs. Here is an example of code that enhances a function:
+Behind the scenes, labeling takes place in the form of key-value pairs. Here is the example of code that enhances a function:
 
 ```
 "labels": {

@@ -52,4 +52,4 @@ Knative is a platform which manages serverless workloads inside Kubernetes envir
 
 Kyma bridges the gap between developers and Knative using its own [Function Controller](https://github.com/kyma-project/kyma/blob/master/components/function-controller/README.md) which uses the Function custom resource to facilitate the deployment of lambda functions.
 
-For details, see [Knative project](https://knative.dev/docs/) documentation.
+For details, see the [Knative project](https://knative.dev/docs/) documentation.
