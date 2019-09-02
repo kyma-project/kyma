@@ -83,7 +83,10 @@ func (r *assetWebhookConfigService) Get(ctx context.Context) (AssetWebhookConfig
 		return toAssetWhsConfig(*i)
 	case *unstructured.Unstructured:
 		var cfgMap v1.ConfigMap
-		runtime.DefaultUnstructuredConverter.FromUnstructured(i.UnstructuredContent(), &cfgMap)
+		err := runtime.DefaultUnstructuredConverter.FromUnstructured(i.UnstructuredContent(), &cfgMap)
+		if err != nil {
+			return nil, fmt.Errorf("while converting from *unstructured.Unstructured to *v1.ConfigMap", item)
+		}
 		return toAssetWhsConfig(cfgMap)
 	default:
 		return nil, fmt.Errorf("incorrect item type: %T, should be: *v1.ConfigMap", item)
