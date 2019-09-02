@@ -25,10 +25,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
+//go:generate mockery -name Client
 type Client interface {
 	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
-	Update(ctx context.Context, obj runtime.Object) error
-	Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOptionFunc) error
+	Update(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error
+	Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOption) error
 }
 
 type Controller struct {

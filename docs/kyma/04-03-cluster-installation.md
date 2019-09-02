@@ -19,11 +19,11 @@ Choose the installation type and get started:
 
 1. Access **project Kyma** on the [Google Cloud Platform (GCP) Marketplace](https://console.cloud.google.com/marketplace/details/sap-public/kyma?q=kyma%20project) and click **CONFIGURE**.
 
-2. When the pop-up box appears, select you project from the available list and confirm your choice.
+2. When the pop-up box appears, select the project in which you want to create a Kubernetes cluster and deploy Kyma.
 
-3. To create a Kubernetes cluster for your Kyma installation, select a cluster zone from the drop-down menu and click **Create cluster**. Wait for a few minutes for the Kubernetes cluster to deploy.
+3. To create a Kubernetes cluster for your Kyma installation, select a cluster zone from the drop-down menu and click **Create cluster**. Wait for a few minutes for the Kubernetes cluster to provision.
 
-4. Leave the default values or adjust these settings:
+4. Adjust the basic settings of the Kyma deployment or use the default values:
 
   | Field   |      Default value     |
   |----------|-------------|
@@ -33,15 +33,14 @@ Choose the installation type and get started:
 
 5. Accept the GCP Marketplace Terms of Service to continue.
 
-6. Click the **Deploy** button for the Kyma installation to start.
+6. Click **Deploy** to install Kyma.
+>**NOTE:** The installation can take several minutes to complete.
 
-> **NOTE:** The installation can take several minutes to complete.
-
-7. Once you become redirected to the **Applications** page under **Kubernetes Engine** in the GCP Console, you get the installation status details. Check the installation status. If it is green, follow the steps under the **Next steps** section in **INFO PANEL** to import the self-signed TLS certificate to your trusted certified authorities.
+7. After you click **Deploy**, you're redirected to the **Applications** page under **Kubernetes Engine** in the GCP Console where you can check the installation status. When you see a green checkmark next to the application name, Kyma is installed. Follow the instructions from the **Next steps** section in **INFO PANEL** to add the Kyma self-signed TLS certificate to the trusted certificates of your OS.
 
 8. Access the cluster using the link and login details provided in the **Kyma info** section on the **Application details** page.
 
-> **TIP:** Watch [this](https://www.youtube.com/watch?v=hxVhQqI1B5A) video for a walkthrough of the installation process.
+>**TIP:** Watch [this](https://www.youtube.com/watch?v=hxVhQqI1B5A) video for a walkthrough of the installation process.
 
   </details>
   <details>
@@ -54,9 +53,8 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 ## Prerequisites
 
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.0
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.13.0 or higher
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
-- [wget](https://www.gnu.org/software/wget/)
 
 
 >**NOTE:** Running Kyma on GKE requires three [`n1-standard-4` machines](https://cloud.google.com/compute/docs/machine-types). You create these machines when you complete the **Prepare the GKE cluster** step.
@@ -86,7 +84,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
     ```
     gcloud container --project "$GCP_PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "$GCP_ZONE" \
-    --cluster-version "1.12" --machine-type "n1-standard-4" \
+    --cluster-version "1.13" --machine-type "n1-standard-4" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing
     ```
 
@@ -183,15 +181,13 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 
 ## Prerequisites
 
-- [Microsoft Azure](https://azure.microsoft.com)
-- [Kubernetes](https://kubernetes.io/) 1.12 or higher
-- Tiller 2.10.0 or higher
-- [Docker](https://www.docker.com/)
-- [Docker Hub](https://hub.docker.com/) account
-- [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+- [Microsoft Azure](https://azure.microsoft.com) account
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.13.0 or higher
+- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
 
 >**NOTE:** Running Kyma on AKS requires three [`Standard_D4_v3` machines](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general#dv3-series-1). You create these machines when you complete the **Prepare the AKS cluster** step.
+
 
 >**CAUTION:** Due to a known Istio-related issue, Kubernetes jobs run endlessly on AKS deployments of Kyma. Read [this](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) document to learn more.
 
@@ -228,7 +224,7 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
       --resource-group $RS_GROUP \
       --name $CLUSTER_NAME \
       --node-vm-size "Standard_D4_v3" \
-      --kubernetes-version 1.12 \
+      --kubernetes-version 1.13 \
       --enable-addons "monitoring,http_application_routing" \
       --generate-ssh-keys
     ```
@@ -241,18 +237,9 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 
 5. Install Tiller and add additional privileges to be able to access readiness probes endpoints on your AKS cluster.
 
-* Installation from release:
-
     ```
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/tiller.yaml
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/azure-crb-for-healthz.yaml
-    ```
-
-* If you install Kyma from sources, check out [kyma-project](https://github.com/kyma-project/kyma) and enter the root folder. Run:
-
-    ```
-    kubectl apply -f installation/resources/tiller.yaml
-    kubectl apply -f installation/resources/azure-crb-for-healthz.yaml
     ```
 
 6. Install custom installation overrides for AKS. Run:
@@ -330,6 +317,59 @@ For MacOS, run:
     kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
     ```
 
+
+  </details>
+  <details>
+  <summary>
+  Gardener
+  </summary>
+
+Install Kyma on a Kubernetes cluster deployed through [Gardener](https://gardener.cloud/).
+
+## Prerequisites
+
+  - [Gardener](https://gardener.cloud/) seed cluster
+  - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled or a [Microsoft Azure](https://azure.microsoft.com) account
+  - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.13.0 or higher
+
+## Choose the release to install
+
+1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to install.
+
+2. Export the release version as an environment variable. Run:
+
+    ```
+    export KYMA_VERSION={KYMA_RELEASE_VERSION}
+    ```
+
+## Provision a Kubernetes cluster through Gardener
+
+1. Go to the **Secrets** tab of the Gardener UI and add Secrets to enable provisioning clusters on different architectures. To learn about the requirements for each environment, click the question mark buttons.  
+
+2. Provision a cluster form the **Clusters** tab. Choose the infrastructure in which you want to provision your cluster and apply these settings:
+
+  | Tab  |  Setting |  Required value |
+  |---|---|---|
+  | Infrastructure |  Kubernetes | `1.13.10`  |
+  | Worker  |  Machine type | `n1-standard-4` (GCP) `Standard_D4_v3` (Azure) |
+  | Worker  | Autoscaler min.  | `3` |
+
+3. After you provision the cluster, download the kubeconfig file available under the **Show Cluster Access** option in the **Actions** column.
+
+4. Export the downloaded kubeconfig as an environment variable to connect to the cluster you provisioned. Run:
+
+    ```
+    export KUBECONFIG={PATH_TO_KUBECONFIG_FILE}
+    ```
+
+5. Install Tiller on the cluster you provisioned. Run:
+
+    ```
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
+    ```
+    >**NOTE:** On an Azure cluster, make sure to run all commands from steps 5 and 6 of [this](#installation-install-kyma-on-a-cluster--provider-installation--aks--prepare-the-aks-cluster) section.
+
+6. Install Kyma using the respective installation instructions for [GCP](#installation-install-kyma-on-a-cluster--provider-installation--gke--install-kyma) or [Azure](#installation-install-kyma-on-a-cluster--provider-installation--aks--install-kyma).
 
   </details>
 </div>

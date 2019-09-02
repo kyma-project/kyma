@@ -4,24 +4,25 @@
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "3d922c3db8df290ef0388b810933d2c26a0d1188"
+  revision = "70782d1888118ad2c76b978b49505bb5286e264c"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.15.2"
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.15.2"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.15.2"
 
 [[override]]
   name = "k8s.io/kubernetes"
-  branch = "release-1.10"
+  version = "kubernetes-1.15.2"
 
 [prune]
+  non-go = true
   go-tests = true
   unused-packages = true

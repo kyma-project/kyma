@@ -1,6 +1,7 @@
 required = [
   "k8s.io/code-generator/cmd/defaulter-gen",
   "k8s.io/code-generator/cmd/deepcopy-gen",
+  "k8s.io/code-generator/cmd/conversion-gen",
   "k8s.io/code-generator/cmd/client-gen",
   "k8s.io/code-generator/cmd/lister-gen",
   "k8s.io/code-generator/cmd/informer-gen",
@@ -19,34 +20,33 @@ required = [
   name = "github.com/gorilla/mux"
   version = "1.6.1"
 
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.15.2"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.15.2"
+
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.12.3"
+  version = "kubernetes-1.15.2"
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  branch = "release-1.12"
+  version = "kubernetes-1.15.2"
+
+[[override]]
+  name = "k8s.io/kubernetes"
+  version = "kubernetes-1.15.2"
 
 [[constraint]]
   name = "github.com/prometheus/client_golang"
   version = "0.8.0"
 
 [[override]]
-  name = "k8s.io/api"
-  version = "kubernetes-1.12.3"
-
-[[override]]
-  name = "k8s.io/apimachinery"
-  version = "kubernetes-1.12.3"
-
-[[override]]
   name = "k8s.io/gengo"
-  revision = "01a732e01d00cb9a81bb0ca050d3e6d2b947927b"
-
-[[override]]
-  name = "k8s.io/kubernetes"
-  branch = "release-1.12"
-
+  revision = "955ffa8fcfc983717cd9de5d2a1e9f5c465f4376"
 
 [[override]]
   name = "github.com/docker/distribution"

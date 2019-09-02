@@ -103,7 +103,7 @@ func (c *FakeRules) DeleteCollection(options *v1.DeleteOptions, listOptions v1.L
 // Patch applies the patch and returns the patched rule.
 func (c *FakeRules) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha2.Rule, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(rulesResource, c.ns, name, data, subresources...), &v1alpha2.Rule{})
+		Invokes(testing.NewPatchSubresourceAction(rulesResource, c.ns, name, pt, data, subresources...), &v1alpha2.Rule{})
 
 	if obj == nil {
 		return nil, err

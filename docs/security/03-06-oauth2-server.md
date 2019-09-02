@@ -3,11 +3,12 @@ title: OAuth2 and OpenID Connect server
 type: Details
 ---
 
-By default, every Kyma deployment comes with an OAuth2 authorization server solution from [ORY](https://www.ory.sh/). The `ory` [component](https://github.com/kyma-project/kyma/tree/master/resources/ory) consists of three elements:
+By default, every Kyma deployment comes with an OAuth2 authorization server solution from [ORY](https://www.ory.sh/). The `ory` [component](https://github.com/kyma-project/kyma/tree/master/resources/ory) consists of four elements:
 
 - [Hydra](https://github.com/ory/hydra) OAuth2 and OpenID Connect server which issues access, refresh, and ID tokens to registered clients which call services in a Kyma cluster.
 - [Oathkeeper](https://github.com/ory/oathkeeper) authorization & authentication proxy which authenticates and authorizes incoming requests basing on the list of defined [Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules).
 - [Oathkeeper Maester](https://github.com/ory/oathkeeper-maester) Kubernetes controller which feeds Access Rules to the Oathkeeper proxy by creating or updating the Oathkeeper ConfigMap and populating it with rules found in instances of the `rules.oathkeeper.ory.sh/v1alpha1` custom resource.
+- [Hydra Maester](https://github.com/ory/hydra-maester) Kubernetes controller which manages OAuth2 clients by communicating the data found in instances of the `oauth2clients.hydra.ory.sh` custom resource to the ORY Hydra API.
 
 Out of the box, the Kyma implementation of the ORY stack supports the [OAuth 2.0 Client Credentials Grant](https://www.oauth.com/oauth2-servers/access-tokens/client-credentials/).
 
@@ -15,19 +16,33 @@ Out of the box, the Kyma implementation of the ORY stack supports the [OAuth 2.0
 
 ## Register an OAuth2 client
 
-To interact with the Kyma OAuth2 server, you must register an OAuth2 client. Follow these steps:
+To interact with the Kyma OAuth2 server, you must register an OAuth2 client. Run this command to create a custom resource that triggers the creation of a client:
 
-1. Export the required client application details and your cluster domain as environment variables. Run:
-  ```
-  export CLIENT_ID={YOUR_CLIENT_ID}
-  export CLIENT_SECRET={YOUR_CLIENT_SECRET}
-  export DOMAIN={YOUR_CLUSTER_DOMAIN}
-  ```
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: hydra.ory.sh/v1alpha1
+kind: OAuth2Client
+metadata:
+  name: {NAME_OF_CLIENT}
+  namespace: {CLIENT_NAMESPACE}
+spec:
+  grantTypes:
+    - "client_credentials"
+  scope: "read write"
+EOF
+```
 
-2. Send a CURL request to the `/clients` endpoint of the OAuth2 server to register your client with the read and write scopes. Run:
-  ```
-  curl -ik -X POST "https://oauth2-admin.$DOMAIN/clients" -d '{"grant_types":["client_credentials"], "client_id":"'$CLIENT_ID'", "client_secret":"'$CLIENT_SECRET'", "scope":"read write"}'
-  ```
+Creating this custom resource triggers the Hydra Maester controller which sends a client registration request to the OAuth2 server and saves the credentials of the registered client to a Kubernetes Secret.
+
+>**NOTE:** By default, you can create clients only in the `kyma-system` and `default` Namespaces. Read [this](https://github.com/ory/k8s/blob/master/docs/helm/hydra-maester.md#configuration) document to learn how to enable creating clients in other Namespaces. Each instance of the `oauth2clients.hydra.ory.sh` custom resource and the Secret that stores the credentials of the corresponding client share the name and the Namespace.
+
+Run this command to get the credentials of the registered OAuth2:
+```
+kubectl get secret -n {CLIENT_NAMESPACE} {NAME_OF_CLIENT} -o yaml
+```
+
+See the ORY Hydra Maester [Github page](https://github.com/ory/hydra-maester) to learn more about the `oauth2clients.hydra.ory.sh` custom resource.
+
 
 ## OAuth2 server in action
 

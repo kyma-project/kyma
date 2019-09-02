@@ -48,7 +48,9 @@ hydra:
     requests:
       cpu: 50m
       memory: 128Mi
-
+  hydra-maester:
+    enabledNamespaces:
+    - default
 # Overrides for the Oathkeeper chart
 oathkeeper:
   oathkeeper:
@@ -111,6 +113,8 @@ oathkeeper:
           enabled: true
         cookie:
           enabled: true
+        hydrator:
+          enabled: true
       serve:
         proxy:
           port: 4455
@@ -125,11 +129,11 @@ oathkeeper:
         cpu: 50m
         memory: 64Mi
   image:
-    tag: v0.17.3-beta.1
+    tag: v0.18.0-beta.1
   oathkeeper-maester:
-    annotations:
-      sidecar.istio.io/inject: "false"
     deployment:
+      annotations:
+        sidecar.istio.io/inject: "false"
       resources:
         limits:
           cpu: 100m
@@ -137,3 +141,6 @@ oathkeeper:
         requests:
           cpu: 50m
           memory: 20Mi
+      envs:
+        - name: "mutatorsAvailable" # TODO: remove after version >v0.0.2-beta.1 is released
+          value: "noop,id_token,header,cookie,hydrator"

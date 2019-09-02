@@ -10,17 +10,6 @@
   version = "v0.1.0"
 
 [[projects]]
-  branch = "travis-1.9"
-  digest = "1:d45f5fe0f8bf6cd0bc592502e7e8ec647d769e55387fe326eb624d67282a7d15"
-  name = "github.com/golang/lint"
-  packages = [
-    ".",
-    "golint",
-  ]
-  pruneopts = ""
-  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
-
-[[projects]]
   digest = "1:09aa5dd1332b93c96bde671bafb053249dc813febf7d5ca84e8f382ba255d67d"
   name = "github.com/gorilla/websocket"
   packages = ["."]
@@ -49,6 +38,17 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:99dc4c94284ccd0d515bc11c906edcc33da407af228c6cf75b6f20e2cd3e6ab6"
+  name = "golang.org/x/lint"
+  packages = [
+    ".",
+    "golint",
+  ]
+  pruneopts = ""
+  revision = "959b441ac422379a43da2230f62be024250818b0"
+
+[[projects]]
+  branch = "master"
   digest = "1:c74da760a8e89e117c68c8d3612acb2c0c200a3d1a152f7ae8bd8371fc5611b5"
   name = "golang.org/x/tools"
   packages = [
@@ -65,8 +65,9 @@
   analyzer-version = 1
   input-imports = [
     "github.com/go-logr/logr",
-    "github.com/golang/lint/golint",
     "github.com/nlopes/slack",
+    "github.com/pkg/errors",
+    "golang.org/x/lint/golint",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

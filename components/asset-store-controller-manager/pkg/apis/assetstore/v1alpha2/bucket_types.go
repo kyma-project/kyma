@@ -4,11 +4,22 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// +genclient
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
+// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+// BucketSpec defines the desired state of Bucket
+type BucketSpec struct {
+	CommonBucketSpec `json:",inline"`
+}
+
+// BucketStatus defines the observed state of Bucket
+type BucketStatus struct {
+	CommonBucketStatus `json:",inline"`
+}
+
+// +kubebuilder:object:root=true
 
 // Bucket is the Schema for the buckets API
-// +k8s:openapi-gen=true
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type="string",JSONPath=".status.phase"
 // +kubebuilder:printcolumn:name="URL",type="string",JSONPath=".status.url"
@@ -21,17 +32,7 @@ type Bucket struct {
 	Status BucketStatus `json:"status,omitempty"`
 }
 
-// BucketSpec defines the desired state of Bucket
-type BucketSpec struct {
-	CommonBucketSpec `json:",inline"`
-}
-
-// BucketStatus defines the observed state of Bucket
-type BucketStatus struct {
-	CommonBucketStatus `json:",inline"`
-}
-
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
 
 // BucketList contains a list of Bucket
 type BucketList struct {

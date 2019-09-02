@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-connectivity-validator
@@ -12,13 +12,17 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-connectivity-validator
+      release: {{ .Release.Name }}
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
         app: {{ .Release.Name }}-connectivity-validator
-        release: {{ .Release.Name }}-connectivity-validator
+        release: {{ .Release.Name }}
     spec:
       containers:
         - name: {{ .Release.Name }}-connectivity-validator
@@ -73,4 +77,4 @@ spec:
       name: http-proxy
   selector:
     app: {{ .Release.Name }}-connectivity-validator
-    release: {{ .Release.Name }}-connectivity-validator
+    release: {{ .Release.Name }}
