@@ -2,7 +2,7 @@
 title: Define notification channels
 type: Tutorials
 ---
-This tutorial shows you how to 
+This tutorial shows you how to set up notification channels for your alerts.
 
 ## Alertmanager configuration - alertmanager.yaml
 
@@ -55,6 +55,13 @@ receivers:
     text: "<!channel> \nsummary: {{`{{ .CommonAnnotations.summary }}`}}\ndescription: {{`{{ .CommonAnnotations.description }}`}}"
 {{ end }}
 ```
+
+Configure your alert rule using the following parameters:
+
+| Parameter | Description | Example value |
+|-----------|-------------|---------------|
+| **route** | Specifies the name of the group listing the rules.  | `cpu.temp.rules` |
+
 **A Quick explanation**
 * ```route:``` A route block defines a node in a routing tree and its children. Its optional configuration parameters are inherited from its parent node if not set.
 * ```routes:``` Child routes.
@@ -86,10 +93,3 @@ global:
 ```
 
 The main reason to keep this configuration as **global** is that these parameters might be replaced with values configured during the cluster build and taken from the final environment variables during the Kyma installation.
-
-**References**
-- [VictorOps-Prometheus Integration Guide](https://help.victorops.com/knowledge-base/victorops-prometheus-integration/)
-- [Prometheus Alerting configuration](https://prometheus.io/docs/alerting/configuration/)
-- [Prometheus Alerting notification examples](https://prometheus.io/docs/alerting/notification_examples/)
-- [Slack Incoming WebHooks](https://slack.com/apps/A0F7XDUAZ-incoming-webhooks)
-- [Slack-API Legacy custom integrations](https://api.slack.com/custom-integrations)
