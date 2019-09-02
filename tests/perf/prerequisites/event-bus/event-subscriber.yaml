@@ -30,7 +30,7 @@ spec:
         sidecar.istio.io/inject: "true"
     spec:
       containers:
-      - image: eu.gcr.io/kyma-project/develop/event-bus-e2e-subscriber:859d7e73
+      - image: eu.gcr.io/kyma-project/event-bus-e2e-subscriber:1.5.0-rc1
         imagePullPolicy: Always
         name: event-subscription-service
         ports:

@@ -17,53 +17,53 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    dir: pr/
-    version: PR-5411
+    dir: 
+    version: 1.5.0-rc1
   application_operator_tests:
-    dir: pr/
-    version: PR-5397
+    dir: 
+    version: 1.5.0-rc1
   connector_service:
-    dir: pr/
-    version: PR-5468
+    dir: 
+    version: 1.5.0-rc1
   connector_service_tests:
-    dir: pr/
-    version: PR-5397
+    dir: 
+    version: 1.5.0-rc1
   connection_token_handler:
-    dir: pr/
-    version: PR-5318
+    dir: 
+    version: 1.5.0-rc1
   connection_token_handler_tests:
-    dir: pr/
-    version: PR-5397
+    dir: 
+    version: 1.5.0-rc1
   connectivity_certs_controller:
-    dir: pr/
-    version: PR-5318
+    dir: 
+    version: 1.5.0-rc1
   event_service:
-    dir: develop/
-    version: "36059183"
+    dir: 
+    version: 1.5.0-rc1
   event_service_integration_tests:
-    dir: develop/
-    version: fc7361ac
+    dir: 
+    version: 1.5.0-rc1
   application_connectivity_validator:
-    dir: pr/
-    version: PR-5318
+    dir: 
+    version: 1.5.0-rc1
   application_gateway:
-    dir: pr/
-    version: PR-5397
+    dir: 
+    version: 1.5.0-rc1
   application_gateway_tests:
-    dir: pr/
-    version: PR-5318
+    dir: 
+    version: 1.5.0-rc1
   application_registry:
-    dir: pr/
-    version: PR-5471
+    dir: 
+    version: 1.5.0-rc1
   application_registry_tests:
-    dir: pr/
-    version: PR-5478
+    dir: 
+    version: 1.5.0-rc1
   application_broker:
-    dir: develop/
-    version: d999e831
+    dir: 
+    version: 1.5.0-rc1
   application_connectivity_certs_setup_job:
-    dir: pr/
-    version: PR-5318
+    dir: 
+    version: 1.5.0-rc1
 connectivity_certs_controller:
   enabled: false
 
@@ -85,6 +85,6 @@ tests:
       central: false
     skipSslVerify: true
     image:
-      dir: pr/
-      version: PR-5411
+      dir: 
+      version: 1.5.0-rc1
       pullPolicy: IfNotPresent
