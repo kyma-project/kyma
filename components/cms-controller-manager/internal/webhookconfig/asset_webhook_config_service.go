@@ -3,12 +3,12 @@ package webhookconfig
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -41,7 +41,7 @@ type AssetWebhookConfig struct {
 }
 
 type assetWebhookConfigService struct {
-	indexer                Indexer
+	resourceGetter         ResourceGetter
 	webhookCfgMapName      string
 	webhookCfgMapNamespace string
 }
@@ -51,46 +51,35 @@ type AssetWebhookConfigService interface {
 	Get(ctx context.Context) (AssetWebhookConfigMap, error)
 }
 
-//go:generate mockery -name=Indexer -output=automock -outpkg=automock -case=underscore
-type Indexer interface {
-	GetByKey(key string) (item interface{}, exists bool, err error)
+//go:generate mockery -name=ResourceGetter -output=automock -outpkg=automock -case=underscore
+type ResourceGetter interface {
+	Get(name string, options metav1.GetOptions, subresources ...string) (*unstructured.Unstructured, error)
 }
 
-func New(indexer Indexer, webhookCfgMapName, webhookCfgMapNamespace string) *assetWebhookConfigService {
+func New(indexer ResourceGetter, webhookCfgMapName, webhookCfgMapNamespace string) *assetWebhookConfigService {
 	return &assetWebhookConfigService{
-		indexer:                indexer,
+		resourceGetter:         indexer,
 		webhookCfgMapName:      webhookCfgMapName,
 		webhookCfgMapNamespace: webhookCfgMapNamespace,
 	}
 }
 
 func (r *assetWebhookConfigService) Get(ctx context.Context) (AssetWebhookConfigMap, error) {
-	key := fmt.Sprintf("%s/%s", r.webhookCfgMapNamespace, r.webhookCfgMapName)
-	item, exists, err := r.indexer.GetByKey(key)
+	item, err := r.resourceGetter.Get(r.webhookCfgMapName, metav1.GetOptions{})
 
 	if err != nil {
+		if apiErrors.IsNotFound(err) {
+			return nil, nil
+		}
 		return nil, errors.Wrapf(err, "while getting webhook configuration in namespace %s", r.webhookCfgMapNamespace)
 	}
 
-	if !exists {
-		return nil, nil
+	var cfgMap v1.ConfigMap
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(item.UnstructuredContent(), &cfgMap)
+	if err != nil {
+		return nil, errors.Wrap(err, "while converting from *unstructured.Unstructured to *v1.ConfigMap")
 	}
-
-	//var cfgMap v1.ConfigMap
-
-	switch i := item.(type) {
-	case *v1.ConfigMap:
-		return toAssetWhsConfig(*i)
-	case *unstructured.Unstructured:
-		var cfgMap v1.ConfigMap
-		err := runtime.DefaultUnstructuredConverter.FromUnstructured(i.UnstructuredContent(), &cfgMap)
-		if err != nil {
-			return nil, errors.Wrap(err, "while converting from *unstructured.Unstructured to *v1.ConfigMap")
-		}
-		return toAssetWhsConfig(cfgMap)
-	default:
-		return nil, fmt.Errorf("incorrect item type: %T, should be: *v1.ConfigMap", item)
-	}
+	return toAssetWhsConfig(cfgMap)
 }
 
 func toAssetWhsConfig(configMap v1.ConfigMap) (AssetWebhookConfigMap, error) {
