@@ -41,7 +41,7 @@ func NewClusterDocsTopic(config ClusterDocsTopicConfig, log logr.Logger, mgr ctr
 		Client:           mgr.GetClient(),
 		Log:              log,
 		relistInterval:   config.RelistInterval,
-		recorder:         mgr.GetEventRecorderFor(""),
+		recorder:         mgr.GetEventRecorderFor("clusterdocstopic-controller"),
 		assetSvc:         assetService,
 		bucketSvc:        bucketService,
 		webhookConfigSvc: webhookConfigSvc,

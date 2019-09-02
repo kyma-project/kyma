@@ -41,7 +41,7 @@ func NewDocsTopic(config DocsTopicConfig, log logr.Logger, mgr ctrl.Manager, web
 		Client:           mgr.GetClient(),
 		Log:              log,
 		relistInterval:   config.RelistInterval,
-		recorder:         mgr.GetEventRecorderFor(""),
+		recorder:         mgr.GetEventRecorderFor("docstopic-controller"),
 		assetSvc:         assetService,
 		bucketSvc:        bucketService,
 		webhookConfigSvc: webhookConfigSvc,
