@@ -20,12 +20,12 @@ To start the Connector Service, run this command:
 ```
 
 The Compass Runtime Agent has the following parameters:
-- **controllerSyncPeriod** is the time period between resyncing exissting resources. 
-- **minimalConfigSyncTime** is the minimal time between synchronizing the configuration.
-- **integrationNamespace** is the namespaces in which the resources are created.
-- **gatewayPort** is the Application Gateway port.
-- **insecureConfigurationFetch** specifies whether to fetch the configuration with disabled TLS verification.
-- **uploadServiceUrl** is the URL of the upload service.
+- **controllerSyncPeriod** is the time period between resyncing existing resources. The default value is `60` and it is in seconds.
+- **minimalConfigSyncTime** is the minimal time between synchronizing the configuration. The default value is `300` and it is in seconds. 
+- **integrationNamespace** is the namespaces in which the resources are created. The default namespace is `kyma-integration`.
+- **gatewayPort** is the Application Gateway port. The default port is `8080`.
+- **insecureConfigurationFetch** specifies whether to fetch the configuration with disabled TLS verification. The default value is `false`.
+- **uploadServiceUrl** is the URL of the upload service. It is empty by default.
 
 The Compass Runtime Agent also uses the following environment variables:
 - **DIRECTOR_URL**
