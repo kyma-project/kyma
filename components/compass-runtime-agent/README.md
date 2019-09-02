@@ -5,8 +5,8 @@
 This is the repository for the Kyma Compass Runtime Agent.
 
 The main responsibilities of the Compass Runtime Agent are:
-- Establishing trusted connection between Runtime and Compass
-- Renewing trusted connection between Runtime and Compass
+- Establishing a trusted connection between the Runtime and the Compass
+- Renewing the trusted connection between the Runtime and the Compass
 - Configuring the Runtime
 
 
