@@ -127,5 +127,5 @@ func validateAsset(status assetstorev1alpha2.CommonAssetStatus, meta controllerr
 	Expect(status.Reason).To(Equal(expectedReason))
 	Expect(status.AssetRef.BaseURL).To(Equal(expectedBaseURL))
 	Expect(status.AssetRef.Files).To(HaveLen(len(files)))
-	Expect(meta.Finalizers).To(ContainElement(deleteAssetFinalizerName))
+	Expect(meta.Finalizers).To(ContainElement("test"))
 }
