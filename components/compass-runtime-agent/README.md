@@ -16,15 +16,13 @@ The Compass Runtime Agent requires Go 1.8 or higher.
 
 ## Usage
 
-This section explains how to use the Compass Runtime Agent.
-
-### Start the Compass Runtime Agent
-
 To start the Connector Service, run this command:
 
 ```
 ./compass-runtime-agent
 ```
+
+## Parameters and environment variables
 
 The Compass Runtime Agent has the following parameters:
 - **controllerSyncPeriod** is the time period between resyncing existing resources. Provide it in seconds. The default value is `60`.
