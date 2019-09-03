@@ -46,7 +46,8 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 
 	informerFactory := informers.NewSharedInformerFactory(clientset, informerResyncPeriod)
 
-	namespaceSvc, err := newNamespaceService(informerFactory.Core().V1().Namespaces().Informer(), client)
+	podService := newPodService(informerFactory.Core().V1().Pods().Informer(), client)
+	namespaceSvc, err := newNamespaceService(informerFactory.Core().V1().Namespaces().Informer(), *podService, client)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating namespace service")
 	}
@@ -56,7 +57,6 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	}
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer(), clientset.CoreV1())
 
-	podService := newPodService(informerFactory.Core().V1().Pods().Informer(), client)
 	resourceService := newResourceService(clientset.Discovery())
 	secretService := newSecretService(informerFactory.Core().V1().Secrets().Informer(), client)
 

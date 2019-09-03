@@ -165,7 +165,7 @@ func (r *namespaceResolver) DeleteNamespace(ctx context.Context, name string) (*
 
 	err = r.namespaceSvc.Delete(name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.Namespace, name))
+		glog.Error(errors.Wrapf(err, "while deleting %s `%s`", pretty.Namespace, name))
 		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
 	}
 

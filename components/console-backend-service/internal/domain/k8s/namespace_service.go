@@ -16,19 +16,21 @@ import (
 )
 
 type namespaceService struct {
-	informer cache.SharedIndexInformer
+	namespacesInformer cache.SharedIndexInformer
+	podsInformer podService
 	client   corev1.CoreV1Interface
 }
 
-func newNamespaceService(informer cache.SharedIndexInformer, client corev1.CoreV1Interface) (*namespaceService, error) {
+func newNamespaceService(namespacesInformer cache.SharedIndexInformer, podsInformer podService, client corev1.CoreV1Interface) (*namespaceService, error) {
 	return &namespaceService{
-		informer: informer,
+		namespacesInformer: namespacesInformer,
+		podsInformer: podsInformer,
 		client:   client,
 	}, nil
 }
 
 func (svc *namespaceService) List() ([]*v1.Namespace, error) { //r error
-	items := svc.informer.GetStore().List()
+	items := svc.namespacesInformer.GetStore().List()
 
 	var namespaces []*v1.Namespace
 	for _, item := range items {
@@ -43,7 +45,7 @@ func (svc *namespaceService) List() ([]*v1.Namespace, error) { //r error
 }
 
 func (svc *namespaceService) Find(name string) (*v1.Namespace, error) {
-	item, exists, err := svc.informer.GetStore().GetByKey(name)
+	item, exists, err := svc.namespacesInformer.GetStore().GetByKey(name)
 
 	if err != nil {
 		return nil, err
