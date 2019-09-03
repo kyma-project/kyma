@@ -10,7 +10,7 @@
 /common/ @mszostok @aszecowka @piotrmiskiewicz @sjanota @Tomasz-Smelcerz-SAP @strekm @crabtree @akgalwas @janmedrek @Szymongib @sayanh @radufa @suleymanakbas91
 
 # Microfrontend k8s client
-/common/microfrontend-client/ @kwiatekus @dariadomagala @y-kkamil @parostatkiem @akucharska @sjanota
+/common/microfrontend-client/ @dariadomagala @y-kkamil @akucharska @sjanota
 
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
@@ -25,8 +25,8 @@
 /resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The Microfrontend CRDs
-/resources/cluster-essentials/templates/microfrontend.crd.yaml @kwiatekus @dariadomagala @y-kkamil @akucharska @sjanota @parostatkiem
-/resources/cluster-essentials/templates/clustermicrofrontend.crd.yaml @kwiatekus @dariadomagala @y-kkamil @akucharska @sjanota @parostatkiem
+/resources/cluster-essentials/templates/microfrontend.crd.yaml @dariadomagala @y-kkamil @akucharska @parostatkiem
+/resources/cluster-essentials/templates/clustermicrofrontend.crd.yaml @dariadomagala @y-kkamil @akucharska @parostatkiem
 
 # The `values.yaml` file for `core` chart
 /resources/core/values.yaml @kyma-project/developers
@@ -83,7 +83,7 @@
 /resources/application-connector-ingress/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `console` subchart
-/resources/core/charts/console/ @kwiatekus @dariadomagala @y-kkamil @parostatkiem @akucharska @sjanota
+/resources/core/charts/console/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321
 
 # The `dex` subchart
 /resources/dex/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -107,13 +107,13 @@
 /resources/core/charts/kubeless/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # The `lambda-ui` subchart
-/resources/core/charts/kubeless/charts/lambdas-ui @kwiatekus @dariadomagala @y-kkamil @parostatkiem @akucharska @sjanota
+/resources/core/charts/kubeless/charts/lambdas-ui @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321
 
 # The `logging` subchart
 /resources/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `log-ui` subchart
-/resources/logging/charts/log-ui/ @rakesh-garimella @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @hisarbalik @a-thaler @igor-karpukhin
+/resources/logging/charts/log-ui/ @dariadomagala @y-kkamil @akucharska @parostatkiem @Wawrzyn321
 
 # The `event-bus` chart
 /resources/event-bus/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
@@ -149,7 +149,7 @@
 /resources/core/templates/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `templates` chart
-/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @tgorgol @magicmatatjahu @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld @jasiu001 @adamwalach
+/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @tgorgol @magicmatatjahu @antiheld @jasiu001 @adamwalach @kwiatekus @dariadomagala @y-kkamil @parostatkiem @sjanota
 
 # The `messaging` subdirectory
 /resources/examples/lambda-messages/ @pbochynski @PK85
@@ -255,7 +255,7 @@
 /components/console-backend-service/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @sjanota
 
 # IDPPreset Component
-/components/idppreset/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
+/components/idppreset/ @dariadomagala @y-kkamil @akucharska @sjanota
 
 # Connector Service Component
 /components/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree

@@ -1,13 +1,19 @@
+
 # Image URL to use all building/pushing image targets
 APP_NAME ?= cms-controller-manager
 IMG ?= $(APP_NAME):latest
 IMG-CI = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME):$(DOCKER_TAG)
+# Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
+CRD_OPTIONS ?= "crd:trivialVersions=true"
+
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
 
 all: test manager
-
-# Resolve dependencies
-resolve:
-	dep ensure -v -vendor-only
 
 pull-licenses:
 ifdef LICENSE_PULLER_PATH
@@ -16,60 +22,62 @@ else
 	mkdir -p licenses
 endif
 
-setup:
-	go get github.com/vektra/mockery/.../
-
 # Run tests
-# Default is 20s - available since controller-runtime 0.1.5
-test: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
-# Default is 20s - available since controller-runtime 0.1.5
-test: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
 test: generate fmt vet manifests
-	go test ./pkg/... ./cmd/... -coverprofile cover.out
+	go test ./... -coverprofile cover.out
 
 # Build manager binary
 manager: generate fmt vet
-	go build -o bin/manager github.com/kyma-project/kyma/components/cms-controller-manager/cmd/manager
+	go build -o bin/manager main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
-run: generate fmt vet
-	go run ./cmd/manager/main.go
+run: generate fmt vet manifests
+	go run ./main.go
 
 # Install CRDs into a cluster
 install: manifests
-	kubectl apply -f config/crds
+	kustomize build config/crd | kubectl apply -f -
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-deploy: install
+deploy: manifests
+	cd config/manager && kustomize edit set image controller=${IMG}
 	kustomize build config/default | kubectl apply -f -
 
 # Generate manifests e.g. CRD, RBAC etc.
-manifests:
-	go run vendor/sigs.k8s.io/controller-tools/cmd/controller-gen/main.go all
+manifests: controller-gen
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 # Run go fmt against code
 fmt:
-	go fmt ./pkg/... ./cmd/...
+	go fmt ./...
 
 # Run go vet against code
 vet:
-	go vet ./pkg/... ./cmd/...
+	go vet ./...
 
 # Generate code
-generate:
-	go generate ./pkg/... ./cmd/...
+generate: controller-gen
+	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
 # Build the docker image
-docker-build: resolve pull-licenses test
+docker-build: test pull-licenses
 	docker build . -t ${IMG}
-	@echo "updating kustomize image patch file for manager resource"
-	sed -i'' -e 's@image: .*@image: '"${IMG}"'@' ./config/default/manager_image_patch.yaml
 
 # Push the docker image
 docker-push:
 	docker tag $(IMG) $(IMG-CI)
 	docker push $(IMG-CI)
 
-ci-pr: setup docker-build docker-push
-ci-master: setup docker-build docker-push
-ci-release: setup docker-build docker-push
+# find or download controller-gen
+# download controller-gen if necessary
+controller-gen:
+ifeq (, $(shell which controller-gen))
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.0
+CONTROLLER_GEN=$(GOBIN)/controller-gen
+else
+CONTROLLER_GEN=$(shell which controller-gen)
+endif
+
+ci-pr: docker-build docker-push
+ci-master: docker-build docker-push
+ci-release: docker-build docker-push

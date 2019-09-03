@@ -1,4 +1,3 @@
-enabled: false
 replicaCount: 1
 
 # rulesConfigmapNamespace: some-namespace
