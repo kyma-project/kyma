@@ -23,6 +23,11 @@ type apiService struct {
 	extractor extractor.ApiUnstructuredExtractor
 }
 
+var apisTypeMeta = metav1.TypeMeta{
+	Kind:       "Api",
+	APIVersion: "gateway.kyma-project.io/v1alpha2",
+}
+
 func newApiService(informer cache.SharedIndexInformer, client dynamic.NamespaceableResourceInterface) *apiService {
 	notifier := resource.NewNotifier()
 	informer.AddEventHandler(notifier)
@@ -93,10 +98,7 @@ func (svc *apiService) Find(name string, namespace string) (*v1alpha2.Api, error
 }
 
 func (svc *apiService) Create(api *v1alpha2.Api) (*v1alpha2.Api, error) {
-	api.TypeMeta = metav1.TypeMeta{
-		Kind:       "Api",
-		APIVersion: "gateway.kyma-project.io/v1alpha2",
-	}
+	api.TypeMeta = apisTypeMeta
 
 	u, err := svc.extractor.ToUnstructured(api)
 	if err != nil {
@@ -126,15 +128,12 @@ func (svc *apiService) Update(api *v1alpha2.Api) (*v1alpha2.Api, error) {
 
 	if oldApi == nil {
 		return nil, apiErrors.NewNotFound(schema.GroupResource{
-			Group:    "authentication.kyma-project.io/v1alpha2",
-			Resource: "API",
+			Group:    apisGroupVersionResource.Group,
+			Resource: apisGroupVersionResource.Resource,
 		}, api.ObjectMeta.Name)
 	}
 	api.ObjectMeta.ResourceVersion = oldApi.ObjectMeta.ResourceVersion
-	api.TypeMeta = metav1.TypeMeta{
-		Kind:       "Api",
-		APIVersion: "gateway.kyma-project.io/v1alpha2",
-	}
+	api.TypeMeta = apisTypeMeta
 
 	u, err := svc.extractor.ToUnstructured(api)
 	if err != nil {

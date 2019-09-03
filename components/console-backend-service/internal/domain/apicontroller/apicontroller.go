@@ -23,7 +23,11 @@ type PluggableResolver struct {
 	Resolver
 	informerFactory dynamicinformer.DynamicSharedInformerFactory
 }
-
+var apisGroupVersionResource = schema.GroupVersionResource{
+	Version:  v1alpha2.SchemeGroupVersion.Version,
+	Group:    v1alpha2.SchemeGroupVersion.Group,
+	Resource: "apis",
+}
 func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*PluggableResolver, error) {
 	client, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
@@ -44,17 +48,9 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Pluggabl
 
 func (r *PluggableResolver) Enable() error {
 	r.informerFactory = dynamicinformer.NewDynamicSharedInformerFactory(r.cfg.client, r.cfg.informerResyncPeriod)
-	aInformer := r.informerFactory.ForResource(schema.GroupVersionResource{
-		Version:  v1alpha2.SchemeGroupVersion.Version,
-		Group:    v1alpha2.SchemeGroupVersion.Group,
-		Resource: "apis",
-	}).Informer()
+	aInformer := r.informerFactory.ForResource(apisGroupVersionResource).Informer()
 
-	aResourceClient := r.cfg.client.Resource(schema.GroupVersionResource{
-		Version:  v1alpha2.SchemeGroupVersion.Version,
-		Group:    v1alpha2.SchemeGroupVersion.Group,
-		Resource: "applications",
-	})
+	aResourceClient := r.cfg.client.Resource(apisGroupVersionResource)
 
 	apiService := newApiService(aInformer, aResourceClient)
 	apiResolver, err := newApiResolver(apiService)
