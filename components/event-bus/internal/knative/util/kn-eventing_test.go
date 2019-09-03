@@ -10,10 +10,14 @@ import (
 	"testing"
 	"time"
 
+	"knative.dev/pkg/apis/duck/v1alpha1"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	evclientsetfake "github.com/knative/eventing/pkg/client/clientset/versioned/fake"
+
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -31,7 +35,7 @@ const (
 )
 
 var (
-	testChannel = &evapisv1alpha1.Channel{
+	testChannel = &messagingV1Alpha1.Channel{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
 			Kind:       "Channel",
@@ -44,11 +48,13 @@ var (
 				"l2": "v2",
 			},
 		},
-		Status: evapisv1alpha1.ChannelStatus{
-			Conditions: []duckv1alpha1.Condition{
-				{
-					Type:   evapisv1alpha1.ChannelConditionReady,
-					Status: corev1.ConditionTrue,
+		Status: messagingV1Alpha1.ChannelStatus{
+			Status: duckv1beta1.Status{
+				Conditions: duckv1beta1.Conditions{
+					apis.Condition{
+						Type:   apis.ConditionReady,
+						Status: corev1.ConditionTrue,
+					},
 				},
 			},
 		},
@@ -73,7 +79,8 @@ func Test_CreateChannel(t *testing.T) {
 	})
 
 	k := &KnativeLib{
-		evClient: client.EventingV1alpha1(),
+		evClient:        client.EventingV1alpha1(),
+		messagingClient: client.MessagingV1alpha1(),
 	}
 	ch, err := k.CreateChannel(provisioner, channelName, testNS, &labels, 10*time.Second)
 	assert.Nil(t, err)
@@ -97,7 +104,8 @@ func Test_CreateChannelWithError(t *testing.T) {
 	})
 
 	k := &KnativeLib{
-		evClient: client.EventingV1alpha1(),
+		evClient:        client.EventingV1alpha1(),
+		messagingClient: client.MessagingV1alpha1(),
 	}
 	ch, err := k.CreateChannel(provisioner, channelName, testNS, &labels, 10*time.Second)
 	assert.Nil(t, err)
@@ -126,7 +134,8 @@ func Test_CreateChannelTimeout(t *testing.T) {
 	})
 
 	k := &KnativeLib{
-		evClient: client.EventingV1alpha1(),
+		evClient:        client.EventingV1alpha1(),
+		messagingClient: client.MessagingV1alpha1(),
 	}
 	_, err := k.CreateChannel(provisioner, channelName, testNS, &labels, 1*time.Second)
 	assert.NotNil(t, err)
@@ -156,13 +165,20 @@ func Test_SendMessage(t *testing.T) {
 		ret runtime.Object, err error) {
 		return true, testChannel, nil
 	})
-	k := &KnativeLib{}
+	k := &KnativeLib{
+		messagingClient: client.MessagingV1alpha1(),
+	}
 	_ = k.InjectClient(client.EventingV1alpha1())
 	ch, err := k.CreateChannel(provisioner, channelName, testNS, &labels, 10*time.Second)
 	assert.Nil(t, err)
 	u, err := url.Parse(srv.URL)
 	assert.Nil(t, err)
-	ch.Status.SetAddress(u.Hostname() + ":" + u.Port())
+	url := &apis.URL{Scheme: "http", Host: fmt.Sprintf("%s:%s", u.Hostname(), u.Port())}
+	address := &v1alpha1.Addressable{
+		Addressable: duckv1beta1.Addressable{URL: url},
+		Hostname:    "u.Hostname()",
+	}
+	ch.Status.SetAddress(address)
 
 	// send a message to the channel
 	p := "message 1"
@@ -197,7 +213,9 @@ func Test_CreateDeleteChannel(t *testing.T) {
 		ret runtime.Object, err error) {
 		return true, testChannel, nil
 	})
-	k := &KnativeLib{}
+	k := &KnativeLib{
+		messagingClient: client.MessagingV1alpha1(),
+	}
 	_ = k.InjectClient(client.EventingV1alpha1())
 	ch, err := k.CreateChannel(provisioner, channelName, testNS, &labels, 1*time.Second)
 	assert.Nil(t, err)
