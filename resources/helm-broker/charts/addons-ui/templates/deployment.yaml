@@ -19,8 +19,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "eu.gcr.io/kyma-project/pr/add-ons-ui:PR-1164"
-          # image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.addons_ui.dir }}{{ .Values.image.name }}:{{ .Values.global.addons_ui.version }}"
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.addons_ui.dir }}{{ .Values.image.name }}:{{ .Values.global.addons_ui.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
           - nginx
