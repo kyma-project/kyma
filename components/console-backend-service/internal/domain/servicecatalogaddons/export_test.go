@@ -31,19 +31,19 @@ func NewClusterAddonsConfigurationConverter() *clusterAddonsConfigurationConvert
 
 func NewClusterAddonsConfigurationResolver(addonsCfgUpdater clusterAddonsCfgUpdater, addonsCfgMutations clusterAddonsCfgMutations, addonsCfgLister clusterAddonsCfgLister) *clusterAddonsConfigurationResolver {
 	return &clusterAddonsConfigurationResolver{
-		addonsCfgConverter:                clusterAddonsConfigurationConverter{},
-		addonsCfgUpdater:                  addonsCfgUpdater,
-		addonsCfgMutations:                addonsCfgMutations,
-		addonsCfgLister:                   addonsCfgLister,
+		addonsCfgConverter: clusterAddonsConfigurationConverter{},
+		addonsCfgUpdater:   addonsCfgUpdater,
+		addonsCfgMutations: addonsCfgMutations,
+		addonsCfgLister:    addonsCfgLister,
 	}
 }
 
 func NewAddonsConfigurationResolver(addonsCfgUpdater addonsCfgUpdater, addonsCfgMutations addonsCfgMutations, addonsCfgLister addonsCfgLister) *addonsConfigurationResolver {
 	return &addonsConfigurationResolver{
-		addonsCfgConverter:                addonsConfigurationConverter{},
-		addonsCfgUpdater:                  addonsCfgUpdater,
-		addonsCfgMutations:                addonsCfgMutations,
-		addonsCfgLister:                   addonsCfgLister,
+		addonsCfgConverter: addonsConfigurationConverter{},
+		addonsCfgUpdater:   addonsCfgUpdater,
+		addonsCfgMutations: addonsCfgMutations,
+		addonsCfgLister:    addonsCfgLister,
 	}
 }
 
