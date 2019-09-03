@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is the repository for the Kyma Compass Runtime Agent.
+This is the repository for the Compass Runtime Agent.
 
 The main responsibilities of the Compass Runtime Agent are:
 - Establishing a trusted connection between the Runtime and the Compass
@@ -19,6 +19,7 @@ The Compass Runtime Agent requires Go 1.8 or higher.
 This section explains how to use the Compass Runtime Agent.
 
 ### Start the Compass Runtime Agent
+
 To start the Connector Service, run this command:
 
 ```
@@ -35,3 +36,5 @@ The Compass Runtime Agent has the following parameters:
 
 The Compass Runtime Agent also uses the following environment variables:
 - **DIRECTOR_URL**
+- **RUNTIME_ID**
+- **TENANT**
