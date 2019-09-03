@@ -28,37 +28,12 @@ data:
       responseTypes: ["code", "token", "id_token"]
 
     staticClients:
-    - id: {{ .Values.oidc.kymaClient }}
-      name: 'Kyma Client'
-      redirectURIs:
-      - 'http://127.0.0.1:5555/callback'
-      secret: ZXhhbXBsZS1hcHAtc2VjcmV0
-      trustedPeers:
-      - kubecontroller
-      - {{ .Values.oidc.consoleClientId }}
-    - id: {{ .Values.oidc.consoleClientId }}
-      name: {{ .Values.oidc.consoleClientName }}
-      redirectURIs:
-      - 'http://console-dev.{{ .Values.global.ingress.domainName }}:4200'
-      - 'https://console.{{ .Values.global.ingress.domainName }}'
-      secret: ZXhhbXBsZS1hcHAtc2VjcmV0
-    - id: {{ .Values.oidc.grafanaClientId }}
-      name: {{ .Values.oidc.grafanaClientName }}
-      redirectURIs:
-      - 'https://grafana.{{ .Values.global.ingress.domainName }}/login/generic_oauth'
-      secret: apie4eeX6hiC9ainieli
-    - id: {{ .Values.oidc.jaegerClientId }}
-      name: {{ .Values.oidc.jaegerClientName }}
-      redirectURIs:
-      - 'http://jaeger.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
-      - 'https://jaeger.{{ .Values.global.ingress.domainName }}/oauth/callback'
-      secret: oiEWUWOIEwedfgg
-    - id: {{ .Values.oidc.kialiClientId }}
-      name: {{ .Values.oidc.kialiClientName }}
-      redirectURIs:
-      - 'http://kiali.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
-      - 'https://kiali.{{ .Values.global.ingress.domainName }}/oauth/callback'
-      secret: hiFWLWqIxw5d3gl
+    {{- with .Values.oidc.staticClientsBase }}
+    {{- tpl . $ | nindent 4 }}
+    {{- end -}}
+    {{- with .Values.oidc.staticClientsExtra }}
+    {{- tpl . $ | nindent 4 }}
+    {{- end }}
 
     enablePasswordDB: true
     #__STATIC_PASSWORDS__
