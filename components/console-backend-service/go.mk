@@ -12,16 +12,17 @@ WORKSPACE_DIR = $(IMG_GOPATH)/src/$(BASE_PKG)/$(APP_PATH)
 FILES_TO_CHECK = find . -type f -name "*.go" | grep -v "$(VERIFY_IGNORE)"
 DIRS_TO_CHECK = go list ./... | grep -v "$(VERIFY_IGNORE)"
 DIRS_TO_IGNORE = go list ./... | grep "$(VERIFY_IGNORE)"
-INTERACTIVE := $(shell [ -t 0 ] && echo 1)
 
-# Docekr configuration
+# Base docker configuration
 DOCKER_CREATE_OPTS := --rm -w $(WORKSPACE_DIR) $(BUILDPACK)
 
-ifdef GOPATH
+# Check if go is available
+ifeq (,$(shell go --version 2>/dev/null))
 DOCKER_CREATE_OPTS := -v $(shell go env GOCACHE):$(IMG_GOCACHE):delegated -v $(shell go env GOPATH)/pkg/dep:$(IMG_GOPATH)/pkg/dep:delegated $(DOCKER_CREATE_OPTS)
 endif
 
-ifdef INTERACTIVE
+# Check if running with TTY
+ifeq (1, $(shell [ -t 0 ] && echo 1))
 DOCKER_INTERACTIVE := -i
 DOCKER_CREATE_OPTS := -t $(DOCKER_CREATE_OPTS)
 endif
@@ -37,8 +38,6 @@ define buildpack-cp-ro
 	@docker cp $(LOCAL_DIR)/. $(container):$(WORKSPACE_DIR)/
 	@docker start $(DOCKER_INTERACTIVE) $(container)
 endef
-
-
 
 .PHONY: verify format release
 verify: test check-imports check-fmt
@@ -58,6 +57,9 @@ build:
 build-local:
 	env CGO_ENABLED=0 go build -o $(APP_NAME)
 	rm $(APP_NAME)
+
+docker-create-opts:
+	@echo $(DOCKER_CREATE_OPTS)
 
 .PHONY: resolve resolve-local
 resolve:
