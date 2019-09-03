@@ -14,6 +14,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
+	"k8s.io/api/core/v1"
 )
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
@@ -499,6 +500,7 @@ type ComplexityRoot struct {
 	Namespace struct {
 		Name         func(childComplexity int) int
 		Labels       func(childComplexity int) int
+		Status       func(childComplexity int) int
 		Applications func(childComplexity int) int
 	}
 
@@ -6221,6 +6223,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Namespace.Labels(childComplexity), true
+
+	case "Namespace.status":
+		if e.complexity.Namespace.Status == nil {
+			break
+		}
+
+		return e.complexity.Namespace.Status(childComplexity), true
 
 	case "Namespace.applications":
 		if e.complexity.Namespace.Applications == nil {
@@ -19086,6 +19095,11 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 			}
 		case "labels":
 			out.Values[i] = ec._Namespace_labels(ctx, field, obj)
+		case "status":
+			out.Values[i] = ec._Namespace_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "applications":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -19152,6 +19166,33 @@ func (ec *executionContext) _Namespace_labels(ctx context.Context, field graphql
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Namespace_status(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Namespace",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(v1.NamespacePhase)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(string(res))
 }
 
 // nolint: vetshadow
@@ -31951,6 +31992,7 @@ type ExceededQuota {
 type Namespace {
     name: String!
     labels: Labels
+    status: String!
 
     # Depends on application module
     applications: [String!]

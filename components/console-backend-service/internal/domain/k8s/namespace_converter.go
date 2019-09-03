@@ -15,6 +15,7 @@ func (c *namespaceConverter) ToGQL(in *v1.Namespace) (*gqlschema.Namespace, erro
 	return &gqlschema.Namespace{
 		Name:   in.Name,
 		Labels: in.Labels,
+		Status: in.Status.Phase,
 	}, nil
 }
 

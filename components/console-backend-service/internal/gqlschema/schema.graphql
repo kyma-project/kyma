@@ -649,6 +649,7 @@ type ExceededQuota {
 type Namespace {
     name: String!
     labels: Labels
+    status: String!
 
     # Depends on application module
     applications: [String!]
