@@ -23,11 +23,13 @@ type PluggableResolver struct {
 	Resolver
 	informerFactory dynamicinformer.DynamicSharedInformerFactory
 }
+
 var apisGroupVersionResource = schema.GroupVersionResource{
 	Version:  v1alpha2.SchemeGroupVersion.Version,
 	Group:    v1alpha2.SchemeGroupVersion.Group,
 	Resource: "apis",
 }
+
 func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*PluggableResolver, error) {
 	client, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
