@@ -29,8 +29,8 @@ type namespaceSvc interface {
 type gqlNamespaceConverter interface {
 	ToGQLs(in []*v1.Namespace) ([]gqlschema.Namespace, error)
 	ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error)
-	ToGQLsWithPods(in []Tets) ([]gqlschema.Namespace, error)
-	ToGQLWithPods(in Tets) (*gqlschema.Namespace, error)
+	ToGQLsWithPods(in []NamespaceWithAdditionalData) ([]gqlschema.Namespace, error)
+	ToGQLWithPods(in NamespaceWithAdditionalData) (*gqlschema.Namespace, error)
 }
 
 type namespaceResolver struct {
@@ -49,7 +49,7 @@ func newNamespaceResolver(namespaceSvc namespaceSvc, podSvc podSvc, appRetriever
 	}
 }
 
-type Tets struct {
+type NamespaceWithAdditionalData struct {
 	namespace *v1.Namespace
 	pods []*v1.Pod
 }
@@ -58,7 +58,7 @@ type Tets struct {
 func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName *string) ([]gqlschema.Namespace, error) {
 	var err error
 
-	var namespaces []Tets
+	var namespaces []NamespaceWithAdditionalData
 	var rawNamespaces []*v1.Namespace
 	if applicationName == nil {
 		rawNamespaces, err = r.namespaceSvc.List()
@@ -93,7 +93,7 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName
 			First:  nil,
 			Offset: nil,
 		})
-		namespaces = append(namespaces, Tets{
+		namespaces = append(namespaces, NamespaceWithAdditionalData{
 			namespace: ns,
 			pods: pods,
 		})

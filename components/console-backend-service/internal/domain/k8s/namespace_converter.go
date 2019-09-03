@@ -34,7 +34,7 @@ func (c *namespaceConverter) ToGQLs(in []*v1.Namespace) ([]gqlschema.Namespace, 
 	return result, nil
 }
 
-func (c *namespaceConverter) ToGQLWithPods(in Tets) (*gqlschema.Namespace, error) {
+func (c *namespaceConverter) ToGQLWithPods(in NamespaceWithAdditionalData) (*gqlschema.Namespace, error) {
 	podC := podConverter{}
 	pods, _ := podC.ToGQLs(in.pods)
 
@@ -46,7 +46,7 @@ func (c *namespaceConverter) ToGQLWithPods(in Tets) (*gqlschema.Namespace, error
 	}, nil
 }
 
-func (c *namespaceConverter) ToGQLsWithPods(in []Tets) ([]gqlschema.Namespace, error) {
+func (c *namespaceConverter) ToGQLsWithPods(in []NamespaceWithAdditionalData) ([]gqlschema.Namespace, error) {
 	var result []gqlschema.Namespace
 	for _, u := range in {
 		converted, err := c.ToGQLWithPods(u)
