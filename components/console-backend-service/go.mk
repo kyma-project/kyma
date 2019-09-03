@@ -13,16 +13,24 @@ DIRS_TO_IGNORE = go list ./... | grep "$(VERIFY_IGNORE)"
 
 .PHONY: release resolve build build-image push-image pull-licenses
 
-DOCKER_CREATE_OPTS = --rm -t -w $(WORKSPACE_DIR) -v $(shell go env GOCACHE):$(IMG_GOCACHE):delegated -v $(shell go env GOPATH)/pkg/dep:$(IMG_GOPATH)/pkg/dep:delegated $(BUILDPACK)
+ifeq (, $(shell which go))
+	CI=true
+endif
+
+DOCKER_CREATE_OPTS := --rm -w $(WORKSPACE_DIR) $(BUILDPACK)
+ifndef CI
+	DOCKER_CREATE_OPTS := -v $(shell go env GOCACHE):$(IMG_GOCACHE):delegated -v $(shell go env GOPATH)/pkg/dep:$(IMG_GOPATH)/pkg/dep:delegated -t $(DOCKER_CREATE_OPTS)
+	DOCKER_INTERACTIVE := -i
+endif
 
 define buildpack-mount
-	@docker run -i -v $(LOCAL_DIR):$(WORKSPACE_DIR):delegated $(DOCKER_CREATE_OPTS) make $(1)-local
+	@docker run $(DOCKER_INTERACTIVE) -v $(LOCAL_DIR):$(WORKSPACE_DIR):delegated $(DOCKER_CREATE_OPTS) make $(1)-local
 endef
 
 define buildpack-cp-ro
-	$(eval container = $(shell docker create  $(DOCKER_CREATE_OPTS) make $(1)-local))
+	$(eval container = $(shell docker create $(DOCKER_CREATE_OPTS) make $(1)-local))
 	@docker cp $(LOCAL_DIR)/. $(container):$(WORKSPACE_DIR)/
-	@docker start -i $(container)
+	@docker start $(DOCKER_INTERACTIVE) $(container)
 endef
 
 verify: test imports fmt
