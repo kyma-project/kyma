@@ -2,9 +2,10 @@ package apicontroller
 
 import (
 	"context"
+	"time"
+
 	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"time"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/disabled"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -55,10 +56,7 @@ func (r *PluggableResolver) Enable() error {
 		Resource: "applications",
 	})
 
-	apiService, err := newApiService(aInformer, aResourceClient)
-	if err != nil {
-		return err
-	}
+	apiService := newApiService(aInformer, aResourceClient)
 	apiResolver, err := newApiResolver(apiService)
 	if err != nil {
 		return err

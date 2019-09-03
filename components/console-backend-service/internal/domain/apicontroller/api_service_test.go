@@ -1,12 +1,13 @@
 package apicontroller
 
 import (
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
-	"testing"
-	"time"
 
 	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/listener"
@@ -170,7 +171,7 @@ func TestApiService_Create(t *testing.T) {
 		dynamicClient, err := newDynamicClient()
 		require.NoError(t, err)
 		informer := createApiFakeInformer(dynamicClient)
-		client:= createApiDynamicClient(dynamicClient)
+		client := createApiDynamicClient(dynamicClient)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
@@ -186,7 +187,7 @@ func TestApiService_Create(t *testing.T) {
 		dynamicClient, err := newDynamicClient(existingApi)
 		require.NoError(t, err)
 		informer := createApiFakeInformer(dynamicClient)
-		client:= createApiDynamicClient(dynamicClient)
+		client := createApiDynamicClient(dynamicClient)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
@@ -214,7 +215,7 @@ func TestApiService_Update(t *testing.T) {
 		dynamicClient, err := newDynamicClient(existingApi)
 		require.NoError(t, err)
 		informer := createApiFakeInformer(dynamicClient)
-		client:= createApiDynamicClient(dynamicClient)
+		client := createApiDynamicClient(dynamicClient)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
@@ -230,7 +231,7 @@ func TestApiService_Update(t *testing.T) {
 		dynamicClient, err := newDynamicClient()
 		require.NoError(t, err)
 		informer := createApiFakeInformer(dynamicClient)
-		client:= createApiDynamicClient(dynamicClient)
+		client := createApiDynamicClient(dynamicClient)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
@@ -249,7 +250,7 @@ func TestApiService_Subscribe(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		apiListener := listener.NewApi(nil, nil, nil)
+		apiListener := listener.NewApi(nil, nil, nil, nil)
 		service.Subscribe(apiListener)
 	})
 
@@ -259,7 +260,7 @@ func TestApiService_Subscribe(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		apiListener := listener.NewApi(nil, nil, nil)
+		apiListener := listener.NewApi(nil, nil, nil, nil)
 		service.Subscribe(apiListener)
 		service.Subscribe(apiListener)
 	})
@@ -270,8 +271,8 @@ func TestApiService_Subscribe(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		apiListener1 := listener.NewApi(nil, nil, nil)
-		apiListener2 := listener.NewApi(nil, nil, nil)
+		apiListener1 := listener.NewApi(nil, nil, nil, nil)
+		apiListener2 := listener.NewApi(nil, nil, nil, nil)
 
 		service.Subscribe(apiListener1)
 		service.Subscribe(apiListener2)
@@ -294,7 +295,7 @@ func TestApiService_Unubscribe(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		apiListener := listener.NewApi(nil, nil, nil)
+		apiListener := listener.NewApi(nil, nil, nil, nil)
 		service.Subscribe(apiListener)
 
 		service.Unsubscribe(apiListener)
@@ -306,7 +307,7 @@ func TestApiService_Unubscribe(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		apiListener := listener.NewApi(nil, nil, nil)
+		apiListener := listener.NewApi(nil, nil, nil, nil)
 		service.Subscribe(apiListener)
 		service.Subscribe(apiListener)
 
@@ -319,8 +320,8 @@ func TestApiService_Unubscribe(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		apiListener1 := listener.NewApi(nil, nil, nil)
-		apiListener2 := listener.NewApi(nil, nil, nil)
+		apiListener1 := listener.NewApi(nil, nil, nil, nil)
+		apiListener2 := listener.NewApi(nil, nil, nil, nil)
 
 		service.Subscribe(apiListener1)
 		service.Subscribe(apiListener2)
@@ -342,8 +343,8 @@ func fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer string, 
 
 	api := v1alpha2.Api{
 		TypeMeta: v1.TypeMeta{
-			APIVersion: "authentication.kyma-project.io/v1alpha2",
-			Kind:       "API",
+			APIVersion: "gateway.kyma-project.io/v1alpha2",
+			Kind:       "Api",
 		},
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,

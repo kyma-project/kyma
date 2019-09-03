@@ -2,6 +2,7 @@ package apicontroller
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/extractor"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
@@ -83,9 +84,9 @@ func (svc *apiService) Find(name string, namespace string) (*v1alpha2.Api, error
 		return nil, nil
 	}
 
-	res, ok := item.(*v1alpha2.Api)
-	if !ok {
-		return nil, fmt.Errorf("incorrect item type: %T, should be: *v1alpha2.Api", res)
+	res, err := svc.extractor.Do(item)
+	if err != nil {
+		return &v1alpha2.Api{}, err
 	}
 
 	return res, nil
