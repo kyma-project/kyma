@@ -22,7 +22,7 @@ spec:
     spec:
       serviceAccountName: dex-account
       securityContext:
-        runAsUSer: 2000
+        runAsUser: 2000
       containers:
       - image: {{ .Values.imageRegistry }}/dex:{{ .Chart.AppVersion }}
         name: dex
