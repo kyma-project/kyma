@@ -21,6 +21,7 @@ endif
 
 # Run tests
 test: generate fmt vet symlinks
+	cat /etc/hosts
 	go test -race -v ./pkg/... ./cmd/... -coverprofile cover.out
 
 symlinks:
