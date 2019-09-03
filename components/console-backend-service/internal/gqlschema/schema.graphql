@@ -650,6 +650,7 @@ type Namespace {
     name: String!
     labels: Labels
     status: String!
+    pods: [Pod!]!
 
     # Depends on application module
     applications: [String!]

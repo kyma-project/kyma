@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 
 	"github.com/golang/glog"
 	appPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
@@ -28,29 +29,39 @@ type namespaceSvc interface {
 type gqlNamespaceConverter interface {
 	ToGQLs(in []*v1.Namespace) ([]gqlschema.Namespace, error)
 	ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error)
+	ToGQLsWithPods(in []Tets) ([]gqlschema.Namespace, error)
+	ToGQLWithPods(in Tets) (*gqlschema.Namespace, error)
 }
 
 type namespaceResolver struct {
 	namespaceSvc       namespaceSvc
+	podSvc	podSvc
 	appRetriever       shared.ApplicationRetriever
 	namespaceConverter gqlNamespaceConverter
 }
 
-func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever) *namespaceResolver {
+func newNamespaceResolver(namespaceSvc namespaceSvc, podSvc podSvc, appRetriever shared.ApplicationRetriever) *namespaceResolver {
 	return &namespaceResolver{
 		namespaceSvc:       namespaceSvc,
+		podSvc: podSvc,
 		appRetriever:       appRetriever,
 		namespaceConverter: &namespaceConverter{},
 	}
+}
+
+type Tets struct {
+	namespace *v1.Namespace
+	pods []*v1.Pod
 }
 
 // TODO: Split this query into two
 func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName *string) ([]gqlschema.Namespace, error) {
 	var err error
 
-	var namespaces []*v1.Namespace
+	var namespaces []Tets
+	var rawNamespaces []*v1.Namespace
 	if applicationName == nil {
-		namespaces, err = r.namespaceSvc.List()
+		rawNamespaces, err = r.namespaceSvc.List()
 	} else {
 
 		// TODO: Investigate if we still need the query for namespaces bound to an application
@@ -59,13 +70,14 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName
 
 		//TODO: Refactor 'ListNamespacesFor' to return []v1.Namespace and remove this workaround
 		for _, nsName := range namespaceNames {
-			namespaces = append(namespaces, &v1.Namespace{
+			rawNamespaces = append(rawNamespaces, &v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: nsName,
 				},
 			})
 		}
 	}
+
 
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
@@ -75,7 +87,19 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName
 		glog.Error(errors.Wrapf(err, "while listing %s", pretty.Namespaces))
 		return nil, gqlerror.New(err, pretty.Namespaces)
 	}
-	converted, err := r.namespaceConverter.ToGQLs(namespaces)
+
+	for _, ns := range rawNamespaces {
+		pods, _ := r.podSvc.List(ns.Name, pager.PagingParams{
+			First:  nil,
+			Offset: nil,
+		})
+		namespaces = append(namespaces, Tets{
+			namespace: ns,
+			pods: pods,
+		})
+	}
+
+	converted, err := r.namespaceConverter.ToGQLsWithPods(namespaces)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespaces))
 		return nil, gqlerror.New(err, pretty.Namespaces)

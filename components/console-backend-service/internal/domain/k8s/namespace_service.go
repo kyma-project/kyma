@@ -17,14 +17,14 @@ import (
 
 type namespaceService struct {
 	namespacesInformer cache.SharedIndexInformer
-	podsInformer podService
+	podsSvc podService
 	client   corev1.CoreV1Interface
 }
 
-func newNamespaceService(namespacesInformer cache.SharedIndexInformer, podsInformer podService, client corev1.CoreV1Interface) (*namespaceService, error) {
+func newNamespaceService(namespacesInformer cache.SharedIndexInformer, podsSvc podService, client corev1.CoreV1Interface) (*namespaceService, error) {
 	return &namespaceService{
 		namespacesInformer: namespacesInformer,
-		podsInformer: podsInformer,
+		podsSvc: podsSvc,
 		client:   client,
 	}, nil
 }
@@ -43,6 +43,21 @@ func (svc *namespaceService) List() ([]*v1.Namespace, error) { //r error
 
 	return namespaces, nil
 }
+
+//func (podsSvc *podService) ListPods(name string) ([]*v1.Pod, error) {
+//	items := podsSvc.informer.GetStore().List();
+//
+//	var pods []*v1.Pod
+//	for _, item := range items {
+//		pod, ok := item.(*v1.Pod)
+//		if !ok {
+//			return nil, fmt.Errorf("Incorrect item type: %T, should be: *Pod", item)
+//		}
+//		pods = append(pods, pod)
+//	}
+//
+//	return pods, nil
+//}
 
 func (svc *namespaceService) Find(name string) (*v1.Namespace, error) {
 	item, exists, err := svc.namespacesInformer.GetStore().GetByKey(name)

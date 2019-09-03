@@ -7,4 +7,5 @@ type Namespace struct {
 	Applications []string `json:"applications"`
 	Labels       Labels   `json:"labels"`
 	Status       v1.NamespacePhase
+	Pods         []Pod    `json:"pods"`
 }
