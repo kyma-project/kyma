@@ -307,7 +307,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:982a1affd67dd11dcd7572f4b13d1b342c2df99dcf7eb3154353df414a4721b5"
+  digest = "1:6075ac9e6f2a43f9d7f6a6c46b68f7714c7aec6f091d3c0d7b5e00e8158839ce"
   name = "github.com/kyma-project/helm-broker"
   packages = [
     "pkg/apis/addons/v1alpha1",
@@ -323,7 +323,7 @@
     "pkg/client/listers/addons/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "082e2dc0ad35dd911872f7dc35fa1401d8fe5887"
+  revision = "d8adcb6e8d02a6d847e16b0f75ee914bc71da257"
 
 [[projects]]
   digest = "1:6874a3b35a4cfa1b0f286400791eed74d43f153b6eecd3eeb06cab6cc7088540"
