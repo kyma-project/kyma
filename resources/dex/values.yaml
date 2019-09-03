@@ -44,6 +44,20 @@ oidc:
 #   - 'https://console.{{ .Values.global.ingress.domainName }}'
 #   secret: ZXhhbXBsZS1hcHAtc2VjcmV0
 
+connectors: |-
+#  - type: saml
+#    id: sci
+#    name: SAP CI
+#    config:
+#      # Issuer for SAML Request
+#      entityIssuer: dex.{{ .Values.global.domainName }}
+#      ssoURL: https://{{ .Values.idp.tenant | default "ycloudtest" }}.{{ .Values.idp.domain | default "accounts400.ondemand.com" }}/saml2/idp/sso?sp=dex.{{ .Values.global.domainName }}
+#      ca: {{ .Values.idp.caPath}}/ca.pem
+#      redirectURI: https://dex.{{ .Values.global.domainName }}/callback
+#      usernameAttr: mail
+#      emailAttr: mail
+#      groupsAttr: groups
+
 dex:
   expiry:
     signingKeys: "720h"

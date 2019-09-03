@@ -22,6 +22,10 @@ data:
       format: "text"
     web:
       http: 0.0.0.0:{{ .Values.containerPort }}
+  {{- with .Values.connectors }}
+    connectors:
+    {{- tpl . $ | nindent 4 }}
+  {{- end }}
 
     oauth2:
       skipApprovalScreen: true
