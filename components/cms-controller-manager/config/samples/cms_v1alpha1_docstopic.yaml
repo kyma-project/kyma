@@ -1,8 +1,6 @@
 apiVersion: cms.kyma-project.io/v1alpha1
 kind: DocsTopic
 metadata:
-  labels:
-    controller-tools.k8s.io: "1.0"
   name: docstopic-sample
 spec:
   displayName: "Docs Topic Sample"

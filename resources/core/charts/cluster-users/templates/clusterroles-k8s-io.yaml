@@ -1,6 +1,6 @@
 ---
 # Admin access to native k8s resources
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-admin-base
@@ -24,7 +24,7 @@ rules:
 {{ toYaml .Values.clusterRoles.verbs.edit | indent 4 }}
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-authorization-self
@@ -44,7 +44,7 @@ rules:
     - "create"
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-authorization-subject
@@ -64,7 +64,7 @@ rules:
 
 ---
 #CRD management
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-crd-edit
@@ -84,7 +84,7 @@ rules:
 
 ---
 #CRD view
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-crd-view
@@ -100,7 +100,7 @@ rules:
 
 ---
 #View access to K8s resources
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-k8s-view

@@ -1,31 +1,9 @@
 ---
 title: Overview
 ---
+The term "serverless" refers to the Internet-based architecture. Application development that uses serverless technology relies solely on a combination of cloud-based, third-party services, client-side logic, and service-hosted remote procedure calls, also known as Functions as a Service (FaaS). Developers create this combination using [lambda functions](/components/serverless#details-managing-lambdas) which connect third-party services and Kyma,replacing the common use of a server.
 
-Lambdas or lambda functions are small functions that run in Kyma in a cost-efficient and scalable way using JavaScript in Node.js. As the following diagram shows, these functions enable the linking of a wide range of functionalities using Kyma.
+Using the serverless approach reduces the implementation and operation effort to the absolute minimum.
 
-![Kyma connected to other products through lambda functions](./assets/kyma_connected.png)
+The serverless implementation of Kyma is based on [Kubeless](https://github.com/kubeless/kubeless).
 
-
-This is an example lambda function:
-
-```
-def myfunction (event, context):
-  print event
-  return event['data']
-
-```
-
-The use of lambdas in Kyma addresses several scenarios:  
-
- * Create and manage lambda functions
- * Trigger functions based on business Events
- * Expose functions through HTTP
- * Consume services
- * Provide customers with customized features
- * Version lambda functions
- * Chain multiple functions
-
-Lambda functions best serve integration purposes due to their ease of use. Lambda is a quick and ideal solution when the goal is to combine functionalities which are tightly coupled. And, in the context of Kyma, they provide integration with the Event system and Customer Engagement and Commerce tools. Lambda functions are not well-suited to building an application from scratch.
-
-The Serverless implementation of Kyma is based on [Kubeless](https://github.com/kubeless/kubeless).

@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	installationConfig "github.com/kyma-project/kyma/components/kyma-operator/pkg/config"
 	internalerrors "github.com/kyma-project/kyma/components/kyma-operator/pkg/errors"
 	serviceCatalog "github.com/kyma-project/kyma/components/kyma-operator/pkg/servicecatalog"
@@ -113,7 +113,7 @@ func (d deprovisioner) deleteBindings(bindings []v1beta1.ServiceBinding) error {
 	deletedBindings := []v1beta1.ServiceBinding{}
 
 	for _, binding := range bindings {
-		log.Printf("----> Deleting Service Binding: [%s/%s], Service Instance: %s\n", binding.Namespace, binding.Name, binding.Spec.ServiceInstanceRef.Name)
+		log.Printf("----> Deleting Service Binding: [%s/%s], Service Instance: %s\n", binding.Namespace, binding.Name, binding.Spec.InstanceRef.Name)
 		err := d.serviceCatalog.DeleteBinding(binding.Namespace, binding.Name)
 		if !d.errorHandlers.CheckError("----> An error occurred during deleting Service Binding: ", err) {
 			deletedBindings = append(deletedBindings, binding)
@@ -279,8 +279,8 @@ func filterAzureBrokerBindings(azureBrokerInstances []v1beta1.ServiceInstance, b
 
 	isAzureBrokerBinding := func(binding v1beta1.ServiceBinding) bool {
 		for _, instance := range azureBrokerInstances {
-			//ServiceInstanceRef is LocalObjectReference (same namespace)
-			if instance.Name == binding.Spec.ServiceInstanceRef.Name {
+			//InstanceRef is LocalObjectReference (same namespace)
+			if instance.Name == binding.Spec.InstanceRef.Name {
 				return true
 			}
 		}

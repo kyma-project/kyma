@@ -5,7 +5,7 @@ package v1alpha1
 import (
 	time "time"
 
-	authentication_v1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1"
+	authenticationv1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1"
 	versioned "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/kyma-project/kyma/components/idppreset/pkg/client/informers/externalversions/internalinterfaces"
 	v1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/client/listers/authentication/v1alpha1"
@@ -53,7 +53,7 @@ func NewFilteredIDPPresetInformer(client versioned.Interface, resyncPeriod time.
 				return client.AuthenticationV1alpha1().IDPPresets().Watch(options)
 			},
 		},
-		&authentication_v1alpha1.IDPPreset{},
+		&authenticationv1alpha1.IDPPreset{},
 		resyncPeriod,
 		indexers,
 	)
@@ -64,7 +64,7 @@ func (f *iDPPresetInformer) defaultInformer(client versioned.Interface, resyncPe
 }
 
 func (f *iDPPresetInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&authentication_v1alpha1.IDPPreset{}, f.defaultInformer)
+	return f.factory.InformerFor(&authenticationv1alpha1.IDPPreset{}, f.defaultInformer)
 }
 
 func (f *iDPPresetInformer) Lister() v1alpha1.IDPPresetLister {
