@@ -14,7 +14,7 @@ DIRS_TO_IGNORE = go list ./... | grep "$(VERIFY_IGNORE)"
 .PHONY: release resolve build build-image push-image pull-licenses
 
 DOCKER_CREATE_OPTS := --rm -w $(WORKSPACE_DIR) $(BUILDPACK)
-ifndef GOPATHg s
+ifndef GOPATH
 DOCKER_CREATE_OPTS := -v $(shell go env GOCACHE):$(IMG_GOCACHE):delegated -v $(shell go env GOPATH)/pkg/dep:$(IMG_GOPATH)/pkg/dep:delegated -t $(DOCKER_CREATE_OPTS)
 DOCKER_INTERACTIVE := -i
 endif
