@@ -3,5 +3,7 @@ approvers:
  - clebs
  - suleymanakbas91
  - igor-karpukhin
+ - lilitgh
+ - a-thaler
 labels:
  - area/monitoring
