@@ -1,6 +1,6 @@
 APP_NAME = console-backend-service
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = buildpack
+BUILDPACK = sjanota/go-buildpack:1.11
 
 include go.mk
 
