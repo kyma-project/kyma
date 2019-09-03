@@ -16,7 +16,7 @@ The Compass Runtime Agent requires Go 1.8 or higher.
 
 ## Usage
 
-To start the Connector Service, run this command:
+To start the Compass Runtime Agent, run this command:
 
 ```
 ./compass-runtime-agent
