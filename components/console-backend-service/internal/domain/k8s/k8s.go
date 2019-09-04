@@ -33,7 +33,7 @@ type Resolver struct {
 	informerFactory informers.SharedInformerFactory
 }
 
-func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicationRetriever shared.ApplicationRetriever, scRetriever shared.ServiceCatalogRetriever, scaRetriever shared.ServiceCatalogAddonsRetriever) (*Resolver, error) {
+func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicationRetriever shared.ApplicationRetriever, scRetriever shared.ServiceCatalogRetriever, scaRetriever shared.ServiceCatalogAddonsRetriever, systemNamespaces []string) (*Resolver, error) {
 	client, err := v1.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating K8S Client")
@@ -70,7 +70,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 
 	return &Resolver{
 		resourceResolver:            newResourceResolver(resourceService),
-		namespaceResolver:           newNamespaceResolver(namespaceSvc, podService, applicationRetriever),
+		namespaceResolver:           newNamespaceResolver(namespaceSvc, podService, applicationRetriever, systemNamespaces),
 		secretResolver:              newSecretResolver(*secretService),
 		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
 		podResolver:                 newPodResolver(podService),

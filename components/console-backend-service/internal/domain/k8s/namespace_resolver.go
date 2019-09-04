@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"context"
+	"fmt"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 
 	"github.com/golang/glog"
@@ -35,16 +36,18 @@ type gqlNamespaceConverter interface {
 
 type namespaceResolver struct {
 	namespaceSvc       namespaceSvc
-	podSvc	podSvc
+	podSvc	           podSvc
 	appRetriever       shared.ApplicationRetriever
 	namespaceConverter gqlNamespaceConverter
+	systemNamespaces   []string
 }
 
-func newNamespaceResolver(namespaceSvc namespaceSvc, podSvc podSvc, appRetriever shared.ApplicationRetriever) *namespaceResolver {
+func newNamespaceResolver(namespaceSvc namespaceSvc, podSvc podSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string) *namespaceResolver {
 	return &namespaceResolver{
 		namespaceSvc:       namespaceSvc,
-		podSvc: podSvc,
+		podSvc:             podSvc,
 		appRetriever:       appRetriever,
+		systemNamespaces:   systemNamespaces,
 		namespaceConverter: &namespaceConverter{},
 	}
 }
@@ -87,6 +90,8 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName
 		glog.Error(errors.Wrapf(err, "while listing %s", pretty.Namespaces))
 		return nil, gqlerror.New(err, pretty.Namespaces)
 	}
+
+	fmt.Println(r.systemNamespaces)
 
 	for _, ns := range rawNamespaces {
 		pods, _ := r.podSvc.List(ns.Name, pager.PagingParams{

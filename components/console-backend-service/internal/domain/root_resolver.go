@@ -38,7 +38,7 @@ type RootResolver struct {
 	authentication *authentication.PluggableResolver
 }
 
-func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles) (*RootResolver, error) {
+func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
 	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
 	makePluggable := module.MakePluggableFunc(uiContainer.BackendModuleInformer)
 
@@ -72,7 +72,7 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 	}
 	makePluggable(appContainer)
 
-	k8sResolver, err := k8s.New(restConfig, informerResyncPeriod, appContainer.ApplicationRetriever, scContainer.ServiceCatalogRetriever, scaContainer.ServiceCatalogAddonsRetriever)
+	k8sResolver, err := k8s.New(restConfig, informerResyncPeriod, appContainer.ApplicationRetriever, scContainer.ServiceCatalogRetriever, scaContainer.ServiceCatalogAddonsRetriever, systemNamespaces)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
