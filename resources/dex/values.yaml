@@ -3,7 +3,6 @@ imageRegistry: "quay.io/coreos"
 containerPort: 5556
 
 oidc:
-  test: "{{ .Values.global.ingress.domainName }}"
   staticClientsBase: |-
     - id: kyma-client
       name: 'Kyma Client'
@@ -36,9 +35,13 @@ oidc:
       - 'http://kiali.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
       - 'https://kiali.{{ .Values.global.ingress.domainName }}/oauth/callback'
       secret: hiFWLWqIxw5d3gl
-  staticClientsExtra:
+  staticClientsExtra: |-
 
-connectors:
+connectors: |-
+
+volumeMountsExtra: |-
+
+volumesExtra: |-
 
 dex:
   expiry:
@@ -64,5 +67,3 @@ global:
   dex_integration_tests:
     dir: pr/
     version: PR-5433
-  ingress:
-    domainName: kyma.local.dupa.blada
