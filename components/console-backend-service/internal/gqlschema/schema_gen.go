@@ -498,11 +498,12 @@ type ComplexityRoot struct {
 	}
 
 	Namespace struct {
-		Name         func(childComplexity int) int
-		Labels       func(childComplexity int) int
-		Status       func(childComplexity int) int
-		Pods         func(childComplexity int) int
-		Applications func(childComplexity int) int
+		Name              func(childComplexity int) int
+		Labels            func(childComplexity int) int
+		Status            func(childComplexity int) int
+		IsSystemNamespace func(childComplexity int) int
+		Pods              func(childComplexity int) int
+		Applications      func(childComplexity int) int
 	}
 
 	NamespaceMutationOutput struct {
@@ -6231,6 +6232,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Namespace.Status(childComplexity), true
+
+	case "Namespace.isSystemNamespace":
+		if e.complexity.Namespace.IsSystemNamespace == nil {
+			break
+		}
+
+		return e.complexity.Namespace.IsSystemNamespace(childComplexity), true
 
 	case "Namespace.pods":
 		if e.complexity.Namespace.Pods == nil {
@@ -19108,6 +19116,11 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "isSystemNamespace":
+			out.Values[i] = ec._Namespace_isSystemNamespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "pods":
 			out.Values[i] = ec._Namespace_pods(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -19206,6 +19219,33 @@ func (ec *executionContext) _Namespace_status(ctx context.Context, field graphql
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(string(res))
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Namespace_isSystemNamespace(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Namespace",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsSystemNamespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalBoolean(res)
 }
 
 // nolint: vetshadow
@@ -32066,6 +32106,7 @@ type Namespace {
     name: String!
     labels: Labels
     status: String!
+    isSystemNamespace: Boolean!
     pods: [Pod!]!
 
     # Depends on application module

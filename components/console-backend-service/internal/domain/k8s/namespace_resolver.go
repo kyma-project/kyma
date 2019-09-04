@@ -2,7 +2,6 @@ package k8s
 
 import (
 	"context"
-	"fmt"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 
 	"github.com/golang/glog"
@@ -54,6 +53,7 @@ func newNamespaceResolver(namespaceSvc namespaceSvc, podSvc podSvc, appRetriever
 
 type NamespaceWithAdditionalData struct {
 	namespace *v1.Namespace
+	isSystemNamespace bool
 	pods []*v1.Pod
 }
 
@@ -91,15 +91,20 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName
 		return nil, gqlerror.New(err, pretty.Namespaces)
 	}
 
-	fmt.Println(r.systemNamespaces)
-
 	for _, ns := range rawNamespaces {
-		pods, _ := r.podSvc.List(ns.Name, pager.PagingParams{
+		pods, err := r.podSvc.List(ns.Name, pager.PagingParams{
 			First:  nil,
 			Offset: nil,
 		})
+		if err != nil {
+			glog.Error(errors.Wrapf(err, "while getting the list of pods for %s %s", ns.Name, pretty.Namespace))
+		}
+
+		isSystem := isSystem(*ns, r.systemNamespaces)
+
 		namespaces = append(namespaces, NamespaceWithAdditionalData{
 			namespace: ns,
+			isSystemNamespace: isSystem,
 			pods: pods,
 		})
 	}
@@ -142,7 +147,23 @@ func (r *namespaceResolver) NamespaceQuery(ctx context.Context, name string) (*g
 		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
 	}
 
-	converted, err := r.namespaceConverter.ToGQL(namespace)
+	pods, err := r.podSvc.List(namespace.Name, pager.PagingParams{
+		First:  nil,
+		Offset: nil,
+	})
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while getting the list of pods for %s %s", namespace.Name, pretty.Namespace))
+	}
+
+	isSystem := isSystem(*namespace, r.systemNamespaces)
+
+	ns := NamespaceWithAdditionalData{
+		namespace: namespace,
+		isSystemNamespace: isSystem,
+		pods: pods,
+	}
+
+	converted, err := r.namespaceConverter.ToGQLWithPods(ns)
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespace))
@@ -209,4 +230,13 @@ func (r *namespaceResolver) populateLabels(givenLabels *gqlschema.Labels) map[st
 		}
 	}
 	return labels
+}
+
+func isSystem(namespace v1.Namespace, sysNamespaces []string) bool {
+	for _, sysNs := range sysNamespaces {
+		if sysNs == namespace.Name {
+			return true
+		}
+	}
+	return false
 }

@@ -42,6 +42,7 @@ func (c *namespaceConverter) ToGQLWithPods(in NamespaceWithAdditionalData) (*gql
 		Name:   in.namespace.Name,
 		Labels: in.namespace.Labels,
 		Status: in.namespace.Status.Phase,
+		IsSystemNamespace: in.isSystemNamespace,
 		Pods: pods,
 	}, nil
 }
