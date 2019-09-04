@@ -20,8 +20,11 @@ else
 endif
 
 # Run tests
+# Default is 20s - available since controller-runtime 0.1.5
+test: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
+# Default is 20s - available since controller-runtime 0.1.5
+test: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
 test: generate fmt vet symlinks
-	cat /etc/hosts
 	go test -race -v ./pkg/... ./cmd/... -coverprofile cover.out
 
 symlinks:
