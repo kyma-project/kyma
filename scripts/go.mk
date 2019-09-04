@@ -7,14 +7,16 @@ IMG_GOCACHE := /root/.cache/go-build
 VERIFY_IGNORE := /vendor\|/automock
 
 # Other variables
-LOCAL_DIR = $(shell pwd)
-WORKSPACE_DIR = $(IMG_GOPATH)/src/$(BASE_PKG)/$(APP_PATH)
+LOCAL_DIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+COMPONENT_DIR = $(shell pwd)
+WORKSPACE_LOCAL_DIR = $(IMG_GOPATH)/src/$(BASE_PKG)/scripts
+WORKSPACE_COMPONENT_DIR = $(IMG_GOPATH)/src/$(BASE_PKG)/$(APP_PATH)
 FILES_TO_CHECK = find . -type f -name "*.go" | grep -v "$(VERIFY_IGNORE)"
 DIRS_TO_CHECK = go list ./... | grep -v "$(VERIFY_IGNORE)"
 DIRS_TO_IGNORE = go list ./... | grep "$(VERIFY_IGNORE)"
 
 # Base docker configuration
-DOCKER_CREATE_OPTS := --rm -w $(WORKSPACE_DIR) $(BUILDPACK)
+DOCKER_CREATE_OPTS := -v $(LOCAL_DIR):$(WORKSPACE_LOCAL_DIR):delegated --rm -w $(WORKSPACE_COMPONENT_DIR) $(BUILDPACK)
 
 # Check if go is available
 ifeq (,$(shell go --version 2>/dev/null))
@@ -32,7 +34,9 @@ define buildpack-mount
 .PHONY: $(1)-local $(1)
 $(1):
 	@echo make $(1)
-	@docker run $(DOCKER_INTERACTIVE) -v $(LOCAL_DIR):$(WORKSPACE_DIR):delegated $(DOCKER_CREATE_OPTS) make $(1)-local
+	@docker run $(DOCKER_INTERACTIVE) \
+		-v $(COMPONENT_DIR):$(WORKSPACE_COMPONENT_DIR):delegated \
+		$(DOCKER_CREATE_OPTS) make $(1)-local
 endef
 
 define buildpack-cp-ro
@@ -40,7 +44,7 @@ define buildpack-cp-ro
 $(1):
 	@echo make $(1)
 	$(eval container = $(shell docker create $(DOCKER_CREATE_OPTS) make $(1)-local))
-	@docker cp $(LOCAL_DIR)/. $(container):$(WORKSPACE_DIR)/
+	@docker cp $(COMPONENT_DIR)/. $(container):$(WORKSPACE_COMPONENT_DIR)/
 	@docker start $(DOCKER_INTERACTIVE) $(container)
 endef
 
