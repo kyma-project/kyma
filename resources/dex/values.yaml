@@ -36,27 +36,9 @@ oidc:
       - 'http://kiali.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
       - 'https://kiali.{{ .Values.global.ingress.domainName }}/oauth/callback'
       secret: hiFWLWqIxw5d3gl
-  staticClientsExtra: |-
-# - id: console2
-#   name: Console2
-#   redirectURIs:
-#   - 'http://console-dev.{{ .Values.global.ingress.domainName }}:4200'
-#   - 'https://console.{{ .Values.global.ingress.domainName }}'
-#   secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+  staticClientsExtra:
 
-connectors: |-
-#  - type: saml
-#    id: sci
-#    name: SAP CI
-#    config:
-#      # Issuer for SAML Request
-#      entityIssuer: dex.{{ .Values.global.domainName }}
-#      ssoURL: https://{{ .Values.idp.tenant | default "ycloudtest" }}.{{ .Values.idp.domain | default "accounts400.ondemand.com" }}/saml2/idp/sso?sp=dex.{{ .Values.global.domainName }}
-#      ca: {{ .Values.idp.caPath}}/ca.pem
-#      redirectURI: https://dex.{{ .Values.global.domainName }}/callback
-#      usernameAttr: mail
-#      emailAttr: mail
-#      groupsAttr: groups
+connectors:
 
 dex:
   expiry:
