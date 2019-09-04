@@ -1,4 +1,4 @@
-white-list-external: ["localhost", "kyma.local", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io"]
+white-list-external: ["localhost", "kyma.local", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io"]
 black-list: ["/vendor/", "/testdata/"]
 black-list-internal: ["./kyma/docs/"]
 timeout: 60
@@ -17,9 +17,6 @@ files:
   - path: "./kyma/components/helm-broker/docs/proposals/addon-git-support.md"
     config:
       white-list-external: ["https://github.com/kyma-project/addons/blob/master/addons/index.yaml", "https://gitlab.com/kyma-project/addons/blob/master/addons/index.yaml", "https://bitbucket.org/kyma-project/addons/src/master/addons/index.yaml"]
-  - path: "./kyma/docs/monitoring/02-01-monitoring.md"
-    config:
-      white-list-external: ["https://grafana.{DOMAIN"]
   - path: "./kyma/resources/core/charts/monitoring/charts/alertmanager/README.md"
     config:
       white-list-external: ["https://alert.victorops.com/integrations/generic/20131114/alert"]
@@ -65,3 +62,9 @@ files:
   - path: "./kyma/tests/perf/README.md"
     config:
       white-list-external: ["https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1"]
+  - path: "./kyma/docs/monitoring/08-02-create-and-configure-grafana-dashboard.md"
+    config:
+      white-list-external: ["https://grafana.example.com/"]
+  - path: "./kyma/docs/helm-broker/03-03-create-addons-repo.md"
+    config:
+      white-list-external: ["https://admin:secretPassword@repository.addons.com/index.yaml"]

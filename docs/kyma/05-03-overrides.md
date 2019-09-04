@@ -43,7 +43,7 @@ Kyma uses component-specific overrides only for the installation of specific com
 
 Overrides for top-level charts are straightforward. Just use the template value from the chart as the entry key in the ConfigMap or Secret. Leave out the `.Values.` prefix.
 
-Se an example:
+See an example:
 
 The Installer uses an `asset-store` top-level chart that contains a template with the following value reference:
 

@@ -23,7 +23,7 @@ import (
 
 func isCatalogForbidden(url string) (bool, error) {
 	config := osb.DefaultClientConfiguration()
-	config.URL = url
+	config.URL = fmt.Sprintf("%s/cluster", url)
 
 	client, err := osb.NewClient(config)
 	if err != nil {

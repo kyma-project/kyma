@@ -43,7 +43,7 @@ func (c *FakeIDPPresets) List(opts v1.ListOptions) (result *v1alpha1.IDPPresetLi
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.IDPPresetList{}
+	list := &v1alpha1.IDPPresetList{ListMeta: obj.(*v1alpha1.IDPPresetList).ListMeta}
 	for _, item := range obj.(*v1alpha1.IDPPresetList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)

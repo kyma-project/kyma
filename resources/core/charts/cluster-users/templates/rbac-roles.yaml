@@ -2,7 +2,7 @@
 # kyma-essentials: Minimal cluster view role necessary to render UI
 ################################################################################
 
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-essentials-base
@@ -32,7 +32,7 @@ rules:
     - "get"
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-essentials
@@ -55,7 +55,7 @@ rules: []
 ################################################################################
 
 #View access to core resources
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-view-base
@@ -64,7 +64,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-view-base: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
     - ""
@@ -77,7 +77,7 @@ rules:
 
 ---
 #View access to all non resource urls
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-nonresource-view
@@ -86,7 +86,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-nonresource-view: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - nonResourceURLs:
     - "*"
@@ -94,7 +94,7 @@ rules:
 {{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-view
@@ -103,7 +103,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-view: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 aggregationRule:
   clusterRoleSelectors:
   - matchLabels:
@@ -127,7 +127,9 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-view: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-dex-view: "true"  
+      rbac.authorization.kyma-project.io/aggregate-to-dex-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-ory-view: "true"
 rules: []
 
 ---
@@ -136,7 +138,7 @@ rules: []
 ################################################################################
 
 #Full access to all non resource urls
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-nonresource-admin
@@ -145,7 +147,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-nonresource-admin: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - nonResourceURLs:
     - "*"
@@ -162,7 +164,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-edit: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 aggregationRule:
   clusterRoleSelectors:
   - matchLabels:
@@ -185,6 +187,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-dex-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-ory-edit: "true"
 rules: []
 
 ---
@@ -194,7 +198,7 @@ rules: []
 ##########################################################################################
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-admin
@@ -202,7 +206,7 @@ metadata:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 aggregationRule:
   clusterRoleSelectors:
   - matchLabels:
@@ -227,6 +231,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-dex-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
 rules: []
 
 ---
@@ -242,7 +248,7 @@ metadata:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 aggregationRule:
   clusterRoleSelectors:
   - matchLabels:
@@ -257,7 +263,7 @@ rules: []
 ################################################################################
 
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: kube-system-view
   namespace: {{ .Release.Namespace }}
@@ -265,7 +271,7 @@ metadata:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 subjects:
 - kind: ServiceAccount
   name: default
@@ -276,7 +282,7 @@ roleRef:
   name: view
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: kyma-essentials-binding
@@ -285,7 +291,7 @@ metadata:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
-    "helm.sh/hook-weight": "1"
+    helm.sh/hook-weight: "1"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -301,7 +307,7 @@ subjects:
 {{- end }}
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: kyma-view-binding
@@ -310,7 +316,7 @@ metadata:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
-    "helm.sh/hook-weight": "1"
+    helm.sh/hook-weight: "1"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -332,7 +338,7 @@ subjects:
 {{ end }}
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: kyma-admin-binding
@@ -341,7 +347,7 @@ metadata:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
-    "helm.sh/hook-weight": "1"
+    helm.sh/hook-weight: "1"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

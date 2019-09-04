@@ -10,15 +10,16 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0
+  selector:
+    matchLabels:
+{{ include "subscription-controller.labels.selectors" . | indent 6 }}
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        app: {{ template "subscription-controller.fullname" . }}
-        release: {{ .Release.Name }}
-        kyma-grafana: {{ .Values.monitoring.grafana}}
-        kyma-alerts: {{ .Values.monitoring.alerts}}
+{{ include "subscription-controller.labels.standard" . | indent 8 }}
+{{ include "subscription-controller.labels.kyma" . | indent 8 }}
     spec:
       containers:
         - name: {{ .Chart.Name }}

@@ -1,6 +1,6 @@
 ---
 #View access to knative-eventing resources
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-knative-eventing-view
@@ -9,7 +9,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-view: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
     - "eventing.knative.dev"
@@ -19,7 +19,7 @@ rules:
 {{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kyma-knative-eventing-admin
@@ -28,7 +28,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-admin: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
     - "eventing.knative.dev"
@@ -47,7 +47,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-knative-eventing-edit: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
     - "eventing.knative.dev"

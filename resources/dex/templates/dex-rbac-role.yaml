@@ -1,6 +1,6 @@
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: dex-role
   namespace: {{ .Release.Namespace }}
@@ -20,7 +20,7 @@ rules:
     verbs: ["get", "list"]
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: dex-role
   namespace: {{ .Release.Namespace }}
@@ -28,7 +28,7 @@ metadata:
     app: dex
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
-    "helm.sh/hook-weight": "1"
+    helm.sh/hook-weight: "1"
 subjects:
   - kind: ServiceAccount
     name: dex-account # Service account assigned to the dex pod.

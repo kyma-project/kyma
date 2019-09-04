@@ -1,5 +1,5 @@
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: dex
@@ -8,6 +8,9 @@ metadata:
     app: dex
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 spec:
+  selector:
+    matchLabels:
+      app: dex
   replicas: 1
   template:
     metadata:
@@ -17,7 +20,9 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/dex-config-map.yaml") . | sha256sum }}
     spec:
-      serviceAccount: dex-account
+      serviceAccountName: dex-account
+      securityContext:
+        runAsUser: 2000
       containers:
       - image: {{ .Values.imageRegistry }}/dex:{{ .Chart.AppVersion }}
         name: dex

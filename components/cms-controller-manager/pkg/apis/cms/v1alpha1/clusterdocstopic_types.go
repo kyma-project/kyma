@@ -4,6 +4,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
+// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
 // ClusterDocsTopicSpec defines the desired state of ClusterDocsTopic
 type ClusterDocsTopicSpec struct {
 	CommonDocsTopicSpec `json:",inline"`
@@ -14,12 +17,10 @@ type ClusterDocsTopicStatus struct {
 	CommonDocsTopicStatus `json:",inline"`
 }
 
-// +genclient
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +genclient:nonNamespaced
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Cluster
 
-// ClusterDocsTopic is the Schema for the clusterdocstopic API
-// +k8s:openapi-gen=true
+// ClusterDocsTopic is the Schema for the clusterdocstopics API
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type="string",JSONPath=".status.phase"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
@@ -31,8 +32,7 @@ type ClusterDocsTopic struct {
 	Status ClusterDocsTopicStatus `json:"status,omitempty"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-// +genclient:nonNamespaced
+// +kubebuilder:object:root=true
 
 // ClusterDocsTopicList contains a list of ClusterDocsTopic
 type ClusterDocsTopicList struct {

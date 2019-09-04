@@ -13,12 +13,8 @@ func (in *DenierHandlerParams) DeepCopyInto(out *DenierHandlerParams) {
 	*out = *in
 	if in.Status != nil {
 		in, out := &in.Status, &out.Status
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(DenierStatus)
-			**out = **in
-		}
+		*out = new(DenierStatus)
+		**out = **in
 	}
 	return
 }
@@ -56,12 +52,8 @@ func (in *Handler) DeepCopyInto(out *Handler) {
 	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
 	if in.Spec != nil {
 		in, out := &in.Spec, &out.Spec
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(HandlerSpec)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(HandlerSpec)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }
@@ -88,7 +80,7 @@ func (in *Handler) DeepCopyObject() runtime.Object {
 func (in *HandlerList) DeepCopyInto(out *HandlerList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]Handler, len(*in))
@@ -122,12 +114,8 @@ func (in *HandlerSpec) DeepCopyInto(out *HandlerSpec) {
 	*out = *in
 	if in.Params != nil {
 		in, out := &in.Params, &out.Params
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(DenierHandlerParams)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(DenierHandlerParams)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }
@@ -149,12 +137,8 @@ func (in *Instance) DeepCopyInto(out *Instance) {
 	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
 	if in.Spec != nil {
 		in, out := &in.Spec, &out.Spec
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(InstanceSpec)
-			**out = **in
-		}
+		*out = new(InstanceSpec)
+		**out = **in
 	}
 	return
 }
@@ -181,7 +165,7 @@ func (in *Instance) DeepCopyObject() runtime.Object {
 func (in *InstanceList) DeepCopyInto(out *InstanceList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]Instance, len(*in))
@@ -233,12 +217,8 @@ func (in *Rule) DeepCopyInto(out *Rule) {
 	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
 	if in.Spec != nil {
 		in, out := &in.Spec, &out.Spec
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(RuleSpec)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(RuleSpec)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }
@@ -286,7 +266,7 @@ func (in *RuleAction) DeepCopy() *RuleAction {
 func (in *RuleList) DeepCopyInto(out *RuleList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]Rule, len(*in))

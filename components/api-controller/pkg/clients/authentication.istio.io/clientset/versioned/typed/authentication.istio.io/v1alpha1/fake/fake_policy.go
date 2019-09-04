@@ -46,7 +46,7 @@ func (c *FakePolicies) List(opts v1.ListOptions) (result *v1alpha1.PolicyList, e
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.PolicyList{}
+	list := &v1alpha1.PolicyList{ListMeta: obj.(*v1alpha1.PolicyList).ListMeta}
 	for _, item := range obj.(*v1alpha1.PolicyList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -103,7 +103,7 @@ func (c *FakePolicies) DeleteCollection(options *v1.DeleteOptions, listOptions v
 // Patch applies the patch and returns the patched policy.
 func (c *FakePolicies) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Policy, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(policiesResource, c.ns, name, data, subresources...), &v1alpha1.Policy{})
+		Invokes(testing.NewPatchSubresourceAction(policiesResource, c.ns, name, pt, data, subresources...), &v1alpha1.Policy{})
 
 	if obj == nil {
 		return nil, err

@@ -23,11 +23,13 @@ const (
 
 type updateApplicationFunc func(application *v1alpha1.Application)
 
+//go:generate mockery -name ApplicationManagerClient
 type ApplicationManagerClient interface {
 	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
-	Update(ctx context.Context, obj runtime.Object) error
+	Update(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error
 }
 
+//go:generate mockery -name ApplicationReconciler
 type ApplicationReconciler interface {
 	Reconcile(request reconcile.Request) (reconcile.Result, error)
 }
@@ -46,6 +48,8 @@ func NewReconciler(appMgrClient ApplicationManagerClient, releaseManager appRele
 
 func (r *applicationReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	instance := &v1alpha1.Application{}
+
+	log.Infof("Processing %s Application...", request.Name)
 
 	err := r.applicationMgrClient.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {

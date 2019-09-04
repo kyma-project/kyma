@@ -5,7 +5,7 @@ package v1alpha2
 import (
 	time "time"
 
-	istio_v1alpha2 "github.com/kyma-project/kyma/components/application-registry/pkg/apis/istio/v1alpha2"
+	istiov1alpha2 "github.com/kyma-project/kyma/components/application-registry/pkg/apis/istio/v1alpha2"
 	versioned "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/kyma-project/kyma/components/application-registry/pkg/client/informers/externalversions/internalinterfaces"
 	v1alpha2 "github.com/kyma-project/kyma/components/application-registry/pkg/client/listers/istio/v1alpha2"
@@ -54,7 +54,7 @@ func NewFilteredHandlerInformer(client versioned.Interface, namespace string, re
 				return client.IstioV1alpha2().Handlers(namespace).Watch(options)
 			},
 		},
-		&istio_v1alpha2.Handler{},
+		&istiov1alpha2.Handler{},
 		resyncPeriod,
 		indexers,
 	)
@@ -65,7 +65,7 @@ func (f *handlerInformer) defaultInformer(client versioned.Interface, resyncPeri
 }
 
 func (f *handlerInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&istio_v1alpha2.Handler{}, f.defaultInformer)
+	return f.factory.InformerFor(&istiov1alpha2.Handler{}, f.defaultInformer)
 }
 
 func (f *handlerInformer) Lister() v1alpha2.HandlerLister {

@@ -10,9 +10,34 @@
 {{- printf "%s-%s" .Release.Name "event-publish-service-metrics" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- /*
+event-publish-service.labels.standard prints the standard labels.
+
+Standard labels are used in metadata.
+*/ -}}
 {{- define "event-publish-service.labels.standard" -}}
-app: {{ template "event-publish-service.name" . }}
-heritage: {{ .Release.Service | quote }}
-release: {{ .Release.Name | quote }}
-chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+app.kubernetes.io/name: {{ template "event-publish-service.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: kyma
+{{- end -}}
+
+{{- /*
+event-publish-service.labels.selectors prints the labels used in selectors.
+
+Selectors use a subset of the standard labels.
+*/ -}}
+{{- define "event-publish-service.labels.selectors" -}}
+app.kubernetes.io/name: {{ template "event-publish-service.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{- /*
+event-publish-service.labels.kyma prints Kyma-specific labels.
+
+Kyma labels are set on various objects to integrate with other technical components (monitoring, ...).
+*/ -}}
+{{- define "event-publish-service.labels.kyma" -}}
+kyma-grafana: {{ .Values.monitoring.grafana }}
+kyma-alerts: {{ .Values.monitoring.alerts }}
 {{- end -}}

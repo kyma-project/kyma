@@ -41,6 +41,8 @@ type API struct {
 	RequestParameters              *RequestParameters   `json:"requestParameters,omitempty"`
 	SpecificationCredentials       *Credentials         `json:"specificationCredentials,omitempty"`
 	SpecificationRequestParameters *RequestParameters   `json:"specificationRequestParameters,omitempty"`
+	Headers                        *map[string][]string `json:"headers,omitempty"`
+	QueryParameters                *map[string][]string `json:"queryParameters,omitempty"`
 }
 
 type RequestParameters struct {
@@ -151,6 +153,8 @@ func serviceDefinitionToServiceDetails(serviceDefinition model.ServiceDefinition
 		}
 		if serviceDefinition.Api.RequestParameters != nil {
 			serviceDetails.Api.RequestParameters = serviceDefinitionRequestParametersToServiceDetailsRequestParameters(serviceDefinition.Api.RequestParameters)
+			serviceDetails.Api.Headers = serviceDetails.Api.RequestParameters.Headers
+			serviceDetails.Api.QueryParameters = serviceDetails.Api.RequestParameters.QueryParameters
 		}
 	}
 
@@ -266,6 +270,9 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 		if serviceDetails.Api.RequestParameters != nil {
 			serviceDefinition.Api.RequestParameters = serviceDetailsRequestParametersToServiceDefinitionRequestParameters(serviceDetails.Api.RequestParameters)
 		}
+		if serviceDefinition.Api.RequestParameters == nil {
+			serviceDefinition.Api.RequestParameters = serviceDefinitionRequestParametersFromServiceDetailsAPI(serviceDetails.Api)
+		}
 
 		if serviceDetails.Api.SpecificationRequestParameters != nil {
 			serviceDefinition.Api.SpecificationRequestParameters = serviceDetailsRequestParametersToServiceDefinitionRequestParameters(serviceDetails.Api.SpecificationRequestParameters)
@@ -298,6 +305,25 @@ func serviceDetailsRequestParametersToServiceDefinitionRequestParameters(request
 		Headers:         requestParameters.Headers,
 		QueryParameters: requestParameters.QueryParameters,
 	}
+}
+
+func serviceDefinitionRequestParametersFromServiceDetailsAPI(api *API) *model.RequestParameters {
+	headers := api.Headers
+	queryParams := api.QueryParameters
+
+	if headers == nil && queryParams == nil {
+		return nil
+	}
+
+	var requestParameters = &model.RequestParameters{}
+	if headers != nil {
+		requestParameters.Headers = headers
+	}
+	if queryParams != nil {
+		requestParameters.QueryParameters = queryParams
+	}
+
+	return requestParameters
 }
 
 func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Credentials) *model.Credentials {

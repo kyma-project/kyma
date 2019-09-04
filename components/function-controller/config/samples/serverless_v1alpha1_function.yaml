@@ -1,0 +1,16 @@
+apiVersion: serverless.kyma-project.io/v1alpha1
+kind: Function
+metadata:
+  name: demo
+  labels:
+    foo: bar
+spec:
+  function: |
+    module.exports = {
+        main: function(event, context) {
+          return 'Hello World'
+        }
+      }
+  functionContentType: "plaintext"
+  size: "L"
+  runtime: "nodejs8"

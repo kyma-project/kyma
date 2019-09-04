@@ -57,6 +57,8 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	// given
 	ts := NewTestSuite(t)
 
+	ts.waitForAPIServer()
+
 	ts.createTestNamespace()
 	ts.createApplication()
 
@@ -709,6 +711,18 @@ func (ts *TestSuite) assertInjectedEnvVariables(requiredVariables []servicecatal
 		return nil
 	}, timeout)
 	ts.t.Logf("Environment variables are injected [%v]", requiredVariables)
+}
+
+func (ts *TestSuite) waitForAPIServer() {
+	k8sCli, err := kubernetes.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+
+	nsClient := k8sCli.CoreV1().Namespaces()
+
+	repeat.FuncAtMost(ts.t, func() error {
+		_, err := nsClient.List(metav1.ListOptions{})
+		return err
+	}, 20*time.Second)
 }
 
 func prettyBindingResourceStatus(conditions []scTypes.ServiceBindingCondition) string {

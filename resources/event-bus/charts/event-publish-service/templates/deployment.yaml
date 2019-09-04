@@ -12,8 +12,7 @@ spec:
   {{ end }}
   selector:
     matchLabels:
-      app: {{ template "event-publish-service.fullname" . }}
-      release: {{ .Release.Name }}
+{{ include "event-publish-service.labels.selectors" . | indent 6 }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -23,10 +22,8 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
-        app: {{ template "event-publish-service.fullname" . }}
-        release: {{ .Release.Name }}
-        kyma-grafana: {{ .Values.monitoring.grafana}}
-        kyma-alerts: {{ .Values.monitoring.alerts}}
+{{ include "event-publish-service.labels.standard" . | indent 8 }}
+{{ include "event-publish-service.labels.kyma" . | indent 8 }}
     spec:
       containers:
         - name: {{ .Chart.Name }}

@@ -103,7 +103,7 @@ func (c *FakeHandlers) DeleteCollection(options *v1.DeleteOptions, listOptions v
 // Patch applies the patch and returns the patched handler.
 func (c *FakeHandlers) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha2.Handler, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(handlersResource, c.ns, name, data, subresources...), &v1alpha2.Handler{})
+		Invokes(testing.NewPatchSubresourceAction(handlersResource, c.ns, name, pt, data, subresources...), &v1alpha2.Handler{})
 
 	if obj == nil {
 		return nil, err

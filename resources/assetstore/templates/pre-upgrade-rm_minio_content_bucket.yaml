@@ -5,8 +5,8 @@ kind: ConfigMap
 metadata:
   name: {{ template "fullname" . }}-rm-minio-content-bucket
   annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
   labels:
     app: {{ template "name" . }}
     chart: {{ .Chart.Name }}
@@ -26,8 +26,8 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
 spec:
   template:
     metadata:

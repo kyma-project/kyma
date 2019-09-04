@@ -74,7 +74,7 @@ func (in *InstallationCondition) DeepCopy() *InstallationCondition {
 func (in *InstallationList) DeepCopyInto(out *InstallationList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]Installation, len(*in))

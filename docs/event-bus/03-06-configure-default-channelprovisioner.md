@@ -4,19 +4,21 @@ type: Details
 ---
 
 
-Kyma comes with NATS Streaming as its default ClusterChannelProvisioner. You can see the configuration details in the [`default-channel-webhook`](../../resources/knative-eventing/charts/knative-eventing/templates/eventing.yaml) ConfigMap. 
+Kyma comes with NATS Streaming as its default ClusterChannelProvisioner. You can see the configuration details in the [`default-channel-webhook`](../../resources/knative-eventing/charts/knative-eventing/templates/eventing.yaml) ConfigMap.
 
-You can use a different messaging middleware, other than NATS Streaming, as the Kyma eventing operator. 
+You can use a different messaging middleware, other than NATS Streaming, as the Kyma eventing operator.
 To achieve that, configure:
-- A ClusterChannelProvisioner that connects with the running messaging middleware 
+
+- A ClusterChannelProvisioner that connects with the running messaging middleware
 - The `default-channel-webhook` to use that particular ClusterChannelProvisioner
 
-Read about the examples and the configuration details. 
+Read about the examples and the configuration details.
 
 ## In-memory channel
-Follow this [guide](https://github.com/knative/eventing/tree/master/config/provisioners/in-memory-channel) to add an in-memory ClusterChannelProvisioner.
 
->**NOTE**: Before installing this provisioner, add the following annotation to the [`podTemplate.Spec`](https://github.com/knative/eventing/blob/master/config/provisioners/in-memory-channel/in-memory-channel.yaml#L107) in the `in-memory-channel-controller` Deployment to remove the Istio sidecar.
+Follow this [guide](https://github.com/knative/eventing/tree/master/config/channels/in-memory-channel) to add an in-memory ClusterChannelProvisioner.
+
+>**NOTE**: Before installing this provisioner, add the following annotation to the [`podTemplate.Spec`](https://github.com/knative/eventing/blob/master/config/channels/in-memory-channel/300-in-memory-channel.yaml) in the `in-memory-channel-controller` Deployment to remove the Istio sidecar.
 
 ```yaml
 template:
@@ -26,7 +28,7 @@ template:
       labels: *labels
 ```
 
-You can change the default cluster channel provisioner by editing the ClusterChannelProvisioner entry in the `default-channel-webhook` ConfigMap. For an example of the in-memory ClusterChannelProvisioner configuration, see [this file](https://github.com/knative/eventing/blob/master/config/400-default-channel-config.yaml).
+You can change the default cluster channel provisioner by editing the ClusterChannelProvisioner entry in the `default-channel-webhook` ConfigMap. For an example of the in-memory ClusterChannelProvisioner configuration, see [this file](https://github.com/knative/eventing/blob/master/config/400-default-ch-config.yaml).
 
 ## Google PubSub
 
