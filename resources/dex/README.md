@@ -16,14 +16,14 @@ Dex is exposed using the [Istio VirtualService](https://istio.io/docs/reference/
 ## Configuration
 
 This chart allows you to provide configuration for Dex connectors and clients using the Helm overrides mechanism.
-
+> **TIP:** You can use Go Template expressions in the override value. These expressions are resolved by Helm using the same set of overrides as configured for the entire chart.
 
 ### Connectors
 
 Configure connectors through the `connectors` override.
-Provide the Dex connectors configuration as a single string in the `yaml` format. See [this](https://github.com/dexidp/dex/tree/master/Documentation/connectors) document for more details. 
+Provide the Dex connectors list as a single string in the `yaml` format. See [these](https://github.com/dexidp/dex/tree/master/Documentation/connectors) documents for syntax details.
 
-Example:
+This is an example of a connector configuration string:
 ```
   connectors: |-
     - type: saml
@@ -41,12 +41,11 @@ Example:
 ```
 
 ### Clients
-Configuration for static clients is split in two parts: `staticClientsBase` and `staticClientsExtra`
-The `staticClientsBase` clients are basic clients required by Kyma and should not be modified.
-Users can provide additional clients using Helm override named `oidc.staticClientsExtra`.
-The value of this override is a string in YAML format with a list of clients.
 
-Example:
+Configure Dex clients through the `oidc.staticClientsExtra` override. Pass the list of clients as a single string in the `yaml` format.
+>**WARNING:** The `oidc.staticClientsBase` override defines the basic clients required by Kyma. Do not edit this override.
+
+This is an example of a client configuration string:
 ```
   oidc.staticClientsExtra: |-
     - id: console2
@@ -57,4 +56,3 @@ Example:
       secret: a1b2c3d4xyz
 ```
 
-> **Note:** you can use Go Template expressions in the override value. These expressions will be resolved by Helm using the same set of overrides as configured for the entire chart.
