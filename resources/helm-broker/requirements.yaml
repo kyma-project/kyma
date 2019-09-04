@@ -1,5 +1,5 @@
 dependencies:
-- name: add-ons-ui
-  condition: add-ons-ui.enabled
+- name: addons-ui
+  condition: addons-ui.enabled
 - name: etcd-stateful
   condition: etcd-stateful.enabled

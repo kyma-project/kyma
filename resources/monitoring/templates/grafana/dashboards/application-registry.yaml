@@ -4,10 +4,10 @@ metadata:
   name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "application-registry" | trunc 63 | trimSuffix "-" }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
-      {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
-      {{- end }}
-      app: {{ template "prometheus-operator.name" $ }}-grafana
-  {{ include "prometheus-operator.labels" $ | indent 4 }}
+    {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
+    {{- end }}
+    app: {{ template "prometheus-operator.name" $ }}-grafana
+{{ include "prometheus-operator.labels" $ | indent 4 }}
 data:
   application-registry.json: |-
     {
@@ -448,7 +448,7 @@ data:
           "expr": "application_registry_endpoints_duration{exported_endpoint=~\"$endpoint\", quantile=\"0.995\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{ exported_endpoint }}",
+          "legendFormat": "{{ `{{exported_endpoint}}` }}",
           "refId": "A"
         }
         ],
@@ -545,7 +545,7 @@ data:
           "expr": "increase(application_registry_endpoints_responses{exported_endpoint=~\"$endpoint\"}[10m])",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{exported_endpoint}} {{ status }}",
+          "legendFormat": "{{ `{{ exported_endpoint }}` }} {{ `{{status}}` }}",
           "refId": "A"
         }
         ],

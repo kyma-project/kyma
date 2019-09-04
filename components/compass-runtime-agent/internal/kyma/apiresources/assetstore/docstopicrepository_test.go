@@ -20,7 +20,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-func TestUpsertDocsTopic(t *testing.T) {
+func TestCreateDocsTopic(t *testing.T) {
 	t.Run("Should create DocsTopic", func(t *testing.T) {
 		// given
 		resourceInterfaceMock := &mocks.ResourceInterface{}
@@ -28,20 +28,35 @@ func TestUpsertDocsTopic(t *testing.T) {
 
 		docsTopicEntry := createTestDocsTopicEntry()
 
-		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
-			Return(&unstructured.Unstructured{}, k8serrors.NewNotFound(schema.GroupResource{}, ""))
-
 		resourceInterfaceMock.On("Create", mock.MatchedBy(createMatcherFunction(docsTopicEntry, "")), metav1.CreateOptions{}).
 			Return(&unstructured.Unstructured{}, nil)
 
 		// when
-		err := repository.Upsert(docsTopicEntry)
+		err := repository.Create(docsTopicEntry)
 
 		// then
 		require.NoError(t, err)
 		resourceInterfaceMock.AssertExpectations(t)
 	})
 
+	t.Run("Should fail if k8s client returned error on Create", func(t *testing.T) {
+		// given
+		resourceInterfaceMock := &mocks.ResourceInterface{}
+		repository := NewDocsTopicRepository(resourceInterfaceMock)
+
+		resourceInterfaceMock.On("Create", mock.Anything, metav1.CreateOptions{}).
+			Return(&unstructured.Unstructured{}, errors.New("some error"))
+
+		// when
+		err := repository.Create(createTestDocsTopicEntry())
+
+		// then
+		require.Error(t, err)
+		resourceInterfaceMock.AssertExpectations(t)
+	})
+}
+
+func TestUpdateDocsTopic(t *testing.T) {
 	t.Run("Should update DocsTopic", func(t *testing.T) {
 		// given
 		resourceInterfaceMock := &mocks.ResourceInterface{}
@@ -55,18 +70,14 @@ func TestUpsertDocsTopic(t *testing.T) {
 		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{Object: object}, nil)
 
-		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
-			Return(&unstructured.Unstructured{Object: object}, nil)
-
 		docsTopicEntry := createTestDocsTopicEntry()
 		resourceInterfaceMock.On("Update", mock.MatchedBy(createMatcherFunction(docsTopicEntry, "1")), metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, nil)
 
 		// when
-		err = repository.Upsert(docsTopicEntry)
+		err = repository.Update(docsTopicEntry)
 
 		// then
 		require.NoError(t, err)
-		resourceInterfaceMock.AssertNumberOfCalls(t, "Create", 0)
 		resourceInterfaceMock.AssertNumberOfCalls(t, "Update", 1)
 	})
 
@@ -79,25 +90,7 @@ func TestUpsertDocsTopic(t *testing.T) {
 			Return(&unstructured.Unstructured{}, errors.New("some error"))
 
 		// when
-		err := repository.Upsert(createTestDocsTopicEntry())
-
-		// then
-		require.Error(t, err)
-		resourceInterfaceMock.AssertExpectations(t)
-	})
-
-	t.Run("Should fail if k8s client returned error on Create", func(t *testing.T) {
-		// given
-		resourceInterfaceMock := &mocks.ResourceInterface{}
-		repository := NewDocsTopicRepository(resourceInterfaceMock)
-
-		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
-			Return(&unstructured.Unstructured{}, k8serrors.NewNotFound(schema.GroupResource{}, ""))
-		resourceInterfaceMock.On("Create", mock.Anything, metav1.CreateOptions{}).
-			Return(&unstructured.Unstructured{}, errors.New("some error"))
-
-		// when
-		err := repository.Upsert(createTestDocsTopicEntry())
+		err := repository.Update(createTestDocsTopicEntry())
 
 		// then
 		require.Error(t, err)
@@ -116,18 +109,14 @@ func TestUpsertDocsTopic(t *testing.T) {
 		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{Object: object}, nil)
 
-		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
-			Return(&unstructured.Unstructured{Object: object}, nil)
-
 		resourceInterfaceMock.On("Update", mock.Anything, metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, errors.New("some error"))
 
 		// when
-		err = repository.Upsert(createTestDocsTopicEntry())
+		err = repository.Update(createTestDocsTopicEntry())
 
 		// then
 		require.Error(t, err)
-		resourceInterfaceMock.AssertNumberOfCalls(t, "Get", 2)
-		resourceInterfaceMock.AssertNumberOfCalls(t, "Create", 0)
+		resourceInterfaceMock.AssertNumberOfCalls(t, "Get", 1)
 		resourceInterfaceMock.AssertNumberOfCalls(t, "Update", 1)
 	})
 }
@@ -261,6 +250,7 @@ func createTestDocsTopicEntry() docstopic.Entry {
 		Labels: map[string]string{
 			"key": "value",
 		},
+		SpecHash: "39faae9f5e6e58d758bce2c88a247a45",
 	}
 }
 

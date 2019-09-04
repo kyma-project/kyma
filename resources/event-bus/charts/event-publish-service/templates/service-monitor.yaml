@@ -2,20 +2,17 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-    namespace: kyma-system
-    name: {{ template "event-publish-service-metrics.name" . }}
-    labels:
-        prometheus: monitoring
-        app: {{ template "event-publish-service.fullname" . }}
-        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-        release: "{{ .Release.Name }}"
-        heritage: "{{ .Release.Service }}"
+  namespace: kyma-system
+  name: {{ template "event-publish-service-metrics.name" . }}
+  labels:
+{{ include "event-publish-service.labels.standard" . | indent 4 }}
+    prometheus: monitoring
 spec:
-    selector:
-        matchLabels:
-            app: {{ template "event-publish-service.fullname" . }}
-    endpoints:
-        - port: metrics-port
-          interval: {{ .Values.monitoring.interval }}
-    namespaceSelector:
-        any: true
+  selector:
+    matchLabels:
+{{ include "event-publish-service.labels.selectors" . | indent 6 }}
+  endpoints:
+  - port: metrics-port
+    interval: {{ .Values.monitoring.interval }}
+  namespaceSelector:
+    any: true

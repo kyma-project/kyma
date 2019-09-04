@@ -5,8 +5,8 @@ metadata:
   name: {{ .Release.Name }}-job
   namespace: kyma-integration
   annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: hook-succeeded
 spec:
   template:
     metadata:

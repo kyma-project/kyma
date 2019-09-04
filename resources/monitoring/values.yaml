@@ -4,6 +4,7 @@
 
 ## Provide a name in place of prometheus-operator for `app:` labels
 ##
+
 nameOverride: ""
 
 ## Provide a name to substitute for the full names of resources
@@ -60,6 +61,16 @@ global:
   rbac:
     create: true
     pspEnabled: true
+
+  isLocalEnv: false
+  istio:
+    gateway:
+      name: kyma-gateway
+  monitoring_integration_tests:
+    name: monitoring-integration-tests
+    dir: pr/
+    version: PR-5226
+
 
   ## Reference to one or more secrets to be used when pulling images
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -298,7 +309,12 @@ alertmanager:
     ## Define resources requests and limits for single Pods.
     ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
     ##
-    resources: {}
+    resources:
+      requests:
+        memory: 200Mi
+      limits:
+        memory: 400Mi
+
     # requests:
     #   memory: 400Mi
 
@@ -1061,13 +1077,13 @@ prometheusOperator:
 
   ## Resource limits & requests
   ##
-  resources: {}
-  # limits:
-  #   cpu: 200m
-  #   memory: 200Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 100Mi
+  resources:
+    requests:
+      memory: 100Mi
+      cpu: 100m
+    limits:
+      memory: 200Mi
+      cpu: 200m
 
   ## Define which Nodes the Pods are scheduled on.
   ## ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -1147,6 +1163,46 @@ prometheus:
   serviceAccount:
     create: true
     name: ""
+
+  additionalServiceMonitors:	
+  - name: istio-mesh	
+    serviceMonitorSelectorLabels:	
+      prometheus: monitoring	
+    selector:	
+      istio: mixer	
+    namespaceSelector:	
+      matchNames:	
+      - istio-system	
+    endpoints:	
+    - port: prometheus	
+      interval: 30s	
+    - port: statsd-prom	
+      interval: 30s	
+    - port: http-monitoring	
+      interval: 30s
+
+  resources:
+    requests:
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+
+  isLocalEnv:
+    resources:
+      requests:
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+
+  storageSpec:	
+    volumeClaimTemplate:	
+      spec:	
+        accessModes:	
+        - ReadWriteOnce	
+        resources:	
+          requests:	
+            storage: 4Gi
+
 
   ## Configuration for Prometheus service
   ##
@@ -1458,7 +1514,11 @@ prometheus:
 
     ## Resource limits & requests
     ##
-    resources: {}
+    resources:
+      requests:
+        memory: 512Mi
+      limits:
+        memory: 1Gi
     # requests:
     #   memory: 400Mi
 
@@ -1658,3 +1718,11 @@ prometheus:
           ## Server name used to verify host name
           ##
           # serverName: ""
+virtualservice:
+  ## If true, Grafana VirtualService will be created
+  ##
+  enabled: true
+
+  ## Annotations for Alertmanager VirtualService
+  ##
+  annotations: {}

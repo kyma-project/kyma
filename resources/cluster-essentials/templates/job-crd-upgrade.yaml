@@ -1,0 +1,75 @@
+# This job is a kyma custom resource.
+# Please take caution during upgrade to not to remove it
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-upgrade-job
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prometheus-upgrade
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+rules:
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "delete", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prometheus-upgrade
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prometheus-upgrade
+subjects:
+- kind: ServiceAccount
+  name: prometheus-upgrade-job
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: prometheus-upgrade-helper
+  annotations:
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "10"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: dex-upgrade-helper
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: dex-upgrade-job
+      restartPolicy: Never
+      containers:
+      - name: job
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+        terminationMessagePolicy: "FallbackToLogsOnError"
+        command:
+          - /bin/bash
+          - -c
+          - |
+            set -e
+            kubectl -n kyma-system delete crd alertmanagers.monitoring.coreos.com
+            kubectl -n kyma-system delete crd podmonitors.monitoring.coreos.com
+            kubectl -n kyma-system delete crd prometheuses.monitoring.coreos.com
+            kubectl -n kyma-system delete crd prometheusrules.monitoring.coreos.com
+            kubectl -n kyma-system delete crd servicemonitors.monitoring.coreos.com

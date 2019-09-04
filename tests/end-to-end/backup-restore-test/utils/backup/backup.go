@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	backup "github.com/heptio/velero/pkg/generated/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -13,8 +12,7 @@ import (
 )
 
 type backupClient struct {
-	backupClient *backup.Clientset
-	coreClient   *kubernetes.Clientset
+	coreClient *kubernetes.Clientset
 }
 
 type BackupClient interface {
@@ -29,19 +27,13 @@ func NewBackupClient() (BackupClient, error) {
 		return nil, err
 	}
 
-	backupClientSet, err := backup.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-
 	coreClientSet, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
 
 	return &backupClient{
-		coreClient:   coreClientSet,
-		backupClient: backupClientSet,
+		coreClient: coreClientSet,
 	}, nil
 
 }

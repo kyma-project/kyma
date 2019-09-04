@@ -13,33 +13,33 @@ type gqlClusterAddonsConfigurationConverter interface {
 	ToGQL(item *v1alpha1.ClusterAddonsConfiguration) *gqlschema.AddonsConfiguration
 }
 
-type AddonsConfiguration struct {
-	channel   chan<- gqlschema.AddonsConfigurationEvent
+type ClusterAddonsConfiguration struct {
+	channel   chan<- gqlschema.ClusterAddonsConfigurationEvent
 	filter    func(entity *v1alpha1.ClusterAddonsConfiguration) bool
 	converter gqlClusterAddonsConfigurationConverter
 }
 
-func NewClusterAddonsConfiguration(channel chan<- gqlschema.AddonsConfigurationEvent, filter func(entity *v1alpha1.ClusterAddonsConfiguration) bool, converter gqlClusterAddonsConfigurationConverter) *AddonsConfiguration {
-	return &AddonsConfiguration{
+func NewClusterAddonsConfiguration(channel chan<- gqlschema.ClusterAddonsConfigurationEvent, filter func(entity *v1alpha1.ClusterAddonsConfiguration) bool, converter gqlClusterAddonsConfigurationConverter) *ClusterAddonsConfiguration {
+	return &ClusterAddonsConfiguration{
 		channel:   channel,
 		filter:    filter,
 		converter: converter,
 	}
 }
 
-func (l *AddonsConfiguration) OnAdd(object interface{}) {
+func (l *ClusterAddonsConfiguration) OnAdd(object interface{}) {
 	l.onEvent(gqlschema.SubscriptionEventTypeAdd, object)
 }
 
-func (l *AddonsConfiguration) OnUpdate(oldObject, newObject interface{}) {
+func (l *ClusterAddonsConfiguration) OnUpdate(oldObject, newObject interface{}) {
 	l.onEvent(gqlschema.SubscriptionEventTypeUpdate, newObject)
 }
 
-func (l *AddonsConfiguration) OnDelete(object interface{}) {
+func (l *ClusterAddonsConfiguration) OnDelete(object interface{}) {
 	l.onEvent(gqlschema.SubscriptionEventTypeDelete, object)
 }
 
-func (l *AddonsConfiguration) onEvent(eventType gqlschema.SubscriptionEventType, object interface{}) {
+func (l *ClusterAddonsConfiguration) onEvent(eventType gqlschema.SubscriptionEventType, object interface{}) {
 	entity, ok := object.(*v1alpha1.ClusterAddonsConfiguration)
 	if !ok {
 		glog.Error(fmt.Errorf("incorrect object type: %T, should be: *v1alpha1.ClusterAddonsConfiguration", object))
@@ -51,13 +51,13 @@ func (l *AddonsConfiguration) onEvent(eventType gqlschema.SubscriptionEventType,
 	}
 }
 
-func (l *AddonsConfiguration) notify(eventType gqlschema.SubscriptionEventType, entity *v1alpha1.ClusterAddonsConfiguration) {
+func (l *ClusterAddonsConfiguration) notify(eventType gqlschema.SubscriptionEventType, entity *v1alpha1.ClusterAddonsConfiguration) {
 	gqlAddonsConfiguration := l.converter.ToGQL(entity)
 	if gqlAddonsConfiguration == nil {
 		return
 	}
 
-	event := gqlschema.AddonsConfigurationEvent{
+	event := gqlschema.ClusterAddonsConfigurationEvent{
 		Type:                eventType,
 		AddonsConfiguration: *gqlAddonsConfiguration,
 	}

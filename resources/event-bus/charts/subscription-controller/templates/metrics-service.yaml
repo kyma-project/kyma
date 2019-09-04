@@ -11,5 +11,4 @@ spec:
   - name: metrics-port
     port: {{ .Values.monitoring.port }}
   selector:
-    app: {{ template "subscription-controller.fullname" . }}
-    release: {{ .Release.Name }}
+{{ include "subscription-controller.labels.selectors" . | indent 4 }}

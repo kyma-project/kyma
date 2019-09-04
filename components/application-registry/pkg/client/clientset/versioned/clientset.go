@@ -12,8 +12,6 @@ import (
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	IstioV1alpha2() istiov1alpha2.IstioV1alpha2Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Istio() istiov1alpha2.IstioV1alpha2Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -25,12 +23,6 @@ type Clientset struct {
 
 // IstioV1alpha2 retrieves the IstioV1alpha2Client
 func (c *Clientset) IstioV1alpha2() istiov1alpha2.IstioV1alpha2Interface {
-	return c.istioV1alpha2
-}
-
-// Deprecated: Istio retrieves the default version of IstioClient.
-// Please explicitly pick a version.
-func (c *Clientset) Istio() istiov1alpha2.IstioV1alpha2Interface {
 	return c.istioV1alpha2
 }
 

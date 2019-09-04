@@ -75,6 +75,8 @@ spec:
           name: cert
           readOnly: true
       terminationGracePeriodSeconds: 10
+      securityContext:
+        runAsUser: 2000
       volumes:
       - name: cert
         secret:

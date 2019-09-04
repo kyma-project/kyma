@@ -87,24 +87,6 @@ func TestOauth_CredentialsProvided(t *testing.T) {
 			result: true,
 		},
 		{
-			credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.Oauth{
-					ClientID:     "",
-					ClientSecret: clientSecret,
-				},
-			},
-			result: false,
-		},
-		{
-			credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.Oauth{
-					ClientID:     clientId,
-					ClientSecret: "",
-				},
-			},
-			result: false,
-		},
-		{
 			credentials: nil,
 			result:      false,
 		},

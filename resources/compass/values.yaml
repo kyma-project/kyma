@@ -6,24 +6,24 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project/incubator
     connector:
-      dir: pr/
-      version: "PR-99"
+      dir: develop/
+      version: "26601526"
     director:
-      dir: pr/
-      version: "PR-144"
+      dir: develop/
+      version: "4ab44720"
     gateway:
-      dir: pr/
-      version: "PR-100"
+      dir: develop/
+      version: "df629420"
     healthchecker:
-      dir: pr/
-      version: "PR-99"
+      dir: develop/
+      version: "26601526"
     schema_migrator:
-      dir: pr/
-      version: "PR-161"
+      dir: develop/
+      version: "2cc96dec"
     tests:
       e2e:
-        dir: pr/
-        version: "PR-170"
+        dir: develop/
+        version: "3c75146c"
 
   isLocalEnv: false
   

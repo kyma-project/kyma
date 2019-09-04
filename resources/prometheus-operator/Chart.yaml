@@ -1,9 +1,0 @@
-apiVersion: v1
-name: prometheus-operator
-description: Provides easy monitoring definitions for Kubernetes services, and deployment and management of Prometheus instances
-engine: gotpl
-version: 0.0.29
-appVersion: v0.29.0
-keywords:
-- monitoring
-- kyma

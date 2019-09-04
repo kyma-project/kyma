@@ -36,7 +36,7 @@ You can search traces using tags. Tags are key-value pairs configured for each s
 
 See the full list of tags for a service from the details of that service's span.
 
-For example, use these tags for `event-publish-knative-service`:
+For example, use these tags for `event-publish-service`:
 
 * `event-type`
 * `event-type-ver`

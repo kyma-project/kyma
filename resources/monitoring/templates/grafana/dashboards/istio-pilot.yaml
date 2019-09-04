@@ -4,10 +4,10 @@ metadata:
   name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "istio-pilot" | trunc 63 | trimSuffix "-" }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
-      {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
-      {{- end }}
-      app: {{ template "prometheus-operator.name" $ }}-grafana
-  {{ include "prometheus-operator.labels" $ | indent 4 }}
+    {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
+    {{- end }}
+    app: {{ template "prometheus-operator.name" $ }}-grafana
+{{ include "prometheus-operator.labels" $ | indent 4 }}
 data:
   istio-pilot.json: |-
     {
@@ -83,7 +83,7 @@ data:
               "expr": "sum(istio_build{component=\"pilot\"}) by (tag)",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{ tag }}",
+              "legendFormat": "{{ `{{tag}}` }}",
               "refId": "A"
             }
           ],
@@ -249,7 +249,7 @@ data:
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
-              "legendFormat": "{{ container_name }} (k8s)",
+              "legendFormat": "{{ `{{container_name}}` }} (k8s)",
               "refId": "B",
               "step": 2
             }
@@ -345,7 +345,7 @@ data:
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
-              "legendFormat": "{{ container_name }} (k8s)",
+              "legendFormat": "{{ `{{container_name}}` }} (k8s)",
               "refId": "B",
               "step": 2
             },
@@ -450,7 +450,7 @@ data:
               "expr": "container_fs_usage_bytes{container_name=~\"discovery|istio-proxy\", pod_name=~\"istio-pilot-.*\"}",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{ container_name }}",
+              "legendFormat": "{{ `{{container_name}}` }}",
               "refId": "B",
               "step": 2
             }
@@ -639,7 +639,7 @@ data:
               "instant": false,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{ type }}",
+              "legendFormat": "{{ `{{type}}` }}",
               "refId": "B",
               "step": 2
             }
@@ -729,7 +729,7 @@ data:
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
-              "legendFormat": "Rejected CDS Configs - {{ node }}: {{ err }}",
+              "legendFormat": "Rejected CDS Configs - {{ `{{node}}` }}: {{ `{{err}}` }}",
               "refId": "C"
             },
             {
@@ -759,7 +759,7 @@ data:
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
-              "legendFormat": "Push Errors ({{ type }})",
+              "legendFormat": "Push Errors ({{ `{{type}}` }})",
               "refId": "I"
             }
           ],
@@ -1236,7 +1236,7 @@ data:
               "format": "time_series",
               "hide": true,
               "intervalFactor": 1,
-              "legendFormat": "Rejected CDS Configs - {{ node }}: {{ err }}",
+              "legendFormat": "Rejected CDS Configs - {{ `{{node}}` }}: {{ `{{err}}` }}",
               "refId": "C"
             },
             {
@@ -1272,14 +1272,14 @@ data:
               "expr": "rate(pilot_xds_pushes{job=\"pilot\"}[1m])",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "Pushes ({{ type }})",
+              "legendFormat": "Pushes ({{ `{{type}}` }})",
               "refId": "H"
             },
             {
               "expr": "rate(pilot_xds_push_errors{job=\"pilot\"}[1m])",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "Push Errors ({{ type }})",
+              "legendFormat": "Push Errors ({{ `{{type}}` }})",
               "refId": "I"
             }
           ],
@@ -1364,7 +1364,7 @@ data:
               "expr": "label_replace(sum(pilot_xds_cds_reject{job=\"pilot\"}) by (node, err), \"node\", \"$1\", \"node\", \".*~.*~(.*)~.*\")",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{ node }}  ({{ err }})",
+              "legendFormat": "{{ `{{node}}` }}  ({{ `{{err}}` }})",
               "refId": "A"
             }
           ],
@@ -1449,7 +1449,7 @@ data:
               "expr": "label_replace(sum(pilot_xds_eds_reject{job=\"pilot\"}) by (node, err), \"node\", \"$1\", \"node\", \".*~.*~(.*)~.*\")",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{ node }} ({{err}})",
+              "legendFormat": "{{ `{{node}}` }} ({{ `{{err}}` }})",
               "refId": "A"
             }
           ],
@@ -1534,7 +1534,7 @@ data:
               "expr": "label_replace(sum(pilot_xds_lds_reject{job=\"pilot\"}) by (node, err), \"node\", \"$1\", \"node\", \".*~.*~(.*)~.*\")",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{ node }} ({{err}})",
+              "legendFormat": "{{ `{{node}}` }} ({{ `{{err}}` }})",
               "refId": "A"
             }
           ],
@@ -1619,7 +1619,7 @@ data:
               "expr": "label_replace(sum(pilot_xds_rds_reject{job=\"pilot\"}) by (node, err), \"node\", \"$1\", \"node\", \".*~.*~(.*)~.*\")",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{ node }} ({{err}})",
+              "legendFormat": "{{ `{{node}}` }} ({{ `{{err}}` }})",
               "refId": "A"
             }
           ],
@@ -1711,7 +1711,7 @@ data:
               "expr": "sum(pilot_xds_eds_instances{job=\"pilot\"}) by (cluster)",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{ cluster }}",
+              "legendFormat": "{{ `{{cluster}}` }}",
               "refId": "A"
             }
           ],

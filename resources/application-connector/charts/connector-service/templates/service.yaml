@@ -15,7 +15,7 @@ spec:
       name: http-ext
   selector:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
 ---
 apiVersion: v1
 kind: Service
@@ -34,7 +34,7 @@ spec:
       name: http-int
   selector:
     app: {{ .Chart.Name }}
-    release: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
 ---
 kind: Service
 apiVersion: v1
@@ -46,6 +46,7 @@ metadata:
 spec:
   selector:
     app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
   ports:
   - name: metrics-port
     port: 9090

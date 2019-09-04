@@ -1,0 +1,121 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: compass-agent-configuration
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: compass-agent-configuration
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: compass-agent-configuration
+subjects:
+  - kind: ServiceAccount
+    name: compass-agent-configuration
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: compass-agent-configuration
+  namespace: {{ .Release.Namespace }}
+rules:
+  - apiGroups: [""]
+    resources: [configmaps]
+    verbs: [create, get]
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: compass-agent-configuration
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      name: compass-agent-configuration
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "{{ .Values.global.gateway.host }}.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
+      serviceAccountName: compass-agent-configuration
+      restartPolicy: Never
+      containers:
+        - name: compass-agent-configuration
+          image: "linkyard/kubectl:1.14.2"
+          command:
+            - bash
+            - -c
+            - |
+              MAX_RETRIES=60
+              DIRECTOR_URL=https://{{ .Values.global.gateway.host }}.{{ .Values.global.ingress.domainName }}/director/graphql
+
+              function director_readiness() {
+                local cnt=0
+                set +o errexit
+                while :
+                do
+                  RESPONSE_CODE=$(curl -k -s "${DIRECTOR_URL}" \
+                    --write-out "%{http_code}\n" --output /dev/null \
+                    -H 'Content-Type: application/json' \
+                    -H 'tenant: {{ .Values.global.defaultTenant }}' \
+                    --data-binary '{
+                         "query":"query queryRuntimes{\n  result: runtimes {\n    data {\n      id\n    }\n  }\n}"
+                    }')
+                  if [[ "$RESPONSE_CODE" == "200" ]]
+                    then
+                      echo "Director ready."
+                      break
+                    else
+                      ((cnt++))
+                      if (( cnt > $MAX_RETRIES )); then
+                        echo "Max retries has been reached (retries $MAX_RETRIES). Exit."
+                        exit 1
+                      fi
+
+                      echo "Director not ready! StatusCode: '${RESPONSE_CODE}' - waiting 5s..."
+                      sleep 5
+                    fi
+                done
+                set -o errexit
+              }
+
+              function agent_configuration() {
+                set +o pipefail
+                echo "Compass agent configuration - in progress."
+
+                RESPONSE_BODY=$(curl -k "${DIRECTOR_URL}" \
+                    -H 'Content-Type: application/json' \
+                    -H 'tenant: {{ .Values.global.defaultTenant }}' \
+                    --data-binary '{
+                      "query":"mutation createRuntime {\n  result: createRuntime(\n    in: { name: \"kymaruntime\", description: \"Default Kyma runtime\" }\n  ) {\n    id\n  }\n}\n"
+                    }')
+                echo $RESPONSE_BODY
+
+                RUNTIME_ID=$(echo $RESPONSE_BODY | jq -e '.data .result .id')
+                RUNTIME_ID="${RUNTIME_ID:1:${#RUNTIME_ID}-2}"
+                kubectl create configmap compass-agent-configuration --from-literal DIRECTOR_URL=$DIRECTOR_URL --from-literal TENANT=3e64ebae-38b5-46a0-b1ed-9ccee153a0ae --from-literal RUNTIME_ID=$RUNTIME_ID -n compass-system
+                echo "Compass agent configuration - finished."
+                set -o pipefail
+              }
+
+              kubectl get configmaps compass-agent-configuration -n compass-system > /dev/null 2>&1
+              if [[ $? -eq 0 ]]; then
+                 echo "Compass agent already configured and paired."
+                 exit 0
+              fi
+              director_readiness
+              agent_configuration

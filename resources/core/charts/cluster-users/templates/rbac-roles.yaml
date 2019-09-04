@@ -64,7 +64,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-view-base: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
     - ""
@@ -86,7 +86,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-nonresource-view: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - nonResourceURLs:
     - "*"
@@ -103,7 +103,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-view: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 aggregationRule:
   clusterRoleSelectors:
   - matchLabels:
@@ -127,7 +127,9 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-view: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-dex-view: "true"  
+      rbac.authorization.kyma-project.io/aggregate-to-dex-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-ory-view: "true"
 rules: []
 
 ---
@@ -145,7 +147,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-nonresource-admin: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 rules:
 - nonResourceURLs:
     - "*"
@@ -162,7 +164,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-kyma-edit: "true"
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 aggregationRule:
   clusterRoleSelectors:
   - matchLabels:
@@ -185,6 +187,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-dex-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-ory-edit: "true"
 rules: []
 
 ---
@@ -202,7 +206,7 @@ metadata:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 aggregationRule:
   clusterRoleSelectors:
   - matchLabels:
@@ -227,6 +231,8 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-dex-admin: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
 rules: []
 
 ---
@@ -242,7 +248,7 @@ metadata:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 aggregationRule:
   clusterRoleSelectors:
   - matchLabels:
@@ -265,7 +271,7 @@ metadata:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
-    "helm.sh/hook-weight": "0"
+    helm.sh/hook-weight: "0"
 subjects:
 - kind: ServiceAccount
   name: default
@@ -285,7 +291,7 @@ metadata:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
-    "helm.sh/hook-weight": "1"
+    helm.sh/hook-weight: "1"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -310,7 +316,7 @@ metadata:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
-    "helm.sh/hook-weight": "1"
+    helm.sh/hook-weight: "1"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -341,7 +347,7 @@ metadata:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
   annotations:
-    "helm.sh/hook-weight": "1"
+    helm.sh/hook-weight: "1"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

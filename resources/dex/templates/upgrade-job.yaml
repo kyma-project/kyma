@@ -6,9 +6,9 @@ kind: ServiceAccount
 metadata:
   name: dex-upgrade-job
   annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "0"
-    "helm.sh/hook-delete-policy": "before-hook-creation"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -16,9 +16,9 @@ metadata:
   name: dex-upgrade
   namespace: {{ .Release.Namespace }}
   annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "0"
-    "helm.sh/hook-delete-policy": "before-hook-creation"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
 rules:
 - apiGroups: [""]
   resources: ["services"]
@@ -32,9 +32,9 @@ metadata:
   name: dex-upgrade
   namespace: {{ .Release.Namespace }}
   annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "0"
-    "helm.sh/hook-delete-policy": "before-hook-creation"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: "before-hook-creation"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -48,9 +48,9 @@ kind: Job
 metadata:
   name: dex-upgrade-helper
   annotations:
-    "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "10"
+    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "10"
 spec:
   backoffLimit: 1
   template:

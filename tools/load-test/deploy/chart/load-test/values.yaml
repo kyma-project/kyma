@@ -3,7 +3,7 @@ env:
   kubelessNamespace: kyma-system
 
 containerRegistry:
-  path: eu.gcr.io/kyma-project
+  path: eu.gcr.io/kyma-project/pr
 
 image:
-  tag: c181e951
+  tag: 'PR-5226'

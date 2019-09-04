@@ -4,10 +4,10 @@ metadata:
   name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "connector-service" | trunc 63 | trimSuffix "-" }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
-      {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
-      {{- end }}
-      app: {{ template "prometheus-operator.name" $ }}-grafana
-  {{ include "prometheus-operator.labels" $ | indent 4 }}
+    {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
+    {{- end }}
+    app: {{ template "prometheus-operator.name" $ }}-grafana
+{{ include "prometheus-operator.labels" $ | indent 4 }}
 data:
   connector-service.json: |-
     {
@@ -473,7 +473,7 @@ data:
               "hide": false,
               "instant": false,
               "intervalFactor": 1,
-              "legendFormat": "{{ exported_endpoint }}",
+              "legendFormat": "{{ `{{ exported_endpoint }}` }}",
               "refId": "A"
             }
           ],
@@ -576,7 +576,7 @@ data:
               "expr": "increase(connector_service_endpoints_responses{exported_endpoint=~\"$endpoint\"}[10m])",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{exported_endpoint}} {{ status }}",
+              "legendFormat": "{{ `{{ exported_endpoint }}` }} {{ `{{ status }}` }}",
               "refId": "A"
             }
           ],

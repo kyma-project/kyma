@@ -3,7 +3,7 @@ title: Install Kyma locally
 type: Installation
 ---
 
-This Installation guide shows you how to quickly deploy Kyma locally on the MacOS and Linux platforms. Kyma is installed locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/).
+This Installation guide shows you how to quickly deploy Kyma locally on the MacOS, Linux, and Windows platforms. Kyma is installed locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/).
 
 >**TIP:** See [this](#troubleshooting-overview) document for troubleshooting tips.
 
@@ -17,7 +17,7 @@ This Installation guide shows you how to quickly deploy Kyma locally on the MacO
 
 Virtualization:
 
-- [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - MacOS only
+- [Hyperkit driver](https://minikube.sigs.k8s.io/docs/reference/drivers/hyperkit/) - MacOS only
 - [VirtualBox](https://www.virtualbox.org/) - Linux only
 
 > **NOTE**: To work with Kyma, use only the provided commands. Kyma requires a specific Minikube configuration and does not work on a basic Minikube cluster that you can start using the `minikube start` command.
@@ -37,7 +37,7 @@ Follow these instructions to install Kyma from a release or from sources:
      ```bash
      kyma provision minikube
      ```
-     > **NOTE:** The `provision` command uses the default Minikube VM driver installed for your operating system. For a list of supported VM drivers see [this document](https://kubernetes.io/docs/setup/minikube/#quickstart).
+     >**NOTE:** The `provision` command uses the default Minikube VM driver installed for your operating system. For a list of supported VM drivers see [this document](https://kubernetes.io/docs/setup/minikube/#quickstart).
 
   2. Install the latest Kyma release on Minikube:
      ```bash
@@ -62,7 +62,7 @@ Follow these instructions to install Kyma from a release or from sources:
      ```bash
      kyma provision minikube
      ```
-     >  **NOTE:** The `provision` command uses default Minikube VM driver installed for your OS. For a list of supported VM drivers see [this document](http://github.com/kyma-project/cli).
+     >**NOTE:** The `provision` command uses default Minikube VM driver installed for your OS. For a list of supported VM drivers see [this document](http://github.com/kyma-project/cli).
 
   4. Install Kyma from sources. Run:
 
@@ -75,7 +75,7 @@ Follow these instructions to install Kyma from a release or from sources:
 
 ## Post-installation steps
 
-Kyma comes with a local wildcard self-signed `server.crt` certificate. The `kyma install` command already downloads and adds trusted certificates to your OS so you can access the Console UI.
+Kyma comes with a local wildcard self-signed `server.crt` certificate. The `kyma install` command downloads and adds this certificate to the trusted certificates in your OS so you can access the Console UI.
 
 >**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
 

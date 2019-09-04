@@ -25,3 +25,7 @@ spec:
             - name: http
               containerPort: {{ .Values.deployment.args.containerPort}}
               protocol: TCP
+          {{- with .Values.deployment.securityContext }}
+          securityContext:
+{{ toYaml . | indent 12 }}
+          {{- end }}
