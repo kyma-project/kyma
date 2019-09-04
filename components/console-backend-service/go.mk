@@ -1,10 +1,10 @@
 # Default configuration
-IMG_NAME = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
-TAG = $(DOCKER_TAG)
-BASE_PKG = github.com/kyma-project/kyma
-IMG_GOPATH = /workspace/go
-IMG_GOCACHE = /root/.cache/go-build
-VERIFY_IGNORE = /vendor\|/automock\|/testdata\|/pkg
+IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
+TAG := $(DOCKER_TAG)
+BASE_PKG := github.com/kyma-project/kyma
+IMG_GOPATH := /workspace/go
+IMG_GOCACHE := /root/.cache/go-build
+VERIFY_IGNORE := /vendor\|/automock
 
 # Other variables
 LOCAL_DIR = $(shell pwd)
