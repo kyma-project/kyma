@@ -17,15 +17,15 @@ import (
 
 type namespaceService struct {
 	namespacesInformer cache.SharedIndexInformer
-	podsSvc podService
-	client   corev1.CoreV1Interface
+	podsSvc            podService
+	client             corev1.CoreV1Interface
 }
 
 func newNamespaceService(namespacesInformer cache.SharedIndexInformer, podsSvc podService, client corev1.CoreV1Interface) (*namespaceService, error) {
 	return &namespaceService{
 		namespacesInformer: namespacesInformer,
-		podsSvc: podsSvc,
-		client:   client,
+		podsSvc:            podsSvc,
+		client:             client,
 	}, nil
 }
 

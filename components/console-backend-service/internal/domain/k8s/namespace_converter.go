@@ -36,9 +36,9 @@ func (c *namespaceConverter) ToGQLs(in []*v1.Namespace) ([]gqlschema.Namespace, 
 
 func (c *namespaceConverter) ToGQLWithAdditionalData(in NamespaceWithAdditionalData) (*gqlschema.Namespace, error) {
 	return &gqlschema.Namespace{
-		Name:   in.namespace.Name,
-		Labels: in.namespace.Labels,
-		Status: string(in.namespace.Status.Phase),
+		Name:              in.namespace.Name,
+		Labels:            in.namespace.Labels,
+		Status:            string(in.namespace.Status.Phase),
 		IsSystemNamespace: in.isSystemNamespace,
 	}, nil
 }

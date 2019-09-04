@@ -47,7 +47,7 @@ func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.Applica
 }
 
 type NamespaceWithAdditionalData struct {
-	namespace *v1.Namespace
+	namespace         *v1.Namespace
 	isSystemNamespace bool
 }
 
@@ -70,7 +70,7 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNames
 		passedStatusCheck := ns.Status.Phase == "Active" || (withInactiveStatus != nil && *withInactiveStatus)
 		if passedSystemNamespaceCheck && passedStatusCheck {
 			namespaces = append(namespaces, NamespaceWithAdditionalData{
-				namespace: ns,
+				namespace:         ns,
 				isSystemNamespace: isSystem,
 			})
 		}
@@ -116,7 +116,7 @@ func (r *namespaceResolver) NamespaceQuery(ctx context.Context, name string) (*g
 
 	isSystem := isSystemNamespace(*namespace, r.systemNamespaces)
 	ns := NamespaceWithAdditionalData{
-		namespace: namespace,
+		namespace:         namespace,
 		isSystemNamespace: isSystem,
 	}
 
