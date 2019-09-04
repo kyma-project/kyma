@@ -106,6 +106,20 @@ rules:
   - '*'
   verbs:
   - '*'
+
+---
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      serving.knative.dev/controller: "true"
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    serving.knative.dev/release: "v0.8.1"
+  name: knative-serving-admin
+rules: []
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -244,6 +258,7 @@ subjects:
   namespace: knative-serving
 
 ---
+
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
@@ -1092,9 +1107,9 @@ data:
     # characters such as `-` in their service, or namespace, names.
     # {{.Annotations}} can be used for any customization in the go template if needed.
     # We strongly recommend keeping namespace part of the template to avoid domain name clashes
-    # Example '{{.Name}}-{{.Namespace}}.{{ index .Annotations "sub"}}.{{.Domain}}'
+    # Example '{{.Name}}-{{.Namespace}}.\{\{ index .Annotations "sub"\}\}.{{.Domain}}'
     # and you have an annotation {"sub":"foo"}, then the generated template would be {Name}-{Namespace}.foo.{Domain}
-    domainTemplate: "{{.Name}}.{{.Namespace}}.{{.Domain}}"
+     domainTemplate: "{{.Name}}.{{.Namespace}}.{{.Domain}}"
 
     # tagTemplate specifies the golang text template string to use
     # when constructing the DNS name for "tags" within the traffic blocks
@@ -1180,7 +1195,7 @@ data:
     #   PodIP         string  // IP of the pod hosting the revision
     # }
     #
-    #logging.request-log-template: '{"httpRequest": {"requestMethod": "{{.Request.Method}}", "requestUrl": "{{js .Request.RequestURI}}", "requestSize": "{{.Request.ContentLength}}", "status": {{.Response.Code}}, "responseSize": "{{.Response.Size}}", "userAgent": "{{js .Request.UserAgent}}", "remoteIp": "{{js .Request.RemoteAddr}}", "serverIp": "{{.Revision.PodIP}}", "referer": "{{js .Request.Referer}}", "latency": "{{.Response.Latency}}s", "protocol": "{{.Request.Proto}}"}, "traceId": "{{index .Request.Header "X-B3-Traceid"}}"}'
+    #logging.request-log-template: '\{"httpRequest": {"requestMethod": "\{\{.Request.Method\}\}", "requestUrl": "\{\{js .Request.RequestURI\}\}", "requestSize": "\{\{.Request.ContentLength\}\}", "status": \{\{.Response.Code\}\}, "responseSize": "\{\{.Response.Size\}\}", "userAgent": "\{\{js .Request.UserAgent\}\}", "remoteIp": "\{\{js .Request.RemoteAddr\}\}", "serverIp": "\{\{.Revision.PodIP\}\}", "referer": "\{\{js .Request.Referer\}\}", "latency": "\{\{.Response.Latency\}\}s", "protocol": "\{\{.Request.Proto\}\}"}, "traceId": "\{\{index .Request.Header "X-B3-Traceid"\}\}"}'
 
     # metrics.backend-destination field specifies the system metrics destination.
     # It supports either prometheus (the default) or stackdriver.

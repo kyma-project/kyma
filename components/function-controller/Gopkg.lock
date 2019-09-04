@@ -187,11 +187,11 @@
   revision = "6f77996f0c42f7b84e5a2b252227263f93432e9b"
 
 [[projects]]
-  digest = "1:9502d3f5526c8c5d234ba0575ce046a5b15f08cd9586e4370a2d61d198b68895"
+  digest = "1:05e0eaca2536c864728df512c58fa470d5c6a07376122a8d853fb7a56b0d3019"
   name = "github.com/google/go-containerregistry"
   packages = ["pkg/name"]
   pruneopts = "T"
-  revision = "ec69c4a8a1bff25fcbe096fcb32c9a6543fbdccf"
+  revision = "abf9ef06abd9f532944e28e8942644ea4b710a40"
 
 [[projects]]
   digest = "1:a6181aca1fd5e27103f9a920876f29ac72854df7345a39f3b01e61c8c94cc8af"
@@ -309,29 +309,22 @@
     "apis/duck",
     "apis/duck/v1alpha1",
     "apis/duck/v1beta1",
-    "configmap",
     "kmeta",
     "kmp",
-    "ptr",
   ]
   pruneopts = "T"
   revision = "262650b2c0dd6e6bfa2990d55cfc958e16179c59"
 
 [[projects]]
-  digest = "1:696d4ea394c9d92b4df5a39456a58110fd9b45eaa7ddd898d60bb15f17bf3421"
+  digest = "1:f96e423db48855ede706731c61308e86ffeb36e3b4a5dc7e5eb0669030463da9"
   name = "github.com/knative/serving"
   packages = [
-    "pkg/apis/autoscaling",
-    "pkg/apis/config",
-    "pkg/apis/networking",
-    "pkg/apis/networking/v1alpha1",
-    "pkg/apis/serving",
     "pkg/apis/serving/v1alpha1",
     "pkg/apis/serving/v1beta1",
   ]
   pruneopts = "T"
-  revision = "6afdcf3c200cc8cffcfdeaa223a00df150f4026f"
-  version = "v0.6.1"
+  revision = "6da659b889aa650b00af07223855a6da3b547c46"
+  version = "v0.8.1"
 
 [[projects]]
   branch = "master"
@@ -602,6 +595,7 @@
     "html/charset",
     "http/httpguts",
     "http2",
+    "http2/h2c",
     "http2/hpack",
     "idna",
   ]
@@ -1069,6 +1063,42 @@
   ]
   pruneopts = "T"
   revision = "db7b694dc208eead64d38030265f702db593fcf2"
+
+[[projects]]
+  branch = "master"
+  digest = "1:999e5842e5917fc452ae40769030dbc049e9def569118d01804f0fc46956e4fa"
+  name = "knative.dev/pkg"
+  packages = [
+    "apis",
+    "apis/duck",
+    "apis/duck/v1alpha1",
+    "apis/duck/v1beta1",
+    "apis/v1alpha1",
+    "configmap",
+    "kmeta",
+    "kmp",
+    "ptr",
+  ]
+  pruneopts = "T"
+  revision = "8cae700d29e47d30cbc05ffb230a5e8d73aaec9e"
+
+[[projects]]
+  digest = "1:f96e423db48855ede706731c61308e86ffeb36e3b4a5dc7e5eb0669030463da9"
+  name = "knative.dev/serving"
+  packages = [
+    "pkg/apis/autoscaling",
+    "pkg/apis/config",
+    "pkg/apis/networking",
+    "pkg/apis/networking/v1alpha1",
+    "pkg/apis/serving",
+    "pkg/apis/serving/v1beta1",
+    "pkg/gc",
+    "pkg/network",
+    "pkg/reconciler/route/config",
+  ]
+  pruneopts = "T"
+  revision = "6da659b889aa650b00af07223855a6da3b547c46"
+  version = "v0.8.1"
 
 [[projects]]
   digest = "1:ea68d743278f7d58f3ce92c01b98f4ed41613a850e9267909c4274b4d8162008"
