@@ -98,3 +98,5 @@ metadata:
     kyma-project.io/installation: ""
 data:
   global.isDevelopMode: "true" # global, because subcharts also use it
+
+
