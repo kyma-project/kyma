@@ -5,5 +5,3 @@ approvers:
  - igor-karpukhin
  - lilitgh
  - a-thaler
-labels:
- - area/performance-test
