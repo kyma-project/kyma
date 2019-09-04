@@ -109,16 +109,19 @@ fmt:
 fmt-local:
 	go fmt $$($(DIRS_TO_CHECK))
 
+.PHONY: errcheck errcheck-local
 errcheck:
 	$(call buildpack-mount,errcheck)
 errcheck-local:
 	errcheck -blank -asserts -ignorepkg '$$($(DIRS_TO_IGNORE) | tr '\n' ',')' -ignoregenerated ./...
 
+.PHONY: vet vet-local
 vet:
 	$(call buildpack-mount,vet)
 vet-local:
 	go vet $$($(DIRS_TO_CHECK))
 
+.PHONY: pull-licenses
 pull-licenses:
 ifdef LICENSE_PULLER_PATH
 	bash $(LICENSE_PULLER_PATH)
