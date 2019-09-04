@@ -39,13 +39,13 @@ func TestAddonsConfigurationResolver_CreateAddonsConfiguration(t *testing.T) {
 	addonsCfgMutation := automock.NewAddonsCfgMutations()
 	defer addonsCfgMutation.AssertExpectations(t)
 
-	addonsCfgMutation.On("Create", fixNS, fixNS, []string{}, &gqlschema.Labels{}).
+	addonsCfgMutation.On("Create", fixNS, fixNS, []gqlschema.AddonsConfigurationRepositoryInput{}, &gqlschema.Labels{}).
 		Return(fixAddonsConfiguration(fixNS), nil).Once()
 
 	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
 
 	// when
-	res, err := resolver.CreateAddonsConfiguration(context.Background(), fixNS, fixNS, []string{}, &gqlschema.Labels{})
+	res, err := resolver.CreateAddonsConfiguration(context.Background(), fixNS, fixNS, nil, []string{}, &gqlschema.Labels{})
 
 	// then
 	require.NoError(t, err)
@@ -57,13 +57,13 @@ func TestAddonsConfigurationResolver_UpdateAddonsConfiguration(t *testing.T) {
 	const addonName = "test"
 	addonsCfgMutation := automock.NewAddonsCfgMutations()
 	defer addonsCfgMutation.AssertExpectations(t)
-	addonsCfgMutation.On("Update", addonName, addonName, []string{}, &gqlschema.Labels{}).
+	addonsCfgMutation.On("Update", addonName, addonName, []gqlschema.AddonsConfigurationRepositoryInput{}, &gqlschema.Labels{}).
 		Return(fixAddonsConfiguration(addonName), nil).Once()
 
 	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(nil, addonsCfgMutation, nil)
 
 	// when
-	cfgs, err := resolver.UpdateAddonsConfiguration(context.Background(), addonName, addonName, []string{}, &gqlschema.Labels{})
+	cfgs, err := resolver.UpdateAddonsConfiguration(context.Background(), addonName, addonName, nil, []string{}, &gqlschema.Labels{})
 
 	// then
 	require.NoError(t, err)
@@ -93,13 +93,13 @@ func TestAddonsConfigurationResolver_AddAddonsConfigurationURLs(t *testing.T) {
 	const addonName = "test"
 	addonsCfgUpdater := automock.NewAddonsCfgUpdater()
 	defer addonsCfgUpdater.AssertExpectations(t)
-	addonsCfgUpdater.On("AddRepos", addonName, addonName, []string{"app.gg"}).
+	addonsCfgUpdater.On("AddRepos", addonName, addonName, []gqlschema.AddonsConfigurationRepositoryInput{{URL: "app.gg"}}).
 		Return(fixAddonsConfiguration(addonName), nil).Once()
 
 	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
 
 	// when
-	cfgs, err := resolver.AddAddonsConfigurationURLs(context.Background(), addonName, addonName, []string{"app.gg"})
+	cfgs, err := resolver.AddAddonsConfigurationURLs(context.Background(), addonName, addonName, nil, []string{"app.gg"})
 
 	// then
 	require.NoError(t, err)
@@ -111,13 +111,13 @@ func TestAddonsConfigurationResolver_RemoveAddonsConfigurationURLs(t *testing.T)
 	const addonName = "test"
 	addonsCfgUpdater := automock.NewAddonsCfgUpdater()
 	defer addonsCfgUpdater.AssertExpectations(t)
-	addonsCfgUpdater.On("RemoveRepos", addonName, addonName, []string{"www.piko.bo"}).
+	addonsCfgUpdater.On("RemoveRepos", addonName, addonName, []gqlschema.AddonsConfigurationRepositoryInput{{URL: "www.piko.bo"}}).
 		Return(fixAddonsConfiguration(addonName), nil).Once()
 
 	resolver := servicecatalogaddons.NewAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
 
 	// when
-	cfgs, err := resolver.RemoveAddonsConfigurationURLs(context.Background(), addonName, addonName, []string{"www.piko.bo"})
+	cfgs, err := resolver.RemoveAddonsConfigurationURLs(context.Background(), addonName, addonName, nil, []string{"www.piko.bo"})
 
 	// then
 	require.NoError(t, err)
@@ -143,10 +143,17 @@ func TestAddonsConfigurationResolver_ResyncAddonsConfigurationURLs(t *testing.T)
 }
 
 func fixGQLAddonsConfiguration(name string) *gqlschema.AddonsConfiguration {
+	url := "www.piko.bello"
 	return &gqlschema.AddonsConfiguration{
 		Name: name,
 		Urls: []string{
-			"www.piko.bello",
+			url,
+		},
+		Repositories: []gqlschema.AddonsConfigurationRepository{
+			{
+				URL:       url,
+				SecretRef: &gqlschema.ResourceRef{},
+			},
 		},
 	}
 }

@@ -6,55 +6,55 @@ import (
 	"time"
 
 	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
-	addonsFakeCli "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned/fake"
-	addonsClientset "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1"
-	addonsInformers "github.com/kyma-project/helm-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	k8s_testing "k8s.io/client-go/testing"
-	"k8s.io/client-go/tools/cache"
 )
 
 func TestClusterAddonsConfigurationService_AddRepos_Success(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name string
-		urls []string
+		urls []gqlschema.AddonsConfigurationRepositoryInput
 	}{
 		"add URL": {
 			name: "test",
-			urls: []string{
-				"www.next",
+			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+				{URL: "www.next"},
 			},
 		},
 		"add many URLs": {
 			name: "test",
-			urls: []string{
-				"www.next",
-				"www.one",
-				"www.two",
+			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+				{URL: "www.next"},
+				{URL: "www.one"},
+				{URL: "www.two"},
 			},
 		},
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
 			fixAddonCfg := fixClusterAddonsConfiguration("test")
+			url := "www.already.present.url"
 			fixAddonCfg.Spec.Repositories = []v1alpha1.SpecRepository{
-				{URL: "www.already.present.url"},
+				{URL: url},
 			}
-			expURLs := append(tc.urls, "www.already.present.url")
+			expURLs := append(tc.urls, gqlschema.AddonsConfigurationRepositoryInput{URL: url})
 
-			informer, client := fixClusterAddonsConfigurationInformer(fixAddonCfg)
+			client, err := newDynamicClient(fixAddonCfg)
+			require.NoError(t, err)
+
+			informer := fixClusterAddonsConfigurationInformer(client)
+			require.NoError(t, err)
+
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-			svc := servicecatalogaddons.NewClusterAddonsConfigurationService(informer, client)
+			svc := servicecatalogaddons.NewClusterAddonsConfigurationService(informer, client.Resource(clusterAddonsConfigGVR))
 
 			// when
 			result, err := svc.AddRepos(tc.name, tc.urls)
@@ -62,12 +62,6 @@ func TestClusterAddonsConfigurationService_AddRepos_Success(t *testing.T) {
 			// then
 			require.NoError(t, err)
 			assert.Len(t, result.Spec.Repositories, len(expURLs))
-
-			var normalizedResultURLs []string
-			for _, r := range result.Spec.Repositories {
-				normalizedResultURLs = append(normalizedResultURLs, r.URL)
-			}
-			assert.ElementsMatch(t, expURLs, normalizedResultURLs)
 		})
 	}
 }
@@ -75,12 +69,17 @@ func TestClusterAddonsConfigurationService_AddRepos_Success(t *testing.T) {
 func TestClusterAddonsConfigurationService_AddRepos_Failure(t *testing.T) {
 	// given
 	fixAddonCfgName := "not-existing-cfg"
-	fixURLs := []string{"www.www"}
+	fixURLs := []gqlschema.AddonsConfigurationRepositoryInput{{URL: "www.www"}}
 
-	informer, client := fixClusterAddonsConfigurationInformer()
+	client, err := newDynamicClient()
+	require.NoError(t, err)
+
+	informer := fixClusterAddonsConfigurationInformer(client)
+	require.NoError(t, err)
+
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(informer, client)
+	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(informer, client.Resource(clusterAddonsConfigGVR))
 
 	// when
 	result, err := svc.AddRepos(fixAddonCfgName, fixURLs)
@@ -94,7 +93,7 @@ func TestClusterAddonsConfigurationService_DeleteRepos(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name         string
 		repos        []v1alpha1.SpecRepository
-		urlsToRemove []string
+		urlsToRemove []gqlschema.AddonsConfigurationRepositoryInput
 	}{
 		"delete URL": {
 			name: "test",
@@ -102,8 +101,10 @@ func TestClusterAddonsConfigurationService_DeleteRepos(t *testing.T) {
 				{URL: "www.already.present.url"},
 				{URL: "www.next"},
 			},
-			urlsToRemove: []string{
-				"www.next",
+			urlsToRemove: []gqlschema.AddonsConfigurationRepositoryInput{
+				{
+					URL: "www.next",
+				},
 			},
 		},
 		"delete many URLs": {
@@ -113,9 +114,13 @@ func TestClusterAddonsConfigurationService_DeleteRepos(t *testing.T) {
 				{URL: "www.next"},
 				{URL: "www.second"},
 			},
-			urlsToRemove: []string{
-				"www.next",
-				"www.second",
+			urlsToRemove: []gqlschema.AddonsConfigurationRepositoryInput{
+				{
+					URL: "www.next",
+				},
+				{
+					URL: "www.second",
+				},
 			},
 		},
 		"delete all URLs": {
@@ -125,10 +130,17 @@ func TestClusterAddonsConfigurationService_DeleteRepos(t *testing.T) {
 				{URL: "www.next"},
 				{URL: "www.second"},
 			},
-			urlsToRemove: []string{
-				"www.already.present.url",
-				"www.next",
-				"www.second",
+
+			urlsToRemove: []gqlschema.AddonsConfigurationRepositoryInput{
+				{
+					URL: "www.already.present.url",
+				},
+				{
+					URL: "www.next",
+				},
+				{
+					URL: "www.second",
+				},
 			},
 		},
 	} {
@@ -137,10 +149,15 @@ func TestClusterAddonsConfigurationService_DeleteRepos(t *testing.T) {
 			cfg := fixClusterAddonsConfiguration(tc.name)
 			cfg.Spec.Repositories = tc.repos
 
-			inf, client := fixClusterAddonsConfigurationInformer(cfg)
+			client, err := newDynamicClient(cfg)
+			require.NoError(t, err)
+
+			inf := fixClusterAddonsConfigurationInformer(client)
+			require.NoError(t, err)
+
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-			svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
+			svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client.Resource(clusterAddonsConfigGVR))
 
 			// when
 			result, err := svc.RemoveRepos(tc.name, tc.urlsToRemove)
@@ -162,12 +179,21 @@ func TestClusterAddonsConfigurationService_DeleteRepos(t *testing.T) {
 func TestClusterAddonsConfigurationService_DeleteRepos_Failure(t *testing.T) {
 	// given
 	fixAddonCfgName := "not-existing-cfg"
-	fixURLs := []string{"www.www"}
+	fixURLs := []gqlschema.AddonsConfigurationRepositoryInput{
+		{
+			URL: "ww.fix.k",
+		},
+	}
 
-	inf, client := fixClusterAddonsConfigurationInformer()
+	client, err := newDynamicClient()
+	require.NoError(t, err)
+
+	inf := fixClusterAddonsConfigurationInformer(client)
+	require.NoError(t, err)
+
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
+	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client.Resource(clusterAddonsConfigGVR))
 
 	// when
 	result, err := svc.RemoveRepos(fixAddonCfgName, fixURLs)
@@ -180,7 +206,7 @@ func TestClusterAddonsConfigurationService_DeleteRepos_Failure(t *testing.T) {
 func TestClusterAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name   string
-		urls   []string
+		urls   []gqlschema.AddonsConfigurationRepositoryInput
 		labels *gqlschema.Labels
 
 		expectedResult *v1alpha1.ClusterAddonsConfiguration
@@ -191,8 +217,11 @@ func TestClusterAddonsConfigurationService_CreateAddonsConfiguration(t *testing.
 				"add": "it",
 				"ion": "al",
 			},
-			urls: []string{
-				"ww.fix.k",
+			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+				{
+					URL:       "ww.fix.k",
+					SecretRef: &gqlschema.ResourceRefInput{},
+				},
 			},
 			expectedResult: &v1alpha1.ClusterAddonsConfiguration{
 				ObjectMeta: metav1.ObjectMeta{
@@ -205,7 +234,10 @@ func TestClusterAddonsConfigurationService_CreateAddonsConfiguration(t *testing.
 				Spec: v1alpha1.ClusterAddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
-							{URL: "ww.fix.k"},
+							{
+								URL:       "ww.fix.k",
+								SecretRef: &v1.SecretReference{},
+							},
 						},
 					},
 				},
@@ -213,8 +245,11 @@ func TestClusterAddonsConfigurationService_CreateAddonsConfiguration(t *testing.
 		},
 		"successWithNilLabels": {
 			name: "test",
-			urls: []string{
-				"ww.fix.k",
+			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+				{
+					URL:       "ww.fix.k",
+					SecretRef: &gqlschema.ResourceRefInput{},
+				},
 			},
 			expectedResult: &v1alpha1.ClusterAddonsConfiguration{
 				ObjectMeta: metav1.ObjectMeta{
@@ -223,7 +258,10 @@ func TestClusterAddonsConfigurationService_CreateAddonsConfiguration(t *testing.
 				Spec: v1alpha1.ClusterAddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
-							{URL: "ww.fix.k"},
+							{
+								URL:       "ww.fix.k",
+								SecretRef: &v1.SecretReference{},
+							},
 						},
 					},
 				},
@@ -232,10 +270,15 @@ func TestClusterAddonsConfigurationService_CreateAddonsConfiguration(t *testing.
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			inf, client := fixClusterAddonsConfigurationInformer()
+			client, err := newDynamicClient()
+			require.NoError(t, err)
+
+			inf := fixClusterAddonsConfigurationInformer(client)
+			require.NoError(t, err)
+
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-			svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
+			svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client.Resource(clusterAddonsConfigGVR))
 
 			// when
 			result, err := svc.Create(tc.name, tc.urls, tc.labels)
@@ -250,7 +293,7 @@ func TestClusterAddonsConfigurationService_CreateAddonsConfiguration(t *testing.
 func TestClusterAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name   string
-		urls   []string
+		urls   []gqlschema.AddonsConfigurationRepositoryInput
 		labels *gqlschema.Labels
 
 		expectedResult *v1alpha1.ClusterAddonsConfiguration
@@ -261,10 +304,17 @@ func TestClusterAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.
 				"add": "it",
 				"ion": "al",
 			},
-			urls: []string{
-				"ww.fix.k",
+			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+				{
+					URL:       "ww.fix.k",
+					SecretRef: &gqlschema.ResourceRefInput{},
+				},
 			},
 			expectedResult: &v1alpha1.ClusterAddonsConfiguration{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "clusteraddonsconfiguration",
+					APIVersion: "addons.kyma-project.io/v1alpha1",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test",
 					Labels: map[string]string{
@@ -275,7 +325,10 @@ func TestClusterAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.
 				Spec: v1alpha1.ClusterAddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
-							{URL: "ww.fix.k"},
+							{
+								URL:       "ww.fix.k",
+								SecretRef: &v1.SecretReference{},
+							},
 						},
 					},
 				},
@@ -283,17 +336,27 @@ func TestClusterAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.
 		},
 		"successWithNilLabels": {
 			name: "test",
-			urls: []string{
-				"ww.fix.k",
+			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+				{
+					URL:       "ww.fix.k",
+					SecretRef: &gqlschema.ResourceRefInput{},
+				},
 			},
 			expectedResult: &v1alpha1.ClusterAddonsConfiguration{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "clusteraddonsconfiguration",
+					APIVersion: "addons.kyma-project.io/v1alpha1",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test",
 				},
 				Spec: v1alpha1.ClusterAddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
-							{URL: "ww.fix.k"},
+							{
+								URL:       "ww.fix.k",
+								SecretRef: &v1.SecretReference{},
+							},
 						},
 					},
 				},
@@ -302,10 +365,15 @@ func TestClusterAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			inf, client := fixClusterAddonsConfigurationInformer(fixClusterAddonsConfiguration(tc.name))
+			client, err := newDynamicClient(fixClusterAddonsConfiguration(tc.name))
+			require.NoError(t, err)
+
+			inf := fixClusterAddonsConfigurationInformer(client)
+			require.NoError(t, err)
+
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-			svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
+			svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client.Resource(clusterAddonsConfigGVR))
 
 			// when
 			result, err := svc.Update(tc.name, tc.urls, tc.labels)
@@ -321,10 +389,15 @@ func TestClusterAddonsConfigurationService_DeleteAddonsConfiguration(t *testing.
 	// given
 	fixAddonCfgName := "test"
 	expectedCfg := fixClusterAddonsConfiguration(fixAddonCfgName)
-	inf, client := fixClusterAddonsConfigurationInformer(expectedCfg)
+	client, err := newDynamicClient(expectedCfg)
+	require.NoError(t, err)
+
+	inf := fixClusterAddonsConfigurationInformer(client)
+	require.NoError(t, err)
+
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
+	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client.Resource(clusterAddonsConfigGVR))
 
 	// when
 	cfg, err := svc.Delete(fixAddonCfgName)
@@ -338,10 +411,16 @@ func TestClusterAddonsConfigurationService_DeleteAddonsConfiguration_Error(t *te
 	// given
 	fixAddonCfgName := "not-existing-cfg"
 	expErrMsg := fmt.Sprintf("%s doesn't exists", fixAddonCfgName)
-	inf, client := fixClusterAddonsConfigurationInformer()
+
+	client, err := newDynamicClient()
+	require.NoError(t, err)
+
+	inf := fixClusterAddonsConfigurationInformer(client)
+	require.NoError(t, err)
+
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
+	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client.Resource(clusterAddonsConfigGVR))
 
 	// when
 	cfg, err := svc.Delete(fixAddonCfgName)
@@ -373,7 +452,12 @@ func TestClusterAddonsConfigurationService_ListAddonsConfigurations(t *testing.T
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			inf, _ := fixClusterAddonsConfigurationInformer(tc.alreadyExitedCfgs...)
+			client, err := newDynamicClient(tc.alreadyExitedCfgs...)
+			require.NoError(t, err)
+
+			inf := fixClusterAddonsConfigurationInformer(client)
+			require.NoError(t, err)
+
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
 			svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, nil)
@@ -392,39 +476,15 @@ func TestClusterAddonsConfigurationService_ResyncAddonsConfiguration(t *testing.
 	// given
 	fixAddonCfgName := "test"
 	expectedCfg := fixClusterAddonsConfiguration(fixAddonCfgName)
-	inf, client := fixClusterAddonsConfigurationInformer(expectedCfg)
-	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client)
-
-	expectedCfg.Spec.ReprocessRequest = 1
-
-	// when
-	cfg, err := svc.Resync(fixAddonCfgName)
-
-	// then
+	client, err := newDynamicClient(expectedCfg)
 	require.NoError(t, err)
-	assert.Equal(t, expectedCfg, cfg)
-}
 
-func TestClusterAddonsConfigurationService_ResyncAddonsConfiguration_OnRetry(t *testing.T) {
-	// given
-	i := 0
-	fixAddonCfgName := "test"
-	expectedCfg := fixClusterAddonsConfiguration(fixAddonCfgName)
-	client := addonsFakeCli.NewSimpleClientset(expectedCfg)
-	client.PrependReactor("update", "clusteraddonsconfigurations", func(action k8s_testing.Action) (handled bool, ret runtime.Object, err error) {
-		if i == 0 {
-			i++
-			return true, nil, errors.NewConflict(schema.GroupResource{}, "", nil)
-		}
-		return false, expectedCfg, nil
-	})
-	addonsInformerFactory := addonsInformers.NewSharedInformerFactory(client, informerResyncPeriod)
-	inf := addonsInformerFactory.Addons().V1alpha1().ClusterAddonsConfigurations().Informer()
+	inf := fixClusterAddonsConfigurationInformer(client)
+
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client.AddonsV1alpha1())
+	svc := servicecatalogaddons.NewClusterAddonsConfigurationService(inf, client.Resource(clusterAddonsConfigGVR))
 
 	expectedCfg.Spec.ReprocessRequest = 1
 
@@ -438,6 +498,10 @@ func TestClusterAddonsConfigurationService_ResyncAddonsConfiguration_OnRetry(t *
 
 func fixClusterAddonsConfiguration(name string) *v1alpha1.ClusterAddonsConfiguration {
 	return &v1alpha1.ClusterAddonsConfiguration{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "clusteraddonsconfiguration",
+			APIVersion: "addons.kyma-project.io/v1alpha1",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 		},
@@ -449,11 +513,4 @@ func fixClusterAddonsConfiguration(name string) *v1alpha1.ClusterAddonsConfigura
 			},
 		},
 	}
-}
-
-func fixClusterAddonsConfigurationInformer(objects ...runtime.Object) (cache.SharedIndexInformer, addonsClientset.AddonsV1alpha1Interface) {
-	fakeCli := addonsFakeCli.NewSimpleClientset(objects...)
-	addonsInformerFactory := addonsInformers.NewSharedInformerFactory(fakeCli, informerResyncPeriod)
-
-	return addonsInformerFactory.Addons().V1alpha1().ClusterAddonsConfigurations().Informer(), fakeCli.AddonsV1alpha1()
 }

@@ -12,6 +12,8 @@ import (
 
 func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 	converter := servicecatalogaddons.NewClusterAddonsConfigurationConverter()
+	url := "ww.fix.k"
+
 	for tn, tc := range map[string]struct {
 		givenAddon           *v1alpha1.ClusterAddonsConfiguration
 		expectedAddonsConfig *gqlschema.AddonsConfiguration
@@ -32,7 +34,7 @@ func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 				Spec: v1alpha1.ClusterAddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
-							{URL: "ww.fix.k"},
+							{URL: url},
 						},
 					},
 				},
@@ -62,7 +64,13 @@ func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 					"add": "it",
 					"ion": "al",
 				},
-				Urls: []string{"ww.fix.k"},
+				Urls: []string{url},
+				Repositories: []gqlschema.AddonsConfigurationRepository{
+					{
+						URL:       url,
+						SecretRef: &gqlschema.ResourceRef{},
+					},
+				},
 				Status: gqlschema.AddonsConfigurationStatus{
 					Phase: string(v1alpha1.AddonsConfigurationReady),
 					Repositories: []gqlschema.AddonsConfigurationStatusRepository{
@@ -90,6 +98,7 @@ func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 
 func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 	converter := servicecatalogaddons.NewClusterAddonsConfigurationConverter()
+	url := "www.example.com"
 
 	for tn, tc := range map[string]struct {
 		givenAddons          []*v1alpha1.ClusterAddonsConfiguration
@@ -111,7 +120,7 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 					Spec: v1alpha1.ClusterAddonsConfigurationSpec{
 						CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 							Repositories: []v1alpha1.SpecRepository{
-								{URL: "www.example.com"},
+								{URL: url},
 							},
 						},
 					},
@@ -126,7 +135,7 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 					Spec: v1alpha1.ClusterAddonsConfigurationSpec{
 						CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 							Repositories: []v1alpha1.SpecRepository{
-								{URL: "www.next.com"},
+								{URL: url},
 							},
 						},
 					}},
@@ -137,14 +146,26 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 					Labels: gqlschema.Labels{
 						"test": "test",
 					},
-					Urls: []string{"www.example.com"},
+					Urls: []string{url},
+					Repositories: []gqlschema.AddonsConfigurationRepository{
+						{
+							URL:       url,
+							SecretRef: &gqlschema.ResourceRef{},
+						},
+					},
 				},
 				{
 					Name: "test2",
 					Labels: gqlschema.Labels{
 						"test2": "test2",
 					},
-					Urls: []string{"www.next.com"},
+					Urls: []string{url},
+					Repositories: []gqlschema.AddonsConfigurationRepository{
+						{
+							URL:       url,
+							SecretRef: &gqlschema.ResourceRef{},
+						},
+					},
 				},
 			},
 		},

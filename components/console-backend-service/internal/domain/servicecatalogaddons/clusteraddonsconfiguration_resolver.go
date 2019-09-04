@@ -28,15 +28,15 @@ type clusterAddonsCfgLister interface {
 
 //go:generate mockery -name=clusterAddonsCfgUpdater  -output=automock -outpkg=automock -case=underscore
 type clusterAddonsCfgUpdater interface {
-	AddRepos(name string, url []string) (*v1alpha1.ClusterAddonsConfiguration, error)
-	RemoveRepos(name string, urls []string) (*v1alpha1.ClusterAddonsConfiguration, error)
+	AddRepos(name string, url []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.ClusterAddonsConfiguration, error)
+	RemoveRepos(name string, urls []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.ClusterAddonsConfiguration, error)
 	Resync(name string) (*v1alpha1.ClusterAddonsConfiguration, error)
 }
 
 //go:generate mockery -name=clusterAddonsCfgMutations  -output=automock -outpkg=automock -case=underscore
 type clusterAddonsCfgMutations interface {
-	Create(name string, urls []string, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error)
-	Update(name string, urls []string, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error)
+	Create(name string, urls []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error)
+	Update(name string, urls []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error)
 	Delete(name string) (*v1alpha1.ClusterAddonsConfiguration, error)
 }
 
@@ -70,8 +70,14 @@ func (r *clusterAddonsConfigurationResolver) ClusterAddonsConfigurationsQuery(ct
 	return r.addonsCfgConverter.ToGQLs(addons), nil
 }
 
-func (r *clusterAddonsConfigurationResolver) CreateClusterAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
-	addon, err := r.addonsCfgMutations.Create(name, urls, labels)
+func (r *clusterAddonsConfigurationResolver) CreateClusterAddonsConfiguration(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+	repositories, err := resolveRepositories(repositories, urls)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while resolving repositories from %s %s", pretty.ClusterAddonsConfiguration, name))
+		return nil, gqlerror.New(err, pretty.ClusterAddonsConfiguration, gqlerror.WithName(name))
+	}
+
+	addon, err := r.addonsCfgMutations.Create(name, repositories, labels)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s %s", pretty.ClusterAddonsConfiguration, name))
 		return nil, gqlerror.New(err, pretty.ClusterAddonsConfiguration, gqlerror.WithName(name), gqlerror.WithCustomArgument("urls", strings.Join(urls, "\n")))
@@ -80,8 +86,14 @@ func (r *clusterAddonsConfigurationResolver) CreateClusterAddonsConfiguration(ct
 	return r.addonsCfgConverter.ToGQL(addon), nil
 }
 
-func (r *clusterAddonsConfigurationResolver) UpdateClusterAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
-	addon, err := r.addonsCfgMutations.Update(name, urls, labels)
+func (r *clusterAddonsConfigurationResolver) UpdateClusterAddonsConfiguration(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+	repositories, err := resolveRepositories(repositories, urls)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while resolving repositories from %s %s", pretty.ClusterAddonsConfiguration, name))
+		return nil, gqlerror.New(err, pretty.ClusterAddonsConfiguration, gqlerror.WithName(name))
+	}
+
+	addon, err := r.addonsCfgMutations.Update(name, repositories, labels)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while updating %s %s", pretty.ClusterAddonsConfiguration, name))
 		return nil, gqlerror.New(err, pretty.ClusterAddonsConfiguration, gqlerror.WithName(name), gqlerror.WithCustomArgument("urls", strings.Join(urls, "\n")))
@@ -100,8 +112,14 @@ func (r *clusterAddonsConfigurationResolver) DeleteClusterAddonsConfiguration(ct
 	return r.addonsCfgConverter.ToGQL(addon), nil
 }
 
-func (r clusterAddonsConfigurationResolver) AddClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
-	addon, err := r.addonsCfgUpdater.AddRepos(name, urls)
+func (r clusterAddonsConfigurationResolver) AddClusterAddonsConfigurationURLs(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	repositories, err := resolveRepositories(repositories, urls)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while resolving repositories from %s %s", pretty.ClusterAddonsConfiguration, name))
+		return nil, gqlerror.New(err, pretty.ClusterAddonsConfiguration, gqlerror.WithName(name))
+	}
+
+	addon, err := r.addonsCfgUpdater.AddRepos(name, repositories)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while adding additional repositories to %s %s", pretty.ClusterAddonsConfiguration, name))
 		return nil, gqlerror.New(err, pretty.ClusterAddonsConfiguration, gqlerror.WithName(name))
@@ -110,8 +128,14 @@ func (r clusterAddonsConfigurationResolver) AddClusterAddonsConfigurationURLs(ct
 	return r.addonsCfgConverter.ToGQL(addon), nil
 }
 
-func (r *clusterAddonsConfigurationResolver) RemoveClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
-	addon, err := r.addonsCfgUpdater.RemoveRepos(name, urls)
+func (r *clusterAddonsConfigurationResolver) RemoveClusterAddonsConfigurationURLs(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	repositories, err := resolveRepositories(repositories, urls)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while resolving repositories from %s %s", pretty.ClusterAddonsConfiguration, name))
+		return nil, gqlerror.New(err, pretty.ClusterAddonsConfiguration, gqlerror.WithName(name))
+	}
+
+	addon, err := r.addonsCfgUpdater.RemoveRepos(name, repositories)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while removing repository from %s %s", pretty.ClusterAddonsConfiguration, name))
 		return nil, gqlerror.New(err, pretty.ClusterAddonsConfiguration, gqlerror.WithName(name))

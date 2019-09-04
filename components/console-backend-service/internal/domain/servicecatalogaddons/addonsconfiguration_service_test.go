@@ -6,55 +6,59 @@ import (
 	"time"
 
 	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
-	addonsFakeCli "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned/fake"
-	addonsClientset "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1"
-	addonsInformers "github.com/kyma-project/helm-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
+	bindingUsageApi "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	k8s_testing "k8s.io/client-go/testing"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/cache"
 )
 
 func TestAddonsConfigurationService_AddRepos_Success(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name string
-		urls []string
+		urls []gqlschema.AddonsConfigurationRepositoryInput
 	}{
 		"add URL": {
 			name: "test",
-			urls: []string{
-				"www.next",
+			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+				{URL: "www.next"},
 			},
 		},
 		"add many URLs": {
 			name: "test",
-			urls: []string{
-				"www.next",
-				"www.one",
-				"www.two",
+			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+				{URL: "www.next"},
+				{URL: "www.one"},
+				{URL: "www.two"},
 			},
 		},
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
 			fixAddonCfg := fixAddonsConfiguration(tc.name)
+			url := "www.already.present.url"
 			fixAddonCfg.Spec.Repositories = []v1alpha1.SpecRepository{
-				{URL: "www.already.present.url"},
+				{URL: url},
 			}
-			expURLs := append(tc.urls, "www.already.present.url")
+			expURLs := append(tc.urls, gqlschema.AddonsConfigurationRepositoryInput{URL: url})
 
-			informer, client := fixAddonsConfigurationInformer(fixAddonCfg)
+			client, err := newDynamicClient(fixAddonCfg)
+			require.NoError(t, err)
+
+			informer := fixAddonsConfigurationInformer(client)
+			require.NoError(t, err)
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-			svc := servicecatalogaddons.NewAddonsConfigurationService(informer, client)
+			svc := servicecatalogaddons.NewAddonsConfigurationService(informer, client.Resource(addonsConfigGVR))
 
 			// when
 			result, err := svc.AddRepos(tc.name, "test", tc.urls)
@@ -62,12 +66,6 @@ func TestAddonsConfigurationService_AddRepos_Success(t *testing.T) {
 			// then
 			require.NoError(t, err)
 			assert.Len(t, result.Spec.Repositories, len(expURLs))
-
-			var normalizedResultURLs []string
-			for _, r := range result.Spec.Repositories {
-				normalizedResultURLs = append(normalizedResultURLs, r.URL)
-			}
-			assert.ElementsMatch(t, expURLs, normalizedResultURLs)
 		})
 	}
 }
@@ -75,12 +73,16 @@ func TestAddonsConfigurationService_AddRepos_Success(t *testing.T) {
 func TestAddonsConfigurationService_AddRepos_Failure(t *testing.T) {
 	// given
 	fixAddonCfgName := "not-existing-cfg"
-	fixURLs := []string{"www.www"}
+	fixURLs := []gqlschema.AddonsConfigurationRepositoryInput{{URL: "www.www"}}
 
-	informer, client := fixAddonsConfigurationInformer()
+	client, err := newDynamicClient()
+	require.NoError(t, err)
+
+	informer := fixAddonsConfigurationInformer(client)
+	require.NoError(t, err)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-	svc := servicecatalogaddons.NewAddonsConfigurationService(informer, client)
+	svc := servicecatalogaddons.NewAddonsConfigurationService(informer, client.Resource(addonsConfigGVR))
 
 	// when
 	result, err := svc.AddRepos(fixAddonCfgName, "test", fixURLs)
@@ -94,7 +96,7 @@ func TestAddonsConfigurationService_DeleteRepos(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name         string
 		repos        []v1alpha1.SpecRepository
-		urlsToRemove []string
+		urlsToRemove []gqlschema.AddonsConfigurationRepositoryInput
 	}{
 		"delete URL": {
 			name: "test",
@@ -102,8 +104,10 @@ func TestAddonsConfigurationService_DeleteRepos(t *testing.T) {
 				{URL: "www.already.present.url"},
 				{URL: "www.next"},
 			},
-			urlsToRemove: []string{
-				"www.next",
+			urlsToRemove: []gqlschema.AddonsConfigurationRepositoryInput{
+				{
+					URL: "www.next",
+				},
 			},
 		},
 		"delete many URLs": {
@@ -113,9 +117,13 @@ func TestAddonsConfigurationService_DeleteRepos(t *testing.T) {
 				{URL: "www.next"},
 				{URL: "www.second"},
 			},
-			urlsToRemove: []string{
-				"www.next",
-				"www.second",
+			urlsToRemove: []gqlschema.AddonsConfigurationRepositoryInput{
+				{
+					URL: "www.next",
+				},
+				{
+					URL: "www.second",
+				},
 			},
 		},
 		"delete all URLs": {
@@ -125,10 +133,17 @@ func TestAddonsConfigurationService_DeleteRepos(t *testing.T) {
 				{URL: "www.next"},
 				{URL: "www.second"},
 			},
-			urlsToRemove: []string{
-				"www.next",
-				"www.second",
-				"www.already.present.url",
+
+			urlsToRemove: []gqlschema.AddonsConfigurationRepositoryInput{
+				{
+					URL: "www.already.present.url",
+				},
+				{
+					URL: "www.next",
+				},
+				{
+					URL: "www.second",
+				},
 			},
 		},
 	} {
@@ -137,10 +152,14 @@ func TestAddonsConfigurationService_DeleteRepos(t *testing.T) {
 			cfg := fixAddonsConfiguration(tc.name)
 			cfg.Spec.Repositories = tc.repos
 
-			inf, client := fixAddonsConfigurationInformer(cfg)
+			client, err := newDynamicClient(cfg)
+			require.NoError(t, err)
+
+			inf := fixAddonsConfigurationInformer(client)
+			require.NoError(t, err)
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-			svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client)
+			svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client.Resource(addonsConfigGVR))
 
 			// when
 			result, err := svc.RemoveRepos(tc.name, "test", tc.urlsToRemove)
@@ -162,12 +181,18 @@ func TestAddonsConfigurationService_DeleteRepos(t *testing.T) {
 func TestAddonsConfigurationService_DeleteRepos_Failure(t *testing.T) {
 	// given
 	fixAddonCfgName := "not-existing-cfg"
-	fixURLs := []string{"www.www"}
+	fixURLs := []gqlschema.AddonsConfigurationRepositoryInput{
+		{
+			URL: "ww.fix.k",
+		},
+	}
+	client, err := newDynamicClient()
+	require.NoError(t, err)
 
-	inf, client := fixAddonsConfigurationInformer()
+	inf := fixAddonsConfigurationInformer(client)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-	svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client)
+	svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client.Resource(addonsConfigGVR))
 
 	// when
 	result, err := svc.RemoveRepos(fixAddonCfgName, "test", fixURLs)
@@ -180,7 +205,7 @@ func TestAddonsConfigurationService_DeleteRepos_Failure(t *testing.T) {
 func TestAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name   string
-		urls   []string
+		urls   []gqlschema.AddonsConfigurationRepositoryInput
 		labels *gqlschema.Labels
 
 		expectedResult *v1alpha1.AddonsConfiguration
@@ -191,13 +216,15 @@ func TestAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 				"add": "it",
 				"ion": "al",
 			},
-			urls: []string{
-				"ww.fix.k",
+			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+				{
+					URL:       "ww.fix.k",
+					SecretRef: &gqlschema.ResourceRefInput{},
+				},
 			},
 			expectedResult: &v1alpha1.AddonsConfiguration{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test",
-					Namespace: "test",
+					Name: "test",
 					Labels: map[string]string{
 						"add": "it",
 						"ion": "al",
@@ -206,7 +233,10 @@ func TestAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 				Spec: v1alpha1.AddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
-							{URL: "ww.fix.k"},
+							{
+								URL:       "ww.fix.k",
+								SecretRef: &v1.SecretReference{},
+							},
 						},
 					},
 				},
@@ -214,18 +244,23 @@ func TestAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 		},
 		"successWithNilLabels": {
 			name: "test",
-			urls: []string{
-				"ww.fix.k",
+			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+				{
+					URL:       "ww.fix.k",
+					SecretRef: &gqlschema.ResourceRefInput{},
+				},
 			},
 			expectedResult: &v1alpha1.AddonsConfiguration{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      "test",
-					Namespace: "test",
+					Name: "test",
 				},
 				Spec: v1alpha1.AddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
-							{URL: "ww.fix.k"},
+							{
+								URL:       "ww.fix.k",
+								SecretRef: &v1.SecretReference{},
+							},
 						},
 					},
 				},
@@ -234,10 +269,12 @@ func TestAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			inf, client := fixAddonsConfigurationInformer()
+			client, err := newDynamicClient()
+			require.NoError(t, err)
+			inf := fixAddonsConfigurationInformer(client)
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-			svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client)
+			svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client.Resource(addonsConfigGVR))
 
 			// when
 			result, err := svc.Create(tc.name, "test", tc.urls, tc.labels)
@@ -252,7 +289,7 @@ func TestAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 func TestAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name   string
-		urls   []string
+		urls   []gqlschema.AddonsConfigurationRepositoryInput
 		labels *gqlschema.Labels
 
 		expectedResult *v1alpha1.AddonsConfiguration
@@ -263,10 +300,17 @@ func TestAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
 				"add": "it",
 				"ion": "al",
 			},
-			urls: []string{
-				"ww.fix.k",
+			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+				{
+					URL:       "ww.fix.k",
+					SecretRef: &gqlschema.ResourceRefInput{},
+				},
 			},
 			expectedResult: &v1alpha1.AddonsConfiguration{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "addonsconfiguration",
+					APIVersion: "addons.kyma-project.io/v1alpha1",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test",
 					Namespace: "test",
@@ -278,7 +322,10 @@ func TestAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
 				Spec: v1alpha1.AddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
-							{URL: "ww.fix.k"},
+							{
+								URL:       "ww.fix.k",
+								SecretRef: &v1.SecretReference{},
+							},
 						},
 					},
 				},
@@ -286,10 +333,17 @@ func TestAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
 		},
 		"successWithNilLabels": {
 			name: "test",
-			urls: []string{
-				"ww.fix.k",
+			urls: []gqlschema.AddonsConfigurationRepositoryInput{
+				{
+					URL:       "ww.fix.k",
+					SecretRef: &gqlschema.ResourceRefInput{},
+				},
 			},
 			expectedResult: &v1alpha1.AddonsConfiguration{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "addonsconfiguration",
+					APIVersion: "addons.kyma-project.io/v1alpha1",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "test",
 					Namespace: "test",
@@ -297,7 +351,10 @@ func TestAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
 				Spec: v1alpha1.AddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
-							{URL: "ww.fix.k"},
+							{
+								URL:       "ww.fix.k",
+								SecretRef: &v1.SecretReference{},
+							},
 						},
 					},
 				},
@@ -306,10 +363,13 @@ func TestAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			inf, client := fixAddonsConfigurationInformer(fixAddonsConfiguration(tc.name))
+			client, err := newDynamicClient(fixAddonsConfiguration(tc.name))
+			require.NoError(t, err)
+
+			inf := fixAddonsConfigurationInformer(client)
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-			svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client)
+			svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client.Resource(addonsConfigGVR))
 
 			// when
 			result, err := svc.Update(tc.name, "test", tc.urls, tc.labels)
@@ -325,10 +385,12 @@ func TestAddonsConfigurationService_DeleteAddonsConfiguration(t *testing.T) {
 	// given
 	fixAddonCfgName := "test"
 	expectedCfg := fixAddonsConfiguration(fixAddonCfgName)
-	inf, client := fixAddonsConfigurationInformer(expectedCfg)
+	client, err := newDynamicClient(expectedCfg)
+	require.NoError(t, err)
+	inf := fixAddonsConfigurationInformer(client)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-	svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client)
+	svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client.Resource(addonsConfigGVR))
 
 	// when
 	cfg, err := svc.Delete(fixAddonCfgName, "test")
@@ -342,10 +404,12 @@ func TestAddonsConfigurationService_DeleteAddonsConfiguration_Error(t *testing.T
 	// given
 	fixAddonCfgName := "not-existing-cfg"
 	expErrMsg := fmt.Sprintf("%s doesn't exists", fixAddonCfgName)
-	inf, client := fixAddonsConfigurationInformer()
+	client, err := newDynamicClient()
+	require.NoError(t, err)
+	inf := fixAddonsConfigurationInformer(client)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-	svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client)
+	svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client.Resource(addonsConfigGVR))
 
 	// when
 	cfg, err := svc.Delete(fixAddonCfgName, "test")
@@ -377,6 +441,10 @@ func TestAddonsConfigurationService_ListAddonsConfigurations(t *testing.T) {
 		"wrong namespace": {
 			alreadyExitedCfgs: []runtime.Object{
 				&v1alpha1.AddonsConfiguration{
+					TypeMeta: metav1.TypeMeta{
+						Kind:       "addonsconfiguration",
+						APIVersion: "addons.kyma-project.io/v1alpha1",
+					},
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "test",
 						Namespace: "wrong",
@@ -388,10 +456,15 @@ func TestAddonsConfigurationService_ListAddonsConfigurations(t *testing.T) {
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			inf, _ := fixAddonsConfigurationInformer(tc.alreadyExitedCfgs...)
+			client, err := newDynamicClient(tc.alreadyExitedCfgs...)
+			require.NoError(t, err)
+
+			inf := fixAddonsConfigurationInformer(client)
+			require.NoError(t, err)
+
 			testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-			svc := servicecatalogaddons.NewAddonsConfigurationService(inf, nil)
+			svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client.Resource(clusterAddonsConfigGVR))
 
 			// when
 			result, err := svc.List("test", pager.PagingParams{})
@@ -407,10 +480,14 @@ func TestAddonsConfigurationService_ResyncAddonsConfiguration(t *testing.T) {
 	// given
 	fixAddonCfgName := "test"
 	expectedCfg := fixAddonsConfiguration(fixAddonCfgName)
-	inf, client := fixAddonsConfigurationInformer(expectedCfg)
+
+	client, err := newDynamicClient(expectedCfg)
+	require.NoError(t, err)
+
+	inf := fixAddonsConfigurationInformer(client)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
 
-	svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client)
+	svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client.Resource(addonsConfigGVR))
 
 	expectedCfg.Spec.ReprocessRequest = 1
 
@@ -422,37 +499,35 @@ func TestAddonsConfigurationService_ResyncAddonsConfiguration(t *testing.T) {
 	assert.Equal(t, expectedCfg, cfg)
 }
 
-func TestAddonsConfigurationService_ResyncAddonsConfiguration_OnRetry(t *testing.T) {
-	// given
-	i := 0
-	fixAddonCfgName := "test"
-	expectedCfg := fixAddonsConfiguration(fixAddonCfgName)
-	client := addonsFakeCli.NewSimpleClientset(expectedCfg)
-	client.PrependReactor("update", "addonsconfigurations", func(action k8s_testing.Action) (handled bool, ret runtime.Object, err error) {
-		if i == 0 {
-			i++
-			return true, nil, errors.NewConflict(schema.GroupResource{}, "", nil)
-		}
-		return false, expectedCfg, nil
-	})
-	addonsInformerFactory := addonsInformers.NewSharedInformerFactory(client, informerResyncPeriod)
-	inf := addonsInformerFactory.Addons().V1alpha1().AddonsConfigurations().Informer()
-	testingUtils.WaitForInformerStartAtMost(t, time.Second, inf)
-
-	svc := servicecatalogaddons.NewAddonsConfigurationService(inf, client.AddonsV1alpha1())
-
-	expectedCfg.Spec.ReprocessRequest = 1
-
-	// when
-	cfg, err := svc.Resync(fixAddonCfgName, expectedCfg.Namespace)
-
-	// then
-	require.NoError(t, err)
-	assert.Equal(t, expectedCfg, cfg)
-}
+var (
+	usageKindsGVR = schema.GroupVersionResource{
+		Version:  bindingUsageApi.SchemeGroupVersion.Version,
+		Group:    bindingUsageApi.SchemeGroupVersion.Group,
+		Resource: "usagekinds",
+	}
+	bindingUsageGVR = schema.GroupVersionResource{
+		Version:  bindingUsageApi.SchemeGroupVersion.Version,
+		Group:    bindingUsageApi.SchemeGroupVersion.Group,
+		Resource: "servicebindingusages",
+	}
+	addonsConfigGVR = schema.GroupVersionResource{
+		Version:  v1alpha1.SchemeGroupVersion.Version,
+		Group:    v1alpha1.SchemeGroupVersion.Group,
+		Resource: "addonsconfigurations",
+	}
+	clusterAddonsConfigGVR = schema.GroupVersionResource{
+		Version:  v1alpha1.SchemeGroupVersion.Version,
+		Group:    v1alpha1.SchemeGroupVersion.Group,
+		Resource: "clusteraddonsconfigurations",
+	}
+)
 
 func fixAddonsConfiguration(name string) *v1alpha1.AddonsConfiguration {
 	return &v1alpha1.AddonsConfiguration{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "addonsconfiguration",
+			APIVersion: "addons.kyma-project.io/v1alpha1",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: "test",
@@ -467,9 +542,10 @@ func fixAddonsConfiguration(name string) *v1alpha1.AddonsConfiguration {
 	}
 }
 
-func fixAddonsConfigurationInformer(objects ...runtime.Object) (cache.SharedIndexInformer, addonsClientset.AddonsV1alpha1Interface) {
-	fakeCli := addonsFakeCli.NewSimpleClientset(objects...)
-	addonsInformerFactory := addonsInformers.NewSharedInformerFactory(fakeCli, informerResyncPeriod)
+func fixAddonsConfigurationInformer(dynamic dynamic.Interface) cache.SharedIndexInformer {
+	return dynamicinformer.NewDynamicSharedInformerFactory(dynamic, 10).ForResource(addonsConfigGVR).Informer()
+}
 
-	return addonsInformerFactory.Addons().V1alpha1().AddonsConfigurations().Informer(), fakeCli.AddonsV1alpha1()
+func fixClusterAddonsConfigurationInformer(dynamic dynamic.Interface) cache.SharedIndexInformer {
+	return dynamicinformer.NewDynamicSharedInformerFactory(dynamic, 10).ForResource(clusterAddonsConfigGVR).Informer()
 }

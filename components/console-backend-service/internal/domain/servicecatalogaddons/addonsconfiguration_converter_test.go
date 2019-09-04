@@ -1,16 +1,18 @@
-package servicecatalogaddons
+package servicecatalogaddons_test
 
 import (
 	"testing"
 
 	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestAddonsConfigurationConverter_ToGQL(t *testing.T) {
-	converter := NewAddonsConfigurationConverter()
+	converter := servicecatalogaddons.NewAddonsConfigurationConverter()
+	url := "ww.fix.k"
 	for tn, tc := range map[string]struct {
 		givenAddon           *v1alpha1.AddonsConfiguration
 		expectedAddonsConfig *gqlschema.AddonsConfiguration
@@ -31,7 +33,7 @@ func TestAddonsConfigurationConverter_ToGQL(t *testing.T) {
 				Spec: v1alpha1.AddonsConfigurationSpec{
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
-							{URL: "ww.fix.k"},
+							{URL: url},
 						},
 					},
 				},
@@ -61,7 +63,13 @@ func TestAddonsConfigurationConverter_ToGQL(t *testing.T) {
 					"add": "it",
 					"ion": "al",
 				},
-				Urls: []string{"ww.fix.k"},
+				Urls: []string{url},
+				Repositories: []gqlschema.AddonsConfigurationRepository{
+					{
+						URL:       url,
+						SecretRef: &gqlschema.ResourceRef{},
+					},
+				},
 				Status: gqlschema.AddonsConfigurationStatus{
 					Phase: string(v1alpha1.AddonsConfigurationReady),
 					Repositories: []gqlschema.AddonsConfigurationStatusRepository{

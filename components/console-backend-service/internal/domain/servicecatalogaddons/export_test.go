@@ -2,23 +2,28 @@ package servicecatalogaddons
 
 import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
-	fakeaddonsClientset "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned/fake"
-	addonsClientset "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1"
-	fakeSbu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	fakeDynamic "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/dynamic"
 )
 
 // Addons Configurations
 
-func NewAddonsConfigurationService(addonsCfgInformer cache.SharedIndexInformer, addonsCfgClient addonsClientset.AddonsV1alpha1Interface) *addonsConfigurationService {
+func NewAddonsConfigurationService(addonsCfgInformer cache.SharedIndexInformer, addonsCfgClient dynamic.NamespaceableResourceInterface) *addonsConfigurationService {
 	return newAddonsConfigurationService(addonsCfgInformer, addonsCfgClient)
 }
 
-func NewClusterAddonsConfigurationService(addonsCfgInformer cache.SharedIndexInformer, addonsCfgClient addonsClientset.AddonsV1alpha1Interface) *clusterAddonsConfigurationService {
+func NewClusterAddonsConfigurationService(addonsCfgInformer cache.SharedIndexInformer, addonsCfgClient dynamic.ResourceInterface) *clusterAddonsConfigurationService {
 	return newClusterAddonsConfigurationService(addonsCfgInformer, addonsCfgClient)
+}
+
+func NewBindableResourcesResolver(lister bindableResourceLister) *bindableResourcesResolver {
+	return newBindableResourcesResolver(lister)
+}
+
+func NewServiceBindingUsageConverter() *serviceBindingUsageConverter {
+	return &serviceBindingUsageConverter{}
 }
 
 func NewAddonsConfigurationConverter() *addonsConfigurationConverter {
@@ -49,8 +54,8 @@ func NewAddonsConfigurationResolver(addonsCfgUpdater addonsCfgUpdater, addonsCfg
 
 // Binding usage
 
-func NewServiceBindingUsageService(buInterface v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, scRetriever shared.ServiceCatalogRetriever, sbuName string) (*serviceBindingUsageService, error) {
-	return newServiceBindingUsageService(buInterface, informer, scRetriever, func() string {
+func NewServiceBindingUsageService(sbuClient dynamic.NamespaceableResourceInterface, informer cache.SharedIndexInformer, scRetriever shared.ServiceCatalogRetriever, sbuName string) (*serviceBindingUsageService, error) {
+	return newServiceBindingUsageService(sbuClient, informer, scRetriever, func() string {
 		return sbuName
 	})
 }
@@ -59,10 +64,19 @@ func NewServiceBindingUsageResolver(op serviceBindingUsageOperations) *serviceBi
 	return newServiceBindingUsageResolver(op)
 }
 
-// Service Catalog Module
+func NewUsageKindResolver(svc usageKindServices) *usageKindResolver {
+	return newUsageKindResolver(svc)
+}
 
+func NewUsageKindService(res dynamic.Interface, informer cache.SharedIndexInformer) *usageKindService {
+	return newUsageKindService(res, informer)
+}
+
+func NewUsageKindConverter() *usageKindConverter {
+	return &usageKindConverter{}
+}
+
+// Service Catalog Module
 func (r *PluggableContainer) SetFakeClient() {
-	r.cfg.addonsCfgCli = fakeaddonsClientset.NewSimpleClientset()
-	r.cfg.serviceBindingUsageClient = fakeSbu.NewSimpleClientset()
 	r.cfg.dynamicClient = fakeDynamic.NewSimpleDynamicClient(runtime.NewScheme())
 }
