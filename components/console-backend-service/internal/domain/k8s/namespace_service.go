@@ -5,6 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -19,13 +20,17 @@ type namespaceService struct {
 	namespacesInformer cache.SharedIndexInformer
 	podsSvc            podService
 	client             corev1.CoreV1Interface
+	notifier           resource.Notifier
 }
 
 func newNamespaceService(namespacesInformer cache.SharedIndexInformer, podsSvc podService, client corev1.CoreV1Interface) (*namespaceService, error) {
+	notifier := resource.NewNotifier()
+	namespacesInformer.AddEventHandler(notifier)
 	return &namespaceService{
 		namespacesInformer: namespacesInformer,
 		podsSvc:            podsSvc,
 		client:             client,
+		notifier:           notifier,
 	}, nil
 }
 
@@ -107,4 +112,12 @@ func (svc *namespaceService) Update(name string, labels gqlschema.Labels) (*v1.N
 
 func (svc *namespaceService) Delete(name string) error {
 	return svc.client.Namespaces().Delete(name, nil)
+}
+
+func (svc *namespaceService) Subscribe(listener resource.Listener) {
+	svc.notifier.AddListener(listener)
+}
+
+func (svc *namespaceService) Unsubscribe(listener resource.Listener) {
+	svc.notifier.DeleteListener(listener)
 }

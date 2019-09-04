@@ -4,11 +4,13 @@ import (
 	"context"
 	"github.com/golang/glog"
 	appPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 )
@@ -20,6 +22,8 @@ type namespaceSvc interface {
 	List() ([]*v1.Namespace, error)
 	Find(name string) (*v1.Namespace, error)
 	Delete(name string) error
+	Subscribe(listener resource.Listener)
+	Unsubscribe(listener resource.Listener)
 }
 
 //go:generate mockery -name=gqlNamespaceConverter -output=automock -outpkg=automock -case=underscore
@@ -177,6 +181,24 @@ func (r *namespaceResolver) DeleteNamespace(ctx context.Context, name string) (*
 	}
 
 	return deletedNamespace, nil
+}
+
+func (r *namespaceResolver) NamespaceEventSubscription(ctx context.Context) (<-chan gqlschema.NamespaceEvent, error) {
+	channel := make(chan gqlschema.NamespaceEvent, 1)
+	filter := func(namespace *v1.Namespace) bool {
+		return namespace != nil
+	}
+
+	namespaceListener := listener.NewNamespace(channel, filter, r.namespaceConverter)
+
+	r.namespaceSvc.Subscribe(namespaceListener)
+	go func() {
+		defer close(channel)
+		defer r.namespaceSvc.Unsubscribe(namespaceListener)
+		<-ctx.Done()
+	}()
+
+	return channel, nil
 }
 
 func (r *namespaceResolver) populateLabels(givenLabels *gqlschema.Labels) map[string]string {

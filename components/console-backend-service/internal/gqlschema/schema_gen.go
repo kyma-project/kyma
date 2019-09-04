@@ -505,6 +505,11 @@ type ComplexityRoot struct {
 		Applications      func(childComplexity int) int
 	}
 
+	NamespaceEvent struct {
+		Type      func(childComplexity int) int
+		Namespace func(childComplexity int) int
+	}
+
 	NamespaceMutationOutput struct {
 		Name   func(childComplexity int) int
 		Labels func(childComplexity int) int
@@ -834,6 +839,7 @@ type ComplexityRoot struct {
 		ClusterAddonsConfigurationEvent func(childComplexity int) int
 		AddonsConfigurationEvent        func(childComplexity int, namespace string) int
 		ApiEvent                        func(childComplexity int, namespace string, serviceName *string) int
+		NamespaceEvent                  func(childComplexity int) int
 	}
 
 	UsageKind struct {
@@ -1023,6 +1029,7 @@ type SubscriptionResolver interface {
 	ClusterAddonsConfigurationEvent(ctx context.Context) (<-chan ClusterAddonsConfigurationEvent, error)
 	AddonsConfigurationEvent(ctx context.Context, namespace string) (<-chan AddonsConfigurationEvent, error)
 	APIEvent(ctx context.Context, namespace string, serviceName *string) (<-chan ApiEvent, error)
+	NamespaceEvent(ctx context.Context) (<-chan NamespaceEvent, error)
 }
 
 func field_Asset_files_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -6268,6 +6275,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Namespace.Applications(childComplexity), true
 
+	case "NamespaceEvent.type":
+		if e.complexity.NamespaceEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.NamespaceEvent.Type(childComplexity), true
+
+	case "NamespaceEvent.namespace":
+		if e.complexity.NamespaceEvent.Namespace == nil {
+			break
+		}
+
+		return e.complexity.NamespaceEvent.Namespace(childComplexity), true
+
 	case "NamespaceMutationOutput.name":
 		if e.complexity.NamespaceMutationOutput.Name == nil {
 			break
@@ -8082,6 +8103,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.ApiEvent(childComplexity, args["namespace"].(string), args["serviceName"].(*string)), true
+
+	case "Subscription.namespaceEvent":
+		if e.complexity.Subscription.NamespaceEvent == nil {
+			break
+		}
+
+		return e.complexity.Subscription.NamespaceEvent(childComplexity), true
 
 	case "UsageKind.name":
 		if e.complexity.UsageKind.Name == nil {
@@ -19359,6 +19387,96 @@ func (ec *executionContext) _Namespace_applications(ctx context.Context, field g
 	return arr1
 }
 
+var namespaceEventImplementors = []string{"NamespaceEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _NamespaceEvent(ctx context.Context, sel ast.SelectionSet, obj *NamespaceEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, namespaceEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("NamespaceEvent")
+		case "type":
+			out.Values[i] = ec._NamespaceEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "namespace":
+			out.Values[i] = ec._NamespaceEvent_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NamespaceEvent_type(ctx context.Context, field graphql.CollectedField, obj *NamespaceEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NamespaceEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NamespaceEvent_namespace(ctx context.Context, field graphql.CollectedField, obj *NamespaceEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NamespaceEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Namespace)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Namespace(ctx, field.Selections, &res)
+}
+
 var namespaceMutationOutputImplementors = []string{"NamespaceMutationOutput"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -28593,6 +28711,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_addonsConfigurationEvent(ctx, fields[0])
 	case "apiEvent":
 		return ec._Subscription_apiEvent(ctx, fields[0])
+	case "namespaceEvent":
+		return ec._Subscription_namespaceEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -29059,6 +29179,31 @@ func (ec *executionContext) _Subscription_apiEvent(ctx context.Context, field gr
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler {
 			return ec._ApiEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_namespaceEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().NamespaceEvent(rctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._NamespaceEvent(ctx, field.Selections, &res)
 		}())
 		return &out
 	}
@@ -32131,6 +32276,11 @@ type Namespace {
     applications: [String!]
 }
 
+type NamespaceEvent {
+    type: SubscriptionEventType!
+    namespace: Namespace!
+}
+
 type NamespaceMutationOutput {
     name: String!
     labels: Labels!
@@ -32519,7 +32669,7 @@ type Subscription {
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
     apiEvent(namespace: String!, serviceName: String): ApiEvent! @HasAccess(attributes: {resource: "apis", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
-
+    namespaceEvent: NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 }
 
 # Schema

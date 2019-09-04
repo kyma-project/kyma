@@ -366,6 +366,11 @@ type MicroFrontend struct {
 	NavigationNodes []NavigationNode `json:"navigationNodes"`
 }
 
+type NamespaceEvent struct {
+	Type      SubscriptionEventType `json:"type"`
+	Namespace Namespace             `json:"namespace"`
+}
+
 type NamespaceMutationOutput struct {
 	Name   string `json:"name"`
 	Labels Labels `json:"labels"`

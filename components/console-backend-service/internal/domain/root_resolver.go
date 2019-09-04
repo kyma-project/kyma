@@ -640,6 +640,10 @@ func (r *subscriptionResolver) APIEvent(ctx context.Context, namespace string, s
 	return r.ac.APIEventSubscription(ctx, namespace, serviceName)
 }
 
+func (r *subscriptionResolver) NamespaceEvent(ctx context.Context) (<-chan gqlschema.NamespaceEvent, error) {
+	return r.k8s.NamespaceEventSubscription(ctx)
+}
+
 // Service Instance
 
 type serviceInstanceResolver struct {
