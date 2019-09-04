@@ -791,6 +791,10 @@ func (r *namespaceResolver) Applications(ctx context.Context, obj *gqlschema.Nam
 	return r.k8s.ApplicationsField(ctx, obj)
 }
 
+func (r *namespaceResolver) Pods(ctx context.Context, obj *gqlschema.Namespace) ([]gqlschema.Pod, error) {
+	return r.k8s.PodsQuery(ctx, obj.Name, nil, nil)
+}
+
 // CMS
 
 type clusterDocsTopicResolver struct {

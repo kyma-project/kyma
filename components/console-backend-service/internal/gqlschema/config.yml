@@ -121,3 +121,5 @@ models:
     fields:
       applications:
         resolver: true
+      pods:
+        resolver: true

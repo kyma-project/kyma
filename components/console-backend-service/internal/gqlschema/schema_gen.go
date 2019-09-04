@@ -933,6 +933,7 @@ type MutationResolver interface {
 	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*LimitRange, error)
 }
 type NamespaceResolver interface {
+	Pods(ctx context.Context, obj *Namespace) ([]Pod, error)
 	Applications(ctx context.Context, obj *Namespace) ([]string, error)
 }
 type QueryResolver interface {
@@ -19135,10 +19136,14 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 				invalid = true
 			}
 		case "pods":
-			out.Values[i] = ec._Namespace_pods(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Namespace_pods(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "applications":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -19274,7 +19279,7 @@ func (ec *executionContext) _Namespace_pods(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Pods, nil
+		return ec.resolvers.Namespace().Pods(rctx, obj)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {

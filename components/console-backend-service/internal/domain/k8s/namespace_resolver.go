@@ -2,8 +2,6 @@ package k8s
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
-
 	"github.com/golang/glog"
 	appPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
@@ -28,22 +26,20 @@ type namespaceSvc interface {
 type gqlNamespaceConverter interface {
 	ToGQLs(in []*v1.Namespace) ([]gqlschema.Namespace, error)
 	ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error)
-	ToGQLsWithPods(in []NamespaceWithAdditionalData) ([]gqlschema.Namespace, error)
-	ToGQLWithPods(in NamespaceWithAdditionalData) (*gqlschema.Namespace, error)
+	ToGQLsWithAdditionalData(in []NamespaceWithAdditionalData) ([]gqlschema.Namespace, error)
+	ToGQLWithAdditionalData(in NamespaceWithAdditionalData) (*gqlschema.Namespace, error)
 }
 
 type namespaceResolver struct {
 	namespaceSvc       namespaceSvc
-	podSvc	           podSvc
 	appRetriever       shared.ApplicationRetriever
 	namespaceConverter gqlNamespaceConverter
 	systemNamespaces   []string
 }
 
-func newNamespaceResolver(namespaceSvc namespaceSvc, podSvc podSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string) *namespaceResolver {
+func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string) *namespaceResolver {
 	return &namespaceResolver{
 		namespaceSvc:       namespaceSvc,
-		podSvc:             podSvc,
 		appRetriever:       appRetriever,
 		systemNamespaces:   systemNamespaces,
 		namespaceConverter: &namespaceConverter{},
@@ -53,13 +49,9 @@ func newNamespaceResolver(namespaceSvc namespaceSvc, podSvc podSvc, appRetriever
 type NamespaceWithAdditionalData struct {
 	namespace *v1.Namespace
 	isSystemNamespace bool
-	pods []*v1.Pod
 }
 
 func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]gqlschema.Namespace, error) {
-	var err error
-
-	var namespaces []NamespaceWithAdditionalData
 	rawNamespaces, err := r.namespaceSvc.List()
 
 	if err != nil {
@@ -71,28 +63,20 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNames
 		return nil, gqlerror.New(err, pretty.Namespaces)
 	}
 
+	var namespaces []NamespaceWithAdditionalData
 	for _, ns := range rawNamespaces {
-		pods, err := r.podSvc.List(ns.Name, pager.PagingParams{
-			First:  nil,
-			Offset: nil,
-		})
-		if err != nil {
-			glog.Error(errors.Wrapf(err, "while getting the list of pods for %s %s", ns.Name, pretty.Namespace))
-		}
-
-		isSystem := isSystem(*ns, r.systemNamespaces)
+		isSystem := isSystemNamespace(*ns, r.systemNamespaces)
 		passedSystemNamespaceCheck := !isSystem || (withSystemNamespaces != nil && *withSystemNamespaces && isSystem)
 		passedStatusCheck := ns.Status.Phase == "Active" || (withInactiveStatus != nil && *withInactiveStatus)
 		if passedSystemNamespaceCheck && passedStatusCheck {
 			namespaces = append(namespaces, NamespaceWithAdditionalData{
 				namespace: ns,
 				isSystemNamespace: isSystem,
-				pods: pods,
 			})
 		}
 	}
 
-	converted, err := r.namespaceConverter.ToGQLsWithPods(namespaces)
+	converted, err := r.namespaceConverter.ToGQLsWithAdditionalData(namespaces)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespaces))
 		return nil, gqlerror.New(err, pretty.Namespaces)
@@ -130,23 +114,13 @@ func (r *namespaceResolver) NamespaceQuery(ctx context.Context, name string) (*g
 		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
 	}
 
-	pods, err := r.podSvc.List(namespace.Name, pager.PagingParams{
-		First:  nil,
-		Offset: nil,
-	})
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting the list of pods for %s %s", namespace.Name, pretty.Namespace))
-	}
-
-	isSystem := isSystem(*namespace, r.systemNamespaces)
-
+	isSystem := isSystemNamespace(*namespace, r.systemNamespaces)
 	ns := NamespaceWithAdditionalData{
 		namespace: namespace,
 		isSystemNamespace: isSystem,
-		pods: pods,
 	}
 
-	converted, err := r.namespaceConverter.ToGQLWithPods(ns)
+	converted, err := r.namespaceConverter.ToGQLWithAdditionalData(ns)
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespace))
@@ -215,7 +189,7 @@ func (r *namespaceResolver) populateLabels(givenLabels *gqlschema.Labels) map[st
 	return labels
 }
 
-func isSystem(namespace v1.Namespace, sysNamespaces []string) bool {
+func isSystemNamespace(namespace v1.Namespace, sysNamespaces []string) bool {
 	for _, sysNs := range sysNamespaces {
 		if sysNs == namespace.Name {
 			return true

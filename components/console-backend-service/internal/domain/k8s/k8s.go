@@ -70,7 +70,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 
 	return &Resolver{
 		resourceResolver:            newResourceResolver(resourceService),
-		namespaceResolver:           newNamespaceResolver(namespaceSvc, podService, applicationRetriever, systemNamespaces),
+		namespaceResolver:           newNamespaceResolver(namespaceSvc, applicationRetriever, systemNamespaces),
 		secretResolver:              newSecretResolver(*secretService),
 		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
 		podResolver:                 newPodResolver(podService),
