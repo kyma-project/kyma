@@ -56,7 +56,7 @@ type NamespaceWithAdditionalData struct {
 	pods []*v1.Pod
 }
 
-func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNamespaces *bool) ([]gqlschema.Namespace, error) {
+func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]gqlschema.Namespace, error) {
 	var err error
 
 	var namespaces []NamespaceWithAdditionalData
@@ -81,7 +81,9 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNames
 		}
 
 		isSystem := isSystem(*ns, r.systemNamespaces)
-		if !isSystem || (withSystemNamespaces != nil && *withSystemNamespaces && isSystem) {
+		passedSystemNamespaceCheck := !isSystem || (withSystemNamespaces != nil && *withSystemNamespaces && isSystem)
+		passedStatusCheck := ns.Status.Phase == "Active" || (withInactiveStatus != nil && *withInactiveStatus)
+		if passedSystemNamespaceCheck && passedStatusCheck {
 			namespaces = append(namespaces, NamespaceWithAdditionalData{
 				namespace: ns,
 				isSystemNamespace: isSystem,

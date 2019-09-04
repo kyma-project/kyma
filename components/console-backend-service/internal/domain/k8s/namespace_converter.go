@@ -15,7 +15,7 @@ func (c *namespaceConverter) ToGQL(in *v1.Namespace) (*gqlschema.Namespace, erro
 	return &gqlschema.Namespace{
 		Name:   in.Name,
 		Labels: in.Labels,
-		Status: in.Status.Phase,
+		Status: string(in.Status.Phase),
 	}, nil
 }
 
@@ -41,7 +41,7 @@ func (c *namespaceConverter) ToGQLWithPods(in NamespaceWithAdditionalData) (*gql
 	return &gqlschema.Namespace{
 		Name:   in.namespace.Name,
 		Labels: in.namespace.Labels,
-		Status: in.namespace.Status.Phase,
+		Status: string(in.namespace.Status.Phase),
 		IsSystemNamespace: in.isSystemNamespace,
 		Pods: pods,
 	}, nil

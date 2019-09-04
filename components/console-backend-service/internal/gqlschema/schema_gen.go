@@ -14,7 +14,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
-	"k8s.io/api/core/v1"
 )
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
@@ -562,7 +561,7 @@ type ComplexityRoot struct {
 		Application                 func(childComplexity int, name string) int
 		Applications                func(childComplexity int, namespace *string, first *int, offset *int) int
 		ConnectorService            func(childComplexity int, application string) int
-		Namespaces                  func(childComplexity int, withSystemNamespaces *bool) int
+		Namespaces                  func(childComplexity int, withSystemNamespaces *bool, withInactiveStatus *bool) int
 		Namespace                   func(childComplexity int, name string) int
 		Deployments                 func(childComplexity int, namespace string, excludeFunctions *bool) int
 		Pod                         func(childComplexity int, name string, namespace string) int
@@ -959,7 +958,7 @@ type QueryResolver interface {
 	Application(ctx context.Context, name string) (*Application, error)
 	Applications(ctx context.Context, namespace *string, first *int, offset *int) ([]Application, error)
 	ConnectorService(ctx context.Context, application string) (ConnectorService, error)
-	Namespaces(ctx context.Context, withSystemNamespaces *bool) ([]Namespace, error)
+	Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]Namespace, error)
 	Namespace(ctx context.Context, name string) (*Namespace, error)
 	Deployments(ctx context.Context, namespace string, excludeFunctions *bool) ([]Deployment, error)
 	Pod(ctx context.Context, name string, namespace string) (*Pod, error)
@@ -3308,6 +3307,20 @@ func field_Query_namespaces_args(rawArgs map[string]interface{}) (map[string]int
 		}
 	}
 	args["withSystemNamespaces"] = arg0
+	var arg1 *bool
+	if tmp, ok := rawArgs["withInactiveStatus"]; ok {
+		var err error
+		var ptr1 bool
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalBoolean(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["withInactiveStatus"] = arg1
 	return args, nil
 
 }
@@ -6675,7 +6688,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Namespaces(childComplexity, args["withSystemNamespaces"].(*bool)), true
+		return e.complexity.Query.Namespaces(childComplexity, args["withSystemNamespaces"].(*bool), args["withInactiveStatus"].(*bool)), true
 
 	case "Query.namespace":
 		if e.complexity.Query.Namespace == nil {
@@ -19215,10 +19228,10 @@ func (ec *executionContext) _Namespace_status(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.(v1.NamespacePhase)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(string(res))
+	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
@@ -21738,7 +21751,7 @@ func (ec *executionContext) _Query_namespaces(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Namespaces(rctx, args["withSystemNamespaces"].(*bool))
+		return ec.resolvers.Query().Namespaces(rctx, args["withSystemNamespaces"].(*bool), args["withInactiveStatus"].(*bool))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -32379,7 +32392,7 @@ type Query {
     connectorService(application: String!): ConnectorService! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
 
     # Depends on 'application'
-    namespaces(withSystemNamespaces: Boolean): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
+    namespaces(withSystemNamespaces: Boolean, withInactiveStatus: Boolean): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
     namespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "get", apiGroup: "", apiVersion: "v1"})
 
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]! @HasAccess(attributes: {resource: "deployments", verb: "list", apiGroup: "apps", apiVersion: "v1beta2", namespaceArg: "namespace"})
