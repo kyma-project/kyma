@@ -10,14 +10,14 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/knative/pkg/apis"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	eventingclientset "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	controllertesting "github.com/knative/eventing/pkg/reconciler/testing"
-	duckv1beta1 "github.com/knative/pkg/apis/duck/v1beta1"
+	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
@@ -348,7 +348,6 @@ func (k *MockKnativeLib) GetChannel(name string, namespace string) (*evapisv1alp
 	}
 	return channel, nil
 }
-
 func (k *MockKnativeLib) CreateChannel(provisioner string, name string, namespace string, labels *map[string]string, timeout time.Duration) (*evapisv1alpha1.Channel, error) {
 	channel := makeKnChannel(provisioner, namespace, name, labels)
 	knChannels[channel.Name] = channel
@@ -363,7 +362,6 @@ func (k *MockKnativeLib) CreateSubscription(name string, namespace string, chann
 	knSubscriptions[knSub.Name] = knSub
 	return nil
 }
-
 func (k *MockKnativeLib) DeleteSubscription(name string, namespace string) error {
 	delete(knSubscriptions, name)
 	return nil
@@ -382,7 +380,6 @@ func (k *MockKnativeLib) UpdateSubscription(sub *evapisv1alpha1.Subscription) (*
 func (k *MockKnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[string][]string, message *string) error {
 	return nil
 }
-
 func (k *MockKnativeLib) InjectClient(c eventingclientset.EventingV1alpha1Interface) error {
 	return nil
 }
@@ -408,12 +405,10 @@ func makeKnChannel(provisioner string, namespace string, name string, labels *ma
 			},
 		},
 		Status: evapisv1alpha1.ChannelStatus{
-			Status: duckv1beta1.Status{
-				Conditions: duckv1beta1.Conditions{
-					apis.Condition{
-						Type:   apis.ConditionReady,
-						Status: corev1.ConditionTrue,
-					},
+			Conditions: []duckv1alpha1.Condition{
+				{
+					Type:   evapisv1alpha1.ChannelConditionReady,
+					Status: corev1.ConditionTrue,
 				},
 			},
 		},
