@@ -382,8 +382,8 @@ type queryResolver struct {
 	*RootResolver
 }
 
-func (r *queryResolver) Namespaces(ctx context.Context, application *string) ([]gqlschema.Namespace, error) {
-	return r.k8s.NamespacesQuery(ctx, application)
+func (r *queryResolver) Namespaces(ctx context.Context, withSystemNamespaces *bool) ([]gqlschema.Namespace, error) {
+	return r.k8s.NamespacesQuery(ctx, withSystemNamespaces)
 }
 
 func (r *queryResolver) Namespace(ctx context.Context, name string) (*gqlschema.Namespace, error) {

@@ -13,7 +13,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 //go:generate mockery -name=namespaceSvc -output=automock -outpkg=automock -case=underscore
@@ -57,30 +56,11 @@ type NamespaceWithAdditionalData struct {
 	pods []*v1.Pod
 }
 
-// TODO: Split this query into two
-func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName *string) ([]gqlschema.Namespace, error) {
+func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNamespaces *bool) ([]gqlschema.Namespace, error) {
 	var err error
 
 	var namespaces []NamespaceWithAdditionalData
-	var rawNamespaces []*v1.Namespace
-	if applicationName == nil {
-		rawNamespaces, err = r.namespaceSvc.List()
-	} else {
-
-		// TODO: Investigate if we still need the query for namespaces bound to an application
-		var namespaceNames []string
-		namespaceNames, err = r.appRetriever.Application().ListNamespacesFor(*applicationName)
-
-		//TODO: Refactor 'ListNamespacesFor' to return []v1.Namespace and remove this workaround
-		for _, nsName := range namespaceNames {
-			rawNamespaces = append(rawNamespaces, &v1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: nsName,
-				},
-			})
-		}
-	}
-
+	rawNamespaces, err := r.namespaceSvc.List()
 
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
@@ -101,12 +81,13 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName
 		}
 
 		isSystem := isSystem(*ns, r.systemNamespaces)
-
-		namespaces = append(namespaces, NamespaceWithAdditionalData{
-			namespace: ns,
-			isSystemNamespace: isSystem,
-			pods: pods,
-		})
+		if !isSystem || (withSystemNamespaces != nil && *withSystemNamespaces && isSystem) {
+			namespaces = append(namespaces, NamespaceWithAdditionalData{
+				namespace: ns,
+				isSystemNamespace: isSystem,
+				pods: pods,
+			})
+		}
 	}
 
 	converted, err := r.namespaceConverter.ToGQLsWithPods(namespaces)
