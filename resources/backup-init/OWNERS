@@ -6,4 +6,4 @@ approvers:
  - lilitgh
  - a-thaler
 labels:
- - area/tracing
+ - area/backup
