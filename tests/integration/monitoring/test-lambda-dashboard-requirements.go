@@ -9,8 +9,8 @@ import (
 )
 
 type PrometheusSeries struct {
-	Status string              `json:status`
-	Data   []map[string]string `json:data`
+	Status string              `json:"status"`
+	Data   []map[string]string `json:"data"`
 }
 
 func checkMetricsAndlabels(metric string, labels ...string) error {
