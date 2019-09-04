@@ -51,10 +51,10 @@ data:
     - size: S
     - size: M
     - size: L
-  funcTypes:
+  funcTypes: |
     - type: plaintext
     - type: base64
-  defaults:
+  defaults: |
     size: S
     runtime: nodejs8
     timeOut: 180
