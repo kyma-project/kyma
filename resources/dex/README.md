@@ -15,13 +15,13 @@ Dex is exposed using the [Istio VirtualService](https://istio.io/docs/reference/
 
 ## Configuration
 
-This chart allows to provide configuration for Dex connectors and clients using Helm overrides mechanism.
+This chart allows you to provide configuration for Dex connectors and clients using the Helm overrides mechanism.
 
 
 ### Connectors
 
-Connectors can be configured using override named `connectors`.
-The value of the override must be a single string containing Dex connectors configuration in YAML format. See [Dex connectors documentation](https://github.com/dexidp/dex/tree/master/Documentation/connectors) for details.
+Configure connectors through the `connectors` override.
+Provide the Dex connectors configuration as a single string in the `yaml` format. See [this](https://github.com/dexidp/dex/tree/master/Documentation/connectors) document for more details. 
 
 Example:
 ```
