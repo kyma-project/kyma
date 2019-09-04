@@ -13,7 +13,7 @@ Cockpit is a UI that calls Compass APIs. This component is interchangeable.
 
 ## API-Gateway
 
-API-Gateway serves as the main gateway that proxies tenant's incoming requests to the Director component. All communication, whether it comes from an applications or other external component, flows through API-Gateway.
+API-Gateway serves as the main gateway that proxies tenant's incoming requests to the Director component. All communication, whether it comes from an application or other external component, flows through API-Gateway.
 
 ## Connector
 

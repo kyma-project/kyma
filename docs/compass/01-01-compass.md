@@ -4,11 +4,11 @@ title: Overview
 
 >**NOTE:** Compass is a new, experimental component in Kyma. To enable it, follow the instructions for the [custom component installation](/root/kyma#configuration-custom-component-installation) and enable the `compass` and `compass-runtime-agent` modules.
 
-Compass is a multi-tenant system which consists of components that provide a way to register, group, and manage your applications across multiple Kyma runtimes. Using Compass, you can control and monitor your application landscape in one central place.
+Compass is a multi-tenant system which consists of components that provide a way to manage your applications across multiple Kyma runtimes. Using Compass, you can control and monitor your application landscape in one central place.
 
 Compass allows for registering different types of applications and runtimes.
 These are the types of possible integration levels between an application and Compass:
-- Basic integration - administrator manually provides API/Events metadata to Compass. This type of integration is used mainly for simple use-case scenarios and doesn't support all features.
+- Manual integration - administrator manually provides API/Events metadata to Compass. This type of integration is used mainly for simple use-case scenarios and doesn't support all features.
 - Built-in integration - integration with Compass is built-in inside the application.
 - Proxy - a highly application-specific proxy component provides the integration.
 - Central service -  a central service provides integration for the whole class of applications. It manages multiple instances of these applications. You can integrate multiple central services to support different types of applications.
