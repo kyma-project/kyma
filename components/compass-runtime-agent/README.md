@@ -5,8 +5,8 @@
 This is the repository for the Compass Runtime Agent.
 
 The main responsibilities of the Compass Runtime Agent are:
-- Establishing a trusted connection between the Runtime and the Compass
-- Renewing the trusted connection between the Runtime and the Compass
+- Establishing a trusted connection between the Runtime and Compass
+- Renewing the trusted connection between the Runtime and Compass
 - Configuring the Runtime
 
 
