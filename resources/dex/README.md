@@ -22,7 +22,6 @@ This chart allows to provide configuration for Dex connectors and clients using 
 
 Connectors can be configured using override named `connectors`.
 The value of the override must be a single string containing Dex connectors configuration in YAML format. See [Dex connectors documentation](https://github.com/dexidp/dex/tree/master/Documentation/connectors) for details.
-Note you can use Go Template expressions inside `connectors` override. These expressions will be resolved by Helm using the same set of overrides as configured for the entire chart.
 
 Example:
 ```
@@ -46,7 +45,6 @@ Configuration for static clients is split in two parts: `staticClientsBase` and 
 The `staticClientsBase` clients are basic clients required by Kyma and should not be modified.
 Users can provide additional clients using Helm override named `oidc.staticClientsExtra`.
 The value of this override is a string in YAML format with a list of clients.
-Note you can use Go Template expressions in the override value. These expressions will be resolved by Helm using the same set of overrides as configured for the entire chart.
 
 Example:
 ```
@@ -58,3 +56,5 @@ Example:
       - 'https://console.{{ .Values.global.ingress.domainName }}'
       secret: a1b2c3d4xyz
 ```
+
+> **Note:** you can use Go Template expressions in the override value. These expressions will be resolved by Helm using the same set of overrides as configured for the entire chart.
