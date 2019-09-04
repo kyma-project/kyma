@@ -24,7 +24,7 @@ Configure connectors through the `connectors` override.
 Provide the Dex connectors list as a single string in the `yaml` format. See [these](https://github.com/dexidp/dex/tree/master/Documentation/connectors) documents for syntax details.
 
 This is an example of a connector configuration string:
-```
+```yaml
   connectors: |-
     - type: saml
       id: sci
@@ -46,7 +46,7 @@ Configure Dex clients through the `oidc.staticClientsExtra` override. Pass the l
 >**WARNING:** The `oidc.staticClientsBase` override defines the basic clients required by Kyma. Do not edit this override.
 
 This is an example of a client configuration string:
-```
+```yaml
   oidc.staticClientsExtra: |-
     - id: console2
       name: Console2
@@ -54,5 +54,18 @@ This is an example of a client configuration string:
       - 'http://console-dev.{{ .Values.global.ingress.domainName }}:4200'
       - 'https://console.{{ .Values.global.ingress.domainName }}'
       secret: a1b2c3d4xyz
+```
+### Custom volumes
+
+Configure additional volumes and mounts for dex (required for certificates) using the `volumeMountsExtra` and `volumesExtra` overrides. Pass the list of volumes and mounts as a single string in the `yaml` format.
+
+This is an example of an extra volume and mount pair:
+```yaml
+volumeMountsExtra: |-
+  - name: config
+    mountPath: /foo
+volumesExtra: |-
+  - name: extra-config
+    emptyDir: {}
 ```
 

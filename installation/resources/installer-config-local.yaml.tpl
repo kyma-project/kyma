@@ -98,35 +98,3 @@ metadata:
     kyma-project.io/installation: ""
 data:
   global.isDevelopMode: "true" # global, because subcharts also use it
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dex-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: dex
-    kyma-project.io/installation: ""
-data:
-  idp.tenant: padu1234
-  connectors: |-
-    - type: saml
-      id: sci
-      name: SAP CI
-      config:
-        # Issuer for SAML Request
-        entityIssuer: dex.{{ .Values.global.domainName }}
-        ssoURL: https://{{ .Values.idp.tenant | default "ycloudtest" }}.{{ .Values.idp.domain | default "accounts400.ondemand.com" }}/saml2/idp/sso?sp=dex.{{ .Values.global.domainName }}
-        ca: {{ .Values.idp.caPath}}/ca.pem
-        redirectURI: https://dex.{{ .Values.global.domainName }}/callback
-        usernameAttr: mail
-        emailAttr: mail
-        groupsAttr: groups
-  oidc.staticClientsExtra: |-
-    - id: console2
-      name: Console2
-      redirectURIs:
-      - 'http://console-dev.{{ .Values.global.ingress.domainName }}:4200'
-      - 'https://console.{{ .Values.global.ingress.domainName }}'
-      secret: paduPADU123paDU456
