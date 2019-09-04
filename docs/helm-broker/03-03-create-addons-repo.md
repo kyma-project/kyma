@@ -115,9 +115,9 @@ spec:
   </details>
 </div>
 
-## Authorization
+## Authentication
 
-The AddonsConfiguration and ClusterAddonsConfiguration custom resources allow you to define authorization as part of the URL. For more details, read the [go-getter protocols](https://github.com/hashicorp/go-getter/blob/master/README.md#general-all-protocols) description.
+The AddonsConfiguration and ClusterAddonsConfiguration custom resources allow you to define authentication as part of the URL. For more details, read the [go-getter protocols](https://github.com/hashicorp/go-getter/blob/master/README.md#general-all-protocols) description.
 Using sensitive information, such as passwords, directly in the URL is not a good approach. Avoid this by putting such data in a Secret resource and taking advantage of templating. Use placeholders which refer to keys in the Secret. For example:
 ```yaml
 apiVersion: addons.kyma-project.io/v1alpha1
@@ -139,20 +139,20 @@ stringData:
   host: "github.com"
   project: "kyma-project/addons"       
 ```
-The URL resolves into: 
+The URL resolves into:
 ```
 https://github.com/kyma-project/addons/addons/index.yaml
 ```
 
-The Helm Broker supports authorization using these protocols:
- 
+The Helm Broker supports authentication using these protocols:
+
 <div tabs>
   <details>
   <summary>
   HTTP/HTTPS
-  </summary> 
- 
-To define basic authentication credentials, prepend a section `username:password@` to the hostname in the URL . For example:
+  </summary>
+
+To define basic authentication credentials, precede a section `username:password@` to the hostname in the URL. For example:
 ```
 https://admin:secretPassword@repository.addons.com/index.yaml
 ```
@@ -184,24 +184,24 @@ spec:
   <summary>
   Git SSH
   </summary>
-  
-  The Git SSH protocol requires an SSH key to authorize with your repository. Setting SSH keys differs among hosting providers. 
-  > **NOTE**: See [this](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key) document to read about the GitHub service. 
-  
-  The private key must be base64 encoded.
-  
+
+  The Git SSH protocol requires an SSH key to authenticate your repository. Setting SSH keys differs among hosting providers.
+  > **NOTE**: See [this](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key) document to read about the GitHub service.
+
+  The private key must be base64-encoded.
+
   To encode your private key, run this command:
   ```bash
     base64 -b -i {path_to_id_rsa} -o id_rsa-encoded
   ```
-  
+
   > **NOTE:** Private SSH key should not be secured by a passphrase.
 
   Create a corresponding Secret resource:
   ```bash
   kubectl create secret generic auth -n stage --from-file=key=id_rsa-encoded
   ```
-  Define a URL with the required sshkey option:
+  Define a URL with the required SSH key option:
   ```yaml
   apiVersion: addons.kyma-project.io/v1alpha1
   kind: ClusterAddonsConfiguration
@@ -209,12 +209,12 @@ spec:
     name: addons-cfg-sample
   spec:
     repositories:
-      # Git SSH protocol with a reference to a secret containing base64 encoded SSH private key
+      # Git SSH protocol with a reference to a Secret that contains base64-encoded SSH private key
       - url: "git::ssh://git@github.com/kyma-project/private-addons.git//addons/index.yaml?sshkey={key}"
         secretRef:
           name: auth
           namespace: stage
   ```
-  
+
 </details>
 </div>  
