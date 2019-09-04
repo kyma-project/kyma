@@ -29,11 +29,16 @@ endif
 
 # Buildpack directives
 define buildpack-mount
+.PHONY: $(1)-local $(1)
+$(1):
 	@echo make $(1)
 	@docker run $(DOCKER_INTERACTIVE) -v $(LOCAL_DIR):$(WORKSPACE_DIR):delegated $(DOCKER_CREATE_OPTS) make $(1)-local
 endef
 
 define buildpack-cp-ro
+.PHONY: $(1)-local $(1)
+$(1):
+	@echo make $(1)
 	$(eval container = $(shell docker create $(DOCKER_CREATE_OPTS) make $(1)-local))
 	@docker cp $(LOCAL_DIR)/. $(container):$(WORKSPACE_DIR)/
 	@docker start $(DOCKER_INTERACTIVE) $(container)
@@ -50,76 +55,50 @@ build-image: pull-licenses
 push-image:
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
+docker-create-opts:
+	@echo $(DOCKER_CREATE_OPTS)
 
-.PHONY: build build-local
-build:
-	$(call buildpack-mount,build)
+# Targets mounting sources to buildpack
+MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet
+$(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
+
 build-local:
 	env CGO_ENABLED=0 go build -o $(APP_NAME)
 	rm $(APP_NAME)
 
-docker-create-opts:
-	@echo $(DOCKER_CREATE_OPTS)
-
-.PHONY: resolve resolve-local
-resolve:
-	$(call buildpack-mount,resolve)
 resolve-local:
 	dep ensure -vendor-only
 
-.PHONY: ensure ensure-local
-ensure:
-	$(call buildpack-mount,ensure)
 ensure-local:
 	dep ensure
 
-.PHONY: dep-status dep-status-local
-dep-status:
-	$(call buildpack-mount,dep-status)
 dep-status-local:
 	dep status
 
-.PHONY: test test-local
-test:
-	$(call buildpack-cp-ro,test)
-test-local:
-	go test ./...
-
-.PHONY: check-imports check-imports-local
-check-imports:
-	$(call buildpack-mount,check-imports)
 check-imports-local:
 	exit $(shell goimports -l $$($(FILES_TO_CHECK)) | wc -l | xargs)
 
-.PHONY: imports imports-local
-imports:
-	$(call buildpack-mount,imports)
 imports-local:
 	goimports -w -l $$($(FILES_TO_CHECK))
 
-.PHONY: check-fmt check-fmt-local
-check-fmt:
-	$(call buildpack-mount,check-fmt)
 check-fmt-local:
 	exit $(shell gofmt -l $$($(FILES_TO_CHECK)) | wc -l | xargs)
 
-.PHONY: fmt fmt-local
-fmt:
-	$(call buildpack-mount,fmt)
 fmt-local:
 	go fmt $$($(DIRS_TO_CHECK))
 
-.PHONY: errcheck errcheck-local
-errcheck:
-	$(call buildpack-mount,errcheck)
 errcheck-local:
 	errcheck -blank -asserts -ignorepkg '$$($(DIRS_TO_IGNORE) | tr '\n' ',')' -ignoregenerated ./...
 
-.PHONY: vet vet-local
-vet:
-	$(call buildpack-mount,vet)
 vet-local:
 	go vet $$($(DIRS_TO_CHECK))
+
+# Targets copying sources to buildpack
+COPY_TARGETS = test
+$(foreach t,$(COPY_TARGETS),$(eval $(call buildpack-cp-ro,$(t))))
+
+test-local:
+	go test ./...
 
 .PHONY: pull-licenses
 pull-licenses:
