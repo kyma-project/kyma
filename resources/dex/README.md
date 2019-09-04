@@ -16,6 +16,7 @@ Dex is exposed using the [Istio VirtualService](https://istio.io/docs/reference/
 ## Configuration
 
 This chart allows you to provide configuration for Dex connectors and clients using the Helm overrides mechanism.
+
 > **TIP:** You can use Go Template expressions in the override value. These expressions are resolved by Helm using the same set of overrides as configured for the entire chart.
 
 ### Connectors
@@ -43,6 +44,7 @@ This is an example of a connector configuration string:
 ### Clients
 
 Configure Dex clients through the `oidc.staticClientsExtra` override. Pass the list of clients as a single string in the `yaml` format.
+
 >**WARNING:** The `oidc.staticClientsBase` override defines the basic clients required by Kyma. Do not edit this override.
 
 This is an example of a client configuration string:
@@ -57,7 +59,7 @@ This is an example of a client configuration string:
 ```
 ### Custom volumes
 
-Configure additional volumes and mounts for dex (required for certificates) using the `volumeMountsExtra` and `volumesExtra` overrides. Pass the list of volumes and mounts as a single string in the `yaml` format.
+Configure additional volumes and mounts required for certificates using the `volumeMountsExtra` and `volumesExtra` overrides. Pass the list of volumes and mounts as a single string in the `yaml` format.
 
 This is an example of an extra volume and mount pair:
 ```yaml
