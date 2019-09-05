@@ -367,9 +367,19 @@
   version = "v1.1.5"
 
 [[projects]]
-  digest = "1:350f91d1f01c61bbea65bd7db21285f56e0f4001711a41cceb8e8b9b3b3de962"
+  digest = "1:15e1b7331e6bff460ecfa49c398ebdd31ad84204a47665d08dd214e9a67de34a"
   name = "github.com/knative/eventing"
   packages = [
+    "contrib/natss/pkg/apis/messaging",
+    "contrib/natss/pkg/apis/messaging/v1alpha1",
+    "contrib/natss/pkg/client/clientset/versioned",
+    "contrib/natss/pkg/client/clientset/versioned/scheme",
+    "contrib/natss/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
+    "contrib/natss/pkg/client/informers/externalversions",
+    "contrib/natss/pkg/client/informers/externalversions/internalinterfaces",
+    "contrib/natss/pkg/client/informers/externalversions/messaging",
+    "contrib/natss/pkg/client/informers/externalversions/messaging/v1alpha1",
+    "contrib/natss/pkg/client/listers/messaging/v1alpha1",
     "pkg/apis/duck",
     "pkg/apis/duck/v1alpha1",
     "pkg/apis/eventing",
@@ -1278,10 +1288,12 @@
     "github.com/golang/glog",
     "github.com/google/go-cmp/cmp",
     "github.com/google/go-cmp/cmp/cmpopts",
+    "github.com/knative/eventing/contrib/natss/pkg/client/informers/externalversions",
     "github.com/knative/eventing/pkg/apis/eventing/v1alpha1",
     "github.com/knative/eventing/pkg/client/clientset/versioned",
     "github.com/knative/eventing/pkg/client/clientset/versioned/fake",
     "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
+    "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
     "github.com/knative/eventing/pkg/reconciler/testing",
     "github.com/nats-io/go-nats-streaming",
     "github.com/onsi/ginkgo",
