@@ -1,0 +1,39 @@
+filters:
+  ".*":
+    approvers:
+      - Tomasz-Smelcerz-SAP
+      - strekm
+      - jakkab
+      - piotrmsc
+      - kubadz
+      - Demonsthere
+      - crabtree
+      - aszecowka
+      - PK85
+      - mszostok
+      - piotrmiskiewicz
+      - polskikiel
+      - jasiu001
+      - adamwalach
+    labels:
+      - area/installation
+  ".*\.ps1$"
+    approvers:
+      - crabtree
+      - venturasr
+    reviewers:
+    - Tomasz-Smelcerz-SAP
+    - strekm
+    - jakkab
+    - piotrmsc
+    - kubadz
+    - Demonsthere
+    - aszecowka
+    - PK85
+    - mszostok
+    - piotrmiskiewicz
+    - polskikiel
+    - jasiu001
+    - adamwalach
+    labels:
+      - area/installation
