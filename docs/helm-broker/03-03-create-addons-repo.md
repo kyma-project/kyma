@@ -208,7 +208,7 @@ spec:
     name: addons-cfg-sample
   spec:
     repositories:
-      # Git SSH protocol with a reference to a Secret that contains base64-encoded SSH private key
+      # Git SSH protocol with the reference to the Secret that contains base64-encoded SSH private key
       - url: "git::ssh://git@github.com/kyma-project/private-addons.git//addons/index.yaml?sshkey={key}"
         secretRef:
           name: auth
