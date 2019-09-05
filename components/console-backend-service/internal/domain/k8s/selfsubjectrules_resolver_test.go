@@ -73,7 +73,7 @@ func TestSelfSubjectRulesQuery(t *testing.T) {
 func fixExampleSSRRGQLResponse() []gqlschema.ResourceRule {
 	return []gqlschema.ResourceRule{
 		gqlschema.ResourceRule{
-			Verbs:     []string{"decorateNamespace", "b"},
+			Verbs:     []string{"a", "b"},
 			Resources: []string{"resA", "resB"},
 			APIGroups: []string{"gA", "gB"},
 		},
@@ -97,7 +97,7 @@ func fixExampleSSRRServiceOutput() *authv1.SelfSubjectRulesReview {
 		Status: authv1.SubjectRulesReviewStatus{
 			ResourceRules: []authv1.ResourceRule{
 				authv1.ResourceRule{
-					Verbs:     []string{"decorateNamespace", "b"},
+					Verbs:     []string{"a", "b"},
 					Resources: []string{"resA", "resB"},
 					APIGroups: []string{"gA", "gB"},
 				},

@@ -17,18 +17,18 @@ func TestResourceQuotaStatusConverter_ToGQL(t *testing.T) {
 	}{
 		"success": {
 			InputMap: map[string]map[v1.ResourceName][]string{
-				"rq-decorateNamespace": {
+				"rq-a": {
 					v1.ResourceLimitsMemory: {
-						"fix-decorateNamespace", "fix-b",
+						"fix-a", "fix-b",
 					},
 				},
 			},
 			ExceededQuotas: []gqlschema.ExceededQuota{
 				{
-					QuotaName:    "rq-decorateNamespace",
+					QuotaName:    "rq-a",
 					ResourceName: string(v1.ResourceLimitsMemory),
 					AffectedResources: []string{
-						"fix-decorateNamespace", "fix-b",
+						"fix-a", "fix-b",
 					},
 				},
 			},
