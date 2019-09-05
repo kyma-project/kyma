@@ -47,7 +47,7 @@ Use the following parameters:
 | **global.alertTools.credentials.slack.channel** | Specifies the Slack channel which receives notifications on new alerts, such as `test-monitoring-alerts`.
 | **global.alertTools.credentials.slack.apiurl** | Specifies the URL endpoint which sends alerts triggered by Prometheus rules. The Incoming WebHooks application provides you with the Webhook URL, such as `https://hooks.slack.com/services/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`, that you can paste in this configuration. |
 
-For details on Alertmanager chart configuration and parameters see [this](https://kyma-project.io/docs/master/components/monitoring/#details-alertmanager-alertmanager-configuration) document.
+For details on Alertmanager chart configuration and parameters, see [this](https://kyma-project.io/docs/master/components/monitoring/#details-alertmanager-alertmanager-configuration) document.
 
 4. Deploy the Secret. Use this command:
 ```bash
