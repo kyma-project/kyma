@@ -51,6 +51,9 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating namespace service")
 	}
+	namespaceResolver := newNamespaceResolver(namespaceSvc, applicationRetriever, systemNamespaces)
+	namespaceResolver.namespaceConverter = *newNamespaceConverter(systemNamespaces)
+
 	deploymentService, err := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating deployment service")
@@ -67,10 +70,9 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	configMapService := newConfigMapService(informerFactory.Core().V1().ConfigMaps().Informer(), clientset.CoreV1())
 	serviceSvc := newServiceService(informerFactory.Core().V1().Services().Informer(), client)
 	selfSubjectRulesService := newSelfSubjectRulesService(clientset.AuthorizationV1())
-
 	return &Resolver{
 		resourceResolver:            newResourceResolver(resourceService),
-		namespaceResolver:           newNamespaceResolver(namespaceSvc, applicationRetriever, systemNamespaces),
+		namespaceResolver:           nr,
 		secretResolver:              newSecretResolver(*secretService),
 		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
 		podResolver:                 newPodResolver(podService),

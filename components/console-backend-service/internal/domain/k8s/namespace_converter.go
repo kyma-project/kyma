@@ -1,22 +1,35 @@
 package k8s
 
 import (
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/types"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	v1 "k8s.io/api/core/v1"
 )
 
-type namespaceConverter struct{}
+type namespaceConverter struct{
+	systemNamespaces []string
+}
 
-func (c *namespaceConverter) ToGQL(in types.NamespaceWithAdditionalData) (*gqlschema.Namespace, error) {
+func newNamespaceConverter(systemNamespaces []string) *namespaceConverter {
+	return &namespaceConverter{
+		systemNamespaces: systemNamespaces,
+	}
+}
+
+func (c *namespaceConverter) ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error) {
+	if in == nil {
+		return nil, nil
+	}
+
+	isSystem := isSystemNamespace(*in, c.systemNamespaces)
 	return &gqlschema.Namespace{
-		Name:              in.Namespace.Name,
-		Labels:            in.Namespace.Labels,
-		Status:            string(in.Namespace.Status.Phase),
-		IsSystemNamespace: in.IsSystemNamespace,
+		Name:              in.Name,
+		Labels:            in.Labels,
+		Status:            string(in.Status.Phase),
+		IsSystemNamespace: isSystem,
 	}, nil
 }
 
-func (c *namespaceConverter) ToGQLs(in []types.NamespaceWithAdditionalData) ([]gqlschema.Namespace, error) {
+func (c *namespaceConverter) ToGQLs(in []*v1.Namespace) ([]gqlschema.Namespace, error) {
 	var result []gqlschema.Namespace
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
@@ -29,4 +42,13 @@ func (c *namespaceConverter) ToGQLs(in []types.NamespaceWithAdditionalData) ([]g
 		}
 	}
 	return result, nil
+}
+
+func isSystemNamespace(namespace v1.Namespace, sysNamespaces []string) bool {
+	for _, sysNs := range sysNamespaces {
+		if sysNs == namespace.Name {
+			return true
+		}
+	}
+	return false
 }

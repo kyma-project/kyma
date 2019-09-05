@@ -17,17 +17,17 @@ import (
 )
 
 type namespaceService struct {
-	namespacesInformer cache.SharedIndexInformer
+	informer cache.SharedIndexInformer
 	podsSvc            podService
 	client             corev1.CoreV1Interface
 	notifier           resource.Notifier
 }
 
-func newNamespaceService(namespacesInformer cache.SharedIndexInformer, podsSvc podService, client corev1.CoreV1Interface) (*namespaceService, error) {
+func newNamespaceService(informer cache.SharedIndexInformer, podsSvc podService, client corev1.CoreV1Interface) (*namespaceService, error) {
 	notifier := resource.NewNotifier()
-	namespacesInformer.AddEventHandler(notifier)
+	informer.AddEventHandler(notifier)
 	return &namespaceService{
-		namespacesInformer: namespacesInformer,
+		informer: informer,
 		podsSvc:            podsSvc,
 		client:             client,
 		notifier:           notifier,
@@ -35,13 +35,13 @@ func newNamespaceService(namespacesInformer cache.SharedIndexInformer, podsSvc p
 }
 
 func (svc *namespaceService) List() ([]*v1.Namespace, error) { //r error
-	items := svc.namespacesInformer.GetStore().List()
+	items := svc.informer.GetStore().List()
 
 	var namespaces []*v1.Namespace
 	for _, item := range items {
 		namespace, ok := item.(*v1.Namespace)
 		if !ok {
-			return nil, fmt.Errorf("Incorrect item type: %T, should be: *Namespace", item)
+			return nil, fmt.Errorf("incorrect item type: %T, should be: *Namespace", item)
 		}
 		namespaces = append(namespaces, namespace)
 	}
@@ -50,7 +50,7 @@ func (svc *namespaceService) List() ([]*v1.Namespace, error) { //r error
 }
 
 func (svc *namespaceService) Find(name string) (*v1.Namespace, error) {
-	item, exists, err := svc.namespacesInformer.GetStore().GetByKey(name)
+	item, exists, err := svc.informer.GetStore().GetByKey(name)
 
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (svc *namespaceService) Find(name string) (*v1.Namespace, error) {
 
 	namespace, ok := item.(*v1.Namespace)
 	if !ok {
-		return nil, fmt.Errorf("Incorrect item type: %T, should be: *Namespace", item)
+		return nil, fmt.Errorf("incorrect item type: %T, should be: *Namespace", item)
 	}
 
 	return namespace, nil

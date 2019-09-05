@@ -6,7 +6,6 @@ import (
 	appPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/types"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -27,16 +26,10 @@ type namespaceSvc interface {
 	Unsubscribe(listener resource.Listener)
 }
 
-//go:generate mockery -name=gqlNamespaceConverter -output=automock -outpkg=automock -case=underscore
-type gqlNamespaceConverter interface {
-	ToGQLs(in []types.NamespaceWithAdditionalData) ([]gqlschema.Namespace, error)
-	ToGQL(in types.NamespaceWithAdditionalData) (*gqlschema.Namespace, error)
-}
-
 type namespaceResolver struct {
 	namespaceSvc       namespaceSvc
 	appRetriever       shared.ApplicationRetriever
-	namespaceConverter gqlNamespaceConverter
+	namespaceConverter namespaceConverter
 	systemNamespaces   []string
 }
 
@@ -44,13 +37,13 @@ func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.Applica
 	return &namespaceResolver{
 		namespaceSvc:       namespaceSvc,
 		appRetriever:       appRetriever,
+		namespaceConverter: *newNamespaceConverter(systemNamespaces),
 		systemNamespaces:   systemNamespaces,
-		namespaceConverter: &namespaceConverter{},
 	}
 }
 
 func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]gqlschema.Namespace, error) {
-	rawNamespaces, err := r.namespaceSvc.List()
+	namespaces, err := r.namespaceSvc.List()
 
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
@@ -59,16 +52,6 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNames
 
 		glog.Error(errors.Wrapf(err, "while listing %s", pretty.Namespaces))
 		return nil, gqlerror.New(err, pretty.Namespaces)
-	}
-
-	var namespaces []types.NamespaceWithAdditionalData
-	for _, ns := range rawNamespaces {
-		if r.checkNamespace(ns, withSystemNamespaces, withInactiveStatus) {
-			namespaces = append(namespaces, types.NamespaceWithAdditionalData{
-				Namespace:         ns,
-				IsSystemNamespace: isSystemNamespace(*ns, r.systemNamespaces),
-			})
-		}
 	}
 
 	converted, err := r.namespaceConverter.ToGQLs(namespaces)
@@ -109,8 +92,7 @@ func (r *namespaceResolver) NamespaceQuery(ctx context.Context, name string) (*g
 		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
 	}
 
-	ns := r.decorateNamespace(namespace)
-	converted, err := r.namespaceConverter.ToGQL(ns)
+	converted, err := r.namespaceConverter.ToGQL(namespace)
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespace))
@@ -154,9 +136,7 @@ func (r *namespaceResolver) DeleteNamespace(ctx context.Context, name string) (*
 	}
 
 	namespaceCopy := namespace.DeepCopy()
-	ns := r.decorateNamespace(namespaceCopy)
-
-	deletedNamespace, err := r.namespaceConverter.ToGQL(ns)
+	deletedNamespace, err := r.namespaceConverter.ToGQL(namespaceCopy)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespace))
 		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
@@ -178,7 +158,7 @@ func (r *namespaceResolver) NamespaceEventSubscription(ctx context.Context, with
 		return namespace != nil && r.checkNamespace(namespace, withSystemNamespaces, &newBool)
 	}
 
-	namespaceListener := listener.NewNamespace(channel, filter, r.namespaceConverter, r.systemNamespaces)
+	namespaceListener := listener.NewNamespace(channel, filter, &r.namespaceConverter, r.systemNamespaces)
 
 	r.namespaceSvc.Subscribe(namespaceListener)
 	go func() {
@@ -198,23 +178,6 @@ func (r *namespaceResolver) populateLabels(givenLabels *gqlschema.Labels) map[st
 		}
 	}
 	return labels
-}
-
-func isSystemNamespace(namespace v1.Namespace, sysNamespaces []string) bool {
-	for _, sysNs := range sysNamespaces {
-		if sysNs == namespace.Name {
-			return true
-		}
-	}
-	return false
-}
-
-func (r *namespaceResolver) decorateNamespace(namespace *v1.Namespace) types.NamespaceWithAdditionalData {
-	isSystem := isSystemNamespace(*namespace, r.systemNamespaces)
-	return types.NamespaceWithAdditionalData{
-		Namespace:         namespace,
-		IsSystemNamespace: isSystem,
-	}
 }
 
 func (r *namespaceResolver) checkNamespace(ns *v1.Namespace, withSystemNamespaces *bool, withInactiveStatus *bool) bool {

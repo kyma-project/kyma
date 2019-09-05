@@ -2,8 +2,6 @@ package listener
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/types"
-
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
@@ -11,18 +9,18 @@ import (
 )
 
 //go:generate mockery -name=gqlNamespaceConverter -output=automock -outpkg=automock -case=underscore
-type gqlNamespaceConverter interface {
-	ToGQL(in types.NamespaceWithAdditionalData) (*gqlschema.Namespace, error)
+type namespaceConverter interface {
+	ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error)
 }
 
 type Namespace struct {
 	channel       chan<- gqlschema.NamespaceEvent
 	filter        func(namespace *v1.Namespace) bool
-	converter     gqlNamespaceConverter
+	converter     namespaceConverter
 	sysNamespaces []string
 }
 
-func NewNamespace(channel chan<- gqlschema.NamespaceEvent, filter func(namespace *v1.Namespace) bool, converter gqlNamespaceConverter, sysNamespaces []string) *Namespace {
+func NewNamespace(channel chan<- gqlschema.NamespaceEvent, filter func(namespace *v1.Namespace) bool, converter namespaceConverter, sysNamespaces []string) *Namespace {
 	return &Namespace{
 		channel:       channel,
 		filter:        filter,
@@ -55,13 +53,7 @@ func (l *Namespace) onEvent(eventType gqlschema.SubscriptionEventType, object in
 	}
 }
 
-func (l *Namespace) notify(eventType gqlschema.SubscriptionEventType, rawNamespace *v1.Namespace) {
-
-	isSystem := isSystemNamespace(*rawNamespace, l.sysNamespaces)
-	namespace := types.NamespaceWithAdditionalData{
-		Namespace:         rawNamespace,
-		IsSystemNamespace: isSystem,
-	}
+func (l *Namespace) notify(eventType gqlschema.SubscriptionEventType, namespace *v1.Namespace) {
 
 	gqlNamespace, err := l.converter.ToGQL(namespace)
 	if err != nil {
@@ -78,13 +70,4 @@ func (l *Namespace) notify(eventType gqlschema.SubscriptionEventType, rawNamespa
 	}
 
 	l.channel <- event
-}
-
-func isSystemNamespace(namespace v1.Namespace, sysNamespaces []string) bool {
-	for _, sysNs := range sysNamespaces {
-		if sysNs == namespace.Name {
-			return true
-		}
-	}
-	return false
 }
