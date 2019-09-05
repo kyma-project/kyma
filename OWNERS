@@ -6,7 +6,7 @@ filters:
       - PK85
       - a-thaler
       - piotrmsc
-  "\\.md$|/docs/|^milv\.config\.yaml$"
+  '\.md$|/docs/|^milv\.config\.yaml$':
     approvers:
       - documentation-approvers
     reviewers:
