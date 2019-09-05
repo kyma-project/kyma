@@ -316,17 +316,6 @@
   revision = "262650b2c0dd6e6bfa2990d55cfc958e16179c59"
 
 [[projects]]
-  digest = "1:f96e423db48855ede706731c61308e86ffeb36e3b4a5dc7e5eb0669030463da9"
-  name = "github.com/knative/serving"
-  packages = [
-    "pkg/apis/serving/v1alpha1",
-    "pkg/apis/serving/v1beta1",
-  ]
-  pruneopts = "T"
-  revision = "6da659b889aa650b00af07223855a6da3b547c46"
-  version = "v0.8.1"
-
-[[projects]]
   branch = "master"
   digest = "1:6bda9283afef46e72e78d90580f152df3a7be019a2f425d1441e45e41c103cc1"
   name = "github.com/mailru/easyjson"
@@ -1091,6 +1080,7 @@
     "pkg/apis/networking",
     "pkg/apis/networking/v1alpha1",
     "pkg/apis/serving",
+    "pkg/apis/serving/v1alpha1",
     "pkg/apis/serving/v1beta1",
     "pkg/gc",
     "pkg/network",
@@ -1236,11 +1226,7 @@
     "github.com/emicklei/go-restful",
     "github.com/ghodss/yaml",
     "github.com/knative/build/pkg/apis/build/v1alpha1",
-    "github.com/knative/pkg/apis",
     "github.com/knative/pkg/apis/duck/v1alpha1",
-    "github.com/knative/pkg/apis/duck/v1beta1",
-    "github.com/knative/serving/pkg/apis/serving/v1alpha1",
-    "github.com/knative/serving/pkg/apis/serving/v1beta1",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/onsi/gomega/gstruct",
@@ -1260,6 +1246,10 @@
     "k8s.io/client-go/rest",
     "k8s.io/code-generator/cmd/client-gen",
     "k8s.io/code-generator/cmd/deepcopy-gen",
+    "knative.dev/pkg/apis",
+    "knative.dev/pkg/apis/duck/v1beta1",
+    "knative.dev/serving/pkg/apis/serving/v1alpha1",
+    "knative.dev/serving/pkg/apis/serving/v1beta1",
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
     "sigs.k8s.io/controller-runtime/pkg/controller",

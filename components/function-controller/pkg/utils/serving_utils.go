@@ -1,10 +1,10 @@
 package utils
 
 import (
-	servingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	"github.com/knative/serving/pkg/apis/serving/v1beta1"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	"knative.dev/serving/pkg/apis/serving/v1beta1"
 )
 
 // GetServiceSpec gets ServiceSpec for a function
@@ -46,7 +46,7 @@ func GetServiceSpec(imageName string, fn serverlessv1alpha1.Function, rnInfo *Ru
 		Template: &servingv1alpha1.RevisionTemplateSpec{
 			Spec: servingv1alpha1.RevisionSpec{
 				RevisionSpec: v1beta1.RevisionSpec{
-					PodSpec: v1beta1.PodSpec{
+					PodSpec: corev1.PodSpec{
 						Containers: []corev1.Container{{
 							Image: imageName,
 							Env:   envVarsForRevision,
