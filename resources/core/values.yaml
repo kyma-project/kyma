@@ -23,8 +23,8 @@ global:
     dir: develop/
     version: 4d43ced2
   ui_acceptance_tests:
-    dir:
-    version: a9d158d5
+    dir: pr/
+    version: PR-1216
   api_controller:
     dir: pr/
     version: "PR-5433"
