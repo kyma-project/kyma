@@ -32,6 +32,7 @@ spec:
                 - "name"
                 - "displayName"
                 - "providerDisplayName"
+                - "description"
                 - "entries"
                 properties:
                   id:
