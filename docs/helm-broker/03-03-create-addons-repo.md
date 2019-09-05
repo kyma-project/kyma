@@ -193,7 +193,7 @@ spec:
   ```bash
     base64 -b -i {path_to_id_rsa} -o id_rsa-encoded
   ```
-  > **NOTE:** Private SSH key should not be secured by a passphrase.
+  > **NOTE:** Do not secure your private SSH key with a passphrase.
 
   2. Create a corresponding Secret resource:
   ```bash
