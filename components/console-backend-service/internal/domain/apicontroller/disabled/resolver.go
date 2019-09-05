@@ -15,6 +15,15 @@ func NewResolver(err error) *Resolver {
 	return &Resolver{err: err}
 }
 
+// APIEventSubscription provides a failing mock function with given fields: ctx, namespace, serviceName
+func (_m *Resolver) APIEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error) {
+	var r0 <-chan gqlschema.ApiEvent
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // APIQuery provides a failing mock function with given fields: ctx, name, namespace
 func (_m *Resolver) APIQuery(ctx context.Context, name string, namespace string) (*gqlschema.API, error) {
 	var r0 *gqlschema.API
@@ -27,15 +36,6 @@ func (_m *Resolver) APIQuery(ctx context.Context, name string, namespace string)
 // APIsQuery provides a failing mock function with given fields: ctx, namespace, serviceName, hostname
 func (_m *Resolver) APIsQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
 	var r0 []gqlschema.API
-	var r1 error
-	r1 = _m.err
-
-	return r0, r1
-}
-
-// APIEventSubscription provides a failing mock function with given fields: ctx, namespace, serviceName
-func (_m *Resolver) APIEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiEvent, error) {
-	var r0 <-chan gqlschema.ApiEvent
 	var r1 error
 	r1 = _m.err
 

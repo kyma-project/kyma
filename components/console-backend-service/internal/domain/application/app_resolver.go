@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/extractor"
+
 	"github.com/golang/glog"
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	appTypes "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -100,7 +102,7 @@ func (r *applicationResolver) ApplicationsQuery(ctx context.Context, namespace *
 
 func (r *applicationResolver) ApplicationEventSubscription(ctx context.Context) (<-chan gqlschema.ApplicationEvent, error) {
 	channel := make(chan gqlschema.ApplicationEvent, 1)
-	appListener := listener.NewApplication(channel, &r.appConverter)
+	appListener := listener.NewApplication(channel, &r.appConverter, extractor.ApplicationUnstructuredExtractor{})
 
 	r.appSvc.Subscribe(appListener)
 	go func() {
