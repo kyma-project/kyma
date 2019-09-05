@@ -14,7 +14,7 @@ This  tutorial is a follow-up of the [observe application metrics](/components/m
 Follow these steps to configure notifications for Slack.
 
 
-1. Install the Incoming Webhooks Slack app and configure it to receive notifications coming from third party services. Read [this](https://api.slack.com/incoming-webhooks#create_a_webhook) document to find out how to set up the configuration. 
+1. Install the Incoming WebHooks Slack app and configure it to receive notifications coming from third party services. Read [this](https://api.slack.com/incoming-webhooks#create_a_webhook) document to find out how to set up the configuration. 
   >**NOTE**: The approval of your Slack workspace administrator may be necessary to set up the webhook.
 
  The integration settings should look similar to the following:
@@ -36,16 +36,21 @@ metadata:
 type: Opaque
 stringData:
     global.alertTools.credentials.slack.channel: "{CHANNEL_NAME}"
-    global.alertTools.credentials.slack.apiurl: "{HOOK_ENDPOINT}"
+    global.alertTools.credentials.slack.apiurl: "{WEBHOOK_URL}"
 ```
 Use the following parameters:
 
 | Parameter | Description |
 |-----------|--------------------|
-| **global.alertTools.credentials.slack.channel** | Specifies the Slack channel which receives notifications on new alerts. It must be the same channel you specified in the Slack webhook configuration. 
-| **global.alertTools.credentials.slack.apiurl** | Specifies the URL endpoint which sends alerts triggered by Prometheus rules. The Incoming Webhooks Slack app provides you with the URL when creating the integration.|
+| **global.alertTools.credentials.slack.channel** | Specifies the Slack channel which receives notifications on new alerts, such as `test-monitoring-alerts`.
+| **global.alertTools.credentials.slack.apiurl** | Specifies the URL endpoint which sends alerts triggered by Prometheus rules. The Incoming Webhooks Slack app provides you with the Webhook URL you can paste in this configuration, such as `https://hooks.slack.com/services/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`. |
 
 For details on Alertmanager chart configuration and parameters see [this](components/monitoring/#configuration-alertmanager-sub-chart) document.
+
+4. Deploy the Secret:
+```bash
+kubectl apply -f {FILE_NAME}.yaml
+```
 
 3. Proceed with Kyma installation. 
 
