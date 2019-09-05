@@ -24,17 +24,8 @@ endif
 test: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
 # Default is 20s - available since controller-runtime 0.1.5
 test: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
-test: generate fmt vet symlinks
+test: generate fmt vet
 	go test -v ./pkg/... ./cmd/... -coverprofile cover.out
-
-symlinks:
-	-rm config/crds/300*.yaml
-	ln -s ../../vendor/github.com/knative/build/config/300-build.yaml config/crds/300-build.yaml
-	ln -s ../../vendor/github.com/knative/build/config/300-buildtemplate.yaml config/crds/300-buildtemplate.yaml
-	ln -s ../../vendor/knative.dev/serving/config/v1alpha1/300-revision.yaml config/crds/300-revision.yaml
-	ln -s ../../vendor/knative.dev/serving/config/v1alpha1/300-route.yaml config/crds/300-route.yaml
-	ln -s ../../vendor/knative.dev/serving/config/v1alpha1/300-service.yaml config/crds/300-service.yaml
-	ln -s ../../vendor/knative.dev/serving/config/v1alpha1/300-configuration.yaml config/crds/300-configuration.yaml
 
 # Generate code
 generate: resolve
