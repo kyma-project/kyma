@@ -63,13 +63,10 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNames
 
 	var namespaces []types.NamespaceWithAdditionalData
 	for _, ns := range rawNamespaces {
-		isSystem := isSystemNamespace(*ns, r.systemNamespaces)
-		passedSystemNamespaceCheck := !isSystem || (withSystemNamespaces != nil && *withSystemNamespaces && isSystem)
-		passedStatusCheck := ns.Status.Phase == "Active" || (withInactiveStatus != nil && *withInactiveStatus)
-		if passedSystemNamespaceCheck && passedStatusCheck {
+		if r.checkNamespace(ns, withSystemNamespaces, withInactiveStatus) {
 			namespaces = append(namespaces, types.NamespaceWithAdditionalData{
 				Namespace:         ns,
-				IsSystemNamespace: isSystem,
+				IsSystemNamespace: isSystemNamespace(*ns, r.systemNamespaces),
 			})
 		}
 	}
@@ -174,10 +171,11 @@ func (r *namespaceResolver) DeleteNamespace(ctx context.Context, name string) (*
 	return deletedNamespace, nil
 }
 
-func (r *namespaceResolver) NamespaceEventSubscription(ctx context.Context) (<-chan gqlschema.NamespaceEvent, error) {
+func (r *namespaceResolver) NamespaceEventSubscription(ctx context.Context, withSystemNamespaces *bool) (<-chan gqlschema.NamespaceEvent, error) {
 	channel := make(chan gqlschema.NamespaceEvent, 1)
 	filter := func(namespace *v1.Namespace) bool {
-		return namespace != nil
+		newBool := true
+		return namespace != nil && r.checkNamespace(namespace, withSystemNamespaces, &newBool)
 	}
 
 	namespaceListener := listener.NewNamespace(channel, filter, r.namespaceConverter, r.systemNamespaces)
@@ -217,4 +215,11 @@ func (r *namespaceResolver) decorateNamespace(namespace *v1.Namespace) types.Nam
 		Namespace:         namespace,
 		IsSystemNamespace: isSystem,
 	}
+}
+
+func (r *namespaceResolver) checkNamespace(ns *v1.Namespace, withSystemNamespaces *bool, withInactiveStatus *bool) bool {
+	isSystem := isSystemNamespace(*ns, r.systemNamespaces)
+	passedSystemNamespaceCheck := !isSystem || (withSystemNamespaces != nil && *withSystemNamespaces && isSystem)
+	passedStatusCheck := ns.Status.Phase == "Active" || (withInactiveStatus != nil && *withInactiveStatus)
+	return passedSystemNamespaceCheck && passedStatusCheck
 }

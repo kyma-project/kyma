@@ -16,17 +16,17 @@ type gqlNamespaceConverter interface {
 }
 
 type Namespace struct {
-	channel   chan<- gqlschema.NamespaceEvent
-	filter    func(namespace *v1.Namespace) bool
-	converter gqlNamespaceConverter
+	channel       chan<- gqlschema.NamespaceEvent
+	filter        func(namespace *v1.Namespace) bool
+	converter     gqlNamespaceConverter
 	sysNamespaces []string
 }
 
 func NewNamespace(channel chan<- gqlschema.NamespaceEvent, filter func(namespace *v1.Namespace) bool, converter gqlNamespaceConverter, sysNamespaces []string) *Namespace {
 	return &Namespace{
-		channel:   channel,
-		filter:    filter,
-		converter: converter,
+		channel:       channel,
+		filter:        filter,
+		converter:     converter,
 		sysNamespaces: sysNamespaces,
 	}
 }
@@ -73,8 +73,8 @@ func (l *Namespace) notify(eventType gqlschema.SubscriptionEventType, rawNamespa
 	}
 
 	event := gqlschema.NamespaceEvent{
-		Type: eventType,
-		Namespace:  *gqlNamespace,
+		Type:      eventType,
+		Namespace: *gqlNamespace,
 	}
 
 	l.channel <- event

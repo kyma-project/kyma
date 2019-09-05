@@ -839,7 +839,7 @@ type ComplexityRoot struct {
 		ClusterAddonsConfigurationEvent func(childComplexity int) int
 		AddonsConfigurationEvent        func(childComplexity int, namespace string) int
 		ApiEvent                        func(childComplexity int, namespace string, serviceName *string) int
-		NamespaceEvent                  func(childComplexity int) int
+		NamespaceEvent                  func(childComplexity int, withSystemNamespaces *bool) int
 	}
 
 	UsageKind struct {
@@ -1029,7 +1029,7 @@ type SubscriptionResolver interface {
 	ClusterAddonsConfigurationEvent(ctx context.Context) (<-chan ClusterAddonsConfigurationEvent, error)
 	AddonsConfigurationEvent(ctx context.Context, namespace string) (<-chan AddonsConfigurationEvent, error)
 	APIEvent(ctx context.Context, namespace string, serviceName *string) (<-chan ApiEvent, error)
-	NamespaceEvent(ctx context.Context) (<-chan NamespaceEvent, error)
+	NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan NamespaceEvent, error)
 }
 
 func field_Asset_files_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -4089,6 +4089,26 @@ func field_Subscription_apiEvent_args(rawArgs map[string]interface{}) (map[strin
 		}
 	}
 	args["serviceName"] = arg1
+	return args, nil
+
+}
+
+func field_Subscription_namespaceEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *bool
+	if tmp, ok := rawArgs["withSystemNamespaces"]; ok {
+		var err error
+		var ptr1 bool
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalBoolean(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["withSystemNamespaces"] = arg0
 	return args, nil
 
 }
@@ -8109,7 +8129,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Subscription.NamespaceEvent(childComplexity), true
+		args, err := field_Subscription_namespaceEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.NamespaceEvent(childComplexity, args["withSystemNamespaces"].(*bool)), true
 
 	case "UsageKind.name":
 		if e.complexity.UsageKind.Name == nil {
@@ -29185,13 +29210,19 @@ func (ec *executionContext) _Subscription_apiEvent(ctx context.Context, field gr
 }
 
 func (ec *executionContext) _Subscription_namespaceEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_namespaceEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Field: field,
 	})
 	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
 	//          and Tracer stack
 	rctx := ctx
-	results, err := ec.resolvers.Subscription().NamespaceEvent(rctx)
+	results, err := ec.resolvers.Subscription().NamespaceEvent(rctx, args["withSystemNamespaces"].(*bool))
 	if err != nil {
 		ec.Error(ctx, err)
 		return nil
@@ -32669,7 +32700,7 @@ type Subscription {
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
     apiEvent(namespace: String!, serviceName: String): ApiEvent! @HasAccess(attributes: {resource: "apis", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
-    namespaceEvent: NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
+    namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 }
 
 # Schema
