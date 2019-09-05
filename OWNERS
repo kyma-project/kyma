@@ -1,5 +1,5 @@
 filters:
-  ".*":
+  '.*':
     approvers:
       - derberg
       - pbochynski
