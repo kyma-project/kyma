@@ -6,19 +6,19 @@ This tutorial shows you how to configure Alertmanager to send notifications. Ale
 
 ## Prerequisites
 
-This  tutorial is a follow-up of the [**observe application metrics**](/components/monitoring/#tutorials-observe-application-metrics) and the [**define alerting rules**](https://kyma-project.io/docs/master/components/monitoring/#tutorials-define-alerting-rules) tutorials that use the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric and creates an alert based on it. That configuration is required to complete this tutorial.
+This  tutorial is a follow-up of the [**Observe application metrics**](/components/monitoring/#tutorials-observe-application-metrics) and the [**Define alerting rules**](https://kyma-project.io/docs/master/components/monitoring/#tutorials-define-alerting-rules) tutorials that use the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric and creates an alert based on it. That configuration is required to complete this tutorial.
 
 
 ## Steps
 
 Follow these steps to configure notifications for Slack every time Alertmanager triggers and resolves the `CPUTempHigh` alert.
+ 
 
+1. Install the Incoming WebHooks application using Slack App Directory.
 
-1. Install the Incoming WebHooks Slack application using Slack App Directory.
+  >**NOTE**: The approval of your Slack workspace administrator may be necessary to install the application.
 
-  >**NOTE**: The approval of your Slack workspace administrator may be necessary install the application.
-
-2. Configure the application to receive notifications coming from third party services. Read [this](https://api.slack.com/incoming-webhooks#create_a_webhook) document to find out how to set up the configuration. 
+2. Configure the application to receive notifications coming from third-party services. Read [this](https://api.slack.com/incoming-webhooks#create_a_webhook) document to find out how to set up the configuration. 
  The integration settings should look similar to the following:
 
  ![Integration Settings](./assets/integration-settings.png)
@@ -45,11 +45,11 @@ Use the following parameters:
 | Parameter | Description |
 |-----------|--------------------|
 | **global.alertTools.credentials.slack.channel** | Specifies the Slack channel which receives notifications on new alerts, such as `test-monitoring-alerts`.
-| **global.alertTools.credentials.slack.apiurl** | Specifies the URL endpoint which sends alerts triggered by Prometheus rules. The Incoming Webhooks Slack application provides you with the Webhook URL, such as `https://hooks.slack.com/services/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`, that you can paste in this configuration. |
+| **global.alertTools.credentials.slack.apiurl** | Specifies the URL endpoint which sends alerts triggered by Prometheus rules. The Incoming WebHooks application provides you with the Webhook URL, such as `https://hooks.slack.com/services/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`, that you can paste in this configuration. |
 
-For details on Alertmanager chart configuration and parameters see [this](components/monitoring/#configuration-alertmanager-sub-chart) document.
+For details on Alertmanager chart configuration and parameters see [this](https://kyma-project.io/docs/master/components/monitoring/#details-alertmanager-alertmanager-configuration) document.
 
-4. Deploy the Secret:
+4. Deploy the Secret. Use this command:
 ```bash
 kubectl apply -f {FILE_NAME}.yaml
 ```

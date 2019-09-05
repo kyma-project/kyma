@@ -5,7 +5,7 @@
 
 This chart contains configuration related to Alertmanager.
 
-For details on Alertmanager configuration, see [this](https://github.com/kyma-project/kyma/blob/master/docs/monitoring/03-01-alertmanager.md) document.
+For details on Alertmanager configuration, see [this](https://kyma-project.io/docs/master/components/monitoring/#details-alertmanager-alertmanager-configuration) document.
 
 ## Details
 
@@ -15,7 +15,7 @@ These rules provide alerting configuration for logging, web applications, REST s
 
 ## Alertmanager configuration - alertmanager.yaml
 
-This section explains how to configure Alertmanager to enable alerting notifications. [This](templates/alertmanager.config.yaml) template pre-configures two simple receivers to handle alerts in VictorOps and Slack.
+This section explains how to configure Alertmanager to enable alerting notifications. [This](https://github.com/kyma-project/kyma/tree/master/resources/monitoring/charts/alertmanager/templates/alertmanager.config.yaml) template pre-configures two simple receivers to handle alerts in VictorOps and Slack.
 
 This yaml file pre-configures two simple receivers to handle alerts in VictorOps and Slack.
 
