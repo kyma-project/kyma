@@ -7,5 +7,4 @@ approvers:
   - Demonsthere
 
 labels:
-- area/service-mesh
-- area/security
+- area/installation
