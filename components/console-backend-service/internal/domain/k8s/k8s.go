@@ -72,7 +72,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	selfSubjectRulesService := newSelfSubjectRulesService(clientset.AuthorizationV1())
 	return &Resolver{
 		resourceResolver:            newResourceResolver(resourceService),
-		namespaceResolver:           nr,
+		namespaceResolver:           namespaceResolver,
 		secretResolver:              newSecretResolver(*secretService),
 		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
 		podResolver:                 newPodResolver(podService),
