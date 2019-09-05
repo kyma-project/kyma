@@ -47,7 +47,7 @@ var _ = Describe("Bucket", func() {
 			recorder:                record.NewFakeRecorder(100),
 			relistInterval:          60 * time.Hour,
 			store:                   mocks.Store,
-			finalizer:               finalizer.New(deleteAssetFinalizerName),
+			finalizer:               finalizer.New("test"),
 			externalEndpoint:        "https://minio.test.local",
 			maxConcurrentReconciles: 1,
 		}

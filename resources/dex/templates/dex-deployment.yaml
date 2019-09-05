@@ -22,7 +22,7 @@ spec:
     spec:
       serviceAccountName: dex-account
       securityContext:
-        runAsUSer: 2000
+        runAsUser: 2000
       containers:
       - image: {{ .Values.imageRegistry }}/dex:{{ .Chart.AppVersion }}
         name: dex
@@ -36,6 +36,9 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /etc/dex/cfg
+        {{- with .Values.volumeMountsExtra }}
+        {{- tpl . $ | nindent 8 }}
+        {{- end }}
 
       initContainers:
       - name: dex-users-configurator
@@ -55,3 +58,6 @@ spec:
             path: config.yaml
       - name: config
         emptyDir: {}
+      {{- with .Values.volumesExtra }}
+      {{- tpl . $ | nindent 6 }}
+      {{- end }}

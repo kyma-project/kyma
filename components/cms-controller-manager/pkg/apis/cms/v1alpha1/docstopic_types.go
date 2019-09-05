@@ -4,6 +4,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
+// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
 // DocsTopicSpec defines the desired state of DocsTopic
 type DocsTopicSpec struct {
 	CommonDocsTopicSpec `json:",inline"`
@@ -14,11 +17,9 @@ type DocsTopicStatus struct {
 	CommonDocsTopicStatus `json:",inline"`
 }
 
-// +genclient
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
 
-// DocsTopic is the Schema for the docstopic API
-// +k8s:openapi-gen=true
+// DocsTopic is the Schema for the docstopics API
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type="string",JSONPath=".status.phase"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
@@ -30,7 +31,7 @@ type DocsTopic struct {
 	Status DocsTopicStatus `json:"status,omitempty"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
 
 // DocsTopicList contains a list of DocsTopic
 type DocsTopicList struct {

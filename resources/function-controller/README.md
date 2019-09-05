@@ -49,7 +49,7 @@ Follow the steps to install the chart:
     helm install function-controller \
                  --namespace="${NAMESPACE}" \
                  --name="${NAME}" \
-                 --set secret.registryAddress="${FN_REPOSITORY}" \
+                 --set secret.registryAddress="${FN_REGISTRY}" \
                  --set secret.registryUserName="${reg_username}" \
                  --set secret.registryPassword="${reg_password}" \
                  --set config.dockerRegistry="${FN_REPOSITORY}" \

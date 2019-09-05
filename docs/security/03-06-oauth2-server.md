@@ -33,7 +33,8 @@ EOF
 ```
 
 Creating this custom resource triggers the Hydra Maester controller which sends a client registration request to the OAuth2 server and saves the credentials of the registered client to a Kubernetes Secret.
->**NOTE:** The instance of the`oauth2clients.hydra.ory.sh` custom resource and the Secret that stores the credentials of the corresponding client share the name and the Namespace.
+
+>**NOTE:** By default, you can create clients only in the `kyma-system` and `default` Namespaces. Read [this](https://github.com/ory/k8s/blob/master/docs/helm/hydra-maester.md#configuration) document to learn how to enable creating clients in other Namespaces. Each instance of the `oauth2clients.hydra.ory.sh` custom resource and the Secret that stores the credentials of the corresponding client share the name and the Namespace.
 
 Run this command to get the credentials of the registered OAuth2:
 ```
