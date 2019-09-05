@@ -17,9 +17,6 @@ package main
 
 import (
 	"flag"
-	"os"
-	"time"
-
 	assetstore "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/controllers"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/internal/webhookconfig"
@@ -29,11 +26,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/dynamic/dynamicinformer"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/cache"
+	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	// +kubebuilder:scaffold:imports
@@ -90,7 +86,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	webhookSvc, cfgMapInformer, err := initWebhookConfigService(cfg.Webhook, restConfig)
+	webhookSvc, err := initWebhookConfigService(cfg.Webhook, restConfig)
 	if err != nil {
 		setupLog.Error(err, "unable to initialize webhook service")
 		os.Exit(1)
@@ -106,11 +102,8 @@ func main() {
 	}
 	// +kubebuilder:scaffold:builder
 
-	setupSignal := ctrl.SetupSignalHandler()
-	go cfgMapInformer.Run(setupSignal)
-
 	setupLog.Info("starting manager")
-	if err := mgr.Start(setupSignal); err != nil {
+	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
@@ -127,16 +120,15 @@ func loadConfig(prefix string) (Config, error) {
 	return cfg, err
 }
 
-func initWebhookConfigService(webhookCfg webhookconfig.Config, config *rest.Config) (webhookconfig.AssetWebhookConfigService, cache.SharedIndexInformer, error) {
+func initWebhookConfigService(webhookCfg webhookconfig.Config, config *rest.Config) (webhookconfig.AssetWebhookConfigService, error) {
 	dc, err := dynamic.NewForConfig(config)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "while initializing dynamic client")
+		return nil, errors.Wrap(err, "while initializing dynamic client")
 	}
 
-	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(dc, time.Hour)
 	configmapsResource := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "configmaps"}
-	informer := informerFactory.ForResource(configmapsResource).Informer()
+	resourceGetter := dc.Resource(configmapsResource).Namespace(webhookCfg.CfgMapNamespace)
 
-	webhookCfgService := webhookconfig.New(informer.GetIndexer(), webhookCfg.CfgMapName, webhookCfg.CfgMapNamespace)
-	return webhookCfgService, informer, nil
+	webhookCfgService := webhookconfig.New(resourceGetter, webhookCfg.CfgMapName, webhookCfg.CfgMapNamespace)
+	return webhookCfgService, nil
 }

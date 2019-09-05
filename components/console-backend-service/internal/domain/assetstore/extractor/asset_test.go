@@ -14,14 +14,14 @@ import (
 func TestAssetUnstructuredExtractor_Do(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		extractor := extractor.AssetUnstructuredExtractor{}
-		obj := testingUtils.NewUnstructured(v1alpha2.SchemeGroupVersion.String(), "Asset", map[string]interface{}{
+		obj := testingUtils.NewUnstructured(v1alpha2.GroupVersion.String(), "Asset", map[string]interface{}{
 			"name":      "ExampleName",
 			"namespace": "ExampleNamespace",
 		}, nil, nil)
 		expected := &v1alpha2.Asset{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Asset",
-				APIVersion: v1alpha2.SchemeGroupVersion.String(),
+				APIVersion: v1alpha2.GroupVersion.String(),
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "ExampleName",
