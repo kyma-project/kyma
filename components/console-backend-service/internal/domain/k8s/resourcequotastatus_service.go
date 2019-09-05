@@ -109,7 +109,7 @@ func (svc *resourceQuotaStatusService) checkResourcesRequests(namespace string, 
 		}
 	}
 
-	// For each StatefulSet that has a number of replicas lower than expected, check if any ResourceQuota blocks the progress of the StatefulSet.
+	// For each StatefulSet that has decorateNamespace number of replicas lower than expected, check if any ResourceQuota blocks the progress of the StatefulSet.
 	// To calculate how many resources the StatefulSet needs to progress, sum up the resource usage of all containers in the replica Pod. You must also calculate the difference from `.spec.hard` and `.status.used`.
 	statefulSets, err := svc.ssLister.ListStatefulSets(namespace)
 	if err != nil {

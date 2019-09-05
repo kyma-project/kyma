@@ -40,7 +40,7 @@ type config struct {
 	AllowedOrigins       []string      `envconfig:"optional"`
 	Verbose              bool          `envconfig:"default=false"`
 	KubeconfigPath       string        `envconfig:"optional"`
-	SystemNamespaces     []string      `envconfig:"default=istio-system;knative-eventing;knative-serving;kube-public;kube-system;kyma-backup;kyma-installer;kyma-integration;kyma-system;natss;compass-system;x;y;z"`
+	SystemNamespaces     []string      `envconfig:"default=istio-system;knative-eventing;knative-serving;kube-public;kube-system;kyma-backup;kyma-installer;kyma-integration;kyma-system;natss;compass-system"`
 	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
 	Application          application.Config

@@ -29,10 +29,8 @@ type namespaceSvc interface {
 
 //go:generate mockery -name=gqlNamespaceConverter -output=automock -outpkg=automock -case=underscore
 type gqlNamespaceConverter interface {
-	ToGQLs(in []*v1.Namespace) ([]gqlschema.Namespace, error)
-	ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error)
-	ToGQLsWithAdditionalData(in []types.NamespaceWithAdditionalData) ([]gqlschema.Namespace, error)
-	ToGQLWithAdditionalData(in types.NamespaceWithAdditionalData) (*gqlschema.Namespace, error)
+	ToGQLs(in []types.NamespaceWithAdditionalData) ([]gqlschema.Namespace, error)
+	ToGQL(in types.NamespaceWithAdditionalData) (*gqlschema.Namespace, error)
 }
 
 type namespaceResolver struct {
@@ -76,7 +74,7 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNames
 		}
 	}
 
-	converted, err := r.namespaceConverter.ToGQLsWithAdditionalData(namespaces)
+	converted, err := r.namespaceConverter.ToGQLs(namespaces)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespaces))
 		return nil, gqlerror.New(err, pretty.Namespaces)
@@ -114,13 +112,8 @@ func (r *namespaceResolver) NamespaceQuery(ctx context.Context, name string) (*g
 		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
 	}
 
-	isSystem := isSystemNamespace(*namespace, r.systemNamespaces)
-	ns := types.NamespaceWithAdditionalData{
-		Namespace:         namespace,
-		IsSystemNamespace: isSystem,
-	}
-
-	converted, err := r.namespaceConverter.ToGQLWithAdditionalData(ns)
+	ns := r.decorateNamespace(namespace)
+	converted, err := r.namespaceConverter.ToGQL(ns)
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespace))
@@ -164,7 +157,9 @@ func (r *namespaceResolver) DeleteNamespace(ctx context.Context, name string) (*
 	}
 
 	namespaceCopy := namespace.DeepCopy()
-	deletedNamespace, err := r.namespaceConverter.ToGQL(namespaceCopy)
+	ns := r.decorateNamespace(namespaceCopy)
+
+	deletedNamespace, err := r.namespaceConverter.ToGQL(ns)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespace))
 		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
@@ -214,4 +209,12 @@ func isSystemNamespace(namespace v1.Namespace, sysNamespaces []string) bool {
 		}
 	}
 	return false
+}
+
+func (r *namespaceResolver) decorateNamespace(namespace *v1.Namespace) types.NamespaceWithAdditionalData {
+	isSystem := isSystemNamespace(*namespace, r.systemNamespaces)
+	return types.NamespaceWithAdditionalData{
+		Namespace:         namespace,
+		IsSystemNamespace: isSystem,
+	}
 }

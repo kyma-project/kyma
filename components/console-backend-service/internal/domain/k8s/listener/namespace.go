@@ -12,7 +12,7 @@ import (
 
 //go:generate mockery -name=gqlNamespaceConverter -output=automock -outpkg=automock -case=underscore
 type gqlNamespaceConverter interface {
-	ToGQLWithAdditionalData(in types.NamespaceWithAdditionalData) (*gqlschema.Namespace, error)
+	ToGQL(in types.NamespaceWithAdditionalData) (*gqlschema.Namespace, error)
 }
 
 type Namespace struct {
@@ -63,7 +63,7 @@ func (l *Namespace) notify(eventType gqlschema.SubscriptionEventType, rawNamespa
 		IsSystemNamespace: isSystem,
 	}
 
-	gqlNamespace, err := l.converter.ToGQLWithAdditionalData(namespace)
+	gqlNamespace, err := l.converter.ToGQL(namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting *Namespace"))
 		return
