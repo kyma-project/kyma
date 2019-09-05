@@ -38,7 +38,7 @@ Follow the instructions to set up Velero:
     labels:
         kyma-project.io/installation: ""
         installer: overrides
-        component: velero
+        component: backup
     type: Opaque
     data:
         configuration.provider: "gcp"
