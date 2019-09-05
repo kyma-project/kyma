@@ -3,14 +3,14 @@
 
 ## Overview 
 
-This chart contains a part of the configuration related to the Alertmanager.
+This chart contains configuration related to Alertmanager.
 
-For details on Alertmanager configuration, see [this](https://github.com/kyma-project/kyma/docs/monitoring/03-01-alertmanager.md) document.
+For details on Alertmanager configuration, see [this](https://github.com/kyma-project/kyma/blob/master/docs/monitoring/03-01-alertmanager.md) document.
 
 ## Details
 
-Kyma comes with a set of alerting rules provided out of the box. You can find them [here](https://github.com/kyma-project/kyma/tree/master/resources/monitoring/charts/alertmanager/templates).
-These rules provide alerting configuration for logging, webapps, rest services, and custom Kyma rules. 
+Kyma comes with a set of out-of-the-box alerting rules. You can find them [here](https://github.com/kyma-project/kyma/tree/master/resources/monitoring/charts/alertmanager/templates).
+These rules provide alerting configuration for logging, web applications, REST services, and custom Kyma rules. 
 
 
 ## Alertmanager configuration - alertmanager.yaml
@@ -19,7 +19,7 @@ This section explains how to configure Alertmanager to enable alerting notificat
 
 This yaml file pre-configures two simple receivers to handle alerts in VictorOps and Slack.
 
-To avoid confusion, use optional configuration parameters for `route:` and then group the receivers under the label ```routes:```
+To avoid confusion, use optional configuration parameters for `route:` and then group the receivers under the label `routes:` label.
 
 ```yaml
 {{ define "alertmanager.yaml.tpl" }}
