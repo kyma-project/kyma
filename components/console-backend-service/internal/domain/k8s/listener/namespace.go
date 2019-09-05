@@ -2,6 +2,7 @@ package listener
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/types"
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -11,20 +12,22 @@ import (
 
 //go:generate mockery -name=gqlNamespaceConverter -output=automock -outpkg=automock -case=underscore
 type gqlNamespaceConverter interface {
-	ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error)
+	ToGQLWithAdditionalData(in types.NamespaceWithAdditionalData) (*gqlschema.Namespace, error)
 }
 
 type Namespace struct {
 	channel   chan<- gqlschema.NamespaceEvent
 	filter    func(namespace *v1.Namespace) bool
 	converter gqlNamespaceConverter
+	sysNamespaces []string
 }
 
-func NewNamespace(channel chan<- gqlschema.NamespaceEvent, filter func(namespace *v1.Namespace) bool, converter gqlNamespaceConverter) *Namespace {
+func NewNamespace(channel chan<- gqlschema.NamespaceEvent, filter func(namespace *v1.Namespace) bool, converter gqlNamespaceConverter, sysNamespaces []string) *Namespace {
 	return &Namespace{
 		channel:   channel,
 		filter:    filter,
 		converter: converter,
+		sysNamespaces: sysNamespaces,
 	}
 }
 
@@ -52,8 +55,15 @@ func (l *Namespace) onEvent(eventType gqlschema.SubscriptionEventType, object in
 	}
 }
 
-func (l *Namespace) notify(eventType gqlschema.SubscriptionEventType, namespace *v1.Namespace) {
-	gqlNamespace, err := l.converter.ToGQL(namespace)
+func (l *Namespace) notify(eventType gqlschema.SubscriptionEventType, rawNamespace *v1.Namespace) {
+
+	isSystem := isSystemNamespace(*rawNamespace, l.sysNamespaces)
+	namespace := types.NamespaceWithAdditionalData{
+		Namespace:         rawNamespace,
+		IsSystemNamespace: isSystem,
+	}
+
+	gqlNamespace, err := l.converter.ToGQLWithAdditionalData(namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting *Namespace"))
 		return
@@ -68,4 +78,13 @@ func (l *Namespace) notify(eventType gqlschema.SubscriptionEventType, namespace 
 	}
 
 	l.channel <- event
+}
+
+func isSystemNamespace(namespace v1.Namespace, sysNamespaces []string) bool {
+	for _, sysNs := range sysNamespaces {
+		if sysNs == namespace.Name {
+			return true
+		}
+	}
+	return false
 }

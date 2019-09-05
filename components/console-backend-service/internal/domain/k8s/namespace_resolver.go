@@ -6,6 +6,7 @@ import (
 	appPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/types"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -30,8 +31,8 @@ type namespaceSvc interface {
 type gqlNamespaceConverter interface {
 	ToGQLs(in []*v1.Namespace) ([]gqlschema.Namespace, error)
 	ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error)
-	ToGQLsWithAdditionalData(in []NamespaceWithAdditionalData) ([]gqlschema.Namespace, error)
-	ToGQLWithAdditionalData(in NamespaceWithAdditionalData) (*gqlschema.Namespace, error)
+	ToGQLsWithAdditionalData(in []types.NamespaceWithAdditionalData) ([]gqlschema.Namespace, error)
+	ToGQLWithAdditionalData(in types.NamespaceWithAdditionalData) (*gqlschema.Namespace, error)
 }
 
 type namespaceResolver struct {
@@ -50,11 +51,6 @@ func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.Applica
 	}
 }
 
-type NamespaceWithAdditionalData struct {
-	namespace         *v1.Namespace
-	isSystemNamespace bool
-}
-
 func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]gqlschema.Namespace, error) {
 	rawNamespaces, err := r.namespaceSvc.List()
 
@@ -67,15 +63,15 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNames
 		return nil, gqlerror.New(err, pretty.Namespaces)
 	}
 
-	var namespaces []NamespaceWithAdditionalData
+	var namespaces []types.NamespaceWithAdditionalData
 	for _, ns := range rawNamespaces {
 		isSystem := isSystemNamespace(*ns, r.systemNamespaces)
 		passedSystemNamespaceCheck := !isSystem || (withSystemNamespaces != nil && *withSystemNamespaces && isSystem)
 		passedStatusCheck := ns.Status.Phase == "Active" || (withInactiveStatus != nil && *withInactiveStatus)
 		if passedSystemNamespaceCheck && passedStatusCheck {
-			namespaces = append(namespaces, NamespaceWithAdditionalData{
-				namespace:         ns,
-				isSystemNamespace: isSystem,
+			namespaces = append(namespaces, types.NamespaceWithAdditionalData{
+				Namespace:         ns,
+				IsSystemNamespace: isSystem,
 			})
 		}
 	}
@@ -119,9 +115,9 @@ func (r *namespaceResolver) NamespaceQuery(ctx context.Context, name string) (*g
 	}
 
 	isSystem := isSystemNamespace(*namespace, r.systemNamespaces)
-	ns := NamespaceWithAdditionalData{
-		namespace:         namespace,
-		isSystemNamespace: isSystem,
+	ns := types.NamespaceWithAdditionalData{
+		Namespace:         namespace,
+		IsSystemNamespace: isSystem,
 	}
 
 	converted, err := r.namespaceConverter.ToGQLWithAdditionalData(ns)
@@ -189,7 +185,7 @@ func (r *namespaceResolver) NamespaceEventSubscription(ctx context.Context) (<-c
 		return namespace != nil
 	}
 
-	namespaceListener := listener.NewNamespace(channel, filter, r.namespaceConverter)
+	namespaceListener := listener.NewNamespace(channel, filter, r.namespaceConverter, r.systemNamespaces)
 
 	r.namespaceSvc.Subscribe(namespaceListener)
 	go func() {
