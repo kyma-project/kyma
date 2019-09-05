@@ -115,10 +115,10 @@ spec:
   </details>
 </div>
 
-## Authentication
+## Supported protocols with authentication
 
-The AddonsConfiguration and ClusterAddonsConfiguration custom resources allow you to define authentication as part of the URL. For more details, read the [go-getter protocols](https://github.com/hashicorp/go-getter/blob/master/README.md#general-all-protocols) description.
-Using sensitive information, such as passwords, directly in the URL is not a good approach. Avoid this by putting such data in a Secret resource and taking advantage of templating. Use placeholders which refer to keys in the Secret. For example:
+You can provide authentication as part of the URL in your AddonsConfiguration and ClusterAddonsConfiguration custom resources. Instead of using sensitive information directly in the URL, put it in the Secret resource and take advantage of templating. In your repository URL, use placeholders which refer to keys in the Secret. See the following example:
+
 ```yaml
 apiVersion: addons.kyma-project.io/v1alpha1
 kind: ClusterAddonsConfiguration
@@ -139,12 +139,12 @@ stringData:
   host: "github.com"
   project: "kyma-project/addons"       
 ```
-The URL resolves into:
+The URL renders as follows:
 ```
 https://github.com/kyma-project/addons/addons/index.yaml
 ```
 
-The Helm Broker supports authentication using these protocols:
+The Helm Broker supports authentication with these protocols:
 
 <div tabs>
   <details>
@@ -152,19 +152,18 @@ The Helm Broker supports authentication using these protocols:
   HTTP/HTTPS
   </summary>
 
-To define basic authentication credentials, precede a section `username:password@` to the hostname in the URL. For example:
+To secure your addons repository with basic authentication credentials, create a Secret resource which contains credentials, and reference it in the repository URL definition using templating. Follow these steps:
+
+1. Create a Secret:
+```bash
+kubectl create secret generic auth -n stage --from-literal=username=admin --from-literal=password=secretPassword
+```
+2. In your repository URL, precede the hostname with the `username:password@` section:
 ```
 https://admin:secretPassword@repository.addons.com/index.yaml
 ```
 
-Create a Secret resource which contains credentials, and reference it in the repository URL definition using templating:
-
-Create a Secret:
-```bash
-kubectl create secret generic auth -n stage --from-literal=username=admin --from-literal=password=secretPassword
-```
-
-Define a ClusterAddonsConfiguration:
+3. Define a ClusterAddonsConfiguration or AddonsConfiguration custom resource:
 ```yaml
 apiVersion: addons.kyma-project.io/v1alpha1
 kind: ClusterAddonsConfiguration
@@ -172,7 +171,7 @@ metadata:
   name: addons-cfg-sample
 spec:
   repositories:
-    # HTTPS protocol with basic authorization provided.
+    # HTTPS protocol with basic authorization provided
     - url: "https://{username}:{password}@repository.addons.com/index.yaml"
       secretRef:
         name: auth
@@ -185,23 +184,23 @@ spec:
   Git SSH
   </summary>
 
-  The Git SSH protocol requires an SSH key to authenticate your repository. Setting SSH keys differs among hosting providers.
-  > **NOTE**: See [this](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key) document to read about the GitHub service.
+  The Git SSH protocol requires an SSH key to authenticate your repository. Setting SSH keys differs among hosting providers. Read [this](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key) document to learn how to generate a new SSH key in the GitHub service.
+  >**NOTE:** The Git SSH private key must be base64-encoded.
 
-  The private key must be base64-encoded.
+  Follow these steps to secure your addons repository with basic authentication credentials:
 
-  To encode your private key, run this command:
+  1. Run this command to encode your private key:
   ```bash
     base64 -b -i {path_to_id_rsa} -o id_rsa-encoded
   ```
-
   > **NOTE:** Private SSH key should not be secured by a passphrase.
 
-  Create a corresponding Secret resource:
+  2. Create a corresponding Secret resource:
   ```bash
   kubectl create secret generic auth -n stage --from-file=key=id_rsa-encoded
   ```
-  Define a URL with the required SSH key option:
+
+  3. Define a URL with the required private SSH key option:
   ```yaml
   apiVersion: addons.kyma-project.io/v1alpha1
   kind: ClusterAddonsConfiguration

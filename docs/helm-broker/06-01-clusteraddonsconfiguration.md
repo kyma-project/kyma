@@ -83,7 +83,7 @@ This table lists all possible parameters of a given resource together with their
 | **spec.reprocessRequest**                | **NO**             | Allows you to manually trigger the reprocessing action of this CR. It is a strictly increasing, non-negative integer counter.    |
 | **spec.repositories.url**                | **YES**            | Provides the full URL to the index file of addons repositories.    |
 | **spec.repositories.secretRef.name**     | **NO**             | Defines the name of a Secret which provides values for the URL template.    |
-| **spec.repositories.secretRef.namespace**| **NO**             | Defines the name of a Secret which provides values for the URL template.    |
+| **spec.repositories.secretRef.namespace**| **NO**             | Defines the Namespace which stores a Secret that provides values for the URL template.    |
 | **status.phase**                       | **Not applicable** | Describes the status of processing the CR by the Helm Broker Controller. It can be `Ready`, `Failed`, or `Pending`.       |
 | **status.lastProcessedTime**           | **Not applicable** | Specifies the last time when the Helm Broker Controller processed the CR.     |
 | **status.observedGeneration**          | **Not applicable** | Specifies the most recent generation that the Helm Broker Controller observed.               |
