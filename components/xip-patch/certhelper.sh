@@ -48,10 +48,10 @@ EOF
 
 function generateCerts() {
   echo "---> Generating Certs for ${DOMAIN}"
-  generateCertificatesForDomain "${DOMAIN}" /root/key.pem /root/cert.pem
-  CERT=$(base64 /root/cert.pem | tr -d '\n')
-  KEY=$(base64 /root/key.pem | tr -d '\n')
-  rm /root/key.pem /root/cert.pem
+  generateCertificatesForDomain "${DOMAIN}" ${HOME}/key.pem ${HOME}/cert.pem
+  CERT=$(base64 ${HOME}/cert.pem | tr -d '\n')
+  KEY=$(base64 ${HOME}/key.pem | tr -d '\n')
+  rm ${HOME}/key.pem ${HOME}/cert.pem
   TLS_CERT_AND_KEY_YAML=$(cat << EOF
 ---
 data:

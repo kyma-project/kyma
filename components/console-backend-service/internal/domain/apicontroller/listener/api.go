@@ -13,17 +13,24 @@ type gqlApiConverter interface {
 	ToGQL(in *v1alpha2.Api) *gqlschema.API
 }
 
+//go:generate mockery -name=extractor -output=automock -outpkg=automock -case=underscore
+type extractor interface {
+	Do(interface{}) (*v1alpha2.Api, error)
+}
+
 type Api struct {
 	channel   chan<- gqlschema.ApiEvent
 	filter    func(api *v1alpha2.Api) bool
 	converter gqlApiConverter
+	extractor extractor
 }
 
-func NewApi(channel chan<- gqlschema.ApiEvent, filter func(api *v1alpha2.Api) bool, converter gqlApiConverter) *Api {
+func NewApi(channel chan<- gqlschema.ApiEvent, filter func(api *v1alpha2.Api) bool, converter gqlApiConverter, extractor extractor) *Api {
 	return &Api{
 		channel:   channel,
 		filter:    filter,
 		converter: converter,
+		extractor: extractor,
 	}
 }
 
@@ -40,14 +47,18 @@ func (l *Api) OnDelete(object interface{}) {
 }
 
 func (l *Api) onEvent(eventType gqlschema.SubscriptionEventType, object interface{}) {
-	api, ok := object.(*v1alpha2.Api)
-	if !ok {
+	convertedApi, err := l.extractor.Do(object)
+	if err != nil {
 		glog.Error(fmt.Errorf("incorrect object type: %T, should be: *Api", object))
 		return
 	}
 
-	if l.filter(api) {
-		l.notify(eventType, api)
+	if convertedApi == nil {
+		return
+	}
+
+	if l.filter(convertedApi) {
+		l.notify(eventType, convertedApi)
 	}
 }
 

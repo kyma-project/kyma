@@ -3,6 +3,9 @@ package listener_test
 import (
 	"testing"
 
+	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
 	api "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/listener/automock"
@@ -14,17 +17,23 @@ func TestApplicationListener_OnAdd(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// given
 		gqlApplication := new(gqlschema.Application)
+		extractor := automock.NewExtractor()
+		unstructuredApi := new(unstructured.Unstructured)
+
 		application := new(api.Application)
+		extractor.On("Do", unstructuredApi).Return(application, nil).Once()
+
 		converter := automock.NewGQLApplicationConverter()
 
 		channel := make(chan gqlschema.ApplicationEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", application).Return(*gqlApplication, nil).Once()
 		defer converter.AssertExpectations(t)
-		applicationListener := listener.NewApplication(channel, converter)
+		defer extractor.AssertExpectations(t)
+		applicationListener := listener.NewApplication(channel, converter, extractor)
 
 		// when
-		applicationListener.OnAdd(application)
+		applicationListener.OnAdd(unstructuredApi)
 		result := <-channel
 
 		// then
@@ -34,7 +43,12 @@ func TestApplicationListener_OnAdd(t *testing.T) {
 
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		applicationListener := listener.NewApplication(nil, nil)
+		extractor := automock.NewExtractor()
+
+		extractor.On("Do", nil).Return(nil, nil).Once()
+
+		defer extractor.AssertExpectations(t)
+		applicationListener := listener.NewApplication(nil, nil, extractor)
 
 		// when
 		applicationListener.OnAdd(nil)
@@ -42,10 +56,16 @@ func TestApplicationListener_OnAdd(t *testing.T) {
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		applicationListener := listener.NewApplication(nil, nil)
+		extractor := automock.NewExtractor()
+
+		invalid := new(struct{})
+		extractor.On("Do", invalid).Return(nil, errors.New("Error")).Once()
+
+		defer extractor.AssertExpectations(t)
+		applicationListener := listener.NewApplication(nil, nil, extractor)
 
 		// when
-		applicationListener.OnAdd(new(struct{}))
+		applicationListener.OnAdd(invalid)
 	})
 }
 
@@ -53,17 +73,23 @@ func TestApplicationListener_OnDelete(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// given
 		gqlApplication := new(gqlschema.Application)
+		extractor := automock.NewExtractor()
+		unstructuredApi := new(unstructured.Unstructured)
+
 		application := new(api.Application)
+		extractor.On("Do", unstructuredApi).Return(application, nil).Once()
+
 		converter := automock.NewGQLApplicationConverter()
 
 		channel := make(chan gqlschema.ApplicationEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", application).Return(*gqlApplication, nil).Once()
 		defer converter.AssertExpectations(t)
-		applicationListener := listener.NewApplication(channel, converter)
+		defer extractor.AssertExpectations(t)
+		applicationListener := listener.NewApplication(channel, converter, extractor)
 
 		// when
-		applicationListener.OnDelete(application)
+		applicationListener.OnDelete(unstructuredApi)
 		result := <-channel
 
 		// then
@@ -74,7 +100,11 @@ func TestApplicationListener_OnDelete(t *testing.T) {
 
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		applicationListener := listener.NewApplication(nil, nil)
+		extractor := automock.NewExtractor()
+		extractor.On("Do", nil).Return(nil, nil).Once()
+
+		defer extractor.AssertExpectations(t)
+		applicationListener := listener.NewApplication(nil, nil, extractor)
 
 		// when
 		applicationListener.OnDelete(nil)
@@ -82,10 +112,16 @@ func TestApplicationListener_OnDelete(t *testing.T) {
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		applicationListener := listener.NewApplication(nil, nil)
+		extractor := automock.NewExtractor()
+		invalid := new(struct{})
+		extractor.On("Do", invalid).Return(nil, errors.New("Error")).Once()
+
+		defer extractor.AssertExpectations(t)
+
+		applicationListener := listener.NewApplication(nil, nil, extractor)
 
 		// when
-		applicationListener.OnDelete(new(struct{}))
+		applicationListener.OnDelete(invalid)
 	})
 }
 
@@ -93,17 +129,23 @@ func TestApplicationListener_OnUpdate(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// given
 		gqlApplication := new(gqlschema.Application)
+		extractor := automock.NewExtractor()
+		unstructuredApi := new(unstructured.Unstructured)
+
 		application := new(api.Application)
+		extractor.On("Do", unstructuredApi).Return(application, nil).Once()
+
 		converter := automock.NewGQLApplicationConverter()
 
 		channel := make(chan gqlschema.ApplicationEvent, 1)
 		defer close(channel)
 		converter.On("ToGQL", application).Return(*gqlApplication, nil).Once()
 		defer converter.AssertExpectations(t)
-		applicationListener := listener.NewApplication(channel, converter)
+		defer extractor.AssertExpectations(t)
+		applicationListener := listener.NewApplication(channel, converter, extractor)
 
 		// when
-		applicationListener.OnUpdate(application, application)
+		applicationListener.OnUpdate(unstructuredApi, unstructuredApi)
 		result := <-channel
 
 		// then
@@ -114,7 +156,12 @@ func TestApplicationListener_OnUpdate(t *testing.T) {
 
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		applicationListener := listener.NewApplication(nil, nil)
+		extractor := automock.NewExtractor()
+
+		extractor.On("Do", nil).Return(nil, nil).Once()
+
+		defer extractor.AssertExpectations(t)
+		applicationListener := listener.NewApplication(nil, nil, extractor)
 
 		// when
 		applicationListener.OnUpdate(nil, nil)
@@ -122,9 +169,15 @@ func TestApplicationListener_OnUpdate(t *testing.T) {
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		applicationListener := listener.NewApplication(nil, nil)
+		extractor := automock.NewExtractor()
+		invalid := new(struct{})
+
+		extractor.On("Do", invalid).Return(nil, errors.New("Error")).Once()
+
+		defer extractor.AssertExpectations(t)
+		applicationListener := listener.NewApplication(nil, nil, extractor)
 
 		// when
-		applicationListener.OnUpdate(new(struct{}), new(struct{}))
+		applicationListener.OnUpdate(invalid, invalid)
 	})
 }
