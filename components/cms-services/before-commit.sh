@@ -61,7 +61,9 @@ check_result "dep status" $?
 # GO TEST
 ##
 echo "? go test"
-go test -count=1 ./...
+go test -count=1 -coverprofile=cover.out ./...
+echo -e "Total coverage: $(go tool cover -func=cover.out | grep total | awk '{print $3}')"
+rm cover.out
 check_result "go test" $?
 
 goFilesToCheck=$(find . -type f -name "*.go" | grep -E -v "/vendor/|/automock/|/testdata/")
