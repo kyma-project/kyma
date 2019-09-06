@@ -149,14 +149,14 @@ func TestDocsTopicService_Unsubscribe(t *testing.T) {
 }
 
 func fixUnstructuredDocsTopic(metadata map[string]interface{}) *unstructured.Unstructured {
-	return testingUtils.NewUnstructured(v1alpha1.SchemeGroupVersion.String(), "DocsTopic", metadata, nil, nil)
+	return testingUtils.NewUnstructured(v1alpha1.GroupVersion.String(), "DocsTopic", metadata, nil, nil)
 }
 
 func fixDocsTopic(name string, labels map[string]string) *v1alpha1.DocsTopic {
 	return &v1alpha1.DocsTopic{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "DocsTopic",
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			APIVersion: v1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -171,8 +171,8 @@ func fixDocsTopicInformer(objects ...runtime.Object) cache.SharedIndexInformer {
 	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(fakeClient, 0)
 
 	informer := informerFactory.ForResource(schema.GroupVersionResource{
-		Version:  v1alpha1.SchemeGroupVersion.Version,
-		Group:    v1alpha1.SchemeGroupVersion.Group,
+		Version:  v1alpha1.GroupVersion.Version,
+		Group:    v1alpha1.GroupVersion.Group,
 		Resource: "docstopics",
 	}).Informer()
 

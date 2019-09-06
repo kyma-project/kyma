@@ -3,7 +3,7 @@ title: Google Cloud Platform Service Broker
 type: Service Brokers
 ---
 
->**NOTE:** This addon is in the preview mode and is not available in Kyma by default. To enable it, add a proper AddonsConfiguration as described [here](#enable-gcp-service-broker).
+>**NOTE:** This addon is in the preview mode and is not available in Kyma by default. To enable it, add a proper AddonsConfiguration as described [here](#service-brokers-google-cloud-platform-service-broker-enable-gcp-service-broker).
 
 The Google Cloud Platform (GCP) Service Broker is an open-source, [Open Service Broker](https://www.openservicebrokerapi.org/)-compatible API server that provisions managed services in the Google Cloud Platform public cloud. Kyma provides Namespace-scoped GCP Service Broker. In each Namespace, you can configure the GCP Service Broker against different subscriptions. Install the GCP Service Broker by provisioning the **Google Cloud Platform Service Broker** class provided by the Helm Broker.
 
