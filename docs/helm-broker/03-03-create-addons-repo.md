@@ -221,12 +221,14 @@ spec:
   S3
   </summary>
 
-  The S3 protocol requires key and secret to authorize in your bucket, to get a key/secret login to the AWS [console](https://console.aws.amazon.com),
-  select `My Security Credentials` and go to `Access keys` tab where you can create new access key.
+  The S3 protocol requires a key and a secret to authenticate with your bucket. To get a key and a Secret, log in to the AWS [console](https://console.aws.amazon.com),
+  select **My Security Credentials**, and go to **Access keys** tab where you can create a new access key.
     
-  > **NOTE:** For more information about security credentials and access key see [this](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys) 
+  > **NOTE:** For more information about security credentials and access key, read [this](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys) document. 
   
-  Create a Secret resource with S3 credentials
+  Follow these steps to secure your S3 addons repository with basic authentication credentials:
+  
+  1. Create a Secret resource with S3 credentials:
   ```bash
     echo -n 'AWS_KEY' > ./key.txt
     echo -n 'AWS_SECRET' > ./secret.txt
@@ -234,7 +236,7 @@ spec:
     kubectl create secret generic aws-auth --from-file=aws_key=./key.txt --from-file=aws_secret=./secret.txt
   ```
   
-  Define a URL with the required key/secret fields:
+  2. Define a URL with the required key and Secret fields:
   ```yaml
     apiVersion: addons.kyma-project.io/v1alpha1
     kind: ClusterAddonsConfiguration
