@@ -6,6 +6,7 @@ filters:
       - PK85
       - a-thaler
       - piotrmsc
+      - kwiatekus
   '\.md$|/docs/|^milv\.config\.yaml$':
     approvers:
       - documentation-approvers
