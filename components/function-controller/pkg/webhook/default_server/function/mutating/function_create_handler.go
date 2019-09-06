@@ -156,7 +156,7 @@ func (h *FunctionCreateHandler) Handle(ctx context.Context, req types.Request) t
 
 	fnConfig := &corev1.ConfigMap{}
 	if err := h.getRuntimeConfig(fnConfig); err != nil {
-		return admission.ErrorResponse(http.StatusBadRequest, err)
+		return admission.ErrorResponse(http.StatusInternalServerError, err)
 	}
 	rnInfo, err := runtimeUtil.New(fnConfig)
 	if err != nil {
@@ -177,7 +177,7 @@ func (h *FunctionCreateHandler) Handle(ctx context.Context, req types.Request) t
 	// validate function and return an error describing the validation error if validation fails
 	err = h.validateFunctionFn(copy, rnInfo)
 	if err != nil {
-		return admission.ErrorResponse(http.StatusInternalServerError, err)
+		return admission.ErrorResponse(http.StatusBadRequest, err)
 	}
 
 	return admission.PatchResponse(obj, copy)
