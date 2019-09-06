@@ -8,7 +8,7 @@ global:
     path: eu.gcr.io/kyma-project/
   knative_function_controller:
     dir: 
-    version: 1.5.0-rc2
+    version: 1.5.0
 
 replicaCount: 1 # the function controller is deployed as one replica instance
 

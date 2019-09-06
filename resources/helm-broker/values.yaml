@@ -39,7 +39,7 @@ global:
     version: "54bb24ad"
   alpine_net:
     dir: 
-    version: 1.5.0-rc2
+    version: 1.5.0
   addons_ui:
     dir: ""
     version: 76f15ebf

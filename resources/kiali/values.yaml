@@ -76,4 +76,4 @@ global:
   alpine_net:
     name: alpine-net
     dir: 
-    version: 1.5.0-rc2
+    version: 1.5.0

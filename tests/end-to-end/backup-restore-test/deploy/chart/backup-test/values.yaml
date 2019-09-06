@@ -6,4 +6,4 @@ nameOverride: backup-test
 image:
   name: backup-test
   dir: tests
-  tag: 1.5.0-rc2
+  tag: 1.5.0
