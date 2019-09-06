@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "eu.gcr.io/kyma-project/pr/console:PR-1164"
+          image: "eu.gcr.io/kyma-project/pr/console:PR-1218"
           # image: "{{ .Values.global.containerRegistry.path }}{{ .Values.image.dir }}/console:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
