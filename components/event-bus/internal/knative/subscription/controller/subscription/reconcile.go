@@ -131,7 +131,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	knativeSubsNamespace := util.GetDefaultChannelNamespace()
 	knativeSubsURI := subscription.Endpoint
 	knativeChannelName := eventBusUtil.GetChannelName(&subscription.SourceID, &subscription.EventType, &subscription.EventTypeVersion)
-	knativeChannelProvisioner := "natss"
+	//knativeChannelProvisioner := "natss"
 	timeout := r.opts.ChannelTimeout
 
 	if subscription.ObjectMeta.DeletionTimestamp.IsZero() {
@@ -182,7 +182,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			knativeChannelLabels[subscriptionEventType] = subscription.EventType
 			knativeChannelLabels[subscriptionEventTypeVersion] = subscription.EventTypeVersion
 
-			knativeChannel, err := r.knativeLib.CreateChannel(knativeChannelProvisioner, knativeChannelName,
+			knativeChannel, err := r.knativeLib.CreateChannel(knativeChannelName,
 				knativeSubsNamespace, &knativeChannelLabels, timeout)
 			if err != nil {
 				return false, err
@@ -209,7 +209,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			log.Info("Knative Subscription is created", "Subscription", knativeSubsName)
 		} else {
 			// In case there is a change in Channel name or URI, delete and re-create Knative Subscription because update does not work.
-			if knativeChannelName != sub.Spec.Channel.Name || knativeSubsURI != *sub.Spec.Subscriber.DNSName {
+			if knativeChannelName != sub.Spec.Channel.Name || knativeSubsURI != *sub.Spec.Subscriber.URI {
 				err = r.knativeLib.DeleteSubscription(knativeSubsName, knativeSubsNamespace)
 				if err != nil {
 					return false, err
@@ -297,7 +297,7 @@ func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 		return err
 	} else if err == nil {
 		if knativeChannel.Spec.Subscribable == nil || (len(knativeChannel.Spec.Subscribable.Subscribers) == 1 && knativeSubs != nil &&
-			knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI == *knativeSubs.Spec.Subscriber.DNSName) {
+			knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI == *knativeSubs.Spec.Subscriber.URI) {
 			err = r.knativeLib.DeleteChannel(channelName, namespace)
 			if err != nil {
 				return err

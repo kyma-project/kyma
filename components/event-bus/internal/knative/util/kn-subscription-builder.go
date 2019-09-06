@@ -60,7 +60,8 @@ func (s *SubscriptionBuilder) ToKNService(knServiceName string) *SubscriptionBui
 // ToURI sets the SubscriptionBuilder Subscriber URI.
 func (s *SubscriptionBuilder) ToURI(uri *string) *SubscriptionBuilder {
 	s.Spec.Subscriber = &eventingv1alpha1.SubscriberSpec{
-		DNSName: uri,
+		DeprecatedDNSName: uri,
+		URI:               uri,
 	}
 	return s
 }
@@ -92,7 +93,8 @@ func Subscription(name string, namespace string) *SubscriptionBuilder {
 					Kind:       "Service",
 					APIVersion: "serving.knative.dev/v1alpha1",
 				},
-				DNSName: &emptyString,
+				DeprecatedDNSName: &emptyString,
+				URI:               &emptyString,
 			},
 			Reply: &eventingv1alpha1.ReplyStrategy{
 				Channel: &corev1.ObjectReference{
