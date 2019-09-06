@@ -165,14 +165,14 @@ func (r *namespaceResolver) NamespaceEventSubscription(ctx context.Context, with
 	podChannel := make(chan gqlschema.PodEvent, 1)
 	podsListener := listener.NewPod(podChannel, allowAll, &podConverter{})
 
-	r.podService.Subscribe(podsListener)
 	r.namespaceSvc.Subscribe(namespaceListener)
+	r.podService.Subscribe(podsListener)
 
 	go func() {
 		defer close(namespaceChannel)
 		defer close(podChannel)
 		defer r.namespaceSvc.Unsubscribe(namespaceListener)
-		defer r.namespaceSvc.Unsubscribe(podsListener)
+		defer r.podService.Unsubscribe(podsListener)
 		for {
 			select {
 			case podEvent := <-podChannel:
