@@ -2,8 +2,9 @@ package k8s_test
 
 import (
 	"errors"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/automock"
@@ -21,20 +22,20 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 
 		k8sNamespace := fixNamespaceWithStatus(name, "Active")
 		gqlNamespace := gqlschema.Namespace{
-			Name:   name,
-			Status: "Active",
+			Name:              name,
+			Status:            "Active",
 			IsSystemNamespace: false,
 		}
 		k8sInactiveNamespace := fixNamespaceWithStatus(inactiveName, "Terminating")
 		gqlInactiveNamespace := gqlschema.Namespace{
-			Name: inactiveName,
-			Status: "Terminating",
+			Name:              inactiveName,
+			Status:            "Terminating",
 			IsSystemNamespace: false,
 		}
 		k8sSystemNamespace := fixNamespaceWithStatus(systemName, "Active")
 		gqlSystemNamespace := gqlschema.Namespace{
-			Name: systemName,
-			Status: "Active",
+			Name:              systemName,
+			Status:            "Active",
 			IsSystemNamespace: true,
 		}
 
@@ -325,7 +326,6 @@ func TestNamespaceResolver_DeleteNamespace(t *testing.T) {
 		assert.Nil(t, result)
 	})
 }
-
 
 func fixNamespaceWithStatus(name string, status string) *v1.Namespace {
 	namespace := fixNamespaceWithoutTypeMeta(name, nil)

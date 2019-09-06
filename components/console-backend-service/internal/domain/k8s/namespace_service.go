@@ -18,9 +18,9 @@ import (
 
 type namespaceService struct {
 	informer cache.SharedIndexInformer
-	podsSvc            podSvc
-	client             corev1.CoreV1Interface
-	notifier           resource.Notifier
+	podsSvc  podSvc
+	client   corev1.CoreV1Interface
+	notifier resource.Notifier
 }
 
 func newNamespaceService(informer cache.SharedIndexInformer, podsSvc podSvc, client corev1.CoreV1Interface) (*namespaceService, error) {
@@ -28,9 +28,9 @@ func newNamespaceService(informer cache.SharedIndexInformer, podsSvc podSvc, cli
 	informer.AddEventHandler(notifier)
 	return &namespaceService{
 		informer: informer,
-		podsSvc:            podsSvc,
-		client:             client,
-		notifier:           notifier,
+		podsSvc:  podsSvc,
+		client:   client,
+		notifier: notifier,
 	}, nil
 }
 

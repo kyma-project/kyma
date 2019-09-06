@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"context"
+
 	"github.com/golang/glog"
 	appPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
@@ -31,7 +32,7 @@ type namespaceResolver struct {
 	appRetriever       shared.ApplicationRetriever
 	namespaceConverter namespaceConverter
 	systemNamespaces   []string
-	podService podSvc
+	podService         podSvc
 }
 
 func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string, podService podSvc) *namespaceResolver {
@@ -40,7 +41,7 @@ func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.Applica
 		appRetriever:       appRetriever,
 		namespaceConverter: *newNamespaceConverter(systemNamespaces),
 		systemNamespaces:   systemNamespaces,
-		podService: podService,
+		podService:         podService,
 	}
 }
 
@@ -55,7 +56,6 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNames
 		glog.Error(errors.Wrapf(err, "while listing %s", pretty.Namespaces))
 		return nil, gqlerror.New(err, pretty.Namespaces)
 	}
-
 
 	var filteredNamespaces []*v1.Namespace
 	for _, ns := range namespaces {
