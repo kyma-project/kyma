@@ -64,11 +64,7 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNames
 		}
 	}
 
-	converted, err := r.namespaceConverter.ToGQLs(filteredNamespaces)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespaces))
-		return nil, gqlerror.New(err, pretty.Namespaces)
-	}
+	converted := r.namespaceConverter.ToGQLs(filteredNamespaces)
 
 	return converted, nil
 }
@@ -102,12 +98,7 @@ func (r *namespaceResolver) NamespaceQuery(ctx context.Context, name string) (*g
 		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
 	}
 
-	converted, err := r.namespaceConverter.ToGQL(namespace)
-
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespace))
-		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
-	}
+	converted := r.namespaceConverter.ToGQL(namespace)
 
 	return converted, nil
 }
@@ -146,11 +137,7 @@ func (r *namespaceResolver) DeleteNamespace(ctx context.Context, name string) (*
 	}
 
 	namespaceCopy := namespace.DeepCopy()
-	deletedNamespace, err := r.namespaceConverter.ToGQL(namespaceCopy)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespace))
-		return nil, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
-	}
+	deletedNamespace := r.namespaceConverter.ToGQL(namespaceCopy)
 
 	err = r.namespaceSvc.Delete(name)
 	if err != nil {

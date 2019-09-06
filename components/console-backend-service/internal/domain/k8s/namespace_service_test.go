@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/automock"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -24,13 +25,14 @@ func TestNamespacesService_List(t *testing.T) {
 			"env":  "true",
 		}
 		emptyLabels := map[string]string{}
-
 		namespace1 := fixNamespace("namespace-name", labels)
 		namespace2 := fixNamespace("namespace-name-2", emptyLabels)
-		fixedInformer, _ := fixNamespaceInformer(namespace1, namespace2)
-		svc, err := k8s.NewNamespaceService(fixedInformer, nil)
-		require.NoError(t, err)
 
+		fixedInformer, _ := fixNamespaceInformer(namespace1, namespace2)
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, nil)
+
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
 
 		namespaces, err := svc.List()
@@ -42,9 +44,10 @@ func TestNamespacesService_List(t *testing.T) {
 
 	t.Run("NotFound", func(t *testing.T) {
 		fixedInformer, _ := fixNamespaceInformer()
-		svc, err := k8s.NewNamespaceService(fixedInformer, nil)
-		require.NoError(t, err)
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, nil)
 
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
 
 		namespaces, err := svc.List()
@@ -60,12 +63,13 @@ func TestNamespacesService_Find(t *testing.T) {
 			"test": "test",
 			"env":  "true",
 		}
-
 		namespace1 := fixNamespace(name, labels)
-		fixedInformer, _ := fixNamespaceInformer(namespace1)
-		svc, err := k8s.NewNamespaceService(fixedInformer, nil)
-		require.NoError(t, err)
 
+		fixedInformer, _ := fixNamespaceInformer(namespace1)
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, nil)
+
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
 
 		namespace, err := svc.Find(name)
@@ -75,7 +79,8 @@ func TestNamespacesService_Find(t *testing.T) {
 
 	t.Run("Not Found", func(t *testing.T) {
 		fixedInformer, _ := fixNamespaceInformer()
-		svc, err := k8s.NewNamespaceService(fixedInformer, nil)
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, nil)
 		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
@@ -96,9 +101,10 @@ func TestNamespacesService_Create(t *testing.T) {
 		}
 
 		fixedInformer, client := fixNamespaceInformer()
-		svc, err := k8s.NewNamespaceService(fixedInformer, client)
-		require.NoError(t, err)
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, client)
 
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
 
 		namespace, err := svc.Create(name, labels)
@@ -117,10 +123,12 @@ func TestNamespacesService_Delete(t *testing.T) {
 			"env":  "true",
 		}
 		namespace1 := fixNamespace(name, labels)
-		fixedInformer, client := fixNamespaceInformer(namespace1)
-		svc, err := k8s.NewNamespaceService(fixedInformer, client)
-		require.NoError(t, err)
 
+		fixedInformer, client := fixNamespaceInformer(namespace1)
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, client)
+
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
 
 		err = svc.Delete(name)
@@ -129,9 +137,10 @@ func TestNamespacesService_Delete(t *testing.T) {
 
 	t.Run("Not Found", func(t *testing.T) {
 		fixedInformer, client := fixNamespaceInformer()
-		svc, err := k8s.NewNamespaceService(fixedInformer, client)
-		require.NoError(t, err)
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, client)
 
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
 
 		err = svc.Delete("name")
@@ -149,17 +158,17 @@ func TestNamespacesService_Update(t *testing.T) {
 		newLabels := map[string]string{
 			"test": "test2",
 		}
-
 		namespace1 := fixNamespace(name, labels)
-		fixedInformer, client := fixNamespaceInformer(namespace1)
-		svc, err := k8s.NewNamespaceService(fixedInformer, client)
-		require.NoError(t, err)
 
+		fixedInformer, client := fixNamespaceInformer(namespace1)
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, client)
+
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, fixedInformer)
 
 		namespace, err := svc.Update(name, newLabels)
 		require.NoError(t, err)
-
 		assert.Equal(t, name, namespace.Name)
 		assert.Equal(t, newLabels["test"], namespace.Labels["test"])
 	})

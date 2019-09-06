@@ -137,7 +137,7 @@ func (r *selfSubjectRulesResolver) SetSelfSubjectRulesConverter(converter gqlSel
 
 //Namespace
 
-func NewNamespaceService(informer cache.SharedIndexInformer, podService podService, client v1.CoreV1Interface) (*namespaceService, error) {
+func NewNamespaceService(informer cache.SharedIndexInformer, podService podSvc, client v1.CoreV1Interface) (*namespaceService, error) {
 	return newNamespaceService(informer, podService, client)
 }
 

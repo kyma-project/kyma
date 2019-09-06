@@ -18,12 +18,12 @@ import (
 
 type namespaceService struct {
 	informer cache.SharedIndexInformer
-	podsSvc            podService
+	podsSvc            podSvc
 	client             corev1.CoreV1Interface
 	notifier           resource.Notifier
 }
 
-func newNamespaceService(informer cache.SharedIndexInformer, podsSvc podService, client corev1.CoreV1Interface) (*namespaceService, error) {
+func newNamespaceService(informer cache.SharedIndexInformer, podsSvc podSvc, client corev1.CoreV1Interface) (*namespaceService, error) {
 	notifier := resource.NewNotifier()
 	informer.AddEventHandler(notifier)
 	return &namespaceService{

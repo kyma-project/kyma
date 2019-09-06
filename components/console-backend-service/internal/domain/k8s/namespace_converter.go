@@ -15,9 +15,9 @@ func newNamespaceConverter(systemNamespaces []string) *namespaceConverter {
 	}
 }
 
-func (c *namespaceConverter) ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error) {
+func (c *namespaceConverter) ToGQL(in *v1.Namespace) *gqlschema.Namespace {
 	if in == nil {
-		return nil, nil
+		return nil
 	}
 
 	isSystem := isSystemNamespace(*in, c.systemNamespaces)
@@ -26,22 +26,19 @@ func (c *namespaceConverter) ToGQL(in *v1.Namespace) (*gqlschema.Namespace, erro
 		Labels:            in.Labels,
 		Status:            string(in.Status.Phase),
 		IsSystemNamespace: isSystem,
-	}, nil
+	}
 }
 
-func (c *namespaceConverter) ToGQLs(in []*v1.Namespace) ([]gqlschema.Namespace, error) {
+func (c *namespaceConverter) ToGQLs(in []*v1.Namespace) []gqlschema.Namespace {
 	var result []gqlschema.Namespace
 	for _, u := range in {
-		converted, err := c.ToGQL(u)
-		if err != nil {
-			return nil, err
-		}
+		converted := c.ToGQL(u)
 
 		if converted != nil {
 			result = append(result, *converted)
 		}
 	}
-	return result, nil
+	return result
 }
 
 func isSystemNamespace(namespace v1.Namespace, sysNamespaces []string) bool {

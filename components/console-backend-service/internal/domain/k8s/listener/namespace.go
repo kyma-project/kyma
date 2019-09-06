@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 )
 
-//go:generate mockery -name=gqlNamespaceConverter -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=namespaceConverter -output=automock -outpkg=automock -case=underscore
 type namespaceConverter interface {
-	ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error)
+	ToGQL(in *v1.Namespace) *gqlschema.Namespace
 }
 
 type Namespace struct {
@@ -55,11 +54,8 @@ func (l *Namespace) onEvent(eventType gqlschema.SubscriptionEventType, object in
 
 func (l *Namespace) notify(eventType gqlschema.SubscriptionEventType, namespace *v1.Namespace) {
 
-	gqlNamespace, err := l.converter.ToGQL(namespace)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting *Namespace"))
-		return
-	}
+	gqlNamespace := l.converter.ToGQL(namespace)
+
 	if gqlNamespace == nil {
 		return
 	}

@@ -6,7 +6,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -31,9 +30,8 @@ func TestNamespaceConverter_ToGQLs(t *testing.T) {
 			},
 		}
 
-		result, err := converter.ToGQLs(in)
+		result := converter.ToGQLs(in)
 
-		require.NoError(t, err)
 		assert.Len(t, result, 2)
 		assert.Equal(t, expectedName, result[0].Name)
 		assert.Equal(t, expectedName2, result[1].Name)
@@ -45,9 +43,8 @@ func TestNamespaceConverter_ToGQLs(t *testing.T) {
 		converter := namespaceConverter{}
 		var in []*v1.Namespace
 
-		result, err := converter.ToGQLs(in)
+		result := converter.ToGQLs(in)
 
-		require.NoError(t, err)
 		assert.Empty(t, result)
 	})
 
@@ -68,9 +65,8 @@ func TestNamespaceConverter_ToGQLs(t *testing.T) {
 			nil,
 		}
 
-		result, err := converter.ToGQLs(in)
+		result := converter.ToGQLs(in)
 
-		require.NoError(t, err)
 		assert.Len(t, result, 1)
 		assert.Equal(t, expectedName, result[0].Name)
 		assert.Equal(t, expectedLabels, result[0].Labels)
@@ -93,9 +89,8 @@ func TestNamespaceConverter_ToGQL(t *testing.T) {
 			},
 		}
 
-		result, err := converter.ToGQL(&in)
+		result := converter.ToGQL(&in)
 
-		require.NoError(t, err)
 		assert.Equal(t, expectedName, result.Name)
 		assert.Equal(t, expectedLabels, result.Labels)
 		assert.True(t, result.IsSystemNamespace)
@@ -113,9 +108,8 @@ func TestNamespaceConverter_ToGQL(t *testing.T) {
 			},
 		}
 
-		result, err := converter.ToGQL(&in)
+		result := converter.ToGQL(&in)
 
-		require.NoError(t, err)
 		assert.Equal(t, expectedName, result.Name)
 		assert.Equal(t, expectedLabels, result.Labels)
 		assert.False(t, result.IsSystemNamespace)
@@ -125,9 +119,8 @@ func TestNamespaceConverter_ToGQL(t *testing.T) {
 		converter := namespaceConverter{}
 		var in *v1.Namespace
 
-		result, err := converter.ToGQL(in)
+		result := converter.ToGQL(in)
 
-		require.NoError(t, err)
 		assert.Empty(t, result)
 	})
 }
