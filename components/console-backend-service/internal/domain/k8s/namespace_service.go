@@ -34,7 +34,7 @@ func newNamespaceService(informer cache.SharedIndexInformer, podsSvc podService,
 	}, nil
 }
 
-func (svc *namespaceService) List() ([]*v1.Namespace, error) { //r error
+func (svc *namespaceService) List() ([]*v1.Namespace, error) {
 	items := svc.informer.GetStore().List()
 
 	var namespaces []*v1.Namespace
