@@ -141,10 +141,6 @@ func NewNamespaceService(informer cache.SharedIndexInformer, podService podServi
 	return newNamespaceService(informer, podService, client)
 }
 
-func NewNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string, podService *podService) *namespaceResolver {
+func NewNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string, podService podSvc) *namespaceResolver {
 	return newNamespaceResolver(namespaceSvc, appRetriever, systemNamespaces, podService)
-}
-
-func (r *namespaceResolver) SetNamespaceConverter(converter namespaceConverter) {
-	r.namespaceConverter = converter
 }

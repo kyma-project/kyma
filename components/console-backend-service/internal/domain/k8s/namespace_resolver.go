@@ -31,10 +31,10 @@ type namespaceResolver struct {
 	appRetriever       shared.ApplicationRetriever
 	namespaceConverter namespaceConverter
 	systemNamespaces   []string
-	podService *podService
+	podService podSvc
 }
 
-func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string, podService *podService) *namespaceResolver {
+func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string, podService podSvc) *namespaceResolver {
 	return &namespaceResolver{
 		namespaceSvc:       namespaceSvc,
 		appRetriever:       appRetriever,
@@ -56,7 +56,15 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, withSystemNames
 		return nil, gqlerror.New(err, pretty.Namespaces)
 	}
 
-	converted, err := r.namespaceConverter.ToGQLs(namespaces)
+
+	var filteredNamespaces []*v1.Namespace
+	for _, ns := range namespaces {
+		if r.checkNamespace(ns, withSystemNamespaces, withInactiveStatus) {
+			filteredNamespaces = append(filteredNamespaces, ns)
+		}
+	}
+
+	converted, err := r.namespaceConverter.ToGQLs(filteredNamespaces)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespaces))
 		return nil, gqlerror.New(err, pretty.Namespaces)
