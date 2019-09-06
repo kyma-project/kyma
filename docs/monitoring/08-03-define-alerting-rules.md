@@ -13,7 +13,7 @@ This tutorial is a follow-up of the [observe application metrics](/components/mo
 
 Follow these steps to create an alerting rule:
 
-1. Create the PrometheusRule resource holding the configuration of your alerting rule. 
+1. Create the PrometheusRule resource holding the configuration of your alerting rule.
 
 >**NOTE:** Prometheus requires a specific label to identify PrometheusRule definitions. Make sure you set **role** to `alert-rules`.
 
@@ -60,7 +60,7 @@ For more details on defining alerting rules, see [this](https://prometheus.io/do
 3. Deploy the alerting rule:
 
 ```bash
-kubectl apply -f test-rules.yaml
+kubectl apply -f {FILE_NAME}.yaml
 ```
 4. Run the `port-forward` command on the `monitoring-prometheus` service to access the Prometheus dashboard:
 

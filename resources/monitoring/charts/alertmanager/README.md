@@ -1,43 +1,25 @@
 # Alertmanager
 
-This chart contains a part of the configuration related to the Alertmanager.
 
-#### Secret configuration
+## Overview 
 
-Alertmanager instances require a Secret resource named with the `alertmanager-{ALERTMANAGER_NAME}` format.
+This chart contains configuration related to Alertmanager.
 
-In Kyma, the name of the Alertmanager is defined by ```name: {{ .Release.Name }}```. The secret is ```name: alertmanager-{{ .Release.Name }}```. The name of the config file is alertmanager.yaml.
+For details on Alertmanager configuration, see [this](https://kyma-project.io/docs/master/components/monitoring/#details-alertmanager-alertmanager-configuration) document.
 
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  labels:
-    alertmanager: {{ .Release.Name }}
-    app: {{ template "alertmanager.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
-  name: alertmanager-{{ .Release.Name }}
-data:
-  alertmanager.yaml: |-
-    {{ include "alertmanager.yaml.tpl" . | b64enc }}
-{{- range $key, $val := .Values.templateFiles }}
-  {{ $key }}: {{ $val | b64enc | quote }}
-{{- end }}
-```
+## Details
 
-The **data** Secret is an encoded `alertmanager.yaml` file which contains all the configuration for alerting notifications.
+Kyma comes with a set of out-of-the-box alerting rules. You can find them [here](https://github.com/kyma-project/kyma/tree/master/resources/monitoring/charts/alertmanager/templates).
+These rules provide alerting configuration for logging, web applications, REST services, and custom Kyma rules. 
 
 
+## Alertmanager configuration - alertmanager.yaml
 
-#### Alertmanager configuration - alertmanager.yaml
-
-This section explains how to configure Alertmanager to enable alerting notifications. [This](templates/alertmanager.config.yaml) template pre-configures two simple receivers to handle alerts in VictorOps and Slack.
+This section explains how to configure Alertmanager to enable alerting notifications. [This](https://github.com/kyma-project/kyma/tree/master/resources/monitoring/charts/alertmanager/templates/alertmanager.config.yaml) template pre-configures two simple receivers to handle alerts in VictorOps and Slack.
 
 This yaml file pre-configures two simple receivers to handle alerts in VictorOps and Slack.
 
-To avoid confusion, use optional configuration parameters for ```route:``` and then group the receivers under the label ```routes:```
+To avoid confusion, use optional configuration parameters for `route:` and then group the receivers under the label `routes:` label.
 
 ```yaml
 {{ define "alertmanager.yaml.tpl" }}
