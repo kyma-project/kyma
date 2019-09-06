@@ -130,7 +130,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	knativeSubsName := util.GetKnSubscriptionName(&subscription.Name, &subscription.Namespace)
 	knativeSubsNamespace := util.GetDefaultChannelNamespace()
 	knativeSubsURI := subscription.Endpoint
-	knativeChannelName := eventBusUtil.GetChannelName(&subscription.SourceID, &subscription.EventType, &subscription.EventTypeVersion)
+	knativeChannelName := eventBusUtil.GetChannelName(&subscription.SubscriptionSpec.SourceID, &subscription.SubscriptionSpec.EventType, &subscription.SubscriptionSpec.EventTypeVersion)
 	//knativeChannelProvisioner := "natss"
 	timeout := r.opts.ChannelTimeout
 

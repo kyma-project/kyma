@@ -18,11 +18,12 @@ func (s *SubscriptionBuilder) Build() *eventingv1alpha1.Subscription {
 }
 
 // ToChannel sets SubscriptionBuilder Channel.
+//TODO fetch based on knative config map
 func (s *SubscriptionBuilder) ToChannel(name string) *SubscriptionBuilder {
 	s.Spec.Channel = corev1.ObjectReference{
 		Name:       name,
-		Kind:       "Channel",
-		APIVersion: "eventing.knative.dev/v1alpha1",
+		Kind:       "NatssChannel",
+		APIVersion: "messaging.knative.dev/v1alpha1",
 	}
 	return s
 }
@@ -84,8 +85,8 @@ func Subscription(name string, namespace string) *SubscriptionBuilder {
 		Spec: eventingv1alpha1.SubscriptionSpec{
 			Channel: corev1.ObjectReference{
 				Name:       "",
-				Kind:       "Channel",
-				APIVersion: "eventing.knative.dev/v1alpha1",
+				Kind:       "NatssChannel",
+				APIVersion: "messaging.knative.dev/v1alpha1",
 			},
 			Subscriber: &eventingv1alpha1.SubscriberSpec{
 				Ref: &corev1.ObjectReference{
@@ -93,14 +94,13 @@ func Subscription(name string, namespace string) *SubscriptionBuilder {
 					Kind:       "Service",
 					APIVersion: "serving.knative.dev/v1alpha1",
 				},
-				DeprecatedDNSName: &emptyString,
-				URI:               &emptyString,
+				URI: &emptyString,
 			},
 			Reply: &eventingv1alpha1.ReplyStrategy{
 				Channel: &corev1.ObjectReference{
 					Name:       "",
-					Kind:       "Channel",
-					APIVersion: "serving.knative.dev/v1alpha1",
+					Kind:       "NatssChannel",
+					APIVersion: "messaging.knative.dev/v1alpha1",
 				},
 			},
 		},
