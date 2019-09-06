@@ -184,7 +184,7 @@ spec:
   Git SSH
   </summary>
 
-  The Git SSH protocol requires an SSH key to authenticate your repository. Setting SSH keys differs among hosting providers. Read [this](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key) document to learn how to generate a new SSH key in the GitHub service.
+  The Git SSH protocol requires an SSH key to authenticate with your repository. Setting SSH keys differs among hosting providers. Read [this](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key) document to learn how to generate a new SSH key in the GitHub service.
   >**NOTE:** The Git SSH private key must be base64-encoded.
 
   Follow these steps to secure your addons repository with basic authentication credentials:
