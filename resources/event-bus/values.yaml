@@ -7,12 +7,12 @@ global:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir: 
-    version: 1.5.0-rc2
+    version: 1.5.0
     publisherImage: event-publish-service
     subscriptionControllerImage: subscription-controller
   event_bus_tests:
     dir: 
-    version: 1.5.0-rc2
+    version: 1.5.0
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
