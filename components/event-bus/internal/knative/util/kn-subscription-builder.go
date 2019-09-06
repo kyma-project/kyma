@@ -61,8 +61,7 @@ func (s *SubscriptionBuilder) ToKNService(knServiceName string) *SubscriptionBui
 // ToURI sets the SubscriptionBuilder Subscriber URI.
 func (s *SubscriptionBuilder) ToURI(uri *string) *SubscriptionBuilder {
 	s.Spec.Subscriber = &eventingv1alpha1.SubscriberSpec{
-		DeprecatedDNSName: uri,
-		URI:               uri,
+		URI: uri,
 	}
 	return s
 }
