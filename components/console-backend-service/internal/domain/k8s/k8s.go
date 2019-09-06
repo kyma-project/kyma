@@ -51,7 +51,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating namespace service")
 	}
-	namespaceResolver := newNamespaceResolver(namespaceSvc, applicationRetriever, systemNamespaces)
+	namespaceResolver := newNamespaceResolver(namespaceSvc, applicationRetriever, systemNamespaces, podService)
 	namespaceResolver.namespaceConverter = *newNamespaceConverter(systemNamespaces)
 
 	deploymentService, err := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())

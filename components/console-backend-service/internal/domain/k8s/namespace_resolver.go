@@ -31,14 +31,16 @@ type namespaceResolver struct {
 	appRetriever       shared.ApplicationRetriever
 	namespaceConverter namespaceConverter
 	systemNamespaces   []string
+	podService *podService
 }
 
-func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string) *namespaceResolver {
+func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string, podService *podService) *namespaceResolver {
 	return &namespaceResolver{
 		namespaceSvc:       namespaceSvc,
 		appRetriever:       appRetriever,
 		namespaceConverter: *newNamespaceConverter(systemNamespaces),
 		systemNamespaces:   systemNamespaces,
+		podService: podService,
 	}
 }
 
@@ -152,22 +154,38 @@ func (r *namespaceResolver) DeleteNamespace(ctx context.Context, name string) (*
 }
 
 func (r *namespaceResolver) NamespaceEventSubscription(ctx context.Context, withSystemNamespaces *bool) (<-chan gqlschema.NamespaceEvent, error) {
-	channel := make(chan gqlschema.NamespaceEvent, 1)
+	namespaceChannel := make(chan gqlschema.NamespaceEvent, 1)
 	filter := func(namespace *v1.Namespace) bool {
 		newBool := true
 		return namespace != nil && r.checkNamespace(namespace, withSystemNamespaces, &newBool)
 	}
+	namespaceListener := listener.NewNamespace(namespaceChannel, filter, &r.namespaceConverter, r.systemNamespaces)
 
-	namespaceListener := listener.NewNamespace(channel, filter, &r.namespaceConverter, r.systemNamespaces)
+	allowAll := func(_ *v1.Pod) bool { return true }
+	podChannel := make(chan gqlschema.PodEvent, 1)
+	podsListener := listener.NewPod(podChannel, allowAll, &podConverter{})
 
+	r.podService.Subscribe(podsListener)
 	r.namespaceSvc.Subscribe(namespaceListener)
+
 	go func() {
-		defer close(channel)
+		defer close(namespaceChannel)
+		defer close(podChannel)
 		defer r.namespaceSvc.Unsubscribe(namespaceListener)
-		<-ctx.Done()
+		defer r.namespaceSvc.Unsubscribe(podsListener)
+		for {
+			select {
+			case podEvent := <-podChannel:
+				ns, err := r.namespaceSvc.Find(podEvent.Pod.Namespace)
+				if err != nil {
+					continue
+				}
+				namespaceListener.OnUpdate(ns, ns)
+			}
+		}
 	}()
 
-	return channel, nil
+	return namespaceChannel, nil
 }
 
 func (r *namespaceResolver) populateLabels(givenLabels *gqlschema.Labels) map[string]string {
