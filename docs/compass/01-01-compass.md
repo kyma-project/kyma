@@ -20,12 +20,13 @@ Compass, as a part of Kyma, uses a set of Kyma features, such as Istio, Promethe
 ## Run Kyma with Compass
 
 You can run Kyma with Compass in two modes:
-- Kyma as a central solution which allows you to connect and manage your multiple Kyma Runtimes. It consists of Compass and only the selected Kyma components.
-
-![Kyma mode1](./assets/kyma-mode1.svg)
 
 - Default Kyma installation which provides all Kyma components together with Compass and Agent, which allows you to register external applications to Kyma.
 
 ![Kyma mode2](./assets/kyma-mode2.svg)
+
+- Kyma as a central solution which allows you to connect and manage your multiple Kyma Runtimes. It consists of Compass and only the selected Kyma components.
+
+![Kyma mode1](./assets/kyma-mode1.svg)
 
 For more details, read the [architecture](#architecture-architecture) documents.
