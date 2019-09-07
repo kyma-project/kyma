@@ -198,10 +198,9 @@ func fixPod(namespace, name string, port int32) (v1.Pod, error) {
 func fixConfigMap(namespace, name string, port int32) v1.ConfigMap {
 	return v1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        name,
-			Namespace:   namespace,
-			Annotations: map[string]string{"sidecar.istio.io/inject": "false"},
-			Labels:      map[string]string{"owner": "console-backend-service-tests", "app": name},
+			Name:      name,
+			Namespace: namespace,
+			Labels:    map[string]string{"owner": "console-backend-service-tests", "app": name},
 		},
 		Data: map[string]string{
 			"config.yaml": fmt.Sprintf(`
