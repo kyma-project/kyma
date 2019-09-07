@@ -7,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -153,6 +154,16 @@ func fixPod(namespace, name string, port int32) v1.Pod {
 						ContainerPort: port,
 						Protocol:      v1.ProtocolTCP,
 					}},
+					Resources: v1.ResourceRequirements{
+						Requests: map[v1.ResourceName]resource.Quantity{
+							v1.ResourceCPU:    *resource.NewQuantity(1, resource.DecimalExponent),
+							v1.ResourceMemory: *resource.NewQuantity(2, resource.BinarySI),
+						},
+						Limits: map[v1.ResourceName]resource.Quantity{
+							v1.ResourceCPU:    *resource.NewQuantity(2, resource.DecimalExponent),
+							v1.ResourceMemory: *resource.NewQuantity(8, resource.BinarySI),
+						},
+					},
 				},
 			},
 		},
