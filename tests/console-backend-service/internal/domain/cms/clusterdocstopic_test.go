@@ -4,7 +4,6 @@ package cms
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/mockice"
 	"strings"
 	"testing"
 
@@ -16,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/mockice"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/resource"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -3,9 +3,10 @@ package mockice
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/pkg/errors"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -112,12 +113,17 @@ func create(client dynamic.Interface, resource schema.GroupVersionResource, name
 }
 
 func fixPod(namespace, name string, port int32) v1.Pod {
+	image := os.Getenv("MOCKICE_IMAGE")
+	if image == "" {
+		image = "hudymi/mockice:0.1.1"
+	}
+
 	return v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        name,
 			Namespace:   namespace,
 			Annotations: map[string]string{"sidecar.istio.io/inject": "false"},
-			Labels:      map[string]string{"owner": "console-backend-service-tests", "app": "mockice"},
+			Labels:      map[string]string{"owner": "console-backend-service-tests", "app": name},
 		},
 		Spec: v1.PodSpec{
 			Volumes: []v1.Volume{
@@ -132,9 +138,10 @@ func fixPod(namespace, name string, port int32) v1.Pod {
 			},
 			Containers: []v1.Container{
 				{
-					Name:  "mockice",
-					Image: "hudymi/mockice:0.1.1",
-					Args:  []string{"--verbose", "--config", "/app/config.yaml"},
+					Name:            "mockice",
+					Image:           image,
+					ImagePullPolicy: v1.PullIfNotPresent,
+					Args:            []string{"--verbose", "--config", "/app/config.yaml"},
 					VolumeMounts: []v1.VolumeMount{{
 						Name:      "config",
 						MountPath: "/app/config.yaml",
@@ -158,7 +165,7 @@ func fixConfigMap(namespace, name string, port int32) v1.ConfigMap {
 			Name:        name,
 			Namespace:   namespace,
 			Annotations: map[string]string{"sidecar.istio.io/inject": "false"},
-			Labels:      map[string]string{"owner": "console-backend-service-tests", "app": "mockice"},
+			Labels:      map[string]string{"owner": "console-backend-service-tests", "app": name},
 		},
 		Data: map[string]string{
 			"config.yaml": fmt.Sprintf(`
@@ -179,7 +186,7 @@ func fixService(namespace, name string, port int32) v1.Service {
 			Name:        name,
 			Namespace:   namespace,
 			Annotations: map[string]string{"auth.istio.io/80": "NONE"},
-			Labels:      map[string]string{"owner": "console-backend-service-tests", "app": "mockice"},
+			Labels:      map[string]string{"owner": "console-backend-service-tests", "app": name},
 		},
 		Spec: v1.ServiceSpec{
 			Ports: []v1.ServicePort{{
@@ -188,7 +195,7 @@ func fixService(namespace, name string, port int32) v1.Service {
 				Protocol:   v1.ProtocolTCP,
 				Name:       "http",
 			}},
-			Selector: map[string]string{"owner": "console-backend-service-tests", "app": "mockice"},
+			Selector: map[string]string{"owner": "console-backend-service-tests", "app": name},
 		},
 	}
 }

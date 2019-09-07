@@ -4,18 +4,18 @@ package servicecatalog
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/mockice"
 	"testing"
-
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/mockice"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/resource"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
