@@ -72,7 +72,11 @@ func createConfigMap(client dynamic.Interface, namespace, name string, port int3
 }
 
 func createPod(client dynamic.Interface, namespace, name string, port int32) (*v1.Pod, error) {
-	pod := fixPod(namespace, name, port)
+	pod, err := fixPod(namespace, name, port)
+	if err != nil {
+		return nil, err
+	}
+
 	resource := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "pods"}
 
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&pod)
@@ -113,10 +117,37 @@ func create(client dynamic.Interface, resource schema.GroupVersionResource, name
 	return nil
 }
 
-func fixPod(namespace, name string, port int32) v1.Pod {
+func getResources(memory, cpu string) (map[v1.ResourceName]resource.Quantity, error) {
+	memQ, err := resource.ParseQuantity(memory)
+	if err != nil {
+		return nil, err
+	}
+
+	cpuQ, err := resource.ParseQuantity(cpu)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[v1.ResourceName]resource.Quantity{
+		v1.ResourceCPU:    cpuQ,
+		v1.ResourceMemory: memQ,
+	}, nil
+}
+
+func fixPod(namespace, name string, port int32) (v1.Pod, error) {
 	image := os.Getenv("MOCKICE_IMAGE")
 	if image == "" {
 		image = "hudymi/mockice:0.1.1"
+	}
+
+	requests, err := getResources("2Mi", "1m")
+	if err != nil {
+		return v1.Pod{}, err
+	}
+
+	limits, err := getResources("8Mi", "2m")
+	if err != nil {
+		return v1.Pod{}, err
 	}
 
 	return v1.Pod{
@@ -155,19 +186,13 @@ func fixPod(namespace, name string, port int32) v1.Pod {
 						Protocol:      v1.ProtocolTCP,
 					}},
 					Resources: v1.ResourceRequirements{
-						Requests: map[v1.ResourceName]resource.Quantity{
-							v1.ResourceCPU:    *resource.NewQuantity(1, resource.DecimalExponent),
-							v1.ResourceMemory: *resource.NewQuantity(2, resource.BinarySI),
-						},
-						Limits: map[v1.ResourceName]resource.Quantity{
-							v1.ResourceCPU:    *resource.NewQuantity(2, resource.DecimalExponent),
-							v1.ResourceMemory: *resource.NewQuantity(8, resource.BinarySI),
-						},
+						Requests: requests,
+						Limits:   limits,
 					},
 				},
 			},
 		},
-	}
+	}, nil
 }
 
 func fixConfigMap(namespace, name string, port int32) v1.ConfigMap {
