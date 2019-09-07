@@ -4,7 +4,7 @@ package cms
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/testenv"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/mockice"
 	"strings"
 	"testing"
 
@@ -46,9 +46,9 @@ func TestClusterDocsTopicsQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Log("Setup test service")
-	host, err := testenv.StartTestWebservice(cmsCli, "default", "test-cbs-service", 8080)
+	host, err := mockice.Start(cmsCli, MockiceNamespace, MockiceSvcName, 8080)
 	require.NoError(t, err)
-	defer testenv.StopTestWebservice(cmsCli, "default", "test-cbs-service")
+	defer mockice.Stop(cmsCli, MockiceNamespace, MockiceSvcName)
 
 	subscription := subscribeClusterDocsTopic(c, clusterDocsTopicEventDetailsFields())
 	defer subscription.Close()
@@ -175,7 +175,7 @@ func checkClusterDocsTopic(t *testing.T, expected, actual shared.ClusterDocsTopi
 	assert.Equal(t, expected.Description, actual.Description)
 
 	// Assets
-	assertClusterAssetsExistsAndEqual(t, fixture.ClusterAsset("openapi"), actual.Assets)
+	assertClusterAssetsExistsAndEqual(t, fixture.ClusterAsset("markdown"), actual.Assets)
 }
 
 func checkClusterAsset(t *testing.T, expected, actual shared.ClusterAsset) {
