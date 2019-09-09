@@ -34,6 +34,8 @@ global:
         version: "2adc7649"
 
   isLocalEnv: false
+
+  agentPreconfiguration: true
   
   director:
     port: 3000

@@ -215,5 +215,40 @@ spec:
           namespace: stage
   ```
 
-</details>
+  </details>
+  <details>
+  <summary>
+  S3
+  </summary>
+
+  The S3 protocol requires a key and a secret to authenticate with your bucket. To get a key and a secret, log in to the AWS [console](https://console.aws.amazon.com),
+  select **My Security Credentials**, and go to the **Access keys** tab where you can create a new access key.
+    
+  > **NOTE:** For more information about security credentials and access key, read [this](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys) document. 
+  
+  Follow these steps to secure your S3 addons repository with basic authentication credentials:
+  
+  1. Create a Secret resource with S3 credentials:
+  ```bash
+    echo -n 'AWS_KEY' > ./key.txt
+    echo -n 'AWS_SECRET' > ./secret.txt
+    
+    kubectl create secret generic aws-auth -n default --from-file=aws_key=./key.txt --from-file=aws_secret=./secret.txt
+  ```
+  
+  2. Define a URL with the required fields:
+  ```yaml
+    apiVersion: addons.kyma-project.io/v1alpha1
+    kind: ClusterAddonsConfiguration
+    metadata:
+      name: addons-cfg-sample
+    spec:
+      repositories:
+        - url: "s3::http://s3-region.amazonaws.com/addon-test/addons//index.yaml?aws_access_key_id={aws_key}&aws_access_key_secret={aws_secret}"
+          secretRef:
+            name: aws-auth
+            namespace: default
+  ```
+  
+  </details>
 </div>  
