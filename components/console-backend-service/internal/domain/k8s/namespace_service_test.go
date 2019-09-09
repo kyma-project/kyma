@@ -1,9 +1,10 @@
 package k8s_test
 
 import (
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/automock"
@@ -174,7 +175,6 @@ func TestNamespacesService_Update(t *testing.T) {
 		assert.Equal(t, newLabels["test"], namespace.Labels["test"])
 	})
 }
-
 
 func TestNamespaceService_Subscribe(t *testing.T) {
 	t.Run("Simple", func(t *testing.T) {

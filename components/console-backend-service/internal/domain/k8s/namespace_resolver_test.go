@@ -3,9 +3,10 @@ package k8s_test
 import (
 	"context"
 	"errors"
-	"github.com/stretchr/testify/mock"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/mock"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 
@@ -332,7 +333,7 @@ func TestNamespaceResolver_DeleteNamespace(t *testing.T) {
 
 func TestNamespaceResolver_NamespaceEventSubscription(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), -24 * time.Hour)
+		ctx, cancel := context.WithTimeout(context.Background(), -24*time.Hour)
 		cancel()
 
 		svc := automock.NewNamespaceSvc()
@@ -353,7 +354,7 @@ func TestNamespaceResolver_NamespaceEventSubscription(t *testing.T) {
 	})
 
 	t.Run("Unsubscribe after connection close", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), -24 * time.Hour)
+		ctx, cancel := context.WithTimeout(context.Background(), -24*time.Hour)
 		cancel()
 
 		svc := automock.NewNamespaceSvc()
