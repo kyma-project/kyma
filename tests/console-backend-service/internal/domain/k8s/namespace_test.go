@@ -38,6 +38,12 @@ func TestNamespace(t *testing.T) {
 	suite.thenThereIsNoGqlError(t, queryRsp.GqlErrors)
 	suite.thenNamespaceResponseIsAsExpected(t, queryRsp)
 
+	t.Log("Quering for namespaces...")
+	listQueryRsp, err := suite.whenNamespacesAreQueried()
+	suite.thenThereIsNoError(t, err)
+	suite.thenThereIsNoGqlError(t, listQueryRsp.GqlErrors)
+	suite.thenNamespacesResponseIsAsExpected(t, listQueryRsp, queryRsp)
+
 	t.Log("Updating namespace...")
 	updateResp, err := suite.whenNamespaceIsUpdated()
 	suite.thenThereIsNoError(t, err)
@@ -124,6 +130,16 @@ func (s testNamespaceSuite) thenNamespaceResponseIsAsExpected(t *testing.T, rsp 
 	assert.Equal(t, s.fixNamespaceResponse(), rsp)
 }
 
+func (s testNamespaceSuite) whenNamespacesAreQueried() (namespacesResponse, error) {
+	var rsp namespacesResponse
+	err := s.gqlClient.Do(s.fixNamespacesQuery(), &rsp)
+	return rsp, err
+}
+
+func (s testNamespaceSuite) thenNamespacesResponseIsAsExpected(t *testing.T, namespacesList namespacesResponse, namespace namespaceResponse) {
+	assert.Contains(t, namespacesList.Namespaces, namespace.Namespace)
+}
+
 func (s testNamespaceSuite) whenNamespaceIsUpdated() (updateNamespaceResponse, error) {
 	var rsp updateNamespaceResponse
 	err := s.gqlClient.Do(s.fixNamespaceUpdate(), &rsp)
@@ -163,43 +179,44 @@ func (s testNamespaceSuite) thenNamespaceIsRemovedFromK8sEventually(t *testing.T
 	require.NoError(t, err)
 }
 
-func (s testNamespaceSuite) fixNamespaceObj() namespaceObj {
-	return namespaceObj{
-		Name:   s.namespaceName,
-		Labels: s.labels,
+func (s testNamespaceSuite) fixFullNamespaceObj() namespaceQueryObj {
+	return namespaceQueryObj{
+		Name:              s.namespaceName,
+		IsSystemNamespace: false,
+		Labels:            s.labels,
 	}
 }
 
-func (s testNamespaceSuite) fixNamespaceObjAfterUpdate() namespaceObj {
-	return namespaceObj{
+func (s testNamespaceSuite) fixNamespaceObj(labels map[string]string) namespaceMutationObj {
+	return namespaceMutationObj{
 		Name:   s.namespaceName,
-		Labels: s.updatedLabels,
+		Labels: labels,
 	}
 }
 
 func (s testNamespaceSuite) fixCreateNamespaceResponse() createNamespaceResponse {
-	return createNamespaceResponse{CreateNamespace: s.fixNamespaceObj()}
+	return createNamespaceResponse{CreateNamespace: s.fixNamespaceObj(s.labels)}
 }
 
 func (s testNamespaceSuite) fixNamespaceResponse() namespaceResponse {
-	return namespaceResponse{Namespace: s.fixNamespaceObj()}
+	return namespaceResponse{Namespace: s.fixFullNamespaceObj()}
 }
 
 func (s testNamespaceSuite) fixUpdateNamespaceResponse() updateNamespaceResponse {
-	return updateNamespaceResponse{UpdateNamespace: s.fixNamespaceObjAfterUpdate()}
+	return updateNamespaceResponse{UpdateNamespace: s.fixNamespaceObj(s.updatedLabels)}
 }
 
 func (s testNamespaceSuite) fixDeleteNamespaceResponse() deleteNamespaceResponse {
-	return deleteNamespaceResponse{DeleteNamespace: s.fixNamespaceObjAfterUpdate()}
+	return deleteNamespaceResponse{DeleteNamespace: s.fixNamespaceObj(s.updatedLabels)}
 }
 
 func (s testNamespaceSuite) fixNamespaceCreate() *graphql.Request {
 	query := `mutation ($name: String!, $labels: Labels!) {
-				  createNamespace(name: $name, labels: $labels) {
-					name
-					labels
-				  }
-				}`
+		  createNamespace(name: $name, labels: $labels) {
+				name
+				labels
+		  }
+	}`
 	req := graphql.NewRequest(query)
 	req.SetVar("name", s.namespaceName)
 	req.SetVar("labels", s.labels)
@@ -208,23 +225,36 @@ func (s testNamespaceSuite) fixNamespaceCreate() *graphql.Request {
 
 func (s testNamespaceSuite) fixNamespaceQuery() *graphql.Request {
 	query := `query ($name: String!) {
-				  namespace(name: $name) {
-					name
-					labels
-				  }
-				}`
+		  namespace(name: $name) {
+				name
+				isSystemNamespace
+				labels
+		  }
+	}`
 	req := graphql.NewRequest(query)
 	req.SetVar("name", s.namespaceName)
 	return req
 }
 
+func (s testNamespaceSuite) fixNamespacesQuery() *graphql.Request {
+	query := `query {
+		  namespaces {
+				name
+				isSystemNamespace
+				labels
+		  }
+	}`
+	req := graphql.NewRequest(query)
+	return req
+}
+
 func (s testNamespaceSuite) fixNamespaceUpdate() *graphql.Request {
 	query := `mutation ($name: String!, $labels: Labels!) {
-				  updateNamespace(name: $name, labels: $labels) {
-					name
-					labels
-				  }
-				}`
+		  updateNamespace(name: $name, labels: $labels) {
+				name
+				labels
+		  }
+	}`
 	req := graphql.NewRequest(query)
 	req.SetVar("name", s.namespaceName)
 	req.SetVar("labels", s.updatedLabels)
@@ -233,19 +263,25 @@ func (s testNamespaceSuite) fixNamespaceUpdate() *graphql.Request {
 
 func (s testNamespaceSuite) fixNamespaceDelete() *graphql.Request {
 	query := `mutation ($name: String!) {
-				  deleteNamespace(name: $name) {
-					name
-					labels
-				  }
-				}`
+		  deleteNamespace(name: $name) {
+				name
+				labels
+		  }
+	}`
 	req := graphql.NewRequest(query)
 	req.SetVar("name", s.namespaceName)
 	return req
 }
 
-type namespaceObj struct {
+type namespaceMutationObj struct {
 	Name   string `json:"name"`
 	Labels labels `json:"labels"`
+}
+
+type namespaceQueryObj struct {
+	Name              string `json:"name"`
+	IsSystemNamespace bool   `json:"isSystemNamespace"`
+	Labels            labels `json:"labels"`
 }
 
 type GqlErrors struct {
@@ -254,27 +290,27 @@ type GqlErrors struct {
 
 type createNamespaceResponse struct {
 	GqlErrors
-	CreateNamespace namespaceObj `json:"createNamespace"`
+	CreateNamespace namespaceMutationObj `json:"createNamespace"`
 }
 
 type namespaceResponse struct {
 	GqlErrors
-	Namespace namespaceObj `json:"namespace"`
+	Namespace namespaceQueryObj `json:"namespace"`
 }
 
 type namespacesResponse struct {
 	GqlErrors
-	Namespaces []namespaceObj `json:"namespaces"`
+	Namespaces []namespaceQueryObj `json:"namespaces"`
 }
 
 type updateNamespaceResponse struct {
 	GqlErrors
-	UpdateNamespace namespaceObj `json:"updateNamespace"`
+	UpdateNamespace namespaceMutationObj `json:"updateNamespace"`
 }
 
 type deleteNamespaceResponse struct {
 	GqlErrors
-	DeleteNamespace namespaceObj `json:"deleteNamespace"`
+	DeleteNamespace namespaceMutationObj `json:"deleteNamespace"`
 }
 
 type namespaceTerminatingError struct {
