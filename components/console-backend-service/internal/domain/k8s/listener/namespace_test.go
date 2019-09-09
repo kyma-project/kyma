@@ -6,7 +6,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 )
@@ -20,7 +19,7 @@ func TestNamespaceListener_OnAdd(t *testing.T) {
 
 		channel := make(chan gqlschema.NamespaceEvent, 1)
 		defer close(channel)
-		converter.On("ToGQL", namespace).Return(gqlNamespace, nil).Once()
+		converter.On("ToGQL", namespace).Return(gqlNamespace).Once()
 		defer converter.AssertExpectations(t)
 		namespaceListener := listener.NewNamespace(channel, filterNamespaceTrue, converter, []string{})
 
@@ -54,7 +53,7 @@ func TestNamespaceListener_OnAdd(t *testing.T) {
 		namespace := new(v1.Namespace)
 		converter := automock.NewNamespaceConverter()
 
-		converter.On("ToGQL", namespace).Return(nil, nil).Once()
+		converter.On("ToGQL", namespace).Return(nil).Once()
 		defer converter.AssertExpectations(t)
 		namespaceListener := listener.NewNamespace(nil, filterNamespaceTrue, converter, []string{})
 
@@ -69,19 +68,6 @@ func TestNamespaceListener_OnAdd(t *testing.T) {
 		// when
 		namespaceListener.OnAdd(new(struct{}))
 	})
-
-	t.Run("Conversion error", func(t *testing.T) {
-		// given
-		namespace := new(v1.Namespace)
-		converter := automock.NewNamespaceConverter()
-
-		converter.On("ToGQL", namespace).Return(nil, errors.New("Conversion error")).Once()
-		defer converter.AssertExpectations(t)
-		namespaceListener := listener.NewNamespace(nil, filterNamespaceTrue, converter, []string{})
-
-		// when
-		namespaceListener.OnAdd(namespace)
-	})
 }
 
 func TestNamespaceListener_OnDelete(t *testing.T) {
@@ -93,7 +79,7 @@ func TestNamespaceListener_OnDelete(t *testing.T) {
 
 		channel := make(chan gqlschema.NamespaceEvent, 1)
 		defer close(channel)
-		converter.On("ToGQL", namespace).Return(gqlNamespace, nil).Once()
+		converter.On("ToGQL", namespace).Return(gqlNamespace).Once()
 		defer converter.AssertExpectations(t)
 		namespaceListener := listener.NewNamespace(channel, filterNamespaceTrue, converter, []string{})
 
@@ -128,7 +114,7 @@ func TestNamespaceListener_OnDelete(t *testing.T) {
 		namespace := new(v1.Namespace)
 		converter := automock.NewNamespaceConverter()
 
-		converter.On("ToGQL", namespace).Return(nil, nil).Once()
+		converter.On("ToGQL", namespace).Return(nil).Once()
 		defer converter.AssertExpectations(t)
 		namespaceListener := listener.NewNamespace(nil, filterNamespaceTrue, converter, []string{})
 
@@ -143,19 +129,6 @@ func TestNamespaceListener_OnDelete(t *testing.T) {
 		// when
 		namespaceListener.OnDelete(new(struct{}))
 	})
-
-	t.Run("Conversion error", func(t *testing.T) {
-		// given
-		namespace := new(v1.Namespace)
-		converter := automock.NewNamespaceConverter()
-
-		converter.On("ToGQL", namespace).Return(nil, errors.New("Conversion error")).Once()
-		defer converter.AssertExpectations(t)
-		namespaceListener := listener.NewNamespace(nil, filterNamespaceTrue, converter, []string{})
-
-		// when
-		namespaceListener.OnDelete(namespace)
-	})
 }
 
 func TestNamespaceListener_OnUpdate(t *testing.T) {
@@ -167,7 +140,7 @@ func TestNamespaceListener_OnUpdate(t *testing.T) {
 
 		channel := make(chan gqlschema.NamespaceEvent, 1)
 		defer close(channel)
-		converter.On("ToGQL", namespace).Return(gqlNamespace, nil).Once()
+		converter.On("ToGQL", namespace).Return(gqlNamespace).Once()
 		defer converter.AssertExpectations(t)
 		namespaceListener := listener.NewNamespace(channel, filterNamespaceTrue, converter, []string{})
 
@@ -202,7 +175,7 @@ func TestNamespaceListener_OnUpdate(t *testing.T) {
 		namespace := new(v1.Namespace)
 		converter := automock.NewNamespaceConverter()
 
-		converter.On("ToGQL", namespace).Return(nil, nil).Once()
+		converter.On("ToGQL", namespace).Return(nil).Once()
 		defer converter.AssertExpectations(t)
 		namespaceListener := listener.NewNamespace(nil, filterNamespaceTrue, converter, []string{})
 
@@ -216,19 +189,6 @@ func TestNamespaceListener_OnUpdate(t *testing.T) {
 
 		// when
 		namespaceListener.OnUpdate(new(struct{}), new(struct{}))
-	})
-
-	t.Run("Conversion error", func(t *testing.T) {
-		// given
-		namespace := new(v1.Namespace)
-		converter := automock.NewNamespaceConverter()
-
-		converter.On("ToGQL", namespace).Return(nil, errors.New("Conversion error")).Once()
-		defer converter.AssertExpectations(t)
-		namespaceListener := listener.NewNamespace(nil, filterNamespaceTrue, converter, []string{})
-
-		// when
-		namespaceListener.OnUpdate(nil, namespace)
 	})
 }
 
