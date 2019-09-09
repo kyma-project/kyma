@@ -224,6 +224,10 @@ func TestClusterAddonsConfigurationService_CreateAddonsConfiguration(t *testing.
 				},
 			},
 			expectedResult: &v1alpha1.ClusterAddonsConfiguration{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "ClusterAddonsConfiguration",
+					APIVersion: "addons.kyma-project.io/v1alpha1",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test",
 					Labels: map[string]string{
@@ -252,6 +256,10 @@ func TestClusterAddonsConfigurationService_CreateAddonsConfiguration(t *testing.
 				},
 			},
 			expectedResult: &v1alpha1.ClusterAddonsConfiguration{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "ClusterAddonsConfiguration",
+					APIVersion: "addons.kyma-project.io/v1alpha1",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test",
 				},
@@ -312,7 +320,7 @@ func TestClusterAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.
 			},
 			expectedResult: &v1alpha1.ClusterAddonsConfiguration{
 				TypeMeta: metav1.TypeMeta{
-					Kind:       "clusteraddonsconfiguration",
+					Kind:       "ClusterAddonsConfiguration",
 					APIVersion: "addons.kyma-project.io/v1alpha1",
 				},
 				ObjectMeta: metav1.ObjectMeta{
@@ -344,7 +352,7 @@ func TestClusterAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.
 			},
 			expectedResult: &v1alpha1.ClusterAddonsConfiguration{
 				TypeMeta: metav1.TypeMeta{
-					Kind:       "clusteraddonsconfiguration",
+					Kind:       "ClusterAddonsConfiguration",
 					APIVersion: "addons.kyma-project.io/v1alpha1",
 				},
 				ObjectMeta: metav1.ObjectMeta{
@@ -499,7 +507,7 @@ func TestClusterAddonsConfigurationService_ResyncAddonsConfiguration(t *testing.
 func fixClusterAddonsConfiguration(name string) *v1alpha1.ClusterAddonsConfiguration {
 	return &v1alpha1.ClusterAddonsConfiguration{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "clusteraddonsconfiguration",
+			Kind:       "ClusterAddonsConfiguration",
 			APIVersion: "addons.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{

@@ -7,6 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -67,8 +68,7 @@ func TestClusterAddonsConfigurationConverter_ToGQL(t *testing.T) {
 				Urls: []string{url},
 				Repositories: []gqlschema.AddonsConfigurationRepository{
 					{
-						URL:       url,
-						SecretRef: &gqlschema.ResourceRef{},
+						URL: url,
 					},
 				},
 				Status: gqlschema.AddonsConfigurationStatus{
@@ -120,7 +120,13 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 					Spec: v1alpha1.ClusterAddonsConfigurationSpec{
 						CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 							Repositories: []v1alpha1.SpecRepository{
-								{URL: url},
+								{
+									URL: url,
+									SecretRef: &v1.SecretReference{
+										Name:      "test",
+										Namespace: "test",
+									},
+								},
 							},
 						},
 					},
@@ -149,8 +155,11 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 					Urls: []string{url},
 					Repositories: []gqlschema.AddonsConfigurationRepository{
 						{
-							URL:       url,
-							SecretRef: &gqlschema.ResourceRef{},
+							URL: url,
+							SecretRef: &gqlschema.ResourceRef{
+								Name:      "test",
+								Namespace: "test",
+							},
 						},
 					},
 				},
@@ -162,8 +171,7 @@ func TestClusterAddonsConfigurationConverter_ToGQLs(t *testing.T) {
 					Urls: []string{url},
 					Repositories: []gqlschema.AddonsConfigurationRepository{
 						{
-							URL:       url,
-							SecretRef: &gqlschema.ResourceRef{},
+							URL: url,
 						},
 					},
 				},

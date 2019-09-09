@@ -119,6 +119,10 @@ func (s *clusterAddonsConfigurationService) RemoveRepos(name string, repos []gql
 
 func (s *clusterAddonsConfigurationService) Create(name string, repos []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
 	addon := &v1alpha1.ClusterAddonsConfiguration{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ClusterAddonsConfiguration",
+			APIVersion: "addons.kyma-project.io/v1alpha1",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   name,
 			Labels: toMapLabels(labels),

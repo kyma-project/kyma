@@ -151,8 +151,7 @@ func fixGQLAddonsConfiguration(name string) *gqlschema.AddonsConfiguration {
 		},
 		Repositories: []gqlschema.AddonsConfigurationRepository{
 			{
-				URL:       url,
-				SecretRef: &gqlschema.ResourceRef{},
+				URL: url,
 			},
 		},
 	}

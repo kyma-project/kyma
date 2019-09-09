@@ -46,6 +46,8 @@ func parseRepository(repo v1alpha1.SpecRepository) gqlschema.AddonsConfiguration
 	if repo.SecretRef != nil {
 		secretRef.Name = repo.SecretRef.Name
 		secretRef.Namespace = repo.SecretRef.Namespace
+	} else {
+		secretRef = nil
 	}
 	return gqlschema.AddonsConfigurationRepository{
 		URL:       repo.URL,

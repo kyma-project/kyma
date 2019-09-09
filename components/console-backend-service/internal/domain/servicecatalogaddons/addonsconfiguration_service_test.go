@@ -14,7 +14,6 @@ import (
 	bindingUsageApi "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -218,11 +217,14 @@ func TestAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 			},
 			urls: []gqlschema.AddonsConfigurationRepositoryInput{
 				{
-					URL:       "ww.fix.k",
-					SecretRef: &gqlschema.ResourceRefInput{},
+					URL: "ww.fix.k",
 				},
 			},
 			expectedResult: &v1alpha1.AddonsConfiguration{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "AddonsConfiguration",
+					APIVersion: "addons.kyma-project.io/v1alpha1",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test",
 					Labels: map[string]string{
@@ -234,8 +236,7 @@ func TestAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
 							{
-								URL:       "ww.fix.k",
-								SecretRef: &v1.SecretReference{},
+								URL: "ww.fix.k",
 							},
 						},
 					},
@@ -246,11 +247,14 @@ func TestAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 			name: "test",
 			urls: []gqlschema.AddonsConfigurationRepositoryInput{
 				{
-					URL:       "ww.fix.k",
-					SecretRef: &gqlschema.ResourceRefInput{},
+					URL: "ww.fix.k",
 				},
 			},
 			expectedResult: &v1alpha1.AddonsConfiguration{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "AddonsConfiguration",
+					APIVersion: "addons.kyma-project.io/v1alpha1",
+				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "test",
 				},
@@ -258,8 +262,7 @@ func TestAddonsConfigurationService_CreateAddonsConfiguration(t *testing.T) {
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
 							{
-								URL:       "ww.fix.k",
-								SecretRef: &v1.SecretReference{},
+								URL: "ww.fix.k",
 							},
 						},
 					},
@@ -302,8 +305,7 @@ func TestAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
 			},
 			urls: []gqlschema.AddonsConfigurationRepositoryInput{
 				{
-					URL:       "ww.fix.k",
-					SecretRef: &gqlschema.ResourceRefInput{},
+					URL: "ww.fix.k",
 				},
 			},
 			expectedResult: &v1alpha1.AddonsConfiguration{
@@ -323,8 +325,7 @@ func TestAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
 							{
-								URL:       "ww.fix.k",
-								SecretRef: &v1.SecretReference{},
+								URL: "ww.fix.k",
 							},
 						},
 					},
@@ -335,8 +336,7 @@ func TestAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
 			name: "test",
 			urls: []gqlschema.AddonsConfigurationRepositoryInput{
 				{
-					URL:       "ww.fix.k",
-					SecretRef: &gqlschema.ResourceRefInput{},
+					URL: "ww.fix.k",
 				},
 			},
 			expectedResult: &v1alpha1.AddonsConfiguration{
@@ -352,8 +352,7 @@ func TestAddonsConfigurationService_UpdateAddonsConfiguration(t *testing.T) {
 					CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
 						Repositories: []v1alpha1.SpecRepository{
 							{
-								URL:       "ww.fix.k",
-								SecretRef: &v1.SecretReference{},
+								URL: "ww.fix.k",
 							},
 						},
 					},

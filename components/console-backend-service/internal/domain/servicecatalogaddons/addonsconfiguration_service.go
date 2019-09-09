@@ -112,6 +112,10 @@ func (s *addonsConfigurationService) RemoveRepos(name, namespace string, repos [
 
 func (s *addonsConfigurationService) Create(name, namespace string, repos []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error) {
 	addon := &v1alpha1.AddonsConfiguration{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "AddonsConfiguration",
+			APIVersion: "addons.kyma-project.io/v1alpha1",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   name,
 			Labels: toMapLabels(labels),
@@ -246,6 +250,8 @@ func toSpecRepository(repo gqlschema.AddonsConfigurationRepositoryInput) v1alpha
 	if repo.SecretRef != nil {
 		secretRef.Name = repo.SecretRef.Name
 		secretRef.Namespace = repo.SecretRef.Namespace
+	} else {
+		secretRef = nil
 	}
 	return v1alpha1.SpecRepository{URL: repo.URL, SecretRef: secretRef}
 }
