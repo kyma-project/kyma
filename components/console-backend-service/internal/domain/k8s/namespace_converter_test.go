@@ -99,7 +99,9 @@ func TestNamespaceConverter_ToGQL(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		expectedName := "exampleName"
 		expectedLabels := gqlschema.Labels{"test": "label"}
-		converter := namespaceConverter{}
+		converter := namespaceConverter{
+			systemNamespaces: []string{"systemNamespace"},
+		}
 
 		in := v1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{

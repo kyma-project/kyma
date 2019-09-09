@@ -1,8 +1,11 @@
 package k8s_test
 
 import (
+	"context"
 	"errors"
+	"github.com/stretchr/testify/mock"
 	"testing"
+	"time"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 
@@ -324,6 +327,51 @@ func TestNamespaceResolver_DeleteNamespace(t *testing.T) {
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
 		assert.Nil(t, result)
+	})
+}
+
+func TestNamespaceResolver_NamespaceEventSubscription(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), -24 * time.Hour)
+		cancel()
+
+		svc := automock.NewNamespaceSvc()
+		podSvc := automock.NewPodSvc()
+		svc.On("Subscribe", mock.Anything).Once()
+		svc.On("Unsubscribe", mock.Anything).Once()
+		podSvc.On("Subscribe", mock.Anything).Once()
+		podSvc.On("Unsubscribe", mock.Anything).Once()
+
+		appRetriever := new(appAutomock.ApplicationRetriever)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+
+		_, err := resolver.NamespaceEventSubscription(ctx, nil)
+		require.NoError(t, err)
+
+		svc.AssertCalled(t, "Subscribe", mock.Anything)
+		podSvc.AssertCalled(t, "Subscribe", mock.Anything)
+	})
+
+	t.Run("Unsubscribe after connection close", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), -24 * time.Hour)
+		cancel()
+
+		svc := automock.NewNamespaceSvc()
+		podSvc := automock.NewPodSvc()
+		svc.On("Subscribe", mock.Anything).Once()
+		svc.On("Unsubscribe", mock.Anything).Once()
+		podSvc.On("Subscribe", mock.Anything).Once()
+		podSvc.On("Unsubscribe", mock.Anything).Once()
+
+		appRetriever := new(appAutomock.ApplicationRetriever)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever, []string{}, podSvc)
+
+		channel, err := resolver.NamespaceEventSubscription(ctx, nil)
+		require.NoError(t, err)
+
+		<-channel
+		svc.AssertCalled(t, "Unsubscribe", mock.Anything)
+		podSvc.AssertCalled(t, "Unsubscribe", mock.Anything)
 	})
 }
 

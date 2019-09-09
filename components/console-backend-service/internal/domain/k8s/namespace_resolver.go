@@ -168,6 +168,7 @@ func (r *namespaceResolver) NamespaceEventSubscription(ctx context.Context, with
 		defer close(podChannel)
 		defer r.namespaceSvc.Unsubscribe(namespaceListener)
 		defer r.podService.Unsubscribe(podsListener)
+
 		for {
 			select {
 			case podEvent := <-podChannel:
@@ -176,6 +177,8 @@ func (r *namespaceResolver) NamespaceEventSubscription(ctx context.Context, with
 					continue
 				}
 				namespaceListener.OnUpdate(ns, ns)
+			case <-ctx.Done():
+				return
 			}
 		}
 	}()

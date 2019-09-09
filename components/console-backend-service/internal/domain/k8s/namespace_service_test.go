@@ -1,6 +1,7 @@
 package k8s_test
 
 import (
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
 	"testing"
 	"time"
 
@@ -171,6 +172,101 @@ func TestNamespacesService_Update(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, name, namespace.Name)
 		assert.Equal(t, newLabels["test"], namespace.Labels["test"])
+	})
+}
+
+
+func TestNamespaceService_Subscribe(t *testing.T) {
+	t.Run("Simple", func(t *testing.T) {
+		fixedInformer, _ := fixNamespaceInformer()
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, nil)
+		require.NoError(t, err)
+		namespaceListener := listener.NewNamespace(nil, nil, nil, []string{})
+
+		svc.Subscribe(namespaceListener)
+	})
+
+	t.Run("Duplicated", func(t *testing.T) {
+		fixedInformer, _ := fixNamespaceInformer()
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, nil)
+		require.NoError(t, err)
+		namespaceListener := listener.NewNamespace(nil, nil, nil, []string{})
+
+		svc.Subscribe(namespaceListener)
+	})
+
+	t.Run("Multiple", func(t *testing.T) {
+		fixedInformer, _ := fixNamespaceInformer()
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, nil)
+		require.NoError(t, err)
+		namespaceListener1 := listener.NewNamespace(nil, nil, nil, []string{})
+		namespaceListener2 := listener.NewNamespace(nil, nil, nil, []string{})
+
+		svc.Subscribe(namespaceListener1)
+		svc.Subscribe(namespaceListener2)
+	})
+
+	t.Run("Nil", func(t *testing.T) {
+		fixedInformer, _ := fixNamespaceInformer()
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, nil)
+		require.NoError(t, err)
+
+		svc.Subscribe(nil)
+	})
+}
+
+func TestNamespaceService_Unsubscribe(t *testing.T) {
+	t.Run("Existing", func(t *testing.T) {
+		fixedInformer, _ := fixNamespaceInformer()
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, nil)
+		require.NoError(t, err)
+		namespaceListener := listener.NewNamespace(nil, nil, nil, []string{})
+
+		svc.Subscribe(namespaceListener)
+
+		svc.Unsubscribe(namespaceListener)
+	})
+
+	t.Run("Duplicated", func(t *testing.T) {
+		fixedInformer, _ := fixNamespaceInformer()
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, nil)
+		require.NoError(t, err)
+		namespaceListener := listener.NewNamespace(nil, nil, nil, []string{})
+
+		svc.Subscribe(namespaceListener)
+		svc.Subscribe(namespaceListener)
+
+		svc.Unsubscribe(namespaceListener)
+	})
+
+	t.Run("Multiple", func(t *testing.T) {
+		fixedInformer, _ := fixNamespaceInformer()
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, nil)
+		require.NoError(t, err)
+		namespaceListener1 := listener.NewNamespace(nil, nil, nil, []string{})
+		namespaceListener2 := listener.NewNamespace(nil, nil, nil, []string{})
+
+		svc.Subscribe(namespaceListener1)
+		svc.Subscribe(namespaceListener2)
+
+		svc.Unsubscribe(namespaceListener1)
+		svc.Unsubscribe(namespaceListener2)
+	})
+
+	t.Run("Multiple", func(t *testing.T) {
+		fixedInformer, _ := fixNamespaceInformer()
+		podSvc := automock.NewPodSvc()
+		svc, err := k8s.NewNamespaceService(fixedInformer, podSvc, nil)
+		require.NoError(t, err)
+
+		svc.Unsubscribe(nil)
 	})
 }
 
