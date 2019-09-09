@@ -134,7 +134,7 @@ func testInvalidFunc(t *testing.T) {
 	g.Expect(response.Response.Allowed).To(gomega.BeFalse())
 	// due to invalid function size
 	g.Expect(response.Response.Result.Message).To(gomega.Equal("Passed function size: 'foo', but size should be one of 'S, M, L'"))
-	g.Expect(response.Response.Result.Code).To(gomega.Equal(int32(500)))
+	g.Expect(response.Response.Result.Code).To(gomega.Equal(int32(400)))
 }
 
 // We are using a certificate signed by an unknown CA
