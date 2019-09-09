@@ -2,7 +2,7 @@
 title: Overview
 ---
 
->**NOTE:** Compass is a new, experimental component in Kyma. To learn how to enable it, read the [installation](#installation-installation) document.
+>**NOTE:** Compass is a new, experimental component in Kyma. To learn how to enable it, read the [installation](#installation-enable-compass-in-kyma) document.
 
 Compass is a multi-tenant system which consists of components that provide a way to manage your applications across multiple Kyma Runtimes. Using Compass, you can control and monitor your application landscape in one central place.
 
@@ -23,11 +23,11 @@ Compass, as a part of Kyma, uses a set of Kyma features, such as Istio, Promethe
 
 You can run Kyma with Compass in two modes:
 
-- Default Kyma installation which provides all Kyma components together with Compass and Agent, which allows you to register external applications to Kyma.
+- [Default Kyma installation](#installation-enable-compass-in-kyma-default-kyma-installation) which provides all Kyma components together with Compass and Agent, which allows you to register external applications to Kyma.
 
 ![Kyma mode2](./assets/kyma-mode2.svg)
 
-- Kyma as a central solution which allows you to connect and manage your multiple Kyma Runtimes. It consists of Compass and only the selected Kyma components.
+- [Kyma as a central solution](#installation-enable-compass-in-kyma-kyma-as-compass) which allows you to connect and manage your multiple [Kyma Runtimes](#installation-enable-compass-in-kyma-kyma-as-a-runtime). It consists of Compass and only the selected Kyma components.
 
 ![Kyma mode1](./assets/kyma-mode1.svg)
 
