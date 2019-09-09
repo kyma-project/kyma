@@ -16,40 +16,47 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
-func Start(client dynamic.Interface, namespace, name string, port int32) (string, error) {
-	_, err := createConfigMap(client, namespace, name, port)
+var (
+	podPort      int32  = 8080
+	svcPort      int32  = 80
+	defaultImage string = "hudymi/mockice:0.1.1"
+)
+
+func Start(client dynamic.Interface, namespace, name string) (string, error) {
+	_, err := createConfigMap(client, namespace, name)
 	if err != nil {
 		return "", err
 	}
 
-	_, err = createPod(client, namespace, name, port)
+	_, err = createPod(client, namespace, name)
 	if err != nil {
 		Stop(client, namespace, name)
 		return "", err
 	}
 
-	_, err = createService(client, namespace, name, port)
+	_, err = createService(client, namespace, name)
 	if err != nil {
 		Stop(client, namespace, name)
 		return "", err
 	}
 
-	return fmt.Sprintf("%s.%s.svc.cluster.local", name, namespace), nil
+	return fmt.Sprintf("%s.%s.svc.cluster.local:%d", name, namespace, svcPort), nil
 }
 
 func Stop(client dynamic.Interface, namespace, name string) {
-	err := deleteResource(client, "configmaps", namespace, name)
+	logOnDeleteError(deleteResource(client, "configmaps", namespace, name), "ConfigMap", namespace, name)
+	logOnDeleteError(deleteResource(client, "pods", namespace, name), "Pod", namespace, name)
+	logOnDeleteError(deleteResource(client, "services", namespace, name), "Service", namespace, name)
+}
+
+func logOnDeleteError(err error, kind, namespace, name string) {
 	if err != nil {
-		log.Println(fmt.Sprintf("Cannot delete ConfigMap %s/%s, because: %v", namespace, name, err))
+		log.Println(fmt.Sprintf("Cannot delete %s %s/%s, because: %v", kind, namespace, name, err))
 	}
-	err = deleteResource(client, "pods", namespace, name)
-	if err != nil {
-		log.Println(fmt.Sprintf("Cannot delete Pod %s/%s, because: %v", namespace, name, err))
-	}
-	err = deleteResource(client, "services", namespace, name)
-	if err != nil {
-		log.Println(fmt.Sprintf("Cannot delete Service %s/%s, because: %v", namespace, name, err))
-	}
+}
+
+func ResourceURL(host string) string {
+	return fmt.Sprintf("http://%s/README.md", host)
 }
 
 func deleteResource(client dynamic.Interface, resource, namespace, name string) error {
@@ -57,8 +64,8 @@ func deleteResource(client dynamic.Interface, resource, namespace, name string) 
 	return client.Resource(groupVersion).Namespace(namespace).Delete(name, nil)
 }
 
-func createConfigMap(client dynamic.Interface, namespace, name string, port int32) (*v1.ConfigMap, error) {
-	configMap := fixConfigMap(namespace, name, port)
+func createConfigMap(client dynamic.Interface, namespace, name string) (*v1.ConfigMap, error) {
+	configMap := fixConfigMap(namespace, name)
 	resource := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "configmaps"}
 
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&configMap)
@@ -71,8 +78,8 @@ func createConfigMap(client dynamic.Interface, namespace, name string, port int3
 	return &configMap, err
 }
 
-func createPod(client dynamic.Interface, namespace, name string, port int32) (*v1.Pod, error) {
-	pod, err := fixPod(namespace, name, port)
+func createPod(client dynamic.Interface, namespace, name string) (*v1.Pod, error) {
+	pod, err := fixPod(namespace, name)
 	if err != nil {
 		return nil, err
 	}
@@ -89,8 +96,8 @@ func createPod(client dynamic.Interface, namespace, name string, port int32) (*v
 	return &pod, err
 }
 
-func createService(client dynamic.Interface, namespace, name string, port int32) (*v1.Service, error) {
-	svc := fixService(namespace, name, port)
+func createService(client dynamic.Interface, namespace, name string) (*v1.Service, error) {
+	svc := fixService(namespace, name)
 	resource := schema.GroupVersionResource{Group: "", Version: "v1", Resource: "services"}
 
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&svc)
@@ -134,10 +141,10 @@ func getResources(memory, cpu string) (map[v1.ResourceName]resource.Quantity, er
 	}, nil
 }
 
-func fixPod(namespace, name string, port int32) (v1.Pod, error) {
+func fixPod(namespace, name string) (v1.Pod, error) {
 	image := os.Getenv("MOCKICE_IMAGE")
 	if image == "" {
-		image = "hudymi/mockice:0.1.1"
+		image = defaultImage
 	}
 
 	requests, err := getResources("2Mi", "1m")
@@ -182,7 +189,7 @@ func fixPod(namespace, name string, port int32) (v1.Pod, error) {
 					}},
 					Ports: []v1.ContainerPort{{
 						Name:          "http",
-						ContainerPort: port,
+						ContainerPort: podPort,
 						Protocol:      v1.ProtocolTCP,
 					}},
 					Resources: v1.ResourceRequirements{
@@ -195,7 +202,7 @@ func fixPod(namespace, name string, port int32) (v1.Pod, error) {
 	}, nil
 }
 
-func fixConfigMap(namespace, name string, port int32) v1.ConfigMap {
+func fixConfigMap(namespace, name string) v1.ConfigMap {
 	return v1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -210,12 +217,12 @@ endpoints:
   defaultResponseCode: 200
   defaultResponseContent: "# Test markdown"  
   defaultResponseContentType: text/markdown; charset=utf-8
-`, port),
+`, podPort),
 		},
 	}
 }
 
-func fixService(namespace, name string, port int32) v1.Service {
+func fixService(namespace, name string) v1.Service {
 	return v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        name,
@@ -225,8 +232,8 @@ func fixService(namespace, name string, port int32) v1.Service {
 		},
 		Spec: v1.ServiceSpec{
 			Ports: []v1.ServicePort{{
-				Port:       80,
-				TargetPort: intstr.IntOrString{IntVal: port},
+				Port:       svcPort,
+				TargetPort: intstr.IntOrString{IntVal: podPort},
 				Protocol:   v1.ProtocolTCP,
 				Name:       "http",
 			}},

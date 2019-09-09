@@ -46,7 +46,7 @@ func TestClusterDocsTopicsQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Log("Setup test service")
-	host, err := mockice.Start(cmsCli, MockiceNamespace, MockiceSvcName, 8080)
+	host, err := mockice.Start(cmsCli, MockiceNamespace, MockiceSvcName)
 	require.NoError(t, err)
 	defer mockice.Stop(cmsCli, MockiceNamespace, MockiceSvcName)
 
@@ -175,7 +175,7 @@ func checkClusterDocsTopic(t *testing.T, expected, actual shared.ClusterDocsTopi
 	assert.Equal(t, expected.Description, actual.Description)
 
 	// Assets
-	assertClusterAssetsExistsAndEqual(t, fixture.ClusterAsset("markdown"), actual.Assets)
+	assertClusterAssetsExistsAndEqual(t, fixture.ClusterAsset(SourceType), actual.Assets)
 }
 
 func checkClusterAsset(t *testing.T, expected, actual shared.ClusterAsset) {
@@ -267,11 +267,11 @@ func fixCommonClusterDocsTopicSpec(host string) v1alpha1.CommonDocsTopicSpec {
 		Description: fixture.DocsTopicDescription,
 		Sources: []v1alpha1.Source{
 			{
-				Type:       "markdown",
-				Name:       "markdown",
+				Type:       SourceType,
+				Name:       SourceType,
 				Parameters: &runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)},
 				Mode:       v1alpha1.DocsTopicSingle,
-				URL:        fmt.Sprintf("http://%s/README.md", host),
+				URL:        mockice.ResourceURL(host),
 			},
 		},
 	}

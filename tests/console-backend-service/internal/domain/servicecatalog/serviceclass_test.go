@@ -39,7 +39,7 @@ func TestServiceClassesQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Log("Setup test service")
-	host, err := mockice.Start(cmsCli, TestNamespace, MockiceSvcName, 8080)
+	host, err := mockice.Start(cmsCli, TestNamespace, MockiceSvcName)
 	require.NoError(t, err)
 	defer mockice.Stop(cmsCli, TestNamespace, MockiceSvcName)
 
@@ -262,7 +262,7 @@ func fixCommonDocsTopicSpec(host string) v1alpha1.CommonDocsTopicSpec {
 				Type: "markdown",
 				Name: "markdown",
 				Mode: v1alpha1.DocsTopicSingle,
-				URL:  fmt.Sprintf("http://%s/README.md", host),
+				URL:  mockice.ResourceURL(host),
 			},
 		},
 	}
