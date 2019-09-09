@@ -61,8 +61,8 @@ global:
     dir: develop/
     version: 655e891b
   console_backend_service_test:
-    dir: develop/
-    version: 971b3bca
+    dir: pr/
+    version: 'PR-5565'
   cluster_users_integration_tests:
     dir: pr/
     version: PR-5277
