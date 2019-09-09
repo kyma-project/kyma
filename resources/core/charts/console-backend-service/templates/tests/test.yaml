@@ -29,6 +29,8 @@ spec:
         - name: tests
           image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.console_backend_service_test.dir }}console-backend-service-test:{{ .Values.global.console_backend_service_test.version }}
           env:
+            - name: MOCKICE_IMAGE
+              value: hudymi/mockice:0.1.1
             - name: DOMAIN
               value: "{{ .Values.global.ingress.domainName }}"
             - name: GRAPHQL_ENDPOINT
