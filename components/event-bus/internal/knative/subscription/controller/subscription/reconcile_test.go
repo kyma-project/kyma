@@ -7,19 +7,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
 	"knative.dev/pkg/apis"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	//eventingclientset "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	controllertesting "github.com/knative/eventing/pkg/reconciler/testing"
 
-	//duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
+	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 
 	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	eventingV1Alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
@@ -75,6 +74,7 @@ func init() {
 	// Add types to scheme
 	_ = eventingv1alpha1.AddToScheme(scheme.Scheme)
 	_ = evapisv1alpha1.AddToScheme(scheme.Scheme)
+	_ = messagingV1Alpha1.AddToScheme(scheme.Scheme)
 }
 
 func TestInjectClient(t *testing.T) {
@@ -387,6 +387,7 @@ func (k *MockKnativeLib) UpdateSubscription(sub *evapisv1alpha1.Subscription) (*
 func (k *MockKnativeLib) SendMessage(channel *messagingV1Alpha1.Channel, headers *map[string][]string, message *string) error {
 	return nil
 }
+
 // InjectClient injects a client, useful for running tests.
 func (k *MockKnativeLib) InjectClient(evClient eventingV1Alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1.MessagingV1alpha1Interface) error {
 	return nil
@@ -395,11 +396,25 @@ func (k *MockKnativeLib) InjectClient(evClient eventingV1Alpha1.EventingV1alpha1
 //  make channels
 func makeKnChannel(namespace string, name string, labels *map[string]string) *messagingV1Alpha1.Channel {
 	return &messagingV1Alpha1.Channel{
-		TypeMeta: metav1.TypeMeta{},
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: messagingV1Alpha1.SchemeGroupVersion.String(),
+			Kind:       "Channel",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
 			Labels:    *labels,
+			UID:       chanUID,
+		},
+		Status: messagingV1Alpha1.ChannelStatus{
+			Status: duckv1beta1.Status{
+				Conditions: duckv1beta1.Conditions{
+					apis.Condition{
+						Type:   apis.ConditionReady,
+						Status: corev1.ConditionTrue,
+					},
+				},
+			},
 		},
 	}
 	//c := &messagingV1Alpha1.Channel{

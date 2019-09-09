@@ -307,7 +307,10 @@ func resendMessage(httpClient *http.Client, channel *messagingV1Alpha1.Channel, 
 
 func makeChannel(name string, namespace string, labels *map[string]string) *messagingV1Alpha1.Channel {
 	return &messagingV1Alpha1.Channel{
-		TypeMeta: metav1.TypeMeta{},
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: messagingV1Alpha1.SchemeGroupVersion.String(),
+			Kind:       "Channel",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
