@@ -22,6 +22,7 @@ endif
 # Run tests
 test: generate fmt vet symlinks
 	go test -v ./pkg/... ./cmd/... -coverprofile cover.out
+	@echo "Total test coverage: $$(go tool cover -func=cover.out | grep total | awk '{print $$3}')"
 
 symlinks:
 	-rm config/crds/300*.yaml
@@ -46,6 +47,7 @@ vet:
 
 qt:
 	go test -v ./pkg/... ./cmd/... -coverprofile cover.out
+	@echo "Total test coverage: $$(go tool cover -func=cover.out | grep total | awk '{print $$3}')"
 
 # Build manager binary
 manager: generate fmt vet
