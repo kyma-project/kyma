@@ -88,18 +88,11 @@ func givenNewTestNamespaceSuite(t *testing.T) testNamespaceSuite {
 	return suite
 }
 
+//create
 func (s testNamespaceSuite) whenNamespaceIsCreated() (createNamespaceResponse, error) {
 	var rsp createNamespaceResponse
 	err := s.gqlClient.Do(s.fixNamespaceCreate(), &rsp)
 	return rsp, err
-}
-
-func (s testNamespaceSuite) thenThereIsNoError(t *testing.T, err error) {
-	require.NoError(t, err)
-}
-
-func (s testNamespaceSuite) thenThereIsNoGqlError(t *testing.T, gqlErr GqlErrors) {
-	require.Empty(t, gqlErr.Errors)
 }
 
 func (s testNamespaceSuite) thenCreateNamespaceResponseIsAsExpected(t *testing.T, rsp createNamespaceResponse) {
@@ -113,13 +106,7 @@ func (s testNamespaceSuite) thenNamespaceExistsInK8s(t *testing.T) {
 	assert.Equal(t, ns.Labels, s.labels)
 }
 
-func (s testNamespaceSuite) thenNamespaceAfterUpdateExistsInK8s(t *testing.T) {
-	ns, err := s.k8sClient.Namespaces().Get(s.namespaceName, metav1.GetOptions{})
-	require.NoError(t, err)
-	assert.Equal(t, ns.Name, s.namespaceName)
-	assert.Equal(t, ns.Labels, s.updatedLabels)
-}
-
+//find
 func (s testNamespaceSuite) whenNamespaceIsQueried() (namespaceResponse, error) {
 	var rsp namespaceResponse
 	err := s.gqlClient.Do(s.fixNamespaceQuery(), &rsp)
@@ -130,6 +117,7 @@ func (s testNamespaceSuite) thenNamespaceResponseIsAsExpected(t *testing.T, rsp 
 	assert.Equal(t, s.fixNamespaceResponse(), rsp)
 }
 
+//list
 func (s testNamespaceSuite) whenNamespacesAreQueried() (namespacesResponse, error) {
 	var rsp namespacesResponse
 	err := s.gqlClient.Do(s.fixNamespacesQuery(), &rsp)
@@ -140,6 +128,7 @@ func (s testNamespaceSuite) thenNamespacesResponseIsAsExpected(t *testing.T, nam
 	assert.Contains(t, namespacesList.Namespaces, namespace.Namespace)
 }
 
+//update
 func (s testNamespaceSuite) whenNamespaceIsUpdated() (updateNamespaceResponse, error) {
 	var rsp updateNamespaceResponse
 	err := s.gqlClient.Do(s.fixNamespaceUpdate(), &rsp)
@@ -150,6 +139,14 @@ func (s testNamespaceSuite) thenUpdateNamespaceResponseIsAsExpected(t *testing.T
 	assert.Equal(t, s.fixUpdateNamespaceResponse(), rsp)
 }
 
+func (s testNamespaceSuite) thenNamespaceAfterUpdateExistsInK8s(t *testing.T) {
+	ns, err := s.k8sClient.Namespaces().Get(s.namespaceName, metav1.GetOptions{})
+	require.NoError(t, err)
+	assert.Equal(t, ns.Name, s.namespaceName)
+	assert.Equal(t, ns.Labels, s.updatedLabels)
+}
+
+//delete
 func (s testNamespaceSuite) whenNamespaceIsDeleted() (deleteNamespaceResponse, error) {
 	var rsp deleteNamespaceResponse
 	err := s.gqlClient.Do(s.fixNamespaceDelete(), &rsp)
@@ -179,6 +176,16 @@ func (s testNamespaceSuite) thenNamespaceIsRemovedFromK8sEventually(t *testing.T
 	require.NoError(t, err)
 }
 
+//errors
+func (s testNamespaceSuite) thenThereIsNoError(t *testing.T, err error) {
+	require.NoError(t, err)
+}
+
+func (s testNamespaceSuite) thenThereIsNoGqlError(t *testing.T, gqlErr GqlErrors) {
+	require.Empty(t, gqlErr.Errors)
+}
+
+//helpers
 func (s testNamespaceSuite) fixFullNamespaceObj() namespaceQueryObj {
 	return namespaceQueryObj{
 		Name:              s.namespaceName,
@@ -273,6 +280,11 @@ func (s testNamespaceSuite) fixNamespaceDelete() *graphql.Request {
 	return req
 }
 
+func (e namespaceTerminatingError) Error() string {
+	return fmt.Sprintf("Namespace is still terminating. Phase: %s", e.phase)
+}
+
+//types
 type namespaceMutationObj struct {
 	Name   string `json:"name"`
 	Labels labels `json:"labels"`
@@ -315,8 +327,4 @@ type deleteNamespaceResponse struct {
 
 type namespaceTerminatingError struct {
 	phase v1.NamespacePhase
-}
-
-func (e namespaceTerminatingError) Error() string {
-	return fmt.Sprintf("Namespace is still terminating. Phase: %s", e.phase)
 }
