@@ -72,7 +72,7 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 	// get the knative channel
 	channel, err := knativeLib.GetChannel(*channelName, *namespace)
 	if err != nil {
-		log.Printf("an error occured while trying to get the knative channel '%v' in namespace '%v'\n" +
+		log.Printf("an error occured while trying to get the knative channel '%v' in namespace '%v'\n"+
 			"error: '%v':", *channelName, *namespace, err)
 		log.Printf("cannot find the knative channel '%v' in namespace '%v'", *channelName, *namespace)
 		log.Println("incrementing ignored messages counter")

@@ -3,13 +3,14 @@ package util
 import (
 	"fmt"
 	"io/ioutil"
-	"knative.dev/pkg/apis/duck/v1alpha1"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
 	"time"
+
+	"knative.dev/pkg/apis/duck/v1alpha1"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -26,8 +27,8 @@ import (
 )
 
 const (
-	channelName      = "test-channel"
-	testNS           = "test-namespace"
+	channelName = "test-channel"
+	testNS      = "test-namespace"
 	//provisioner      = "test-provisioner"
 	subscriptionName = "test-subscription"
 )
@@ -77,7 +78,7 @@ func Test_CreateChannel(t *testing.T) {
 	})
 
 	k := &KnativeLib{
-		evClient: client.EventingV1alpha1(),
+		evClient:         client.EventingV1alpha1(),
 		messagingChannel: client.MessagingV1alpha1(),
 	}
 	ch, err := k.CreateChannel(channelName, testNS, &labels, 10*time.Second)
@@ -102,7 +103,7 @@ func Test_CreateChannelWithError(t *testing.T) {
 	})
 
 	k := &KnativeLib{
-		evClient: client.EventingV1alpha1(),
+		evClient:         client.EventingV1alpha1(),
 		messagingChannel: client.MessagingV1alpha1(),
 	}
 	ch, err := k.CreateChannel(channelName, testNS, &labels, 10*time.Second)
@@ -132,7 +133,7 @@ func Test_CreateChannelTimeout(t *testing.T) {
 	})
 
 	k := &KnativeLib{
-		evClient: client.EventingV1alpha1(),
+		evClient:         client.EventingV1alpha1(),
 		messagingChannel: client.MessagingV1alpha1(),
 	}
 	_, err := k.CreateChannel(channelName, testNS, &labels, 1*time.Second)
@@ -198,7 +199,7 @@ func Test_DeleteInexistentChannel(t *testing.T) {
 	evClient := evclientsetfake.NewSimpleClientset().EventingV1alpha1()
 	msgClient := evclientsetfake.NewSimpleClientset().MessagingV1alpha1()
 	k := &KnativeLib{}
-	_ =  k.InjectClient(evClient, msgClient)
+	_ = k.InjectClient(evClient, msgClient)
 	err := k.DeleteChannel(channelName, testNS)
 	assert.True(t, k8serrors.IsNotFound(err))
 }
