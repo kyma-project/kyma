@@ -1,5 +1,6 @@
 global:
-  connector:
-    secrets:
-      rootCA:
+  compass:
+    mtls:
+      secret:
         name: application-connector-certs
+      host: compass-gateway-mtls
