@@ -107,7 +107,7 @@ func TestPod(t *testing.T) {
 	defer subscription.Close()
 
 	t.Log("Creating pod...")
-	_, err = k8sClient.Pods(podNamespace).Create(fixPod(podName, podNamespace))
+	_, err = k8sClient.Pods(podNamespace).Create(FixPod(podName, podNamespace))
 	require.NoError(t, err)
 
 	t.Log("Retrieving pod...")
@@ -198,7 +198,7 @@ func TestPod(t *testing.T) {
 	AuthSuite.Run(t, ops)
 }
 
-func fixPod(name, namespace string) *v1.Pod {
+func FixPod(name, namespace string) *v1.Pod {
 	return &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,

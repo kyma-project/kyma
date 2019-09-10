@@ -54,6 +54,11 @@ func TestNamespace(t *testing.T) {
 	suite.thenNamespaceAfterUpdateExistsInK8s(t)
 	suite.thenUpdateEventIsSent(t, subscription)
 
+	t.Log("Adding pod to namespace...")
+	err = suite.whenPodIsAdded(t)
+	suite.thenThereIsNoError(t, err)
+	suite.thenUpdateEventIsSent(t, subscription)
+
 	t.Log("Deleting namespace...")
 	deleteRsp, err := suite.whenNamespaceIsDeleted()
 	suite.thenThereIsNoError(t, err)
@@ -119,7 +124,10 @@ func (s testNamespaceSuite) thenNamespaceExistsInK8s(t *testing.T) {
 
 func (s testNamespaceSuite) thenAddEventIsSent(t *testing.T, subscription *graphql.Subscription) {
 	expectedEvent := fixNamespaceEvent("ADD", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.labels})
-	require.NoError(t, checkNamespaceEvent(expectedEvent, subscription))
+	event, err := readNamespaceEvent(subscription)
+	require.NoError(t, err)
+	assert.Equal(t, expectedEvent.Type, event.Type)
+	assert.Equal(t, expectedEvent.Namespace.Name, event.Namespace.Name)
 }
 
 //find
@@ -164,7 +172,17 @@ func (s testNamespaceSuite) thenNamespaceAfterUpdateExistsInK8s(t *testing.T) {
 
 func (s testNamespaceSuite) thenUpdateEventIsSent(t *testing.T, subscription *graphql.Subscription) {
 	expectedEvent := fixNamespaceEvent("UPDATE", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.updatedLabels})
-	require.NoError(t, checkNamespaceEvent(expectedEvent, subscription))
+	event, err := readNamespaceEvent(subscription)
+	require.NoError(t, err)
+	assert.Equal(t, expectedEvent.Type, event.Type)
+	assert.Equal(t, expectedEvent.Namespace.Name, event.Namespace.Name)
+}
+
+func (s testNamespaceSuite) whenPodIsAdded(t *testing.T) error {
+	k8sClient, _, err := client.NewClientWithConfig()
+	require.NoError(t, err)
+	_, err = k8sClient.Pods(s.namespaceName).Create(FixPod("test-pod", s.namespaceName))
+	return err
 }
 
 //delete
@@ -241,18 +259,6 @@ func readNamespaceEvent(subscription *graphql.Subscription) (NamespaceEventObj, 
 	var namespaceEvent Response
 	err := subscription.Next(&namespaceEvent, tester.DefaultSubscriptionTimeout)
 	return namespaceEvent.NamespaceEvent, err
-}
-
-func checkNamespaceEvent(expected NamespaceEventObj, subscription *graphql.Subscription) error {
-	for {
-		event, err := readNamespaceEvent(subscription)
-		if err != nil {
-			return err
-		}
-		if expected.Type == event.Type && expected.Namespace.Name == event.Namespace.Name {
-			return nil
-		}
-	}
 }
 
 //queries
