@@ -6,15 +6,16 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
-
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/mockice"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/resource"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -37,10 +38,15 @@ func TestServiceClassesQueries(t *testing.T) {
 	cmsCli, _, err := client.NewDynamicClientWithConfig()
 	require.NoError(t, err)
 
+	t.Log("Setup test service")
+	host, err := mockice.Start(cmsCli, TestNamespace, MockiceSvcName)
+	require.NoError(t, err)
+	defer mockice.Stop(cmsCli, TestNamespace, MockiceSvcName)
+
 	docsTopicClient := resource.NewDocsTopic(cmsCli, expectedResource.Namespace, t.Logf)
 
 	t.Log(fmt.Sprintf("Create docsTopic %s", expectedResource.Name))
-	err = docsTopicClient.Create(fixDocsTopicMeta(expectedResource.Name), fixCommonDocsTopicSpec())
+	err = docsTopicClient.Create(fixDocsTopicMeta(expectedResource.Name), fixCommonDocsTopicSpec(host))
 	require.NoError(t, err)
 
 	t.Log(fmt.Sprintf("Wait for docsTopic %s Ready", expectedResource.Name))
@@ -247,16 +253,16 @@ func fixDocsTopicMeta(name string) metav1.ObjectMeta {
 	}
 }
 
-func fixCommonDocsTopicSpec() v1alpha1.CommonDocsTopicSpec {
+func fixCommonDocsTopicSpec(host string) v1alpha1.CommonDocsTopicSpec {
 	return v1alpha1.CommonDocsTopicSpec{
 		DisplayName: "Docs Topic Sample",
 		Description: "Docs Topic Description",
 		Sources: []v1alpha1.Source{
 			{
-				Type: "openapi",
-				Name: "openapi",
+				Type: "markdown",
+				Name: "markdown",
 				Mode: v1alpha1.DocsTopicSingle,
-				URL:  "https://petstore.swagger.io/v2/swagger.json",
+				URL:  mockice.ResourceURL(host),
 			},
 		},
 	}

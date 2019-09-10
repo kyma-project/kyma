@@ -6,6 +6,7 @@ metadata:
   labels:
     kyma-project.io/installation: ""
     installer: overrides
+    component: backup
 type: Opaque
 data:
   configuration.provider: "__CLOUD_PROVIDER__"
