@@ -312,12 +312,20 @@ func (r *mutationResolver) DeleteAddonsConfiguration(ctx context.Context, name s
 	return r.sca.Resolver.DeleteAddonsConfiguration(ctx, name, namespace)
 }
 
-func (r *mutationResolver) AddAddonsConfigurationURLs(ctx context.Context, name string, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string) (*gqlschema.AddonsConfiguration, error) {
-	return r.sca.Resolver.AddAddonsConfigurationURLs(ctx, name, namespace, repositories, urls)
+func (r *mutationResolver) AddAddonsConfigurationURLs(ctx context.Context, name string, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.AddAddonsConfigurationURLs(ctx, name, namespace, urls)
 }
 
-func (r *mutationResolver) RemoveAddonsConfigurationURLs(ctx context.Context, name string, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string) (*gqlschema.AddonsConfiguration, error) {
-	return r.sca.Resolver.RemoveAddonsConfigurationURLs(ctx, name, namespace, repositories, urls)
+func (r *mutationResolver) RemoveAddonsConfigurationURLs(ctx context.Context, name string, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.RemoveAddonsConfigurationURLs(ctx, name, namespace, urls)
+}
+
+func (r *mutationResolver) AddAddonsConfigurationRepository(ctx context.Context, name string, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.AddAddonsConfigurationRepositories(ctx, name, namespace, repositories)
+}
+
+func (r *mutationResolver) RemoveAddonsConfigurationRepository(ctx context.Context, name string, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.RemoveAddonsConfigurationRepositories(ctx, name, namespace, urls)
 }
 
 func (r *mutationResolver) ResyncAddonsConfiguration(ctx context.Context, name string, namespace string) (*gqlschema.AddonsConfiguration, error) {
@@ -336,12 +344,20 @@ func (r *mutationResolver) DeleteClusterAddonsConfiguration(ctx context.Context,
 	return r.sca.Resolver.DeleteClusterAddonsConfiguration(ctx, name)
 }
 
-func (r *mutationResolver) AddClusterAddonsConfigurationURLs(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string) (*gqlschema.AddonsConfiguration, error) {
-	return r.sca.Resolver.AddClusterAddonsConfigurationURLs(ctx, name, repositories, urls)
+func (r *mutationResolver) AddClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.AddClusterAddonsConfigurationURLs(ctx, name, urls)
 }
 
-func (r *mutationResolver) RemoveClusterAddonsConfigurationURLs(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string) (*gqlschema.AddonsConfiguration, error) {
-	return r.sca.Resolver.RemoveClusterAddonsConfigurationURLs(ctx, name, repositories, urls)
+func (r *mutationResolver) RemoveClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.RemoveClusterAddonsConfigurationURLs(ctx, name, urls)
+}
+
+func (r *mutationResolver) AddClusterAddonsConfigurationRepository(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.AddClusterAddonsConfigurationRepositories(ctx, name, repositories)
+}
+
+func (r *mutationResolver) RemoveClusterAddonsConfigurationRepository(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.RemoveClusterAddonsConfigurationRepositories(ctx, name, urls)
 }
 
 func (r *mutationResolver) ResyncClusterAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error) {

@@ -60,7 +60,7 @@ func (s *clusterAddonsConfigurationService) List(pagingParams pager.PagingParams
 	return addons, nil
 }
 
-func (s *clusterAddonsConfigurationService) AddRepos(name string, repos []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.ClusterAddonsConfiguration, error) {
+func (s *clusterAddonsConfigurationService) AddRepos(name string, repository []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.ClusterAddonsConfiguration, error) {
 	var addon *v1alpha1.ClusterAddonsConfiguration
 	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		obj, err := s.addonsCfgClient.Get(name, metav1.GetOptions{})
@@ -72,7 +72,7 @@ func (s *clusterAddonsConfigurationService) AddRepos(name string, repos []gqlsch
 		if err != nil {
 			return err
 		}
-		addon.Spec.Repositories = append(addon.Spec.Repositories, toSpecRepositories(repos)...)
+		addon.Spec.Repositories = append(addon.Spec.Repositories, toSpecRepositories(repository)...)
 
 		obj, err = s.extractor.ToUnstructured(addon)
 		if err != nil {
@@ -88,7 +88,7 @@ func (s *clusterAddonsConfigurationService) AddRepos(name string, repos []gqlsch
 	return addon, nil
 }
 
-func (s *clusterAddonsConfigurationService) RemoveRepos(name string, repos []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.ClusterAddonsConfiguration, error) {
+func (s *clusterAddonsConfigurationService) RemoveRepos(name string, reposToRemove []string) (*v1alpha1.ClusterAddonsConfiguration, error) {
 	var addon *v1alpha1.ClusterAddonsConfiguration
 	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		obj, err := s.addonsCfgClient.Get(name, metav1.GetOptions{})
@@ -100,7 +100,7 @@ func (s *clusterAddonsConfigurationService) RemoveRepos(name string, repos []gql
 		if err != nil {
 			return err
 		}
-		resultRepos := filterOutRepositories(addon.Spec.Repositories, repos)
+		resultRepos := filterOutRepositories(addon.Spec.Repositories, reposToRemove)
 		addon.Spec.Repositories = resultRepos
 
 		obj, err = s.extractor.ToUnstructured(addon)
@@ -117,7 +117,7 @@ func (s *clusterAddonsConfigurationService) RemoveRepos(name string, repos []gql
 	return addon, nil
 }
 
-func (s *clusterAddonsConfigurationService) Create(name string, repos []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
+func (s *clusterAddonsConfigurationService) Create(name string, repository []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
 	addon := &v1alpha1.ClusterAddonsConfiguration{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterAddonsConfiguration",
@@ -129,7 +129,7 @@ func (s *clusterAddonsConfigurationService) Create(name string, repos []gqlschem
 		},
 		Spec: v1alpha1.ClusterAddonsConfigurationSpec{
 			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
-				Repositories: toSpecRepositories(repos),
+				Repositories: toSpecRepositories(repository),
 			},
 		},
 	}
@@ -146,12 +146,12 @@ func (s *clusterAddonsConfigurationService) Create(name string, repos []gqlschem
 	return addon, nil
 }
 
-func (s *clusterAddonsConfigurationService) Update(name string, repos []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
+func (s *clusterAddonsConfigurationService) Update(name string, repository []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
 	addon, err := s.getClusterAddonsConfiguration(name)
 	if err != nil {
 		return nil, err
 	}
-	addon.Spec.Repositories = toSpecRepositories(repos)
+	addon.Spec.Repositories = toSpecRepositories(repository)
 	addon.Labels = toMapLabels(labels)
 
 	obj, err := s.extractor.ToUnstructured(addon)

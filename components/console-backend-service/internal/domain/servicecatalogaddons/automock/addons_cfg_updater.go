@@ -11,13 +11,13 @@ type addonsCfgUpdater struct {
 	mock.Mock
 }
 
-// AddRepos provides a mock function with given fields: name, namespace, repos
-func (_m *addonsCfgUpdater) AddRepos(name string, namespace string, repos []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.AddonsConfiguration, error) {
-	ret := _m.Called(name, namespace, repos)
+// AddRepos provides a mock function with given fields: name, namespace, repository
+func (_m *addonsCfgUpdater) AddRepos(name string, namespace string, repository []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.AddonsConfiguration, error) {
+	ret := _m.Called(name, namespace, repository)
 
 	var r0 *v1alpha1.AddonsConfiguration
 	if rf, ok := ret.Get(0).(func(string, string, []gqlschema.AddonsConfigurationRepositoryInput) *v1alpha1.AddonsConfiguration); ok {
-		r0 = rf(name, namespace, repos)
+		r0 = rf(name, namespace, repository)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha1.AddonsConfiguration)
@@ -26,7 +26,7 @@ func (_m *addonsCfgUpdater) AddRepos(name string, namespace string, repos []gqls
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string, []gqlschema.AddonsConfigurationRepositoryInput) error); ok {
-		r1 = rf(name, namespace, repos)
+		r1 = rf(name, namespace, repository)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -34,13 +34,13 @@ func (_m *addonsCfgUpdater) AddRepos(name string, namespace string, repos []gqls
 	return r0, r1
 }
 
-// RemoveRepos provides a mock function with given fields: name, namespace, repos
-func (_m *addonsCfgUpdater) RemoveRepos(name string, namespace string, repos []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.AddonsConfiguration, error) {
-	ret := _m.Called(name, namespace, repos)
+// RemoveRepos provides a mock function with given fields: name, namespace, reposToRemove
+func (_m *addonsCfgUpdater) RemoveRepos(name string, namespace string, reposToRemove []string) (*v1alpha1.AddonsConfiguration, error) {
+	ret := _m.Called(name, namespace, reposToRemove)
 
 	var r0 *v1alpha1.AddonsConfiguration
-	if rf, ok := ret.Get(0).(func(string, string, []gqlschema.AddonsConfigurationRepositoryInput) *v1alpha1.AddonsConfiguration); ok {
-		r0 = rf(name, namespace, repos)
+	if rf, ok := ret.Get(0).(func(string, string, []string) *v1alpha1.AddonsConfiguration); ok {
+		r0 = rf(name, namespace, reposToRemove)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha1.AddonsConfiguration)
@@ -48,8 +48,8 @@ func (_m *addonsCfgUpdater) RemoveRepos(name string, namespace string, repos []g
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, []gqlschema.AddonsConfigurationRepositoryInput) error); ok {
-		r1 = rf(name, namespace, repos)
+	if rf, ok := ret.Get(1).(func(string, string, []string) error); ok {
+		r1 = rf(name, namespace, reposToRemove)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -11,13 +11,13 @@ type addonsCfgMutations struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: name, namespace, repos, labels
-func (_m *addonsCfgMutations) Create(name string, namespace string, repos []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error) {
-	ret := _m.Called(name, namespace, repos, labels)
+// Create provides a mock function with given fields: name, namespace, repository, labels
+func (_m *addonsCfgMutations) Create(name string, namespace string, repository []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error) {
+	ret := _m.Called(name, namespace, repository, labels)
 
 	var r0 *v1alpha1.AddonsConfiguration
 	if rf, ok := ret.Get(0).(func(string, string, []gqlschema.AddonsConfigurationRepositoryInput, *gqlschema.Labels) *v1alpha1.AddonsConfiguration); ok {
-		r0 = rf(name, namespace, repos, labels)
+		r0 = rf(name, namespace, repository, labels)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha1.AddonsConfiguration)
@@ -26,7 +26,7 @@ func (_m *addonsCfgMutations) Create(name string, namespace string, repos []gqls
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string, []gqlschema.AddonsConfigurationRepositoryInput, *gqlschema.Labels) error); ok {
-		r1 = rf(name, namespace, repos, labels)
+		r1 = rf(name, namespace, repository, labels)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -57,13 +57,13 @@ func (_m *addonsCfgMutations) Delete(name string, namespace string) (*v1alpha1.A
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: name, namespace, repos, labels
-func (_m *addonsCfgMutations) Update(name string, namespace string, repos []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error) {
-	ret := _m.Called(name, namespace, repos, labels)
+// Update provides a mock function with given fields: name, namespace, repository, labels
+func (_m *addonsCfgMutations) Update(name string, namespace string, repository []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error) {
+	ret := _m.Called(name, namespace, repository, labels)
 
 	var r0 *v1alpha1.AddonsConfiguration
 	if rf, ok := ret.Get(0).(func(string, string, []gqlschema.AddonsConfigurationRepositoryInput, *gqlschema.Labels) *v1alpha1.AddonsConfiguration); ok {
-		r0 = rf(name, namespace, repos, labels)
+		r0 = rf(name, namespace, repository, labels)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha1.AddonsConfiguration)
@@ -72,7 +72,7 @@ func (_m *addonsCfgMutations) Update(name string, namespace string, repos []gqls
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string, []gqlschema.AddonsConfigurationRepositoryInput, *gqlschema.Labels) error); ok {
-		r1 = rf(name, namespace, repos, labels)
+		r1 = rf(name, namespace, repository, labels)
 	} else {
 		r1 = ret.Error(1)
 	}

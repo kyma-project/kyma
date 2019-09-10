@@ -15,8 +15,8 @@ func NewResolver(err error) *Resolver {
 	return &Resolver{err: err}
 }
 
-// AddAddonsConfigurationURLs provides a failing mock function with given fields: ctx, name, namespace, repositories, urls
-func (_m *Resolver) AddAddonsConfigurationURLs(ctx context.Context, name string, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string) (*gqlschema.AddonsConfiguration, error) {
+// AddAddonsConfigurationRepositories provides a failing mock function with given fields: ctx, name, namespace, repositories
+func (_m *Resolver) AddAddonsConfigurationRepositories(ctx context.Context, name string, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error) {
 	var r0 *gqlschema.AddonsConfiguration
 	var r1 error
 	r1 = _m.err
@@ -24,8 +24,26 @@ func (_m *Resolver) AddAddonsConfigurationURLs(ctx context.Context, name string,
 	return r0, r1
 }
 
-// AddClusterAddonsConfigurationURLs provides a failing mock function with given fields: ctx, name, repositories, urls
-func (_m *Resolver) AddClusterAddonsConfigurationURLs(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string) (*gqlschema.AddonsConfiguration, error) {
+// AddAddonsConfigurationURLs provides a failing mock function with given fields: ctx, name, namespace, urls
+func (_m *Resolver) AddAddonsConfigurationURLs(ctx context.Context, name string, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// AddClusterAddonsConfigurationRepositories provides a failing mock function with given fields: ctx, name, repositories
+func (_m *Resolver) AddClusterAddonsConfigurationRepositories(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// AddClusterAddonsConfigurationURLs provides a failing mock function with given fields: ctx, name, urls
+func (_m *Resolver) AddClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
 	var r0 *gqlschema.AddonsConfiguration
 	var r1 error
 	r1 = _m.err
@@ -141,8 +159,8 @@ func (_m *Resolver) ListUsageKinds(ctx context.Context, first *int, offset *int)
 	return r0, r1
 }
 
-// RemoveAddonsConfigurationURLs provides a failing mock function with given fields: ctx, name, namespace, repositories, urls
-func (_m *Resolver) RemoveAddonsConfigurationURLs(ctx context.Context, name string, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string) (*gqlschema.AddonsConfiguration, error) {
+// RemoveAddonsConfigurationRepositories provides a failing mock function with given fields: ctx, name, namespace, urls
+func (_m *Resolver) RemoveAddonsConfigurationRepositories(ctx context.Context, name string, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error) {
 	var r0 *gqlschema.AddonsConfiguration
 	var r1 error
 	r1 = _m.err
@@ -150,8 +168,26 @@ func (_m *Resolver) RemoveAddonsConfigurationURLs(ctx context.Context, name stri
 	return r0, r1
 }
 
-// RemoveClusterAddonsConfigurationURLs provides a failing mock function with given fields: ctx, name, repositories, urls
-func (_m *Resolver) RemoveClusterAddonsConfigurationURLs(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string) (*gqlschema.AddonsConfiguration, error) {
+// RemoveAddonsConfigurationURLs provides a failing mock function with given fields: ctx, name, namespace, urls
+func (_m *Resolver) RemoveAddonsConfigurationURLs(ctx context.Context, name string, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// RemoveClusterAddonsConfigurationRepositories provides a failing mock function with given fields: ctx, name, urls
+func (_m *Resolver) RemoveClusterAddonsConfigurationRepositories(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// RemoveClusterAddonsConfigurationURLs provides a failing mock function with given fields: ctx, name, urls
+func (_m *Resolver) RemoveClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
 	var r0 *gqlschema.AddonsConfiguration
 	var r1 error
 	r1 = _m.err

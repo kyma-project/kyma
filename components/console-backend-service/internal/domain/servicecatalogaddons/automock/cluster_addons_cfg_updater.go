@@ -11,13 +11,13 @@ type clusterAddonsCfgUpdater struct {
 	mock.Mock
 }
 
-// AddRepos provides a mock function with given fields: name, url
-func (_m *clusterAddonsCfgUpdater) AddRepos(name string, url []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.ClusterAddonsConfiguration, error) {
-	ret := _m.Called(name, url)
+// AddRepos provides a mock function with given fields: name, repository
+func (_m *clusterAddonsCfgUpdater) AddRepos(name string, repository []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.ClusterAddonsConfiguration, error) {
+	ret := _m.Called(name, repository)
 
 	var r0 *v1alpha1.ClusterAddonsConfiguration
 	if rf, ok := ret.Get(0).(func(string, []gqlschema.AddonsConfigurationRepositoryInput) *v1alpha1.ClusterAddonsConfiguration); ok {
-		r0 = rf(name, url)
+		r0 = rf(name, repository)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha1.ClusterAddonsConfiguration)
@@ -26,7 +26,7 @@ func (_m *clusterAddonsCfgUpdater) AddRepos(name string, url []gqlschema.AddonsC
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, []gqlschema.AddonsConfigurationRepositoryInput) error); ok {
-		r1 = rf(name, url)
+		r1 = rf(name, repository)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -34,13 +34,13 @@ func (_m *clusterAddonsCfgUpdater) AddRepos(name string, url []gqlschema.AddonsC
 	return r0, r1
 }
 
-// RemoveRepos provides a mock function with given fields: name, urls
-func (_m *clusterAddonsCfgUpdater) RemoveRepos(name string, urls []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.ClusterAddonsConfiguration, error) {
-	ret := _m.Called(name, urls)
+// RemoveRepos provides a mock function with given fields: name, reposToRemove
+func (_m *clusterAddonsCfgUpdater) RemoveRepos(name string, reposToRemove []string) (*v1alpha1.ClusterAddonsConfiguration, error) {
+	ret := _m.Called(name, reposToRemove)
 
 	var r0 *v1alpha1.ClusterAddonsConfiguration
-	if rf, ok := ret.Get(0).(func(string, []gqlschema.AddonsConfigurationRepositoryInput) *v1alpha1.ClusterAddonsConfiguration); ok {
-		r0 = rf(name, urls)
+	if rf, ok := ret.Get(0).(func(string, []string) *v1alpha1.ClusterAddonsConfiguration); ok {
+		r0 = rf(name, reposToRemove)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha1.ClusterAddonsConfiguration)
@@ -48,8 +48,8 @@ func (_m *clusterAddonsCfgUpdater) RemoveRepos(name string, urls []gqlschema.Add
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, []gqlschema.AddonsConfigurationRepositoryInput) error); ok {
-		r1 = rf(name, urls)
+	if rf, ok := ret.Get(1).(func(string, []string) error); ok {
+		r1 = rf(name, reposToRemove)
 	} else {
 		r1 = ret.Error(1)
 	}

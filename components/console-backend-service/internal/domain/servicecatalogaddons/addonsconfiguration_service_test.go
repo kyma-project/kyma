@@ -95,7 +95,7 @@ func TestAddonsConfigurationService_DeleteRepos(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		name         string
 		repos        []v1alpha1.SpecRepository
-		urlsToRemove []gqlschema.AddonsConfigurationRepositoryInput
+		urlsToRemove []string
 	}{
 		"delete URL": {
 			name: "test",
@@ -103,11 +103,7 @@ func TestAddonsConfigurationService_DeleteRepos(t *testing.T) {
 				{URL: "www.already.present.url"},
 				{URL: "www.next"},
 			},
-			urlsToRemove: []gqlschema.AddonsConfigurationRepositoryInput{
-				{
-					URL: "www.next",
-				},
-			},
+			urlsToRemove: []string{"www.next"},
 		},
 		"delete many URLs": {
 			name: "test",
@@ -116,14 +112,7 @@ func TestAddonsConfigurationService_DeleteRepos(t *testing.T) {
 				{URL: "www.next"},
 				{URL: "www.second"},
 			},
-			urlsToRemove: []gqlschema.AddonsConfigurationRepositoryInput{
-				{
-					URL: "www.next",
-				},
-				{
-					URL: "www.second",
-				},
-			},
+			urlsToRemove: []string{"www.next", "www.second"},
 		},
 		"delete all URLs": {
 			name: "test",
@@ -133,17 +122,7 @@ func TestAddonsConfigurationService_DeleteRepos(t *testing.T) {
 				{URL: "www.second"},
 			},
 
-			urlsToRemove: []gqlschema.AddonsConfigurationRepositoryInput{
-				{
-					URL: "www.already.present.url",
-				},
-				{
-					URL: "www.next",
-				},
-				{
-					URL: "www.second",
-				},
-			},
+			urlsToRemove: []string{"www.already.present.url", "www.next", "www.second"},
 		},
 	} {
 		t.Run(tn, func(t *testing.T) {
@@ -180,11 +159,7 @@ func TestAddonsConfigurationService_DeleteRepos(t *testing.T) {
 func TestAddonsConfigurationService_DeleteRepos_Failure(t *testing.T) {
 	// given
 	fixAddonCfgName := "not-existing-cfg"
-	fixURLs := []gqlschema.AddonsConfigurationRepositoryInput{
-		{
-			URL: "ww.fix.k",
-		},
-	}
+	fixURLs := []string{"ww.fix.k"}
 	client, err := newDynamicClient()
 	require.NoError(t, err)
 

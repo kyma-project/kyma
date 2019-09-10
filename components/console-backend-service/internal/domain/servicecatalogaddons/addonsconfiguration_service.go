@@ -85,7 +85,7 @@ func (s *addonsConfigurationService) AddRepos(name, namespace string, repositori
 	return addon, nil
 }
 
-func (s *addonsConfigurationService) RemoveRepos(name, namespace string, repos []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.AddonsConfiguration, error) {
+func (s *addonsConfigurationService) RemoveRepos(name, namespace string, reposToRemove []string) (*v1alpha1.AddonsConfiguration, error) {
 	var addon *v1alpha1.AddonsConfiguration
 	var err error
 	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -93,7 +93,7 @@ func (s *addonsConfigurationService) RemoveRepos(name, namespace string, repos [
 		if err != nil {
 			return err
 		}
-		resultRepos := filterOutRepositories(addon.Spec.Repositories, repos)
+		resultRepos := filterOutRepositories(addon.Spec.Repositories, reposToRemove)
 		addon.Spec.Repositories = resultRepos
 
 		obj, err := s.extractor.ToUnstructured(addon)
@@ -110,7 +110,7 @@ func (s *addonsConfigurationService) RemoveRepos(name, namespace string, repos [
 	return addon, nil
 }
 
-func (s *addonsConfigurationService) Create(name, namespace string, repos []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error) {
+func (s *addonsConfigurationService) Create(name, namespace string, repository []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error) {
 	addon := &v1alpha1.AddonsConfiguration{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "AddonsConfiguration",
@@ -122,7 +122,7 @@ func (s *addonsConfigurationService) Create(name, namespace string, repos []gqls
 		},
 		Spec: v1alpha1.AddonsConfigurationSpec{
 			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
-				Repositories: toSpecRepositories(repos),
+				Repositories: toSpecRepositories(repository),
 			},
 		},
 	}
@@ -138,12 +138,12 @@ func (s *addonsConfigurationService) Create(name, namespace string, repos []gqls
 	return addon, nil
 }
 
-func (s *addonsConfigurationService) Update(name, namespace string, repos []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error) {
+func (s *addonsConfigurationService) Update(name, namespace string, repository []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.AddonsConfiguration, error) {
 	addon, err := s.getAddonsConfiguration(name, namespace)
 	if err != nil {
 		return nil, err
 	}
-	addon.Spec.Repositories = toSpecRepositories(repos)
+	addon.Spec.Repositories = toSpecRepositories(repository)
 	addon.Labels = toMapLabels(labels)
 
 	obj, err := s.extractor.ToUnstructured(addon)
@@ -218,14 +218,14 @@ func (s *addonsConfigurationService) getAddonsConfiguration(name, namespace stri
 	return addons, nil
 }
 
-func filterOutRepositories(repos []v1alpha1.SpecRepository, reposInput []gqlschema.AddonsConfigurationRepositoryInput) []v1alpha1.SpecRepository {
+func filterOutRepositories(repository []v1alpha1.SpecRepository, repos []string) []v1alpha1.SpecRepository {
 	idxURLs := map[string]struct{}{}
-	for _, repo := range reposInput {
-		idxURLs[repo.URL] = struct{}{}
+	for _, repo := range repos {
+		idxURLs[repo] = struct{}{}
 	}
 
 	result := make([]v1alpha1.SpecRepository, 0)
-	for _, r := range repos {
+	for _, r := range repository {
 		if _, found := idxURLs[r.URL]; !found {
 			result = append(result, r)
 		}
@@ -256,10 +256,10 @@ func toSpecRepository(repo gqlschema.AddonsConfigurationRepositoryInput) v1alpha
 	return v1alpha1.SpecRepository{URL: repo.URL, SecretRef: secretRef}
 }
 
-func toSpecRepositories(repos []gqlschema.AddonsConfigurationRepositoryInput) []v1alpha1.SpecRepository {
+func toSpecRepositories(repositories []gqlschema.AddonsConfigurationRepositoryInput) []v1alpha1.SpecRepository {
 	var result []v1alpha1.SpecRepository
 
-	for _, repo := range repos {
+	for _, repo := range repositories {
 		result = append(result, toSpecRepository(repo))
 	}
 	return result

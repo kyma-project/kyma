@@ -11,13 +11,13 @@ type clusterAddonsCfgMutations struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: name, urls, labels
-func (_m *clusterAddonsCfgMutations) Create(name string, urls []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
-	ret := _m.Called(name, urls, labels)
+// Create provides a mock function with given fields: name, repository, labels
+func (_m *clusterAddonsCfgMutations) Create(name string, repository []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
+	ret := _m.Called(name, repository, labels)
 
 	var r0 *v1alpha1.ClusterAddonsConfiguration
 	if rf, ok := ret.Get(0).(func(string, []gqlschema.AddonsConfigurationRepositoryInput, *gqlschema.Labels) *v1alpha1.ClusterAddonsConfiguration); ok {
-		r0 = rf(name, urls, labels)
+		r0 = rf(name, repository, labels)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha1.ClusterAddonsConfiguration)
@@ -26,7 +26,7 @@ func (_m *clusterAddonsCfgMutations) Create(name string, urls []gqlschema.Addons
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, []gqlschema.AddonsConfigurationRepositoryInput, *gqlschema.Labels) error); ok {
-		r1 = rf(name, urls, labels)
+		r1 = rf(name, repository, labels)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -57,13 +57,13 @@ func (_m *clusterAddonsCfgMutations) Delete(name string) (*v1alpha1.ClusterAddon
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: name, urls, labels
-func (_m *clusterAddonsCfgMutations) Update(name string, urls []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
-	ret := _m.Called(name, urls, labels)
+// Update provides a mock function with given fields: name, repository, labels
+func (_m *clusterAddonsCfgMutations) Update(name string, repository []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
+	ret := _m.Called(name, repository, labels)
 
 	var r0 *v1alpha1.ClusterAddonsConfiguration
 	if rf, ok := ret.Get(0).(func(string, []gqlschema.AddonsConfigurationRepositoryInput, *gqlschema.Labels) *v1alpha1.ClusterAddonsConfiguration); ok {
-		r0 = rf(name, urls, labels)
+		r0 = rf(name, repository, labels)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha1.ClusterAddonsConfiguration)
@@ -72,7 +72,7 @@ func (_m *clusterAddonsCfgMutations) Update(name string, urls []gqlschema.Addons
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, []gqlschema.AddonsConfigurationRepositoryInput, *gqlschema.Labels) error); ok {
-		r1 = rf(name, urls, labels)
+		r1 = rf(name, repository, labels)
 	} else {
 		r1 = ret.Error(1)
 	}

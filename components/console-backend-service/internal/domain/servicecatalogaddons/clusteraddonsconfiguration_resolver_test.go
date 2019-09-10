@@ -87,6 +87,7 @@ func TestClusterAddonsConfigurationResolver_DeleteAddonsConfiguration(t *testing
 	assert.Equal(t, fixGQLAddonsConfiguration(addonName), cfgs)
 }
 
+// DEPRECATED: Remove
 func TestClusterAddonsConfigurationResolver_AddAddonsConfigurationURLs(t *testing.T) {
 	// given
 	const addonName = "test"
@@ -98,7 +99,7 @@ func TestClusterAddonsConfigurationResolver_AddAddonsConfigurationURLs(t *testin
 	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
 
 	// when
-	cfgs, err := resolver.AddClusterAddonsConfigurationURLs(context.Background(), addonName, nil, []string{"app.gg"})
+	cfgs, err := resolver.AddClusterAddonsConfigurationURLs(context.Background(), addonName, []string{"app.gg"})
 
 	// then
 	require.NoError(t, err)
@@ -110,13 +111,49 @@ func TestClusterAddonsConfigurationResolver_RemoveAddonsConfigurationURLs(t *tes
 	const addonName = "test"
 	addonsCfgUpdater := automock.NewClusterAddonsCfgUpdater()
 	defer addonsCfgUpdater.AssertExpectations(t)
-	addonsCfgUpdater.On("RemoveRepos", addonName, []gqlschema.AddonsConfigurationRepositoryInput{{URL: "www.piko.bo"}}).
+	addonsCfgUpdater.On("RemoveRepos", addonName, []string{"www.piko.bo"}).
 		Return(fixClusterAddonsConfiguration(addonName), nil).Once()
 
 	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
 
 	// when
-	cfgs, err := resolver.RemoveClusterAddonsConfigurationURLs(context.Background(), addonName, nil, []string{"www.piko.bo"})
+	cfgs, err := resolver.RemoveClusterAddonsConfigurationURLs(context.Background(), addonName, []string{"www.piko.bo"})
+
+	// then
+	require.NoError(t, err)
+	assert.Equal(t, fixGQLAddonsConfiguration(addonName), cfgs)
+}
+
+func TestClusterAddonsConfigurationResolver_AddAddonsConfigurationRepository(t *testing.T) {
+	// given
+	const addonName = "test"
+	addonsCfgUpdater := automock.NewClusterAddonsCfgUpdater()
+	defer addonsCfgUpdater.AssertExpectations(t)
+	addonsCfgUpdater.On("AddRepos", addonName, []gqlschema.AddonsConfigurationRepositoryInput{{URL: "app.gg"}}).
+		Return(fixClusterAddonsConfiguration(addonName), nil).Once()
+
+	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
+
+	// when
+	cfgs, err := resolver.AddClusterAddonsConfigurationRepositories(context.Background(), addonName, []gqlschema.AddonsConfigurationRepositoryInput{{URL: "app.gg"}})
+
+	// then
+	require.NoError(t, err)
+	assert.Equal(t, fixGQLAddonsConfiguration(addonName), cfgs)
+}
+
+func TestClusterAddonsConfigurationResolver_RemoveAddonsConfigurationRepository(t *testing.T) {
+	// given
+	const addonName = "test"
+	addonsCfgUpdater := automock.NewClusterAddonsCfgUpdater()
+	defer addonsCfgUpdater.AssertExpectations(t)
+	addonsCfgUpdater.On("RemoveRepos", addonName, []string{"www.piko.bo"}).
+		Return(fixClusterAddonsConfiguration(addonName), nil).Once()
+
+	resolver := servicecatalogaddons.NewClusterAddonsConfigurationResolver(addonsCfgUpdater, nil, nil)
+
+	// when
+	cfgs, err := resolver.RemoveClusterAddonsConfigurationRepositories(context.Background(), addonName, []string{"www.piko.bo"})
 
 	// then
 	require.NoError(t, err)
