@@ -2,7 +2,7 @@
 
 ## Overview
 
-Kyma uses Prometheus alerting rules to monitor the health of resources and inform about issues.
+Kyma uses Prometheus alerting rules to monitor the health of resources and inform about potential issues.
 
 ## Details
 
@@ -15,4 +15,4 @@ Follow [this](https://kyma-project.io/docs/components/monitoring/#tutorials-defi
 
 ### Configure Alertmanager
 
-You can configure the Alertmanager using the [alertmanager](../alertmanager/README.md) chart.
+Configure the Alertmanager using the [alertmanager](../alertmanager/README.md) chart.
