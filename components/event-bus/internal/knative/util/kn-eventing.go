@@ -114,7 +114,7 @@ func GetKnativeLib() (*KnativeLib, error) {
 func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error) {
 	channel, err := k.evClient.Channels(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
-		//log.Printf("ERROR: GetChannel(): getting channel: %v", err)
+		log.Printf("ERROR: GetChannel(): getting channel: %v", err)
 		return nil, err
 	}
 	if !channel.Status.IsReady() {
