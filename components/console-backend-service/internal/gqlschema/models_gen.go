@@ -28,15 +28,26 @@ type APIInput struct {
 }
 
 type AddonsConfiguration struct {
-	Name   string                    `json:"name"`
-	Urls   []string                  `json:"urls"`
-	Labels Labels                    `json:"labels"`
-	Status AddonsConfigurationStatus `json:"status"`
+	Name         string                          `json:"name"`
+	Urls         []string                        `json:"urls"`
+	Repositories []AddonsConfigurationRepository `json:"repositories"`
+	Labels       Labels                          `json:"labels"`
+	Status       AddonsConfigurationStatus       `json:"status"`
 }
 
 type AddonsConfigurationEvent struct {
 	Type                SubscriptionEventType `json:"type"`
 	AddonsConfiguration AddonsConfiguration   `json:"addonsConfiguration"`
+}
+
+type AddonsConfigurationRepository struct {
+	URL       string       `json:"url"`
+	SecretRef *ResourceRef `json:"secretRef"`
+}
+
+type AddonsConfigurationRepositoryInput struct {
+	URL       string            `json:"url"`
+	SecretRef *ResourceRefInput `json:"secretRef"`
 }
 
 type AddonsConfigurationStatus struct {
@@ -442,6 +453,16 @@ type ResourceQuotaInput struct {
 type ResourceQuotasStatus struct {
 	Exceeded       bool            `json:"exceeded"`
 	ExceededQuotas []ExceededQuota `json:"exceededQuotas"`
+}
+
+type ResourceRef struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
+type ResourceRefInput struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 type ResourceRule struct {
