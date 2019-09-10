@@ -370,7 +370,9 @@ func TestNamespaceResolver_NamespaceEventSubscription(t *testing.T) {
 		channel, err := resolver.NamespaceEventSubscription(ctx, nil)
 		require.NoError(t, err)
 
-		<-channel
+		_, ok := <-channel
+		assert.False(t, ok)
+
 		svc.AssertCalled(t, "Unsubscribe", mock.Anything)
 		podSvc.AssertCalled(t, "Unsubscribe", mock.Anything)
 	})

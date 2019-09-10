@@ -5,6 +5,8 @@ package k8s
 import (
 	"testing"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
@@ -13,9 +15,6 @@ import (
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 func TestNamespace(t *testing.T) {
