@@ -44,8 +44,8 @@ define buildpack-cp-ro
 $(1):
 	@echo make $(1)
 	$$(eval container = $$(shell docker create $(DOCKER_CREATE_OPTS) make $(1)-local))
-	@docker cp $(COMPONENT_DIR)/. $(container):$(WORKSPACE_COMPONENT_DIR)/
-	@docker start $(DOCKER_INTERACTIVE) $(container)
+	@docker cp $(COMPONENT_DIR)/. $$(container):$(WORKSPACE_COMPONENT_DIR)/
+	@docker start $(DOCKER_INTERACTIVE) $$(container)
 endef
 
 .PHONY: verify format release
