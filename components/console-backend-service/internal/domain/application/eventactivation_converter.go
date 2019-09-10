@@ -40,8 +40,8 @@ func (c *eventActivationConverter) ToGQLEvents(in *spec.AsyncAPISpec) []gqlschem
 	}
 
 	var events []gqlschema.EventActivationEvent
-	for k, topic := range in.Data.Topics {
-		if !c.isSubscribeEvent(topic) {
+	for k, channel := range in.Data.Channels {
+		if !c.isSubscribeEvent(channel) {
 			continue
 		}
 
@@ -49,8 +49,8 @@ func (c *eventActivationConverter) ToGQLEvents(in *spec.AsyncAPISpec) []gqlschem
 		events = append(events, gqlschema.EventActivationEvent{
 			EventType:   eventType,
 			Version:     version,
-			Description: c.getSummary(topic),
-			Schema:      c.getPayload(topic),
+			Description: c.getSummary(channel),
+			Schema:      c.getPayload(channel),
 		})
 	}
 
