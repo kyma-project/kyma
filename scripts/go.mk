@@ -43,7 +43,7 @@ define buildpack-cp-ro
 .PHONY: $(1)-local $(1)
 $(1):
 	@echo make $(1)
-	$(eval container = $(shell docker create $(DOCKER_CREATE_OPTS) make $(1)-local))
+	$$(eval container = $$(shell docker create $(DOCKER_CREATE_OPTS) make $(1)-local))
 	@docker cp $(COMPONENT_DIR)/. $(container):$(WORKSPACE_COMPONENT_DIR)/
 	@docker start $(DOCKER_INTERACTIVE) $(container)
 endef
