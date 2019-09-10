@@ -3,11 +3,8 @@
 package k8s
 
 import (
-	"fmt"
 	"testing"
 
-	"github.com/avast/retry-go"
-	v1 "k8s.io/api/core/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
@@ -64,7 +61,8 @@ func TestNamespace(t *testing.T) {
 	suite.thenThereIsNoGqlError(t, deleteRsp.GqlErrors)
 	suite.thenDeleteNamespaceResponseIsAsExpected(t, deleteRsp)
 	suite.thenNamespaceIsRemovedFromK8sEventually(t)
-	suite.thenDeleteEventIsSent(t, subscription)
+	//namespace changes its status to 'Terminating' first - delete event is sent after few seconds
+	suite.thenUpdateEventIsSent(t, subscription)
 }
 
 type testNamespaceSuite struct {
@@ -122,7 +120,7 @@ func (s testNamespaceSuite) thenNamespaceExistsInK8s(t *testing.T) {
 
 func (s testNamespaceSuite) thenAddEventIsSent(t *testing.T, subscription *graphql.Subscription) {
 	expectedEvent := fixNamespaceEvent("ADD", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.labels})
-	assert.NoError(t, checkNamespaceEvent(expectedEvent, subscription))
+	require.NoError(t, checkNamespaceEvent(expectedEvent, subscription))
 }
 
 //find
@@ -167,7 +165,7 @@ func (s testNamespaceSuite) thenNamespaceAfterUpdateExistsInK8s(t *testing.T) {
 
 func (s testNamespaceSuite) thenUpdateEventIsSent(t *testing.T, subscription *graphql.Subscription) {
 	expectedEvent := fixNamespaceEvent("UPDATE", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.updatedLabels})
-	assert.NoError(t, checkNamespaceEvent(expectedEvent, subscription))
+	require.NoError(t, checkNamespaceEvent(expectedEvent, subscription))
 }
 
 //delete
@@ -182,27 +180,11 @@ func (s testNamespaceSuite) thenDeleteNamespaceResponseIsAsExpected(t *testing.T
 }
 
 func (s testNamespaceSuite) thenNamespaceIsRemovedFromK8sEventually(t *testing.T) {
-	err := retry.Do(func() error {
-		ns, err := s.k8sClient.Namespaces().Get(s.namespaceName, metav1.GetOptions{})
-		if apierrors.IsNotFound(err) {
-			return nil
-		}
-
-		if err == nil {
-			return namespaceTerminatingError{phase: ns.Status.Phase}
-		}
-
-		return err
-	}, retry.RetryIf(func(e error) bool {
-		_, isTerminating := e.(namespaceTerminatingError)
-		return isTerminating
-	}))
-	require.NoError(t, err)
-}
-
-func (s testNamespaceSuite) thenDeleteEventIsSent(t *testing.T, subscription *graphql.Subscription) {
-	expectedEvent := fixNamespaceEvent("DELETE", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.updatedLabels})
-	assert.NoError(t, checkNamespaceEvent(expectedEvent, subscription))
+	ns, err := s.k8sClient.Namespaces().Get(s.namespaceName, metav1.GetOptions{})
+	if !apierrors.IsNotFound(err) {
+		require.NoError(t, err)
+		assert.Equal(t, "Terminating", string(ns.Status.Phase))
+	}
 }
 
 //errors
@@ -251,10 +233,6 @@ func (s testNamespaceSuite) fixUpdateNamespaceResponse() updateNamespaceResponse
 
 func (s testNamespaceSuite) fixDeleteNamespaceResponse() deleteNamespaceResponse {
 	return deleteNamespaceResponse{DeleteNamespace: s.fixNamespaceMutationObj(s.updatedLabels)}
-}
-
-func (e namespaceTerminatingError) Error() string {
-	return fmt.Sprintf("Namespace is still terminating. Phase: %s", e.phase)
 }
 
 func readNamespaceEvent(subscription *graphql.Subscription) (NamespaceEventObj, error) {
@@ -401,8 +379,4 @@ type updateNamespaceResponse struct {
 type deleteNamespaceResponse struct {
 	GqlErrors
 	DeleteNamespace namespaceMutationObj `json:"deleteNamespace"`
-}
-
-type namespaceTerminatingError struct {
-	phase v1.NamespacePhase
 }
