@@ -18,5 +18,3 @@ kubectl port-forward -n kyma-system <pod_name> 3100:3100
 ```bash
 curl -X GET -G 'http://localhost:3100/api/prom/query' --data-urlencode 'query={namespace="kyma-system"}' --data-urlencode 'limit=1000' --data-urlencode 'regexp=error'
 ```
-
-For further information, see the [Loki API documentation](https://github.com/grafana/loki/blob/master/docs/api.md).
