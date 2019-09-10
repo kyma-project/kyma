@@ -1,0 +1,5 @@
+global:
+  connector:
+    secrets:
+      rootCA:
+        name: application-connector-certs

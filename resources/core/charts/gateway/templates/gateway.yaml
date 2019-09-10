@@ -22,9 +22,18 @@ spec:
       protocol: HTTPS
     tls:
       mode: MUTUAL
-      credentialName: application-connector-certs
+      credentialName: {{ .Values.global.connector.secrets.rootCA.name }}
     hosts:
       - "gateway.{{.Values.global.ingress.domainName}}"
+  - port:
+      name: https-compass-mtls
+      number: 443
+      protocol: HTTPS
+    tls:
+      mode: MUTUAL
+      credentialName: {{ .Values.global.connector.secrets.rootCA.name }}
+    hosts:
+      - "compass-gateway-mtls.{{.Values.global.ingress.domainName}}"
   - port:
       number: 80
       name: http

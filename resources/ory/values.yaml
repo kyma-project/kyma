@@ -3,6 +3,11 @@ global:
   istio:
     gateway:
       name: kyma-gateway
+  oauthkeeper:
+    headerRewrite:
+      enabled: true
+      certificateDataHeader: "Certificate-Data"
+    label: oauthkeeper
 hpa:
   oathkeeper:
     minReplicas: 1
