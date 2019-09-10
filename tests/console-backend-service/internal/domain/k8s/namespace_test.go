@@ -124,10 +124,7 @@ func (s testNamespaceSuite) thenNamespaceExistsInK8s(t *testing.T) {
 
 func (s testNamespaceSuite) thenAddEventIsSent(t *testing.T, subscription *graphql.Subscription) {
 	expectedEvent := fixNamespaceEvent("ADD", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.labels})
-	event, err := readNamespaceEvent(subscription)
-	require.NoError(t, err)
-	assert.Equal(t, expectedEvent.Type, event.Type)
-	assert.Equal(t, expectedEvent.Namespace.Name, event.Namespace.Name)
+	assert.NoError(t, checkNamespaceEvent(expectedEvent, subscription))
 }
 
 //find
@@ -172,16 +169,13 @@ func (s testNamespaceSuite) thenNamespaceAfterUpdateExistsInK8s(t *testing.T) {
 
 func (s testNamespaceSuite) thenUpdateEventIsSent(t *testing.T, subscription *graphql.Subscription) {
 	expectedEvent := fixNamespaceEvent("UPDATE", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.updatedLabels})
-	event, err := readNamespaceEvent(subscription)
-	require.NoError(t, err)
-	assert.Equal(t, expectedEvent.Type, event.Type)
-	assert.Equal(t, expectedEvent.Namespace.Name, event.Namespace.Name)
+	assert.NoError(t, checkNamespaceEvent(expectedEvent, subscription))
 }
 
 func (s testNamespaceSuite) whenPodIsAdded(t *testing.T) error {
 	k8sClient, _, err := client.NewClientWithConfig()
 	require.NoError(t, err)
-	_, err = k8sClient.Pods(s.namespaceName).Create(FixPod("test-pod", s.namespaceName))
+	_, err = k8sClient.Pods(s.namespaceName).Create(fixPod("test-pod", s.namespaceName))
 	return err
 }
 
@@ -259,6 +253,18 @@ func readNamespaceEvent(subscription *graphql.Subscription) (NamespaceEventObj, 
 	var namespaceEvent Response
 	err := subscription.Next(&namespaceEvent, tester.DefaultSubscriptionTimeout)
 	return namespaceEvent.NamespaceEvent, err
+}
+
+func checkNamespaceEvent(expected NamespaceEventObj, subscription *graphql.Subscription) error {
+	for {
+		event, err := readNamespaceEvent(subscription)
+		if err != nil {
+			return err
+		}
+		if expected.Type == event.Type && expected.Namespace.Name == event.Namespace.Name {
+			return nil
+		}
+	}
 }
 
 //queries
