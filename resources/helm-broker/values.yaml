@@ -5,8 +5,7 @@ image:
 service:
   type: NodePort
   externalPort: 80
-  internalPort: 8081
-  ctrlInternalPort: 8080
+  internalPort: 8070
 
 ctrl:
   tmpDirSizeLimit: 1Gi
@@ -17,6 +16,8 @@ ctrl:
     requests:
       memory: 32Mi
       cpu: 80m
+  internalPort: 8080
+  statusPort: 8081
 
 config:
   tillerTLSInsecure: true
@@ -43,8 +44,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   helm_broker:
-    dir: develop/
-    version: "54bb24ad"
+    dir: pr/
+    version: "PR-24"
   alpine_net:
     dir: develop/
     version: 149967d0
