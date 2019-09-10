@@ -20,11 +20,13 @@ func (s *SubscriptionBuilder) Build() *eventingv1alpha1.Subscription {
 // ToChannel sets SubscriptionBuilder Channel.
 //TODO fetch based on knative config map
 func (s *SubscriptionBuilder) ToChannel(name string) *SubscriptionBuilder {
-	s.Spec.Channel = corev1.ObjectReference{
+	channel := corev1.ObjectReference{
 		Name:       name,
-		Kind:       "NatssChannel",
+		Kind:       "Channel",
 		APIVersion: "messaging.knative.dev/v1alpha1",
 	}
+	s.Spec.Channel = channel
+	s.Spec.Reply.Channel = &channel
 	return s
 }
 
