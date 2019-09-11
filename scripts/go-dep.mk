@@ -58,7 +58,6 @@ endef
 verify:: test check-imports check-fmt
 format:: imports fmt
 
-
 release: resolve dep-status verify build-image push-image
 
 .PHONY: build-image push-image

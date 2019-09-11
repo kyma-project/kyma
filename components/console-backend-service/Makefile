@@ -3,7 +3,7 @@ APP_PATH = components/$(APP_NAME)
 BUILDPACK = sjanota/go-buildpack:1.11
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/scripts
 
-include $(SCRIPTS_DIR)/go.mk
+include $(SCRIPTS_DIR)/go-dep.mk
 
 VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
 
