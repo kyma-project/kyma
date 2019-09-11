@@ -1,4 +1,4 @@
-required = ["github.com/rakesh-garimella/kyma/common"]
+required = ["github.com/kyma-project/kyma/common"]
 [prune]
   go-tests = true
   unused-packages = true

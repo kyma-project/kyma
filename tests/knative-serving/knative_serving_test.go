@@ -22,7 +22,7 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1alpha1"
 	servingtyped "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
 
-	"github.com/rakesh-garimella/kyma/common/ingressgateway"
+	"github.com/kyma-project/kyma/common/ingressgateway"
 )
 
 const (
@@ -57,7 +57,7 @@ func TestKnativeServingAcceptance(t *testing.T) {
 			ConfigurationSpec: serving.ConfigurationSpec{
 				Template: &serving.RevisionTemplateSpec{
 					ObjectMeta: meta.ObjectMeta{
-						Name: "test-service",
+						Name: "test-service-foo",
 					},
 					Spec: serving.RevisionSpec{
 						RevisionSpec: v1beta1.RevisionSpec{
@@ -66,7 +66,7 @@ func TestKnativeServingAcceptance(t *testing.T) {
 									Image: "gcr.io/knative-samples/helloworld-go",
 									Env: []corev1.EnvVar{
 										{
-											Name:  "TARGET",
+											Name: targetEnvVar,
 											Value: target,
 										},
 									},
@@ -75,16 +75,6 @@ func TestKnativeServingAcceptance(t *testing.T) {
 							},
 						},
 					},
-				},
-			},
-			RouteSpec: serving.RouteSpec{
-				Traffic: []serving.TrafficTarget{{
-					TrafficTarget: v1beta1.TrafficTarget{
-						Tag:          "rev-01",
-						RevisionName: "test-service",
-						Percent:      100,
-					},
-				},
 				},
 			},
 		},
@@ -96,6 +86,7 @@ func TestKnativeServingAcceptance(t *testing.T) {
 	defer deleteService(serviceClient, svc.Name)
 
 	err = retry.Do(func() error {
+		fmt.Printf("Calling: %s\n", testServiceURL)
 		t.Logf("Calling: %s", testServiceURL)
 		resp, err := ingressClient.Get(testServiceURL)
 		if err != nil {
