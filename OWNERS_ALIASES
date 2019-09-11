@@ -3,7 +3,7 @@ aliases:
     - kazydek
     - klaudiagrz
     - tomekpapiernik
-    - a-bszwarc
+    - bszwarc
     - mmitoraj
     - majakurcius
     - alexandra-simeonova
@@ -11,7 +11,23 @@ aliases:
     - kazydek
     - klaudiagrz
     - tomekpapiernik
-    - a-bszwarc
+    - bszwarc
     - mmitoraj
     - majakurcius
     - alexandra-simeonova
+  console-reviewers:
+    - parostatkiem
+    - Wawrzyn321
+    - y-kkamil
+    - kwiatekus
+    - dariadomagala
+    - akucharska
+    - sjanota
+  console-approvers:
+    - parostatkiem
+    - Wawrzyn321
+    - y-kkamil
+    - kwiatekus
+    - dariadomagala
+    - akucharska
+    - sjanota

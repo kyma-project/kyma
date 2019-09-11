@@ -89,8 +89,8 @@ func (r *PluggableContainer) Enable() error {
 	r.informerFactory = informerFactory
 
 	clusterDocsTopicService, err := newClusterDocsTopicService(informerFactory.ForResource(schema.GroupVersionResource{
-		Version:  v1alpha1.SchemeGroupVersion.Version,
-		Group:    v1alpha1.SchemeGroupVersion.Group,
+		Version:  v1alpha1.GroupVersion.Version,
+		Group:    v1alpha1.GroupVersion.Group,
 		Resource: "clusterdocstopics",
 	}).Informer())
 	if err != nil {
@@ -98,8 +98,8 @@ func (r *PluggableContainer) Enable() error {
 	}
 
 	docsTopicService, err := newDocsTopicService(informerFactory.ForResource(schema.GroupVersionResource{
-		Version:  v1alpha1.SchemeGroupVersion.Version,
-		Group:    v1alpha1.SchemeGroupVersion.Group,
+		Version:  v1alpha1.GroupVersion.Version,
+		Group:    v1alpha1.GroupVersion.Group,
 		Resource: "docstopics",
 	}).Informer())
 	if err != nil {

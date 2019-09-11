@@ -142,7 +142,6 @@ func getEnvDefault(envName string, defaultValue string) string {
 // +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;watch;update;list
 // +kubebuilder:rbac:groups=";apps;extensions",resources=deployments,verbs=create;get;watch;update;delete;list;update;patch
 func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-
 	// Get Function instance
 	fn := &serverlessv1alpha1.Function{}
 	err := r.getFunctionInstance(request, fn)
@@ -200,7 +199,7 @@ func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Resu
 	imageName := fmt.Sprintf("%s/%s-%s:%s", rnInfo.RegistryInfo, fn.Namespace, fn.Name, functionSha)
 	log.Info("function image", "namespace:", fn.Namespace, "name:", fn.Name, "imageName:", imageName)
 
-	if err := r.getFunctionBuildTemplate(fn); err != nil {
+	if err := r.getFunctionBuildTemplate(fn, rnInfo); err != nil {
 		// status of the functon must change to error.
 		r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
 
@@ -331,22 +330,13 @@ func (r *ReconcileFunction) updateFunctionConfigMap(foundCm *corev1.ConfigMap, d
 			return err
 		}
 
-		log.Info("Updated Function'S ConfigMap", "namespace", deployCm.Namespace, "name", deployCm.Name)
-	}
-
-	err := r.Get(context.TODO(), types.NamespacedName{Name: deployCm.Name, Namespace: deployCm.Namespace}, foundCm)
-	if err != nil && !errors.IsNotFound(err) {
-		log.Error(err, "Unable to read the updated Function ConfigMap", "namespace", deployCm.Namespace, "name", deployCm.Name)
-		return err
 	}
 
 	return nil
 
 }
 
-func (r *ReconcileFunction) getFunctionBuildTemplate(fn *serverlessv1alpha1.Function) error {
-
-	buildTemplateNamespace := fn.Namespace
+func (r *ReconcileFunction) getFunctionBuildTemplate(fn *serverlessv1alpha1.Function, ri *runtimeUtil.RuntimeInfo) error {
 
 	deployBuildTemplate := &buildv1alpha1.BuildTemplate{
 		TypeMeta: metav1.TypeMeta{
@@ -355,9 +345,9 @@ func (r *ReconcileFunction) getFunctionBuildTemplate(fn *serverlessv1alpha1.Func
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      buildTemplateName,
-			Namespace: buildTemplateNamespace,
+			Namespace: fn.Namespace,
 		},
-		Spec: runtimeUtil.GetBuildTemplateSpec(fn),
+		Spec: runtimeUtil.GetBuildTemplateSpec(ri),
 	}
 
 	if err := controllerutil.SetControllerReference(fn, deployBuildTemplate, r.scheme); err != nil {

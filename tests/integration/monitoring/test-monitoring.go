@@ -67,7 +67,7 @@ func getNumberofNodeExporter() int {
 	cmd := exec.Command("kubectl", "get", "nodes")
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("Error while kubectl get nodes: %v", err)
+		log.Fatalf("Error while kubectl get nodes: %v.\nKubectl output: %s.", err, stdoutStderr)
 	}
 	outputArr := strings.Split(string(stdoutStderr), "\n")
 	return len(outputArr) - 2
@@ -83,9 +83,8 @@ func main() {
 }
 
 func testGrafanaIsReady(url string) {
-	_, statusCode := doGet(url)
-	if statusCode != 302 {
-		log.Fatalf("Test grafana: Expected HTTP response code 302 but got %v", statusCode)
+	if b, statusCode := doGet(url); statusCode != 302 {
+		log.Fatalf("Test grafana: Expected HTTP response code 302 but got %v.\nResponse body: %s", statusCode, b)
 	}
 	log.Printf("Test grafana UI: Success")
 }
@@ -122,7 +121,7 @@ func testQueryTargets(url string) {
 			respBody, statusCode := doGet(url)
 			err := json.Unmarshal([]byte(respBody), &respObj)
 			if err != nil {
-				log.Fatalf("Error marshalling response: %v", err)
+				log.Fatalf("Error unmarshalling response: %v.\n Response body: %s", err, respBody)
 			}
 			if statusCode == 200 && respObj.Status != "success" {
 				log.Fatalf("Error in response status with errorType: %s error: %s", respObj.Error, respObj.ErrorType)
@@ -196,7 +195,7 @@ func testPodsAreReady() {
 			cmd := exec.Command("kubectl", "get", "pods", "-l", "app in (alertmanager,prometheus,monitoring-grafana,monitoring-exporter-node,monitoring-exporter-kube-state)", "-n", namespace, "--no-headers")
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
-				log.Fatalf("Error while kubectl get: %s ", err)
+				log.Fatalf("Error while kubectl get pods: %s.Kubectl output: %s. ", err, stdoutStderr)
 			}
 			outputArr := strings.Split(string(stdoutStderr), "\n")
 			for index := range outputArr {

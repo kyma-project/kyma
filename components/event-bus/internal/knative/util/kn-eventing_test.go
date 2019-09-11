@@ -15,7 +15,7 @@ import (
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	evclientsetfake "github.com/knative/eventing/pkg/client/clientset/versioned/fake"
 	"github.com/knative/pkg/apis"
-	duckv1beta1 "github.com/knative/pkg/apis/duck/v1beta1"
+	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -46,12 +46,10 @@ var (
 			},
 		},
 		Status: evapisv1alpha1.ChannelStatus{
-			Status: duckv1beta1.Status{
-				Conditions: duckv1beta1.Conditions{
-					apis.Condition{
-						Type:   apis.ConditionReady,
-						Status: corev1.ConditionTrue,
-					},
+			Conditions: []duckv1alpha1.Condition{
+				{
+					Type:   evapisv1alpha1.ChannelConditionReady,
+					Status: corev1.ConditionTrue,
 				},
 			},
 		},
@@ -121,10 +119,8 @@ func Test_CreateChannelTimeout(t *testing.T) {
 	client.Fake.ReactionChain = nil
 	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool,
 		ret runtime.Object, err error) {
-		notReadyCondition := apis.Condition{
-			Type:   apis.ConditionReady,
-			Status: corev1.ConditionFalse,
-		}
+		notReadyCondition := duckv1alpha1.Condition{
+			Type: evapisv1alpha1.ChannelConditionReady, Status: corev1.ConditionFalse}
 		tc := testChannel.DeepCopy()
 		tc.Status.Conditions[0] = notReadyCondition
 		return true, tc, nil
@@ -167,8 +163,7 @@ func Test_SendMessage(t *testing.T) {
 	assert.Nil(t, err)
 	u, err := url.Parse(srv.URL)
 	assert.Nil(t, err)
-	url := &apis.URL{Scheme: "http", Host: fmt.Sprintf("%s:%s", u.Hostname(), u.Port())}
-	ch.Status.SetAddress(url)
+	ch.Status.SetAddress(u.Hostname() + ":" + u.Port())
 
 	// send a message to the channel
 	p := "message 1"

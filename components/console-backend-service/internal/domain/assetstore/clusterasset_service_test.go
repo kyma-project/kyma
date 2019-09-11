@@ -243,14 +243,14 @@ func TestClusterAssetService_Unsubscribe(t *testing.T) {
 }
 
 func fixUnstructuredClusterAsset(metadata map[string]interface{}) *unstructured.Unstructured {
-	return testingUtils.NewUnstructured(v1alpha2.SchemeGroupVersion.String(), "ClusterAsset", metadata, nil, nil)
+	return testingUtils.NewUnstructured(v1alpha2.GroupVersion.String(), "ClusterAsset", metadata, nil, nil)
 }
 
 func fixClusterAsset(name string, labels map[string]string) *v1alpha2.ClusterAsset {
 	return &v1alpha2.ClusterAsset{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterAsset",
-			APIVersion: v1alpha2.SchemeGroupVersion.String(),
+			APIVersion: v1alpha2.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   name,
@@ -264,8 +264,8 @@ func fixClusterAssetInformer(objects ...runtime.Object) cache.SharedIndexInforme
 	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(fakeClient, 0)
 
 	informer := informerFactory.ForResource(schema.GroupVersionResource{
-		Version:  v1alpha2.SchemeGroupVersion.Version,
-		Group:    v1alpha2.SchemeGroupVersion.Group,
+		Version:  v1alpha2.GroupVersion.Version,
+		Group:    v1alpha2.GroupVersion.Group,
 		Resource: "clusterassets",
 	}).Informer()
 

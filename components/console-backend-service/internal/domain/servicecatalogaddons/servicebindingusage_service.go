@@ -6,11 +6,13 @@ import (
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	api "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -20,20 +22,22 @@ type notifier interface {
 }
 
 type serviceBindingUsageService struct {
-	client      v1alpha1.ServicecatalogV1alpha1Interface
-	informer    cache.SharedIndexInformer
-	scRetriever shared.ServiceCatalogRetriever
-	notifier    notifier
+	dynamicClient dynamic.NamespaceableResourceInterface
+	informer      cache.SharedIndexInformer
+	scRetriever   shared.ServiceCatalogRetriever
+	extractor     extractor.BindingUsageUnstructuredExtractor
+	notifier      notifier
 
 	nameFunc func() string
 }
 
-func newServiceBindingUsageService(client v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, scRetriever shared.ServiceCatalogRetriever, nameFunc func() string) (*serviceBindingUsageService, error) {
+func newServiceBindingUsageService(resourceInterface dynamic.NamespaceableResourceInterface, informer cache.SharedIndexInformer, scRetriever shared.ServiceCatalogRetriever, nameFunc func() string) (*serviceBindingUsageService, error) {
 	svc := &serviceBindingUsageService{
-		client:      client,
-		informer:    informer,
-		scRetriever: scRetriever,
-		nameFunc:    nameFunc,
+		dynamicClient: resourceInterface,
+		informer:      informer,
+		scRetriever:   scRetriever,
+		nameFunc:      nameFunc,
+		extractor:     extractor.BindingUsageUnstructuredExtractor{},
 	}
 
 	err := informer.AddIndexers(cache.Indexers{
@@ -64,11 +68,18 @@ func (f *serviceBindingUsageService) Create(namespace string, sb *api.ServiceBin
 	if sb.Name == "" {
 		sb.Name = f.nameFunc()
 	}
-	return f.client.ServiceBindingUsages(namespace).Create(sb)
+
+	obj, err := f.extractor.ToUnstructured(sb)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = f.dynamicClient.Namespace(namespace).Create(obj, v1.CreateOptions{})
+	return sb, err
 }
 
 func (f *serviceBindingUsageService) Delete(namespace string, name string) error {
-	return f.client.ServiceBindingUsages(namespace).Delete(name, &v1.DeleteOptions{})
+	return f.dynamicClient.Namespace(namespace).Delete(name, &v1.DeleteOptions{})
 }
 
 func (f *serviceBindingUsageService) Find(namespace string, name string) (*api.ServiceBindingUsage, error) {
@@ -148,9 +159,14 @@ func (f *serviceBindingUsageService) toServiceBindingUsages(items []interface{})
 }
 
 func (f *serviceBindingUsageService) toServiceBindingUsage(item interface{}) (*api.ServiceBindingUsage, error) {
-	usage, ok := item.(*api.ServiceBindingUsage)
+	u, ok := item.(*unstructured.Unstructured)
 	if !ok {
-		return nil, fmt.Errorf("incorrect item type: %T, should be: *ServiceBindingUsage", item)
+		return nil, fmt.Errorf("incorrect item type: %T, should be: *unstructured.Unstructured", item)
+	}
+
+	usage, err := f.extractor.FromUnstructured(u)
+	if err != nil {
+		return nil, err
 	}
 
 	return usage, nil

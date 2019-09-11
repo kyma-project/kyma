@@ -48,13 +48,15 @@ fi
 # GO TEST
 ##
 echo "? go test"
-go test ./...
+go test -short -coverprofile=cover.out ./...
 # Check if tests passed
-if [ $? != 0 ];
-    then
-    	echo -e "${RED}✗ go test\n${NC}"
-    	exit 1;
-	else echo -e "${GREEN}√ go test${NC}"
+if [ $? != 0 ]; then
+	echo -e "${RED}✗ go test\n${NC}"
+	exit 1
+else 
+	echo -e "Total coverage: $(go tool cover -func=cover.out | grep total | awk '{print $3}')"
+	rm cover.out
+	echo -e "${GREEN}√ go test${NC}"
 fi
 
 filesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/|_*/testdata/|/pkg\/|_*export_test.go")
