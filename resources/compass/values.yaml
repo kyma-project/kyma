@@ -6,8 +6,8 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project/incubator
     connector:
-      dir: develop/
-      version: "e8efc60c"
+      dir: pr/
+      version: "PR-273"
     director:
       dir: develop/
       version: "10f7383b"
