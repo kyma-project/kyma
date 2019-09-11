@@ -46,8 +46,12 @@ func Add(mgr manager.Manager) error {
 		secretName = "webhook-server-secret"
 	}
 
+	controlPlane := os.Getenv("CONTROL_PLANE")
+	if len(controlPlane) == 0 {
+		controlPlane = "controller-manager"
+	}
+
 	svr, err := webhook.NewServer("function-admission-server", mgr, webhook.ServerOptions{
-		// TODO(user): change the configuration of ServerOptions based on your need.
 		Port:    9876,
 		CertDir: "/tmp/cert",
 		BootstrapOptions: &webhook.BootstrapOptions{
@@ -63,7 +67,7 @@ func Add(mgr manager.Manager) error {
 				// Selectors should select the pods that runs this webhook server.
 				Selectors: map[string]string{
 					"app":                     "function-controller",
-					"control-plane":           "controller-manager",
+					"control-plane":           controlPlane,
 					"controller-tools.k8s.io": "1.0",
 				},
 			},
