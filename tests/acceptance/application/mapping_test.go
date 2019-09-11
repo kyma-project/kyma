@@ -18,9 +18,6 @@ func TestApplicationMapping_EnsureBrokerAndClassesOnlyWhenMappingExist(t *testin
 	if err := envconfig.Init(&cfg); err != nil {
 		t.Fatalf(err.Error())
 	}
-	if cfg.Disabled {
-		t.Skip("Test skipped due to test configuration.")
-	}
 
 	ts := suite.NewMappingTestSuite(t)
 	ts.Setup()

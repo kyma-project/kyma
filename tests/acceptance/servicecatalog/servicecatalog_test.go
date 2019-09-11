@@ -15,7 +15,6 @@ import (
 
 	scc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
-	"github.com/davecgh/go-spew/spew"
 	corev1 "github.com/kubernetes/client-go/kubernetes/typed/core/v1"
 	v1alpha12 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
@@ -74,7 +73,9 @@ func waitForIstio(t *testing.T) {
 
 	var podList v1.PodList
 	repeat.FuncAtMost(t, func() error {
-		pods, err := k8sCli.CoreV1().Pods("kyma-system").List(metav1.ListOptions{})
+		pods, err := k8sCli.CoreV1().Pods("kyma-system").List(metav1.ListOptions{
+			LabelSelector: "testing.kyma-project.io/def-name=core",
+		})
 		if err != nil {
 			return err
 		}
@@ -82,7 +83,13 @@ func waitForIstio(t *testing.T) {
 		return nil
 	}, time.Second*30)
 
-	spew.Dump(podList.Items)
+	fmt.Println("DUPA", podList.Items)
+
+	for _, p := range podList.Items {
+		fmt.Println("NAME: ", p.Name)
+		fmt.Println("SPEC: ", p.Spec)
+		fmt.Println("STATUS: ", p.Status)
+	}
 }
 
 func TestHelmBrokerAddonsConfiguration(t *testing.T) {

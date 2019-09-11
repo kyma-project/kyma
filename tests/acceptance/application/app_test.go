@@ -24,10 +24,6 @@ func TestApplicationAPIAccess(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	if cfg.Disabled {
-		t.Skip("Test skipped due to test configuration.")
-	}
-
 	t.Logf("Running Application Test with config: %+v", cfg)
 
 	// GIVEN

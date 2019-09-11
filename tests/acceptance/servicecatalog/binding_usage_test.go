@@ -718,7 +718,6 @@ func (ts *TestSuite) waitForIstio() {
 	k8sCli, err := kubernetes.NewForConfig(ts.k8sClientCfg)
 	require.NoError(ts.t, err)
 
-	fmt.Println("DUPA", ts.namespace)
 	var podList k8sCoreTypes.PodList
 	repeat.FuncAtMost(ts.t, func() error {
 		pods, err := k8sCli.CoreV1().Pods(ts.namespace).List(metav1.ListOptions{})
@@ -729,7 +728,10 @@ func (ts *TestSuite) waitForIstio() {
 		return nil
 	}, time.Second*30)
 
-	fmt.Println("DUPA", podList.Items)
+	for _, p := range podList.Items {
+		fmt.Println(p.Namespace, p.Name)
+	}
+
 }
 
 func (ts *TestSuite) waitForAPIServer() {
