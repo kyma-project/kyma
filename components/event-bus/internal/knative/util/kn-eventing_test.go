@@ -29,7 +29,6 @@ import (
 const (
 	channelName = "test-channel"
 	testNS      = "test-namespace"
-	//provisioner      = "test-provisioner"
 	subscriptionName = "test-subscription"
 )
 
