@@ -49,8 +49,16 @@ $(1):
 endef
 
 .PHONY: verify format release
-verify: test check-imports check-fmt
-format: imports fmt
+
+# You may add additional targets/commands to be run on format and verify. Declare the target again in your makefile,
+# using two double colons. For example to run errcheck on verify add this to your makefile:
+#
+#   verify:: errcheck
+#
+verify:: test check-imports check-fmt
+format:: imports fmt
+
+
 release: resolve dep-status verify build-image push-image
 
 .PHONY: build-image push-image
