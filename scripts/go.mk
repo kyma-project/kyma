@@ -34,7 +34,7 @@ define buildpack-mount
 .PHONY: $(1)-local $(1)
 $(1):
 	@echo make $(1)
-	docker run $(DOCKER_INTERACTIVE) \
+	@docker run $(DOCKER_INTERACTIVE) \
 		-v $(COMPONENT_DIR):$(WORKSPACE_COMPONENT_DIR):delegated \
 		$(DOCKER_CREATE_OPTS) make $(1)-local
 endef
@@ -71,13 +71,13 @@ build-local:
 	rm $(APP_NAME)
 
 resolve-local:
-	dep ensure -vendor-only
+	dep ensure -vendor-only -v
 
 ensure-local:
-	dep ensure
+	dep ensure -v
 
 dep-status-local:
-	dep status
+	dep status -v
 
 check-imports-local:
 	exit $(shell goimports -l $$($(FILES_TO_CHECK)) | wc -l | xargs)
