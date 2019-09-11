@@ -1,8 +1,9 @@
-package servicecatalogaddons
+package servicecatalogaddons_test
 
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,7 @@ import (
 
 func TestUsageKindConverter_ToGQL(t *testing.T) {
 	// GIVEN
-	conv := usageKindConverter{}
+	conv := servicecatalogaddons.NewUsageKindConverter()
 	name := "harry"
 
 	// WHEN
@@ -23,6 +24,10 @@ func TestUsageKindConverter_ToGQL(t *testing.T) {
 
 func fixUsageKind(name string) *v1alpha1.UsageKind {
 	return &v1alpha1.UsageKind{
+		TypeMeta: v1.TypeMeta{
+			APIVersion: "servicecatalog.kyma-project.io/v1alpha1",
+			Kind:       "usagekind",
+		},
 		ObjectMeta: v1.ObjectMeta{
 			Name: name,
 		},

@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 
-	publishv1 "github.com/kyma-project/kyma/components/event-bus/api/publish/v1"
+	"github.com/kyma-project/kyma/components/event-bus/api/publish/v1"
 	publishv2 "github.com/kyma-project/kyma/components/event-bus/api/publish/v2"
 
 	"log"
@@ -124,7 +124,7 @@ func handleKnativePublishRequestV1(w http.ResponseWriter, r *http.Request, knati
 	}
 
 	// validate the publish request
-	if err = publishv1.ValidatePublish(publishRequest, opts.EventOptions); err != nil {
+	if err = v1.ValidatePublish(publishRequest, opts.EventOptions); err != nil {
 		log.Printf("validate publish failed: %v", err)
 		_ = sendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED

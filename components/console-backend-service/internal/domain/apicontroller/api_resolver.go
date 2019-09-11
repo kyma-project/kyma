@@ -3,6 +3,8 @@ package apicontroller
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/extractor"
+
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/listener"
@@ -74,7 +76,7 @@ func (ar *apiResolver) APIEventSubscription(ctx context.Context, namespace strin
 		return api != nil && api.Namespace == namespace && api.Spec.Service.Name == *serviceName
 	}
 
-	apiListener := listener.NewApi(channel, filter, ar.apiConverter)
+	apiListener := listener.NewApi(channel, filter, ar.apiConverter, extractor.ApiUnstructuredExtractor{})
 
 	ar.apiSvc.Subscribe(apiListener)
 	go func() {
