@@ -41,7 +41,10 @@ global:
     port: 3000
 
   connector:
-    port: 3000
+    graphql:
+      port: 3000
+    validator:
+      port: 8080
     # If secrets do not exist they will be created
     secrets:
       ca:
@@ -50,13 +53,18 @@ global:
       rootCA:
         name: application-connector-certs
         namespace: istio-system
+    certificateDataHeader: "Certificate-Data"
     # If key and certificate are not provided they will be generated
     caKey: ""
     caCertificate: ""
 
-  gateway:
-    host: compass-gateway
-  
+    gateway:
+      port: 3000
+      tls:
+        host: compass-gateway
+      mtls:
+        host: compass-gateway-mtls
+
   istio:
     gateway:
       name: "kyma-gateway"
