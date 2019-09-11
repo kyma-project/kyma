@@ -19,7 +19,7 @@ DIRS_TO_IGNORE = go list ./... | grep "$(VERIFY_IGNORE)"
 DOCKER_CREATE_OPTS := -v $(LOCAL_DIR):$(WORKSPACE_LOCAL_DIR):delegated --rm -w $(WORKSPACE_COMPONENT_DIR) $(BUILDPACK)
 
 # Check if go is available
-ifeq (,$(shell go --version 2>/dev/null))
+ifneq (,$(shell go version 2>/dev/null))
 DOCKER_CREATE_OPTS := -v $(shell go env GOCACHE):$(IMG_GOCACHE):delegated -v $(shell go env GOPATH)/pkg/dep:$(IMG_GOPATH)/pkg/dep:delegated $(DOCKER_CREATE_OPTS)
 endif
 
@@ -34,7 +34,7 @@ define buildpack-mount
 .PHONY: $(1)-local $(1)
 $(1):
 	@echo make $(1)
-	@docker run $(DOCKER_INTERACTIVE) \
+	docker run $(DOCKER_INTERACTIVE) \
 		-v $(COMPONENT_DIR):$(WORKSPACE_COMPONENT_DIR):delegated \
 		$(DOCKER_CREATE_OPTS) make $(1)-local
 endef
