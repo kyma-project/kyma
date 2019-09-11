@@ -9,10 +9,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
+	"github.com/avast/retry-go"
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -124,7 +126,7 @@ func (s testNamespaceSuite) thenNamespaceExistsInK8s(t *testing.T) {
 
 func (s testNamespaceSuite) thenAddEventIsSent(t *testing.T, subscription *graphql.Subscription) {
 	expectedEvent := fixNamespaceEvent("ADD", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.labels})
-	assert.NoError(t, checkNamespaceEvent(expectedEvent, subscription))
+	checkNamespaceEvent(t, expectedEvent, subscription)
 }
 
 //find
@@ -169,7 +171,7 @@ func (s testNamespaceSuite) thenNamespaceAfterUpdateExistsInK8s(t *testing.T) {
 
 func (s testNamespaceSuite) thenUpdateEventIsSent(t *testing.T, subscription *graphql.Subscription) {
 	expectedEvent := fixNamespaceEvent("UPDATE", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.updatedLabels})
-	assert.NoError(t, checkNamespaceEvent(expectedEvent, subscription))
+	checkNamespaceEvent(t, expectedEvent, subscription)
 }
 
 func (s testNamespaceSuite) whenPodIsAdded(t *testing.T) error {
@@ -255,16 +257,19 @@ func readNamespaceEvent(subscription *graphql.Subscription) (NamespaceEventObj, 
 	return namespaceEvent.NamespaceEvent, err
 }
 
-func checkNamespaceEvent(expected NamespaceEventObj, subscription *graphql.Subscription) error {
-	for {
-		event, err := readNamespaceEvent(subscription)
+func checkNamespaceEvent(t *testing.T, expected NamespaceEventObj, subscription *graphql.Subscription) {
+	var event NamespaceEventObj
+	err := retry.Do(func() (err error) {
+		event, err = readNamespaceEvent(subscription)
 		if err != nil {
-			return err
+			return
 		}
-		if expected.Type == event.Type && expected.Namespace.Name == event.Namespace.Name {
-			return nil
+		if !assert.ObjectsAreEqual(expected, event) {
+			return errors.Errorf("unexpected event %#v", event)
 		}
-	}
+		return nil
+	})
+	require.NoError(t, err)
 }
 
 //queries
