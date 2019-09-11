@@ -58,12 +58,12 @@ global:
     caKey: ""
     caCertificate: ""
 
-    gateway:
-      port: 3000
-      tls:
-        host: compass-gateway
-      mtls:
-        host: compass-gateway-mtls
+  gateway:
+    port: 3000
+    tls:
+      host: compass-gateway
+    mtls:
+      host: compass-gateway-mtls
 
   istio:
     gateway:
