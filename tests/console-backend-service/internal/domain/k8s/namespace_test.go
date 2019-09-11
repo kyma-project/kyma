@@ -259,11 +259,10 @@ func readNamespaceEvent(subscription *graphql.Subscription) (NamespaceEventObj, 
 }
 
 func checkNamespaceEvent(t *testing.T, expected NamespaceEventObj, subscription *graphql.Subscription) {
-	var event NamespaceEventObj
-	err := retry.Do(func() (err error) {
-		event, err = readNamespaceEvent(subscription)
+	err := retry.Do(func() error {
+		event, err := readNamespaceEvent(subscription)
 		if err != nil {
-			return
+			return err
 		}
 		if !assert.ObjectsAreEqual(expected, event) {
 			return errors.Errorf("unexpected event %#v", event)
