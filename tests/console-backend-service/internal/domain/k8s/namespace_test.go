@@ -54,12 +54,12 @@ func TestNamespace(t *testing.T) {
 	suite.thenThereIsNoGqlError(t, updateResp.GqlErrors)
 	suite.thenUpdateNamespaceResponseIsAsExpected(t, updateResp)
 	suite.thenNamespaceAfterUpdateExistsInK8s(t)
-	suite.thenUpdateEventIsSent(t, subscription)
+	suite.thenUpdateEventIsSent(t, subscription, "Active")
 
 	t.Log("Adding pod to namespace...")
 	err = suite.whenPodIsAdded(t)
 	suite.thenThereIsNoError(t, err)
-	suite.thenUpdateEventIsSent(t, subscription)
+	suite.thenUpdateEventIsSent(t, subscription, "Active")
 
 	t.Log("Deleting namespace...")
 	deleteRsp, err := suite.whenNamespaceIsDeleted()
@@ -68,7 +68,7 @@ func TestNamespace(t *testing.T) {
 	suite.thenDeleteNamespaceResponseIsAsExpected(t, deleteRsp)
 	suite.thenNamespaceIsRemovedFromK8sEventually(t)
 	//namespace changes its status to 'Terminating' first - delete event is sent after few seconds
-	suite.thenUpdateEventIsSent(t, subscription)
+	suite.thenUpdateEventIsSent(t, subscription, "Terminating")
 }
 
 type testNamespaceSuite struct {
@@ -125,7 +125,7 @@ func (s testNamespaceSuite) thenNamespaceExistsInK8s(t *testing.T) {
 }
 
 func (s testNamespaceSuite) thenAddEventIsSent(t *testing.T, subscription *graphql.Subscription) {
-	expectedEvent := fixNamespaceEvent("ADD", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.labels})
+	expectedEvent := fixNamespaceEvent("ADD", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.labels, Status: "Active"})
 	checkNamespaceEvent(t, expectedEvent, subscription)
 }
 
@@ -169,8 +169,8 @@ func (s testNamespaceSuite) thenNamespaceAfterUpdateExistsInK8s(t *testing.T) {
 	assert.Equal(t, ns.Labels, s.updatedLabels)
 }
 
-func (s testNamespaceSuite) thenUpdateEventIsSent(t *testing.T, subscription *graphql.Subscription) {
-	expectedEvent := fixNamespaceEvent("UPDATE", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.updatedLabels})
+func (s testNamespaceSuite) thenUpdateEventIsSent(t *testing.T, subscription *graphql.Subscription, status string) {
+	expectedEvent := fixNamespaceEvent("UPDATE", namespaceObj{Name: s.namespaceName, IsSystemNamespace: false, Labels: s.updatedLabels, Status: status})
 	checkNamespaceEvent(t, expectedEvent, subscription)
 }
 
@@ -215,6 +215,7 @@ func (s testNamespaceSuite) fixNamespaceObj() namespaceObj {
 		Name:              s.namespaceName,
 		IsSystemNamespace: false,
 		Labels:            s.labels,
+		Status:            "Active",
 	}
 }
 
@@ -281,6 +282,7 @@ func (s testNamespaceSuite) fixNamespacesSubscription() *graphql.Request {
 				name
 				isSystemNamespace
 				labels
+				status
 			}
 		}
 	}`
@@ -307,6 +309,7 @@ func (s testNamespaceSuite) fixNamespaceQuery() *graphql.Request {
 				name
 				isSystemNamespace
 				labels
+				status
 		  }
 	}`
 	req := graphql.NewRequest(query)
@@ -320,6 +323,7 @@ func (s testNamespaceSuite) fixNamespacesQuery() *graphql.Request {
 				name
 				isSystemNamespace
 				labels
+				status
 		  }
 	}`
 	req := graphql.NewRequest(query)
@@ -361,6 +365,7 @@ type namespaceObj struct {
 	Name              string `json:"name"`
 	IsSystemNamespace bool   `json:"isSystemNamespace"`
 	Labels            labels `json:"labels"`
+	Status            string `json:"status"`
 }
 
 type NamespaceEventObj struct {
