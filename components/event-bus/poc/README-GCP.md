@@ -69,6 +69,8 @@ data:
     clusterDefault:
       apiVersion: messaging.cloud.run/v1alpha1
       kind: Channel
+      spec:
+        project: my-gcp-project #### This lands up in PROJECT_ID env variable in the job -> ksvc
 EOF
 ```
 
