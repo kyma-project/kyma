@@ -9,9 +9,9 @@ spec:
     istio: ingressgateway # use istio default ingress gateway
   servers:
     - port:
-      number: 443
-      name: https
-      protocol: HTTPS
+        number: 443
+        name: https-mtls
+        protocol: HTTPS
       tls:
         mode: MUTUAL
         credentialName: {{ .Values.global.connector.secrets.rootCA.name }}
