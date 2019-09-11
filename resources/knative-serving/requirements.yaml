@@ -1,3 +1,2 @@
 dependencies:
-  - name: knative-serving-crds-init
-  - name: knative-serving-crds
+  # - name: knative-serving-init

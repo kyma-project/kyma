@@ -272,19 +272,22 @@ spec:
     istio: ingressgateway
   servers:
   - hosts:
-    - '*'
-    port:
-      name: http
-      number: 80
-      protocol: HTTP
-  - hosts:
-    - '*'
+    - "*.{{ .Values.global.ingress.domainName }}"
     port:
       name: https
       number: 443
       protocol: HTTPS
     tls:
-      mode: PASSTHROUGH
+      credentialName: kyma-gateway-certs
+      mode: SIMPLE
+  - hosts:
+    - "*.{{ .Values.global.ingress.domainName }}"
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+    tls:
+      httpsRedirect: true
 
 ---
 apiVersion: networking.istio.io/v1alpha3
