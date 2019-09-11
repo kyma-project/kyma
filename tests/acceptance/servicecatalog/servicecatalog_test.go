@@ -15,15 +15,18 @@ import (
 
 	scc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
+	"github.com/davecgh/go-spew/spew"
 	corev1 "github.com/kubernetes/client-go/kubernetes/typed/core/v1"
 	v1alpha12 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"k8s.io/api/core/v1"
 	apimerr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
+	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -38,7 +41,9 @@ const (
 
 func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
 	// TODO: remove skipping the test if issue https://github.com/kyma-project/kyma/issues/5375 will be fixed
-	t.Skip("Test skipped due to istio rbac rules issue.")
+	//t.Skip("Test skipped due to istio rbac rules issue.")
+
+	waitForIstio(t)
 
 	for testName, brokerURL := range map[string]string{
 		"Helm Broker":        os.Getenv(helmBrokerURLEnvName),
@@ -58,6 +63,26 @@ func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
 			}, time.Minute)
 		})
 	}
+}
+
+func waitForIstio(t *testing.T) {
+	k8sConfig, err := restclient.InClusterConfig()
+	require.NoError(t, err)
+
+	k8sCli, err := kubernetes.NewForConfig(k8sConfig)
+	require.NoError(t, err)
+
+	var podList v1.PodList
+	repeat.FuncAtMost(t, func() error {
+		pods, err := k8sCli.CoreV1().Pods("kyma-system").List(metav1.ListOptions{})
+		if err != nil {
+			return err
+		}
+		podList = *pods
+		return nil
+	}, time.Second*30)
+
+	spew.Dump(podList.Items)
 }
 
 func TestHelmBrokerAddonsConfiguration(t *testing.T) {

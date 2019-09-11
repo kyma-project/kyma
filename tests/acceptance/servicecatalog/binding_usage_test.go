@@ -58,6 +58,7 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	ts := NewTestSuite(t)
 
 	ts.waitForAPIServer()
+	ts.waitForIstio()
 
 	ts.createTestNamespace()
 	ts.createApplication()
@@ -711,6 +712,24 @@ func (ts *TestSuite) assertInjectedEnvVariables(requiredVariables []servicecatal
 		return nil
 	}, timeout)
 	ts.t.Logf("Environment variables are injected [%v]", requiredVariables)
+}
+
+func (ts *TestSuite) waitForIstio() {
+	k8sCli, err := kubernetes.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+
+	fmt.Println("DUPA", ts.namespace)
+	var podList k8sCoreTypes.PodList
+	repeat.FuncAtMost(ts.t, func() error {
+		pods, err := k8sCli.CoreV1().Pods(ts.namespace).List(metav1.ListOptions{})
+		if err != nil {
+			return err
+		}
+		podList = *pods
+		return nil
+	}, time.Second*30)
+
+	fmt.Println("DUPA", podList.Items)
 }
 
 func (ts *TestSuite) waitForAPIServer() {
