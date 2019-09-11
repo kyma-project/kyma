@@ -66,7 +66,7 @@ func TestKnativeServingAcceptance(t *testing.T) {
 									Image: "gcr.io/knative-samples/helloworld-go",
 									Env: []corev1.EnvVar{
 										{
-											Name: targetEnvVar,
+											Name:  targetEnvVar,
 											Value: target,
 										},
 									},
@@ -86,7 +86,6 @@ func TestKnativeServingAcceptance(t *testing.T) {
 	defer deleteService(serviceClient, svc.Name)
 
 	err = retry.Do(func() error {
-		fmt.Printf("Calling: %s\n", testServiceURL)
 		t.Logf("Calling: %s", testServiceURL)
 		resp, err := ingressClient.Get(testServiceURL)
 		if err != nil {
