@@ -1,8 +1,6 @@
 apiVersion: cms.kyma-project.io/v1alpha1
 kind: ClusterDocsTopic
 metadata:
-  labels:
-    controller-tools.k8s.io: "1.0"
   name: clusterdocstopic-sample
 spec:
   displayName: "Cluster Docs Topic Sample"

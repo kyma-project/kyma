@@ -1,8 +1,8 @@
 package servicecatalogaddons
 
 import (
+	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 )
 
 type clusterAddonsConfigurationConverter struct{}
@@ -13,15 +13,18 @@ func (c *clusterAddonsConfigurationConverter) ToGQL(item *v1alpha1.ClusterAddons
 	}
 
 	var urls []string
+	var repositories []gqlschema.AddonsConfigurationRepository
 	for _, repo := range item.Spec.Repositories {
 		urls = append(urls, repo.URL)
+		repositories = append(repositories, parseRepository(repo))
 	}
 
 	addonsCfg := gqlschema.AddonsConfiguration{
-		Name:   item.Name,
-		Labels: item.Labels,
-		Urls:   urls,
-		Status: parseStatus(item.Status.CommonAddonsConfigurationStatus),
+		Name:         item.Name,
+		Labels:       item.Labels,
+		Urls:         urls,
+		Status:       parseStatus(item.Status.CommonAddonsConfigurationStatus),
+		Repositories: repositories,
 	}
 
 	return &addonsCfg

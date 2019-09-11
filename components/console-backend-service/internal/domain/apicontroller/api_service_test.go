@@ -4,15 +4,19 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
+
 	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
-	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/listener"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	dynamicFake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -28,8 +32,10 @@ func TestApiService_List(t *testing.T) {
 		api2 := fixAPIWith("test-2", "different-namespace", hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
 		api3 := fixAPIWith("test-3", namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
 
-		informer := fixAPIInformer(api1, api2, api3)
-		client := fake.NewSimpleClientset(api1, api2, api3)
+		dynamicClient, err := newDynamicClient(api1, api2, api3)
+		require.NoError(t, err)
+		informer := createApiFakeInformer(dynamicClient)
+		client := createApiDynamicClient(dynamicClient)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
@@ -47,8 +53,10 @@ func TestApiService_List(t *testing.T) {
 		api2 := fixAPIWith("test-2", "different-namespace", hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
 		api3 := fixAPIWith("test-3", namespace, "different-hostname", serviceName, jwksUri, issuer, servicePort, nil, nil)
 
-		informer := fixAPIInformer(api1, api2, api3)
-		client := fake.NewSimpleClientset(api1, api2, api3)
+		dynamicClient, err := newDynamicClient(api1, api2, api3)
+		require.NoError(t, err)
+		informer := createApiFakeInformer(dynamicClient)
+		client := createApiDynamicClient(dynamicClient)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
@@ -68,8 +76,10 @@ func TestApiService_List(t *testing.T) {
 		api2 := fixAPIWith("test-2", "different-namespace", hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
 		api3 := fixAPIWith("test-3", namespace, hostname, "different-service-name", jwksUri, issuer, servicePort, nil, nil)
 
-		informer := fixAPIInformer(api1, api2, api3)
-		client := fake.NewSimpleClientset(api1, api2, api3)
+		dynamicClient, err := newDynamicClient(api1, api2, api3)
+		require.NoError(t, err)
+		informer := createApiFakeInformer(dynamicClient)
+		client := createApiDynamicClient(dynamicClient)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
@@ -90,8 +100,10 @@ func TestApiService_List(t *testing.T) {
 		api2 := fixAPIWith("test-2", "different-namespace", hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
 		api3 := fixAPIWith("test-3", namespace, hostname, "different-service-name", jwksUri, issuer, servicePort, nil, nil)
 
-		informer := fixAPIInformer(api1, api2, api3)
-		client := fake.NewSimpleClientset(api1, api2, api3)
+		dynamicClient, err := newDynamicClient(api1, api2, api3)
+		require.NoError(t, err)
+		informer := createApiFakeInformer(dynamicClient)
+		client := createApiDynamicClient(dynamicClient)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
@@ -116,8 +128,10 @@ func TestApiService_Find(t *testing.T) {
 	t.Run("Should find an API", func(t *testing.T) {
 		api := fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
 
-		informer := fixAPIInformer(api)
-		client := fake.NewSimpleClientset(api)
+		dynamicClient, err := newDynamicClient(api)
+		require.NoError(t, err)
+		informer := createApiFakeInformer(dynamicClient)
+		client := createApiDynamicClient(dynamicClient)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
@@ -129,9 +143,8 @@ func TestApiService_Find(t *testing.T) {
 	})
 
 	t.Run("Should return nil if not found", func(t *testing.T) {
-		informer := fixAPIInformer()
-		client := fake.NewSimpleClientset()
-		service := newApiService(informer, client)
+		informer := fixAPIInformer(t)
+		service := newApiService(informer, nil)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
@@ -155,8 +168,10 @@ func TestApiService_Create(t *testing.T) {
 	newApi := fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
 
 	t.Run("Should create an API", func(t *testing.T) {
-		informer := fixAPIInformer()
-		client := fake.NewSimpleClientset()
+		dynamicClient, err := newDynamicClient()
+		require.NoError(t, err)
+		informer := createApiFakeInformer(dynamicClient)
+		client := createApiDynamicClient(dynamicClient)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
@@ -169,13 +184,15 @@ func TestApiService_Create(t *testing.T) {
 
 	t.Run("Should throw an error if API already exists", func(t *testing.T) {
 		existingApi := fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
-		informer := fixAPIInformer(existingApi)
-		client := fake.NewSimpleClientset(existingApi)
+		dynamicClient, err := newDynamicClient(existingApi)
+		require.NoError(t, err)
+		informer := createApiFakeInformer(dynamicClient)
+		client := createApiDynamicClient(dynamicClient)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		_, err := service.Create(newApi)
+		_, err = service.Create(newApi)
 
 		require.Error(t, err)
 	})
@@ -195,8 +212,10 @@ func TestApiService_Update(t *testing.T) {
 
 	t.Run("Should update an API", func(t *testing.T) {
 		existingApi := fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer, servicePort, nil, nil)
-		informer := fixAPIInformer(existingApi)
-		client := fake.NewSimpleClientset(existingApi)
+		dynamicClient, err := newDynamicClient(existingApi)
+		require.NoError(t, err)
+		informer := createApiFakeInformer(dynamicClient)
+		client := createApiDynamicClient(dynamicClient)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
@@ -209,13 +228,15 @@ func TestApiService_Update(t *testing.T) {
 	})
 
 	t.Run("Should throw an error if API doesn't exists", func(t *testing.T) {
-		informer := fixAPIInformer()
-		client := fake.NewSimpleClientset()
+		dynamicClient, err := newDynamicClient()
+		require.NoError(t, err)
+		informer := createApiFakeInformer(dynamicClient)
+		client := createApiDynamicClient(dynamicClient)
 		service := newApiService(informer, client)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		_, err := service.Update(newApi)
+		_, err = service.Update(newApi)
 
 		require.Error(t, err)
 	})
@@ -224,41 +245,41 @@ func TestApiService_Update(t *testing.T) {
 
 func TestApiService_Subscribe(t *testing.T) {
 	t.Run("Simple", func(t *testing.T) {
-		informer := fixAPIInformer()
+		informer := fixAPIInformer(t)
 		service := newApiService(informer, nil)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		apiListener := listener.NewApi(nil, nil, nil)
+		apiListener := listener.NewApi(nil, nil, nil, nil)
 		service.Subscribe(apiListener)
 	})
 
 	t.Run("Duplicated", func(t *testing.T) {
-		informer := fixAPIInformer()
+		informer := fixAPIInformer(t)
 		service := newApiService(informer, nil)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		apiListener := listener.NewApi(nil, nil, nil)
+		apiListener := listener.NewApi(nil, nil, nil, nil)
 		service.Subscribe(apiListener)
 		service.Subscribe(apiListener)
 	})
 
 	t.Run("Miltiple", func(t *testing.T) {
-		informer := fixAPIInformer()
+		informer := fixAPIInformer(t)
 		service := newApiService(informer, nil)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		apiListener1 := listener.NewApi(nil, nil, nil)
-		apiListener2 := listener.NewApi(nil, nil, nil)
+		apiListener1 := listener.NewApi(nil, nil, nil, nil)
+		apiListener2 := listener.NewApi(nil, nil, nil, nil)
 
 		service.Subscribe(apiListener1)
 		service.Subscribe(apiListener2)
 	})
 
 	t.Run("Nil", func(t *testing.T) {
-		informer := fixAPIInformer()
+		informer := fixAPIInformer(t)
 		service := newApiService(informer, nil)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
@@ -269,24 +290,24 @@ func TestApiService_Subscribe(t *testing.T) {
 
 func TestApiService_Unubscribe(t *testing.T) {
 	t.Run("Simple", func(t *testing.T) {
-		informer := fixAPIInformer()
+		informer := fixAPIInformer(t)
 		service := newApiService(informer, nil)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		apiListener := listener.NewApi(nil, nil, nil)
+		apiListener := listener.NewApi(nil, nil, nil, nil)
 		service.Subscribe(apiListener)
 
 		service.Unsubscribe(apiListener)
 	})
 
 	t.Run("Duplicated", func(t *testing.T) {
-		informer := fixAPIInformer()
+		informer := fixAPIInformer(t)
 		service := newApiService(informer, nil)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		apiListener := listener.NewApi(nil, nil, nil)
+		apiListener := listener.NewApi(nil, nil, nil, nil)
 		service.Subscribe(apiListener)
 		service.Subscribe(apiListener)
 
@@ -294,13 +315,13 @@ func TestApiService_Unubscribe(t *testing.T) {
 	})
 
 	t.Run("Miltiple", func(t *testing.T) {
-		informer := fixAPIInformer()
+		informer := fixAPIInformer(t)
 		service := newApiService(informer, nil)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		apiListener1 := listener.NewApi(nil, nil, nil)
-		apiListener2 := listener.NewApi(nil, nil, nil)
+		apiListener1 := listener.NewApi(nil, nil, nil, nil)
+		apiListener2 := listener.NewApi(nil, nil, nil, nil)
 
 		service.Subscribe(apiListener1)
 		service.Subscribe(apiListener2)
@@ -309,7 +330,7 @@ func TestApiService_Unubscribe(t *testing.T) {
 	})
 
 	t.Run("Nil", func(t *testing.T) {
-		informer := fixAPIInformer()
+		informer := fixAPIInformer(t)
 		service := newApiService(informer, nil)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
@@ -322,8 +343,8 @@ func fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer string, 
 
 	api := v1alpha2.Api{
 		TypeMeta: v1.TypeMeta{
-			APIVersion: "authentication.kyma-project.io/v1alpha2",
-			Kind:       "API",
+			APIVersion: "gateway.kyma-project.io/v1alpha2",
+			Kind:       "Api",
 		},
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
@@ -351,9 +372,39 @@ func fixAPIWith(name, namespace, hostname, serviceName, jwksUri, issuer string, 
 	return &api
 }
 
-func fixAPIInformer(objects ...runtime.Object) cache.SharedIndexInformer {
-	client := fake.NewSimpleClientset(objects...)
-	informerFactory := externalversions.NewSharedInformerFactory(client, 10)
+func fixAPIInformer(t *testing.T, objects ...runtime.Object) cache.SharedIndexInformer {
+	dynamicClient, err := newDynamicClient(objects...)
+	require.NoError(t, err)
+	return createApiFakeInformer(dynamicClient)
+}
 
-	return informerFactory.Gateway().V1alpha2().Apis().Informer()
+func createApiDynamicClient(dynamicClient dynamic.Interface) dynamic.NamespaceableResourceInterface {
+	return dynamicClient.Resource(schema.GroupVersionResource{
+		Version:  v1alpha2.SchemeGroupVersion.Version,
+		Group:    v1alpha2.SchemeGroupVersion.Group,
+		Resource: "apis",
+	})
+}
+
+func createApiFakeInformer(dynamic dynamic.Interface) cache.SharedIndexInformer {
+	appInformerFactory := dynamicinformer.NewDynamicSharedInformerFactory(dynamic, 10)
+	return appInformerFactory.ForResource(schema.GroupVersionResource{
+		Version:  v1alpha2.SchemeGroupVersion.Version,
+		Group:    v1alpha2.SchemeGroupVersion.Group,
+		Resource: "apis",
+	}).Informer()
+}
+
+func newDynamicClient(objects ...runtime.Object) (*dynamicFake.FakeDynamicClient, error) {
+	scheme := runtime.NewScheme()
+	err := v1alpha2.AddToScheme(scheme)
+	if err != nil {
+		return &dynamicFake.FakeDynamicClient{}, err
+	}
+	result := make([]runtime.Object, len(objects))
+	for i, obj := range objects {
+		converted, _ := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
+		result[i] = &unstructured.Unstructured{Object: converted}
+	}
+	return dynamicFake.NewSimpleDynamicClient(scheme, result...), nil
 }

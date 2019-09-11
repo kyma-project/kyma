@@ -112,7 +112,143 @@ spec:
     - url: "bitbucket.org/kyma-project/addons//addons/index.yaml"
 ```
 
->**NOTE:** For now, the SSH protocol is not supported.
-
   </details>
 </div>
+
+## Supported protocols with authentication
+
+You can provide authentication as part of the URL in your AddonsConfiguration and ClusterAddonsConfiguration custom resources. Instead of using sensitive information directly in the URL, put it in the Secret resource and take advantage of templating. In your repository URL, use placeholders which refer to keys in the Secret. See the following example:
+
+```yaml
+apiVersion: addons.kyma-project.io/v1alpha1
+kind: ClusterAddonsConfiguration
+metadata:
+  name: addons-cfg-sample
+spec:
+  repositories:
+    - url: "https://{host}/{project}/addons/index.yaml"
+      secretRef:
+        name: data
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: data
+type: Opaque
+stringData:
+  host: "github.com"
+  project: "kyma-project/addons"       
+```
+The URL renders as follows:
+```
+https://github.com/kyma-project/addons/addons/index.yaml
+```
+
+The Helm Broker supports authentication with these protocols:
+
+<div tabs>
+  <details>
+  <summary>
+  HTTP/HTTPS
+  </summary>
+
+To secure your addons repository with basic authentication credentials, create a Secret resource which contains credentials, and reference it in the repository URL definition using templating. Follow these steps:
+
+1. Create a Secret:
+```bash
+kubectl create secret generic auth -n stage --from-literal=username=admin --from-literal=password=secretPassword
+```
+2. In your repository URL, precede the hostname with the `username:password@` section:
+```
+https://admin:secretPassword@repository.addons.com/index.yaml
+```
+
+3. Define a ClusterAddonsConfiguration or AddonsConfiguration custom resource:
+```yaml
+apiVersion: addons.kyma-project.io/v1alpha1
+kind: ClusterAddonsConfiguration
+metadata:
+  name: addons-cfg-sample
+spec:
+  repositories:
+    # HTTPS protocol with basic authorization provided
+    - url: "https://{username}:{password}@repository.addons.com/index.yaml"
+      secretRef:
+        name: auth
+        namespace: stage     
+```
+
+  </details>
+  <details>
+  <summary>
+  Git SSH
+  </summary>
+
+  The Git SSH protocol requires an SSH key to authenticate with your repository. Setting SSH keys differs among hosting providers. Read [this](https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key) document to learn how to generate a new SSH key in the GitHub service.
+  >**NOTE:** The Git SSH private key must be base64-encoded.
+
+  Follow these steps to secure your addons repository with basic authentication credentials:
+
+  1. Run this command to encode your private key:
+  ```bash
+    base64 -b -i {path_to_id_rsa} -o id_rsa-encoded
+  ```
+  > **NOTE:** Do not secure your private SSH key with a passphrase.
+
+  2. Create a corresponding Secret resource:
+  ```bash
+  kubectl create secret generic auth -n stage --from-file=key=id_rsa-encoded
+  ```
+
+  3. Define a URL with the required private SSH key option:
+  ```yaml
+  apiVersion: addons.kyma-project.io/v1alpha1
+  kind: ClusterAddonsConfiguration
+  metadata:
+    name: addons-cfg-sample
+  spec:
+    repositories:
+      # Git SSH protocol with the reference to the Secret that contains base64-encoded SSH private key
+      - url: "git::ssh://git@github.com/kyma-project/private-addons.git//addons/index.yaml?sshkey={key}"
+        secretRef:
+          name: auth
+          namespace: stage
+  ```
+
+  </details>
+  <details>
+  <summary>
+  S3
+  </summary>
+
+  The S3 protocol requires a key and a secret to authenticate with your bucket. To get a key and a secret, log in to the AWS [console](https://console.aws.amazon.com),
+  select **My Security Credentials**, and go to the **Access keys** tab where you can create a new access key.
+    
+  > **NOTE:** For more information about security credentials and access key, read [this](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys) document. 
+  
+  Follow these steps to secure your S3 addons repository with basic authentication credentials:
+  
+  1. Create a Secret resource with S3 credentials:
+  ```bash
+    echo -n 'AWS_KEY' > ./key.txt
+    echo -n 'AWS_SECRET' > ./secret.txt
+    
+    kubectl create secret generic aws-auth -n default --from-file=aws_key=./key.txt --from-file=aws_secret=./secret.txt
+  ```
+  
+  2. Define a URL with the required fields:
+  ```yaml
+    apiVersion: addons.kyma-project.io/v1alpha1
+    kind: ClusterAddonsConfiguration
+    metadata:
+      name: addons-cfg-sample
+    spec:
+      repositories:
+        - url: "s3::http://s3-region.amazonaws.com/addon-test/addons//index.yaml?aws_access_key_id={aws_key}&aws_access_key_secret={aws_secret}"
+          secretRef:
+            name: aws-auth
+            namespace: default
+  ```
+  
+  </details>
+</div>  

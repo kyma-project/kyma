@@ -46,7 +46,7 @@ func (c *FakeApis) List(opts v1.ListOptions) (result *v1alpha2.ApiList, err erro
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha2.ApiList{}
+	list := &v1alpha2.ApiList{ListMeta: obj.(*v1alpha2.ApiList).ListMeta}
 	for _, item := range obj.(*v1alpha2.ApiList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -115,7 +115,7 @@ func (c *FakeApis) DeleteCollection(options *v1.DeleteOptions, listOptions v1.Li
 // Patch applies the patch and returns the patched api.
 func (c *FakeApis) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha2.Api, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(apisResource, c.ns, name, data, subresources...), &v1alpha2.Api{})
+		Invokes(testing.NewPatchSubresourceAction(apisResource, c.ns, name, pt, data, subresources...), &v1alpha2.Api{})
 
 	if obj == nil {
 		return nil, err

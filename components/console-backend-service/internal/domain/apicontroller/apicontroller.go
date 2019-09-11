@@ -4,12 +4,15 @@ import (
 	"context"
 	"time"
 
-	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
-	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions"
+	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller/disabled"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
 	"github.com/pkg/errors"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 )
 
@@ -18,11 +21,17 @@ type PluggableResolver struct {
 	cfg *resolverConfig
 
 	Resolver
-	informerFactory externalversions.SharedInformerFactory
+	informerFactory dynamicinformer.DynamicSharedInformerFactory
+}
+
+var apisGroupVersionResource = schema.GroupVersionResource{
+	Version:  v1alpha2.SchemeGroupVersion.Version,
+	Group:    v1alpha2.SchemeGroupVersion.Group,
+	Resource: "apis",
 }
 
 func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*PluggableResolver, error) {
-	client, err := versioned.NewForConfig(restConfig)
+	client, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing clientset")
 	}
@@ -40,14 +49,21 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Pluggabl
 }
 
 func (r *PluggableResolver) Enable() error {
-	r.informerFactory = externalversions.NewSharedInformerFactory(r.cfg.client, r.cfg.informerResyncPeriod)
-	apiService := newApiService(r.informerFactory.Gateway().V1alpha2().Apis().Informer(), r.cfg.client)
+	r.informerFactory = dynamicinformer.NewDynamicSharedInformerFactory(r.cfg.client, r.cfg.informerResyncPeriod)
+	aInformer := r.informerFactory.ForResource(apisGroupVersionResource).Informer()
+
+	aResourceClient := r.cfg.client.Resource(apisGroupVersionResource)
+
+	apiService := newApiService(aInformer, aResourceClient)
 	apiResolver, err := newApiResolver(apiService)
 	if err != nil {
 		return err
 	}
 
-	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {
+	r.Pluggable.EnableAndSyncCache(func(stopCh chan struct{}) {
+		r.informerFactory.Start(stopCh)
+		r.informerFactory.WaitForCacheSync(stopCh)
+
 		r.Resolver = &domainResolver{
 			apiResolver: apiResolver,
 		}
@@ -67,7 +83,7 @@ func (r *PluggableResolver) Disable() error {
 
 type resolverConfig struct {
 	informerResyncPeriod time.Duration
-	client               versioned.Interface
+	client               dynamic.Interface
 }
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled

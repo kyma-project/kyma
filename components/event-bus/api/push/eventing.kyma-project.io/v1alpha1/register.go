@@ -1,7 +1,7 @@
 package v1alpha1
 
 import (
-	eventingkymaio "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io"
+	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"

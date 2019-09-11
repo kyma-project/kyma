@@ -13,15 +13,22 @@ type appConverter interface {
 	ToGQL(in *api.Application) gqlschema.Application
 }
 
+//go:generate mockery -name=extractor -output=automock -outpkg=automock -case=underscore
+type extractor interface {
+	Do(interface{}) (*api.Application, error)
+}
+
 type Application struct {
 	channel   chan<- gqlschema.ApplicationEvent
 	converter appConverter
+	extractor extractor
 }
 
-func NewApplication(channel chan<- gqlschema.ApplicationEvent, converter appConverter) *Application {
+func NewApplication(channel chan<- gqlschema.ApplicationEvent, converter appConverter, extractor extractor) *Application {
 	return &Application{
 		channel:   channel,
 		converter: converter,
+		extractor: extractor,
 	}
 }
 
@@ -38,13 +45,17 @@ func (l *Application) OnDelete(object interface{}) {
 }
 
 func (l *Application) onEvent(eventType gqlschema.SubscriptionEventType, object interface{}) {
-	app, ok := object.(*api.Application)
-	if !ok {
+	convertedApp, err := l.extractor.Do(object)
+	if err != nil {
 		glog.Error(fmt.Errorf("incorrect object type: %T, should be: *Application", object))
 		return
 	}
 
-	l.notify(eventType, app)
+	if convertedApp == nil {
+		return
+	}
+
+	l.notify(eventType, convertedApp)
 }
 
 func (l *Application) notify(eventType gqlschema.SubscriptionEventType, application *api.Application) {

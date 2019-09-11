@@ -15,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/mockice"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/resource"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -44,12 +45,17 @@ func TestClusterDocsTopicsQueries(t *testing.T) {
 	cmsCli, _, err := client.NewDynamicClientWithConfig()
 	require.NoError(t, err)
 
+	t.Log("Setup test service")
+	host, err := mockice.Start(cmsCli, MockiceNamespace, MockiceSvcName)
+	require.NoError(t, err)
+	defer mockice.Stop(cmsCli, MockiceNamespace, MockiceSvcName)
+
 	subscription := subscribeClusterDocsTopic(c, clusterDocsTopicEventDetailsFields())
 	defer subscription.Close()
 
 	clusterDocsTopicClient := resource.NewClusterDocsTopic(cmsCli, t.Logf)
 
-	createClusterDocsTopic(t, clusterDocsTopicClient, clusterDocsTopicName1, "1")
+	createClusterDocsTopic(t, clusterDocsTopicClient, clusterDocsTopicName1, "1", host)
 	fixedClusterDocsTopic := fixture.ClusterDocsTopic(clusterDocsTopicName1)
 
 	t.Log(fmt.Sprintf("Check subscription event of clusterDocsTopic %s created", clusterDocsTopicName1))
@@ -58,8 +64,8 @@ func TestClusterDocsTopicsQueries(t *testing.T) {
 	assert.NoError(t, err)
 	checkClusterDocsTopicEvent(t, expectedEvent, event)
 
-	createClusterDocsTopic(t, clusterDocsTopicClient, clusterDocsTopicName3, "3")
-	createClusterDocsTopic(t, clusterDocsTopicClient, clusterDocsTopicName2, "2")
+	createClusterDocsTopic(t, clusterDocsTopicClient, clusterDocsTopicName3, "3", host)
+	createClusterDocsTopic(t, clusterDocsTopicClient, clusterDocsTopicName2, "2", host)
 
 	waitForClusterDocsTopic(t, clusterDocsTopicClient, clusterDocsTopicName1)
 	waitForClusterDocsTopic(t, clusterDocsTopicClient, clusterDocsTopicName3)
@@ -80,9 +86,9 @@ func TestClusterDocsTopicsQueries(t *testing.T) {
 	AuthSuite.Run(t, ops)
 }
 
-func createClusterDocsTopic(t *testing.T, client *resource.ClusterDocsTopic, name, order string) {
+func createClusterDocsTopic(t *testing.T, client *resource.ClusterDocsTopic, name, order, host string) {
 	t.Log(fmt.Sprintf("Create clusterDocsTopic %s", name))
-	err := client.Create(fixClusterDocsTopicMeta(name, order), fixCommonClusterDocsTopicSpec())
+	err := client.Create(fixClusterDocsTopicMeta(name, order), fixCommonClusterDocsTopicSpec(host))
 	require.NoError(t, err)
 }
 
@@ -169,7 +175,7 @@ func checkClusterDocsTopic(t *testing.T, expected, actual shared.ClusterDocsTopi
 	assert.Equal(t, expected.Description, actual.Description)
 
 	// Assets
-	assertClusterAssetsExistsAndEqual(t, fixture.ClusterAsset("openapi"), actual.Assets)
+	assertClusterAssetsExistsAndEqual(t, fixture.ClusterAsset(SourceType), actual.Assets)
 }
 
 func checkClusterAsset(t *testing.T, expected, actual shared.ClusterAsset) {
@@ -255,17 +261,17 @@ func fixClusterDocsTopicMeta(name, order string) metav1.ObjectMeta {
 	}
 }
 
-func fixCommonClusterDocsTopicSpec() v1alpha1.CommonDocsTopicSpec {
+func fixCommonClusterDocsTopicSpec(host string) v1alpha1.CommonDocsTopicSpec {
 	return v1alpha1.CommonDocsTopicSpec{
 		DisplayName: fixture.DocsTopicDisplayName,
 		Description: fixture.DocsTopicDescription,
 		Sources: []v1alpha1.Source{
 			{
-				Type:       "openapi",
-				Name:       "openapi",
+				Type:       SourceType,
+				Name:       SourceType,
 				Parameters: &runtime.RawExtension{Raw: []byte(`{"json":"true","complex":{"data":"true"}}`)},
 				Mode:       v1alpha1.DocsTopicSingle,
-				URL:        "https://petstore.swagger.io/v2/swagger.json",
+				URL:        mockice.ResourceURL(host),
 			},
 		},
 	}

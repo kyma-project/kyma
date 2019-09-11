@@ -96,8 +96,8 @@ func (r *PluggableContainer) Enable() error {
 	r.informerFactory = informerFactory
 
 	clusterAssetService, err := newClusterAssetService(informerFactory.ForResource(schema.GroupVersionResource{
-		Version:  v1alpha2.SchemeGroupVersion.Version,
-		Group:    v1alpha2.SchemeGroupVersion.Group,
+		Version:  v1alpha2.GroupVersion.Version,
+		Group:    v1alpha2.GroupVersion.Group,
 		Resource: "clusterassets",
 	}).Informer())
 	if err != nil {
@@ -105,8 +105,8 @@ func (r *PluggableContainer) Enable() error {
 	}
 
 	assetService, err := newAssetService(informerFactory.ForResource(schema.GroupVersionResource{
-		Version:  v1alpha2.SchemeGroupVersion.Version,
-		Group:    v1alpha2.SchemeGroupVersion.Group,
+		Version:  v1alpha2.GroupVersion.Version,
+		Group:    v1alpha2.GroupVersion.Group,
 		Resource: "assets",
 	}).Informer())
 	if err != nil {

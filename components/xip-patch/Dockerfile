@@ -2,7 +2,7 @@ FROM alpine:3.8
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
-ENV KUBECTL_VERSION 1.15.2
+ENV KUBECTL_VERSION 1.15.3
 
 RUN apk --no-cache upgrade \
     && apk --no-cache --update add curl \
@@ -10,5 +10,8 @@ RUN apk --no-cache upgrade \
     && apk --no-cache add bash openssl
 
 COPY . /app
+
+RUN addgroup -S xipgroup && adduser -S xip --uid 2000 -G xipgroup -h /home/xip && chown -R xip /app
+USER 2000
 
 ENTRYPOINT [ "/app/xip-patch.sh" ]

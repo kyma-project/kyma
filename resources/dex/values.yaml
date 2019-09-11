@@ -3,15 +3,45 @@ imageRegistry: "quay.io/coreos"
 containerPort: 5556
 
 oidc:
-  kymaClient: "kyma-client"
-  consoleClientId: console
-  consoleClientName: 'Console'
-  grafanaClientId: grafana
-  grafanaClientName: 'Grafana UI'
-  jaegerClientId: jaeger
-  jaegerClientName: 'Jaeger UI'
-  kialiClientId: kiali
-  kialiClientName: 'Kiali UI'
+  staticClientsBase: |-
+    - id: kyma-client
+      name: 'Kyma Client'
+      redirectURIs:
+      - 'http://127.0.0.1:5555/callback'
+      secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+      trustedPeers:
+      - kubecontroller
+      - console
+    - id: console
+      name: Console
+      redirectURIs:
+      - 'http://console-dev.{{ .Values.global.ingress.domainName }}:4200'
+      - 'https://console.{{ .Values.global.ingress.domainName }}'
+      secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+    - id: grafana
+      name: Grafana UI
+      redirectURIs:
+      - 'https://grafana.{{ .Values.global.ingress.domainName }}/login/generic_oauth'
+      secret: apie4eeX6hiC9ainieli
+    - id: jaeger
+      name: Jaeger UI
+      redirectURIs:
+      - 'http://jaeger.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
+      - 'https://jaeger.{{ .Values.global.ingress.domainName }}/oauth/callback'
+      secret: oiEWUWOIEwedfgg
+    - id: kiali
+      name: Kiali UI
+      redirectURIs:
+      - 'http://kiali.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
+      - 'https://kiali.{{ .Values.global.ingress.domainName }}/oauth/callback'
+      secret: hiFWLWqIxw5d3gl
+  staticClientsExtra: |-
+
+connectors: |-
+
+volumeMountsExtra: |-
+
+volumesExtra: |-
 
 dex:
   expiry:
@@ -31,9 +61,9 @@ global:
     name: kyma-gateway
   dex_static_user_configurer:
     dir: pr/
-    version: "PR-5226"
+    version: "PR-5433"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:
     dir: pr/
-    version: PR-4837
+    version: PR-5433

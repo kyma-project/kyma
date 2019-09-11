@@ -5,7 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	. "github.com/smartystreets/goconvey/convey"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const finalizerName = "test.finalizer.kyma.cx"
