@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -229,7 +230,17 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[s
 			return err
 		}
 	} else if res.StatusCode != http.StatusAccepted {
-		log.Printf("ERROR: SendMessage(): %s", res.Status)
+		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			if err := res.Body.Close(); err != nil {
+				log.Printf("error while closing body %v", err)
+			}
+		}()
+		log.Printf("ERROR: SendMessage() NotStatusAccepted: %s", string(body))
+		log.Printf("ERROR: SendMessage() NotStatusAccepted: %s", res.Status)
 		return errors.New(res.Status)
 	}
 	// ok
