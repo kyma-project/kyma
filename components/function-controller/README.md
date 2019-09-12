@@ -1,12 +1,12 @@
 # Function Controller
 
-The Knative Function Controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses Knative Build and Knative Serving under the hood.
+The Knative Function Controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses Tekton Pipelines and Knative Serving under the hood.
 
 ## Prerequisites
 
 The Function Controller requires the following components to be installed:
 
-- Knative Build (v0.6.0)
+- Tekton Pipelines (v0.7.0)
 - Knative Serving (v0.8.1)
 - Istio (v1.0.7)
 
@@ -81,7 +81,7 @@ Follow these steps to prepare the environment you will use to deploy the Control
     kubectl apply -n ${FN_NAMESPACE} -f config/dockerfiles.yaml
     ```
 
-6. Before you create Functions, it is necessary to create the `registry-credentials` Secret, which contains credentials to the Docker registry defined by the **FN_REGISTRY** environment variable. Knative Build uses this Secret to push the images it builds for the deployed Functions. The corresponding `function-controller-build` ServiceAccount was referenced inside the controller configuration in step 3.
+6. Before you create Functions, it is necessary to create the `registry-credentials` Secret, which contains credentials to the Docker registry defined by the **FN_REGISTRY** environment variable. Tekton Pipelines uses this Secret to push the images it builds for the deployed Functions. The corresponding `function-controller-build` ServiceAccount was referenced inside the controller configuration in step 3.
 
     ```bash
     reg_username=<container registry username>
@@ -95,7 +95,7 @@ Follow these steps to prepare the environment you will use to deploy the Control
     metadata:
       name: registry-credentials
       annotations:
-        build.knative.dev/docker-0: ${FN_REGISTRY}
+        tekton.dev/docker-0: ${FN_REGISTRY}
     stringData:
       username: ${reg_username}
       password: ${reg_password}
@@ -142,19 +142,19 @@ Follow the steps below to create a sample Function.
 2. Ensure the Function was created:
 
     ```bash
-    kubectl get functions
+    kubectl -n ${FN_NAMESPACE} get functions
     ```
 
 3. Check the status of the build:
 
     ```bash
-    kubectl get builds.build.knative.dev
+    kubectl -n ${FN_NAMESPACE} get taskruns.tekton.dev
     ```
 
 4. Check the status of the Knative Serving service:
 
     ```bash
-    kubectl get services.serving.knative.dev
+    kubectl -n ${FN_NAMESPACE} get services.serving.knative.dev
     ```
 
 5. Access the Function:
@@ -165,7 +165,7 @@ Follow the steps below to create a sample Function.
       <summary>Minikube</summary>
 
       ```bash
-      FN_DOMAIN="$(kubectl get ksvc demo --output 'jsonpath={.status.url}' | sed -e 's/http\([s]\)*:[/][/]//')"
+      FN_DOMAIN="$(kubectl -n ${FN_NAMESPACE} get ksvc demo --output 'jsonpath={.status.url}' | sed -e 's/http\([s]\)*:[/][/]//')"
       FN_PORT="$(kubectl get svc istio-ingressgateway -n istio-system --output 'jsonpath={.spec.ports[?(@.port==80)].nodePort}')"
       curl -v -H "Host: ${FN_DOMAIN}" http://$(minikube ip):${FN_PORT}
       ```
@@ -175,7 +175,7 @@ Follow the steps below to create a sample Function.
       <summary>Remote cluster</summary>
 
       ```bash
-      FN_DOMAIN="$(kubectl get ksvc demo --output 'jsonpath={.status.url}' | sed -e 's/http\([s]\)*:[/][/]//')"
+      FN_DOMAIN="$(kubectl -n ${FN_NAMESPACE} get ksvc demo --output 'jsonpath={.status.url}' | sed -e 's/http\([s]\)*:[/][/]//')"
       FN_INGRESS="$(kubectl get svc istio-ingressgateway -n istio-system --output 'jsonpath={.status.loadBalancer.ingress[0].ip}')"
       curl -kD- -H "Host: ${FN_DOMAIN}" "http://${FN_INGRESS}"   
       ```

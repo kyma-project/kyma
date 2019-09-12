@@ -22,23 +22,26 @@ import (
 	"testing"
 	"time"
 
-	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
+	"golang.org/x/net/context"
 
-	buildv1alpha1 "github.com/knative/build/pkg/apis/build/v1alpha1"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/gstruct"
-	"golang.org/x/net/context"
+	gomegatypes "github.com/onsi/gomega/types"
+
+	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
+	knapis "knative.dev/pkg/apis"
+	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
-	"knative.dev/pkg/apis"
-	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 var c client.Client
@@ -139,73 +142,93 @@ func TestReconcile(t *testing.T) {
 	g.Expect(functionConfigMap.Data["handler.js"]).To(gomega.Equal(fnCreated.Spec.Function))
 	g.Expect(functionConfigMap.Data["package.json"]).To(gomega.Equal("{}"))
 
-	// get service
-	service := &servingv1alpha1.Service{}
-	g.Eventually(func() error { return c.Get(context.TODO(), depKey, service) }, timeout).
+	// get Knative Service
+	ksvc := &servingv1alpha1.Service{}
+	g.Eventually(func() error { return c.Get(context.TODO(), depKey, ksvc) }, timeout).
 		Should(gomega.Succeed())
-	g.Expect(service.Namespace).To(gomega.Equal("default"))
+	g.Expect(ksvc.Namespace).To(gomega.Equal("default"))
 
 	// ensure container environment variables are correct
-	g.Expect(service.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Env).To(gomega.Equal(expectedEnv))
+	g.Expect(ksvc.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Env).To(gomega.Equal(expectedEnv))
 
 	// Unique Build name base on function sha
 	hash := sha256.New()
 	hash.Write([]byte(functionConfigMap.Data["handler.js"] + functionConfigMap.Data["package.json"]))
 	functionSha := fmt.Sprintf("%x", hash.Sum(nil))
-	shortSha := functionSha[0:10]
+	shortSha := functionSha[:10]
 	buildName := fmt.Sprintf("%s-%s", fnCreated.Name, shortSha)
 
-	// get the build object
-	build := &buildv1alpha1.Build{}
+	// get the Task
+	task := &tektonv1alpha1.Task{}
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Name: buildName, Namespace: "default"}, build)
+		return c.Get(context.TODO(), types.NamespacedName{Name: "function-build", Namespace: "default"}, task)
 	}, timeout).
 		Should(gomega.Succeed())
 
-	// get the build template
-	buildTemplate := &buildv1alpha1.BuildTemplate{}
+	// ensure Task input params are defined
+	var idTaskInputParam gstruct.Identifier = func(element interface{}) string {
+		return element.(tektonv1alpha1.ParamSpec).Name
+	}
+	var matchTaskInputParamType gomegatypes.GomegaMatcher = gstruct.MatchFields(gstruct.IgnoreExtras,
+		gstruct.Fields{"Type": gomega.Equal(tektonv1alpha1.ParamTypeString)},
+	)
+	g.Expect(task.Spec.Inputs.Params).To(gstruct.MatchAllElements(idTaskInputParam, gstruct.Elements{
+		"imageName":               matchTaskInputParamType,
+		"dockerfileConfigmapName": matchTaskInputParamType,
+		"sourceConfigmapName":     matchTaskInputParamType,
+	}))
+
+	// get the TaskRun object
+	tr := &tektonv1alpha1.TaskRun{}
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Name: "function-kaniko", Namespace: "default"}, buildTemplate)
+		return c.Get(context.TODO(), types.NamespacedName{Name: buildName, Namespace: "default"}, tr)
 	}, timeout).
 		Should(gomega.Succeed())
 
-	// ensure build template is correct
-	// parameters are available
-	g.Expect(buildTemplate.Spec.Parameters).To(gomega.ContainElement(
-		gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
-			"Name": gomega.BeEquivalentTo("IMAGE"),
-		}),
-	))
-	g.Expect(buildTemplate.Spec.Parameters).To(gomega.ContainElement(
-		gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
-			"Name": gomega.BeEquivalentTo("DOCKERFILE"),
-		}),
-	))
-	// ensure build template references correct config map
-	expectedConfigMaps := []string{"dockerfile-nodejs6", "dockerfile-nodejs8"}
-
-	for _, cmName := range buildTemplate.Spec.Volumes {
-		g.Expect(expectedConfigMaps).To(gomega.ContainElement(gomega.BeEquivalentTo(cmName.ConfigMap.LocalObjectReference.Name)))
+	// ensure build template references all ConfigMaps (Dockerfiles, Fn source)
+	var idTaskVolumes gstruct.Identifier = func(element interface{}) string {
+		return element.(corev1.Volume).Name
 	}
-	// g.Expect(service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Image).To(gomega.HavePrefix("test/default-foo"))
-	g.Expect(build.Spec.ServiceAccountName).To(gomega.Equal("build-bot"))
-	// g.Expect(service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Image).To(gomega.HavePrefix("test/default-foo"))
+	var matchTaskVolumeSource gomegatypes.GomegaMatcher = gstruct.MatchFields(gstruct.IgnoreExtras,
+		gstruct.Fields{"VolumeSource": gstruct.MatchFields(gstruct.IgnoreExtras,
+			gstruct.Fields{"ConfigMap": gomega.Not(gomega.BeNil())},
+		)},
+	)
+	g.Expect(task.Spec.Volumes).To(gstruct.MatchAllElements(idTaskVolumes, gstruct.Elements{
+		"dockerfile-nodejs6": matchTaskVolumeSource,
+		"dockerfile-nodejs8": matchTaskVolumeSource,
+		"source":             matchTaskVolumeSource,
+	}))
 
-	// ensure that image name referenced in build is used in the service
-	g.Expect(len(service.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers)).To(gomega.Equal(1))
-	var imageNameService = service.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image
-	var imageNameBuild string
-	for _, argumentSpec := range build.Spec.Template.Arguments {
-		if argumentSpec.Name == "IMAGE" {
-			imageNameBuild = argumentSpec.Value
-			break
-		}
+	g.Expect(tr.Spec.ServiceAccount).To(gomega.Equal("build-bot"))
+
+	g.Expect(len(ksvc.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers)).To(gomega.Equal(1))
+
+	// ensure that TaskRun params are set to their expected value
+	imageNameService := ksvc.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image
+
+	var idTaskRunInputParam gstruct.Identifier = func(element interface{}) string {
+		return element.(tektonv1alpha1.Param).Name
 	}
-	g.Expect(imageNameBuild).To(gomega.Equal(imageNameService))
+	var matchTaskRunInputParamValue = func(val string) gomegatypes.GomegaMatcher {
+		return gstruct.MatchFields(gstruct.IgnoreExtras,
+			gstruct.Fields{"Value": gstruct.MatchFields(gstruct.IgnoreExtras,
+				gstruct.Fields{"StringVal": gomega.Equal(val)},
+			)},
+		)
+	}
+	g.Expect(tr.Spec.Inputs.Params).To(gstruct.MatchAllElements(idTaskRunInputParam, gstruct.Elements{
+		"imageName":               matchTaskRunInputParamValue(imageNameService),
+		"dockerfileConfigmapName": matchTaskRunInputParamValue("dockerfile-" + fnCreated.Spec.Runtime),
+		"sourceConfigmapName":     matchTaskRunInputParamValue(fnCreated.Name),
+	}))
 
-	// ensure build template has correct destination
-	g.Expect(len(buildTemplate.Spec.Steps)).To(gomega.Equal(1))
-	g.Expect(buildTemplate.Spec.Steps[0].Args[1]).To(gomega.Equal("--destination=${IMAGE}"))
+	g.Expect(len(task.Spec.Steps)).To(gomega.Equal(1))
+
+	// ensure Task build step has correct args
+	g.Expect(task.Spec.Steps[0].Args).To(gomega.ConsistOf(
+		"--destination=$(inputs.params.imageName)",
+	))
 
 	// ensure fetched function spec corresponds to created function spec
 	fnUpdatedFetched := &serverlessv1alpha1.Function{}
@@ -363,7 +386,10 @@ func TestFunctionConditionNewFunction(t *testing.T) {
 
 	g.Expect(c.Create(context.TODO(), function)).Should(gomega.Succeed())
 
-	reconcileFunction.setFunctionCondition(function)
+	reconcileFunction.setFunctionCondition(function,
+		&tektonv1alpha1.TaskRun{},
+		&servingv1alpha1.Service{},
+	)
 
 	// no knative objects present => no function status update
 	g.Expect(fmt.Sprint(function.Status.Condition)).To(gomega.Equal(""))
@@ -398,7 +424,7 @@ func TestFunctionConditionBuildError(t *testing.T) {
 	//  Message:               build step "build-step-build-and-push" exited with code 1 (image: "docker-pullable://gcr.io/kaniko-project/executor@sha256:d9fe474f80b73808dc12b54f45f5fc90f7856d9fc699d4a5e79d968a1aef1a72"); for logs run: kubectl -n default logs example-build-pod-ed7514 -c build-step-build-and-push
 	//  Status:                False
 	//  Type:                  Succeeded
-	build := &buildv1alpha1.Build{
+	tr := &tektonv1alpha1.TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
@@ -407,31 +433,34 @@ func TestFunctionConditionBuildError(t *testing.T) {
 
 	// create function and build
 	g.Expect(c.Create(context.TODO(), function)).Should(gomega.Succeed())
-	g.Expect(c.Create(context.TODO(), build)).Should(gomega.Succeed())
+	g.Expect(c.Create(context.TODO(), tr)).Should(gomega.Succeed())
 	defer func() {
 		_ = c.Delete(context.TODO(), function)
-		_ = c.Delete(context.TODO(), build)
+		_ = c.Delete(context.TODO(), tr)
 	}()
 
 	// get build and update status
-	foundBuild := &buildv1alpha1.Build{}
+	foundTr := &tektonv1alpha1.TaskRun{}
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Name: objectName, Namespace: "default"}, foundBuild)
+		return c.Get(context.TODO(), types.NamespacedName{Name: objectName, Namespace: "default"}, foundTr)
 	}).Should(gomega.Succeed())
-	foundBuild.Status = buildv1alpha1.BuildStatus{
-		Status: duckv1alpha1.Status{
-			Conditions: []duckv1alpha1.Condition{
+	foundTr.Status = tektonv1alpha1.TaskRunStatus{
+		Status: duckv1beta1.Status{
+			Conditions: duckv1beta1.Conditions{
 				{
-					Type:   duckv1alpha1.ConditionSucceeded,
+					Type:   knapis.ConditionSucceeded,
 					Status: corev1.ConditionFalse,
 				},
 			},
 		},
 	}
-	g.Expect(c.Status().Update(context.TODO(), foundBuild)).Should(gomega.Succeed())
+	g.Expect(c.Status().Update(context.TODO(), foundTr)).Should(gomega.Succeed())
 
 	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
-		reconcileFunction.setFunctionCondition(function)
+		reconcileFunction.setFunctionCondition(function,
+			foundTr,
+			&servingv1alpha1.Service{},
+		)
 		return function.Status.Condition
 	}).Should(gomega.Equal(serverlessv1alpha1.FunctionConditionError))
 }
@@ -485,7 +514,7 @@ func TestFunctionConditionServiceSuccess(t *testing.T) {
 			LatestReadyRevisionName:   "foo",
 		},
 		Status: duckv1beta1.Status{
-			Conditions: []apis.Condition{
+			Conditions: duckv1beta1.Conditions{
 				{
 					Type:   servingv1alpha1.ServiceConditionReady,
 					Status: corev1.ConditionTrue,
@@ -504,7 +533,10 @@ func TestFunctionConditionServiceSuccess(t *testing.T) {
 	g.Expect(c.Status().Update(context.TODO(), foundService)).Should(gomega.Succeed())
 
 	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
-		reconcileFunction.setFunctionCondition(function)
+		reconcileFunction.setFunctionCondition(function,
+			&tektonv1alpha1.TaskRun{},
+			foundService,
+		)
 		return function.Status.Condition
 	}).Should(gomega.Equal(serverlessv1alpha1.FunctionConditionRunning))
 }
@@ -557,7 +589,7 @@ func TestFunctionConditionServiceError(t *testing.T) {
 			LatestReadyRevisionName:   "foo",
 		},
 		Status: duckv1beta1.Status{
-			Conditions: []apis.Condition{
+			Conditions: duckv1beta1.Conditions{
 				{
 					Type:   servingv1alpha1.ServiceConditionReady,
 					Status: corev1.ConditionFalse,
@@ -576,7 +608,10 @@ func TestFunctionConditionServiceError(t *testing.T) {
 	g.Expect(c.Status().Update(context.TODO(), foundService)).Should(gomega.Succeed())
 
 	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
-		reconcileFunction.setFunctionCondition(function)
+		reconcileFunction.setFunctionCondition(function,
+			&tektonv1alpha1.TaskRun{},
+			foundService,
+		)
 		return function.Status.Condition
 	}).Should(gomega.Equal(serverlessv1alpha1.FunctionConditionDeploying))
 }

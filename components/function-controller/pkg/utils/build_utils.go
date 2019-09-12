@@ -17,129 +17,176 @@ limitations under the License.
 package utils
 
 import (
+	"fmt"
 	"os"
 	"time"
 
-	buildv1alpha1 "github.com/knative/build/pkg/apis/build/v1alpha1"
+	"github.com/gogo/protobuf/proto"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var buildTimeout = os.Getenv("BUILD_TIMEOUT")
 
-var defaultMode = int32(420)
+const (
+	// Timeout after which a TaskRun gets canceled. Can be overridden by the BUILD_TIMEOUT env
+	// var.
+	defaultBuildTimeout = 30 * time.Minute
+	// Kaniko executor image used to build Function container images.
+	// https://github.com/GoogleContainerTools/kaniko/blob/master/deploy/Dockerfile
+	kanikoExecutorImage = "gcr.io/kaniko-project/executor:v0.12.0"
+	// Default mode of files mounted from ConfiMap volumes.
+	defaultFileMode int32 = 420
+)
 
-func GetBuildResource(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, imageName string, buildName string) *buildv1alpha1.Build {
-	args := []buildv1alpha1.ArgumentSpec{}
-	args = append(args, buildv1alpha1.ArgumentSpec{Name: "IMAGE", Value: imageName})
+// Task inputs and outputs
+const (
+	imageInputName      = "imageName"
+	dockerfileInputName = "dockerfileConfigmapName"
+	sourceInputName     = "sourceConfigmapName"
+)
 
-	envs := []corev1.EnvVar{}
+// GetBuildTaskRunSpec generates a TaskRun spec from a RuntimeInfo.
+func GetBuildTaskRunSpec(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, imageName, buildTaskName string) *tektonv1alpha1.TaskRunSpec {
+	ref := &tektonv1alpha1.TaskRef{
+		Name: buildTaskName,
+		Kind: tektonv1alpha1.NamespacedTaskKind,
+	}
 
 	timeout, err := time.ParseDuration(buildTimeout)
 	if err != nil {
-		timeout = 30 * time.Minute
+		timeout = defaultBuildTimeout
 	}
 
+	// find Dockerfile name for runtime
+	var dockerfileName string
 	for _, rt := range rnInfo.AvailableRuntimes {
-		if rt.ID == fn.Spec.Runtime {
-			args = append(args, buildv1alpha1.ArgumentSpec{Name: "DOCKERFILE", Value: rt.DockerfileName})
+		if fn.Spec.Runtime == rt.ID {
+			dockerfileName = rt.DockerfileName
+			break
 		}
 	}
 
-	vols := []corev1.Volume{
-		{
-			Name: "source",
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					DefaultMode: &defaultMode,
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: fn.Name,
-					},
+	inputs := tektonv1alpha1.TaskRunInputs{
+		Params: []tektonv1alpha1.Param{
+			{
+				Name: imageInputName,
+				Value: tektonv1alpha1.ArrayOrString{
+					Type:      tektonv1alpha1.ParamTypeString,
+					StringVal: imageName,
+				},
+			},
+			{
+				Name: dockerfileInputName,
+				Value: tektonv1alpha1.ArrayOrString{
+					Type:      tektonv1alpha1.ParamTypeString,
+					StringVal: dockerfileName,
+				},
+			},
+			{
+				Name: sourceInputName,
+				Value: tektonv1alpha1.ArrayOrString{
+					Type:      tektonv1alpha1.ParamTypeString,
+					StringVal: fn.Name,
 				},
 			},
 		},
 	}
 
-	b := buildv1alpha1.Build{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "build.knative.dev/v1alpha1",
-			Kind:       "Build",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      buildName,
-			Namespace: fn.Namespace,
-			Labels:    fn.Labels,
-		},
-		Spec: buildv1alpha1.BuildSpec{
-			ServiceAccountName: rnInfo.ServiceAccount,
-			Template: &buildv1alpha1.TemplateInstantiationSpec{
-				Name:      "function-kaniko",
-				Kind:      buildv1alpha1.BuildTemplateKind,
-				Arguments: args,
-				Env:       envs,
-			},
-			Volumes: vols,
-		},
+	return &tektonv1alpha1.TaskRunSpec{
+		ServiceAccount: rnInfo.ServiceAccount,
+		TaskRef:        ref,
+		Timeout:        &metav1.Duration{Duration: timeout},
+		Inputs:         inputs,
 	}
-
-	if b.Spec.Timeout == nil {
-		b.Spec.Timeout = &metav1.Duration{Duration: timeout}
-	}
-
-	return &b
 }
 
-func GetBuildTemplateSpec(rnInfo *RuntimeInfo) buildv1alpha1.BuildTemplateSpec {
-	parameters := []buildv1alpha1.ParameterSpec{
-		{
-			Name:        "IMAGE",
-			Description: "The name of the image to push",
-		},
-		{
-			Name:        "DOCKERFILE",
-			Description: "name of the configmap that contains the Dockerfile",
+// GetBuildTaskSpec generates a Task spec from a RuntimeInfo.
+func GetBuildTaskSpec(rnInfo *RuntimeInfo) *tektonv1alpha1.TaskSpec {
+	inputs := &tektonv1alpha1.Inputs{
+		Params: []tektonv1alpha1.ParamSpec{
+			{
+				Name:        imageInputName,
+				Description: "Name of the container image to build, including the repository",
+				Type:        tektonv1alpha1.ParamTypeString,
+			},
+			{
+				Name:        dockerfileInputName,
+				Description: "Name of the ConfigMap that contains the Dockerfile",
+				Type:        tektonv1alpha1.ParamTypeString,
+			},
+			{
+				Name:        sourceInputName,
+				Description: "Name of the ConfigMap that contains the Function source",
+				Type:        tektonv1alpha1.ParamTypeString,
+			},
 		},
 	}
 
-	destination := "--destination=${IMAGE}"
-	steps := []corev1.Container{
-		{
+	steps := []tektonv1alpha1.Step{
+		{Container: corev1.Container{
 			Name:  "build-and-push",
-			Image: "gcr.io/kaniko-project/executor",
+			Image: kanikoExecutorImage,
 			Args: []string{
-				"--dockerfile=/workspace/Dockerfile",
-				destination,
+				fmt.Sprintf("--destination=$(inputs.params.%s)", imageInputName),
 			},
+			Env: []corev1.EnvVar{{
+				// Environment variable read by Kaniko to locate the container
+				// registry credentials.
+				// The Tekton credentials initializer sources container registry
+				// credentials from the Secrets referenced in TaskRun's
+				// ServiceAccounts, and makes them available in this directory.
+				// https://github.com/tektoncd/pipeline/blob/master/docs/auth.md
+				Name:  "DOCKER_CONFIG",
+				Value: "/builder/home/.docker/",
+			}},
 			VolumeMounts: []corev1.VolumeMount{
-				{
-					Name:      "${DOCKERFILE}",
-					MountPath: "/workspace",
-				},
 				{
 					Name:      "source",
 					MountPath: "/src",
 				},
+				{
+					Name:      fmt.Sprintf("$(inputs.params.%s)", dockerfileInputName),
+					MountPath: "/workspace",
+				},
+			},
+		}},
+	}
+
+	// populate Volume list with runtimes Dockerfiles
+	vols := make([]corev1.Volume, len(rnInfo.AvailableRuntimes)+1)
+	for i, rt := range rnInfo.AvailableRuntimes {
+		vols[i] = corev1.Volume{
+			Name: rt.DockerfileName,
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					DefaultMode: proto.Int32(defaultFileMode),
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: rt.DockerfileName,
+					},
+				},
+			},
+		}
+	}
+
+	vols[len(rnInfo.AvailableRuntimes)] = corev1.Volume{
+		Name: "source",
+		VolumeSource: corev1.VolumeSource{
+			ConfigMap: &corev1.ConfigMapVolumeSource{
+				DefaultMode: proto.Int32(defaultFileMode),
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: fmt.Sprintf("$(inputs.params.%s)", sourceInputName),
+				},
 			},
 		},
 	}
 
-	var vol corev1.Volume
-	var volumes []corev1.Volume
-	for _, rt := range rnInfo.AvailableRuntimes {
-		vol.Name = rt.DockerfileName
-		vol.VolumeSource.ConfigMap = &corev1.ConfigMapVolumeSource{
-			DefaultMode:          &defaultMode,
-			LocalObjectReference: corev1.LocalObjectReference{Name: rt.DockerfileName},
-		}
-		volumes = append(volumes, vol)
+	return &tektonv1alpha1.TaskSpec{
+		Inputs:  inputs,
+		Steps:   steps,
+		Volumes: vols,
 	}
-
-	bt := buildv1alpha1.BuildTemplateSpec{
-		Parameters: parameters,
-		Steps:      steps,
-		Volumes:    volumes,
-	}
-
-	return bt
 }
