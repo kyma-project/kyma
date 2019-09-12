@@ -85,7 +85,7 @@ deploy: manifests install bin/kustomize ko
 	bin/kustomize build config/default | ko apply -f -
 
 removewebhook:
-	kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io function-webhook.serverless.kyma-project.io
+	-kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io function-webhook.serverless.kyma-project.io
 
 undeploy: uninstall removewebhook bin/kustomize ko
 	bin/kustomize build config/default | ko delete  -f -
@@ -128,5 +128,5 @@ bin/kustomize:
 
 .PHONY: ko
 ko:
-	@go get github.com/google/ko/cmd/ko
+	@go get -u github.com/google/ko/cmd/ko
 
