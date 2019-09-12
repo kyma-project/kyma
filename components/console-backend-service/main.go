@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -24,7 +23,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/origin"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/signal"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/tracing"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go"
 	zipkin "github.com/openzipkin/zipkin-go-opentracing"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
@@ -41,7 +40,7 @@ type config struct {
 	AllowedOrigins       []string      `envconfig:"optional"`
 	Verbose              bool          `envconfig:"default=false"`
 	KubeconfigPath       string        `envconfig:"optional"`
-	SystemNamespaces     string        `envconfig:"default=istio-system knative-eventing knative-serving kube-public kube-system kyma-backup kyma-installer kyma-integration kyma-system natss compass-system"`
+	SystemNamespaces     []string      `envconfig:"default=istio-system,knative-eventing,knative-serving,kube-public,kube-system,kyma-backup,kyma-installer,kyma-integration,kyma-system,natss,compass-system"`
 	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
 	Application          application.Config
@@ -60,8 +59,7 @@ func main() {
 	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	exitOnError(err, "Error while initializing REST client config")
 
-	sysNamespaces := strings.Fields(cfg.SystemNamespaces)
-	resolvers, err := domain.New(k8sConfig, cfg.Application, cfg.AssetStore, cfg.InformerResyncPeriod, cfg.FeatureToggles, sysNamespaces)
+	resolvers, err := domain.New(k8sConfig, cfg.Application, cfg.AssetStore, cfg.InformerResyncPeriod, cfg.FeatureToggles, cfg.SystemNamespaces)
 	exitOnError(err, "Error while creating resolvers")
 
 	kubeClient, err := kubernetes.NewForConfig(k8sConfig)
