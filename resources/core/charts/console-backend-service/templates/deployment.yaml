@@ -49,6 +49,8 @@ spec:
             {{- end }}
           - name: APP_VERBOSE
             value: "true"
+          - name: APP_SYSTEM_NAMESPACES
+            value: {{ .Values.systemNamespaces }}
           - name: APP_ASSET_STORE_ADDRESS
             valueFrom:
               configMapKeyRef:
