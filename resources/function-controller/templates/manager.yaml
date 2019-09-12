@@ -47,6 +47,8 @@ spec:
                 fieldPath: metadata.namespace
           - name: SECRET_NAME
             value: {{ template "fullname" . }}-webhook-server-secret
+          - name: CONTROL_PLANE
+            value: "controller-manager"
           - name: BUILD_TIMEOUT
             value: "20"
           - name: CONTROLLER_CONFIGMAP
