@@ -23,7 +23,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/origin"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/signal"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/tracing"
-	"github.com/opentracing/opentracing-go"
+	opentracing "github.com/opentracing/opentracing-go"
 	zipkin "github.com/openzipkin/zipkin-go-opentracing"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
