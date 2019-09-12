@@ -101,12 +101,31 @@ func TestReconcile(t *testing.T) {
 		Data: map[string]string{
 			"dockerRegistry":     "test",
 			"serviceAccountName": "build-bot",
+			"defaults": `{
+			"size": "S",
+			"runtime": "nodejs8",
+			"timeOut": 180,
+			"funcContentType": "plaintext",
+		}`,
 			"runtimes": `[
-				{
-					"ID": "nodejs8",
-					"DockerFileName": "dockerfile-nodejs8",
-				}
-			]`,
+			{
+				"ID": "nodejs8",
+				"DockerFileName": "dockerfile-nodejs8",
+			},
+			{
+				"ID": "nodejs6",
+				"DockerFileName": "dockerfile-nodejs6",
+			}
+		]`,
+			"funcSizes": `[
+			{"size": "S"},
+			{"size": "M"},
+			{"size": "L"},
+		]`,
+			"funcTypes": `[
+			{"type": "plaintext"},
+			{"type": "base64"}
+		]`,
 		},
 	}
 
@@ -183,13 +202,12 @@ func TestReconcile(t *testing.T) {
 			"Name": gomega.BeEquivalentTo("DOCKERFILE"),
 		}),
 	))
-	// TODO: ignore order
 	// ensure build template references correct config map
-	var configMapNameNodeJs6 = "dockerfile-nodejs-6"
-	var configMapNameNodeJs8 = "dockerfile-nodejs-8"
-	g.Expect(buildTemplate.Spec.Volumes[0].ConfigMap.LocalObjectReference.Name).To(gomega.BeEquivalentTo(configMapNameNodeJs6))
-	g.Expect(buildTemplate.Spec.Volumes[1].ConfigMap.LocalObjectReference.Name).To(gomega.BeEquivalentTo(configMapNameNodeJs8))
+	expectedConfigMaps := []string{"dockerfile-nodejs6", "dockerfile-nodejs8"}
 
+	for _, cmName := range buildTemplate.Spec.Volumes {
+		g.Expect(expectedConfigMaps).To(gomega.ContainElement(gomega.BeEquivalentTo(cmName.ConfigMap.LocalObjectReference.Name)))
+	}
 	// g.Expect(service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Image).To(gomega.HavePrefix("test/default-foo"))
 	g.Expect(build.Spec.ServiceAccountName).To(gomega.Equal("build-bot"))
 	// g.Expect(service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Image).To(gomega.HavePrefix("test/default-foo"))

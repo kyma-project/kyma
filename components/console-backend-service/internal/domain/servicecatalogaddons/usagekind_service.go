@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	v1alpha12 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/cache"
@@ -18,14 +19,15 @@ import (
 type usageKindService struct {
 	informer      cache.SharedIndexInformer
 	dynamicClient dynamic.Interface
-	scClient      v1alpha12.ServicecatalogV1alpha1Interface
+
+	extractor extractor.UsageKindUnstructuredExtractor
 }
 
-func newUsageKindService(client v1alpha12.ServicecatalogV1alpha1Interface, resourceInterface dynamic.Interface, informer cache.SharedIndexInformer) *usageKindService {
+func newUsageKindService(resourceInterface dynamic.Interface, informer cache.SharedIndexInformer) *usageKindService {
 	return &usageKindService{
 		informer:      informer,
 		dynamicClient: resourceInterface,
-		scClient:      client,
+		extractor:     extractor.UsageKindUnstructuredExtractor{},
 	}
 }
 
@@ -37,9 +39,14 @@ func (svc *usageKindService) List(params pager.PagingParams) ([]*v1alpha1.UsageK
 
 	res := make([]*v1alpha1.UsageKind, 0, len(targets))
 	for _, item := range targets {
-		uk, ok := item.(*v1alpha1.UsageKind)
+		u, ok := item.(*unstructured.Unstructured)
 		if !ok {
 			return nil, fmt.Errorf("incorrect item type: %T, should be: 'UsageKind' in version 'v1alpha1'", item)
+		}
+
+		uk, err := svc.extractor.FromUnstructured(u)
+		if err != nil {
+			return nil, err
 		}
 
 		res = append(res, uk)

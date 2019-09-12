@@ -47,7 +47,7 @@ metadata:
 spec:
   ports:
     - name: http-metrics
-      port: 8080
+      port: {{ .Values.ctrl.internalPort }}
   selector:
     app: {{ template "fullname" . }}
 ---

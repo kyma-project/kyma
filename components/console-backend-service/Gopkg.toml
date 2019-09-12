@@ -51,6 +51,10 @@ required = [
   name="github.com/kyma-project/kyma"
   revision = "3a0c31e7c33b83912dfb6f39cdf46720254e5b0f"
 
+[[constraint]]
+  name="github.com/kyma-project/helm-broker"
+  revision = "d07feb2d365a58645031e96b27a95c8d50bb8349"
+
 [[override]]
   name="sigs.k8s.io/controller-runtime"
   version = "v0.2.0"

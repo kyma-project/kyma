@@ -19,17 +19,17 @@ func GetBuildResource(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, imag
 	args := []buildv1alpha1.ArgumentSpec{}
 	args = append(args, buildv1alpha1.ArgumentSpec{Name: "IMAGE", Value: imageName})
 
-	for _, rt := range rnInfo.AvailableRuntimes {
-		if rt.ID == fn.Spec.Runtime {
-			args = append(args, buildv1alpha1.ArgumentSpec{Name: "DOCKERFILE", Value: rt.DockerFileName})
-		}
-	}
-
 	envs := []corev1.EnvVar{}
 
 	timeout, err := time.ParseDuration(buildTimeout)
 	if err != nil {
 		timeout = 30 * time.Minute
+	}
+
+	for _, rt := range rnInfo.AvailableRuntimes {
+		if rt.ID == fn.Spec.Runtime {
+			args = append(args, buildv1alpha1.ArgumentSpec{Name: "DOCKERFILE", Value: rt.DockerFileName})
+		}
 	}
 
 	vols := []corev1.Volume{
@@ -75,7 +75,7 @@ func GetBuildResource(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, imag
 	return &b
 }
 
-func GetBuildTemplateSpec(fn *serverlessv1alpha1.Function) buildv1alpha1.BuildTemplateSpec {
+func GetBuildTemplateSpec(rnInfo *RuntimeInfo) buildv1alpha1.BuildTemplateSpec {
 
 	parameters := []buildv1alpha1.ParameterSpec{
 		{
@@ -110,29 +110,15 @@ func GetBuildTemplateSpec(fn *serverlessv1alpha1.Function) buildv1alpha1.BuildTe
 		},
 	}
 
-	volumes := []corev1.Volume{
-		{
-			Name: "dockerfile-nodejs-6",
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					DefaultMode: &defaultMode,
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "dockerfile-nodejs-6",
-					},
-				},
-			},
-		},
-		{
-			Name: "dockerfile-nodejs-8",
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					DefaultMode: &defaultMode,
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "dockerfile-nodejs-8",
-					},
-				},
-			},
-		},
+	var vol corev1.Volume
+	var volumes []corev1.Volume
+	for _, rt := range rnInfo.AvailableRuntimes {
+		vol.Name = rt.DockerFileName
+		vol.VolumeSource.ConfigMap = &corev1.ConfigMapVolumeSource{
+			DefaultMode:          &defaultMode,
+			LocalObjectReference: corev1.LocalObjectReference{Name: rt.DockerFileName},
+		}
+		volumes = append(volumes, vol)
 	}
 
 	bt := buildv1alpha1.BuildTemplateSpec{

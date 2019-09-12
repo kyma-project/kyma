@@ -5,6 +5,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
@@ -17,6 +18,7 @@ type ClusterAddonsConfiguration struct {
 	channel   chan<- gqlschema.ClusterAddonsConfigurationEvent
 	filter    func(entity *v1alpha1.ClusterAddonsConfiguration) bool
 	converter gqlClusterAddonsConfigurationConverter
+	extractor extractor.ClusterAddonsUnstructuredExtractor
 }
 
 func NewClusterAddonsConfiguration(channel chan<- gqlschema.ClusterAddonsConfigurationEvent, filter func(entity *v1alpha1.ClusterAddonsConfiguration) bool, converter gqlClusterAddonsConfigurationConverter) *ClusterAddonsConfiguration {
@@ -24,6 +26,7 @@ func NewClusterAddonsConfiguration(channel chan<- gqlschema.ClusterAddonsConfigu
 		channel:   channel,
 		filter:    filter,
 		converter: converter,
+		extractor: extractor.ClusterAddonsUnstructuredExtractor{},
 	}
 }
 
@@ -40,9 +43,12 @@ func (l *ClusterAddonsConfiguration) OnDelete(object interface{}) {
 }
 
 func (l *ClusterAddonsConfiguration) onEvent(eventType gqlschema.SubscriptionEventType, object interface{}) {
-	entity, ok := object.(*v1alpha1.ClusterAddonsConfiguration)
-	if !ok {
+	entity, err := l.extractor.Do(object)
+	if err != nil {
 		glog.Error(fmt.Errorf("incorrect object type: %T, should be: *v1alpha1.ClusterAddonsConfiguration", object))
+		return
+	}
+	if entity == nil {
 		return
 	}
 
