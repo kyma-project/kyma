@@ -63,12 +63,12 @@ run: generate fmt vet
 	go run ./cmd/manager/main.go
 
 # Install CRDs into a cluster
-install:
-	kubectl apply -f config/crds/serverless_v1alpha1_function.yaml
+install: symlinks
+	kubectl apply -f config/crds/
 
 # Uninstall CRDs from cluster
-uninstall:
-	kubectl delete -f config/crds/serverless_v1alpha1_function.yaml
+uninstall: symlinks
+	kubectl delete -f config/crds/
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests:
