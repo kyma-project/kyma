@@ -30,8 +30,8 @@ global:
         dir: develop/
         version: "3c75146c"
       connector:
-        dir: develop/
-        version: "2adc7649"
+        dir: pr/
+        version: "PR-273"
 
   isLocalEnv: false
 
