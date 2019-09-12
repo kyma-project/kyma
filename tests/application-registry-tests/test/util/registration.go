@@ -11,7 +11,7 @@ import (
 )
 
 type serviceResponse struct {
-	ID string `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -24,33 +24,44 @@ func DeleteAll(registryAPIURL string) error {
 	}
 	registeredServices, err := readAll(registryAPIURL)
 
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	for i := range registeredServices {
-		request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/%s",registryAPIURL, registeredServices[i]), nil)
-		if err != nil { return err }
+		request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/%s", registryAPIURL, registeredServices[i]), nil)
+		if err != nil {
+			return err
+		}
 
 		_, err = httpClient.Do(request)
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func readAll(registryAPIURL string) (registerdAPIs []string, err error){
+func readAll(registryAPIURL string) (registerdAPIs []string, err error) {
 
 	response, err := httpClient.Get(registryAPIURL)
+	if err != nil {
+		return
+	}
 	defer response.Body.Close()
-	if err != nil {return}
-
 
 	var services []serviceResponse
 
 	responseBytes, err := ioutil.ReadAll(response.Body)
-	if err != nil {return}
+	if err != nil {
+		return
+	}
 
 	err = json.Unmarshal(responseBytes, &services)
-	if err != nil {return}
+	if err != nil {
+		return
+	}
 
 	registerdAPIs = make([]string, len(services))
 
@@ -77,7 +88,6 @@ func RegisterSpec(registryAPIURL string, spec []byte) error {
 
 	return err
 }
-
 
 func RegisterSpecForFolder(registryAPIURL string, folderPath string) error {
 
@@ -119,5 +129,3 @@ func RegisterSpecForFolder(registryAPIURL string, folderPath string) error {
 
 	return err
 }
-
-
