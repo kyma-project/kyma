@@ -27,8 +27,8 @@ import (
 )
 
 const (
-	channelName = "test-channel"
-	testNS      = "test-namespace"
+	channelName      = "test-channel"
+	testNS           = "test-namespace"
 	subscriptionName = "test-subscription"
 )
 
