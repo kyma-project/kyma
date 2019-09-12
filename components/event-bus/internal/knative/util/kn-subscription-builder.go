@@ -18,7 +18,6 @@ func (s *SubscriptionBuilder) Build() *eventingv1alpha1.Subscription {
 }
 
 // ToChannel sets SubscriptionBuilder Channel.
-//TODO fetch based on knative config map
 func (s *SubscriptionBuilder) ToChannel(name string) *SubscriptionBuilder {
 	channel := corev1.ObjectReference{
 		Name:       name,

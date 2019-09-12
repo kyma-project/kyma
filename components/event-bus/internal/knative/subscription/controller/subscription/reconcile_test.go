@@ -396,10 +396,6 @@ func (k *MockKnativeLib) InjectClient(evClient eventingV1Alpha1.EventingV1alpha1
 //  make channels
 func makeKnChannel(namespace string, name string, labels *map[string]string) *messagingV1Alpha1.Channel {
 	return &messagingV1Alpha1.Channel{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: messagingV1Alpha1.SchemeGroupVersion.String(),
-			Kind:       "Channel",
-		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
