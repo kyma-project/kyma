@@ -418,34 +418,6 @@ func makeKnChannel(namespace string, name string, labels *map[string]string) *me
 			},
 		},
 	}
-	//c := &messagingV1Alpha1.Channel{
-	//	TypeMeta: metav1.TypeMeta{
-	//		APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
-	//		Kind:       "Channel",
-	//	},
-	//	ObjectMeta: metav1.ObjectMeta{
-	//		Namespace: namespace,
-	//		Name:      name,
-	//		Labels:    *labels,
-	//		UID:       chanUID,
-	//	},
-	//	Spec: evapisv1alpha1.ChannelSpec{
-	//		Provisioner: &corev1.ObjectReference{
-	//			Name:       provisioner,
-	//			APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
-	//			Kind:       "ClusterChannelProvisioner",
-	//		},
-	//	},
-	//	Status: evapisv1alpha1.ChannelStatus{
-	//		Conditions: []duckv1alpha1.Condition{
-	//			{
-	//				Type:   evapisv1alpha1.ChannelConditionReady,
-	//				Status: corev1.ConditionTrue,
-	//			},
-	//		},
-	//	},
-	//}
-	//return c
 }
 
 func makeKnChannelName(kySub *eventingv1alpha1.Subscription) string {
