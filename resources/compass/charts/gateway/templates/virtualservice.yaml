@@ -25,7 +25,7 @@ spec:
       headers:
         request:
           remove:
-            {{- range .Values.headers.request.remove }}
+            {{- range .Values.global.gateway.headers.request.remove }}
             - {{ . }}
             {{- end }}
     - match:
@@ -39,7 +39,7 @@ spec:
       headers:
         request:
           remove:
-            {{- range .Values.headers.request.remove }}
+            {{- range .Values.global.gateway.headers.request.remove }}
             - {{ . }}
             {{- end }}
       corsPolicy:

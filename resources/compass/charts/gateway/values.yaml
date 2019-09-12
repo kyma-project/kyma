@@ -11,10 +11,3 @@ oathkeeper:
 
 gateway:
   enabled: true
-
-headers:
-  request:
-    remove:
-      - "Client-Id-From-Token"
-      - "Client-Id-From-Certificate"
-      - "Client-Certificate-Hash"

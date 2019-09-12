@@ -53,7 +53,7 @@ global:
       rootCA:
         name: application-connector-certs
         namespace: istio-system
-    certificateDataHeader: "Certificate-Data"
+    certificateDataHeader: "Certificate-Data" # Should be stripped by Virtual Service
     # If key and certificate are not provided they will be generated
     caKey: ""
     caCertificate: ""
@@ -64,6 +64,13 @@ global:
       host: compass-gateway
     mtls:
       host: compass-gateway-mtls
+    headers:
+      request:
+        remove:
+          - "Client-Id-From-Token"
+          - "Client-Id-From-Certificate"
+          - "Client-Certificate-Hash"
+          - "Certificate-Data"
 
   istio:
     gateway:

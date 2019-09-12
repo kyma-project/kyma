@@ -50,7 +50,7 @@ spec:
     - handler: hydrator
       config:
         api:
-          url: http://{{ template "fullname" . }}.{{ .Release.Namespace }}:{{ .Values.global.connector.validator.port }}/v1/subject/validate
+          url: http://{{ template "fullname" . }}.{{ .Release.Namespace }}:{{ .Values.global.connector.validator.port }}/v1/certificate/data/resolve
           retry:
             number: {{ .Values.oathkeeper.istioCertHeaderHydrator.retry.number }}
             delayInMilliseconds: {{ .Values.oathkeeper.istioCertHeaderHydrator.retry.delayInMilliseconds }}

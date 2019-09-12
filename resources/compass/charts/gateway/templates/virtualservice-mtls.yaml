@@ -20,7 +20,7 @@ spec:
       headers:
         request:
           remove:
-            {{- range .Values.headers.request.remove }}
+            {{- range .Values.global.gateway.headers.request.remove }}
             - {{ . }}
             {{- end }}
       route:

@@ -31,7 +31,7 @@ spec:
               protocol: TCP
           env:
             - name: APP_ADDRESS
-              value: "0.0.0.0:{{ .Values.deployment.args.containerPort }}"
+              value: "0.0.0.0:{{ .Values.global.connector.graphql.port }}"
             - name: APP_HYDRATOR_ADDRESS
               value: "0.0.0.0:{{ .Values.global.connector.validator.port }}"
             - name: APP_PLAYGROUND_API_ENDPOINT
