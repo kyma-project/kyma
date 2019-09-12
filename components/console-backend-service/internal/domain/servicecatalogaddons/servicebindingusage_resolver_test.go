@@ -210,6 +210,9 @@ func fixServiceBindingUsage() *gqlschema.ServiceBindingUsage {
 			Name: "sample-deployment",
 		},
 		ServiceBindingName: "binding-name",
+		Status: gqlschema.ServiceBindingUsageStatus{
+			Type: gqlschema.ServiceBindingUsageStatusTypePending,
+		},
 	}
 }
 
