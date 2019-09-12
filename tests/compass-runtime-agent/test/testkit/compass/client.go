@@ -108,7 +108,12 @@ func (c *Client) getScenarios() (ScenariosSchema, error) {
 }
 
 func (c *Client) updateScenarios(schema ScenariosSchema) (ScenariosSchema, error) {
-	gqlInput, err := c.graphqlizer.LabelDefinitionInputToGQL(schema.ToLabelDefinitionInput(ScenariosLabelName))
+	labelDef, err := schema.ToLabelDefinitionInput(ScenariosLabelName)
+	if err != nil {
+		return ScenariosSchema{}, errors.Wrap(err, "Failed to convert ScenarioSchema")
+	}
+
+	gqlInput, err := c.graphqlizer.LabelDefinitionInputToGQL(labelDef)
 	if err != nil {
 		return ScenariosSchema{}, errors.Wrap(err, "Failed to convert LabelDefinitionInput")
 	}

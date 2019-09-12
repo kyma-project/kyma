@@ -14,13 +14,17 @@ type ScenariosItems struct {
 	Enum []string `json:"enum"`
 }
 
-func (ss *ScenariosSchema) ToLabelDefinitionInput(key string) graphql.LabelDefinitionInput {
-	var schema interface{} = ss
+func (ss *ScenariosSchema) ToLabelDefinitionInput(key string) (graphql.LabelDefinitionInput, error) {
+	var inputSchema interface{} = ss
+	schema, err := graphql.MarshalSchema(&inputSchema)
+	if err != nil {
+		return graphql.LabelDefinitionInput{}, err
+	}
 
 	return graphql.LabelDefinitionInput{
 		Key:    key,
-		Schema: &schema,
-	}
+		Schema: schema,
+	}, nil
 }
 
 func (ss *ScenariosSchema) AddScenario(value string) {
