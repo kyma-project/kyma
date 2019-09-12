@@ -434,7 +434,8 @@ func makeKnSubscription(kySub *eventingv1alpha1.Subscription) *evapisv1alpha1.Su
 	knSubName := util.GetKnSubscriptionName(&kySub.Name, &kySub.Namespace)
 	knChannelName := makeKnChannelName(kySub)
 	subscriberURL := subscriberURI
-	return util.Subscription(knSubName, "kyma-system").ToChannel(knChannelName).ToURI(&subscriberURL).EmptyReply().Build()
+	chNamespace := util.GetDefaultChannelNamespace()
+	return util.Subscription(knSubName, chNamespace).ToChannel(knChannelName).ToURI(&subscriberURL).EmptyReply().Build()
 }
 
 func dumpKnativeLibObjects(t *testing.T) {
