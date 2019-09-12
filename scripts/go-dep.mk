@@ -70,7 +70,7 @@ docker-create-opts:
 	@echo $(DOCKER_CREATE_OPTS)
 
 # Targets mounting sources to buildpack
-MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet
+MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate
 $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
 build-local:
@@ -103,6 +103,9 @@ errcheck-local:
 
 vet-local:
 	go vet $$($(DIRS_TO_CHECK))
+
+generate-local:
+	go genrate ./...
 
 # Targets copying sources to buildpack
 COPY_TARGETS = test

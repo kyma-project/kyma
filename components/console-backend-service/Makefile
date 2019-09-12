@@ -1,6 +1,6 @@
 APP_NAME = console-backend-service
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = sjanota/go-buildpack:1.11
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/pr/buildpack-golang-toolbox:PR-1469
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/scripts
 
 include $(SCRIPTS_DIR)/go-dep.mk
