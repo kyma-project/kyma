@@ -86,7 +86,7 @@ func Subscription(name string, namespace string) *SubscriptionBuilder {
 		Spec: eventingv1alpha1.SubscriptionSpec{
 			Channel: corev1.ObjectReference{
 				Name:       "",
-				Kind:       "NatssChannel",
+				Kind:       "Channel",
 				APIVersion: "messaging.knative.dev/v1alpha1",
 			},
 			Subscriber: &eventingv1alpha1.SubscriberSpec{
@@ -100,7 +100,7 @@ func Subscription(name string, namespace string) *SubscriptionBuilder {
 			Reply: &eventingv1alpha1.ReplyStrategy{
 				Channel: &corev1.ObjectReference{
 					Name:       "",
-					Kind:       "NatssChannel",
+					Kind:       "Channel",
 					APIVersion: "messaging.knative.dev/v1alpha1",
 				},
 			},
