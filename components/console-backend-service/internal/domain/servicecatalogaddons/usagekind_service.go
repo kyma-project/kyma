@@ -59,9 +59,9 @@ func (svc *usageKindService) ListResources(namespace string) ([]gqlschema.Bindab
 	results := make([]gqlschema.BindableResourcesOutputItem, 0)
 	usageKinds := svc.informer.GetStore().List()
 	for _, item := range usageKinds {
-		uk, ok := item.(*v1alpha1.UsageKind)
-		if !ok {
-			return nil, fmt.Errorf("incorrect item type: %T, should be: *UsageKind", item)
+		uk, err := svc.extractor.Do(item)
+		if err != nil {
+			return nil, errors.Wrap(err, "while extracting UsageKind")
 		}
 
 		ukResources, err := svc.listResourcesForUsageKind(uk, namespace)

@@ -11,11 +11,11 @@ For example, whenever the `order-created` Event comes in, the Event Bus stores i
 
 ![Configure and Consume Events](./assets/configure-consume-events.svg)
 
-
 1. A user creates a lambda or a service that an Event coming from an external solution triggers.
+
     >**NOTE**: When creating a service, the user must create a Kyma Subscription resource manually. If the user uses Kyma Console UI to create a lambda, the Subscription resource is created automatically.
     
-2. **subscription-controller** reacts to the creation of Kyma Subscription.  It [verifies](#event-validation) if the Event type from the application can be consumed in the Namespace where the Kyma Subscription has been created.  If so, it creates the Knative Channel and Knative Subscription resources.
+2. **subscription-controller** reacts to the creation of Kyma Subscription. It [verifies](#event-validation) if the Event type from the application can be consumed in the Namespace where the Kyma Subscription has been created.  If so, it creates the Knative Channel and Knative Subscription resources.
 3. [**nats-controller**](https://github.com/knative/eventing-contrib/tree/master/natss/pkg/reconciler/controller) reacts to the creation of a Knative [Channel](https://github.com/knative/eventing/blob/release-0.6/config/300-channel.yaml) and creates the required Kubernetes services.
 4. [**nats-dispatcher**](https://github.com/knative/eventing-contrib/tree/master/natss/pkg/dispatcher) reacts to the creation of a Knative [Subscription](https://github.com/knative/eventing/blob/release-0.6/config/300-subscription.yaml) and creates the NATS Streaming Subscription.
 5. [**nats-dispatcher**](https://github.com/knative/eventing-contrib/tree/master/natss/pkg/dispatcher) picks the Event and dispatches it to the configured lambda or the service URL as an HTTP POST request. The lambda reacts to the received Event.
