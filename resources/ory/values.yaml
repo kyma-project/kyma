@@ -6,7 +6,7 @@ global:
 headerRewrite:
   enabled: true
   certificateDataHeader: "Certificate-Data"
-  workloadLabel: oauthkeeper
+  workloadLabel: oathkeeper
 hpa:
   oathkeeper:
     minReplicas: 1
