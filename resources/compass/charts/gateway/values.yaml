@@ -10,4 +10,4 @@ oathkeeper:
   port: 4455
 
 gateway:
-  enabled: true
+  enabled: false
