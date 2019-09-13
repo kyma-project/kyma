@@ -11,4 +11,4 @@ Kyma-specific changes:
  * The `config-domain` is made configurable by specifying the `.Values.global.domainName` as the helm template.
  * The `knative-serving` Namespace is no longer created. This happens during the installation process.
  * The image versions are changed to use the release tag.
- * knative-ingress-gateway is now a copy from kyma-gateway.
+ * The `knative-ingress-gateway` is now a copy of `kyma-gateway`.
