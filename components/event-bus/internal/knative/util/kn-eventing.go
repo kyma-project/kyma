@@ -239,7 +239,7 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[s
 				log.Printf("error while closing body %v", err)
 			}
 		}()
-		log.Printf("ERROR: SendMessage() NotStatusAccepted: %s", string(body))
+		log.Printf("ERROR: Response: SendMessage() NotStatusAccepted: %s", string(body))
 		log.Printf("ERROR: SendMessage() NotStatusAccepted: %s", res.Status)
 		return errors.New(res.Status)
 	}
