@@ -21,9 +21,9 @@ spec:
         - name: APP_INTERNAL_CONNECTOR_URL
           value: 'http://{{ template "fullname" . }}:{{ .Values.global.connector.graphql.port }}/graphql'
         - name: APP_CONNECTOR_URL
-          value: 'http://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql'
+          value: 'https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql'
         - name: APP_SECURED_CONNECTOR_URL
-          value: 'http://{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql'
+          value: 'https://{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql'
         - name: APP_HYDRATOR_URL
           value: 'http://{{ template "fullname" . }}:{{ .Values.global.connector.validator.port }}'
         - name: APP_CERTIFICATE_DATA_HEADER
