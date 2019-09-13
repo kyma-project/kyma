@@ -49,6 +49,6 @@ To update the Subscription CRD, run this command:
 
 `kubectl edit crd subscriptions.eventing.kyma-project.io`
 
-The Event Bus reacts to the changes in the CRD, and updates the corresponding NATS-Streaming subscription accordingly.
+The Event Bus reacts to the changes in the CRD and updates the corresponding NATS-Streaming subscription accordingly.
 
 >**CAUTION:** The current subscription update mechanism recreates a Subscription custom resource with new specifications. This may result in the loss of messages delivered during the recreation process.
