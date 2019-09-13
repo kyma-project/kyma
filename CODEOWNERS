@@ -32,10 +32,10 @@
 /resources/core/values.yaml @kyma-project/developers
 
 # The `backup-init` chart
-/resources/backup-init/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/resources/backup-init/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `backup` chart
-/resources/backup/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/resources/backup/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -101,7 +101,7 @@
 /resources/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `monitoring` subchart
-/resources/monitoring/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/resources/monitoring/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `kubeless` subchart
 /resources/core/charts/kubeless/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
@@ -110,7 +110,7 @@
 /resources/core/charts/kubeless/charts/lambdas-ui @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321
 
 # The `logging` subchart
-/resources/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/resources/logging/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `log-ui` subchart
 /resources/logging/charts/log-ui/ @dariadomagala @y-kkamil @akucharska @parostatkiem @Wawrzyn321
@@ -179,10 +179,10 @@
 /resources/knative-eventing/ @Abd4llA @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # The `jaeger` charts
-/resources/jaeger/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/resources/jaeger/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `prometheus-operator` chart
-/resources/prometheus-operator/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/resources/prometheus-operator/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `service-catalog` chart
 /resources/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -206,7 +206,7 @@
 /resources/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
 
 # The `kiali`chart
-/resources/kiali/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/resources/kiali/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `function-controller` chart
 /resources/function-controller/ @Abd4llA @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
@@ -319,10 +319,10 @@
 /tests/test-namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
 
 # monitoring tests
-/tests/integration/monitoring/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/tests/integration/monitoring/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # test-logging tests
-/tests/integration/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/tests/integration/logging/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # api-controller integration tests
 /tests/integration/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -360,7 +360,7 @@
 # Tools
 
 # The alpine-net directory
-/tools/alpine-net/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/tools/alpine-net/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The etcd-tls-setup directory
 /tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
@@ -372,7 +372,7 @@
 /tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
 
 # The tools/load-test directory
-/tools/load-test/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/tools/load-test/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # kubeless-integration tests directory
 /tests/end-to-end/kubeless-integration/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
@@ -390,7 +390,7 @@
 /tests/integration/event-service/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # E2E Backup Tests
-/tests/end-to-end/backup-restore-test @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/tests/end-to-end/backup-restore-test @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # E2E Upgrade Tests
 /tests/end-to-end/upgrade @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -408,4 +408,4 @@
 milv.config.yaml @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
 
 # performance tests
-/tests/perf/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
+/tests/perf/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
