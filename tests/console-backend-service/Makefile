@@ -7,6 +7,8 @@ include $(SCRIPTS_DIR)/go-dep.mk
 
 VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
 
+verify:: errcheck
+
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/core"
