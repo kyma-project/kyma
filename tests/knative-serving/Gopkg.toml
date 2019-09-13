@@ -3,9 +3,6 @@ required = ["github.com/kyma-project/kyma/common"]
   go-tests = true
   unused-packages = true
 
-# [[constraint]]
-#   name = "github.com/rakesh-garimella/kyma/common"
-#   branch = "upgrade-knative-081"
 
 [[constraint]]
   name = "github.com/avast/retry-go"
