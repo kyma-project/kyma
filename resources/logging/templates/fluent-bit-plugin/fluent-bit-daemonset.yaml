@@ -1,3 +1,4 @@
+{{- if eq .Values.logcollector.name "fluent-bit" }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -27,7 +28,7 @@ spec:
     spec:
       containers:
         - name: fluent-bit-loki
-          image: cosmo0920/fluent-bit-go-loki:v0.3.0
+          image: fluent/fluent-bit:1.2.1
           imagePullPolicy: Always
           env:
           - name: LOKI_URL
@@ -55,3 +56,4 @@ spec:
         effect: "NoExecute"
       - operator: "Exists"
         effect: "NoSchedule"
+{{- end }}

@@ -15,6 +15,7 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
+| **logcollector.name** | Specifies which log collector will be installed with kyma installation. Kyma support also `fluent-bit` as log collector. | `promtail` |
 | **persistence.enabled** | Specifies whether you store logs on a persistent volume instead of a volatile mounted volume. | `true` |
 | **persistence.size** | Defines the size of the persistent volume. | `10Gi` |
 | **config.auth_enabled** | Specifies the authentication mechanism you use to access the logging service. Set it to `false` to use built-in Istio authentication, or to `true` to use the basic HTTP authentication instead.  | `false` |

@@ -1,3 +1,4 @@
+{{- if eq .Values.logcollector.name "fluent-bit" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -19,7 +20,7 @@ data:
 
         @INCLUDE input-kubernetes.conf
         @INCLUDE filter-kubernetes.conf
-        @INCLUDE output-loki.conf
+        @INCLUDE output-elasticsearch.conf
 
     input-kubernetes.conf: |
         [INPUT]
@@ -45,15 +46,15 @@ data:
             K8S-Logging.Parser  On
             K8S-Logging.Exclude Off
 
-    fluent-loki.conf: |
+    output-elasticsearch.conf: |
         [OUTPUT]
-            Name loki
-            Match *
-            Url {{ .Values.loki.service.scheme }}://{{ template "loki.fullname" . }}:{{ .Values.loki.service.port }}/api/prom/push
-            BatchWait 10 # (10msec)
-            BatchSize 30 # (30KiB)
-            Labels {test="fluent-bit-go",lang="Golang"}
-            RemoveKeys key1,key2
+            Name            es
+            Match           *
+            Host            ${FLUENT_ELASTICSEARCH_HOST}
+            Port            ${FLUENT_ELASTICSEARCH_PORT}
+            Logstash_Format On
+            Replace_Dots    On
+            Retry_Limit     False
 
     parsers.conf: |
         [PARSER]
@@ -101,3 +102,5 @@ data:
             Regex       ^\<(?<pri>[0-9]+)\>(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$
             Time_Key    time
             Time_Format %b %d %H:%M:%S
+
+{{- end }}
