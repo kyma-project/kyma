@@ -424,7 +424,8 @@ func makeKnSubscriptionName(kySub *eventingv1alpha1.Subscription) string {
 }
 
 func makeKnativeLibChannel() *messagingV1Alpha1.Channel {
-	channel, _ := knativeLib.CreateChannel(makeKnChannelName(makeEventsActivatedSubscription()), "kyma-system", &labels, time.Second)
+	chNamespace := util.GetDefaultChannelNamespace()
+	channel, _ := knativeLib.CreateChannel(makeKnChannelName(makeEventsActivatedSubscription()), chNamespace, &labels, time.Second)
 	channel.SetClusterName("fake-channel") // use it as a marker
 	knChannels[channel.Name] = channel
 	return channel
