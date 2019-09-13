@@ -16,7 +16,27 @@ Out of the box, the Kyma implementation of the ORY stack supports the [OAuth 2.0
 
 ## Register an OAuth2 client
 
-To interact with the Kyma OAuth2 server, you must register an OAuth2 client. Run this command to create a custom resource that triggers the creation of a client:
+To interact with the Kyma OAuth2 server, you must register an OAuth2 client. For each client, you can either specify your own ID and password or let Hydra OAuth2 server allocate random credentials.
+
+>**NOTE:** By default, you can create clients only in the `kyma-system` and `default` Namespaces. Read [this](https://github.com/ory/k8s/blob/master/docs/helm/hydra-maester.md#configuration) document to learn how to enable creating clients in other Namespaces. See the ORY Hydra Maester [Github page](https://github.com/ory/hydra-maester) to learn more about the `oauth2clients.hydra.ory.sh` custom resource. 
+
+### Use your own credentials
+
+1. Create a Kubernetes Secret that contains an ID and password you want to use to create a client:
+
+```
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {NAME_OF_SECRET}
+  namespace: {CLIENT_NAMESPACE}
+type: Opaque
+data:
+  client_id: {BASE64_ENCODED_ID}
+  client_secret: {BASE64_ENCODED_PASSWORD}
+```
+
+2. Create a custom resource with the `secretName` property set to the name of Kubernetes Secret you created. Run this command to trigger the creation of a client:
 
 ```
 cat <<EOF | kubectl apply -f -
@@ -29,19 +49,41 @@ spec:
   grantTypes:
     - "client_credentials"
   scope: "read write"
+  secretName: {NAME_OF_SECRET}
 EOF
 ```
 
-Creating this custom resource triggers the Hydra Maester controller which sends a client registration request to the OAuth2 server and saves the credentials of the registered client to a Kubernetes Secret.
+>**NOTE:** Each instance of the `oauth2clients.hydra.ory.sh` custom resource and the Secret that stores the credentials of the corresponding client must exist in the same Namespace.
 
->**NOTE:** By default, you can create clients only in the `kyma-system` and `default` Namespaces. Read [this](https://github.com/ory/k8s/blob/master/docs/helm/hydra-maester.md#configuration) document to learn how to enable creating clients in other Namespaces. Each instance of the `oauth2clients.hydra.ory.sh` custom resource and the Secret that stores the credentials of the corresponding client share the name and the Namespace.
+Creating this custom resource triggers the Hydra Maester controller which sends a client registration request to the OAuth2 server. You can interact with the client using the credentials specified in the secret.
+
+### Use Hydra-generated credentials
+
+Run this command to create a custom resource that triggers the creation of a client:
+
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: hydra.ory.sh/v1alpha1
+kind: OAuth2Client
+metadata:
+  name: {NAME_OF_CLIENT}
+  namespace: {CLIENT_NAMESPACE}
+spec:
+  grantTypes:
+    - "client_credentials"
+  scope: "read write"
+  secretName: {NAME_OF_KUBERNETES_SECRET}
+EOF
+```
+
+Creating this custom resource triggers the Hydra Maester controller which sends a client registration request to the OAuth2 server and creates a new Kubernetes Secret using the name specified in the `secretName` property. This Secret contains the credentials of the registered client.
+
+>**NOTE:** Each instance of the `oauth2clients.hydra.ory.sh` custom resource and the Secret that stores the credentials of the corresponding client share the Namespace.
 
 Run this command to get the credentials of the registered OAuth2:
 ```
-kubectl get secret -n {CLIENT_NAMESPACE} {NAME_OF_CLIENT} -o yaml
+kubectl get secret -n {CLIENT_NAMESPACE} {NAME_OF_KUBERNETES_SECRET} -o yaml
 ```
-
-See the ORY Hydra Maester [Github page](https://github.com/ory/hydra-maester) to learn more about the `oauth2clients.hydra.ory.sh` custom resource.
 
 
 ## OAuth2 server in action
