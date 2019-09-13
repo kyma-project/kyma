@@ -53,7 +53,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 ## Prerequisites
 
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.13.0 or higher
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6 or higher
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 
 
@@ -84,7 +84,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
     ```
     gcloud container --project "$GCP_PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "$GCP_ZONE" \
-    --cluster-version "1.13" --machine-type "n1-standard-4" \
+    --cluster-version "1.14" --machine-type "n1-standard-4" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing
     ```
 
@@ -182,7 +182,7 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 ## Prerequisites
 
 - [Microsoft Azure](https://azure.microsoft.com) account
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.13.0 or higher
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6 or higher
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 
 
@@ -224,7 +224,7 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
       --resource-group $RS_GROUP \
       --name $CLUSTER_NAME \
       --node-vm-size "Standard_D4_v3" \
-      --kubernetes-version 1.13 \
+      --kubernetes-version 1.14.6 \
       --enable-addons "monitoring,http_application_routing" \
       --generate-ssh-keys
     ```
@@ -330,7 +330,7 @@ Install Kyma on a Kubernetes cluster deployed through [Gardener](https://gardene
 
   - [Gardener](https://gardener.cloud/) seed cluster
   - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled or a [Microsoft Azure](https://azure.microsoft.com) account
-  - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.13.0 or higher
+  - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6 or higher
 
 ## Choose the release to install
 
@@ -350,7 +350,7 @@ Install Kyma on a Kubernetes cluster deployed through [Gardener](https://gardene
 
   | Tab  |  Setting |  Required value |
   |---|---|---|
-  | Infrastructure |  Kubernetes | `1.13.10`  |
+  | Infrastructure |  Kubernetes | `1.14.6`  |
   | Worker  |  Machine type | `n1-standard-4` (GCP) `Standard_D4_v3` (Azure) |
   | Worker  | Autoscaler min.  | `3` |
 
