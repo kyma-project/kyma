@@ -44,7 +44,6 @@ Follow these steps to prepare the environment you will use to deploy the Control
 
     ```bash
     cat <<EOF | kubectl -n serverless-system apply -f -
-    ---
     apiVersion: v1
     kind: ConfigMap
     metadata:
@@ -57,6 +56,18 @@ Follow these steps to prepare the environment you will use to deploy the Control
           dockerFileName: dockerfile-nodejs-8
         - ID: nodejs6
           dockerFileName: dockerfile-nodejs-6
+      funcSizes: |
+        - size: S
+        - size: M
+        - size: L
+      funcTypes: |
+        - type: plaintext
+        - type: base64
+      defaults: |
+        size: S
+        runtime: nodejs8
+        timeOut: 180
+        funcContentType: plaintext
     EOF
     ```
 
