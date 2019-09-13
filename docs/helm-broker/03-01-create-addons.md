@@ -29,7 +29,7 @@ sample-addon/
 
 > **NOTE:** All file names in an addon repository are case-sensitive.
 
-> **NOTE:** The maximum size of an addon is determined by the amount of memory and storage size. These limits are set in the 
+> **NOTE:** The maximum size of an addon is determined by the amount of memory and storage size. These limits are set in the
 [Helm Broker chart](https://kyma-project.io/docs/components/helm-broker/#configuration-helm-broker-chart).
 
 For details about particular files, read the following sections.
@@ -95,29 +95,27 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 
 ## docs directory
 
-In the `docs` directory, provide documentation for your addon. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` which provides information on how documentation for the addon is uploaded.
-As the Helm Broker is installed as a ClusterServiceBroker, documentation for addons is provided using [ClusterDocsTopics](/components/headless-cms/#custom-resource-clusterdocstopic).
+In the `docs` directory, provide documentation for your addon. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` file which provides information on how documentation for the addon is uploaded.
+As you can install the Helm Broker as a ClusterServiceBroker or as a ServiceBroker, documentation for addons is provided using either [ClusterDocsTopics](/components/headless-cms/#custom-resource-clusterdocstopic) or [DocsTopics](/components/headless-cms/#custom-resource-docs-topic) custom resources, respectively.
 
 The `meta.yaml` file contains the specification of the ClusterDocsTopic. The example structure of the `meta.yaml` file looks as follows:
 
 |  Field Name | Required |      Description               |
 |-----------|:--------:|------------------------------------|
 |   **docs[]**                           |   YES   | Contains the definitions of documentation.   |
-| **docs[].template**                    |   YES   | Contains the specification of the ClusterDocsTopic. |
-| **docs[].template.displayName**        |   YES   | Specifies the display name of the ClusterDocsTopic. |
-| **docs[].template.description**        |   YES   | Provides the description of the ClusterDocsTopic. |
+| **docs[].template**                    |   YES   | Contains the specification of the ClusterDocsTopic or DocsTopic. |
+| **docs[].template.displayName**        |   YES   | Specifies the display name of the ClusterDocsTopic or DocsTopic. |
+| **docs[].template.description**        |   YES   | Provides the description of the ClusterDocsTopic or DocsTopic. |
 | **docs[].template.sources[]**          |   YES   | Contains the definitions of assets for an addon. |
 | **docs[].template.sources[].type**     |   YES   | Defines the type of the asset. |
-| **docs[].template.sources[].name**     |   YES   | Defines the name of the asset. |
-| **docs[].template.sources[].mode**     |   YES   | Defines the type of the asset file. |
-| **docs[].template.sources[].url**      |   YES   | Defines the URL under which the asset is stored. |
-| **docs[].template.sources[].filter**   |   YES   | Defines the path from which to upload assets.  |
+| **docs[].template.sources[].name**     |   YES   | Defines a unique identifier of a given asset. It must be unique if there is more than one asset of a given type. |
+| **docs[].template.sources[].mode**     |   YES   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR format. Use `single` for one file and `package` for a set of files. |
+| **docs[].template.sources[].url**      |   YES   | Specifies the location of a single file or a package. |
+| **docs[].template.sources[].filter**   |   YES   | Specifies a set of assets from the package to upload. The regex used in the filter must be [RE2](https://golang.org/s/re2syntax)-compliant.  |
 
 >**NOTE:** Currently you can provide only one entry in the `docs` array.
 
-See [this](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) example of the `docs` directory with documentation for the testing addon.
-
-Using the Helm Broker, you can provision a broker which provides its own Service Classes. To learn how to upload documentation for those classes, read [this](#details-provide-service-classes-documentation) document.
+See [this](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) example of the `docs` directory with documentation for the testing addon. For more information on how to provide addons documentation, read [this](#details-provide-service-classes-documentation) document.
 
 ## Troubleshooting
 
