@@ -1,28 +1,11 @@
-IMG_NAME = console-backend-service-test
-IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(IMG_NAME)
-TAG = $(DOCKER_TAG)
+APP_NAME = console-backend-service-test
+APP_PATH = tests/console-backend-service
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/pr/buildpack-golang-toolbox:PR-1469
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/scripts
 
-.PHONY: ci-pr ci-master ci-release resolve build-and-test build-image push-image pull-licenses
+include $(SCRIPTS_DIR)/go-dep.mk
 
-ci-pr: resolve build-and-test build-image push-image
-ci-master: resolve build-and-test build-image push-image
-ci-release: resolve build-and-test build-image push-image
-
-resolve:
-	dep ensure -v -vendor-only
-pull-licenses:
-ifdef LICENSE_PULLER_PATH
-	bash $(LICENSE_PULLER_PATH)
-else
-	mkdir -p licenses
-endif
-build-and-test:
-	./before-commit.sh ci
-build-image: pull-licenses
-	docker build -t $(IMG_NAME) .
-push-image:
-	docker tag $(IMG_NAME) $(IMG):$(TAG)
-	docker push $(IMG):$(TAG)
+VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
