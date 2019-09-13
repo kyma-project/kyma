@@ -20,3 +20,20 @@ To define how DocsTopic and ClusterDocsTopic are rendered in the UI, use the fol
 | Parameter | Default Value | Description |
 | --------- | ------------- | ----------- |
 | **spec.sources.metadata.disableRelativeLinks** | `false` | Disables relative links when documentation is rendered. It only applies to the `markdown` type of assets included in the (Cluster)DocsTopic CR. |
+
+## Supported specifications
+
+The Console UI supports only certain specification types, formats, and versions passed in the DocsTopics and ClusterDocsTopics:
+
+| Type | Description | Format | Version |
+| --------- | ------------- | ----------- | ----------- |
+| [OpenAPI](https://www.openapis.org/) |   API-related information  | `json` and `yaml`| 2.0 and lower |
+| [OData](https://www.odata.org/documentation) |   API-related information  | `xml` | 4.0 and lower |
+| [AsyncAPI](https://www.asyncapi.com/) |   Messaging data (for Events)  | `json` and `yaml`| 2.0 and lower |
+| Markdown |  Service Class or component documentation  | `md`|  |
+
+All API and messaging specifications are converted to the `json` format in the Console UI. However, Kyma uses its own implementation of the validation and mutation webhooks, called CMS AsyncAPI Service, to validate if the AsyncAPI input files are in the `2.0` version. If not, it converts them to `2.0`. The service also changes any AsyncAPI `yaml` input file to the `json` format:
+
+![Specification types](./assets/spec-types.svg)
+
+> **NOTE:** OpenAPI, OData, and AsyncAPI specifications rendered in the Console follow the [Fiori 3 Fundamentals](https://sap.github.io/fundamental/) styling standards.
