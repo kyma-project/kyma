@@ -80,6 +80,12 @@ Run this command to get the credentials of the registered OAuth2 client:
 ```
 kubectl get secret -n {CLIENT_NAMESPACE} {NAME_OF_KUBERNETES_SECRET} -o yaml
 ```
+### Update the OAuth2 client secret
+
+Follow these steps to change the client secret of a registered OAuth2 client:
+
+1. Create a new Kubernetes Secret with the ID of the client you want to update and the new client secret.
+2. Edit the instance of the client's corresponding `oauth2clients.hydra.ory.sh/v1alpha1` CR by replacing the value of the **SecretName** property with the name of the newly created Secret. 
 
 ## OAuth2 server in action
 
