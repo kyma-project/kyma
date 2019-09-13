@@ -41,6 +41,9 @@ func TestBindingUsageConversionToGQLCornerCases(t *testing.T) {
 			UsedBy: gqlschema.LocalObjectReference{
 				Kind: "Function",
 			},
+			Status: gqlschema.ServiceBindingUsageStatus{
+				Type: gqlschema.ServiceBindingUsageStatusTypePending,
+			},
 		}
 		sut := servicecatalogaddons.NewServiceBindingUsageConverter()
 
@@ -68,6 +71,9 @@ func TestBindingUsageConversionToGQL(t *testing.T) {
 				},
 				ServiceBindingName: "redis-binding",
 				Namespace:          "production",
+				Status: gqlschema.ServiceBindingUsageStatus{
+					Type: gqlschema.ServiceBindingUsageStatusTypePending,
+				},
 			},
 		},
 		"with env prefix": {
@@ -88,6 +94,9 @@ func TestBindingUsageConversionToGQL(t *testing.T) {
 				Namespace:          "production",
 				Parameters: &gqlschema.ServiceBindingUsageParameters{
 					EnvPrefix: &gqlschema.EnvPrefix{Name: "ENV_PREFIX"},
+				},
+				Status: gqlschema.ServiceBindingUsageStatus{
+					Type: gqlschema.ServiceBindingUsageStatusTypePending,
 				},
 			},
 		},
