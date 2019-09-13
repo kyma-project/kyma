@@ -29,11 +29,6 @@ func (c *serviceBindingUsageConverter) ToGQL(in *api.ServiceBindingUsage) (*gqls
 		return nil, nil
 	}
 
-	s := gqlschema.ServiceBindingUsageStatus{}
-	if len(in.Status.Conditions) > 0 {
-		s = c.extractor.Status(in.Status.Conditions)
-	}
-
 	gqlSBU := gqlschema.ServiceBindingUsage{
 		Name:      in.Name,
 		Namespace: in.Namespace,
@@ -42,7 +37,7 @@ func (c *serviceBindingUsageConverter) ToGQL(in *api.ServiceBindingUsage) (*gqls
 			Kind: in.Spec.UsedBy.Kind,
 		},
 		ServiceBindingName: in.Spec.ServiceBindingRef.Name,
-		Status:             s,
+		Status:             c.extractor.Status(in.Status.Conditions),
 	}
 
 	if in.Spec.Parameters != nil && in.Spec.Parameters.EnvPrefix != nil {

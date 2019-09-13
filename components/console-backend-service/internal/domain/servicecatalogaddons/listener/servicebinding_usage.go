@@ -1,9 +1,8 @@
 package listener
 
 import (
-	"fmt"
-
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	api "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/pkg/errors"
@@ -18,6 +17,7 @@ type BindingUsage struct {
 	channel   chan<- gqlschema.ServiceBindingUsageEvent
 	filter    func(bindingUsage *api.ServiceBindingUsage) bool
 	converter gqlBindingUsageConverter
+	extractor extractor.BindingUsageUnstructuredExtractor
 }
 
 func NewBindingUsage(channel chan<- gqlschema.ServiceBindingUsageEvent, filter func(bindingUsage *api.ServiceBindingUsage) bool, converter gqlBindingUsageConverter) *BindingUsage {
@@ -25,6 +25,7 @@ func NewBindingUsage(channel chan<- gqlschema.ServiceBindingUsageEvent, filter f
 		channel:   channel,
 		filter:    filter,
 		converter: converter,
+		extractor: extractor.BindingUsageUnstructuredExtractor{},
 	}
 }
 
@@ -41,9 +42,12 @@ func (l *BindingUsage) OnDelete(object interface{}) {
 }
 
 func (l *BindingUsage) onEvent(eventType gqlschema.SubscriptionEventType, object interface{}) {
-	bindingUsage, ok := object.(*api.ServiceBindingUsage)
-	if !ok {
-		glog.Error(fmt.Errorf("incorrect object type: %T, should be: *ServiceBindingUsage", object))
+	bindingUsage, err := l.extractor.Do(object)
+	if err != nil {
+		glog.Error(errors.New("cannot extract *ServiceBindingUsage"))
+		return
+	}
+	if bindingUsage == nil {
 		return
 	}
 

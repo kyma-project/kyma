@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+
 	"github.com/ghodss/yaml"
 	corev1 "k8s.io/api/core/v1"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -17,8 +18,26 @@ type RuntimeInfo struct {
 	RegistryInfo      string
 	AvailableRuntimes []RuntimesSupported
 	ServiceAccount    string
+	Defaults          DefaultConfig
+	FuncTypes         []FuncType
+	//BuildNamespace    string
+	FuncSizes []FuncSize
 }
 
+type FuncType struct {
+	Type string `json:"type"`
+}
+
+type FuncSize struct {
+	Size string `json:"size"`
+}
+
+type DefaultConfig struct {
+	Runtime         string `json:"runtime"`
+	Size            string `json:"size"`
+	TimeOut         int32  `json:"timeOut"`
+	FuncContentType string `json:"funcContentType"`
+}
 type RuntimesSupported struct {
 	ID             string `json:"ID"`
 	DockerFileName string `json:"DockerFileName"`
@@ -46,11 +65,39 @@ func New(config *corev1.ConfigMap) (*RuntimeInfo, error) {
 	if sa, ok := config.Data["serviceAccountName"]; ok {
 		rnInfo.ServiceAccount = sa
 	} else {
-		err := errors.New("Error while fetching serviceAccountName")
-		log.Error(err, "Error while fetching serviceAccountName")
+		err := errors.New("Error while fetching Service Account Name")
+		log.Error(err, "Error while fetching Service Account Name")
 		return nil, err
 	}
 
+	var defaultConfig DefaultConfig
+	if defaults, ok := config.Data["defaults"]; ok {
+		err := yaml.Unmarshal([]byte(defaults), &defaultConfig)
+		if err != nil {
+			log.Error(err, "Error while fetching defaults")
+			return nil, err
+		}
+		rnInfo.Defaults = defaultConfig
+	}
+
+	var funcTypes []FuncType
+	if funcs, ok := config.Data["funcTypes"]; ok {
+		err := yaml.Unmarshal([]byte(funcs), &funcTypes)
+		if err != nil {
+			log.Error(err, "Error while fetching function types")
+			return nil, err
+		}
+		rnInfo.FuncTypes = funcTypes
+	}
+
+	var funcSizes []FuncSize
+	if sizes, ok := config.Data["funcSizes"]; ok {
+		err := yaml.Unmarshal([]byte(sizes), &funcSizes)
+		if err != nil {
+			log.Error(err, "Error while fetching function sizes")
+		}
+		rnInfo.FuncSizes = funcSizes
+	}
 	return rnInfo, nil
 }
 

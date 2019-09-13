@@ -1,6 +1,7 @@
 package servicecatalogaddons
 
 import (
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/status"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic"
@@ -23,7 +24,9 @@ func NewBindableResourcesResolver(lister bindableResourceLister) *bindableResour
 }
 
 func NewServiceBindingUsageConverter() *serviceBindingUsageConverter {
-	return &serviceBindingUsageConverter{}
+	return &serviceBindingUsageConverter{
+		extractor: &status.BindingUsageExtractor{},
+	}
 }
 
 func NewAddonsConfigurationConverter() *addonsConfigurationConverter {
