@@ -24,8 +24,8 @@ spec:
         api:
           url: http://{{ template "fullname" . }}.{{ .Release.Namespace }}:{{ .Values.global.connector.validator.port }}/v1/tokens/resolve
           retry:
-            number: {{ .Values.oathkeeper.connectorTokenHydrator.retry.number }}
-            delayInMilliseconds: {{ .Values.oathkeeper.connectorTokenHydrator.retry.delayInMilliseconds }}
+            number: {{ .Values.oathkeeper.hydrators.connectorToken.retry.number }}
+            delayInMilliseconds: {{ .Values.oathkeeper.hydrators.connectorToken.retry.delayInMilliseconds }}
 
 ---
 apiVersion: oathkeeper.ory.sh/v1alpha1
@@ -52,5 +52,5 @@ spec:
         api:
           url: http://{{ template "fullname" . }}.{{ .Release.Namespace }}:{{ .Values.global.connector.validator.port }}/v1/certificate/data/resolve
           retry:
-            number: {{ .Values.oathkeeper.istioCertHeaderHydrator.retry.number }}
-            delayInMilliseconds: {{ .Values.oathkeeper.istioCertHeaderHydrator.retry.delayInMilliseconds }}
+            number: {{ .Values.oathkeeper.hydrators.istioCertHeader.retry.number }}
+            delayInMilliseconds: {{ .Values.oathkeeper.hydrators.istioCertHeader.retry.delayInMilliseconds }}
