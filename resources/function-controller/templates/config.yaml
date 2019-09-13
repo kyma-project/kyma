@@ -47,6 +47,18 @@ data:
     - ID: nodejs6
       dockerFileName: dockerfile-nodejs-6
   serviceAccountName: {{ template "fullname" . }}-build
+  funcSizes: |
+    - size: S
+    - size: M
+    - size: L
+  funcTypes: |
+    - type: plaintext
+    - type: base64
+  defaults: |
+    size: S
+    runtime: nodejs8
+    timeOut: 180
+    funcContentType: plaintext
 kind: ConfigMap
 metadata:
   labels:
