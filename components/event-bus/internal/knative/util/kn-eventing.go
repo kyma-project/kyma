@@ -129,6 +129,18 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.
 	log.Println("Successfully got channel, it is ::::")
 	log.Printf("%v\n", string(bChannel))
 
+	// get all subscriptions
+	subs, err := k.evClient.Subscriptions(namespace).List(metav1.ListOptions{})
+	if err != nil {
+		log.Printf("error in getting subscriptions: %v\n", subs)
+	}
+	bSubs, err := json.Marshal(subs)
+	if err != nil {
+		log.Println("Could not marshal a json ::::")
+	}
+	log.Println("Successfully got subs, they are ::::")
+	log.Printf("%v\n", string(bSubs))
+
 	return channel, nil
 }
 
