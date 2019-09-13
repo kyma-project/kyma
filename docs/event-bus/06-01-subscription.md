@@ -42,3 +42,13 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.event_type**                       | **YES**   | The Event type to which the Event trigger is registered. For example, **order.created**.                                                                 |
 | **spec.event_type_version**               | **YES**   | The version of the Event type.                                                                                             |
 | **spec.source_id**                        | **YES**   | Identifies the origin of events. This can be an external solution or a defined identifier for internally generated events.|
+
+## Update Subscription CRD
+
+To update the Subscription CRD, run this command:
+
+`kubectl edit crd subscriptions.eventing.kyma-project.io`
+
+The Event Bus reacts to the changes in the CRD, and updates the corresponding NATS-Streaming subscription accordingly.
+
+>**CAUTION:** The current subscription update mechanism recreates a Subscription custom resource with new specifications. This may result in the loss of messages delivered during the recreation process.
