@@ -29,7 +29,7 @@ rules:
     verbs: ["list", "create"]
   - apiGroups: ["apps"]
     resources: ["deployments"]
-    verbs: ["list", "create"]
+    verbs: ["list", "create", "get"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["clusterserviceclasses", "clusterserviceplans"]
     verbs: ["watch", "list", "get"]

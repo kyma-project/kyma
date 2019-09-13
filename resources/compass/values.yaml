@@ -10,7 +10,7 @@ global:
       version: "e8efc60c"
     director:
       dir: develop/
-      version: "10f7383b"
+      version: "e5daeb53"
     gateway:
       dir: develop/
       version: "1ce3b6c3"
@@ -19,7 +19,7 @@ global:
       version: "26601526"
     schema_migrator:
       dir: develop/
-      version: "10f7383b"
+      version: "07a992a2"
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
@@ -28,7 +28,7 @@ global:
     tests:
       e2e:
         dir: develop/
-        version: "3c75146c"
+        version: "07a992a2"
       connector:
         dir: develop/
         version: "2adc7649"
