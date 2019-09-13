@@ -3,6 +3,7 @@ package util
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -121,6 +122,13 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.
 	if !channel.Status.IsReady() {
 		return nil, fmt.Errorf("ERROR: GetChannel():channel NotReady")
 	}
+	bChannel, err := json.Marshal(channel)
+	if err != nil {
+		log.Println("Could not marshal a json ::::")
+	}
+	log.Println("Successfully got channel, it is ::::")
+	log.Printf("%v\n", string(bChannel))
+
 	return channel, nil
 }
 
@@ -168,6 +176,7 @@ func (k *KnativeLib) CreateSubscription(name string, namespace string, channelNa
 		log.Printf("ERROR: CreateSubscription(): creating subscription: %v", err)
 		return err
 	}
+	time.Now().Unix()
 	return nil
 }
 
