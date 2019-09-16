@@ -9,7 +9,7 @@ spec:
     url: http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:3000
   match:
     methods: ["GET", "POST", "OPTIONS"]
-    url: <http|https>://{{ .Values.global.gateway.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/<.*>
+    url: <http|https>://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/<.*>
   authenticators:
   - handler: oauth2_introspection
   authorizer:
@@ -34,7 +34,7 @@ spec:
     url: http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:3000
   match:
     methods: ["GET", "POST", "OPTIONS"]
-    url: <http|https>://{{ .Values.global.gateway.secure.jwt.host }}.{{ .Values.global.ingress.domainName }}/<.*>
+    url: <http|https>://{{ .Values.global.gateway.tls.secure.jwt.host }}.{{ .Values.global.ingress.domainName }}/<.*>
   authenticators:
   - handler: jwt
     config:
