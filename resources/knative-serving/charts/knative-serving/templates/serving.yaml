@@ -272,7 +272,7 @@ spec:
     istio: ingressgateway
   servers:
   - hosts:
-    - "*.{{ .Values.global.ingress.domainName }}"
+    - "*.{{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}"
     port:
       name: https
       number: 443
@@ -281,7 +281,7 @@ spec:
       credentialName: kyma-gateway-certs
       mode: SIMPLE
   - hosts:
-    - "*.{{ .Values.global.ingress.domainName }}"
+    - "*.{{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}"
     port:
       name: http
       number: 80
