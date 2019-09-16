@@ -77,5 +77,5 @@ The repository has the following structure:
   ├── tests                       # Acceptance tests
   ├── common                      # Common Go libraries
   ├── scripts                     # Scripts used for building
-  └── tools                       # Source code of utilities used, for example, for the installation and testing
+  └── tools                       # Source code of utilities used, for installation, testing, and more
   ```
