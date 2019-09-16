@@ -5,7 +5,7 @@ type: Custom Resource
 
 The `docstopics.cms.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to define an orchestrator that creates Asset CRs for a specific asset type. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
-```
+```bash
 kubectl get crd docstopics.cms.kyma-project.io -o yaml
 ```
 
@@ -13,7 +13,7 @@ kubectl get crd docstopics.cms.kyma-project.io -o yaml
 
 This is a sample DocsTopic custom resource (CR) that provides details of the Asset CRs for the **markdown**, **asyncapi**, and **openapi** source types.
 
-```
+```yaml
 apiVersion: cms.kyma-project.io/v1alpha1
 kind: DocsTopic
 metadata:
@@ -48,7 +48,6 @@ status:
 ## Custom resource parameters
 
 This table lists all possible parameters of a given resource together with their descriptions:
-
 
 | Parameter   |      Mandatory      |  Description |
 |----------|:-------------:|------|

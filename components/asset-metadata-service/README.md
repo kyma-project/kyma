@@ -8,7 +8,7 @@ The Asset Metadata Service is an HTTP server that exposes the functionality for 
 
 Use the following tools to set up the project:
 
-- [Go distribution](https://golang.org)
+- [Go](https://golang.org)
 - [Docker](https://www.docker.com/)
 
 ## Usage
@@ -67,6 +67,7 @@ Use the following environment variables to configure the application:
 This application uses `glog` to log messages. Pass command line arguments described in the [`glog.go`](https://github.com/golang/glog/blob/master/glog.go) file to customize the log parameters, such as the log level and output.
 
 For example:
+
 ```bash
 go run main.go --stderrthreshold=INFO -logtostderr=false
 ```
@@ -76,6 +77,7 @@ go run main.go --stderrthreshold=INFO -logtostderr=false
 ### Install dependencies
 
 This project uses `dep` as a dependency manager. To install all required dependencies, use the following command:
+
 ```bash
 dep ensure -vendor-only
 ```
