@@ -31,10 +31,8 @@ aliases:
     - dariadomagala
     - akucharska
     - sjanota
-  skydiving-tunas-approvers:
+  event-bus-approvers:
     - @Abd4llA
-    - @joek
-    - @abbi-gaurav
     - @rakesh-garimella
     - @lilitgh
     - @k15r
@@ -45,10 +43,32 @@ aliases:
     - @radufa
     - @sayanh
     - @antoineco
-  skydiving-tunas-reviewers:
+  event-bus-reviewers:
     - @Abd4llA
-    - @joek
-    - @abbi-gaurav
+    - @rakesh-garimella
+    - @lilitgh
+    - @k15r
+    - @nachtmaar
+    - @anishj0shi
+    - @montaro
+    - @marcobebway
+    - @radufa
+    - @sayanh
+    - @antoineco
+  serverless-approvers:
+    - @Abd4llA
+    - @rakesh-garimella
+    - @lilitgh
+    - @k15r
+    - @nachtmaar
+    - @anishj0shi
+    - @montaro
+    - @marcobebway
+    - @radufa
+    - @sayanh
+    - @antoineco
+  serverless-reviewers:
+    - @Abd4llA
     - @rakesh-garimella
     - @lilitgh
     - @k15r
