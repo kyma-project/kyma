@@ -65,6 +65,9 @@ var (
 		"l1": "v13",
 		"l2": "v23",
 	}
+	testChannelList = &messagingv1alpha1.ChannelList{
+		Items: []messagingv1alpha1.Channel{*testChannel},
+	}
 )
 
 func Test_CreateChannel(t *testing.T) {
@@ -86,6 +89,40 @@ func Test_CreateChannel(t *testing.T) {
 
 	ignore := cmpopts.IgnoreTypes(apis.VolatileTime{})
 	if diff := cmp.Diff(testChannel, ch, ignore); diff != "" {
+		t.Errorf("%s (-want, +got) = %v", "Test_CreateChannel", diff)
+	}
+}
+
+func Test_GetChannelByLabels(t *testing.T) {
+	log.Print("Test_GetChannelByLabels")
+	log.Print("Creating Channel to fetch")
+	client := evclientsetfake.NewSimpleClientset()
+	client.Fake.ReactionChain = nil
+	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool,
+		ret runtime.Object, err error) {
+		return true, testChannel, nil
+	})
+	client.Fake.AddReactor("list", "channels", func(action k8stesting.Action) (handled bool,
+		ret runtime.Object, err error) {
+		return true, testChannelList, nil
+	})
+
+	k := &KnativeLib{
+		evClient:         client.EventingV1alpha1(),
+		messagingChannel: client.MessagingV1alpha1(),
+	}
+	ch1, err1 := k.CreateChannel(channelName, testNS, &labels, 10*time.Second)
+	assert.Nil(t, err1)
+	log.Printf("Channel created: %v", ch1)
+	log.Println("Getting Channel By label")
+
+	ch2, err2 := k.GetChannelByLabels(testNS, &labels)
+	assert.Nil(t, err2)
+
+	fmt.Printf("======== %v\n", ch2)
+
+	ignore := cmpopts.IgnoreTypes(apis.VolatileTime{})
+	if diff := cmp.Diff(ch1, ch2, ignore); diff != "" {
 		t.Errorf("%s (-want, +got) = %v", "Test_CreateChannel", diff)
 	}
 }
