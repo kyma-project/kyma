@@ -18,6 +18,7 @@ import (
 	messagingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8slabels "k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/rest"
 )
 
@@ -62,6 +63,7 @@ var once sync.Once
 // KnativeAccessLib encapsulates the Knative access lib behaviours.
 type KnativeAccessLib interface {
 	GetChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error)
+	GetChannelByLabels(namespace string, labels *map[string]string) (*messagingV1Alpha1.Channel, error)
 	CreateChannel(name string, namespace string, labels *map[string]string,
 		timeout time.Duration) (*messagingV1Alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
@@ -125,6 +127,31 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*messagingV1Alph
 		return nil, fmt.Errorf("ERROR: GetChannel():channel NotReady")
 	}
 	return channel, nil
+}
+
+// GetChannelByLabels return a knative channel fetched via label selectors
+// so based on the labels, we assume that the list of channels should have only one item in it
+// Hence, we'd be returning the item at 0th index.
+func (k *KnativeLib) GetChannelByLabels(namespace string, labels *map[string]string) (*messagingV1Alpha1.Channel, error) {
+	if labels == nil {
+		return nil, errors.New("no labels were passed to GetChannelByLabels()")
+	}
+	channelList, err := k.messagingChannel.Channels(namespace).List(metav1.ListOptions{
+		LabelSelector: getLabelSelectorsAsString(*labels),
+	})
+	if err != nil {
+		log.Printf("ERROR: GetChannelByLabels(): getting channels by labels: %v", err)
+		return nil, err
+	}
+
+	log.Printf("knative channels fetched %v", channelList)
+
+	// ChannelList length should exactly be equal to 1
+	if channelListLength := len(channelList.Items); channelListLength != 1 {
+		log.Printf("ERROR: GetChannelByLabels(): channel list has %d items", channelListLength)
+		return nil, errors.New("length of channel list is not equal to 1")
+	}
+	return &channelList.Items[0], nil
 }
 
 // CreateChannel creates a Knative/Eventing channel controlled by the specified provisioner
@@ -347,4 +374,8 @@ func dumpResponse(res *http.Response) {
 		log.Printf("ERROR: dumpResponse(): %v", err)
 	}
 	log.Printf("\n\ndump res1:%s", dump)
+}
+
+func getLabelSelectorsAsString(labels map[string]string) string {
+	return k8slabels.SelectorFromSet(labels).String()
 }

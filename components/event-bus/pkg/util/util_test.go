@@ -23,7 +23,7 @@ func TestGetChannelName(t *testing.T) {
 			sourceID:            "ec-default",
 			eventType:           "order.created",
 			eventTypeVersion:    "v1",
-			expectedChannelName: "kf5wxkg4bobejchlt6ekbpuwiixddqenw",
+			expectedChannelName: "kf5wxkg4bobejchlt6ekbpuwi",
 		},
 	}
 

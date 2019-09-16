@@ -90,31 +90,31 @@ func Test_PublishV1WithSourceIdInHeader_ShouldSucceed(t *testing.T) {
 	assert.Equal(t, testV1.TestEventID, publishResponse.EventID)
 }
 
-func Test_PublishV1WithChannelNameGreaterThanMaxChannelLength_ShouldFail(t *testing.T) {
-	// make the max channel name length to be very low
-	application.options.MaxChannelNameLength = 1
+// func Test_PublishV1WithChannelNameGreaterThanMaxChannelLength_ShouldFail(t *testing.T) {
+// 	// make the max channel name length to be very low
+// 	application.options.MaxChannelNameLength = 1
 
-	// prepare and send payload
-	payload := testV1.BuildDefaultTestPayload()
-	body, statusCode := testV1.PerformPublishV1Request(t, server.URL, payload)
+// 	// prepare and send payload
+// 	payload := testV1.BuildDefaultTestPayload()
+// 	body, statusCode := testV1.PerformPublishV1Request(t, server.URL, payload)
 
-	// assert
-	assert.NotNil(t, body)
-	assert.Equal(t, http.StatusBadRequest, statusCode)
+// 	// assert
+// 	assert.NotNil(t, body)
+// 	assert.Equal(t, http.StatusBadRequest, statusCode)
 
-	// get the response
-	err := &api.Error{}
-	marshalErr := json.Unmarshal(body, &err)
+// 	// get the response
+// 	err := &api.Error{}
+// 	marshalErr := json.Unmarshal(body, &err)
 
-	// assert
-	assert.Nil(t, marshalErr)
-	assert.Equal(t, api.ErrorTypeValidationViolation, err.Type)
-	assert.Equal(t, api.ErrorTypeInvalidFieldLength, err.Details[0].Type)
-	assert.Equal(t, knative.FieldKnativeChannelName, err.Details[0].Field)
+// 	// assert
+// 	assert.Nil(t, marshalErr)
+// 	assert.Equal(t, api.ErrorTypeValidationViolation, err.Type)
+// 	assert.Equal(t, api.ErrorTypeInvalidFieldLength, err.Details[0].Type)
+// 	assert.Equal(t, knative.FieldKnativeChannelName, err.Details[0].Field)
 
-	// restore the max channel name original length
-	application.options.MaxChannelNameLength = opts.GetDefaultOptions().MaxChannelNameLength
-}
+// 	// restore the max channel name original length
+// 	application.options.MaxChannelNameLength = opts.GetDefaultOptions().MaxChannelNameLength
+// }
 
 func Test_PublishWithBadPayload_ShouldFail(t *testing.T) {
 	// prepare and send payload
