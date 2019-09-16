@@ -49,7 +49,8 @@ const (
 	provisioner   = "natss"
 	subscriberURI = "URL-test-susbscriber"
 
-	testErrorMessage = "test induced error"
+	testErrorMessage        = "test induced error"
+	defaultMaxChannelLength = 25
 )
 
 var (
@@ -426,7 +427,7 @@ func makeKnChannel(namespace string, name string, labels *map[string]string) *me
 }
 
 func makeKnChannelName(kySub *eventingv1alpha1.Subscription) string {
-	return eventBusUtil.GetKnativeChannelName(&kySub.SourceID, &kySub.EventType)
+	return eventBusUtil.GetKnativeChannelName(&kySub.SourceID, &kySub.EventType, defaultMaxChannelLength)
 }
 
 func makeKnSubscriptionName(kySub *eventingv1alpha1.Subscription) string {

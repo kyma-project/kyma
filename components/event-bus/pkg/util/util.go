@@ -16,8 +16,8 @@ var (
 // which eventually creates problem in creating gcp-pub/sub service, Hence restricting the channel length
 // to 15 characters and due to a timestamp substring in the channel name we are ensured that the channel name
 // is unique
-func GetKnativeChannelName(sourceID, eventType *string) string {
+func GetKnativeChannelName(sourceID, eventType *string, maxChannelLength int) string {
 	chanName := fmt.Sprintf("%s-%s-%s", strconv.FormatInt(time.Now().Unix(), 10),
-		replacer.Replace(*sourceID), replacer.Replace(*eventType))[:25]
+		replacer.Replace(*sourceID), replacer.Replace(*eventType))[:maxChannelLength]
 	return fmt.Sprintf("k%s", chanName)
 }
