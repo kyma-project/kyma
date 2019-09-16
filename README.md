@@ -70,10 +70,12 @@ The repository has the following structure:
 
   ```
   ├── .github                     # Pull request and issue templates             
-  ├── components                  # Source code of all Kyma components                                                
+  ├── components                  # Source code of all Kyma components
   ├── docs                        # Documentation source files
   ├── installation                # Installation scripts     
   ├── resources                   # Helm charts and Kubernetes resources for the Kyma installation
   ├── tests                       # Acceptance tests
+  ├── common                      # Common Go libraries
+  ├── scripts                     # Scripts used for building
   └── tools                       # Source code of utilities used, for example, for the installation and testing
   ```
