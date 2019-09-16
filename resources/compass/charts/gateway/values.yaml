@@ -10,5 +10,11 @@ deployment:
 service:
   port: *port
 
+oathkeeper:
+  host: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
+  port: 4455
+  idTokenConfig:
+    claims: "{\"scope\": \"{{ print .Extra.scopes }}\", \"tenants\": \"{{ print .Extra.tenants }}\"}"
+
 gateway:
   enabled: false
