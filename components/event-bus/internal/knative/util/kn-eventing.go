@@ -148,6 +148,10 @@ func (k *KnativeLib) GetChannelByLabels(namespace string, labels *map[string]str
 
 	// ChannelList length should exactly be equal to 1
 	if channelListLength := len(channelList.Items); channelListLength != 1 {
+		if channelListLength == 0 {
+			log.Printf("no channels with the %v labels were found in %v namespace", *labels, namespace)
+			return nil, k8serrors.NewNotFound(messagingV1Alpha1.Resource("channels"), "")
+		}
 		log.Printf("ERROR: GetChannelByLabels(): channel list has %d items", channelListLength)
 		return nil, errors.New("length of channel list is not equal to 1")
 	}
