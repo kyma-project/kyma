@@ -26,13 +26,13 @@ metadata:
     component: compass
     kyma-project.io/installation: ""
 data:
-  # Enables the Compass gateway, as the default Kyma gateway is disabled in this installation mode
+  # The parameter that enables the Compass gateway, as the default Kyma gateway is disabled in this installation mode.
   gateway.gateway.enabled: "true"
-  # The name of the actually used gateway
+  # The name of the currently used gateway
   global.istio.gateway.name: compass-istio-gateway
-  # The Namespace of the actually used gateway
+  # The Namespace of the currently used gateway
   global.istio.gateway.namespace: compass-system
-  # Disables pre-configuration for the Compass Agent
+  # The parameter that disables preconfiguration for the Compass Agent
   global.agentPreconfiguration: "false"
   # The Namespace with a Secret that contains a certificate for the Connector Service
   global.connector.secrets.ca.namespace: compass-system
