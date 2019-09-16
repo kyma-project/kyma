@@ -119,8 +119,6 @@ func Test_GetChannelByLabels(t *testing.T) {
 	ch2, err2 := k.GetChannelByLabels(testNS, &labels)
 	assert.Nil(t, err2)
 
-	fmt.Printf("======== %v\n", ch2)
-
 	ignore := cmpopts.IgnoreTypes(apis.VolatileTime{})
 	if diff := cmp.Diff(ch1, ch2, ignore); diff != "" {
 		t.Errorf("%s (-want, +got) = %v", "Test_CreateChannel", diff)
