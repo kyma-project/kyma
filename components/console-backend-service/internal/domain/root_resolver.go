@@ -38,7 +38,7 @@ type RootResolver struct {
 	authentication *authentication.PluggableResolver
 }
 
-func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles) (*RootResolver, error) {
+func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
 	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
 	makePluggable := module.MakePluggableFunc(uiContainer.BackendModuleInformer)
 
@@ -72,7 +72,7 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 	}
 	makePluggable(appContainer)
 
-	k8sResolver, err := k8s.New(restConfig, informerResyncPeriod, appContainer.ApplicationRetriever, scContainer.ServiceCatalogRetriever, scaContainer.ServiceCatalogAddonsRetriever)
+	k8sResolver, err := k8s.New(restConfig, informerResyncPeriod, appContainer.ApplicationRetriever, scContainer.ServiceCatalogRetriever, scaContainer.ServiceCatalogAddonsRetriever, systemNamespaces)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
@@ -398,8 +398,8 @@ type queryResolver struct {
 	*RootResolver
 }
 
-func (r *queryResolver) Namespaces(ctx context.Context, application *string) ([]gqlschema.Namespace, error) {
-	return r.k8s.NamespacesQuery(ctx, application)
+func (r *queryResolver) Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]gqlschema.Namespace, error) {
+	return r.k8s.NamespacesQuery(ctx, withSystemNamespaces, withInactiveStatus)
 }
 
 func (r *queryResolver) Namespace(ctx context.Context, name string) (*gqlschema.Namespace, error) {
@@ -656,6 +656,10 @@ func (r *subscriptionResolver) APIEvent(ctx context.Context, namespace string, s
 	return r.ac.APIEventSubscription(ctx, namespace, serviceName)
 }
 
+func (r *subscriptionResolver) NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan gqlschema.NamespaceEvent, error) {
+	return r.k8s.NamespaceEventSubscription(ctx, withSystemNamespaces)
+}
+
 // Service Instance
 
 type serviceInstanceResolver struct {
@@ -805,6 +809,10 @@ type namespaceResolver struct {
 
 func (r *namespaceResolver) Applications(ctx context.Context, obj *gqlschema.Namespace) ([]string, error) {
 	return r.k8s.ApplicationsField(ctx, obj)
+}
+
+func (r *namespaceResolver) Pods(ctx context.Context, obj *gqlschema.Namespace) ([]gqlschema.Pod, error) {
+	return r.k8s.PodsQuery(ctx, obj.Name, nil, nil)
 }
 
 // CMS

@@ -15,3 +15,7 @@ func NewGQLServiceConverter() *gqlServiceConverter {
 func NewGQLConfigMapConverter() *gqlConfigMapConverter {
 	return new(gqlConfigMapConverter)
 }
+
+func NewNamespaceConverter() *namespaceConverter {
+	return new(namespaceConverter)
+}

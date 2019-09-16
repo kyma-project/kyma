@@ -1,5 +1,5 @@
 global:
-  defaultTenant : 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
+  defaultTenant: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
   tenants: foo bar
 
   images:
@@ -7,7 +7,7 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir: develop/
-      version: "e8efc60c"
+      version: "1adfa459"
     director:
       dir: develop/
       version: "e5daeb53"
@@ -31,17 +31,20 @@ global:
         version: "07a992a2"
       connector:
         dir: develop/
-        version: "2adc7649"
+        version: "1adfa459"
 
   isLocalEnv: false
 
   agentPreconfiguration: true
-  
+
   director:
     port: 3000
 
   connector:
-    port: 3000
+    graphql:
+      port: 3000
+    validator:
+      port: 8080
     # If secrets do not exist they will be created
     secrets:
       ca:
@@ -50,18 +53,30 @@ global:
       rootCA:
         name: application-connector-certs
         namespace: istio-system
+    certificateDataHeader: "Certificate-Data" # Should be stripped by Virtual Service
     # If key and certificate are not provided they will be generated
     caKey: ""
     caCertificate: ""
 
   gateway:
-    host: compass-gateway
-    secure:
-      jwt:
-        host: compass-gateway-auth-jwt
-      oauth:
-        host: compass-gateway-auth-oauth
-  
+    port: 3000
+    tls:
+      host: compass-gateway
+      secure:
+        jwt:
+          host: compass-gateway-auth-jwt
+        oauth:
+          host: compass-gateway-auth-oauth
+    mtls:
+      host: compass-gateway-mtls
+    headers:
+      request:
+        remove:
+          - "Client-Id-From-Token"
+          - "Client-Id-From-Certificate"
+          - "Client-Certificate-Hash"
+          - "Certificate-Data"
+
   istio:
     gateway:
       name: "kyma-gateway"
