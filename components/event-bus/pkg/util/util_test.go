@@ -33,7 +33,7 @@ func TestGetChannelName(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 
-			channelName := util.GetKnativeChannelName(&testCase.sourceID, &testCase.eventType)
+			channelName := util.GetKnativeChannelName(&testCase.sourceID, &testCase.eventType, 25)
 			tokens := strings.Split(channelName, "-")
 			if !strings.HasPrefix(tokens[0], "k") || tokens[1] != "ec" || tokens[2] != "default" ||
 				tokens[3] != "ord" || len(channelName) != 26 {
