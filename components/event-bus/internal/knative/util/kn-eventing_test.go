@@ -199,7 +199,8 @@ func Test_DeleteInexistentChannel(t *testing.T) {
 	evClient := evclientsetfake.NewSimpleClientset().EventingV1alpha1()
 	msgClient := evclientsetfake.NewSimpleClientset().MessagingV1alpha1()
 	k := &KnativeLib{}
-	_ = k.InjectClient(evClient, msgClient)
+	e := k.InjectClient(evClient, msgClient)
+	assert.Nil(t, e)
 	err := k.DeleteChannel(channelName, testNS)
 	assert.True(t, k8serrors.IsNotFound(err))
 }
