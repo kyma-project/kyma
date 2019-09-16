@@ -22,6 +22,6 @@ func NewMockKnativePublisher() publisher.KnativePublisher {
 // Publish for mocking the KnativePublisher.Publish behaviour.
 func (m *MockKnativePublisher) Publish(knativeLib *knative.KnativeLib, namespace *string,
 	headers *map[string][]string, payload *[]byte, source string, eventType string,
-	eventTypeVersion string) (*api.Error, string, string) {
+	eventTypeVersion string) (error *api.Error, status string, channelName string) {
 	return nil, publisher.PUBLISHED, channelName
 }
