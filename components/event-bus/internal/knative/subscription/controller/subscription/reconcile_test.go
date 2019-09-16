@@ -426,7 +426,7 @@ func makeKnChannel(namespace string, name string, labels *map[string]string) *me
 }
 
 func makeKnChannelName(kySub *eventingv1alpha1.Subscription) string {
-	return eventBusUtil.GetChannelName(&kySub.SourceID, &kySub.EventType, &kySub.EventTypeVersion)
+	return eventBusUtil.GetKnativeChannelName(&kySub.SourceID, &kySub.EventType, &kySub.EventTypeVersion)
 }
 
 func makeKnSubscriptionName(kySub *eventingv1alpha1.Subscription) string {
