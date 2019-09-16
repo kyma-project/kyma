@@ -13,10 +13,10 @@
 /common/microfrontend-client/ @dariadomagala @y-kkamil @akucharska @sjanota
 
 # The `installation` directory and subdirectories
-/installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
+/installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `installation` PowerShell scripts
-/installation/**/*.ps1 @crabtree @venturasr
+/installation/**/*.ps1 @crabtree @venturasr @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # The `cluster-essentials` chart
 /resources/cluster-essentials/ @piotrmsc @PK85 @derberg
