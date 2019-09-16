@@ -23,15 +23,15 @@ spec:
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.deployment.args.containerPort}}
+              containerPort: {{ .Values.global.gateway.port }}
               protocol: TCP
           env:
             - name: APP_ADDRESS
-              value: "0.0.0.0:{{ .Values.deployment.args.containerPort}}"
+              value: "0.0.0.0:{{ .Values.global.gateway.port }}"
             - name: APP_DIRECTOR_ORIGIN
               value: "http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}"
             - name: APP_CONNECTOR_ORIGIN
-              value: "http://compass-connector.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.port }}"
+              value: "http://compass-connector.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.port }}"
           {{- with .Values.deployment.securityContext }}
           securityContext:
 {{ toYaml . | indent 12 }}

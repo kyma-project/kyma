@@ -23,12 +23,17 @@ spec:
           image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.connector.dir }}compass-connector:{{ .Values.global.images.connector.version }}
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           ports:
-            - name: http
-              containerPort: {{ .Values.deployment.args.containerPort }}
+            - name: http-graphql
+              containerPort: {{ .Values.global.connector.graphql.port }}
+              protocol: TCP
+            - name: http-validator
+              containerPort: {{ .Values.global.connector.validator.port }}
               protocol: TCP
           env:
             - name: APP_ADDRESS
-              value: "0.0.0.0:{{ .Values.deployment.args.containerPort }}"
+              value: "0.0.0.0:{{ .Values.global.connector.graphql.port }}"
+            - name: APP_HYDRATOR_ADDRESS
+              value: "0.0.0.0:{{ .Values.global.connector.validator.port }}"
             - name: APP_PLAYGROUND_API_ENDPOINT
               value: "/connector/graphql"
             - name: APP_TOKEN_LENGTH
@@ -45,6 +50,8 @@ spec:
             - name: APP_ROOT_CA_CERTIFICATE_SECRET_NAME
               value: "{{ .Values.global.connector.secrets.rootCA.namespace }}/{{ .Values.global.connector.secrets.rootCA.name }}"
             {{ end }}
+            - name: APP_CERTIFICATE_DATA_HEADER
+              value: "{{ .Values.global.connector.certificateDataHeader }}"
             - name: APP_CSR_SUBJECT_COUNTRY
               value: "{{ .Values.deployment.args.csrSubject.country }}"
             - name: APP_CSR_SUBJECT_ORGANIZATION
@@ -55,6 +62,10 @@ spec:
               value: "{{ .Values.deployment.args.csrSubject.locality }}"
             - name: APP_CSR_SUBJECT_PROVINCE
               value: "{{ .Values.deployment.args.csrSubject.province }}"
+            - name: APP_DIRECTOR_URL
+              value: "{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/director/graphql"
+            - name: APP_CERTIFICATE_SECURED_CONNECTOR_URL
+              value: "{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql"
           {{- with .Values.deployment.securityContext }}
           securityContext:
 {{ toYaml . | indent 12 }}
