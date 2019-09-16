@@ -29,7 +29,7 @@ const (
 type KnativePublisher interface {
 	Publish(knativeLib *knative.KnativeLib, namespace *string, headers *map[string][]string,
 		payload *[]byte, source string,
-		eventType string, eventTypeVersion string) (*api.Error, string, string)
+		eventType string, eventTypeVersion string) (error *api.Error, status string, channelName string)
 }
 
 // DefaultKnativePublisher is the default KnativePublisher instance.
@@ -44,8 +44,7 @@ func NewKnativePublisher() KnativePublisher {
 // Publish events using the KnativeLib
 func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib,
 	namespace *string, headers *map[string][]string, payload *[]byte, source string,
-	eventType string, eventTypeVersion string) (*api.Error,
-	string, string) {
+	eventType string, eventTypeVersion string) (error *api.Error, status string, channelName string) {
 
 	// knativelib should not be nil
 	if knativeLib == nil {
@@ -71,8 +70,18 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 		return api.ErrorResponseInternalServer(), FAILED, empty
 	}
 
-	if len(source) == 0 || len(eventType) == 0 || len(eventTypeVersion) == 0 {
-		log.Println("one of the event source, type or version value is missing")
+	if len(source) == 0 {
+		log.Println("source is missing")
+		return api.ErrorResponseInternalServer(), FAILED, empty
+	}
+
+	if len(eventType) == 0 {
+		log.Println("eventType is missing")
+		return api.ErrorResponseInternalServer(), FAILED, empty
+	}
+
+	if len(eventTypeVersion) == 0 {
+		log.Println("eventTypeVersion is missing")
 		return api.ErrorResponseInternalServer(), FAILED, empty
 	}
 
@@ -103,18 +112,12 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 func (publisher *DefaultKnativePublisher) publishOnChannel(knativeLib *knative.KnativeLib, channel *messagingV1Alpha1.Channel, namespace *string, headers *map[string][]string,
 	payload *[]byte) (*api.Error, string, string) {
 
-	// knative Channel reference should not be nil
-	if channel == nil {
-		log.Println("knative channel reference is not passed")
-		return api.ErrorResponseInternalServer(), FAILED, empty
-	}
-
 	// send message to the knative channel
 	messagePayload := string(*payload)
 	err := knativeLib.SendMessage(channel, headers, &messagePayload)
 	if err != nil {
 		log.Printf("failed to send message to the knative channel '%v' in namespace '%v'", channel.Name, *namespace)
-		return api.ErrorResponseInternalServer(), FAILED, empty
+		return api.ErrorResponseInternalServer(), FAILED, channel.Name
 	}
 
 	// publish to channel succeeded return nil error
