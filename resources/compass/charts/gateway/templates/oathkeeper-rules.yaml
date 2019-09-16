@@ -2,7 +2,6 @@ apiVersion: oathkeeper.ory.sh/v1alpha1
 kind: Rule
 metadata:
   name: compass-gateway-oauth
-  namespace: compass-system
 spec:
   description: Configuration of oathkeeper for secure endpoint of compass gateway
   upstream:
@@ -27,7 +26,6 @@ apiVersion: oathkeeper.ory.sh/v1alpha1
 kind: Rule
 metadata:
   name: compass-gateway-jwt
-  namespace: compass-system
 spec:
   description: Configuration of oathkeeper for secure endpoint of compass gateway
   upstream:
