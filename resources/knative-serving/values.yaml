@@ -9,7 +9,7 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
-    dir: pr
+    dir: pr/
     version: PR-5656
   subDomain: "serverless"
 
