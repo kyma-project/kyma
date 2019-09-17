@@ -17,7 +17,7 @@ After you complete the registration, [request](https://help.github.com/articles/
 
 ## Configure Dex
 
-Register the connector by creating a [Helm override](/docs/root/#configuration-helm-overrides-for-kyma-installation) for Dex. Create the override ConfigMap in the Kubernetes cluster before Dex is installed. If you want to register a connector at run time, trigger the [update process](/docs/root/#installation-update-kyma-trigger-the-update-process) after creating the override.
+Register the connector by creating a [Helm override](/docs/root/#configuration-helm-overrides-for-kyma-installation) for Dex. Create the override ConfigMap in the Kubernetes cluster before Dex is installed. If you want to register a connector at runtime, trigger the [update process](/docs/root/#installation-update-kyma-trigger-the-update-process) after creating the override.
 >**TIP:** You can use Go Template expressions in the override value. These expressions are resolved by Helm using the same set of overrides as configured for the entire chart.
 
 ```
