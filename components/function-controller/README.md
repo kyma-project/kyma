@@ -122,6 +122,16 @@ make deploy
 This runs `ko` to build your image and push it to your configured docker repository. 
 See [google/ko](https://github.com/google/ko) for more details about `ko`
 
+`ko` requires the environment variable `$KO_DOCKER_REPO` to point to a valid docker repository
+
+```bash
+#for hub.docker.io
+export KO_DOCKER_REPO=<your dockerhub username>
+
+#to use your local docker daemon and its image store
+export KO_DOCKER_REPO=ko.local
+
+```
 ## Usage
 
 ### Run tests
