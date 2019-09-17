@@ -8,7 +8,7 @@ The CMS Services project collects the source code for services that extend the f
 
 Use the following tools to set up the project:
 
-- [Go distribution](https://golang.org)
+- [Go](https://golang.org)
 - [Docker](https://www.docker.com/)
 
 ## Development
@@ -18,6 +18,7 @@ Read how to develop, test, and validate the project.
 ### Install dependencies
 
 This project uses `dep` as a dependency manager. To install all required dependencies, use the following command:
+
 ```bash
 dep ensure --vendor-only --v
 ```

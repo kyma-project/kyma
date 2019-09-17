@@ -35,16 +35,18 @@ Follow these steps:
 3. Add the IP address of Minikube to the `hosts` file on your local machine for your APIs:
 
    ```bash
-   $ echo "$(minikube ip) http-db-service.kyma.local" | sudo tee -a /etc/hosts
+   echo "$(minikube ip) http-db-service.kyma.local" | sudo tee -a /etc/hosts
    ```
 
 4. Access the service using the following call:
+
    ```bash
    curl -ik https://http-db-service.kyma.local/orders
    ```
 
    The system returns a response similar to the following:
-   ```
+
+   ```HTTP
    HTTP/2 200
    content-type: application/json;charset=UTF-8
    vary: Origin
@@ -63,6 +65,7 @@ Run the following command:
    ```bash
    kubectl apply -n stage -f https://raw.githubusercontent.com/kyma-project/examples/master/gateway/service/api-with-auth.yaml
    ```
+
 After you apply this update, you must include a valid bearer ID token in the Authorization header to access the service.
 
 >**NOTE:** The update might take some time.

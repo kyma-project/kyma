@@ -1,7 +1,9 @@
 # Configuration
+
 This document describes configuration details of the application.
 
 ## Environmental Variables
+
 Use the following environment variables to configure the application:
 
 | Name | Required | Default | Description |
@@ -35,9 +37,11 @@ Use the following environment variables to configure the application:
 | APP_TRACING_SERVICE_SPAN_NAME | YES | `console-backend-service` | The name of the service span. |
 
 ## Configure logger verbosity level
+
 This application uses `glog` to log messages. Pass command line arguments described in the [glog.go](https://github.com/golang/glog/blob/master/glog.go) document to customize the log, such as log level and output.
 
 For example:
+
 ```bash
 go run main.go --stderrthreshold=INFO -logtostderr=false
 ```

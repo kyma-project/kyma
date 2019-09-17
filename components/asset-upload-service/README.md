@@ -8,7 +8,7 @@ The Asset Upload Service is an HTTP server that exposes the file upload function
 
 Use the following tools to set up the project:
 
-- [Go distribution](https://golang.org)
+- [Go](https://golang.org)
 - [Docker](https://www.docker.com/)
 
 ## Usage
@@ -22,6 +22,7 @@ APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_VERBOSE=true APP_UPLOAD_ACCESS
 ```
 
 Replace values in curly braces with proper details, where:
+
 - `{accessKey}` is the access key required to sign in to the content storage server.
 - `{secretKey}` is the secret key required to sign in to the content storage server.
 
@@ -93,6 +94,7 @@ go run main.go --stderrthreshold=INFO -logtostderr=false
 ### Install dependencies
 
 This project uses `dep` as a dependency manager. To install all required dependencies, use the following command:
+
 ```bash
 dep ensure -vendor-only
 ```
