@@ -11,13 +11,13 @@ Currently, Dex uses a static user database and authenticates static users by its
 
 For the list of static Dex users and clients, as well as the information about the connectors that delegate authentication to external identity providers, see the [dex-config-map.yaml](templates/dex-config-map.yaml) file.
 
-Dex is exposed using the [Istio VirtualService](https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/) feature. Access Dex at `https://dex.kyma.local`.
+Dex is exposed using the [Istio VirtualService](https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/) feature. Access Dex at `https://dex.{CLUSTER_DOMAIN}`.
 
 ## Configuration
 
 This chart allows you to provide configuration for Dex connectors and clients using the Helm overrides mechanism.
 
-> **TIP:** You can use Go Template expressions in the override value. These expressions are resolved by Helm using the same set of overrides as configured for the entire chart.
+>**TIP:** You can use Go Template expressions in the override value. These expressions are resolved by Helm using the same set of overrides as configured for the entire chart.
 
 ### Connectors
 
@@ -45,7 +45,7 @@ This is an example of a connector configuration string:
 
 Configure Dex clients through the `oidc.staticClientsExtra` override. Pass the list of clients as a single string in the `yaml` format.
 
->**WARNING:** The `oidc.staticClientsBase` override defines the basic clients required by Kyma. Do not edit this override.
+>**CAUTION:** The `oidc.staticClientsBase` override defines the basic clients required by Kyma. Do not edit this override.
 
 This is an example of a client configuration string:
 ```yaml
@@ -70,4 +70,3 @@ volumesExtra: |-
   - name: extra-config
     emptyDir: {}
 ```
-
