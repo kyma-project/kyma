@@ -14,7 +14,8 @@ logcollector:
   name: promtailfleunt-bit
 ```
 
-Add following configuration to the `fluent-bit-configmap.yaml` to configure fluent-bit to forward logs to the elastic search. Environment variables `${FLUENT_ELASTICSEARCH_HOST}` and `${FLUENT_ELASTICSEARCH_PORT}` should be configured accordingly to your elastic search deployment.
+2. Add the following configuration to the `fluent-bit-configmap.yaml` file for Fluent Bit to forward logs to Elasticsearch. 
+>**NOTE:** Configure **{FLUENT_ELASTICSEARCH_HOST}** and  **{FLUENT_ELASTICSEARCH_PORT}**  environment variables accordingly for your Elasticsearch deployment.
 ```yaml
     output-elasticsearch.conf: |
         [OUTPUT]
