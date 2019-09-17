@@ -851,7 +851,7 @@ metadata:
 apiVersion: v1
 data:
   {{ if (ne "" .Values.global.ingress.domainName) }}
-  {{ .Values.global.ingress.domainName }}: ""
+  {{ .Values.global.subDomain }}.{{ .Values.global.ingress.domainName }}: ""
   {{ end }}
    # Routes having domain suffix of 'svc.cluster.local' will not be exposed
     # through Ingress. You can define your own label selector to assign that
