@@ -38,6 +38,6 @@ data:
   global.connector.secrets.ca.namespace: compass-system
 ```
 
-## Kyma as a Runtime
+## Kyma as a Runtime (with Agent only)
 
-This is a single-tenant mode that provides complete cluster Kyma installation with Agent only. To enable this mode, follow the cluster Kyma installation and use the  [`installer-cr-cluster-runtime.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-runtime.yaml.tpl) configuration file.
+This is a single-tenant mode that provides complete cluster Kyma installation with Agent only. To enable this mode, follow the cluster Kyma installation and use the [`installer-cr-cluster-runtime.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-runtime.yaml.tpl) configuration file.
