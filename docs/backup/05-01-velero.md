@@ -14,20 +14,19 @@ This document lists and describes the parameters that you can configure in veler
 This table lists the required parameters for velero to work, their descriptions, and default values:
 
 | Parameter | Description | Default value | Required |
-|-----------|-------------|---------------|---------------|
-**configuration.provider** | Specifies the name of the cloud provider where you are deploying Velero to, such as `aws`, `azure`, `gcp`.| none | yes
-**configuration.backupStorageLocation.name** | Specifies the name of the cloud provider used to store backups, such as `aws`, `gcp`, or `azure`. | none | yes
-**configuration.backupStorageLocation.bucket** | Specifies the storage bucket where backups are uploaded. | none | yes
-**configuration.backupStorageLocation.config.region** | Provides the region in which the bucket is created. It only applies to AWS. | none | yes, if using AWS
+|-----------|-------------|:---------------:|:---------------:|
+**configuration.provider** | Specifies the name of the cloud provider where you are deploying Velero to, such as `aws`, `azure`, `gcp`.| None | Yes
+**configuration.backupStorageLocation.name** | Specifies the name of the cloud provider used to store backups, such as `aws`, `gcp`, or `azure`. | None | Yes
+**configuration.backupStorageLocation.bucket** | Specifies the storage bucket where backups are uploaded. | None | Yes
+**configuration.backupStorageLocation.config.region** | Provides the region in which the bucket is created. It only applies to AWS. | None | Yes, if using AWS
 **configuration.backupStorageLocation.config.resourceGroup** | Specifies the name of the resource group which contains the storage account for the backup storage location. It only applies to Azure. | none | yes, if using Azure
-**configuration.backupStorageLocation.config.storageAccount** | Provides the name of the storage account for the backup storage location. It only applies to Azure.| none | yes, if using Azure
-**configuration.volumeSnapshotLocation.name** | Specifies the name of the cloud provider the cluster is using for persistent volumes. | none | yes, if using PV snapshots
-**configuration.volumeSnapshotLocation.config.region** | Provides the region in which the bucket is created. It only applies to AWS.| none | yes, if using AWS
-**configuration.volumeSnapshotLocation.config.apitimeout** | Defines the amount of time after which an API request returns a timeout status. It only applies to Azure. | none | yes, if using Azure
-**credentials.useSecret** | Specifies if a secret is required for IAM credentials. Set this to `false` when using `kube2iam`. | `true` | yes
-**credentials.existingSecret** | If specified and **useSecret** is `true`, uses an existing secret with this name instead of creating one. | none | yes, if **useSecret** is `true` and **secretContents** is empty
-**credentials.secretContents** | If specified and **useSecret** is `true`, provides the content for the credentials secret. | none | yes, if **useSecret** is `true` and **existingSecret** is empty
-
+**configuration.backupStorageLocation.config.storageAccount** | Provides the name of the storage account for the backup storage location. It only applies to Azure.| None | Yes, if using Azure
+**configuration.volumeSnapshotLocation.name** | Specifies the name of the cloud provider the cluster is using for persistent volumes. | None | Yes, if using PV snapshots
+**configuration.volumeSnapshotLocation.config.region** | Provides the region in which the bucket is created. It only applies to AWS.| None | Yes, if using AWS
+**configuration.volumeSnapshotLocation.config.apitimeout** | Defines the amount of time after which an API request returns a timeout status. It only applies to Azure. | None | Yes, if using Azure
+**credentials.useSecret** | Specifies if a secret is required for IAM credentials. Set this to `false` when using `kube2iam`. | `true` | Yes
+**credentials.existingSecret** | If specified and **useSecret** is `true`, uses an existing secret with this name instead of creating one. | None | Yes, if **useSecret** is `true` and **secretContents** is empty
+**credentials.secretContents** | If specified and **useSecret** is `true`, provides the content for the credentials secret. | None | Yes, if **useSecret** is `true` and **existingSecret** is empty
 
 ## Configurable parameters
 
