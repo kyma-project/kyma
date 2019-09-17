@@ -24,7 +24,7 @@ Depending on the type of the input files, the Console UI renders specifications 
 
 See the tabs overview:
 
-![](./assets/spec-view.png)
+![Specification tabs in the Console UI](./assets/spec-view.png)
 
 
 ## Markdown documents
