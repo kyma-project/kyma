@@ -39,7 +39,7 @@ func TestKnativeServingAcceptance(t *testing.T) {
 	domainName := mustGetenv(t, domainNameEnvVar)
 	target := mustGetenv(t, targetEnvVar)
 
-	testServiceURL := fmt.Sprintf("https://test-service.knative-serving.%s", domainName)
+	testServiceURL := fmt.Sprintf("https://test-service.knative-serving.serverless.%s", domainName)
 
 	ingressClient, err := ingressgateway.FromEnv().Client()
 	if err != nil {
