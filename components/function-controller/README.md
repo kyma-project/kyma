@@ -115,12 +115,12 @@ Follow these steps to prepare the environment you will use to deploy the Control
 
 To deploy the Function Controller to the `serverless-system` Namespace run
 
-    ```bash
-    make deploy
-    ```
-   
-   This runs `ko` to build your image and push it to your configured docker repository. 
-  See [google/ko](https://github.com/google/ko) for more details about `ko`
+```bash
+make deploy
+```
+
+This runs `ko` to build your image and push it to your configured docker repository. 
+See [google/ko](https://github.com/google/ko) for more details about `ko`
 
 ## Usage
 
