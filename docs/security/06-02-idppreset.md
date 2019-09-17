@@ -29,7 +29,7 @@ spec:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-| Parameter   |  Requitred  |  Description |
+| Parameter   |  Required  |  Description |
 |----------|:-------------:|------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
 | **spec.issuer** | Yes | Specifies the issuer of the JWT tokens used to access the services. |
