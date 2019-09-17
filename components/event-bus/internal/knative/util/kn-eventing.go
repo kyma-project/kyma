@@ -15,7 +15,7 @@ import (
 	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	evclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
 	eventingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
-	messagingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	messagingv1alpha1Client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8slabels "k8s.io/apimachinery/pkg/labels"
@@ -72,7 +72,7 @@ type KnativeAccessLib interface {
 	GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error)
 	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
 	SendMessage(channel *messagingV1Alpha1.Channel, headers *map[string][]string, message *string) error
-	InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1.MessagingV1alpha1Interface) error
+	InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error
 }
 
 // NewKnativeLib returns an interface to KnativeLib, which can be mocked
@@ -84,7 +84,7 @@ func NewKnativeLib() (KnativeAccessLib, error) {
 type KnativeLib struct {
 	evClient         eventingv1alpha1.EventingV1alpha1Interface
 	httpClient       http.Client
-	messagingChannel messagingv1alpha1.MessagingV1alpha1Interface
+	messagingChannel messagingv1alpha1Client.MessagingV1alpha1Interface
 }
 
 // Verify the struct KnativeLib implements KnativeLibIntf
@@ -272,7 +272,7 @@ func (k *KnativeLib) SendMessage(channel *messagingV1Alpha1.Channel, headers *ma
 }
 
 // InjectClient injects a client, useful for running tests.
-func (k *KnativeLib) InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1.MessagingV1alpha1Interface) error {
+func (k *KnativeLib) InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error {
 	k.evClient = evClient
 	k.messagingChannel = msgClient
 	return nil
