@@ -171,14 +171,20 @@
 # The `istio-kyma-patch` chart
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# The `knative-build-init` chart
+/resources/knative-build/ @rakesh-garimella @lilitgh @k15r @nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi @Abd4llA
+
 # The `knative-build` chart
-/resources/knative-build/ @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi @Abd4llA
+/resources/knative-build/ @rakesh-garimella @lilitgh @k15r @nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi @Abd4llA
+
+# The `knative-serving-init` chart
+/resources/knative-serving-init/ @Abd4llA @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # The `knative-serving` chart
-/resources/knative-serving/ @Abd4llA @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/resources/knative-serving/ @Abd4llA @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # The `knative-eventing` chart
-/resources/knative-eventing/ @Abd4llA @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
+/resources/knative-eventing/ @Abd4llA @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # The `jaeger` charts
 /resources/jaeger/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
