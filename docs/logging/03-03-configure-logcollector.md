@@ -4,7 +4,7 @@ type: Details
 ---
 
 ## Storage
-By default, Loki comes with the [promtail](https://github.com/grafana/loki) log collector configuration. Additionally, kyma supports other log collector, such as [fluent-bit](https://fluentbit.io/).
+By default, Loki comes with the [promtail](https://github.com/grafana/loki) log collector configuration. Additionally, Kyma supports other log collectors, such as [Fluent Bit](https://fluentbit.io/) you can easily configure.
 
 This is an example of Loki configuration using fluent-bit and elesticsearch:
 
