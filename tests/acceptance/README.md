@@ -21,3 +21,29 @@ To add a new test:
 ### Configure Kyma
 
 After building and pushing the Docker image, set the proper tag in the `resources/core/values.yaml` file, in the`acceptanceTest.imageTag` property.
+
+## Running the test on Kyma
+
+Update the test definition with proper docker image:
+```bash
+kubectl edit testdefinition -n kyma-system core
+```
+
+Create ClsuterTestSuite to run the test:
+```bash
+cat <<EOF | kubectl apply -f -
+apiVersion: testing.kyma-project.io/v1alpha1
+kind: ClusterTestSuite
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: acceptance-test
+spec:
+  maxRetries: 1
+  concurrency: 1
+  selectors:
+      matchNames:
+      - name: core
+        namespace: kyma-system
+EOF
+```
