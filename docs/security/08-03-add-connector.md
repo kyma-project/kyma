@@ -3,7 +3,7 @@ title: Add an Identity Provider to Dex
 type: Tutorials
 ---
 
-Add external authentication providers to Kyma using [Dex connectors](https://github.com/dexidp/dex#connectors). You can add connectors to Dex by creating component overrides.  
+Add external identity providers to Kyma using [Dex connectors](https://github.com/dexidp/dex#connectors). You can add connectors to Dex by creating component overrides.  
 This tutorial shows how to add a [GitHub connector](https://github.com/dexidp/dex/blob/master/Documentation/connectors/github.md) and use it to authenticate users in Kyma.
 
 >**NOTE:** Groups in the Github are represented as teams. See [this](https://help.github.com/articles/organizing-members-into-teams/) document to learn how to manage teams in Github.
@@ -39,7 +39,7 @@ data:
       config:
         clientID: {GITHUB_CLIENT_ID}
         clientSecret: {GITHUB_CLIENT_SECRET}
-        redirectURI: https://dex.kyma.local/callback
+         redirectURI: https://dex.{{ .Values.global.domainName }}/callback
         orgs:
           - name: {GITHUB_ORGANIZATION}
 EOF
