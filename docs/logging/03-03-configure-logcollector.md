@@ -10,7 +10,7 @@ Follow these steps to adjust the Loki configuration to use Fluent Bit and Elasti
 1. Override the [`values.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/logging/values.yaml) file includes the defined **logcollector** parameter. See the example: 
 ```yaml
 logcollector:
-  name: promtailfleunt-bit
+  name: fleunt-bit
 ```
 For details on configurable parameters and overrides, see [this](/components/logging/#configuration-configuration) document.
 2. Add the following configuration to the `fluent-bit-configmap.yaml` file for Fluent Bit to forward logs to Elasticsearch. 
