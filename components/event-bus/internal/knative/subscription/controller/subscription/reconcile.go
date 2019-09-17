@@ -23,9 +23,10 @@ const (
 	// Finalizer for deleting Knative Subscriptions
 	finalizerName = "subscription.finalizers.kyma-project.io"
 
-	subscriptionSourceID         = "kyma-source-id"
-	subscriptionEventType        = "kyma-event-type"
-	subscriptionEventTypeVersion = "kyma-event-type-version"
+	//subscriptionSourceID         = "kyma-source-id"
+	//subscriptionEventType        = "kyma-event-type"
+	//subscriptionEventTypeVersion = "kyma-event-type-version"
+
 )
 
 type reconciler struct {
@@ -133,9 +134,10 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 
 	//Adding the event-metadata as channel labels
 	knativeChannelLabels := make(map[string]string)
-	knativeChannelLabels[subscriptionSourceID] = subscription.SourceID
-	knativeChannelLabels[subscriptionEventType] = subscription.EventType
-	knativeChannelLabels[subscriptionEventTypeVersion] = subscription.EventTypeVersion
+	knativeChannelLabels[util.SubscriptionSourceID] = subscription.SourceID
+	knativeChannelLabels[util.SubscriptionEventType] = subscription.EventType
+	knativeChannelLabels[util.SubscriptionEventTypeVersion] = subscription.EventTypeVersion
+	knativeChannelLabels[util.SubNs] = subscription.Namespace
 
 	if subscription.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is not being deleted, so if it does not have our finalizer,

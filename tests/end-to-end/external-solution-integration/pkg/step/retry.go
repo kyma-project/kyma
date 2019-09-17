@@ -21,6 +21,12 @@ func (r *Retried) Name() string {
 }
 
 func (r *Retried) Run() error {
+	retryOptions := []retry.Option{
+		retry.Attempts(20), // at max (100 * (1 << 13)) / 1000 = 819,2 sec
+		retry.OnRetry(func(n uint, err error) {
+			fmt.Printf(".")
+		}),
+	}
 	return retry.Do(func() error {
 		for _, step := range r.steps {
 			err := step.Run()
@@ -29,7 +35,7 @@ func (r *Retried) Run() error {
 			}
 		}
 		return nil
-	})
+	}, retryOptions...)
 }
 
 func (r *Retried) Cleanup() error {
@@ -44,5 +50,3 @@ func (r *Retried) Cleanup() error {
 func Retry(steps ...Step) *Retried {
 	return &Retried{steps: steps}
 }
-
-

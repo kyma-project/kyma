@@ -10,10 +10,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/go-logr/logr"
+	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	pushv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/eventactivation"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/knativechannel"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -56,6 +58,10 @@ func main() {
 		log.Error(err, "unable to add event activation APIs to scheme")
 		os.Exit(1)
 	}
+	if err := messagingV1Alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "unable to add event activation APIs to scheme")
+		os.Exit(1)
+	}
 
 	// Setup all Controllers
 	log.Info("Setting up Subscription Controller")
@@ -67,6 +73,13 @@ func main() {
 
 	log.Info("Setting up Event Activation Controller")
 	_, err = eventactivation.ProvideController(mgr)
+	if err != nil {
+		log.Error(err, "Unable to create Event Activation controller")
+		os.Exit(1)
+	}
+
+	log.Info("Setting up Knative Channel Controller")
+	_, err = knativechannel.ProvideController(mgr)
 	if err != nil {
 		log.Error(err, "Unable to create Event Activation controller")
 		os.Exit(1)

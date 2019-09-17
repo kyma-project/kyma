@@ -266,6 +266,7 @@ func makeReadySubscription() *eventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
 	subscription.Status.Conditions = []eventingv1alpha1.SubscriptionCondition{
 		{Type: eventingv1alpha1.EventsActivated, Status: eventingv1alpha1.ConditionTrue},
+		{Type: eventingv1alpha1.ChannelReady, Status: eventingv1alpha1.ConditionTrue},
 		{Type: eventingv1alpha1.Ready, Status: eventingv1alpha1.ConditionTrue},
 	}
 	return subscription
@@ -284,6 +285,9 @@ func makeEventsActivatedSubscription() *eventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
 	subscription.Status.Conditions = []eventingv1alpha1.SubscriptionCondition{{
 		Type:   eventingv1alpha1.EventsActivated,
+		Status: eventingv1alpha1.ConditionTrue,
+	}, {
+		Type:   eventingv1alpha1.ChannelReady,
 		Status: eventingv1alpha1.ConditionTrue,
 	}}
 	return subscription

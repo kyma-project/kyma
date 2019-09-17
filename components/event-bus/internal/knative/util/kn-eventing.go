@@ -3,6 +3,7 @@ package util
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -65,10 +66,9 @@ var once sync.Once
 
 // KnativeAccessLib encapsulates the Knative access lib behaviours.
 type KnativeAccessLib interface {
-	GetChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error)
+	//GetChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error)
 	GetChannelByLabels(namespace string, labels map[string]string) (*messagingV1Alpha1.Channel, error)
-	CreateChannel(prefix, namespace string, labels map[string]string,
-		timeout time.Duration) (*messagingV1Alpha1.Channel, error)
+	CreateChannel(name string, namespace string, labels *map[string]string, timeout time.Duration) (*messagingV1Alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string) error
 	DeleteSubscription(name string, namespace string) error
@@ -79,7 +79,7 @@ type KnativeAccessLib interface {
 }
 
 // NewKnativeLib returns an interface to KnativeLib, which can be mocked
-func NewKnativeLib() (KnativeAccessLib, error) {
+func NewKnativeLib() (*KnativeLib, error) {
 	return GetKnativeLib()
 }
 
@@ -120,17 +120,17 @@ func GetKnativeLib() (*KnativeLib, error) {
 // GetChannel returns an existing Knative/Eventing channel, if it exists.
 // If the channel doesn't exist, the error returned can be checked using the
 // standard K8S function: "k8serrors.IsNotFound(err) "
-func (k *KnativeLib) GetChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error) {
-	channel, err := k.messagingChannel.Channels(namespace).Get(name, metav1.GetOptions{})
-	if err != nil {
-		log.Printf("ERROR: GetChannel(): getting channel: %v", err)
-		return nil, err
-	}
-	if !channel.Status.IsReady() {
-		return nil, fmt.Errorf("ERROR: GetChannel():channel NotReady")
-	}
-	return channel, nil
-}
+//func (k *KnativeLib) GetChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error) {
+//	channel, err := k.messagingChannel.Channels(namespace).Get(name, metav1.GetOptions{})
+//	if err != nil {
+//		log.Printf("ERROR: GetChannel(): getting channel: %v", err)
+//		return nil, err
+//	}
+//	if !channel.Status.IsReady() {
+//		return nil, fmt.Errorf("ERROR: GetChannel():channel NotReady")
+//	}
+//	return channel, nil
+//}
 
 // GetChannelByLabels return a knative channel fetched via label selectors
 // so based on the labels, we assume that the list of channels should have only one item in it
@@ -149,6 +149,14 @@ func (k *KnativeLib) GetChannelByLabels(namespace string, labels map[string]stri
 
 	log.Printf("knative channels fetched %v", channelList)
 
+	subs, err := k.evClient.Subscriptions(namespace).List(metav1.ListOptions{})
+	if err != nil {
+		log.Printf("######################## Error while fetching all knative subs: %v\n", err)
+	}
+	bSubs, _ := json.Marshal(subs)
+	log.Println("########### Subs are ##############")
+	log.Printf("%s\n", string(bSubs))
+
 	// ChannelList length should exactly be equal to 1
 	if channelListLength := len(channelList.Items); channelListLength != 1 {
 		if channelListLength == 0 {
@@ -157,6 +165,12 @@ func (k *KnativeLib) GetChannelByLabels(namespace string, labels map[string]stri
 		}
 		log.Printf("ERROR: GetChannelByLabels(): channel list has %d items", channelListLength)
 		return nil, errors.New("length of channel list is not equal to 1")
+	}
+
+	channel := &channelList.Items[0]
+
+	if !channel.Status.IsReady() {
+		return nil, fmt.Errorf("ERROR: GetChannel():channel NotReady")
 	}
 	return &channelList.Items[0], nil
 }
@@ -358,9 +372,11 @@ func makeChannel(prefix, namespace string, labels map[string]string) *messagingV
 
 func makeHTTPRequest(channel *messagingV1Alpha1.Channel, headers *map[string][]string, payload *string) (*http.Request, error) {
 	var jsonStr = []byte(*payload)
-
-	channelURI := "http://" + channel.Status.Address.Hostname
-	req, err := http.NewRequest(http.MethodPost, channelURI, bytes.NewBuffer(jsonStr))
+	bChannel, _ := json.Marshal(channel)
+	log.Println("Got this ########################### Channel:")
+	log.Printf("%s\n", string(bChannel))
+	channelURI := channel.Status.Address.URL
+	req, err := http.NewRequest(http.MethodPost, channelURI.String(), bytes.NewBuffer(jsonStr))
 	if err != nil {
 		log.Printf("ERROR: makeHTTPRequest(): could not create HTTP request: %v", err)
 		return nil, err

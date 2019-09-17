@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/kyma-project/kyma/common/resilient"
 	"github.com/pkg/errors"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -40,6 +41,9 @@ func (s *EventSender) SendEvent(appName string, event *ExampleEvent) error {
 		return err
 	}
 	defer response.Body.Close()
+
+	respBody, _ := ioutil.ReadAll(response.Body)
+	fmt.Printf("Response from publisher: %s\n", string(respBody))
 
 	if response.StatusCode != http.StatusOK {
 		return errors.Errorf("send event failed: %v\nrequest: %v\nresponse: %v", response.StatusCode, request, response)

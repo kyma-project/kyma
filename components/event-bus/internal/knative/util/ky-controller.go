@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -49,6 +50,72 @@ func UpdateEventActivation(ctx context.Context, client runtimeClient.Client, u *
 		}
 	}
 	return nil
+}
+
+// GetSubscriptionForChannel gets Subscription for a particular Channel
+func GetSubscriptionForChannel(ctx context.Context, client runtimeClient.Client, ch *messagingV1Alpha1.Channel) (*subApis.Subscription, error) {
+	var chNamespace string
+	if _, ok := ch.Labels[SubNs]; ok {
+		chNamespace = ch.Labels[SubNs]
+	}
+	fmt.Printf("namespace: %s\n", chNamespace)
+	sl := &subApis.SubscriptionList{}
+	lo := &runtimeClient.ListOptions{
+		Namespace: chNamespace,
+		Raw: &metav1.ListOptions{ // TODO this is here because the fake client needs it. Remove this when it's no longer needed.
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: subApis.SchemeGroupVersion.String(),
+				Kind:       "Subscription",
+			},
+		},
+	}
+	if err := client.List(ctx, lo, sl); err != nil {
+		fmt.Printf("do we have errors while listing? %v\n", err)
+		return nil, err
+	}
+	// there should be one matching subscription if there are more then getting the first one from the list
+	//if len(sl.Items) <= 0 {
+	//	return nil, fmt.Errorf("subscription list is empty for the channel: %s", ch.Name)
+	//}
+	fmt.Printf("List of subs: %v\n", sl)
+	var sub *subApis.Subscription
+	for _, s := range sl.Items {
+		fmt.Printf("Processing sub: %s/%s\n", s.Namespace, s.Name)
+		eventTypeMatched := false
+		eventTypeVersionMatched := false
+		sourceIDMatched := false
+		if eventType, ok := ch.Labels[SubscriptionEventType]; ok {
+			fmt.Printf("Eventtype : sub: %s == channel: %s\n", s.SubscriptionSpec.EventType, eventType)
+			if s.SubscriptionSpec.EventType == eventType {
+				eventTypeMatched = true
+			}
+		}
+		if eventTypeVersion, ok := ch.Labels[SubscriptionEventTypeVersion]; ok {
+			fmt.Printf("Eventtypeversion : sub: %s == channel: %s\n", s.SubscriptionSpec.EventTypeVersion, eventTypeVersion)
+			if s.SubscriptionSpec.EventTypeVersion == eventTypeVersion {
+				eventTypeVersionMatched = true
+			}
+		}
+
+		if sourceID, ok := ch.Labels[SubscriptionSourceID]; ok {
+			fmt.Printf("Source id : sub: %s == channel: %s\n", s.SubscriptionSpec.SourceID, sourceID)
+			if s.SubscriptionSpec.SourceID == sourceID {
+				sourceIDMatched = true
+			}
+		}
+		fmt.Printf("eventTypeMatched: %v, eventTypeVersionMatched: %v, sourceIDMatched: %v\n", eventTypeMatched, eventTypeVersionMatched, sourceIDMatched)
+		if eventTypeMatched && eventTypeVersionMatched && sourceIDMatched {
+			fmt.Printf("After matching, sub: %v", sub)
+			sub = &s
+			break
+		}
+	}
+	//if sub == nil {
+	//	return nil, fmt.Errorf("subscription list is empty for the channel: %s", ch.Name)
+	//}
+
+	return sub, nil
+
 }
 
 // CheckIfEventActivationExistForSubscription returns a boolean value indicating if there is an EventActivation for
@@ -175,8 +242,9 @@ func SetNotReadySubscription(ctx context.Context, client runtimeClient.Client, s
 
 // IsSubscriptionActivated checks if the subscription is active or not.
 func IsSubscriptionActivated(sub *subApis.Subscription) bool {
-	activatedCondition := subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue}
-	return sub.HasCondition(activatedCondition)
+	eventActivatedCondition := subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue}
+	channelReadyCondition := subApis.SubscriptionCondition{Type: subApis.ChannelReady, Status: subApis.ConditionTrue}
+	return sub.HasCondition(eventActivatedCondition) && sub.HasCondition(channelReadyCondition)
 
 }
 
@@ -186,10 +254,22 @@ func ActivateSubscriptions(ctx context.Context, client runtimeClient.Client, sub
 	return updateSubscriptions(ctx, client, updatedSubs, log, time)
 }
 
+// ActivateSubscriptionForChannel activates a Subscription
+func ActivateSubscriptionForChannel(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, log logr.Logger, time CurrentTime) error {
+	updatedSub := updateSubscriptionChannelStatus(sub, subApis.ConditionTrue, time)
+	return updateSubscription(ctx, client, updatedSub, log, time)
+}
+
 // DeactivateSubscriptions deactivate subscriptions.
 func DeactivateSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription, log logr.Logger, time CurrentTime) error {
 	updatedSubs := updateSubscriptionsEventActivatedStatus(subs, subApis.ConditionFalse, time)
 	return updateSubscriptions(ctx, client, updatedSubs, log, time)
+}
+
+// DeactivateSubscriptionForChannel deactivates a Subscription
+func DeactivateSubscriptionForChannel(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, log logr.Logger, time CurrentTime) error {
+	updatedSub := updateSubscriptionChannelStatus(sub, subApis.ConditionFalse, time)
+	return updateSubscription(ctx, client, updatedSub, log, time)
 }
 
 func updateSubscriptionsEventActivatedStatus(subs []*subApis.Subscription, conditionStatus subApis.ConditionStatus, time CurrentTime) []*subApis.Subscription {
@@ -209,6 +289,21 @@ func updateSubscriptionsEventActivatedStatus(subs []*subApis.Subscription, condi
 		}
 	}
 	return updatedSubs
+}
+
+func updateSubscriptionChannelStatus(sub *subApis.Subscription, conditionStatus subApis.ConditionStatus, time CurrentTime) *subApis.Subscription {
+	t := time.GetCurrentTime()
+	var newCondition subApis.SubscriptionCondition
+	if conditionStatus == subApis.ConditionTrue {
+		newCondition = subApis.SubscriptionCondition{Type: subApis.ChannelReady, Status: subApis.ConditionTrue, LastTransitionTime: t}
+	} else {
+		newCondition = subApis.SubscriptionCondition{Type: subApis.ChannelReady, Status: subApis.ConditionFalse, LastTransitionTime: t}
+	}
+
+	if !sub.HasCondition(newCondition) {
+		sub = updateSubscriptionStatus(sub, subApis.ChannelReady, conditionStatus, "", time)
+	}
+	return sub
 }
 
 func updateSubscriptionReadyStatus(sub *subApis.Subscription, conditionStatus subApis.ConditionStatus, msg string, time CurrentTime) *subApis.Subscription {
@@ -250,6 +345,15 @@ func updateSubscriptions(ctx context.Context, client runtimeClient.Client, subs 
 			}
 		}
 		return fmt.Errorf("WriteSubscriptions() failed, see the Ready status of each subscription")
+	}
+	return nil
+}
+
+func updateSubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, log logr.Logger, time CurrentTime) error {
+	err := WriteSubscription(ctx, client, sub)
+	if err != nil {
+		log.Error(err, "Update Ready status failed")
+		return err
 	}
 	return nil
 }
