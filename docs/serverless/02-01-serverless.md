@@ -4,13 +4,13 @@ title: Architecture
 
 The following diagram illustrates a generic serverless implementation.
 
-![General serverless architecture](./assets/serverless_general.png)
+![General serverless architecture](./assets/serverless_general.svg)
 
 The application flow takes place on the client side. Third parties handle the infrastructural logic. Custom logic can process updates and encapsulate databases. Authentication is an example of custom logic. Third parties can also handle business logic. A hosted database contains read-only data that the client reads. None of this functionality runs on a single, central server. Instead, the client relies on FaaS as its resource.
 
 The following diagram shows an example of tasks that lambdas can perform in Kyma after a user invokes them.
 
-![Lambdas in Kyma](./assets/lambda_example.png)
+![Lambdas in Kyma](./assets/lambda_example.svg)
 
 First, the user invokes the exposed lambda endpoint. Then, the lambda function can carry out a number of tasks, such as:
 
@@ -34,7 +34,7 @@ Istio is a third-party component that makes it possible to expose and consume se
 
 In Kyma, functions run in Pods. Istio provides a proxy for specified pods that talk to a pilot. The pilot confirms whether access to the pod is permissible as per the request. In the diagram, Pod B requests access to Pod A. Pod A has an Istio proxy that contains a set of instructions on which services can access Pod A. The Istio proxy also notifies Pod A as to whether Pod B is a part of the service mesh. The Istio Proxy gets all of its information from the Pilot.
 
-![Istio architecture](./assets/istio.png)
+![Istio architecture](./assets/istio.svg)
 
 ### NATS
 
@@ -42,7 +42,7 @@ The Event Bus in Kyma monitors business events and trigger functions based on th
 
 The following diagram demonstrates the Event Bus architecture.
 
-![Event Bus architecture](./assets/nats.png)
+![Event Bus architecture](./assets/nats.svg)
 
 The Event Bus exposes an HTTP endpoint that the system can consume. An external event, such as a subscription, triggers the Event Bus. A lambda function works with a push notification, and the subscription handling of the Event Bus processes the notification.
 
