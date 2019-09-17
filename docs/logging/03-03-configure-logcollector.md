@@ -6,7 +6,7 @@ type: Details
 ## Storage
 By default, Loki comes with the [promtail](https://github.com/grafana/loki) log collector configuration. Additionally, Kyma supports other log collectors, such as [Fluent Bit](https://fluentbit.io/) you can easily configure.
 
-This is an example of Loki configuration using fluent-bit and elesticsearch:
+Follow these steps to adjust the Loki configuration to use Fluent Bit and Elasticsearch:
 
 File `values.yaml` from kyma logging helm chart have to be configured like following example:
 ```yaml
