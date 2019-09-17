@@ -10,8 +10,8 @@ type Manager struct {
 	mock.Mock
 }
 
-// GetCredentials provides a mock function with given fields:
-func (_m *Manager) GetCredentials() (certificates.Credentials, error) {
+// GetClientCredentials provides a mock function with given fields:
+func (_m *Manager) GetClientCredentials() (certificates.Credentials, error) {
 	ret := _m.Called()
 
 	var r0 certificates.Credentials

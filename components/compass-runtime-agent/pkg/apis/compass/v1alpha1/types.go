@@ -17,6 +17,7 @@ type CompassConnection struct {
 
 type CompassConnectionSpec struct {
 	ManagementInfo ManagementInfo `json:"managementInfo"`
+	ResyncNow      bool           `json:"resyncNow,omitempty"`
 }
 
 type ManagementInfo struct {

@@ -6,9 +6,11 @@ import (
 )
 
 type EnvConfig struct {
-	DirectorURL string `envconfig:"DIRECTOR_URL"`
-	RuntimeId   string `envconfig:"RUNTIME_ID"`
-	Tenant      string `envconfig:"TENANT"`
+	//DirectorURL string `envconfig:"DIRECTOR_URL"`
+	ConnectorURL string `envconfig:"CONNECTOR_URL"`
+	Token        string `envconfig:"TOKEN"`
+	//RuntimeId    string `envconfig:"RUNTIME_ID"`
+	//Tenant       string `envconfig:"TENANT"`
 }
 
 type options struct {
@@ -47,5 +49,5 @@ func (o *options) String() string {
 }
 
 func (ec EnvConfig) String() string {
-	return fmt.Sprintf("DIRECTOR_URL=%s, RUNTIME_ID=%s, TENANT=%s", ec.DirectorURL, ec.RuntimeId, ec.Tenant)
+	return fmt.Sprintf("CONNECTOR_URL=%s, TOKEN_PROVIDED=%t", ec.ConnectorURL, ec.Token != "")
 }

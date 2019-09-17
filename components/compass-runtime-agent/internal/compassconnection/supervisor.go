@@ -16,7 +16,6 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// TODO - as a parameter?
 const (
 	DefaultCompassConnectionName = "compass-connection"
 )
@@ -89,7 +88,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	syncAttemptTime := metav1.Now()
 
 	log.Infof("Getting client credentials...")
-	credentials, err := s.credentialsManager.GetCredentials()
+	credentials, err := s.credentialsManager.GetClientCredentials()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to get credentials: %s", err.Error())
 		log.Error(errorMsg)

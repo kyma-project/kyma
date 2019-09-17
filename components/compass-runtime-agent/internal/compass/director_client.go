@@ -11,10 +11,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	HeaderTenant = "Tenant"
-)
-
 //go:generate mockery -name=ConfigClient
 type ConfigClient interface {
 	FetchConfiguration(directorURL string, credentials certificates.Credentials) ([]kymamodel.Application, error)
@@ -22,18 +18,14 @@ type ConfigClient interface {
 
 type GraphQLClientConstructor func(certificate tls.Certificate, graphqlEndpoint string, enableLogging bool, insecureConfigFetch bool) (gql.Client, error)
 
-func NewConfigurationClient(tenant, runtimeId string, gqlClientConstructor GraphQLClientConstructor, insecureConfigFetch bool) ConfigClient {
+func NewConfigurationClient(gqlClientConstructor GraphQLClientConstructor, insecureConfigFetch bool) ConfigClient {
 	return &configClient{
-		tenant:                     tenant,
-		runtimeId:                  runtimeId,
 		gqlClientConstructor:       gqlClientConstructor,
 		insecureConfigurationFetch: insecureConfigFetch,
 	}
 }
 
 type configClient struct {
-	tenant                     string
-	runtimeId                  string
 	gqlClientConstructor       GraphQLClientConstructor
 	insecureConfigurationFetch bool
 }
@@ -47,9 +39,9 @@ func (cc *configClient) FetchConfiguration(directorURL string, credentials certi
 	applicationPage := ApplicationPage{}
 	response := ApplicationsForRuntimeResponse{Result: &applicationPage}
 
+	// TODO: will this query stay the same? Meaning will the Id be required or will it be determined based on certificate?
 	applicationsQuery := ApplicationsForRuntimeQuery(cc.runtimeId)
 	req := graphql.NewRequest(applicationsQuery)
-	req.Header.Add(HeaderTenant, cc.tenant)
 
 	err = client.Do(req, &response)
 	if err != nil {

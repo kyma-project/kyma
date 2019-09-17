@@ -224,7 +224,7 @@ func TestCrSupervisor_SynchronizeWithCompass(t *testing.T) {
 		{
 			description: "synchronize and apply config",
 			mockFunc: func(credManager, compassClient, syncService *mock.Mock) {
-				credManager.On("GetCredentials").Return(credentials, nil)
+				credManager.On("GetClientCredentials").Return(credentials, nil)
 				compassClient.On("FetchConfiguration", directorURL, credentials).
 					Return(applicationsConfig, nil)
 				syncService.On("Apply", applicationsConfig).
@@ -240,7 +240,7 @@ func TestCrSupervisor_SynchronizeWithCompass(t *testing.T) {
 		{
 			description: "set error status if failed to apply config",
 			mockFunc: func(credManager, compassClient, syncService *mock.Mock) {
-				credManager.On("GetCredentials").Return(credentials, nil)
+				credManager.On("GetClientCredentials").Return(credentials, nil)
 				compassClient.On("FetchConfiguration", directorURL, credentials).
 					Return(applicationsConfig, nil)
 				syncService.On("Apply", applicationsConfig).
@@ -256,7 +256,7 @@ func TestCrSupervisor_SynchronizeWithCompass(t *testing.T) {
 		{
 			description: "set error status if failed to fetch config",
 			mockFunc: func(credManager, compassClient, syncService *mock.Mock) {
-				credManager.On("GetCredentials").Return(credentials, nil)
+				credManager.On("GetClientCredentials").Return(credentials, nil)
 				compassClient.On("FetchConfiguration", directorURL, credentials).
 					Return(nil, errors.New("error"))
 			},
@@ -270,7 +270,7 @@ func TestCrSupervisor_SynchronizeWithCompass(t *testing.T) {
 		{
 			description: "set error status if failed to get credentials",
 			mockFunc: func(credManager, compassClient, syncService *mock.Mock) {
-				credManager.On("GetCredentials").
+				credManager.On("GetClientCredentials").
 					Return(certificates.Credentials{}, errors.New("error"))
 			},
 			expectedConnectionState: v1alpha1.SynchronizationFailed,
