@@ -1,18 +1,29 @@
 # Default configuration
 IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG := $(DOCKER_TAG)
+# BASE_PKG is a root packge of the component
 BASE_PKG := github.com/kyma-project/kyma
+# IMG_GOPATH is a path to go path in the container
 IMG_GOPATH := /workspace/go
+# IMG_GOCACHE is a path to go cache in the container
 IMG_GOCACHE := /root/.cache/go-build
+# VERIFY_IGNORE is a grep pattern to exclude files and directories from verification
 VERIFY_IGNORE := /vendor\|/automock
 
 # Other variables
+# LOCAL_DIR in a local path to scripts folder
 LOCAL_DIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+# COMPONENT_DIR is a local path to commponent
 COMPONENT_DIR = $(shell pwd)
+# WORKSPACE_LOCAL_DIR is a path to the scripts folder in the container
 WORKSPACE_LOCAL_DIR = $(IMG_GOPATH)/src/$(BASE_PKG)/scripts
+# WORKSPACE_COMPONENT_DIR is a path to commponent in hte container
 WORKSPACE_COMPONENT_DIR = $(IMG_GOPATH)/src/$(BASE_PKG)/$(APP_PATH)
+# FILES_TO_CHECK is a command used to determine which files should be verified
 FILES_TO_CHECK = find . -type f -name "*.go" | grep -v "$(VERIFY_IGNORE)"
+# DIRS_TO_CHECK is a command used to determine which directories should be verified
 DIRS_TO_CHECK = go list ./... | grep -v "$(VERIFY_IGNORE)"
+# DIRS_TO_IGNORE is a command used to determine which directories should not be verified
 DIRS_TO_IGNORE = go list ./... | grep "$(VERIFY_IGNORE)"
 
 # Base docker configuration
