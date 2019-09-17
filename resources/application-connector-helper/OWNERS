@@ -1,0 +1,18 @@
+approvers:
+  - akgalwas 
+  - janmedrek 
+  - Szymongib 
+  - franpog859 
+  - Maladie
+  - crabtree
+
+reviewers:
+  - piotrmsc
+  - kubadz
+  - strekm
+  - jakkab
+  - Tomasz-Smelcerz-SAP
+  - Demonsthere
+
+labels:
+  - area/application-connector

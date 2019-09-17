@@ -38,7 +38,7 @@ type RootResolver struct {
 	authentication *authentication.PluggableResolver
 }
 
-func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles) (*RootResolver, error) {
+func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
 	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
 	makePluggable := module.MakePluggableFunc(uiContainer.BackendModuleInformer)
 
@@ -72,7 +72,7 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 	}
 	makePluggable(appContainer)
 
-	k8sResolver, err := k8s.New(restConfig, informerResyncPeriod, appContainer.ApplicationRetriever, scContainer.ServiceCatalogRetriever, scaContainer.ServiceCatalogAddonsRetriever)
+	k8sResolver, err := k8s.New(restConfig, informerResyncPeriod, appContainer.ApplicationRetriever, scContainer.ServiceCatalogRetriever, scaContainer.ServiceCatalogAddonsRetriever, systemNamespaces)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
@@ -300,12 +300,12 @@ func (r *mutationResolver) DeleteApplication(ctx context.Context, name string) (
 	return r.app.Resolver.DeleteApplication(ctx, name)
 }
 
-func (r *mutationResolver) CreateAddonsConfiguration(ctx context.Context, name string, namespace string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
-	return r.sca.Resolver.CreateAddonsConfiguration(ctx, name, namespace, urls, labels)
+func (r *mutationResolver) CreateAddonsConfiguration(ctx context.Context, name string, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.CreateAddonsConfiguration(ctx, name, namespace, repositories, urls, labels)
 }
 
-func (r *mutationResolver) UpdateAddonsConfiguration(ctx context.Context, name string, namespace string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
-	return r.sca.Resolver.UpdateAddonsConfiguration(ctx, name, namespace, urls, labels)
+func (r *mutationResolver) UpdateAddonsConfiguration(ctx context.Context, name string, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.UpdateAddonsConfiguration(ctx, name, namespace, repositories, urls, labels)
 }
 
 func (r *mutationResolver) DeleteAddonsConfiguration(ctx context.Context, name string, namespace string) (*gqlschema.AddonsConfiguration, error) {
@@ -320,16 +320,24 @@ func (r *mutationResolver) RemoveAddonsConfigurationURLs(ctx context.Context, na
 	return r.sca.Resolver.RemoveAddonsConfigurationURLs(ctx, name, namespace, urls)
 }
 
+func (r *mutationResolver) AddAddonsConfigurationRepository(ctx context.Context, name string, namespace string, repositories []gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.AddAddonsConfigurationRepositories(ctx, name, namespace, repositories)
+}
+
+func (r *mutationResolver) RemoveAddonsConfigurationRepository(ctx context.Context, name string, namespace string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.RemoveAddonsConfigurationRepositories(ctx, name, namespace, urls)
+}
+
 func (r *mutationResolver) ResyncAddonsConfiguration(ctx context.Context, name string, namespace string) (*gqlschema.AddonsConfiguration, error) {
 	return r.sca.Resolver.ResyncAddonsConfiguration(ctx, name, namespace)
 }
 
-func (r *mutationResolver) CreateClusterAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
-	return r.sca.Resolver.CreateClusterAddonsConfiguration(ctx, name, urls, labels)
+func (r *mutationResolver) CreateClusterAddonsConfiguration(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.CreateClusterAddonsConfiguration(ctx, name, repositories, urls, labels)
 }
 
-func (r *mutationResolver) UpdateClusterAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
-	return r.sca.Resolver.UpdateClusterAddonsConfiguration(ctx, name, urls, labels)
+func (r *mutationResolver) UpdateClusterAddonsConfiguration(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.UpdateClusterAddonsConfiguration(ctx, name, repositories, urls, labels)
 }
 
 func (r *mutationResolver) DeleteClusterAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error) {
@@ -342,6 +350,14 @@ func (r *mutationResolver) AddClusterAddonsConfigurationURLs(ctx context.Context
 
 func (r *mutationResolver) RemoveClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
 	return r.sca.Resolver.RemoveClusterAddonsConfigurationURLs(ctx, name, urls)
+}
+
+func (r *mutationResolver) AddClusterAddonsConfigurationRepository(ctx context.Context, name string, repositories []gqlschema.AddonsConfigurationRepositoryInput) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.AddClusterAddonsConfigurationRepositories(ctx, name, repositories)
+}
+
+func (r *mutationResolver) RemoveClusterAddonsConfigurationRepository(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.RemoveClusterAddonsConfigurationRepositories(ctx, name, urls)
 }
 
 func (r *mutationResolver) ResyncClusterAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error) {
@@ -382,8 +398,8 @@ type queryResolver struct {
 	*RootResolver
 }
 
-func (r *queryResolver) Namespaces(ctx context.Context, application *string) ([]gqlschema.Namespace, error) {
-	return r.k8s.NamespacesQuery(ctx, application)
+func (r *queryResolver) Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]gqlschema.Namespace, error) {
+	return r.k8s.NamespacesQuery(ctx, withSystemNamespaces, withInactiveStatus)
 }
 
 func (r *queryResolver) Namespace(ctx context.Context, name string) (*gqlschema.Namespace, error) {
@@ -640,6 +656,10 @@ func (r *subscriptionResolver) APIEvent(ctx context.Context, namespace string, s
 	return r.ac.APIEventSubscription(ctx, namespace, serviceName)
 }
 
+func (r *subscriptionResolver) NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan gqlschema.NamespaceEvent, error) {
+	return r.k8s.NamespaceEventSubscription(ctx, withSystemNamespaces)
+}
+
 // Service Instance
 
 type serviceInstanceResolver struct {
@@ -789,6 +809,10 @@ type namespaceResolver struct {
 
 func (r *namespaceResolver) Applications(ctx context.Context, obj *gqlschema.Namespace) ([]string, error) {
 	return r.k8s.ApplicationsField(ctx, obj)
+}
+
+func (r *namespaceResolver) Pods(ctx context.Context, obj *gqlschema.Namespace) ([]gqlschema.Pod, error) {
+	return r.k8s.PodsQuery(ctx, obj.Name, nil, nil)
 }
 
 // CMS

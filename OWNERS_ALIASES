@@ -1,0 +1,33 @@
+aliases:
+  documentation-reviewers:
+    - kazydek
+    - klaudiagrz
+    - tomekpapiernik
+    - bszwarc
+    - mmitoraj
+    - majakurcius
+    - alexandra-simeonova
+  documentation-approvers:
+    - kazydek
+    - klaudiagrz
+    - tomekpapiernik
+    - bszwarc
+    - mmitoraj
+    - majakurcius
+    - alexandra-simeonova
+  console-reviewers:
+    - parostatkiem
+    - Wawrzyn321
+    - y-kkamil
+    - kwiatekus
+    - dariadomagala
+    - akucharska
+    - sjanota
+  console-approvers:
+    - parostatkiem
+    - Wawrzyn321
+    - y-kkamil
+    - kwiatekus
+    - dariadomagala
+    - akucharska
+    - sjanota

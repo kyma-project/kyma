@@ -1,3 +1,4 @@
+{{ if .Values.global.agentPreconfiguration }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -49,7 +50,7 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-            - "{{ .Values.global.gateway.host }}.{{ .Values.global.ingress.domainName }}"
+            - "{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}"
       {{ end }}
       serviceAccountName: compass-agent-configuration
       restartPolicy: Never
@@ -61,7 +62,7 @@ spec:
             - -c
             - |
               MAX_RETRIES=60
-              DIRECTOR_URL=https://{{ .Values.global.gateway.host }}.{{ .Values.global.ingress.domainName }}/director/graphql
+              DIRECTOR_URL=https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/director/graphql
 
               function director_readiness() {
                 local cnt=0
@@ -119,3 +120,4 @@ spec:
               fi
               director_readiness
               agent_configuration
+{{ end }}

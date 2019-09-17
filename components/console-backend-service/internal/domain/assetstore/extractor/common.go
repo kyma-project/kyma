@@ -14,7 +14,7 @@ type Common struct{}
 func (e *Common) Status(status v1alpha2.CommonAssetStatus) gqlschema.AssetStatus {
 	return gqlschema.AssetStatus{
 		Phase:   e.phase(status.Phase),
-		Reason:  status.Reason,
+		Reason:  string(status.Reason),
 		Message: status.Message,
 	}
 }

@@ -7,35 +7,71 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir: develop/
-      version: "26601526"
+      version: "1adfa459"
     director:
       dir: develop/
-      version: "4ab44720"
+      version: "e5daeb53"
     gateway:
       dir: develop/
-      version: "df629420"
+      version: "1ce3b6c3"
     healthchecker:
       dir: develop/
       version: "26601526"
     schema_migrator:
       dir: develop/
-      version: "2cc96dec"
+      version: "07a992a2"
+    certs_setup_job:
+      containerRegistry:
+        path: eu.gcr.io/kyma-project
+      dir: develop/
+      version: "70782d18"
     tests:
       e2e:
         dir: develop/
-        version: "3c75146c"
+        version: "07a992a2"
+      connector:
+        dir: develop/
+        version: "1adfa459"
 
   isLocalEnv: false
+
+  agentPreconfiguration: true
   
   director:
     port: 3000
-  
+
   connector:
-    port: 3000
+    graphql:
+      port: 3000
+    validator:
+      port: 8080
+    # If secrets do not exist they will be created
+    secrets:
+      ca:
+        name: connector-service-app-ca
+        namespace: kyma-integration
+      rootCA:
+        name: application-connector-certs
+        namespace: istio-system
+    certificateDataHeader: "Certificate-Data" # Should be stripped by Virtual Service
+    # If key and certificate are not provided they will be generated
+    caKey: ""
+    caCertificate: ""
 
   gateway:
-    host: compass-gateway
-  
+    port: 3000
+    tls:
+      host: compass-gateway
+    mtls:
+      host: compass-gateway-mtls
+    headers:
+      request:
+        remove:
+          - "Client-Id-From-Token"
+          - "Client-Id-From-Certificate"
+          - "Client-Certificate-Hash"
+          - "Certificate-Data"
+
   istio:
     gateway:
       name: "kyma-gateway"

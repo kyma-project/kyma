@@ -3,7 +3,6 @@
 package versioned
 
 import (
-	glog "github.com/golang/glog"
 	networkingv1alpha3 "github.com/kyma-project/kyma/components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
@@ -13,8 +12,6 @@ import (
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	NetworkingV1alpha3() networkingv1alpha3.NetworkingV1alpha3Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Networking() networkingv1alpha3.NetworkingV1alpha3Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -26,12 +23,6 @@ type Clientset struct {
 
 // NetworkingV1alpha3 retrieves the NetworkingV1alpha3Client
 func (c *Clientset) NetworkingV1alpha3() networkingv1alpha3.NetworkingV1alpha3Interface {
-	return c.networkingV1alpha3
-}
-
-// Deprecated: Networking retrieves the default version of NetworkingClient.
-// Please explicitly pick a version.
-func (c *Clientset) Networking() networkingv1alpha3.NetworkingV1alpha3Interface {
 	return c.networkingV1alpha3
 }
 
@@ -58,7 +49,6 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 
 	cs.DiscoveryClient, err = discovery.NewDiscoveryClientForConfig(&configShallowCopy)
 	if err != nil {
-		glog.Errorf("failed to create the DiscoveryClient: %v", err)
 		return nil, err
 	}
 	return &cs, nil

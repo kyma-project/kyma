@@ -1,13 +1,20 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "fullname" . }}-manager-role
   labels:
     app: {{ template "name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
 - apiGroups:
   - assetstore.kyma-project.io
   resources:
@@ -20,17 +27,10 @@ rules:
   - clusterbuckets
   - clusterbuckets/status
   verbs:
+  - create
+  - delete
   - get
   - list
-  - watch
-  - create
+  - patch
   - update
-  - patch
-  - delete
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
+  - watch

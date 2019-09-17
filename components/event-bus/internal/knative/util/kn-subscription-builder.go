@@ -19,11 +19,13 @@ func (s *SubscriptionBuilder) Build() *eventingv1alpha1.Subscription {
 
 // ToChannel sets SubscriptionBuilder Channel.
 func (s *SubscriptionBuilder) ToChannel(name string) *SubscriptionBuilder {
-	s.Spec.Channel = corev1.ObjectReference{
+	channel := corev1.ObjectReference{
 		Name:       name,
 		Kind:       "Channel",
-		APIVersion: "eventing.knative.dev/v1alpha1",
+		APIVersion: "messaging.knative.dev/v1alpha1",
 	}
+	s.Spec.Channel = channel
+	s.Spec.Reply.Channel = &channel
 	return s
 }
 
@@ -84,7 +86,7 @@ func Subscription(name string, namespace string) *SubscriptionBuilder {
 			Channel: corev1.ObjectReference{
 				Name:       "",
 				Kind:       "Channel",
-				APIVersion: "eventing.knative.dev/v1alpha1",
+				APIVersion: "messaging.knative.dev/v1alpha1",
 			},
 			Subscriber: &eventingv1alpha1.SubscriberSpec{
 				Ref: &corev1.ObjectReference{
@@ -98,7 +100,7 @@ func Subscription(name string, namespace string) *SubscriptionBuilder {
 				Channel: &corev1.ObjectReference{
 					Name:       "",
 					Kind:       "Channel",
-					APIVersion: "serving.knative.dev/v1alpha1",
+					APIVersion: "messaging.knative.dev/v1alpha1",
 				},
 			},
 		},

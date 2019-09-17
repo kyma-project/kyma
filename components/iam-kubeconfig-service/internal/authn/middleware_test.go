@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/pkg/errors"
+	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/apiserver/pkg/authentication/user"
 )
 
@@ -86,7 +87,7 @@ type mockAuthenticator struct {
 	Called     bool
 }
 
-func (a *mockAuthenticator) AuthenticateRequest(req *http.Request) (user.Info, bool, error) {
+func (a *mockAuthenticator) AuthenticateRequest(req *http.Request) (*authenticator.Response, bool, error) {
 	a.Called = true
 	a.LastReq = req
 
@@ -95,7 +96,7 @@ func (a *mockAuthenticator) AuthenticateRequest(req *http.Request) (user.Info, b
 		req.Header.Del("Authorization")
 	}
 
-	return a.UserInfo, a.Authorised, a.Err
+	return &authenticator.Response{User: a.UserInfo}, a.Authorised, a.Err
 }
 
 type mockHandler struct {

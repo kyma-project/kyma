@@ -12,10 +12,13 @@ import (
 	"time"
 
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	evclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
 	eventingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+	messagingv1alpha1Client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8slabels "k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/rest"
 )
 
@@ -59,16 +62,17 @@ var once sync.Once
 
 // KnativeAccessLib encapsulates the Knative access lib behaviours.
 type KnativeAccessLib interface {
-	GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error)
-	CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
-		timeout time.Duration) (*evapisv1alpha1.Channel, error)
+	GetChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error)
+	GetChannelByLabels(namespace string, labels *map[string]string) (*messagingV1Alpha1.Channel, error)
+	CreateChannel(name string, namespace string, labels *map[string]string,
+		timeout time.Duration) (*messagingV1Alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string) error
 	DeleteSubscription(name string, namespace string) error
 	GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error)
 	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
-	SendMessage(channel *evapisv1alpha1.Channel, headers *map[string][]string, message *string) error
-	InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) error
+	SendMessage(channel *messagingV1Alpha1.Channel, headers *map[string][]string, message *string) error
+	InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error
 }
 
 // NewKnativeLib returns an interface to KnativeLib, which can be mocked
@@ -78,8 +82,9 @@ func NewKnativeLib() (KnativeAccessLib, error) {
 
 // KnativeLib represents the knative lib.
 type KnativeLib struct {
-	evClient   eventingv1alpha1.EventingV1alpha1Interface
-	httpClient http.Client
+	evClient         eventingv1alpha1.EventingV1alpha1Interface
+	httpClient       http.Client
+	messagingChannel messagingv1alpha1Client.MessagingV1alpha1Interface
 }
 
 // Verify the struct KnativeLib implements KnativeLibIntf
@@ -98,7 +103,8 @@ func GetKnativeLib() (*KnativeLib, error) {
 		return nil, err
 	}
 	k := &KnativeLib{
-		evClient: evClient.EventingV1alpha1(),
+		evClient:         evClient.EventingV1alpha1(),
+		messagingChannel: evClient.MessagingV1alpha1(),
 	}
 	once.Do(func() {
 		k.httpClient = http.Client{
@@ -111,10 +117,10 @@ func GetKnativeLib() (*KnativeLib, error) {
 // GetChannel returns an existing Knative/Eventing channel, if it exists.
 // If the channel doesn't exist, the error returned can be checked using the
 // standard K8S function: "k8serrors.IsNotFound(err) "
-func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error) {
-	channel, err := k.evClient.Channels(namespace).Get(name, metav1.GetOptions{})
+func (k *KnativeLib) GetChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error) {
+	channel, err := k.messagingChannel.Channels(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
-		//log.Printf("ERROR: GetChannel(): getting channel: %v", err)
+		log.Printf("ERROR: GetChannel(): getting channel: %v", err)
 		return nil, err
 	}
 	if !channel.Status.IsReady() {
@@ -123,11 +129,40 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.
 	return channel, nil
 }
 
+// GetChannelByLabels return a knative channel fetched via label selectors
+// so based on the labels, we assume that the list of channels should have only one item in it
+// Hence, we'd be returning the item at 0th index.
+func (k *KnativeLib) GetChannelByLabels(namespace string, labels *map[string]string) (*messagingV1Alpha1.Channel, error) {
+	if labels == nil {
+		return nil, errors.New("no labels were passed to GetChannelByLabels()")
+	}
+	channelList, err := k.messagingChannel.Channels(namespace).List(metav1.ListOptions{
+		LabelSelector: getLabelSelectorsAsString(*labels),
+	})
+	if err != nil {
+		log.Printf("ERROR: GetChannelByLabels(): getting channels by labels: %v", err)
+		return nil, err
+	}
+
+	log.Printf("knative channels fetched %v", channelList)
+
+	// ChannelList length should exactly be equal to 1
+	if channelListLength := len(channelList.Items); channelListLength != 1 {
+		if channelListLength == 0 {
+			log.Printf("no channels with the %v labels were found in %v namespace", *labels, namespace)
+			return nil, k8serrors.NewNotFound(messagingV1Alpha1.Resource("channels"), "")
+		}
+		log.Printf("ERROR: GetChannelByLabels(): channel list has %d items", channelListLength)
+		return nil, errors.New("length of channel list is not equal to 1")
+	}
+	return &channelList.Items[0], nil
+}
+
 // CreateChannel creates a Knative/Eventing channel controlled by the specified provisioner
-func (k *KnativeLib) CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
-	timeout time.Duration) (*evapisv1alpha1.Channel, error) {
+func (k *KnativeLib) CreateChannel(name string, namespace string, labels *map[string]string,
+	timeout time.Duration) (*messagingV1Alpha1.Channel, error) {
 	c := makeChannel(name, namespace, labels)
-	channel, err := k.evClient.Channels(namespace).Create(c)
+	channel, err := k.messagingChannel.Channels(namespace).Create(c)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		log.Printf("ERROR: CreateChannel(): creating channel: %v", err)
 		return nil, err
@@ -141,7 +176,7 @@ func (k *KnativeLib) CreateChannel(provisioner string, name string, namespace st
 		case <-tout:
 			return nil, errors.New("timed out")
 		case <-tick:
-			if channel, err = k.evClient.Channels(namespace).Get(name, metav1.GetOptions{}); err != nil {
+			if channel, err = k.messagingChannel.Channels(namespace).Get(name, metav1.GetOptions{}); err != nil {
 				log.Printf("ERROR: CreateChannel(): geting channel: %v", err)
 			} else {
 				isReady = channel.Status.IsReady()
@@ -153,7 +188,7 @@ func (k *KnativeLib) CreateChannel(provisioner string, name string, namespace st
 
 // DeleteChannel deletes a Knative/Eventing channel
 func (k *KnativeLib) DeleteChannel(name string, namespace string) error {
-	if err := k.evClient.Channels(namespace).Delete(name, &metav1.DeleteOptions{}); err != nil {
+	if err := k.messagingChannel.Channels(namespace).Delete(name, &metav1.DeleteOptions{}); err != nil {
 		log.Printf("ERROR: DeleteChannel(): deleting channel: %v", err)
 		return err
 	}
@@ -200,7 +235,7 @@ func (k *KnativeLib) UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evap
 }
 
 // SendMessage sends a message to a channel
-func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[string][]string, payload *string) error {
+func (k *KnativeLib) SendMessage(channel *messagingV1Alpha1.Channel, headers *map[string][]string, payload *string) error {
 
 	req, err := makeHTTPRequest(channel, headers, payload)
 	if err != nil {
@@ -237,12 +272,13 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[s
 }
 
 // InjectClient injects a client, useful for running tests.
-func (k *KnativeLib) InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) error {
-	k.evClient = c
+func (k *KnativeLib) InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error {
+	k.evClient = evClient
+	k.messagingChannel = msgClient
 	return nil
 }
 
-func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, headers *map[string][]string, message *string) error {
+func resendMessage(httpClient *http.Client, channel *messagingV1Alpha1.Channel, headers *map[string][]string, message *string) error {
 	timeout := time.After(10 * time.Second)
 	tick := time.Tick(200 * time.Millisecond)
 	req, err := makeHTTPRequest(channel, headers, message)
@@ -300,22 +336,17 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 	return nil
 }
 
-func makeChannel(name string, namespace string, labels *map[string]string) *evapisv1alpha1.Channel {
-	c := &evapisv1alpha1.Channel{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
-			Kind:       "Channel",
-		},
+func makeChannel(name string, namespace string, labels *map[string]string) *messagingV1Alpha1.Channel {
+	return &messagingV1Alpha1.Channel{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
 			Labels:    *labels,
 		},
 	}
-	return c
 }
 
-func makeHTTPRequest(channel *evapisv1alpha1.Channel, headers *map[string][]string, payload *string) (*http.Request, error) {
+func makeHTTPRequest(channel *messagingV1Alpha1.Channel, headers *map[string][]string, payload *string) (*http.Request, error) {
 	var jsonStr = []byte(*payload)
 
 	channelURI := "http://" + channel.Status.Address.Hostname
@@ -343,4 +374,8 @@ func dumpResponse(res *http.Response) {
 		log.Printf("ERROR: dumpResponse(): %v", err)
 	}
 	log.Printf("\n\ndump res1:%s", dump)
+}
+
+func getLabelSelectorsAsString(labels map[string]string) string {
+	return k8slabels.SelectorFromSet(labels).String()
 }
