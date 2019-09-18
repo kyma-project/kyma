@@ -130,7 +130,7 @@ This runs [ko](https://github.com/google/ko) to build your image and push it to 
 >#to use your local docker daemon and its image store
 >export KO_DOCKER_REPO=ko.local
 
-```
+>```
 ## Usage
 
 ### Run tests
