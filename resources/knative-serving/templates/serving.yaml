@@ -453,7 +453,7 @@ spec:
           requests:
             cpu: "{{ .Values.knative_serving.minikube.activator.resources.requests.cpu }}"
             memory: "{{ .Values.knative_serving.minikube.activator.resources.requests.memory }}"
-        {{ else }}}
+        {{ else }}
         resources:
           limits:
             cpu: 1000m
@@ -531,7 +531,7 @@ spec:
           requests:
             cpu: "{{ .Values.knative_serving.minikube.autoscaler_hpa.resources.requests.cpu }}"
             memory: "{{ .Values.knative_serving.minikube.autoscaler_hpa.resources.requests.memory }}"
-        {{ else }}}
+        {{ else }}
         resources:
           limits:
             cpu: 1000m
@@ -637,7 +637,7 @@ spec:
           requests:
             cpu: "{{ .Values.knative_serving.minikube.autoscaler.resources.requests.cpu }}"
             memory: "{{ .Values.knative_serving.minikube.autoscaler.resources.requests.memory }}"
-        {{ else }}}
+        {{ else }}
         resources:
           limits:
             cpu: 300m
@@ -1342,7 +1342,7 @@ spec:
           requests:
             cpu: "{{ .Values.knative_serving.minikube.autoscaler.resources.requests.cpu }}"
             memory: "{{ .Values.knative_serving.minikube.autoscaler.resources.requests.memory }}"
-        {{ else }}}
+        {{ else }}
         resources:
           limits:
             cpu: 1000m
@@ -1419,7 +1419,7 @@ spec:
           requests:
             cpu: "{{ .Values.knative_serving.minikube.networking_istio.resources.requests.cpu }}"
             memory: "{{ .Values.knative_serving.minikube.networking_istio.resources.requests.memory }}"
-        {{ else }}}
+        {{ else }}
         resources:
           limits:
             cpu: 1000m
