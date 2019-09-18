@@ -128,7 +128,7 @@ This runs [ko](https://github.com/google/ko) to build your image and push it to 
 >export KO_DOCKER_REPO=<your dockerhub username>
 
 >#to use your local docker daemon and its image store
-export KO_DOCKER_REPO=ko.local
+>export KO_DOCKER_REPO=ko.local
 
 ```
 ## Usage
