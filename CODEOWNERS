@@ -12,7 +12,7 @@
 /common/ @mszostok @aszecowka @piotrmiskiewicz @sjanota @Tomasz-Smelcerz-SAP @strekm @crabtree @akgalwas @janmedrek @Szymongib @sayanh @radufa @suleymanakbas91
 
 # Microfrontend k8s client
-/common/microfrontend-client/ @dariadomagala @y-kkamil @akucharska @sjanota
+/common/microfrontend-client/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
 
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere @michal-hudy @m00g3n @aerfio @magicmatatjahu
@@ -27,8 +27,8 @@
 /resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The Microfrontend CRDs
-/resources/cluster-essentials/templates/microfrontend.crd.yaml @dariadomagala @y-kkamil @akucharska @parostatkiem
-/resources/cluster-essentials/templates/clustermicrofrontend.crd.yaml @dariadomagala @y-kkamil @akucharska @parostatkiem
+/resources/cluster-essentials/templates/microfrontend.crd.yaml @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
+/resources/cluster-essentials/templates/clustermicrofrontend.crd.yaml @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
 
 # The `values.yaml` file for `core` chart
 /resources/core/values.yaml @kyma-project/developers
@@ -202,7 +202,7 @@
 /resources/compass/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
 
 # The `compass-cockpit` chart
-/resources/compass/charts/cockpit @kwiatekus @dariadomagala @y-kkamil @akucharska @sjanota @parostatkiem
+/resources/compass/charts/cockpit @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
 
 # The `compass-runtime-agent` chart
 /resources/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
@@ -257,7 +257,7 @@
 /components/console-backend-service/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
 
 # IDPPreset Component
-/components/idppreset/ @dariadomagala @y-kkamil @akucharska @sjanota
+/components/idppreset/ @dariadomagala @y-kkamil @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @sjanota
 
 # Connector Service Component
 /components/connector-service/ @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
