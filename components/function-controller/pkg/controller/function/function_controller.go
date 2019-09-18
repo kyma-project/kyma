@@ -201,10 +201,14 @@ func (r *ReconcileFunction) Reconcile(req reconcile.Request) (reconcile.Result, 
 		log.Error(err, "Error generating Function hash", "namespace", fn.Namespace, "name", fn.Name)
 		return reconcile.Result{}, err
 	}
-	shortSha := fnSha[:10]
 
+	// length of the suffix appended to the function name to generate a build name
+	const buildNameSuffixLen = 10
+
+	// note: we generate these to ensure a new TaskRun is created every
+	// time the Function spec is updated.
 	imgName := fmt.Sprintf("%s/%s-%s:%s", rnInfo.RegistryInfo, fn.Namespace, fn.Name, fnSha)
-	buildName := fmt.Sprintf("%s-%s", fn.Name, shortSha)
+	buildName := fmt.Sprintf("%s-%s", fn.Name, fnSha[:buildNameSuffixLen])
 	log.Info("Build info", "namespace", fn.Namespace, "name", fn.Name, "buildName", buildName, "imageName", imgName)
 
 	err = r.buildFunctionImage(rnInfo, fn, imgName, buildName)
