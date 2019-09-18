@@ -113,7 +113,7 @@ Follow these steps to prepare the environment you will use to deploy the Control
 
 ### Deploy the controller
 
-To deploy the Function Controller to the `serverless-system` Namespace run
+To deploy the Function Controller to the `serverless-system` Namespace, run:
 
 ```bash
 make deploy
