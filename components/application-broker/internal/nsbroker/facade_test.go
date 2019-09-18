@@ -9,7 +9,7 @@ import (
 	sc_fake "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
 	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker/automock"
-	"github.com/kyma-project/kyma/components/helm-broker/platform/logger/spy"
+	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -39,7 +39,7 @@ func TestNsBrokerCreateHappyPath(t *testing.T) {
 
 	// THEN
 	require.NoError(t, err)
-	actualBroker, err := scFakeClientset.Servicecatalog().ServiceBrokers(fixDestNs()).Get("application-broker", v1.GetOptions{})
+	actualBroker, err := scFakeClientset.ServicecatalogV1beta1().ServiceBrokers(fixDestNs()).Get("application-broker", v1.GetOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, "true", actualBroker.Labels["namespaced-application-broker"])
 	assert.Equal(t, svcURL, actualBroker.Spec.URL)

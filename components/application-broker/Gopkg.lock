@@ -229,11 +229,12 @@
   version = "v0.3.7"
 
 [[projects]]
-  digest = "1:0243cffa4a3410f161ee613dfdd903a636d07e838a42d341da95d81f42cd1d41"
+  digest = "1:92f6419f388bd31a433b1388910f15a882c9980e383e89ebf8fb2524583707ac"
   name = "github.com/json-iterator/go"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "ab8a2e0c74be9d3be70b3184d9acc634935ded82"
+  revision = "27518f6661eba504be5a7a9a9f6d9460d892ade3"
+  version = "v1.1.7"
 
 [[projects]]
   branch = "master"
@@ -242,6 +243,14 @@
   packages = ["."]
   pruneopts = "NUT"
   revision = "a6a43ccde81e32de31ce3c12f12f510568a96c94"
+
+[[projects]]
+  digest = "1:58999a98719fddbac6303cb17e8d85b945f60b72f48e3a2df6b950b97fa926f1"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
+  version = "v1.0.2"
 
 [[projects]]
   branch = "crds"
@@ -274,7 +283,7 @@
   source = "github.com/kyma-incubator/service-catalog"
 
 [[projects]]
-  digest = "1:7b1417e9bf0f932c2c046c29851502d40b74c7162b2808b90b8402473d1dc711"
+  digest = "1:26724db2c9956ab25ce1b921fa4b097d601c1974483c3fa88dc384d9ed1f6bc5"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -288,11 +297,10 @@
     "components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/informers/externalversions/internalinterfaces",
     "components/application-operator/pkg/client/listers/applicationconnector/v1alpha1",
-    "components/helm-broker/platform/logger/spy",
   ]
   pruneopts = "NUT"
-  revision = "8a1b035d7ba034fdbd50f65100e3b037107155ab"
-  version = "1.4.1"
+  revision = "69599d4a33a2d206a906bd87c95af3e615830216"
+  version = "1.5.0"
 
 [[projects]]
   digest = "1:927762c6729b4e72957ba3310e485ed09cf8451c5a637a52fd016a9fe09e7936"
@@ -379,19 +387,20 @@
   version = "0.0.12"
 
 [[projects]]
-  digest = "1:414933e1ae2e9e19123e52fb29c97cb9d127d8a500f45a2ba80b537283a38b87"
+  digest = "1:f4aaa07a6c33f2b354726d0571acbc8ca118837c75709f6353203ae1a3f8eeab"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "89742aefa4b206dcf400792f3bd35b542998eb3b"
+  revision = "839c75faf7f98a33d445d181f3018b5c3409a45e"
+  version = "v1.4.2"
 
 [[projects]]
   digest = "1:d115708a27806831d1babbc6f28a7478ddf8e32a7095507c816e2515fb03a810"
   name = "github.com/spf13/pflag"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "e8f29969b682c41a730f8f08b76033b120498464"
-  version = "v1.0.4"
+  revision = "2e9d26c8c37aae03e3f9d4e90b7116f5accb7cab"
+  version = "v1.0.5"
 
 [[projects]]
   digest = "1:60a46e2410edbf02b419f833372dd1d24d7aa1b916a990a7370e792fada1eadd"
@@ -466,7 +475,7 @@
     "idna",
   ]
   pruneopts = "NUT"
-  revision = "c8589233b77dde5edd2205ba8a4fb5c9c2472556"
+  revision = "a8b05e9114ab0cb08faec337c959aed24b68bf50"
 
 [[projects]]
   branch = "master"
@@ -481,14 +490,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2edf69a0cc1bdd80b3b53f52d10170fac6868e371482f4ed4feb289acb10e111"
+  digest = "1:250d51bb00710c47f8ead30e2aa2aff10198916f4bd9bcc45d69610be1ea58a2"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "NUT"
-  revision = "b4ddaad3f8a36719f2b8bc6486c14cc468ca2bb5"
+  revision = "0c1ff786ef13daa914a3351c5e6b0321aed5960e"
 
 [[projects]]
   digest = "1:66a2f252a58b4fbbad0e4e180e1d85a83c222b6bce09c3dcdef3dc87c72eda7c"
@@ -526,7 +535,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:92bd2a9bfd2846ba3903c2ffc7d1ae9d97fbfa216ff38e66583e7035a033c062"
+  digest = "1:15e3e24d9793be8bf64d407a87ea86d2c405410268cd4584b62fe7dbd0f64899"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
@@ -544,7 +553,7 @@
     "internal/semver",
   ]
   pruneopts = "NUT"
-  revision = "905c8ffbfa41b8a66dda0ba8e5d90908c3447522"
+  revision = "7460b8e10b7e52d99c584c90f012aa07828f5d81"
 
 [[projects]]
   digest = "1:372cd8eba449f9b6db06677d0e73fa193ec5b19aaee148f355503ab6127045ca"
@@ -592,8 +601,7 @@
   version = "v2.2.2"
 
 [[projects]]
-  branch = "release-1.15"
-  digest = "1:760e08df99c3c3b53764ef7c41c03ea9d90e8594d9df42364d9209e99a0352e1"
+  digest = "1:759855d98a898d7d6a091b89b9c85c03d6efd673c44e15561d716543f4e88f31"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1beta1",
@@ -634,7 +642,8 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "e14a4b1f5f840029e170c0d892f7a12f19afd558"
+  revision = "7cf5895f2711098d7d9527db0a4a49fb0dff7de2"
+  version = "kubernetes-1.15.0"
 
 [[projects]]
   branch = "master"
@@ -645,8 +654,7 @@
   revision = "40952ff8d5b6e201308b5e11cc51e045401947ed"
 
 [[projects]]
-  branch = "release-1.15"
-  digest = "1:78a0ebd65dd142140619ecdcbf42bfff9d4c3f201a880e7fdef8cb83c2dfceca"
+  digest = "1:4e13eee8921f9694bf834623009617d528c0f655e6237d0839a4af0954826dc9"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -697,7 +705,8 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "f2f3a405f61d6c2cdc0d00687c1b5d90de91e9f0"
+  revision = "1799e75a07195de9460b8ef7300883499f12127b"
+  version = "kubernetes-1.15.0"
 
 [[projects]]
   branch = "master"
@@ -914,7 +923,6 @@
   revision = "637fc595d17acea6ce5f5b894b0a3ab301bf674e"
 
 [[projects]]
-  branch = "release-1.15"
   digest = "1:c169302e123c3e1478da21b2e56ab20a0a8e0ce7b8abe238f448aba7bd6876fd"
   name = "k8s.io/code-generator"
   packages = [
@@ -944,6 +952,7 @@
   ]
   pruneopts = "NUT"
   revision = "18da4a14b22b17d2fa761e50037fabfbacec225b"
+  version = "kubernetes-1.15.0"
 
 [[projects]]
   branch = "master"
@@ -954,7 +963,7 @@
   revision = "61bc4cc48c91118b272b37f356826d1a9ff06603"
 
 [[projects]]
-  digest = "1:53e84052118027b435227562394fce46d0aad0071ecbe62f8a7a6290b83f104b"
+  digest = "1:39912eb5f8eaf46486faae0839586c27c93423e552f76875defa048f52c15c15"
   name = "k8s.io/gengo"
   packages = [
     "args",
@@ -967,18 +976,18 @@
     "types",
   ]
   pruneopts = "NUT"
-  revision = "01a732e01d00cb9a81bb0ca050d3e6d2b947927b"
+  revision = "e17681d19d3ac4837a019ece36c2a0ec31ffe985"
 
 [[projects]]
-  digest = "1:1b5541b75698d26c59881c8d029c339e655af8819e2edd2c93e1e20523f3e961"
+  digest = "1:c05ad592787fc6cdacf8c5309d826561aa4a7d9e4e7ea28660dfb2c77ff68ab0"
   name = "k8s.io/klog"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "aaeac2fedbead93263ae78b80849cac7ff5a5fbb"
+  revision = "3ca30a56d8a775276f9cdae009ba326fdc05af7f"
+  version = "v0.4.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:3335e3b787839359b6159f5b86a4aca953899c81e8e92ce7c39d04cbae0488d5"
+  digest = "1:da19df1e9641fcb3a0bce343b0dec020243a71f73a98e93adc423e924b146dec"
   name = "k8s.io/kube-openapi"
   packages = [
     "cmd/openapi-gen",
@@ -990,7 +999,7 @@
     "pkg/util/sets",
   ]
   pruneopts = "NUT"
-  revision = "743ec37842bffe49dd4221d9026f30fb1d5adbc4"
+  revision = "94e1e7b7574c44c4c0f2007de6fe617e259191f3"
 
 [[projects]]
   branch = "release-1.15"
@@ -1023,7 +1032,7 @@
     "pkg/util/taints",
   ]
   pruneopts = "NUT"
-  revision = "67d2fcf276fcd9cf743ad4be9a9ef5828adc082f"
+  revision = "5040d52845cf82a70d07c2edf2b60e31b3dbc0ec"
 
 [[projects]]
   branch = "master"
@@ -1064,7 +1073,6 @@
     "github.com/asaskevich/govalidator",
     "github.com/davecgh/go-spew/spew",
     "github.com/ghodss/yaml",
-    "github.com/golang/glog",
     "github.com/gorilla/mux",
     "github.com/hashicorp/go-multierror",
     "github.com/imdario/mergo",
@@ -1083,7 +1091,6 @@
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/helm-broker/platform/logger/spy",
     "github.com/mcuadros/go-defaults",
     "github.com/meatballhat/negroni-logrus",
     "github.com/oklog/ulid",

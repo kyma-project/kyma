@@ -22,13 +22,13 @@ import (
 func TestServiceBrokerSync_Success(t *testing.T) {
 	// given
 	client := fake.NewSimpleClientset(fixServiceBroker())
-	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+	nsBrokerSync := NewServiceBrokerSyncer(client.ServicecatalogV1beta1())
 
 	// when
 	err := nsBrokerSync.Sync(maxSyncRetries)
 
 	// then
-	sb, err := client.Servicecatalog().ServiceBrokers("test").Get(nsbroker.NamespacedBrokerName, v1.GetOptions{})
+	sb, err := client.ServicecatalogV1beta1().ServiceBrokers("test").Get(nsbroker.NamespacedBrokerName, v1.GetOptions{})
 	require.NoError(t, err)
 
 	assert.Equal(t, int64(1), sb.Spec.RelistRequests)
@@ -48,13 +48,13 @@ func TestServiceBrokerSync_SuccessAfterRetry(t *testing.T) {
 		return false, fixServiceBroker(), nil
 	})
 
-	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+	nsBrokerSync := NewServiceBrokerSyncer(client.ServicecatalogV1beta1())
 
 	// when
 	resultErr := nsBrokerSync.Sync(maxSyncRetries)
 
 	// then
-	sb, err := client.Servicecatalog().ServiceBrokers("test").Get(nsbroker.NamespacedBrokerName, v1.GetOptions{})
+	sb, err := client.ServicecatalogV1beta1().ServiceBrokers("test").Get(nsbroker.NamespacedBrokerName, v1.GetOptions{})
 	require.NoError(t, err)
 
 	assert.Equal(t, int64(1), sb.Spec.RelistRequests)
@@ -64,7 +64,7 @@ func TestServiceBrokerSync_SuccessAfterRetry(t *testing.T) {
 func TestServiceBrokerSync_Empty(t *testing.T) {
 	// given
 	client := fake.NewSimpleClientset()
-	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+	nsBrokerSync := NewServiceBrokerSyncer(client.ServicecatalogV1beta1())
 
 	// when
 	err := nsBrokerSync.Sync(maxSyncRetries)
@@ -78,7 +78,7 @@ func TestServiceBrokerSync_ListError(t *testing.T) {
 	client := fake.NewSimpleClientset()
 	client.PrependReactor("list", "servicebrokers", failingReactor(fixError()))
 
-	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+	nsBrokerSync := NewServiceBrokerSyncer(client.ServicecatalogV1beta1())
 
 	// when
 	err := nsBrokerSync.Sync(maxSyncRetries)
@@ -92,13 +92,13 @@ func TestServiceBrokerSync_ConflictError(t *testing.T) {
 	client := fake.NewSimpleClientset(fixServiceBroker())
 	client.PrependReactor("update", "servicebrokers", failingReactor(apiErrors.NewConflict(schema.GroupResource{}, "", fixError())))
 
-	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+	nsBrokerSync := NewServiceBrokerSyncer(client.ServicecatalogV1beta1())
 
 	// when
 	err := nsBrokerSync.Sync(maxSyncRetries)
 
 	// then
-	assert.EqualError(t, err, "1 error occurred:\n\n* could not sync ServiceBroker \"application-broker\" [namespace: test], after 5 tries")
+	assert.EqualError(t, err, "1 error occurred:\n\t* could not sync ServiceBroker \"application-broker\" [namespace: test], after 5 tries\n\n")
 }
 
 func TestServiceBrokerSync_UpdateError(t *testing.T) {
@@ -106,7 +106,7 @@ func TestServiceBrokerSync_UpdateError(t *testing.T) {
 	client := fake.NewSimpleClientset(fixServiceBroker())
 	client.PrependReactor("update", "servicebrokers", failingReactor(fixError()))
 
-	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+	nsBrokerSync := NewServiceBrokerSyncer(client.ServicecatalogV1beta1())
 
 	// when
 	err := nsBrokerSync.Sync(maxSyncRetries)
@@ -120,7 +120,7 @@ func TestServiceBrokerSync_GetError(t *testing.T) {
 	client := fake.NewSimpleClientset(fixServiceBroker())
 	client.PrependReactor("get", "servicebrokers", failingReactor(fixError()))
 
-	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+	nsBrokerSync := NewServiceBrokerSyncer(client.ServicecatalogV1beta1())
 
 	// when
 	err := nsBrokerSync.Sync(maxSyncRetries)
@@ -133,13 +133,13 @@ func TestServiceBrokerSync_SyncBroker_Success(t *testing.T) {
 	// given
 	client := fake.NewSimpleClientset(fixServiceBroker())
 
-	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+	nsBrokerSync := NewServiceBrokerSyncer(client.ServicecatalogV1beta1())
 
 	// when
 	err := nsBrokerSync.SyncBroker("test")
 
 	// then
-	sb, err := client.Servicecatalog().ServiceBrokers("test").Get(nsbroker.NamespacedBrokerName, v1.GetOptions{})
+	sb, err := client.ServicecatalogV1beta1().ServiceBrokers("test").Get(nsbroker.NamespacedBrokerName, v1.GetOptions{})
 	require.NoError(t, err)
 
 	assert.Equal(t, int64(1), sb.Spec.RelistRequests)
@@ -151,7 +151,7 @@ func TestServiceBrokerSync_SyncBroker_GetError(t *testing.T) {
 	client := fake.NewSimpleClientset(fixServiceBroker())
 	client.PrependReactor("get", "servicebrokers", failingReactor(fixError()))
 
-	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+	nsBrokerSync := NewServiceBrokerSyncer(client.ServicecatalogV1beta1())
 
 	// when
 	err := nsBrokerSync.SyncBroker("test")
@@ -165,7 +165,7 @@ func TestServiceBrokerSync_SyncBroker_UpdateError(t *testing.T) {
 	client := fake.NewSimpleClientset(fixServiceBroker())
 	client.PrependReactor("update", "servicebrokers", failingReactor(fixError()))
 
-	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+	nsBrokerSync := NewServiceBrokerSyncer(client.ServicecatalogV1beta1())
 
 	// when
 	err := nsBrokerSync.SyncBroker("test")
@@ -179,7 +179,7 @@ func TestServiceBrokerSync_SyncBroker_ConflictError(t *testing.T) {
 	client := fake.NewSimpleClientset(fixServiceBroker())
 	client.PrependReactor("update", "servicebrokers", failingReactor(apiErrors.NewConflict(schema.GroupResource{}, "", fixError())))
 
-	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+	nsBrokerSync := NewServiceBrokerSyncer(client.ServicecatalogV1beta1())
 
 	// when
 	err := nsBrokerSync.SyncBroker("test")
