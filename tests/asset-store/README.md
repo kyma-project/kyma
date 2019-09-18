@@ -8,14 +8,14 @@ The project is a test scenario for all Asset Store subcomponents, such as contro
 
 Use the following tools to set up the project:
 
-- [Go distribution](https://golang.org)
+- [Go](https://golang.org)
 - [Docker](https://www.docker.com/)
 
 ## Usage
 
 ### Run a local version
 
-To run the application against the local Kyma installation on Minikube without building the binary, expose the Asset Upload Service to make it available outside the Kyma installation, or run it in a local version outside the Minikube cluster. For more details, read the [`README.md`](../../components/asset-upload-service/README.md#usage) document for the Asset Upload Service. 
+To run the application against the local Kyma installation on Minikube without building the binary, expose the Asset Upload Service to make it available outside the Kyma installation, or run it in a local version outside the Minikube cluster. For more details, read the [`README.md`](../../components/asset-upload-service/README.md#usage) document for the Asset Upload Service.
 
 To run integration tests, use the following command:
 
@@ -24,6 +24,7 @@ APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_TEST_MINIO_ACCESS_KEY={accessK
 ```
 
 Replace values in curly braces with proper details, where:
+
 - `{accessKey}` is the access key required to sign in to the content storage server.
 - `{secretKey}` is the secret key required to sign in to the content storage server.
 
@@ -63,6 +64,7 @@ Use the following environment variables to configure the application:
 ### Install dependencies
 
 This project uses `dep` as a dependency manager. To install all required dependencies, use the following command:
+
 ```bash
 dep ensure -vendor-only
 ```

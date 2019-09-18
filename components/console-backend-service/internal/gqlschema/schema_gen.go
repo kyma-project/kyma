@@ -507,9 +507,17 @@ type ComplexityRoot struct {
 	}
 
 	Namespace struct {
-		Name         func(childComplexity int) int
-		Labels       func(childComplexity int) int
-		Applications func(childComplexity int) int
+		Name              func(childComplexity int) int
+		Labels            func(childComplexity int) int
+		Status            func(childComplexity int) int
+		IsSystemNamespace func(childComplexity int) int
+		Pods              func(childComplexity int) int
+		Applications      func(childComplexity int) int
+	}
+
+	NamespaceEvent struct {
+		Type      func(childComplexity int) int
+		Namespace func(childComplexity int) int
 	}
 
 	NamespaceMutationOutput struct {
@@ -568,7 +576,7 @@ type ComplexityRoot struct {
 		Application                 func(childComplexity int, name string) int
 		Applications                func(childComplexity int, namespace *string, first *int, offset *int) int
 		ConnectorService            func(childComplexity int, application string) int
-		Namespaces                  func(childComplexity int, application *string) int
+		Namespaces                  func(childComplexity int, withSystemNamespaces *bool, withInactiveStatus *bool) int
 		Namespace                   func(childComplexity int, name string) int
 		Deployments                 func(childComplexity int, namespace string, excludeFunctions *bool) int
 		Pod                         func(childComplexity int, name string, namespace string) int
@@ -846,6 +854,7 @@ type ComplexityRoot struct {
 		ClusterAddonsConfigurationEvent func(childComplexity int) int
 		AddonsConfigurationEvent        func(childComplexity int, namespace string) int
 		ApiEvent                        func(childComplexity int, namespace string, serviceName *string) int
+		NamespaceEvent                  func(childComplexity int, withSystemNamespaces *bool) int
 	}
 
 	UsageKind struct {
@@ -949,6 +958,7 @@ type MutationResolver interface {
 	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*LimitRange, error)
 }
 type NamespaceResolver interface {
+	Pods(ctx context.Context, obj *Namespace) ([]Pod, error)
 	Applications(ctx context.Context, obj *Namespace) ([]string, error)
 }
 type QueryResolver interface {
@@ -974,7 +984,7 @@ type QueryResolver interface {
 	Application(ctx context.Context, name string) (*Application, error)
 	Applications(ctx context.Context, namespace *string, first *int, offset *int) ([]Application, error)
 	ConnectorService(ctx context.Context, application string) (ConnectorService, error)
-	Namespaces(ctx context.Context, application *string) ([]Namespace, error)
+	Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]Namespace, error)
 	Namespace(ctx context.Context, name string) (*Namespace, error)
 	Deployments(ctx context.Context, namespace string, excludeFunctions *bool) ([]Deployment, error)
 	Pod(ctx context.Context, name string, namespace string) (*Pod, error)
@@ -1038,6 +1048,7 @@ type SubscriptionResolver interface {
 	ClusterAddonsConfigurationEvent(ctx context.Context) (<-chan ClusterAddonsConfigurationEvent, error)
 	AddonsConfigurationEvent(ctx context.Context, namespace string) (<-chan AddonsConfigurationEvent, error)
 	APIEvent(ctx context.Context, namespace string, serviceName *string) (<-chan ApiEvent, error)
+	NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan NamespaceEvent, error)
 }
 
 func field_Asset_files_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -3547,12 +3558,12 @@ func field_Query_connectorService_args(rawArgs map[string]interface{}) (map[stri
 
 func field_Query_namespaces_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["application"]; ok {
+	var arg0 *bool
+	if tmp, ok := rawArgs["withSystemNamespaces"]; ok {
 		var err error
-		var ptr1 string
+		var ptr1 bool
 		if tmp != nil {
-			ptr1, err = graphql.UnmarshalString(tmp)
+			ptr1, err = graphql.UnmarshalBoolean(tmp)
 			arg0 = &ptr1
 		}
 
@@ -3560,7 +3571,21 @@ func field_Query_namespaces_args(rawArgs map[string]interface{}) (map[string]int
 			return nil, err
 		}
 	}
-	args["application"] = arg0
+	args["withSystemNamespaces"] = arg0
+	var arg1 *bool
+	if tmp, ok := rawArgs["withInactiveStatus"]; ok {
+		var err error
+		var ptr1 bool
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalBoolean(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["withInactiveStatus"] = arg1
 	return args, nil
 
 }
@@ -4321,6 +4346,26 @@ func field_Subscription_apiEvent_args(rawArgs map[string]interface{}) (map[strin
 		}
 	}
 	args["serviceName"] = arg1
+	return args, nil
+
+}
+
+func field_Subscription_namespaceEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *bool
+	if tmp, ok := rawArgs["withSystemNamespaces"]; ok {
+		var err error
+		var ptr1 bool
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalBoolean(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["withSystemNamespaces"] = arg0
 	return args, nil
 
 }
@@ -6548,12 +6593,47 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Namespace.Labels(childComplexity), true
 
+	case "Namespace.status":
+		if e.complexity.Namespace.Status == nil {
+			break
+		}
+
+		return e.complexity.Namespace.Status(childComplexity), true
+
+	case "Namespace.isSystemNamespace":
+		if e.complexity.Namespace.IsSystemNamespace == nil {
+			break
+		}
+
+		return e.complexity.Namespace.IsSystemNamespace(childComplexity), true
+
+	case "Namespace.pods":
+		if e.complexity.Namespace.Pods == nil {
+			break
+		}
+
+		return e.complexity.Namespace.Pods(childComplexity), true
+
 	case "Namespace.applications":
 		if e.complexity.Namespace.Applications == nil {
 			break
 		}
 
 		return e.complexity.Namespace.Applications(childComplexity), true
+
+	case "NamespaceEvent.type":
+		if e.complexity.NamespaceEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.NamespaceEvent.Type(childComplexity), true
+
+	case "NamespaceEvent.namespace":
+		if e.complexity.NamespaceEvent.Namespace == nil {
+			break
+		}
+
+		return e.complexity.NamespaceEvent.Namespace(childComplexity), true
 
 	case "NamespaceMutationOutput.name":
 		if e.complexity.NamespaceMutationOutput.Name == nil {
@@ -6976,7 +7056,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Namespaces(childComplexity, args["application"].(*string)), true
+		return e.complexity.Query.Namespaces(childComplexity, args["withSystemNamespaces"].(*bool), args["withInactiveStatus"].(*bool)), true
 
 	case "Query.namespace":
 		if e.complexity.Query.Namespace == nil {
@@ -8383,6 +8463,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.ApiEvent(childComplexity, args["namespace"].(string), args["serviceName"].(*string)), true
+
+	case "Subscription.namespaceEvent":
+		if e.complexity.Subscription.NamespaceEvent == nil {
+			break
+		}
+
+		args, err := field_Subscription_namespaceEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.NamespaceEvent(childComplexity, args["withSystemNamespaces"].(*bool)), true
 
 	case "UsageKind.name":
 		if e.complexity.UsageKind.Name == nil {
@@ -19721,6 +19813,25 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 			}
 		case "labels":
 			out.Values[i] = ec._Namespace_labels(ctx, field, obj)
+		case "status":
+			out.Values[i] = ec._Namespace_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "isSystemNamespace":
+			out.Values[i] = ec._Namespace_isSystemNamespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "pods":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Namespace_pods(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "applications":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -19790,6 +19901,120 @@ func (ec *executionContext) _Namespace_labels(ctx context.Context, field graphql
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Namespace_status(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Namespace",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Namespace_isSystemNamespace(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Namespace",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsSystemNamespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalBoolean(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Namespace_pods(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Namespace",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Namespace().Pods(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]Pod)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._Pod(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Namespace_applications(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -19820,6 +20045,96 @@ func (ec *executionContext) _Namespace_applications(ctx context.Context, field g
 	}
 
 	return arr1
+}
+
+var namespaceEventImplementors = []string{"NamespaceEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _NamespaceEvent(ctx context.Context, sel ast.SelectionSet, obj *NamespaceEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, namespaceEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("NamespaceEvent")
+		case "type":
+			out.Values[i] = ec._NamespaceEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "namespace":
+			out.Values[i] = ec._NamespaceEvent_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NamespaceEvent_type(ctx context.Context, field graphql.CollectedField, obj *NamespaceEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NamespaceEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NamespaceEvent_namespace(ctx context.Context, field graphql.CollectedField, obj *NamespaceEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NamespaceEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Namespace)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Namespace(ctx, field.Selections, &res)
 }
 
 var namespaceMutationOutputImplementors = []string{"NamespaceMutationOutput"}
@@ -22219,7 +22534,7 @@ func (ec *executionContext) _Query_namespaces(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Namespaces(rctx, args["application"].(*string))
+		return ec.resolvers.Query().Namespaces(rctx, args["withSystemNamespaces"].(*bool), args["withInactiveStatus"].(*bool))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -29145,6 +29460,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_addonsConfigurationEvent(ctx, fields[0])
 	case "apiEvent":
 		return ec._Subscription_apiEvent(ctx, fields[0])
+	case "namespaceEvent":
+		return ec._Subscription_namespaceEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -29611,6 +29928,37 @@ func (ec *executionContext) _Subscription_apiEvent(ctx context.Context, field gr
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler {
 			return ec._ApiEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_namespaceEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_namespaceEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().NamespaceEvent(rctx, args["withSystemNamespaces"].(*bool))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._NamespaceEvent(ctx, field.Selections, &res)
 		}())
 		return &out
 	}
@@ -32749,9 +33097,17 @@ type ExceededQuota {
 type Namespace {
     name: String!
     labels: Labels
+    status: String!
+    isSystemNamespace: Boolean!
+    pods: [Pod!]!
 
     # Depends on application module
     applications: [String!]
+}
+
+type NamespaceEvent {
+    type: SubscriptionEventType!
+    namespace: Namespace!
 }
 
 type NamespaceMutationOutput {
@@ -33020,7 +33376,7 @@ type Query {
     connectorService(application: String!): ConnectorService! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
 
     # Depends on 'application'
-    namespaces(application: String): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
+    namespaces(withSystemNamespaces: Boolean, withInactiveStatus: Boolean): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
     namespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "get", apiGroup: "", apiVersion: "v1"})
 
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]! @HasAccess(attributes: {resource: "deployments", verb: "list", apiGroup: "apps", apiVersion: "v1beta2", namespaceArg: "namespace"})
@@ -33146,7 +33502,7 @@ type Subscription {
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
     apiEvent(namespace: String!, serviceName: String): ApiEvent! @HasAccess(attributes: {resource: "apis", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
-
+    namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 }
 
 # Schema

@@ -29,11 +29,11 @@ spec:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-| Parameter   |  Mandatory  |  Description |
+| Parameter   |  Required  |  Description |
 |----------|:-------------:|------|
-| **metadata.name** | **YES** | Specifies the name of the CR. |
-| **spec.issuer** | **YES** | Specifies the issuer of the JWT tokens used to access the services. |
-| **spec.jwksUri** | **YES** | Specifies the URL of the OpenID Provider’s public key set to validate the signature of the JWT token. |
+| **metadata.name** | Yes | Specifies the name of the CR. |
+| **spec.issuer** | Yes | Specifies the issuer of the JWT tokens used to access the services. |
+| **spec.jwksUri** | Yes | Specifies the URL of the OpenID Provider’s public key set to validate the signature of the JWT token. |
 
 ## Usage in the UI
 

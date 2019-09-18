@@ -31,3 +31,51 @@ aliases:
     - dariadomagala
     - akucharska
     - sjanota
+  event-bus-approvers:
+    - @Abd4llA
+    - @rakesh-garimella
+    - @lilitgh
+    - @k15r
+    - @nachtmaar
+    - @anishj0shi
+    - @montaro
+    - @marcobebway
+    - @radufa
+    - @sayanh
+    - @antoineco
+  event-bus-reviewers:
+    - @Abd4llA
+    - @rakesh-garimella
+    - @lilitgh
+    - @k15r
+    - @nachtmaar
+    - @anishj0shi
+    - @montaro
+    - @marcobebway
+    - @radufa
+    - @sayanh
+    - @antoineco
+  serverless-approvers:
+    - @Abd4llA
+    - @rakesh-garimella
+    - @lilitgh
+    - @k15r
+    - @nachtmaar
+    - @anishj0shi
+    - @montaro
+    - @marcobebway
+    - @radufa
+    - @sayanh
+    - @antoineco
+  serverless-reviewers:
+    - @Abd4llA
+    - @rakesh-garimella
+    - @lilitgh
+    - @k15r
+    - @nachtmaar
+    - @anishj0shi
+    - @montaro
+    - @marcobebway
+    - @radufa
+    - @sayanh
+    - @antoineco

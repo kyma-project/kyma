@@ -18,5 +18,4 @@ spec:
       containers:
         - name: manager
           # image and tag get replaced by 'make docker-build'
-          image: function-controller:latest
           imagePullPolicy: Always

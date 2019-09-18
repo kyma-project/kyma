@@ -33,7 +33,7 @@ type Resolver struct {
 	informerFactory informers.SharedInformerFactory
 }
 
-func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicationRetriever shared.ApplicationRetriever, scRetriever shared.ServiceCatalogRetriever, scaRetriever shared.ServiceCatalogAddonsRetriever) (*Resolver, error) {
+func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicationRetriever shared.ApplicationRetriever, scRetriever shared.ServiceCatalogRetriever, scaRetriever shared.ServiceCatalogAddonsRetriever, systemNamespaces []string) (*Resolver, error) {
 	client, err := v1.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating K8S Client")
@@ -46,17 +46,18 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 
 	informerFactory := informers.NewSharedInformerFactory(clientset, informerResyncPeriod)
 
-	namespaceSvc, err := newNamespaceService(informerFactory.Core().V1().Namespaces().Informer(), client)
+	podService := newPodService(informerFactory.Core().V1().Pods().Informer(), client)
+	namespaceSvc, err := newNamespaceService(informerFactory.Core().V1().Namespaces().Informer(), podService, client)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating namespace service")
 	}
+
 	deploymentService, err := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating deployment service")
 	}
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer(), clientset.CoreV1())
 
-	podService := newPodService(informerFactory.Core().V1().Pods().Informer(), client)
 	resourceService := newResourceService(clientset.Discovery())
 	secretService := newSecretService(informerFactory.Core().V1().Secrets().Informer(), client)
 
@@ -67,10 +68,9 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	configMapService := newConfigMapService(informerFactory.Core().V1().ConfigMaps().Informer(), clientset.CoreV1())
 	serviceSvc := newServiceService(informerFactory.Core().V1().Services().Informer(), client)
 	selfSubjectRulesService := newSelfSubjectRulesService(clientset.AuthorizationV1())
-
 	return &Resolver{
 		resourceResolver:            newResourceResolver(resourceService),
-		namespaceResolver:           newNamespaceResolver(namespaceSvc, applicationRetriever),
+		namespaceResolver:           newNamespaceResolver(namespaceSvc, applicationRetriever, systemNamespaces, podService),
 		secretResolver:              newSecretResolver(*secretService),
 		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
 		podResolver:                 newPodResolver(podService),

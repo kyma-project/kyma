@@ -59,7 +59,7 @@ install:
 
 # Uninstall CRDs from cluster
 uninstall:
-	kubectl apply -f config/crds/serverless_v1alpha1_function.yaml
+	kubectl delete -f config/crds/serverless_v1alpha1_function.yaml
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests:
@@ -72,16 +72,14 @@ ifeq ($(shell uname -s),Darwin)
 	sedbackupflag +=
 endif
 
-deploy: manifests install bin/kustomize
-	@echo "updating kustomize image patch file for manager resource"
-	cp ./config/default/manager_image_patch.yaml{,.bak}
-	sed $(sedbackupflag)'' -e 's@image: .*@image: $(IMG)@' ./config/default/manager_image_patch.yaml
-	bin/kustomize build config/default | kubectl apply -f -
-	mv ./config/default/manager_image_patch.yaml{.bak,}
+deploy: manifests install bin/kustomize ko
+	bin/kustomize build config/default | ko apply -f -
 
-undeploy: uninstall bin/kustomize
-	kubectl delete -f config/crds
-	bin/kustomize build config/default | kubectl delete  -f -
+removewebhook:
+	-kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io function-webhook.serverless.kyma-project.io
+
+undeploy: uninstall removewebhook bin/kustomize ko
+	bin/kustomize build config/default | ko delete  -f -
 
 # Build the docker image
 .PHONY: docker-build
@@ -118,3 +116,8 @@ export GOBIN := $(GOPATH)/src/$(PKG)/bin
 .PHONY: bin/kustomize
 bin/kustomize:
 	@go install ./vendor/sigs.k8s.io/kustomize
+
+.PHONY: ko
+ko:
+	@go get -u github.com/google/ko/cmd/ko
+

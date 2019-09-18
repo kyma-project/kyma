@@ -7,7 +7,8 @@ This project is a generator of configurations used in Kyma.
 ## Prerequisites
 
 The following tools are required to set up the project:
-- [Go distribution](https://golang.org)
+
+- [Go](https://golang.org)
 - [Docker](https://www.docker.com/)
 
 ## Installation

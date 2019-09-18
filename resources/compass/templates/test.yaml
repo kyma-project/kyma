@@ -18,7 +18,7 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-          - "{{ .Values.global.gateway.host }}.{{ .Values.global.ingress.domainName }}"
+          - "{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}"
     {{ end }}
       shareProcessNamespace: true
       containers:
@@ -29,5 +29,5 @@ spec:
           args: ["-c", "sleep 10; /director.test -test.v; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
           env:
           - name: "DIRECTOR_GRAPHQL_API"
-            value: "https://{{ .Values.global.gateway.host }}.{{ .Values.global.ingress.domainName }}/director/graphql"
+            value: "https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/director/graphql"
       restartPolicy: Never

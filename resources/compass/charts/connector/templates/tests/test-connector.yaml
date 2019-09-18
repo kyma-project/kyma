@@ -19,10 +19,25 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: APP_INTERNAL_CONNECTOR_URL
-          value: 'http://{{ template "fullname" . }}:{{ .Values.global.connector.port }}/graphql'
+          value: 'http://{{ template "fullname" . }}:{{ .Values.global.connector.graphql.port }}/graphql'
+        - name: APP_CONNECTOR_URL
+          value: 'https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql'
+        - name: APP_SECURED_CONNECTOR_URL
+          value: 'https://{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql'
+        - name: APP_HYDRATOR_URL
+          value: 'http://{{ template "fullname" . }}:{{ .Values.global.connector.validator.port }}'
+        - name: APP_CERTIFICATE_DATA_HEADER
+          value: {{ .Values.global.connector.certificateDataHeader }}
         command:
         - "/bin/sh"
         args:
         - "-c"
         - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; sleep 4; exit $exit_code;"
       restartPolicy: Never
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}"
+            - "{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}"
+      {{ end }}

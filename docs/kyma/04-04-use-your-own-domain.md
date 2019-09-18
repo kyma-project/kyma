@@ -20,7 +20,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 
 ## Prerequisites
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.13.0
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 - [wget](https://www.gnu.org/software/wget/)
 - A domain for your GKE cluster
@@ -147,7 +147,7 @@ Follow these steps:
     ```
     gcloud container --project "$GCP_PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "$GCP_ZONE" \
-    --cluster-version "1.13" --machine-type "n1-standard-4" \
+    --cluster-version "1.14" --machine-type "n1-standard-4" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing
     ```
 
@@ -229,7 +229,7 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 
 ## Prerequisites
 - [Microsoft Azure](https://azure.microsoft.com)
-- [Kubernetes](https://kubernetes.io/) 1.13
+- [Kubernetes](https://kubernetes.io/) 1.14
 - Tiller 2.10.0 or higher
 - [Docker](https://www.docker.com/)
 - [Docker Hub](https://hub.docker.com/) account
@@ -374,7 +374,7 @@ Follow these steps:
       --resource-group $RS_GROUP \
       --name $CLUSTER_NAME \
       --node-vm-size "Standard_D4_v3" \
-      --kubernetes-version 1.13 \
+      --kubernetes-version 1.14.6 \
       --enable-addons "monitoring,http_application_routing" \
       --generate-ssh-keys
     ```
