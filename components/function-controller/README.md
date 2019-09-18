@@ -126,7 +126,7 @@ See [google/ko](https://github.com/google/ko) for more details about `ko`
 
 ```bash
 #for hub.docker.io
-export KO_DOCKER_REPO=<your dockerhub username>
+>export KO_DOCKER_REPO=<your dockerhub username>
 
 #to use your local docker daemon and its image store
 export KO_DOCKER_REPO=ko.local
