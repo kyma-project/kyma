@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"net/http"
-
 	"github.com/kyma-project/kyma/components/cms-services/pkg/runtime/signal"
 	"github.com/vrischmann/envconfig"
 
@@ -40,11 +38,7 @@ func main() {
 	}
 
 	if err := srv.Start(ctx); err != nil {
-		if err != http.ErrServerClosed {
-			log.Fatal(errors.Wrap(err, "while starting the service"))
-		} else {
-			log.Info("The service was shut down")
-		}
+		log.Fatal(errors.Wrap(err, "while starting the service"))
 	}
 }
 
