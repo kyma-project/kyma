@@ -97,4 +97,4 @@ global:
 
   tenantMappingService:
     port: 3000
-    url: http://compass-healthchecker.compass-system.svc.cluster.local
+    url: http://compass-director.compass-system.svc.cluster.local:3001/tenant-mapping
