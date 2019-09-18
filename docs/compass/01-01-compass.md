@@ -8,8 +8,8 @@ Compass is a multi-tenant system which consists of components that provide a way
 
 Compass allows for registering different types of applications and Runtimes.
 These are the types of possible integration levels between an application and Compass:
-- Manual integration - administrator manually provides API or Events metadata to Compass. This type of integration is used mainly for simple use-case scenarios and doesn't support all features.
-- Built-in integration - integration with Compass is built-in inside the application.
+- Manual integration - the administrator manually provides API or Events metadata to Compass. This type of integration is used mainly for simple use-case scenarios and doesn't support all features.
+- Built-in integration - integration with Compass is built in the application.
 - Proxy - a highly application-specific proxy component provides the integration.
 - Central integration service -  a central service provides integration for the whole group of applications. It manages multiple instances of these applications. You can integrate multiple central services to support different types of applications.
 

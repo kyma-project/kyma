@@ -26,7 +26,7 @@ metadata:
     component: compass
     kyma-project.io/installation: ""
 data:
-  # The parameter that enables the Compass gateway, as the default Kyma gateway is disabled in this installation mode.
+  # The parameter that enables the Compass gateway, as the default Kyma gateway is disabled in this installation mode
   gateway.gateway.enabled: "true"
   # The name of the currently used gateway
   global.istio.gateway.name: compass-istio-gateway
