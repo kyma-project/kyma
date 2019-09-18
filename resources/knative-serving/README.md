@@ -12,3 +12,4 @@ Kyma-specific changes:
  * The `knative-serving` Namespace is no longer created. This happens during the installation process.
  * The image versions are changed to use the release tag.
  * The `knative-ingress-gateway` is now a copy of `kyma-gateway`.
+ * Changed CPU for minikube

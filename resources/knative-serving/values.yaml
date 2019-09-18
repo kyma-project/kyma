@@ -1,7 +1,30 @@
-knative-serving:
-  gateway:
-    name: kyma-gateway.kyma-system.svc.cluster.local
-    serviceUrl: istio-ingressgateway.istio-system.svc.cluster.local
+knative_serving:
+  minikube:
+    networking_istio:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 100Mi
+    activator:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+    autoscaler:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 100Mi
+    autoscaler_hpa:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 100Mi
+    controller:
+      resources:
+        requests:
+          cpu: 30m
+          memory: 100Mi
 
 global:
   isLocalEnv: false
