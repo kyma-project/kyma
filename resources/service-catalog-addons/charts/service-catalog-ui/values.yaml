@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  dir:
+  dir: /pr
   pullPolicy: IfNotPresent
 catalog:
   service:
@@ -16,7 +16,7 @@ brokers:
   service:
     internalPort: 8082
     externalPort: 8082
-  hostname: brokers  
+  hostname: brokers
 protocol: TCP
 virtualservice:
   enabled: true
