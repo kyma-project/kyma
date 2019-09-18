@@ -1,22 +1,28 @@
 ---
-title: Configure default ClusterChannelProvisioner
+title: Configure default Knative Channel
 type: Details
 ---
 
 
-Kyma comes with NATS Streaming as its default ClusterChannelProvisioner. You can see the configuration details in the [`default-channel-webhook`](../../resources/knative-eventing/charts/knative-eventing/templates/eventing.yaml) ConfigMap.
+Kyma comes with NATS Streaming as its default Channel. You can see the configuration details in the [`default-ch-webhook`](../../resources/knative-eventing/charts/knative-eventing/templates/eventing.yaml) ConfigMap.
 
 You can use a different messaging middleware, other than NATS Streaming, as the Kyma eventing operator.
-To achieve that, configure:
+To achieve that::
 
-- A ClusterChannelProvisioner that connects with the running messaging middleware
-- The `default-channel-webhook` to use that particular ClusterChannelProvisioner
+- Apply the Channel Resources for the messaging middleware you want to use. These resources connects with the running messaging middleware
+- Configure the `default-ch-webhook` ConfigMap in the `knative-eventing` namespace to use that particular Channel.
+
+### Editing the default-ch-webhook ConfigMap
+
+  ```bash
+    kubectl -n knative-eventing edit configmaps default-ch-webhook
+  ```
 
 Read about the examples and the configuration details.
 
 ## In-memory channel
 
-Follow this [guide](https://github.com/knative/eventing/tree/master/config/channels/in-memory-channel) to add an in-memory ClusterChannelProvisioner.
+Follow this [guide](https://github.com/knative/eventing/tree/master/config/channels/in-memory-channel) to add the InMemoryChannel resources. This would apply the InMemoryChannel CRD, Controller, and Dispatcher.
 
 >**NOTE**: Before installing this provisioner, add the following annotation to the [`podTemplate.Spec`](https://github.com/knative/eventing/blob/master/config/channels/in-memory-channel/300-in-memory-channel.yaml) in the `in-memory-channel-controller` Deployment to remove the Istio sidecar.
 
@@ -28,42 +34,44 @@ template:
       labels: *labels
 ```
 
-You can change the default cluster channel provisioner by editing the ClusterChannelProvisioner entry in the `default-channel-webhook` ConfigMap. For an example of the in-memory ClusterChannelProvisioner configuration, see [this file](https://github.com/knative/eventing/blob/master/config/400-default-ch-config.yaml).
-
-## Google PubSub
-
-After you complete the [prerequisite steps](https://github.com/knative/eventing/tree/release-0.5/contrib/gcppubsub/config#prerequisites) mentioned in the Knative eventing documentation, follow these steps to configure the Google PubSub ClusterChannelProvisioner:
-
-    > **NOTE:** Skip the last step to install `Knative eventing` as it is pre-installed with Kyma.
-
-1. Deploy the Google PubSub ClusterChannelProvisioner:
-
-    ```bash
-    sed "s/REPLACE_WITH_GCP_PROJECT/$PROJECT_ID/" ./assets/gcppubsub.yaml | kubectl apply -f -
-    ```
-
-2. In  the `default-channel-webhook` located in the `knative-eventing` Namespace, change the value of the **data.default-channel-config.clusterdefault.name** parameter to `gcp-pubsub`.
-
-    ```bash
-    kubectl -n knative-eventing edit configmaps default-channel-webhook
-    ```
-
-After the change, the ConfigMap should have the following data:
+You can change the default channel configuration by editing the ConfigMap `default-ch-webhook` in `knative-eventing` namespace. For example, if you want to set In-Memory Channels as default provisioner, then the aforementioned ConfigMap should have the following data:
 
 ```yaml
 apiVersion: v1
-data:
-  default-channel-config: |
-    clusterdefault:
-      apiversion: eventing.knative.dev/v1alpha1
-      kind: ClusterChannelProvisioner
-      name: gcp-pubsub     #this value has to be changed
 kind: ConfigMap
 metadata:
-  creationTimestamp: "2019-06-05T09:40:17Z"
-  name: default-channel-webhook
+  name: default-ch-webhook
   namespace: knative-eventing
-  resourceVersion: "66671"
-  selfLink: /api/v1/namespaces/knative-eventing/configmaps/default-channel-webhook
-  uid: edab3828-8775-11e9-b70b-42010a840216
+data:
+  default-ch-config: |
+    clusterDefault:
+      apiVersion: messaging.knative.dev/v1alpha1
+      kind: InMemoryChannel
+    namespaceDefaults:
+      some-namespace:
+        apiVersion: messaging.knative.dev/v1alpha1
+        kind: InMemoryChannel
 ```
+> **NOTE**: This ConfigMap may specify a cluster-wide default channel and/or namespace-specific channel implementations.
+
+## Google PubSub
+
+Follow this [guide](https://github.com/google/knative-gcp/blob/master/docs/install/README.md) to install GCP PubSub Channel resources. this would apply the GCP PubSub Channel CRDs and deploy the cloud-run-events-controller controller.
+
+1. Edit  the `default-ch-webhook` ConfigMap located in the `knative-eventing` Namespace with the following data.
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: default-ch-webhook
+  namespace: knative-eventing
+data:
+  default-ch-config: |
+    clusterDefault:
+      apiVersion: messaging.cloud.run/v1alpha1
+      kind: Channel
+      spec:
+        project: <GCP Project Name>
+```
+> **NOTE**: You need to mention the GCP Project Name in the specification which will be used as the reference GCP project to create GCP PubSub Topics.
