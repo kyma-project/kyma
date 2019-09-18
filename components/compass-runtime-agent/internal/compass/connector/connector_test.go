@@ -1,4 +1,4 @@
-package compass
+package connector
 
 import (
 	"testing"
@@ -8,11 +8,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	directorURL = "https://compass-geteway.kyma.local/director/graphql"
+)
+
 func TestCompassConnector_EstablishConnection(t *testing.T) {
 
 	t.Run("should establish connection", func(t *testing.T) {
 		// given
-		connector := NewCompassConnector(directorURL)
+		connector := NewCompassConnector()
 
 		// when
 		connection, err := connector.EstablishConnection()

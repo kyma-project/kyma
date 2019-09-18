@@ -1,6 +1,7 @@
 package compass
 
 import (
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
 	"testing"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
@@ -244,7 +245,7 @@ func (UnsupportedCredentials) IsCredentialData() {}
 
 func fixCompassUnsupportedCredentialsAuth() *graphql.RuntimeAuth {
 	return &graphql.RuntimeAuth{
-		RuntimeID: runtimeId,
+		RuntimeID: director.runtimeId,
 		Auth: &graphql.Auth{
 			Credential: UnsupportedCredentials{},
 		},
@@ -383,7 +384,7 @@ func fixCompassDocument(suffix string, data *graphql.CLOB) *graphql.Document {
 
 func fixCompassOauthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.RuntimeAuth {
 	return &graphql.RuntimeAuth{
-		RuntimeID: runtimeId,
+		RuntimeID: director.runtimeId,
 		Auth: &graphql.Auth{
 			Credential: &graphql.OAuthCredentialData{
 				URL:          oauthURL,
@@ -397,7 +398,7 @@ func fixCompassOauthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.Ru
 
 func fixCompassBasicAuthAuth(requestAuth *graphql.CredentialRequestAuth) *graphql.RuntimeAuth {
 	return &graphql.RuntimeAuth{
-		RuntimeID: runtimeId,
+		RuntimeID: director.runtimeId,
 		Auth: &graphql.Auth{
 			Credential: &graphql.BasicCredentialData{
 				Username: username,

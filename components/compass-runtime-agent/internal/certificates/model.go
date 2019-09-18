@@ -4,7 +4,10 @@ import (
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
+
+	"github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
 
 	"github.com/pkg/errors"
 )
@@ -18,6 +21,42 @@ type ClientCredentials struct {
 	ClientKey         *rsa.PrivateKey
 	CertificateChain  []*x509.Certificate
 	ClientCertificate *x509.Certificate
+}
+
+func NewCredentials(key *rsa.PrivateKey, certificateResponse gqlschema.CertificationResult) (Credentials, error) {
+	pemCertChain, err := base64.StdEncoding.DecodeString(certificateResponse.CertificateChain)
+	if err != nil {
+		return Credentials{}, errors.Wrap(err, "Failed to decode base 64 certificate chain")
+	}
+	certificateChain, err := decodeCertificates(pemCertChain)
+	if err != nil {
+		return Credentials{}, errors.Wrap(err, "Failed to decode certificate chain")
+	}
+	pemClientCert, err := base64.StdEncoding.DecodeString(certificateResponse.ClientCertificate)
+	if err != nil {
+		return Credentials{}, errors.Wrap(err, "Failed to decode base 64 client certificate")
+	}
+	clientCert, err := decodeCertificate(pemClientCert)
+	if err != nil {
+		return Credentials{}, errors.Wrap(err, "Failed to decode client certificate")
+	}
+	pemCACert, err := base64.StdEncoding.DecodeString(certificateResponse.CaCertificate)
+	if err != nil {
+		return Credentials{}, errors.Wrap(err, "Failed to decode base 64 CA certificate")
+	}
+	caCerts, err := decodeCertificates(pemCACert)
+	if err != nil {
+		return Credentials{}, errors.Wrap(err, "Failed to decode CA certificate")
+	}
+
+	return Credentials{
+		ClientCredentials: ClientCredentials{
+			ClientKey:         key,
+			CertificateChain:  certificateChain,
+			ClientCertificate: clientCert,
+		},
+		CACertificates: caCerts,
+	}, nil
 }
 
 type PemEncodedCredentials struct {

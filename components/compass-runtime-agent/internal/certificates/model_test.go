@@ -3,7 +3,10 @@ package certificates
 import (
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"testing"
+
+	"github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
 
 	"github.com/stretchr/testify/assert"
 
@@ -11,7 +14,7 @@ import (
 )
 
 func TestClientCredentials_AsTLSCertificate(t *testing.T) {
-
+	// given
 	pemCredentials := PemEncodedCredentials{
 		ClientKey:         clientKey,
 		CertificateChain:  crtChain,
@@ -22,11 +25,13 @@ func TestClientCredentials_AsTLSCertificate(t *testing.T) {
 	credentials, err := pemCredentials.AsCredentials()
 	require.NoError(t, err)
 
+	// when
 	tlsCert := credentials.AsTLSCertificate()
-	require.NotEmpty(t, tlsCert)
 
-	assert.NotEmpty(t, tlsCert.PrivateKey)
-	assert.NotEmpty(t, tlsCert.Certificate)
+	// then
+	require.NotEmpty(t, tlsCert)
+	require.NotEmpty(t, tlsCert.PrivateKey)
+	require.NotEmpty(t, tlsCert.Certificate)
 
 	privKey, ok := tlsCert.PrivateKey.(*rsa.PrivateKey)
 	assert.True(t, ok)
@@ -40,8 +45,35 @@ func TestClientCredentials_AsTLSCertificate(t *testing.T) {
 		certs = append(certs, cert)
 	}
 
-	assert.Equal(t, 2, len(certs))
+	require.Equal(t, 2, len(certs))
 	assert.NotEmpty(t, certs[0])
 	assert.NotEmpty(t, certs[1])
 	assert.Equal(t, credentials.CertificateChain, certs)
+}
+
+func TestNewCredentials(t *testing.T) {
+	// given
+	expectedCredentials, err := PemEncodedCredentials{
+		ClientKey:         clientKey,
+		ClientCertificate: clientCRT,
+		CertificateChain:  crtChain,
+		CACertificates:    caCRT,
+	}.AsCredentials()
+	require.NoError(t, err)
+
+	certificateResponse := gqlschema.CertificationResult{
+		CertificateChain:  base64.StdEncoding.EncodeToString(crtChain),
+		CaCertificate:     base64.StdEncoding.EncodeToString(caCRT),
+		ClientCertificate: base64.StdEncoding.EncodeToString(clientCRT),
+	}
+
+	key, err := getClientPrivateKey(clientKey)
+	require.NoError(t, err)
+
+	// when
+	credentials, err := NewCredentials(key, certificateResponse)
+	require.NoError(t, err)
+
+	// then
+	assert.Equal(t, expectedCredentials, credentials)
 }

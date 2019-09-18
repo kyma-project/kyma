@@ -1,7 +1,9 @@
-package compass
+package director
 
 import (
 	"crypto/tls"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 
 	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 
@@ -176,12 +178,12 @@ func (c *mockGQLClient) Do(req *graphql.Request, res interface{}) error {
 	assert.Equal(c.t, c.expectedRequest, req)
 
 	if !c.shouldFail {
-		appForRuntimesResp, ok := res.(*ApplicationsForRuntimeResponse)
+		appForRuntimesResp, ok := res.(*compass.ApplicationsForRuntimeResponse)
 		if !ok {
 			return errors.New("invalid response type expected")
 		}
 
-		appForRuntimesResp.Result.Data = []*Application{
+		appForRuntimesResp.Result.Data = []*compass.Application{
 			{Name: "App"},
 		}
 
@@ -244,7 +246,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 			configClient := NewConfigurationClient(tenant, runtimeId, testCase.clientConstructor, true)
 
 			// when
-			apps, err := configClient.FetchConfiguration(directorURL, certificates.Credentials{})
+			apps, err := FetchConfiguration(directorURL, certificates.Credentials{})
 
 			// then
 			assert.Equal(t, testCase.expectedApps, apps)

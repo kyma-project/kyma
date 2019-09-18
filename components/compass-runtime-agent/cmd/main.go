@@ -2,9 +2,12 @@ package main
 
 import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/connector"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
+	"k8s.io/client-go/kubernetes"
 
 	"os"
 	"time"
@@ -15,22 +18,27 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 
-	"github.com/kelseyhightower/envconfig"
 	apis "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	log "github.com/sirupsen/logrus"
+	"github.com/vrischmann/envconfig"
 )
 
 func main() {
 	log.Infoln("Starting Runtime Agent")
-	options := parseArgs()
-	log.Infof("Options: %s", options)
 
-	var envConfig EnvConfig
-	err := envconfig.Process("", &envConfig)
+	var options Config
+	err := envconfig.InitWithPrefix(&options, "APP") // TODO - refactor in chart
 	if err != nil {
 		log.Error("Failed to process environment variables")
 	}
-	log.Infof("Env config: %s", envConfig)
+	log.Infof("Env config: %s", options)
+
+	var connectionConfig EnvConfig
+	err = envconfig.InitWithPrefix(&connectionConfig, "")
+	if err != nil {
+		log.Error("Failed to process environment variables for connection")
+	}
+	log.Infof("Connection config: %s", connectionConfig)
 
 	// Get a config to talk to the apiserver
 	log.Info("Setting up client for manager")
@@ -40,7 +48,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	syncPeriod := time.Second * time.Duration(options.controllerSyncPeriod)
+	syncPeriod := time.Second * time.Duration(options.ControllerSyncPeriod)
 
 	log.Info("Setting up manager")
 	mgr, err := manager.New(cfg, manager.Options{SyncPeriod: &syncPeriod})
@@ -64,15 +72,32 @@ func main() {
 		os.Exit(1)
 	}
 
-	certManager := certificates.NewCredentialsManager()
-	compassConfigClient := compass.NewConfigurationClient(graphql.New, options.insecureConfigurationFetch)
-	syncService, err := createNewSynchronizationService(cfg, options.integrationNamespace, options.gatewayPort, options.uploadServiceUrl)
+	// TODO - rework this part
+	coreClientset, err := kubernetes.NewForConfig(cfg)
+	if err != nil {
+		log.Errorf("Failed to initialize core clientset: %s", err.Error())
+		os.Exit(1)
+	}
+
+	coreClientSet := coreClientset.CoreV1()
+
+	// TODO - one secret repo instead of 2
+	secretsRepository := secrets.NewRepository(func(namespace string) secrets.Manager {
+		return coreClientSet.Secrets(namespace)
+	})
+
+	clusterCertSecret := parseNamespacedName(options.ClusterCertificatesSecret)
+	caCertSecret := parseNamespacedName(options.CaCertificatesSecret)
+
+	certManager := certificates.NewCredentialsManager(clusterCertSecret, caCertSecret, secretsRepository)
+	compassConfigClient := director.NewConfigurationClient(graphql.New, options.InsecureConfigurationFetch)
+	syncService, err := createNewSynchronizationService(cfg, options.IntegrationNamespace, options.GatewayPort, options.UploadServiceUrl)
 	if err != nil {
 		log.Errorf("Failed to create synchronization service, %s", err.Error())
 		os.Exit(1)
 	}
 
-	compassConnector := compass.NewCompassConnector(envConfig.DirectorURL)
+	compassConnector := newCompassConnector(connectionConfig.ConnectorURL, true) // TODO - pass param
 	connectionSupervisor := compassconnection.NewSupervisor(
 		compassConnector,
 		compassConnectionCRClient.CompassConnections(),
@@ -80,18 +105,16 @@ func main() {
 		compassConfigClient,
 		syncService)
 
-	minimalConfigSyncTime := time.Duration(options.minimalConfigSyncTime) * time.Second
-
 	// Setup all Controllers
 	log.Info("Setting up controller")
-	if err := compassconnection.InitCompassConnectionController(mgr, connectionSupervisor, minimalConfigSyncTime); err != nil {
+	if err := compassconnection.InitCompassConnectionController(mgr, connectionSupervisor, options.MinimalConfigSyncTime); err != nil {
 		log.Error(err, "Unable to register controllers to the manager")
 		os.Exit(1)
 	}
 
 	// Initialize Compass Connection CR
 	log.Infoln("Initializing Compass Connection CR")
-	_, err = connectionSupervisor.InitializeCompassConnection()
+	_, err = connectionSupervisor.InitializeCompassConnection("") // TODO - token
 	if err != nil {
 		log.Error("Unable to initialize Compass Connection CR")
 	}
@@ -102,4 +125,11 @@ func main() {
 		log.Error(err, "Unable to run the manager")
 		os.Exit(1)
 	}
+}
+
+func newCompassConnector(connectorURL string, insecureConnection bool) connector.Connector {
+	csrProvider := certificates.NewCSRProvider()
+	tokenSecuredClient := connector.NewConnectorClient(connectorURL, insecureConnection)
+
+	return connector.NewCompassConnector(connectorURL, csrProvider, tokenSecuredClient)
 }

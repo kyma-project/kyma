@@ -1,8 +1,10 @@
-package compass
+package connector
 
 import "fmt"
 
-func Configuration() string {
+type queryProvider struct{}
+
+func (qp queryProvider) configuration() string {
 	return fmt.Sprintf(`query {
 	result: configuration() {
 		%s
@@ -10,7 +12,7 @@ func Configuration() string {
 }`, configurationResult())
 }
 
-func SignCSR(csr string) string {
+func (qp queryProvider) signCSR(csr string) string {
 	return fmt.Sprintf(`mutation {
 	result: signCertificateSigningRequest(csr: "%s") {
 		%s

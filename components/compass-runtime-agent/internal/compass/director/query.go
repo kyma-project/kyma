@@ -1,8 +1,10 @@
-package compass
+package director
 
 import "fmt"
 
-func ApplicationsForRuntimeQuery(runtimeID string) string {
+type queryProvider struct{}
+
+func (qp queryProvider) applicationsForRuntimeQuery(runtimeID string) string {
 	return fmt.Sprintf(`query {
 	result: applicationsForRuntime(runtimeID: "%s") {
 		%s

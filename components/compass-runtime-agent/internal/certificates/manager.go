@@ -21,28 +21,28 @@ const (
 
 //go:generate mockery -name=Manager
 type Manager interface {
-	GetClientCredentials() (Credentials, error)
+	GetClientCredentials() (ClientCredentials, error)
 	PreserveCredentials(Credentials) error
 }
 
-func NewCredentialsManager(clusterCredentialsSecretName, caCertSecretName types.NamespacedName, secretsRepository secrets.Repository) *credentialsManager {
+func NewCredentialsManager(clusterCertificateSecretName, caCertSecretName types.NamespacedName, secretsRepository secrets.Repository) *credentialsManager {
 	return &credentialsManager{
-		caCertSecretName:             caCertSecretName,
-		clusterCredentialsSecretName: clusterCredentialsSecretName,
-		secretsRepository:            secretsRepository,
+		caCertSecretName:              caCertSecretName,
+		clusterCertificatesSecretName: clusterCertificateSecretName,
+		secretsRepository:             secretsRepository,
 	}
 }
 
 type credentialsManager struct {
-	caCertSecretName             types.NamespacedName
-	clusterCredentialsSecretName types.NamespacedName
-	secretsRepository            secrets.Repository
+	caCertSecretName              types.NamespacedName
+	clusterCertificatesSecretName types.NamespacedName
+	secretsRepository             secrets.Repository
 }
 
 func (cm *credentialsManager) GetClientCredentials() (ClientCredentials, error) {
-	secretData, err := cm.secretsRepository.Get(cm.clusterCredentialsSecretName)
+	secretData, err := cm.secretsRepository.Get(cm.clusterCertificatesSecretName)
 	if err != nil {
-		return ClientCredentials{}, errors.Wrap(err, fmt.Sprintf("Failed to read %s secret with certificates", cm.clusterCredentialsSecretName))
+		return ClientCredentials{}, errors.Wrap(err, fmt.Sprintf("Failed to read %s secret with certificates", cm.clusterCertificatesSecretName))
 	}
 
 	pemCredentials := PemEncodedCredentials{
@@ -72,7 +72,7 @@ func (cm *credentialsManager) saveClusterCertificateAndKey(clientKey, clientCert
 		certificateChainSecretKey:   certificateChain,
 	}
 
-	err := cm.secretsRepository.UpsertWithMerge(cm.clusterCredentialsSecretName, clusterSecretData)
+	err := cm.secretsRepository.UpsertWithMerge(cm.clusterCertificatesSecretName, clusterSecretData)
 	if err != nil {
 		return errors.Wrap(err, "Failed to preserve client certificate and key in secret")
 	}

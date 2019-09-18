@@ -28,6 +28,7 @@ func NewCSRProvider() CSRProvider {
 	return &csrProvider{}
 }
 
+// CreateCSR generates private key and returns it along with base 64 encoded CSR
 func (cp *csrProvider) CreateCSR(subject pkix.Name) (string, *rsa.PrivateKey, error) {
 	clusterPrivateKey, err := rsa.GenerateKey(rand.Reader, rsaKeySize)
 	if err != nil {

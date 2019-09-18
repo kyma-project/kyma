@@ -2,9 +2,11 @@ package compassconnection
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/connector"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	"github.com/pkg/errors"
@@ -30,15 +32,15 @@ type CRManager interface {
 
 //go:generate mockery -name=Supervisor
 type Supervisor interface {
-	InitializeCompassConnection() (*v1alpha1.CompassConnection, error)
+	InitializeCompassConnection(token string) (*v1alpha1.CompassConnection, error)
 	SynchronizeWithCompass(connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error)
 }
 
 func NewSupervisor(
-	connector compass.Connector,
+	connector connector.Connector,
 	crManager CRManager,
 	credManager certificates.Manager,
-	compassClient compass.ConfigClient,
+	compassClient director.ConfigClient,
 	syncService kyma.Service,
 ) Supervisor {
 	return &crSupervisor{
@@ -52,19 +54,19 @@ func NewSupervisor(
 }
 
 type crSupervisor struct {
-	compassConnector   compass.Connector
+	compassConnector   connector.Connector
 	crManager          CRManager
 	credentialsManager certificates.Manager
-	compassClient      compass.ConfigClient
+	compassClient      director.ConfigClient
 	syncService        kyma.Service
 	log                *logrus.Entry
 }
 
-func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnection, error) {
+func (s *crSupervisor) InitializeCompassConnection(token string) (*v1alpha1.CompassConnection, error) {
 	compassConnectionCR, err := s.crManager.Get(DefaultCompassConnectionName, v1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			return s.newCompassConnection()
+			return s.newCompassConnection(token)
 		}
 
 		return nil, errors.Wrap(err, "Connection failed while getting existing Compass Connection")
@@ -77,7 +79,7 @@ func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnectio
 		return compassConnectionCR, nil
 	}
 
-	s.establishConnection(compassConnectionCR)
+	s.establishConnection(compassConnectionCR, token)
 
 	return s.updateCompassConnection(compassConnectionCR)
 }
@@ -140,7 +142,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	return s.updateCompassConnection(connection)
 }
 
-func (s *crSupervisor) newCompassConnection() (*v1alpha1.CompassConnection, error) {
+func (s *crSupervisor) newCompassConnection(token string) (*v1alpha1.CompassConnection, error) {
 	connectionCR := &v1alpha1.CompassConnection{
 		ObjectMeta: v1.ObjectMeta{
 			Name: DefaultCompassConnectionName,
@@ -148,13 +150,13 @@ func (s *crSupervisor) newCompassConnection() (*v1alpha1.CompassConnection, erro
 		Spec: v1alpha1.CompassConnectionSpec{},
 	}
 
-	s.establishConnection(connectionCR)
+	s.establishConnection(connectionCR, token)
 
 	return s.crManager.Create(connectionCR)
 }
 
-func (s *crSupervisor) establishConnection(connectionCR *v1alpha1.CompassConnection) {
-	connection, err := s.compassConnector.EstablishConnection()
+func (s *crSupervisor) establishConnection(connectionCR *v1alpha1.CompassConnection, token string) {
+	connection, err := s.compassConnector.EstablishConnection(token)
 	if err != nil {
 		s.log.Errorf("SynchronizationFailed while establishing connection with Compass: %s", err.Error())
 		s.log.Infof("Setting Compass Connection to ConnectionFailed state")
@@ -168,7 +170,7 @@ func (s *crSupervisor) establishConnection(connectionCR *v1alpha1.CompassConnect
 	}
 }
 
-func (s *crSupervisor) saveCredentials(connectionCR *v1alpha1.CompassConnection, establishedConnection compass.EstablishedConnection) {
+func (s *crSupervisor) saveCredentials(connectionCR *v1alpha1.CompassConnection, establishedConnection connector.EstablishedConnection) {
 	err := s.credentialsManager.PreserveCredentials(establishedConnection.Credentials)
 	if err != nil {
 		s.log.Errorf("SynchronizationFailed while preserving credentials: %s", err.Error())
