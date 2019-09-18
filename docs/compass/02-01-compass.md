@@ -3,7 +3,7 @@ title: Basic architecture
 type: Architecture
 ---
 
-Compass is a central place which stores applications and Runtimes configurations, and then propagates that information accordingly. It also plays a crucial role in establishing a trusted connection between applications and Runtimes. The basic workflow looks as follows:
+Compass is a central place which stores applications and Runtimes configurations, and then communicates the information about the current configuration to applications and Runtimes. It also plays a crucial role in establishing a trusted connection between applications and Runtimes. The basic workflow looks as follows:
 
 ![Basic architecture](./assets/architecture.svg)
 

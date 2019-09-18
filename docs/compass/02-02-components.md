@@ -11,13 +11,13 @@ Compass consists of a set of components that allow you to extend, customize, and
 
 Cockpit is a UI that calls Compass APIs. This component is interchangeable.
 
-## API-Gateway
+## Gateway
 
-API Gateway serves as the main gateway that proxies the tenant's incoming requests to the Director component. All communication, whether it comes from an application or other external components, flows through API-Gateway.
+Gateway proxies the tenant's incoming requests to the Director component. All communication, whether it comes from an application or other external components, flows through Gateway.
 
 ## Connector
 
-Connector establishes trust between applications, Runtimes, and Compass. Currently, only client certificates are supported.
+Connector establishes trust between applications and Runtimes. Currently, only client certificates are supported.
 
 ## Director
 

@@ -11,7 +11,7 @@ These are the types of possible integration levels between an application and Co
 - Manual integration - administrator manually provides API or Events metadata to Compass. This type of integration is used mainly for simple use-case scenarios and doesn't support all features.
 - Built-in integration - integration with Compass is built-in inside the application.
 - Proxy - a highly application-specific proxy component provides the integration.
-- Central integration service -  a central service provides integration for the whole class of applications. It manages multiple instances of these applications. You can integrate multiple central services to support different types of applications.
+- Central integration service -  a central service provides integration for the whole group of applications. It manages multiple instances of these applications. You can integrate multiple central services to support different types of applications.
 
 See [this](#architecture-compass-components) diagram for reference.
 
@@ -23,11 +23,11 @@ As an integral part of Kyma, Compass uses a set of Kyma features, such as Istio,
 
 You can run Kyma with Compass in two modes:
 
-- [Default Kyma installation](#installation-enable-compass-in-kyma-default-kyma-installation) which provides all Kyma components together with Compass and Agent. This mode allows you to register external applications in Kyma.
+- [Default installation](#installation-enable-compass-in-kyma-default-kyma-installation) which provides all Kyma components together with Compass and Agent. This mode allows you to register external applications in Kyma.
 
 ![Kyma mode2](./assets/kyma-mode2.svg)
 
-- [Kyma as a central solution](#installation-enable-compass-in-kyma-kyma-as-compass) which allows you to connect and manage your multiple [Kyma Runtimes](#installation-enable-compass-in-kyma-kyma-as-a-runtime). It consists of Compass and selected Kyma components.
+- [Kyma with Compass only](#installation-enable-compass-in-kyma-kyma-as-compass) which allows you to connect and manage your multiple [Kyma Runtimes](#installation-enable-compass-in-kyma-kyma-as-a-runtime). It consists of Compass and selected Kyma components.
 
 ![Kyma mode1](./assets/kyma-mode1.svg)
 
