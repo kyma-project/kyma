@@ -36,7 +36,9 @@ global:
   urlRepoPrefixes:
     default:
       - "https://"
+      - "hg::"
       - "git::"
+      - "s3::"
       - "github.com/"
       - "bitbucket.org/"
     additionalDevelopMode:
