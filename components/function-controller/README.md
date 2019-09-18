@@ -120,7 +120,6 @@ make deploy
 ```
 
 This runs [ko](https://github.com/google/ko) to build your image and push it to your configured docker repository. 
-See [google/ko](https://github.com/google/ko) for more details about `ko`
 
 >**NOTE:** Make sure the  **$KO_DOCKER_REPO**  environment variable points to a valid docker repository.
 
