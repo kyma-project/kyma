@@ -15,8 +15,8 @@ global:
       dir: develop/
       version: "1ce3b6c3"
     healthchecker:
-      dir: pr/
-      version: "PR-287"
+      dir: develop/
+      version: "26601526"
     schema_migrator:
       dir: develop/
       version: "07a992a2"
