@@ -23,12 +23,12 @@ As an integral part of Kyma, Compass uses a set of Kyma features, such as Istio,
 
 You can run Kyma with Compass in two modes:
 
-- [Default installation](#installation-enable-compass-in-kyma-default-kyma-installation) which provides all Kyma components together with Compass and Agent. This mode allows you to register external applications in Kyma.
+- [Default installation](#installation-enable-compass-in-kyma-default-installation) which provides all Kyma components together with Compass and Agent. This mode allows you to register external applications in Kyma.
 
 ![Kyma mode2](./assets/kyma-mode2.svg)
 
-- [Kyma with Compass only](#installation-enable-compass-in-kyma-kyma-as-compass) which allows you to connect and manage your multiple [Kyma Runtimes](#installation-enable-compass-in-kyma-kyma-as-a-runtime). It consists of Compass and selected Kyma components.
+- [Kyma with Compass only](#installation-enable-compass-in-kyma-kyma-with-compass-only) which allows you to connect and manage your multiple [Kyma Runtimes](#installation-enable-compass-in-kyma-kyma-as-a-runtime). It consists of Compass and selected Kyma components.
 
 ![Kyma mode1](./assets/kyma-mode1.svg)
 
-For more information on Compass installation modes, read [this](#installation-installation) document.
+For more information on Compass installation modes, read [this](#installation-enable-compass-in-kyma) document.

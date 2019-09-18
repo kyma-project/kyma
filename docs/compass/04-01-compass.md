@@ -12,7 +12,7 @@ This is a preconfigured single-tenant and single-Runtime mode which will eventua
 
 ## Kyma with Compass only
 
-This is a multi-tenant and multi-Runtime mode that provides cluster Kyma installation with Compass only. This configuration includes only the selected Kyma components that Compass uses. To enable this mode, create this ConfigMap and then perform the cluster Kyma installation using the
+This is a multi-tenant and multi-Runtime mode that provides cluster Kyma installation with Compass and only the selected Kyma components that Compass uses. To enable this mode, create this ConfigMap and then perform the cluster Kyma installation using the
  [`installer-cr-cluster-compass.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-compass.yaml.tpl) configuration file:
 
 ```yaml
