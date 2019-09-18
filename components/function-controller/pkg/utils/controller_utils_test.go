@@ -53,7 +53,7 @@ func TestNewRuntimeInfo(t *testing.T) {
 		},
 	}
 	_, err = utils.New(cmMissing)
-	g.Expect(err.Error()).To(gomega.ContainSubstring("missing config values"))
+	g.Expect(err.Error()).To(gomega.ContainSubstring("missing mandatory attributes in ConfigMap data"))
 
 	cmBroken := &corev1.ConfigMap{
 		Data: map[string]string{

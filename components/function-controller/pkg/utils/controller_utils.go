@@ -115,7 +115,7 @@ func validateMandatoryConfig(c *corev1.ConfigMap, mandatoryKeys []string) error 
 	}
 
 	if len(missing) > 0 {
-		return fmt.Errorf("missing config values in ConfigMap %q: %q", c.Name, missing)
+		return fmt.Errorf("missing mandatory attributes in ConfigMap data %q: %q", c.Name, missing)
 	}
 	return nil
 }
