@@ -11,7 +11,6 @@ import (
 	api "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/cache"
 )
@@ -42,7 +41,7 @@ func newServiceBindingUsageService(resourceInterface dynamic.NamespaceableResour
 
 	err := informer.AddIndexers(cache.Indexers{
 		"usedBy": func(obj interface{}) ([]string, error) {
-			serviceBindingUsage, err := svc.toServiceBindingUsage(obj)
+			serviceBindingUsage, err := svc.extractor.Do(obj)
 			if err != nil {
 				return nil, errors.New("while indexing by `usedBy`")
 			}
@@ -68,6 +67,7 @@ func (f *serviceBindingUsageService) Create(namespace string, sb *api.ServiceBin
 	if sb.Name == "" {
 		sb.Name = f.nameFunc()
 	}
+	sb.Namespace = namespace
 
 	obj, err := f.extractor.ToUnstructured(sb)
 	if err != nil {
@@ -89,7 +89,7 @@ func (f *serviceBindingUsageService) Find(namespace string, name string) (*api.S
 		return nil, err
 	}
 
-	return f.toServiceBindingUsage(item)
+	return f.extractor.Do(item)
 }
 
 func (f *serviceBindingUsageService) List(namespace string) ([]*api.ServiceBindingUsage, error) {
@@ -147,7 +147,7 @@ func (f *serviceBindingUsageService) Unsubscribe(listener resource.Listener) {
 func (f *serviceBindingUsageService) toServiceBindingUsages(items []interface{}) ([]*api.ServiceBindingUsage, error) {
 	var usages []*api.ServiceBindingUsage
 	for _, item := range items {
-		usage, err := f.toServiceBindingUsage(item)
+		usage, err := f.extractor.Do(item)
 		if err != nil {
 			return nil, err
 		}
@@ -156,18 +156,4 @@ func (f *serviceBindingUsageService) toServiceBindingUsages(items []interface{})
 	}
 
 	return usages, nil
-}
-
-func (f *serviceBindingUsageService) toServiceBindingUsage(item interface{}) (*api.ServiceBindingUsage, error) {
-	u, ok := item.(*unstructured.Unstructured)
-	if !ok {
-		return nil, fmt.Errorf("incorrect item type: %T, should be: *unstructured.Unstructured", item)
-	}
-
-	usage, err := f.extractor.FromUnstructured(u)
-	if err != nil {
-		return nil, err
-	}
-
-	return usage, nil
 }

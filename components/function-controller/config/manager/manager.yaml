@@ -35,9 +35,7 @@ spec:
         controller-tools.k8s.io: "1.0"
     spec:
       containers:
-      - command:
-        - /manager
-        image: ""
+      - image: github.com/kyma-project/kyma/components/function-controller/cmd/manager
         imagePullPolicy: Always
         name: manager
         env:

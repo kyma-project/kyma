@@ -5,7 +5,7 @@ type: Custom Resource
 
 The `applications.applicationconnector.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to register an Application (App) in Kyma. The `Application` custom resource defines the APIs that the App offers. After creating a new custom resource for a given App, the App is mapped to appropriate ServiceClasses in the Service Catalog. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
-```
+```bash
 kubectl get crd applications.applicationconnector.kyma-project.io -o yaml
 ```
 
@@ -15,7 +15,7 @@ This is a sample resource that registers the `system-prod` App which offers one 
 
 >**NOTE:** The name of the App must consist of lower case alphanumeric characters, `-` or `.`, and start and end with an alphanumeric character.
 
-```
+```yaml
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
@@ -31,29 +31,29 @@ spec:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-| Parameter   |      Mandatory      |  Description |
+| Parameter   |      Required      |  Description |
 |----------|:-------------:|------|
-| **metadata.name** |    **YES**   | Specifies the name of the CR. |
-| **spec.description** |    **NO**   | Describes the connected Application.  |
-| **spec.accessLabel** |    **NO**   | Labels the App when an ApplicationMapping is created. |
-| **spec.labels** |    **NO**   | Defines the labels of the App. |
-| **spec.services** |    **NO**   | Contains all services that the Application provides. |
-| **spec.services.id** |    **YES**   | Identifies the service that the Application provides. |
-| **spec.services.identifier** |    **NO**   | Provides an additional identifier of the ServiceClass. |
-| **spec.services.name** |    **NO**   | Represents a unique name of the service used by the Service Catalog. |
-| **spec.services.displayName** |    **YES**   | Specifies a human-readable name of the Application service. Parameter provided by the Application Registry, do not edit. |
-| **spec.services.description** |    **NO**   | Provides a short, human-readable description of the service offered by the App. Parameter provided by the Application Registry, do not edit. |
-| **spec.services.longDescription** |    **NO**   | Provides a longer, human-readable description of the service offered by the App. Parameter provided by the Application Registry, do not edit. |
-| **spec.services.providerDisplayName** |    **YES**   | Specifies a human-readable name of the Application service provider. Parameter provided by the Application Registry, do not edit. |
-| **spec.services.tags** |    **NO**   | Specifies additional tags used for better documentation of the available APIs. Parameter provided by the Application Registry, do not edit. |
-| **spec.services.labels** |    **NO**   | Specifies additional labels for the service offered by the App. Parameter provided by the Application Registry, do not edit. |
-| **spec.services.entries** |    **YES**   | Contains the information about the APIs and Events that the service offered by the App provides. Parameter provided by the Application Registry, do not edit. |
-| **spec.services.entries.type** |    **YES**   | Specifies the entry type: API or Event. Parameter provided by the Application Registry, do not edit. |
-| **spec.services.entries.gatewayUrl** |    **NO**   | Specifies the URL of the Application Connector. This field is required for the API entry type. Parameter provided by the Application Registry, do not edit. |
-| **spec.services.entries.accessLabel** |    **NO**   | Specifies the label used in Istio rules in the Application Connector. This field is required for the API entry type. |
-| **spec.services.entries.targetUrl** |    **NO**   | Specifies the URL of a given API. This field is required for the API entry type. Parameter provided by the Application Registry, do not edit. |
-| **spec.services.entries.oauthUrl** |    **NO**   | Specifies the URL used to authorize with a given API. This field is required for the API entry type. Parameter provided by the Application Registry, do not edit. |
-| **spec.services.entries.credentialsSecretName** |    **NO**   | Specifies the name of the Secret which allows you to call a given API. This field is required if **spec.services.entries.oauthUrl** is specified. Parameter provided by the Application Registry, do not edit. |
+| **metadata.name** | Yes | Specifies the name of the CR. |
+| **spec.description** | No | Describes the connected Application.  |
+| **spec.accessLabel** | No | Labels the App when an ApplicationMapping is created. |
+| **spec.labels** | No | Defines the labels of the App. |
+| **spec.services** | No | Contains all services that the Application provides. |
+| **spec.services.id** | Yes | Identifies the service that the Application provides. |
+| **spec.services.identifier** | No | Provides an additional identifier of the ServiceClass. |
+| **spec.services.name** | No | Represents a unique name of the service used by the Service Catalog. |
+| **spec.services.displayName** | Yes | Specifies a human-readable name of the Application service. Parameter provided by the Application Registry, do not edit. |
+| **spec.services.description** | No | Provides a short, human-readable description of the service offered by the App. Parameter provided by the Application Registry, do not edit. |
+| **spec.services.longDescription** | No | Provides a longer, human-readable description of the service offered by the App. Parameter provided by the Application Registry, do not edit. |
+| **spec.services.providerDisplayName** | Yes | Specifies a human-readable name of the Application service provider. Parameter provided by the Application Registry, do not edit. |
+| **spec.services.tags** | No | Specifies additional tags used for better documentation of the available APIs. Parameter provided by the Application Registry, do not edit. |
+| **spec.services.labels** | No | Specifies additional labels for the service offered by the App. Parameter provided by the Application Registry, do not edit. |
+| **spec.services.entries** | Yes | Contains the information about the APIs and Events that the service offered by the App provides. Parameter provided by the Application Registry, do not edit. |
+| **spec.services.entries.type** | Yes | Specifies the entry type: API or Event. Parameter provided by the Application Registry, do not edit. |
+| **spec.services.entries.gatewayUrl** | No | Specifies the URL of the Application Connector. This field is required for the API entry type. Parameter provided by the Application Registry, do not edit. |
+| **spec.services.entries.accessLabel** | No | Specifies the label used in Istio rules in the Application Connector. This field is required for the API entry type. |
+| **spec.services.entries.targetUrl** |  No | Specifies the URL of a given API. This field is required for the API entry type. Parameter provided by the Application Registry, do not edit. |
+| **spec.services.entries.oauthUrl** | No | Specifies the URL used to authorize with a given API. This field is required for the API entry type. Parameter provided by the Application Registry, do not edit. |
+| **spec.services.entries.credentialsSecretName** | No | Specifies the name of the Secret which allows you to call a given API. This field is required if **spec.services.entries.oauthUrl** is specified. Parameter provided by the Application Registry, do not edit. |
 
 ## Related resources and components
 

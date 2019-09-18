@@ -13,7 +13,7 @@ kubectl get crd usagekinds.servicecatalog.kyma-project.io -o yaml
 
 This is a sample resource that allows you to bind a given resource with the ServiceBinding. This example has a **resource** section specified as `function`. You can adjust this section to point to any other kind of resource.
 
-```
+```yaml
 apiVersion: servicecatalog.kyma-project.io/v1alpha1
 kind: UsageKind
 metadata:
@@ -31,17 +31,15 @@ spec:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-
-| Parameter   |      Mandatory      |  Description |
+| Parameter   |      Required      |  Description |
 |----------|:-------------:|------|
-| **metadata.name** |    YES   | Specifies the name of the CR. |
-| **spec.displayName** |    YES   | Provides a human-readable name of the UsageKind. |
-| **spec.resource** |    YES   | Specifies a resource which is bound with the ServiceBinding. The target resource is specified by its resource group, kind, and version. |
-| **spec.resource.group** |    YES   | Specifies the group of the resource. |
-| **spec.resource.kind** |    YES   | Specifies the kind of the resource. |
-| **spec.resource.version** |    YES   | Specifies the version of the resource. |
-| **spec.labelsPath** |    YES   | Specifies a path to the key that contains labels which are later injected into Pods. |
-
+| **metadata.name** |    Yes   | Specifies the name of the CR. |
+| **spec.displayName** |    Yes   | Provides a human-readable name of the UsageKind. |
+| **spec.resource** |    Yes   | Specifies a resource which is bound with the ServiceBinding. The target resource is specified by its resource group, kind, and version. |
+| **spec.resource.group** |    Yes   | Specifies the group of the resource. |
+| **spec.resource.kind** |    Yes   | Specifies the kind of the resource. |
+| **spec.resource.version** |    Yes   | Specifies the version of the resource. |
+| **spec.labelsPath** |    Yes   | Specifies a path to the key that contains labels which are later injected into Pods. |
 
 ## Related resources and components
 

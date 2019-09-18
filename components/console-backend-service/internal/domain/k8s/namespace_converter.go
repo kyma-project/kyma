@@ -5,30 +5,47 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-type namespaceConverter struct{}
-
-func (c *namespaceConverter) ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error) {
-	if in == nil {
-		return nil, nil
-	}
-
-	return &gqlschema.Namespace{
-		Name:   in.Name,
-		Labels: in.Labels,
-	}, nil
+type namespaceConverter struct {
+	systemNamespaces []string
 }
 
-func (c *namespaceConverter) ToGQLs(in []*v1.Namespace) ([]gqlschema.Namespace, error) {
+func newNamespaceConverter(systemNamespaces []string) *namespaceConverter {
+	return &namespaceConverter{
+		systemNamespaces: systemNamespaces,
+	}
+}
+
+func (c *namespaceConverter) ToGQL(in *v1.Namespace) *gqlschema.Namespace {
+	if in == nil {
+		return nil
+	}
+
+	isSystem := isSystemNamespace(*in, c.systemNamespaces)
+	return &gqlschema.Namespace{
+		Name:              in.Name,
+		Labels:            in.Labels,
+		Status:            string(in.Status.Phase),
+		IsSystemNamespace: isSystem,
+	}
+}
+
+func (c *namespaceConverter) ToGQLs(in []*v1.Namespace) []gqlschema.Namespace {
 	var result []gqlschema.Namespace
 	for _, u := range in {
-		converted, err := c.ToGQL(u)
-		if err != nil {
-			return nil, err
-		}
+		converted := c.ToGQL(u)
 
 		if converted != nil {
 			result = append(result, *converted)
 		}
 	}
-	return result, nil
+	return result
+}
+
+func isSystemNamespace(namespace v1.Namespace, sysNamespaces []string) bool {
+	for _, sysNs := range sysNamespaces {
+		if sysNs == namespace.Name {
+			return true
+		}
+	}
+	return false
 }

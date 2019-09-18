@@ -9,9 +9,12 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.global.connector.port }}
+    - port: {{ .Values.global.connector.graphql.port }}
       protocol: TCP
-      name: http
+      name: http-graphql
+    - port: {{ .Values.global.connector.validator.port }}
+      protocol: TCP
+      name: http-validator
   selector:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}

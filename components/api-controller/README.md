@@ -10,9 +10,8 @@ This [Helm chart](/resources/core/charts/api-controller/Chart.yaml) defines the 
 
 You need these tools to work with the API Controller:
 
-- [Go distribution](https://golang.org)
+- [Go](https://golang.org)
 - [Docker](https://www.docker.com/)
-
 
 ## Details
 
@@ -23,7 +22,7 @@ This section describes how to run the controller locally, how to build the Docke
 Run Minikube with Istio to use the API Controller locally. Run this command to run the application without building the binary:
 
 ```bash
-$ go run cmd/controller/main.go
+go run cmd/controller/main.go
 ```
 
 ### Use environment variables
@@ -44,7 +43,8 @@ Use these environment variables to configure the application:
 
 ### Blacklisted services
 
-The API Controller doesn't create a Virtual Service or Authentication Policies for these services: 
+The API Controller doesn't create a Virtual Service or Authentication Policies for these services:
+
 - `kubernetes.default`
 - `istio-citadel.istio-system`
 - `istio-galley.istio-system`
@@ -61,19 +61,19 @@ The API Controller doesn't create a Virtual Service or Authentication Policies f
 Run all tests:
 
 ```bash
-$ go test -v ./...
+go test -v ./...
 ```
 
 Run all tests with coverage:
 
 ```bash
-$ go test -coverprofile=coverage_report.out -v ./...
+go test -coverprofile=coverage_report.out -v ./...
 ```
 
 Run unit tests only:
 
 ```bash
-$ go test -short -v ./...
+go test -short -v ./...
 ```
 
 Run unit tests with coverage:
@@ -85,5 +85,5 @@ go test -short -coverprofile=coverage_report.out -v ./...
 Run integration tests only:
 
 ```bash
-$ go test -run Integration -v ./...
+go test -run Integration -v ./...
 ```

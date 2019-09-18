@@ -670,9 +670,17 @@ type ExceededQuota {
 type Namespace {
     name: String!
     labels: Labels
+    status: String!
+    isSystemNamespace: Boolean!
+    pods: [Pod!]!
 
     # Depends on application module
     applications: [String!]
+}
+
+type NamespaceEvent {
+    type: SubscriptionEventType!
+    namespace: Namespace!
 }
 
 type NamespaceMutationOutput {
@@ -941,7 +949,7 @@ type Query {
     connectorService(application: String!): ConnectorService! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
 
     # Depends on 'application'
-    namespaces(application: String): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
+    namespaces(withSystemNamespaces: Boolean, withInactiveStatus: Boolean): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
     namespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "get", apiGroup: "", apiVersion: "v1"})
 
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]! @HasAccess(attributes: {resource: "deployments", verb: "list", apiGroup: "apps", apiVersion: "v1beta2", namespaceArg: "namespace"})
@@ -1067,7 +1075,7 @@ type Subscription {
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
     apiEvent(namespace: String!, serviceName: String): ApiEvent! @HasAccess(attributes: {resource: "apis", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
-
+    namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 }
 
 # Schema

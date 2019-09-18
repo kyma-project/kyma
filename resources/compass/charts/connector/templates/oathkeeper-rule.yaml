@@ -1,0 +1,56 @@
+# TODO: Generate Token mutations are still not secured. Those should be secured the same as console.
+---
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: {{ template "fullname" . }}-tokens
+  namespace: {{ .Release.Namespace }}
+spec:
+  description: Connector Tokens validation rule
+  upstream:
+    url: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}/connector"
+    preserveHost: false
+    stripPath: /connector
+  match:
+    methods: ["GET", "POST"]
+    url: <http|https>://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql
+  authenticators:
+    - handler: noop
+  authorizer:
+    handler: allow
+  mutators:
+    - handler: hydrator
+      config:
+        api:
+          url: http://{{ template "fullname" . }}.{{ .Release.Namespace }}:{{ .Values.global.connector.validator.port }}/v1/tokens/resolve
+          retry:
+            number: {{ .Values.oathkeeper.hydrators.connectorToken.retry.number }}
+            delayInMilliseconds: {{ .Values.oathkeeper.hydrators.connectorToken.retry.delayInMilliseconds }}
+
+---
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: {{ template "fullname" . }}-cert-header
+  namespace: {{ .Release.Namespace }}
+spec:
+  description: Istio certificate header validation rule
+  upstream:
+    url: "http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.gateway.port }}/connector"
+    preserveHost: false
+    stripPath: /connector
+  match:
+    methods: ["GET", "POST"]
+    url: <http|https>://{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql
+  authenticators:
+    - handler: noop
+  authorizer:
+    handler: allow
+  mutators:
+    - handler: hydrator
+      config:
+        api:
+          url: http://{{ template "fullname" . }}.{{ .Release.Namespace }}:{{ .Values.global.connector.validator.port }}/v1/certificate/data/resolve
+          retry:
+            number: {{ .Values.oathkeeper.hydrators.istioCertHeader.retry.number }}
+            delayInMilliseconds: {{ .Values.oathkeeper.hydrators.istioCertHeader.retry.delayInMilliseconds }}

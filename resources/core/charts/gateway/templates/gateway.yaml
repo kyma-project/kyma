@@ -26,6 +26,15 @@ spec:
     hosts:
       - "gateway.{{.Values.global.ingress.domainName}}"
   - port:
+      name: https-compass-mtls
+      number: 443
+      protocol: HTTPS
+    tls:
+      mode: MUTUAL
+      credentialName: {{ .Values.global.compass.mtls.secret.name }}
+    hosts:
+      - "{{ .Values.global.compass.mtls.host }}.{{.Values.global.ingress.domainName}}"
+  - port:
       number: 80
       name: http
       protocol: HTTP

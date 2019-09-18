@@ -5,7 +5,7 @@ type: Custom Resource
 
 The `functions.serverless.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to manage lambda functions within Kyma. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
-```
+```bash
 kubectl get crd functions.serverless.kyma-project.io -o yaml
 ```
 
@@ -34,16 +34,16 @@ spec:
 
 This table lists all the possible properties of a given resource together with their descriptions:
 
-| Property | Mandatory | Description |
+| Property | Required | Description |
 |----------|:---------:|-------------|
-| **metadata.name** | YES | Specifies the name of the CR. |
-| **spec.function** | YES | Provides the source code of the lambda function. |
-| **spec.functionContentType** | YES | Specifies the content type of the function's code defined in the **function** property. The content type can be plaintext or base64-encoded. |
-| **spec.runtime** | YES | Specifies the software runtime used to run the function's code. |
-| **spec.size** | YES | Specifies the compute requirement of the function expressed in size, such as S, M, L, or XL. |
-| **spec.deps** | NO | Specifies the dependencies of the lambda function. |
-| **spec.env** | NO | Specifies environment variables you need to export for the lambda function. |
-| **spec.timeout** | NO | Specifies the duration in seconds after which the function execution is terminated. The default value is `180`. |
+| **metadata.name** | Yes | Specifies the name of the CR. |
+| **spec.function** | Yes | Provides the source code of the lambda function. |
+| **spec.functionContentType** | Yes | Specifies the content type of the function's code defined in the **function** property. The content type can be plaintext or base64-encoded. |
+| **spec.runtime** | Yes | Specifies the software runtime used to run the function's code. |
+| **spec.size** | Yes | Specifies the compute requirement of the function expressed in size, such as S, M, L, or XL. |
+| **spec.deps** | No | Specifies the dependencies of the lambda function. |
+| **spec.env** | No | Specifies environment variables you need to export for the lambda function. |
+| **spec.timeout** | No | Specifies the duration in seconds after which the function execution is terminated. The default value is `180`. |
 
 ## Related resources and components
 

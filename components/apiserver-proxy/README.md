@@ -8,24 +8,24 @@ The Kyma API Server Proxy is a core component that uses JWT authentication to se
 
 Use these tools to work with the API Server Proxy:
 
-- [Go distribution](https://golang.org)
+- [Go](https://golang.org)
 - [Docker](https://www.docker.com/)
-
 
 ## Details
 
 This section describes:
-* How to run the controller locally
-* How to build the Docker image for the production environment
-* How to use the environment variables
-* How to test the Kyma API Server Proxy
+
+- How to run the controller locally
+- How to build the Docker image for the production environment
+- How to use the environment variables
+- How to test the Kyma API Server Proxy
 
 ### Run the component locally
 
 Run Minikube to use the API Server Proxy locally. Run this command to run the application without building the binary:
 
 ```bash
-$ go run cmd/proxy/main.go
+go run cmd/proxy/main.go
 ```
 
 ### API Server Proxy configuration
@@ -46,6 +46,5 @@ Find more details about available flags [here](https://github.com/brancz/kube-rb
 Run all tests:
 
 ```bash
-$ go test -v ./...
+go test -v ./...
 ```
-
