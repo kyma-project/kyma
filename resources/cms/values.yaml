@@ -5,6 +5,5 @@ global:
     dir: pr/
     version: 'PR-5523'
   cmsAsyncAPIService:
-    dir: develop/
-    version: 'f5d791b2'
-    enabled: false
+    dir: pr/
+    version: 'PR-5594'
