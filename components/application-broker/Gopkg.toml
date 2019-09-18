@@ -80,10 +80,6 @@ required = [
   version = "0.0.12"
 
 [[constraint]]
-  name = "github.com/sirupsen/logrus"
-  version = "1.0.4"
-
-[[constraint]]
   name = "github.com/urfave/negroni"
   version = "0.3.0"
 
@@ -128,3 +124,11 @@ required = [
 [[override]]
   name = "github.com/json-iterator/go"
   revision = "ab8a2e0c74be9d3be70b3184d9acc634935ded82"
+
+[[override]]
+  name = "k8s.io/klog"
+  revision = "aaeac2fedbead93263ae78b80849cac7ff5a5fbb"
+
+[[override]]
+  name = "github.com/sirupsen/logrus"
+  revision = "89742aefa4b206dcf400792f3bd35b542998eb3b"
