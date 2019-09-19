@@ -9,7 +9,7 @@ Kyma comes with NATS Streaming as its default Channel. You can see the configura
 You can use a different messaging middleware, other than NATS Streaming, as the Kyma eventing operator.
 To achieve that:
 
-- Apply the Channel Resources for the messaging middleware you want to use. These resources connects with the running messaging middleware
+- Apply the Channel Resources for the messaging middleware you want to use. These resources connect with the running messaging middleware.
 - Configure the `default-ch-webhook` ConfigMap in the `knative-eventing` Namespace to use that particular Channel.
 
 If you want to edit the `default-ch-webhook` ConfigMap, run: 
