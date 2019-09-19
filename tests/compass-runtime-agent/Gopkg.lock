@@ -191,7 +191,6 @@
   version = "v1.0.2"
 
 [[projects]]
-  branch = "fix-schema-as-string"
   digest = "1:a1bccfad08a451631f68bd47d1beb2e21b8147c44175be661ed2ec5d9d7a7be0"
   name = "github.com/kyma-incubator/compass"
   packages = [
@@ -199,8 +198,7 @@
     "components/director/pkg/scalar",
   ]
   pruneopts = "UT"
-  revision = "56233ec1086ed8b2a97a97a6d4b1d2765f332946"
-  source = "github.com/dbadura/compass"
+  revision = "d07b0a01e87f0bb476f7aaa80119dd0f1bcbd756"
 
 [[projects]]
   digest = "1:bca259d300baf6a00f5046bda527fcbe4ce8d9b9284565815444814a10d106fe"
