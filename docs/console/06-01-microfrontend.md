@@ -50,12 +50,12 @@ This table lists all the possible parameters of a given resource together with t
 |----------|:-------------:|------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
 | **metadata.namespace** | Yes | Specifies the target Namespace for the CR. |
-| **spec.version** | No | Specifies the version of the micro front-end. |
-| **spec.category** | No | Specifies the category name under which the micro front-end appears in the navigation. |
-| **spec.viewBaseUrl** | Yes |  Specifies the address of the micro front-end. The address has to begin with `https://`.  |
-| **spec.navigationNodes** | Yes | The list of navigation nodes specified for the micro front-end. |
-| **spec.navigationNodes.label** | Yes | Specifies the name used to display the micro front-end's node in the Console UI. |
+| **spec.version** | No | Specifies the version of the micro frontend. |
+| **spec.category** | No | Specifies the category name under which the micro frontend appears in the navigation. |
+| **spec.viewBaseUrl** | Yes |  Specifies the address of the micro frontend. The address has to begin with `https://`.  |
+| **spec.navigationNodes** | Yes | The list of navigation nodes specified for the micro frontend. |
+| **spec.navigationNodes.label** | Yes | Specifies the name used to display the micro frontend's node in the Console UI. |
 | **spec.navigationNodes.navigationPath** | No | Specifies the path used for routing within the Console. |
-| **spec.navigationNodes.viewUrl** | No | Specifies the URL used to display the content of a micro front-end. |
-| **spec.navigationNodes.showInNavigation** | No | The Boolean that specifies if the micro front-end's node is visible in the navigation or not. |
+| **spec.navigationNodes.viewUrl** | No | Specifies the URL used to display the content of a micro frontend. |
+| **spec.navigationNodes.showInNavigation** | No | The Boolean that specifies if the micro frontend's node is visible in the navigation or not. |
 | **spec.navigationNodes.requiredPermissions** | No | Specifies the list of permissions (RBAC rules) that determine if the navigation node should be shown for the current user.  |
