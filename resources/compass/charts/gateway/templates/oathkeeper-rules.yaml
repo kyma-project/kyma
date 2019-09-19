@@ -43,7 +43,7 @@ spec:
   - handler: hydrator
     config:
       api:
-        url: {{ .Values.global.tenantMappingService.url }}:{{ .Values.global.tenantMappingService.port }}
+        url: {{ .Values.global.tenantMappingService.url }}
   - handler: id_token
     config:
       claims: {{ .Values.oathkeeper.idTokenConfig.claims | quote }}
