@@ -35,6 +35,12 @@ oidc:
       - 'http://kiali.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
       - 'https://kiali.{{ .Values.global.ingress.domainName }}/oauth/callback'
       secret: hiFWLWqIxw5d3gl
+    - id: compass-ui
+      name: Compass UI
+      redirectURIs:
+      - 'https://compass.{{ .Values.global.ingress.domainName }}'
+      - 'http://compass-dev.{{ .Values.global.ingress.domainName }}:8080'
+      secret: th2T43VyHp43bqr
   staticClientsExtra: |-
 
 connectors: |-
