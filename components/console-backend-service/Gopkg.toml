@@ -19,7 +19,9 @@ required = [
 
 [[constraint]]
   name = "github.com/kubernetes-sigs/service-catalog"
-  version = "v0.1.36"
+#  version = "v0.1.36"
+  source = "github.com/kyma-incubator/service-catalog"
+  branch = "crds"
 
 [[constraint]]
   name = "github.com/stretchr/testify"
@@ -39,7 +41,7 @@ required = [
 
 [[constraint]]
   name="github.com/kyma-project/kyma"
-  revision = "3a0c31e7c33b83912dfb6f39cdf46720254e5b0f"
+  version = "1.5.0"
 
 [[constraint]]
   name="github.com/kyma-project/helm-broker"
@@ -51,23 +53,23 @@ required = [
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.12.5"
+  version = "kubernetes-1.15.0"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.12.5"
+  version = "kubernetes-1.15.0"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.12.5"
+  version = "kubernetes-1.15.0"
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.12.5"
+  version = "kubernetes-1.15.0"
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  branch = "release-1.12"
+  version = "kubernetes-1.15.0"
 
 [[constraint]]
   name = "github.com/vrischmann/envconfig"
