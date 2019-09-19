@@ -10,7 +10,7 @@ You can use a different messaging middleware, other than NATS Streaming, as the 
 To achieve that:
 
 - Apply the Channel Resources for the messaging middleware you want to use. These resources connects with the running messaging middleware
-- Configure the `default-ch-webhook` ConfigMap in the `knative-eventing` namespace to use that particular Channel.
+- Configure the `default-ch-webhook` ConfigMap in the `knative-eventing` Namespace to use that particular Channel.
 
 ### Editing the default-ch-webhook ConfigMap
 
