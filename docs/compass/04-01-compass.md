@@ -20,7 +20,6 @@ This is a preconfigured single-tenant and single-Runtime mode which will eventua
 ![Kyma mode2](./assets/kyma-mode2.svg)
 
 
-
 ### Kyma with Compass only
 
 This is a multi-tenant and multi-Runtime mode that provides cluster Kyma installation with Compass and only the selected Kyma components that Compass uses. To enable this mode, create this ConfigMap and then perform the cluster Kyma installation using the
