@@ -11,7 +11,7 @@ The Event Bus ensures a successful flow of Events in Kyma when:
 - The Events are [published](#details-event-flow-requirements-event-publishing).
 
 
-## Create EventActivation controller
+## Create the EventActivation controller
 
 Enable the EventActivation controller to ensure the Event flow between the Namespace and the Application (App). Alternatively, [bind](/components/application-connector#tutorials-bind-an-application-to-a-namespace) the App to the Namespace and create a Service Instance.
 
