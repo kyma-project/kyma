@@ -9,7 +9,7 @@ All tutorials use the [`monitoring-custom-metrics`](https://github.com/kyma-proj
 
 The tutorial set consists of these documents:
 
-1. [**Observe application metrics**](#tutorials-observe-application-metrics) in which you redirect the `cpu_temperature_celsius` metric to a localhost and the Prometheus UI. You later observe how the metric value changes in the predefined 10 seconds interval in which Prometheus scrapes the metric values from the service's `/metrics` endpoint.
+1. [**Observe application metrics**](#tutorials-observe-application-metrics) in which you redirect the `cpu_temperature_celsius` metric to the localhost and the Prometheus UI. You later observe how the metric value changes in the predefined 10 seconds interval in which Prometheus scrapes the metric values from the service's `/metrics` endpoint.
 
 2. [**Create a Grafana dashboard**](#tutorials-create-a-grafana-dashboard) in which you create a Grafana dashboard of a Gauge type for the `cpu_temperature_celsius` metric. This dashboard shows explicitly when the CPU temperature exceeds the predefined threshold of 75 degrees Celsius and turns red whenever this value is higher.
 
