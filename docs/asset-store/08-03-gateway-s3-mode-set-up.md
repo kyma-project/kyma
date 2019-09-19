@@ -16,7 +16,7 @@ You can set Minio to the AWS S3 Gateway mode both during and after Kyma installa
 
 >**CAUTION:** Buckets created in Minio without using Bucket CRs are not recreated or migrated while switching to the Minio Gateway mode.
 
->**CAUTION:** AWS S3 Gateway Mode is testes only manually.
+>**CAUTION:** AWS S3 Gateway Mode is tested only manually.
 
 ### Create a AWS access key
 
