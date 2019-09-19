@@ -253,7 +253,6 @@
   version = "v1.0.2"
 
 [[projects]]
-  branch = "crds"
   digest = "1:ae92f05296783bbb51741229b1dced5442f94d12de521ec2261feb9d5be59c41"
   name = "github.com/kubernetes-sigs/service-catalog"
   packages = [
@@ -279,8 +278,7 @@
     "pkg/filter",
   ]
   pruneopts = "NUT"
-  revision = "b324e83f098466cea33559207c2f9a7f4f169b01"
-  source = "github.com/kyma-incubator/service-catalog"
+  revision = "ccab5234396729fee8dbf70620eafdfbc3d1a6af"
 
 [[projects]]
   digest = "1:26724db2c9956ab25ce1b921fa4b097d601c1974483c3fa88dc384d9ed1f6bc5"
@@ -715,8 +713,7 @@
   revision = "b11291ff0a5094cefd86a539a41235d781073d57"
 
 [[projects]]
-  branch = "release-12.0"
-  digest = "1:e09e82d61728db9237f4e6621a7805cf5adc084468575dc3a112c1744d88c2ec"
+  digest = "1:1f8d12d10f277b62bf1a69e709f2558dc71821f3fed1edc79eb0209ef53f4560"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -912,7 +909,8 @@
     "util/workqueue",
   ]
   pruneopts = "NUT"
-  revision = "637fc595d17acea6ce5f5b894b0a3ab301bf674e"
+  revision = "78d2af792babf2dd937ba2e2a8d99c753a5eda89"
+  version = "kubernetes-1.15.0"
 
 [[projects]]
   digest = "1:c169302e123c3e1478da21b2e56ab20a0a8e0ce7b8abe238f448aba7bd6876fd"
@@ -979,7 +977,7 @@
   version = "v0.4.0"
 
 [[projects]]
-  digest = "1:da19df1e9641fcb3a0bce343b0dec020243a71f73a98e93adc423e924b146dec"
+  digest = "1:fa3a5cec1b4b891db4de61a849f03c8e474781a733404d20b56c4bc4f557406e"
   name = "k8s.io/kube-openapi"
   packages = [
     "cmd/openapi-gen",
@@ -991,7 +989,7 @@
     "pkg/util/sets",
   ]
   pruneopts = "NUT"
-  revision = "94e1e7b7574c44c4c0f2007de6fe617e259191f3"
+  revision = "0270cf2f1c1d995d34b36019a6f65d58e6e33ad4"
 
 [[projects]]
   branch = "release-1.15"
