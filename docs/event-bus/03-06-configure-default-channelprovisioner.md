@@ -12,7 +12,7 @@ To achieve that:
 - Apply the Channel Resources for the messaging middleware you want to use. These resources connects with the running messaging middleware
 - Configure the `default-ch-webhook` ConfigMap in the `knative-eventing` Namespace to use that particular Channel.
 
-### Editing the default-ch-webhook ConfigMap
+If you want to edit the `default-ch-webhook` ConfigMap, run: 
 
   ```bash
     kubectl -n knative-eventing edit configmaps default-ch-webhook
