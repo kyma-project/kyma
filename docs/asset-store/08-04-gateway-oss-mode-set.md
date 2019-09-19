@@ -16,9 +16,9 @@ You can set Minio to the Alibaba OSS Gateway mode both during and after Kyma ins
 
 >**CAUTION:** Buckets created in Minio without using Bucket CRs are not recreated or migrated while switching to the Minio Gateway mode.
 
->**CAUTION:** Alibaba OSS Gateway Mode is testes only manually.
+>**CAUTION:** Alibaba OSS Gateway Mode is tested only manually.
 
-### Create a AWS access key
+### Create a Alibaba Cloud access key
 
 Create a Alibaba Cloud access key for user. Follow these steps:
 
