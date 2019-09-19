@@ -9,16 +9,16 @@ For example, whenever the `order-created` Event comes in, the Event Bus stores i
 
 > **NOTE:** The Event Bus creates a separate Event trigger for each Subscription.
 
-![Configure and Consume Events](./assets/configure-consume-events.svg)
+![Configure and Consume Events](./assets/configure-consume-events_1.svg)
 
 1. A user creates a lambda or a service that an Event coming from an external solution triggers.
 
     >**NOTE**: When creating a service, the user must create a Kyma Subscription resource manually. If the user uses Kyma Console UI to create a lambda, the Subscription resource is created automatically.
     
-2. [**Event Bus Subscription Controller**](https://github.com/kyma-project/kyma/tree/master/components/event-bus/internal/knative/subscription/controller/subscription) reacts to the creation of Kyma Subscription. It [verifies](#event-validation) if the Event type from the application can be consumed in the Namespace where the Kyma Subscription has been created.  If so, it creates the Knative Channel and Knative Subscription resources.
+2. [**Event Bus Subscription Controller**](https://github.com/kyma-project/kyma/tree/master/components/event-bus/internal/knative/subscription/controller/subscription) reacts to the creation of Kyma Subscription. It [verifies](#event-validation) if the Event type from the application can be consumed in the Namespace where the Kyma Subscription has been created.  If so, it creates the [Knative Channel](https://github.com/knative/eventing/blob/master/config/300-channel.yaml) and [Knative Subscription](https://github.com/knative/eventing/blob/master/config/300-subscription.yaml) resources.
 3. [**Knative Eventing Controller**](https://github.com/knative/eventing/tree/master/cmd/controller) reacts to the creation of Knative Channel and creates a [NatssChannel](https://github.com/knative/eventing-contrib/tree/master/natss/config) resource with all the necessary specification about the subscriber.
 4. [**NatssChannel Controller**](https://github.com/knative/eventing-contrib/tree/master/natss/pkg/reconciler/controller) reacts to the creation of a [NatssChannel](https://github.com/knative/eventing-contrib/tree/master/natss/config)  and creates the required Kubernetes services.
- [**NatssChannel Dispatcher**](https://github.com/knative/eventing-contrib/tree/master/natss/pkg/dispatcher) also reacts to the creation of a [NatssChannel](https://github.com/knative/eventing-contrib/tree/master/natss/config)  and creates the NATSS Streaming Subscription.
+ [**NatssChannel Dispatcher**](https://github.com/knative/eventing-contrib/tree/master/natss/pkg/dispatcher) also reacts to the creation of a [NatssChannel](https://github.com/knative/eventing-contrib/tree/master/natss/config)  and creates the [NATSS Streaming Subscription](https://nats-io.github.io/docs/nats_streaming/channels/subscriptions/subscriptions.html).
 5. [**NatssChannel Dispatcher**](https://github.com/knative/eventing-contrib/tree/master/natss/pkg/dispatcher) picks the Event and dispatches it to the configured lambda or the service URL as an HTTP POST request. The lambda reacts to the received Event.
 
 ## Event publishing
