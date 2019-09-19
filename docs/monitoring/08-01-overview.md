@@ -7,7 +7,7 @@ The set of monitoring tutorials you are about to read describes the complete mon
 
 All tutorials use the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services called `sample-metrics-8081`. This service exposes the `cpu_temperature_celsius` custom metric on the `/metrics` endpoint. This custom metric is the central element of all tutorials. Its value aims to simulate the current processor temperature and changes randomly from 60 to 90 degrees Celsius. The alerting threshold in these tutorials is 75 degrees Celsius. If the temperature exceeds this value, the Grafana dashboard you create, and the Prometheus rule you set for monitoring the metric, clearly inform you of the alerting value.
 
-The tutorial set contains:
+The tutorial set consists of these documents:
 
 1. [**Observe application metrics**](#tutorials-observe-application-metrics) in which you redirect the `cpu_temperature_celsius` metric to a localhost and the Prometheus UI. You later observe how the metric value changes in the predefined 10s interval in which Prometheus scrapes the metric values from the service `/metrics` endpoint.
 
