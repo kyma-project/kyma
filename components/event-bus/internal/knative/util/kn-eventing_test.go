@@ -11,20 +11,24 @@ import (
 	"testing"
 	"time"
 
-	"knative.dev/pkg/apis/duck/v1alpha1"
-
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
-	evclientsetfake "github.com/knative/eventing/pkg/client/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
+
+	"knative.dev/pkg/apis"
+	"knative.dev/pkg/apis/duck/v1alpha1"
+	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
+
+	messagingv1alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
+	evclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
+	evclientsetfake "github.com/knative/eventing/pkg/client/clientset/versioned/fake"
+	evinformers "github.com/knative/eventing/pkg/client/informers/externalversions"
+
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8stesting "k8s.io/client-go/testing"
-	"knative.dev/pkg/apis"
-	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 )
 
 const (
@@ -33,101 +37,108 @@ const (
 	subscriptionName = "test-subscription"
 )
 
-var (
-	testChannel = &messagingv1alpha1.Channel{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: messagingv1alpha1.SchemeGroupVersion.String(),
-			Kind:       "Channel",
+var testChannel = &messagingv1alpha1.Channel{
+	TypeMeta: metav1.TypeMeta{
+		APIVersion: messagingv1alpha1.SchemeGroupVersion.String(),
+		Kind:       "Channel",
+	},
+	ObjectMeta: metav1.ObjectMeta{
+		Namespace:    testNS,
+		GenerateName: "testchann-", // as generated from channelName by makeChannel()
+		Labels: map[string]string{
+			"l1": "v1",
+			"l2": "v2",
 		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: testNS,
-			Name:      channelName,
-			Labels: map[string]string{
-				"l1": "v1",
-				"l2": "v2",
-			},
-		},
-		Status: messagingv1alpha1.ChannelStatus{
-			Status: duckv1beta1.Status{
-				Conditions: duckv1beta1.Conditions{
-					apis.Condition{
-						Type:   apis.ConditionReady,
-						Status: corev1.ConditionTrue,
-					},
-				},
-			},
-		},
-	}
-	labels = map[string]string{
-		"l1": "v1",
-		"l2": "v2",
-	}
-	labels2 = map[string]string{
-		"l1": "v13",
-		"l2": "v23",
-	}
-	testChannelList = &messagingv1alpha1.ChannelList{
-		Items: []messagingv1alpha1.Channel{*testChannel},
-	}
-)
+	},
+}
+
+var labels = map[string]string{
+	"l1": "v1",
+	"l2": "v2",
+}
+
+var labels2 = map[string]string{
+	"l1": "v13",
+	"l2": "v23",
+}
+
+var testChannelList = &messagingv1alpha1.ChannelList{
+	Items: []messagingv1alpha1.Channel{*testChannel},
+}
 
 func Test_CreateChannel(t *testing.T) {
-	log.Print("Test_CreateChannel")
 	client := evclientsetfake.NewSimpleClientset()
 	client.Fake.ReactionChain = nil
-	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool,
-		ret runtime.Object, err error) {
+	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, testChannel, nil
 	})
 
-	k := &KnativeLib{
-		evClient:         client.EventingV1alpha1(),
-		messagingChannel: client.MessagingV1alpha1(),
-	}
+	k, stop := newKnativeLib(client, t)
+	defer close(stop)
+
 	ch, err := k.CreateChannel(channelName, testNS, labels, 10*time.Second)
 	assert.Nil(t, err)
 	log.Printf("Channel created: %v", ch)
 
 	ignore := cmpopts.IgnoreTypes(apis.VolatileTime{})
 	if diff := cmp.Diff(testChannel, ch, ignore); diff != "" {
-		t.Errorf("%s (-want, +got) = %v", "Test_CreateChannel", diff)
+		t.Errorf("(-want, +got) = %v", diff)
 	}
 }
 
 func Test_GetChannelByLabels(t *testing.T) {
-	log.Print("Test_GetChannelByLabels")
 	log.Print("Creating Channel to fetch")
-	client := evclientsetfake.NewSimpleClientset()
-	client.Fake.ReactionChain = nil
-	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool,
-		ret runtime.Object, err error) {
-		return true, testChannel, nil
-	})
-	client.Fake.AddReactor("list", "channels", func(action k8stesting.Action) (handled bool,
-		ret runtime.Object, err error) {
-		return true, testChannelList, nil
-	})
 
-	k := &KnativeLib{
-		evClient:         client.EventingV1alpha1(),
-		messagingChannel: client.MessagingV1alpha1(),
-	}
+	client := evclientsetfake.NewSimpleClientset()
+
+	/*
+	   FIXME(antoineco): if the object was handled, fake.Invokes() returns
+	   immediately and the object never makes it to the tracker. As a result, the
+	   informer's cache doesn't get updated.
+	   See https://github.com/kubernetes/client-go/issues/500
+	   Fixed in client-go v11.0.0 (k8s 1.13) via https://github.com/kubernetes/kubernetes/pull/73601
+	*/
+	/*
+		client.Fake.PrependReactor("create", "channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+			obj := action.(k8stesting.CreateAction).GetObject()
+			ch := obj.(*messagingv1alpha1.Channel)
+
+			ch.Status = messagingv1alpha1.ChannelStatus{
+				Status: duckv1beta1.Status{
+					Conditions: duckv1beta1.Conditions{
+						apis.Condition{
+							Type:   messagingv1alpha1.ChannelConditionReady,
+							Status: corev1.ConditionTrue,
+						},
+					},
+				},
+			}
+
+			return false, ch, nil
+		})
+	*/
+
+	k, stop := newKnativeLib(client, t)
+	defer close(stop)
+
 	ch1, err1 := k.CreateChannel(channelName, testNS, labels, 10*time.Second)
 	assert.Nil(t, err1)
-	log.Printf("Channel created: %v", ch1)
-	log.Println("Getting Channel By label")
+	t.Logf("Channel created: %v", ch1)
 
+	time.Sleep(time.Second)
+
+	t.Log("Getting Channel by label")
 	ch2, err2 := k.GetChannelByLabels(testNS, labels)
+
 	assert.Nil(t, err2)
 
 	ignore := cmpopts.IgnoreTypes(apis.VolatileTime{})
 	if diff := cmp.Diff(ch1, ch2, ignore); diff != "" {
-		t.Errorf("%s (-want, +got) = %v", "Test_CreateChannel", diff)
+		t.Errorf("(-want, +got) = %v", diff)
 	}
 }
 
 func Test_CreateChannelWithError(t *testing.T) {
-	log.Print("Test_CreateChannel")
 	client := evclientsetfake.NewSimpleClientset()
 	client.Fake.ReactionChain = nil
 	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool,
@@ -137,17 +148,16 @@ func Test_CreateChannelWithError(t *testing.T) {
 		return true, tc, nil
 	})
 
-	k := &KnativeLib{
-		evClient:         client.EventingV1alpha1(),
-		messagingChannel: client.MessagingV1alpha1(),
-	}
+	k, stop := newKnativeLib(client, t)
+	defer close(stop)
+
 	ch, err := k.CreateChannel(channelName, testNS, labels, 10*time.Second)
 	assert.Nil(t, err)
 	log.Printf("Channel created: %v", ch)
 
 	ignore := cmpopts.IgnoreTypes(apis.VolatileTime{})
 	if diff := cmp.Diff(testChannel, ch, ignore); diff != "" {
-		t.Logf("%s (-want, +got) = %v;\n want should be: %v;\n got should be: %v", "Test_CreateChannel",
+		t.Logf("(-want, +got) = %v;\n want should be: %v;\n got should be: %v",
 			diff, labels, labels2)
 	} else {
 		t.Error("Test_CreateChannelWithError should return different labels")
@@ -167,10 +177,9 @@ func Test_CreateChannelTimeout(t *testing.T) {
 		return true, tc, nil
 	})
 
-	k := &KnativeLib{
-		evClient:         client.EventingV1alpha1(),
-		messagingChannel: client.MessagingV1alpha1(),
-	}
+	k, stop := newKnativeLib(client, t)
+	defer close(stop)
+
 	_, err := k.CreateChannel(channelName, testNS, labels, 1*time.Second)
 	assert.NotNil(t, err)
 	log.Printf("Test_CreateChannelTimeout: %v", err)
@@ -340,4 +349,20 @@ func Test_MakeChannelWithPrefix(t *testing.T) {
 	prefix = "order"
 	a = makeChannel(prefix, testNS, labels)
 	assert.Equal(t, a.GenerateName, "order-")
+}
+
+func newKnativeLib(client evclientset.Interface, t *testing.T) (*KnativeLib, chan struct{}) {
+	t.Helper()
+
+	factory := evinformers.NewSharedInformerFactory(client, 0)
+	stopCh := make(chan struct{})
+	factory.Start(stopCh)
+	factory.WaitForCacheSync(stopCh)
+
+	factory.Messaging().V1alpha1().Channels().Informer()
+	return &KnativeLib{
+		evClient:         client.EventingV1alpha1(),
+		messagingChannel: client.MessagingV1alpha1(),
+		chLister:         factory.Messaging().V1alpha1().Channels().Lister(),
+	}, stopCh
 }

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -17,6 +16,8 @@ import (
 	evclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
 	eventingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	messagingv1alpha1Client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	evinformers "github.com/knative/eventing/pkg/client/informers/externalversions"
+	evlistersv1alpha1 "github.com/knative/eventing/pkg/client/listers/messaging/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8slabels "k8s.io/apimachinery/pkg/labels"
@@ -88,6 +89,7 @@ func NewKnativeLib() (*KnativeLib, error) {
 type KnativeLib struct {
 	evClient         eventingv1alpha1.EventingV1alpha1Interface
 	httpClient       http.Client
+	chLister         evlistersv1alpha1.ChannelLister
 	messagingChannel messagingv1alpha1Client.MessagingV1alpha1Interface
 }
 
@@ -106,8 +108,12 @@ func GetKnativeLib() (*KnativeLib, error) {
 		log.Printf("ERROR: GetChannel(): creating eventing client: %v", err)
 		return nil, err
 	}
+
+	factory := evinformers.NewSharedInformerFactory(evClient, 0)
+
 	k := &KnativeLib{
 		evClient:         evClient.EventingV1alpha1(),
+		chLister:         factory.Messaging().V1alpha1().Channels().Lister(),
 		messagingChannel: evClient.MessagingV1alpha1(),
 	}
 	once.Do(func() {
@@ -115,6 +121,12 @@ func GetKnativeLib() (*KnativeLib, error) {
 			Transport: initHTTPTransport(),
 		}
 	})
+
+	// TODO(antoineco): handle termination via k8s lifecycle events
+	stop := make(chan struct{})
+	factory.Start(stop)
+	factory.WaitForCacheSync(stop)
+
 	return k, nil
 }
 
@@ -125,9 +137,7 @@ func (k *KnativeLib) GetChannelByLabels(namespace string, labels map[string]stri
 	if labels == nil {
 		return nil, errors.New("no labels were passed to GetChannelByLabels()")
 	}
-	channelList, err := k.messagingChannel.Channels(namespace).List(metav1.ListOptions{
-		LabelSelector: getLabelSelectorsAsString(labels),
-	})
+	channelList, err := k.chLister.Channels(namespace).List(k8slabels.SelectorFromSet(labels))
 	if err != nil {
 		log.Printf("ERROR: GetChannelByLabels(): getting channels by labels: %v", err)
 		return nil, err
@@ -136,7 +146,7 @@ func (k *KnativeLib) GetChannelByLabels(namespace string, labels map[string]stri
 	log.Printf("knative channels fetched %v", channelList)
 
 	// ChannelList length should exactly be equal to 1
-	if channelListLength := len(channelList.Items); channelListLength != 1 {
+	if channelListLength := len(channelList); channelListLength != 1 {
 		if channelListLength == 0 {
 			log.Printf("no channels with the %v labels were found in %v namespace", labels, namespace)
 			return nil, k8serrors.NewNotFound(messagingV1Alpha1.Resource("channels"), "")
@@ -144,8 +154,8 @@ func (k *KnativeLib) GetChannelByLabels(namespace string, labels map[string]stri
 		log.Printf("ERROR: GetChannelByLabels(): channel list has %d items", channelListLength)
 		return nil, errors.New("length of channel list is not equal to 1")
 	}
-	channel := &channelList.Items[0]
-	return channel, nil
+
+	return channelList[0], nil
 }
 
 // CreateChannel creates a Knative/Eventing channel controlled by the specified provisioner
@@ -166,11 +176,12 @@ func (k *KnativeLib) CreateChannel(prefix, namespace string, labels map[string]s
 		case <-tout:
 			return nil, errors.New("timed out")
 		case <-tick:
-			if channel, err = k.GetChannelByLabels(namespace, labels); err != nil {
-				log.Printf("ERROR: CreateChannel(): geting channel: %v", err)
-			} else {
-				isReady = channel.Status.IsReady()
+			channel, err = k.GetChannelByLabels(namespace, labels)
+			if err != nil {
+				log.Printf("ERROR: CreateChannel(): getting channel: %v", err)
+				continue
 			}
+			isReady = channel.Status.IsReady()
 		}
 	}
 	return channel, nil
@@ -332,10 +343,11 @@ func makeChannel(prefix, namespace string, labels map[string]string) *messagingV
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	if len(prefix) > maxChannelNamePrefixLength {
 		prefix = prefix[:maxChannelNamePrefixLength]
 	}
-	prefix = fmt.Sprint(reg.ReplaceAllString(prefix, ""), generateNameSuffix)
+	prefix = reg.ReplaceAllString(prefix, "") + generateNameSuffix
 
 	return &messagingV1Alpha1.Channel{
 		ObjectMeta: metav1.ObjectMeta{
