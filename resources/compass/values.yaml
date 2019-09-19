@@ -96,4 +96,4 @@ global:
       sslMode: ""
 
   tenantMappingService:
-    url: http://compass-director.compass-system.svc.cluster.local:3001/tenant-mapping
+    url: http://compass-director.compass-system.svc.cluster.local:3000/tenant-mapping
