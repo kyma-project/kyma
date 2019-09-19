@@ -1,13 +1,12 @@
-package servicecatalogaddons
+package servicecatalogaddons_test
 
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/automock"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	api "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -19,7 +18,7 @@ func TestBindingUsageConversionToGQLCornerCases(t *testing.T) {
 			givenK8sSBU *api.ServiceBindingUsage       = nil
 			expGQLSBU   *gqlschema.ServiceBindingUsage = nil
 		)
-		sut := serviceBindingUsageConverter{}
+		sut := servicecatalogaddons.NewServiceBindingUsageConverter()
 
 		// WHEN
 		gotGQLSBU, err := sut.ToGQL(givenK8sSBU)
@@ -42,15 +41,11 @@ func TestBindingUsageConversionToGQLCornerCases(t *testing.T) {
 			UsedBy: gqlschema.LocalObjectReference{
 				Kind: "Function",
 			},
+			Status: gqlschema.ServiceBindingUsageStatus{
+				Type: gqlschema.ServiceBindingUsageStatusTypePending,
+			},
 		}
-
-		statusExtractorMock := automock.NewStatusBindingUsageExtractor()
-		defer statusExtractorMock.AssertExpectations(t)
-		statusExtractorMock.
-			On("Status", mock.Anything).
-			Return(gqlschema.ServiceBindingUsageStatus{})
-
-		sut := serviceBindingUsageConverter{statusExtractorMock}
+		sut := servicecatalogaddons.NewServiceBindingUsageConverter()
 
 		// WHEN
 		gotGQLSBU, err := sut.ToGQL(givenK8sSBU)
@@ -76,6 +71,9 @@ func TestBindingUsageConversionToGQL(t *testing.T) {
 				},
 				ServiceBindingName: "redis-binding",
 				Namespace:          "production",
+				Status: gqlschema.ServiceBindingUsageStatus{
+					Type: gqlschema.ServiceBindingUsageStatusTypePending,
+				},
 			},
 		},
 		"with env prefix": {
@@ -97,19 +95,16 @@ func TestBindingUsageConversionToGQL(t *testing.T) {
 				Parameters: &gqlschema.ServiceBindingUsageParameters{
 					EnvPrefix: &gqlschema.EnvPrefix{Name: "ENV_PREFIX"},
 				},
+				Status: gqlschema.ServiceBindingUsageStatus{
+					Type: gqlschema.ServiceBindingUsageStatusTypePending,
+				},
 			},
 		},
 	}
 	for tn, tc := range tests {
 		t.Run(tn, func(t *testing.T) {
 			// GIVEN
-			statusExtractorMock := automock.NewStatusBindingUsageExtractor()
-			defer statusExtractorMock.AssertExpectations(t)
-			statusExtractorMock.
-				On("Status", tc.givenK8sSBU.Status.Conditions).
-				Return(gqlschema.ServiceBindingUsageStatus{})
-
-			sut := serviceBindingUsageConverter{statusExtractorMock}
+			sut := servicecatalogaddons.NewServiceBindingUsageConverter()
 
 			// WHEN
 			gotGQLSBU, err := sut.ToGQL(tc.givenK8sSBU)
@@ -141,7 +136,7 @@ func TestBindingUsageConversionToGQLs(t *testing.T) {
 	for tn, tc := range tests {
 		t.Run(tn, func(t *testing.T) {
 			// GIVEN
-			sut := newBindingUsageConverter()
+			sut := servicecatalogaddons.NewServiceBindingUsageConverter()
 			// WHEN
 			actual, err := sut.ToGQLs(tc.givenK8sSBUs)
 			// THEN
@@ -249,7 +244,7 @@ func TestBindingUsageConversionInput(t *testing.T) {
 	for tn, tc := range tests {
 		t.Run(tn, func(t *testing.T) {
 			// GIVEN
-			sut := serviceBindingUsageConverter{}
+			sut := servicecatalogaddons.NewServiceBindingUsageConverter()
 			// WHEN
 			gotK8sSBU, err := sut.InputToK8s(tc.givenSBUInput)
 			// THEN

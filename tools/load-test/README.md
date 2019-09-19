@@ -1,9 +1,8 @@
 # Load Test
 
-
 ## Overview
 
-The load test verifies the execution of the Horizontal Pod Autoscaling of functions deployed using Kubeless in Kyma. It runs a Golang application which stresses a function by making thousands of HTTP POST requests in a set period of time defined in an environment variable. At the end of the test execution, a notification with the output is sent to a Slack channel.
+The load test verifies the execution of the Horizontal Pod Autoscaling of functions deployed using Kubeless in Kyma. It runs a Go application which stresses a function by making thousands of HTTP POST requests in a set period of time defined in an environment variable. At the end of the test execution, a notification with the output is sent to a Slack channel.
 
 ## Installation
 
@@ -49,15 +48,15 @@ These are the main components of the load test:
 - **load-test/k8syaml**  contains all the Kubernetes resources needed to deploy the function.
 
 - **load-test.go** contains all the logic of the load test. You can build it with these commands:
- 
- ```
+
+ ```bash
     GOOS=linux GOARCH=amd64 go build -o ./bin/app (Mac)
     CGO_ENABLED=0 go build -o ./bin/app (Linux)
- ``` 
- 
+ ```
+
 - **load-test/Dockerfile** is a file needed to build the Docker image. To build the image, run this command:
 
-```
+```bash
     docker build -t load-test .
 ```
 

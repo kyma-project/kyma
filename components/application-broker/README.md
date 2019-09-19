@@ -38,10 +38,10 @@ Before each commit, use the `before-commit.sh` script or the `make build` comman
 | **APP_UNIQUE_SELECTOR_LABEL_VALUE** | YES | - | Defined label value selector which allows uniquely identify AB pod's |
 | **NAMESPACE** | YES | - | AB working Namespace |
 
-
 ## Code generation
 
 Structs related to CustomResourceDefinitions are defined in `pkg/apis/application/v1alpha1/types.go` and registered in `pkg/apis/application/v1alpha1/`. After making any changes there, please run:
+
 ```bash
 ./hack/update-codegen.sh
 ```

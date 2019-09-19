@@ -10,18 +10,38 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   hosts:
-    - '{{ .Values.global.gateway.host }}.{{ .Values.global.ingress.domainName }}'
+    - '{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}'
   gateways:
     - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}.svc.cluster.local
   http:
     - match:
-        - uri:
-            regex: /.*
+      - uri:
+          prefix: /connector
+      route:
+      - destination:
+          host: {{ .Values.oathkeeper.host }}
+          port:
+            number: {{ .Values.oathkeeper.port }}
+      headers:
+        request:
+          remove:
+            {{- range .Values.global.gateway.headers.request.remove }}
+            - {{ . }}
+            {{- end }}
+    - match:
+      - uri:
+          regex: /.*
       route:
         - destination:
-            host: {{ .Values.global.gateway.host }}
+            host: {{ .Values.global.gateway.tls.host }}
             port:
-              number: {{ .Values.service.port }}
+              number: {{ .Values.global.gateway.port }}
+      headers:
+        request:
+          remove:
+            {{- range .Values.global.gateway.headers.request.remove }}
+            - {{ . }}
+            {{- end }}
       corsPolicy:
         allowOrigin:
           - "*"

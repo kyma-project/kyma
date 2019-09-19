@@ -5,7 +5,7 @@ type: Custom Resource
 
 The `addonsconfiguration.addons.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to define define Namespace-scoped addons fetched by the Helm Broker. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
-```
+```bash
 kubectl get crd addonsconfiguration.addons.kyma-project.io -o yaml
 ```
 
@@ -76,31 +76,30 @@ status:
 
 This table lists all possible parameters of a given resource together with their descriptions:
 
-| Parameter                              | Mandatory          | Description            |
+| Parameter                              | Required          | Description            |
 |----------------------------------------|:------------------:|------------------------|
-| **metadata.name**                      | **YES**            | Specifies the name of the CR.         |
-| **metadata.namespace**                 | **YES**            | Specifies the Namespace in which the CR is available.        |
-| **metadata.finalizers**                 | **YES**            | Specifies the finalizer which prevents the CR from deletion until the Controller completes the deletion logic. The default finalizer is `addons.kyma-project.io`.       |
-| **metadata.labels**                   | **NO**            | Specifies a key-value pair that helps you to organize and filter your CRs. The label indicating the default addon configuration is `addons.kyma-project.io/managed: "true"`.       |
-| **spec.reprocessRequest**              | **NO**             | Allows you to manually trigger the reprocessing action of this CR. It is a strictly increasing, non-negative integer counter.   |
-| **spec.repositories.url**              | **YES**            | Provides the full URL to the index file of addons repositories.    |
-| **spec.repositories.secretRef.name**     | **NO**           | Defines the name of a Secret which provides values for the URL template.    |
-| **spec.repositories.secretRef.namespace**| **NO**           | Defines the Namespace which stores a Secret that provides values for the URL template.    |
-| **status.phase**                       | **Not applicable** | Describes the status of processing the CR by the Helm Broker Controller. It can be `Ready`, `Failed`, or `Pending`.       |
-| **status.lastProcessedTime**           | **Not applicable** | Specifies the last time when the Helm Broker Controller processed the CR.     |
-| **status.observedGeneration**          | **Not applicable** | Specifies the most recent generation that the Helm Broker Controller observed.               |
-| **status.repositories.url**            | **Not applicable** | Provides the full URL to the index file with addons definitions.         |
-| **status.repositories.status**         | **Not applicable** | Describes the status of processing a given repository by the Helm Broker Controller.     |
-| **status.repositories.reason**         | **Not applicable** | Provides the reason why the repository processing failed. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of reasons.     |
-| **status.repositories.message**        | **Not applicable** | Provides a human-readable message why the repository processing failed. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of messages.     |
-| **status.repositories.addons.name**    | **Not applicable** | Defines the name of the addon.         |
-| **status.repositories.addons.version** | **Not applicable** | Defines the version of the addon.        |
-| **status.repositories.addons.status**  | **Not applicable** | Describes the status of processing a given addon by the Helm Broker Controller.           |
-| **status.repositories.addons.reason**  | **Not applicable** | Provides the reason why the addon processing failed. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of reasons.      |
-| **status.repositories.addons.message** | **Not applicable** | Provides a human-readable message on processing progress, success, or failure. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of messages. |
+| **metadata.name**                      | Yes            | Specifies the name of the CR.         |
+| **metadata.namespace**                 | Yes            | Specifies the Namespace in which the CR is available.        |
+| **metadata.finalizers**                | Yes            | Specifies the finalizer which prevents the CR from deletion until the Controller completes the deletion logic. The default finalizer is `addons.kyma-project.io`.       |
+| **metadata.labels**                    | No            | Specifies a key-value pair that helps you to organize and filter your CRs. The label indicating the default addon configuration is `addons.kyma-project.io/managed: "true"`.       |
+| **spec.reprocessRequest**              | No             | Allows you to manually trigger the reprocessing action of this CR. It is a strictly increasing, non-negative integer counter.   |
+| **spec.repositories.url**              | Yes            | Provides the full URL to the index file of addons repositories.    |
+| **spec.repositories.secretRef.name**     | No           | Defines the name of a Secret which provides values for the URL template.    |
+| **spec.repositories.secretRef.namespace**| No           | Defines the Namespace which stores a Secret that provides values for the URL template.    |
+| **status.phase**                       | Not applicable | Describes the status of processing the CR by the Helm Broker Controller. It can be `Ready`, `Failed`, or `Pending`.       |
+| **status.lastProcessedTime**           | Not applicable | Specifies the last time when the Helm Broker Controller processed the CR.     |
+| **status.observedGeneration**          | Not applicable | Specifies the most recent generation that the Helm Broker Controller observed.               |
+| **status.repositories.url**            | Not applicable | Provides the full URL to the index file with addons definitions.         |
+| **status.repositories.status**         | Not applicable | Describes the status of processing a given repository by the Helm Broker Controller.     |
+| **status.repositories.reason**         | Not applicable | Provides the reason why the repository processing failed. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of reasons.     |
+| **status.repositories.message**        | Not applicable | Provides a human-readable message why the repository processing failed. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of messages.     |
+| **status.repositories.addons.name**    | Not applicable | Defines the name of the addon.         |
+| **status.repositories.addons.version** | Not applicable | Defines the version of the addon.        |
+| **status.repositories.addons.status**  | Not applicable | Describes the status of processing a given addon by the Helm Broker Controller.           |
+| **status.repositories.addons.reason**  | Not applicable | Provides the reason why the addon processing failed. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of reasons.      |
+| **status.repositories.addons.message** | Not applicable | Provides a human-readable message on processing progress, success, or failure. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of messages. |
 
 > **NOTE:** The Helm Broker Controller automatically adds all parameters marked as **Not applicable** to the AddonsConfiguration CR.
-
 
 ## Related resources and components
 

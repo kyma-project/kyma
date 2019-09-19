@@ -40,23 +40,23 @@ The `meta.yaml` file contains information about the addon. Define the following 
 
 |      Field Name     | Required |                   Description             |
 |-------------------|:--------:|----------------------------------------------|
-|         **name**        |   YES   | The name of the addon.  |
-|       **version**       |   YES   | The version of the addon. It is a broker service identifier.  |
-|          **id**         |   YES   | The broker service identifier.  |
-|     **description**     |   YES   | The short description of the service. |
-|     **displayName**     |   YES   | The display name of the addon.    |
-|         **tags**        |   NO  | Keywords describing the provided service, separated by commas.     |
-|       **bindable**      |   NO  | The field that specifies whether you can bind a given addon. |
-| **providerDisplayName** |   NO  | The name of the upstream entity providing the actual service.  |
-|   **longDescription**   |   NO  | The long description of the service.     |
-|   **documentationURL**  |   NO  | The link to the documentation page for the service.        |
-|      **supportURL**     |   NO  | The link to the support page for the service.     |
-|       **imageURL**      |   NO  | The URL to an image. You must provide the image in the `SVG` format.          |
-|       **labels**        |   NO  | Key-value pairs that help you to organize your project. Use labels to indicate different elements, such as Namespaces, services, or teams.   |
-| **bindingsRetrievable** |   NO  | The field that specifies whether fetching a ServiceBinding using a GET request on the resource's endpoint is supported for all plans. The default value is `false`.   |
-|   **planUpdatable**     |   NO  |  The field that specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
-|       **requires**      |   NO  | The list of permissions the user must grant to the instances of this service. |
-| **provisionOnlyOnce**   |   NO  | The field that specifies whether the addon can be provisioned only once in a given Namespace. The default value is `false`. |
+|         **name**        |   Yes   | The name of the addon.  |
+|       **version**       |   Yes   | The version of the addon. It is a broker service identifier.  |
+|          **id**         |   Yes   | The broker service identifier.  |
+|     **description**     |   Yes   | The short description of the service. |
+|     **displayName**     |   Yes   | The display name of the addon.    |
+|         **tags**        |   No  | Keywords describing the provided service, separated by commas.     |
+|       **bindable**      |   No  | The field that specifies whether you can bind a given addon. |
+| **providerDisplayName** |   No  | The name of the upstream entity providing the actual service.  |
+|   **longDescription**   |   No  | The long description of the service.     |
+|   **documentationURL**  |   No  | The link to the documentation page for the service.        |
+|      **supportURL**     |   No  | The link to the support page for the service.     |
+|       **imageURL**      |   No  | The URL to an image. You must provide the image in the `SVG` format.          |
+|       **labels**        |   No  | Key-value pairs that help you to organize your project. Use labels to indicate different elements, such as Namespaces, services, or teams.   |
+| **bindingsRetrievable** |   No  | The field that specifies whether fetching a ServiceBinding using a GET request on the resource's endpoint is supported for all plans. The default value is `false`.   |
+|   **planUpdatable**     |   No  |  The field that specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
+|       **requires**      |   No  | The list of permissions the user must grant to the instances of this service. |
+| **provisionOnlyOnce**   |   No  | The field that specifies whether the addon can be provisioned only once in a given Namespace. The default value is `false`. |
 
 > **NOTE**: The **provisionOnlyOnce** and **local** keys are reserved and cannot be added to the **labels** entry, since the Helm Broker overrides them at runtime. The Helm Broker always adds the `local:true` label and it adds the `provisionOnlyOnce:true` label only if **provisionOnlyOnce** is set to `true`.
 
@@ -74,12 +74,12 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 
 |  Field Name | Required |      Description               |
 |-----------|:--------:|------------------------------------|
-|     **name**    |   YES   |     The name of the plan.   |
-|      **id**     |   YES   |     The ID of the plan. |
-| **description** |   YES   | The description of the plan. |
-| **displayName** |   YES   | The display name of the plan. |
-|  **bindable**   |   NO  | The field that specifies whether you can bind an instance of the plan or not. The default value is `false`. |
-|     **free**    |   NO  | The attribute which specifies whether an instance of the plan is free or not. The default value is `false`.    |
+|     **name**    |   Yes   |     The name of the plan.   |
+|      **id**     |   Yes   |     The ID of the plan. |
+| **description** |   Yes   | The description of the plan. |
+| **displayName** |   Yes   | The display name of the plan. |
+|  **bindable**   |   No  | The field that specifies whether you can bind an instance of the plan or not. The default value is `false`. |
+|     **free**    |   No  | The attribute which specifies whether an instance of the plan is free or not. The default value is `false`.    |
 
 * `bind.yaml` file - contains information about binding in a specific plan. If you define in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file. For more information about this file, see [this](#details-bind-addons) document.
 
@@ -102,16 +102,16 @@ The `meta.yaml` file contains the specification of the ClusterDocsTopic. The exa
 
 |  Field Name | Required |      Description               |
 |-----------|:--------:|------------------------------------|
-|   **docs[]**                           |   YES   | Contains the definitions of documentation.   |
-| **docs[].template**                    |   YES   | Contains the specification of the ClusterDocsTopic or DocsTopic. |
-| **docs[].template.displayName**        |   YES   | Specifies the display name of the ClusterDocsTopic or DocsTopic. |
-| **docs[].template.description**        |   YES   | Provides the description of the ClusterDocsTopic or DocsTopic. |
-| **docs[].template.sources[]**          |   YES   | Contains the definitions of assets for an addon. |
-| **docs[].template.sources[].type**     |   YES   | Defines the type of the asset. |
-| **docs[].template.sources[].name**     |   YES   | Defines a unique identifier of a given asset. It must be unique if there is more than one asset of a given type. |
-| **docs[].template.sources[].mode**     |   YES   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR format. Use `single` for one file and `package` for a set of files. |
-| **docs[].template.sources[].url**      |   YES   | Specifies the location of a single file or a package. |
-| **docs[].template.sources[].filter**   |   YES   | Specifies a set of assets from the package to upload. The regex used in the filter must be [RE2](https://golang.org/s/re2syntax)-compliant.  |
+|   **docs[]**                           |   Yes   | Contains the definitions of documentation.   |
+| **docs[].template**                    |   Yes   | Contains the specification of the ClusterDocsTopic or DocsTopic. |
+| **docs[].template.displayName**        |   Yes   | Specifies the display name of the ClusterDocsTopic or DocsTopic. |
+| **docs[].template.description**        |   Yes   | Provides the description of the ClusterDocsTopic or DocsTopic. |
+| **docs[].template.sources[]**          |   Yes   | Contains the definitions of assets for an addon. |
+| **docs[].template.sources[].type**     |   Yes   | Defines the type of the asset. |
+| **docs[].template.sources[].name**     |   Yes   | Defines a unique identifier of a given asset. It must be unique if there is more than one asset of a given type. |
+| **docs[].template.sources[].mode**     |   Yes   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR format. Use `single` for one file and `package` for a set of files. |
+| **docs[].template.sources[].url**      |   Yes   | Specifies the location of a single file or a package. |
+| **docs[].template.sources[].filter**   |   Yes   | Specifies a set of assets from the package to upload. The regex used in the filter must be [RE2](https://golang.org/s/re2syntax)-compliant.  |
 
 >**NOTE:** Currently you can provide only one entry in the `docs` array.
 

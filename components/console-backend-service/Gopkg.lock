@@ -238,16 +238,6 @@
   version = "v1.1.5"
 
 [[projects]]
-  digest = "1:d3209f11918bfd131db14e9ea1691bd202568228715980f71e56b1bd60ad1e07"
-  name = "github.com/kisielk/errcheck"
-  packages = [
-    ".",
-    "internal/errcheck",
-  ]
-  pruneopts = "NUT"
-  revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
-
-[[projects]]
   branch = "master"
   digest = "1:f91bb67d051a94cf6ab2cf07eee0550432afc31655838d42cdec258db4b348f0"
   name = "github.com/kr/logfmt"
@@ -306,27 +296,14 @@
   version = "v0.1.36"
 
 [[projects]]
-  branch = "master"
-  digest = "1:6075ac9e6f2a43f9d7f6a6c46b68f7714c7aec6f091d3c0d7b5e00e8158839ce"
+  digest = "1:073352c65b34bfc085f68a4444e1752252d0b03d28dd7b5e65a36859f4a48175"
   name = "github.com/kyma-project/helm-broker"
-  packages = [
-    "pkg/apis/addons/v1alpha1",
-    "pkg/client/clientset/versioned",
-    "pkg/client/clientset/versioned/fake",
-    "pkg/client/clientset/versioned/scheme",
-    "pkg/client/clientset/versioned/typed/addons/v1alpha1",
-    "pkg/client/clientset/versioned/typed/addons/v1alpha1/fake",
-    "pkg/client/informers/externalversions",
-    "pkg/client/informers/externalversions/addons",
-    "pkg/client/informers/externalversions/addons/v1alpha1",
-    "pkg/client/informers/externalversions/internalinterfaces",
-    "pkg/client/listers/addons/v1alpha1",
-  ]
+  packages = ["pkg/apis/addons/v1alpha1"]
   pruneopts = "NUT"
-  revision = "d8adcb6e8d02a6d847e16b0f75ee914bc71da257"
+  revision = "d07feb2d365a58645031e96b27a95c8d50bb8349"
 
 [[projects]]
-  digest = "1:6874a3b35a4cfa1b0f286400791eed74d43f153b6eecd3eeb06cab6cc7088540"
+  digest = "1:8069f9969f7706ed0081b4ead65ad60248f02066e01d4aaefea473b02472dadd"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -385,7 +362,6 @@
     "components/service-binding-usage-controller/pkg/client/informers/externalversions/settings/v1alpha1",
     "components/service-binding-usage-controller/pkg/client/listers/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/client/listers/settings/v1alpha1",
-    "tools/failery",
   ]
   pruneopts = "NUT"
   revision = "3a0c31e7c33b83912dfb6f39cdf46720254e5b0f"
@@ -669,10 +645,9 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ab4b2ff1736add652ebc5cd657ed31dabf72e4dff3999f2b119ac15761c17dea"
+  digest = "1:3ba2bf74b2397e9bfa0ca8de22cd61d1464d6b7b3963ff3eeaccd2b09b968cd8"
   name = "golang.org/x/tools"
   packages = [
-    "cmd/goimports",
     "go/ast/astutil",
     "go/buildutil",
     "go/gcexportdata",
@@ -1104,7 +1079,6 @@
     "github.com/googleapis/gnostic/OpenAPIv2",
     "github.com/gorilla/mux",
     "github.com/gorilla/websocket",
-    "github.com/kisielk/errcheck",
     "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned/fake",
@@ -1115,10 +1089,6 @@
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions",
     "github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1",
-    "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned",
-    "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned/fake",
-    "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1",
-    "github.com/kyma-project/helm-broker/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned/fake",
@@ -1140,11 +1110,8 @@
     "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1",
     "github.com/kyma-project/kyma/components/idppreset/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
-    "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake",
-    "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions",
-    "github.com/kyma-project/kyma/tools/failery",
     "github.com/moby/moby/pkg/namesgenerator",
     "github.com/opentracing/opentracing-go",
     "github.com/opentracing/opentracing-go/ext",
@@ -1159,7 +1126,6 @@
     "github.com/vektah/gqlparser",
     "github.com/vektah/gqlparser/ast",
     "github.com/vrischmann/envconfig",
-    "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/apps/v1",
     "k8s.io/api/apps/v1beta2",
     "k8s.io/api/authorization/v1",

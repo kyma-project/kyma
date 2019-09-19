@@ -3,15 +3,17 @@
 ## Overview
 
 This project contains end-to-end upgrade tests run for the Kyma [upgrade plan](https://github.com/kyma-project/test-infra/blob/master/prow/scripts/cluster-integration/kyma-gke-upgrade.sh) on CI. The tests are written in Go. The framework allows you to define two actions:
+
 - Preparing the data
 - Running tests against the prepared data
 
 ## Prerequisites
 
 To set up the project, use these tools:
-* Version 1.11 or higher of [Go](https://golang.org/dl/)
-* Version 0.5 or higher of [Dep](https://github.com/golang/dep)
-* The latest version of [Docker](https://www.docker.com/)
+
+- Version 1.11 or higher of [Go](https://golang.org/dl/)
+- Version 0.5 or higher of [Dep](https://github.com/golang/dep)
+- The latest version of [Docker](https://www.docker.com/)
 
 ## Usage
 
@@ -34,6 +36,7 @@ Use the following environment variables to configure the application:
 | **APP_MAX_CONCURRENCY_LEVEL** | NO | `1` | A maximum concurrency level used for running tests. |
 
 ### Use flags
+
 Use the following flags to configure the application:
 
 | Name | Required | Description |
@@ -42,7 +45,8 @@ Use the following flags to configure the application:
 | **verbose** | NO | Prints logs for all tests. |
 
 See the example:
-```
+
+```go
 go run main.go --action prepareData --verbose
 ```
 
@@ -62,21 +66,23 @@ Add a new test under the `pkg/tests/{domain-name}` directory and implement the f
 ```
 
 In each method, the framework injects the following parameters:
+
 - **stop** - a channel called when the application shutdown is requested. Use it to gracefully shutdown your test.
 - **log** - a logger used when you need additional logging in your test. Logged data is printed only if a given method fails.
 - **namespace** - a space created for you by the framework.
 
 This interface allows you to easily register the test in the [`main.go`](./main.go) file by adding a new entry in the test map:
+
 ```go
-	// Register tests. Convention:
-	// {test-name} : {test-instance}
-	//
-	// Using map is intentional - we ensure that test name is not duplicated.
-	// Test name is sanitized and used for creating dedicated Namespace for a given test
-	// so that it doesn't overlap with others.
-	tests := map[string]runner.UpgradeTest{
-		"YourTestName": yourpkg.NewTest(),
-	}
+  // Register tests. Convention:
+  // {test-name} : {test-instance}
+  //
+  // Using map is intentional - we ensure that test name is not duplicated.
+  // Test name is sanitized and used for creating dedicated Namespace for a given test
+  // so that it doesn't overlap with others.
+  tests := map[string]runner.UpgradeTest{
+    "YourTestName": yourpkg.NewTest(),
+  }
 ```
 
 See the example test [here](./pkg/tests/hello-world/test.go).
@@ -88,14 +94,16 @@ See the example test [here](./pkg/tests/hello-world/test.go).
 Run the application without building a binary file. To do so:
 
 1. Prepare the upgrade data:
-  ```bash
-  env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug go run main.go --action prepareData
-  ```
+
+   ```bash
+   env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug go run main.go --action prepareData
+   ```
 
 2. Run tests:
-  ```bash
-  env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug go run main.go --action executeTests
-  ```
+
+   ```bash
+   env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug go run main.go --action executeTests
+   ```
 
 For the description of the available environment variables, see [this](#use-environment-variables) section.
 
@@ -104,23 +112,27 @@ For the description of the available environment variables, see [this](#use-envi
 Run the application using Helm:
 
 1. Prepare the upgrade data:
+
     ```bash
     helm install --name e2e-test-upgrade --namespace {namespace} ./chart/upgrade/ --wait --tls
     ```
 
 2. Run tests:
+
     ```bash
     helm test e2e-test-upgrade --tls
     ```
 
 ### Run tests using Telepresence
+
 [Telepresence](https://www.telepresence.io/) allows you to run tests locally while connecting a service to a remote Kubernetes cluster. It is helpful when the test needs access to other services in a cluster.
 
 1. [Install Telepresence](https://www.telepresence.io/reference/install).
 2. Run tests:
-```bash
-env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config telepresence --run go run main.go  --action executeTests --verbose
-```
+
+   ```bash
+   env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config telepresence --run go run main.go  --action executeTests --verbose
+   ```
 
 ### Verify the code
 
@@ -130,7 +142,7 @@ Use the `before-commit.sh` script or the `make build` command to test your chang
 
 The repository has the following structure:
 
-```
+```text
 .
 ├── chart                   # The Helm chart for deploying the upgrade test application
 ├── internal                # The internal source code of the upgrade test framework

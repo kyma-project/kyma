@@ -7,7 +7,7 @@ The security model in Kyma uses the Service Mesh component to enforce authorizat
 Dex implements a system of connectors that allow you to delegate authentication to external OpenID Connect and SAML2-compliant Identity Providers and use their user stores. Read [this](#details-add-an-identity-provider-to-dex) document to learn how to enable authentication with an external Identity Provider by using a Dex connector.
 
 Out of the box, Kyma comes with its own static user store used by Dex to authenticate users. This solution is designed for use with local Kyma deployments as it allows to easily create predefined users' credentials by creating Secret objects with a custom `dex-user-config` label.
-Read [this](#details-manage-static-users-in-dex) document to learn how to manage users in the static store used by Dex.
+Read [this](#tutorials-manage-static-users-in-dex) document to learn how to manage users in the static store used by Dex.
 
 Kyma uses a group-based approach to managing authorizations.
 To give users that belong to a group access to resources in Kyma, you must create:

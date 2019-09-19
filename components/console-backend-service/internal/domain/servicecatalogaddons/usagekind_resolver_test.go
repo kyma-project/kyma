@@ -1,10 +1,11 @@
-package servicecatalogaddons
+package servicecatalogaddons_test
 
 import (
 	"context"
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
@@ -32,7 +33,7 @@ func TestUsageKindResolver_ListUsageKinds(t *testing.T) {
 
 	informer := informerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer()
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
-	resolver := newUsageKindResolver(svc)
+	resolver := servicecatalogaddons.NewUsageKindResolver(svc)
 
 	// WHEN
 	resp, err := resolver.ListUsageKinds(context.Background(), nil, nil)
