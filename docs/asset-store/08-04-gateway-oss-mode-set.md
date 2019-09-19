@@ -3,6 +3,8 @@ title: Set Minio to the Alibaba OSS Gateway mode
 type: Tutorials
 ---
 
+>**CAUTION:** Alibaba OSS Gateway Mode was tested only manually on Kyma 1.6. Currently, we don't have an automated pipeline like for other gateway modes.
+
 By default, you install Kyma with the Asset Store in Minio stand-alone mode. This tutorial shows how to set Minio to the Alibaba Object Storage Service (OSS) Gateway mode using an [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation).
 
 ## Prerequisites
@@ -15,8 +17,6 @@ By default, you install Kyma with the Asset Store in Minio stand-alone mode. Thi
 You can set Minio to the Alibaba OSS Gateway mode both during and after Kyma installation. In both cases, you need to create and configure a access key for Alibaba Cloud account, apply a Secret and Config Map with an override onto a cluster or Minikube, and trigger the Kyma installation process. 
 
 >**CAUTION:** Buckets created in Minio without using Bucket CRs are not recreated or migrated while switching to the Minio Gateway mode.
-
->**CAUTION:** Alibaba OSS Gateway Mode is tested only manually.
 
 ### Create a Alibaba Cloud access key
 
