@@ -15,7 +15,6 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 	watchcache "k8s.io/client-go/tools/watch"
-
 )
 
 //go:generate mockery -name=applicationFinder -output=automock -outpkg=automock -case=underscore
@@ -58,7 +57,7 @@ func (c *MappingExistsProvisionChecker) CanProvision(serviceID internal.Applicat
 		},
 	}
 
-	ctx,_ := context.WithTimeout(context.Background(), maxWaitTime)
+	ctx, _ := context.WithTimeout(context.Background(), maxWaitTime)
 	_, err = watchcache.ListWatchUntil(ctx, lw, func(event watch.Event) (bool, error) {
 		deepCopy := event.Object.DeepCopyObject()
 		appMapping, ok := deepCopy.(*v1alpha1.ApplicationMapping)
