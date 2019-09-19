@@ -144,7 +144,7 @@ func fixPromotionsServiceBinding() *v1beta1.ServiceBinding {
 			Namespace: "production",
 		},
 		Spec: v1beta1.ServiceBindingSpec{
-			ServiceInstanceRef: v1beta1.LocalObjectReference{
+			InstanceRef: v1beta1.LocalObjectReference{
 				Name: "promotions-service",
 			},
 		},

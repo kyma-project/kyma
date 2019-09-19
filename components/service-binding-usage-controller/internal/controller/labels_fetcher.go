@@ -33,7 +33,7 @@ func (c *BindingLabelsFetcher) Fetch(svcBinding *scTypes.ServiceBinding) (map[st
 		return nil, errors.New("cannot fetch labels from ClusterServiceClass/ServiceClass because binding is nil")
 	}
 
-	svcInstanceName := svcBinding.Spec.ServiceInstanceRef.Name
+	svcInstanceName := svcBinding.Spec.InstanceRef.Name
 	svcInstance, err := c.siLister.ServiceInstances(svcBinding.Namespace).Get(svcInstanceName)
 
 	if err != nil {
