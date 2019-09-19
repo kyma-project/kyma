@@ -38,22 +38,31 @@ Create a Google service account that has a private key and the **Storage Admin**
     export ROLE=roles/storage.admin
     ```
 2. When you communicate with Google Cloud for the first time, set context to your Google Cloud project. Run this command:
+
     ```bash
     gcloud config set project $PROJECT
     ```
+    
 3. Create a service account. Run:
+
     ```bash
     gcloud iam service-accounts create $SA_NAME --display-name $SA_DISPLAY_NAME
     ```
+
 4. Add a policy binding for the **Storage Admin** role to the service account. Run:
+
     ```bash
     gcloud projects add-iam-policy-binding $PROJECT --member=serviceAccount:$SA_NAME@$PROJECT.iam.gserviceaccount.com --role=$ROLE
     ```
+
 5. Create a private key for the service account:
+
     ```bash
     gcloud iam service-accounts keys create $SECRET_FILE --iam-account=$SA_NAME@$PROJECT.iam.gserviceaccount.com
     ```
+
 5. Export the private key as an environment variable:
+
     ```bash
     export GCS_KEY_JSON=$(< "$SECRET_FILE" base64 | tr -d '\n')
     ```
@@ -61,6 +70,7 @@ Create a Google service account that has a private key and the **Storage Admin**
 ### Configure Minio Gateway mode
 
 Apply the following ConfigMap with an override onto a cluster or Minikube. Run:
+
 ```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
@@ -99,6 +109,7 @@ EOF
 ### Trigger installation
 
 Trigger Kyma installation or update by labeling the Installation custom resource. Run:
+
 ```bash
 kubectl label installation/kyma-installation action=install
 ```

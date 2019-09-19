@@ -8,6 +8,7 @@ By default, you install Kyma with the Asset Store in Minio stand-alone mode. Thi
 ## Prerequisites
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- [jq](https://stedolan.github.io/jq/)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure)
 - [Microsoft Azure](http://azure.com) subscription
 
