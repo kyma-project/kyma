@@ -14,7 +14,7 @@ logcollector:
 ```
 For details on configurable parameters and overrides, see [this](/components/logging/#configuration-configuration) document.
 2. Add the following configuration to the `fluent-bit-configmap.yaml` file for Fluent Bit to forward logs to Elasticsearch. 
->**NOTE:** Configure **{FLUENT_ELASTICSEARCH_HOST}** and  **{FLUENT_ELASTICSEARCH_PORT}**  environment variables accordingly for your Elasticsearch deployment.
+
 ```yaml
     output-elasticsearch.conf: |
         [OUTPUT]
@@ -26,3 +26,5 @@ For details on configurable parameters and overrides, see [this](/components/log
             Replace_Dots    On
             Retry_Limit     False
 ```
+
+>**NOTE:** Configure **{FLUENT_ELASTICSEARCH_HOST}** and  **{FLUENT_ELASTICSEARCH_PORT}**  environment variables accordingly for your Elasticsearch deployment.
