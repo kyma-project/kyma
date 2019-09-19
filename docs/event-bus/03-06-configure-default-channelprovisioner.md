@@ -34,7 +34,7 @@ template:
       labels: *labels
 ```
 
-You can change the default channel configuration by editing the ConfigMap `default-ch-webhook` in `knative-eventing` namespace. For example, if you want to set In-Memory Channels as default provisioner, then the aforementioned ConfigMap should have the following data:
+You can change the default channel configuration by editing the ConfigMap `default-ch-webhook` in `knative-eventing` Namespace. For example, if you want to set In-Memory Channels as default provisioner, include the following data in the ConfigMap:
 
 ```yaml
 apiVersion: v1
