@@ -98,7 +98,7 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 In the `docs` directory, provide documentation for your addon. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` file which provides information on how documentation for the addon is uploaded.
 As you can install the Helm Broker as a ClusterServiceBroker or as a ServiceBroker, documentation for addons is provided using either [ClusterDocsTopics](/components/headless-cms/#custom-resource-clusterdocstopic) or [DocsTopics](/components/headless-cms/#custom-resource-docs-topic) custom resources, respectively.
 
-The `meta.yaml` file contains the specification of the ClusterDocsTopic. The example structure of the `meta.yaml` file looks as follows:
+The `meta.yaml` file contains the specification of the ClusterDocsTopic or DocsTopic. The example structure of the `meta.yaml` file looks as follows:
 
 |  Field Name | Required |      Description               |
 |-----------|:--------:|------------------------------------|
@@ -108,10 +108,10 @@ The `meta.yaml` file contains the specification of the ClusterDocsTopic. The exa
 | **docs[].template.description**        |   Yes   | Provides the description of the ClusterDocsTopic or DocsTopic. |
 | **docs[].template.sources[]**          |   Yes   | Contains the definitions of assets for an addon. |
 | **docs[].template.sources[].type**     |   Yes   | Defines the type of the asset. |
-| **docs[].template.sources[].name**     |   Yes   | Defines a unique identifier of a given asset. It must be unique if there is more than one asset of a given type. |
+| **docs[].template.sources[].name**     |   Yes   | Defines a unique identifier of a given asset. It must be unique in a given type. |
 | **docs[].template.sources[].mode**     |   Yes   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR format. Use `single` for one file and `package` for a set of files. |
-| **docs[].template.sources[].url**      |   Yes   | Specifies the location of a single file or a package. |
-| **docs[].template.sources[].filter**   |   Yes   | Specifies a set of assets from the package to upload. The regex used in the filter must be [RE2](https://golang.org/s/re2syntax)-compliant.  |
+| **docs[].template.sources[].url**      |   Yes   | Specifies the location of a file. |
+| **docs[].template.sources[].filter**   |   Yes   | Specifies the directory from which the documentation is fetched. The regex used in the filter must be [RE2](https://golang.org/s/re2syntax)-compliant.  |
 
 >**NOTE:** Currently you can provide only one entry in the `docs` array.
 
