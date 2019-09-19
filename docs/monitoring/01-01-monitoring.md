@@ -11,4 +11,4 @@ The whole installation package provides the end-to-end Kubernetes cluster monito
 - Manage the default alert rules and create new ones.
 - Set up channels for notifications informing of any detected alerts.
 
-> **NOTE:** The monitoring functionality is available by default in the cluster installation, but it is disabled in the **Kyma Lite** local installation on Minikube. Read [here](/root/kyma/#configuration-custom-component-installation) how to enable monitoring for the local installation.
+> **NOTE:** The monitoring functionality is available by default in the cluster installation, but it is disabled in the **Kyma Lite** local installation on Minikube. Read [here](/root/kyma/#configuration-custom-component-installation) how to enable monitoring for the local installation. You must install both the `monitoring` and `prometheus-operator` components and increase the default Minikube memory and CPU values. Use these recommended values for local monitoring installation through Kyma CLI: `kyma provision minikube --memory 18000 --cpu 8`.
