@@ -1,8 +1,12 @@
 package connector
 
 import (
+	"crypto/tls"
 	"crypto/x509/pkix"
 	"strings"
+
+	"github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 
 	"github.com/pkg/errors"
 
@@ -10,37 +14,49 @@ import (
 )
 
 type EstablishedConnection struct {
-	Credentials certificates.Credentials
-	DirectorURL string
+	Credentials    certificates.Credentials
+	ManagementInfo v1alpha1.ManagementInfo
 }
+
+type TokenSecuredClientConstructor func(endpoint string, skipTLSVerify bool) TokenSecuredClient
+type CertSecuredClientConstructor func(endpoint string, skipTLSVerify bool, certificates ...tls.Certificate) CertificateSecuredClient
 
 //go:generate mockery -name=Connector
 type Connector interface {
-	EstablishConnection(token string) (EstablishedConnection, error)
+	EstablishConnection(connectorURL, token string) (EstablishedConnection, error)
+	MaintainConnection(credentials certificates.ClientCredentials, connectorURL string, renewCert bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error)
 }
 
-func NewCompassConnector(connectorURL string, csrProvider certificates.CSRProvider, tokenSecuredConnectorClient TokenSecuredClient) Connector {
+func NewCompassConnector(
+	csrProvider certificates.CSRProvider,
+	tokenSecuredClientConstructor TokenSecuredClientConstructor,
+	certSecuredClientConstructor CertSecuredClientConstructor,
+	insecureConnectorCommunication bool,
+) Connector {
 	return &compassConnector{
-		connectorURL:                connectorURL,
-		csrProvider:                 csrProvider,
-		tokenSecuredConnectorClient: tokenSecuredConnectorClient,
-		//certSecuredConnectorClient:  certSecuredConnectorClient, // TODO - cert secured client constructor?
+		csrProvider:                    csrProvider,
+		tokenSecuredClientConstructor:  tokenSecuredClientConstructor,
+		certSecuredClientConstructor:   certSecuredClientConstructor,
+		insecureConnectorCommunication: insecureConnectorCommunication,
 	}
 }
 
 type compassConnector struct {
-	connectorURL                string
-	csrProvider                 certificates.CSRProvider
-	tokenSecuredConnectorClient TokenSecuredClient
-	certSecuredConnectorClient  CertificateSecuredClient
+	csrProvider                    certificates.CSRProvider
+	tokenSecuredClientConstructor  TokenSecuredClientConstructor
+	certSecuredClientConstructor   CertSecuredClientConstructor
+	insecureConnectorCommunication bool
+
+	certSecuredClient CertificateSecuredClient
 }
 
-func (cc *compassConnector) EstablishConnection(token string) (EstablishedConnection, error) {
-	if cc.connectorURL == "" {
+func (cc *compassConnector) EstablishConnection(connectorURL, token string) (EstablishedConnection, error) {
+	if connectorURL == "" {
 		return EstablishedConnection{}, errors.New("Failed to establish connection. Connector URL is empty")
 	}
 
-	configuration, err := cc.tokenSecuredConnectorClient.Configuration(token)
+	tokenSecuredConnectorClient := cc.tokenSecuredClientConstructor(connectorURL, cc.insecureConnectorCommunication)
+	configuration, err := tokenSecuredConnectorClient.Configuration(token)
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to fetch configuration")
 	}
@@ -51,20 +67,71 @@ func (cc *compassConnector) EstablishConnection(token string) (EstablishedConnec
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to generate CSR")
 	}
 
-	certResponse, err := cc.tokenSecuredConnectorClient.SignCSR(configuration.Token.Token, csr)
+	certResponse, err := tokenSecuredConnectorClient.SignCSR(configuration.Token.Token, csr)
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to sign CSR")
 	}
 
 	credentials, err := certificates.NewCredentials(key, certResponse)
 	if err != nil {
-		return EstablishedConnection{}, errors.Wrap(err, "Failed to sign CSR")
+		return EstablishedConnection{}, errors.Wrap(err, "Failed to parse certification response to credentials")
 	}
 
 	return EstablishedConnection{
-		Credentials: credentials,
-		DirectorURL: cc.connectorURL,
+		Credentials:    credentials,
+		ManagementInfo: toManagementInfo(configuration.ManagementPlaneInfo),
 	}, nil
+}
+
+func (cc *compassConnector) MaintainConnection(credentials certificates.ClientCredentials, connectorURL string, renewCert bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error) {
+	certSecuredClient := cc.certSecuredClientConstructor(connectorURL, cc.insecureConnectorCommunication, credentials.AsTLSCertificate())
+
+	configuration, err := certSecuredClient.Configuration()
+	if err != nil {
+		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to query Connection Configuration while checking connection")
+	}
+
+	if !renewCert {
+		return nil, toManagementInfo(configuration.ManagementPlaneInfo), nil
+	}
+
+	subject := parseSubject(configuration.CertificateSigningRequestInfo.Subject)
+	csr, key, err := cc.csrProvider.CreateCSR(subject)
+	if err != nil {
+		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to create CSR while renewing connection")
+	}
+
+	certResponse, err := certSecuredClient.SignCSR(csr)
+	if err != nil {
+		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to sign CSR while renewing connection")
+	}
+
+	renewedCredentials, err := certificates.NewCredentials(key, certResponse)
+	if err != nil {
+		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to parse certification response to credentials while renewing connection")
+	}
+
+	return &renewedCredentials, toManagementInfo(configuration.ManagementPlaneInfo), nil
+}
+
+func toManagementInfo(configInfo *gqlschema.ManagementPlaneInfo) v1alpha1.ManagementInfo {
+	if configInfo == nil {
+		return v1alpha1.ManagementInfo{}
+	}
+
+	var directorURL = ""
+	if configInfo.DirectorURL != nil {
+		directorURL = *configInfo.DirectorURL
+	}
+	var certSecuredConnectorURL = ""
+	if configInfo.CertificateSecuredConnectorURL != nil {
+		certSecuredConnectorURL = *configInfo.CertificateSecuredConnectorURL
+	}
+
+	return v1alpha1.ManagementInfo{
+		DirectorURL:  directorURL,
+		ConnectorURL: certSecuredConnectorURL,
+	}
 }
 
 func parseSubject(plainSubject string) pkix.Name {

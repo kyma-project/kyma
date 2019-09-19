@@ -12,7 +12,7 @@ const (
 	defaultNamespace = "default"
 )
 
-// TODO - I think it is bas cause we need to restart pod to read new token. Maybe the better way would be to mount this cm?
+// TODO - This will be removed in favour of mounting Config Map
 type EnvConfig struct {
 	//DirectorURL string `envconfig:"DIRECTOR_URL"`
 	ConnectorURL string `envconfig:"CONNECTOR_URL"`
@@ -22,25 +22,31 @@ type EnvConfig struct {
 }
 
 type Config struct {
-	ControllerSyncPeriod       time.Duration `envconfig:"default=60s"`
-	MinimalConfigSyncTime      time.Duration `envconfig:"default=300s"`
-	ClusterCertificatesSecret  string        `envconfig:"default=kyma-integration/cluster-client-certificates"`
-	CaCertificatesSecret       string        `envconfig:"default=istio-system/ca-certificates"`
-	IntegrationNamespace       string        `envconfig:"default=kyma-integration"`
-	GatewayPort                int           `envconfig:"default=8080"`
-	InsecureConfigurationFetch bool          `envconfig:"default=false"`
-	UploadServiceUrl           string        `envconfig:"default=http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000"`
+	ConfigFile                     string        `envconfig:"default=/etc/config/config.json"`
+	ControllerSyncPeriod           time.Duration `envconfig:"default=60s"`
+	MinimalCompassSyncTime         time.Duration `envconfig:"default=300s"`
+	CertValidityRenewalThreshold   float64       `envconfig:"default=0.3"`
+	ClusterCertificatesSecret      string        `envconfig:"default=kyma-integration/cluster-client-certificates"`
+	CaCertificatesSecret           string        `envconfig:"default=istio-system/ca-certificates"`
+	InsecureConnectorCommunication bool          `envconfig:"default=false"`
+	IntegrationNamespace           string        `envconfig:"default=kyma-integration"`
+	GatewayPort                    int           `envconfig:"default=8080"`
+	InsecureConfigurationFetch     bool          `envconfig:"default=false"`
+	UploadServiceUrl               string        `envconfig:"default=http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000"`
 }
 
 func (o *Config) String() string {
-	return fmt.Sprintf("ControllerSyncPeriod=%d, MinimalConfigSyncTime=%d, "+
-		"ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
+	return fmt.Sprintf("ConfigFile=%s, "+
+		"ControllerSyncPeriod=%d, MinimalCompassSyncTime=%d, "+
+		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
 		"IntegrationNamespace=%s, GatewayPort=%d, InsecureConfigurationFetch=%v, UploadServiceUrl=%s",
-		o.ControllerSyncPeriod, o.MinimalConfigSyncTime,
-		o.ClusterCertificatesSecret, o.CaCertificatesSecret,
+		o.ConfigFile,
+		o.ControllerSyncPeriod, o.MinimalCompassSyncTime,
+		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
 		o.IntegrationNamespace, o.GatewayPort, o.InsecureConfigurationFetch, o.UploadServiceUrl)
 }
 
+// TODO - This will be removed in favour of mounting Config Map
 func (ec EnvConfig) String() string {
 	return fmt.Sprintf("CONNECTOR_URL=%s, TOKEN_PROVIDED=%t", ec.ConnectorURL, ec.Token != "")
 }

@@ -10,16 +10,22 @@ import (
 	"github.com/pkg/errors"
 )
 
-type CertificateSecuredClient struct {
+//go:generate mockery -name=CertificateSecuredClient
+type CertificateSecuredClient interface {
+	Configuration() (schema.Configuration, error)
+	SignCSR(csr string) (schema.CertificationResult, error)
+}
+
+type certificateSecuredClient struct {
 	graphQlClient *gcli.Client
 	queryProvider queryProvider
 }
 
-func NewCertificateSecuredConnectorClient(endpoint string, insecureConnectorCommunication bool, certificates ...tls.Certificate) *CertificateSecuredClient {
+func NewCertificateSecuredConnectorClient(endpoint string, skipTLSVerify bool, certificates ...tls.Certificate) CertificateSecuredClient {
 	tlsConfig := &tls.Config{
 		Certificates:       certificates,
 		ClientAuth:         tls.RequireAndVerifyClientCert,
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: skipTLSVerify,
 	}
 
 	httpClient := &http.Client{
@@ -30,13 +36,13 @@ func NewCertificateSecuredConnectorClient(endpoint string, insecureConnectorComm
 
 	graphQlClient := gcli.NewClient(endpoint, gcli.WithHTTPClient(httpClient))
 
-	return &CertificateSecuredClient{
+	return &certificateSecuredClient{
 		graphQlClient: graphQlClient,
 		queryProvider: queryProvider{},
 	}
 }
 
-func (c CertificateSecuredClient) Configuration(headers ...http.Header) (schema.Configuration, error) {
+func (c certificateSecuredClient) Configuration() (schema.Configuration, error) {
 	query := c.queryProvider.configuration()
 	req := gcli.NewRequest(query)
 
@@ -49,7 +55,7 @@ func (c CertificateSecuredClient) Configuration(headers ...http.Header) (schema.
 	return response.Result, nil
 }
 
-func (c CertificateSecuredClient) SignCSR(csr string, headers ...http.Header) (schema.CertificationResult, error) {
+func (c certificateSecuredClient) SignCSR(csr string) (schema.CertificationResult, error) {
 	query := c.queryProvider.signCSR(csr)
 	req := gcli.NewRequest(query)
 

@@ -25,11 +25,11 @@ type tokenSecuredClient struct {
 	queryProvider queryProvider
 }
 
-func NewConnectorClient(endpoint string, insecureConnectorCommunication bool) TokenSecuredClient {
+func NewTokenSecuredConnectorClient(endpoint string, skipTLSVerify bool) TokenSecuredClient {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: insecureConnectorCommunication,
+				InsecureSkipVerify: skipTLSVerify,
 			},
 		},
 	}

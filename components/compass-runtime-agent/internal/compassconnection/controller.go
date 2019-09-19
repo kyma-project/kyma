@@ -95,7 +95,8 @@ func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	log.Infof("Processing Compass Connection, current status: %s", instance.Status)
 
 	// If connection is not established read Config Map and try to fetch Certificate
-	if instance.ShouldReconnect() {
+	if instance.ShouldAttemptReconnect() {
+		log.Infof("Attempting to initialize connection with Compass...")
 		instance, err := r.supervisor.InitializeCompassConnection()
 		if err != nil {
 			log.Errorf("Failed to initialize Compass Connection: %s", err.Error())

@@ -4,13 +4,13 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/connector"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
+	config_provider "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
 	"k8s.io/client-go/kubernetes"
 
 	"os"
-	"time"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compassconnection"
 
@@ -48,10 +48,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	syncPeriod := time.Second * time.Duration(options.ControllerSyncPeriod)
-
 	log.Info("Setting up manager")
-	mgr, err := manager.New(cfg, manager.Options{SyncPeriod: &syncPeriod})
+	mgr, err := manager.New(cfg, manager.Options{SyncPeriod: &options.ControllerSyncPeriod})
 	if err != nil {
 		log.Error(err, "unable to set up overall controller manager")
 		os.Exit(1)
@@ -97,24 +95,29 @@ func main() {
 		os.Exit(1)
 	}
 
-	compassConnector := newCompassConnector(connectionConfig.ConnectorURL, true) // TODO - pass param
+	configProvider := config_provider.NewConfigProvider(options.ConfigFile)
+
+	compassConnector := newCompassConnector(options.InsecureConnectorCommunication)
 	connectionSupervisor := compassconnection.NewSupervisor(
 		compassConnector,
 		compassConnectionCRClient.CompassConnections(),
 		certManager,
 		compassConfigClient,
-		syncService)
+		syncService,
+		configProvider,
+		options.CertValidityRenewalThreshold,
+		options.MinimalCompassSyncTime)
 
 	// Setup all Controllers
 	log.Info("Setting up controller")
-	if err := compassconnection.InitCompassConnectionController(mgr, connectionSupervisor, options.MinimalConfigSyncTime); err != nil {
+	if err := compassconnection.InitCompassConnectionController(mgr, connectionSupervisor, options.MinimalCompassSyncTime); err != nil {
 		log.Error(err, "Unable to register controllers to the manager")
 		os.Exit(1)
 	}
 
 	// Initialize Compass Connection CR
 	log.Infoln("Initializing Compass Connection CR")
-	_, err = connectionSupervisor.InitializeCompassConnection("") // TODO - token
+	_, err = connectionSupervisor.InitializeCompassConnection()
 	if err != nil {
 		log.Error("Unable to initialize Compass Connection CR")
 	}
@@ -127,9 +130,11 @@ func main() {
 	}
 }
 
-func newCompassConnector(connectorURL string, insecureConnection bool) connector.Connector {
+func newCompassConnector(insecureConnection bool) connector.Connector {
 	csrProvider := certificates.NewCSRProvider()
-	tokenSecuredClient := connector.NewConnectorClient(connectorURL, insecureConnection)
-
-	return connector.NewCompassConnector(connectorURL, csrProvider, tokenSecuredClient)
+	return connector.NewCompassConnector(
+		csrProvider,
+		connector.NewTokenSecuredConnectorClient,
+		connector.NewCertificateSecuredConnectorClient,
+		insecureConnection)
 }
