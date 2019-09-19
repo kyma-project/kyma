@@ -6,7 +6,8 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/pkg/errors"
-	v2 "github.com/pmorie/go-open-service-broker-client/v2"
+	"github.com/pmorie/go-open-service-broker-client/v2"
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 )
 
@@ -53,7 +54,7 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 	case err != nil:
 		return nil, errors.Wrap(err, "while checking if instance is already deprovisioned")
 	case deprovisioned:
-		return &v2.DeprovisionResponse{Async: false}, nil
+		return &osb.DeprovisionResponse{Async: false}, nil
 	}
 
 	opIDInProgress, inProgress, err := svc.instanceStateGetter.IsDeprovisioningInProgress(iID)
@@ -63,8 +64,8 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 	case err != nil:
 		return nil, errors.Wrap(err, "while checking if instance is being deprovisioned")
 	case inProgress:
-		opKeyInProgress := v2.OperationKey(opIDInProgress)
-		return &v2.DeprovisionResponse{Async: true, OperationKey: &opKeyInProgress}, nil
+		opKeyInProgress := osb.OperationKey(opIDInProgress)
+		return &osb.DeprovisionResponse{Async: true, OperationKey: &opKeyInProgress}, nil
 	}
 
 	operationID, err := svc.operationIDProvider()
@@ -98,8 +99,8 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 		return nil, errors.Wrap(err, "while removing instance from storage")
 	}
 
-	opKey := v2.OperationKey(operationID)
-	resp := &v2.DeprovisionResponse{
+	opKey := osb.OperationKey(operationID)
+	resp := &osb.DeprovisionResponse{
 		Async:        true,
 		OperationKey: &opKey,
 	}

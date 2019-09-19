@@ -21,7 +21,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8testing "k8s.io/client-go/testing"

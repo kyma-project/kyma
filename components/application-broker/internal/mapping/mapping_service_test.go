@@ -9,7 +9,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"
 )
 

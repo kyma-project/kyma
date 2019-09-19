@@ -6,7 +6,8 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -40,7 +41,7 @@ func fixEventActivation() *v1alpha1.EventActivation {
 		ObjectMeta: v1.ObjectMeta{
 			Name:      fixServiceID(),
 			Namespace: fixNs(),
-			OwnerReferences: []v1.OwnerReference{
+			OwnerReferences: []metav1.OwnerReference{
 				{
 					UID:        fixServiceInstanceUID(),
 					Name:       fixServiceInstanceName(),
@@ -133,7 +134,7 @@ func fixAppName() internal.ApplicationName {
 }
 func FixServiceInstance() *v1beta1.ServiceInstance {
 	return &v1beta1.ServiceInstance{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      fixServiceInstanceName(),
 			UID:       fixServiceInstanceUID(),
 			Namespace: fixNs(),

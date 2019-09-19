@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	negronilogrus "github.com/meatballhat/negroni-logrus"
+	"github.com/meatballhat/negroni-logrus"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/negroni"
