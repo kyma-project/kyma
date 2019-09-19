@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/connector"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
 	config_provider "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
@@ -97,6 +98,8 @@ func main() {
 
 	configProvider := config_provider.NewConfigProvider(options.ConfigFile)
 
+	clientsProvider := compass.NewClientsProvider(graphql.New, options.InsecureConnectorCommunication, options.InsecureConfigurationFetch, options.QueryLogging)
+
 	compassConnector := newCompassConnector(options.InsecureConnectorCommunication)
 	connectionSupervisor := compassconnection.NewSupervisor(
 		compassConnector,
@@ -130,9 +133,9 @@ func main() {
 	}
 }
 
-func newCompassConnector(insecureConnection bool) connector.Connector {
+func newCompassConnector(insecureConnection bool) compassconnection.Connector {
 	csrProvider := certificates.NewCSRProvider()
-	return connector.NewCompassConnector(
+	return compassconnection.NewCompassConnector(
 		csrProvider,
 		connector.NewTokenSecuredConnectorClient,
 		connector.NewCertificateSecuredConnectorClient,

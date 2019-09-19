@@ -1,4 +1,4 @@
-package compass
+package director
 
 import (
 	"errors"

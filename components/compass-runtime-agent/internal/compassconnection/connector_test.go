@@ -1,4 +1,4 @@
-package connector
+package compassconnection
 
 import (
 	"testing"
@@ -19,7 +19,7 @@ func TestCompassConnector_EstablishConnection(t *testing.T) {
 		connector := NewCompassConnector()
 
 		// when
-		connection, err := connector.EstablishConnection()
+		connection, err := EstablishConnection()
 
 		// then
 		require.NoError(t, err)
@@ -31,7 +31,7 @@ func TestCompassConnector_EstablishConnection(t *testing.T) {
 		connector := NewCompassConnector("")
 
 		// when
-		_, err := connector.EstablishConnection()
+		_, err := EstablishConnection()
 
 		// then
 		require.Error(t, err)

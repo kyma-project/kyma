@@ -33,17 +33,20 @@ type Config struct {
 	GatewayPort                    int           `envconfig:"default=8080"`
 	InsecureConfigurationFetch     bool          `envconfig:"default=false"`
 	UploadServiceUrl               string        `envconfig:"default=http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000"`
+	QueryLogging                   bool          `envconfig:"default=false"`
 }
 
 func (o *Config) String() string {
 	return fmt.Sprintf("ConfigFile=%s, "+
 		"ControllerSyncPeriod=%d, MinimalCompassSyncTime=%d, "+
 		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
-		"IntegrationNamespace=%s, GatewayPort=%d, InsecureConfigurationFetch=%v, UploadServiceUrl=%s",
+		"IntegrationNamespace=%s, GatewayPort=%d, InsecureConfigurationFetch=%v, UploadServiceUrl=%s, "+
+		"QueryLogging=%v",
 		o.ConfigFile,
 		o.ControllerSyncPeriod, o.MinimalCompassSyncTime,
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
-		o.IntegrationNamespace, o.GatewayPort, o.InsecureConfigurationFetch, o.UploadServiceUrl)
+		o.IntegrationNamespace, o.GatewayPort, o.InsecureConfigurationFetch, o.UploadServiceUrl,
+		o.QueryLogging)
 }
 
 // TODO - This will be removed in favour of mounting Config Map

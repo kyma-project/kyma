@@ -1,7 +1,6 @@
 package compassconnection
 
 import (
-	connector2 "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/connector"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
@@ -74,7 +73,7 @@ func TestCrSupervisor_InitializeCompassConnectionCR(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			establishedConnection := connector2.EstablishedConnection{
+			establishedConnection := EstablishedConnection{
 				Credentials: certificates.Credentials{},
 				DirectorURL: directorURL,
 			}
@@ -105,7 +104,7 @@ func TestCrSupervisor_InitializeCompassConnectionCR(t *testing.T) {
 		// given
 		fakeCRDClient := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
 
-		establishedConnection := connector2.EstablishedConnection{
+		establishedConnection := EstablishedConnection{
 			Credentials: certificates.Credentials{},
 			DirectorURL: directorURL,
 		}
@@ -130,7 +129,7 @@ func TestCrSupervisor_InitializeCompassConnectionCR(t *testing.T) {
 		fakeCRDClient := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
 
 		connector := &mocks.Connector{}
-		connector.On("EstablishConnection").Return(connector2.EstablishedConnection{}, errors.New("error"))
+		connector.On("EstablishConnection").Return(EstablishedConnection{}, errors.New("error"))
 
 		supervisor := NewSupervisor(connector, fakeCRDClient, nil, nil, nil)
 
@@ -162,7 +161,7 @@ func TestCrSupervisor_InitializeCompassConnectionCR_Error(t *testing.T) {
 		mockCRDClient.On("Create", mock.AnythingOfType("*v1alpha1.CompassConnection")).
 			Return(nil, errors.New("error"))
 
-		establishedConnection := connector2.EstablishedConnection{
+		establishedConnection := EstablishedConnection{
 			Credentials: certificates.Credentials{},
 			DirectorURL: directorURL,
 		}

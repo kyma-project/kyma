@@ -29,7 +29,7 @@ func TestClientCredentials_AsTLSCertificate(t *testing.T) {
 	tlsCert := credentials.AsTLSCertificate()
 
 	// then
-	require.NotEmpty(t, tlsCert)
+	require.NotNil(t, tlsCert)
 	require.NotEmpty(t, tlsCert.PrivateKey)
 	require.NotEmpty(t, tlsCert.Certificate)
 

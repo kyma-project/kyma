@@ -15,6 +15,9 @@ const (
 	timeout = 30 * time.Second
 )
 
+type ClientConstructor func(certificate *tls.Certificate, graphqlEndpoint string, enableLogging bool, insecureConfigFetch bool) (Client, error)
+
+//go:generate mockery -name=Client
 type Client interface {
 	Do(req *graphql.Request, res interface{}) error
 	DisableLogging()
@@ -26,13 +29,17 @@ type client struct {
 	logging   bool
 }
 
-func New(certificate tls.Certificate, graphqlEndpoint string, enableLogging, insecureConfigFetch bool) (Client, error) {
+func New(certificate *tls.Certificate, graphqlEndpoint string, enableLogging, insecureConfigFetch bool) (Client, error) {
+	var certificates []tls.Certificate
+	if certificate != nil {
+		certificates = []tls.Certificate{*certificate}
+	}
+
 	httpClient := &http.Client{
-		// TODO: enable when the certificates will be ready
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: insecureConfigFetch,
-				//Certificates: []tls.Certificate{certificate},
+				Certificates:       certificates,
 			},
 		},
 	}

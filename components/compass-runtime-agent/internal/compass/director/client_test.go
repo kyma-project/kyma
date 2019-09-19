@@ -3,8 +3,6 @@ package director
 import (
 	"crypto/tls"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
-
 	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 
 	"github.com/pkg/errors"
@@ -178,12 +176,12 @@ func (c *mockGQLClient) Do(req *graphql.Request, res interface{}) error {
 	assert.Equal(c.t, c.expectedRequest, req)
 
 	if !c.shouldFail {
-		appForRuntimesResp, ok := res.(*compass.ApplicationsForRuntimeResponse)
+		appForRuntimesResp, ok := res.(*ApplicationsForRuntimeResponse)
 		if !ok {
 			return errors.New("invalid response type expected")
 		}
 
-		appForRuntimesResp.Result.Data = []*compass.Application{
+		appForRuntimesResp.Result.Data = []*Application{
 			{Name: "App"},
 		}
 
@@ -195,7 +193,7 @@ func (c *mockGQLClient) Do(req *graphql.Request, res interface{}) error {
 
 func (c *mockGQLClient) DisableLogging() {}
 
-func newMockClientConstructor(t *testing.T, shouldFail bool) GraphQLClientConstructor {
+func newMockClientConstructor(t *testing.T, shouldFail bool) gql.ClientConstructor {
 	return func(certificate tls.Certificate, graphqlEndpoint string, enableLogging, insecureConfigFetch bool) (client gql.Client, e error) {
 		expectedReq := graphql.NewRequest(expectedQuery)
 		expectedReq.Header.Set("Tenant", tenant)
@@ -217,7 +215,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 	for _, testCase := range []struct {
 		description       string
 		expectedApps      []kymamodel.Application
-		clientConstructor GraphQLClientConstructor
+		clientConstructor gql.ClientConstructor
 		shouldFail        bool
 	}{
 		{

@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/connector"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
@@ -40,10 +39,10 @@ type Supervisor interface {
 }
 
 func NewSupervisor(
-	connector connector.Connector,
+	connector Connector,
 	crManager CRManager,
 	credManager certificates.Manager,
-	compassClient director.ConfigClient,
+	clientsProvider compass.ClientsProvider,
 	syncService kyma.Service,
 	configProvider config.Provider,
 	certValidityRenewalThreshold float64,
@@ -53,7 +52,7 @@ func NewSupervisor(
 		compassConnector:             connector,
 		crManager:                    crManager,
 		credentialsManager:           credManager,
-		compassClient:                compassClient,
+		clientsProvider:              clientsProvider,
 		syncService:                  syncService,
 		configProvider:               configProvider,
 		certValidityRenewalThreshold: certValidityRenewalThreshold,
@@ -63,10 +62,10 @@ func NewSupervisor(
 }
 
 type crSupervisor struct {
-	compassConnector             connector.Connector
+	compassConnector             Connector
 	crManager                    CRManager
 	credentialsManager           certificates.Manager
-	compassClient                director.ConfigClient
+	clientsProvider              compass.ClientsProvider
 	syncService                  kyma.Service
 	configProvider               config.Provider
 	certValidityRenewalThreshold float64
@@ -96,6 +95,7 @@ func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnectio
 	return s.updateCompassConnection(compassConnectionCR)
 }
 
+// TODO - split to methods?
 // SynchronizeWithCompass synchronizes with Compass
 func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error) {
 	s.log = s.log.WithField("CompassConnection", connection.Name)
@@ -129,7 +129,15 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	}
 
 	s.log.Infof("Fetching configuration from Director, from %s url...", connection.Spec.ManagementInfo.DirectorURL)
-	applicationsConfig, err := s.compassClient.FetchConfiguration(connection.Spec.ManagementInfo.DirectorURL, runtimeConfig.RuntimeId, credentials)
+	directorClient, err := s.clientsProvider.GetCompassConfigClient(credentials, connection.Spec.ManagementInfo.DirectorURL)
+	if err != nil {
+		errorMsg := fmt.Sprintf("Failed to prepare configuration client: %s", err.Error())
+		s.log.Error(errorMsg)
+		setSyncFailedStatus(connection, syncAttemptTime, errorMsg)
+		return s.updateCompassConnection(connection)
+	}
+
+	applicationsConfig, err := directorClient.FetchConfiguration(connection.Spec.ManagementInfo.DirectorURL, runtimeConfig.RuntimeId, credentials)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to fetch configuration: %s", err.Error())
 		s.log.Error(errorMsg)

@@ -1,9 +1,11 @@
-package connector
+package compassconnection
 
 import (
 	"crypto/tls"
 	"crypto/x509/pkix"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 
 	"github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
@@ -18,8 +20,8 @@ type EstablishedConnection struct {
 	ManagementInfo v1alpha1.ManagementInfo
 }
 
-type TokenSecuredClientConstructor func(endpoint string, skipTLSVerify bool) TokenSecuredClient
-type CertSecuredClientConstructor func(endpoint string, skipTLSVerify bool, certificates ...tls.Certificate) CertificateSecuredClient
+type TokenSecuredClientConstructor func(endpoint string, skipTLSVerify bool) compass.TokenSecuredClient
+type CertSecuredClientConstructor func(endpoint string, skipTLSVerify bool, certificate *tls.Certificate) CertificateSecuredClient
 
 //go:generate mockery -name=Connector
 type Connector interface {
@@ -29,25 +31,22 @@ type Connector interface {
 
 func NewCompassConnector(
 	csrProvider certificates.CSRProvider,
-	tokenSecuredClientConstructor TokenSecuredClientConstructor,
-	certSecuredClientConstructor CertSecuredClientConstructor,
+	clientsProvider compass.ClientsProvider,
 	insecureConnectorCommunication bool,
 ) Connector {
 	return &compassConnector{
 		csrProvider:                    csrProvider,
-		tokenSecuredClientConstructor:  tokenSecuredClientConstructor,
-		certSecuredClientConstructor:   certSecuredClientConstructor,
+		clientsProvider:                clientsProvider,
 		insecureConnectorCommunication: insecureConnectorCommunication,
 	}
 }
 
 type compassConnector struct {
 	csrProvider                    certificates.CSRProvider
-	tokenSecuredClientConstructor  TokenSecuredClientConstructor
-	certSecuredClientConstructor   CertSecuredClientConstructor
+	clientsProvider                compass.ClientsProvider
 	insecureConnectorCommunication bool
 
-	certSecuredClient CertificateSecuredClient
+	certSecuredClient compass.CertificateSecuredClient
 }
 
 func (cc *compassConnector) EstablishConnection(connectorURL, token string) (EstablishedConnection, error) {
@@ -55,7 +54,11 @@ func (cc *compassConnector) EstablishConnection(connectorURL, token string) (Est
 		return EstablishedConnection{}, errors.New("Failed to establish connection. Connector URL is empty")
 	}
 
-	tokenSecuredConnectorClient := cc.tokenSecuredClientConstructor(connectorURL, cc.insecureConnectorCommunication)
+	tokenSecuredConnectorClient, err := cc.clientsProvider.GetConnectorTokenSecuredClient(connectorURL)
+	if err != nil {
+		return EstablishedConnection{}, errors.Wrap(err, "Failed to prepare Connector Token-secured client")
+	}
+
 	configuration, err := tokenSecuredConnectorClient.Configuration(token)
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to fetch configuration")
@@ -84,7 +87,10 @@ func (cc *compassConnector) EstablishConnection(connectorURL, token string) (Est
 }
 
 func (cc *compassConnector) MaintainConnection(credentials certificates.ClientCredentials, connectorURL string, renewCert bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error) {
-	certSecuredClient := cc.certSecuredClientConstructor(connectorURL, cc.insecureConnectorCommunication, credentials.AsTLSCertificate())
+	certSecuredClient, err := cc.clientsProvider.GetConnectorCertSecuredClient(credentials, connectorURL)
+	if err != nil {
+		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to prepare Certificate-secured Connector client while checking connection")
+	}
 
 	configuration, err := certSecuredClient.Configuration()
 	if err != nil {

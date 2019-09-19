@@ -1,9 +1,7 @@
 package connector
 
 import (
-	"context"
-	"crypto/tls"
-	"net/http"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
 
 	schema "github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
 	gcli "github.com/machinebox/graphql"
@@ -21,21 +19,11 @@ type TokenSecuredClient interface {
 }
 
 type tokenSecuredClient struct {
-	graphQlClient *gcli.Client
-	queryProvider queryProvider
+	graphQlClient graphql.Client
+	queryProvider queryProvider // TODO - query provider as interface?
 }
 
-func NewTokenSecuredConnectorClient(endpoint string, skipTLSVerify bool) TokenSecuredClient {
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: skipTLSVerify,
-			},
-		},
-	}
-
-	graphQlClient := gcli.NewClient(endpoint, gcli.WithHTTPClient(httpClient))
-
+func NewTokenSecuredConnectorClient(graphQlClient graphql.Client) TokenSecuredClient {
 	return &tokenSecuredClient{
 		graphQlClient: graphQlClient,
 		queryProvider: queryProvider{},
@@ -49,7 +37,7 @@ func (c *tokenSecuredClient) Configuration(token string) (schema.Configuration, 
 
 	var response ConfigurationResponse
 
-	err := c.graphQlClient.Run(context.Background(), req, &response)
+	err := c.graphQlClient.Do(req, &response)
 	if err != nil {
 		return schema.Configuration{}, errors.Wrap(err, "Failed to get configuration")
 	}
@@ -63,7 +51,7 @@ func (c *tokenSecuredClient) SignCSR(csr string, token string) (schema.Certifica
 
 	var response CertificationResponse
 
-	err := c.graphQlClient.Run(context.Background(), req, &response)
+	err := c.graphQlClient.Do(req, &response)
 	if err != nil {
 		return schema.CertificationResult{}, errors.Wrap(err, "Failed to generate certificate")
 	}

@@ -1,4 +1,4 @@
-package compass
+package director
 
 import (
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
