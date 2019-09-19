@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -70,7 +71,7 @@ var once sync.Once
 // KnativeAccessLib encapsulates the Knative access lib behaviours.
 type KnativeAccessLib interface {
 	GetChannelByLabels(namespace string, labels map[string]string) (*messagingV1Alpha1.Channel, error)
-	CreateChannel(prefix, namespace string, labels map[string]string, timeout time.Duration) (*messagingV1Alpha1.Channel, error)
+	CreateChannel(prefix, namespace string, labels map[string]string, readyFn ...ChannelReadyFunc) (*messagingV1Alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string, labels map[string]string) error
 	DeleteSubscription(name string, namespace string) error
@@ -78,6 +79,37 @@ type KnativeAccessLib interface {
 	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
 	SendMessage(channel *messagingV1Alpha1.Channel, headers *map[string][]string, message *string) error
 	InjectClient(evClient eventingv1alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1Client.MessagingV1alpha1Interface) error
+}
+
+// ChannelReadyFunc is a function used to ensure that a Channel has become Ready.
+type ChannelReadyFunc func(name string, lister evlistersv1alpha1.ChannelNamespaceLister) error
+
+// WaitForChannelWithTimeout returns a function that waits until a Channel gets
+// Ready or fails after a timeout.
+func WaitForChannelWithTimeout(timeout time.Duration) ChannelReadyFunc {
+	return func(name string, l evlistersv1alpha1.ChannelNamespaceLister) error {
+		tout := time.After(timeout)
+		tick := time.Tick(100 * time.Millisecond)
+
+		var channel *messagingV1Alpha1.Channel
+		var err error
+
+		for ready := false; !ready; {
+			select {
+			case <-tout:
+				return fmt.Errorf("timed out waiting for Channel readiness")
+			case <-tick:
+				channel, err = l.Get(name)
+				if err != nil {
+					log.Printf("ERROR: CreateChannel(): getting channel: %v", err)
+					continue
+				}
+				ready = channel.Status.IsReady()
+			}
+		}
+
+		return nil
+	}
 }
 
 // NewKnativeLib returns an interface to KnativeLib, which can be mocked
@@ -160,7 +192,8 @@ func (k *KnativeLib) GetChannelByLabels(namespace string, labels map[string]stri
 
 // CreateChannel creates a Knative/Eventing channel controlled by the specified provisioner
 func (k *KnativeLib) CreateChannel(prefix, namespace string, labels map[string]string,
-	timeout time.Duration) (*messagingV1Alpha1.Channel, error) {
+	readyFn ...ChannelReadyFunc) (*messagingV1Alpha1.Channel, error) {
+
 	c := makeChannel(prefix, namespace, labels)
 	channel, err := k.messagingChannel.Channels(namespace).Create(c)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
@@ -168,22 +201,12 @@ func (k *KnativeLib) CreateChannel(prefix, namespace string, labels map[string]s
 		return nil, err
 	}
 
-	isReady := channel.Status.IsReady()
-	tout := time.After(timeout)
-	tick := time.Tick(100 * time.Millisecond)
-	for !isReady {
-		select {
-		case <-tout:
-			return nil, errors.New("timed out")
-		case <-tick:
-			channel, err = k.GetChannelByLabels(namespace, labels)
-			if err != nil {
-				log.Printf("ERROR: CreateChannel(): getting channel: %v", err)
-				continue
-			}
-			isReady = channel.Status.IsReady()
+	if readyFn != nil && len(readyFn) == 1 {
+		if err := readyFn[0](channel.Name, k.chLister.Channels(namespace)); err != nil {
+			return nil, err
 		}
 	}
+
 	return channel, nil
 }
 
