@@ -45,7 +45,7 @@ The tracing in Kyma uses the [Jaeger](https://github.com/jaegertracing) distribu
 
 ## API Gateway
 
-The API Gateway aims to provide a set of functionalities which allow developers to expose, secure, and manage their API's in an easy way. The main elemennt of the API Gateway is the API Controllers which exposes services in Kyma.
+The API Gateway aims to provide a set of functionalities which allow developers to expose, secure, and manage their API's in an easy way. The main elemennt of the API Gateway is the API Controller which exposes services in Kyma.
 
 ## Logging
 
