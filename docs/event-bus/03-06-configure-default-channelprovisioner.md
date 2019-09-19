@@ -22,7 +22,7 @@ Read about the examples and the configuration details.
 
 ## In-memory channel
 
-Follow this [guide](https://github.com/knative/eventing/tree/master/config/channels/in-memory-channel) to add the InMemoryChannel resources. This would apply the InMemoryChannel CRD, Controller, and Dispatcher.
+Follow this [guide](https://github.com/knative/eventing/tree/master/config/channels/in-memory-channel) to add the InMemoryChannel resources. This will deploy the InMemoryChannel CRD, Controller, and Dispatcher.
 
 >**NOTE**: Before installing this provisioner, add the following annotation to the [`podTemplate.Spec`](https://github.com/knative/eventing/blob/master/config/channels/in-memory-channel/300-in-memory-channel.yaml) in the `in-memory-channel-controller` Deployment to remove the Istio sidecar.
 
