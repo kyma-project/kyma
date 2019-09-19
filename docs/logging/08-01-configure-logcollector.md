@@ -3,7 +3,7 @@ title: Configure the log collector
 type: Tutorials
 ---
 
-By default, Loki comes with the [promtail](https://github.com/grafana/loki) log collector configuration. Additionally, Kyma supports other log collectors you can easily configure, such as [Fluent Bit](https://fluentbit.io/).
+By default, Loki comes with the [Promtail](https://github.com/grafana/loki) log collector configuration. Additionally, Kyma supports other log collectors you can easily configure, such as [Fluent Bit](https://fluentbit.io/).
 
 Follow these steps to adjust the Loki configuration to use Fluent Bit and Elasticsearch:
 
