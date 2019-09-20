@@ -67,7 +67,7 @@ var once sync.Once
 type KnativeAccessLib interface {
 	GetChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error)
 	GetChannelByLabels(namespace string, labels *map[string]string) (*messagingV1Alpha1.Channel, error)
-	CreateChannel(prefix string, namespace string, labels *map[string]string,
+	CreateChannel(prefix, namespace string, labels map[string]string,
 		timeout time.Duration) (*messagingV1Alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string) error
