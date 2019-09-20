@@ -136,7 +136,7 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*messagingV1Alph
 // so based on the labels, we assume that the list of channels should have only one item in it
 // Hence, we'd be returning the item at 0th index.
 func (k *KnativeLib) GetChannelByLabels(namespace string, labels map[string]string) (*messagingV1Alpha1.Channel, error) {
-	if labels == nil {
+	if len(labels) == 0 {
 		return nil, errors.New("no labels were passed to GetChannelByLabels()")
 	}
 	channelList, err := k.messagingChannel.Channels(namespace).List(metav1.ListOptions{
