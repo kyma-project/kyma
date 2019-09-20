@@ -162,7 +162,7 @@ func (k *KnativeLib) GetChannelByLabels(namespace string, labels *map[string]str
 }
 
 // CreateChannel creates a Knative/Eventing channel controlled by the specified provisioner
-func (k *KnativeLib) CreateChannel(prefix string, namespace string, labels *map[string]string,
+func (k *KnativeLib) CreateChannel(prefix, namespace string, labels map[string]string,
 	timeout time.Duration) (*messagingV1Alpha1.Channel, error) {
 	c := makeChannel(prefix, namespace, labels)
 	channel, err := k.messagingChannel.Channels(namespace).Create(c)
