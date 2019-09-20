@@ -20,77 +20,82 @@ import (
 	"flag"
 	"os"
 
-	buildv1alpha1 "github.com/knative/build/pkg/apis/build/v1alpha1"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/controller"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/webhook"
+	// allow client authentication against GKE clusters
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+
+	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
+
+	buildv1alpha1 "github.com/knative/build/pkg/apis/build/v1alpha1"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/controller"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/webhook"
 )
 
-func main() {
-	var metricsAddr string
+var (
+	metricsAddr string
+	devLog      bool
+)
+
+func init() {
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
+	flag.BoolVar(&devLog, "devlog", false, "Enable logger's development mode")
+}
+
+func main() {
 	flag.Parse()
-	logf.SetLogger(logf.ZapLogger(false))
+
+	logf.SetLogger(logf.ZapLogger(devLog))
 	log := logf.Log.WithName("entrypoint")
 
-	// Get a config to talk to the apiserver
-	log.Info("setting up client for manager")
+	log.Info("Generating Kubernetes client config")
 	cfg, err := config.GetConfig()
 	if err != nil {
-		log.Error(err, "unable to set up client config")
+		log.Error(err, "Unable to generate Kubernetes client config")
 		os.Exit(1)
 	}
 
-	// Create a new Cmd to provide shared dependencies and start components
-	log.Info("setting up manager")
+	log.Info("Initializing controller manager")
 	mgr, err := manager.New(cfg, manager.Options{})
 	if err != nil {
-		log.Error(err, "unable to set up overall controller manager")
+		log.Error(err, "Unable to initialize controller manager")
 		os.Exit(1)
 	}
 
-	log.Info("Registering Components.")
-
-	// Setup Scheme for all resources
-	log.Info("setting up scheme")
-	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "unable add APIs to scheme")
-		os.Exit(1)
+	log.Info("Registering custom resources")
+	schemeSetupFns := []func(*runtime.Scheme) error{
+		apis.AddToScheme,
+		servingv1alpha1.AddToScheme,
+		buildv1alpha1.AddToScheme,
 	}
 
-	if err := servingv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "unable add Serving APIs to scheme")
-		os.Exit(1)
+	for _, fn := range schemeSetupFns {
+		if err := fn(mgr.GetScheme()); err != nil {
+			log.Error(err, "Unable to register custom resources")
+			os.Exit(1)
+		}
 	}
 
-	if err := buildv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "unable add Build APIs to scheme")
-		os.Exit(1)
-	}
-
-	// Setup all Controllers
-	log.Info("Setting up controller")
+	log.Info("Adding controllers to the manager")
 	if err := controller.AddToManager(mgr); err != nil {
-		log.Error(err, "unable to register controllers to the manager")
+		log.Error(err, "Unable to add controllers to the manager")
 		os.Exit(1)
 	}
 
-	log.Info("setting up webhooks")
+	log.Info("Adding webhooks to the manager")
 	if err := webhook.AddToManager(mgr); err != nil {
-		log.Error(err, "unable to register webhooks to the manager")
+		log.Error(err, "Unable to add webhooks to the manager")
 		os.Exit(1)
 	}
 
-	// Start the Cmd
-	log.Info("Starting the Cmd.")
+	log.Info("Running manager")
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-		log.Error(err, "unable to run the manager")
+		log.Error(err, "Unable to run the manager")
 		os.Exit(1)
 	}
 }
