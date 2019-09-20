@@ -148,6 +148,10 @@ func TestReconcile(t *testing.T) {
 		Should(gomega.Succeed())
 	g.Expect(ksvc.Namespace).To(gomega.Equal("default"))
 
+	// ensure only one container is defined
+	g.Expect(len(ksvc.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers)).
+		To(gomega.Equal(1))
+
 	// ensure container environment variables are correct
 	g.Expect(ksvc.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Env).To(gomega.Equal(expectedEnv))
 
@@ -155,28 +159,9 @@ func TestReconcile(t *testing.T) {
 	hash := sha256.New()
 	hash.Write([]byte(functionConfigMap.Data["handler.js"] + functionConfigMap.Data["package.json"]))
 	functionSha := fmt.Sprintf("%x", hash.Sum(nil))
+	functionShaImage := fmt.Sprintf("test/%s-%s:%s", "default", "foo", functionSha)
 	shortSha := functionSha[:10]
 	buildName := fmt.Sprintf("%s-%s", fnCreated.Name, shortSha)
-
-	// get the Task
-	task := &tektonv1alpha1.Task{}
-	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Name: "function-build", Namespace: "default"}, task)
-	}, timeout).
-		Should(gomega.Succeed())
-
-	// ensure Task input params are defined
-	var idTaskInputParam gstruct.Identifier = func(element interface{}) string {
-		return element.(tektonv1alpha1.ParamSpec).Name
-	}
-	var matchTaskInputParamType gomegatypes.GomegaMatcher = gstruct.MatchFields(gstruct.IgnoreExtras,
-		gstruct.Fields{"Type": gomega.Equal(tektonv1alpha1.ParamTypeString)},
-	)
-	g.Expect(task.Spec.Inputs.Params).To(gstruct.MatchAllElements(idTaskInputParam, gstruct.Elements{
-		"imageName":               matchTaskInputParamType,
-		"dockerfileConfigmapName": matchTaskInputParamType,
-		"sourceConfigmapName":     matchTaskInputParamType,
-	}))
 
 	// get the TaskRun object
 	tr := &tektonv1alpha1.TaskRun{}
@@ -185,50 +170,51 @@ func TestReconcile(t *testing.T) {
 	}, timeout).
 		Should(gomega.Succeed())
 
-	// ensure build template references all ConfigMaps (Dockerfiles, Fn source)
-	var idTaskVolumes gstruct.Identifier = func(element interface{}) string {
+	// ensure build TaskSpec references all ConfigMaps (Dockerfile, Fn source)
+	var idVolume gstruct.Identifier = func(element interface{}) string {
 		return element.(corev1.Volume).Name
 	}
-	var matchTaskVolumeSource gomegatypes.GomegaMatcher = gstruct.MatchFields(gstruct.IgnoreExtras,
-		gstruct.Fields{"VolumeSource": gstruct.MatchFields(gstruct.IgnoreExtras,
-			gstruct.Fields{"ConfigMap": gomega.Not(gomega.BeNil())},
-		)},
-	)
-	g.Expect(task.Spec.Volumes).To(gstruct.MatchAllElements(idTaskVolumes, gstruct.Elements{
-		"dockerfile-nodejs6": matchTaskVolumeSource,
-		"dockerfile-nodejs8": matchTaskVolumeSource,
-		"source":             matchTaskVolumeSource,
+	var matchCmapVolumeSource = func(cmName string) gomegatypes.GomegaMatcher {
+		return gstruct.MatchFields(gstruct.IgnoreExtras,
+			gstruct.Fields{"VolumeSource": gstruct.MatchFields(gstruct.IgnoreExtras,
+				gstruct.Fields{"ConfigMap": gstruct.PointTo(gstruct.MatchFields(gstruct.IgnoreExtras,
+					gstruct.Fields{
+						"DefaultMode": gstruct.PointTo(gomega.BeNumerically("==", 420)),
+						"LocalObjectReference": gstruct.MatchFields(gstruct.Options(0),
+							gstruct.Fields{"Name": gomega.Equal(cmName)},
+						),
+					},
+				))},
+			)},
+		)
+	}
+	g.Expect(tr.Spec.TaskSpec.Volumes).To(gstruct.MatchAllElements(idVolume, gstruct.Elements{
+		"dockerfile": matchCmapVolumeSource("dockerfile-nodejs6"),
+		"source":     matchCmapVolumeSource("foo"),
 	}))
 
 	g.Expect(tr.Spec.ServiceAccount).To(gomega.Equal("build-bot"))
 
-	g.Expect(len(ksvc.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers)).To(gomega.Equal(1))
-
-	// ensure that TaskRun params are set to their expected value
-	imageNameService := ksvc.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image
-
-	var idTaskRunInputParam gstruct.Identifier = func(element interface{}) string {
-		return element.(tektonv1alpha1.Param).Name
-	}
-	var matchTaskRunInputParamValue = func(val string) gomegatypes.GomegaMatcher {
-		return gstruct.MatchFields(gstruct.IgnoreExtras,
-			gstruct.Fields{"Value": gstruct.MatchFields(gstruct.IgnoreExtras,
-				gstruct.Fields{"StringVal": gomega.Equal(val)},
-			)},
-		)
-	}
-	g.Expect(tr.Spec.Inputs.Params).To(gstruct.MatchAllElements(idTaskRunInputParam, gstruct.Elements{
-		"imageName":               matchTaskRunInputParamValue(imageNameService),
-		"dockerfileConfigmapName": matchTaskRunInputParamValue("dockerfile-" + fnCreated.Spec.Runtime),
-		"sourceConfigmapName":     matchTaskRunInputParamValue(fnCreated.Name),
-	}))
-
-	g.Expect(len(task.Spec.Steps)).To(gomega.Equal(1))
+	g.Expect(len(tr.Spec.TaskSpec.Steps)).To(gomega.Equal(1))
 
 	// ensure Task build step has correct args
-	g.Expect(task.Spec.Steps[0].Args).To(gomega.ConsistOf(
-		"--destination=$(inputs.params.imageName)",
+	g.Expect(tr.Spec.TaskSpec.Steps[0].Args).To(gomega.ConsistOf(
+		"--destination=" + functionShaImage,
 	))
+
+	// ensure Task build step has the correct volumes mounted
+	var idVolumeMount gstruct.Identifier = func(element interface{}) string {
+		return element.(corev1.VolumeMount).Name
+	}
+	var matchVolumeMountPath = func(path string) gomegatypes.GomegaMatcher {
+		return gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+			"MountPath": gomega.Equal(path),
+		})
+	}
+	g.Expect(tr.Spec.TaskSpec.Steps[0].VolumeMounts).To(gstruct.MatchAllElements(idVolumeMount, gstruct.Elements{
+		"source":     matchVolumeMountPath("/src"),
+		"dockerfile": matchVolumeMountPath("/workspace"),
+	}))
 
 	// ensure fetched function spec corresponds to created function spec
 	fnUpdatedFetched := &serverlessv1alpha1.Function{}
@@ -276,11 +262,11 @@ func TestReconcile(t *testing.T) {
 	hash = sha256.New()
 	hash.Write([]byte(cmUpdated.Data["handler.js"] + cmUpdated.Data["package.json"]))
 	functionSha = fmt.Sprintf("%x", hash.Sum(nil))
+	functionShaImage = fmt.Sprintf("test/%s-%s:%s", "default", "foo", functionSha)
 	fmt.Printf("functionSha: %s \n", functionSha)
 	fmt.Printf("ksvcUpdated: %v \n", ksvcUpdated)
 	fmt.Printf("ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image: %s \n", ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image)
 	ksvcUpdatedImage := ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image
-	functionShaImage := fmt.Sprintf("test/%s-%s:%s", "default", "foo", functionSha)
 
 	g.Expect(ksvcUpdatedImage).To(gomega.Equal(functionShaImage))
 

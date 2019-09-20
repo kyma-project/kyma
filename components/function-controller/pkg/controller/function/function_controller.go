@@ -97,9 +97,6 @@ var (
 
 	// namespace of function config
 	fnConfigNamespace = getEnvDefault("CONTROLLER_CONFIGMAP_NS", "default")
-
-	// name of build Task
-	buildTaskName = getEnvDefault("BUILD_TASK", "function-build")
 )
 
 // ReconcileFunction is the controller.Reconciler implementation for Function objects.
@@ -178,16 +175,6 @@ func (r *ReconcileFunction) Reconcile(req reconcile.Request) (reconcile.Result, 
 		}
 
 		log.Error(err, "Error during sync of the Function ConfigMap", "namespace", fn.Namespace, "name", fn.Name)
-		return reconcile.Result{}, err
-	}
-
-	// Synchronize Function build Task
-	if err := r.syncFunctionBuildTask(fn, rnInfo); err != nil {
-		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
-			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
-		}
-
-		log.Error(err, "Error during sync of the Function build Task", "namespace", fn.Namespace, "name", buildTaskName)
 		return reconcile.Result{}, err
 	}
 
@@ -369,94 +356,6 @@ func generateFunctionHash(fnCm *corev1.ConfigMap) (string, error) {
 	return fmt.Sprintf("%x", hash.Sum(nil)), nil
 }
 
-// syncFunctionBuildTask reconciles the current Function build Task with its
-// desired state.
-func (r *ReconcileFunction) syncFunctionBuildTask(fn *serverlessv1alpha1.Function, ri *runtimeUtil.RuntimeInfo) error {
-	desiredTask := &tektonv1alpha1.Task{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      buildTaskName,
-			Namespace: fn.Namespace,
-		},
-		Spec: *runtimeUtil.GetBuildTaskSpec(ri),
-	}
-
-	if err := controllerutil.SetControllerReference(fn, desiredTask, r.scheme); err != nil {
-		return fmt.Errorf("error setting controller reference: %s", err)
-	}
-
-	currentTask, err := r.getOrCreateFunctionBuildTask(desiredTask)
-	if err != nil {
-		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
-			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
-		}
-
-		return err
-	}
-
-	if _, err = r.updateFunctionBuildTask(currentTask, desiredTask); err != nil {
-		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
-			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
-		}
-
-		return err
-	}
-
-	return nil
-}
-
-// getOrCreateFunctionBuildTask returns the existing Function build Task or
-// creates it from the given desired state if it does not exist.
-func (r *ReconcileFunction) getOrCreateFunctionBuildTask(desiredTask *tektonv1alpha1.Task) (*tektonv1alpha1.Task, error) {
-	ctx := context.TODO()
-
-	currentTask := &tektonv1alpha1.Task{}
-	err := r.Get(ctx,
-		client.ObjectKey{
-			Name:      desiredTask.Name,
-			Namespace: desiredTask.Namespace,
-		},
-		currentTask,
-	)
-
-	switch {
-	case errors.IsNotFound(err):
-		// TODO(antoineco): a Kubernetes event would be more suitable than a log entry
-		log.Info("Creating Function build Task", "namespace", desiredTask.Namespace, "name", desiredTask.Name)
-
-		if err := r.Create(ctx, desiredTask); err != nil {
-			return nil, err
-		}
-		return desiredTask, nil
-
-	case err != nil:
-		return nil, err
-	}
-
-	return currentTask, nil
-}
-
-// updateFunctionBuildTask reconciles the current Function build Task with its
-// desired state.
-func (r *ReconcileFunction) updateFunctionBuildTask(currentTask, desiredTask *tektonv1alpha1.Task) (*tektonv1alpha1.Task, error) {
-	if reflect.DeepEqual(desiredTask.Spec, currentTask.Spec) {
-		return currentTask, nil
-	}
-
-	// TODO(antoineco): a Kubernetes event would be more suitable than a log entry
-	log.Info("Updating Function build Task", "namespace", desiredTask.Namespace, "name", desiredTask.Name)
-
-	newTask := &tektonv1alpha1.Task{
-		ObjectMeta: desiredTask.ObjectMeta,
-		Spec:       desiredTask.Spec,
-	}
-	newTask.ResourceVersion = currentTask.ResourceVersion
-
-	if err := r.Update(context.TODO(), newTask); err != nil {
-		return nil, err
-	}
-	return newTask, nil
-}
-
 // buildFunctionImage creates a container image build.
 func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, fn *serverlessv1alpha1.Function,
 	imageName, buildName string) (*tektonv1alpha1.TaskRun, error) {
@@ -467,7 +366,7 @@ func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, 
 			Namespace: fn.Namespace,
 			Labels:    fn.Labels,
 		},
-		Spec: *runtimeUtil.GetBuildTaskRunSpec(rnInfo, fn, imageName, buildTaskName),
+		Spec: *runtimeUtil.GetBuildTaskRunSpec(rnInfo, fn, imageName),
 	}
 
 	if err := controllerutil.SetControllerReference(fn, desiredTr, r.scheme); err != nil {
