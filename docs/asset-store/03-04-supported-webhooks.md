@@ -22,7 +22,8 @@ If you create a specific mutation, validation, or metadata service for the avail
 - **mutation service** must expose endpoints that:
 
   - accept **parameters** and **content** properties.
-  - return `200` and `304` responses, and provide new file content with the `200` response.
+  - return the `200` response with new file content.
+  - return the `304` response.
 
 See the example of the validation service with the `/convert` endpoint [here](./assets/mutation-service.yaml). To preview and test it, use the [Swagger Editor](https://editor.swagger.io).
 
