@@ -35,6 +35,12 @@ oidc:
       - 'http://kiali.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
       - 'https://kiali.{{ .Values.global.ingress.domainName }}/oauth/callback'
       secret: hiFWLWqIxw5d3gl
+    - id: compass-ui
+      name: Compass UI
+      redirectURIs:
+      - 'https://compass.{{ .Values.global.ingress.domainName }}'
+      - 'http://compass-dev.{{ .Values.global.ingress.domainName }}:8080'
+      secret: th2T43VyHp43bqr
   staticClientsExtra: |-
 
 connectors: |-
@@ -57,8 +63,10 @@ resources:
     memory: 16Mi
 global:
   isLocalEnv: false
-  gateway:
-    name: kyma-gateway
+  istio:
+    gateway:
+      name: kyma-gateway
+      namespace: kyma-system
   dex_static_user_configurer:
     dir: pr/
     version: "PR-5433"
