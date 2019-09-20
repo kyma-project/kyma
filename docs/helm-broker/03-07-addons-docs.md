@@ -4,14 +4,14 @@ type: Details
 ---
 
 Using the Helm Broker, you can provide documentation for your addon and display it in the Console UI. There are two cases in which you may want to use this feature:
-- Provide documentation for your addon
-- Provide documentation for objects that appear after provisioning your addon
+- Providing documentation for your addon
+- Providing documentation for objects that appear after provisioning your addon
 
 >**NOTE:** Deliver documentation for your addons in Markdown files with specified metadata. To learn more about the metadata and content of the Markdown files, read [this](/components/headless-cms/#details-markdown-documents) document. For more information about the currently supported types of assets, read [this](/components/headless-cms/#overview-overview-headless-cms-in-kyma) document.
 
 ## Provide documentation for your addon
 
-To provide documentation for your addon, create the `docs` folder inside it. Your `docs` folder must contain a [`meta.yaml`](#details-create-addons-docs-directory) file with metadata information about how documentation for the addon is uploaded. You can either provide your own documents or point to the external URL with the source documentation:
+To provide documentation for your addon, create the `docs` folder inside your addon's directory. Your `docs` folder must contain a [`meta.yaml`](#details-create-addons-docs-directory) file with metadata information about how documentation for the addon is uploaded. You can either provide your own documents or point to the external URL with the source documentation:
 
 <div tabs>
   <details>
@@ -19,7 +19,7 @@ To provide documentation for your addon, create the `docs` folder inside it. You
   Provide your own documentation
   </summary>
 
-Store your documents and assets in the `docs` folder inside your addon. Each Markdown file represents a separate tab in the Console UI. The documents are ordered according to the **type** metadata of your Markdown documents. Point the **filter** parameter of your `meta.yaml` file to the location where your documentation is stored, for example the `docs` directory.
+Store your documents and assets in the `docs` folder inside your addon's directory. Each Markdown file represents a separate tab in the Console UI. The **type** metadata of your Markdown documents determines the order of the documents. Point the **filter** parameter of your `meta.yaml` file to the location where your documentation is stored, for example the `docs` directory.
 
   </details>
   <details>
