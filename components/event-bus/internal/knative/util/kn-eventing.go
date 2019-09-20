@@ -66,7 +66,7 @@ var once sync.Once
 // KnativeAccessLib encapsulates the Knative access lib behaviours.
 type KnativeAccessLib interface {
 	GetChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error)
-	GetChannelByLabels(namespace string, labels *map[string]string) (*messagingV1Alpha1.Channel, error)
+	GetChannelByLabels(namespace string, labels map[string]string) (*messagingV1Alpha1.Channel, error)
 	CreateChannel(prefix, namespace string, labels map[string]string,
 		timeout time.Duration) (*messagingV1Alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
@@ -135,12 +135,12 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*messagingV1Alph
 // GetChannelByLabels return a knative channel fetched via label selectors
 // so based on the labels, we assume that the list of channels should have only one item in it
 // Hence, we'd be returning the item at 0th index.
-func (k *KnativeLib) GetChannelByLabels(namespace string, labels *map[string]string) (*messagingV1Alpha1.Channel, error) {
+func (k *KnativeLib) GetChannelByLabels(namespace string, labels map[string]string) (*messagingV1Alpha1.Channel, error) {
 	if labels == nil {
 		return nil, errors.New("no labels were passed to GetChannelByLabels()")
 	}
 	channelList, err := k.messagingChannel.Channels(namespace).List(metav1.ListOptions{
-		LabelSelector: getLabelSelectorsAsString(*labels),
+		LabelSelector: getLabelSelectorsAsString(labels),
 	})
 	if err != nil {
 		log.Printf("ERROR: GetChannelByLabels(): getting channels by labels: %v", err)
@@ -152,7 +152,7 @@ func (k *KnativeLib) GetChannelByLabels(namespace string, labels *map[string]str
 	// ChannelList length should exactly be equal to 1
 	if channelListLength := len(channelList.Items); channelListLength != 1 {
 		if channelListLength == 0 {
-			log.Printf("no channels with the %v labels were found in %v namespace", *labels, namespace)
+			log.Printf("no channels with the %v labels were found in %v namespace", labels, namespace)
 			return nil, k8serrors.NewNotFound(messagingV1Alpha1.Resource("channels"), "")
 		}
 		log.Printf("ERROR: GetChannelByLabels(): channel list has %d items", channelListLength)
@@ -179,7 +179,7 @@ func (k *KnativeLib) CreateChannel(prefix, namespace string, labels map[string]s
 		case <-tout:
 			return nil, errors.New("timed out")
 		case <-tick:
-			if channel, err = k.GetChannelByLabels(namespace, &labels); err != nil {
+			if channel, err = k.GetChannelByLabels(namespace, labels); err != nil {
 				log.Printf("ERROR: CreateChannel(): geting channel: %v", err)
 			} else {
 				isReady = channel.Status.IsReady()

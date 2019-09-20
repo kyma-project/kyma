@@ -357,7 +357,7 @@ func (k *MockKnativeLib) GetChannel(name string, namespace string) (*messagingV1
 	return channel, nil
 }
 
-func (k *MockKnativeLib) GetChannelByLabels(namespace string, labels *map[string]string) (*messagingV1Alpha1.Channel, error) {
+func (k *MockKnativeLib) GetChannelByLabels(namespace string, labels map[string]string) (*messagingV1Alpha1.Channel, error) {
 	var channelName string
 	for name := range knChannels {
 		channelName = name

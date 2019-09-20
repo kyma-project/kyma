@@ -117,7 +117,7 @@ func Test_GetChannelByLabels(t *testing.T) {
 	log.Printf("Channel created: %v", ch1)
 	log.Println("Getting Channel By label")
 
-	ch2, err2 := k.GetChannelByLabels(testNS, &labels)
+	ch2, err2 := k.GetChannelByLabels(testNS, labels)
 	assert.Nil(t, err2)
 
 	ignore := cmpopts.IgnoreTypes(apis.VolatileTime{})
