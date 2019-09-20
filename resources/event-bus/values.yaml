@@ -12,7 +12,7 @@ global:
     subscriptionControllerImage: subscription-controller
   event_bus_tests:
     dir: develop/
-    version: 7f7a8031
+    version: 1568c92d
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
