@@ -57,15 +57,15 @@ Kyma integrates with [Velero](https://github.com/heptio/velero/) to provide back
 
 ## Console
 
-The Console is a web-based administrative UI for Kyma. It uses the [Luigi framework](https://github.com/SAP/luigi) to allow you to seamlessly extend the UI content with custom micro frontends. A backend service which provides an API for all views of the Console UI is the Console Backend Service.
+The Console is a web-based administrative UI for Kyma. It uses the [Luigi framework](https://github.com/SAP/luigi) to allow you to seamlessly extend the UI content with custom micro frontends. The Console has a dedicated backend service, Console Backend Service, which provides an API tailor-made to each view of the Console UI.
 
 ## Asset Store
 
-The Asset Store is a flexible, scalable, multi-cloud, and location-independent Kubernetes-native solution for storing assets, such as documents, files, images, API specifications, and client-side applications. Its main components are Asset and Bucket custom resources (CRs), Asset and Bucket Controllers, and Minio Gateway as a default storage solution. The Asset Store also allows you to use optional services, such as Validation, Mutation, and Metadata Services.
+The Asset Store is a flexible, scalable, multi-cloud, and location-independent Kubernetes-native solution for storing assets, such as documents, files, images, API specifications, and client-side applications. The Asset Store consists of Minio and custom resources. The custom resources are managed by a controller that communicates through Minio Gateway with external cloud providers.
 
 ## Headless CMS
 
-The Headless CMS is a new kind of Content Management Systems (CMS) that provides a way of storing and managing raw content, and exposing it through an API. It only ensures a database backend without providing a display layer. In Kyma, the Headless CMS allows you to upload multiple and grouped data for a given documentation topic and store them as Asset CRs in Minio buckets.
+The Headless CMS is a Kubernetes native Content Management Systems (CMS) that provides a way of storing and managing raw content, and exposing it through an API. The Headless CMS is an abstraction on top of the Asset Store which provides a data layer. The Headless CMS has no dedicated presentation layer but it is integrated with the Console UI that consumes content stored using Headless CMS.
 
 ## Compass
 
