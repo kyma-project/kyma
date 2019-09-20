@@ -58,13 +58,14 @@ func (c *eventActivationConverter) ToGQLEvents(in *spec.AsyncAPISpec) []gqlschem
 }
 
 func (c *eventActivationConverter) getEventVersionedType(in string) (string, string) {
-	lastDotIndex := strings.LastIndex(in, ".")
+	versionedType := strings.ReplaceAll(in, "/", ".")
+	lastDotIndex := strings.LastIndex(versionedType, ".")
 	if lastDotIndex < 0 {
-		return in, ""
+		return versionedType, ""
 	}
 
-	eventType := in[:lastDotIndex]
-	version := in[(lastDotIndex + 1):]
+	eventType := versionedType[:lastDotIndex]
+	version := versionedType[(lastDotIndex + 1):]
 
 	return eventType, version
 }
