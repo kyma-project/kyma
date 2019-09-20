@@ -105,7 +105,7 @@ The `meta.yaml` file contains the specification of the ClusterDocsTopic or DocsT
 | **docs[].template.description**        |   Yes   | Provides the description of the ClusterDocsTopic or DocsTopic. |
 | **docs[].template.sources[]**          |   Yes   | Contains the definitions of assets for an addon. |
 | **docs[].template.sources[].type**     |   Yes   | Defines the type of the asset. |
-| **docs[].template.sources[].name**     |   Yes   | Defines a unique identifier of a given asset. It must be unique in a given type. |
+| **docs[].template.sources[].name**     |   Yes   | Defines a unique identifier of a given asset. It must be unique for a given type. |
 | **docs[].template.sources[].mode**     |   Yes   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR format. Use `single` for one file and `package` for a set of files. |
 | **docs[].template.sources[].url**      |   Yes   | Specifies the location of a file. |
 | **docs[].template.sources[].filter**   |   Yes   | Specifies the directory from which the documentation is fetched. The regex used in the filter must be [RE2](https://golang.org/s/re2syntax)-compliant.  |
