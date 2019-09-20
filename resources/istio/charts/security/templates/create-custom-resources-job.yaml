@@ -1,6 +1,12 @@
 {{- if .Values.createMeshPolicy }}
 apiVersion: v1
 kind: ServiceAccount
+{{- if .Values.global.imagePullSecrets }}
+imagePullSecrets:
+{{- range .Values.global.imagePullSecrets }}
+  - name: {{ . }}
+{{- end }}
+{{- end }}
 metadata:
   name: istio-security-post-install-account
   namespace: {{ .Release.Namespace }}
@@ -57,6 +63,7 @@ metadata:
   name: istio-security-post-install-{{ .Values.global.tag | printf "%v" | trunc 32  }}
   namespace: {{ .Release.Namespace }}
   annotations:
+    # the "post-upgrade" hook is added to ensure proper Kyma upgrade. Leave it as it is when upgrading istio
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: hook-succeeded
   labels:
