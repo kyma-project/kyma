@@ -13,8 +13,8 @@ Kyma modifications in Istio-init are Helm hooks in jobs. Istio-init also contain
 
 The Istio chart should be upgraded by applying all changes introduced in the target version of Istio.
 
-Sub-charts shouldn't contain any Kyma-specific modifications either in the sub-chart's `values.yaml` file or in the sub-chart's `yaml` files. Any necessary modifications should be introduced in the `values.yaml` file of the main Istio chart. 
-Additionally, the main Istio chart has a `customization` sub-chart designed to handle all modifications that can't be applied through the `values.yaml` file of the main chart.  
+Sub-charts shouldn't contain any Kyma-specific modifications either in the sub-chart's `values.yaml` file or in the sub-chart's `yaml` files. Any necessary modifications should be introduced in the `values.yaml` file of the main Istio chart. There are, however, some changes that had to be applied directly in the charts. Those changes are marked with appropriate comments.
+Additionally, the main Istio chart has a `customization` sub-chart designed to handle all modifications that can't be applied through the `values.yaml` file of the main chart. The custom changes in `values.yaml` are also marked with appropriate comments.
 
 The default versions of Prometheus, Grafana, and Kiali that come with Istio are not used in Kyma. Update these components without introducing any changes and make sure they remain disabled in the `requirements.yaml` file. Changes to these components should be applied in their respective standalone component charts and should be consulted with the owners of these components.
 
