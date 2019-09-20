@@ -1,6 +1,11 @@
 package compass
 
-import "github.com/kyma-incubator/compass/components/director/pkg/graphql"
+import (
+	"encoding/json"
+
+	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
+	"github.com/pkg/errors"
+)
 
 type ScenariosSchema struct {
 	Type        string         `json:"type"`
@@ -12,6 +17,15 @@ type ScenariosSchema struct {
 type ScenariosItems struct {
 	Type string   `json:"type"`
 	Enum []string `json:"enum"`
+}
+
+func ToScenarioSchema(response ScenarioLabelDefinitionResponse) (ScenariosSchema, error) {
+	var scenarioSchema ScenariosSchema
+	err := json.Unmarshal([]byte(response.Result.Schema), &scenarioSchema)
+	if err != nil {
+		return ScenariosSchema{}, errors.Wrap(err, "Failed to unmarshall scenario schema")
+	}
+	return scenarioSchema, nil
 }
 
 func (ss *ScenariosSchema) ToLabelDefinitionInput(key string) (graphql.LabelDefinitionInput, error) {

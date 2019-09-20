@@ -3,6 +3,7 @@ package compass
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
@@ -103,8 +104,13 @@ func (c *Client) getScenarios() (ScenariosSchema, error) {
 	if err != nil {
 		return ScenariosSchema{}, errors.Wrap(err, "Failed to get scenarios label definition")
 	}
+	fmt.Println(response)
+	scenarioSchema, err := ToScenarioSchema(response)
+	if err != nil {
+		return ScenariosSchema{}, errors.Wrap(err, "Failed to get scenario schema")
+	}
 
-	return response.Result.Schema, nil
+	return scenarioSchema, nil
 }
 
 func (c *Client) updateScenarios(schema ScenariosSchema) (ScenariosSchema, error) {
@@ -126,7 +132,12 @@ func (c *Client) updateScenarios(schema ScenariosSchema) (ScenariosSchema, error
 		return ScenariosSchema{}, errors.Wrap(err, "Failed to update scenarios label definition")
 	}
 
-	return response.Result.Schema, nil
+	scenarioSchema, err := ToScenarioSchema(response)
+	if err != nil {
+		return ScenariosSchema{}, errors.Wrap(err, "Failed to get scenario schema")
+	}
+
+	return scenarioSchema, nil
 }
 
 func (c *Client) labelRuntime(values []string) error {
