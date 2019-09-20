@@ -7,7 +7,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/metrics"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
-	eventBusUtil "github.com/kyma-project/kyma/components/event-bus/pkg/util"
 	"github.com/prometheus/client_golang/prometheus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -130,7 +129,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	knativeSubsName := util.GetKnSubscriptionName(&subscription.Name, &subscription.Namespace)
 	knativeSubsNamespace := util.GetDefaultChannelNamespace()
 	knativeSubsURI := subscription.Endpoint
-	knativeChannelName := eventBusUtil.GetKnativeChannelName(&subscription.SubscriptionSpec.SourceID, &subscription.SubscriptionSpec.EventType, r.opts.MaxChannelNameLength)
+	//knativeChannelName := eventBusUtil.GetKnativeChannelName(&subscription.SubscriptionSpec.SourceID, &subscription.SubscriptionSpec.EventType, r.opts.MaxChannelNameLength)
 	timeout := r.opts.ChannelTimeout
 
 	//Adding the event-metadata as channel labels
@@ -181,7 +180,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			return false, err
 		} else if errors.IsNotFound(err) {
 
-			knativeChannel, err = r.knativeLib.CreateChannel(knativeChannelName,
+			knativeChannel, err = r.knativeLib.CreateChannel(subscription.SubscriptionSpec.EventType,
 				knativeSubsNamespace, &knativeChannelLabels, timeout)
 			if err != nil {
 				return false, err

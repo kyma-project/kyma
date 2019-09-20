@@ -64,7 +64,7 @@ var once sync.Once
 type KnativeAccessLib interface {
 	GetChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error)
 	GetChannelByLabels(namespace string, labels *map[string]string) (*messagingV1Alpha1.Channel, error)
-	CreateChannel(name string, namespace string, labels *map[string]string,
+	CreateChannel(generatedName string, namespace string, labels *map[string]string,
 		timeout time.Duration) (*messagingV1Alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string) error
@@ -159,9 +159,9 @@ func (k *KnativeLib) GetChannelByLabels(namespace string, labels *map[string]str
 }
 
 // CreateChannel creates a Knative/Eventing channel controlled by the specified provisioner
-func (k *KnativeLib) CreateChannel(name string, namespace string, labels *map[string]string,
+func (k *KnativeLib) CreateChannel(generatedName string, namespace string, labels *map[string]string,
 	timeout time.Duration) (*messagingV1Alpha1.Channel, error) {
-	c := makeChannel(name, namespace, labels)
+	c := makeChannel(generatedName, namespace, labels)
 	channel, err := k.messagingChannel.Channels(namespace).Create(c)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		log.Printf("ERROR: CreateChannel(): creating channel: %v", err)
@@ -176,7 +176,7 @@ func (k *KnativeLib) CreateChannel(name string, namespace string, labels *map[st
 		case <-tout:
 			return nil, errors.New("timed out")
 		case <-tick:
-			if channel, err = k.messagingChannel.Channels(namespace).Get(name, metav1.GetOptions{}); err != nil {
+			if channel, err = k.GetChannelByLabels(namespace, labels); err != nil {
 				log.Printf("ERROR: CreateChannel(): geting channel: %v", err)
 			} else {
 				isReady = channel.Status.IsReady()
@@ -336,12 +336,12 @@ func resendMessage(httpClient *http.Client, channel *messagingV1Alpha1.Channel, 
 	return nil
 }
 
-func makeChannel(name string, namespace string, labels *map[string]string) *messagingV1Alpha1.Channel {
+func makeChannel(generatedName string, namespace string, labels *map[string]string) *messagingV1Alpha1.Channel {
 	return &messagingV1Alpha1.Channel{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-			Labels:    *labels,
+			Namespace:    namespace,
+			GenerateName: generatedName,
+			Labels:       *labels,
 		},
 	}
 }
