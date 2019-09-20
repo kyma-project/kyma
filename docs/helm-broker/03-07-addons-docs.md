@@ -27,7 +27,7 @@ Store your documents and assets in the `docs` folder inside your addon's directo
   Use external documentation
   </summary>
 
-In the `meta.yaml` file, provide the **url** parameter with a value that points to the address where the documentation is stored.
+In the `meta.yaml` file, provide the **url** parameter with a value that points to the address of the documentation repository.
 
   </details>
 </div>
@@ -50,7 +50,7 @@ Store documentation for each object in the `docs/{object_name}` directory. In th
   Use external documentation
   </summary>
 
-In your `docs.yaml` file, specify the **url** parameter of every ClusterDocsTopic or DocsTopic custom resource with the URL that points to the location containing the documentation for a given object.
+In your `docs.yaml` file, specify the **url** parameter of every ClusterDocsTopic or DocsTopic custom resource with the URL that points to the location containing the documentation for the given object.
 
   </details>
 </div>
