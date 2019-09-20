@@ -76,12 +76,12 @@ func (c *eventActivationConverter) isSubscribeEvent(in interface{}) bool {
 }
 
 func (c *eventActivationConverter) getSummary(in interface{}) string {
-	subscribe, exists := c.convertToMap(in)["subscribe"]
-	if !exists {
+	message := c.getMessage(in)
+	if message == nil {
 		return ""
 	}
 
-	summary, exists := c.convertToMap(subscribe)["summary"]
+	summary, exists := message["summary"]
 	if !exists {
 		return ""
 	}
@@ -95,17 +95,30 @@ func (c *eventActivationConverter) getSummary(in interface{}) string {
 }
 
 func (c *eventActivationConverter) getPayload(in interface{}) map[string]interface{} {
-	subscribe, exists := c.convertToMap(in)["subscribe"]
-	if !exists {
+	message := c.getMessage(in)
+	if message == nil {
 		return nil
 	}
 
-	payload, exists := c.convertToMap(subscribe)["payload"]
+	payload, exists := message["payload"]
 	if !exists {
 		return nil
 	}
 
 	return c.convertToMap(payload)
+}
+
+func (c *eventActivationConverter) getMessage(in interface{}) map[string]interface{} {
+	subscribe, exists := c.convertToMap(in)["subscribe"]
+	if !exists {
+		return map[string]interface{}{}
+	}
+
+	message, exists := c.convertToMap(subscribe)["message"]
+	if !exists {
+		return map[string]interface{}{}
+	}
+	return c.convertToMap(message)
 }
 
 func (c *eventActivationConverter) convertToMap(in interface{}) map[string]interface{} {
