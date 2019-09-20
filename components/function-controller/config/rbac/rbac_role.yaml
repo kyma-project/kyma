@@ -29,6 +29,29 @@ rules:
   - patch
   - delete
 - apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - get
+  - watch
+  - update
+  - list
+- apiGroups:
+  - apps
+  - extensions
+  resources:
+  - deployments
+  verbs:
+  - create
+  - get
+  - watch
+  - update
+  - delete
+  - list
+  - update
+  - patch
+- apiGroups:
   - serverless.kyma-project.io
   resources:
   - functions
@@ -92,29 +115,18 @@ rules:
   - patch
   - watch
 - apiGroups:
-  - ""
+  - tekton.dev
   resources:
-  - serviceaccounts
+  - tasks
+  - taskruns
   verbs:
   - get
-  - watch
-  - update
   - list
-- apiGroups:
-  - ""
-  - apps
-  - extensions
-  resources:
-  - deployments
-  verbs:
+  - watch
   - create
-  - get
-  - watch
-  - update
-  - delete
-  - list
   - update
   - patch
+  - delete
 - apiGroups:
   - admissionregistration.k8s.io
   resources:
