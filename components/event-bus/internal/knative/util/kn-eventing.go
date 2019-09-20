@@ -339,7 +339,7 @@ func resendMessage(httpClient *http.Client, channel *messagingV1Alpha1.Channel, 
 	return nil
 }
 
-func makeChannel(prefix string, namespace string, labels *map[string]string) *messagingV1Alpha1.Channel {
+func makeChannel(prefix, namespace string, labels map[string]string) *messagingV1Alpha1.Channel {
 	// Remove all the special characters from the prefix string
 	reg, err := regexp.Compile("[^a-z0-9]+")
 	if err != nil {
