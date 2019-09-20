@@ -67,6 +67,7 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 			AccessLabel:      application.ID,
 			Labels:           convertLabels(application.Labels),
 			Services:         c.toServices(application.ID, application.APIs, application.EventAPIs),
+			CompassMetadata:  c.toCompassMetadata(application.ID),
 		},
 	}
 }
@@ -203,5 +204,15 @@ func (c converter) toEventServiceEntry(applicationID string, eventsDefinition mo
 		Type:             SpecEventsType,
 		AccessLabel:      c.nameResolver.GetResourceName(applicationID, eventsDefinition.ID),
 		SpecificationUrl: "", // Director returns BLOB here
+	}
+}
+
+func (c converter) toCompassMetadata(applicationID string) *v1alpha1.CompassMetadata {
+	return &v1alpha1.CompassMetadata{
+		Authentication: v1alpha1.Authentication{
+			ClientIds: []string{
+				applicationID,
+			},
+		},
 	}
 }

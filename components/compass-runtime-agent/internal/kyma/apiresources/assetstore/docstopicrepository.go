@@ -170,10 +170,10 @@ func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.ClusterDocsTopic {
 	sources := make([]v1alpha1.Source, 0, 3)
 	for key, url := range docsTopicEntry.Urls {
 		source := v1alpha1.Source{
-			Name: fmt.Sprintf(DocsTopicNameFormat, key, docsTopicEntry.Id),
+			Name: v1alpha1.DocsTopicSourceName(fmt.Sprintf(DocsTopicNameFormat, key, docsTopicEntry.Id)),
 			URL:  url,
 			Mode: DocsTopicModeSingle,
-			Type: key,
+			Type: v1alpha1.DocsTopicSourceType(key),
 		}
 		sources = append(sources, source)
 	}
@@ -185,7 +185,7 @@ func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.ClusterDocsTopic {
 	return v1alpha1.ClusterDocsTopic{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterDocsTopic",
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			APIVersion: v1alpha1.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        docsTopicEntry.Id,
@@ -206,7 +206,7 @@ func fromK8sType(k8sDocsTopic v1alpha1.ClusterDocsTopic) docstopic.Entry {
 	urls := make(map[string]string)
 
 	for _, source := range k8sDocsTopic.Spec.Sources {
-		urls[source.Type] = source.URL
+		urls[string(source.Type)] = source.URL
 	}
 
 	return docstopic.Entry{

@@ -71,7 +71,7 @@ else
 	echo -e "${GREEN}√ go test${NC}"
 fi
 
-filesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/|_*/testdata/|/pkg\/|_*export_test.go")
+filesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/mocks/|_*/automock/|_*/testdata/|/pkg\/|_*export_test.go")
 #
 # GO IMPORTS
 #

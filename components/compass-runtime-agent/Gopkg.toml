@@ -49,7 +49,10 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "327770ad3ad572e8b7a5d32c25b69fc3033d41b4"
+  branch = "5227-implementation"
+  source = "https://github.com/franpog859/kyma"
+# [metadata]
+# instead-of-branch-and-source = "revision = \"327770ad3ad572e8b7a5d32c25b69fc3033d41b4\""
 
 [[override]]
   name = "k8s.io/gengo"

@@ -70,8 +70,8 @@ func newResourcesService(coreClientset *kubernetes.Clientset, ic *istioclient.Cl
 
 func newAssetStore(dynamicClient dynamic.Interface, namespace, uploadServiceURL string) assetstore.Service {
 	groupVersionResource := schema.GroupVersionResource{
-		Version:  v1alpha1.SchemeGroupVersion.Version,
-		Group:    v1alpha1.SchemeGroupVersion.Group,
+		Version:  v1alpha1.GroupVersion.Version,
+		Group:    v1alpha1.GroupVersion.Group,
 		Resource: "clusterdocstopics",
 	}
 	resourceInterface := dynamicClient.Resource(groupVersionResource)
