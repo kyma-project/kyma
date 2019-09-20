@@ -59,7 +59,7 @@ if err := k.CreateSubscription("my-sub", namespace, channelName, &uri); err != n
 return
 */
 
-const hyphen = "-"
+const generateNameSuffix = "-"
 
 var once sync.Once
 
@@ -345,7 +345,7 @@ func makeChannel(prefix, namespace string, labels map[string]string) *messagingV
 	if err != nil {
 		log.Fatal(err)
 	}
-	prefix = fmt.Sprint(reg.ReplaceAllString(prefix, ""), hyphen)
+	prefix = fmt.Sprint(reg.ReplaceAllString(prefix, ""), generateNameSuffix)
 
 	return &messagingV1Alpha1.Channel{
 		ObjectMeta: metav1.ObjectMeta{
