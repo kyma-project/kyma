@@ -89,7 +89,7 @@ sample-addon-repository
 
 See the example of the Kyma `addons` repository [here](https://github.com/kyma-project/addons/tree/master/addons).
 
-> **NOTE:** The maximum size of your addons repository is determined by the amount of memory and storage size. These limits are set in the
+> **NOTE:** The amount of memory and storage size determine the maximum size of your addons. These limits are set in the
 [Helm Broker chart](https://kyma-project.io/docs/components/helm-broker/#configuration-helm-broker-chart).
 
 You can specify a Git repository URL by adding a special `git::` prefix to the URL address. After this prefix, provide any valid Git URL with one of the protocols supported by Git. In the URL, you can specify a branch, commit, or tag version. You can also add the `depth` query parameter with a number that specifies the last revision you want to clone from the repository.
@@ -130,7 +130,7 @@ sample-addon-repository
   ├── index-2.yaml                              
   └── ...                                                    
 ```
-> **NOTE:** The maximum size of your addons repository is determined by the amount of memory and storage size. These limits are set in the
+> **NOTE:** The amount of memory and storage size determine the maximum size of your addons. These limits are set in the
 [Helm Broker chart](https://kyma-project.io/docs/components/helm-broker/#configuration-helm-broker-chart).
 
 You can specify a Mercurial repository URL by adding a special `hg::` prefix to the URL address. After this prefix, provide a valid Mercurial URL with one of the supported protocols. In the URL, you can specify a revision to checkout.

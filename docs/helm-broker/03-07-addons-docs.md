@@ -7,7 +7,7 @@ Using the Helm Broker, you can provide documentation for your addon and display 
 - Provide documentation for your addon
 - Provide documentation for objects that appear after provisioning your addon
 
->**NOTE:** Deliver documentation for your addons in Markdown files with specified metadata. To learn more about the metadata and content of the Markdown files, read [this](/components/headless-cms/#details-markdown-documents) document. For more information about currently supported types of the assets, read [this](/components/headless-cms/#overview-overview-headless-cms-in-kyma) document.
+>**NOTE:** Deliver documentation for your addons in Markdown files with specified metadata. To learn more about the metadata and content of the Markdown files, read [this](/components/headless-cms/#details-markdown-documents) document. For more information about the currently supported types of assets, read [this](/components/headless-cms/#overview-overview-headless-cms-in-kyma) document.
 
 ## Provide documentation for your addon
 
@@ -42,7 +42,7 @@ To provide documentation for objects that appear after provisioning your addon, 
   Provide your own documentation
   </summary>
 
-Store documentation for each object in the `docs/{object_name}` directory. In the `docs.yaml` file, set the **url** parameter to the `{{ .Values.addonsRepositoryURL }}` variable which points to your addon compressed to a `.tgz` file. During the provisioning process, the Helm Broker pushes this variable into the chart. The **filter** parameter in the ClusterDocsTopic or DocsTopic definition must point to the path where the object's documentation is stored, for example `docs/{object_name}` directory.
+Store documentation for each object in the `docs/{object_name}` directory. In the `docs.yaml` file, set the **url** parameter to the `{{ .Values.addonsRepositoryURL }}` variable, which points to your addon compressed to a `.tgz` file. During the provisioning process, the Helm Broker pushes this variable into the chart. The **filter** parameter in the ClusterDocsTopic or DocsTopic definition must point to the path where the object's documentation is stored, for example `docs/{object_name}` directory.
 
   </details>
   <details>
@@ -50,7 +50,7 @@ Store documentation for each object in the `docs/{object_name}` directory. In th
   Use external documentation
   </summary>
 
-In your `docs.yaml` file, specify the **url** parameter of every ClusterDocsTopic or DocsTopic custom resource with the URL that points to the location where the documentation for a given object is stored.
+In your `docs.yaml` file, specify the **url** parameter of every ClusterDocsTopic or DocsTopic custom resource with the URL that points to the location containing the documentation for a given object.
 
   </details>
 </div>
