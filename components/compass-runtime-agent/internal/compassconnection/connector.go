@@ -1,7 +1,6 @@
 package compassconnection
 
 import (
-	"crypto/tls"
 	"crypto/x509/pkix"
 	"strings"
 
@@ -20,8 +19,9 @@ type EstablishedConnection struct {
 	ManagementInfo v1alpha1.ManagementInfo
 }
 
-type TokenSecuredClientConstructor func(endpoint string, skipTLSVerify bool) compass.TokenSecuredClient
-type CertSecuredClientConstructor func(endpoint string, skipTLSVerify bool, certificate *tls.Certificate) CertificateSecuredClient
+const (
+	ConnectorTokenHeader = "Connector-Token"
+)
 
 //go:generate mockery -name=Connector
 type Connector interface {
@@ -45,8 +45,6 @@ type compassConnector struct {
 	csrProvider                    certificates.CSRProvider
 	clientsProvider                compass.ClientsProvider
 	insecureConnectorCommunication bool
-
-	certSecuredClient compass.CertificateSecuredClient
 }
 
 func (cc *compassConnector) EstablishConnection(connectorURL, token string) (EstablishedConnection, error) {
@@ -54,12 +52,12 @@ func (cc *compassConnector) EstablishConnection(connectorURL, token string) (Est
 		return EstablishedConnection{}, errors.New("Failed to establish connection. Connector URL is empty")
 	}
 
-	tokenSecuredConnectorClient, err := cc.clientsProvider.GetConnectorTokenSecuredClient(connectorURL)
+	tokenSecuredConnectorClient, err := cc.clientsProvider.GetConnectorClient(connectorURL)
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to prepare Connector Token-secured client")
 	}
 
-	configuration, err := tokenSecuredConnectorClient.Configuration(token)
+	configuration, err := tokenSecuredConnectorClient.Configuration(connectorTokenHeader(token))
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to fetch configuration")
 	}
@@ -70,7 +68,7 @@ func (cc *compassConnector) EstablishConnection(connectorURL, token string) (Est
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to generate CSR")
 	}
 
-	certResponse, err := tokenSecuredConnectorClient.SignCSR(configuration.Token.Token, csr)
+	certResponse, err := tokenSecuredConnectorClient.SignCSR(csr, connectorTokenHeader(token))
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to sign CSR")
 	}
@@ -92,7 +90,7 @@ func (cc *compassConnector) MaintainConnection(credentials certificates.ClientCr
 		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to prepare Certificate-secured Connector client while checking connection")
 	}
 
-	configuration, err := certSecuredClient.Configuration()
+	configuration, err := certSecuredClient.Configuration(nil)
 	if err != nil {
 		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to query Connection Configuration while checking connection")
 	}
@@ -107,7 +105,7 @@ func (cc *compassConnector) MaintainConnection(credentials certificates.ClientCr
 		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to create CSR while renewing connection")
 	}
 
-	certResponse, err := certSecuredClient.SignCSR(csr)
+	certResponse, err := certSecuredClient.SignCSR(csr, nil)
 	if err != nil {
 		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to sign CSR while renewing connection")
 	}
@@ -137,6 +135,12 @@ func toManagementInfo(configInfo *gqlschema.ManagementPlaneInfo) v1alpha1.Manage
 	return v1alpha1.ManagementInfo{
 		DirectorURL:  directorURL,
 		ConnectorURL: certSecuredConnectorURL,
+	}
+}
+
+func connectorTokenHeader(token string) map[string][]string {
+	return map[string][]string{
+		ConnectorTokenHeader: {token},
 	}
 }
 

@@ -138,6 +138,6 @@ func newCompassConnector(insecureConnection bool) compassconnection.Connector {
 	return compassconnection.NewCompassConnector(
 		csrProvider,
 		connector.NewTokenSecuredConnectorClient,
-		connector.NewCertificateSecuredConnectorClient,
+		connector.NewConnectorClient,
 		insecureConnection)
 }

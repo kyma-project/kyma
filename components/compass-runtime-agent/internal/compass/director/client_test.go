@@ -1,18 +1,16 @@
 package director
 
 import (
-	"crypto/tls"
+	"github.com/stretchr/testify/require"
 
 	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 
-	"github.com/pkg/errors"
-
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
-
 	"github.com/stretchr/testify/assert"
 
+	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	gql "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
-	"github.com/machinebox/graphql"
+
+	gcli "github.com/machinebox/graphql"
 
 	"testing"
 )
@@ -166,92 +164,95 @@ const (
 }`
 )
 
-type mockGQLClient struct {
-	t               *testing.T
-	expectedRequest *graphql.Request
-	shouldFail      bool
-}
-
-func (c *mockGQLClient) Do(req *graphql.Request, res interface{}) error {
-	assert.Equal(c.t, c.expectedRequest, req)
-
-	if !c.shouldFail {
-		appForRuntimesResp, ok := res.(*ApplicationsForRuntimeResponse)
-		if !ok {
-			return errors.New("invalid response type expected")
-		}
-
-		appForRuntimesResp.Result.Data = []*Application{
-			{Name: "App"},
-		}
-
-		return nil
-	}
-
-	return errors.New("error")
-}
-
-func (c *mockGQLClient) DisableLogging() {}
-
-func newMockClientConstructor(t *testing.T, shouldFail bool) gql.ClientConstructor {
-	return func(certificate tls.Certificate, graphqlEndpoint string, enableLogging, insecureConfigFetch bool) (client gql.Client, e error) {
-		expectedReq := graphql.NewRequest(expectedQuery)
-		expectedReq.Header.Set("Tenant", tenant)
-
-		return &mockGQLClient{
-			expectedRequest: expectedReq,
-			t:               t,
-			shouldFail:      shouldFail,
-		}, nil
-	}
-}
-
-func failingGQLClientConstructor(_ tls.Certificate, _ string, _, _ bool) (client gql.Client, e error) {
-	return nil, errors.New("error")
-}
-
 func TestConfigClient_FetchConfiguration(t *testing.T) {
 
-	for _, testCase := range []struct {
-		description       string
-		expectedApps      []kymamodel.Application
-		clientConstructor gql.ClientConstructor
-		shouldFail        bool
-	}{
-		{
-			description: "fetch applications",
-			expectedApps: []kymamodel.Application{
-				{Name: "App"},
+	expectedRequest := gcli.NewRequest(expectedQuery)
+
+	t.Run("should fetch configuration", func(t *testing.T) {
+		// given
+		expectedResponse := &ApplicationPage{
+			Data: []*Application{
+				{
+					ID:   "abcd-efgh",
+					Name: "App1",
+				},
+				{
+					ID:   "ijkl-mnop",
+					Name: "App2",
+				},
 			},
-			clientConstructor: newMockClientConstructor(t, false),
-			shouldFail:        false,
-		},
-		{
-			description:       "return error when failed to fetch config",
-			expectedApps:      nil,
-			clientConstructor: newMockClientConstructor(t, true),
-			shouldFail:        true,
-		},
-		{
-			description:       "return error when failed to create graphql client",
-			expectedApps:      nil,
-			clientConstructor: failingGQLClientConstructor,
-			shouldFail:        true,
-		},
-	} {
-		t.Run("should "+testCase.description, func(t *testing.T) {
-			// given
-			configClient := NewConfigurationClient(tenant, runtimeId, testCase.clientConstructor, true)
+			PageInfo:   &graphql.PageInfo{},
+			TotalCount: 2,
+		}
 
-			// when
-			apps, err := FetchConfiguration(directorURL, certificates.Credentials{})
+		expectedApps := []kymamodel.Application{
+			{
+				Name: "App1",
+				ID:   "abcd-efgh",
+			},
+			{
+				ID:   "ijkl-mnop",
+				Name: "App2",
+			},
+		}
 
-			// then
-			assert.Equal(t, testCase.expectedApps, apps)
-
-			isError := err != nil
-			assert.Equal(t, testCase.shouldFail, isError)
+		gqlClient := gql.NewQueryAssertClient(t, expectedRequest, false, func(t *testing.T, r interface{}) {
+			config, ok := r.(*ApplicationsForRuntimeResponse)
+			require.True(t, ok)
+			assert.Empty(t, config)
+			config.Result = expectedResponse
 		})
-	}
 
+		configClient := NewConfigurationClient(gqlClient)
+
+		// when
+		applicationsResponse, err := configClient.FetchConfiguration(directorURL, runtimeId)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, expectedApps, applicationsResponse)
+	})
+
+	t.Run("should return empty array if no Apps for Runtime", func(t *testing.T) {
+		// given
+		expectedResponse := &ApplicationPage{
+			Data:       nil,
+			PageInfo:   &graphql.PageInfo{},
+			TotalCount: 0,
+		}
+
+		gqlClient := gql.NewQueryAssertClient(t, expectedRequest, false, func(t *testing.T, r interface{}) {
+			config, ok := r.(*ApplicationsForRuntimeResponse)
+			require.True(t, ok)
+			assert.Empty(t, config)
+			config.Result = expectedResponse
+		})
+
+		configClient := NewConfigurationClient(gqlClient)
+
+		// when
+		applicationsResponse, err := configClient.FetchConfiguration(directorURL, runtimeId)
+
+		// then
+		require.NoError(t, err)
+		assert.Empty(t, applicationsResponse)
+	})
+
+	t.Run("should return error when failed to fetch Applications", func(t *testing.T) {
+		// given
+		gqlClient := gql.NewQueryAssertClient(t, expectedRequest, true, func(t *testing.T, r interface{}) {
+			config, ok := r.(*ApplicationsForRuntimeResponse)
+			require.True(t, ok)
+			assert.Empty(t, config)
+		})
+
+		configClient := NewConfigurationClient(gqlClient)
+
+		// when
+		applicationsResponse, err := configClient.FetchConfiguration(directorURL, runtimeId)
+
+		// then
+		require.Error(t, err)
+		assert.Nil(t, applicationsResponse)
+	})
 }

@@ -8,11 +8,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-
 type ClientsProvider interface {
 	GetCompassConfigClient(credentials certificates.ClientCredentials, url string) (director.ConfigClient, error)
-	GetConnectorTokenSecuredClient(url string) (connector.TokenSecuredClient, error)
-	GetConnectorCertSecuredClient(credentials certificates.ClientCredentials, url string) (connector.CertificateSecuredClient, error)
+	GetConnectorClient(url string) (connector.ConnectorClient, error)
+	GetConnectorCertSecuredClient(credentials certificates.ClientCredentials, url string) (connector.ConnectorClient, error)
 }
 
 func NewClientsProvider(gqlClientConstr graphql.ClientConstructor, insecureConnectorCommunication, insecureConfigFetch, enableLogging bool) ClientsProvider {
@@ -40,20 +39,20 @@ func (cp *clientsProvider) GetCompassConfigClient(credentials certificates.Clien
 	return director.NewConfigurationClient(gqlClient), nil
 }
 
-func (cp *clientsProvider) GetConnectorTokenSecuredClient(url string) (connector.TokenSecuredClient, error) {
+func (cp *clientsProvider) GetConnectorClient(url string) (connector.ConnectorClient, error) {
 	gqlClient, err := cp.gqlClientConstructor(nil, url, cp.enableLogging, cp.insecureConnectionCommunication)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to create GraphQL client")
 	}
 
-	return connector.NewTokenSecuredConnectorClient(gqlClient), nil
+	return connector.NewConnectorClient(gqlClient), nil
 }
 
-func (cp *clientsProvider) GetConnectorCertSecuredClient(credentials certificates.ClientCredentials, url string) (connector.CertificateSecuredClient, error) {
+func (cp *clientsProvider) GetConnectorCertSecuredClient(credentials certificates.ClientCredentials, url string) (connector.ConnectorClient, error) {
 	gqlClient, err := cp.gqlClientConstructor(credentials.AsTLSCertificate(), url, cp.enableLogging, cp.insecureConnectionCommunication)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to create GraphQL client")
 	}
 
-	return connector.NewCertificateSecuredConnectorClient(gqlClient), nil
+	return connector.NewConnectorClient(gqlClient), nil
 }

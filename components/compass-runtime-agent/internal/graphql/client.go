@@ -20,7 +20,6 @@ type ClientConstructor func(certificate *tls.Certificate, graphqlEndpoint string
 //go:generate mockery -name=Client
 type Client interface {
 	Do(req *graphql.Request, res interface{}) error
-	DisableLogging()
 }
 
 type client struct {
@@ -71,10 +70,6 @@ func (c *client) Do(req *graphql.Request, res interface{}) error {
 		}
 	}
 	return err
-}
-
-func (c *client) DisableLogging() {
-	c.logging = false
 }
 
 func (c *client) addLog(log string) {

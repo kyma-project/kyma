@@ -89,7 +89,7 @@ func TestClientsProvider_GetConnectorTokenSecuredClient(t *testing.T) {
 		provider := NewClientsProvider(constructor, insecureFetch, false, enableLogging)
 
 		// when
-		configClient, err := provider.GetConnectorTokenSecuredClient(url)
+		configClient, err := provider.GetConnectorClient(url)
 
 		// then
 		require.NoError(t, err)
@@ -103,7 +103,7 @@ func TestClientsProvider_GetConnectorTokenSecuredClient(t *testing.T) {
 		provider := NewClientsProvider(constructor, insecureFetch, false, enableLogging)
 
 		// when
-		_, err := provider.GetConnectorTokenSecuredClient(url)
+		_, err := provider.GetConnectorClient(url)
 
 		// then
 		require.Error(t, err)

@@ -22,15 +22,15 @@ func (qp queryProvider) signCSR(csr string) string {
 
 func configurationResult() string {
 	return `token { token }
-	certificateSigningRequestInfo { subject keyAlgorithm }
-	managementPlaneInfo { 
-		directorURL
-		certificateSecuredConnectorURL
-	}`
+		certificateSigningRequestInfo { subject keyAlgorithm }
+		managementPlaneInfo { 
+			directorURL
+			certificateSecuredConnectorURL
+		}`
 }
 
 func certificationResult() string {
 	return `certificateChain
-			caCertificate
-			clientCertificate`
+		caCertificate
+		clientCertificate`
 }
