@@ -11,8 +11,7 @@ ROOT_PKG="github.com/kyma-project/kyma/components/console-backend-service/pkg"
 API_TYPE_VERSION="ui:v1alpha1"
 
 go install ./vendor/k8s.io/code-generator/cmd/{defaulter-gen,client-gen,lister-gen,informer-gen,deepcopy-gen}
-#go install ./vendor/k8s.io/code-generator/cmd/{defaulter-gen,client-gen,liste
-echo "eeee"
+
 ./vendor/k8s.io/code-generator/generate-groups.sh all \
   ${ROOT_PKG}/client ${ROOT_PKG}/apis \
   ${API_TYPE_VERSION} \
