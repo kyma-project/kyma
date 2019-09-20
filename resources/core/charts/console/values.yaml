@@ -2,14 +2,25 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
-image:
-  dir:
-  tag: fb3cad85
-  pullPolicy: IfNotPresent
-service:
-  name: nginx
-  externalPort: 80
-  internalPort: 8080
+console:
+  image:
+    dir:
+    tag: fb3cad85
+    pullPolicy: IfNotPresent
+  service:
+    name: nginx
+    externalPort: 80
+    internalPort: 8080
+
+core_ui:
+  image:
+    dir:
+    tag: fb3cad85
+    pullPolicy: IfNotPresent
+  service:
+    name: nginx
+    externalPort: 8080
+    internalPort: 8080
 
 resources:
   {}
