@@ -59,7 +59,7 @@ if err := k.CreateSubscription("my-sub", namespace, channelName, &uri); err != n
 return
 */
 
-const HYPHEN = "-"
+const hyphen = "-"
 
 var once sync.Once
 
@@ -179,7 +179,7 @@ func (k *KnativeLib) CreateChannel(prefix, namespace string, labels map[string]s
 		case <-tout:
 			return nil, errors.New("timed out")
 		case <-tick:
-			if channel, err = k.GetChannelByLabels(namespace, labels); err != nil {
+			if channel, err = k.GetChannelByLabels(namespace, &labels); err != nil {
 				log.Printf("ERROR: CreateChannel(): geting channel: %v", err)
 			} else {
 				isReady = channel.Status.IsReady()
@@ -345,13 +345,13 @@ func makeChannel(prefix, namespace string, labels map[string]string) *messagingV
 	if err != nil {
 		log.Fatal(err)
 	}
-	prefix = fmt.Sprint(reg.ReplaceAllString(prefix, ""), HYPHEN)
+	prefix = fmt.Sprint(reg.ReplaceAllString(prefix, ""), hyphen)
 
 	return &messagingV1Alpha1.Channel{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    namespace,
 			GenerateName: prefix,
-			Labels:       *labels,
+			Labels:       labels,
 		},
 	}
 }
