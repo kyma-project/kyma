@@ -5,28 +5,30 @@
 This controller injects limit ranges and resource quotas into each Namespace that you create. In addition, it enables Istio injection for the Namespace by labeling it with the `istio-injection` label.
 
 Limit range configuration is required. These environment variables provide the configuration:
-* `APP_LIMIT_RANGE_MEMORY_DEFAULT_REQUEST`
-* `APP_LIMIT_RANGE_MEMORY_DEFAULT`
-* `APP_LIMIT_RANGE_MEMORY_MAX`
+
+- `APP_LIMIT_RANGE_MEMORY_DEFAULT_REQUEST`
+- `APP_LIMIT_RANGE_MEMORY_DEFAULT`
+- `APP_LIMIT_RANGE_MEMORY_MAX`
 
 Each Kubernetes environment has a `ResourceQuota` configured with standard quantities (such as 1G1 or 256Mi) that are set in the following required configuration values:
-* `APP_RESOURCE_QUOTA_REQUESTS_MEMORY`
-* `APP_RESOURCE_QUOTA_LIMITS_MEMORY`
+
+- `APP_RESOURCE_QUOTA_REQUESTS_MEMORY`
+- `APP_RESOURCE_QUOTA_LIMITS_MEMORY`
 
 ## Prerequisites
 
- - A working Golang installation
- - Minikube
- - kubectl
- - Docker
+- A working Go installation
+- Minikube
+- kubectl
+- Docker
 
 ### Build to run on Kubernetes
 
 Use the following commands to prepare to run on Kubernetes. Run them in the following order:
 
- - `dep ensure`
- - `export GOOS=linux`
- - `go build -o namespace-controller cmd/controller/main.go`
+- `dep ensure`
+- `export GOOS=linux`
+- `go build -o namespace-controller cmd/controller/main.go`
 
 ### Build a Docker image
 
@@ -53,16 +55,18 @@ Read the main [Kyma project README.md](../../README.md). By default, the system 
 
 In case you have no access to a Docker registry, use Minikube’s built in Docker daemon that keeps images for running containers:
 
- 1. Modify the deployment.yaml file by swapping the image version.
-```
-image: namespace-controller:my_tag
-```
+1. Modify the deployment.yaml file by swapping the image version.
+
+   ```bash
+   image: namespace-controller:my_tag
+   ```
 
 2. Start Kyma installation as usual
 
 3. Run the following command to set up the Docker environment variables so a Docker client can communicate with the Minikube Docker daemon:
-```
-eval $(minikube docker-env)
-```
+
+   ```bash
+   eval $(minikube docker-env)
+   ```
 
 4. [Build your Docker image](#build-a-docker-image) with the tag you specified in the first step. Wait for the installation to complete.

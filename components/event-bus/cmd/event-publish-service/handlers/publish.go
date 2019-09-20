@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 
-	"github.com/kyma-project/kyma/components/event-bus/api/publish/v1"
+	v1 "github.com/kyma-project/kyma/components/event-bus/api/publish/v1"
 	publishv2 "github.com/kyma-project/kyma/components/event-bus/api/publish/v2"
 
 	"log"
@@ -18,7 +18,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
-	eventBusUtil "github.com/kyma-project/kyma/components/event-bus/pkg/util"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 )
@@ -156,17 +155,8 @@ func handleKnativePublishRequestV1(w http.ResponseWriter, r *http.Request, knati
 		return nil, nil, nil, err, publisher.FAILED
 	}
 
-	// get the channel name and validate its length
-	channelName := eventBusUtil.GetChannelName(&publishRequest.SourceID, &publishRequest.EventType,
-		&publishRequest.EventTypeVersion)
-	if err = validators.ValidateChannelNameLength(&channelName, opts.MaxChannelNameLength); err != nil {
-		log.Printf("publish message failed: %v", err)
-		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
-	}
-
 	// publish the message
-	err, status := (*knativePublisher).Publish(knativeLib, &channelName, &defaultChannelNamespace, &message.Headers,
+	err, status, channelName := (*knativePublisher).Publish(knativeLib, &defaultChannelNamespace, &message.Headers,
 		&messagePayload, publishRequest.SourceID, publishRequest.EventType, publishRequest.EventTypeVersion)
 	if err != nil {
 		_ = sendJSONError(w, err)
@@ -311,17 +301,8 @@ func handleKnativePublishRequestV2(w http.ResponseWriter, r *http.Request, knati
 		return nil, nil, nil, err, publisher.FAILED
 	}
 
-	// get the channel name and validate its length
-	channelName := eventBusUtil.GetChannelName(&event.Source, &event.Type,
-		&event.TypeVersion)
-	if err = validators.ValidateChannelNameLength(&channelName, opts.MaxChannelNameLength); err != nil {
-		log.Printf("publish message failed: %v", err)
-		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
-	}
-
 	// publish the message
-	err, status := (*knativePublisher).Publish(knativeLib, &channelName, &defaultChannelNamespace, &message.Headers,
+	err, status, channelName := (*knativePublisher).Publish(knativeLib, &defaultChannelNamespace, &message.Headers,
 		&messagePayload, event.Source, event.Type, event.TypeVersion)
 	if err != nil {
 		_ = sendJSONError(w, err)

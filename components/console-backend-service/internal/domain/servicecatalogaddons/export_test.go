@@ -1,12 +1,12 @@
 package servicecatalogaddons
 
 import (
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/status"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/dynamic"
 	fakeDynamic "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/dynamic"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/status"
 )
 
 // Addons Configurations
@@ -39,19 +39,19 @@ func NewClusterAddonsConfigurationConverter() *clusterAddonsConfigurationConvert
 
 func NewClusterAddonsConfigurationResolver(addonsCfgUpdater clusterAddonsCfgUpdater, addonsCfgMutations clusterAddonsCfgMutations, addonsCfgLister clusterAddonsCfgLister) *clusterAddonsConfigurationResolver {
 	return &clusterAddonsConfigurationResolver{
-		addonsCfgConverter:                clusterAddonsConfigurationConverter{},
-		addonsCfgUpdater:                  addonsCfgUpdater,
-		addonsCfgMutations:                addonsCfgMutations,
-		addonsCfgLister:                   addonsCfgLister,
+		addonsCfgConverter: clusterAddonsConfigurationConverter{},
+		addonsCfgUpdater:   addonsCfgUpdater,
+		addonsCfgMutations: addonsCfgMutations,
+		addonsCfgLister:    addonsCfgLister,
 	}
 }
 
 func NewAddonsConfigurationResolver(addonsCfgUpdater addonsCfgUpdater, addonsCfgMutations addonsCfgMutations, addonsCfgLister addonsCfgLister) *addonsConfigurationResolver {
 	return &addonsConfigurationResolver{
-		addonsCfgConverter:                addonsConfigurationConverter{},
-		addonsCfgUpdater:                  addonsCfgUpdater,
-		addonsCfgMutations:                addonsCfgMutations,
-		addonsCfgLister:                   addonsCfgLister,
+		addonsCfgConverter: addonsConfigurationConverter{},
+		addonsCfgUpdater:   addonsCfgUpdater,
+		addonsCfgMutations: addonsCfgMutations,
+		addonsCfgLister:    addonsCfgLister,
 	}
 }
 

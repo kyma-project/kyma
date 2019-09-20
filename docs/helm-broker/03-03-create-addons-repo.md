@@ -113,6 +113,40 @@ spec:
 ```
 
   </details>
+  <details>
+  <summary>
+  Mercurial
+  </summary>
+
+If you want to use Mercurial (hg), place your addons directly in addons directories. The repository structure looks as follows:
+```
+sample-addon-repository
+  ├── {addon_x_name}-{addon_x_version}               # An addon directory
+  ├── {addon_y_name}-{addon_y_version}        
+  ├── ...                                      
+  ├── index.yaml                                     # A file which defines available addons
+  ├── index-2.yaml                              
+  └── ...                                                    
+```
+
+You can specify a Mercurial repository URL by adding a special `hg::` prefix to the URL address. After this prefix, provide a valid Mercurial URL with one of the supported protocols. In the URL, you can specify a revision to checkout.
+
+These are the allowed addon repository URLs provided in CAC or AC custom resources for Mercurial:
+```yaml
+apiVersion: addons.kyma-project.io/v1alpha1
+kind: ClusterAddonsConfiguration
+metadata:
+  name: addons-cfg-sample
+spec:
+  repositories:
+    # Mercurial HTTPS protocol with a path to index.yaml
+    - url: "hg::https://hg.osdn.net/view/project-name/repo-name//index.yaml"
+    # Mercurial HTTPS protocol with a path to index.yaml and a revision
+    - url: "hg::https://hg.osdn.net/view/project-name/repo-name//index.yaml?rev=e67e535230d4eded318b30967e32397872e53af1"
+```
+
+  </details>
+
 </div>
 
 ## Supported protocols with authentication

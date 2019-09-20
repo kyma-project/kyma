@@ -44,7 +44,6 @@ Follow these steps to prepare the environment you will use to deploy the Control
 
     ```bash
     cat <<EOF | kubectl -n serverless-system apply -f -
-    ---
     apiVersion: v1
     kind: ConfigMap
     metadata:
@@ -57,6 +56,18 @@ Follow these steps to prepare the environment you will use to deploy the Control
           dockerFileName: dockerfile-nodejs-8
         - ID: nodejs6
           dockerFileName: dockerfile-nodejs-6
+      funcSizes: |
+        - size: S
+        - size: M
+        - size: L
+      funcTypes: |
+        - type: plaintext
+        - type: base64
+      defaults: |
+        size: S
+        runtime: nodejs8
+        timeOut: 180
+        funcContentType: plaintext
     EOF
     ```
 
@@ -102,18 +113,22 @@ Follow these steps to prepare the environment you will use to deploy the Control
 
 ### Deploy the controller
 
-1. Use the `make` targets to build the Function Controller image, tag it to the value of the **IMG** environment variable, and push it to the remote container registry.
+To deploy the Function Controller to the `serverless-system` Namespace, run:
 
-    ```bash
-    make docker-build
-    make docker-push
-    ```
+```bash
+make deploy
+```
 
-2. After the image has been successfully pushed, deploy the Function Controller to the `serverless-system` Namespace.
+This runs [ko](https://github.com/google/ko) to build your image and push it to your configured docker repository. 
 
-    ```bash
-    make deploy
-    ```
+>**NOTE:** Make sure the  **KO_DOCKER_REPO**  environment variable points to a valid docker repository.
+>```bash
+>#for hub.docker.io
+>export KO_DOCKER_REPO=<your dockerhub username>
+>
+>#to use your local docker daemon and its image store
+>export KO_DOCKER_REPO=ko.local
+>```
 
 ## Usage
 

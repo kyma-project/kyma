@@ -24,7 +24,7 @@ global:
     version: 4d43ced2
   ui_acceptance_tests:
     dir:
-    version: ea3f0fd3
+    version: 66bcb3dd
   api_controller:
     dir: pr/
     version: "PR-5433"
@@ -58,8 +58,8 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    dir: pr/
-    version: PR-5551
+    dir:
+    version: PR-5648
   console_backend_service_test:
     dir: pr/
     version: PR-5551
