@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
 
@@ -312,4 +313,21 @@ func Test_makeHttpRequest(t *testing.T) {
 		log.Printf("Request Header: %s", k)
 	}
 	assert.Len(t, req.Header, 3, "Headers map should have exactly 3 keys")
+}
+
+func Test_MakeChannelWithPrefix(t *testing.T) {
+	prefix := "order.created"
+	a := makeChannel(prefix, testNS, &labels)
+
+	// makeChannel should rmove all the special characters from the prefix string
+	assert.False(t, strings.Contains(a.GenerateName, "."))
+
+	// makeChannel should add hyphen at the end if not present
+	assert.True(t, strings.HasSuffix(a.GenerateName, "-"))
+
+	prefix = "order.created-"
+	a = makeChannel(prefix, testNS, &labels)
+
+	// makeChannel should not add double hyphens if already present
+	assert.False(t, strings.HasSuffix(a.GenerateName, "--"))
 }
