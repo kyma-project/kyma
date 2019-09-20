@@ -72,16 +72,16 @@ Processing of a ClusterDocsTopic CR can succeed, continue, or fail for one of th
 
 | Reason | Phase | Description |
 | --------- | ------------- | ----------- |
-| `AssetCreated` | `Ready` | The Asset Controller created the specified asset. |
-| `AssetCreationFailed` | `Failed` | The Asset Controller couldn't create the specified asset due to the provided error. |
-| `AssetsCreationFailed` | `Failed` | The Asset Controller couldn't create assets due to the provided error. |
-| `AssetsListingFailed` | `Failed` | The Asset Controller couldn't list assets due to the provided error. |
-| `AssetDeleted` | `Pending` | The Asset Controller deleted specified assets. |
-| `AssetDeletionFailed` | `Failed`  | The Asset Controller couldn't delete the specified asset due to the provided error. |
-| `AssetsDeletionFailed` | `Failed` | The Asset Controller couldn't delete assets due to the provided error. |
-| `AssetUpdated` | `Ready` | The Asset Controller updated the specified asset. |
-| `AssetUpdateFailed` | `Failed` | The Asset Controller couldn't upload the specified asset due to the provided error. |
-| `AssetsUpdateFailed` | `Failed` | The Asset Controller couldn't update assets due to the provided error. |
+| `AssetCreated` | `Pending` | The DocsTopic Controller created the specified asset. |
+| `AssetCreationFailed` | `Failed` | The DocsTopic Controller couldn't create the specified asset due to the provided error. |
+| `AssetsCreationFailed` | `Failed` | The DocsTopic Controller couldn't create assets due to the provided error. |
+| `AssetsListingFailed` | `Failed` | The DocsTopic Controller couldn't list assets due to the provided error. |
+| `AssetDeleted` | `Pending` | The DocsTopic Controller deleted specified assets. |
+| `AssetDeletionFailed` | `Failed`  | The DocsTopic Controller couldn't delete the specified asset due to the provided error. |
+| `AssetsDeletionFailed` | `Failed` | The DocsTopic Controller couldn't delete assets due to the provided error. |
+| `AssetUpdated` | `Pending` | The DocsTopic Controller updated the specified asset. |
+| `AssetUpdateFailed` | `Failed` | The DocsTopic Controller couldn't upload the specified asset due to the provided error. |
+| `AssetsUpdateFailed` | `Failed` | The DocsTopic Controller couldn't update assets due to the provided error. |
 | `AssetsReady` | `Ready` | Assets are ready to use. |  
 | `WaitingForAssets` | `Pending` | Waiting for assets to be in the `Ready` status phase. |
 | `BucketError` | `Failed` | Bucket verification failed due to the provided error. |

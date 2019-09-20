@@ -110,24 +110,24 @@ Processing of an Asset CR can succeed, continue, or fail for one of these reason
 
 | Reason | Phase | Description |
 | --------- | ------------- | ----------- |
-| `Pulled` | `Ready` | The Asset Controller pulled the asset content for processing. |
+| `Pulled` | `Pending` | The Asset Controller pulled the asset content for processing. |
 | `PullingFailed` | `Failed` | Asset content pulling failed due to the provided error. |
 | `Uploaded` | `Ready` | The Asset Controller uploaded the asset content to Minio. |
 | `UploadFailed` | `Failed` | Asset content uploading failed due to the provided error. |
 | `BucketNotReady` | `Pending` | The referenced bucket is not ready. |
 | `BucketError` | `Failed` | Reading the bucket status failed due to the provided error. |
-| `Mutated` | `Ready` | The mutation service changed the asset content. |
+| `Mutated` | `Pending` | Mutation services changed the asset content. |
 | `MutationFailed` | `Failed` | Asset mutation failed for one of the provided reasons. |
 | `MutationError` | `Failed` | Asset mutation failed due to the provided error. |
-| `MetadataExtracted` | `Ready` | The metadata service extracted metadata from the asset content. |
+| `MetadataExtracted` | `Pending` | Metadata services extracted metadata from the asset content. |
 | `MetadataExtractionFailed` | `Failed` | Metadata extraction failed due to the provided error. |
-| `Validated` | `Ready` | The validation service validated the asset content. |
+| `Validated` | `Pending` | Validation services validated the asset content. |
 | `ValidationFailed` | `Failed` | Asset validation failed for one of the provided reasons. |
 | `ValidationError` | `Failed` | Asset validation failed due to the provided error. |
 | `MissingContent` | `Failed` | There is missing asset content in the cloud storage bucket. |
 | `RemoteContentVerificationError` | `Failed` | Asset content verification in the cloud storage bucket failed due to the provided error. |
 | `CleanupError` | `Failed` | The Asset Controller failed to remove the old asset content due to the provided error. |
-| `Cleaned` | `Ready` | The Asset Controller removed the old asset content that was modified. |
+| `Cleaned` | `Pending` | The Asset Controller removed the old asset content that was modified. |
 | `Scheduled` | `Pending` | The asset you added is scheduled for processing. |
 
 

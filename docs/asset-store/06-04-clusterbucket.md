@@ -57,7 +57,7 @@ Processing of a ClusterBucket CR can succeed, continue, or fail for one of these
 
 | Reason | Phase | Description |
 | --------- | ------------- | ----------- |
-| `BucketCreated` | `Ready` | The bucket was created. |
+| `BucketCreated` | `Pending` | The bucket was created. |
 | `BucketNotFound` | `Failed` | The specified bucket doesn't exist anymore. |
 | `BucketCreationFailure` | `Failed` | The bucket couldn't be created due to the provided error. |
 | `BucketVerificationFailure` | `Failed` | The bucket couldn't be verified due to the provided error. |
