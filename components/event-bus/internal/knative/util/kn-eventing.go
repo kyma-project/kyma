@@ -64,7 +64,7 @@ var once sync.Once
 type KnativeAccessLib interface {
 	GetChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error)
 	GetChannelByLabels(namespace string, labels *map[string]string) (*messagingV1Alpha1.Channel, error)
-	CreateChannel(generatedName string, namespace string, labels *map[string]string,
+	CreateChannel(prefix string, namespace string, labels *map[string]string,
 		timeout time.Duration) (*messagingV1Alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string) error
@@ -159,9 +159,9 @@ func (k *KnativeLib) GetChannelByLabels(namespace string, labels *map[string]str
 }
 
 // CreateChannel creates a Knative/Eventing channel controlled by the specified provisioner
-func (k *KnativeLib) CreateChannel(generatedName string, namespace string, labels *map[string]string,
+func (k *KnativeLib) CreateChannel(prefix string, namespace string, labels *map[string]string,
 	timeout time.Duration) (*messagingV1Alpha1.Channel, error) {
-	c := makeChannel(generatedName, namespace, labels)
+	c := makeChannel(prefix, namespace, labels)
 	channel, err := k.messagingChannel.Channels(namespace).Create(c)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		log.Printf("ERROR: CreateChannel(): creating channel: %v", err)
@@ -336,11 +336,11 @@ func resendMessage(httpClient *http.Client, channel *messagingV1Alpha1.Channel, 
 	return nil
 }
 
-func makeChannel(generatedName string, namespace string, labels *map[string]string) *messagingV1Alpha1.Channel {
+func makeChannel(prefix string, namespace string, labels *map[string]string) *messagingV1Alpha1.Channel {
 	return &messagingV1Alpha1.Channel{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    namespace,
-			GenerateName: generatedName,
+			GenerateName: prefix,
 			Labels:       *labels,
 		},
 	}
