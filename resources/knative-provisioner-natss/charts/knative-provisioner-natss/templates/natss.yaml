@@ -1,0 +1,416 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    labels:
+        duck.knative.dev/addressable: "true"
+        eventing.knative.dev/release: "v0.8.0"
+    name: natss-addressable-resolver
+rules:
+    - apiGroups:
+          - messaging.knative.dev
+      resources:
+          - natsschannels
+          - natsschannels/status
+      verbs:
+          - get
+          - list
+          - watch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    labels:
+        duck.knative.dev/channelable: "true"
+        eventing.knative.dev/release: "v0.8.0"
+    name: natss-channelable-manipulator
+rules:
+    - apiGroups:
+          - messaging.knative.dev
+      resources:
+          - natsschannels
+          - natsschannels/status
+      verbs:
+          - create
+          - get
+          - list
+          - watch
+          - update
+          - patch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    labels:
+        eventing.knative.dev/release: "v0.8.0"
+    name: natss-ch-controller
+rules:
+    - apiGroups:
+          - messaging.knative.dev
+      resources:
+          - natsschannels
+          - natsschannels/status
+      verbs:
+          - get
+          - list
+          - watch
+          - update
+          - patch
+    - apiGroups:
+          - messaging.knative.dev
+      resources:
+          - natsschannels/finalizers
+      verbs:
+          - update
+    - apiGroups:
+          - ""
+      resources:
+          - services
+          - configmaps
+      verbs:
+          - get
+          - list
+          - watch
+          - create
+    - apiGroups:
+          - ""
+      resources:
+          - services
+      verbs:
+          - update
+    - apiGroups:
+          - ""
+      resources:
+          - events
+      verbs:
+          - create
+          - patch
+          - update
+    - apiGroups:
+          - ""
+      resources:
+          - configmaps
+      verbs:
+          - get
+          - list
+          - watch
+    - apiGroups:
+          - ""
+      resources:
+          - endpoints
+      verbs:
+          - get
+          - list
+          - watch
+    - apiGroups:
+          - apps
+      resources:
+          - deployments
+          - deployments/status
+      verbs:
+          - get
+          - list
+          - watch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    labels:
+        eventing.knative.dev/release: "v0.8.0"
+    name: natss-ch-dispatcher
+rules:
+    - apiGroups:
+          - messaging.knative.dev
+      resources:
+          - natsschannels
+          - natsschannels/status
+      verbs:
+          - get
+          - list
+          - watch
+          - update
+          - patch
+    - apiGroups:
+          - messaging.knative.dev
+      resources:
+          - natsschannels/finalizers
+      verbs:
+          - update
+    - apiGroups:
+          - ""
+      resources:
+          - configmaps
+      verbs:
+          - get
+          - list
+          - watch
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+    labels:
+        eventing.knative.dev/release: "v0.8.0"
+        messaging.knative.dev/channel: natss-channel
+        messaging.knative.dev/role: dispatcher
+    name: natss-ch-dispatcher
+    namespace: knative-eventing
+spec:
+    ports:
+        - port: 80
+          protocol: TCP
+          targetPort: 8080
+    selector:
+        messaging.knative.dev/channel: natss-channel
+        messaging.knative.dev/role: dispatcher
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+    labels:
+        eventing.knative.dev/release: "v0.8.0"
+    name: natss-ch-controller
+    namespace: knative-eventing
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+    labels:
+        eventing.knative.dev/release: "v0.8.0"
+    name: natss-ch-dispatcher
+    namespace: knative-eventing
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+    labels:
+        eventing.knative.dev/release: "v0.8.0"
+    name: natss-ch-controller
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: natss-ch-controller
+subjects:
+    - kind: ServiceAccount
+      name: natss-ch-controller
+      namespace: knative-eventing
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+    labels:
+        eventing.knative.dev/release: "v0.8.0"
+    name: natss-ch-dispatcher
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: natss-ch-dispatcher
+subjects:
+    - kind: ServiceAccount
+      name: natss-ch-dispatcher
+      namespace: knative-eventing
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+    labels:
+        eventing.knative.dev/release: "v0.8.0"
+        knative.dev/crd-install: "true"
+        messaging.knative.dev/subscribable: "true"
+    name: natsschannels.messaging.knative.dev
+spec:
+    additionalPrinterColumns:
+        - JSONPath: .status.conditions[?(@.type=="Ready")].status
+          name: Ready
+          type: string
+        - JSONPath: .status.conditions[?(@.type=="Ready")].reason
+          name: Reason
+          type: string
+        - JSONPath: .status.address.hostname
+          name: Hostname
+          type: string
+        - JSONPath: .metadata.creationTimestamp
+          name: Age
+          type: date
+    group: messaging.knative.dev
+    names:
+        categories:
+            - all
+            - knative
+            - messaging
+            - channel
+        kind: NatssChannel
+        plural: natsschannels
+        shortNames:
+            - natssc
+        singular: natsschannel
+    scope: Namespaced
+    subresources:
+        status: {}
+    validation:
+        openAPIV3Schema:
+            properties:
+                spec:
+                    properties:
+                        subscribable:
+                            properties:
+                                subscribers:
+                                    description: The list of subscribers that have expressed interest
+                                        in receiving events from this channel.
+                                    items:
+                                        properties:
+                                            ref:
+                                                properties:
+                                                    apiVersion:
+                                                        type: string
+                                                    kind:
+                                                        type: string
+                                                    name:
+                                                        minLength: 1
+                                                        type: string
+                                                    namespace:
+                                                        minLength: 1
+                                                        type: string
+                                                    uid:
+                                                        minLength: 1
+                                                        type: string
+                                                required:
+                                                    - namespace
+                                                    - name
+                                                    - uid
+                                                type: object
+                                            replyURI:
+                                                minLength: 1
+                                                type: string
+                                            subscriberURI:
+                                                minLength: 1
+                                                type: string
+                                            uid:
+                                                minLength: 1
+                                                type: string
+                                        required:
+                                            - uid
+                                    type: array
+                            type: object
+    version: v1alpha1
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        eventing.knative.dev/release: "v0.8.0"
+    name: natss-ch-controller
+    namespace: knative-eventing
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            messaging.knative.dev/channel: natss-channel
+            messaging.knative.dev/role: controller
+    template:
+        metadata:
+            annotations:
+                sidecar.istio.io/inject: "false"
+            labels:
+                rand: {{ randAlpha 6 }}
+                messaging.knative.dev/channel: natss-channel
+                messaging.knative.dev/role: controller
+        spec:
+            serviceAccountName: natss-ch-controller
+            containers:
+                - name: controller
+                  image: {{ .Values.controller.image.location }}
+                  imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+                  env:
+                      - name: EB_USER
+                        valueFrom:
+                            secretKeyRef:
+                                name: nats-user-eventbus
+                                key: username
+                      - name: EB_PASS
+                        valueFrom:
+                            secretKeyRef:
+                                name: nats-user-eventbus
+                                key: password
+                      - name: DEFAULT_CLUSTER_ID
+                        value: kyma-nats-streaming
+                      - name: DEFAULT_NATSS_URL
+                        value: nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
+                      - name: CONFIG_LOGGING_NAME
+                        value: config-logging
+                      - name: SYSTEM_NAMESPACE
+                        valueFrom:
+                            fieldRef:
+                                fieldPath: metadata.namespace
+                  volumeMounts:
+                      - name: config-logging
+                        mountPath: /etc/config-logging
+            volumes:
+                - name: config-logging
+                  configMap:
+                      name: config-logging
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        eventing.knative.dev/release: "v0.8.0"
+    name: natss-ch-dispatcher
+    namespace: knative-eventing
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            messaging.knative.dev/channel: natss-channel
+            messaging.knative.dev/role: dispatcher
+    template:
+        metadata:
+            annotations:
+                sidecar.istio.io/inject: "true"
+            labels:
+                rand: {{ randAlpha 6 }}
+                messaging.knative.dev/channel: natss-channel
+                messaging.knative.dev/role: dispatcher
+        spec:
+            serviceAccountName: natss-ch-dispatcher
+            containers:
+                - name: dispatcher
+                  image: {{ .Values.dispatcher.image.location }}
+                  imagePullPolicy: {{ .Values.dispatcher.image.pullPolicy }}
+                  env:
+                      - name: EB_USER
+                        valueFrom:
+                            secretKeyRef:
+                                name: nats-user-eventbus
+                                key: username
+                      - name: EB_PASS
+                        valueFrom:
+                            secretKeyRef:
+                                name: nats-user-eventbus
+                                key: password
+                      - name: DEFAULT_CLUSTER_ID
+                        value: kyma-nats-streaming
+                      - name: DEFAULT_NATSS_URL
+                        value: nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
+                      - name: CONFIG_LOGGING_NAME
+                        value: config-logging
+                      - name: SYSTEM_NAMESPACE
+                        valueFrom:
+                            fieldRef:
+                                fieldPath: metadata.namespace
+                  volumeMounts:
+                      - name: config-logging
+                        mountPath: /etc/config-logging
+            volumes:
+                - name: config-logging
+                  configMap:
+                      name: config-logging
+
+---
