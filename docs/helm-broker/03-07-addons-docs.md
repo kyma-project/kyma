@@ -19,7 +19,7 @@ To provide documentation for your addon, create the `docs` folder inside your ad
   Provide your own documentation
   </summary>
 
-Store your documents and assets in the `docs` folder inside your addon's directory. Each Markdown file represents a separate tab in the Console UI. The **type** metadata of your Markdown documents determines the order of the documents. Point the **filter** parameter of your `meta.yaml` file to the location where your documentation is stored, for example the `docs` directory.
+Store your documents and assets in the `docs` folder inside your addon's directory. Each Markdown file represents a separate tab in the Console UI. The **type** metadata of your Markdown documents determines the order of the documents. Point the **filter** parameter of your `meta.yaml` file to the `docs` directory that contains the documentation.
 
   </details>
   <details>
@@ -42,7 +42,7 @@ To provide documentation for objects that appear after provisioning your addon, 
   Provide your own documentation
   </summary>
 
-Store documentation for each object in the `docs/{object_name}` directory. In the `docs.yaml` file, set the **url** parameter to the `{{ .Values.addonsRepositoryURL }}` variable, which points to your addon compressed to a `.tgz` file. During the provisioning process, the Helm Broker pushes this variable into the chart. The **filter** parameter in the ClusterDocsTopic or DocsTopic definition must point to the path where the object's documentation is stored, for example `docs/{object_name}` directory.
+Store documentation for each object in the `docs/{object_name}` directory. In the `docs.yaml` file, set the **url** parameter to the `{{ .Values.addonsRepositoryURL }}` variable, which points to your addon compressed to a `.tgz` file. During the provisioning process, the Helm Broker pushes this variable into the chart. The **filter** parameter in the ClusterDocsTopic or DocsTopic definition must point to the `docs/{object_name}` directory that contains the documentation.
 
   </details>
   <details>
