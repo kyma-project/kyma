@@ -61,7 +61,8 @@ global:
     dir: pr/
     version: PR-5551
   console_backend_service_test:
-    version: PR-5628
+    dir: pr/
+    version: PR-5551
   cluster_users_integration_tests:
     dir: pr/
     version: PR-5277
