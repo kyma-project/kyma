@@ -66,7 +66,3 @@ The Asset Store is a flexible, scalable, multi-cloud, and location-independent K
 ## Headless CMS
 
 The Headless CMS is a Kubernetes native Content Management Systems (CMS) that provides a way of storing and managing raw content, and exposing it through an API. The Headless CMS is an abstraction on top of the Asset Store which provides a data layer. The Headless CMS has no dedicated presentation layer but it is integrated with the Console UI that consumes content stored using Headless CMS.
-
-## Compass
-
-Compass is a multi-tenant system which allows you to manage your applications across multiple Kyma Runtimes. Using Compass, you can control and monitor your application landscape in one central place. Compass stores applications and Runtimes configurations, and then communicates the information about the current configuration to applications and Runtimes. It also plays a crucial role in establishing a trusted connection between applications and Runtimes. Compass allows you to connect and group your applications and Runtimes by assigning them to different scenarios.
