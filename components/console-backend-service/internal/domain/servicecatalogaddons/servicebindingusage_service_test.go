@@ -124,7 +124,7 @@ func TestBindingUsageServiceListForServiceInstance(t *testing.T) {
 					Namespace: "prod",
 				},
 				Spec: v1beta1.ServiceBindingSpec{
-					ServiceInstanceRef: v1beta1.LocalObjectReference{
+					InstanceRef: v1beta1.LocalObjectReference{
 						Name: "redis-instance",
 					},
 				}},
@@ -134,7 +134,7 @@ func TestBindingUsageServiceListForServiceInstance(t *testing.T) {
 					Namespace: "prod",
 				},
 				Spec: v1beta1.ServiceBindingSpec{
-					ServiceInstanceRef: v1beta1.LocalObjectReference{
+					InstanceRef: v1beta1.LocalObjectReference{
 						Name: "redis-instance",
 					},
 				}},

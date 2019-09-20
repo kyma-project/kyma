@@ -25,8 +25,8 @@ func (p *servicePlanConverter) ToGQL(item *v1beta1.ServicePlan) (*gqlschema.Serv
 	}
 
 	var instanceCreateParameterSchema *gqlschema.JSON
-	if item.Spec.ServiceInstanceCreateParameterSchema != nil {
-		instanceCreateParameterSchema, err = jsonschema.Unpack(item.Spec.ServiceInstanceCreateParameterSchema.Raw)
+	if item.Spec.InstanceCreateParameterSchema != nil {
+		instanceCreateParameterSchema, err = jsonschema.Unpack(item.Spec.InstanceCreateParameterSchema.Raw)
 		if err != nil {
 			return nil, errors.Wrapf(err, "while unpacking service instance create parameter schema from ServicePlan [%s]", item.Name)
 		}

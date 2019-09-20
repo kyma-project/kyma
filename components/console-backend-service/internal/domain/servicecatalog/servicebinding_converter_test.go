@@ -191,8 +191,8 @@ func fixBinding(conditionType api.ServiceBindingConditionType) *api.ServiceBindi
 			Namespace: "production",
 		},
 		Spec: api.ServiceBindingSpec{
-			ServiceInstanceRef: api.LocalObjectReference{Name: "instance"},
-			SecretName:         "secret-name",
+			InstanceRef: api.LocalObjectReference{Name: "instance"},
+			SecretName:  "secret-name",
 			Parameters: &runtime.RawExtension{
 				Raw: []byte(`{"json":"true"}`),
 			},

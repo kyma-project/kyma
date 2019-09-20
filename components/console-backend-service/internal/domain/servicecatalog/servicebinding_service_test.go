@@ -98,7 +98,7 @@ func fixServiceBindingToRedis() *api.ServiceBinding {
 			Namespace: "production",
 		},
 		Spec: api.ServiceBindingSpec{
-			ServiceInstanceRef: api.LocalObjectReference{
+			InstanceRef: api.LocalObjectReference{
 				Name: "redis",
 			},
 		},
@@ -112,7 +112,7 @@ func fixServiceBindingToSql() *api.ServiceBinding {
 			Namespace: "production",
 		},
 		Spec: api.ServiceBindingSpec{
-			ServiceInstanceRef: api.LocalObjectReference{
+			InstanceRef: api.LocalObjectReference{
 				Name: "sql",
 			},
 		},

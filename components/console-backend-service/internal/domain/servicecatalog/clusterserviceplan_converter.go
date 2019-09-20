@@ -25,8 +25,8 @@ func (p *clusterServicePlanConverter) ToGQL(item *v1beta1.ClusterServicePlan) (*
 	}
 
 	var instanceCreateParameterSchema *gqlschema.JSON
-	if item.Spec.ServiceInstanceCreateParameterSchema != nil {
-		instanceCreateParameterSchema, err = jsonschema.Unpack(item.Spec.ServiceInstanceCreateParameterSchema.Raw)
+	if item.Spec.InstanceCreateParameterSchema != nil {
+		instanceCreateParameterSchema, err = jsonschema.Unpack(item.Spec.InstanceCreateParameterSchema.Raw)
 		if err != nil {
 			return nil, p.wrapConversionError(err, item.Name)
 		}

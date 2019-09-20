@@ -163,7 +163,7 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 		binding := &v1beta1.ServiceBinding{
 			Spec: v1beta1.ServiceBindingSpec{
-				ServiceInstanceRef: v1beta1.LocalObjectReference{
+				InstanceRef: v1beta1.LocalObjectReference{
 					Name: "instance",
 				},
 			},
@@ -208,7 +208,7 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 		binding := &v1beta1.ServiceBinding{
 			Spec: v1beta1.ServiceBindingSpec{
-				ServiceInstanceRef: v1beta1.LocalObjectReference{
+				InstanceRef: v1beta1.LocalObjectReference{
 					Name: "instance",
 				},
 			},

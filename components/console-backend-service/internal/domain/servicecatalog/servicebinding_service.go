@@ -33,7 +33,7 @@ func newServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, inf
 				return nil, errors.Wrapf(err, "while indexing by `relatedServiceInstanceName`")
 			}
 
-			key := fmt.Sprintf("%s/%s", serviceBinding.Namespace, serviceBinding.Spec.ServiceInstanceRef.Name)
+			key := fmt.Sprintf("%s/%s", serviceBinding.Namespace, serviceBinding.Spec.InstanceRef.Name)
 			return []string{key}, nil
 		},
 	})

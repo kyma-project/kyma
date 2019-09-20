@@ -34,7 +34,7 @@ func (r *serviceBindingResolver) CreateServiceBindingMutation(ctx context.Contex
 			Name: name.EmptyIfNil(serviceBindingName),
 		},
 		Spec: api.ServiceBindingSpec{
-			ServiceInstanceRef: api.LocalObjectReference{
+			InstanceRef: api.LocalObjectReference{
 				Name: serviceInstanceName,
 			},
 		},

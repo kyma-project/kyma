@@ -44,7 +44,7 @@ func TestServicePlanConverter_ToGQL(t *testing.T) {
 				CommonServicePlanSpec: v1beta1.CommonServicePlanSpec{
 					ExternalMetadata: &runtime.RawExtension{Raw: metadataBytes},
 					ExternalName:     "ExampleExternalName",
-					ServiceInstanceCreateParameterSchema: &runtime.RawExtension{
+					InstanceCreateParameterSchema: &runtime.RawExtension{
 						Raw: encodedParameterSchemaBytes,
 					},
 					ServiceBindingCreateParameterSchema: &runtime.RawExtension{
@@ -305,7 +305,7 @@ func fixServicePlan(t require.TestingT, parameterSchema map[string]interface{}) 
 			CommonServicePlanSpec: v1beta1.CommonServicePlanSpec{
 				ExternalMetadata: &runtime.RawExtension{Raw: metadataBytes},
 				ExternalName:     "ExampleExternalName",
-				ServiceInstanceCreateParameterSchema: &runtime.RawExtension{
+				InstanceCreateParameterSchema: &runtime.RawExtension{
 					Raw: encodedParameterSchemaBytes,
 				},
 				ServiceBindingCreateParameterSchema: &runtime.RawExtension{
