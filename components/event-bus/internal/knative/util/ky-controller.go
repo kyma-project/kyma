@@ -52,6 +52,23 @@ func UpdateEventActivation(ctx context.Context, client runtimeClient.Client, u *
 	return nil
 }
 
+// UpdateKnativeChannel updates Knative Channel on channge in Finalizer
+func UpdateKnativeChannel(ctx context.Context, client runtimeClient.Client, ch *messagingV1Alpha1.Channel) error {
+	objectKey := runtimeClient.ObjectKey{Namespace: ch.Namespace, Name: ch.Name}
+	ea := &eventingv1alpha1.EventActivation{}
+	if err := client.Get(ctx, objectKey, ea); err != nil {
+		return err
+	}
+
+	if !equality.Semantic.DeepEqual(ch.Finalizers, ch.Finalizers) {
+		ea.SetFinalizers(ch.ObjectMeta.Finalizers)
+		if err := client.Update(ctx, ch); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // GetSubscriptionForChannel gets Subscription for a particular Channel
 func GetSubscriptionForChannel(ctx context.Context, client runtimeClient.Client, ch *messagingV1Alpha1.Channel) (*subApis.Subscription, error) {
 	var chNamespace string

@@ -43,6 +43,20 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	// nothing to be done.
 	if errors.IsNotFound(err) {
 		log.Info("Could not find Channel: ", "err", err)
+		//sub, err := util.GetSubscriptionForChannel(ctx, r.client, channel)
+		//if err != nil {
+		//	log.Error(err, "GetSubscriptionsForChannel() failed")
+		//	return reconcile.Result{}, err
+		//}
+		//err = util.DeactivateSubscriptionForChannel(ctx, r.client, sub, log, r.time)
+		//if err != nil {
+		//	return reconcile.Result{}, err
+		//}
+		//log.Info("Kyma subscription found: ", "sub", sub)
+		//if sub == nil {
+		//	log.Info("No matching subscription found for channel: " + channel.Namespace + "/" + channel.Name)
+		//	return reconcile.Result{}, nil
+		//}
 		return reconcile.Result{}, nil
 	}
 
@@ -55,7 +69,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	log.Info("Reconciling Channel", "UID", string(channel.ObjectMeta.UID))
 
 	// Modify a copy, not the original.
-	//channel = channel.DeepCopy()
+	channel = channel.DeepCopy()
 
 	// Reconcile this copy of the EventActivation and then write back any status
 	// updates regardless of whether the reconcile error out.
@@ -65,11 +79,11 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 		r.recorder.Eventf(channel, corev1.EventTypeWarning, "ChannelReconcileFailed", "Channel reconciliation failed: %v", reconcileErr)
 	}
 
-	//if updateStatusErr := util.UpdateEventActivation(ctx, r.client, channel); updateStatusErr != nil {
-	//	log.Error(updateStatusErr, "Updating EventActivation status")
-	//	r.recorder.Eventf(channel, corev1.EventTypeWarning, "EventactivationReconcileFailed", "Updating EventActivation status failed: %v", updateStatusErr)
-	//	return reconcile.Result{}, updateStatusErr
-	//}
+	if updateStatusErr := util.UpdateKnativeChannel(ctx, r.client, channel); updateStatusErr != nil {
+		log.Error(updateStatusErr, "Updating Knative Channel status")
+		r.recorder.Eventf(channel, corev1.EventTypeWarning, "ChannelReconcileFailed", "Updating Kn sChannel status failed: %v", updateStatusErr)
+		return reconcile.Result{}, updateStatusErr
+	}
 
 	if !requeue && reconcileErr == nil {
 		log.Info("Channel reconciled")
@@ -84,8 +98,17 @@ func (r *reconciler) reconcile(ctx context.Context, ch *messagingV1Alpha1.Channe
 	log.Info(" ############ Reconciling for channel: " + ch.Namespace + "/" + ch.Name)
 
 	sub, err := util.GetSubscriptionForChannel(ctx, r.client, ch)
+	if err != nil {
+		log.Error(err, "GetSubscriptionsForChannel() failed")
+		return false, err
+	}
 	log.Info("Kyma subscription found: ", "sub", sub)
-	// delete or add finalizers
+	if sub == nil {
+		log.Info("No matching subscription found for channel: " + ch.Namespace + "/" + ch.Name)
+		return false, nil
+	}
+
+	//// delete or add finalizers
 	if !ch.DeletionTimestamp.IsZero() {
 		// deactivate all Kyma subscriptions related to this ea
 		util.DeactivateSubscriptionForChannel(ctx, r.client, sub, log, r.time)
@@ -103,14 +126,6 @@ func (r *reconciler) reconcile(ctx context.Context, ch *messagingV1Alpha1.Channe
 		log.Info("Finalizer added", "Finalizer name", finalizerName)
 		return true, nil
 	}
-	if err != nil {
-		log.Error(err, "GetSubscriptionsForChannel() failed")
-		return false, err
-	}
-	if sub == nil {
-		log.Info("No matching subscription found for channel: " + ch.Namespace + "/" + ch.Name)
-		return false, nil
-	}
 
 	// activate all subscriptions
 	var isChReady bool
@@ -121,7 +136,6 @@ func (r *reconciler) reconcile(ctx context.Context, ch *messagingV1Alpha1.Channe
 			break
 		}
 	}
-	log.Info("what is going on: ", isChReady)
 	//var currentSubChStatus bool
 	for _, cond := range sub.Status.Conditions {
 		if cond.Type == subApis.ChannelReady {
