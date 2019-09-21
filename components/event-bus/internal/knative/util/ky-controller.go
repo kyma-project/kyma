@@ -53,16 +53,16 @@ func UpdateEventActivation(ctx context.Context, client runtimeClient.Client, u *
 }
 
 // UpdateKnativeChannel updates Knative Channel on channge in Finalizer
-func UpdateKnativeChannel(ctx context.Context, client runtimeClient.Client, ch *messagingV1Alpha1.Channel) error {
-	objectKey := runtimeClient.ObjectKey{Namespace: ch.Namespace, Name: ch.Name}
-	ea := &eventingv1alpha1.EventActivation{}
-	if err := client.Get(ctx, objectKey, ea); err != nil {
+func UpdateKnativeChannel(ctx context.Context, client runtimeClient.Client, u *messagingV1Alpha1.Channel) error {
+	objectKey := runtimeClient.ObjectKey{Namespace: u.Namespace, Name: u.Name}
+	channel := &messagingV1Alpha1.Channel{}
+	if err := client.Get(ctx, objectKey, channel); err != nil {
 		return err
 	}
 
-	if !equality.Semantic.DeepEqual(ch.Finalizers, ch.Finalizers) {
-		ea.SetFinalizers(ch.ObjectMeta.Finalizers)
-		if err := client.Update(ctx, ch); err != nil {
+	if !equality.Semantic.DeepEqual(channel.Finalizers, u.Finalizers) {
+		channel.SetFinalizers(u.ObjectMeta.Finalizers)
+		if err := client.Update(ctx, channel); err != nil {
 			return err
 		}
 	}
