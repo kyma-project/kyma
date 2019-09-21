@@ -67,8 +67,8 @@ var once sync.Once
 // KnativeAccessLib encapsulates the Knative access lib behaviours.
 type KnativeAccessLib interface {
 	//GetChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error)
-	GetChannelByLabels(namespace string, labels *map[string]string) (*messagingV1Alpha1.Channel, error)
-	CreateChannel(name string, namespace string, labels *map[string]string, timeout time.Duration) (*messagingV1Alpha1.Channel, error)
+	GetChannelByLabels(namespace string, labels map[string]string) (*messagingV1Alpha1.Channel, error)
+	CreateChannel(name string, namespace string, labels map[string]string, timeout time.Duration) (*messagingV1Alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string) error
 	DeleteSubscription(name string, namespace string) error
@@ -79,7 +79,7 @@ type KnativeAccessLib interface {
 }
 
 // NewKnativeLib returns an interface to KnativeLib, which can be mocked
-func NewKnativeLib() (*KnativeAccessLib, error) {
+func NewKnativeLib() (*KnativeLib, error) {
 	return GetKnativeLib()
 }
 
@@ -94,7 +94,7 @@ type KnativeLib struct {
 var _ KnativeAccessLib = &KnativeLib{}
 
 // GetKnativeLib returns the Knative/Eventing access layer
-func GetKnativeLib() (*KnativeAccessLib, error) {
+func GetKnativeLib() (*KnativeLib, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		log.Printf("ERROR: GetChannel(): getting cluster config: %v", err)
