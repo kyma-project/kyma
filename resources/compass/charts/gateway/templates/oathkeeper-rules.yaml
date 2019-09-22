@@ -1,0 +1,49 @@
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: compass-gateway-oauth
+spec:
+  description: Configuration of oathkeeper for secure endpoint of compass gateway
+  upstream:
+    url: http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:3000
+  match:
+    methods: ["GET", "POST", "OPTIONS"]
+    url: <http|https>://{{ .Values.global.gateway.tls.secure.oauth.host }}.{{ .Values.global.ingress.domainName }}/<.*>
+  authenticators:
+  - handler: oauth2_introspection
+  authorizer:
+    handler: allow
+  mutators:
+  - handler: hydrator
+    config:
+      api:
+        url: {{ .Values.global.tenantMappingService.url }}
+  - handler: id_token
+    config:
+      claims: {{ .Values.oathkeeper.idTokenConfig.claims | quote }}
+---
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: compass-gateway-jwt
+spec:
+  description: Configuration of oathkeeper for secure endpoint of compass gateway
+  upstream:
+    url: http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:3000
+  match:
+    methods: ["GET", "POST", "OPTIONS"]
+    url: <http|https>://{{ .Values.global.gateway.tls.secure.jwt.host }}.{{ .Values.global.ingress.domainName }}/<.*>
+  authenticators:
+  - handler: jwt
+    config:
+      trusted_issuers: ["https://dex.{{ .Values.global.ingress.domainName }}"]
+  authorizer:
+    handler: allow
+  mutators:
+  - handler: hydrator
+    config:
+      api:
+        url: {{ .Values.global.tenantMappingService.url }}
+  - handler: id_token
+    config:
+      claims: {{ .Values.oathkeeper.idTokenConfig.claims | quote }}

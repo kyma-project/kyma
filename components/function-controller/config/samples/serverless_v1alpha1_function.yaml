@@ -11,6 +11,6 @@ spec:
           return 'Hello World'
         }
       }
-  functionContentType: "plaintext"
-  size: "L"
-  runtime: "nodejs8"
+  functionContentType: plaintext
+  size: S
+  runtime: nodejs8

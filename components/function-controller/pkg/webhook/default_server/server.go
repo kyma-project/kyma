@@ -17,7 +17,6 @@ limitations under the License.
 package defaultserver
 
 import (
-	"fmt"
 	"os"
 
 	"k8s.io/apimachinery/pkg/types"
@@ -81,7 +80,7 @@ func Add(mgr manager.Manager) error {
 	for k, builder := range builderMap {
 		handlers, ok := HandlerMap[k]
 		if !ok {
-			log.V(1).Info(fmt.Sprintf("can't find handlers for builder: %v", k))
+			log.V(1).Info("No handler for builder %q", k)
 			handlers = []admission.Handler{}
 		}
 		wh, err := builder.

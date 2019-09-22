@@ -1,17 +1,13 @@
 ---
-title: Service Programming Model
+title: Event delivery
 type: Details
 ---
 
-You can configure a microservice deployed in Kyma to receive Events from the Event Bus by creating a [Subscription](/components/event-bus/#custom-resource-subscription) custom resource.
-
-## Event delivery
-
-The Event is delivered as an HTTP POST request. Event metadata is a part of an HTTP request headers. Event payload is the body of the request.
-
-![eventdelivery](./assets/event-delivery.svg)
+Events are delivered as HTTP POST requests. The Event metadata is a part of an HTTP request headers, whereas the Event payload is the body of the request.
 
 The Event delivery workflow is as follows:
+
+![eventdelivery](./assets/event-delivery.svg)
 
 1. An external system uses the bound Application to publish an Event to the Event Bus.
 2. The Event Bus checks for the Event subscription and activation. It creates a POST request using Event payload and metadata.
@@ -45,9 +41,7 @@ The following HTTP headers provide information about the Event metadata. The hea
 
 The Event payload is delivered as the body of the HTTP Request in `JSON` format. The `JSON` schema is available in the Service Catalog in the registered service for the remote Events.
 
-## Event payload example
-
-In this example, you write a service for an `order.created` Event published by the external solution service. The published Event schema looks as follows:
+This example shows the `order.created` Event published by the external solution service:
 
 ```json
 {
@@ -71,7 +65,7 @@ The HTTP POST request payload is a JSON object:
 {"orderCode": "4caad296-e0c5-491e-98ac-0ed118f9474e"}
 ```
 
-## Successful delivery
+## Responses
 
 The service's HTTP response status code `2xx` means that the message was successfully delivered to the subscriber.
 For example:
@@ -97,4 +91,4 @@ will look like this:
 
 ## Event Subscription service example
 
-Refer to [this](https://github.com/kyma-project/examples/tree/master/event-subscription/service) example to find a complete scenario for implementing a subscriber service to a business Event.
+See [this](https://github.com/kyma-project/examples/tree/master/event-subscription/service) example to find a complete scenario for implementing a subscriber service to a business Event.

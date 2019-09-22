@@ -92,7 +92,7 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 	knativeChannelLabels[subscriptionEventTypeVersion] = eventTypeVersion
 
 	//Fetch knative channel via label
-	channel, err := knativeLib.GetChannelByLabels(*namespace, &knativeChannelLabels)
+	channel, err := knativeLib.GetChannelByLabels(*namespace, knativeChannelLabels)
 	if err != nil {
 		log.Printf("an error occured while trying to get the knative channel for source: '%v', event-type: '%v', event-type-version: '%v' in namespace '%v'\n"+
 			"error: '%v':", source, eventType, eventTypeVersion, *namespace, err)

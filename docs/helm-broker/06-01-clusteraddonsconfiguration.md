@@ -95,7 +95,7 @@ This table lists all possible parameters of a given resource together with their
 | **status.repositories.addons.version** | Not applicable | Defines the version of the addon.        |
 | **status.repositories.addons.status**  | Not applicable | Describes the status of processing a given addon by the Helm Broker Controller.           |
 | **status.repositories.addons.reason**  | Not applicable | Provides the reason why the addon processing failed. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of reasons.      |
-| **status.repositories.addons.message** | **Not applicable** | Provides a human-readable message on processing progress, success, or failure. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of messages. |
+| **status.repositories.addons.message** | Not applicable | Provides a human-readable message on processing progress, success, or failure. [Here](https://github.com/kyma-project/helm-broker/blob/master/pkg/apis/addons/v1alpha1/reason.go) you can find a complete list of messages. |
 
 > **NOTE:** The Helm Broker Controller automatically adds all parameters marked as **Not applicable** to the ClusterAddonsConfiguration CR.
 

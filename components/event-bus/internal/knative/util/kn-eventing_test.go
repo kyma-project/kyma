@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
 
@@ -83,7 +84,7 @@ func Test_CreateChannel(t *testing.T) {
 		evClient:         client.EventingV1alpha1(),
 		messagingChannel: client.MessagingV1alpha1(),
 	}
-	ch, err := k.CreateChannel(channelName, testNS, &labels, 10*time.Second)
+	ch, err := k.CreateChannel(channelName, testNS, labels, 10*time.Second)
 	assert.Nil(t, err)
 	log.Printf("Channel created: %v", ch)
 
@@ -111,12 +112,12 @@ func Test_GetChannelByLabels(t *testing.T) {
 		evClient:         client.EventingV1alpha1(),
 		messagingChannel: client.MessagingV1alpha1(),
 	}
-	ch1, err1 := k.CreateChannel(channelName, testNS, &labels, 10*time.Second)
+	ch1, err1 := k.CreateChannel(channelName, testNS, labels, 10*time.Second)
 	assert.Nil(t, err1)
 	log.Printf("Channel created: %v", ch1)
 	log.Println("Getting Channel By label")
 
-	ch2, err2 := k.GetChannelByLabels(testNS, &labels)
+	ch2, err2 := k.GetChannelByLabels(testNS, labels)
 	assert.Nil(t, err2)
 
 	ignore := cmpopts.IgnoreTypes(apis.VolatileTime{})
@@ -140,7 +141,7 @@ func Test_CreateChannelWithError(t *testing.T) {
 		evClient:         client.EventingV1alpha1(),
 		messagingChannel: client.MessagingV1alpha1(),
 	}
-	ch, err := k.CreateChannel(channelName, testNS, &labels, 10*time.Second)
+	ch, err := k.CreateChannel(channelName, testNS, labels, 10*time.Second)
 	assert.Nil(t, err)
 	log.Printf("Channel created: %v", ch)
 
@@ -170,7 +171,7 @@ func Test_CreateChannelTimeout(t *testing.T) {
 		evClient:         client.EventingV1alpha1(),
 		messagingChannel: client.MessagingV1alpha1(),
 	}
-	_, err := k.CreateChannel(channelName, testNS, &labels, 1*time.Second)
+	_, err := k.CreateChannel(channelName, testNS, labels, 1*time.Second)
 	assert.NotNil(t, err)
 	log.Printf("Test_CreateChannelTimeout: %v", err)
 }
@@ -201,7 +202,7 @@ func Test_SendMessage(t *testing.T) {
 	k := &KnativeLib{}
 	e := k.InjectClient(client.EventingV1alpha1(), client.MessagingV1alpha1())
 	assert.Nil(t, e)
-	ch, err := k.CreateChannel(channelName, testNS, &labels, 10*time.Second)
+	ch, err := k.CreateChannel(channelName, testNS, labels, 10*time.Second)
 	assert.Nil(t, err)
 	u, err := url.Parse(srv.URL)
 	assert.Nil(t, err)
@@ -251,7 +252,7 @@ func Test_CreateDeleteChannel(t *testing.T) {
 	k := &KnativeLib{}
 	e := k.InjectClient(client.EventingV1alpha1(), client.MessagingV1alpha1())
 	assert.Nil(t, e)
-	ch, err := k.CreateChannel(channelName, testNS, &labels, 1*time.Second)
+	ch, err := k.CreateChannel(channelName, testNS, labels, 1*time.Second)
 	assert.Nil(t, err)
 	err = k.DeleteChannel(ch.Name, ch.Namespace)
 	assert.Nil(t, err)
@@ -312,4 +313,21 @@ func Test_makeHttpRequest(t *testing.T) {
 		log.Printf("Request Header: %s", k)
 	}
 	assert.Len(t, req.Header, 3, "Headers map should have exactly 3 keys")
+}
+
+func Test_MakeChannelWithPrefix(t *testing.T) {
+	prefix := "order.created"
+	a := makeChannel(prefix, testNS, labels)
+
+	// makeChannel should rmove all the special characters from the prefix string
+	assert.False(t, strings.Contains(a.GenerateName, "."))
+
+	// makeChannel should add hyphen at the end if not present
+	assert.True(t, strings.HasSuffix(a.GenerateName, "-"))
+
+	prefix = "order.created-"
+	a = makeChannel(prefix, testNS, labels)
+
+	// makeChannel should not add double hyphens if already present
+	assert.False(t, strings.HasSuffix(a.GenerateName, "--"))
 }
