@@ -42,4 +42,4 @@ To add `UpdateStatus` method to Application client, following actions has to be 
 
 >The FooCondition type for some resource type Foo must contain at least type and status fields.
 
-I found [implementation](https://github.com/jetstack/cert-manager/blob/master/pkg/apis/certmanager/v1alpha1/types.go) which follows those conventions about Status field. Currently they are using `Update`, instead `UpdateStatus` which seems to be against conventions.
+I found [implementation](https://github.com/jetstack/cert-manager/blob/release-0.4/pkg/apis/certmanager/v1alpha1/types.go) which follows those conventions about Status field. Currently they are using `Update`, instead `UpdateStatus` which seems to be against conventions.
