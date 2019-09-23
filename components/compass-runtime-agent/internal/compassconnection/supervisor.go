@@ -95,7 +95,6 @@ func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnectio
 	return s.updateCompassConnection(compassConnectionCR)
 }
 
-// TODO - split to methods?
 // SynchronizeWithCompass synchronizes with Compass
 func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error) {
 	s.log = s.log.WithField("CompassConnection", connection.Name)
@@ -161,14 +160,8 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	// TODO: report Results to Director
 
 	// TODO: decide the approach of setting this status. Should it be success even if one App failed?
-	connection.Status.State = v1alpha1.Synchronized
-	connection.Status.SynchronizationStatus = &v1alpha1.SynchronizationStatus{
-		LastAttempt:               syncAttemptTime,
-		LastSuccessfulFetch:       syncAttemptTime,
-		LastSuccessfulApplication: syncAttemptTime,
-	}
-
-	connection.Status.State = v1alpha1.Synchronized
+	s.setConnectionSynchronizedStatus(connection, syncAttemptTime)
+	connection.Spec.ResyncNow = false
 
 	return s.updateCompassConnection(connection)
 }
@@ -263,6 +256,16 @@ func (s *crSupervisor) setConnectionFailedStatus(connectionCR *v1alpha1.CompassC
 	connectionCR.Status.ConnectionStatus = &v1alpha1.ConnectionStatus{
 		LastSync: metav1.Now(),
 		Error:    connStatusError,
+	}
+}
+
+func (s *crSupervisor) setConnectionSynchronizedStatus(connectionCR *v1alpha1.CompassConnection, attemptTime metav1.Time) {
+	s.log.Infof("Setting Compass Connection to Synchronized state")
+	connectionCR.Status.State = v1alpha1.Synchronized
+	connectionCR.Status.SynchronizationStatus = &v1alpha1.SynchronizationStatus{
+		LastAttempt:               attemptTime,
+		LastSuccessfulFetch:       attemptTime,
+		LastSuccessfulApplication: attemptTime,
 	}
 }
 

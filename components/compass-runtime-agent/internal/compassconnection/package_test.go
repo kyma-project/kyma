@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/apimachinery/pkg/types"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 
@@ -77,6 +77,8 @@ var (
 	runtimeConfig = config.RuntimeConfig{RuntimeId: runtimeId}
 
 	kymaModelApps = []kymaModel.Application{{Name: "App-1", ID: "abcd-efgh"}}
+
+	operationResults = []kyma.Result{{ApplicationID: "abcd-efgh", Operation: kyma.Create}}
 )
 
 func TestCompassConnectionController(t *testing.T) {
@@ -85,28 +87,27 @@ func TestCompassConnectionController(t *testing.T) {
 	ctrlManager, err := manager.New(cfg, manager.Options{SyncPeriod: &syncPeriodTime})
 	require.NoError(t, err)
 
-	tokensConnectorClientMock := connectorTokensClientMock(nil, nil)
-	certsConnectorClientMock := connectorCertClientMock(nil, nil)
-	configurationClientMock := directorClientMock(nil)
-	synchronizationServiceMock := synchronizationServiceMock(nil)
+	// Credentials manager
+	credentialsManagerMock := &certsMocks.Manager{}
+	credentialsManagerMock.On("GetClientCredentials").Return(credentials.ClientCredentials, nil)
+	credentialsManagerMock.On("PreserveCredentials", mock.AnythingOfType("certificates.Credentials")).Run(func(args mock.Arguments) {
+		credentials, ok := args[0].(certificates.Credentials)
+		assert.True(t, ok)
+		assert.NotEmpty(t, credentials)
+	}).Return(nil)
+	// Config provider
+	configProviderMock := configProviderMock()
+	// Connector clients
+	tokensConnectorClientMock := connectorTokensClientMock()
+	certsConnectorClientMock := connectorCertClientMock()
+	// Director config client
+	configurationClientMock := &directorMocks.ConfigClient{}
+	configurationClientMock.On("FetchConfiguration", directorURL, runtimeId).Return(kymaModelApps, nil)
+	// Clients provider
 	clientsProviderMock := clientsProviderMock(configurationClientMock, tokensConnectorClientMock, certsConnectorClientMock)
-	credentialsManagerMock := credentialsManagerMock(t, nil, nil)
-	configProviderMock := configProviderMock(nil, nil)
-
-	//// Director config client
-	//directorClientMock := &directorMocks.ConfigClient{}
-	//directorClientMock.On("FetchConfiguration", directorURL, runtimeId).Return(kymaModelApps, nil)
-	//
-	//// Connector token client
-	//connectorTokenClientMock := &connectorMocks.Client{}
-	//connectorTokenClientMock.On("Configuration", connectorTokenHeaders).Return(connectorConfigurationResponse, nil)
-	//connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders).Return(connectorCertResponse, nil)
-	//
-	//// Clients provider
-	//clientsProviderMock := &compassMocks.ClientsProvider{}
-	//clientsProviderMock.On("GetCompassConfigClient", credentials.ClientCredentials, directorURL).Return(directorClientMock, nil)
-	//clientsProviderMock.On("GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL).Return(connectorCertsClient, nil)
-	//clientsProviderMock.On("GetConnectorClient", connectorURL).Return(connectorTokenClientMock, nil)
+	// Sync service
+	synchronizationServiceMock := &kymaMocks.Service{}
+	synchronizationServiceMock.On("Apply", kymaModelApps).Return(operationResults, nil)
 
 	var baseDependencies = DependencyConfig{
 		K8sConfig:         cfg,
@@ -171,6 +172,15 @@ func TestCompassConnectionController(t *testing.T) {
 			credentialsManagerMock)
 		certsConnectorClientMock.AssertCalled(t, "Configuration", nilHeaders)
 		certsConnectorClientMock.AssertNotCalled(t, "SignCSR", mock.AnythingOfType("string"), nilHeaders)
+	})
+
+	t.Run("should not reinitialized connection if connection is in Synchronized state", func(t *testing.T) {
+		// when
+		connection, err := supervisor.InitializeCompassConnection()
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, v1alpha1.Synchronized, connection.Status.State)
 	})
 
 	t.Run("Should renew certificate if RefreshCredentialsNow set to true", func(t *testing.T) {
@@ -285,17 +295,11 @@ func TestFailedToInitializeConnection(t *testing.T) {
 	require.NoError(t, err)
 
 	// Connector token client
-	connectorTokenClientMock := &connectorMocks.Client{}
-	connectorTokenClientMock.On("Configuration", connectorTokenHeaders).Return(connectorConfigurationResponse, nil)
-	connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders).Return(connectorCertResponse, nil)
-
+	connectorTokenClientMock := connectorTokensClientMock()
 	// Config provider
-	configProviderMock := &configMocks.Provider{}
-	configProviderMock.On("GetConnectionConfig").Return(connectionConfig, nil)
-
+	configProviderMock := configProviderMock()
 	// Clients provider
-	clientsProviderMock := &compassMocks.ClientsProvider{}
-	clientsProviderMock.On("GetConnectorClient", connectorURL).Return(connectorTokenClientMock, nil)
+	clientsProviderMock := clientsProviderMock(nil, connectorTokenClientMock, nil)
 
 	// Credentials manager
 	credentialsManagerMock := &certsMocks.Manager{}
@@ -347,25 +351,38 @@ func TestFailedToInitializeConnection(t *testing.T) {
 		{
 			description: "failed to sign CSR",
 			setupFunc: func() {
-				connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders).Return(nil, errors.New("error"))
+				connectorTokenClientMock.ExpectedCalls = nil
+				connectorTokenClientMock.On("Configuration", connectorTokenHeaders).Return(connectorConfigurationResponse, nil)
+				connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders).Return(gqlschema.CertificationResult{}, errors.New("error"))
 			},
 		},
 		{
 			description: "failed to fetch Configuration",
 			setupFunc: func() {
-				connectorTokenClientMock.On("Configuration", connectorTokenHeaders).Return(nil, errors.New("error"))
+				connectorTokenClientMock.ExpectedCalls = nil
+				connectorTokenClientMock.On("Configuration", connectorTokenHeaders).Return(gqlschema.Configuration{}, errors.New("error"))
+				connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders).Return(gqlschema.CertificationResult{}, errors.New("error"))
 			},
 		},
 		{
 			description: "failed to get Connector client",
 			setupFunc: func() {
-				clientsProviderMock.On("GetConnectorClient", connectorURL).Return(connectorTokenClientMock, nil)
+				clientsProviderMock.ExpectedCalls = nil
+				clientsProviderMock.On("GetConnectorClient", connectorURL).Return(nil, errors.New("error"))
+			},
+		},
+		{
+			description: "connector URL is empty",
+			setupFunc: func() {
+				configProviderMock.ExpectedCalls = nil
+				configProviderMock.On("GetConnectionConfig").Return(config.ConnectionConfig{Token: token}, nil)
 			},
 		},
 		{
 			description: "failed to get connection config",
 			setupFunc: func() {
-				configProviderMock.On("GetConnectionConfig").Return(nil, errors.New("error"))
+				configProviderMock.ExpectedCalls = nil
+				configProviderMock.On("GetConnectionConfig").Return(config.ConnectionConfig{}, errors.New("error"))
 			},
 		},
 	} {
@@ -394,7 +411,6 @@ func assertCompassConnectionState(t *testing.T, expectedState v1alpha1.Connectio
 	assert.Equal(t, expectedState, connectedConnection.Status.State)
 }
 
-// TODO - cleanup mock functions
 func clientsProviderMock(configClient *directorMocks.ConfigClient, connectorTokensClient, connectorCertsClient *connectorMocks.Client) *compassMocks.ClientsProvider {
 	clientsProviderMock := &compassMocks.ClientsProvider{}
 	clientsProviderMock.On("GetCompassConfigClient", credentials.ClientCredentials, directorURL).Return(configClient, nil)
@@ -404,52 +420,26 @@ func clientsProviderMock(configClient *directorMocks.ConfigClient, connectorToke
 	return clientsProviderMock
 }
 
-func directorClientMock(configFetchError error) *directorMocks.ConfigClient {
-	directorClientMock := &directorMocks.ConfigClient{}
-	directorClientMock.On("FetchConfiguration", directorURL, runtimeId).Return(kymaModelApps, configFetchError)
-
-	return directorClientMock
-}
-
-func connectorCertClientMock(configError, signingError error) *connectorMocks.Client {
+func connectorCertClientMock() *connectorMocks.Client {
 	connectorMock := &connectorMocks.Client{}
-	connectorMock.On("Configuration", nilHeaders).Return(connectorConfigurationResponse, configError)
-	connectorMock.On("SignCSR", mock.AnythingOfType("string"), nilHeaders).Return(connectorCertResponse, signingError) // TODO - renewed creds?
+	connectorMock.On("Configuration", nilHeaders).Return(connectorConfigurationResponse, nil)
+	connectorMock.On("SignCSR", mock.AnythingOfType("string"), nilHeaders).Return(connectorCertResponse, nil)
 
 	return connectorMock
 }
 
-func connectorTokensClientMock(configErr, signingErr error) *connectorMocks.Client {
+func connectorTokensClientMock() *connectorMocks.Client {
 	connectorMock := &connectorMocks.Client{}
-	connectorMock.On("Configuration", connectorTokenHeaders).Return(connectorConfigurationResponse, configErr)
-	connectorMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders).Return(connectorCertResponse, signingErr)
+	connectorMock.On("Configuration", connectorTokenHeaders).Return(connectorConfigurationResponse, nil)
+	connectorMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders).Return(connectorCertResponse, nil)
 
 	return connectorMock
 }
 
-func credentialsManagerMock(t *testing.T, getCredsError, preserveError error) *certsMocks.Manager {
-	credManagerMock := &certsMocks.Manager{}
-	credManagerMock.On("GetClientCredentials").Return(credentials.ClientCredentials, getCredsError)
-	credManagerMock.On("PreserveCredentials", mock.AnythingOfType("certificates.Credentials")).Run(func(args mock.Arguments) {
-		credentials, ok := args[0].(certificates.Credentials)
-		assert.True(t, ok)
-		assert.NotEmpty(t, credentials)
-	}).Return(preserveError)
-
-	return credManagerMock
-}
-
-func synchronizationServiceMock(applyError error) *kymaMocks.Service {
-	syncServiceMock := &kymaMocks.Service{}
-	syncServiceMock.On("Apply", kymaModelApps).Return(nil, applyError) // TODO - statuses
-
-	return syncServiceMock
-}
-
-func configProviderMock(connectionConfErr, runtimeConfErr error) *configMocks.Provider {
+func configProviderMock() *configMocks.Provider {
 	providerMock := &configMocks.Provider{}
-	providerMock.On("GetConnectionConfig").Return(connectionConfig, connectionConfErr)
-	providerMock.On("GetRuntimeConfig").Return(runtimeConfig, runtimeConfErr)
+	providerMock.On("GetConnectionConfig").Return(connectionConfig, nil)
+	providerMock.On("GetRuntimeConfig").Return(runtimeConfig, nil)
 
 	return providerMock
 }
@@ -466,158 +456,3 @@ func StartTestManager(t *testing.T, mgr manager.Manager) (chan struct{}, *sync.W
 	}()
 	return stop, wg
 }
-
-var (
-	compassConnectionNamespacedName = types.NamespacedName{
-		Name: compassConnectionName,
-	}
-)
-
-//
-//func TestReconcile(t *testing.T) {
-//
-//	t.Run("should reconcile request", func(t *testing.T) {
-//		// given
-//		compassConnection := &v1alpha1.CompassConnection{
-//			ObjectMeta: v1.ObjectMeta{
-//				Name: compassConnectionName,
-//			},
-//		}
-//
-//		fakeClientset := fake.NewSimpleClientset(compassConnection).CompassV1alpha1().CompassConnections()
-//		objClient := NewObjectClientWrapper(fakeClientset)
-//		supervisor := &mocks.Supervisor{}
-//		supervisor.On("SynchronizeWithCompass", compassConnection).Return(compassConnection, nil)
-//
-//		reconciler := newReconciler(objClient, supervisor, minimalConfigSyncTime)
-//
-//		request := reconcile.Request{
-//			NamespacedName: compassConnectionNamespacedName,
-//		}
-//
-//		// when
-//		result, err := reconciler.Reconcile(request)
-//
-//		// then
-//		require.NoError(t, err)
-//		require.Empty(t, result)
-//
-//	})
-//
-//	t.Run("should reconcile delete request", func(t *testing.T) {
-//		// given
-//		compassConnection := &v1alpha1.CompassConnection{
-//			ObjectMeta: v1.ObjectMeta{
-//				Name: compassConnectionName,
-//			},
-//			Status: v1alpha1.CompassConnectionStatus{
-//				State: v1alpha1.Connected,
-//			},
-//		}
-//
-//		fakeClientset := fake.NewSimpleClientset().CompassV1alpha1().CompassConnections()
-//		objClient := NewObjectClientWrapper(fakeClientset)
-//		supervisor := &mocks.Supervisor{}
-//		supervisor.On("InitializeCompassConnection").
-//			Run(func(args mock.Arguments) {
-//				_, err := fakeClientset.Create(compassConnection)
-//				require.NoError(t, err)
-//			}).
-//			Return(compassConnection, nil)
-//
-//		reconciler := newReconciler(objClient, supervisor, minimalConfigSyncTime)
-//
-//		request := reconcile.Request{
-//			NamespacedName: compassConnectionNamespacedName,
-//		}
-//
-//		// when
-//		result, err := reconciler.Reconcile(request)
-//
-//		// then
-//		require.NoError(t, err)
-//		require.Empty(t, result)
-//
-//	})
-//}
-//
-//func Test_shouldResyncConfig(t *testing.T) {
-//
-//	minimalResyncTime := 300 * time.Second
-//
-//	for _, testCase := range []struct {
-//		description  string
-//		syncStatus   *v1alpha1.SynchronizationStatus
-//		shouldResync bool
-//	}{
-//		{
-//			description:  "resync if sync status not present",
-//			syncStatus:   nil,
-//			shouldResync: true,
-//		},
-//		{
-//			description: "resync if sync minimal time passed",
-//			syncStatus: &v1alpha1.SynchronizationStatus{
-//				LastAttempt: metav1.Unix(time.Now().Unix()-600, 0),
-//			},
-//			shouldResync: true,
-//		},
-//		{
-//			description: "not resync if sync minimal time did not pass",
-//			syncStatus: &v1alpha1.SynchronizationStatus{
-//				LastAttempt: metav1.Now(),
-//			},
-//			shouldResync: false,
-//		},
-//	} {
-//		t.Run("should "+testCase.description, func(t *testing.T) {
-//			// given
-//			connection := &v1alpha1.CompassConnection{
-//				ObjectMeta: v1.ObjectMeta{Name: "connection"},
-//				Status: v1alpha1.CompassConnectionStatus{
-//					SynchronizationStatus: testCase.syncStatus,
-//				},
-//			}
-//
-//			// when
-//			resync := shouldResyncConfig(connection, minimalResyncTime)
-//
-//			// then
-//			assert.Equal(t, testCase.shouldResync, resync)
-//		})
-//	}
-//
-//}
-//
-//func NewObjectClientWrapper(client clientset.CompassConnectionInterface) Client {
-//	return &objectClientWrapper{
-//		fakeClient: client,
-//	}
-//}
-//
-//type objectClientWrapper struct {
-//	fakeClient clientset.CompassConnectionInterface
-//}
-//
-//func (f *objectClientWrapper) Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error {
-//	compassConnection, ok := obj.(*v1alpha1.CompassConnection)
-//	if !ok {
-//		return errors.New("object is not Compass Connection")
-//	}
-//
-//	cc, err := f.fakeClient.Get(key.Name, v1.GetOptions{})
-//	if err != nil {
-//		return err
-//	}
-//
-//	cc.DeepCopyInto(compassConnection)
-//	return nil
-//}
-//
-//func (f *objectClientWrapper) Update(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error {
-//	panic("implement me")
-//}
-//
-//func (f *objectClientWrapper) Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOption) error {
-//	panic("implement me")
-//}
