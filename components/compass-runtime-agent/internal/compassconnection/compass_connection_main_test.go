@@ -1,0 +1,124 @@
+package compassconnection
+
+import (
+	"crypto/rsa"
+	"encoding/base64"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/testutil"
+	compassCRClientset "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
+
+	"github.com/sirupsen/logrus"
+
+	"github.com/pkg/errors"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
+
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
+)
+
+var cfg *rest.Config
+var k8sClient client.Client
+var testEnv *envtest.Environment
+
+var compassConnectionCRClient compassCRClientset.CompassConnectionInterface
+
+var (
+	crtChain    []byte
+	clientCRT   []byte
+	caCRT       []byte
+	clientKey   *rsa.PrivateKey
+	credentials certificates.Credentials
+)
+
+var (
+	connectorCertResponse gqlschema.CertificationResult
+)
+
+func TestMain(m *testing.M) {
+	err := setupEnv()
+	if err != nil {
+		logrus.Errorf("Failed to setup test environment: %s", err.Error())
+		os.Exit(1)
+	}
+	defer testEnv.Stop()
+
+	compassClientset, err := compassCRClientset.NewForConfig(cfg)
+	if err != nil {
+		logrus.Errorf("Failed to setup CompassConnection clientset: %s", err.Error())
+		os.Exit(1)
+	}
+
+	compassConnectionCRClient = compassClientset.CompassConnections()
+
+	err = setupCredentials()
+	if err != nil {
+		logrus.Errorf("Failed to setup credentials: %s", err.Error())
+		os.Exit(1)
+	}
+
+	exitCode := m.Run()
+
+	os.Exit(exitCode)
+}
+
+func setupEnv() error {
+	testEnv = &envtest.Environment{
+		CRDDirectoryPaths: []string{filepath.Join("testdata")},
+	}
+
+	var err error
+	cfg, err = testEnv.Start()
+	if err != nil {
+		return errors.Wrap(err, "Failed to start test environment")
+	}
+
+	err = v1alpha1.AddToScheme(scheme.Scheme)
+	if err != nil {
+		return errors.Wrap(err, "Failed to add to schema")
+	}
+
+	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
+	if err != nil {
+		return errors.Wrap(err, "Failed create kubernetes client")
+	}
+
+	return nil
+}
+
+func setupCredentials() error {
+	certsData, err := testutil.LoadCertsTestData("../testutil/testdata")
+	if err != nil {
+		return errors.Wrap(err, "Failed to load certs test data")
+	}
+
+	crtChain = certsData.CertificateChain
+	clientCRT = certsData.ClientCertificate
+	caCRT = certsData.CACertificate
+	clientKey, err = certificates.ParsePrivateKey(certsData.ClientKey)
+	if err != nil {
+		return errors.Wrap(err, "Failed to parse private key")
+	}
+
+	connectorCertResponse = gqlschema.CertificationResult{
+		CertificateChain:  base64.StdEncoding.EncodeToString(crtChain),
+		CaCertificate:     base64.StdEncoding.EncodeToString(caCRT),
+		ClientCertificate: base64.StdEncoding.EncodeToString(clientCRT),
+	}
+
+	credentials, err = certificates.NewCredentials(clientKey, connectorCertResponse)
+	if err != nil {
+		return errors.Wrap(err, "Failed to create credentials")
+	}
+
+	return nil
+}

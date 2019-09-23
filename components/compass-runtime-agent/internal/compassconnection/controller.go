@@ -128,12 +128,12 @@ func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 }
 
 // Configuration resync is performed not more frequent that minimalConfigSyncTime,
-// unless deliberately requested by spec.ResyncConfig set to true
+// unless deliberately requested by spec.ResyncNow set to true
 func shouldResyncConfig(connection *v1alpha1.CompassConnection, minimalConfigSyncTime time.Duration) bool {
-	// TODO - add such option
-	//if connection.Spec.ResyncNow {
-	//	return true
-	//}
+	if connection.Spec.ResyncNow {
+		return true
+	}
+
 	if connection.Status.SynchronizationStatus == nil {
 		return true
 	}

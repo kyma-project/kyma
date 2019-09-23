@@ -8,8 +8,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:generate mockery -name=ConnectorClient
-type ConnectorClient interface {
+//go:generate mockery -name=Client
+type Client interface {
 	Configuration(headers map[string][]string) (schema.Configuration, error)
 	SignCSR(csr string, headers map[string][]string) (schema.CertificationResult, error)
 }
@@ -19,7 +19,7 @@ type connectorClient struct {
 	queryProvider queryProvider
 }
 
-func NewConnectorClient(graphQlClient graphql.Client) ConnectorClient {
+func NewConnectorClient(graphQlClient graphql.Client) Client {
 	return &connectorClient{
 		graphQlClient: graphQlClient,
 		queryProvider: queryProvider{},

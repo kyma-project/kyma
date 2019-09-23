@@ -1,0 +1,9 @@
+{
+  "connectionConfig": {
+    "connectorUrl": "https://connector.com",
+    "token": "token"
+  },
+  "runtimeConfig": {
+    "runtimeId": "abcd-efgh-ijkl"
+  }
+}

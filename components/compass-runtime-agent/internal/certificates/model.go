@@ -59,6 +59,19 @@ func NewCredentials(key *rsa.PrivateKey, certificateResponse gqlschema.Certifica
 	}, nil
 }
 
+func ParsePrivateKey(clusterKey []byte) (*rsa.PrivateKey, error) {
+	if clusterKey == nil {
+		return nil, errors.New("Private key data is empty")
+	}
+
+	block, _ := pem.Decode(clusterKey)
+	if block == nil {
+		return nil, errors.New("Failed to decode client key pem")
+	}
+
+	return x509.ParsePKCS1PrivateKey(block.Bytes)
+}
+
 type PemEncodedCredentials struct {
 	ClientKey         []byte
 	CertificateChain  []byte
@@ -109,7 +122,7 @@ func (c PemEncodedCredentials) AsClientCredentials() (ClientCredentials, error) 
 		return ClientCredentials{}, errors.Wrap(err, "Failed to decode client certificate")
 	}
 
-	clientKey, err := getClientPrivateKey(c.ClientKey)
+	clientKey, err := ParsePrivateKey(c.ClientKey)
 	if err != nil {
 		return ClientCredentials{}, errors.Wrap(err, "Failed to decode client key")
 	}

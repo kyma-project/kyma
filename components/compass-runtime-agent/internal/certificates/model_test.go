@@ -67,7 +67,7 @@ func TestNewCredentials(t *testing.T) {
 		ClientCertificate: base64.StdEncoding.EncodeToString(clientCRT),
 	}
 
-	key, err := getClientPrivateKey(clientKey)
+	key, err := ParsePrivateKey(clientKey)
 	require.NoError(t, err)
 
 	// when

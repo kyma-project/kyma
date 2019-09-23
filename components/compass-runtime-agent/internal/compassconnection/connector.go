@@ -2,6 +2,7 @@ package compassconnection
 
 import (
 	"crypto/x509/pkix"
+	"fmt"
 	"strings"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
@@ -32,19 +33,16 @@ type Connector interface {
 func NewCompassConnector(
 	csrProvider certificates.CSRProvider,
 	clientsProvider compass.ClientsProvider,
-	insecureConnectorCommunication bool,
 ) Connector {
 	return &compassConnector{
-		csrProvider:                    csrProvider,
-		clientsProvider:                clientsProvider,
-		insecureConnectorCommunication: insecureConnectorCommunication,
+		csrProvider:     csrProvider,
+		clientsProvider: clientsProvider,
 	}
 }
 
 type compassConnector struct {
-	csrProvider                    certificates.CSRProvider
-	clientsProvider                compass.ClientsProvider
-	insecureConnectorCommunication bool
+	csrProvider     certificates.CSRProvider
+	clientsProvider compass.ClientsProvider
 }
 
 func (cc *compassConnector) EstablishConnection(connectorURL, token string) (EstablishedConnection, error) {
@@ -105,6 +103,7 @@ func (cc *compassConnector) MaintainConnection(credentials certificates.ClientCr
 		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to create CSR while renewing connection")
 	}
 
+	fmt.Println("Calling sing CSR with, ", csr)
 	certResponse, err := certSecuredClient.SignCSR(csr, nil)
 	if err != nil {
 		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to sign CSR while renewing connection")

@@ -7,6 +7,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+// TODO - test
+
 type ConnectionConfig struct {
 	Token        string `json:"token"`
 	ConnectorURL string `json:"connectorUrl"`

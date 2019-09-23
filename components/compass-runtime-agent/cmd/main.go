@@ -3,12 +3,9 @@ package main
 import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/connector"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
-	config_provider "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
+	confProvider "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/client/clientset/versioned/typed/compass/v1alpha1"
 	"k8s.io/client-go/kubernetes"
 
 	"os"
@@ -65,12 +62,6 @@ func main() {
 
 	log.Info("Registering Components.")
 
-	compassConnectionCRClient, err := v1alpha1.NewForConfig(cfg)
-	if err != nil {
-		log.Error("Unable to setup Compass Connection CR client")
-		os.Exit(1)
-	}
-
 	// TODO - rework this part
 	coreClientset, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
@@ -89,38 +80,37 @@ func main() {
 	caCertSecret := parseNamespacedName(options.CaCertificatesSecret)
 
 	certManager := certificates.NewCredentialsManager(clusterCertSecret, caCertSecret, secretsRepository)
-	compassConfigClient := director.NewConfigurationClient(graphql.New, options.InsecureConfigurationFetch)
 	syncService, err := createNewSynchronizationService(cfg, options.IntegrationNamespace, options.GatewayPort, options.UploadServiceUrl)
 	if err != nil {
 		log.Errorf("Failed to create synchronization service, %s", err.Error())
 		os.Exit(1)
 	}
 
-	configProvider := config_provider.NewConfigProvider(options.ConfigFile)
-
+	configProvider := confProvider.NewConfigProvider(options.ConfigFile)
 	clientsProvider := compass.NewClientsProvider(graphql.New, options.InsecureConnectorCommunication, options.InsecureConfigurationFetch, options.QueryLogging)
 
-	compassConnector := newCompassConnector(options.InsecureConnectorCommunication)
-	connectionSupervisor := compassconnection.NewSupervisor(
-		compassConnector,
-		compassConnectionCRClient.CompassConnections(),
-		certManager,
-		compassConfigClient,
-		syncService,
-		configProvider,
-		options.CertValidityRenewalThreshold,
-		options.MinimalCompassSyncTime)
+	log.Infoln("Setting up Controller")
+	controllerDependencies := compassconnection.DependencyConfig{
+		K8sConfig:                    cfg,
+		ControllerManager:            mgr,
+		ClientsProvider:              clientsProvider,
+		CredentialsManager:           certManager,
+		SynchronizationService:       syncService,
+		ConfigProvider:               configProvider,
+		CertValidityRenewalThreshold: options.CertValidityRenewalThreshold,
+		MinimalCompassSyncTime:       options.MinimalCompassSyncTime,
+	}
 
-	// Setup all Controllers
-	log.Info("Setting up controller")
-	if err := compassconnection.InitCompassConnectionController(mgr, connectionSupervisor, options.MinimalCompassSyncTime); err != nil {
-		log.Error(err, "Unable to register controllers to the manager")
+	compassConnectionSupervisor, err := controllerDependencies.InitializeController()
+	if err != nil {
+		log.Error(err, "Unable to initialize Controller")
 		os.Exit(1)
 	}
 
+	// TODO - move to init?
 	// Initialize Compass Connection CR
 	log.Infoln("Initializing Compass Connection CR")
-	_, err = connectionSupervisor.InitializeCompassConnection()
+	_, err = compassConnectionSupervisor.InitializeCompassConnection()
 	if err != nil {
 		log.Error("Unable to initialize Compass Connection CR")
 	}
@@ -131,13 +121,4 @@ func main() {
 		log.Error(err, "Unable to run the manager")
 		os.Exit(1)
 	}
-}
-
-func newCompassConnector(insecureConnection bool) compassconnection.Connector {
-	csrProvider := certificates.NewCSRProvider()
-	return compassconnection.NewCompassConnector(
-		csrProvider,
-		connector.NewTokenSecuredConnectorClient,
-		connector.NewConnectorClient,
-		insecureConnection)
 }

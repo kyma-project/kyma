@@ -1,7 +1,6 @@
 package certificates
 
 import (
-	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
@@ -125,17 +124,4 @@ func decodeCertificates(certificate []byte) ([]*x509.Certificate, error) {
 	}
 
 	return certificates, nil
-}
-
-func getClientPrivateKey(clusterKey []byte) (*rsa.PrivateKey, error) {
-	if clusterKey == nil {
-		return nil, errors.New("Private key data is empty")
-	}
-
-	block, _ := pem.Decode(clusterKey)
-	if block == nil {
-		return nil, errors.New("Failed to decode client key pem")
-	}
-
-	return x509.ParsePKCS1PrivateKey(block.Bytes)
 }

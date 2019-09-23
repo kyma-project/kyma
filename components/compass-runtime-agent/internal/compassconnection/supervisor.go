@@ -104,9 +104,8 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	s.log.Infof("Getting client credentials...")
 	credentials, err := s.credentialsManager.GetClientCredentials()
 	if err != nil {
-		errorMsg := fmt.Sprintf("Failed to get credentials: %s", err.Error())
-		s.log.Error(errorMsg)
-		setSyncFailedStatus(connection, syncAttemptTime, errorMsg)
+		errorMsg := fmt.Sprintf("Failed to get client credentials: %s", err.Error())
+		s.setConnectionMaintenanceFailedStatus(connection, syncAttemptTime, errorMsg)
 		return s.updateCompassConnection(connection)
 	}
 
@@ -114,8 +113,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	err = s.maintainCompassConnection(credentials, connection)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error while trying to maintain connection: %s", err.Error())
-		s.log.Error(errorMsg)
-		s.setConnectionMaintenanceFailedStatus(connection, err, errorMsg)
+		s.setConnectionMaintenanceFailedStatus(connection, syncAttemptTime, errorMsg)
 		return s.updateCompassConnection(connection)
 	}
 
@@ -123,8 +121,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	runtimeConfig, err := s.configProvider.GetRuntimeConfig()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to read Runtime config: %s", err.Error())
-		s.log.Error(errorMsg)
-		setSyncFailedStatus(connection, syncAttemptTime, errorMsg)
+		s.setSyncFailedStatus(connection, syncAttemptTime, errorMsg)
 		return s.updateCompassConnection(connection)
 	}
 
@@ -132,16 +129,14 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	directorClient, err := s.clientsProvider.GetCompassConfigClient(credentials, connection.Spec.ManagementInfo.DirectorURL)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to prepare configuration client: %s", err.Error())
-		s.log.Error(errorMsg)
-		setSyncFailedStatus(connection, syncAttemptTime, errorMsg)
+		s.setSyncFailedStatus(connection, syncAttemptTime, errorMsg)
 		return s.updateCompassConnection(connection)
 	}
 
-	applicationsConfig, err := directorClient.FetchConfiguration(connection.Spec.ManagementInfo.DirectorURL, runtimeConfig.RuntimeId, credentials)
+	applicationsConfig, err := directorClient.FetchConfiguration(connection.Spec.ManagementInfo.DirectorURL, runtimeConfig.RuntimeId)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to fetch configuration: %s", err.Error())
-		s.log.Error(errorMsg)
-		setSyncFailedStatus(connection, syncAttemptTime, errorMsg)
+		s.setSyncFailedStatus(connection, syncAttemptTime, errorMsg)
 		return s.updateCompassConnection(connection)
 	}
 
@@ -181,6 +176,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 func (s *crSupervisor) maintainCompassConnection(credentials certificates.ClientCredentials, compassConnection *v1alpha1.CompassConnection) error {
 	shouldRenew := compassConnection.ShouldRenewCertificate(s.certValidityRenewalThreshold, s.minimalCompassSyncTime)
 
+	s.log.Infof("Trying to maintain certificates connection... Renewal: %v", shouldRenew)
 	newCreds, managementInfo, err := s.compassConnector.MaintainConnection(credentials, compassConnection.Spec.ManagementInfo.ConnectorURL, shouldRenew)
 	if err != nil {
 		return errors.Wrap(err, "Failed to connect to Compass Connector")
@@ -189,22 +185,25 @@ func (s *crSupervisor) maintainCompassConnection(credentials certificates.Client
 	connectionTime := metav1.Now()
 
 	if shouldRenew && newCreds != nil {
-		s.log.Infof("Trying to renew client certificates...")
+		s.log.Infof("Trying to save renewed certificates...")
 		err = s.credentialsManager.PreserveCredentials(*newCreds)
 		if err != nil {
 			return errors.Wrap(err, "Failed to preserve certificate")
 		}
 
 		compassConnection.SetCertificateStatus(connectionTime, newCreds.ClientCertificate)
+		compassConnection.Spec.RefreshCredentialsNow = false
 	}
 
 	s.log.Infof("Connection maintained. Director URL: %s , ConnectorURL: %s", managementInfo.DirectorURL, managementInfo.ConnectorURL)
 
-	compassConnection.Status.ConnectionStatus = &v1alpha1.ConnectionStatus{
-		Renewed:     connectionTime,
-		LastSync:    connectionTime,
-		LastSuccess: connectionTime,
+	if compassConnection.Status.ConnectionStatus == nil {
+		compassConnection.Status.ConnectionStatus = &v1alpha1.ConnectionStatus{}
 	}
+
+	compassConnection.Status.ConnectionStatus.Renewed = connectionTime
+	compassConnection.Status.ConnectionStatus.LastSync = connectionTime
+	compassConnection.Status.ConnectionStatus.LastSuccess = connectionTime
 	compassConnection.Spec.ManagementInfo = managementInfo
 
 	return nil
@@ -267,13 +266,13 @@ func (s *crSupervisor) setConnectionFailedStatus(connectionCR *v1alpha1.CompassC
 	}
 }
 
-func (s *crSupervisor) setConnectionMaintenanceFailedStatus(connectionCR *v1alpha1.CompassConnection, err error, connStatusError string) {
-	s.log.Errorf("Error while maintaining connection with Compass: %s", err.Error())
+func (s *crSupervisor) setConnectionMaintenanceFailedStatus(connectionCR *v1alpha1.CompassConnection, attemptTime metav1.Time, errorMsg string) {
+	s.log.Error(errorMsg)
 	s.log.Infof("Setting Compass Connection to ConnectionMaintenanceFailed state")
 	connectionCR.Status.State = v1alpha1.ConnectionMaintenanceFailed
 	connectionCR.Status.ConnectionStatus = &v1alpha1.ConnectionStatus{
-		LastSync: metav1.Now(),
-		Error:    connStatusError,
+		LastSync: attemptTime,
+		Error:    errorMsg,
 	}
 }
 
@@ -283,7 +282,9 @@ func (s *crSupervisor) updateCompassConnection(connectionCR *v1alpha1.CompassCon
 	return s.crManager.Update(connectionCR)
 }
 
-func setSyncFailedStatus(connection *v1alpha1.CompassConnection, attemptTime metav1.Time, errorMsg string) {
+func (s *crSupervisor) setSyncFailedStatus(connection *v1alpha1.CompassConnection, attemptTime metav1.Time, errorMsg string) {
+	s.log.Error(errorMsg)
+	s.log.Infof("Setting Compass Connection to SynchronizationFailed state")
 	connection.Status.State = v1alpha1.SynchronizationFailed
 	connection.Status.SynchronizationStatus = &v1alpha1.SynchronizationStatus{
 		LastAttempt: attemptTime,
