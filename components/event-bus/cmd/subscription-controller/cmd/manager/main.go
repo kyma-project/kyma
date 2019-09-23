@@ -81,7 +81,14 @@ func main() {
 	log.Info("Setting up Knative Channel Controller")
 	_, err = knativechannel.ProvideController(mgr)
 	if err != nil {
-		log.Error(err, "Unable to create Event Activation controller")
+		log.Error(err, "Unable to create Knative Channel controller")
+		os.Exit(1)
+	}
+
+	log.Info("Setting up Knative Subscription Controller")
+	_, err = knativechannel.ProvideController(mgr)
+	if err != nil {
+		log.Error(err, "Unable to create Knative Subscription controller")
 		os.Exit(1)
 	}
 

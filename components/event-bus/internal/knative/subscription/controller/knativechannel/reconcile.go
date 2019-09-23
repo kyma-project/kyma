@@ -43,20 +43,6 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	// nothing to be done.
 	if errors.IsNotFound(err) {
 		log.Info("Could not find Channel: ", "err", err)
-		//sub, err := util.GetSubscriptionForChannel(ctx, r.client, channel)
-		//if err != nil {
-		//	log.Error(err, "GetSubscriptionsForChannel() failed")
-		//	return reconcile.Result{}, err
-		//}
-		//err = util.DeactivateSubscriptionForChannel(ctx, r.client, sub, log, r.time)
-		//if err != nil {
-		//	return reconcile.Result{}, err
-		//}
-		//log.Info("Kyma subscription found: ", "sub", sub)
-		//if sub == nil {
-		//	log.Info("No matching subscription found for channel: " + channel.Namespace + "/" + channel.Name)
-		//	return reconcile.Result{}, nil
-		//}
 		return reconcile.Result{}, nil
 	}
 
@@ -96,24 +82,23 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 
 func (r *reconciler) reconcile(ctx context.Context, ch *messagingV1Alpha1.Channel) (bool, error) {
 	log.Info(" ############ Reconciling for channel: " + ch.Namespace + "/" + ch.Name)
+	var isChReady, isChannelReadyInSub bool
 
 	sub, err := util.GetSubscriptionForChannel(ctx, r.client, ch)
 	if err != nil {
 		log.Error(err, "GetSubscriptionsForChannel() failed")
 		return false, err
 	}
-	log.Info("Kyma subscription found: ", "sub", sub)
 	if sub == nil {
 		log.Info("No matching subscription found for channel: " + ch.Namespace + "/" + ch.Name)
 		return false, nil
 	}
+	log.Info("Kyma subscription found: ", "sub", sub)
 
-	//// delete or add finalizers
+	// Delete or add finalizers
 	if !ch.DeletionTimestamp.IsZero() {
-		// deactivate all Kyma subscriptions related to this ea
 		util.DeactivateSubscriptionForChannel(ctx, r.client, sub, log, r.time)
 
-		// remove the finalizer from the list
 		ch.ObjectMeta.Finalizers = util.RemoveString(&ch.ObjectMeta.Finalizers, finalizerName)
 		log.Info("Finalizer removed", "Finalizer name", finalizerName)
 		return false, nil
@@ -121,22 +106,18 @@ func (r *reconciler) reconcile(ctx context.Context, ch *messagingV1Alpha1.Channe
 
 	// If we are adding the finalizer for the first time, then ensure that finalizer is persisted
 	if !util.ContainsString(&ch.ObjectMeta.Finalizers, finalizerName) {
-		//Finalizer is not added, let's add it
 		ch.ObjectMeta.Finalizers = append(ch.ObjectMeta.Finalizers, finalizerName)
 		log.Info("Finalizer added", "Finalizer name", finalizerName)
 		return true, nil
 	}
 
 	// activate all subscriptions
-	var isChReady bool
-	var isChannelReadyInSub bool
 	for _, condition := range ch.Status.Conditions {
 		if condition.Type == "Ready" && condition.Status == corev1.ConditionTrue {
 			isChReady = true
 			break
 		}
 	}
-	//var currentSubChStatus bool
 	for _, cond := range sub.Status.Conditions {
 		if cond.Type == subApis.ChannelReady {
 			if cond.Status == subApis.ConditionTrue {

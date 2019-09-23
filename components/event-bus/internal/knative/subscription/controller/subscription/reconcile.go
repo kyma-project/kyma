@@ -196,7 +196,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		if err != nil && !errors.IsNotFound(err) {
 			return false, err
 		} else if errors.IsNotFound(err) {
-			err = r.knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannel.Name, &knativeSubsURI)
+			err = r.knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannel.Name, &knativeSubsURI, knativeChannelLabels)
 			if err != nil {
 				return false, err
 			}
@@ -214,7 +214,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 					return false, err
 				}
 				log.Info("Knative Subscription is deleted", "Subscription", knativeSubsName)
-				err = r.knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannel.Name, &knativeSubsURI)
+				err = r.knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannel.Name, &knativeSubsURI, knativeChannelLabels)
 				if err != nil {
 					return false, err
 				}

@@ -70,7 +70,7 @@ type KnativeAccessLib interface {
 	GetChannelByLabels(namespace string, labels map[string]string) (*messagingV1Alpha1.Channel, error)
 	CreateChannel(name string, namespace string, labels map[string]string, timeout time.Duration) (*messagingV1Alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
-	CreateSubscription(name string, namespace string, channelName string, uri *string) error
+	CreateSubscription(name string, namespace string, channelName string, uri *string, labels map[string]string) error
 	DeleteSubscription(name string, namespace string) error
 	GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error)
 	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
@@ -213,8 +213,8 @@ func (k *KnativeLib) DeleteChannel(name string, namespace string) error {
 }
 
 // CreateSubscription creates a Knative/Eventing subscription for the specified channel
-func (k *KnativeLib) CreateSubscription(name string, namespace string, channelName string, uri *string) error {
-	sub := Subscription(name, namespace).ToChannel(channelName).ToURI(uri).EmptyReply().Build()
+func (k *KnativeLib) CreateSubscription(name string, namespace string, channelName string, uri *string, labels map[string]string) error {
+	sub := Subscription(name, namespace, labels).ToChannel(channelName).ToURI(uri).EmptyReply().Build()
 	if _, err := k.evClient.Subscriptions(namespace).Create(sub); err != nil {
 		log.Printf("ERROR: CreateSubscription(): creating subscription: %v", err)
 		return err
@@ -372,9 +372,6 @@ func makeChannel(prefix, namespace string, labels map[string]string) *messagingV
 
 func makeHTTPRequest(channel *messagingV1Alpha1.Channel, headers *map[string][]string, payload *string) (*http.Request, error) {
 	var jsonStr = []byte(*payload)
-	bChannel, _ := json.Marshal(channel)
-	log.Println("Got this ########################### Channel:")
-	log.Printf("%s\n", string(bChannel))
 	channelURI := channel.Status.Address.URL
 	req, err := http.NewRequest(http.MethodPost, channelURI.String(), bytes.NewBuffer(jsonStr))
 	if err != nil {

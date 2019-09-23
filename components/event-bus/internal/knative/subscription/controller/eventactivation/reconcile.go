@@ -107,8 +107,8 @@ func (r *reconciler) reconcile(ctx context.Context, ea *eventingv1alpha1.EventAc
 	} else {
 		log.Info("Kyma subscriptions found: ", "subs", subs)
 		// activate all subscriptions
-		log.Error(err, "activateSubscriptions() failed")
 		if err := util.ActivateSubscriptions(ctx, r.client, subs, log, r.time); err != nil {
+			log.Error(err, "ActivateSubscriptions() failed")
 			return false, err
 		}
 	}

@@ -264,7 +264,7 @@ func Test_CreateSubscription(t *testing.T) {
 	e := k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1(), evclientsetfake.NewSimpleClientset().MessagingV1alpha1())
 	assert.Nil(t, e)
 	var uri = "dnsName: hello-00001-service.default"
-	err := k.CreateSubscription(subscriptionName, testNS, channelName, &uri)
+	err := k.CreateSubscription(subscriptionName, testNS, channelName, &uri, labels)
 	assert.Nil(t, err)
 }
 
@@ -283,7 +283,7 @@ func Test_CreateDeleteSubscription(t *testing.T) {
 	e := k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1(), evclientsetfake.NewSimpleClientset().MessagingV1alpha1())
 	assert.Nil(t, e)
 	var uri = "dnsName: hello-00001-service.default"
-	err := k.CreateSubscription(subscriptionName, testNS, channelName, &uri)
+	err := k.CreateSubscription(subscriptionName, testNS, channelName, &uri, labels)
 	assert.Nil(t, err)
 	err = k.DeleteSubscription(subscriptionName, testNS)
 	assert.Nil(t, err)
@@ -295,9 +295,9 @@ func Test_CreateSubscriptionAgain(t *testing.T) {
 	e := k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1(), evclientsetfake.NewSimpleClientset().MessagingV1alpha1())
 	assert.Nil(t, e)
 	var uri = "dnsName: hello-00001-service.default"
-	err := k.CreateSubscription(subscriptionName, testNS, channelName, &uri)
+	err := k.CreateSubscription(subscriptionName, testNS, channelName, &uri, labels)
 	assert.Nil(t, err)
-	err = k.CreateSubscription(subscriptionName, testNS, channelName, &uri)
+	err = k.CreateSubscription(subscriptionName, testNS, channelName, &uri, labels)
 	assert.True(t, k8serrors.IsAlreadyExists(err))
 }
 
@@ -319,7 +319,7 @@ func Test_MakeChannelWithPrefix(t *testing.T) {
 	prefix := "order.created"
 	a := makeChannel(prefix, testNS, labels)
 
-	// makeChannel should rmove all the special characters from the prefix string
+	// makeChannel should remove all the special characters from the prefix string
 	assert.False(t, strings.Contains(a.GenerateName, "."))
 
 	// makeChannel should add hyphen at the end if not present
