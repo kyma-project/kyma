@@ -23,6 +23,3 @@ vendor/
 *.swp
 *.swo
 *~
-
-# vendored CRD definitions from Knative serving 
-config/crds/300*.yaml

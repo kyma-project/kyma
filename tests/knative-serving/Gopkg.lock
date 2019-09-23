@@ -53,14 +53,6 @@
   version = "v1.2.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:1ba1d79f2810270045c328ae5d674321db34e3aae468eb4233883b473c5c0467"
-  name = "github.com/golang/glog"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
-
-[[projects]]
   digest = "1:239c4c7fd2159585454003d9be7207167970194216193a8a210b8d29576f19c9"
   name = "github.com/golang/protobuf"
   packages = [
@@ -83,24 +75,24 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:2e3c336fc7fde5c984d2841455a658a6d626450b1754a854b3b32e7a8f49a07a"
+  digest = "1:bf40199583e5143d1472fc34d10d6f4b69d97572142acf343b3e43136da40823"
   name = "github.com/google/go-cmp"
   packages = [
     "cmp",
     "cmp/internal/diff",
+    "cmp/internal/flags",
     "cmp/internal/function",
     "cmp/internal/value",
   ]
   pruneopts = "UT"
-  revision = "3af367b6b30c263d47e8895973edcca9a49cf029"
-  version = "v0.2.0"
+  revision = "6f77996f0c42f7b84e5a2b252227263f93432e9b"
 
 [[projects]]
-  digest = "1:c280fbe00363f7c8db868a738b94df33586ce05c10d26578c3adf544d010eb64"
+  digest = "1:7915c656a10819b240db94ffd6afc6a621af4687db735341d9919668750485ec"
   name = "github.com/google/go-containerregistry"
   packages = ["pkg/name"]
   pruneopts = "UT"
-  revision = "dbc4da98389f9d0c42eb314c2b346bf1d2a27310"
+  revision = "abf9ef06abd9f532944e28e8942644ea4b710a40"
 
 [[projects]]
   digest = "1:a6181aca1fd5e27103f9a920876f29ac72854df7345a39f3b01e61c8c94cc8af"
@@ -161,56 +153,15 @@
   version = "v1.1.6"
 
 [[projects]]
-  digest = "1:0836bde83bdc49aae7710e22d04e2555d9bd25cd133fbb78508c492307081aea"
-  name = "github.com/knative/build"
-  packages = [
-    "pkg/apis/build",
-    "pkg/apis/build/v1alpha1",
-  ]
-  pruneopts = "UT"
-  revision = "4fc8663ff9c48a66c52684b2e4cdf06ec83117c8"
-  version = "v0.5.0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:cd3f92fe2ca31248e213783227162f253b9113be24d0048507b7c1748b8fbc69"
-  name = "github.com/knative/pkg"
-  packages = [
-    "apis",
-    "apis/duck",
-    "apis/duck/v1alpha1",
-    "configmap",
-    "kmeta",
-    "kmp",
-  ]
-  pruneopts = "UT"
-  revision = "f55c11c3ce2dbeb895307455e56e5dba9573243e"
-
-[[projects]]
-  digest = "1:1f7ea394cc83ad6aabf3c61c6faeeed3043744ba094b92f8bc52d22273f7a34c"
-  name = "github.com/knative/serving"
-  packages = [
-    "pkg/apis/autoscaling",
-    "pkg/apis/autoscaling/v1alpha1",
-    "pkg/apis/config",
-    "pkg/apis/networking",
-    "pkg/apis/networking/v1alpha1",
-    "pkg/apis/serving",
-    "pkg/apis/serving/v1alpha1",
-    "pkg/client/clientset/versioned/scheme",
-    "pkg/client/clientset/versioned/typed/serving/v1alpha1",
-  ]
-  pruneopts = "UT"
-  revision = "de51b2cd890649e2081dcafbc50afa8b07b54704"
-  version = "v0.5.1"
-
-[[projects]]
-  branch = "master"
-  digest = "1:0fa2738aa26d35776533be1af819481d545840c116a168d0523331527329e5f5"
+  digest = "1:15023d11d50e5fb240254e698feef4c32f3b6eaf916e31e194e130774651db69"
   name = "github.com/kyma-project/kyma"
-  packages = ["common/ingressgateway"]
+  packages = [
+    "common",
+    "common/ingressgateway",
+  ]
   pruneopts = "UT"
-  revision = "d394365971d5c1caae84cc42e57751378913c38d"
+  revision = "69599d4a33a2d206a906bd87c95af3e615830216"
+  version = "1.5.0"
 
 [[projects]]
   branch = "master"
@@ -270,13 +221,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c745644c88df7496196bf316dd0e813f1908215ff29e96622c2fc194f21bac0c"
+  digest = "1:f88ab4bc9356c8379c46e28f453d531768fa2f73800049ea9f63d0e0ec2da5c6"
   name = "golang.org/x/net"
   packages = [
     "context",
     "context/ctxhttp",
     "http/httpguts",
     "http2",
+    "http2/h2c",
     "http2/hpack",
     "idna",
   ]
@@ -375,7 +327,7 @@
   version = "v2.2.2"
 
 [[projects]]
-  digest = "1:faf52d216e0d651ee48a5ee8fb43f818a6c36bf4246282a5e30b8985da5581ff"
+  digest = "1:6cec2c64c7569cd43b9fa5f8973f3a82919ebed36296d19312de057e59651b05"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1alpha1",
@@ -383,6 +335,7 @@
     "apps/v1",
     "apps/v1beta1",
     "apps/v1beta2",
+    "auditregistration/v1alpha1",
     "authentication/v1",
     "authentication/v1beta1",
     "authorization/v1",
@@ -411,11 +364,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "UT"
-  revision = "145d52631d00cbfe68490d19ae4f0f501fd31a95"
-  version = "kubernetes-1.12.6"
+  revision = "5cb15d34447165a97c76ed5a60e4e99c8a01ecfe"
+  version = "kubernetes-1.13.4"
 
 [[projects]]
-  digest = "1:bdc492eb88fded25128f6dc1e49ebe61102fbc1566f382c269a8bdcdbf056cd2"
+  digest = "1:97bf20ea6b1e8367dc6704fafd6b5673eca543f2ea95bc1a7005deda35d1402c"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/equality",
@@ -462,11 +415,11 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "UT"
-  revision = "01f179d85dbce0f2e0e4351a92394b38694b7cae"
-  version = "kubernetes-1.12.6"
+  revision = "86fb29eff6288413d76bd8506874fddd9fccdff0"
+  version = "kubernetes-1.13.4"
 
 [[projects]]
-  digest = "1:cf7dd24a60a10c8092df576341eebbab41b93ba989017b8b55c63d04d17e9a37"
+  digest = "1:dd9d803a2f08fd0f0a518b033c7bc61f42308cbb58c8247c9d12f6f42145e838"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -479,6 +432,8 @@
     "informers/apps/v1",
     "informers/apps/v1beta1",
     "informers/apps/v1beta2",
+    "informers/auditregistration",
+    "informers/auditregistration/v1alpha1",
     "informers/autoscaling",
     "informers/autoscaling/v1",
     "informers/autoscaling/v2beta1",
@@ -522,6 +477,7 @@
     "kubernetes/typed/apps/v1",
     "kubernetes/typed/apps/v1beta1",
     "kubernetes/typed/apps/v1beta2",
+    "kubernetes/typed/auditregistration/v1alpha1",
     "kubernetes/typed/authentication/v1",
     "kubernetes/typed/authentication/v1beta1",
     "kubernetes/typed/authorization/v1",
@@ -553,6 +509,7 @@
     "listers/apps/v1",
     "listers/apps/v1beta1",
     "listers/apps/v1beta2",
+    "listers/auditregistration/v1alpha1",
     "listers/autoscaling/v1",
     "listers/autoscaling/v2beta1",
     "listers/autoscaling/v2beta2",
@@ -604,23 +561,80 @@
     "util/retry",
   ]
   pruneopts = "UT"
-  revision = "78295b709ec6fa5be12e35892477a326dea2b5d3"
-  version = "kubernetes-1.12.6"
+  revision = "e64494209f554a6723674bd494d69445fb76a1d4"
+  version = "v10.0.0"
+
+[[projects]]
+  digest = "1:ccb9be4c583b6ec848eb98aa395a4e8c8f8ad9ebb823642c0dd1c1c45939a5bb"
+  name = "k8s.io/klog"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3ca30a56d8a775276f9cdae009ba326fdc05af7f"
+  version = "v0.4.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:a59562791d80e23d0d0ca9ed10e8b5662f692d95756930b3a5797b3a704e6828"
+  name = "knative.dev/pkg"
+  packages = [
+    "apis",
+    "apis/duck",
+    "apis/duck/v1alpha1",
+    "apis/duck/v1beta1",
+    "apis/v1alpha1",
+    "configmap",
+    "kmeta",
+    "kmp",
+    "ptr",
+  ]
+  pruneopts = "UT"
+  revision = "75da3911c0205df6c1b8acb74662d96a6e37b305"
+
+[[projects]]
+  digest = "1:3aad1cabea415bbb4fd42f10b44765baae75cfb4bdd298686d21e044cb6932d7"
+  name = "knative.dev/serving"
+  packages = [
+    "pkg/apis/autoscaling",
+    "pkg/apis/autoscaling/v1alpha1",
+    "pkg/apis/config",
+    "pkg/apis/networking",
+    "pkg/apis/networking/v1alpha1",
+    "pkg/apis/serving",
+    "pkg/apis/serving/v1alpha1",
+    "pkg/apis/serving/v1beta1",
+    "pkg/client/clientset/versioned/scheme",
+    "pkg/client/clientset/versioned/typed/serving/v1alpha1",
+    "pkg/gc",
+    "pkg/network",
+    "pkg/reconciler/route/config",
+  ]
+  pruneopts = "UT"
+  revision = "6da659b889aa650b00af07223855a6da3b547c46"
+  version = "v0.8.1"
+
+[[projects]]
+  digest = "1:7719608fe0b52a4ece56c2dde37bedd95b938677d1ab0f84b8a7852e4c59f849"
+  name = "sigs.k8s.io/yaml"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "fd68e9863619f6ec2fdd8625fe1f02e7c877e480"
+  version = "v1.1.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/avast/retry-go",
-    "github.com/knative/serving/pkg/apis/serving/v1alpha1",
-    "github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1",
+    "github.com/kyma-project/kyma/common",
     "github.com/kyma-project/kyma/common/ingressgateway",
     "k8s.io/api/core/v1",
-    "k8s.io/apimachinery/pkg/api/resource",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
+    "knative.dev/serving/pkg/apis/serving/v1alpha1",
+    "knative.dev/serving/pkg/apis/serving/v1beta1",
+    "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
