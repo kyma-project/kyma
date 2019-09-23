@@ -131,7 +131,7 @@ var testCases = []controllertesting.TestCase{
 				if _, ok := knSubscriptions[makeKnSubscriptionName(makeEventsActivatedSubscription())]; !ok {
 					t.Errorf("Knative subscription was NOT created")
 				}
-				if channel, ok := knChannels[makeKnChannelNamePrefix(makeEventsActivatedSubscription())]; ok {
+				if channel, ok := knChannels[knChannelNames[makeKnChannelNamePrefix(makeEventsActivatedSubscription())]]; ok {
 					if channel.GetClusterName() != "fake-channel" {
 						t.Errorf("Knative channel should NOT be created in this case")
 					}
@@ -189,7 +189,7 @@ var testCases = []controllertesting.TestCase{
 				if _, ok := knSubscriptions[makeKnSubscriptionName(makeEventsActivatedSubscription())]; ok {
 					t.Errorf("Knative subscription was NOT deleted")
 				}
-				if _, ok := knChannels[makeKnChannelNamePrefix(makeEventsActivatedSubscription())]; ok {
+				if _, ok := knChannels[knChannelNames[makeKnChannelNamePrefix(makeEventsActivatedSubscription())]]; ok {
 					t.Errorf("Knative channel was NOT deleted")
 				}
 			},
