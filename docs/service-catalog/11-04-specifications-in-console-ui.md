@@ -11,7 +11,7 @@ Documentation for Service Classes is rendered in both Service Catalog and Instan
 - [OData](https://www.odata.org/)
 
 
-This document explains how and where these specifications are rendered in the Console UI. It also describes on the structure of the Markdown documents, their obligatory metadata, and optional features in the content body.
+This document explains how and where these specifications are rendered in the Console UI. It also describes the structure of the Markdown documents, their obligatory metadata, and optional features in the content body.
 
 ## Tabs
 
@@ -26,6 +26,8 @@ See the tabs overview:
 
 ![Specification tabs in the Console UI](./assets/spec-view.png)
 
+
+>**NOTE:** OpenAPI, OData, and AsyncAPI specifications rendered in the Console UI follow the [Fiori 3 Fundamentals](https://sap.github.io/fundamental/) styling standards.
 
 ## Markdown documents
 

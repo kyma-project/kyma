@@ -27,13 +27,18 @@ The Console UI supports only certain specification types, formats, and versions 
 
 | Type | Description | Format | Version |
 | --------- | ------------- | ----------- | ----------- |
-| [OpenAPI](https://www.openapis.org/) |   API-related information  | `json` and `yaml`| 2.0 and lower |
+| [OpenAPI](https://www.openapis.org/) |   API-related information  | `json` and `yaml`| 3.0 and lower |
 | [OData](https://www.odata.org/documentation) |   API-related information  | `xml` | 4.0 and lower |
 | [AsyncAPI](https://www.asyncapi.com/) |   Messaging data (for Events)  | `json` and `yaml`| 2.0 and lower |
 | Markdown |  Service Class or component documentation  | `md`|  |
 
-All API and messaging specifications are converted to the `json` format in the Console UI. However, Kyma uses its own implementation of the validation and mutation webhooks, called CMS AsyncAPI Service, to validate if the AsyncAPI input files are in the `2.0` version. If not, it converts them to `2.0`. The service also changes any AsyncAPI `yaml` input file to the `json` format:
+>**NOTE:** OpenAPI, OData, and AsyncAPI specifications rendered in the Console UI follow the [Fiori 3 Fundamentals](https://sap.github.io/fundamental/) styling standards.
+
+The source files are uploaded directly to the given storage without any modifications, except for the following source types:
+
+- `asyncapi` that the CMS AsyncAPI Service validates and, if required, converts them to version 2.0 and the `json` format.
+- `markdown` from which the Asset Metadata Service extracts front matter metadata.
 
 ![Specification types](./assets/spec-types.svg)
 
-> **NOTE:** OpenAPI, OData, and AsyncAPI specifications rendered in the Console follow the [Fiori 3 Fundamentals](https://sap.github.io/fundamental/) styling standards.
+>**TIP:** The default Kyma webhooks that modify and validate `asyncapi` source files and extract metadata from `markdown` files are defined in the [`webhook-config-map.yaml)`](https://github.com/kyma-project/kyma/blob/master/resources/cms/charts/cms-controller-manager/templates/webhook-config-map.yaml) ConfigMap. You can easily configure it by adding new or removing existing webhooks. Edit the ConfigMap before installation if you install Kyma from sources or in the runtime if you install Kyma from a release. Apply the changes using the `kubectl apply -f webhook-config-map.yaml` command.
