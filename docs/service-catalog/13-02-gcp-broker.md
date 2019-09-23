@@ -35,7 +35,7 @@ For more information about the Service Brokers, see [this](#service-brokers-serv
 
 ## Enable GCP Service Broker
 
-The GCP Service Broker is a preview implementation and should not be used in a production environment. To enable the GCP Service Broker only in a given Namespace:
+The GCP Service Broker is a preview implementation and should not be used in a production environment. Run these commands to enable the GCP Service Broker in a given Namespace:
 1. Create a Namespace:
     ```
     export NAMESPACE={NAMESPACE_NAME}
