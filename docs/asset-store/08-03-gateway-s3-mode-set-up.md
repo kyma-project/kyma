@@ -3,7 +3,7 @@ title: Set Minio to the AWS S3 Gateway mode
 type: Tutorials
 ---
 
->**CAUTION:** AWS S3 Gateway Mode was tested only manually on Kyma 1.6. Currently, we don't have an automated pipeline like for other gateway modes.
+>**CAUTION:** AWS S3 Gateway mode was only tested manually on Kyma 1.6. Currently, there is no automated pipeline for it in Kyma.
 
 By default, you install Kyma with the Asset Store in Minio stand-alone mode. This tutorial shows how to set Minio to the AWS S3 Gateway mode using an [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation).
 
@@ -14,19 +14,19 @@ By default, you install Kyma with the Asset Store in Minio stand-alone mode. Thi
 
 ## Steps
 
-You can set Minio to the AWS S3 Gateway mode both during and after Kyma installation. In both cases, you need to create and configure a access key for AWS account, apply a Secret and Config Map with an override onto a cluster or Minikube, and trigger the Kyma installation process. 
+You can set Minio to the AWS S3 Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an access key for the AWS account, apply a Secret and Config Map with an override onto a cluster or Minikube, and trigger the Kyma installation process. 
 
 >**CAUTION:** Buckets created in Minio without using Bucket CRs are not recreated or migrated while switching to the Minio Gateway mode.
 
-### Create a AWS access key
+### Create an AWS access key
 
-Create a AWS access key for IAM user. Follow these steps:
+Create an AWS access key for an IAM user. Follow these steps:
 
 1. Access the [AWS Identity and Access Management console](https://console.aws.amazon.com/iam/)
 2. In the left navigation panel, choose **Users**.
-3. Choose the user whose access keys you want to create, and then choose the **Security credentials** tab.
-4. In the **Access keys** section, choose **Create access key**.
-5. Export the access key and secret key as an environment variable:
+3. Choose the user whose access keys you want to create, and select the **Security credentials** tab.
+4. In the **Access keys** section, select **Create access key**.
+5. Export the access and secret keys as environment variables:
 
     ```bash
     export AWS_ACCESS_KEY={your-access-ID}
@@ -35,7 +35,7 @@ Create a AWS access key for IAM user. Follow these steps:
 
 ### Configure Minio Gateway mode
 
-Export AWS S3 service endpoint (https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region) as an environment variable:
+Export an AWS S3 service endpoint (https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region) as an environment variable:
 
 ```bash
 export AWS_SERVICE_ENDPOINT=https://{endpoint-address}

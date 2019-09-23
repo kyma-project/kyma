@@ -3,7 +3,7 @@ title: Set Minio to the Alibaba OSS Gateway mode
 type: Tutorials
 ---
 
->**CAUTION:** Alibaba OSS Gateway Mode was tested only manually on Kyma 1.6. Currently, we don't have an automated pipeline like for other gateway modes.
+>**CAUTION:** Alibaba OSS Gateway Mode was only tested manually on Kyma 1.6. Currently, there is no automated pipeline for it in Kyma
 
 By default, you install Kyma with the Asset Store in Minio stand-alone mode. This tutorial shows how to set Minio to the Alibaba Object Storage Service (OSS) Gateway mode using an [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation).
 
@@ -14,19 +14,19 @@ By default, you install Kyma with the Asset Store in Minio stand-alone mode. Thi
 
 ## Steps
 
-You can set Minio to the Alibaba OSS Gateway mode both during and after Kyma installation. In both cases, you need to create and configure a access key for Alibaba Cloud account, apply a Secret and Config Map with an override onto a cluster or Minikube, and trigger the Kyma installation process. 
+You can set Minio to the Alibaba OSS Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an access key for your Alibaba Cloud account, apply a Secret and a Config Map with an override onto a cluster or Minikube, and trigger the Kyma installation process. 
 
 >**CAUTION:** Buckets created in Minio without using Bucket CRs are not recreated or migrated while switching to the Minio Gateway mode.
 
-### Create a Alibaba Cloud access key
+### Create an Alibaba Cloud access key
 
-Create a Alibaba Cloud access key for user. Follow these steps:
+Create an Alibaba Cloud access key for a user. Follow these steps:
 
 1. Access the [Resource Access Management console](https://ram.console.aliyun.com)
-2. In the left navigation panel, choose **User**.
+2. In the left navigation panel, select **User**.
 3. Choose the user whose access keys you want to create.
 4. Click **Create AccessKey** in the **User AccessKey** section.
-5. Export the access key and secret key as an environment variable:
+5. Export the access and secret keys as environment variables:
 
     ```bash
     export ALIBABA_ACCESS_KEY={your-access-ID}
@@ -35,7 +35,7 @@ Create a Alibaba Cloud access key for user. Follow these steps:
 
 ### Configure Minio Gateway mode
 
-Export Alibaba OSS service endpoint (https://www.alibabacloud.com/help/doc-detail/31837.htm) as an environment variable:
+Export an Alibaba OSS service [endpoint](https://www.alibabacloud.com/help/doc-detail/31837.htm) as an environment variable:
 
 ```bash
 export ALIBABA_SERVICE_ENDPOINT=https://{endpoint-address}

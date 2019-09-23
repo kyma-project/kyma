@@ -14,20 +14,20 @@ By default, you install Kyma with the Asset Store in Minio stand-alone mode. Thi
 
 ## Steps
 
-You can set Minio to the Azure Blob Storage Gateway mode both during and after Kyma installation. In both cases, you need to create and configure a Azure storage account, apply a Secret and Config Map with an override onto a cluster or Minikube, and trigger the Kyma installation process. 
+You can set Minio to the Azure Blob Storage Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an Azure storage account, apply a Secret and ConfigMap with an override onto a cluster or Minikube, and trigger the Kyma installation process. 
 
 >**CAUTION:** Buckets created in Minio without using Bucket CRs are not recreated or migrated while switching to the Minio Gateway mode.
 
-### Setup a Azure Blob Storage resources
+### Setup Azure Blob Storage resources
 
-Create a Azure resource group and storage account. Follow these steps:
+Create an Azure resource group and a storage account. Follow these steps:
 
 1. Run the `export {VARIABLE}={value}` command to set up the following environment variables, where:
 
     - **AZ_ACCOUNT_NAME** is the name of the storage account.
     - **AZ_RESOURCE_GROUP** is the name of the resource group.
     - **AZ_RESOURCE_GROUP_LOCATION** is the location of the resource group.
-    - **AZ_SUBSCRIPTION** is the id of the Azure subscription.
+    - **AZ_SUBSCRIPTION** is the ID of the Azure subscription.
 
     Example:
     ```
@@ -36,7 +36,7 @@ Create a Azure resource group and storage account. Follow these steps:
     export AZ_RESOURCE_GROUP_LOCATION=westeurope
     export AZ_SUBSCRIPTION=123456-123456-123456-1234567
     ```
-2. When you communicate with Microsoft Azure for the first time, login to your Azure account. Run this command:
+2. When you communicate with Microsoft Azure for the first time, log into your Azure account. Run this command:
 
     ```bash
     az login
