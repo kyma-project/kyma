@@ -37,6 +37,7 @@ For more information about the Service Brokers, see [this](#service-brokers-serv
 
 The GCP Service Broker is a preview implementation and should not be used in a production environment. To enable the GCP Service Broker, create the following AddonsConfiguration:
 ```
+cat <<EOF | kubectl apply -f -
 apiVersion: addons.kyma-project.io/v1alpha1
 kind: AddonsConfiguration
 metadata:
@@ -46,5 +47,6 @@ spec:
   reprocessRequest: 0
   repositories:
     - url: https://github.com/kyma-project/addons/releases/download/0.7.0/index-gcp.yaml
+EOF
 ```
 >**NOTE:** If you register this addons repository URL as cluster-wide, there will be a conflict with the next release, after the GCP Service Broker is enabled by default.
