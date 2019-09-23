@@ -165,7 +165,7 @@ Follow the steps below to create a sample Function.
       <summary>Minikube</summary>
 
       ```bash
-      FN_DOMAIN="$(kubectl get ksvc demo --output 'jsonpath={.status.domain}')"
+      FN_DOMAIN="$(kubectl get ksvc demo --output 'jsonpath={.status.url}' | sed -e 's/http\([s]\)*:[/][/]//')"
       FN_PORT="$(kubectl get svc istio-ingressgateway -n istio-system --output 'jsonpath={.spec.ports[?(@.port==80)].nodePort}')"
       curl -v -H "Host: ${FN_DOMAIN}" http://$(minikube ip):${FN_PORT}
       ```
@@ -175,8 +175,9 @@ Follow the steps below to create a sample Function.
       <summary>Remote cluster</summary>
 
       ```bash
-      FN_DOMAIN="$(kubectl get ksvc demo --output 'jsonpath={.status.domain}')"
-      curl -kD- "https://${FN_DOMAIN}"
+      FN_DOMAIN="$(kubectl get ksvc demo --output 'jsonpath={.status.url}' | sed -e 's/http\([s]\)*:[/][/]//')"
+      FN_INGRESS="$(kubectl get svc istio-ingressgateway -n istio-system --output 'jsonpath={.status.loadBalancer.ingress[0].ip}')"
+      curl -kD- -H "Host: ${FN_DOMAIN}" "http://${FN_INGRESS}"   
       ```
       </details>
 
