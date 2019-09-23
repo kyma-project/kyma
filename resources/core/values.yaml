@@ -65,7 +65,7 @@ global:
     version: PR-5551
   cluster_users_integration_tests:
     dir: pr/
-    version: PR-5277
+    version: "PR-5712"
   xip_patch:
     dir: develop/
     version: 2a61dc74
