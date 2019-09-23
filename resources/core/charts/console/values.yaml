@@ -19,8 +19,8 @@ core_ui:
     pullPolicy: IfNotPresent
   service:
     name: nginx
-    externalPort: 8080
-    internalPort: 8080
+    externalPort: 80
+    internalPort: 80
 
 resources:
   {}

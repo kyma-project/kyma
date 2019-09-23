@@ -3,7 +3,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "fullname" . }}-core-ui
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "name" . }}
@@ -23,4 +23,4 @@ spec:
     - destination:
         port:
           number: {{ $servicePort }}
-        host: {{ $serviceName }}
+        host: {{ $serviceName }}-core-ui
