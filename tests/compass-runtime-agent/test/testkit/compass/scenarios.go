@@ -21,7 +21,12 @@ type ScenariosItems struct {
 
 func ToScenarioSchema(response ScenarioLabelDefinitionResponse) (ScenariosSchema, error) {
 	var scenarioSchema ScenariosSchema
-	err := json.Unmarshal([]byte(response.Result.Schema), &scenarioSchema)
+
+	if response.Result.Schema == nil {
+		return ScenariosSchema{}, nil
+	}
+
+	err := json.Unmarshal([]byte(*response.Result.Schema), &scenarioSchema)
 	if err != nil {
 		return ScenariosSchema{}, errors.Wrap(err, "Failed to unmarshall scenario schema")
 	}
