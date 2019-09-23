@@ -17,7 +17,6 @@ limitations under the License.
 package defaultserver
 
 import (
-	"fmt"
 	"os"
 
 	"k8s.io/apimachinery/pkg/types"
@@ -46,8 +45,12 @@ func Add(mgr manager.Manager) error {
 		secretName = "webhook-server-secret"
 	}
 
+	controlPlane := os.Getenv("CONTROL_PLANE")
+	if len(controlPlane) == 0 {
+		controlPlane = "controller-manager"
+	}
+
 	svr, err := webhook.NewServer("function-admission-server", mgr, webhook.ServerOptions{
-		// TODO(user): change the configuration of ServerOptions based on your need.
 		Port:    9876,
 		CertDir: "/tmp/cert",
 		BootstrapOptions: &webhook.BootstrapOptions{
@@ -63,7 +66,7 @@ func Add(mgr manager.Manager) error {
 				// Selectors should select the pods that runs this webhook server.
 				Selectors: map[string]string{
 					"app":                     "function-controller",
-					"control-plane":           "controller-manager",
+					"control-plane":           controlPlane,
 					"controller-tools.k8s.io": "1.0",
 				},
 			},
@@ -77,7 +80,7 @@ func Add(mgr manager.Manager) error {
 	for k, builder := range builderMap {
 		handlers, ok := HandlerMap[k]
 		if !ok {
-			log.V(1).Info(fmt.Sprintf("can't find handlers for builder: %v", k))
+			log.V(1).Info("No handler for builder %q", k)
 			handlers = []admission.Handler{}
 		}
 		wh, err := builder.

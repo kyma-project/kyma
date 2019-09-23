@@ -2,7 +2,6 @@ deployment:
   image:
     pullPolicy: IfNotPresent
   args:
-    containerPort: 3000
     token:
       length: 64
       runtimeExpiration: 60m
@@ -20,5 +19,18 @@ deployment:
     runAsUser: 2000
     allowPrivilegeEscalation: false
 
+oathkeeper:
+  hydrators:
+    connectorToken:
+      retry:
+        number: 3
+        delayInMilliseconds: 3000
+    istioCertHeader:
+      retry:
+        number: 3
+        delayInMilliseconds: 3000
+
 certsSetupJob:
   generatedCertificateValidity: 92d
+  securityContext: # Set on container level
+    runAsUser: 2000

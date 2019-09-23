@@ -122,8 +122,29 @@ enum DocsTopicPhaseType {
 type AddonsConfiguration {
     name: String!
     urls: [String!]
+    repositories: [AddonsConfigurationRepository!]
     labels: Labels!
     status: AddonsConfigurationStatus!
+}
+
+type AddonsConfigurationRepository {
+    url: String!
+    secretRef: ResourceRef
+}
+
+type ResourceRef {
+    name: String!
+    namespace: String!
+}
+
+input AddonsConfigurationRepositoryInput {
+    url: String!
+    secretRef: ResourceRefInput
+}
+
+input ResourceRefInput {
+    name: String!
+    namespace: String!
 }
 
 type AddonsConfigurationStatus {
@@ -649,9 +670,17 @@ type ExceededQuota {
 type Namespace {
     name: String!
     labels: Labels
+    status: String!
+    isSystemNamespace: Boolean!
+    pods: [Pod!]!
 
     # Depends on application module
     applications: [String!]
+}
+
+type NamespaceEvent {
+    type: SubscriptionEventType!
+    namespace: Namespace!
 }
 
 type NamespaceMutationOutput {
@@ -920,7 +949,7 @@ type Query {
     connectorService(application: String!): ConnectorService! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
 
     # Depends on 'application'
-    namespaces(application: String): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
+    namespaces(withSystemNamespaces: Boolean, withInactiveStatus: Boolean): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
     namespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "get", apiGroup: "", apiVersion: "v1"})
 
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]! @HasAccess(attributes: {resource: "deployments", verb: "list", apiGroup: "apps", apiVersion: "v1beta2", namespaceArg: "namespace"})
@@ -954,7 +983,7 @@ type Query {
 
     microFrontends(namespace: String!): [MicroFrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
     clusterMicroFrontends: [ClusterMicroFrontend!]! @HasAccess(attributes: {resource: "clustermicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
-    
+
     selfSubjectRules(namespace: String): [ResourceRule!]! @HasAccess(attributes: {apiGroup: "authorization.k8s.io", resource: "selfsubjectrulesreviews", verb: "create", apiVersion: "v1" namespaceArg: "namespace"})
 }
 
@@ -969,18 +998,22 @@ type Mutation {
     createServiceBindingUsage(namespace: String!, createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage @HasAccess(attributes: {resource: "servicebindingusages", verb: "create", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     deleteServiceBindingUsage(serviceBindingUsageName: String!, namespace: String!): DeleteServiceBindingUsageOutput @HasAccess(attributes: {resource: "servicebindingusages", verb: "delete", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "serviceBindingUsageName"})
 
-    createClusterAddonsConfiguration(name: String!, urls: [String!]!, labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "create", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-    updateClusterAddonsConfiguration(name: String!, urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    createClusterAddonsConfiguration(name: String!, repositories: [AddonsConfigurationRepositoryInput!], urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "create", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    updateClusterAddonsConfiguration(name: String!, repositories: [AddonsConfigurationRepositoryInput!], urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     deleteClusterAddonsConfiguration(name: String!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "delete", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-    addClusterAddonsConfigurationURLs(name: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-    removeClusterAddonsConfigurationURLs(name: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    addClusterAddonsConfigurationURLs(name: String!, urls: [String!]): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    removeClusterAddonsConfigurationURLs(name: String!, urls: [String!]): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    addClusterAddonsConfigurationRepository(name: String!, repositories: [AddonsConfigurationRepositoryInput!]): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    removeClusterAddonsConfigurationRepository(name: String!, urls: [String!]): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     resyncClusterAddonsConfiguration(name: String!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 
-    createAddonsConfiguration(name: String!, namespace: String!, urls: [String!]!, labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "create", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-    updateAddonsConfiguration(name: String!, namespace: String!, urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    createAddonsConfiguration(name: String!, namespace: String!, repositories: [AddonsConfigurationRepositoryInput!], urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "create", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    updateAddonsConfiguration(name: String!, namespace: String!, repositories: [AddonsConfigurationRepositoryInput!], urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     deleteAddonsConfiguration(name: String!, namespace: String!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "delete", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-    addAddonsConfigurationURLs(name: String!, namespace: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-    removeAddonsConfigurationURLs(name: String!, namespace: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    addAddonsConfigurationURLs(name: String!, namespace: String!, urls: [String!]): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    removeAddonsConfigurationURLs(name: String!, namespace: String!, urls: [String!]): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    addAddonsConfigurationRepository(name: String!, namespace: String!, repositories: [AddonsConfigurationRepositoryInput!]): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    removeAddonsConfigurationRepository(name: String!, namespace: String!, urls: [String!]): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     resyncAddonsConfiguration(name: String!, namespace: String!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 
     createApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
@@ -1042,7 +1075,7 @@ type Subscription {
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
     apiEvent(namespace: String!, serviceName: String): ApiEvent! @HasAccess(attributes: {resource: "apis", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
-
+    namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 }
 
 # Schema

@@ -5,13 +5,12 @@ type: Architecture
 
 ![Architecture Diagram](./assets/001-application-connector.svg)
 
-
 ## Istio Ingress Gateway
 
 The Istio Ingress Gateway exposes the Application Connector and other Kyma components.
 The DNS name of the Ingress is cluster-dependant and follows the `gateway.{cluster-dns}` format, for example `gateway.servicemanager.cluster.kyma.cx`.
 Istio Ingress Gateway secures the endpoints with certificate validation. Each call must include a valid client certificate.
-You can access every exposed Application (App) using the assigned path. For example, to reach the Gateway for the `user-custom` App, use `gateway.servicemanager.cluster.kyma.cx/user-custom`. 
+You can access every exposed Application (App) using the assigned path. For example, to reach the Gateway for the `user-custom` App, use `gateway.servicemanager.cluster.kyma.cx/user-custom`.
 
 ## Application Connectivity Validator
 
@@ -20,6 +19,7 @@ The Application Connectivity Validator verifies the subject of the client certif
 ## Connector Service
 
 The Connector Service:
+
 - Handles the exchange of client certificates for a given App.
 - Provides the Application Registry and Event Service endpoints.
 - Signs client certificates using the server-side certificate stored in a Kubernetes Secret.
@@ -50,13 +50,14 @@ The AB implements the [Open Service Broker API](https://www.openservicebrokerapi
 
 ## Application Operator
 
-The operator listens for creating or deleting the Application custom resources and acts accordingly, either provisioning or de-provisioning an instance of Application Gateway and Event Service for every custom resource.         
+The operator listens for creating or deleting the Application custom resources and acts accordingly, either provisioning or de-provisioning an instance of Application Gateway and Event Service for every custom resource.
 
 >**NOTE:** Every Application custom resource corresponds to a single App to which you can connect an external solution.
 
 ## Application Gateway
 
 The Application Gateway is an intermediary component between a lambda function or a service and an external API registered with the Application Registry. It can call services secured with:
+
 - [Basic Authentication](https://tools.ietf.org/html/rfc7617) mechanism,
 - OAuth
 - Client certificates

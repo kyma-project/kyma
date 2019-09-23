@@ -14,13 +14,13 @@ import (
 func TestClusterDocsTopicUnstructuredExtractor_Do(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		extractor := extractor.ClusterDocsTopicUnstructuredExtractor{}
-		obj := testingUtils.NewUnstructured(v1alpha1.SchemeGroupVersion.String(), "ClusterDocsTopic", map[string]interface{}{
+		obj := testingUtils.NewUnstructured(v1alpha1.GroupVersion.String(), "ClusterDocsTopic", map[string]interface{}{
 			"name": "ExampleName",
 		}, nil, nil)
 		expected := &v1alpha1.ClusterDocsTopic{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "ClusterDocsTopic",
-				APIVersion: v1alpha1.SchemeGroupVersion.String(),
+				APIVersion: v1alpha1.GroupVersion.String(),
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "ExampleName",

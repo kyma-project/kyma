@@ -14,7 +14,7 @@ The Secret allows you to run the service successfully. However, a problem appear
 
 The diagram shows an overview of interactions between all resources related to Kyma provisioning and binding, and the reverting, deprovisioning, and unbinding operations.
 
-![Kyma provisioning and binding](./assets/provisioning-and-binding.png)
+![Kyma provisioning and binding](./assets/provisioning-and-binding.svg)
 
 The process of provisioning and binding invokes the creation of three custom resources:
 - ServiceInstance
@@ -29,7 +29,7 @@ When you invoke the deprovisioning and unbinding actions, the system deletes all
 
 To provision a service, create a ServiceInstance custom resource. Generally speaking, provisioning is a process in which the Service Broker creates a new instance of a service. The form and scope of this instance depends on the Service Broker.
 
-![Kyma provisioning](./assets/provisioning.png)
+![Kyma provisioning](./assets/provisioning.svg)
 
 ### Create a ServiceBinding
 
@@ -38,7 +38,7 @@ Kyma binding operation consists of two phases:
 1. The system gathers the information necessary to connect to the ServiceInstance and authenticate it. The Service Catalog handles this phase directly, without the use of any additional Kyma custom resources.
 2. The system must make the information it collected available to the application. Since the Service Catalog does not provide this functionality, you must create a ServiceBindingUsage custom resource.
 
-![Kyma binding](./assets/binding.png)
+![Kyma binding](./assets/binding.svg)
 
 > **TIP:** You can create the ServiceBinding and ServiceBindingUsage resources at the same time.
 
@@ -46,7 +46,7 @@ Kyma binding operation consists of two phases:
 
 The UsageKind is a cluster-wide custom resource which allows you to bind a ServiceInstance to any kind of resource. By default, Kyma provides two UsageKinds which enable binding either to a Deployment or Function. You can add more UsageKinds if you want to bind your ServiceInstance to other types of resources. The UsageKind contains information on how the binding to these custom resources is conducted. The ServiceBindingUsage uses this information to inject Secrets to the application.
 
-![Kyma UsageKind](./assets/usagekind.png)
+![Kyma UsageKind](./assets/usagekind.svg)
 
 
 ### Delete a ServiceBinding
@@ -55,12 +55,12 @@ Kyma unbinding can be achieved in two ways:
 - Delete the ServiceBindingUsage. The Service Binding Usage Controller deletes the Secret injection, but the Secret itself still exists in the Namespace.
 - Delete the ServiceBinding. It deletes the Secret and triggers the deletion of all related ServiceBindingUsages.
 
-![Kyma unbinding](./assets/unbinding.png)
+![Kyma unbinding](./assets/unbinding.svg)
 
 ### Deprovision a service
 
 To deprovision a given service, delete the ServiceInstance custom resource. As part of this operation, the Service Broker deletes any resource created during the provisioning. When the process completes, the service becomes unavailable.
 
-![Kyma deprovisioning](./assets/deprovisioning.png)
+![Kyma deprovisioning](./assets/deprovisioning.svg)
 
 > **NOTE:** You can deprovision a service only if no corresponding ServiceBinding for a given ServiceInstance exists.

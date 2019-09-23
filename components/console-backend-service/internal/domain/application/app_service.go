@@ -7,11 +7,12 @@ import (
 	"net/http"
 	"regexp"
 
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	mappingLister "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
@@ -19,11 +20,13 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/extractor"
 	"github.com/pkg/errors"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -44,7 +47,7 @@ type notifier interface {
 // applicationService provides listing namespaces along with Applications.
 // It provides also Applications enabling/disabling in given namespace.
 type applicationService struct {
-	aCli        appCli.ApplicationconnectorV1alpha1Interface
+	aCli        dynamic.NamespaceableResourceInterface
 	appInformer cache.SharedIndexInformer
 
 	mCli            mappingCli.ApplicationconnectorV1alpha1Interface
@@ -55,11 +58,12 @@ type applicationService struct {
 	httpClient      *http.Client
 	appNameRegex    *regexp.Regexp
 	notifier        notifier
+	extractor       extractor.ApplicationUnstructuredExtractor
 
 	appMappingConverter applicationMappingConverter
 }
 
-func newApplicationService(cfg Config, aCli appCli.ApplicationconnectorV1alpha1Interface, mCli mappingCli.ApplicationconnectorV1alpha1Interface, mInformer cache.SharedIndexInformer, mLister mappingLister.ApplicationMappingLister, appInformer cache.SharedIndexInformer) (*applicationService, error) {
+func newApplicationService(cfg Config, aCli dynamic.NamespaceableResourceInterface, mCli mappingCli.ApplicationconnectorV1alpha1Interface, mInformer cache.SharedIndexInformer, mLister mappingLister.ApplicationMappingLister, appInformer cache.SharedIndexInformer) (*applicationService, error) {
 	err := mInformer.AddIndexers(cache.Indexers{
 		appMappingNameIndex: func(obj interface{}) ([]string, error) {
 			mapping, ok := obj.(*mappingTypes.ApplicationMapping)
@@ -95,13 +99,14 @@ func newApplicationService(cfg Config, aCli appCli.ApplicationconnectorV1alpha1I
 		},
 		notifier:     notifier,
 		appNameRegex: regex,
+		extractor:    extractor.ApplicationUnstructuredExtractor{},
 
 		appMappingConverter: applicationMappingConverter{},
 	}, nil
 }
 
 func (svc *applicationService) Create(name string, description string, labels gqlschema.Labels) (*v1alpha1.Application, error) {
-	return svc.aCli.Applications().Create(&v1alpha1.Application{
+	u, err := svc.extractor.ToUnstructured(&v1alpha1.Application{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Application",
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
@@ -115,6 +120,16 @@ func (svc *applicationService) Create(name string, description string, labels gq
 			Services:    []v1alpha1.Service{},
 		},
 	})
+	if err != nil {
+		return &v1alpha1.Application{}, err
+	}
+
+	created, err := svc.aCli.Create(u, metav1.CreateOptions{})
+
+	if err != nil {
+		return &v1alpha1.Application{}, err
+	}
+	return svc.extractor.FromUnstructured(created)
 }
 
 func (svc *applicationService) Update(name string, description string, labels gqlschema.Labels) (*v1alpha1.Application, error) {
@@ -133,10 +148,15 @@ func (svc *applicationService) Update(name string, description string, labels gq
 		app.Spec.Description = description
 		app.Spec.Labels = labels
 
-		updated, err := svc.aCli.Applications().Update(app)
+		unstructuredApp, err := svc.extractor.ToUnstructured(app)
+		if err != nil {
+			return &v1alpha1.Application{}, err
+		}
+
+		updated, err := svc.aCli.Update(unstructuredApp, metav1.UpdateOptions{})
 		switch {
 		case err == nil:
-			return updated, nil
+			return svc.extractor.FromUnstructured(updated)
 		case apiErrors.IsConflict(err):
 			lastErr = err
 			continue
@@ -148,7 +168,7 @@ func (svc *applicationService) Update(name string, description string, labels gq
 }
 
 func (svc *applicationService) Delete(name string) error {
-	return svc.aCli.Applications().Delete(name, &metav1.DeleteOptions{})
+	return svc.aCli.Delete(name, &metav1.DeleteOptions{})
 }
 
 func (svc *applicationService) ListNamespacesFor(appName string) ([]string, error) {
@@ -176,12 +196,12 @@ func (svc *applicationService) Find(name string) (*v1alpha1.Application, error) 
 		return nil, err
 	}
 
-	app, ok := item.(*v1alpha1.Application)
+	app, ok := item.(*unstructured.Unstructured)
 	if !ok {
 		return nil, fmt.Errorf("incorrect item type: %T, should be: 'Application' in version 'v1alpha1'", item)
 	}
 
-	return app, nil
+	return svc.extractor.FromUnstructured(app)
 }
 
 func (svc *applicationService) List(params pager.PagingParams) ([]*v1alpha1.Application, error) {
@@ -192,9 +212,9 @@ func (svc *applicationService) List(params pager.PagingParams) ([]*v1alpha1.Appl
 
 	res := make([]*v1alpha1.Application, 0, len(items))
 	for _, item := range items {
-		re, ok := item.(*v1alpha1.Application)
-		if !ok {
-			return nil, fmt.Errorf("incorrect item type: %T, should be: 'Application' in version 'v1alpha1'", item)
+		re, err := svc.extractor.Do(item)
+		if err != nil {
+			return nil, fmt.Errorf("cannot convert item to 'v1alpha1.Application': %v", item)
 		}
 
 		res = append(res, re)
@@ -222,9 +242,9 @@ func (svc *applicationService) ListInNamespace(namespace string) ([]*v1alpha1.Ap
 			continue
 		}
 
-		app, ok := item.(*v1alpha1.Application)
-		if !ok {
-			return nil, fmt.Errorf("incorrect item type: %T, should be: 'Application' in version 'v1alpha1'", item)
+		app, err := svc.extractor.Do(item)
+		if err != nil {
+			return nil, fmt.Errorf("cannot convert item to 'v1alpha1.Application': %v", item)
 		}
 
 		//TODO: Write test to make sure that this is a real deep copy

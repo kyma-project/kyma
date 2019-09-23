@@ -28,22 +28,6 @@
   version = "v1.4.0"
 
 [[projects]]
-  digest = "1:d8ebbd207f3d3266d4423ce4860c9f3794956306ded6c7ba312ecc69cdfbf04c"
-  name = "github.com/PuerkitoBio/purell"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "0bcb03f4b4d0a9428594752bd2a3b9aa0a9d4bd4"
-  version = "v1.1.0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:8098cd40cd09879efbf12e33bcd51ead4a66006ac802cd563a66c4f3373b9727"
-  name = "github.com/PuerkitoBio/urlesc"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "de5bf2ad457846296e2031421a34e2568e304e35"
-
-[[projects]]
   digest = "1:45e86bcbe146ad699636f02e00ff89e239ad678ce4dab8ee58cce8249815d795"
   name = "github.com/Shopify/sarama"
   packages = ["."]
@@ -116,17 +100,6 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:3537d33c077a9666720dc987fddfecb07270606ac0a58f67abd08e3b252c0a45"
-  name = "github.com/emicklei/go-restful"
-  packages = [
-    ".",
-    "log",
-  ]
-  pruneopts = "NUT"
-  revision = "3eb9738c1697594ea6e71a7156a9bb32ed216cf0"
-  version = "v2.8.0"
-
-[[projects]]
   digest = "1:81466b4218bf6adddac2572a30ac733a9255919bc2f470b4827a317bd4ee1756"
   name = "github.com/ghodss/yaml"
   packages = ["."]
@@ -141,38 +114,6 @@
   pruneopts = "NUT"
   revision = "07c9b44f60d7ffdfb7d8efe1ad539965737836dc"
   version = "v0.4.0"
-
-[[projects]]
-  digest = "1:260f7ebefc63024c8dfe2c9f1a2935a89fa4213637a1f522f592f80c001cc441"
-  name = "github.com/go-openapi/jsonpointer"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "ef5f0afec364d3b9396b7b77b43dbe26bf1f8004"
-  version = "v0.18.0"
-
-[[projects]]
-  digest = "1:98abd61947ff5c7c6fcfec5473d02a4821ed3a2dd99a4fbfdb7925b0dd745546"
-  name = "github.com/go-openapi/jsonreference"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "8483a886a90412cd6858df4ea3483dce9c8e35a3"
-  version = "v0.18.0"
-
-[[projects]]
-  digest = "1:4da4ea0a664ba528965683d350f602d0f11464e6bb2e17aad0914723bc25d163"
-  name = "github.com/go-openapi/spec"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "5b6cdde3200976e3ecceb2868706ee39b6aff3e4"
-  version = "v0.18.0"
-
-[[projects]]
-  digest = "1:dc0f590770e5a6c70ea086232324f7b7dc4857c60eca63ab8ff78e0a5cfcdbf3"
-  name = "github.com/go-openapi/swag"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "1d29f06aebd59ccdf11ae04aa0334ded96e2d909"
-  version = "v0.18.0"
 
 [[projects]]
   digest = "1:abea725bcf0210887f5da19d804fffa1dd45a42a56bdf5f02322345e3fee4f0d"
@@ -215,12 +156,12 @@
   version = "v0.0.1"
 
 [[projects]]
-  branch = "master"
   digest = "1:05f95ffdfcf651bdb0f05b40b69e7f5663047f8da75c72d58728acb59b5cc107"
   name = "github.com/google/btree"
   packages = ["."]
   pruneopts = "NUT"
   revision = "4030bb1f1f0c35b30ca7009e9ebd06849dd45306"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -260,14 +201,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7fdf3223c7372d1ced0b98bf53457c5e89d89aecbad9a77ba9fcc6e01f9e5621"
+  digest = "1:a86d65bc23eea505cd9139178e4d889733928fe165c7a008f41eaab039edf9df"
   name = "github.com/gregjones/httpcache"
   packages = [
     ".",
     "diskcache",
   ]
   pruneopts = "NUT"
-  revision = "c63ab54fda8f77302f8d414e19933f2b6026a089"
+  revision = "901d90724c7919163f472a9812253fb26761123d"
 
 [[projects]]
   digest = "1:b42cde0e1f3c816dd57f57f7bbcf05ca40263ad96f168714c130c611fc0856a6"
@@ -295,16 +236,6 @@
   pruneopts = "NUT"
   revision = "1624edc4454b8682399def8740d46db5e4362ba4"
   version = "v1.1.5"
-
-[[projects]]
-  digest = "1:d3209f11918bfd131db14e9ea1691bd202568228715980f71e56b1bd60ad1e07"
-  name = "github.com/kisielk/errcheck"
-  packages = [
-    ".",
-    "internal/errcheck",
-  ]
-  pruneopts = "NUT"
-  revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
 
 [[projects]]
   branch = "master"
@@ -365,7 +296,14 @@
   version = "v0.1.36"
 
 [[projects]]
-  digest = "1:1a741c30eb8e545da77e0f5b42e0f0f53410306b76275b2b9fe67568324fcaac"
+  digest = "1:073352c65b34bfc085f68a4444e1752252d0b03d28dd7b5e65a36859f4a48175"
+  name = "github.com/kyma-project/helm-broker"
+  packages = ["pkg/apis/addons/v1alpha1"]
+  pruneopts = "NUT"
+  revision = "d07feb2d365a58645031e96b27a95c8d50bb8349"
+
+[[projects]]
+  digest = "1:8069f9969f7706ed0081b4ead65ad60248f02066e01d4aaefea473b02472dadd"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -382,16 +320,6 @@
     "common/microfrontend-client/pkg/client/listers/ui/v1alpha1",
     "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
     "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/fake",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/scheme",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2/fake",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions/gateway.kyma-project.io",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions/gateway.kyma-project.io/v1alpha2",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions/internalinterfaces",
-    "components/api-controller/pkg/clients/gateway.kyma-project.io/listers/gateway.kyma-project.io/v1alpha2",
     "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "components/application-broker/pkg/client/clientset/versioned",
     "components/application-broker/pkg/client/clientset/versioned/fake",
@@ -404,29 +332,8 @@
     "components/application-broker/pkg/client/informers/externalversions/internalinterfaces",
     "components/application-broker/pkg/client/listers/applicationconnector/v1alpha1",
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
-    "components/application-operator/pkg/client/clientset/versioned",
-    "components/application-operator/pkg/client/clientset/versioned/fake",
-    "components/application-operator/pkg/client/clientset/versioned/scheme",
-    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1/fake",
-    "components/application-operator/pkg/client/informers/externalversions",
-    "components/application-operator/pkg/client/informers/externalversions/applicationconnector",
-    "components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
-    "components/application-operator/pkg/client/informers/externalversions/internalinterfaces",
-    "components/application-operator/pkg/client/listers/applicationconnector/v1alpha1",
     "components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
     "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
-    "components/helm-broker/pkg/apis/addons/v1alpha1",
-    "components/helm-broker/pkg/client/clientset/versioned",
-    "components/helm-broker/pkg/client/clientset/versioned/fake",
-    "components/helm-broker/pkg/client/clientset/versioned/scheme",
-    "components/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1",
-    "components/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1/fake",
-    "components/helm-broker/pkg/client/informers/externalversions",
-    "components/helm-broker/pkg/client/informers/externalversions/addons",
-    "components/helm-broker/pkg/client/informers/externalversions/addons/v1alpha1",
-    "components/helm-broker/pkg/client/informers/externalversions/internalinterfaces",
-    "components/helm-broker/pkg/client/listers/addons/v1alpha1",
     "components/idppreset/pkg/apis/authentication/v1alpha1",
     "components/idppreset/pkg/client/clientset/versioned",
     "components/idppreset/pkg/client/clientset/versioned/fake",
@@ -455,22 +362,9 @@
     "components/service-binding-usage-controller/pkg/client/informers/externalversions/settings/v1alpha1",
     "components/service-binding-usage-controller/pkg/client/listers/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/client/listers/settings/v1alpha1",
-    "tools/failery",
   ]
   pruneopts = "NUT"
-  revision = "7c2360a1ea71ba311c462f98cd9450b617c822ef"
-
-[[projects]]
-  branch = "master"
-  digest = "1:84a5a2b67486d5d67060ac393aa255d05d24ed5ee41daecd5635ec22657b6492"
-  name = "github.com/mailru/easyjson"
-  packages = [
-    "buffer",
-    "jlexer",
-    "jwriter",
-  ]
-  pruneopts = "NUT"
-  revision = "60711f1a8329503b04e1c88535f419d0bb440bff"
+  revision = "3a0c31e7c33b83912dfb6f39cdf46720254e5b0f"
 
 [[projects]]
   digest = "1:730bb303c6e80807a43c37b546e06de0fa32f9cde76a198e87653ce8859fd028"
@@ -540,19 +434,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3bf17a6e6eaa6ad24152148a631d18662f7212e21637c2699bff3369b7f00fa2"
+  digest = "1:89da0f0574bc94cfd0ac8b59af67bf76cdd110d503df2721006b9f0492394333"
   name = "github.com/petar/GoLLRB"
   packages = ["llrb"]
   pruneopts = "NUT"
-  revision = "53be0d36a84c2a886ca057d34b6aa4468df9ccb4"
+  revision = "33fb24c13b99c46c93183c291836c573ac382536"
 
 [[projects]]
-  digest = "1:6c6d91dc326ed6778783cff869c49fb2f61303cdd2ebbcf90abe53505793f3b6"
+  digest = "1:e1b94bd98c62fc2f905621fc6ba8209b7004e4513a1dfecb12a3de56ec2bb519"
   name = "github.com/peterbourgon/diskv"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "5f041e8faa004a95c88a202771f4cc3e991971e6"
-  version = "v2.0.1"
+  revision = "0be1b92a6df0e4f5cb0a5d15fb7f643d0ad93ce6"
+  version = "v3.0.0"
 
 [[projects]]
   digest = "1:1bf95fa61209ea03139b5708ea26a364209f99a4fb70990a2697070588c156ab"
@@ -719,7 +613,7 @@
   revision = "48ac38b7c8cbedd50b1613c0fccacfc7d88dfcdf"
 
 [[projects]]
-  digest = "1:e33513a825fcd765e97b5de639a2f7547542d1a8245df0cef18e1fd390b778a9"
+  digest = "1:e7071ed636b5422cc51c0e3a6cebc229d6c9fffc528814b519a980641422d619"
   name = "golang.org/x/text"
   packages = [
     "collate",
@@ -736,7 +630,6 @@
     "unicode/cldr",
     "unicode/norm",
     "unicode/rangetable",
-    "width",
   ]
   pruneopts = "NUT"
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
@@ -752,10 +645,9 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ab4b2ff1736add652ebc5cd657ed31dabf72e4dff3999f2b119ac15761c17dea"
+  digest = "1:3ba2bf74b2397e9bfa0ca8de22cd61d1464d6b7b3963ff3eeaccd2b09b968cd8"
   name = "golang.org/x/tools"
   packages = [
-    "cmd/goimports",
     "go/ast/astutil",
     "go/buildutil",
     "go/gcexportdata",
@@ -854,11 +746,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "b503174bad5991eb66f18247f52e41c3258f6348"
-  version = "kubernetes-1.12.3"
+  revision = "6db15a15d2d3874a6c3ddb2140ac9f3bc7058428"
+  version = "kubernetes-1.12.5"
 
 [[projects]]
-  digest = "1:ada25b0fc2dab44cead6649ce86f1592e3a34b82f934a598223806a876a744eb"
+  digest = "1:e29b9d05002abc1a54d1a0f392041e8bec05bcdd861a81f3b87d7e3a4eae9398"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -905,11 +797,11 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "eddba98df674a16931d2d4ba75edc3a389bf633a"
-  version = "kubernetes-1.12.3"
+  revision = "49ce2735e5074ffc3f8190c8406cf51a96302dad"
+  version = "kubernetes-1.12.5"
 
 [[projects]]
-  digest = "1:562c59c2b47fecfe461fac96bbb25dcfbcd9c38fab857de58ae4c1fcbe86614b"
+  digest = "1:befd39995c1bd6de19905b4323abd2974a897a2959b133b4692dffd10f1212d7"
   name = "k8s.io/apiserver"
   packages = [
     "pkg/authentication/authenticator",
@@ -922,11 +814,11 @@
     "plugin/pkg/authorizer/webhook",
   ]
   pruneopts = "NUT"
-  revision = "92fdef3a232a23afb9644f6151119b5961b9feab"
-  version = "kubernetes-1.12.3"
+  revision = "a748535592ba957da14f6279ebd43cfb2fe44463"
+  version = "kubernetes-1.12.5"
 
 [[projects]]
-  digest = "1:908dbccfffc73f69daabac462565cf2f4c52c4c9b2f77d230d9de3aa4485ddc7"
+  digest = "1:9b466ef822e98ba513d544216f95aff89c8b2d94804e0d42ff642ecdddfade2b"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -1097,12 +989,12 @@
     "util/retry",
   ]
   pruneopts = "NUT"
-  revision = "d082d5923d3cc0bfbb066ee5fbdea3d0ca79acf8"
-  version = "kubernetes-1.12.3"
+  revision = "701b913670036511e3d752318272c97f1a2a2edd"
+  version = "kubernetes-1.12.5"
 
 [[projects]]
-  branch = "release-1.11"
-  digest = "1:7320216e50843bfc1092d20b535a20683abc967e0eba38441c85c3265da10a34"
+  branch = "release-1.12"
+  digest = "1:6fc0f18519c37b9bd56f3c458398e79bea7c749190a18b7f76a6dc045aa56d3c"
   name = "k8s.io/code-generator"
   packages = [
     "cmd/client-gen",
@@ -1126,12 +1018,10 @@
     "cmd/lister-gen",
     "cmd/lister-gen/args",
     "cmd/lister-gen/generators",
-    "cmd/openapi-gen",
-    "cmd/openapi-gen/args",
     "pkg/util",
   ]
   pruneopts = "T"
-  revision = "f8cba74510f397bac80157a6c4ccb0ffbc31b9d0"
+  revision = "6727e3d3f9c05284748fe90ec24f4dd6b1c20de4"
 
 [[projects]]
   branch = "master"
@@ -1160,26 +1050,22 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:67864daa8a5832b6a0a81969fd17dc00552c5970f204baa2b30f922b603f89f7"
+  digest = "1:03a96603922fc1f6895ae083e1e16d943b55ef0656b56965351bd87e7d90485f"
   name = "k8s.io/kube-openapi"
-  packages = [
-    "cmd/openapi-gen/args",
-    "pkg/common",
-    "pkg/generators",
-    "pkg/generators/rules",
-    "pkg/util/proto",
-    "pkg/util/sets",
-  ]
+  packages = ["pkg/util/proto"]
   pruneopts = "NUT"
   revision = "0317810137be915b9cf888946c6e115c1bfac693"
 
 [[projects]]
-  digest = "1:84a8609383bec11b71d52dd813f33f1d16614b91966940bdc2aa79bea864fa25"
+  digest = "1:68cd93696d4de06936c94bf0c510802140c2d3c956b557f3d001430d58cf676c"
   name = "sigs.k8s.io/controller-runtime"
-  packages = ["pkg/runtime/scheme"]
+  packages = [
+    "pkg/runtime/scheme",
+    "pkg/scheme",
+  ]
   pruneopts = "NUT"
-  revision = "12d98582e72927b6cd0123e2b4e819f9341ce62c"
-  version = "v0.1.10"
+  revision = "e1159d6655b260c4812fd0792cd1344ecc96a57e"
+  version = "v0.2.0"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -1193,7 +1079,6 @@
     "github.com/googleapis/gnostic/OpenAPIv2",
     "github.com/gorilla/mux",
     "github.com/gorilla/websocket",
-    "github.com/kisielk/errcheck",
     "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned/fake",
@@ -1203,14 +1088,12 @@
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/fake",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions",
+    "github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned/fake",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
-    "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
-    "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/fake",
-    "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions",
     "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake",
@@ -1219,28 +1102,16 @@
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake",
-    "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
     "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
-    "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1",
-    "github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned/fake",
-    "github.com/kyma-project/kyma/components/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1",
-    "github.com/kyma-project/kyma/components/helm-broker/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1",
     "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/fake",
     "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1",
     "github.com/kyma-project/kyma/components/idppreset/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
-    "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake",
-    "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions",
-    "github.com/kyma-project/kyma/tools/failery",
     "github.com/moby/moby/pkg/namesgenerator",
     "github.com/opentracing/opentracing-go",
     "github.com/opentracing/opentracing-go/ext",
@@ -1255,7 +1126,6 @@
     "github.com/vektah/gqlparser",
     "github.com/vektah/gqlparser/ast",
     "github.com/vrischmann/envconfig",
-    "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/apps/v1",
     "k8s.io/api/apps/v1beta2",
     "k8s.io/api/authorization/v1",
@@ -1305,7 +1175,6 @@
     "k8s.io/code-generator/cmd/defaulter-gen",
     "k8s.io/code-generator/cmd/informer-gen",
     "k8s.io/code-generator/cmd/lister-gen",
-    "k8s.io/code-generator/cmd/openapi-gen",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

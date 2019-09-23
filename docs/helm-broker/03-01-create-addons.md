@@ -29,9 +29,6 @@ sample-addon/
 
 > **NOTE:** All file names in an addon repository are case-sensitive.
 
-> **NOTE:** The maximum size of an addon is determined by the amount of memory and storage size. These limits are set in the 
-[Helm Broker chart](https://kyma-project.io/docs/components/helm-broker/#configuration-helm-broker-chart).
-
 For details about particular files, read the following sections.
 
 ## meta.yaml file
@@ -40,23 +37,23 @@ The `meta.yaml` file contains information about the addon. Define the following 
 
 |      Field Name     | Required |                   Description             |
 |-------------------|:--------:|----------------------------------------------|
-|         **name**        |   YES   | The name of the addon.  |
-|       **version**       |   YES   | The version of the addon. It is a broker service identifier.  |
-|          **id**         |   YES   | The broker service identifier.  |
-|     **description**     |   YES   | The short description of the service. |
-|     **displayName**     |   YES   | The display name of the addon.    |
-|         **tags**        |   NO  | Keywords describing the provided service, separated by commas.     |
-|       **bindable**      |   NO  | The field that specifies whether you can bind a given addon. |
-| **providerDisplayName** |   NO  | The name of the upstream entity providing the actual service.  |
-|   **longDescription**   |   NO  | The long description of the service.     |
-|   **documentationURL**  |   NO  | The link to the documentation page for the service.        |
-|      **supportURL**     |   NO  | The link to the support page for the service.     |
-|       **imageURL**      |   NO  | The URL to an image. You must provide the image in the `SVG` format.          |
-|       **labels**        |   NO  | Key-value pairs that help you to organize your project. Use labels to indicate different elements, such as Namespaces, services, or teams.   |
-| **bindingsRetrievable** |   NO  | The field that specifies whether fetching a ServiceBinding using a GET request on the resource's endpoint is supported for all plans. The default value is `false`.   |
-|   **planUpdatable**     |   NO  |  The field that specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
-|       **requires**      |   NO  | The list of permissions the user must grant to the instances of this service. |
-| **provisionOnlyOnce**   |   NO  | The field that specifies whether the addon can be provisioned only once in a given Namespace. The default value is `false`. |
+|         **name**        |   Yes   | The name of the addon.  |
+|       **version**       |   Yes   | The version of the addon. It is a broker service identifier.  |
+|          **id**         |   Yes   | The broker service identifier.  |
+|     **description**     |   Yes   | The short description of the service. |
+|     **displayName**     |   Yes   | The display name of the addon.    |
+|         **tags**        |   No  | Keywords describing the provided service, separated by commas.     |
+|       **bindable**      |   No  | The field that specifies whether you can bind a given addon. |
+| **providerDisplayName** |   No  | The name of the upstream entity providing the actual service.  |
+|   **longDescription**   |   No  | The long description of the service.     |
+|   **documentationURL**  |   No  | The link to the documentation page for the service.        |
+|      **supportURL**     |   No  | The link to the support page for the service.     |
+|       **imageURL**      |   No  | The URL to an image. You must provide the image in the `SVG` format.          |
+|       **labels**        |   No  | Key-value pairs that help you to organize your project. Use labels to indicate different elements, such as Namespaces, services, or teams.   |
+| **bindingsRetrievable** |   No  | The field that specifies whether fetching a ServiceBinding using a GET request on the resource's endpoint is supported for all plans. The default value is `false`.   |
+|   **planUpdatable**     |   No  |  The field that specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
+|       **requires**      |   No  | The list of permissions the user must grant to the instances of this service. |
+| **provisionOnlyOnce**   |   No  | The field that specifies whether the addon can be provisioned only once in a given Namespace. The default value is `false`. |
 
 > **NOTE**: The **provisionOnlyOnce** and **local** keys are reserved and cannot be added to the **labels** entry, since the Helm Broker overrides them at runtime. The Helm Broker always adds the `local:true` label and it adds the `provisionOnlyOnce:true` label only if **provisionOnlyOnce** is set to `true`.
 
@@ -74,12 +71,12 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 
 |  Field Name | Required |      Description               |
 |-----------|:--------:|------------------------------------|
-|     **name**    |   YES   |     The name of the plan.   |
-|      **id**     |   YES   |     The ID of the plan. |
-| **description** |   YES   | The description of the plan. |
-| **displayName** |   YES   | The display name of the plan. |
-|  **bindable**   |   NO  | The field that specifies whether you can bind an instance of the plan or not. The default value is `false`. |
-|     **free**    |   NO  | The attribute which specifies whether an instance of the plan is free or not. The default value is `false`.    |
+|     **name**    |   Yes   |     The name of the plan.   |
+|      **id**     |   Yes   |     The ID of the plan. |
+| **description** |   Yes   | The description of the plan. |
+| **displayName** |   Yes   | The display name of the plan. |
+|  **bindable**   |   No  | The field that specifies whether you can bind an instance of the plan or not. The default value is `false`. |
+|     **free**    |   No  | The attribute which specifies whether an instance of the plan is free or not. The default value is `false`.    |
 
 * `bind.yaml` file - contains information about binding in a specific plan. If you define in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file. For more information about this file, see [this](#details-bind-addons) document.
 
@@ -95,29 +92,27 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 
 ## docs directory
 
-In the `docs` directory, provide documentation for your addon. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` which provides information on how documentation for the addon is uploaded.
-As the Helm Broker is installed as a ClusterServiceBroker, documentation for addons is provided using [ClusterDocsTopics](/components/headless-cms/#custom-resource-clusterdocstopic).
+In the `docs` directory, provide documentation for your addon. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` file, which provides information on how documentation for the addon is uploaded.
+Because you can install the Helm Broker as a ClusterServiceBroker or as a ServiceBroker, documentation for addons is provided using either [ClusterDocsTopics](/components/headless-cms/#custom-resource-clusterdocstopic) or [DocsTopics](/components/headless-cms/#custom-resource-docs-topic) custom resources, respectively.
 
-The `meta.yaml` file contains the specification of the ClusterDocsTopic. The example structure of the `meta.yaml` file looks as follows:
+The `meta.yaml` file contains the specification of the ClusterDocsTopic or DocsTopic. The example structure of the `meta.yaml` file looks as follows:
 
 |  Field Name | Required |      Description               |
 |-----------|:--------:|------------------------------------|
-|   **docs[]**                           |   YES   | Contains the definitions of documentation.   |
-| **docs[].template**                    |   YES   | Contains the specification of the ClusterDocsTopic. |
-| **docs[].template.displayName**        |   YES   | Specifies the display name of the ClusterDocsTopic. |
-| **docs[].template.description**        |   YES   | Provides the description of the ClusterDocsTopic. |
-| **docs[].template.sources[]**          |   YES   | Contains the definitions of assets for an addon. |
-| **docs[].template.sources[].type**     |   YES   | Defines the type of the asset. |
-| **docs[].template.sources[].name**     |   YES   | Defines the name of the asset. |
-| **docs[].template.sources[].mode**     |   YES   | Defines the type of the asset file. |
-| **docs[].template.sources[].url**      |   YES   | Defines the URL under which the asset is stored. |
-| **docs[].template.sources[].filter**   |   YES   | Defines the path from which to upload assets.  |
+|   **docs[]**                           |   Yes   | Contains the definitions of documentation.   |
+| **docs[].template**                    |   Yes   | Contains the specification of the ClusterDocsTopic or DocsTopic. |
+| **docs[].template.displayName**        |   Yes   | Specifies the display name of the ClusterDocsTopic or DocsTopic. |
+| **docs[].template.description**        |   Yes   | Provides the description of the ClusterDocsTopic or DocsTopic. |
+| **docs[].template.sources[]**          |   Yes   | Contains the definitions of assets for an addon. |
+| **docs[].template.sources[].type**     |   Yes   | Defines the type of the asset. |
+| **docs[].template.sources[].name**     |   Yes   | Defines a unique identifier of a given asset. It must be unique for a given asset type. |
+| **docs[].template.sources[].mode**     |   Yes   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR format. Use `single` for one file and `package` for a set of files. |
+| **docs[].template.sources[].url**      |   Yes   | Specifies the location of a file. |
+| **docs[].template.sources[].filter**   |   Yes   | Specifies the directory from which the documentation is fetched. The regex used in the filter must be [RE2](https://golang.org/s/re2syntax)-compliant.  |
 
 >**NOTE:** Currently you can provide only one entry in the `docs` array.
 
-See [this](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) example of the `docs` directory with documentation for the testing addon.
-
-Using the Helm Broker, you can provision a broker which provides its own Service Classes. To learn how to upload documentation for those classes, read [this](#details-provide-service-classes-documentation) document.
+See [this](https://github.com/kyma-project/addons/tree/master/addons/testing-0.0.1/docs) example of the `docs` directory with documentation for the testing addon. For more information on how to provide addons documentation, read [this](#details-provide-service-classes-documentation) document.
 
 ## Troubleshooting
 

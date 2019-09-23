@@ -256,14 +256,14 @@ func TestAssetService_Unsubscribe(t *testing.T) {
 }
 
 func fixUnstructuredAsset(metadata map[string]interface{}) *unstructured.Unstructured {
-	return testingUtils.NewUnstructured(v1alpha2.SchemeGroupVersion.String(), "Asset", metadata, nil, nil)
+	return testingUtils.NewUnstructured(v1alpha2.GroupVersion.String(), "Asset", metadata, nil, nil)
 }
 
 func fixAsset(name string, labels map[string]string) *v1alpha2.Asset {
 	return &v1alpha2.Asset{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Asset",
-			APIVersion: v1alpha2.SchemeGroupVersion.String(),
+			APIVersion: v1alpha2.GroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -278,8 +278,8 @@ func fixAssetInformer(objects ...runtime.Object) cache.SharedIndexInformer {
 	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(fakeClient, 0)
 
 	informer := informerFactory.ForResource(schema.GroupVersionResource{
-		Version:  v1alpha2.SchemeGroupVersion.Version,
-		Group:    v1alpha2.SchemeGroupVersion.Group,
+		Version:  v1alpha2.GroupVersion.Version,
+		Group:    v1alpha2.GroupVersion.Group,
 		Resource: "assets",
 	}).Informer()
 

@@ -1,8 +1,26 @@
+/*
+Copyright 2019 The Kyma Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package utils
 
 import (
-	"errors"
+	"fmt"
+
 	"github.com/ghodss/yaml"
+
 	corev1 "k8s.io/api/core/v1"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
@@ -17,53 +35,87 @@ type RuntimeInfo struct {
 	RegistryInfo      string
 	AvailableRuntimes []RuntimesSupported
 	ServiceAccount    string
+	Defaults          DefaultConfig
+	FuncTypes         []FuncType
+	FuncSizes         []FuncSize
+}
+
+type FuncType struct {
+	Type string `json:"type"`
+}
+
+type FuncSize struct {
+	Size string `json:"size"`
+}
+
+type DefaultConfig struct {
+	Runtime         string `json:"runtime"`
+	Size            string `json:"size"`
+	TimeOut         int32  `json:"timeOut"`
+	FuncContentType string `json:"funcContentType"`
 }
 
 type RuntimesSupported struct {
 	ID             string `json:"ID"`
-	DockerFileName string `json:"DockerFileName"`
+	DockerfileName string `json:"dockerfileName"`
 }
 
 func New(config *corev1.ConfigMap) (*RuntimeInfo, error) {
-	rnInfo := &RuntimeInfo{}
-	if dockerReg, ok := config.Data["dockerRegistry"]; ok {
-		rnInfo.RegistryInfo = dockerReg
-	} else {
-		err := errors.New("Error while fetching docker registry info from configmap")
-		log.Error(err, "Error while fetching docker registry info")
-		return nil, err
-	}
-	var availableRuntimes []RuntimesSupported
-	if runtimeImages, ok := config.Data["runtimes"]; ok {
-		err := yaml.Unmarshal([]byte(runtimeImages), &availableRuntimes)
-		if err != nil {
-			log.Error(err, "Unable to get the supported runtimes")
-			return nil, err
-		}
-		rnInfo.AvailableRuntimes = availableRuntimes
+	mandatoryConfKeys := []string{
+		"dockerRegistry",
+		"serviceAccountName",
+		"runtimes",
+		"defaults",
+		"funcTypes",
+		"funcSizes",
 	}
 
-	if sa, ok := config.Data["serviceAccountName"]; ok {
-		rnInfo.ServiceAccount = sa
-	} else {
-		err := errors.New("Error while fetching serviceAccountName")
-		log.Error(err, "Error while fetching serviceAccountName")
+	if err := validateMandatoryConfig(config, mandatoryConfKeys); err != nil {
 		return nil, err
 	}
 
-	return rnInfo, nil
+	var runtimes []RuntimesSupported
+	if err := yaml.Unmarshal([]byte(config.Data["runtimes"]), &runtimes); err != nil {
+		return nil, fmt.Errorf("unable to read supported runtimes: %s", err)
+	}
+
+	var defaultConfig DefaultConfig
+	if err := yaml.Unmarshal([]byte(config.Data["defaults"]), &defaultConfig); err != nil {
+		return nil, fmt.Errorf("unable to read default function config: %s", err)
+	}
+
+	var funcTypes []FuncType
+	if err := yaml.Unmarshal([]byte(config.Data["funcTypes"]), &funcTypes); err != nil {
+		return nil, fmt.Errorf("unable to read function types: %s", err)
+	}
+
+	var funcSizes []FuncSize
+	if err := yaml.Unmarshal([]byte(config.Data["funcSizes"]), &funcSizes); err != nil {
+		return nil, fmt.Errorf("unable to read function sizes: %s", err)
+	}
+
+	return &RuntimeInfo{
+		RegistryInfo:      config.Data["dockerRegistry"],
+		ServiceAccount:    config.Data["serviceAccountName"],
+		AvailableRuntimes: runtimes,
+		Defaults:          defaultConfig,
+		FuncTypes:         funcTypes,
+		FuncSizes:         funcSizes,
+	}, nil
 }
 
-func (ri *RuntimeInfo) DockerFileConfigMapName(runtime string) string {
-	result := ""
-	for _, runtimeInf := range ri.AvailableRuntimes {
-		if runtimeInf.ID == runtime {
-			result = runtimeInf.DockerFileName
-			break
+// validateMandatoryConfig asserts that all required values are defined in the
+// given ConfigMap.
+func validateMandatoryConfig(c *corev1.ConfigMap, mandatoryKeys []string) error {
+	var missing []string
+	for _, k := range mandatoryKeys {
+		if c.Data[k] == "" {
+			missing = append(missing, k)
 		}
 	}
-	if result == "" {
-		log.Info("Unable to find the docker file for serverless: %v", runtime)
+
+	if len(missing) > 0 {
+		return fmt.Errorf("missing mandatory attributes in ConfigMap data %q: %q", c.Name, missing)
 	}
-	return result
+	return nil
 }

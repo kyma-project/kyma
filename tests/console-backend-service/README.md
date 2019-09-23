@@ -8,14 +8,15 @@ This project includes acceptance tests for a Console Backend Service project.
 
 Use the following tools to set up the project:
 
-* [Go distribution](https://golang.org)
-* [Docker](https://www.docker.com/)
+- [Go](https://golang.org)
+- [Docker](https://www.docker.com/)
 
 ## Development
 
 ### Install dependencies
 
 This project uses `dep` as a dependency manager. To install all required dependencies, use the following command:
+
 ```bash
 dep ensure -vendor-only
 ```

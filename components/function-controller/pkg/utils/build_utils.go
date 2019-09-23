@@ -1,3 +1,19 @@
+/*
+Copyright 2019 The Kyma Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package utils
 
 import (
@@ -15,21 +31,20 @@ var buildTimeout = os.Getenv("BUILD_TIMEOUT")
 var defaultMode = int32(420)
 
 func GetBuildResource(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, imageName string, buildName string) *buildv1alpha1.Build {
-
 	args := []buildv1alpha1.ArgumentSpec{}
 	args = append(args, buildv1alpha1.ArgumentSpec{Name: "IMAGE", Value: imageName})
-
-	for _, rt := range rnInfo.AvailableRuntimes {
-		if rt.ID == fn.Spec.Runtime {
-			args = append(args, buildv1alpha1.ArgumentSpec{Name: "DOCKERFILE", Value: rt.DockerFileName})
-		}
-	}
 
 	envs := []corev1.EnvVar{}
 
 	timeout, err := time.ParseDuration(buildTimeout)
 	if err != nil {
 		timeout = 30 * time.Minute
+	}
+
+	for _, rt := range rnInfo.AvailableRuntimes {
+		if rt.ID == fn.Spec.Runtime {
+			args = append(args, buildv1alpha1.ArgumentSpec{Name: "DOCKERFILE", Value: rt.DockerfileName})
+		}
 	}
 
 	vols := []corev1.Volume{
@@ -75,8 +90,7 @@ func GetBuildResource(rnInfo *RuntimeInfo, fn *serverlessv1alpha1.Function, imag
 	return &b
 }
 
-func GetBuildTemplateSpec(fn *serverlessv1alpha1.Function) buildv1alpha1.BuildTemplateSpec {
-
+func GetBuildTemplateSpec(rnInfo *RuntimeInfo) buildv1alpha1.BuildTemplateSpec {
 	parameters := []buildv1alpha1.ParameterSpec{
 		{
 			Name:        "IMAGE",
@@ -110,29 +124,15 @@ func GetBuildTemplateSpec(fn *serverlessv1alpha1.Function) buildv1alpha1.BuildTe
 		},
 	}
 
-	volumes := []corev1.Volume{
-		{
-			Name: "dockerfile-nodejs-6",
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					DefaultMode: &defaultMode,
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "dockerfile-nodejs-6",
-					},
-				},
-			},
-		},
-		{
-			Name: "dockerfile-nodejs-8",
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					DefaultMode: &defaultMode,
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "dockerfile-nodejs-8",
-					},
-				},
-			},
-		},
+	var vol corev1.Volume
+	var volumes []corev1.Volume
+	for _, rt := range rnInfo.AvailableRuntimes {
+		vol.Name = rt.DockerfileName
+		vol.VolumeSource.ConfigMap = &corev1.ConfigMapVolumeSource{
+			DefaultMode:          &defaultMode,
+			LocalObjectReference: corev1.LocalObjectReference{Name: rt.DockerfileName},
+		}
+		volumes = append(volumes, vol)
 	}
 
 	bt := buildv1alpha1.BuildTemplateSpec{

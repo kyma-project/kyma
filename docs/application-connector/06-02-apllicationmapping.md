@@ -5,7 +5,7 @@ type: Custom Resource
 
 The `applicationmappings.application.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to enable APIs and Events from an Application (App) as a ServiceClass in a given Namespace. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
-```
+```bash
 kubectl get crd applicationmappings.applicationconnector.kyma-project.io -o yaml
 ```
 
@@ -22,6 +22,7 @@ metadata:
 ```
 
 Using ApplicationMapping, you can also enable only the selected services in a given Namespace. See the example:
+
 ```yaml
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: ApplicationMapping
@@ -33,18 +34,19 @@ spec:
     - id: ac031e8c-9aa4-4cb7-8999-0d358726ffaa
     - id: bef3143c-d1a5-674c-8dc9-ab4788896fba
 ```
+
 The `services` list contains IDs of enabled services.
 
 ## Custom resource parameters
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-| Parameter   |      Mandatory      |  Description |
+| Parameter   |      Required      |  Description |
 |----------|:-------------:|------|
-| **metadata.name** |    **YES**   | Specifies the name of the CR and the App. |
-| **metadata.namespace** |    **YES**   | Specifies the Namespace in which the App is enabled. |
-| **spec.services[]** |    **NO**   | Lists enabled services. If the list is specified, only the selected services are enabled. If the list is empty, all services of the Application are enabled.|
-| **spec.services[].id** |    **NO**   | Specifies the ID of the enabled service.
+| **metadata.name** | Yes | Specifies the name of the CR and the App. |
+| **metadata.namespace** | Yes | Specifies the Namespace in which the App is enabled. |
+| **spec.services[]** | No | Lists enabled services. If the list is specified, only the selected services are enabled. If the list is empty, all services of the Application are enabled.|
+| **spec.services[].id** | No | Specifies the ID of the enabled service.
 
 ## Related resources and components
 

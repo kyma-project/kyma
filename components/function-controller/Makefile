@@ -20,17 +20,13 @@ else
 endif
 
 # Run tests
-test: generate fmt vet symlinks
-	go test -v ./pkg/... ./cmd/... -coverprofile cover.out
-
-symlinks:
-	-rm config/crds/300*.yaml
-	ln -s ../../vendor/github.com/knative/build/config/300-build.yaml config/crds/300-build.yaml
-	ln -s ../../vendor/github.com/knative/build/config/300-buildtemplate.yaml config/crds/300-buildtemplate.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-revision.yaml config/crds/300-revision.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-route.yaml config/crds/300-route.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-service.yaml config/crds/300-service.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-configuration.yaml config/crds/300-configuration.yaml
+# Default is 20s - available since controller-runtime 0.1.5
+test: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
+# Default is 20s - available since controller-runtime 0.1.5
+test: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
+test: generate fmt vet
+	go test -race -v ./pkg/... ./cmd/... -coverprofile cover.out
+	@echo "Total test coverage: $$(go tool cover -func=cover.out | grep total | awk '{print $$3}')"
 
 # Generate code
 generate: resolve
@@ -46,6 +42,7 @@ vet:
 
 qt:
 	go test -v ./pkg/... ./cmd/... -coverprofile cover.out
+	@echo "Total test coverage: $$(go tool cover -func=cover.out | grep total | awk '{print $$3}')"
 
 # Build manager binary
 manager: generate fmt vet
@@ -57,12 +54,12 @@ run: generate fmt vet
 	go run ./cmd/manager/main.go
 
 # Install CRDs into a cluster
-install:
-	kubectl apply -f config/crds/serverless_v1alpha1_function.yaml
+install: symlinks
+	kubectl apply -f config/crds/
 
 # Uninstall CRDs from cluster
-uninstall:
-	kubectl apply -f config/crds/serverless_v1alpha1_function.yaml
+uninstall: symlinks
+	kubectl delete -f config/crds/
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests:
@@ -75,20 +72,18 @@ ifeq ($(shell uname -s),Darwin)
 	sedbackupflag +=
 endif
 
-deploy: manifests install bin/kustomize
-	@echo "updating kustomize image patch file for manager resource"
-	cp ./config/default/manager_image_patch.yaml{,.bak}
-	sed $(sedbackupflag)'' -e 's@image: .*@image: $(IMG)@' ./config/default/manager_image_patch.yaml
-	bin/kustomize build config/default | kubectl apply -f -
-	mv ./config/default/manager_image_patch.yaml{.bak,}
+deploy: manifests install bin/kustomize ko
+	bin/kustomize build config/default | ko apply -f -
 
-undeploy: uninstall bin/kustomize
-	kubectl delete -f config/crds
-	bin/kustomize build config/default | kubectl delete  -f -
+removewebhook:
+	-kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io function-webhook.serverless.kyma-project.io
+
+undeploy: uninstall removewebhook bin/kustomize ko
+	bin/kustomize build config/default | ko delete  -f -
 
 # Build the docker image
 .PHONY: docker-build
-docker-build: resolve pull-licenses manifests
+docker-build: resolve pull-licenses manifests test
 	docker build . -t $(IMG)
 
 # Push the docker image
@@ -121,3 +116,8 @@ export GOBIN := $(GOPATH)/src/$(PKG)/bin
 .PHONY: bin/kustomize
 bin/kustomize:
 	@go install ./vendor/sigs.k8s.io/kustomize
+
+.PHONY: ko
+ko:
+	@go get -u github.com/google/ko/cmd/ko
+
