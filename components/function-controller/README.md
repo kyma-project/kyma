@@ -6,9 +6,9 @@ The Knative Function Controller is a Kubernetes controller that enables Kyma to 
 
 The Function Controller requires the following components to be installed:
 
-- Tekton Pipelines (v0.7.0)
-- Knative Serving (v0.8.1)
-- Istio (v1.0.7)
+- [Tekton Pipelines](https://github.com/tektoncd/pipeline/releases) (v0.7.0)
+- [Knative Serving](https://github.com/knative/serving/releases) (v0.8.1)
+- [Istio](https://github.com/istio/istio/releases) (v1.0.7)
 
 ## Installation
 
@@ -136,7 +136,7 @@ Follow the steps below to create a sample Function.
 1. Apply the following Function manifest:
 
     ```bash
-    kubectl apply -f config/samples/serverless_v1alpha1_function.yaml
+    kubectl -n ${FN_NAMESPACE} apply -f config/samples/serverless_v1alpha1_function.yaml
     ```
 
 2. Ensure the Function was created:

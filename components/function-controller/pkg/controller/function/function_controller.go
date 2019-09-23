@@ -40,6 +40,7 @@ import (
 
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	knapis "knative.dev/pkg/apis"
+	servingapis "knative.dev/serving/pkg/apis/serving"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -47,6 +48,12 @@ import (
 )
 
 var log = logf.Log.WithName("function_controller")
+
+// List of annotations set on Knative Serving objects by the Knative Serving admission webhook.
+var knativeServingAnnotations = []string{
+	servingapis.GroupName + knapis.CreatorAnnotationSuffix,
+	servingapis.GroupName + knapis.UpdaterAnnotationSuffix,
+}
 
 // Add creates a new Function Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -466,7 +473,7 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, found
 		return nil, err
 	}
 
-	if reflect.DeepEqual(desiredKsvc.Spec, currentKsvc.Spec) {
+	if runtimeUtil.Semantic.DeepEqual(desiredKsvc, currentKsvc) {
 		return currentKsvc, nil
 	}
 
@@ -478,6 +485,10 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, found
 		Spec:       desiredKsvc.Spec,
 	}
 	newKsvc.ResourceVersion = currentKsvc.ResourceVersion
+	// immutable Knative annotations must be preserved
+	for _, ann := range knativeServingAnnotations {
+		metav1.SetMetaDataAnnotation(&newKsvc.ObjectMeta, ann, currentKsvc.Annotations[ann])
+	}
 
 	if err := r.Update(ctx, newKsvc); err != nil {
 		return nil, err

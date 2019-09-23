@@ -42,8 +42,11 @@ var cfg *rest.Config
 
 func TestMain(m *testing.M) {
 	t := &envtest.Environment{
-		Config:            cfg,
-		CRDDirectoryPaths: []string{filepath.Join("..", "..", "..", "config", "crds")},
+		Config: cfg,
+		CRDDirectoryPaths: []string{
+			filepath.Join("..", "..", "..", "config", "crds"),
+			filepath.Join("..", "..", "..", "config", "crds-thirdparty"),
+		},
 	}
 
 	logf.SetLogger(logf.ZapLogger(false))
