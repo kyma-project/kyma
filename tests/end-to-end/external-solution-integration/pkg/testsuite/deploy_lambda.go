@@ -38,6 +38,7 @@ function sendReq(url, resolve, reject) {
 
 module.exports = { main: function (event, context) {
 	console.log("Received event: ", event);
+    console.log(process.env.GATEWAY_URL.length)
 	
 	return new Promise((resolve, reject) => {
 		const url = process.env.GATEWAY_URL + "/counter";
