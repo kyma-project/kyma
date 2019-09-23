@@ -12,15 +12,6 @@ const (
 	defaultNamespace = "default"
 )
 
-// TODO - This will be removed in favour of mounting Config Map
-type EnvConfig struct {
-	//DirectorURL string `envconfig:"DIRECTOR_URL"`
-	ConnectorURL string `envconfig:"CONNECTOR_URL"`
-	Token        string `envconfig:"TOKEN"`
-	//RuntimeId    string `envconfig:"RUNTIME_ID"`
-	//Tenant       string `envconfig:"TENANT"`
-}
-
 type Config struct {
 	ConfigFile                     string        `envconfig:"default=/etc/config/config.json"`
 	ControllerSyncPeriod           time.Duration `envconfig:"default=60s"`
@@ -47,11 +38,6 @@ func (o *Config) String() string {
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
 		o.IntegrationNamespace, o.GatewayPort, o.InsecureConfigurationFetch, o.UploadServiceUrl,
 		o.QueryLogging)
-}
-
-// TODO - This will be removed in favour of mounting Config Map
-func (ec EnvConfig) String() string {
-	return fmt.Sprintf("CONNECTOR_URL=%s, TOKEN_PROVIDED=%t", ec.ConnectorURL, ec.Token != "")
 }
 
 func parseNamespacedName(value string) types.NamespacedName {

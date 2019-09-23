@@ -16,6 +16,7 @@ type ConnectionConfig struct {
 
 type RuntimeConfig struct {
 	RuntimeId string `json:"runtimeId"`
+	Tenant    string `json:"tenant"` // TODO: after full implementation of certs it will no longer be needed
 }
 
 type config struct {

@@ -29,14 +29,7 @@ func main() {
 	if err != nil {
 		log.Error("Failed to process environment variables")
 	}
-	log.Infof("Env config: %s", options)
-
-	var connectionConfig EnvConfig
-	err = envconfig.InitWithPrefix(&connectionConfig, "")
-	if err != nil {
-		log.Error("Failed to process environment variables for connection")
-	}
-	log.Infof("Connection config: %s", connectionConfig)
+	log.Infof("Env config: %s", options.String())
 
 	// Get a config to talk to the apiserver
 	log.Info("Setting up client for manager")

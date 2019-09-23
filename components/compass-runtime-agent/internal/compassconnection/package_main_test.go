@@ -27,7 +27,7 @@ import (
 )
 
 var cfg *rest.Config
-var k8sClient client.Client
+var k8sClient client.Client // TODO - podepnij secrets repo?
 var testEnv *envtest.Environment
 
 var compassConnectionCRClient compassCRClientset.CompassConnectionInterface
@@ -45,6 +45,10 @@ var (
 )
 
 func TestMain(m *testing.M) {
+	os.Exit(runTests(m))
+}
+
+func runTests(m *testing.M) int {
 	err := setupEnv()
 	if err != nil {
 		logrus.Errorf("Failed to setup test environment: %s", err.Error())
@@ -66,9 +70,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 
-	exitCode := m.Run()
-
-	os.Exit(exitCode)
+	return m.Run()
 }
 
 func setupEnv() error {
