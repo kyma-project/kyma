@@ -52,6 +52,10 @@ spec:
             {{ end }}
             - name: APP_CERTIFICATE_DATA_HEADER
               value: "{{ .Values.global.connector.certificateDataHeader }}"
+            - name: APP_REVOCATION_CONFIG_MAP_NAMESPACE
+              value: "{{ .Values.global.connector.revocation.configmap.namespace }}"
+            - name: APP_REVOCATION_CONFIG_MAP_NAME
+              value: "{{ .Values.global.connector.revocation.configmap.name }}"
             - name: APP_CSR_SUBJECT_COUNTRY
               value: "{{ .Values.deployment.args.csrSubject.country }}"
             - name: APP_CSR_SUBJECT_ORGANIZATION
