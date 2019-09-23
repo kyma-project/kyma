@@ -14,7 +14,7 @@ By default, you install Kyma with the Asset Store in Minio stand-alone mode. Thi
 
 ## Steps
 
-You can set Minio to the AWS S3 Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an access key for the AWS account, apply a Secret and Config Map with an override onto a cluster or Minikube, and trigger the Kyma installation process. 
+You can set Minio to the AWS S3 Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an access key for the AWS account, apply a Secret and ConfigMap with an override onto a cluster or Minikube, and trigger the Kyma installation process. 
 
 >**CAUTION:** Buckets created in Minio without using Bucket CRs are not recreated or migrated while switching to the Minio Gateway mode.
 
@@ -35,7 +35,7 @@ Create an AWS access key for an IAM user. Follow these steps:
 
 ### Configure Minio Gateway mode
 
-Export an AWS S3 service endpoint (https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region) as an environment variable:
+Export an AWS S3 service [endpoint](https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region) as an environment variable:
 
 ```bash
 export AWS_SERVICE_ENDPOINT=https://{endpoint-address}
