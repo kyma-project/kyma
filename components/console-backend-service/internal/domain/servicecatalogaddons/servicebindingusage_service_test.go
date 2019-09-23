@@ -11,35 +11,35 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared/automock"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	api "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/tools/cache"
 )
 
 func TestBindingUsageServiceCreate(t *testing.T) {
 	// GIVEN
-	fakeClient := fake.NewSimpleClientset()
-	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), fixBindingUsageInformer(fakeClient), nil, "sbu-name")
+	fakeClient, err := newDynamicClient()
+	require.NoError(t, err)
+	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.Resource(bindingUsageGVR), newSbuFakeInformer(fakeClient), nil, "sbu-name")
 	require.NoError(t, err)
 	// WHEN
-	_, err = sut.Create("prod", fixBindingUsage())
+	usage := fixBindingUsage()
+	_, err = sut.Create("prod", usage)
 	// THEN
 	require.NoError(t, err)
-	actualUsage, err := fakeClient.ServicecatalogV1alpha1().ServiceBindingUsages("prod").Get("usage", v1.GetOptions{})
+	actualUsage, err := fakeClient.Resource(bindingUsageGVR).Namespace(usage.Namespace).Get(usage.Name, v1.GetOptions{})
 	require.NoError(t, err)
 	assert.NotNil(t, actualUsage)
 }
 
 func TestBindingUsageServiceCreateWithGeneratedName(t *testing.T) {
 	// GIVEN
-	fakeClient := fake.NewSimpleClientset()
-	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), fixBindingUsageInformer(fakeClient), nil, "generated-sbu-name")
+	fakeClient, err := newDynamicClient()
+	require.NoError(t, err)
+	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.Resource(bindingUsageGVR), newSbuFakeInformer(fakeClient), nil, "generated-sbu-name")
 	require.NoError(t, err)
 	sbu := fixBindingUsage()
 	sbu.Name = ""
@@ -47,36 +47,40 @@ func TestBindingUsageServiceCreateWithGeneratedName(t *testing.T) {
 	_, err = sut.Create("prod", sbu)
 	// THEN
 	require.NoError(t, err)
-	actualUsage, err := fakeClient.ServicecatalogV1alpha1().ServiceBindingUsages("prod").Get("generated-sbu-name", v1.GetOptions{})
+	actualUsage, err := fakeClient.Resource(bindingUsageGVR).Namespace("prod").Get("generated-sbu-name", v1.GetOptions{})
 	require.NoError(t, err)
 	assert.NotNil(t, actualUsage)
 }
 
 func TestBindingUsageServiceDelete(t *testing.T) {
 	// GIVEN
-	fakeClient := fake.NewSimpleClientset(fixBindingUsage())
-	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), fixBindingUsageInformer(fakeClient), nil, "sbu-name")
+	bindingUsage := fixBindingUsage()
+	fakeClient, err := newDynamicClient(bindingUsage)
+	require.NoError(t, err)
+	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.Resource(bindingUsageGVR), newSbuFakeInformer(fakeClient), nil, bindingUsage.Name)
 	require.NoError(t, err)
 	// WHEN
-	err = sut.Delete("prod", "usage")
+	err = sut.Delete(bindingUsage.Namespace, bindingUsage.Name)
 	// THEN
 	require.NoError(t, err)
-	_, err = fakeClient.ServicecatalogV1alpha1().ServiceBindingUsages("prod").Get("usage", v1.GetOptions{})
+	_, err = fakeClient.Resource(bindingUsageGVR).Namespace(bindingUsage.Namespace).Get(bindingUsage.Name, v1.GetOptions{})
 	require.True(t, apierrors.IsNotFound(err))
 }
 
 func TestBindingUsageServiceFind(t *testing.T) {
 	// GIVEN
-	fakeClient := fake.NewSimpleClientset(fixBindingUsage())
-	informer := fixBindingUsageInformer(fakeClient)
-	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, nil, "sbu-name")
+	bindingUsage := fixBindingUsage()
+	fakeClient, err := newDynamicClient(bindingUsage)
+	require.NoError(t, err)
+	informer := newSbuFakeInformer(fakeClient)
+	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.Resource(bindingUsageGVR), informer, nil, "sbu-name")
 	require.NoError(t, err)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 	// WHEN
-	actual, err := sut.Find("prod", "usage")
+	actual, err := sut.Find(bindingUsage.Namespace, bindingUsage.Name)
 	// THEN
 	require.NoError(t, err)
-	assert.Equal(t, fixBindingUsage(), actual)
+	assert.Equal(t, bindingUsage, actual)
 }
 
 func TestBindingUsageServiceList(t *testing.T) {
@@ -84,9 +88,10 @@ func TestBindingUsageServiceList(t *testing.T) {
 	us1 := fixBindingUsage()
 	us2 := fixBindingUsage()
 	us2.Name = "second-usage"
-	fakeClient := fake.NewSimpleClientset(us1, us2)
-	informer := fixBindingUsageInformer(fakeClient)
-	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, nil, "")
+	fakeClient, err := newDynamicClient(us1, us2)
+	require.NoError(t, err)
+	informer := newSbuFakeInformer(fakeClient)
+	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.Resource(bindingUsageGVR), informer, nil, "")
 	require.NoError(t, err)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 	// WHEN
@@ -105,8 +110,9 @@ func TestBindingUsageServiceListForServiceInstance(t *testing.T) {
 	us2 := customBindingUsage("redis-2")
 	us3 := customBindingUsage("mysql-1")
 
-	fakeClient := fake.NewSimpleClientset(us1, us2, us3)
-	informer := fixBindingUsageInformer(fakeClient)
+	fakeClient, err := newDynamicClient(us1, us2, us3)
+	require.NoError(t, err)
+	informer := newSbuFakeInformer(fakeClient)
 	bindingFinderLister := &automock.ServiceBindingFinderLister{}
 	defer bindingFinderLister.AssertExpectations(t)
 
@@ -137,7 +143,7 @@ func TestBindingUsageServiceListForServiceInstance(t *testing.T) {
 	scRetriever := &automock.ServiceCatalogRetriever{}
 	scRetriever.On("ServiceBinding").Return(bindingFinderLister)
 
-	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, scRetriever, "sbu-name")
+	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.Resource(bindingUsageGVR), informer, scRetriever, "sbu-name")
 	require.NoError(t, err)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 	// WHEN
@@ -152,8 +158,9 @@ func TestBindingUsageServiceListForServiceInstance(t *testing.T) {
 func TestBindingUsageServiceListForServiceInstanceErrors(t *testing.T) {
 	t.Run("on getting bindings", func(t *testing.T) {
 		// GIVEN
-		fakeClient := fake.NewSimpleClientset()
-		informer := fixBindingUsageInformer(fakeClient)
+		fakeClient, err := newDynamicClient()
+		require.NoError(t, err)
+		informer := newSbuFakeInformer(fakeClient)
 		bindingFinderLister := &automock.ServiceBindingFinderLister{}
 		defer bindingFinderLister.AssertExpectations(t)
 		bindingFinderLister.On("ListForServiceInstance", mock.Anything, mock.Anything).Return(nil, errors.New("some error"))
@@ -161,7 +168,7 @@ func TestBindingUsageServiceListForServiceInstanceErrors(t *testing.T) {
 		scRetriever := &automock.ServiceCatalogRetriever{}
 		scRetriever.On("ServiceBinding").Return(bindingFinderLister)
 
-		sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, scRetriever, "sbu-name")
+		sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.Resource(bindingUsageGVR), informer, scRetriever, "sbu-name")
 		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 		// WHEN
@@ -177,9 +184,10 @@ func TestBindingUsageServiceListForDeployment(t *testing.T) {
 	us2 := customBindingUsage("redis-2")
 	us3 := customFunctionBindingUsage("mysql-1")
 
-	fakeClient := fake.NewSimpleClientset(us1, us2, us3)
-	informer := fixBindingUsageInformer(fakeClient)
-	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, nil, "sbu-name")
+	fakeClient, err := newDynamicClient(us1, us2, us3)
+	require.NoError(t, err)
+	informer := newSbuFakeInformer(fakeClient)
+	sut, err := servicecatalogaddons.NewServiceBindingUsageService(fakeClient.Resource(bindingUsageGVR), informer, nil, "sbu-name")
 	require.NoError(t, err)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 	// WHEN
@@ -194,6 +202,10 @@ func TestBindingUsageServiceListForDeployment(t *testing.T) {
 
 func fixBindingUsage() *api.ServiceBindingUsage {
 	return &api.ServiceBindingUsage{
+		TypeMeta: v1.TypeMeta{
+			APIVersion: "servicecatalog.kyma-project.io/v1alpha1",
+			Kind:       "servicebindingusage",
+		},
 		ObjectMeta: v1.ObjectMeta{
 			Name:      "usage",
 			Namespace: "prod",
@@ -210,15 +222,12 @@ func fixBindingUsage() *api.ServiceBindingUsage {
 	}
 }
 
-func fixBindingUsageInformer(client *fake.Clientset) cache.SharedIndexInformer {
-	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-	informer := informerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages().Informer()
-
-	return informer
-}
-
 func customBindingUsage(id string) *api.ServiceBindingUsage {
 	return &api.ServiceBindingUsage{
+		TypeMeta: v1.TypeMeta{
+			APIVersion: "servicecatalog.kyma-project.io/v1alpha1",
+			Kind:       "servicebindingusage",
+		},
 		ObjectMeta: v1.ObjectMeta{
 			Name:      fmt.Sprintf("usage-%s", id),
 			Namespace: "prod",

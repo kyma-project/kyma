@@ -21,8 +21,8 @@ namePrefix: function-
   # the auth proxy (https://github.com/brancz/kube-rbac-proxy)
   # which protects your /metrics endpoint.
 resources:
-- ../rbac/manager_role.yaml
-- ../rbac/manager_role_binding.yaml
+- ../rbac/rbac_role.yaml
+- ../rbac/rbac_role_binding.yaml
 - ../manager/manager.yaml
 - ../rbac/auth_proxy_service.yaml
 - ../rbac/auth_proxy_role.yaml

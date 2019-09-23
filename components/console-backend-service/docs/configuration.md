@@ -1,7 +1,9 @@
 # Configuration
+
 This document describes configuration details of the application.
 
 ## Environmental Variables
+
 Use the following environment variables to configure the application:
 
 | Name | Required | Default | Description |
@@ -13,6 +15,7 @@ Use the following environment variables to configure the application:
 | APP_VERBOSE | No | No | Show detailed logs in the application. |
 | APP_KUBECONFIG_PATH | No |  | The path to the `kubeconfig` file, needed for running an application outside of the cluster. |
 | APP_INFORMER_RESYNC_PERIOD | No | `10m` | The period of time after which the system resynchronizes the informers. |
+| APP_SYSTEM_NAMESPACES | No | `istio-system,knative-eventing,knative-serving,kube-public,kube-system,kyma-backup,kyma-installer,kyma-integration,kyma-system,natss,compass-system` | The list of Namespaces that should be considered as system Namespaces. |
 | APP_ASSET_STORE_ADDRESS | No | `minio.kyma.local` | The address of the content storage server. |
 | APP_ASSET_STORE_SECURE | No | `true` | Use HTTPS for the connection with the content storage server. |
 | APP_ASSET_STORE_VERIFY_SSL | No | `true` | Ignore invalid SSL certificates. |
@@ -34,9 +37,11 @@ Use the following environment variables to configure the application:
 | APP_TRACING_SERVICE_SPAN_NAME | YES | `console-backend-service` | The name of the service span. |
 
 ## Configure logger verbosity level
+
 This application uses `glog` to log messages. Pass command line arguments described in the [glog.go](https://github.com/golang/glog/blob/master/glog.go) document to customize the log, such as log level and output.
 
 For example:
+
 ```bash
 go run main.go --stderrthreshold=INFO -logtostderr=false
 ```

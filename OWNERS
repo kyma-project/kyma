@@ -1,12 +1,13 @@
 filters:
-  ".*":
+  '.*':
     approvers:
       - derberg
       - pbochynski
       - PK85
       - a-thaler
       - piotrmsc
-  "\\.md$|/docs/|^milv\.config\.yaml$"
+      - kwiatekus
+  '\.md$|/docs/|^milv\.config\.yaml$':
     approvers:
       - documentation-approvers
     reviewers:

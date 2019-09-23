@@ -24,7 +24,9 @@ endif
 
 # Run tests
 test: generate fmt vet manifests
-	go test ./... -coverprofile cover.out
+	go test -coverprofile=cover.out ./...
+	@echo "Total test coverage: $$(go tool cover -func=cover.out | grep total | awk '{print $$3}')"
+	@rm cover.out
 
 # Build manager binary
 manager: generate fmt vet

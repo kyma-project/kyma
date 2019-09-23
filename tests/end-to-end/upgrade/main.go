@@ -21,6 +21,8 @@ import (
 	restClient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"time"
+
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
 	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
@@ -41,6 +43,8 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	serviceCatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
+	"github.com/pkg/errors"
 )
 
 // Config holds application configuration
@@ -196,14 +200,21 @@ func getDomainNameFromCluster(k8sCli *k8sClientSet.Clientset) (string, error) {
 }
 
 func getDexConfigFromCluster(k8sCli *k8sClientSet.Clientset, userSecret, dexNamespace, domainName string) (dex.Config, error) {
-	secret, err := k8sCli.CoreV1().Secrets(dexNamespace).Get(userSecret, metav1.GetOptions{})
+	dexConfig := dex.Config{}
+	err := waiter.WaitAtMost(func() (done bool, err error) {
+		secret, err := k8sCli.CoreV1().Secrets(dexNamespace).Get(userSecret, metav1.GetOptions{})
+		if err != nil {
+			return false, err
+		}
+		dexConfig = dex.Config{
+			Domain:       domainName,
+			UserEmail:    string(secret.Data["email"]),
+			UserPassword: string(secret.Data["password"]),
+		}
+		return true, nil
+	}, time.Second*20, nil)
 	if err != nil {
-		return dex.Config{}, err
-	}
-	dexConfig := dex.Config{
-		Domain:       domainName,
-		UserEmail:    string(secret.Data["email"]),
-		UserPassword: string(secret.Data["password"]),
+		return dex.Config{}, errors.Wrapf(err, "while waiting for dex config secret %s", userSecret)
 	}
 	return dexConfig, nil
 }

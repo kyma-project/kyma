@@ -25,5 +25,7 @@ spec:
       namespace: "istio-system"
     - name: "dex"
       namespace: "kyma-system"
+    - name: "ory"
+      namespace: "kyma-system"
     - name: "compass"
       namespace: "compass-system"

@@ -26,3 +26,7 @@ spec:
           - "--caCertificate={{ .Values.global.connector.caCertificate }}"
           - "--caKey={{ .Values.global.connector.caKey }}"
           - "--generatedValidityTime={{ .Values.certsSetupJob.generatedCertificateValidity }}"
+      {{- with .Values.certsSetupJob.securityContext }}
+      securityContext:
+{{ toYaml . | indent 12 }}
+      {{- end }}

@@ -4,8 +4,9 @@ import (
 	"fmt"
 
 	"github.com/golang/glog"
+	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
 )
 
 //go:generate mockery -name=gqlAddonsConfigurationConverter -output=automock -outpkg=automock -case=underscore
@@ -17,6 +18,7 @@ type AddonsConfiguration struct {
 	channel   chan<- gqlschema.AddonsConfigurationEvent
 	filter    func(entity *v1alpha1.AddonsConfiguration) bool
 	converter gqlAddonsConfigurationConverter
+	extractor extractor.AddonsUnstructuredExtractor
 }
 
 func NewAddonsConfiguration(channel chan<- gqlschema.AddonsConfigurationEvent, filter func(entity *v1alpha1.AddonsConfiguration) bool, converter gqlAddonsConfigurationConverter) *AddonsConfiguration {
@@ -24,6 +26,7 @@ func NewAddonsConfiguration(channel chan<- gqlschema.AddonsConfigurationEvent, f
 		channel:   channel,
 		filter:    filter,
 		converter: converter,
+		extractor: extractor.AddonsUnstructuredExtractor{},
 	}
 }
 
@@ -40,9 +43,12 @@ func (l *AddonsConfiguration) OnDelete(object interface{}) {
 }
 
 func (l *AddonsConfiguration) onEvent(eventType gqlschema.SubscriptionEventType, object interface{}) {
-	entity, ok := object.(*v1alpha1.AddonsConfiguration)
-	if !ok {
+	entity, err := l.extractor.Do(object)
+	if err != nil {
 		glog.Error(fmt.Errorf("incorrect object type: %T, should be: *v1alpha1.AddonsConfiguration", object))
+		return
+	}
+	if entity == nil {
 		return
 	}
 

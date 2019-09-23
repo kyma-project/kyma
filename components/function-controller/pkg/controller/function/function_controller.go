@@ -23,16 +23,17 @@ import (
 	"reflect"
 	"strings"
 
-	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
+	"crypto/sha256"
 
 	buildv1alpha1 "github.com/knative/build/pkg/apis/build/v1alpha1"
-	servingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -42,8 +43,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	"crypto/sha256"
-
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	runtimeUtil "github.com/kyma-project/kyma/components/function-controller/pkg/utils"
 )
 
@@ -74,27 +74,20 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for changes to Service
-	err = c.Watch(&source.Kind{Type: &servingv1alpha1.Service{}}, &handler.EnqueueRequestForObject{})
-	if err != nil {
+	functionAsOwner := &handler.EnqueueRequestForOwner{
+		OwnerType:    &serverlessv1alpha1.Function{},
+		IsController: true,
+	}
+
+	// Watch for changes to Knative Service
+	if err := c.Watch(&source.Kind{Type: &servingv1alpha1.Service{}}, functionAsOwner); err != nil {
 		return err
 	}
 
-	// Watch for changes to Build
-	err = c.Watch(&source.Kind{Type: &buildv1alpha1.Build{}}, &handler.EnqueueRequestForOwner{
-		OwnerType:    &serverlessv1alpha1.Function{},
-		IsController: true,
-	})
-
-	// TODO(user): Modify this to be the types you create
-	// Uncomment watch a Deployment created by Function - change this for objects you create
-	// err = c.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForOwner{
-	// 	IsController: true,
-	// 	OwnerType:    &serverlessv1alpha1.Function{},
-	// })
-	// if err != nil {
-	// 	return err
-	// }
+	// Watch for changes to Knative Build
+	if err := c.Watch(&source.Kind{Type: &buildv1alpha1.Build{}}, functionAsOwner); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -107,318 +100,364 @@ var (
 	fnConfigNamespace = getEnvDefault("CONTROLLER_CONFIGMAP_NS", "default")
 
 	// name of build-template
-	buildTemplateName                      = getEnvDefault("BUILD_TEMPLATE", "function-kaniko")
-	_                 reconcile.Reconciler = &ReconcileFunction{}
+	buildTemplateName = getEnvDefault("BUILD_TEMPLATE", "function-kaniko")
 
-	// "build and push step"
+	// build and push step name
 	buildAndPushStep = "build-step-build-and-push"
 )
 
-// ReconcileFunction is the controller.Reconciler implementation for Function objects
-// ReconcileFunction reconciles a Function object
+// ReconcileFunction is the controller.Reconciler implementation for Function objects.
 type ReconcileFunction struct {
 	client.Client
 	scheme *runtime.Scheme
 }
 
-func getEnvDefault(envName string, defaultValue string) string {
+func getEnvDefault(envName, defaultValue string) string {
 	// use default value if environment variable is empty
-	var value string
-	if value = os.Getenv(envName); value == "" {
-		return defaultValue
+	if value := os.Getenv(envName); value != "" {
+		return value
 	}
-	return value
+	return defaultValue
 }
 
 // Reconcile reads that state of the cluster for a Function object and makes changes based on the state read
 // and what is in the Function.Spec
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;watch;update;list
+// +kubebuilder:rbac:groups="apps;extensions",resources=deployments,verbs=create;get;watch;update;delete;list;update;patch
 // +kubebuilder:rbac:groups="serverless.kyma-project.io",resources=functions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="serverless.kyma-project.io",resources=functions/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups="admissionregistration.k8s.io",resources=mutatingwebhookconfigurations;validatingwebhookconfigurations,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="serving.knative.dev",resources=services;routes;configurations;revisions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="build.knative.dev",resources=builds;buildtemplates;clusterbuildtemplates;services,verbs=get;list;create;update;delete;patch;watch
-// +kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;watch;update;list
-// +kubebuilder:rbac:groups=";apps;extensions",resources=deployments,verbs=create;get;watch;update;delete;list;update;patch
-func (r *ReconcileFunction) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-
+// +kubebuilder:rbac:groups="tekton.dev",resources=tasks;taskruns,verbs=get;list;watch;create;update;patch;delete
+func (r *ReconcileFunction) Reconcile(req reconcile.Request) (reconcile.Result, error) {
 	// Get Function instance
-	fn := &serverlessv1alpha1.Function{}
-	err := r.getFunctionInstance(request, fn)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			return reconcile.Result{}, nil
-		}
-		// status of the functon must change to error.
-		r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
+	fn, err := r.getFunctionInstance(req)
+	switch {
+	case errors.IsNotFound(err):
+		// Function was deleted, skip reconciliation
+		return reconcile.Result{}, nil
 
-		log.Error(err, "Error reading Function instance", "namespace", request.Namespace, "name", request.Name)
+	case err != nil:
+		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
+			log.Error(err, "Error setting Function status", "namespace", req.Namespace, "name", req.Name)
+		}
+
+		log.Error(err, "Error reading Function instance", "namespace", req.Namespace, "name", req.Name)
 		return reconcile.Result{}, err
 	}
 
+	log.Info("Function instance found", "namespace", fn.Namespace, "name", fn.Name)
+
+	// Initialize Function condition
+	if fn.Status.Condition == "" {
+		if err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionUnknown); err != nil {
+			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
 	// Get Function Controller Configuration
-	fnConfig := &corev1.ConfigMap{}
-	if err := r.getFunctionControllerConfiguration(fnConfig); err != nil {
+	fnConfig, err := r.getRuntimeConfig()
+	if err != nil {
+		log.Error(err, "Error reading controller configuration", "namespace", fnConfigNamespace, "name", fnConfigName)
 		return reconcile.Result{}, err
 	}
 
 	// Get a new *RuntimeInfo
+	// TODO(antoineco): this validation should happen ahead of the reconciliation
 	rnInfo, err := runtimeUtil.New(fnConfig)
 	if err != nil {
-		log.Error(err, "Error while trying to get a new RuntimeInfo instance", "namespace", fnConfig.Namespace, "name", fnConfig.Name)
+		log.Error(err, "Error creating RuntimeInfo", "namespace", fnConfig.Namespace, "name", fnConfig.Name)
 		return reconcile.Result{}, err
 	}
 
-	// Create Function's ConfigMap
-	foundCm := &corev1.ConfigMap{}
-	deployCm := &corev1.ConfigMap{}
-	_, err = r.createFunctionConfigMap(foundCm, deployCm, fn)
+	// Synchronize Function ConfigMap
+	fnCm, err := r.syncFunctionConfigMap(fn)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			return reconcile.Result{}, nil
+		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
+			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
 		}
-		r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
 
-		log.Error(err, "function configmap can't be created. The function could have been deleted.", "namespace", deployCm.Namespace, "name", deployCm.Name)
+		log.Error(err, "Error during sync of the Function ConfigMap", "namespace", fn.Namespace, "name", fn.Name)
 		return reconcile.Result{}, err
 	}
 
-	// Update Function's ConfigMap
-	if err := r.updateFunctionConfigMap(foundCm, deployCm); err != nil {
-		// status of the functon must change to error.
-		r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
+	// Synchronize Function BuildTemplate
+	if err := r.syncFunctionBuildTemplate(fn, rnInfo); err != nil {
+		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
+			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
+		}
 
-		log.Error(err, "Error while trying to update Function's ConfigMap:", "namespace", deployCm.Namespace, "name", deployCm.Name)
+		log.Error(err, "Error during sync of the Function BuildTemplate", "namespace", fn.Namespace, "name", buildTemplateName)
 		return reconcile.Result{}, err
 	}
 
-	// Create function's image name
-	hash := sha256.New()
-	hash.Write([]byte(foundCm.Data["handler.js"] + foundCm.Data["package.json"]))
-	functionSha := fmt.Sprintf("%x", hash.Sum(nil))
-	imageName := fmt.Sprintf("%s/%s-%s:%s", rnInfo.RegistryInfo, fn.Namespace, fn.Name, functionSha)
-	log.Info("function image", "namespace:", fn.Namespace, "name:", fn.Name, "imageName:", imageName)
-
-	if err := r.getFunctionBuildTemplate(fn); err != nil {
-		// status of the functon must change to error.
-		r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
-
+	// Generate build and image names
+	fnSha, err := generateFunctionHash(fnCm)
+	if err != nil {
+		log.Error(err, "Error generating Function hash", "namespace", fn.Namespace, "name", fn.Name)
 		return reconcile.Result{}, err
 	}
 
-	// Unique Build name base on function sha
-	shortSha := ""
-	if len(functionSha) > 10 {
-		shortSha = functionSha[0:10]
-	} else if len(functionSha) > 0 && len(functionSha) < 10 {
-		shortSha = functionSha
-	}
-	buildName := fmt.Sprintf("%s-%s", fn.Name, shortSha)
-	if err := r.buildFunctionImage(rnInfo, fn, imageName, buildName); err != nil {
-		// status of the functon must change to error.
-		r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
+	// length of the suffix appended to the function name to generate a build name
+	const buildNameSuffixLen = 10
 
+	// note: we generate these to ensure a new TaskRun is created every
+	// time the Function spec is updated.
+	imgName := fmt.Sprintf("%s/%s-%s:%s", rnInfo.RegistryInfo, fn.Namespace, fn.Name, fnSha)
+	buildName := fmt.Sprintf("%s-%s", fn.Name, fnSha[:buildNameSuffixLen])
+	log.Info("Build info", "namespace", fn.Namespace, "name", fn.Name, "buildName", buildName, "imageName", imgName)
+
+	err = r.buildFunctionImage(rnInfo, fn, imgName, buildName)
+	if err != nil {
+		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
+			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
+		}
+
+		log.Error(err, "Error during Function build", "namespace", fn.Namespace, "name", buildName)
 		return reconcile.Result{}, err
 	}
 
-	if err := r.serveFunction(rnInfo, foundCm, fn, imageName); err != nil {
-		// status of the functon must change to error.
-		r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError)
+	_, err = r.serveFunction(rnInfo, fnCm, fn, imgName)
+	if err != nil {
+		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
+			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
+		}
+
+		log.Error(err, "Error during Function serving", "namespace", fn.Namespace, "name", fn.Name)
 		return reconcile.Result{}, err
 	}
 
-	r.getFunctionCondition(fn)
+	r.setFunctionCondition(fn)
 
 	return reconcile.Result{}, nil
-
 }
 
-// Get Function Controller Configuration
-func (r *ReconcileFunction) getFunctionControllerConfiguration(fnConfig *corev1.ConfigMap) error {
+// getRuntimeConfig returns the Function Controller ConfigMap from the cluster.
+// TODO(antoineco): func duplicated in pkg/webhook/default_server/function/mutating
+func (r *ReconcileFunction) getRuntimeConfig() (*corev1.ConfigMap, error) {
+	cm := &corev1.ConfigMap{}
 
-	err := r.Get(context.TODO(), types.NamespacedName{Name: fnConfigName, Namespace: fnConfigNamespace}, fnConfig)
+	err := r.Get(context.TODO(),
+		client.ObjectKey{
+			Name:      fnConfigName,
+			Namespace: fnConfigNamespace,
+		},
+		cm,
+	)
 	if err != nil {
-		log.Error(err, "Unable to read Function controller's configuration", "namespace", fnConfigNamespace, "name", fnConfigName)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return cm, nil
 }
 
-// Get the Function instance
-func (r *ReconcileFunction) getFunctionInstance(request reconcile.Request, fn *serverlessv1alpha1.Function) error {
-	// Get the Function instance
-	err := r.Get(context.TODO(), request.NamespacedName, fn)
-	if err != nil {
-		// Error reading the object - requeue the request.
-		return err
+// getFunctionInstance gets the Function instance from the cluster.
+func (r *ReconcileFunction) getFunctionInstance(req reconcile.Request) (*serverlessv1alpha1.Function, error) {
+	fn := &serverlessv1alpha1.Function{}
+	if err := r.Get(context.TODO(), req.NamespacedName, fn); err != nil {
+		return nil, err
 	}
 
-	log.Info("Function instance found:", "namespace", fn.Namespace, "name", fn.Name)
-
-	if fn.Status.Condition == "" {
-		// As the instance of the new function was found. It status is updated.
-		err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionUnknown)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return fn, nil
 }
 
+// createFunctionHandlerMap converts a Function spec to a map that can be
+// mounted as individual files inside a runtime container.
 func createFunctionHandlerMap(fn *serverlessv1alpha1.Function) map[string]string {
-
 	data := make(map[string]string)
 	data["handler"] = "handler.main"
 	data["handler.js"] = fn.Spec.Function
-	if len(strings.Trim(fn.Spec.Deps, " ")) == 0 {
-		data["package.json"] = "{}"
-	} else {
+
+	data["package.json"] = "{}"
+	if strings.Trim(fn.Spec.Deps, " ") != "" {
 		data["package.json"] = fn.Spec.Deps
 	}
 
 	return data
-
 }
 
-// Create Function's ConfigMap
-func (r *ReconcileFunction) createFunctionConfigMap(foundCm *corev1.ConfigMap, deployCm *corev1.ConfigMap, fn *serverlessv1alpha1.Function) (reconcile.Result, error) {
-
-	// Create Function Handler
-	deployCm.Data = createFunctionHandlerMap(fn)
-
-	// Managing a ConfigMap
-	deployCm.ObjectMeta = metav1.ObjectMeta{
-		Labels:    fn.Labels,
-		Namespace: fn.Namespace,
-		Name:      fn.Name,
-	}
-
-	if err := controllerutil.SetControllerReference(fn, deployCm, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	err := r.Get(context.TODO(), types.NamespacedName{Name: deployCm.Name, Namespace: deployCm.Namespace}, foundCm)
-	if err != nil && errors.IsNotFound(err) {
-		log.Info("Creating the Function's ConfigMap", "namespace", deployCm.Namespace, "name", deployCm.Name)
-		err = r.Create(context.TODO(), deployCm)
-		if errors.IsNotFound(err) {
-			return reconcile.Result{}, nil
-		}
-		return reconcile.Result{}, err
-
-	} else if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	log.Info("Function ConfigMap:", "namespace", deployCm.Namespace, "name", deployCm.Name)
-
-	return reconcile.Result{}, nil
-}
-
-// Update found Function's ConfigMap
-func (r *ReconcileFunction) updateFunctionConfigMap(foundCm *corev1.ConfigMap, deployCm *corev1.ConfigMap) error {
-
-	if !reflect.DeepEqual(deployCm.Data, foundCm.Data) {
-		foundCm.Data = deployCm.Data
-		foundCm.TypeMeta = deployCm.TypeMeta
-		foundCm.ObjectMeta = deployCm.ObjectMeta
-		log.Info("Updating Function's ConfigMap", "namespace", deployCm.Namespace, "name", deployCm.Name)
-		err := r.Update(context.TODO(), foundCm)
-		if err != nil && !errors.IsNotFound(err) {
-			return err
-		}
-
-		log.Info("Updated Function'S ConfigMap", "namespace", deployCm.Namespace, "name", deployCm.Name)
-	}
-
-	err := r.Get(context.TODO(), types.NamespacedName{Name: deployCm.Name, Namespace: deployCm.Namespace}, foundCm)
-	if err != nil && !errors.IsNotFound(err) {
-		log.Error(err, "Unable to read the updated Function ConfigMap", "namespace", deployCm.Namespace, "name", deployCm.Name)
-		return err
-	}
-
-	return nil
-
-}
-
-func (r *ReconcileFunction) getFunctionBuildTemplate(fn *serverlessv1alpha1.Function) error {
-
-	buildTemplateNamespace := fn.Namespace
-
-	deployBuildTemplate := &buildv1alpha1.BuildTemplate{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "build.knative.dev/v1alpha1",
-			Kind:       "BuildTemplate",
+// syncFunctionConfigMap reconciles the current Function ConfigMap with its
+// desired state.
+func (r *ReconcileFunction) syncFunctionConfigMap(fn *serverlessv1alpha1.Function) (*corev1.ConfigMap, error) {
+	desiredCm := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels:    fn.Labels,
+			Namespace: fn.Namespace,
+			Name:      fn.Name,
 		},
+		Data: createFunctionHandlerMap(fn),
+	}
+
+	if err := controllerutil.SetControllerReference(fn, desiredCm, r.scheme); err != nil {
+		return nil, fmt.Errorf("error setting controller reference: %s", err)
+	}
+
+	currentCm, err := r.getOrCreateFunctionConfigMap(desiredCm)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.updateFunctionConfigMap(currentCm, desiredCm)
+}
+
+// getOrCreateFunctionConfigMap returns the existing Function ConfigMap or
+// creates it from the given desired state if it does not exist.
+func (r *ReconcileFunction) getOrCreateFunctionConfigMap(desiredCm *corev1.ConfigMap) (*corev1.ConfigMap, error) {
+	ctx := context.TODO()
+
+	currentCm := &corev1.ConfigMap{}
+	err := r.Get(ctx,
+		client.ObjectKey{
+			Name:      desiredCm.Name,
+			Namespace: desiredCm.Namespace,
+		},
+		currentCm,
+	)
+
+	switch {
+	case errors.IsNotFound(err):
+		// TODO(antoineco): a Kubernetes event would be more suitable than a log entry
+		log.Info("Creating Function ConfigMap", "namespace", desiredCm.Namespace, "name", desiredCm.Name)
+
+		if err := r.Create(ctx, desiredCm); err != nil {
+			return nil, err
+		}
+		return desiredCm, nil
+
+	case err != nil:
+		return nil, err
+	}
+
+	return currentCm, nil
+}
+
+// updateFunctionConfigMap reconciles the current Function ConfigMap with its
+// desired state.
+func (r *ReconcileFunction) updateFunctionConfigMap(currentCm, desiredCm *corev1.ConfigMap) (*corev1.ConfigMap, error) {
+	if reflect.DeepEqual(desiredCm.Data, currentCm.Data) {
+		return currentCm, nil
+	}
+
+	// TODO(antoineco): a Kubernetes event would be more suitable than a log entry
+	log.Info("Updating Function ConfigMap", "namespace", desiredCm.Namespace, "name", desiredCm.Name)
+
+	newCm := &corev1.ConfigMap{
+		ObjectMeta: desiredCm.ObjectMeta,
+		Data:       desiredCm.Data,
+	}
+	newCm.ResourceVersion = currentCm.ResourceVersion
+
+	if err := r.Update(context.TODO(), newCm); err != nil {
+		return nil, err
+	}
+	return newCm, nil
+}
+
+// generateFunctionHash generates a hash from the Function config.
+func generateFunctionHash(fnCm *corev1.ConfigMap) (string, error) {
+	hash := sha256.New()
+	if _, err := hash.Write([]byte(fnCm.Data["handler.js"] + fnCm.Data["package.json"])); err != nil {
+		return "", fmt.Errorf("error writing to hash: %s", err)
+	}
+
+	return fmt.Sprintf("%x", hash.Sum(nil)), nil
+}
+
+// syncFunctionBuildTemplate reconciles the current Function BuildTemplate with its
+// desired state.
+func (r *ReconcileFunction) syncFunctionBuildTemplate(fn *serverlessv1alpha1.Function, ri *runtimeUtil.RuntimeInfo) error {
+	desiredBt := &buildv1alpha1.BuildTemplate{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      buildTemplateName,
-			Namespace: buildTemplateNamespace,
+			Namespace: fn.Namespace,
 		},
-		Spec: runtimeUtil.GetBuildTemplateSpec(fn),
+		Spec: runtimeUtil.GetBuildTemplateSpec(ri),
 	}
 
-	if err := controllerutil.SetControllerReference(fn, deployBuildTemplate, r.scheme); err != nil {
+	if err := controllerutil.SetControllerReference(fn, desiredBt, r.scheme); err != nil {
+		return fmt.Errorf("error setting controller reference: %s", err)
+	}
+
+	currentBt, err := r.getOrCreateFunctionBuildTemplate(desiredBt)
+	if err != nil {
+		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
+			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
+		}
+
+		log.Error(err, "Error during sync of the Function BuildTemplate", "namespace", desiredBt.Namespace, "name", desiredBt.Name)
+
 		return err
 	}
 
-	// Check if the BuildTemplate object already exists, if not create a new one.
-	foundBuildTemplate := &buildv1alpha1.BuildTemplate{}
-	err := r.Get(context.TODO(), types.NamespacedName{Name: deployBuildTemplate.Name, Namespace: deployBuildTemplate.Namespace}, foundBuildTemplate)
-	if err != nil && errors.IsNotFound(err) {
-		log.Info("Creating Knative BuildTemplate", "namespace", deployBuildTemplate.Namespace, "name", deployBuildTemplate.Name)
-		err = r.Create(context.TODO(), deployBuildTemplate)
-		if err != nil {
-			log.Error(err, "Error while trying to Create Knative BuildTemplate", "namespace", deployBuildTemplate.Namespace, "name", deployBuildTemplate.Name)
-			return err
-
+	if _, err = r.updateFunctionBuildTemplate(currentBt, desiredBt); err != nil {
+		if err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionError); err != nil {
+			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
 		}
 
-		err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionBuilding)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil
-			}
-			return err
-		}
-
-		return nil
-
-	} else if err != nil {
-		log.Error(err, "Error while trying to get Knative BuildTemplate", "namespace", deployBuildTemplate.Namespace, "name", deployBuildTemplate.Name)
+		log.Error(err, "Error during sync of the Function BuildTemplate", "namespace", desiredBt.Namespace, "name", desiredBt.Name)
 		return err
-	}
-
-	if !reflect.DeepEqual(deployBuildTemplate.Spec, foundBuildTemplate.Spec) {
-
-		foundBuildTemplate.Spec = deployBuildTemplate.Spec
-		log.Info("Updating Knative BuildTemplate", "namespace", deployBuildTemplate.Namespace, "name", deployBuildTemplate.Name)
-		err = r.Update(context.TODO(), foundBuildTemplate)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil
-			}
-			log.Error(err, "Error while trying to Update Knative BuildTemplate", "namespace", deployBuildTemplate.Namespace, "name", deployBuildTemplate.Name)
-			return err
-		}
-
-		err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionBuilding)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil
-			}
-			return err
-		}
-
 	}
 
 	return nil
 }
 
-func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, fn *serverlessv1alpha1.Function, imageName string, buildName string) error {
+// getOrCreateFunctionBuildTemplate returns the existing Function BuildTemplate
+// or creates it from the given desired state if it does not exist.
+func (r *ReconcileFunction) getOrCreateFunctionBuildTemplate(desiredBt *buildv1alpha1.BuildTemplate) (*buildv1alpha1.BuildTemplate, error) {
+	ctx := context.TODO()
 
+	foundBt := &buildv1alpha1.BuildTemplate{}
+	err := r.Get(ctx,
+		client.ObjectKey{
+			Name:      desiredBt.Name,
+			Namespace: desiredBt.Namespace,
+		},
+		foundBt,
+	)
+
+	switch {
+	case errors.IsNotFound(err):
+		log.Info("Creating Function BuildTemplate", "namespace", desiredBt.Namespace, "name", desiredBt.Name)
+
+		if err := r.Create(ctx, desiredBt); err != nil {
+			return nil, err
+		}
+		return desiredBt, nil
+
+	case err != nil:
+		return nil, err
+	}
+
+	return foundBt, nil
+}
+
+// updateFunctionBuildTemplate reconciles the current Function BuildTemplate
+// with its desired state.
+func (r *ReconcileFunction) updateFunctionBuildTemplate(currentBt, desiredBt *buildv1alpha1.BuildTemplate) (*buildv1alpha1.BuildTemplate, error) {
+	if reflect.DeepEqual(desiredBt.Spec, currentBt.Spec) {
+		return currentBt, nil
+	}
+
+	log.Info("Updating Function BuildTemplate", "namespace", desiredBt.Namespace, "name", desiredBt.Name)
+
+	newBt := &buildv1alpha1.BuildTemplate{
+		ObjectMeta: desiredBt.ObjectMeta,
+		Spec:       desiredBt.Spec,
+	}
+	newBt.ResourceVersion = currentBt.ResourceVersion
+
+	if err := r.Update(context.TODO(), newBt); err != nil {
+		return nil, err
+	}
+	return newBt, nil
+}
+
+// buildFunctionImage creates a container image build.
+func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, fn *serverlessv1alpha1.Function, imageName string, buildName string) error {
 	// Create a new Build data structure
 	deployBuild := runtimeUtil.GetBuildResource(rnInfo, fn, imageName, buildName)
 
@@ -452,7 +491,6 @@ func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, 
 
 	// Update Build object
 	if !reflect.DeepEqual(deployBuild.Spec, foundBuild.Spec) && !compareBuildImages(foundBuild, imageName) {
-
 		err := r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionUpdating)
 		if err != nil {
 			if errors.IsNotFound(err) {
@@ -479,6 +517,7 @@ func (r *ReconcileFunction) buildFunctionImage(rnInfo *runtimeUtil.RuntimeInfo, 
 	return nil
 }
 
+// compareBuildImages returns whether two builds are equal.
 func compareBuildImages(foundBuild *buildv1alpha1.Build, imageName string) bool {
 	if foundBuild.Spec.Template != nil && len(foundBuild.Spec.Template.Arguments) > 0 {
 		args := foundBuild.Spec.Template.Arguments
@@ -492,9 +531,13 @@ func compareBuildImages(foundBuild *buildv1alpha1.Build, imageName string) bool 
 	return false
 }
 
-func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, foundCm *corev1.ConfigMap, fn *serverlessv1alpha1.Function, imageName string) error {
+// serveFunction creates a Knative Service for serving a Function.
+func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, foundCm *corev1.ConfigMap,
+	fn *serverlessv1alpha1.Function, imageName string) (*servingv1alpha1.Service, error) {
 
-	deployService := &servingv1alpha1.Service{
+	ctx := context.TODO()
+
+	desiredKsvc := &servingv1alpha1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels:    fn.Labels,
 			Namespace: fn.Namespace,
@@ -503,81 +546,72 @@ func (r *ReconcileFunction) serveFunction(rnInfo *runtimeUtil.RuntimeInfo, found
 		Spec: runtimeUtil.GetServiceSpec(imageName, *fn, rnInfo),
 	}
 
-	if err := controllerutil.SetControllerReference(fn, deployService, r.scheme); err != nil {
-		return err
+	if err := controllerutil.SetControllerReference(fn, desiredKsvc, r.scheme); err != nil {
+		return nil, err
 	}
 
 	// Check if the Serving object (serving the function) already exists, if not create a new one.
-	foundService := &servingv1alpha1.Service{}
-	err := r.Get(context.TODO(), types.NamespacedName{Name: deployService.Name, Namespace: deployService.Namespace}, foundService)
-	if err != nil && errors.IsNotFound(err) {
-		log.Info("Creating Knative Service", "namespace", deployService.Namespace, "name", deployService.Name)
-		err = r.Create(context.TODO(), deployService)
-		if err != nil {
-			return err
+	currentKsvc := &servingv1alpha1.Service{}
+	err := r.Get(ctx,
+		client.ObjectKey{
+			Name:      desiredKsvc.Name,
+			Namespace: desiredKsvc.Namespace,
+		},
+		currentKsvc,
+	)
+
+	switch {
+	case errors.IsNotFound(err):
+		// TODO(antoineco): a Kubernetes event would be more suitable than a log entry
+		log.Info("Creating Knative Service", "namespace", desiredKsvc.Namespace, "name", desiredKsvc.Name)
+
+		if err := r.Create(ctx, desiredKsvc); err != nil {
+			return nil, err
 		}
 
-		err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionDeploying)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil
-			}
-			return err
+		// TODO(antoineco): it would be enough to compute the status ONCE, at the end of the sync
+		if err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionDeploying); err != nil {
+			log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
 		}
 
-		return nil
-	} else if err != nil {
-		log.Error(err, "Error while trying to create Knative Service", "namespace", deployService.Namespace, "name", deployService.Name)
-		return err
+		return desiredKsvc, nil
+
+	case err != nil:
+		return nil, err
 	}
 
-	if !reflect.DeepEqual(deployService.Spec, foundService.Spec) && !compareServiceImage(foundService, imageName, fn) {
-
-		foundService.Spec = deployService.Spec
-		foundService.Status = deployService.Status
-
-		log.Info("Updating Knative Service", "namespace", deployService.Namespace, "name", deployService.Name)
-		err = r.Update(context.TODO(), foundService)
-		if err != nil {
-			return err
-		}
-
-		log.Info("Updated Knative Service", "namespace", deployService.Namespace, "name", deployService.Name)
-
-		err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionDeploying)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				return nil
-			}
-			return err
-		}
-
+	if reflect.DeepEqual(desiredKsvc.Spec, currentKsvc.Spec) {
+		return currentKsvc, nil
 	}
 
-	return nil
+	// TODO(antoineco): a Kubernetes event would be more suitable than a log entry
+	log.Info("Updating Knative Service", "namespace", desiredKsvc.Namespace, "name", desiredKsvc.Name)
+
+	newKsvc := &servingv1alpha1.Service{
+		ObjectMeta: desiredKsvc.ObjectMeta,
+		Spec:       desiredKsvc.Spec,
+	}
+	newKsvc.ResourceVersion = currentKsvc.ResourceVersion
+
+	if err := r.Update(ctx, newKsvc); err != nil {
+		return nil, err
+	}
+
+	// TODO(antoineco): it would be enough to compute the status ONCE, at the end of the sync
+	if err = r.updateFunctionStatus(fn, serverlessv1alpha1.FunctionConditionDeploying); err != nil {
+		log.Error(err, "Error setting Function status", "namespace", fn.Namespace, "name", fn.Name)
+	}
+
+	return newKsvc, nil
 }
 
-func compareServiceImage(foundService *servingv1alpha1.Service, imageName string, fn *serverlessv1alpha1.Function) bool {
-
-	if len(foundService.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers) > 0 {
-		args := foundService.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers
-		for _, arg := range args {
-			if arg.Image == imageName && strings.Contains(arg.Image, fn.Name) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// It defines if the function condition is running or deploying base on the status of the Knative service.
+// setFunctionCondition sets the Function condition based on the status of the Knative service.
 // A function is running is if the Status of the Knative service has:
 // - the last created revision and the last ready revision are the same.
 // - the conditions service, route and configuration should have status true and type ready.
 // Update the status of the function base on the defined function condition.
 // For a function get the status error either the creation or update of the knative service or build must have failed.
-func (r *ReconcileFunction) getFunctionCondition(fn *serverlessv1alpha1.Function) {
-
+func (r *ReconcileFunction) setFunctionCondition(fn *serverlessv1alpha1.Function) {
 	serviceReady := false
 	configurationsReady := false
 	routesReady := false
@@ -609,13 +643,11 @@ func (r *ReconcileFunction) getFunctionCondition(fn *serverlessv1alpha1.Function
 
 	// latest created and ready revisions share the same name.
 	if foundService.Status.LatestCreatedRevisionName == foundService.Status.LatestReadyRevisionName {
-
 		// Evaluates the status of the conditions
 		if len(foundService.Status.Conditions) == 3 {
 			conditions := foundService.Status.Conditions
 
 			for _, cond := range conditions {
-
 				if cond.Status == corev1.ConditionTrue {
 
 					if cond.Type == servingv1alpha1.ServiceConditionReady {
@@ -629,30 +661,20 @@ func (r *ReconcileFunction) getFunctionCondition(fn *serverlessv1alpha1.Function
 					if cond.Type == servingv1alpha1.ConfigurationConditionReady {
 						configurationsReady = true
 					}
-
 				}
-
 			}
-
 		}
-
 	}
 
 	// Update the function status base on the ksvc status
 	fnCondition := serverlessv1alpha1.FunctionConditionDeploying
 	if configurationsReady && routesReady && serviceReady {
-
 		fnCondition = serverlessv1alpha1.FunctionConditionRunning
-
-	}
-	err := r.updateFunctionStatus(fn, fnCondition)
-	if err != nil {
-		log.Error(err, "Error while trying to update the function Status", "namespace", fn.Namespace, "name", fn.Name)
-		return
 	}
 
 	log.Info(fmt.Sprintf("Function status: %s", fnCondition), "namespace", fn.Namespace, "name", fn.Name)
 
+	r.updateFunctionStatus(fn, fnCondition)
 }
 
 func ignoreNotFound(err error) error {
@@ -662,14 +684,8 @@ func ignoreNotFound(err error) error {
 	return err
 }
 
-// Update the status of the function JSONPath: .status.condition
+// updateFunctionStatus updates the condition of a Function.
 func (r *ReconcileFunction) updateFunctionStatus(fn *serverlessv1alpha1.Function, condition serverlessv1alpha1.FunctionCondition) error {
-
 	fn.Status.Condition = condition
-	err := r.Status().Update(context.TODO(), fn)
-	if err != nil && !errors.IsNotFound(err) {
-		return err
-	}
-
-	return nil
+	return r.Status().Update(context.TODO(), fn)
 }

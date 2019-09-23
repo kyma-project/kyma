@@ -137,14 +137,10 @@ func (r *selfSubjectRulesResolver) SetSelfSubjectRulesConverter(converter gqlSel
 
 //Namespace
 
-func NewNamespaceService(informer cache.SharedIndexInformer, client v1.CoreV1Interface) (*namespaceService, error) {
-	return newNamespaceService(informer, client)
+func NewNamespaceService(informer cache.SharedIndexInformer, podService podSvc, client v1.CoreV1Interface) (*namespaceService, error) {
+	return newNamespaceService(informer, podService, client)
 }
 
-func NewNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever) *namespaceResolver {
-	return newNamespaceResolver(namespaceSvc, appRetriever)
-}
-
-func (r *namespaceResolver) SetNamespaceConverter(converter gqlNamespaceConverter) {
-	r.namespaceConverter = converter
+func NewNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever, systemNamespaces []string, podService podSvc) *namespaceResolver {
+	return newNamespaceResolver(namespaceSvc, appRetriever, systemNamespaces, podService)
 }

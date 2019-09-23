@@ -3,15 +3,51 @@ imageRegistry: "quay.io/coreos"
 containerPort: 5556
 
 oidc:
-  kymaClient: "kyma-client"
-  consoleClientId: console
-  consoleClientName: 'Console'
-  grafanaClientId: grafana
-  grafanaClientName: 'Grafana UI'
-  jaegerClientId: jaeger
-  jaegerClientName: 'Jaeger UI'
-  kialiClientId: kiali
-  kialiClientName: 'Kiali UI'
+  staticClientsBase: |-
+    - id: kyma-client
+      name: 'Kyma Client'
+      redirectURIs:
+      - 'http://127.0.0.1:5555/callback'
+      secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+      trustedPeers:
+      - kubecontroller
+      - console
+    - id: console
+      name: Console
+      redirectURIs:
+      - 'http://console-dev.{{ .Values.global.ingress.domainName }}:4200'
+      - 'https://console.{{ .Values.global.ingress.domainName }}'
+      secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+    - id: grafana
+      name: Grafana UI
+      redirectURIs:
+      - 'https://grafana.{{ .Values.global.ingress.domainName }}/login/generic_oauth'
+      secret: apie4eeX6hiC9ainieli
+    - id: jaeger
+      name: Jaeger UI
+      redirectURIs:
+      - 'http://jaeger.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
+      - 'https://jaeger.{{ .Values.global.ingress.domainName }}/oauth/callback'
+      secret: oiEWUWOIEwedfgg
+    - id: kiali
+      name: Kiali UI
+      redirectURIs:
+      - 'http://kiali.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
+      - 'https://kiali.{{ .Values.global.ingress.domainName }}/oauth/callback'
+      secret: hiFWLWqIxw5d3gl
+    - id: compass-ui
+      name: Compass UI
+      redirectURIs:
+      - 'https://compass.{{ .Values.global.ingress.domainName }}'
+      - 'http://compass-dev.{{ .Values.global.ingress.domainName }}:8080'
+      secret: th2T43VyHp43bqr
+  staticClientsExtra: |-
+
+connectors: |-
+
+volumeMountsExtra: |-
+
+volumesExtra: |-
 
 dex:
   expiry:
@@ -27,8 +63,10 @@ resources:
     memory: 16Mi
 global:
   isLocalEnv: false
-  gateway:
-    name: kyma-gateway
+  istio:
+    gateway:
+      name: kyma-gateway
+      namespace: kyma-system
   dex_static_user_configurer:
     dir: pr/
     version: "PR-5433"

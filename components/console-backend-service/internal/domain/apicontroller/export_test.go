@@ -1,7 +1,11 @@
 package apicontroller
 
-import "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/fake"
+import (
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/dynamic/fake"
+)
 
 func (r *PluggableResolver) SetFakeClient() {
-	r.cfg.client = fake.NewSimpleClientset()
+	scheme := runtime.NewScheme()
+	r.cfg.client = fake.NewSimpleDynamicClient(scheme)
 }

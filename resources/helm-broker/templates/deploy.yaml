@@ -80,7 +80,7 @@ spec:
           exec:
             command:
               - curl
-              - localhost:{{ .Values.service.internalPort }}/statusz
+              - localhost:{{ .Values.service.internalPort }}/ready
           failureThreshold: 3
           periodSeconds: 3
           successThreshold: 1
@@ -89,7 +89,7 @@ spec:
           exec:
             command:
               - curl
-              - localhost:{{ .Values.service.internalPort }}/statusz
+              - localhost:{{ .Values.service.internalPort }}/live
           periodSeconds: 10
           timeoutSeconds: 2
           successThreshold: 1
@@ -102,6 +102,8 @@ spec:
         env:
           - name: APP_TMP_DIR
             value: /tmp
+          - name: APP_PORT
+            value: "{{ .Values.ctrl.statusPort }}"
           - name: APP_NAMESPACE
             value: {{ .Release.Namespace }}
           - name: APP_SERVICE_NAME
@@ -127,14 +129,14 @@ spec:
           name: ssh-cfg
           readOnly: true
         ports:
-        - containerPort: {{ .Values.service.ctrlInternalPort }}
+        - containerPort: {{ .Values.ctrl.internalPort }}
         # Temporary solution for readiness probe
         # Ref: https://github.com/istio/istio/issues/2628
         readinessProbe:
           exec:
             command:
               - curl
-              - localhost:{{ .Values.service.internalPort }}/statusz
+              - localhost:{{ .Values.ctrl.statusPort }}/ready
           failureThreshold: 3
           periodSeconds: 3
           successThreshold: 1
@@ -143,7 +145,7 @@ spec:
           exec:
             command:
               - curl
-              - localhost:{{ .Values.service.internalPort }}/statusz
+              - localhost:{{ .Values.ctrl.statusPort }}/live
           periodSeconds: 10
           timeoutSeconds: 2
           successThreshold: 1

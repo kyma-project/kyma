@@ -10,12 +10,12 @@ Each subdirectory in the `components` directory defines one component.
 
 Every Kyma component resides in a dedicated folder which contains its sources and a `README.md` file. This file provides instructions on how to build and develop the component.
 
-The component's name consists of a term describing the component, followed by the **component type**. The first part of the name may differ depending on the component's purpose. 
+The component's name consists of a term describing the component, followed by the **component type**. The first part of the name may differ depending on the component's purpose.
 This table lists the available types:
 
 | type|description|example|
 |--|--|--|
-|controller|A [Kubernetes Controller](https://kubernetes.io/docs/concepts/workloads/controllers/) which reacts on a standard Kubernetes resource or manages [Custom Resource Definition](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) resources. The component's name reflects the name of the primary resource it controls.|namespace-controller|
+|controller|A [Kubernetes Controller](https://kubernetes.io/docs/concepts/workloads/controllers/) which reacts on a standard Kubernetes resource or manages [Custom Resource Definition](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) resources. The component's name reflects the name of the primary resource it controls.|connectivity-certs-controller|
 |controller-manager|A daemon that embeds all [Kubernetes Controllers](https://kubernetes.io/docs/concepts/workloads/controllers/) of a domain. Such an approach brings operational benefits in comparison to shipping all controllers separately. A `controller-manager` takes the name of the domain it belongs to. |asset-store-controller-manager|
 |operator|is a [Kubernetes Operator](https://coreos.com/operators/) which covers the application-specific logic behind the operation of the application, such as steps to upscale a stateful application. It reacts on changes made to custom resources derived from a given [CustomResourceDefinition](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/). It uses the name of the application it operates. |application-operator|
 |job| A [Kubernetes Job](https://kubernetes.io/docs/tasks/job/) which performs a task once or periodically. It uses the name of the task it performs. |istio-patch-job (not renamed yet)|
