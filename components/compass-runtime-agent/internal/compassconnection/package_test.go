@@ -45,6 +45,9 @@ const (
 
 	syncPeriod            = 2 * time.Second
 	minimalConfigSyncTime = 4 * time.Second
+
+	checkInterval = 2 * time.Second
+	testTimeout   = 20 * time.Second
 )
 
 var (
@@ -157,11 +160,11 @@ func TestCompassConnectionController(t *testing.T) {
 		err := compassConnectionCRClient.Delete(compassConnectionName, &v1.DeleteOptions{})
 		require.NoError(t, err)
 
-		// when
-		waitForResynchronization()
-
 		// then
-		assertCompassConnectionState(t, v1alpha1.Synchronized)
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			return isConnectionInState(v1alpha1.Synchronized)
+		})
+		require.NoError(t, err)
 
 		mock.AssertExpectationsForObjects(t,
 			tokensConnectorClientMock,
@@ -193,62 +196,89 @@ func TestCompassConnectionController(t *testing.T) {
 		// when
 		connectedConnection, err = compassConnectionCRClient.Update(connectedConnection)
 		require.NoError(t, err)
-		waitForResynchronization()
+
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			fakeT := &testing.T{}
+			called := certsConnectorClientMock.AssertCalled(fakeT, "SignCSR", mock.AnythingOfType("string"), nilHeaders)
+			return called
+		})
 
 		// then
-		assertCompassConnectionState(t, v1alpha1.Synchronized)
-
+		require.NoError(t, err)
+		require.NoError(t, waitForResourceUpdate(v1alpha1.Synchronized))
 		certsConnectorClientMock.AssertCalled(t, "SignCSR", mock.AnythingOfType("string"), nilHeaders)
 	})
 
 	t.Run("Compass Connection should be in ResourceApplicationFailed state if failed to apply resources", func(t *testing.T) {
 		// given
-		synchronizationServiceMock.ExpectedCalls = nil
+		clearMockCalls(&synchronizationServiceMock.Mock)
 		synchronizationServiceMock.On("Apply", kymaModelApps).Return(nil, apperrors.Internal("error"))
 
 		// when
-		waitForResynchronization()
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			fakeT := &testing.T{}
+			called := synchronizationServiceMock.AssertCalled(fakeT, "Apply", kymaModelApps)
+			return called
+		})
 
 		// then
-		assertCompassConnectionState(t, v1alpha1.ResourceApplicationFailed)
+		require.NoError(t, err)
+		require.NoError(t, waitForResourceUpdate(v1alpha1.ResourceApplicationFailed))
 	})
 
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed to fetch configuration from Director", func(t *testing.T) {
 		// given
-		configurationClientMock.ExpectedCalls = nil
+		clearMockCalls(&configurationClientMock.Mock)
 		configurationClientMock.On("FetchConfiguration", directorURL, runtimeId).Return(nil, errors.New("error"))
 
 		// when
-		waitForResynchronization()
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			fakeT := &testing.T{}
+			called := configurationClientMock.AssertCalled(fakeT, "FetchConfiguration", directorURL, runtimeId)
+			return called
+		})
 
 		// then
-		assertCompassConnectionState(t, v1alpha1.SynchronizationFailed)
+		require.NoError(t, err)
+		require.NoError(t, waitForResourceUpdate(v1alpha1.SynchronizationFailed))
 	})
 
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed create Director config client", func(t *testing.T) {
 		// given
 		clientsProviderMock.ExpectedCalls = nil
+		clientsProviderMock.Calls = nil
 		clientsProviderMock.On("GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL).Return(certsConnectorClientMock, nil)
 		clientsProviderMock.On("GetCompassConfigClient", credentials.ClientCredentials, directorURL).Return(nil, errors.New("error"))
 
 		// when
-		waitForResynchronization()
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			fakeT := &testing.T{}
+			called := clientsProviderMock.AssertCalled(fakeT, "GetCompassConfigClient", credentials.ClientCredentials, directorURL)
+			return called
+		})
 
 		// then
-		assertCompassConnectionState(t, v1alpha1.SynchronizationFailed)
+		require.NoError(t, err)
+		require.NoError(t, waitForResourceUpdate(v1alpha1.SynchronizationFailed))
 	})
 
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed to read runtime configuration", func(t *testing.T) {
 		// given
 		configProviderMock.ExpectedCalls = nil
+		configProviderMock.Calls = nil
 		configProviderMock.On("GetConnectionConfig").Return(connectionConfig, nil)
 		configProviderMock.On("GetRuntimeConfig").Return(runtimeConfig, errors.New("error"))
 
 		// when
-		waitForResynchronization()
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			fakeT := &testing.T{}
+			called := configProviderMock.AssertCalled(fakeT, "GetRuntimeConfig")
+			return called
+		})
 
 		// then
-		assertCompassConnectionState(t, v1alpha1.SynchronizationFailed)
+		require.NoError(t, err)
+		require.NoError(t, waitForResourceUpdate(v1alpha1.SynchronizationFailed))
 	})
 
 	t.Run("Compass Connection should be in ConnectionMaintenanceFailed if failed to access Connector Configuration query", func(t *testing.T) {
@@ -257,10 +287,15 @@ func TestCompassConnectionController(t *testing.T) {
 		certsConnectorClientMock.On("Configuration", nilHeaders).Return(gqlschema.Configuration{}, errors.New("error"))
 
 		// when
-		waitForResynchronization()
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			fakeT := &testing.T{}
+			called := certsConnectorClientMock.AssertCalled(fakeT, "Configuration", nilHeaders)
+			return called
+		})
 
 		// then
-		assertCompassConnectionState(t, v1alpha1.ConnectionMaintenanceFailed)
+		require.NoError(t, err)
+		require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionMaintenanceFailed))
 	})
 
 	t.Run("Compass Connection should be in ConnectionMaintenanceFailed state if failed create Cert secured client", func(t *testing.T) {
@@ -269,10 +304,15 @@ func TestCompassConnectionController(t *testing.T) {
 		clientsProviderMock.On("GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL).Return(nil, errors.New("error"))
 
 		// when
-		waitForResynchronization()
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			fakeT := &testing.T{}
+			called := clientsProviderMock.AssertCalled(fakeT, "GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL)
+			return called
+		})
 
 		// then
-		assertCompassConnectionState(t, v1alpha1.ConnectionMaintenanceFailed)
+		require.NoError(t, err)
+		require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionMaintenanceFailed))
 	})
 
 	t.Run("Compass Connection should be in ConnectionMaintenanceFailed if failed to get client credentials from secret", func(t *testing.T) {
@@ -281,10 +321,15 @@ func TestCompassConnectionController(t *testing.T) {
 		credentialsManagerMock.On("GetClientCredentials").Return(certificates.ClientCredentials{}, errors.New("error"))
 
 		// when
-		waitForResynchronization()
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			fakeT := &testing.T{}
+			called := credentialsManagerMock.AssertCalled(fakeT, "GetClientCredentials")
+			return called
+		})
 
 		// then
-		assertCompassConnectionState(t, v1alpha1.ConnectionMaintenanceFailed)
+		require.NoError(t, err)
+		require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionMaintenanceFailed))
 	})
 }
 
@@ -339,50 +384,82 @@ func TestFailedToInitializeConnection(t *testing.T) {
 	}
 
 	for _, test := range []struct {
-		description string
-		setupFunc   func()
+		description  string
+		setupFunc    func()
+		waitFunction func() bool
 	}{
 		{
 			description: "failed to preserve credentials",
 			setupFunc: func() {
 				credentialsManagerMock.On("PreserveCredentials", mock.AnythingOfType("certificates.Credentials")).Return(errors.New("error"))
 			},
+			waitFunction: func() bool {
+				credentialsManagerMock.Calls = nil
+				fakeT := &testing.T{}
+				called := credentialsManagerMock.AssertCalled(fakeT, "PreserveCredentials", mock.AnythingOfType("certificates.Credentials"))
+				return called
+			},
 		},
 		{
 			description: "failed to sign CSR",
 			setupFunc: func() {
-				connectorTokenClientMock.ExpectedCalls = nil
+				clearMockCalls(&connectorTokenClientMock.Mock)
 				connectorTokenClientMock.On("Configuration", connectorTokenHeaders).Return(connectorConfigurationResponse, nil)
 				connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders).Return(gqlschema.CertificationResult{}, errors.New("error"))
+			},
+			waitFunction: func() bool {
+				fakeT := &testing.T{}
+				called := connectorTokenClientMock.AssertCalled(fakeT, "SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders)
+				return called
 			},
 		},
 		{
 			description: "failed to fetch Configuration",
 			setupFunc: func() {
-				connectorTokenClientMock.ExpectedCalls = nil
+				clearMockCalls(&connectorTokenClientMock.Mock)
 				connectorTokenClientMock.On("Configuration", connectorTokenHeaders).Return(gqlschema.Configuration{}, errors.New("error"))
 				connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders).Return(gqlschema.CertificationResult{}, errors.New("error"))
+			},
+			waitFunction: func() bool {
+				fakeT := &testing.T{}
+				called := connectorTokenClientMock.AssertCalled(fakeT, "Configuration", connectorTokenHeaders)
+				return called
 			},
 		},
 		{
 			description: "failed to get Connector client",
 			setupFunc: func() {
-				clientsProviderMock.ExpectedCalls = nil
+				clearMockCalls(&clientsProviderMock.Mock)
 				clientsProviderMock.On("GetConnectorClient", connectorURL).Return(nil, errors.New("error"))
+			},
+			waitFunction: func() bool {
+				fakeT := &testing.T{}
+				called := clientsProviderMock.AssertCalled(fakeT, "GetConnectorClient", connectorURL)
+				return called
 			},
 		},
 		{
 			description: "connector URL is empty",
 			setupFunc: func() {
-				configProviderMock.ExpectedCalls = nil
+				clearMockCalls(&configProviderMock.Mock)
 				configProviderMock.On("GetConnectionConfig").Return(config.ConnectionConfig{Token: token}, nil)
+			},
+			waitFunction: func() bool {
+				fakeT := &testing.T{}
+				called := configProviderMock.AssertCalled(fakeT, "GetConnectionConfig")
+				return called
 			},
 		},
 		{
 			description: "failed to get connection config",
 			setupFunc: func() {
-				configProviderMock.ExpectedCalls = nil
+				clearMockCalls(&configProviderMock.Mock)
 				configProviderMock.On("GetConnectionConfig").Return(config.ConnectionConfig{}, errors.New("error"))
+			},
+			waitFunction: func() bool {
+				fakeT := &testing.T{}
+				called := configProviderMock.AssertCalled(fakeT, "GetConnectionConfig")
+				return called
 			},
 		},
 	} {
@@ -392,17 +469,57 @@ func TestFailedToInitializeConnection(t *testing.T) {
 			initConnectionIfNotExist()
 
 			// when
-			waitForResynchronization()
+			test.waitFunction()
 
 			// then
-			assertCompassConnectionState(t, v1alpha1.ConnectionFailed)
+			require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionFailed))
 		})
 	}
 
 }
 
+func waitFor(interval, timeout time.Duration, isDone func() bool) error {
+	done := time.After(timeout)
+
+	for {
+		if isDone() {
+			return nil
+		}
+
+		select {
+		case <-done:
+			return errors.New("timeout waiting for condition")
+		default:
+			time.Sleep(interval)
+		}
+	}
+}
+
+func clearMockCalls(mock *mock.Mock) {
+	mock.ExpectedCalls = nil
+	mock.Calls = nil
+}
+
 func waitForResynchronization() {
-	time.Sleep(minimalConfigSyncTime + 3*time.Second)
+	time.Sleep(minimalConfigSyncTime * 2)
+}
+
+func waitForResourceUpdate(expectedState v1alpha1.ConnectionState) error {
+	// Initial sleep to make sure
+	time.Sleep(2 * time.Second)
+
+	return waitFor(1*time.Second, 4*time.Second, func() bool {
+		return isConnectionInState(expectedState)
+	})
+}
+
+func isConnectionInState(expectedState v1alpha1.ConnectionState) bool {
+	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	if err != nil {
+		return false
+	}
+
+	return connectedConnection.Status.State == expectedState
 }
 
 func assertCompassConnectionState(t *testing.T, expectedState v1alpha1.ConnectionState) {

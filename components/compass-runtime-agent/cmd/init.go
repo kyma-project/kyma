@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	appclient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
@@ -22,20 +22,27 @@ import (
 	restclient "k8s.io/client-go/rest"
 )
 
-func createNewSynchronizationService(k8sConfig *restclient.Config, namespace string, gatewayPort int, uploadServiceUrl string) (kyma.Service, error) {
+type k8sResourceClientSets struct {
+	core        *kubernetes.Clientset
+	istio       *istioclient.Clientset
+	application *appclient.Clientset
+	dynamic     dynamic.Interface
+}
+
+func k8sResourceClients(k8sConfig *restclient.Config) (*k8sResourceClientSets, error) {
 	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to create k8s core client")
 	}
 
-	ic, err := istioclient.NewForConfig(k8sConfig)
+	istioClientset, err := istioclient.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, apperrors.Internal("Failed to create Istio client, %s", err)
 	}
 
-	applicationManager, err := newApplicationManager(k8sConfig)
+	applicationClientset, err := appclient.NewForConfig(k8sConfig)
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed to initialize Applications manager")
+		return nil, apperrors.Internal("Failed to create k8s application client, %s", err)
 	}
 
 	dynamicClient, err := dynamic.NewForConfig(k8sConfig)
@@ -43,32 +50,40 @@ func createNewSynchronizationService(k8sConfig *restclient.Config, namespace str
 		return nil, apperrors.Internal("Failed to create dynamic client, %s", err)
 	}
 
+	return &k8sResourceClientSets{
+		core:        coreClientset,
+		istio:       istioClientset,
+		application: applicationClientset,
+		dynamic:     dynamicClient,
+	}, nil
+}
+
+func createNewSynchronizationService(k8sResourceClients *k8sResourceClientSets, secretsManager secrets.Manager, namespace string, gatewayPort int, uploadServiceUrl string) (kyma.Service, error) {
 	nameResolver := k8sconsts.NewNameResolver(namespace)
 	converter := applications.NewConverter(nameResolver)
 
-	resourcesService := newResourcesService(coreClientset, ic, dynamicClient, nameResolver, namespace, gatewayPort, uploadServiceUrl)
+	applicationManager := newApplicationManager(k8sResourceClients.application)
+	accessServiceManager := newAccessServiceManager(k8sResourceClients.core, namespace, gatewayPort)
+	istioService := newIstioService(k8sResourceClients.istio, namespace)
+
+	resourcesService := newResourcesService(secretsManager, accessServiceManager, istioService, k8sResourceClients.dynamic, nameResolver, uploadServiceUrl)
 
 	return kyma.NewService(applicationManager, converter, resourcesService), nil
 }
 
-func newResourcesService(coreClientset *kubernetes.Clientset, ic *istioclient.Clientset, dynamicClient dynamic.Interface,
-	nameResolver k8sconsts.NameResolver, namespace string, gatewayPort int, uploadServiceUrl string) apiresources.Service {
+func newResourcesService(secretsManager secrets.Manager, accessServiceMgr accessservice.AccessServiceManager, istioSvc istio.Service,
+	dynamicClient dynamic.Interface, nameResolver k8sconsts.NameResolver, uploadServiceUrl string) apiresources.Service {
 
-	accessServiceManager := newAccessServiceManager(coreClientset, namespace, gatewayPort)
-
-	sei := coreClientset.CoreV1().Secrets(namespace)
-	secretsRepository := secrets.NewRepository(sei)
+	secretsRepository := secrets.NewRepository(secretsManager)
 
 	secretsService := newSecretsService(secretsRepository, nameResolver)
 
-	istioService := newIstioService(ic, namespace)
+	assetStoreService := newAssetStore(dynamicClient, uploadServiceUrl)
 
-	assetstore := newAssetStore(dynamicClient, namespace, uploadServiceUrl)
-
-	return apiresources.NewService(accessServiceManager, secretsService, nameResolver, istioService, assetstore)
+	return apiresources.NewService(accessServiceMgr, secretsService, nameResolver, istioSvc, assetStoreService)
 }
 
-func newAssetStore(dynamicClient dynamic.Interface, namespace, uploadServiceURL string) assetstore.Service {
+func newAssetStore(dynamicClient dynamic.Interface, uploadServiceURL string) assetstore.Service {
 	groupVersionResource := schema.GroupVersionResource{
 		Version:  v1alpha1.SchemeGroupVersion.Version,
 		Group:    v1alpha1.SchemeGroupVersion.Group,
@@ -91,15 +106,9 @@ func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace stri
 	return accessservice.NewAccessServiceManager(si, config)
 }
 
-func newApplicationManager(config *restclient.Config) (applications.Repository, apperrors.AppError) {
-	applicationEnvironmentClientset, err := versioned.NewForConfig(config)
-	if err != nil {
-		return nil, apperrors.Internal("Failed to create k8s application client, %s", err)
-	}
-
-	appInterface := applicationEnvironmentClientset.ApplicationconnectorV1alpha1().Applications()
-
-	return applications.NewRepository(appInterface), nil
+func newApplicationManager(appClientset *appclient.Clientset) applications.Repository {
+	appInterface := appClientset.ApplicationconnectorV1alpha1().Applications()
+	return applications.NewRepository(appInterface)
 }
 
 func newSecretsService(repository secrets.Repository, nameResolver k8sconsts.NameResolver) secrets.Service {

@@ -6,7 +6,6 @@ import (
 	confProvider "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets"
-	"k8s.io/client-go/kubernetes"
 
 	"os"
 
@@ -55,25 +54,28 @@ func main() {
 
 	log.Info("Registering Components.")
 
-	// TODO - rework this part
-	coreClientset, err := kubernetes.NewForConfig(cfg)
+	k8sResourceClientSets, err := k8sResourceClients(cfg)
 	if err != nil {
-		log.Errorf("Failed to initialize core clientset: %s", err.Error())
+		log.Errorf("Failed to initialize K8s resource clients: %s", err.Error())
 		os.Exit(1)
 	}
 
-	coreClientSet := coreClientset.CoreV1()
+	secretsManagerConstructor := func(namespace string) secrets.Manager {
+		return k8sResourceClientSets.core.CoreV1().Secrets(namespace)
+	}
 
-	// TODO - one secret repo instead of 2
-	secretsRepository := secrets.NewRepository(func(namespace string) secrets.Manager {
-		return coreClientSet.Secrets(namespace)
-	})
+	secretsRepository := secrets.NewRepository(secretsManagerConstructor)
 
 	clusterCertSecret := parseNamespacedName(options.ClusterCertificatesSecret)
 	caCertSecret := parseNamespacedName(options.CaCertificatesSecret)
 
 	certManager := certificates.NewCredentialsManager(clusterCertSecret, caCertSecret, secretsRepository)
-	syncService, err := createNewSynchronizationService(cfg, options.IntegrationNamespace, options.GatewayPort, options.UploadServiceUrl)
+	syncService, err := createNewSynchronizationService(
+		k8sResourceClientSets,
+		secretsManagerConstructor(options.IntegrationNamespace),
+		options.IntegrationNamespace,
+		options.GatewayPort,
+		options.UploadServiceUrl)
 	if err != nil {
 		log.Errorf("Failed to create synchronization service, %s", err.Error())
 		os.Exit(1)
@@ -100,7 +102,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// TODO - move to init?
 	// Initialize Compass Connection CR
 	log.Infoln("Initializing Compass Connection CR")
 	_, err = compassConnectionSupervisor.InitializeCompassConnection()
