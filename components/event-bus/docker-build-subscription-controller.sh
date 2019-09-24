@@ -14,7 +14,6 @@ cp -R ./generated ./cmd/subscription-controller/docker/image/
 cp -R ./internal ./cmd/subscription-controller/docker/image/
 cp -R ./vendor ./cmd/subscription-controller/docker/image/
 cp -R ./api ./cmd/subscription-controller/docker/image/
-#cp -R ./pkg ./cmd/subscription-controller/docker/image/
 cp -R ./licenses ./cmd/subscription-controller/docker/image/
 tagName="${NAME}:${VERSION}"
 docker build --build-arg version=${VERSION} -t ${tagName} --label version=${VERSION} --label component=${COMPONENT} --rm ./cmd/subscription-controller/docker/image
