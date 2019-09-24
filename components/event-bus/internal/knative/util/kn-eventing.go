@@ -66,7 +66,7 @@ var once sync.Once
 // KnativeAccessLib encapsulates the Knative access lib behaviours.
 type KnativeAccessLib interface {
 	GetChannelByLabels(namespace string, labels map[string]string) (*messagingV1Alpha1.Channel, error)
-	CreateChannel(name string, namespace string, labels map[string]string, timeout time.Duration) (*messagingV1Alpha1.Channel, error)
+	CreateChannel(prefix, namespace string, labels map[string]string, timeout time.Duration) (*messagingV1Alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string, labels map[string]string) error
 	DeleteSubscription(name string, namespace string) error
