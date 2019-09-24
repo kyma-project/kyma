@@ -59,8 +59,8 @@ global:
     dir: pr/
     version: PR-5478
   application_broker:
-    dir: develop/
-    version: d999e831
+    dir: pr/
+    version: PR-5687
   application_connectivity_certs_setup_job:
     dir: pr/
     version: PR-5318
