@@ -29,7 +29,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 
-	buildv1alpha1 "github.com/knative/build/pkg/apis/build/v1alpha1"
+	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis"
@@ -71,7 +71,7 @@ func main() {
 	schemeSetupFns := []func(*runtime.Scheme) error{
 		apis.AddToScheme,
 		servingv1alpha1.AddToScheme,
-		buildv1alpha1.AddToScheme,
+		tektonv1alpha1.AddToScheme,
 	}
 
 	for _, fn := range schemeSetupFns {

@@ -187,6 +187,9 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create Services in production"
 	testPermissions "create" "service" "production" "no"
 
+	echo "--> ${DEVELOPER_EMAIL} should  be able to get Installation CR in ${NAMESPACE}"
+	testPermissions "get" "installation" "${NAMESPACE}" "yes"
+
 	EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"
 
@@ -210,6 +213,9 @@ function runTests() {
 
 	echo "--> ${ADMIN_EMAIL} should be able to delete specific CRD"
 	testPermissions "delete" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
+
+	echo "--> ${ADMIN_EMAIL} should  be able to patch Installation CR in ${NAMESPACE}"
+	testPermissions "patch" "installation" "${NAMESPACE}" "yes"
 
 	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
 	export KUBECONFIG="${PWD}/kubeconfig"

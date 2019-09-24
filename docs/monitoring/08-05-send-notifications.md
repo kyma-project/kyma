@@ -6,20 +6,21 @@ This tutorial shows you how to configure Alertmanager to send notifications. Ale
 
 ## Prerequisites
 
-This  tutorial is a follow-up of the [**Observe application metrics**](/components/monitoring/#tutorials-observe-application-metrics) and the [**Define alerting rules**](https://kyma-project.io/docs/master/components/monitoring/#tutorials-define-alerting-rules) tutorials that use the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric and creates an alert based on it. That configuration is required to complete this tutorial.
+This  tutorial is a follow-up of the [**Observe application metrics**](#tutorials-observe-application-metrics) and the [**Define alerting rules**](#tutorials-define-alerting-rules) tutorials that use the `monitoring-custom-metrics` example. Follow this tutorial to deploy the `sample-metrics-8081` service which exposes the `cpu_temperature_celsius` metric and creates an alert based on it. That configuration is required to complete this tutorial.
 
 
 ## Steps
 
 Follow these steps to configure notifications for Slack every time Alertmanager triggers and resolves the `CPUTempHigh` alert.
- 
+
 
 1. Install the Incoming WebHooks application using Slack App Directory.
 
   >**NOTE**: The approval of your Slack workspace administrator may be necessary to install the application.
 
-2. Configure the application to receive notifications coming from third-party services. Read [this](https://api.slack.com/incoming-webhooks#create_a_webhook) document to find out how to set up the configuration. 
- The integration settings should look similar to the following:
+2. Configure the application to receive notifications coming from third-party services. Read [this](https://api.slack.com/incoming-webhooks#create_a_webhook) document to find out how to set up the configuration for Slack.
+
+The integration settings should look similar to the following:
 
  ![Integration Settings](./assets/integration-settings.png)
 
@@ -54,7 +55,7 @@ For details on Alertmanager chart configuration and parameters, see [this](https
 kubectl apply -f {FILE_NAME}.yaml
 ```
 
-3. Proceed with Kyma installation. 
+3. Proceed with Kyma installation.
 
   >**NOTE**: If you add the overrides in the runtime, trigger the update process using this command:
   >```
@@ -64,6 +65,3 @@ kubectl apply -f {FILE_NAME}.yaml
 4. Verify if your Slack channel receives alert notifications about firing and resolved alerts. See the example:
 
 ![Alert Notifications](./assets/alert-notifications.png)
-
-
-
