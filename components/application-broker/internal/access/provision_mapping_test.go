@@ -30,24 +30,6 @@ func TestMappingExistsProvisionCheckerWhenProvisionAcceptable(t *testing.T) {
 	assert.True(t, canProvisionOutput.Allowed)
 }
 
-func TestMappingExistsProvisionCheckerWhenProvisionNotAcceptable(t *testing.T) {
-	// GIVEN
-	rm := fixProdMapping()
-	mockClientSet := fake.NewSimpleClientset(rm)
-
-	mockREStorage := &automock.ApplicationFinder{}
-	defer mockREStorage.AssertExpectations(t)
-	mockREStorage.On("FindOneByServiceID", fixApplicationServiceID()).Return(fixApplicationModel(), nil)
-
-	sut := access.NewMappingExistsProvisionChecker(mockREStorage, mockClientSet.ApplicationconnectorV1alpha1())
-	// WHEN
-	canProvisionOutput, err := sut.CanProvision(fixApplicationServiceID(), internal.Namespace("stage"), time.Nanosecond)
-	// THEN
-	assert.NoError(t, err)
-	assert.False(t, canProvisionOutput.Allowed)
-	assert.Equal(t, "ApplicationMapping does not exist in the [stage] namespace", canProvisionOutput.Reason)
-}
-
 func TestMappingExistsProvisionCheckerReturnsErrorWhenRENotFound(t *testing.T) {
 	// GIVEN
 	mockREStorage := &automock.ApplicationFinder{}
