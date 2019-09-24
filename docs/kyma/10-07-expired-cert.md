@@ -5,7 +5,7 @@ type: Troubleshooting
 
 The self-signed SSL certificate used in Kyma instances deployed with `xip.io` is valid for 30 days. If the self-signed certificate expired for your cluster and you can't, for example, log in to the Kyma Console, follow these steps to regenerate the certificate.
 
->**CAUTION:** When you regenerate the SSL certificate for Kyma, the kubeconfig file generated through the Console UI becomes invalid. To complete these steps, use the admin kubeconfig file generated for the Kubernetes cluster that hosts the Kyma instance you're working with.
+>**CAUTION:** When you regenerate the SSL certificate for Kyma, the kubeconfig file generated through the Console UI becomes invalid. To complete these steps, use the admin kubeconfig file generated for the Kubernetes cluster that hosts the Kyma instance you're working on.
 
 1. Delete the ConfigMap and the Secret that stores the expired Kyma SSL certificate. Run:
 
