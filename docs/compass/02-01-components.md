@@ -8,16 +8,14 @@ type: Architecture
 ## Application
 
 Application represents any external system that you want to register to Compass with its API and Event definitions. These are the types of possible integration levels between an application and Compass:
-- Manual integration - the administrator manually provides API or Events metadata to Compass. This type of integration is used mainly for simple use-case scenarios and doesn't support all features.
+- Manual integration - the administrator manually provides API or Events metadata to Compass. Use this type of integration for simple use-case scenarios as it doesn't support all features.
 - Built-in integration - integration with Compass is built in the application.
 - Proxy - a highly application-specific proxy component provides the integration.
 - Central integration service -  a central service provides integration for the dedicated group of applications. It manages multiple instances of these applications. You can integrate multiple central services to support different types of applications.
 
 ## Kyma Runtime
 
-Runtime is any system to which you can apply configuration provided by Compass. Your Runtime must get a trusted connection to Compass. It must also allow for fetching application definitions and using these applications in a given tenant.
-
-By default, Compass is integrated with Kyma (Kubernetes), but its usage can also be extended to other platforms, such as CloudFoundry or Serverless.
+Runtime is any system to which you can apply configuration provided by Compass. Your Runtime must get a trusted connection to Compass. It must also allow for fetching application definitions and using these applications in a given tenant. By default, Compass is integrated with Kyma (Kubernetes), but its usage can also be extended to other platforms, such as CloudFoundry or Serverless.
 
 ## Agent
 
@@ -42,7 +40,3 @@ Director handles the process of registering applications and Runtimes. It also r
 ## Runtime Provisioner
 
 Runtime Provisioner handles the creation, modification, and deletion of Runtimes. This component is interchangeable.
-
-## Central Integration Service
-
-Central Integration Service provides integration with Compass for the whole class of applications. It manages multiple instances of these applications. You can integrate multiple central services to support different types of applications.
