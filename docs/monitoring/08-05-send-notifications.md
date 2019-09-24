@@ -18,8 +18,9 @@ Follow these steps to configure notifications for Slack every time Alertmanager 
 
   >**NOTE**: The approval of your Slack workspace administrator may be necessary to install the application.
 
-2. Configure the application to receive notifications coming from third-party services. Read [this](https://api.slack.com/incoming-webhooks#create_a_webhook) document to find out how to set up the configuration.
- The integration settings should look similar to the following:
+2. Configure the application to receive notifications coming from third-party services. Read [this](https://api.slack.com/incoming-webhooks#create_a_webhook) document to find out how to set up the configuration for Slack.
+
+The integration settings should look similar to the following:
 
  ![Integration Settings](./assets/integration-settings.png)
 
