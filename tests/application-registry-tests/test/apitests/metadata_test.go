@@ -841,7 +841,7 @@ func requireServiceDefinitionEqual(t *testing.T, expected testkit.ServiceDetails
 	require.EqualValues(t, expected.Api, actual.Api)
 	if expected.Events != nil {
 		require.NotNil(t, actual.Events)
-	}else {
+	} else {
 		require.Nil(t, actual.Events)
 	}
 	require.EqualValues(t, expected.Documentation, actual.Documentation)
