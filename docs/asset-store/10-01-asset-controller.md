@@ -1,10 +1,9 @@
 ---
-title: Performance
+title: Asset Controller
+type: Performance
 ---
 
 This document presents Asset Store performance based on chosen scenarios for particular Asset Store services. The data are the Asset Store key performance indicators (KPIs).
-
-## Asset Controller
 
 These are the scenarios for the Asset Controller:
 
@@ -23,19 +22,3 @@ These are the scenarios for the Asset Controller:
 | 1 |  |
 | 10 |  |
 | 30 |  |
-
-## Asset Upload Service
-
-This scenario verifies how many files the Asset Upload Service can upload in a given time.
-
-|Number of files | Time |
-|------------------|------|
-|  |  |
-
-## Asset Metadata Service
-
-This scenario verifies from how many files the Asset Metadata Service can extract metadata in a given time.
-
-|Number of files | Time |
-|------------------|------|
-|  |  |
