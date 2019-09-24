@@ -7,6 +7,9 @@ metadata:
     app: {{ .Chart.Name }}-certs-setup-job
     release: {{ .Chart.Name }}
     heritage: {{ .Release.Service }}
+  # annotations:
+  #   helm.sh/hook: pre-install,pre-upgrade
+  #   helm.sh/hook-weight: "0"
 rules:
   - apiGroups: ["*"]
     resources: ["secrets"]
@@ -21,6 +24,9 @@ metadata:
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}
     heritage: {{ .Release.Service }}
+  # annotations:
+  #   helm.sh/hook: pre-install,pre-upgrade
+  #   helm.sh/hook-weight: "0"
 subjects:
   - kind: ServiceAccount
     name: {{ .Chart.Name }}-certs-setup-job
@@ -39,6 +45,9 @@ metadata:
     app: {{ .Chart.Name }}-certs-setup-job
     release: {{ .Chart.Name }}
     heritage: {{ .Release.Service }}
+  # annotations:
+  #   helm.sh/hook: pre-install,pre-upgrade
+  #   helm.sh/hook-weight: "0"
 rules:
   - apiGroups: ["*"]
     resources: ["secrets"]
@@ -53,6 +62,9 @@ metadata:
     app: {{ .Chart.Name }}-certs-setup-job
     release: {{ .Chart.Name }}
     heritage: {{ .Release.Service }}
+  # annotations:
+  #   helm.sh/hook: pre-install,pre-upgrade
+  #   helm.sh/hook-weight: "0"
 subjects:
   - kind: ServiceAccount
     name: {{ .Chart.Name }}-certs-setup-job

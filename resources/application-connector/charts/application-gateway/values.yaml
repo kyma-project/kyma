@@ -1,0 +1,13 @@
+---
+application_connectivity_certs_setup_job:
+  secrets:
+    connectorCertificateSecret:
+      name: connector-service-app-ca
+      namespace: kyma-integration
+    caCertificateSecret:
+      name: application-connector-certs
+      namespace: istio-system
+  certificate:
+    validityTime: 92d
+connectivity_certs_controller:
+  enabled: false
