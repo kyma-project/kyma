@@ -54,9 +54,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kubernetes-sigs/service-catalog"
-  source = "github.com/kyma-incubator/service-catalog"
-  branch = "crds"
-  #version = "=v0.1.28"
+  revision = "ccab5234396729fee8dbf70620eafdfbc3d1a6af"
 
 [[constraint]]
   name = "k8s.io/api"

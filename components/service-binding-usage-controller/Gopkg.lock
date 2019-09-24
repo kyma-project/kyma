@@ -192,7 +192,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "crds"
   digest = "1:af07c18cfebea3e92dcc2f40eaf78b82551efaffa6d503e73146df949dbed784"
   name = "github.com/kubernetes-sigs/service-catalog"
   packages = [
@@ -219,8 +218,7 @@
     "pkg/pretty",
   ]
   pruneopts = "UT"
-  revision = "b324e83f098466cea33559207c2f9a7f4f169b01"
-  source = "github.com/kyma-incubator/service-catalog"
+  revision = "ccab5234396729fee8dbf70620eafdfbc3d1a6af"
 
 [[projects]]
   branch = "master"
