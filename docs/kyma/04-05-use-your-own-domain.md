@@ -1,5 +1,5 @@
 ---
-title: Use your own domain
+title: Install Kyma with your own domain
 type: Installation
 ---
 
