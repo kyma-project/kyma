@@ -9,10 +9,16 @@ import (
 	"net/http"
 )
 
+const (
+	AuthorizationHeader  = "Authorization"
+	CredentialsGrantType = "client_credentials"
+	RWScope              = "read write"
+)
+
 type Client struct {
-	HydraURL       string
-	TokensEndpoint string
-	HttpClient     http.Client
+	clientsEndpoint string
+	tokensEndpoint  string
+	httpClient      http.Client
 }
 
 type oauthClient struct {
@@ -24,26 +30,58 @@ type oauthClient struct {
 	Owner         string   `json:"owner"`
 }
 
-func (c *Client) CreateOAuth2Client() (string error) {
-	grantTypes := []string{"client_credentials"}
+type credentials struct {
+	clientID     string
+	clientSecret string
+}
+
+func NewOauthClient(hydraURL string) *Client {
+	return &Client{
+		clientsEndpoint: fmt.Sprintf("%s/clients", hydraURL),
+		tokensEndpoint:  fmt.Sprintf("%s/oauth2/tokens", hydraURL),
+		httpClient:      http.Client{},
+	}
+}
+
+func (c *Client) GetAuthorizationToken() (string, error) {
+	clientCredentials, e := c.createOAuth2Client()
+
+	if e != nil {
+		return "", e
+	}
+
+	credentials, e := buildCredentialsString(clientCredentials)
+
+	if e != nil {
+		return "", e
+	}
+
+	return c.getOAuthToken(credentials)
+}
+
+func (c *Client) createOAuth2Client() (credentials, error) {
 	body := oauthClient{
-		GrantTypes: grantTypes,
-		Scope:      "read write",
+		GrantTypes: []string{CredentialsGrantType},
+		Scope:      RWScope,
 	}
 
 	buf := new(bytes.Buffer)
 	err := json.NewEncoder(buf).Encode(body)
 	if err != nil {
-		return err
+		return credentials{}, err
 	}
 
-	request, err := http.NewRequest(http.MethodPost, c.HydraURL, buf)
+	request, err := http.NewRequest(http.MethodPost, c.clientsEndpoint, buf)
+
+	if err != nil {
+		return credentials{}, err
+	}
 
 	var oauthResp oauthClient
 
-	resp, err := c.HttpClient.Do(request)
+	resp, err := c.httpClient.Do(request)
 	if err != nil {
-		return err
+		return credentials{}, err
 	}
 
 	defer resp.Body.Close()
@@ -52,48 +90,61 @@ func (c *Client) CreateOAuth2Client() (string error) {
 		err = json.NewDecoder(resp.Body).Decode(oauthResp)
 	}
 
-	clientID := oauthResp.ClientID
-	clientSecret := oauthResp.ClientID
+	if err != nil {
+		return credentials{}, err
+	}
 
-	buildCredentialsString(clientID, clientSecret)
-
-	return err
+	return credentials{
+		clientID:     oauthResp.ClientID,
+		clientSecret: oauthResp.Secret,
+	}, nil
 }
 
-func buildCredentialsString(clientID string, clientSecret string) (string, error) {
-	clientIDBytes, e := base64.StdEncoding.DecodeString(clientID)
+func buildCredentialsString(credentials credentials) (string, error) {
+	clientIDBytes, e := base64.StdEncoding.DecodeString(credentials.clientID)
 
 	if e != nil {
 		return "", e
 	}
 
-	secretValueBytes, e := base64.StdEncoding.DecodeString(clientSecret)
+	secretValueBytes, e := base64.StdEncoding.DecodeString(credentials.clientSecret)
 
 	if e != nil {
 		return "", e
 	}
 
-	clientID = string(clientIDBytes)
-	clientSecret = string(secretValueBytes)
+	clientID := string(clientIDBytes)
+	clientSecret := string(secretValueBytes)
 
-	credentials := []byte(fmt.Sprintf("Basic %s:%s", clientID, clientSecret))
-	return base64.StdEncoding.EncodeToString(credentials), nil
+	credentialsEncoded := []byte(fmt.Sprintf("Basic %s:%s", clientID, clientSecret))
+	return base64.StdEncoding.EncodeToString(credentialsEncoded), nil
 }
 
 func (c *Client) getOAuthToken(credentials string) (string, error) {
-	request, e := http.NewRequest(http.MethodPost, c.TokensEndpoint, nil)
+	request, e := http.NewRequest(http.MethodPost, c.tokensEndpoint, nil)
 
 	if e != nil {
 		return "", e
 	}
 
-	request.MultipartForm = &multipart.Form{Value: map[string][]string{"grant_type": {"client_credentials"}, "scope": {"scope-a scope-b"}}}
-	request.Header.Set("Authorization", credentials)
+	request.MultipartForm = &multipart.Form{Value: map[string][]string{"grant_type": {CredentialsGrantType}, "scope": {RWScope}}}
+	request.Header.Set(AuthorizationHeader, credentials)
 
-	response, e := c.HttpClient.Do(request)
+	response, e := c.httpClient.Do(request)
 
 	if e != nil {
 		return "", e
 	}
 
+	defer response.Body.Close()
+
+	if response.StatusCode == http.StatusCreated {
+		e = json.NewDecoder(response.Body).Decode()
+	}
+
+	if e != nil {
+		return "", e
+	}
+
+	return "", nil
 }

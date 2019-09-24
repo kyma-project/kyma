@@ -20,6 +20,7 @@ type TestConfig struct {
 	ProxyInvalidationWaitTime int64  `envconfig:"PROXY_INVALIDATION_WAIT_TIME" default:"150"`
 	GraphQLLog                bool   `envconfig:"GRAPHQL_LOG" default:"false"`
 	ScenarioLabel             string `envconfig:"SCENARIO_LABEL" default:"COMPASS_RUNTIME_AGENT_TESTS"`
+	HyadraURL                 string `envconfig:"HYDRA_URL" default:"https://oauth2.kyma.local"`
 }
 
 func ReadConfig() (TestConfig, error) {
