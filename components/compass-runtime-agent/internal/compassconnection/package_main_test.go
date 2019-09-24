@@ -22,12 +22,10 @@ import (
 
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
 var cfg *rest.Config
-var k8sClient client.Client // TODO - podepnij secrets repo?
 var testEnv *envtest.Environment
 
 var compassConnectionCRClient compassCRClientset.CompassConnectionInterface
@@ -54,7 +52,12 @@ func runTests(m *testing.M) int {
 		logrus.Errorf("Failed to setup test environment: %s", err.Error())
 		os.Exit(1)
 	}
-	defer testEnv.Stop()
+	defer func() {
+		err := testEnv.Stop()
+		if err != nil {
+			logrus.Errorf("error while deleting Compass Connection: %s", err.Error())
+		}
+	}()
 
 	compassClientset, err := compassCRClientset.NewForConfig(cfg)
 	if err != nil {
@@ -87,11 +90,6 @@ func setupEnv() error {
 	err = v1alpha1.AddToScheme(scheme.Scheme)
 	if err != nil {
 		return errors.Wrap(err, "Failed to add to schema")
-	}
-
-	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
-	if err != nil {
-		return errors.Wrap(err, "Failed create kubernetes client")
 	}
 
 	return nil

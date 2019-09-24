@@ -127,11 +127,14 @@ func TestCompassConnectionController(t *testing.T) {
 	supervisor, err := baseDependencies.InitializeController()
 	require.NoError(t, err)
 
+	defer func() {
+		err := compassConnectionCRClient.Delete(compassConnectionName, &v1.DeleteOptions{})
+		if err != nil {
+			t.Logf("error while deleting Compass Connection: %s", err.Error())
+		}
+	}()
 	stopChan, _ := StartTestManager(t, ctrlManager)
 	defer close(stopChan)
-	defer func() {
-		compassConnectionCRClient.Delete(compassConnectionName, &v1.DeleteOptions{})
-	}()
 
 	connection, err := supervisor.InitializeCompassConnection()
 	require.NoError(t, err)
@@ -216,9 +219,7 @@ func TestCompassConnectionController(t *testing.T) {
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			fakeT := &testing.T{}
-			called := synchronizationServiceMock.AssertCalled(fakeT, "Apply", kymaModelApps)
-			return called
+			return mockFunctionCalled(&synchronizationServiceMock.Mock, "Apply", kymaModelApps)
 		})
 
 		// then
@@ -233,9 +234,7 @@ func TestCompassConnectionController(t *testing.T) {
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			fakeT := &testing.T{}
-			called := configurationClientMock.AssertCalled(fakeT, "FetchConfiguration", directorURL, runtimeId)
-			return called
+			return mockFunctionCalled(&configurationClientMock.Mock, "FetchConfiguration", directorURL, runtimeId)
 		})
 
 		// then
@@ -247,14 +246,13 @@ func TestCompassConnectionController(t *testing.T) {
 		// given
 		clientsProviderMock.ExpectedCalls = nil
 		clientsProviderMock.Calls = nil
+		clientsProviderMock.On("GetConnectorClient", connectorURL).Return(tokensConnectorClientMock, nil)
 		clientsProviderMock.On("GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL).Return(certsConnectorClientMock, nil)
 		clientsProviderMock.On("GetCompassConfigClient", credentials.ClientCredentials, directorURL).Return(nil, errors.New("error"))
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			fakeT := &testing.T{}
-			called := clientsProviderMock.AssertCalled(fakeT, "GetCompassConfigClient", credentials.ClientCredentials, directorURL)
-			return called
+			return mockFunctionCalled(&clientsProviderMock.Mock, "GetCompassConfigClient", credentials.ClientCredentials, directorURL)
 		})
 
 		// then
@@ -271,9 +269,7 @@ func TestCompassConnectionController(t *testing.T) {
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			fakeT := &testing.T{}
-			called := configProviderMock.AssertCalled(fakeT, "GetRuntimeConfig")
-			return called
+			return mockFunctionCalled(&configProviderMock.Mock, "GetRuntimeConfig")
 		})
 
 		// then
@@ -288,9 +284,7 @@ func TestCompassConnectionController(t *testing.T) {
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			fakeT := &testing.T{}
-			called := certsConnectorClientMock.AssertCalled(fakeT, "Configuration", nilHeaders)
-			return called
+			return mockFunctionCalled(&certsConnectorClientMock.Mock, "Configuration", nilHeaders)
 		})
 
 		// then
@@ -305,9 +299,7 @@ func TestCompassConnectionController(t *testing.T) {
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			fakeT := &testing.T{}
-			called := clientsProviderMock.AssertCalled(fakeT, "GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL)
-			return called
+			return mockFunctionCalled(&clientsProviderMock.Mock, "GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL)
 		})
 
 		// then
@@ -322,9 +314,7 @@ func TestCompassConnectionController(t *testing.T) {
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			fakeT := &testing.T{}
-			called := credentialsManagerMock.AssertCalled(fakeT, "GetClientCredentials")
-			return called
+			return mockFunctionCalled(&credentialsManagerMock.Mock, "GetClientCredentials")
 		})
 
 		// then
@@ -364,11 +354,14 @@ func TestFailedToInitializeConnection(t *testing.T) {
 	supervisor, err := baseDependencies.InitializeController()
 	require.NoError(t, err)
 
+	defer func() {
+		err := compassConnectionCRClient.Delete(compassConnectionName, &v1.DeleteOptions{})
+		if err != nil {
+			t.Logf("error while deleting Compass Connection: %s", err.Error())
+		}
+	}()
 	stopChan, _ := StartTestManager(t, ctrlManager)
 	defer close(stopChan)
-	defer func() {
-		compassConnectionCRClient.Delete(compassConnectionName, &v1.DeleteOptions{})
-	}()
 
 	initConnectionIfNotExist := func() {
 		_, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
@@ -391,13 +384,11 @@ func TestFailedToInitializeConnection(t *testing.T) {
 		{
 			description: "failed to preserve credentials",
 			setupFunc: func() {
+				credentialsManagerMock.Calls = nil
 				credentialsManagerMock.On("PreserveCredentials", mock.AnythingOfType("certificates.Credentials")).Return(errors.New("error"))
 			},
 			waitFunction: func() bool {
-				credentialsManagerMock.Calls = nil
-				fakeT := &testing.T{}
-				called := credentialsManagerMock.AssertCalled(fakeT, "PreserveCredentials", mock.AnythingOfType("certificates.Credentials"))
-				return called
+				return mockFunctionCalled(&credentialsManagerMock.Mock, "PreserveCredentials", mock.AnythingOfType("certificates.Credentials"))
 			},
 		},
 		{
@@ -408,9 +399,7 @@ func TestFailedToInitializeConnection(t *testing.T) {
 				connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders).Return(gqlschema.CertificationResult{}, errors.New("error"))
 			},
 			waitFunction: func() bool {
-				fakeT := &testing.T{}
-				called := connectorTokenClientMock.AssertCalled(fakeT, "SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders)
-				return called
+				return mockFunctionCalled(&connectorTokenClientMock.Mock, "SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders)
 			},
 		},
 		{
@@ -421,9 +410,7 @@ func TestFailedToInitializeConnection(t *testing.T) {
 				connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders).Return(gqlschema.CertificationResult{}, errors.New("error"))
 			},
 			waitFunction: func() bool {
-				fakeT := &testing.T{}
-				called := connectorTokenClientMock.AssertCalled(fakeT, "Configuration", connectorTokenHeaders)
-				return called
+				return mockFunctionCalled(&connectorTokenClientMock.Mock, "Configuration", connectorTokenHeaders)
 			},
 		},
 		{
@@ -433,9 +420,7 @@ func TestFailedToInitializeConnection(t *testing.T) {
 				clientsProviderMock.On("GetConnectorClient", connectorURL).Return(nil, errors.New("error"))
 			},
 			waitFunction: func() bool {
-				fakeT := &testing.T{}
-				called := clientsProviderMock.AssertCalled(fakeT, "GetConnectorClient", connectorURL)
-				return called
+				return mockFunctionCalled(&connectorTokenClientMock.Mock, "GetConnectorClient", connectorURL)
 			},
 		},
 		{
@@ -445,9 +430,9 @@ func TestFailedToInitializeConnection(t *testing.T) {
 				configProviderMock.On("GetConnectionConfig").Return(config.ConnectionConfig{Token: token}, nil)
 			},
 			waitFunction: func() bool {
-				fakeT := &testing.T{}
-				called := configProviderMock.AssertCalled(fakeT, "GetConnectionConfig")
-				return called
+
+				return mockFunctionCalled(&configProviderMock.Mock, "GetConnectionConfig")
+
 			},
 		},
 		{
@@ -498,6 +483,11 @@ func waitFor(interval, timeout time.Duration, isDone func() bool) error {
 func clearMockCalls(mock *mock.Mock) {
 	mock.ExpectedCalls = nil
 	mock.Calls = nil
+}
+
+func mockFunctionCalled(mock *mock.Mock, methodName string, arguments ...interface{}) bool {
+	fakeT := &testing.T{}
+	return mock.AssertNotCalled(fakeT, methodName, arguments...)
 }
 
 func waitForResynchronization() {
