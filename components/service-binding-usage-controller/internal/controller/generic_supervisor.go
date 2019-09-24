@@ -125,7 +125,7 @@ func (m *GenericSupervisor) HasSynced() bool {
 }
 
 func (m *GenericSupervisor) executeUpdate(res *unstructured.Unstructured) error {
-	_, err := m.resourceInterface.Namespace(res.GetNamespace()).Update(res)
+	_, err := m.resourceInterface.Namespace(res.GetNamespace()).Update(res, metav1.UpdateOptions{}, "")
 	if err != nil {
 		return errors.Wrapf(err, "while updating %s %s in namespace %s", res.GetKind(), res.GetName(), res.GetNamespace())
 	}

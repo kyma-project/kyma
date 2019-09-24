@@ -5,7 +5,7 @@ package v1alpha1
 import (
 	time "time"
 
-	settings_v1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/settings/v1alpha1"
+	settingsv1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/settings/v1alpha1"
 	versioned "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions/internalinterfaces"
 	v1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/listers/settings/v1alpha1"
@@ -54,7 +54,7 @@ func NewFilteredPodPresetInformer(client versioned.Interface, namespace string, 
 				return client.SettingsV1alpha1().PodPresets(namespace).Watch(options)
 			},
 		},
-		&settings_v1alpha1.PodPreset{},
+		&settingsv1alpha1.PodPreset{},
 		resyncPeriod,
 		indexers,
 	)
@@ -65,7 +65,7 @@ func (f *podPresetInformer) defaultInformer(client versioned.Interface, resyncPe
 }
 
 func (f *podPresetInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&settings_v1alpha1.PodPreset{}, f.defaultInformer)
+	return f.factory.InformerFor(&settingsv1alpha1.PodPreset{}, f.defaultInformer)
 }
 
 func (f *podPresetInformer) Lister() v1alpha1.PodPresetLister {
