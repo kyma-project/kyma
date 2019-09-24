@@ -40,8 +40,8 @@ func (c *eventActivationConverter) ToGQLEvents(in *spec.AsyncAPISpec) []gqlschem
 	}
 
 	var events []gqlschema.EventActivationEvent
-	for k, topic := range in.Data.Topics {
-		if !c.isSubscribeEvent(topic) {
+	for k, channel := range in.Data.Channels {
+		if !c.isSubscribeEvent(channel) {
 			continue
 		}
 
@@ -49,8 +49,8 @@ func (c *eventActivationConverter) ToGQLEvents(in *spec.AsyncAPISpec) []gqlschem
 		events = append(events, gqlschema.EventActivationEvent{
 			EventType:   eventType,
 			Version:     version,
-			Description: c.getSummary(topic),
-			Schema:      c.getPayload(topic),
+			Description: c.getSummary(channel),
+			Schema:      c.getPayload(channel),
 		})
 	}
 
@@ -58,13 +58,14 @@ func (c *eventActivationConverter) ToGQLEvents(in *spec.AsyncAPISpec) []gqlschem
 }
 
 func (c *eventActivationConverter) getEventVersionedType(in string) (string, string) {
-	lastDotIndex := strings.LastIndex(in, ".")
+	versionedType := strings.Replace(in, "/", ".", -1)
+	lastDotIndex := strings.LastIndex(versionedType, ".")
 	if lastDotIndex < 0 {
-		return in, ""
+		return versionedType, ""
 	}
 
-	eventType := in[:lastDotIndex]
-	version := in[(lastDotIndex + 1):]
+	eventType := versionedType[:lastDotIndex]
+	version := versionedType[(lastDotIndex + 1):]
 
 	return eventType, version
 }
@@ -75,12 +76,12 @@ func (c *eventActivationConverter) isSubscribeEvent(in interface{}) bool {
 }
 
 func (c *eventActivationConverter) getSummary(in interface{}) string {
-	subscribe, exists := c.convertToMap(in)["subscribe"]
-	if !exists {
+	message := c.getMessage(in)
+	if message == nil {
 		return ""
 	}
 
-	summary, exists := c.convertToMap(subscribe)["summary"]
+	summary, exists := message["summary"]
 	if !exists {
 		return ""
 	}
@@ -94,17 +95,30 @@ func (c *eventActivationConverter) getSummary(in interface{}) string {
 }
 
 func (c *eventActivationConverter) getPayload(in interface{}) map[string]interface{} {
-	subscribe, exists := c.convertToMap(in)["subscribe"]
-	if !exists {
+	message := c.getMessage(in)
+	if message == nil {
 		return nil
 	}
 
-	payload, exists := c.convertToMap(subscribe)["payload"]
+	payload, exists := message["payload"]
 	if !exists {
 		return nil
 	}
 
 	return c.convertToMap(payload)
+}
+
+func (c *eventActivationConverter) getMessage(in interface{}) map[string]interface{} {
+	subscribe, exists := c.convertToMap(in)["subscribe"]
+	if !exists {
+		return map[string]interface{}{}
+	}
+
+	message, exists := c.convertToMap(subscribe)["message"]
+	if !exists {
+		return map[string]interface{}{}
+	}
+	return c.convertToMap(message)
 }
 
 func (c *eventActivationConverter) convertToMap(in interface{}) map[string]interface{} {
