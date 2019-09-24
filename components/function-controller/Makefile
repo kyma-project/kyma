@@ -54,11 +54,11 @@ run: generate fmt vet
 	go run ./cmd/manager/main.go
 
 # Install CRDs into a cluster
-install: symlinks
+install:
 	kubectl apply -f config/crds/
 
 # Uninstall CRDs from cluster
-uninstall: symlinks
+uninstall:
 	kubectl delete -f config/crds/
 
 # Generate manifests e.g. CRD, RBAC etc.

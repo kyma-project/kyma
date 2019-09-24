@@ -1,10 +1,10 @@
-# Copyright 2018 The Knative Authors
+# Copyright 2019 The Tekton Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,21 +14,19 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: builds.build.knative.dev
-  labels:
-    knative.dev/crd-install: "true"
+  name: taskruns.tekton.dev
 spec:
-  group: build.knative.dev
-  version: v1alpha1
+  group: tekton.dev
   names:
-    kind: Build
-    plural: builds
+    kind: TaskRun
+    plural: taskruns
     categories:
     - all
-    - knative
+    - tekton-pipelines
+    shortNames:
+    - tr
+    - trs
   scope: Namespaced
-  subresources:
-    status: {}
   additionalPrinterColumns:
   - name: Succeeded
     type: string
@@ -42,3 +40,8 @@ spec:
   - name: CompletionTime
     type: date
     JSONPath: .status.completionTime
+  # Opt into the status subresource so metadata.generation
+  # starts to increment
+  subresources:
+    status: {}
+  version: v1alpha1
