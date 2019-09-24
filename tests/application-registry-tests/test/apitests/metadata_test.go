@@ -831,7 +831,6 @@ func requireDefinitionsWithCertCredentialsEqual(t *testing.T, expected testkit.S
 
 func requireServiceDefinitionEqual(t *testing.T, expected testkit.ServiceDetails, actual *testkit.ServiceDetails) {
 	require.NotNil(t, actual)
-	require.EqualValues(t, expected, *actual)
 	require.Equal(t, expected.Name, actual.Name)
 	require.Equal(t, expected.Provider, actual.Provider)
 	require.Equal(t, expected.Description, actual.Description)
