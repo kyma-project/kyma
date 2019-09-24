@@ -41,4 +41,4 @@ The source files are uploaded directly to the given storage without any modifica
 
 ![Specification types](./assets/spec-types.svg)
 
->**TIP:** The default Kyma webhooks that modify and validate `asyncapi` source files and extract metadata from `markdown` files are defined in the [`webhook-config-map.yaml)`](https://github.com/kyma-project/kyma/blob/master/resources/cms/charts/cms-controller-manager/templates/webhook-config-map.yaml) ConfigMap. You can easily configure it by adding new or removing existing webhooks. Edit the ConfigMap before installation if you install Kyma from sources or in the runtime if you install Kyma from a release. Apply the changes using the `kubectl apply -f webhook-config-map.yaml` command.
+>**TIP:** The default Kyma webhooks that modify and validate `asyncapi` source files and extract metadata from `markdown` files are defined in the [`webhook-config-map.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/cms/charts/cms-controller-manager/templates/webhook-config-map.yaml) ConfigMap.
