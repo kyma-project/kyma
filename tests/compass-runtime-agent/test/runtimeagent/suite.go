@@ -2,6 +2,7 @@ package runtimeagent
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/oauth"
 	"testing"
 
 	"k8s.io/apimachinery/pkg/labels"
@@ -107,6 +108,14 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		return nil, err
 	}
 
+	oauthClient := oauth.NewOauthClient(config.HyadraURL)
+
+	token, err := oauthClient.GetAuthorizationToken()
+
+	if err != nil {
+		return nil, err
+	}
+
 	serviceClient := k8sClient.Core().Services(config.IntegrationNamespace)
 	secretsClient := k8sClient.Core().Secrets(config.IntegrationNamespace)
 
@@ -116,7 +125,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		k8sClient:          k8sClient,
 		podClient:          k8sClient.Core().Pods(config.Namespace),
 		nameResolver:       nameResolver,
-		CompassClient:      compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.GraphQLLog),
+		CompassClient:      compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, token, config.GraphQLLog),
 		APIAccessChecker:   assertions.NewAPIAccessChecker(nameResolver),
 		K8sResourceChecker: assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
 		mockServiceServer:  mock.NewAppMockServer(config.MockServicePort),
