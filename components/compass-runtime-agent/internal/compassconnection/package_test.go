@@ -505,7 +505,7 @@ func waitForResynchronization() {
 }
 
 func waitForResourceUpdate(expectedState v1alpha1.ConnectionState) error {
-	// Initial sleep to make sure
+	// Initial sleep in case if Connection will change from expected state to different
 	time.Sleep(2 * time.Second)
 
 	return waitFor(1*time.Second, 4*time.Second, func() bool {
