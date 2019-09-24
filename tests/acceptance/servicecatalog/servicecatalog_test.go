@@ -127,7 +127,7 @@ func TestHelmBrokerAddonsConfiguration(t *testing.T) {
 	repeat.AssertFuncAtMost(t, func() error {
 		_, err := scClient.ServicecatalogV1beta1().ServiceClasses(namespace).Get(addonId, metav1.GetOptions{})
 		return err
-	}, time.Second*10)
+	}, time.Second*20)
 }
 
 func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
@@ -168,7 +168,7 @@ func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
 	repeat.AssertFuncAtMost(t, func() error {
 		_, err := scClient.ServicecatalogV1beta1().ClusterServiceClasses().Get(addonId, metav1.GetOptions{})
 		return err
-	}, time.Second*10)
+	}, time.Second*20)
 }
 
 func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {
