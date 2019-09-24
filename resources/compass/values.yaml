@@ -56,7 +56,8 @@ global:
     certificateDataHeader: "Certificate-Data" # Should be stripped by Virtual Service
     revocation:
       configmap:
-        namespace: compass-system
+        shouldCreate: false
+        namespace: kyma-integration
         name: revocations-config
     # If key and certificate are not provided they will be generated
     caKey: ""

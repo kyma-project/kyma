@@ -1,12 +1,13 @@
----
+{{ if .Values.global.connector.revocation.configmap.shouldCreate }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: revocations-config
-  namespace: {{ .Values.global.namespace }}
+  name: {{ .Values.global.connector.revocation.configmap.name }}
+  namespace: {{ .Values.global.connector.revocation.configmap.namespace }}
   labels:
     app: {{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
+{{ end }}
