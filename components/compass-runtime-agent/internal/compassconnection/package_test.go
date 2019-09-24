@@ -487,7 +487,7 @@ func clearMockCalls(mock *mock.Mock) {
 
 func mockFunctionCalled(mock *mock.Mock, methodName string, arguments ...interface{}) bool {
 	fakeT := &testing.T{}
-	return mock.AssertNotCalled(fakeT, methodName, arguments...)
+	return mock.AssertCalled(fakeT, methodName, arguments...)
 }
 
 func waitForResynchronization() {
