@@ -230,6 +230,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			},
 		},
 		// TODO: CSRF Tokens does not work properly with Director (https://github.com/kyma-incubator/compass/issues/207)
+		// TODO: Issue is closed
 		//{
 		//	description: "Test case 4:Fetch new CSRF token and retry if token expired",
 		//	initialPhaseInput: func() *applications.ApplicationInput {
