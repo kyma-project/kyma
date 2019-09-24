@@ -96,7 +96,7 @@ func (c *FakeClusterMicroFrontends) DeleteCollection(options *v1.DeleteOptions, 
 // Patch applies the patch and returns the patched clusterMicroFrontend.
 func (c *FakeClusterMicroFrontends) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.ClusterMicroFrontend, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootPatchSubresourceAction(clustermicrofrontendsResource, name, data, subresources...), &v1alpha1.ClusterMicroFrontend{})
+		Invokes(testing.NewRootPatchSubresourceAction(clustermicrofrontendsResource, name, pt, data, subresources...), &v1alpha1.ClusterMicroFrontend{})
 	if obj == nil {
 		return nil, err
 	}
