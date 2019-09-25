@@ -73,7 +73,7 @@ func (r *eventActivationResolver) EventActivationEventsField(ctx context.Context
 		return []gqlschema.EventActivationEvent{}, gqlerror.New(err, assetstorePretty.ClusterAsset)
 	}
 
-	if asyncApiSpec.Data.AsyncAPI != "1.0.0" {
+	if asyncApiSpec.Data.AsyncAPI != "2.0.0" {
 		details := fmt.Sprintf("not supported version `%s` of %s", asyncApiSpec.Data.AsyncAPI, "AsyncApiSpec")
 		glog.Error(details)
 		return nil, gqlerror.NewInternal(gqlerror.WithDetails(details))

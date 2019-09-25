@@ -106,7 +106,7 @@ func TestService_Start(t *testing.T) {
 			wait.Wait()
 
 			// then
-			g.Expect(err).To(gomega.Equal(http.ErrServerClosed))
+			g.Expect(err).To(gomega.Succeed())
 
 		})
 	}

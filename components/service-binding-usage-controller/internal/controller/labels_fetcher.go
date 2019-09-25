@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	scListers "github.com/kubernetes-incubator/service-catalog/pkg/client/listers_generated/servicecatalog/v1beta1"
+	scTypes "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	scListers "github.com/kubernetes-sigs/service-catalog/pkg/client/listers_generated/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/pretty"
 	"github.com/pkg/errors"
 )
@@ -33,7 +33,7 @@ func (c *BindingLabelsFetcher) Fetch(svcBinding *scTypes.ServiceBinding) (map[st
 		return nil, errors.New("cannot fetch labels from ClusterServiceClass/ServiceClass because binding is nil")
 	}
 
-	svcInstanceName := svcBinding.Spec.ServiceInstanceRef.Name
+	svcInstanceName := svcBinding.Spec.InstanceRef.Name
 	svcInstance, err := c.siLister.ServiceInstances(svcBinding.Namespace).Get(svcInstanceName)
 
 	if err != nil {
