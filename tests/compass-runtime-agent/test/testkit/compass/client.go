@@ -3,6 +3,7 @@ package compass
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
@@ -327,6 +328,6 @@ func (c *Client) DeleteEventAPI(id string) (string, error) {
 func (c *Client) newRequest(query string) *gcli.Request {
 	req := gcli.NewRequest(query)
 	req.Header.Set(TenantHeader, c.tenant)
-	req.Header.Set(AuthorizationHeader, c.authorizationToken)
+	req.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", c.authorizationToken))
 	return req
 }
