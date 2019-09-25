@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/testutil"
+	"kyma-project.io/compass-runtime-agent/internal/testutil"
 )
 
 var (

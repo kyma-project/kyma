@@ -9,12 +9,12 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
+	"kyma-project.io/compass-runtime-agent/internal/certificates"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql/mocks"
 	"github.com/stretchr/testify/assert"
+	"kyma-project.io/compass-runtime-agent/internal/graphql/mocks"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
+	"kyma-project.io/compass-runtime-agent/internal/graphql"
 )
 
 func newMockGQLConstructor(

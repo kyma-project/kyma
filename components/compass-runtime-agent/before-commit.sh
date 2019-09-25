@@ -10,19 +10,7 @@ NC='\033[0m' # No Color
 echo -e "${INVERTED}"
 echo "USER: " + $USER
 echo "PATH: " + $PATH
-echo "GOPATH:" + $GOPATH
 echo -e "${NC}"
-
-##
-# DEP ENSURE
-##
-dep ensure -v --vendor-only
-ensureResult=$?
-if [ ${ensureResult} != 0 ]; then
-	echo -e "${RED}✗ dep ensure -v --vendor-only${NC}\n$ensureResult${NC}"
-	exit 1
-else echo -e "${GREEN}√ dep ensure -v --vendor-only${NC}"
-fi
 
 ##
 # GO BUILD
@@ -41,18 +29,6 @@ if [ ${goBuildResult} != 0 ]; then
 	echo -e "${RED}✗ go build${NC}\n$goBuildResult${NC}"
 	exit 1
 else echo -e "${GREEN}√ go build${NC}"
-fi
-
-##
-# DEP STATUS
-##
-echo "? dep status"
-depResult=$(dep status -v)
-if [[ $? != 0 ]]
-    then
-        echo -e "${RED}✗ dep status\n$depResult${NC}"
-        exit 1;
-    else  echo -e "${GREEN}√ dep status${NC}"
 fi
 
 ##

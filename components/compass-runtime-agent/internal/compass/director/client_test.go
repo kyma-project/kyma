@@ -3,12 +3,12 @@ package director
 import (
 	"github.com/stretchr/testify/require"
 
-	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
+	kymamodel "kyma-project.io/compass-runtime-agent/internal/kyma/model"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	gql "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
+	gql "kyma-project.io/compass-runtime-agent/internal/graphql"
 
 	gcli "github.com/machinebox/graphql"
 

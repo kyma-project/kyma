@@ -1,11 +1,11 @@
 package compass
 
 import (
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/connector"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/director"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
 	"github.com/pkg/errors"
+	"kyma-project.io/compass-runtime-agent/internal/certificates"
+	"kyma-project.io/compass-runtime-agent/internal/compass/connector"
+	"kyma-project.io/compass-runtime-agent/internal/compass/director"
+	"kyma-project.io/compass-runtime-agent/internal/graphql"
 )
 
 //go:generate mockery -name=ClientsProvider

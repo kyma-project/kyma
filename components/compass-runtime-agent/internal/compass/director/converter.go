@@ -6,7 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
+	kymamodel "kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
 func (app Application) ToApplication() kymamodel.Application {

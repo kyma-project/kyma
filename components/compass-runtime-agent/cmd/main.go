@@ -1,23 +1,23 @@
 package main
 
 import (
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
-	confProvider "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets"
+	"kyma-project.io/compass-runtime-agent/internal/certificates"
+	"kyma-project.io/compass-runtime-agent/internal/compass"
+	confProvider "kyma-project.io/compass-runtime-agent/internal/config"
+	"kyma-project.io/compass-runtime-agent/internal/graphql"
+	"kyma-project.io/compass-runtime-agent/internal/secrets"
 
 	"os"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compassconnection"
+	"kyma-project.io/compass-runtime-agent/internal/compassconnection"
 
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 
-	apis "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	log "github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
+	apis "kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 )
 
 func main() {

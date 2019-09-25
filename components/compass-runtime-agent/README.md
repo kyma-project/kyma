@@ -36,3 +36,12 @@ The Compass Runtime Agent uses these environment variables:
 - **DIRECTOR_URL**
 - **RUNTIME_ID**
 - **TENANT**
+
+
+## Generating Custom Resource client
+
+Code generation is not yet supported with Go Modules, therefor the code generator needs to be run inside Docker container.
+To generate Custom Resource client and deep copy functions, run this command from component directory:
+```
+./hack/code-gen-in-docker.sh
+```

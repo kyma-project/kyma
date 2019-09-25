@@ -3,8 +3,8 @@ package istio
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
+	"kyma-project.io/compass-runtime-agent/internal/apperrors"
+	"kyma-project.io/compass-runtime-agent/internal/k8sconsts"
 
 	"k8s.io/apimachinery/pkg/types"
 

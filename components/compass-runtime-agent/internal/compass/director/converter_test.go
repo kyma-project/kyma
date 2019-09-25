@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
+	kymamodel "kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
 const (

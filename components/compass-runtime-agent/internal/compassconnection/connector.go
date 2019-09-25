@@ -4,14 +4,14 @@ import (
 	"crypto/x509/pkix"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
+	"kyma-project.io/compass-runtime-agent/internal/compass"
 
 	"github.com/kyma-incubator/compass/components/connector/pkg/gqlschema"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
+	"kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 
 	"github.com/pkg/errors"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
+	"kyma-project.io/compass-runtime-agent/internal/certificates"
 )
 
 type EstablishedConnection struct {

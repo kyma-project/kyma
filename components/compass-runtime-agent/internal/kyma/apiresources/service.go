@@ -1,16 +1,16 @@
 package apiresources
 
 import (
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/accessservice"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/istio"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/types"
+	"kyma-project.io/compass-runtime-agent/internal/apperrors"
+	"kyma-project.io/compass-runtime-agent/internal/k8sconsts"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/accessservice"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/istio"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 )
 
 type ApiIDToSecretNameMap map[string]string
