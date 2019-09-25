@@ -184,8 +184,10 @@ func (s *crSupervisor) maintainCompassConnection(credentials certificates.Client
 			return errors.Wrap(err, "Failed to preserve certificate")
 		}
 
+		s.log.Infof("Successfully saved renewed certificates")
 		compassConnection.SetCertificateStatus(connectionTime, newCreds.ClientCertificate)
 		compassConnection.Spec.RefreshCredentialsNow = false
+		compassConnection.Status.ConnectionStatus.Renewed = connectionTime
 	}
 
 	s.log.Infof("Connection maintained. Director URL: %s , ConnectorURL: %s", managementInfo.DirectorURL, managementInfo.ConnectorURL)
@@ -194,7 +196,6 @@ func (s *crSupervisor) maintainCompassConnection(credentials certificates.Client
 		compassConnection.Status.ConnectionStatus = &v1alpha1.ConnectionStatus{}
 	}
 
-	compassConnection.Status.ConnectionStatus.Renewed = connectionTime
 	compassConnection.Status.ConnectionStatus.LastSync = connectionTime
 	compassConnection.Status.ConnectionStatus.LastSuccess = connectionTime
 	compassConnection.Spec.ManagementInfo = managementInfo
@@ -253,10 +254,11 @@ func (s *crSupervisor) setConnectionFailedStatus(connectionCR *v1alpha1.CompassC
 	s.log.Errorf("Error while establishing connection with Compass: %s", err.Error())
 	s.log.Infof("Setting Compass Connection to ConnectionFailed state")
 	connectionCR.Status.State = v1alpha1.ConnectionFailed
-	connectionCR.Status.ConnectionStatus = &v1alpha1.ConnectionStatus{
-		LastSync: metav1.Now(),
-		Error:    connStatusError,
+	if connectionCR.Status.ConnectionStatus == nil {
+		connectionCR.Status.ConnectionStatus = &v1alpha1.ConnectionStatus{}
 	}
+	connectionCR.Status.ConnectionStatus.LastSync = metav1.Now()
+	connectionCR.Status.ConnectionStatus.Error = connStatusError
 }
 
 func (s *crSupervisor) setConnectionSynchronizedStatus(connectionCR *v1alpha1.CompassConnection, attemptTime metav1.Time) {
@@ -273,10 +275,11 @@ func (s *crSupervisor) setConnectionMaintenanceFailedStatus(connectionCR *v1alph
 	s.log.Error(errorMsg)
 	s.log.Infof("Setting Compass Connection to ConnectionMaintenanceFailed state")
 	connectionCR.Status.State = v1alpha1.ConnectionMaintenanceFailed
-	connectionCR.Status.ConnectionStatus = &v1alpha1.ConnectionStatus{
-		LastSync: attemptTime,
-		Error:    errorMsg,
+	if connectionCR.Status.ConnectionStatus == nil {
+		connectionCR.Status.ConnectionStatus = &v1alpha1.ConnectionStatus{}
 	}
+	connectionCR.Status.ConnectionStatus.LastSync = attemptTime
+	connectionCR.Status.ConnectionStatus.Error = errorMsg
 }
 
 func (s *crSupervisor) updateCompassConnection(connectionCR *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error) {
@@ -285,12 +288,13 @@ func (s *crSupervisor) updateCompassConnection(connectionCR *v1alpha1.CompassCon
 	return s.crManager.Update(connectionCR)
 }
 
-func (s *crSupervisor) setSyncFailedStatus(connection *v1alpha1.CompassConnection, attemptTime metav1.Time, errorMsg string) {
+func (s *crSupervisor) setSyncFailedStatus(connectionCR *v1alpha1.CompassConnection, attemptTime metav1.Time, errorMsg string) {
 	s.log.Error(errorMsg)
 	s.log.Infof("Setting Compass Connection to SynchronizationFailed state")
-	connection.Status.State = v1alpha1.SynchronizationFailed
-	connection.Status.SynchronizationStatus = &v1alpha1.SynchronizationStatus{
-		LastAttempt: attemptTime,
-		Error:       errorMsg,
+	connectionCR.Status.State = v1alpha1.SynchronizationFailed
+	if connectionCR.Status.SynchronizationStatus == nil {
+		connectionCR.Status.SynchronizationStatus = &v1alpha1.SynchronizationStatus{}
 	}
+	connectionCR.Status.SynchronizationStatus.LastAttempt = attemptTime
+	connectionCR.Status.SynchronizationStatus.Error = errorMsg
 }

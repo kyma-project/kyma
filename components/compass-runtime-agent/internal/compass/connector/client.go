@@ -10,8 +10,8 @@ import (
 
 //go:generate mockery -name=Client
 type Client interface {
-	Configuration(headers map[string][]string) (schema.Configuration, error)
-	SignCSR(csr string, headers map[string][]string) (schema.CertificationResult, error)
+	Configuration(headers map[string]string) (schema.Configuration, error)
+	SignCSR(csr string, headers map[string]string) (schema.CertificationResult, error)
 }
 
 type connectorClient struct {
@@ -26,7 +26,7 @@ func NewConnectorClient(graphQlClient graphql.Client) Client {
 	}
 }
 
-func (c connectorClient) Configuration(headers map[string][]string) (schema.Configuration, error) {
+func (c connectorClient) Configuration(headers map[string]string) (schema.Configuration, error) {
 	query := c.queryProvider.configuration()
 	req := gcli.NewRequest(query)
 
@@ -41,7 +41,7 @@ func (c connectorClient) Configuration(headers map[string][]string) (schema.Conf
 	return response.Result, nil
 }
 
-func (c connectorClient) SignCSR(csr string, headers map[string][]string) (schema.CertificationResult, error) {
+func (c connectorClient) SignCSR(csr string, headers map[string]string) (schema.CertificationResult, error) {
 	query := c.queryProvider.signCSR(csr)
 	req := gcli.NewRequest(query)
 
@@ -56,11 +56,9 @@ func (c connectorClient) SignCSR(csr string, headers map[string][]string) (schem
 	return response.Result, nil
 }
 
-func applyHeaders(req *gcli.Request, headers map[string][]string) {
+func applyHeaders(req *gcli.Request, headers map[string]string) {
 	for h, val := range headers {
-		for _, v := range val {
-			req.Header.Add(h, v)
-		}
+		req.Header.Set(h, val)
 	}
 }
 

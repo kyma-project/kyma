@@ -65,7 +65,7 @@ func (cc *compassConnector) EstablishConnection(connectorURL, token string) (Est
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to generate CSR")
 	}
 
-	certResponse, err := tokenSecuredConnectorClient.SignCSR(csr, connectorTokenHeader(token))
+	certResponse, err := tokenSecuredConnectorClient.SignCSR(csr, connectorTokenHeader(configuration.Token.Token))
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to sign CSR")
 	}
@@ -135,9 +135,9 @@ func toManagementInfo(configInfo *gqlschema.ManagementPlaneInfo) v1alpha1.Manage
 	}
 }
 
-func connectorTokenHeader(token string) map[string][]string {
-	return map[string][]string{
-		ConnectorTokenHeader: {token},
+func connectorTokenHeader(token string) map[string]string {
+	return map[string]string{
+		ConnectorTokenHeader: token,
 	}
 }
 

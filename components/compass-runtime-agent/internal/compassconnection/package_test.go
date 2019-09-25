@@ -51,10 +51,10 @@ const (
 )
 
 var (
-	connectorTokenHeaders = map[string][]string{
-		ConnectorTokenHeader: {token},
+	connectorTokenHeaders = map[string]string{
+		ConnectorTokenHeader: token,
 	}
-	nilHeaders map[string][]string
+	nilHeaders map[string]string
 
 	connectorURL            = "https://connector.com"
 	directorURL             = "https://director.com"

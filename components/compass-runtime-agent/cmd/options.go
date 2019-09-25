@@ -13,11 +13,11 @@ const (
 )
 
 type Config struct {
-	ConfigFile                     string        `envconfig:"default=/etc/config/config.json"`
-	ControllerSyncPeriod           time.Duration `envconfig:"default=60s"`
-	MinimalCompassSyncTime         time.Duration `envconfig:"default=300s"`
+	ConfigFile                     string        `envconfig:"default=config/config.json"`
+	ControllerSyncPeriod           time.Duration `envconfig:"default=20s"`
+	MinimalCompassSyncTime         time.Duration `envconfig:"default=10s"`
 	CertValidityRenewalThreshold   float64       `envconfig:"default=0.3"`
-	ClusterCertificatesSecret      string        `envconfig:"default=kyma-integration/cluster-client-certificates"`
+	ClusterCertificatesSecret      string        `envconfig:"default=compass-system/cluster-client-certificates"`
 	CaCertificatesSecret           string        `envconfig:"default=istio-system/ca-certificates"`
 	InsecureConnectorCommunication bool          `envconfig:"default=false"`
 	IntegrationNamespace           string        `envconfig:"default=kyma-integration"`
@@ -29,12 +29,12 @@ type Config struct {
 
 func (o *Config) String() string {
 	return fmt.Sprintf("ConfigFile=%s, "+
-		"ControllerSyncPeriod=%d, MinimalCompassSyncTime=%d, "+
+		"ControllerSyncPeriod=%s, MinimalCompassSyncTime=%s, "+
 		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
 		"IntegrationNamespace=%s, GatewayPort=%d, InsecureConfigurationFetch=%v, UploadServiceUrl=%s, "+
 		"QueryLogging=%v",
 		o.ConfigFile,
-		o.ControllerSyncPeriod, o.MinimalCompassSyncTime,
+		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
 		o.IntegrationNamespace, o.GatewayPort, o.InsecureConfigurationFetch, o.UploadServiceUrl,
 		o.QueryLogging)

@@ -37,6 +37,10 @@ const (
 	token = "token"
 )
 
+var (
+	connectorTokenHeaders map[string]string = map[string]string{TokenHeader: token}
+)
+
 func TestCertificateSecuredClient_Configuration(t *testing.T) {
 
 	expectedRequest := gql.NewRequest(expectedConfigurationQuery)
@@ -63,7 +67,7 @@ func TestCertificateSecuredClient_Configuration(t *testing.T) {
 		certSecuredClient := NewConnectorClient(gqlClient)
 
 		// when
-		configResponse, err := certSecuredClient.Configuration(map[string][]string{TokenHeader: {token}})
+		configResponse, err := certSecuredClient.Configuration(connectorTokenHeaders)
 
 		// then
 		require.NoError(t, err)
@@ -81,7 +85,7 @@ func TestCertificateSecuredClient_Configuration(t *testing.T) {
 		certSecuredClient := NewConnectorClient(gqlClient)
 
 		// when
-		configResponse, err := certSecuredClient.Configuration(map[string][]string{TokenHeader: {token}})
+		configResponse, err := certSecuredClient.Configuration(connectorTokenHeaders)
 
 		// then
 		require.Error(t, err)
@@ -112,7 +116,7 @@ func TestCertificateSecuredClient_SignCSR(t *testing.T) {
 		certSecuredClient := NewConnectorClient(gqlClient)
 
 		// when
-		configResponse, err := certSecuredClient.SignCSR(encodedCSR, map[string][]string{TokenHeader: {token}})
+		configResponse, err := certSecuredClient.SignCSR(encodedCSR, connectorTokenHeaders)
 
 		// then
 		require.NoError(t, err)
@@ -130,7 +134,7 @@ func TestCertificateSecuredClient_SignCSR(t *testing.T) {
 		certSecuredClient := NewConnectorClient(gqlClient)
 
 		// when
-		configResponse, err := certSecuredClient.SignCSR(encodedCSR, map[string][]string{TokenHeader: {token}})
+		configResponse, err := certSecuredClient.SignCSR(encodedCSR, connectorTokenHeaders)
 
 		// then
 		require.Error(t, err)
