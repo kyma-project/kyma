@@ -4,7 +4,7 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir: pr/
-      version: "PR-5340"
+      version: "PR-5729"
     runtimeAgentTests:
       dir: pr/
       version: "PR-5625"
@@ -13,16 +13,34 @@ compassRuntimeAgent:
   image:
     pullPolicy: IfNotPresent
   sync:
-    controllerSyncPeriod: 15
-    minimalConfigSyncTime: 15
+    controllerSyncPeriod: 15s
+    minimalConfigSyncTime: 15s
   resources:
     integrationNamespace: "kyma-integration"
     gatewayPort: 8080
     uploadServiceUrl: http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000
   config:
     insecureConfigurationFetch: true
+    file:
+      path: /etc/config
+      name: config.json
     configMap:
       name: compass-agent-configuration
+  certificates:
+    renewal:
+      validityThreshold: "0.3"
+    clientCertificate:
+      secret:
+        name: cluster-client-certificates
+        namespace: compass-system
+    caCertificate:
+      secret:
+        name: application-connector-certs
+        namespace: istio-system
+  connector:
+    insecureCommunication: true
+  debugg:
+    queryLogging: false
   tests:
     enabled: true
     mockService:
