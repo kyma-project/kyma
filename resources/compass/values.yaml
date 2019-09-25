@@ -17,6 +17,9 @@ global:
     healthchecker:
       dir: develop/
       version: "26601526"
+    provisioner:
+      dir: develop/
+      version: "70d89bff"
     schema_migrator:
       dir: develop/
       version: "07a992a2"
@@ -32,6 +35,9 @@ global:
       connector:
         dir: develop/
         version: "1adfa459"
+      provisioner:
+        dir: develop/
+        version: "96714748"
 
   isLocalEnv: false
 
@@ -57,6 +63,10 @@ global:
     # If key and certificate are not provided they will be generated
     caKey: ""
     caCertificate: ""
+
+  provisioner:
+    graphql:
+      port: 3000
 
   gateway:
     port: 3000
