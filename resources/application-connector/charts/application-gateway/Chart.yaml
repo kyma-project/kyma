@@ -1,4 +1,0 @@
-apiVersion: v1
-description: Gateway for Application Connector
-name: application-gateway
-version: 0.0.1
