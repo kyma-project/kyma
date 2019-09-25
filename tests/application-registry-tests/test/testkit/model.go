@@ -7,7 +7,7 @@ import (
 
 var (
 	ApiRawSpec    = Compact([]byte("{\"name\":\"api\"}"))
-	EventsRawSpec = Compact([]byte("{\"name\":\"events\"}"))
+	EventsRawSpec = Compact([]byte("{\"asyncapi\":\"2.0.0\",\"info\":{\"title\":\"OneOf example\",\"version\":\"1.0.0\"},\"channels\":{\"test\":{\"publish\":{\"message\":{\"$ref\":\"#/components/messages/testMessages\"}}}},\"components\":{\"messages\":{\"testMessages\":{\"description\":\"test\"}}}}"))
 
 	SwaggerApiSpec = Compact([]byte("{\"swagger\":\"2.0\"}"))
 )

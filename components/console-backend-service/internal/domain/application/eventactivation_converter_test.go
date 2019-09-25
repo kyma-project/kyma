@@ -124,14 +124,14 @@ func TestEventActivationConverter_ToGQLEvents(t *testing.T) {
 	t.Run("Without topics", func(t *testing.T) {
 		converter := &eventActivationConverter{}
 		asyncApi := fixAsyncApiSpec()
-		asyncApi.Data.Topics = map[string]interface{}{}
+		asyncApi.Data.Channels = map[string]interface{}{}
 
 		result := converter.ToGQLEvents(asyncApi)
 
 		assert.Empty(t, result)
 	})
 
-	t.Run("Topics without version", func(t *testing.T) {
+	t.Run("Channels without version", func(t *testing.T) {
 		converter := &eventActivationConverter{}
 
 		result := converter.ToGQLEvents(fixAsyncApiSpecWithoutVersion())
@@ -161,23 +161,27 @@ func fixAsyncApiSpec() *spec.AsyncAPISpec {
 	return &spec.AsyncAPISpec{
 		Data: spec.AsyncAPISpecData{
 			AsyncAPI: "1.0.0",
-			Topics: map[string]interface{}{
+			Channels: map[string]interface{}{
 				"sell.v1": map[string]interface{}{
 					"subscribe": map[string]interface{}{
-						"summary": "desc",
-						"payload": map[string]interface{}{
-							"type": "string",
+						"message": map[string]interface{}{
+							"summary": "desc",
+							"payload": map[string]interface{}{
+								"type": "string",
+							},
 						},
 					},
 				},
 				"sell.v2": map[string]interface{}{
 					"subscribe": map[string]interface{}{
-						"summary": "desc",
-						"payload": map[string]interface{}{
-							"type": "object",
-							"properties": map[string]interface{}{
-								"name": map[string]interface{}{
-									"type": "string",
+						"message": map[string]interface{}{
+							"summary": "desc",
+							"payload": map[string]interface{}{
+								"type": "object",
+								"properties": map[string]interface{}{
+									"name": map[string]interface{}{
+										"type": "string",
+									},
 								},
 							},
 						},
@@ -191,11 +195,13 @@ func fixAsyncApiSpec() *spec.AsyncAPISpec {
 func fixAsyncApiSpecWithoutVersion() *spec.AsyncAPISpec {
 	return &spec.AsyncAPISpec{
 		Data: spec.AsyncAPISpecData{
-			AsyncAPI: "1.0.0",
-			Topics: map[string]interface{}{
+			AsyncAPI: "2.0.0",
+			Channels: map[string]interface{}{
 				"sell": map[string]interface{}{
 					"subscribe": map[string]interface{}{
-						"summary": "desc",
+						"message": map[string]interface{}{
+							"summary": "desc",
+						},
 					},
 				},
 			},

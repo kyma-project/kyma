@@ -46,7 +46,7 @@ func (c *FakeApplicationMappings) List(opts v1.ListOptions) (result *v1alpha1.Ap
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.ApplicationMappingList{}
+	list := &v1alpha1.ApplicationMappingList{ListMeta: obj.(*v1alpha1.ApplicationMappingList).ListMeta}
 	for _, item := range obj.(*v1alpha1.ApplicationMappingList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -103,7 +103,7 @@ func (c *FakeApplicationMappings) DeleteCollection(options *v1.DeleteOptions, li
 // Patch applies the patch and returns the patched applicationMapping.
 func (c *FakeApplicationMappings) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.ApplicationMapping, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(applicationmappingsResource, c.ns, name, data, subresources...), &v1alpha1.ApplicationMapping{})
+		Invokes(testing.NewPatchSubresourceAction(applicationmappingsResource, c.ns, name, pt, data, subresources...), &v1alpha1.ApplicationMapping{})
 
 	if obj == nil {
 		return nil, err

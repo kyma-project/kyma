@@ -3,9 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
-	"net/http"
-
 	log "github.com/sirupsen/logrus"
+	"net/http"
 )
 
 // Config is used to customize the service configuration.
@@ -64,13 +63,13 @@ func (s *service) Start(ctx context.Context) error {
 	log.Infof("Service listen at %s", host)
 
 	go func() {
-		<-ctx.Done()
-		if err := srv.Shutdown(context.Background()); err != nil {
-			log.Errorf("HTTP server Shutdown: %v", err)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Error while starting HTTP service: %v", err)
 		}
 	}()
 
-	return srv.ListenAndServe()
+	<-ctx.Done()
+	return srv.Shutdown(context.Background())
 }
 
 // Register adds an endpoint to a service.
