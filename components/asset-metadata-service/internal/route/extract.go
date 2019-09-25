@@ -138,7 +138,7 @@ func (h *ExtractHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	}
 
 	h.writeResponse(w, status, response)
-	
+
 	httpServeHistogram.Observe(time.Since(start).Seconds())
 }
 
