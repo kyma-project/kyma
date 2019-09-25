@@ -38,6 +38,8 @@ endif
 ifeq (1, $(shell [ -t 0 ] && echo 1))
 DOCKER_INTERACTIVE := -i
 DOCKER_CREATE_OPTS := -t $(DOCKER_CREATE_OPTS)
+else
+DOCKER_INTERACTIVE := -a
 endif
 
 # Buildpack directives
