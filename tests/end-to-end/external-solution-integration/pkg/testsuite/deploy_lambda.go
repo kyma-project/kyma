@@ -2,6 +2,8 @@ package testsuite
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/avast/retry-go"
 	kubelessApi "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubelessClient "github.com/kubeless/kubeless/pkg/client/clientset/versioned/typed/kubeless/v1beta1"
@@ -13,7 +15,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	coreClient "k8s.io/client-go/kubernetes/typed/core/v1"
-	"time"
 )
 
 const lambdaFunction = `
@@ -38,7 +39,9 @@ function sendReq(url, resolve, reject) {
 
 module.exports = { main: function (event, context) {
 	console.log("Received event: ", event);
-    console.log(process.env.GATEWAY_URL.length)
+    if (process.env.GATEWAY_URL === undefined) {
+		throw new Error("GATEWAY_URL is undefined")
+	}
 	
 	return new Promise((resolve, reject) => {
 		const url = process.env.GATEWAY_URL + "/counter";
@@ -77,7 +80,6 @@ func (s *DeployLambda) Name() string {
 // Run executes the step
 func (s *DeployLambda) Run() error {
 	lambda := s.createLambda()
-
 	_, err := s.functions.Create(lambda)
 	if err != nil {
 		return err

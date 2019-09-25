@@ -101,9 +101,7 @@ func (s *E2E) Steps(config *rest.Config) ([]step.Step, error) {
 		testsuite.NewCreateServiceBindingUsage(s.testID, s.testID, s.testID, serviceBindingUsageClientset.ServicecatalogV1alpha1().ServiceBindingUsages(s.testID), state),
 		testsuite.NewCreateSubscription(s.testID, s.testID, lambdaEndpoint, eventingClientset.EventingV1alpha1().Subscriptions(s.testID)),
 		testsuite.NewSendEvent(s.testID, state),
-		step.Retry(
-			testsuite.NewCheckCounterPod(testService),
-		),
+		testsuite.NewCheckCounterPod(testService),
 	}, nil
 }
 
