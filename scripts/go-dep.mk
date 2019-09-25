@@ -39,7 +39,7 @@ ifeq (1, $(shell [ -t 0 ] && echo 1))
 DOCKER_INTERACTIVE := -i
 DOCKER_CREATE_OPTS := -t $(DOCKER_CREATE_OPTS)
 else
-DOCKER_INTERACTIVE := --attach 
+DOCKER_INTERACTIVE_START := --attach 
 endif
 
 # Buildpack directives
@@ -58,7 +58,7 @@ $(1):
 	@echo make $(1)
 	$$(eval container = $$(shell docker create $(DOCKER_CREATE_OPTS) make $(1)-local))
 	docker cp $(COMPONENT_DIR)/. $$(container):$(WORKSPACE_COMPONENT_DIR)/
-	docker start $(DOCKER_INTERACTIVE) $$(container)
+	docker start $(DOCKER_INTERACTIVE_START) $(DOCKER_INTERACTIVE) $$(container)
 endef
 
 .PHONY: verify format release
