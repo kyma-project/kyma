@@ -73,28 +73,28 @@ func main() {
 	log.Info("Setting up Subscription Controller")
 	err = subscription.ProvideController(mgr, sckOpts)
 	if err != nil {
-		log.Error(err, "Unable to create Subscription controller")
+		log.Error(err, "unable to create Subscription controller")
 		os.Exit(1)
 	}
 
 	log.Info("Setting up Event Activation Controller")
 	err = eventactivation.ProvideController(mgr)
 	if err != nil {
-		log.Error(err, "Unable to create Event Activation controller")
+		log.Error(err, "unable to create Event Activation controller")
 		os.Exit(1)
 	}
 
 	log.Info("Setting up Knative Channel Controller")
 	err = knativechannel.ProvideController(mgr)
 	if err != nil {
-		log.Error(err, "Unable to create Knative Channel controller")
+		log.Error(err, "unable to create Knative Channel controller")
 		os.Exit(1)
 	}
 
 	log.Info("Setting up Knative Subscription Controller")
 	err = knativesubscription.ProvideController(mgr)
 	if err != nil {
-		log.Error(err, "Unable to create Knative Subscription controller")
+		log.Error(err, "unable to create Knative Subscription controller")
 		os.Exit(1)
 	}
 
