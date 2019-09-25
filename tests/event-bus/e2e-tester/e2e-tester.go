@@ -28,6 +28,7 @@ import (
 const (
 	eventType1              = "test-e2e-1"
 	eventType2              = "test-e2e-2"
+	eventHeaderType         = "test-e2e-header-2"
 	eventTypeVersion        = "v1"
 	subscriptionName1       = "test-sub-1"
 	subscriptionName2       = "test-sub-2"
@@ -184,7 +185,7 @@ func main() {
 		shutdown(fail, &subscriber)
 	}
 
-	if err := createSubscription(subscriber.namespace, headersSubscriptionName, subscriber.eventEndpointV3URL, eventType1); err != nil {
+	if err := createSubscription(subscriber.namespace, headersSubscriptionName, subscriber.eventEndpointV3URL, eventHeaderType); err != nil {
 		log.WithField("error", err).Error("cannot create Kyma headers subscription")
 		shutdown(fail, &subscriber)
 	}
@@ -401,7 +402,7 @@ func publishTestEvent(publishEventURL, payload string) (*api.Response, error) {
 
 func publishHeadersTestEvent(publishEventURL string) (*api.Response, error) {
 	payload := fmt.Sprintf(
-		`{"source-id": "%s","event-type":"%s","event-type-version":"%s","event-time":"2018-11-02T22:08:41+00:00","data":"headers-test-event"}`, srcID, eventType1, eventTypeVersion)
+		`{"source-id": "%s","event-type":"%s","event-type-version":"%s","event-time":"2018-11-02T22:08:41+00:00","data":"headers-test-event"}`, srcID, eventHeaderType, eventTypeVersion)
 	log.WithField("event", payload).Info("event to be published")
 
 	client := &http.Client{}
