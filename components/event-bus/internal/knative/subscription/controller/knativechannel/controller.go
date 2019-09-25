@@ -16,7 +16,7 @@ const (
 	controllerAgentName = "knativechannel-controller"
 )
 
-// ProvideController returns an Knative-channel controller.
+// ProvideController instantiates a reconciler which reconciles Knative Channels.
 func ProvideController(mgr manager.Manager) error {
 
 	var err error

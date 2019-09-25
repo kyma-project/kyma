@@ -16,7 +16,7 @@ const (
 	controllerAgentName = "eventactivation-controller"
 )
 
-// ProvideController returns an EventActivation controller.
+// ProvideController instantiates a reconciler which reconciles EventActivations.
 func ProvideController(mgr manager.Manager) error {
 
 	var err error

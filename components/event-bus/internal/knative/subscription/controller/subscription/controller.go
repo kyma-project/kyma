@@ -22,8 +22,7 @@ const (
 	controllerAgentName = "subscription-controller"
 )
 
-// ProvideController returns a Controller that represents the subscription controller. It
-// reconciles only the Kyma Subscription.
+// ProvideController instantiates a reconciler which reconciles Kyma Subscriptions.
 func ProvideController(mgr manager.Manager, opts *opts.Options) error {
 
 	// init the knative lib

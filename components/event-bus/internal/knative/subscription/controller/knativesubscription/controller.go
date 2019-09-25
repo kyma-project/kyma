@@ -16,7 +16,7 @@ const (
 	controllerAgentName = "knative-subscription-controller"
 )
 
-// ProvideController returns an Knative-subscription controller.
+// ProvideController instantiates a reconciler which reconciles Knative Subscriptions.
 func ProvideController(mgr manager.Manager) error {
 
 	var err error

@@ -28,7 +28,7 @@ import (
 const (
 	eventType1              = "test-e2e-1"
 	eventType2              = "test-e2e-2"
-	eventHeaderType         = "test-e2e-header-2"
+	eventHeaderType         = "test-e2e-header"
 	eventTypeVersion        = "v1"
 	subscriptionName1       = "test-sub-1"
 	subscriptionName2       = "test-sub-2"
