@@ -12,7 +12,12 @@ data:
 {{ toYaml .Values.serverDashboardFiles | indent 2 }}
   {{ end }}
   {{- if .Values.keepOriginalDashboards }}
-{{ (.Files.Glob "dashboards/*.json").AsConfig | indent 2 }}
+    {{- $root := . }}
+    {{- range $path, $bytes := .Files.Glob "dashboards/*.json" }}
+      {{- if not (hasPrefix "istio-" ($path | base)) }}
+        {{- $path | base | nindent 2}}: {{ $root.Files.Get $path | quote}}
+      {{- end }}
+    {{- end }}
   {{- end }}
   {{- if .Values.dataSource }}
 {{ toYaml .Values.dataSource | indent 2 }}

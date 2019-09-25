@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: {{ template "grafana.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+  name: {{ template "grafana.server.fullname" . }}-istio-dashboards
+data:
+{{- $root := . }}
+{{- range $path, $bytes := .Files.Glob "dashboards/*.json" }}
+  {{- if hasPrefix "istio-" ($path | base) }}
+    {{- $path | base | nindent 2}}: {{ $root.Files.Get $path | quote}}
+  {{- end }}
+{{- end }}

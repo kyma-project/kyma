@@ -118,8 +118,12 @@ spec:
           emptyDir: {}
           {{- end }}
         - name: grafana-dashboards
-          configMap:
-            name: {{ template "grafana.server.fullname" . }}
+          projected:
+            sources:
+              - configMap:
+                  name: {{ template "grafana.server.fullname" . }}
+              - configMap:
+                  name: {{ template "grafana.server.fullname" . }}-istio-dashboards
         - name: dashboard-provisioner
           configMap:
             name: {{ template "grafana.configmap.dashboard" . }}
