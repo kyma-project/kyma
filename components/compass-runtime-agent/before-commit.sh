@@ -13,6 +13,11 @@ echo "PATH: " + $PATH
 echo -e "${NC}"
 
 ##
+# VENDOR DEPENDENCIES
+##
+go mod vendor
+
+##
 # GO BUILD
 ##
 buildEnv=""

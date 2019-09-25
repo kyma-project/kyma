@@ -11,6 +11,7 @@ require (
 	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/google/uuid v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.6 // indirect
+	github.com/kisielk/errcheck v1.2.0 // indirect
 	github.com/kyma-incubator/compass v0.0.0-20190916105119-d020cd970c45
 	github.com/kyma-project/kyma v0.5.1-0.20190805122745-327770ad3ad5
 	github.com/machinebox/graphql v0.2.2

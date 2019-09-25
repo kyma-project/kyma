@@ -24,18 +24,19 @@ To start the Compass Runtime Agent, run this command:
 
 ## Parameters and environment variables
 
-The Compass Runtime Agent has the following parameters:
-- **controllerSyncPeriod** is the time period between resyncing existing resources. Provide it in seconds. The default value is `60`.
-- **minimalConfigSyncTime** is the minimal time between synchronizing the configuration. Provide it in seconds. The default value is `300`.
-- **integrationNamespace** is the Namespace in which the resources are created. The default Namespace is `kyma-integration`.
-- **gatewayPort** is the Application Gateway port. The default port is `8080`.
-- **insecureConfigurationFetch** specifies whether to fetch the configuration with disabled TLS verification. The default value is `false`.
-- **uploadServiceUrl** is the URL of the upload service. By default, it is an empty string.
-
 The Compass Runtime Agent uses these environment variables:
-- **DIRECTOR_URL**
-- **RUNTIME_ID**
-- **TENANT**
+- **APP_CONFIG_FILE** - specifies the path to the configuration file.
+- **APP_CONTROLLER_SYNC_PERIOD** - specifies the time period between resyncing existing resources.
+- **APP_MINIMAL_COMPASS_SYNC_TIME** - specifies the minimal time between synchronizing the configuration.
+- **APP_CERT_VALIDITY_RENEWAL_THRESHOLD** - specifies when the certificate should be renewed based on remaining validity time of current certificate. 
+- **APP_CLUSTER_CERTIFICATES_SECRET** - specifies the Namespace and Name of the secret in which client certificate and key should be stored.
+- **APP_CA_CERTIFICATES_SECRET** - specifies the Namespace and Name of the secret in which CA certificate should be stored.
+- **APP_INSECURE_CONNECTOR_COMMUNICATION** - specifies whether to communicate with Connector Service with disabled TLS verification.
+- **APP_INTEGRATION_NAMESPACE** - specifies the Namespace in which the resources are created.
+- **APP_GATEWAY_PORT** - specifies the Application Gateway port.
+- **APP_INSECURE_CONFIGURATION_FETCH** - specifies whether to fetch the configuration with disabled TLS verification.
+- **APP_UPLOAD_SERVICE_URL** - specifies the URL of the upload service.
+- **APP_QUERY_LOGGING** - specifies whether GraphQL queries should be logged.
 
 
 ## Generating Custom Resource client
