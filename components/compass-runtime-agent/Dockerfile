@@ -1,8 +1,8 @@
-FROM golang:1.12.5-alpine3.9 as builder
+FROM golang:1.12.5 as builder
 
 ENV GO111MODULE=on
 
-RUN apk add -U --no-cache ca-certificates
+RUN apt-get install -y ca-certificates
 
 ARG DOCK_PKG_DIR=/compass-runtime-agent
 
