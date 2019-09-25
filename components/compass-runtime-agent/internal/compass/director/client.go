@@ -29,7 +29,9 @@ type configClient struct {
 }
 
 func (cc *configClient) FetchConfiguration(directorURL string, runtimeConfig config.RuntimeConfig) ([]kymamodel.Application, error) {
-	response := ApplicationsForRuntimeResponse{}
+	response := ApplicationsForRuntimeResponse{
+		Result: &ApplicationPage{},
+	}
 
 	applicationsQuery := cc.queryProvider.applicationsForRuntimeQuery(runtimeConfig.RuntimeId)
 	req := graphql.NewRequest(applicationsQuery)

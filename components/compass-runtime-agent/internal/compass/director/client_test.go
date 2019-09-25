@@ -206,7 +206,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 		gqlClient := gql.NewQueryAssertClient(t, expectedRequest, false, func(t *testing.T, r interface{}) {
 			cfg, ok := r.(*ApplicationsForRuntimeResponse)
 			require.True(t, ok)
-			assert.Empty(t, cfg)
+			assert.Empty(t, cfg.Result)
 			cfg.Result = expectedResponse
 		})
 
@@ -231,7 +231,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 		gqlClient := gql.NewQueryAssertClient(t, expectedRequest, false, func(t *testing.T, r interface{}) {
 			cfg, ok := r.(*ApplicationsForRuntimeResponse)
 			require.True(t, ok)
-			assert.Empty(t, cfg)
+			assert.Empty(t, cfg.Result)
 			cfg.Result = expectedResponse
 		})
 
@@ -250,7 +250,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 		gqlClient := gql.NewQueryAssertClient(t, expectedRequest, true, func(t *testing.T, r interface{}) {
 			cfg, ok := r.(*ApplicationsForRuntimeResponse)
 			require.True(t, ok)
-			assert.Empty(t, cfg)
+			assert.Empty(t, cfg.Result)
 		})
 
 		configClient := NewConfigurationClient(gqlClient)
