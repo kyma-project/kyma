@@ -123,15 +123,15 @@ func (r *reconciler) reconcile(ctx context.Context, sub *evapisv1alpha1.Subscrip
 		}
 	}
 	if isSubReady && !isKnSubReadyInSub {
-		if err := util.ActivateSubscriptionForKnativeSub(ctx, r.client, kymaSub, log, r.time); err != nil {
-			log.Error(err, "ActivateSubscriptionForKnativeSub() failed")
+		if err := util.ActivateSubscriptionForKnSubscription(ctx, r.client, kymaSub, log, r.time); err != nil {
+			log.Error(err, "ActivateSubscriptionForKnSubscription() failed")
 			return false, err
 		}
 	}
 
 	if !isSubReady && isKnSubReadyInSub {
-		if err := util.ActivateSubscriptionForKnativeSub(ctx, r.client, kymaSub, log, r.time); err != nil {
-			log.Error(err, "ActivateSubscriptionForKnativeSub() failed")
+		if err := util.DeactivateSubscriptionForKnSubscription(ctx, r.client, kymaSub, log, r.time); err != nil {
+			log.Error(err, "DeactivateSubscriptionForKnSubscription() failed")
 			return false, err
 		}
 	}

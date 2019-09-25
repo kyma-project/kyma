@@ -289,8 +289,8 @@ func ActivateSubscriptionForChannel(ctx context.Context, client runtimeClient.Cl
 	return updateSubscription(ctx, client, updatedSub, log)
 }
 
-// ActivateSubscriptionForKnativeSub activates a Subscription
-func ActivateSubscriptionForKnativeSub(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, log logr.Logger, time CurrentTime) error {
+// ActivateSubscriptionForKnSubscription activates a Kyma Subscription when Kn Subscription is ready
+func ActivateSubscriptionForKnSubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, log logr.Logger, time CurrentTime) error {
 	updatedSub := updateSubscriptionKnSubscriptionStatus(sub, subApis.ConditionTrue, time)
 	return updateSubscription(ctx, client, updatedSub, log)
 }
@@ -307,7 +307,7 @@ func DeactivateSubscriptionForChannel(ctx context.Context, client runtimeClient.
 	return updateSubscription(ctx, client, updatedSub, log)
 }
 
-// DeactivateSubscriptionForKnSubscription deactivates a Subscription
+// DeactivateSubscriptionForKnSubscription  deactivates a Kyma Subscription when Kn Subscription is not ready
 func DeactivateSubscriptionForKnSubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, log logr.Logger, time CurrentTime) error {
 	updatedSub := updateSubscriptionKnSubscriptionStatus(sub, subApis.ConditionFalse, time)
 	return updateSubscription(ctx, client, updatedSub, log)
