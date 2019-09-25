@@ -164,20 +164,24 @@ func fixAsyncApiSpec() *spec.AsyncAPISpec {
 			Channels: map[string]interface{}{
 				"sell.v1": map[string]interface{}{
 					"subscribe": map[string]interface{}{
-						"summary": "desc",
-						"payload": map[string]interface{}{
-							"type": "string",
+						"message": map[string]interface{}{
+							"summary": "desc",
+							"payload": map[string]interface{}{
+								"type": "string",
+							},
 						},
 					},
 				},
 				"sell.v2": map[string]interface{}{
 					"subscribe": map[string]interface{}{
-						"summary": "desc",
-						"payload": map[string]interface{}{
-							"type": "object",
-							"properties": map[string]interface{}{
-								"name": map[string]interface{}{
-									"type": "string",
+						"message": map[string]interface{}{
+							"summary": "desc",
+							"payload": map[string]interface{}{
+								"type": "object",
+								"properties": map[string]interface{}{
+									"name": map[string]interface{}{
+										"type": "string",
+									},
 								},
 							},
 						},
@@ -191,11 +195,13 @@ func fixAsyncApiSpec() *spec.AsyncAPISpec {
 func fixAsyncApiSpecWithoutVersion() *spec.AsyncAPISpec {
 	return &spec.AsyncAPISpec{
 		Data: spec.AsyncAPISpecData{
-			AsyncAPI: "1.0.0",
+			AsyncAPI: "2.0.0",
 			Channels: map[string]interface{}{
 				"sell": map[string]interface{}{
 					"subscribe": map[string]interface{}{
-						"summary": "desc",
+						"message": map[string]interface{}{
+							"summary": "desc",
+						},
 					},
 				},
 			},
