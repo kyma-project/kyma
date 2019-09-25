@@ -62,7 +62,7 @@ func (r *eventActivationResolver) EventActivationEventsField(ctx context.Context
 		return nil, gqlerror.New(err, assetstorePretty.ClusterAssets)
 	}
 
-	if len(items) == 0 && items[0].Status.Phase != v1alpha2.AssetReady && len(items[0].Status.AssetRef.Files) == 0 {
+	if len(items) == 0 || items[0].Status.Phase != v1alpha2.AssetReady || len(items[0].Status.AssetRef.Files) == 0 {
 		return nil, nil
 	}
 
