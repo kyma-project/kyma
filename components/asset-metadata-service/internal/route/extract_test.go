@@ -133,7 +133,6 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 		mux.ServeHTTP(recordExtract, reqExtract)
 
 		// Then
-		// question for review - is it ok? I'm only testing if there's anything there other than 404, other tests take care of handling /v1/extract route
 		g.Expect(recordExtract.Result().StatusCode).To(gomega.Not(gomega.Equal(http.StatusNotFound)))
 	})
 

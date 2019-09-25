@@ -272,7 +272,6 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 		mux.ServeHTTP(recordUpload, reqUpload)
 
 		// Then
-		// question for review - is it ok? I'm only testing if there's anything there, other tests take care of handling /v1/extract route
 		g.Expect(recordUpload.Result().StatusCode).To(gomega.Equal(http.StatusInternalServerError))
 	})
 

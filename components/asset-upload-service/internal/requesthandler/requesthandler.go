@@ -41,7 +41,15 @@ var (
 		Name: "assetstore_upload_service_http_request_duration_seconds",
 		Help: "Requests' duration distribution",
 	})
+	statusCodesCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "assetstore_upload_service_http_request_returned_status_code",
+		Help: "Service's HTTP response status code",
+	}, []string{"status_code"})
 )
+
+func incrementStatusCounter(status int) {
+	statusCodesCounter.WithLabelValues(strconv.Itoa(status)).Inc()
+}
 
 func SetupHandlers(client uploader.MinioClient, buckets bucket.SystemBucketNames, uploadExternalEndpoint string, timeout time.Duration, maxWorkers int) *http.ServeMux {
 	mux := http.NewServeMux()
@@ -78,7 +86,9 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	}
 
 	if rq.MultipartForm == nil {
-		r.writeResponse(w, http.StatusBadRequest, Response{
+		status := http.StatusBadRequest
+		incrementStatusCounter(status)
+		r.writeResponse(w, status, Response{
 			Errors: []ResponseError{
 				{
 					Message: "No multipart/form-data form received.",
@@ -109,6 +119,8 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	filesCount := len(publicFiles) + len(privateFiles)
 
 	if filesCount == 0 {
+		status := http.StatusBadRequest
+		incrementStatusCounter(status)
 		r.writeResponse(w, http.StatusBadRequest, Response{
 			Errors: []ResponseError{
 				{
@@ -137,17 +149,20 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 
 	if len(uploadErrors) == 0 {
 		status = http.StatusOK
+		incrementStatusCounter(status)
 	} else if len(uploadedFiles) == 0 {
 		status = http.StatusBadGateway
+		incrementStatusCounter(status)
 	} else {
 		status = http.StatusMultiStatus
+		incrementStatusCounter(status)
 	}
 
 	r.writeResponse(w, status, Response{
 		UploadedFiles: uploadedFiles,
 		Errors:        uploadErrors,
 	})
-	
+
 	httpServeHistogram.Observe(time.Since(start).Seconds())
 }
 
