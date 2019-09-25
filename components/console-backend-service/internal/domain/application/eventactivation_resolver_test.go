@@ -96,12 +96,16 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 				Channels: map[string]interface{}{
 					"sell.v1": map[string]interface{}{
 						"subscribe": map[string]interface{}{
-							"summary": "desc",
+							"message": map[string]interface{}{
+								"summary": "desc",
+							},
 						},
 					},
 					"sell.v2": map[string]interface{}{
 						"subscribe": map[string]interface{}{
-							"summary": "desc",
+							"message": map[string]interface{}{
+								"summary": "desc",
+							},
 						},
 					},
 				},
