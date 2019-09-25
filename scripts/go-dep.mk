@@ -45,7 +45,7 @@ define buildpack-mount
 .PHONY: $(1)-local $(1)
 $(1):
 	@echo make $(1)
-	@docker run $(DOCKER_INTERACTIVE) \
+	docker run $(DOCKER_INTERACTIVE) \
 		-v $(COMPONENT_DIR):$(WORKSPACE_COMPONENT_DIR):delegated \
 		$(DOCKER_CREATE_OPTS) make $(1)-local
 endef
@@ -55,8 +55,8 @@ define buildpack-cp-ro
 $(1):
 	@echo make $(1)
 	$$(eval container = $$(shell docker create $(DOCKER_CREATE_OPTS) make $(1)-local))
-	@docker cp $(COMPONENT_DIR)/. $$(container):$(WORKSPACE_COMPONENT_DIR)/
-	@docker start $(DOCKER_INTERACTIVE) $$(container)
+	docker cp $(COMPONENT_DIR)/. $$(container):$(WORKSPACE_COMPONENT_DIR)/
+	docker start $(DOCKER_INTERACTIVE) $$(container)
 endef
 
 .PHONY: verify format release
