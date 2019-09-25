@@ -74,9 +74,9 @@ func (s *CreateSubscription) isSubscriptionReady() error {
 	}
 
 	for _, condition := range subscription.Status.Conditions {
-		if condition.Type == "is-ready" && condition.Status == eventingApi.ConditionTrue {
+		if condition.Type == eventingApi.Ready && condition.Status == eventingApi.ConditionTrue {
 			return nil
 		}
 	}
-	return fmt.Errorf("subscription is not ready")
+	return fmt.Errorf("subscription: %s is not ready", subscription.Name)
 }

@@ -17,7 +17,7 @@ const (
 )
 
 // ProvideController returns an Knative-subscription controller.
-func ProvideController(mgr manager.Manager) (controller.Controller, error) {
+func ProvideController(mgr manager.Manager) error {
 
 	var err error
 
@@ -30,8 +30,8 @@ func ProvideController(mgr manager.Manager) (controller.Controller, error) {
 		Reconciler: r,
 	})
 	if err != nil {
-		log.Error(err, "Unable to create Knative subscription controller")
-		return nil, err
+		log.Error(err, "unable to create Knative subscription controller")
+		return err
 	}
 
 	// Watch Knative Subscriptions
@@ -39,9 +39,9 @@ func ProvideController(mgr manager.Manager) (controller.Controller, error) {
 		Type: &evapisv1alpha1.Subscription{},
 	}, &handler.EnqueueRequestForObject{})
 	if err != nil {
-		log.Error(err, "Unable to watch Knative Subscription")
-		return nil, err
+		log.Error(err, "unable to watch Knative Subscription")
+		return err
 	}
 
-	return c, nil
+	return nil
 }

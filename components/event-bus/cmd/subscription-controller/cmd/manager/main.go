@@ -65,35 +65,34 @@ func main() {
 		log.Error(err, "unable to add event activation APIs to scheme")
 		os.Exit(1)
 	}
-
 	if err := evapisv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Error(err, "unable to add Knative Eventing APIs to scheme")
 		os.Exit(1)
 	}
 	// Setup all Controllers
 	log.Info("Setting up Subscription Controller")
-	_, err = subscription.ProvideController(mgr, sckOpts)
+	err = subscription.ProvideController(mgr, sckOpts)
 	if err != nil {
 		log.Error(err, "Unable to create Subscription controller")
 		os.Exit(1)
 	}
 
 	log.Info("Setting up Event Activation Controller")
-	_, err = eventactivation.ProvideController(mgr)
+	err = eventactivation.ProvideController(mgr)
 	if err != nil {
 		log.Error(err, "Unable to create Event Activation controller")
 		os.Exit(1)
 	}
 
 	log.Info("Setting up Knative Channel Controller")
-	_, err = knativechannel.ProvideController(mgr)
+	err = knativechannel.ProvideController(mgr)
 	if err != nil {
 		log.Error(err, "Unable to create Knative Channel controller")
 		os.Exit(1)
 	}
 
 	log.Info("Setting up Knative Subscription Controller")
-	_, err = knativesubscription.ProvideController(mgr)
+	err = knativesubscription.ProvideController(mgr)
 	if err != nil {
 		log.Error(err, "Unable to create Knative Subscription controller")
 		os.Exit(1)

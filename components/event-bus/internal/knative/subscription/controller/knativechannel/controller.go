@@ -17,7 +17,7 @@ const (
 )
 
 // ProvideController returns an Knative-channel controller.
-func ProvideController(mgr manager.Manager) (controller.Controller, error) {
+func ProvideController(mgr manager.Manager) error {
 
 	var err error
 
@@ -30,8 +30,8 @@ func ProvideController(mgr manager.Manager) (controller.Controller, error) {
 		Reconciler: r,
 	})
 	if err != nil {
-		log.Error(err, "Unable to create Knative channel controller")
-		return nil, err
+		log.Error(err, "unable to create Knative channel controller")
+		return err
 	}
 
 	// Watch Knative Channels
@@ -39,9 +39,9 @@ func ProvideController(mgr manager.Manager) (controller.Controller, error) {
 		Type: &messagingV1Alpha1.Channel{},
 	}, &handler.EnqueueRequestForObject{})
 	if err != nil {
-		log.Error(err, "Unable to watch Knative Channel")
-		return nil, err
+		log.Error(err, "unable to watch Knative Channel")
+		return err
 	}
 
-	return c, nil
+	return nil
 }

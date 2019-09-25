@@ -24,13 +24,13 @@ const (
 
 // ProvideController returns a Controller that represents the subscription controller. It
 // reconciles only the Kyma Subscription.
-func ProvideController(mgr manager.Manager, opts *opts.Options) (controller.Controller, error) {
+func ProvideController(mgr manager.Manager, opts *opts.Options) error {
 
 	// init the knative lib
 	knativeLib, err := knative.NewKnativeLib()
 	if err != nil {
 		log.Error(err, "Failed to get Knative library")
-		return nil, err
+		return err
 	}
 
 	// Setup a new controller to Reconcile Kyma Subscription.
@@ -45,7 +45,7 @@ func ProvideController(mgr manager.Manager, opts *opts.Options) (controller.Cont
 	})
 	if err != nil {
 		log.Error(err, "Unable to create controller")
-		return nil, err
+		return err
 	}
 
 	// Watch Subscriptions.
@@ -54,8 +54,8 @@ func ProvideController(mgr manager.Manager, opts *opts.Options) (controller.Cont
 	}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		log.Error(err, "Unable to watch Subscription")
-		return nil, err
+		return err
 	}
 
-	return c, nil
+	return nil
 }

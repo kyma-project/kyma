@@ -30,7 +30,7 @@ import (
 
 const (
 	subUID           = "test-uid"
-	subName          = "my-sub-1"
+	subName          = "my-sub"
 	knSubName        = "my-kn-sub"
 	sourceID         = "my_source_ID"
 	eventType        = "my-event-type"

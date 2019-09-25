@@ -26,7 +26,7 @@ import (
 
 const (
 	subUID   = "test-uid"
-	subName  = "my-sub-1"
+	subName  = "my-sub"
 	eaName   = "my-event-activation"
 	sourceID = "my_source_ID"
 

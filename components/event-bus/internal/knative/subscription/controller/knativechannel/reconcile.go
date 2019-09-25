@@ -50,7 +50,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 
 	// Any other error should be retrieved in another reconciliation. ???
 	if err != nil {
-		log.Error(err, "Unable to Get channel object")
+		log.Error(err, "unable to Get channel object")
 		return reconcile.Result{}, err
 	}
 
@@ -63,12 +63,12 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	// updates regardless of whether the reconcile error out.
 	requeue, reconcileErr := r.reconcile(ctx, channel)
 	if reconcileErr != nil {
-		log.Error(reconcileErr, "Reconciling Channel")
+		log.Error(reconcileErr, "failed in reconciling Channel")
 		r.recorder.Eventf(channel, corev1.EventTypeWarning, "ChannelReconcileFailed", "Channel reconciliation failed: %v", reconcileErr)
 	}
 
 	if updateStatusErr := util.UpdateKnativeChannel(ctx, r.client, channel); updateStatusErr != nil {
-		log.Error(updateStatusErr, "Updating Knative Channel status")
+		log.Error(updateStatusErr, "failed in updating Knative Channel status")
 		r.recorder.Eventf(channel, corev1.EventTypeWarning, "ChannelReconcileFailed", "Updating Kn Channel status failed: %v", updateStatusErr)
 		return reconcile.Result{}, updateStatusErr
 	}
@@ -97,8 +97,11 @@ func (r *reconciler) reconcile(ctx context.Context, ch *messagingV1Alpha1.Channe
 
 	// Delete or add finalizers
 	if !ch.DeletionTimestamp.IsZero() {
-		util.DeactivateSubscriptionForChannel(ctx, r.client, sub, log, r.time)
-
+		err := util.DeactivateSubscriptionForChannel(ctx, r.client, sub, log, r.time)
+		if err != nil {
+			log.Error(err, "DeactivateSubscriptionForChannel() failed")
+			return false, err
+		}
 		ch.ObjectMeta.Finalizers = util.RemoveString(&ch.ObjectMeta.Finalizers, finalizerName)
 		log.Info("Finalizer removed for Knative Channel", "Finalizer name", finalizerName)
 		return false, nil

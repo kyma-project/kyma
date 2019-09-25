@@ -113,9 +113,7 @@ func GetSubscriptionForChannel(ctx context.Context, client runtimeClient.Client,
 			break
 		}
 	}
-
 	return sub, nil
-
 }
 
 // GetKymaSubscriptionForSubscription gets Kyma Subscription for a particular Knative Subscription

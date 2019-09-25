@@ -48,7 +48,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	}
 
 	if err != nil {
-		log.Error(err, "Unable to Get Knative subscription object")
+		log.Error(err, "unable to Get Knative subscription object")
 		return reconcile.Result{}, err
 	}
 
@@ -59,12 +59,12 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	// updates regardless of whether the reconcile error out.
 	requeue, reconcileErr := r.reconcile(ctx, sub)
 	if reconcileErr != nil {
-		log.Error(reconcileErr, "Reconciling Subscription")
+		log.Error(reconcileErr, "error in reconciling Subscription")
 		r.recorder.Eventf(sub, corev1.EventTypeWarning, "SubscriptionReconcileFailed", "Subscription reconciliation failed: %v", reconcileErr)
 	}
 
 	if updateStatusErr := util.UpdateKnativeSubscription(ctx, r.client, sub); updateStatusErr != nil {
-		log.Error(updateStatusErr, "Updating Knative Subscription status")
+		log.Error(updateStatusErr, "failed in updating Knative Subscription status")
 		r.recorder.Eventf(sub, corev1.EventTypeWarning, "KnativeSubscriptionReconcileFailed", "Updating Kn subscription status failed: %v", updateStatusErr)
 		return reconcile.Result{}, updateStatusErr
 	}
@@ -93,8 +93,11 @@ func (r *reconciler) reconcile(ctx context.Context, sub *evapisv1alpha1.Subscrip
 
 	// Delete or add finalizers
 	if !sub.DeletionTimestamp.IsZero() {
-		util.DeactivateSubscriptionForKnSubscription(ctx, r.client, kymaSub, log, r.time)
-
+		err := util.DeactivateSubscriptionForKnSubscription(ctx, r.client, kymaSub, log, r.time)
+		if err != nil {
+			log.Error(err, "DeactivateSubscriptionForKnSubscription() failed")
+			return false, err
+		}
 		sub.ObjectMeta.Finalizers = util.RemoveString(&sub.ObjectMeta.Finalizers, finalizerName)
 		log.Info("Finalizer removed for Knative Subscription", "Finalizer name", finalizerName)
 		return false, nil

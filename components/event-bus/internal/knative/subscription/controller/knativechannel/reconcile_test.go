@@ -27,7 +27,7 @@ import (
 
 const (
 	subUID           = "test-uid"
-	subName          = "my-sub-1"
+	subName          = "my-sub"
 	chName           = "my-kn-channel"
 	sourceID         = "my-source-ID"
 	eventType        = "my-event-type"
