@@ -105,7 +105,7 @@ func TestCompassConnectionController(t *testing.T) {
 	certsConnectorClientMock := connectorCertClientMock()
 	// Director config client
 	configurationClientMock := &directorMocks.ConfigClient{}
-	configurationClientMock.On("FetchConfiguration", directorURL, runtimeId).Return(kymaModelApps, nil)
+	configurationClientMock.On("FetchConfiguration", directorURL, runtimeConfig).Return(kymaModelApps, nil)
 	// Clients provider
 	clientsProviderMock := clientsProviderMock(configurationClientMock, tokensConnectorClientMock, certsConnectorClientMock)
 	// Sync service
@@ -230,11 +230,11 @@ func TestCompassConnectionController(t *testing.T) {
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed to fetch configuration from Director", func(t *testing.T) {
 		// given
 		clearMockCalls(&configurationClientMock.Mock)
-		configurationClientMock.On("FetchConfiguration", directorURL, runtimeId).Return(nil, errors.New("error"))
+		configurationClientMock.On("FetchConfiguration", directorURL, runtimeConfig).Return(nil, errors.New("error"))
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&configurationClientMock.Mock, "FetchConfiguration", directorURL, runtimeId)
+			return mockFunctionCalled(&configurationClientMock.Mock, "FetchConfiguration", directorURL, runtimeConfig)
 		})
 
 		// then

@@ -3,13 +3,18 @@ package director
 import (
 	"github.com/machinebox/graphql"
 	"github.com/pkg/errors"
+	"kyma-project.io/compass-runtime-agent/internal/config"
 	gql "kyma-project.io/compass-runtime-agent/internal/graphql"
 	kymamodel "kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
+const (
+	TenantHeader = "Tenant"
+)
+
 //go:generate mockery -name=ConfigClient
 type ConfigClient interface {
-	FetchConfiguration(directorURL, runtimeId string) ([]kymamodel.Application, error)
+	FetchConfiguration(directorURL string, runtimeConfig config.RuntimeConfig) ([]kymamodel.Application, error)
 }
 
 func NewConfigurationClient(gqlClient gql.Client) ConfigClient {
@@ -23,11 +28,12 @@ type configClient struct {
 	queryProvider queryProvider
 }
 
-func (cc *configClient) FetchConfiguration(directorURL, runtimeId string) ([]kymamodel.Application, error) {
+func (cc *configClient) FetchConfiguration(directorURL string, runtimeConfig config.RuntimeConfig) ([]kymamodel.Application, error) {
 	response := ApplicationsForRuntimeResponse{}
 
-	applicationsQuery := cc.queryProvider.applicationsForRuntimeQuery(runtimeId)
+	applicationsQuery := cc.queryProvider.applicationsForRuntimeQuery(runtimeConfig.RuntimeId)
 	req := graphql.NewRequest(applicationsQuery)
+	req.Header.Set(TenantHeader, runtimeConfig.Tenant)
 
 	err := cc.gqlClient.Do(req, &response)
 	if err != nil {

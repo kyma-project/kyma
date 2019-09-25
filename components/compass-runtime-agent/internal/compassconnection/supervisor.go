@@ -132,7 +132,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 		return s.updateCompassConnection(connection)
 	}
 
-	applicationsConfig, err := directorClient.FetchConfiguration(connection.Spec.ManagementInfo.DirectorURL, runtimeConfig.RuntimeId)
+	applicationsConfig, err := directorClient.FetchConfiguration(connection.Spec.ManagementInfo.DirectorURL, runtimeConfig)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to fetch configuration: %s", err.Error())
 		s.setSyncFailedStatus(connection, syncAttemptTime, errorMsg)

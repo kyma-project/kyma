@@ -2,6 +2,7 @@ package director
 
 import (
 	"github.com/stretchr/testify/require"
+	"kyma-project.io/compass-runtime-agent/internal/config"
 
 	kymamodel "kyma-project.io/compass-runtime-agent/internal/kyma/model"
 
@@ -167,6 +168,12 @@ const (
 func TestConfigClient_FetchConfiguration(t *testing.T) {
 
 	expectedRequest := gcli.NewRequest(expectedQuery)
+	expectedRequest.Header.Set(TenantHeader, tenant)
+
+	runtimeConfig := config.RuntimeConfig{
+		RuntimeId: runtimeId,
+		Tenant:    tenant,
+	}
 
 	t.Run("should fetch configuration", func(t *testing.T) {
 		// given
@@ -197,16 +204,16 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 		}
 
 		gqlClient := gql.NewQueryAssertClient(t, expectedRequest, false, func(t *testing.T, r interface{}) {
-			config, ok := r.(*ApplicationsForRuntimeResponse)
+			cfg, ok := r.(*ApplicationsForRuntimeResponse)
 			require.True(t, ok)
-			assert.Empty(t, config)
-			config.Result = expectedResponse
+			assert.Empty(t, cfg)
+			cfg.Result = expectedResponse
 		})
 
 		configClient := NewConfigurationClient(gqlClient)
 
 		// when
-		applicationsResponse, err := configClient.FetchConfiguration(directorURL, runtimeId)
+		applicationsResponse, err := configClient.FetchConfiguration(directorURL, runtimeConfig)
 
 		// then
 		require.NoError(t, err)
@@ -222,16 +229,16 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 		}
 
 		gqlClient := gql.NewQueryAssertClient(t, expectedRequest, false, func(t *testing.T, r interface{}) {
-			config, ok := r.(*ApplicationsForRuntimeResponse)
+			cfg, ok := r.(*ApplicationsForRuntimeResponse)
 			require.True(t, ok)
-			assert.Empty(t, config)
-			config.Result = expectedResponse
+			assert.Empty(t, cfg)
+			cfg.Result = expectedResponse
 		})
 
 		configClient := NewConfigurationClient(gqlClient)
 
 		// when
-		applicationsResponse, err := configClient.FetchConfiguration(directorURL, runtimeId)
+		applicationsResponse, err := configClient.FetchConfiguration(directorURL, runtimeConfig)
 
 		// then
 		require.NoError(t, err)
@@ -241,15 +248,15 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 	t.Run("should return error when failed to fetch Applications", func(t *testing.T) {
 		// given
 		gqlClient := gql.NewQueryAssertClient(t, expectedRequest, true, func(t *testing.T, r interface{}) {
-			config, ok := r.(*ApplicationsForRuntimeResponse)
+			cfg, ok := r.(*ApplicationsForRuntimeResponse)
 			require.True(t, ok)
-			assert.Empty(t, config)
+			assert.Empty(t, cfg)
 		})
 
 		configClient := NewConfigurationClient(gqlClient)
 
 		// when
-		applicationsResponse, err := configClient.FetchConfiguration(directorURL, runtimeId)
+		applicationsResponse, err := configClient.FetchConfiguration(directorURL, runtimeConfig)
 
 		// then
 		require.Error(t, err)
