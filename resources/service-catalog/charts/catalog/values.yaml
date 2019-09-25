@@ -1,124 +1,44 @@
 # Default values for Service Catalog
 # service-catalog image to use
-image: quay.io/kubernetes-service-catalog/service-catalog:v0.1.43
+#TODO: change that!
+image: awalach/service-catalog:crds
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
 # "Never", and "Always"
 imagePullPolicy: Always
-# determines whether the API server should be registered with the kube-aggregator
-useAggregator: true
 ## If true, create & use RBAC resources
 ##
 rbacEnable: true
 rbacApiVersion: rbac.authorization.k8s.io/v1
-apiserver:
-  replicas: 1
+webhook:
+  # deployment strategy for service-catalog webhook
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
   minReadySeconds: 1
-  # annotations is a collection of annotations to add to the apiserver pods.
+  # annotations is a collection of annotations to add to the webhook pods.
   annotations: {}
-  # nodeSelector to apply to the apiserver pods
+  # nodeSelector to apply to the webhook pods
   nodeSelector:
-  # PodPreset is an optional feature and can be enabled by uncommenting the line below
-  # featureGates: "PodPreset=true"
-  aggregator:
-    # priority is the priority of the APIService. Please see
-    # https://github.com/kubernetes/kubernetes/blob/v1.7.0/staging/src/k8s.io/kube-aggregator/pkg/apis/apiregistration/v1beta1/types.go#L56-L61
-    # for more information on proper values of this field.
-    #
-    # This field is only applicable on clusters that expose APIService as a v1alpha1 field,
-    # which is generally 1.6.x clusters
-    priority: 100
-    # groupPriorityMinimum is the minimum priority the group should have. Please see
-    # https://github.com/kubernetes/kubernetes/blob/v1.7.0/staging/src/k8s.io/kube-aggregator/pkg/apis/apiregistration/v1beta1/types.go#L56-L61
-    # for more information on proper values of this field.
-    groupPriorityMinimum: 10000
-    # versionPriority is the ordering of this API inside of the group. Please see
-    # https://github.com/kubernetes/kubernetes/blob/v1.7.0/staging/src/k8s.io/kube-aggregator/pkg/apis/apiregistration/v1beta1/types.go#L56-L61
-    # for more information on proper values of this field
-    versionPriority: 20
-  # healthcheck configures the readiness and liveliness probes for the apiserver pod.
+  # healthcheck configures the readiness and liveliness probes for the webhook pod.
   healthcheck:
     enabled: true
-  tls:
-    # Base64-encoded CA used to validate request-header authentication, when
-    # receiving delegated authentication from an aggregator. If not set, the
-    # service catalog API server will inherit this CA from the
-    # extension-apiserver-authentication ConfigMap if available.
-    requestHeaderCA:
-
+  # Attributes of the webhook's service resource
   service:
-    # Type of service; valid values are "LoadBalancer" and "NodePort"
+    port: 443
+    # Type of service; valid values are "LoadBalancer", "NodePort" or "ClusterIP"
     # NodePort is useful if deploying on bare metal or hacking locally on
-    # minikube. If Values.global.isLocalEnv is set to true then default type
-    # "LoadBalancer" will be used.
+    # minikube
     type: NodePort
     # Further configuration for services of type NodePort
     nodePort:
       # Available port in allowable range (e.g. 30000 - 32767 on minikube)
       # The TLS-enabled endpoint will be exposed here
-      securePort: 30443
-  storage:
-    # The storage backend to use; the only valid value is "etcd"
-    # (left for "crd" support in future)
-    type: etcd
-    # Further configuration for the etcd-based backend
-    etcd:
-      # Whether to enable TLS communitation with etcd
-      tls:
-        enabled: true # Remember to switch proto (http/https) in servers url accordingly
-
-        ## If etcd tls is enabled you need to provide name of secret which stores 3 keys:
-        ## etcd-client-ca.crt - SSL Certificate Authority file used to secure etcd communication
-        ## etcd-client.crt - SSL certification file used to secure etcd communication.
-        ## etcd-client.key - SSL key file used to secure etcd communication.
-        clientCertSecretName: service-catalog-etcd-stateful-etcd-client-tls
-      # Whether to embed an etcd container in the apiserver pod
-      # THIS IS INADEQUATE FOR PRODUCTION USE!
-      useEmbedded: false
-      # etcd URL(s); override this if NOT using embedded etcd
-      servers: https://service-catalog-etcd-stateful-client.kyma-system.svc.cluster.local:2379
-      # Below parameters are used only when useEmbedded property is set to `true`
-      # etcd image to use
-      image: quay.io/coreos/etcd:latest
-      # imagePullPolicy for the etcd; valid values are "IfNotPresent",
-      # "Never", and "Always"
-      imagePullPolicy: Always
-      # etcd persistence options IF using embedded etcd
-      persistence:
-        enabled: false
-        ## If defined, storageClassName: <storageClass>
-        ## If set to "-", storageClassName: "", which disables dynamic provisioning
-        ## If undefined (the default) or set to null, no storageClassName spec is
-        ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-        ##   GKE, AWS & OpenStack)
-        ##
-        # storageClass: "-"
-        accessMode: ReadWriteOnce
-        size: 4Gi
-      # etcd resource requests and limits
-      # Ref: http://kubernetes.io/docs/user-guide/compute-resources/
-      resources:
-        requests:
-          cpu: 100m
-          memory: 30Mi
-        limits:
-          cpu: 100m
-          memory: 40Mi
+      securePort: 30441
   # Log level; valid values are in the range 0 - 10
-  verbosity: 1
-  auth:
-    # Enable or disable authentication and authorization. Disabling
-    # authentication and authorization can be useful for outlying scenarios
-    # but is not suitable for production.
-    enabled: true
-  audit:
-    # If true, enables the use of audit features via this chart.
-    activated: false
-    # If specified, audit log goes to specified path.
-    logPath: "/tmp/service-catalog-apiserver-audit.log"
-  serviceAccount: service-catalog-apiserver
-  # if true, makes the API server serve the OpenAPI schema (which is problematic with older versions of kubectl)
-  serveOpenAPISpec: false
-  # Apiserver resource requests and limits
+  verbosity: 10
+  serviceAccount: service-catalog-webhook
+  # Webhook resource requests and limits
   # Ref: http://kubernetes.io/docs/user-guide/compute-resources/
   resources:
     requests:
@@ -126,9 +46,15 @@ apiserver:
       memory: 20Mi
     limits:
       cpu: 100m
-      memory: 96Mi
+      memory: 30Mi
 controllerManager:
   replicas: 1
+  # deployment strategy for service-catalog controllerManager
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  minReadySeconds: 1
   # annotations is a collection of annotations to add to the controllerManager pod.
   annotations: {}
   # nodeSelector to apply to the controllerManager pods
@@ -137,7 +63,7 @@ controllerManager:
   healthcheck:
     enabled: true
   # Log level; valid values are in the range 0 - 10
-  verbosity: 1
+  verbosity: 10
   # Resync interval; format is a duration (`20m`, `1h`, etc)
   resyncInterval: 5m
   # Broker relist interval; format is a duration (`20m`, `1h`, etc)
@@ -157,8 +83,6 @@ controllerManager:
     # Whether the controller has leader election enabled.
     activated: false
   serviceAccount: service-catalog-controller-manager
-  # Controls whether the API server's TLS verification should be skipped.
-  apiserverSkipVerify: true
   # Whether the controller will expose metrics on /metrics
   enablePrometheusScrape: false
   # Controller Manager resource requests and limits
@@ -170,6 +94,17 @@ controllerManager:
     limits:
       cpu: 100m
       memory: 30Mi
+  # Attributes of the controller's service resource
+  service:
+    # Type of service; valid values are "LoadBalancer", "NodePort" and "ClusterIP"
+    # NodePort is useful if deploying on bare metal or hacking locally on
+    # minikube
+    type: ClusterIP
+    # Further configuration for services of type NodePort
+    nodePort:
+      # Available port in allowable range (e.g. 30000 - 32767 on minikube)
+      # The TLS-enabled endpoint will be exposed here
+      securePort: 30444
 # Whether the OriginatingIdentity feature should be enabled
 originatingIdentityEnabled: true
 # Whether the AsyncBindingOperations alpha feature should be enabled
@@ -182,3 +117,6 @@ servicePlanDefaultsEnabled: false
 ## by example :
 ## securityContext: { runAsUser: 1001 }
 securityContext: {}
+## image for migration process prevent SBU deletion
+migrationImagePath: eu.gcr.io/kyma-project/develop/sbu-upgrade-protector
+migrationImageVersion: latest

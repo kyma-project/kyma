@@ -13,26 +13,6 @@
 				    "description": "Specifies if environment is local",
 				    "default": false
 			    },
-			    "serviceCatalogApiserver": {
-				    "type": "object",
-				    "properties": {
-					    "enabled": {
-						    "type": "boolean",
-						    "description": "Enable/Disable service catalog API server",
-						    "default": true
-					    }
-				    }
-			    },
-			    "serviceCatalogCrds": {
-				    "type": "object",
-				    "properties": {
-					    "enabled": {
-						    "type": "boolean",
-						    "description": "Enable/Disabled service catalog custom resource defintion",
-						    "default": false
-					    }
-				    }
-			    },
 			    "istio": {
 				    "type": "object",
 				    "properties": {
