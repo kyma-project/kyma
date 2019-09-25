@@ -3,7 +3,7 @@ title: Install Kyma through the GCP Marketplace
 type: Installation
 ---
 
-Follow these steps to quickly install Kyma through the GCP Marketpalce:
+Follow these steps to quickly install Kyma through the GCP Marketplace:
 
 1. Access **project Kyma** on the [Google Cloud Platform (GCP) Marketplace](https://console.cloud.google.com/marketplace/details/sap-public/kyma?q=kyma%20project) and click **CONFIGURE**.
 

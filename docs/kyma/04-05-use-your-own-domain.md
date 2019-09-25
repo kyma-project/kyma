@@ -67,7 +67,7 @@ Delegate the management of your domain to Google Cloud DNS.
 
 Follow these steps:
 
-1. Export the project name, the domain name, and the DNS zone name as environment variables. Run thesecommands:
+1. Export the project name, the domain name, and the DNS zone name as environment variables. Run these commands:
 
     ```bash
     export GCP_PROJECT={YOUR_GCP_PROJECT}
@@ -81,7 +81,7 @@ Follow these steps:
     gcloud dns --project=$GCP_PROJECT managed-zones create $DNS_ZONE --description= --dns-name=$DNS_NAME
     ```
 
-    Alternatively, create the DNS-managed zone through the GCP UI. In the **Network** section navigate to **Network Services**, click **Cloud DNS** and select **Create Zone**.
+    Alternatively, create the DNS-managed zone through the GCP UI. In the **Network** section navigate to **Network Services**, click **Cloud DNS**, and select **Create Zone**.
 
 3. Delegate your domain to Google name servers.
 
@@ -288,7 +288,7 @@ Get the TLS certificate:
     az network dns record-set txt add-record -n "_acme-challenge.$SUB_DOMAIN" -g $RS_GROUP -z $DNS_DOMAIN --value $TXT_VALUE
     ```
 
-6. Go back to the first console, wait about 2 minutes and press **Enter**.
+6. Go back to the first console, wait for about 2 minutes and press **Enter**.
 
 7. Export the certificate and the key as environment variables. Run these commands:
 
