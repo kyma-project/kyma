@@ -22,16 +22,17 @@ import (
 	"testing"
 	"time"
 
-	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
-
-	buildv1alpha1 "github.com/knative/build/pkg/apis/build/v1alpha1"
-	"github.com/knative/pkg/apis"
-	duckv1beta1 "github.com/knative/pkg/apis/duck/v1beta1"
-	servingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-	"github.com/onsi/gomega"
-	"github.com/onsi/gomega/gstruct"
 	"golang.org/x/net/context"
+
+	gm "github.com/onsi/gomega"
+	gs "github.com/onsi/gomega/gstruct"
+	gt "github.com/onsi/gomega/types"
+
+	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
+	knapis "knative.dev/pkg/apis"
+	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -39,6 +40,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 var c client.Client
@@ -46,7 +49,7 @@ var c client.Client
 const timeout = time.Second * 60
 
 func TestReconcile(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
+	g := gm.NewGomegaWithT(t)
 	var depKey = types.NamespacedName{Name: "foo", Namespace: "default"}
 
 	fnCreated := &serverlessv1alpha1.Function{
@@ -101,40 +104,19 @@ func TestReconcile(t *testing.T) {
 		Data: map[string]string{
 			"dockerRegistry":     "test",
 			"serviceAccountName": "build-bot",
-			"defaults": `{
-			"size": "S",
-			"runtime": "nodejs8",
-			"timeOut": 180,
-			"funcContentType": "plaintext",
-		}`,
-			"runtimes": `[
-			{
-				"ID": "nodejs8",
-				"DockerFileName": "dockerfile-nodejs8",
-			},
-			{
-				"ID": "nodejs6",
-				"DockerFileName": "dockerfile-nodejs6",
-			}
-		]`,
-			"funcSizes": `[
-			{"size": "S"},
-			{"size": "M"},
-			{"size": "L"},
-		]`,
-			"funcTypes": `[
-			{"type": "plaintext"},
-			{"type": "base64"}
-		]`,
+			"defaults":           `{"size": "S", "runtime": "nodejs8", "timeOut": 180, "funcContentType": "plaintext"}`,
+			"runtimes":           `[{"ID": "nodejs8", "dockerfileName": "dockerfile-nodejs8"}, {"ID": "nodejs6", "dockerfileName": "dockerfile-nodejs6"}]`,
+			"funcSizes":          `[{"size": "S"}, {"size": "M"}, {"size": "L"}]`,
+			"funcTypes":          `[{"type": "plaintext"}, {"type": "base64"}]`,
 		},
 	}
 
 	// start manager
 	mgr, err := manager.New(cfg, manager.Options{})
-	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(err).NotTo(gm.HaveOccurred())
 	c = mgr.GetClient()
 	recFn, requests, errors := SetupTestReconcile(newReconciler(mgr))
-	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
+	g.Expect(add(mgr, recFn)).NotTo(gm.HaveOccurred())
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
 	defer func() {
 		close(stopMgr)
@@ -142,149 +124,153 @@ func TestReconcile(t *testing.T) {
 	}()
 
 	// create configmap which holds settings required by the function controller
-	g.Expect(c.Create(context.TODO(), fnConfig)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(context.TODO(), fnConfig)).NotTo(gm.HaveOccurred())
 	// create the actual function
-	g.Expect(c.Create(context.TODO(), fnCreated)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(context.TODO(), fnCreated)).NotTo(gm.HaveOccurred())
 	defer func() {
 		_ = c.Delete(context.TODO(), fnCreated)
 		_ = c.Delete(context.TODO(), fnConfig)
 	}()
 
 	// call reconcile function
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: "foo", Namespace: "default"}})))
+	g.Eventually(requests, timeout).Should(gm.Receive(gm.Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: "foo", Namespace: "default"}})))
 
 	// get config map
 	functionConfigMap := &corev1.ConfigMap{}
 	g.Eventually(func() error { return c.Get(context.TODO(), depKey, functionConfigMap) }, timeout).
-		Should(gomega.Succeed())
-	g.Expect(functionConfigMap.Data["handler.js"]).To(gomega.Equal(fnCreated.Spec.Function))
-	g.Expect(functionConfigMap.Data["package.json"]).To(gomega.Equal("{}"))
+		Should(gm.Succeed())
+	g.Expect(functionConfigMap.Data["handler.js"]).To(gm.Equal(fnCreated.Spec.Function))
+	g.Expect(functionConfigMap.Data["package.json"]).To(gm.Equal("{}"))
 
-	// get service
-	service := &servingv1alpha1.Service{}
-	g.Eventually(func() error { return c.Get(context.TODO(), depKey, service) }, timeout).
-		Should(gomega.Succeed())
-	g.Expect(service.Namespace).To(gomega.Equal("default"))
+	// get Knative Service
+	ksvc := &servingv1alpha1.Service{}
+	g.Eventually(func() error { return c.Get(context.TODO(), depKey, ksvc) }, timeout).
+		Should(gm.Succeed())
+	g.Expect(ksvc.Namespace).To(gm.Equal("default"))
+
+	// ensure only one container is defined
+	g.Expect(len(ksvc.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers)).
+		To(gm.Equal(1))
 
 	// ensure container environment variables are correct
-	g.Expect(service.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Env).To(gomega.Equal(expectedEnv))
+	g.Expect(ksvc.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Env).To(gm.Equal(expectedEnv))
 
 	// Unique Build name base on function sha
 	hash := sha256.New()
 	hash.Write([]byte(functionConfigMap.Data["handler.js"] + functionConfigMap.Data["package.json"]))
 	functionSha := fmt.Sprintf("%x", hash.Sum(nil))
-	shortSha := functionSha[0:10]
+	functionShaImage := fmt.Sprintf("test/%s-%s:%s", "default", "foo", functionSha)
+	shortSha := functionSha[:10]
 	buildName := fmt.Sprintf("%s-%s", fnCreated.Name, shortSha)
 
-	// get the build object
-	build := &buildv1alpha1.Build{}
+	// get the TaskRun object
+	tr := &tektonv1alpha1.TaskRun{}
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Name: buildName, Namespace: "default"}, build)
+		return c.Get(context.TODO(), types.NamespacedName{Name: buildName, Namespace: "default"}, tr)
 	}, timeout).
-		Should(gomega.Succeed())
+		Should(gm.Succeed())
 
-	// get the build template
-	buildTemplate := &buildv1alpha1.BuildTemplate{}
-	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Name: "function-kaniko", Namespace: "default"}, buildTemplate)
-	}, timeout).
-		Should(gomega.Succeed())
-
-	// ensure build template is correct
-	// parameters are available
-	g.Expect(buildTemplate.Spec.Parameters).To(gomega.ContainElement(
-		gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
-			"Name": gomega.BeEquivalentTo("IMAGE"),
-		}),
-	))
-	g.Expect(buildTemplate.Spec.Parameters).To(gomega.ContainElement(
-		gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
-			"Name": gomega.BeEquivalentTo("DOCKERFILE"),
-		}),
-	))
-	// ensure build template references correct config map
-	expectedConfigMaps := []string{"dockerfile-nodejs6", "dockerfile-nodejs8"}
-
-	for _, cmName := range buildTemplate.Spec.Volumes {
-		g.Expect(expectedConfigMaps).To(gomega.ContainElement(gomega.BeEquivalentTo(cmName.ConfigMap.LocalObjectReference.Name)))
+	// ensure build TaskSpec references all ConfigMaps (Dockerfile, Fn source)
+	var idVolume gs.Identifier = func(element interface{}) string {
+		return element.(corev1.Volume).Name
 	}
-	// g.Expect(service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Image).To(gomega.HavePrefix("test/default-foo"))
-	g.Expect(build.Spec.ServiceAccountName).To(gomega.Equal("build-bot"))
-	// g.Expect(service.Spec.RunLatest.Configuration.RevisionTemplate.Spec.Container.Image).To(gomega.HavePrefix("test/default-foo"))
-
-	// ensure that image name referenced in build is used in the service
-	g.Expect(len(service.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers)).To(gomega.Equal(1))
-	var imageNameService = service.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image
-	var imageNameBuild string
-	for _, argumentSpec := range build.Spec.Template.Arguments {
-		if argumentSpec.Name == "IMAGE" {
-			imageNameBuild = argumentSpec.Value
-			break
-		}
+	var matchCmapVolumeSource = func(cmName string) gt.GomegaMatcher {
+		return gs.MatchFields(gs.IgnoreExtras,
+			gs.Fields{"VolumeSource": gs.MatchFields(gs.IgnoreExtras,
+				gs.Fields{"ConfigMap": gs.PointTo(gs.MatchFields(gs.IgnoreExtras,
+					gs.Fields{
+						"DefaultMode": gs.PointTo(gm.BeNumerically("==", 420)),
+						"LocalObjectReference": gs.MatchFields(gs.Options(0),
+							gs.Fields{"Name": gm.Equal(cmName)},
+						),
+					},
+				))},
+			)},
+		)
 	}
-	g.Expect(imageNameBuild).To(gomega.Equal(imageNameService))
+	g.Expect(tr.Spec.TaskSpec.Volumes).To(gs.MatchAllElements(idVolume, gs.Elements{
+		"dockerfile": matchCmapVolumeSource("dockerfile-nodejs6"),
+		"source":     matchCmapVolumeSource("foo"),
+	}))
 
-	// ensure build template has correct destination
-	g.Expect(len(buildTemplate.Spec.Steps)).To(gomega.Equal(1))
-	g.Expect(buildTemplate.Spec.Steps[0].Args[1]).To(gomega.Equal("--destination=${IMAGE}"))
+	g.Expect(tr.Spec.ServiceAccount).To(gm.Equal("build-bot"))
+
+	g.Expect(len(tr.Spec.TaskSpec.Steps)).To(gm.Equal(1))
+
+	// ensure Task build step has correct args
+	g.Expect(tr.Spec.TaskSpec.Steps[0].Args).To(gm.ConsistOf(
+		"--destination=" + functionShaImage,
+	))
+
+	// ensure Task build step has the correct volumes mounted
+	var idVolumeMount gs.Identifier = func(element interface{}) string {
+		return element.(corev1.VolumeMount).Name
+	}
+	var matchVolumeMountPath = func(path string) gt.GomegaMatcher {
+		return gs.MatchFields(gs.IgnoreExtras, gs.Fields{
+			"MountPath": gm.Equal(path),
+		})
+	}
+	g.Expect(tr.Spec.TaskSpec.Steps[0].VolumeMounts).To(gs.MatchAllElements(idVolumeMount, gs.Elements{
+		"source":     matchVolumeMountPath("/src"),
+		"dockerfile": matchVolumeMountPath("/workspace"),
+	}))
 
 	// ensure fetched function spec corresponds to created function spec
 	fnUpdatedFetched := &serverlessv1alpha1.Function{}
-	g.Expect(c.Get(context.TODO(), depKey, fnUpdatedFetched)).NotTo(gomega.HaveOccurred())
-	g.Expect(fnUpdatedFetched.Spec).To(gomega.Equal(fnCreated.Spec))
+	g.Expect(c.Get(context.TODO(), depKey, fnUpdatedFetched)).NotTo(gm.HaveOccurred())
+	g.Expect(fnUpdatedFetched.Spec).To(gm.Equal(fnCreated.Spec))
 
 	// update function code and add dependencies
 	fnUpdated := fnUpdatedFetched.DeepCopy()
 	fnUpdated.Spec.Function = `main() {return "bla"}`
 	fnUpdated.Spec.Deps = `dependencies`
-	g.Expect(c.Update(context.TODO(), fnUpdated)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Update(context.TODO(), fnUpdated)).NotTo(gm.HaveOccurred())
 
 	// get the updated function and compare spec
 	fnUpdatedFetched = &serverlessv1alpha1.Function{}
-	g.Expect(c.Get(context.TODO(), depKey, fnUpdatedFetched)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Get(context.TODO(), depKey, fnUpdatedFetched)).NotTo(gm.HaveOccurred())
 
 	g.Eventually(func() string {
 		c.Get(context.TODO(), depKey, fnUpdatedFetched)
 		return fnUpdatedFetched.Spec.Function
-	}, timeout, 10*time.Second).Should(gomega.Equal(fnUpdated.Spec.Function))
+	}, timeout, 10*time.Second).Should(gm.Equal(fnUpdated.Spec.Function))
 
-	fnUpdatedFetchedSpec := fnUpdatedFetched.Spec
-	fnUpdatedSpec := fnUpdated.Spec
-	g.Expect(fnUpdatedFetchedSpec).To(gomega.Equal(fnUpdatedSpec))
+	g.Expect(fnUpdatedFetched.Spec).To(gm.Equal(fnUpdated.Spec))
 	// call reconcile function
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: "foo", Namespace: "default"}})))
+	g.Eventually(requests, timeout).Should(gm.Receive(gm.Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: "foo", Namespace: "default"}})))
 
 	// get updated function code and ensure it got updated
 	cmUpdated := &corev1.ConfigMap{}
 	g.Eventually(func() error {
 		return c.Get(context.TODO(), depKey, cmUpdated)
-	}).Should(gomega.Succeed())
+	}).Should(gm.Succeed())
 	g.Eventually(func() string {
 		c.Get(context.TODO(), depKey, cmUpdated)
 		return cmUpdated.Data["handler.js"]
-	}, timeout, 10*time.Second).Should(gomega.Equal(fnUpdated.Spec.Function))
+	}, timeout, 10*time.Second).Should(gm.Equal(fnUpdated.Spec.Function))
 	g.Eventually(func() string {
 		c.Get(context.TODO(), depKey, cmUpdated)
 		return cmUpdated.Data["package.json"]
-	}, timeout, 10*time.Second).Should(gomega.Equal(`dependencies`))
+	}, timeout, 10*time.Second).Should(gm.Equal(`dependencies`))
 
 	// ensure updated knative service has updated image
 	ksvcUpdated := &servingv1alpha1.Service{}
-	g.Expect(c.Get(context.TODO(), depKey, ksvcUpdated)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Get(context.TODO(), depKey, ksvcUpdated)).NotTo(gm.HaveOccurred())
 
 	fmt.Printf("cmUpdated: %v \n", cmUpdated)
 	hash = sha256.New()
 	hash.Write([]byte(cmUpdated.Data["handler.js"] + cmUpdated.Data["package.json"]))
 	functionSha = fmt.Sprintf("%x", hash.Sum(nil))
+	functionShaImage = fmt.Sprintf("test/%s-%s:%s", "default", "foo", functionSha)
 	fmt.Printf("functionSha: %s \n", functionSha)
 	fmt.Printf("ksvcUpdated: %v \n", ksvcUpdated)
 	fmt.Printf("ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image: %s \n", ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image)
 	ksvcUpdatedImage := ksvcUpdated.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers[0].Image
-	functionShaImage := fmt.Sprintf("test/%s-%s:%s", "default", "foo", functionSha)
 
-	g.Expect(ksvcUpdatedImage).To(gomega.Equal(functionShaImage))
+	g.Expect(ksvcUpdatedImage).To(gm.Equal(functionShaImage))
 
-	g.Expect(fnUpdatedFetched.Status.Condition).To(gomega.Equal(serverlessv1alpha1.FunctionConditionDeploying))
+	g.Expect(fnUpdatedFetched.Status.Condition).To(gm.Equal(serverlessv1alpha1.FunctionConditionDeploying))
 
 	// tests use a shared etcd, we need to clean up
 	defer func() {
@@ -294,12 +280,12 @@ func TestReconcile(t *testing.T) {
 	}()
 
 	// ensure no errors occurred in reconciler
-	g.Eventually(errors).ShouldNot(gomega.Receive(gomega.Succeed()))
+	g.Eventually(errors).ShouldNot(gm.Receive(gm.Succeed()))
 }
 
 // Test that deleting a function does not produce any errors
 func TestReconcileDeleteFunction(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
+	g := gm.NewGomegaWithT(t)
 	objectName := "test-reconcile-delete-function"
 
 	fnCreated := &serverlessv1alpha1.Function{
@@ -323,21 +309,19 @@ func TestReconcileDeleteFunction(t *testing.T) {
 		Data: map[string]string{
 			"dockerRegistry":     "test",
 			"serviceAccountName": "build-bot",
-			"runtimes": `[
-				{
-					"ID": "nodejs8",
-					"DockerFileName": "dockerfile-nodejs8",
-				}
-			]`,
+			"defaults":           `{"size": "S", "runtime": "nodejs8", "timeOut": 180, "funcContentType": "plaintext"}`,
+			"runtimes":           `[{"ID": "nodejs6", "dockerfileName": "dockerfile-nodejs6"}]`,
+			"funcSizes":          `[{"size": "L"}]`,
+			"funcTypes":          `[{"type": "plaintext"}]`,
 		},
 	}
 
 	// start manager
 	mgr, err := manager.New(cfg, manager.Options{})
-	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(err).NotTo(gm.HaveOccurred())
 	c = mgr.GetClient()
 	recFn, requests, errors := SetupTestReconcile(newReconciler(mgr))
-	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
+	g.Expect(add(mgr, recFn)).NotTo(gm.HaveOccurred())
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
 	defer func() {
 		close(stopMgr)
@@ -345,9 +329,9 @@ func TestReconcileDeleteFunction(t *testing.T) {
 	}()
 
 	// create configmap which holds settings required by the function controller
-	g.Expect(c.Create(context.TODO(), fnConfig)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(context.TODO(), fnConfig)).NotTo(gm.HaveOccurred())
 	// create the actual function
-	g.Expect(c.Create(context.TODO(), fnCreated)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(context.TODO(), fnCreated)).NotTo(gm.HaveOccurred())
 	defer func() {
 		_ = c.Delete(context.TODO(), fnConfig)
 		_ = c.Delete(context.TODO(), fnCreated)
@@ -355,29 +339,29 @@ func TestReconcileDeleteFunction(t *testing.T) {
 
 	// call reconcile function
 	fmt.Print("waiting for reconcile function to be called")
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: objectName, Namespace: "default"}})))
+	g.Eventually(requests, timeout).Should(gm.Receive(gm.Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: objectName, Namespace: "default"}})))
 
 	// delete the actual function
-	g.Expect(c.Delete(context.TODO(), fnCreated)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Delete(context.TODO(), fnCreated)).NotTo(gm.HaveOccurred())
 
 	// call reconcile function
 	fmt.Print("waiting for reconcile function to be called")
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: objectName, Namespace: "default"}})))
+	g.Eventually(requests, timeout).Should(gm.Receive(gm.Equal(reconcile.Request{NamespacedName: types.NamespacedName{Name: objectName, Namespace: "default"}})))
 
 	// ensure no errors occurred in reconciler
-	g.Eventually(errors).ShouldNot(gomega.Receive(gomega.Succeed()))
+	g.Eventually(errors).ShouldNot(gm.Receive(gm.Succeed()))
 }
 
 // Test status of newly created function
 func TestFunctionConditionNewFunction(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
+	g := gm.NewGomegaWithT(t)
 
 	objectName := "test-condition-new-function"
 	mgr, err := manager.New(cfg, manager.Options{})
-	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(err).NotTo(gm.HaveOccurred())
 	c := mgr.GetClient()
 
-	function := serverlessv1alpha1.Function{
+	function := &serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
@@ -386,21 +370,24 @@ func TestFunctionConditionNewFunction(t *testing.T) {
 
 	reconcileFunction := &ReconcileFunction{Client: c, scheme: scheme.Scheme}
 
-	g.Expect(c.Create(context.TODO(), &function)).Should(gomega.Succeed())
+	g.Expect(c.Create(context.TODO(), function)).Should(gm.Succeed())
 
-	reconcileFunction.getFunctionCondition(&function)
+	reconcileFunction.setFunctionCondition(function,
+		&tektonv1alpha1.TaskRun{},
+		&servingv1alpha1.Service{},
+	)
 
-	// no knative objects present => no function status
-	g.Expect(fmt.Sprint(function.Status.Condition)).To(gomega.Equal(""))
+	// no knative objects present => no function status update
+	g.Expect(fmt.Sprint(function.Status.Condition)).To(gm.Equal(""))
 }
 
 // Test status of function with errored build
 func TestFunctionConditionBuildError(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
+	g := gm.NewGomegaWithT(t)
 	objectName := "test-build-error"
 
 	mgr, err := manager.New(cfg, manager.Options{})
-	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(err).NotTo(gm.HaveOccurred())
 	c := mgr.GetClient()
 	reconcileFunction := &ReconcileFunction{Client: c, scheme: scheme.Scheme}
 
@@ -410,7 +397,7 @@ func TestFunctionConditionBuildError(t *testing.T) {
 		mgrStopped.Wait()
 	}()
 
-	function := serverlessv1alpha1.Function{
+	function := &serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
@@ -423,7 +410,7 @@ func TestFunctionConditionBuildError(t *testing.T) {
 	//  Message:               build step "build-step-build-and-push" exited with code 1 (image: "docker-pullable://gcr.io/kaniko-project/executor@sha256:d9fe474f80b73808dc12b54f45f5fc90f7856d9fc699d4a5e79d968a1aef1a72"); for logs run: kubectl -n default logs example-build-pod-ed7514 -c build-step-build-and-push
 	//  Status:                False
 	//  Type:                  Succeeded
-	build := buildv1alpha1.Build{
+	tr := &tektonv1alpha1.TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
@@ -431,43 +418,46 @@ func TestFunctionConditionBuildError(t *testing.T) {
 	}
 
 	// create function and build
-	g.Expect(c.Create(context.TODO(), &function)).Should(gomega.Succeed())
-	g.Expect(c.Create(context.TODO(), &build)).Should(gomega.Succeed())
+	g.Expect(c.Create(context.TODO(), function)).Should(gm.Succeed())
+	g.Expect(c.Create(context.TODO(), tr)).Should(gm.Succeed())
 	defer func() {
-		_ = c.Delete(context.TODO(), &function)
-		_ = c.Delete(context.TODO(), &build)
+		_ = c.Delete(context.TODO(), function)
+		_ = c.Delete(context.TODO(), tr)
 	}()
 
 	// get build and update status
-	foundBuild := buildv1alpha1.Build{}
+	foundTr := &tektonv1alpha1.TaskRun{}
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Name: objectName, Namespace: "default"}, &foundBuild)
-	}).Should(gomega.Succeed())
-	foundBuild.Status = buildv1alpha1.BuildStatus{
-		Status: duckv1alpha1.Status{
-			Conditions: []duckv1alpha1.Condition{
+		return c.Get(context.TODO(), types.NamespacedName{Name: objectName, Namespace: "default"}, foundTr)
+	}).Should(gm.Succeed())
+	foundTr.Status = tektonv1alpha1.TaskRunStatus{
+		Status: duckv1beta1.Status{
+			Conditions: duckv1beta1.Conditions{
 				{
-					Type:   duckv1alpha1.ConditionSucceeded,
+					Type:   knapis.ConditionSucceeded,
 					Status: corev1.ConditionFalse,
 				},
 			},
 		},
 	}
-	g.Expect(c.Status().Update(context.TODO(), &foundBuild)).Should(gomega.Succeed())
+	g.Expect(c.Status().Update(context.TODO(), foundTr)).Should(gm.Succeed())
 
 	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
-		reconcileFunction.getFunctionCondition(&function)
+		reconcileFunction.setFunctionCondition(function,
+			foundTr,
+			&servingv1alpha1.Service{},
+		)
 		return function.Status.Condition
-	}).Should(gomega.Equal(serverlessv1alpha1.FunctionConditionError))
+	}).Should(gm.Equal(serverlessv1alpha1.FunctionConditionError))
 }
 
 func TestFunctionConditionServiceSuccess(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
+	g := gm.NewGomegaWithT(t)
 
 	objectName := "test-service-success"
 
 	mgr, err := manager.New(cfg, manager.Options{})
-	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(err).NotTo(gm.HaveOccurred())
 	c := mgr.GetClient()
 	reconcileFunction := &ReconcileFunction{Client: c, scheme: scheme.Scheme}
 
@@ -477,40 +467,40 @@ func TestFunctionConditionServiceSuccess(t *testing.T) {
 		mgrStopped.Wait()
 	}()
 
-	function := serverlessv1alpha1.Function{
+	function := &serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
 		},
 	}
 
-	service := servingv1alpha1.Service{
+	service := &servingv1alpha1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
 		},
 	}
 
-	// create function and build
-	g.Expect(c.Create(context.TODO(), &function)).Should(gomega.Succeed())
-	g.Expect(c.Create(context.TODO(), &service)).Should(gomega.Succeed())
+	// create Function and Knative Service
+	g.Expect(c.Create(context.TODO(), function)).Should(gm.Succeed())
+	g.Expect(c.Create(context.TODO(), service)).Should(gm.Succeed())
 	defer func() {
-		_ = c.Delete(context.TODO(), &function)
-		_ = c.Delete(context.TODO(), &service)
+		_ = c.Delete(context.TODO(), function)
+		_ = c.Delete(context.TODO(), service)
 	}()
 
 	// get service and update status
-	foundService := servingv1alpha1.Service{}
+	foundService := &servingv1alpha1.Service{}
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Name: objectName, Namespace: "default"}, &foundService)
-	}).Should(gomega.Succeed())
+		return c.Get(context.TODO(), types.NamespacedName{Name: objectName, Namespace: "default"}, foundService)
+	}).Should(gm.Succeed())
 	foundService.Status = servingv1alpha1.ServiceStatus{
 		ConfigurationStatusFields: servingv1alpha1.ConfigurationStatusFields{
 			LatestCreatedRevisionName: "foo",
 			LatestReadyRevisionName:   "foo",
 		},
 		Status: duckv1beta1.Status{
-			Conditions: []apis.Condition{
+			Conditions: duckv1beta1.Conditions{
 				{
 					Type:   servingv1alpha1.ServiceConditionReady,
 					Status: corev1.ConditionTrue,
@@ -526,20 +516,23 @@ func TestFunctionConditionServiceSuccess(t *testing.T) {
 			},
 		},
 	}
-	g.Expect(c.Status().Update(context.TODO(), &foundService)).Should(gomega.Succeed())
+	g.Expect(c.Status().Update(context.TODO(), foundService)).Should(gm.Succeed())
 
 	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
-		reconcileFunction.getFunctionCondition(&function)
+		reconcileFunction.setFunctionCondition(function,
+			&tektonv1alpha1.TaskRun{},
+			foundService,
+		)
 		return function.Status.Condition
-	}).Should(gomega.Equal(serverlessv1alpha1.FunctionConditionRunning))
+	}).Should(gm.Equal(serverlessv1alpha1.FunctionConditionRunning))
 }
 
 func TestFunctionConditionServiceError(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
+	g := gm.NewGomegaWithT(t)
 	objectName := "test-service-error"
 
 	mgr, err := manager.New(cfg, manager.Options{})
-	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(err).NotTo(gm.HaveOccurred())
 	c := mgr.GetClient()
 	reconcileFunction := &ReconcileFunction{Client: c, scheme: scheme.Scheme}
 
@@ -549,14 +542,14 @@ func TestFunctionConditionServiceError(t *testing.T) {
 		mgrStopped.Wait()
 	}()
 
-	function := serverlessv1alpha1.Function{
+	function := &serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
 		},
 	}
 
-	service := servingv1alpha1.Service{
+	service := &servingv1alpha1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      objectName,
 			Namespace: "default",
@@ -564,25 +557,25 @@ func TestFunctionConditionServiceError(t *testing.T) {
 	}
 
 	// create function and build
-	g.Expect(c.Create(context.TODO(), &function)).Should(gomega.Succeed())
-	g.Expect(c.Create(context.TODO(), &service)).Should(gomega.Succeed())
+	g.Expect(c.Create(context.TODO(), function)).Should(gm.Succeed())
+	g.Expect(c.Create(context.TODO(), service)).Should(gm.Succeed())
 	defer func() {
-		_ = c.Delete(context.TODO(), &function)
-		_ = c.Delete(context.TODO(), &service)
+		_ = c.Delete(context.TODO(), function)
+		_ = c.Delete(context.TODO(), service)
 	}()
 
 	// get service and update status
-	foundService := servingv1alpha1.Service{}
+	foundService := &servingv1alpha1.Service{}
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Name: objectName, Namespace: "default"}, &foundService)
-	}).Should(gomega.Succeed())
+		return c.Get(context.TODO(), types.NamespacedName{Name: objectName, Namespace: "default"}, foundService)
+	}).Should(gm.Succeed())
 	foundService.Status = servingv1alpha1.ServiceStatus{
 		ConfigurationStatusFields: servingv1alpha1.ConfigurationStatusFields{
 			LatestCreatedRevisionName: "foo",
 			LatestReadyRevisionName:   "foo",
 		},
 		Status: duckv1beta1.Status{
-			Conditions: []apis.Condition{
+			Conditions: duckv1beta1.Conditions{
 				{
 					Type:   servingv1alpha1.ServiceConditionReady,
 					Status: corev1.ConditionFalse,
@@ -598,16 +591,19 @@ func TestFunctionConditionServiceError(t *testing.T) {
 			},
 		},
 	}
-	g.Expect(c.Status().Update(context.TODO(), &foundService)).Should(gomega.Succeed())
+	g.Expect(c.Status().Update(context.TODO(), foundService)).Should(gm.Succeed())
 
 	g.Eventually(func() serverlessv1alpha1.FunctionCondition {
-		reconcileFunction.getFunctionCondition(&function)
+		reconcileFunction.setFunctionCondition(function,
+			&tektonv1alpha1.TaskRun{},
+			foundService,
+		)
 		return function.Status.Condition
-	}).Should(gomega.Equal(serverlessv1alpha1.FunctionConditionDeploying))
+	}).Should(gm.Equal(serverlessv1alpha1.FunctionConditionDeploying))
 }
 
 func TestCreateFunctionHandlerMap(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
+	g := gm.NewGomegaWithT(t)
 	functionCode := "some function code"
 	functionDependecies := "some function dependencies"
 	function := serverlessv1alpha1.Function{Spec: serverlessv1alpha1.FunctionSpec{
@@ -622,11 +618,11 @@ func TestCreateFunctionHandlerMap(t *testing.T) {
 		"handler.js":   functionCode,
 		"package.json": functionDependecies,
 	}
-	g.Expect(functionHandlerMap).To(gomega.Equal(mapx))
+	g.Expect(functionHandlerMap).To(gm.Equal(mapx))
 }
 
 func TestCreateFunctionHandlerMapNoDependencies(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
+	g := gm.NewGomegaWithT(t)
 	functionCode := "some function code"
 	function := serverlessv1alpha1.Function{Spec: serverlessv1alpha1.FunctionSpec{
 		Function: functionCode,
@@ -639,5 +635,5 @@ func TestCreateFunctionHandlerMapNoDependencies(t *testing.T) {
 		"handler.js":   functionCode,
 		"package.json": "{}",
 	}
-	g.Expect(functionHandlerMap).To(gomega.Equal(mapx))
+	g.Expect(functionHandlerMap).To(gm.Equal(mapx))
 }

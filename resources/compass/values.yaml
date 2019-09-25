@@ -1,5 +1,5 @@
 global:
-  defaultTenant : 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
+  defaultTenant: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
   tenants: foo bar
 
   images:
@@ -10,7 +10,7 @@ global:
       version: "1adfa459"
     director:
       dir: develop/
-      version: "e5daeb53"
+      version: "ce9087a1"
     gateway:
       dir: develop/
       version: "1ce3b6c3"
@@ -28,7 +28,7 @@ global:
     tests:
       e2e:
         dir: develop/
-        version: "07a992a2"
+        version: "d07b0a01"
       connector:
         dir: develop/
         version: "1adfa459"
@@ -36,7 +36,7 @@ global:
   isLocalEnv: false
 
   agentPreconfiguration: true
-  
+
   director:
     port: 3000
 
@@ -62,6 +62,11 @@ global:
     port: 3000
     tls:
       host: compass-gateway
+      secure:
+        jwt:
+          host: compass-gateway-auth-jwt
+        oauth:
+          host: compass-gateway-auth-oauth
     mtls:
       host: compass-gateway-mtls
     headers:
@@ -89,3 +94,6 @@ global:
       host: "localhost"
       hostPort: "5432"
       sslMode: ""
+
+  tenantMappingService:
+    url: http://compass-director.compass-system.svc.cluster.local:3000/tenant-mapping

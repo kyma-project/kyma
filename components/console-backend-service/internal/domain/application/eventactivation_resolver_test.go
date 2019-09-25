@@ -92,8 +92,8 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		asyncApiSpec := &spec.AsyncAPISpec{
 			Data: spec.AsyncAPISpecData{
-				AsyncAPI: "1.0.0",
-				Topics: map[string]interface{}{
+				AsyncAPI: "2.0.0",
+				Channels: map[string]interface{}{
 					"sell.v1": map[string]interface{}{
 						"subscribe": map[string]interface{}{
 							"summary": "desc",

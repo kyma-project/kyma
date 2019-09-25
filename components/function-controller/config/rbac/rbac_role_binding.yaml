@@ -9,4 +9,5 @@ roleRef:
   name: manager-role
 subjects:
 - kind: ServiceAccount
-  name: ""
+  name: default
+  namespace: system

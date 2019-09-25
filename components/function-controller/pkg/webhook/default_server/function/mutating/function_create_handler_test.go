@@ -35,11 +35,11 @@ var fnConfig = &corev1.ConfigMap{
 		"runtimes": `[
 			{
 				"ID": "nodejs8",
-				"DockerFileName": "dockerfile-nodejs8",
+				"dockerfileName": "dockerfile-nodejs8",
 			},
 			{
 				"ID": "nodejs6",
-				"DockerFileName": "dockerfile-nodejs6",
+				"dockerfileName": "dockerfile-nodejs6",
 			}
 		]`,
 		"funcSizes": `[
@@ -101,7 +101,7 @@ func TestValidation(t *testing.T) {
 			Runtime:             "nodejs4",
 		},
 	}
-	g.Expect(functionCreateHandler.validateFunctionFn(function, rnInfo)).To(gomega.MatchError("Passed Runtime: 'nodejs4', but runtime should be one of 'nodejs8, nodejs6'"))
+	g.Expect(functionCreateHandler.validateFunctionFn(function, rnInfo)).To(gomega.MatchError(`runtime should be one of ["nodejs8" "nodejs6"] (got "nodejs4")`))
 
 	// wrong size
 	function = &serverlessv1alpha1.Function{
@@ -112,7 +112,7 @@ func TestValidation(t *testing.T) {
 			Runtime:             "nodejs8",
 		},
 	}
-	g.Expect(functionCreateHandler.validateFunctionFn(function, rnInfo)).To(gomega.MatchError("Passed function size: 'UnknownSize', but size should be one of 'S, M, L'"))
+	g.Expect(functionCreateHandler.validateFunctionFn(function, rnInfo)).To(gomega.MatchError(`size should be one of ["S" "M" "L"] (got "UnknownSize")`))
 
 	// wrong functionContentType
 	function = &serverlessv1alpha1.Function{
@@ -123,6 +123,6 @@ func TestValidation(t *testing.T) {
 			Runtime:             "nodejs8",
 		},
 	}
-	g.Expect(functionCreateHandler.validateFunctionFn(function, rnInfo)).To(gomega.MatchError("Passed functionContetype: 'UnknownFunctionContentType', but functionContentType should be one of 'plaintetext, base64'"))
+	g.Expect(functionCreateHandler.validateFunctionFn(function, rnInfo)).To(gomega.MatchError(`functionContentType should be one of ["plaintetext" "base64"] (got "UnknownFunctionContentType")`))
 
 }

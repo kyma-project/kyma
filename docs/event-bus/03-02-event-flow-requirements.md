@@ -11,7 +11,7 @@ The Event Bus ensures a successful flow of Events in Kyma when:
 - The Events are [published](#details-event-flow-requirements-event-publishing).
 
 
-## Activate Events
+## Create the EventActivation controller
 
 Enable the EventActivation controller to ensure the Event flow between the Namespace and the Application (App). Alternatively, [bind](/components/application-connector#tutorials-bind-an-application-to-a-namespace) the App to the Namespace and create a Service Instance.
 
@@ -24,7 +24,7 @@ The diagram shows you the Event activation flow for a given Namespace.
 * The lambda in the `test123` Namespace does not receive any Events since you have not enabled the EventActivation controller.
 
 
-## Consume Events
+## Create Subscription
 
 Configure lambdas and services to use the `push` command for consuming Events coming from the App. To make sure the lambda or the service receive the Events, register a webhook for them by creating a [Subscription custom resource](/components/event-bus#custom-resource-subscription). 
 

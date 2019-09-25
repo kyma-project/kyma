@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"time"
 
-	scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	scInformer "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions/servicecatalog/v1beta1"
-	scLister "github.com/kubernetes-incubator/service-catalog/pkg/client/listers_generated/servicecatalog/v1beta1"
+	scTypes "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	scInformer "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions/servicecatalog/v1beta1"
+	scLister "github.com/kubernetes-sigs/service-catalog/pkg/client/listers_generated/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/metric"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/pretty"
 	sbuStatus "github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/status"
@@ -711,10 +711,10 @@ func (c *ServiceBindingUsageController) AddOnDeleteListener(listener onDeleteLis
 // with status true.
 //
 // I checked that they always updated this status to false if there are some problems.
-// see: https://github.com/kubernetes-incubator/service-catalog/blob/v0.1.3/pkg/controller/controller_binding.go#L178
+// see: https://github.com/kubernetes-sigs/service-catalog/blob/v0.1.3/pkg/controller/controller_binding.go#L178
 //
 // What's more they doing same thing for checking if given service instance is ready.
-// see: https://github.com/kubernetes-incubator/service-catalog/blob/v0.1.3/pkg/controller/controller.go#L606
+// see: https://github.com/kubernetes-sigs/service-catalog/blob/v0.1.3/pkg/controller/controller.go#L606
 func isServiceBindingReady(instance *scTypes.ServiceBinding) bool {
 	for _, cond := range instance.Status.Conditions {
 		if cond.Type == scTypes.ServiceBindingConditionReady {

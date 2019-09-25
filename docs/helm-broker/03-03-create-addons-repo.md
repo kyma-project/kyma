@@ -89,6 +89,8 @@ sample-addon-repository
 
 See the example of the Kyma `addons` repository [here](https://github.com/kyma-project/addons/tree/master/addons).
 
+> **NOTE:** The amount of memory and storage size determine the maximum size of your addons repository. These limits are set in the
+[Helm Broker chart](https://kyma-project.io/docs/components/helm-broker/#configuration-helm-broker-chart).
 
 You can specify a Git repository URL by adding a special `git::` prefix to the URL address. After this prefix, provide any valid Git URL with one of the protocols supported by Git. In the URL, you can specify a branch, commit, or tag version. You can also add the `depth` query parameter with a number that specifies the last revision you want to clone from the repository.
 
@@ -128,6 +130,8 @@ sample-addon-repository
   ├── index-2.yaml                              
   └── ...                                                    
 ```
+> **NOTE:** The amount of memory and storage size determine the maximum size of your addons repository. These limits are set in the
+[Helm Broker chart](https://kyma-project.io/docs/components/helm-broker/#configuration-helm-broker-chart).
 
 You can specify a Mercurial repository URL by adding a special `hg::` prefix to the URL address. After this prefix, provide a valid Mercurial URL with one of the supported protocols. In the URL, you can specify a revision to checkout.
 
@@ -257,19 +261,19 @@ spec:
 
   The S3 protocol requires a key and a secret to authenticate with your bucket. To get a key and a secret, log in to the AWS [console](https://console.aws.amazon.com),
   select **My Security Credentials**, and go to the **Access keys** tab where you can create a new access key.
-    
-  > **NOTE:** For more information about security credentials and access key, read [this](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys) document. 
-  
+
+  > **NOTE:** For more information about security credentials and access key, read [this](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys) document.
+
   Follow these steps to secure your S3 addons repository with basic authentication credentials:
-  
+
   1. Create a Secret resource with S3 credentials:
   ```bash
     echo -n 'AWS_KEY' > ./key.txt
     echo -n 'AWS_SECRET' > ./secret.txt
-    
+
     kubectl create secret generic aws-auth -n default --from-file=aws_key=./key.txt --from-file=aws_secret=./secret.txt
   ```
-  
+
   2. Define a URL with the required fields:
   ```yaml
     apiVersion: addons.kyma-project.io/v1alpha1
@@ -283,6 +287,6 @@ spec:
             name: aws-auth
             namespace: default
   ```
-  
+
   </details>
 </div>  

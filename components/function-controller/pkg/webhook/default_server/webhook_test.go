@@ -51,11 +51,11 @@ var fnConfig = &corev1.ConfigMap{
 		"runtimes": `[
 			{
 				"ID": "nodejs8",
-				"DockerFileName": "dockerfile-nodejs8",
+				"dockerfileName": "dockerfile-nodejs8",
 			},
 			{
 				"ID": "nodejs6",
-				"DockerFileName": "dockerfile-nodejs6",
+				"dockerfileName": "dockerfile-nodejs6",
 			}
 		]`,
 		"funcSizes": `[
@@ -133,7 +133,7 @@ func testInvalidFunc(t *testing.T) {
 	// ensure function got rejected
 	g.Expect(response.Response.Allowed).To(gomega.BeFalse())
 	// due to invalid function size
-	g.Expect(response.Response.Result.Message).To(gomega.Equal("Passed function size: 'foo', but size should be one of 'S, M, L'"))
+	g.Expect(response.Response.Result.Message).To(gomega.Equal(`size should be one of ["S" "M" "L"] (got "foo")`))
 	g.Expect(response.Response.Result.Code).To(gomega.Equal(int32(400)))
 }
 

@@ -94,7 +94,7 @@ func TestApiMetadata(t *testing.T) {
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
-			require.EqualValues(t, expectedServiceDefinition, *receivedServiceDefinition)
+			requireServiceDefinitionEqual(t, expectedServiceDefinition, receivedServiceDefinition)
 
 			// when
 			statusCode, existingServices, err := metadataServiceClient.GetAllServices(t)
@@ -248,7 +248,7 @@ func TestApiMetadata(t *testing.T) {
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
-			require.EqualValues(t, expectedServiceDefinition, *receivedServiceDefinition)
+			requireServiceDefinitionEqual(t, expectedServiceDefinition, receivedServiceDefinition)
 
 			// when
 			statusCode, existingServices, err := metadataServiceClient.GetAllServices(t)
@@ -333,7 +333,7 @@ func TestApiMetadata(t *testing.T) {
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
-			require.EqualValues(t, expectedServiceDefinition, *receivedServiceDefinition)
+			requireServiceDefinitionEqual(t, expectedServiceDefinition, receivedServiceDefinition)
 
 			// when
 			statusCode, existingServices, err := metadataServiceClient.GetAllServices(t)
@@ -371,7 +371,7 @@ func TestApiMetadata(t *testing.T) {
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
-			require.EqualValues(t, expectedServiceDefinition, *receivedServiceDefinition)
+			requireServiceDefinitionEqual(t, expectedServiceDefinition, receivedServiceDefinition)
 
 			// when
 			statusCode, existingServices, err := metadataServiceClient.GetAllServices(t)
@@ -441,7 +441,7 @@ func TestApiMetadata(t *testing.T) {
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
-			require.EqualValues(t, expectedServiceDefinition, *receivedServiceDefinition)
+			requireServiceDefinitionEqual(t, expectedServiceDefinition, receivedServiceDefinition)
 
 			// when
 			statusCode, existingServices, err := metadataServiceClient.GetAllServices(t)
@@ -509,7 +509,7 @@ func TestApiMetadata(t *testing.T) {
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
-			require.EqualValues(t, expectedServiceDefinition, *receivedServiceDefinition)
+			requireServiceDefinitionEqual(t, expectedServiceDefinition, receivedServiceDefinition)
 
 			// when
 			statusCode, existingServices, err := metadataServiceClient.GetAllServices(t)
@@ -614,7 +614,7 @@ func TestApiMetadata(t *testing.T) {
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
-			require.EqualValues(t, expectedServiceDefinition, *receivedServiceDefinition)
+			requireServiceDefinitionEqual(t, expectedServiceDefinition, receivedServiceDefinition)
 
 			// when
 			statusCode, existingServices, err := metadataServiceClient.GetAllServices(t)
@@ -825,7 +825,24 @@ func requireDefinitionsWithCertCredentialsEqual(t *testing.T, expected testkit.S
 	require.Equal(t, expected.Name, actual.Name)
 	require.Equal(t, expected.Provider, actual.Provider)
 	require.EqualValues(t, expected.Labels, actual.Labels)
-	require.EqualValues(t, expected.Events, actual.Events)
+	require.NotNil(t, actual.Events)
+	require.EqualValues(t, expected.Documentation, actual.Documentation)
+}
+
+func requireServiceDefinitionEqual(t *testing.T, expected testkit.ServiceDetails, actual *testkit.ServiceDetails) {
+	require.NotNil(t, actual)
+	require.Equal(t, expected.Name, actual.Name)
+	require.Equal(t, expected.Provider, actual.Provider)
+	require.Equal(t, expected.Description, actual.Description)
+	require.Equal(t, expected.ShortDescription, actual.ShortDescription)
+	require.Equal(t, expected.Identifier, actual.Identifier)
+	require.EqualValues(t, expected.Labels, actual.Labels)
+	require.EqualValues(t, expected.Api, actual.Api)
+	if expected.Events != nil {
+		require.NotNil(t, actual.Events)
+	} else {
+		require.Nil(t, actual.Events)
+	}
 	require.EqualValues(t, expected.Documentation, actual.Documentation)
 }
 

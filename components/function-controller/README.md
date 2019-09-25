@@ -1,14 +1,14 @@
 # Function Controller
 
-The Knative Function Controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses Knative Build and Knative Serving under the hood.
+The Knative Function Controller is a Kubernetes controller that enables Kyma to manage Function resources. It uses Tekton Pipelines and Knative Serving under the hood.
 
 ## Prerequisites
 
 The Function Controller requires the following components to be installed:
 
-- Knative Build (v0.6.0)
-- Knative Serving (v0.6.1)
-- Istio (v1.0.7)
+- [Tekton Pipelines](https://github.com/tektoncd/pipeline/releases) (v0.7.0)
+- [Knative Serving](https://github.com/knative/serving/releases) (v0.8.1)
+- [Istio](https://github.com/istio/istio/releases) (v1.0.7)
 
 ## Installation
 
@@ -20,17 +20,15 @@ Follow these steps to prepare the environment you will use to deploy the Control
 
     | Variable        | Description | Sample value |
     | --------------- | ----------- |--------------|
-    | **IMG** | The full image name the Function Controller will be tagged with. | `gcr.io/my-project/function-controller` for GCR, `my-user/function-controller` for Docker Hub |
     | **FN_REGISTRY** | The URL of the container registry Function images will be pushed to. Used for authentication. | `https://gcr.io/` for GCR, `https://index.docker.io/v1/` for Docker Hub |
-    | **FN_REPOSITORY** | The name of the container repository Function images will be pushed to. | `gcr.io/my-project` for GCR, `my-user` for Docker Hub |
+    | **KO_DOCKER_REPO** | The name of the container repository Function images will be pushed to. | `gcr.io/my-project` for GCR, `my-user` for Docker Hub |
     | **FN_NAMESPACE** | The Namespace where Functions are deployed. | `sample-namespace` |
 
     See the example:
 
     ```bash
-    export IMG=my-docker-user/function-controller
     export FN_REGISTRY=https://index.docker.io/v1/
-    export FN_REPOSITORY=my-docker-user
+    export KO_DOCKER_REPO=my-docker-user
     export FN_NAMESPACE=my-functions
     ```
 
@@ -40,7 +38,7 @@ Follow these steps to prepare the environment you will use to deploy the Control
     kubectl create namespace serverless-system
     ```
 
-3. Create the following configuration for the controller. It contains a list of supported runtimes as well as the container repository referenced by the **FN_REPOSITORY** environment variable, which you will create a Secret for in the next steps.
+3. Create the following configuration for the controller. It contains a list of supported runtimes as well as the container repository referenced by the **KO_DOCKER_REPO** environment variable, which you will create a Secret for in the next steps.
 
     ```bash
     cat <<EOF | kubectl -n serverless-system apply -f -
@@ -50,7 +48,7 @@ Follow these steps to prepare the environment you will use to deploy the Control
       name: fn-config
     data:
       serviceAccountName: function-controller-build
-      dockerRegistry: ${FN_REPOSITORY}
+      dockerRegistry: ${KO_DOCKER_REPO}
       runtimes: |
         - ID: nodejs8
           dockerFileName: dockerfile-nodejs-8
@@ -83,7 +81,7 @@ Follow these steps to prepare the environment you will use to deploy the Control
     kubectl apply -n ${FN_NAMESPACE} -f config/dockerfiles.yaml
     ```
 
-6. Before you create Functions, it is necessary to create the `registry-credentials` Secret, which contains credentials to the Docker registry defined by the **FN_REGISTRY** environment variable. Knative Build uses this Secret to push the images it builds for the deployed Functions. The corresponding `function-controller-build` ServiceAccount was referenced inside the controller configuration in step 3.
+6. Before you create Functions, it is necessary to create the `registry-credentials` Secret, which contains credentials to the Docker registry defined by the **FN_REGISTRY** environment variable. Tekton Pipelines uses this Secret to push the images it builds for the deployed Functions. The corresponding `function-controller-build` ServiceAccount was referenced inside the controller configuration in step 3.
 
     ```bash
     reg_username=<container registry username>
@@ -97,7 +95,7 @@ Follow these steps to prepare the environment you will use to deploy the Control
     metadata:
       name: registry-credentials
       annotations:
-        build.knative.dev/docker-0: ${FN_REGISTRY}
+        tekton.dev/docker-0: ${FN_REGISTRY}
     stringData:
       username: ${reg_username}
       password: ${reg_password}
@@ -119,16 +117,7 @@ To deploy the Function Controller to the `serverless-system` Namespace, run:
 make deploy
 ```
 
-This runs [ko](https://github.com/google/ko) to build your image and push it to your configured docker repository. 
-
->**NOTE:** Make sure the  **KO_DOCKER_REPO**  environment variable points to a valid docker repository.
->```bash
->#for hub.docker.io
->export KO_DOCKER_REPO=<your dockerhub username>
->
->#to use your local docker daemon and its image store
->export KO_DOCKER_REPO=ko.local
->```
+This runs [ko](https://github.com/google/ko) to build your image and push it to the container repository set in the **KO_DOCKER_REPO** environment variable.
 
 ## Usage
 
@@ -147,25 +136,25 @@ Follow the steps below to create a sample Function.
 1. Apply the following Function manifest:
 
     ```bash
-    kubectl apply -f config/samples/serverless_v1alpha1_function.yaml
+    kubectl -n ${FN_NAMESPACE} apply -f config/samples/serverless_v1alpha1_function.yaml
     ```
 
 2. Ensure the Function was created:
 
     ```bash
-    kubectl get functions
+    kubectl -n ${FN_NAMESPACE} get functions
     ```
 
 3. Check the status of the build:
 
     ```bash
-    kubectl get builds.build.knative.dev
+    kubectl -n ${FN_NAMESPACE} get taskruns.tekton.dev
     ```
 
 4. Check the status of the Knative Serving service:
 
     ```bash
-    kubectl get services.serving.knative.dev
+    kubectl -n ${FN_NAMESPACE} get services.serving.knative.dev
     ```
 
 5. Access the Function:
@@ -176,7 +165,7 @@ Follow the steps below to create a sample Function.
       <summary>Minikube</summary>
 
       ```bash
-      FN_DOMAIN="$(kubectl get ksvc demo --output 'jsonpath={.status.domain}')"
+      FN_DOMAIN="$(kubectl -n ${FN_NAMESPACE} get ksvc demo --output 'jsonpath={.status.url}' | sed -e 's/http\([s]\)*:[/][/]//')"
       FN_PORT="$(kubectl get svc istio-ingressgateway -n istio-system --output 'jsonpath={.spec.ports[?(@.port==80)].nodePort}')"
       curl -v -H "Host: ${FN_DOMAIN}" http://$(minikube ip):${FN_PORT}
       ```
@@ -186,8 +175,9 @@ Follow the steps below to create a sample Function.
       <summary>Remote cluster</summary>
 
       ```bash
-      FN_DOMAIN="$(kubectl get ksvc demo --output 'jsonpath={.status.domain}')"
-      curl -kD- "https://${FN_DOMAIN}"
+      FN_DOMAIN="$(kubectl -n ${FN_NAMESPACE} get ksvc demo --output 'jsonpath={.status.url}' | sed -e 's/http\([s]\)*:[/][/]//')"
+      FN_INGRESS="$(kubectl get svc istio-ingressgateway -n istio-system --output 'jsonpath={.status.loadBalancer.ingress[0].ip}')"
+      curl -kD- -H "Host: ${FN_DOMAIN}" "http://${FN_INGRESS}"   
       ```
       </details>
 

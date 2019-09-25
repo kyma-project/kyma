@@ -24,18 +24,9 @@ endif
 test: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
 # Default is 20s - available since controller-runtime 0.1.5
 test: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
-test: generate fmt vet symlinks
+test: generate fmt vet
 	go test -race -v ./pkg/... ./cmd/... -coverprofile cover.out
 	@echo "Total test coverage: $$(go tool cover -func=cover.out | grep total | awk '{print $$3}')"
-
-symlinks:
-	-rm config/crds/300*.yaml
-	ln -s ../../vendor/github.com/knative/build/config/300-build.yaml config/crds/300-build.yaml
-	ln -s ../../vendor/github.com/knative/build/config/300-buildtemplate.yaml config/crds/300-buildtemplate.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-revision.yaml config/crds/300-revision.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-route.yaml config/crds/300-route.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-service.yaml config/crds/300-service.yaml
-	ln -s ../../vendor/github.com/knative/serving/config/300-configuration.yaml config/crds/300-configuration.yaml
 
 # Generate code
 generate: resolve
@@ -64,11 +55,11 @@ run: generate fmt vet
 
 # Install CRDs into a cluster
 install:
-	kubectl apply -f config/crds/serverless_v1alpha1_function.yaml
+	kubectl apply -f config/crds/
 
 # Uninstall CRDs from cluster
 uninstall:
-	kubectl delete -f config/crds/serverless_v1alpha1_function.yaml
+	kubectl delete -f config/crds/
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests:

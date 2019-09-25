@@ -20,17 +20,16 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-	runtimeUtil "github.com/kyma-project/kyma/components/function-controller/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
-	k8sTypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission/types"
+
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	runtimeUtil "github.com/kyma-project/kyma/components/function-controller/pkg/utils"
 )
 
 var (
@@ -56,7 +55,6 @@ type FunctionCreateHandler struct {
 
 // Mutates function values
 func (h *FunctionCreateHandler) mutatingFunctionFn(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) {
-
 	if obj.Spec.Size == "" {
 		obj.Spec.Size = rnInfo.Defaults.Size
 	}
@@ -73,13 +71,11 @@ func (h *FunctionCreateHandler) mutatingFunctionFn(obj *serverlessv1alpha1.Funct
 
 // Validate function values and return an error if the function is not valid
 func (h *FunctionCreateHandler) validateFunctionFn(obj *serverlessv1alpha1.Function, rnInfo *runtimeUtil.RuntimeInfo) error {
-
 	// function size
-	isValidFunctionSize := false
+	var isValidFunctionSize bool
 	var functionSizes []string
 	for _, functionSize := range rnInfo.FuncSizes {
 		functionSizes = append(functionSizes, functionSize.Size)
-
 		if obj.Spec.Size == functionSize.Size {
 			isValidFunctionSize = true
 			break
@@ -87,11 +83,12 @@ func (h *FunctionCreateHandler) validateFunctionFn(obj *serverlessv1alpha1.Funct
 	}
 
 	if !isValidFunctionSize {
-		return fmt.Errorf("Passed function size: '%v', but size should be one of '%v'", obj.Spec.Size, strings.Join(functionSizes, ", "))
+		return fmt.Errorf("size should be one of %q (got %q)",
+			functionSizes, obj.Spec.Size)
 	}
 
 	// function serverless
-	isValidRuntime := false
+	var isValidRuntime bool
 	var runtimes []string
 	for _, runtime := range rnInfo.AvailableRuntimes {
 		runtimes = append(runtimes, runtime.ID)
@@ -102,11 +99,12 @@ func (h *FunctionCreateHandler) validateFunctionFn(obj *serverlessv1alpha1.Funct
 	}
 
 	if !isValidRuntime {
-		return fmt.Errorf("Passed Runtime: '%v', but runtime should be one of '%v'", obj.Spec.Runtime, strings.Join(runtimes, ", "))
+		return fmt.Errorf("runtime should be one of %q (got %q)",
+			runtimes, obj.Spec.Runtime)
 	}
 
 	// function content type
-	isValidFunctionContentType := false
+	var isValidFunctionContentType bool
 	var functionContentTypes []string
 	for _, functionContentType := range rnInfo.FuncTypes {
 		functionContentTypes = append(functionContentTypes, functionContentType.Type)
@@ -115,8 +113,10 @@ func (h *FunctionCreateHandler) validateFunctionFn(obj *serverlessv1alpha1.Funct
 			break
 		}
 	}
+
 	if !isValidFunctionContentType {
-		return fmt.Errorf("Passed functionContetype: '%v', but functionContentType should be one of '%v'", obj.Spec.FunctionContentType, strings.Join(functionContentTypes, ", "))
+		return fmt.Errorf("functionContentType should be one of %q (got %q)",
+			functionContentTypes, obj.Spec.FunctionContentType)
 	}
 
 	return nil
@@ -140,33 +140,43 @@ func getEnvDefault(envName string, defaultValue string) string {
 	}
 	return value
 }
-func (h *FunctionCreateHandler) getRuntimeConfig(fnConfig *corev1.ConfigMap) error {
-	// Get Function Controller Configuration
-	err := h.Client.Get(context.TODO(), k8sTypes.NamespacedName{Name: fnConfigName, Namespace: fnConfigNamespace}, fnConfig)
+
+// getRuntimeConfig returns the Function Controller ConfigMap from the cluster.
+func (h *FunctionCreateHandler) getRuntimeConfig() (*corev1.ConfigMap, error) {
+	cm := &corev1.ConfigMap{}
+
+	err := h.Client.Get(context.TODO(),
+		client.ObjectKey{
+			Name:      fnConfigName,
+			Namespace: fnConfigNamespace,
+		},
+		cm,
+	)
+
 	if err != nil {
-		log.Error(err, "Unable to read Function controller's configuration", "namespace", fnConfigNamespace, "name", fnConfigName)
-		return err
+		return nil, err
 	}
-	return nil
+	return cm, nil
 }
 
 // Handle handles admission requests.
 func (h *FunctionCreateHandler) Handle(ctx context.Context, req types.Request) types.Response {
 	log.Info("received admission request", "request", req)
 
-	fnConfig := &corev1.ConfigMap{}
-	if err := h.getRuntimeConfig(fnConfig); err != nil {
+	fnConfig, err := h.getRuntimeConfig()
+	if err != nil {
+		log.Error(err, "Error reading controller configuration", "namespace", fnConfigNamespace, "name", fnConfigName)
 		return admission.ErrorResponse(http.StatusInternalServerError, err)
 	}
+
 	rnInfo, err := runtimeUtil.New(fnConfig)
 	if err != nil {
-		log.Error(err, "Error while trying to get a new RuntimeInfo instance", "namespace", fnConfig.Namespace, "name", fnConfig.Name)
+		log.Error(err, "Error creating RuntimeInfo", "namespace", fnConfig.Namespace, "name", fnConfig.Name)
 		return admission.ErrorResponse(http.StatusBadRequest, err)
 	}
 	obj := &serverlessv1alpha1.Function{}
 
-	err = h.Decoder.Decode(req, obj)
-	if err != nil {
+	if err := h.Decoder.Decode(req, obj); err != nil {
 		return admission.ErrorResponse(http.StatusBadRequest, err)
 	}
 	copy := obj.DeepCopy()
@@ -175,8 +185,7 @@ func (h *FunctionCreateHandler) Handle(ctx context.Context, req types.Request) t
 	h.mutatingFunctionFn(copy, rnInfo)
 
 	// validate function and return an error describing the validation error if validation fails
-	err = h.validateFunctionFn(copy, rnInfo)
-	if err != nil {
+	if err := h.validateFunctionFn(copy, rnInfo); err != nil {
 		return admission.ErrorResponse(http.StatusBadRequest, err)
 	}
 

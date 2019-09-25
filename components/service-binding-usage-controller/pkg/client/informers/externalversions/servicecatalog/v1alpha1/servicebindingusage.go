@@ -5,7 +5,7 @@ package v1alpha1
 import (
 	time "time"
 
-	servicecatalog_v1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	servicecatalogv1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	versioned "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions/internalinterfaces"
 	v1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/listers/servicecatalog/v1alpha1"
@@ -54,7 +54,7 @@ func NewFilteredServiceBindingUsageInformer(client versioned.Interface, namespac
 				return client.ServicecatalogV1alpha1().ServiceBindingUsages(namespace).Watch(options)
 			},
 		},
-		&servicecatalog_v1alpha1.ServiceBindingUsage{},
+		&servicecatalogv1alpha1.ServiceBindingUsage{},
 		resyncPeriod,
 		indexers,
 	)
@@ -65,7 +65,7 @@ func (f *serviceBindingUsageInformer) defaultInformer(client versioned.Interface
 }
 
 func (f *serviceBindingUsageInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&servicecatalog_v1alpha1.ServiceBindingUsage{}, f.defaultInformer)
+	return f.factory.InformerFor(&servicecatalogv1alpha1.ServiceBindingUsage{}, f.defaultInformer)
 }
 
 func (f *serviceBindingUsageInformer) Lister() v1alpha1.ServiceBindingUsageLister {
