@@ -108,7 +108,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		return nil, err
 	}
 
-	oauthClient := oauth.NewOauthClient(config.HyadraURL)
+	oauthClient := oauth.NewOauthClient(config.HydraPublicURL, config.HydraAdminURL)
 
 	token, err := oauthClient.GetAuthorizationToken()
 

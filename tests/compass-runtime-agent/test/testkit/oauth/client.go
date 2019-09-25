@@ -10,9 +10,14 @@ import (
 )
 
 const (
-	AuthorizationHeader  = "Authorization"
+	AuthorizationHeader = "Authorization"
+	ContentTypeHeader   = "Content-Type"
+
+	GrantTypeFieldName   = "grant_type"
 	CredentialsGrantType = "client_credentials"
-	RWScope              = "read write"
+
+	ScopeFieldName = "scope"
+	RWScope        = "read write"
 )
 
 type Client struct {
@@ -30,15 +35,20 @@ type oauthClient struct {
 	Owner         string   `json:"owner"`
 }
 
+type tokenResponse struct {
+	AccessToken string `json:"access_token"`
+	Expiration  int    `json:"expires_in"`
+}
+
 type credentials struct {
 	clientID     string
 	clientSecret string
 }
 
-func NewOauthClient(hydraURL string) *Client {
+func NewOauthClient(hydraPublicURL, hydraAdminURL string) *Client {
 	return &Client{
-		clientsEndpoint: fmt.Sprintf("%s/clients", hydraURL),
-		tokensEndpoint:  fmt.Sprintf("%s/oauth2/tokens", hydraURL),
+		clientsEndpoint: fmt.Sprintf("%s/clients", hydraAdminURL),
+		tokensEndpoint:  fmt.Sprintf("%s/oauth2/token", hydraPublicURL),
 		httpClient:      http.Client{},
 	}
 }
@@ -65,7 +75,7 @@ func (c *Client) createOAuth2Client() (credentials, error) {
 		Scope:      RWScope,
 	}
 
-	buf := new(bytes.Buffer)
+	buf := &bytes.Buffer{}
 	err := json.NewEncoder(buf).Encode(body)
 	if err != nil {
 		return credentials{}, err
@@ -86,9 +96,11 @@ func (c *Client) createOAuth2Client() (credentials, error) {
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusCreated {
-		err = json.NewDecoder(resp.Body).Decode(oauthResp)
+	if resp.StatusCode != http.StatusCreated {
+		return credentials{}, fmt.Errorf("create OAuth2 client call returned unexpected status code, %d", resp.StatusCode)
 	}
+
+	err = json.NewDecoder(resp.Body).Decode(&oauthResp)
 
 	if err != nil {
 		return credentials{}, err
@@ -101,34 +113,28 @@ func (c *Client) createOAuth2Client() (credentials, error) {
 }
 
 func buildCredentialsString(credentials credentials) (string, error) {
-	clientIDBytes, e := base64.StdEncoding.DecodeString(credentials.clientID)
-
-	if e != nil {
-		return "", e
-	}
-
-	secretValueBytes, e := base64.StdEncoding.DecodeString(credentials.clientSecret)
-
-	if e != nil {
-		return "", e
-	}
-
-	clientID := string(clientIDBytes)
-	clientSecret := string(secretValueBytes)
-
-	credentialsEncoded := []byte(fmt.Sprintf("Basic %s:%s", clientID, clientSecret))
-	return base64.StdEncoding.EncodeToString(credentialsEncoded), nil
+	credentialsEncoded := []byte(fmt.Sprintf("%s:%s", credentials.clientID, credentials.clientSecret))
+	return fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString(credentialsEncoded)), nil
 }
 
 func (c *Client) getOAuthToken(credentials string) (string, error) {
-	request, e := http.NewRequest(http.MethodPost, c.tokensEndpoint, nil)
+	b := &bytes.Buffer{}
+	w := multipart.NewWriter(b)
+
+	e := setRequiredFields(w)
 
 	if e != nil {
 		return "", e
 	}
 
-	request.MultipartForm = &multipart.Form{Value: map[string][]string{"grant_type": {CredentialsGrantType}, "scope": {RWScope}}}
+	request, e := http.NewRequest(http.MethodPost, c.tokensEndpoint, b)
+
+	if e != nil {
+		return "", e
+	}
+
 	request.Header.Set(AuthorizationHeader, credentials)
+	request.Header.Set(ContentTypeHeader, w.FormDataContentType())
 
 	response, e := c.httpClient.Do(request)
 
@@ -138,13 +144,31 @@ func (c *Client) getOAuthToken(credentials string) (string, error) {
 
 	defer response.Body.Close()
 
-	if response.StatusCode == http.StatusCreated {
-		e = json.NewDecoder(response.Body).Decode()
+	var tokenResponse tokenResponse
+
+	if response.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("get token call returned unexpected status code, %d", response.StatusCode)
 	}
+
+	e = json.NewDecoder(response.Body).Decode(&tokenResponse)
 
 	if e != nil {
 		return "", e
 	}
 
-	return "", nil
+	return tokenResponse.AccessToken, nil
+}
+
+func setRequiredFields(w *multipart.Writer) error {
+	defer w.Close()
+
+	err := w.WriteField(GrantTypeFieldName, CredentialsGrantType)
+	if err != nil {
+		return err
+	}
+	err = w.WriteField(ScopeFieldName, RWScope)
+	if err != nil {
+		return err
+	}
+	return nil
 }
