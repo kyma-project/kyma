@@ -531,7 +531,7 @@ func (subscriber *testSubscriber) checkReceivedEventHeaders() error {
 			headerExpectedValue string
 		}{
 			{headerKey: sourceHeader, headerExpectedValue: srcID},
-			{headerKey: eventTypeHeader, headerExpectedValue: eventType1},
+			{headerKey: eventTypeHeader, headerExpectedValue: eventHeaderType},
 			{headerKey: eventTypeVersionHeader, headerExpectedValue: eventTypeVersion},
 			{headerKey: contentTypeHeader, headerExpectedValue: contentTypeHeaderValue},
 			{headerKey: customHeader, headerExpectedValue: customHeaderValue},
