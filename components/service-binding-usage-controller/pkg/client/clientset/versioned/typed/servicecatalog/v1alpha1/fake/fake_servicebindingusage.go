@@ -46,7 +46,7 @@ func (c *FakeServiceBindingUsages) List(opts v1.ListOptions) (result *v1alpha1.S
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.ServiceBindingUsageList{}
+	list := &v1alpha1.ServiceBindingUsageList{ListMeta: obj.(*v1alpha1.ServiceBindingUsageList).ListMeta}
 	for _, item := range obj.(*v1alpha1.ServiceBindingUsageList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -103,7 +103,7 @@ func (c *FakeServiceBindingUsages) DeleteCollection(options *v1.DeleteOptions, l
 // Patch applies the patch and returns the patched serviceBindingUsage.
 func (c *FakeServiceBindingUsages) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.ServiceBindingUsage, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(servicebindingusagesResource, c.ns, name, data, subresources...), &v1alpha1.ServiceBindingUsage{})
+		Invokes(testing.NewPatchSubresourceAction(servicebindingusagesResource, c.ns, name, pt, data, subresources...), &v1alpha1.ServiceBindingUsage{})
 
 	if obj == nil {
 		return nil, err

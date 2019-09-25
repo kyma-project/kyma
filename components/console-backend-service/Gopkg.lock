@@ -246,27 +246,6 @@
   revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
 
 [[projects]]
-  digest = "1:bc84096300a94af149177a7a11f414bca6483069bc0a90db7709b75f4ba57c35"
-  name = "github.com/kubeless/kubeless"
-  packages = [
-    "pkg/apis/kubeless",
-    "pkg/apis/kubeless/v1beta1",
-    "pkg/client/clientset/versioned",
-    "pkg/client/clientset/versioned/fake",
-    "pkg/client/clientset/versioned/scheme",
-    "pkg/client/clientset/versioned/typed/kubeless/v1beta1",
-    "pkg/client/clientset/versioned/typed/kubeless/v1beta1/fake",
-    "pkg/client/informers/externalversions",
-    "pkg/client/informers/externalversions/internalinterfaces",
-    "pkg/client/informers/externalversions/kubeless",
-    "pkg/client/informers/externalversions/kubeless/v1beta1",
-    "pkg/client/listers/kubeless/v1beta1",
-  ]
-  pruneopts = "NUT"
-  revision = "4f4f531f6a1b685bf3842b26cfff5ca7eee533cc"
-  version = "v0.4.0"
-
-[[projects]]
   digest = "1:1069a7ee451253ba038ab9c1031ff1a3de731b825e573d774284a159639d814a"
   name = "github.com/kubernetes-incubator/service-catalog"
   packages = [
@@ -303,7 +282,7 @@
   revision = "d07feb2d365a58645031e96b27a95c8d50bb8349"
 
 [[projects]]
-  digest = "1:8069f9969f7706ed0081b4ead65ad60248f02066e01d4aaefea473b02472dadd"
+  digest = "1:6874a3b35a4cfa1b0f286400791eed74d43f153b6eecd3eeb06cab6cc7088540"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -362,6 +341,7 @@
     "components/service-binding-usage-controller/pkg/client/informers/externalversions/settings/v1alpha1",
     "components/service-binding-usage-controller/pkg/client/listers/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/client/listers/settings/v1alpha1",
+    "tools/failery",
   ]
   pruneopts = "NUT"
   revision = "3a0c31e7c33b83912dfb6f39cdf46720254e5b0f"
@@ -1079,10 +1059,6 @@
     "github.com/googleapis/gnostic/OpenAPIv2",
     "github.com/gorilla/mux",
     "github.com/gorilla/websocket",
-    "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
-    "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
-    "github.com/kubeless/kubeless/pkg/client/clientset/versioned/fake",
-    "github.com/kubeless/kubeless/pkg/client/informers/externalversions",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/fake",
@@ -1112,6 +1088,7 @@
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions",
+    "github.com/kyma-project/kyma/tools/failery",
     "github.com/moby/moby/pkg/namesgenerator",
     "github.com/opentracing/opentracing-go",
     "github.com/opentracing/opentracing-go/ext",

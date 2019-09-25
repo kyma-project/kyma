@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	serviceCatalogClientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	serviceCatalogInformers "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
+	serviceCatalogClientset "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
+	serviceCatalogInformers "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/metric"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/usagekind"
