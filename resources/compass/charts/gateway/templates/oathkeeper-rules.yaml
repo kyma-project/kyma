@@ -47,3 +47,31 @@ spec:
   - handler: id_token
     config:
       claims: {{ .Values.oathkeeper.idTokenConfig.claims | quote }}
+---
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: compass-gateway-certs
+spec:
+  description: Configuration of oathkeeper for secure endpoint of compass gateway
+  upstream:
+    url: http://compass-gateway.{{ .Release.Namespace }}.svc.cluster.local:3000
+  match:
+    methods: ["GET", "POST", "OPTIONS"]
+    url: <http|https>://{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}/director/graphql
+  authenticators:
+    - handler: noop
+  authorizer:
+    handler: allow
+  mutators:
+  - handler: hydrator
+    config:
+      api:
+        url: {{ .Values.global.certificateResolverService.url }}
+  - handler: hydrator
+    config:
+      api:
+        url: {{ .Values.global.tenantMappingService.url }}
+  - handler: id_token
+    config:
+      claims: {{ .Values.oathkeeper.idTokenConfig.claims | quote }}

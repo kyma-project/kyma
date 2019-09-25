@@ -97,3 +97,6 @@ global:
 
   tenantMappingService:
     url: http://compass-director.compass-system.svc.cluster.local:3000/tenant-mapping
+
+  certificateResolverService:
+    url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/certificate/data/resolve
