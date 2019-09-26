@@ -20,8 +20,8 @@ type TestConfig struct {
 	ProxyInvalidationWaitTime int64  `envconfig:"PROXY_INVALIDATION_WAIT_TIME" default:"150"`
 	GraphQLLog                bool   `envconfig:"GRAPHQL_LOG" default:"false"`
 	ScenarioLabel             string `envconfig:"SCENARIO_LABEL" default:"COMPASS_RUNTIME_AGENT_TESTS"`
-	HydraPublicURL            string `envconfig:"HYDRA_PUBLIC_URL" default:"http://ory-hydra-public:4444"`
-	HydraAdminURL             string `envconfig:"HYDRA_ADMIN_URL" default:"http://ory-hydra-admin:4445"`
+	HydraPublicURL            string `envconfig:"HYDRA_PUBLIC_URL" default:"http://ory-hydra-public.kyma-system:4444"`
+	HydraAdminURL             string `envconfig:"HYDRA_ADMIN_URL" default:"http://ory-hydra-admin.kyma-system:4445"`
 }
 
 func ReadConfig() (TestConfig, error) {
