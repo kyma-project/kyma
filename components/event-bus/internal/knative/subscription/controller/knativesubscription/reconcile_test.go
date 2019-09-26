@@ -32,7 +32,7 @@ const (
 	subUID           = "test-uid"
 	subName          = "my-sub"
 	knSubName        = "my-kn-sub"
-	sourceID         = "my_source_ID"
+	sourceID         = "my-source-id"
 	eventType        = "my-event-type"
 	eventTypeVersion = "my-event-type-version"
 	testNamespace    = "default"
