@@ -73,9 +73,18 @@ var (
 
 func init() {
 	// Add types to scheme
-	_ = eventingv1alpha1.AddToScheme(scheme.Scheme)
-	_ = evapisv1alpha1.AddToScheme(scheme.Scheme)
-	_ = messagingV1Alpha1.AddToScheme(scheme.Scheme)
+	err := eventingv1alpha1.AddToScheme(scheme.Scheme)
+	if err != nil {
+		log.Error(err, "Failed to add kyma eventing scheme")
+	}
+	err = evapisv1alpha1.AddToScheme(scheme.Scheme)
+	if err != nil {
+		log.Error(err, "Failed to add knative eventing scheme")
+	}
+	err = messagingV1Alpha1.AddToScheme(scheme.Scheme)
+	if err != nil {
+		log.Error(err, "Failed to add knative messaging scheme")
+	}
 }
 
 func TestInjectClient(t *testing.T) {
@@ -266,6 +275,8 @@ func makeReadySubscription() *eventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
 	subscription.Status.Conditions = []eventingv1alpha1.SubscriptionCondition{
 		{Type: eventingv1alpha1.EventsActivated, Status: eventingv1alpha1.ConditionTrue},
+		{Type: eventingv1alpha1.ChannelReady, Status: eventingv1alpha1.ConditionTrue},
+		{Type: eventingv1alpha1.SubscriptionReady, Status: eventingv1alpha1.ConditionTrue},
 		{Type: eventingv1alpha1.Ready, Status: eventingv1alpha1.ConditionTrue},
 	}
 	return subscription
@@ -284,6 +295,12 @@ func makeEventsActivatedSubscription() *eventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
 	subscription.Status.Conditions = []eventingv1alpha1.SubscriptionCondition{{
 		Type:   eventingv1alpha1.EventsActivated,
+		Status: eventingv1alpha1.ConditionTrue,
+	}, {
+		Type:   eventingv1alpha1.ChannelReady,
+		Status: eventingv1alpha1.ConditionTrue,
+	}, {
+		Type:   eventingv1alpha1.SubscriptionReady,
 		Status: eventingv1alpha1.ConditionTrue,
 	}}
 	return subscription
@@ -375,7 +392,7 @@ func (k *MockKnativeLib) DeleteChannel(name string, namespace string) error {
 	delete(knChannels, name)
 	return nil
 }
-func (k *MockKnativeLib) CreateSubscription(name string, namespace string, channelName string, uri *string) error {
+func (k *MockKnativeLib) CreateSubscription(name string, namespace string, channelName string, uri *string, labels map[string]string) error {
 	knSub := makeKnSubscription(makeEventsActivatedSubscription())
 	knSubscriptions[knSub.Name] = knSub
 	return nil
@@ -447,7 +464,7 @@ func makeKnSubscription(kySub *eventingv1alpha1.Subscription) *evapisv1alpha1.Su
 	knChannelName := makeKnChannelName(kySub)
 	subscriberURL := subscriberURI
 	chNamespace := util.GetDefaultChannelNamespace()
-	return util.Subscription(knSubName, chNamespace).ToChannel(knChannelName).ToURI(&subscriberURL).EmptyReply().Build()
+	return util.Subscription(knSubName, chNamespace, labels).ToChannel(knChannelName).ToURI(&subscriberURL).EmptyReply().Build()
 }
 
 func dumpKnativeLibObjects(t *testing.T) {

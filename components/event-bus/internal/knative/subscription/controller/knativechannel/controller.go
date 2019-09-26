@@ -1,7 +1,7 @@
-package eventactivation
+package knativechannel
 
 import (
-	eventactivationv1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
+	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -10,18 +10,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-var log = logf.Log.WithName("eventactivation-controller")
+var log = logf.Log.WithName("knativechannel-controller")
 
 const (
-	controllerAgentName = "eventactivation-controller"
+	controllerAgentName = "knativechannel-controller"
 )
 
-// ProvideController instantiates a reconciler which reconciles EventActivations.
+// ProvideController instantiates a reconciler which reconciles Knative Channels.
 func ProvideController(mgr manager.Manager) error {
 
 	var err error
 
-	// Setup a new controller to Reconcile EventActivation.
+	// Setup a new controller to Reconcile Knative Channels.
 	r := &reconciler{
 		recorder: mgr.GetRecorder(controllerAgentName),
 		time:     util.NewDefaultCurrentTime(),
@@ -30,16 +30,16 @@ func ProvideController(mgr manager.Manager) error {
 		Reconciler: r,
 	})
 	if err != nil {
-		log.Error(err, "Unable to create controller")
+		log.Error(err, "unable to create Knative channel controller")
 		return err
 	}
 
-	// Watch EventActivations.
+	// Watch Knative Channels
 	err = c.Watch(&source.Kind{
-		Type: &eventactivationv1alpha1.EventActivation{},
+		Type: &messagingV1Alpha1.Channel{},
 	}, &handler.EnqueueRequestForObject{})
 	if err != nil {
-		log.Error(err, "Unable to watch EventActivation")
+		log.Error(err, "unable to watch Knative Channel")
 		return err
 	}
 
