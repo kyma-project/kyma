@@ -23,20 +23,21 @@ If you create a specific mutation, validation, or metadata service for the avail
 
   - accept **parameters** and **content** properties.
   - return the `200` response with new file content.
-  - return the `304` response.
+  - return the `304` response informing that the file content was not modified.
 
 See the example of the validation service with the `/convert` endpoint [here](./assets/mutation-service.yaml). To preview and test it, use the [Swagger Editor](https://editor.swagger.io).
 
 - **validation service** must expose endpoints that:
 
   - contain **parameters** and **content** properties.
-  - return the `200` response with new file content.
+  - return the `200` response confirming that validation succeeded.
+  - return the `422` response informing why validation failed.
 
 See the example of the validation service with the `/validate` endpoint [here](./assets/validation-service.yaml). To preview and test it, use the [Swagger Editor](https://editor.swagger.io).
 
 - **metadata service** must expose endpoints that:
 
   - pass file data in the `"object": "string"` format in the request body, where **object** stands for the file name and **string** is the file content.
-  - return the `200` response with new file content.
+  - return the `200` response with extracted metadata.
 
 See the example of the validation service with the `/extract` endpoint [here](./assets/metadata-service.yaml). To preview and test it, use the [Swagger Editor](https://editor.swagger.io).
