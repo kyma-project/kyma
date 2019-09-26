@@ -6,6 +6,6 @@ keywords:
   - kyma
   - knative
   - knative-serving
-  - knative-build
+  - tekton-pipelines 
   - function
   - serverless

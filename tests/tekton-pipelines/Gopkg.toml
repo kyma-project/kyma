@@ -1,0 +1,7 @@
+[prune]
+  go-tests = true
+  unused-packages = true
+
+[[constraint]]
+  name = "github.com/tektoncd/pipeline"
+  version = "v0.7.0"

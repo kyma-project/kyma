@@ -8,7 +8,7 @@ This project contains the chart for the Function Controller.
 
 ## Prerequisites
 
-- Knative Build (v0.6.0)
+- Tekton Pipelines (v0.7.0)
 - Knative Serving (v0.8.1)
 - Istio (v1.0.7)
 
@@ -24,16 +24,16 @@ Follow the steps to install the chart:
 | **FN_REGISTRY**   | The URL of the container registry Function images will be pushed to. Used for authentication.  | `https://gcr.io/` for GCR, `https://index.docker.io/v1/` for Docker Hub|
 | **FN_REPOSITORY** | The name of the container repository Function images will be pushed to. | `gcr.io/my-project` for GCR, `my-user` for Docker Hub |
 
-2. Install Knative Build:
+2. Install tekton:
     ```bash
-    helm install knative-build-init \
-                 --namespace="knative-build" \
-                 --name="knative-build-init" \
+    helm install tekton-init \
+                 --namespace="tekton-pipelines" \
+                 --name="tekton-init" \
                  --tls
     
-    helm install knative-build \
-                 --namespace="knative-build" \
-                 --name="knative-build" \
+    helm install tekton \
+                 --namespace="tekton-pipelines" \
+                 --name="tekton" \
                  --tls
     ```
 3. Install the Function Controller charts:

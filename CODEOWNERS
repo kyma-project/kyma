@@ -171,11 +171,11 @@
 # The `istio-kyma-patch` chart
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
-# The `knative-build-init` chart
-/resources/knative-build/ @rakesh-garimella @lilitgh @k15r @nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi @Abd4llA
+# The `tekton-pipelines-init` chart
+/resources/tekton-pipelines-init/ @rakesh-garimella @lilitgh @k15r @nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi @Abd4llA
 
-# The `knative-build` chart
-/resources/knative-build/ @rakesh-garimella @lilitgh @k15r @nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi @Abd4llA
+# The `tekton-pipelines` chart
+/resources/tekton-pipelines/ @rakesh-garimella @lilitgh @k15r @nachtmaar @montaro @marcobebway @radufa @sayanh @antoineco @anishj0shi @Abd4llA
 
 # The `knative-serving-init` chart
 /resources/knative-serving-init/ @Abd4llA @rakesh-garimella @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco

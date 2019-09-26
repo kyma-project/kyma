@@ -1,0 +1,8 @@
+global:
+  isLocalEnv: false
+  knative: false
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  test_tekton_acceptance:
+    dir: develop/
+    version: NOT_AVAILABLE

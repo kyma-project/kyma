@@ -1,0 +1,15 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TaskRun
+metadata:
+  labels:
+    test-build-func: test-build
+  name: test-build
+  namespace: tekton-pipelines
+spec:
+  taskSpec:
+    steps:
+    - command:
+      - exit
+      - "1"
+      image: alpine:3.8
+      name: test-build
