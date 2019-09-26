@@ -11,7 +11,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	//	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,10 +40,6 @@ func init() {
 	err = subApis.AddToScheme(scheme.Scheme)
 	if err != nil {
 		log.Error(err, "Failed to add Kyma eventing scheme")
-	}
-	err = messagingV1Alpha1.AddToScheme(scheme.Scheme)
-	if err != nil {
-		log.Error(err, "Failed to add Knative messaging scheme")
 	}
 }
 
