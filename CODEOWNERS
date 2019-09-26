@@ -17,9 +17,6 @@
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
-# The `installation` PowerShell scripts
-/installation/**/*.ps1 @crabtree @venturasr @michal-hudy @m00g3n @aerfio @magicmatatjahu
-
 # The `cluster-essentials` chart
 /resources/cluster-essentials/ @piotrmsc @PK85 @derberg
 
@@ -386,7 +383,7 @@
 /tests/end-to-end/kubeless-integration/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco
 
 # external-solution-integration test directory
-/tests/end-to-end/external-solution-integration @sjanota @janmedrek @rakesh-garimella
+/tests/end-to-end/external-solution-integration @sjanota @janmedrek @rakesh-garimella @sayanh
 
 # kubeless tests
 /tests/kubeless/ @Abd4llA @joek @abbi-gaurav @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar @anishj0shi @montaro @marcobebway @radufa @sayanh @antoineco

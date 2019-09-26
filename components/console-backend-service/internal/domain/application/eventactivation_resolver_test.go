@@ -75,6 +75,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 			},
 			Status: v1alpha2.ClusterAssetStatus{
 				CommonAssetStatus: v1alpha2.CommonAssetStatus{
+					Phase: v1alpha2.AssetReady,
 					AssetRef: v1alpha2.AssetStatusRef{
 						BaseURL: asyncApiBaseUrl,
 						Files: []v1alpha2.AssetFile{
@@ -87,6 +88,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 			},
 		},
 	}
+
 	types := []string{"asyncapi", "asyncApi", "asyncapispec", "asyncApiSpec", "events"}
 
 	t.Run("Success", func(t *testing.T) {
@@ -136,6 +138,42 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 	t.Run("Not found", func(t *testing.T) {
 		clusterAssetGetter := new(assetstoreMock.ClusterAssetGetter)
 		clusterAssetGetter.On("ListForDocsTopicByType", "test", types).Return(nil, nil)
+		defer clusterAssetGetter.AssertExpectations(t)
+
+		assetStoreRetriever := new(assetstoreMock.AssetStoreRetriever)
+		assetStoreRetriever.On("ClusterAsset").Return(clusterAssetGetter)
+
+		resolver := application.NewEventActivationResolver(nil, assetStoreRetriever)
+		result, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
+
+		require.NoError(t, err)
+		assert.Empty(t, result)
+	})
+
+	t.Run("Not ready", func(t *testing.T) {
+		asset := v1alpha2.ClusterAsset{}
+		asset.Status.Phase = v1alpha2.AssetFailed
+
+		clusterAssetGetter := new(assetstoreMock.ClusterAssetGetter)
+		clusterAssetGetter.On("ListForDocsTopicByType", "test", types).Return([]*v1alpha2.ClusterAsset{&asset}, nil)
+		defer clusterAssetGetter.AssertExpectations(t)
+
+		assetStoreRetriever := new(assetstoreMock.AssetStoreRetriever)
+		assetStoreRetriever.On("ClusterAsset").Return(clusterAssetGetter)
+
+		resolver := application.NewEventActivationResolver(nil, assetStoreRetriever)
+		result, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
+
+		require.NoError(t, err)
+		assert.Empty(t, result)
+	})
+
+	t.Run("No files", func(t *testing.T) {
+		asset := v1alpha2.ClusterAsset{}
+		asset.Status.Phase = v1alpha2.AssetReady
+
+		clusterAssetGetter := new(assetstoreMock.ClusterAssetGetter)
+		clusterAssetGetter.On("ListForDocsTopicByType", "test", types).Return([]*v1alpha2.ClusterAsset{&asset}, nil)
 		defer clusterAssetGetter.AssertExpectations(t)
 
 		assetStoreRetriever := new(assetstoreMock.AssetStoreRetriever)

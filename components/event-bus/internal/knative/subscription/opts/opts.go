@@ -9,18 +9,16 @@ import (
 )
 
 const (
-	defaultPort                 = 8080
-	defaultResyncPeriod         = 10 * time.Second
-	defaultChannelTimeout       = 10 * time.Second
-	defaultMaxChannelNameLength = 25
+	defaultPort           = 8080
+	defaultResyncPeriod   = 10 * time.Second
+	defaultChannelTimeout = 10 * time.Second
 )
 
 // Options represents the subscription options.
 type Options struct {
-	Port                 int
-	ResyncPeriod         time.Duration
-	ChannelTimeout       time.Duration
-	MaxChannelNameLength int
+	Port           int
+	ResyncPeriod   time.Duration
+	ChannelTimeout time.Duration
 }
 
 var (
@@ -56,7 +54,6 @@ func configureOptions(fs *flag.FlagSet, args []string) (*Options, error) {
 	fs.IntVar(&opts.Port, "port", defaultPort, "The subscription controller knative healtcheck listen port")
 	fs.DurationVar(&opts.ResyncPeriod, "resyncPeriod", defaultResyncPeriod, "The resync period for the used informers")
 	fs.DurationVar(&opts.ChannelTimeout, "channelTimeout", defaultChannelTimeout, "The timeout for Knative Channel creation")
-	fs.IntVar(&opts.MaxChannelNameLength, "maxChannelNameLength", defaultMaxChannelNameLength, "The Maximum number of characters allowed in creating knative channel name")
 	if err := fs.Parse(args); err != nil {
 		return nil, err
 	}

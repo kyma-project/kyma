@@ -1,3 +1,4 @@
+{{- if eq .Values.logcollector.name "promtail" }}
 {{- $version :=  semver .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: apps/v1
 kind: DaemonSet
@@ -99,4 +100,4 @@ spec:
         {{- with .Values.promtail.volumes }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-
+{{- end }}
