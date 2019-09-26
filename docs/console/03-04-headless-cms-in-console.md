@@ -3,7 +3,7 @@ title: Headless CMS in the Console
 type: Details
 ---
 
-Headless CMS in Kyma is a separate component and does not provide templates or a standalone UI to display content from the CMS. Still, the Console UI displays some of the assets in the Docs view (generic and component-related documentation) and the Service Catalog views (API specifications).
+The Headless CMS in Kyma is a separate component and does not provide templates or a standalone UI to display content from the CMS. Still, the Console UI displays some of the assets in the Docs view (generic and component-related documentation) and the Service Catalog views (API specifications and Service Class-related documentation).
 
 Add a new documentation topic to the Console UI by creating a CR, while the [Asset Store](/components/asset-store/#overview-overview) handles the rest. Define the location, grouping, and order of the documents through DocsTopic and ClusterDocsTopic labels that you add to the custom resource definition. You can create your own labels and follow your own naming convention, but **cms.kyma-project.io/{label-name}** applies to the Console UI.
 
@@ -36,7 +36,7 @@ The Console UI supports only certain specification types, formats, and versions 
 
 The source files are uploaded directly to the given storage without any modifications, except for the following source types:
 
-- `asyncapi` that the CMS AsyncAPI Service validates and, if required, converts them to version 2.0 and the `json` format.
+- `asyncapi` that the CMS AsyncAPI Service validates and, if required, converts to version 2.0 and the `json` format.
 - `markdown` from which the Asset Metadata Service extracts front matter metadata.
 
 ![Specification types](./assets/spec-types.svg)

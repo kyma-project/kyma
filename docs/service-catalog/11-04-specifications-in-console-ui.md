@@ -10,7 +10,6 @@ Documentation for Service Classes is rendered in both Service Catalog and Instan
 - [AsyncAPI](https://www.asyncapi.com/)
 - [OData](https://www.odata.org/)
 
-
 This document explains how and where these specifications are rendered in the Console UI. It also describes the structure of the Markdown documents, their obligatory metadata, and optional features in the content body.
 
 ## Tabs
@@ -25,7 +24,6 @@ Depending on the type of the input files, the Console UI renders specifications 
 See the tabs overview:
 
 ![Specification tabs in the Console UI](./assets/spec-view.png)
-
 
 >**NOTE:** OpenAPI, OData, and AsyncAPI specifications rendered in the Console UI follow the [Fiori 3 Fundamentals](https://sap.github.io/fundamental/) styling standards.
 
@@ -44,7 +42,7 @@ another_metadata: {value or text string}
 
 ### Metadata
 
-Each Markdown document displayed in the Kyma Console UI requires metadata in a specific format called [Front Matter](https://forestry.io/docs/editing/front-matter/).
+Each Markdown document displayed in the Kyma Console requires metadata in a specific format called [front matter](https://forestry.io/docs/editing/front-matter/).
 
 ### Structure
 

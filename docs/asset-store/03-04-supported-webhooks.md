@@ -5,7 +5,7 @@ type: Details
 
 ## Types
 
-Asset Store supports the following types of webhooks:
+The Asset Store supports the following types of webhooks:
 
 - **Mutation webhook** modifies fetched assets before the Asset Controller uploads them into the bucket. For example, this can mean asset rewriting through the `regex` operation or `key-value`, or the modification in the JSON specification. The mutation webhook service must return modified files to the Asset Controller.
 
