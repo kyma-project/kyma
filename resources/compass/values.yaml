@@ -74,6 +74,8 @@ global:
           host: compass-gateway-auth-oauth
     mtls:
       host: compass-gateway-mtls
+      secret:
+        name: application-connector-certs
     headers:
       request:
         remove:
