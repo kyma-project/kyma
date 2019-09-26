@@ -21,7 +21,7 @@ To interact with the Kyma OAuth2 server, you must register an OAuth2 client. To 
 For each client, you can provide client ID and secret. If you don't provide the credentials, Hydra generates a random client ID and secret pair.
 Client credentials are stored as Kubernetes Secret in the same Namespace as the CR instances of the corresponding clients.
 
->**NOTE:** By default, you can create clients only in the `kyma-system` and `default` Namespaces. Read [this](https://github.com/ory/k8s/blob/master/docs/helm/hydra-maester.md#configuration) document to learn how to enable creating clients in other Namespaces. 
+>**NOTE:** By default, you can create clients only in the `kyma-system` and `default` Namespaces. Read [this](https://github.com/ory/k8s/blob/master/docs/helm/hydra-maester.md#configuration) document to learn how to enable creating clients in other Namespaces.
 
 ### Use your own credentials
 
@@ -74,18 +74,21 @@ spec:
   secretName: {NAME_OF_KUBERNETES_SECRET}
 EOF
 ```
+
 ### Get the registered client credentials
 
 Run this command to get the credentials of the registered OAuth2 client:
+
 ```
 kubectl get secret -n {CLIENT_NAMESPACE} {NAME_OF_KUBERNETES_SECRET} -o yaml
 ```
+
 ### Update the OAuth2 client secret
 
 Follow these steps to change the client secret of a registered OAuth2 client:
 
 1. Create a new Kubernetes Secret with the ID of the client you want to update and the new client secret.
-2. Edit the instance of the client's corresponding `oauth2clients.hydra.ory.sh/v1alpha1` CR by replacing the value of the **SecretName** property with the name of the newly created Secret. 
+2. Edit the instance of the client's corresponding `oauth2clients.hydra.ory.sh/v1alpha1` CR by replacing the value of the **SecretName** property with the name of the newly created Secret.
 
 ## OAuth2 server in action
 
