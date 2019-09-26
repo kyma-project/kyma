@@ -15,11 +15,4 @@ spec:
       navigationPath: core-ui
       viewUrl: '/'
       order: 10
-      requiredPermissions:
-        - apiGroup: authentication.kyma-project.io
-          resource: idppresets
-          verbs:
-            - list
-            - get
-            - create
-            - delete
+
