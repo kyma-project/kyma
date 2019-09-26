@@ -798,21 +798,6 @@ type IDPPreset {
     jwksUri: String!
 }
 
-# Kubeless
-
-type Function {
-    name: String!
-    trigger: String!
-    creationTimestamp: Timestamp!
-    labels: Labels!
-    namespace: String!
-}
-
-input InputTopic {
-    id: String!
-    type: String!
-}
-
 # API controller
 
 type ApiService {
@@ -966,8 +951,6 @@ type Query {
 
     resourceQuotas(namespace: String!): [ResourceQuota!]! @HasAccess(attributes: {resource: "resourcequotas", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     resourceQuotasStatus(namespace: String!): ResourceQuotasStatus! @HasAccess(attributes: {resource: "resourcequotas", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
-
-    functions(namespace: String!, first: Int, offset: Int): [Function!]! @HasAccess(attributes: {resource: "functions", verb: "list", apiGroup: "kubeless.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
     eventActivations(namespace: String!): [EventActivation!]! @HasAccess(attributes: {resource: "eventactivations", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
