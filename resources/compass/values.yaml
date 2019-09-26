@@ -105,3 +105,6 @@ global:
 
   certificateResolverService:
     url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/certificate/data/resolve
+
+  tokenResolverService:
+    url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/tokens/resolve
