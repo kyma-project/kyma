@@ -43,8 +43,6 @@ spec:
   template:
     metadata:
       name: compass-agent-configuration
-      annotations:
-        sidecar.istio.io/inject: "false"
     spec:
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
@@ -54,6 +52,7 @@ spec:
       {{ end }}
       serviceAccountName: compass-agent-configuration
       restartPolicy: Never
+      shareProcessNamespace: true
       containers:
         - name: compass-agent-configuration
           image: "linkyard/kubectl:1.14.2"
@@ -63,6 +62,38 @@ spec:
             - |
               MAX_RETRIES=60
               DIRECTOR_URL=https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/director/graphql
+              CONNECTOR_INTERNAL_URL=http://compass-connector.{{ .Release.Namespace }}:{{ .Values.global.connector.graphql.port }}/graphql
+              CONNECOTR_EXTERNAL_URL=https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql
+
+              function kill_proxy_and_exit() {
+                echo 'killing pilot-agent...'
+                pkill -INT pilot-agent
+                sleep 4
+                exit 0
+              }
+
+              function wait_for_access_to_api_server() {
+                local cnt=0
+                set +o errexit
+                while :
+                do
+                  kubectl version > /dev/null 2>&1
+                  if [[ $? -eq 0 ]]; then
+                    echo "Successfully accessed API Server"
+                    break
+                  else
+                      ((cnt++))
+                      if (( cnt > $MAX_RETRIES )); then
+                        echo "Max retries has been reached (retries $MAX_RETRIES). Exit."
+                        exit 1
+                      fi
+
+                      echo "Cannot access API Server waiting 5s..."
+                      sleep 5
+                    fi
+                done
+                set -o errexit
+              }
 
               function director_readiness() {
                 local cnt=0
@@ -108,16 +139,47 @@ spec:
 
                 RUNTIME_ID=$(echo $RESPONSE_BODY | jq -e '.data .result .id')
                 RUNTIME_ID="${RUNTIME_ID:1:${#RUNTIME_ID}-2}"
-                kubectl create configmap compass-agent-configuration --from-literal DIRECTOR_URL=$DIRECTOR_URL --from-literal TENANT=3e64ebae-38b5-46a0-b1ed-9ccee153a0ae --from-literal RUNTIME_ID=$RUNTIME_ID -n compass-system
+
+                TOKEN_RESPONSE=$(curl "${CONNECTOR_INTERNAL_URL}" \
+                    -H 'Content-Type: application/json' \
+                    --data-binary '{
+                      "query":"mutation generateRuntimeToken {\n  result: generateRuntimeToken(\n runtimeID: '\\\""${RUNTIME_ID}"\\\"' \n ) {\n   token\n  }\n}\n"
+                    }')
+                echo ${TOKEN_RESPONSE}
+
+                TOKEN=$(echo ${TOKEN_RESPONSE} | jq -e '.data.result.token')
+
+                kubectl create configmap -n compass-system compass-agent-configuration --from-literal config.json='{
+                  "connectionConfig": {
+                    "connectorUrl": '\""${CONNECOTR_EXTERNAL_URL}"\"',
+                    "token": '\""${TOKEN}"\"'
+                  },
+                  "runtimeConfig": {
+                    "runtimeId": '\""${RUNTIME_ID}"\"',
+                    "tenant": "{{ .Values.global.defaultTenant }}"
+                  }
+                }'
+
                 echo "Compass agent configuration - finished."
                 set -o pipefail
               }
 
-              kubectl get configmaps compass-agent-configuration -n compass-system > /dev/null 2>&1
+              wait_for_access_to_api_server
+
+              echo "Checking if config map exists..."
+
+              set +o errexit
+              kubectl get configmaps compass-agent-configuration -n {{ .Release.Namespace }} > /dev/null 2>&1
               if [[ $? -eq 0 ]]; then
                  echo "Compass agent already configured and paired."
-                 exit 0
+                 kill_proxy_and_exit
               fi
+              set -o errexit
+
+              echo "Checking Director rediness"
               director_readiness
+
+              echo "Configuring agent"
               agent_configuration
+              kill_proxy_and_exit
 {{ end }}
