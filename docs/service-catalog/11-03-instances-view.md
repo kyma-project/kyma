@@ -1,6 +1,6 @@
 ---
 title: Instances View
-type: UI Contracts
+type: Console UI Views
 ---
 
 This document describes the mapping of [OSBA service objects](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#service-objects), [plan objects](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#plan-object), and [conventions](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/profile.md#service-metadata) in the Kyma Console Instances view.
