@@ -1,111 +1,88 @@
-package config
+package config_test
 
 import (
+	"errors"
 	"testing"
+
+	"kyma-project.io/compass-runtime-agent/internal/config"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kyma-project.io/compass-runtime-agent/internal/config/mocks"
 )
 
 const (
-	runtimeId    = "runtimeId"
-	tenant       = "tenant"
-	connectorURL = "https://connector.com"
-	token        = "token"
+	runtimeId     = "runtimeId"
+	tenant        = "tenant"
+	connectorURL  = "https://connector.com"
+	token         = "token"
+	configMapName = "compass-agent-configuration"
 )
 
 func TestProvider(t *testing.T) {
 
-	for _, test := range []struct {
-		description          string
-		configFilePath       string
-		expectedConnectorURL string
-		expectedToken        string
-		expectedTenant       string
-		expectedRuntimeId    string
-	}{
-		{
-			description:          "get valid config",
-			configFilePath:       validConfigPath,
-			expectedConnectorURL: connectorURL,
-			expectedToken:        token,
-			expectedTenant:       tenant,
-			expectedRuntimeId:    runtimeId,
-		},
-		{
-			description:          "return error empty values when config is invalid",
-			configFilePath:       invalidConfigPath,
-			expectedConnectorURL: "",
-			expectedToken:        "",
-			expectedTenant:       "",
-			expectedRuntimeId:    "",
-		},
-	} {
-		t.Run("should "+test.description, func(t *testing.T) {
-			// given
-			provider := NewConfigProvider(test.configFilePath)
-
-			// when
-			connectionConfig, connErr := provider.GetConnectionConfig()
-			runtimeConfig, runtimeErr := provider.GetRuntimeConfig()
-
-			// then
-			require.NoError(t, connErr)
-			require.NoError(t, runtimeErr)
-
-			assert.Equal(t, test.expectedToken, connectionConfig.Token)
-			assert.Equal(t, test.expectedConnectorURL, connectionConfig.ConnectorURL)
-			assert.Equal(t, test.expectedRuntimeId, runtimeConfig.RuntimeId)
-			assert.Equal(t, test.expectedTenant, runtimeConfig.Tenant)
-
-		})
+	configMapData := map[string]string{
+		"CONNECTOR_URL": connectorURL,
+		"TOKEN":         token,
+		"TENANT":        tenant,
+		"RUNTIME_ID":    runtimeId,
 	}
 
-	t.Run("should return error when config format is invalid", func(t *testing.T) {
-		// given
-		provider := NewConfigProvider(invalidConfigFormatPath)
+	validConfigMap := &v1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{Name: configMapName},
+		Data:       configMapData,
+	}
 
+	crManager := &mocks.ConfigMapManager{}
+	crManager.On("Get", configMapName, metav1.GetOptions{}).Return(validConfigMap, nil)
+	configProvider := config.NewConfigProvider(configMapName, crManager)
+
+	t.Run("should get Connection config", func(t *testing.T) {
 		// when
-		connectionConfig, connErr := provider.GetConnectionConfig()
-		runtimeConfig, runtimeErr := provider.GetRuntimeConfig()
+		connectionConfig, err := configProvider.GetConnectionConfig()
 
 		// then
-		require.Error(t, connErr)
-		require.Error(t, runtimeErr)
+		require.NoError(t, err)
+		assert.Equal(t, connectorURL, connectionConfig.ConnectorURL)
+		assert.Equal(t, token, connectionConfig.Token)
 
-		assert.Empty(t, connectionConfig)
-		assert.Empty(t, runtimeConfig)
 	})
 
-	t.Run("should return error when config file is empty", func(t *testing.T) {
-		// given
-		provider := NewConfigProvider(emptyFilePath)
-
+	t.Run("should get Runtime config", func(t *testing.T) {
 		// when
-		connectionConfig, connErr := provider.GetConnectionConfig()
-		runtimeConfig, runtimeErr := provider.GetRuntimeConfig()
+		runtimeConfig, err := configProvider.GetRuntimeConfig()
 
 		// then
-		require.Error(t, connErr)
-		require.Error(t, runtimeErr)
-
-		assert.Empty(t, connectionConfig)
-		assert.Empty(t, runtimeConfig)
+		require.NoError(t, err)
+		assert.Equal(t, runtimeId, runtimeConfig.RuntimeId)
+		assert.Equal(t, tenant, runtimeConfig.Tenant)
 	})
 
-	t.Run("should return error when file does not exist", func(t *testing.T) {
-		// given
-		provider := NewConfigProvider("not_existing_file")
+}
 
+func TestProvider_Errors(t *testing.T) {
+
+	crManager := &mocks.ConfigMapManager{}
+	crManager.On("Get", configMapName, metav1.GetOptions{}).Return(nil, errors.New("error"))
+	configProvider := config.NewConfigProvider(configMapName, crManager)
+
+	t.Run("should return error when failed to get config map for Connection config", func(t *testing.T) {
 		// when
-		connectionConfig, connErr := provider.GetConnectionConfig()
-		runtimeConfig, runtimeErr := provider.GetRuntimeConfig()
+		connectionConfig, err := configProvider.GetConnectionConfig()
 
 		// then
-		require.Error(t, connErr)
-		require.Error(t, runtimeErr)
-
+		require.Error(t, err)
 		assert.Empty(t, connectionConfig)
+	})
+
+	t.Run("should return error when failed to get config map for Runtime config", func(t *testing.T) {
+		// when
+		runtimeConfig, err := configProvider.GetRuntimeConfig()
+
+		// then
+		require.Error(t, err)
 		assert.Empty(t, runtimeConfig)
 	})
 }

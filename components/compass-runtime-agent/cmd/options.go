@@ -13,7 +13,7 @@ const (
 )
 
 type Config struct {
-	ConfigFile                     string        `envconfig:"default=config/config.json"`
+	ConnectionConfigMap            string        `envconfig:"default=compass-system/compass-agent-configuration"`
 	ControllerSyncPeriod           time.Duration `envconfig:"default=20s"`
 	MinimalCompassSyncTime         time.Duration `envconfig:"default=10s"`
 	CertValidityRenewalThreshold   float64       `envconfig:"default=0.3"`
@@ -28,12 +28,12 @@ type Config struct {
 }
 
 func (o *Config) String() string {
-	return fmt.Sprintf("ConfigFile=%s, "+
+	return fmt.Sprintf("ConnectionConfigMap=%s, "+
 		"ControllerSyncPeriod=%s, MinimalCompassSyncTime=%s, "+
 		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
 		"IntegrationNamespace=%s, GatewayPort=%d, InsecureConfigurationFetch=%v, UploadServiceUrl=%s, "+
 		"QueryLogging=%v",
-		o.ConfigFile,
+		o.ConnectionConfigMap,
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
 		o.IntegrationNamespace, o.GatewayPort, o.InsecureConfigurationFetch, o.UploadServiceUrl,

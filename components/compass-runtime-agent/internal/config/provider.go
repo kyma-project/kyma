@@ -1,13 +1,23 @@
 package config
 
 import (
-	"encoding/json"
-	"io/ioutil"
+	v1 "k8s.io/api/core/v1"
 
 	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// TODO - test
+const (
+	connectorURLConfigKey = "CONNECTOR_URL"
+	tokenConfigKey        = "TOKEN"
+	runtimeIdConfigKey    = "RUNTIME_ID"
+	tenantConfigKey       = "TENANT"
+)
+
+//go:generate mockery -name=ConfigMapManager
+type ConfigMapManager interface {
+	Get(name string, options metav1.GetOptions) (*v1.ConfigMap, error)
+}
 
 type ConnectionConfig struct {
 	Token        string `json:"token"`
@@ -16,12 +26,7 @@ type ConnectionConfig struct {
 
 type RuntimeConfig struct {
 	RuntimeId string `json:"runtimeId"`
-	Tenant    string `json:"tenant"` // TODO: after full implementation of certs it will no longer be needed
-}
-
-type config struct {
-	ConnectionConfig ConnectionConfig `json:"connectionConfig"`
-	RuntimeConfig    RuntimeConfig    `json:"runtimeConfig"`
+	Tenant    string `json:"tenant"` // TODO: after full implementation of certs in Director it will no longer be needed
 }
 
 //go:generate mockery -name=Provider
@@ -30,45 +35,38 @@ type Provider interface {
 	GetRuntimeConfig() (RuntimeConfig, error)
 }
 
-func NewConfigProvider(configFile string) Provider {
+func NewConfigProvider(configMapName string, cmManager ConfigMapManager) Provider {
 	return &provider{
-		configFile: configFile,
+		configMapName: configMapName,
+		cmManager:     cmManager,
 	}
 }
 
 type provider struct {
-	configFile string
+	configMapName string
+	cmManager     ConfigMapManager
 }
 
 func (p *provider) GetConnectionConfig() (ConnectionConfig, error) {
-	config, err := p.readConfigFile()
+	configMap, err := p.cmManager.Get(p.configMapName, metav1.GetOptions{})
 	if err != nil {
-		return ConnectionConfig{}, errors.Wrap(err, "Failed to get Connection config")
+		return ConnectionConfig{}, errors.WithMessagef(err, "Failed to read Connection config from %s config map", p.configMapName)
 	}
 
-	return config.ConnectionConfig, nil
+	return ConnectionConfig{
+		Token:        configMap.Data[tokenConfigKey],
+		ConnectorURL: configMap.Data[connectorURLConfigKey],
+	}, nil
 }
 
 func (p *provider) GetRuntimeConfig() (RuntimeConfig, error) {
-	config, err := p.readConfigFile()
+	configMap, err := p.cmManager.Get(p.configMapName, metav1.GetOptions{})
 	if err != nil {
-		return RuntimeConfig{}, errors.Wrap(err, "Failed to get Runtime config")
+		return RuntimeConfig{}, errors.WithMessagef(err, "Failed to read Runtime config from %s config map", p.configMapName)
 	}
 
-	return config.RuntimeConfig, nil
-}
-
-func (p *provider) readConfigFile() (config, error) {
-	content, err := ioutil.ReadFile(p.configFile)
-	if err != nil {
-		return config{}, errors.Wrap(err, "Failed to read cfg file")
-	}
-
-	var cfg config
-	err = json.Unmarshal(content, &cfg)
-	if err != nil {
-		return config{}, errors.Wrap(err, "Failed to unmarshal cfg")
-	}
-
-	return cfg, nil
+	return RuntimeConfig{
+		RuntimeId: configMap.Data[runtimeIdConfigKey],
+		Tenant:    configMap.Data[tenantConfigKey],
+	}, nil
 }

@@ -81,7 +81,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	configProvider := confProvider.NewConfigProvider(options.ConfigFile)
+	configMapNamespacedName := parseNamespacedName(options.ConnectionConfigMap)
+	configMapClient := k8sResourceClientSets.core.CoreV1().ConfigMaps(configMapNamespacedName.Namespace)
+
+	configProvider := confProvider.NewConfigProvider(configMapNamespacedName.Name, configMapClient)
 	clientsProvider := compass.NewClientsProvider(graphql.New, options.InsecureConnectorCommunication, options.InsecureConfigurationFetch, options.QueryLogging)
 
 	log.Infoln("Setting up Controller")
