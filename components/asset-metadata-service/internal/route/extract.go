@@ -84,7 +84,9 @@ func (h *ExtractHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	}
 
 	if rq.MultipartForm == nil {
-		h.writeResponse(w, http.StatusBadRequest, Response{
+		status := http.StatusBadRequest
+		incrementStatusCounter(status)
+		h.writeResponse(w, status, Response{
 			Errors: []ResultError{
 				{
 					Message: "No multipart/form-data form received.",
@@ -103,7 +105,9 @@ func (h *ExtractHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 
 	jobCh, jobsCount, err := h.chanFromFormFiles(rq.MultipartForm.File)
 	if err != nil {
-		h.writeResponse(w, http.StatusBadRequest, Response{
+		status := http.StatusBadRequest
+		incrementStatusCounter(status)
+		h.writeResponse(w, status, Response{
 			Errors: []ResultError{
 				{
 					Message: err.Error(),
@@ -227,7 +231,9 @@ func (h *ExtractHandler) writeResponse(w http.ResponseWriter, statusCode int, re
 }
 
 func (h *ExtractHandler) writeInternalError(w http.ResponseWriter, err error) {
-	h.writeResponse(w, http.StatusInternalServerError, Response{
+	status := http.StatusInternalServerError
+	incrementStatusCounter(status)
+	h.writeResponse(w, status, Response{
 		Errors: []ResultError{
 			{Message: err.Error()},
 		},
