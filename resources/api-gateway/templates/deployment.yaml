@@ -35,8 +35,12 @@ spec:
             - --oathkeeper-svc-address={{ .Values.config.oathkeeper.service }}
             - --oathkeeper-svc-port={{ .Values.config.oathkeeper.port }}
             - --jwks-uri={{ .Values.config.jwksURI }}
-            - --service-blacklist={{ .Values.config.serviceBlacklist }}
-            - --domain-whitelist={{ .Values.global.ingress.domainName }}
+            {{- with .Values.config.serviceBlackList }}
+            - --service-blacklist={{ . | join ", " }}
+            {{- end }}
+            {{- with .Values.global.ingress.domainName }}
+            - --domain-whitelist={{ . | join ", " }}
+            {{- end }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           terminationMessagePath: /dev/termination-log
