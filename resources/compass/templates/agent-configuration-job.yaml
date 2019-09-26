@@ -148,17 +148,13 @@ spec:
                 echo ${TOKEN_RESPONSE}
 
                 TOKEN=$(echo ${TOKEN_RESPONSE} | jq -e '.data.result.token')
+                TOKEN="${TOKEN:1:${#TOKEN}-2}"
 
-                kubectl create configmap -n compass-system compass-agent-configuration --from-literal config.json='{
-                  "connectionConfig": {
-                    "connectorUrl": '\""${CONNECOTR_EXTERNAL_URL}"\"',
-                    "token": '\""${TOKEN}"\"'
-                  },
-                  "runtimeConfig": {
-                    "runtimeId": '\""${RUNTIME_ID}"\"',
-                    "tenant": "{{ .Values.global.defaultTenant }}"
-                  }
-                }'
+                kubectl create configmap -n {{ .Release.Namespace }} compass-agent-configuration \
+                  --from-literal CONNECTOR_URL=$CONNECOTR_EXTERNAL_URL \
+                  --from-literal TOKEN=$TOKEN \
+                  --from-literal RUNTIME_ID=$RUNTIME_ID \
+                  --from-literal TENANT={{ .Values.global.defaultTenant }}
 
                 echo "Compass agent configuration - finished."
                 set -o pipefail

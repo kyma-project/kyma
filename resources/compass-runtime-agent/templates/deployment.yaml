@@ -27,8 +27,8 @@ spec:
           args:
             - "/compass-runtime-agent"
           env:
-            - name: APP_CONFIG_FILE
-              value: "{{ .Values.compassRuntimeAgent.config.file.path }}/{{ .Values.compassRuntimeAgent.config.file.name }}"
+            - name: APP_CONNECTION_CONFIG_MAP
+              value: "{{ .Values.compassRuntimeAgent.config.configMap.namespace }}/{{ .Values.compassRuntimeAgent.config.configMap.name }}"
             - name: APP_CONTROLLER_SYNC_PERIOD
               value: "{{ .Values.compassRuntimeAgent.sync.controllerSyncPeriod }}"
             - name: APP_MINIMAL_COMPASS_SYNC_TIME
@@ -51,14 +51,6 @@ spec:
               value: "{{ .Values.compassRuntimeAgent.resources.uploadServiceUrl }}"
             - name: APP_QUERY_LOGGING
               value: "{{ .Values.compassRuntimeAgent.debugg.queryLogging }}"
-          volumeMounts:
-            - mountPath: "{{ .Values.compassRuntimeAgent.config.file.path }}"
-              name: connection-config
-      volumes:
-        - name: connection-config
-          configMap:
-            name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
-            optional: true
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}

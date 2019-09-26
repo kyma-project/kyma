@@ -21,11 +21,9 @@ compassRuntimeAgent:
     uploadServiceUrl: http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000
   config:
     insecureConfigurationFetch: true
-    file:
-      path: /etc/config
-      name: config.json
     configMap:
       name: compass-agent-configuration
+      namespace: compass-system
   certificates:
     renewal:
       validityThreshold: "0.3"
