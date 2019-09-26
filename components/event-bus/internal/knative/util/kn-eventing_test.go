@@ -330,4 +330,14 @@ func Test_MakeChannelWithPrefix(t *testing.T) {
 
 	// makeChannel should not add double hyphens if already present
 	assert.False(t, strings.HasSuffix(a.GenerateName, "--"))
+
+	//Test prefix length is truncated if the event-type is too big
+	prefix = "order.created.on.some.big.enterprise.soljution"
+	a = makeChannel(prefix, testNS, labels)
+	assert.Equal(t, len(a.GenerateName), 10)
+
+	// Check if prefix is added with a "-" at the end.
+	prefix = "order"
+	a = makeChannel(prefix, testNS, labels)
+	assert.Equal(t, a.GenerateName, "order-")
 }
