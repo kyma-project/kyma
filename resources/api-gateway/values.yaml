@@ -7,7 +7,7 @@ rbacJob:
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
-  tag: "e13b6767"
+  tag: "42ac1146"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -29,6 +29,7 @@ config:
     service: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
     port: 4455
   jwksURI: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+  serviceBlacklist: kubernetes,kube-dns
 
   # Node labels for pod assignment.
   nodeSelector: {}
