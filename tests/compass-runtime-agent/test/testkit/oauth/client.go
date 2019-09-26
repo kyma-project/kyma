@@ -17,7 +17,7 @@ const (
 	CredentialsGrantType = "client_credentials"
 
 	ScopeFieldName = "scope"
-	RWScope        = "read write"
+	Scopes         = "application:read application:write runtime:read runtime:write label_definition:read label_definition:write health_checks:read"
 )
 
 type Client struct {
@@ -72,7 +72,7 @@ func (c *Client) GetAuthorizationToken() (string, error) {
 func (c *Client) createOAuth2Client() (credentials, error) {
 	body := oauthClient{
 		GrantTypes: []string{CredentialsGrantType},
-		Scope:      RWScope,
+		Scope:      Scopes,
 	}
 
 	buf := &bytes.Buffer{}
@@ -166,7 +166,7 @@ func setRequiredFields(w *multipart.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = w.WriteField(ScopeFieldName, RWScope)
+	err = w.WriteField(ScopeFieldName, Scopes)
 	if err != nil {
 		return err
 	}
