@@ -25,7 +25,6 @@ global:
   eventPublishService:
     maxRequests: 200
     maxRequestSize: 65536
-    maxChannelNameLength: 33
     maxSourceIDLength: 253
     maxEventTypeLength: 253
     maxEventTypeVersionLength: 4
