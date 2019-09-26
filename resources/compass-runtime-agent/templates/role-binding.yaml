@@ -1,30 +1,51 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ .Chart.Name }}
-  namespace: {{ .Values.compassRuntimeAgent.resources.integrationNamespace }}
+  name: {{ .Chart.Name }}-client-cert-role
+  namespace: {{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}
 rules:
   - apiGroups: ["*"]
-    resources: ["services"]
-    verbs: ["create", "get", "delete"]
-  - apiGroups: ["*"]
     resources: ["secrets"]
     verbs: ["create", "get", "update", "delete"]
-  - apiGroups: ["*"]
-    resources: ["configmaps"]
-    verbs: ["get"]
-  - apiGroups: ["config.istio.io"]
-    resources: ["rules", "handlers", "instances"]
-    verbs: ["get", "update", "list", "create", "delete"]
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Chart.Name }}
-  namespace: {{ .Values.compassRuntimeAgent.resources.integrationNamespace }}
+  name: {{ .Chart.Name }}-client-cert-rolebinding
+  namespace: {{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.namespace | default "default" }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Chart.Name }}-client-cert-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Chart.Name }}-ca-cert-role
+  namespace: {{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.namespace | default "default" }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+rules:
+  - apiGroups: ["*"]
+    resources: ["secrets"]
+    verbs: ["create", "get", "update", "delete"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}-ca-cert-rolebinding
+  namespace: {{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.namespace | default "default" }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}
@@ -34,5 +55,36 @@ subjects:
     namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: {{ .Chart.Name }}
+  name: {{ .Chart.Name }}-ca-cert-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Chart.Name }}-config
+  namespace: {{ .Values.compassRuntimeAgent.config.configMap.namespace | default "default" }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+rules:
+  - apiGroups: ["*"]
+    resources: ["configmaps"]
+    resourceNames: ["{{ .Values.compassRuntimeAgent.config.configMap.name }}"]
+    verbs: ["get"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}-config
+  namespace: {{ .Values.compassRuntimeAgent.config.configMap.namespace | default "default" }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Chart.Name }}-config
   apiGroup: rbac.authorization.k8s.io
