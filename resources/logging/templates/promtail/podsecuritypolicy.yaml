@@ -1,3 +1,4 @@
+{{- if eq .Values.logcollector.name "promtail" }}
 {{- if .Values.rbac.pspEnabled }}
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
@@ -29,4 +30,5 @@ spec:
   readOnlyRootFilesystem: true
   requiredDropCapabilities:
     - ALL
+{{- end }}
 {{- end }}

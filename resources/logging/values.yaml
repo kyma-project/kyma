@@ -296,7 +296,11 @@ promtail:
     target_config:
       # Period to resync directories being watched and files being tailed
       sync_period: 10s
-
+fluent:
+  nameOverride: fluent-bit
+# name of log collector to be installed, by default will be grafana promtail installed, other supported collector is "fluent-bit"
+logcollector:
+  name: promtail
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project

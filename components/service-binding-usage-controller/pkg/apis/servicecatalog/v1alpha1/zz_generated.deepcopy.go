@@ -61,12 +61,8 @@ func (in *Parameters) DeepCopyInto(out *Parameters) {
 	*out = *in
 	if in.EnvPrefix != nil {
 		in, out := &in.EnvPrefix, &out.EnvPrefix
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(EnvPrefix)
-			**out = **in
-		}
+		*out = new(EnvPrefix)
+		**out = **in
 	}
 	return
 }
@@ -147,7 +143,7 @@ func (in *ServiceBindingUsageCondition) DeepCopy() *ServiceBindingUsageCondition
 func (in *ServiceBindingUsageList) DeepCopyInto(out *ServiceBindingUsageList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]ServiceBindingUsage, len(*in))
@@ -183,12 +179,8 @@ func (in *ServiceBindingUsageSpec) DeepCopyInto(out *ServiceBindingUsageSpec) {
 	out.UsedBy = in.UsedBy
 	if in.Parameters != nil {
 		in, out := &in.Parameters, &out.Parameters
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(Parameters)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(Parameters)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }
@@ -257,7 +249,7 @@ func (in *UsageKind) DeepCopyObject() runtime.Object {
 func (in *UsageKindList) DeepCopyInto(out *UsageKindList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]UsageKind, len(*in))
@@ -291,12 +283,8 @@ func (in *UsageKindSpec) DeepCopyInto(out *UsageKindSpec) {
 	*out = *in
 	if in.Resource != nil {
 		in, out := &in.Resource, &out.Resource
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(ResourceReference)
-			**out = **in
-		}
+		*out = new(ResourceReference)
+		**out = **in
 	}
 	return
 }
