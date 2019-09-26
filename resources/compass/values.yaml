@@ -7,7 +7,7 @@ global:
       path: eu.gcr.io/kyma-project/incubator
     connector:
       dir: develop/
-      version: "1adfa459"
+      version: "47b6dfb2"
     director:
       dir: develop/
       version: "ce9087a1"
@@ -37,7 +37,7 @@ global:
         version: "1adfa459"
       provisioner:
         dir: develop/
-        version: "96714748"
+        version: "47b6dfb2"
 
   isLocalEnv: false
 
@@ -60,6 +60,11 @@ global:
         name: application-connector-certs
         namespace: istio-system
     certificateDataHeader: "Certificate-Data" # Should be stripped by Virtual Service
+    revocation:
+      configmap:
+        shouldCreate: false
+        namespace: kyma-integration
+        name: revocations-config
     # If key and certificate are not provided they will be generated
     caKey: ""
     caCertificate: ""
