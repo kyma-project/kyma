@@ -10,7 +10,6 @@ import (
 
 	controllertesting "github.com/knative/eventing/pkg/reconciler/testing"
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	"github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -40,10 +39,6 @@ func init() {
 	err := subApis.AddToScheme(scheme.Scheme)
 	if err != nil {
 		log.Error(err, "Failed to add Kyma eventing scheme")
-	}
-	err = v1alpha1.AddToScheme(scheme.Scheme)
-	if err != nil {
-		log.Error(err, "Failed to add Kyma application connector scheme")
 	}
 	err = messagingV1Alpha1.AddToScheme(scheme.Scheme)
 	if err != nil {

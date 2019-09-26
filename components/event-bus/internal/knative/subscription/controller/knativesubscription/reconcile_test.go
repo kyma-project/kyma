@@ -16,7 +16,6 @@ import (
 	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	//	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	"testing"
 
@@ -42,10 +41,6 @@ func init() {
 	err := eventingv1alpha1.AddToScheme(scheme.Scheme)
 	if err != nil {
 		log.Error(err, "Failed to add Application Connector scheme")
-	}
-	err = messagingV1Alpha1.AddToScheme(scheme.Scheme)
-	if err != nil {
-		log.Error(err, "Failed to add Knative messaging scheme")
 	}
 	err = evapisv1alpha1.AddToScheme(scheme.Scheme)
 	if err != nil {

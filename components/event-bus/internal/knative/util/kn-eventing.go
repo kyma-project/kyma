@@ -141,12 +141,7 @@ func (k *KnativeLib) GetChannelByLabels(namespace string, labels map[string]stri
 		log.Printf("ERROR: GetChannelByLabels(): channel list has %d items", channelListLength)
 		return nil, errors.New("length of channel list is not equal to 1")
 	}
-
 	channel := &channelList.Items[0]
-
-	if !channel.Status.IsReady() {
-		return nil, fmt.Errorf("ERROR: GetChannel():channel NotReady")
-	}
 	return channel, nil
 }
 
