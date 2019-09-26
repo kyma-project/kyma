@@ -59,7 +59,10 @@ if err := k.CreateSubscription("my-sub", namespace, channelName, &uri); err != n
 return
 */
 
-const generateNameSuffix = "-"
+const (
+	generateNameSuffix         = "-"
+	maxChannelNamePrefixLength = 10
+)
 
 var once sync.Once
 
@@ -344,6 +347,9 @@ func makeChannel(prefix, namespace string, labels map[string]string) *messagingV
 	reg, err := regexp.Compile("[^a-z0-9]+")
 	if err != nil {
 		log.Fatal(err)
+	}
+	if len(prefix) > maxChannelNamePrefixLength {
+		prefix = prefix[:maxChannelNamePrefixLength]
 	}
 	prefix = fmt.Sprint(reg.ReplaceAllString(prefix, ""), generateNameSuffix)
 
