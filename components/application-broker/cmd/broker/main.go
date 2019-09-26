@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	scCs "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	catalogInformers "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
+	scCs "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
+	catalogInformers "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/config"

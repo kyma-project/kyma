@@ -46,7 +46,7 @@ func (c *FakeEventActivations) List(opts v1.ListOptions) (result *v1alpha1.Event
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.EventActivationList{}
+	list := &v1alpha1.EventActivationList{ListMeta: obj.(*v1alpha1.EventActivationList).ListMeta}
 	for _, item := range obj.(*v1alpha1.EventActivationList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -103,7 +103,7 @@ func (c *FakeEventActivations) DeleteCollection(options *v1.DeleteOptions, listO
 // Patch applies the patch and returns the patched eventActivation.
 func (c *FakeEventActivations) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.EventActivation, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(eventactivationsResource, c.ns, name, data, subresources...), &v1alpha1.EventActivation{})
+		Invokes(testing.NewPatchSubresourceAction(eventactivationsResource, c.ns, name, pt, data, subresources...), &v1alpha1.EventActivation{})
 
 	if obj == nil {
 		return nil, err

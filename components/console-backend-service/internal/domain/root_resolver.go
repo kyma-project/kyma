@@ -17,7 +17,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/authentication"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/cms"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/kubeless"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
@@ -33,13 +32,15 @@ type RootResolver struct {
 	app            *application.PluggableContainer
 	assetstore     *assetstore.PluggableContainer
 	cms            *cms.PluggableContainer
-	kubeless       *kubeless.PluggableResolver
 	ac             *apicontroller.PluggableResolver
 	authentication *authentication.PluggableResolver
 }
 
 func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
 	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing UI resolver")
+	}
 	makePluggable := module.MakePluggableFunc(uiContainer.BackendModuleInformer)
 
 	assetStoreContainer, err := assetstore.New(restConfig, assetstoreCfg, informerResyncPeriod)
@@ -77,12 +78,6 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
 
-	kubelessResolver, err := kubeless.New(restConfig, informerResyncPeriod)
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing Kubeless resolver")
-	}
-	makePluggable(kubelessResolver)
-
 	acResolver, err := apicontroller.New(restConfig, informerResyncPeriod)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing API controller resolver")
@@ -104,7 +99,6 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 		assetstore:     assetStoreContainer,
 		cms:            cmsContainer,
 		ac:             acResolver,
-		kubeless:       kubelessResolver,
 		authentication: authenticationResolver,
 	}, nil
 }
@@ -122,7 +116,6 @@ func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.cms.StopCacheSyncOnClose(stopCh)
 	r.assetstore.StopCacheSyncOnClose(stopCh)
 	r.ac.StopCacheSyncOnClose(stopCh)
-	r.kubeless.StopCacheSyncOnClose(stopCh)
 	r.authentication.StopCacheSyncOnClose(stopCh)
 }
 
@@ -452,10 +445,6 @@ func (r *queryResolver) ConfigMap(ctx context.Context, name string, namespace st
 
 func (r *queryResolver) ConfigMaps(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ConfigMap, error) {
 	return r.k8s.ConfigMapsQuery(ctx, namespace, first, offset)
-}
-
-func (r *queryResolver) Functions(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Function, error) {
-	return r.kubeless.FunctionsQuery(ctx, namespace, first, offset)
 }
 
 func (r *queryResolver) ServiceInstance(ctx context.Context, name string, namespace string) (*gqlschema.ServiceInstance, error) {

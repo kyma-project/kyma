@@ -10,8 +10,8 @@ type AsyncAPISpec struct {
 }
 
 type AsyncAPISpecData struct {
-	AsyncAPI string
-	Topics   map[string]interface{}
+	AsyncAPI string                 `json:"asyncapi"`
+	Channels map[string]interface{} `json:"channels"`
 }
 
 func (o *AsyncAPISpec) Decode(data []byte) error {

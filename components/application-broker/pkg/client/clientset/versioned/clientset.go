@@ -3,7 +3,6 @@
 package versioned
 
 import (
-	glog "github.com/golang/glog"
 	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
@@ -13,8 +12,6 @@ import (
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	ApplicationconnectorV1alpha1() applicationconnectorv1alpha1.ApplicationconnectorV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Applicationconnector() applicationconnectorv1alpha1.ApplicationconnectorV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -26,12 +23,6 @@ type Clientset struct {
 
 // ApplicationconnectorV1alpha1 retrieves the ApplicationconnectorV1alpha1Client
 func (c *Clientset) ApplicationconnectorV1alpha1() applicationconnectorv1alpha1.ApplicationconnectorV1alpha1Interface {
-	return c.applicationconnectorV1alpha1
-}
-
-// Deprecated: Applicationconnector retrieves the default version of ApplicationconnectorClient.
-// Please explicitly pick a version.
-func (c *Clientset) Applicationconnector() applicationconnectorv1alpha1.ApplicationconnectorV1alpha1Interface {
 	return c.applicationconnectorV1alpha1
 }
 
@@ -58,7 +49,6 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 
 	cs.DiscoveryClient, err = discovery.NewDiscoveryClientForConfig(&configShallowCopy)
 	if err != nil {
-		glog.Errorf("failed to create the DiscoveryClient: %v", err)
 		return nil, err
 	}
 	return &cs, nil

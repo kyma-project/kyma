@@ -8,9 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	retry "github.com/avast/retry-go"
-	core "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
+	"knative.dev/serving/pkg/apis/serving/v1beta1"
+
+	"github.com/avast/retry-go"
+	corev1 "k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -18,8 +19,8 @@ import (
 	// allow client authentication against GKE clusters
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
-	serving "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	servingtyped "github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
+	serving "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	servingtyped "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
 
 	"github.com/kyma-project/kyma/common/ingressgateway"
 )
@@ -48,27 +49,28 @@ func TestKnativeServingAcceptance(t *testing.T) {
 	kubeConfig := loadKubeConfigOrDie(t)
 	serviceClient := servingtyped.NewForConfigOrDie(kubeConfig).Services("knative-serving")
 
-	svc := &serving.Service{
+	svc := serving.Service{
 		ObjectMeta: meta.ObjectMeta{
 			Name: "test-service",
 		},
 		Spec: serving.ServiceSpec{
-			RunLatest: &serving.RunLatestType{
-				Configuration: serving.ConfigurationSpec{
-					RevisionTemplate: serving.RevisionTemplateSpec{
-						Spec: serving.RevisionSpec{
-							Container: core.Container{
-								Image: "gcr.io/knative-samples/helloworld-go",
-								Env: []core.EnvVar{
-									{
-										Name:  targetEnvVar,
-										Value: target,
+			ConfigurationSpec: serving.ConfigurationSpec{
+				Template: &serving.RevisionTemplateSpec{
+					ObjectMeta: meta.ObjectMeta{
+						Name: "test-service-foo",
+					},
+					Spec: serving.RevisionSpec{
+						RevisionSpec: v1beta1.RevisionSpec{
+							PodSpec: corev1.PodSpec{
+								Containers: []corev1.Container{{
+									Image: "gcr.io/knative-samples/helloworld-go",
+									Env: []corev1.EnvVar{
+										{
+											Name:  targetEnvVar,
+											Value: target,
+										},
 									},
 								},
-								Resources: core.ResourceRequirements{
-									Requests: core.ResourceList{
-										core.ResourceCPU: *resource.NewMilliQuantity(50, resource.DecimalSI), // 50m
-									},
 								},
 							},
 						},
@@ -78,7 +80,7 @@ func TestKnativeServingAcceptance(t *testing.T) {
 		},
 	}
 
-	if _, err := serviceClient.Create(svc); err != nil {
+	if _, err := serviceClient.Create(&svc); err != nil {
 		t.Fatalf("Cannot create test Service: %v", err)
 	}
 	defer deleteService(serviceClient, svc.Name)

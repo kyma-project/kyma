@@ -43,7 +43,7 @@ type SetRuntimeLabelResponse struct {
 
 type ScenarioLabelDefinitionResponse struct {
 	Result struct {
-		Key    string
-		Schema ScenariosSchema
-	}
+		Key    string              `json:"key"`
+		Schema *graphql.JSONSchema `json:"schema"`
+	} `json:"result"`
 }

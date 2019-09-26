@@ -3,11 +3,12 @@ package publisher
 import (
 	"log"
 
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/metrics"
+	"github.com/prometheus/client_golang/prometheus"
+
 	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/metrics"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
-	"github.com/prometheus/client_golang/prometheus"
 )
 
 const (
@@ -92,10 +93,23 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 	knativeChannelLabels[subscriptionEventTypeVersion] = eventTypeVersion
 
 	//Fetch knative channel via label
-	channel, err := knativeLib.GetChannelByLabels(*namespace, &knativeChannelLabels)
+	channel, err := knativeLib.GetChannelByLabels(*namespace, knativeChannelLabels)
 	if err != nil {
-		log.Printf("an error occured while trying to get the knative channel for source: '%v', event-type: '%v', event-type-version: '%v' in namespace '%v'\n"+
+		log.Printf("failed to get the knative channel for source: '%v', event-type: '%v', event-type-version: '%v' in namespace '%v'\n"+
 			"error: '%v':", source, eventType, eventTypeVersion, *namespace, err)
+		log.Println("incrementing ignored messages counter")
+		metrics.TotalPublishedMessages.With(prometheus.Labels{
+			metrics.Namespace:        *namespace,
+			metrics.Status:           IGNORED,
+			metrics.SourceID:         source,
+			metrics.EventType:        eventType,
+			metrics.EventTypeVersion: eventTypeVersion}).Inc()
+		return nil, IGNORED, empty
+	}
+
+	// If Knative channel is not ready there is no point in pushing it to dispatcher hence ignored
+	if !channel.Status.IsReady() {
+		log.Printf("knative channel is not ready :: for source: '%v', event-type: '%v', event-type-version: '%v' in namespace '%v' error: '%v':", source, eventType, eventTypeVersion, *namespace, err)
 		log.Println("incrementing ignored messages counter")
 		metrics.TotalPublishedMessages.With(prometheus.Labels{
 			metrics.Namespace:        *namespace,

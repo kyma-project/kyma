@@ -26,12 +26,6 @@ function check_result() {
 }
 
 ##
-# DEP ENSURE
-##
-dep ensure --v --vendor-only
-check_result "dep ensure --v --vendor-only" $?
-
-##
 # GO BUILD
 ##
 
@@ -45,60 +39,18 @@ fi
 while IFS= read -r -d '' directory
 do
     cmdName=$(basename "${directory}")
-    ${buildEnv} go build -o "bin/${cmdName}" "${directory}"
+    ${buildEnv} GO111MODULE=on go build -o "bin/${cmdName}" "${directory}"
     buildResult=$?
     check_result "go build ${directory}" "${buildResult}"
 done <   <(find "./cmd" -mindepth 1 -type d -print0)
 
 ##
-# DEP STATUS
-##
-echo "? dep status"
-dep status -v
-check_result "dep status" $?
-
-##
 # GO TEST
 ##
 echo "? go test"
-go test -count=1 -coverprofile=cover.out ./...
+GO111MODULE=on go test -count=1 -coverprofile=cover.out ./...
 echo -e "Total coverage: $(go tool cover -func=cover.out | grep total | awk '{print $3}')"
 rm cover.out
 check_result "go test" $?
 
 goFilesToCheck=$(find . -type f -name "*.go" | grep -E -v "/vendor/|/automock/|/testdata/")
-
-##
-# GO LINT
-##
-echo "? golint"
-go build -o golint-vendored ./vendor/golang.org/x/lint/golint
-check_result "go build lint" $?
-
-golintResult=$(echo "${goFilesToCheck}" | xargs -L1 ./golint-vendored)
-rm golint-vendored
-
-check_result "golint" "${#golintResult}" "${golintResult}"
-
-##
-# GO IMPORTS & FMT
-##
-echo "? goimports and fmt"
-go build -o goimports-vendored ./vendor/golang.org/x/tools/cmd/goimports
-check_result "go build goimports" $?
-
-goImportsResult=$(echo "${goFilesToCheck}" | xargs -L1 ./goimports-vendored -w -l)
-rm goimports-vendored
-
-check_result "goimports and fmt" "${#goImportsResult}" "${goImportsResult}"
-
-##
-# GO VET
-##
-echo "? go vet"
-packagesToVet=("./cmd/..." "./pkg/...")
-
-for vPackage in "${packagesToVet[@]}"; do
-	vetResult=$(go vet "${vPackage}")
-    check_result "go vet ${vPackage}" "${#vetResult}" "${vetResult}"
-done
