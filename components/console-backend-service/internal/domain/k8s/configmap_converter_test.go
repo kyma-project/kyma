@@ -21,7 +21,7 @@ func TestConfigMapConverter_ToGQL(t *testing.T) {
 				CreationTimestamp: metav1.Time{},
 				Labels: map[string]string{
 					"exampleKey":  "exampleValue",
-					"exampleKey2": "exampleValue",
+					"exampleKey2": "exampleValue2",
 				},
 			},
 		}
