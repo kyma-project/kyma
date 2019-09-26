@@ -164,6 +164,7 @@ spec:
                 set -o pipefail
               }
 
+              echo "Waiting for access to API Server..."
               wait_for_access_to_api_server
 
               echo "Checking if config map exists..."
@@ -176,10 +177,7 @@ spec:
               fi
               set -o errexit
 
-              echo "Checking Director rediness"
               director_readiness
-
-              echo "Configuring agent"
               agent_configuration
               kill_proxy_and_exit
 {{ end }}
