@@ -26,7 +26,7 @@ deployment:
 
 config:
   oathkeeper:
-    service: ory-oathkeeper
+    service: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
     port: 4455
   jwksURI: http://dex-service.kyma-system.svc.cluster.local:5556/keys
   serviceBlackList:
