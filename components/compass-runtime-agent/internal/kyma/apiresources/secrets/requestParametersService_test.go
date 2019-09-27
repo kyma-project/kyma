@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy"
+	"kyma-project.io/compass-runtime-agent/internal/apperrors"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy"
 
 	"github.com/stretchr/testify/require"
 
-	k8smocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts/mocks"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/mocks"
 	"github.com/stretchr/testify/assert"
+	k8smocks "kyma-project.io/compass-runtime-agent/internal/k8sconsts/mocks"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/mocks"
 )
 
 var (
