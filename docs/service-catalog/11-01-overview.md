@@ -1,6 +1,6 @@
 ---
-title: Overview
-type: UI Contracts
+title: UI Contracts
+type: Console UI Views
 ---
 
 UI Contracts are contracts between the Service Catalog views in the Kyma Console UI and the [Open Service Broker API](https://www.openservicebrokerapi.org/) (OSBA) specification.

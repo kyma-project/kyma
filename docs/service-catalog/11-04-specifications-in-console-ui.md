@@ -1,9 +1,35 @@
 ---
-title: Markdown documents
-type: Details
+title: Specifications in the Console UI
+type: Console UI Views
 ---
 
-The DocsTopic or ClusterDocsTopic custom resource supports various documentation formats, including Markdown (`.md`) documents. Each `.md` file must consist of two parts: metadata and content. The following example illustrates the required structure:
+Documentation for Service Classes is rendered in both Service Catalog and Instances views. It includes the following specification types:
+
+- Markdown
+- [OpenAPI](https://www.openapis.org/)
+- [AsyncAPI](https://www.asyncapi.com/)
+- [OData](https://www.odata.org/)
+
+This document explains how and where these specifications are rendered in the Console UI. It also describes the structure of the Markdown documents, their obligatory metadata, and optional features in the content body.
+
+## Tabs
+
+Depending on the type of the input files, the Console UI renders specifications under different tabs in Service Catalog and Instances views:
+
+- Markdown under the **Documentation** tab.
+- OpenAPI under the **Console** tab.
+- AsyncAPI under the **Events** tab.
+- OData under the **OData** tab.
+
+See the tabs overview:
+
+![Specification tabs in the Console UI](./assets/spec-view.png)
+
+>**NOTE:** OpenAPI, OData, and AsyncAPI specifications rendered in the Console UI follow the [Fiori 3 Fundamentals](https://sap.github.io/fundamental/) styling standards.
+
+## Markdown documents
+
+DocsTopic and ClusterDocsTopic custom resources that orchestrate documentation in the Console UI support various documentation formats, including Markdown (`.md`) documents. Each `.md` file must consist of two parts: metadata and content. The following example illustrates the required structure:
 
 ```
 ---
@@ -14,9 +40,9 @@ another_metadata: {value or text string}
 {The content of your document in **Markdown**.}
 ```
 
-## Metadata
+### Metadata
 
-Each Markdown document displayed in the Kyma Console requires metadata in a specific format called [Front Matter](https://forestry.io/docs/editing/front-matter/).
+Each Markdown document displayed in the Kyma Console requires metadata in a specific format called [front matter](https://forestry.io/docs/editing/front-matter/).
 
 ### Structure
 
@@ -42,51 +68,6 @@ type: {Document type}
 >**NOTE:** If there is only one document of a certain type, remove the `type` metadata, so that the document displays well in the UI.
 
 ### Display
-
-In the Documentation view (Docs UI), that is available in the Console UI under the question mark icon on the top navigation panel, the metadata allow you to create the left-side and right-side navigation structures. The left-side navigation displays topics' groups and topics. The right-side navigation displays documents grouped under a common `type` in alphanumeric order as per files names. Underneath the `type` you can see the document's `title`, and subsequent headers from the document. The following example shows four documents, their metadata, and corresponding places in the left-side and right-side navigation:
-
-<div tabs>
-  <details>
-  <summary>
-  Metadata source
-  </summary>
-
-```
-//03-01-sidecar-proxy-injection.md
----
-title: Sidecar Proxy Injection
-type: Details
----
-```
-```
-//03-02-istio-patch.md
----
-title: Istio Patch
-type: Details
----
-```
-```
-//03-03-istio-rbac.md
----
-title: Istio RBAC configuration
-type: Details
----
-```
-```
-//01-01-service-mesh.md
----
-title: Overview
----
-```
-  </details>
-  <details>
-  <summary>
-  Docs UI preview
-  </summary>
-
-![](./assets/nav-docs-ui.png)
-  </details>
-</div>
 
 In the Service Catalog and Instances views, which contain Service Classes documentation, Markdown documents display in the **Documentation** tab. The `title` and `type` metadata create the right-side navigation. A document with the **Overview** `title` always displays on top. If you don't provide `title` and `type`, these UIs display the file name as a fallback. The right-side document structure is based on the same logic as in the Documentation view. See the following example:
 
@@ -121,7 +102,7 @@ type: Details
 
 >**NOTE:** A document with the **Overview** `title` always displays as the first tab. Markdown files with `title` other than **Overview** appear in alphanumeric order.
 
-## Content
+### Content
 
 Content is the body of your document. Write content in [Markdown](https://daringfireball.net/projects/markdown/syntax) which is a simplified markup language.
 

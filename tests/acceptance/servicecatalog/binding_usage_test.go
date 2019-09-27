@@ -303,7 +303,7 @@ func (ts *TestSuite) deleteServiceBinding(bindingName string, timeout time.Durat
 	err = siClient.Delete(bindingName, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 
-	repeat.FuncAtMost(ts.t, func() error {
+	repeat.AssertFuncAtMost(ts.t, func() error {
 		binding, err := siClient.Get(bindingName, metav1.GetOptions{})
 		switch {
 		case err == nil:
@@ -337,7 +337,7 @@ func (ts *TestSuite) createAndWaitForServiceBinding(bindingName, instanceName st
 	})
 	require.NoError(ts.t, err)
 
-	repeat.FuncAtMost(ts.t, func() error {
+	repeat.AssertFuncAtMost(ts.t, func() error {
 		b, err := bindingClient.Get(bindingName, metav1.GetOptions{})
 		if err != nil {
 			return err
@@ -405,7 +405,7 @@ func (ts *TestSuite) createAndWaitBindingUsage(bindingName, sbuName, envPrefix s
 	_, err := usageCli.Create(sbu)
 	require.NoError(ts.t, err)
 
-	repeat.FuncAtMost(ts.t, func() error {
+	repeat.AssertFuncAtMost(ts.t, func() error {
 		usage, err := usageCli.Get(sbuName, metav1.GetOptions{})
 		if err != nil {
 			return err
@@ -463,7 +463,7 @@ func (ts *TestSuite) deleteServiceInstance(instanceName string, timeout time.Dur
 	err = siClient.Delete(instanceName, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 
-	repeat.FuncAtMost(ts.t, func() error {
+	repeat.AssertFuncAtMost(ts.t, func() error {
 		instance, err := siClient.Get(instanceName, metav1.GetOptions{})
 		switch {
 		case err == nil:
@@ -497,7 +497,7 @@ func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternal
 	})
 	require.NoError(ts.t, err)
 
-	repeat.FuncAtMost(ts.t, func() error {
+	repeat.AssertFuncAtMost(ts.t, func() error {
 		si, err := siClient.Get(instanceName, metav1.GetOptions{})
 		if err != nil {
 			return err
@@ -522,9 +522,9 @@ func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternal
 
 // ServiceClass helpers
 func (ts *TestSuite) waitForAppServiceClasses(timeout time.Duration) {
-	repeat.FuncAtMost(ts.t, ts.serviceClassIsAvailableA(), timeout)
+	repeat.AssertFuncAtMost(ts.t, ts.serviceClassIsAvailableA(), timeout)
 	ts.t.Logf("Service class [%s] is available in the testing namespace", ts.appSvcIDA)
-	repeat.FuncAtMost(ts.t, ts.serviceClassIsAvailableB(), timeout)
+	repeat.AssertFuncAtMost(ts.t, ts.serviceClassIsAvailableB(), timeout)
 	ts.t.Logf("Service class [%s] is available in the testing namespace", ts.appSvcIDB)
 
 }
@@ -649,7 +649,7 @@ func (ts *TestSuite) envTesterDeployment(labels map[string]string) *appsTypes.De
 func (ts *TestSuite) assertInjectedEnvVariables(requiredVariables []servicecatalog.EnvVariable, timeout time.Duration) {
 	url := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs", ts.namespace)
 
-	repeat.FuncAtMost(ts.t, func() error {
+	repeat.AssertFuncAtMost(ts.t, func() error {
 		client := http.Client{
 			Transport: &http.Transport{
 				DisableKeepAlives: true,
@@ -719,7 +719,7 @@ func (ts *TestSuite) waitForAPIServer() {
 
 	nsClient := k8sCli.CoreV1().Namespaces()
 
-	repeat.FuncAtMost(ts.t, func() error {
+	repeat.AssertFuncAtMost(ts.t, func() error {
 		_, err := nsClient.List(metav1.ListOptions{})
 		return err
 	}, 20*time.Second)

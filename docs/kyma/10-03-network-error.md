@@ -14,11 +14,9 @@ To fix this, follow one of these two approaches:
   Minikube on MacOS
   </summary>
 
-
 ```
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain {PATH_TO_CERT}
 ```
-
   </details>
   <details>
   <summary>
@@ -28,14 +26,11 @@ sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keyc
 ```
 certutil -d sql:$HOME/.pki/nssdb -A -t "P,," -n {CERT_DISPLAYNAME} -i {PATH_TO_CERT}
 ```
-
-
   </details>
   <details>
   <summary>
   Cluster installation with xip.io
   </summary>
-
 
 Run this command after you install Kyma on your GKE or AKS cluster:
 
@@ -45,7 +40,6 @@ tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
 && sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
 && rm $tmpfile
 ```
-
   </details>
 </div>
 

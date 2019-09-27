@@ -75,6 +75,38 @@ func (_m *DiscoveryInterface) ServerGroups() (*v1.APIGroupList, error) {
 	return r0, r1
 }
 
+// ServerGroupsAndResources provides a mock function with given fields:
+func (_m *DiscoveryInterface) ServerGroupsAndResources() ([]*v1.APIGroup, []*v1.APIResourceList, error) {
+	ret := _m.Called()
+
+	var r0 []*v1.APIGroup
+	if rf, ok := ret.Get(0).(func() []*v1.APIGroup); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*v1.APIGroup)
+		}
+	}
+
+	var r1 []*v1.APIResourceList
+	if rf, ok := ret.Get(1).(func() []*v1.APIResourceList); ok {
+		r1 = rf()
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).([]*v1.APIResourceList)
+		}
+	}
+
+	var r2 error
+	if rf, ok := ret.Get(2).(func() error); ok {
+		r2 = rf()
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}
+
 // ServerPreferredNamespacedResources provides a mock function with given fields:
 func (_m *DiscoveryInterface) ServerPreferredNamespacedResources() ([]*v1.APIResourceList, error) {
 	ret := _m.Called()

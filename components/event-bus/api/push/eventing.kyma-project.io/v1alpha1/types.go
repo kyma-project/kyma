@@ -70,4 +70,8 @@ const (
 	Ready SubscriptionConditionType = "is-ready"
 	// EventsActivated label for the Kyma subscription condition type.
 	EventsActivated SubscriptionConditionType = "events-activated"
+	// ChannelReady label for Knative channel readiness in Kyma Subscription
+	ChannelReady SubscriptionConditionType = "kn-channel-ready"
+	// SubscriptionReady label for Knative Subscription readiness in Kyma Subscription
+	SubscriptionReady SubscriptionConditionType = "kn-subscription-ready"
 )

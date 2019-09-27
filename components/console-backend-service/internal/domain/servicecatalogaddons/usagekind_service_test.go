@@ -58,7 +58,7 @@ func TestUsageKindService_List_Empty(t *testing.T) {
 func TestUsageKindService_ListResources_Empty(t *testing.T) {
 	// There is no any test for non-empty response because of a bug in fake dynamic scClient List() method.
 	// The bug is fixed in scClient-go version 1.12-rc.1 but this version is not compatible with service-catalog:
-	// vendor/github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1/register.go:77:36: too many arguments in call to scheme.AddFieldLabelConversionFunc
+	// vendor/github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1/register.go:77:36: too many arguments in call to scheme.AddFieldLabelConversionFunc
 
 	// GIVEN
 	usageKind := fixUsageKind("fix-A")
