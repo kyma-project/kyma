@@ -31,13 +31,11 @@ do
             shift
             ;;
         --test-name|-t)
-            TEST_NAME="$2"
-            shift
+            TEST_NAME="$1"
             shift
             ;;
         --test-namespace|-tn)
-            TEST_NAMESPACE="$2"
-            shift
+            TEST_NAMESPACE="$1"
             shift
             ;;
         -*)
