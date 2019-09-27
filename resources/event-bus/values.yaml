@@ -6,8 +6,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
-    dir: develop/
-    version: 9853e77d
+    dir: pr/
+    version: PR-5793
     publisherImage: event-publish-service
     subscriptionControllerImage: subscription-controller
   event_bus_tests:
@@ -25,6 +25,7 @@ global:
   eventPublishService:
     maxRequests: 200
     maxRequestSize: 65536
+    maxChannelNameLength: 33
     maxSourceIDLength: 253
     maxEventTypeLength: 253
     maxEventTypeVersionLength: 4
