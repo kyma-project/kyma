@@ -40,7 +40,7 @@ rules:
     verbs: ["list", "update"]
   - apiGroups: [""]
     resources: ["configmaps"]
-    verbs: ["get", "create", "update"]
+    verbs: ["get", "create", "update", "delete"]
 
 ---
 kind: ClusterRoleBinding
