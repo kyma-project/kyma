@@ -23,7 +23,7 @@ You can set Minio to the AWS S3 Gateway mode both during and after Kyma installa
 Create an AWS access key for an IAM user. Follow these steps:
 
 1. Access the [AWS Identity and Access Management console](https://console.aws.amazon.com/iam/)
-2. In the left navigation panel, choose **Users**.
+2. In the left navigation panel, select **Users**.
 3. Choose the user whose access keys you want to create, and select the **Security credentials** tab.
 4. In the **Access keys** section, select **Create access key**.
 5. Export the access and secret keys as environment variables:

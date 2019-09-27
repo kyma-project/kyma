@@ -8,7 +8,6 @@ By default, you install Kyma with the Asset Store in Minio stand-alone mode. Thi
 ## Prerequisites
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- [jq](https://stedolan.github.io/jq/)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure)
 - [Microsoft Azure](http://azure.com) subscription
 
@@ -18,7 +17,7 @@ You can set Minio to the Azure Blob Storage Gateway mode both during and after K
 
 >**CAUTION:** Buckets created in Minio without using Bucket CRs are not recreated or migrated while switching to the Minio Gateway mode.
 
-### Setup Azure Blob Storage resources
+### Set up Azure Blob Storage resources
 
 Create an Azure resource group and a storage account. Follow these steps:
 
@@ -57,7 +56,7 @@ Create an Azure resource group and a storage account. Follow these steps:
 5. Export the access key as an environment variable:
 
     ```bash
-    export AZ_ACCOUNT_KEY=$(az storage account keys list --account-name ${AZ_ACCOUNT_NAME} --resource-group ${AZ_RESOURCE_GROUP} --subscription ${AZ_SUBSCRIPTION} | jq '.[0].value' -r | base64)
+    export AZ_ACCOUNT_KEY=$(az storage account keys list --account-name "${AZURE_STORAGE_ACCOUNT_NAME}" --resource-group "${AZURE_RS_GROUP}" --query "[?keyName=='key1'].value" --output tsv | base64)
     ```
 
 ### Configure Minio Gateway mode
