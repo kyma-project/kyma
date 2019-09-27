@@ -28,7 +28,7 @@ spec:
               optional: true
           env:
             - name: DIRECTOR_URL
-              value: {{ .Values.compassRuntimeAgent.tests.director.url }}
+              value: "https://compass-gateway-auth-oauth.{{ .Values.global.ingress.domainName }}/director/graphql"
             - name: NAMESPACE
               value: {{ .Release.Namespace }}
             - name: INTEGRATION_NAMESPACE
