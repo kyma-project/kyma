@@ -92,6 +92,11 @@ func (cc *compassConnector) MaintainConnection(credentials certificates.ClientCr
 		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to query Connection Configuration while checking connection")
 	}
 
+	// Due to bug in Graphql client the response may not result in error but be empty
+	if err := validateConfigInfo(configuration.ManagementPlaneInfo); err != nil {
+		return nil, v1alpha1.ManagementInfo{}, err
+	}
+
 	if !renewCert {
 		return nil, toManagementInfo(configuration.ManagementPlaneInfo), nil
 	}
@@ -113,6 +118,18 @@ func (cc *compassConnector) MaintainConnection(credentials certificates.ClientCr
 	}
 
 	return &renewedCredentials, toManagementInfo(configuration.ManagementPlaneInfo), nil
+}
+
+func validateConfigInfo(configInfo *gqlschema.ManagementPlaneInfo) error {
+	if configInfo == nil {
+		return errors.New("Management info is empty")
+	}
+
+	if configInfo.CertificateSecuredConnectorURL == nil || configInfo.DirectorURL == nil {
+		return errors.New("Connector URL or Director URL is empty")
+	}
+
+	return nil
 }
 
 func toManagementInfo(configInfo *gqlschema.ManagementPlaneInfo) v1alpha1.ManagementInfo {

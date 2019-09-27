@@ -147,6 +147,7 @@ func TestCompassConnectionController(t *testing.T) {
 		// then
 		assertCompassConnectionState(t, v1alpha1.Synchronized)
 		assertConnectionStatusSet(t)
+		assertManagementInfoSetInCR(t)
 
 		mock.AssertExpectationsForObjects(t,
 			tokensConnectorClientMock,
@@ -170,6 +171,7 @@ func TestCompassConnectionController(t *testing.T) {
 		})
 		require.NoError(t, err)
 		assertConnectionStatusSet(t)
+		assertManagementInfoSetInCR(t)
 
 		mock.AssertExpectationsForObjects(t,
 			tokensConnectorClientMock,
@@ -213,6 +215,7 @@ func TestCompassConnectionController(t *testing.T) {
 		require.NoError(t, waitForResourceUpdate(v1alpha1.Synchronized))
 
 		assertCertificateRenewed(t)
+		assertManagementInfoSetInCR(t)
 		certsConnectorClientMock.AssertCalled(t, "SignCSR", mock.AnythingOfType("string"), nilHeaders)
 	})
 
@@ -229,6 +232,7 @@ func TestCompassConnectionController(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		require.NoError(t, waitForResourceUpdate(v1alpha1.ResourceApplicationFailed))
+		assertManagementInfoSetInCR(t)
 	})
 
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed to fetch configuration from Director", func(t *testing.T) {
@@ -244,6 +248,7 @@ func TestCompassConnectionController(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		require.NoError(t, waitForResourceUpdate(v1alpha1.SynchronizationFailed))
+		assertManagementInfoSetInCR(t)
 	})
 
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed create Director config client", func(t *testing.T) {
@@ -262,6 +267,7 @@ func TestCompassConnectionController(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		require.NoError(t, waitForResourceUpdate(v1alpha1.SynchronizationFailed))
+		assertManagementInfoSetInCR(t)
 	})
 
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed to read runtime configuration", func(t *testing.T) {
@@ -279,6 +285,24 @@ func TestCompassConnectionController(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		require.NoError(t, waitForResourceUpdate(v1alpha1.SynchronizationFailed))
+		assertManagementInfoSetInCR(t)
+	})
+
+	t.Run("Compass Connection should be in ConnectionMaintenanceFailed if Management Info is empty and no error", func(t *testing.T) {
+		// given
+		certsConnectorClientMock.ExpectedCalls = nil
+		certsConnectorClientMock.On("Configuration", nilHeaders).Return(gqlschema.Configuration{ManagementPlaneInfo: nil}, nil)
+
+		// when
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			return mockFunctionCalled(&certsConnectorClientMock.Mock, "Configuration", nilHeaders)
+		})
+
+		// then
+		require.NoError(t, err)
+		require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionMaintenanceFailed))
+
+		assertManagementInfoSetInCR(t)
 	})
 
 	t.Run("Compass Connection should be in ConnectionMaintenanceFailed if failed to access Connector Configuration query", func(t *testing.T) {
@@ -514,6 +538,13 @@ func isConnectionInState(expectedState v1alpha1.ConnectionState) bool {
 	}
 
 	return connectedConnection.Status.State == expectedState
+}
+
+func assertManagementInfoSetInCR(t *testing.T) {
+	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	require.NoError(t, err)
+	assert.Equal(t, directorURL, connectedConnection.Spec.ManagementInfo.DirectorURL)
+	assert.Equal(t, certSecuredConnectorURL, connectedConnection.Spec.ManagementInfo.ConnectorURL)
 }
 
 func assertCompassConnectionState(t *testing.T, expectedState v1alpha1.ConnectionState) {
