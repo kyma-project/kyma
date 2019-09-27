@@ -1,7 +1,7 @@
 # Default values for Service Catalog
 # service-catalog image to use
 #TODO: change that!
-image: awalach/service-catalog:crds
+image: eu.gcr.io/kyma-project/pr/ab-upgrade-protector:PR-5798
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
 # "Never", and "Always"
 imagePullPolicy: Always
