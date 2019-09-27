@@ -2,7 +2,6 @@ package oauth
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"mime/multipart"
@@ -10,8 +9,7 @@ import (
 )
 
 const (
-	AuthorizationHeader = "Authorization"
-	ContentTypeHeader   = "Content-Type"
+	ContentTypeHeader = "Content-Type"
 
 	GrantTypeFieldName   = "grant_type"
 	CredentialsGrantType = "client_credentials"
@@ -54,19 +52,13 @@ func NewOauthClient(hydraPublicURL, hydraAdminURL string) *Client {
 }
 
 func (c *Client) GetAuthorizationToken() (string, error) {
-	clientCredentials, e := c.createOAuth2Client()
+	clientCredentials, err := c.createOAuth2Client()
 
-	if e != nil {
-		return "", e
+	if err != nil {
+		return "", err
 	}
 
-	credentials, e := buildCredentialsString(clientCredentials)
-
-	if e != nil {
-		return "", e
-	}
-
-	return c.getOAuthToken(credentials)
+	return c.getOAuthToken(clientCredentials)
 }
 
 func (c *Client) createOAuth2Client() (credentials, error) {
@@ -87,8 +79,6 @@ func (c *Client) createOAuth2Client() (credentials, error) {
 		return credentials{}, err
 	}
 
-	var oauthResp oauthClient
-
 	resp, err := c.httpClient.Do(request)
 	if err != nil {
 		return credentials{}, err
@@ -100,6 +90,7 @@ func (c *Client) createOAuth2Client() (credentials, error) {
 		return credentials{}, fmt.Errorf("create OAuth2 client call returned unexpected status code, %d", resp.StatusCode)
 	}
 
+	var oauthResp oauthClient
 	err = json.NewDecoder(resp.Body).Decode(&oauthResp)
 
 	if err != nil {
@@ -112,34 +103,30 @@ func (c *Client) createOAuth2Client() (credentials, error) {
 	}, nil
 }
 
-func buildCredentialsString(credentials credentials) (string, error) {
-	credentialsEncoded := []byte(fmt.Sprintf("%s:%s", credentials.clientID, credentials.clientSecret))
-	return fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString(credentialsEncoded)), nil
-}
+func (c *Client) getOAuthToken(credentials credentials) (string, error) {
+	buffer := &bytes.Buffer{}
+	writer := multipart.NewWriter(buffer)
 
-func (c *Client) getOAuthToken(credentials string) (string, error) {
-	b := &bytes.Buffer{}
-	w := multipart.NewWriter(b)
+	err := setRequiredFields(writer)
 
-	e := setRequiredFields(w)
-
-	if e != nil {
-		return "", e
+	if err != nil {
+		return "", err
 	}
 
-	request, e := http.NewRequest(http.MethodPost, c.tokensEndpoint, b)
+	request, err := http.NewRequest(http.MethodPost, c.tokensEndpoint, buffer)
 
-	if e != nil {
-		return "", e
+	if err != nil {
+		return "", err
 	}
 
-	request.Header.Set(AuthorizationHeader, credentials)
-	request.Header.Set(ContentTypeHeader, w.FormDataContentType())
+	request.SetBasicAuth(credentials.clientID, credentials.clientSecret)
 
-	response, e := c.httpClient.Do(request)
+	request.Header.Set(ContentTypeHeader, writer.FormDataContentType())
 
-	if e != nil {
-		return "", e
+	response, err := c.httpClient.Do(request)
+
+	if err != nil {
+		return "", err
 	}
 
 	defer response.Body.Close()
@@ -150,10 +137,10 @@ func (c *Client) getOAuthToken(credentials string) (string, error) {
 		return "", fmt.Errorf("get token call returned unexpected status code, %d", response.StatusCode)
 	}
 
-	e = json.NewDecoder(response.Body).Decode(&tokenResponse)
+	err = json.NewDecoder(response.Body).Decode(&tokenResponse)
 
-	if e != nil {
-		return "", e
+	if err != nil {
+		return "", err
 	}
 
 	return tokenResponse.AccessToken, nil
