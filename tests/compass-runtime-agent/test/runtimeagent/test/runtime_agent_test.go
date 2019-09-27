@@ -378,7 +378,7 @@ func TestCompassRuntimeAgentNotManagedApplications(t *testing.T) {
 		compassManagedApplicationTemplate := createSimpleApplicationTemplate(compassManagedApplicationName)
 
 		t.Logf("Creating Application %s managed by Compass Runtime Agent", compassManagedApplicationName)
-		compassManagedApplication, err := testSuite.AppClient.Create(&compassManagedApplicationTemplate)
+		compassManagedApplication, err := testSuite.ApplicationCRClient.Create(&compassManagedApplicationTemplate)
 		require.NoError(t, err)
 
 		compassNotManagedApplicationName := "compass-not-managed-app"
@@ -386,11 +386,11 @@ func TestCompassRuntimeAgentNotManagedApplications(t *testing.T) {
 		compassNotManagedApplicationTemplate.Spec.CompassMetadata = nil
 
 		t.Logf("Creating Application %s not managed by Compass Runtime Agent", compassNotManagedApplicationName)
-		compassNotManagedApplication, err := testSuite.AppClient.Create(&compassNotManagedApplicationTemplate)
+		compassNotManagedApplication, err := testSuite.ApplicationCRClient.Create(&compassNotManagedApplicationTemplate)
 		require.NoError(t, err)
 		defer func() {
 			t.Logf("Deleting Application %s not managed by Compass Runtime Agent", compassNotManagedApplicationName)
-			err := testSuite.AppClient.Delete(compassNotManagedApplication.Name, &metav1.DeleteOptions{})
+			err := testSuite.ApplicationCRClient.Delete(compassNotManagedApplication.Name, &metav1.DeleteOptions{})
 			require.NoError(t, err)
 
 			testSuite.K8sResourceChecker.AssertAppResourcesDeleted(t, compassNotManagedApplication.Name)
@@ -404,7 +404,7 @@ func TestCompassRuntimeAgentNotManagedApplications(t *testing.T) {
 		testSuite.K8sResourceChecker.AssertAppResourcesDeleted(t, compassManagedApplication.Name)
 
 		t.Logf("Asserting that Application not managed by Compass Runtime Agent still exists even if does not exist in Director config")
-		returnedCompassNotManagedApplication, err := testSuite.AppClient.Get(compassNotManagedApplication.Name, metav1.GetOptions{})
+		returnedCompassNotManagedApplication, err := testSuite.ApplicationCRClient.Get(compassNotManagedApplication.Name, metav1.GetOptions{})
 		require.NoError(t, err)
 		assert.Equal(t, &compassNotManagedApplication, returnedCompassNotManagedApplication)
 	})

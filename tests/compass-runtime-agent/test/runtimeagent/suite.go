@@ -44,10 +44,10 @@ const (
 type updatePodFunc func(pod *v1.Pod)
 
 type TestSuite struct {
-	CompassClient      *compass.Client
-	K8sResourceChecker *assertions.K8sResourceChecker
-	APIAccessChecker   *assertions.APIAccessChecker
-	AppClient          v1alpha1.ApplicationInterface
+	CompassClient       *compass.Client
+	K8sResourceChecker  *assertions.K8sResourceChecker
+	APIAccessChecker    *assertions.APIAccessChecker
+	ApplicationCRClient v1alpha1.ApplicationInterface
 
 	k8sClient    *kubernetes.Clientset
 	podClient    v1typed.PodInterface
@@ -102,17 +102,17 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 	nameResolver := applications.NewNameResolver(config.IntegrationNamespace)
 
 	return &TestSuite{
-		k8sClient:          k8sClient,
-		podClient:          k8sClient.CoreV1().Pods(config.Namespace),
-		AppClient:          appClient.Applications(),
-		nameResolver:       nameResolver,
-		CompassClient:      compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.GraphQLLog),
-		APIAccessChecker:   assertions.NewAPIAccessChecker(nameResolver),
-		K8sResourceChecker: assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
-		mockServiceServer:  mock.NewAppMockServer(config.MockServicePort),
-		config:             config,
-		mockServiceName:    config.MockServiceName,
-		testPodsLabels:     testPodLabels,
+		k8sClient:           k8sClient,
+		podClient:           k8sClient.CoreV1().Pods(config.Namespace),
+		ApplicationCRClient: appClient.Applications(),
+		nameResolver:        nameResolver,
+		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.GraphQLLog),
+		APIAccessChecker:    assertions.NewAPIAccessChecker(nameResolver),
+		K8sResourceChecker:  assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
+		mockServiceServer:   mock.NewAppMockServer(config.MockServicePort),
+		config:              config,
+		mockServiceName:     config.MockServiceName,
+		testPodsLabels:      testPodLabels,
 	}, nil
 }
 
