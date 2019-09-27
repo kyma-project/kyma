@@ -17,7 +17,7 @@ To get the list of Virtual Services in Kyma, run:
 
 - **Oathkeeper Access Rule** allows operators to specify authentication requirements for a service. It is an optional resource, created only when the CR specifies the desired authentication method, the trusted token issuer, allowed methods and paths, and required scopes. To learn more about Oathkeeper Access Rules, read [this](https://www.ory.sh/docs/oryos.10/oathkeeper/api-access-rules) document.
 
-To get the list of Oathkeeper Access Rules created in Kyma, run:
+  To get the list of Oathkeeper Access Rules created in Kyma, run:
 
   ```
   kubectl get rules.oathkeeper.ory.sh --all-namespaces
