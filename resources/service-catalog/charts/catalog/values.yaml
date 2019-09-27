@@ -1,7 +1,7 @@
 # Default values for Service Catalog
 # service-catalog image to use
 #TODO: change that!
-image: eu.gcr.io/kyma-project/pr/ab-upgrade-protector:PR-5798
+image: awalach/service-catalog:crds
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
 # "Never", and "Always"
 imagePullPolicy: Always
@@ -117,6 +117,10 @@ servicePlanDefaultsEnabled: false
 ## by example :
 ## securityContext: { runAsUser: 1001 }
 securityContext: {}
-## image for migration process prevent SBU deletion
-migrationImagePath: eu.gcr.io/kyma-project/develop/sbu-upgrade-protector
-migrationImageVersion: latest
+
+## images for migration process
+migration:
+  sbuImage: eu.gcr.io/kyma-project/develop/sbu-upgrade-protector:latest
+  abImage: eu.gcr.io/kyma-project/pr/ab-upgrade-protector:PR-5798
+
+

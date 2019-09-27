@@ -1,7 +1,7 @@
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: upgrade-job-account
+  name: sbu-upgrade-job-account
   namespace: {{ .Release.Namespace }}
   labels:
     upgrade-job: "true"
@@ -17,7 +17,7 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: upgrade-job-account
+  name: sbu-upgrade-job-account
   labels:
     upgrade-job: "true"
     app: {{ template "fullname" . }}
@@ -42,7 +42,7 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: upgrade-job-account
+  name: sbu-upgrade-job-account
   labels:
     upgrade-job: "true"
     app: {{ template "fullname" . }}
@@ -95,7 +95,7 @@ spec:
       serviceAccountName: upgrade-job-account
       containers:
         - name: sbu-upgrade-protector
-          image: {{ .Values.migrationImagePath }}:{{ .Values.migrationImageVersion }}
+          image: {{ .Values.migration.sbuImage }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           args:
           - --action
