@@ -11,9 +11,10 @@ In addition to the tools required to install Kyma on a cluster, you also need:
 - [Docker Hub](https://hub.docker.com/) account or any other Docker registry
 
 1. Clone the Kyma repository to your machine using either HTTPS or SSH. Run this command to clone the repository and change your working directory to `kyma`:
-    <div tabs>
+
+    <div tabs name="use-your-own-kyma-installer-image">
       <details>
-      <summary>
+      <summary label="https">
       HTTPS
       </summary>
 
@@ -22,7 +23,7 @@ In addition to the tools required to install Kyma on a cluster, you also need:
       ```
       </details>
       <details>
-      <summary>
+      <summary label="ssh">
       SSH
       </summary>
 

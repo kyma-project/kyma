@@ -16,26 +16,27 @@ The Kyma Installer reads the configuration from the Installation CR and the over
 
 The default settings for the cluster and local installation are defined in different files.
 
-<div tabs>
+<div tabs name="default-settings" group="configuration">
   <details>
-  <summary>
+  <summary label="local-installation">
   Local installation
   </summary>
 
   For the list of all components available to install see the `installer-cr.yaml.tpl` file.
   For the list of the default installation overrides see the `installer-config-local.yaml.tpl` file.
   Other configuration values are defined directly in the configuration of the respective components.
+  
   >**CAUTION:** The default configuration uses tested and recommended settings. Change them at your own risk.
   </details>
   <details>
-  <summary>
+  <summary label="cluster-installation">
   Cluster installation
   </summary>
 
   The default installation flow uses a Kyma release.
   All components available in a given release are listed in the  `kyma-installer-cluster.yaml`, which is one of the release artifacts.
   Any required overrides are described in the [cluster installation guide](#installation-install-kyma-on-a-cluster).
- Other settings are defined directly in the configuration of the components released with the given Kyma version.
+  Other settings are defined directly in the configuration of the components released with the given Kyma version.
   </details>
 </div>
 

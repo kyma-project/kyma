@@ -22,13 +22,13 @@ Virtualization:
 
 > **NOTE**: To work with Kyma, use only the provided commands. Kyma requires a specific Minikube configuration and does not work on a basic Minikube cluster that you can start using the `minikube start` command.
 
-
 ## Install Kyma
 
 Follow these instructions to install Kyma from a release or from sources:
-<div tabs>
+
+<div tabs name="install-kyma" group="install-kyma-locally">
   <details>
-  <summary>
+  <summary label="from-a-release">
   From a release
   </summary>
 
@@ -47,7 +47,7 @@ Follow these instructions to install Kyma from a release or from sources:
 
   </details>
   <details>
-  <summary>
+  <summary label="from-sources">
   From sources
   </summary>
 
