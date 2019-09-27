@@ -146,6 +146,7 @@ func TestCompassConnectionController(t *testing.T) {
 
 		// then
 		assertCompassConnectionState(t, v1alpha1.Synchronized)
+		assertConnectionStatusSet(t)
 
 		mock.AssertExpectationsForObjects(t,
 			tokensConnectorClientMock,
@@ -168,6 +169,7 @@ func TestCompassConnectionController(t *testing.T) {
 			return isConnectionInState(v1alpha1.Synchronized)
 		})
 		require.NoError(t, err)
+		assertConnectionStatusSet(t)
 
 		mock.AssertExpectationsForObjects(t,
 			tokensConnectorClientMock,
@@ -209,6 +211,8 @@ func TestCompassConnectionController(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		require.NoError(t, waitForResourceUpdate(v1alpha1.Synchronized))
+
+		assertCertificateRenewed(t)
 		certsConnectorClientMock.AssertCalled(t, "SignCSR", mock.AnythingOfType("string"), nilHeaders)
 	})
 
@@ -516,6 +520,22 @@ func assertCompassConnectionState(t *testing.T, expectedState v1alpha1.Connectio
 	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, expectedState, connectedConnection.Status.State)
+}
+
+func assertConnectionStatusSet(t *testing.T) {
+	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	require.NoError(t, err)
+	require.NotNil(t, connectedConnection.Status.ConnectionStatus)
+	assert.NotEmpty(t, connectedConnection.Status.ConnectionStatus)
+	assert.NotEmpty(t, connectedConnection.Status.ConnectionStatus.CertificateStatus)
+}
+
+func assertCertificateRenewed(t *testing.T) {
+	connectedConnection, err := compassConnectionCRClient.Get(compassConnectionName, v1.GetOptions{})
+	require.NoError(t, err)
+	require.NotNil(t, connectedConnection.Status.ConnectionStatus)
+	assert.NotEmpty(t, connectedConnection.Status.ConnectionStatus.CertificateStatus)
+	assert.True(t, connectedConnection.Status.ConnectionStatus.Established.Unix() < connectedConnection.Status.ConnectionStatus.Renewed.Unix())
 }
 
 func clientsProviderMock(configClient *directorMocks.ConfigClient, connectorTokensClient, connectorCertsClient *connectorMocks.Client) *compassMocks.ClientsProvider {

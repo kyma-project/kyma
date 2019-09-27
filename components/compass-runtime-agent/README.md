@@ -25,7 +25,7 @@ To start the Compass Runtime Agent, run this command:
 ## Parameters and environment variables
 
 The Compass Runtime Agent uses these environment variables:
-- **APP_CONFIG_FILE** specifies the path to the configuration file.
+- **APP_CONNECTION_CONFIG_MAP** specifies the Namespace and the Name of the Config Map containing Runtime Agent Configuration. 
 - **APP_CONTROLLER_SYNC_PERIOD** specifies the time period between resynchronizing existing resources.
 - **APP_MINIMAL_COMPASS_SYNC_TIME** specifies the minimal time between synchronizing the configuration.
 - **APP_CERT_VALIDITY_RENEWAL_THRESHOLD** specifies when the certificate must be renewed based on the remaining validity time of the current certificate. 
