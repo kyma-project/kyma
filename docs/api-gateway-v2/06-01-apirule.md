@@ -13,7 +13,7 @@ kubectl get crd apirule.gateway.kyma-project.io -o yaml
 
 This is a sample custom resource (CR) that the API Gateway Controller listens for to expose a service. This example has the **rules** section specified which makes the API Gateway Controller create an Oathkeeper Access Rule for the service.
 
-```
+```yaml
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
@@ -64,7 +64,7 @@ When you fetch an existing APIRule CR, the system adds the **status** section wh
 
 ### Status codes
 
-These are the status codes used to describe the Virtual Services and Oatheeper Access Rules:
+These are the status codes used to describe the Virtual Services and Oathkeeper Access Rules:
 
 | Code   |  Description |
 |---|---|

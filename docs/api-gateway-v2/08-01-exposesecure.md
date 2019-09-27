@@ -3,7 +3,7 @@ title: Expose and secure a service
 type: Tutorials
 ---
 
-This tutorial shows you how to expose and secure services or lambda functions using the API Gateway Controller. The controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses an OAuth2 client registered through the Hydra Maester controller.
+This tutorial shows how to expose and secure services or lambda functions using the API Gateway Controller. The controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses an OAuth2 client registered through the Hydra Maester controller.
 
 The tutorial comes with a sample HttpBin service deployment and a sample lambda function.
 
@@ -218,7 +218,7 @@ Follow the instructions in the tabs to call the secured service or lambda functi
   curl -ik -X POST https://httpbin-proxy.$DOMAIN/post -d "test data" -H "Authorization: bearer $ACCESS_TOKEN_WRITE"
   ```
 
-These calls return a code `200` response. If you call the service without a token, you get a code `401` response. If you call the service or its secured endpoint with a token with the wrong scope, you get the code `403` response.
+These calls return the code `200` response. If you call the service without a token, you get the code `401` response. If you call the service or its secured endpoint with a token with the wrong scope, you get the code `403` response.
 
   </details>
 
@@ -233,7 +233,7 @@ Send a `GET` request with a token with the "read" scope to the lambda function:
   curl -ik https://lambda-proxy.$DOMAIN/lambda -H "Authorization: bearer $ACCESS_TOKEN_READ"
   ```
 
-This call returns a code `200` response. If you call the lambda function without a token, you get a code `401` response. If you call the lambda function with a token with the wrong scope, you get the code `403` response.
+This call returns the code `200` response. If you call the lambda function without a token, you get the code `401` response. If you call the lambda function with a token with the wrong scope, you get the code `403` response.
 
   </details>
 </div>
