@@ -59,7 +59,7 @@ The tutorial comes with a sample HttpBin service deployment and a sample lambda 
   export ENCODED_CREDENTIALS=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
   ```
 
-5. Get tokens to interact with secured resources:
+5. Get tokens to interact with secured resources using client credentials flow:
 
 <div tabs>
   <details>
@@ -102,7 +102,7 @@ The tutorial comes with a sample HttpBin service deployment and a sample lambda 
 
 ## Deploy, expose, and secure the sample resources
 
-Follow the instructions in the tabs to deploy an instance of the HttpBin service or a sample lambda function, expose them, and secure them with Oathkeeper rules.
+Follow the instructions in the tabs to deploy an instance of the HttpBin service or a sample lambda function, expose them, and secure them with Oauth2 scopes.
 
 <div tabs>
 
