@@ -2,8 +2,9 @@ package runtimeagent
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/oauth"
 	"testing"
+
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/oauth"
 
 	"k8s.io/apimachinery/pkg/labels"
 
