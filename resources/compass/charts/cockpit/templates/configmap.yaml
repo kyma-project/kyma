@@ -12,4 +12,10 @@ data:
       graphqlApiUrl: 'https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/director/graphql',
       tenants: '{{ .Values.global.defaultTenant }} {{ .Values.global.tenants }}',
       defaultTenant: '{{ .Values.global.defaultTenant }}',
+      domain: '{{ .Values.global.ingress.domainName }}'
+      auth: {
+        authority: 'https://dex.{{ .Values.global.ingress.domainName }}',
+        client_id: 'compass-ui',
+        scope: 'audience:server:client_id:compass-ui openid profile email groups',
+      }
     };
