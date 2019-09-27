@@ -25,9 +25,9 @@ If you call a registered service and receive an error, follow these steps to det
 
     If Access Service does not exist, run this command to deregister the service you tried to call:
 
-    <div tabs name="deregistration">
+    <div tabs name="deregistration" group="error-when-calling-a-registered-service">
       <details>
-      <summary>
+      <summary label="with-a-trusted-certificate">
       With a trusted certificate
       </summary>
 
@@ -36,7 +36,7 @@ If you call a registered service and receive an error, follow these steps to det
       ```
       </details>
       <details>
-      <summary>
+      <summary label="without-a-trusted-certificate">
       Without a trusted certificate
       </summary>
 
@@ -55,9 +55,9 @@ If you call a registered service and receive an error, follow these steps to det
     If your call reaches the Application Gateway and the Access Service exists, but you still receive an error, check if the API URL in the service definition matches the API URL of the actual service you are trying to call.  
     To check the target URL of the API, fetch the Service definition from Application Registry:
 
-    <div tabs name="verification">
+    <div tabs name="verification" group="error-when-calling-a-registered-service">
       <details>
-      <summary>
+      <summary label="with-a-trusted-certificate">
       With a trusted certificate
       </summary>
 
@@ -66,7 +66,7 @@ If you call a registered service and receive an error, follow these steps to det
       ```
       </details>
       <details>
-      <summary>
+      <summary label="without-a-trusted-certificate">
       Without a trusted certificate
       </summary>
 

@@ -347,7 +347,7 @@ Get the TLS certificate:
 
 >**TIP:** An example config map is available [here](./assets/owndomain-overrides.yaml).
 
-</details>
+  </details>
   <details>
   <summary label="AKS">
   AKS
@@ -448,7 +448,7 @@ kubectl -n kyma-installer logs -l 'name=kyma-installer'
 
 ## Configure DNS for the cluster load balancer
 
-<div tabs name="configure-dns" group="use-your-domain">
+<div tabs name="configure-dns" group="use-your-own-domain">
   <details>
   <summary label="GKE">
   GKE
