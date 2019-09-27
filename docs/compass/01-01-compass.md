@@ -13,4 +13,4 @@ These are the functionalities that Compass provides:
 - Communicate the configuration changes to applications and Runtimes
 - Establish a trusted connection between applications and Runtimes
 
-Compass itself does not store applications' or Runtimes' business logic and does not participate in any business flow. In case of any connection error, the applications and Runtimes workflow does not break and there is only a disruption in transmitting a new configuration.
+Compass itself does not store applications' or Runtimes' business logic and does not participate in any business flow. In case the cluster with Compass is down, the applications and Runtimes flow still works and there is only a disruption in transmitting a new configuration.
