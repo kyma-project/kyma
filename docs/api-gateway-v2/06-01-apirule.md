@@ -29,10 +29,9 @@ spec:
       methods: ["GET"]
       mutators: []
       accessStrategy:
-        - handler: jwt
+        - handler: oauth2_introspection
           config:
-            trusted_issuers: ["http://dex.kyma.local"]
-            required_scope: ["foo", "bar"]
+            required_scope: ["read"]
 
 ```
 

@@ -5,7 +5,7 @@ type: Tutorials
 
 This tutorial shows you how to expose and secure services or lambda functions using the API Gateway Controller. The controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses an OAuth2 client registered through the Hydra Maester controller.
 
-The tutorial comes with a sample HttpBin service deployment and a sample lambda function. 
+The tutorial comes with a sample HttpBin service deployment and a sample lambda function.
 
 ## Register an OAuth2 client and get tokens
 
@@ -158,10 +158,10 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
   Secure a lambda function
   </summary>
 
-1. Create a lambda function using the supplied code:
+1. Create a lambda function using the [supplied code](./assets/lambda.yaml):
 
   ```
-  kubectl apply -f lambda.yaml
+  kubectl apply -f ./assets/lambda.yaml
   ```
 
 2. Expose the lambda function and secure it by creating an APIRule CR:

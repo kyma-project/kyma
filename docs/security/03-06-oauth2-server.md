@@ -83,16 +83,18 @@ Run this command to get the credentials of the registered OAuth2 client:
 kubectl get secret -n {CLIENT_NAMESPACE} {NAME_OF_KUBERNETES_SECRET} -o yaml
 ```
 
-### Update the OAuth2 client secret
+### Update the OAuth2 client credentials
 
-Follow these steps to change the client secret of a registered OAuth2 client:
+If the credentials of your OAuth2 client are compromised, follow these steps to change them to a new pair:
 
-1. Create a new Kubernetes Secret with the ID of the client you want to update and the new client secret.
+1. Create a new Kubernetes Secret with a new client ID and client secret.
 2. Edit the instance of the client's corresponding `oauth2clients.hydra.ory.sh/v1alpha1` CR by replacing the value of the **SecretName** property with the name of the newly created Secret.
+
+>**TIP:** When you complete these steps, remember to delete the Secret that stores the old client credentials.
 
 ## OAuth2 server in action
 
-After you register an OAuth2 client, go to [this](https://github.com/kyma-incubator/examples/tree/master/ory-hydra/scenarios/client-credentials) Kyma Incubator repository to try a Client Credentials Grant example that showcases the integration.
+To see the OAuth2 server in action, complete [this](/components/api-gateway-v2/#tutorials-tutorials) tutorial which shows you how to expose a service, secure it with OAuth2 tokens, and interact with it using the registered client.  
 
 You can also interact with the OAuth2 server using its REST API. Read the official [ORY documentation](https://www.ory.sh/docs/hydra/sdk/api) to learn more about the available endpoints.
 

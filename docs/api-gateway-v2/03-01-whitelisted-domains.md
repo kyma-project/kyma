@@ -3,7 +3,7 @@ title: Whitelisted domains in the API Gateway Controller
 type: Details
 ---
 
-The API Gateway Controller uses a whitelist of domains for which it allows to expose services. Every time a user creates a new APIRule custom resource (CR) for a service, the API Gateway Controller checks the domain of the service specified in the CR against the whitelist. If the domain of the service matches a whitelisted entry, the API Gateway Controller creates a Virtual Service and Oathkeeper Access Rules for the service accoriding to the details specified in the CR. If the domain is not whitelisted, the Controller doesn't create either a Virtual Service or Oathkeeper Access Rules and, as a result, doesn't expose the service.
+The API Gateway Controller uses a whitelist of domains for which it allows to expose services. Every time a user creates a new APIRule custom resource (CR) for a service, the API Gateway Controller checks the domain of the service specified in the CR against the whitelist. If the domain of the service matches a whitelisted entry, the API Gateway Controller creates a Virtual Service and Oathkeeper Access Rules for the service according to the details specified in the CR. If the domain is not whitelisted, the Controller doesn't create either a Virtual Service or Oathkeeper Access Rules and, as a result, doesn't expose the service.
 
 If the domain doesn't match the whitelist, the API Gateway Controller sets an appropriate validation status on the APIRule CR created for that service.
 
