@@ -131,7 +131,7 @@ func TestResourceQuotaService_ListPods(t *testing.T) {
 
 	client := fake.NewSimpleClientset(po1, po2, po3, po4)
 
-	svc := k8s.NewResourceQuotaService(nil, nil, nil, client.Core())
+	svc := k8s.NewResourceQuotaService(nil, nil, nil, client.CoreV1())
 
 	// WHEN
 	result, err := svc.ListPods("prod", labels)

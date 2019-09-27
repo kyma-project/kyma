@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	api "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	api "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -191,8 +191,8 @@ func fixBinding(conditionType api.ServiceBindingConditionType) *api.ServiceBindi
 			Namespace: "production",
 		},
 		Spec: api.ServiceBindingSpec{
-			ServiceInstanceRef: api.LocalObjectReference{Name: "instance"},
-			SecretName:         "secret-name",
+			InstanceRef: api.LocalObjectReference{Name: "instance"},
+			SecretName:  "secret-name",
 			Parameters: &runtime.RawExtension{
 				Raw: []byte(`{"json":"true"}`),
 			},

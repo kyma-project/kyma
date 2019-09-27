@@ -3,6 +3,7 @@ package servicecatalog_test
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"testing"
 	"time"
@@ -29,33 +30,48 @@ import (
 )
 
 const (
-	helmBrokerURLEnvName        = "HELM_BROKER_URL"
-	applicationBrokerURLEnvName = "APPLICATION_BROKER_URL"
+	helmBrokerURLEnvName                = "HELM_BROKER_URL"
+	applicationBrokerURLEnvName         = "APPLICATION_BROKER_URL"
+	istioAuthorizationRuleEnabledEnvVar = "BROKER_ISTIO_RBAC_ENABLED"
 
 	addonId       = "a54abe18-0a84-22e9-ab34-d663bbce3d88"
 	addonsRepoURL = "https://github.com/kyma-project/bundles/releases/download/latest/index-acc-testing.yaml"
 )
 
 func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
-	// TODO: remove skipping the test if issue https://github.com/kyma-project/kyma/issues/5375 will be fixed
-	t.Skip("Test skipped due to istio rbac rules issue.")
+	if !(os.Getenv(istioAuthorizationRuleEnabledEnvVar) == "true") {
+		t.Skipf("Test skipped due to %s environment variable value.", istioAuthorizationRuleEnabledEnvVar)
+	}
+	type brokerInfo struct {
+		url           string
+		labelSelector string
+	}
 
-	for testName, brokerURL := range map[string]string{
-		"Helm Broker":        os.Getenv(helmBrokerURLEnvName),
-		"Application Broker": os.Getenv(applicationBrokerURLEnvName),
+	for testName, broker := range map[string]brokerInfo{
+		"Helm Broker":        {url: os.Getenv(helmBrokerURLEnvName), labelSelector: "app=helm-broker"},
+		"Application Broker": {url: os.Getenv(applicationBrokerURLEnvName), labelSelector: "app=application-broker"},
 		// "<next broker>": os.Getenv("<broker url env name>"),
 	} {
 		t.Run(testName, func(t *testing.T) {
-			repeat.FuncAtMost(t, func() error {
-				isForbidden, err := isCatalogForbidden(brokerURL)
+			err := repeat.FuncAtMost(func() error {
+				isForbidden, statusCode, err := isCatalogForbidden(broker.url)
 				if err != nil {
 					return errors.Wrap(err, "while getting catalog")
 				}
 				if !isForbidden {
-					return fmt.Errorf("%s catalog response must be forbidden", testName)
+					return fmt.Errorf("%s catalog response must be forbidden, status code: %d", testName, statusCode)
 				}
 				return nil
 			}, time.Minute)
+			assert.NoError(t, err)
+
+			if err != nil || os.Getenv("DUMP_ISTIO_CONFIG") == "true" {
+				u, err := url.Parse(broker.url)
+				require.NoError(t, err)
+
+				dumpIstioConfig(t, u.Host, broker.labelSelector)
+
+			}
 		})
 	}
 }
@@ -108,10 +124,10 @@ func TestHelmBrokerAddonsConfiguration(t *testing.T) {
 	}()
 
 	// then
-	repeat.FuncAtMost(t, func() error {
+	repeat.AssertFuncAtMost(t, func() error {
 		_, err := scClient.ServicecatalogV1beta1().ServiceClasses(namespace).Get(addonId, metav1.GetOptions{})
 		return err
-	}, time.Second*10)
+	}, time.Second*20)
 }
 
 func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
@@ -149,10 +165,10 @@ func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
 	}()
 
 	// then
-	repeat.FuncAtMost(t, func() error {
+	repeat.AssertFuncAtMost(t, func() error {
 		_, err := scClient.ServicecatalogV1beta1().ClusterServiceClasses().Get(addonId, metav1.GetOptions{})
 		return err
-	}, time.Second*10)
+	}, time.Second*20)
 }
 
 func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {
@@ -197,7 +213,7 @@ func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {
 	assert.NoError(t, err)
 
 	t.Log("Assert namespace is removed")
-	repeat.FuncAtMost(t, func() error {
+	repeat.AssertFuncAtMost(t, func() error {
 		_, err := k8sClient.Namespaces().Get(namespace, metav1.GetOptions{})
 		if apimerr.IsNotFound(err) {
 			return nil

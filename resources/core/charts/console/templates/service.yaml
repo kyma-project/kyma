@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ template "fullname" . }}
   annotations:
-    "auth.istio.io/{{ .Values.service.externalPort }}": NONE  
+    "auth.istio.io/{{ .Values.console.service.externalPort }}": NONE
   labels:
     app: core-{{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -11,9 +11,9 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   ports:
-    - port: {{ .Values.service.externalPort }}
-      name: http2
-      targetPort: {{ .Values.service.internalPort }}      
+    - port: {{ .Values.console.service.externalPort }}
+      name: http2-console
+      targetPort: {{ .Values.console.service.internalPort }}
   selector:
     app: core-{{ template "name" . }}
     release: {{ .Release.Name }}

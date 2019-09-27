@@ -60,7 +60,7 @@ EOF
 
 2. Check the status of custom resources:
 
-```
+```bash
 kubectl get clusterdocstopics
 ```
 
@@ -74,13 +74,13 @@ prometheus-guides                      Ready   59s
 
 If a given custom resource is in the `Ready` phase and you want to get details of the created ClusterAssets, such as document names and the location of Minio buckets, run this command:
 
-```
+```bash
 kubectl get clusterasset -o yaml -l cms.kyma-project.io/docs-topic=prometheus-concepts
 ```
 
 The command lists details of the ClusterAsset created by the **prometheus-concepts** custom resource:
 
-```
+```yaml
 apiVersion: v1
 items:
 - apiVersion: assetstore.kyma-project.io/v1alpha2
@@ -151,7 +151,8 @@ metadata:
 ```
 
 In the **status** section of the ClusterAsset, you can see details of all documents and **baseUrl** with their location in Minio:
-```
+
+```yaml
 status:
   assetRef:
     baseUrl: https://minio.kyma.local/cms-public-1b7mtf1de5ost-1b7mtf1h187r7/prometheus-concepts-docs-markdown-1b7mu6bmkmse4
@@ -174,13 +175,13 @@ If you apply the ClusterDocsTopic custom resource but its status stays `Pending`
 
 This command lists details of the `prometheus-concepts` ClusterDocsTopic:
 
-```
+```bash
 kubectl get clusterasset -o yaml -l cms.kyma-project.io/docs-topic=prometheus-concepts
 ```
 
 See the status details sample:
 
-```
+```yaml
 status:
   phase: Failed
   reason: ValidationFailed
@@ -189,6 +190,6 @@ status:
 
 You can also analyze logs of the Asset Store Controller Manager:
 
-```
+```bash
 kubectl -n kyma-system logs -l 'app=asset-store-controller-manager'
 ```
