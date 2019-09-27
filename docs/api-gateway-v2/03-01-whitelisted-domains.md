@@ -7,6 +7,6 @@ The API Gateway Controller uses a whitelist of domains for which it allows to ex
 
 If the domain doesn't match the whitelist, the API Gateway Controller sets an appropriate validation status on the APIRule CR created for that service.
 
->**TIP:** Read [this](#custom-resource-api-status-codes) document to learn more about the Api CR statuses.
+>**TIP:** Read [this](#custom-resource-api-rule-status-codes) document to learn more about the Api CR statuses.
 
 By default, the only whitelisted domain is the domain of the Kyma cluster.
