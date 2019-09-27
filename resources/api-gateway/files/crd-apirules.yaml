@@ -2,18 +2,18 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   creationTimestamp: null
-  name: gates.gateway.kyma-project.io
+  name: apirules.gateway.kyma-project.io
 spec:
   group: gateway.kyma-project.io
   names:
-    kind: Gate
-    plural: gates
+    kind: APIRule
+    plural: apirules
   scope: ""
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: Gate is the Schema for the apis Gate
+      description: APIRule is the Schema for the apis ApiRule
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -385,26 +385,60 @@ spec:
           type: object
         spec:
           properties:
-            auth:
-              description: Auth strategy to be used
-              properties:
-                config:
-                  description: Config configures the auth strategy. Configuration
-                    keys vary per strategy.
-                  type: object
-                name:
-                  enum:
-                  - JWT
-                  - OAUTH
-                  - PASSTHROUGH
-                  type: string
-              required:
-              - name
-              type: object
             gateway:
               description: Gateway to be used
               pattern: ^(?:[_a-z0-9](?:[_a-z0-9-]+[a-z0-9])?\.)+(?:[a-z](?:[a-z0-9-]+[a-z0-9])?)?$
               type: string
+            rules:
+              description: Paths represents collection of Path to secure
+              items:
+                properties:
+                  accessStrategies:
+                    description: Set of access strategies for a single path
+                    items:
+                      properties:
+                        config:
+                          description: Config configures the handler. Configuration
+                            keys vary per handler.
+                          type: object
+                        handler:
+                          description: Name is the name of a handler
+                          type: string
+                      required:
+                      - handler
+                      type: object
+                    minItems: 1
+                    type: array
+                  methods:
+                    description: Set of allowed HTTP methods
+                    items:
+                      type: string
+                    type: array
+                  mutators:
+                    description: Mutators to be used
+                    items:
+                      properties:
+                        config:
+                          description: Config configures the handler. Configuration
+                            keys vary per handler.
+                          type: object
+                        handler:
+                          description: Name is the name of a handler
+                          type: string
+                      required:
+                      - handler
+                      type: object
+                    type: array
+                  path:
+                    description: Path to be exposed
+                    pattern: ^/([0-9a-zA-Z./*]+)
+                    type: string
+                required:
+                - path
+                - accessStrategies
+                type: object
+              minItems: 1
+              type: array
             service:
               description: Definition of the service to expose
               properties:
@@ -424,7 +458,7 @@ spec:
                 port:
                   description: Port of the service to expose
                   format: int32
-                  maximum: 99999
+                  maximum: 65535
                   minimum: 1
                   type: integer
               required:
@@ -434,12 +468,11 @@ spec:
               type: object
           required:
           - service
-          - auth
           - gateway
           type: object
         status:
           properties:
-            GateStatus:
+            APIRuleStatus:
               properties:
                 code:
                   type: string
@@ -459,13 +492,6 @@ spec:
             observedGeneration:
               format: int64
               type: integer
-            policyStatus:
-              properties:
-                code:
-                  type: string
-                desc:
-                  type: string
-              type: object
             virtualServiceStatus:
               properties:
                 code:
@@ -476,7 +502,7 @@ spec:
           type: object
       type: object
   versions:
-  - name: v2alpha1
+  - name: v1alpha1
     served: true
     storage: true
 status:
