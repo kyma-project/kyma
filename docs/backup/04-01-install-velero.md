@@ -21,7 +21,7 @@ Follow the instructions to set up Velero:
 2. Override the default configuration by creating a Secret containing the [required parameters](/components/backup/#configuration-configuration) for a chosen provider. 
 
     See the examples of such Secrets:
-    
+
     >**NOTE**: The values are provided in plain text only for illustrative purposes. Remember to set them as base64-encoded strings. For details on Kyma overrides, see the [this](/root/kyma/#configuration-helm-overrides-for-kyma-installation) document.
 
     <div tabs name="override-configuration">
@@ -97,7 +97,7 @@ Follow the instructions to set up Velero:
                         AZURE_RESOURCE_GROUP=my-resource-group
       ```
 
-      >**NOTE:** For details on configuring and installing Velero in Azure,  see [this](https://velero.io/docs/v1.0.0/azure-config/) document.
+      >**NOTE:** For details on configuring and installing Velero in Azure, see [this](https://velero.io/docs/v1.0.0/azure-config/) document.
         
       </details>
     </div>
