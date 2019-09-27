@@ -13,19 +13,19 @@ The tutorial comes with a sample HttpBin service deployment and a sample lambda 
 
   - The name of your client and the Secret which stores the client credentials:
 
-    ```
+    ```shell
     export CLIENT_NAME={YOUR_CLIENT_NAME}
     ```
 
   - The Namespace in which you want to create the client and the Secret that stores its credentials:
 
-    ```
+    ```shell
     export CLIENT_NAMESPACE={YOUR_CLIENT_NAMESPACE}
     ```
 
   - The domain of your cluster:
 
-    ```
+    ```shell
     export DOMAIN={CLUSTER_DOMAIN}
     ```
 
@@ -48,14 +48,14 @@ The tutorial comes with a sample HttpBin service deployment and a sample lambda 
 
 3. Export the credentials of the created client as environment variables. Run:
 
-  ```
+  ```shell
   export CLIENT_ID="$(kubectl get secret -n $CLIENT_NAMESPACE $CLIENT_NAME -o jsonpath='{.data.client_id}' | base64 --decode)"
   export CLIENT_SECRET="$(kubectl get secret -n $CLIENT_NAMESPACE $CLIENT_NAME -o jsonpath='{.data.client_secret}' | base64 --decode)"
   ```
 
 4. Encode your client credentials and export them as an environment variable:
 
-  ```
+  ```shell
   export ENCODED_CREDENTIALS=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
   ```
 
@@ -69,13 +69,13 @@ The tutorial comes with a sample HttpBin service deployment and a sample lambda 
 
   1. Get the token:
 
-      ```
+      ```shell
       curl -ik -X POST "https://oauth2.$DOMAIN/oauth2/token" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "grant_type=client_credentials" -F "scope=read"
       ```
 
   2. Export the issued token as an environment variable:
 
-      ```
+      ```shell
       export ACCESS_TOKEN_READ={ISSUED_READ_TOKEN}
       ```
 
@@ -87,13 +87,13 @@ The tutorial comes with a sample HttpBin service deployment and a sample lambda 
 
   1. Get the token:
 
-      ```
+      ```shell
       curl -ik -X POST "https://oauth2.$DOMAIN/oauth2/token" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "grant_type=client_credentials" -F "scope=write"
       ```
 
   2. Export the issued token as an environment variable:
 
-      ```
+      ```shell
       export ACCESS_TOKEN_WRITE={ISSUED_WRITE_TOKEN}
       ```
 
@@ -113,13 +113,13 @@ Follow the instructions in the tabs to deploy an instance of the HttpBin service
 
 1. Deploy an instance of the HttpBin service:
 
-  ```
+  ```shell
   kubectl apply -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
   ```
 
 2. Expose the service and secure it by creating an APIRule CR:
 
-  ```
+  ```shell
   cat <<EOF | kubectl apply -f -
   apiVersion: gateway.kyma-project.io/v1alpha1
   kind: APIRule
@@ -160,13 +160,13 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
 
 1. Create a lambda function using the [supplied code](./assets/lambda.yaml):
 
-  ```
+  ```shell
   kubectl apply -f ./assets/lambda.yaml
   ```
 
 2. Expose the lambda function and secure it by creating an APIRule CR:
 
-  ```
+  ```shell
   cat <<EOF | kubectl apply -f -
   apiVersion: gateway.kyma-project.io/v1alpha1
   kind: APIRule
@@ -208,13 +208,13 @@ Follow the instructions in the tabs to call the secured service or lambda functi
 
 1. Send a `GET` request with a token that has the "read" scope to the HttpBin service:
 
-  ```
+  ```shell
   curl -ik -X GET https://httpbin-proxy.$DOMAIN/headers -H "Authorization: Bearer $ACCESS_TOKEN_READ"
   ```
 
 2. Send a `POST` request with a token that has the "write" scope to the HttpBin's `/post` endpoint:
 
-  ```
+  ```shell
   curl -ik -X POST https://httpbin-proxy.$DOMAIN/post -d "test data" -H "Authorization: bearer $ACCESS_TOKEN_WRITE"
   ```
 
@@ -229,7 +229,7 @@ These calls return the code `200` response. If you call the service without a to
 
 Send a `GET` request with a token that has the "read" scope to the lambda function:
 
-  ```
+  ```shell
   curl -ik https://lambda-proxy.$DOMAIN/lambda -H "Authorization: bearer $ACCESS_TOKEN_READ"
   ```
 
