@@ -3,7 +3,7 @@ title: CMS AsyncAPI Service
 type: Metrics
 ---
 
-This table shows the CMS AsyncAPI Service custom matrics, their descriptions, and types.
+This table shows the CMS AsyncAPI Service custom matrics, their types, and descriptions.
 
 | Name | Type | Description |
 |------|-------------|------|
