@@ -271,7 +271,6 @@ func SetNotReadySubscription(ctx context.Context, client runtimeClient.Client, s
 // IsSubscriptionActivated checks if the subscription is active or not.
 func IsSubscriptionActivated(sub *subApis.Subscription) bool {
 	eventActivatedCondition := subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue}
-	//channelReadyCondition := subApis.SubscriptionCondition{Type: subApis.ChannelReady, Status: subApis.ConditionTrue}
 	knSubReadyCondition := subApis.SubscriptionCondition{Type: subApis.SubscriptionReady, Status: subApis.ConditionTrue}
 	return sub.HasCondition(eventActivatedCondition) && sub.HasCondition(knSubReadyCondition)
 
