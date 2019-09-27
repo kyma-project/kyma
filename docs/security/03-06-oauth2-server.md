@@ -21,8 +21,6 @@ To interact with the Kyma OAuth2 server, you must register an OAuth2 client. To 
 For each client, you can provide client ID and secret. If you don't provide the credentials, Hydra generates a random client ID and secret pair.
 Client credentials are stored as Kubernetes Secret in the same Namespace as the CR instances of the corresponding clients.
 
->**NOTE:** By default, you can create clients only in the `kyma-system` and `default` Namespaces. Read [this](https://github.com/ory/k8s/blob/master/docs/helm/hydra-maester.md#configuration) document to learn how to enable creating clients in other Namespaces.
-
 ### Use your own credentials
 
 1. Create a Kubernetes Secret that contains the client ID and secret you want to use to create a client:
