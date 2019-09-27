@@ -19,17 +19,10 @@ DOMAIN=$(kubectl -n compass-system get vs compass-gateway -o 'jsonpath={.spec.ho
 cat <<EOF | kubectl -n compass-system apply -f -
 apiVersion: v1
 data:
-  config.json: |
-    {
-      "connectionConfig": {
-        "connectorUrl": "https://${DOMAIN}/connector/graphql",
-        "token": "${TOKEN}"
-      },
-      "runtimeConfig": {
-        "runtimeId": "${RUNTIME_ID}",
-        "tenant": "3e64ebae-38b5-46a0-b1ed-9ccee153a0ae"
-      }
-    }
+  CONNECTOR_URL: https://${DOMAIN}/connector/graphql
+  RUNTIME_ID: ${RUNTIME_ID}
+  TENANT: 3e64ebae-38b5-46a0-b1ed-9ccee153a0ae
+  TOKEN: ${TOKEN}
 kind: ConfigMap
 metadata:
   name: compass-agent-configuration
