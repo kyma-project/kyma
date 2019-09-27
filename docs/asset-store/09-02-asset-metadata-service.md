@@ -3,7 +3,7 @@ title: Asset Metadata Service
 type: Metrics
 ---
 
-This table shows the Asset Metadata Service custom matrics, their types, and descriptions.
+This table shows the Asset Metadata Service custom metrics, their types, and descriptions.
 
 | Name | Type | Description |
 |------|-------------|------|

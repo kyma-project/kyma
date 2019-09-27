@@ -3,7 +3,7 @@ title: Asset Upload Service
 type: Matrics
 ---
 
-This table shows the Asset Upload Service custom matrics, their types, and descriptions.
+This table shows the Asset Upload Service custom metrics, their types, and descriptions.
 
 | Name | Type | Decription |
 |------|-------------|------|
