@@ -24,7 +24,7 @@ config:
   oathkeeper:
     service: ory-oathkeeper-proxy.kyma-system.svc.cluster.local
     port: 4455
-  jwksURI: https://example.com/.well-known/jwks.json
+  jwksURI: http://dex-service.kyma-system.svc.cluster.local:5556/keys
   serviceBlackList:
     - kubernetes
     - istio-citadel
