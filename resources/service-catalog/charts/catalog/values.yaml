@@ -56,7 +56,8 @@ controllerManager:
       maxUnavailable: 0
   minReadySeconds: 1
   # annotations is a collection of annotations to add to the controllerManager pod.
-  annotations: {}
+  annotations:
+    sidecar.istio.io/inject: "true"
   # nodeSelector to apply to the controllerManager pods
   nodeSelector:
   # healthcheck configures the readiness and liveliness probes for the controllerManager pod.

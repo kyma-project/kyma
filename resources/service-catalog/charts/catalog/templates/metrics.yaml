@@ -2,7 +2,7 @@
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "fullname" . }}-controller-manager
 spec:
   peers:
   - mtls:

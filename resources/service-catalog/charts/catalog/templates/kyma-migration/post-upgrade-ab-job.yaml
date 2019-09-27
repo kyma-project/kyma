@@ -33,11 +33,15 @@ rules:
     resources: ["deployments"]
     verbs:     ["get", "list", "update"]
   - apiGroups: ["servicecatalog.k8s.io"]
-    resources: ["servicebindings"]
+    resources: ["serviceinstances"]
     verbs:     ["list"]
-  - apiGroups: ["servicecatalog.kyma-project.io"]
-    resources: ["servicebindingusages"]
+  - apiGroups: ["applicationconnector.kyma-project.io"]
+    resources: ["eventactivations"]
     verbs: ["list", "update"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "create", "update"]
+
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1

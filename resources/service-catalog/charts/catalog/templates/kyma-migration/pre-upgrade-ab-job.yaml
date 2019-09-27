@@ -39,7 +39,7 @@ rules:
     resources: ["eventactivations"]
     verbs: ["list", "update"]
   - apiGroups: [""]
-    resources: ["configmap"]
+    resources: ["configmaps"]
     verbs: ["get", "create", "update"]
 
 ---
