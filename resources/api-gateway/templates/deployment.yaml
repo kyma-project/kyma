@@ -38,7 +38,7 @@ spec:
             {{- with .Values.config.serviceBlackList }}
             - --service-blacklist={{ . | join ", " }}
             {{- end }}
-            {{- with .Values.config.domainWhiteList }}
+            {{- with .Values.global.ingress.domainName }}
             - --domain-whitelist={{ . | join ", " }}
             {{- end }}
           resources:
