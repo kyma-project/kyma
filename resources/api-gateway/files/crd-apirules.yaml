@@ -1,3 +1,5 @@
+
+---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -131,7 +133,7 @@ spec:
                           this object.
                         type: string
                     required:
-                    - name
+                      - name
                     type: object
                   type: array
                 result:
@@ -263,7 +265,7 @@ spec:
                       type: string
                   type: object
               required:
-              - pending
+                - pending
               type: object
             labels:
               additionalProperties:
@@ -356,10 +358,10 @@ spec:
                     description: 'UID of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#uids'
                     type: string
                 required:
-                - apiVersion
-                - kind
-                - name
-                - uid
+                  - apiVersion
+                  - kind
+                  - name
+                  - uid
                 type: object
               type: array
             resourceVersion:
@@ -405,7 +407,7 @@ spec:
                           description: Name is the name of a handler
                           type: string
                       required:
-                      - handler
+                        - handler
                       type: object
                     minItems: 1
                     type: array
@@ -426,7 +428,7 @@ spec:
                           description: Name is the name of a handler
                           type: string
                       required:
-                      - handler
+                        - handler
                       type: object
                     type: array
                   path:
@@ -434,8 +436,8 @@ spec:
                     pattern: ^/([0-9a-zA-Z./*]+)
                     type: string
                 required:
-                - path
-                - accessStrategies
+                  - path
+                  - accessStrategies
                 type: object
               minItems: 1
               type: array
@@ -450,7 +452,7 @@ spec:
                   description: URL on which the service will be visible
                   maxLength: 256
                   minLength: 3
-                  pattern: ^(?:[_a-z0-9](?:[_a-z0-9-]+[a-z0-9])?\.)+(?:[a-z](?:[a-z0-9-]+[a-z0-9])?)?$
+                  pattern: ^([a-zA-Z0-9][a-zA-Z0-9-_]*\.)*[a-zA-Z0-9]*[a-zA-Z0-9-_]*[[a-zA-Z0-9]+$
                   type: string
                 name:
                   description: Name of the service
@@ -462,13 +464,13 @@ spec:
                   minimum: 1
                   type: integer
               required:
-              - name
-              - port
-              - host
+                - name
+                - port
+                - host
               type: object
           required:
-          - service
-          - gateway
+            - service
+            - gateway
           type: object
         status:
           properties:
@@ -502,9 +504,9 @@ spec:
           type: object
       type: object
   versions:
-  - name: v1alpha1
-    served: true
-    storage: true
+    - name: v1alpha1
+      served: true
+      storage: true
 status:
   acceptedNames:
     kind: ""
