@@ -1,1 +1,23 @@
 ---
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+    name: {{ .Chart.Name }}
+    labels:
+        app: {{ .Chart.Name }}-tests
+        app.kubernetes.io/name: {{ .Chart.Name }}-tests
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+    disableConcurrency: false
+    template:
+        metadata:
+            annotations:
+                sidecar.istio.io/inject: "false"
+        spec:
+            serviceAccount: {{ .Chart.Name }}-tests
+            containers:
+                - name: tests
+                  image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_tekton_acceptance }}tekton-pipelines-acceptance-tests:{{ .Values.global.test_tekton_acceptance.version }}"
+            restartPolicy: Never
