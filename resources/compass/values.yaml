@@ -34,10 +34,10 @@ global:
         version: "d07b0a01"
       connector:
         dir: develop/
-        version: "1adfa459"
+        version: "67535547"
       provisioner:
         dir: develop/
-        version: "47b6dfb2"
+        version: "96714748"
 
   isLocalEnv: false
 
