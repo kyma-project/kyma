@@ -3,7 +3,6 @@ title: CMS Controller Manager
 type: Metrics
 ---
 
-
 Metrics for the CMS Controller Manager include:
 
 - default metrics instrumented by [kubebuilder](https://book.kubebuilder.io/)

@@ -12,7 +12,7 @@ This table shows the CMS AsyncAPI Service custom matrics, their types, and descr
 | `cms_services_handle_mutation_status_code` | counter | Specifies a number of different HTTP response status codes in a given time series. |
 | `cms_services_handle_mutation_status_code` | counter | Specifies a number of different HTTP response status codes in a given time series. |
 
-Apart from the custom mertrics, the CMS AsyncAPI Service also exposes:
+Apart from the custom metrics, the CMS AsyncAPI Service also exposes:
 
 - default metrics instrumented by [kubebuilder](https://book.kubebuilder.io/)
 - default Prometheus metrics for [Go applications](https://prometheus.io/docs/guides/go-application/#how-go-exposition-works)
