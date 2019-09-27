@@ -75,7 +75,7 @@ spec:
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-ext
           - containerPort: 9090
-            name: metrics-port
+            name: http-metrics
         securityContext:
           runAsUser: {{ .Values.deployment.runAsUser }}
       {{- if .Values.deployment.externalClusterLookup.enabled }}
