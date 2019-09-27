@@ -8,4 +8,4 @@ You can get the API specification of the Application Registry for a given versio
 curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/api.yaml
 ```
 
->**TIP:** For details on the Application Registry API specification, see [this file](./assets/metadataapi.yaml).
+>**TIP:** For details on the Application Registry API specification, see [this](./assets/metadataapi.yaml) file.
