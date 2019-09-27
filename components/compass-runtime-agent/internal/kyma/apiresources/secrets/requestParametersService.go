@@ -6,9 +6,9 @@ import (
 
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
+	"kyma-project.io/compass-runtime-agent/internal/apperrors"
+	"kyma-project.io/compass-runtime-agent/internal/k8sconsts"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 )
 
 const (

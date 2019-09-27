@@ -3,12 +3,12 @@ package applications
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	k8smocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts/mocks"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8smocks "kyma-project.io/compass-runtime-agent/internal/k8sconsts/mocks"
 )
 
 func TestConverter(t *testing.T) {

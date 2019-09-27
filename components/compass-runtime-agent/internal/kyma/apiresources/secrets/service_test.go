@@ -5,20 +5,20 @@ import (
 
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 
 	"github.com/stretchr/testify/mock"
 
-	strategyMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy/mocks"
+	strategyMocks "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy/mocks"
 
-	k8smocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts/mocks"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/mocks"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 	"github.com/stretchr/testify/assert"
+	k8smocks "kyma-project.io/compass-runtime-agent/internal/k8sconsts/mocks"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/mocks"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 )
 
 const (
