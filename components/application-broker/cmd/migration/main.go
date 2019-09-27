@@ -66,19 +66,9 @@ func main() {
 	switch cfg.action {
 	case removeOwnerReference:
 		log.Info("Start removing owner reference from EventActivation")
-		cm := v1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      configMapNameForOwnerRef,
-				Namespace: manager.workingNS,
-			},
-			Data: map[string]string{},
+		if err = manager.ensureBackupConfigMapExists(); err != nil {
+			log.Fatalf("while ensuring that backup config map exists: %s", err)
 		}
-
-		_, err := manager.k8sClient.CoreV1().ConfigMaps(manager.workingNS).Create(&cm)
-		if err != nil {
-			log.Fatalf("failed during creating ConfigMap %s/%s : %s", manager.workingNS, configMapNameForOwnerRef, err)
-		}
-
 		migrationRequired, err := manager.isMigrationRequired(cfg.apiServerName, cfg.namespace)
 		if err != nil {
 			log.Fatalf("failed during assessing run process: %s", err)
@@ -250,6 +240,10 @@ func (sm *migrationManager) backupOwnerRefFromEventActivation(ea *v1alpha1.Event
 	}
 
 	cmCopy := cm.DeepCopy()
+	if cmCopy.Data == nil {
+		cmCopy.Data = map[string]string{}
+	}
+
 	cmCopy.Data[eventActivationKey(ea)] = instanceName
 
 	_, err = sm.k8sClient.CoreV1().ConfigMaps(sm.workingNS).Update(cm)
@@ -276,4 +270,28 @@ func serviceInstanceKey(ea *v1alpha1.EventActivation) (string, bool) {
 	}
 
 	return instanceName, true
+}
+
+func (sm *migrationManager) ensureBackupConfigMapExists() error {
+	_, err := sm.k8sClient.CoreV1().ConfigMaps(sm.workingNS).Get(configMapNameForOwnerRef, metav1.GetOptions{})
+	switch {
+	case err == nil:
+	case apiErr.IsNotFound(err):
+		cm := v1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      configMapNameForOwnerRef,
+				Namespace: sm.workingNS,
+			},
+			Data: map[string]string{},
+		}
+
+		_, err := sm.k8sClient.CoreV1().ConfigMaps(sm.workingNS).Create(&cm)
+		if err != nil {
+			return fmt.Errorf("while creating ConfigMap %s/%s : %s", sm.workingNS, configMapNameForOwnerRef, err)
+		}
+	default:
+		return fmt.Errorf("while getting ConfigMap %s/%s : %s", sm.workingNS, configMapNameForOwnerRef, err)
+	}
+
+	return nil
 }
