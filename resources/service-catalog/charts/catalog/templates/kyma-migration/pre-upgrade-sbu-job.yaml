@@ -55,17 +55,17 @@ metadata:
     helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
 subjects:
   - kind: ServiceAccount
-    name: upgrade-job-account
+    name: sbu-upgrade-job-account
     namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: upgrade-job-account
+  name: sbu-upgrade-job-account
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "fullname" . }}-pre-upgrade-job
+  name: {{ template "fullname" . }}-sbu-pre-upgrade-job
   labels:
     upgrade-job: "true"
     app: {{ template "fullname" . }}
@@ -86,13 +86,13 @@ spec:
         sidecar.istio.io/inject: "false"
       labels:
         upgrade-job: "true"
-        app: {{ template "fullname" . }}-pre-upgrade-job
+        app: {{ template "fullname" . }}-sbu-pre-upgrade-job
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
     spec:
       restartPolicy: Never
-      serviceAccountName: upgrade-job-account
+      serviceAccountName: sbu-upgrade-job-account
       containers:
         - name: sbu-upgrade-protector
           image: {{ .Values.migration.sbuImage }}

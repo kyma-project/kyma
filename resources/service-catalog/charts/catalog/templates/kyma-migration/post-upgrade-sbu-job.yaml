@@ -55,17 +55,17 @@ metadata:
     helm.sh/hook-delete-policy: hook-succeeded,before-hook-creation
 subjects:
   - kind: ServiceAccount
-    name: upgrade-job-account
+    name: sbu-upgrade-job-account
     namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: upgrade-job-account
+  name: sbu-upgrade-job-account
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "fullname" . }}-post-upgrade-job
+  name: {{ template "fullname" . }}-sbu-post-upgrade-job
   labels:
     app: {{ template "fullname" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -91,7 +91,7 @@ spec:
         heritage: "{{ .Release.Service }}"
     spec:
       restartPolicy: Never
-      serviceAccountName: upgrade-job-account
+      serviceAccountName: sbu-upgrade-job-account
       containers:
         - name: sbu-upgrade-protector
           image: {{ .Values.migration.sbuImage }}
