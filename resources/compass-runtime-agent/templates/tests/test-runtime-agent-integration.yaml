@@ -27,8 +27,8 @@ spec:
               name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
               optional: true
           env:
-          - name: DIRECTOR_URL
-          value: {{ .Values.compassRuntimeAgent.tests.director.url }}
+            - name: DIRECTOR_URL
+              value: {{ .Values.compassRuntimeAgent.tests.director.url }}
             - name: NAMESPACE
               value: {{ .Release.Namespace }}
             - name: INTEGRATION_NAMESPACE
