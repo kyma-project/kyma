@@ -10,15 +10,15 @@
   version = "v0.46.3"
 
 [[projects]]
-  digest = "1:c2d520d6035524b609322761ced15ab5ba3d47daa2d04d136a8e21b2b5b9cb98"
+  digest = "1:711cd11b4ae785822be831e4c5072963f6f8e32fef376d1796501e5b2a62b997"
   name = "github.com/99designs/gqlgen"
   packages = [
     "graphql",
     "graphql/introspection",
   ]
   pruneopts = "UT"
-  revision = "a7bc468ca1b184a5ce1b07ea331e0121fc56ae82"
-  version = "v0.9.3"
+  revision = "efb6efe06c6e4fc706440acebf6f81fff85f295c"
+  version = "v0.10.1"
 
 [[projects]]
   digest = "1:3b10c6fd33854dc41de2cf78b7bae105da94c2789b6fa5b9ac9e593ea43484ac"
@@ -196,7 +196,7 @@
     "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "1e4cd5462124d15259dd4ce66818c25f0c56b93f"
+  revision = "df4fefdaf5c1ca75e027e69bad1fb3e7c6cefcd7"
   source = "https://github.com/franpog859/kyma"
 
 [[projects]]
@@ -284,7 +284,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0334c6ad49c8b349607d6e44a978a6d309b44d13ff4b046d4815d68a348a5135"
+  digest = "1:c72812eff46e3f038674f00d9e043412d2bafd79bdbb4995075aa16b83445135"
   name = "golang.org/x/crypto"
   packages = [
     "pbkdf2",
@@ -292,7 +292,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "9ee001bba392397c76f100a2d5b13afc86f167f1"
+  revision = "cea2066c64117dea9cba47afc7c35e4d2299107d"
 
 [[projects]]
   branch = "master"
@@ -307,7 +307,7 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "1a5e07d1ff72da30f660d3c95b312a20be31173c"
+  revision = "c00fd9afed17cfdca9b3e1e3b8de7ef2b3f0347b"
 
 [[projects]]
   branch = "master"
@@ -325,14 +325,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f369a12d6d393e0de995fc012983d815dac4c6d13a692bbbf7b6deb5fe4c9ff9"
+  digest = "1:7711a885664a85941a1d9d339f7f12c742cd8f88def90e74f89805508cfca97f"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "0a153f010e6963173baba2306531d173aa843137"
+  revision = "c990c680b611ac1aeb7d8f2af94a825f98d69720"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -386,7 +386,7 @@
     "internal/semver",
   ]
   pruneopts = "UT"
-  revision = "5eefd052ad727afc5e2e7b034c752b9d3d902b3b"
+  revision = "69890759d905b86648703ac9ab3157fd923dbb34"
 
 [[projects]]
   digest = "1:066bca8a35b34227298f7f02ab5a4b2523dcea43ad72af4c69c3451e8fd8e56b"
@@ -404,8 +404,8 @@
     "urlfetch",
   ]
   pruneopts = "UT"
-  revision = "c71d63e301d75423acb410203c747cad31e9a5e7"
-  version = "v1.6.3"
+  revision = "bddb1f54ecfd64b1350fd2dd897fa11d426632bc"
+  version = "v1.6.4"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
