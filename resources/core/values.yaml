@@ -59,10 +59,10 @@ global:
     version: 6b4c356f
   console_backend_service:
     dir:
-    version: PR-5771
+    version: c5073264
   console_backend_service_test:
-    dir: pr/
-    version: PR-5551
+    dir:
+    version: 983a652c
   cluster_users_integration_tests:
     dir: develop/
     version: "d53509a0"
