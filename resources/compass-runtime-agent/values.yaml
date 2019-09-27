@@ -7,7 +7,7 @@ global:
       version: "PR-5729"
     runtimeAgentTests:
       dir: pr/
-      version: "PR-5625"
+      version: "PR-5782"
 
 compassRuntimeAgent:
   image:
@@ -46,3 +46,7 @@ compassRuntimeAgent:
     configApplicationWaitTime: 50
     proxyInvalidationWaitTime: 150
     graphqlLogs: false
+    oauth:
+      hydra:
+        publicUrl: http://ory-hydra-public.kyma-system:4444
+        adminUrl: http://ory-hydra-admin.kyma-system:4445

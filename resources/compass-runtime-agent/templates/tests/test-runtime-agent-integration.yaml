@@ -45,6 +45,10 @@ spec:
               value: "{{ .Values.compassRuntimeAgent.tests.graphqlLogs }}"
             - name: SCENARIO_LABEL
               value: "COMPASS_RUNTIME_AGENT_TESTS"
+            - name: HYDRA_PUBLIC_URL
+              value: {{ .Values.compassRuntimeAgent.tests.oauth.hydra.publicUrl }}
+            - name: HYDRA_ADMIN_URL
+              value: {{ .Values.compassRuntimeAgent.tests.oauth.hydra.adminUrl }}
           command:
           - "/bin/sh"
           args:
