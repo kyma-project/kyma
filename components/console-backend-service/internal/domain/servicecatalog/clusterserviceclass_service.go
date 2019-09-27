@@ -3,7 +3,7 @@ package servicecatalog
 import (
 	"fmt"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/tools/cache"
