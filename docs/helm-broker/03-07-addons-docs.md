@@ -13,9 +13,9 @@ Using the Helm Broker, you can provide documentation for your addon and display 
 
 To provide documentation for your addon, create the `docs` folder inside your addon's directory. Your `docs` folder must contain a [`meta.yaml`](#details-create-addons-docs-directory) file with metadata information about how documentation for the addon is uploaded. You can either provide your own documents or point to the external URL with the source documentation:
 
-<div tabs>
+<div tabs name="provide-documentation-for-your-addon" group="provide-documentation-for-your-addon">
   <details>
-  <summary>
+  <summary label="provide-your-own-documentation">
   Provide your own documentation
   </summary>
 
@@ -23,7 +23,7 @@ Store your documents and assets in the `docs` folder inside your addon's directo
 
   </details>
   <details>
-  <summary>
+  <summary label="use-external-documentation">
   Use external documentation
   </summary>
 
@@ -36,9 +36,9 @@ In the `meta.yaml` file, provide the **url** parameter with a value that points 
 
 To provide documentation for objects that appear after provisioning your addon, create the `docs.yaml` file inside the addon's chart. This file contains [ClusterDocsTopic](/components/headless-cms/#custom-resource-cluster-docs-topic) or [DocsTopic](/components/headless-cms/#custom-resource-docstopic) custom resources. Each ClusterDocsTopic or DocsTopic corresponds to a single object with the same ID as the name of the specified object. Your `docs.yaml` file can contain many ClusterDocsTopics or DocsTopics.
 
-<div tabs>
+<div tabs name="provide-documentation-for-objects" group="provide-documentation-for-your-addon">
   <details>
-  <summary>
+  <summary label="provide-your-own-documentation">
   Provide your own documentation
   </summary>
 
@@ -46,7 +46,7 @@ Store documentation for each object in the `docs/{object_name}` directory. In th
 
   </details>
   <details>
-  <summary>
+  <summary label="use-external-documentation">
   Use external documentation
   </summary>
 

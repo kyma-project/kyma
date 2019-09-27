@@ -33,6 +33,7 @@ You can add a component before and after installation.
 ### Installation from the release
 
 1. Download the [newest version](https://github.com/kyma-project/kyma/releases) of Kyma.
+
 2. Customize the installation by adding a component to the list in the installation file or removing the hash character (#) in front of the `name` and `namespace` entries. For example, to enable the Monitoring installation, add or unmark these entries:
     ```
     - name: "monitoring"
