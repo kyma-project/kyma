@@ -297,21 +297,6 @@ func updateSubscriptionsEventActivatedStatus(subs []*subApis.Subscription, condi
 	return updatedSubs
 }
 
-func updateSubscriptionChannelStatus(sub *subApis.Subscription, conditionStatus subApis.ConditionStatus, time CurrentTime) *subApis.Subscription {
-	t := time.GetCurrentTime()
-	var newCondition subApis.SubscriptionCondition
-	if conditionStatus == subApis.ConditionTrue {
-		newCondition = subApis.SubscriptionCondition{Type: subApis.ChannelReady, Status: subApis.ConditionTrue, LastTransitionTime: t}
-	} else {
-		newCondition = subApis.SubscriptionCondition{Type: subApis.ChannelReady, Status: subApis.ConditionFalse, LastTransitionTime: t}
-	}
-
-	if !sub.HasCondition(newCondition) {
-		sub = updateSubscriptionStatus(sub, subApis.ChannelReady, conditionStatus, "", time)
-	}
-	return sub
-}
-
 func updateSubscriptionKnSubscriptionStatus(sub *subApis.Subscription, conditionStatus subApis.ConditionStatus, time CurrentTime) *subApis.Subscription {
 	t := time.GetCurrentTime()
 	var newCondition subApis.SubscriptionCondition
