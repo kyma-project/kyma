@@ -32,7 +32,6 @@ spec:
         - handler: oauth2_introspection
           config:
             required_scope: ["read"]
-
 ```
 
 This table lists all the possible parameters of a given resource together with their descriptions:

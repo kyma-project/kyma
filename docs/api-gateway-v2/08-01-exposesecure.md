@@ -31,7 +31,7 @@ The tutorial comes with a sample HttpBin service deployment and a sample lambda 
 
 2. Create an OAuth2 client with `read` and `write` scopes. Run:
 
-  ```
+  ```shell
   cat <<EOF | kubectl apply -f -
   apiVersion: hydra.ory.sh/v1alpha1
   kind: OAuth2Client
@@ -206,13 +206,13 @@ Follow the instructions in the tabs to call the secured service or lambda functi
   Call secured endpoints of a service
   </summary>
 
-1. Send a `GET` request with a token with the "read" scope to the HttpBin service:
+1. Send a `GET` request with a token that has the "read" scope to the HttpBin service:
 
   ```
   curl -ik -X GET https://httpbin-proxy.$DOMAIN/headers -H "Authorization: Bearer $ACCESS_TOKEN_READ"
   ```
 
-2. Send a `POST` request with a token with the "write" scope to the HttpBin's `/post` endpoint:
+2. Send a `POST` request with a token that has the "write" scope to the HttpBin's `/post` endpoint:
 
   ```
   curl -ik -X POST https://httpbin-proxy.$DOMAIN/post -d "test data" -H "Authorization: bearer $ACCESS_TOKEN_WRITE"
@@ -227,7 +227,7 @@ These calls return the code `200` response. If you call the service without a to
   Call the secured lambda function
   </summary>
 
-Send a `GET` request with a token with the "read" scope to the lambda function:
+Send a `GET` request with a token that has the "read" scope to the lambda function:
 
   ```
   curl -ik https://lambda-proxy.$DOMAIN/lambda -H "Authorization: bearer $ACCESS_TOKEN_READ"
