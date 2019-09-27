@@ -130,7 +130,7 @@ spec:
                 RESPONSE_BODY=$(curl -k "${DIRECTOR_URL}" \
                     -H 'Content-Type: application/json' \
                     -H 'tenant: {{ .Values.global.defaultTenant }}' \
-                    -H 'authorization: "Bearer ${INTERNAL_TOKEN}"' \
+                    -H "authorization: Bearer ${INTERNAL_TOKEN}" \
                     --data-binary '{
                       "query":"mutation createRuntime {\n  result: createRuntime(\n    in: { name: \"kymaruntime\", description: \"Default Kyma runtime\" }\n  ) {\n    id\n  }\n}\n"
                     }')
@@ -141,7 +141,6 @@ spec:
 
                 TOKEN_RESPONSE=$(curl "${CONNECTOR_INTERNAL_URL}" \
                     -H 'Content-Type: application/json' \
-                    -H 'authorization: "Bearer ${INTERNAL_TOKEN}"' \
                     --data-binary '{
                       "query":"mutation generateRuntimeToken {\n  result: generateRuntimeToken(\n runtimeID: '\\\""${RUNTIME_ID}"\\\"' \n ) {\n   token\n  }\n}\n"
                     }')
