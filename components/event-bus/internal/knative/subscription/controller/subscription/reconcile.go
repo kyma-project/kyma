@@ -132,7 +132,6 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	knativeChannelLabels[util.SubscriptionSourceID] = subscription.SourceID
 	knativeChannelLabels[util.SubscriptionEventType] = subscription.EventType
 	knativeChannelLabels[util.SubscriptionEventTypeVersion] = subscription.EventTypeVersion
-	knativeChannelLabels[util.SubNs] = subscription.Namespace
 
 	if subscription.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is not being deleted, so if it does not have our finalizer,
