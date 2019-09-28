@@ -1,7 +1,6 @@
 # Default values for Service Catalog
 # service-catalog image to use
-#TODO: change that!
-image: awalach/service-catalog:crds
+image: quay.io/kubernetes-service-catalog/service-catalog:v0.3.0-beta.0
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
 # "Never", and "Always"
 imagePullPolicy: Always
