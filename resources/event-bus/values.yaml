@@ -6,13 +6,13 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
-    dir: develop/
-    version: 1568c92d
+    dir: pr/
+    version: PR-5811
     publisherImage: event-publish-service
     subscriptionControllerImage: subscription-controller
   event_bus_tests:
     dir: develop/
-    version: 7f7a8031
+    version: bd7b9d23
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
@@ -25,7 +25,6 @@ global:
   eventPublishService:
     maxRequests: 200
     maxRequestSize: 65536
-    maxChannelNameLength: 33
     maxSourceIDLength: 253
     maxEventTypeLength: 253
     maxEventTypeVersionLength: 4
