@@ -55,10 +55,6 @@ required = [
   name = "github.com/apache/thrift"
 
 [[override]]
-  name = "github.com/knative/pkg"
-  branch = "release-0.8"
-
-[[override]]
   name = "knative.dev/pkg"
   branch = "release-0.8"
 

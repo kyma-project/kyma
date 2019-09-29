@@ -88,7 +88,7 @@ func (r *deploymentResolver) DeploymentBoundServiceInstanceNamesField(ctx contex
 		}
 
 		if binding != nil {
-			instanceNames[binding.Spec.ServiceInstanceRef.Name] = struct{}{}
+			instanceNames[binding.Spec.InstanceRef.Name] = struct{}{}
 		}
 	}
 

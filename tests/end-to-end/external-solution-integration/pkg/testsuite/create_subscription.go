@@ -1,12 +1,13 @@
 package testsuite
 
 import (
+	"fmt"
+
 	"github.com/avast/retry-go"
 	eventingApi "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eventingClient "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/internal/example_schema"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/pkg/step"
-	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -47,7 +48,7 @@ func (s *CreateSubscription) Run() error {
 
 	sub := &eventingApi.Subscription{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   s.name,
+			Name: s.name,
 		},
 
 		SubscriptionSpec: subSpec,
@@ -73,9 +74,9 @@ func (s *CreateSubscription) isSubscriptionReady() error {
 	}
 
 	for _, condition := range subscription.Status.Conditions {
-		if condition.Status != eventingApi.ConditionTrue {
-			return errors.Errorf("subscription condition not true: %s", condition.Type)
+		if condition.Type == eventingApi.Ready && condition.Status == eventingApi.ConditionTrue {
+			return nil
 		}
 	}
-	return nil
+	return fmt.Errorf("subscription: %s is not ready", subscription.Name)
 }

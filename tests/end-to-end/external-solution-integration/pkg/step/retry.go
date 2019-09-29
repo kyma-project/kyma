@@ -2,9 +2,10 @@ package step
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/avast/retry-go"
 	"github.com/hashicorp/go-multierror"
-	"strings"
 )
 
 type Retried struct {
@@ -44,5 +45,3 @@ func (r *Retried) Cleanup() error {
 func Retry(steps ...Step) *Retried {
 	return &Retried{steps: steps}
 }
-
-

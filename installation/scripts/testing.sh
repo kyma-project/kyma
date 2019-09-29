@@ -5,6 +5,9 @@ CONCURRENCY=1
 
 POSITIONAL=()
 
+TEST_NAME=
+TEST_NAMESPACE=
+
 function validateConcurrency() {
   if [[ -z "$1" ]]; then
     echo "Error: --concurrency requires a value"
@@ -25,6 +28,14 @@ do
         --concurrency|-c)
             validateConcurrency "$1"
             CONCURRENCY="$1"
+            shift
+            ;;
+        --test-name|-t)
+            TEST_NAME="$1"
+            shift
+            ;;
+        --test-namespace|-tn)
+            TEST_NAMESPACE="$1"
             shift
             ;;
         -*)
@@ -64,18 +75,26 @@ done
 
 matchTests="" # match all tests
 
-${kc} get cm dex-config -n kyma-system -ojsonpath="{.data}" | grep --silent "#__STATIC_PASSWORDS__"
-if [[ $? -eq 1 ]]
-then
-  # if static users are not available, do not execute tests which requires them
-  matchTests=$(${kc} get testdefinitions --all-namespaces -l 'require-static-users!=true' -o=go-template='  selectors:
+if [[ -n "${TEST_NAME}" && -n "${TEST_NAMESPACE}" ]]; then
+  matchTests="  selectors:
+    matchNames:
+      - name: ${TEST_NAME}
+        namespace: ${TEST_NAMESPACE}
+"
+else
+  ${kc} get cm dex-config -n kyma-system -ojsonpath="{.data}" | grep --silent "#__STATIC_PASSWORDS__"
+  if [[ $? -eq 1 ]]
+  then
+    # if static users are not available, do not execute tests which requires them
+    matchTests=$(${kc} get testdefinitions --all-namespaces -l 'require-static-users!=true' -o=go-template='  selectors:
     matchNames:
 {{- range .items}}
       - name: {{.metadata.name}}
         namespace: {{.metadata.namespace}}
 {{- end}}')
-  echo "WARNING: following tests will be skipped due to the lack of static users:"
-  echo "$(${kc} get testdefinitions --all-namespaces -l 'require-static-users=true' -o=go-template --template='{{- range .items}}{{printf " - %s\n" .metadata.name}}{{- end}}')"
+    echo "WARNING: following tests will be skipped due to the lack of static users:"
+    echo "$(${kc} get testdefinitions --all-namespaces -l 'require-static-users=true' -o=go-template --template='{{- range .items}}{{printf " - %s\n" .metadata.name}}{{- end}}')"
+  fi
 fi
 
 # creates a config map which provides the testing addons

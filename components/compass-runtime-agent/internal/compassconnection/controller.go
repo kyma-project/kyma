@@ -6,9 +6,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"kyma-project.io/compass-runtime-agent/pkg/apis/compass/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -95,7 +95,8 @@ func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	log.Infof("Processing Compass Connection, current status: %s", instance.Status)
 
 	// If connection is not established read Config Map and try to fetch Certificate
-	if instance.ShouldReconnect() {
+	if instance.ShouldAttemptReconnect() {
+		log.Infof("Attempting to initialize connection with Compass...")
 		instance, err := r.supervisor.InitializeCompassConnection()
 		if err != nil {
 			log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
@@ -127,12 +128,12 @@ func (r *Reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 }
 
 // Configuration resync is performed not more frequent that minimalConfigSyncTime,
-// unless deliberately requested by spec.ResyncConfig set to true
+// unless deliberately requested by spec.ResyncNow set to true
 func shouldResyncConfig(connection *v1alpha1.CompassConnection, minimalConfigSyncTime time.Duration) bool {
-	// TODO - add such option
-	//if connection.Spec.ResyncNow {
-	//	return true
-	//}
+	if connection.Spec.ResyncNow {
+		return true
+	}
+
 	if connection.Status.SynchronizationStatus == nil {
 		return true
 	}

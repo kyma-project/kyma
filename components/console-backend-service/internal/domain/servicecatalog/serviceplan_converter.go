@@ -1,7 +1,7 @@
 package servicecatalog
 
 import (
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/jsonschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
@@ -25,8 +25,8 @@ func (p *servicePlanConverter) ToGQL(item *v1beta1.ServicePlan) (*gqlschema.Serv
 	}
 
 	var instanceCreateParameterSchema *gqlschema.JSON
-	if item.Spec.ServiceInstanceCreateParameterSchema != nil {
-		instanceCreateParameterSchema, err = jsonschema.Unpack(item.Spec.ServiceInstanceCreateParameterSchema.Raw)
+	if item.Spec.InstanceCreateParameterSchema != nil {
+		instanceCreateParameterSchema, err = jsonschema.Unpack(item.Spec.InstanceCreateParameterSchema.Raw)
 		if err != nil {
 			return nil, errors.Wrapf(err, "while unpacking service instance create parameter schema from ServicePlan [%s]", item.Name)
 		}

@@ -25,7 +25,7 @@ import (
 
 const (
 	subUID   = "test-uid"
-	subName  = "my-sub-1"
+	subName  = "my-sub"
 	eaName   = "my-event-activation"
 	sourceID = "my_source_ID"
 
@@ -33,8 +33,14 @@ const (
 )
 
 func init() {
-	_ = eventingv1alpha1.AddToScheme(scheme.Scheme)
-	_ = subApis.AddToScheme(scheme.Scheme)
+	err := eventingv1alpha1.AddToScheme(scheme.Scheme)
+	if err != nil {
+		log.Error(err, "Failed to add Application Connector scheme")
+	}
+	err = subApis.AddToScheme(scheme.Scheme)
+	if err != nil {
+		log.Error(err, "Failed to add Kyma eventing scheme")
+	}
 }
 
 var testCases = []controllertesting.TestCase{

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -44,7 +44,7 @@ func TestServicePlanConverter_ToGQL(t *testing.T) {
 				CommonServicePlanSpec: v1beta1.CommonServicePlanSpec{
 					ExternalMetadata: &runtime.RawExtension{Raw: metadataBytes},
 					ExternalName:     "ExampleExternalName",
-					ServiceInstanceCreateParameterSchema: &runtime.RawExtension{
+					InstanceCreateParameterSchema: &runtime.RawExtension{
 						Raw: encodedParameterSchemaBytes,
 					},
 					ServiceBindingCreateParameterSchema: &runtime.RawExtension{
@@ -305,7 +305,7 @@ func fixServicePlan(t require.TestingT, parameterSchema map[string]interface{}) 
 			CommonServicePlanSpec: v1beta1.CommonServicePlanSpec{
 				ExternalMetadata: &runtime.RawExtension{Raw: metadataBytes},
 				ExternalName:     "ExampleExternalName",
-				ServiceInstanceCreateParameterSchema: &runtime.RawExtension{
+				InstanceCreateParameterSchema: &runtime.RawExtension{
 					Raw: encodedParameterSchemaBytes,
 				},
 				ServiceBindingCreateParameterSchema: &runtime.RawExtension{
