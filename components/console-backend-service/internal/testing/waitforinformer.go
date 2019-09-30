@@ -13,7 +13,7 @@ func WaitForInformerStartAtMost(t *testing.T, timeout time.Duration, informer ca
 
 	go func() {
 		if !cache.WaitForCacheSync(stop, informer.HasSynced) {
-			t.Fatalf("Timeout occurred when waiting to sync informer")
+			t.Fatalf("timeout occurred when waiting for sync informer")
 		}
 		close(syncedDone)
 	}()
