@@ -382,7 +382,7 @@ func TestCompassRuntimeAgentNotManagedApplications(t *testing.T) {
 		require.NoError(t, err)
 		defer func() {
 			// In case test failed before deleting app, perform cleanup
-			_ := testSuite.ApplicationCRClient.Delete(compassManagedApplicationName, &metav1.DeleteOptions{})
+			_ = testSuite.ApplicationCRClient.Delete(compassManagedApplicationName, &metav1.DeleteOptions{})
 		}()
 
 		compassNotManagedApplicationName := "compass-not-managed-app"
