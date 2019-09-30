@@ -43,7 +43,7 @@ func TestApiService_List(t *testing.T) {
 		result, err := service.List(namespace, nil, nil)
 
 		require.NoError(t, err)
-		assert.Equal(t, []*v1alpha2.Api{
+		assert.ElementsMatch(t, []*v1alpha2.Api{
 			api1, api3,
 		}, result)
 	})
@@ -64,7 +64,7 @@ func TestApiService_List(t *testing.T) {
 		result, err := service.List(namespace, nil, &hostname)
 
 		require.NoError(t, err)
-		assert.Equal(t, []*v1alpha2.Api{
+		assert.ElementsMatch(t, []*v1alpha2.Api{
 			api1,
 		}, result)
 	})
@@ -87,7 +87,7 @@ func TestApiService_List(t *testing.T) {
 		result, err := service.List(namespace, &serviceName, nil)
 
 		require.NoError(t, err)
-		assert.Equal(t, []*v1alpha2.Api{
+		assert.ElementsMatch(t, []*v1alpha2.Api{
 			api1,
 		}, result)
 	})
@@ -111,7 +111,7 @@ func TestApiService_List(t *testing.T) {
 		result, err := service.List(namespace, &serviceName, nil)
 
 		require.NoError(t, err)
-		assert.Equal(t, []*v1alpha2.Api{
+		assert.ElementsMatch(t, []*v1alpha2.Api{
 			api1,
 		}, result)
 	})

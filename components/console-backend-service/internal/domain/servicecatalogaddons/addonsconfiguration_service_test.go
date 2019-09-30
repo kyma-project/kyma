@@ -445,7 +445,7 @@ func TestAddonsConfigurationService_ListAddonsConfigurations(t *testing.T) {
 
 			// then
 			require.NoError(t, err)
-			assert.Equal(t, tc.expectedAddonsCfgs, result)
+			assert.ElementsMatch(t, tc.expectedAddonsCfgs, result)
 		})
 	}
 }

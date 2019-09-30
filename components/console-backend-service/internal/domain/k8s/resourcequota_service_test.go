@@ -115,7 +115,9 @@ func TestResourceQuotaService_ListStatefulSets(t *testing.T) {
 
 	// THEN
 	require.NoError(t, err)
-	assert.ElementsMatch(t, []*apps.StatefulSet{rs1, rs2}, result)
+	assert.ElementsMatch(t, []*apps.StatefulSet{
+		rs1, rs2,
+	}, result)
 }
 
 func TestResourceQuotaService_ListPods(t *testing.T) {
