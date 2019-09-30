@@ -95,18 +95,6 @@
   version = "v1.2.0"
 
 [[projects]]
-  name = "github.com/google/go-cmp"
-  packages = [
-    "cmp",
-    "cmp/internal/diff",
-    "cmp/internal/flags",
-    "cmp/internal/function",
-    "cmp/internal/value"
-  ]
-  revision = "2d0692c2e9617365a95b295612ac0d4415ba4627"
-  version = "v0.3.1"
-
-[[projects]]
   branch = "master"
   name = "github.com/google/gofuzz"
   packages = ["."]
@@ -473,8 +461,8 @@
     "third_party/forked/golang/json",
     "third_party/forked/golang/reflect"
   ]
-  revision = "1799e75a07195de9460b8ef7300883499f12127b"
-  version = "kubernetes-1.15.0"
+  revision = "6a84e37a896db9780c75367af8d2ed2bb944022e"
+  version = "kubernetes-1.14.1"
 
 [[projects]]
   name = "k8s.io/client-go"
@@ -540,11 +528,10 @@
     "util/keyutil",
     "util/retry"
   ]
-  revision = "2fe0317bcee0e1ff48861f77cc1e2791cceba458"
-  version = "kubernetes-1.15.2"
+  revision = "1a26190bd76a9017e289958b9fba936430aa3704"
+  version = "kubernetes-1.14.1"
 
 [[projects]]
-  branch = "release-1.15"
   name = "k8s.io/code-generator"
   packages = [
     "cmd/client-gen",
@@ -571,7 +558,8 @@
     "pkg/namer",
     "pkg/util"
   ]
-  revision = "18da4a14b22b17d2fa761e50037fabfbacec225b"
+  revision = "50b561225d70b3eb79a1faafd3dfe7b1a62cbe73"
+  version = "kubernetes-1.14.0"
 
 [[projects]]
   name = "k8s.io/gengo"
@@ -611,9 +599,12 @@
 
 [[projects]]
   name = "sigs.k8s.io/controller-runtime"
-  packages = ["pkg/runtime/scheme"]
-  revision = "12d98582e72927b6cd0123e2b4e819f9341ce62c"
-  version = "v0.1.10"
+  packages = [
+    "pkg/runtime/scheme",
+    "pkg/scheme"
+  ]
+  revision = "fc5542c693e3340f8abbe91c6345bd64c494a60c"
+  version = "v0.2.2"
 
 [[projects]]
   name = "sigs.k8s.io/yaml"
@@ -624,6 +615,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7a02c16e15697df35c9342e32ca7ca8c3e0e10ac495989ffea602a5216f0bec6"
+  inputs-digest = "71a869126509b57aedec7fbb52642fa026025e7ca001a1d231dab21d26e449dd"
   solver-name = "gps-cdcl"
   solver-version = 1

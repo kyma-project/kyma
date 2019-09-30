@@ -1,4 +1,4 @@
-wrequired = [
+required = [
     "golang.org/x/tools/cmd/goimports",
     "github.com/kisielk/errcheck",
 ]
