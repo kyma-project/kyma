@@ -15,4 +15,4 @@ spec:
   endpoints:
   - port: service
     path: /minio/prometheus/metrics
-    interval: 10s
+    interval: 30s

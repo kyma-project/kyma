@@ -4,7 +4,7 @@ metadata:
   labels:
     cms.kyma-project.io/view-context: docs-ui
     cms.kyma-project.io/group-name: components
-    cms.kyma-project.io/order: "15"
+    cms.kyma-project.io/order: "16"
   name: headless-cms
 spec:
   displayName: "Headless CMS"

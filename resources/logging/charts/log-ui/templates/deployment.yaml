@@ -25,7 +25,7 @@ spec:
             - containerPort: {{ .Values.service.internalPort }}
           volumeMounts:
             - name: config
-              mountPath: /usr/share/nginx/html/assets/config
+              mountPath: /var/public/config
       volumes:
         - name: config
           configMap:

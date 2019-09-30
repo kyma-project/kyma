@@ -3,18 +3,18 @@ package apiresources
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	k8sconstsmocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts/mocks"
-	accessservicemock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/accessservice/mocks"
-	assetstoremock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/mocks"
-	istiomocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/istio/mocks"
-	secretmock "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/mocks"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/types"
+	"kyma-project.io/compass-runtime-agent/internal/apperrors"
+	k8sconstsmocks "kyma-project.io/compass-runtime-agent/internal/k8sconsts/mocks"
+	accessservicemock "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/accessservice/mocks"
+	assetstoremock "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/mocks"
+	istiomocks "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/istio/mocks"
+	secretmock "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/mocks"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 )
 
 func TestService(t *testing.T) {

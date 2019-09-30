@@ -1,7 +1,7 @@
 package shared
 
 import (
-	bindingApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	bindingApi "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 )
 
 //go:generate mockery -name=ServiceCatalogRetriever -output=automock -outpkg=automock -case=underscore

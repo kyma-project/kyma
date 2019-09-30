@@ -7,24 +7,17 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
-  annotations:
-    checksum/config: {{ include (print $.Template.BasePath "/apiregistration.yaml") . | sha256sum }}
 spec:
   replicas: {{ .Values.controllerManager.replicas }}
-  minReadySeconds: {{ .Values.apiserver.minReadySeconds }}
+  strategy:
+{{ toYaml .Values.controllerManager.updateStrategy | indent 4 }}
+  minReadySeconds: {{ .Values.controllerManager.minReadySeconds }}
   selector:
     matchLabels:
       app: {{ template "fullname" . }}-controller-manager
-  # Strategy overwrites the default service-catalog strategy because of using helm '--wait' flag.
-  # As a result, Tiller waits for the readiness of all of the components, and then evaluates the readiness.
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
   template:
     metadata:
       annotations:
-        sidecar.istio.io/inject: "true"
         prometheus.io/scrape: "{{ .Values.controllerManager.enablePrometheusScrape }}"
       {{ if .Values.controllerManager.annotations }}
 {{ toYaml .Values.controllerManager.annotations | indent 8 }}
@@ -45,8 +38,8 @@ spec:
       - name: healthcheck
         image: eu.gcr.io/kyma-project/develop/service-catalog/health-proxy:0.0.1
         env:
-        - name: PROXY_TARGET_URL
-          value: "https://localhost:8444/"
+          - name: PROXY_TARGET_URL
+            value: "https://localhost:8444/"
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
@@ -68,7 +61,7 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 5
-      {{- end }}
+    {{- end }}
       - name: controller-manager
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -96,24 +89,17 @@ spec:
         {{ if .Values.controllerManager.profiling.contentionProfiling -}}
         - "--contention-profiling=true"
         {{- end}}
-        {{- if not .Values.useAggregator }}
-        - --service-catalog-api-server-url
-        - https://{{ template "fullname" . }}-apiserver
-        {{- end }}
-        {{ if and (.Values.controllerManager.apiserverSkipVerify) (not .Values.useAggregator) -}}
-        - "--service-catalog-insecure-skip-verify=true"
-        {{- end }}
         - -v
         - "{{ .Values.controllerManager.verbosity }}"
         - --resync-interval
         - {{ .Values.controllerManager.resyncInterval }}
-        {{ if .Values.controllerManager.operationPollingMaximumBackoffDuration -}}
-        - --operation-polling-maximum-backoff-duration
-        - {{ .Values.controllerManager.operationPollingMaximumBackoffDuration }}
-        {{- end }}
         {{ if .Values.controllerManager.brokerRelistIntervalActivated -}}
         - --broker-relist-interval
         - {{ .Values.controllerManager.brokerRelistInterval }}
+        {{- end }}
+        {{ if .Values.controllerManager.operationPollingMaximumBackoffDuration -}}
+        - --operation-polling-maximum-backoff-duration
+        - {{ .Values.controllerManager.operationPollingMaximumBackoffDuration }}
         {{- end }}
         - --feature-gates
         - OriginatingIdentity={{.Values.originatingIdentityEnabled}}
@@ -133,24 +119,7 @@ spec:
         {{- end }}
         ports:
         - containerPort: 8444
-        volumeMounts:
-        - name: service-catalog-cert
-          mountPath: /var/run/kubernetes-service-catalog
-          readOnly: true
       {{ if .Values.controllerManager.nodeSelector }}
       nodeSelector:
          {{ .Values.controllerManager.nodeSelector }}
       {{ end }}
-      volumes:
-      - name: service-catalog-cert
-        secret:
-          secretName: {{ template "fullname" . }}-apiserver-cert
-          items:
-          - key: tls.crt
-            path: apiserver.crt
-          - key: tls.key
-            path: apiserver.key
-          {{- if .Values.apiserver.tls.requestHeaderCA }}
-          - key: requestheader-ca.crt
-            path: requestheader-ca.crt
-          {{- end }}

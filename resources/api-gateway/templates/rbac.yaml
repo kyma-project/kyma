@@ -12,13 +12,10 @@ metadata:
   namespace:  {{ .Release.Namespace }}
 rules:
   - apiGroups: ["gateway.kyma-project.io"]
-    resources: ["gates", "gates/status"]
+    resources: ["apirules", "apirules/status"]
     verbs: ["*"]
   - apiGroups: ["networking.istio.io"]
     resources: ["virtualservices"]
-    verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
-  - apiGroups: ["authentication.istio.io"]
-    resources: ["policies"]
     verbs: ["create", "delete", "get", "patch", "list", "watch", "update"]
   - apiGroups: ["oathkeeper.ory.sh"]
     resources: ["rules"]

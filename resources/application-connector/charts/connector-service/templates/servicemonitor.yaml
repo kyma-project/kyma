@@ -15,7 +15,7 @@ spec:
   targetLabels:
     - k8s-app
   endpoints:
-  - port: metrics-port
+  - port: http-metrics
     interval: 30s
   namespaceSelector:
     matchNames:

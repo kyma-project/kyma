@@ -72,7 +72,7 @@ var (
 )
 
 // Subscription returns a new SubscriptionBuilder instance.
-func Subscription(name string, namespace string) *SubscriptionBuilder {
+func Subscription(name string, namespace string, labels map[string]string) *SubscriptionBuilder {
 	subscription := &eventingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
@@ -81,6 +81,7 @@ func Subscription(name string, namespace string) *SubscriptionBuilder {
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
+			Labels:    labels,
 		},
 		Spec: eventingv1alpha1.SubscriptionSpec{
 			Channel: corev1.ObjectReference{

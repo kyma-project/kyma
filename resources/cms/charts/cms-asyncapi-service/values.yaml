@@ -7,5 +7,7 @@ service:
   externalPort: 80
   protocol: TCP
   verbose: true
+metrics:
+  scrapeInterval: 30s
 istio:
   namespace: istio-system

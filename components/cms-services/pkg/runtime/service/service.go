@@ -3,8 +3,10 @@ package service
 import (
 	"context"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"net/http"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	log "github.com/sirupsen/logrus"
 )
 
 // Config is used to customize the service configuration.
@@ -45,10 +47,15 @@ func (s *service) setupHandlers() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	for _, endpoint := range s.endpoints {
+		if endpoint.Name() == "metrics" {
+			log.Fatal("/metrics endpoint is reserved")
+		}
 		log.Infof("Registering %s endpoint", endpoint.Name())
 		path := fmt.Sprintf("/%s", endpoint.Name())
 		mux.HandleFunc(path, endpoint.Handle)
 	}
+	log.Info("Registering metrics endpoint")
+	mux.Handle("/metrics", promhttp.Handler())
 
 	return mux
 }

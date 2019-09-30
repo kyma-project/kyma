@@ -26,3 +26,7 @@ required = [
 [[constraint]]
   branch = "master"
   name = "github.com/gernest/front"
+
+[[constraint]]
+  name = "github.com/prometheus/client_golang"
+  version = "1.1.0"

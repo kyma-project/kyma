@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"knative.dev/pkg/apis"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -27,7 +27,7 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
-	eventBusUtil "github.com/kyma-project/kyma/components/event-bus/pkg/util"
+
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -66,16 +66,26 @@ var (
 	knativeLib = NewMockKnativeLib()
 
 	labels = map[string]string{
-		"l1": "v1",
-		"l2": "v2",
+		"kyma-event-type":         "testevent",
+		"kyma-event-type-version": "v1",
+		"kyma-source-id":          "testsourceid",
 	}
 )
 
 func init() {
 	// Add types to scheme
-	_ = eventingv1alpha1.AddToScheme(scheme.Scheme)
-	_ = evapisv1alpha1.AddToScheme(scheme.Scheme)
-	_ = messagingV1Alpha1.AddToScheme(scheme.Scheme)
+	err := eventingv1alpha1.AddToScheme(scheme.Scheme)
+	if err != nil {
+		log.Error(err, "Failed to add kyma eventing scheme")
+	}
+	err = evapisv1alpha1.AddToScheme(scheme.Scheme)
+	if err != nil {
+		log.Error(err, "Failed to add knative eventing scheme")
+	}
+	err = messagingV1Alpha1.AddToScheme(scheme.Scheme)
+	if err != nil {
+		log.Error(err, "Failed to add knative messaging scheme")
+	}
 }
 
 func TestInjectClient(t *testing.T) {
@@ -130,7 +140,9 @@ var testCases = []controllertesting.TestCase{
 				if _, ok := knSubscriptions[makeKnSubscriptionName(makeEventsActivatedSubscription())]; !ok {
 					t.Errorf("Knative subscription was NOT created")
 				}
-				if channel, ok := knChannels[makeKnChannelName(makeEventsActivatedSubscription())]; ok {
+				channelNamePrefix := makeKnChannelNamePrefix(makeEventsActivatedSubscription())
+				channelName := knChannelNames[channelNamePrefix] // Get the channel name from the prefix
+				if channel, ok := knChannels[channelName]; ok {
 					if channel.GetClusterName() != "fake-channel" {
 						t.Errorf("Knative channel should NOT be created in this case")
 					}
@@ -157,7 +169,10 @@ var testCases = []controllertesting.TestCase{
 				if _, ok := knSubscriptions[makeKnSubscriptionName(makeEventsActivatedSubscription())]; !ok {
 					t.Errorf("Knative subscription was NOT created")
 				}
-				if ch, ok := knChannels[makeKnChannelName(makeEventsActivatedSubscription())]; !ok {
+				channelNamePrefix := makeKnChannelNamePrefix(makeEventsActivatedSubscription())
+				channelName := knChannelNames[channelNamePrefix] // Get the channel name from the prefix
+
+				if ch, ok := knChannels[channelName]; !ok {
 					t.Errorf("Knative channel was NOT created")
 				} else {
 					chLabels := ch.Labels
@@ -188,7 +203,10 @@ var testCases = []controllertesting.TestCase{
 				if _, ok := knSubscriptions[makeKnSubscriptionName(makeEventsActivatedSubscription())]; ok {
 					t.Errorf("Knative subscription was NOT deleted")
 				}
-				if _, ok := knChannels[makeKnChannelName(makeEventsActivatedSubscription())]; ok {
+				channelNamePrefix := makeKnChannelNamePrefix(makeEventsActivatedSubscription())
+				channelName := knChannelNames[channelNamePrefix] // Get the channel name from the prefix
+
+				if _, ok := knChannels[channelName]; ok {
 					t.Errorf("Knative channel was NOT deleted")
 				}
 			},
@@ -266,6 +284,7 @@ func makeReadySubscription() *eventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
 	subscription.Status.Conditions = []eventingv1alpha1.SubscriptionCondition{
 		{Type: eventingv1alpha1.EventsActivated, Status: eventingv1alpha1.ConditionTrue},
+		{Type: eventingv1alpha1.SubscriptionReady, Status: eventingv1alpha1.ConditionTrue},
 		{Type: eventingv1alpha1.Ready, Status: eventingv1alpha1.ConditionTrue},
 	}
 	return subscription
@@ -284,6 +303,9 @@ func makeEventsActivatedSubscription() *eventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
 	subscription.Status.Conditions = []eventingv1alpha1.SubscriptionCondition{{
 		Type:   eventingv1alpha1.EventsActivated,
+		Status: eventingv1alpha1.ConditionTrue,
+	}, {
+		Type:   eventingv1alpha1.SubscriptionReady,
 		Status: eventingv1alpha1.ConditionTrue,
 	}}
 	return subscription
@@ -342,6 +364,7 @@ func (m *MockCurrentTime) GetCurrentTime() metav1.Time {
 // Mock KnativeLib
 var knSubscriptions = make(map[string]*evapisv1alpha1.Subscription)
 var knChannels = make(map[string]*messagingV1Alpha1.Channel)
+var knChannelNames = make(map[string]string)
 
 type MockKnativeLib struct{}
 
@@ -366,8 +389,8 @@ func (k *MockKnativeLib) GetChannelByLabels(namespace string, labels map[string]
 	return k.GetChannel(channelName, namespace)
 }
 
-func (k *MockKnativeLib) CreateChannel(name string, namespace string, labels map[string]string, timeout time.Duration) (*messagingV1Alpha1.Channel, error) {
-	channel := makeKnChannel(namespace, name, labels)
+func (k *MockKnativeLib) CreateChannel(prefix, namespace string, labels map[string]string, timeout time.Duration) (*messagingV1Alpha1.Channel, error) {
+	channel := makeKnChannel(prefix, namespace, labels)
 	knChannels[channel.Name] = channel
 	return channel, nil
 }
@@ -375,7 +398,7 @@ func (k *MockKnativeLib) DeleteChannel(name string, namespace string) error {
 	delete(knChannels, name)
 	return nil
 }
-func (k *MockKnativeLib) CreateSubscription(name string, namespace string, channelName string, uri *string) error {
+func (k *MockKnativeLib) CreateSubscription(name string, namespace string, channelName string, uri *string, labels map[string]string) error {
 	knSub := makeKnSubscription(makeEventsActivatedSubscription())
 	knSubscriptions[knSub.Name] = knSub
 	return nil
@@ -405,13 +428,16 @@ func (k *MockKnativeLib) InjectClient(evClient eventingV1Alpha1.EventingV1alpha1
 }
 
 //  make channels
-func makeKnChannel(namespace string, name string, labels map[string]string) *messagingV1Alpha1.Channel {
+func makeKnChannel(prefix, namespace string, labels map[string]string) *messagingV1Alpha1.Channel {
+	channelName := fmt.Sprint(prefix, "-", "23vwq3")
+	knChannelNames[prefix] = channelName
 	return &messagingV1Alpha1.Channel{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-			Labels:    labels,
-			UID:       chanUID,
+			Namespace:    namespace,
+			Name:         channelName,
+			GenerateName: prefix,
+			Labels:       labels,
+			UID:          chanUID,
 		},
 		Status: messagingV1Alpha1.ChannelStatus{
 			Status: duckv1beta1.Status{
@@ -426,8 +452,8 @@ func makeKnChannel(namespace string, name string, labels map[string]string) *mes
 	}
 }
 
-func makeKnChannelName(kySub *eventingv1alpha1.Subscription) string {
-	return eventBusUtil.GetKnativeChannelName(&kySub.SourceID, &kySub.EventType, defaultMaxChannelLength)
+func makeKnChannelNamePrefix(kySub *eventingv1alpha1.Subscription) string {
+	return kySub.EventType
 }
 
 func makeKnSubscriptionName(kySub *eventingv1alpha1.Subscription) string {
@@ -436,7 +462,7 @@ func makeKnSubscriptionName(kySub *eventingv1alpha1.Subscription) string {
 
 func makeKnativeLibChannel() *messagingV1Alpha1.Channel {
 	chNamespace := util.GetDefaultChannelNamespace()
-	channel, _ := knativeLib.CreateChannel(makeKnChannelName(makeEventsActivatedSubscription()), chNamespace, labels, time.Second)
+	channel, _ := knativeLib.CreateChannel(makeKnChannelNamePrefix(makeEventsActivatedSubscription()), chNamespace, labels, time.Second)
 	channel.SetClusterName("fake-channel") // use it as a marker
 	knChannels[channel.Name] = channel
 	return channel
@@ -444,10 +470,10 @@ func makeKnativeLibChannel() *messagingV1Alpha1.Channel {
 
 func makeKnSubscription(kySub *eventingv1alpha1.Subscription) *evapisv1alpha1.Subscription {
 	knSubName := util.GetKnSubscriptionName(&kySub.Name, &kySub.Namespace)
-	knChannelName := makeKnChannelName(kySub)
+	knChannelName := knChannelNames[makeKnChannelNamePrefix(kySub)]
 	subscriberURL := subscriberURI
 	chNamespace := util.GetDefaultChannelNamespace()
-	return util.Subscription(knSubName, chNamespace).ToChannel(knChannelName).ToURI(&subscriberURL).EmptyReply().Build()
+	return util.Subscription(knSubName, chNamespace, labels).ToChannel(knChannelName).ToURI(&subscriberURL).EmptyReply().Build()
 }
 
 func dumpKnativeLibObjects(t *testing.T) {
