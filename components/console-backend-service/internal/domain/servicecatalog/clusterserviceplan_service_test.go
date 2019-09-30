@@ -130,7 +130,7 @@ func TestClusterServicePlanService_ListForClass(t *testing.T) {
 
 		plans, err := svc.ListForClusterServiceClass(className)
 		require.NoError(t, err)
-		assert.Equal(t, []*v1beta1.ClusterServicePlan{
+		assert.ElementsMatch(t, []*v1beta1.ClusterServicePlan{
 			servicePlan1, servicePlan2, servicePlan3,
 		}, plans)
 	})

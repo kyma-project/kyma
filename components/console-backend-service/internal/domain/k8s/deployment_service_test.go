@@ -31,7 +31,7 @@ func TestDeploymentService_List(t *testing.T) {
 		result, err := svc.List("ns1")
 
 		require.NoError(t, err)
-		assert.Equal(t, []*v1beta2.Deployment{
+		assert.ElementsMatch(t, []*v1beta2.Deployment{
 			deployment1, deployment2,
 		}, result)
 	})
