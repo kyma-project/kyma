@@ -24,7 +24,7 @@ global:
     version: "PR-5668"
   ui_acceptance_tests:
     dir:
-    version: acefe725
+    version: 1a48bf40
   api_controller:
     dir: develop/
     version: e029fcf4
@@ -61,8 +61,8 @@ global:
     dir:
     version: PR-5724
   console_backend_service_test:
-    dir: pr/
-    version: PR-5551
+    dir:
+    version: b71dd1aa
   cluster_users_integration_tests:
     dir: develop/
     version: "d53509a0"
