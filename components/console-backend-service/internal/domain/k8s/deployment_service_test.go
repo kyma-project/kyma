@@ -31,7 +31,7 @@ func TestDeploymentService_List(t *testing.T) {
 		result, err := svc.List("ns1")
 
 		require.NoError(t, err)
-		assert.Equal(t, []*v1beta2.Deployment{
+		assert.ElementsMatch(t, []*v1beta2.Deployment{
 			deployment1, deployment2,
 		}, result)
 	})
@@ -47,7 +47,7 @@ func TestDeploymentService_List(t *testing.T) {
 		result, err := svc.List("ns1")
 
 		require.NoError(t, err)
-		assert.Equal(t, expected, result)
+		assert.ElementsMatch(t, expected, result)
 	})
 }
 
@@ -66,7 +66,7 @@ func TestDeploymentService_ListWithoutFunctions(t *testing.T) {
 		result, err := svc.ListWithoutFunctions("ns1")
 
 		require.NoError(t, err)
-		assert.Equal(t, []*v1beta2.Deployment{
+		assert.ElementsMatch(t, []*v1beta2.Deployment{
 			deployment1,
 		}, result)
 	})
@@ -82,7 +82,7 @@ func TestDeploymentService_ListWithoutFunctions(t *testing.T) {
 		result, err := svc.ListWithoutFunctions("ns1")
 
 		require.NoError(t, err)
-		assert.Equal(t, expected, result)
+		assert.ElementsMatch(t, expected, result)
 	})
 }
 
