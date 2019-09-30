@@ -9,14 +9,20 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/gorilla/mux"
+	applicationsMocks "github.com/kyma-project/kyma/components/application-connectivity-validator/internal/applications/mocks"
+	cacheMocks "github.com/kyma-project/kyma/components/application-connectivity-validator/internal/cache/mocks"
+	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
-	applicationName = "test-application"
+	applicationName     = "test-application"
+	applicationMetaName = "test-application-meta"
 
 	group  = "group"
 	tenant = "tenant"
@@ -29,6 +35,36 @@ const (
 type event struct {
 	Title string `json:"title"`
 }
+
+var (
+	applicationManagedByCompass = &v1alpha12.Application{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Application",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: applicationMetaName,
+		},
+		Spec: v1alpha12.ApplicationSpec{
+			Description:     "Description",
+			Services:        []v1alpha12.Service{},
+			CompassMetadata: &v1alpha12.CompassMetadata{Authentication: v1alpha12.Authentication{ClientIds: []string{applicationName}}},
+		},
+	}
+	applicationNotManagedByCompass = &v1alpha12.Application{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Application",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: applicationName,
+		},
+		Spec: v1alpha12.ApplicationSpec{
+			Description: "Description",
+			Services:    []v1alpha12.Service{},
+		},
+	}
+)
 
 func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 
@@ -46,6 +82,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		group           string
 		certInfoHeader  string
 		expectedStatus  int
+		application     *v1alpha12.Application
 	}{
 		{
 			caseDescription: "Application without group and tenant",
@@ -54,6 +91,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
 			expectedStatus: http.StatusOK,
+			application:    applicationManagedByCompass,
 		},
 		{
 			caseDescription: "Application without group and tenant and with invalid Common Name",
@@ -62,6 +100,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
 			expectedStatus: http.StatusForbidden,
+			application:    applicationManagedByCompass,
 		},
 		{
 			caseDescription: "Application with group and tenant",
@@ -72,6 +111,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
 			expectedStatus: http.StatusOK,
+			application:    applicationManagedByCompass,
 		},
 		{
 			caseDescription: "Application with group, tenant and invalid Common Name",
@@ -82,6 +122,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
 			expectedStatus: http.StatusForbidden,
+			application:    applicationManagedByCompass,
 		},
 		{
 			caseDescription: "Application with group, tenant and invalid Organizational Unit",
@@ -92,6 +133,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
 			expectedStatus: http.StatusForbidden,
+			application:    applicationManagedByCompass,
 		},
 		{
 			caseDescription: "Application with group, tenant and invalid Organization",
@@ -102,18 +144,89 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
 			expectedStatus: http.StatusForbidden,
+			application:    applicationManagedByCompass,
 		},
 		{
 			caseDescription: "X-Forwarded-Client-Cert header not specified",
 			tenant:          tenant,
 			group:           group,
 			expectedStatus:  http.StatusInternalServerError,
+			application:     applicationManagedByCompass,
+		},
+		{
+			caseDescription: "Application not managed by Compass Runtime Agent without group and tenant",
+			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
+				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
+				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
+			expectedStatus: http.StatusOK,
+			application:    applicationNotManagedByCompass,
+		},
+		{
+			caseDescription: "Application not managed by Compass Runtime Agent without group and tenant and with invalid Common Name",
+			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=invalid-cn,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
+				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
+				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
+			expectedStatus: http.StatusForbidden,
+			application:    applicationNotManagedByCompass,
+		},
+		{
+			caseDescription: "Application not managed by Compass Runtime Agent with group and tenant",
+			tenant:          tenant,
+			group:           group,
+			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
+				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
+				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
+			expectedStatus: http.StatusOK,
+			application:    applicationNotManagedByCompass,
+		},
+		{
+			caseDescription: "Application not managed by Compass Runtime Agent with group, tenant and invalid Common Name",
+			tenant:          tenant,
+			group:           group,
+			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=invalid-application,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
+				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
+				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
+			expectedStatus: http.StatusForbidden,
+			application:    applicationNotManagedByCompass,
+		},
+		{
+			caseDescription: "Application not managed by Compass Runtime Agent with group, tenant and invalid Organizational Unit",
+			tenant:          tenant,
+			group:           group,
+			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=invalid,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
+				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
+				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
+			expectedStatus: http.StatusForbidden,
+			application:    applicationNotManagedByCompass,
+		},
+		{
+			caseDescription: "Application not managed by Compass Runtime Agent with group, tenant and invalid Organization",
+			tenant:          tenant,
+			group:           group,
+			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=group,O=invalid,L=Waldorf,ST=Waldorf,C=DE";` +
+				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
+				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
+				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
+			expectedStatus: http.StatusForbidden,
+			application:    applicationNotManagedByCompass,
 		},
 	}
 
 	t.Run("should proxy requests", func(t *testing.T) {
 		for _, testCase := range testCases {
 			// given
+			applicationGetter := &applicationsMocks.Getter{}
+			applicationGetter.On("Get", applicationName).Return(testCase.application, nil)
+
+			cache := &cacheMocks.IdCache{}
+			cache.On("GetClientIDs", applicationName).Return([]string{}, false)
+			cache.On("SetClientIDs", applicationName, mock.AnythingOfType("[]string")).Return()
+
 			proxyHandler := NewProxyHandler(
 				testCase.group,
 				testCase.tenant,
@@ -121,7 +234,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventServicePathPrefixV2,
 				eventServiceHost,
 				appRegistryPathPrefix,
-				appRegistryHost)
+				appRegistryHost,
+				applicationGetter,
+				cache)
 
 			t.Run("should proxy event service V1 request when "+testCase.caseDescription, func(t *testing.T) {
 				eventTitle := "my-event-1"
@@ -209,10 +324,99 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		}
 	})
 
+	t.Run("should use cached IDs while proxying requests", func(t *testing.T) {
+		for _, testCase := range testCases {
+			// given
+			applicationGetter := &applicationsMocks.Getter{}
+			applicationGetter.On("Get", applicationName).Return(testCase.application, nil)
+
+			cache := &cacheMocks.IdCache{}
+			if testCase.application.Spec.CompassMetadata != nil {
+				cache.On("GetClientIDs", applicationName).Return(testCase.application.Spec.CompassMetadata.Authentication.ClientIds, true)
+			} else {
+				cache.On("GetClientIDs", applicationName).Return([]string{testCase.application.Name}, true)
+			}
+			cache.On("SetClientIDs", applicationName, mock.AnythingOfType("[]string")).Return()
+
+			proxyHandler := NewProxyHandler(
+				testCase.group,
+				testCase.tenant,
+				eventServicePathPrefixV1,
+				eventServicePathPrefixV2,
+				eventServiceHost,
+				appRegistryPathPrefix,
+				appRegistryHost,
+				applicationGetter,
+				cache)
+
+			t.Run("should proxy application registry request when "+testCase.caseDescription, func(t *testing.T) {
+				appRegistryHandler.PathPrefix("/{application}/v1/metadata/services").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					appName := mux.Vars(r)["application"]
+					assert.Equal(t, applicationName, appName)
+					w.WriteHeader(http.StatusOK)
+				})
+
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/metadata/services", applicationName), nil)
+				require.NoError(t, err)
+				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
+				req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+				recorder := httptest.NewRecorder()
+
+				// when
+				proxyHandler.ProxyAppConnectorRequests(recorder, req)
+
+				// then
+				assert.Equal(t, testCase.expectedStatus, recorder.Code)
+			})
+		}
+	})
+
+	t.Run("should return 500 when failed to get Application resource", func(t *testing.T) {
+		for _, testCase := range testCases {
+			// given
+			applicationGetter := &applicationsMocks.Getter{}
+			applicationGetter.On("Get", applicationName).Return(nil, fmt.Errorf("some error"))
+
+			cache := &cacheMocks.IdCache{}
+			cache.On("GetClientIDs", applicationName).Return([]string{}, false)
+			cache.On("SetClientIDs", applicationName, mock.AnythingOfType("[]string")).Return()
+
+			proxyHandler := NewProxyHandler(
+				testCase.group,
+				testCase.tenant,
+				eventServicePathPrefixV1,
+				eventServicePathPrefixV2,
+				eventServiceHost,
+				appRegistryPathPrefix,
+				appRegistryHost,
+				applicationGetter,
+				cache)
+
+			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/metadata/services", applicationName), nil)
+			require.NoError(t, err)
+			req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
+			req = mux.SetURLVars(req, map[string]string{"application": applicationName})
+			recorder := httptest.NewRecorder()
+
+			// when
+			proxyHandler.ProxyAppConnectorRequests(recorder, req)
+
+			// then
+			assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+		}
+	})
+
 	t.Run("should return 400 when application not specified in path", func(t *testing.T) {
 		// given
 		certInfoHeader :=
 			`Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";URI=`
+
+		applicationGetter := &applicationsMocks.Getter{}
+		applicationGetter.On("Get", applicationName).Return(applicationManagedByCompass, nil)
+
+		cache := &cacheMocks.IdCache{}
+		cache.On("GetClientIDs", applicationName).Return([]string{}, false)
+		cache.On("SetClientIDs", applicationName, []string{applicationName}).Return()
 
 		proxyHandler := NewProxyHandler(
 			group,
@@ -221,7 +425,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			eventServicePathPrefixV2,
 			eventServiceHost,
 			appRegistryPathPrefix,
-			appRegistryHost)
+			appRegistryHost,
+			applicationGetter,
+			cache)
 
 		req, err := http.NewRequest(http.MethodGet, "/path", nil)
 		require.NoError(t, err)
@@ -243,6 +449,13 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`
 
+		applicationGetter := &applicationsMocks.Getter{}
+		applicationGetter.On("Get", applicationName).Return(applicationManagedByCompass, nil)
+
+		cache := &cacheMocks.IdCache{}
+		cache.On("GetClientIDs", applicationName).Return([]string{}, false)
+		cache.On("SetClientIDs", applicationName, []string{applicationName}).Return()
+
 		proxyHandler := NewProxyHandler(
 			"",
 			"",
@@ -250,7 +463,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			eventServicePathPrefixV2,
 			eventServiceHost,
 			appRegistryPathPrefix,
-			appRegistryHost)
+			appRegistryHost,
+			applicationGetter,
+			cache)
 
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/bad/path", applicationName), nil)
 		require.NoError(t, err)

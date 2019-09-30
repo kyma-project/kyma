@@ -59,14 +59,14 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: application.ID,
+			Name: application.Name,
 		},
 		Spec: v1alpha1.ApplicationSpec{
 			Description:      application.Description,
 			SkipInstallation: false,
-			AccessLabel:      application.ID,
+			AccessLabel:      application.Name,
 			Labels:           convertLabels(application.Labels),
-			Services:         c.toServices(application.ID, application.APIs, application.EventAPIs),
+			Services:         c.toServices(application.Name, application.APIs, application.EventAPIs),
 			CompassMetadata:  c.toCompassMetadata(application.ID),
 		},
 	}
@@ -90,7 +90,7 @@ func (c converter) toServices(applicationID string, apis []model.APIDefinition, 
 	return services
 }
 
-func (c converter) toAPIService(applicationID string, apiDefinition model.APIDefinition) v1alpha1.Service {
+func (c converter) toAPIService(applicationName string, apiDefinition model.APIDefinition) v1alpha1.Service {
 
 	description := apiDefinition.Description
 	if description == "" {
@@ -103,21 +103,21 @@ func (c converter) toAPIService(applicationID string, apiDefinition model.APIDef
 		Name:                createServiceName(apiDefinition.Name, apiDefinition.ID),
 		DisplayName:         apiDefinition.Name,
 		Description:         description,
-		Labels:              map[string]string{connectedApp: applicationID}, // not available in the Director's API
-		LongDescription:     "",                                             // not available in the Director's API
-		ProviderDisplayName: "",                                             // not available in the Director's API
+		Labels:              map[string]string{connectedApp: applicationName}, // not available in the Director's API
+		LongDescription:     "",                                               // not available in the Director's API
+		ProviderDisplayName: "",                                               // not available in the Director's API
 		Tags:                make([]string, 0),
 		Entries: []v1alpha1.Entry{
-			c.toServiceEntry(applicationID, apiDefinition),
+			c.toServiceEntry(applicationName, apiDefinition),
 		},
 	}
 }
 
-func (c converter) toServiceEntry(applicationID string, apiDefinition model.APIDefinition) v1alpha1.Entry {
+func (c converter) toServiceEntry(applicationName string, apiDefinition model.APIDefinition) v1alpha1.Entry {
 
 	getRequestParamsSecretName := func() string {
 		if apiDefinition.RequestParameters.Headers != nil || apiDefinition.RequestParameters.QueryParameters != nil {
-			return c.nameResolver.GetRequestParamsSecretName(applicationID, apiDefinition.ID)
+			return c.nameResolver.GetRequestParamsSecretName(applicationName, apiDefinition.ID)
 		}
 
 		return ""
@@ -133,19 +133,19 @@ func (c converter) toServiceEntry(applicationID string, apiDefinition model.APID
 
 	entry := v1alpha1.Entry{
 		Type:                        SpecAPIType,
-		AccessLabel:                 c.nameResolver.GetResourceName(applicationID, apiDefinition.ID),
+		AccessLabel:                 c.nameResolver.GetResourceName(applicationName, apiDefinition.ID),
 		ApiType:                     getApiType(),
 		TargetUrl:                   apiDefinition.TargetUrl,
-		GatewayUrl:                  c.nameResolver.GetGatewayUrl(applicationID, apiDefinition.ID),
+		GatewayUrl:                  c.nameResolver.GetGatewayUrl(applicationName, apiDefinition.ID),
 		SpecificationUrl:            "", // Director returns BLOB here
-		Credentials:                 c.toCredentials(applicationID, apiDefinition.ID, apiDefinition.Credentials),
+		Credentials:                 c.toCredentials(applicationName, apiDefinition.ID, apiDefinition.Credentials),
 		RequestParametersSecretName: getRequestParamsSecretName(),
 	}
 
 	return entry
 }
 
-func (c converter) toCredentials(applicationID string, apiDefinitionID string, credentials *model.Credentials) v1alpha1.Credentials {
+func (c converter) toCredentials(applicationName string, apiDefinitionID string, credentials *model.Credentials) v1alpha1.Credentials {
 
 	toCSRF := func(csrf *model.CSRFInfo) *v1alpha1.CSRFInfo {
 		if csrf != nil {
@@ -162,7 +162,7 @@ func (c converter) toCredentials(applicationID string, apiDefinitionID string, c
 			return v1alpha1.Credentials{
 				Type:              CredentialsOAuthType,
 				AuthenticationUrl: credentials.Oauth.URL,
-				SecretName:        c.nameResolver.GetCredentialsSecretName(applicationID, apiDefinitionID),
+				SecretName:        c.nameResolver.GetCredentialsSecretName(applicationName, apiDefinitionID),
 				CSRFInfo:          toCSRF(credentials.CSRFInfo),
 			}
 		}
@@ -170,7 +170,7 @@ func (c converter) toCredentials(applicationID string, apiDefinitionID string, c
 		if credentials.Basic != nil {
 			return v1alpha1.Credentials{
 				Type:       CredentialsBasicType,
-				SecretName: c.nameResolver.GetCredentialsSecretName(applicationID, apiDefinitionID),
+				SecretName: c.nameResolver.GetCredentialsSecretName(applicationName, apiDefinitionID),
 				CSRFInfo:   toCSRF(credentials.CSRFInfo),
 			}
 		}
@@ -179,7 +179,7 @@ func (c converter) toCredentials(applicationID string, apiDefinitionID string, c
 	return v1alpha1.Credentials{}
 }
 
-func (c converter) toEventAPIService(applicationID string, eventsDefinition model.EventAPIDefinition) v1alpha1.Service {
+func (c converter) toEventAPIService(applicationName string, eventsDefinition model.EventAPIDefinition) v1alpha1.Service {
 	description := eventsDefinition.Description
 	if description == "" {
 		description = "Description not provided"
@@ -191,18 +191,18 @@ func (c converter) toEventAPIService(applicationID string, eventsDefinition mode
 		Name:                createServiceName(eventsDefinition.Name, eventsDefinition.ID),
 		DisplayName:         eventsDefinition.Name,
 		Description:         description,
-		Labels:              map[string]string{connectedApp: applicationID}, // Application Registry adds here an union of two things: labels specified in the payload and connectedApp label
-		LongDescription:     "",                                             // not available in the Director's API
-		ProviderDisplayName: "",                                             // not available in the Director's API
+		Labels:              map[string]string{connectedApp: applicationName}, // Application Registry adds here an union of two things: labels specified in the payload and connectedApp label
+		LongDescription:     "",                                               // not available in the Director's API
+		ProviderDisplayName: "",                                               // not available in the Director's API
 		Tags:                make([]string, 0),
-		Entries:             []v1alpha1.Entry{c.toEventServiceEntry(applicationID, eventsDefinition)},
+		Entries:             []v1alpha1.Entry{c.toEventServiceEntry(applicationName, eventsDefinition)},
 	}
 }
 
-func (c converter) toEventServiceEntry(applicationID string, eventsDefinition model.EventAPIDefinition) v1alpha1.Entry {
+func (c converter) toEventServiceEntry(applicationName string, eventsDefinition model.EventAPIDefinition) v1alpha1.Entry {
 	return v1alpha1.Entry{
 		Type:             SpecEventsType,
-		AccessLabel:      c.nameResolver.GetResourceName(applicationID, eventsDefinition.ID),
+		AccessLabel:      c.nameResolver.GetResourceName(applicationName, eventsDefinition.ID),
 		SpecificationUrl: "", // Director returns BLOB here
 	}
 }

@@ -3,12 +3,18 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"sync"
 
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/externalapi"
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/cache"
 
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/applications"
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	log "github.com/sirupsen/logrus"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 func main() {
@@ -22,6 +28,14 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
+	applicationGetter, err := newApplicationGetter()
+	if err != nil {
+		log.Errorf("Failed to create Application Getter: %s", err)
+		os.Exit(1)
+	}
+
+	idCache := cache.NewCache(options.cacheExpirationMinutes, options.cacheCleanupMinutes)
+
 	proxyHandler := validationproxy.NewProxyHandler(
 		options.group,
 		options.tenant,
@@ -29,7 +43,9 @@ func main() {
 		options.eventServicePathPrefixV2,
 		options.eventServiceHost,
 		options.appRegistryPathPrefix,
-		options.appRegistryHost)
+		options.appRegistryHost,
+		applicationGetter,
+		idCache)
 
 	proxyServer := http.Server{
 		Handler: validationproxy.NewHandler(proxyHandler),
@@ -53,4 +69,21 @@ func main() {
 	}()
 
 	wg.Wait()
+}
+
+func newApplicationGetter() (applications.Getter, apperrors.AppError) {
+	cfg, err := config.GetConfig()
+	if err != nil {
+		return nil, apperrors.Internal("failed to get k8s config: %s", err)
+	}
+
+	applicationEnvironmentClientset, err := versioned.NewForConfig(cfg)
+	if err != nil {
+		return nil, apperrors.Internal("failed to create k8s application client: %s", err)
+	}
+
+	applicationInterface := applicationEnvironmentClientset.ApplicationconnectorV1alpha1().Applications()
+	applicationGetter := applications.NewGetter(applicationInterface)
+
+	return applicationGetter, nil
 }

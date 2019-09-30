@@ -91,12 +91,12 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 					// assert APIs deleted
 					for _, api := range application.APIs.Data {
-						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.ID, api.ID)
+						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.Name, api.ID)
 					}
 
 					// assert EventAPIs deleted
 					for _, eventAPI := range application.EventAPIs.Data {
-						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.ID, eventAPI.ID)
+						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.Name, eventAPI.ID)
 					}
 				}
 			},
@@ -137,25 +137,25 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						},
 					)
 
-				updatedApp, err := testSuite.CompassClient.UpdateApplication(application.ID, updatedInput.ToCompassInput())
+				updatedApp, err := testSuite.CompassClient.UpdateApplication(application.Name, updatedInput.ToCompassInput())
 				require.NoError(t, err)
 				assert.Equal(t, 3, len(updatedApp.APIs.Data))
 
 				apiIds := getAPIsIds(updatedApp)
-				t.Logf("Updated APIs for %s Application", updatedApp.ID)
+				t.Logf("Updated APIs for %s Application", updatedApp.Name)
 				logIds(t, apiIds)
-				t.Logf("Adding denier labels for %s Application", updatedApp.ID)
-				testSuite.AddDenierLabels(t, updatedApp.ID, apiIds...)
+				t.Logf("Adding denier labels for %s Application", updatedApp.Name)
+				testSuite.AddDenierLabels(t, updatedApp.Name, apiIds...)
 
 				// then
 				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 					// assert previous APIs deleted
 					for _, api := range application.APIs.Data {
-						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.ID, api.ID)
+						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.Name, api.ID)
 					}
 					// assert previous EventAPIs deleted
 					for _, eventAPI := range application.EventAPIs.Data {
-						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.ID, eventAPI.ID)
+						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.Name, eventAPI.ID)
 					}
 
 					// assert updated Application
@@ -215,7 +215,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				// then
 				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 					// assert updated APIs
-					testSuite.K8sResourceChecker.AssertAPIResources(t, application.ID, updatedAPIs...)
+					testSuite.K8sResourceChecker.AssertAPIResources(t, application.Name, updatedAPIs...)
 
 					testSuite.APIAccessChecker.AssertAPIAccess(t, updatedAPIs...)
 				}
@@ -282,16 +282,16 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				application := this.initialPhaseResult
 
 				apiIds := getAPIsIds(application)
-				t.Logf("Removing denier labels for %s Application, For APIs: ", application.ID)
+				t.Logf("Removing denier labels for %s Application, For APIs: ", application.Name)
 				logIds(t, apiIds)
-				testSuite.RemoveDenierLabels(t, application.ID, apiIds...)
+				testSuite.RemoveDenierLabels(t, application.Name, apiIds...)
 
 				// then
 				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 					// assert deniers block requests and the response has status 403
 					for _, api := range application.APIs.Data {
 						path := testSuite.APIAccessChecker.GetPathBasedOnAuth(t, api.DefaultAuth)
-						response := testSuite.APIAccessChecker.CallAccessService(t, application.ID, api.ID, path)
+						response := testSuite.APIAccessChecker.CallAccessService(t, application.Name, api.ID, path)
 						util.RequireStatus(t, http.StatusForbidden, response)
 					}
 				}
@@ -305,8 +305,8 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		t.Log("Checking resources are removed")
 		waitForAgentToApplyConfig(t, testSuite)
 		for _, app := range createdApplications {
-			t.Logf("Asserting resources for %s application are deleted", app.ID)
-			testSuite.K8sResourceChecker.AssertAppResourcesDeleted(t, app.ID)
+			t.Logf("Asserting resources for %s application are deleted", app.Name)
+			testSuite.K8sResourceChecker.AssertAppResourcesDeleted(t, app.Name)
 		}
 	}()
 
@@ -320,23 +320,23 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		require.NoError(t, err)
 
 		defer func() {
-			t.Logf("Cleaning up %s Application...", response.ID)
-			removedId, err := testSuite.CompassClient.DeleteApplication(response.ID)
+			t.Logf("Cleaning up %s Application...", response.Name)
+			removedId, err := testSuite.CompassClient.DeleteApplication(response.Name)
 			require.NoError(t, err)
-			assert.Equal(t, response.ID, removedId)
+			assert.Equal(t, response.Name, removedId)
 		}()
 
 		apiIds := getAPIsIds(response)
-		t.Logf("APIs for %s Application", response.ID)
+		t.Logf("APIs for %s Application", response.Name)
 		logIds(t, apiIds)
 
-		t.Logf("Adding denier labels for %s Application...", response.ID)
-		testSuite.AddDenierLabels(t, response.ID, apiIds...)
+		t.Logf("Adding denier labels for %s Application...", response.Name)
+		testSuite.AddDenierLabels(t, response.Name, apiIds...)
 
 		createdApplications = append(createdApplications, &response)
 
 		testCase.initialPhaseResult = response
-		t.Logf("Initial test case setup finished for %s test case. Created Application: %s", testCase.description, response.ID)
+		t.Logf("Initial test case setup finished for %s test case. Created Application: %s", testCase.description, response.Name)
 	}
 
 	// Wait for agent to apply config
