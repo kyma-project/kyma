@@ -15,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/oauth"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"

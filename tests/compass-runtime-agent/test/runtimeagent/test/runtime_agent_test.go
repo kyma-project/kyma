@@ -380,6 +380,10 @@ func TestCompassRuntimeAgentNotManagedApplications(t *testing.T) {
 		t.Logf("Creating Application %s managed by Compass Runtime Agent", compassManagedApplicationName)
 		compassManagedApplication, err := testSuite.ApplicationCRClient.Create(&compassManagedApplicationTemplate)
 		require.NoError(t, err)
+		defer func() {
+			// In case test failed before deleting app, perform cleanup
+			_ := testSuite.ApplicationCRClient.Delete(compassManagedApplicationName, &metav1.DeleteOptions{})
+		}()
 
 		compassNotManagedApplicationName := "compass-not-managed-app"
 		compassNotManagedApplicationTemplate := createSimpleApplicationTemplate(compassNotManagedApplicationName)
