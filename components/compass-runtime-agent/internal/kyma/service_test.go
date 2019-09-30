@@ -3,7 +3,7 @@ package kyma
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
 
 	"github.com/stretchr/testify/require"
 
@@ -11,14 +11,14 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	resourcesServiceMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/mocks"
-	secretsmodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
-	appMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications/mocks"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kyma-project.io/compass-runtime-agent/internal/apperrors"
+	resourcesServiceMocks "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/mocks"
+	secretsmodel "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
+	appMocks "kyma-project.io/compass-runtime-agent/internal/kyma/applications/mocks"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
 func TestService(t *testing.T) {

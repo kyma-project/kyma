@@ -3,6 +3,7 @@ package compass
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
@@ -14,8 +15,9 @@ import (
 )
 
 const (
-	TenantHeader       = "Tenant"
-	ScenariosLabelName = "scenarios"
+	TenantHeader        = "Tenant"
+	ScenariosLabelName  = "scenarios"
+	AuthorizationHeader = "Authorization"
 )
 
 type Client struct {
@@ -26,10 +28,12 @@ type Client struct {
 	tenant        string
 	runtimeId     string
 	scenarioLabel string
+
+	authorizationToken string
 }
 
 // TODO: client will need to be authenticated after implementation of certs
-func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel string, gqlLog bool) *Client {
+func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel, token string, gqlLog bool) *Client {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
@@ -46,12 +50,13 @@ func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel string, gqlLog 
 	}
 
 	return &Client{
-		client:        client,
-		graphqlizer:   &gqltools.Graphqlizer{},
-		queryProvider: queryProvider{},
-		tenant:        tenant,
-		scenarioLabel: scenarioLabel,
-		runtimeId:     runtimeId,
+		client:             client,
+		graphqlizer:        &gqltools.Graphqlizer{},
+		queryProvider:      queryProvider{},
+		tenant:             tenant,
+		scenarioLabel:      scenarioLabel,
+		runtimeId:          runtimeId,
+		authorizationToken: token,
 	}
 }
 
@@ -323,5 +328,6 @@ func (c *Client) DeleteEventAPI(id string) (string, error) {
 func (c *Client) newRequest(query string) *gcli.Request {
 	req := gcli.NewRequest(query)
 	req.Header.Set(TenantHeader, c.tenant)
+	req.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", c.authorizationToken))
 	return req
 }

@@ -7,9 +7,6 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -18,6 +15,9 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"kyma-project.io/compass-runtime-agent/internal/apperrors"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/mocks"
 )
 
 func TestCreateDocsTopic(t *testing.T) {

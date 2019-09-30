@@ -2,8 +2,8 @@
 package istio
 
 import (
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"k8s.io/apimachinery/pkg/types"
+	"kyma-project.io/compass-runtime-agent/internal/apperrors"
 )
 
 // Service is responsible for creating Istio resources associated with deniers.
