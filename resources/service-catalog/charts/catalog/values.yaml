@@ -120,7 +120,7 @@ securityContext: {}
 
 ## images for migration process
 migration:
-  sbuImage: eu.gcr.io/kyma-project/develop/sbu-upgrade-protector:latest
-  abImage: eu.gcr.io/kyma-project/pr/ab-upgrade-protector:PR-5798
+  sbuImage: eu.gcr.io/kyma-project/develop/sbu-upgrade-protector:b1f395fa
+  abImage: eu.gcr.io/kyma-project/develop/ab-upgrade-protector:b1f395fa
 
 
