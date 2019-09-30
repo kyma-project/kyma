@@ -131,18 +131,6 @@
   version = "v1.3.2"
 
 [[projects]]
-  name = "github.com/google/go-cmp"
-  packages = [
-    "cmp",
-    "cmp/internal/diff",
-    "cmp/internal/flags",
-    "cmp/internal/function",
-    "cmp/internal/value"
-  ]
-  revision = "2d0692c2e9617365a95b295612ac0d4415ba4627"
-  version = "v0.3.1"
-
-[[projects]]
   name = "github.com/google/gofuzz"
   packages = ["."]
   revision = "f140a6486e521aad38f5917de355cbf147cc0496"
@@ -290,6 +278,12 @@
   ]
   revision = "90e289841c1ed79b7a598a7cd9959750cb5e89e2"
   version = "v1.5.0"
+
+[[projects]]
+  name = "github.com/pborman/uuid"
+  packages = ["."]
+  revision = "adf5a7427709b9deb95d29d3fa8a2bf9cfd388f1"
+  version = "v1.2"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -577,6 +571,12 @@
   version = "v2.2.2"
 
 [[projects]]
+  branch = "v3"
+  name = "gopkg.in/yaml.v3"
+  packages = ["."]
+  revision = "c8b7dadae55537a6c8367220c0f93d3205869c8a"
+
+[[projects]]
   name = "k8s.io/api"
   packages = [
     "admission/v1beta1",
@@ -617,8 +617,8 @@
     "storage/v1alpha1",
     "storage/v1beta1"
   ]
-  revision = "fdd30b57c827abbc506646ecfd579f6ccb3b80ab"
-  version = "kubernetes-1.15.2"
+  revision = "6e4e0e4f393bf5e8bbff570acd13217aa5a770cd"
+  version = "kubernetes-1.14.1"
 
 [[projects]]
   name = "k8s.io/apiextensions-apiserver"
@@ -626,12 +626,13 @@
     "pkg/apis/apiextensions",
     "pkg/apis/apiextensions/v1beta1"
   ]
-  revision = "cdb999c96590a9647b48f2c523d3842e44e4d436"
-  version = "kubernetes-1.15.2"
+  revision = "727a075fdec8319bf095330e344b3ccc668abc73"
+  version = "kubernetes-1.14.1"
 
 [[projects]]
   name = "k8s.io/apimachinery"
   packages = [
+    "pkg/api/equality",
     "pkg/api/errors",
     "pkg/api/meta",
     "pkg/api/resource",
@@ -676,8 +677,8 @@
     "third_party/forked/golang/json",
     "third_party/forked/golang/reflect"
   ]
-  revision = "1799e75a07195de9460b8ef7300883499f12127b"
-  version = "kubernetes-1.15.2"
+  revision = "6a84e37a896db9780c75367af8d2ed2bb944022e"
+  version = "kubernetes-1.14.1"
 
 [[projects]]
   name = "k8s.io/client-go"
@@ -757,8 +758,8 @@
     "util/retry",
     "util/workqueue"
   ]
-  revision = "2fe0317bcee0e1ff48861f77cc1e2791cceba458"
-  version = "kubernetes-1.15.2"
+  revision = "1a26190bd76a9017e289958b9fba936430aa3704"
+  version = "kubernetes-1.14.1"
 
 [[projects]]
   name = "k8s.io/code-generator"
@@ -787,8 +788,8 @@
     "pkg/namer",
     "pkg/util"
   ]
-  revision = "18da4a14b22b17d2fa761e50037fabfbacec225b"
-  version = "kubernetes-1.15.2"
+  revision = "50b561225d70b3eb79a1faafd3dfe7b1a62cbe73"
+  version = "kubernetes-1.14.1"
 
 [[projects]]
   name = "k8s.io/gengo"
@@ -845,7 +846,6 @@
   packages = [
     "buffer",
     "integer",
-    "pointer",
     "trace"
   ]
   revision = "6c36bc71fc4aeb1f49801054e71aebdaef1fbeb4"
@@ -883,8 +883,8 @@
     "pkg/webhook/internal/certwatcher",
     "pkg/webhook/internal/metrics"
   ]
-  revision = "eb94491f7ac37f163aef146cf3c17f87d21ae184"
-  version = "v0.2.0-beta.5"
+  revision = "fc5542c693e3340f8abbe91c6345bd64c494a60c"
+  version = "v0.2.2"
 
 [[projects]]
   name = "sigs.k8s.io/controller-tools"
@@ -899,10 +899,12 @@
     "pkg/loader",
     "pkg/markers",
     "pkg/rbac",
+    "pkg/schemapatcher",
+    "pkg/schemapatcher/internal/yaml",
     "pkg/webhook"
   ]
-  revision = "46695abfb89bb6fcd972edf4f925915434726008"
-  version = "v0.2.0-beta.5"
+  revision = "ba11932048e4538f6e435f5ca0cdea19bf458338"
+  version = "v0.2.1"
 
 [[projects]]
   name = "sigs.k8s.io/testing_frameworks"
@@ -923,6 +925,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "72345be4ce0dfb139027c4d7530e2bf0b08fdf5430c174381c67aab2c5c90358"
+  inputs-digest = "20cfdf444560b444e984f3edac53af3d97bd3e0108d8af5f36709f748f36d672"
   solver-name = "gps-cdcl"
   solver-version = 1

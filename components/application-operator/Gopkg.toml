@@ -30,27 +30,27 @@ required = [
   go-tests = true
   unused-packages = true
 
-# The 'v0.2.0-beta.5' version of 'sigs.k8s.io/controller-runtime' requires some 'k8s.io' dependencies in version 'kubernetes-1.14.1'
+# The 'v0.2.0' version of 'sigs.k8s.io/controller-runtime' requires some 'k8s.io' dependencies in version 'kubernetes-1.14.1'
 
-[[override]]
+[[constraint]]
 name="k8s.io/api"
-version="kubernetes-1.15.2"
+version="kubernetes-1.14.1"
 
-[[override]]
+[[constraint]]
   name="k8s.io/apimachinery"
-  version="kubernetes-1.15.2"
+  version="kubernetes-1.14.1"
 
-[[override]]
+[[constraint]]
   name="k8s.io/client-go"
-  version="kubernetes-1.15.2"
+  version="kubernetes-1.14.1"
 
-[[override]]
+[[constraint]]
   name="k8s.io/code-generator"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.14.1"
 
-[[override]]
+[[constraint]]
   name = "k8s.io/apiextensions-apiserver"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.14.1"
 
 [[override]]
   name = "k8s.io/gengo"
@@ -65,11 +65,11 @@ version="kubernetes-1.15.2"
 
 [[constraint]]
   name="sigs.k8s.io/controller-runtime"
-  version="v0.2.0-beta.5"
+  version="v0.2.0"
 
 [[constraint]]
   name="sigs.k8s.io/controller-tools"
-  version="v0.2.0-beta.5"
+  version="v0.2.0"
 
 # For dependency below: Refer to issue https://github.com/golang/dep/issues/1799
 [[override]]
