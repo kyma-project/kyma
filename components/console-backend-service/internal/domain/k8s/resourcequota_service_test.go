@@ -101,6 +101,7 @@ func TestResourceQuotaService_ListReplicaSets(t *testing.T) {
 }
 
 func TestResourceQuotaService_ListStatefulSets(t *testing.T) {
+	t.Skip("Skipping flaky test")
 	// GIVEN
 	rs1 := fixStatefulSet("rs1", "prod")
 	rs2 := fixStatefulSet("rs2", "prod")
