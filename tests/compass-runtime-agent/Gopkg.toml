@@ -29,5 +29,4 @@ required = [
 
  [[constraint]]
   name = "github.com/kyma-project/kyma"
-  branch = "5309-add-labels"
-  source = "https://github.com/franpog859/kyma"
+  revision = "c9f7a5f5947b9bef289c068b73deb585b636e7a4"
