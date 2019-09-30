@@ -7,7 +7,7 @@ rbacJob:
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
-  tag: "7409c68b"
+  tag: "dfcb9e32"
   # Image pull policy
   pullPolicy: IfNotPresent
 
