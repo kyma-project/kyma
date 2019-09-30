@@ -228,7 +228,7 @@
     "scrypt",
     "ssh/terminal"
   ]
-  revision = "cea2066c64117dea9cba47afc7c35e4d2299107d"
+  revision = "a832865fa7ada6126f4c6124ac49f71be71bff2a"
 
 [[projects]]
   branch = "master"
@@ -241,7 +241,7 @@
     "http2/hpack",
     "idna"
   ]
-  revision = "c00fd9afed17cfdca9b3e1e3b8de7ef2b3f0347b"
+  revision = "c5a3c61f89f3ed696ec36b629ef1b97541165225"
 
 [[projects]]
   branch = "master"
@@ -310,7 +310,7 @@
     "internal/module",
     "internal/semver"
   ]
-  revision = "e7abfedfabcfcc6a3220ae994ab001754cf1a76a"
+  revision = "7c411dea38b0106295d041581abb0a958e571b7d"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -338,8 +338,8 @@
 [[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
-  version = "v2.2.2"
+  revision = "bb4e33bf68bf89cad44d386192cbed201f35b241"
+  version = "v2.2.3"
 
 [[projects]]
   name = "k8s.io/api"
@@ -424,7 +424,7 @@
     "third_party/forked/golang/reflect"
   ]
   revision = "1799e75a07195de9460b8ef7300883499f12127b"
-  version = "kubernetes-1.15.2"
+  version = "kubernetes-1.15.0"
 
 [[projects]]
   name = "k8s.io/client-go"
