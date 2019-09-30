@@ -1,6 +1,6 @@
 APP_NAME = console-backend-service-test
 APP_PATH = tests/console-backend-service
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/pr/buildpack-golang-toolbox:PR-1512
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/pr/buildpack-golang-toolbox:v20190930-d28d219
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/scripts
 
 include $(SCRIPTS_DIR)/go-dep.mk
