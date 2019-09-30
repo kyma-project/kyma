@@ -39,11 +39,3 @@ func GetDefaultChannelNamespace() string {
 func escapeHyphensAndPeriods(str *string) string {
 	return replacer.Replace(*str)
 }
-
-// EncodeChannelName function encodes and joins the given event components to construct the encoded channel name
-func EncodeChannelName(sourceID, eventType, eventTypeVersion *string) string {
-	return fmt.Sprintf("%s%s%s%s%s",
-		escapeHyphensAndPeriods(sourceID), delimiter,
-		escapeHyphensAndPeriods(eventType), delimiter,
-		escapeHyphensAndPeriods(eventTypeVersion))
-}
