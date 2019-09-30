@@ -1,6 +1,6 @@
 ---
 title: Asset Upload Service
-type: Matrics
+type: Metrics
 ---
 
 This table shows the Asset Upload Service custom metrics, their types, and descriptions.
