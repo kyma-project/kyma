@@ -32,8 +32,7 @@ type Client struct {
 	authorizationToken string
 }
 
-// TODO: client will need to be authenticated after implementation of certs
-func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel, token string, gqlLog bool) *Client {
+func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel string, gqlLog bool) *Client {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
@@ -50,14 +49,17 @@ func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel, token string, 
 	}
 
 	return &Client{
-		client:             client,
-		graphqlizer:        &gqltools.Graphqlizer{},
-		queryProvider:      queryProvider{},
-		tenant:             tenant,
-		scenarioLabel:      scenarioLabel,
-		runtimeId:          runtimeId,
-		authorizationToken: token,
+		client:        client,
+		graphqlizer:   &gqltools.Graphqlizer{},
+		queryProvider: queryProvider{},
+		tenant:        tenant,
+		scenarioLabel: scenarioLabel,
+		runtimeId:     runtimeId,
 	}
+}
+
+func (c *Client) SetAccessToken(token string) {
+	c.authorizationToken = token
 }
 
 // Scenario labels

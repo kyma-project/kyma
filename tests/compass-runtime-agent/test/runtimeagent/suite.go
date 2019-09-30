@@ -97,14 +97,6 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		return nil, err
 	}
 
-	oauthClient := oauth.NewOauthClient(config.HydraPublicURL, config.HydraAdminURL)
-
-	token, err := oauthClient.GetAuthorizationToken()
-
-	if err != nil {
-		return nil, err
-	}
-
 	serviceClient := k8sClient.CoreV1().Services(config.IntegrationNamespace)
 	secretsClient := k8sClient.CoreV1().Secrets(config.IntegrationNamespace)
 
@@ -115,7 +107,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		podClient:           k8sClient.CoreV1().Pods(config.Namespace),
 		ApplicationCRClient: appClient.Applications(),
 		nameResolver:        nameResolver,
-		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, token, config.GraphQLLog),
+		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.GraphQLLog),
 		APIAccessChecker:    assertions.NewAPIAccessChecker(nameResolver),
 		K8sResourceChecker:  assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
 		mockServiceServer:   mock.NewAppMockServer(config.MockServicePort),
@@ -131,6 +123,14 @@ func (ts *TestSuite) Setup() error {
 		return errors.Wrap(err, "Error while waiting for access to API server")
 	}
 	logrus.Infof("Successfully accessed API Server")
+
+	oauthClient := oauth.NewOauthClient(ts.config.HydraPublicURL, ts.config.HydraAdminURL)
+	token, err := oauthClient.GetAccessToken()
+	if err != nil {
+		return errors.Wrap(err, "Error while generating Access Token")
+	}
+
+	ts.CompassClient.SetAccessToken(token)
 
 	ts.mockServiceServer.Start()
 
