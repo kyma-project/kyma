@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/runtimeagent"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
@@ -14,7 +13,6 @@ import (
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type testCase struct {
@@ -368,66 +366,6 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Logf("Asserting second phase for test case: %s", testCase.description)
 		testCase.secondPhaseAssert(t, testSuite, testCase)
-	}
-}
-
-func TestCompassRuntimeAgentNotManagedApplications(t *testing.T) {
-	t.Run("should not delete an Application if it has no CompassMetadata in Spec", func(t *testing.T) {
-		// given
-		compassManagedApplicationName := "compass-managed-app"
-		compassManagedApplicationTemplate := createSimpleApplicationTemplate(compassManagedApplicationName)
-
-		t.Logf("Creating Application %s managed by Compass Runtime Agent", compassManagedApplicationName)
-		compassManagedApplication, err := testSuite.ApplicationCRClient.Create(&compassManagedApplicationTemplate)
-		require.NoError(t, err)
-		defer func() {
-			// In case test failed before deleting app, perform cleanup
-			_ = testSuite.ApplicationCRClient.Delete(compassManagedApplicationName, &metav1.DeleteOptions{})
-		}()
-
-		compassNotManagedApplicationName := "compass-not-managed-app"
-		compassNotManagedApplicationTemplate := createSimpleApplicationTemplate(compassNotManagedApplicationName)
-		compassNotManagedApplicationTemplate.Spec.CompassMetadata = nil
-
-		t.Logf("Creating Application %s not managed by Compass Runtime Agent", compassNotManagedApplicationName)
-		compassNotManagedApplication, err := testSuite.ApplicationCRClient.Create(&compassNotManagedApplicationTemplate)
-		require.NoError(t, err)
-		defer func() {
-			t.Logf("Deleting Application %s not managed by Compass Runtime Agent", compassNotManagedApplicationName)
-			err := testSuite.ApplicationCRClient.Delete(compassNotManagedApplication.Name, &metav1.DeleteOptions{})
-			require.NoError(t, err)
-
-			testSuite.K8sResourceChecker.AssertAppResourcesDeleted(t, compassNotManagedApplication.Name)
-		}()
-
-		// when
-		waitForAgentToApplyConfig(t, testSuite)
-
-		// then
-		t.Logf("Asserting that Application managed by Compass Runtime Agent is deleted if does not exist in Director config")
-		testSuite.K8sResourceChecker.AssertAppResourcesDeleted(t, compassManagedApplication.Name)
-
-		t.Logf("Asserting that Application not managed by Compass Runtime Agent still exists even if does not exist in Director config")
-		returnedCompassNotManagedApplication, err := testSuite.ApplicationCRClient.Get(compassNotManagedApplication.Name, metav1.GetOptions{})
-		require.NoError(t, err)
-		assert.Equal(t, compassNotManagedApplication, returnedCompassNotManagedApplication)
-	})
-}
-
-func createSimpleApplicationTemplate(id string) v1alpha1.Application {
-	return v1alpha1.Application{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Application",
-			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: id,
-		},
-		Spec: v1alpha1.ApplicationSpec{
-			Description:     "Description",
-			Services:        []v1alpha1.Service{},
-			CompassMetadata: &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{id}}},
-		},
 	}
 }
 
