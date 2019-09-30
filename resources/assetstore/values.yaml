@@ -8,11 +8,11 @@ global:
     dir: develop/
     version: 'e4d913fc'
   asset_upload_service:
-    dir: pr/
-    version: 'PR-5680'
+    dir: develop/
+    version: '37ed12b8'
   asset_metadata_service:
-    dir: pr/
-    version: 'PR-5680'
+    dir: develop/
+    version: '37ed12b8'
   asset_store_test:
     dir: develop/
     version: 'e4d913fc'
