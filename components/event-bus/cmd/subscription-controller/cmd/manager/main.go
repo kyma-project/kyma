@@ -11,7 +11,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/eventactivation"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/knativechannel"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/knativesubscription"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
@@ -81,13 +80,6 @@ func main() {
 	err = eventactivation.ProvideController(mgr)
 	if err != nil {
 		log.Error(err, "unable to create Event Activation controller")
-		os.Exit(1)
-	}
-
-	log.Info("Setting up Knative Channel Controller")
-	err = knativechannel.ProvideController(mgr)
-	if err != nil {
-		log.Error(err, "unable to create Knative Channel controller")
 		os.Exit(1)
 	}
 
