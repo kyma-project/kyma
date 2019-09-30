@@ -6,4 +6,4 @@ global:
     version: 'PR-5523'
   cmsAsyncAPIService:
     dir: pr/
-    version: 'PR-5594'
+    version: 'PR-5680'

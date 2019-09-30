@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -15,14 +16,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
-	"github.com/kyma-project/kyma/components/asset-upload-service/internal/requesthandler"
-	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
-	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader/automock"
 	"github.com/minio/minio-go"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/requesthandler"
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader/automock"
 )
 
 func TestRequestHandler_ServeHTTP(t *testing.T) {
@@ -234,6 +236,45 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 			g.Expect(result.Errors).To(gomega.ContainElement(responseError))
 		}
 	})
+	t.Run("Metrics endpoint", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+
+		buckets := bucket.SystemBucketNames{
+			Private: "private",
+			Public:  "public",
+		}
+		mux := requesthandler.SetupHandlers(nil, buckets, "https://example.com", 10*time.Second, 5)
+
+		record := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
+
+		// When
+		mux.ServeHTTP(record, req)
+
+		respMet := record.Result()
+		defer func() {
+			err := respMet.Body.Close()
+			g.Expect(err).NotTo(gomega.HaveOccurred())
+		}()
+
+		bodyMet, err := ioutil.ReadAll(respMet.Body)
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+
+		// Then
+		g.Expect(respMet.StatusCode).To(gomega.Equal(http.StatusOK))
+		g.Expect(bodyMet).To(gomega.Not(gomega.HaveLen(0)))
+
+		// Given
+		recordUpload := httptest.NewRecorder()
+		reqUpload := httptest.NewRequest(http.MethodGet, "/v1/upload", nil)
+		// When
+		mux.ServeHTTP(recordUpload, reqUpload)
+
+		// Then
+		g.Expect(recordUpload.Result().StatusCode).To(gomega.Equal(http.StatusInternalServerError))
+	})
+
 }
 
 type RequestFile struct {

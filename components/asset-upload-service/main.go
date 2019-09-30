@@ -85,8 +85,7 @@ func main() {
 		uploadExternalEndpoint = cfg.Upload.Endpoint
 	}
 
-	mux := http.NewServeMux()
-	mux.Handle("/v1/upload", requesthandler.New(client, buckets, uploadExternalEndpoint, cfg.UploadTimeout, cfg.MaxUploadWorkers))
+	mux := requesthandler.SetupHandlers(client, buckets, uploadExternalEndpoint, cfg.UploadTimeout, cfg.MaxUploadWorkers)
 
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	srv := &http.Server{Addr: addr, Handler: mux}

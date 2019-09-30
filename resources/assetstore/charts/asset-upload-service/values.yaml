@@ -9,6 +9,8 @@ service:
   internalPort: 3000
   externalPort: 3000
   protocol: TCP
+metrics:
+  scrapeInterval: 30s
 virtualservice:
   enabled: false
   annotations: {}
