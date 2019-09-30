@@ -4,46 +4,32 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/oauth"
+	"path/filepath"
+	"time"
 
-	"k8s.io/apimachinery/pkg/labels"
-
+	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
+	scheme "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	v1typed "k8s.io/client-go/kubernetes/typed/core/v1"
-
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
-
-	scheme "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-
-	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
-
-	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions"
-
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
-
-	"path/filepath"
-	"time"
-
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
-
+	v1typed "k8s.io/client-go/kubernetes/typed/core/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
+	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
-
-	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/util/retry"
 )
 
@@ -58,10 +44,10 @@ const (
 type updatePodFunc func(pod *v1.Pod)
 
 type TestSuite struct {
-	CompassClient      *compass.Client
-	K8sResourceChecker *assertions.K8sResourceChecker
-	APIAccessChecker   *assertions.APIAccessChecker
-	AppClient          v1alpha1.ApplicationInterface
+	CompassClient       *compass.Client
+	K8sResourceChecker  *assertions.K8sResourceChecker
+	APIAccessChecker    *assertions.APIAccessChecker
+	ApplicationCRClient v1alpha1.ApplicationInterface
 
 	k8sClient    *kubernetes.Clientset
 	podClient    v1typed.PodInterface
@@ -124,17 +110,17 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 	nameResolver := applications.NewNameResolver(config.IntegrationNamespace)
 
 	return &TestSuite{
-		k8sClient:          k8sClient,
-		podClient:          k8sClient.CoreV1().Pods(config.Namespace),
-		AppClient:          appClient.Applications(),
-		nameResolver:       nameResolver,
-		CompassClient:      compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, token, config.GraphQLLog),
-		APIAccessChecker:   assertions.NewAPIAccessChecker(nameResolver),
-		K8sResourceChecker: assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
-		mockServiceServer:  mock.NewAppMockServer(config.MockServicePort),
-		config:             config,
-		mockServiceName:    config.MockServiceName,
-		testPodsLabels:     testPodLabels,
+		k8sClient:           k8sClient,
+		podClient:           k8sClient.CoreV1().Pods(config.Namespace),
+		ApplicationCRClient: appClient.Applications(),
+		nameResolver:        nameResolver,
+		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, token, config.GraphQLLog),
+		APIAccessChecker:    assertions.NewAPIAccessChecker(nameResolver),
+		K8sResourceChecker:  assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
+		mockServiceServer:   mock.NewAppMockServer(config.MockServicePort),
+		config:              config,
+		mockServiceName:     config.MockServiceName,
+		testPodsLabels:      testPodLabels,
 	}, nil
 }
 
