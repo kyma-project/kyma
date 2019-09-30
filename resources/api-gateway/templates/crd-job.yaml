@@ -3,7 +3,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: {{ .Release.Name }}-crd-gates
+  name: {{ .Release.Name }}-crd-apirules
   annotations:
     "helm.sh/hook-delete-policy": "before-hook-creation, hook-succeeded"
     "helm.sh/hook": "pre-install, pre-upgrade"
@@ -16,15 +16,15 @@ spec:
     spec:
       serviceAccountName: {{ .Release.Name }}-crd-init
       containers:
-      - name: {{ .Release.Name }}-crd-gates
+      - name: {{ .Release.Name }}-crd-apirules
         image: "{{ .Values.rbacJob.image.repository }}:{{ .Values.rbacJob.image.tag }}"
         volumeMounts:
-        - name: crd-gates
+        - name: crd-apirules
           mountPath: /etc/crd
           readOnly: true
-        command: ["kubectl",  "apply", "-f", "/etc/crd/gates.yaml"]
+        command: ["kubectl",  "apply", "-f", "/etc/crd/apirules.yaml"]
       volumes:
-      - name: crd-gates
+      - name: crd-apirules
         configMap:
-          name: {{ .Release.Name }}-crd-gates
+          name: {{ .Release.Name }}-crd-apirules
       restartPolicy: OnFailure
