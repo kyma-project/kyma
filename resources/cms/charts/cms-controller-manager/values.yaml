@@ -5,7 +5,8 @@ service:
   type: ClusterIP
   externalPort: 80
   internalPort: 8080
-
+metrics:
+  scrapeInterval: 30s
 resources:
   limits:
     cpu: 100m

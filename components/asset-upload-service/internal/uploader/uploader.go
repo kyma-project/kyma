@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/fileheader"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"github.com/golang/glog"
 	"github.com/minio/minio-go"
@@ -46,6 +48,17 @@ type Uploader struct {
 	MaxUploadWorkers     int
 }
 
+var (
+	uploadFilesDurationHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
+		Name: "assetstore_upload_service_upload_files_duration_seconds",
+		Help: "All files upload duration distribution",
+	})
+	uploadSingleFileDurationHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
+		Name: "assetstore_upload_service_upload_single_file_duration_seconds",
+		Help: "Single file upload duration distribution",
+	})
+)
+
 // New returns a new instance of Uploader
 func New(client MinioClient, uploadOrigin string, uploadTimeout time.Duration, maxUploadWorkers int) *Uploader {
 	return &Uploader{
@@ -58,6 +71,8 @@ func New(client MinioClient, uploadOrigin string, uploadTimeout time.Duration, m
 
 // UploadFiles uploads multiple files (Files struct) to particular bucket
 func (u *Uploader) UploadFiles(ctx context.Context, filesChannel chan FileUpload, filesCount int) ([]UploadResult, []UploadError) {
+	start := time.Now()
+
 	errorsCh := make(chan *UploadError, filesCount)
 	resultsCh := make(chan *UploadResult, filesCount)
 
@@ -107,6 +122,9 @@ func (u *Uploader) UploadFiles(ctx context.Context, filesChannel chan FileUpload
 
 	result := u.populateResults(resultsCh)
 	errs := u.populateErrors(errorsCh)
+
+	uploadFilesDurationHistogram.Observe(time.Since(start).Seconds())
+
 	return result, errs
 }
 
@@ -119,6 +137,8 @@ func (u *Uploader) countNeededWorkers(filesCount, maxUploadWorkers int) int {
 
 // UploadFile uploads single file from given path to particular bucket
 func (u *Uploader) uploadFile(ctx context.Context, fileUpload FileUpload) (*UploadResult, error) {
+	start := time.Now()
+
 	file := fileUpload.File
 	f, err := fileUpload.File.Open()
 	if err != nil {
@@ -151,6 +171,7 @@ func (u *Uploader) uploadFile(ctx context.Context, fileUpload FileUpload) (*Uplo
 		RemotePath: fmt.Sprintf("%s/%s/%s", u.externalUploadOrigin, fileUpload.Bucket, objectName),
 	}
 
+	uploadSingleFileDurationHistogram.Observe(time.Since(start).Seconds())
 	return result, nil
 }
 

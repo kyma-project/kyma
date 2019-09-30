@@ -6,15 +6,33 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/extractor"
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/fileheader"
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/processor"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
 )
+
+var (
+	httpServeHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
+		Name: "assetstore_metadata_service_http_request_duration_seconds",
+		Help: "Request's duration distribution",
+	})
+	statusCodesCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "assetstore_metadata_service_http_request_returned_status_code",
+		Help: "Service's HTTP response status code",
+	}, []string{"status_code"})
+)
+
+func incrementStatusCounter(status int) {
+	statusCodesCounter.WithLabelValues(strconv.Itoa(status)).Inc()
+}
 
 type ExtractHandler struct {
 	maxWorkers     int
@@ -49,6 +67,8 @@ func NewExtractHandler(maxWorkers int, processTimeout time.Duration) *ExtractHan
 }
 
 func (h *ExtractHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
+	start := time.Now()
+
 	defer func() {
 		err := rq.Body.Close()
 		if err != nil {
@@ -64,7 +84,9 @@ func (h *ExtractHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	}
 
 	if rq.MultipartForm == nil {
-		h.writeResponse(w, http.StatusBadRequest, Response{
+		status := http.StatusBadRequest
+		incrementStatusCounter(status)
+		h.writeResponse(w, status, Response{
 			Errors: []ResultError{
 				{
 					Message: "No multipart/form-data form received.",
@@ -83,7 +105,9 @@ func (h *ExtractHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 
 	jobCh, jobsCount, err := h.chanFromFormFiles(rq.MultipartForm.File)
 	if err != nil {
-		h.writeResponse(w, http.StatusBadRequest, Response{
+		status := http.StatusBadRequest
+		incrementStatusCounter(status)
+		h.writeResponse(w, status, Response{
 			Errors: []ResultError{
 				{
 					Message: err.Error(),
@@ -108,13 +132,18 @@ func (h *ExtractHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 
 	if len(response.Errors) == 0 {
 		status = http.StatusOK
+		incrementStatusCounter(status)
 	} else if len(response.Data) == 0 {
 		status = http.StatusUnprocessableEntity
+		incrementStatusCounter(status)
 	} else {
 		status = http.StatusMultiStatus
+		incrementStatusCounter(status)
 	}
 
 	h.writeResponse(w, status, response)
+
+	httpServeHistogram.Observe(time.Since(start).Seconds())
 }
 
 func (h *ExtractHandler) chanFromFormFiles(fileFields map[string][]*multipart.FileHeader) (chan processor.Job, int, error) {
@@ -202,7 +231,9 @@ func (h *ExtractHandler) writeResponse(w http.ResponseWriter, statusCode int, re
 }
 
 func (h *ExtractHandler) writeInternalError(w http.ResponseWriter, err error) {
-	h.writeResponse(w, http.StatusInternalServerError, Response{
+	status := http.StatusInternalServerError
+	incrementStatusCounter(status)
+	h.writeResponse(w, status, Response{
 		Errors: []ResultError{
 			{Message: err.Error()},
 		},
