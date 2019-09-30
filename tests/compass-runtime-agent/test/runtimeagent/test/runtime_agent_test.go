@@ -410,7 +410,7 @@ func TestCompassRuntimeAgentNotManagedApplications(t *testing.T) {
 		t.Logf("Asserting that Application not managed by Compass Runtime Agent still exists even if does not exist in Director config")
 		returnedCompassNotManagedApplication, err := testSuite.ApplicationCRClient.Get(compassNotManagedApplication.Name, metav1.GetOptions{})
 		require.NoError(t, err)
-		assert.Equal(t, &compassNotManagedApplication, returnedCompassNotManagedApplication)
+		assert.Equal(t, compassNotManagedApplication, returnedCompassNotManagedApplication)
 	})
 }
 
