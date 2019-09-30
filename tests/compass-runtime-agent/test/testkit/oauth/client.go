@@ -51,7 +51,7 @@ func NewOauthClient(hydraPublicURL, hydraAdminURL string) *Client {
 	}
 }
 
-func (c *Client) GetAuthorizationToken() (string, error) {
+func (c *Client) GetAccessToken() (string, error) {
 	clientCredentials, err := c.createOAuth2Client()
 
 	if err != nil {

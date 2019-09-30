@@ -9,6 +9,7 @@ require (
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/kyma-incubator/compass v0.0.0-20190916105119-d020cd970c45
 	github.com/kyma-project/kyma v0.5.1-0.20190805122745-327770ad3ad5
+	github.com/kyma-project/kyma/components/cms-controller-manager v0.0.0-20190930061401-0b9792cb2766
 	github.com/machinebox/graphql v0.2.2
 	github.com/matryer/is v1.2.0 // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
@@ -31,3 +32,5 @@ require (
 	k8s.io/kube-openapi v0.0.0-20190228160746-b3a7cee44a30 // indirect
 	sigs.k8s.io/controller-runtime v0.2.0
 )
+
+replace github.com/kyma-project/kyma => github.com/franpog859/kyma v0.0.0-20190930063132-9a8ed1bea81a

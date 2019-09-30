@@ -46,6 +46,7 @@ func TestConverter(t *testing.T) {
 				Labels: map[string]string{
 					"key": "value1,value2",
 				},
+				CompassMetadata: &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{"App1"}}},
 			},
 		}
 
@@ -135,6 +136,7 @@ func TestConverter(t *testing.T) {
 				SkipInstallation: false,
 				AccessLabel:      "App1",
 				Labels:           map[string]string{},
+				CompassMetadata:  &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{"App1"}}},
 				Services: []v1alpha1.Service{
 					{
 						ID:          "serviceId1",
@@ -254,6 +256,7 @@ func TestConverter(t *testing.T) {
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description",
 				SkipInstallation: false,
+				CompassMetadata:  &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{"App1"}}},
 				Services: []v1alpha1.Service{
 					{
 						ID:          "serviceId1",
