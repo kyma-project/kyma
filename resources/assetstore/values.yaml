@@ -5,8 +5,8 @@ global:
     gateway:
       name: kyma-gateway
   asset_store_controller_manager:
-    dir: pr/
-    version: 'PR-5465'
+    dir: develop/
+    version: 'e4d913fc'
   asset_upload_service:
     dir: pr/
     version: 'PR-5680'
@@ -14,8 +14,8 @@ global:
     dir: pr/
     version: 'PR-5680'
   asset_store_test:
-    dir: pr/
-    version: 'PR-5148'
+    dir: develop/
+    version: 'e4d913fc'
   minio_client:
     image: 'minio/mc'
     tag: 'RELEASE.2019-04-03T17-59-57Z'
