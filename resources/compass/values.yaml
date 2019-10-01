@@ -27,7 +27,7 @@ global:
       containerRegistry:
         path: eu.gcr.io/kyma-project
       dir: develop/
-      version: "70782d18"
+      version: "e029fcf4"
     tests:
       e2e:
         dir: develop/
