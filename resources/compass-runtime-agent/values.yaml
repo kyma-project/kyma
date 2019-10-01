@@ -6,7 +6,7 @@ global:
       dir: develop/
       version: "309eb6b3"
     runtimeAgentTests:
-      dir: decelop/
+      dir: develop/
       version: "309eb6b3"
 
 compassRuntimeAgent:
