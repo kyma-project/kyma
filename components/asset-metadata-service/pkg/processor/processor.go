@@ -2,9 +2,12 @@ package processor
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/fileheader"
 	"sync"
 	"time"
+
+	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/fileheader"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
@@ -35,6 +38,18 @@ type Processor struct {
 	workerFn func(job Job) (interface{}, error)
 }
 
+var (
+	processSingleFileHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
+		Name:    "assetstore_metadata_service_process_single_file_duration_seconds",
+		Help:    "Duration distribution of processing single file",
+		Buckets: prometheus.ExponentialBuckets(0.00001, 2, 16), // discuss about loading those values from envs, not only here but generally
+	})
+	processFilesHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
+		Name: "assetstore_metadata_service_process_all_files_duration_seconds",
+		Help: "Duration distribution of processing all files and extracting metadata",
+	})
+)
+
 // New returns a new instance of Processor
 func New(workerFn func(job Job) (interface{}, error), maxWorkers int, processTimeout time.Duration) *Processor {
 	return &Processor{
@@ -46,6 +61,7 @@ func New(workerFn func(job Job) (interface{}, error), maxWorkers int, processTim
 
 // Process processes files and extracts file metadata
 func (p *Processor) Do(ctx context.Context, jobCh chan Job, jobCount int) ([]ResultSuccess, []ResultError) {
+	start := time.Now()
 	errorsCh := make(chan *ResultError, jobCount)
 	successCh := make(chan *ResultSuccess, jobCount)
 
@@ -69,6 +85,8 @@ func (p *Processor) Do(ctx context.Context, jobCh chan Job, jobCount int) ([]Res
 
 	result := p.populateResults(successCh)
 	errs := p.populateErrors(errorsCh)
+
+	processFilesHistogram.Observe(time.Since(start).Seconds())
 	return result, errs
 }
 
@@ -112,6 +130,7 @@ func (p *Processor) work(context context.Context, jobCh chan Job, errorsCh chan 
 
 // processFile processes a single file
 func (p *Processor) processFile(job Job) (*ResultSuccess, error) {
+	start := time.Now()
 	glog.Infof("Processing file `%s`...\n", job.FilePath)
 
 	res, err := p.workerFn(job)
@@ -125,7 +144,8 @@ func (p *Processor) processFile(job Job) (*ResultSuccess, error) {
 		FilePath: job.FilePath,
 		Output:   res,
 	}
-
+	
+	processSingleFileHistogram.Observe(time.Since(start).Seconds())
 	return result, nil
 }
 

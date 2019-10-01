@@ -4,17 +4,17 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir: pr/
-      version: "PR-5340"
+      version: "PR-5805"
     runtimeAgentTests:
       dir: pr/
-      version: "PR-5625"
+      version: "PR-5805"
 
 compassRuntimeAgent:
   image:
     pullPolicy: IfNotPresent
   sync:
-    controllerSyncPeriod: 15
-    minimalConfigSyncTime: 15
+    controllerSyncPeriod: 15s
+    minimalConfigSyncTime: 15s
   resources:
     integrationNamespace: "kyma-integration"
     gatewayPort: 8080
@@ -23,6 +23,22 @@ compassRuntimeAgent:
     insecureConfigurationFetch: true
     configMap:
       name: compass-agent-configuration
+      namespace: compass-system
+  certificates:
+    renewal:
+      validityThreshold: "0.3"
+    clientCertificate:
+      secret:
+        name: cluster-client-certificates
+        namespace: compass-system
+    caCertificate:
+      secret:
+        name: application-connector-certs
+        namespace: istio-system
+  connector:
+    insecureCommunication: true
+  debugg:
+    queryLogging: false
   tests:
     enabled: true
     mockService:
@@ -30,3 +46,7 @@ compassRuntimeAgent:
     configApplicationWaitTime: 50
     proxyInvalidationWaitTime: 150
     graphqlLogs: false
+    oauth:
+      hydra:
+        publicUrl: http://ory-hydra-public.kyma-system:4444
+        adminUrl: http://ory-hydra-admin.kyma-system:4445

@@ -7,9 +7,6 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -18,6 +15,9 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"kyma-project.io/compass-runtime-agent/internal/apperrors"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/mocks"
 )
 
 func TestCreateDocsTopic(t *testing.T) {
@@ -257,7 +257,7 @@ func createTestDocsTopicEntry() docstopic.Entry {
 func createMatcherFunction(docsTopicEntry docstopic.Entry, expectedResourceVersion string) func(*unstructured.Unstructured) bool {
 	findSource := func(sources []v1alpha1.Source, key string) (v1alpha1.Source, bool) {
 		for _, source := range sources {
-			if source.Type == key && source.Name == fmt.Sprintf(DocsTopicNameFormat, key, docsTopicEntry.Id) {
+			if source.Type == v1alpha1.DocsTopicSourceType(key) && source.Name == v1alpha1.DocsTopicSourceName(fmt.Sprintf(DocsTopicNameFormat, key, docsTopicEntry.Id)) {
 				return source, true
 			}
 		}

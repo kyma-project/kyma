@@ -27,6 +27,8 @@ spec:
               name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
               optional: true
           env:
+            - name: DIRECTOR_URL
+              value: "https://compass-gateway-auth-oauth.{{ .Values.global.ingress.domainName }}/director/graphql"
             - name: NAMESPACE
               value: {{ .Release.Namespace }}
             - name: INTEGRATION_NAMESPACE
@@ -45,6 +47,10 @@ spec:
               value: "{{ .Values.compassRuntimeAgent.tests.graphqlLogs }}"
             - name: SCENARIO_LABEL
               value: "COMPASS_RUNTIME_AGENT_TESTS"
+            - name: HYDRA_PUBLIC_URL
+              value: {{ .Values.compassRuntimeAgent.tests.oauth.hydra.publicUrl }}
+            - name: HYDRA_ADMIN_URL
+              value: {{ .Values.compassRuntimeAgent.tests.oauth.hydra.adminUrl }}
           command:
           - "/bin/sh"
           args:

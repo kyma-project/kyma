@@ -1,13 +1,13 @@
 package secrets
 
 import (
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
+	"kyma-project.io/compass-runtime-agent/internal/apperrors"
+	"kyma-project.io/compass-runtime-agent/internal/k8sconsts"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy"
 	"k8s.io/apimachinery/pkg/types"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy"
 )
 
 type modificationFunction func(modStrategy strategy.ModificationStrategy, application string, appUID types.UID, name, serviceID string, newData strategy.SecretData) apperrors.AppError

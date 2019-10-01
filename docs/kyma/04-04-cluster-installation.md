@@ -152,7 +152,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
   </details>
   <details>
-  <summary>
+  <summary label="Gardener">
   Gardener
   </summary>
   

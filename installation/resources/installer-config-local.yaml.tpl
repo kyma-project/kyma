@@ -37,8 +37,6 @@ data:
   global.adminPassword: ""
   global.minikubeIP: ""
   nginx-ingress.controller.service.loadBalancerIP: ""
-  global.serviceCatalogApiserver.enabled: "true"
-  global.serviceCatalogCrds.enabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -34,9 +34,9 @@ Use the following environment variables to configure the tests:
 | Name | Required | Default | Description |
 |-----|:---------:|--------|------------|
 | **DOMAIN** | NO | `kyma.local` | The domain where Kyma runs. |
-| **USER_EMAIL** | YES | - | The email address for authentication in Dex. |
-| **USER_PASSWORD** | YES | - | The password for authentication in Dex. |
-| **KUBECONFIG** | NO | - | The path to the `kubeconfig` file needed to run tests outside the cluster. |
+| **USER_EMAIL** | YES | None | The email address for authentication in Dex. |
+| **USER_PASSWORD** | YES | None | The password for authentication in Dex. |
+| **KUBECONFIG** | NO | None | The path to the `kubeconfig` file needed to run tests outside the cluster. |
 
 ### Use flags
 

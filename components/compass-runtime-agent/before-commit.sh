@@ -10,18 +10,33 @@ NC='\033[0m' # No Color
 echo -e "${INVERTED}"
 echo "USER: " + $USER
 echo "PATH: " + $PATH
-echo "GOPATH:" + $GOPATH
 echo -e "${NC}"
 
 ##
-# DEP ENSURE
+# GET DEPENDENCIES
 ##
-dep ensure -v --vendor-only
-ensureResult=$?
-if [ ${ensureResult} != 0 ]; then
-	echo -e "${RED}✗ dep ensure -v --vendor-only${NC}\n$ensureResult${NC}"
+go mod download
+goModResult=$?
+if [ ${goModResult} != 0 ]; then
+	echo -e "${RED}✗ go mod download${NC}\n$goModResult${NC}"
 	exit 1
-else echo -e "${GREEN}√ dep ensure -v --vendor-only${NC}"
+else echo -e "${GREEN}√ go mod download${NC}"
+fi
+
+go mod vendor
+goModVendorResult=$?
+if [ ${goModVendorResult} != 0 ]; then
+	echo -e "${RED}✗ go mod vendor${NC}\n$goModVendorResult${NC}"
+	exit 1
+else echo -e "${GREEN}√ go mod vendor${NC}"
+fi
+
+go mod verify
+goModVerifyResult=$?
+if [ ${goModVerifyResult} != 0 ]; then
+	echo -e "${RED}✗ go mod verify${NC}\ngoModVerifyResult${NC}"
+	exit 1
+else echo -e "${GREEN}√ go mod verify${NC}"
 fi
 
 ##
@@ -44,18 +59,6 @@ else echo -e "${GREEN}√ go build${NC}"
 fi
 
 ##
-# DEP STATUS
-##
-echo "? dep status"
-depResult=$(dep status -v)
-if [[ $? != 0 ]]
-    then
-        echo -e "${RED}✗ dep status\n$depResult${NC}"
-        exit 1;
-    else  echo -e "${GREEN}√ dep status${NC}"
-fi
-
-##
 # GO TEST
 ##
 echo "? go test"
@@ -71,49 +74,17 @@ else
 	echo -e "${GREEN}√ go test${NC}"
 fi
 
-filesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/|_*/testdata/|/pkg\/|_*export_test.go")
-#
-# GO IMPORTS
-#
-go build -o goimports-vendored ./vendor/golang.org/x/tools/cmd/goimports
-goImportsResult=$(echo "${filesToCheck}" | xargs -L1 ./goimports-vendored -w -l)
-rm goimports-vendored
-
-if [[ $(echo ${#goImportsResult}) != 0 ]]
-	then
-    	echo -e "${RED}✗ goimports ${NC}\n$goImportsResult${NC}"
-    	exit 1;
-	else echo -e "${GREEN}√ goimports ${NC}"
-fi
-
 #
 # GO FMT
 #
+filesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/|_*/testdata/|/pkg\/|_*export_test.go")
+
 goFmtResult=$(echo "${filesToCheck}" | xargs -L1 go fmt)
 if [[ $(echo ${#goFmtResult}) != 0 ]]
 	then
     	echo -e "${RED}✗ go fmt${NC}\n$goFmtResult${NC}"
     	exit 1;
 	else echo -e "${GREEN}√ go fmt${NC}"
-fi
-
-##
-# ERRCHECK
-##
-go build -o errcheck-vendored ./vendor/github.com/kisielk/errcheck
-buildErrCheckResult=$?
-if [[ ${buildErrCheckResult} != 0 ]]; then
-    echo -e "${RED}✗ go build errcheck${NC}\n${buildErrCheckResult}${NC}"
-    exit 1
-fi
-
-errCheckResult=$(./errcheck-vendored -blank -asserts -ignoregenerated ./...)
-rm errcheck-vendored
-
-if [[ $(echo ${#errCheckResult}) != 0 ]]; then
-    echo -e "${RED}✗ [errcheck] unchecked error in:${NC}\n${errCheckResult}${NC}"
-    exit 1
-else echo -e "${GREEN}√ errcheck ${NC}"
 fi
 
 #

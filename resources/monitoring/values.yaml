@@ -1,9 +1,5 @@
 global:
   isLocalEnv: false
-  serviceCatalogApiserver:
-    enabled: true
-  serviceCatalogCrds:
-    enabled: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:

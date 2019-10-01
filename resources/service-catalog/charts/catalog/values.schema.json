@@ -3,16 +3,16 @@
     "description": "Schema definition for catalog helm subchart values",
     "type": "object",
     "properties": {
-        "apiserver": {
-            "description": "Configuration properties for the apiserver component",
+        "webhook": {
+            "description": "Configuration properties for the webhook component",
             "type": "object",
             "properties": {
                 "resources": {
-                    "description": "Defining the resources for the apiserver component",
+                    "description": "Defining the resources for the webhook component.",
                     "type": "object",
                     "properties": {
                         "requests": {
-                            "description": "Defining the amount of resources needed",
+                            "description": "Defining the amount of resources needed.",
                             "type": "object",
                             "properties": {
                                 "cpu": {
@@ -53,7 +53,7 @@
             }
         },
         "controllerManager": {
-            "description": "Configuration properties for the controllerManager",
+            "description": "Configuration properties for the controllerManager component",
             "type": "object",
             "properties": {
                 "resources": {
