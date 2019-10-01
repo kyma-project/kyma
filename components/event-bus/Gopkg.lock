@@ -9,7 +9,7 @@
     "container/apiv1",
     "internal/version",
     "monitoring/apiv3",
-    "trace/apiv2"
+    "trace/apiv2",
   ]
   pruneopts = "NUT"
   revision = "ceeb313ad77b789a7fa5287b36a1d127b69b7093"
@@ -28,7 +28,7 @@
   name = "contrib.go.opencensus.io/exporter/stackdriver"
   packages = [
     ".",
-    "monitoredresource"
+    "monitoredresource",
   ]
   pruneopts = "NUT"
   revision = "bf39ce456bd8c6e2e3e37ef9775ed8b10628feca"
@@ -85,7 +85,7 @@
     "private/protocol/rest",
     "private/protocol/xml/xmlutil",
     "service/sts",
-    "service/sts/stsiface"
+    "service/sts/stsiface",
   ]
   pruneopts = "NUT"
   revision = "4651c2a344e90782ae06c956a5b0edcae3ae21d0"
@@ -105,7 +105,7 @@
   packages = [
     "gen-go/agent/common/v1",
     "gen-go/metrics/v1",
-    "gen-go/resource/v1"
+    "gen-go/resource/v1",
   ]
   pruneopts = "NUT"
   revision = "d89fa54de508111353cb0b06403c00569be780d8"
@@ -148,7 +148,7 @@
   name = "github.com/emicklei/go-restful"
   packages = [
     ".",
-    "log"
+    "log",
   ]
   pruneopts = "NUT"
   revision = "3eb9738c1697594ea6e71a7156a9bb32ed216cf0"
@@ -217,7 +217,7 @@
     "gogoproto",
     "proto",
     "protoc-gen-gogo/descriptor",
-    "sortkeys"
+    "sortkeys",
   ]
   pruneopts = "NUT"
   revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
@@ -251,7 +251,7 @@
     "ptypes/empty",
     "ptypes/struct",
     "ptypes/timestamp",
-    "ptypes/wrappers"
+    "ptypes/wrappers",
   ]
   pruneopts = "NUT"
   revision = "6c65a5562fc06764971b7c5d05c76c75e84bdbf7"
@@ -282,7 +282,7 @@
     "cmp/internal/diff",
     "cmp/internal/flags",
     "cmp/internal/function",
-    "cmp/internal/value"
+    "cmp/internal/value",
   ]
   pruneopts = "NUT"
   revision = "6f77996f0c42f7b84e5a2b252227263f93432e9b"
@@ -318,7 +318,7 @@
   packages = [
     "OpenAPIv2",
     "compiler",
-    "extensions"
+    "extensions",
   ]
   pruneopts = "NUT"
   revision = "7c663266750e7d82587642f65e60bc4083f1f84e"
@@ -330,7 +330,7 @@
   name = "github.com/gregjones/httpcache"
   packages = [
     ".",
-    "diskcache"
+    "diskcache",
   ]
   pruneopts = "NUT"
   revision = "c63ab54fda8f77302f8d414e19933f2b6026a089"
@@ -340,7 +340,7 @@
   name = "github.com/hashicorp/golang-lru"
   packages = [
     ".",
-    "simplelru"
+    "simplelru",
   ]
   pruneopts = "NUT"
   revision = "20f1fb78b0740ba8c3cb143a61e86ba5c8669768"
@@ -354,7 +354,7 @@
     "ratelimiter",
     "util",
     "watch",
-    "winfile"
+    "winfile",
   ]
   pruneopts = "NUT"
   revision = "a30252cb686a21eb2d0b98132633053ec2f7f1e5"
@@ -437,7 +437,7 @@
     "pkg/logging",
     "pkg/reconciler/names",
     "pkg/reconciler/testing",
-    "pkg/utils"
+    "pkg/utils",
   ]
   pruneopts = "NUT"
   revision = "a59dae6f326057211f43f7c2d1414a9fd821b8aa"
@@ -497,7 +497,7 @@
   packages = [
     ".",
     "encoders/builtin",
-    "util"
+    "util",
   ]
   pruneopts = "NUT"
   revision = "fb0396ee0bdb8018b0fef30d6d1de798ce99cd05"
@@ -508,7 +508,7 @@
   name = "github.com/nats-io/go-nats-streaming"
   packages = [
     ".",
-    "pb"
+    "pb",
   ]
   pruneopts = "NUT"
   revision = "e15a53f85e4932540600a16b56f6c4f65f58176f"
@@ -543,7 +543,7 @@
     "reporters/stenographer",
     "reporters/stenographer/support/go-colorable",
     "reporters/stenographer/support/go-isatty",
-    "types"
+    "types",
   ]
   pruneopts = "NUT"
   revision = "2e1be8f7d90e9d3e3e58b0ce470f2f14d075406f"
@@ -566,7 +566,7 @@
     "matchers/support/goraph/edge",
     "matchers/support/goraph/node",
     "matchers/support/goraph/util",
-    "types"
+    "types",
   ]
   pruneopts = "NUT"
   revision = "65fb64232476ad9046e57c26cd0bff3d3a8dc6cd"
@@ -586,7 +586,7 @@
   packages = [
     ".",
     "ext",
-    "log"
+    "log",
   ]
   pruneopts = "NUT"
   revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
@@ -601,7 +601,7 @@
     "thrift/gen-go/scribe",
     "thrift/gen-go/zipkincore",
     "types",
-    "wire"
+    "wire",
   ]
   pruneopts = "NUT"
   revision = "26cf9707480e6b90e5eff22cf0bbf05319154232"
@@ -636,7 +636,7 @@
   name = "github.com/pierrec/lz4"
   packages = [
     ".",
-    "internal/xxh32"
+    "internal/xxh32",
   ]
   pruneopts = "NUT"
   revision = "635575b42742856941dbc767b44905bb9ba083f6"
@@ -665,7 +665,7 @@
     "prometheus",
     "prometheus/internal",
     "prometheus/promauto",
-    "prometheus/promhttp"
+    "prometheus/promhttp",
   ]
   pruneopts = "NUT"
   revision = "505eaef017263e299324067d40ca2c48f6a2cf50"
@@ -685,7 +685,7 @@
   packages = [
     "expfmt",
     "internal/bitbucket.org/ww/goautoneg",
-    "model"
+    "model",
   ]
   pruneopts = "NUT"
   revision = "a82f4c12f983cc2649298185f296632953e50d3e"
@@ -713,7 +713,7 @@
   packages = [
     "modfile",
     "module",
-    "semver"
+    "semver",
   ]
   pruneopts = "NUT"
   revision = "d87f08a7d80821c797ffc8eb8f4e01675f378736"
@@ -724,7 +724,7 @@
   name = "github.com/spf13/afero"
   packages = [
     ".",
-    "mem"
+    "mem",
   ]
   pruneopts = "NUT"
   revision = "a5d6946387efe7d64d09dcba68cdd523dc1273a3"
@@ -776,7 +776,7 @@
     "trace",
     "trace/internal",
     "trace/propagation",
-    "trace/tracestate"
+    "trace/tracestate",
   ]
   pruneopts = "NUT"
   revision = "9c377598961b706d1542bd2d84d538b5094d596e"
@@ -809,7 +809,7 @@
     "internal/exit",
     "internal/ztest",
     "zapcore",
-    "zaptest"
+    "zaptest",
   ]
   pruneopts = "NUT"
   revision = "67bc79d13d155c02fd008f721863ff8cc5f30659"
@@ -828,7 +828,7 @@
   name = "golang.org/x/lint"
   packages = [
     ".",
-    "golint"
+    "golint",
   ]
   pruneopts = "NUT"
   revision = "959b441ac422379a43da2230f62be024250818b0"
@@ -848,7 +848,7 @@
     "http2/hpack",
     "idna",
     "internal/timeseries",
-    "trace"
+    "trace",
   ]
   pruneopts = "NUT"
   revision = "146acd28ed5894421fb5aac80ca93bc1b1f46f87"
@@ -862,7 +862,7 @@
     "google",
     "internal",
     "jws",
-    "jwt"
+    "jwt",
   ]
   pruneopts = "NUT"
   revision = "0f29369cfe4552d0e4bcddc57cc75f4d7e672a33"
@@ -881,7 +881,7 @@
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows"
+    "windows",
   ]
   pruneopts = "NUT"
   revision = "4497e2df6f9e69048a54498c7affbbec3294ad47"
@@ -915,7 +915,7 @@
     "unicode/bidi",
     "unicode/cldr",
     "unicode/norm",
-    "unicode/rangetable"
+    "unicode/rangetable",
   ]
   pruneopts = "NUT"
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
@@ -940,7 +940,7 @@
     "go/internal/gcimporter",
     "go/types/typeutil",
     "imports",
-    "internal/fastwalk"
+    "internal/fastwalk",
   ]
   pruneopts = "NUT"
   revision = "29f11e2b93f4d66f7c335bd7b2892836d4944f5c"
@@ -958,7 +958,7 @@
     "transport",
     "transport/grpc",
     "transport/http",
-    "transport/http/internal/propagation"
+    "transport/http/internal/propagation",
   ]
   pruneopts = "NUT"
   revision = "c5ff4101c09da19daa147f5d98245a08bfea9838"
@@ -978,7 +978,7 @@
     "internal/socket",
     "internal/urlfetch",
     "socket",
-    "urlfetch"
+    "urlfetch",
   ]
   pruneopts = "NUT"
   revision = "5f2a59506353b8d5ba8cbbcd9f3c1f41f1eaf079"
@@ -999,7 +999,7 @@
     "googleapis/devtools/cloudtrace/v2",
     "googleapis/monitoring/v3",
     "googleapis/rpc/status",
-    "protobuf/field_mask"
+    "protobuf/field_mask",
   ]
   pruneopts = "NUT"
   revision = "92dd089d5514cecde7a465f807541f83dfd486d5"
@@ -1051,7 +1051,7 @@
     "serviceconfig",
     "stats",
     "status",
-    "tap"
+    "tap",
   ]
   pruneopts = "NUT"
   revision = "6eaf6f47437a6b4e2153a190160ef39a92c7eceb"
@@ -1125,7 +1125,7 @@
     "settings/v1alpha1",
     "storage/v1",
     "storage/v1alpha1",
-    "storage/v1beta1"
+    "storage/v1beta1",
   ]
   pruneopts = "NUT"
   revision = "9ad12a4af32677db3ae70bef3371bf9b618eb3a0"
@@ -1142,7 +1142,7 @@
     "pkg/client/clientset/clientset/scheme",
     "pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
     "pkg/client/clientset/clientset/typed/apiextensions/v1beta1/fake",
-    "pkg/client/listers/apiextensions/v1beta1"
+    "pkg/client/listers/apiextensions/v1beta1",
   ]
   pruneopts = "NUT"
   revision = "fa58353d80f37509c2b8de8e67f2377a2bc2ce80"
@@ -1197,7 +1197,7 @@
     "pkg/version",
     "pkg/watch",
     "third_party/forked/golang/json",
-    "third_party/forked/golang/reflect"
+    "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
   revision = "01f179d85dbce0f2e0e4351a92394b38694b7cae"
@@ -1376,7 +1376,7 @@
     "util/homedir",
     "util/integer",
     "util/retry",
-    "util/workqueue"
+    "util/workqueue",
   ]
   pruneopts = "NUT"
   revision = "4f3abb12cae2d6817e1b6d72d9cbc3d3a6ddf965"
@@ -1391,7 +1391,7 @@
     "generator",
     "namer",
     "parser",
-    "types"
+    "types",
   ]
   pruneopts = "NUT"
   revision = "4242d8e6c5dba56827bb7bcf14ad11cda38f3991"
@@ -1444,7 +1444,7 @@
     "system",
     "system/testing",
     "tracker",
-    "webhook"
+    "webhook",
   ]
   pruneopts = "NUT"
   revision = "2b848f71969c997809a2dbea8351eaadb23e9bc9"
@@ -1480,7 +1480,7 @@
     "pkg/webhook/admission",
     "pkg/webhook/admission/types",
     "pkg/webhook/internal/metrics",
-    "pkg/webhook/types"
+    "pkg/webhook/types",
   ]
   pruneopts = "NUT"
   revision = "f6f0bc9611363b43664d08fb097ab13243ef621d"
@@ -1496,7 +1496,7 @@
     "pkg/generate/rbac",
     "pkg/internal/codegen",
     "pkg/internal/codegen/parse",
-    "pkg/util"
+    "pkg/util",
   ]
   pruneopts = "NUT"
   revision = "38b2f3f497ed6b8ea5d2844ecf00c28ac4b5c2c4"
@@ -1508,7 +1508,7 @@
   packages = [
     "integration",
     "integration/addr",
-    "integration/internal"
+    "integration/internal",
   ]
   pruneopts = "NUT"
   revision = "d348cb12705b516376e0c323bacca72b00a78425"
@@ -1580,7 +1580,7 @@
     "sigs.k8s.io/controller-runtime/pkg/runtime/signals",
     "sigs.k8s.io/controller-runtime/pkg/source",
     "sigs.k8s.io/controller-tools/cmd/controller-gen",
-    "sigs.k8s.io/testing_frameworks/integration"
+    "sigs.k8s.io/testing_frameworks/integration",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
