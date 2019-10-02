@@ -898,6 +898,16 @@ type ResourceRule {
     resources: [String!]
 }
 
+# Function
+
+type Function {
+    name: String!
+	namespace: String!
+	labels: Labels!
+	runtime: String!
+	size: String!
+}
+
 # Queries
 
 type Query {
@@ -968,6 +978,8 @@ type Query {
     clusterMicroFrontends: [ClusterMicroFrontend!]! @HasAccess(attributes: {resource: "clustermicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
 
     selfSubjectRules(namespace: String): [ResourceRule!]! @HasAccess(attributes: {apiGroup: "authorization.k8s.io", resource: "selfsubjectrulesreviews", verb: "create", apiVersion: "v1" namespaceArg: "namespace"})
+
+    functions(namespace: String!): [Function!]! @HasAccess(attributes: {apiGroup: "serverless.kyma-project.io", resource: "functions", verb: "list", apiVersion: "v1alpha1" namespaceArg: "namespace"})
 }
 
 # Mutations

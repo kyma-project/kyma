@@ -312,6 +312,14 @@ type File struct {
 	Metadata JSON   `json:"metadata"`
 }
 
+type Function struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	Labels    Labels `json:"labels"`
+	Runtime   string `json:"runtime"`
+	Size      string `json:"size"`
+}
+
 type IDPPreset struct {
 	Name    string `json:"name"`
 	Issuer  string `json:"issuer"`

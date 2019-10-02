@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless"
 	"time"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
@@ -34,6 +35,7 @@ type RootResolver struct {
 	cms            *cms.PluggableContainer
 	ac             *apicontroller.PluggableResolver
 	authentication *authentication.PluggableResolver
+	serverless	*serverless.Container
 }
 
 func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
@@ -90,6 +92,12 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 	}
 	makePluggable(authenticationResolver)
 
+	serverlessResolver, err := serverless.New(restConfig, informerResyncPeriod)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing serverless resolver")
+	}
+	makePluggable(serverlessResolver)
+
 	return &RootResolver{
 		k8s:            k8sResolver,
 		ui:             uiContainer.Resolver,
@@ -100,6 +108,7 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 		cms:            cmsContainer,
 		ac:             acResolver,
 		authentication: authenticationResolver,
+		serverless:		serverlessResolver,
 	}, nil
 }
 
@@ -389,6 +398,10 @@ func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace strin
 
 type queryResolver struct {
 	*RootResolver
+}
+
+func (r *queryResolver) Functions(ctx context.Context, namespace string) ([]gqlschema.Function, error) {
+	panic("implement me")
 }
 
 func (r *queryResolver) Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]gqlschema.Namespace, error) {
