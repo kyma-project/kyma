@@ -4,8 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/cms/extractor"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/convert"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
