@@ -2,8 +2,8 @@
 package convert
 
 import (
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/pretty"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
