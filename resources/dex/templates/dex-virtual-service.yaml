@@ -20,6 +20,10 @@ spec:
         port:
           number: {{ .Values.containerPort }}
         host: dex-service
+      headers:
+        response:
+          add:
+            "Vary": "Origin"
     corsPolicy:
       allowOrigin:
       - "*"
