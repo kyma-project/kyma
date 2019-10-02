@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"knative.dev/serving/pkg/apis/serving/v1beta1"
 
@@ -36,12 +37,13 @@ const (
 )
 
 func TestKnativeServingAcceptance(t *testing.T) {
-	domainName := mustGetenv(t, domainNameEnvVar)
+	//domainName := mustGetenv(t, domainNameEnvVar)
 	target := mustGetenv(t, targetEnvVar)
 
-	testServiceURL := fmt.Sprintf("https://test-service.knative-serving.%s", domainName)
+	//testServiceURL := fmt.Sprintf("https://test-service.knative-serving.serverless.%s", domainName)
 
 	ingressClient, err := ingressgateway.FromEnv().Client()
+
 	if err != nil {
 		t.Fatalf("Unexpected error when creating ingressgateway client: %s", err)
 	}
@@ -49,15 +51,17 @@ func TestKnativeServingAcceptance(t *testing.T) {
 	kubeConfig := loadKubeConfigOrDie(t)
 	serviceClient := servingtyped.NewForConfigOrDie(kubeConfig).Services("knative-serving")
 
+	const podName = "test-service-foo"
+	const svcName = "test-service"
 	svc := serving.Service{
 		ObjectMeta: meta.ObjectMeta{
-			Name: "test-service",
+			Name: svcName,
 		},
 		Spec: serving.ServiceSpec{
 			ConfigurationSpec: serving.ConfigurationSpec{
 				Template: &serving.RevisionTemplateSpec{
 					ObjectMeta: meta.ObjectMeta{
-						Name: "test-service-foo",
+						Name: podName,
 					},
 					Spec: serving.RevisionSpec{
 						RevisionSpec: v1beta1.RevisionSpec{
@@ -80,13 +84,35 @@ func TestKnativeServingAcceptance(t *testing.T) {
 		},
 	}
 
-	if _, err := serviceClient.Create(&svc); err != nil {
+	if _, err = serviceClient.Create(&svc); err != nil {
 		t.Fatalf("Cannot create test Service: %v", err)
 	}
+
 	defer deleteService(serviceClient, svc.Name)
+	var testServiceURL string
+
+	err = retry.Do(func() error {
+		ksvc, err := serviceClient.Get(svcName, meta.GetOptions{})
+		if err != nil {
+			return err
+		}
+		if ksvc.Status.URL.String() == "" {
+			return fmt.Errorf("url not set yet")
+		}
+		svcurl := ksvc.Status.URL
+		svcurl.Scheme = "https"
+		testServiceURL = svcurl.String()
+		return nil
+
+	}, retry.DelayType(retry.FixedDelay), retry.Delay(5*time.Second), retry.Attempts(10))
+
+	if err != nil {
+		t.Fatalf("Cannot get test service url: %s", err)
+	}
 
 	err = retry.Do(func() error {
 		t.Logf("Calling: %s", testServiceURL)
+
 		resp, err := ingressClient.Get(testServiceURL)
 		if err != nil {
 			return err
@@ -111,8 +137,10 @@ func TestKnativeServingAcceptance(t *testing.T) {
 
 		return nil
 	}, retry.OnRetry(func(n uint, err error) {
-		t.Logf("[%v] try failed: %s", n, err)
+		fmt.Printf("[%v] try failed: %s", n, err)
 	}), retry.Attempts(20),
+		retry.DelayType(retry.FixedDelay),
+		retry.Delay(5*time.Second),
 	)
 
 	if err != nil {
