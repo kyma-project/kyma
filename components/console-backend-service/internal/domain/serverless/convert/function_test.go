@@ -39,7 +39,7 @@ func TestFunctionConvert_UnstructuredToFunction(t *testing.T) {
 	})
 }
 
-func TestFunctionConvert_FunctionToUnstructuredn(t *testing.T) {
+func TestFunctionConvert_FunctionToUnstructured(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		apiVersion := "serverless.kyma-project.io" // v1alpha1.SchemeGroupVersion.String()
 		obj := &v1alpha1.Function{
@@ -51,9 +51,19 @@ func TestFunctionConvert_FunctionToUnstructuredn(t *testing.T) {
 				Name: "ExampleName",
 			},
 		}
-		expected := testingUtils.NewUnstructured(apiVersion, "Function", map[string]interface{}{
-			"name": "ExampleName",
-		}, nil, nil)
+		expected := testingUtils.NewUnstructured(apiVersion, "Function",
+			map[string]interface{} {
+				"name": "ExampleName",
+				"creationTimestamp": nil,
+			},
+			map[string]interface{} {
+				"function": "",
+				"functionContentType": "",
+				"runtime": "",
+				"size": "",
+			},
+			map[string]interface{} {},
+		)
 
 		result, err := convert.FunctionToUnstructured(obj)
 		require.NoError(t, err)

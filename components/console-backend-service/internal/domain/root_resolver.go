@@ -400,10 +400,6 @@ type queryResolver struct {
 	*RootResolver
 }
 
-func (r *queryResolver) Functions(ctx context.Context, namespace string) ([]gqlschema.Function, error) {
-	panic("implement me")
-}
-
 func (r *queryResolver) Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]gqlschema.Namespace, error) {
 	return r.k8s.NamespacesQuery(ctx, withSystemNamespaces, withInactiveStatus)
 }
@@ -582,6 +578,10 @@ func (r *queryResolver) ClusterMicroFrontends(ctx context.Context) ([]gqlschema.
 
 func (r *queryResolver) SelfSubjectRules(ctx context.Context, namespace *string) ([]gqlschema.ResourceRule, error) {
 	return r.k8s.SelfSubjectRulesQuery(ctx, namespace)
+}
+
+func (r *queryResolver) Functions(ctx context.Context, namespace string) ([]gqlschema.Function, error) {
+	return r.serverless.FunctionsQuery(ctx, namespace)
 }
 
 // Subscriptions

@@ -1,10 +1,14 @@
 package serverless
 
 import (
+	"context"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/disabled"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
 	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 	"time"
@@ -20,21 +24,28 @@ type Container struct {
 
 type resolver struct {
 	container *Container
+	functionService *functionService
 }
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
 type Resolver interface {
-
+	FunctionsQuery(ctx context.Context, namespace string) ([]gqlschema.Function, error)
 }
 
 func (r *Container) Enable() error {
 	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(r.dynamicClient, r.informerResyncPeriod)
 	r.informerFactory = informerFactory
 
+	functionService := newFunctionService(informerFactory.ForResource(schema.GroupVersionResource{
+		Version: v1alpha1.GroupVersion.Version,
+		Group: v1alpha1.GroupVersion.Group,
+		Resource: "function",
+	}).Informer())
+
 	r.Pluggable.EnableAndSyncDynamicInformerFactory(r.informerFactory, func() {
 		r.Resolver = &resolver{
 			container: r,
-		}
+			functionService: functionService}
 	})
 
 	return nil
@@ -56,7 +67,7 @@ func New(config *rest.Config, informerResyncPeriod time.Duration) (*Container, e
 	}
 
 	container := &Container{
-		Pluggable: module.NewPluggable("serverless"), // TODO change to serverless
+		Pluggable: module.NewPluggable("serverless"),
 		informerResyncPeriod: informerResyncPeriod,
 		dynamicClient: dynamicClient,
 	}
