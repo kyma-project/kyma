@@ -27,20 +27,13 @@ import (
 )
 
 const (
-	// Domain name used to build the URL tests send HTTP requests to.
-	// `test-service.knative-serving.DOMAIN` is expected to resolve to the IP of the Istio Ingress Gateway.
-	domainNameEnvVar = "DOMAIN_NAME"
-
 	// Message that should be printed by the sample Hello World service.
 	// https://knative.dev/docs/serving/samples/hello-world/helloworld-go/index.html
 	targetEnvVar = "TARGET"
 )
 
 func TestKnativeServingAcceptance(t *testing.T) {
-	//domainName := mustGetenv(t, domainNameEnvVar)
 	target := mustGetenv(t, targetEnvVar)
-
-	//testServiceURL := fmt.Sprintf("https://test-service.knative-serving.serverless.%s", domainName)
 
 	ingressClient, err := ingressgateway.FromEnv().Client()
 
@@ -100,6 +93,9 @@ func TestKnativeServingAcceptance(t *testing.T) {
 			return fmt.Errorf("url not set yet")
 		}
 		svcurl := ksvc.Status.URL
+
+		//TODO(k15r): ksvc returns a URL with scheme http, but this fails as the client then tries to
+		//  open an unencrypted connection on a secure port (443, as probably configured by the ingressgateway.client() )
 		svcurl.Scheme = "https"
 		testServiceURL = svcurl.String()
 		return nil
