@@ -17,7 +17,7 @@ func FunctionToUnstructured(obj *v1alpha1.Function) (*unstructured.Unstructured,
 
 	u, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while converting resource %s %s to unstructured", pretty.Function, obj)
+		return nil, errors.Wrapf(err, "while converting resource %s %T to unstructured", pretty.Function, obj)
 	}
 	if len(u) == 0 {
 		return nil, nil
