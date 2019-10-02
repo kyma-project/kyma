@@ -133,7 +133,7 @@ func TestKnativeServingAcceptance(t *testing.T) {
 
 		return nil
 	}, retry.OnRetry(func(n uint, err error) {
-		fmt.Printf("[%v] try failed: %s", n, err)
+		t.Logf("[%v] try failed: %s", n, err)
 	}), retry.Attempts(20),
 		retry.DelayType(retry.FixedDelay),
 		retry.Delay(5*time.Second),
