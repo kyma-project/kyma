@@ -32,6 +32,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 	"k8s.io/client-go/util/retry"
+	helmapirelease "k8s.io/helm/pkg/proto/hapi/release"
 )
 
 const (
@@ -174,6 +175,21 @@ func (ts *TestSuite) waitForAccessToAPIServer() error {
 
 func (ts *TestSuite) GetMockServiceURL() string {
 	return fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", ts.mockServiceName, ts.config.Namespace, ts.config.MockServicePort)
+}
+
+func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T, applicationName string) {
+	err := testkit.WaitForFunction(defaultCheckInterval, ts.config.ApplicationInstallationTimeout, func() bool {
+		t.Log("Waiting for Application to be deployed...")
+
+		app, err := ts.ApplicationCRClient.Get(applicationName, metav1.GetOptions{})
+		if err != nil {
+			return false
+		}
+
+		return app.Status.InstallationStatus.Status == helmapirelease.Status_DEPLOYED.String()
+	})
+
+	require.NoError(t, err)
 }
 
 func (ts *TestSuite) AddDenierLabels(t *testing.T, appId string, apiIds ...string) {
