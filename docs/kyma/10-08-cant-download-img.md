@@ -3,7 +3,7 @@ title: '"Failed to pull image"' error
 type: Troubleshooting
 ---
 
-When you try to install Kyma locally on Minikube, the installation can fail at a very early stage logging this error:
+When you try to install Kyma locally on Minikube, the installation may fail at a very early stage logging this error:
 
   ```
   POD: tiller-certs-job-cpl67: ERROR: Failed to pull image "eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a": rpc error: code = Unknown desc = Error response from daemon: Get https://eu.gcr.io/v2/: dial tcp: lookup eu.gcr.io on 192.168.64.1:53: read udp 192.168.64.5:55778->192.168.64.1:53: read: connection refused
