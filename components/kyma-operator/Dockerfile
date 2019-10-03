@@ -16,8 +16,8 @@ COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 # Build app
 #
 
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o main .
-RUN mkdir /app && mv ./main /app/main && mv ${BASE_APP_DIR}/licenses /app/licenses
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o kyma-operator .
+RUN mkdir /app && mv ./kyma-operator /app/kyma-operator && mv ${BASE_APP_DIR}/licenses /app/licenses
 
 FROM alpine:3.8
 LABEL source = git@github.com:kyma-project/kyma.git
