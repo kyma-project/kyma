@@ -7,7 +7,7 @@ To enable Compass in Kyma, follow the instructions for the [custom component ins
 
 ## Default Kyma installation
 
-This is a preconfigured single-tenant and single-Runtime mode which will eventually become part of the default Kyma installation. It provides the complete cluster Kyma installation with all components, including both Compass and Agent. Using this mode, you can register external Applications in Kyma. To enable this it, follow the cluster Kyma installation and use the [`installer-cr-cluster-with-compass.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-with-compass.yaml.tpl) configuration file.
+This is a single-tenant mode, which provides the complete cluster Kyma installation with all components, including Compass and Agent. In this mode, Agent is already connected to Compass and they both work in a single-tenant mode. Using this mode, you can register external Applications in Kyma. To enable it, follow the cluster Kyma installation and use the [`installer-cr-cluster-with-compass.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-with-compass.yaml.tpl) configuration file.
 
 ![Kyma mode1](./assets/kyma-mode1.svg)
 
@@ -19,9 +19,9 @@ This is a multi-cluster mode in which you need one cluster with Compass and at l
 ![Kyma mode2](./assets/kyma-mode2.svg)
 
 
-### Kyma with Compass
+### Kyma Compass
 
-This is a multi-tenant and multi-Runtime mode that provides cluster Kyma installation with Compass and only the selected Kyma components that Compass uses. To enable this mode, create this ConfigMap and then perform the cluster Kyma installation using the
+This is a multi-tenant and multi-Runtime mode that provides cluster with Compass and only the selected Kyma components that Compass uses. To enable this mode, create this ConfigMap and then perform the cluster Kyma installation using the
  [`installer-cr-cluster-compass.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-compass.yaml.tpl) configuration file:
 
 ```yaml
