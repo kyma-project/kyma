@@ -1,11 +1,43 @@
+FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190913-65b55d1 as builder
+
+ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/components/kyma-operator
+WORKDIR ${BASE_APP_DIR}
+
+#
+# Copy files
+#
+
+COPY ./vendor/ ${BASE_APP_DIR}/vendor/
+COPY ./pkg/ ${BASE_APP_DIR}/pkg/
+COPY ./cmd/operatr/main.go ${BASE_APP_DIR}/
+COPY ./licenses/ ${BASE_APP_DIR}/licenses/
+
+#
+# Build app
+#
+
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o main .
+RUN mkdir /app && mv ./main /app/main && mv ${BASE_APP_DIR}/licenses /app/licenses
+
 FROM alpine:3.8
+LABEL source = git@github.com:kyma-project/kyma.git
+WORKDIR /app
 
-LABEL source="git@github.com:kyma-project/kyma.git"
+#
+# Install certificates
+#
 
-RUN apk --no-cache add ca-certificates
-RUN apk add --no-cache curl
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
-ADD kyma-operator ./kyma-operator
-COPY ./licenses/ /app/licenses
+#
+# Copy binary
+#
 
-ENTRYPOINT ["/kyma-operator"]
+COPY --from=builder /app /app
+
+#
+# Run app
+#
+
+CMD ["/app/main"]
+
