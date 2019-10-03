@@ -265,11 +265,11 @@ func (ts *TestSuite) getResourceNames(t *testing.T, appId string, apiIds ...stri
 
 func (ts *TestSuite) WaitForProxyInvalidation() {
 	// TODO: we should consider introducing some way to invalidate proxy cache
-	time.Sleep(time.Duration(ts.config.ProxyInvalidationWaitTime) * time.Second)
+	time.Sleep(ts.config.ProxyInvalidationWaitTime)
 }
 
 func (ts *TestSuite) WaitForConfigurationApplication() {
-	time.Sleep(time.Duration(ts.config.ConfigApplicationWaitTime) * time.Second)
+	time.Sleep(ts.config.ConfigApplicationWaitTime)
 }
 
 func (ts *TestSuite) updatePod(podName string, updateFunc updatePodFunc) error {
