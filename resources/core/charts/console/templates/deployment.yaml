@@ -44,8 +44,8 @@ spec:
           ports:
             - containerPort: {{ .Values.core_ui.service.internalPort }}
           volumeMounts:
-            - name: config
-              mountPath: /usr/share/nginx/html/assets/config
+            - name: core-ui-config
+              mountPath: /var/public/config
             - name: nginx
               mountPath: /usr/share/nginx-extended/
       volumes:
@@ -55,6 +55,12 @@ spec:
           items:
           - key: config.js
             path: config.js
+      - name: core-ui-config
+        configMap:
+          name: {{ .Chart.Name }}-config
+          items:
+          - key: core-ui-config.js
+            path: core-ui-config.js
       - name: nginx
         configMap:
           name: {{ .Chart.Name }}-config

@@ -8,7 +8,7 @@ spec:
   displayName: Core
   version: v1
   category: Configuration
-  placement: namespace
+  placement: cluster
   viewBaseUrl: 'https://core-ui.{{ js .Values.global.ingress.domainName }}'
   navigationNodes:
     - label: Core UI
