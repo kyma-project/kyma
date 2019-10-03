@@ -1,8 +1,9 @@
 package resource_test
 
 import (
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -54,17 +55,17 @@ func TestToUnstructured(t *testing.T) {
 			},
 		}
 		expected := testingUtils.NewUnstructured(apiVersion, "Function",
-			map[string]interface{} {
-				"name": "ExampleName",
+			map[string]interface{}{
+				"name":              "ExampleName",
 				"creationTimestamp": nil,
 			},
-			map[string]interface{} {
-				"function": "",
+			map[string]interface{}{
+				"function":            "",
 				"functionContentType": "",
-				"runtime": "",
-				"size": "",
+				"runtime":             "",
+				"size":                "",
 			},
-			map[string]interface{} {},
+			map[string]interface{}{},
 		)
 
 		result, err := resource.ToUnstructured(obj)

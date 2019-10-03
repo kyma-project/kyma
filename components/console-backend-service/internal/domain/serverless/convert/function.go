@@ -1,4 +1,3 @@
-
 package convert
 
 import (
@@ -48,4 +47,3 @@ func FunctionsToGQLs(in []*v1alpha1.Function) ([]gqlschema.Function, error) {
 	}
 	return result, nil
 }
-

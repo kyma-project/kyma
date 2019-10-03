@@ -2,8 +2,9 @@ package domain
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless"
 	"time"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
 
@@ -35,7 +36,7 @@ type RootResolver struct {
 	cms            *cms.PluggableContainer
 	ac             *apicontroller.PluggableResolver
 	authentication *authentication.PluggableResolver
-	serverless	*serverless.Container
+	serverless     *serverless.Container
 }
 
 func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
@@ -108,7 +109,7 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 		cms:            cmsContainer,
 		ac:             acResolver,
 		authentication: authenticationResolver,
-		serverless:		serverlessResolver,
+		serverless:     serverlessResolver,
 	}, nil
 }
 

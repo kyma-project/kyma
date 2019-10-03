@@ -3,7 +3,7 @@ package pretty
 type Kind string
 
 const (
-	Function Kind = "Function"
+	Function  Kind = "Function"
 	Functions Kind = "Functions"
 )
 

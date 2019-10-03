@@ -2,14 +2,13 @@ package serverless
 
 import (
 	"context"
+	"time"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/disabled"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/rest"
-	"time"
 )
 
 type Container struct {
@@ -29,11 +28,7 @@ type Resolver interface {
 }
 
 func (r *Container) Enable() error {
-	functionService := newFunctionService(r.serviceFactory.ForResource(schema.GroupVersionResource{
-		Version:  v1alpha1.SchemeGroupVersion.Version,
-		Group:    v1alpha1.SchemeGroupVersion.Group,
-		Resource: "functions",
-	}))
+	functionService := newFunctionService(r.serviceFactory)
 
 	r.Pluggable.EnableAndSyncDynamicInformerFactory(r.serviceFactory.InformerFactory, func() {
 		r.Resolver = &resolver{
@@ -53,7 +48,7 @@ func (r *Container) Disable() error {
 }
 
 func New(config *rest.Config, informerResyncPeriod time.Duration) (*Container, error) {
-	serviceFactory, err := resource.NewServiceFactory(config, informerResyncPeriod)
+	serviceFactory, err := resource.NewServiceFactoryForConfig(config, informerResyncPeriod)
 	container := &Container{
 		Pluggable:      module.NewPluggable("serverless"),
 		serviceFactory: serviceFactory,
