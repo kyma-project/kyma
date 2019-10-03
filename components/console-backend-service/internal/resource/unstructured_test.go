@@ -43,7 +43,7 @@ func TestFromUnstructured(t *testing.T) {
 
 func TestToUnstructured(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		apiVersion := "serverless.kyma-project.io" // v1alpha1.SchemeGroupVersion.String()
+		apiVersion := "serverless.kyma-project.io"
 		obj := &v1alpha1.Function{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Function",
