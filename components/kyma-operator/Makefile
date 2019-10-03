@@ -1,39 +1,11 @@
 APP_NAME = kyma-operator
-IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
-TAG = $(DOCKER_TAG)
-binary=$(APP_NAME)
+APP_PATH = components/kyma-operator
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190913-65b55d1
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/scripts
 
-.PHONY: build
-build:
-	./before-commit.sh ci
+include $(SCRIPTS_DIR)/go-dep.mk
 
-.PHONY: pull-licenses
-pull-licenses:
-ifdef LICENSE_PULLER_PATH
-	bash $(LICENSE_PULLER_PATH)
-else
-	mkdir -p licenses
-endif
-
-.PHONY: build-image
-build-image: pull-licenses
-	cp $(binary) deploy/kyma-operator/$(binary)
-	cp -R licenses deploy/kyma-operator/
-	docker build -t $(APP_NAME):latest deploy/kyma-operator
-
-.PHONY: push-image
-push-image:
-	docker tag $(APP_NAME) $(IMG):$(TAG)
-	docker push $(IMG):$(TAG)
-
-.PHONY: ci-pr
-ci-pr: build build-image push-image
-
-.PHONY: ci-master
-ci-master: build build-image push-image
-
-.PHONY: ci-release
-ci-release: build build-image push-image
+verify:: vet
 
 .PHONY: clean
 clean:
