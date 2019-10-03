@@ -1,6 +1,6 @@
 ---
 title: '"Failed to pull image" error'
-type: Examples
+type: Troubleshooting
 ---
 
 When you try to install Kyma locally on Minikube, the installation may fail at a very early stage logging this error:
