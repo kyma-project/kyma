@@ -11,7 +11,7 @@ When you try to install Kyma locally on Minikube, the installation can fail at a
   POD: tiller-deploy-f88ff7869-z5cmx: ERROR: MountVolume.SetUp failed for volume "tiller-certs" : secrets "tiller-secret" not found
   ```
 
-This message shows that the installation fails because the required Docker image cannot be downloaded from a Google Container Registry address. Minikube can't download the image because its DNS server cannot resolve the image's address.
+This message shows that the installation fails because the required Docker image can't be downloaded from a Google Container Registry address. Minikube can't download the image because its DNS server can't resolve the image's address.
 
 If you get this error, check if any process is listening on port `53`. Run:
 
