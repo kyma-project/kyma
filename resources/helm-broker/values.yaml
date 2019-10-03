@@ -6,6 +6,7 @@ service:
   type: NodePort
   externalPort: 80
   internalPort: 8070
+  statusPort: 8071
 
 ctrl:
   tmpDirSizeLimit: 1Gi
@@ -27,6 +28,9 @@ config:
         all: ~
 
       etcd:
+        dialTimeout: 5s
+        dialKeepAliveTime: 2s
+        dialKeepAliveTimeout: 5s
         endpoints:
           - http://helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379
 
@@ -47,7 +51,7 @@ global:
     path: eu.gcr.io/kyma-project
   helm_broker:
     dir: develop/
-    version: "a27e3a82"
+    version: "0d7fd890"
   alpine_net:
     dir: develop/
     version: 149967d0
