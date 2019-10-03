@@ -9,14 +9,14 @@ WORKDIR ${BASE_APP_DIR}
 
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
-COPY ./cmd/operator/main.go ${BASE_APP_DIR}/
+COPY ./cmd/operator/main.go ${BASE_APP_DIR}/cmd/operator/main.go
 COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 #
 # Build app
 #
 
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o kyma-operator .
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o kyma-operator ${BASE_APP_DIR}/cmd/operator/main.go
 RUN mkdir /app && mv ./kyma-operator /app/kyma-operator && mv ${BASE_APP_DIR}/licenses /app/licenses
 
 FROM alpine:3.8
