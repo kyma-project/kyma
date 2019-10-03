@@ -13,7 +13,7 @@ func FunctionToUnstructured(obj *v1alpha1.Function) (*unstructured.Unstructured,
 }
 
 func UnstructuredToFunction(obj *unstructured.Unstructured) (*v1alpha1.Function, error) {
-	var function *v1alpha1.Function
+	function := &v1alpha1.Function{}
 	err := resource.FromUnstructured(obj, function)
 	return function, err
 }
