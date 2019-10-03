@@ -108,7 +108,7 @@ spec:
     {{- end }}
       serviceAccountName: {{ .Release.Name }}-grafana-loki
       securityContext:
-        fsGroup: 472
+{{ toYaml .Values.securityContext | indent 8 }}
       volumes:
         - name: grafana-storage
           {{- if .Values.persistence }}
