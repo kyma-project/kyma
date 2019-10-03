@@ -34,14 +34,14 @@ func (svc *functionService) Delete(name string, namespace string) error {
 }
 
 func (svc *functionService) Create(name string, namespace string, labels gqlschema.Labels, size string, runtime string) (*v1alpha1.Function, error) {
-	// TODO: add labels
 	function, err := convert.FunctionToUnstructured(&v1alpha1.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Function",
 			APIVersion: "serverless.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name:   name,
+			Labels: labels,
 		},
 		Spec: v1alpha1.FunctionSpec{
 			Size:    size,
