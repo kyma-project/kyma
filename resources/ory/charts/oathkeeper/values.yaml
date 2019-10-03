@@ -2,8 +2,9 @@
 replicaCount: 1
 
 image:
+  # TODO: change to official image after it is released
   # ORY Oathkeeper image
-  repository: oryd/oathkeeper
+  repository: kubagoryl/oathkeeper
   # ORY Oathkeeper version
   tag: v0.18.0
   # Image pull policy
