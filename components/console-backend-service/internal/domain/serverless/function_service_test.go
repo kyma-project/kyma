@@ -30,7 +30,9 @@ func TestFunctionService_List(t *testing.T) {
 }
 
 func TestFunctionService_Delete(t *testing.T) {
-	functionA1 := fixFunction("a1", "a")
+	fixName := "a1"
+	fixNamespace := "a"
+	functionA1 := fixFunction(fixName, fixNamespace)
 
 	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, functionA1)
 	require.NoError(t, err)
@@ -38,10 +40,10 @@ func TestFunctionService_Delete(t *testing.T) {
 	service := newFunctionService(serviceFactory)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
-	err = service.Delete("a1", "a")
+	err = service.Delete(fixName, fixNamespace)
 	require.NoError(t, err)
 
-	_, err = service.Client.Namespace("a").Get("a1", v1.GetOptions{})
+	_, err = service.Client.Namespace(fixNamespace).Get(fixName, v1.GetOptions{})
 	assert.True(t, apiErrors.IsNotFound(err))
 }
 
