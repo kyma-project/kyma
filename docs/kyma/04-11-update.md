@@ -42,7 +42,7 @@ In case of dependency conflicts or major changes between components versions, so
    kubectl edit installation kyma-installation
    ```
 
-> **NOTE:** Read [this](#custom-resource-installation) document to learn more about the Installation custom resource.
+   > **NOTE:** Read [this](#custom-resource-installation) document to learn more about the Installation custom resource.
 
 - If you introduced changes in overrides, update the existing ConfigMaps and Secrets. Add new ConfigMaps and Secrets if required. See [this](#configuration-helm-overrides-for-kyma-installation) document for more information on overrides.
 
@@ -93,7 +93,7 @@ Read about each update step in the following sections.
              imagePullPolicy: Always
    ```
 
-> **NOTE:** If the desired image name and `imagePullPolicy` is already set in the deployment configuration, restart the Pod by running `kubectl delete pod -n kyma-installer {INSTALLER_POD_NAME}`.
+   > **NOTE:** If the desired image name and `imagePullPolicy` is already set in the deployment configuration, restart the Pod by running `kubectl delete pod -n kyma-installer {INSTALLER_POD_NAME}`.
 
 ### Trigger the update process
 
