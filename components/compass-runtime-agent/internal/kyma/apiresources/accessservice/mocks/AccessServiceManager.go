@@ -2,7 +2,7 @@
 
 package mocks
 
-import apperrors "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+import apperrors "kyma-project.io/compass-runtime-agent/internal/apperrors"
 import mock "github.com/stretchr/testify/mock"
 import types "k8s.io/apimachinery/pkg/types"
 

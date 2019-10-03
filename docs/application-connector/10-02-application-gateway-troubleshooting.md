@@ -8,13 +8,13 @@ If you call a registered service and receive an error, follow these steps to det
 
 1. Check the logs
 
-    Check the logs from Application Gateway Pod to verify that the call reached Application Gateway.   
+    Check the logs from Application Gateway Pod to verify that the call reached Application Gateway.
     To fetch these logs, run this command:
     ```
     kubectl -n kyma-integration logs -l app={APP_NAME}-application-gateway -c {APP_NAME}-application-gateway
     ```
     The request that reached the Pod is logged by Application Gateway.
-  
+
 2. Check for Access Service
 
     If the call you tried to make is not in the logs, check if an [Access Service](#architecture-application-connector-components-access-service) exists for the service you are trying to call.
@@ -46,13 +46,13 @@ If you call a registered service and receive an error, follow these steps to det
       </details>
     </div>
 
-    Then, register the service and try calling again. Registering the service again recreates the Access Service.  
-    To register a service, see [this tutorial](components/application-connector/#tutorials-register-a-service-register-a-service).
+    Then, register the service and try calling again. Registering the service again recreates the Access Service.
+    To register a service, see [this tutorial](#tutorials-register-a-service-register-a-service).
 
 
 4. Check the API URL
 
-    If your call reaches the Application Gateway and the Access Service exists, but you still receive an error, check if the API URL in the service definition matches the API URL of the actual service you are trying to call.  
+    If your call reaches the Application Gateway and the Access Service exists, but you still receive an error, check if the API URL in the service definition matches the API URL of the actual service you are trying to call.
     To check the target URL of the API, fetch the Service definition from Application Registry:
 
     <div tabs name="verification" group="error-when-calling-a-registered-service">
@@ -76,5 +76,5 @@ If you call a registered service and receive an error, follow these steps to det
       </details>
     </div>
 
-    A successful call returns a `json` response with the service definition that contains the target URL.  
+    A successful call returns a `json` response with the service definition that contains the target URL.
     Call the target URL directly to verify that the value of `api.targetUrl` is correct.

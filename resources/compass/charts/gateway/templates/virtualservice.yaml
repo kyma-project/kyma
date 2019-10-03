@@ -33,9 +33,9 @@ spec:
           regex: /.*
       route:
         - destination:
-            host: {{ .Values.global.gateway.tls.host }}
+            host: {{ .Values.oathkeeper.host }}
             port:
-              number: {{ .Values.global.gateway.port }}
+              number: {{ .Values.oathkeeper.port }}
       headers:
         request:
           remove:

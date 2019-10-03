@@ -37,21 +37,28 @@ func (pw *Application) GetObjectKind() schema.ObjectKind {
 
 // ApplicationSpec defines spec section of the Application custom resource
 type ApplicationSpec struct {
-	Description      string    `json:"description"`
-	SkipInstallation bool      `json:"skipInstallation,omitempty"`
-	Services         []Service `json:"services"`
-	// AccessLabel is not required, 'omitempty' is needed because of regexp validation
-	AccessLabel string            `json:"accessLabel,omitempty"`
-	Labels      map[string]string `json:"labels"`
-	Tenant      string            `json:"tenant,omitempty"`
-	Group       string            `json:"group,omitempty"`
+	Description      string            `json:"description"`
+	SkipInstallation bool              `json:"skipInstallation,omitempty"`
+	Services         []Service         `json:"services"`
+	AccessLabel      string            `json:"accessLabel,omitempty"`
+	Labels           map[string]string `json:"labels"`
+	Tenant           string            `json:"tenant,omitempty"`
+	Group            string            `json:"group,omitempty"`
+	CompassMetadata  *CompassMetadata  `json:"compassMetadata,omitempty"`
+}
+
+type CompassMetadata struct {
+	Authentication Authentication `json:"authentication"`
+}
+
+type Authentication struct {
+	ClientIds []string `json:"clientIds"`
 }
 
 // Entry defines, what is enabled by activating the service.
 type Entry struct {
-	Type       string `json:"type"`
-	GatewayUrl string `json:"gatewayUrl"`
-	// AccessLabel is not required for Events, 'omitempty' is needed because of regexp validation
+	Type                        string      `json:"type"`
+	GatewayUrl                  string      `json:"gatewayUrl"`
 	AccessLabel                 string      `json:"accessLabel,omitempty"`
 	TargetUrl                   string      `json:"targetUrl"`
 	SpecificationUrl            string      `json:"specificationUrl,omitempty"`

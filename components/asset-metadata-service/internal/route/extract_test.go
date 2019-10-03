@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -13,9 +14,8 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/asset-metadata-service/internal/route"
-	"github.com/onsi/gomega/gstruct"
-
 	"github.com/onsi/gomega"
+	"github.com/onsi/gomega/gstruct"
 )
 
 func TestRequestHandler_ServeHTTP(t *testing.T) {
@@ -102,6 +102,38 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusBadRequest))
 		g.Expect(result.Errors).To(gomega.HaveLen(1))
 		g.Expect(result.Errors[0].Message).To(gomega.ContainSubstring("No files"))
+	})
+
+	t.Run("Metrics endpoint answer", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+		mux := route.SetupHandlers(5, 10*time.Second)
+
+		recordMetrics := httptest.NewRecorder()
+		reqMetrics := httptest.NewRequest(http.MethodGet, "/metrics", nil)
+		recordExtract := httptest.NewRecorder()
+		reqExtract := httptest.NewRequest(http.MethodPost, "/v1/extract", nil)
+
+		// When
+		mux.ServeHTTP(recordMetrics, reqMetrics)
+
+		respMetrics := recordMetrics.Result()
+		defer func() {
+			err := respMetrics.Body.Close()
+			g.Expect(err).NotTo(gomega.HaveOccurred())
+		}()
+		bodyMetrics, err := ioutil.ReadAll(respMetrics.Body)
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+
+		// Then
+		g.Expect(respMetrics.StatusCode).To(gomega.Equal(http.StatusOK))
+		g.Expect(bodyMetrics).To(gomega.Not(gomega.HaveLen(0)))
+
+		// When
+		mux.ServeHTTP(recordExtract, reqExtract)
+
+		// Then
+		g.Expect(recordExtract.Result().StatusCode).To(gomega.Not(gomega.Equal(http.StatusNotFound)))
 	})
 
 	t.Run("Partial Errors", func(t *testing.T) {

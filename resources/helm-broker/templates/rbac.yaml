@@ -19,7 +19,7 @@ rules:
   verbs: ["get", "create", "update", "delete", "list", "watch"]
 - apiGroups: ["addons.kyma-project.io"]
   resources: ["addonsconfigurations", "clusteraddonsconfigurations", "addonsconfigurations/status", "clusteraddonsconfigurations/status", "addonsconfigurations/finalizers", "clusteraddonsconfigurations/finalizers"]
-  verbs: ["get", "list", "watch", "create", "update"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
 
 ---
 apiVersion: v1

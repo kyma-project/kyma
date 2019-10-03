@@ -1,8 +1,8 @@
 package strategy
 
 import (
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
 )
 
 func convertToModelCSRInfo(appCredentials *applications.Credentials) *model.CSRFInfo {

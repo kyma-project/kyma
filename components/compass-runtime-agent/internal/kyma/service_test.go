@@ -3,7 +3,7 @@ package kyma
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
 
 	"github.com/stretchr/testify/require"
 
@@ -11,14 +11,14 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	resourcesServiceMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/mocks"
-	secretsmodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
-	appMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications/mocks"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kyma-project.io/compass-runtime-agent/internal/apperrors"
+	resourcesServiceMocks "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/mocks"
+	secretsmodel "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
+	appMocks "kyma-project.io/compass-runtime-agent/internal/kyma/applications/mocks"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
 func TestService(t *testing.T) {
@@ -202,6 +202,48 @@ func TestService(t *testing.T) {
 		resourcesServiceMocks.AssertExpectations(t)
 	})
 
+	t.Run("should manage only Applications with CompassMetadata in the Spec", func(t *testing.T) {
+		// given
+		applicationsManagerMock := &appMocks.Repository{}
+		converterMock := &appMocks.Converter{}
+		resourcesServiceMocks := &resourcesServiceMocks.Service{}
+
+		runtimeService1 := getTestServiceWithCredentials("API1")
+		runtimeService2 := getTestServiceWithCredentials("API2")
+		runtimeApplication := getTestApplication("id1", []v1alpha1.Service{runtimeService1})
+		notManagedRuntimeApplication := getTestApplicationNotManagedByCompass("id2", []v1alpha1.Service{runtimeService2})
+
+		existingRuntimeApplications := v1alpha1.ApplicationList{
+			Items: []v1alpha1.Application{
+				runtimeApplication,
+				notManagedRuntimeApplication,
+			},
+		}
+
+		applicationsManagerMock.On("Delete", mock.AnythingOfType("string"), &metav1.DeleteOptions{}).Return(nil)
+		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
+		resourcesServiceMocks.On("DeleteApiResources", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(nil)
+
+		expectedResult := []Result{
+			{
+				ApplicationID: "id1",
+				Operation:     Delete,
+				Error:         nil,
+			},
+		}
+
+		// when
+		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
+		result, err := kymaService.Apply([]model.Application{})
+
+		// then
+		assert.NoError(t, err)
+		assert.Equal(t, expectedResult, result)
+		converterMock.AssertExpectations(t)
+		applicationsManagerMock.AssertExpectations(t)
+		resourcesServiceMocks.AssertExpectations(t)
+	})
+
 	t.Run("should not break execution when error occurred when applying Application CR", func(t *testing.T) {
 		// given
 		applicationsManagerMock := &appMocks.Repository{}
@@ -362,14 +404,21 @@ func getTestServiceWithoutCredentials(serviceID string) v1alpha1.Service {
 	}
 }
 
-func getTestApplication(applicationName string, services []v1alpha1.Service) v1alpha1.Application {
+func getTestApplication(id string, services []v1alpha1.Service) v1alpha1.Application {
+	testApplication := getTestApplicationNotManagedByCompass(id, services)
+	testApplication.Spec.CompassMetadata = &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{id}}}
+
+	return testApplication
+}
+
+func getTestApplicationNotManagedByCompass(id string, services []v1alpha1.Service) v1alpha1.Application {
 	return v1alpha1.Application{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Application",
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: applicationName,
+			Name: id,
 		},
 		Spec: v1alpha1.ApplicationSpec{
 			Description: "Description",

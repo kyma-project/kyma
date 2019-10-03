@@ -6,15 +6,11 @@ import (
 	"testing"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock"
-
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/runtimeagent"
-
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/util"
-
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

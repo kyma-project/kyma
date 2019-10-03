@@ -20,6 +20,7 @@ func TestMain(m *testing.M) {
 	exitCode := runTests(m)
 
 	logrus.Info("Tests finished. Exit code: ", exitCode)
+	os.Exit(exitCode)
 }
 
 func runTests(m *testing.M) int {
@@ -41,12 +42,10 @@ func runTests(m *testing.M) int {
 	defer testSuite.Cleanup()
 	if err != nil {
 		logrus.Errorf("Error while setting up tests: %s", err.Error())
-		os.Exit(1)
+		return 1
 	}
 
 	// run tests
 	logrus.Info("Running tests...")
-	exitCode := m.Run()
-
-	return exitCode
+	return m.Run()
 }
