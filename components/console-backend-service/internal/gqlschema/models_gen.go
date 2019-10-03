@@ -320,6 +320,11 @@ type Function struct {
 	Size      string `json:"size"`
 }
 
+type FunctionMutationOutput struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
 type IDPPreset struct {
 	Name    string `json:"name"`
 	Issuer  string `json:"issuer"`

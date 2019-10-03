@@ -30,17 +30,24 @@ type resolver struct {
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
 type Resolver interface {
 	FunctionsQuery(ctx context.Context, namespace string) ([]gqlschema.Function, error)
+	DeleteFunction(ctx context.Context, name string, namespace string) (gqlschema.FunctionMutationOutput, error)
 }
 
 func (r *Container) Enable() error {
 	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(r.dynamicClient, r.informerResyncPeriod)
 	r.informerFactory = informerFactory
 
+	functionClient := r.dynamicClient.Resource(schema.GroupVersionResource{
+		Version: v1alpha1.SchemeGroupVersion.Version,
+		Group: v1alpha1.SchemeGroupVersion.Group,
+		Resource: "functions",
+	})
+
 	functionService := newFunctionService(informerFactory.ForResource(schema.GroupVersionResource{
 		Version: v1alpha1.SchemeGroupVersion.Version,
 		Group: v1alpha1.SchemeGroupVersion.Group,
 		Resource: "functions",
-	}).Informer())
+	}).Informer(), functionClient)
 
 	r.Pluggable.EnableAndSyncDynamicInformerFactory(r.informerFactory, func() {
 		r.Resolver = &resolver{

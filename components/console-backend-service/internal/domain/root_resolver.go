@@ -394,6 +394,10 @@ func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace strin
 	return r.k8s.CreateLimitRange(ctx, namespace, name, limitRange)
 }
 
+func (r *mutationResolver) DeleteFunction(ctx context.Context, name string, namespace string) (gqlschema.FunctionMutationOutput, error) {
+	return r.serverless.Resolver.DeleteFunction(ctx, name, namespace)
+}
+
 // Queries
 
 type queryResolver struct {

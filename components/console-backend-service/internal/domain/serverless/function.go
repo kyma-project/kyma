@@ -26,3 +26,15 @@ func (r *resolver) FunctionsQuery(ctx context.Context, namespace string) ([]gqls
 
 	return functions, nil
 }
+
+func (r *resolver) DeleteFunction(ctx context.Context, name string, namespace string) (gqlschema.FunctionMutationOutput, error) {
+	err := r.functionService.Delete(name, namespace)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while deleting %s `%s`", pretty.Function, name))
+		return gqlschema.FunctionMutationOutput{}, gqlerror.New(err, pretty.Function, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+	return gqlschema.FunctionMutationOutput{
+		Name:      name,
+		Namespace: namespace,
+	}, nil
+}
