@@ -7,14 +7,14 @@ To enable Compass in Kyma, follow the instructions for the [custom component ins
 
 ## Default Kyma installation
 
-This is a preconfigured single-tenant and single-Runtime mode which will eventually become part of the default Kyma installation. It provides the complete cluster Kyma installation with all components, including both Compass and Agent. Using this mode, you can register external applications in Kyma. To enable this it, follow the cluster Kyma installation and use the [`installer-cr-cluster-with-compass.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-with-compass.yaml.tpl) configuration file.
+This is a preconfigured single-tenant and single-Runtime mode which will eventually become part of the default Kyma installation. It provides the complete cluster Kyma installation with all components, including both Compass and Agent. Using this mode, you can register external Applications in Kyma. To enable this it, follow the cluster Kyma installation and use the [`installer-cr-cluster-with-compass.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-with-compass.yaml.tpl) configuration file.
 
 ![Kyma mode1](./assets/kyma-mode1.svg)
 
 
 ## Compass as a Central Management Plane
 
-This is a multi-cluster mode in which you need one cluster with Compass and at least one cluster with Kyma Runtime, which you can connect and manage using Compass. This mode allows you to integrate your Runtimes with applications and manage them in one central place.
+This is a multi-cluster mode in which you need one cluster with Compass and at least one cluster with Kyma Runtime, which you can connect and manage using Compass. This mode allows you to integrate your Runtimes with Applications and manage them in one central place.
 
 ![Kyma mode2](./assets/kyma-mode2.svg)
 
