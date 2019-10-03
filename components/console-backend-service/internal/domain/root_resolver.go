@@ -399,6 +399,9 @@ func (r *mutationResolver) DeleteFunction(ctx context.Context, name string, name
 	return r.serverless.Resolver.DeleteFunction(ctx, name, namespace)
 }
 
+func (r *mutationResolver) CreateFunction(ctx context.Context, name string, namespace string, labels gqlschema.Labels, size string, runtime string) (gqlschema.Function, error) {
+	return r.serverless.Resolver.CreateFunction(ctx, name, namespace, labels, size, runtime)
+}
 // Queries
 
 type queryResolver struct {
