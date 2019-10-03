@@ -2,11 +2,11 @@ package serverless
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/disabled"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
@@ -37,9 +37,9 @@ func (r *Container) Enable() error {
 	r.informerFactory = informerFactory
 
 	functionService := newFunctionService(informerFactory.ForResource(schema.GroupVersionResource{
-		Version: v1alpha1.GroupVersion.Version,
-		Group: v1alpha1.GroupVersion.Group,
-		Resource: "function",
+		Version: v1alpha1.SchemeGroupVersion.Version,
+		Group: v1alpha1.SchemeGroupVersion.Group,
+		Resource: "functions",
 	}).Informer())
 
 	r.Pluggable.EnableAndSyncDynamicInformerFactory(r.informerFactory, func() {
