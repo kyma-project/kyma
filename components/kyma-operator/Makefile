@@ -5,6 +5,8 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/scripts
 
 include $(SCRIPTS_DIR)/go-dep.mk
 
+MAIN_PATH := ./cmd/operator/main.go
+
 verify:: vet
 
 .PHONY: clean
