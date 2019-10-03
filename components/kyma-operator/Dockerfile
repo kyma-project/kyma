@@ -9,7 +9,7 @@ WORKDIR ${BASE_APP_DIR}
 
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
-COPY ./cmd/operatr/main.go ${BASE_APP_DIR}/
+COPY ./cmd/operator/main.go ${BASE_APP_DIR}/
 COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 #
