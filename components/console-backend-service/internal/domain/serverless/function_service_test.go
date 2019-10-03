@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 func TestFunctionService_List(t *testing.T) {
@@ -26,6 +27,22 @@ func TestFunctionService_List(t *testing.T) {
 	functions, err := service.List("a")
 	require.NoError(t, err)
 	assert.ElementsMatch(t, []*v1alpha1.Function{functionA1, functionA2}, functions)
+}
+
+func TestFunctionService_Delete(t *testing.T) {
+	functionA1 := fixFunction("a1", "a")
+
+	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, functionA1)
+	require.NoError(t, err)
+
+	service := newFunctionService(serviceFactory)
+	testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
+
+	err = service.Delete("a1", "a")
+	require.NoError(t, err)
+
+	_, err = service.Client.Namespace("a").Get("a1", v1.GetOptions{})
+	assert.True(t, apiErrors.IsNotFound(err))
 }
 
 func fixFunction(name, namespace string) *v1alpha1.Function {
