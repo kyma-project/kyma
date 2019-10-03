@@ -19,11 +19,7 @@ func (r *resolver) FunctionsQuery(ctx context.Context, namespace string) ([]gqls
 		return nil, gqlerror.New(err, pretty.Functions, gqlerror.WithNamespace(namespace))
 	}
 
-	functions, err := convert.FunctionsToGQLs(items)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Functions))
-		return nil, gqlerror.New(err, pretty.Functions, gqlerror.WithNamespace(namespace))
-	}
+	functions := convert.FunctionsToGQLs(items)
 
 	return functions, nil
 }
@@ -35,11 +31,7 @@ func (r *resolver) CreateFunction(ctx context.Context, name string, namespace st
 		return gqlschema.Function{}, gqlerror.New(err, pretty.Function, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
-	function, err := convert.FunctionToGQL(item)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Function))
-		return gqlschema.Function{}, gqlerror.New(err, pretty.Function, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
-	}
+	function := convert.FunctionToGQL(item)
 
 	return *function, nil
 }
