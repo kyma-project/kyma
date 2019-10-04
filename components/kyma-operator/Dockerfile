@@ -39,5 +39,5 @@ COPY --from=builder /app /app
 # Run app
 #
 
-CMD ["/app/kyma-operator"]
+ENTRYPOINT ["/app/kyma-operator"]
 
