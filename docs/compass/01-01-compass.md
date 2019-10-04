@@ -12,4 +12,4 @@ These are the functionalities that Compass provides:
 - Communicate the configuration changes to Applications and Runtimes
 - Establish a trusted connection between Applications and Runtimes using various authentication methods
 
-Compass by design does not participate in direct communication between Applications and Runtimes. It only allows them to communicate. In case the cluster with Compass is down, the Applications and Runtimes flow still works.
+Compass by design does not participate in direct communication between Applications and Runtimes. It only allows them to communicate. In case the cluster with Compass is down, the Applications and Runtimes cooperation still works.

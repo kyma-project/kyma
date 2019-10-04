@@ -11,7 +11,7 @@ Application represents any external system that you want to register to Compass 
 - Manual integration - the administrator manually provides API or Events metadata to Compass. Use this type of integration for simple use-case scenarios as it doesn't support all features.
 - Built-in integration - integration with Compass is built in the Application.
 - Proxy - a highly Application-specific proxy component provides the integration.
-- Central integration service -  a central service provides integration for the dedicated group of Applications across multiple tenants. It manages multiple instances of the given Application type. You can integrate multiple central services to support different types of Applications.
+- Integration System -  a central service provides integration for the dedicated group of Applications across multiple tenants. It manages multiple instances of the given Application type. You can integrate multiple Integration Systems to support different types of Applications.
 
 ## Kyma Runtime
 
@@ -38,7 +38,7 @@ Connector establishes trust between Applications and Runtimes. Currently, only c
 
 ## Director
 
-Director handles the process of registering Applications and Runtimes. It also requests Application webhook APIs for credentials and exposes health information about Runtimes. This component has access to the storage.
+Director handles the process of managing Applications and Runtimes. It also requests Application webhook APIs for credentials and exposes health information about Runtimes. This component has access to the storage.
 
 ## Runtime Provisioner
 
