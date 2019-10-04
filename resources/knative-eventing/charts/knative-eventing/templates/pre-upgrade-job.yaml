@@ -40,7 +40,7 @@ data:
     #!/usr/bin/env bash
     set -eu
     echo "*** Pre upgrade job starts ***"
-    kubectl scale -n kyma-system deploy/event-bus-subscription-controller --replicas=0 || true
+    kubectl delete deploy/event-bus-subscription-controller -n kyma-system --ignore-not-found
     if kubectl get crd subscriptions.eventing.knative.dev; then
       echo "deleting subscriptions"
       kubectl delete subscriptions.eventing.knative.dev --all -n kyma-system --ignore-not-found
