@@ -1,11 +1,12 @@
 package convert_test
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/convert"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/stretchr/testify/assert"
-	"testing"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -90,7 +91,6 @@ func TestConvert_FunctionsToGQLs(t *testing.T) {
 		expectedNamespace := "expectedNamespace"
 		expectedLabels := gqlschema.Labels{"test": "label"}
 
-
 		in := []*v1alpha1.Function{
 			nil,
 			{
@@ -115,7 +115,7 @@ func TestConvert_FunctionsToGQLs(t *testing.T) {
 		in := []*v1alpha1.Function{}
 
 		result := convert.FunctionsToGQLs(in)
-		
+
 		assert.Empty(t, result)
 	})
 }

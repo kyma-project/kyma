@@ -28,7 +28,7 @@ func TestFromUnstructured(t *testing.T) {
 			},
 		}
 
-		var result *v1alpha1.Function
+		result := &v1alpha1.Function{}
 		err := resource.FromUnstructured(obj, result)
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
