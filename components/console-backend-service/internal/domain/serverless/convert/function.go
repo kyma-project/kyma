@@ -17,9 +17,9 @@ func UnstructuredToFunction(obj *unstructured.Unstructured) (*v1alpha1.Function,
 	return function, err
 }
 
-func FunctionToGQL(item *v1alpha1.Function) (*gqlschema.Function, error) {
+func FunctionToGQL(item *v1alpha1.Function) *gqlschema.Function {
 	if item == nil {
-		return nil, nil
+		return nil
 	}
 
 	function := gqlschema.Function{
@@ -30,20 +30,17 @@ func FunctionToGQL(item *v1alpha1.Function) (*gqlschema.Function, error) {
 		Size:      item.Spec.Size,
 	}
 
-	return &function, nil
+	return &function
 }
 
-func FunctionsToGQLs(in []*v1alpha1.Function) ([]gqlschema.Function, error) {
+func FunctionsToGQLs(in []*v1alpha1.Function) []gqlschema.Function {
 	var result []gqlschema.Function
 	for _, u := range in {
-		converted, err := FunctionToGQL(u)
-		if err != nil {
-			return nil, err
-		}
+		converted := FunctionToGQL(u)
 
 		if converted != nil {
 			result = append(result, *converted)
 		}
 	}
-	return result, nil
+	return result
 }

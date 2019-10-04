@@ -19,11 +19,7 @@ func (r *resolver) FunctionsQuery(ctx context.Context, namespace string) ([]gqls
 		return nil, gqlerror.New(err, pretty.Functions)
 	}
 
-	functions, err := convert.FunctionsToGQLs(items)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Functions))
-		return nil, gqlerror.New(err, pretty.Functions)
-	}
+	functions := convert.FunctionsToGQLs(items)
 
 	return functions, nil
 }
