@@ -176,7 +176,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		} else if errors.IsNotFound(err) {
 
 			knativeChannel, err = r.knativeLib.CreateChannel(subscription.SubscriptionSpec.EventType,
-				knativeSubsNamespace, knativeChannelLabels, timeout)
+				knativeSubsNamespace, knativeChannelLabels, util.WaitForChannelWithTimeout(timeout))
 			if err != nil {
 				return false, err
 			}
