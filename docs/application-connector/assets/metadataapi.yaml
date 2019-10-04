@@ -2,9 +2,7 @@ openapi: '3.0.0'
 info:
   version: '1.0.0'
   title: 'Kyma Application Registry API'
-tags:
-- name: 'Application Registry'
-  description: 'API for registering services in Kyma.'
+  description: 'API for registering services in Kyma' 
 paths:
   /v1/health:
     get:

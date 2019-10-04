@@ -2,6 +2,7 @@ openapi: '3.0.0'
 info:
   version: '1.0.0'
   title: 'Kyma Connector Service API'
+  description: 'API for connecting Applications to Kyma'
 paths:
   /v1/health:
     get:

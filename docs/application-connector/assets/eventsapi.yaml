@@ -2,9 +2,7 @@ openapi: '3.0.0'
 info:
   version: '1.0.0'
   title: 'Kyma Events API'
-tags:
-- name: 'Kyma events'
-  description: 'API for eventing.'
+  description: 'API for eventing' 
 paths:
   /v1/health:
     get:
