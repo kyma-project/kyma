@@ -41,6 +41,15 @@ spec:
             {{- with .Values.global.ingress.domainName }}
             - --domain-whitelist={{ . | join ", " }}
             {{- end }}
+            {{- with .Values.config.cors.allowOrigin }}
+            - --cors-allow-origin={{ . | join ", " }}
+            {{- end }}
+            {{- with .Values.config.cors.allowMethods }}
+            - --cors-allow-methods={{ . | join ", " }}
+            {{- end }}
+            {{- with .Values.config.cors.allowHeaders }}
+            - --cors-allow-headers={{ . | join ", " }}
+            {{- end }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           terminationMessagePath: /dev/termination-log
