@@ -17,23 +17,23 @@ func TestNameResolver(t *testing.T) {
 		{
 			application:  "short_application",
 			id:           "c687e68a-9038-4f38-845b-9c61592e59e6",
-			resourceName: "app-short_application-c687e68a-9038-4f38-845b-9c61592e59e6",
-			metadataUrl:  "http://app-short_application-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
-			host:         "app-short_application-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			resourceName: "short_application-c687e68a-9038-4f38-845b-9c61592e59e6",
+			metadataUrl:  "http://short_application-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			host:         "short_application-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
 		},
 		{
-			application:  "max_application_aaaaaaaaa",
+			application:  "max_application_aaaaaaaaaa",
 			id:           "c687e68a-9038-4f38-845b-9c61592e59e6",
-			resourceName: "app-max_application_aaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6",
-			metadataUrl:  "http://app-max_application_aaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
-			host:         "app-max_application_aaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			resourceName: "max_application_aaaaaaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6",
+			metadataUrl:  "http://max_application_aaaaaaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			host:         "max_application_aaaaaaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
 		},
 		{
 			application:  "toolong_application_aaaaaxxxx",
 			id:           "c687e68a-9038-4f38-845b-9c61592e59e6",
-			resourceName: "app-toolong_application_aa-c687e68a-9038-4f38-845b-9c61592e59e6",
-			metadataUrl:  "http://app-toolong_application_aa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
-			host:         "app-toolong_application_aa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			resourceName: "toolong_application_aaaaax-c687e68a-9038-4f38-845b-9c61592e59e6",
+			metadataUrl:  "http://toolong_application_aaaaax-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			host:         "toolong_application_aaaaax-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
 		},
 	}
 

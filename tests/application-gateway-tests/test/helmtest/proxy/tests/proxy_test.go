@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -21,5 +22,5 @@ func TestApplicationGateway(t *testing.T) {
 	t.Log("Getting logs from test executor...")
 	testSuit.GetTestExecutorLogs(t)
 
-	require.Equal(t, int32(0), testExecutorStatus.State.Terminated.ExitCode, "Test executor exited with code: ", string(testExecutorStatus.State.Terminated.ExitCode))
+	require.Equal(t, int32(0), testExecutorStatus.State.Terminated.ExitCode, "Test executor exited with code: ", strconv.Itoa(int(testExecutorStatus.State.Terminated.ExitCode)))
 }

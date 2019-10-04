@@ -48,16 +48,16 @@ global:
     version: PR-5697
   application_gateway:
     dir: pr/
-    version: PR-6072
+    version: PR-5858
   application_gateway_tests:
     dir: pr/
-    version: PR-5890
+    version: PR-5858
   application_registry:
-    dir: develop/
-    version: c9f7a5f5
+    dir: pr/
+    version: PR-5858
   application_registry_tests:
-    dir: develop/
-    version: 3d15ac72
+    dir: pr/
+    version: PR-5858
   application_broker:
     dir: develop/
     version: b1f395fa
