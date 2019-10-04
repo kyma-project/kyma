@@ -1,6 +1,7 @@
 package serverless
 
 import (
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"testing"
 	"time"
 
@@ -13,9 +14,9 @@ import (
 )
 
 func TestFunctionService_List(t *testing.T) {
-	functionA1 := fixFunction("a1", "a")
-	functionA2 := fixFunction("a2", "a")
-	functionB := fixFunction("b", "b")
+	functionA1 := fixFunction("a1", "a", nil, "M", "nodejs8")
+	functionA2 := fixFunction("a2", "a", nil, "M", "nodejs8")
+	functionB := fixFunction("b", "b", nil, "M", "nodejs8")
 
 	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, functionA1, functionA2, functionB)
 	require.NoError(t, err)
@@ -28,7 +29,50 @@ func TestFunctionService_List(t *testing.T) {
 	assert.ElementsMatch(t, []*v1alpha1.Function{functionA1, functionA2}, functions)
 }
 
-func fixFunction(name, namespace string) *v1alpha1.Function {
+func TestFunctionService_Create(t *testing.T) {
+
+	t.Run("Success", func(t *testing.T) {
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
+		require.NoError(t, err)
+
+		service := newFunctionService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
+
+		labels := gqlschema.Labels{
+			"test": "test",
+		}
+		function, err := service.Create("a", "a", labels, "M", "nodejs8")
+		expectedLabels := map[string]string{
+			"test": "test",
+		}
+		expectedFunction := fixFunction("a", "a", expectedLabels, "M", "nodejs8")
+
+		require.NoError(t, err)
+		assert.Equal(t, expectedFunction, function)
+	})
+
+	t.Run("AlreadyExists", func(t *testing.T) {
+		labels := map[string]string{
+			"test": "test",
+		}
+		function := fixFunction("a", "a", labels, "M", "nodejs8")
+
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, function)
+		require.NoError(t, err)
+
+		service := newFunctionService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
+
+		gqlLabels := gqlschema.Labels{
+			"test": "test",
+		}
+		_, err = service.Create("a", "a", gqlLabels, "M", "nodejs8")
+
+		require.Error(t, err)
+	})
+}
+
+func fixFunction(name, namespace string, labels map[string]string, size, runtime string) *v1alpha1.Function {
 	return &v1alpha1.Function{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "Function",
@@ -37,6 +81,11 @@ func fixFunction(name, namespace string) *v1alpha1.Function {
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
+			Labels:    labels,
+		},
+		Spec: v1alpha1.FunctionSpec{
+			Size:    size,
+			Runtime: runtime,
 		},
 	}
 }
