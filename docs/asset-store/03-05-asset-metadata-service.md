@@ -71,4 +71,4 @@ The result is as follows:
 }
 ```
 
-See the [OpenAPI specification](./assets/asset-metadata-service-openapi.yaml) for the full API documentation. You can use the [Swagger Editor](https://editor.swagger.io) to preview and test the API service.
+See the [OpenAPI specification](./assets/asset-metadata-service-openapi.yaml) for the full API documentation.
