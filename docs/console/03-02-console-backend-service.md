@@ -19,9 +19,12 @@ These are the available Console Backend Service pluggable modules which contain 
 - `apicontroller` relates to the API Controller.
 - `authentication` relates to IDP Presets.
 - `application` relates to the Application Connector.
-- `content` relates to documentation.
+- `assetstore` relates to Asset Store.
+- `cms` relates to Headless CMS.
 - `kubeless` relates to Serverless.
 - `servicecatalog` relates to the Service Catalog, including Service Classes, Service Instances, and Service Bindings.
 - `servicecatalogaddons` relates to the Service Catalog add-ons, such as ServiceBindingUsage, and UsageKinds.
+- `grafana` relates to Grafana.
+- `loki` relates to Loki.
 
 To enable a given module, install the corresponding Kyma component. It includes the BackendModule custom resource with the same name as the name of a given module.
