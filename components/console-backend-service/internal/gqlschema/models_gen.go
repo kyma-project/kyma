@@ -312,23 +312,10 @@ type File struct {
 	Metadata JSON   `json:"metadata"`
 }
 
-type Function struct {
-	Name              string    `json:"name"`
-	Trigger           string    `json:"trigger"`
-	CreationTimestamp time.Time `json:"creationTimestamp"`
-	Labels            Labels    `json:"labels"`
-	Namespace         string    `json:"namespace"`
-}
-
 type IDPPreset struct {
 	Name    string `json:"name"`
 	Issuer  string `json:"issuer"`
 	JwksURI string `json:"jwksUri"`
-}
-
-type InputTopic struct {
-	ID   string `json:"id"`
-	Type string `json:"type"`
 }
 
 type LimitRange struct {

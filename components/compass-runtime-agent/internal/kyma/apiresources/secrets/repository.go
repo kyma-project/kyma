@@ -2,13 +2,13 @@
 package secrets
 
 import (
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"kyma-project.io/compass-runtime-agent/internal/apperrors"
+	"kyma-project.io/compass-runtime-agent/internal/k8sconsts"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/strategy"
 )
 
 // Repository contains operations for managing client credentials

@@ -23,17 +23,17 @@ Use the following arguments to configure the application:
 
 | Name | Required | Default | Description |
 | -----|---------|--------|------------ |
-| port | No | 8000 | Application port. |
-| kube-config-cluster-name | Yes | |  Name of the Kubernetes cluster. |
-| kube-config-url | Yes | | URL of the Kubernetes Apiserver. |
-| kube-config-ca-file | Yes | | Path of the file with Certificate Authority of the Kubernetes cluster. |
-| kube-config-ns | No | | Default namespace of the Kubernetes context. |
-| oidc-issuer-url | Yes | | The URL of the OpenID issuer. Used to verify the OIDC JSON Web Token (JWT). |
-| oidc-client-id | Yes | | The client ID for the OpenID Connect client. |
-| oidc-username-claim | No | email | Identifier of the user in JWT claim. |
-| oidc-groups-claim | No | groups | Identifier of groups in JWT claim. |
-| oidc-username-prefix | No | | If provided, all users will be prefixed with this value to prevent conflicts with other authentication strategies. |
-| oidc-groups-prefix | No | | If provided, all groups will be prefixed with this value to prevent conflicts with other authentication strategies. |
+| port | No | `8000` | Application port. |
+| kube-config-cluster-name | Yes | None |  Name of the Kubernetes cluster. |
+| kube-config-url | Yes | None | URL of the Kubernetes Apiserver. |
+| kube-config-ca-file | Yes | None | Path of the file with Certificate Authority of the Kubernetes cluster. |
+| kube-config-ns | No | None | Default namespace of the Kubernetes context. |
+| oidc-issuer-url | Yes | None | The URL of the OpenID issuer. Used to verify the OIDC JSON Web Token (JWT). |
+| oidc-client-id | Yes | None | The client ID for the OpenID Connect client. |
+| oidc-username-claim | No | `email` | Identifier of the user in JWT claim. |
+| oidc-groups-claim | No | `groups` | Identifier of groups in JWT claim. |
+| oidc-username-prefix | No | None | If provided, all users will be prefixed with this value to prevent conflicts with other authentication strategies. |
+| oidc-groups-prefix | No | None | If provided, all groups will be prefixed with this value to prevent conflicts with other authentication strategies. |
 
 ### Run a local version
 

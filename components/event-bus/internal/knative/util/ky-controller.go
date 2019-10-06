@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -49,6 +50,53 @@ func UpdateEventActivation(ctx context.Context, client runtimeClient.Client, u *
 		}
 	}
 	return nil
+}
+
+// UpdateKnativeSubscription updates Knative subscription on change in Finalizer
+func UpdateKnativeSubscription(ctx context.Context, client runtimeClient.Client, u *evapisv1alpha1.Subscription) error {
+	objectKey := runtimeClient.ObjectKey{Namespace: u.Namespace, Name: u.Name}
+	sub := &evapisv1alpha1.Subscription{}
+	if err := client.Get(ctx, objectKey, sub); err != nil {
+		return err
+	}
+
+	if !equality.Semantic.DeepEqual(sub.Finalizers, u.Finalizers) {
+		sub.SetFinalizers(u.ObjectMeta.Finalizers)
+		if err := client.Update(ctx, sub); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// GetKymaSubscriptionForSubscription gets Kyma Subscription for a particular Knative Subscription
+func GetKymaSubscriptionForSubscription(ctx context.Context, client runtimeClient.Client, knSub *evapisv1alpha1.Subscription) (*subApis.Subscription, error) {
+	var chNamespace string
+	if _, ok := knSub.Labels[SubNs]; ok {
+		chNamespace = knSub.Labels[SubNs]
+	}
+	sl := &subApis.SubscriptionList{}
+	lo := &runtimeClient.ListOptions{
+		Namespace: chNamespace,
+		Raw: &metav1.ListOptions{ // TODO this is here because the fake client needs it. Remove this when it's no longer needed.
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: subApis.SchemeGroupVersion.String(),
+				Kind:       "Subscription",
+			},
+		},
+	}
+	if err := client.List(ctx, lo, sl); err != nil {
+		return nil, err
+	}
+	var kymaSub *subApis.Subscription
+	for _, s := range sl.Items {
+		if doesSubscriptionMatchLabels(&s, knSub.Labels) {
+			kymaSub = &s
+			break
+		}
+	}
+
+	return kymaSub, nil
 }
 
 // CheckIfEventActivationExistForSubscription returns a boolean value indicating if there is an EventActivation for
@@ -175,8 +223,9 @@ func SetNotReadySubscription(ctx context.Context, client runtimeClient.Client, s
 
 // IsSubscriptionActivated checks if the subscription is active or not.
 func IsSubscriptionActivated(sub *subApis.Subscription) bool {
-	activatedCondition := subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue}
-	return sub.HasCondition(activatedCondition)
+	eventActivatedCondition := subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue}
+	knSubReadyCondition := subApis.SubscriptionCondition{Type: subApis.SubscriptionReady, Status: subApis.ConditionTrue}
+	return sub.HasCondition(eventActivatedCondition) && sub.HasCondition(knSubReadyCondition)
 
 }
 
@@ -186,10 +235,47 @@ func ActivateSubscriptions(ctx context.Context, client runtimeClient.Client, sub
 	return updateSubscriptions(ctx, client, updatedSubs, log, time)
 }
 
+// ActivateSubscriptionForKnSubscription activates a Kyma Subscription when Kn Subscription is ready
+func ActivateSubscriptionForKnSubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, log logr.Logger, time CurrentTime) error {
+	updatedSub := updateSubscriptionKnSubscriptionStatus(sub, subApis.ConditionTrue, time)
+	return updateSubscription(ctx, client, updatedSub, log)
+}
+
 // DeactivateSubscriptions deactivate subscriptions.
 func DeactivateSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription, log logr.Logger, time CurrentTime) error {
 	updatedSubs := updateSubscriptionsEventActivatedStatus(subs, subApis.ConditionFalse, time)
 	return updateSubscriptions(ctx, client, updatedSubs, log, time)
+}
+
+// DeactivateSubscriptionForKnSubscription  deactivates a Kyma Subscription when Kn Subscription is not ready
+func DeactivateSubscriptionForKnSubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, log logr.Logger, time CurrentTime) error {
+	updatedSub := updateSubscriptionKnSubscriptionStatus(sub, subApis.ConditionFalse, time)
+	return updateSubscription(ctx, client, updatedSub, log)
+}
+
+func doesSubscriptionMatchLabels(sub *subApis.Subscription, labels map[string]string) bool {
+	eventTypeMatched := false
+	eventTypeVersionMatched := false
+	sourceIDMatched := false
+	if eventType, ok := labels[SubscriptionEventType]; ok {
+		if sub.SubscriptionSpec.EventType == eventType {
+			eventTypeMatched = true
+		}
+	}
+	if eventTypeVersion, ok := labels[SubscriptionEventTypeVersion]; ok {
+		if sub.SubscriptionSpec.EventTypeVersion == eventTypeVersion {
+			eventTypeVersionMatched = true
+		}
+	}
+	if sourceID, ok := labels[SubscriptionSourceID]; ok {
+		if sub.SubscriptionSpec.SourceID == sourceID {
+			sourceIDMatched = true
+		}
+	}
+	if eventTypeMatched && eventTypeVersionMatched && sourceIDMatched {
+		return true
+	}
+	return false
 }
 
 func updateSubscriptionsEventActivatedStatus(subs []*subApis.Subscription, conditionStatus subApis.ConditionStatus, time CurrentTime) []*subApis.Subscription {
@@ -209,6 +295,21 @@ func updateSubscriptionsEventActivatedStatus(subs []*subApis.Subscription, condi
 		}
 	}
 	return updatedSubs
+}
+
+func updateSubscriptionKnSubscriptionStatus(sub *subApis.Subscription, conditionStatus subApis.ConditionStatus, time CurrentTime) *subApis.Subscription {
+	t := time.GetCurrentTime()
+	var newCondition subApis.SubscriptionCondition
+	if conditionStatus == subApis.ConditionTrue {
+		newCondition = subApis.SubscriptionCondition{Type: subApis.SubscriptionReady, Status: subApis.ConditionTrue, LastTransitionTime: t}
+	} else {
+		newCondition = subApis.SubscriptionCondition{Type: subApis.SubscriptionReady, Status: subApis.ConditionFalse, LastTransitionTime: t}
+	}
+
+	if !sub.HasCondition(newCondition) {
+		sub = updateSubscriptionStatus(sub, subApis.SubscriptionReady, conditionStatus, "", time)
+	}
+	return sub
 }
 
 func updateSubscriptionReadyStatus(sub *subApis.Subscription, conditionStatus subApis.ConditionStatus, msg string, time CurrentTime) *subApis.Subscription {
@@ -250,6 +351,15 @@ func updateSubscriptions(ctx context.Context, client runtimeClient.Client, subs 
 			}
 		}
 		return fmt.Errorf("WriteSubscriptions() failed, see the Ready status of each subscription")
+	}
+	return nil
+}
+
+func updateSubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription, log logr.Logger) error {
+	err := WriteSubscription(ctx, client, sub)
+	if err != nil {
+		log.Error(err, "Update Ready status failed")
+		return err
 	}
 	return nil
 }

@@ -2,14 +2,14 @@ package kyma
 
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
-	secretsmodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kyma-project.io/compass-runtime-agent/internal/apperrors"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/assetstore/docstopic"
+	secretsmodel "kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 )
 
 //go:generate mockery -name=Service
@@ -56,7 +56,9 @@ func (s *service) Apply(directorApplications []model.Application) ([]Result, app
 		return nil, err
 	}
 
-	return s.apply(currentApplications, directorApplications), nil
+	compassCurrentApplications := s.filterCompassApplications(currentApplications)
+
+	return s.apply(compassCurrentApplications, directorApplications), nil
 }
 
 func (s *service) apply(runtimeApplications []v1alpha1.Application, directorApplications []model.Application) []Result {
@@ -81,6 +83,17 @@ func (s *service) getExistingRuntimeApplications() ([]v1alpha1.Application, appe
 	}
 
 	return applications.Items, nil
+}
+
+func (s *service) filterCompassApplications(applications []v1alpha1.Application) []v1alpha1.Application {
+	var compassApplications []v1alpha1.Application
+
+	for _, application := range applications {
+		if application.Spec.CompassMetadata != nil {
+			compassApplications = append(compassApplications, application)
+		}
+	}
+	return compassApplications
 }
 
 func (s *service) createApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {

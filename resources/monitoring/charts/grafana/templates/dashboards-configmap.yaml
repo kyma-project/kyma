@@ -19,9 +19,4 @@ data:
   {{- end }}
   {{- if .Values.keepOriginalDatasources }}
   {{- end }}
-{{- if .Values.global.serviceCatalogApiserver.enabled}}
-{{ (.Files.Glob "dashboards/service-catalog/service-catalog-apiserver.json").AsConfig | indent 2 }}
-{{- end }}
-{{- if .Values.global.serviceCatalogCrds.enabled}}
-{{ (.Files.Glob "dashboards/service-catalog/service-catalog-crds.json").AsConfig | indent 2 }}
-{{- end }}
+{{ (.Files.Glob "dashboards/service-catalog.json").AsConfig | indent 2 }}

@@ -7,9 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kyma-project/kyma/components/asset-metadata-service/internal/route"
-
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/asset-metadata-service/internal/route"
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/signal"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
@@ -26,8 +25,8 @@ type config struct {
 
 func main() {
 	cfg, err := loadConfig("APP")
-	parseFlags(cfg)
 	exitOnError(err, "Error while loading app config")
+	parseFlags(cfg)
 
 	stopCh := signal.SetupChannel()
 
@@ -35,8 +34,7 @@ func main() {
 	defer cancel()
 	cancelOnInterrupt(stopCh, ctx, cancel)
 
-	mux := http.NewServeMux()
-	mux.Handle("/v1/extract", route.NewExtractHandler(cfg.MaxWorkers, cfg.ProcessTimeout))
+	mux := route.SetupHandlers(cfg.MaxWorkers, cfg.ProcessTimeout)
 
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	srv := &http.Server{Addr: addr, Handler: mux}

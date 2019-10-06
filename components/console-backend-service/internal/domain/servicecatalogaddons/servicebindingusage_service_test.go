@@ -7,7 +7,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared/automock"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	api "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
@@ -124,7 +124,7 @@ func TestBindingUsageServiceListForServiceInstance(t *testing.T) {
 					Namespace: "prod",
 				},
 				Spec: v1beta1.ServiceBindingSpec{
-					ServiceInstanceRef: v1beta1.LocalObjectReference{
+					InstanceRef: v1beta1.LocalObjectReference{
 						Name: "redis-instance",
 					},
 				}},
@@ -134,7 +134,7 @@ func TestBindingUsageServiceListForServiceInstance(t *testing.T) {
 					Namespace: "prod",
 				},
 				Spec: v1beta1.ServiceBindingSpec{
-					ServiceInstanceRef: v1beta1.LocalObjectReference{
+					InstanceRef: v1beta1.LocalObjectReference{
 						Name: "redis-instance",
 					},
 				}},

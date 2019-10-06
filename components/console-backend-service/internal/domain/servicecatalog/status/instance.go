@@ -3,7 +3,7 @@ package status
 import (
 	"strings"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 )
 
 type InstanceExtractor struct{}

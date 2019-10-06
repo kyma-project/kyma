@@ -1,13 +1,19 @@
 package repeat
 
 import (
+	"fmt"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func FuncAtMost(t *testing.T, fn func() error, duration time.Duration) {
+func AssertFuncAtMost(t *testing.T, fn func() error, duration time.Duration) {
 	t.Helper()
+	assert.NoError(t, FuncAtMost(fn, duration))
+}
 
+func FuncAtMost(fn func() error, duration time.Duration) error {
 	var (
 		tick    = time.Tick(time.Second)
 		timeout = time.After(duration)
@@ -16,11 +22,10 @@ func FuncAtMost(t *testing.T, fn func() error, duration time.Duration) {
 		execCnt uint
 	)
 
-waitingLoop:
 	for {
 		select {
 		case <-timeout:
-			t.Fatalf("Waiting for function failed in given timeout %v. Function was executed %d times. Last error: %v", duration, execCnt, lastErr)
+			return fmt.Errorf("waiting for function failed in given timeout %v. Function was executed %d times. Last error: %v", duration, execCnt, lastErr)
 		case <-tick:
 			execCnt++
 
@@ -28,7 +33,7 @@ waitingLoop:
 				continue
 			}
 
-			break waitingLoop
+			return nil
 		}
 	}
 }

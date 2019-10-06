@@ -4,17 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
-
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
-
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
+	"github.com/pkg/errors"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
 	assetstorePretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/pkg/errors"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
 )
 
 type eventActivationResolver struct {
@@ -62,7 +62,7 @@ func (r *eventActivationResolver) EventActivationEventsField(ctx context.Context
 		return nil, gqlerror.New(err, assetstorePretty.ClusterAssets)
 	}
 
-	if len(items) == 0 {
+	if len(items) == 0 || items[0].Status.Phase != v1alpha2.AssetReady || len(items[0].Status.AssetRef.Files) == 0 {
 		return nil, nil
 	}
 

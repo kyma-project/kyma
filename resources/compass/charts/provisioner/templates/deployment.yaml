@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "fullname" . }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ .Values.global.images.containerRegistry.path }}/{{ .Values.global.images.provisioner.dir }}compass-provisioner:{{ .Values.global.images.provisioner.version }}
+        imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.global.provisioner.graphql.port }}
+          protocol: TCP
+        env:
+        - name: APP_ADDRESS
+          value: "0.0.0.0:{{ .Values.global.provisioner.graphql.port }}"
+        - name: APP_API_ENDPOINT
+          value: "/graphql"

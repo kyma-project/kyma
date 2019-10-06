@@ -1,12 +1,16 @@
-FROM golang:1.12.5-alpine3.9 as builder
+FROM golang:1.12.5 as builder
 
-RUN apk add -U --no-cache ca-certificates
+ENV GO111MODULE=on
 
-ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/compass-runtime-agent
+RUN apt-get install -y ca-certificates
+
+ARG DOCK_PKG_DIR=/compass-runtime-agent
 
 WORKDIR $DOCK_PKG_DIR
 COPY . $DOCK_PKG_DIR
 COPY ./licenses/ /app/licenses
+
+RUN go mod download
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o compass-runtime-agent ./cmd
 
@@ -15,7 +19,7 @@ LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-COPY --from=builder /go/src/github.com/kyma-project/kyma/components/compass-runtime-agent/compass-runtime-agent .
+COPY --from=builder $DOCK_PKG_DIR/compass-runtime-agent .
 COPY --from=builder /app/licenses /app/licenses
 
 CMD ["/compass-runtime-agent"]

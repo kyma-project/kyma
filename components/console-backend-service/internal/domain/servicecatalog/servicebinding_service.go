@@ -3,8 +3,8 @@ package servicecatalog
 import (
 	"fmt"
 
-	api "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	api "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,7 +33,7 @@ func newServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, inf
 				return nil, errors.Wrapf(err, "while indexing by `relatedServiceInstanceName`")
 			}
 
-			key := fmt.Sprintf("%s/%s", serviceBinding.Namespace, serviceBinding.Spec.ServiceInstanceRef.Name)
+			key := fmt.Sprintf("%s/%s", serviceBinding.Namespace, serviceBinding.Spec.InstanceRef.Name)
 			return []string{key}, nil
 		},
 	})

@@ -99,7 +99,7 @@ func (ts *TestSuite) WaitForServiceClassWithTimeout(timeout time.Duration) {
 		return nil
 	}
 
-	repeat.FuncAtMost(ts.t, fn, timeout)
+	repeat.AssertFuncAtMost(ts.t, fn, timeout)
 }
 
 func (ts *TestSuite) ProvisionServiceInstance(timeout time.Duration) {
@@ -206,7 +206,7 @@ func (ts *TestSuite) ensureServiceBindingIsDeleted(timeout time.Duration) {
 	err := siClient.Delete(ts.bindingName, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 
-	repeat.FuncAtMost(ts.t, func() error {
+	repeat.AssertFuncAtMost(ts.t, func() error {
 		_, err := siClient.Get(ts.bindingName, metav1.GetOptions{})
 		switch {
 		case err == nil:
@@ -225,7 +225,7 @@ func (ts *TestSuite) ensureServiceInstanceIsDeleted(timeout time.Duration) {
 	err := siClient.Delete(ts.serviceInstance.Name, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 
-	repeat.FuncAtMost(ts.t, func() error {
+	repeat.AssertFuncAtMost(ts.t, func() error {
 		_, err := siClient.Get(ts.serviceInstance.Name, metav1.GetOptions{})
 		switch {
 		case err == nil:

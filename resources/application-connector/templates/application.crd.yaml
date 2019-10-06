@@ -19,6 +19,20 @@ spec:
       properties:
         spec:
           properties:
+            compassMetadata:
+              type: object
+              required:
+              - "authentication"
+              properties:
+                authentication:
+                  type: object
+                  required:
+                  - "clientIds"
+                  properties:
+                    clientIds:
+                      type: array
+                      items:
+                        type: string
             accessLabel:
               type: string
               maxLength: 63

@@ -33,7 +33,6 @@ spec:
             - --port={{ .Values.port }}
             - --max_requests={{ .Values.global.eventPublishService.maxRequests }}
             - --max_request_size={{ .Values.global.eventPublishService.maxRequestSize }}
-            - --max_channel_name_length={{ .Values.global.eventPublishService.maxChannelNameLength }}
             - --trace_api_url={{ .Values.global.trace.apiURL }}
             - --trace_service_name={{ .Values.trace.serviceName }}
             - --trace_operation_name={{ .Values.trace.operationName }}

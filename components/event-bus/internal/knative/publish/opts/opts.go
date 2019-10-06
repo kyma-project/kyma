@@ -11,17 +11,15 @@ import (
 
 const (
 	// default option values
-	defaultPort                 = 8080
-	defaultMaxRequests          = 100
-	defaultMaxRequestSize       = 65536
-	defaultMaxChannelNameLength = 33
-	defaultMonitoringPort       = 9090
+	defaultPort           = 8080
+	defaultMaxRequests    = 100
+	defaultMaxRequestSize = 65536
+	defaultMonitoringPort = 9090
 
 	// option names
 	port                      = "port"
 	maxRequests               = "max_requests"
 	maxRequestSize            = "max_request_size"
-	maxChannelNameLength      = "max_channel_name_length"
 	traceDebug                = "trace_debug"
 	traceAPIURL               = "trace_api_url"
 	traceHostPort             = "trace_host_port"
@@ -35,13 +33,12 @@ const (
 
 // Options represents the publish options.
 type Options struct {
-	Port                 int
-	MaxRequests          int
-	MaxRequestSize       int64
-	MaxChannelNameLength int
-	TraceOptions         *trace.Options
-	EventOptions         *publish.EventOptions
-	MonitoringPort       int
+	Port           int
+	MaxRequests    int
+	MaxRequestSize int64
+	TraceOptions   *trace.Options
+	EventOptions   *publish.EventOptions
+	MonitoringPort int
 }
 
 // ParseFlags parses the command line flags.
@@ -52,7 +49,6 @@ func ParseFlags() *Options {
 	flag.IntVar(&opts.Port, port, defaultPort, "The port used to communicate with the Knative Publish service endpoints")
 	flag.IntVar(&opts.MaxRequests, maxRequests, defaultMaxRequests, "The maximum number of allowed concurrent requests handled by the Knative Publish service")
 	flag.Int64Var(&opts.MaxRequestSize, maxRequestSize, defaultMaxRequestSize, "The maximum request size in bytes")
-	flag.IntVar(&opts.MaxChannelNameLength, maxChannelNameLength, defaultMaxChannelNameLength, "The maximum channel name length")
 	// trace opts
 	flag.BoolVar(&opts.TraceOptions.Debug, traceDebug, trace.DefaultTraceDebug, "The Trace debug flag")
 	flag.StringVar(&opts.TraceOptions.APIURL, traceAPIURL, trace.DefaultTraceAPIURL, "The Trace API URL")
@@ -73,12 +69,11 @@ func ParseFlags() *Options {
 // GetDefaultOptions returns a default publish options instance.
 func GetDefaultOptions() *Options {
 	opts := &Options{
-		Port:                 defaultPort,
-		MaxRequests:          defaultMaxRequests,
-		MaxRequestSize:       defaultMaxRequestSize,
-		MaxChannelNameLength: defaultMaxChannelNameLength,
-		TraceOptions:         trace.GetDefaultTraceOptions(),
-		EventOptions:         publish.GetDefaultEventOptions(),
+		Port:           defaultPort,
+		MaxRequests:    defaultMaxRequests,
+		MaxRequestSize: defaultMaxRequestSize,
+		TraceOptions:   trace.GetDefaultTraceOptions(),
+		EventOptions:   publish.GetDefaultEventOptions(),
 	}
 	return opts
 }
@@ -89,7 +84,6 @@ func (options *Options) Print() {
 	log.Printf(" %s %v", port, options.Port)
 	log.Printf(" %s %v", maxRequests, options.MaxRequests)
 	log.Printf(" %s %v", maxRequestSize, options.MaxRequestSize)
-	log.Printf(" %s %v", maxChannelNameLength, options.MaxChannelNameLength)
 	log.Printf(" %s %v", traceDebug, options.TraceOptions.Debug)
 	log.Printf(" %s %v", traceAPIURL, options.TraceOptions.APIURL)
 	log.Printf(" %s %v", traceHostPort, options.TraceOptions.HostPort)
