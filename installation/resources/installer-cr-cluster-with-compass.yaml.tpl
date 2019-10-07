@@ -59,8 +59,6 @@ spec:
       namespace: "knative-eventing"
     - name: "event-bus"
       namespace: "kyma-system"
-    - name: "application-connector-ingress"
-      namespace: "kyma-system"
     - name: "application-connector-helper"
       namespace: "kyma-integration"
     - name: "application-connector"

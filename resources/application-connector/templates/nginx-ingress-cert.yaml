@@ -1,9 +1,0 @@
-apiVersion: v1
-data:
-  "tls.crt": {{ .Values.global.applicationConnector.tlsCrt }}
-  "tls.key": {{ .Values.global.applicationConnector.tlsKey }}
-kind: Secret
-metadata:
-  name: application-connector-ingress-tls-cert
-  namespace: kyma-integration
-type: kubernetes.io/tls

@@ -1,8 +1,0 @@
-apiVersion: v1
-description: Helper chart of Application Connector
-name: application-connector-helper
-version: 0.0.1
-keywords:
-  - Application Connector
-  - xip.io
-  - kyma
