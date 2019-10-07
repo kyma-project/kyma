@@ -28,12 +28,12 @@ podAnnotations:
 resources: {}
 
 # Init containers to add to the Velero deployment's pod spec. Optional.
-initContainers: []
-  # - name:
-  #   image:
-  #   volumeMounts:
-  #     - name: plugins
-  #       mountPath: /target
+initContainers:
+- name: plugins
+  image: eu.gcr.io/kyma-project/develop/velero-plugins:1.6-mk
+  volumeMounts:
+  - name: plugins
+    mountPath: /target
 
 # Tolerations to use for the Velero deployment. Optional.
 tolerations: []
