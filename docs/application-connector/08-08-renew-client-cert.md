@@ -19,7 +19,7 @@ By default, the client certificate you generate when you connect an external sol
    openssl req -new -sha256 -out renewal.csr -key {PATH_TO_KEY} -subj "{SUBJECT}"
    ```
 
-   Send a request to the Connector Service to renew the certificate:
+3. Send a request to the Connector Service to renew the certificate:
 
    ```bash
    curl -X POST https://gateway.{DOMAIN}/v1/applications/certificates/renewals -d '{"csr":"BASE64_ENCODED_CSR"}' -k --cert {PATH_TO_OLD_CRT} --key {PATH_TO_KEY}

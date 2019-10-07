@@ -45,27 +45,27 @@ Follow these sections to create the Gauge dashboard type for the `cpu_temperatur
 
 ### Configure the dashboard
 
-To edit the dashboard settings, go to the **Panel Title** options and select **Edit**.
+1. To edit the dashboard settings, go to the **Panel Title** options and select **Edit**.
 
-![Edit the dashboard](./assets/edit-dashboard.png)
+   ![Edit the dashboard](./assets/edit-dashboard.png)
 
-1. Back in the **Visualization** section, set up the measuring unit to Celsius degrees to reflect the metric data type.
+2. Back in the **Visualization** section, set up the measuring unit to Celsius degrees to reflect the metric data type.
 
    ![Temperature](./assets/temperature-celsius.png)
 
-2. Set the minimum metric value to `60` and the maximum value to `90` to reflect the `cpu_temperature_celsius` metric value range. Enable the **Show labels** option to display this range on the dashboard.
+3. Set the minimum metric value to `60` and the maximum value to `90` to reflect the `cpu_temperature_celsius` metric value range. Enable the **Show labels** option to display this range on the dashboard.
 
    ![Minimum and maximum values](./assets/min-max-values.png)
 
-3. Set a red color threshold to `75` for the dashboard to turn red once the CPU temperature reaches and exceeds this value.
+4. Set a red color threshold to `75` for the dashboard to turn red once the CPU temperature reaches and exceeds this value.
 
    ![Threshold](./assets/threshold.png)
 
-4. Go to the **General** section and give a title to the dashboard.
+5. Go to the **General** section and give a title to the dashboard.
 
    ![Panel title](./assets/panel-title.png)
 
-5. Click the disk icon in the top right corner of the page to save the changes. Add an optional note to describe the changes made.
+6. Click the disk icon in the top right corner of the page to save the changes. Add an optional note to describe the changes made.
 
    ![Note](./assets/save-note.png)
 

@@ -59,7 +59,7 @@ Follow these steps:
    kubectl get pods -n testing-monitoring
    ```
 
-You should get a result similar to this one:
+   You should get a result similar to this one:
 
    ```bash
    NAME                              READY   STATUS    RESTARTS   AGE

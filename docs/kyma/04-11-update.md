@@ -87,10 +87,10 @@ Read about each update step in the following sections.
    Change the `image` and `imagePullPolicy` attributes in this section:
 
    ```bash
-        spec:
-          containers:
-          - image: <your_image_name>:<your_tag>
-             imagePullPolicy: Always
+   spec:
+      containers:
+      - image: <your_image_name>:<your_tag>
+         imagePullPolicy: Always
    ```
 
    > **NOTE:** If the desired image name and `imagePullPolicy` is already set in the deployment configuration, restart the Pod by running `kubectl delete pod -n kyma-installer {INSTALLER_POD_NAME}`.

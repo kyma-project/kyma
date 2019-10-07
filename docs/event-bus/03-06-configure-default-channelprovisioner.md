@@ -15,9 +15,9 @@ To achieve that:
 
 If you want to edit the `default-ch-webhook` ConfigMap, run: 
 
-  ```bash
-    kubectl -n knative-eventing edit configmaps default-ch-webhook
-  ```
+```bash
+kubectl -n knative-eventing edit configmaps default-ch-webhook
+```
 
 Read about the examples and the configuration details.
 
