@@ -127,7 +127,3 @@ additionalServiceMonitorLabels: {}
 users:
   default:
     theme: "light"
-
-# StatefulSet security context
-securityContext:
-  fsGroup: 472
