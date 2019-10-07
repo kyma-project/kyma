@@ -20,14 +20,10 @@ data:
       faviconUrl: '{{ js .Values.cluster.faviconUrl }}',
       gateway_kyma_cx_api_version: 'v1alpha2',
       disabledNavigationNodes: '{{ js .Values.cluster.disabledNavigationNodes }}',
-      systemNamespaces: '{{ js .Values.cluster.systemNamespaces }}'
-    };
-  
-  core-ui-config.js: |
-    window.clusterConfig = {
+      systemNamespaces: '{{ js .Values.cluster.systemNamespaces }}',
       graphqlApiUrl: 'https://console-backend{{ .Value.global.ingress.domainName }}/graphql',
       subscriptionsApiUrl: 'wss://console-backend{{ .Value.global.ingress.domainName }}/graphql',
     };
-
+    
   nginx-extended.conf: |
     set $kymadomain {{ js .Values.global.ingress.domainName }};
