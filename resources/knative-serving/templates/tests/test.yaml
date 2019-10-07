@@ -23,8 +23,6 @@ spec:
         env:
         - name: INGRESSGATEWAY_ADDRESS
           value: istio-ingressgateway.istio-system.svc.cluster.local
-        - name: DOMAIN_NAME
-          value: {{ .Values.global.ingress.domainName }}
         - name: TARGET
           value: {{ .Values.test.target }}
       restartPolicy: Never

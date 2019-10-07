@@ -389,7 +389,9 @@ func (k *MockKnativeLib) GetChannelByLabels(namespace string, labels map[string]
 	return k.GetChannel(channelName, namespace)
 }
 
-func (k *MockKnativeLib) CreateChannel(prefix, namespace string, labels map[string]string, timeout time.Duration) (*messagingV1Alpha1.Channel, error) {
+func (k *MockKnativeLib) CreateChannel(prefix, namespace string, labels map[string]string,
+	readyFn ...util.ChannelReadyFunc) (*messagingV1Alpha1.Channel, error) {
+
 	channel := makeKnChannel(prefix, namespace, labels)
 	knChannels[channel.Name] = channel
 	return channel, nil
@@ -462,7 +464,7 @@ func makeKnSubscriptionName(kySub *eventingv1alpha1.Subscription) string {
 
 func makeKnativeLibChannel() *messagingV1Alpha1.Channel {
 	chNamespace := util.GetDefaultChannelNamespace()
-	channel, _ := knativeLib.CreateChannel(makeKnChannelNamePrefix(makeEventsActivatedSubscription()), chNamespace, labels, time.Second)
+	channel, _ := knativeLib.CreateChannel(makeKnChannelNamePrefix(makeEventsActivatedSubscription()), chNamespace, labels)
 	channel.SetClusterName("fake-channel") // use it as a marker
 	knChannels[channel.Name] = channel
 	return channel

@@ -15,7 +15,7 @@ data:
         #!/usr/bin/env bash
         set -eu
         echo "*** Pre upgrade job starts ***"
-        kubectl scale -n kyma-system deploy/event-bus-subscription-controller --replicas=0
+        kubectl scale -n kyma-system deploy/event-bus-subscription-controller --replicas=0 || true
         kubectl delete subscriptions.eventing.knative.dev --all -n kyma-system --ignore-not-found
         kubectl delete channels.eventing.knative.dev --all -n kyma-system --ignore-not-found
         kubectl delete clusterchannelprovisioners.eventing.knative.dev --all --ignore-not-found

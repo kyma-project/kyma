@@ -2,9 +2,10 @@ openapi: '3.0.0'
 info:
   version: '1.0.0'
   title: 'Kyma Events API'
-tags:
-- name: 'Kyma events'
-  description: 'API for eventing.'
+  description: 'API for eventing'
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0 
 paths:
   /v1/health:
     get:
