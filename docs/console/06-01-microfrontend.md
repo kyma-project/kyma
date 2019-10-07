@@ -5,7 +5,7 @@ type: Custom Resource
 
 The `microfrontends.ui.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to extend the Kyma Console. It allows you to extend the Console for the specific Namespace. A micro frontend is added to the Console automatically based on the `yaml` file. To avoid naming conflicts with the core system, the root node receives the `mf-` prefix in the URL. Additionally, the **navigationContext** and **viewGroup** [node configuration](https://github.com/kyma-project/luigi/blob/master/docs/navigation-parameters-reference.md#node-parameters) parameters are set to allow simple navigation. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
-```bash
+``` bash
 kubectl get crd microfrontends.ui.kyma-project.io -o yaml
 ```
 
@@ -13,7 +13,7 @@ kubectl get crd microfrontends.ui.kyma-project.io -o yaml
 
 This is a sample CR that extends the Console.
 
-```yaml
+``` yaml
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: MicroFrontend
 metadata:
