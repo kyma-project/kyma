@@ -1,4 +1,5 @@
 # Default configuration
+MAIN_PATH := ./main.go
 IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG := $(DOCKER_TAG)
 # BASE_PKG is a root packge of the component
@@ -87,7 +88,7 @@ MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt 
 $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
 build-local:
-	env CGO_ENABLED=0 go build -o $(APP_NAME)
+	env CGO_ENABLED=0 go build -o $(APP_NAME) $(MAIN_PATH)
 	rm $(APP_NAME)
 
 resolve-local:
