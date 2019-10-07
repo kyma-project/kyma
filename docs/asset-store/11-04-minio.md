@@ -3,4 +3,4 @@ title: Minio
 type: Metrics
 ---
 
-As an external, open-source asset storage solution, Minio exposes its own metrics. See the [official documentation](https://github.com/minio/minio/tree/master/docs/metrics) for details.
+As an external, open-source file storage solution, Minio exposes its own metrics. See the [official documentation](https://github.com/minio/minio/tree/master/docs/metrics) for details. The Asset Stores comes with a preconfigured ServiceMonitor CRD that scraps those metrics into Prometheus. Using the metrics, you can create your own Grafana dashboard or reuse the dashboard that is already prepared.
