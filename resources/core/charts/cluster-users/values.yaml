@@ -1,3 +1,6 @@
+tests:
+  enabled: false
+
 bindings:
   kymaEssentials:
     groups: []
