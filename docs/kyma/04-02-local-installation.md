@@ -13,7 +13,6 @@ This Installation guide shows you how to quickly deploy Kyma locally on the MacO
 - [Docker](https://www.docker.com/get-started)
 - [Minikube](https://github.com/kubernetes/minikube) 1.3.1
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6
-- [Helm](https://github.com/kubernetes/helm) 2.10
 
 Virtualization:
 
@@ -43,7 +42,7 @@ Follow these instructions to install Kyma from a release or from sources:
      ```bash
      kyma install
      ```
-     >**NOTE** If you want to install a specific release version, go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about available releases. Use the release version as a parameter when calling ` kyma install --release {KYMA_RELEASE}`.
+     >**NOTE** If you want to install a specific release version, go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about available releases. Use the release version as a parameter when calling ` kyma install --source {KYMA_RELEASE}`.
 
   </details>
   <details>
@@ -67,7 +66,7 @@ Follow these instructions to install Kyma from a release or from sources:
   4. Install Kyma from sources. Run:
 
      ```bash
-     kyma install --local --src-path {YOUR_KYMA_SOURCE_PATH}
+     kyma install --source local --src-path {YOUR_KYMA_SOURCE_PATH}
      ```
 
    </details>
