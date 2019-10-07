@@ -36,7 +36,6 @@ data:
   global.domainName: "kyma.local"
   global.adminPassword: ""
   global.minikubeIP: ""
-  nginx-ingress.controller.service.loadBalancerIP: ""
 ---
 apiVersion: v1
 kind: ConfigMap
