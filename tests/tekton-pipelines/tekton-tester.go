@@ -9,10 +9,12 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"knative.dev/pkg/apis"
 	"os"
+	"time"
 
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	log "github.com/sirupsen/logrus"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -79,6 +81,8 @@ func runTest(tektonClient tekton.TaskRunInterface) error {
 		}
 		return nil
 	}, retry.Attempts(15),
+		retry.DelayType(retry.FixedDelay),
+		retry.Delay(5*time.Second),
 	)
 	if err != nil {
 		return errors.Wrap(err, "build failed")
