@@ -20,8 +20,8 @@ global:
     gateway:
       name: kyma-gateway
   acceptance_tests:
-    dir: pr/
-    version: "PR-5668"
+    dir:
+    version: "PR-5891"
   ui_acceptance_tests:
     dir: 
     version: d1d3246e
