@@ -1,4 +1,4 @@
-{{- if and ( .Values.test.acceptance.core.enabled ) ( .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" ) }}
+{{- if and ( .Values.test.acceptance.service-catalog.enabled ) ( .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" ) }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
@@ -26,20 +26,8 @@ spec:
           value: http://helm-broker.kyma-system.svc.cluster.local
         - name: APPLICATION_BROKER_URL
           value: http://application-broker.kyma-integration.svc.cluster.local
-        - name: RELEASE_NAMESPACE
-          value: {{ .Values.test.acceptance.core.application.brokerNamespace }}
         - name: STUBS_DOCKER_IMAGE
           value: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.acceptance_tests.dir }}acceptance-tests:{{ .Values.global.acceptance_tests.version }}
-        - name: APPLICATION_UNLINKING_TIMEOUT
-          value: {{ .Values.test.acceptance.core.application.unlinkingTimeout | quote }}
-        - name: APPLICATION_LINKING_TIMEOUT
-          value: {{ .Values.test.acceptance.core.application.linkingTimeout | quote }}
-        - name: APPLICATION_KEEP_RESOURCES
-          value: "false"
-        - name: APPLICATION_DISABLED
-          value: {{ .Values.test.acceptance.core.application.disabled | quote }}
-        - name: TEAR_DOWN_TIMEOUT_PER_STEP
-          value: {{ .Values.test.acceptance.core.application.tearDownTimeoutPerStep | quote }}
         - name: BROKER_ISTIO_RBAC_ENABLED
           value: "false"
         - name: POD_NAME

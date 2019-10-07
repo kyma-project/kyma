@@ -11,6 +11,7 @@ import (
 	"k8s.io/client-go/rest"
 
 	scClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	bucClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 )
@@ -45,10 +46,10 @@ func (t TestLogWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-// PrintJsonReport create report for injected namespace for every resource taking part in binding usage test
+// PrintJsonReport create report for injected namespace for every resource taking part in binding usage and service catalog test
 // and print all of them as a json in testing logs
 // resources included in report: Deployment, Pod, Service, ServiceBroker, ServiceClass, ServiceInstance
-// ServiceBinding, Application, ServiceBindingUsage
+// ServiceBinding, ClusterServiceBroker, ClusterServiceClass, Application, ServiceBindingUsage
 func (r Report) PrintJsonReport(namespace string) {
 	printer := &printers.JSONPrinter{}
 
@@ -62,17 +63,41 @@ func (r Report) PrintJsonReport(namespace string) {
 		r.test.Logf("Service Catalog clientset unreachable, cannot create namespace report: %v \n", err)
 	}
 
+	appclientset, err := appClient.NewForConfig(r.cfg)
+	if err != nil {
+		r.test.Logf("Application client unreachable: %v \n", err)
+	}
+
+	mclientset, err := mappingClient.NewForConfig(r.cfg)
+	if err != nil {
+		r.test.Logf("Application Connector client unreachable: %v \n", err)
+	}
+
+	bucclientset, err := bucClient.NewForConfig(r.cfg)
+	if err != nil {
+		r.test.Logf("Binding Usage Controller client unreachable: %v \n", err)
+	}
+
 	r.test.Log("########## Start Report Namespace ##########")
 
 	r.kubernetesResourceDump(printer, k8sclientset, namespace)
 	r.serviceCatalogResourceDump(printer, scclientset, namespace)
-	r.applicationResourceDump(printer, r.cfg)
-	r.bucResourceDump(printer, r.cfg, namespace)
+	r.applicationResourceDump(printer, appclientset, mclientset, namespace)
+	r.bucResourceDump(printer, bucclientset, namespace)
 
 	r.test.Log("########## End Report Namespace ##########")
 }
 
+func (r Report) PrintSingleResourceJsonReport(obj printerObject, kind string) {
+	printer := &printers.JSONPrinter{}
+	r.printObject(printer, obj, kind)
+}
+
 func (r Report) kubernetesResourceDump(printer printers.ResourcePrinter, clientset *kubernetes.Clientset, ns string) {
+	if clientset == nil {
+		return
+	}
+
 	dpls, err := clientset.AppsV1().Deployments(ns).List(metav1.ListOptions{})
 	if err != nil {
 		r.test.Logf("Deployment list unreachable: %v \n", err)
@@ -93,6 +118,10 @@ func (r Report) kubernetesResourceDump(printer printers.ResourcePrinter, clients
 }
 
 func (r Report) serviceCatalogResourceDump(printer printers.ResourcePrinter, clientset *scClient.Clientset, ns string) {
+	if clientset == nil {
+		return
+	}
+
 	sbro, err := clientset.ServicecatalogV1beta1().ServiceBrokers(ns).List(metav1.ListOptions{})
 	if err != nil {
 		r.test.Logf("ServiceBroker list unreachable: %v \n", err)
@@ -116,27 +145,43 @@ func (r Report) serviceCatalogResourceDump(printer printers.ResourcePrinter, cli
 		r.test.Logf("ServiceBinding list unreachable: %v \n", err)
 	}
 	r.printObject(printer, bngs, "ServiceBinding")
+
+	csbro, err := clientset.ServicecatalogV1beta1().ClusterServiceBrokers().List(metav1.ListOptions{})
+	if err != nil {
+		r.test.Logf("ClusterServiceBroker list unreachable: %v \n", err)
+	}
+	r.printObject(printer, csbro, "ClusterServiceBroker")
+
+	cscls, err := clientset.ServicecatalogV1beta1().ClusterServiceClasses().List((metav1.ListOptions{}))
+	if err != nil {
+		r.test.Logf("ClusterServiceClass list unreachable: %v \n", err)
+	}
+	r.printObject(printer, cscls, "ClusterServiceClass")
 }
 
-func (r Report) applicationResourceDump(printer printers.ResourcePrinter, config *rest.Config) {
-	clientset, err := appClient.NewForConfig(config)
-	if err != nil {
-		r.test.Logf("Application client unreachable: %v \n", err)
+func (r Report) applicationResourceDump(printer printers.ResourcePrinter, clientset *appClient.Clientset, mclientset *mappingClient.Clientset, ns string) {
+	if clientset != nil {
+		ab, err := clientset.ApplicationconnectorV1alpha1().Applications().List(metav1.ListOptions{})
+		if err != nil {
+			r.test.Logf("Application list unreachable: %v \n", err)
+		}
+		r.printObject(printer, ab, "Application")
 	}
 
-	ab, err := clientset.ApplicationconnectorV1alpha1().Applications().List(metav1.ListOptions{})
-	if err != nil {
-		r.test.Logf("Application list unreachable: %v \n", err)
+	if mclientset == nil {
+		return
 	}
-	r.printObject(printer, ab, "Application")
+	am, err := mclientset.ApplicationconnectorV1alpha1().ApplicationMappings(ns).List(metav1.ListOptions{})
+	if err != nil {
+		r.test.Logf("ApplicationMapping list unreachable: %v \n", err)
+	}
+	r.printObject(printer, am, "ApplicationMapping")
 }
 
-func (r Report) bucResourceDump(printer printers.ResourcePrinter, config *rest.Config, ns string) {
-	clientset, err := bucClient.NewForConfig(config)
-	if err != nil {
-		r.test.Logf("Binding Usage Controller client unreachable: %v \n", err)
+func (r Report) bucResourceDump(printer printers.ResourcePrinter, clientset *bucClient.Clientset, ns string) {
+	if clientset == nil {
+		return
 	}
-
 	sbus, err := clientset.ServicecatalogV1alpha1().ServiceBindingUsages(ns).List(metav1.ListOptions{})
 	if err != nil {
 		r.test.Logf("ServiceBindingUsage list unreachable: %v \n", err)

@@ -70,11 +70,5 @@ function goBuild() {
     GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w" -o $1 $2
 }
 
-echo -e "${GREEN} Building fake-gateway${NC}"
-goBuild gateway.bin ./application/cmd/fake-gateway/main.go
-
-echo -e "${GREEN} Building gateway-client${NC}"
-goBuild client.bin ./application/cmd/gateway-client/main.go
-
 echo -e "${GREEN} Building env-tester${NC}"
-goBuild env-tester.bin ./servicecatalog/cmd/env-tester/main.go
+goBuild env-tester.bin ./test/cmd/env-tester/main.go

@@ -1,6 +1,6 @@
 // +build acceptance
 
-package servicecatalog_test
+package test
 
 import (
 	"context"
@@ -10,17 +10,18 @@ import (
 	"testing"
 	"time"
 
-	appTypes "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"k8s.io/apimachinery/pkg/types"
+
 	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 
-	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 
 	scc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
 	corev1 "github.com/kubernetes/client-go/kubernetes/typed/core/v1"
 	v1alpha12 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
-	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
+	"github.com/kyma-project/kyma/tests/service-catalog/test/pkg/repeat"
+	"github.com/kyma-project/kyma/tests/service-catalog/test/pkg/report"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -158,13 +159,24 @@ func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
 	scClient, err := scc.NewForConfig(k8sConfig)
 	require.NoError(t, err)
 
-	// when
-	err = dynamicClient.Create(context.TODO(), addonsConfig)
-	require.NoError(t, err)
 	defer func() {
+		if t.Failed() {
+			cac := &v1alpha12.ClusterAddonsConfiguration{}
+			err = dynamicClient.Get(context.TODO(), types.NamespacedName{Name: addonsConfig.ObjectMeta.Name}, cac)
+			if err != nil {
+				t.Logf("ClusterAddonsConfiguration unreachable: %v \n", err)
+			}
+			namespaceReport := report.NewReport(t, k8sConfig)
+			namespaceReport.PrintSingleResourceJsonReport(cac, "ClusterAddonsConfiguration")
+		}
 		err = dynamicClient.Delete(context.TODO(), addonsConfig)
 		assert.NoError(t, err)
 	}()
+
+	// when
+	err = dynamicClient.Create(context.TODO(), addonsConfig)
+	require.NoError(t, err)
+	assert.True(t, false) // break test
 
 	// then
 	repeat.AssertFuncAtMost(t, func() error {
@@ -192,6 +204,13 @@ func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {
 
 	name := fmt.Sprintf("test-acc-app-%s", rand.String(4))
 	namespace := fmt.Sprintf("test-acc-ns-broker-%s", rand.String(4))
+
+	defer func() {
+		if t.Failed() {
+			namespaceReport := report.NewReport(t, k8sConfig)
+			namespaceReport.PrintJsonReport(namespace)
+		}
+	}()
 
 	t.Log("Creating Application")
 	app, err := aClient.ApplicationconnectorV1alpha1().Applications().Create(fixApplication(name))
@@ -236,62 +255,4 @@ func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {
 
 	listServiceBrokers, err := scClient.ServicecatalogV1beta1().ServiceBrokers(namespace).List(metav1.ListOptions{})
 	assert.Empty(t, listServiceBrokers.Items)
-}
-
-type brokerURL struct {
-	prefix    string
-	namespace string
-}
-
-func (b *brokerURL) buildURL(releaseNS string) string {
-	return fmt.Sprintf("http://%s%s.%s.svc.cluster.local", b.prefix, b.namespace, releaseNS)
-}
-
-func fixApplication(name string) *appTypes.Application {
-	return &appTypes.Application{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Application",
-			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-		Spec: appTypes.ApplicationSpec{
-			Description:      "Application used by acceptance test",
-			AccessLabel:      "fix-access",
-			SkipInstallation: true,
-			Services: []appTypes.Service{
-				{
-					ID:   "id-00000-1234-test",
-					Name: "provider-4951",
-					Labels: map[string]string{
-						"connected-app": name,
-					},
-					ProviderDisplayName: "provider",
-					DisplayName:         name,
-					Description:         "Application Service Class used by acceptance test",
-					Tags:                []string{},
-					Entries: []appTypes.Entry{
-						{
-							Type:        "API",
-							AccessLabel: "acc-label",
-							GatewayUrl:  "http://promotions-gateway.production.svc.cluster.local/",
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
-func fixApplicationMapping(name string) *mappingTypes.ApplicationMapping {
-	return &mappingTypes.ApplicationMapping{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ApplicationMapping",
-			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-	}
 }

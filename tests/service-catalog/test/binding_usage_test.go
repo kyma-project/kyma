@@ -10,9 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog"
-
-	"github.com/kyma-project/kyma/tests/acceptance/pkg/retriever"
+	"github.com/kyma-project/kyma/tests/service-catalog/test/pkg/retriever"
 
 	"github.com/pkg/errors"
 
@@ -30,8 +28,8 @@ import (
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 
-	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
-	"github.com/kyma-project/kyma/tests/acceptance/pkg/report"
+	"github.com/kyma-project/kyma/tests/service-catalog/test/pkg/repeat"
+	"github.com/kyma-project/kyma/tests/service-catalog/test/pkg/report"
 	"github.com/stretchr/testify/require"
 	"github.com/vrischmann/envconfig"
 	appsTypes "k8s.io/api/apps/v1beta1"

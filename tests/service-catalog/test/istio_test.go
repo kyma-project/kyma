@@ -1,4 +1,4 @@
-package servicecatalog_test
+package test
 
 import (
 	"bufio"

@@ -1,4 +1,4 @@
-{{- if .Values.test.acceptance.core.enabled }}
+{{- if .Values.test.acceptance.service-catalog.enabled }}
 kind: ServiceAccount
 apiVersion: v1
 metadata:
@@ -24,6 +24,10 @@ rules:
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["clusterserviceclasses"]
     verbs: ["list", "delete", "get"]
+    nonResourceURLs: []
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["clusterservicebrokers"]
+    verbs: ["get", "list"]
     nonResourceURLs: []
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["clusterserviceplans"]

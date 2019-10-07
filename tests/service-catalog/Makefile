@@ -8,3 +8,15 @@ include $(SCRIPTS_DIR)/go-dep.mk
 
 VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
 
+.PHONY: ci-release
+ci-release: build build-image push-image
+
+.PHONY: clean
+clean:
+	rm -f gateway.bin
+	rm -f env-tester.bin
+	rm -f client.bin
+
+#.PHONY: path-to-referenced-charts
+#path-to-referenced-charts:
+#	@echo "resources/core"
