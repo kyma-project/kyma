@@ -13,7 +13,6 @@ const namespace = "kyma-system"
 const yamlFile = "testCounterPod.yaml"
 
 func getPodStatus(stdout string) (podName string, isReady bool) {
-	log.Print(stdout)
 	isReady = false
 	stdoutArr := regexp.MustCompile("( )+").Split(stdout, -1)
 	podName = stdoutArr[0]
@@ -32,7 +31,7 @@ func getNumberOfNodes() int {
 		log.Fatalf("Error while kubectl get nodes: %v", string(stdoutStderr))
 	}
 	linesToRemove := 1;
-	if strings.Contains(string(stdoutStderr), "master") && !strings.Contains(string(stdoutStderr), "minikube") {
+	if strings.Contains(string(stdoutStderr), "master") && !strings.Contains(string(stdoutStderr), "minikube") && !strings.Contains(string(stdoutStderr), "control-plane") {
 		linesToRemove++
 	}
 	outputArr := strings.Split(string(stdoutStderr), "\n")
