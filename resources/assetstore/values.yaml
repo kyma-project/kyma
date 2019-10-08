@@ -58,3 +58,6 @@ minio:
 
   gcsgateway:
     replicas: 2
+
+tests:
+  enabled: false
