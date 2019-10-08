@@ -32,6 +32,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 	"k8s.io/client-go/util/retry"
+	helmapirelease "k8s.io/helm/pkg/proto/hapi/release"
 )
 
 const (
@@ -176,6 +177,21 @@ func (ts *TestSuite) GetMockServiceURL() string {
 	return fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", ts.mockServiceName, ts.config.Namespace, ts.config.MockServicePort)
 }
 
+func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T, applicationName string) {
+	err := testkit.WaitForFunction(defaultCheckInterval, ts.config.ApplicationInstallationTimeout, func() bool {
+		t.Log("Waiting for Application to be deployed...")
+
+		app, err := ts.ApplicationCRClient.Get(applicationName, metav1.GetOptions{})
+		if err != nil {
+			return false
+		}
+
+		return app.Status.InstallationStatus.Status == helmapirelease.Status_DEPLOYED.String()
+	})
+
+	require.NoError(t, err)
+}
+
 func (ts *TestSuite) AddDenierLabels(t *testing.T, appId string, apiIds ...string) {
 	pod := ts.getTestPod(t)
 	serviceNames := ts.getResourceNames(t, appId, apiIds...)
@@ -249,11 +265,11 @@ func (ts *TestSuite) getResourceNames(t *testing.T, appId string, apiIds ...stri
 
 func (ts *TestSuite) WaitForProxyInvalidation() {
 	// TODO: we should consider introducing some way to invalidate proxy cache
-	time.Sleep(time.Duration(ts.config.ProxyInvalidationWaitTime) * time.Second)
+	time.Sleep(ts.config.ProxyInvalidationWaitTime)
 }
 
 func (ts *TestSuite) WaitForConfigurationApplication() {
-	time.Sleep(time.Duration(ts.config.ConfigApplicationWaitTime) * time.Second)
+	time.Sleep(ts.config.ConfigApplicationWaitTime)
 }
 
 func (ts *TestSuite) updatePod(podName string, updateFunc updatePodFunc) error {
