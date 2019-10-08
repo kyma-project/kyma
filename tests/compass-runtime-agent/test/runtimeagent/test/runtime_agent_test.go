@@ -137,7 +137,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 						},
 					)
 
-				updatedApp, err := testSuite.CompassClient.UpdateApplication(application.Name, updatedInput.ToCompassInput())
+				updatedApp, err := testSuite.CompassClient.UpdateApplication(application.ID, updatedInput.ToCompassInput())
 				require.NoError(t, err)
 				assert.Equal(t, 3, len(updatedApp.APIs.Data))
 
@@ -321,7 +321,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 
 		defer func() {
 			t.Logf("Cleaning up %s Application...", response.Name)
-			removedId, err := testSuite.CompassClient.DeleteApplication(response.Name)
+			removedId, err := testSuite.CompassClient.DeleteApplication(response.ID)
 			require.NoError(t, err)
 			assert.Equal(t, response.Name, removedId)
 		}()
