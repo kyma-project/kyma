@@ -13,6 +13,7 @@ const namespace = "kyma-system"
 const yamlFile = "testCounterPod.yaml"
 
 func getPodStatus(stdout string) (podName string, isReady bool) {
+	log.Print(stdout)
 	isReady = false
 	stdoutArr := regexp.MustCompile("( )+").Split(stdout, -1)
 	podName = stdoutArr[0]
