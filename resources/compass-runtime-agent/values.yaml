@@ -6,8 +6,8 @@ global:
       dir: develop/
       version: "309eb6b3"
     runtimeAgentTests:
-      dir: develop/
-      version: "309eb6b3"
+      dir: pr/
+      version: "PR-5870"
 
 compassRuntimeAgent:
   image:
@@ -43,8 +43,9 @@ compassRuntimeAgent:
     enabled: true
     mockService:
       port: 8080
-    configApplicationWaitTime: 50
-    proxyInvalidationWaitTime: 150
+    configApplicationWaitTime: 50s
+    proxyInvalidationWaitTime: 120s
+    applicationInstallationTimeout: 150s
     graphqlLogs: false
     oauth:
       hydra:
