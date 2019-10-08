@@ -323,7 +323,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 			t.Logf("Cleaning up %s Application...", response.Name)
 			removedId, err := testSuite.CompassClient.DeleteApplication(response.ID)
 			require.NoError(t, err)
-			assert.Equal(t, response.Name, removedId)
+			assert.Equal(t, response.ID, removedId)
 		}()
 
 		apiIds := getAPIsIds(response)
