@@ -32,8 +32,8 @@ global:
     dir: develop/
     version: 665a2857
   apiserver_proxy:
-    dir: develop/
-    version: e029fcf4
+    dir:
+    version: PR-5931
   iam_kubeconfig_service:
     dir: develop/
     version: e029fcf4
