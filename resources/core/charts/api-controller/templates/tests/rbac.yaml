@@ -44,4 +44,4 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: {{ .Chart.Name }}-tests
-{{ end }}
+{{- end }}

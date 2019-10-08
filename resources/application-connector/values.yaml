@@ -41,8 +41,8 @@ global:
     dir: develop/
     version: "36059183"
   event_service_integration_tests:
-    dir: develop/
-    version: fc7361ac
+    dir: pr/
+    version: PR-5890
   application_connectivity_validator:
     dir: develop/
     version: e029fcf4
@@ -50,8 +50,8 @@ global:
     dir: develop/
     version: e029fcf4
   application_gateway_tests:
-    dir: develop/
-    version: b1f395fa
+    dir: pr/
+    version: PR-5890
   application_registry:
     dir: develop/
     version: c9f7a5f5
@@ -80,7 +80,8 @@ application_connectivity_certs_setup_job:
 
 tests:
   application_connector_tests:
-    enabled: *connectorServiceEnabled
+#    enabled: *connectorServiceEnabled
+    enabled: false
     connector_service:
       central: false
     skipSslVerify: true

@@ -94,7 +94,7 @@ tests:
 test:
   acceptance:
     external_solution:
-      enabled: true
+      enabled: false
     core:
       enabled: true
       # environments used in application acceptance test
