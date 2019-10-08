@@ -42,9 +42,6 @@ const (
 
 func TestGatewayEvents(t *testing.T) {
 
-	config, err := testkit.ReadConfig()
-	require.NoError(t, err)
-
 	t.Run("should send events via Event Service", func(t *testing.T) {
 		// given
 		publishRequest := PublishRequest{

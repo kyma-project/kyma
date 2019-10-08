@@ -8,12 +8,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/common/resilient"
+
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools"
 
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/testkit/util"
 
 	"github.com/stretchr/testify/require"
 
+	retry "github.com/avast/retry-go"
 	"k8s.io/apimachinery/pkg/util/rand"
 )
 
@@ -22,10 +25,12 @@ const (
 	getDeleteURLFormat = "%s/%s/v1/metadata/services/%s"
 	specFetchInterval  = 3 * time.Second
 	specFetchTimeout   = 60 * time.Second
+
+	retryCount = 3
 )
 
 type AppRegistryClient struct {
-	httpClient *http.Client
+	httpClient resilient.HttpClient
 
 	appRegistryURL string
 	application    string
@@ -35,7 +40,7 @@ func NewAppRegistryClient(registryURL, application string) *AppRegistryClient {
 	return &AppRegistryClient{
 		appRegistryURL: registryURL,
 		application:    application,
-		httpClient:     &http.Client{},
+		httpClient:     resilient.NewHttpClient(retry.Delay(time.Second), retry.Attempts(retryCount)),
 	}
 }
 
@@ -144,7 +149,10 @@ func (arc *AppRegistryClient) GetApiSpecWithRetries(t *testing.T, serviceId stri
 		t.Logf("Fetching registered service at: %s", url)
 		var err error
 
-		response, err = arc.httpClient.Get(url)
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		require.NoError(t, err)
+
+		response, err = arc.httpClient.Do(req)
 		require.NoError(t, err)
 		defer response.Body.Close()
 		util.RequireStatus(t, http.StatusOK, response)

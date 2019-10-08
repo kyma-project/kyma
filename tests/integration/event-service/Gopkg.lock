@@ -79,6 +79,14 @@
   version = "v1.1.6"
 
 [[projects]]
+  digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
+  version = "v1.0.2"
+
+[[projects]]
   digest = "1:12ba0eb2d76b5ddfa7666b29ffdfec59669b4b1afaee94aaedbc9f6897794be1"
   name = "github.com/kyma-project/kyma"
   packages = [
@@ -115,6 +123,14 @@
   pruneopts = "UT"
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:04457f9f6f3ffc5fea48e71d62f2ca256637dee0a04d710288e27e05c8b41976"
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "839c75faf7f98a33d445d181f3018b5c3409a45e"
+  version = "v1.4.2"
 
 [[projects]]
   digest = "1:c1b1102241e7f645bc8e0c22ae352e8f0dc6484b6cb4d132fa9f24174e0119e2"
@@ -348,6 +364,7 @@
   input-imports = [
     "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
     "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned",
+    "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
     "golang.org/x/lint/golint",
