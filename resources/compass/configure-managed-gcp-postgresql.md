@@ -12,7 +12,7 @@ To set up the database, create the following:
 
 ## Install the Compass with managed GCP PostgreSQL database
 
-To install the Compass with GCP managed Postgres database, set `database.embedded.enabled` value to `false` inside `./chart/compass/values.yaml` file, and fill those values:
+To install the Compass with GCP managed Postgres database, set the `database.embedded.enabled` value to `false` inside the `./chart/compass/values.yaml` file, and fill in these values:
 
 | Parameter | Description | Values | Default |
 | --- | --- | --- | --- |
