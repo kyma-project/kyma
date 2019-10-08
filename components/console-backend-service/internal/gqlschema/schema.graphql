@@ -906,6 +906,16 @@ type Function {
 	labels: Labels!
 	runtime: String!
 	size: String!
+	status: FunctionStatusType!
+}
+
+enum FunctionStatusType {
+    Unknown
+    Running
+    Building
+    Error
+    Deploying
+    Updating
 }
 
 type FunctionMutationOutput {

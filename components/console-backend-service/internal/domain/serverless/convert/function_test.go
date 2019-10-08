@@ -41,9 +41,10 @@ func TestConvert_FunctionToGQL(t *testing.T) {
 
 	t.Run("Empty", func(t *testing.T) {
 		in := v1alpha1.Function{}
-
+		expected := gqlschema.Function{
+			Status: gqlschema.FunctionStatusTypeError}
 		result := convert.FunctionToGQL(&in)
-		assert.Empty(t, result)
+		assert.Equal(t, &expected, result)
 	})
 }
 
