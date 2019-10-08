@@ -7,12 +7,14 @@ metadata:
     "helm.sh/hook": "pre-upgrade"
     "helm.sh/hook-weight": "-6"
     "helm.sh/hook-delete-policy": "before-hook-creation"
+  labels:
+    job: {{ .Release.Name }}-pre-upgrade
 rules:
 - apiGroups: ["apps","extensions"]
   resources: ["deployments/scale", "deployments"]
   verbs: ["create", "get", "list", "watch", "patch", "update", "delete"]
 - apiGroups: ["eventing.knative.dev"]
-  resources: 
+  resources:
     - subscriptions
     - channels
     - clusterchannelprovisioners
@@ -24,98 +26,100 @@ rules:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-    name: {{ .Release.Name }}-pre-upgrade
-    annotations:
-        "helm.sh/hook-delete-policy": before-hook-creation
-        "helm.sh/hook": pre-upgrade
-        "helm.sh/hook-weight": "-5"
-    labels:
-        job: pre-upgrade-knative-eventing
+  name: {{ .Release.Name }}-pre-upgrade
+  annotations:
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-5"
+  labels:
+      job: {{ .Release.Name }}-pre-upgrade
 ---
 apiVersion: v1
 data:
-    pre-upgrade.sh: |
-        #!/usr/bin/env bash
-        set -eu
-        echo "*** Pre upgrade job starts ***"
-        kubectl scale -n kyma-system deploy/event-bus-subscription-controller --replicas=0 || true
-        if kubectl get crd subscriptions.eventing.knative.dev; then 
-          echo "deleting subscriptions"
-          kubectl delete subscriptions.eventing.knative.dev --all -n kyma-system --ignore-not-found
-        fi
-        if kubectl get crd channels.eventing.knative.dev; then 
-          echo "deleting channels"
-          kubectl delete channels.eventing.knative.dev --all -n kyma-system --ignore-not-found 
-        fi
-        if kubectl get crd clusterchannelprovisioners.eventing.knative.dev; then 
-          echo "deleting clusterchannelprovisioners"
-          kubectl delete clusterchannelprovisioners.eventing.knative.dev --all --ignore-not-found
-        fi
-        kubectl delete crd \
-          subscriptions.eventing.knative.dev \
-          clusterchannelprovisioners.eventing.knative.dev \
-          channels.eventing.knative.dev --ignore-not-found
-        echo "*** Pre upgrade job executed ***"
+  pre-upgrade.sh: |
+    #!/usr/bin/env bash
+    set -eu
+    echo "*** Pre upgrade job starts ***"
+    kubectl scale -n kyma-system deploy/event-bus-subscription-controller --replicas=0 || true
+    if kubectl get crd subscriptions.eventing.knative.dev; then
+      echo "deleting subscriptions"
+      kubectl delete subscriptions.eventing.knative.dev --all -n kyma-system --ignore-not-found
+    fi
+    if kubectl get crd channels.eventing.knative.dev; then
+      echo "deleting channels"
+      kubectl delete channels.eventing.knative.dev --all -n kyma-system --ignore-not-found
+    fi
+    if kubectl get crd clusterchannelprovisioners.eventing.knative.dev; then
+      echo "deleting clusterchannelprovisioners"
+      kubectl delete clusterchannelprovisioners.eventing.knative.dev --all --ignore-not-found
+    fi
+    kubectl delete crd \
+      subscriptions.eventing.knative.dev \
+      clusterchannelprovisioners.eventing.knative.dev \
+      channels.eventing.knative.dev --ignore-not-found
+    echo "*** Pre upgrade job executed ***"
 kind: ConfigMap
 metadata:
-    annotations:
-        "helm.sh/hook-delete-policy": before-hook-creation
-        "helm.sh/hook": pre-upgrade
-        "helm.sh/hook-weight": "-5"
-    labels:
-        job: pre-upgrade-knative-eventing
-    name: {{ .Release.Name }}-pre-upgrade
+  annotations:
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-5"
+  labels:
+    job: {{ .Release.Name }}-pre-upgrade
+  name: {{ .Release.Name }}-pre-upgrade
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-    name: {{ .Release.Name }}-pre-upgrade
-    annotations:
-        "helm.sh/hook-delete-policy": before-hook-creation
-        "helm.sh/hook": pre-upgrade
-        "helm.sh/hook-weight": "-4"
+  name: {{ .Release.Name }}-pre-upgrade
+  annotations:
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-4"
+  labels:
+    job: {{ .Release.Name }}-pre-upgrade
 roleRef:
-    apiGroup: rbac.authorization.k8s.io
-    kind: ClusterRole
-    name: {{ .Release.Name }}-pre-upgrade
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name }}-pre-upgrade
 subjects:
-    - kind: ServiceAccount
-      name: {{ .Release.Name }}-pre-upgrade
-      namespace: {{ .Release.Namespace }}
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-pre-upgrade
+    namespace: {{ .Release.Namespace }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-    annotations:
-        "helm.sh/hook-delete-policy": before-hook-creation
-        "helm.sh/hook": pre-upgrade
-        "helm.sh/hook-weight": "-3"
-    labels:
-        job: pre-upgrade-knative-eventing
-    name: {{ .Release.Name }}-pre-upgrade
+  annotations:
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-3"
+  labels:
+    job: {{ .Release.Name }}-pre-upgrade
+  name: {{ .Release.Name }}-pre-upgrade
 spec:
-    completions: 1
-    parallelism: 1
-    template:
-        metadata:
-            annotations:
-                sidecar.istio.io/inject: "false"
-            labels:
-                job: pre-upgrade-knative-eventing
-        spec:
-            restartPolicy: OnFailure
-            containers:
-                - command: ["sh", "/scripts/pre-upgrade.sh"]
-                  image: docker.io/istio/kubectl:1.1.6
-                  imagePullPolicy: IfNotPresent
-                  name: {{ .Release.Name }}-pre-upgrade
-                  volumeMounts:
-                      - mountPath: /scripts
-                        name: scripts
-                        readOnly: true
-            serviceAccountName: {{ .Release.Name }}-pre-upgrade
-            volumes:
-                - configMap:
-                      defaultMode: 420
-                      name: {{ .Release.Name }}-pre-upgrade
-                  name: scripts
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        job: {{ .Release.Name }}-pre-upgrade
+    spec:
+        restartPolicy: OnFailure
+        containers:
+          - command: ["sh", "/scripts/pre-upgrade.sh"]
+            image: docker.io/istio/kubectl:1.1.6
+            imagePullPolicy: IfNotPresent
+            name: {{ .Release.Name }}-pre-upgrade
+            volumeMounts:
+              - mountPath: /scripts
+                name: scripts
+                readOnly: true
+        serviceAccountName: {{ .Release.Name }}-pre-upgrade
+        volumes:
+          - configMap:
+              defaultMode: 420
+              name: {{ .Release.Name }}-pre-upgrade
+            name: scripts
