@@ -7,7 +7,7 @@ global:
       version: "PR-5943"
     runtimeAgentTests:
       dir: pr/
-      version: "PR-6081"
+      version: "PR-5858"
 
 compassRuntimeAgent:
   image:
