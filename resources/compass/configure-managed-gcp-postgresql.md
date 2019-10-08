@@ -12,7 +12,7 @@ To set up the database, create the following:
 
 ## Install the Compass with managed GCP PostgreSQL database
 
-To install the Compass with GCP managed Postgres database, set `database.useEmbedded` value to `false` inside `./chart/compass/values.yaml` file, and fill those values:
+To install the Compass with GCP managed Postgres database, set `database.embedded.enabled` value to `false` inside `./chart/compass/values.yaml` file, and fill those values:
 
 | Parameter | Description | Values | Default |
 | --- | --- | --- | --- |
@@ -20,7 +20,8 @@ To install the Compass with GCP managed Postgres database, set `database.useEmbe
 | `global.database.managedGCP.instanceConnectionName` | Specifies instance connection name to GCP PostgreSQL database | string | "" |
 | `global.database.managedGCP.dbUser` | Specifies database username | string | "" |
 | `global.database.managedGCP.dbPassword` | Specifies password for database user | string | "" |
-| `global.database.managedGCP.dbName` | Specifies database name | string | "" |
+| `global.database.managedGCP.directorDBName` | Specifies Director database name | string | "" |
+| `global.database.managedGCP.provisionerDBName` | Specifies Provisioner database name | string | "" |
 | `global.database.managedGCP.host` | Specifies cloudsql-proxy host | string | "localhost" |
 | `global.database.managedGCP.hostPort` | Specifies cloudsql-proxy port | string | "5432" |
 | `global.database.managedGCP.sslMode` | Specifies SSL connection mode | string | "" |
