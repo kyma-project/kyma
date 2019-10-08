@@ -39,4 +39,4 @@ COPY --from=builder /app /app
 # Run app
 #
 
-CMD ["/app/app"]
+ENTRYPOINT ["/app/app"]
