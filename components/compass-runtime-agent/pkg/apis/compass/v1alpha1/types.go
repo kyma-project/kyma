@@ -72,7 +72,13 @@ func (s CompassConnectionStatus) String() string {
 	return string(s.State)
 }
 
+type ConnectionProcessStatus struct {
+	ConnectionEstablished bool
+}
+
 type ConnectionState string
+
+// TODO - consider reworking those states to some pipeline info
 
 const (
 	// Connection was established successfully
@@ -85,6 +91,8 @@ const (
 	SynchronizationFailed ConnectionState = "SynchronizationFailed"
 	// Connection was established but applying configuration failed
 	ResourceApplicationFailed ConnectionState = "ResourceApplicationFailed"
+	// Resources were applied successfully but Runtime metadata update failed
+	MetadataUpdateFailed ConnectionState = "MetadataUpdateFailed"
 	// Connection was successful and configuration has been applied
 	Synchronized ConnectionState = "Synchronized"
 )

@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"kyma-project.io/compass-runtime-agent/internal/certificates"
 	"kyma-project.io/compass-runtime-agent/internal/compass"
 	confProvider "kyma-project.io/compass-runtime-agent/internal/config"
@@ -95,6 +96,7 @@ func main() {
 		CredentialsManager:           certManager,
 		SynchronizationService:       syncService,
 		ConfigProvider:               configProvider,
+		RuntimeURLsConfig:            options.Runtime,
 		CertValidityRenewalThreshold: options.CertValidityRenewalThreshold,
 		MinimalCompassSyncTime:       options.MinimalCompassSyncTime,
 	}
