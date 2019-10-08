@@ -370,8 +370,8 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 }
 
 func assertK8sResourcesAndAPIAccess(t *testing.T, testSuite *runtimeagent.TestSuite, application compass.Application) {
-	t.Logf("Waiting for %s Application to be deployed...", application.ID)
-	testSuite.WaitForApplicationToBeDeployed(t, application.ID)
+	t.Logf("Waiting for %s Application to be deployed...", application.Name)
+	testSuite.WaitForApplicationToBeDeployed(t, application.Name)
 
 	t.Logf("Checking K8s resources")
 	testSuite.K8sResourceChecker.AssertResourcesForApp(t, application)
