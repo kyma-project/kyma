@@ -7,6 +7,9 @@ include $(SCRIPTS_DIR)/go-dep.mk
 
 MAIN_PATH := ./cmd/operator/main.go
 
+test-local:
+	go test -short ./...
+
 verify:: vet
 
 .PHONY: clean
