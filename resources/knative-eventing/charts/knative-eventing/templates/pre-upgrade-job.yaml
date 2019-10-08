@@ -24,7 +24,7 @@ rules:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-    name: pre-upgrade-knative-eventing
+    name: {{ .Release.Name }}-pre-upgrade
     annotations:
         "helm.sh/hook-delete-policy": before-hook-creation
         "helm.sh/hook": pre-upgrade
@@ -64,12 +64,12 @@ metadata:
         "helm.sh/hook-weight": "-5"
     labels:
         job: pre-upgrade-knative-eventing
-    name: pre-upgrade-knative-eventing
+    name: {{ .Release.Name }}-pre-upgrade
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-    name: pre-upgrade
+    name: {{ .Release.Name }}-pre-upgrade
     annotations:
         "helm.sh/hook-delete-policy": before-hook-creation
         "helm.sh/hook": pre-upgrade
@@ -80,7 +80,7 @@ roleRef:
     name: {{ .Release.Name }}-pre-upgrade
 subjects:
     - kind: ServiceAccount
-      name: pre-upgrade-knative-eventing
+      name: {{ .Release.Name }}-pre-upgrade
       namespace: {{ .Release.Namespace }}
 ---
 apiVersion: batch/v1
@@ -92,7 +92,7 @@ metadata:
         "helm.sh/hook-weight": "-3"
     labels:
         job: pre-upgrade-knative-eventing
-    name: pre-upgrade-knative-eventing
+    name: {{ .Release.Name }}-pre-upgrade
 spec:
     completions: 1
     parallelism: 1
@@ -108,14 +108,14 @@ spec:
                 - command: ["sh", "/scripts/pre-upgrade.sh"]
                   image: docker.io/istio/kubectl:1.1.6
                   imagePullPolicy: IfNotPresent
-                  name: pre-upgrade-knative-eventing
+                  name: {{ .Release.Name }}-pre-upgrade
                   volumeMounts:
                       - mountPath: /scripts
                         name: scripts
                         readOnly: true
-            serviceAccountName: pre-upgrade-knative-eventing
+            serviceAccountName: {{ .Release.Name }}-pre-upgrade
             volumes:
                 - configMap:
                       defaultMode: 420
-                      name: pre-upgrade-knative-eventing
+                      name: {{ .Release.Name }}-pre-upgrade
                   name: scripts
