@@ -1,0 +1,17 @@
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: serverless
+  labels:
+    app:  serverless
+spec:
+  displayName: Core
+  version: v1
+  category: Development
+  placement: namespace
+  viewBaseUrl: 'https://core-ui.{{ js .Values.global.ingress.domainName }}'
+  navigationNodes:
+    - label: Knative lambdas
+      navigationPath: knative-lambdas
+      viewUrl: '/lambdas'
+      order: 1
