@@ -18,8 +18,8 @@ global:
       dir: develop/
       version: "26601526"
     provisioner:
-      dir: develop/
-      version: "4f007a9f"
+      dir: pr/
+      version: "PR-352"
     schema_migrator:
       dir: develop/
       version: "4fc82813"
@@ -36,8 +36,8 @@ global:
         dir: develop/
         version: "67535547"
       provisioner:
-        dir: develop/
-        version: "96714748"
+        dir: pr/
+        version: "PR-352"
 
   isLocalEnv: false
 
@@ -96,14 +96,18 @@ global:
       namespace: "kyma-system"
 
   database:
-    useEmbedded: true
+    embedded:
+      enabled: true
+      directorDBName: "postgres"
+      provisionerDBName: "provisioner"
     # Values for GCP managed PostgreSQL database
     managedGCP:
       serviceAccountKey: ""
       instanceConnectionName: ""
       dbUser: ""
       dbPassword: ""
-      dbName: ""
+      directorDBName: ""
+      provisionerDBName: ""
       host: "localhost"
       hostPort: "5432"
       sslMode: ""
