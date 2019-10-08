@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"kyma-project.io/compass-runtime-agent/internal/compass/director"
+
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -25,6 +27,8 @@ type Config struct {
 	InsecureConfigurationFetch     bool          `envconfig:"default=false"`
 	UploadServiceUrl               string        `envconfig:"default=http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000"`
 	QueryLogging                   bool          `envconfig:"default=false"`
+
+	Runtime director.RuntimeURLsConfig
 }
 
 func (o *Config) String() string {
@@ -32,12 +36,14 @@ func (o *Config) String() string {
 		"ControllerSyncPeriod=%s, MinimalCompassSyncTime=%s, "+
 		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
 		"IntegrationNamespace=%s, GatewayPort=%d, InsecureConfigurationFetch=%v, UploadServiceUrl=%s, "+
-		"QueryLogging=%v",
+		"QueryLogging=%v, "+
+		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s",
 		o.ConnectionConfigMap,
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
 		o.IntegrationNamespace, o.GatewayPort, o.InsecureConfigurationFetch, o.UploadServiceUrl,
-		o.QueryLogging)
+		o.QueryLogging,
+		o.Runtime.EventsURL, o.Runtime.ConsoleURL)
 }
 
 func parseNamespacedName(value string) types.NamespacedName {

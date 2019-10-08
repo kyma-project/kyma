@@ -8,6 +8,10 @@ type ApplicationsForRuntimeResponse struct {
 	Result *ApplicationPage `json:"result"`
 }
 
+type SetRuntimeLabelResponse struct {
+	Result *graphql.Label `json:"result"`
+}
+
 type ApplicationPage struct {
 	Data       []*Application    `json:"data"`
 	PageInfo   *graphql.PageInfo `json:"pageInfo"`
