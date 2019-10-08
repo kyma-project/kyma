@@ -27,7 +27,7 @@ global:
     version: 1a48bf40
   api_controller:
     dir:
-    version: PR-5882
+    version: 8eb3a417
   api_controller_integration_tests:
     dir: develop/
     version: 665a2857
