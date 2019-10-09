@@ -39,6 +39,7 @@ data:
     {{- with .Values.oidc.staticClientsExtra }}
     {{- tpl . $ | nindent 4 }}
     {{- end }}
-
+    {{ if .Values.dex.useStaticConnector }}
     enablePasswordDB: true
     #__STATIC_PASSWORDS__
+    {{ end }}
