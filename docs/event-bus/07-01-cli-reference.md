@@ -31,7 +31,7 @@ The following examples show how to create new Subscriptions, list them, and obta
 
 * Create a new Subscription directly from the terminal:
 
-```
+   ```
    cat <<EOF | kubectl create -f -
    apiVersion: eventing.kyma-project.io/v1alpha1
    kind: Subscription
@@ -44,17 +44,17 @@ The following examples show how to create new Subscriptions, list them, and obta
      event_type: order_created
      event_type_version: v1
      source_id: stage.commerce.kyma.local
-EOF
-```
+   EOF
+   ```
 
 * Get the list of all Subscriptions:
 
-```
-kubectl get subscription --all-namespaces
-```
+   ```
+   kubectl get subscription --all-namespaces
+   ```
 
 * Get the list of all Subscriptions with detailed information on the Subscription status:
 
-```
-kubectl get subscriptions -n stage -o=custom-columns=NAME:.metadata.name,STATUS:.status.conditions[*].status,STATUS\ TYPE:.status.conditions[*].type
-```
+   ```
+   kubectl get subscriptions -n stage -o=custom-columns=NAME:.metadata.name,STATUS:.status.conditions[*].status,STATUS\ TYPE:.status.conditions[*].type
+   ```
