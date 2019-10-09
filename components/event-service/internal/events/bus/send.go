@@ -2,11 +2,14 @@ package bus
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 
+	cloudevents "github.com/cloudevents/sdk-go"
+	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
@@ -96,6 +99,45 @@ func SendEvent(apiVersion string, req interface{}, traceHeaders *map[string]stri
 	}
 
 	return &response, nil
+}
+
+func SendEventV2(event cloudevents.Event, traceHeaders map[string]string) (*cloudevents.Event, error) {
+	ctx := cloudevents.ContextWithEncoding(context.Background(), cloudevents.Structured)
+
+	encoding := cloudevents.HTTPStructuredV1
+
+	options := []cloudeventshttp.Option{
+		cloudevents.WithTarget(eventsTargetURLV2),
+		cloudevents.WithEncoding(encoding),
+	}
+
+	for key, value := range traceHeaders {
+		options = append(options, cloudevents.WitHHeader(key, value))
+	}
+
+	t, err := cloudevents.NewHTTPTransport(options...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	c, err := cloudevents.NewClient(t,
+		cloudevents.WithTimeNow(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO(k15r): is this how you convert to v1?
+	event = cloudevents.Event{
+		Context: event.Context.AsV1(),
+		Data:    event.Data,
+	}
+	_, resp, err := c.Send(ctx, event)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 func addTraceHeaders(httpReq *http.Request, traceHeaders *map[string]string) {

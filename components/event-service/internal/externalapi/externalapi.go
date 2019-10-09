@@ -4,12 +4,14 @@ import (
 	"net/http"
 
 	v1 "github.com/kyma-project/kyma/components/event-service/internal/externalapi/v1"
+	v2 "github.com/kyma-project/kyma/components/event-service/internal/externalapi/v2"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
 
 	"github.com/gorilla/mux"
 
 	cloudevents "github.com/cloudevents/sdk-go"
+	cloudeventstransport "github.com/cloudevents/sdk-go/pkg/cloudevents/transport"
 )
 
 //SubscribedEventsHandler is an interface representing handler for the /v1/subscribedevents endpoint
@@ -29,7 +31,7 @@ func NewHandler(maxRequestSize int64, eventsClient subscribed.EventsClient) http
 	}
 
 	//TODO: set the logic here
-	//t.SetReceiver(some magic receiver)
+	t.SetReceiver(cloudeventstransport.ReceiveFunc(v2.HandleEvent))
 
 	router.Path("/{application}/v2/events").Handler(t).Methods(http.MethodPost)
 

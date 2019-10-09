@@ -12,11 +12,11 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	apiv2 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v2"
-	busv2 "github.com/kyma-project/kyma/components/event-service/internal/events/bus/v2"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 
 	cloudevents "github.com/cloudevents/sdk-go"
+	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -48,12 +48,16 @@ func NewEventsHandler(maxRequestSize int64) http.Handler {
 }
 
 // FilterCEHeaders filters Cloud Events Headers
-func FilterCEHeaders(req *http.Request) map[string][]string {
+//TODO(k15r): seems not needed anymore, verify
+func FilterCEHeaders(ctx context.Context) map[string][]string {
 	//forward `ce-` headers only
 	headers := make(map[string][]string)
-	for k := range req.Header {
+
+	tctx := cloudeventshttp.TransportContextFrom(ctx)
+
+	for k := range tctx.Header {
 		if strings.HasPrefix(strings.ToUpper(k), "CE-") {
-			headers[k] = req.Header[k]
+			headers[k] = tctx.Header[k]
 		}
 	}
 	return headers
@@ -83,9 +87,9 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	}
 	resp := &api.PublishEventResponses{}
 
-	traceHeaders := getTraceHeaders(req)
+	traceHeaders := &map[string]string{} //getTraceHeaders(req)
 
-	forwardHeaders := FilterCEHeaders(req)
+	forwardHeaders := make(map[string][]string) //nil //FilterCEHeaders(req)
 
 	err = handleEvent(parameters, resp, traceHeaders, &forwardHeaders)
 	if err == nil {
@@ -110,12 +114,12 @@ func handleEvent(publishRequest *apiv2.PublishEventParametersV2, publishResponse
 		return
 	}
 	// add source to the incoming request
-	sendRequest, err := busv2.AddSource(publishRequest)
-	if err != nil {
-		return err
-	}
+	// sendRequest, err := busv2.AddSource(publishRequest)
+	// if err != nil {
+	// 	return err
+	// }
 	// send the event
-	sendEventResponse, err := bus.SendEvent("v2", sendRequest, traceHeaders, forwardHeaders)
+	sendEventResponse, err := bus.SendEvent("v2", nil, traceHeaders, forwardHeaders)
 	if err != nil {
 		return err
 	}
@@ -173,16 +177,24 @@ func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 	return
 }
 
-func getTraceHeaders(req *http.Request) *map[string]string {
+func getTraceHeaders(ctx context.Context) *map[string]string {
+	tctx := cloudeventshttp.TransportContextFrom(ctx)
+
 	traceHeaders := make(map[string]string)
 	for _, key := range traceHeaderKeys {
-		if value := req.Header.Get(key); len(value) > 0 {
+		if value := tctx.Header.Get(key); len(value) > 0 {
 			traceHeaders[key] = value
 		}
 	}
 	return &traceHeaders
 }
 
-func Receive(context.Context, cloudevents.Event, *cloudevents.EventResponse) error {
+// Receive finally handles the decoded event
+func HandleEvent(ctx context.Context, event cloudevents.Event, eventResponse *cloudevents.EventResponse) error {
+
+	traceHeaders := getTraceHeaders(ctx)
+
+	bus.SendEventV2(event, *traceHeaders)
+
 	return nil
 }

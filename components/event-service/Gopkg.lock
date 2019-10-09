@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:a24d4f0bfca235899423e806a033447bb840d48970ecd8e1bc409537d0289c23"
+  name = "cloud.google.com/go"
+  packages = ["compute/metadata"]
+  pruneopts = "NUT"
+  revision = "264def2dd949cdb8a803bb9f50fa29a67b798a6a"
+  version = "v0.46.3"
+
+[[projects]]
   branch = "master"
   digest = "1:c6618c3b3f102529c5724deb95c15cb654501b6a0f5af8799123cb497e295b8d"
   name = "github.com/cloudevents/sdk-go"
@@ -302,9 +310,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:cc6f4d2bebef910ca1230def23145d3508056255e3cbc71101c283d8a5ab8e92"
+  digest = "1:c86c292c268416012ab237c22c2c69fdd04cb891815b40343e75210472198455"
   name = "golang.org/x/net"
   packages = [
+    "context",
+    "context/ctxhttp",
     "http/httpguts",
     "http2",
     "http2/hpack",
@@ -312,6 +322,20 @@
   ]
   pruneopts = "NUT"
   revision = "1da14a5a36f220ea3f03470682b737b1dfd5de22"
+
+[[projects]]
+  branch = "master"
+  digest = "1:1519760444b90c560eb01373869bc66fd539e6fe1bf77af22047c43edc40ab35"
+  name = "golang.org/x/oauth2"
+  packages = [
+    ".",
+    "google",
+    "internal",
+    "jws",
+    "jwt",
+  ]
+  pruneopts = "NUT"
+  revision = "0f29369cfe4552d0e4bcddc57cc75f4d7e672a33"
 
 [[projects]]
   branch = "master"
@@ -375,6 +399,25 @@
   ]
   pruneopts = "NUT"
   revision = "4ca4b55e2050cfa75f1a1f72ae10825e80b052a0"
+
+[[projects]]
+  digest = "1:c381a96ea5276e8c5e98b2fa4fab83be71a959ff37dc51117555dc5059390c18"
+  name = "google.golang.org/appengine"
+  packages = [
+    ".",
+    "internal",
+    "internal/app_identity",
+    "internal/base",
+    "internal/datastore",
+    "internal/log",
+    "internal/modules",
+    "internal/remote_api",
+    "internal/urlfetch",
+    "urlfetch",
+  ]
+  pruneopts = "NUT"
+  revision = "971852bfffca25b069c31162ae8f247a3dba083b"
+  version = "v1.6.5"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
@@ -474,7 +517,7 @@
   version = "kubernetes-1.10.1"
 
 [[projects]]
-  digest = "1:37c23f7aa9ee87e11cefd231423ca5dc015a563b31ddb4ad6dd1b759d2426b82"
+  digest = "1:ceea0c405b2146003b2856378f9cdf963144ba1dc7925e952485da11c5b46157"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -484,8 +527,10 @@
     "pkg/apis/clientauthentication/v1alpha1",
     "pkg/version",
     "plugin/pkg/client/auth/exec",
+    "plugin/pkg/client/auth/gcp",
     "rest",
     "rest/watch",
+    "third_party/forked/golang/template",
     "tools/auth",
     "tools/clientcmd",
     "tools/clientcmd/api",
@@ -498,6 +543,7 @@
     "util/flowcontrol",
     "util/homedir",
     "util/integer",
+    "util/jsonpath",
   ]
   pruneopts = "NUT"
   revision = "989be4278f353e42f26c416c53757d16fcff77db"
@@ -508,6 +554,8 @@
   analyzer-version = 1
   input-imports = [
     "github.com/cloudevents/sdk-go",
+    "github.com/cloudevents/sdk-go/pkg/cloudevents/transport",
+    "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http",
     "github.com/gorilla/mux",
     "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
     "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned",
@@ -524,6 +572,7 @@
     "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/kubernetes/typed/core/v1",
+    "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
   ]
