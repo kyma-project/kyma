@@ -7,6 +7,8 @@ import (
 	"errors"
 	"testing"
 
+	"kyma-project.io/compass-runtime-agent/internal/config"
+
 	"github.com/stretchr/testify/require"
 
 	"kyma-project.io/compass-runtime-agent/internal/certificates"
@@ -36,6 +38,11 @@ func newMockGQLConstructor(
 
 func TestClientsProvider_GetCompassConfigClient(t *testing.T) {
 
+	runtimeConfig := config.RuntimeConfig{
+		RuntimeId: "runtimeId",
+		Tenant:    "tenant",
+	}
+
 	credentials := certificates.ClientCredentials{
 		ClientKey:         &rsa.PrivateKey{},
 		CertificateChain:  []*x509.Certificate{},
@@ -54,7 +61,7 @@ func TestClientsProvider_GetCompassConfigClient(t *testing.T) {
 		provider := NewClientsProvider(constructor, false, insecureFetch, enableLogging)
 
 		// when
-		configClient, err := provider.GetCompassConfigClient(credentials, url)
+		configClient, err := provider.GetCompassConfigClient(credentials, url, runtimeConfig)
 
 		// then
 		require.NoError(t, err)
@@ -68,7 +75,7 @@ func TestClientsProvider_GetCompassConfigClient(t *testing.T) {
 		provider := NewClientsProvider(constructor, false, insecureFetch, enableLogging)
 
 		// when
-		_, err := provider.GetCompassConfigClient(credentials, url)
+		_, err := provider.GetCompassConfigClient(credentials, url, runtimeConfig)
 
 		// then
 		require.Error(t, err)

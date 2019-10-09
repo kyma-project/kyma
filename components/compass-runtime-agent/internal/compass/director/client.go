@@ -24,7 +24,7 @@ type RuntimeURLsConfig struct {
 //go:generate mockery -name=ConfigClient
 type ConfigClient interface {
 	FetchConfiguration() ([]kymamodel.Application, error)
-	SetURLsLabels(urlsCfg RuntimeURLsConfig) ([]*graphql.Label, error)
+	SetURLsLabels(urlsCfg RuntimeURLsConfig) (graphql.Labels, error)
 }
 
 func NewConfigurationClient(gqlClient gql.Client, runtimeConfig config.RuntimeConfig) ConfigClient {
@@ -65,7 +65,7 @@ func (cc *configClient) FetchConfiguration() ([]kymamodel.Application, error) {
 	return applications, nil
 }
 
-func (cc *configClient) SetURLsLabels(urlsCfg RuntimeURLsConfig) ([]*graphql.Label, error) {
+func (cc *configClient) SetURLsLabels(urlsCfg RuntimeURLsConfig) (graphql.Labels, error) {
 	eventsURLLabel, err := cc.setURLLabel(eventsURLLabelKey, urlsCfg.EventsURL)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,10 @@ func (cc *configClient) SetURLsLabels(urlsCfg RuntimeURLsConfig) ([]*graphql.Lab
 		return nil, err
 	}
 
-	return []*graphql.Label{eventsURLLabel, consoleURLLabel}, nil
+	return graphql.Labels{
+		eventsURLLabel.Key:  eventsURLLabel.Value,
+		consoleURLLabel.Key: consoleURLLabel.Value,
+	}, nil
 }
 
 func (cc *configClient) setURLLabel(key, value string) (*graphql.Label, error) {

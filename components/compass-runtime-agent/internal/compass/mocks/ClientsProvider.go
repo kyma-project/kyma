@@ -5,6 +5,8 @@ package mocks
 import (
 	certificates "kyma-project.io/compass-runtime-agent/internal/certificates"
 
+	config "kyma-project.io/compass-runtime-agent/internal/config"
+
 	connector "kyma-project.io/compass-runtime-agent/internal/compass/connector"
 
 	director "kyma-project.io/compass-runtime-agent/internal/compass/director"
@@ -17,13 +19,13 @@ type ClientsProvider struct {
 	mock.Mock
 }
 
-// GetCompassConfigClient provides a mock function with given fields: credentials, url
-func (_m *ClientsProvider) GetCompassConfigClient(credentials certificates.ClientCredentials, url string) (director.ConfigClient, error) {
-	ret := _m.Called(credentials, url)
+// GetCompassConfigClient provides a mock function with given fields: credentials, url, runtimeConfig
+func (_m *ClientsProvider) GetCompassConfigClient(credentials certificates.ClientCredentials, url string, runtimeConfig config.RuntimeConfig) (director.ConfigClient, error) {
+	ret := _m.Called(credentials, url, runtimeConfig)
 
 	var r0 director.ConfigClient
-	if rf, ok := ret.Get(0).(func(certificates.ClientCredentials, string) director.ConfigClient); ok {
-		r0 = rf(credentials, url)
+	if rf, ok := ret.Get(0).(func(certificates.ClientCredentials, string, config.RuntimeConfig) director.ConfigClient); ok {
+		r0 = rf(credentials, url, runtimeConfig)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(director.ConfigClient)
@@ -31,8 +33,8 @@ func (_m *ClientsProvider) GetCompassConfigClient(credentials certificates.Clien
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(certificates.ClientCredentials, string) error); ok {
-		r1 = rf(credentials, url)
+	if rf, ok := ret.Get(1).(func(certificates.ClientCredentials, string, config.RuntimeConfig) error); ok {
+		r1 = rf(credentials, url, runtimeConfig)
 	} else {
 		r1 = ret.Error(1)
 	}

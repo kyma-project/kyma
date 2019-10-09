@@ -3,7 +3,8 @@
 package mocks
 
 import (
-	config "kyma-project.io/compass-runtime-agent/internal/config"
+	graphql "github.com/kyma-incubator/compass/components/director/pkg/graphql"
+	director "kyma-project.io/compass-runtime-agent/internal/compass/director"
 
 	mock "github.com/stretchr/testify/mock"
 
@@ -15,13 +16,13 @@ type ConfigClient struct {
 	mock.Mock
 }
 
-// FetchConfiguration provides a mock function with given fields: directorURL, runtimeConfig
-func (_m *ConfigClient) FetchConfiguration(directorURL string, runtimeConfig config.RuntimeConfig) ([]model.Application, error) {
-	ret := _m.Called(directorURL, runtimeConfig)
+// FetchConfiguration provides a mock function with given fields:
+func (_m *ConfigClient) FetchConfiguration() ([]model.Application, error) {
+	ret := _m.Called()
 
 	var r0 []model.Application
-	if rf, ok := ret.Get(0).(func(string, config.RuntimeConfig) []model.Application); ok {
-		r0 = rf(directorURL, runtimeConfig)
+	if rf, ok := ret.Get(0).(func() []model.Application); ok {
+		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]model.Application)
@@ -29,8 +30,31 @@ func (_m *ConfigClient) FetchConfiguration(directorURL string, runtimeConfig con
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, config.RuntimeConfig) error); ok {
-		r1 = rf(directorURL, runtimeConfig)
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// SetURLsLabels provides a mock function with given fields: urlsCfg
+func (_m *ConfigClient) SetURLsLabels(urlsCfg director.RuntimeURLsConfig) (graphql.Labels, error) {
+	ret := _m.Called(urlsCfg)
+
+	var r0 graphql.Labels
+	if rf, ok := ret.Get(0).(func(director.RuntimeURLsConfig) graphql.Labels); ok {
+		r0 = rf(urlsCfg)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(graphql.Labels)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(director.RuntimeURLsConfig) error); ok {
+		r1 = rf(urlsCfg)
 	} else {
 		r1 = ret.Error(1)
 	}

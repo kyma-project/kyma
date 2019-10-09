@@ -9,8 +9,6 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/graphql"
 )
 
-// TODO - maybe this client may read the config map
-
 //go:generate mockery -name=ClientsProvider
 type ClientsProvider interface {
 	GetCompassConfigClient(credentials certificates.ClientCredentials, url string, runtimeConfig config.RuntimeConfig) (director.ConfigClient, error)
