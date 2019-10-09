@@ -1,4 +1,3 @@
-{{- if .Values.tests.enabled }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -52,4 +51,3 @@ roleRef:
   kind: ClusterRole
   name: {{ .Chart.Name }}-tests
   apiGroup: rbac.authorization.k8s.io
-{{- end }}

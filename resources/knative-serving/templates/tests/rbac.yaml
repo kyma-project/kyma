@@ -1,4 +1,3 @@
-{{- if .Values.test.enabled }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -44,4 +43,3 @@ subjects:
 - kind: ServiceAccount
   name: {{ .Chart.Name }}-tests
   namespace: {{ .Release.Namespace }}
-{{- end }}

@@ -38,4 +38,3 @@ global:
 
 test:
   target: "Test Target"
-  enabled: false
