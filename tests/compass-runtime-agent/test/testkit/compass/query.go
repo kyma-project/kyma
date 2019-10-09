@@ -60,6 +60,14 @@ func (qp queryProvider) deleteApplication(id string) string {
 }`, id)
 }
 
+func (qp queryProvider) getRuntime(runtimeId string) string {
+	return fmt.Sprintf(`query {
+	result: runtime(id: "%s") {
+		%s
+	}
+}`, runtimeId, runtimeData())
+}
+
 func (qp queryProvider) createAPI(applicationId string, input string) string {
 	return fmt.Sprintf(`mutation {
 	result: addAPI(applicationID: "%s", in: %s) {
@@ -132,6 +140,22 @@ func applicationData() string {
 		eventAPIs {%s}
 		documents {%s}
 	`, pageData(apiDefinitionData()), pageData(eventAPIData()), pageData(documentData()))
+}
+
+func runtimeData() string {
+	return fmt.Sprintf(`
+		id
+		name
+		description
+		labels 
+		status {condition timestamp}
+		auths {%s}`, systemAuthData())
+}
+
+func systemAuthData() string {
+	return fmt.Sprintf(`
+		id
+		auth {%s}`, authData())
 }
 
 func authData() string {
