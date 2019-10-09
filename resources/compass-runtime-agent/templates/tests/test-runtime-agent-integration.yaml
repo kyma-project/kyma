@@ -53,6 +53,10 @@ spec:
               value: {{ .Values.compassRuntimeAgent.tests.oauth.hydra.adminUrl }}
             - name: APPLICATION_INSTALLATION_TIMEOUT
               value: {{ .Values.compassRuntimeAgent.tests.applicationInstallationTimeout }}
+            - name: RUNTIME_EVENTS_URL
+              value: "https://gateway.{{ .Values.global.ingress.domainName }}"
+            - name: RUNTIME_CONSOLE_URL
+              value: "https://console.{{ .Values.global.ingress.domainName }}"
           command:
           - "/bin/sh"
           args:

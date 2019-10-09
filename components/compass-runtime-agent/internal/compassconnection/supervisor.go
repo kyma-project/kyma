@@ -163,7 +163,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	}
 
 	s.log.Infof("Labeling Runtime with URLs...")
-	_, err = directorClient.SetURLsLabels(s.runtimeURLsConfig) // TODO - wpisać gdzieś obecny status labelek
+	_, err = directorClient.SetURLsLabels(s.runtimeURLsConfig)
 	if err != nil {
 		connection.Status.State = v1alpha1.MetadataUpdateFailed
 		connection.Status.SynchronizationStatus = &v1alpha1.SynchronizationStatus{

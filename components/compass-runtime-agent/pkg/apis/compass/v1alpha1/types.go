@@ -51,7 +51,6 @@ func (in CompassConnection) ShouldAttemptReconnect() bool {
 	return in.Status.State == ConnectionFailed
 }
 
-// TODO - decide if this function should be defined on CompassConnection type
 func (in CompassConnection) ShouldRenewCertificate(certValidityRenewalThreshold float64, minimalSyncTime time.Duration) bool {
 	if in.Spec.RefreshCredentialsNow {
 		return true

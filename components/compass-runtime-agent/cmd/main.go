@@ -25,7 +25,7 @@ func main() {
 	log.Infoln("Starting Runtime Agent")
 
 	var options Config
-	err := envconfig.InitWithPrefix(&options, "APP") // TODO - refactor in chart
+	err := envconfig.InitWithPrefix(&options, "APP")
 	if err != nil {
 		log.Error("Failed to process environment variables")
 	}
