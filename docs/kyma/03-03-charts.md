@@ -23,93 +23,92 @@ Here are some examples:
 
 1. Generic
 
+   ```yaml
+   apiVersion: apps/v1beta2
+   kind: Deployment
+   metadata:
+     name: nginx-deployment
+   spec:
+     replicas: 3
+     selector:
+       matchLabels:
+         app: nginx
+     template:
+       metadata:
+         labels:
+           app: nginx
+       spec:
+         containers:
+         - name: nginx
+           image: nginx:1.7.9
+           ports:
+           - containerPort: 80
+           readinessProbe:
+             httpGet:
+               path: /healthz
+               port: 80
+             initialDelaySeconds: 30
+             timeoutSeconds: 1
+   ```
 
-```yaml
-apiVersion: apps/v1beta2
-kind: Deployment
-metadata:
-  name: nginx-deployment
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.7.9
-        ports:
-        - containerPort: 80
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 80
-          initialDelaySeconds: 30
-          timeoutSeconds: 1
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: myapp-pod
-spec:
-  initContainers:
-  - name: init-myservice
-    image: busybox
-    command: ['sh', '-c', 'until nslookup nginx; do echo waiting for nginx; sleep 2; done;']
-  containers:
-  - name: myapp-container
-    image: busybox
-    command: ['sh', '-c', 'echo The app is running! && sleep 3600']
-```
+   ```yaml
+   apiVersion: v1
+   kind: Pod
+   metadata:
+     name: myapp-pod
+   spec:
+     initContainers:
+     - name: init-myservice
+       image: busybox
+       command: ['sh', '-c', 'until nslookup nginx; do echo waiting for nginx; sleep 2; done;']
+     containers:
+     - name: myapp-container
+       image: busybox
+       command: ['sh', '-c', 'echo The app is running! && sleep 3600']
+   ```
 
 2. Kyma
 
-```yaml
-apiVersion: extensions/v1beta1
-kind: Deployment
-metadata:
-  name: helm-broker
-  labels:
-    app: helm-broker
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: helm-broker
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
-  template:
-    metadata:
-      labels:
-        app: helm-broker
-    spec:
+   ```yaml
+   apiVersion: extensions/v1beta1
+   kind: Deployment
+   metadata:
+     name: helm-broker
+     labels:
+       app: helm-broker
+   spec:
+     replicas: 1
+     selector:
+       matchLabels:
+         app: helm-broker
+     strategy:
+       type: RollingUpdate
+       rollingUpdate:
+         maxUnavailable: 0
+     template:
+       metadata:
+         labels:
+           app: helm-broker
+       spec:
 
-      initContainers:
-      - name: init-helm-broker
-        image: eu.gcr.io/kyma-project/alpine-net:0.2.74
-        command: ['sh', '-c', 'until nc -zv service-catalog-controller-manager.kyma-system.svc.cluster.local 8080; do echo waiting for etcd service; sleep 2; done;']
+         initContainers:
+         - name: init-helm-broker
+           image: eu.gcr.io/kyma-project/alpine-net:0.2.74
+           command: ['sh', '-c', 'until nc -zv service-catalog-controller-manager.kyma-system.svc.cluster.local 8080; do echo waiting for etcd service; sleep 2; done;']
 
-      containers:
-      - name: helm-broker
-        ports:
-        - containerPort: 6699
-        readinessProbe:
-          tcpSocket:
-            port: 6699
-          failureThreshold: 3
-          initialDelaySeconds: 10
-          periodSeconds: 3
-          successThreshold: 1
-          timeoutSeconds: 2
-```
+         containers:
+         - name: helm-broker
+           ports:
+           - containerPort: 6699
+           readinessProbe:
+             tcpSocket:
+               port: 6699
+             failureThreshold: 3
+             initialDelaySeconds: 10
+             periodSeconds: 3
+             successThreshold: 1
+             timeoutSeconds: 2
+   ```
 
 ## Support for the Helm wait flag
 

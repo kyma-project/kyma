@@ -77,10 +77,11 @@ For example:
     "reason": "Message successfully published to the channel"
 }
 ```
-If the status code is not `2xx` (< `200` or >= `300`), it means that the delivery was unsuccessful and
-that the Event Bus will try to deliver it again. This implies **At-least-once** delivery guarantee.
->**NOTE**: If there were no subscriptions or consumers to this `event-type`, the message is ignored and the response
-will look like this:
+
+If the status code is not `2xx` (< `200` or >= `300`), it means that the delivery was unsuccessful and that the Event Bus will try to deliver it again. This implies **At-least-once** delivery guarantee.
+
+If there were no subscriptions or consumers to this `event-type`, the message is ignored and the response will look like this:
+
 ```json
 {
     "event-id": "22ae22a4-f5b7-4fa1-ada9-558a10a96f3d",
