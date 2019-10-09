@@ -8,7 +8,7 @@ type: Architecture
 ## Application
 
 Application represents any external system that you want to register to Compass with its API and Event definitions. These are the types of possible integration levels between an Application and Compass:
-- Manual integration - the administrator manually provides API or Events metadata to Compass. Use this type of integration for simple use-case scenarios as it doesn't support all features.
+- Manual integration - the Administrator manually provides API or Events metadata to Compass. Use this type of integration for simple use-case scenarios as it does not support all features.
 - Built-in integration - integration with Compass is built in the Application.
 - Proxy - a highly Application-specific proxy component provides the integration.
 - Integration System -  a central service provides integration for the dedicated group of Applications across multiple tenants. It manages multiple instances of the given Application type. You can integrate multiple Integration Systems to support different types of Applications.
