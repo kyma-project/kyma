@@ -42,7 +42,7 @@ Follow these instructions to install Kyma from a release or from sources:
      ```bash
      kyma install
      ```
-     >**NOTE** If you want to install a specific release version, go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about available releases. Use the release version as a parameter when calling ` kyma install --source {KYMA_RELEASE}`.
+     >**NOTE:** If you want to install a specific release version, go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about available releases. Use the release version as a parameter when calling `kyma install --source {KYMA_RELEASE}`.
 
   </details>
   <details>
@@ -66,8 +66,9 @@ Follow these instructions to install Kyma from a release or from sources:
   4. Install Kyma from sources. Run:
 
      ```bash
-     kyma install --source local --src-path {YOUR_KYMA_SOURCE_PATH}
+     kyma install --source local
      ```
+     >**NOTE:** By default, the installation uses sources located under your [GOPATH](https://github.com/golang/go/wiki/GOPATH). If you want to use a specific source folder, use it as a parameter when calling `kyma install --source local --src-path {YOUR_KYMA_SOURCE_PATH}`. 
 
    </details>
 </div>
