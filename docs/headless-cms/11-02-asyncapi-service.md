@@ -12,9 +12,6 @@ This table shows the CMS AsyncAPI Service custom metrics, their types, and descr
 | `cms_services_handle_mutation_status_code` | counter | Specifies a number of different HTTP response status codes in a given time series. |
 | `cms_services_handle_mutation_status_code` | counter | Specifies a number of different HTTP response status codes in a given time series. |
 
-Apart from the custom metrics, the CMS AsyncAPI Service also exposes:
-
-- default metrics instrumented by [kubebuilder](https://book.kubebuilder.io/).
-- default Prometheus metrics for [Go applications](https://prometheus.io/docs/guides/go-application/).
+Apart from the custom metrics, the CMS AsyncAPI Service also exposes default Prometheus metrics for [Go applications](https://prometheus.io/docs/guides/go-application/).
 
 See the [Monitoring](/components/monitoring) documentation to learn more about monitoring and metrics in Kyma.
