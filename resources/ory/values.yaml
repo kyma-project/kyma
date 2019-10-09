@@ -167,7 +167,7 @@ oathkeeper:
         cpu: 50m
         memory: 64Mi
   image:
-    tag: token-location-v1 # TODO: change to official image after it is released
+    tag: v0.19.2-beta.1
   oathkeeper-maester:
     deployment:
       annotations:
