@@ -1,6 +1,7 @@
 package v2
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"regexp"
@@ -14,6 +15,8 @@ import (
 	busv2 "github.com/kyma-project/kyma/components/event-service/internal/events/bus/v2"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
+
+	cloudevents "github.com/cloudevents/sdk-go"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -63,6 +66,7 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 		writeJSONResponse(w, resp)
 		return
 	}
+
 	var err error
 	parameters := &apiv2.PublishEventParametersV2{}
 	decoder := json.NewDecoder(req.Body)
@@ -98,7 +102,7 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	return
 }
 
-var handleEvent = func(publishRequest *apiv2.PublishEventParametersV2, publishResponse *api.PublishEventResponses,
+func handleEvent(publishRequest *apiv2.PublishEventParametersV2, publishResponse *api.PublishEventResponses,
 	traceHeaders *map[string]string, forwardHeaders *map[string][]string) (err error) {
 	checkResp := checkParameters(publishRequest)
 	if checkResp.Error != nil {
@@ -177,4 +181,8 @@ func getTraceHeaders(req *http.Request) *map[string]string {
 		}
 	}
 	return &traceHeaders
+}
+
+func Receive(context.Context, cloudevents.Event, *cloudevents.EventResponse) error {
+	return nil
 }

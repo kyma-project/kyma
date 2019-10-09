@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
 
@@ -103,7 +104,7 @@ func shutdown(server *http.Server, timeout time.Duration) {
 }
 
 func initK8sResourcesClients() (subscribed.SubscriptionsGetter, subscribed.NamespacesClient, error) {
-	k8sConfig, err := rest.InClusterConfig()
+	k8sConfig, err := loadKubeConfig()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -121,4 +122,20 @@ func initK8sResourcesClients() (subscribed.SubscriptionsGetter, subscribed.Names
 	namespacesClient := coreClient.Namespaces()
 
 	return subscriptionsClient.EventingV1alpha1(), namespacesClient, nil
+}
+
+func loadKubeConfig() (*rest.Config, error) {
+	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
+		cfg, err := rest.InClusterConfig()
+		if err != nil {
+			return nil, err
+		}
+		return cfg, nil
+	}
+
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
+	if err != nil {
+		return nil, err
+	}
+	return kubeConfig, nil
 }

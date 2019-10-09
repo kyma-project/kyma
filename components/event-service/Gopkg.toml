@@ -28,3 +28,7 @@ required = [
   name = "k8s.io/apimachinery"
   version = "kubernetes-1.10.1"
 
+[[override]]
+  name = "github.com/cloudevents/sdk-go"
+  branch = "master"
+
