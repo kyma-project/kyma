@@ -1,3 +1,4 @@
+{{- if .Values.test.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -26,4 +27,5 @@ spec:
         - name: TARGET
           value: {{ .Values.test.target }}
       restartPolicy: Never
+{{- end }}
 {{- end }}

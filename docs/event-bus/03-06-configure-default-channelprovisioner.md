@@ -4,6 +4,7 @@ type: Details
 ---
 
 ## Overview
+
 Kyma comes with NATS Streaming as its default Channel. You can see the configuration details in the [`default-ch-webhook`](../../resources/knative-eventing/charts/knative-eventing/templates/eventing.yaml) ConfigMap.
 
 You can use a different messaging middleware, other than NATS Streaming, as the Kyma eventing operator.
@@ -14,9 +15,9 @@ To achieve that:
 
 If you want to edit the `default-ch-webhook` ConfigMap, run: 
 
-  ```bash
-    kubectl -n knative-eventing edit configmaps default-ch-webhook
-  ```
+```bash
+kubectl -n knative-eventing edit configmaps default-ch-webhook
+```
 
 Read about the examples and the configuration details.
 
@@ -52,6 +53,7 @@ data:
         apiVersion: messaging.knative.dev/v1alpha1
         kind: InMemoryChannel
 ```
+
 > **NOTE**: This ConfigMap may specify a cluster-wide default channel and/or namespace-specific channel implementations.
 
 ## Google PubSub
@@ -74,4 +76,5 @@ data:
       spec:
         project: <GCP Project Name>
 ```
+
 > **NOTE**: You need to mention the GCP Project Name in the specification which will be used as the reference GCP project to create GCP PubSub Topics.

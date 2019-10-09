@@ -62,3 +62,6 @@ global:
 e2eTests:
   nameTester: test-event-bus-tester
   nameSubscriber: test-event-bus-subscriber
+
+tests:
+  enabled: false
