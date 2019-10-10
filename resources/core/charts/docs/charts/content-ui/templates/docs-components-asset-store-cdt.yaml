@@ -23,11 +23,3 @@ spec:
       name: asset-upload-service-openapi
       mode: single
       url: https://raw.githubusercontent.com/{{ .Values.global.kymaOrgName }}/kyma/{{ .Values.global.docs.clusterDocsTopicsVersion }}/docs/asset-store/assets/asset-upload-service-openapi.yaml
-    - type: openapi
-      name: mutation-service
-      mode: single
-      url: https://raw.githubusercontent.com/{{ .Values.global.kymaOrgName }}/kyma/{{ .Values.global.docs.clusterDocsTopicsVersion }}/docs/asset-store/assets/mutation-service.yaml
-    - type: openapi
-      name: validation-service
-      mode: single
-      url: https://raw.githubusercontent.com/{{ .Values.global.kymaOrgName }}/kyma/{{ .Values.global.docs.clusterDocsTopicsVersion }}/docs/asset-store/assets/validation-service.yaml
