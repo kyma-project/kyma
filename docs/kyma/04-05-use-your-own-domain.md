@@ -85,16 +85,16 @@ Follow these steps:
 
 3. Delegate your domain to Google name servers.
 
-- Get the list of the name servers from the zone details. This is a sample list:
+    - Get the list of the name servers from the zone details. This is a sample list:
 
-   ```bash
-   ns-cloud-b1.googledomains.com.
-   ns-cloud-b2.googledomains.com.
-   ns-cloud-b3.googledomains.com.
-   ns-cloud-b4.googledomains.com.
-   ```
+    ```bash
+    ns-cloud-b1.googledomains.com.
+    ns-cloud-b2.googledomains.com.
+    ns-cloud-b3.googledomains.com.
+    ns-cloud-b4.googledomains.com.
+    ```
 
-- Set up your domain to use these name servers.
+    - Set up your domain to use these name servers.
 
 4. Check if everything is set up correctly and your domain is managed by Google name servers. Run:
 
@@ -102,7 +102,7 @@ Follow these steps:
    host -t ns $DNS_NAME
    ```
 
-A successful response returns the list of the name servers you fetched from GCP.
+   A successful response returns the list of the name servers you fetched from GCP.
 
 </details>
   <details>
@@ -131,16 +131,16 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 3. Delegate your domain to Azure name servers.
 
-- Get the list of the name servers from the zone details. This is a sample list:
+    - Get the list of the name servers from the zone details. This is a sample list:
 
-   ```bash
-   ns1-05.azure-dns.com.
-   ns2-05.azure-dns.net.
-   ns3-05.azure-dns.org.
-   ns4-05.azure-dns.info.
-   ```
+    ```bash
+    ns1-05.azure-dns.com.
+    ns2-05.azure-dns.net.
+    ns3-05.azure-dns.org.
+    ns4-05.azure-dns.info.
+    ```
 
-- Set up your domain to use these name servers.
+    - Set up your domain to use these name servers.
 
 4. Check if everything is set up correctly and your domain is managed by Azure name servers. Run:
 
@@ -161,7 +161,7 @@ A successful response returns the list of the name servers you fetched from Azur
   <summary label="GKE">
   GKE
   </summary>
-  
+
 Get the TLS certificate:
 
 1. Export the certificate issuer email and the cluster domain as environment variables:

@@ -23,20 +23,20 @@ global:
     dir: pr/
     version: "PR-5668"
   ui_acceptance_tests:
-    dir:
-    version: 1a48bf40
+    dir: 
+    version: d1d3246e
   api_controller:
-    dir: develop/
-    version: e029fcf4
+    dir:
+    version: 8eb3a417
   api_controller_integration_tests:
     dir: develop/
     version: 665a2857
   apiserver_proxy:
-    dir: develop/
-    version: e029fcf4
+    dir:
+    version: d81e090b
   iam_kubeconfig_service:
-    dir: develop/
-    version: e029fcf4
+    dir:
+    version: 22ed8bc7
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
