@@ -42,9 +42,7 @@ type configClient struct {
 }
 
 func (cc *configClient) FetchConfiguration() ([]kymamodel.Application, error) {
-	response := ApplicationsForRuntimeResponse{
-		Result: &ApplicationPage{},
-	}
+	response := ApplicationsForRuntimeResponse{}
 
 	applicationsQuery := cc.queryProvider.applicationsForRuntimeQuery(cc.runtimeConfig.RuntimeId)
 	req := gcli.NewRequest(applicationsQuery)
@@ -53,6 +51,11 @@ func (cc *configClient) FetchConfiguration() ([]kymamodel.Application, error) {
 	err := cc.gqlClient.Do(req, &response)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to fetch Applications")
+	}
+
+	// Nil check is necessary due to GraphQL client not checking response code
+	if response.Result == nil {
+		return nil, errors.Errorf("Failed fetch Applications for Runtime from Director: received nil response.")
 	}
 
 	// TODO: After implementation of paging modify the fetching logic
@@ -94,6 +97,7 @@ func (cc *configClient) setURLLabel(key, value string) (*graphql.Label, error) {
 		return nil, errors.WithMessagef(err, "Failed to set %s Runtime label to value %s", key, value)
 	}
 
+	// Nil check is necessary due to GraphQL client not checking response code
 	if response.Result == nil {
 		return nil, errors.Errorf("Failed to set %s Runtime label to value %s. Received nil response.", key, value)
 	}

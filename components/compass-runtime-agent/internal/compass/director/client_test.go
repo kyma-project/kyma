@@ -258,6 +258,25 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 		assert.Empty(t, applicationsResponse)
 	})
 
+	t.Run("should return error when result is nil", func(t *testing.T) {
+		// given
+		gqlClient := gql.NewQueryAssertClient(t, false, func(t *testing.T, r interface{}) {
+			cfg, ok := r.(*ApplicationsForRuntimeResponse)
+			require.True(t, ok)
+			assert.Empty(t, cfg.Result)
+			cfg.Result = nil
+		}, expectedRequest)
+
+		configClient := NewConfigurationClient(gqlClient, runtimeConfig)
+
+		// when
+		applicationsResponse, err := configClient.FetchConfiguration()
+
+		// then
+		require.Error(t, err)
+		assert.Empty(t, applicationsResponse)
+	})
+
 	t.Run("should return error when failed to fetch Applications", func(t *testing.T) {
 		// given
 		gqlClient := gql.NewQueryAssertClient(t, true, func(t *testing.T, r interface{}) {
