@@ -18,8 +18,8 @@ global:
       dir: develop/
       version: "26601526"
     provisioner:
-      dir: pr/
-      version: "PR-352"
+      dir: develop/
+      version: "6a37c1f7"
     schema_migrator:
       dir: develop/
       version: "4fc82813"
@@ -36,8 +36,8 @@ global:
         dir: develop/
         version: "67535547"
       provisioner:
-        dir: pr/
-        version: "PR-352"
+        dir: develop/
+        version: "6a37c1f7"
 
   isLocalEnv: false
 
