@@ -2,45 +2,33 @@
 title: Architecture
 ---
 
-The diagram presents the tracing flow including the details of requesting and storing traces.
+
+In Kyma, tracing provides all necessary functionality to collect and query traces. Both operations may occur at the same time, triggered by external sources. See the diagram for details: 
 
 ![Tracing architecture](./assets/tracing-architecture.svg)
 
 
-The Jaeger Deployment is the central element of the tracing architecture.
-It serves as a target of all query requests sent from the Jaeger UI. It is also the space for storing and processing the spans and traces created by Envoy, Istio, and Kyma services.
+## Collect traces
 
-## Request traces
+The process of collecting traces by Jaeger looks as follows:
+ 
+1. The application receives a request.
+2. Istio Proxy configured for the application makes sure to propagate the correct [HTTP headers](/components/tracing#details-propagate-http-headers) of the requests further to the [`zipkin`](https://zipkin.io/) service, responsible for looking up and collecting traces from various distributed systems.
+3. Zipkin receives the data and passes it further through [Istio Proxy](https://github.com/istio/proxy) which provides further authorization mechanisms to ensure proper communication. 
+4. Jaeger processes the data. Specifically, the  `jaeger-agent` service receives the spans, batches them and forwards to collectors. 
+5. The data is then saved in the database.
 
-The process of requesting traces from Jaeger looks as follows:
+## Query traces
 
-1. A Kyma user accesses Jaeger UI.
-2. The user uses the UI to request the trace details for a given service by selecting the service from the **Services** drop-down menu and confirming the choice by selecting the **Find Traces** button. Jaeger passes the request to jaeger-query, which is the UI facade.
-3. The jaeger-query forwards the details to Jaeger Deployment. The kcproxy verifies each request and if the authentication is successful, Jaeger sends the requested information back.
+The process of querying traces from Jaeger looks as follows:
 
-![Request traces](./assets/request-traces.svg)
+1. A Kyma user accesses the Jaeger UI to [look for specific traces](/components/tracing#details-search-for-traces).
+2. Jaeger UI passes the request to the `jaeger-query` service. The requests goes through the [Istio Ingress Gateway](https://kyma-project.io/docs/components/application-connector/#architecture-application-connector-components-istio-ingress-gateway) which receives and processes the incoming connections between the service and the external source.
+3. The `jaeger-query` service passes the request to the [Keycloak Gatekeeper](https://github.com/keycloak/keycloak-gatekeeper) for verification. Keycloak calls [Dex](https://github.com/dexidp/dex) to authenticate the user and the request, and grants further access if the authentication is successful. 
+4. The request goes through [Istio Proxy](https://github.com/istio/proxy) which provides further authorization mechanisms to ensure proper communication. 
+5. Finally, the functionality provided by the Jaeger Deployment enables the retrival of trace information. 
 
-## Store traces
 
-Traces are stored in Jaeger in the following way:
 
-1. A Kyma user configures the application to propagate the correct [HTTP headers](https://istio.io/docs/tasks/telemetry/distributed-tracing/overview/) for the outbound calls.
-2. Envoy passes the trace details to the Zipkin Kubernetes service. This service acts as a facade receiving the trace and span details.
-3. The Zipkin service forwards the tracing information to Jaeger Deployment, allowing it to process them.
 
-![Store traces](./assets/store-traces.svg)
 
-## Search traces by tags
-
-You can search traces using tags. Tags are key-value pairs configured for each service.
-
-See the full list of tags for a service from the details of that service's span.
-
-For example, use these tags for `event-publish-service`:
-
-* `event-type`
-* `event-type-ver`
-* `event-id`
-* `source-id`
-
-To search the traces, you can use either a single tag, such as `event-type="order.created"`, or multiple tags, such as `event-type="order.created" event-type-ver="v1"`.
