@@ -3,7 +3,7 @@ title: Architecture
 ---
 
 
-In Kyma, tracin component provides the necessary functionality to collect and query traces. Both operations may occur at the same time, meaning that you can retrieve specific traces using the UI, while Jaeger and [Zipkin](https://zipkin.io/) take care of proper trace collection ans storage. See the diagram for details: 
+In Kyma, tracin component provides the necessary functionality to collect and query traces. Both operations may occur at the same time, meaning that you can retrieve specific traces using the Jeager UI, while at the same time Jaeger and [Zipkin](https://zipkin.io/) take care of proper trace collection ans storage. See the diagram for details: 
 
 ![Tracing architecture](./assets/tracing-architecture.svg)
 
