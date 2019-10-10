@@ -3,7 +3,7 @@ title: Architecture
 ---
 
 
-In Kyma, tracing provides all necessary functionality to collect and query traces. Both operations may occur at the same time, triggered by external sources. See the diagram for details: 
+In Kyma, tracin component provides the necessary functionality to collect and query traces. Both operations may occur at the same time, meaning that you can retrieve specific traces using the UI, while Jaeger and [Zipkin](https://zipkin.io/) take care of proper trace collection ans storage. See the diagram for details: 
 
 ![Tracing architecture](./assets/tracing-architecture.svg)
 
@@ -13,7 +13,7 @@ In Kyma, tracing provides all necessary functionality to collect and query trace
 The process of collecting traces by Jaeger looks as follows:
  
 1. The application receives trace data.
-2. Istio Proxy configured for the application makes sure to propagate the correct [HTTP headers](/components/tracing#details-propagate-http-headers) of the requests further to the [`zipkin`](https://zipkin.io/) service, responsible for looking up and collecting traces from various distributed systems.
+2. Istio Proxy configured for the application makes sure to propagate the correct [HTTP headers](/components/tracing#details-propagate-http-headers) of the requests further to the `zipkin` service, responsible for looking up and collecting traces from various distributed systems.
 3. Zipkin receives the data and passes it further through [Istio Proxy](https://github.com/istio/proxy) which provides further authorization mechanisms to ensure proper communication. 
 4. Jaeger processes the data. Specifically, the  `jaeger-agent` service receives the spans, batches them and forwards to collectors. 
 5. The data is then saved in the database.
