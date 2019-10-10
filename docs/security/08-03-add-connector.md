@@ -33,15 +33,15 @@ metadata:
     kyma-project.io/installation: ""
 data:
     connectors: |-
-    - type: github
-      id: github
-      name: GitHub
-      config:
-        clientID: {GITHUB_CLIENT_ID}
-        clientSecret: {GITHUB_CLIENT_SECRET}
-         redirectURI: https://dex.{{ .Values.global.domainName }}/callback
-        orgs:
-          - name: {GITHUB_ORGANIZATION}
+      - type: github
+        id: github
+        name: GitHub
+        config:
+          clientID: {GITHUB_CLIENT_ID}
+          clientSecret: {GITHUB_CLIENT_SECRET}
+          redirectURI: https://dex.{{ .Values.global.domainName }}/callback
+          orgs:
+            - name: {GITHUB_ORGANIZATION}
 EOF
 ```
 
