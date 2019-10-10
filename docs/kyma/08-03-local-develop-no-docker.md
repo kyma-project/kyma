@@ -47,7 +47,7 @@ For this step, you need a running local Kyma instance. Read [this](#installation
    minikube mount ~/go/src/github.com/kyma-project/examples/http-db-service:/go/src/github.com/kyma-project/examples/http-db-service
    ```
 
-See the example and expected result:
+   See the example and expected result:
 
    ```shell
    # Terminal 1

@@ -193,28 +193,32 @@ The Helm Broker supports authentication with these protocols:
 To secure your addons repository with basic authentication credentials, create a Secret resource which contains credentials, and reference it in the repository URL definition using templating. Follow these steps:
 
 1. Create a Secret:
-```bash
-kubectl create secret generic auth -n stage --from-literal=username=admin --from-literal=password=secretPassword
-```
+
+   ```bash
+   kubectl create secret generic auth -n stage --from-literal=username=admin --from-literal=password=secretPassword
+   ```
+
 2. In your repository URL, precede the hostname with the `username:password@` section:
-```
-https://admin:secretPassword@repository.addons.com/index.yaml
-```
+
+   ```
+   https://admin:secretPassword@repository.addons.com/index.yaml
+   ```
 
 3. Define a ClusterAddonsConfiguration or AddonsConfiguration custom resource:
-```yaml
-apiVersion: addons.kyma-project.io/v1alpha1
-kind: ClusterAddonsConfiguration
-metadata:
-  name: addons-cfg-sample
-spec:
-  repositories:
-    # HTTPS protocol with basic authorization provided
-    - url: "https://{username}:{password}@repository.addons.com/index.yaml"
-      secretRef:
-        name: auth
-        namespace: stage     
-```
+
+   ```yaml
+   apiVersion: addons.kyma-project.io/v1alpha1
+   kind: ClusterAddonsConfiguration
+   metadata:
+     name: addons-cfg-sample
+   spec:
+     repositories:
+       # HTTPS protocol with basic authorization provided
+       - url: "https://{username}:{password}@repository.addons.com/index.yaml"
+         secretRef:
+           name: auth
+           namespace: stage
+   ```
 
   </details>
   <details>
