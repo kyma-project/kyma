@@ -54,7 +54,7 @@ Read about each update step in the following sections.
 
 ### Update the Kyma Installer on a local deployment
 
-- Build a new image for the Kyma Installer:
+1. Build a new image for the Kyma Installer:
 
    ```bash
    ./installation/scripts/build-kyma-installer.sh
@@ -62,7 +62,7 @@ Read about each update step in the following sections.
 
    > **NOTE:** If you started Kyma with the `run.sh` script with a `--vm-driver {value}` parameter, provide the same parameter to the `build-kyma-installer.sh` script.
 
-- Restart the Kyma Installer Pod:
+2. Restart the Kyma Installer Pod:
 
    ```bash
    kubectl delete pod -n kyma-installer {INSTALLER_POD_NAME}
@@ -70,20 +70,20 @@ Read about each update step in the following sections.
 
 ### Update the Kyma Installer on a cluster deployment
 
-- Build a new image for the Kyma Installer:
+1. Build a new image for the Kyma Installer:
 
    ```bash
    docker build -t {IMAGE_NAME}:{IMAGE_TAG} -f tools/kyma-installer/kyma.Dockerfile .
    ```
 
-- Push the image to your Docker registry.
+2. Push the image to your Docker registry.
 
-- Redeploy the Kyma Installer Pod using the new image. Run this command to edit the Deployment configuration:
+3. Redeploy the Kyma Installer Pod using the new image. Run this command to edit the Deployment configuration:
 
    ```bash
    kubectl edit deployment kyma-installer -n kyma-installer
    ```
-  
+
    Change the `image` and `imagePullPolicy` attributes in this section:
 
    ```bash

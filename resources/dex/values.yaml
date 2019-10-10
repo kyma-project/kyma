@@ -53,6 +53,7 @@ dex:
   expiry:
     signingKeys: "720h"
     idTokens: "8h"
+  useStaticConnector: true
 
 resources:
   limits:

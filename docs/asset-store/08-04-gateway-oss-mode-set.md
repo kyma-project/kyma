@@ -14,7 +14,7 @@ By default, you install Kyma with the Asset Store in Minio stand-alone mode. Thi
 
 ## Steps
 
-You can set Minio to the Alibaba OSS Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an access key for your Alibaba Cloud account, apply a Secret and a ConfigMap with an override onto a cluster or Minikube, and trigger the Kyma installation process. 
+You can set Minio to the Alibaba OSS Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an access key for your Alibaba Cloud account, apply a Secret and a ConfigMap with an override onto a cluster or Minikube, and trigger the Kyma installation process.
 
 >**CAUTION:** Buckets created in Minio without using Bucket CRs are not recreated or migrated while switching to the Minio Gateway mode.
 
@@ -56,8 +56,8 @@ metadata:
     kyma-project.io/installation: ""
 type: Opaque
 data:
-  minio.accessKey: "$(< ${ALIBABA_ACCESS_KEY} base64)"
-  minio.secretKey: "$(< ${ALIBABA_SECRET_KEY} base64)"
+  minio.accessKey: "$(echo "${ALIBABA_ACCESS_KEY}" | base64)"
+  minio.secretKey: "$(echo "${ALIBABA_SECRET_KEY}" | base64)"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -77,6 +77,7 @@ data:
   minio.DeploymentUpdate.maxUnavailable: "50%"
 EOF
 ```
+
 >**CAUTION:** When you install Kyma locally from sources, you need to manually add the ConfigMap and the Secret to the `installer-config-local.yaml.tpl` template located under the `installation/resources` subfolder before you run the installation script.
 
 ### Trigger installation
