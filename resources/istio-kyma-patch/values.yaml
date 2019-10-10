@@ -7,10 +7,5 @@ global:
     version: 84219cbc
   istio_kyma_patch:
     dir:
-<<<<<<< Updated upstream
-    version: PR-5963
-  required_istio_version: 1.2.7
-=======
     version: 050bab29
-  required_istio_version: 1.2.6
->>>>>>> Stashed changes
+  required_istio_version: 1.2.7
