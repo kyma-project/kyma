@@ -17,6 +17,7 @@ func TestConvert_FunctionToGQL(t *testing.T) {
 		expectedRuntime := "expectedRuntime"
 		expectedSize := "expectedSize"
 		expectedLabels := gqlschema.Labels{"test": "label"}
+		expectedStatus := gqlschema.FunctionStatusTypeUpdating
 
 		in := v1alpha1.Function{
 			ObjectMeta: metav1.ObjectMeta{
@@ -28,6 +29,9 @@ func TestConvert_FunctionToGQL(t *testing.T) {
 				Runtime: expectedRuntime,
 				Size:    expectedSize,
 			},
+			Status: v1alpha1.FunctionStatus{
+				Condition: v1alpha1.FunctionCondition(expectedStatus),
+			},
 		}
 
 		result := convert.FunctionToGQL(&in)
@@ -37,6 +41,7 @@ func TestConvert_FunctionToGQL(t *testing.T) {
 		assert.Equal(t, expectedRuntime, result.Runtime)
 		assert.Equal(t, expectedSize, result.Size)
 		assert.Equal(t, expectedLabels, result.Labels)
+		assert.Equal(t, expectedStatus, result.Status)
 	})
 
 	t.Run("Empty", func(t *testing.T) {
