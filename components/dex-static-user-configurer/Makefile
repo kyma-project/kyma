@@ -11,15 +11,4 @@ push-image:
 	docker tag $(APP_NAME) $(IMG):$(TAG)
 	docker push $(IMG):$(TAG)
 
-.PHONY: ci-pr
-ci-pr: build-image push-image
-
-.PHONY: ci-master
-ci-master: build-image push-image
-
-.PHONY: ci-release
-ci-release: build-image push-image
-
-.PHONY: path-to-referenced-charts
-path-to-referenced-charts:
-	@echo "resources/dex"
+release: build-image push-image
