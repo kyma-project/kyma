@@ -128,16 +128,15 @@ oathkeeper:
           enabled: true
         id_token:
           enabled: true
-          config:
-            # REQUIRED IF ENABLED - Sets the "iss" value of the ID Token.
-            issuer_url: https://oathkeeper.{{ .Values.global.ingress.domainName }}/
-            # REQUIRED IF ENABLED - Sets the URL where keys should be fetched from. Supports remote locations (http, https) as
-            # well as local filesystem paths.
-            # jwks_url: https://fetch-keys/from/this/location.json
-            # jwks_url: file:///from/this/absolute/location.json
-            # jwks_url: file://../from/this/relative/location.json
-            # Sets the time-to-live of the ID token. Defaults to one minute. Valid time units are: s (second), m (minute), h (hour).
-            ttl: 60s
+          # REQUIRED IF ENABLED - Sets the "iss" value of the ID Token.
+          issuer_url: https://oathkeeper.{{ .Values.global.ingress.domainName }}/
+          # REQUIRED IF ENABLED - Sets the URL where keys should be fetched from. Supports remote locations (http, https) as
+          # well as local filesystem paths.
+          # jwks_url: https://fetch-keys/from/this/location.json
+          # jwks_url: file:///from/this/absolute/location.json
+          # jwks_url: file://../from/this/relative/location.json
+          # Sets the time-to-live of the ID token. Defaults to one minute. Valid time units are: s (second), m (minute), h (hour).
+          ttl: 60s
         header:
           enabled: true
           config:
