@@ -8,6 +8,14 @@ import (
 const (
 	delimiter               = "--"
 	defaultChannelNamespace = "kyma-system"
+	// SubscriptionSourceID is the key for source id in label
+	SubscriptionSourceID = "kyma-source-id"
+	// SubscriptionEventType is the key for event type in label
+	SubscriptionEventType = "kyma-event-type"
+	// SubscriptionEventTypeVersion is the key for event type version in label
+	SubscriptionEventTypeVersion = "kyma-event-type-version"
+	// SubNs is the key for namespace of the subscription
+	SubNs = "kyma-ns"
 )
 
 var (

@@ -10,6 +10,7 @@ Start with the overarching [Kyma](./kyma) documentation where you can find the g
 -   [Application Connector](./application-connector/)
 -   [Asset Store](./asset-store/)
 -   [Backup](./backup/)
+-   [Compass](./compass/)
 -   [Console](./console/)
 -   [Event Bus](./event-bus/)
 -   [Headless CMS](./headless-cms/)

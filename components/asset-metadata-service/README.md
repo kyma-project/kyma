@@ -2,13 +2,13 @@
 
 ## Overview
 
-The Asset Metadata Service is an HTTP server that exposes the functionality for extracting metadata from files. It contains a simple HTTP endpoint which accepts `multipart/form-data` forms. The service extracts front matter YAML metadata from text files of all extensions. 
+The Asset Metadata Service is an HTTP server that exposes the functionality for extracting metadata from files. It contains a simple HTTP endpoint which accepts `multipart/form-data` forms. The service extracts front matter YAML metadata from text files of all extensions.
 
 ## Prerequisites
 
 Use the following tools to set up the project:
 
-- [Go distribution](https://golang.org)
+- [Go](https://golang.org)
 - [Docker](https://www.docker.com/)
 
 ## Usage
@@ -58,7 +58,7 @@ Use the following environment variables to configure the application:
 |------|:----------:|---------|-------------|
 | **APP_HOST** | No | `127.0.0.1` | The host on which the HTTP server listens |
 | **APP_PORT** | No | `3000` | The port on which the HTTP server listens |
-| **APP_VERBOSE** | No | No | The toggle used to enable detailed logs in the application |
+| **APP_VERBOSE** | No | None | The toggle used to enable detailed logs in the application |
 | **APP_PROCESS_TIMEOUT** | No | `10m` | The file process timeout |
 | **APP_MAX_WORKERS** | No | `10` | The maximum number of concurrent metadata extraction workers |
 
@@ -67,6 +67,7 @@ Use the following environment variables to configure the application:
 This application uses `glog` to log messages. Pass command line arguments described in the [`glog.go`](https://github.com/golang/glog/blob/master/glog.go) file to customize the log parameters, such as the log level and output.
 
 For example:
+
 ```bash
 go run main.go --stderrthreshold=INFO -logtostderr=false
 ```
@@ -76,6 +77,7 @@ go run main.go --stderrthreshold=INFO -logtostderr=false
 ### Install dependencies
 
 This project uses `dep` as a dependency manager. To install all required dependencies, use the following command:
+
 ```bash
 dep ensure -vendor-only
 ```

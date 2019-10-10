@@ -37,12 +37,16 @@ fi
 # GO TEST
 ##
 echo "? go test"
-go test -count 100 -race ./...
+go test -count 100 -race -coverprofile=cover.out ./...
 # Check if tests passed
 if [[ $? != 0 ]]; then
 	echo -e "${RED}✗ go test\n${NC}"
+	rm cover.out
 	exit 1
-else echo -e "${GREEN}√ go test${NC}"
+else 
+	echo -e "Total coverage: $(go tool cover -func=cover.out | grep total | awk '{print $3}')"
+	rm cover.out
+	echo -e "${GREEN}√ go test${NC}"
 fi
 
 

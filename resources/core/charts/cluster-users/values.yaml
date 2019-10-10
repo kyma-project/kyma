@@ -1,3 +1,6 @@
+tests:
+  enabled: false
+
 bindings:
   kymaEssentials:
     groups: []
@@ -31,6 +34,7 @@ clusterRoles:
       - "ui.kyma.cx"
       - "testing.kyma-project.io"
       - "addons.kyma-project.io"
+      - "installer.kyma-project.io"
     monitoring:
       - "monitoring.coreos.com"
     dex:

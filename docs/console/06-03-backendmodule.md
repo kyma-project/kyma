@@ -7,7 +7,7 @@ The `backendmodules.ui.kyma-project.io` CustomResourceDefinition (CRD) is a deta
 
 To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
-```
+``` bash
 kubectl get crd backendmodules.ui.kyma-project.io -o yaml
 ```
 
@@ -15,7 +15,7 @@ kubectl get crd backendmodules.ui.kyma-project.io -o yaml
 
 This is a sample CR that enables the `servicecatalog` module in the Console Backend Service:
 
-```
+``` yaml
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: BackendModule
 metadata:
@@ -26,9 +26,9 @@ metadata:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-| Parameter   |      Mandatory      |  Description |
+| Parameter   |      Required      |  Description |
 |----------|:-------------:|------|
-| **metadata.name** |    **YES**   | Specifies the name of the CR. It must be the same as the name of a given Console Backend Service module. |
+| **metadata.name** | Yes | Specifies the name of the CR. It must be the same as the name of a given Console Backend Service module. |
 
 ## Related resources and components
 

@@ -8,7 +8,6 @@ import (
 
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	v2 "github.com/kyma-project/kyma/components/event-bus/api/publish/v2"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 
 const (
@@ -87,12 +86,4 @@ func ValidateRequestV2(r *http.Request) (*v2.EventRequestV2, *api.Error) {
 	}
 
 	return publishRequest, nil
-}
-
-// ValidateChannelNameLength validates the channel name length.
-func ValidateChannelNameLength(channelName *string, length int) *api.Error {
-	if len(*channelName) > length {
-		return util.ErrorInvalidChannelNameLength(length)
-	}
-	return nil
 }

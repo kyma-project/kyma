@@ -3,11 +3,11 @@ package strategy
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/applications"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/secrets/model"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/fake"
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
+	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
+	"github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
 	listener "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/status"

@@ -4,7 +4,7 @@ metadata:
   labels:
     cms.kyma-project.io/view-context: docs-ui
     cms.kyma-project.io/group-name: components
-    cms.kyma-project.io/order: "11"
+    cms.kyma-project.io/order: "12"
   name: logging
 spec:
   displayName: "Logging"

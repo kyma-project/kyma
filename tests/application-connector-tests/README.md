@@ -10,9 +10,9 @@ Environment parameters used by the tests:
 
 | Name | Required | Default | Description | Possible values |
 |------|----------|---------|-------------|-----------------|
-| **NAMESPACE** | Yes | - | The Namespace in which the test Application runs. | `kyma-integration` |
+| **NAMESPACE** | Yes | None | The Namespace in which the test Application runs. | `kyma-integration` |
 | **CENTRAL** | No | false | Determines if the Connector Service operates in the central mode.  | true | 
-| **SKIP_SSL_VERIFY** | No | false | Determines if the TLS should be skipped. | true | 
+| **SKIP_SSL_VERIFY** | No | false | Determines if the TLS should be skipped. | true |
 
 
 ### Run locally
@@ -25,7 +25,7 @@ export NAMESPACE=kyma-integration
 export CENTRAL=false
 export SKIP_SSL_VERIFY=true
 ```
- 
+
 Use `go test` to run the tests:
 ```
 go test ./test/... -v

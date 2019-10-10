@@ -7,21 +7,27 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/knative/pkg/apis"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"knative.dev/pkg/apis"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	eventingclientset "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+
 	controllertesting "github.com/knative/eventing/pkg/reconciler/testing"
-	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
+
+	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
+
+	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
+	eventingV1Alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
+
+	messagingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
-	eventBusUtil "github.com/kyma-project/kyma/components/event-bus/pkg/util"
+
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -43,7 +49,8 @@ const (
 	provisioner   = "natss"
 	subscriberURI = "URL-test-susbscriber"
 
-	testErrorMessage = "test induced error"
+	testErrorMessage        = "test induced error"
+	defaultMaxChannelLength = 25
 )
 
 var (
@@ -59,15 +66,26 @@ var (
 	knativeLib = NewMockKnativeLib()
 
 	labels = map[string]string{
-		"l1": "v1",
-		"l2": "v2",
+		"kyma-event-type":         "testevent",
+		"kyma-event-type-version": "v1",
+		"kyma-source-id":          "testsourceid",
 	}
 )
 
 func init() {
 	// Add types to scheme
-	_ = eventingv1alpha1.AddToScheme(scheme.Scheme)
-	_ = evapisv1alpha1.AddToScheme(scheme.Scheme)
+	err := eventingv1alpha1.AddToScheme(scheme.Scheme)
+	if err != nil {
+		log.Error(err, "Failed to add kyma eventing scheme")
+	}
+	err = evapisv1alpha1.AddToScheme(scheme.Scheme)
+	if err != nil {
+		log.Error(err, "Failed to add knative eventing scheme")
+	}
+	err = messagingV1Alpha1.AddToScheme(scheme.Scheme)
+	if err != nil {
+		log.Error(err, "Failed to add knative messaging scheme")
+	}
 }
 
 func TestInjectClient(t *testing.T) {
@@ -122,7 +140,9 @@ var testCases = []controllertesting.TestCase{
 				if _, ok := knSubscriptions[makeKnSubscriptionName(makeEventsActivatedSubscription())]; !ok {
 					t.Errorf("Knative subscription was NOT created")
 				}
-				if channel, ok := knChannels[makeKnChannelName(makeEventsActivatedSubscription())]; ok {
+				channelNamePrefix := makeKnChannelNamePrefix(makeEventsActivatedSubscription())
+				channelName := knChannelNames[channelNamePrefix] // Get the channel name from the prefix
+				if channel, ok := knChannels[channelName]; ok {
 					if channel.GetClusterName() != "fake-channel" {
 						t.Errorf("Knative channel should NOT be created in this case")
 					}
@@ -149,7 +169,10 @@ var testCases = []controllertesting.TestCase{
 				if _, ok := knSubscriptions[makeKnSubscriptionName(makeEventsActivatedSubscription())]; !ok {
 					t.Errorf("Knative subscription was NOT created")
 				}
-				if ch, ok := knChannels[makeKnChannelName(makeEventsActivatedSubscription())]; !ok {
+				channelNamePrefix := makeKnChannelNamePrefix(makeEventsActivatedSubscription())
+				channelName := knChannelNames[channelNamePrefix] // Get the channel name from the prefix
+
+				if ch, ok := knChannels[channelName]; !ok {
 					t.Errorf("Knative channel was NOT created")
 				} else {
 					chLabels := ch.Labels
@@ -180,7 +203,10 @@ var testCases = []controllertesting.TestCase{
 				if _, ok := knSubscriptions[makeKnSubscriptionName(makeEventsActivatedSubscription())]; ok {
 					t.Errorf("Knative subscription was NOT deleted")
 				}
-				if _, ok := knChannels[makeKnChannelName(makeEventsActivatedSubscription())]; ok {
+				channelNamePrefix := makeKnChannelNamePrefix(makeEventsActivatedSubscription())
+				channelName := knChannelNames[channelNamePrefix] // Get the channel name from the prefix
+
+				if _, ok := knChannels[channelName]; ok {
 					t.Errorf("Knative channel was NOT deleted")
 				}
 			},
@@ -258,6 +284,7 @@ func makeReadySubscription() *eventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
 	subscription.Status.Conditions = []eventingv1alpha1.SubscriptionCondition{
 		{Type: eventingv1alpha1.EventsActivated, Status: eventingv1alpha1.ConditionTrue},
+		{Type: eventingv1alpha1.SubscriptionReady, Status: eventingv1alpha1.ConditionTrue},
 		{Type: eventingv1alpha1.Ready, Status: eventingv1alpha1.ConditionTrue},
 	}
 	return subscription
@@ -276,6 +303,9 @@ func makeEventsActivatedSubscription() *eventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
 	subscription.Status.Conditions = []eventingv1alpha1.SubscriptionCondition{{
 		Type:   eventingv1alpha1.EventsActivated,
+		Status: eventingv1alpha1.ConditionTrue,
+	}, {
+		Type:   eventingv1alpha1.SubscriptionReady,
 		Status: eventingv1alpha1.ConditionTrue,
 	}}
 	return subscription
@@ -333,14 +363,15 @@ func (m *MockCurrentTime) GetCurrentTime() metav1.Time {
 
 // Mock KnativeLib
 var knSubscriptions = make(map[string]*evapisv1alpha1.Subscription)
-var knChannels = make(map[string]*evapisv1alpha1.Channel)
+var knChannels = make(map[string]*messagingV1Alpha1.Channel)
+var knChannelNames = make(map[string]string)
 
 type MockKnativeLib struct{}
 
 func NewMockKnativeLib() util.KnativeAccessLib {
 	return new(MockKnativeLib)
 }
-func (k *MockKnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error) {
+func (k *MockKnativeLib) GetChannel(name string, namespace string) (*messagingV1Alpha1.Channel, error) {
 	channel, ok := knChannels[name]
 	if !ok {
 		gr := schema.GroupResource{Group: "test", Resource: "channel"}
@@ -348,8 +379,20 @@ func (k *MockKnativeLib) GetChannel(name string, namespace string) (*evapisv1alp
 	}
 	return channel, nil
 }
-func (k *MockKnativeLib) CreateChannel(provisioner string, name string, namespace string, labels *map[string]string, timeout time.Duration) (*evapisv1alpha1.Channel, error) {
-	channel := makeKnChannel(provisioner, namespace, name, labels)
+
+func (k *MockKnativeLib) GetChannelByLabels(namespace string, labels map[string]string) (*messagingV1Alpha1.Channel, error) {
+	var channelName string
+	for name := range knChannels {
+		channelName = name
+		break
+	}
+	return k.GetChannel(channelName, namespace)
+}
+
+func (k *MockKnativeLib) CreateChannel(prefix, namespace string, labels map[string]string,
+	readyFn ...util.ChannelReadyFunc) (*messagingV1Alpha1.Channel, error) {
+
+	channel := makeKnChannel(prefix, namespace, labels)
 	knChannels[channel.Name] = channel
 	return channel, nil
 }
@@ -357,7 +400,7 @@ func (k *MockKnativeLib) DeleteChannel(name string, namespace string) error {
 	delete(knChannels, name)
 	return nil
 }
-func (k *MockKnativeLib) CreateSubscription(name string, namespace string, channelName string, uri *string) error {
+func (k *MockKnativeLib) CreateSubscription(name string, namespace string, channelName string, uri *string, labels map[string]string) error {
 	knSub := makeKnSubscription(makeEventsActivatedSubscription())
 	knSubscriptions[knSub.Name] = knSub
 	return nil
@@ -377,55 +420,51 @@ func (k *MockKnativeLib) GetSubscription(name string, namespace string) (*evapis
 func (k *MockKnativeLib) UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error) {
 	return nil, nil
 }
-func (k *MockKnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[string][]string, message *string) error {
+func (k *MockKnativeLib) SendMessage(channel *messagingV1Alpha1.Channel, headers *map[string][]string, message *string) error {
 	return nil
 }
-func (k *MockKnativeLib) InjectClient(c eventingclientset.EventingV1alpha1Interface) error {
+
+// InjectClient injects a client, useful for running tests.
+func (k *MockKnativeLib) InjectClient(evClient eventingV1Alpha1.EventingV1alpha1Interface, msgClient messagingv1alpha1.MessagingV1alpha1Interface) error {
 	return nil
 }
 
 //  make channels
-func makeKnChannel(provisioner string, namespace string, name string, labels *map[string]string) *evapisv1alpha1.Channel {
-	c := &evapisv1alpha1.Channel{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
-			Kind:       "Channel",
-		},
+func makeKnChannel(prefix, namespace string, labels map[string]string) *messagingV1Alpha1.Channel {
+	channelName := fmt.Sprint(prefix, "-", "23vwq3")
+	knChannelNames[prefix] = channelName
+	return &messagingV1Alpha1.Channel{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-			Labels:    *labels,
-			UID:       chanUID,
+			Namespace:    namespace,
+			Name:         channelName,
+			GenerateName: prefix,
+			Labels:       labels,
+			UID:          chanUID,
 		},
-		Spec: evapisv1alpha1.ChannelSpec{
-			Provisioner: &corev1.ObjectReference{
-				Name:       provisioner,
-				APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
-				Kind:       "ClusterChannelProvisioner",
-			},
-		},
-		Status: evapisv1alpha1.ChannelStatus{
-			Conditions: []duckv1alpha1.Condition{
-				{
-					Type:   evapisv1alpha1.ChannelConditionReady,
-					Status: corev1.ConditionTrue,
+		Status: messagingV1Alpha1.ChannelStatus{
+			Status: duckv1beta1.Status{
+				Conditions: duckv1beta1.Conditions{
+					apis.Condition{
+						Type:   apis.ConditionReady,
+						Status: corev1.ConditionTrue,
+					},
 				},
 			},
 		},
 	}
-	return c
 }
 
-func makeKnChannelName(kySub *eventingv1alpha1.Subscription) string {
-	return eventBusUtil.GetChannelName(&kySub.SourceID, &kySub.EventType, &kySub.EventTypeVersion)
+func makeKnChannelNamePrefix(kySub *eventingv1alpha1.Subscription) string {
+	return kySub.EventType
 }
 
 func makeKnSubscriptionName(kySub *eventingv1alpha1.Subscription) string {
 	return util.GetKnSubscriptionName(&kySub.Name, &kySub.Namespace)
 }
 
-func makeKnativeLibChannel() *evapisv1alpha1.Channel {
-	channel, _ := knativeLib.CreateChannel(provisioner, makeKnChannelName(makeEventsActivatedSubscription()), "kyma-system", &labels, time.Second)
+func makeKnativeLibChannel() *messagingV1Alpha1.Channel {
+	chNamespace := util.GetDefaultChannelNamespace()
+	channel, _ := knativeLib.CreateChannel(makeKnChannelNamePrefix(makeEventsActivatedSubscription()), chNamespace, labels)
 	channel.SetClusterName("fake-channel") // use it as a marker
 	knChannels[channel.Name] = channel
 	return channel
@@ -433,9 +472,10 @@ func makeKnativeLibChannel() *evapisv1alpha1.Channel {
 
 func makeKnSubscription(kySub *eventingv1alpha1.Subscription) *evapisv1alpha1.Subscription {
 	knSubName := util.GetKnSubscriptionName(&kySub.Name, &kySub.Namespace)
-	knChannelName := makeKnChannelName(kySub)
+	knChannelName := knChannelNames[makeKnChannelNamePrefix(kySub)]
 	subscriberURL := subscriberURI
-	return util.Subscription(knSubName, "kyma-system").ToChannel(knChannelName).ToURI(&subscriberURL).EmptyReply().Build()
+	chNamespace := util.GetDefaultChannelNamespace()
+	return util.Subscription(knSubName, chNamespace, labels).ToChannel(knChannelName).ToURI(&subscriberURL).EmptyReply().Build()
 }
 
 func dumpKnativeLibObjects(t *testing.T) {

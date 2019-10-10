@@ -5,7 +5,7 @@ package v1alpha1
 import (
 	time "time"
 
-	applicationconnector_v1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	versioned "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions/internalinterfaces"
 	v1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
@@ -54,7 +54,7 @@ func NewFilteredApplicationMappingInformer(client versioned.Interface, namespace
 				return client.ApplicationconnectorV1alpha1().ApplicationMappings(namespace).Watch(options)
 			},
 		},
-		&applicationconnector_v1alpha1.ApplicationMapping{},
+		&applicationconnectorv1alpha1.ApplicationMapping{},
 		resyncPeriod,
 		indexers,
 	)
@@ -65,7 +65,7 @@ func (f *applicationMappingInformer) defaultInformer(client versioned.Interface,
 }
 
 func (f *applicationMappingInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&applicationconnector_v1alpha1.ApplicationMapping{}, f.defaultInformer)
+	return f.factory.InformerFor(&applicationconnectorv1alpha1.ApplicationMapping{}, f.defaultInformer)
 }
 
 func (f *applicationMappingInformer) Lister() v1alpha1.ApplicationMappingLister {

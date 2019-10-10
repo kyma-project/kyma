@@ -8,7 +8,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   gateways:
-    - {{ .Values.global.istio.gateway.name }}
+    - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}
   hosts:
     - oauth2.{{ .Values.global.ingress.domainName }}
   http:
@@ -30,7 +30,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   gateways:
-    - {{ .Values.global.istio.gateway.name }}
+    - {{ .Values.global.istio.gateway.name }}.{{ .Values.global.istio.gateway.namespace }}
   hosts:
     - oauth2-admin.{{ .Values.global.ingress.domainName }}
   http:

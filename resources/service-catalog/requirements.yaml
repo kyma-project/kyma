@@ -1,9 +1,0 @@
-dependencies:
-- name: etcd-stateful
-  condition: global.serviceCatalogApiserver.enabled
-
-- name: catalog
-  condition: global.serviceCatalogApiserver.enabled
-
-- name: catalog-crds
-  condition: global.serviceCatalogCrds.enabled

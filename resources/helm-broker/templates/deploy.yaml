@@ -50,6 +50,8 @@ spec:
             value: {{ .Release.Namespace }}
           - name: APP_PORT
             value: "{{ .Values.service.internalPort }}"
+          - name: APP_STATUS_PORT
+            value: "{{ .Values.service.statusPort }}"
           - name: APP_CONFIG_FILE_NAME
             value: /etc/config/helm-broker/config.yaml
           - name: APP_HELM_TILLER_HOST
@@ -80,17 +82,17 @@ spec:
           exec:
             command:
               - curl
-              - localhost:{{ .Values.service.internalPort }}/statusz
+              - localhost:{{ .Values.service.statusPort }}/ready
           failureThreshold: 3
-          periodSeconds: 3
+          periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 2
         livenessProbe:
           exec:
             command:
               - curl
-              - localhost:{{ .Values.service.internalPort }}/statusz
-          periodSeconds: 10
+              - localhost:{{ .Values.service.statusPort }}/live
+          periodSeconds: 15
           timeoutSeconds: 2
           successThreshold: 1
 
@@ -102,6 +104,8 @@ spec:
         env:
           - name: APP_TMP_DIR
             value: /tmp
+          - name: APP_STATUS_PORT
+            value: "{{ .Values.ctrl.statusPort }}"
           - name: APP_NAMESPACE
             value: {{ .Release.Namespace }}
           - name: APP_SERVICE_NAME
@@ -127,25 +131,25 @@ spec:
           name: ssh-cfg
           readOnly: true
         ports:
-        - containerPort: {{ .Values.service.ctrlInternalPort }}
+        - containerPort: {{ .Values.ctrl.internalPort }}
         # Temporary solution for readiness probe
         # Ref: https://github.com/istio/istio/issues/2628
         readinessProbe:
           exec:
             command:
               - curl
-              - localhost:{{ .Values.service.internalPort }}/statusz
+              - localhost:{{ .Values.ctrl.statusPort }}/ready
           failureThreshold: 3
-          periodSeconds: 3
+          periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 2
         livenessProbe:
           exec:
             command:
               - curl
-              - localhost:{{ .Values.service.internalPort }}/statusz
-          periodSeconds: 10
-          timeoutSeconds: 2
+              - localhost:{{ .Values.ctrl.statusPort }}/live
+          periodSeconds: 60
+          timeoutSeconds: 30
           successThreshold: 1
 
       volumes:

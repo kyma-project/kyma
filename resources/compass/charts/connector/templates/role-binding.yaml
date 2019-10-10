@@ -70,3 +70,40 @@ roleRef:
   name: {{ template "fullname" . }}-{{ .Values.global.connector.secrets.rootCA.name }}
   apiGroup: rbac.authorization.k8s.io
 {{ end }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "fullname" . }}-{{ .Values.global.connector.revocation.configmap.name }}
+  namespace: {{ .Values.global.connector.revocation.configmap.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+rules:
+- apiGroups: ["*"]
+  resources: ["configmaps"]
+  resourceNames: ["{{ .Values.global.connector.revocation.configmap.name }}"]
+  verbs: ["get", "update"]
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "fullname" . }}-{{ .Values.global.connector.revocation.configmap.name }}
+  namespace: {{ .Values.global.connector.revocation.configmap.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ template "fullname" . }}-{{ .Values.global.connector.revocation.configmap.name }}
+  apiGroup: rbac.authorization.k8s.io
+
+---

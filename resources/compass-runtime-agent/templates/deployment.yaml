@@ -26,19 +26,35 @@ spec:
           imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
           args:
             - "/compass-runtime-agent"
-            - "--controllerSyncPeriod={{ .Values.compassRuntimeAgent.sync.controllerSyncPeriod }}"
-            - "--minimalConfigSyncTime={{ .Values.compassRuntimeAgent.sync.minimalConfigSyncTime }}"
-            - "--integrationNamespace={{ .Values.compassRuntimeAgent.resources.integrationNamespace }}"
-            - "--gatewayPort={{ .Values.compassRuntimeAgent.resources.gatewayPort }}"
-            - "--insecureConfigurationFetch={{ .Values.compassRuntimeAgent.config.insecureConfigurationFetch }}"
-            - "--uploadServiceUrl={{ .Values.compassRuntimeAgent.resources.uploadServiceUrl }}"
-          envFrom:
-          - configMapRef:
-              optional: true
-              name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
+          env:
+            - name: APP_CONNECTION_CONFIG_MAP
+              value: "{{ .Values.compassRuntimeAgent.config.configMap.namespace }}/{{ .Values.compassRuntimeAgent.config.configMap.name }}"
+            - name: APP_CONTROLLER_SYNC_PERIOD
+              value: "{{ .Values.compassRuntimeAgent.sync.controllerSyncPeriod }}"
+            - name: APP_MINIMAL_COMPASS_SYNC_TIME
+              value: "{{ .Values.compassRuntimeAgent.sync.minimalConfigSyncTime }}"
+            - name: APP_CERT_VALIDITY_RENEWAL_THRESHOLD
+              value: "{{ .Values.compassRuntimeAgent.certificates.renewal.validityThreshold }}"
+            - name: APP_CLUSTER_CERTIFICATES_SECRET
+              value: "{{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.namespace }}/{{ .Values.compassRuntimeAgent.certificates.clientCertificate.secret.name }}"
+            - name: APP_CA_CERTIFICATES_SECRET
+              value: "{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.namespace }}/{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.name }}"
+            - name: APP_INSECURE_CONNECTOR_COMMUNICATION
+              value: "{{ .Values.compassRuntimeAgent.connector.insecureCommunication }}"
+            - name: APP_INTEGRATION_NAMESPACE
+              value: "{{ .Values.compassRuntimeAgent.resources.integrationNamespace }}"
+            - name: APP_GATEWAY_PORT
+              value: "{{ .Values.compassRuntimeAgent.resources.gatewayPort }}"
+            - name: APP_INSECURE_CONFIGURATION_FETCH
+              value: "{{ .Values.compassRuntimeAgent.config.insecureConfigurationFetch }}"
+            - name: APP_UPLOAD_SERVICE_URL
+              value: "{{ .Values.compassRuntimeAgent.resources.uploadServiceUrl }}"
+            - name: APP_QUERY_LOGGING
+              value: "{{ .Values.compassRuntimeAgent.debugg.queryLogging }}"
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
             - "compass-gateway.{{ .Values.global.ingress.domainName }}"
+            - "compass-gateway-mtls.{{ .Values.global.ingress.domainName }}"
       {{ end }}

@@ -10,7 +10,7 @@ In Kyma, you can use addons to install the following Service Brokers:
 
 * [Azure Service Broker](/components/service-catalog/#service-brokers-azure-service-broker)
 * [AWS Service Broker](/components/service-catalog/#service-brokers-aws-service-broker)
-* [Google Cloud Platform Service Broker](/components/service-catalog/#service-brokers-google-cloud-platform-service-broker) (preview)
+* [GCP Service Broker](/components/service-catalog/#service-brokers-gcp-service-broker)
 
 To see all addons that the Helm Broker provides, go to the [`addons`](https://github.com/kyma-project/addons) repository.
 

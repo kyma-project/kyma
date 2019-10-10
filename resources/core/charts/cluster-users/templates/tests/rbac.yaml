@@ -1,3 +1,4 @@
+{{- if .Values.tests.enabled}}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: v1
 kind: ServiceAccount
@@ -28,4 +29,5 @@ subjects:
 - kind: ServiceAccount
   name: {{ .Chart.Name }}-tests
   namespace: {{ .Release.Namespace }}
+{{- end }}
 {{- end }}

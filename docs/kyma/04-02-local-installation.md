@@ -11,9 +11,8 @@ This Installation guide shows you how to quickly deploy Kyma locally on the MacO
 
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Docker](https://www.docker.com/get-started)
-- [Minikube](https://github.com/kubernetes/minikube) 1.0
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.13
-- [Helm](https://github.com/kubernetes/helm) 2.10
+- [Minikube](https://github.com/kubernetes/minikube) 1.3.1
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6
 
 Virtualization:
 
@@ -22,13 +21,13 @@ Virtualization:
 
 > **NOTE**: To work with Kyma, use only the provided commands. Kyma requires a specific Minikube configuration and does not work on a basic Minikube cluster that you can start using the `minikube start` command.
 
-
 ## Install Kyma
 
 Follow these instructions to install Kyma from a release or from sources:
-<div tabs>
+
+<div tabs name="install-kyma" group="install-kyma-locally">
   <details>
-  <summary>
+  <summary label="from-a-release">
   From a release
   </summary>
 
@@ -43,11 +42,11 @@ Follow these instructions to install Kyma from a release or from sources:
      ```bash
      kyma install
      ```
-     >**NOTE** If you want to install a specific release version, go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about available releases. Use the release version as a parameter when calling ` kyma install --release {KYMA_RELEASE}`.
+     >**NOTE:** If you want to install a specific release version, go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about available releases. Use the release version as a parameter when calling `kyma install --source {KYMA_RELEASE}`.
 
   </details>
   <details>
-  <summary>
+  <summary label="from-sources">
   From sources
   </summary>
 
@@ -67,8 +66,9 @@ Follow these instructions to install Kyma from a release or from sources:
   4. Install Kyma from sources. Run:
 
      ```bash
-     kyma install --local --src-path {YOUR_KYMA_SOURCE_PATH}
+     kyma install --source local
      ```
+     >**NOTE:** By default, the installation uses sources located under your [GOPATH](https://github.com/golang/go/wiki/GOPATH). If you want to use a specific source folder, use it as a parameter when calling `kyma install --source local --src-path {YOUR_KYMA_SOURCE_PATH}`. 
 
    </details>
 </div>

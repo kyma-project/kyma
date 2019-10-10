@@ -1,18 +1,22 @@
-package servicecatalogaddons
+package servicecatalogaddons_test
 
 import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
-	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
+	sbu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	fakeDynamic "k8s.io/client-go/dynamic/fake"
+	"k8s.io/client-go/dynamic"
+	dynamicFake "k8s.io/client-go/dynamic/fake"
+	"k8s.io/client-go/tools/cache"
 )
 
 func TestUsageKindService_List_Success(t *testing.T) {
@@ -20,11 +24,11 @@ func TestUsageKindService_List_Success(t *testing.T) {
 	usageKindA := fixUsageKind("fix-A")
 	usageKindB := fixUsageKind("fix-B")
 
-	client := fake.NewSimpleClientset(usageKindA, usageKindB)
-	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
+	client, err := newDynamicClient(usageKindA, usageKindB)
+	require.NoError(t, err)
+	informer := newUkFakeInformer(client)
 
-	informer := informerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer()
-	svc := newUsageKindService(client.ServicecatalogV1alpha1(), nil, informer)
+	svc := servicecatalogaddons.NewUsageKindService(client, informer)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 	// WHEN
@@ -37,14 +41,16 @@ func TestUsageKindService_List_Success(t *testing.T) {
 
 func TestUsageKindService_List_Empty(t *testing.T) {
 	// GIVEN
-	client := fake.NewSimpleClientset()
-	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-	informer := informerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer()
-	svc := newUsageKindService(client.ServicecatalogV1alpha1(), nil, informer)
+	scheme := runtime.NewScheme()
+	client := dynamicFake.NewSimpleDynamicClient(scheme)
+	informer := newUkFakeInformer(client)
+	svc := servicecatalogaddons.NewUsageKindService(client, informer)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+
 	// WHEN
 	result, err := svc.List(pager.PagingParams{})
 	require.NoError(t, err)
+
 	// THEN
 	assert.Empty(t, result)
 }
@@ -52,20 +58,17 @@ func TestUsageKindService_List_Empty(t *testing.T) {
 func TestUsageKindService_ListResources_Empty(t *testing.T) {
 	// There is no any test for non-empty response because of a bug in fake dynamic scClient List() method.
 	// The bug is fixed in scClient-go version 1.12-rc.1 but this version is not compatible with service-catalog:
-	// vendor/github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1/register.go:77:36: too many arguments in call to scheme.AddFieldLabelConversionFunc
+	// vendor/github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1/register.go:77:36: too many arguments in call to scheme.AddFieldLabelConversionFunc
 
 	// GIVEN
 	usageKind := fixUsageKind("fix-A")
 
 	existingFunction := newUnstructured(usageKind.Spec.Resource.Version, usageKind.Spec.Resource.Kind, "test", "test")
 	scheme := runtime.NewScheme()
-	dynamicClient := fakeDynamic.NewSimpleDynamicClient(scheme, existingFunction)
+	dynamicClient := dynamicFake.NewSimpleDynamicClient(scheme, existingFunction)
+	informer := newUkFakeInformer(dynamicClient)
 
-	client := fake.NewSimpleClientset()
-	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-
-	informer := informerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer()
-	svc := newUsageKindService(client.ServicecatalogV1alpha1(), dynamicClient, informer)
+	svc := servicecatalogaddons.NewUsageKindService(dynamicClient, informer)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 	// WHEN
@@ -88,4 +91,31 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 		},
 	}
 	return obj
+}
+
+func newSbuFakeInformer(dynamic dynamic.Interface) cache.SharedIndexInformer {
+	return dynamicinformer.NewDynamicSharedInformerFactory(dynamic, 10).ForResource(bindingUsageGVR).Informer()
+}
+
+func newUkFakeInformer(dynamic dynamic.Interface) cache.SharedIndexInformer {
+	return dynamicinformer.NewDynamicSharedInformerFactory(dynamic, 10).ForResource(usageKindsGVR).Informer()
+}
+
+func newDynamicClient(objects ...runtime.Object) (*dynamicFake.FakeDynamicClient, error) {
+	scheme := runtime.NewScheme()
+	err := v1alpha1.AddToScheme(scheme)
+	if err != nil {
+		return &dynamicFake.FakeDynamicClient{}, err
+	}
+	err = sbu.AddToScheme(scheme)
+	if err != nil {
+		return &dynamicFake.FakeDynamicClient{}, err
+	}
+
+	result := make([]runtime.Object, len(objects))
+	for i, obj := range objects {
+		converted, _ := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
+		result[i] = &unstructured.Unstructured{Object: converted}
+	}
+	return dynamicFake.NewSimpleDynamicClient(scheme, result...), nil
 }

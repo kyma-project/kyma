@@ -1,3 +1,4 @@
+{{- if eq .Values.logcollector.name "promtail" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -550,3 +551,4 @@ data:
         - __meta_kubernetes_pod_container_name
         target_label: __path__
     {{- end }}
+{{- end }}

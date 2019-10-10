@@ -129,7 +129,7 @@ func (ts *TestSuite) ensureNamespaceIsDeleted(timeout time.Duration) {
 		}
 	}
 
-	repeat.FuncAtMost(ts.t, waitForNsTermination, timeout)
+	repeat.AssertFuncAtMost(ts.t, waitForNsTermination, timeout)
 }
 
 func (ts *TestSuite) deleteNamespace() {

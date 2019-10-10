@@ -4,24 +4,28 @@ import (
 	"fmt"
 
 	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
-	addonsClientset "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned/typed/addons/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/retry"
 )
 
 type clusterAddonsConfigurationService struct {
 	addonsNotifier    notifier
-	addonsCfgClient   addonsClientset.AddonsV1alpha1Interface
+	addonsCfgClient   dynamic.ResourceInterface
 	addonsCfgInformer cache.SharedIndexInformer
+
+	extractor extractor.ClusterAddonsUnstructuredExtractor
 }
 
-func newClusterAddonsConfigurationService(addonsCfgInformer cache.SharedIndexInformer, addonsCfgClient addonsClientset.AddonsV1alpha1Interface) *clusterAddonsConfigurationService {
+func newClusterAddonsConfigurationService(addonsCfgInformer cache.SharedIndexInformer, addonsCfgClient dynamic.ResourceInterface) *clusterAddonsConfigurationService {
 	addonsNotifier := resource.NewNotifier()
 	addonsCfgInformer.AddEventHandler(addonsNotifier)
 
@@ -29,6 +33,7 @@ func newClusterAddonsConfigurationService(addonsCfgInformer cache.SharedIndexInf
 		addonsCfgClient:   addonsCfgClient,
 		addonsCfgInformer: addonsCfgInformer,
 		addonsNotifier:    addonsNotifier,
+		extractor:         extractor.ClusterAddonsUnstructuredExtractor{},
 	}
 }
 
@@ -40,31 +45,41 @@ func (s *clusterAddonsConfigurationService) List(pagingParams pager.PagingParams
 
 	var addons []*v1alpha1.ClusterAddonsConfiguration
 	for _, item := range items {
-		ac, ok := item.(*v1alpha1.ClusterAddonsConfiguration)
+		u, ok := item.(*unstructured.Unstructured)
 		if !ok {
 			return nil, fmt.Errorf("incorrect item type: %T, should be: *v1alpha1.ClusterAddonsConfiguration", item)
 		}
 
-		addons = append(addons, ac)
+		addon, err := s.extractor.FromUnstructured(u)
+		if err != nil {
+			return nil, err
+		}
+		addons = append(addons, addon)
 	}
 
 	return addons, nil
 }
 
-func (s *clusterAddonsConfigurationService) AddRepos(name string, urls []string) (*v1alpha1.ClusterAddonsConfiguration, error) {
+func (s *clusterAddonsConfigurationService) AddRepos(name string, repository []gqlschema.AddonsConfigurationRepositoryInput) (*v1alpha1.ClusterAddonsConfiguration, error) {
 	var addon *v1alpha1.ClusterAddonsConfiguration
-	var err error
 	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		addon, err = s.addonsCfgClient.ClusterAddonsConfigurations().Get(name, metav1.GetOptions{})
+		obj, err := s.addonsCfgClient.Get(name, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
 
-		for _, u := range urls {
-			addon.Spec.Repositories = append(addon.Spec.Repositories, v1alpha1.SpecRepository{URL: u})
+		addon, err = s.extractor.FromUnstructured(obj)
+		if err != nil {
+			return err
+		}
+		addon.Spec.Repositories = append(addon.Spec.Repositories, toSpecRepositories(repository)...)
+
+		obj, err = s.extractor.ToUnstructured(addon)
+		if err != nil {
+			return err
 		}
 
-		_, err = s.addonsCfgClient.ClusterAddonsConfigurations().Update(addon)
+		_, err = s.addonsCfgClient.Update(obj, metav1.UpdateOptions{})
 		return err
 	}); err != nil {
 		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, name)
@@ -73,18 +88,27 @@ func (s *clusterAddonsConfigurationService) AddRepos(name string, urls []string)
 	return addon, nil
 }
 
-func (s *clusterAddonsConfigurationService) RemoveRepos(name string, urls []string) (*v1alpha1.ClusterAddonsConfiguration, error) {
+func (s *clusterAddonsConfigurationService) RemoveRepos(name string, reposToRemove []string) (*v1alpha1.ClusterAddonsConfiguration, error) {
 	var addon *v1alpha1.ClusterAddonsConfiguration
-	var err error
 	if err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		addon, err = s.addonsCfgClient.ClusterAddonsConfigurations().Get(name, metav1.GetOptions{})
+		obj, err := s.addonsCfgClient.Get(name, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
-		resultRepos := filterOutRepositories(addon.Spec.Repositories, urls)
+
+		addon, err = s.extractor.FromUnstructured(obj)
+		if err != nil {
+			return err
+		}
+		resultRepos := filterOutRepositories(addon.Spec.Repositories, reposToRemove)
 		addon.Spec.Repositories = resultRepos
 
-		_, err = s.addonsCfgClient.ClusterAddonsConfigurations().Update(addon)
+		obj, err = s.extractor.ToUnstructured(addon)
+		if err != nil {
+			return err
+		}
+
+		_, err = s.addonsCfgClient.Update(obj, metav1.UpdateOptions{})
 		return err
 	}); err != nil {
 		return nil, errors.Wrapf(err, "while updating %s %s", pretty.AddonsConfiguration, name)
@@ -93,43 +117,53 @@ func (s *clusterAddonsConfigurationService) RemoveRepos(name string, urls []stri
 	return addon, nil
 }
 
-func (s *clusterAddonsConfigurationService) Create(name string, urls []string, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
+func (s *clusterAddonsConfigurationService) Create(name string, repository []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
 	addon := &v1alpha1.ClusterAddonsConfiguration{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ClusterAddonsConfiguration",
+			APIVersion: "addons.kyma-project.io/v1alpha1",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   name,
 			Labels: toMapLabels(labels),
 		},
 		Spec: v1alpha1.ClusterAddonsConfigurationSpec{
 			CommonAddonsConfigurationSpec: v1alpha1.CommonAddonsConfigurationSpec{
-				Repositories: toSpecRepositories(urls),
+				Repositories: toSpecRepositories(repository),
 			},
 		},
 	}
 
-	result, err := s.addonsCfgClient.ClusterAddonsConfigurations().Create(addon)
+	obj, err := s.extractor.ToUnstructured(addon)
+	if err != nil {
+		return nil, err
+	}
+	_, err = s.addonsCfgClient.Create(obj, metav1.CreateOptions{})
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating %s %s", pretty.ClusterAddonsConfiguration, addon.Name)
 	}
 
-	return result, nil
+	return addon, nil
 }
 
-func (s *clusterAddonsConfigurationService) Update(name string, urls []string, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
+func (s *clusterAddonsConfigurationService) Update(name string, repository []gqlschema.AddonsConfigurationRepositoryInput, labels *gqlschema.Labels) (*v1alpha1.ClusterAddonsConfiguration, error) {
 	addon, err := s.getClusterAddonsConfiguration(name)
 	if err != nil {
 		return nil, err
 	}
+	addon.Spec.Repositories = toSpecRepositories(repository)
+	addon.Labels = toMapLabels(labels)
 
-	addonCpy := addon.DeepCopy()
-	addonCpy.Spec.Repositories = toSpecRepositories(urls)
-	addonCpy.Labels = toMapLabels(labels)
-
-	result, err := s.addonsCfgClient.ClusterAddonsConfigurations().Update(addonCpy)
+	obj, err := s.extractor.ToUnstructured(addon)
+	if err != nil {
+		return nil, err
+	}
+	_, err = s.addonsCfgClient.Update(obj, metav1.UpdateOptions{})
 	if err != nil {
 		return nil, errors.Wrapf(err, "while updating %s %s", pretty.ClusterAddonsConfiguration, addon.Name)
 	}
 
-	return result, nil
+	return addon, nil
 }
 
 func (s *clusterAddonsConfigurationService) Delete(name string) (*v1alpha1.ClusterAddonsConfiguration, error) {
@@ -138,7 +172,7 @@ func (s *clusterAddonsConfigurationService) Delete(name string) (*v1alpha1.Clust
 		return nil, err
 	}
 
-	if err := s.addonsCfgClient.ClusterAddonsConfigurations().Delete(name, &metav1.DeleteOptions{}); err != nil {
+	if err := s.addonsCfgClient.Delete(name, &metav1.DeleteOptions{}); err != nil {
 		return nil, errors.Wrapf(err, "while deleting %s %s", pretty.ClusterAddonsConfiguration, addon.Name)
 	}
 
@@ -146,22 +180,26 @@ func (s *clusterAddonsConfigurationService) Delete(name string) (*v1alpha1.Clust
 }
 
 func (s *clusterAddonsConfigurationService) Resync(name string) (*v1alpha1.ClusterAddonsConfiguration, error) {
-	var result *v1alpha1.ClusterAddonsConfiguration
+	var addon *v1alpha1.ClusterAddonsConfiguration
+	var err error
 	if err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		addon, err := s.getClusterAddonsConfiguration(name)
+		addon, err = s.getClusterAddonsConfiguration(name)
 		if err != nil {
 			return err
 		}
-		addonCpy := addon.DeepCopy()
-		addonCpy.Spec.ReprocessRequest++
+		addon.Spec.ReprocessRequest++
 
-		result, err = s.addonsCfgClient.ClusterAddonsConfigurations().Update(addonCpy)
+		obj, err := s.extractor.ToUnstructured(addon)
+		if err != nil {
+			return err
+		}
+		_, err = s.addonsCfgClient.Update(obj, metav1.UpdateOptions{})
 		return err
 	}); err != nil {
 		return nil, errors.Wrapf(err, "cannot update ClusterAddonsConfiguration %s", name)
 	}
 
-	return result, nil
+	return addon, nil
 }
 
 func (s *clusterAddonsConfigurationService) getClusterAddonsConfiguration(name string) (*v1alpha1.ClusterAddonsConfiguration, error) {
@@ -174,9 +212,14 @@ func (s *clusterAddonsConfigurationService) getClusterAddonsConfiguration(name s
 		return nil, errors.Errorf("%s doesn't exists", name)
 	}
 
-	addons, ok := item.(*v1alpha1.ClusterAddonsConfiguration)
+	u, ok := item.(*unstructured.Unstructured)
 	if !ok {
-		return nil, fmt.Errorf("incorrect item type: %T, should be: *v1alpha1.ClusterAddonsConfiguration", item)
+		return nil, fmt.Errorf("incorrect item type: %T, should be: *unstructured.Unstructured", item)
+	}
+
+	addons, err := s.extractor.FromUnstructured(u)
+	if !ok {
+		return nil, err
 	}
 
 	return addons, nil

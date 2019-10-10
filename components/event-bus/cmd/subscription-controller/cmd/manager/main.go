@@ -3,19 +3,23 @@ package main
 import (
 	"context"
 	"fmt"
+
+	"github.com/go-logr/logr"
+	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
+	pushv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/internal/common"
+	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/eventactivation"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/knativesubscription"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
+
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-
-	"github.com/go-logr/logr"
-	pushv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	"github.com/kyma-project/kyma/components/event-bus/internal/common"
-	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/eventactivation"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -56,19 +60,33 @@ func main() {
 		log.Error(err, "unable to add event activation APIs to scheme")
 		os.Exit(1)
 	}
-
+	if err := messagingV1Alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "unable to add event activation APIs to scheme")
+		os.Exit(1)
+	}
+	if err := evapisv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "unable to add Knative Eventing APIs to scheme")
+		os.Exit(1)
+	}
 	// Setup all Controllers
 	log.Info("Setting up Subscription Controller")
-	_, err = subscription.ProvideController(mgr, sckOpts)
+	err = subscription.ProvideController(mgr, sckOpts)
 	if err != nil {
-		log.Error(err, "Unable to create Subscription controller")
+		log.Error(err, "unable to create Subscription controller")
 		os.Exit(1)
 	}
 
 	log.Info("Setting up Event Activation Controller")
-	_, err = eventactivation.ProvideController(mgr)
+	err = eventactivation.ProvideController(mgr)
 	if err != nil {
-		log.Error(err, "Unable to create Event Activation controller")
+		log.Error(err, "unable to create Event Activation controller")
+		os.Exit(1)
+	}
+
+	log.Info("Setting up Knative Subscription Controller")
+	err = knativesubscription.ProvideController(mgr)
+	if err != nil {
+		log.Error(err, "unable to create Knative Subscription controller")
 		os.Exit(1)
 	}
 

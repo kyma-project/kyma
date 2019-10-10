@@ -3,6 +3,11 @@ IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 binary=$(APP_NAME)
 
+APP_MIGRATION = ab-upgrade-protector
+IMG_MIGRATION = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_MIGRATION)
+binary_migration=$(APP_MIGRATION)
+
+
 .PHONY: build
 build:
 	./before-commit.sh ci
@@ -18,13 +23,19 @@ endif
 .PHONY: build-image
 build-image: pull-licenses
 	cp $(binary) deploy/broker/$(binary)
+	cp $(binary_migration) deploy/migration/$(binary_migration)
 	cp -R licenses deploy/broker/
+
 	docker build -t $(APP_NAME):latest deploy/broker
+	docker build -t $(APP_MIGRATION):latest deploy/migration
 
 .PHONY: push-image
 push-image:
 	docker tag $(APP_NAME) $(IMG):$(TAG)
 	docker push $(IMG):$(TAG)
+
+	docker tag $(APP_MIGRATION) $(IMG_MIGRATION):$(TAG)
+	docker push $(IMG_MIGRATION):$(TAG)
 
 .PHONY: ci-pr
 ci-pr: build build-image push-image

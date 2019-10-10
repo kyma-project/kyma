@@ -1,6 +1,11 @@
 package compass
 
-import "github.com/kyma-incubator/compass/components/director/pkg/graphql"
+import (
+	"encoding/json"
+
+	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
+	"github.com/pkg/errors"
+)
 
 type ScenariosSchema struct {
 	Type        string         `json:"type"`
@@ -14,13 +19,31 @@ type ScenariosItems struct {
 	Enum []string `json:"enum"`
 }
 
-func (ss *ScenariosSchema) ToLabelDefinitionInput(key string) graphql.LabelDefinitionInput {
-	var schema interface{} = ss
+func ToScenarioSchema(response ScenarioLabelDefinitionResponse) (ScenariosSchema, error) {
+	var scenarioSchema ScenariosSchema
+
+	if response.Result.Schema == nil {
+		return ScenariosSchema{}, nil
+	}
+
+	err := json.Unmarshal([]byte(*response.Result.Schema), &scenarioSchema)
+	if err != nil {
+		return ScenariosSchema{}, errors.Wrap(err, "Failed to unmarshall scenario schema")
+	}
+	return scenarioSchema, nil
+}
+
+func (ss *ScenariosSchema) ToLabelDefinitionInput(key string) (graphql.LabelDefinitionInput, error) {
+	var inputSchema interface{} = ss
+	schema, err := graphql.MarshalSchema(&inputSchema)
+	if err != nil {
+		return graphql.LabelDefinitionInput{}, err
+	}
 
 	return graphql.LabelDefinitionInput{
 		Key:    key,
-		Schema: &schema,
-	}
+		Schema: schema,
+	}, nil
 }
 
 func (ss *ScenariosSchema) AddScenario(value string) {

@@ -1,51 +1,73 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	"strings"
+	"time"
+
+	"k8s.io/apimachinery/pkg/types"
 )
 
-type EnvConfig struct {
-	DirectorURL string `envconfig:"DIRECTOR_URL"`
-	RuntimeId   string `envconfig:"RUNTIME_ID"`
-	Tenant      string `envconfig:"TENANT"`
+const (
+	defaultNamespace = "default"
+)
+
+type Config struct {
+	ConnectionConfigMap            string        `envconfig:"default=compass-system/compass-agent-configuration"`
+	ControllerSyncPeriod           time.Duration `envconfig:"default=20s"`
+	MinimalCompassSyncTime         time.Duration `envconfig:"default=10s"`
+	CertValidityRenewalThreshold   float64       `envconfig:"default=0.3"`
+	ClusterCertificatesSecret      string        `envconfig:"default=compass-system/cluster-client-certificates"`
+	CaCertificatesSecret           string        `envconfig:"default=istio-system/ca-certificates"`
+	InsecureConnectorCommunication bool          `envconfig:"default=false"`
+	IntegrationNamespace           string        `envconfig:"default=kyma-integration"`
+	GatewayPort                    int           `envconfig:"default=8080"`
+	InsecureConfigurationFetch     bool          `envconfig:"default=false"`
+	UploadServiceUrl               string        `envconfig:"default=http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000"`
+	QueryLogging                   bool          `envconfig:"default=false"`
 }
 
-type options struct {
-	controllerSyncPeriod       int
-	minimalConfigSyncTime      int
-	integrationNamespace       string
-	gatewayPort                int
-	insecureConfigurationFetch bool
-	uploadServiceUrl           string
+func (o *Config) String() string {
+	return fmt.Sprintf("ConnectionConfigMap=%s, "+
+		"ControllerSyncPeriod=%s, MinimalCompassSyncTime=%s, "+
+		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
+		"IntegrationNamespace=%s, GatewayPort=%d, InsecureConfigurationFetch=%v, UploadServiceUrl=%s, "+
+		"QueryLogging=%v",
+		o.ConnectionConfigMap,
+		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
+		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
+		o.IntegrationNamespace, o.GatewayPort, o.InsecureConfigurationFetch, o.UploadServiceUrl,
+		o.QueryLogging)
 }
 
-func parseArgs() *options {
-	controllerSyncPeriod := flag.Int("controllerSyncPeriod", 60, "Time period between resyncing existing resources.")
-	minimalConfigSyncTime := flag.Int("minimalConfigSyncTime", 300, "Minimal time between synchronizing configuration.")
-	integrationNamespace := flag.String("integrationNamespace", "kyma-integration", "Namespace the resources will be created in.")
-	gatewayPort := flag.Int("gatewayPort", 8080, "Application Gateway port.")
-	insecureConfigurationFetch := flag.Bool("insecureConfigurationFetch", false, "Specifies if the configuration should be fetch with disabled TLS verification.")
-	uploadServiceUrl := flag.String("uploadServiceUrl", "", "URL of upload service")
+func parseNamespacedName(value string) types.NamespacedName {
+	parts := strings.Split(value, string(types.Separator))
 
-	flag.Parse()
+	if singleValueProvided(parts) {
+		return types.NamespacedName{
+			Name:      parts[0],
+			Namespace: defaultNamespace,
+		}
+	}
 
-	return &options{
-		controllerSyncPeriod:       *controllerSyncPeriod,
-		minimalConfigSyncTime:      *minimalConfigSyncTime,
-		integrationNamespace:       *integrationNamespace,
-		gatewayPort:                *gatewayPort,
-		insecureConfigurationFetch: *insecureConfigurationFetch,
-		uploadServiceUrl:           *uploadServiceUrl,
+	namespace := get(parts, 0)
+	if namespace == "" {
+		namespace = defaultNamespace
+	}
+
+	return types.NamespacedName{
+		Namespace: namespace,
+		Name:      get(parts, 1),
 	}
 }
 
-func (o *options) String() string {
-	return fmt.Sprintf("--controllerSyncPeriod=%d --minimalConfigSyncTime=%d "+
-		"--integrationNamespace=%s gatewayPort=%d --insecureConfigurationFetch=%v --uploadServiceUrl=%s",
-		o.controllerSyncPeriod, o.minimalConfigSyncTime, o.integrationNamespace, o.gatewayPort, o.insecureConfigurationFetch, o.uploadServiceUrl)
+func singleValueProvided(split []string) bool {
+	return len(split) == 1 || get(split, 1) == ""
 }
 
-func (ec EnvConfig) String() string {
-	return fmt.Sprintf("DIRECTOR_URL=%s, RUNTIME_ID=%s, TENANT=%s", ec.DirectorURL, ec.RuntimeId, ec.Tenant)
+func get(array []string, index int) string {
+	if len(array) > index {
+		return array[index]
+	}
+	return ""
 }

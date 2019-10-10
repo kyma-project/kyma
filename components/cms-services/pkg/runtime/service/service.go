@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -46,10 +47,15 @@ func (s *service) setupHandlers() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	for _, endpoint := range s.endpoints {
+		if endpoint.Name() == "metrics" {
+			log.Fatal("/metrics endpoint is reserved")
+		}
 		log.Infof("Registering %s endpoint", endpoint.Name())
 		path := fmt.Sprintf("/%s", endpoint.Name())
 		mux.HandleFunc(path, endpoint.Handle)
 	}
+	log.Info("Registering metrics endpoint")
+	mux.Handle("/metrics", promhttp.Handler())
 
 	return mux
 }
@@ -64,13 +70,13 @@ func (s *service) Start(ctx context.Context) error {
 	log.Infof("Service listen at %s", host)
 
 	go func() {
-		<-ctx.Done()
-		if err := srv.Shutdown(context.Background()); err != nil {
-			log.Errorf("HTTP server Shutdown: %v", err)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Error while starting HTTP service: %v", err)
 		}
 	}()
 
-	return srv.ListenAndServe()
+	<-ctx.Done()
+	return srv.Shutdown(context.Background())
 }
 
 // Register adds an endpoint to a service.

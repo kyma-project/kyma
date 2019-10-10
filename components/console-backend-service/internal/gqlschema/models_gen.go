@@ -28,15 +28,26 @@ type APIInput struct {
 }
 
 type AddonsConfiguration struct {
-	Name   string                    `json:"name"`
-	Urls   []string                  `json:"urls"`
-	Labels Labels                    `json:"labels"`
-	Status AddonsConfigurationStatus `json:"status"`
+	Name         string                          `json:"name"`
+	Urls         []string                        `json:"urls"`
+	Repositories []AddonsConfigurationRepository `json:"repositories"`
+	Labels       Labels                          `json:"labels"`
+	Status       AddonsConfigurationStatus       `json:"status"`
 }
 
 type AddonsConfigurationEvent struct {
 	Type                SubscriptionEventType `json:"type"`
 	AddonsConfiguration AddonsConfiguration   `json:"addonsConfiguration"`
+}
+
+type AddonsConfigurationRepository struct {
+	URL       string       `json:"url"`
+	SecretRef *ResourceRef `json:"secretRef"`
+}
+
+type AddonsConfigurationRepositoryInput struct {
+	URL       string            `json:"url"`
+	SecretRef *ResourceRefInput `json:"secretRef"`
 }
 
 type AddonsConfigurationStatus struct {
@@ -301,23 +312,10 @@ type File struct {
 	Metadata JSON   `json:"metadata"`
 }
 
-type Function struct {
-	Name              string    `json:"name"`
-	Trigger           string    `json:"trigger"`
-	CreationTimestamp time.Time `json:"creationTimestamp"`
-	Labels            Labels    `json:"labels"`
-	Namespace         string    `json:"namespace"`
-}
-
 type IDPPreset struct {
 	Name    string `json:"name"`
 	Issuer  string `json:"issuer"`
 	JwksURI string `json:"jwksUri"`
-}
-
-type InputTopic struct {
-	ID   string `json:"id"`
-	Type string `json:"type"`
 }
 
 type LimitRange struct {
@@ -364,6 +362,11 @@ type MicroFrontend struct {
 	Category        string           `json:"category"`
 	ViewBaseURL     string           `json:"viewBaseUrl"`
 	NavigationNodes []NavigationNode `json:"navigationNodes"`
+}
+
+type NamespaceEvent struct {
+	Type      SubscriptionEventType `json:"type"`
+	Namespace Namespace             `json:"namespace"`
 }
 
 type NamespaceMutationOutput struct {
@@ -442,6 +445,16 @@ type ResourceQuotaInput struct {
 type ResourceQuotasStatus struct {
 	Exceeded       bool            `json:"exceeded"`
 	ExceededQuotas []ExceededQuota `json:"exceededQuotas"`
+}
+
+type ResourceRef struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
+type ResourceRefInput struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 type ResourceRule struct {

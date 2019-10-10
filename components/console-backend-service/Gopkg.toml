@@ -1,5 +1,5 @@
 required = [
-    "golang.org/x/tools/cmd/goimports",
+    "github.com/kyma-project/kyma/tools/failery",
     "github.com/urfave/cli",
     "k8s.io/code-generator/cmd/defaulter-gen",
     "k8s.io/code-generator/cmd/deepcopy-gen",
@@ -7,13 +7,7 @@ required = [
     "k8s.io/code-generator/cmd/client-gen",
     "k8s.io/code-generator/cmd/lister-gen",
     "k8s.io/code-generator/cmd/informer-gen",
-    "github.com/kyma-project/kyma/tools/failery",
-    "github.com/kisielk/errcheck",
 ]
-
-[[constraint]]
-  name = "github.com/kisielk/errcheck"
-  revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
 
 [[override]]
   name = "golang.org/x/net"
@@ -24,8 +18,8 @@ required = [
   name = "github.com/golang/glog"
 
 [[constraint]]
-  name = "github.com/kubernetes-incubator/service-catalog"
-  version = "v0.1.36"
+  name = "github.com/kubernetes-sigs/service-catalog"
+  revision = "ccab5234396729fee8dbf70620eafdfbc3d1a6af"
 
 [[constraint]]
   name = "github.com/stretchr/testify"
@@ -40,16 +34,16 @@ required = [
   version = "v0.7.2"
 
 [[constraint]]
-  name = "github.com/kubeless/kubeless"
-  version = "v0.4.0"
-
-[[constraint]]
   name = "github.com/moby/moby"
   version = "v1.13.1"
 
 [[constraint]]
   name="github.com/kyma-project/kyma"
-  revision = "3a0c31e7c33b83912dfb6f39cdf46720254e5b0f"
+  revision = "1e9aa1b23a3911a42b425dadeb1b8abf39d32ebe"
+
+[[constraint]]
+  name="github.com/kyma-project/helm-broker"
+  revision = "d07feb2d365a58645031e96b27a95c8d50bb8349"
 
 [[override]]
   name="sigs.k8s.io/controller-runtime"
@@ -57,23 +51,23 @@ required = [
 
 [[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.12.5"
+  version = "kubernetes-1.15.0"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.12.5"
+  version = "kubernetes-1.15.0"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.12.5"
+  version = "kubernetes-1.15.0"
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.12.5"
+  version = "kubernetes-1.15.0"
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  branch = "release-1.12"
+  version = "kubernetes-1.15.0"
 
 [[constraint]]
   name = "github.com/vrischmann/envconfig"

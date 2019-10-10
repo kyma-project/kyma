@@ -3,12 +3,12 @@ package applications
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/model"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	k8smocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts/mocks"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8smocks "kyma-project.io/compass-runtime-agent/internal/k8sconsts/mocks"
 )
 
 func TestConverter(t *testing.T) {
@@ -46,6 +46,7 @@ func TestConverter(t *testing.T) {
 				Labels: map[string]string{
 					"key": "value1,value2",
 				},
+				CompassMetadata: &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{"App1"}}},
 			},
 		}
 
@@ -135,6 +136,7 @@ func TestConverter(t *testing.T) {
 				SkipInstallation: false,
 				AccessLabel:      "App1",
 				Labels:           map[string]string{},
+				CompassMetadata:  &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{"App1"}}},
 				Services: []v1alpha1.Service{
 					{
 						ID:          "serviceId1",
@@ -254,6 +256,7 @@ func TestConverter(t *testing.T) {
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description",
 				SkipInstallation: false,
+				CompassMetadata:  &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{"App1"}}},
 				Services: []v1alpha1.Service{
 					{
 						ID:          "serviceId1",

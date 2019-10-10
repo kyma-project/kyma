@@ -25,10 +25,12 @@ Follow these steps to get the `kubeconfig` file and configure the CLI to connect
 3. Click the **Download config** button to download the `kubeconfig` file to a selected location on your machine.
 4. Open a terminal window.
 5. Export the **KUBECONFIG** environment variable to point to the downloaded `kubeconfig`. Run this command:
-  ```
-  export KUBECONFIG={KUBECONFIG_FILE_PATH}
-  ```
-  >**NOTE:** Drag and drop the `kubeconfig` file in the terminal to easily add the path of the file to the `export KUBECONFIG` command you run.
+
+   ```bash
+   export KUBECONFIG={KUBECONFIG_FILE_PATH}
+   ```
+
+   >**NOTE:** Drag and drop the `kubeconfig` file in the terminal to easily add the path of the file to the `export KUBECONFIG` command you run.
 
 6. Run `kubectl cluster-info` to check if the CLI is connected to the correct cluster.
 
@@ -36,9 +38,10 @@ Follow these steps to get the `kubeconfig` file and configure the CLI to connect
 
 The commands in this guide use URLs in which you must provide the domain of the cluster that you use.
 Export the domain of your cluster as an environment variable. Run:  
-  ```
-  export yourClusterDomain='{YOUR_CLUSTER_DOMAIN}'
-  ```
+
+   ```bash
+   export yourClusterDomain='{YOUR_CLUSTER_DOMAIN}'
+   ```
 
 ### Deploy and expose a sample standalone service
 
@@ -57,12 +60,14 @@ Follow these steps:
    ```
 
 3. Access the service using the following call:
+
    ```bash
    curl -ik https://http-db-service.$yourClusterDomain/orders
    ```
 
    The system returns a response similar to the following:
-   ```
+
+   ```HTTP
    HTTP/2 200
    content-type: application/json;charset=UTF-8
    vary: Origin
@@ -81,6 +86,7 @@ Run the following command:
    ```bash
    curl -k https://raw.githubusercontent.com/kyma-project/examples/master/gateway/service/api-with-auth.yaml |  sed "s/.kyma.local/.$yourClusterDomain/" | kubectl apply -n stage -f -
    ```
+
 After you apply this update, you must include a valid bearer ID token in the Authorization header to access the service.
 
 >**NOTE:** The update might take some time.

@@ -5,6 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -17,24 +18,30 @@ import (
 
 type namespaceService struct {
 	informer cache.SharedIndexInformer
+	podsSvc  podSvc
 	client   corev1.CoreV1Interface
+	notifier resource.Notifier
 }
 
-func newNamespaceService(informer cache.SharedIndexInformer, client corev1.CoreV1Interface) (*namespaceService, error) {
+func newNamespaceService(informer cache.SharedIndexInformer, podsSvc podSvc, client corev1.CoreV1Interface) (*namespaceService, error) {
+	notifier := resource.NewNotifier()
+	informer.AddEventHandler(notifier)
 	return &namespaceService{
 		informer: informer,
+		podsSvc:  podsSvc,
 		client:   client,
+		notifier: notifier,
 	}, nil
 }
 
-func (svc *namespaceService) List() ([]*v1.Namespace, error) { //r error
+func (svc *namespaceService) List() ([]*v1.Namespace, error) {
 	items := svc.informer.GetStore().List()
 
 	var namespaces []*v1.Namespace
 	for _, item := range items {
 		namespace, ok := item.(*v1.Namespace)
 		if !ok {
-			return nil, fmt.Errorf("Incorrect item type: %T, should be: *Namespace", item)
+			return nil, fmt.Errorf("incorrect item type: %T, should be: *Namespace", item)
 		}
 		namespaces = append(namespaces, namespace)
 	}
@@ -55,7 +62,7 @@ func (svc *namespaceService) Find(name string) (*v1.Namespace, error) {
 
 	namespace, ok := item.(*v1.Namespace)
 	if !ok {
-		return nil, fmt.Errorf("Incorrect item type: %T, should be: *Namespace", item)
+		return nil, fmt.Errorf("incorrect item type: %T, should be: *Namespace", item)
 	}
 
 	return namespace, nil
@@ -105,4 +112,12 @@ func (svc *namespaceService) Update(name string, labels gqlschema.Labels) (*v1.N
 
 func (svc *namespaceService) Delete(name string) error {
 	return svc.client.Namespaces().Delete(name, nil)
+}
+
+func (svc *namespaceService) Subscribe(listener resource.Listener) {
+	svc.notifier.AddListener(listener)
+}
+
+func (svc *namespaceService) Unsubscribe(listener resource.Listener) {
+	svc.notifier.DeleteListener(listener)
 }

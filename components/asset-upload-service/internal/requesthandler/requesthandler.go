@@ -13,6 +13,9 @@ import (
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/fileheader"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type RequestHandler struct {
@@ -33,6 +36,28 @@ type ResponseError struct {
 	FileName string `json:"omitempty,fileName"`
 }
 
+var (
+	httpServeHistogram = promauto.NewHistogram(prometheus.HistogramOpts{
+		Name: "assetstore_upload_service_http_request_duration_seconds",
+		Help: "Requests' duration distribution",
+	})
+	statusCodesCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "assetstore_upload_service_http_request_returned_status_code",
+		Help: "Service's HTTP response status code",
+	}, []string{"status_code"})
+)
+
+func incrementStatusCounter(status int) {
+	statusCodesCounter.WithLabelValues(strconv.Itoa(status)).Inc()
+}
+
+func SetupHandlers(client uploader.MinioClient, buckets bucket.SystemBucketNames, uploadExternalEndpoint string, timeout time.Duration, maxWorkers int) *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.Handle("/v1/upload", New(client, buckets, uploadExternalEndpoint, timeout, maxWorkers))
+	mux.Handle("/metrics", promhttp.Handler())
+	return mux
+}
+
 func New(client uploader.MinioClient, buckets bucket.SystemBucketNames, externalUploadOrigin string, uploadTimeout time.Duration, maxUploadWorkers int) *RequestHandler {
 	return &RequestHandler{
 		client:               client,
@@ -44,6 +69,8 @@ func New(client uploader.MinioClient, buckets bucket.SystemBucketNames, external
 }
 
 func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
+	start := time.Now()
+
 	defer func() {
 		err := rq.Body.Close()
 		if err != nil {
@@ -59,7 +86,9 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	}
 
 	if rq.MultipartForm == nil {
-		r.writeResponse(w, http.StatusBadRequest, Response{
+		status := http.StatusBadRequest
+		incrementStatusCounter(status)
+		r.writeResponse(w, status, Response{
 			Errors: []ResponseError{
 				{
 					Message: "No multipart/form-data form received.",
@@ -90,6 +119,8 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	filesCount := len(publicFiles) + len(privateFiles)
 
 	if filesCount == 0 {
+		status := http.StatusBadRequest
+		incrementStatusCounter(status)
 		r.writeResponse(w, http.StatusBadRequest, Response{
 			Errors: []ResponseError{
 				{
@@ -118,16 +149,21 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 
 	if len(uploadErrors) == 0 {
 		status = http.StatusOK
+		incrementStatusCounter(status)
 	} else if len(uploadedFiles) == 0 {
 		status = http.StatusBadGateway
+		incrementStatusCounter(status)
 	} else {
 		status = http.StatusMultiStatus
+		incrementStatusCounter(status)
 	}
 
 	r.writeResponse(w, status, Response{
 		UploadedFiles: uploadedFiles,
 		Errors:        uploadErrors,
 	})
+
+	httpServeHistogram.Observe(time.Since(start).Seconds())
 }
 
 func (r *RequestHandler) generateDirectoryName() string {

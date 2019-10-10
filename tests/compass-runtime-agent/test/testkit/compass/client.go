@@ -3,6 +3,7 @@ package compass
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
@@ -14,8 +15,9 @@ import (
 )
 
 const (
-	TenantHeader       = "Tenant"
-	ScenariosLabelName = "scenarios"
+	TenantHeader        = "Tenant"
+	ScenariosLabelName  = "scenarios"
+	AuthorizationHeader = "Authorization"
 )
 
 type Client struct {
@@ -26,9 +28,10 @@ type Client struct {
 	tenant        string
 	runtimeId     string
 	scenarioLabel string
+
+	authorizationToken string
 }
 
-// TODO: client will need to be authenticated after implementation of certs
 func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel string, gqlLog bool) *Client {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
@@ -53,6 +56,10 @@ func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel string, gqlLog 
 		scenarioLabel: scenarioLabel,
 		runtimeId:     runtimeId,
 	}
+}
+
+func (c *Client) SetAccessToken(token string) {
+	c.authorizationToken = token
 }
 
 // Scenario labels
@@ -104,11 +111,21 @@ func (c *Client) getScenarios() (ScenariosSchema, error) {
 		return ScenariosSchema{}, errors.Wrap(err, "Failed to get scenarios label definition")
 	}
 
-	return response.Result.Schema, nil
+	scenarioSchema, err := ToScenarioSchema(response)
+	if err != nil {
+		return ScenariosSchema{}, errors.Wrap(err, "Failed to get scenario schema")
+	}
+
+	return scenarioSchema, nil
 }
 
 func (c *Client) updateScenarios(schema ScenariosSchema) (ScenariosSchema, error) {
-	gqlInput, err := c.graphqlizer.LabelDefinitionInputToGQL(schema.ToLabelDefinitionInput(ScenariosLabelName))
+	labelDef, err := schema.ToLabelDefinitionInput(ScenariosLabelName)
+	if err != nil {
+		return ScenariosSchema{}, errors.Wrap(err, "Failed to convert ScenarioSchema")
+	}
+
+	gqlInput, err := c.graphqlizer.LabelDefinitionInputToGQL(labelDef)
 	if err != nil {
 		return ScenariosSchema{}, errors.Wrap(err, "Failed to convert LabelDefinitionInput")
 	}
@@ -121,7 +138,12 @@ func (c *Client) updateScenarios(schema ScenariosSchema) (ScenariosSchema, error
 		return ScenariosSchema{}, errors.Wrap(err, "Failed to update scenarios label definition")
 	}
 
-	return response.Result.Schema, nil
+	scenarioSchema, err := ToScenarioSchema(response)
+	if err != nil {
+		return ScenariosSchema{}, errors.Wrap(err, "Failed to get scenario schema")
+	}
+
+	return scenarioSchema, nil
 }
 
 func (c *Client) labelRuntime(values []string) error {
@@ -308,5 +330,6 @@ func (c *Client) DeleteEventAPI(id string) (string, error) {
 func (c *Client) newRequest(query string) *gcli.Request {
 	req := gcli.NewRequest(query)
 	req.Header.Set(TenantHeader, c.tenant)
+	req.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", c.authorizationToken))
 	return req
 }

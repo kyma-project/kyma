@@ -3,7 +3,7 @@ package servicecatalog
 import (
 	"encoding/json"
 
-	api "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	api "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/status"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
@@ -22,7 +22,7 @@ func (c *serviceBindingConverter) ToCreateOutputGQL(in *api.ServiceBinding) *gql
 	return &gqlschema.CreateServiceBindingOutput{
 		Name:                in.Name,
 		Namespace:           in.Namespace,
-		ServiceInstanceName: in.Spec.ServiceInstanceRef.Name,
+		ServiceInstanceName: in.Spec.InstanceRef.Name,
 	}
 }
 
@@ -38,7 +38,7 @@ func (c *serviceBindingConverter) ToGQL(in *api.ServiceBinding) (*gqlschema.Serv
 
 	return &gqlschema.ServiceBinding{
 		Name:                in.Name,
-		ServiceInstanceName: in.Spec.ServiceInstanceRef.Name,
+		ServiceInstanceName: in.Spec.InstanceRef.Name,
 		Namespace:           in.Namespace,
 		SecretName:          in.Spec.SecretName,
 		Status:              c.extractor.Status(in.Status.Conditions),

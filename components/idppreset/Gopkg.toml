@@ -32,6 +32,8 @@ required = [
   "k8s.io/code-generator/cmd/lister-gen",
   "k8s.io/code-generator/cmd/informer-gen",
   "k8s.io/gengo/args",
+
+  "golang.org/x/tools/cmd/goimports",
 ]
 
 [[override]]
@@ -40,15 +42,19 @@ required = [
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.12.5"
+  version = "kubernetes-1.15.0"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.15.0"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.12.5"
+  version = "kubernetes-1.15.0"
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  branch = "release-1.12"
+  version = "kubernetes-1.15.0"
 
 [[override]]
   name = "github.com/json-iterator/go"

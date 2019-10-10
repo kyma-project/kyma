@@ -19,34 +19,37 @@ You can also revoke the client certificate, which prevents it from being renewed
 To get the configuration URL which allows you to fetch the required configuration details, create a TokenRequest custom resource (CR). The controller which handles this CR kind adds the **status** section to the created CR. The **status** section contains the required configuration details.
 
 - Create a TokenRequest CR. The CR name must match the name of the App for which you want to get the configuration details. Run:
-  ```
-  cat <<EOF | kubectl apply -f -
-  apiVersion: applicationconnector.kyma-project.io/v1alpha1
-  kind: TokenRequest
-  metadata:
-    name: {APP_NAME}
-  EOF
-  ```
+   ```
+   cat <<EOF | kubectl apply -f -
+   apiVersion: applicationconnector.kyma-project.io/v1alpha1
+   kind: TokenRequest
+   metadata:
+     name: {APP_NAME}
+   EOF
+   ```
 
 - Fetch the TokenRequest CR you created to get the configuration details from the **status** section. Run:
-  ```
-  kubectl get tokenrequest.applicationconnector.kyma-project.io {APP_NAME} -o yaml
-  ```
-  >**NOTE:** If the response doesn't contain the **status** section, wait for a few moments and fetch the CR again.
 
-A successful call returns the following response:
-  ```
-  apiVersion: applicationconnector.kyma-project.io/v1alpha1
-  kind: TokenRequest
-  metadata:
-    name: {APP_NAME}
-  status:
-    expireAfter: 2018-11-22T18:38:44Z
-    application: {APP_NAME}
-    state: OK
-    token: h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
-    url: https://connector-service.kyma.local/v1/applications/signingRequests/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
-  ```
+   ```
+   kubectl get tokenrequest.applicationconnector.kyma-project.io {APP_NAME} -o yaml
+   ```
+   
+   >**NOTE:** If the response doesn't contain the **status** section, wait for a few moments and fetch the CR again.
+
+   A successful call returns the following response:
+  
+   ```
+   apiVersion: applicationconnector.kyma-project.io/v1alpha1
+   kind: TokenRequest
+   metadata:
+     name: {APP_NAME}
+   status:
+     expireAfter: 2018-11-22T18:38:44Z
+     application: {APP_NAME}
+     state: OK
+     token: h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
+     url: https://connector-service.kyma.local/v1/applications/signingRequests/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
+   ```
 
 ## Get the CSR information and configuration details from Kyma
 
@@ -142,13 +145,14 @@ Use `urls.metadataUrl` and `urls.eventsUrl` to get the URLs to the Application R
 
 ## Call the Application Registry and Event services on local deployment
 
-- Since Kyma installation on Minikube uses the self-signed certificate by default, skip TLS verification:
+Since Kyma installation on Minikube uses the self-signed certificate by default, skip TLS verification.
 
-> **NOTE:** You no longer need to add `NodePort` to the the Gateway URL.
+Call the Application Registry with this command:
+```
+curl https://gateway.kyma.local/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+```
 
-  ```
-  curl https://gateway.kyma.local/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-  ```
-  ```
-  curl https://gateway.kyma.local/{APP_NAME}/v1/events --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-  ```
+Use this command to call the Event services:
+```
+curl https://gateway.kyma.local/{APP_NAME}/v1/events --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+```

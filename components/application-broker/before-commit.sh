@@ -34,12 +34,19 @@ if [ "$1" == "$CI_FLAG" ]; then
 fi
 
 ${buildEnv} go build -o application-broker ./cmd/broker
-
 goBuildResult=$?
-if [ ${goBuildResult} != 0 ]; then
-	echo -e "${RED}✗ go build${NC}\n$goBuildResult${NC}"
+if [[ ${goBuildResult} != 0 ]]; then
+	echo -e "${RED}✗ go build application-broker ${NC}\n$goBuildResult${NC}"
 	exit 1
-else echo -e "${GREEN}√ go build${NC}"
+else echo -e "${GREEN}√ go build application-broker ${NC}"
+fi
+
+${buildEnv} go build -o ab-upgrade-protector ./cmd/migration
+goBuildResult=$?
+if [[ ${goBuildResult} != 0 ]]; then
+	echo -e "${RED}✗ go build ab-upgrade-protector ${NC}\n$goBuildResult${NC}"
+	exit 1
+else echo -e "${GREEN}√ go build ab-upgrade-protector ${NC}"
 fi
 
 ##
@@ -57,12 +64,16 @@ fi
 # GO TEST
 ##
 echo "? go test"
-go test ./...
+go test -short -coverprofile=cover.out ./...
 # Check if tests passed
 if [ $? != 0 ]; then
 	echo -e "${RED}✗ go test\n${NC}"
+	rm cover.out
 	exit 1
-else echo -e "${GREEN}√ go test${NC}"
+else 
+	echo -e "Total coverage: $(go tool cover -func=cover.out | grep total | awk '{print $3}')"
+	rm cover.out
+	echo -e "${GREEN}√ go test${NC}"
 fi
 
 goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/|_*/testdata/|/pkg\/|_*export_test.go")

@@ -7,11 +7,13 @@ import (
 	"strings"
 	"testing"
 
-	parser "github.com/asyncapi/parser/pkg"
+	parser "github.com/asyncapi/parser/pkg/parser"
 
 	v1 "github.com/kyma-project/kyma/components/cms-services/pkg/endpoint/asyncapi/v1"
 	"github.com/onsi/gomega"
 )
+
+var noopMessageProcessor parser.MessageProcessor = func(_ *map[string]interface{}) error { return nil }
 
 func TestValidator_Validate(t *testing.T) {
 	for testName, testCase := range map[string]struct {
@@ -42,7 +44,8 @@ func TestValidator_Validate(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			// Given
 			g := gomega.NewWithT(t)
-			validator := v1.Validate(parser.Parse)
+			parse := noopMessageProcessor.BuildParse()
+			validator := v1.Validate(parse)
 			var reader io.Reader
 			if testCase.filePath != "" {
 				file, err := os.Open(testCase.filePath)

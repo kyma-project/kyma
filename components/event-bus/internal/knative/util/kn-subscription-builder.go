@@ -19,11 +19,13 @@ func (s *SubscriptionBuilder) Build() *eventingv1alpha1.Subscription {
 
 // ToChannel sets SubscriptionBuilder Channel.
 func (s *SubscriptionBuilder) ToChannel(name string) *SubscriptionBuilder {
-	s.Spec.Channel = corev1.ObjectReference{
+	channel := corev1.ObjectReference{
 		Name:       name,
 		Kind:       "Channel",
-		APIVersion: "eventing.knative.dev/v1alpha1",
+		APIVersion: "messaging.knative.dev/v1alpha1",
 	}
+	s.Spec.Channel = channel
+	s.Spec.Reply.Channel = &channel
 	return s
 }
 
@@ -60,7 +62,7 @@ func (s *SubscriptionBuilder) ToKNService(knServiceName string) *SubscriptionBui
 // ToURI sets the SubscriptionBuilder Subscriber URI.
 func (s *SubscriptionBuilder) ToURI(uri *string) *SubscriptionBuilder {
 	s.Spec.Subscriber = &eventingv1alpha1.SubscriberSpec{
-		DNSName: uri,
+		URI: uri,
 	}
 	return s
 }
@@ -70,7 +72,7 @@ var (
 )
 
 // Subscription returns a new SubscriptionBuilder instance.
-func Subscription(name string, namespace string) *SubscriptionBuilder {
+func Subscription(name string, namespace string, labels map[string]string) *SubscriptionBuilder {
 	subscription := &eventingv1alpha1.Subscription{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
@@ -79,12 +81,13 @@ func Subscription(name string, namespace string) *SubscriptionBuilder {
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
+			Labels:    labels,
 		},
 		Spec: eventingv1alpha1.SubscriptionSpec{
 			Channel: corev1.ObjectReference{
 				Name:       "",
 				Kind:       "Channel",
-				APIVersion: "eventing.knative.dev/v1alpha1",
+				APIVersion: "messaging.knative.dev/v1alpha1",
 			},
 			Subscriber: &eventingv1alpha1.SubscriberSpec{
 				Ref: &corev1.ObjectReference{
@@ -92,13 +95,13 @@ func Subscription(name string, namespace string) *SubscriptionBuilder {
 					Kind:       "Service",
 					APIVersion: "serving.knative.dev/v1alpha1",
 				},
-				DNSName: &emptyString,
+				URI: &emptyString,
 			},
 			Reply: &eventingv1alpha1.ReplyStrategy{
 				Channel: &corev1.ObjectReference{
 					Name:       "",
 					Kind:       "Channel",
-					APIVersion: "serving.knative.dev/v1alpha1",
+					APIVersion: "messaging.knative.dev/v1alpha1",
 				},
 			},
 		},

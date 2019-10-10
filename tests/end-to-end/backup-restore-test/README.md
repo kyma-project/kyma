@@ -34,9 +34,9 @@ Use the following environment variables to configure the tests:
 | Name | Required | Default | Description |
 |-----|:---------:|--------|------------|
 | **DOMAIN** | NO | `kyma.local` | The domain where Kyma runs. |
-| **USER_EMAIL** | YES | - | The email address for authentication in Dex. |
-| **USER_PASSWORD** | YES | - | The password for authentication in Dex. |
-| **KUBECONFIG** | NO | - | The path to the `kubeconfig` file needed to run tests outside the cluster. |
+| **USER_EMAIL** | YES | None | The email address for authentication in Dex. |
+| **USER_PASSWORD** | YES | None | The password for authentication in Dex. |
+| **KUBECONFIG** | NO | None | The path to the `kubeconfig` file needed to run tests outside the cluster. |
 
 ### Use flags
 
@@ -96,9 +96,9 @@ Run the tests using Helm:
 
 1. Prepare the data:
 
-```bash
-helm install deploy/chart/backup-test/ --name "backup-test" --namespace backup-test --set global.ingress.domainName="$CLUSTER_DOMAIN" --set-file global.adminEmail=<(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode) --set-file global.adminPassword=<(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode)
-```
+    ```bash
+    helm install deploy/chart/backup-test/ --name "backup-test" --namespace backup-test --set global.ingress.domainName="$CLUSTER_DOMAIN" --set-file global.adminEmail=<(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode) --set-file global.adminPassword=<(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode)
+    ```
 
 2. Run tests:
 
@@ -130,12 +130,11 @@ Use the `before-commit.sh` script or the `make build` command to test your chang
 
 The repository has the following structure:
 
-```
+```text
 ├── deploy                          # The Helm chart for deploying the backup test application with configuration
 ├── backupe2e                       # The package where backup tests are defined. Put your test here.
 ├── utils                           # The directory which contains all secondary Go packages.
 ├── restore_cluster_backup_test.go  # The entrypoint for backup test runner
 ├── Gopkg.toml                      # A dep manifest
 └── Gopkg.lock                      # A dep lock which is generated automatically. Do not edit it.
-
 ```

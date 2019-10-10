@@ -6,4 +6,6 @@ const (
 
 	ClusterServiceBrokerKind = "ClusterServiceBroker"
 	ServiceBrokerKind        = "ServiceBroker"
+
+	MockiceSvcName string = "cbs-sc-test-svc"
 )

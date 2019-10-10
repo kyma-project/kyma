@@ -19,6 +19,7 @@ These Go and Dep versions are compliant with the `buildpack` used by Prow. For m
 This section explains how to use the Service Binding Usage Controller.
 
 ### Run a local version
+
 To run the application without building the binary file, run this command:
 
 ```bash
@@ -28,16 +29,16 @@ APP_KUBECONFIG_PATH=/Users/$User/.kube/config APP_LOGGER_LEVEL=debug go run cmd/
 For the description of the available environment variables, see the **Use environment variables** section.
 
 ### Use environment variables
+
 Use the following environment variables to configure the application:
 
 | Name | Required | Default | Description |
 |-----|---------|--------|------------|
 | **APP_PORT** | No | `3000` | The port on which the HTTP server listens. |
 | **APP_LOGGER_LEVEL** | No | `info` | Show detailed logs in the application. |
-| **APP_KUBECONFIG_PATH** | No |  | The path to the `kubeconfig` file that you need to run an application outside of the cluster. |
-| **APP_PLUGGABLE_SBU** | No | false | The feature flag that enables pluggable binding usage by **UsageKind** resources. 
+| **APP_KUBECONFIG_PATH** | No | None | The path to the `kubeconfig` file that you need to run an application outside of the cluster. |
+| **APP_PLUGGABLE_SBU** | No | `false` | The feature flag that enables pluggable binding usage by **UsageKind** resources.
 
 ## Development
 
 Use the `before-commit.sh` script or the `make build` command to test your changes before each commit.
-

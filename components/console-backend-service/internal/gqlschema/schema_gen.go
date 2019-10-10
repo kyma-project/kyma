@@ -64,15 +64,21 @@ type ComplexityRoot struct {
 	}
 
 	AddonsConfiguration struct {
-		Name   func(childComplexity int) int
-		Urls   func(childComplexity int) int
-		Labels func(childComplexity int) int
-		Status func(childComplexity int) int
+		Name         func(childComplexity int) int
+		Urls         func(childComplexity int) int
+		Repositories func(childComplexity int) int
+		Labels       func(childComplexity int) int
+		Status       func(childComplexity int) int
 	}
 
 	AddonsConfigurationEvent struct {
 		Type                func(childComplexity int) int
 		AddonsConfiguration func(childComplexity int) int
+	}
+
+	AddonsConfigurationRepository struct {
+		Url       func(childComplexity int) int
+		SecretRef func(childComplexity int) int
 	}
 
 	AddonsConfigurationStatus struct {
@@ -400,14 +406,6 @@ type ComplexityRoot struct {
 		Metadata func(childComplexity int) int
 	}
 
-	Function struct {
-		Name              func(childComplexity int) int
-		Trigger           func(childComplexity int) int
-		CreationTimestamp func(childComplexity int) int
-		Labels            func(childComplexity int) int
-		Namespace         func(childComplexity int) int
-	}
-
 	Idppreset struct {
 		Name    func(childComplexity int) int
 		Issuer  func(childComplexity int) int
@@ -449,57 +447,69 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateResource                       func(childComplexity int, namespace string, resource JSON) int
-		CreateServiceInstance                func(childComplexity int, namespace string, params ServiceInstanceCreateInput) int
-		DeleteServiceInstance                func(childComplexity int, name string, namespace string) int
-		CreateServiceBinding                 func(childComplexity int, serviceBindingName *string, serviceInstanceName string, namespace string, parameters *JSON) int
-		DeleteServiceBinding                 func(childComplexity int, serviceBindingName string, namespace string) int
-		CreateServiceBindingUsage            func(childComplexity int, namespace string, createServiceBindingUsageInput *CreateServiceBindingUsageInput) int
-		DeleteServiceBindingUsage            func(childComplexity int, serviceBindingUsageName string, namespace string) int
-		CreateClusterAddonsConfiguration     func(childComplexity int, name string, urls []string, labels *Labels) int
-		UpdateClusterAddonsConfiguration     func(childComplexity int, name string, urls []string, labels *Labels) int
-		DeleteClusterAddonsConfiguration     func(childComplexity int, name string) int
-		AddClusterAddonsConfigurationUrls    func(childComplexity int, name string, urls []string) int
-		RemoveClusterAddonsConfigurationUrls func(childComplexity int, name string, urls []string) int
-		ResyncClusterAddonsConfiguration     func(childComplexity int, name string) int
-		CreateAddonsConfiguration            func(childComplexity int, name string, namespace string, urls []string, labels *Labels) int
-		UpdateAddonsConfiguration            func(childComplexity int, name string, namespace string, urls []string, labels *Labels) int
-		DeleteAddonsConfiguration            func(childComplexity int, name string, namespace string) int
-		AddAddonsConfigurationUrls           func(childComplexity int, name string, namespace string, urls []string) int
-		RemoveAddonsConfigurationUrls        func(childComplexity int, name string, namespace string, urls []string) int
-		ResyncAddonsConfiguration            func(childComplexity int, name string, namespace string) int
-		CreateApplication                    func(childComplexity int, name string, description *string, labels *Labels) int
-		UpdateApplication                    func(childComplexity int, name string, description *string, labels *Labels) int
-		DeleteApplication                    func(childComplexity int, name string) int
-		EnableApplication                    func(childComplexity int, application string, namespace string, allServices *bool, services []*ApplicationMappingService) int
-		OverloadApplication                  func(childComplexity int, application string, namespace string, allServices *bool, services []*ApplicationMappingService) int
-		DisableApplication                   func(childComplexity int, application string, namespace string) int
-		UpdatePod                            func(childComplexity int, name string, namespace string, pod JSON) int
-		DeletePod                            func(childComplexity int, name string, namespace string) int
-		UpdateSecret                         func(childComplexity int, name string, namespace string, secret JSON) int
-		DeleteSecret                         func(childComplexity int, name string, namespace string) int
-		UpdateReplicaSet                     func(childComplexity int, name string, namespace string, replicaSet JSON) int
-		DeleteReplicaSet                     func(childComplexity int, name string, namespace string) int
-		CreateResourceQuota                  func(childComplexity int, namespace string, name string, resourceQuota ResourceQuotaInput) int
-		UpdateConfigMap                      func(childComplexity int, name string, namespace string, configMap JSON) int
-		DeleteConfigMap                      func(childComplexity int, name string, namespace string) int
-		CreateIdppreset                      func(childComplexity int, name string, issuer string, jwksUri string) int
-		DeleteIdppreset                      func(childComplexity int, name string) int
-		UpdateService                        func(childComplexity int, name string, namespace string, service JSON) int
-		DeleteService                        func(childComplexity int, name string, namespace string) int
-		CreateNamespace                      func(childComplexity int, name string, labels *Labels) int
-		UpdateNamespace                      func(childComplexity int, name string, labels Labels) int
-		DeleteNamespace                      func(childComplexity int, name string) int
-		CreateApi                            func(childComplexity int, name string, namespace string, params APIInput) int
-		UpdateApi                            func(childComplexity int, name string, namespace string, params APIInput) int
-		DeleteApi                            func(childComplexity int, name string, namespace string) int
-		CreateLimitRange                     func(childComplexity int, namespace string, name string, limitRange LimitRangeInput) int
+		CreateResource                             func(childComplexity int, namespace string, resource JSON) int
+		CreateServiceInstance                      func(childComplexity int, namespace string, params ServiceInstanceCreateInput) int
+		DeleteServiceInstance                      func(childComplexity int, name string, namespace string) int
+		CreateServiceBinding                       func(childComplexity int, serviceBindingName *string, serviceInstanceName string, namespace string, parameters *JSON) int
+		DeleteServiceBinding                       func(childComplexity int, serviceBindingName string, namespace string) int
+		CreateServiceBindingUsage                  func(childComplexity int, namespace string, createServiceBindingUsageInput *CreateServiceBindingUsageInput) int
+		DeleteServiceBindingUsage                  func(childComplexity int, serviceBindingUsageName string, namespace string) int
+		CreateClusterAddonsConfiguration           func(childComplexity int, name string, repositories []AddonsConfigurationRepositoryInput, urls []string, labels *Labels) int
+		UpdateClusterAddonsConfiguration           func(childComplexity int, name string, repositories []AddonsConfigurationRepositoryInput, urls []string, labels *Labels) int
+		DeleteClusterAddonsConfiguration           func(childComplexity int, name string) int
+		AddClusterAddonsConfigurationUrls          func(childComplexity int, name string, urls []string) int
+		RemoveClusterAddonsConfigurationUrls       func(childComplexity int, name string, urls []string) int
+		AddClusterAddonsConfigurationRepository    func(childComplexity int, name string, repositories []AddonsConfigurationRepositoryInput) int
+		RemoveClusterAddonsConfigurationRepository func(childComplexity int, name string, urls []string) int
+		ResyncClusterAddonsConfiguration           func(childComplexity int, name string) int
+		CreateAddonsConfiguration                  func(childComplexity int, name string, namespace string, repositories []AddonsConfigurationRepositoryInput, urls []string, labels *Labels) int
+		UpdateAddonsConfiguration                  func(childComplexity int, name string, namespace string, repositories []AddonsConfigurationRepositoryInput, urls []string, labels *Labels) int
+		DeleteAddonsConfiguration                  func(childComplexity int, name string, namespace string) int
+		AddAddonsConfigurationUrls                 func(childComplexity int, name string, namespace string, urls []string) int
+		RemoveAddonsConfigurationUrls              func(childComplexity int, name string, namespace string, urls []string) int
+		AddAddonsConfigurationRepository           func(childComplexity int, name string, namespace string, repositories []AddonsConfigurationRepositoryInput) int
+		RemoveAddonsConfigurationRepository        func(childComplexity int, name string, namespace string, urls []string) int
+		ResyncAddonsConfiguration                  func(childComplexity int, name string, namespace string) int
+		CreateApplication                          func(childComplexity int, name string, description *string, labels *Labels) int
+		UpdateApplication                          func(childComplexity int, name string, description *string, labels *Labels) int
+		DeleteApplication                          func(childComplexity int, name string) int
+		EnableApplication                          func(childComplexity int, application string, namespace string, allServices *bool, services []*ApplicationMappingService) int
+		OverloadApplication                        func(childComplexity int, application string, namespace string, allServices *bool, services []*ApplicationMappingService) int
+		DisableApplication                         func(childComplexity int, application string, namespace string) int
+		UpdatePod                                  func(childComplexity int, name string, namespace string, pod JSON) int
+		DeletePod                                  func(childComplexity int, name string, namespace string) int
+		UpdateSecret                               func(childComplexity int, name string, namespace string, secret JSON) int
+		DeleteSecret                               func(childComplexity int, name string, namespace string) int
+		UpdateReplicaSet                           func(childComplexity int, name string, namespace string, replicaSet JSON) int
+		DeleteReplicaSet                           func(childComplexity int, name string, namespace string) int
+		CreateResourceQuota                        func(childComplexity int, namespace string, name string, resourceQuota ResourceQuotaInput) int
+		UpdateConfigMap                            func(childComplexity int, name string, namespace string, configMap JSON) int
+		DeleteConfigMap                            func(childComplexity int, name string, namespace string) int
+		CreateIdppreset                            func(childComplexity int, name string, issuer string, jwksUri string) int
+		DeleteIdppreset                            func(childComplexity int, name string) int
+		UpdateService                              func(childComplexity int, name string, namespace string, service JSON) int
+		DeleteService                              func(childComplexity int, name string, namespace string) int
+		CreateNamespace                            func(childComplexity int, name string, labels *Labels) int
+		UpdateNamespace                            func(childComplexity int, name string, labels Labels) int
+		DeleteNamespace                            func(childComplexity int, name string) int
+		CreateApi                                  func(childComplexity int, name string, namespace string, params APIInput) int
+		UpdateApi                                  func(childComplexity int, name string, namespace string, params APIInput) int
+		DeleteApi                                  func(childComplexity int, name string, namespace string) int
+		CreateLimitRange                           func(childComplexity int, namespace string, name string, limitRange LimitRangeInput) int
 	}
 
 	Namespace struct {
-		Name         func(childComplexity int) int
-		Labels       func(childComplexity int) int
-		Applications func(childComplexity int) int
+		Name              func(childComplexity int) int
+		Labels            func(childComplexity int) int
+		Status            func(childComplexity int) int
+		IsSystemNamespace func(childComplexity int) int
+		Pods              func(childComplexity int) int
+		Applications      func(childComplexity int) int
+	}
+
+	NamespaceEvent struct {
+		Type      func(childComplexity int) int
+		Namespace func(childComplexity int) int
 	}
 
 	NamespaceMutationOutput struct {
@@ -558,7 +568,7 @@ type ComplexityRoot struct {
 		Application                 func(childComplexity int, name string) int
 		Applications                func(childComplexity int, namespace *string, first *int, offset *int) int
 		ConnectorService            func(childComplexity int, application string) int
-		Namespaces                  func(childComplexity int, application *string) int
+		Namespaces                  func(childComplexity int, withSystemNamespaces *bool, withInactiveStatus *bool) int
 		Namespace                   func(childComplexity int, name string) int
 		Deployments                 func(childComplexity int, namespace string, excludeFunctions *bool) int
 		Pod                         func(childComplexity int, name string, namespace string) int
@@ -571,7 +581,6 @@ type ComplexityRoot struct {
 		ReplicaSets                 func(childComplexity int, namespace string, first *int, offset *int) int
 		ResourceQuotas              func(childComplexity int, namespace string) int
 		ResourceQuotasStatus        func(childComplexity int, namespace string) int
-		Functions                   func(childComplexity int, namespace string, first *int, offset *int) int
 		EventActivations            func(childComplexity int, namespace string) int
 		LimitRanges                 func(childComplexity int, namespace string) int
 		BackendModules              func(childComplexity int) int
@@ -610,6 +619,11 @@ type ComplexityRoot struct {
 	ResourceQuotasStatus struct {
 		Exceeded       func(childComplexity int) int
 		ExceededQuotas func(childComplexity int) int
+	}
+
+	ResourceRef struct {
+		Name      func(childComplexity int) int
+		Namespace func(childComplexity int) int
 	}
 
 	ResourceRule struct {
@@ -831,6 +845,7 @@ type ComplexityRoot struct {
 		ClusterAddonsConfigurationEvent func(childComplexity int) int
 		AddonsConfigurationEvent        func(childComplexity int, namespace string) int
 		ApiEvent                        func(childComplexity int, namespace string, serviceName *string) int
+		NamespaceEvent                  func(childComplexity int, withSystemNamespaces *bool) int
 	}
 
 	UsageKind struct {
@@ -890,17 +905,21 @@ type MutationResolver interface {
 	DeleteServiceBinding(ctx context.Context, serviceBindingName string, namespace string) (*DeleteServiceBindingOutput, error)
 	CreateServiceBindingUsage(ctx context.Context, namespace string, createServiceBindingUsageInput *CreateServiceBindingUsageInput) (*ServiceBindingUsage, error)
 	DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, namespace string) (*DeleteServiceBindingUsageOutput, error)
-	CreateClusterAddonsConfiguration(ctx context.Context, name string, urls []string, labels *Labels) (*AddonsConfiguration, error)
-	UpdateClusterAddonsConfiguration(ctx context.Context, name string, urls []string, labels *Labels) (*AddonsConfiguration, error)
+	CreateClusterAddonsConfiguration(ctx context.Context, name string, repositories []AddonsConfigurationRepositoryInput, urls []string, labels *Labels) (*AddonsConfiguration, error)
+	UpdateClusterAddonsConfiguration(ctx context.Context, name string, repositories []AddonsConfigurationRepositoryInput, urls []string, labels *Labels) (*AddonsConfiguration, error)
 	DeleteClusterAddonsConfiguration(ctx context.Context, name string) (*AddonsConfiguration, error)
 	AddClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*AddonsConfiguration, error)
 	RemoveClusterAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*AddonsConfiguration, error)
+	AddClusterAddonsConfigurationRepository(ctx context.Context, name string, repositories []AddonsConfigurationRepositoryInput) (*AddonsConfiguration, error)
+	RemoveClusterAddonsConfigurationRepository(ctx context.Context, name string, urls []string) (*AddonsConfiguration, error)
 	ResyncClusterAddonsConfiguration(ctx context.Context, name string) (*AddonsConfiguration, error)
-	CreateAddonsConfiguration(ctx context.Context, name string, namespace string, urls []string, labels *Labels) (*AddonsConfiguration, error)
-	UpdateAddonsConfiguration(ctx context.Context, name string, namespace string, urls []string, labels *Labels) (*AddonsConfiguration, error)
+	CreateAddonsConfiguration(ctx context.Context, name string, namespace string, repositories []AddonsConfigurationRepositoryInput, urls []string, labels *Labels) (*AddonsConfiguration, error)
+	UpdateAddonsConfiguration(ctx context.Context, name string, namespace string, repositories []AddonsConfigurationRepositoryInput, urls []string, labels *Labels) (*AddonsConfiguration, error)
 	DeleteAddonsConfiguration(ctx context.Context, name string, namespace string) (*AddonsConfiguration, error)
 	AddAddonsConfigurationURLs(ctx context.Context, name string, namespace string, urls []string) (*AddonsConfiguration, error)
 	RemoveAddonsConfigurationURLs(ctx context.Context, name string, namespace string, urls []string) (*AddonsConfiguration, error)
+	AddAddonsConfigurationRepository(ctx context.Context, name string, namespace string, repositories []AddonsConfigurationRepositoryInput) (*AddonsConfiguration, error)
+	RemoveAddonsConfigurationRepository(ctx context.Context, name string, namespace string, urls []string) (*AddonsConfiguration, error)
 	ResyncAddonsConfiguration(ctx context.Context, name string, namespace string) (*AddonsConfiguration, error)
 	CreateApplication(ctx context.Context, name string, description *string, labels *Labels) (ApplicationMutationOutput, error)
 	UpdateApplication(ctx context.Context, name string, description *string, labels *Labels) (ApplicationMutationOutput, error)
@@ -930,6 +949,7 @@ type MutationResolver interface {
 	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*LimitRange, error)
 }
 type NamespaceResolver interface {
+	Pods(ctx context.Context, obj *Namespace) ([]Pod, error)
 	Applications(ctx context.Context, obj *Namespace) ([]string, error)
 }
 type QueryResolver interface {
@@ -955,7 +975,7 @@ type QueryResolver interface {
 	Application(ctx context.Context, name string) (*Application, error)
 	Applications(ctx context.Context, namespace *string, first *int, offset *int) ([]Application, error)
 	ConnectorService(ctx context.Context, application string) (ConnectorService, error)
-	Namespaces(ctx context.Context, application *string) ([]Namespace, error)
+	Namespaces(ctx context.Context, withSystemNamespaces *bool, withInactiveStatus *bool) ([]Namespace, error)
 	Namespace(ctx context.Context, name string) (*Namespace, error)
 	Deployments(ctx context.Context, namespace string, excludeFunctions *bool) ([]Deployment, error)
 	Pod(ctx context.Context, name string, namespace string) (*Pod, error)
@@ -968,7 +988,6 @@ type QueryResolver interface {
 	ReplicaSets(ctx context.Context, namespace string, first *int, offset *int) ([]ReplicaSet, error)
 	ResourceQuotas(ctx context.Context, namespace string) ([]ResourceQuota, error)
 	ResourceQuotasStatus(ctx context.Context, namespace string) (ResourceQuotasStatus, error)
-	Functions(ctx context.Context, namespace string, first *int, offset *int) ([]Function, error)
 	EventActivations(ctx context.Context, namespace string) ([]EventActivation, error)
 	LimitRanges(ctx context.Context, namespace string) ([]LimitRange, error)
 	BackendModules(ctx context.Context) ([]BackendModule, error)
@@ -1019,6 +1038,7 @@ type SubscriptionResolver interface {
 	ClusterAddonsConfigurationEvent(ctx context.Context) (<-chan ClusterAddonsConfigurationEvent, error)
 	AddonsConfigurationEvent(ctx context.Context, namespace string) (<-chan AddonsConfigurationEvent, error)
 	APIEvent(ctx context.Context, namespace string, serviceName *string) (<-chan ApiEvent, error)
+	NamespaceEvent(ctx context.Context, withSystemNamespaces *bool) (<-chan NamespaceEvent, error)
 }
 
 func field_Asset_files_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -1377,7 +1397,27 @@ func field_Mutation_createClusterAddonsConfiguration_args(rawArgs map[string]int
 		}
 	}
 	args["name"] = arg0
-	var arg1 []string
+	var arg1 []AddonsConfigurationRepositoryInput
+	if tmp, ok := rawArgs["repositories"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg1 = make([]AddonsConfigurationRepositoryInput, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg1[idx1], err = UnmarshalAddonsConfigurationRepositoryInput(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["repositories"] = arg1
+	var arg2 []string
 	if tmp, ok := rawArgs["urls"]; ok {
 		var err error
 		var rawIf1 []interface{}
@@ -1388,29 +1428,29 @@ func field_Mutation_createClusterAddonsConfiguration_args(rawArgs map[string]int
 				rawIf1 = []interface{}{tmp}
 			}
 		}
-		arg1 = make([]string, len(rawIf1))
+		arg2 = make([]string, len(rawIf1))
 		for idx1 := range rawIf1 {
-			arg1[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
+			arg2[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
 		}
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["urls"] = arg1
-	var arg2 *Labels
+	args["urls"] = arg2
+	var arg3 *Labels
 	if tmp, ok := rawArgs["labels"]; ok {
 		var err error
 		var ptr1 Labels
 		if tmp != nil {
 			err = (&ptr1).UnmarshalGQL(tmp)
-			arg2 = &ptr1
+			arg3 = &ptr1
 		}
 
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["labels"] = arg2
+	args["labels"] = arg3
 	return args, nil
 
 }
@@ -1426,7 +1466,27 @@ func field_Mutation_updateClusterAddonsConfiguration_args(rawArgs map[string]int
 		}
 	}
 	args["name"] = arg0
-	var arg1 []string
+	var arg1 []AddonsConfigurationRepositoryInput
+	if tmp, ok := rawArgs["repositories"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg1 = make([]AddonsConfigurationRepositoryInput, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg1[idx1], err = UnmarshalAddonsConfigurationRepositoryInput(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["repositories"] = arg1
+	var arg2 []string
 	if tmp, ok := rawArgs["urls"]; ok {
 		var err error
 		var rawIf1 []interface{}
@@ -1437,29 +1497,29 @@ func field_Mutation_updateClusterAddonsConfiguration_args(rawArgs map[string]int
 				rawIf1 = []interface{}{tmp}
 			}
 		}
-		arg1 = make([]string, len(rawIf1))
+		arg2 = make([]string, len(rawIf1))
 		for idx1 := range rawIf1 {
-			arg1[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
+			arg2[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
 		}
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["urls"] = arg1
-	var arg2 *Labels
+	args["urls"] = arg2
+	var arg3 *Labels
 	if tmp, ok := rawArgs["labels"]; ok {
 		var err error
 		var ptr1 Labels
 		if tmp != nil {
 			err = (&ptr1).UnmarshalGQL(tmp)
-			arg2 = &ptr1
+			arg3 = &ptr1
 		}
 
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["labels"] = arg2
+	args["labels"] = arg3
 	return args, nil
 
 }
@@ -1549,6 +1609,76 @@ func field_Mutation_removeClusterAddonsConfigurationURLs_args(rawArgs map[string
 
 }
 
+func field_Mutation_addClusterAddonsConfigurationRepository_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 []AddonsConfigurationRepositoryInput
+	if tmp, ok := rawArgs["repositories"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg1 = make([]AddonsConfigurationRepositoryInput, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg1[idx1], err = UnmarshalAddonsConfigurationRepositoryInput(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["repositories"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_removeClusterAddonsConfigurationRepository_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 []string
+	if tmp, ok := rawArgs["urls"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg1 = make([]string, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg1[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["urls"] = arg1
+	return args, nil
+
+}
+
 func field_Mutation_resyncClusterAddonsConfiguration_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -1584,7 +1714,27 @@ func field_Mutation_createAddonsConfiguration_args(rawArgs map[string]interface{
 		}
 	}
 	args["namespace"] = arg1
-	var arg2 []string
+	var arg2 []AddonsConfigurationRepositoryInput
+	if tmp, ok := rawArgs["repositories"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg2 = make([]AddonsConfigurationRepositoryInput, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg2[idx1], err = UnmarshalAddonsConfigurationRepositoryInput(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["repositories"] = arg2
+	var arg3 []string
 	if tmp, ok := rawArgs["urls"]; ok {
 		var err error
 		var rawIf1 []interface{}
@@ -1595,29 +1745,29 @@ func field_Mutation_createAddonsConfiguration_args(rawArgs map[string]interface{
 				rawIf1 = []interface{}{tmp}
 			}
 		}
-		arg2 = make([]string, len(rawIf1))
+		arg3 = make([]string, len(rawIf1))
 		for idx1 := range rawIf1 {
-			arg2[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
+			arg3[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
 		}
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["urls"] = arg2
-	var arg3 *Labels
+	args["urls"] = arg3
+	var arg4 *Labels
 	if tmp, ok := rawArgs["labels"]; ok {
 		var err error
 		var ptr1 Labels
 		if tmp != nil {
 			err = (&ptr1).UnmarshalGQL(tmp)
-			arg3 = &ptr1
+			arg4 = &ptr1
 		}
 
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["labels"] = arg3
+	args["labels"] = arg4
 	return args, nil
 
 }
@@ -1642,7 +1792,27 @@ func field_Mutation_updateAddonsConfiguration_args(rawArgs map[string]interface{
 		}
 	}
 	args["namespace"] = arg1
-	var arg2 []string
+	var arg2 []AddonsConfigurationRepositoryInput
+	if tmp, ok := rawArgs["repositories"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg2 = make([]AddonsConfigurationRepositoryInput, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg2[idx1], err = UnmarshalAddonsConfigurationRepositoryInput(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["repositories"] = arg2
+	var arg3 []string
 	if tmp, ok := rawArgs["urls"]; ok {
 		var err error
 		var rawIf1 []interface{}
@@ -1653,29 +1823,29 @@ func field_Mutation_updateAddonsConfiguration_args(rawArgs map[string]interface{
 				rawIf1 = []interface{}{tmp}
 			}
 		}
-		arg2 = make([]string, len(rawIf1))
+		arg3 = make([]string, len(rawIf1))
 		for idx1 := range rawIf1 {
-			arg2[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
+			arg3[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
 		}
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["urls"] = arg2
-	var arg3 *Labels
+	args["urls"] = arg3
+	var arg4 *Labels
 	if tmp, ok := rawArgs["labels"]; ok {
 		var err error
 		var ptr1 Labels
 		if tmp != nil {
 			err = (&ptr1).UnmarshalGQL(tmp)
-			arg3 = &ptr1
+			arg4 = &ptr1
 		}
 
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["labels"] = arg3
+	args["labels"] = arg4
 	return args, nil
 
 }
@@ -1749,6 +1919,94 @@ func field_Mutation_addAddonsConfigurationURLs_args(rawArgs map[string]interface
 }
 
 func field_Mutation_removeAddonsConfigurationURLs_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 []string
+	if tmp, ok := rawArgs["urls"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg2 = make([]string, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg2[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["urls"] = arg2
+	return args, nil
+
+}
+
+func field_Mutation_addAddonsConfigurationRepository_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 []AddonsConfigurationRepositoryInput
+	if tmp, ok := rawArgs["repositories"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg2 = make([]AddonsConfigurationRepositoryInput, len(rawIf1))
+		for idx1 := range rawIf1 {
+			arg2[idx1], err = UnmarshalAddonsConfigurationRepositoryInput(rawIf1[idx1])
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["repositories"] = arg2
+	return args, nil
+
+}
+
+func field_Mutation_removeAddonsConfigurationRepository_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
@@ -3290,12 +3548,12 @@ func field_Query_connectorService_args(rawArgs map[string]interface{}) (map[stri
 
 func field_Query_namespaces_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["application"]; ok {
+	var arg0 *bool
+	if tmp, ok := rawArgs["withSystemNamespaces"]; ok {
 		var err error
-		var ptr1 string
+		var ptr1 bool
 		if tmp != nil {
-			ptr1, err = graphql.UnmarshalString(tmp)
+			ptr1, err = graphql.UnmarshalBoolean(tmp)
 			arg0 = &ptr1
 		}
 
@@ -3303,7 +3561,21 @@ func field_Query_namespaces_args(rawArgs map[string]interface{}) (map[string]int
 			return nil, err
 		}
 	}
-	args["application"] = arg0
+	args["withSystemNamespaces"] = arg0
+	var arg1 *bool
+	if tmp, ok := rawArgs["withInactiveStatus"]; ok {
+		var err error
+		var ptr1 bool
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalBoolean(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["withInactiveStatus"] = arg1
 	return args, nil
 
 }
@@ -3646,49 +3918,6 @@ func field_Query_resourceQuotasStatus_args(rawArgs map[string]interface{}) (map[
 		}
 	}
 	args["namespace"] = arg0
-	return args, nil
-
-}
-
-func field_Query_functions_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["namespace"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["namespace"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg1 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["first"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["offset"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg2 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["offset"] = arg2
 	return args, nil
 
 }
@@ -4068,6 +4297,26 @@ func field_Subscription_apiEvent_args(rawArgs map[string]interface{}) (map[strin
 
 }
 
+func field_Subscription_namespaceEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *bool
+	if tmp, ok := rawArgs["withSystemNamespaces"]; ok {
+		var err error
+		var ptr1 bool
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalBoolean(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["withSystemNamespaces"] = arg0
+	return args, nil
+
+}
+
 func field___Type_fields_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 bool
@@ -4175,6 +4424,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AddonsConfiguration.Urls(childComplexity), true
 
+	case "AddonsConfiguration.repositories":
+		if e.complexity.AddonsConfiguration.Repositories == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfiguration.Repositories(childComplexity), true
+
 	case "AddonsConfiguration.labels":
 		if e.complexity.AddonsConfiguration.Labels == nil {
 			break
@@ -4202,6 +4458,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AddonsConfigurationEvent.AddonsConfiguration(childComplexity), true
+
+	case "AddonsConfigurationRepository.url":
+		if e.complexity.AddonsConfigurationRepository.Url == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfigurationRepository.Url(childComplexity), true
+
+	case "AddonsConfigurationRepository.secretRef":
+		if e.complexity.AddonsConfigurationRepository.SecretRef == nil {
+			break
+		}
+
+		return e.complexity.AddonsConfigurationRepository.SecretRef(childComplexity), true
 
 	case "AddonsConfigurationStatus.phase":
 		if e.complexity.AddonsConfigurationStatus.Phase == nil {
@@ -5500,41 +5770,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.File.Metadata(childComplexity), true
 
-	case "Function.name":
-		if e.complexity.Function.Name == nil {
-			break
-		}
-
-		return e.complexity.Function.Name(childComplexity), true
-
-	case "Function.trigger":
-		if e.complexity.Function.Trigger == nil {
-			break
-		}
-
-		return e.complexity.Function.Trigger(childComplexity), true
-
-	case "Function.creationTimestamp":
-		if e.complexity.Function.CreationTimestamp == nil {
-			break
-		}
-
-		return e.complexity.Function.CreationTimestamp(childComplexity), true
-
-	case "Function.labels":
-		if e.complexity.Function.Labels == nil {
-			break
-		}
-
-		return e.complexity.Function.Labels(childComplexity), true
-
-	case "Function.namespace":
-		if e.complexity.Function.Namespace == nil {
-			break
-		}
-
-		return e.complexity.Function.Namespace(childComplexity), true
-
 	case "IDPPreset.name":
 		if e.complexity.Idppreset.Name == nil {
 			break
@@ -5762,7 +5997,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateClusterAddonsConfiguration(childComplexity, args["name"].(string), args["urls"].([]string), args["labels"].(*Labels)), true
+		return e.complexity.Mutation.CreateClusterAddonsConfiguration(childComplexity, args["name"].(string), args["repositories"].([]AddonsConfigurationRepositoryInput), args["urls"].([]string), args["labels"].(*Labels)), true
 
 	case "Mutation.updateClusterAddonsConfiguration":
 		if e.complexity.Mutation.UpdateClusterAddonsConfiguration == nil {
@@ -5774,7 +6009,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateClusterAddonsConfiguration(childComplexity, args["name"].(string), args["urls"].([]string), args["labels"].(*Labels)), true
+		return e.complexity.Mutation.UpdateClusterAddonsConfiguration(childComplexity, args["name"].(string), args["repositories"].([]AddonsConfigurationRepositoryInput), args["urls"].([]string), args["labels"].(*Labels)), true
 
 	case "Mutation.deleteClusterAddonsConfiguration":
 		if e.complexity.Mutation.DeleteClusterAddonsConfiguration == nil {
@@ -5812,6 +6047,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.RemoveClusterAddonsConfigurationUrls(childComplexity, args["name"].(string), args["urls"].([]string)), true
 
+	case "Mutation.addClusterAddonsConfigurationRepository":
+		if e.complexity.Mutation.AddClusterAddonsConfigurationRepository == nil {
+			break
+		}
+
+		args, err := field_Mutation_addClusterAddonsConfigurationRepository_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddClusterAddonsConfigurationRepository(childComplexity, args["name"].(string), args["repositories"].([]AddonsConfigurationRepositoryInput)), true
+
+	case "Mutation.removeClusterAddonsConfigurationRepository":
+		if e.complexity.Mutation.RemoveClusterAddonsConfigurationRepository == nil {
+			break
+		}
+
+		args, err := field_Mutation_removeClusterAddonsConfigurationRepository_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveClusterAddonsConfigurationRepository(childComplexity, args["name"].(string), args["urls"].([]string)), true
+
 	case "Mutation.resyncClusterAddonsConfiguration":
 		if e.complexity.Mutation.ResyncClusterAddonsConfiguration == nil {
 			break
@@ -5834,7 +6093,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateAddonsConfiguration(childComplexity, args["name"].(string), args["namespace"].(string), args["urls"].([]string), args["labels"].(*Labels)), true
+		return e.complexity.Mutation.CreateAddonsConfiguration(childComplexity, args["name"].(string), args["namespace"].(string), args["repositories"].([]AddonsConfigurationRepositoryInput), args["urls"].([]string), args["labels"].(*Labels)), true
 
 	case "Mutation.updateAddonsConfiguration":
 		if e.complexity.Mutation.UpdateAddonsConfiguration == nil {
@@ -5846,7 +6105,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateAddonsConfiguration(childComplexity, args["name"].(string), args["namespace"].(string), args["urls"].([]string), args["labels"].(*Labels)), true
+		return e.complexity.Mutation.UpdateAddonsConfiguration(childComplexity, args["name"].(string), args["namespace"].(string), args["repositories"].([]AddonsConfigurationRepositoryInput), args["urls"].([]string), args["labels"].(*Labels)), true
 
 	case "Mutation.deleteAddonsConfiguration":
 		if e.complexity.Mutation.DeleteAddonsConfiguration == nil {
@@ -5883,6 +6142,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RemoveAddonsConfigurationUrls(childComplexity, args["name"].(string), args["namespace"].(string), args["urls"].([]string)), true
+
+	case "Mutation.addAddonsConfigurationRepository":
+		if e.complexity.Mutation.AddAddonsConfigurationRepository == nil {
+			break
+		}
+
+		args, err := field_Mutation_addAddonsConfigurationRepository_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddAddonsConfigurationRepository(childComplexity, args["name"].(string), args["namespace"].(string), args["repositories"].([]AddonsConfigurationRepositoryInput)), true
+
+	case "Mutation.removeAddonsConfigurationRepository":
+		if e.complexity.Mutation.RemoveAddonsConfigurationRepository == nil {
+			break
+		}
+
+		args, err := field_Mutation_removeAddonsConfigurationRepository_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveAddonsConfigurationRepository(childComplexity, args["name"].(string), args["namespace"].(string), args["urls"].([]string)), true
 
 	case "Mutation.resyncAddonsConfiguration":
 		if e.complexity.Mutation.ResyncAddonsConfiguration == nil {
@@ -6222,12 +6505,47 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Namespace.Labels(childComplexity), true
 
+	case "Namespace.status":
+		if e.complexity.Namespace.Status == nil {
+			break
+		}
+
+		return e.complexity.Namespace.Status(childComplexity), true
+
+	case "Namespace.isSystemNamespace":
+		if e.complexity.Namespace.IsSystemNamespace == nil {
+			break
+		}
+
+		return e.complexity.Namespace.IsSystemNamespace(childComplexity), true
+
+	case "Namespace.pods":
+		if e.complexity.Namespace.Pods == nil {
+			break
+		}
+
+		return e.complexity.Namespace.Pods(childComplexity), true
+
 	case "Namespace.applications":
 		if e.complexity.Namespace.Applications == nil {
 			break
 		}
 
 		return e.complexity.Namespace.Applications(childComplexity), true
+
+	case "NamespaceEvent.type":
+		if e.complexity.NamespaceEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.NamespaceEvent.Type(childComplexity), true
+
+	case "NamespaceEvent.namespace":
+		if e.complexity.NamespaceEvent.Namespace == nil {
+			break
+		}
+
+		return e.complexity.NamespaceEvent.Namespace(childComplexity), true
 
 	case "NamespaceMutationOutput.name":
 		if e.complexity.NamespaceMutationOutput.Name == nil {
@@ -6650,7 +6968,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Namespaces(childComplexity, args["application"].(*string)), true
+		return e.complexity.Query.Namespaces(childComplexity, args["withSystemNamespaces"].(*bool), args["withInactiveStatus"].(*bool)), true
 
 	case "Query.namespace":
 		if e.complexity.Query.Namespace == nil {
@@ -6795,18 +7113,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.ResourceQuotasStatus(childComplexity, args["namespace"].(string)), true
-
-	case "Query.functions":
-		if e.complexity.Query.Functions == nil {
-			break
-		}
-
-		args, err := field_Query_functions_args(rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Functions(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
 
 	case "Query.eventActivations":
 		if e.complexity.Query.EventActivations == nil {
@@ -7029,6 +7335,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ResourceQuotasStatus.ExceededQuotas(childComplexity), true
+
+	case "ResourceRef.name":
+		if e.complexity.ResourceRef.Name == nil {
+			break
+		}
+
+		return e.complexity.ResourceRef.Name(childComplexity), true
+
+	case "ResourceRef.namespace":
+		if e.complexity.ResourceRef.Namespace == nil {
+			break
+		}
+
+		return e.complexity.ResourceRef.Namespace(childComplexity), true
 
 	case "ResourceRule.verbs":
 		if e.complexity.ResourceRule.Verbs == nil {
@@ -8044,6 +8364,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscription.ApiEvent(childComplexity, args["namespace"].(string), args["serviceName"].(*string)), true
 
+	case "Subscription.namespaceEvent":
+		if e.complexity.Subscription.NamespaceEvent == nil {
+			break
+		}
+
+		args, err := field_Subscription_namespaceEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.NamespaceEvent(childComplexity, args["withSystemNamespaces"].(*bool)), true
+
 	case "UsageKind.name":
 		if e.complexity.UsageKind.Name == nil {
 			break
@@ -8429,6 +8761,8 @@ func (ec *executionContext) _AddonsConfiguration(ctx context.Context, sel ast.Se
 			}
 		case "urls":
 			out.Values[i] = ec._AddonsConfiguration_urls(ctx, field, obj)
+		case "repositories":
+			out.Values[i] = ec._AddonsConfiguration_repositories(ctx, field, obj)
 		case "labels":
 			out.Values[i] = ec._AddonsConfiguration_labels(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -8507,6 +8841,63 @@ func (ec *executionContext) _AddonsConfiguration_urls(ctx context.Context, field
 		}()
 	}
 
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfiguration_repositories(ctx context.Context, field graphql.CollectedField, obj *AddonsConfiguration) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfiguration",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Repositories, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]AddonsConfigurationRepository)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._AddonsConfigurationRepository(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
 	return arr1
 }
 
@@ -8653,6 +9044,94 @@ func (ec *executionContext) _AddonsConfigurationEvent_addonsConfiguration(ctx co
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._AddonsConfiguration(ctx, field.Selections, &res)
+}
+
+var addonsConfigurationRepositoryImplementors = []string{"AddonsConfigurationRepository"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _AddonsConfigurationRepository(ctx context.Context, sel ast.SelectionSet, obj *AddonsConfigurationRepository) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, addonsConfigurationRepositoryImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AddonsConfigurationRepository")
+		case "url":
+			out.Values[i] = ec._AddonsConfigurationRepository_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "secretRef":
+			out.Values[i] = ec._AddonsConfigurationRepository_secretRef(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfigurationRepository_url(ctx context.Context, field graphql.CollectedField, obj *AddonsConfigurationRepository) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfigurationRepository",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _AddonsConfigurationRepository_secretRef(ctx context.Context, field graphql.CollectedField, obj *AddonsConfigurationRepository) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "AddonsConfigurationRepository",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SecretRef, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ResourceRef)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ResourceRef(ctx, field.Selections, res)
 }
 
 var addonsConfigurationStatusImplementors = []string{"AddonsConfigurationStatus"}
@@ -16287,191 +16766,6 @@ func (ec *executionContext) _File_metadata(ctx context.Context, field graphql.Co
 	return res
 }
 
-var functionImplementors = []string{"Function"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet, obj *Function) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, functionImplementors)
-
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Function")
-		case "name":
-			out.Values[i] = ec._Function_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "trigger":
-			out.Values[i] = ec._Function_trigger(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "creationTimestamp":
-			out.Values[i] = ec._Function_creationTimestamp(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "labels":
-			out.Values[i] = ec._Function_labels(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "namespace":
-			out.Values[i] = ec._Function_namespace(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Function_name(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Function",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Function_trigger(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Function",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Trigger, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Function_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Function",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreationTimestamp, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return MarshalTimestamp(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Function_labels(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Function",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Labels, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(Labels)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return res
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Function_namespace(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Function",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Namespace, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
 var iDPPresetImplementors = []string{"IDPPreset"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -17399,6 +17693,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_addClusterAddonsConfigurationURLs(ctx, field)
 		case "removeClusterAddonsConfigurationURLs":
 			out.Values[i] = ec._Mutation_removeClusterAddonsConfigurationURLs(ctx, field)
+		case "addClusterAddonsConfigurationRepository":
+			out.Values[i] = ec._Mutation_addClusterAddonsConfigurationRepository(ctx, field)
+		case "removeClusterAddonsConfigurationRepository":
+			out.Values[i] = ec._Mutation_removeClusterAddonsConfigurationRepository(ctx, field)
 		case "resyncClusterAddonsConfiguration":
 			out.Values[i] = ec._Mutation_resyncClusterAddonsConfiguration(ctx, field)
 		case "createAddonsConfiguration":
@@ -17411,6 +17709,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_addAddonsConfigurationURLs(ctx, field)
 		case "removeAddonsConfigurationURLs":
 			out.Values[i] = ec._Mutation_removeAddonsConfigurationURLs(ctx, field)
+		case "addAddonsConfigurationRepository":
+			out.Values[i] = ec._Mutation_addAddonsConfigurationRepository(ctx, field)
+		case "removeAddonsConfigurationRepository":
+			out.Values[i] = ec._Mutation_removeAddonsConfigurationRepository(ctx, field)
 		case "resyncAddonsConfiguration":
 			out.Values[i] = ec._Mutation_resyncAddonsConfiguration(ctx, field)
 		case "createApplication":
@@ -17760,7 +18062,7 @@ func (ec *executionContext) _Mutation_createClusterAddonsConfiguration(ctx conte
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateClusterAddonsConfiguration(rctx, args["name"].(string), args["urls"].([]string), args["labels"].(*Labels))
+		return ec.resolvers.Mutation().CreateClusterAddonsConfiguration(rctx, args["name"].(string), args["repositories"].([]AddonsConfigurationRepositoryInput), args["urls"].([]string), args["labels"].(*Labels))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -17795,7 +18097,7 @@ func (ec *executionContext) _Mutation_updateClusterAddonsConfiguration(ctx conte
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateClusterAddonsConfiguration(rctx, args["name"].(string), args["urls"].([]string), args["labels"].(*Labels))
+		return ec.resolvers.Mutation().UpdateClusterAddonsConfiguration(rctx, args["name"].(string), args["repositories"].([]AddonsConfigurationRepositoryInput), args["urls"].([]string), args["labels"].(*Labels))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -17917,6 +18219,76 @@ func (ec *executionContext) _Mutation_removeClusterAddonsConfigurationURLs(ctx c
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Mutation_addClusterAddonsConfigurationRepository(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_addClusterAddonsConfigurationRepository_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddClusterAddonsConfigurationRepository(rctx, args["name"].(string), args["repositories"].([]AddonsConfigurationRepositoryInput))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*AddonsConfiguration)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._AddonsConfiguration(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_removeClusterAddonsConfigurationRepository(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_removeClusterAddonsConfigurationRepository_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RemoveClusterAddonsConfigurationRepository(rctx, args["name"].(string), args["urls"].([]string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*AddonsConfiguration)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._AddonsConfiguration(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Mutation_resyncClusterAddonsConfiguration(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -17970,7 +18342,7 @@ func (ec *executionContext) _Mutation_createAddonsConfiguration(ctx context.Cont
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateAddonsConfiguration(rctx, args["name"].(string), args["namespace"].(string), args["urls"].([]string), args["labels"].(*Labels))
+		return ec.resolvers.Mutation().CreateAddonsConfiguration(rctx, args["name"].(string), args["namespace"].(string), args["repositories"].([]AddonsConfigurationRepositoryInput), args["urls"].([]string), args["labels"].(*Labels))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -18005,7 +18377,7 @@ func (ec *executionContext) _Mutation_updateAddonsConfiguration(ctx context.Cont
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateAddonsConfiguration(rctx, args["name"].(string), args["namespace"].(string), args["urls"].([]string), args["labels"].(*Labels))
+		return ec.resolvers.Mutation().UpdateAddonsConfiguration(rctx, args["name"].(string), args["namespace"].(string), args["repositories"].([]AddonsConfigurationRepositoryInput), args["urls"].([]string), args["labels"].(*Labels))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -18111,6 +18483,76 @@ func (ec *executionContext) _Mutation_removeAddonsConfigurationURLs(ctx context.
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().RemoveAddonsConfigurationURLs(rctx, args["name"].(string), args["namespace"].(string), args["urls"].([]string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*AddonsConfiguration)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._AddonsConfiguration(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_addAddonsConfigurationRepository(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_addAddonsConfigurationRepository_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddAddonsConfigurationRepository(rctx, args["name"].(string), args["namespace"].(string), args["repositories"].([]AddonsConfigurationRepositoryInput))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*AddonsConfiguration)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._AddonsConfiguration(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_removeAddonsConfigurationRepository(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_removeAddonsConfigurationRepository_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RemoveAddonsConfigurationRepository(rctx, args["name"].(string), args["namespace"].(string), args["urls"].([]string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -19086,6 +19528,25 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 			}
 		case "labels":
 			out.Values[i] = ec._Namespace_labels(ctx, field, obj)
+		case "status":
+			out.Values[i] = ec._Namespace_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "isSystemNamespace":
+			out.Values[i] = ec._Namespace_isSystemNamespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "pods":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Namespace_pods(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "applications":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -19155,6 +19616,120 @@ func (ec *executionContext) _Namespace_labels(ctx context.Context, field graphql
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Namespace_status(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Namespace",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Namespace_isSystemNamespace(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Namespace",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsSystemNamespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalBoolean(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Namespace_pods(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Namespace",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Namespace().Pods(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]Pod)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._Pod(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Namespace_applications(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -19185,6 +19760,96 @@ func (ec *executionContext) _Namespace_applications(ctx context.Context, field g
 	}
 
 	return arr1
+}
+
+var namespaceEventImplementors = []string{"NamespaceEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _NamespaceEvent(ctx context.Context, sel ast.SelectionSet, obj *NamespaceEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, namespaceEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("NamespaceEvent")
+		case "type":
+			out.Values[i] = ec._NamespaceEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "namespace":
+			out.Values[i] = ec._NamespaceEvent_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NamespaceEvent_type(ctx context.Context, field graphql.CollectedField, obj *NamespaceEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NamespaceEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NamespaceEvent_namespace(ctx context.Context, field graphql.CollectedField, obj *NamespaceEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NamespaceEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Namespace)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Namespace(ctx, field.Selections, &res)
 }
 
 var namespaceMutationOutputImplementors = []string{"NamespaceMutationOutput"}
@@ -20311,15 +20976,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_resourceQuotasStatus(ctx, field)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
-				wg.Done()
-			}(i, field)
-		case "functions":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_functions(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -21584,7 +22240,7 @@ func (ec *executionContext) _Query_namespaces(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Namespaces(rctx, args["application"].(*string))
+		return ec.resolvers.Query().Namespaces(rctx, args["withSystemNamespaces"].(*bool), args["withInactiveStatus"].(*bool))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -22234,72 +22890,6 @@ func (ec *executionContext) _Query_resourceQuotasStatus(ctx context.Context, fie
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ResourceQuotasStatus(ctx, field.Selections, &res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Query_functions(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Query_functions_args(rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx := &graphql.ResolverContext{
-		Object: "Query",
-		Args:   args,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Functions(rctx, args["namespace"].(string), args["first"].(*int), args["offset"].(*int))
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]Function)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	arr1 := make(graphql.Array, len(res))
-	var wg sync.WaitGroup
-
-	isLen1 := len(res) == 1
-	if !isLen1 {
-		wg.Add(len(res))
-	}
-
-	for idx1 := range res {
-		idx1 := idx1
-		rctx := &graphql.ResolverContext{
-			Index:  &idx1,
-			Result: &res[idx1],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(idx1 int) {
-			if !isLen1 {
-				defer wg.Done()
-			}
-			arr1[idx1] = func() graphql.Marshaler {
-
-				return ec._Function(ctx, field.Selections, &res[idx1])
-			}()
-		}
-		if isLen1 {
-			f(idx1)
-		} else {
-			go f(idx1)
-		}
-
-	}
-	wg.Wait()
-	return arr1
 }
 
 // nolint: vetshadow
@@ -23613,6 +24203,95 @@ func (ec *executionContext) _ResourceQuotasStatus_exceededQuotas(ctx context.Con
 	}
 	wg.Wait()
 	return arr1
+}
+
+var resourceRefImplementors = []string{"ResourceRef"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ResourceRef(ctx context.Context, sel ast.SelectionSet, obj *ResourceRef) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, resourceRefImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ResourceRef")
+		case "name":
+			out.Values[i] = ec._ResourceRef_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "namespace":
+			out.Values[i] = ec._ResourceRef_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ResourceRef_name(ctx context.Context, field graphql.CollectedField, obj *ResourceRef) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ResourceRef",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ResourceRef_namespace(ctx context.Context, field graphql.CollectedField, obj *ResourceRef) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ResourceRef",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
 }
 
 var resourceRuleImplementors = []string{"ResourceRule"}
@@ -28421,6 +29100,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_addonsConfigurationEvent(ctx, fields[0])
 	case "apiEvent":
 		return ec._Subscription_apiEvent(ctx, fields[0])
+	case "namespaceEvent":
+		return ec._Subscription_namespaceEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -28887,6 +29568,37 @@ func (ec *executionContext) _Subscription_apiEvent(ctx context.Context, field gr
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler {
 			return ec._ApiEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_namespaceEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_namespaceEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().NamespaceEvent(rctx, args["withSystemNamespaces"].(*bool))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._NamespaceEvent(ctx, field.Selections, &res)
 		}())
 		return &out
 	}
@@ -30827,6 +31539,35 @@ func UnmarshalAPIInput(v interface{}) (APIInput, error) {
 	return it, nil
 }
 
+func UnmarshalAddonsConfigurationRepositoryInput(v interface{}) (AddonsConfigurationRepositoryInput, error) {
+	var it AddonsConfigurationRepositoryInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "url":
+			var err error
+			it.URL, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "secretRef":
+			var err error
+			var ptr1 ResourceRefInput
+			if v != nil {
+				ptr1, err = UnmarshalResourceRefInput(v)
+				it.SecretRef = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func UnmarshalCreateServiceBindingUsageInput(v interface{}) (CreateServiceBindingUsageInput, error) {
 	var it CreateServiceBindingUsageInput
 	var asMap = v.(map[string]interface{})
@@ -30882,30 +31623,6 @@ func UnmarshalEnvPrefixInput(v interface{}) (EnvPrefixInput, error) {
 		case "name":
 			var err error
 			it.Name, err = graphql.UnmarshalString(v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func UnmarshalInputTopic(v interface{}) (InputTopic, error) {
-	var it InputTopic
-	var asMap = v.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "id":
-			var err error
-			it.ID, err = graphql.UnmarshalString(v)
-			if err != nil {
-				return it, err
-			}
-		case "type":
-			var err error
-			it.Type, err = graphql.UnmarshalString(v)
 			if err != nil {
 				return it, err
 			}
@@ -31086,6 +31803,30 @@ func UnmarshalResourceQuotaInput(v interface{}) (ResourceQuotaInput, error) {
 		case "requests":
 			var err error
 			it.Requests, err = UnmarshalResourceValuesInput(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func UnmarshalResourceRefInput(v interface{}) (ResourceRefInput, error) {
+	var it ResourceRefInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "namespace":
+			var err error
+			it.Namespace, err = graphql.UnmarshalString(v)
 			if err != nil {
 				return it, err
 			}
@@ -31424,8 +32165,29 @@ enum DocsTopicPhaseType {
 type AddonsConfiguration {
     name: String!
     urls: [String!]
+    repositories: [AddonsConfigurationRepository!]
     labels: Labels!
     status: AddonsConfigurationStatus!
+}
+
+type AddonsConfigurationRepository {
+    url: String!
+    secretRef: ResourceRef
+}
+
+type ResourceRef {
+    name: String!
+    namespace: String!
+}
+
+input AddonsConfigurationRepositoryInput {
+    url: String!
+    secretRef: ResourceRefInput
+}
+
+input ResourceRefInput {
+    name: String!
+    namespace: String!
 }
 
 type AddonsConfigurationStatus {
@@ -31951,9 +32713,17 @@ type ExceededQuota {
 type Namespace {
     name: String!
     labels: Labels
+    status: String!
+    isSystemNamespace: Boolean!
+    pods: [Pod!]!
 
     # Depends on application module
     applications: [String!]
+}
+
+type NamespaceEvent {
+    type: SubscriptionEventType!
+    namespace: Namespace!
 }
 
 type NamespaceMutationOutput {
@@ -32069,21 +32839,6 @@ type IDPPreset {
     name: String!
     issuer: String!
     jwksUri: String!
-}
-
-# Kubeless
-
-type Function {
-    name: String!
-    trigger: String!
-    creationTimestamp: Timestamp!
-    labels: Labels!
-    namespace: String!
-}
-
-input InputTopic {
-    id: String!
-    type: String!
 }
 
 # API controller
@@ -32222,7 +32977,7 @@ type Query {
     connectorService(application: String!): ConnectorService! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
 
     # Depends on 'application'
-    namespaces(application: String): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
+    namespaces(withSystemNamespaces: Boolean, withInactiveStatus: Boolean): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
     namespace(name: String!): Namespace @HasAccess(attributes: {resource: "namespaces", verb: "get", apiGroup: "", apiVersion: "v1"})
 
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]! @HasAccess(attributes: {resource: "deployments", verb: "list", apiGroup: "apps", apiVersion: "v1beta2", namespaceArg: "namespace"})
@@ -32240,8 +32995,6 @@ type Query {
     resourceQuotas(namespace: String!): [ResourceQuota!]! @HasAccess(attributes: {resource: "resourcequotas", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     resourceQuotasStatus(namespace: String!): ResourceQuotasStatus! @HasAccess(attributes: {resource: "resourcequotas", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    functions(namespace: String!, first: Int, offset: Int): [Function!]! @HasAccess(attributes: {resource: "functions", verb: "list", apiGroup: "kubeless.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
-
     eventActivations(namespace: String!): [EventActivation!]! @HasAccess(attributes: {resource: "eventactivations", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
     limitRanges(namespace: String!): [LimitRange!]! @HasAccess(attributes: {resource: "limitranges", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
@@ -32256,7 +33009,7 @@ type Query {
 
     microFrontends(namespace: String!): [MicroFrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
     clusterMicroFrontends: [ClusterMicroFrontend!]! @HasAccess(attributes: {resource: "clustermicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
-    
+
     selfSubjectRules(namespace: String): [ResourceRule!]! @HasAccess(attributes: {apiGroup: "authorization.k8s.io", resource: "selfsubjectrulesreviews", verb: "create", apiVersion: "v1" namespaceArg: "namespace"})
 }
 
@@ -32271,18 +33024,22 @@ type Mutation {
     createServiceBindingUsage(namespace: String!, createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage @HasAccess(attributes: {resource: "servicebindingusages", verb: "create", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     deleteServiceBindingUsage(serviceBindingUsageName: String!, namespace: String!): DeleteServiceBindingUsageOutput @HasAccess(attributes: {resource: "servicebindingusages", verb: "delete", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "serviceBindingUsageName"})
 
-    createClusterAddonsConfiguration(name: String!, urls: [String!]!, labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "create", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-    updateClusterAddonsConfiguration(name: String!, urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    createClusterAddonsConfiguration(name: String!, repositories: [AddonsConfigurationRepositoryInput!], urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "create", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    updateClusterAddonsConfiguration(name: String!, repositories: [AddonsConfigurationRepositoryInput!], urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     deleteClusterAddonsConfiguration(name: String!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "delete", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-    addClusterAddonsConfigurationURLs(name: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-    removeClusterAddonsConfigurationURLs(name: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    addClusterAddonsConfigurationURLs(name: String!, urls: [String!]): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    removeClusterAddonsConfigurationURLs(name: String!, urls: [String!]): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    addClusterAddonsConfigurationRepository(name: String!, repositories: [AddonsConfigurationRepositoryInput!]): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    removeClusterAddonsConfigurationRepository(name: String!, urls: [String!]): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     resyncClusterAddonsConfiguration(name: String!): AddonsConfiguration @HasAccess(attributes: {resource: "clusteraddonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 
-    createAddonsConfiguration(name: String!, namespace: String!, urls: [String!]!, labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "create", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-    updateAddonsConfiguration(name: String!, namespace: String!, urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    createAddonsConfiguration(name: String!, namespace: String!, repositories: [AddonsConfigurationRepositoryInput!], urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "create", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    updateAddonsConfiguration(name: String!, namespace: String!, repositories: [AddonsConfigurationRepositoryInput!], urls: [String!], labels: Labels): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     deleteAddonsConfiguration(name: String!, namespace: String!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "delete", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-    addAddonsConfigurationURLs(name: String!, namespace: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
-    removeAddonsConfigurationURLs(name: String!, namespace: String!, urls: [String!]!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    addAddonsConfigurationURLs(name: String!, namespace: String!, urls: [String!]): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    removeAddonsConfigurationURLs(name: String!, namespace: String!, urls: [String!]): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    addAddonsConfigurationRepository(name: String!, namespace: String!, repositories: [AddonsConfigurationRepositoryInput!]): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    removeAddonsConfigurationRepository(name: String!, namespace: String!, urls: [String!]): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     resyncAddonsConfiguration(name: String!, namespace: String!): AddonsConfiguration @HasAccess(attributes: {resource: "addonsconfigurations", verb: "update", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 
     createApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
@@ -32344,7 +33101,7 @@ type Subscription {
     addonsConfigurationEvent(namespace: String!): AddonsConfigurationEvent! @HasAccess(attributes: {resource: "addonsconfigurations", verb: "watch", apiGroup: "addons.kyma-project.io", apiVersion: "v1alpha1"})
     # secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}) # This subscription has to be disabled until https://github.com/kyma-project/kyma/issues/3412 gets resolved
     apiEvent(namespace: String!, serviceName: String): ApiEvent! @HasAccess(attributes: {resource: "apis", verb: "watch", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
-
+    namespaceEvent(withSystemNamespaces: Boolean): NamespaceEvent! @HasAccess(attributes: {resource: "namespaces", verb: "watch", apiGroup: "", apiVersion: "v1"})
 }
 
 # Schema

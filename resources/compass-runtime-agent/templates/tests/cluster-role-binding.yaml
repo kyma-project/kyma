@@ -16,6 +16,8 @@ rules:
   verbs:
   - get
   - list
+  - create
+  - delete
 - apiGroups:
   - cms.kyma-project.io
   resources:
