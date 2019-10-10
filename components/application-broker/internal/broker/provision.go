@@ -207,6 +207,9 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 	}
 }
 
+// TODO(event-broker):
+//  - change that to create the Subscription CR instead of EventActivation, reuse the `OwnerReferences` concept
+//  - label the given namespace for enabling the Event Broker
 func (svc *ProvisionService) createEaOnSuccessProvision(appName, appID, ns string, displayName string, iID internal.InstanceID) error {
 	// instance ID is the serviceInstance.Spec.ExternalID
 	si, err := svc.serviceInstanceGetter.GetByNamespaceAndExternalID(ns, string(iID))

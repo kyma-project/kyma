@@ -113,6 +113,9 @@ func (svc *DeprovisionService) doAsync(iID internal.InstanceID, opID internal.Op
 	go svc.do(iID, opID, appID, ns)
 }
 
+// TODO(event-broker):
+//  - add logic for deleting the Event Broker from the given namespace
+//  - do not delete the Subscription CR - it will be removed by the k8s GC because of `OwnerReferences`
 func (svc *DeprovisionService) do(iID internal.InstanceID, opID internal.OperationID, appID string, ns internal.Namespace) {
 	if svc.asyncHook != nil {
 		defer svc.asyncHook()
