@@ -28,6 +28,7 @@ func FunctionToGQL(item *v1alpha1.Function) *gqlschema.Function {
 		Labels:    item.Labels,
 		Runtime:   item.Spec.Runtime,
 		Size:      item.Spec.Size,
+		Status:    getStatus(item.Status.Condition),
 	}
 
 	return &function
@@ -43,4 +44,23 @@ func FunctionsToGQLs(in []*v1alpha1.Function) []gqlschema.Function {
 		}
 	}
 	return result
+}
+
+func getStatus(status v1alpha1.FunctionCondition) gqlschema.FunctionStatusType {
+	switch status {
+	case v1alpha1.FunctionConditionUnknown:
+		return gqlschema.FunctionStatusTypeUnknown
+	case v1alpha1.FunctionConditionRunning:
+		return gqlschema.FunctionStatusTypeRunning
+	case v1alpha1.FunctionConditionBuilding:
+		return gqlschema.FunctionStatusTypeBuilding
+	case v1alpha1.FunctionConditionError:
+		return gqlschema.FunctionStatusTypeError
+	case v1alpha1.FunctionConditionDeploying:
+		return gqlschema.FunctionStatusTypeDeploying
+	case v1alpha1.FunctionConditionUpdating:
+		return gqlschema.FunctionStatusTypeUpdating
+	default:
+		return gqlschema.FunctionStatusTypeError
+	}
 }

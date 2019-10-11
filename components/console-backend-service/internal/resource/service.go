@@ -1,9 +1,10 @@
 package resource
 
 import (
-	"github.com/pkg/errors"
 	"reflect"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

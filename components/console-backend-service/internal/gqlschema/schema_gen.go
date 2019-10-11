@@ -412,6 +412,7 @@ type ComplexityRoot struct {
 		Labels    func(childComplexity int) int
 		Runtime   func(childComplexity int) int
 		Size      func(childComplexity int) int
+		Status    func(childComplexity int) int
 	}
 
 	FunctionMutationOutput struct {
@@ -5913,6 +5914,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Function.Size(childComplexity), true
+
+	case "Function.status":
+		if e.complexity.Function.Status == nil {
+			break
+		}
+
+		return e.complexity.Function.Status(childComplexity), true
 
 	case "FunctionMutationOutput.name":
 		if e.complexity.FunctionMutationOutput.Name == nil {
@@ -16999,6 +17007,11 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "status":
+			out.Values[i] = ec._Function_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -17143,6 +17156,33 @@ func (ec *executionContext) _Function_size(ctx context.Context, field graphql.Co
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Function_status(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Function",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(FunctionStatusType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
 }
 
 var functionMutationOutputImplementors = []string{"FunctionMutationOutput"}
@@ -33570,6 +33610,16 @@ type Function {
 	labels: Labels!
 	runtime: String!
 	size: String!
+	status: FunctionStatusType!
+}
+
+enum FunctionStatusType {
+    Unknown
+    Running
+    Building
+    Error
+    Deploying
+    Updating
 }
 
 type FunctionMutationOutput {

@@ -1,15 +1,17 @@
 package serverless
 
 import (
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
 	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -70,6 +72,24 @@ func TestFunctionService_Create(t *testing.T) {
 
 		require.Error(t, err)
 	})
+}
+
+func TestFunctionService_Delete(t *testing.T) {
+	fixName := "a1"
+	fixNamespace := "a"
+	functionA1 := fixFunction(fixName, fixNamespace)
+
+	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, functionA1)
+	require.NoError(t, err)
+
+	service := newFunctionService(serviceFactory)
+	testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
+
+	err = service.Delete(fixName, fixNamespace)
+	require.NoError(t, err)
+
+	_, err = service.Client.Namespace(fixNamespace).Get(fixName, v1.GetOptions{})
+	assert.True(t, apiErrors.IsNotFound(err))
 }
 
 func fixFunction(name, namespace string, labels map[string]string, size, runtime string) *v1alpha1.Function {

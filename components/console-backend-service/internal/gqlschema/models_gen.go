@@ -313,11 +313,12 @@ type File struct {
 }
 
 type Function struct {
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-	Labels    Labels `json:"labels"`
-	Runtime   string `json:"runtime"`
-	Size      string `json:"size"`
+	Name      string             `json:"name"`
+	Namespace string             `json:"namespace"`
+	Labels    Labels             `json:"labels"`
+	Runtime   string             `json:"runtime"`
+	Size      string             `json:"size"`
+	Status    FunctionStatusType `json:"status"`
 }
 
 type FunctionMutationOutput struct {
@@ -840,6 +841,46 @@ func (e *DocsTopicPhaseType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e DocsTopicPhaseType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type FunctionStatusType string
+
+const (
+	FunctionStatusTypeUnknown   FunctionStatusType = "Unknown"
+	FunctionStatusTypeRunning   FunctionStatusType = "Running"
+	FunctionStatusTypeBuilding  FunctionStatusType = "Building"
+	FunctionStatusTypeError     FunctionStatusType = "Error"
+	FunctionStatusTypeDeploying FunctionStatusType = "Deploying"
+	FunctionStatusTypeUpdating  FunctionStatusType = "Updating"
+)
+
+func (e FunctionStatusType) IsValid() bool {
+	switch e {
+	case FunctionStatusTypeUnknown, FunctionStatusTypeRunning, FunctionStatusTypeBuilding, FunctionStatusTypeError, FunctionStatusTypeDeploying, FunctionStatusTypeUpdating:
+		return true
+	}
+	return false
+}
+
+func (e FunctionStatusType) String() string {
+	return string(e)
+}
+
+func (e *FunctionStatusType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FunctionStatusType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FunctionStatusType", str)
+	}
+	return nil
+}
+
+func (e FunctionStatusType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
