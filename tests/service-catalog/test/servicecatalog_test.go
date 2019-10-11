@@ -125,7 +125,6 @@ func TestHelmBrokerAddonsConfiguration(t *testing.T) {
 		err = dynamicClient.Delete(context.TODO(), addonsConfig)
 		assert.NoError(t, err)
 	}()
-
 	// then
 	repeat.AssertFuncAtMost(t, func() error {
 		_, err := scClient.ServicecatalogV1beta1().ServiceClasses(namespace).Get(addonId, metav1.GetOptions{})
@@ -176,13 +175,12 @@ func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
 	// when
 	err = dynamicClient.Create(context.TODO(), addonsConfig)
 	require.NoError(t, err)
-	assert.True(t, false) // break test
 
 	// then
 	repeat.AssertFuncAtMost(t, func() error {
 		_, err := scClient.ServicecatalogV1beta1().ClusterServiceClasses().Get(addonId, metav1.GetOptions{})
 		return err
-	}, time.Second*20)
+	}, time.Second*30)
 }
 
 func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {
@@ -223,7 +221,6 @@ func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {
 	t.Log("Creating ApplicationMapping")
 	am, err := mClient.ApplicationconnectorV1alpha1().ApplicationMappings(namespace).Create(fixApplicationMapping(name))
 	require.NoError(t, err)
-
 	// when
 	t.Logf("Removing Namespace %s", namespace)
 	err = k8sClient.Namespaces().Delete(namespace, &metav1.DeleteOptions{})
@@ -240,7 +237,7 @@ func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {
 			return nil
 		}
 		return fmt.Errorf("%s is not removed", namespace)
-	}, time.Second*90)
+	}, time.Minute*2)
 
 	// then
 	t.Log("Check resources are removed")
