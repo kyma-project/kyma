@@ -5,7 +5,9 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../../..)/scripts
 
 include $(SCRIPTS_DIR)/go-dep.mk
 
-verify: check-imports check-fmt vet
+release: resolve dep-status verify-local build-image push-image
+
+verify-local: check-imports check-fmt vet
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
