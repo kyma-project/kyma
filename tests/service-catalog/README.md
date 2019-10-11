@@ -8,6 +8,11 @@ This folder contains the tests which check if a given service broker integrates 
 
 This section explains how to add a test for another broker and how to run a Service Catalog test on a local machine.
 
+To test your changes and build an image, use the `make build-image` command with **DOCKER_PUSH_REPOSITORY** and **DOCKER_PUSH_DIRECTORY** variables, for example:
+```
+DOCKER_PUSH_REPOSITORY=eu.gcr.io DOCKER_PUSH_DIRECTORY=/kyma-project/develop make build-image
+```
+
 ### Adding a test for another broker
 
 The test checks if the Service Catalog contains all the necessary service classes. All actions use standard APIs, such as Kubernetes and the Open Service Broker API, for all tests, and only the service broker URL changes.
