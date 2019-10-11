@@ -1,19 +1,21 @@
-FROM golang:1.10-alpine3.7
-
-RUN apk update && apk add curl
+FROM golang:1.12.10-alpine3.10 as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/acceptance
 ADD . $SRC_DIR
-
-ADD client.bin /go/bin/client.bin
-ADD gateway.bin /go/bin/gateway.bin
-ADD env-tester.bin /go/bin/env-tester.bin
-COPY ./licenses/ /app/licenses
+COPY ./licenses/ $SRC_DIR/licenses/
+COPY entrypoint.sh /
 
 WORKDIR $SRC_DIR
 
-RUN go test -c ./application
-RUN go test -c ./servicecatalog
+RUN CGO_ENABLED=0 go build -o /env-tester.bin ./servicecatalog/cmd/env-tester/main.go
+RUN CGO_ENABLED=0 go test -tags=acceptance -c ./servicecatalog -o /servicecatalog.test
+
+FROM alpine:3.10
+
+COPY --from=builder env-tester.bin /go/bin/env-tester.bin
+COPY --from=builder ./servicecatalog.test .
+COPY ./licenses/ /app/licenses
+COPY --from=builder /entrypoint.sh .
 
 LABEL source=git@github.com:kyma-project/kyma.git
 

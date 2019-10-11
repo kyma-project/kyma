@@ -7,7 +7,10 @@ The tests are written in Go. Each component or group of scenarios has a separate
 
 ## Usage
 
-To test your changes and build an image, use the `make build build-image` command.
+To test your changes and build an image, use the `make build-image` command with **DOCKER_PUSH_REPOSITORY** and **DOCKER_PUSH_DIRECTORY** variables, for example:
+```
+DOCKER_PUSH_REPOSITORY=eu.gcr.io DOCKER_PUSH_DIRECTORY=/kyma-project/develop make build-image
+```
 
 ### Add a new test
 

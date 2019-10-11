@@ -15,3 +15,15 @@ spec:
       mode: package
       url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterDocsTopicsVersion }}.zip
       filter: /docs/application-connector/
+    - type: openapi
+      name: connectorapi
+      mode: single
+      url: https://raw.githubusercontent.com/{{ .Values.global.kymaOrgName }}/kyma/{{ .Values.global.docs.clusterDocsTopicsVersion }}/docs/application-connector/assets/connectorapi.yaml
+    - type: openapi
+      name: eventsapi
+      mode: single
+      url: https://raw.githubusercontent.com/{{ .Values.global.kymaOrgName }}/kyma/{{ .Values.global.docs.clusterDocsTopicsVersion }}/docs/application-connector/assets/eventsapi.yaml
+    - type: openapi
+      name: metadataapi
+      mode: single
+      url: https://raw.githubusercontent.com/{{ .Values.global.kymaOrgName }}/kyma/{{ .Values.global.docs.clusterDocsTopicsVersion }}/docs/application-connector/assets/metadataapi.yaml
