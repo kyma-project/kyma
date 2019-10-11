@@ -1,6 +1,6 @@
 // +build acceptance
 
-package servicecatalog_test
+package test
 
 import (
 	"encoding/json"
@@ -84,9 +84,8 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	// when
 	ts.createBindingUsageForInstanceAWithoutPrefix(timeoutPerStep)
 	ts.createBindingUsageForInstanceBWithPrefix(timeoutPerStep)
-
 	// then
-	ts.assertInjectedEnvVariables([]servicecatalog.EnvVariable{
+	ts.assertInjectedEnvVariables([]EnvVariable{
 		{Name: ts.envPrefix + baseEnvName, Value: ts.gatewayUrl},
 		{Name: baseEnvName, Value: ts.gatewayUrl},
 	}, timeoutPerAssert)
@@ -646,7 +645,7 @@ func (ts *TestSuite) envTesterDeployment(labels map[string]string) *appsTypes.De
 	}
 }
 
-func (ts *TestSuite) assertInjectedEnvVariables(requiredVariables []servicecatalog.EnvVariable, timeout time.Duration) {
+func (ts *TestSuite) assertInjectedEnvVariables(requiredVariables []EnvVariable, timeout time.Duration) {
 	url := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs", ts.namespace)
 
 	repeat.AssertFuncAtMost(ts.t, func() error {
@@ -680,13 +679,13 @@ func (ts *TestSuite) assertInjectedEnvVariables(requiredVariables []servicecatal
 		}
 
 		decoder := json.NewDecoder(resp.Body)
-		var data []servicecatalog.EnvVariable
+		var data []EnvVariable
 		err = decoder.Decode(&data)
 		if err != nil {
 			return err
 		}
 
-		var missing []servicecatalog.EnvVariable
+		var missing []EnvVariable
 		for _, req := range requiredVariables {
 			found := false
 			for _, act := range data {
