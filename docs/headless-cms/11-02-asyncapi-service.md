@@ -14,4 +14,14 @@ This table shows the CMS AsyncAPI Service custom metrics, their types, and descr
 
 Apart from the custom metrics, the CMS AsyncAPI Service also exposes default Prometheus metrics for [Go applications](https://prometheus.io/docs/guides/go-application/).
 
+To see a complete list of the default Go metrics, run the following command:
+
+```bash
+kubectl -n kyma-system port-forward svc/cms-cms-asyncapi-service 80
+```
+
+Now open a browser and access [http://localhost:80/metrics](http://localhost:80/metrics) to check the metrics.
+
+> **TIP:** Before you use the command, make sure you have a running Kyma cluster and kubectl installed. If you cannot access the 8080 port, redirect the metrics to another one. For example, run: `kubectl -n kyma-system port-forward svc/cms-cms-asyncapi-service 8080:80` and update the port in the localhost address in your browser.
+
 See the [Monitoring](/components/monitoring) documentation to learn more about monitoring and metrics in Kyma.
