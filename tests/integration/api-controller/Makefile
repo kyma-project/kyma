@@ -2,7 +2,6 @@ APP_NAME = api-controller-integration-tests
 APP_PATH = tests/integration/api-controller
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190913-65b55d1
 SCRIPTS_DIR = $(realpath $(shell pwd)/../../..)/scripts
-MAIN_PATH := ./cmd/operator/main.go
 
 include $(SCRIPTS_DIR)/go-dep.mk
 
