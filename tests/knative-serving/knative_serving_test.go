@@ -81,7 +81,7 @@ func TestKnativeServingAcceptance(t *testing.T) {
 		t.Fatalf("Cannot create test Service: %v", err)
 	}
 
-	defer deleteService(serviceClient, svc.Name)
+	defer deleteService(t, serviceClient, svc.Name)
 	var testServiceURL string
 
 	err = retry.Do(func() error {
@@ -173,9 +173,9 @@ func loadKubeConfigOrDie(t *testing.T) *rest.Config {
 	return kubeConfig
 }
 
-func deleteService(servingClient servingtyped.ServiceInterface, name string) {
-	var deleteImmediately int64
-	_ = servingClient.Delete(name, &meta.DeleteOptions{
-		GracePeriodSeconds: &deleteImmediately,
-	})
+func deleteService(t *testing.T, servingClient servingtyped.ServiceInterface, name string) {
+	err := servingClient.Delete(name, &meta.DeleteOptions{})
+	if err != nil {
+		t.Fatalf("Cannot delete service %v, Error: %v", name, err)
+	}
 }
