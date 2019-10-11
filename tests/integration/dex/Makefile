@@ -10,6 +10,9 @@ else
 	mkdir -p licenses
 endif
 
+resolve-local:
+	dep ensure -vendor-only -v
+
 .PHONY: build-image
 build-image: pull-licenses
 	docker build -t $(APP_NAME):latest .
@@ -19,7 +22,7 @@ push-image:
 	docker tag $(APP_NAME) $(IMG):$(TAG)
 	docker push $(IMG):$(TAG)
 
-release: build-image push-image
+release: resolve-local build-image push-image
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:

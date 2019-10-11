@@ -17,7 +17,7 @@ COPY ./entrypoint.sh ${BASE_APP_DIR}/entrypoint.sh
 #
 
 RUN go test -c ./dex
-RUN mkdir /tests && mv ./dex.test /tests/dex.test ${BASE_APP_DIR}/licenses /app/licenses
+RUN mkdir /tests && mv ./dex.test /tests/dex.test && mv ${BASE_APP_DIR}/licenses /tests/licenses
 
 FROM alpine:3.8
 LABEL source = git@github.com:kyma-project/kyma.git
