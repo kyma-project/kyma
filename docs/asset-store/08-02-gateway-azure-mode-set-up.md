@@ -13,7 +13,7 @@ By default, you install Kyma with the Asset Store in Minio stand-alone mode. Thi
 
 ## Steps
 
-You can set Minio to the Azure Blob Storage Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an Azure storage account, apply a Secret and ConfigMap with an override onto a cluster or Minikube, and trigger the Kyma installation process. 
+You can set Minio to the Azure Blob Storage Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an Azure storage account, apply a Secret and ConfigMap with an override onto a cluster or Minikube, and trigger the Kyma installation process.
 
 >**CAUTION:** Buckets created in Minio without using Bucket CRs are not recreated or migrated while switching to the Minio Gateway mode.
 
@@ -29,12 +29,14 @@ Create an Azure resource group and a storage account. Follow these steps:
     - **AZ_SUBSCRIPTION** is the ID of the Azure subscription.
 
     Example:
-    ```
+
+    ```bash
     export AZ_ACCOUNT_NAME=myStorageAccount
     export AZ_RESOURCE_GROUP=my-resource-group
     export AZ_RESOURCE_GROUP_LOCATION=westeurope
     export AZ_SUBSCRIPTION=123456-123456-123456-1234567
     ```
+
 2. When you communicate with Microsoft Azure for the first time, log into your Azure account. Run this command:
 
     ```bash
@@ -56,7 +58,7 @@ Create an Azure resource group and a storage account. Follow these steps:
 5. Export the access key as an environment variable:
 
     ```bash
-    export AZ_ACCOUNT_KEY=$(az storage account keys list --account-name "${AZURE_STORAGE_ACCOUNT_NAME}" --resource-group "${AZURE_RS_GROUP}" --query "[?keyName=='key1'].value" --output tsv | base64)
+    export AZ_ACCOUNT_KEY=$(az storage account keys list --account-name "${AZURE_ACCOUNT_NAME}" --resource-group "${AZURE_RESOURCE_GROUP}" --query "[?keyName=='key1'].value" --output tsv | base64)
     ```
 
 ### Configure Minio Gateway mode
@@ -76,8 +78,8 @@ metadata:
     kyma-project.io/installation: ""
 type: Opaque
 data:
-  minio.accessKey: "$(< ${AZ_ACCOUNT_NAME} base64)"
-  minio.secretKey: "${AZURE_STORAGE_ACCOUNT_KEY}"
+  minio.accessKey: "$(echo "${AZ_ACCOUNT_NAME}" | base64)"
+  minio.secretKey: "${AZURE_ACCOUNT_KEY}"
 ---
 apiVersion: v1
 kind: ConfigMap
