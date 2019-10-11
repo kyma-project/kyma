@@ -3,11 +3,6 @@ FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190913-65b55d
 ENV BASE_APP_DIR /workspace/go/src/github.com/kyma-project/kyma/tests/integration/dex
 WORKDIR ${BASE_APP_DIR}
 
-##
-# DEP ENSURE
-##
-RUN dep ensure --vendor-only
-
 #
 # Copy files
 #
@@ -21,7 +16,7 @@ COPY ./entrypoint.sh ${BASE_APP_DIR}/entrypoint.sh
 # Build tests
 #
 
-RUN go test -c ./dex
+RUN go test -c ./dex -tags=ignore
 RUN mkdir /tests && mv ./dex.test /tests/dex.test && mv ${BASE_APP_DIR}/licenses /tests/licenses
 
 FROM alpine:3.8

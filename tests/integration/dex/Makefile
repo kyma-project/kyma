@@ -1,28 +1,13 @@
 APP_NAME = dex-integration-tests
-IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
-TAG = $(DOCKER_TAG)
+APP_PATH = tests/integration/dex
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190913-65b55d1
+#IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
+#TAG = $(DOCKER_TAG)
+SCRIPTS_DIR = $(realpath $(shell pwd)/../../..)/scripts
 
-.PHONY: pull-licenses
-pull-licenses:
-ifdef LICENSE_PULLER_PATH
-	bash $(LICENSE_PULLER_PATH)
-else
-	mkdir -p licenses
-endif
+include $(SCRIPTS_DIR)/go-dep.mk
 
-resolve-local:
-	dep ensure -vendor-only -v
-
-.PHONY: build-image
-build-image: pull-licenses
-	docker build -t $(APP_NAME):latest .
-
-.PHONY: push-image
-push-image:
-	docker tag $(APP_NAME) $(IMG):$(TAG)
-	docker push $(IMG):$(TAG)
-
-release: resolve-local build-image push-image
+verify:: vet
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:

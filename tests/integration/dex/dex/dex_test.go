@@ -1,3 +1,5 @@
+// +build ignore
+
 package dex
 
 import (
@@ -10,7 +12,6 @@ import (
 
 	"github.com/kyma-project/kyma/common/ingressgateway"
 	"github.com/kyma-project/kyma/common/resilient"
-	. "github.com/smartystreets/goconvey/convey"
 	"github.com/vrischmann/envconfig"
 )
 
