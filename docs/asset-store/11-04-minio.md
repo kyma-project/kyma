@@ -7,7 +7,7 @@ As an external, open-source file storage solution, Minio exposes its own metrics
 
 Apart from the custom metrics, Minio also exposes default Prometheus metrics for [Go applications](https://prometheus.io/docs/guides/go-application/).
 
-To see a complete list of the Go metrics, run the following command:
+To see a complete list of the custom and Go metrics, run the following command:
 
 ```bash
 kubectl -n kyma-system port-forward svc/assetstore-minio 9000

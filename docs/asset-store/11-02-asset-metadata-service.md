@@ -12,7 +12,7 @@ This table shows the Asset Metadata Service custom metrics, their types, and des
 
 Apart from the custom metrics, the Asset Metadata Service also exposes default Prometheus metrics for [Go applications](https://prometheus.io/docs/guides/go-application/).
 
-To see a complete list of the default Go metrics, run the following command:
+To see a complete list of the custom and Go metrics, run the following command:
 
 ```bash
 kubectl -n kyma-system port-forward svc/assetstore-asset-metadata-service 80
