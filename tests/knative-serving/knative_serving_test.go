@@ -174,6 +174,8 @@ func loadKubeConfigOrDie(t *testing.T) *rest.Config {
 }
 
 func deleteService(t *testing.T, servingClient servingtyped.ServiceInterface, name string) {
+	t.Helper()
+
 	err := servingClient.Delete(name, &meta.DeleteOptions{})
 	if err != nil {
 		t.Fatalf("Cannot delete service %v, Error: %v", name, err)
