@@ -67,8 +67,8 @@ global:
     dir: develop/
     version: "d53509a0"
   xip_patch:
-    dir: develop/
-    version: 665a2857
+    dir:
+    version: 28fc9db3
   e2e_external_solution:
     dir: develop/
     version: 3f9dc61a
