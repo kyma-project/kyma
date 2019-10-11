@@ -1,0 +1,3 @@
+version: "2"
+domain: tutorial.kubebuilder.io
+repo: github.com/kyma-project/kyma/tools/velero-plugins
