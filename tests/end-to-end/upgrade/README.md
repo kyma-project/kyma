@@ -136,7 +136,10 @@ Run the application using Helm:
 
 ### Verify the code
 
-Use the `before-commit.sh` script or the `make build` command to test your changes before each commit.
+Use the `make verify` command to test your changes before each commit. To build an image, use the `make build-image` command with **DOCKER_PUSH_REPOSITORY** and **DOCKER_PUSH_DIRECTORY** variables, for example:
+```
+DOCKER_PUSH_REPOSITORY=eu.gcr.io DOCKER_PUSH_DIRECTORY=/kyma-project/develop make build-image
+```
 
 ### Project structure
 
