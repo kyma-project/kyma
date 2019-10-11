@@ -151,16 +151,16 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
 					// assert previous APIs deleted
 					for _, api := range application.APIs.Data {
-						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.Name, api.ID)
+						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, updatedApp.Name, api.ID)
 					}
 					// assert previous EventAPIs deleted
 					for _, eventAPI := range application.EventAPIs.Data {
-						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, application.Name, eventAPI.ID)
+						testSuite.K8sResourceChecker.AssertAPIResourcesDeleted(t, updatedApp.Name, eventAPI.ID)
 					}
 
 					// assert updated Application
 					testSuite.K8sResourceChecker.AssertResourcesForApp(t, updatedApp)
-					testSuite.APIAccessChecker.AssertAPIAccess(t, updatedApp.APIs.Data...)
+					testSuite.APIAccessChecker.AssertAPIAccess(t, updatedApp.Name, updatedApp.APIs.Data...)
 				}
 			},
 		},
@@ -217,7 +217,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 					// assert updated APIs
 					testSuite.K8sResourceChecker.AssertAPIResources(t, application.Name, updatedAPIs...)
 
-					testSuite.APIAccessChecker.AssertAPIAccess(t, updatedAPIs...)
+					testSuite.APIAccessChecker.AssertAPIAccess(t, application.Name, updatedAPIs...)
 				}
 			},
 		},
@@ -377,7 +377,7 @@ func assertK8sResourcesAndAPIAccess(t *testing.T, testSuite *runtimeagent.TestSu
 	testSuite.K8sResourceChecker.AssertResourcesForApp(t, application)
 
 	t.Logf("Checking API Access")
-	testSuite.APIAccessChecker.AssertAPIAccess(t, application.APIs.Data...)
+	testSuite.APIAccessChecker.AssertAPIAccess(t, application.Name, application.APIs.Data...)
 }
 
 func waitForAgentToApplyConfig(t *testing.T, testSuite *runtimeagent.TestSuite) {

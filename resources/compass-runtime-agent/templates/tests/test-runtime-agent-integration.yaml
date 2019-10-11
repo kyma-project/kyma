@@ -67,6 +67,7 @@ spec:
           hostnames:
             - "compass-gateway.{{ .Values.global.ingress.domainName }}"
             - "compass-gateway-auth-oauth.{{ .Values.global.ingress.domainName }}"
+            - "minio.{{ .Values.global.ingress.domainName }}"
       {{ end }}
     restartPolicy: Never
 {{- end }}

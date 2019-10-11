@@ -33,7 +33,7 @@ func TestService(t *testing.T) {
 
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(nil, apperrors.Internal("some error"))
 
-		directorApplication := getTestDirectorApplication("id1", []model.APIDefinition{}, []model.EventAPIDefinition{})
+		directorApplication := getTestDirectorApplication("id1", "name1", []model.APIDefinition{}, []model.EventAPIDefinition{})
 
 		directorApplications := []model.Application{
 			directorApplication,
@@ -66,12 +66,12 @@ func TestService(t *testing.T) {
 
 		eventAPI := getTestDirectorEventAPIDefinition("EventAPI1", nil)
 
-		directorApplication := getTestDirectorApplication("id1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
+		directorApplication := getTestDirectorApplication("id1", "name1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
 
 		runtimeService1 := getTestServiceWithCredentials("API1")
 		runtimeService2 := getTestServiceWithCredentials("EventAPI1")
 
-		runtimeApplication := getTestApplication("id1", []v1alpha1.Service{runtimeService1, runtimeService2})
+		runtimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeService1, runtimeService2})
 
 		directorApplications := []model.Application{
 			directorApplication,
@@ -85,14 +85,14 @@ func TestService(t *testing.T) {
 		applicationsManagerMock.On("Create", &runtimeApplication).Return(&runtimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		resourcesServiceMocks.On("CreateApiResources", "id1", runtimeApplication.UID, "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), []byte("spec"), docstopic.OpenApiType).Return(nil)
-		resourcesServiceMocks.On("CreateEventApiResources", "id1", "EventAPI1", nilSpec, docstopic.Empty).Return(nil)
+		resourcesServiceMocks.On("CreateApiResources", "name1", runtimeApplication.UID, "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), []byte("spec"), docstopic.OpenApiType).Return(nil)
+		resourcesServiceMocks.On("CreateEventApiResources", "name1", "EventAPI1", nilSpec, docstopic.Empty).Return(nil)
 
 		expectedResult := []Result{
 			{
-				ApplicationID: "id1",
-				Operation:     Create,
-				Error:         nil,
+				ApplicationName: "name1",
+				Operation:       Create,
+				Error:           nil,
 			},
 		}
 
@@ -119,19 +119,19 @@ func TestService(t *testing.T) {
 			Data: []byte("spec"), Type: model.EventAPISpecTypeAsyncAPI,
 		})
 
-		directorApplication := getTestDirectorApplication("id1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
+		directorApplication := getTestDirectorApplication("id1", "name1", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI})
 
 		runtimeService1 := getTestServiceWithCredentials("API1")
 		runtimeService2 := getTestServiceWithoutCredentials("EventAPI1")
 		runtimeService3 := getTestServiceWithoutCredentials("API2")
 
-		runtimeApplication := getTestApplication("id1", []v1alpha1.Service{runtimeService1, runtimeService2})
+		runtimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeService1, runtimeService2})
 
 		directorApplications := []model.Application{
 			directorApplication,
 		}
 
-		existingRuntimeApplication := getTestApplication("id1", []v1alpha1.Service{runtimeService1, runtimeService3})
+		existingRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeService1, runtimeService3})
 		existingRuntimeApplications := v1alpha1.ApplicationList{
 			Items: []v1alpha1.Application{existingRuntimeApplication},
 		}
@@ -139,15 +139,15 @@ func TestService(t *testing.T) {
 		converterMock.On("Do", directorApplication).Return(runtimeApplication)
 		applicationsManagerMock.On("Update", &runtimeApplication).Return(&runtimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		resourcesServiceMocks.On("UpdateApiResources", "id1", types.UID(""), "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), nilSpec, docstopic.Empty).Return(nil)
-		resourcesServiceMocks.On("CreateEventApiResources", "id1", "EventAPI1", []byte("spec"), docstopic.AsyncApi).Return(nil)
-		resourcesServiceMocks.On("DeleteApiResources", "id1", "API2", "").Return(nil)
+		resourcesServiceMocks.On("UpdateApiResources", "name1", types.UID(""), "API1", mock.MatchedBy(getCredentialsMatcher(api.Credentials)), nilSpec, docstopic.Empty).Return(nil)
+		resourcesServiceMocks.On("CreateEventApiResources", "name1", "EventAPI1", []byte("spec"), docstopic.AsyncApi).Return(nil)
+		resourcesServiceMocks.On("DeleteApiResources", "name1", "API2", "").Return(nil)
 
 		expectedResult := []Result{
 			{
-				ApplicationID: "id1",
-				Operation:     Update,
-				Error:         nil,
+				ApplicationName: "name1",
+				Operation:       Update,
+				Error:           nil,
 			},
 		}
 
@@ -170,7 +170,7 @@ func TestService(t *testing.T) {
 		resourcesServiceMocks := &resourcesServiceMocks.Service{}
 
 		runtimeService := getTestServiceWithCredentials("API1")
-		runtimeApplication := getTestApplication("id1", []v1alpha1.Service{runtimeService})
+		runtimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeService})
 
 		existingRuntimeApplications := v1alpha1.ApplicationList{
 			Items: []v1alpha1.Application{
@@ -180,13 +180,13 @@ func TestService(t *testing.T) {
 
 		applicationsManagerMock.On("Delete", runtimeApplication.Name, &metav1.DeleteOptions{}).Return(nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		resourcesServiceMocks.On("DeleteApiResources", "id1", "API1", "credentialsSecretName1").Return(nil)
+		resourcesServiceMocks.On("DeleteApiResources", "name1", "API1", "credentialsSecretName1").Return(nil)
 
 		expectedResult := []Result{
 			{
-				ApplicationID: "id1",
-				Operation:     Delete,
-				Error:         nil,
+				ApplicationName: "name1",
+				Operation:       Delete,
+				Error:           nil,
 			},
 		}
 
@@ -210,7 +210,7 @@ func TestService(t *testing.T) {
 
 		runtimeService1 := getTestServiceWithCredentials("API1")
 		runtimeService2 := getTestServiceWithCredentials("API2")
-		runtimeApplication := getTestApplication("id1", []v1alpha1.Service{runtimeService1})
+		runtimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeService1})
 		notManagedRuntimeApplication := getTestApplicationNotManagedByCompass("id2", []v1alpha1.Service{runtimeService2})
 
 		existingRuntimeApplications := v1alpha1.ApplicationList{
@@ -226,9 +226,9 @@ func TestService(t *testing.T) {
 
 		expectedResult := []Result{
 			{
-				ApplicationID: "id1",
-				Operation:     Delete,
-				Error:         nil,
+				ApplicationName: "name1",
+				Operation:       Delete,
+				Error:           nil,
 			},
 		}
 
@@ -262,24 +262,24 @@ func TestService(t *testing.T) {
 		newDirectorApi := getTestDirectorAPiDefinition("API1", nil, nil)
 		newDirectorEventApi := getTestDirectorEventAPIDefinition("EventAPI1", nil)
 
-		newDirectorApplication := getTestDirectorApplication("id1",
+		newDirectorApplication := getTestDirectorApplication("id1", "name1",
 			[]model.APIDefinition{newDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi})
-		convertedNewRuntimeApplication := getTestApplication("id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2})
+		convertedNewRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2})
 
 		existingDirectorApi := getTestDirectorAPiDefinition("API2", nil, nil)
 		existingDirectorEventApi := getTestDirectorEventAPIDefinition("EventAPI2", nil)
 
-		existingDirectorApplication := getTestDirectorApplication("id2", []model.APIDefinition{newDirectorApi, existingDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi, existingDirectorEventApi})
-		convertedExistingRuntimeApplication := getTestApplication("id2", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, existingRuntimeService1, existingRuntimeService2})
+		existingDirectorApplication := getTestDirectorApplication("id2", "name2", []model.APIDefinition{newDirectorApi, existingDirectorApi}, []model.EventAPIDefinition{newDirectorEventApi, existingDirectorEventApi})
+		convertedExistingRuntimeApplication := getTestApplication("name2", "id2", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, existingRuntimeService1, existingRuntimeService2})
 
-		runtimeApplicationToBeDeleted := getTestApplication("id3", []v1alpha1.Service{runtimeServiceToBeDeleted1, runtimeServiceToBeDeleted2})
+		runtimeApplicationToBeDeleted := getTestApplication("name3", "id3", []v1alpha1.Service{runtimeServiceToBeDeleted1, runtimeServiceToBeDeleted2})
 
 		directorApplications := []model.Application{
 			newDirectorApplication,
 			existingDirectorApplication,
 		}
 
-		existingRuntimeApplication := getTestApplication("id2", []v1alpha1.Service{existingRuntimeService1, existingRuntimeService2, runtimeServiceToBeDeleted1, runtimeServiceToBeDeleted2})
+		existingRuntimeApplication := getTestApplication("name2", "id2", []v1alpha1.Service{existingRuntimeService1, existingRuntimeService2, runtimeServiceToBeDeleted1, runtimeServiceToBeDeleted2})
 
 		existingRuntimeApplications := v1alpha1.ApplicationList{
 			Items: []v1alpha1.Application{existingRuntimeApplication,
@@ -293,8 +293,8 @@ func TestService(t *testing.T) {
 		applicationsManagerMock.On("Delete", runtimeApplicationToBeDeleted.Name, &metav1.DeleteOptions{}).Return(apperrors.Internal("some error"))
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		resourcesServiceMocks.On("DeleteApiResources", "id3", "API3", "credentialsSecretName1").Return(apperrors.Internal("some error"))
-		resourcesServiceMocks.On("DeleteApiResources", "id3", "EventAPI3", "credentialsSecretName1").Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("DeleteApiResources", "name3", "API3", "credentialsSecretName1").Return(apperrors.Internal("some error"))
+		resourcesServiceMocks.On("DeleteApiResources", "name3", "EventAPI3", "credentialsSecretName1").Return(apperrors.Internal("some error"))
 
 		// when
 		kymaService := NewService(applicationsManagerMock, converterMock, resourcesServiceMocks)
@@ -345,10 +345,10 @@ func getCredentialsMatcher(expected *model.Credentials) func(*secretsmodel.Crede
 	}
 }
 
-func getTestDirectorApplication(id string, apiDefinitions []model.APIDefinition, eventApiDefinitions []model.EventAPIDefinition) model.Application {
+func getTestDirectorApplication(id, name string, apiDefinitions []model.APIDefinition, eventApiDefinitions []model.EventAPIDefinition) model.Application {
 	return model.Application{
 		ID:        id,
-		Name:      "First App",
+		Name:      name,
 		APIs:      apiDefinitions,
 		EventAPIs: eventApiDefinitions,
 	}
@@ -404,8 +404,8 @@ func getTestServiceWithoutCredentials(serviceID string) v1alpha1.Service {
 	}
 }
 
-func getTestApplication(id string, services []v1alpha1.Service) v1alpha1.Application {
-	testApplication := getTestApplicationNotManagedByCompass(id, services)
+func getTestApplication(name, id string, services []v1alpha1.Service) v1alpha1.Application {
+	testApplication := getTestApplicationNotManagedByCompass(name, services)
 	testApplication.Spec.CompassMetadata = &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{id}}}
 
 	return testApplication

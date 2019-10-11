@@ -33,9 +33,8 @@ func NewConverter(nameResolver k8sconsts.NameResolver) Converter {
 }
 
 // TODO: consider differences in Director's and Application CRD
-// 1. Director provides Application Name and Application ID but we cannot store both. Application ID is used as application name in the CRD.
-// 2. Director provides application labels in a form of map[string]string[] whereas application CRD expects map[string]string
-// 3. Service object being a part of Application CRD contains some fields which are not returned by the Director:
+// 1. Director provides application labels in a form of map[string]string[] whereas application CRD expects map[string]string
+// 2. Service object being a part of Application CRD contains some fields which are not returned by the Director:
 // 	 1) ProviderDisplayName field ; Application Registry takes this value from the payload passed on service registration.
 //	 2) LongDescription field ; Application Registry takes this value from the payload passed on service registration.
 //   3) Identifier field ; Application Registry takes this value from the payload passed on service registration. The field represent an external identifier defined in the system exposing API/Events.
@@ -76,15 +75,15 @@ const (
 	connectedApp = "connected-app"
 )
 
-func (c converter) toServices(applicationID string, apis []model.APIDefinition, eventAPIs []model.EventAPIDefinition) []v1alpha1.Service {
+func (c converter) toServices(applicationName string, apis []model.APIDefinition, eventAPIs []model.EventAPIDefinition) []v1alpha1.Service {
 	services := make([]v1alpha1.Service, 0, len(apis)+len(eventAPIs))
 
 	for _, apiDefinition := range apis {
-		services = append(services, c.toAPIService(applicationID, apiDefinition))
+		services = append(services, c.toAPIService(applicationName, apiDefinition))
 	}
 
 	for _, eventsDefinition := range eventAPIs {
-		services = append(services, c.toEventAPIService(applicationID, eventsDefinition))
+		services = append(services, c.toEventAPIService(applicationName, eventsDefinition))
 	}
 
 	return services
