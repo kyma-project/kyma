@@ -3,6 +3,8 @@ FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190913-65b55d
 ENV BASE_APP_DIR /workspace/go/src/github.com/kyma-project/kyma/tests/integration/dex
 WORKDIR ${BASE_APP_DIR}
 
+RUN apk update && apk add curl
+
 #
 # Copy files
 #
