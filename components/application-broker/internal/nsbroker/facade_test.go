@@ -15,8 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 	core_v1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8s_fake "k8s.io/client-go/kubernetes/fake"
@@ -78,7 +77,7 @@ func TestNsBrokerCreateAlreadyExistErrorsIgnored(t *testing.T) {
 	scFakeClientset.PrependReactor("create", "servicebrokers", failingReactor(fixAlreadyExistError()))
 	scFakeClientset.PrependReactor("get", "servicebrokers", func(action k8s_testing.Action) (handled bool, ret runtime.Object, err error) {
 		return true, &v1beta1.ServiceBroker{
-			ObjectMeta: meta_v1.ObjectMeta{
+			ObjectMeta: v1.ObjectMeta{
 				Name: nsbroker.NamespacedBrokerName,
 				UID:  "1234-abcd",
 			},
@@ -108,7 +107,7 @@ func TestNsBrokerDeleteErrorOnRemovingBroker(t *testing.T) {
 	// GIVEN
 	scFakeClientset := sc_fake.NewSimpleClientset()
 	k8sFakeClientSet := k8s_fake.NewSimpleClientset(&core_v1.Service{
-		ObjectMeta: meta_v1.ObjectMeta{
+		ObjectMeta: v1.ObjectMeta{
 			Name:      "ab-ns-for-stage",
 			Namespace: fixWorkingNs(),
 		}})
@@ -149,14 +148,14 @@ func TestNsBrokerDoesNotExist(t *testing.T) {
 func TestNsBrokerExist(t *testing.T) {
 	// GIVEN
 	scFakeClientset := sc_fake.NewSimpleClientset(&v1beta1.ServiceBroker{
-		ObjectMeta: meta_v1.ObjectMeta{
+		ObjectMeta: v1.ObjectMeta{
 			Name:      "application-broker",
 			Namespace: fixDestNs(),
 		}})
 
 	k8sFakeClientset := k8s_fake.NewSimpleClientset(
 		&core_v1.Service{
-			ObjectMeta: meta_v1.ObjectMeta{
+			ObjectMeta: v1.ObjectMeta{
 				Name:      "ab-ns-for-stage",
 				Namespace: fixWorkingNs(),
 			},

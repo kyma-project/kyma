@@ -16,8 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )
 
@@ -163,7 +162,7 @@ func testDetailsReport(t *testing.T, services []osb.Service, ns string) {
 		t.Logf("   Is removed from catalog: %t", sc.Status.CommonServiceClassStatus.RemovedFromBrokerCatalog)
 	}
 
-	sbs, err := scCnt.ServicecatalogV1beta1().ServiceBrokers(ns).List(metav1.ListOptions{})
+	sbs, err := scCnt.ServicecatalogV1beta1().ServiceBrokers(ns).List(v1.ListOptions{})
 	if err != nil {
 		t.Errorf("Cannot fetch ServiceBrokers list during creating a report: %s", err)
 	}

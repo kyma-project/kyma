@@ -6,7 +6,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/pkg/errors"
-	"github.com/pmorie/go-open-service-broker-client/v2"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 )
@@ -37,7 +36,7 @@ type DeprovisionService struct {
 }
 
 // Deprovision action
-func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContext, req *v2.DeprovisionRequest) (*v2.DeprovisionResponse, error) {
+func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContext, req *osb.DeprovisionRequest) (*osb.DeprovisionResponse, error) {
 	if !req.AcceptsIncomplete {
 		return nil, errors.New("asynchronous operation mode required")
 	}
