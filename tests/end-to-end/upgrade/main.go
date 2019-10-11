@@ -204,7 +204,8 @@ func getDexConfigFromCluster(k8sCli *k8sClientSet.Clientset, userSecret, dexName
 	err := waiter.WaitAtMost(func() (done bool, err error) {
 		secret, err := k8sCli.CoreV1().Secrets(dexNamespace).Get(userSecret, metav1.GetOptions{})
 		if err != nil {
-			return false, err
+			logrus.Infof("while getting dex secret: %v", err)
+			return false, nil
 		}
 		dexConfig = dex.Config{
 			Domain:       domainName,
