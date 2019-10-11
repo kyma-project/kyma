@@ -3,7 +3,8 @@ title: Resources
 type: Details
 ---
 
-This document includes an overview of resources that the Kyma Service Catalog provides.
+Service Catalog uses a set of custom resources provided either by Kubernetes or by Kyma itself.
+These are the native [Kubernetes resources](https://kubernetes.io/docs/concepts/extend-kubernetes/service-catalog/#api-resources) that Service Catalog uses:
 
 >**NOTE:** The "Cluster" prefix in front of resources means they are cluster-wide. Resources without that prefix refer to the Namespace scope.   
 
@@ -25,6 +26,9 @@ This document includes an overview of resources that the Kyma Service Catalog pr
 
 * **Secret** is a basic resource to transfer credentials or configuration details that the application uses to consume a ServiceInstance. The service binding process leads to the creation of a Secret.
 
-* **ServiceBindingUsage** is a Kyma custom resource that allows the ServiceBindingUsage controller to inject Secrets into a given application.
 
-* **UsageKind** is a Kyma custom resource that defines which resources can be bound with the ServiceBinding and how to bind them.
+These are the Service Catalog resources that Kyma provides:
+
+* [**ServiceBindingUsage**](#custom-resource-service-binding-usage) is a Kyma custom resource that allows the ServiceBindingUsage controller to inject Secrets into a given application.
+
+* [**UsageKind**](#custom-resource-usage-kind) is a Kyma custom resource that defines which resources you can bind to the ServiceBinding and how to bind them.

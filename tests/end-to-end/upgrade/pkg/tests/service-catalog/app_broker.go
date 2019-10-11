@@ -12,6 +12,7 @@ import (
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -103,6 +104,7 @@ func (f *appBrokerFlow) CreateResources() error {
 	} {
 		err := fn()
 		if err != nil {
+			f.log.Errorln(err)
 			f.logReport()
 			return err
 		}
@@ -127,6 +129,7 @@ func (f *appBrokerFlow) TestResources() error {
 	} {
 		err := fn()
 		if err != nil {
+			f.log.Errorln(err)
 			f.logReport()
 			return err
 		}
@@ -146,57 +149,62 @@ func (f *appBrokerFlow) deleteApplication() error {
 
 func (f *appBrokerFlow) createApplication() error {
 	f.log.Info("Creating Application")
-	_, err := f.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().Create(&v1alpha1.Application{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Application",
-			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: applicationName,
-		},
-		Spec: v1alpha1.ApplicationSpec{
-			AccessLabel:      "app-access-label",
-			Description:      "Application used by application acceptance test",
-			SkipInstallation: true,
-			Services: []v1alpha1.Service{
-				{
-					ID:   apiServiceID,
-					Name: apiServiceID,
-					Labels: map[string]string{
-						"connected-app": "app-name",
-					},
-					ProviderDisplayName: "provider",
-					DisplayName:         "Some API",
-					Description:         "Application Service Class with API",
-					Tags:                []string{},
-					Entries: []v1alpha1.Entry{
-						{
-							Type:        "API",
-							AccessLabel: "accessLabel",
-							GatewayUrl:  gatewayURL,
+	return wait.Poll(time.Millisecond*500, time.Second*30, func() (done bool, err error) {
+		if _, err = f.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().Create(&v1alpha1.Application{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Application",
+				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: applicationName,
+			},
+			Spec: v1alpha1.ApplicationSpec{
+				AccessLabel:      "app-access-label",
+				Description:      "Application used by application acceptance test",
+				SkipInstallation: true,
+				Services: []v1alpha1.Service{
+					{
+						ID:   apiServiceID,
+						Name: apiServiceID,
+						Labels: map[string]string{
+							"connected-app": "app-name",
+						},
+						ProviderDisplayName: "provider",
+						DisplayName:         "Some API",
+						Description:         "Application Service Class with API",
+						Tags:                []string{},
+						Entries: []v1alpha1.Entry{
+							{
+								Type:        "API",
+								AccessLabel: "accessLabel",
+								GatewayUrl:  gatewayURL,
+							},
 						},
 					},
-				},
-				{
-					ID:   eventsServiceID,
-					Name: eventsServiceID,
-					Labels: map[string]string{
-						"connected-app": "app-name",
-					},
-					ProviderDisplayName: "provider",
-					DisplayName:         "Some Events",
-					Description:         "Application Service Class with Events",
-					Tags:                []string{},
-					Entries: []v1alpha1.Entry{
-						{
-							Type: "Events",
+					{
+						ID:   eventsServiceID,
+						Name: eventsServiceID,
+						Labels: map[string]string{
+							"connected-app": "app-name",
+						},
+						ProviderDisplayName: "provider",
+						DisplayName:         "Some Events",
+						Description:         "Application Service Class with Events",
+						Tags:                []string{},
+						Entries: []v1alpha1.Entry{
+							{
+								Type: "Events",
+							},
 						},
 					},
 				},
 			},
-		},
+		}); err != nil {
+			f.log.Errorf("while creating application: %v", err)
+			return false, nil
+		}
+		return true, nil
 	})
-	return err
 }
 
 func (f *appBrokerFlow) deployEnvTester() error {

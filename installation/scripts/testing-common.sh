@@ -226,6 +226,7 @@ EOF
         fi
         if [[ "${msg}" = "Failed" ]]; then
             log "Testing addons configuration failed" red
+            removeTestingAddons
             return 1
         fi
         echo "Waiting for ready testing addons ${retry}/10.. status: ${msg}"

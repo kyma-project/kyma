@@ -14,6 +14,7 @@ type Config struct {
 }
 
 func TestApplicationMapping_EnsureBrokerAndClassesOnlyWhenMappingExist(t *testing.T) {
+	t.Skip()
 	var cfg Config
 	if err := envconfig.Init(&cfg); err != nil {
 		t.Fatalf(err.Error())

@@ -97,12 +97,12 @@ else
   fi
 fi
 
-# creates a config map which provides the testing addons
+# creates a ClusterAddonsConfiguration which provides the testing addons
 injectTestingAddons
 if [[ $? -eq 1 ]]; then
   exit 1
 fi
-trap removeTestingAddons ERR EXIT
+trap removeTestingAddons EXIT
 
 cat <<EOF | ${kc} apply -f -
 apiVersion: testing.kyma-project.io/v1alpha1

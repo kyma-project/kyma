@@ -1,6 +1,6 @@
 package mapping
 
-import "k8s.io/api/core/v1"
+import v1 "k8s.io/api/core/v1"
 
 func (c *Controller) ProcessItem(key string) error {
 	return c.processItem(key)
