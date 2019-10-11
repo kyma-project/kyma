@@ -99,4 +99,4 @@ go test ./...
 
 To check if the code is correct and you can push it, use the `make` command. It builds the application, runs tests, checks the status of the vendored libraries, runs the static code analysis, and checks if the formatting of the code is correct. 
 
-Command `make format` can be used to automatically format incorrect code.
+To automatically format the incorrect code, use the `make format` command.
