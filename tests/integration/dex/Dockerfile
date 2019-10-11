@@ -11,6 +11,7 @@ RUN apk update && apk add curl
 
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./dex/ ${BASE_APP_DIR}/dex/
+COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 COPY ./entrypoint.sh ${BASE_APP_DIR}/entrypoint.sh
 
 #
@@ -18,7 +19,7 @@ COPY ./entrypoint.sh ${BASE_APP_DIR}/entrypoint.sh
 #
 
 RUN go test -c ./dex
-RUN mkdir /tests && mv ./dex.test /tests/dex.test
+RUN mkdir /tests && mv ./dex.test /tests/dex.test ${BASE_APP_DIR}/licenses /app/licenses
 
 FROM alpine:3.8
 LABEL source = git@github.com:kyma-project/kyma.git
