@@ -112,6 +112,27 @@
   version = "v0.2.1"
 
 [[projects]]
+  branch = "master"
+  digest = "1:de0016e87636a076499c2c4840563d7e54c4acbc2fc5dca303390501a4d85b12"
+  name = "github.com/cloudevents/sdk-go"
+  packages = [
+    ".",
+    "pkg/cloudevents",
+    "pkg/cloudevents/client",
+    "pkg/cloudevents/context",
+    "pkg/cloudevents/datacodec",
+    "pkg/cloudevents/datacodec/json",
+    "pkg/cloudevents/datacodec/text",
+    "pkg/cloudevents/datacodec/xml",
+    "pkg/cloudevents/observability",
+    "pkg/cloudevents/transport",
+    "pkg/cloudevents/transport/http",
+    "pkg/cloudevents/types",
+  ]
+  pruneopts = "NUT"
+  revision = "8dc7a6994d99f07031904838c4e91101d5fd218a"
+
+[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -1204,7 +1225,7 @@
   version = "kubernetes-1.12.9"
 
 [[projects]]
-  digest = "1:6dc6befe132744c323c7f359aa26fdcca860a66d0dd464c4aab6558150247e55"
+  digest = "1:57fa2d1a3ab49d87cc23bcc3ac8f8c81d26ab134904e68dd53f53db1d6921919"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -1352,10 +1373,12 @@
     "pkg/apis/clientauthentication/v1beta1",
     "pkg/version",
     "plugin/pkg/client/auth/exec",
+    "plugin/pkg/client/auth/gcp",
     "rest",
     "rest/watch",
     "restmapper",
     "testing",
+    "third_party/forked/golang/template",
     "tools/auth",
     "tools/cache",
     "tools/clientcmd",
@@ -1375,6 +1398,7 @@
     "util/flowcontrol",
     "util/homedir",
     "util/integer",
+    "util/jsonpath",
     "util/retry",
     "util/workqueue",
   ]
@@ -1518,6 +1542,8 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/cloudevents/sdk-go",
+    "github.com/cloudevents/sdk-go/pkg/cloudevents/transport",
     "github.com/emicklei/go-restful",
     "github.com/go-logr/logr",
     "github.com/gofrs/uuid",
@@ -1560,9 +1586,11 @@
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
     "k8s.io/client-go/kubernetes/scheme",
+    "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
     "k8s.io/client-go/tools/cache",
+    "k8s.io/client-go/tools/clientcmd",
     "k8s.io/client-go/tools/record",
     "k8s.io/client-go/util/flowcontrol",
     "k8s.io/gengo/args",
