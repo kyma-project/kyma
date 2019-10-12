@@ -3,6 +3,8 @@ package v2
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -191,6 +193,12 @@ func getTraceHeaders(ctx context.Context) *map[string]string {
 
 // Receive finally handles the decoded event
 func HandleEvent(ctx context.Context, event cloudevents.Event, eventResponse *cloudevents.EventResponse) error {
+	fmt.Printf("received event %+v", event)
+
+	if _, err := event.Context.GetExtension("event-type-version"); err != nil {
+		// TODO(nachtmaar): set proper status code
+		return errors.New("günther")
+	}
 
 	traceHeaders := getTraceHeaders(ctx)
 
