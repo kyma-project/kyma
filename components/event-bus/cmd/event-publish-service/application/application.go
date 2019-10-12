@@ -1,8 +1,13 @@
 package application
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"net/http"
 
+	cloudevents "github.com/cloudevents/sdk-go"
+	cloudeventstransport "github.com/cloudevents/sdk-go/pkg/cloudevents/transport"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/handlers"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
 	constants "github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/util"
@@ -77,7 +82,37 @@ func (app *KnativePublishApplication) registerPublishV1Handler() {
 }
 
 func (app *KnativePublishApplication) registerPublishV2Handler() {
-	knativePublishHandler := handlers.KnativePublishHandler(constants.EventAPIV2, app.knativeLib, app.knativePublisher, app.tracer, app.options)
-	requestSizeLimitHandler := handlers.WithRequestSizeLimiting(knativePublishHandler, app.options.MaxRequestSize)
+	t, err := cloudevents.NewHTTPTransport()
+	// TODO(nachtmaar):
+	if err != nil {
+		return
+	}
+	//TODO: set the logic here
+	t.SetReceiver(cloudeventstransport.ReceiveFunc(app.HandleEvent))
+
+	requestSizeLimitHandler := handlers.WithRequestSizeLimiting(t.ServeHTTP, app.options.MaxRequestSize)
 	app.serveMux.HandleFunc(APIV2, requestSizeLimitHandler)
+}
+
+// Receive finally handles the decoded event
+func (app *KnativePublishApplication) HandleEvent(ctx context.Context, event cloudevents.Event, eventResponse *cloudevents.EventResponse) error {
+	fmt.Printf("received event %+v", event)
+
+	//traceHeaders := getTraceHeaders(ctx)
+
+	//bus.SendEventV2(event, *traceHeaders)
+	//downgradedEvent := cloudevents.Event{
+	//	// TODO(nachtmaar) dont' downgrade to CE v0.3 anymore if knative supports CE v1.0
+	//	Context:     event.Context.AsV03(),
+	//	Data:        event.Data,
+	//	DataEncoded: event.DataEncoded,
+	//	DataBinary:  event.DataBinary,
+	//}
+	if _, err := event.Context.GetExtension("event-type-version"); err != nil {
+		// TODO(nachtmaar): set proper status code
+		//eventResponse.Error(400, "we need a valid günther")
+		return errors.New("günther")
+	}
+
+	return nil
 }
