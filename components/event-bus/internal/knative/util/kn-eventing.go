@@ -5,9 +5,11 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"k8s.io/client-go/tools/clientcmd"
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"os"
 	"regexp"
 	"sync"
 	"time"
@@ -128,9 +130,27 @@ type KnativeLib struct {
 // Verify the struct KnativeLib implements KnativeLibIntf
 var _ KnativeAccessLib = &KnativeLib{}
 
+func loadKubeConfig() (*rest.Config, error) {
+	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
+		cfg, err := rest.InClusterConfig()
+		if err != nil {
+			return nil, err
+		}
+		return cfg, nil
+	}
+
+	kubeConfig, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
+	if err != nil {
+		return nil, err
+	}
+	return kubeConfig, nil
+}
+
 // GetKnativeLib returns the Knative/Eventing access layer
 func GetKnativeLib() (*KnativeLib, error) {
-	config, err := rest.InClusterConfig()
+	//config, err := rest.InClusterConfig()
+	config, err := loadKubeConfig()
+
 	if err != nil {
 		log.Printf("ERROR: GetChannel(): getting cluster config: %v", err)
 		return nil, err

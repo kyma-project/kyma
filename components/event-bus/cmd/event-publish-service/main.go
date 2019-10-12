@@ -14,6 +14,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 const (
