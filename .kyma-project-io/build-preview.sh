@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Script for preparing content for kyma-project.io
+# Script for build preview of this repo like in https://kyma-project.io/docs/ on every PR.
+# For more information, please contact with: @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 set -e
 set -o pipefail
@@ -7,13 +8,13 @@ set -o pipefail
 pushd "$(pwd)" > /dev/null
 
 on_error() {
-    echo -e "${RED}✗ Failed${NC}"
-    exit 1
+  echo -e "${RED}✗ Failed${NC}"
+  exit 1
 }
 trap on_error ERR
 
 on_exit() {
-    popd > /dev/null
+  popd > /dev/null
 }
 trap on_exit EXIT
 
@@ -33,51 +34,27 @@ readonly YELLOW='\033[0;33m'
 readonly NC='\033[0m' # No Color
 
 pass() {
-    local message="$1"
-    echo -e "${GREEN}√ ${message}${NC}"
+  local message="$1"
+  echo -e "${GREEN}√ ${message}${NC}"
 }
 
 step() {
-    local message="$1"
-    echo -e "\\n${YELLOW}${message}${NC}"
+  local message="$1"
+  echo -e "\\n${YELLOW}${message}${NC}"
 }
 
 copy-website-repo() {
   git clone -b "docs-community-preview" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
 }
 
-pre-build() {
-  cd "${BUILD_DIR}" && make resolve
-  cd "${BUILD_DIR}" && make clear-cache
-  cd "${BUILD_DIR}" && make prepare-tools
-}
-
-prepare-content() {
-    export APP_PREPARE_DOCS="true"
-    export APP_PREPARE_COMMUNITY="false"
-    export APP_PREPARE_ROADMAP="false"
-    export APP_DOCS_SOURCE_DIR="${KYMA_PROJECT_IO_DIR}/.."
-    export APP_DOCS_OUTPUT="${BUILD_DIR}/content/docs/netlify-preview"
-
-    cd "${BUILD_DIR}" && make -C "./tools/content-loader" fetch-content
-}
-
 build-preview() {
-  cd "${BUILD_DIR}" && make build
+  make -C "${BUILD_DIR}" netlify-kyma-preview
 }
 
 main() {
   step "Copying kyma/website repo"
   copy-website-repo
   pass "Copied"
-
-  step "Pre building process"
-  pre-build
-  pass "Processed"
-
-  step "Preparing content"
-  prepare-content
-  pass "Prepared"
 
   step "Building preview"
   build-preview
