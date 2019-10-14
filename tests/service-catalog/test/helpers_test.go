@@ -13,11 +13,6 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type EnvVariable struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
-}
-
 func isCatalogForbidden(url string) (bool, int, error) {
 	config := osb.DefaultClientConfiguration()
 	config.URL = fmt.Sprintf("%s/cluster", url)
