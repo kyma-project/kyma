@@ -20,15 +20,20 @@ type Report struct {
 	test      *testing.T
 	logWriter TestLogWriter
 	cfg       *rest.Config
+	opt       []Option
+	printer   printers.ResourcePrinter
 }
 
-func NewReport(t *testing.T, config *rest.Config) *Report {
+func NewReport(t *testing.T, config *rest.Config, options ...Option) *Report {
 	return &Report{
 		test:      t,
 		logWriter: TestLogWriter{testing: t},
 		cfg:       config,
+		opt:       options,
 	}
 }
+
+type Option func(r *Report, ns string)
 
 type printerObject interface {
 	GetObjectKind() schema.ObjectKind
@@ -46,51 +51,85 @@ func (t TestLogWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
+func (r *Report) setReportPrinter(pnr printers.ResourcePrinter) {
+	r.printer = pnr
+}
+
 // PrintJsonReport create report for injected namespace for every resource taking part in binding usage and service catalog test
 // and print all of them as a json in testing logs
 // resources included in report: Deployment, Pod, Service, ServiceBroker, ServiceClass, ServiceInstance
 // ServiceBinding, ClusterServiceBroker, ClusterServiceClass, Application, ServiceBindingUsage
-func (r Report) PrintJsonReport(namespace string) {
+func (r *Report) PrintJsonReport(namespace string) {
+
+	//report.PrintJsonReport("ns-dupa", WithSBU(), WithSC(), WithApp())
+	//report.PrintJsonReport("ns-dupa", WithSBU(), WithSC())
+	//report.PrintJsonReport("ns-dupa", SkipSBU())
 	printer := &printers.JSONPrinter{}
-
-	k8sclientset, err := kubernetes.NewForConfig(r.cfg)
-	if err != nil {
-		r.test.Logf("Kubernetes clientset unreachable, cannot create namespace report: %v \n", err)
-	}
-
-	scclientset, err := scClient.NewForConfig(r.cfg)
-	if err != nil {
-		r.test.Logf("Service Catalog clientset unreachable, cannot create namespace report: %v \n", err)
-	}
-
-	appclientset, err := appClient.NewForConfig(r.cfg)
-	if err != nil {
-		r.test.Logf("Application client unreachable: %v \n", err)
-	}
-
-	mclientset, err := mappingClient.NewForConfig(r.cfg)
-	if err != nil {
-		r.test.Logf("Application Connector client unreachable: %v \n", err)
-	}
-
-	bucclientset, err := bucClient.NewForConfig(r.cfg)
-	if err != nil {
-		r.test.Logf("Binding Usage Controller client unreachable: %v \n", err)
-	}
+	r.setReportPrinter(printer)
 
 	r.test.Log("########## Start Report Namespace ##########")
-
-	r.kubernetesResourceDump(printer, k8sclientset, namespace)
-	r.serviceCatalogResourceDump(printer, scclientset, namespace)
-	r.applicationResourceDump(printer, appclientset, mclientset, namespace)
-	r.bucResourceDump(printer, bucclientset, namespace)
-
+	for _, option := range r.opt {
+		option(r, namespace)
+	}
 	r.test.Log("########## End Report Namespace ##########")
+
 }
 
 func (r Report) PrintSingleResourceJsonReport(obj printerObject, kind string) {
 	printer := &printers.JSONPrinter{}
 	r.printObject(printer, obj, kind)
+}
+
+// WithK8s creates report with Kubernetes resources list: Deployment, Pod, Service
+func WithK8s() Option {
+	return func(r *Report, ns string) {
+		k8sclientset, err := kubernetes.NewForConfig(r.cfg)
+		if err != nil {
+			r.test.Logf("Kubernetes clientset unreachable, cannot create namespace report: %v \n", err)
+
+		}
+		r.kubernetesResourceDump(r.printer, k8sclientset, ns)
+	}
+}
+
+// WithSC creates report with Service Catalog resources list: ServiceBroker, ServiceClass, ServiceInstance,
+// ServiceBinding, ClusterServiceBroker, ClusterServiceClass
+func WithSC() Option {
+	return func(r *Report, ns string) {
+		scclientset, err := scClient.NewForConfig(r.cfg)
+		if err != nil {
+			r.test.Logf("Service Catalog clientset unreachable, cannot create namespace report: %v \n", err)
+		}
+		r.serviceCatalogResourceDump(r.printer, scclientset, ns)
+	}
+}
+
+// WithApp creates report with Application resources list: Application, ApplicationMapping
+func WithApp() Option {
+	return func(r *Report, ns string) {
+		appclientset, err := appClient.NewForConfig(r.cfg)
+		if err != nil {
+			r.test.Logf("Application client unreachable: %v \n", err)
+		}
+
+		mclientset, err := mappingClient.NewForConfig(r.cfg)
+		if err != nil {
+			r.test.Logf("Application Connector client unreachable: %v \n", err)
+		}
+
+		r.applicationResourceDump(r.printer, appclientset, mclientset, ns)
+	}
+}
+
+// WithSBU creates report with ServiceBindingUsage list
+func WithSBU() Option {
+	return func(r *Report, ns string) {
+		bucclientset, err := bucClient.NewForConfig(r.cfg)
+		if err != nil {
+			r.test.Logf("Binding Usage Controller client unreachable: %v \n", err)
+		}
+		r.bucResourceDump(r.printer, bucclientset, ns)
+	}
 }
 
 func (r Report) kubernetesResourceDump(printer printers.ResourcePrinter, clientset *kubernetes.Clientset, ns string) {

@@ -5,7 +5,6 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	envtester "github.com/kyma-project/kyma/tests/service-catalog/test/cmd/env-tester"
 	"net"
 	"net/http"
 	"testing"
@@ -65,7 +64,12 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 
 	defer func() {
 		if t.Failed() {
-			namespaceReport := report.NewReport(t, ts.k8sClientCfg)
+			namespaceReport := report.NewReport(t,
+				ts.k8sClientCfg,
+				report.WithK8s(),
+				report.WithSC(),
+				report.WithApp(),
+				report.WithSBU())
 			namespaceReport.PrintJsonReport(ts.namespace)
 		}
 		ts.cleanup()
@@ -86,7 +90,8 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	ts.createBindingUsageForInstanceAWithoutPrefix(timeoutPerStep)
 	ts.createBindingUsageForInstanceBWithPrefix(timeoutPerStep)
 	// then
-	ts.assertInjectedEnvVariables([]envtester.EnvVariable{
+
+	ts.assertInjectedEnvVariables([]EnvVariable{
 		{Name: ts.envPrefix + baseEnvName, Value: ts.gatewayUrl},
 		{Name: baseEnvName, Value: ts.gatewayUrl},
 	}, timeoutPerAssert)
@@ -646,7 +651,7 @@ func (ts *TestSuite) envTesterDeployment(labels map[string]string) *appsTypes.De
 	}
 }
 
-func (ts *TestSuite) assertInjectedEnvVariables(requiredVariables []envtester.EnvVariable, timeout time.Duration) {
+func (ts *TestSuite) assertInjectedEnvVariables(requiredVariables []EnvVariable, timeout time.Duration) {
 	url := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs", ts.namespace)
 
 	repeat.AssertFuncAtMost(ts.t, func() error {
@@ -680,13 +685,13 @@ func (ts *TestSuite) assertInjectedEnvVariables(requiredVariables []envtester.En
 		}
 
 		decoder := json.NewDecoder(resp.Body)
-		var data []envtester.EnvVariable
+		var data []EnvVariable
 		err = decoder.Decode(&data)
 		if err != nil {
 			return err
 		}
 
-		var missing []envtester.EnvVariable
+		var missing []EnvVariable
 		for _, req := range requiredVariables {
 			found := false
 			for _, act := range data {

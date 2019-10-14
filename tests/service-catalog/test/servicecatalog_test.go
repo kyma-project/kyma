@@ -205,7 +205,11 @@ func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {
 
 	defer func() {
 		if t.Failed() {
-			namespaceReport := report.NewReport(t, k8sConfig)
+			namespaceReport := report.NewReport(t,
+				k8sConfig,
+				report.WithK8s(),
+				report.WithApp(),
+				report.WithSC())
 			namespaceReport.PrintJsonReport(namespace)
 		}
 	}()
