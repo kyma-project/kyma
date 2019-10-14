@@ -13,9 +13,9 @@ The Jaeger-based tracing component provides the necessary functionality to colle
 The process of collecting traces by Jaeger looks as follows:
  
 1. The application receives a request, either from an internal or external source.
-2. If the application has Istio injection enabled, [Istio proxy](https://github.com/istio/proxy) propagates the correct [HTTP headers](/components/tracing#details-propagate-http-headers) of the requests to the Jaeger Deployment. Istio proxy accesses the Deployment using the [Zipkin](https://zipkin.io/) service which exposes a Jaeger port compatible with the Zipkin protocol.  
+2. If the application has Istio injection enabled, [Istio proxy](https://github.com/istio/proxy) propagates the correct [HTTP headers](/components/tracing#details-propagate-http-headers) of the requests to the Jaeger Deployment. Istio proxy calls Jaeger using the [Zipkin](https://zipkin.io/) service which exposes a Jaeger port compatible with the Zipkin protocol.  
 3. Jaeger processes the data. Specifically, the  Jaeger Agent component receives the spans, batches them, and forwards to the Jaeger Collector service. 
-4. The BadgerDB database stores the data and persists it using the PersistentVolume resource.
+4. The BadgerDB database stores the data and persists it using a PersistentVolume resource.
 
 ## Query traces
 
