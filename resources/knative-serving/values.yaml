@@ -32,10 +32,10 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
-    dir: develop/
-    version: "d2afb583"
+    dir: pr/
+    version: PR-5984
   subDomain: "serverless"
 
 test:
   target: "Test Target"
-  enabled: false
+  enabled: true
