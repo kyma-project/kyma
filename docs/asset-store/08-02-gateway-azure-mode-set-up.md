@@ -31,7 +31,7 @@ Create an Azure resource group and a storage account. Follow these steps:
     Example:
 
     ```bash
-    export AZ_ACCOUNT_NAME=myStorageAccount
+    export AZ_ACCOUNT_NAME=accountname
     export AZ_RESOURCE_GROUP=my-resource-group
     export AZ_RESOURCE_GROUP_LOCATION=westeurope
     export AZ_SUBSCRIPTION=123456-123456-123456-1234567
