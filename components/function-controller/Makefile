@@ -75,6 +75,9 @@ endif
 deploy: manifests install bin/kustomize ko
 	bin/kustomize build config/default | ko apply -f -
 
+debug: manifests install bin/kustomize ko
+	bin/kustomize build config/default | ko apply -f - --disable-optimizations
+
 removewebhook:
 	-kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io function-webhook.serverless.kyma-project.io
 
