@@ -13,8 +13,12 @@ To see a complete list of the custom and Go metrics, run the following command:
 kubectl -n kyma-system port-forward svc/assetstore-minio 9000
 ```
 
-Now open a browser and access [http://localhost:9000/minio/prometheus/metrics](http://localhost:9000/minio/prometheus/metrics) to check the metrics.
+To check the metrics, open a new terminal window and run:
 
-> **TIP:** Before you use the command, make sure you have a running Kyma cluster and kubectl installed. If you cannot access the 9000 port, redirect the metrics to another one. For example, run: `kubectl -n kyma-system port-forward svc/assetstore-minio 3000:9000` and update the port in the localhost address in your browser.
+```bash
+curl http://localhost:9000/minio/prometheus/metrics
+```
+
+> **TIP:** Before you use the command, make sure you have a running Kyma cluster and kubectl installed. If you cannot access port 9000, redirect the metrics to another one. For example, run: `kubectl -n kyma-system port-forward svc/assetstore-minio 3000:9000` and update the port in the localhost address.
 
 See the [Monitoring](/components/monitoring) documentation to learn more about monitoring and metrics in Kyma.

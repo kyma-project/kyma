@@ -14,8 +14,12 @@ To see a complete list of the default kubebuilder and Go metrics, run the follow
 kubectl -n kyma-system port-forward svc/assetstore-asset-store-controller-manager 8080
 ```
 
-Now open a browser and access [http://localhost:8080/metrics](http://localhost:8080/metrics) to check the metrics.
+To check the metrics, open a new terminal window and run:
 
-> **TIP:** Before you use the command, make sure you have a running Kyma cluster and kubectl installed. If you cannot access the 8080 port, redirect the metrics to another one. For example, run: `kubectl -n kyma-system port-forward svc/assetstore-asset-store-controller-manager 3000:8080` and update the port in the localhost address in your browser.
+```bash
+curl http://localhost:8080/metrics
+```
+
+> **TIP:** Before you use the command, make sure you have a running Kyma cluster and kubectl installed. If you cannot access port 8080, redirect the metrics to another one. For example, run: `kubectl -n kyma-system port-forward svc/assetstore-asset-store-controller-manager 3000:8080` and update the port in the localhost address.
 
 See the [Monitoring](/components/monitoring) documentation to learn more about monitoring and metrics in Kyma.

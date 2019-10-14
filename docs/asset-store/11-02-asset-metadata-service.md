@@ -18,8 +18,12 @@ To see a complete list of the custom and Go metrics, run the following command:
 kubectl -n kyma-system port-forward svc/assetstore-asset-metadata-service 80
 ```
 
-Now open a browser and access [http://localhost:80/metrics](http://localhost:80/metrics) to check the metrics.
+To check the metrics, open a new terminal window and run:
 
-> **TIP:** Before you use the command, make sure you have a running Kyma cluster and kubectl installed. If you cannot access the 80 port, redirect the metrics to another one. For example, run: `kubectl -n kyma-system port-forward svc/assetstore-asset-metadata-service 8080:80:` and update the port in the localhost address in your browser.
+```bash
+curl http://localhost:80/metrics
+```
+
+> **TIP:** Before you use the command, make sure you have a running Kyma cluster and kubectl installed. If you cannot access port 80, redirect the metrics to another one. For example, run: `kubectl -n kyma-system port-forward svc/assetstore-asset-metadata-service 8080:80:` and update the port in the localhost address.
 
 See the [Monitoring](/components/monitoring) documentation to learn more about monitoring and metrics in Kyma.
