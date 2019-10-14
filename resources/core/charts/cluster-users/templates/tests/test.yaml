@@ -19,6 +19,10 @@ spec:
       shareProcessNamespace: true
       {{- if .Values.global.isLocalEnv }}
       hostNetwork: true
+      hostAliases:
+      - ip: {{ .Values.global.minikubeIP }}
+        hostnames:
+        - "configurations-generator.{{ .Values.global.ingress.domainName }}"
       {{- end }}
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccount: {{ .Chart.Name }}-tests
