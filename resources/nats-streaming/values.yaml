@@ -41,6 +41,7 @@ global:
         memory: "256M"
     channel:
       maxInactivity: "48h"
+      maxChannels: 0
     clusterID: "kyma-nats-streaming"
     users:
       stan:
