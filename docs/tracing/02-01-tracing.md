@@ -3,7 +3,7 @@ title: Architecture
 ---
 
 
-The Jaeger-based tracing component provides the necessary functionality to collect and query traces. Both operations may occur at the same time. This way inspect specific traces using the Jaeger UI, while Jaeger takes care of proper trace collection and storage in parallel. See the diagram for details: 
+The Jaeger-based tracing component provides the necessary functionality to collect and query traces. Both operations may occur at the same time. This way you inspect specific traces using the Jaeger UI, while Jaeger takes care of proper trace collection and storage in parallel. See the diagram for details: 
 
 ![Tracing architecture](./assets/tracing-architecture.svg)
 
