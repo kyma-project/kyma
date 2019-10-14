@@ -3,24 +3,24 @@ title: Trigger a lambda with events
 type: Tutorials
 ---
 
-To create a simple lambda function and trigger it with an event, you must first register a service using metadata service in Application Connector. This service then exposes the event that triggers the lambda. You must create a Service Instance which produces the event to enable this event in the Namespace.  
-Follow this guide to learn how to do it. 
+To create a simple lambda function and trigger it with an event, you must first register a service using metadata service in Application Connector. This service then sends the event that triggers the lambda. You must create a Service Instance which enables this event in the Namespace. Follow this guide to learn how to do it. 
 
 
 ## Prerequisites
 
-- An Application (App) bound to the `production` Namespace
+- An Application bound to the `production` Namespace
 - Client certificates generated for the connected App.
 
->**NOTE:** To see how to create an Application, follow [this](https://kyma-project.io/docs/components/application-connector#tutorials-create-a-new-application) tutorial.  
->To get the client certificate, see [this](https://kyma-project.io/docs/components/application-connector#tutorials-get-the-client-certificate) tutorial.  
->To learn how to bind an Application to a Namespace, see [this](https://kyma-project.io/docs/components/application-connector#tutorials-bind-an-application-to-a-namespace) tutorial.
+>**NOTE:** See the respective tutorials to learn how to [create](https://kyma-project.io/docs/components/application-connector#tutorials-create-a-new-application) an Application, [get](https://kyma-project.io/docs/components/application-connector#tutorials-get-the-client-certificate) the client certificate, and [bind](https://kyma-project.io/docs/components/application-connector#tutorials-bind-an-application-to-a-namespace) an Application to a Namespace.
 
 ## Steps
 
 1. Use this example request body with defined AsyncAPI specification to register a service to the desired Application:
 
+1. Register an event service with this AsyncAPI specification to the desired Application.
+
    >**NOTE:** See [this](#tutorials-get-the-client-certificate) tutorial to learn how to register a service.
+
 
    ```json
    {
@@ -71,10 +71,9 @@ Follow this guide to learn how to do it.
    }
    ```
 
-2. Get the `externalName` of the Service Class of the registered service.
-
+2. Expose the `externalName` of the Service Class of the registered service.
    ```bash
-   kubectl -n production get serviceclass {SERVICE_ID}  -o jsonpath='{.spec.externalName}'
+   export EXTERNAL_NAME=$(kubectl -n production get serviceclass {SERVICE_ID}  -o jsonpath='{.spec.externalName}')
    ```
 
 3. Create a Service Instance for the registered service.
@@ -87,11 +86,11 @@ Follow this guide to learn how to do it.
      name: my-events-service-instance-name
      namespace: production
    spec:
-     serviceClassExternalName: {EXTERNAL_NAME}
+     serviceClassExternalName: $EXTERNAL_NAME
    EOF
    ```
 
-4. Create a sample lambda function which sends a request to `http://httpbin.org/uuid`. A successful response logs a `Response acquired successfully! Uuid: {RECEIVED_UUID}` message. To create and register the lambda function in the `production` Namespace, run:
+4. Create and register a lambda function in the `production` Namespace.
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -194,8 +193,8 @@ Follow this guide to learn how to do it.
    }'
    ```
 
-7. Check the logs of the lambda function to see if it was triggered. Every time an event successfully triggers the function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`. Run this command:
+7. Check the logs of the lambda function to see if it was triggered. Every time an event successfully triggers the function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`.
 
    ```bash
-   kubectl -n production logs "$(kubectl -n production get po -l function=my-events-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-events-lambda | grep "Response acquired successfully! Uuid: "
+   kubectl -n production logs "$(kubectl -n production get po -l function=my-events-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-events-lambda | grep -E "Response acquired successfully! Uuid: [a-f0-9-]+"
    ```
