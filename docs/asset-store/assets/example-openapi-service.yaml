@@ -1,0 +1,124 @@
+openapi: 3.0.0
+info:
+  description: This example shows API requirements for a service that communicates with the Asset Store. This example contains `/convert`, `/validate`, and `/extract` endpoints.
+  title: Example OpenAPI service
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 0.0.1
+paths:
+  /convert:
+    post:
+      description: Converts files sent in the `multipart/form-data` form from the old AsyncAPI version to 2.0.0.
+      tags:
+        - convert
+      summary: Converts the AsyncAPI specification to version 2.0.0.
+      operationId: convertReq
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                parameters:
+                  description: Additional parameters for the service
+                  type: string
+                content:
+                  description: File to convert
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          $ref: "#/components/responses/successConversionResponse"
+        "304":
+          $ref: "#/components/responses/notModified"
+  /validate:
+    post:
+      description: Validates files sent in the `multipart/form-data` form against the AsyncAPI schema in version 2.0.0.
+      tags:
+        - validate
+      summary: Validates the AsyncAPI specification against the AsyncAPI schema in version 2.0.0.
+      operationId: validateReq
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                parameters:
+                  description: Additional parameters for the service
+                  type: string
+                content:
+                  description: File to validate
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          $ref: "#/components/responses/successValidationResponse"
+        "422":
+          $ref: "#/components/responses/unprocessableEntity"
+  /extract:
+    post:
+      description: Extracts metadata from text files sent in the `multipart/form-data` form. As a field name, specify the relative or absolute path to the file.
+      tags:
+        - extract
+      summary: Extracts metadata from files.
+      operationId: extractReq
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+                format: binary
+      responses:
+        "200":
+          $ref: "#/components/responses/successResponse"
+servers:
+  - url: http://localhost:3000/v1
+components:
+  responses:
+    successConversionResponse:
+      description: Successful response with the new file content
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: "{\"info\":{\"version\":\"1.0.0\",\"title\":\"AnyOf example\"},\"topics\":{\"test\":{\"publish\":{\"$ref\":\"#\/components\/messages\/testMessages\"}}},\"asyncapi\":\"1.1.0\",\"components\":{\"messages\":{\"testMessages\":{\"payload\":{\"anyOf\":[{\"$ref\":\"#\/components\/schemas\/objectWithKey\"},{\"$ref\":\"#\/components\/schemas\/objectWithKey2\"}]}}},\"schemas\":{\"objectWithKey2\":{\"type\":\"object\",\"properties\":{\"key2\":{\"type\":\"string\"}}},\"objectWithKey\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"}}}}}}"
+    notModified:
+      description: File content was not modified
+    successValidationResponse:
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                description: Files that were successfully processed
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResultSuccess"
+    unprocessableEntity:
+      description: Unprocessable entities. File validation failed.
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: Invalid property
+    successResponse:
+      description: Successful response
+  schemas:
+    ResultSuccess:
+      description: "It represents successful processing of a single file."
+      type: object
+      properties:
+        filePath:
+          description: "Relative or absolute path to the file which was sent in the form body"
+          type: string
+        metadata:
+          description: "Front matter metadata extracted from the file"
+          type: object
+          additionalProperties:
+            type: object
