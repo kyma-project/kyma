@@ -3,9 +3,7 @@ title: Trigger a lambda with events
 type: Tutorials
 ---
 
-To create a simple lambda function and trigger it with an event, you must first register a service using metadata service in Application Connector.  
-This service then exposes the event that triggers the lambda.  
-You must create a Service Instance which produces the event to enable this event in the Namespace.  
+To create a simple lambda function and trigger it with an event, you must first register a service using metadata service in Application Connector. This service then exposes the event that triggers the lambda. You must create a Service Instance which produces the event to enable this event in the Namespace.  
 Follow this guide to learn how to do it. 
 
 
