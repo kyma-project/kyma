@@ -3,16 +3,24 @@ title: Trigger a lambda with events
 type: Tutorials
 ---
 
-This guide shows how to create a simple lambda function and trigger it with an event.
+To create a simple lambda function and trigger it with an event, you must first register a service using metadata service in Application Connector.  
+This service then exposes the event that triggers the lambda.  
+You must create a Service Instance which produces the event to enable this event in the Namespace.  
+Follow this guide to learn how to do it. 
+
 
 ## Prerequisites
 
 - An Application (App) bound to the `production` Namespace
 - Client certificates generated for the connected App.
 
+>**NOTE:** To see how to create an Application, follow [this](https://kyma-project.io/docs/components/application-connector#tutorials-create-a-new-application) tutorial.  
+>To get the client certificate, see [this](https://kyma-project.io/docs/components/application-connector#tutorials-get-the-client-certificate) tutorial.  
+>To learn how to bind an Application to a Namespace, see [this](https://kyma-project.io/docs/components/application-connector#tutorials-bind-an-application-to-a-namespace) tutorial.
+
 ## Steps
 
-1. Register a service with the following specification to the desired App.
+1. Use this example request body with defined AsyncAPI specification to register a service to the desired Application:
 
    >**NOTE:** See [this](#tutorials-get-the-client-certificate) tutorial to learn how to register a service.
 
@@ -24,33 +32,34 @@ This guide shows how to create a simple lambda function and trigger it with an e
      "description": "This is some service",
      "events": {
        "spec": {
-         "asyncapi": "1.0.0",
+         "asyncapi": "2.0.0",
          "info": {
            "title": "Example Events",
-           "version": "1.0.0",
+           "version": "2.0.0",
            "description": "Description of all the example events"
          },
-         "baseTopic": "example.events.com",
-         "topics": {
-           "exampleEvent.v1": {
+         "channels": {
+           "example/events/com/exampleEvent/v1": {
              "subscribe": {
-               "summary": "Example event",
-               "payload": {
-                 "type": "object",
-                 "properties": {
-                   "myObject": {
-                     "type": "object",
-                     "required": [
-                       "id"
-                     ],
-                     "example": {
-                       "id": "4caad296-e0c5-491e-98ac-0ed118f9474e"
-                     },
-                     "properties": {
-                       "id": {
-                         "title": "Id",
-                         "description": "Resource identifier",
-                         "type": "string"
+               "message": {
+                 "summary": "Example event",
+                 "payload": {
+                   "type": "object",
+                   "properties": {
+                     "myObject": {
+                       "type": "object",
+                       "required": [
+                         "id"
+                       ],
+                       "example": {
+                         "id": "4caad296-e0c5-491e-98ac-0ed118f9474e"
+                       },
+                       "properties": {
+                         "id": {
+                           "title": "Id",
+                           "description": "Resource identifier",
+                           "type": "string"
+                         }
                        }
                      }
                    }
@@ -59,7 +68,7 @@ This guide shows how to create a simple lambda function and trigger it with an e
              }
            }
          }
-       }
+       }    
      }
    }
    ```
