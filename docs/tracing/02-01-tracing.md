@@ -3,7 +3,7 @@ title: Architecture
 ---
 
 
-The Jaeger-based tracing component provides the necessary functionality to collect and query traces. Both operations may occur at the same time. This way you  you can inspect specific traces using the Jaeger UI, while Jaeger takes care of proper trace collection and storage in parallel. See the diagram for details: 
+The Jaeger-based tracing component provides the necessary functionality to collect and query traces. Both operations may occur at the same time. This way inspect specific traces using the Jaeger UI, while Jaeger takes care of proper trace collection and storage in parallel. See the diagram for details: 
 
 ![Tracing architecture](./assets/tracing-architecture.svg)
 
@@ -14,7 +14,7 @@ The process of collecting traces by Jaeger looks as follows:
  
 1. The application receives a request, either from an internal or external source.
 2. If the application has Istio injection enabled, [Istio proxy](https://github.com/istio/proxy) propagates the correct [HTTP headers](/components/tracing#details-propagate-http-headers) of the requests to the Jaeger Deployment. Istio proxy calls Jaeger using the [Zipkin](https://zipkin.io/) service which exposes a Jaeger port compatible with the Zipkin protocol.  
-3. Jaeger processes the data. Specifically, the  Jaeger Agent component receives the spans, batches them, and forwards to the Jaeger Collector service. 
+3. Jaeger processes the data. Specifically, the Jaeger Agent component receives the spans, batches them, and forwards to the Jaeger Collector service. 
 4. The BadgerDB database stores the data and persists it using a PersistentVolume resource.
 
 ## Query traces
