@@ -64,8 +64,8 @@ global:
     dir:
     version: b71dd1aa
   cluster_users_integration_tests:
-    dir: develop/
-    version: "d53509a0"
+    dir: pr/
+    version: "PR-5929"
   xip_patch:
     dir:
     version: 28fc9db3
