@@ -100,5 +100,5 @@ spec:
         - containerPort: {{ .Values.kcproxy.inPort }}
       volumes:
       - name: storage
-        persistenceVolumeClaim:
+        persistentVolumeClaim:
           claimName: {{ template "jaeger.fullname" . }}

@@ -38,7 +38,7 @@ func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify
 	}
 	tlscfg, err := tlsutil.ClientConfig(tlsopts)
 	return &Client{
-		helm: helm.NewClient(helm.Host(host), helm.WithTLS(tlscfg)),
+		helm: helm.NewClient(helm.Host(host), helm.WithTLS(tlscfg), helm.ConnectTimeout(30)),
 	}, err
 }
 
