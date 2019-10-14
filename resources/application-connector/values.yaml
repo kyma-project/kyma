@@ -80,8 +80,8 @@ application_connectivity_certs_setup_job:
 
 tests:
   application_connector_tests:
-#    enabled: *connectorServiceEnabled
-    enabled: false
+    enabled: *connectorServiceEnabled
+    # enabled: true
     connector_service:
       central: false
     skipSslVerify: true

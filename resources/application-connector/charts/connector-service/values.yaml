@@ -65,7 +65,7 @@ istio:
     required: false
 
 tests:
-  enabled: false
+  enabled: true
   skipSslVerify: true
   central: *central
   image:

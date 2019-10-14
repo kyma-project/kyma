@@ -13,4 +13,4 @@ global:
     dir: develop/
     version: 7a12b224
 tests:
-  enabled: false
+  enabled: true
