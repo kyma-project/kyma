@@ -42,6 +42,8 @@ clusterRoles:
     ory:
       - "oathkeeper.ory.sh"
       - "hydra.ory.sh"
+    backup:
+      - "velero.io"
   verbs:
     edit:
       - "create"

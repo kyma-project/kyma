@@ -1,5 +1,6 @@
 APP_NAME = istio-kyma-patch
-IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
+APP_PATH = components/$(APP_NAME)
+IMG_NAME = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 
 .PHONY: build-image
@@ -8,18 +9,7 @@ build-image:
 
 .PHONY: push-image
 push-image:
-	docker tag $(APP_NAME) $(IMG):$(TAG)
-	docker push $(IMG):$(TAG)
+	docker tag $(APP_NAME) $(IMG_NAME):$(TAG)
+	docker push $(IMG_NAME):$(TAG)
 
-.PHONY: ci-pr
-ci-pr: build-image push-image
-
-.PHONY: ci-master
-ci-master: build-image push-image
-
-.PHONY: ci-release
-ci-release: build-image push-image
-
-.PHONY: path-to-referenced-charts
-path-to-referenced-charts:
-	@echo "resources/istio-kyma-patch"
+release: build-image push-image

@@ -25,7 +25,10 @@ These Go and Dep versions are compliant with the `buildpack` used by Prow. For m
 
 ## Development
 
-Before each commit, use the `before-commit.sh` script or the `make build` command to test your changes.
+Before each commit, use the `make verify` command to test your changes. To build an image, use the `make build-image` command with **DOCKER_PUSH_REPOSITORY** and **DOCKER_PUSH_DIRECTORY** variables, for example:
+```
+DOCKER_PUSH_REPOSITORY=eu.gcr.io DOCKER_PUSH_DIRECTORY=/kyma-project/develop make build-image
+```
 
 ### Use environment variables
 

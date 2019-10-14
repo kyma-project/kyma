@@ -20,11 +20,11 @@ global:
     gateway:
       name: kyma-gateway
   acceptance_tests:
-    dir: pr/
-    version: "PR-5668"
+    dir:
+    version: "PR-5891"
   ui_acceptance_tests:
     dir:
-    version: 1a48bf40
+    version: 2ce268ee
   api_controller:
     dir:
     version: 8eb3a417
@@ -53,7 +53,7 @@ global:
     version: PR-5226
   apiserver_proxy_integration_tests:
     dir: develop/
-    version: 40c7e5df
+    version: 4a6bef81
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
@@ -67,8 +67,8 @@ global:
     dir: pr/
     version: "PR-5929"
   xip_patch:
-    dir: develop/
-    version: 665a2857
+    dir:
+    version: 28fc9db3
   e2e_external_solution:
     dir: develop/
     version: 3f9dc61a

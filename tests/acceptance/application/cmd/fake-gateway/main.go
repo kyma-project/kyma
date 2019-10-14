@@ -10,7 +10,7 @@ import (
 	"syscall"
 
 	"github.com/Bplotka/go-httplog"
-	"github.com/Bplotka/go-httplog/logrus"
+	httplogrus "github.com/Bplotka/go-httplog/logrus"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 )
