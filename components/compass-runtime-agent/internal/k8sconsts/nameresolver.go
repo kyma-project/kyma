@@ -74,11 +74,11 @@ func (resolver nameResolver) ExtractServiceId(applicaton, host string) string {
 }
 
 func getResourceNamePrefix(applicaton string) string {
-	truncatedApplicaton := truncateapplicaton(applicaton)
+	truncatedApplicaton := truncateApplicaton(applicaton)
 	return fmt.Sprintf(resourceNamePrefixFormat, truncatedApplicaton)
 }
 
-func truncateapplicaton(applicaton string) string {
+func truncateApplicaton(applicaton string) string {
 	maxResourceNamePrefixLength := maxResourceNameLength - uuidLength
 	testResourceNamePrefix := fmt.Sprintf(resourceNamePrefixFormat, applicaton)
 	testResourceNamePrefixLength := len(testResourceNamePrefix)
