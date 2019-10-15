@@ -17,7 +17,6 @@ mkdir -p ./cmd/event-publish-service/docker/image/internal
 cp -R ./vendor            ./cmd/event-publish-service/docker/image/
 cp -R ./api/publish/      ./cmd/event-publish-service/docker/image/api/publish/
 cp -R ./api/push/      ./cmd/event-publish-service/docker/image/api/push/
-cp -R ./pkg      ./cmd/event-publish-service/docker/image/
 cp -R ./internal/trace/   ./cmd/event-publish-service/docker/image/internal/trace/
 cp -R ./internal/knative/ ./cmd/event-publish-service/docker/image/internal/knative/
 cp -R ./internal/ea/ ./cmd/event-publish-service/docker/image/internal/ea/

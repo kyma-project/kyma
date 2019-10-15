@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-registry/pkg/apis/istio/v1alpha2"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/istio/mocks"
+	"kyma-project.io/compass-runtime-agent/internal/k8sconsts"
+	"kyma-project.io/compass-runtime-agent/internal/kyma/apiresources/istio/mocks"
 
 	"k8s.io/apimachinery/pkg/types"
 

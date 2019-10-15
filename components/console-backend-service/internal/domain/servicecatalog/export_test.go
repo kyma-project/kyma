@@ -2,12 +2,12 @@ package servicecatalog
 
 // ServiceInstance
 import (
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/fake"
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
+	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
 )
 
 func NewServiceInstanceService(informer cache.SharedIndexInformer, client clientset.Interface) (*serviceInstanceService, error) {

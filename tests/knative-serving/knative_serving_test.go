@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"knative.dev/serving/pkg/apis/serving/v1beta1"
 
@@ -26,22 +27,16 @@ import (
 )
 
 const (
-	// Domain name used to build the URL tests send HTTP requests to.
-	// `test-service.knative-serving.DOMAIN` is expected to resolve to the IP of the Istio Ingress Gateway.
-	domainNameEnvVar = "DOMAIN_NAME"
-
 	// Message that should be printed by the sample Hello World service.
 	// https://knative.dev/docs/serving/samples/hello-world/helloworld-go/index.html
 	targetEnvVar = "TARGET"
 )
 
 func TestKnativeServingAcceptance(t *testing.T) {
-	domainName := mustGetenv(t, domainNameEnvVar)
 	target := mustGetenv(t, targetEnvVar)
 
-	testServiceURL := fmt.Sprintf("https://test-service.knative-serving.%s", domainName)
-
 	ingressClient, err := ingressgateway.FromEnv().Client()
+
 	if err != nil {
 		t.Fatalf("Unexpected error when creating ingressgateway client: %s", err)
 	}
@@ -49,15 +44,17 @@ func TestKnativeServingAcceptance(t *testing.T) {
 	kubeConfig := loadKubeConfigOrDie(t)
 	serviceClient := servingtyped.NewForConfigOrDie(kubeConfig).Services("knative-serving")
 
+	const podName = "test-service-foo"
+	const svcName = "test-service"
 	svc := serving.Service{
 		ObjectMeta: meta.ObjectMeta{
-			Name: "test-service",
+			Name: svcName,
 		},
 		Spec: serving.ServiceSpec{
 			ConfigurationSpec: serving.ConfigurationSpec{
 				Template: &serving.RevisionTemplateSpec{
 					ObjectMeta: meta.ObjectMeta{
-						Name: "test-service-foo",
+						Name: podName,
 					},
 					Spec: serving.RevisionSpec{
 						RevisionSpec: v1beta1.RevisionSpec{
@@ -80,13 +77,38 @@ func TestKnativeServingAcceptance(t *testing.T) {
 		},
 	}
 
-	if _, err := serviceClient.Create(&svc); err != nil {
+	if _, err = serviceClient.Create(&svc); err != nil {
 		t.Fatalf("Cannot create test Service: %v", err)
 	}
+
 	defer deleteService(serviceClient, svc.Name)
+	var testServiceURL string
+
+	err = retry.Do(func() error {
+		ksvc, err := serviceClient.Get(svcName, meta.GetOptions{})
+		if err != nil {
+			return err
+		}
+		if ksvc.Status.URL.String() == "" {
+			return fmt.Errorf("url not set yet")
+		}
+		svcurl := ksvc.Status.URL
+
+		//TODO(k15r): ksvc returns a URL with scheme http, but this fails as the client then tries to
+		//  open an unencrypted connection on a secure port (443, as probably configured by the ingressgateway.client() )
+		svcurl.Scheme = "https"
+		testServiceURL = svcurl.String()
+		return nil
+
+	}, retry.DelayType(retry.FixedDelay), retry.Delay(5*time.Second), retry.Attempts(10))
+
+	if err != nil {
+		t.Fatalf("Cannot get test service url: %s", err)
+	}
 
 	err = retry.Do(func() error {
 		t.Logf("Calling: %s", testServiceURL)
+
 		resp, err := ingressClient.Get(testServiceURL)
 		if err != nil {
 			return err
@@ -113,6 +135,8 @@ func TestKnativeServingAcceptance(t *testing.T) {
 	}, retry.OnRetry(func(n uint, err error) {
 		t.Logf("[%v] try failed: %s", n, err)
 	}), retry.Attempts(20),
+		retry.DelayType(retry.FixedDelay),
+		retry.Delay(5*time.Second),
 	)
 
 	if err != nil {

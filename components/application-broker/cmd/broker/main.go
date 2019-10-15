@@ -25,7 +25,7 @@ import (
 	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	appInformer "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
 	"github.com/sirupsen/logrus"
-	"k8s.io/client-go/informers/core/v1"
+	v1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"

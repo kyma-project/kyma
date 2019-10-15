@@ -17,7 +17,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
-	"k8s.io/client-go/kubernetes/typed/core/v1"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	restclient "k8s.io/client-go/rest"
 )
 
@@ -95,11 +95,11 @@ func (ts *MappingTestSuite) WaitForServiceClassWithTimeout(timeout time.Duration
 		return nil
 	}
 
-	repeat.FuncAtMost(ts.t, fn, timeout)
+	repeat.AssertFuncAtMost(ts.t, fn, timeout)
 }
 
 func (ts *MappingTestSuite) WaitForServiceBrokerWithTimeout(timeout time.Duration) {
-	repeat.FuncAtMost(ts.t, func() error {
+	repeat.AssertFuncAtMost(ts.t, func() error {
 		_, err := ts.scClient.ServiceBrokers(ts.MappedNs).Get(ts.brokerName, metav1.GetOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "error while getting service broker %s", ts.brokerName)
@@ -109,7 +109,7 @@ func (ts *MappingTestSuite) WaitForServiceBrokerWithTimeout(timeout time.Duratio
 }
 
 func (ts *MappingTestSuite) EnsureServiceBrokerNotExistWithTimeout(timeout time.Duration) {
-	repeat.FuncAtMost(ts.t, func() error {
+	repeat.AssertFuncAtMost(ts.t, func() error {
 		_, err := ts.scClient.ServiceBrokers(ts.MappedNs).Get(ts.brokerName, metav1.GetOptions{})
 		switch {
 		case apierrors.IsNotFound(err):

@@ -6,15 +6,11 @@ import (
 	"testing"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock"
-
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/runtimeagent"
-
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/util"
-
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -218,10 +214,6 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 
 				// then
 				this.secondPhaseAssert = func(t *testing.T, testSuite *runtimeagent.TestSuite, this *testCase) {
-					// Due to Application Gateway caching the reverse proxy, after changing the authentication method we need to wait for cache to invalidate
-					t.Log("Wait for proxy to invalidate...")
-					testSuite.WaitForProxyInvalidation()
-
 					// assert updated APIs
 					testSuite.K8sResourceChecker.AssertAPIResources(t, application.ID, updatedAPIs...)
 
@@ -366,6 +358,10 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	// Wait for agent to apply config
 	waitForAgentToApplyConfig(t, testSuite)
 
+	// Due to Application Gateway caching the reverse proxy, after changing the authentication method we need to wait for cache to invalidate
+	t.Log("Wait for proxy to invalidate...")
+	testSuite.WaitForProxyInvalidation()
+
 	// Assert second phase
 	for _, testCase := range testCases {
 		t.Logf("Asserting second phase for test case: %s", testCase.description)
@@ -374,6 +370,9 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 }
 
 func assertK8sResourcesAndAPIAccess(t *testing.T, testSuite *runtimeagent.TestSuite, application compass.Application) {
+	t.Logf("Waiting for %s Application to be deployed...", application.ID)
+	testSuite.WaitForApplicationToBeDeployed(t, application.ID)
+
 	t.Logf("Checking K8s resources")
 	testSuite.K8sResourceChecker.AssertResourcesForApp(t, application)
 

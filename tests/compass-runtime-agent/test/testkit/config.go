@@ -2,6 +2,7 @@ package testkit
 
 import (
 	"log"
+	"time"
 
 	"github.com/kelseyhightower/envconfig"
 )
@@ -11,15 +12,18 @@ type TestConfig struct {
 	Tenant      string `envconfig:"TENANT" required:"true"`
 	RuntimeId   string `envconfig:"RUNTIME_ID" required:"true"`
 
-	Namespace                 string `envconfig:"NAMESPACE" default:"compass-system"`
-	IntegrationNamespace      string `envconfig:"INTEGRATION_NAMESPACE" default:"kyma-integration"`
-	TestPodAppLabel           string `envconfig:"TEST_POD_APP_LABEL" default:"compass-runtime-agent-tests"`
-	MockServicePort           int32  `envconfig:"MOCK_SERVICE_PORT" default:"8080"`
-	MockServiceName           string `envconfig:"MOCK_SERVICE_NAME" default:"compass-runtime-agent-tests-mock"`
-	ConfigApplicationWaitTime int64  `envconfig:"CONFIG_APPLICATION_WAIT_TIME" default:"40"`
-	ProxyInvalidationWaitTime int64  `envconfig:"PROXY_INVALIDATION_WAIT_TIME" default:"150"`
-	GraphQLLog                bool   `envconfig:"GRAPHQL_LOG" default:"false"`
-	ScenarioLabel             string `envconfig:"SCENARIO_LABEL" default:"COMPASS_RUNTIME_AGENT_TESTS"`
+	Namespace                      string        `envconfig:"NAMESPACE" default:"compass-system"`
+	IntegrationNamespace           string        `envconfig:"INTEGRATION_NAMESPACE" default:"kyma-integration"`
+	TestPodAppLabel                string        `envconfig:"TEST_POD_APP_LABEL" default:"compass-runtime-agent-tests"`
+	MockServicePort                int32         `envconfig:"MOCK_SERVICE_PORT" default:"8080"`
+	MockServiceName                string        `envconfig:"MOCK_SERVICE_NAME" default:"compass-runtime-agent-tests-mock"`
+	ConfigApplicationWaitTime      time.Duration `envconfig:"CONFIG_APPLICATION_WAIT_TIME" default:"40s"`
+	ProxyInvalidationWaitTime      time.Duration `envconfig:"PROXY_INVALIDATION_WAIT_TIME" default:"150s"`
+	GraphQLLog                     bool          `envconfig:"GRAPHQL_LOG" default:"false"`
+	ScenarioLabel                  string        `envconfig:"SCENARIO_LABEL" default:"COMPASS_RUNTIME_AGENT_TESTS"`
+	HydraPublicURL                 string        `envconfig:"HYDRA_PUBLIC_URL" default:"http://ory-hydra-public.kyma-system:4444"`
+	HydraAdminURL                  string        `envconfig:"HYDRA_ADMIN_URL" default:"http://ory-hydra-admin.kyma-system:4445"`
+	ApplicationInstallationTimeout time.Duration `envconfig:"APPLICATION_INSTALLATION_TIMEOUT" default:"180s"`
 }
 
 func ReadConfig() (TestConfig, error) {

@@ -48,6 +48,6 @@ spec:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
   ports:
-  - name: metrics-port
+  - name: http-metrics
     port: 9090
     protocol: TCP

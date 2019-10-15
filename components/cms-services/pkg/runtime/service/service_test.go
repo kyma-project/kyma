@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"context"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -45,8 +46,11 @@ func TestService_setupHandlers(t *testing.T) {
 				srv.Register(endpoint)
 			}
 			recorder := httptest.NewRecorder()
+
+			metRecorder := httptest.NewRecorder()
 			mux := srv.SetupHandlers()
 			request := httptest.NewRequest(testCase.targetMethod, testCase.targetEndpoint, nil)
+			metricsReq := httptest.NewRequest(http.MethodGet, "/metrics", nil)
 
 			// when
 			mux.ServeHTTP(recorder, request)
@@ -54,6 +58,18 @@ func TestService_setupHandlers(t *testing.T) {
 			// then
 			g.Expect(recorder.Result().StatusCode).To(gomega.Equal(testCase.expectedStatus))
 
+			// when
+			mux.ServeHTTP(metRecorder, metricsReq)
+
+			// then
+			resp := metRecorder.Result()
+			defer func() {
+				err := resp.Body.Close()
+				g.Expect(err).NotTo(gomega.HaveOccurred())
+			}()
+			body, _ := ioutil.ReadAll(resp.Body)
+			g.Expect(resp.StatusCode).To(gomega.Equal(http.StatusOK))
+			g.Expect(body).To(gomega.Not(gomega.HaveLen(0)))
 		})
 	}
 }

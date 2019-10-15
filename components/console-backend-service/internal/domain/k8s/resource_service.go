@@ -12,11 +12,17 @@ import (
 	"k8s.io/client-go/discovery"
 )
 
-type resourceService struct {
-	client discovery.DiscoveryInterface
+type DiscoveryInterface interface {
+	discovery.DiscoveryInterface
 }
 
-func newResourceService(client discovery.DiscoveryInterface) *resourceService {
+//go:generate mockery -name=DiscoveryInterface -case=underscore -output=automock -outpkg=automock
+
+type resourceService struct {
+	client DiscoveryInterface
+}
+
+func newResourceService(client DiscoveryInterface) *resourceService {
 	return &resourceService{
 		client: client,
 	}

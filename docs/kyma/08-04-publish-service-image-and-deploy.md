@@ -36,8 +36,7 @@ This guide bases on Docker Hub. However, there are many other Docker registries 
 
 1. Tag the local image with a proper name required in the registry: `docker tag example-http-db-service {USERNAME}/example-http-db-service:0.0.1`.
 2. Push the image to the registry: `docker push {USERNAME}/example-http-db-service:0.0.1`.
-
->**NOTE:** To verify if the image is successfully published, check if it is available online at the following address: `https://hub.docker.com/r/{USERNAME}/example-http-db-service/`
+3. To verify if the image is successfully published, check if it is available online at the following address: `https://hub.docker.com/r/{USERNAME}/example-http-db-service/`.
 
 ### Deploy to Kyma
 

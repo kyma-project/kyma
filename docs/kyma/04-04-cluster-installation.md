@@ -5,7 +5,7 @@ type: Installation
 
 This installation guide explains how you can quickly deploy Kyma on a cluster with a wildcard DNS provided by [`xip.io`](http://xip.io) using a GitHub release of your choice.
 
->**TIP:** A xip.io domain is not recommended for production. If you want to expose the Kyma cluster on your own domain, follow [this](#installation-use-your-own-domain) installation guide. To install Kyma using your own image instead of a GitHub release, follow [these](#installation-use-your-own-kyma-installer-image) instructions.
+>**TIP:** An xip.io domain is not recommended for production. If you want to expose the Kyma cluster on your own domain, follow [this](#installation-use-your-own-domain) installation guide. To install Kyma using your own image instead of a GitHub release, follow [these](#installation-use-your-own-kyma-installer-image) instructions.
 
 ## Prerequisites
 
@@ -152,7 +152,7 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
   </details>
   <details>
-  <summary>
+  <summary label="Gardener">
   Gardener
   </summary>
   
@@ -160,19 +160,19 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 2. Provision a cluster form the **Clusters** tab. Click the plus sign in the lower-right corner and choose the infrastructure in which you want to provision your cluster. Apply these settings in the following tabs:
 
-    | Tab  |  Setting |  Required value |
-    |---|---|---|
-    | Infrastructure |  Kubernetes | `1.14.6`  |
-    | Worker  |  Machine type | `n1-standard-4` (GCP) `Standard_D4_v3` (Azure)|
-    | Worker  | Autoscaler min.  | `3` |
+   | Tab  |  Setting |  Required value |
+   |---|---|---|
+   | Infrastructure |  Kubernetes | `1.14.6`  |
+   | Worker  |  Machine type | `n1-standard-4` (GCP) `Standard_D4_v3` (Azure)|
+   | Worker  | Autoscaler min.  | `3` |
 
 3. After you provision the cluster, download the kubeconfig file available under the **Show Cluster Access** option in the **Actions** column.
 
 4. Export the downloaded kubeconfig as an environment variable to connect to the cluster you provisioned. Run:
 
-    ```bash
-    export KUBECONFIG={PATH_TO_KUBECONFIG_FILE}
-    ```
+   ```bash
+   export KUBECONFIG={PATH_TO_KUBECONFIG_FILE}
+   ```
 
 >**NOTE:** If you use an Azure cluster, make sure to run all commands from steps 5 and 6 of [this](#installation-install-kyma-on-a-cluster--prepare-cluster--aks) section.
 

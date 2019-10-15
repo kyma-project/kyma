@@ -22,10 +22,6 @@ const (
 
 	// Finalizer for deleting Knative Subscriptions
 	finalizerName = "subscription.finalizers.kyma-project.io"
-
-	subscriptionSourceID         = "kyma-source-id"
-	subscriptionEventType        = "kyma-event-type"
-	subscriptionEventTypeVersion = "kyma-event-type-version"
 )
 
 type reconciler struct {
@@ -133,9 +129,9 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 
 	//Adding the event-metadata as channel labels
 	knativeChannelLabels := make(map[string]string)
-	knativeChannelLabels[subscriptionSourceID] = subscription.SourceID
-	knativeChannelLabels[subscriptionEventType] = subscription.EventType
-	knativeChannelLabels[subscriptionEventTypeVersion] = subscription.EventTypeVersion
+	knativeChannelLabels[util.SubscriptionSourceID] = subscription.SourceID
+	knativeChannelLabels[util.SubscriptionEventType] = subscription.EventType
+	knativeChannelLabels[util.SubscriptionEventTypeVersion] = subscription.EventTypeVersion
 
 	if subscription.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is not being deleted, so if it does not have our finalizer,
@@ -180,7 +176,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		} else if errors.IsNotFound(err) {
 
 			knativeChannel, err = r.knativeLib.CreateChannel(subscription.SubscriptionSpec.EventType,
-				knativeSubsNamespace, knativeChannelLabels, timeout)
+				knativeSubsNamespace, knativeChannelLabels, util.WaitForChannelWithTimeout(timeout))
 			if err != nil {
 				return false, err
 			}
@@ -194,7 +190,8 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		if err != nil && !errors.IsNotFound(err) {
 			return false, err
 		} else if errors.IsNotFound(err) {
-			err = r.knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannel.Name, &knativeSubsURI)
+			knativeChannelLabels[util.SubNs] = subscription.Namespace
+			err = r.knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannel.Name, &knativeSubsURI, knativeChannelLabels)
 			if err != nil {
 				return false, err
 			}
@@ -212,7 +209,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 					return false, err
 				}
 				log.Info("Knative Subscription is deleted", "Subscription", knativeSubsName)
-				err = r.knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannel.Name, &knativeSubsURI)
+				err = r.knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannel.Name, &knativeSubsURI, knativeChannelLabels)
 				if err != nil {
 					return false, err
 				}

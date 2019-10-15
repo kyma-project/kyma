@@ -25,7 +25,13 @@ podAnnotations:
   sidecar.istio.io/inject: "false"
 
 # Resource requests/limits to specify for the Velero deployment. Optional.
-resources: {}
+resources:
+  limits: 
+    cpu: "1"
+    memory: 256Mi
+  requests:
+    cpu: 500m
+    memory: 128Mi
 
 # Init containers to add to the Velero deployment's pod spec. Optional.
 initContainers: []

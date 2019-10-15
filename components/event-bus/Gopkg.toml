@@ -32,7 +32,7 @@ required = [
 [[override]]
   name = "gopkg.in/fsnotify.v1"
   source = "https://github.com/fsnotify/fsnotify.git"
-  version="v1.4.7"
+  version = "v1.4.7"
 
 [[override]]
   name = "k8s.io/apimachinery"
@@ -53,10 +53,6 @@ required = [
 [[override]]
   branch = "master"
   name = "github.com/apache/thrift"
-
-[[override]]
-  name = "github.com/knative/pkg"
-  branch = "release-0.8"
 
 [[override]]
   name = "knative.dev/pkg"

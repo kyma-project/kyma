@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Asset Upload Service is an HTTP server that exposes the file upload functionality for Minio. It contains a simple HTTP endpoint which accepts `multipart/form-data` forms. It can upload files to the private and public system buckets. 
+The Asset Upload Service is an HTTP server that exposes the file upload functionality for Minio. It contains a simple HTTP endpoint which accepts `multipart/form-data` forms. It can upload files to the private and public system buckets.
 
 ## Prerequisites
 
@@ -63,14 +63,14 @@ Use the following environment variables to configure the application:
 |------|----------|---------|-------------|
 | **APP_HOST** | No | `127.0.0.1` | The host on which the HTTP server listens |
 | **APP_PORT** | No | `3000` | The port on which the HTTP server listens |
-| **APP_KUBECONFIG_PATH** | No |  | The path to the `kubeconfig` file, needed for running an application outside of the cluster |
-| **APP_VERBOSE** | No | No | The toggle used to enable detailed logs in the application |
+| **APP_KUBECONFIG_PATH** | No | None | The path to the `kubeconfig` file, needed for running an application outside of the cluster |
+| **APP_VERBOSE** | No | None | The toggle used to enable detailed logs in the application |
 | **APP_UPLOAD_TIMEOUT** | No | `30m` | The file upload timeout |
 | **APP_MAX_UPLOAD_WORKERS** | No | `10` | The maximum number of concurrent upload workers |
 | **APP_UPLOAD_ENDPOINT** | No | `minio.kyma.local` | The address of the content storage server |
 | **APP_UPLOAD_PORT** | No | `443` | The port on which the content storage server listens |
-| **APP_UPLOAD_ACCESS_KEY** | Yes |  | The access key required to sign in to the content storage server |
-| **APP_UPLOAD_SECRET_KEY** | Yes |  | The secret key required to sign in to the content storage server |
+| **APP_UPLOAD_ACCESS_KEY** | Yes | None | The access key required to sign in to the content storage server |
+| **APP_UPLOAD_SECRET_KEY** | Yes | None | The secret key required to sign in to the content storage server |
 | **APP_UPLOAD_SECURE** | No | `true` | The HTTPS connection with the content storage server |
 | **APP_UPLOAD_EXTERNAL_ENDPOINT** | No | `https://minio.kyma.local` | The external address of the content storage server. If not set, the system uses the `APP_UPLOAD_ENDPOINT` variable. |
 | **APP_BUCKET_PRIVATE_PREFIX** | No | `private` | The prefix of the private system bucket |

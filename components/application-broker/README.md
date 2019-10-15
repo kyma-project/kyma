@@ -25,18 +25,21 @@ These Go and Dep versions are compliant with the `buildpack` used by Prow. For m
 
 ## Development
 
-Before each commit, use the `before-commit.sh` script or the `make build` command to test your changes.
+Before each commit, use the `make verify` command to test your changes. To build an image, use the `make build-image` command with **DOCKER_PUSH_REPOSITORY** and **DOCKER_PUSH_DIRECTORY** variables, for example:
+```
+DOCKER_PUSH_REPOSITORY=eu.gcr.io DOCKER_PUSH_DIRECTORY=/kyma-project/develop make build-image
+```
 
 ### Use environment variables
 
 | Name | Required | Default | Description |
 |-----|---------|--------|------------|
 |**APP_PORT** | NO | `8080` | The port on which the HTTP server listens |
-|**APP_BROKER_RELIST_DURATION_WINDOW** | YES | - | Time period after which the AB synchronizes with the Service Catalog if a new Application is added. In case more than one Application is added, synchronization is performed only once. |
-| **APP_SERVICE_NAME** | YES | - | The name of the Kubernetes service which exposes the Service Brokers API |
-| **APP_UNIQUE_SELECTOR_LABEL_KEY** | YES | - | Defined label key selector which allows uniquely identify AB pod's |
-| **APP_UNIQUE_SELECTOR_LABEL_VALUE** | YES | - | Defined label value selector which allows uniquely identify AB pod's |
-| **NAMESPACE** | YES | - | AB working Namespace |
+|**APP_BROKER_RELIST_DURATION_WINDOW** | YES | None | Time period after which the AB synchronizes with the Service Catalog if a new Application is added. In case more than one Application is added, synchronization is performed only once. |
+| **APP_SERVICE_NAME** | YES | None | The name of the Kubernetes service which exposes the Service Brokers API |
+| **APP_UNIQUE_SELECTOR_LABEL_KEY** | YES | None | Defined label key selector which allows uniquely identify AB pod's |
+| **APP_UNIQUE_SELECTOR_LABEL_VALUE** | YES | None | Defined label value selector which allows uniquely identify AB pod's |
+| **NAMESPACE** | YES | None | AB working Namespace |
 
 ## Code generation
 

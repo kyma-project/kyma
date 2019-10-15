@@ -135,6 +135,7 @@ func (in *CompassConnectionStatus) DeepCopy() *CompassConnectionStatus {
 func (in *ConnectionStatus) DeepCopyInto(out *ConnectionStatus) {
 	*out = *in
 	in.Established.DeepCopyInto(&out.Established)
+	in.Renewed.DeepCopyInto(&out.Renewed)
 	in.LastSync.DeepCopyInto(&out.LastSync)
 	in.LastSuccess.DeepCopyInto(&out.LastSuccess)
 	in.CertificateStatus.DeepCopyInto(&out.CertificateStatus)

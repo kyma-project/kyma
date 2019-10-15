@@ -1,9 +1,5 @@
 global:
   isLocalEnv: false
-  serviceCatalogApiserver:
-    enabled: true
-  serviceCatalogCrds:
-    enabled: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
@@ -16,3 +12,5 @@ global:
     name: monitoring-integration-tests
     dir: develop/
     version: 7a12b224
+tests:
+  enabled: false

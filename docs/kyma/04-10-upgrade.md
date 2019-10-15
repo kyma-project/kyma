@@ -31,9 +31,10 @@ Follow these steps:
   >**NOTE:** Not all releases require you to perform additional migration steps. If your target release doesn't come with a migration guide, proceed to the next step.
 
 3. Trigger the upgrade:
-    <div tabs>
+
+    <div tabs name="trigger-the-upgrade" group="upgrade-kyma">
       <details>
-      <summary>
+      <summary label="local-deployment">
       Local deployment
       </summary>
 
@@ -51,7 +52,7 @@ Follow these steps:
 
       </details>
       <details>
-      <summary>
+      <summary label="cluster-deployment">
       Cluster deployment
       </summary>
 
@@ -67,9 +68,10 @@ Follow these steps:
     </div>
 
 4. Applying the release artifacts to the cluster triggers the installation of the desired Kyma version. To watch the installation status, run:
-    <div tabs>
+
+    <div tabs name="installation-status" group="upgrade-kyma">
       <details>
-      <summary>
+      <summary label="local-deployment">
       Local deployment
       </summary>
 
@@ -79,7 +81,7 @@ Follow these steps:
 
       </details>
       <details>
-      <summary>
+      <summary label="cluster-deployment">
       Cluster deployment
       </summary>
 

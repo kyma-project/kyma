@@ -18,13 +18,14 @@ A micro frontend is a standalone web application which is developed, tested and 
 The Luigi Client enables communication between the micro frontend and the Console application.
 Include [Luigi Client](https://www.npmjs.com/package/@kyma-project/luigi-client) in the micro frontend's codebase as an npm dependency.
 
-```
+``` bash
 npm i @kyma-project/luigi-client
 ```
+
 It helps to read the context data that is sent by the Console when the user activates the micro frontend in the UI.
 Use the following example to read the context data:
 
-```
+``` js
 LuigiClient.addInitListener((data)=>{
     // do stuff with the context data
 });
@@ -32,7 +33,7 @@ LuigiClient.addInitListener((data)=>{
 
 The Luigi Client facilitates communication between the micro frontend and the Console. Use the Luigi Client API to request the Console to navigate from the micro frontend to any other route available in the application:
 
-```
+``` js
 LuigiClient.linkManager().navigate('/targetRoute', null, true)
 ```
 
@@ -53,6 +54,7 @@ Using this yaml file in your Kyma cluster results in a **Tractors Overview** mic
 ![MF-one-namespace](./assets/mf-one-namespace.png)
 
 ### Cluster-wide micro frontend
+
 You can define a cluster-wide micro frontend available for all Namespaces in the side navigation.
 
 [Here](./assets/cmf-environment.yaml) you can find a sample ClusterMicroFrontend entity using the `namespace` value for the **placement** attribute to make the micro frontend available for all Namespaces in the cluster.

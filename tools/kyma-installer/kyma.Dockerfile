@@ -1,5 +1,5 @@
-ARG INSTALLER_VERSION="PR-5433"
-ARG INSTALLER_DIR=eu.gcr.io/kyma-project/pr
+ARG INSTALLER_VERSION="56ac7bb4"
+ARG INSTALLER_DIR=eu.gcr.io/kyma-project
 FROM $INSTALLER_DIR/kyma-operator:$INSTALLER_VERSION
 
 LABEL source="git@github.com:kyma-project/kyma.git"

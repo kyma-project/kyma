@@ -4,7 +4,7 @@ metadata:
   labels:
     cms.kyma-project.io/view-context: docs-ui
     cms.kyma-project.io/group-name: components
-    cms.kyma-project.io/order: "12"
+    cms.kyma-project.io/order: "13"
   name: backup
 spec:
   displayName: "Backup"

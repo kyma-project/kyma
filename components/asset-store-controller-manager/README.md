@@ -51,8 +51,8 @@ Use the following environment variables to configure the application:
 | **APP_CLUSTER_BUCKET_MAX_CONCURRENT_RECONCILES** | No | `1` | The maximum number of cluster bucket reconciles that can run in parallel |
 | **APP_STORE_ENDPOINT** | No | `minio.kyma.local` | The address of the content storage server |
 | **APP_STORE_EXTERNAL_ENDPOINT** | No | `https://minio.kyma.local` | The external address of the content storage server |
-| **APP_STORE_ACCESS_KEY** | Yes |  | The access key required to sign in to the content storage server |
-| **APP_STORE_SECRET_KEY** | Yes |  | The secret key required to sign in to the content storage server |
+| **APP_STORE_ACCESS_KEY** | Yes | None | The access key required to sign in to the content storage server |
+| **APP_STORE_SECRET_KEY** | Yes | None | The secret key required to sign in to the content storage server |
 | **APP_STORE_USE_SSL** | No | `true` | The variable that enforces the use of HTTPS for the connection with the content storage server |
 | **APP_STORE_UPLOAD_WORKERS_COUNT** | No | `10` | The number of workers used in parallel to upload files to the storage bucket |
 | **APP_WEBHOOK_MUTATION_TIMEOUT** | No | `1m` | The period of time after which mutation is canceled |

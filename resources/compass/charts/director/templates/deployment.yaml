@@ -34,6 +34,8 @@ spec:
               value: "0.0.0.0:{{ .Values.deployment.args.containerPort }}"
             - name: APP_PLAYGROUND_API_ENDPOINT
               value: "/director/graphql"
+            - name: APP_JWKS_ENDPOINT
+              value: http://ory-oathkeeper-api.kyma-system.svc.cluster.local:4456/.well-known/jwks.json
             - name: APP_DB_USER
               valueFrom:
                 secretKeyRef:
@@ -58,13 +60,25 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: compass-postgresql
-                  key: postgresql-databaseName
+                  key: postgresql-directorDatabaseName
             - name: APP_DB_SSL
               valueFrom:
                 secretKeyRef:
                   name: compass-postgresql
                   key: postgresql-sslMode
-        {{if eq .Values.global.database.useEmbedded false}}
+            - name: APP_ONE_TIME_TOKEN_URL
+              value: "http://compass-connector.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.port }}/graphql"
+            - name: APP_CONNECTOR_URL
+              value: "http://compass-connector.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.port }}/graphql"
+            - name: APP_SCOPES_CONFIGURATION_FILE
+              value: /config/scopes.yaml
+            - name: APP_ALLOW_JWT_SIGNING_NONE
+              value: {{ .Values.deployment.allowJWTSigningNone | quote }}
+          volumeMounts:
+            - mountPath: /config
+              name: scopes-config
+
+        {{if eq .Values.global.database.embedded.enabled false}}
         - name: cloudsql-proxy
           image: gcr.io/cloudsql-docker/gce-proxy:1.11
           command: ["/cloud_sql_proxy",
@@ -78,8 +92,14 @@ spec:
             - name: cloudsql-instance-credentials
               mountPath: /secrets/cloudsql-instance-credentials
               readOnly: true
+          {{end}}
       volumes:
+        {{if eq .Values.global.database.embedded.enabled false}}
         - name: cloudsql-instance-credentials
           secret:
             secretName: cloudsql-instance-credentials
         {{end}}
+        - name: scopes-config
+          configMap:
+            name: {{ template "fullname" . }}-scopes
+

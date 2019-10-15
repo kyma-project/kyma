@@ -43,3 +43,14 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
+
+{{/*
+Create a list of namespaced services to blacklist
+*/}}
+{{- define "api-gateway.serviceBlackList" -}}
+{{- range $i, $e := .Values.config.serviceBlackList -}}
+{{- range $e -}}
+{{ printf "%s.%s," . $i -}}
+{{- end }}
+{{- end }}
+{{- end -}}

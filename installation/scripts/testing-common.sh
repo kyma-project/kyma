@@ -215,7 +215,7 @@ metadata:
   name: ${TESTING_ADDONS_CFG_NAME}
 spec:
   repositories:
-  - url: "https://github.com/kyma-project/addons/releases/download/0.7.0/index-testing.yaml"
+  - url: "https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml"
 EOF
     local retry=0
     while [[ ${retry} -lt 10 ]]; do
@@ -226,6 +226,7 @@ EOF
         fi
         if [[ "${msg}" = "Failed" ]]; then
             log "Testing addons configuration failed" red
+            removeTestingAddons
             return 1
         fi
         echo "Waiting for ready testing addons ${retry}/10.. status: ${msg}"

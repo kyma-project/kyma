@@ -16,35 +16,36 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )
 
-func isCatalogForbidden(url string) (bool, error) {
+func isCatalogForbidden(url string) (bool, int, error) {
 	config := osb.DefaultClientConfiguration()
 	config.URL = fmt.Sprintf("%s/cluster", url)
 
 	client, err := osb.NewClient(config)
 	if err != nil {
-		return false, errors.Wrapf(err, "while creating osb client for broker with URL: %s", url)
+		return false, 0, errors.Wrapf(err, "while creating osb client for broker with URL: %s", url)
 	}
+	var statusCode int
 	isForbiddenError := func(err error) bool {
 		statusCodeError, ok := err.(osb.HTTPStatusCodeError)
 		if !ok {
 			return false
 		}
+		statusCode = statusCodeError.StatusCode
 		return statusCodeError.StatusCode == http.StatusForbidden
 	}
 
 	_, err = client.GetCatalog()
 	switch {
 	case err == nil:
-		return false, nil
+		return false, http.StatusOK, nil
 	case isForbiddenError(err):
-		return true, nil
+		return true, statusCode, nil
 	default:
-		return false, errors.Wrapf(err, "while getting catalog from broker with URL: %s", url)
+		return false, statusCode, errors.Wrapf(err, "while getting catalog from broker with URL: %s", url)
 	}
 }
 func getCatalogForBroker(url string) ([]osb.Service, error) {
@@ -64,7 +65,7 @@ func getCatalogForBroker(url string) ([]osb.Service, error) {
 }
 
 func awaitCatalogContainsServiceClasses(t *testing.T, namespace string, timeout time.Duration, services []osb.Service) {
-	repeat.FuncAtMost(t, func() error {
+	repeat.AssertFuncAtMost(t, func() error {
 		serviceMap := make(map[string]osb.Service)
 		for _, service := range services {
 			serviceMap[service.ID] = service
@@ -161,7 +162,7 @@ func testDetailsReport(t *testing.T, services []osb.Service, ns string) {
 		t.Logf("   Is removed from catalog: %t", sc.Status.CommonServiceClassStatus.RemovedFromBrokerCatalog)
 	}
 
-	sbs, err := scCnt.ServicecatalogV1beta1().ServiceBrokers(ns).List(metav1.ListOptions{})
+	sbs, err := scCnt.ServicecatalogV1beta1().ServiceBrokers(ns).List(v1.ListOptions{})
 	if err != nil {
 		t.Errorf("Cannot fetch ServiceBrokers list during creating a report: %s", err)
 	}

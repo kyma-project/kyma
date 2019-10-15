@@ -16,8 +16,8 @@ const (
 	controllerAgentName = "eventactivation-controller"
 )
 
-// ProvideController returns an EventActivation controller.
-func ProvideController(mgr manager.Manager) (controller.Controller, error) {
+// ProvideController instantiates a reconciler which reconciles EventActivations.
+func ProvideController(mgr manager.Manager) error {
 
 	var err error
 
@@ -31,7 +31,7 @@ func ProvideController(mgr manager.Manager) (controller.Controller, error) {
 	})
 	if err != nil {
 		log.Error(err, "Unable to create controller")
-		return nil, err
+		return err
 	}
 
 	// Watch EventActivations.
@@ -40,8 +40,8 @@ func ProvideController(mgr manager.Manager) (controller.Controller, error) {
 	}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		log.Error(err, "Unable to watch EventActivation")
-		return nil, err
+		return err
 	}
 
-	return c, nil
+	return nil
 }

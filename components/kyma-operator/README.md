@@ -13,9 +13,9 @@ Kyma Operator is a tool for installing all Kyma components. The project is based
 
 ## Development
 
-Before each commit, use the [`before-commit.sh`](./before-commit.sh) script to test your changes:
-  ```
-  ./before-commit.sh
+Before each commit, use the [`Makefile`](./Makefile) script to test your changes:
+  ```bash
+  make verify
   ```
 
 ## Build a Docker image

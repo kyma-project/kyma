@@ -29,7 +29,7 @@ const (
 func (ts *TestSuite) createKubernetesResources() {
 	gwSelectorLabels := map[string]string{
 		// label app value must match container name - used, when printing logs
-		"app": "fake-gateway",
+		"app":                 "fake-gateway",
 		"acceptance-test-app": "fake-gateway",
 	}
 
@@ -129,7 +129,7 @@ func (ts *TestSuite) ensureNamespaceIsDeleted(timeout time.Duration) {
 		}
 	}
 
-	repeat.FuncAtMost(ts.t, waitForNsTermination, timeout)
+	repeat.AssertFuncAtMost(ts.t, waitForNsTermination, timeout)
 }
 
 func (ts *TestSuite) deleteNamespace() {

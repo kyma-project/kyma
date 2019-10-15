@@ -47,7 +47,7 @@ Use the following environment variables to configure the application:
 
 | Name | Required | Default | Description |
 |------|----------|---------|-------------|
-| **APP_KUBECONFIG_PATH** | No |  | The path to the `kubeconfig` file, needed for running an application outside of the cluster |
+| **APP_KUBECONFIG_PATH** | No | None | The path to the `kubeconfig` file, needed for running an application outside of the cluster |
 | **APP_TEST_UPLOAD_SERVICE_URL** | No | `http://localhost:3000/v1/upload` | The address of the Asset Upload Service |
 | **APP_TEST_WAIT_TIMEOUT** | No | `3m` | The period of time for which the application waits for the resources to meet defined conditions |
 | **APP_TEST_NAMESPACE** | No | `test-asset-store` | The name of the Namespace created and deleted during integration tests |
@@ -55,8 +55,8 @@ Use the following environment variables to configure the application:
 | **APP_TEST_BUCKET_NAME** | No | `test-bucket` | The Bucket resource name |
 | **APP_TEST_COMMON_ASSET_PREFIX** | No | `test` | The name of the prefix for the Asset and ClusterAsset resources |
 | **APP_TEST_MINIO_ENDPOINT** | No | `minio.kyma.local` | The address of the content storage server |
-| **APP_TEST_MINIO_ACCESS_KEY** | Yes |  | The access key required to sign in to the content storage server |
-| **APP_TEST_MINIO_SECRET_KEY** | Yes |  | The secret key required to sign in to the content storage server |
+| **APP_TEST_MINIO_ACCESS_KEY** | Yes | None | The access key required to sign in to the content storage server |
+| **APP_TEST_MINIO_SECRET_KEY** | Yes | None | The secret key required to sign in to the content storage server |
 | **APP_TEST_MINIO_USE_SSL** | No | `true` | The variable that enforces the use of HTTPS for the connection with the content storage server |
 
 ## Development
