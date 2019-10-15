@@ -11,6 +11,22 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:f14d1b50e0075fb00177f12a96dd7addf93d1e2883c25befd17285b779549795"
+  name = "github.com/gopherjs/gopherjs"
+  packages = ["js"]
+  pruneopts = "NUT"
+  revision = "d3ddacdb130fcd23f77a827e3b599804730be6b5"
+
+[[projects]]
+  digest = "1:395b1480ae42c3fec6fff19823e66e173819f85826811387f9045c88515a7f0f"
+  name = "github.com/jtolds/gls"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "b4936e06046bbecbb94cae9c18127ebe510a2cb9"
+  version = "v4.20"
+
+[[projects]]
+  branch = "master"
   digest = "1:5bc3e016b5102d10a66e4bb725c32e88dbf5f9a3cb8405f9af43113620e51dff"
   name = "github.com/kyma-project/kyma"
   packages = [
@@ -18,7 +34,7 @@
     "common/resilient",
   ]
   pruneopts = "NUT"
-  revision = "248b90b242926dc3ac82167306d1a1e324aa646a"
+  revision = "ecf1497706f660d515907e34b8155dda744bcdeb"
 
 [[projects]]
   digest = "1:14715f705ff5dfe0ffd6571d7d201dd8e921030f8070321a79380d8ca4ec1a24"
@@ -27,6 +43,31 @@
   pruneopts = "NUT"
   revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
   version = "v0.8.1"
+
+[[projects]]
+  digest = "1:a0509115762ee481fd95b60521b4dcc5ad226c54b741a4924f4f28c0cc6aabc8"
+  name = "github.com/smartystreets/assertions"
+  packages = [
+    ".",
+    "internal/go-diff/diffmatchpatch",
+    "internal/go-render/render",
+    "internal/oglematchers",
+  ]
+  pruneopts = "NUT"
+  revision = "f487f9de1cd36ebab28235b9373028812fb47cbd"
+  version = "1.10.1"
+
+[[projects]]
+  digest = "1:7efd0b2309cdd6468029fa30c808c50a820c9344df07e1a4bbdaf18f282907aa"
+  name = "github.com/smartystreets/goconvey"
+  packages = [
+    "convey",
+    "convey/gotest",
+    "convey/reporting",
+  ]
+  pruneopts = "NUT"
+  revision = "9e8dc3f972df6c8fcc0375ef492c24d0bb204857"
+  version = "1.6.3"
 
 [[projects]]
   digest = "1:dc2fb9fbadabda2bc4f23a952449600109a85d77ba9bd9a8b707610bd0b8ee7a"
@@ -57,7 +98,7 @@
     "html/atom",
   ]
   pruneopts = "NUT"
-  revision = "d66e71096ffb9f08f36d9aefcae80ce319de6d68"
+  revision = "da9a3fd4c5820e74b24a6cb7fb438dc9b0dd377c"
 
 [[projects]]
   branch = "master"
@@ -78,7 +119,7 @@
     "internal/semver",
   ]
   pruneopts = "NUT"
-  revision = "e5ffc44a6fee48797f1a6e50da4caa281d3282bb"
+  revision = "18e3458ac98b4126ac324c8056a0f2d826c6688a"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -87,6 +128,7 @@
     "github.com/kyma-project/kyma/common/ingressgateway",
     "github.com/kyma-project/kyma/common/resilient",
     "github.com/pkg/errors",
+    "github.com/smartystreets/goconvey/convey",
     "github.com/vrischmann/envconfig",
     "golang.org/x/lint/golint",
     "golang.org/x/net/html",
