@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -87,6 +88,7 @@ func (f *helmBrokerFlow) CreateResources() error {
 	} {
 		err := fn()
 		if err != nil {
+			f.log.Errorln(err)
 			f.logReport()
 			return err
 		}
@@ -109,6 +111,7 @@ func (f *helmBrokerFlow) TestResources() error {
 	} {
 		err := fn()
 		if err != nil {
+			f.log.Errorln(err)
 			f.logReport()
 			return err
 		}
@@ -127,22 +130,28 @@ func (f *helmBrokerFlow) deployEnvTester() error {
 
 func (f *helmBrokerFlow) createRedisInstance() error {
 	f.log.Infof("Creating Redis service instance")
-	_, err := f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Create(&v1beta1.ServiceInstance{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ServiceInstance",
-			APIVersion: "servicecatalog.k8s.io/v1beta1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: redisInstanceName,
-		},
-		Spec: v1beta1.ServiceInstanceSpec{
-			PlanReference: v1beta1.PlanReference{
-				ClusterServiceClassExternalName: "redis",
-				ClusterServicePlanExternalName:  "micro",
+
+	return wait.Poll(time.Millisecond*500, time.Second*30, func() (done bool, err error) {
+		if _, err = f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).Create(&v1beta1.ServiceInstance{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ServiceInstance",
+				APIVersion: "servicecatalog.k8s.io/v1beta1",
 			},
-		},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: redisInstanceName,
+			},
+			Spec: v1beta1.ServiceInstanceSpec{
+				PlanReference: v1beta1.PlanReference{
+					ClusterServiceClassExternalName: "redis",
+					ClusterServicePlanExternalName:  "micro",
+				},
+			},
+		}); err != nil {
+			f.log.Errorf("while creating redis instance: %v", err)
+			return false, nil
+		}
+		return true, nil
 	})
-	return err
 }
 
 func (f *helmBrokerFlow) createRedisBindingAndWaitForReadiness() error {
