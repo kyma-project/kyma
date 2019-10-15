@@ -58,10 +58,11 @@
   version = "1.10.1"
 
 [[projects]]
-  digest = "1:8f608a1ce50308b128928d67a427636a30bc048837867bc6805f715cddc7cf86"
+  digest = "1:c7fd7e7a9c5a85177689cd07e53d92626080b6468f7df861006934089fbdd52d"
   name = "github.com/smartystreets/goconvey"
   packages = [
     ".",
+    "convey",
     "convey/gotest",
     "convey/reporting",
     "web/server/api",
@@ -136,6 +137,7 @@
     "github.com/kyma-project/kyma/common/resilient",
     "github.com/pkg/errors",
     "github.com/smartystreets/goconvey",
+    "github.com/smartystreets/goconvey/convey",
     "github.com/vrischmann/envconfig",
     "golang.org/x/lint/golint",
     "golang.org/x/net/html",
