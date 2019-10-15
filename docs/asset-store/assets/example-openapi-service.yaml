@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  description: This example shows API requirements for a service that communicates with the Asset Store. This example contains `/convert`, `/validate`, and `/extract` endpoints.
-  title: Example OpenAPI service
+  description: This example shows API specification of a service that exposes endpoints for all Asset Store webhooks. It contains `/convert`, `/validate`, and `/extract` endpoints.
+  title: Example webhook service
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
@@ -9,10 +9,10 @@ info:
 paths:
   /convert:
     post:
-      description: Converts files sent in the `multipart/form-data` form from the old AsyncAPI version to 2.0.0.
+      description: Represents the `mutation webhook`.
       tags:
         - convert
-      summary: Converts the AsyncAPI specification to version 2.0.0.
+      summary: Converts input files.
       operationId: convertReq
       requestBody:
         content:
@@ -34,10 +34,10 @@ paths:
           $ref: "#/components/responses/notModified"
   /validate:
     post:
-      description: Validates files sent in the `multipart/form-data` form against the AsyncAPI schema in version 2.0.0.
+      description: Represents the `validation webhook`.
       tags:
         - validate
-      summary: Validates the AsyncAPI specification against the AsyncAPI schema in version 2.0.0.
+      summary: Validates input files.
       operationId: validateReq
       requestBody:
         content:
@@ -59,10 +59,10 @@ paths:
           $ref: "#/components/responses/unprocessableEntity"
   /extract:
     post:
-      description: Extracts metadata from text files sent in the `multipart/form-data` form. As a field name, specify the relative or absolute path to the file.
+      description: Represents the `metadata webhook`.
       tags:
         - extract
-      summary: Extracts metadata from files.
+      summary: Extracts metadata from input files.
       operationId: extractReq
       requestBody:
         content:
