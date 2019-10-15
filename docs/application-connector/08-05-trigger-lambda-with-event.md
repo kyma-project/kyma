@@ -78,7 +78,7 @@ To create a simple lambda function and trigger it with an event, you must first 
 3. Expose the `externalName` of the Service Class of the registered service.
 
    ```bash
-   export EXTERNAL_NAME=$(kubectl -n production get serviceclass {SERVICE_ID}  -o jsonpath='{.spec.externalName}')
+   export EXTERNAL_NAME=$(kubectl -n $NAMESPACE get serviceclass {SERVICE_ID}  -o jsonpath='{.spec.externalName}')
    ```
 
 4. Create a Service Instance for the registered service.
