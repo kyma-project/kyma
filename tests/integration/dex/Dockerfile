@@ -10,14 +10,14 @@ WORKDIR ${BASE_APP_DIR}
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./dex/ ${BASE_APP_DIR}/dex/
 COPY ./licenses/ ${BASE_APP_DIR}/licenses/
-COPY ./entrypoint.sh ${BASE_APP_DIR}/tests/entrypoint.sh
+COPY ./entrypoint.sh ${BASE_APP_DIR}/entrypoint.sh
 
 #
 # Build tests
 #
 
 RUN go test -c ./dex -tags=integration
-RUN mkdir /tests && mv ./dex.test /tests/dex.test && mv ${BASE_APP_DIR}/licenses /tests/licenses
+RUN mkdir /tests && mv ./dex.test /tests/dex.test && mv ${BASE_APP_DIR}/licenses /tests/licenses && mv ${BASE_APP_DIR}/entrypoint.sh /tests/entrypoint.sh
 
 FROM alpine:3.8
 LABEL source = git@github.com:kyma-project/kyma.git
