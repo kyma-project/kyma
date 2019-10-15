@@ -34,7 +34,7 @@
     "common/resilient",
   ]
   pruneopts = "NUT"
-  revision = "ecf1497706f660d515907e34b8155dda744bcdeb"
+  revision = "fc687b676ccb418f89288c613b8b8efe310678e7"
 
 [[projects]]
   digest = "1:14715f705ff5dfe0ffd6571d7d201dd8e921030f8070321a79380d8ca4ec1a24"
@@ -58,12 +58,19 @@
   version = "1.10.1"
 
 [[projects]]
-  digest = "1:7efd0b2309cdd6468029fa30c808c50a820c9344df07e1a4bbdaf18f282907aa"
+  digest = "1:8f608a1ce50308b128928d67a427636a30bc048837867bc6805f715cddc7cf86"
   name = "github.com/smartystreets/goconvey"
   packages = [
-    "convey",
+    ".",
     "convey/gotest",
     "convey/reporting",
+    "web/server/api",
+    "web/server/contract",
+    "web/server/executor",
+    "web/server/messaging",
+    "web/server/parser",
+    "web/server/system",
+    "web/server/watch",
   ]
   pruneopts = "NUT"
   revision = "9e8dc3f972df6c8fcc0375ef492c24d0bb204857"
@@ -128,7 +135,7 @@
     "github.com/kyma-project/kyma/common/ingressgateway",
     "github.com/kyma-project/kyma/common/resilient",
     "github.com/pkg/errors",
-    "github.com/smartystreets/goconvey/convey",
+    "github.com/smartystreets/goconvey",
     "github.com/vrischmann/envconfig",
     "golang.org/x/lint/golint",
     "golang.org/x/net/html",
