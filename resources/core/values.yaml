@@ -59,7 +59,7 @@ global:
     version: 6b4c356f
   console_backend_service:
     dir:
-    version: PR-5876
+    version: a92f7fec
   console_backend_service_test:
     dir:
     version: b71dd1aa
