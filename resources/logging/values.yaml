@@ -307,7 +307,7 @@ global:
   logging_integration_tests:
     name: logging-integration-tests
     dir: pr/
-    version: PR-5226
+    version: PR-5896
   logging:
     promtail:
       config:
