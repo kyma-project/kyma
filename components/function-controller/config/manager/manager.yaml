@@ -54,7 +54,7 @@ spec:
           - name: BUILD_TIMEOUT
             value: "20"
         # NOTE: use this command for debugging with delve
-        # command: ["dlv", "exec", "/ko-app/manager", "--listen=:40000", "--headless=true", "--api-version=2", "--log", "--accept-multiclient", "--", "--metrics-addr=127.0.0.1:8080"]
+        command: ["dlv", "exec", "/ko-app/manager", "--listen=:40000", "--headless=true", "--api-version=2", "--log", "--accept-multiclient", "--", "--metrics-addr=127.0.0.1:8080"]
         # disable or increase resource limits for dlv such that we don't want to get OOMkilled
 #        resources:
 #          limits:
