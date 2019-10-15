@@ -11,7 +11,7 @@ spec:
   placement: namespace
   viewBaseUrl: 'https://core-ui.{{ js .Values.global.ingress.domainName }}'
   navigationNodes:
-    - label: Knative lambdas
-      navigationPath: knative-lambdas
+    - label: Functions [preview]
+      navigationPath: functions-preview
       viewUrl: '/lambdas'
       order: 1
