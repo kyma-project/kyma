@@ -47,7 +47,7 @@ spec:
                         valueFrom:
                             secretKeyRef:
                                 name: compass-postgresql
-                                key: postgresql-databaseName
+                                key: postgresql-directorDatabaseName
                       - name: DB_SSL
                         valueFrom:
                             secretKeyRef:

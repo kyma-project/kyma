@@ -19,7 +19,7 @@ global:
       version: "26601526"
     provisioner:
       dir: develop/
-      version: "4f007a9f"
+      version: "6a37c1f7"
     schema_migrator:
       dir: develop/
       version: "4fc82813"
@@ -37,7 +37,7 @@ global:
         version: "67535547"
       provisioner:
         dir: develop/
-        version: "96714748"
+        version: "6a37c1f7"
 
   isLocalEnv: false
 
@@ -96,23 +96,42 @@ global:
       namespace: "kyma-system"
 
   database:
-    useEmbedded: true
+    embedded:
+      enabled: true
+      directorDBName: "postgres"
+      provisionerDBName: "provisioner"
     # Values for GCP managed PostgreSQL database
     managedGCP:
       serviceAccountKey: ""
       instanceConnectionName: ""
       dbUser: ""
       dbPassword: ""
-      dbName: ""
+      directorDBName: ""
+      provisionerDBName: ""
       host: "localhost"
       hostPort: "5432"
       sslMode: ""
 
-  tenantMappingService:
-    url: http://compass-director.compass-system.svc.cluster.local:3000/tenant-mapping
-
-  certificateResolverService:
-    url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/certificate/data/resolve
-
-  tokenResolverService:
-    url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/tokens/resolve
+  oathkeeper:
+    mutators:
+      tenantMappingService:
+        config:
+          api:
+            url: http://compass-director.compass-system.svc.cluster.local:3000/tenant-mapping
+            retry:
+              number_of_retries: 5
+              delay_in_milliseconds: 5000
+      certificateResolverService:
+        config:
+          api:
+            url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/certificate/data/resolve
+            retry:
+              number_of_retries: 5
+              delay_in_milliseconds: 5000
+      tokenResolverService:
+        config:
+          api:
+            url: http://compass-connector.compass-system.svc.cluster.local:8080/v1/tokens/resolve
+            retry:
+              number_of_retries: 5
+              delay_in_milliseconds: 5000
