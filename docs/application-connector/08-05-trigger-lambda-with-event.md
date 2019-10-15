@@ -15,7 +15,7 @@ To create a simple lambda function and trigger it with an event, you must first 
 
 ## Steps
 
-1. Register an event service with this AsyncAPI specification to the desired Application.
+1. Register an event service with this example AsyncAPI specification to the desired Application.
 
    >**NOTE:** See [this](#tutorials-get-the-client-certificate) tutorial to learn how to register a service.
 
