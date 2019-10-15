@@ -3,22 +3,28 @@ title: Trigger a lambda with events
 type: Tutorials
 ---
 
-To create a simple lambda function and trigger it with an event, you must first register a service using metadata service in Application Connector. This service then sends the event that triggers the lambda. You must create a Service Instance which enables this event in the Namespace. Follow this guide to learn how to do it. 
+To create a simple lambda function and trigger it with an event, you must first register a service using the Application Registry in Application Connector. This service then sends the event that triggers the lambda. You must create a Service Instance which enables this event in the Namespace. Follow this guide to learn how to do it. 
 
 
 ## Prerequisites
 
-- An Application bound to the `production` Namespace
+- An Application bound to a Namespace.
 - Client certificates generated for the connected Application.
 
 >**NOTE:** See the respective tutorials to learn how to [create](https://kyma-project.io/docs/components/application-connector#tutorials-create-a-new-application) an Application, [get](https://kyma-project.io/docs/components/application-connector#tutorials-get-the-client-certificate) the client certificate, and [bind](https://kyma-project.io/docs/components/application-connector#tutorials-bind-an-application-to-a-namespace) an Application to a Namespace.
 
 ## Steps
 
-1. Register an event service with this example AsyncAPI specification to the desired Application.
+1. Export the name of the Namespace to which you bound your Application, and the name of your Application.
+
+   ```bash
+   export NAMESPACE={YOUR_NAMESPACE}
+   export APP_NAME={YOUR_APPLICATION_NAME}
+   ```
+
+2. Register a service with events with this example AsyncAPI specification to the desired Application.
 
    >**NOTE:** See [this](#tutorials-get-the-client-certificate) tutorial to learn how to register a service.
-
 
    ```json
    {
@@ -69,13 +75,13 @@ To create a simple lambda function and trigger it with an event, you must first 
    }
    ```
 
-2. Expose the `externalName` of the Service Class of the registered service.
+3. Expose the `externalName` of the Service Class of the registered service.
 
    ```bash
    export EXTERNAL_NAME=$(kubectl -n production get serviceclass {SERVICE_ID}  -o jsonpath='{.spec.externalName}')
    ```
 
-3. Create a Service Instance for the registered service.
+4. Create a Service Instance for the registered service.
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -83,13 +89,13 @@ To create a simple lambda function and trigger it with an event, you must first 
    kind: ServiceInstance
    metadata:
      name: my-events-service-instance-name
-     namespace: production
+     namespace: $NAMESPACE
    spec:
      serviceClassExternalName: $EXTERNAL_NAME
    EOF
    ```
 
-4. Create and register a lambda function in the `production` Namespace.
+5. Create and register a lambda function in your Namespace.
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -97,7 +103,7 @@ To create a simple lambda function and trigger it with an event, you must first 
    kind: Function
    metadata:
      name: my-events-lambda
-     namespace: production
+     namespace: $NAMESPACE
      labels:
        app: my-events-lambda
    spec:
@@ -159,7 +165,7 @@ To create a simple lambda function and trigger it with an event, you must first 
    EOF
    ```
 
-5. Create a Subscription to allow events to trigger the lambda function.
+6. Create a Subscription to allow events to trigger the lambda function.
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -169,20 +175,20 @@ To create a simple lambda function and trigger it with an event, you must first 
      labels:
        Function: my-events-lambda
      name: lambda-my-events-lambda-exampleevent-v1
-     namespace: production
+     namespace: $NAMESPACE
    spec:
-     endpoint: http://my-events-lambda.production:8080/
+     endpoint: http://my-events-lambda.$NAMESPACE:8080/
      event_type: exampleevent
      event_type_version: v1
      include_subscription_name_header: true
-     source_id: {APP_NAME}
+     source_id: $APP_NAME
    EOF
    ```
 
-6. Send an event to trigger the created lambda.
+7. Send an event to trigger the created lambda.
 
    ```bash
-   curl -X POST https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+   curl -X POST https://gateway.{CLUSTER_DOMAIN}/$APP_NAME/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
    '{
        "event-type": "exampleevent",
        "event-type-version": "v1",
@@ -192,8 +198,8 @@ To create a simple lambda function and trigger it with an event, you must first 
    }'
    ```
 
-7. Check the logs of the lambda function to see if it was triggered. Every time an event successfully triggers the function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`.
+8. Check the logs of the lambda function to see if it was triggered. Every time an event successfully triggers the function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`.
 
    ```bash
-   kubectl -n production logs "$(kubectl -n production get po -l function=my-events-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-events-lambda | grep -E "Response acquired successfully! Uuid: [a-f0-9-]+"
+   kubectl -n $NAMESPACE logs "$(kubectl -n $NAMESPACE get po -l function=my-events-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-events-lambda | grep -E "Response acquired successfully! Uuid: [a-f0-9-]+"
    ```
