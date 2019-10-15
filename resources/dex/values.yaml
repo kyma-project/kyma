@@ -74,5 +74,5 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:
-    dir: develop/
-    version: 665a2857
+    dir:
+    version: PR-5981
