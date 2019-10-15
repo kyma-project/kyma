@@ -18,7 +18,7 @@ spec:
     spec:
       shareProcessNamespace: true
       {{- if .Values.global.isLocalEnv }}
-      # hostNetwork: true
+      hostNetwork: true
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
