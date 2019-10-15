@@ -1,3 +1,4 @@
+{{- if .Values.test.enabled }}
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
@@ -23,9 +24,8 @@ spec:
         env:
         - name: INGRESSGATEWAY_ADDRESS
           value: istio-ingressgateway.istio-system.svc.cluster.local
-        - name: DOMAIN_NAME
-          value: {{ .Values.global.ingress.domainName }}
         - name: TARGET
           value: {{ .Values.test.target }}
       restartPolicy: Never
+{{- end }}
 {{- end }}

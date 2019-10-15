@@ -511,7 +511,6 @@ type ComplexityRoot struct {
 		DeleteApi                                  func(childComplexity int, name string, namespace string) int
 		CreateLimitRange                           func(childComplexity int, namespace string, name string, limitRange LimitRangeInput) int
 		DeleteFunction                             func(childComplexity int, name string, namespace string) int
-		CreateFunction                             func(childComplexity int, name string, namespace string, labels Labels, size string, runtime string) int
 	}
 
 	Namespace struct {
@@ -965,7 +964,6 @@ type MutationResolver interface {
 	DeleteAPI(ctx context.Context, name string, namespace string) (*API, error)
 	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*LimitRange, error)
 	DeleteFunction(ctx context.Context, name string, namespace string) (FunctionMutationOutput, error)
-	CreateFunction(ctx context.Context, name string, namespace string, labels Labels, size string, runtime string) (Function, error)
 }
 type NamespaceResolver interface {
 	Pods(ctx context.Context, obj *Namespace) ([]Pod, error)
@@ -2920,57 +2918,6 @@ func field_Mutation_deleteFunction_args(rawArgs map[string]interface{}) (map[str
 		}
 	}
 	args["namespace"] = arg1
-	return args, nil
-
-}
-
-func field_Mutation_createFunction_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["namespace"]; ok {
-		var err error
-		arg1, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["namespace"] = arg1
-	var arg2 Labels
-	if tmp, ok := rawArgs["labels"]; ok {
-		var err error
-		err = (&arg2).UnmarshalGQL(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["labels"] = arg2
-	var arg3 string
-	if tmp, ok := rawArgs["size"]; ok {
-		var err error
-		arg3, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["size"] = arg3
-	var arg4 string
-	if tmp, ok := rawArgs["runtime"]; ok {
-		var err error
-		arg4, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["runtime"] = arg4
 	return args, nil
 
 }
@@ -6668,18 +6615,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteFunction(childComplexity, args["name"].(string), args["namespace"].(string)), true
-
-	case "Mutation.createFunction":
-		if e.complexity.Mutation.CreateFunction == nil {
-			break
-		}
-
-		args, err := field_Mutation_createFunction_args(rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateFunction(childComplexity, args["name"].(string), args["namespace"].(string), args["labels"].(Labels), args["size"].(string), args["runtime"].(string)), true
 
 	case "Namespace.name":
 		if e.complexity.Namespace.Name == nil {
@@ -18301,11 +18236,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "createFunction":
-			out.Values[i] = ec._Mutation_createFunction(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -20056,40 +19986,6 @@ func (ec *executionContext) _Mutation_deleteFunction(ctx context.Context, field 
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._FunctionMutationOutput(ctx, field.Selections, &res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Mutation_createFunction(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Mutation_createFunction_args(rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx := &graphql.ResolverContext{
-		Object: "Mutation",
-		Args:   args,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateFunction(rctx, args["name"].(string), args["namespace"].(string), args["labels"].(Labels), args["size"].(string), args["runtime"].(string))
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(Function)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	return ec._Function(ctx, field.Selections, &res)
 }
 
 var namespaceImplementors = []string{"Namespace"}
@@ -33768,7 +33664,6 @@ type Mutation {
 
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1"})
     deleteFunction(name: String!, namespace: String!): FunctionMutationOutput! @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
-    createFunction(name: String!, namespace: String!, labels: Labels!, size: String!, runtime: String!): Function! @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
 }
 
 # Subscriptions

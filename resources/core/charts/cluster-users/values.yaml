@@ -1,3 +1,6 @@
+tests:
+  enabled: false
+
 bindings:
   kymaEssentials:
     groups: []
@@ -40,6 +43,8 @@ clusterRoles:
     ory:
       - "oathkeeper.ory.sh"
       - "hydra.ory.sh"
+    backup:
+      - "velero.io"
   verbs:
     edit:
       - "create"

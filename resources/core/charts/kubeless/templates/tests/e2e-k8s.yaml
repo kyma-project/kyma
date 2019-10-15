@@ -47,4 +47,4 @@ spec:
   event_type: test
   event_type_version: v1
   source_id: "dummy"
-{{ end }}
+{{- end }}

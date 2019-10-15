@@ -7,7 +7,7 @@ rbacJob:
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/develop/api-gateway-controller
-  tag: "7409c68b"
+  tag: "c1d35a0c"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -26,18 +26,33 @@ config:
     port: 4455
   jwksURI: http://dex-service.kyma-system.svc.cluster.local:5556/keys
   serviceBlackList:
-    - kubernetes
-    - istio-citadel
-    - istio-galley
-    - istio-ingressgateway
-    - istio-pilot
-    - istio-policy
-    - istio-sidecar-injector
-    - istio-telemetry
-    - apiserver-proxy
-    - apiserver-proxy-ssl
+    default:
+      - kubernetes
+    istio-system:
+      - istio-citadel
+      - istio-galley
+      - istio-ingressgateway
+      - istio-pilot
+      - istio-policy
+      - istio-sidecar-injector
+      - istio-telemetry
+    kyma-system:
+      - apiserver-proxy
+      - apiserver-proxy-ssl
   domainWhiteList:
     - kyma.local
+  cors: # values listed below will be used to set corsPolicy in created VirtualServices (https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/#CorsPolicy)
+    allowOrigin:
+      - "*"
+    allowMethods: # no possibility to use "*"
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+    allowHeaders: # "*" is not yet supported by all browsers
+      - "Authorization"
+      - "Content-Type"
+      - "*"
 
   # Node labels for pod assignment.
   nodeSelector: {}

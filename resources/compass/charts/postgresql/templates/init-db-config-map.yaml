@@ -1,0 +1,10 @@
+# This file is not part of official PostgreSQL chart
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}-db-init
+data:
+  init-director-db.sql: |
+    CREATE DATABASE {{ .Values.global.database.embedded.directorDBName }};
+  init-provisioner-db.sql: |
+    CREATE DATABASE {{ .Values.global.database.embedded.provisionerDBName }};

@@ -1,6 +1,6 @@
 # Default values for Service Catalog
 # service-catalog image to use
-image: quay.io/kubernetes-service-catalog/service-catalog:v0.3.0-beta.0
+image: quay.io/kubernetes-service-catalog/service-catalog:v0.3.0-beta.1
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
 # "Never", and "Always"
 imagePullPolicy: Always
@@ -120,7 +120,7 @@ securityContext: {}
 
 ## images for migration process
 migration:
-  sbuImage: eu.gcr.io/kyma-project/develop/sbu-upgrade-protector:latest
-  abImage: eu.gcr.io/kyma-project/pr/ab-upgrade-protector:PR-5798
+  sbuImage: eu.gcr.io/kyma-project/develop/sbu-upgrade-protector:b1f395fa
+  abImage: eu.gcr.io/kyma-project/develop/ab-upgrade-protector:b1f395fa
 
 

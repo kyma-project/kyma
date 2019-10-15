@@ -3,11 +3,11 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
-      dir: pr/
-      version: "PR-5729"
+      dir: develop/
+      version: "309eb6b3"
     runtimeAgentTests:
       dir: pr/
-      version: "PR-5782"
+      version: "PR-5870"
 
 compassRuntimeAgent:
   image:
@@ -43,8 +43,9 @@ compassRuntimeAgent:
     enabled: true
     mockService:
       port: 8080
-    configApplicationWaitTime: 50
-    proxyInvalidationWaitTime: 150
+    configApplicationWaitTime: 50s
+    proxyInvalidationWaitTime: 120s
+    applicationInstallationTimeout: 150s
     graphqlLogs: false
     oauth:
       hydra:

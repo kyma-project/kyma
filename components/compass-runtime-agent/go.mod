@@ -5,10 +5,10 @@ go 1.12
 require (
 	github.com/99designs/gqlgen v0.10.0 // indirect
 	github.com/gogo/protobuf v1.2.1 // indirect
-	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/kyma-incubator/compass v0.0.0-20190916105119-d020cd970c45
-	github.com/kyma-project/kyma v0.5.1-0.20190805122745-327770ad3ad5
+	github.com/kyma-project/kyma v0.5.1-0.20190930211557-c9f7a5f5947b
+	github.com/kyma-project/kyma/components/cms-controller-manager v0.0.0-20190930061401-0b9792cb2766
 	github.com/machinebox/graphql v0.2.2
 	github.com/matryer/is v1.2.0 // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect

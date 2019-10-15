@@ -48,10 +48,10 @@ chart and their default values.
 | **webhook.updateStrategy** | Specifies **updateStrategy** for the Service Catalog webhook deployment. | `RollingUpdate` |
 | **webhook.minReadySeconds** | The minimum number of seconds for which a newly created webhook Pod is ready without any of its containers crashing, for it to be considered available. | `1` |
 | **webhook.annotations** | Provides annotations for webhook Pods. | `{}` |
-| **webhook.nodeSelector** | A **nodeSelector** value to apply to the webhook Pods. If not specified, no nodeSelector will be applied. | |
+| **webhook.nodeSelector** | A **nodeSelector** value to apply to the webhook Pods. If not specified, no nodeSelector will be applied. | None |
 | **webhook.service.type** | Specifies the type of service. The possible values are `LoadBalancer`, `NodePort`, and `ClusterIP`. | `NodePort` |
 | **webhook.service.nodePort.securePort** | If the service type is `NodePort`, it specifies a port in the allowed range in which the TLS-enabled endpoint will be exposed (for example, `30000 - 32767` on Minikube). | `30443` |
-| **webhook.service.clusterIP** | If the service type is `ClusterIP`, specify the cluster as `None` for the headless services, specify your own specific IP, or leave this parameter blank to let Kubernetes assign a cluster IP. |  |
+| **webhook.service.clusterIP** | If the service type is `ClusterIP`, specify the cluster as `None` for the headless services, specify your own specific IP, or leave this parameter blank to let Kubernetes assign a cluster IP. | None |
 | **webhook.verbosity** | The log level. The possible values range from `0 - 10`. | `10` |
 | **webhook.healthcheck.enabled** | Enables readiness and liveliness probes. | `true` |
 | **webhook.resources** | Specifies resources allocation (requests and limits). | `{requests: {cpu: 100m, memory: 20Mi}, limits: {cpu: 100m, memory: 30Mi}}` |
@@ -59,7 +59,7 @@ chart and their default values.
 | **controllerManager.updateStrategy** | Specifies the update strategy for the Service Catalog controllerManager deployments. | `RollingUpdate` |
 | **controllerManager.minReadySeconds** |The minimum number of seconds for which a newly created controllerManager Pod is ready without any of its containers crashing, for it to be considered available.  | `1` |
 | **controllerManager.annotations** | Provides annotations for controllerManager Pods. | `{}` |
-| **controllerManager.nodeSelector** | A nodeSelector value to apply to the controllerManager Pods. If not specified, no nodeSelector will be applied. | |
+| **controllerManager.nodeSelector** | A nodeSelector value to apply to the controllerManager Pods. If not specified, no nodeSelector will be applied. | None |
 | **controllerManager.healthcheck.enabled** | Enables readiness and liveliness probes. | `true` |
 | **controllerManager.verbosity** | The log level. The possible values range from `0 - 10`. | `10` |
 | **controllerManager.resyncInterval** | Specifies how often the controller resyncs informers. The duration has a format of `20m`, `1h`, etc. | `5m` |
@@ -79,7 +79,7 @@ chart and their default values.
 Specify each parameter using the `--set key=value[,key=value]` argument to
 `helm install`.
 
-Alternatively, you can create a YAML file that specifies the values for the parameters 
+Alternatively, you can create a YAML file that specifies the values for the parameters
 while installing the chart. For example:
 
 ```bash

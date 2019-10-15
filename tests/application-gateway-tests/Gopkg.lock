@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/avast/retry-go"
+  packages = ["."]
+  revision = "101acd3290b786bf437607d874596e3996484d8d"
+  version = "v2.4.1"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
@@ -61,6 +67,12 @@
   packages = ["."]
   revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
   version = "v1.0.2"
+
+[[projects]]
+  name = "github.com/kyma-project/kyma"
+  packages = ["common/resilient"]
+  revision = "69599d4a33a2d206a906bd87c95af3e615830216"
+  version = "1.5.0"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -295,7 +307,7 @@
     "third_party/forked/golang/reflect"
   ]
   revision = "1799e75a07195de9460b8ef7300883499f12127b"
-  version = "kubernetes-1.15.0"
+  version = "kubernetes-1.15.2"
 
 [[projects]]
   name = "k8s.io/client-go"
@@ -380,6 +392,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "227d6af1edf840178826a4c107ab94187dcf8dcb1d5ed20c3fe86300ab14a24a"
+  inputs-digest = "a03231861ea6aa8710e5aa1acbce57f6445b9834ab0db1fb81d4fbb6cefbe3dd"
   solver-name = "gps-cdcl"
   solver-version = 1

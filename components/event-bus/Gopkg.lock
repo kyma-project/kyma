@@ -400,7 +400,7 @@
   version = "v1.1.5"
 
 [[projects]]
-  digest = "1:350f91d1f01c61bbea65bd7db21285f56e0f4001711a41cceb8e8b9b3b3de962"
+  digest = "1:fc3cc57d9d96cbb45da33a4372d85f4a8fe8dd02dfdbe3f8787eed7a6d414e27"
   name = "github.com/knative/eventing"
   packages = [
     "pkg/apis/duck",
@@ -420,6 +420,14 @@
     "pkg/client/clientset/versioned/typed/messaging/v1alpha1/fake",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1",
     "pkg/client/clientset/versioned/typed/sources/v1alpha1/fake",
+    "pkg/client/informers/externalversions",
+    "pkg/client/informers/externalversions/eventing",
+    "pkg/client/informers/externalversions/eventing/v1alpha1",
+    "pkg/client/informers/externalversions/internalinterfaces",
+    "pkg/client/informers/externalversions/messaging",
+    "pkg/client/informers/externalversions/messaging/v1alpha1",
+    "pkg/client/informers/externalversions/sources",
+    "pkg/client/informers/externalversions/sources/v1alpha1",
     "pkg/client/injection/client",
     "pkg/client/injection/client/fake",
     "pkg/client/listers/eventing/v1alpha1",
@@ -1522,6 +1530,8 @@
     "github.com/knative/eventing/pkg/client/clientset/versioned/fake",
     "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
     "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
+    "github.com/knative/eventing/pkg/client/informers/externalversions",
+    "github.com/knative/eventing/pkg/client/listers/messaging/v1alpha1",
     "github.com/knative/eventing/pkg/reconciler/testing",
     "github.com/nats-io/go-nats-streaming",
     "github.com/onsi/ginkgo",

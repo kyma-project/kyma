@@ -1,4 +1,5 @@
 # Default configuration
+MAIN_PATH := ./main.go
 IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG := $(DOCKER_TAG)
 # BASE_PKG is a root packge of the component
@@ -83,11 +84,11 @@ docker-create-opts:
 	@echo $(DOCKER_CREATE_OPTS)
 
 # Targets mounting sources to buildpack
-MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate
+MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate pull-licenses
 $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
 build-local:
-	env CGO_ENABLED=0 go build -o $(APP_NAME)
+	env CGO_ENABLED=0 go build -o $(APP_NAME) $(MAIN_PATH)
 	rm $(APP_NAME)
 
 resolve-local:
@@ -120,6 +121,13 @@ vet-local:
 generate-local:
 	go genrate ./...
 
+pull-licenses-local:
+ifdef LICENSE_PULLER_PATH
+	bash $(LICENSE_PULLER_PATH)
+else
+	mkdir -p licenses
+endif
+
 # Targets copying sources to buildpack
 COPY_TARGETS = test
 $(foreach t,$(COPY_TARGETS),$(eval $(call buildpack-cp-ro,$(t))))
@@ -127,14 +135,12 @@ $(foreach t,$(COPY_TARGETS),$(eval $(call buildpack-cp-ro,$(t))))
 test-local:
 	go test ./...
 
-.PHONY: pull-licenses
-pull-licenses:
-ifdef LICENSE_PULLER_PATH
-	bash $(LICENSE_PULLER_PATH)
-else
-	mkdir -p licenses
-endif
-
 .PHONY: list
 list:
 	@$(MAKE) -pRrq -f $(COMPONENT_DIR)/Makefile : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
+
+.PHONY: exec
+exec:
+	@docker run $(DOCKER_INTERACTIVE) \
+    		-v $(COMPONENT_DIR):$(WORKSPACE_COMPONENT_DIR):delegated \
+    		$(DOCKER_CREATE_OPTS) bash

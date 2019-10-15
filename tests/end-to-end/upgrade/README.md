@@ -32,7 +32,7 @@ Use the following environment variables to configure the application:
 | Name | Required | Default | Description |
 |-----|:---------:|--------|------------|
 | **APP_LOGGER_LEVEL** | NO | `info` | A parameter that sets the logging level in an application. The possible values are `debug`, `info`, `warn`, `warning`, `error`, `fatal`, and `panic`. |
-| **APP_KUBECONFIG_PATH** | NO | - | A path to the `kubeconfig` file needed to run an application outside of the cluster. |
+| **APP_KUBECONFIG_PATH** | NO | None | A path to the `kubeconfig` file needed to run an application outside of the cluster. |
 | **APP_MAX_CONCURRENCY_LEVEL** | NO | `1` | A maximum concurrency level used for running tests. |
 
 ### Use flags
@@ -136,7 +136,10 @@ Run the application using Helm:
 
 ### Verify the code
 
-Use the `before-commit.sh` script or the `make build` command to test your changes before each commit.
+Use the `make verify` command to test your changes before each commit. To build an image, use the `make build-image` command with **DOCKER_PUSH_REPOSITORY** and **DOCKER_PUSH_DIRECTORY** variables, for example:
+```
+DOCKER_PUSH_REPOSITORY=eu.gcr.io DOCKER_PUSH_DIRECTORY=/kyma-project/develop make build-image
+```
 
 ### Project structure
 

@@ -56,7 +56,9 @@ func (s *service) Apply(directorApplications []model.Application) ([]Result, app
 		return nil, err
 	}
 
-	return s.apply(currentApplications, directorApplications), nil
+	compassCurrentApplications := s.filterCompassApplications(currentApplications)
+
+	return s.apply(compassCurrentApplications, directorApplications), nil
 }
 
 func (s *service) apply(runtimeApplications []v1alpha1.Application, directorApplications []model.Application) []Result {
@@ -81,6 +83,17 @@ func (s *service) getExistingRuntimeApplications() ([]v1alpha1.Application, appe
 	}
 
 	return applications.Items, nil
+}
+
+func (s *service) filterCompassApplications(applications []v1alpha1.Application) []v1alpha1.Application {
+	var compassApplications []v1alpha1.Application
+
+	for _, application := range applications {
+		if application.Spec.CompassMetadata != nil {
+			compassApplications = append(compassApplications, application)
+		}
+	}
+	return compassApplications
 }
 
 func (s *service) createApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {

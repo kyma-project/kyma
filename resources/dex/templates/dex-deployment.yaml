@@ -32,14 +32,13 @@ spec:
         ports:
         - name: http
           containerPort: {{ .Values.containerPort }}
-
         volumeMounts:
         - name: config
           mountPath: /etc/dex/cfg
         {{- with .Values.volumeMountsExtra }}
         {{- tpl . $ | nindent 8 }}
         {{- end }}
-
+      {{ if .Values.dex.useStaticConnector }}
       initContainers:
       - name: dex-users-configurator
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.dex_static_user_configurer.dir }}dex-static-user-configurer:{{ .Values.global.dex_static_user_configurer.version }}
@@ -58,6 +57,16 @@ spec:
             path: config.yaml
       - name: config
         emptyDir: {}
+      {{ else }}
+      volumes:
+      - name: config
+        configMap:
+          name: dex-config
+          items:
+            - key: config.yaml
+              path: config.yaml
+      {{ end }}
       {{- with .Values.volumesExtra }}
       {{- tpl . $ | nindent 6 }}
       {{- end }}
+

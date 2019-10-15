@@ -75,9 +75,12 @@ func TestFunctionService_Create(t *testing.T) {
 }
 
 func TestFunctionService_Delete(t *testing.T) {
+	labels := map[string]string{
+		"test": "test",
+	}
 	fixName := "a1"
 	fixNamespace := "a"
-	functionA1 := fixFunction(fixName, fixNamespace)
+	functionA1 := fixFunction(fixName, fixNamespace, labels, "M", "nodejs8")
 
 	serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, functionA1)
 	require.NoError(t, err)

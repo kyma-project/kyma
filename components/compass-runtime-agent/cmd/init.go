@@ -85,8 +85,8 @@ func newResourcesService(secretsManager secrets.Manager, accessServiceMgr access
 
 func newAssetStore(dynamicClient dynamic.Interface, uploadServiceURL string) assetstore.Service {
 	groupVersionResource := schema.GroupVersionResource{
-		Version:  v1alpha1.SchemeGroupVersion.Version,
-		Group:    v1alpha1.SchemeGroupVersion.Group,
+		Version:  v1alpha1.GroupVersion.Version,
+		Group:    v1alpha1.GroupVersion.Group,
 		Resource: "clusterdocstopics",
 	}
 	resourceInterface := dynamicClient.Resource(groupVersionResource)

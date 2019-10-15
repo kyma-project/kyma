@@ -9,7 +9,7 @@ Istio is installed using the official charts from the currently supported releas
 
 This list shows the available Istio components and the components enabled by default:
 
-| Component | Enabled? |
+| Component | Enabled |
 | :--- | :---: |
 | Gateways | ✅ |
 | Sidecar Injector | ✅ |
