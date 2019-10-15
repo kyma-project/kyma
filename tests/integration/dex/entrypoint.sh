@@ -3,7 +3,7 @@
 res=0
 
 echo "Run dex tests"
-./tests/dex.test -test.v
+/tests/dex.test -test.v
 res=$((res+$?))
 
 exit ${res}

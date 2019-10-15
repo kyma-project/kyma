@@ -39,4 +39,4 @@ COPY --from=builder /tests /tests
 # Run tests
 #
 
-ENTRYPOINT ./tests/entrypoint.sh
+ENTRYPOINT /tests/entrypoint.sh
