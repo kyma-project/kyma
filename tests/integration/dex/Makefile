@@ -7,6 +7,10 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../../..)/scripts
 
 include $(SCRIPTS_DIR)/go-dep.mk
 
+# test target is overriden, so it won't run actual tests
+test:
+	@echo -n ""
+
 verify:: vet
 
 .PHONY: path-to-referenced-charts
