@@ -170,19 +170,36 @@ func newSubjectValidator(applicationClientIDs []string, appName, group, tenant s
 	}
 
 	switch {
-	case group == "" || tenant == "":
+	case len(applicationClientIDs) == 0 && !areStringsFilled(group, tenant):
 		return validateCommonNameWithAppName
 
-	case len(applicationClientIDs) == 0:
+	case len(applicationClientIDs) == 0 && areStringsFilled(group, tenant):
 		return func(subject pkix.Name) bool {
 			return validateCommonNameWithAppName(subject) && validateSubjectField(subject.Organization, tenant) && validateSubjectField(subject.OrganizationalUnit, group)
 		}
 
-	default:
+	case len(applicationClientIDs) != 0 && !areStringsFilled(group, tenant):
+		return validateCommonNameWithClientIDs
+
+	case len(applicationClientIDs) != 0 && areStringsFilled(group, tenant):
 		return func(subject pkix.Name) bool {
 			return validateCommonNameWithClientIDs(subject) && validateSubjectField(subject.Organization, tenant) && validateSubjectField(subject.OrganizationalUnit, group)
 		}
+
+	default:
+		return func(subject pkix.Name) bool {
+			return false
+		}
 	}
+}
+
+func areStringsFilled(strs... string) bool {
+	for _, str := range strs {
+		if str == "" {
+			return false
+		}
+	}
+	return true
 }
 
 func extractSubjects(certInfoData string) []string {
