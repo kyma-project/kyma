@@ -105,20 +105,30 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:355ea21aebd464b288d0a7dcf2d9e11e1abe8a65458ef1af0006eed8cd654ef6"
-  name = "github.com/kubernetes-sigs/service-catalog"
+  digest = "1:69f208814f6d9a26e36ff20b19c50dafc2bc243eb7c5049961553a3f0f0ec461"
+  name = "github.com/kubernetes-incubator/service-catalog"
   packages = [
     "pkg/apis/servicecatalog",
     "pkg/apis/servicecatalog/v1beta1",
     "pkg/apis/settings",
     "pkg/apis/settings/v1alpha1",
     "pkg/client/clientset_generated/clientset/scheme",
-    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "pkg/filter",
   ]
   pruneopts = "NUT"
-  revision = "33d0c09773b4a57b652b4e08b68921f402065f1d"
-  version = "v0.2.2"
+  revision = "6c6a49d216a67e368c397b849b831c251f6762be"
+  version = "v0.2.1"
+
+[[projects]]
+  digest = "1:0ca0fcbad7fa8de874138b33abc7cb381fc36260ce8de5112e4eeaa8bb1954cf"
+  name = "github.com/kubernetes-sigs/service-catalog"
+  packages = [
+    "pkg/apis/servicecatalog/v1beta1",
+    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
+  ]
+  pruneopts = "NUT"
+  revision = "6c6a49d216a67e368c397b849b831c251f6762be"
+  version = "v0.2.1"
 
 [[projects]]
   digest = "1:18b773b92ac82a451c1276bd2776c1e55ce057ee202691ab33c8d6690efcc048"
@@ -261,6 +271,27 @@
   revision = "f51c12702a4d776e4c1fa9b0fabab841babae631"
 
 [[projects]]
+  branch = "master"
+  digest = "1:ef4d8c35d3c083b4a4e5f6057d37145acda78d7d154937d519bfc6e0bb089d22"
+  name = "golang.org/x/tools"
+  packages = [
+    "cmd/goimports",
+    "go/ast/astutil",
+    "go/gcexportdata",
+    "go/internal/gcimporter",
+    "go/internal/packagesdriver",
+    "go/packages",
+    "go/types/typeutil",
+    "internal/fastwalk",
+    "internal/gopathwalk",
+    "internal/imports",
+    "internal/module",
+    "internal/semver",
+  ]
+  pruneopts = "NUT"
+  revision = "18e3458ac98b4126ac324c8056a0f2d826c6688a"
+
+[[projects]]
   digest = "1:c8131c929081f0fa26901a27eec93162a44afb3fc89a38573520dd4e3f1b1621"
   name = "google.golang.org/appengine"
   packages = [
@@ -345,7 +376,10 @@
 [[projects]]
   digest = "1:7b97babdd2ae0921c2e109f43e740efaa4623d59331f151d8bb027a9b2041258"
   name = "k8s.io/api"
-  packages = ["core/v1"]
+  packages = [
+    ".",
+    "core/v1",
+  ]
   pruneopts = "NUT"
   revision = "40a48860b5abbba9aa891b02b32da429b08d96a0"
   version = "kubernetes-1.14.0"
@@ -449,6 +483,8 @@
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
+    "golang.org/x/tools/cmd/goimports",
+    "k8s.io/api",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/api/meta",
     "k8s.io/apimachinery/pkg/apis/meta/v1",

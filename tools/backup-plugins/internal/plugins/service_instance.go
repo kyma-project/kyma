@@ -1,10 +1,10 @@
 package plugins
 
 import (
+	"github.com/heptio/velero/pkg/plugin/velero"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"github.com/heptio/velero/pkg/plugin/velero"
 )
 
 // RemoveServiceInstanceFields is a plugin for velero to remove several fields before creating restored object

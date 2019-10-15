@@ -16,18 +16,18 @@ echo -e "${NC}"
 ##
 # DEP ENSURE
 ##
-#dep ensure -v --vendor-only
-#ensureResult=$?
-#if [ ${ensureResult} != 0 ]; then
-#	echo -e "${RED}✗ dep ensure -v --vendor-only${NC}\n$ensureResult${NC}"
-#	exit 1
-#else echo -e "${GREEN}√ dep ensure -v --vendor-only${NC}"
-#fi
+dep ensure -v --vendor-only
+ensureResult=$?
+if [ ${ensureResult} != 0 ]; then
+	echo -e "${RED}✗ dep ensure -v --vendor-only${NC}\n$ensureResult${NC}"
+	exit 1
+else echo -e "${GREEN}√ dep ensure -v --vendor-only${NC}"
+fi
 
 ##
 # GO BUILD
 ##
-binary="velero-plugins"
+binary="backup-plugins"
 buildEnv=""
 if [ "$1" == "$CI_FLAG" ]; then
 	# build binary statically
@@ -67,19 +67,6 @@ if [ $? != 0 ]; then
 else echo -e "${GREEN}√ go test${NC}"
 fi
 
-goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/|_*/testdata/|/pkg\/|_*export_test.go")
-
-##
-#  GO LINT
-##
-golintResult=$(gometalinter --exclude=vendor --disable-all --enable=vet --enable=golint  ./...)
-
-if [[ $golintResult ]]; then
-	echo -e "${RED}✗ golint\n$golintResult${NC}"
-	exit 1
-else echo -e "${GREEN}√ golint${NC}"
-fi
-
 ##
 # GO IMPORTS & FMT
 ##
@@ -90,6 +77,7 @@ if [ ${buildGoImportResult} != 0 ]; then
 	exit 1
 fi
 
+goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/|_*/testdata/|/pkg\/|_*export_test.go")
 goImportsResult=$(echo "${goFilesToCheck}" | xargs -L1 ./goimports-vendored -w -l)
 rm goimports-vendored
 
@@ -98,4 +86,20 @@ if [ $(echo ${#goImportsResult}) != 0 ]; then
 	exit 1
 else echo -e "${GREEN}√ goimports and fmt${NC}"
 fi
+
+##
+# GO VET
+##
+packagesToVet=($(go list ./... | grep -v /vendor/ ))
+
+for vPackage in "${packagesToVet[@]}"; do
+	vetResult=$(go vet ${vPackage})
+	if [ $(echo ${#vetResult}) != 0 ]; then
+		echo -e "${RED}✗ go vet ${vPackage} ${NC}\n$vetResult${NC}"
+		exit 1
+	else echo -e "${GREEN}√ go vet ${vPackage} ${NC}"
+	fi
+done
+
+
 
