@@ -66,7 +66,7 @@ return
 const (
 	generateNameSuffix         = "-"
 	maxChannelNamePrefixLength = 10
-	informerSyncTimeout        = time.Second * 6
+	informerSyncTimeout        = time.Second * 5
 )
 
 var once sync.Once
