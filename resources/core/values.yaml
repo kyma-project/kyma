@@ -53,7 +53,7 @@ global:
     version: PR-5226
   apiserver_proxy_integration_tests:
     dir:
-    version: PR-6012
+    version: 22d3353e
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
