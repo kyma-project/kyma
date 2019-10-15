@@ -56,13 +56,13 @@ spec:
         # NOTE: use this command for debugging with delve
         # command: ["dlv", "exec", "/ko-app/manager", "--listen=:40000", "--headless=true", "--api-version=2", "--log", "--accept-multiclient", "--", "--metrics-addr=127.0.0.1:8080"]
         # disable or increase resource limits for dlv such that we don't want to get OOMkilled
-        resources:
-          limits:
-            cpu: 100m
-            memory: 30Mi
-          requests:
-            cpu: 100m
-            memory: 20Mi
+#        resources:
+#          limits:
+#            cpu: 100m
+#            memory: 30Mi
+#          requests:
+#            cpu: 100m
+#            memory: 20Mi
         ports:
         - containerPort: 9876
           name: webhook-server
