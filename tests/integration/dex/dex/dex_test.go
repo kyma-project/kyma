@@ -10,7 +10,6 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
 	"github.com/kyma-project/kyma/common/ingressgateway"
 	"github.com/kyma-project/kyma/common/resilient"
 	"github.com/vrischmann/envconfig"
