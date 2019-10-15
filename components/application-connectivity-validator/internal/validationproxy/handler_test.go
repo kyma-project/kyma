@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/gorilla/mux"
-	applicationsMocks "github.com/kyma-project/kyma/components/application-connectivity-validator/internal/applications/mocks"
 	cacheMocks "github.com/kyma-project/kyma/components/application-connectivity-validator/internal/cache/mocks"
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy/mocks"
 	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -23,6 +23,7 @@ import (
 const (
 	applicationName     = "test-application"
 	applicationMetaName = "test-application-meta"
+	applicationID       = "test-application-id"
 
 	group  = "group"
 	tenant = "tenant"
@@ -48,7 +49,7 @@ var (
 		Spec: v1alpha12.ApplicationSpec{
 			Description:     "Description",
 			Services:        []v1alpha12.Service{},
-			CompassMetadata: &v1alpha12.CompassMetadata{Authentication: v1alpha12.Authentication{ClientIds: []string{applicationName}}},
+			CompassMetadata: &v1alpha12.CompassMetadata{Authentication: v1alpha12.Authentication{ClientIds: []string{applicationID}}},
 		},
 	}
 	applicationNotManagedByCompass = &v1alpha12.Application{
@@ -86,7 +87,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	}{
 		{
 			caseDescription: "Application without group and tenant",
-			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
+			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application-id,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
 				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
@@ -106,7 +107,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			caseDescription: "Application with group and tenant",
 			tenant:          tenant,
 			group:           group,
-			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
+			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application-id,OU=group,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
 				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
@@ -128,7 +129,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			caseDescription: "Application with group, tenant and invalid Organizational Unit",
 			tenant:          tenant,
 			group:           group,
-			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=invalid,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
+			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application-id,OU=invalid,O=tenant,L=Waldorf,ST=Waldorf,C=DE";` +
 				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
@@ -139,7 +140,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			caseDescription: "Application with group, tenant and invalid Organization",
 			tenant:          tenant,
 			group:           group,
-			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=group,O=invalid,L=Waldorf,ST=Waldorf,C=DE";` +
+			certInfoHeader: `Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application-id,OU=group,O=invalid,L=Waldorf,ST=Waldorf,C=DE";` +
 				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`,
@@ -220,8 +221,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	t.Run("should proxy requests", func(t *testing.T) {
 		for _, testCase := range testCases {
 			// given
-			applicationGetter := &applicationsMocks.Getter{}
-			applicationGetter.On("Get", applicationName).Return(testCase.application, nil)
+			applicationGetter := &mocks.ApplicationGetter{}
+			applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(testCase.application, nil)
 
 			cache := &cacheMocks.IdCache{}
 			cache.On("GetClientIDs", applicationName).Return([]string{}, false)
@@ -327,14 +328,14 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	t.Run("should use cached IDs while proxying requests", func(t *testing.T) {
 		for _, testCase := range testCases {
 			// given
-			applicationGetter := &applicationsMocks.Getter{}
-			applicationGetter.On("Get", applicationName).Return(testCase.application, nil)
+			applicationGetter := &mocks.ApplicationGetter{}
+			applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(testCase.application, nil)
 
 			cache := &cacheMocks.IdCache{}
 			if testCase.application.Spec.CompassMetadata != nil {
 				cache.On("GetClientIDs", applicationName).Return(testCase.application.Spec.CompassMetadata.Authentication.ClientIds, true)
 			} else {
-				cache.On("GetClientIDs", applicationName).Return([]string{testCase.application.Name}, true)
+				cache.On("GetClientIDs", applicationName).Return([]string{}, false)
 			}
 			cache.On("SetClientIDs", applicationName, mock.AnythingOfType("[]string")).Return()
 
@@ -374,8 +375,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	t.Run("should return 500 when failed to get Application resource", func(t *testing.T) {
 		for _, testCase := range testCases {
 			// given
-			applicationGetter := &applicationsMocks.Getter{}
-			applicationGetter.On("Get", applicationName).Return(nil, fmt.Errorf("some error"))
+			applicationGetter := &mocks.ApplicationGetter{}
+			applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(nil, fmt.Errorf("some error"))
 
 			cache := &cacheMocks.IdCache{}
 			cache.On("GetClientIDs", applicationName).Return([]string{}, false)
@@ -411,12 +412,12 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		certInfoHeader :=
 			`Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";URI=`
 
-		applicationGetter := &applicationsMocks.Getter{}
-		applicationGetter.On("Get", applicationName).Return(applicationManagedByCompass, nil)
+		applicationGetter := &mocks.ApplicationGetter{}
+		applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(applicationManagedByCompass, nil)
 
 		cache := &cacheMocks.IdCache{}
 		cache.On("GetClientIDs", applicationName).Return([]string{}, false)
-		cache.On("SetClientIDs", applicationName, []string{applicationName}).Return()
+		cache.On("SetClientIDs", applicationName, mock.AnythingOfType("[]string")).Return()
 
 		proxyHandler := NewProxyHandler(
 			group,
@@ -444,17 +445,17 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	t.Run("should return 404 when path is invalid", func(t *testing.T) {
 		// given
 		certInfoHeader :=
-			`Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
+			`Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application-id,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
 				`URI=,By=spiffe://cluster.local/ns/kyma-integration/sa/default;` +
 				`Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject="";` +
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`
 
-		applicationGetter := &applicationsMocks.Getter{}
-		applicationGetter.On("Get", applicationName).Return(applicationManagedByCompass, nil)
+		applicationGetter := &mocks.ApplicationGetter{}
+		applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(applicationManagedByCompass, nil)
 
 		cache := &cacheMocks.IdCache{}
 		cache.On("GetClientIDs", applicationName).Return([]string{}, false)
-		cache.On("SetClientIDs", applicationName, []string{applicationName}).Return()
+		cache.On("SetClientIDs", applicationName, mock.AnythingOfType("[]string")).Return()
 
 		proxyHandler := NewProxyHandler(
 			"",

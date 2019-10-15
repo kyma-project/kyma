@@ -7,9 +7,11 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/applications"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/cache"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/httptools"
 	log "github.com/sirupsen/logrus"
@@ -21,6 +23,11 @@ const (
 
 type ProxyHandler interface {
 	ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request)
+}
+
+//go:generate mockery -name=ApplicationGetter
+type ApplicationGetter interface {
+	Get(name string, options v1.GetOptions) (*v1alpha1.Application, error)
 }
 
 type proxyHandler struct {
@@ -35,11 +42,11 @@ type proxyHandler struct {
 	eventsProxy      *httputil.ReverseProxy
 	appRegistryProxy *httputil.ReverseProxy
 
-	applicationGetter applications.Getter
+	applicationGetter ApplicationGetter
 	cache             cache.IdCache
 }
 
-func NewProxyHandler(group, tenant, eventServicePathPrefixV1, eventServicePathPrefixV2, eventServiceHost, appRegistryPathPrefix, appRegistryHost string, applicationGetter applications.Getter, cache cache.IdCache) *proxyHandler {
+func NewProxyHandler(group, tenant, eventServicePathPrefixV1, eventServicePathPrefixV2, eventServiceHost, appRegistryPathPrefix, appRegistryHost string, applicationGetter ApplicationGetter, cache cache.IdCache) *proxyHandler {
 	return &proxyHandler{
 		group:  group,
 		tenant: tenant,
@@ -111,7 +118,7 @@ func (ph *proxyHandler) getCompassMetadataClientIDs(applicationName string) ([]s
 }
 
 func (ph *proxyHandler) getApplicationClientIDs(applicationName string) ([]string, bool, apperrors.AppError) {
-	application, err := ph.applicationGetter.Get(applicationName)
+	application, err := ph.applicationGetter.Get(applicationName, v1.GetOptions{})
 	if err != nil {
 		return []string{}, false, apperrors.Internal("failed to get %s application: %s", applicationName, err)
 	}
@@ -193,7 +200,7 @@ func newSubjectValidator(applicationClientIDs []string, appName, group, tenant s
 	}
 }
 
-func areStringsFilled(strs... string) bool {
+func areStringsFilled(strs ...string) bool {
 	for _, str := range strs {
 		if str == "" {
 			return false

@@ -6,10 +6,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/cache"
-
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/applications"
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/cache"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
@@ -71,19 +69,18 @@ func main() {
 	wg.Wait()
 }
 
-func newApplicationGetter() (applications.Getter, apperrors.AppError) {
+func newApplicationGetter() (validationproxy.ApplicationGetter, apperrors.AppError) {
 	cfg, err := config.GetConfig()
 	if err != nil {
 		return nil, apperrors.Internal("failed to get k8s config: %s", err)
 	}
 
-	applicationEnvironmentClientset, err := versioned.NewForConfig(cfg)
+	applicationClientset, err := versioned.NewForConfig(cfg)
 	if err != nil {
 		return nil, apperrors.Internal("failed to create k8s application client: %s", err)
 	}
 
-	applicationInterface := applicationEnvironmentClientset.ApplicationconnectorV1alpha1().Applications()
-	applicationGetter := applications.NewGetter(applicationInterface)
+	applicationInterface := applicationClientset.ApplicationconnectorV1alpha1().Applications()
 
-	return applicationGetter, nil
+	return applicationInterface, nil
 }
