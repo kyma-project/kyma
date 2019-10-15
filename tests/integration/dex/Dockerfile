@@ -10,7 +10,7 @@ WORKDIR ${BASE_APP_DIR}
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./dex/ ${BASE_APP_DIR}/dex/
 COPY ./licenses/ ${BASE_APP_DIR}/licenses/
-COPY ./entrypoint.sh ${BASE_APP_DIR}/entrypoint.sh
+COPY ./entrypoint.sh ${BASE_APP_DIR}/tests/entrypoint.sh
 
 #
 # Build tests
@@ -21,7 +21,7 @@ RUN mkdir /tests && mv ./dex.test /tests/dex.test && mv ${BASE_APP_DIR}/licenses
 
 FROM alpine:3.8
 LABEL source = git@github.com:kyma-project/kyma.git
-WORKDIR /app
+WORKDIR /tests
 
 #
 # Install certificates
@@ -39,4 +39,4 @@ COPY --from=builder /tests /tests
 # Run tests
 #
 
-ENTRYPOINT ./entrypoint.sh
+ENTRYPOINT ./tests/entrypoint.sh
