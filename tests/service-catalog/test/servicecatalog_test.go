@@ -10,8 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/apimachinery/pkg/types"
-
 	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 
 	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
@@ -114,6 +112,12 @@ func TestHelmBrokerAddonsConfiguration(t *testing.T) {
 	require.NoError(t, err)
 
 	defer func() {
+		if t.Failed() {
+			namespaceReport := report.NewReport(t,
+				k8sConfig,
+				report.WithHB())
+			namespaceReport.PrintJsonReport(namespace)
+		}
 		err = k8sClient.Namespaces().Delete(namespace, &metav1.DeleteOptions{})
 		assert.NoError(t, err)
 	}()
@@ -160,13 +164,10 @@ func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
 
 	defer func() {
 		if t.Failed() {
-			cac := &v1alpha12.ClusterAddonsConfiguration{}
-			err = dynamicClient.Get(context.TODO(), types.NamespacedName{Name: addonsConfig.ObjectMeta.Name}, cac)
-			if err != nil {
-				t.Logf("ClusterAddonsConfiguration unreachable: %v \n", err)
-			}
-			namespaceReport := report.NewReport(t, k8sConfig)
-			namespaceReport.PrintSingleResourceJsonReport(cac, "ClusterAddonsConfiguration")
+			namespaceReport := report.NewReport(t,
+				k8sConfig,
+				report.WithHB())
+			namespaceReport.PrintJsonReport("default")
 		}
 		err = dynamicClient.Delete(context.TODO(), addonsConfig)
 		assert.NoError(t, err)

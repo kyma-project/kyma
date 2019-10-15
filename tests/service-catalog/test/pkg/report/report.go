@@ -11,6 +11,7 @@ import (
 	"k8s.io/client-go/rest"
 
 	scClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	hbClient "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned"
 	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	bucClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
@@ -51,7 +52,7 @@ func (t TestLogWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func (r *Report) setReportPrinter(pnr printers.ResourcePrinter) {
+func (r *Report) setPrinter(pnr printers.ResourcePrinter) {
 	r.printer = pnr
 }
 
@@ -60,12 +61,8 @@ func (r *Report) setReportPrinter(pnr printers.ResourcePrinter) {
 // resources included in report: Deployment, Pod, Service, ServiceBroker, ServiceClass, ServiceInstance
 // ServiceBinding, ClusterServiceBroker, ClusterServiceClass, Application, ServiceBindingUsage
 func (r *Report) PrintJsonReport(namespace string) {
-
-	//report.PrintJsonReport("ns-dupa", WithSBU(), WithSC(), WithApp())
-	//report.PrintJsonReport("ns-dupa", WithSBU(), WithSC())
-	//report.PrintJsonReport("ns-dupa", SkipSBU())
 	printer := &printers.JSONPrinter{}
-	r.setReportPrinter(printer)
+	r.setPrinter(printer)
 
 	r.test.Log("########## Start Report Namespace ##########")
 	for _, option := range r.opt {
@@ -73,11 +70,6 @@ func (r *Report) PrintJsonReport(namespace string) {
 	}
 	r.test.Log("########## End Report Namespace ##########")
 
-}
-
-func (r Report) PrintSingleResourceJsonReport(obj printerObject, kind string) {
-	printer := &printers.JSONPrinter{}
-	r.printObject(printer, obj, kind)
 }
 
 // WithK8s creates report with Kubernetes resources list: Deployment, Pod, Service
@@ -129,6 +121,16 @@ func WithSBU() Option {
 			r.test.Logf("Binding Usage Controller client unreachable: %v \n", err)
 		}
 		r.bucResourceDump(r.printer, bucclientset, ns)
+	}
+}
+
+func WithHB() Option {
+	return func(r *Report, ns string) {
+		hbclientset, err := hbClient.NewForConfig(r.cfg)
+		if err != nil {
+			r.test.Logf("Helm Broker client unreachable: %v \n", err)
+		}
+		r.hbResourceDump(r.printer, hbclientset, ns)
 	}
 }
 
@@ -226,6 +228,24 @@ func (r Report) bucResourceDump(printer printers.ResourcePrinter, clientset *buc
 		r.test.Logf("ServiceBindingUsage list unreachable: %v \n", err)
 	}
 	r.printObject(printer, sbus, "ServiceBindingUsage")
+}
+
+func (r Report) hbResourceDump(printer printers.ResourcePrinter, clientset *hbClient.Clientset, ns string) {
+	if clientset == nil {
+		return
+	}
+
+	addc, err := clientset.AddonsV1alpha1().AddonsConfigurations(ns).List(metav1.ListOptions{})
+	if err != nil {
+		r.test.Logf("AddonsConfiguration list unreachable: %v \n", err)
+	}
+	r.printObject(printer, addc, "AddonsConfiguration")
+
+	caddc, err := clientset.AddonsV1alpha1().ClusterAddonsConfigurations().List(metav1.ListOptions{})
+	if err != nil {
+		r.test.Logf("ClusterAddonsConfiguration list unreachable: %v \n", err)
+	}
+	r.printObject(printer, caddc, "ClusterAddonsConfiguration")
 }
 
 func (r Report) printObject(printer printers.ResourcePrinter, obj printerObject, kind string) {
