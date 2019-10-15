@@ -41,32 +41,32 @@ Follow these steps to prepare the environment you will use to deploy the Control
 3. Create the following configuration for the controller. It contains a list of supported runtimes as well as the container repository referenced by the **KO_DOCKER_REPO** environment variable, which you will create a Secret for in the next steps.
 
     ```bash
-    cat <<EOF | kubectl -n serverless-system apply -f -
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: fn-config
-    data:
-      serviceAccountName: function-controller-build
-      dockerRegistry: ${KO_DOCKER_REPO}
-      runtimes: |
-        - ID: nodejs8
-          dockerFileName: dockerfile-nodejs-8
-        - ID: nodejs6
-          dockerFileName: dockerfile-nodejs-6
-      funcSizes: |
-        - size: S
-        - size: M
-        - size: L
-      funcTypes: |
-        - type: plaintext
-        - type: base64
-      defaults: |
-        size: S
-        runtime: nodejs8
-        timeOut: 180
-        funcContentType: plaintext
-    EOF
+cat <<EOF | kubectl -n serverless-system apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fn-config
+data:
+  serviceAccountName: function-controller-build
+  dockerRegistry: ${KO_DOCKER_REPO}
+  runtimes: |
+    - ID: nodejs8
+      dockerFileName: dockerfile-nodejs-8
+    - ID: nodejs6
+      dockerFileName: dockerfile-nodejs-6
+  funcSizes: |
+    - size: S
+    - size: M
+    - size: L
+  funcTypes: |
+    - type: plaintext
+    - type: base64
+  defaults: |
+    size: S
+    runtime: nodejs8
+    timeOut: 180
+    funcContentType: plaintext
+EOF
     ```
 
 4. Create the Namespace defined previously by the **FN_NAMESPACE** environment variable. Function will be deployed to it.
@@ -87,26 +87,26 @@ Follow these steps to prepare the environment you will use to deploy the Control
     reg_username=<container registry username>
     reg_password=<container registry password>
 
-    cat <<EOF | kubectl -n ${FN_NAMESPACE} apply -f -
-    ---
-    apiVersion: v1
-    kind: Secret
-    type: kubernetes.io/basic-auth
-    metadata:
-      name: registry-credentials
-      annotations:
-        tekton.dev/docker-0: ${FN_REGISTRY}
-    stringData:
-      username: ${reg_username}
-      password: ${reg_password}
-    ---
-    apiVersion: v1
-    kind: ServiceAccount
-    metadata:
-      name: function-controller-build
-    secrets:
-    - name: registry-credentials
-    EOF
+cat <<EOF | kubectl -n ${FN_NAMESPACE} apply -f -
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/basic-auth
+metadata:
+  name: registry-credentials
+  annotations:
+    tekton.dev/docker-0: ${FN_REGISTRY}
+stringData:
+  username: ${reg_username}
+  password: ${reg_password}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: function-controller-build
+secrets:
+- name: registry-credentials
+EOF
     ```
 
 ### Deploy the controller
