@@ -8,7 +8,7 @@ Metrics for the CMS Controller Manager include:
 - default metrics instrumented by [kubebuilder](https://book.kubebuilder.io/).
 - default Prometheus metrics for [Go applications](https://prometheus.io/docs/guides/go-application/).
 
-To see a complete list of the default kubebuilder and Go metrics, run this command:
+To see a complete list of metrics, run this command:
 
 ```bash
 kubectl -n kyma-system port-forward svc/cms-cms-controller-manager 8080

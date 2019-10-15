@@ -14,7 +14,7 @@ This table shows the CMS AsyncAPI Service custom metrics, their types, and descr
 
 Apart from the custom metrics, the CMS AsyncAPI Service also exposes default Prometheus metrics for [Go applications](https://prometheus.io/docs/guides/go-application/).
 
-To see a complete list of the custom and Go metrics, run this command:
+To see a complete list of metrics, run this command:
 
 ```bash
 kubectl -n kyma-system port-forward svc/cms-cms-asyncapi-service 80
