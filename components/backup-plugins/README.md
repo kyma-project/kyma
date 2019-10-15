@@ -25,7 +25,7 @@ velero plugin add {yourRepo/imageName:tag}
       ├── restore   # new Restore Item Action plugins 
   ```
 
-- All new plugins must be registered in the `tools/velero-plugins/main.go` file.
+- All new plugins must be registered in the `components/backup-plugins/main.go` file.
 - **Backup Item Action** - performs arbitrary logic on individual items prior to storing them in the backup file.
 - **Restore Item Action** - performs arbitrary logic on individual items prior to restoring them in the Kyma cluster.
 - All plugins must be implemented as the following example:
