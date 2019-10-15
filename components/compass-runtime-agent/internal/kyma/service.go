@@ -33,7 +33,7 @@ const (
 
 type Result struct {
 	ApplicationName string
-	ApplicationID   string
+	ApplicationIDs  []string
 	Operation       Operation
 	Error           apperrors.AppError
 }
@@ -414,6 +414,7 @@ func getEventApiType(eventApiSpec *model.EventAPISpec) docstopic.ApiType {
 func newResult(application v1alpha1.Application, operation Operation, appError apperrors.AppError) Result {
 	return Result{
 		ApplicationName: application.Name,
+		ApplicationIDs:  application.Spec.CompassMetadata.Authentication.ClientIds,
 		Operation:       operation,
 		Error:           appError,
 	}
