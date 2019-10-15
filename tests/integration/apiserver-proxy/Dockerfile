@@ -20,7 +20,7 @@ RUN mkdir /test && mv ${BASE_DIR}/app /test/app && mv ${BASE_DIR}/test.sh /test/
 
 FROM alpine:3.9
 LABEL source=git@github.com:kyma-project/kyma.git
-WORKDIR /root
+WORKDIR /test
 
 RUN apk update &&\
 	apk add curl bash grep &&\
@@ -28,6 +28,6 @@ RUN apk update &&\
 	chmod +x kubectl &&\
 	mv kubectl /usr/local/bin/kubectl
 
-COPY --from=builder /test /root/test
+COPY --from=builder /test /test
 
-ENTRYPOINT ["/bin/bash", "-c", "/root/test/test.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "/test/test.sh"]
