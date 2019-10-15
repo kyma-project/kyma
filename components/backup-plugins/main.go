@@ -2,7 +2,7 @@ package main
 
 import (
 	veleroplugin "github.com/heptio/velero/pkg/plugin/framework"
-	"github.com/kyma-project/kyma/tools/backup-plugins/internal/plugins"
+	"github.com/kyma-project/kyma/components/backup-plugins/internal/plugins"
 	"github.com/sirupsen/logrus"
 )
 
