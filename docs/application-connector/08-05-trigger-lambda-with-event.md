@@ -9,7 +9,7 @@ To create a simple lambda function and trigger it with an event, you must first 
 ## Prerequisites
 
 - An Application bound to the `production` Namespace
-- Client certificates generated for the connected App.
+- Client certificates generated for the connected Application.
 
 >**NOTE:** See the respective tutorials to learn how to [create](https://kyma-project.io/docs/components/application-connector#tutorials-create-a-new-application) an Application, [get](https://kyma-project.io/docs/components/application-connector#tutorials-get-the-client-certificate) the client certificate, and [bind](https://kyma-project.io/docs/components/application-connector#tutorials-bind-an-application-to-a-namespace) an Application to a Namespace.
 
@@ -70,6 +70,7 @@ To create a simple lambda function and trigger it with an event, you must first 
    ```
 
 2. Expose the `externalName` of the Service Class of the registered service.
+
    ```bash
    export EXTERNAL_NAME=$(kubectl -n production get serviceclass {SERVICE_ID}  -o jsonpath='{.spec.externalName}')
    ```
