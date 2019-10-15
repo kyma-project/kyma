@@ -64,7 +64,7 @@ To create a simple lambda function and trigger it with an event, you must first 
              }
            }
          }
-       }    
+       }
      }
    }
    ```
