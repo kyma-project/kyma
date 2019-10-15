@@ -33,6 +33,7 @@ const (
 
 type Result struct {
 	ApplicationName string
+	ApplicationID   string
 	Operation       Operation
 	Error           apperrors.AppError
 }

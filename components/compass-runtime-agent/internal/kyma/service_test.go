@@ -91,6 +91,7 @@ func TestService(t *testing.T) {
 		expectedResult := []Result{
 			{
 				ApplicationName: "name1",
+				ApplicationID:   "id1",
 				Operation:       Create,
 				Error:           nil,
 			},
@@ -146,6 +147,7 @@ func TestService(t *testing.T) {
 		expectedResult := []Result{
 			{
 				ApplicationName: "name1",
+				ApplicationID:   "id1",
 				Operation:       Update,
 				Error:           nil,
 			},
@@ -185,6 +187,7 @@ func TestService(t *testing.T) {
 		expectedResult := []Result{
 			{
 				ApplicationName: "name1",
+				ApplicationID:   "id1",
 				Operation:       Delete,
 				Error:           nil,
 			},
@@ -227,6 +230,7 @@ func TestService(t *testing.T) {
 		expectedResult := []Result{
 			{
 				ApplicationName: "name1",
+				ApplicationID:   "id1",
 				Operation:       Delete,
 				Error:           nil,
 			},
