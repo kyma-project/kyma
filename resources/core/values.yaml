@@ -29,8 +29,8 @@ global:
     dir:
     version: 8eb3a417
   api_controller_integration_tests:
-    dir: develop/
-    version: 665a2857
+    dir:
+    version: 73f8eff7
   apiserver_proxy:
     dir:
     version: d81e090b
