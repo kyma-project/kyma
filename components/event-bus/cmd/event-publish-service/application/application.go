@@ -2,12 +2,14 @@ package application
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 
 	cloudevents "github.com/cloudevents/sdk-go"
+
 	cloudeventstransport "github.com/cloudevents/sdk-go/pkg/cloudevents/transport"
+	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/handlers"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
 	constants "github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/util"
@@ -96,23 +98,31 @@ func (app *KnativePublishApplication) registerPublishV2Handler() {
 
 // Receive finally handles the decoded event
 func (app *KnativePublishApplication) HandleEvent(ctx context.Context, event cloudevents.Event, eventResponse *cloudevents.EventResponse) error {
-	fmt.Printf("received event %+v", event)
-
-	//traceHeaders := getTraceHeaders(ctx)
-
-	//bus.SendEventV2(event, *traceHeaders)
-	//downgradedEvent := cloudevents.Event{
-	//	// TODO(nachtmaar) dont' downgrade to CE v0.3 anymore if knative supports CE v1.0
-	//	Context:     event.Context.AsV03(),
-	//	Data:        event.Data,
-	//	DataEncoded: event.DataEncoded,
-	//	DataBinary:  event.DataBinary,
-	//}
-	if _, err := event.Context.GetExtension("event-type-version"); err != nil {
-		// TODO(nachtmaar): set proper status code
-		//eventResponse.Error(400, "we need a valid günther")
-		return errors.New("günther")
+	codec := cloudeventshttp.CodecV03{
+		DefaultEncoding: cloudeventshttp.StructuredV03,
 	}
+
+	m, err := codec.Encode(ctx, event)
+	if err != nil {
+		return err
+	}
+
+	message, ok := m.(*cloudeventshttp.Message)
+	if !ok {
+		return fmt.Errorf("expected type http message, but got type: %v", reflect.TypeOf(m))
+	}
+
+	fmt.Printf("%v", message)
+
+	etv, err := event.Context.GetExtension("event-type-version")
+
+	if err != nil {
+		return err
+	}
+	ns := knative.GetDefaultChannelNamespace()
+	header := map[string][]string(message.Header)
+	publishError, namespace, channelname := (*app.knativePublisher).Publish(app.knativeLib, &ns, &header, &message.Body, event.Source(), event.Type(), etv.(string))
+	fmt.Printf("%+v\n\n%+v\n\n%+v\n\n", publishError, namespace, channelname)
 
 	return nil
 }
