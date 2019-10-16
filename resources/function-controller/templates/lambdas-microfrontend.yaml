@@ -15,12 +15,3 @@ spec:
       navigationPath: functions-preview
       viewUrl: '/lambdas'
       order: 1
-    - label: Lambda Details
-      navigationPath: functions-preview/details
-      viewUrl: '/lambdas'
-      showInNavigation: false
-    - label: Lambda Details
-      navigationPath: functions-preview/details/:lambda
-      viewUrl: '/lambda/:lambda'
-      showInNavigation: false
-      
