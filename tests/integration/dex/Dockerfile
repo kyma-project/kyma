@@ -16,7 +16,7 @@ COPY ./entrypoint.sh ${BASE_APP_DIR}/entrypoint.sh
 # Build tests
 #
 
-RUN go test -c ./dex -tags=integration
+RUN CGO_ENABLED=0 go test -c ./dex -tags=integration
 RUN mkdir /tests && mv ./dex.test /tests/dex.test && mv ${BASE_APP_DIR}/licenses /tests/licenses && mv ${BASE_APP_DIR}/entrypoint.sh /tests/entrypoint.sh
 
 FROM alpine:3.8
