@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/gorilla/mux"
-	cacheMocks "github.com/kyma-project/kyma/components/application-connectivity-validator/internal/cache/mocks"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy/mocks"
 	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
@@ -224,9 +223,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			applicationGetter := &mocks.ApplicationGetter{}
 			applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(testCase.application, nil)
 
-			cache := &cacheMocks.IdCache{}
-			cache.On("GetClientIDs", applicationName).Return([]string{}, false)
-			cache.On("SetClientIDs", applicationName, mock.AnythingOfType("[]string")).Return()
+			cache := &mocks.Cache{}
+			cache.On("Get", applicationName).Return([]string{}, false)
+			cache.On("Set", applicationName, mock.AnythingOfType("[]string"), mock.AnythingOfType("time.Duration")).Return()
 
 			proxyHandler := NewProxyHandler(
 				testCase.group,
@@ -331,13 +330,13 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			applicationGetter := &mocks.ApplicationGetter{}
 			applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(testCase.application, nil)
 
-			cache := &cacheMocks.IdCache{}
+			cache := &mocks.Cache{}
 			if testCase.application.Spec.CompassMetadata != nil {
-				cache.On("GetClientIDs", applicationName).Return(testCase.application.Spec.CompassMetadata.Authentication.ClientIds, true)
+				cache.On("Get", applicationName).Return(testCase.application.Spec.CompassMetadata.Authentication.ClientIds, true)
 			} else {
-				cache.On("GetClientIDs", applicationName).Return([]string{}, false)
+				cache.On("Get", applicationName).Return([]string{}, false)
 			}
-			cache.On("SetClientIDs", applicationName, mock.AnythingOfType("[]string")).Return()
+			cache.On("Set", applicationName, mock.AnythingOfType("[]string"), mock.AnythingOfType("time.Duration")).Return()
 
 			proxyHandler := NewProxyHandler(
 				testCase.group,
@@ -378,9 +377,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			applicationGetter := &mocks.ApplicationGetter{}
 			applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(nil, fmt.Errorf("some error"))
 
-			cache := &cacheMocks.IdCache{}
-			cache.On("GetClientIDs", applicationName).Return([]string{}, false)
-			cache.On("SetClientIDs", applicationName, mock.AnythingOfType("[]string")).Return()
+			cache := &mocks.Cache{}
+			cache.On("Get", applicationName).Return([]string{}, false)
+			cache.On("Set", applicationName, mock.AnythingOfType("[]string"), mock.AnythingOfType("time.Duration")).Return()
 
 			proxyHandler := NewProxyHandler(
 				testCase.group,
@@ -415,9 +414,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		applicationGetter := &mocks.ApplicationGetter{}
 		applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(applicationManagedByCompass, nil)
 
-		cache := &cacheMocks.IdCache{}
-		cache.On("GetClientIDs", applicationName).Return([]string{}, false)
-		cache.On("SetClientIDs", applicationName, mock.AnythingOfType("[]string")).Return()
+		cache := &mocks.Cache{}
+		cache.On("Get", applicationName).Return([]string{}, false)
+		cache.On("Set", applicationName, mock.AnythingOfType("[]string"), mock.AnythingOfType("time.Duration")).Return()
 
 		proxyHandler := NewProxyHandler(
 			group,
@@ -453,9 +452,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		applicationGetter := &mocks.ApplicationGetter{}
 		applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(applicationManagedByCompass, nil)
 
-		cache := &cacheMocks.IdCache{}
-		cache.On("GetClientIDs", applicationName).Return([]string{}, false)
-		cache.On("SetClientIDs", applicationName, mock.AnythingOfType("[]string")).Return()
+		cache := &mocks.Cache{}
+		cache.On("Get", applicationName).Return([]string{}, false)
+		cache.On("Set", applicationName, mock.AnythingOfType("[]string"), mock.AnythingOfType("time.Duration")).Return()
 
 		proxyHandler := NewProxyHandler(
 			"",

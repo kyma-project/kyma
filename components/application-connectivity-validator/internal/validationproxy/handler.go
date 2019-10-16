@@ -6,15 +6,15 @@ import (
 	"net/http/httputil"
 	"regexp"
 	"strings"
-
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/cache"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/httptools"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -30,6 +30,12 @@ type ApplicationGetter interface {
 	Get(name string, options v1.GetOptions) (*v1alpha1.Application, error)
 }
 
+//go:generate mockery -name=Cache
+type Cache interface {
+	Get(k string) (interface{}, bool)
+	Set(k string, x interface{}, d time.Duration)
+}
+
 type proxyHandler struct {
 	group                    string
 	tenant                   string
@@ -43,10 +49,10 @@ type proxyHandler struct {
 	appRegistryProxy *httputil.ReverseProxy
 
 	applicationGetter ApplicationGetter
-	cache             cache.IdCache
+	cache             Cache
 }
 
-func NewProxyHandler(group, tenant, eventServicePathPrefixV1, eventServicePathPrefixV2, eventServiceHost, appRegistryPathPrefix, appRegistryHost string, applicationGetter ApplicationGetter, cache cache.IdCache) *proxyHandler {
+func NewProxyHandler(group, tenant, eventServicePathPrefixV1, eventServicePathPrefixV2, eventServiceHost, appRegistryPathPrefix, appRegistryHost string, applicationGetter ApplicationGetter, cache Cache) *proxyHandler {
 	return &proxyHandler{
 		group:  group,
 		tenant: tenant,
@@ -102,35 +108,40 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 }
 
 func (ph *proxyHandler) getCompassMetadataClientIDs(applicationName string) ([]string, apperrors.AppError) {
-	applicationClientIDs, found := ph.cache.GetClientIDs(applicationName)
+	applicationClientIDs, found := ph.getClientIDsFromCache(applicationName)
 	if !found {
 		var err apperrors.AppError
-		applicationClientIDs, found, err = ph.getApplicationClientIDs(applicationName)
+		applicationClientIDs, err = ph.getClientIDsFromResource(applicationName)
 		if err != nil {
 			return []string{}, err
 		}
 
-		if found {
-			ph.cache.SetClientIDs(applicationName, applicationClientIDs)
-		}
+		ph.cache.Set(applicationName, applicationClientIDs, cache.DefaultExpiration)
 	}
 	return applicationClientIDs, nil
 }
 
-func (ph *proxyHandler) getApplicationClientIDs(applicationName string) ([]string, bool, apperrors.AppError) {
+func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string, bool) {
+	clientIDs, found := ph.cache.Get(applicationName)
+	if !found {
+		return []string{}, found
+	}
+	return clientIDs.([]string), found
+}
+
+func (ph *proxyHandler) getClientIDsFromResource(applicationName string) ([]string, apperrors.AppError) {
 	application, err := ph.applicationGetter.Get(applicationName, v1.GetOptions{})
 	if err != nil {
-		return []string{}, false, apperrors.Internal("failed to get %s application: %s", applicationName, err)
+		return []string{}, apperrors.Internal("failed to get %s application: %s", applicationName, err)
 	}
 	if application.Spec.CompassMetadata == nil {
-		return []string{}, false, nil
+		return []string{}, nil
 	}
 
-	return application.Spec.CompassMetadata.Authentication.ClientIds, true, nil
+	return application.Spec.CompassMetadata.Authentication.ClientIds, nil
 }
 
 func (ph *proxyHandler) mapRequestToProxy(path string) (*httputil.ReverseProxy, apperrors.AppError) {
-
 	if strings.HasPrefix(path, ph.eventServicePathPrefixV1) {
 		return ph.eventsProxy, nil
 	}

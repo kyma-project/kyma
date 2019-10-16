@@ -5,12 +5,13 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/cache"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
@@ -32,7 +33,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	idCache := cache.NewCache(options.cacheExpirationMinutes, options.cacheCleanupMinutes)
+	idCache := cache.New(
+		time.Duration(options.cacheExpirationMinutes)*time.Minute,
+		time.Duration(options.cacheCleanupMinutes)*time.Minute,
+	)
 
 	proxyHandler := validationproxy.NewProxyHandler(
 		options.group,
