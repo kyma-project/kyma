@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/avast/retry-go"
 	publishApi "github.com/kyma-project/kyma/components/event-bus/api/publish"
@@ -37,7 +36,7 @@ const (
 )
 
 var retryOptions = []retry.Option{
-	retry.Attempts(13), // at max (100 * (1 << 13)) / 1000 = 819,2 sec
+	retry.Attempts(25), // at max (100 * (1 << 13)) / 1000 = 819,2 sec
 	retry.OnRetry(func(n uint, err error) {
 		fmt.Printf(".")
 	}),
@@ -149,7 +148,6 @@ func (f *eventBusFlow) testResources() error {
 			return fmt.Errorf("TestResources() failed with: %v", err)
 		}
 	}
-	time.Sleep(600 * time.Minute)
 	return nil
 }
 
