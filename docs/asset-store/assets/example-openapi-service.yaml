@@ -2,6 +2,10 @@ openapi: 3.0.0
 info:
   description: This example shows API specification of a service that exposes endpoints for all Asset Store webhooks. It contains `/convert`, `/validate`, and `/extract` endpoints.
   title: Example webhook service
+  contact:
+    name: Kyma project authors
+    url: http://slack.kyma-project.io
+    email: kyma-sig-core@googlegroups.com
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
@@ -75,6 +79,8 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/successResponse"
+servers:
+  - url: http://localhost:3000/v1
 components:
   responses:
     successConversionResponse:

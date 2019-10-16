@@ -2,6 +2,10 @@ openapi: 3.0.0
 info:
   description: The purpose of this application is to provide an API to process the AsyncAPI specification.
   title: CMS AsyncAPI Service API
+  contact:
+    name: Kyma project authors
+    url: http://slack.kyma-project.io
+    email: kyma-sig-core@googlegroups.com
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
