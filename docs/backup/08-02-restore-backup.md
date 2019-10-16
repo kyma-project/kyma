@@ -9,10 +9,9 @@ Follow this tutorial to restore a backed up Kyma cluster. Start with restoring C
 
 To use the restore functionality, download and install the [Velero CLI](https://github.com/heptio/velero/releases/tag/v1.0.0).
 
-
 ## Steps
 
-Follow these steps to restore resources: 
+Follow these steps to restore resources:
 
 1. Install the Velero server. Use the same bucket as for backups:
 
@@ -22,19 +21,25 @@ Follow these steps to restore resources:
 
     >**NOTE**: Check out this [guide](https://velero.io/docs/v1.0.0/install-overview/) to correctly fill the parameters of this command corresponding to the cloud provider in use.
 
-2. List available backups:
+2. Install the Kyma backup plugins:
+
+    ```bash
+    velero plugin add eu.gcr.io/kyma-project/backup-plugins:e7df9098
+    ```
+
+3. List available backups:
 
     ```bash
     velero get backups
     ```
 
-3. Restore Kyma CRDs, services, and endpoints:
+4. Restore Kyma CRDs, services, and endpoints:
 
     ```bash
     velero restore create --from-backup <BACKUP_NAME> --include-resources customresourcedefinitions.apiextensions.k8s.io,services,endpoints --include-cluster-resources --wait
     ```
 
-4. Restore the rest of Kyma resources:
+5. Restore the rest of Kyma resources:
 
     ```bash
     velero restore create --from-backup <BACKUP_NAME> --exclude-resources customresourcedefinitions.apiextensions.k8s.io,services,endpoints --include-cluster-resources --restore-volumes --wait
@@ -53,7 +58,7 @@ Follow these steps to restore resources:
     > kubectl get virtualservices --all-namespaces
     > ```
 
-5. Once the restore succeeds, remove the `velero` namespace:
+6. Once the restore succeeds, remove the `velero` namespace:
 
     ```bash
     kubectl delete ns velero
