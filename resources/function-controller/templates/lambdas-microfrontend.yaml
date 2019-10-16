@@ -5,7 +5,7 @@ metadata:
   labels:
     app:  serverless
 spec:
-  displayName: Core
+  displayName: Functions
   version: v1
   category: Development
   placement: namespace
