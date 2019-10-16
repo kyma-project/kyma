@@ -1,4 +1,4 @@
-# Backup plugins
+# Backup Plugins
 
 ## Overview
 
