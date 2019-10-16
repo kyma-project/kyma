@@ -43,7 +43,9 @@ jaeger:
     # subPath: ""
     # existingClaim:
 resources:
-  limits:
+  requests:
     memory: "128M"
+  limits:
+    memory: "768M"
 kcproxy:
   inPort: 3000
