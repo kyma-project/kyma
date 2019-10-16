@@ -8,9 +8,9 @@ The structure of folders and files is based on the [Velero plugin example reposi
 
 ## Installation
 
-Run a Docker image build from the [Dockerfile](Dockerfile) as an init container inside the [Velero chart](../../resources/velero) Deployment.
+For Velero to use plugins, run a Docker image built from the [Dockerfile](Dockerfile) as an init container inside the [Velero chart](../../resources/velero) Deployment.
 
-During development, you can push the built image to your own image repository and run:
+During development, you can push the image to your own image repository and add the plugin by running:
 
 ```bash
 velero plugin add {yourRepo/imageName:tag}
@@ -20,14 +20,14 @@ velero plugin add {yourRepo/imageName:tag}
 
 ### Create a new plugin
 
-To add a new plugin, perform the following steps:
+To create a new plugin for Velero to use, perform the following steps:
 
 1. Go to the [`internal/plugins`](internal/plugins) folder:
 
-This folder includes the backup and restore subfolders, where you can define the following plugins:
+This folder includes the backup and restore subfolders, where you can define plugins based on the following object types:
 
-- **Backup Item Action** - performs arbitrary logic on individual items prior to storing them in the backup file.
-- **Restore Item Action** - performs arbitrary logic on individual items prior to restoring them in the Kyma cluster.
+- **Backup Item Action** - performs arbitrary logic on individual items before storing them in the backup file.
+- **Restore Item Action** - performs arbitrary logic on individual items before restoring them in the Kyma cluster.
 
 ```bash
   ├── internal
