@@ -21,7 +21,7 @@ Follow these steps to restore resources:
 
     >**NOTE**: Check out this [guide](https://velero.io/docs/v1.0.0/install-overview/) to correctly fill the parameters of this command corresponding to the cloud provider in use.
 
-2. Install the Kyma backup plugins:
+2. Install Kyma backup plugins:
 
     ```bash
     velero plugin add eu.gcr.io/kyma-project/backup-plugins:e7df9098
