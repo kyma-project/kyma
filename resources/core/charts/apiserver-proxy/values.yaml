@@ -30,4 +30,4 @@ hpa:
       targetAverageUtilization: 50
 
 tests:
-  enabled: false
+  enabled: true
