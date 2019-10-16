@@ -23,4 +23,4 @@ spec:
       navigationPath: functions-preview/details/:lambda
       viewUrl: '/lambda/:lambda'
       showInNavigation: false
-
+      
