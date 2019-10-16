@@ -1,45 +1,43 @@
 package namespace
 
 import (
+	"github.com/kyma-project/kyma/tests/asset-store/pkg/retry"
 	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/api/core/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 type Namespace struct {
 	coreCli corev1.CoreV1Interface
-	name string
+	name    string
 }
 
 func New(coreCli corev1.CoreV1Interface, name string) *Namespace {
 	return &Namespace{coreCli: coreCli, name: name}
 }
 
-func (n *Namespace) Create() error {
-	_, err := n.coreCli.Namespaces().Create(&v1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:  n.name,
-		},
-	})
-
+func (n *Namespace) Create(callbacks ...func(...interface{})) error {
+	err := retry.OnCreateError(retry.DefaultBackoff, func() error {
+		_, err := n.coreCli.Namespaces().Create(&v1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: n.name,
+			},
+		})
+		return err
+	}, callbacks...)
 	if err != nil {
-		if apierrors.IsAlreadyExists(err) {
-			return nil
-		}
-
 		return errors.Wrapf(err, "while creating namespace %s", n.name)
 	}
-
 	return nil
 }
 
-func (n *Namespace) Delete() error {
-	err := n.coreCli.Namespaces().Delete(n.name, &metav1.DeleteOptions{})
+func (n *Namespace) Delete(callbacks ...func(...interface{})) error {
+	err := retry.OnDeleteError(retry.DefaultBackoff, func() error {
+		return n.coreCli.Namespaces().Delete(n.name, &metav1.DeleteOptions{})
+	}, callbacks...)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting namespace %s", n.name)
 	}
-
 	return nil
 }

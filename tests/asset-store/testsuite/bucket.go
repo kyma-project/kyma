@@ -33,7 +33,7 @@ func newBucket(dynamicCli dynamic.Interface, name, namespace string, waitTimeout
 	}
 }
 
-func (b *bucket) Create() error {
+func (b *bucket) Create(callbacks ...func(...interface{})) error {
 	bucket := &v1alpha2.Bucket{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Bucket",
@@ -50,7 +50,7 @@ func (b *bucket) Create() error {
 		},
 	}
 
-	err := b.resCli.Create(bucket)
+	err := b.resCli.Create(bucket, callbacks...)
 	if err != nil {
 		return errors.Wrapf(err, "while creating Bucket %s in namespace %s", b.name, b.namespace)
 	}

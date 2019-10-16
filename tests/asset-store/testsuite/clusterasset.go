@@ -32,7 +32,7 @@ func newClusterAsset(dynamicCli dynamic.Interface, clusterBucketName string, wai
 	}
 }
 
-func (a *clusterAsset) CreateMany(assets []assetData) error {
+func (a *clusterAsset) CreateMany(assets []assetData, callbacks ...func(...interface{})) error {
 	for _, asset := range assets {
 		asset := &v1alpha2.ClusterAsset{
 			TypeMeta: metav1.TypeMeta{
@@ -55,7 +55,7 @@ func (a *clusterAsset) CreateMany(assets []assetData) error {
 			},
 		}
 
-		err := a.resCli.Create(asset)
+		err := a.resCli.Create(asset, callbacks...)
 		if err != nil {
 			return errors.Wrapf(err, "while creating ClusterAsset %s", asset.Name)
 		}
@@ -142,9 +142,9 @@ func (a *clusterAsset) Get(name string) (*v1alpha2.ClusterAsset, error) {
 	return &ca, nil
 }
 
-func (a *clusterAsset) DeleteMany(assets []assetData) error {
+func (a *clusterAsset) DeleteMany(assets []assetData, callbacks ...func(...interface{})) error {
 	for _, asset := range assets {
-		err := a.resCli.Delete(asset.Name)
+		err := a.resCli.Delete(asset.Name, callbacks...)
 		if err != nil {
 			return errors.Wrapf(err, "while deleting ClusterAsset %s", asset.Name)
 		}

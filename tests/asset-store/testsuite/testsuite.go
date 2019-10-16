@@ -7,13 +7,15 @@ import (
 	"testing"
 	"time"
 
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/dynamic/dynamicinformer"
+
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/upload"
 	"github.com/minio/minio-go"
 
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/namespace"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
-	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 )
@@ -26,6 +28,7 @@ type Config struct {
 	UploadServiceUrl  string        `envconfig:"default=http://localhost:3000/v1/upload"`
 	WaitTimeout       time.Duration `envconfig:"default=2m"`
 	Minio             MinioConfig
+	ResyncDuration    time.Duration `envconfig:"default=2m"`
 }
 
 type TestSuite struct {
@@ -57,6 +60,8 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
 	}
+
+	dynamicinformer.NewDynamicSharedInformerFactory(dynamicCli, cfg.ResyncDuration)
 
 	minioCli, err := minio.New(cfg.Minio.Endpoint, cfg.Minio.AccessKey, cfg.Minio.SecretKey, cfg.Minio.UseSSL)
 	if err != nil {
@@ -91,11 +96,11 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 }
 
 func (t *TestSuite) Run() {
-	err := t.namespace.Create()
+	err := t.namespace.Create(t.t.Log)
 	failOnError(t.g, err)
 
 	t.t.Log("Creating buckets...")
-	err = t.createBuckets()
+	err = t.createBuckets(t.t.Log)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for ready buckets...")
@@ -151,13 +156,13 @@ func (t *TestSuite) Cleanup() {
 	failOnError(t.g, err)
 }
 
-func (t *TestSuite) createBuckets() error {
+func (t *TestSuite) createBuckets(callbacks ...func(...interface{})) error {
 	err := t.bucket.Create()
 	if err != nil {
 		return err
 	}
 
-	err = t.clusterBucket.Create()
+	err = t.clusterBucket.Create(callbacks...)
 	if err != nil {
 		return err
 	}
@@ -185,12 +190,12 @@ func (t *TestSuite) uploadTestFiles() (*upload.Response, error) {
 func (t *TestSuite) createAssets(uploadResult *upload.Response) error {
 	t.assetDetails = convertToAssetResourceDetails(uploadResult, t.cfg.CommonAssetPrefix)
 
-	err := t.asset.CreateMany(t.assetDetails)
+	err := t.asset.CreateMany(t.assetDetails, t.t.Log)
 	if err != nil {
 		return err
 	}
 
-	err = t.clusterAsset.CreateMany(t.assetDetails)
+	err = t.clusterAsset.CreateMany(t.assetDetails, t.t.Log)
 	if err != nil {
 		return err
 	}
@@ -281,8 +286,8 @@ func (t *TestSuite) waitForBucketsReady() error {
 	return nil
 }
 
-func (t *TestSuite) deleteAssets() error {
-	err := t.asset.DeleteMany(t.assetDetails)
+func (t *TestSuite) deleteAssets(callbacks ...func(...interface{})) error {
+	err := t.asset.DeleteMany(t.assetDetails, callbacks...)
 	if err != nil {
 		return err
 	}

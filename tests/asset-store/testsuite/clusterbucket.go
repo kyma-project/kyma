@@ -32,7 +32,7 @@ func newClusterBucket(dynamicCli dynamic.Interface, name string, waitTimeout tim
 	}
 }
 
-func (b *clusterBucket) Create() error {
+func (b *clusterBucket) Create(callbacks ...func(...interface{})) error {
 	clusterBucket := &v1alpha2.ClusterBucket{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterBucket",
@@ -49,7 +49,7 @@ func (b *clusterBucket) Create() error {
 		},
 	}
 
-	err := b.resCli.Create(clusterBucket)
+	err := b.resCli.Create(clusterBucket, callbacks...)
 	if err != nil {
 		return errors.Wrapf(err, "while creating ClusterBucket %s", b.name)
 	}

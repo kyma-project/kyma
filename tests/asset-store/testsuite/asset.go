@@ -34,7 +34,7 @@ func newAsset(dynamicCli dynamic.Interface, namespace string, bucketName string,
 	}
 }
 
-func (a *asset) CreateMany(assets []assetData) error {
+func (a *asset) CreateMany(assets []assetData, callbacks ...func(...interface{})) error {
 	for _, asset := range assets {
 		asset := &v1alpha2.Asset{
 			TypeMeta: metav1.TypeMeta{
@@ -58,7 +58,7 @@ func (a *asset) CreateMany(assets []assetData) error {
 			},
 		}
 
-		err := a.resCli.Create(asset)
+		err := a.resCli.Create(asset, callbacks...)
 		if err != nil {
 			return errors.Wrapf(err, "while creating Asset %s in namespace %s", asset.Name, a.Namespace)
 		}
@@ -147,9 +147,9 @@ func (a *asset) Get(name string) (*v1alpha2.Asset, error) {
 	return &res, nil
 }
 
-func (a *asset) DeleteMany(assets []assetData) error {
+func (a *asset) DeleteMany(assets []assetData, callbacks ...func(...interface{})) error {
 	for _, asset := range assets {
-		err := a.resCli.Delete(asset.Name)
+		err := a.resCli.Delete(asset.Name, callbacks...)
 		if err != nil {
 			return errors.Wrapf(err, "while deleting Asset %s in namespace %s", asset.Name, a.Namespace)
 		}
