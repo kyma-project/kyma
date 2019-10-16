@@ -1,18 +1,17 @@
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
 metadata:
-  name: coremicrofrontend
+  name: serverless
   labels:
-    app:  coremicrofrontend
+    app:  serverless
 spec:
-  displayName: Core
+  displayName: Functions
   version: v1
-  category: Configuration
+  category: Development
   placement: namespace
   viewBaseUrl: 'https://core-ui.{{ js .Values.global.ingress.domainName }}'
   navigationNodes:
-    - label: Core UI
-      navigationPath: core-ui
-      viewUrl: '/'
-      order: 10
-
+    - label: Functions [preview]
+      navigationPath: functions-preview
+      viewUrl: '/lambdas'
+      order: 1

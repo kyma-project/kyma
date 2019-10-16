@@ -60,7 +60,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: compass-postgresql
-                  key: postgresql-databaseName
+                  key: postgresql-directorDatabaseName
             - name: APP_DB_SSL
               valueFrom:
                 secretKeyRef:
@@ -78,7 +78,7 @@ spec:
             - mountPath: /config
               name: scopes-config
 
-        {{if eq .Values.global.database.useEmbedded false}}
+        {{if eq .Values.global.database.embedded.enabled false}}
         - name: cloudsql-proxy
           image: gcr.io/cloudsql-docker/gce-proxy:1.11
           command: ["/cloud_sql_proxy",
@@ -94,7 +94,7 @@ spec:
               readOnly: true
           {{end}}
       volumes:
-        {{if eq .Values.global.database.useEmbedded false}}
+        {{if eq .Values.global.database.embedded.enabled false}}
         - name: cloudsql-instance-credentials
           secret:
             secretName: cloudsql-instance-credentials

@@ -232,6 +232,9 @@
 # Asset Metadata Service
 /components/asset-metadata-service/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
+# Backup Plugins
+/components/backup-plugins/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
+
 # CMS Controller Manager Component
 /components/cms-controller-manager/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
