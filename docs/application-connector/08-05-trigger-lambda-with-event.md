@@ -11,7 +11,7 @@ To create a simple lambda function and trigger it with an event, you must first 
 - An Application bound to a Namespace.
 - Client certificates generated for the connected Application.
 
->**NOTE:** See the respective tutorials to learn how to [create](https://kyma-project.io/docs/components/application-connector#tutorials-create-a-new-application) an Application, [get](https://kyma-project.io/docs/components/application-connector#tutorials-get-the-client-certificate) the client certificate, and [bind](https://kyma-project.io/docs/components/application-connector#tutorials-bind-an-application-to-a-namespace) an Application to a Namespace.
+>**NOTE:** See the respective tutorials to learn how to [create](#tutorials-create-a-new-application) an Application, [get](#tutorials-get-the-client-certificate) the client certificate, and [bind](#tutorials-bind-an-application-to-a-namespace) an Application to a Namespace.
 
 ## Steps
 
