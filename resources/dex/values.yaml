@@ -75,4 +75,4 @@ global:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:
     dir:
-    version: PR-5981
+    version: a8ed2afb
