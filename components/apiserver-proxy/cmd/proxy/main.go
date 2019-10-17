@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
 	"syscall"
 
 	"github.com/gorilla/handlers"
@@ -149,20 +150,18 @@ func main() {
 	var authenticator authenticator.Request
 	// If OIDC configuration provided, use oidc authenticator
 	if cfg.auth.Authentication.OIDC.IssuerURL != "" {
+		//TODO: Wrap this
 		authenticator, err = authn.NewOIDCAuthenticator(cfg.auth.Authentication.OIDC)
 		if err != nil {
 			glog.Fatalf("Failed to instantiate OIDC authenticator: %v", err)
 		}
-
 	} else {
 		//Use Delegating authenticator
-
 		tokenClient := kubeClient.AuthenticationV1beta1().TokenReviews()
 		authenticator, err = authn.NewDelegatingAuthenticator(tokenClient, cfg.auth.Authentication)
 		if err != nil {
 			glog.Fatalf("Failed to instantiate delegating authenticator: %v", err)
 		}
-
 	}
 
 	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
@@ -172,6 +171,7 @@ func main() {
 		glog.Fatalf("Failed to create authorizer: %v", err)
 	}
 
+	//TODO: This must accept a wrapping authenticator
 	authProxy := proxy.New(cfg.auth, authorizer, authenticator)
 
 	if err != nil {
@@ -201,6 +201,7 @@ func main() {
 
 	if cfg.secureListenAddress != "" {
 		srv := &http.Server{Handler: getCORSHandler(mux, cfg.cors)}
+
 		if cfg.tls.certFile == "" && cfg.tls.keyFile == "" {
 			glog.Info("Generating self signed cert as no cert is provided")
 			certBytes, keyBytes, err := certutil.GenerateSelfSignedCertKey("", nil, nil)
@@ -229,6 +230,16 @@ func main() {
 				// See net/http.Server.shouldConfigureHTTP2ForServe for more context
 				NextProtos: []string{"h2"},
 			}
+		} else {
+			tn := TestNotifier{}
+			tn.Start()
+			krldr, err := NewReloadableTLSCertProvider(cfg.tls.certFile, cfg.tls.keyFile, &tn)
+			if err != nil {
+				glog.Fatalf("Failed to create ReloadableTLSCertProvider: %v", err)
+			}
+			srv.TLSConfig = &tls.Config{
+				GetCertificate: krldr.GetCertificateFunc,
+			}
 		}
 
 		l, err := net.Listen("tcp", cfg.secureListenAddress)
@@ -236,7 +247,12 @@ func main() {
 			glog.Fatalf("Failed to listen on secure address: %v", err)
 		}
 		glog.Infof("Listening securely on %v", cfg.secureListenAddress)
-		go srv.ServeTLS(l, cfg.tls.certFile, cfg.tls.keyFile)
+
+		if err != nil {
+			glog.Fatalf("Failed to create reloader", err)
+		}
+
+		go srv.ServeTLS(l, "", "")
 	}
 
 	if cfg.insecureListenAddress != "" {
@@ -353,4 +369,164 @@ func deleteUpstreamCORSHeaders(r *http.Response) error {
 		r.Header.Del(h)
 	}
 	return nil
+}
+
+type TestNotifier struct {
+	onEventFunc func()
+}
+
+func (tn *TestNotifier) Start() {
+	tn.onEventFunc = func() {
+		fmt.Println("TestNotifier: No handler installed")
+	}
+
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGHUP)
+		for range c {
+			/*
+				log.Printf("Received SIGHUP, reloading TLS certificate and key from %s and %s", certPath, keyPath)
+				if err := result.maybeReload(); err != nil {
+					log.Printf("Keeping old TLS certificate because the new one could not be loaded: %v", err)
+				}
+			*/
+
+			if tn.onEventFunc != nil {
+				tn.onEventFunc()
+			}
+		}
+	}()
+}
+
+func (tn *TestNotifier) RegisterCallback(handler func()) {
+	tn.onEventFunc = handler
+}
+
+//ReloadNotifier is used to sent notifications about events requiring refreshing data
+type ReloadNotifier interface {
+	//Registers callback handler that is called when an event requiring refreshing data occurs
+	RegisterCallback(handler func())
+}
+
+type TLSCertCreator func() *tls.Certificate
+
+type ReloadableTLSCertProvider struct {
+	holder   *TLSCrtKeyPairHolder
+	crtPath  string
+	keyPath  string
+	notifier ReloadNotifier
+}
+
+func NewReloadableTLSCertProvider(tlsCertCreator TLSCertCreator, notifier ReloadNotifier) (*ReloadableTLSCertProvider, error) {
+
+	result := &ReloadableTLSCertProvider{
+		holder:   NewTLSCrtKeyPairHolder(),
+		crtPath:  crtPath,
+		keyPath:  keyPath,
+		notifier: notifier,
+	}
+
+	//Initial read
+	err := result.reload()
+	if err != nil {
+		return nil, err
+	}
+
+	//Used by external notifier to trigger certificate reloads
+	reloadCertificateFunc := func() {
+		err := result.reload()
+		if err != nil {
+			glog.Errorf("Failed to reload certificate: %v", err)
+		}
+	}
+	result.notifier.RegisterCallback(reloadCertificateFunc)
+
+	return result, nil
+}
+
+//reloads the certificate from configured input files
+//Note: It must NOT modify the existing certificate in case of errors!
+func (ckpr *ReloadableTLSCertProvider) reload() error {
+	glog.Infof("Loading TLS Certificate data from files: %s, %s", ckpr.crtPath, ckpr.keyPath)
+	newCert, err := tls.LoadX509KeyPair(ckpr.crtPath, ckpr.keyPath)
+	if err != nil {
+		return err
+	}
+	ckpr.holder.Set(&newCert)
+	return nil
+}
+
+//GetCertificateFunc is used by tls.Server to get TLS Cert
+func (ckpr *ReloadableTLSCertProvider) GetCertificateFunc(*tls.ClientHelloInfo) (*tls.Certificate, error) {
+	fmt.Println("getCertificateFunc")
+	return ckpr.holder.Get(), nil
+}
+
+//TLSCrtKeyPairHolder keeps an instance of tls.Certificate and allows for safe multi-threaded Get/Set operations
+type TLSCrtKeyPairHolder struct {
+	rwmu  sync.RWMutex
+	value *tls.Certificate
+}
+
+func NewTLSCrtKeyPairHolder() *TLSCrtKeyPairHolder {
+	return &TLSCrtKeyPairHolder{}
+}
+
+func (tlsh *TLSCrtKeyPairHolder) Get() *tls.Certificate {
+	tlsh.rwmu.RLock()
+	defer tlsh.rwmu.RUnlock()
+	return tlsh.value
+}
+
+func (tlsh *TLSCrtKeyPairHolder) Set(v *tls.Certificate) {
+	tlsh.rwmu.Lock()
+	defer tlsh.rwmu.Unlock()
+	tlsh.value = v
+}
+
+//ReloadableAuthenticatorRequest implements authenticator.Request interface
+//It's used to re-create authenticator.Request instance every time a change in oidc-ca-file is detected
+type ReloadableAuthenticatorRequest struct {
+	holder   *AuthenticatorRequestHolder
+	notifier ReloadNotifier
+}
+
+func NewReloadableAuthenticatorRequest(notifier ReloadNotifier) *ReloadableAuthenticatorRequest {
+	result := ReloadableAuthenticatorRequest{
+		holder:   NewAuthenticatorRequestHolder(),
+		notifier: notifier,
+	}
+
+	reloadAuthRequestFunc := func() {
+	}
+
+	notifier.RegisterCallback(reloadAuthRequestFunc)
+	return result
+}
+
+func (rar *ReloadableAuthenticatorRequest) AuthenticateRequest(req *http.Request) (*Response, bool, error) {
+	//Delegate to internally-stored instance (thread-safe)
+	return rar.holder.Get().AuthenticateRequest(req)
+}
+
+//AuthenticatorRequestHolder keeps an instance of authenticator.Request and allows for safe multi-threaded Get/Set operations
+type AuthenticatorRequestHolder struct {
+	rwmu  sync.RWMutex
+	value authenticator.Request
+}
+
+func NewAuthenticatorRequestHolder() *AuthenticatorRequestHolder {
+	return &AuthenticatorRequestHolder{}
+}
+
+func (arh *AuthenticatorRequestHolder) Get() authenticator.Request {
+	arh.rwmu.RLock()
+	defer arh.rwmu.RUnlock()
+	return arh.value
+}
+
+func (arh *AuthenticatorRequestHolder) Set(v authenticator.Request) {
+	arh.rwmu.Lock()
+	defer arh.rwmu.Unlock()
+	arh.value = v
 }
