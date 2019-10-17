@@ -29,11 +29,17 @@ func (svc *functionService) List(namespace string) ([]*v1alpha1.Function, error)
 	return results, err
 }
 
-func (svc *functionService) Delete(name string, namespace string) error {
+func (svc *functionService) Find(name, namespace string) (*v1alpha1.Function, error) {
+	var result *v1alpha1.Function
+	err := svc.FindInNamespace(name, namespace, &result)
+	return result, err
+}
+
+func (svc *functionService) Delete(name, namespace string) error {
 	return svc.Client.Namespace(namespace).Delete(name, &metav1.DeleteOptions{})
 }
 
-func (svc *functionService) Create(name string, namespace string, labels gqlschema.Labels, size string, runtime string) (*v1alpha1.Function, error) {
+func (svc *functionService) Create(name, namespace string, labels gqlschema.Labels, size, runtime string) (*v1alpha1.Function, error) {
 	function, err := convert.FunctionToUnstructured(&v1alpha1.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Function",

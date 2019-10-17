@@ -593,6 +593,10 @@ func (r *queryResolver) Functions(ctx context.Context, namespace string) ([]gqls
 	return r.serverless.FunctionsQuery(ctx, namespace)
 }
 
+func (r *queryResolver) Function(ctx context.Context, name string, namespace string) (*gqlschema.Function, error) {
+	return r.serverless.FunctionQuery(ctx, name, namespace)
+}
+
 // Subscriptions
 
 type subscriptionResolver struct {

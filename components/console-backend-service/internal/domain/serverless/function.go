@@ -2,7 +2,6 @@ package serverless
 
 import (
 	"context"
-
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
 
@@ -22,6 +21,17 @@ func (r *resolver) FunctionsQuery(ctx context.Context, namespace string) ([]gqls
 	functions := convert.FunctionsToGQLs(items)
 
 	return functions, nil
+}
+
+func (r *resolver) FunctionQuery(ctx context.Context, name, namespace string) (*gqlschema.Function, error) {
+	item, err := r.functionService.Find(name, namespace)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while finding %s", pretty.Function))
+		return nil, gqlerror.New(err, pretty.Function, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+	function := convert.FunctionToGQL(item)
+
+	return function, nil
 }
 
 func (r *resolver) CreateFunction(ctx context.Context, name string, namespace string, labels gqlschema.Labels, size string, runtime string) (gqlschema.Function, error) {
