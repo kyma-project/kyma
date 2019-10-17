@@ -96,6 +96,17 @@ metadata:
     kyma-project.io/installation: ""
 data:
   global.isDevelopMode: "true" # global, because subcharts also use it
-
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dex-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: dex
+    kyma-project.io/installation: ""
+data:
+  telemetry.enabled: "false"
 
 
