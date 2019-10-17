@@ -27,7 +27,7 @@ Check if all natsschannels are reporting status ready:
 kubectl get natsschannels.messaging.knative.dev -n kyma-system
 ```
 
-If one or more channels report not as ready, delete their corresponding channel services. These services will be recreated by the controller automatically.
+If one or more channels report as not ready, delete their corresponding channel services. These services will be recreated by the controller automatically.
 
 ```bash
 kubectl delete service -l messaging.knative.dev/role=natss-channel -n kyma-system
