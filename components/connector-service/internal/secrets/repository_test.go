@@ -9,7 +9,6 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/secrets/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

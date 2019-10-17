@@ -1,6 +1,6 @@
 APP_NAME = connectivity-certs-controller
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190913-65b55d1
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20191011-51ed45a
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/scripts
 
 include $(SCRIPTS_DIR)/go-dep.mk
@@ -20,3 +20,4 @@ verify:: vet
 # Check if tests passed
 # GO FMT
 # GO VET
+# here

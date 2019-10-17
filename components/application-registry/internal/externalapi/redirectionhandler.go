@@ -2,9 +2,10 @@ package externalapi
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 const pathVarFormat = "{%s}"
