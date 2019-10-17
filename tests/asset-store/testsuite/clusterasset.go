@@ -32,7 +32,7 @@ func newClusterAsset(dynamicCli dynamic.Interface, clusterBucketName string, wai
 	}
 }
 
-func (a *clusterAsset) CreateMany(assets []assetData, callbacks ...func(...interface{})) error {
+func (a *clusterAsset) CreateMany(assets []assetData, testId string, callbacks ...func(...interface{})) error {
 	for _, asset := range assets {
 		asset := &v1alpha2.ClusterAsset{
 			TypeMeta: metav1.TypeMeta{
@@ -41,6 +41,9 @@ func (a *clusterAsset) CreateMany(assets []assetData, callbacks ...func(...inter
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: asset.Name,
+				Labels: map[string]string{
+					"test-id": testId,
+				},
 			},
 			Spec: v1alpha2.ClusterAssetSpec{
 				CommonAssetSpec: v1alpha2.CommonAssetSpec{
@@ -65,6 +68,7 @@ func (a *clusterAsset) CreateMany(assets []assetData, callbacks ...func(...inter
 }
 
 func (a *clusterAsset) WaitForStatusesReady(assets []assetData) error {
+	//FIXME
 	err := waiter.WaitAtMost(func() (bool, error) {
 		for _, asset := range assets {
 			res, err := a.Get(asset.Name)
@@ -148,6 +152,11 @@ func (a *clusterAsset) DeleteMany(assets []assetData, callbacks ...func(...inter
 			return errors.Wrapf(err, "while deleting ClusterAsset %s", asset.Name)
 		}
 	}
-
 	return nil
+}
+
+func (a *clusterAsset) DeleteLeftovers(testId string, callbacks ...func(...interface{})) error {
+	deleteLeftovers := buildDeleteLeftovers(a.resCli.ResCli, a.waitTimeout)
+	err := deleteLeftovers(testId, callbacks...)
+	return err
 }

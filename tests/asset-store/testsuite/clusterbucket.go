@@ -1,7 +1,6 @@
 package testsuite
 
 import (
-	"context"
 	"time"
 
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
@@ -11,7 +10,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
-	watchtools "k8s.io/client-go/tools/watch"
 )
 
 type clusterBucket struct {
@@ -57,13 +55,8 @@ func (b *clusterBucket) Create(callbacks ...func(...interface{})) (string, error
 }
 
 func (b *clusterBucket) WaitForStatusReady(initialResourceVersion string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), b.waitTimeout)
-	defer cancel()
-	condition := isPhaseReady(b.name)
-	_, err := watchtools.Until(ctx, initialResourceVersion, b.resCli.ResCli, condition)
-	if err != nil {
-		return err
-	}
+	waitForStatusReady := buildWaitForStatusesReady(b.resCli.ResCli, b.waitTimeout, b.name)
+	err := waitForStatusReady(initialResourceVersion)
 	return err
 }
 

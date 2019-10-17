@@ -32,6 +32,10 @@ required = [
   name = "k8s.io/client-go"
   version = "kubernetes-1.16.1"
 
+[[override]]
+  name = "github.com/golang/protobuf"
+  version = "v1.3.0"
+
 [prune]
   go-tests = true
   unused-packages = true

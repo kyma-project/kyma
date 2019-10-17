@@ -1,6 +1,7 @@
 package testsuite
 
 import (
+	"github.com/kyma-project/kyma/tests/asset-store/pkg/retry"
 	"k8s.io/client-go/dynamic"
 	"time"
 
@@ -34,7 +35,7 @@ func newAsset(dynamicCli dynamic.Interface, namespace string, bucketName string,
 	}
 }
 
-func (a *asset) CreateMany(assets []assetData, callbacks ...func(...interface{})) ([]string, error) {
+func (a *asset) CreateMany(assets []assetData, testId string, callbacks ...func(...interface{})) ([]string, error) {
 	var resourceVersions []string
 	for _, asset := range assets {
 		asset := &v1alpha2.Asset{
@@ -45,6 +46,9 @@ func (a *asset) CreateMany(assets []assetData, callbacks ...func(...interface{})
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      asset.Name,
 				Namespace: a.Namespace,
+				Labels: map[string]string{
+					"test-id": testId,
+				},
 			},
 			Spec: v1alpha2.AssetSpec{
 				CommonAssetSpec: v1alpha2.CommonAssetSpec{
@@ -58,35 +62,31 @@ func (a *asset) CreateMany(assets []assetData, callbacks ...func(...interface{})
 				},
 			},
 		}
-		resourceVersion, err := a.resCli.Create(asset, callbacks...)
+		err := retry.OnCreateError(retry.DefaultBackoff, func() error {
+			resourceVersion, err := a.resCli.Create(asset, callbacks...)
+			if err != nil {
+				return err
+			}
+			resourceVersions = append(resourceVersions, resourceVersion)
+			return nil
+		}, callbacks...)
 		if err != nil {
-			return resourceVersions, errors.Wrapf(err, "while creating Asset %s in namespace %s", asset.Name, a.Namespace)
+			return nil, errors.Wrapf(err, "while creating Asset %s in namespace %s", asset.Name, a.Namespace)
 		}
-		resourceVersions = append(resourceVersions, resourceVersion)
 	}
-
 	return resourceVersions, nil
 }
 
 func (a *asset) WaitForStatusesReady(assets []assetData, resourceVersion string) error {
-	err := waiter.WaitAtMost(func() (bool, error) {
-		for _, asset := range assets {
-			res, err := a.Get(asset.Name)
-			if err != nil {
-				return false, err
-			}
-
-			if res.Status.Phase != v1alpha2.AssetReady {
-				return false, nil
-			}
-		}
-
-		return true, nil
-	}, a.waitTimeout)
+	var assetNames []string
+	for _, asset := range assets {
+		assetNames = append(assetNames, asset.Name)
+	}
+	waitForStatusesReady := buildWaitForStatusesReady(a.resCli.ResCli, a.waitTimeout, assetNames...)
+	err := waitForStatusesReady(resourceVersion)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for ready Asset resources")
 	}
-
 	return nil
 }
 
@@ -108,7 +108,6 @@ func (a *asset) WaitForDeletedResources(assets []assetData) error {
 	if err != nil {
 		return errors.Wrapf(err, "while deleting Asset resources %s in namespace %s")
 	}
-
 	return nil
 }
 
@@ -145,6 +144,12 @@ func (a *asset) Get(name string) (*v1alpha2.Asset, error) {
 	}
 
 	return &res, nil
+}
+
+func (a *asset) DeleteLeftovers(testId string, callbacks ...func(...interface{})) error {
+	deleteLeftovers := buildDeleteLeftovers(a.resCli.ResCli, a.waitTimeout)
+	err := deleteLeftovers(testId, callbacks...)
+	return err
 }
 
 func (a *asset) DeleteMany(assets []assetData, callbacks ...func(...interface{})) error {

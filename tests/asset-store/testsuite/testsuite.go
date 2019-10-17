@@ -3,13 +3,13 @@ package testsuite
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/watch"
 	"net/http"
 	"testing"
 	"time"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/watch"
 
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/upload"
 	"github.com/minio/minio-go"
@@ -30,7 +30,6 @@ type Config struct {
 	UploadServiceUrl  string        `envconfig:"default=http://localhost:3000/v1/upload"`
 	WaitTimeout       time.Duration `envconfig:"default=2m"`
 	Minio             MinioConfig
-	ResyncDuration    time.Duration `envconfig:"default=2m"`
 }
 
 type TestSuite struct {
@@ -50,6 +49,8 @@ type TestSuite struct {
 	systemBucketName string
 	minioCli         *minio.Client
 	cfg              Config
+
+	testId string
 }
 
 func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWithT) (*TestSuite, error) {
@@ -90,8 +91,8 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		t:             t,
 		g:             g,
 		minioCli:      minioCli,
-
-		cfg: cfg,
+		testId:        "singularity",
+		cfg:           cfg,
 	}, nil
 }
 
@@ -103,7 +104,6 @@ func (t *TestSuite) Run() {
 	var resourceVersion string
 	resourceVersion, err = t.clusterBucket.Create(t.t.Log)
 	failOnError(t.g, err)
-
 	// wait for Ready status if resource does not exist
 	if "" != resourceVersion {
 		t.t.Log("Waiting for cluster bucket to have ready phase...")
@@ -128,29 +128,17 @@ func (t *TestSuite) Run() {
 	t.uploadResult = uploadResult
 	t.systemBucketName = uploadResult.UploadedFiles[0].Bucket
 
-	// removing leftovers from previous test
-	t.t.Log("Removing old assets...")
-	err = t.asset.DeleteMany(t.assetDetails, t.t.Log)
-	failOnError(t.g, err)
-	err = t.asset.WaitForDeletedResources(t.assetDetails)
+	err = t.asset.DeleteLeftovers(t.testId)
 	failOnError(t.g, err)
 
-	// removing leftovers from previous test
-	t.t.Log("Removing old cluster assets...")
-	err = t.clusterAsset.DeleteMany(t.assetDetails)
-	failOnError(t.g, err)
-	err = t.clusterAsset.WaitForDeletedResources(t.assetDetails)
+	err = t.clusterAsset.DeleteLeftovers(t.testId)
 	failOnError(t.g, err)
 
-	//FIXME remove common method
 	t.t.Log("Creating assets...")
 	var assetVersions []string
 	assetVersions, err = t.createAssets(uploadResult)
 	failOnError(t.g, err)
 
-	//TODO add wait
-
-	//TODO
 	t.t.Log("Waiting for assets to have ready phase...")
 	err = t.asset.WaitForStatusesReady(t.assetDetails, assetVersions[0])
 	failOnError(t.g, err)
@@ -167,16 +155,13 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Removing assets...")
-	err = t.asset.DeleteMany(t.assetDetails, t.t.Log)
+	err = t.asset.DeleteLeftovers(t.testId, t.t.Log)
 	failOnError(t.g, err)
-
-	//TODO add wait
 
 	t.t.Log("Removing cluster assets...")
-	err = t.clusterAsset.DeleteMany(t.assetDetails)
+	err = t.clusterAsset.DeleteLeftovers(t.testId, t.t.Log)
 	failOnError(t.g, err)
 
-	//TODO add wait
 	err = t.verifyDeletedFiles(files)
 	failOnError(t.g, err)
 }
@@ -213,12 +198,12 @@ func (t *TestSuite) uploadTestFiles() (*upload.Response, error) {
 func (t *TestSuite) createAssets(uploadResult *upload.Response) ([]string, error) {
 	t.assetDetails = convertToAssetResourceDetails(uploadResult, t.cfg.CommonAssetPrefix)
 
-	resourceVersions, err := t.asset.CreateMany(t.assetDetails, t.t.Log)
+	resourceVersions, err := t.asset.CreateMany(t.assetDetails, t.testId, t.t.Log)
 	if err != nil {
 		return nil, err
 	}
 
-	err = t.clusterAsset.CreateMany(t.assetDetails, t.t.Log)
+	err = t.clusterAsset.CreateMany(t.assetDetails, t.testId, t.t.Log)
 	if err != nil {
 		return nil, err
 	}
@@ -277,6 +262,8 @@ func failOnError(g *gomega.GomegaWithT, err error) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 }
 
+var ready = "Ready"
+
 func isPhaseReady(name string) func(event watch.Event) (bool, error) {
 	return func(event watch.Event) (bool, error) {
 		if event.Type != watch.Modified {
@@ -288,7 +275,7 @@ func isPhaseReady(name string) func(event watch.Event) (bool, error) {
 		}
 		var bucketLike struct {
 			Status struct {
-				Phase v1alpha2.BucketPhase
+				Phase string
 			}
 		}
 		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &bucketLike)
@@ -296,6 +283,6 @@ func isPhaseReady(name string) func(event watch.Event) (bool, error) {
 			return false, err
 		}
 		phase := bucketLike.Status.Phase
-		return phase != v1alpha2.BucketReady, nil
+		return phase != ready, nil
 	}
 }
