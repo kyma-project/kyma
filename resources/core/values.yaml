@@ -19,9 +19,6 @@ global:
   istio:
     gateway:
       name: kyma-gateway
-  acceptance_tests:
-    dir:
-    version: "PR-5891"
   ui_acceptance_tests:
     dir:
     version: 2ce268ee
@@ -95,6 +92,4 @@ test:
   acceptance:
     external_solution:
       enabled: false
-    service-catalog:
-      enabled: true
 
