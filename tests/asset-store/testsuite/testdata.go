@@ -87,7 +87,7 @@ func verifyUploadedAssets(files []uploadedFile, logFn func(format string, args .
 		}
 
 		if !equal {
-			return fmt.Errorf("Files from %s and %s are not equal, defined in %s %s", path, f.URL, f.Owner.Kind, f.Owner.Name)
+			return fmt.Errorf("files from %s and %s are not equal, defined in %s %s", path, f.URL, f.Owner.Kind, f.Owner.Name)
 		}
 	}
 
@@ -103,7 +103,7 @@ func verifyDeletedAssets(files []uploadedFile, logFn func(format string, args ..
 		}
 
 		if exists {
-			return fmt.Errorf("File %s defined in %s %s should not exist", f.URL, f.Owner.Kind, f.Owner.Name)
+			return fmt.Errorf("file %s defined in %s %s should not exist", f.URL, f.Owner.Kind, f.Owner.Name)
 		}
 	}
 

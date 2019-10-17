@@ -3,15 +3,17 @@ package testsuite
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/watch"
 	"net/http"
 	"testing"
 	"time"
 
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/dynamic/dynamicinformer"
-
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/upload"
 	"github.com/minio/minio-go"
+	"k8s.io/client-go/dynamic"
 
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/namespace"
 	"github.com/onsi/gomega"
@@ -61,8 +63,6 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
 	}
 
-	dynamicinformer.NewDynamicSharedInformerFactory(dynamicCli, cfg.ResyncDuration)
-
 	minioCli, err := minio.New(cfg.Minio.Endpoint, cfg.Minio.AccessKey, cfg.Minio.SecretKey, cfg.Minio.UseSSL)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating Minio client")
@@ -99,28 +99,64 @@ func (t *TestSuite) Run() {
 	err := t.namespace.Create(t.t.Log)
 	failOnError(t.g, err)
 
-	t.t.Log("Creating buckets...")
-	err = t.createBuckets(t.t.Log)
+	t.t.Log("Creating cluster bucket...")
+	var resourceVersion string
+	resourceVersion, err = t.clusterBucket.Create(t.t.Log)
 	failOnError(t.g, err)
 
-	t.t.Log("Waiting for ready buckets...")
-	err = t.waitForBucketsReady()
+	// wait for Ready status if resource does not exist
+	if "" != resourceVersion {
+		t.t.Log("Waiting for cluster bucket to have ready phase...")
+		err = t.clusterBucket.WaitForStatusReady(resourceVersion)
+		failOnError(t.g, err)
+	}
+
+	t.t.Log("Creating bucket...")
+	resourceVersion, err = t.bucket.Create(t.t.Log)
 	failOnError(t.g, err)
+	// wait for Ready status if resource does not exist
+	if resourceVersion != "" {
+		t.t.Log("Waiting for bucket to have ready phase...")
+		err = t.bucket.WaitForStatusReady(resourceVersion)
+		failOnError(t.g, err)
+	}
 
 	t.t.Log("Uploading test files...")
 	uploadResult, err := t.uploadTestFiles()
 	failOnError(t.g, err)
 
 	t.uploadResult = uploadResult
+	t.systemBucketName = uploadResult.UploadedFiles[0].Bucket
 
-	t.systemBucketName = t.systemBucketNameFromUploadResult(uploadResult)
-
-	t.t.Log("Creating assets...")
-	err = t.createAssets(uploadResult)
+	// removing leftovers from previous test
+	t.t.Log("Removing old assets...")
+	err = t.asset.DeleteMany(t.assetDetails, t.t.Log)
+	failOnError(t.g, err)
+	err = t.asset.WaitForDeletedResources(t.assetDetails)
 	failOnError(t.g, err)
 
-	t.t.Log("Waiting for ready assets...")
-	err = t.waitForAssetsReady()
+	// removing leftovers from previous test
+	t.t.Log("Removing old cluster assets...")
+	err = t.clusterAsset.DeleteMany(t.assetDetails)
+	failOnError(t.g, err)
+	err = t.clusterAsset.WaitForDeletedResources(t.assetDetails)
+	failOnError(t.g, err)
+
+	//FIXME remove common method
+	t.t.Log("Creating assets...")
+	var assetVersions []string
+	assetVersions, err = t.createAssets(uploadResult)
+	failOnError(t.g, err)
+
+	//TODO add wait
+
+	//TODO
+	t.t.Log("Waiting for assets to have ready phase...")
+	err = t.asset.WaitForStatusesReady(t.assetDetails, assetVersions[0])
+	failOnError(t.g, err)
+
+	t.t.Log("Waiting for cluster assets to have ready phase...")
+	err = t.clusterAsset.WaitForStatusesReady(t.assetDetails)
 	failOnError(t.g, err)
 
 	files, err := t.populateUploadedFiles()
@@ -130,15 +166,17 @@ func (t *TestSuite) Run() {
 	err = t.verifyUploadedFiles(files)
 	failOnError(t.g, err)
 
-	t.t.Log("Deleting assets...")
-	err = t.deleteAssets()
+	t.t.Log("Removing assets...")
+	err = t.asset.DeleteMany(t.assetDetails, t.t.Log)
 	failOnError(t.g, err)
 
-	t.t.Log("Waiting for deleted assets...")
-	err = t.waitForAssetsDeleted()
+	//TODO add wait
+
+	t.t.Log("Removing cluster assets...")
+	err = t.clusterAsset.DeleteMany(t.assetDetails)
 	failOnError(t.g, err)
 
-	t.t.Log("Verifying if files have been deleted...")
+	//TODO add wait
 	err = t.verifyDeletedFiles(files)
 	failOnError(t.g, err)
 }
@@ -146,7 +184,10 @@ func (t *TestSuite) Run() {
 func (t *TestSuite) Cleanup() {
 	t.t.Log("Cleaning up...")
 
-	err := t.deleteBuckets()
+	err := t.clusterBucket.Delete()
+	failOnError(t.g, err)
+
+	err = t.deleteBuckets()
 	failOnError(t.g, err)
 
 	err = t.namespace.Delete()
@@ -154,24 +195,6 @@ func (t *TestSuite) Cleanup() {
 
 	err = deleteFiles(t.minioCli, t.uploadResult, t.t.Logf)
 	failOnError(t.g, err)
-}
-
-func (t *TestSuite) createBuckets(callbacks ...func(...interface{})) error {
-	err := t.bucket.Create()
-	if err != nil {
-		return err
-	}
-
-	err = t.clusterBucket.Create(callbacks...)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (t *TestSuite) systemBucketNameFromUploadResult(result *upload.Response) string {
-	return result.UploadedFiles[0].Bucket
 }
 
 func (t *TestSuite) uploadTestFiles() (*upload.Response, error) {
@@ -187,48 +210,20 @@ func (t *TestSuite) uploadTestFiles() (*upload.Response, error) {
 	return uploadResult, nil
 }
 
-func (t *TestSuite) createAssets(uploadResult *upload.Response) error {
+func (t *TestSuite) createAssets(uploadResult *upload.Response) ([]string, error) {
 	t.assetDetails = convertToAssetResourceDetails(uploadResult, t.cfg.CommonAssetPrefix)
 
-	err := t.asset.CreateMany(t.assetDetails, t.t.Log)
+	resourceVersions, err := t.asset.CreateMany(t.assetDetails, t.t.Log)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = t.clusterAsset.CreateMany(t.assetDetails, t.t.Log)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
-}
-
-func (t *TestSuite) waitForAssetsReady() error {
-	err := t.asset.WaitForStatusesReady(t.assetDetails)
-	if err != nil {
-		return err
-	}
-
-	err = t.clusterAsset.WaitForStatusesReady(t.assetDetails)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (t *TestSuite) waitForAssetsDeleted() error {
-	err := t.asset.WaitForDeletedResources(t.assetDetails)
-	if err != nil {
-		return err
-	}
-
-	err = t.clusterAsset.WaitForDeletedResources(t.assetDetails)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return resourceVersions, nil
 }
 
 func (t *TestSuite) populateUploadedFiles() ([]uploadedFile, error) {
@@ -259,7 +254,6 @@ func (t *TestSuite) verifyUploadedFiles(files []uploadedFile) error {
 	if err != nil {
 		return errors.Wrap(err, "while verifying uploaded files")
 	}
-
 	return nil
 }
 
@@ -268,35 +262,6 @@ func (t *TestSuite) verifyDeletedFiles(files []uploadedFile) error {
 	if err != nil {
 		return errors.Wrap(err, "while verifying deleted files")
 	}
-
-	return nil
-}
-
-func (t *TestSuite) waitForBucketsReady() error {
-	err := t.bucket.WaitForStatusReady()
-	if err != nil {
-		return err
-	}
-
-	err = t.clusterBucket.WaitForStatusReady()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (t *TestSuite) deleteAssets(callbacks ...func(...interface{})) error {
-	err := t.asset.DeleteMany(t.assetDetails, callbacks...)
-	if err != nil {
-		return err
-	}
-
-	err = t.clusterAsset.DeleteMany(t.assetDetails)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -305,15 +270,32 @@ func (t *TestSuite) deleteBuckets() error {
 	if err != nil {
 		return err
 	}
-
-	err = t.clusterBucket.Delete()
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
 func failOnError(g *gomega.GomegaWithT, err error) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+}
+
+func isPhaseReady(name string) func(event watch.Event) (bool, error) {
+	return func(event watch.Event) (bool, error) {
+		if event.Type != watch.Modified {
+			return false, nil
+		}
+		u := event.Object.(*unstructured.Unstructured)
+		if u.GetName() != name {
+			return false, nil
+		}
+		var bucketLike struct {
+			Status struct {
+				Phase v1alpha2.BucketPhase
+			}
+		}
+		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &bucketLike)
+		if err != nil {
+			return false, err
+		}
+		phase := bucketLike.Status.Phase
+		return phase != v1alpha2.BucketReady, nil
+	}
 }

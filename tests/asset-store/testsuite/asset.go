@@ -1,6 +1,7 @@
 package testsuite
 
 import (
+	"k8s.io/client-go/dynamic"
 	"time"
 
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
@@ -11,7 +12,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
 )
 
 type asset struct {
@@ -34,7 +34,8 @@ func newAsset(dynamicCli dynamic.Interface, namespace string, bucketName string,
 	}
 }
 
-func (a *asset) CreateMany(assets []assetData, callbacks ...func(...interface{})) error {
+func (a *asset) CreateMany(assets []assetData, callbacks ...func(...interface{})) ([]string, error) {
+	var resourceVersions []string
 	for _, asset := range assets {
 		asset := &v1alpha2.Asset{
 			TypeMeta: metav1.TypeMeta{
@@ -57,17 +58,17 @@ func (a *asset) CreateMany(assets []assetData, callbacks ...func(...interface{})
 				},
 			},
 		}
-
-		err := a.resCli.Create(asset, callbacks...)
+		resourceVersion, err := a.resCli.Create(asset, callbacks...)
 		if err != nil {
-			return errors.Wrapf(err, "while creating Asset %s in namespace %s", asset.Name, a.Namespace)
+			return resourceVersions, errors.Wrapf(err, "while creating Asset %s in namespace %s", asset.Name, a.Namespace)
 		}
+		resourceVersions = append(resourceVersions, resourceVersion)
 	}
 
-	return nil
+	return resourceVersions, nil
 }
 
-func (a *asset) WaitForStatusesReady(assets []assetData) error {
+func (a *asset) WaitForStatusesReady(assets []assetData, resourceVersion string) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 		for _, asset := range assets {
 			res, err := a.Get(asset.Name)
@@ -91,7 +92,6 @@ func (a *asset) WaitForStatusesReady(assets []assetData) error {
 
 func (a *asset) WaitForDeletedResources(assets []assetData) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
-
 		for _, asset := range assets {
 			_, err := a.Get(asset.Name)
 			if err == nil {

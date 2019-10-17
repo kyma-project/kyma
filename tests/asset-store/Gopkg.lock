@@ -476,7 +476,7 @@
   version = "kubernetes-1.16.1"
 
 [[projects]]
-  digest = "1:3d6d01092c9848db745b201dc89ffe9589dd0ebe5f123a22ab36eff2bd49cb87"
+  digest = "1:db4edf98411f6cdd259904f0d12905f0b3f7b63f4567e273606d3acf2430c070"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -627,6 +627,7 @@
     "tools/metrics",
     "tools/pager",
     "tools/reference",
+    "tools/watch",
     "transport",
     "util/cert",
     "util/connrotation",
@@ -700,7 +701,9 @@
     "k8s.io/client-go/dynamic/dynamicinformer",
     "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/rest",
+    "k8s.io/client-go/tools/cache",
     "k8s.io/client-go/tools/clientcmd",
+    "k8s.io/client-go/tools/watch",
     "k8s.io/client-go/util/retry",
   ]
   solver-name = "gps-cdcl"

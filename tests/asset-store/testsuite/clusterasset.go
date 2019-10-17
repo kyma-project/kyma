@@ -54,8 +54,8 @@ func (a *clusterAsset) CreateMany(assets []assetData, callbacks ...func(...inter
 				},
 			},
 		}
-
-		err := a.resCli.Create(asset, callbacks...)
+		//FIXME Handle this
+		_, err := a.resCli.Create(asset, callbacks...)
 		if err != nil {
 			return errors.Wrapf(err, "while creating ClusterAsset %s", asset.Name)
 		}
@@ -66,7 +66,6 @@ func (a *clusterAsset) CreateMany(assets []assetData, callbacks ...func(...inter
 
 func (a *clusterAsset) WaitForStatusesReady(assets []assetData) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
-
 		for _, asset := range assets {
 			res, err := a.Get(asset.Name)
 			if err != nil {
