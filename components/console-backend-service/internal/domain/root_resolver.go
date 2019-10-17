@@ -403,6 +403,10 @@ func (r *mutationResolver) CreateFunction(ctx context.Context, name string, name
 	return r.serverless.Resolver.CreateFunction(ctx, name, namespace, labels, size, runtime)
 }
 
+func (r *mutationResolver) UpdateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionUpdateInput) (gqlschema.Function, error) {
+	return r.serverless.Resolver.UpdateFunction(ctx, name, namespace, params)
+}
+
 // Queries
 
 type queryResolver struct {

@@ -328,6 +328,14 @@ type FunctionMutationOutput struct {
 	Namespace string `json:"namespace"`
 }
 
+type FunctionUpdateInput struct {
+	Labels       Labels `json:"labels"`
+	Size         string `json:"size"`
+	Runtime      string `json:"runtime"`
+	Content      string `json:"content"`
+	Dependencies string `json:"dependencies"`
+}
+
 type IDPPreset struct {
 	Name    string `json:"name"`
 	Issuer  string `json:"issuer"`

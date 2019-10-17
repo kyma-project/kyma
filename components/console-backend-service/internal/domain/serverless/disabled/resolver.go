@@ -50,3 +50,12 @@ func (_m *Resolver) FunctionsQuery(ctx context.Context, namespace string) ([]gql
 
 	return r0, r1
 }
+
+// UpdateFunction provides a failing mock function with given fields: ctx, name, namespace, params
+func (_m *Resolver) UpdateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionUpdateInput) (gqlschema.Function, error) {
+	var r0 gqlschema.Function
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}

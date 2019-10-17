@@ -925,6 +925,14 @@ type FunctionMutationOutput {
     namespace: String!
 }
 
+input FunctionUpdateInput {
+    labels: Labels!
+    size: String!
+    runtime: String!
+    content: String!
+    dependencies: String!
+}
+
 # Queries
 
 type Query {
@@ -1066,8 +1074,10 @@ type Mutation {
     deleteAPI(name: String!, namespace: String!): API @HasAccess(attributes: {resource: "apis", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
 
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1"})
+
     deleteFunction(name: String!, namespace: String!): FunctionMutationOutput! @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
     createFunction(name: String!, namespace: String!, labels: Labels!, size: String!, runtime: String!): Function! @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+    updateFunction(name: String!, namespace: String!, params: FunctionUpdateInput!): Function! @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
 }
 
 # Subscriptions

@@ -46,6 +46,18 @@ func (r *resolver) CreateFunction(ctx context.Context, name string, namespace st
 	return *function, nil
 }
 
+func (r *resolver) UpdateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionUpdateInput) (gqlschema.Function, error) {
+	item, err := r.functionService.Update(name, namespace, params)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while editing %s `%s`", pretty.Function, name))
+		return gqlschema.Function{}, gqlerror.New(err, pretty.Function, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	function := convert.FunctionToGQL(item)
+
+	return *function, nil
+}
+
 func (r *resolver) DeleteFunction(ctx context.Context, name string, namespace string) (gqlschema.FunctionMutationOutput, error) {
 	err := r.functionService.Delete(name, namespace)
 	if err != nil {
