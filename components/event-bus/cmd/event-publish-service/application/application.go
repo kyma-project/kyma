@@ -1,16 +1,10 @@
 package application
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
 	"net/http"
-	"reflect"
 
 	cloudevents "github.com/cloudevents/sdk-go"
 
-	cloudeventstransport "github.com/cloudevents/sdk-go/pkg/cloudevents/transport"
-	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/handlers"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
 	constants "github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/util"
@@ -85,60 +79,18 @@ func (app *KnativePublishApplication) registerPublishV1Handler() {
 }
 
 func (app *KnativePublishApplication) registerPublishV2Handler() {
+
 	t, err := cloudevents.NewHTTPTransport()
 	// TODO(nachtmaar):
 	if err != nil {
 		return
 	}
-	//TODO: set the logic here
-	t.SetReceiver(cloudeventstransport.ReceiveFunc(app.HandleEvent))
+	handler := handlers.CloudEventHandler{
+		KnativePublisher: app.knativePublisher,
+		KnativeLib:       app.knativeLib,
+		Transport:        t,
+	}
 
-	requestSizeLimitHandler := handlers.WithRequestSizeLimiting(t.ServeHTTP, app.options.MaxRequestSize)
+	requestSizeLimitHandler := handlers.WithRequestSizeLimiting(handler.ServeHTTP, app.options.MaxRequestSize)
 	app.serveMux.HandleFunc(APIV2, requestSizeLimitHandler)
-}
-
-// Receive finally handles the decoded event
-func (app *KnativePublishApplication) HandleEvent(ctx context.Context, event cloudevents.Event, eventResponse *cloudevents.EventResponse) error {
-	codec := cloudeventshttp.CodecV03{
-		DefaultEncoding: cloudeventshttp.StructuredV03,
-	}
-
-	m, err := codec.Encode(ctx, event)
-	if err != nil {
-		return err
-	}
-
-	message, ok := m.(*cloudeventshttp.Message)
-	if !ok {
-		return fmt.Errorf("expected type http message, but got type: %v", reflect.TypeOf(m))
-	}
-
-	fmt.Printf("%v", message)
-
-	etv, err := event.Context.GetExtension("event-type-version")
-
-	var etvstring string
-
-	if rawmessage, ok := etv.(json.RawMessage); ok {
-
-		err := json.Unmarshal(rawmessage, &etvstring)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	if err != nil {
-		return err
-	}
-	ns := knative.GetDefaultChannelNamespace()
-	header := map[string][]string(message.Header)
-
-	publishError, namespace, channelname := (*app.knativePublisher).Publish(app.knativeLib, &ns, &header, &message.Body, event.Source(), event.Type(), etvstring)
-	fmt.Printf("%+v\n\n%+v\n\n%+v\n\n", publishError, namespace, channelname)
-
-	b, err := json.Marshal(publishError)
-	if err != nil {
-		return err
-	}
-	return fmt.Errorf("%s", b)
 }
