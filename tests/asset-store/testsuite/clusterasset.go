@@ -57,7 +57,7 @@ func (a *clusterAsset) CreateMany(assets []assetData, testId string, callbacks .
 				},
 			},
 		}
-		//FIXME Handle this
+		//FIXME Handle this | not
 		_, err := a.resCli.Create(asset, callbacks...)
 		if err != nil {
 			return errors.Wrapf(err, "while creating ClusterAsset %s", asset.Name)
@@ -67,26 +67,16 @@ func (a *clusterAsset) CreateMany(assets []assetData, testId string, callbacks .
 	return nil
 }
 
-func (a *clusterAsset) WaitForStatusesReady(assets []assetData) error {
-	//FIXME
-	err := waiter.WaitAtMost(func() (bool, error) {
-		for _, asset := range assets {
-			res, err := a.Get(asset.Name)
-			if err != nil {
-				return false, err
-			}
-
-			if res.Status.Phase != v1alpha2.AssetReady {
-				return false, nil
-			}
-		}
-
-		return true, nil
-	}, a.waitTimeout)
-	if err != nil {
-		return errors.Wrapf(err, "while waiting for ready ClusterAsset resources")
+func (a *clusterAsset) WaitForStatusesReady(assets []assetData, initialResourceVersion string) error {
+	var assetNames []string
+	for _, asset := range assets {
+		assetNames = append(assetNames, asset.Name)
 	}
-
+	waitForStatusesReady := buildWaitForStatusesReady(a.resCli.ResCli, a.waitTimeout, assetNames...)
+	err := waitForStatusesReady(initialResourceVersion)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for ready Asset resources")
+	}
 	return nil
 }
 

@@ -35,8 +35,8 @@ func newAsset(dynamicCli dynamic.Interface, namespace string, bucketName string,
 	}
 }
 
-func (a *asset) CreateMany(assets []assetData, testId string, callbacks ...func(...interface{})) ([]string, error) {
-	var resourceVersions []string
+func (a *asset) CreateMany(assets []assetData, testId string, callbacks ...func(...interface{})) (string, error) {
+	var initialResourceVersion string
 	for _, asset := range assets {
 		asset := &v1alpha2.Asset{
 			TypeMeta: metav1.TypeMeta{
@@ -67,14 +67,17 @@ func (a *asset) CreateMany(assets []assetData, testId string, callbacks ...func(
 			if err != nil {
 				return err
 			}
-			resourceVersions = append(resourceVersions, resourceVersion)
+			if initialResourceVersion != "" {
+				return nil
+			}
+			initialResourceVersion = resourceVersion
 			return nil
 		}, callbacks...)
 		if err != nil {
-			return nil, errors.Wrapf(err, "while creating Asset %s in namespace %s", asset.Name, a.Namespace)
+			return initialResourceVersion, errors.Wrapf(err, "while creating Asset %s in namespace %s", asset.Name, a.Namespace)
 		}
 	}
-	return resourceVersions, nil
+	return initialResourceVersion, nil
 }
 
 func (a *asset) WaitForStatusesReady(assets []assetData, resourceVersion string) error {

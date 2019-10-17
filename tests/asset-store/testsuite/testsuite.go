@@ -134,17 +134,17 @@ func (t *TestSuite) Run() {
 	err = t.clusterAsset.DeleteLeftovers(t.testId)
 	failOnError(t.g, err)
 
+	// FIXME break to 2 different methods due to resourceVersion
 	t.t.Log("Creating assets...")
-	var assetVersions []string
-	assetVersions, err = t.createAssets(uploadResult)
+	resourceVersion, err = t.createAssets(uploadResult)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for assets to have ready phase...")
-	err = t.asset.WaitForStatusesReady(t.assetDetails, assetVersions[0])
+	err = t.asset.WaitForStatusesReady(t.assetDetails, resourceVersion)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for cluster assets to have ready phase...")
-	err = t.clusterAsset.WaitForStatusesReady(t.assetDetails)
+	err = t.clusterAsset.WaitForStatusesReady(t.assetDetails, resourceVersion)
 	failOnError(t.g, err)
 
 	files, err := t.populateUploadedFiles()
@@ -172,7 +172,7 @@ func (t *TestSuite) Cleanup() {
 	err := t.clusterBucket.Delete()
 	failOnError(t.g, err)
 
-	err = t.deleteBuckets()
+	err = t.bucket.Delete()
 	failOnError(t.g, err)
 
 	err = t.namespace.Delete()
@@ -195,20 +195,20 @@ func (t *TestSuite) uploadTestFiles() (*upload.Response, error) {
 	return uploadResult, nil
 }
 
-func (t *TestSuite) createAssets(uploadResult *upload.Response) ([]string, error) {
+func (t *TestSuite) createAssets(uploadResult *upload.Response) (string, error) {
 	t.assetDetails = convertToAssetResourceDetails(uploadResult, t.cfg.CommonAssetPrefix)
 
-	resourceVersions, err := t.asset.CreateMany(t.assetDetails, t.testId, t.t.Log)
+	assetVersion, err := t.asset.CreateMany(t.assetDetails, t.testId, t.t.Log)
 	if err != nil {
-		return nil, err
+		return assetVersion, err
 	}
 
 	err = t.clusterAsset.CreateMany(t.assetDetails, t.testId, t.t.Log)
 	if err != nil {
-		return nil, err
+		return assetVersion, err
 	}
 
-	return resourceVersions, nil
+	return assetVersion, nil
 }
 
 func (t *TestSuite) populateUploadedFiles() ([]uploadedFile, error) {
@@ -246,14 +246,6 @@ func (t *TestSuite) verifyDeletedFiles(files []uploadedFile) error {
 	err := verifyDeletedAssets(files, t.t.Logf)
 	if err != nil {
 		return errors.Wrap(err, "while verifying deleted files")
-	}
-	return nil
-}
-
-func (t *TestSuite) deleteBuckets() error {
-	err := t.bucket.Delete()
-	if err != nil {
-		return err
 	}
 	return nil
 }
