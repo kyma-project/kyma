@@ -2,12 +2,14 @@ package util
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"reflect"
 	"regexp"
 	"sync"
 	"time"
@@ -64,6 +66,7 @@ return
 const (
 	generateNameSuffix         = "-"
 	maxChannelNamePrefixLength = 10
+	informerSyncTimeout        = time.Second * 5
 )
 
 var once sync.Once
@@ -157,9 +160,47 @@ func GetKnativeLib() (*KnativeLib, error) {
 	// TODO(antoineco): handle termination via k8s lifecycle events
 	stop := make(chan struct{})
 	factory.Start(stop)
-	factory.WaitForCacheSync(stop)
+	waitForInformersSyncOrDie(factory)
 
 	return k, nil
+}
+
+// waitForInformersSyncOrDie blocks until all informer caches are synced, or panics after a timeout.
+func waitForInformersSyncOrDie(f evinformers.SharedInformerFactory) {
+	ctx, cancel := context.WithTimeout(context.Background(), informerSyncTimeout)
+	defer cancel()
+
+	err := hasSynced(ctx, f.WaitForCacheSync)
+	if err != nil {
+		log.Fatalf("Error waiting for caches sync: %s", err)
+	}
+}
+
+type waitForCacheSyncFunc func(stopCh <-chan struct{}) map[reflect.Type]bool
+
+// hasSynced blocks until the given informer sync waiting function completes. It returns an error if the passed context
+// gets canceled.
+func hasSynced(ctx context.Context, fn waitForCacheSyncFunc) error {
+	// synced gets closed as soon as fn returns
+	synced := make(chan struct{})
+
+	// closing stopWait forces fn to return, which happens whenever ctx
+	// gets canceled
+	stopWait := make(chan struct{})
+	defer close(stopWait)
+
+	go func() {
+		fn(stopWait)
+		close(synced)
+	}()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-synced:
+	}
+
+	return nil
 }
 
 // GetChannelByLabels return a knative channel fetched via label selectors
