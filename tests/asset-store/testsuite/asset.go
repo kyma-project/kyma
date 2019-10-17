@@ -1,9 +1,9 @@
 package testsuite
 
 import (
-	"github.com/kyma-project/kyma/tests/asset-store/pkg/retry"
-	"k8s.io/client-go/dynamic"
 	"time"
+
+	"k8s.io/client-go/dynamic"
 
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
@@ -35,7 +35,7 @@ func newAsset(dynamicCli dynamic.Interface, namespace string, bucketName string,
 	}
 }
 
-func (a *asset) CreateMany(assets []assetData, testId string, callbacks ...func(...interface{})) (string, error) {
+func (a *asset) CreateMany(assets []assetData, testID string, callbacks ...func(...interface{})) (string, error) {
 	var initialResourceVersion string
 	for _, asset := range assets {
 		asset := &v1alpha2.Asset{
@@ -47,7 +47,7 @@ func (a *asset) CreateMany(assets []assetData, testId string, callbacks ...func(
 				Name:      asset.Name,
 				Namespace: a.Namespace,
 				Labels: map[string]string{
-					"test-id": testId,
+					"test-id": testID,
 				},
 			},
 			Spec: v1alpha2.AssetSpec{
@@ -62,21 +62,14 @@ func (a *asset) CreateMany(assets []assetData, testId string, callbacks ...func(
 				},
 			},
 		}
-		//TODO check if it is needed
-		err := retry.OnCreateError(retry.DefaultBackoff, func() error {
-			resourceVersion, err := a.resCli.Create(asset, callbacks...)
-			if err != nil {
-				return err
-			}
-			if initialResourceVersion != "" {
-				return nil
-			}
-			initialResourceVersion = resourceVersion
-			return nil
-		}, callbacks...)
+		resourceVersion, err := a.resCli.Create(asset, callbacks...)
 		if err != nil {
 			return initialResourceVersion, errors.Wrapf(err, "while creating Asset %s in namespace %s", asset.Name, a.Namespace)
 		}
+		if initialResourceVersion != "" {
+			continue
+		}
+		initialResourceVersion = resourceVersion
 	}
 	return initialResourceVersion, nil
 }
@@ -94,6 +87,7 @@ func (a *asset) WaitForStatusesReady(assets []assetData, resourceVersion string)
 	return nil
 }
 
+//FIXME to delete
 func (a *asset) WaitForDeletedResources(assets []assetData) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 		for _, asset := range assets {
@@ -119,12 +113,10 @@ func (a *asset) PopulateUploadFiles(assets []assetData) ([]uploadedFile, error) 
 	var files []uploadedFile
 
 	for _, asset := range assets {
-		// FIXME
 		res, err := a.Get(asset.Name)
 		if err != nil {
 			return nil, err
 		}
-
 		assetFiles := uploadedFiles(res.Status.CommonAssetStatus.AssetRef, res.Name, "Asset")
 		files = append(files, assetFiles...)
 	}
@@ -157,6 +149,7 @@ func (a *asset) DeleteLeftovers(testId string, callbacks ...func(...interface{})
 	return err
 }
 
+//FIXME to delete
 func (a *asset) DeleteMany(assets []assetData, callbacks ...func(...interface{})) error {
 	for _, asset := range assets {
 		err := a.resCli.Delete(asset.Name, callbacks...)

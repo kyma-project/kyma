@@ -32,7 +32,7 @@ func newClusterAsset(dynamicCli dynamic.Interface, clusterBucketName string, wai
 	}
 }
 
-func (a *clusterAsset) CreateMany(assets []assetData, testId string, callbacks ...func(...interface{})) (string, error) {
+func (a *clusterAsset) CreateMany(assets []assetData, testID string, callbacks ...func(...interface{})) (string, error) {
 	initialResourceVersion := ""
 	for _, asset := range assets {
 		asset := &v1alpha2.ClusterAsset{
@@ -43,7 +43,7 @@ func (a *clusterAsset) CreateMany(assets []assetData, testId string, callbacks .
 			ObjectMeta: metav1.ObjectMeta{
 				Name: asset.Name,
 				Labels: map[string]string{
-					"test-id": testId,
+					"test-id": testID,
 				},
 			},
 			Spec: v1alpha2.ClusterAssetSpec{
@@ -58,7 +58,6 @@ func (a *clusterAsset) CreateMany(assets []assetData, testId string, callbacks .
 				},
 			},
 		}
-		// TODO check if it is needed
 		resourceVersion, err := a.resCli.Create(asset, callbacks...)
 		if err != nil {
 			return initialResourceVersion, errors.Wrapf(err, "while creating ClusterAsset %s", asset.Name)
@@ -112,7 +111,6 @@ func (a *clusterAsset) PopulateUploadFiles(assets []assetData) ([]uploadedFile, 
 	var files []uploadedFile
 
 	for _, asset := range assets {
-		// FIXME
 		res, err := a.Get(asset.Name)
 		if err != nil {
 			return nil, err

@@ -1,7 +1,7 @@
 package resource
 
 import (
-	. "github.com/kyma-project/kyma/tests/asset-store/pkg/retry"
+	"github.com/kyma-project/kyma/tests/asset-store/pkg/retry"
 	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -9,7 +9,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/util/retry"
 )
 
 type Resource struct {
@@ -34,7 +33,7 @@ func (r *Resource) Create(res interface{}, callbacks ...func(...interface{})) (s
 	unstructuredObj := &unstructured.Unstructured{
 		Object: u,
 	}
-	err = OnCreateError(retry.DefaultBackoff, func() error {
+	err = retry.OnCreateError(retry.DefaultBackoff, func() error {
 		var resource *unstructured.Unstructured
 		resource, err = r.ResCli.Create(unstructuredObj, metav1.CreateOptions{})
 		if err != nil {
@@ -49,19 +48,24 @@ func (r *Resource) Create(res interface{}, callbacks ...func(...interface{})) (s
 	return resourceVersion, nil
 }
 
-func (r *Resource) Get(name string) (*unstructured.Unstructured, error) {
-	u, err := r.ResCli.Get(name, metav1.GetOptions{})
+func (r *Resource) Get(name string, callbacks ...func(...interface{})) (*unstructured.Unstructured, error) {
+	var result *unstructured.Unstructured
+	err := retry.OnGetError(retry.DefaultBackoff, func() error {
+		var err error
+		result, err = r.ResCli.Get(name, metav1.GetOptions{})
+		return err
+	}, callbacks...)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			return nil, err
 		}
 		return nil, errors.Wrapf(err, "while getting resource %s '%s'", r.kind, name)
 	}
-	return u, nil
+	return result, nil
 }
 
 func (r *Resource) Delete(name string, callbacks ...func(...interface{})) error {
-	err := OnDeleteError(retry.DefaultBackoff, func() error {
+	err := retry.OnDeleteError(retry.DefaultBackoff, func() error {
 		return r.ResCli.Delete(name, &metav1.DeleteOptions{})
 	}, callbacks...)
 	if err != nil {

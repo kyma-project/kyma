@@ -7,10 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/watch"
-
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/upload"
 	"github.com/minio/minio-go"
 	"k8s.io/client-go/dynamic"
@@ -97,7 +93,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 }
 
 func (t *TestSuite) Run() {
-	//fixme add log
+	t.t.Log("Creating namespace...")
 	err := t.namespace.Create(t.t.Log)
 	failOnError(t.g, err)
 
@@ -240,29 +236,4 @@ func (t *TestSuite) verifyDeletedFiles(files []uploadedFile) error {
 
 func failOnError(g *gomega.GomegaWithT, err error) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-}
-
-var ready = "Ready"
-
-func isPhaseReady(name string) func(event watch.Event) (bool, error) {
-	return func(event watch.Event) (bool, error) {
-		if event.Type != watch.Modified {
-			return false, nil
-		}
-		u := event.Object.(*unstructured.Unstructured)
-		if u.GetName() != name {
-			return false, nil
-		}
-		var bucketLike struct {
-			Status struct {
-				Phase string
-			}
-		}
-		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &bucketLike)
-		if err != nil {
-			return false, err
-		}
-		phase := bucketLike.Status.Phase
-		return phase != ready, nil
-	}
 }

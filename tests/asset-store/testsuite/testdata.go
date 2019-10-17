@@ -36,7 +36,6 @@ func (u *testData) Upload() (*upload.Response, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "while loading files to upload")
 	}
-	//FIXME ?
 	resp, err := upload.Do("", upload.UploadInput{
 		PrivateFiles: nil,
 		PublicFiles:  publicFiles,

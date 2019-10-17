@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic"
 	watchtools "k8s.io/client-go/tools/watch"
@@ -90,5 +91,30 @@ func buildDeleteLeftovers(iRsc dynamic.ResourceInterface, timeout time.Duration)
 			return errors.Wrapf(err, "while deleting resource leftovers with label selector %s", labelSelector)
 		}
 		return nil
+	}
+}
+
+var ready = "Ready"
+
+func isPhaseReady(name string) func(event watch.Event) (bool, error) {
+	return func(event watch.Event) (bool, error) {
+		if event.Type != watch.Modified {
+			return false, nil
+		}
+		u := event.Object.(*unstructured.Unstructured)
+		if u.GetName() != name {
+			return false, nil
+		}
+		var bucketLike struct {
+			Status struct {
+				Phase string
+			}
+		}
+		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &bucketLike)
+		if err != nil {
+			return false, err
+		}
+		phase := bucketLike.Status.Phase
+		return phase != ready, nil
 	}
 }
