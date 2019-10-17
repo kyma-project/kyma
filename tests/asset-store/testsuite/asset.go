@@ -7,7 +7,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
-	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
 	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -87,28 +86,6 @@ func (a *asset) WaitForStatusesReady(assets []assetData, resourceVersion string)
 	return nil
 }
 
-//FIXME to delete
-func (a *asset) WaitForDeletedResources(assets []assetData) error {
-	err := waiter.WaitAtMost(func() (bool, error) {
-		for _, asset := range assets {
-			_, err := a.Get(asset.Name)
-			if err == nil {
-				return false, nil
-			}
-
-			if !apierrors.IsNotFound(err) {
-				return false, nil
-			}
-		}
-
-		return true, nil
-	}, a.waitTimeout)
-	if err != nil {
-		return errors.Wrapf(err, "while deleting Asset resources %s in namespace %s")
-	}
-	return nil
-}
-
 func (a *asset) PopulateUploadFiles(assets []assetData) ([]uploadedFile, error) {
 	var files []uploadedFile
 
@@ -147,16 +124,4 @@ func (a *asset) DeleteLeftovers(testId string, callbacks ...func(...interface{})
 	deleteLeftovers := buildDeleteLeftovers(a.resCli.ResCli, a.waitTimeout)
 	err := deleteLeftovers(testId, callbacks...)
 	return err
-}
-
-//FIXME to delete
-func (a *asset) DeleteMany(assets []assetData, callbacks ...func(...interface{})) error {
-	for _, asset := range assets {
-		err := a.resCli.Delete(asset.Name, callbacks...)
-		if err != nil {
-			return errors.Wrapf(err, "while deleting Asset %s in namespace %s", asset.Name, a.Namespace)
-		}
-	}
-
-	return nil
 }

@@ -15,7 +15,7 @@ var (
 	errTest1 = errors.New("errorTest1")
 )
 
-func Test_errorFuncWithIgnore(t *testing.T) {
+func Test_fnWithIgnore(t *testing.T) {
 	tests := []struct {
 		fn       func() error
 		ignoreFn func(error) bool
@@ -48,7 +48,7 @@ func Test_errorFuncWithIgnore(t *testing.T) {
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("test%d", i), func(t *testing.T) {
 			g := NewGomegaWithT(t)
-			actualErr := errorFuncWithIgnore(test.fn, test.ignoreFn)()
+			actualErr := fnWithIgnore(test.fn, test.ignoreFn)()
 			switch {
 			case test.expected == nil:
 				g.Expect(actualErr).To(BeNil())
@@ -59,10 +59,10 @@ func Test_errorFuncWithIgnore(t *testing.T) {
 	}
 }
 
-func Test_errorFuncWithIgnore_callback(t *testing.T) {
+func Test_fnWithIgnore_callback(t *testing.T) {
 	g := NewGomegaWithT(t)
 	actual := false
-	errorFuncWithIgnore(func() error {
+	_ = fnWithIgnore(func() error {
 		return errTest1
 	}, func(err error) bool {
 		return true
@@ -72,7 +72,7 @@ func Test_errorFuncWithIgnore_callback(t *testing.T) {
 	g.Expect(actual).To(Equal(true))
 }
 
-func Test_shouldRetry(t *testing.T) {
+func Test_errorFn(t *testing.T) {
 	tests := []struct {
 		err      error
 		expected bool
@@ -101,7 +101,7 @@ func Test_shouldRetry(t *testing.T) {
 		},
 	}
 	for i, test := range tests {
-		retry := shouldRetry()
+		retry := errorFn()
 		t.Run(fmt.Sprintf("test%d", i), func(t *testing.T) {
 			g := NewGomegaWithT(t)
 			actual := retry(test.err)
@@ -110,12 +110,12 @@ func Test_shouldRetry(t *testing.T) {
 	}
 }
 
-func Test_shouldRetr_callback(t *testing.T) {
+func Test_errorFn_callback(t *testing.T) {
 	g := NewGomegaWithT(t)
 	var actual string
 	cbk := func(data ...interface{}) {
 		actual = data[0].(string)
 	}
-	shouldRetry(cbk)(apierrors.NewTimeoutError("test timeout error", 10))
+	errorFn(cbk)(apierrors.NewTimeoutError("test timeout error", 10))
 	g.Expect(actual).To(Equal("retrying due to: Timeout: test timeout error"))
 }
