@@ -12,4 +12,4 @@ oathkeeper:
     claims: "{\"scopes\": \"{{ print .Extra.scope }}\", \"tenant\": \"{{ print .Extra.tenant }}\"}"
 
 gateway:
-  enabled: true
+  enabled: false
