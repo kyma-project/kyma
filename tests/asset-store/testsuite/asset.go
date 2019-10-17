@@ -62,6 +62,7 @@ func (a *asset) CreateMany(assets []assetData, testId string, callbacks ...func(
 				},
 			},
 		}
+		//TODO check if it is needed
 		err := retry.OnCreateError(retry.DefaultBackoff, func() error {
 			resourceVersion, err := a.resCli.Create(asset, callbacks...)
 			if err != nil {
@@ -118,6 +119,7 @@ func (a *asset) PopulateUploadFiles(assets []assetData) ([]uploadedFile, error) 
 	var files []uploadedFile
 
 	for _, asset := range assets {
+		// FIXME
 		res, err := a.Get(asset.Name)
 		if err != nil {
 			return nil, err

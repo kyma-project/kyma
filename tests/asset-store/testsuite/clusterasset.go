@@ -32,7 +32,8 @@ func newClusterAsset(dynamicCli dynamic.Interface, clusterBucketName string, wai
 	}
 }
 
-func (a *clusterAsset) CreateMany(assets []assetData, testId string, callbacks ...func(...interface{})) error {
+func (a *clusterAsset) CreateMany(assets []assetData, testId string, callbacks ...func(...interface{})) (string, error) {
+	initialResourceVersion := ""
 	for _, asset := range assets {
 		asset := &v1alpha2.ClusterAsset{
 			TypeMeta: metav1.TypeMeta{
@@ -57,14 +58,17 @@ func (a *clusterAsset) CreateMany(assets []assetData, testId string, callbacks .
 				},
 			},
 		}
-		//FIXME Handle this | not
-		_, err := a.resCli.Create(asset, callbacks...)
+		// TODO check if it is needed
+		resourceVersion, err := a.resCli.Create(asset, callbacks...)
 		if err != nil {
-			return errors.Wrapf(err, "while creating ClusterAsset %s", asset.Name)
+			return initialResourceVersion, errors.Wrapf(err, "while creating ClusterAsset %s", asset.Name)
 		}
+		if initialResourceVersion != "" {
+			continue
+		}
+		initialResourceVersion = resourceVersion
 	}
-
-	return nil
+	return initialResourceVersion, nil
 }
 
 func (a *clusterAsset) WaitForStatusesReady(assets []assetData, initialResourceVersion string) error {
@@ -108,6 +112,7 @@ func (a *clusterAsset) PopulateUploadFiles(assets []assetData) ([]uploadedFile, 
 	var files []uploadedFile
 
 	for _, asset := range assets {
+		// FIXME
 		res, err := a.Get(asset.Name)
 		if err != nil {
 			return nil, err

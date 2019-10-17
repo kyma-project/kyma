@@ -61,7 +61,7 @@ func (r *Resource) Get(name string) (*unstructured.Unstructured, error) {
 }
 
 func (r *Resource) Delete(name string, callbacks ...func(...interface{})) error {
-	err := OnCreateError(retry.DefaultBackoff, func() error {
+	err := OnDeleteError(retry.DefaultBackoff, func() error {
 		return r.ResCli.Delete(name, &metav1.DeleteOptions{})
 	}, callbacks...)
 	if err != nil {

@@ -97,6 +97,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 }
 
 func (t *TestSuite) Run() {
+	//fixme add log
 	err := t.namespace.Create(t.t.Log)
 	failOnError(t.g, err)
 
@@ -104,7 +105,7 @@ func (t *TestSuite) Run() {
 	var resourceVersion string
 	resourceVersion, err = t.clusterBucket.Create(t.t.Log)
 	failOnError(t.g, err)
-	// wait for Ready status if resource does not exist
+	// skip if resource already exists
 	if "" != resourceVersion {
 		t.t.Log("Waiting for cluster bucket to have ready phase...")
 		err = t.clusterBucket.WaitForStatusReady(resourceVersion)
@@ -114,7 +115,7 @@ func (t *TestSuite) Run() {
 	t.t.Log("Creating bucket...")
 	resourceVersion, err = t.bucket.Create(t.t.Log)
 	failOnError(t.g, err)
-	// wait for Ready status if resource does not exist
+	// skip if resource already exists
 	if resourceVersion != "" {
 		t.t.Log("Waiting for bucket to have ready phase...")
 		err = t.bucket.WaitForStatusReady(resourceVersion)
@@ -134,15 +135,18 @@ func (t *TestSuite) Run() {
 	err = t.clusterAsset.DeleteLeftovers(t.testId)
 	failOnError(t.g, err)
 
-	// FIXME break to 2 different methods due to resourceVersion
-	t.t.Log("Creating assets...")
-	resourceVersion, err = t.createAssets(uploadResult)
-	failOnError(t.g, err)
+	t.assetDetails = convertToAssetResourceDetails(uploadResult, t.cfg.CommonAssetPrefix)
 
+	t.t.Log("Creating assets...")
+	resourceVersion, err = t.asset.CreateMany(t.assetDetails, t.testId, t.t.Log)
+	failOnError(t.g, err)
 	t.t.Log("Waiting for assets to have ready phase...")
 	err = t.asset.WaitForStatusesReady(t.assetDetails, resourceVersion)
 	failOnError(t.g, err)
 
+	t.t.Log("Creating cluster assets...")
+	resourceVersion, err = t.clusterAsset.CreateMany(t.assetDetails, t.testId, t.t.Log)
+	failOnError(t.g, err)
 	t.t.Log("Waiting for cluster assets to have ready phase...")
 	err = t.clusterAsset.WaitForStatusesReady(t.assetDetails, resourceVersion)
 	failOnError(t.g, err)
@@ -193,22 +197,6 @@ func (t *TestSuite) uploadTestFiles() (*upload.Response, error) {
 	}
 
 	return uploadResult, nil
-}
-
-func (t *TestSuite) createAssets(uploadResult *upload.Response) (string, error) {
-	t.assetDetails = convertToAssetResourceDetails(uploadResult, t.cfg.CommonAssetPrefix)
-
-	assetVersion, err := t.asset.CreateMany(t.assetDetails, t.testId, t.t.Log)
-	if err != nil {
-		return assetVersion, err
-	}
-
-	err = t.clusterAsset.CreateMany(t.assetDetails, t.testId, t.t.Log)
-	if err != nil {
-		return assetVersion, err
-	}
-
-	return assetVersion, nil
 }
 
 func (t *TestSuite) populateUploadedFiles() ([]uploadedFile, error) {
