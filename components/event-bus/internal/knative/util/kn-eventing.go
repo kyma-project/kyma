@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"k8s.io/client-go/tools/clientcmd"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -13,6 +12,8 @@ import (
 	"regexp"
 	"sync"
 	"time"
+
+	"k8s.io/client-go/tools/clientcmd"
 
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	messagingV1Alpha1 "github.com/knative/eventing/pkg/apis/messaging/v1alpha1"
@@ -188,6 +189,10 @@ func GetKnativeLib() (*KnativeLib, error) {
 func (k *KnativeLib) GetChannelByLabels(namespace string, labels map[string]string) (*messagingV1Alpha1.Channel, error) {
 	if labels == nil {
 		return nil, errors.New("no labels were passed to GetChannelByLabels()")
+	}
+	selector := k8slabels.SelectorFromSet(labels)
+	if selector.Empty() {
+		return nil, fmt.Errorf("could not create selector from %+v", labels)
 	}
 	channelList, err := k.chLister.Channels(namespace).List(k8slabels.SelectorFromSet(labels))
 	if err != nil {

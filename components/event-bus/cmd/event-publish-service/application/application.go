@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -116,13 +117,28 @@ func (app *KnativePublishApplication) HandleEvent(ctx context.Context, event clo
 
 	etv, err := event.Context.GetExtension("event-type-version")
 
+	var etvstring string
+
+	if rawmessage, ok := etv.(json.RawMessage); ok {
+
+		err := json.Unmarshal(rawmessage, &etvstring)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	if err != nil {
 		return err
 	}
 	ns := knative.GetDefaultChannelNamespace()
 	header := map[string][]string(message.Header)
-	publishError, namespace, channelname := (*app.knativePublisher).Publish(app.knativeLib, &ns, &header, &message.Body, event.Source(), event.Type(), etv.(string))
+
+	publishError, namespace, channelname := (*app.knativePublisher).Publish(app.knativeLib, &ns, &header, &message.Body, event.Source(), event.Type(), etvstring)
 	fmt.Printf("%+v\n\n%+v\n\n%+v\n\n", publishError, namespace, channelname)
 
-	return nil
+	b, err := json.Marshal(publishError)
+	if err != nil {
+		return err
+	}
+	return fmt.Errorf("%s", b)
 }
