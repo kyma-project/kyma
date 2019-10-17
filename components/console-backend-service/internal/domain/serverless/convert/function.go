@@ -23,12 +23,14 @@ func FunctionToGQL(item *v1alpha1.Function) *gqlschema.Function {
 	}
 
 	function := gqlschema.Function{
-		Name:      item.Name,
-		Namespace: item.Namespace,
-		Labels:    item.Labels,
-		Runtime:   item.Spec.Runtime,
-		Size:      item.Spec.Size,
-		Status:    getStatus(item.Status.Condition),
+		Name:         item.Name,
+		Namespace:    item.Namespace,
+		Labels:       item.Labels,
+		Runtime:      item.Spec.Runtime,
+		Size:         item.Spec.Size,
+		Status:       getStatus(item.Status.Condition),
+		Content:      item.Spec.Function,
+		Dependencies: item.Spec.Deps,
 	}
 
 	return &function

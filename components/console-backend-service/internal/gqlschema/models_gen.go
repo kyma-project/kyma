@@ -313,12 +313,14 @@ type File struct {
 }
 
 type Function struct {
-	Name      string             `json:"name"`
-	Namespace string             `json:"namespace"`
-	Labels    Labels             `json:"labels"`
-	Runtime   string             `json:"runtime"`
-	Size      string             `json:"size"`
-	Status    FunctionStatusType `json:"status"`
+	Name         string             `json:"name"`
+	Namespace    string             `json:"namespace"`
+	Labels       Labels             `json:"labels"`
+	Runtime      string             `json:"runtime"`
+	Size         string             `json:"size"`
+	Status       FunctionStatusType `json:"status"`
+	Content      string             `json:"content"`
+	Dependencies string             `json:"dependencies"`
 }
 
 type FunctionMutationOutput struct {

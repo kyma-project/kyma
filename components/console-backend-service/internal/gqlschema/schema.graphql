@@ -907,6 +907,8 @@ type Function {
 	runtime: String!
 	size: String!
 	status: FunctionStatusType!
+    content: String!
+    dependencies: String!
 }
 
 enum FunctionStatusType {

@@ -407,12 +407,14 @@ type ComplexityRoot struct {
 	}
 
 	Function struct {
-		Name      func(childComplexity int) int
-		Namespace func(childComplexity int) int
-		Labels    func(childComplexity int) int
-		Runtime   func(childComplexity int) int
-		Size      func(childComplexity int) int
-		Status    func(childComplexity int) int
+		Name         func(childComplexity int) int
+		Namespace    func(childComplexity int) int
+		Labels       func(childComplexity int) int
+		Runtime      func(childComplexity int) int
+		Size         func(childComplexity int) int
+		Status       func(childComplexity int) int
+		Content      func(childComplexity int) int
+		Dependencies func(childComplexity int) int
 	}
 
 	FunctionMutationOutput struct {
@@ -5947,6 +5949,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Function.Status(childComplexity), true
+
+	case "Function.content":
+		if e.complexity.Function.Content == nil {
+			break
+		}
+
+		return e.complexity.Function.Content(childComplexity), true
+
+	case "Function.dependencies":
+		if e.complexity.Function.Dependencies == nil {
+			break
+		}
+
+		return e.complexity.Function.Dependencies(childComplexity), true
 
 	case "FunctionMutationOutput.name":
 		if e.complexity.FunctionMutationOutput.Name == nil {
@@ -17050,6 +17066,16 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "content":
+			out.Values[i] = ec._Function_content(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "dependencies":
+			out.Values[i] = ec._Function_dependencies(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -17221,6 +17247,60 @@ func (ec *executionContext) _Function_status(ctx context.Context, field graphql.
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Function_content(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Function",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Content, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Function_dependencies(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Function",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Dependencies, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
 }
 
 var functionMutationOutputImplementors = []string{"FunctionMutationOutput"}
@@ -33690,6 +33770,8 @@ type Function {
 	runtime: String!
 	size: String!
 	status: FunctionStatusType!
+    content: String!
+    dependencies: String!
 }
 
 enum FunctionStatusType {
