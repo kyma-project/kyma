@@ -27,6 +27,58 @@ type APIInput struct {
 	AuthenticationEnabled      *bool  `json:"authenticationEnabled"`
 }
 
+type APIRule struct {
+	Name    string           `json:"name"`
+	Service APIRuleService   `json:"service"`
+	Gateway string           `json:"gateway"`
+	Rules   []Rule           `json:"rules"`
+	Status  *APIRuleStatuses `json:"status"`
+}
+
+type APIRuleAccessStrategy struct {
+	Handler string                       `json:"handler"`
+	Config  *APIRuleAccessStrategyConfig `json:"config"`
+}
+
+type APIRuleAccessStrategyConfig struct {
+	TrustedIssuers []string `json:"trustedIssuers"`
+	RequiredScope  []string `json:"requiredScope"`
+}
+
+type APIRuleInput struct {
+	Name        string `json:"name"`
+	Host        string `json:"host"`
+	ServiceName string `json:"serviceName"`
+	ServicePort int    `json:"servicePort"`
+	Gateway     string `json:"gateway"`
+}
+
+type APIRuleMutator struct {
+	Handler string                `json:"handler"`
+	Config  *APIRuleMutatorConfig `json:"config"`
+}
+
+type APIRuleMutatorConfig struct {
+	Name string `json:"name"`
+}
+
+type APIRuleService struct {
+	Host string `json:"host"`
+	Name string `json:"name"`
+	Port int    `json:"port"`
+}
+
+type APIRuleStatus struct {
+	Code string  `json:"code"`
+	Desc *string `json:"desc"`
+}
+
+type APIRuleStatuses struct {
+	APIRuleStatus        APIRuleStatus `json:"apiRuleStatus"`
+	AccessRuleStatus     APIRuleStatus `json:"accessRuleStatus"`
+	VirtualServiceStatus APIRuleStatus `json:"virtualServiceStatus"`
+}
+
 type AddonsConfiguration struct {
 	Name         string                          `json:"name"`
 	Urls         []string                        `json:"urls"`
@@ -72,6 +124,11 @@ type AddonsConfigurationStatusRepository struct {
 type ApiEvent struct {
 	Type SubscriptionEventType `json:"type"`
 	API  API                   `json:"api"`
+}
+
+type ApiRuleEvent struct {
+	Type SubscriptionEventType `json:"type"`
+	API  APIRule               `json:"api"`
 }
 
 type ApiService struct {
@@ -500,6 +557,13 @@ type ResourceValues struct {
 type ResourceValuesInput struct {
 	Memory *string `json:"memory"`
 	CPU    *string `json:"cpu"`
+}
+
+type Rule struct {
+	Path             string                  `json:"path"`
+	Methods          []string                `json:"methods"`
+	AccessStrategies []APIRuleAccessStrategy `json:"accessStrategies"`
+	Mutators         []APIRuleMutator        `json:"mutators"`
 }
 
 type Secret struct {
