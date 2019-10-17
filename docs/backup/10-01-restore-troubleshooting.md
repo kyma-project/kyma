@@ -21,7 +21,7 @@ kubectl label installation/kyma-installation action=install
 
 ## Eventing not working
 
-Check if all natsschannels are reporting status ready:
+Check if all NatssChannels are reporting as ready:
 
 ```bash
 kubectl get natsschannels.messaging.knative.dev -n kyma-system
