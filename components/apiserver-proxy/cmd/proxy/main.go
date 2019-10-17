@@ -233,7 +233,14 @@ func main() {
 		} else {
 			tn := TestNotifier{}
 			tn.Start()
-			krldr, err := NewReloadableTLSCertProvider(cfg.tls.certFile, cfg.tls.keyFile, &tn)
+
+			tlsConstructorFunc := func() (*tls.Certificate, error) {
+				glog.Infof("Loading TLS Certificate data from files: %s, %s", cfg.tls.certFile, cfg.tls.keyFile)
+				res, err := tls.LoadX509KeyPair(cfg.tls.certFile, cfg.tls.keyFile)
+				return &res, err
+			}
+
+			krldr, err := NewReloadableTLSCertProvider(tlsConstructorFunc, &tn)
 			if err != nil {
 				glog.Fatalf("Failed to create ReloadableTLSCertProvider: %v", err)
 			}
@@ -384,13 +391,6 @@ func (tn *TestNotifier) Start() {
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGHUP)
 		for range c {
-			/*
-				log.Printf("Received SIGHUP, reloading TLS certificate and key from %s and %s", certPath, keyPath)
-				if err := result.maybeReload(); err != nil {
-					log.Printf("Keeping old TLS certificate because the new one could not be loaded: %v", err)
-				}
-			*/
-
 			if tn.onEventFunc != nil {
 				tn.onEventFunc()
 			}
@@ -402,28 +402,34 @@ func (tn *TestNotifier) RegisterCallback(handler func()) {
 	tn.onEventFunc = handler
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 //ReloadNotifier is used to sent notifications about events requiring refreshing data
 type ReloadNotifier interface {
 	//Registers callback handler that is called when an event requiring refreshing data occurs
 	RegisterCallback(handler func())
 }
 
-type TLSCertCreator func() *tls.Certificate
+////////////////////////////////////////////////////////////////////////////////
 
+//TLSCertConstructor knows how to construct a tls.Certificate instance
+type TLSCertConstructor func() (*tls.Certificate, error)
+
+//ReloadableTLSCertProvider enables to create and re-create an instance of tls.Certificate in a thread-safe way.
+//It's GetCertificateFunc conforms to tls.Config.GetCertificate function type.
 type ReloadableTLSCertProvider struct {
-	holder   *TLSCrtKeyPairHolder
-	crtPath  string
-	keyPath  string
-	notifier ReloadNotifier
+	constructor TLSCertConstructor
+	holder      *TLSCrtKeyPairHolder
 }
 
-func NewReloadableTLSCertProvider(tlsCertCreator TLSCertCreator, notifier ReloadNotifier) (*ReloadableTLSCertProvider, error) {
+//NewReloadableTLSCertProvider creates a new instance of ReloadableTLSCertProvider.
+//notifier parameter allows to control when the instance is re-created from outside.
+//It's safe to trigger re-creation from other goroutines.
+func NewReloadableTLSCertProvider(constructor TLSCertConstructor, notifier ReloadNotifier) (*ReloadableTLSCertProvider, error) {
 
 	result := &ReloadableTLSCertProvider{
-		holder:   NewTLSCrtKeyPairHolder(),
-		crtPath:  crtPath,
-		keyPath:  keyPath,
-		notifier: notifier,
+		constructor: constructor,
+		holder:      NewTLSCrtKeyPairHolder(),
 	}
 
 	//Initial read
@@ -433,99 +439,135 @@ func NewReloadableTLSCertProvider(tlsCertCreator TLSCertCreator, notifier Reload
 	}
 
 	//Used by external notifier to trigger certificate reloads
-	reloadCertificateFunc := func() {
+	reloadFunc := func() {
 		err := result.reload()
 		if err != nil {
 			glog.Errorf("Failed to reload certificate: %v", err)
 		}
 	}
-	result.notifier.RegisterCallback(reloadCertificateFunc)
+	notifier.RegisterCallback(reloadFunc)
 
 	return result, nil
 }
 
-//reloads the certificate from configured input files
-//Note: It must NOT modify the existing certificate in case of errors!
+//reloads the internal instance using provided constructor function
+//Note: It must NOT modify the existing value in case of an error!
 func (ckpr *ReloadableTLSCertProvider) reload() error {
-	glog.Infof("Loading TLS Certificate data from files: %s, %s", ckpr.crtPath, ckpr.keyPath)
-	newCert, err := tls.LoadX509KeyPair(ckpr.crtPath, ckpr.keyPath)
+	newCert, err := ckpr.constructor()
 	if err != nil {
 		return err
 	}
-	ckpr.holder.Set(&newCert)
+	ckpr.holder.Set(newCert)
 	return nil
 }
 
-//GetCertificateFunc is used by tls.Server to get TLS Cert
+//GetCertificateFunc conforms to tls.Config.GetCertificate function type
 func (ckpr *ReloadableTLSCertProvider) GetCertificateFunc(*tls.ClientHelloInfo) (*tls.Certificate, error) {
 	fmt.Println("getCertificateFunc")
 	return ckpr.holder.Get(), nil
 }
 
-//TLSCrtKeyPairHolder keeps an instance of tls.Certificate and allows for safe multi-threaded Get/Set operations
+//TLSCrtKeyPairHolder keeps a tls.Certificate instance and allows for Get/Set operations in a thread-safe way
 type TLSCrtKeyPairHolder struct {
 	rwmu  sync.RWMutex
 	value *tls.Certificate
 }
 
+//NewTLSCrtKeyPairHolder returns new TLSCrtKeyPairHolder instance
 func NewTLSCrtKeyPairHolder() *TLSCrtKeyPairHolder {
 	return &TLSCrtKeyPairHolder{}
 }
 
+//Get returns the tls.Certificate instance stored in the TLSCrtKeyPairHolder
 func (tlsh *TLSCrtKeyPairHolder) Get() *tls.Certificate {
 	tlsh.rwmu.RLock()
 	defer tlsh.rwmu.RUnlock()
 	return tlsh.value
 }
 
+//Set stores given tls.Certificate in the TLSCrtKeyPairHolder
 func (tlsh *TLSCrtKeyPairHolder) Set(v *tls.Certificate) {
 	tlsh.rwmu.Lock()
 	defer tlsh.rwmu.Unlock()
 	tlsh.value = v
 }
 
-//ReloadableAuthenticatorRequest implements authenticator.Request interface
-//It's used to re-create authenticator.Request instance every time a change in oidc-ca-file is detected
-type ReloadableAuthenticatorRequest struct {
-	holder   *AuthenticatorRequestHolder
-	notifier ReloadNotifier
+////////////////////////////////////////////////////////////////////////////////
+
+//AuthReqConstructor knows how to construct an authenticator.Request instance
+type AuthReqConstructor func() (authenticator.Request, error)
+
+//ReloadableAuthReq enables to create and re-create an instance of authenticator.Request in a thread-safe way.
+//It's used to re-create authenticator.Request instance every time a change in oidc-ca-file is detected.
+//It implements authenticator.Request interface so it can be easily plugged in instead of a "real" instance.
+type ReloadableAuthReq struct {
+	constructor AuthReqConstructor
+	holder      *AuthReqHolder
 }
 
-func NewReloadableAuthenticatorRequest(notifier ReloadNotifier) *ReloadableAuthenticatorRequest {
-	result := ReloadableAuthenticatorRequest{
-		holder:   NewAuthenticatorRequestHolder(),
-		notifier: notifier,
+//NewReloadableAuthReq creates a new instance of ReloadableAuthReq.
+//notifier parameter allows to control when the instance is re-created from outside.
+//It's safe to trigger re-creation from other goroutines.
+func NewReloadableAuthReq(constructor AuthReqConstructor, notifier ReloadNotifier) (*ReloadableAuthReq, error) {
+	result := ReloadableAuthReq{
+		constructor: constructor,
+		holder:      NewAuthReqHolder(),
 	}
 
-	reloadAuthRequestFunc := func() {
+	//Initial read
+	err := result.reload()
+	if err != nil {
+		return nil, err
 	}
 
-	notifier.RegisterCallback(reloadAuthRequestFunc)
-	return result
+	reloadFunc := func() {
+		err := result.reload()
+		if err != nil {
+			glog.Errorf("Failed to reload authenticator.Request: %v", err)
+		}
+	}
+	notifier.RegisterCallback(reloadFunc)
+
+	return &result, nil
 }
 
-func (rar *ReloadableAuthenticatorRequest) AuthenticateRequest(req *http.Request) (*Response, bool, error) {
+//reloads the internal instance using provided constructor function
+//Note: It must NOT modify the existing value in case of an error!
+func (rar *ReloadableAuthReq) reload() error {
+	newAuthReq, err := rar.constructor()
+	if err != nil {
+		return err
+	}
+	rar.holder.Set(newAuthReq)
+	return nil
+}
+
+//AuthenticateRequest implements authenticator.Request interface
+func (rar *ReloadableAuthReq) AuthenticateRequest(req *http.Request) (*authenticator.Response, bool, error) {
 	//Delegate to internally-stored instance (thread-safe)
 	return rar.holder.Get().AuthenticateRequest(req)
 }
 
-//AuthenticatorRequestHolder keeps an instance of authenticator.Request and allows for safe multi-threaded Get/Set operations
-type AuthenticatorRequestHolder struct {
+//AuthReqHolder keeps an authenticator.Request instance and allows for Get/Set operations in a thread-safe way
+type AuthReqHolder struct {
 	rwmu  sync.RWMutex
 	value authenticator.Request
 }
 
-func NewAuthenticatorRequestHolder() *AuthenticatorRequestHolder {
-	return &AuthenticatorRequestHolder{}
+//NewAuthReqHolder returns new AuthReqHolder instance
+func NewAuthReqHolder() *AuthReqHolder {
+	return &AuthReqHolder{}
 }
 
-func (arh *AuthenticatorRequestHolder) Get() authenticator.Request {
+//Get returns the tls.Certificate instance stored in the AuthReqHolder
+func (arh *AuthReqHolder) Get() authenticator.Request {
 	arh.rwmu.RLock()
 	defer arh.rwmu.RUnlock()
 	return arh.value
 }
 
-func (arh *AuthenticatorRequestHolder) Set(v authenticator.Request) {
+//Set stores given authenticator.Request in the AuthReqHolder
+func (arh *AuthReqHolder) Set(v authenticator.Request) {
 	arh.rwmu.Lock()
 	defer arh.rwmu.Unlock()
 	arh.value = v
