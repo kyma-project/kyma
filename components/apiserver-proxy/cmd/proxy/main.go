@@ -142,23 +142,31 @@ func main() {
 
 	spdyProxy := spdy.New(kcfg, upstreamURL)
 
+	tn := TestNotifier{}
+	tn.Start()
+
 	kubeClient, err := kubernetes.NewForConfig(kcfg)
 	if err != nil {
 		glog.Fatalf("Failed to instantiate Kubernetes client: %v", err)
 	}
 
-	var authenticator authenticator.Request
+	var athntctr authenticator.Request
 	// If OIDC configuration provided, use oidc authenticator
 	if cfg.auth.Authentication.OIDC.IssuerURL != "" {
-		//TODO: Wrap this
-		authenticator, err = authn.NewOIDCAuthenticator(cfg.auth.Authentication.OIDC)
+
+		authReqConstructorFunc := func() (authenticator.Request, error) {
+			glog.Infof("creating new instance of authenticator.Request...")
+			return authn.NewOIDCAuthenticator(cfg.auth.Authentication.OIDC)
+		}
+
+		athntctr, err = NewReloadableAuthReq(authReqConstructorFunc, &tn)
 		if err != nil {
 			glog.Fatalf("Failed to instantiate OIDC authenticator: %v", err)
 		}
 	} else {
 		//Use Delegating authenticator
 		tokenClient := kubeClient.AuthenticationV1beta1().TokenReviews()
-		authenticator, err = authn.NewDelegatingAuthenticator(tokenClient, cfg.auth.Authentication)
+		athntctr, err = authn.NewDelegatingAuthenticator(tokenClient, cfg.auth.Authentication)
 		if err != nil {
 			glog.Fatalf("Failed to instantiate delegating authenticator: %v", err)
 		}
@@ -171,8 +179,7 @@ func main() {
 		glog.Fatalf("Failed to create authorizer: %v", err)
 	}
 
-	//TODO: This must accept a wrapping authenticator
-	authProxy := proxy.New(cfg.auth, authorizer, authenticator)
+	authProxy := proxy.New(cfg.auth, authorizer, athntctr)
 
 	if err != nil {
 		glog.Fatalf("Failed to create rbac-proxy: %v", err)
@@ -231,11 +238,8 @@ func main() {
 				NextProtos: []string{"h2"},
 			}
 		} else {
-			tn := TestNotifier{}
-			tn.Start()
-
 			tlsConstructorFunc := func() (*tls.Certificate, error) {
-				glog.Infof("Loading TLS Certificate data from files: %s, %s", cfg.tls.certFile, cfg.tls.keyFile)
+				glog.Infof("Creating new TLS Certificate from data files: %s, %s", cfg.tls.certFile, cfg.tls.keyFile)
 				res, err := tls.LoadX509KeyPair(cfg.tls.certFile, cfg.tls.keyFile)
 				return &res, err
 			}
@@ -379,27 +383,23 @@ func deleteUpstreamCORSHeaders(r *http.Response) error {
 }
 
 type TestNotifier struct {
-	onEventFunc func()
+	onEventFuncs []func()
 }
 
 func (tn *TestNotifier) Start() {
-	tn.onEventFunc = func() {
-		fmt.Println("TestNotifier: No handler installed")
-	}
-
 	go func() {
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGHUP)
 		for range c {
-			if tn.onEventFunc != nil {
-				tn.onEventFunc()
+			for _, f := range tn.onEventFuncs {
+				f()
 			}
 		}
 	}()
 }
 
 func (tn *TestNotifier) RegisterCallback(handler func()) {
-	tn.onEventFunc = handler
+	tn.onEventFuncs = append(tn.onEventFuncs, handler)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
