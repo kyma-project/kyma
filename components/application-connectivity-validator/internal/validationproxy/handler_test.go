@@ -8,12 +8,12 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-
-	"github.com/stretchr/testify/mock"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy/mocks"
 	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -223,9 +223,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			applicationGetter := &mocks.ApplicationGetter{}
 			applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(testCase.application, nil)
 
-			cache := &mocks.Cache{}
-			cache.On("Get", applicationName).Return([]string{}, false)
-			cache.On("Set", applicationName, mock.AnythingOfType("[]string"), mock.AnythingOfType("time.Duration")).Return()
+			idCache := cache.New(time.Minute, time.Minute)
 
 			proxyHandler := NewProxyHandler(
 				testCase.group,
@@ -236,7 +234,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				appRegistryPathPrefix,
 				appRegistryHost,
 				applicationGetter,
-				cache)
+				idCache)
 
 			t.Run("should proxy event service V1 request when "+testCase.caseDescription, func(t *testing.T) {
 				eventTitle := "my-event-1"
@@ -330,13 +328,10 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			applicationGetter := &mocks.ApplicationGetter{}
 			applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(testCase.application, nil)
 
-			cache := &mocks.Cache{}
+			idCache := cache.New(time.Minute, time.Minute)
 			if testCase.application.Spec.CompassMetadata != nil {
-				cache.On("Get", applicationName).Return(testCase.application.Spec.CompassMetadata.Authentication.ClientIds, true)
-			} else {
-				cache.On("Get", applicationName).Return([]string{}, false)
+				idCache.Set(applicationName, testCase.application.Spec.CompassMetadata.Authentication.ClientIds, cache.DefaultExpiration)
 			}
-			cache.On("Set", applicationName, mock.AnythingOfType("[]string"), mock.AnythingOfType("time.Duration")).Return()
 
 			proxyHandler := NewProxyHandler(
 				testCase.group,
@@ -347,7 +342,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				appRegistryPathPrefix,
 				appRegistryHost,
 				applicationGetter,
-				cache)
+				idCache)
 
 			t.Run("should proxy application registry request when "+testCase.caseDescription, func(t *testing.T) {
 				appRegistryHandler.PathPrefix("/{application}/v1/metadata/services").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -377,9 +372,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			applicationGetter := &mocks.ApplicationGetter{}
 			applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(nil, fmt.Errorf("some error"))
 
-			cache := &mocks.Cache{}
-			cache.On("Get", applicationName).Return([]string{}, false)
-			cache.On("Set", applicationName, mock.AnythingOfType("[]string"), mock.AnythingOfType("time.Duration")).Return()
+			idCache := cache.New(time.Minute, time.Minute)
 
 			proxyHandler := NewProxyHandler(
 				testCase.group,
@@ -390,7 +383,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				appRegistryPathPrefix,
 				appRegistryHost,
 				applicationGetter,
-				cache)
+				idCache)
 
 			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/metadata/services", applicationName), nil)
 			require.NoError(t, err)
@@ -414,9 +407,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		applicationGetter := &mocks.ApplicationGetter{}
 		applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(applicationManagedByCompass, nil)
 
-		cache := &mocks.Cache{}
-		cache.On("Get", applicationName).Return([]string{}, false)
-		cache.On("Set", applicationName, mock.AnythingOfType("[]string"), mock.AnythingOfType("time.Duration")).Return()
+		idCache := cache.New(time.Minute, time.Minute)
 
 		proxyHandler := NewProxyHandler(
 			group,
@@ -427,7 +418,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			appRegistryPathPrefix,
 			appRegistryHost,
 			applicationGetter,
-			cache)
+			idCache)
 
 		req, err := http.NewRequest(http.MethodGet, "/path", nil)
 		require.NoError(t, err)
@@ -452,9 +443,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		applicationGetter := &mocks.ApplicationGetter{}
 		applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(applicationManagedByCompass, nil)
 
-		cache := &mocks.Cache{}
-		cache.On("Get", applicationName).Return([]string{}, false)
-		cache.On("Set", applicationName, mock.AnythingOfType("[]string"), mock.AnythingOfType("time.Duration")).Return()
+		idCache := cache.New(time.Minute, time.Minute)
 
 		proxyHandler := NewProxyHandler(
 			"",
@@ -465,7 +454,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			appRegistryPathPrefix,
 			appRegistryHost,
 			applicationGetter,
-			cache)
+			idCache)
 
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/bad/path", applicationName), nil)
 		require.NoError(t, err)
