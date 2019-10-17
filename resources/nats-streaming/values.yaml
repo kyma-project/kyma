@@ -31,17 +31,19 @@ global:
       enabled: true
       accessMode: ReadWriteOnce
       # Max duration for which an event can be stored (0 for unlimited)
-      maxAge: "24h"
-      size: "1Gi"
+      maxAge: 24h
+      size: 1Gi
     ports:
       client: 4222
       monitoring: 8222
     resources:
       limits:
-        memory: "256M"
+        memory: 256M
     channel:
-      maxInactivity: "48h"
+      maxInactivity: 24h
       maxChannels: 0
+      maxBytes: 0
+      maxMessages: 0
     clusterID: "kyma-nats-streaming"
     users:
       stan:
