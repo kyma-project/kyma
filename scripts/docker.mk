@@ -4,7 +4,7 @@ TAG := $(DOCKER_TAG)
 
 .PHONY: release
 
-release: build-image push-image
+release:: build-image push-image
 
 .PHONY: build-image push-image
 build-image:
