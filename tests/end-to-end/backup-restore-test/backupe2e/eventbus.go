@@ -36,7 +36,7 @@ const (
 )
 
 var retryOptions = []retry.Option{
-	retry.Attempts(13), // at max (100 * (1 << 13)) / 1000 = 819,2 sec
+	retry.Attempts(20), // at max (100 * (1 << 13)) / 1000 = 819,2 sec
 	retry.OnRetry(func(n uint, err error) {
 		fmt.Printf(".")
 	}),
