@@ -10,7 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/service-catalog/test/pkg/retriever"
+	"github.com/kyma-project/kyma/tests/service-catalog/test/common"
+
+	"github.com/kyma-project/kyma/tests/service-catalog/test/utils/retriever"
 
 	"github.com/pkg/errors"
 
@@ -28,8 +30,8 @@ import (
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 
-	"github.com/kyma-project/kyma/tests/service-catalog/test/pkg/repeat"
-	"github.com/kyma-project/kyma/tests/service-catalog/test/pkg/report"
+	"github.com/kyma-project/kyma/tests/service-catalog/test/utils/repeat"
+	"github.com/kyma-project/kyma/tests/service-catalog/test/utils/report"
 	"github.com/stretchr/testify/require"
 	"github.com/vrischmann/envconfig"
 	appsTypes "k8s.io/api/apps/v1beta1"
@@ -91,7 +93,7 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	ts.createBindingUsageForInstanceBWithPrefix(timeoutPerStep)
 	// then
 
-	ts.assertInjectedEnvVariables([]EnvVariable{
+	ts.assertInjectedEnvVariables([]common.EnvVariable{
 		{Name: ts.envPrefix + baseEnvName, Value: ts.gatewayUrl},
 		{Name: baseEnvName, Value: ts.gatewayUrl},
 	}, timeoutPerAssert)
@@ -651,7 +653,7 @@ func (ts *TestSuite) envTesterDeployment(labels map[string]string) *appsTypes.De
 	}
 }
 
-func (ts *TestSuite) assertInjectedEnvVariables(requiredVariables []EnvVariable, timeout time.Duration) {
+func (ts *TestSuite) assertInjectedEnvVariables(requiredVariables []common.EnvVariable, timeout time.Duration) {
 	url := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs", ts.namespace)
 
 	repeat.AssertFuncAtMost(ts.t, func() error {
@@ -685,13 +687,13 @@ func (ts *TestSuite) assertInjectedEnvVariables(requiredVariables []EnvVariable,
 		}
 
 		decoder := json.NewDecoder(resp.Body)
-		var data []EnvVariable
+		var data []common.EnvVariable
 		err = decoder.Decode(&data)
 		if err != nil {
 			return err
 		}
 
-		var missing []EnvVariable
+		var missing []common.EnvVariable
 		for _, req := range requiredVariables {
 			found := false
 			for _, act := range data {

@@ -5,27 +5,33 @@ package test
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"testing"
 	"time"
 
 	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/service-catalog/test/utils/istio"
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
 
+	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	appTypes "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 
 	scc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
-	corev1 "github.com/kubernetes/client-go/kubernetes/typed/core/v1"
 	v1alpha12 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
-	"github.com/kyma-project/kyma/tests/service-catalog/test/pkg/repeat"
-	"github.com/kyma-project/kyma/tests/service-catalog/test/pkg/report"
+	"github.com/kyma-project/kyma/tests/service-catalog/test/utils/repeat"
+	"github.com/kyma-project/kyma/tests/service-catalog/test/utils/report"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	v1 "k8s.io/api/core/v1"
 	apimerr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	restclient "k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -70,7 +76,7 @@ func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
 				u, err := url.Parse(broker.url)
 				require.NoError(t, err)
 
-				dumpIstioConfig(t, u.Host, broker.labelSelector)
+				istio.DumpIstioConfig(t, u.Host, broker.labelSelector)
 
 			}
 		})
@@ -112,12 +118,6 @@ func TestHelmBrokerAddonsConfiguration(t *testing.T) {
 	require.NoError(t, err)
 
 	defer func() {
-		if t.Failed() {
-			namespaceReport := report.NewReport(t,
-				k8sConfig,
-				report.WithHB())
-			namespaceReport.PrintJsonReport(namespace)
-		}
 		err = k8sClient.Namespaces().Delete(namespace, &metav1.DeleteOptions{})
 		assert.NoError(t, err)
 	}()
@@ -126,6 +126,12 @@ func TestHelmBrokerAddonsConfiguration(t *testing.T) {
 	err = dynamicClient.Create(context.TODO(), addonsConfig)
 	require.NoError(t, err)
 	defer func() {
+		if t.Failed() {
+			namespaceReport := report.NewReport(t,
+				k8sConfig,
+				report.WithHB())
+			namespaceReport.PrintJsonReport(namespace)
+		}
 		err = dynamicClient.Delete(context.TODO(), addonsConfig)
 		assert.NoError(t, err)
 	}()
@@ -162,6 +168,10 @@ func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
 	scClient, err := scc.NewForConfig(k8sConfig)
 	require.NoError(t, err)
 
+	// when
+	err = dynamicClient.Create(context.TODO(), addonsConfig)
+	require.NoError(t, err)
+
 	defer func() {
 		if t.Failed() {
 			namespaceReport := report.NewReport(t,
@@ -172,10 +182,6 @@ func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
 		err = dynamicClient.Delete(context.TODO(), addonsConfig)
 		assert.NoError(t, err)
 	}()
-
-	// when
-	err = dynamicClient.Create(context.TODO(), addonsConfig)
-	require.NoError(t, err)
 
 	// then
 	repeat.AssertFuncAtMost(t, func() error {
@@ -257,4 +263,90 @@ func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {
 
 	listServiceBrokers, err := scClient.ServicecatalogV1beta1().ServiceBrokers(namespace).List(metav1.ListOptions{})
 	assert.Empty(t, listServiceBrokers.Items)
+}
+
+func isCatalogForbidden(url string) (bool, int, error) {
+	config := osb.DefaultClientConfiguration()
+	config.URL = fmt.Sprintf("%s/cluster", url)
+
+	client, err := osb.NewClient(config)
+	if err != nil {
+		return false, 0, errors.Wrapf(err, "while creating osb client for broker with URL: %s", url)
+	}
+	var statusCode int
+	isForbiddenError := func(err error) bool {
+		statusCodeError, ok := err.(osb.HTTPStatusCodeError)
+		if !ok {
+			return false
+		}
+		statusCode = statusCodeError.StatusCode
+		return statusCodeError.StatusCode == http.StatusForbidden
+	}
+
+	_, err = client.GetCatalog()
+	switch {
+	case err == nil:
+		return false, http.StatusOK, nil
+	case isForbiddenError(err):
+		return true, statusCode, nil
+	default:
+		return false, statusCode, errors.Wrapf(err, "while getting catalog from broker with URL: %s", url)
+	}
+}
+
+func fixNamespace(name string) *v1.Namespace {
+	return &v1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+	}
+}
+
+func fixApplication(name string) *appTypes.Application {
+	return &appTypes.Application{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Application",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+		Spec: appTypes.ApplicationSpec{
+			Description:      "Application used by acceptance test",
+			AccessLabel:      "fix-access",
+			SkipInstallation: true,
+			Services: []appTypes.Service{
+				{
+					ID:   "id-00000-1234-test",
+					Name: "provider-4951",
+					Labels: map[string]string{
+						"connected-app": name,
+					},
+					ProviderDisplayName: "provider",
+					DisplayName:         name,
+					Description:         "Application Service Class used by acceptance test",
+					Tags:                []string{},
+					Entries: []appTypes.Entry{
+						{
+							Type:        "API",
+							AccessLabel: "acc-label",
+							GatewayUrl:  "http://promotions-gateway.production.svc.cluster.local/",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func fixApplicationMapping(name string) *mappingTypes.ApplicationMapping {
+	return &mappingTypes.ApplicationMapping{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ApplicationMapping",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+	}
 }

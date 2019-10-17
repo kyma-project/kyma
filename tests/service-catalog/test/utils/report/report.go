@@ -18,23 +18,25 @@ import (
 )
 
 type Report struct {
-	test      *testing.T
-	logWriter TestLogWriter
-	cfg       *rest.Config
-	opt       []Option
-	printer   printers.ResourcePrinter
+	test        *testing.T
+	logWriter   TestLogWriter
+	cfg         *rest.Config
+	reportTypes []ReportType
+	printer     printers.ResourcePrinter
 }
 
-func NewReport(t *testing.T, config *rest.Config, options ...Option) *Report {
+// NewReport creates a report with chosen
+func NewReport(t *testing.T, config *rest.Config, types ...ReportType) *Report {
 	return &Report{
-		test:      t,
-		logWriter: TestLogWriter{testing: t},
-		cfg:       config,
-		opt:       options,
+		test:        t,
+		logWriter:   TestLogWriter{testing: t},
+		cfg:         config,
+		reportTypes: types,
+		printer:     &printers.JSONPrinter{},
 	}
 }
 
-type Option func(r *Report, ns string)
+type ReportType func(r *Report, ns string)
 
 type printerObject interface {
 	GetObjectKind() schema.ObjectKind
@@ -52,28 +54,20 @@ func (t TestLogWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func (r *Report) setPrinter(pnr printers.ResourcePrinter) {
-	r.printer = pnr
-}
-
-// PrintJsonReport create report for injected namespace for every resource taking part in binding usage and service catalog test
-// and print all of them as a json in testing logs
-// resources included in report: Deployment, Pod, Service, ServiceBroker, ServiceClass, ServiceInstance
-// ServiceBinding, ClusterServiceBroker, ClusterServiceClass, Application, ServiceBindingUsage
+// PrintJsonReport prints chosen resources taking part in binding usage and service catalog test
+//  for injected namespace as a json in testing logs
 func (r *Report) PrintJsonReport(namespace string) {
-	printer := &printers.JSONPrinter{}
-	r.setPrinter(printer)
 
 	r.test.Log("########## Start Report Namespace ##########")
-	for _, option := range r.opt {
-		option(r, namespace)
+	for _, reportType := range r.reportTypes {
+		reportType(r, namespace)
 	}
 	r.test.Log("########## End Report Namespace ##########")
 
 }
 
 // WithK8s creates report with Kubernetes resources list: Deployment, Pod, Service
-func WithK8s() Option {
+func WithK8s() ReportType {
 	return func(r *Report, ns string) {
 		k8sclientset, err := kubernetes.NewForConfig(r.cfg)
 		if err != nil {
@@ -86,7 +80,7 @@ func WithK8s() Option {
 
 // WithSC creates report with Service Catalog resources list: ServiceBroker, ServiceClass, ServiceInstance,
 // ServiceBinding, ClusterServiceBroker, ClusterServiceClass
-func WithSC() Option {
+func WithSC() ReportType {
 	return func(r *Report, ns string) {
 		scclientset, err := scClient.NewForConfig(r.cfg)
 		if err != nil {
@@ -97,7 +91,7 @@ func WithSC() Option {
 }
 
 // WithApp creates report with Application resources list: Application, ApplicationMapping
-func WithApp() Option {
+func WithApp() ReportType {
 	return func(r *Report, ns string) {
 		appclientset, err := appClient.NewForConfig(r.cfg)
 		if err != nil {
@@ -114,7 +108,7 @@ func WithApp() Option {
 }
 
 // WithSBU creates report with ServiceBindingUsage list
-func WithSBU() Option {
+func WithSBU() ReportType {
 	return func(r *Report, ns string) {
 		bucclientset, err := bucClient.NewForConfig(r.cfg)
 		if err != nil {
@@ -124,7 +118,7 @@ func WithSBU() Option {
 	}
 }
 
-func WithHB() Option {
+func WithHB() ReportType {
 	return func(r *Report, ns string) {
 		hbclientset, err := hbClient.NewForConfig(r.cfg)
 		if err != nil {
@@ -234,7 +228,6 @@ func (r Report) hbResourceDump(printer printers.ResourcePrinter, clientset *hbCl
 	if clientset == nil {
 		return
 	}
-
 	addc, err := clientset.AddonsV1alpha1().AddonsConfigurations(ns).List(metav1.ListOptions{})
 	if err != nil {
 		r.test.Logf("AddonsConfiguration list unreachable: %v \n", err)

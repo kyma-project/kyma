@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/kyma-project/kyma/tests/service-catalog/test"
+
+	"github.com/kyma-project/kyma/tests/service-catalog/test/common"
+
 	"log"
 	"net/http"
 	"os"
@@ -18,10 +20,10 @@ func envChecker(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	envVariables := os.Environ()
-	out := make([]test.EnvVariable, len(envVariables))
+	out := make([]common.EnvVariable, len(envVariables))
 	for i, line := range envVariables {
 		splitted := strings.SplitN(line, "=", 2)
-		out[i] = test.EnvVariable{Name: splitted[0], Value: splitted[1]}
+		out[i] = common.EnvVariable{Name: splitted[0], Value: splitted[1]}
 	}
 
 	err := json.NewEncoder(w).Encode(out)

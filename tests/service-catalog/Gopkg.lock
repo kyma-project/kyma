@@ -126,14 +126,6 @@
   version = "v0.1.39"
 
 [[projects]]
-  digest = "1:3f3cae7758f544d88873001e0b11f636fe812500711343cc0f3d7402a17ccbbd"
-  name = "github.com/kubernetes/client-go"
-  packages = ["kubernetes/typed/core/v1"]
-  pruneopts = "NUT"
-  revision = "1638f8970cefaa404ff3a62950f88b08292b2696"
-  version = "v9.0.0"
-
-[[projects]]
   branch = "master"
   digest = "1:a95edbcd9cb61b037f32b4f18630c8b2fa945936075f86d173a0c003420a5f37"
   name = "github.com/kyma-project/helm-broker"
@@ -570,7 +562,6 @@
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
-    "github.com/kubernetes/client-go/kubernetes/typed/core/v1",
     "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
@@ -594,12 +585,12 @@
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
-    "k8s.io/apimachinery/pkg/types",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apimachinery/pkg/util/rand",
     "k8s.io/cli-runtime/pkg/genericclioptions/printers",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/scheme",
+    "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/remotecommand",
     "sigs.k8s.io/controller-runtime/pkg/client",

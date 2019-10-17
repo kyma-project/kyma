@@ -1,4 +1,4 @@
-package test
+package common
 
 type EnvVariable struct {
 	Name  string `json:"name"`
