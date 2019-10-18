@@ -13,9 +13,13 @@ import (
 	"testing"
 	"time"
 
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	"sigs.k8s.io/yaml"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/clientcmd"
@@ -29,7 +33,7 @@ const resourceSeparator = "---"
 
 func TestApiGatewayIntegration(t *testing.T) {
 
-	//k8sClient := getDynamicClient()
+	k8sClient := getDynamicClient()
 
 	// load common resource file
 	commonResourcesRaw := getManifestsFromFile(commonResourcesFile)
@@ -38,10 +42,15 @@ func TestApiGatewayIntegration(t *testing.T) {
 		t.Parallel()
 		testID := generateTestID()
 
+		// create common resources
 		commonResources := getCommonResourcesForTest(testID, commonResourcesRaw...)
-		fmt.Println(commonResources)
-
-		// TODO: create common resources from manifests
+		for _, commonResource := range commonResources {
+			fmt.Println(commonResource)
+			resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
+			fmt.Println(resourceSchema)
+			createResource(k8sClient, resourceSchema, ns, commonResource)
+			deleteResource(k8sClient, resourceSchema, ns, name) // TODO: move delete after test execution
+		}
 
 		// TODO: create api-rule
 
@@ -49,7 +58,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 		// TODO: test response from service
 
-		fmt.Println("test 1")
+		fmt.Println("test finished")
 	})
 }
 
@@ -134,4 +143,52 @@ func getCommonResourcesForTest(testID string, commonResourcesRaw ...string) []un
 		commonResources = append(commonResources, *commonResource)
 	}
 	return commonResources
+}
+
+func getResourceSchemaAndNamespace(manifest unstructured.Unstructured) (schema.GroupVersionResource, string, string) {
+	metadata := manifest.Object["metadata"].(map[string]interface{})
+	apiVersion := strings.Split(fmt.Sprintf("%s", manifest.Object["apiVersion"]), "/")
+	namespace := "default"
+	if metadata["namespace"] != nil {
+		namespace = fmt.Sprintf("%s", metadata["namespace"])
+	}
+	resourceName := fmt.Sprintf("%s", metadata["name"])
+	resourceKind := fmt.Sprintf("%s", manifest.Object["kind"])
+
+	var apiGroup, version string
+	if len(apiVersion) > 1 {
+		apiGroup = apiVersion[0]
+		version = apiVersion[1]
+	} else {
+		apiGroup = ""
+		version = apiVersion[0]
+	}
+	resourceSchema := schema.GroupVersionResource{Group: apiGroup, Version: version, Resource: plurarForm(resourceKind)}
+	return resourceSchema, namespace, resourceName
+}
+
+func plurarForm(name string) string {
+	return fmt.Sprintf("%ss", strings.ToLower(name))
+}
+
+func createResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, manifest unstructured.Unstructured) {
+	fmt.Println("Creating resource...")
+	result, err := client.Resource(resourceSchema).Namespace(namespace).Create(&manifest, metav1.CreateOptions{})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Created resource %q.\n", result.GetName())
+}
+
+func deleteResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, resourceName string) {
+	fmt.Println("Deleting resource...")
+	deletePolicy := metav1.DeletePropagationForeground
+	deleteOptions := &metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	}
+	if err := client.Resource(resourceSchema).Namespace(namespace).Delete(resourceName, deleteOptions); err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("Deleted resource %q.\n", resourceName)
 }
