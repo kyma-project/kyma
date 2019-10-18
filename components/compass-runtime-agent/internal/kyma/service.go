@@ -32,9 +32,10 @@ const (
 )
 
 type Result struct {
-	ApplicationID string
-	Operation     Operation
-	Error         apperrors.AppError
+	ApplicationName string
+	ApplicationID   string
+	Operation       Operation
+	Error           apperrors.AppError
 }
 
 type ApiIDToSecretNameMap map[string]string
@@ -101,7 +102,7 @@ func (s *service) createApplications(directorApplications []model.Application, r
 	results := make([]Result, 0)
 
 	for _, directorApplication := range directorApplications {
-		if !applications.ApplicationExists(directorApplication.ID, runtimeApplications) {
+		if !applications.ApplicationExists(directorApplication.Name, runtimeApplications) {
 			result := s.createApplication(directorApplication, s.converter.Do(directorApplication))
 			results = append(results, result)
 		}
@@ -111,21 +112,21 @@ func (s *service) createApplications(directorApplications []model.Application, r
 }
 
 func (s *service) createApplication(directorApplication model.Application, runtimeApplication v1alpha1.Application) Result {
-	log.Infof("Creating application '%s'.", directorApplication.ID)
+	log.Infof("Creating application '%s'.", directorApplication.Name)
 	newRuntimeApplication, err := s.applicationRepository.Create(&runtimeApplication)
 	if err != nil {
-		log.Warningf("Failed to create application '%s': %s.", directorApplication.ID, err)
-		return newResult(runtimeApplication, Create, err)
+		log.Warningf("Failed to create application '%s': %s.", directorApplication.Name, err)
+		return newResult(runtimeApplication, directorApplication.ID, Create, err)
 	}
 
-	log.Infof("Creating API resources for application '%s'.", directorApplication.ID)
+	log.Infof("Creating API resources for application '%s'.", directorApplication.Name)
 	err = s.createAPIResources(directorApplication, *newRuntimeApplication)
 	if err != nil {
-		log.Warningf("Failed to create API resources for application '%s': %s.", directorApplication.ID, err)
-		return newResult(runtimeApplication, Create, err)
+		log.Warningf("Failed to create API resources for application '%s': %s.", directorApplication.Name, err)
+		return newResult(runtimeApplication, directorApplication.ID, Create, err)
 	}
 
-	return newResult(runtimeApplication, Create, nil)
+	return newResult(runtimeApplication, directorApplication.ID, Create, nil)
 }
 
 func (s *service) createAPIResources(directorApplication model.Application, runtimeApplication v1alpha1.Application) apperrors.AppError {
@@ -199,21 +200,21 @@ func (s *service) deleteApplications(directorApplications []model.Application, r
 	for _, runtimeApplication := range runtimeApplications {
 		existsInDirector := false
 		for _, directorApp := range directorApplications {
-			if directorApp.ID == runtimeApplication.Name {
+			if directorApp.Name == runtimeApplication.Name {
 				existsInDirector = true
 				break
 			}
 		}
 
 		if !existsInDirector {
-			result := s.deleteApplication(runtimeApplication)
+			result := s.deleteApplication(runtimeApplication, "") //TODO: We should consider saving Application ID in the CR not to pass an empty string here.
 			results = append(results, result)
 		}
 	}
 	return results
 }
 
-func (s *service) deleteApplication(runtimeApplication v1alpha1.Application) Result {
+func (s *service) deleteApplication(runtimeApplication v1alpha1.Application, applicationID string) Result {
 	log.Infof("Deleting API resources for application '%s'.", runtimeApplication.Name)
 	appendedErr := s.deleteAllAPIResources(runtimeApplication)
 	if appendedErr != nil {
@@ -227,7 +228,7 @@ func (s *service) deleteApplication(runtimeApplication v1alpha1.Application) Res
 		appendedErr = apperrors.AppendError(appendedErr, err)
 	}
 
-	return newResult(runtimeApplication, Delete, err)
+	return newResult(runtimeApplication, applicationID, Delete, err)
 }
 
 func (s *service) deleteAllAPIResources(runtimeApplication v1alpha1.Application) apperrors.AppError {
@@ -262,8 +263,8 @@ func (s *service) updateApplications(directorApplications []model.Application, r
 	results := make([]Result, 0)
 
 	for _, directorApplication := range directorApplications {
-		if applications.ApplicationExists(directorApplication.ID, runtimeApplications) {
-			existentApplication := applications.GetApplication(directorApplication.ID, runtimeApplications)
+		if applications.ApplicationExists(directorApplication.Name, runtimeApplications) {
+			existentApplication := applications.GetApplication(directorApplication.Name, runtimeApplications)
 			result := s.updateApplication(directorApplication, existentApplication, s.converter.Do(directorApplication))
 			results = append(results, result)
 		}
@@ -273,20 +274,20 @@ func (s *service) updateApplications(directorApplications []model.Application, r
 }
 
 func (s *service) updateApplication(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) Result {
-	log.Infof("Updating API resources for application '%s'.", directorApplication.ID)
+	log.Infof("Updating API resources for application '%s'.", directorApplication.Name)
 	updatedRuntimeApplication, err := s.applicationRepository.Update(&newRuntimeApplication)
 	if err != nil {
-		log.Warningf("Failed to update application '%s': %s.", directorApplication.ID, err)
-		return newResult(existentRuntimeApplication, Update, err)
+		log.Warningf("Failed to update application '%s': %s.", directorApplication.Name, err)
+		return newResult(existentRuntimeApplication, directorApplication.ID, Update, err)
 	}
 
-	log.Infof("Updating API resources for application '%s'.", directorApplication.ID)
+	log.Infof("Updating API resources for application '%s'.", directorApplication.Name)
 	appendedErr := s.updateAPIResources(directorApplication, existentRuntimeApplication, *updatedRuntimeApplication)
 	if appendedErr != nil {
-		log.Warningf("Failed to update API resources for application '%s': %s.", directorApplication.ID, appendedErr)
+		log.Warningf("Failed to update API resources for application '%s': %s.", directorApplication.Name, appendedErr)
 	}
 
-	return newResult(existentRuntimeApplication, Update, appendedErr)
+	return newResult(existentRuntimeApplication, directorApplication.ID, Update, appendedErr)
 }
 
 func (s *service) updateAPIResources(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {
@@ -313,14 +314,14 @@ func (s *service) updateOrCreateRESTAPIResources(directorApplication model.Appli
 		service := applications.GetService(apiDefinition.ID, newRuntimeApplication)
 
 		if existsInRuntime {
-			log.Infof("Updating resources for API '%s' and application '%s'", apiDefinition.ID, directorApplication.ID)
+			log.Infof("Updating resources for API '%s' and application '%s'", apiDefinition.ID, directorApplication.Name)
 			err := s.resourcesService.UpdateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec), getApiType(apiDefinition.APISpec))
 			if err != nil {
 				log.Warningf("Failed to update API '%s': %s.", apiDefinition.ID, err)
 				appendedErr = apperrors.AppendError(appendedErr, err)
 			}
 		} else {
-			log.Infof("Creating resources for API '%s' and application '%s'", apiDefinition.ID, directorApplication.ID)
+			log.Infof("Creating resources for API '%s' and application '%s'", apiDefinition.ID, directorApplication.Name)
 			err := s.resourcesService.CreateApiResources(newRuntimeApplication.Name, newRuntimeApplication.UID, service.ID, toSecretsModel(apiDefinition.Credentials), getSpec(apiDefinition.APISpec), getApiType(apiDefinition.APISpec))
 			if err != nil {
 				log.Warningf("Failed to create API '%s': %s.", apiDefinition.ID, err)
@@ -340,14 +341,14 @@ func (s *service) updateOrCreateEventAPIResources(directorApplication model.Appl
 		service := applications.GetService(eventAPIDefinition.ID, newRuntimeApplication)
 
 		if existsInRuntime {
-			log.Infof("Updating resources for API '%s' and application '%s'", eventAPIDefinition.ID, directorApplication.ID)
+			log.Infof("Updating resources for API '%s' and application '%s'", eventAPIDefinition.ID, directorApplication.Name)
 			err := s.resourcesService.UpdateEventApiResources(newRuntimeApplication.Name, service.ID, getEventSpec(eventAPIDefinition.EventAPISpec), getEventApiType(eventAPIDefinition.EventAPISpec))
 			if err != nil {
 				log.Warningf("Failed to update Event API '%s': %s.", eventAPIDefinition.ID, err)
 				appendedErr = apperrors.AppendError(appendedErr, err)
 			}
 		} else {
-			log.Infof("Creating resources for API '%s' and application '%s'", eventAPIDefinition.ID, directorApplication.ID)
+			log.Infof("Creating resources for API '%s' and application '%s'", eventAPIDefinition.ID, directorApplication.Name)
 			err := s.resourcesService.CreateEventApiResources(newRuntimeApplication.Name, service.ID, getEventSpec(eventAPIDefinition.EventAPISpec), getEventApiType(eventAPIDefinition.EventAPISpec))
 			if err != nil {
 				log.Warningf("Failed to create Event API '%s': %s.", eventAPIDefinition.ID, err)
@@ -363,7 +364,7 @@ func (s *service) deleteResourcesOfNonExistentAPI(existentRuntimeApplication v1a
 	var appendedErr apperrors.AppError
 	for _, service := range existentRuntimeApplication.Spec.Services {
 		if !model.APIExists(service.ID, directorApplication) {
-			log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.ID)
+			log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.Name)
 			err := s.deleteAPIResources(name, service)
 			appendedErr = apperrors.AppendError(appendedErr, err)
 		}
@@ -410,10 +411,11 @@ func getEventApiType(eventApiSpec *model.EventAPISpec) docstopic.ApiType {
 	return docstopic.Empty
 }
 
-func newResult(application v1alpha1.Application, operation Operation, appError apperrors.AppError) Result {
+func newResult(application v1alpha1.Application, applicationID string, operation Operation, appError apperrors.AppError) Result {
 	return Result{
-		ApplicationID: application.Name,
-		Operation:     operation,
-		Error:         appError,
+		ApplicationName: application.Name,
+		ApplicationID:   applicationID,
+		Operation:       operation,
+		Error:           appError,
 	}
 }

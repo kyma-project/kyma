@@ -90,8 +90,8 @@ func (svc *functionService) Update(name, namespace string, params gqlschema.Func
 			APIVersion: "serverless.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   name,
-			Labels: params.Labels,
+			Name:            name,
+			Labels:          params.Labels,
 			ResourceVersion: resourceVersion,
 		},
 		Spec: v1alpha1.FunctionSpec{
