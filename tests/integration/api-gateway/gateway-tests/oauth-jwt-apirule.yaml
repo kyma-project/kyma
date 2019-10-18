@@ -1,0 +1,62 @@
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: multiple-rules
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  service:
+    name: httpbin-multiple
+    port: 8080
+    host: httpbin-multiple.kyma.local
+  rules:
+    - path: /img
+      methods: ["GET"]
+      mutators: []
+      accessStrategies:
+        - handler: jwt
+          config:
+            trusted_issuers: ["http://dex.kyma.local"]
+            required_scope: []
+    - path: /headers
+      methods: ["GET"]
+      accessStrategies:
+        - handler: oauth2_introspection
+          config:
+            required_scope: ["foo"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin-multiple
+  labels:
+    app: httpbin-multiple
+spec:
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 80
+  selector:
+    app: httpbin-multiple
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin-multiple
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpbin-multiple
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: httpbin-multiple
+        version: v1
+    spec:
+      containers:
+        - image: docker.io/kennethreitz/httpbin
+          imagePullPolicy: IfNotPresent
+          name: httpbin-multiple
+          ports:
+            - containerPort: 80

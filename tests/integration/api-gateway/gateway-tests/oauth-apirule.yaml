@@ -1,0 +1,55 @@
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: oauth
+spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  service:
+    host: httpbin-oauth.kyma.local
+    name: httpbin-oauth
+    port: 8000
+  rules:
+    - path: /.*
+      methods: ["GET"]
+      mutators: []
+      accessStrategies:
+        - handler: oauth2_introspection
+          config:
+            required_scope: ["foo", "bar"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin-oauth
+  labels:
+    app: httpbin-oauth
+spec:
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 80
+  selector:
+    app: httpbin-oauth
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin-oauth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpbin-oauth
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: httpbin-oauth
+        version: v1
+    spec:
+      containers:
+        - image: docker.io/kennethreitz/httpbin
+          imagePullPolicy: IfNotPresent
+          name: httpbin-oauth
+          ports:
+            - containerPort: 80

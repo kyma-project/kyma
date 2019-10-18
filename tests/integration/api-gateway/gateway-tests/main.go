@@ -1,21 +1,8 @@
-/*
-Copyright 2019 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 // Note: the example only works with the code within the same release/branch.
 package main
+
+// TODO: create a helper for fetching OAUTH2 token from hydra
+// TODO: copy paste a helper for fetching JWT token from dex
 
 import (
 	"bufio"
@@ -162,6 +149,9 @@ func main() {
 		panic(err)
 	}
 
+	// TODO: load manifests from files and pass them to run function
+	// TODO: parse yaml to json
+
 	run(client, deployment)
 }
 
@@ -194,6 +184,7 @@ func plurarForm(name string) string {
 	return fmt.Sprintf("%ss", strings.ToLower(name))
 }
 
+// TODO: load more than one manifests
 func run(client dynamic.Interface, manifest *unstructured.Unstructured) {
 	metadata := manifest.Object["metadata"].(map[string]interface{})
 	apiVersion := strings.Split(fmt.Sprintf("%s", manifest.Object["apiVersion"]), "/")
@@ -205,8 +196,11 @@ func run(client dynamic.Interface, manifest *unstructured.Unstructured) {
 
 	resourceSchema := schema.GroupVersionResource{Group: apiVersion[0], Version: apiVersion[1], Resource: plurarForm(resourceName)}
 	fmt.Printf("---\n%v\n%v\n%v", resourceSchema, manifest, namespace)
+
+	// TODO: apply create to all manifests
 	// Create Deployment
 	prompt()
+	// TODO: move to generic function
 	fmt.Println("Creating resource...")
 	result, err := client.Resource(resourceSchema).Namespace(namespace).Create(manifest, metav1.CreateOptions{})
 	if err != nil {
@@ -214,8 +208,12 @@ func run(client dynamic.Interface, manifest *unstructured.Unstructured) {
 	}
 	fmt.Printf("Created resource %q.\n", result.GetName())
 
+	// TODO: invoke tests here
+
+	// TODO: apply delete to all manifests
 	// Delete Deployment
 	prompt()
+	// TODO: move to generic function
 	fmt.Println("Deleting resource...")
 	deletePolicy := metav1.DeletePropagationForeground
 	deleteOptions := &metav1.DeleteOptions{
