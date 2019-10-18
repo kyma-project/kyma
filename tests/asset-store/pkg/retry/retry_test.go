@@ -114,9 +114,11 @@ func Test_errorFn(t *testing.T) {
 func Test_errorFn_callback(t *testing.T) {
 	g := NewGomegaWithT(t)
 	var actual string
+	var ok bool
 	cbk := func(data ...interface{}) {
-		actual = data[0].(string)
+		actual, ok = data[0].(string)
 	}
 	errorFn(cbk)(apierrors.NewTimeoutError("test timeout error", 10))
+	g.Expect(ok).To(BeTrue())
 	g.Expect(actual).To(Equal("retrying due to: Timeout: test timeout error"))
 }

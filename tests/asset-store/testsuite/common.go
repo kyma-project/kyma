@@ -15,6 +15,10 @@ import (
 	watchtools "k8s.io/client-go/tools/watch"
 )
 
+var (
+	ErrInvalidDataType = errors.New("invalid data type")
+)
+
 func buildWaitForStatusesReady(iRsc dynamic.ResourceInterface, timeout time.Duration, rscNames ...string) func(string) error {
 	return func(initialResourceVersion string) error {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
@@ -72,9 +76,12 @@ func buildDeleteLeftovers(iRsc dynamic.ResourceInterface, timeout time.Duration)
 		var assetDeletionCounter = len(assetNames)
 		_, err = watchtools.Until(ctx, initialResourceVersion, iRsc, func(event watch.Event) (b bool, e error) {
 			if event.Type != watch.Deleted {
+				return false, ErrInvalidDataType
+			}
+			u, ok := event.Object.(*unstructured.Unstructured)
+			if !ok {
 				return false, nil
 			}
-			u := event.Object.(*unstructured.Unstructured)
 			for _, name := range assetNames {
 				if name != u.GetName() {
 					continue
@@ -101,7 +108,10 @@ func isPhaseReady(name string) func(event watch.Event) (bool, error) {
 		if event.Type != watch.Modified {
 			return false, nil
 		}
-		u := event.Object.(*unstructured.Unstructured)
+		u, ok := event.Object.(*unstructured.Unstructured)
+		if !ok {
+			return false, ErrInvalidDataType
+		}
 		if u.GetName() != name {
 			return false, nil
 		}
