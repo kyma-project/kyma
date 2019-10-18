@@ -113,7 +113,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:de0016e87636a076499c2c4840563d7e54c4acbc2fc5dca303390501a4d85b12"
+  digest = "1:902544577dcb868a5ae31529d73a1ce5031e224923290caedf6176241ee304e0"
   name = "github.com/cloudevents/sdk-go"
   packages = [
     ".",
@@ -130,7 +130,7 @@
     "pkg/cloudevents/types",
   ]
   pruneopts = "NUT"
-  revision = "8dc7a6994d99f07031904838c4e91101d5fd218a"
+  revision = "b0ed3376c113528ca45911a44eac70307912b318"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -1543,7 +1543,9 @@
   analyzer-version = 1
   input-imports = [
     "github.com/cloudevents/sdk-go",
-    "github.com/cloudevents/sdk-go/pkg/cloudevents/transport",
+    "github.com/cloudevents/sdk-go/pkg/cloudevents/context",
+    "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http",
+    "github.com/cloudevents/sdk-go/pkg/cloudevents/types",
     "github.com/emicklei/go-restful",
     "github.com/go-logr/logr",
     "github.com/gofrs/uuid",
@@ -1570,6 +1572,7 @@
     "github.com/prometheus/client_golang/prometheus/promauto",
     "github.com/prometheus/client_golang/prometheus/promhttp",
     "github.com/stretchr/testify/assert",
+    "go.uber.org/zap",
     "golang.org/x/lint/golint",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/apps/v1",

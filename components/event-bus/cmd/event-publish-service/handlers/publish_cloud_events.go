@@ -4,77 +4,67 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	cloudevents "github.com/cloudevents/sdk-go"
-	cecontext "github.com/cloudevents/sdk-go/pkg/cloudevents/context"
-	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
-	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
-	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 	"reflect"
 	"strconv"
+	"strings"
+
+	cloudevents "github.com/cloudevents/sdk-go"
+	cecontext "github.com/cloudevents/sdk-go/pkg/cloudevents/context"
+	cehttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
+	cetypes "github.com/cloudevents/sdk-go/pkg/cloudevents/types"
+	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
+	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	"go.uber.org/zap"
 )
 
 type CloudEventHandler struct {
 	KnativePublisher *publisher.KnativePublisher
 	KnativeLib       *knative.KnativeLib
-	Transport        *cloudeventshttp.Transport
+	Transport        *cehttp.Transport
 }
 
-// Receive finally handles the decoded event
-func (handler *CloudEventHandler) HandleEvent(ctx context.Context, event cloudevents.Event) (*api.Error, error) {
-	codec := cloudeventshttp.CodecV03{
-		DefaultEncoding: cloudeventshttp.StructuredV03,
+// HandleEvent finally handles the decoded event
+func (handler *CloudEventHandler) HandleEvent(ctx context.Context, event cloudevents.Event) (*api.Response, *api.Error, error) {
+
+	//TODO(k15r): should we make this configurable
+	codec := cehttp.CodecV03{
+		DefaultEncoding: cehttp.StructuredV03,
 	}
 
 	m, err := codec.Encode(ctx, event)
-	// err is the error from EventContext.Validate
-	//if err != nil {
-	//	if marshalError, ok := err.(json.MarshalerError); !ok {
-	//		marshalError.Error()
-	//
-	//	}
+	if err != nil {
+		return nil, nil, err
+	}
 
-	// TODO(nachtmaar): create api.ErrorDetails
-	//	return nil, err
-	//}
-
-	message, ok := m.(*cloudeventshttp.Message)
+	message, ok := m.(*cehttp.Message)
 	if !ok {
-		return nil, fmt.Errorf("expected type http message, but got type: %v", reflect.TypeOf(m))
+		return nil, nil, fmt.Errorf("expected type http message, but got type: %v", reflect.TypeOf(m))
 	}
 
 	fmt.Printf("%v", message)
 
-	etv, err := event.Context.GetExtension("event-type-version")
-
-	var etvstring string
-
-	if rawmessage, ok := etv.(json.RawMessage); ok {
-
-		err := json.Unmarshal(rawmessage, &etvstring)
-		if err != nil {
-			panic(err)
-		}
-	}
-
+	etv, err := cetypes.ToString(event.Context.GetExtensions()[api.FieldEventTypeVersion])
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	ns := knative.GetDefaultChannelNamespace()
 	header := map[string][]string(message.Header)
 
-	publishError, namespace, channelname := (*handler.KnativePublisher).Publish(handler.KnativeLib, &ns, &header, &message.Body, event.Source(), event.Type(), etvstring)
-	fmt.Printf("%+v\n\n%+v\n\n%+v\n\n", publishError, namespace, channelname)
-
-	b, err := json.Marshal(publishError)
-	if err != nil {
-		return publishError, err
+	publishError, status, _ := (*handler.KnativePublisher).Publish(handler.KnativeLib, &ns, &header, &message.Body, event.Source(), event.Type(), etv)
+	if publishError != nil {
+		return nil, publishError, nil
 	}
-	fmt.Printf("publishError: %s", b)
-	return publishError, nil
+
+	resp := &api.Response{
+		Status:  status,
+		EventID: event.ID(),
+		Reason:  getPublishStatusReason(&status),
+	}
+	return resp, nil, nil
+
 }
 
 // ServeHTTP implements http.Handler
@@ -82,7 +72,7 @@ func (handler *CloudEventHandler) HandleEvent(ctx context.Context, event cloudev
 func (handler *CloudEventHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// Add the transport context to ctx.
 	ctx := req.Context()
-	ctx = cloudeventshttp.WithTransportContext(ctx, cloudeventshttp.NewTransportContext(req))
+	ctx = cehttp.WithTransportContext(ctx, cehttp.NewTransportContext(req))
 	logger := cecontext.LoggerFrom(ctx)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -96,19 +86,46 @@ func (handler *CloudEventHandler) ServeHTTP(w http.ResponseWriter, req *http.Req
 		return
 	}
 
-	event, err := handler.Transport.MessageToEvent(ctx, &cloudeventshttp.Message{
+	event, err := handler.Transport.MessageToEvent(ctx, &cehttp.Message{
 		Header: req.Header,
 		Body:   body,
 	})
+
 	if err != nil {
-		logger.Errorw("failed to convert message to event", zap.Error(err))
-	}
-	//errorDetails := validateKymaSpecific(event)
-	if err != nil {
-		logger.Errorw("failed validating kyma specifics", zap.Error(err))
+		fmt.Printf("%v", err)
+		//TODO(k15r): handle this here
+		return
 	}
 
-	apiError, err := handler.HandleEvent(ctx, *event)
+	specErrors := []api.ErrorDetail(nil)
+	err = event.Validate()
+
+	if err != nil {
+		specErrors = errorToDetails(err)
+	}
+
+	kymaErrors := validateKymaSpecific(event)
+
+	allErrors := append(specErrors, kymaErrors...)
+	if len(allErrors) != 0 {
+		error := api.Error{
+			Status:  http.StatusBadRequest,
+			Message: api.ErrorMessageBadRequest,
+			Type:    api.ErrorTypeBadRequest,
+			Details: allErrors,
+		}
+		err := respondWithError(w, error)
+		if err != nil {
+			//TODO(k15r): handle this
+		}
+	}
+
+	apiResponse, apiError, err := handler.HandleEvent(ctx, *event)
+	if err != nil {
+		//TODO(k15r): do shit
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	if apiError != nil {
 		// TODO(nachtmaar)
 		//if handler.Transport.Req != nil {
@@ -119,8 +136,6 @@ func (handler *CloudEventHandler) ServeHTTP(w http.ResponseWriter, req *http.Req
 		//}
 		status := apiError.Status
 		w.WriteHeader(status)
-
-		w.Header().Add("Content-Length", strconv.Itoa(0))
 		if len(apiError.Message) > 0 {
 
 			apiErrorBytes, err := json.Marshal(apiError)
@@ -141,12 +156,40 @@ func (handler *CloudEventHandler) ServeHTTP(w http.ResponseWriter, req *http.Req
 		}
 		// TODO(nachtmaar) write actual response in case of no error
 
-		//r.OK()
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
-	//r.OK()
+	// Yeah... we got here
+	if apiResponse != nil {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(apiResponse)
+	}
+	w.WriteHeader(http.StatusInternalServerError)
+
+}
+
+func respondWithError(w http.ResponseWriter, error api.Error) error {
+	w.WriteHeader(error.Status)
+	if err := json.NewEncoder(w).Encode(error); err != nil {
+		return err
+	}
+	return nil
+}
+
+func respondWithSuccess(w http.ResponseWriter, event *cloudevents.Event, status string) {
+
+}
+
+func errorToDetails(err error) []api.ErrorDetail {
+	errors := []api.ErrorDetail(nil)
+
+	for _, error := range strings.Split(strings.TrimSuffix(err.Error(), "\n"), "\n") {
+		errors = append(errors, api.ErrorDetail{
+			Message: error,
+		})
+	}
+
+	return errors
 }
 
 func validateKymaSpecific(event *cloudevents.Event) []api.ErrorDetail {

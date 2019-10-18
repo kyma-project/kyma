@@ -30,6 +30,17 @@ const (
 	HeaderSourceID = "Source-Id"
 )
 
+type PublishStatus string
+
+const (
+	// PublishFailed status label
+	PublishFailed PublishStatus = "failed"
+	// PublishIgnored status label
+	PublishIgnored PublishStatus = "ignored"
+	// PublishPublished status label
+	PublishPublished PublishStatus = "published"
+)
+
 // Request represents a publish request
 type Request struct {
 	SourceID           string   `json:"source-id"`
@@ -46,9 +57,9 @@ type AnyValue interface{}
 
 // Response represents a successful publish response
 type Response struct {
-	EventID string `json:"event-id"`
-	Status  string `json:"status"`
-	Reason  string `json:"reason"`
+	EventID string        `json:"event-id"`
+	Status  PublishStatus `json:"status"`
+	Reason  string        `json:"reason"`
 }
 
 // CloudEvent represents the event to be persisted to NATS

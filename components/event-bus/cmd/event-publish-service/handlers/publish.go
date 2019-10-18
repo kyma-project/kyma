@@ -52,7 +52,7 @@ func KnativePublishHandler(version string, knativeLib *knative.KnativeLib, knati
 		var channelName *string
 		var namespace *string
 		var err *api.Error
-		var status string
+		var status api.PublishStatus
 
 		switch version {
 		case constants.EventAPIV1:
@@ -105,13 +105,13 @@ func filterCEHeaders(req *http.Request) map[string][]string {
 
 func handleKnativePublishRequestV1(w http.ResponseWriter, r *http.Request, knativeLib *knative.KnativeLib,
 	knativePublisher *publisher.KnativePublisher, context *api.TraceContext, opts *opts.Options) (*Message,
-	*string, *string, *api.Error, string) {
+	*string, *string, *api.Error, api.PublishStatus) {
 	// validate the http request
 	publishRequest, err := validators.ValidateRequestV1(r)
 	if err != nil {
 		log.Printf("validate request failed: %v", err)
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, api.PublishFailed
 	}
 
 	// set source-id from the headers if missing in the payload
@@ -119,14 +119,14 @@ func handleKnativePublishRequestV1(w http.ResponseWriter, r *http.Request, knati
 		err = api.ErrorResponseMissingFieldSourceID()
 		log.Printf("source-id missing: %v", err)
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, api.PublishFailed
 	}
 
 	// validate the publish request
 	if err = v1.ValidatePublish(publishRequest, opts.EventOptions); err != nil {
 		log.Printf("validate publish failed: %v", err)
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, api.PublishFailed
 	}
 
 	// generate event-id if there is none
@@ -136,7 +136,7 @@ func handleKnativePublishRequestV1(w http.ResponseWriter, r *http.Request, knati
 			err = api.ErrorResponseInternalServer()
 			log.Printf("EventID generation failed: %v", err)
 			_ = sendJSONError(w, err)
-			return nil, nil, nil, err, publisher.FAILED
+			return nil, nil, nil, err, api.PublishFailed
 		}
 		publishRequest.EventID = eventID
 	}
@@ -152,7 +152,7 @@ func handleKnativePublishRequestV1(w http.ResponseWriter, r *http.Request, knati
 		log.Printf("marshal message failed: %v", errMarshal.Error())
 		err = api.ErrorResponseInternalServer()
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, api.PublishFailed
 	}
 
 	// publish the message
@@ -160,7 +160,7 @@ func handleKnativePublishRequestV1(w http.ResponseWriter, r *http.Request, knati
 		&messagePayload, publishRequest.SourceID, publishRequest.EventType, publishRequest.EventTypeVersion)
 	if err != nil {
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, api.PublishFailed
 	}
 	// Succeed if the Status is IGNORED | PUBLISHED
 	return message, &channelName, &defaultChannelNamespace, nil, status
@@ -245,14 +245,14 @@ func buildCEMessage(event *publishv2.EventRequestV2, traceContext *api.TraceCont
 	return message
 }
 
-func getPublishStatusReason(status *string) string {
+func getPublishStatusReason(status *api.PublishStatus) string {
 	var reason string
 	switch *status {
-	case publisher.PUBLISHED:
+	case api.PublishPublished:
 		reason = "Message successfully published to the channel"
-	case publisher.IGNORED:
+	case api.PublishIgnored:
 		reason = "Event was ignored as there are no subscriptions or consumers configured for this event"
-	case publisher.FAILED:
+	case api.PublishFailed:
 		reason = "Some validation or internal error occurred"
 	}
 	return reason
@@ -271,20 +271,20 @@ func sendJSONError(w http.ResponseWriter, err *api.Error) error {
 
 func handleKnativePublishRequestV2(w http.ResponseWriter, r *http.Request, knativeLib *knative.KnativeLib,
 	knativePublisher *publisher.KnativePublisher, context *api.TraceContext, opts *opts.Options) (*Message,
-	*string, *string, *api.Error, string) {
+	*string, *string, *api.Error, api.PublishStatus) {
 	// validate the http request
 	event, err := validators.ValidateRequestV2(r)
 	if err != nil {
 		log.Printf("validate request failed: %v", err)
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, api.PublishFailed
 	}
 
 	// validate the publish request
 	if err = publishv2.ValidatePublish(event, opts.EventOptions); err != nil {
 		log.Printf("validate publish failed: %v", err)
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, api.PublishFailed
 	}
 
 	headers := filterCEHeaders(r)
@@ -298,7 +298,7 @@ func handleKnativePublishRequestV2(w http.ResponseWriter, r *http.Request, knati
 		log.Printf("marshal message failed: %v", errMarshal.Error())
 		err = api.ErrorResponseInternalServer()
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, api.PublishFailed
 	}
 
 	// publish the message
@@ -306,7 +306,7 @@ func handleKnativePublishRequestV2(w http.ResponseWriter, r *http.Request, knati
 		&messagePayload, event.Source, event.Type, event.TypeVersion)
 	if err != nil {
 		_ = sendJSONError(w, err)
-		return nil, nil, nil, err, publisher.FAILED
+		return nil, nil, nil, err, api.PublishFailed
 	}
 	// Succeed if the Status is IGNORED | PUBLISHED
 	return message, &channelName, &defaultChannelNamespace, nil, status
