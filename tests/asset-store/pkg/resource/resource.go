@@ -63,13 +63,24 @@ func (r *Resource) Get(name string, callbacks ...func(...interface{})) (*unstruc
 		return nil, errors.Wrapf(err, "while getting resource %s '%s'", r.kind, name)
 	}
 	for _, callback := range callbacks {
-		callback(fmt.Sprintf("GET: %s.%s\n%v", r.namespace, r.kind, result))
+		namespace := "-"
+		if r.namespace != "" {
+			namespace = r.namespace
+		}
+		callback(fmt.Sprintf("GET %s: namespace:%s kind:%s\n%v", name, namespace, r.kind, result))
 	}
 	return result, nil
 }
 
 func (r *Resource) Delete(name string, callbacks ...func(...interface{})) error {
 	err := retry.OnDeleteError(retry.DefaultBackoff, func() error {
+		for _, callback := range callbacks {
+			namespace := "-"
+			if r.namespace != "" {
+				namespace = r.namespace
+			}
+			callback(fmt.Sprintf("DELETE %s: namespace:%s name:%s", r.kind, namespace, name))
+		}
 		return r.ResCli.Delete(name, &metav1.DeleteOptions{})
 	}, callbacks...)
 	if err != nil {

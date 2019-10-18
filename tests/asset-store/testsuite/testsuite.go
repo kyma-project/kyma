@@ -97,6 +97,9 @@ func (t *TestSuite) Run() {
 	err := t.namespace.Create(t.t.Log)
 	failOnError(t.g, err)
 
+	t.t.Log("Deleting old cluster bucket...")
+	err = t.clusterBucket.Delete(t.t.Log)
+	failOnError(t.g, err)
 	t.t.Log("Creating cluster bucket...")
 	var resourceVersion string
 	resourceVersion, err = t.clusterBucket.Create(t.t.Log)
@@ -104,17 +107,20 @@ func (t *TestSuite) Run() {
 	// skip if resource already exists
 	if "" != resourceVersion {
 		t.t.Log("Waiting for cluster bucket to have ready phase...")
-		err = t.clusterBucket.WaitForStatusReady(resourceVersion)
+		err = t.clusterBucket.WaitForStatusReady(resourceVersion, t.t.Log)
 		failOnError(t.g, err)
 	}
 
+	t.t.Log("Deleting old bucket...")
+	err = t.bucket.Delete(t.t.Log)
+	failOnError(t.g, err)
 	t.t.Log("Creating bucket...")
 	resourceVersion, err = t.bucket.Create(t.t.Log)
 	failOnError(t.g, err)
 	// skip if resource already exists
 	if resourceVersion != "" {
 		t.t.Log("Waiting for bucket to have ready phase...")
-		err = t.bucket.WaitForStatusReady(resourceVersion)
+		err = t.bucket.WaitForStatusReady(resourceVersion, t.t.Log)
 		failOnError(t.g, err)
 	}
 
@@ -173,13 +179,13 @@ func (t *TestSuite) Run() {
 func (t *TestSuite) Cleanup() {
 	t.t.Log("Cleaning up...")
 
-	err := t.clusterBucket.Delete()
+	err := t.clusterBucket.Delete(t.t.Log)
 	failOnError(t.g, err)
 
-	err = t.bucket.Delete()
+	err = t.bucket.Delete(t.t.Log)
 	failOnError(t.g, err)
 
-	err = t.namespace.Delete()
+	err = t.namespace.Delete(t.t.Log)
 	failOnError(t.g, err)
 
 	err = deleteFiles(t.minioCli, t.uploadResult, t.t.Logf)

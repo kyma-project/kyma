@@ -75,8 +75,8 @@ func (b *clusterBucket) Get(name string) (*v1alpha2.ClusterBucket, error) {
 	return &res, nil
 }
 
-func (b *clusterBucket) Delete() error {
-	err := b.resCli.Delete(b.name)
+func (b *clusterBucket) Delete(callbacks ...func(...interface{})) error {
+	err := b.resCli.Delete(b.name, callbacks...)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting ClusterBucket %s", b.name)
 	}

@@ -61,10 +61,10 @@ func (b *bucket) Create(callbacks ...func(...interface{})) (string, error) {
 	return resourceVersion, err
 }
 
-func (b *bucket) WaitForStatusReady(initialResourceVersion string) error {
+func (b *bucket) WaitForStatusReady(initialResourceVersion string, callbacks ...func(...interface{})) error {
 	ctx, cancel := context.WithTimeout(context.Background(), b.waitTimeout)
 	defer cancel()
-	condition := isPhaseReady(b.name)
+	condition := isPhaseReady(b.name, callbacks...)
 	_, err := watchtools.Until(ctx, initialResourceVersion, b.resCli.ResCli, condition)
 	if err != nil {
 		return err
@@ -87,11 +87,10 @@ func (b *bucket) Get(name string) (*v1alpha2.Bucket, error) {
 	return &res, nil
 }
 
-func (b *bucket) Delete() error {
-	err := b.resCli.Delete(b.name)
+func (b *bucket) Delete(callbacks ...func(...interface{})) error {
+	err := b.resCli.Delete(b.name, callbacks...)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting Bucket %s in namespace %s", b.name, b.namespace)
 	}
-
 	return nil
 }

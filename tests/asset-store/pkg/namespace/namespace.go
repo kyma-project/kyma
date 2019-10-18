@@ -1,6 +1,7 @@
 package namespace
 
 import (
+	"fmt"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/retry"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
@@ -34,6 +35,9 @@ func (n *Namespace) Create(callbacks ...func(...interface{})) error {
 
 func (n *Namespace) Delete(callbacks ...func(...interface{})) error {
 	err := retry.OnDeleteError(retry.DefaultBackoff, func() error {
+		for _, callback := range callbacks {
+			callback(fmt.Sprintf("DELETE: namespace: %s", n.name))
+		}
 		return n.coreCli.Namespaces().Delete(n.name, &metav1.DeleteOptions{})
 	}, callbacks...)
 	if err != nil {
