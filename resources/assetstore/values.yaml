@@ -14,8 +14,8 @@ global:
     dir: develop/
     version: '37ed12b8'
   asset_store_test:
-    dir: develop/
-    version: 'e4d913fc'
+    dir: pr/
+    version: 'PR-6058'
   minio_client:
     image: 'minio/mc'
     tag: 'RELEASE.2019-04-03T17-59-57Z'
