@@ -19,13 +19,13 @@ var (
 	ErrInvalidDataType = errors.New("invalid data type")
 )
 
-func buildWaitForStatusesReady(iRsc dynamic.ResourceInterface, timeout time.Duration, rscNames ...string) func(string) error {
-	return func(initialResourceVersion string) error {
+func buildWaitForStatusesReady(iRsc dynamic.ResourceInterface, timeout time.Duration, rscNames ...string) func(string, ...func(...interface{})) error {
+	return func(initialResourceVersion string, callbacks ...func(...interface{})) error {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 		var conditions []watchtools.ConditionFunc
 		for _, rsName := range rscNames {
-			conditions = append(conditions, isPhaseReady(rsName))
+			conditions = append(conditions, isPhaseReady(rsName, callbacks...))
 		}
 		_, err := watchtools.Until(ctx, initialResourceVersion, iRsc, conditions...)
 		if err != nil {
@@ -103,7 +103,7 @@ func buildDeleteLeftovers(iRsc dynamic.ResourceInterface, timeout time.Duration)
 
 var ready = "Ready"
 
-func isPhaseReady(name string) func(event watch.Event) (bool, error) {
+func isPhaseReady(name string, callbacks ...func(...interface{})) func(event watch.Event) (bool, error) {
 	return func(event watch.Event) (bool, error) {
 		if event.Type != watch.Modified {
 			return false, nil
@@ -125,6 +125,12 @@ func isPhaseReady(name string) func(event watch.Event) (bool, error) {
 			return false, err
 		}
 		phase := bucketLike.Status.Phase
-		return phase != ready, nil
+		isReady := phase != ready
+		if isReady {
+			for _, callback := range callbacks {
+				callback(fmt.Sprintf("%s is ready", name))
+			}
+		}
+		return isReady, nil
 	}
 }

@@ -125,28 +125,32 @@ func (t *TestSuite) Run() {
 	t.uploadResult = uploadResult
 	t.systemBucketName = uploadResult.UploadedFiles[0].Bucket
 
+	t.t.Log("Deleting old assets...")
 	err = t.asset.DeleteLeftovers(t.testId)
 	failOnError(t.g, err)
 
+	t.t.Log("Deleting old cluster assets...")
 	err = t.clusterAsset.DeleteLeftovers(t.testId)
 	failOnError(t.g, err)
 
+	t.t.Log("Preparing metadata...")
 	t.assetDetails = convertToAssetResourceDetails(uploadResult, t.cfg.CommonAssetPrefix)
 
 	t.t.Log("Creating assets...")
 	resourceVersion, err = t.asset.CreateMany(t.assetDetails, t.testId, t.t.Log)
 	failOnError(t.g, err)
 	t.t.Log("Waiting for assets to have ready phase...")
-	err = t.asset.WaitForStatusesReady(t.assetDetails, resourceVersion)
+	err = t.asset.WaitForStatusesReady(t.assetDetails, resourceVersion, t.t.Log)
 	failOnError(t.g, err)
 
 	t.t.Log("Creating cluster assets...")
 	resourceVersion, err = t.clusterAsset.CreateMany(t.assetDetails, t.testId, t.t.Log)
 	failOnError(t.g, err)
 	t.t.Log("Waiting for cluster assets to have ready phase...")
-	err = t.clusterAsset.WaitForStatusesReady(t.assetDetails, resourceVersion)
+	err = t.clusterAsset.WaitForStatusesReady(t.assetDetails, resourceVersion, t.t.Log)
 	failOnError(t.g, err)
 
+	t.t.Log("Populating uploaded files...")
 	files, err := t.populateUploadedFiles()
 	failOnError(t.g, err)
 

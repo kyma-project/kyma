@@ -54,9 +54,9 @@ func (b *clusterBucket) Create(callbacks ...func(...interface{})) (string, error
 	return resourceVersion, nil
 }
 
-func (b *clusterBucket) WaitForStatusReady(initialResourceVersion string) error {
+func (b *clusterBucket) WaitForStatusReady(initialResourceVersion string, callbacks ...func(...interface{})) error {
 	waitForStatusReady := buildWaitForStatusesReady(b.resCli.ResCli, b.waitTimeout, b.name)
-	err := waitForStatusReady(initialResourceVersion)
+	err := waitForStatusReady(initialResourceVersion, callbacks...)
 	return err
 }
 

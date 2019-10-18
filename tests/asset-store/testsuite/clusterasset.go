@@ -68,13 +68,13 @@ func (a *clusterAsset) CreateMany(assets []assetData, testID string, callbacks .
 	return initialResourceVersion, nil
 }
 
-func (a *clusterAsset) WaitForStatusesReady(assets []assetData, initialResourceVersion string) error {
+func (a *clusterAsset) WaitForStatusesReady(assets []assetData, initialResourceVersion string, callbacks ...func(...interface{})) error {
 	var assetNames []string
 	for _, asset := range assets {
 		assetNames = append(assetNames, asset.Name)
 	}
 	waitForStatusesReady := buildWaitForStatusesReady(a.resCli.ResCli, a.waitTimeout, assetNames...)
-	err := waitForStatusesReady(initialResourceVersion)
+	err := waitForStatusesReady(initialResourceVersion, callbacks...)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for cluster assets to have ready state")
 	}

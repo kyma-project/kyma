@@ -73,13 +73,13 @@ func (a *asset) CreateMany(assets []assetData, testID string, callbacks ...func(
 	return initialResourceVersion, nil
 }
 
-func (a *asset) WaitForStatusesReady(assets []assetData, resourceVersion string) error {
+func (a *asset) WaitForStatusesReady(assets []assetData, resourceVersion string, callbacks ...func(...interface{})) error {
 	var assetNames []string
 	for _, asset := range assets {
 		assetNames = append(assetNames, asset.Name)
 	}
 	waitForStatusesReady := buildWaitForStatusesReady(a.resCli.ResCli, a.waitTimeout, assetNames...)
-	err := waitForStatusesReady(resourceVersion)
+	err := waitForStatusesReady(resourceVersion, callbacks...)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for assets to have ready state")
 	}
