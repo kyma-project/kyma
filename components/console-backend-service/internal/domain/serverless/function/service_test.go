@@ -1,4 +1,4 @@
-package serverless
+package function
 
 import (
 	"testing"
