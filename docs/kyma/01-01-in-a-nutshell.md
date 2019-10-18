@@ -3,13 +3,13 @@ title: In a nutshell
 type: Overview
 ---
 
-Kyma allows you to extend applications through microservices and lambda functions. You first connect your application to a Kubernetes cluster and expose the application's API or Events securely. You can then create microservices or functions, trigger them to react to particular Events or calls to your application's API, and this way implement the business logic you require. You can also limit the time spent on coding and simply use the in-built cloud services from the Service Catalog portfolio, exposed by open service brokers from such cloud providers as GCP, Azure, and AWS.
+Kyma allows you to extend applications with microservices and lambda functions. You first connect your application to a Kubernetes cluster and expose the application's API or Events securely. You can then create microservices or functions, trigger them to react to particular Events or calls to your application's API, and implement the business logic you require. To limit the time spent on coding, use the in-built cloud services from the Service Catalog, exposed by open service brokers from such cloud providers as GCP, Azure, and AWS.
 
 Kyma comes equipped with those out-of-the-box functionalities:
 
 - Service-to-service communication and proxying (Istio-based [Service Mesh](/components/service-mesh/#overview-overview))
 - In-built [monitoring](/components/monitoring/#overview-overview), [tracing](/components/tracing/#overview-overview), and [logging](/components/logging/#overview-overview) (Grafana, Prometheus, Jaeger), Loki, Kiali)
-- Secure [authentication and authorization](/components/security/#overview-overview) (Dex, Service Identity, TLS, Role Based Access Control)
+- Secure [authentication and authorization](/components/security/#overview-overview) (Dex, Ory, Service Identity, TLS, Role Based Access Control)
 - The catalog of services to choose from ([Service Catalog](/components/service-catalog/#overview-overview), [Service Brokers](https://kyma-project.io/docs/components/service-catalog/#service-brokers-service-brokers))
 - The development platform to run lightweight functions in a cost-efficient and scalable way ([Serverless](/components/serverless/#overview-overview), Kubeless)
 - The endpoint to register Events and APIs of external applications ([Application Connector](/components/application-connector/#overview-overview))
@@ -17,4 +17,4 @@ Kyma comes equipped with those out-of-the-box functionalities:
 - The messaging channel to receive Events, enrich them, and trigger business flows using lambdas or services ([Event Bus](/components/event-bus/#overview-overview), NATS)
 - [Backup and restore](/components/backup#overview-overview) capabilities (Velero)
 - CLI supported by the intuitive UI ([Console](/components/console/#overview-overview))
-- Asset management and rendering tools ([Asset Store](/components/asset-store/#overview-overview), [Headless CMS](/components/headless-cms/#overview-overview))
+- Asset management and storing tools ([Asset Store](/components/asset-store/#overview-overview), [Headless CMS](/components/headless-cms/#overview-overview), Minio)
