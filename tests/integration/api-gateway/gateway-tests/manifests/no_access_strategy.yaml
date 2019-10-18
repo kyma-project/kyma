@@ -14,3 +14,20 @@ spec:
     accessStrategies:
     - handler: noop
     mutators: []
+---
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: passthrough-unsecured-{{.TestID}}
+spec:
+  service:
+    host: httpbin-{{.TestID}}.kyma.local
+    name: httpbin-{{.TestID}}
+    port: 8001
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  rules:
+    - path: /.*
+      methods: ["GET"]
+      accessStrategies:
+        - handler: noop
+      mutators: []

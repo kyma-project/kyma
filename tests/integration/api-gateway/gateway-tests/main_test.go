@@ -19,11 +19,13 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
+
+	manager "github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/resourcemanager"
 )
 
 const testIDLength = 8
 const manifestsDirectory = "manifests/"
-const commonResourcesFile = "common.yaml"
+const commonResourcesFile = "no_access_strategy.yaml"
 const resourceSeparator = "---"
 
 func TestApiGatewayIntegration(t *testing.T) {
@@ -42,11 +44,11 @@ func TestApiGatewayIntegration(t *testing.T) {
 		for _, commonResource := range commonResources {
 			fmt.Println(commonResource)
 			resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
-			fmt.Println(resourceSchema)
-			createResource(k8sClient, resourceSchema, ns, commonResource)
-			deleteResource(k8sClient, resourceSchema, ns, name) // TODO: move delete after test execution
+			fmt.Printf("group: %s, ver: %s, res: %s \n",resourceSchema.Group,resourceSchema.Version,resourceSchema.Resource)
+			manager.CreateResource(k8sClient, resourceSchema, ns, commonResource)
+			manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResources[i+1]) //TODO: wait for resource creation
+			manager.DeleteResource(k8sClient, resourceSchema, ns, name) // TODO: move delete after test execution
 		}
-
 		// TODO: create api-rule
 
 		// TODO: wait until rules propagate
@@ -116,7 +118,7 @@ func plurarForm(name string) string {
 }
 
 func createResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, manifest unstructured.Unstructured) {
-	fmt.Println("Creating resource...")
+	fmt.Printf("Creating resource %s...\n", manifest.GetName())
 	result, err := client.Resource(resourceSchema).Namespace(namespace).Create(&manifest, metav1.CreateOptions{})
 	if err != nil {
 		panic(err)
