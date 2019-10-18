@@ -103,14 +103,14 @@ else
 fi
 
 # creates a ClusterAddonsConfiguration which provides the testing addons
-injectTestingAddons
-if [[ $? -eq 1 ]]; then
-  exit 1
-fi
+#injectTestingAddons
+#if [[ $? -eq 1 ]]; then
+#  exit 1
+#fi
 
-if [[ ${CLEANUP} = "true" ]]; then
-  trap removeTestingAddons EXIT
-fi
+#if [[ ${CLEANUP} = "true" ]]; then
+#  trap removeTestingAddons EXIT
+#fi
 
 cat <<EOF | ${kc} apply -f -
 apiVersion: testing.kyma-project.io/v1alpha1
