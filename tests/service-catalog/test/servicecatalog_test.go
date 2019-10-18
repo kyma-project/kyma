@@ -11,19 +11,18 @@ import (
 	"testing"
 	"time"
 
-	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	"github.com/kyma-project/kyma/tests/service-catalog/test/utils/istio"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
-
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appTypes "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/service-catalog/utils/istio"
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
 
 	scc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
 	v1alpha12 "github.com/kyma-project/kyma/components/helm-broker/pkg/apis/addons/v1alpha1"
-	"github.com/kyma-project/kyma/tests/service-catalog/test/utils/repeat"
-	"github.com/kyma-project/kyma/tests/service-catalog/test/utils/report"
+	"github.com/kyma-project/kyma/tests/service-catalog/utils/repeat"
+	"github.com/kyma-project/kyma/tests/service-catalog/utils/report"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -43,6 +42,8 @@ const (
 
 	addonId       = "a54abe18-0a84-22e9-ab34-d663bbce3d88"
 	addonsRepoURL = "https://github.com/kyma-project/bundles/releases/download/latest/index-acc-testing.yaml"
+
+	anyNamespaceName = "default"
 )
 
 func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
@@ -76,7 +77,7 @@ func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
 				u, err := url.Parse(broker.url)
 				require.NoError(t, err)
 
-				istio.DumpIstioConfig(t, u.Host, broker.labelSelector)
+				istio.DumpConfig(t, u.Host, broker.labelSelector)
 
 			}
 		})
@@ -177,7 +178,7 @@ func TestHelmBrokerClusterAddonsConfiguration(t *testing.T) {
 			namespaceReport := report.NewReport(t,
 				k8sConfig,
 				report.WithHB())
-			namespaceReport.PrintJsonReport("default")
+			namespaceReport.PrintJsonReport(anyNamespaceName)
 		}
 		err = dynamicClient.Delete(context.TODO(), addonsConfig)
 		assert.NoError(t, err)
@@ -290,7 +291,7 @@ func isCatalogForbidden(url string) (bool, int, error) {
 	case isForbiddenError(err):
 		return true, statusCode, nil
 	default:
-		return false, statusCode, errors.Wrapf(err, "while getting catalog from broker with URL: %s", url)
+		return false, 0, errors.Wrapf(err, "while getting catalog from broker with URL: %s", url)
 	}
 }
 

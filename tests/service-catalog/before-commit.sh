@@ -71,4 +71,4 @@ function goBuild() {
 }
 
 echo -e "${GREEN} Building env-tester${NC}"
-goBuild env-tester.bin ./test/cmd/env-tester/main.go
+goBuild env-tester.bin ./cmd/env-tester/main.go

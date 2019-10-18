@@ -25,7 +25,7 @@ type Report struct {
 	printer     printers.ResourcePrinter
 }
 
-// NewReport creates a report with chosen
+// NewReport creates a report with chosen resources
 func NewReport(t *testing.T, config *rest.Config, types ...ReportType) *Report {
 	return &Report{
 		test:        t,
@@ -118,6 +118,7 @@ func WithSBU() ReportType {
 	}
 }
 
+// WithHB creates report with HelmBroker resources list: AddonsConfiguration, ClusterAddonsConfiguration
 func WithHB() ReportType {
 	return func(r *Report, ns string) {
 		hbclientset, err := hbClient.NewForConfig(r.cfg)

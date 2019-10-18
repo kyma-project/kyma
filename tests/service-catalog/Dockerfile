@@ -7,7 +7,7 @@ COPY entrypoint.sh /
 
 WORKDIR $SRC_DIR
 
-RUN CGO_ENABLED=0 go build -o /env-tester.bin ./test/cmd/env-tester/main.go
+RUN CGO_ENABLED=0 go build -o /env-tester.bin ./cmd/env-tester/main.go
 RUN CGO_ENABLED=0 go test -tags=acceptance -c ./test -o /servicecatalog.test
 
 FROM alpine:3.10
