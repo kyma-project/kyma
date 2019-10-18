@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"html/template"
@@ -11,6 +12,10 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"sigs.k8s.io/yaml"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/clientcmd"
@@ -33,11 +38,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 		t.Parallel()
 		testID := generateTestID()
 
-		// parse go template to add unique id
-		for _, commonResourceRaw := range commonResourcesRaw {
-			fmt.Println(parseTemplateWithData(commonResourceRaw, struct{ TestID string }{TestID: testID}))
-			// TODO: save output to a slice with common manifests
-		}
+		commonResources := getCommonResourcesForTest(testID, commonResourcesRaw...)
+		fmt.Println(commonResources)
 
 		// TODO: create common resources from manifests
 
@@ -102,4 +104,34 @@ func parseTemplateWithData(templateRaw string, data interface{}) string {
 		panic(err)
 	}
 	return resource.String()
+}
+
+func parseManifest(input []byte) (*unstructured.Unstructured, error) {
+	var middleware map[string]interface{}
+	err := json.Unmarshal(input, &middleware)
+	if err != nil {
+		return nil, err
+	}
+
+	resource := &unstructured.Unstructured{
+		Object: middleware,
+	}
+	return resource, nil
+}
+
+func getCommonResourcesForTest(testID string, commonResourcesRaw ...string) []unstructured.Unstructured {
+	var commonResources []unstructured.Unstructured
+	for _, commonResourceRaw := range commonResourcesRaw {
+		commonResourceYAML := parseTemplateWithData(commonResourceRaw, struct{ TestID string }{TestID: testID})
+		commonResourceJSON, err := yaml.YAMLToJSON([]byte(commonResourceYAML))
+		if err != nil {
+			panic(err)
+		}
+		commonResource, err := parseManifest(commonResourceJSON)
+		if err != nil {
+			panic(err)
+		}
+		commonResources = append(commonResources, *commonResource)
+	}
+	return commonResources
 }
