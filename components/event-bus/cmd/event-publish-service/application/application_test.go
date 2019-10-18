@@ -8,8 +8,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
-
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/test/fake"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
@@ -292,6 +290,6 @@ func Test_PublishV1ResponseFields(t *testing.T) {
 	// assert
 	assert.Nil(t, err)
 	assert.Equal(t, testV1.TestEventID, publishResponse.EventID)
-	assert.Equal(t, publisher.PUBLISHED, publishResponse.Status)
+	assert.Equal(t, api.PublishPublished, publishResponse.Status)
 	assert.Equal(t, "Message successfully published to the channel", publishResponse.Reason)
 }
