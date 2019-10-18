@@ -6,12 +6,13 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/manifestprocessor"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -144,7 +145,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	deployment, err := parseManifest(rawAPIRule)
+	deployment, err := manifestprocessor.ParseManifest(rawAPIRule)
 	if err != nil {
 		panic(err)
 	}
@@ -165,19 +166,6 @@ func prompt() {
 		panic(err)
 	}
 	fmt.Println()
-}
-
-func parseManifest(input []byte) (*unstructured.Unstructured, error) {
-	var middleware map[string]interface{}
-	err := json.Unmarshal(input, &middleware)
-	if err != nil {
-		return nil, err
-	}
-
-	resource := &unstructured.Unstructured{
-		Object: middleware,
-	}
-	return resource, nil
 }
 
 func plurarForm(name string) string {

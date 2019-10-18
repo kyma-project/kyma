@@ -1,7 +1,14 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: api-gateway-tests
+---
 apiVersion: v1
 kind: Service
 metadata:
   name: httpbin-{{.TestID}}
+  namespace: api-gateway-tests
   labels:
     app: httpbin-{{.TestID}}
 spec:
@@ -16,6 +23,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: httpbin-{{.TestID}}
+  namespace: api-gateway-tests
 spec:
   replicas: 1
   selector:
