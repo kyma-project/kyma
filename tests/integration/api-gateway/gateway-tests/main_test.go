@@ -1,21 +1,16 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"flag"
 	"fmt"
-	"html/template"
-	"io/ioutil"
 	"math/rand"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/manifestprocessor"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	"sigs.k8s.io/yaml"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -35,15 +30,15 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 	k8sClient := getDynamicClient()
 
-	// load common resource file
-	commonResourcesRaw := getManifestsFromFile(commonResourcesFile)
-
 	t.Run("expose service without access strategy (plain access)", func(t *testing.T) {
 		t.Parallel()
 		testID := generateTestID()
 
-		// create common resources
-		commonResources := getCommonResourcesForTest(testID, commonResourcesRaw...)
+		// create common resources from files
+		commonResources, err := manifestprocessor.ParseTemplate(commonResourcesFile, manifestsDirectory, "", testID)
+		if err != nil {
+			panic(err)
+		}
 		for _, commonResource := range commonResources {
 			fmt.Println(commonResource)
 			resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
@@ -92,57 +87,6 @@ func generateTestID() string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
-}
-
-func getManifestsFromFile(fileName string) []string {
-	data, err := ioutil.ReadFile(manifestsDirectory + fileName)
-	if err != nil {
-		panic(err)
-	}
-	return strings.Split(string(data), resourceSeparator)
-}
-
-func parseTemplateWithData(templateRaw string, data interface{}) string {
-	tmpl, err := template.New("tmpl").Parse(templateRaw)
-	if err != nil {
-		panic(err)
-	}
-	var resource bytes.Buffer
-	err = tmpl.Execute(&resource, data)
-	if err != nil {
-		panic(err)
-	}
-	return resource.String()
-}
-
-func parseManifest(input []byte) (*unstructured.Unstructured, error) {
-	var middleware map[string]interface{}
-	err := json.Unmarshal(input, &middleware)
-	if err != nil {
-		return nil, err
-	}
-
-	resource := &unstructured.Unstructured{
-		Object: middleware,
-	}
-	return resource, nil
-}
-
-func getCommonResourcesForTest(testID string, commonResourcesRaw ...string) []unstructured.Unstructured {
-	var commonResources []unstructured.Unstructured
-	for _, commonResourceRaw := range commonResourcesRaw {
-		commonResourceYAML := parseTemplateWithData(commonResourceRaw, struct{ TestID string }{TestID: testID})
-		commonResourceJSON, err := yaml.YAMLToJSON([]byte(commonResourceYAML))
-		if err != nil {
-			panic(err)
-		}
-		commonResource, err := parseManifest(commonResourceJSON)
-		if err != nil {
-			panic(err)
-		}
-		commonResources = append(commonResources, *commonResource)
-	}
-	return commonResources
 }
 
 func getResourceSchemaAndNamespace(manifest unstructured.Unstructured) (schema.GroupVersionResource, string, string) {

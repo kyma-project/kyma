@@ -3,6 +3,7 @@ module github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests
 go 1.12
 
 require (
+	github.com/ghodss/yaml v0.0.0-20150909031657-73d445a93680
 	github.com/golang/protobuf v1.3.2 // indirect
 	golang.org/x/sys v0.0.0-20191010194322-b09406accb47 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
