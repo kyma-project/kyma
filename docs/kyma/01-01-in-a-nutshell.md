@@ -3,7 +3,7 @@ title: In a nutshell
 type: Overview
 ---
 
-Kyma allows you to extend applications with microservices and lambda functions. You first connect your application to a Kubernetes cluster and expose the application's API or Events securely. You can then create microservices or functions, trigger them to react to particular Events or calls to your application's API, and implement the business logic you require. To limit the time spent on coding, use the in-built cloud services from the Service Catalog, exposed by open service brokers from such cloud providers as GCP, Azure, and AWS.
+Kyma allows you to extend applications with microservices and lambda functions. You first connect your application to a Kubernetes cluster and expose the application's API or Events securely. You can then implement the business logic you require by creating microservices or functions, and triggering them to react to particular Events or calls to your application's API. To limit the time spent on coding, use the in-built cloud services from the Service Catalog, exposed by open service brokers from such cloud providers as GCP, Azure, and AWS.
 
 Kyma comes equipped with those out-of-the-box functionalities:
 
