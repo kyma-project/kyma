@@ -76,11 +76,11 @@ func buildDeleteLeftovers(iRsc dynamic.ResourceInterface, timeout time.Duration)
 		var assetDeletionCounter = len(assetNames)
 		_, err = watchtools.Until(ctx, initialResourceVersion, iRsc, func(event watch.Event) (b bool, e error) {
 			if event.Type != watch.Deleted {
-				return false, ErrInvalidDataType
+				return false, nil
 			}
 			u, ok := event.Object.(*unstructured.Unstructured)
 			if !ok {
-				return false, nil
+				return false, ErrInvalidDataType
 			}
 			for _, name := range assetNames {
 				if name != u.GetName() {
