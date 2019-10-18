@@ -28,10 +28,11 @@ type CloudEventHandler struct {
 
 // HandleEvent finally handles the decoded event
 func (handler *CloudEventHandler) HandleEvent(ctx context.Context, event cloudevents.Event) (*api.Response, *api.Error, error) {
+	// make sure to get v1 event
 
 	//TODO(k15r): should we make this configurable
-	codec := cehttp.CodecV03{
-		DefaultEncoding: cehttp.StructuredV03,
+	codec := cehttp.CodecV1{
+		DefaultEncoding: cehttp.StructuredV1,
 	}
 
 	m, err := codec.Encode(ctx, event)
@@ -46,10 +47,24 @@ func (handler *CloudEventHandler) HandleEvent(ctx context.Context, event cloudev
 
 	fmt.Printf("%v", message)
 
-	etv, err := cetypes.ToString(event.Context.GetExtensions()[api.FieldEventTypeVersion])
-	if err != nil {
-		return nil, nil, err
+	var etv string
+	var ex interface{}
+	if ex, ok = event.Context.GetExtensions()[api.FieldEventTypeVersion]; !ok {
+		return nil, nil, fmt.Errorf("this should never happen, sine the event has been already validated. Hence the extension should not be missing.")
 	}
+
+	// extension can have a different type depending on CE version
+	if event.SpecVersion() == cloudevents.VersionV1 {
+		etv, err = cetypes.ToString(ex)
+		if err != nil {
+			return nil, nil, err
+		}
+	} else if event.SpecVersion() == cloudevents.VersionV03 {
+		if err := json.Unmarshal(ex.(json.RawMessage), &etv); err != nil {
+			return nil, nil, err
+		}
+	}
+
 	ns := knative.GetDefaultChannelNamespace()
 	header := map[string][]string(message.Header)
 
