@@ -46,7 +46,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
 			fmt.Printf("group: %s, ver: %s, res: %s \n",resourceSchema.Group,resourceSchema.Version,resourceSchema.Resource)
 			manager.CreateResource(k8sClient, resourceSchema, ns, commonResource)
-			manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResources[i+1]) //TODO: wait for resource creation
+			manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource) //TODO: wait for resource creation
 			manager.DeleteResource(k8sClient, resourceSchema, ns, name) // TODO: move delete after test execution
 		}
 		// TODO: create api-rule

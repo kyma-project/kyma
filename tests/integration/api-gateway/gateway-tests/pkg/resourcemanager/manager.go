@@ -22,10 +22,12 @@ func CreateResource(client dynamic.Interface, resourceSchema schema.GroupVersion
 
 //UpdateResource updates a given k8s resource
 func UpdateResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, name string, updateTo unstructured.Unstructured) {
-	fmt.Println("Updating resource...")
-	time.Sleep(5*time.Second)
+	time.Sleep(5*time.Second) //TODO: delete after waiting for resource creation is implemented
 
 	toUpdate, err:=client.Resource(resourceSchema).Namespace(namespace).Get(name,metav1.GetOptions{})
+	if err!= nil {
+		panic(err)
+	}
 	updateTo.SetResourceVersion(toUpdate.GetResourceVersion())
 	fmt.Printf("Update to: %q\n",updateTo)
 
