@@ -62,13 +62,14 @@ func Test_fnWithIgnore(t *testing.T) {
 func Test_fnWithIgnore_callback(t *testing.T) {
 	g := NewGomegaWithT(t)
 	actual := false
-	_ = fnWithIgnore(func() error {
+	err := fnWithIgnore(func() error {
 		return errTest1
 	}, func(err error) bool {
 		return true
 	}, func(args ...interface{}) {
 		actual = true
 	})()
+	g.Expect(err).To(BeNil())
 	g.Expect(actual).To(Equal(true))
 }
 
