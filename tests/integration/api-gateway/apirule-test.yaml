@@ -2,7 +2,7 @@
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
-  name: passthrough-unsecured
+  name: jwt2noop-strategy
 spec:
   service:
     host: httpbin1.kyma.local
@@ -10,8 +10,12 @@ spec:
     port: 8000
   gateway: kyma-gateway.kyma-system.svc.cluster.local
   rules:
-    - path: /.*
+    - path: /headers
       methods: ["GET"]
       accessStrategies:
         - handler: noop
+        # - handler: jwt
+        #   config:
+        #     trusted_issuers: ["http://dex.kyma.local"]
+        #     required_scope: []
       mutators: []
