@@ -35,15 +35,18 @@ func TestApiGatewayIntegration(t *testing.T) {
 		testID := generateTestID()
 
 		// create common resources from files
-		commonResources, err := manifestprocessor.ParseTemplate(commonResourcesFile, manifestsDirectory, "", testID)
+		commonResources, err := manifestprocessor.ParseFromFileWithTemplate(commonResourcesFile, manifestsDirectory, "", testID)
 		if err != nil {
 			panic(err)
 		}
 		for _, commonResource := range commonResources {
 			fmt.Println(commonResource)
-			resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
+			resourceSchema, ns, _ := getResourceSchemaAndNamespace(commonResource)
 			fmt.Println(resourceSchema)
 			createResource(k8sClient, resourceSchema, ns, commonResource)
+		}
+		for _, commonResource := range commonResources {
+			resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
 			deleteResource(k8sClient, resourceSchema, ns, name) // TODO: move delete after test execution
 		}
 
@@ -98,7 +101,10 @@ func getResourceSchemaAndNamespace(manifest unstructured.Unstructured) (schema.G
 	}
 	resourceName := fmt.Sprintf("%s", metadata["name"])
 	resourceKind := fmt.Sprintf("%s", manifest.Object["kind"])
-
+	if resourceKind == "Namespace" {
+		namespace = ""
+	}
+	//TODO: Move this ^ somewhere else and make it clearer
 	var apiGroup, version string
 	if len(apiVersion) > 1 {
 		apiGroup = apiVersion[0]

@@ -48,7 +48,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	resources, err := manifestprocessor.Parse("common.yaml", "manifests/", "")
+	resources, err := manifestprocessor.ParseFromFile("common.yaml", "manifests/", "")
 	if err != nil {
 		panic(err)
 	}

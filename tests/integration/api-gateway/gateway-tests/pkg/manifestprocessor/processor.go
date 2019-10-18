@@ -66,8 +66,8 @@ func parseTemplateWithData(templateRaw string, data interface{}) string {
 	return resource.String()
 }
 
-//Parse Parse simple yaml manifests
-func Parse(fileName string, directory string, separator string) ([]unstructured.Unstructured, error) {
+//ParseFromFile parse simple yaml manifests
+func ParseFromFile(fileName string, directory string, separator string) ([]unstructured.Unstructured, error) {
 	manifests, err := convert(getManifestsFromFile(fileName, directory, separator))
 	if err != nil {
 		return nil, err
@@ -83,8 +83,8 @@ func Parse(fileName string, directory string, separator string) ([]unstructured.
 	return resources, nil
 }
 
-//ParseTemplate Parse manifests with goTemplate support
-func ParseTemplate(fileName string, directory string, separator string, testID string) ([]unstructured.Unstructured, error) {
+//ParseFromFileWithTemplate parse manifests with goTemplate support
+func ParseFromFileWithTemplate(fileName string, directory string, separator string, testID string) ([]unstructured.Unstructured, error) {
 	manifestsRaw, err := convert(getManifestsFromFile(fileName, directory, separator))
 	if err != nil {
 		return nil, err
