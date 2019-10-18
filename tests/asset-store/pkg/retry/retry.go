@@ -11,14 +11,14 @@ import (
 )
 
 var (
-	DefaultBackoff      = retry.DefaultBackoff
-	ErrInvalidErrorFunc = goerrors.New("invalid error function")
+	DefaultBackoff = retry.DefaultBackoff
+	ErrInvalidFunc = goerrors.New("invalid function")
 )
 
 func fnWithIgnore(fn func() error, ignoreErr func(error) bool, callbacks ...func(...interface{})) func() error {
 	return func() error {
 		if fn == nil {
-			return ErrInvalidErrorFunc
+			return ErrInvalidFunc
 		}
 		err := fn()
 		if ignoreErr == nil {

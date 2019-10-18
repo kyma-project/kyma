@@ -36,13 +36,13 @@ func Test_fnWithIgnore(t *testing.T) {
 			},
 		},
 		{
-			expected: ErrInvalidErrorFunc,
+			expected: ErrInvalidFunc,
 		},
 		{
 			ignoreFn: func(err error) bool {
-				return err == ErrInvalidErrorFunc
+				return err == ErrInvalidFunc
 			},
-			expected: ErrInvalidErrorFunc,
+			expected: ErrInvalidFunc,
 		},
 	}
 	for i, test := range tests {
@@ -93,7 +93,7 @@ func Test_errorFn(t *testing.T) {
 			expected: true,
 		},
 		{
-			err:      ErrInvalidErrorFunc,
+			err:      ErrInvalidFunc,
 			expected: false,
 		},
 		{

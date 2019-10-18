@@ -76,7 +76,7 @@ func (a *clusterAsset) WaitForStatusesReady(assets []assetData, initialResourceV
 	waitForStatusesReady := buildWaitForStatusesReady(a.resCli.ResCli, a.waitTimeout, assetNames...)
 	err := waitForStatusesReady(initialResourceVersion)
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for ready Asset resources")
+		return errors.Wrapf(err, "while waiting for cluster assets to have ready state")
 	}
 	return nil
 }

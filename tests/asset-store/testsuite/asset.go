@@ -81,7 +81,7 @@ func (a *asset) WaitForStatusesReady(assets []assetData, resourceVersion string)
 	waitForStatusesReady := buildWaitForStatusesReady(a.resCli.ResCli, a.waitTimeout, assetNames...)
 	err := waitForStatusesReady(resourceVersion)
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for ready Asset resources")
+		return errors.Wrapf(err, "while waiting for assets to have ready state")
 	}
 	return nil
 }
