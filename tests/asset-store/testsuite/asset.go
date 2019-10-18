@@ -86,11 +86,11 @@ func (a *asset) WaitForStatusesReady(assets []assetData, resourceVersion string,
 	return nil
 }
 
-func (a *asset) PopulateUploadFiles(assets []assetData) ([]uploadedFile, error) {
+func (a *asset) PopulateUploadFiles(assets []assetData, callbacks ...func(...interface{})) ([]uploadedFile, error) {
 	var files []uploadedFile
 
 	for _, asset := range assets {
-		res, err := a.Get(asset.Name)
+		res, err := a.Get(asset.Name, callbacks...)
 		if err != nil {
 			return nil, err
 		}
@@ -101,8 +101,8 @@ func (a *asset) PopulateUploadFiles(assets []assetData) ([]uploadedFile, error) 
 	return files, nil
 }
 
-func (a *asset) Get(name string) (*v1alpha2.Asset, error) {
-	u, err := a.resCli.Get(name)
+func (a *asset) Get(name string, callbacks ...func(...interface{})) (*v1alpha2.Asset, error) {
+	u, err := a.resCli.Get(name, callbacks...)
 	if err != nil {
 		return nil, err
 	}

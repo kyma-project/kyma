@@ -150,8 +150,8 @@ func (t *TestSuite) Run() {
 	err = t.clusterAsset.WaitForStatusesReady(t.assetDetails, resourceVersion, t.t.Log)
 	failOnError(t.g, err)
 
-	t.t.Log("Populating uploaded files...")
-	files, err := t.populateUploadedFiles()
+	t.t.Log(fmt.Sprintf("asset details:\n%v", t.assetDetails))
+	files, err := t.populateUploadedFiles(t.t.Log)
 	failOnError(t.g, err)
 
 	t.t.Log("Verifying uploaded files...")
@@ -199,9 +199,9 @@ func (t *TestSuite) uploadTestFiles() (*upload.Response, error) {
 	return uploadResult, nil
 }
 
-func (t *TestSuite) populateUploadedFiles() ([]uploadedFile, error) {
+func (t *TestSuite) populateUploadedFiles(callbacks ...func(...interface{})) ([]uploadedFile, error) {
 	var allFiles []uploadedFile
-	assetFiles, err := t.asset.PopulateUploadFiles(t.assetDetails)
+	assetFiles, err := t.asset.PopulateUploadFiles(t.assetDetails, callbacks...)
 	if err != nil {
 		return nil, err
 	}

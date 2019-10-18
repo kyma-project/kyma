@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"fmt"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/retry"
 	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -60,6 +61,9 @@ func (r *Resource) Get(name string, callbacks ...func(...interface{})) (*unstruc
 			return nil, err
 		}
 		return nil, errors.Wrapf(err, "while getting resource %s '%s'", r.kind, name)
+	}
+	for _, callback := range callbacks {
+		callback(fmt.Sprintf("GET: %s.%s\n%v", r.namespace, r.kind, result))
 	}
 	return result, nil
 }
