@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/gorilla/handlers"
+	r "github.com/kyma-project/kyma/components/apiserver-proxy/cmd/proxy/reload"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/spdy"
 
 	"github.com/golang/glog"
@@ -164,12 +165,12 @@ func main() {
 			return authn.NewOIDCAuthenticator(cfg.auth.Authentication.OIDC)
 		}
 
-		athntctr, err = NewReloadableAuthReq(authReqConstructorFunc, &oidcCAFileNotifier)
+		athntctr, err = r.NewReloadableAuthReq(authReqConstructorFunc, &oidcCAFileNotifier)
 		if err != nil {
 			glog.Fatalf("Failed to instantiate OIDC authenticator: %v", err)
 		}
 
-		oidcCAFileWatcher := NewWatcher([]string{cfg.auth.Authentication.OIDC.CAFile}, 10, oidcCAFileNotifier.trigger)
+		oidcCAFileWatcher := r.NewWatcher("oidc-ca-dex-tls-cert", []string{cfg.auth.Authentication.OIDC.CAFile}, 10, oidcCAFileNotifier.trigger)
 		go oidcCAFileWatcher.Run(fileWatcherCtx)
 	} else {
 		//Use Delegating authenticator
@@ -256,7 +257,7 @@ func main() {
 				res, err := tls.LoadX509KeyPair(cfg.tls.certFile, cfg.tls.keyFile)
 				return &res, err
 			}
-			krldr, err := NewReloadableTLSCertProvider(tlsConstructorFunc, &tlsCertFileNotifier)
+			krldr, err := r.NewReloadableTLSCertProvider(tlsConstructorFunc, &tlsCertFileNotifier)
 			if err != nil {
 				glog.Fatalf("Failed to create ReloadableTLSCertProvider: %v", err)
 			}
@@ -268,7 +269,7 @@ func main() {
 
 			//Start file watcher for certificate files
 			//TODO: Parametrize minDelaySeconds
-			tlsCertFileWatcher := NewWatcher([]string{cfg.tls.certFile, cfg.tls.keyFile}, 10, tlsCertFileNotifier.trigger)
+			tlsCertFileWatcher := r.NewWatcher("main-tls-crt/key", []string{cfg.tls.certFile, cfg.tls.keyFile}, 10, tlsCertFileNotifier.trigger)
 			go tlsCertFileWatcher.Run(fileWatcherCtx)
 		}
 

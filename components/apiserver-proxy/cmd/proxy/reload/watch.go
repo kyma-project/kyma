@@ -1,4 +1,4 @@
-package main
+package reload
 
 import (
 	"context"
@@ -7,17 +7,12 @@ import (
 
 	"github.com/howeyc/fsnotify"
 
-	"istio.io/pkg/log"
+	"github.com/golang/glog"
 )
 
-const (
-	// defaultMinDelay is the minimum amount of time between delivery of two successive events via updateFunc.
-	defaultMinDelay = 10 * time.Second
-)
-
-// Watcher provides notifications about changes files mounted inside kubernetes Pod, like Secrets or ConfigMaps
-// Note: Because file watches breaks in kubernetes when mounts are updated, we watch for directories instead.
-// This happens because files mounted to a Pod are actually symbolic links pointing to "real" files.
+// Watcher is designed to provide notifications about changes to files mounted inside kubernetes Pod, like Secrets or ConfigMaps
+// Because file watches breaks in kubernetes when mounts are updated, we watch for directories instead.
+// This happens because files mounted in a Pod are actually symbolic links pointing to "real" files.
 // On updating mounted files, kubernetes deletes the existing file, which sends a DELETE file event and breaks the watch
 type Watcher interface {
 	// Run start the watcher loop (blocking call)
@@ -26,16 +21,19 @@ type Watcher interface {
 }
 
 type watcher struct {
+	name            string   //name used in logs
 	filePaths       []string //a single watcher can react to changes to many files
 	minDelaySeconds uint8
 	notifyFunc      func()
 }
 
 // NewWatcher creates a new watcher instance
+// name is used in logging
 // filePaths parameter is a list of file paths to watch
 // notifyFunc is a function that is invoked after watcher detects changes to monitored files.
-func NewWatcher(filePaths []string, minDelaySeconds uint8, notifyFunc func()) Watcher {
+func NewWatcher(name string, filePaths []string, minDelaySeconds uint8, notifyFunc func()) Watcher {
 	return &watcher{
+		name:            name,
 		filePaths:       filePaths,
 		minDelaySeconds: minDelaySeconds,
 		notifyFunc:      notifyFunc,
@@ -44,26 +42,30 @@ func NewWatcher(filePaths []string, minDelaySeconds uint8, notifyFunc func()) Wa
 
 //Run implements Watcher interface
 func (w *watcher) Run(ctx context.Context) {
+	glog.Infof("Watcher [%s] starts watching for files: %v", w.name, w.filePaths)
+
 	watchFileEventsFunc := func(fEventChan <-chan *fsnotify.FileEvent) {
-		watchFileEvents(ctx, fEventChan, defaultMinDelay, w.notifyFunc)
+		w.watchFileEvents(ctx, fEventChan)
 	}
 
 	dirs := uniqeDirNames(w.filePaths)
 
 	// monitor files
 	go func() {
-		watchForDirs(dirs, watchFileEventsFunc)
+		w.watchForDirs(dirs, watchFileEventsFunc)
 	}()
 
 	<-ctx.Done()
-	log.Info("Watcher has successfully terminated")
+	glog.Infof("Watcher [%s] has successfully terminated", w.name)
 }
 
 // watchFileEvents watches for changes on a channel and notifies via notifyFn().
 // The function batches changes so that related changes are processed together.
 // The function ensures that notifyFn() is called no more than one time per minDelay.
 // The function does not return until the the context is canceled.
-func watchFileEvents(ctx context.Context, wch <-chan *fsnotify.FileEvent, minDelay time.Duration, notifyFunc func()) {
+func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan *fsnotify.FileEvent) {
+	minDelay := time.Second * time.Duration(w.minDelaySeconds)
+
 	// timer and channel for managing minDelay.
 	var timeChan <-chan time.Time
 	var timer *time.Timer
@@ -71,7 +73,7 @@ func watchFileEvents(ctx context.Context, wch <-chan *fsnotify.FileEvent, minDel
 	for {
 		select {
 		case ev := <-wch:
-			log.Infof("watchFileEvents: %s", ev.String())
+			glog.Infof("Watcher[%s]: watchFileEvents: %s", w.name, ev.String())
 			if timer != nil {
 				continue
 			}
@@ -84,10 +86,10 @@ func watchFileEvents(ctx context.Context, wch <-chan *fsnotify.FileEvent, minDel
 			timer.Stop()
 			timer = nil
 
-			log.Info("watchFileEvents: notifying")
-			notifyFunc()
+			glog.Infof("Watcher[%s]: watchFileEvents: notifying", w.name)
+			w.notifyFunc()
 		case <-ctx.Done():
-			log.Infof("watchFileEvents for has successfully terminated")
+			glog.Infof("Watcher[%s]: watchFileEvents has successfully terminated", w.name)
 			return
 		}
 	}
@@ -96,24 +98,24 @@ func watchFileEvents(ctx context.Context, wch <-chan *fsnotify.FileEvent, minDel
 // watchForDirs configures a watch for every directory path in dirs.
 // It then invokes provided watchFunc with configured Watcher.
 // This function is expected to be blocking so it should be run as a goroutine.
-func watchForDirs(dirs []string, watchFunc func(fEventChan <-chan *fsnotify.FileEvent)) {
+func (w *watcher) watchForDirs(dirs []string, watchFunc func(fEventChan <-chan *fsnotify.FileEvent)) {
 	fw, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Warnf("failed to create a watcher for certificate files: %v", err)
+		glog.Warningf("Watcher[%s]: failed to create a watcher for certificate files: %v", w.name, err)
 		return
 	}
 	defer func() {
 		if err := fw.Close(); err != nil {
-			log.Warnf("closing watcher encounters an error %v", err)
+			glog.Warningf("Watcher[%s]: closing watcher encounters an error %v", w.name, err)
 		}
 	}()
 
 	for _, dir := range dirs {
 		if err := fw.Watch(dir); err != nil {
-			log.Warnf("watching %s encountered an error %v", dir, err)
+			glog.Warningf("Watcher[%s]: watching %s encountered an error %v", w.name, dir, err)
 			return
 		}
-		log.Infof("watching %s for changes", dir)
+		glog.Infof("Watcher[%s]: watching %s for changes", w.name, dir)
 	}
 
 	watchFunc(fw.Event)
@@ -141,7 +143,7 @@ func main() {
 	ctx := context.TODO()
 
 	var notifyFunc func() = func() {
-		log.Infof("Changes detected!, %v", files)
+		glog.Infof("Changes detected!, %v", files)
 	}
 	watcher := NewWatcher(files, 10, notifyFunc)
 	watcher.Run(ctx)
