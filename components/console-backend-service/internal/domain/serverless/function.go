@@ -13,6 +13,8 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
+//go:generate mockgen -source=function.go -destination=mocks/function_service.go
+
 type FunctionService interface {
 	List(namespace string) ([]*v1alpha1.Function, error)
 	Delete(name string, namespace string) error
@@ -29,7 +31,7 @@ func (r *resolver) FunctionsQuery(ctx context.Context, namespace string) ([]gqls
 	}
 
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].UID > items[j].UID
+		return items[i].UID < items[j].UID
 	})
 
 	functions := function.ToGQLs(items)
