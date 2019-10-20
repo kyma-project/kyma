@@ -88,7 +88,7 @@ func (b *bucket) Get(name string) (*v1alpha2.Bucket, error) {
 }
 
 func (b *bucket) Delete(callbacks ...func(...interface{})) error {
-	err := b.resCli.Delete(b.name, callbacks...)
+	err := b.resCli.Delete(b.name, b.waitTimeout, callbacks...)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting Bucket %s in namespace %s", b.name, b.namespace)
 	}

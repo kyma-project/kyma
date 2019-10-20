@@ -40,7 +40,7 @@ func buildDeleteLeftovers(iRsc dynamic.ResourceInterface, timeout time.Duration)
 		labelSelector := fmt.Sprintf("test-id=%s", testId)
 		var assetNames []string
 		var initialResourceVersion = ""
-		err := retry.OnGetError(retry.DefaultBackoff, func() error {
+		err := retry.OnTimeout(retry.DefaultBackoff, func() error {
 			result, err := iRsc.List(metav1.ListOptions{
 				LabelSelector: labelSelector,
 			})
@@ -62,7 +62,7 @@ func buildDeleteLeftovers(iRsc dynamic.ResourceInterface, timeout time.Duration)
 		if len(assetNames) < 1 {
 			return nil
 		}
-		err = retry.OnDeleteError(retry.DefaultBackoff, func() error {
+		err = retry.OnIsNotFound(retry.DefaultBackoff, func() error {
 			err := iRsc.DeleteCollection(nil, metav1.ListOptions{
 				LabelSelector: labelSelector,
 			})

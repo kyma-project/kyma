@@ -100,10 +100,12 @@ func (t *TestSuite) Run() {
 	t.t.Log("Deleting old cluster bucket...")
 	err = t.clusterBucket.Delete(t.t.Log)
 	failOnError(t.g, err)
+
 	t.t.Log("Creating cluster bucket...")
 	var resourceVersion string
 	resourceVersion, err = t.clusterBucket.Create(t.t.Log)
 	failOnError(t.g, err)
+
 	// skip if resource already exists
 	if "" != resourceVersion {
 		t.t.Log("Waiting for cluster bucket to have ready phase...")
@@ -114,9 +116,11 @@ func (t *TestSuite) Run() {
 	t.t.Log("Deleting old bucket...")
 	err = t.bucket.Delete(t.t.Log)
 	failOnError(t.g, err)
+
 	t.t.Log("Creating bucket...")
 	resourceVersion, err = t.bucket.Create(t.t.Log)
 	failOnError(t.g, err)
+
 	// skip if resource already exists
 	if resourceVersion != "" {
 		t.t.Log("Waiting for bucket to have ready phase...")

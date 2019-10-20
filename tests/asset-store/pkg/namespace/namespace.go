@@ -19,7 +19,7 @@ func New(coreCli corev1.CoreV1Interface, name string) *Namespace {
 }
 
 func (n *Namespace) Create(callbacks ...func(...interface{})) error {
-	err := retry.OnCreateError(retry.DefaultBackoff, func() error {
+	err := retry.OnIsAlreadyExist(retry.DefaultBackoff, func() error {
 		_, err := n.coreCli.Namespaces().Create(&v1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: n.name,
@@ -34,7 +34,7 @@ func (n *Namespace) Create(callbacks ...func(...interface{})) error {
 }
 
 func (n *Namespace) Delete(callbacks ...func(...interface{})) error {
-	err := retry.OnDeleteError(retry.DefaultBackoff, func() error {
+	err := retry.OnIsNotFound(retry.DefaultBackoff, func() error {
 		for _, callback := range callbacks {
 			callback(fmt.Sprintf("DELETE: namespace: %s", n.name))
 		}

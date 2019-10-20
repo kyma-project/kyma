@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"context"
 	"fmt"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/retry"
 	"github.com/pkg/errors"
@@ -9,7 +10,10 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic"
+	watchtools "k8s.io/client-go/tools/watch"
+	"time"
 )
 
 type Resource struct {
@@ -34,7 +38,7 @@ func (r *Resource) Create(res interface{}, callbacks ...func(...interface{})) (s
 	unstructuredObj := &unstructured.Unstructured{
 		Object: u,
 	}
-	err = retry.OnCreateError(retry.DefaultBackoff, func() error {
+	err = retry.OnTimeout(retry.DefaultBackoff, func() error {
 		var resource *unstructured.Unstructured
 		resource, err = r.ResCli.Create(unstructuredObj, metav1.CreateOptions{})
 		if err != nil {
@@ -51,7 +55,7 @@ func (r *Resource) Create(res interface{}, callbacks ...func(...interface{})) (s
 
 func (r *Resource) Get(name string, callbacks ...func(...interface{})) (*unstructured.Unstructured, error) {
 	var result *unstructured.Unstructured
-	err := retry.OnGetError(retry.DefaultBackoff, func() error {
+	err := retry.OnTimeout(retry.DefaultBackoff, func() error {
 		var err error
 		result, err = r.ResCli.Get(name, metav1.GetOptions{})
 		return err
@@ -72,8 +76,23 @@ func (r *Resource) Get(name string, callbacks ...func(...interface{})) (*unstruc
 	return result, nil
 }
 
-func (r *Resource) Delete(name string, callbacks ...func(...interface{})) error {
-	err := retry.OnDeleteError(retry.DefaultBackoff, func() error {
+func (r *Resource) Delete(name string, timeout time.Duration, callbacks ...func(...interface{})) error {
+	var initialResourceVersion string
+	err := retry.OnTimeout(retry.DefaultBackoff, func() error {
+		u, err := r.ResCli.Get(name, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		initialResourceVersion = u.GetResourceVersion()
+		return nil
+	}, callbacks...)
+	if apierrors.IsNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	err = retry.OnIsNotFound(retry.DefaultBackoff, func() error {
 		for _, callback := range callbacks {
 			namespace := "-"
 			if r.namespace != "" {
@@ -83,8 +102,27 @@ func (r *Resource) Delete(name string, callbacks ...func(...interface{})) error 
 		}
 		return r.ResCli.Delete(name, &metav1.DeleteOptions{})
 	}, callbacks...)
+
 	if err != nil {
-		return errors.Wrapf(err, "while deleting resource %s '%s'", r.kind, name)
+		return err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	condition := func(event watch.Event) (bool, error) {
+		if event.Type != watch.Deleted {
+			return false, nil
+		}
+		u, ok := event.Object.(*unstructured.Unstructured)
+		if !ok || u.GetName() != name {
+			return false, nil
+		}
+		return true, nil
+	}
+	_, err = watchtools.Until(ctx, initialResourceVersion, r.ResCli, condition)
+	if err != nil {
+		return err
 	}
 	return nil
 }

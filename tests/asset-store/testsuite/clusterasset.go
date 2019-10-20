@@ -114,7 +114,7 @@ func (a *clusterAsset) Get(name string) (*v1alpha2.ClusterAsset, error) {
 
 func (a *clusterAsset) DeleteMany(assets []assetData, callbacks ...func(...interface{})) error {
 	for _, asset := range assets {
-		err := a.resCli.Delete(asset.Name, callbacks...)
+		err := a.resCli.Delete(asset.Name, a.waitTimeout, callbacks...)
 		if err != nil {
 			return errors.Wrapf(err, "while deleting ClusterAsset %s", asset.Name)
 		}
