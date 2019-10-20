@@ -93,12 +93,25 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 }
 
 func (t *TestSuite) Run() {
-	t.t.Log("Creating namespace...")
-	err := t.namespace.Create(t.t.Log)
+
+	t.t.Log("Deleting old assets...")
+	err := t.asset.DeleteLeftovers(t.testId)
+	failOnError(t.g, err)
+
+	t.t.Log("Deleting old cluster assets...")
+	err = t.clusterAsset.DeleteLeftovers(t.testId)
 	failOnError(t.g, err)
 
 	t.t.Log("Deleting old cluster bucket...")
 	err = t.clusterBucket.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Deleting old bucket...")
+	err = t.bucket.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Creating namespace...")
+	err = t.namespace.Create(t.t.Log)
 	failOnError(t.g, err)
 
 	t.t.Log("Creating cluster bucket...")
@@ -112,10 +125,6 @@ func (t *TestSuite) Run() {
 		err = t.clusterBucket.WaitForStatusReady(resourceVersion, t.t.Log)
 		failOnError(t.g, err)
 	}
-
-	t.t.Log("Deleting old bucket...")
-	err = t.bucket.Delete(t.t.Log)
-	failOnError(t.g, err)
 
 	t.t.Log("Creating bucket...")
 	resourceVersion, err = t.bucket.Create(t.t.Log)
@@ -132,16 +141,10 @@ func (t *TestSuite) Run() {
 	uploadResult, err := t.uploadTestFiles()
 	failOnError(t.g, err)
 
+	t.t.Log("Uploaded files:\n", uploadResult.UploadedFiles)
+
 	t.uploadResult = uploadResult
 	t.systemBucketName = uploadResult.UploadedFiles[0].Bucket
-
-	t.t.Log("Deleting old assets...")
-	err = t.asset.DeleteLeftovers(t.testId)
-	failOnError(t.g, err)
-
-	t.t.Log("Deleting old cluster assets...")
-	err = t.clusterAsset.DeleteLeftovers(t.testId)
-	failOnError(t.g, err)
 
 	t.t.Log("Preparing metadata...")
 	t.assetDetails = convertToAssetResourceDetails(uploadResult, t.cfg.CommonAssetPrefix)

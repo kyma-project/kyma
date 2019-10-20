@@ -40,6 +40,9 @@ func (r *Resource) Create(res interface{}, callbacks ...func(...interface{})) (s
 	}
 	err = retry.OnTimeout(retry.DefaultBackoff, func() error {
 		var resource *unstructured.Unstructured
+		for _, callback := range callbacks {
+			callback(fmt.Sprintf("[CREATE]: %s", unstructuredObj))
+		}
 		resource, err = r.ResCli.Create(unstructuredObj, metav1.CreateOptions{})
 		if err != nil {
 			return err

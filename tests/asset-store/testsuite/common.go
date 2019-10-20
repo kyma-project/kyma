@@ -121,16 +121,12 @@ func isPhaseReady(name string, callbacks ...func(...interface{})) func(event wat
 			}
 		}
 		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &bucketLike)
-		if err != nil {
+		if err != nil || bucketLike.Status.Phase != ready {
 			return false, err
 		}
-		phase := bucketLike.Status.Phase
-		isReady := phase != ready
-		if isReady {
-			for _, callback := range callbacks {
-				callback(fmt.Sprintf("%s is ready", name))
-			}
+		for _, callback := range callbacks {
+			callback(fmt.Sprintf("%s is ready:\n%v", name, u))
 		}
-		return isReady, nil
+		return true, nil
 	}
 }
