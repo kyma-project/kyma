@@ -12,7 +12,6 @@ import (
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/manifestprocessor"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
@@ -46,10 +45,10 @@ func TestApiGatewayIntegration(t *testing.T) {
 			manager.CreateResource(k8sClient, resourceSchema, ns, commonResource)
 		}
 
-		for _, commonResource := range commonResources {
-			resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
-			manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource) //TODO: wait for resource creation
-		}
+		//for _, commonResource := range commonResources {
+		//	resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
+		//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource) //TODO: wait for resource creation
+		//}
 
 		for _, commonResource := range commonResources {
 			resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
@@ -110,40 +109,18 @@ func getResourceSchemaAndNamespace(manifest unstructured.Unstructured) (schema.G
 		namespace = ""
 	}
 	//TODO: Move this ^ somewhere else and make it clearer
-	var apiGroup, version string
-	if len(apiVersion) > 1 {
-		apiGroup = apiVersion[0]
-		version = apiVersion[1]
-	} else {
-		apiGroup = ""
-		version = apiVersion[0]
-	}
-	resourceSchema := schema.GroupVersionResource{Group: apiGroup, Version: version, Resource: plurarForm(resourceKind)}
+	apiGroup, version := getGroupAndVersion(apiVersion)
+	resourceSchema := schema.GroupVersionResource{Group: apiGroup, Version: version, Resource: pluralForm(resourceKind)}
 	return resourceSchema, namespace, resourceName
 }
 
-func plurarForm(name string) string {
+func getGroupAndVersion(apiVersion []string) (apiGroup string, version string) {
+	if len(apiVersion) > 1 {
+		return apiVersion[0], apiVersion[1]
+	}
+	return "", apiVersion[0]
+}
+
+func pluralForm(name string) string {
 	return fmt.Sprintf("%ss", strings.ToLower(name))
-}
-
-func createResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, manifest unstructured.Unstructured) {
-	fmt.Printf("Creating resource %s...\n", manifest.GetName())
-	result, err := client.Resource(resourceSchema).Namespace(namespace).Create(&manifest, metav1.CreateOptions{})
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("Created resource %q.\n", result.GetName())
-}
-
-func deleteResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, resourceName string) {
-	fmt.Println("Deleting resource...")
-	deletePolicy := metav1.DeletePropagationForeground
-	deleteOptions := &metav1.DeleteOptions{
-		PropagationPolicy: &deletePolicy,
-	}
-	if err := client.Resource(resourceSchema).Namespace(namespace).Delete(resourceName, deleteOptions); err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("Deleted resource %q.\n", resourceName)
 }
