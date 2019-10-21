@@ -61,7 +61,7 @@ func (w *watcher) Run(ctx context.Context) {
 
 // watchFileEvents watches for changes on a channel and notifies via notifyFn().
 // The function batches changes so that related changes are processed together.
-// The function ensures that notifyFn() is called no more than one time per minDelay.
+// The function ensures that notifyFn() is called no more than one time per minDelaySeconds.
 // The function does not return until the the context is canceled.
 func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan *fsnotify.FileEvent) {
 	minDelay := time.Second * time.Duration(w.minDelaySeconds)
@@ -96,8 +96,8 @@ func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan *fsnotify.File
 }
 
 // watchForDirs configures a watch for every directory path in dirs.
-// It then invokes provided watchFunc with configured Watcher.
-// This function is expected to be blocking so it should be run as a goroutine.
+// It then invokes provided watchFunc with configured Watchers.
+// This function is blocking so it should be run in a goroutine.
 func (w *watcher) watchForDirs(dirs []string, watchFunc func(fEventChan <-chan *fsnotify.FileEvent)) {
 	fw, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -121,7 +121,7 @@ func (w *watcher) watchForDirs(dirs []string, watchFunc func(fEventChan <-chan *
 	watchFunc(fw.Event)
 }
 
-//Extracts directory paths from provided filePaths and returns a list of paths with removed duplicates.
+//Extracts directory paths from provided filePaths list and returns a list of paths with duplicates removed.
 func uniqeDirNames(filePaths []string) []string {
 	dirMap := make(map[string]bool)
 	for _, c := range filePaths {
