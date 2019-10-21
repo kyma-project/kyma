@@ -10,7 +10,7 @@ const (
 	// FieldEventType value
 	FieldEventType = "event-type"
 	// FieldEventTypeVersion value
-	FieldEventTypeVersion = "event-type-version"
+	FieldEventTypeVersion = "eventtypeversion"
 	// FieldSourceID value
 	FieldSourceID = "source-id"
 	// FieldTraceContext value

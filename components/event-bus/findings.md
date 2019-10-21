@@ -7,5 +7,5 @@
 
 
 Test case stuff:
-* ```curl -v  -H "ce-eventtypeversion: 1" -H "ce-specversion: 0.3" -H "ce-type: com.example.someevent" -H "ce-source: mycontext" -H "ce-id: aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" -d '{ "data" : "<much wow=\"xml\"/>" }' -H "Content-Type: application/json" -X POST http://localhost:8080/v2/events``` 
+* ```curl -v  -H "ce-eventtypeversion: ichbringihnum" -H "ce-specversion: 0.3" -H "ce-type: com.example.someevent" -H "ce-source: mycontext" -H "ce-id: aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" -d '{ "data" : "<much wow=\"xml\"/>" }' -H "Content-Type: application/json" -X POST http://localhost:8080/v2/events``` 
 

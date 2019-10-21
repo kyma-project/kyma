@@ -35,8 +35,8 @@ func (handler *CloudEventHandler) HandleEvent(ctx context.Context, traceSpan *op
 
 	//TODO(k15r): should we make this configurable
 	// NOPE: this is how it is implemented atm for v1 as well!
-	codec := cehttp.CodecV1{
-		DefaultEncoding: cehttp.BinaryV1,
+	codec := cehttp.CodecV03{
+		DefaultEncoding: cehttp.BinaryV03,
 	}
 
 	m, err := codec.Encode(ctx, event)
@@ -69,9 +69,16 @@ func (handler *CloudEventHandler) HandleEvent(ctx context.Context, traceSpan *op
 			return nil, nil, err
 		}
 	} else if event.SpecVersion() == cloudevents.VersionV03 {
+		fmt.Printf("%v", reflect.TypeOf(ex))
 		switch v := ex.(type) {
+		case string:
+			etv = v
 		case json.RawMessage:
 			if err := json.Unmarshal(v, &etv); err != nil {
+				return nil, nil, err
+			}
+		case *json.RawMessage:
+			if err := json.Unmarshal(*v, &etv); err != nil {
 				return nil, nil, err
 			}
 		// we only support string like objects here

@@ -89,6 +89,8 @@ func (app *KnativePublishApplication) registerPublishV2Handler() {
 		KnativePublisher: app.knativePublisher,
 		KnativeLib:       app.knativeLib,
 		Transport:        t,
+		Tracer: app.tracer,
+		
 	}
 
 	requestSizeLimitHandler := handlers.WithRequestSizeLimiting(handler.ServeHTTP, app.options.MaxRequestSize)
