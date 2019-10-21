@@ -5,10 +5,10 @@ import (
 )
 
 type TokenRequest struct {
-	ID        string
-	Secret    string
-	Scope     string
-	GrantType string
+	OAuth2ClientID     string
+	OAuth2ClientSecret string
+	Scope              string
+	GrantType          string
 }
 
 type tokenResponse struct {

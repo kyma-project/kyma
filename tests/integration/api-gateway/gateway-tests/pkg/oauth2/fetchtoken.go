@@ -76,7 +76,7 @@ func (t *tokenManager) prepareHTTPRequest(tr *TokenRequest) (*http.Request, erro
 		return nil, err
 	}
 
-	req.SetBasicAuth(tr.ID, tr.Secret)
+	req.SetBasicAuth(tr.OAuth2ClientID, tr.OAuth2ClientSecret)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 

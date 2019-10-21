@@ -2,6 +2,7 @@ package oauth2_test
 
 import (
 	"fmt"
+	"github.com/avast/retry-go"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -40,10 +41,10 @@ var (
 	}
 
 	tokenRequest = &oauth2.TokenRequest{
-		ID:        testID,
-		Secret:    testSecret,
-		Scope:     testScope,
-		GrantType: testGrantType,
+		OAuth2ClientID:     testID,
+		OAuth2ClientSecret: testSecret,
+		Scope:              testScope,
+		GrantType:          testGrantType,
 	}
 
 	expectedToken = &oauth2.Token{testToken, expiresIn, scope, tokenType}
