@@ -24,7 +24,7 @@ import (
 
 const testIDLength = 8
 const manifestsDirectory = "manifests/"
-const commonResourcesFile = "no_access_strategy.yaml"
+const commonResourcesFile = "common.yaml"
 const resourceSeparator = "---"
 
 func TestApiGatewayIntegration(t *testing.T) {
@@ -40,25 +40,20 @@ func TestApiGatewayIntegration(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-		for _, commonResource := range commonResources {
-			resourceSchema, ns, _ := getResourceSchemaAndNamespace(commonResource)
-			manager.CreateResource(k8sClient, resourceSchema, ns, commonResource)
-		}
+		createResources(k8sClient, commonResources)
 
 		//for _, commonResource := range commonResources {
 		//	resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
 		//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource) //TODO: wait for resource creation
 		//}
 
-		for _, commonResource := range commonResources {
-			resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
-			manager.DeleteResource(k8sClient, resourceSchema, ns, name) // TODO: move delete after test execution
-		}
 		// TODO: create api-rule
 
 		// TODO: wait until rules propagate
 
 		// TODO: test response from service
+
+		deleteResources(k8sClient, commonResources)
 
 		fmt.Println("test finished")
 	})
@@ -112,6 +107,20 @@ func getResourceSchemaAndNamespace(manifest unstructured.Unstructured) (schema.G
 	apiGroup, version := getGroupAndVersion(apiVersion)
 	resourceSchema := schema.GroupVersionResource{Group: apiGroup, Version: version, Resource: pluralForm(resourceKind)}
 	return resourceSchema, namespace, resourceName
+}
+
+func createResources(k8sClient dynamic.Interface, resources []unstructured.Unstructured) {
+	for _, resource := range resources {
+		resourceSchema, ns, _ := getResourceSchemaAndNamespace(resource)
+		manager.CreateResource(k8sClient, resourceSchema, ns, resource)
+	}
+}
+
+func deleteResources(k8sClient dynamic.Interface, resources []unstructured.Unstructured) {
+	for _, resource := range resources {
+		resourceSchema, ns, name := getResourceSchemaAndNamespace(resource)
+		manager.DeleteResource(k8sClient, resourceSchema, ns, name)
+	}
 }
 
 func getGroupAndVersion(apiVersion []string) (apiGroup string, version string) {

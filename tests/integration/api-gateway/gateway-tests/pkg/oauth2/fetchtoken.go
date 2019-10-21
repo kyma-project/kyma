@@ -3,13 +3,16 @@ package oauth2
 import (
 	"encoding/json"
 	"github.com/avast/retry-go"
-	"github.com/pkg/errors"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
-const (tokenEndpoint = "oauth2/token")
+const (
+	tokenEndpoint = "oauth2/token"
+)
 
 type tokenManager struct {
 	httpClient *http.Client

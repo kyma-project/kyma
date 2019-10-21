@@ -2,16 +2,16 @@ package oauth2_test
 
 import (
 	"fmt"
-	"github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/oauth2"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/oauth2"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
