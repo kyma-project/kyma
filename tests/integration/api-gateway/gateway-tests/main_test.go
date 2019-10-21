@@ -25,18 +25,28 @@ import (
 const testIDLength = 8
 const manifestsDirectory = "manifests/"
 const commonResourcesFile = "common.yaml"
+const testNamespaceFile = "test-ns.yaml"
 const resourceSeparator = "---"
 
 func TestApiGatewayIntegration(t *testing.T) {
 
 	k8sClient := getDynamicClient()
 
+	// create namespace for testing
+	nsResource, err := manifestprocessor.ParseFromFile(testNamespaceFile, manifestsDirectory, resourceSeparator)
+	if err != nil {
+		panic(err)
+	}
+	nsResourceSchema, ns, _ := getResourceSchemaAndNamespace(nsResource[0])
+	// TODO: should not fail if namespace doesn't exists
+	manager.CreateResource(k8sClient, nsResourceSchema, ns, nsResource[0])
+
 	t.Run("expose service without access strategy (plain access)", func(t *testing.T) {
 		t.Parallel()
 		testID := generateTestID()
 
 		// create common resources from files
-		commonResources, err := manifestprocessor.ParseFromFileWithTemplate(commonResourcesFile, manifestsDirectory, "", testID)
+		commonResources, err := manifestprocessor.ParseFromFileWithTemplate(commonResourcesFile, manifestsDirectory, resourceSeparator, testID)
 		if err != nil {
 			panic(err)
 		}

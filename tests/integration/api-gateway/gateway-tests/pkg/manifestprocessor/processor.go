@@ -11,10 +11,6 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-const (
-	separatorYAML = "---"
-)
-
 func parseManifest(input []byte) (*unstructured.Unstructured, error) {
 	var middleware map[string]interface{}
 	err := json.Unmarshal(input, &middleware)
@@ -29,9 +25,6 @@ func parseManifest(input []byte) (*unstructured.Unstructured, error) {
 }
 
 func getManifestsFromFile(fileName string, directory string, separator string) []string {
-	if separator == "" {
-		separator = separatorYAML
-	}
 	data, err := ioutil.ReadFile(directory + fileName)
 	if err != nil {
 		panic(err)

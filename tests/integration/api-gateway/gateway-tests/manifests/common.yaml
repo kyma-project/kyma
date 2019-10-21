@@ -1,10 +1,3 @@
-# TODO: Fix error on namespace handling: the server could not find the requested resource
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: api-gateway-tests
----
 apiVersion: v1
 kind: Service
 metadata:
