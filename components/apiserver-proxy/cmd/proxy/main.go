@@ -235,17 +235,7 @@ func main() {
 				NextProtos: []string{"h2"},
 			}
 		} else {
-
-			//Binds the watcher for tls.certFile and tls.keyFile with ReloadableTLSCertProvider
-			tlsCertFileNotifier := simpleNotifier{}
-
-			//Create ReloadableTLSCertProvider
-			tlsConstructorFunc := func() (*tls.Certificate, error) {
-				glog.Infof("Creating new TLS Certificate from data files: %s, %s", cfg.tls.certFile, cfg.tls.keyFile)
-				res, err := tls.LoadX509KeyPair(cfg.tls.certFile, cfg.tls.keyFile)
-				return &res, err
-			}
-			krldr, err := r.NewReloadableTLSCertProvider(tlsConstructorFunc, &tlsCertFileNotifier)
+			krldr, err := setupReloadableTLSCertProvider(fileWatcherCtx, cfg.tls.certFile, cfg.tls.keyFile)
 			if err != nil {
 				glog.Fatalf("Failed to create ReloadableTLSCertProvider: %v", err)
 			}
@@ -254,11 +244,6 @@ func main() {
 			srv.TLSConfig = &tls.Config{
 				GetCertificate: krldr.GetCertificateFunc,
 			}
-
-			//Start file watcher for certificate files
-			//TODO: Parametrize minDelaySeconds
-			tlsCertFileWatcher := r.NewWatcher("main-tls-crt/key", []string{cfg.tls.certFile, cfg.tls.keyFile}, 10, tlsCertFileNotifier.trigger)
-			go tlsCertFileWatcher.Run(fileWatcherCtx)
 		}
 
 		l, err := net.Listen("tcp", cfg.secureListenAddress)
@@ -430,4 +415,29 @@ func setupReloadableOIDCAuthr(fileWatcherCtx context.Context, cfg *authn.OIDCCon
 	go oidcCAFileWatcher.Run(fileWatcherCtx)
 
 	return athntctr, nil
+}
+
+func setupReloadableTLSCertProvider(fileWatcherCtx context.Context, certFile, keyFile string) (*r.ReloadableTLSCertProvider, error) {
+	const eventBatchDelaySeconds = 10
+
+	//Binds the watcher for tls.certFile and tls.keyFile with ReloadableTLSCertProvider
+	tlsCertFileNotifier := simpleNotifier{}
+
+	//Create ReloadableTLSCertProvider
+	tlsConstructorFunc := func() (*tls.Certificate, error) {
+		glog.Infof("Creating new TLS Certificate from data files: %s, %s", certFile, keyFile)
+		res, err := tls.LoadX509KeyPair(certFile, keyFile)
+		return &res, err
+	}
+	krldr, err := r.NewReloadableTLSCertProvider(tlsConstructorFunc, &tlsCertFileNotifier)
+
+	if err != nil {
+		return nil, err
+	}
+
+	//Start file watcher for certificate files
+	tlsCertFileWatcher := r.NewWatcher("main-tls-crt/key", []string{certFile, keyFile}, eventBatchDelaySeconds, tlsCertFileNotifier.trigger)
+	go tlsCertFileWatcher.Run(fileWatcherCtx)
+
+	return krldr, nil
 }
