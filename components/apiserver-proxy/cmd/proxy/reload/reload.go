@@ -27,8 +27,9 @@ type ReloadableTLSCertProvider struct {
 }
 
 //NewReloadableTLSCertProvider creates a new instance of ReloadableTLSCertProvider.
-//notifier parameter allows to control when the instance is re-created from outside.
-//It's safe to trigger re-creation from other goroutines.
+//notifier parameter is used register a data reloading callback.
+//External code can make use of this callback to trigger data reloading from outside.
+//It's safe to trigger reloading from other goroutines.
 func NewReloadableTLSCertProvider(constructor TLSCertConstructor, notifier ReloadNotifier) (*ReloadableTLSCertProvider, error) {
 
 	result := &ReloadableTLSCertProvider{

@@ -406,28 +406,6 @@ func deleteUpstreamCORSHeaders(r *http.Response) error {
 	return nil
 }
 
-/*
-type FileNotifier struct {
-	onEventFuncs []func()
-}
-
-func (tn *TestNotifier) Start() {
-	go func() {
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, syscall.SIGHUP)
-		for range c {
-			for _, f := range tn.onEventFuncs {
-				f()
-			}
-		}
-	}()
-}
-
-func (tn *TestNotifier) RegisterCallback(handler func()) {
-	tn.onEventFuncs = append(tn.onEventFuncs, handler)
-}
-*/
-
 //Simple Notifier can register only a single callback.
 type simpleNotifier struct {
 	onEventFunc func()
