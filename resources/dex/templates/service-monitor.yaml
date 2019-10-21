@@ -1,0 +1,16 @@
+{{ if .Values.telemetry.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: dex-metrics
+  namespace: kyma-system
+  labels:
+    prometheus: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: dex
+  endpoints:
+    - port: http-metrics
+      interval: 10s
+{{ end }}
