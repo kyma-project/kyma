@@ -39,19 +39,19 @@ func NewAPIAccessChecker(nameResolver *applications.NameResolver) *APIAccessChec
 	}
 }
 
-func (c *APIAccessChecker) AssertAPIAccess(t *testing.T, apis ...*graphql.APIDefinition) {
+func (c *APIAccessChecker) AssertAPIAccess(t *testing.T, applicationName string, apis ...*graphql.APIDefinition) {
 	t.Log("Waiting for DNS in Istio Proxy...")
 	// Wait for Istio Pilot to propagate DNS
 	time.Sleep(dnsWaitTime)
 
 	for _, api := range apis {
-		c.accessAPI(t, api)
+		c.accessAPI(t, applicationName, api)
 	}
 }
 
-func (c *APIAccessChecker) accessAPI(t *testing.T, api *graphql.APIDefinition) {
+func (c *APIAccessChecker) accessAPI(t *testing.T, applicationName string, api *graphql.APIDefinition) {
 	path := c.GetPathBasedOnAuth(t, api.DefaultAuth)
-	response := c.CallAccessService(t, api.ApplicationID, api.ID, path)
+	response := c.CallAccessService(t, applicationName, api.ID, path)
 	defer response.Body.Close()
 	util.RequireStatus(t, http.StatusOK, response)
 }

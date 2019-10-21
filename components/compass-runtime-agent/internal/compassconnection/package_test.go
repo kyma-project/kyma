@@ -81,7 +81,7 @@ var (
 
 	kymaModelApps = []kymaModel.Application{{Name: "App-1", ID: "abcd-efgh"}}
 
-	operationResults = []kyma.Result{{ApplicationID: "abcd-efgh", Operation: kyma.Create}}
+	operationResults = []kyma.Result{{ApplicationName: "App-1", ApplicationID: "abcd-efgh", Operation: kyma.Create}}
 )
 
 func TestCompassConnectionController(t *testing.T) {

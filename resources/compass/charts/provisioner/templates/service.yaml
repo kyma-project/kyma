@@ -9,9 +9,9 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: {{ .Values.global.provisioner.graphql.port }}
-    protocol: TCP
-    name: http
+    - port: {{ .Values.global.provisioner.graphql.port }}
+      protocol: TCP
+      name: http
   selector:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}

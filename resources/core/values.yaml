@@ -24,13 +24,13 @@ global:
     version: "PR-5891"
   ui_acceptance_tests:
     dir:
-    version: 2ce268ee
+    version: 7f00b4c5
   api_controller:
     dir:
     version: 8eb3a417
   api_controller_integration_tests:
-    dir: develop/
-    version: 665a2857
+    dir:
+    version: 73f8eff7
   apiserver_proxy:
     dir:
     version: d81e090b
@@ -52,20 +52,20 @@ global:
     dir: pr/
     version: PR-5226
   apiserver_proxy_integration_tests:
-    dir: develop/
-    version: 4a6bef81
+    dir:
+    version: 22d3353e
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
     dir:
-    version: b71dd1aa
+    version: a92f7fec
   console_backend_service_test:
     dir:
     version: b71dd1aa
   cluster_users_integration_tests:
-    dir: develop/
-    version: "d53509a0"
+    dir:
+    version: 3cf2773d
   xip_patch:
     dir:
     version: 28fc9db3

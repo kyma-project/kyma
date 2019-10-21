@@ -20,7 +20,7 @@ func TestConverter(t *testing.T) {
 
 		directorApp := model.Application{
 			ID:          "App1",
-			Name:        "App name 1",
+			Name:        "Appname1",
 			Description: "Description",
 			Labels: map[string][]string{
 				"key": {"value1", "value2"},
@@ -36,13 +36,13 @@ func TestConverter(t *testing.T) {
 				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "App1",
+				Name: "Appname1",
 			},
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description",
 				SkipInstallation: false,
 				Services:         []v1alpha1.Service{},
-				AccessLabel:      "App1",
+				AccessLabel:      "Appname1",
 				Labels: map[string]string{
 					"key": "value1,value2",
 				},
@@ -62,21 +62,21 @@ func TestConverter(t *testing.T) {
 		mockNameResolver := &k8smocks.NameResolver{}
 		converter := NewConverter(mockNameResolver)
 
-		mockNameResolver.On("GetResourceName", "App1", "serviceId1").Return("resourceName1")
-		mockNameResolver.On("GetResourceName", "App1", "serviceId2").Return("resourceName2")
+		mockNameResolver.On("GetResourceName", "Appname1", "serviceId1").Return("resourceName1")
+		mockNameResolver.On("GetResourceName", "Appname1", "serviceId2").Return("resourceName2")
 
-		mockNameResolver.On("GetGatewayUrl", "App1", "serviceId1").Return("application-gateway.kyma-integration.svc.cluster.local")
-		mockNameResolver.On("GetGatewayUrl", "App1", "serviceId2").Return("application-gateway.kyma-integration.svc.cluster.local")
+		mockNameResolver.On("GetGatewayUrl", "Appname1", "serviceId1").Return("application-gateway.kyma-integration.svc.cluster.local")
+		mockNameResolver.On("GetGatewayUrl", "Appname1", "serviceId2").Return("application-gateway.kyma-integration.svc.cluster.local")
 
-		mockNameResolver.On("GetCredentialsSecretName", "App1", "serviceId1").Return("credentialsSecretName1")
-		mockNameResolver.On("GetRequestParamsSecretName", "App1", "serviceId1").Return("paramatersSecretName1")
+		mockNameResolver.On("GetCredentialsSecretName", "Appname1", "serviceId1").Return("credentialsSecretName1")
+		mockNameResolver.On("GetRequestParamsSecretName", "Appname1", "serviceId1").Return("paramatersSecretName1")
 
-		mockNameResolver.On("GetCredentialsSecretName", "App1", "serviceId2").Return("credentialsSecretName2")
-		mockNameResolver.On("GetRequestParamsSecretName", "App1", "serviceId2").Return("paramatersSecretName2")
+		mockNameResolver.On("GetCredentialsSecretName", "Appname1", "serviceId2").Return("credentialsSecretName2")
+		mockNameResolver.On("GetRequestParamsSecretName", "Appname1", "serviceId2").Return("paramatersSecretName2")
 
 		directorApp := model.Application{
 			ID:          "App1",
-			Name:        "App name 1",
+			Name:        "Appname1",
 			Description: "Description",
 			Labels:      nil,
 			APIs: []model.APIDefinition{
@@ -129,12 +129,12 @@ func TestConverter(t *testing.T) {
 				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "App1",
+				Name: "Appname1",
 			},
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description",
 				SkipInstallation: false,
-				AccessLabel:      "App1",
+				AccessLabel:      "Appname1",
 				Labels:           map[string]string{},
 				CompassMetadata:  &v1alpha1.CompassMetadata{Authentication: v1alpha1.Authentication{ClientIds: []string{"App1"}}},
 				Services: []v1alpha1.Service{
@@ -145,7 +145,7 @@ func TestConverter(t *testing.T) {
 						DisplayName: "serviceName1",
 						Description: "Description not provided",
 						Labels: map[string]string{
-							"connected-app": "App1",
+							"connected-app": "Appname1",
 						},
 						LongDescription:     "",
 						ProviderDisplayName: "",
@@ -173,7 +173,7 @@ func TestConverter(t *testing.T) {
 						DisplayName: "serviceName2",
 						Description: "API 2 description",
 						Labels: map[string]string{
-							"connected-app": "App1",
+							"connected-app": "Appname1",
 						},
 						LongDescription:     "",
 						ProviderDisplayName: "",
@@ -213,14 +213,14 @@ func TestConverter(t *testing.T) {
 		mockNameResolver := &k8smocks.NameResolver{}
 		converter := NewConverter(mockNameResolver)
 
-		mockNameResolver.On("GetResourceName", "App1", "serviceId1").Return("resourceName1")
-		mockNameResolver.On("GetResourceName", "App1", "serviceId2").Return("resourceName2")
+		mockNameResolver.On("GetResourceName", "Appname1", "serviceId1").Return("resourceName1")
+		mockNameResolver.On("GetResourceName", "Appname1", "serviceId2").Return("resourceName2")
 
-		mockNameResolver.On("GetGatewayUrl", "App1", "serviceId1").Return("application-gateway.kyma-integration.svc.cluster.local")
+		mockNameResolver.On("GetGatewayUrl", "Appname1", "serviceId1").Return("application-gateway.kyma-integration.svc.cluster.local")
 
 		directorApp := model.Application{
 			ID:          "App1",
-			Name:        "App name 1",
+			Name:        "Appname1",
 			Description: "Description",
 			Labels:      nil,
 			APIs: []model.APIDefinition{
@@ -251,7 +251,7 @@ func TestConverter(t *testing.T) {
 				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "App1",
+				Name: "Appname1",
 			},
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description",
@@ -265,7 +265,7 @@ func TestConverter(t *testing.T) {
 						DisplayName: "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
 						Description: "API 1 description",
 						Labels: map[string]string{
-							"connected-app": "App1",
+							"connected-app": "Appname1",
 						},
 						LongDescription:     "",
 						ProviderDisplayName: "",
@@ -290,7 +290,7 @@ func TestConverter(t *testing.T) {
 						DisplayName: "serviceName2",
 						Description: "Events 1 description",
 						Labels: map[string]string{
-							"connected-app": "App1",
+							"connected-app": "Appname1",
 						},
 						LongDescription:     "",
 						ProviderDisplayName: "",
@@ -305,7 +305,7 @@ func TestConverter(t *testing.T) {
 						},
 					},
 				},
-				AccessLabel: "App1",
+				AccessLabel: "Appname1",
 				Labels:      map[string]string{},
 			},
 		}
