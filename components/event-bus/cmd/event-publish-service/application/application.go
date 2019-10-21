@@ -7,7 +7,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/handlers"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
-	constants "github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
@@ -73,7 +72,8 @@ func (app *KnativePublishApplication) registerReadinessProbe() {
 }
 
 func (app *KnativePublishApplication) registerPublishV1Handler() {
-	knativePublishHandler := handlers.KnativePublishHandler(constants.EventAPIV1, app.knativeLib, app.knativePublisher, app.tracer, app.options)
+	// TODO(nachtmaar): move to v1 package, e.g. v1handlers.KnativePublishHandler
+	knativePublishHandler := handlers.KnativePublishHandler(app.knativeLib, app.knativePublisher, app.tracer, app.options)
 	requestSizeLimitHandler := handlers.WithRequestSizeLimiting(knativePublishHandler, app.options.MaxRequestSize)
 	app.serveMux.HandleFunc(APIV1, requestSizeLimitHandler)
 }
@@ -89,8 +89,7 @@ func (app *KnativePublishApplication) registerPublishV2Handler() {
 		KnativePublisher: app.knativePublisher,
 		KnativeLib:       app.knativeLib,
 		Transport:        t,
-		Tracer: app.tracer,
-		
+		Tracer:           app.tracer,
 	}
 
 	requestSizeLimitHandler := handlers.WithRequestSizeLimiting(handler.ServeHTTP, app.options.MaxRequestSize)
