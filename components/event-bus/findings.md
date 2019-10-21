@@ -16,3 +16,13 @@ Test case stuff:
 * test in event-publish only used CE structured encoding beforehand uses CE structured with `application/json`
   => wrong Content-Type
  
+ 
+ ## ToDo
+ - tests for metrics
+ - tests for tracing
+ - do same changes to event-service as already done to event-bus
+ - nachtmaar: do we still need validation of eventtypeversion? Before: `AllowedEventTypeVersionChars = `^[a-zA-Z0-9]+$`
+
+ ## Changes
+ * new /v2 endpoint validates event id according to [CE standard](https://github.com/cloudevents/spec/blob/master/json-format.md)
+   * not with regexp `AllowedEventIDChars = `^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$`` anymore

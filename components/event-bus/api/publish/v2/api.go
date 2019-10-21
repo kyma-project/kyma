@@ -16,9 +16,6 @@ const (
 	// FieldSourceID value
 	FieldSourceID = "source"
 
-	// AllowedEventIDChars regex
-	AllowedEventIDChars = `^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$`
-
 	// AllowedEventTypeVersionChars regex
 	AllowedEventTypeVersionChars = `^[a-zA-Z0-9]+$`
 
