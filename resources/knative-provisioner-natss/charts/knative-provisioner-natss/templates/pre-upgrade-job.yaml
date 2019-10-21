@@ -40,24 +40,10 @@ data:
     #!/usr/bin/env bash
     set -eu
     echo "*** Pre upgrade job starts ***"
-    kubectl scale -n kyma-system deploy/event-bus-subscription-controller --replicas=0 || true
     if kubectl get crd subscriptions.eventing.knative.dev; then
       echo "deleting subscriptions"
       kubectl delete subscriptions.eventing.knative.dev --all -n kyma-system --ignore-not-found
     fi
-    if kubectl get crd channels.eventing.knative.dev; then
-      echo "deleting channels"
-      kubectl delete channels.eventing.knative.dev --all -n kyma-system --ignore-not-found
-    fi
-    if kubectl get crd clusterchannelprovisioners.eventing.knative.dev; then
-      echo "deleting clusterchannelprovisioners"
-      kubectl delete clusterchannelprovisioners.eventing.knative.dev --all --ignore-not-found
-    fi
-    kubectl delete crd \
-      subscriptions.eventing.knative.dev \
-      clusterchannelprovisioners.eventing.knative.dev \
-      channels.eventing.knative.dev --ignore-not-found
-    echo "*** Pre upgrade job executed ***"
 kind: ConfigMap
 metadata:
   annotations:
