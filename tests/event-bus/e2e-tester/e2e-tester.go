@@ -369,7 +369,7 @@ func publishTestEventV2(publishEventURL string) (*api.Response, error) {
 }
 
 func publishTestEvent(publishEventURL, payload string) (*api.Response, error) {
-	res, err := http.Post(publishEventURL, "application/json", strings.NewReader(payload))
+	res, err := http.Post(publishEventURL, "application/cloudevents+json", strings.NewReader(payload))
 	if err != nil {
 		return nil, err
 	}
