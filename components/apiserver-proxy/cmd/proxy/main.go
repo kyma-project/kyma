@@ -381,14 +381,14 @@ type simpleNotifier struct {
 }
 
 //RegisterCallback implements ReloadNotifier interface
-func (fcn *simpleNotifier) RegisterCallback(handler func()) {
-	fcn.onEventFunc = handler
+func (sn *simpleNotifier) RegisterCallback(handler func()) {
+	sn.onEventFunc = handler
 }
 
 //triggers event dispatch
-func (fcn *simpleNotifier) trigger() {
-	if fcn.onEventFunc != nil {
-		fcn.onEventFunc()
+func (sn *simpleNotifier) trigger() {
+	if sn.onEventFunc != nil {
+		sn.onEventFunc()
 	}
 }
 
@@ -400,7 +400,7 @@ func setupReloadableOIDCAuthr(fileWatcherCtx context.Context, cfg *authn.OIDCCon
 	oidcCAFileNotifier := simpleNotifier{}
 
 	//Create ReloadableAuthReq
-	authReqConstructorFunc := func() (authenticator.Request, error) {
+	authReqConstructorFunc := func() (authenticator.Request, authn.AuthenticatorCancelFunc, error) {
 		glog.Infof("creating new instance of authenticator.Request...")
 		return authn.NewOIDCAuthenticator(cfg)
 	}

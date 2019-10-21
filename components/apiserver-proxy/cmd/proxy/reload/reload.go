@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authn"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 )
 
@@ -44,13 +45,13 @@ func NewReloadableTLSCertProvider(constructor TLSCertConstructor, notifier Reloa
 	}
 
 	//Used by external notifier to trigger certificate reloads
-	reloadFunc := func() {
+	onDataChangeFunc := func() {
 		err := result.reload()
 		if err != nil {
 			glog.Errorf("Failed to reload certificate: %v", err)
 		}
 	}
-	notifier.RegisterCallback(reloadFunc)
+	notifier.RegisterCallback(onDataChangeFunc)
 
 	return result, nil
 }
@@ -98,7 +99,8 @@ func (tlsh *TLSCrtKeyPairHolder) Set(v *tls.Certificate) {
 }
 
 //AuthReqConstructor knows how to construct an authenticator.Request instance
-type AuthReqConstructor func() (authenticator.Request, error)
+//It also returns an instance of authn.AuthenticatorCancelFunc that allows to cancel the authenticator.
+type AuthReqConstructor func() (authenticator.Request, authn.AuthenticatorCancelFunc, error)
 
 //ReloadableAuthReq enables to create and re-create an instance of authenticator.Request in a thread-safe way.
 //It's used to re-create authenticator.Request instance every time a change in oidc-ca-file is detected.
@@ -123,13 +125,13 @@ func NewReloadableAuthReq(constructor AuthReqConstructor, notifier ReloadNotifie
 		return nil, err
 	}
 
-	reloadFunc := func() {
+	onDataChangeFunc := func() {
 		err := result.reload()
 		if err != nil {
 			glog.Errorf("Failed to reload authenticator.Request: %v", err)
 		}
 	}
-	notifier.RegisterCallback(reloadFunc)
+	notifier.RegisterCallback(onDataChangeFunc)
 
 	return &result, nil
 }
@@ -137,24 +139,34 @@ func NewReloadableAuthReq(constructor AuthReqConstructor, notifier ReloadNotifie
 //reloads the internal instance using provided constructor function
 //Note: It must NOT modify the existing value in case of an error!
 func (rar *ReloadableAuthReq) reload() error {
-	newAuthReq, err := rar.constructor()
+	newAuthReq, newAuthCancelFunc, err := rar.constructor()
 	if err != nil {
 		return err
 	}
-	rar.holder.Set(newAuthReq)
+
+	_, oldAuthCancelFunc := rar.holder.Get()
+	if oldAuthCancelFunc != nil {
+		glog.Info("Cancelling previous OIDC Authenticator instance")
+		oldAuthCancelFunc()
+	}
+
+	rar.holder.Set(newAuthReq, newAuthCancelFunc)
 	return nil
 }
 
 //AuthenticateRequest implements authenticator.Request interface
 func (rar *ReloadableAuthReq) AuthenticateRequest(req *http.Request) (*authenticator.Response, bool, error) {
 	//Delegate to internally-stored instance (thread-safe)
-	return rar.holder.Get().AuthenticateRequest(req)
+	actual, _ := rar.holder.Get()
+	return actual.AuthenticateRequest(req)
 }
 
-//AuthReqHolder keeps an authenticator.Request instance and allows for Get/Set operations in a thread-safe way
+//AuthReqHolder keeps an authenticator.Request and an authn.AuthenticatorCancelFunc instance.
+//It allows for Get/Set operations in a thread-safe way
 type AuthReqHolder struct {
-	rwmu  sync.RWMutex
-	value authenticator.Request
+	rwmu       sync.RWMutex
+	value      authenticator.Request
+	cancelFunc authn.AuthenticatorCancelFunc
 }
 
 //NewAuthReqHolder returns new AuthReqHolder instance
@@ -162,16 +174,17 @@ func NewAuthReqHolder() *AuthReqHolder {
 	return &AuthReqHolder{}
 }
 
-//Get returns the tls.Certificate instance stored in the AuthReqHolder
-func (arh *AuthReqHolder) Get() authenticator.Request {
+//Get returns the instances stored in the AuthReqHolder
+func (arh *AuthReqHolder) Get() (authenticator.Request, authn.AuthenticatorCancelFunc) {
 	arh.rwmu.RLock()
 	defer arh.rwmu.RUnlock()
-	return arh.value
+	return arh.value, arh.cancelFunc
 }
 
-//Set stores given authenticator.Request in the AuthReqHolder
-func (arh *AuthReqHolder) Set(v authenticator.Request) {
+//Set stores given instances in the AuthReqHolder
+func (arh *AuthReqHolder) Set(v authenticator.Request, c authn.AuthenticatorCancelFunc) {
 	arh.rwmu.Lock()
 	defer arh.rwmu.Unlock()
 	arh.value = v
+	arh.cancelFunc = c
 }
