@@ -48,7 +48,7 @@ var (
 		GrantType:          testGrantType,
 	}
 
-	expectedToken = &oauth2.Token{testToken, expiresIn, scope, tokenType}
+	expectedToken = &oauth2.Token{AccessToken: testToken, ExpiresIn: expiresIn, Scope: scope, TokenType: tokenType}
 )
 
 type serverErr struct {
