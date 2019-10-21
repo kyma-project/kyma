@@ -9,3 +9,10 @@
 Test case stuff:
 * ```curl -v  -H "ce-eventtypeversion: ichbringihnum" -H "ce-specversion: 0.3" -H "ce-type: com.example.someevent" -H "ce-source: mycontext" -H "ce-id: aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" -d '{ "data" : "<much wow=\"xml\"/>" }' -H "Content-Type: application/json" -X POST http://localhost:8080/v2/events``` 
 
+* [kyma doc](https://github.com/kyma-project/kyma/blob/master/docs/event-bus/03-03-service-programming-model.md) says to use CE binary encoding
+  => Content-Type not explicitely defined
+* e2e test (`e2e-tester.go`) uses CE structured with `application/json`
+  => wrong Content-Type
+* test in event-publish only used CE structured encoding beforehand uses CE structured with `application/json`
+  => wrong Content-Type
+ 
