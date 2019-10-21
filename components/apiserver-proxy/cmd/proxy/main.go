@@ -156,22 +156,10 @@ func main() {
 	// If OIDC configuration provided, use oidc authenticator
 	if cfg.auth.Authentication.OIDC.IssuerURL != "" {
 
-		//Binds the watcher for OIDC.CAFile with ReloadableAuthReq
-		oidcCAFileNotifier := simpleNotifier{}
-
-		//Create ReloadableAuthReq
-		authReqConstructorFunc := func() (authenticator.Request, error) {
-			glog.Infof("creating new instance of authenticator.Request...")
-			return authn.NewOIDCAuthenticator(cfg.auth.Authentication.OIDC)
-		}
-
-		athntctr, err = r.NewReloadableAuthReq(authReqConstructorFunc, &oidcCAFileNotifier)
+		athntctr, err = setupReloadableOIDCAuthr(fileWatcherCtx, cfg.auth.Authentication.OIDC)
 		if err != nil {
 			glog.Fatalf("Failed to instantiate OIDC authenticator: %v", err)
 		}
-
-		oidcCAFileWatcher := r.NewWatcher("oidc-ca-dex-tls-cert", []string{cfg.auth.Authentication.OIDC.CAFile}, 10, oidcCAFileNotifier.trigger)
-		go oidcCAFileWatcher.Run(fileWatcherCtx)
 	} else {
 		//Use Delegating authenticator
 		tokenClient := kubeClient.AuthenticationV1beta1().TokenReviews()
@@ -417,4 +405,29 @@ func (fcn *simpleNotifier) trigger() {
 	if fcn.onEventFunc != nil {
 		fcn.onEventFunc()
 	}
+}
+
+func setupReloadableOIDCAuthr(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) (authenticator.Request, error) {
+	const eventBatchDelaySeconds = 10
+	filesToWatch := []string{cfg.CAFile}
+
+	//Binds the watcher for OIDC.CAFile with ReloadableAuthReq
+	oidcCAFileNotifier := simpleNotifier{}
+
+	//Create ReloadableAuthReq
+	authReqConstructorFunc := func() (authenticator.Request, error) {
+		glog.Infof("creating new instance of authenticator.Request...")
+		return authn.NewOIDCAuthenticator(cfg)
+	}
+
+	athntctr, err := r.NewReloadableAuthReq(authReqConstructorFunc, &oidcCAFileNotifier)
+	if err != nil {
+		return nil, err
+	}
+
+	//Setup file watcher
+	oidcCAFileWatcher := r.NewWatcher("oidc-ca-dex-tls-cert", filesToWatch, eventBatchDelaySeconds, oidcCAFileNotifier.trigger)
+	go oidcCAFileWatcher.Run(fileWatcherCtx)
+
+	return athntctr, nil
 }

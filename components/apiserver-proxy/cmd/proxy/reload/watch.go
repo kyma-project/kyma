@@ -21,22 +21,22 @@ type Watcher interface {
 }
 
 type watcher struct {
-	name            string   //name used in logs
-	filePaths       []string //a single watcher can react to changes to many files
-	minDelaySeconds uint8
-	notifyFunc      func()
+	name                   string   //name of the watcher to improve logging
+	filePaths              []string //a single watcher can react to changes to many files
+	eventBatchDelaySeconds uint8    //changes that occur within this time window are batched in a single notification
+	notifyFunc             func()   //notification function invoked when changes are detected, but only after configured eventBatchDelaySeconds time
 }
 
 // NewWatcher creates a new watcher instance
 // name is used in logging
 // filePaths parameter is a list of file paths to watch
 // notifyFunc is a function that is invoked after watcher detects changes to monitored files.
-func NewWatcher(name string, filePaths []string, minDelaySeconds uint8, notifyFunc func()) Watcher {
+func NewWatcher(name string, filePaths []string, evBatchDelaySeconds uint8, notifyFunc func()) Watcher {
 	return &watcher{
-		name:            name,
-		filePaths:       filePaths,
-		minDelaySeconds: minDelaySeconds,
-		notifyFunc:      notifyFunc,
+		name:                   name,
+		filePaths:              filePaths,
+		eventBatchDelaySeconds: evBatchDelaySeconds,
+		notifyFunc:             notifyFunc,
 	}
 }
 
@@ -60,11 +60,11 @@ func (w *watcher) Run(ctx context.Context) {
 }
 
 // watchFileEvents watches for changes on a channel and notifies via notifyFn().
-// The function batches changes so that related changes are processed together.
-// The function ensures that notifyFn() is called no more than one time per minDelaySeconds.
+// The function batches changes so that related changes are processed together in a single step.
+// The function ensures that notifyFn() is called no more than one time per eventBatchDelaySeconds.
 // The function does not return until the the context is canceled.
 func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan *fsnotify.FileEvent) {
-	minDelay := time.Second * time.Duration(w.minDelaySeconds)
+	minDelay := time.Second * time.Duration(w.eventBatchDelaySeconds)
 
 	// timer and channel for managing minDelay.
 	var timeChan <-chan time.Time
@@ -123,6 +123,10 @@ func (w *watcher) watchForDirs(dirs []string, watchFunc func(fEventChan <-chan *
 
 //Extracts directory paths from provided filePaths list and returns a list of paths with duplicates removed.
 func uniqeDirNames(filePaths []string) []string {
+	if len(filePaths) == 0 {
+		return []string{}
+	}
+
 	dirMap := make(map[string]bool)
 	for _, c := range filePaths {
 		dirMap[filepath.Dir(c)] = true
@@ -136,18 +140,3 @@ func uniqeDirNames(filePaths []string) []string {
 	}
 	return res
 }
-
-/*
-func main() {
-	files := []string{"/etc/tls-cert/tls.crt", "/etc/tls-cert/tls.key"}
-	ctx := context.TODO()
-
-	var notifyFunc func() = func() {
-		glog.Infof("Changes detected!, %v", files)
-	}
-	watcher := NewWatcher(files, 10, notifyFunc)
-	watcher.Run(ctx)
-
-	<-ctx.Done()
-}
-*/
