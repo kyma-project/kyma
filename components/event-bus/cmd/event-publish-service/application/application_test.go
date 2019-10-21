@@ -24,6 +24,70 @@ var (
 	application *KnativePublishApplication
 )
 
+type testInput struct {
+	specVersion string
+	id          string
+	typ         string
+	typeVersion string
+	source      string
+	time        string
+	data        string
+}
+
+type testExpectation struct {
+	statusCode int
+	emptyBody  bool
+}
+
+var tableTest = []struct {
+	testInput       testInput
+	testExpectation testExpectation
+	name            string
+}{
+	{
+		name: "valid CE v0.3",
+		testInput: testInput{
+			specVersion: "0.3",
+			id:          "4ea567cf-812b-49d9-a4b2-cb5ddf464094",
+			typ:         "test-type",
+			typeVersion: "v1",
+			source:      "test-source",
+			data:        "{'key':'value'}",
+			time:        "2012-11-01T22:08:41+00:00",
+		},
+		testExpectation: testExpectation{
+			statusCode: 200,
+			emptyBody:  false,
+		},
+	},
+	{
+		name: "valid CE v1.0",
+		testInput: testInput{
+			specVersion: "1.0",
+			id:          "4ea567cf-812b-49d9-a4b2-cb5ddf464094",
+			typ:         "test-type",
+			typeVersion: "v1",
+			source:      "test-source",
+			data:        "{'key':'value'}",
+			time:        "2012-11-01T22:08:41+00:00",
+		},
+		testExpectation: testExpectation{
+			statusCode: 200,
+			emptyBody:  false,
+		},
+	},
+}
+
+func TestTable(t *testing.T) {
+	for _, tt := range tableTest {
+		t.Run(tt.name+"_structured", func(t *testing.T) {
+			testCloudEventStructuredEncoding(t, tt.testInput, tt.testExpectation)
+		})
+		t.Run(tt.name+"_binary", func(t *testing.T) {
+			testCloudEventBinaryEncoding(t, tt.testInput, tt.testExpectation)
+		})
+	}
+}
 func TestMain(m *testing.M) {
 	// init and start the knative publish application
 	options := opts.GetDefaultOptions()
@@ -42,6 +106,34 @@ func TestMain(m *testing.M) {
 	tracer.Stop()
 	server.Close()
 	os.Exit(exitCode)
+}
+
+// test cloudevents structured encoding
+func testCloudEventStructuredEncoding(t *testing.T, testInput testInput, testExpectation testExpectation) {
+	payload := testV2.BuildPublishV2TestPayload(testInput.source, testInput.typ, testInput.typeVersion, testInput.id, testInput.time, testInput.data)
+	body, statusCode := testV2.PerformPublishV2RequestStructured(t, server.URL, payload)
+	// check body
+	if testExpectation.emptyBody {
+		assert.Nil(t, body)
+	} else {
+		assert.NotNil(t, body)
+	}
+	// check status code
+	assert.Equal(t, testExpectation.statusCode, statusCode)
+}
+
+// test cloudevents binary encoding
+func testCloudEventBinaryEncoding(t *testing.T, testInput testInput, testExpectation testExpectation) {
+	headers := testV2.BuildPublishV2TestHeader(testInput.source, testInput.typ, testInput.typeVersion, testInput.id, testInput.time)
+	body, statusCode := testV2.PerformPublishV2RequestBinary(t, server.URL, testInput.data, headers)
+	// check body
+	if testExpectation.emptyBody {
+		assert.Nil(t, body)
+	} else {
+		assert.NotNil(t, body)
+	}
+	// check status code
+	assert.Equal(t, testExpectation.statusCode, statusCode)
 }
 
 func Test_KnativePublishApplication_ShouldStart(t *testing.T) {
