@@ -8,6 +8,7 @@ import (
 	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	evclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
 	messagingv1alpha1Client "github.com/knative/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -55,6 +56,15 @@ func (p *SetNatsChannelOwnerReference) Execute(input *velero.RestoreItemActionEx
 	channelName := metadata.GetName() + channelNameSuffix
 	p.Log.Infof("NATS Channel Owner: %s", channelName)
 	natsChannel, err := messagingChannel.Channels(metadata.GetNamespace()).Get(channelName, metav1.GetOptions{})
+	switch {
+	case err == nil:
+	case apierrors.IsNotFound(err):
+		// there's no NATS Channel with such name
+		p.Log.Errorf("Couldn't get NATS Channel %s: %v", metadata.GetName(), err)
+		return velero.NewRestoreItemActionExecuteOutput(input.Item), nil
+	default:
+		return velero.NewRestoreItemActionExecuteOutput(input.Item), err
+	}
 	var natsChannelKind = v1alpha1.SchemeGroupVersion.WithKind(channelKind)
 
 	ownerReferences := []metav1.OwnerReference{
