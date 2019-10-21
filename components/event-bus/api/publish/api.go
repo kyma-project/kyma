@@ -13,8 +13,6 @@ const (
 	FieldEventTypeVersion = "eventtypeversion"
 	// FieldSourceID value
 	FieldSourceID = "source-id"
-	// FieldTraceContext value
-	FieldTraceContext = "trace-context"
 
 	// AllowedEventIDChars regex
 	AllowedEventIDChars = `^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$`
