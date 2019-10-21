@@ -14,7 +14,7 @@ console:
 
 core_ui:
   image:
-    dir: 
+    dir:
     tag: 44e9e137
     pullPolicy: IfNotPresent
   service:
