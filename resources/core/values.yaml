@@ -27,7 +27,7 @@ global:
     version: bdfddb63
   api_controller_integration_tests:
     dir:
-    version: bdfddb63
+    version: 22d3353e
   apiserver_proxy:
     dir:
     version: bdfddb63
