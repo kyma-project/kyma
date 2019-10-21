@@ -6,6 +6,9 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/scripts
 include $(SCRIPTS_DIR)/go-dep.mk
 
 VERIFY_IGNORE := /vendor\|/mocks
+NAMESPACE := kyma-integration
+CENTRAL := false
+SKIP_SSL_VERIFY := true
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
