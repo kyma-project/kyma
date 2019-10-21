@@ -124,7 +124,7 @@ func NewReloadableAuthReq(constructor AuthReqConstructor) (*ReloadableAuthReq, e
 func (rar *ReloadableAuthReq) Reload() {
 	err := rar.reload()
 	if err != nil {
-		glog.Errorf("Failed to reload authenticator.Request: %v", err)
+		glog.Errorf("Failed to reload OIDC Authenticator instance: %v", err)
 	}
 }
 
