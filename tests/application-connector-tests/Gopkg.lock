@@ -2,67 +2,84 @@
 
 
 [[projects]]
+  digest = "0:"
   name = "cloud.google.com/go"
   packages = ["compute/metadata"]
+  pruneopts = "NUT"
   revision = "775730d6e48254a2430366162cf6298e5368833c"
   version = "v0.39.0"
 
 [[projects]]
+  digest = "0:"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
+  pruneopts = "NUT"
   revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
   version = "v1.1.1"
 
 [[projects]]
+  digest = "0:"
   name = "github.com/gogo/protobuf"
   packages = [
     "proto",
-    "sortkeys"
+    "sortkeys",
   ]
+  pruneopts = "NUT"
   revision = "ba06b47c162d49f2af050fb4c75bcbc86a159d5c"
   version = "v1.2.1"
 
 [[projects]]
+  digest = "0:"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
     "ptypes",
     "ptypes/any",
     "ptypes/duration",
-    "ptypes/timestamp"
+    "ptypes/timestamp",
   ]
+  pruneopts = "NUT"
   revision = "b5d812f8a3706043e23a9cd5babf2e5423744d30"
   version = "v1.3.1"
 
 [[projects]]
+  digest = "0:"
   name = "github.com/google/gofuzz"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "f140a6486e521aad38f5917de355cbf147cc0496"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "0:"
   name = "github.com/googleapis/gnostic"
   packages = [
     "OpenAPIv2",
     "compiler",
-    "extensions"
+    "extensions",
   ]
+  pruneopts = "NUT"
   revision = "7c663266750e7d82587642f65e60bc4083f1f84e"
   version = "v0.2.0"
 
 [[projects]]
+  digest = "0:"
   name = "github.com/imdario/mergo"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "7c29201646fa3de8506f701213473dd407f19646"
   version = "v0.3.7"
 
 [[projects]]
+  digest = "0:"
   name = "github.com/json-iterator/go"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "0ff49de124c6f76f8494e194af75bde0f1a49a29"
   version = "v1.1.6"
 
 [[projects]]
+  digest = "0:"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -72,57 +89,73 @@
     "components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1",
     "components/connection-token-handler/pkg/client/clientset/versioned",
     "components/connection-token-handler/pkg/client/clientset/versioned/scheme",
-    "components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+    "components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
   ]
+  pruneopts = "NUT"
   revision = "70782d1888118ad2c76b978b49505bb5286e264c"
 
 [[projects]]
+  digest = "0:"
   name = "github.com/modern-go/concurrent"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94"
   version = "1.0.3"
 
 [[projects]]
+  digest = "0:"
   name = "github.com/modern-go/reflect2"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
   version = "1.0.1"
 
 [[projects]]
+  digest = "0:"
   name = "github.com/pkg/errors"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
   version = "v0.8.1"
 
 [[projects]]
+  digest = "0:"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
+  pruneopts = "NUT"
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "0:"
   name = "github.com/spf13/pflag"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
   version = "v1.0.3"
 
 [[projects]]
+  digest = "0:"
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
-    "require"
+    "require",
   ]
+  pruneopts = "NUT"
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
   version = "v1.3.0"
 
 [[projects]]
   branch = "master"
+  digest = "0:"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
+  pruneopts = "NUT"
   revision = "22d7a77e9e5f409e934ed268692e56707cd169e5"
 
 [[projects]]
   branch = "master"
+  digest = "0:"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -130,32 +163,38 @@
     "http/httpguts",
     "http2",
     "http2/hpack",
-    "idna"
+    "idna",
   ]
+  pruneopts = "NUT"
   revision = "f3200d17e092c607f615320ecaad13d87ad9a2b3"
 
 [[projects]]
   branch = "master"
+  digest = "0:"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "google",
     "internal",
     "jws",
-    "jwt"
+    "jwt",
   ]
+  pruneopts = "NUT"
   revision = "aaccbc9213b0974828f81aaac109d194880e3014"
 
 [[projects]]
   branch = "master"
+  digest = "0:"
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows"
+    "windows",
   ]
+  pruneopts = "NUT"
   revision = "0e01d883c5c5e3a1741118a9962f68d71b0a6ed4"
 
 [[projects]]
+  digest = "0:"
   name = "golang.org/x/text"
   packages = [
     "collate",
@@ -173,18 +212,22 @@
     "unicode/bidi",
     "unicode/cldr",
     "unicode/norm",
-    "unicode/rangetable"
+    "unicode/rangetable",
   ]
+  pruneopts = "NUT"
   revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
   version = "v0.3.2"
 
 [[projects]]
   branch = "master"
+  digest = "0:"
   name = "golang.org/x/time"
   packages = ["rate"]
+  pruneopts = "NUT"
   revision = "9d24e82272b4f38b78bc8cff74fa936d31ccd8ef"
 
 [[projects]]
+  digest = "0:"
   name = "google.golang.org/appengine"
   packages = [
     ".",
@@ -196,24 +239,30 @@
     "internal/modules",
     "internal/remote_api",
     "internal/urlfetch",
-    "urlfetch"
+    "urlfetch",
   ]
+  pruneopts = "NUT"
   revision = "4c25cacc810c02874000e4f7071286a8e96b2515"
   version = "v1.6.0"
 
 [[projects]]
+  digest = "0:"
   name = "gopkg.in/inf.v0"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "d2d2541c53f18d2a059457998ce2876cc8e67cbf"
   version = "v0.9.1"
 
 [[projects]]
+  digest = "0:"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
   version = "v2.2.2"
 
 [[projects]]
+  digest = "0:"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1beta1",
@@ -251,12 +300,14 @@
     "settings/v1alpha1",
     "storage/v1",
     "storage/v1alpha1",
-    "storage/v1beta1"
+    "storage/v1beta1",
   ]
+  pruneopts = "NUT"
   revision = "fdd30b57c827abbc506646ecfd579f6ccb3b80ab"
   version = "kubernetes-1.15.2"
 
 [[projects]]
+  digest = "0:"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -292,12 +343,14 @@
     "pkg/util/yaml",
     "pkg/version",
     "pkg/watch",
-    "third_party/forked/golang/reflect"
+    "third_party/forked/golang/reflect",
   ]
+  pruneopts = "NUT"
   revision = "1799e75a07195de9460b8ef7300883499f12127b"
-  version = "kubernetes-1.15.0"
+  version = "kubernetes-1.15.2"
 
 [[projects]]
+  digest = "0:"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -323,50 +376,77 @@
     "util/flowcontrol",
     "util/homedir",
     "util/jsonpath",
-    "util/keyutil"
+    "util/keyutil",
   ]
+  pruneopts = "NUT"
   revision = "2fe0317bcee0e1ff48861f77cc1e2791cceba458"
   version = "kubernetes-1.15.2"
 
 [[projects]]
+  digest = "0:"
   name = "k8s.io/helm"
   packages = [
     "pkg/proto/hapi/chart",
-    "pkg/proto/hapi/release"
+    "pkg/proto/hapi/release",
   ]
+  pruneopts = "NUT"
   revision = "05811b84a3f93603dd6c2fcfe57944dfa7ab7fd0"
   version = "v2.14.0"
 
 [[projects]]
+  digest = "0:"
   name = "k8s.io/klog"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "3ca30a56d8a775276f9cdae009ba326fdc05af7f"
   version = "v0.4.0"
 
 [[projects]]
   branch = "master"
+  digest = "0:"
   name = "k8s.io/utils"
   packages = ["integer"]
+  pruneopts = "NUT"
   revision = "6c36bc71fc4aeb1f49801054e71aebdaef1fbeb4"
 
 [[projects]]
+  digest = "0:"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
     "pkg/runtime/scheme",
-    "pkg/scheme"
+    "pkg/scheme",
   ]
+  pruneopts = "NUT"
   revision = "eb94491f7ac37f163aef146cf3c17f87d21ae184"
   version = "v0.2.0-beta.5"
 
 [[projects]]
+  digest = "0:"
   name = "sigs.k8s.io/yaml"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "fd68e9863619f6ec2fdd8625fe1f02e7c877e480"
   version = "v1.1.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "16967323d71ab1a0b7876fa6c8494996e28eb0b8443b7a7f8b4bfef5c9cbeebe"
+  input-imports = [
+    "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
+    "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1",
+    "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "github.com/pkg/errors",
+    "github.com/stretchr/testify/require",
+    "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/util/rand",
+    "k8s.io/client-go/plugin/pkg/client/auth/gcp",
+    "k8s.io/client-go/rest",
+    "k8s.io/client-go/tools/clientcmd",
+    "k8s.io/client-go/util/homedir",
+    "k8s.io/helm/pkg/proto/hapi/release",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
