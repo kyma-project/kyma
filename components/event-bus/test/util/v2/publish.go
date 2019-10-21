@@ -32,7 +32,7 @@ const (
 	TestSpecVersion = "0.3"
 
 	// TestSpecVersionInvalid used in the tests
-	TestSpecVersionInvalid = "0.2"
+	TestSpecVersionInvalid = "0.8"
 
 	// TestData used in the tests
 	TestData = "{'key':'value'}"
@@ -159,7 +159,8 @@ func BuildPublishV2TestPayloadWithoutType() string {
 func PerformPublishV2RequestWithHeaders(t *testing.T, publishURL string, payload string) ([]byte, int) {
 	req, _ := http.NewRequest("POST", publishURL+"/v2/events", strings.NewReader(payload))
 
-	req.Header.Set("Content-Type", "application/json")
+	// TODO(nachtmaar): can we simply change the content-type? Or is anyone relying on the old Content-Type
+	req.Header.Set("Content-Type", "application/cloudevents+json")
 
 	res, err := http.DefaultClient.Do(req)
 
