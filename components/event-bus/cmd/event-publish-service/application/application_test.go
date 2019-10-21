@@ -205,10 +205,20 @@ func Test_PublishWithTooLargePayload_ShouldFail(t *testing.T) {
 	testV1.AssertExpectedError(t, body, statusCode, http.StatusRequestEntityTooLarge, nil, api.ErrorTypeRequestBodyTooLarge)
 }
 
-func Test_PublishV2WithCorrectPayload_ShouldSuceed(t *testing.T) {
+func Test_PublishV2WithCorrectPayloadBinary_ShouldSuceed(t *testing.T) {
+	// prepare and send payload
+	headers := testV2.BuildPublishV2TestHeader(testV2.TestSource, testV2.TestType, testV2.TestEventTypeVersion, testV2.TestEventID, testV2.TestEventTime)
+	body, statusCode := testV2.PerformPublishV2RequestBinary(t, server.URL, testV2.TestData, headers)
+
+	// assert
+	assert.NotNil(t, body)
+	assert.Equal(t, http.StatusOK, statusCode)
+}
+
+func Test_PublishV2WithCorrectPayloadStructured_ShouldSuceed(t *testing.T) {
 	// prepare and send payload
 	payload := testV2.BuildPublishV2TestPayload(testV2.TestSource, testV2.TestType, testV2.TestEventTypeVersion, testV2.TestEventID, testV2.TestEventTime, testV2.TestData)
-	body, statusCode := testV2.PerformPublishV2RequestWithHeaders(t, server.URL, payload)
+	body, statusCode := testV2.PerformPublishV2RequestStructured(t, server.URL, payload)
 
 	// assert
 	assert.NotNil(t, body)
@@ -218,16 +228,18 @@ func Test_PublishV2WithCorrectPayload_ShouldSuceed(t *testing.T) {
 func Test_PublishV2WithInvalidSpecVersion_ShouldFail(t *testing.T) {
 	// prepare and send payload
 	payload := testV2.BuildPublishV2TestPayloadWithInvalidSpecversion()
-	body, statusCode := testV2.PerformPublishV2RequestWithHeaders(t, server.URL, payload)
+	body, statusCode := testV2.PerformPublishV2RequestStructured(t, server.URL, payload)
 
 	// assert
 	assert.NotNil(t, body)
 	assert.Equal(t, http.StatusBadRequest, statusCode)
 }
+
+// CloudEvents structured mode
 func Test_PublishV2WithoutAnyCEFields_ShouldFail(t *testing.T) {
 	// prepare and send payload
 	payload := testV2.BuildV2PayloadWithoutCEFields()
-	body, statusCode := testV2.PerformPublishV2RequestWithHeaders(t, server.URL, payload)
+	body, statusCode := testV2.PerformPublishV2RequestStructured(t, server.URL, payload)
 
 	// assert
 	assert.NotNil(t, body)
@@ -237,7 +249,7 @@ func Test_PublishV2WithoutAnyCEFields_ShouldFail(t *testing.T) {
 func Test_PublishV2WithoutAnyCEId_ShouldFail(t *testing.T) {
 	// prepare and send payload
 	payload := testV2.BuildPublishV2TestPayloadWithoutID()
-	body, statusCode := testV2.PerformPublishV2RequestWithHeaders(t, server.URL, payload)
+	body, statusCode := testV2.PerformPublishV2RequestStructured(t, server.URL, payload)
 
 	// assert
 	assert.NotNil(t, body)
@@ -247,7 +259,7 @@ func Test_PublishV2WithoutAnyCEId_ShouldFail(t *testing.T) {
 func Test_PublishV2WithoutAnyCESource_ShouldFail(t *testing.T) {
 	// prepare and send payload
 	payload := testV2.BuildPublishV2TestPayloadWithoutSource()
-	body, statusCode := testV2.PerformPublishV2RequestWithHeaders(t, server.URL, payload)
+	body, statusCode := testV2.PerformPublishV2RequestStructured(t, server.URL, payload)
 
 	// assert
 	assert.NotNil(t, body)
@@ -257,7 +269,7 @@ func Test_PublishV2WithoutAnyCESource_ShouldFail(t *testing.T) {
 func Test_PublishV2WithoutAnyCEWithoutSpecversion_ShouldFail(t *testing.T) {
 	// prepare and send payload
 	payload := testV2.BuildPublishV2TestPayloadWithoutSpecversion()
-	body, statusCode := testV2.PerformPublishV2RequestWithHeaders(t, server.URL, payload)
+	body, statusCode := testV2.PerformPublishV2RequestStructured(t, server.URL, payload)
 
 	// assert
 	assert.NotNil(t, body)
@@ -267,7 +279,7 @@ func Test_PublishV2WithoutAnyCEWithoutSpecversion_ShouldFail(t *testing.T) {
 func Test_PublishV2WithoutAnyCEWithoutType_ShouldFail(t *testing.T) {
 	// prepare and send payload
 	payload := testV2.BuildPublishV2TestPayloadWithoutType()
-	body, statusCode := testV2.PerformPublishV2RequestWithHeaders(t, server.URL, payload)
+	body, statusCode := testV2.PerformPublishV2RequestStructured(t, server.URL, payload)
 
 	// assert
 	assert.NotNil(t, body)

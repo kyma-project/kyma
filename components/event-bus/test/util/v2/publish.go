@@ -76,7 +76,19 @@ func (b *eventBuilder) String() string {
 	return fmt.Sprintf(eventFormat, b.Buffer.String())
 }
 
-// BuildPublishV2TestPayload returns a complete payload compliant with CE 0.3
+// BuildPublishV2TestPayload returns a complete payload compliant with CE
+func BuildPublishV2TestHeader(sourceID, eventType, eventTypeVersion, eventID, eventTime string) http.Header {
+	return http.Header{
+		"ce-source":           []string{sourceID},
+		"ce-specversion":      []string{TestSpecVersion},
+		"ce-type":             []string{eventType},
+		"ce-eventtypeversion": []string{eventTypeVersion},
+		"ce-id":               []string{eventID},
+		"ce-time":             []string{eventTime},
+	}
+}
+
+// BuildPublishV2TestPayload returns a complete payload compliant with CE
 func BuildPublishV2TestPayload(sourceID, eventType, eventTypeVersion, eventID, eventTime, data string) string {
 	builder := new(eventBuilder).
 		build(source, sourceID).
@@ -155,8 +167,31 @@ func BuildPublishV2TestPayloadWithoutType() string {
 	return payload
 }
 
-// PerformPublishV2RequestWithHeaders performs a test publish request with HTTP headers.
-func PerformPublishV2RequestWithHeaders(t *testing.T, publishURL string, payload string) ([]byte, int) {
+// PerformPublishV2RequestBinary performs a test publish request in CloudEvents binary mode
+func PerformPublishV2RequestBinary(t *testing.T, publishURL string, payload string, headers http.Header) ([]byte, int) {
+	req, _ := http.NewRequest("POST", publishURL+"/v2/events", strings.NewReader(payload))
+	req.Header = headers
+
+	// TODO(nachtmaar): can we simply change the content-type? Or is anyone relying on the old Content-Type
+	req.Header.Set("Content-Type", "application/json")
+
+	res, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = res.Body.Close() }()
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return body, res.StatusCode
+}
+
+// PerformPublishV2RequestStructured performs a test publish request in CloudEvents structured mode
+func PerformPublishV2RequestStructured(t *testing.T, publishURL string, payload string) ([]byte, int) {
 	req, _ := http.NewRequest("POST", publishURL+"/v2/events", strings.NewReader(payload))
 
 	// TODO(nachtmaar): can we simply change the content-type? Or is anyone relying on the old Content-Type
