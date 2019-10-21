@@ -2,6 +2,7 @@ package resourcemanager
 
 import (
 	"fmt"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -22,17 +23,17 @@ func CreateResource(client dynamic.Interface, resourceSchema schema.GroupVersion
 
 //UpdateResource updates a given k8s resource
 func UpdateResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, name string, updateTo unstructured.Unstructured) {
-	time.Sleep(5*time.Second) //TODO: delete after waiting for resource creation is implemented
+	time.Sleep(5 * time.Second) //TODO: delete after waiting for resource creation is implemented
 
-	toUpdate, err:=client.Resource(resourceSchema).Namespace(namespace).Get(name,metav1.GetOptions{})
-	if err!= nil {
+	toUpdate, err := client.Resource(resourceSchema).Namespace(namespace).Get(name, metav1.GetOptions{})
+	if err != nil {
 		panic(err)
 	}
 	updateTo.SetResourceVersion(toUpdate.GetResourceVersion())
-	fmt.Printf("Update to: %q\n",updateTo)
+	fmt.Printf("Update to: %q\n", updateTo)
 
-	result, err:= client.Resource(resourceSchema).Namespace(namespace).Update(&updateTo,metav1.UpdateOptions{})
-	if err!=nil {
+	result, err := client.Resource(resourceSchema).Namespace(namespace).Update(&updateTo, metav1.UpdateOptions{})
+	if err != nil {
 		panic(err)
 	}
 	fmt.Printf("Updated resource %q.\n", result.GetName())

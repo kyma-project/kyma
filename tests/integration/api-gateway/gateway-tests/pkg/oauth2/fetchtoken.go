@@ -2,10 +2,11 @@ package oauth2
 
 import (
 	"encoding/json"
-	"github.com/avast/retry-go"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/avast/retry-go"
 
 	"github.com/pkg/errors"
 )
