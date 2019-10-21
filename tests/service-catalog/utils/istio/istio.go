@@ -1,4 +1,4 @@
-package servicecatalog_test
+package istio
 
 import (
 	"bufio"
@@ -58,7 +58,7 @@ func filterLines(input io.Reader, expectedString string) {
 	}
 }
 
-func dumpIstioConfig(t *testing.T, host, labelSelector string) {
+func DumpConfig(t *testing.T, host, labelSelector string) {
 	podName := os.Getenv("POD_NAME")
 
 	cfg, err := restclient.InClusterConfig()

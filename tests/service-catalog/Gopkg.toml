@@ -61,7 +61,7 @@ required = [
 
 [[constraint]]
   name="sigs.k8s.io/controller-runtime"
-  version = "=v0.1.8"
+  version = "=v0.1.12"
 
 [[override]]
   name="sigs.k8s.io/controller-tools"

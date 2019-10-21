@@ -2,17 +2,6 @@
 
 
 [[projects]]
-  branch = "master"
-  digest = "1:c2134592a9d83b8a4ee8a536a057d7415450bfdb54dd264cd54cdf57943008b1"
-  name = "github.com/Bplotka/go-httplog"
-  packages = [
-    ".",
-    "logrus",
-  ]
-  pruneopts = "NUT"
-  revision = "fd208923b012d2b64c790e98c7731b32f676ea04"
-
-[[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -137,12 +126,17 @@
   version = "v0.1.39"
 
 [[projects]]
-  digest = "1:3f3cae7758f544d88873001e0b11f636fe812500711343cc0f3d7402a17ccbbd"
-  name = "github.com/kubernetes/client-go"
-  packages = ["kubernetes/typed/core/v1"]
+  branch = "master"
+  digest = "1:a95edbcd9cb61b037f32b4f18630c8b2fa945936075f86d173a0c003420a5f37"
+  name = "github.com/kyma-project/helm-broker"
+  packages = [
+    "pkg/apis/addons/v1alpha1",
+    "pkg/client/clientset/versioned",
+    "pkg/client/clientset/versioned/scheme",
+    "pkg/client/clientset/versioned/typed/addons/v1alpha1",
+  ]
   pruneopts = "NUT"
-  revision = "1638f8970cefaa404ff3a62950f88b08292b2696"
-  version = "v9.0.0"
+  revision = "c63d044592089a42213fec189bb619866f3e2a98"
 
 [[projects]]
   branch = "master"
@@ -225,27 +219,10 @@
   version = "0.0.12"
 
 [[projects]]
-  digest = "1:6989062eb7ccf25cf38bf4fe3dba097ee209f896cda42cefdca3927047bef7b6"
-  name = "github.com/sirupsen/logrus"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
-  version = "v1.0.5"
-
-[[projects]]
-  digest = "1:10301358a67805684f6b525cba6ad7ec014dbd56cccc2926fadc9189faa7889a"
-  name = "github.com/stretchr/objx"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "facf9a85c22f48d2f52f2380e4efce1768749a89"
-  version = "v0.1"
-
-[[projects]]
-  digest = "1:6a42cdb57ce4039d00df79bc6a61d53d2748afd226e839d8dd84d5de65d5c0ab"
+  digest = "1:be7d615463b5c9c5fd732a3cc028038e8643543def6e55344b52a3a4dbb667a3"
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
-    "mock",
     "require",
   ]
   pruneopts = "NUT"
@@ -559,7 +536,7 @@
   version = "kubernetes-1.12.3"
 
 [[projects]]
-  digest = "1:9b89872389bed1e6647547b868c3f9fa813f8adf098ba0984bc672e4b78ae235"
+  digest = "1:f1eb153c64afa0405c89ef387fa6c8835387fad95b396bcff2a92767f2ad17f3"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
     "pkg/client",
@@ -567,8 +544,8 @@
     "pkg/runtime/scheme",
   ]
   pruneopts = "NUT"
-  revision = "c63ebda0bf4be5f0a8abd4003e4ea546032545ba"
-  version = "v0.1.8"
+  revision = "f1eaba5087d69cebb154c6a48193e6667f5b512c"
+  version = "v0.1.12"
 
 [[projects]]
   digest = "1:8730e0150dfb2b7e173890c8b9868e7a273082ef8e39f4940e3506a481cf895c"
@@ -582,16 +559,12 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/Bplotka/go-httplog",
-    "github.com/Bplotka/go-httplog/logrus",
-    "github.com/ghodss/yaml",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
-    "github.com/kubernetes/client-go/kubernetes/typed/core/v1",
+    "github.com/kyma-project/helm-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
@@ -601,7 +574,6 @@
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
     "github.com/pkg/errors",
     "github.com/pmorie/go-open-service-broker-client/v2",
-    "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
     "github.com/vrischmann/envconfig",
@@ -609,16 +581,13 @@
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/apps/v1beta1",
     "k8s.io/api/core/v1",
-    "k8s.io/api/rbac/v1beta1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
-    "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apimachinery/pkg/util/rand",
     "k8s.io/cli-runtime/pkg/genericclioptions/printers",
-    "k8s.io/client-go/dynamic",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/kubernetes/typed/core/v1",

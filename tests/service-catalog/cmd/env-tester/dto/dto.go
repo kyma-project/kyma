@@ -1,4 +1,4 @@
-package servicecatalog
+package dto
 
 type EnvVariable struct {
 	Name  string `json:"name"`
