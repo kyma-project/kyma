@@ -434,7 +434,3 @@ func dumpResponse(res *http.Response) {
 	}
 	log.Printf("\n\ndump res1:%s", dump)
 }
-
-func getLabelSelectorsAsString(labels map[string]string) string {
-	return k8slabels.SelectorFromSet(labels).String()
-}

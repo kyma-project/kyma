@@ -148,43 +148,6 @@ func mockSubscriptionEmptyList() []controllertesting.MockList {
 	}
 }
 
-func mockSubscriptionActivatedGet() []controllertesting.MockGet {
-	return []controllertesting.MockGet{
-		func(innerClient client.Client, ctx context.Context, key client.ObjectKey, obj runtime.Object) (controllertesting.MockHandled, error) {
-			if _, ok := obj.(*subApis.Subscription); ok {
-				obj = makeEventsActivatedSubscription(subName)
-				return controllertesting.Handled, nil
-			}
-			return controllertesting.Unhandled, nil
-		},
-	}
-}
-
-func mockSubscriptionUpdate() []controllertesting.MockUpdate {
-	return []controllertesting.MockUpdate{
-		func(innerClient client.Client, ctx context.Context, obj runtime.Object) (controllertesting.MockHandled, error) {
-			if _, ok := obj.(*subApis.Subscription); ok {
-				return controllertesting.Handled, nil
-			}
-			return controllertesting.Unhandled, nil
-		},
-	}
-}
-
-func mockSubscriptionDeactivatedList() []controllertesting.MockList {
-	return []controllertesting.MockList{
-		func(_ client.Client, _ context.Context, _ *client.ListOptions, obj runtime.Object) (controllertesting.MockHandled, error) {
-			if l, ok := obj.(*subApis.SubscriptionList); ok {
-				l.Items = []subApis.Subscription{
-					*makeEventsDeactivatedSubscription(subName),
-				}
-				return controllertesting.Handled, nil
-			}
-			return controllertesting.Unhandled, nil
-		},
-	}
-}
-
 func makeNewEventActivation(namespace string, name string) *eventingv1alpha1.EventActivation {
 	eas := eventingv1alpha1.EventActivationSpec{
 		DisplayName: "display_name",
