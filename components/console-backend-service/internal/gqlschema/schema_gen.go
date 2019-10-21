@@ -150,8 +150,8 @@ type ComplexityRoot struct {
 	}
 
 	ApiRuleEvent struct {
-		Type func(childComplexity int) int
-		Api  func(childComplexity int) int
+		Type    func(childComplexity int) int
+		ApiRule func(childComplexity int) int
 	}
 
 	ApiService struct {
@@ -1061,8 +1061,8 @@ type QueryResolver interface {
 	BindableResources(ctx context.Context, namespace string) ([]BindableResourcesOutputItem, error)
 	Apis(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]API, error)
 	API(ctx context.Context, name string, namespace string) (*API, error)
-	Apirules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]APIRule, error)
-	Apirule(ctx context.Context, name string, namespace string) (*APIRule, error)
+	APIRules(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]APIRule, error)
+	APIRule(ctx context.Context, name string, namespace string) (*APIRule, error)
 	Application(ctx context.Context, name string) (*Application, error)
 	Applications(ctx context.Context, namespace *string, first *int, offset *int) ([]Application, error)
 	ConnectorService(ctx context.Context, application string) (ConnectorService, error)
@@ -3760,7 +3760,7 @@ func field_Query_api_args(rawArgs map[string]interface{}) (map[string]interface{
 
 }
 
-func field_Query_apirules_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Query_APIRules_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["namespace"]; ok {
@@ -3803,7 +3803,7 @@ func field_Query_apirules_args(rawArgs map[string]interface{}) (map[string]inter
 
 }
 
-func field_Query_apirule_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Query_APIRule_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
@@ -5131,12 +5131,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ApiRuleEvent.Type(childComplexity), true
 
-	case "ApiRuleEvent.api":
-		if e.complexity.ApiRuleEvent.Api == nil {
+	case "ApiRuleEvent.apiRule":
+		if e.complexity.ApiRuleEvent.ApiRule == nil {
 			break
 		}
 
-		return e.complexity.ApiRuleEvent.Api(childComplexity), true
+		return e.complexity.ApiRuleEvent.ApiRule(childComplexity), true
 
 	case "ApiService.name":
 		if e.complexity.ApiService.Name == nil {
@@ -7645,24 +7645,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Api(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
-	case "Query.apirules":
+	case "Query.APIRules":
 		if e.complexity.Query.Apirules == nil {
 			break
 		}
 
-		args, err := field_Query_apirules_args(rawArgs)
+		args, err := field_Query_APIRules_args(rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
 		return e.complexity.Query.Apirules(childComplexity, args["namespace"].(string), args["serviceName"].(*string), args["hostname"].(*string)), true
 
-	case "Query.apirule":
+	case "Query.APIRule":
 		if e.complexity.Query.Apirule == nil {
 			break
 		}
 
-		args, err := field_Query_apirule_args(rawArgs)
+		args, err := field_Query_APIRule_args(rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -11381,8 +11381,8 @@ func (ec *executionContext) _ApiRuleEvent(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "api":
-			out.Values[i] = ec._ApiRuleEvent_api(ctx, field, obj)
+		case "apiRule":
+			out.Values[i] = ec._ApiRuleEvent_apiRule(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -11425,7 +11425,7 @@ func (ec *executionContext) _ApiRuleEvent_type(ctx context.Context, field graphq
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ApiRuleEvent_api(ctx context.Context, field graphql.CollectedField, obj *ApiRuleEvent) graphql.Marshaler {
+func (ec *executionContext) _ApiRuleEvent_apiRule(ctx context.Context, field graphql.CollectedField, obj *ApiRuleEvent) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -11437,7 +11437,7 @@ func (ec *executionContext) _ApiRuleEvent_api(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.API, nil
+		return obj.APIRule, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -23230,19 +23230,19 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				out.Values[i] = ec._Query_api(ctx, field)
 				wg.Done()
 			}(i, field)
-		case "apirules":
+		case "APIRules":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_apirules(ctx, field)
+				out.Values[i] = ec._Query_APIRules(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
 				wg.Done()
 			}(i, field)
-		case "apirule":
+		case "APIRule":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_apirule(ctx, field)
+				out.Values[i] = ec._Query_APIRule(ctx, field)
 				wg.Done()
 			}(i, field)
 		case "application":
@@ -24492,11 +24492,11 @@ func (ec *executionContext) _Query_api(ctx context.Context, field graphql.Collec
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Query_apirules(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _Query_APIRules(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Query_apirules_args(rawArgs)
+	args, err := field_Query_APIRules_args(rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -24510,7 +24510,7 @@ func (ec *executionContext) _Query_apirules(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Apirules(rctx, args["namespace"].(string), args["serviceName"].(*string), args["hostname"].(*string))
+		return ec.resolvers.Query().APIRules(rctx, args["namespace"].(string), args["serviceName"].(*string), args["hostname"].(*string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -24558,11 +24558,11 @@ func (ec *executionContext) _Query_apirules(ctx context.Context, field graphql.C
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Query_apirule(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _Query_APIRule(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Query_apirule_args(rawArgs)
+	args, err := field_Query_APIRule_args(rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -24576,7 +24576,7 @@ func (ec *executionContext) _Query_apirule(ctx context.Context, field graphql.Co
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Apirule(rctx, args["name"].(string), args["namespace"].(string))
+		return ec.resolvers.Query().APIRule(rctx, args["name"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -35611,7 +35611,7 @@ type ApiEvent {
 
 type ApiRuleEvent {
     type: SubscriptionEventType!
-    api: APIRule!
+    apiRule: APIRule!
 }
 
 type ContainerState {
@@ -35889,8 +35889,8 @@ input APIRuleInput {
     serviceName: String!
     servicePort: Int!
     gateway: String!
-# TODO how to model rules on input? (only input or scalar allowed)
-#    rules: [Rule!]!
+    # TODO how to model rules on input? (only input or scalar allowed)
+    #    rules: [Rule!]!
 }
 
 # Backend Module
@@ -36024,8 +36024,8 @@ type Query {
     apis(namespace: String!, serviceName: String, hostname: String): [API!]! @HasAccess(attributes: {resource: "apis", verb: "list", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
     api(name: String!, namespace: String!): API @HasAccess(attributes: {resource: "apis", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
 
-    apirules(namespace: String!, serviceName: String, hostname: String): [APIRule!]! @HasAccess(attributes: {resource: "apirules", verb: "list", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-    apirule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    APIRules(namespace: String!, serviceName: String, hostname: String): [APIRule!]! @HasAccess(attributes: {resource: "apirules", verb: "list", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    APIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "get", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
 
     application(name: String!): Application @HasAccess(attributes: {resource: "applications", verb: "get", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     applications(namespace: String, first: Int, offset: Int): [Application!]! @HasAccess(attributes: {resource: "applicationmappings", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"}) @HasAccess(attributes: {resource: "applications", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})

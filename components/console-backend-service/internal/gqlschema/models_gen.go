@@ -127,8 +127,8 @@ type ApiEvent struct {
 }
 
 type ApiRuleEvent struct {
-	Type SubscriptionEventType `json:"type"`
-	API  APIRule               `json:"api"`
+	Type    SubscriptionEventType `json:"type"`
+	APIRule APIRule               `json:"apiRule"`
 }
 
 type ApiService struct {
