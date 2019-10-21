@@ -98,9 +98,8 @@ func (tlsh *TLSCrtKeyPairHolder) Set(v *tls.Certificate) {
 	tlsh.value = v
 }
 
-//AuthReqConstructor knows how to construct an authenticator.Request instance
-//It also returns an instance of authn.AuthenticatorCancelFunc that allows to cancel the authenticator.
-type AuthReqConstructor func() (authenticator.Request, authn.AuthenticatorCancelFunc, error)
+//AuthReqConstructor knows how to construct an authn.CancellableAuthRequest instance
+type AuthReqConstructor func() (authn.CancellableAuthRequest, error)
 
 //ReloadableAuthReq enables to create and re-create an instance of authenticator.Request in a thread-safe way.
 //It's used to re-create authenticator.Request instance every time a change in oidc-ca-file is detected.
@@ -139,34 +138,32 @@ func NewReloadableAuthReq(constructor AuthReqConstructor, notifier ReloadNotifie
 //reloads the internal instance using provided constructor function
 //Note: It must NOT modify the existing value in case of an error!
 func (rar *ReloadableAuthReq) reload() error {
-	newAuthReq, newAuthCancelFunc, err := rar.constructor()
+	newAuthReq, err := rar.constructor()
 	if err != nil {
 		return err
 	}
 
-	_, oldAuthCancelFunc := rar.holder.Get()
-	if oldAuthCancelFunc != nil {
+	oldAuthReq := rar.holder.Get()
+	if oldAuthReq != nil {
 		glog.Info("Cancelling previous OIDC Authenticator instance")
-		oldAuthCancelFunc()
+		oldAuthReq.Cancel()
 	}
 
-	rar.holder.Set(newAuthReq, newAuthCancelFunc)
+	rar.holder.Set(newAuthReq)
 	return nil
 }
 
 //AuthenticateRequest implements authenticator.Request interface
 func (rar *ReloadableAuthReq) AuthenticateRequest(req *http.Request) (*authenticator.Response, bool, error) {
 	//Delegate to internally-stored instance (thread-safe)
-	actual, _ := rar.holder.Get()
-	return actual.AuthenticateRequest(req)
+	return rar.holder.Get().AuthenticateRequest(req)
 }
 
 //AuthReqHolder keeps an authenticator.Request and an authn.AuthenticatorCancelFunc instance.
 //It allows for Get/Set operations in a thread-safe way
 type AuthReqHolder struct {
-	rwmu       sync.RWMutex
-	value      authenticator.Request
-	cancelFunc authn.AuthenticatorCancelFunc
+	rwmu  sync.RWMutex
+	value authn.CancellableAuthRequest
 }
 
 //NewAuthReqHolder returns new AuthReqHolder instance
@@ -175,16 +172,15 @@ func NewAuthReqHolder() *AuthReqHolder {
 }
 
 //Get returns the instances stored in the AuthReqHolder
-func (arh *AuthReqHolder) Get() (authenticator.Request, authn.AuthenticatorCancelFunc) {
+func (arh *AuthReqHolder) Get() authn.CancellableAuthRequest {
 	arh.rwmu.RLock()
 	defer arh.rwmu.RUnlock()
-	return arh.value, arh.cancelFunc
+	return arh.value
 }
 
 //Set stores given instances in the AuthReqHolder
-func (arh *AuthReqHolder) Set(v authenticator.Request, c authn.AuthenticatorCancelFunc) {
+func (arh *AuthReqHolder) Set(v authn.CancellableAuthRequest) {
 	arh.rwmu.Lock()
 	defer arh.rwmu.Unlock()
 	arh.value = v
-	arh.cancelFunc = c
 }

@@ -400,7 +400,7 @@ func setupReloadableOIDCAuthr(fileWatcherCtx context.Context, cfg *authn.OIDCCon
 	oidcCAFileNotifier := simpleNotifier{}
 
 	//Create ReloadableAuthReq
-	authReqConstructorFunc := func() (authenticator.Request, authn.AuthenticatorCancelFunc, error) {
+	authReqConstructorFunc := func() (authn.CancellableAuthRequest, error) {
 		glog.Infof("creating new instance of authenticator.Request...")
 		return authn.NewOIDCAuthenticator(cfg)
 	}
