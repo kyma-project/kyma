@@ -27,3 +27,4 @@ data:
     
   nginx-extended.conf: |
     set $kymadomain {{ js .Values.global.ingress.domainName }};
+#test
