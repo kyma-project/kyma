@@ -18,8 +18,8 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
-	"go.uber.org/zap"
 	"github.com/opentracing/opentracing-go"
+	"go.uber.org/zap"
 )
 
 type CloudEventHandler struct {
@@ -87,8 +87,8 @@ func (handler *CloudEventHandler) HandleEvent(ctx context.Context, traceSpan *op
 		}
 	}
 
-	(*traceSpan).SetTag(trace.EventID,event.ID())
-	(*traceSpan).SetTag(trace.SourceID,event.Source() )
+	(*traceSpan).SetTag(trace.EventID, event.ID())
+	(*traceSpan).SetTag(trace.SourceID, event.Source())
 	(*traceSpan).SetTag(trace.EventType, event.Type())
 	(*traceSpan).SetTag(trace.EventTypeVersion, etv)
 
@@ -106,8 +106,6 @@ func (handler *CloudEventHandler) HandleEvent(ctx context.Context, traceSpan *op
 		Reason:  getPublishStatusReason(&status),
 	}
 
-
-	
 	return resp, nil, nil
 
 }
@@ -133,15 +131,15 @@ func (handler *CloudEventHandler) ServeHTTP(w http.ResponseWriter, req *http.Req
 		//r.Error()
 		return
 	}
-
-	event, err := handler.Transport.MessageToEvent(ctx, &cehttp.Message{
+	message := cehttp.Message{
 		Header: req.Header,
 		Body:   body,
-	})
+	}
+	event, err := handler.Transport.MessageToEvent(ctx, &message)
 
 	if err != nil {
-		fmt.Printf("%v", err)
-		//TODO(k15r): handle this here
+		w.WriteHeader(http.StatusBadRequest)
+		logger.Errorw("could not parse message from event", zap.String("message", fmt.Sprintf("%+v", message)), zap.Error(err))
 		return
 	}
 
