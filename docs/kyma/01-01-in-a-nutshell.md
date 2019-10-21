@@ -3,12 +3,12 @@ title: In a nutshell
 type: Overview
 ---
 
-Kyma allows you to extend applications with microservices and lambda functions. You first connect your application to a Kubernetes cluster and expose the application's API or Events securely. You can then implement the business logic you require by creating microservices or functions, and triggering them to react to particular Events or calls to your application's API. To limit the time spent on coding, use the in-built cloud services from the Service Catalog, exposed by open service brokers from such cloud providers as GCP, Azure, and AWS.
+Kyma allows you to extend applications with microservices and lambda functions. First, connect your application to a Kubernetes cluster and expose the application's API or Events securely. Then, implement the business logic you require by creating microservices or functions, and triggering them to react to particular Events or calls to your application's API. To limit the time spent on coding, use the in-built cloud services from the Service Catalog, exposed by open service brokers from such cloud providers as GCP, Azure, and AWS.
 
-Kyma comes equipped with those out-of-the-box functionalities:
+Kyma comes equipped with these out-of-the-box functionalities:
 
 - Service-to-service communication and proxying (Istio-based [Service Mesh](/components/service-mesh/#overview-overview))
-- In-built [monitoring](/components/monitoring/#overview-overview), [tracing](/components/tracing/#overview-overview), and [logging](/components/logging/#overview-overview) (Grafana, Prometheus, Jaeger), Loki, Kiali)
+- In-built [monitoring](/components/monitoring/#overview-overview), [tracing](/components/tracing/#overview-overview), and [logging](/components/logging/#overview-overview) (Grafana, Prometheus, Jaeger, Loki, Kiali)
 - Secure [authentication and authorization](/components/security/#overview-overview) (Dex, Ory, Service Identity, TLS, Role Based Access Control)
 - The catalog of services to choose from ([Service Catalog](/components/service-catalog/#overview-overview), [Service Brokers](https://kyma-project.io/docs/components/service-catalog/#service-brokers-service-brokers))
 - The development platform to run lightweight functions in a cost-efficient and scalable way ([Serverless](/components/serverless/#overview-overview), Kubeless)
