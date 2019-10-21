@@ -17,8 +17,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    dir: develop/
-    version: c9f7a5f5
+    dir: pr/
+    version: PR-5697
   application_operator_tests:
     dir: develop/
     version: 2569744b
