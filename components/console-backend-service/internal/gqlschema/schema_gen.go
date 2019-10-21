@@ -968,9 +968,9 @@ type MutationResolver interface {
 	UpdateAPI(ctx context.Context, name string, namespace string, params APIInput) (API, error)
 	DeleteAPI(ctx context.Context, name string, namespace string) (*API, error)
 	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*LimitRange, error)
-	DeleteFunction(ctx context.Context, name string, namespace string) (FunctionMutationOutput, error)
-	CreateFunction(ctx context.Context, name string, namespace string, labels Labels, size string, runtime string) (Function, error)
-	UpdateFunction(ctx context.Context, name string, namespace string, params FunctionUpdateInput) (Function, error)
+	DeleteFunction(ctx context.Context, name string, namespace string) (*FunctionMutationOutput, error)
+	CreateFunction(ctx context.Context, name string, namespace string, labels Labels, size string, runtime string) (*Function, error)
+	UpdateFunction(ctx context.Context, name string, namespace string, params FunctionUpdateInput) (*Function, error)
 }
 type NamespaceResolver interface {
 	Pods(ctx context.Context, obj *Namespace) ([]Pod, error)
@@ -18463,19 +18463,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_createLimitRange(ctx, field)
 		case "deleteFunction":
 			out.Values[i] = ec._Mutation_deleteFunction(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		case "createFunction":
 			out.Values[i] = ec._Mutation_createFunction(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		case "updateFunction":
 			out.Values[i] = ec._Mutation_updateFunction(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -20216,16 +20207,17 @@ func (ec *executionContext) _Mutation_deleteFunction(ctx context.Context, field 
 		return ec.resolvers.Mutation().DeleteFunction(rctx, args["name"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(FunctionMutationOutput)
+	res := resTmp.(*FunctionMutationOutput)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._FunctionMutationOutput(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._FunctionMutationOutput(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -20250,16 +20242,17 @@ func (ec *executionContext) _Mutation_createFunction(ctx context.Context, field 
 		return ec.resolvers.Mutation().CreateFunction(rctx, args["name"].(string), args["namespace"].(string), args["labels"].(Labels), args["size"].(string), args["runtime"].(string))
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(Function)
+	res := resTmp.(*Function)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._Function(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Function(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -20284,16 +20277,17 @@ func (ec *executionContext) _Mutation_updateFunction(ctx context.Context, field 
 		return ec.resolvers.Mutation().UpdateFunction(rctx, args["name"].(string), args["namespace"].(string), args["params"].(FunctionUpdateInput))
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(Function)
+	res := resTmp.(*Function)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._Function(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Function(ctx, field.Selections, res)
 }
 
 var namespaceImplementors = []string{"Namespace"}
@@ -34066,9 +34060,9 @@ type Mutation {
 
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1"})
 
-    deleteFunction(name: String!, namespace: String!): FunctionMutationOutput! @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
-    createFunction(name: String!, namespace: String!, labels: Labels!, size: String!, runtime: String!): Function! @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
-    updateFunction(name: String!, namespace: String!, params: FunctionUpdateInput!): Function! @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+    deleteFunction(name: String!, namespace: String!): FunctionMutationOutput @HasAccess(attributes: {resource: "functions", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+    createFunction(name: String!, namespace: String!, labels: Labels!, size: String!, runtime: String!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
+    updateFunction(name: String!, namespace: String!, params: FunctionUpdateInput!): Function @HasAccess(attributes: {resource: "functions", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name",  namespaceArg: "namespace"})
 }
 
 # Subscriptions
