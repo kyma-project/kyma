@@ -235,14 +235,14 @@ func main() {
 				NextProtos: []string{"h2"},
 			}
 		} else {
-			krldr, err := setupReloadableTLSCertProvider(fileWatcherCtx, cfg.tls.certFile, cfg.tls.keyFile)
+			rldcp, err := setupReloadableTLSCertProvider(fileWatcherCtx, cfg.tls.certFile, cfg.tls.keyFile)
 			if err != nil {
 				glog.Fatalf("Failed to create ReloadableTLSCertProvider: %v", err)
 			}
 
 			//Configure srv with GetCertificate function
 			srv.TLSConfig = &tls.Config{
-				GetCertificate: krldr.GetCertificateFunc,
+				GetCertificate: rldcp.GetCertificateFunc,
 			}
 		}
 
@@ -375,29 +375,9 @@ func deleteUpstreamCORSHeaders(r *http.Response) error {
 	return nil
 }
 
-//Simple Notifier can register only a single callback.
-type simpleNotifier struct {
-	onEventFunc func()
-}
-
-//RegisterCallback implements ReloadNotifier interface
-func (sn *simpleNotifier) RegisterCallback(handler func()) {
-	sn.onEventFunc = handler
-}
-
-//triggers event dispatch
-func (sn *simpleNotifier) trigger() {
-	if sn.onEventFunc != nil {
-		sn.onEventFunc()
-	}
-}
-
 func setupReloadableOIDCAuthr(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) (authenticator.Request, error) {
 	const eventBatchDelaySeconds = 10
 	filesToWatch := []string{cfg.CAFile}
-
-	//Binds the watcher for OIDC.CAFile with ReloadableAuthReq
-	oidcCAFileNotifier := simpleNotifier{}
 
 	//Create ReloadableAuthReq
 	authReqConstructorFunc := func() (authn.CancellableAuthRequest, error) {
@@ -405,13 +385,13 @@ func setupReloadableOIDCAuthr(fileWatcherCtx context.Context, cfg *authn.OIDCCon
 		return authn.NewOIDCAuthenticator(cfg)
 	}
 
-	athntctr, err := r.NewReloadableAuthReq(authReqConstructorFunc, &oidcCAFileNotifier)
+	athntctr, err := r.NewReloadableAuthReq(authReqConstructorFunc)
 	if err != nil {
 		return nil, err
 	}
 
 	//Setup file watcher
-	oidcCAFileWatcher := r.NewWatcher("oidc-ca-dex-tls-cert", filesToWatch, eventBatchDelaySeconds, oidcCAFileNotifier.trigger)
+	oidcCAFileWatcher := r.NewWatcher("oidc-ca-dex-tls-cert", filesToWatch, eventBatchDelaySeconds, athntctr.Reload)
 	go oidcCAFileWatcher.Run(fileWatcherCtx)
 
 	return athntctr, nil
@@ -420,24 +400,20 @@ func setupReloadableOIDCAuthr(fileWatcherCtx context.Context, cfg *authn.OIDCCon
 func setupReloadableTLSCertProvider(fileWatcherCtx context.Context, certFile, keyFile string) (*r.ReloadableTLSCertProvider, error) {
 	const eventBatchDelaySeconds = 10
 
-	//Binds the watcher for tls.certFile and tls.keyFile with ReloadableTLSCertProvider
-	tlsCertFileNotifier := simpleNotifier{}
-
 	//Create ReloadableTLSCertProvider
 	tlsConstructorFunc := func() (*tls.Certificate, error) {
 		glog.Infof("Creating new TLS Certificate from data files: %s, %s", certFile, keyFile)
 		res, err := tls.LoadX509KeyPair(certFile, keyFile)
 		return &res, err
 	}
-	krldr, err := r.NewReloadableTLSCertProvider(tlsConstructorFunc, &tlsCertFileNotifier)
-
+	rldcp, err := r.NewReloadableTLSCertProvider(tlsConstructorFunc)
 	if err != nil {
 		return nil, err
 	}
 
 	//Start file watcher for certificate files
-	tlsCertFileWatcher := r.NewWatcher("main-tls-crt/key", []string{certFile, keyFile}, eventBatchDelaySeconds, tlsCertFileNotifier.trigger)
+	tlsCertFileWatcher := r.NewWatcher("main-tls-crt/key", []string{certFile, keyFile}, eventBatchDelaySeconds, rldcp.Reload)
 	go tlsCertFileWatcher.Run(fileWatcherCtx)
 
-	return krldr, nil
+	return rldcp, nil
 }

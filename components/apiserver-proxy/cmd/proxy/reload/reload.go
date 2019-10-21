@@ -11,12 +11,6 @@ import (
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 )
 
-//ReloadNotifier is used to sent notifications about events requiring refreshing data
-type ReloadNotifier interface {
-	//Registers callback handler that is called when an event requiring refreshing data occurs
-	RegisterCallback(handler func())
-}
-
 //TLSCertConstructor knows how to construct a tls.Certificate instance
 type TLSCertConstructor func() (*tls.Certificate, error)
 
@@ -31,7 +25,7 @@ type ReloadableTLSCertProvider struct {
 //notifier parameter is used register a data reloading callback.
 //External code can make use of this callback to trigger data reloading from outside.
 //It's safe to trigger reloading from other goroutines.
-func NewReloadableTLSCertProvider(constructor TLSCertConstructor, notifier ReloadNotifier) (*ReloadableTLSCertProvider, error) {
+func NewReloadableTLSCertProvider(constructor TLSCertConstructor) (*ReloadableTLSCertProvider, error) {
 
 	result := &ReloadableTLSCertProvider{
 		constructor: constructor,
@@ -44,16 +38,15 @@ func NewReloadableTLSCertProvider(constructor TLSCertConstructor, notifier Reloa
 		return nil, err
 	}
 
-	//Used by external notifier to trigger certificate reloads
-	onDataChangeFunc := func() {
-		err := result.reload()
-		if err != nil {
-			glog.Errorf("Failed to reload certificate: %v", err)
-		}
-	}
-	notifier.RegisterCallback(onDataChangeFunc)
-
 	return result, nil
+}
+
+//Reload reloads the internal instance.
+func (ckpr *ReloadableTLSCertProvider) Reload() {
+	err := ckpr.reload()
+	if err != nil {
+		glog.Errorf("Failed to reload certificate: %v", err)
+	}
 }
 
 //reloads the internal instance using provided constructor function
@@ -112,7 +105,7 @@ type ReloadableAuthReq struct {
 //NewReloadableAuthReq creates a new instance of ReloadableAuthReq.
 //notifier parameter allows to control when the instance is re-created from outside.
 //It's safe to trigger re-creation from other goroutines.
-func NewReloadableAuthReq(constructor AuthReqConstructor, notifier ReloadNotifier) (*ReloadableAuthReq, error) {
+func NewReloadableAuthReq(constructor AuthReqConstructor) (*ReloadableAuthReq, error) {
 	result := ReloadableAuthReq{
 		constructor: constructor,
 		holder:      NewAuthReqHolder(),
@@ -124,15 +117,15 @@ func NewReloadableAuthReq(constructor AuthReqConstructor, notifier ReloadNotifie
 		return nil, err
 	}
 
-	onDataChangeFunc := func() {
-		err := result.reload()
-		if err != nil {
-			glog.Errorf("Failed to reload authenticator.Request: %v", err)
-		}
-	}
-	notifier.RegisterCallback(onDataChangeFunc)
-
 	return &result, nil
+}
+
+//Reload reloads internal instance.
+func (rar *ReloadableAuthReq) Reload() {
+	err := rar.reload()
+	if err != nil {
+		glog.Errorf("Failed to reload authenticator.Request: %v", err)
+	}
 }
 
 //reloads the internal instance using provided constructor function
