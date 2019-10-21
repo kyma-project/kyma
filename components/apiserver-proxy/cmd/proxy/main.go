@@ -279,10 +279,6 @@ func main() {
 		}
 		glog.Infof("Listening securely on %v", cfg.secureListenAddress)
 
-		if err != nil {
-			glog.Fatalf("Failed to create reloader", err)
-		}
-
 		go srv.ServeTLS(l, "", "")
 	}
 
