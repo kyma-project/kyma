@@ -52,7 +52,6 @@ required = [
   name = "github.com/knative/eventing"
   version = "v0.8.0"
 
-# Transitive dependencies of k8s.io/kubernetes
 [[override]]
   name = "k8s.io/client-go"
   version = "kubernetes-1.14.8"
