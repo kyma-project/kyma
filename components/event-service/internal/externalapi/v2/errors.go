@@ -1,8 +1,8 @@
 package v2
 
 import (
-	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
+	"github.com/kyma-project/kyma/components/event-service/pkg/event/api"
 )
 
 // ErrorResponseMissingFieldEventID returns an error of type PublishEventResponses for missing EventID field

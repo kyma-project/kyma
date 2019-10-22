@@ -1,6 +1,6 @@
 package api
 
-import "github.com/kyma-project/kyma/components/event-service/internal/events/api"
+import "github.com/kyma-project/kyma/components/event-service/pkg/event/api"
 
 // PublishRequestV1 implements the service definition of PublishRequestV1
 type PublishRequestV1 struct {

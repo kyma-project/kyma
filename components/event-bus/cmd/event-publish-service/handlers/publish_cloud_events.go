@@ -4,13 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	kymaevent "github.com/kyma-project/kyma/components/event-bus/pkg/event"
-	"io/ioutil"
-	"net/http"
-	"reflect"
-	"strconv"
-	"strings"
-
 	cloudevents "github.com/cloudevents/sdk-go"
 	cecontext "github.com/cloudevents/sdk-go/pkg/cloudevents/context"
 	cehttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
@@ -19,8 +12,14 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
+	kymaevent "github.com/kyma-project/kyma/components/event-service/pkg/event"
+	serviceapi "github.com/kyma-project/kyma/components/event-service/pkg/event/api"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
+	"io/ioutil"
+	"net/http"
+	"reflect"
+	"strconv"
 )
 
 type CloudEventHandler struct {
@@ -136,36 +135,24 @@ func (handler *CloudEventHandler) ServeHTTP(w http.ResponseWriter, req *http.Req
 		Header: req.Header,
 		Body:   body,
 	}
-	event, err := handler.Transport.MessageToEvent(ctx, &message)
-
+	event, apiError, err := kymaevent.DecodeMessage(handler.Transport, ctx, message)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		logger.Errorw("could not parse message from event", zap.String("message", fmt.Sprintf("%+v", message)), zap.Error(err))
+		if err := kymaevent.RespondWithError(w, serviceapi.Error{
+			Status:   http.StatusBadRequest,
+			Type:     api.ErrorTypeBadRequest,
+			Message:  api.ErrorMessageBadRequest,
+			MoreInfo: "",
+			Details:  nil,
+		}); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
-	specErrors := []api.ErrorDetail(nil)
-	err = event.Validate()
-
-	if err != nil {
-		specErrors = errorToDetails(err)
-	}
-
-	kymaErrors := kymaevent.Validate(event)
-
-	allErrors := append(specErrors, kymaErrors...)
-	if len(allErrors) != 0 {
-		error := api.Error{
-			Status:  http.StatusBadRequest,
-			Message: api.ErrorMessageBadRequest,
-			Type:    api.ErrorTypeBadRequest,
-			Details: allErrors,
+	if apiError != nil {
+		if err := kymaevent.RespondWithError(w, *apiError); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
 		}
-		err := respondWithError(w, error)
-		if err != nil {
-			//TODO(k15r): handle this
-		}
-		// send error response back to client
 		return
 	}
 
@@ -222,22 +209,6 @@ func (handler *CloudEventHandler) ServeHTTP(w http.ResponseWriter, req *http.Req
 
 }
 
-func respondWithError(w http.ResponseWriter, error api.Error) error {
-	w.WriteHeader(error.Status)
-	if err := json.NewEncoder(w).Encode(error); err != nil {
-		return err
-	}
-	return nil
-}
 
-func errorToDetails(err error) []api.ErrorDetail {
-	errors := []api.ErrorDetail(nil)
 
-	for _, error := range strings.Split(strings.TrimSuffix(err.Error(), "\n"), "\n") {
-		errors = append(errors, api.ErrorDetail{
-			Message: error,
-		})
-	}
 
-	return errors
-}

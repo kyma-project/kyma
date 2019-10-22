@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
+	"github.com/kyma-project/kyma/components/event-service/pkg/event/api"
 )
 
 func TestErrorEmptyData(t *testing.T) {

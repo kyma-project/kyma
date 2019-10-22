@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
+	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strings"
@@ -12,14 +14,17 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 
-	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
-	apiv2 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v2"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
+	kymaevent "github.com/kyma-project/kyma/components/event-service/pkg/event"
+	"github.com/kyma-project/kyma/components/event-service/pkg/event/api"
+	apiv2 "github.com/kyma-project/kyma/components/event-service/pkg/event/api/v2"
+	// TODO(k15r): get rid off publish import
+	"github.com/kyma-project/kyma/components/event-bus/api/publish"
 
-	cloudevents "github.com/cloudevents/sdk-go"
-	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
-
+	ce "github.com/cloudevents/sdk-go"
+	cecontext "github.com/cloudevents/sdk-go/pkg/cloudevents/context"
+	cehttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -39,6 +44,10 @@ type maxBytesHandler struct {
 	limit int64
 }
 
+type CloudEventsHandler struct  {
+	Transport * cehttp.Transport
+}
+
 func (h *maxBytesHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(rw, r.Body, h.limit)
 	h.next.ServeHTTP(rw, r)
@@ -46,7 +55,14 @@ func (h *maxBytesHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 // NewEventsHandler creates an http.Handler to handle the events endpoint
 func NewEventsHandler(maxRequestSize int64) http.Handler {
-	return &maxBytesHandler{next: http.HandlerFunc(handleEvents), limit: maxRequestSize}
+	t, err := ce.NewHTTPTransport()
+	if err != nil {
+		return nil
+	}
+
+	handler := CloudEventsHandler{Transport:t}
+
+	return &maxBytesHandler{next: &handler, limit: maxRequestSize}
 }
 
 // FilterCEHeaders filters Cloud Events Headers
@@ -55,7 +71,7 @@ func FilterCEHeaders(ctx context.Context) map[string][]string {
 	//forward `ce-` headers only
 	headers := make(map[string][]string)
 
-	tctx := cloudeventshttp.TransportContextFrom(ctx)
+	tctx := cehttp.TransportContextFrom(ctx)
 
 	for k := range tctx.Header {
 		if strings.HasPrefix(strings.ToUpper(k), "CE-") {
@@ -180,7 +196,7 @@ func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 }
 
 func getTraceHeaders(ctx context.Context) *map[string]string {
-	tctx := cloudeventshttp.TransportContextFrom(ctx)
+	tctx := cehttp.TransportContextFrom(ctx)
 
 	traceHeaders := make(map[string]string)
 	for _, key := range traceHeaderKeys {
@@ -192,7 +208,7 @@ func getTraceHeaders(ctx context.Context) *map[string]string {
 }
 
 // Receive finally handles the decoded event
-func HandleEvent(ctx context.Context, event cloudevents.Event, eventResponse *cloudevents.EventResponse) error {
+func HandleEvent(ctx context.Context, event ce.Event, eventResponse *ce.EventResponse) error {
 	fmt.Printf("received event %+v", event)
 
 	if _, err := event.Context.GetExtension("event-type-version"); err != nil {
@@ -205,4 +221,49 @@ func HandleEvent(ctx context.Context, event cloudevents.Event, eventResponse *cl
 	bus.SendEventV2(event, *traceHeaders)
 
 	return nil
+}
+
+
+func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	ctx = cehttp.WithTransportContext(ctx, cehttp.NewTransportContext(req))
+	logger := cecontext.LoggerFrom(ctx)
+	w.Header().Set("Content-Type", "application/json")
+
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		// TODO(nachtmaar)
+		logger.Errorw("failed to handle request", zap.Error(err))
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte(`{"error":"Invalid request"}`))
+		//r.Error()
+		return
+	}
+	message := cehttp.Message{
+		Header: req.Header,
+		Body:   body,
+	}
+	e, apiError, err := kymaevent.DecodeMessage(h.Transport, ctx, message)
+	if err != nil {
+		if err := kymaevent.RespondWithError(w, api.Error{
+			Status:   http.StatusBadRequest,
+			Type:     publish.ErrorTypeBadRequest,
+			Message:  publish.ErrorMessageBadRequest,
+			MoreInfo: "",
+			Details:  nil,
+		}); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	if apiError != nil {
+		if err := kymaevent.RespondWithError(w, *apiError); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+
+	fmt.Printf("%v", e)
 }

@@ -1,6 +1,7 @@
 package v2
 
 import (
+	event2 "github.com/kyma-project/kyma/components/event-bus/pkg/event"
 	"net/http"
 	"testing"
 
@@ -13,7 +14,7 @@ import (
 func Test_ValidatePublish_MissingSourceId(t *testing.T) {
 	event := buildTestPublishRequest()
 	event.Source = ""
-	err := ValidatePublish(&event, api.GetDefaultEventOptions())
+	err := event2.Validate(&event, api.GetDefaultEventOptions())
 	assert.Equal(t, len(err.Details), 1)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, ErrorMessageMissingSourceID, err.Message)
@@ -23,7 +24,7 @@ func Test_ValidatePublish_MissingSourceId(t *testing.T) {
 func Test_ValidatePublish_MissingEventType(t *testing.T) {
 	event := buildTestPublishRequest()
 	event.Type = ""
-	err := ValidatePublish(&event, api.GetDefaultEventOptions())
+	err := event2.Validate(&event, api.GetDefaultEventOptions())
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, FieldEventType, err.Details[0].Field)
@@ -32,7 +33,7 @@ func Test_ValidatePublish_MissingEventType(t *testing.T) {
 func Test_ValidatePublish_MissingEventTypeVersion(t *testing.T) {
 	event := buildTestPublishRequest()
 	event.TypeVersion = ""
-	err := ValidatePublish(&event, api.GetDefaultEventOptions())
+	err := event2.Validate(&event, api.GetDefaultEventOptions())
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, FieldEventTypeVersion, err.Details[0].Field)
@@ -41,7 +42,7 @@ func Test_ValidatePublish_MissingEventTypeVersion(t *testing.T) {
 func Test_ValidatePublish_MissingEventTime(t *testing.T) {
 	event := buildTestPublishRequest()
 	event.Time = ""
-	err := ValidatePublish(&event, api.GetDefaultEventOptions())
+	err := event2.Validate(&event, api.GetDefaultEventOptions())
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, FieldEventTime, err.Details[0].Field)
@@ -50,7 +51,7 @@ func Test_ValidatePublish_MissingEventTime(t *testing.T) {
 func Test_ValidatePublish_MissingData(t *testing.T) {
 	event := buildTestPublishRequest()
 	event.Data = nil
-	err := ValidatePublish(&event, api.GetDefaultEventOptions())
+	err := event2.Validate(&event, api.GetDefaultEventOptions())
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, FieldData, err.Details[0].Field)
@@ -59,7 +60,7 @@ func Test_ValidatePublish_MissingData(t *testing.T) {
 func Test_ValidatePublish_EmptyData(t *testing.T) {
 	event := buildTestPublishRequest()
 	event.Data = ""
-	err := ValidatePublish(&event, api.GetDefaultEventOptions())
+	err := event2.Validate(&event, api.GetDefaultEventOptions())
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, api.FieldData, err.Details[0].Field)
@@ -68,7 +69,7 @@ func Test_ValidatePublish_EmptyData(t *testing.T) {
 func Test_ValidatePublish_InvalidEventType(t *testing.T) {
 	event := buildTestPublishRequest()
 	event.Type = "invalid/event-type"
-	err := ValidatePublish(&event, api.GetDefaultEventOptions())
+	err := event2.Validate(&event, api.GetDefaultEventOptions())
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, FieldEventType, err.Details[0].Field)
@@ -77,7 +78,7 @@ func Test_ValidatePublish_InvalidEventType(t *testing.T) {
 func Test_ValidatePublish_InvalidEventTypeVersion(t *testing.T) {
 	event := buildTestPublishRequest()
 	event.TypeVersion = "$"
-	err := ValidatePublish(&event, api.GetDefaultEventOptions())
+	err := event2.Validate(&event, api.GetDefaultEventOptions())
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, FieldEventTypeVersion, err.Details[0].Field)
@@ -86,7 +87,7 @@ func Test_ValidatePublish_InvalidEventTypeVersion(t *testing.T) {
 func Test_ValidatePublish_InvalidEventTime(t *testing.T) {
 	event := buildTestPublishRequest()
 	event.Time = "invalid-time"
-	err := ValidatePublish(&event, api.GetDefaultEventOptions())
+	err := event2.Validate(&event, api.GetDefaultEventOptions())
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, FieldEventTime, err.Details[0].Field)
@@ -95,7 +96,7 @@ func Test_ValidatePublish_InvalidEventTime(t *testing.T) {
 func Test_ValidatePublish_InvalidEventID(t *testing.T) {
 	event := buildTestPublishRequest()
 	event.ID = "invalid-id"
-	err := ValidatePublish(&event, api.GetDefaultEventOptions())
+	err := event2.Validate(&event, api.GetDefaultEventOptions())
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, FieldEventID, err.Details[0].Field)
@@ -104,7 +105,7 @@ func Test_ValidatePublish_InvalidEventID(t *testing.T) {
 func Test_ValidatePublish_InvalidSourceId_In_Payload(t *testing.T) {
 	event := buildTestPublishRequest()
 	event.Source = "source/Id"
-	err := ValidatePublish(&event, api.GetDefaultEventOptions())
+	err := event2.Validate(&event, api.GetDefaultEventOptions())
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, FieldSourceID, err.Details[0].Field)
@@ -113,7 +114,7 @@ func Test_ValidatePublish_InvalidSourceId_In_Payload(t *testing.T) {
 
 func Test_ValidatePublish_Success(t *testing.T) {
 	event := buildTestPublishRequest()
-	err := ValidatePublish(&event, api.GetDefaultEventOptions())
+	err := event2.Validate(&event, api.GetDefaultEventOptions())
 	assert.Nil(t, err)
 }
 
@@ -121,7 +122,7 @@ func Test_ValidatePublish_InvalidSourceIdLength(t *testing.T) {
 	event := buildTestPublishRequest()
 	opts := api.GetDefaultEventOptions()
 	opts.MaxSourceIDLength = 1
-	err := ValidatePublish(&event, opts)
+	err := event2.Validate(&event, opts)
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, api.FieldSourceID, err.Details[0].Field)
@@ -132,7 +133,7 @@ func Test_ValidatePublish_InvalidEventTypeLength(t *testing.T) {
 	event := buildTestPublishRequest()
 	opts := api.GetDefaultEventOptions()
 	opts.MaxEventTypeLength = 1
-	err := ValidatePublish(&event, opts)
+	err := event2.Validate(&event, opts)
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, api.FieldEventType, err.Details[0].Field)
@@ -143,7 +144,7 @@ func Test_ValidatePublish_InvalidEventTypeVersionLength(t *testing.T) {
 	event := buildTestPublishRequest()
 	opts := api.GetDefaultEventOptions()
 	opts.MaxEventTypeVersionLength = 1
-	err := ValidatePublish(&event, opts)
+	err := event2.Validate(&event, opts)
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, api.FieldEventTypeVersion, err.Details[0].Field)

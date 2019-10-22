@@ -155,9 +155,10 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:12ba0eb2d76b5ddfa7666b29ffdfec59669b4b1afaee94aaedbc9f6897794be1"
+  digest = "1:798b058d7eaa1dc09e301482fc4afa0ea76094f4df3627f4cda77ee3c0974101"
   name = "github.com/kyma-project/kyma"
   packages = [
+    "components/event-bus/api/publish",
     "components/event-bus/api/push/eventing.kyma-project.io",
     "components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
     "components/event-bus/generated/push/clientset/versioned",
@@ -554,9 +555,10 @@
   analyzer-version = 1
   input-imports = [
     "github.com/cloudevents/sdk-go",
-    "github.com/cloudevents/sdk-go/pkg/cloudevents/transport",
+    "github.com/cloudevents/sdk-go/pkg/cloudevents/context",
     "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http",
     "github.com/gorilla/mux",
+    "github.com/kyma-project/kyma/components/event-bus/api/publish",
     "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
     "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned",
     "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
@@ -565,6 +567,7 @@
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/mock",
     "github.com/stretchr/testify/require",
+    "go.uber.org/zap",
     "golang.org/x/lint/golint",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/core/v1",

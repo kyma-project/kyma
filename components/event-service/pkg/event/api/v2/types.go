@@ -1,6 +1,6 @@
 package api
 
-import "github.com/kyma-project/kyma/components/event-service/internal/events/api"
+import "github.com/kyma-project/kyma/components/event-service/pkg/event/api"
 
 // EventRequestV2 implements the service definition of EventRequestV2
 type EventRequestV2 struct {
