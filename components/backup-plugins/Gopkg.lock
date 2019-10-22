@@ -168,7 +168,6 @@
   ]
   pruneopts = "NUT"
   revision = "6f77996f0c42f7b84e5a2b252227263f93432e9b"
-  version = "v0.3.0"
 
 [[projects]]
   digest = "1:52c5834e2bebac9030c97cc0798ac11c3aa8a39f098aeb419f142533da6cd3cc"
@@ -524,7 +523,7 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:4af5a022f8c5c97734c3c6fad58fdce078e2322ddc98d3102b225a729f03916e"
+  digest = "1:68f88ba37231669bda397c3593acb77c2946d2fb8d28f726ce9458ce29aa2488"
   name = "go.uber.org/zap"
   packages = [
     ".",
@@ -535,8 +534,8 @@
     "zapcore",
   ]
   pruneopts = "NUT"
-  revision = "27376062155ad36be76b0f12cf1572a221d3a48c"
-  version = "v1.10.0"
+  revision = "0065243e7bbd958fab35324e41201f5eb682c527"
+  version = "v1.11.0"
 
 [[projects]]
   digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
@@ -547,10 +546,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:30765133805f91eb78f0c1b85e3cfc66b4775ac1297c7350c867deec4b54b363"
+  digest = "1:a678b152ef62d69dfb98d8f4910eb7cbf35496fd1341735d96860e3f5b90fefd"
   name = "golang.org/x/net"
   packages = [
     "context",
+    "context/ctxhttp",
     "http/httpguts",
     "http2",
     "http2/hpack",
@@ -562,7 +562,8 @@
   revision = "d98b1b4438230571bd7fbc5aaa89843e92937bd3"
 
 [[projects]]
-  digest = "1:da311e132160fec8dfc9e659915b8f942e5563c27bbf3c45d2c9e67a1434ef65"
+  branch = "master"
+  digest = "1:1519760444b90c560eb01373869bc66fd539e6fe1bf77af22047c43edc40ab35"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
@@ -572,7 +573,7 @@
     "jwt",
   ]
   pruneopts = "NUT"
-  revision = "a6bd8cefa1811bd24b86f8902872e4e8225f74c4"
+  revision = "0f29369cfe4552d0e4bcddc57cc75f4d7e672a33"
 
 [[projects]]
   branch = "master"
@@ -661,8 +662,8 @@
     "transport/http/internal/propagation",
   ]
   pruneopts = "NUT"
-  revision = "d7605a20bfcb4659ee2ea347b1f8f5be12b8a5b7"
-  version = "v0.11.0"
+  revision = "feb0267beb8644f5088a03be4d5ec3f8c7020152"
+  version = "v0.9.0"
 
 [[projects]]
   digest = "1:be5054b1c190011dca4e1c3c051025294e97f14fdfd354093fc233b4d05dcd98"
@@ -706,7 +707,7 @@
   revision = "c459b9ce5143dd819763d9329ff92a8e35e61bd9"
 
 [[projects]]
-  digest = "1:1e0ab78e7a51cd9eae30402f7b29ea70f2c00c56614ef89f516450bd01122d00"
+  digest = "1:c3fd727ab5649c4e89538708b43e9e365b3656425ed66826d91beb4875fcbcc2"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -736,6 +737,7 @@
     "health/grpc_health_v1",
     "internal",
     "internal/backoff",
+    "internal/balancerload",
     "internal/binarylog",
     "internal/channelz",
     "internal/envconfig",
@@ -750,13 +752,14 @@
     "resolver",
     "resolver/dns",
     "resolver/passthrough",
+    "serviceconfig",
     "stats",
     "status",
     "tap",
   ]
   pruneopts = "NUT"
-  revision = "3507fb8e1a5ad030303c106fef3a47c9fdad16ad"
-  version = "v1.19.1"
+  revision = "f6d0f9ee430895e87ef1ceb5ac8f39725bafceef"
+  version = "v1.24.0"
 
 [[projects]]
   digest = "1:ef72505cf098abdd34efeea032103377bec06abb61d8a06f002d5d296a4b1185"
@@ -946,8 +949,7 @@
   revision = "8e90cee79f823779174776412c13478955131846"
 
 [[projects]]
-  branch = "master"
-  digest = "1:2d3f59daa4b479ff4e100a2e1d8fea6780040fdadc177869531fe4cc29407f55"
+  digest = "1:14e8a3b53e6d8cb5f44783056b71bb2ca1ac7e333939cc97f3e50b579c920845"
   name = "k8s.io/utils"
   packages = [
     "buffer",
@@ -955,7 +957,7 @@
     "trace",
   ]
   pruneopts = "NUT"
-  revision = "8d271d903fe4c290aa361acfb242cff7bcee96f1"
+  revision = "c2654d5206da6b7b6ace12841e8f359bb89b443c"
 
 [[projects]]
   branch = "release-0.8"
