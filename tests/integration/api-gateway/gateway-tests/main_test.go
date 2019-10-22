@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/base64"
 	"flag"
 	"fmt"
@@ -11,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/api"
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/manifestprocessor"
