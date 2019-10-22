@@ -76,7 +76,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	createResources(k8sClient, globalCommonResources)
+	createResources(k8sClient, globalCommonResources...)
 	// defer deleting namespace (it will also delete all remaining resources in that namespace)
 	defer func() {
 		time.Sleep(time.Second * 3)
