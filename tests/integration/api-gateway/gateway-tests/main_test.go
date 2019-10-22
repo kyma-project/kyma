@@ -51,9 +51,11 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 	flag.Parse()
 
+	oauthClientID := generateRandomString(OauthClientIDLength)
+	oauthClientSecret := generateRandomString(OauthClientSecretLength)
 	cfg := clientcredentials.Config{
-		ClientID:     "client_id",
-		ClientSecret: "uYWimVHjnYi6",
+		ClientID:     oauthClientID,
+		ClientSecret: oauthClientSecret,
 		TokenURL:     "https://oauth2.kyma.local/oauth2/token",
 		Scopes:       []string{"read"},
 	}
@@ -68,8 +70,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 		OauthClientSecret string
 		OauthClientID     string
 	}{
-		OauthClientSecret: base64.StdEncoding.EncodeToString([]byte(generateRandomString(OauthClientSecretLength))),
-		OauthClientID:     base64.StdEncoding.EncodeToString([]byte(generateRandomString(OauthClientIDLength))),
+		OauthClientSecret: base64.StdEncoding.EncodeToString([]byte(oauthClientSecret)),
+		OauthClientID:     base64.StdEncoding.EncodeToString([]byte(oauthClientID)),
 	})
 	if err != nil {
 		panic(err)
@@ -91,19 +93,23 @@ func TestApiGatewayIntegration(t *testing.T) {
 			if err != nil {
 				panic(err)
 			}
-			createResources(k8sClient, commonResources)
+			createResources(k8sClient, commonResources...)
+
+			// create api-rule from file
+			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			if err != nil {
+				panic(err)
+			}
+			createResources(k8sClient, noAccessStrategyApiruleResource...)
 
 			//for _, commonResource := range commonResources {
 			//	resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
-			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource) //TODO: wait for resource creation
+			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
 			//}
 
-			// TODO: create api-rule
-			// wait?
 			// TODO: test response from service - jakkab
-			// TODO: env vars - HYDRA URL, USER PWD & EMAIL, TIMEOUT,
 
-			deleteResources(k8sClient, commonResources)
+			deleteResources(k8sClient, commonResources...)
 
 			fmt.Println("test finished")
 		})
@@ -160,14 +166,14 @@ func getResourceSchemaAndNamespace(manifest unstructured.Unstructured) (schema.G
 	return resourceSchema, namespace, resourceName
 }
 
-func createResources(k8sClient dynamic.Interface, resources []unstructured.Unstructured) {
+func createResources(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) {
 	for _, resource := range resources {
 		resourceSchema, ns, _ := getResourceSchemaAndNamespace(resource)
 		manager.CreateResource(k8sClient, resourceSchema, ns, resource)
 	}
 }
 
-func deleteResources(k8sClient dynamic.Interface, resources []unstructured.Unstructured) {
+func deleteResources(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) {
 	for _, resource := range resources {
 		resourceSchema, ns, name := getResourceSchemaAndNamespace(resource)
 		manager.DeleteResource(k8sClient, resourceSchema, ns, name)
