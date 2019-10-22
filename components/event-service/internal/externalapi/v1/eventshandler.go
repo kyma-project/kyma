@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
+	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	busV1 "github.com/kyma-project/kyma/components/event-service/internal/events/bus/v1"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
-	"github.com/kyma-project/kyma/components/event-service/pkg/event/api"
-	apiv1 "github.com/kyma-project/kyma/components/event-service/pkg/event/api/v1"
 	log "github.com/sirupsen/logrus"
 )
 

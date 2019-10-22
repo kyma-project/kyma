@@ -1,8 +1,8 @@
 package v1
 
 import (
+	"github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
-	"github.com/kyma-project/kyma/components/event-service/pkg/event/api/v1"
 )
 
 // AddSource adds the "source" related data to the incoming request

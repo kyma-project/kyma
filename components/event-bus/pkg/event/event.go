@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	cloudevents "github.com/cloudevents/sdk-go"
 	cehttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
-	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
+	// TODO(k15r): get rid off publish import
+	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
-	busv2 "github.com/kyma-project/kyma/components/event-service/internal/events/bus/v2"
 	"net/http"
 )
 
@@ -30,8 +29,8 @@ func DecodeMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Mess
 	if len(allErrors) != 0 {
 		return event,  &api.Error{
 			Status:  http.StatusBadRequest,
-			Message: shared.ErrorMessageMissingField,
-			Type:    shared.ErrorTypeValidationViolation,
+			Message: api.ErrorMessageBadRequest,
+			Type:    api.ErrorTypeBadRequest,
 			Details: allErrors,
 		}, nil
 	}
@@ -67,7 +66,7 @@ func Validate(event *cloudevents.Event) []api.ErrorDetail {
 	if err != nil {
 		errors = append(errors, api.ErrorDetail{
 			Field:   "data",
-			Type:    shared.ErrorTypeBadPayload,
+			Type:    api.ErrorTypeBadPayload,
 			Message: err.Error(),
 		})
 	}
@@ -75,16 +74,16 @@ func Validate(event *cloudevents.Event) []api.ErrorDetail {
 	if len(eventBytes) == 0 {
 		errors = append(errors, api.ErrorDetail{
 			Field:   "data",
-			Type:    shared.ErrorTypeBadPayload,
+			Type:    api.ErrorTypeBadPayload,
 			Message: "payload is missing",
 		})
 	}
-	_, err = event.Context.GetExtension(shared.FieldEventTypeVersionV2)
+	_, err = event.Context.GetExtension(api.FieldEventTypeVersion)
 	if err != nil {
 		errors = append(errors, api.ErrorDetail{
-			Field:   shared.FieldEventTypeVersionV2,
-			Type:    shared.ErrorTypeMissingField,
-			Message: shared.ErrorMessageMissingField,
+			Field:   api.FieldEventTypeVersion,
+			Type:    api.ErrorTypeMissingField,
+			Message: api.ErrorMessageMissingField,
 		})
 	}
 

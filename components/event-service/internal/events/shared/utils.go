@@ -3,7 +3,7 @@ package shared
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/event-service/pkg/event/api"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 )
 
 // ErrorResponseBadRequest returns an error of type PublishEventResponses with BadRequest status code

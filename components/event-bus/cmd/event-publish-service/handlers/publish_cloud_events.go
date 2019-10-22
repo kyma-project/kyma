@@ -12,8 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-publish-service/publisher"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
-	kymaevent "github.com/kyma-project/kyma/components/event-service/pkg/event"
-	serviceapi "github.com/kyma-project/kyma/components/event-service/pkg/event/api"
+	kymaevent "github.com/kyma-project/kyma/components/event-bus/pkg/event"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 	"io/ioutil"
@@ -137,7 +136,7 @@ func (handler *CloudEventHandler) ServeHTTP(w http.ResponseWriter, req *http.Req
 	}
 	event, apiError, err := kymaevent.DecodeMessage(handler.Transport, ctx, message)
 	if err != nil {
-		if err := kymaevent.RespondWithError(w, serviceapi.Error{
+		if err := kymaevent.RespondWithError(w, api.Error{
 			Status:   http.StatusBadRequest,
 			Type:     api.ErrorTypeBadRequest,
 			Message:  api.ErrorMessageBadRequest,

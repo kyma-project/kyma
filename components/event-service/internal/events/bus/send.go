@@ -10,9 +10,9 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go"
 	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
-	"github.com/kyma-project/kyma/components/event-service/pkg/event/api"
 )
 
 var (

@@ -14,11 +14,11 @@ import (
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 
+	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
+	apiv2 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v2"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 	kymaevent "github.com/kyma-project/kyma/components/event-service/pkg/event"
-	"github.com/kyma-project/kyma/components/event-service/pkg/event/api"
-	apiv2 "github.com/kyma-project/kyma/components/event-service/pkg/event/api/v2"
 	// TODO(k15r): get rid off publish import
 	"github.com/kyma-project/kyma/components/event-bus/api/publish"
 

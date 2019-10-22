@@ -11,12 +11,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
+	apiv1 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v1"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
-	"github.com/kyma-project/kyma/components/event-service/pkg/event/api"
-	apiv1 "github.com/kyma-project/kyma/components/event-service/pkg/event/api/v1"
 )
 
 const (
