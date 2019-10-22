@@ -9,4 +9,4 @@ global:
           - helm-broker.kyma-system.svc.cluster.local
           - connector-service-internal-api.kyma-integration.svc.cluster.local
           - application-broker.kyma-integration.svc.cluster.local
-          - compass-connector.compass-system.svc.cluster.local
+          - compass-connector-internal.compass-system.svc.cluster.local
