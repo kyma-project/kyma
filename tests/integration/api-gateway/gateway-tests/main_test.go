@@ -32,6 +32,17 @@ const testNamespaceFile = "test-ns.yaml"
 const resourceSeparator = "---"
 
 func TestApiGatewayIntegration(t *testing.T) {
+	var hydraAddr string
+	var user string
+	var	pwd	string
+	var reqTimeout int
+
+	flag.StringVar(&hydraAddr,"hydra-address", "", "Hydra service address")
+	flag.StringVar(&user, "user","","User login to fetch JWT token")
+	flag.StringVar(&pwd,"password", "", "User password to fetch JWT token")
+	flag.IntVar(&reqTimeout,"request-timeout",5,"Delay (in seconds) after which requests to API fail")
+
+	flag.Parse()
 
 	cfg := clientcredentials.Config{
 		ClientID:     "client_id",
