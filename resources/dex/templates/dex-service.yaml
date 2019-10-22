@@ -12,5 +12,10 @@ spec:
   - name: http
     port: {{.Values.containerPort}}
     targetPort: {{.Values.containerPort}}
+{{ if .Values.telemetry.enabled }}
+  - name: http-metrics
+    port: {{.Values.telemetry.port}}
+    targetPort: {{.Values.telemetry.port}}
+{{ end }}
   selector:
     app: dex

@@ -100,6 +100,9 @@ spec:
         - --stan_config=/etc/nats-streaming/{{ .Values.global.natsStreaming.fullname }}/stan.conf
         {{- end }}
         - --max_inactivity={{ .Values.global.natsStreaming.channel.maxInactivity }}
+        - --max_channels={{ .Values.global.natsStreaming.channel.maxChannels }}
+        - --max_msgs={{ .Values.global.natsStreaming.channel.maxMessages }}
+        - --max_bytes={{ .Values.global.natsStreaming.channel.maxBytes }}
         - --user=$(STAN_USERNAME)
         - --pass=$(STAN_PASSWD)
         env:

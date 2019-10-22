@@ -38,7 +38,7 @@ func (in *BackendModule) DeepCopyObject() runtime.Object {
 func (in *BackendModuleList) DeepCopyInto(out *BackendModuleList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	in.ListMeta.DeepCopyInto(&out.ListMeta)
+	out.ListMeta = in.ListMeta
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]BackendModule, len(*in))

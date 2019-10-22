@@ -119,7 +119,7 @@ vet-local:
 	go vet $$($(DIRS_TO_CHECK))
 
 generate-local:
-	go genrate ./...
+	go generate ./...
 
 pull-licenses-local:
 ifdef LICENSE_PULLER_PATH
