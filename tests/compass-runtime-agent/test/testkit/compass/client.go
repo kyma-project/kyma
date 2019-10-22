@@ -178,10 +178,10 @@ func (c *Client) labelRuntime(values []string) error {
 
 // Applications
 
-func (c *Client) CreateApplication(input graphql.ApplicationInput) (Application, error) {
+func (c *Client) CreateApplication(input graphql.ApplicationCreateInput) (Application, error) {
 	c.setScenarioLabel(&input)
 
-	appInputGQL, err := c.graphqlizer.ApplicationInputToGQL(input)
+	appInputGQL, err := c.graphqlizer.ApplicationCreateInputToGQL(input)
 	if err != nil {
 		return Application{}, errors.Wrap(err, "Failed to convert Application Input to query")
 	}
@@ -198,10 +198,8 @@ func (c *Client) CreateApplication(input graphql.ApplicationInput) (Application,
 	return application, nil
 }
 
-func (c *Client) UpdateApplication(applicationId string, input graphql.ApplicationInput) (Application, error) {
-	c.setScenarioLabel(&input)
-
-	appInputGQL, err := c.graphqlizer.ApplicationInputToGQL(input)
+func (c *Client) UpdateApplication(applicationId string, input graphql.ApplicationUpdateInput) (Application, error) {
+	appInputGQL, err := c.graphqlizer.ApplicationUpdateInputToGQL(input)
 	if err != nil {
 		return Application{}, errors.Wrap(err, "Failed to convert Application Input to query")
 	}
@@ -232,7 +230,7 @@ func (c *Client) DeleteApplication(id string) (string, error) {
 	return response.Id, nil
 }
 
-func (c *Client) setScenarioLabel(input *graphql.ApplicationInput) {
+func (c *Client) setScenarioLabel(input *graphql.ApplicationCreateInput) {
 	var labels = map[string]interface{}{
 		ScenariosLabelName: []string{c.scenarioLabel},
 	}

@@ -18,7 +18,7 @@ import (
 type testCase struct {
 	description string
 
-	initialPhaseInput  func() *applications.ApplicationInput
+	initialPhaseInput  func() *applications.ApplicationCreateInput
 	initialPhaseAssert func(t *testing.T, testSuite *runtimeagent.TestSuite, application compass.Application)
 	initialPhaseResult compass.Application
 
@@ -50,7 +50,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 	testCases := []*testCase{
 		{
 			description: "Test case 1: Create all types of APIs and remove them",
-			initialPhaseInput: func() *applications.ApplicationInput {
+			initialPhaseInput: func() *applications.ApplicationCreateInput {
 				return applications.NewApplication("test-app-1", "testApp1", map[string]interface{}{}).
 					WithAPIs(
 						[]*applications.APIDefinitionInput{
@@ -103,7 +103,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		},
 		{
 			description: "Test case 2: Update Application overriding all APIs",
-			initialPhaseInput: func() *applications.ApplicationInput {
+			initialPhaseInput: func() *applications.ApplicationCreateInput {
 				return applications.NewApplication("test-app-2", "", map[string]interface{}{}).
 					WithAPIs(
 						[]*applications.APIDefinitionInput{
@@ -123,23 +123,47 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 				// when
 				application := this.initialPhaseResult
 
+				// remove existing APIs
+				for _, api := range application.APIs.Data {
+					id, err := testSuite.CompassClient.DeleteAPI(api.ID)
+					require.NoError(t, err)
+					require.Equal(t, api.ID, id)
+				}
+
+				// remove existing EventAPIs
+				for _, eventAPI := range application.EventAPIs.Data {
+					id, err := testSuite.CompassClient.DeleteEventAPI(eventAPI.ID)
+					require.NoError(t, err)
+					require.Equal(t, eventAPI.ID, id)
+				}
+
+				// create new APIs
+				apiInputs := []*applications.APIDefinitionInput{
+					noAuthAPIInput,
+					basicAuthAPIInput,
+					oauthAPIInput,
+				}
+				for _, v := range apiInputs {
+					_, err := testSuite.CompassClient.CreateAPI(application.ID, *v.ToCompassInput())
+					require.NoError(t, err)
+				}
+
+				// create new EventAPIs
+				eventAPIInputs := []*applications.EventAPIDefinitionInput{
+					applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiSpecData),
+				}
+				for _, v := range eventAPIInputs {
+					_, err := testSuite.CompassClient.CreateEventAPI(application.ID, *v.ToCompassInput())
+					require.NoError(t, err)
+				}
+
 				// updating whole application
-				updatedInput := applications.NewApplication("test-app-2-updated", "", map[string]interface{}{}).
-					WithAPIs(
-						[]*applications.APIDefinitionInput{
-							noAuthAPIInput,
-							basicAuthAPIInput,
-							oauthAPIInput,
-						}).
-					WithEventAPIs(
-						[]*applications.EventAPIDefinitionInput{
-							applications.NewEventAPI("events-api", "description").WithJsonEventApiSpec(&apiSpecData),
-						},
-					)
+				updatedInput := applications.NewApplicationUpdateInput("test-app-2-updated", "")
 
 				updatedApp, err := testSuite.CompassClient.UpdateApplication(application.ID, updatedInput.ToCompassInput())
 				require.NoError(t, err)
 				assert.Equal(t, 3, len(updatedApp.APIs.Data))
+				assert.Equal(t, 1, len(updatedApp.EventAPIs.Data))
 
 				apiIds := getAPIsIds(updatedApp)
 				t.Logf("Updated APIs for %s Application", updatedApp.Name)
@@ -166,7 +190,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		},
 		{
 			description: "Test case 3: Change auth in all APIs",
-			initialPhaseInput: func() *applications.ApplicationInput {
+			initialPhaseInput: func() *applications.ApplicationCreateInput {
 				return applications.NewApplication("test-app-3", "", map[string]interface{}{}).
 					WithAPIs(
 						[]*applications.APIDefinitionInput{
@@ -225,7 +249,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		// TODO: Issue is closed
 		//{
 		//	description: "Test case 4:Fetch new CSRF token and retry if token expired",
-		//	initialPhaseInput: func() *applications.ApplicationInput {
+		//	initialPhaseInput: func() *applications.ApplicationCreateInput {
 		//		csrfAuth := applications.NewAuth().WithBasicAuth(validUsername, validPassword).
 		//			WithCSRF(testSuite.GetMockServiceURL() + mock.CSRFToken.String() + "/valid-csrf-token")
 		//		csrfAPIInput := applications.NewAPI("csrf-api", "csrf", testSuite.GetMockServiceURL()).WithAuth(csrfAuth)
@@ -267,7 +291,7 @@ func TestCompassRuntimeAgentSynchronization(t *testing.T) {
 		//},
 		{
 			description: "Test case 5: Denier should block access without labels",
-			initialPhaseInput: func() *applications.ApplicationInput {
+			initialPhaseInput: func() *applications.ApplicationCreateInput {
 				return applications.NewApplication("test-app-5", "", map[string]interface{}{}).
 					WithAPIs(
 						[]*applications.APIDefinitionInput{
