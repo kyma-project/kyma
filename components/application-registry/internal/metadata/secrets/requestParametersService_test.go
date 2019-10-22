@@ -8,11 +8,10 @@ import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/strategy"
 
-	"github.com/stretchr/testify/require"
-
 	k8smocks "github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts/mocks"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (

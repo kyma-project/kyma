@@ -5,6 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	restclient "k8s.io/client-go/rest"
 )
 

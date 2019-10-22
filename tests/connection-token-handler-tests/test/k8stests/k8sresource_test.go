@@ -8,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/tests/connection-token-handler-tests/test/testkit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
 )
 

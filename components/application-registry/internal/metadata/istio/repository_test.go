@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
