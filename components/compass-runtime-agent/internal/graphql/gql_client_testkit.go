@@ -10,7 +10,7 @@ import (
 
 type QueryAssertClient struct {
 	t                  *testing.T
-	expectedRequest    *graphql.Request
+	expectedRequests   []*graphql.Request
 	shouldFail         bool
 	modifyResponseFunc ModifyResponseFunc
 }
@@ -18,7 +18,14 @@ type QueryAssertClient struct {
 type ModifyResponseFunc func(t *testing.T, r interface{})
 
 func (c *QueryAssertClient) Do(req *graphql.Request, res interface{}) error {
-	assert.Equal(c.t, c.expectedRequest, req)
+	if len(c.expectedRequests) == 0 {
+		return errors.New("no more requests were expected")
+	}
+
+	assert.Equal(c.t, c.expectedRequests[0], req)
+	if len(c.expectedRequests) > 1 {
+		c.expectedRequests = c.expectedRequests[1:]
+	}
 
 	if !c.shouldFail {
 		c.modifyResponseFunc(c.t, res)
@@ -29,10 +36,10 @@ func (c *QueryAssertClient) Do(req *graphql.Request, res interface{}) error {
 	return errors.New("error")
 }
 
-func NewQueryAssertClient(t *testing.T, expectedReq *graphql.Request, shouldFail bool, modifyResponseFunc func(t *testing.T, r interface{})) Client {
+func NewQueryAssertClient(t *testing.T, shouldFail bool, modifyResponseFunc func(t *testing.T, r interface{}), expectedReq ...*graphql.Request) Client {
 	return &QueryAssertClient{
 		t:                  t,
-		expectedRequest:    expectedReq,
+		expectedRequests:   expectedReq,
 		shouldFail:         shouldFail,
 		modifyResponseFunc: modifyResponseFunc,
 	}
