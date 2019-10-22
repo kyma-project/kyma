@@ -66,3 +66,9 @@ config:
 
 # Configure node affinity
 affinity: {}
+
+tests:
+  enabled: true
+  image:
+    registry: "eu.gcr.io/kyma-project/"
+    version: "PR-6061"
