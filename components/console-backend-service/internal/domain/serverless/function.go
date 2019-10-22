@@ -42,7 +42,7 @@ func (r *resolver) FunctionsQuery(ctx context.Context, namespace string) ([]gqls
 func (r *resolver) FunctionQuery(ctx context.Context, name, namespace string) (*gqlschema.Function, error) {
 	item, err := r.functionService.Find(name, namespace)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while finding %s", KindFunction))
+		glog.Error(errors.Wrapf(err, "while finding %s `%s`", KindFunction, name))
 		return nil, gqlerror.New(err, KindFunction, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 	f := function.ToGQL(item)
@@ -65,7 +65,7 @@ func (r *resolver) CreateFunction(ctx context.Context, name string, namespace st
 func (r *resolver) UpdateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionUpdateInput) (*gqlschema.Function, error) {
 	item, err := r.functionService.Update(name, namespace, params)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while editing %s `%s`", KindFunction, name))
+		glog.Error(errors.Wrapf(err, "while updating %s `%s`", KindFunction, name))
 		return nil, gqlerror.New(err, KindFunction, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
