@@ -64,9 +64,6 @@ func (r *Resource) Get(name string, callbacks ...func(...interface{})) (*unstruc
 		return err
 	}, callbacks...)
 	if err != nil {
-		if apierrors.IsNotFound(err) {
-			return nil, err
-		}
 		return nil, errors.Wrapf(err, "while getting resource %s '%s'", r.kind, name)
 	}
 	for _, callback := range callbacks {
@@ -95,7 +92,7 @@ func (r *Resource) Delete(name string, timeout time.Duration, callbacks ...func(
 	if err != nil {
 		return err
 	}
-	err = retry.OnIsNotFound(retry.DefaultBackoff, func() error {
+	err = retry.WithIgnoreOnNotFound(retry.DefaultBackoff, func() error {
 		for _, callback := range callbacks {
 			namespace := "-"
 			if r.namespace != "" {

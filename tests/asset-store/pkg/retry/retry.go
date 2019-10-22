@@ -48,11 +48,11 @@ func errorFn(callbacks ...func(...interface{})) func(error) bool {
 	}
 }
 
-func OnIsAlreadyExist(backoff wait.Backoff, fn func() error, callbacks ...func(...interface{})) error {
+func WithIgnoreOnAlreadyExist(backoff wait.Backoff, fn func() error, callbacks ...func(...interface{})) error {
 	return retry.OnError(backoff, errorFn(callbacks...), fnWithIgnore(fn, errors.IsAlreadyExists, callbacks...))
 }
 
-func OnIsNotFound(backoff wait.Backoff, fn func() error, callbacks ...func(...interface{})) error {
+func WithIgnoreOnNotFound(backoff wait.Backoff, fn func() error, callbacks ...func(...interface{})) error {
 	return retry.OnError(backoff, errorFn(callbacks...), fnWithIgnore(fn, errors.IsNotFound, callbacks...))
 }
 

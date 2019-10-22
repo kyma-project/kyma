@@ -62,7 +62,7 @@ func buildDeleteLeftovers(iRsc dynamic.ResourceInterface, timeout time.Duration)
 		if len(assetNames) < 1 {
 			return nil
 		}
-		err = retry.OnIsNotFound(retry.DefaultBackoff, func() error {
+		err = retry.WithIgnoreOnNotFound(retry.DefaultBackoff, func() error {
 			err := iRsc.DeleteCollection(nil, metav1.ListOptions{
 				LabelSelector: labelSelector,
 			})

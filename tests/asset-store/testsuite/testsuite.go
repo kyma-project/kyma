@@ -94,6 +94,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 
 func (t *TestSuite) Run() {
 
+	// clean up leftovers from previous tests
 	t.t.Log("Deleting old assets...")
 	err := t.asset.DeleteLeftovers(t.testId)
 	failOnError(t.g, err)
@@ -110,6 +111,7 @@ func (t *TestSuite) Run() {
 	err = t.bucket.Delete(t.t.Log)
 	failOnError(t.g, err)
 
+	// setup environment
 	t.t.Log("Creating namespace...")
 	err = t.namespace.Create(t.t.Log)
 	failOnError(t.g, err)
@@ -119,23 +121,17 @@ func (t *TestSuite) Run() {
 	resourceVersion, err = t.clusterBucket.Create(t.t.Log)
 	failOnError(t.g, err)
 
-	// skip if resource already exists
-	if "" != resourceVersion {
-		t.t.Log("Waiting for cluster bucket to have ready phase...")
-		err = t.clusterBucket.WaitForStatusReady(resourceVersion, t.t.Log)
-		failOnError(t.g, err)
-	}
+	t.t.Log("Waiting for cluster bucket to have ready phase...")
+	err = t.clusterBucket.WaitForStatusReady(resourceVersion, t.t.Log)
+	failOnError(t.g, err)
 
 	t.t.Log("Creating bucket...")
 	resourceVersion, err = t.bucket.Create(t.t.Log)
 	failOnError(t.g, err)
 
-	// skip if resource already exists
-	if resourceVersion != "" {
-		t.t.Log("Waiting for bucket to have ready phase...")
-		err = t.bucket.WaitForStatusReady(resourceVersion, t.t.Log)
-		failOnError(t.g, err)
-	}
+	t.t.Log("Waiting for bucket to have ready phase...")
+	err = t.bucket.WaitForStatusReady(resourceVersion, t.t.Log)
+	failOnError(t.g, err)
 
 	t.t.Log("Uploading test files...")
 	uploadResult, err := t.uploadTestFiles()
