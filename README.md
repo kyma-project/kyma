@@ -67,18 +67,8 @@ Follow these steps:
 
 Kyma is used in these projects:
 
-<ul style="list-style-type: none; display: flex; flex-wrap: wrap;">
-  <li>
-      <img src="https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg" alt="SAP" style="width: 200px;"/>
-  </li>
-  <li>
-      <img src="https://TODO.svg" alt="Twiggle" style="width: 200px;"/>
-  </li>
-  <li>
-      <img src="https://TODO.svg" alt="mgm" style="width: 200px;"/>
-  </li>
-  <li>
-      <img src="https://TODO.svg" alt="NETCONOMY" style="width: 200px;"/>
-</ul>
+<center>
+<img src="https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg" alt="SAP" width="200" /> <img src="https://TODO.svg" alt="Twiggle" width="200" /> <img src="https://TODO.svg" alt="mgm" width="200" /> <img src="https://TODO.svg" alt="NETCONOMY" width="200" />
+</center>
 
 Read about their [use cases](https://kyma-project.io/#used-by).
