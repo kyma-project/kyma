@@ -1,6 +1,7 @@
 # Kyma common package
 
 This package is a set of Go libraries that implement common use cases found in different Kyma components.
+<!-- test PR Edit -->
 
 ## Purpose
 
