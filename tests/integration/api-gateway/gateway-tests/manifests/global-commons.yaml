@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: api-gateway-tests
+---
+apiVersion: hydra.ory.sh/v1alpha1
+kind: OAuth2Client
+metadata:
+  name: api-gateway-tests
+  namespace: api-gateway-tests
+spec:
+  grantTypes:
+  - "client_credentials"
+  scope: "read write"
+  secretName: api-gateway-tests
+---
+apiVersion: v1
+data:
+  client_id: "{{.OauthClientID}}"
+  client_secret: "{{.OauthClientSecret}}"
+kind: Secret
+metadata:
+  name: api-gateway-tests
+  namespace: api-gateway-tests
+type: Opaque

@@ -2,15 +2,17 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"flag"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/callretry"
-	"golang.org/x/oauth2/clientcredentials"
 	"math/rand"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/callretry"
+	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/manifestprocessor"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -26,21 +28,26 @@ import (
 )
 
 const testIDLength = 8
+const OauthClientSecretLength = 8
+const OauthClientIDLength = 8
 const manifestsDirectory = "manifests/"
-const commonResourcesFile = "common.yaml"
-const testNamespaceFile = "test-ns.yaml"
+const perScenarioCommonResourcesFile = "per-scenario-commons.yaml"
+const globalCommonResourcesFile = "global-commons.yaml"
+const noAccessStrategyApiruleFile = "no_access_strategy.yaml"
+const oauthStrategyApiruleFile = "oauth-strategy.yaml"
+const jwtAndOauthStrategyApiruleFile = "jwt-oauth-strategy.yaml"
 const resourceSeparator = "---"
 
 func TestApiGatewayIntegration(t *testing.T) {
 	var hydraAddr string
 	var user string
-	var	pwd	string
+	var pwd string
 	var reqTimeout int
 
-	flag.StringVar(&hydraAddr,"hydra-address", "", "Hydra service address")
-	flag.StringVar(&user, "user","","User login to fetch JWT token")
-	flag.StringVar(&pwd,"password", "", "User password to fetch JWT token")
-	flag.IntVar(&reqTimeout,"request-timeout",5,"Delay (in seconds) after which requests to API fail")
+	flag.StringVar(&hydraAddr, "hydra-address", "", "Hydra service address")
+	flag.StringVar(&user, "user", "", "User login to fetch JWT token")
+	flag.StringVar(&pwd, "password", "", "User password to fetch JWT token")
+	flag.IntVar(&reqTimeout, "request-timeout", 5, "Delay (in seconds) after which requests to API fail")
 
 	flag.Parse()
 
@@ -56,40 +63,50 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 	k8sClient := getDynamicClient()
 
-	// create namespace for testing
-	nsResource, err := manifestprocessor.ParseFromFile(testNamespaceFile, manifestsDirectory, resourceSeparator)
+	// create common resources for all scenarios
+	globalCommonResources, err := manifestprocessor.ParseFromFileWithTemplate(globalCommonResourcesFile, manifestsDirectory, resourceSeparator, struct {
+		OauthClientSecret string
+		OauthClientID     string
+	}{
+		OauthClientSecret: base64.StdEncoding.EncodeToString([]byte(generateRandomString(OauthClientSecretLength))),
+		OauthClientID:     base64.StdEncoding.EncodeToString([]byte(generateRandomString(OauthClientIDLength))),
+	})
 	if err != nil {
 		panic(err)
 	}
-	nsResourceSchema, ns, _ := getResourceSchemaAndNamespace(nsResource[0])
-	// TODO: should not fail if namespace doesn't exists
-	manager.CreateResource(k8sClient, nsResourceSchema, ns, nsResource[0])
+	createResources(k8sClient, globalCommonResources)
+	// defer deleting namespace (it will also delete all remaining resources in that namespace)
+	defer func() {
+		time.Sleep(time.Second * 3)
+		nsResourceSchema, ns, name := getResourceSchemaAndNamespace(globalCommonResources[0])
+		manager.DeleteResource(k8sClient, nsResourceSchema, ns, name)
+	}()
+	t.Run("parallel tests", func(t *testing.T) {
+		t.Run("expose service without access strategy (plain access)", func(t *testing.T) {
+			t.Parallel()
+			testID := generateRandomString(testIDLength)
 
-	t.Run("expose service without access strategy (plain access)", func(t *testing.T) {
-		t.Parallel()
-		testID := generateTestID()
+			// create common resources from files
+			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(perScenarioCommonResourcesFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			if err != nil {
+				panic(err)
+			}
+			createResources(k8sClient, commonResources)
 
-		// create common resources from files
-		commonResources, err := manifestprocessor.ParseFromFileWithTemplate(commonResourcesFile, manifestsDirectory, resourceSeparator, testID)
-		if err != nil {
-			panic(err)
-		}
-		createResources(k8sClient, commonResources)
+			//for _, commonResource := range commonResources {
+			//	resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
+			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource) //TODO: wait for resource creation
+			//}
 
-		//for _, commonResource := range commonResources {
-		//	resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
-		//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource) //TODO: wait for resource creation
-		//}
+			// TODO: create api-rule
+			// wait?
+			// TODO: test response from service - jakkab
+			// TODO: env vars - HYDRA URL, USER PWD & EMAIL, TIMEOUT,
 
-		// TODO: create api-rule
+			deleteResources(k8sClient, commonResources)
 
-		// TODO: wait until rules propagate
-
-		// TODO: test response from service
-
-		deleteResources(k8sClient, commonResources)
-
-		fmt.Println("test finished")
+			fmt.Println("test finished")
+		})
 	})
 }
 
@@ -113,12 +130,12 @@ func getDynamicClient() dynamic.Interface {
 	return client
 }
 
-func generateTestID() string {
+func generateRandomString(length int) string {
 	rand.Seed(time.Now().UnixNano())
 
 	letterRunes := []rune("abcdefghijklmnopqrstuvwxyz")
 
-	b := make([]rune, testIDLength)
+	b := make([]rune, length)
 	for i := range b {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}

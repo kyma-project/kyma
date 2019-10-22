@@ -77,14 +77,14 @@ func ParseFromFile(fileName string, directory string, separator string) ([]unstr
 }
 
 //ParseFromFileWithTemplate parse manifests with goTemplate support
-func ParseFromFileWithTemplate(fileName string, directory string, separator string, testID string) ([]unstructured.Unstructured, error) {
+func ParseFromFileWithTemplate(fileName string, directory string, separator string, templateData interface{}) ([]unstructured.Unstructured, error) {
 	manifestsRaw, err := convert(getManifestsFromFile(fileName, directory, separator))
 	if err != nil {
 		return nil, err
 	}
 	var resources []unstructured.Unstructured
 	for _, raw := range manifestsRaw {
-		man := parseTemplateWithData(raw, struct{ TestID string }{TestID: testID})
+		man := parseTemplateWithData(raw, templateData)
 		res, err := parseManifest([]byte(man))
 		if err != nil {
 			return nil, err
