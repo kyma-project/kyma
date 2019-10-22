@@ -9,7 +9,7 @@
 
 ## Overview
 
-**Kyma** `/kee-ma/` is a platform for extending applications with microservices and [serverless](https://kyma-project.io/docs/components/serverless/) functions. It provides CLI and UI through which you can connect your application to a Kubernetes cluster and expose the application's API or Events securely thanks to the in-built [Application Connector](https://kyma-project.io/docs/components/application-connector/#overview-overview). You can then implement the business logic you require by creating microservices or functions, and triggering them to react to particular Events or calls to your application's API. To limit the time spent on coding, use the in-built cloud services from the [Service Catalog](https://kyma-project.io/docs/components/service-catalog/), exposed by [Service Brokers](https://kyma-project.io/docs/components/service-catalog/#service-brokers-service-brokers) from such cloud providers as GCP, Azure, and AWS.
+**Kyma** `/kee-ma/` is a platform for extending applications with microservices and [serverless](https://kyma-project.io/docs/components/serverless/) functions. It provides CLI and UI through which you can connect your application to a Kubernetes cluster and expose the application's API or Events securely thanks to the in-built [Application Connector](https://kyma-project.io/docs/components/application-connector/#overview-overview). You can then implement the business logic you require by creating microservices or serverless functions, and triggering them to react to particular Events or calls to your application's API. To limit the time spent on coding, use the in-built cloud services from the [Service Catalog](https://kyma-project.io/docs/components/service-catalog/), exposed by [Service Brokers](https://kyma-project.io/docs/components/service-catalog/#service-brokers-service-brokers) from such cloud providers as GCP, Azure, and AWS.
 
 Go to the [Kyma project website](https://kyma-project.io/) to learn more about our project, its features, and components.
 
@@ -69,24 +69,16 @@ Kyma is used in these projects:
 
 <ul style="list-style-type: none; display: flex; flex-wrap: wrap;">
   <li>
-    <a href="https://www.sap.com/index.html" target="_blank">
       <img src="https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg" alt="SAP" style="width: 200px;"/>
-    </a>
   </li>
   <li>
-    <a href="https://twiggle.com/" target="_blank">
       <img src="https://TODO.svg" alt="Twiggle" style="width: 200px;"/>
-    </a>
   </li>
   <li>
-    <a href="https://www.mgm-tp.com/en/" target="_blank">
       <img src="https://TODO.svg" alt="mgm" style="width: 200px;"/>
-    </a>
   </li>
   <li>
-    <a href="https://www.netconomy.net/" target="_blank">
       <img src="https://TODO.svg" alt="NETCONOMY" style="width: 200px;"/>
-    </a>
 </ul>
 
 Read about their [use cases](https://kyma-project.io/#used-by).
