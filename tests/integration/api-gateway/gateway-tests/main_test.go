@@ -49,10 +49,11 @@ func TestApiGatewayIntegration(t *testing.T) {
 	var pwd string
 	var reqTimeout int
 
-	flag.StringVar(&hydraAddr, "hydra-address", "", "Hydra service address")
-	flag.StringVar(&user, "user", "", "User login to fetch JWT token")
-	flag.StringVar(&pwd, "password", "", "User password to fetch JWT token")
-	flag.IntVar(&reqTimeout, "request-timeout", 5, "Delay (in seconds) after which requests to API fail")
+	flag.StringVar(&hydraAddr,"hydra-address", "", "Hydra service address")
+	flag.StringVar(&user, "user","","User login to fetch JWT token")
+	flag.StringVar(&pwd,"password", "", "User password to fetch JWT token")
+	flag.IntVar(&reqTimeout,"request-timeout",5,"Delay (in seconds) after which requests to API fail")
+	flag.IntVar(&reqTimeout,"initial-delay",5,"Delay (in seconds) after which start sending requests to API")
 
 	flag.Parse()
 
@@ -78,7 +79,6 @@ func TestApiGatewayIntegration(t *testing.T) {
 	// create common resources for all scenarios
 	globalCommonResources, err := manifestprocessor.ParseFromFileWithTemplate(globalCommonResourcesFile, manifestsDirectory, resourceSeparator, struct {
 		OauthClientSecret string
-		OauthClientID     string
 	}{
 		OauthClientSecret: base64.StdEncoding.EncodeToString([]byte(oauthClientSecret)),
 		OauthClientID:     base64.StdEncoding.EncodeToString([]byte(oauthClientID)),
