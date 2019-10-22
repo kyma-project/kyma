@@ -88,6 +88,7 @@ func TestTable(t *testing.T) {
 		})
 	}
 }
+
 func TestMain(m *testing.M) {
 	// init and start the knative publish application
 	options := opts.GetDefaultOptions()
@@ -112,28 +113,46 @@ func TestMain(m *testing.M) {
 func testCloudEventStructuredEncoding(t *testing.T, testInput testInput, testExpectation testExpectation) {
 	payload := testV2.BuildPublishV2TestPayload(testInput.source, testInput.typ, testInput.typeVersion, testInput.id, testInput.time, testInput.data)
 	body, statusCode := testV2.PerformPublishV2RequestStructured(t, server.URL, payload)
-	// check body
-	if testExpectation.emptyBody {
-		assert.Nil(t, body)
-	} else {
-		assert.NotNil(t, body)
-	}
-	// check status code
-	assert.Equal(t, testExpectation.statusCode, statusCode)
+	handleTableTestResult(t, testExpectation, body, statusCode)
 }
 
 // test cloudevents binary encoding
 func testCloudEventBinaryEncoding(t *testing.T, testInput testInput, testExpectation testExpectation) {
 	headers := testV2.BuildPublishV2TestHeader(testInput.source, testInput.typ, testInput.typeVersion, testInput.id, testInput.time)
 	body, statusCode := testV2.PerformPublishV2RequestBinary(t, server.URL, testInput.data, headers)
+	handleTableTestResult(t, testExpectation, body, statusCode)
+}
+
+// Implements the validation logic for a `testExpectation` based on a `testInput` HTTP request to /v2 endpoint
+func handleTableTestResult(t *testing.T, testExpectation testExpectation, body []byte, statusCode int) {
 	// check body
 	if testExpectation.emptyBody {
 		assert.Nil(t, body)
 	} else {
 		assert.NotNil(t, body)
 	}
+
 	// check status code
 	assert.Equal(t, testExpectation.statusCode, statusCode)
+
+	// valid successful http request
+	if (statusCode / 100) == 2 {
+		// get the response
+		publishResponse := api.Response{}
+		err := json.Unmarshal(body, &publishResponse)
+		assert.Nil(t, err)
+		fmt.Println(publishResponse)
+	} else {
+		// valid unsuccessful http request
+		apiError := api.Error{}
+
+		err := json.Unmarshal(body, &apiError)
+		assert.Nil(t, err)
+
+		// status code is also expected in returned error object
+		assert.Equal(t, testExpectation.statusCode, apiError.Status)
+		fmt.Println(apiError)
+	}
 }
 
 func Test_KnativePublishApplication_ShouldStart(t *testing.T) {
