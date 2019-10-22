@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	publishv2 "github.com/kyma-project/kyma/components/event-bus/api/publish/v2"
+	kymaevent "github.com/kyma-project/kyma/components/event-bus/pkg/event"
 	"io/ioutil"
 	"net/http"
 	"reflect"
@@ -151,7 +151,7 @@ func (handler *CloudEventHandler) ServeHTTP(w http.ResponseWriter, req *http.Req
 		specErrors = errorToDetails(err)
 	}
 
-	kymaErrors := publishv2.ValidateKyma(event)
+	kymaErrors := kymaevent.Validate(event)
 
 	allErrors := append(specErrors, kymaErrors...)
 	if len(allErrors) != 0 {
