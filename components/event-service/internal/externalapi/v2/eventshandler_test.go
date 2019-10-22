@@ -110,6 +110,9 @@ func TestPropagateTraceHeaders(t *testing.T) {
 	// simulate request from outside of event-service
 	event := "{\"type\":\"order.created\",\"specversion\":\"0.3\",\"eventtypeversion\":\"v1\",\"id\":\"31109198-4d69-4ae0-972d-76117f3748c8\",\"time\":\"2012-11-01T22:08:41+00:00\",\"data\":\"{'key':'value'}\"}"
 	req, err := http.NewRequest(http.MethodPost, shared.EventsV2Path, strings.NewReader(event))
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// simulate trace headers added by envoy sidecar
 	traceHeaderKey, traceHeaderVal := "x-b3-traceid", "0887296564d75cda"
@@ -118,10 +121,6 @@ func TestPropagateTraceHeaders(t *testing.T) {
 	// add none-trace headers
 	nonTraceHeaderKey, nonTraceHeaderVal := "key", "value"
 	req.Header.Add(nonTraceHeaderKey, nonTraceHeaderVal)
-
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	if downstreamReq != nil {
 		t.Fatal("http request should have not be initialized at this point")

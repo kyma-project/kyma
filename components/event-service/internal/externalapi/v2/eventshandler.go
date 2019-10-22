@@ -108,7 +108,7 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	return
 }
 
-func handleEvent(publishRequest *apiv2.PublishEventParametersV2, publishResponse *api.PublishEventResponses,
+var handleEvent = func(publishRequest *apiv2.PublishEventParametersV2, publishResponse *api.PublishEventResponses,
 	traceHeaders *map[string]string, forwardHeaders *map[string][]string) (err error) {
 	checkResp := checkParameters(publishRequest)
 	if checkResp.Error != nil {
