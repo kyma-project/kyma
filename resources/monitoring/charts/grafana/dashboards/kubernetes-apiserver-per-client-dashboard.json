@@ -15,8 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 31,
-  "iteration": 1571658389646,
+  "iteration": 1571723154901,
   "links": [],
   "panels": [
     {
@@ -383,8 +382,8 @@
         "allValue": null,
         "current": {
           "tags": [],
-          "text": "controller/v0.0.0 (linux/amd64) kubernetes/$Format",
-          "value": "controller/v0.0.0 (linux/amd64) kubernetes/$Format"
+          "text": "apicontroller.test/v0.0.0 (linux/amd64) kubernetes/$Format",
+          "value": "apicontroller.test/v0.0.0 (linux/amd64) kubernetes/$Format"
         },
         "datasource": "Prometheus",
         "definition": "label_values(client)",
@@ -437,7 +436,7 @@
     ]
   },
   "timezone": "",
-  "title": "API server client dashboard",
+  "title": "Kubernetes API Server client dashboard",
   "uid": "tKyXpwoWk",
-  "version": 2
+  "version": 1
 }
