@@ -38,8 +38,8 @@ global:
     dir: develop/
     version: e029fcf4
   event_service:
-    dir: develop/
-    version: "36059183"
+    dir: pr/
+    version: PR-6078
   event_service_integration_tests:
     dir: pr/
     version: PR-5890
@@ -47,8 +47,8 @@ global:
     dir: pr/
     version: PR-5697
   application_gateway:
-    dir: develop/
-    version: e029fcf4
+    dir: pr/
+    version: PR-6078
   application_gateway_tests:
     dir: pr/
     version: PR-5890
