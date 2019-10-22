@@ -4,7 +4,10 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
+	"github.com/avast/retry-go"
+	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/api"
 	"math/rand"
+	"net/http"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -55,9 +58,15 @@ func TestApiGatewayIntegration(t *testing.T) {
 	_ = clientcredentials.Config{
 		ClientID:     oauthClientID,
 		ClientSecret: oauthClientSecret,
-		TokenURL:     "https://oauth2.kyma.local/oauth2/token",
+		TokenURL:     hydraAddr,
 		Scopes:       []string{"read"},
 	}
+
+	_ = api.NewTester(&http.Client{}, []retry.Option{
+		retry.Delay(time.Second * 5),
+		retry.Attempts(12),
+		retry.DelayType(retry.FixedDelay),
+	})
 
 	k8sClient := getDynamicClient()
 
@@ -103,7 +112,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
 			//}
 
-			// TODO: test response from service - jakkab
+			//assert.NoError(t, tester.TestUnsecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local", testID)))
 
 			deleteResources(k8sClient, commonResources...)
 

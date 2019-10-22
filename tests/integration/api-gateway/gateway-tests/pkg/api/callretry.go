@@ -19,7 +19,7 @@ func NewTester(c *http.Client, opts []retry.Option) *Tester {
 	}
 }
 
-func (h *Tester) TestSecureAPI(url, token string) error {
+func (h *Tester) TestSecuredAPI(url, token string) error {
 
 	err := h.withRetries(func() (*http.Response, error) {
 		return h.client.Get(url)
@@ -40,7 +40,7 @@ func (h *Tester) TestSecureAPI(url, token string) error {
 	}, httpOkPredicate)
 }
 
-func (h *Tester) TestInsecureAPI(url string) error {
+func (h *Tester) TestUnsecuredAPI(url string) error {
 	return h.withRetries(func() (*http.Response, error) {
 		return h.client.Get(url)
 	}, httpOkPredicate)
