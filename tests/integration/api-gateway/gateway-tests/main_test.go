@@ -58,7 +58,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 	_ = clientcredentials.Config{
 		ClientID:     oauthClientID,
 		ClientSecret: oauthClientSecret,
-		TokenURL:     hydraAddr,
+		TokenURL:     fmt.Sprintf("https://%s/oauth2/token", hydraAddr),
 		Scopes:       []string{"read"},
 	}
 
