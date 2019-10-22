@@ -12,13 +12,13 @@ global:
       dir:
       version: "b83580e5"
     gateway:
-      dir: /
+      dir:
       version: "e3e84b72"
     healthchecker:
-      dir: /
+      dir:
       version: "e3e84b72"
     schema_migrator:
-      dir: /
+      dir:
       version: "e3e84b72"
     provisioner:
       dir: develop/
@@ -30,7 +30,7 @@ global:
       version: "e029fcf4"
     tests:
       e2e:
-        dir: /
+        dir:
         version: "23afc550"
       connector:
         dir: develop/
