@@ -4,18 +4,23 @@ ENV BASE_DIR /workspace/go/src/github.com/kyma-project/kyma/tests/integration/ap
 WORKDIR ${BASE_DIR}
 
 COPY . ${BASE_DIR}/
+COPY ./licenses/ ${BASE_DIR}/licenses/
 
 ##
-# BUILD FETCH-TOKEN APP
+# BUILD APP
 ##
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o ${BASE_DIR}/app ${BASE_DIR}/gateway-tests/main.go
+RUN cd ${BASE_DIR}/gateway-tests &&\
+	GO111MODULE=on go mod vendor &&\
+	CGO_ENABLED=0 GOOS=linux go test -c -v -o ${BASE_DIR}/app.test main_test.go
 
 ##
 # EXTRACT SCRIPT AND BINARY
 ##
-RUN mkdir /test && mv ${BASE_DIR}/app /test/app && mv ${BASE_DIR}/test.sh /test/test.sh && mv ${BASE_DIR}/licenses /test/licenses
+RUN mkdir /test &&\
+	mv ${BASE_DIR}/app.test /test/app.test  &&\
+	mv ${BASE_DIR}/licenses /test/licenses
 
-FROM alpine:3.9
+FROM alpine:3.10
 LABEL source=git@github.com:kyma-project/kyma.git
 WORKDIR /test
 
@@ -27,4 +32,4 @@ RUN apk update &&\
 
 COPY --from=builder /test /test
 
-ENTRYPOINT ["/bin/bash", "-c", "/test/test.sh"]
+ENTRYPOINT ["/test/app.test"]
