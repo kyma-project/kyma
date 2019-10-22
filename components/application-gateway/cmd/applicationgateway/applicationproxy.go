@@ -24,6 +24,8 @@ import (
 	restclient "k8s.io/client-go/rest"
 )
 
+// Force component rebuild
+
 func main() {
 	formatter := &log.TextFormatter{
 		FullTimestamp: true,

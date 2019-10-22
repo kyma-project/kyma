@@ -21,6 +21,8 @@ import (
 	core "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
+// Force component rebuild
+
 const (
 	shutdownTimeout = time.Minute
 )
