@@ -101,6 +101,8 @@ func SendEvent(apiVersion string, req interface{}, traceHeaders *map[string]stri
 	return &response, nil
 }
 
+// Send an event to event-bus as CloudEvents 1.0 in structured encoding
+// Use the client from the cloudevents sdk for sending
 func SendEventV2(event cloudevents.Event, traceHeaders map[string]string) (*cloudevents.Event, error) {
 	ctx := cloudevents.ContextWithEncoding(context.Background(), cloudevents.Structured)
 
