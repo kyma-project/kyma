@@ -20,7 +20,7 @@ func NewSecurityValidator(c *http.Client, opts []retry.Option) *securityValidato
 	}
 }
 
-func (h *securityValidator) ValidateAPISecured(url string) error {
+func (h *securityValidator) ValidateSecureAPI(url string) error {
 
 	err := h.withRetries(func() (*http.Response, error) {
 		return h.securedClient.Get(fmt.Sprintf("https://%s", url))
@@ -35,7 +35,7 @@ func (h *securityValidator) ValidateAPISecured(url string) error {
 	}, httpUnauthorizedPredicate)
 }
 
-func (h *securityValidator) ValidateAPINotSecured(url string) error {
+func (h *securityValidator) ValidateInsecureAPI(url string) error {
 	return h.withRetries(func() (*http.Response, error) {
 		return h.unsecuredClient.Get(fmt.Sprintf("https://%s", url))
 	}, httpOkPredicate)
