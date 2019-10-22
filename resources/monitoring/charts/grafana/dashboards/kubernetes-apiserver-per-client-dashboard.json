@@ -165,7 +165,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Request rate per client grouped by status code",
+      "title": "Request rate per by status code",
       "tooltip": {
         "shared": true,
         "sort": 0,
