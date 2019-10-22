@@ -1,6 +1,7 @@
 ---
 title: Overview
 ---
+<!-- TEST UPDATE -->
 
 >**CAUTION:** This implementation replaces the API Gateway that is based on the Api custom resource. The services you exposed and secured using the deprecated implementation require no action, as the API Gateway Controller co-exists with the API Controller in the cluster. Expose and secure new services and functions secured with OAuth2 using the `v2` implementation described in this documentation topic.
 
