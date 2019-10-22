@@ -37,6 +37,10 @@ type testInput struct {
 type testExpectation struct {
 	statusCode int
 	emptyBody  bool
+	// TODO(nachtmaar): validate api.Response object in success case
+	// apiError api.Error
+	// TODO(nachtmaar): validate publish.Error object in error case
+	// apiResponse api.Response
 }
 
 var tableTest = []struct {
@@ -74,6 +78,39 @@ var tableTest = []struct {
 		testExpectation: testExpectation{
 			statusCode: 200,
 			emptyBody:  false,
+		},
+	},
+	// these tests are a replacement for the tests in api/publish/v2/validators_test.go
+	{
+		name: "invalid CE v0.3 no source id",
+		testInput: testInput{
+			specVersion: "0.3",
+			id:          testV2.TestEventID,
+			typ:         testV2.TestType,
+			typeVersion: testV2.TestEventTypeVersion,
+			// ups ...
+			source: "",
+			data:   testV2.TestData,
+			time:   testV2.TestEventTime,
+		},
+		testExpectation: testExpectation{
+			statusCode: 400,
+			emptyBody:  false,
+			// TODO(nachtmaar): something like this maybe ?
+			// apiError: api.Error{
+			// 	Status:   400,
+			// 	Type:     "",
+			// 	Message:  "Some unexpected internal error occurred, please contact support.",
+			// 	MoreInfo: "",
+			// 	Details: []api.ErrorDetail{
+			// 		{
+			// 			Field:    "",
+			// 			Type:     "",
+			// 			Message:  "source: REQUIRED",
+			// 			MoreInfo: "",
+			// 		},
+			// 	},
+			// },
 		},
 	},
 }

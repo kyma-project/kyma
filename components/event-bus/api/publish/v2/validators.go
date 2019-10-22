@@ -1,77 +1,46 @@
 package v2
 
 import (
-	"regexp"
-	"time"
-
+	"github.com/cloudevents/sdk-go"
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
+	"regexp"
 )
 
 var (
-	isValidEventID = regexp.MustCompile(api.AllowedEventIDChars).MatchString
-
 	// channel name components
+	// TODO(nachtmaar): only used by tests
 	isValidSourceID         = regexp.MustCompile(api.AllowedSourceIDChars).MatchString
 	isValidEventType        = regexp.MustCompile(api.AllowedEventTypeChars).MatchString
 	isValidEventTypeVersion = regexp.MustCompile(api.AllowedEventTypeVersionChars).MatchString
 )
 
-//ValidatePublish validates a publish POST request
-func ValidatePublish(r *EventRequestV2, opts *api.EventOptions) *api.Error {
-	if len(r.ID) == 0 {
-		return ErrorResponseMissingFieldEventID()
+// Further Kyma specific validations in addition to CloudEvents specification
+func ValidateKyma(event *cloudevents.Event) []api.ErrorDetail {
+	var errors []api.ErrorDetail
+	eventBytes, err := event.DataBytes()
+	if err != nil {
+		errors = append(errors, api.ErrorDetail{
+			Field:   "data",
+			Type:    api.ErrorTypeBadPayload,
+			Message: err.Error(),
+		})
 	}
-	if len(r.Source) == 0 {
-		return ErrorResponseMissingFieldSourceID()
+	// empty payload is considered as error by earlier /v2 endpoint which was not using cloudevents sdk-go yet
+	if len(eventBytes) == 0 {
+		errors = append(errors, api.ErrorDetail{
+			Field:   "data",
+			Type:    api.ErrorTypeBadPayload,
+			Message: "payload is missing",
+		})
 	}
-	if len(r.SpecVersion) == 0 {
-		return ErrorResponseMissingFieldSpecVersion()
-	}
-	if len(r.Type) == 0 {
-		return ErrorResponseMissingFieldEventType()
-	}
-	if len(r.TypeVersion) == 0 {
-		return ErrorResponseMissingFieldEventTypeVersion()
-	}
-	if len(r.Time) == 0 {
-		return ErrorResponseMissingFieldEventTime()
-	}
-	if r.Data == nil {
-		return api.ErrorResponseMissingFieldData()
-	} else if d, ok := (r.Data).(string); ok && d == "" {
-		return api.ErrorResponseMissingFieldData()
-	}
-
-	//validate the event components lengths
-	if len(r.Source) > opts.MaxSourceIDLength {
-		return api.ErrorInvalidSourceIDLength(opts.MaxSourceIDLength)
-	}
-	if len(r.Type) > opts.MaxEventTypeLength {
-		return api.ErrorInvalidEventTypeLength(opts.MaxEventTypeLength)
-	}
-	if len(r.TypeVersion) > opts.MaxEventTypeVersionLength {
-		return api.ErrorInvalidEventTypeVersionLength(opts.MaxEventTypeVersionLength)
+	_, err = event.Context.GetExtension(api.FieldEventTypeVersion)
+	if err != nil {
+		errors = append(errors, api.ErrorDetail{
+			Field:   api.FieldEventTypeVersion,
+			Type:    api.ErrorTypeMissingField,
+			Message: api.ErrorMessageMissingField,
+		})
 	}
 
-	// validate the fully-qualified topic name components
-	if !isValidSourceID(r.Source) {
-		return ErrorResponseWrongSourceID()
-	}
-	if !isValidEventType(r.Type) {
-		return ErrorResponseWrongEventType()
-	}
-	if !isValidEventTypeVersion(r.TypeVersion) {
-		return ErrorResponseWrongEventTypeVersion()
-	}
-	if r.SpecVersion != SpecVersionV3 {
-		return ErrorResponseWrongSpecVersion()
-	}
-
-	if _, err := time.Parse(time.RFC3339, r.Time); err != nil {
-		return ErrorResponseWrongEventTime()
-	}
-	if len(r.ID) > 0 && !isValidEventID(r.ID) {
-		return ErrorResponseWrongEventID()
-	}
-	return nil
+	return errors
 }

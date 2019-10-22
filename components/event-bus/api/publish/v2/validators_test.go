@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TODO(nachtmaar) transform them into a tabletest in `application_test.go`
 func Test_ValidatePublish_MissingSourceId(t *testing.T) {
 	event := buildTestPublishRequest()
 	event.Source = ""

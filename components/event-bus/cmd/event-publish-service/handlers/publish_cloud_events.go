@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	publishv2 "github.com/kyma-project/kyma/components/event-bus/api/publish/v2"
 	"io/ioutil"
 	"net/http"
 	"reflect"
@@ -150,7 +151,7 @@ func (handler *CloudEventHandler) ServeHTTP(w http.ResponseWriter, req *http.Req
 		specErrors = errorToDetails(err)
 	}
 
-	kymaErrors := validateKymaSpecific(event)
+	kymaErrors := publishv2.ValidateKyma(event)
 
 	allErrors := append(specErrors, kymaErrors...)
 	if len(allErrors) != 0 {
@@ -164,6 +165,8 @@ func (handler *CloudEventHandler) ServeHTTP(w http.ResponseWriter, req *http.Req
 		if err != nil {
 			//TODO(k15r): handle this
 		}
+		// send error response back to client
+		return
 	}
 
 	apiResponse, apiError, err := handler.HandleEvent(ctx, traceSpan, traceContext, *event)
@@ -227,45 +230,12 @@ func respondWithError(w http.ResponseWriter, error api.Error) error {
 	return nil
 }
 
-func respondWithSuccess(w http.ResponseWriter, event *cloudevents.Event, status string) {
-
-}
-
 func errorToDetails(err error) []api.ErrorDetail {
 	errors := []api.ErrorDetail(nil)
 
 	for _, error := range strings.Split(strings.TrimSuffix(err.Error(), "\n"), "\n") {
 		errors = append(errors, api.ErrorDetail{
 			Message: error,
-		})
-	}
-
-	return errors
-}
-
-func validateKymaSpecific(event *cloudevents.Event) []api.ErrorDetail {
-	var errors []api.ErrorDetail
-	eventBytes, err := event.DataBytes()
-	if err != nil {
-		errors = append(errors, api.ErrorDetail{
-			Field:   "data",
-			Type:    api.ErrorTypeBadPayload,
-			Message: err.Error(),
-		})
-	}
-	if len(eventBytes) == 0 {
-		errors = append(errors, api.ErrorDetail{
-			Field:   "data",
-			Type:    api.ErrorTypeBadPayload,
-			Message: "payload is missing",
-		})
-	}
-	_, err = event.Context.GetExtension(api.FieldEventTypeVersion)
-	if err != nil {
-		errors = append(errors, api.ErrorDetail{
-			Field:   api.FieldEventTypeVersion,
-			Type:    api.ErrorTypeMissingField,
-			Message: api.ErrorMessageMissingField,
 		})
 	}
 
