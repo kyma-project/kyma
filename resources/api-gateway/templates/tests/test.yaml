@@ -29,7 +29,7 @@ spec:
           image: {{ .Values.tests.image.registry }}/api-gateway-integration-tests:{{ .Values.tests.image.version }}
           env:
           - name: HYDRA_ADDRESS
-            value: {{ .Values.tests.env.hydraAddress }}
+            value: "oauth2.{{ .Values.global.ingress.domainName }}"
           - name: USER
             valueFrom:
               secretKeyRef:
