@@ -21,27 +21,27 @@ type RuntimeURLsConfig struct {
 	ConsoleURL string `envconfig:"default=https://console.kyma.local"`
 }
 
-//go:generate mockery -name=ConfigClient
-type ConfigClient interface {
+//go:generate mockery -name=DirectorClient
+type DirectorClient interface {
 	FetchConfiguration() ([]kymamodel.Application, error)
 	SetURLsLabels(urlsCfg RuntimeURLsConfig) (graphql.Labels, error)
 }
 
-func NewConfigurationClient(gqlClient gql.Client, runtimeConfig config.RuntimeConfig) ConfigClient {
-	return &configClient{
+func NewConfigurationClient(gqlClient gql.Client, runtimeConfig config.RuntimeConfig) DirectorClient {
+	return &directorClient{
 		gqlClient:     gqlClient,
 		queryProvider: queryProvider{},
 		runtimeConfig: runtimeConfig,
 	}
 }
 
-type configClient struct {
+type directorClient struct {
 	gqlClient     gql.Client
 	queryProvider queryProvider
 	runtimeConfig config.RuntimeConfig
 }
 
-func (cc *configClient) FetchConfiguration() ([]kymamodel.Application, error) {
+func (cc *directorClient) FetchConfiguration() ([]kymamodel.Application, error) {
 	response := ApplicationsForRuntimeResponse{}
 
 	applicationsQuery := cc.queryProvider.applicationsForRuntimeQuery(cc.runtimeConfig.RuntimeId)
@@ -68,7 +68,7 @@ func (cc *configClient) FetchConfiguration() ([]kymamodel.Application, error) {
 	return applications, nil
 }
 
-func (cc *configClient) SetURLsLabels(urlsCfg RuntimeURLsConfig) (graphql.Labels, error) {
+func (cc *directorClient) SetURLsLabels(urlsCfg RuntimeURLsConfig) (graphql.Labels, error) {
 	eventsURLLabel, err := cc.setURLLabel(eventsURLLabelKey, urlsCfg.EventsURL)
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func (cc *configClient) SetURLsLabels(urlsCfg RuntimeURLsConfig) (graphql.Labels
 	}, nil
 }
 
-func (cc *configClient) setURLLabel(key, value string) (*graphql.Label, error) {
+func (cc *directorClient) setURLLabel(key, value string) (*graphql.Label, error) {
 	response := SetRuntimeLabelResponse{}
 
 	setLabelQuery := cc.queryProvider.setRuntimeLabelMutation(cc.runtimeConfig.RuntimeId, key, value)

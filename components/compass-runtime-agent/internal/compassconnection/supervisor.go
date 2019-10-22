@@ -130,7 +130,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	}
 
 	s.log.Infof("Fetching configuration from Director, from %s url...", connection.Spec.ManagementInfo.DirectorURL)
-	directorClient, err := s.clientsProvider.GetCompassConfigClient(credentials, connection.Spec.ManagementInfo.DirectorURL, runtimeConfig)
+	directorClient, err := s.clientsProvider.GetDirectorClient(credentials, connection.Spec.ManagementInfo.DirectorURL, runtimeConfig)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to prepare configuration client: %s", err.Error())
 		s.setSyncFailedStatus(connection, syncAttemptTime, errorMsg)

@@ -61,7 +61,7 @@ func TestClientsProvider_GetCompassConfigClient(t *testing.T) {
 		provider := NewClientsProvider(constructor, false, insecureFetch, enableLogging)
 
 		// when
-		configClient, err := provider.GetCompassConfigClient(credentials, url, runtimeConfig)
+		configClient, err := provider.GetDirectorClient(credentials, url, runtimeConfig)
 
 		// then
 		require.NoError(t, err)
@@ -75,7 +75,7 @@ func TestClientsProvider_GetCompassConfigClient(t *testing.T) {
 		provider := NewClientsProvider(constructor, false, insecureFetch, enableLogging)
 
 		// when
-		_, err := provider.GetCompassConfigClient(credentials, url, runtimeConfig)
+		_, err := provider.GetDirectorClient(credentials, url, runtimeConfig)
 
 		// then
 		require.Error(t, err)

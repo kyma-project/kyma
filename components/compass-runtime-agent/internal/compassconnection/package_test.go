@@ -118,7 +118,7 @@ func TestCompassConnectionController(t *testing.T) {
 	tokensConnectorClientMock := connectorTokensClientMock()
 	certsConnectorClientMock := connectorCertClientMock()
 	// Director config client
-	configurationClientMock := &directorMocks.ConfigClient{}
+	configurationClientMock := &directorMocks.DirectorClient{}
 	configurationClientMock.On("FetchConfiguration").Return(kymaModelApps, nil)
 	configurationClientMock.On("SetURLsLabels", runtimeURLsConfig).Return(runtimeLabels, nil)
 	// Clients provider
@@ -293,11 +293,11 @@ func TestCompassConnectionController(t *testing.T) {
 		clientsProviderMock.Calls = nil
 		clientsProviderMock.On("GetConnectorClient", connectorURL).Return(tokensConnectorClientMock, nil)
 		clientsProviderMock.On("GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL).Return(certsConnectorClientMock, nil)
-		clientsProviderMock.On("GetCompassConfigClient", credentials.ClientCredentials, directorURL, runtimeConfig).Return(nil, errors.New("error"))
+		clientsProviderMock.On("GetDirectorClient", credentials.ClientCredentials, directorURL, runtimeConfig).Return(nil, errors.New("error"))
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&clientsProviderMock.Mock, "GetCompassConfigClient", credentials.ClientCredentials, directorURL, runtimeConfig)
+			return mockFunctionCalled(&clientsProviderMock.Mock, "GetDirectorClient", credentials.ClientCredentials, directorURL, runtimeConfig)
 		})
 
 		// then
@@ -624,9 +624,9 @@ func assertCertificateRenewed(t *testing.T) {
 	assert.True(t, connectedConnection.Status.ConnectionStatus.Established.Unix() < connectedConnection.Status.ConnectionStatus.Renewed.Unix())
 }
 
-func clientsProviderMock(configClient *directorMocks.ConfigClient, connectorTokensClient, connectorCertsClient *connectorMocks.Client) *compassMocks.ClientsProvider {
+func clientsProviderMock(configClient *directorMocks.DirectorClient, connectorTokensClient, connectorCertsClient *connectorMocks.Client) *compassMocks.ClientsProvider {
 	clientsProviderMock := &compassMocks.ClientsProvider{}
-	clientsProviderMock.On("GetCompassConfigClient", credentials.ClientCredentials, directorURL, runtimeConfig).Return(configClient, nil)
+	clientsProviderMock.On("GetDirectorClient", credentials.ClientCredentials, directorURL, runtimeConfig).Return(configClient, nil)
 	clientsProviderMock.On("GetConnectorCertSecuredClient", credentials.ClientCredentials, certSecuredConnectorURL).Return(connectorCertsClient, nil)
 	clientsProviderMock.On("GetConnectorClient", connectorURL).Return(connectorTokensClient, nil)
 
