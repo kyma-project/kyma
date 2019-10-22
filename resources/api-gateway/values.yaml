@@ -72,3 +72,7 @@ tests:
   image:
     registry: "eu.gcr.io/kyma-project"
     version: "PR-6061"
+  env:
+    hydraAddress: "foo.bar"
+    testUser: "admin-user"
+    timeout: 60

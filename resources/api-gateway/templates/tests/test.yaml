@@ -21,8 +21,20 @@ spec:
         - name: tests
           image: {{ .Values.tests.image.registry }}/api-gateway-integration-tests:{{ .Values.tests.image.version }}
           env:
-          - name: FOO
-            value: BAR
+          - name: HYDRA_ADDRESS
+            value: {{ .Values.tests.env.hydraAddress }}
+          - name: USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.tests.env.testUser }}
+                key: email
+          - name: PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.tests.env.testUser }}
+                key: password
+          - name: REQUEST_TIMEOUT
+            value: {{ .Values.tests.env.timeout }}
       restartPolicy: Never
 {{- end }}
 {{- end }}
