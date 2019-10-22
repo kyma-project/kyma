@@ -1,8 +1,9 @@
 package function_test
 
 import (
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/function"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/function"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"

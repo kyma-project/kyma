@@ -76,7 +76,7 @@ func (s *Service) ListInIndex(index, key string, results interface{}) error {
 	return nil
 }
 
-func (s *Service) FindInNamespace (name, namespace string, result interface{}) error {
+func (s *Service) FindInNamespace(name, namespace string, result interface{}) error {
 
 	key := fmt.Sprintf("%s/%s", namespace, name)
 	item, exists, err := s.Informer.GetStore().GetByKey(key)

@@ -2,8 +2,9 @@ package serverless
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"sort"
+
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	"github.com/golang/glog"
 	"github.com/pkg/errors"

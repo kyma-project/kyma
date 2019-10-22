@@ -2,8 +2,9 @@ package domain
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	"time"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"

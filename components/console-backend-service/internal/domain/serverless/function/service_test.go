@@ -130,10 +130,10 @@ func TestFunctionService_Update(t *testing.T) {
 			"test": "new-test",
 		}
 		params := gqlschema.FunctionUpdateInput{
-			Labels: newLabelsGql,
-			Size: newSize,
-			Runtime: newRuntime,
-			Content: newContent,
+			Labels:       newLabelsGql,
+			Size:         newSize,
+			Runtime:      newRuntime,
+			Content:      newContent,
 			Dependencies: newDependencies,
 		}
 
@@ -152,10 +152,10 @@ func TestFunctionService_Update(t *testing.T) {
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		params := gqlschema.FunctionUpdateInput{
-			Labels: nil,
-			Size: "S",
-			Runtime: "nodejs6",
-			Content: "new content",
+			Labels:       nil,
+			Size:         "S",
+			Runtime:      "nodejs6",
+			Content:      "new content",
 			Dependencies: "new dependencies",
 		}
 		_, err = service.Update("a", "a", params)
@@ -198,10 +198,10 @@ func fixFunction(name, namespace string, labels map[string]string, size, runtime
 			Labels:    labels,
 		},
 		Spec: v1alpha1.FunctionSpec{
-			Size:    size,
-			Runtime: runtime,
+			Size:     size,
+			Runtime:  runtime,
 			Function: content,
-			Deps: dependencies,
+			Deps:     dependencies,
 		},
 	}
 }

@@ -5,10 +5,11 @@
 package mock_serverless
 
 import (
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	gqlschema "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	v1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-	reflect "reflect"
 )
 
 // MockFunctionService is a mock of FunctionService interface

@@ -2,6 +2,7 @@ package serverless
 
 import (
 	"context"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/disabled"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/function"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
