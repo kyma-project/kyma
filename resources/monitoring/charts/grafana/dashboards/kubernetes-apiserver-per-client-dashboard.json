@@ -15,7 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1571723154901,
+  "id": 45,
+  "iteration": 1571746159460,
   "links": [],
   "panels": [
     {
@@ -73,6 +74,7 @@
           "expr": "sum(rate(apiserver_request_count{job=\"apiserver\", client=\"$client\"}[5m])) BY (client)",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "{{ client }}",
           "refId": "A"
         }
       ],
@@ -132,13 +134,15 @@
       },
       "id": 10,
       "legend": {
-        "avg": false,
+        "alignAsTable": true,
+        "avg": true,
         "current": false,
-        "max": false,
+        "max": true,
         "min": false,
+        "rightSide": true,
         "show": true,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
@@ -157,7 +161,7 @@
           "expr": "sum(rate(apiserver_request_count{job=\"apiserver\", client=\"$client\"}[5m])) BY (code)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "",
+          "legendFormat": "{{ code }}",
           "refId": "A"
         }
       ],
@@ -244,6 +248,7 @@
           "expr": "sum(rate(apiserver_request_count{job=\"apiserver\", client=\"$client\"}[5m])) BY (verb)",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "{{ verb }}",
           "refId": "A"
         }
       ],
@@ -381,7 +386,6 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
           "text": "apicontroller.test/v0.0.0 (linux/amd64) kubernetes/$Format",
           "value": "apicontroller.test/v0.0.0 (linux/amd64) kubernetes/$Format"
         },

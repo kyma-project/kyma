@@ -15,6 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
+  "id": 44,
   "links": [],
   "panels": [
     {
@@ -404,7 +405,7 @@
           "expr": "sum by(verb) (rate(apiserver_latency_seconds:quantile{job=\"apiserver\"}[5m]) >= 0)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "",
+          "legendFormat": "{{ verb }}",
           "refId": "A",
           "step": 30
         }
@@ -590,6 +591,7 @@
           "expr": "sum(rate(apiserver_request_count{job=\"apiserver\"}[5m])) BY (code)",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "{{ code }}",
           "refId": "A"
         }
       ],
@@ -678,6 +680,7 @@
           "expr": "sum(rate(apiserver_request_count{job=\"apiserver\"}[5m])) BY (verb)",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "{{ verb }}",
           "refId": "A"
         }
       ],
@@ -767,7 +770,7 @@
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "",
+          "legendFormat": "{{ client }}",
           "refId": "A"
         }
       ],
