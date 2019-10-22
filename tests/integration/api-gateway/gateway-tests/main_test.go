@@ -5,13 +5,16 @@ import (
 	"flag"
 	"fmt"
 	"github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/api"
 	"math/rand"
-	"net/http"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/api"
+	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/ingressgateway"
 
 	"golang.org/x/oauth2/clientcredentials"
 
@@ -61,8 +64,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 		TokenURL:     fmt.Sprintf("https://%s/oauth2/token", hydraAddr),
 		Scopes:       []string{"read"},
 	}
-
-	_ = api.NewTester(&http.Client{}, []retry.Option{
+	httpClient, err := ingressgateway.FromEnv().Client()
+	tester := api.NewTester(httpClient, []retry.Option{
 		retry.Delay(time.Second * 5),
 		retry.Attempts(12),
 		retry.DelayType(retry.FixedDelay),
@@ -112,7 +115,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
 			//}
 
-			//assert.NoError(t, tester.TestUnsecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local", testID)))
+			assert.NoError(t, tester.TestUnsecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local", testID)))
 
 			deleteResources(k8sClient, commonResources...)
 
