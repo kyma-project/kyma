@@ -109,7 +109,7 @@ postgresqlUsername: postgres
 ## Create a database
 ## ref: https://github.com/bitnami/bitnami-docker-postgresql/blob/master/README.md#creating-a-database-on-first-run
 ##
-postgresqlDatabase: postgres # Modified
+# postgresqlDatabase:
 
 ## PostgreSQL data dir
 ## ref: https://github.com/bitnami/bitnami-docker-postgresql/blob/master/README.md
@@ -168,7 +168,7 @@ postgresqlDataDir: /bitnami/postgresql/data
 
 ## ConfigMap with scripts to be run at first boot
 ## NOTE: This will override initdbScripts
-# initdbScriptsConfigMap:
+initdbScriptsConfigMap: compass-postgresql-db-init # Modified
 
 ## Secret with scripts to be run at first boot (in case it contains sensitive information)
 ## NOTE: This can work along initdbScripts or initdbScriptsConfigMap

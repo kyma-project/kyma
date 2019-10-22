@@ -2,6 +2,7 @@
 ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 CONCURRENCY=1
+CLEANUP="true"
 
 POSITIONAL=()
 
@@ -36,6 +37,10 @@ do
             ;;
         --test-namespace|-tn)
             TEST_NAMESPACE="$1"
+            shift
+            ;;
+        --cleanup)
+            CLEANUP="$1"
             shift
             ;;
         -*)
@@ -97,12 +102,15 @@ else
   fi
 fi
 
-# creates a config map which provides the testing addons
+# creates a ClusterAddonsConfiguration which provides the testing addons
 injectTestingAddons
 if [[ $? -eq 1 ]]; then
   exit 1
 fi
-trap removeTestingAddons ERR EXIT
+
+if [[ ${CLEANUP} = "true" ]]; then
+  trap removeTestingAddons EXIT
+fi
 
 cat <<EOF | ${kc} apply -f -
 apiVersion: testing.kyma-project.io/v1alpha1
@@ -169,7 +177,9 @@ cleanupExitCode=$?
 echo "ClusterTestSuite details:"
 kubectl get cts ${suiteName} -oyaml
 
-deleteCTS ${suiteName}
+if [[ ${CLEANUP} = "true" ]]; then
+  deleteCTS ${suiteName}
+fi
 
 printImagesWithLatestTag
 latestTagExitCode=$?

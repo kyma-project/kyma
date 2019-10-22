@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
@@ -34,6 +36,7 @@ type RootResolver struct {
 	cms            *cms.PluggableContainer
 	ac             *apicontroller.PluggableResolver
 	authentication *authentication.PluggableResolver
+	serverless     *serverless.Container
 }
 
 func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
@@ -90,6 +93,12 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 	}
 	makePluggable(authenticationResolver)
 
+	serverlessResolver, err := serverless.New(restConfig, informerResyncPeriod)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing serverless resolver")
+	}
+	makePluggable(serverlessResolver)
+
 	return &RootResolver{
 		k8s:            k8sResolver,
 		ui:             uiContainer.Resolver,
@@ -100,6 +109,7 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 		cms:            cmsContainer,
 		ac:             acResolver,
 		authentication: authenticationResolver,
+		serverless:     serverlessResolver,
 	}, nil
 }
 
@@ -385,6 +395,14 @@ func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace strin
 	return r.k8s.CreateLimitRange(ctx, namespace, name, limitRange)
 }
 
+func (r *mutationResolver) DeleteFunction(ctx context.Context, name string, namespace string) (gqlschema.FunctionMutationOutput, error) {
+	return r.serverless.Resolver.DeleteFunction(ctx, name, namespace)
+}
+
+func (r *mutationResolver) CreateFunction(ctx context.Context, name string, namespace string, labels gqlschema.Labels, size string, runtime string) (gqlschema.Function, error) {
+	return r.serverless.Resolver.CreateFunction(ctx, name, namespace, labels, size, runtime)
+}
+
 // Queries
 
 type queryResolver struct {
@@ -569,6 +587,10 @@ func (r *queryResolver) ClusterMicroFrontends(ctx context.Context) ([]gqlschema.
 
 func (r *queryResolver) SelfSubjectRules(ctx context.Context, namespace *string) ([]gqlschema.ResourceRule, error) {
 	return r.k8s.SelfSubjectRulesQuery(ctx, namespace)
+}
+
+func (r *queryResolver) Functions(ctx context.Context, namespace string) ([]gqlschema.Function, error) {
+	return r.serverless.FunctionsQuery(ctx, namespace)
 }
 
 // Subscriptions

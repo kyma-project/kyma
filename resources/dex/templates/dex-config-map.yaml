@@ -20,6 +20,10 @@ data:
     logger:
       level: "info"
       format: "text"
+    {{ if .Values.telemetry.enabled }}
+    telemetry:
+      http: 0.0.0.0:{{.Values.telemetry.port}}
+    {{ end }}
     web:
       http: 0.0.0.0:{{ .Values.containerPort }}
 
@@ -39,6 +43,7 @@ data:
     {{- with .Values.oidc.staticClientsExtra }}
     {{- tpl . $ | nindent 4 }}
     {{- end }}
-
+    {{ if .Values.dex.useStaticConnector }}
     enablePasswordDB: true
     #__STATIC_PASSWORDS__
+    {{ end }}
