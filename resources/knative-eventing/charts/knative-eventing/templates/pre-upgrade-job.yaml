@@ -56,7 +56,8 @@ data:
       subscriptions.eventing.knative.dev \
       clusterchannelprovisioners.eventing.knative.dev \
       channels.eventing.knative.dev --ignore-not-found
-    kubectl scale -n kyma-system deploy/event-bus-subscription-controller --replicas=0 || true
+    #### deploy/event-bus-subscription-controller adds/removes a finalizer to knative subscriptions hence it needs to be deleted after knative subscriptions are deleted
+    kubectl delete -n kyma-system deploy/event-bus-subscription-controller --ignore-not-found
     echo "*** Pre upgrade job executed ***"
 kind: ConfigMap
 metadata:
