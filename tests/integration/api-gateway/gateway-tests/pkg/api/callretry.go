@@ -1,4 +1,4 @@
-package callretry
+package api
 
 import (
 	"fmt"
@@ -7,41 +7,46 @@ import (
 	"net/http"
 )
 
-type securityValidator struct {
-	securedClient, unsecuredClient *http.Client
-	opts                           []retry.Option
+type Tester struct {
+	client *http.Client
+	opts   []retry.Option
 }
 
-func NewSecurityValidator(c *http.Client, opts []retry.Option) *securityValidator {
-	return &securityValidator{
-		securedClient:   c,
-		unsecuredClient: &http.Client{},
-		opts:            opts,
+func NewTester(c *http.Client, opts []retry.Option) *Tester {
+	return &Tester{
+		client: c,
+		opts:   opts,
 	}
 }
 
-func (h *securityValidator) ValidateSecureAPI(url string) error {
+func (h *Tester) TestSecureAPI(url, token string) error {
 
 	err := h.withRetries(func() (*http.Response, error) {
-		return h.securedClient.Get(fmt.Sprintf("https://%s", url))
-	}, httpOkPredicate)
+		return h.client.Get(url)
+	}, httpUnauthorizedPredicate)
 
 	if err != nil {
 		return err
 	}
 
-	return h.withRetries(func() (*http.Response, error) {
-		return h.unsecuredClient.Get(fmt.Sprintf("https://%s", url))
-	}, httpUnauthorizedPredicate)
-}
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
-func (h *securityValidator) ValidateInsecureAPI(url string) error {
 	return h.withRetries(func() (*http.Response, error) {
-		return h.unsecuredClient.Get(fmt.Sprintf("https://%s", url))
+		return h.client.Do(req)
 	}, httpOkPredicate)
 }
 
-func (h *securityValidator) withRetries(httpCall func() (*http.Response, error), shouldRetry func(*http.Response) bool) error {
+func (h *Tester) TestInsecureAPI(url string) error {
+	return h.withRetries(func() (*http.Response, error) {
+		return h.client.Get(url)
+	}, httpOkPredicate)
+}
+
+func (h *Tester) withRetries(httpCall func() (*http.Response, error), shouldRetry func(*http.Response) bool) error {
 
 	if err := retry.Do(func() error {
 
@@ -71,4 +76,5 @@ func httpOkPredicate(response *http.Response) bool {
 
 func httpUnauthorizedPredicate(response *http.Response) bool {
 	return response.StatusCode != 401
+
 }

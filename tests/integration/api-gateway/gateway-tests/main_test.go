@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/callretry"
+	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/api"
 	"golang.org/x/oauth2/clientcredentials"
 
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/manifestprocessor"
@@ -53,15 +53,13 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 	oauthClientID := generateRandomString(OauthClientIDLength)
 	oauthClientSecret := generateRandomString(OauthClientSecretLength)
-	cfg := clientcredentials.Config{
+
+	_ = clientcredentials.Config{
 		ClientID:     oauthClientID,
 		ClientSecret: oauthClientSecret,
 		TokenURL:     "https://oauth2.kyma.local/oauth2/token",
 		Scopes:       []string{"read"},
 	}
-
-	c := cfg.Client(context.Background())
-	_ = callretry.NewSecurityValidator(c, nil)
 
 	k8sClient := getDynamicClient()
 
