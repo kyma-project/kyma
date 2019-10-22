@@ -1,9 +1,11 @@
-# Generic makefile
+# Generic Makefile
 ## Overview
 
 `generic_make_go.mk` is a generic make file used to build, format and test Golang components.
-To use this makefile you need to have installed: [Docker](https://www.docker.com/get-started),
-[GNU Makefile](https://www.gnu.org/software/make/manual/make.html), version >=3.80 .
+
+## Prerequisites 
+* [Docker](https://www.docker.com/get-started)
+* [GNU Makefile](https://www.gnu.org/software/make/manual/make.html) v3.80 or higher
 
 ## Usage
 Syntax:
@@ -46,7 +48,7 @@ APP_NAME = App name
 APP_PATH = App path in repository
 BUILDPACK = BUILDPACK_IMAGE 
 SCRIPTS_DIR = Path to generic makefile #e.g. $(realpath $(shell pwd)/../..)/common/makefiles
-include $(SCRIPTS_DIR)/generic_make_go.mk
+include $(SCRIPTS_DIR)/generic-make-go.mk
 ```
 available images are listed in [config.yaml](https://github.com/kyma-project/test-infra/blob/master/templates/config.yaml).
 
@@ -77,10 +79,10 @@ Target types:
 - `COPY_TAGRT` - copy components files to docker container.
 
 ## How to adjust makefile
-### How to disable current rule in local makefile
-In new Makefile add the following line: `{rule}: ;`.
-There will be warnings printed on console, but the rule will be disabled.
-
+### Disable the current rule in the local Makefile
+To disable a rule in the new Makefile, follow it with the semicolon `;`.
+For example, write: `{RULE}: ;`.
+This results in the rule being disabled and warnings printed on the console.
 ### How to add new local rule, which doesn't need `BUILDPACK`:
 Define rule in local makefile.
 Add this rule to one of the  global rule:
@@ -101,7 +103,7 @@ Available BUILDPACK_FUNCTIONS:
 - buildpack-mount
 - buildpkac-cp-ro
 
-### How to add new rule in generic makefile:
+### Add a new rule in the Generic Makefile
 Definie new local rule in `generic_make_go.mk` file:
 ```makefile
 your-rule-local:

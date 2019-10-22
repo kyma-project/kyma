@@ -1,4 +1,4 @@
-# makefiles directory
+# Makefiles directory
 
-The `makefiles` directory contains a various makefiles that contains common targets, 
-which are used in Kyma components.
+The `makefiles` directory contains various Makefiles that include common targets, 
+ used in Kyma components.
