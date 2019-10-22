@@ -857,30 +857,13 @@ type APIRuleService{
 type Rule {
     path: String!
     methods: [String!]!
-    accessStrategies: [APIRuleAccessStrategy!]!
-    mutators: [APIRuleMutator!]
-
+    accessStrategies: [APIRuleConfig!]!
+    mutators: [APIRuleConfig!]
 }
 
-type APIRuleAccessStrategy {
-    handler: String!
-    config: APIRuleAccessStrategyConfig
-}
-
-type APIRuleAccessStrategyConfig {
-    trustedIssuers: [String!]
-    requiredScope: [String!]
-
-}
-
-type APIRuleMutator {
-    handler: String!
-    config: APIRuleMutatorConfig
-}
-
-# TODO how to model different ory oathkeeper mutators?
-type APIRuleMutatorConfig{
+type APIRuleConfig {
     name: String!
+    config: JSON!
 }
 
 type APIRuleStatuses {
@@ -900,8 +883,19 @@ input APIRuleInput {
     serviceName: String!
     servicePort: Int!
     gateway: String!
-    # TODO how to model rules on input? (only input or scalar allowed)
-    #    rules: [Rule!]!
+    rules: [RuleInput!]!
+}
+
+input RuleInput {
+    path: String!
+    methods: [String!]!
+    accessStrategies: [APIRuleConfigInput!]!
+    mutators: [APIRuleConfigInput!]
+}
+
+input APIRuleConfigInput {
+    name: String!
+    config: JSON!
 }
 
 # Backend Module

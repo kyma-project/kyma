@@ -71,23 +71,9 @@ type ComplexityRoot struct {
 		Status  func(childComplexity int) int
 	}
 
-	ApiruleAccessStrategy struct {
-		Handler func(childComplexity int) int
-		Config  func(childComplexity int) int
-	}
-
-	ApiruleAccessStrategyConfig struct {
-		TrustedIssuers func(childComplexity int) int
-		RequiredScope  func(childComplexity int) int
-	}
-
-	ApiruleMutator struct {
-		Handler func(childComplexity int) int
-		Config  func(childComplexity int) int
-	}
-
-	ApiruleMutatorConfig struct {
-		Name func(childComplexity int) int
+	ApiruleConfig struct {
+		Name   func(childComplexity int) int
+		Config func(childComplexity int) int
 	}
 
 	ApiruleService struct {
@@ -4872,54 +4858,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Apirule.Status(childComplexity), true
 
-	case "APIRuleAccessStrategy.handler":
-		if e.complexity.ApiruleAccessStrategy.Handler == nil {
+	case "APIRuleConfig.name":
+		if e.complexity.ApiruleConfig.Name == nil {
 			break
 		}
 
-		return e.complexity.ApiruleAccessStrategy.Handler(childComplexity), true
+		return e.complexity.ApiruleConfig.Name(childComplexity), true
 
-	case "APIRuleAccessStrategy.config":
-		if e.complexity.ApiruleAccessStrategy.Config == nil {
+	case "APIRuleConfig.config":
+		if e.complexity.ApiruleConfig.Config == nil {
 			break
 		}
 
-		return e.complexity.ApiruleAccessStrategy.Config(childComplexity), true
-
-	case "APIRuleAccessStrategyConfig.trustedIssuers":
-		if e.complexity.ApiruleAccessStrategyConfig.TrustedIssuers == nil {
-			break
-		}
-
-		return e.complexity.ApiruleAccessStrategyConfig.TrustedIssuers(childComplexity), true
-
-	case "APIRuleAccessStrategyConfig.requiredScope":
-		if e.complexity.ApiruleAccessStrategyConfig.RequiredScope == nil {
-			break
-		}
-
-		return e.complexity.ApiruleAccessStrategyConfig.RequiredScope(childComplexity), true
-
-	case "APIRuleMutator.handler":
-		if e.complexity.ApiruleMutator.Handler == nil {
-			break
-		}
-
-		return e.complexity.ApiruleMutator.Handler(childComplexity), true
-
-	case "APIRuleMutator.config":
-		if e.complexity.ApiruleMutator.Config == nil {
-			break
-		}
-
-		return e.complexity.ApiruleMutator.Config(childComplexity), true
-
-	case "APIRuleMutatorConfig.name":
-		if e.complexity.ApiruleMutatorConfig.Name == nil {
-			break
-		}
-
-		return e.complexity.ApiruleMutatorConfig.Name(childComplexity), true
+		return e.complexity.ApiruleConfig.Config(childComplexity), true
 
 	case "APIRuleService.host":
 		if e.complexity.ApiruleService.Host == nil {
@@ -9769,11 +9720,11 @@ func (ec *executionContext) _APIRule_status(ctx context.Context, field graphql.C
 	return ec._APIRuleStatuses(ctx, field.Selections, res)
 }
 
-var aPIRuleAccessStrategyImplementors = []string{"APIRuleAccessStrategy"}
+var aPIRuleConfigImplementors = []string{"APIRuleConfig"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _APIRuleAccessStrategy(ctx context.Context, sel ast.SelectionSet, obj *APIRuleAccessStrategy) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, aPIRuleAccessStrategyImplementors)
+func (ec *executionContext) _APIRuleConfig(ctx context.Context, sel ast.SelectionSet, obj *APIRuleConfig) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, aPIRuleConfigImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -9782,280 +9733,14 @@ func (ec *executionContext) _APIRuleAccessStrategy(ctx context.Context, sel ast.
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("APIRuleAccessStrategy")
-		case "handler":
-			out.Values[i] = ec._APIRuleAccessStrategy_handler(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "config":
-			out.Values[i] = ec._APIRuleAccessStrategy_config(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _APIRuleAccessStrategy_handler(ctx context.Context, field graphql.CollectedField, obj *APIRuleAccessStrategy) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "APIRuleAccessStrategy",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Handler, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _APIRuleAccessStrategy_config(ctx context.Context, field graphql.CollectedField, obj *APIRuleAccessStrategy) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "APIRuleAccessStrategy",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Config, nil
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*APIRuleAccessStrategyConfig)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-
-	return ec._APIRuleAccessStrategyConfig(ctx, field.Selections, res)
-}
-
-var aPIRuleAccessStrategyConfigImplementors = []string{"APIRuleAccessStrategyConfig"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _APIRuleAccessStrategyConfig(ctx context.Context, sel ast.SelectionSet, obj *APIRuleAccessStrategyConfig) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, aPIRuleAccessStrategyConfigImplementors)
-
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("APIRuleAccessStrategyConfig")
-		case "trustedIssuers":
-			out.Values[i] = ec._APIRuleAccessStrategyConfig_trustedIssuers(ctx, field, obj)
-		case "requiredScope":
-			out.Values[i] = ec._APIRuleAccessStrategyConfig_requiredScope(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _APIRuleAccessStrategyConfig_trustedIssuers(ctx context.Context, field graphql.CollectedField, obj *APIRuleAccessStrategyConfig) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "APIRuleAccessStrategyConfig",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TrustedIssuers, nil
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	arr1 := make(graphql.Array, len(res))
-
-	for idx1 := range res {
-		arr1[idx1] = func() graphql.Marshaler {
-			return graphql.MarshalString(res[idx1])
-		}()
-	}
-
-	return arr1
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _APIRuleAccessStrategyConfig_requiredScope(ctx context.Context, field graphql.CollectedField, obj *APIRuleAccessStrategyConfig) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "APIRuleAccessStrategyConfig",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.RequiredScope, nil
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	arr1 := make(graphql.Array, len(res))
-
-	for idx1 := range res {
-		arr1[idx1] = func() graphql.Marshaler {
-			return graphql.MarshalString(res[idx1])
-		}()
-	}
-
-	return arr1
-}
-
-var aPIRuleMutatorImplementors = []string{"APIRuleMutator"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _APIRuleMutator(ctx context.Context, sel ast.SelectionSet, obj *APIRuleMutator) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, aPIRuleMutatorImplementors)
-
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("APIRuleMutator")
-		case "handler":
-			out.Values[i] = ec._APIRuleMutator_handler(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "config":
-			out.Values[i] = ec._APIRuleMutator_config(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _APIRuleMutator_handler(ctx context.Context, field graphql.CollectedField, obj *APIRuleMutator) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "APIRuleMutator",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Handler, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _APIRuleMutator_config(ctx context.Context, field graphql.CollectedField, obj *APIRuleMutator) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "APIRuleMutator",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Config, nil
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*APIRuleMutatorConfig)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-
-	return ec._APIRuleMutatorConfig(ctx, field.Selections, res)
-}
-
-var aPIRuleMutatorConfigImplementors = []string{"APIRuleMutatorConfig"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _APIRuleMutatorConfig(ctx context.Context, sel ast.SelectionSet, obj *APIRuleMutatorConfig) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, aPIRuleMutatorConfigImplementors)
-
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("APIRuleMutatorConfig")
+			out.Values[i] = graphql.MarshalString("APIRuleConfig")
 		case "name":
-			out.Values[i] = ec._APIRuleMutatorConfig_name(ctx, field, obj)
+			out.Values[i] = ec._APIRuleConfig_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "config":
+			out.Values[i] = ec._APIRuleConfig_config(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -10071,11 +9756,11 @@ func (ec *executionContext) _APIRuleMutatorConfig(ctx context.Context, sel ast.S
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _APIRuleMutatorConfig_name(ctx context.Context, field graphql.CollectedField, obj *APIRuleMutatorConfig) graphql.Marshaler {
+func (ec *executionContext) _APIRuleConfig_name(ctx context.Context, field graphql.CollectedField, obj *APIRuleConfig) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "APIRuleMutatorConfig",
+		Object: "APIRuleConfig",
 		Args:   nil,
 		Field:  field,
 	}
@@ -10095,6 +9780,33 @@ func (ec *executionContext) _APIRuleMutatorConfig_name(ctx context.Context, fiel
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _APIRuleConfig_config(ctx context.Context, field graphql.CollectedField, obj *APIRuleConfig) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "APIRuleConfig",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Config, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
 }
 
 var aPIRuleServiceImplementors = []string{"APIRuleService"}
@@ -27327,7 +27039,7 @@ func (ec *executionContext) _Rule_accessStrategies(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]APIRuleAccessStrategy)
+	res := resTmp.([]APIRuleConfig)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -27352,7 +27064,7 @@ func (ec *executionContext) _Rule_accessStrategies(ctx context.Context, field gr
 			}
 			arr1[idx1] = func() graphql.Marshaler {
 
-				return ec._APIRuleAccessStrategy(ctx, field.Selections, &res[idx1])
+				return ec._APIRuleConfig(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -27384,7 +27096,7 @@ func (ec *executionContext) _Rule_mutators(ctx context.Context, field graphql.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]APIRuleMutator)
+	res := resTmp.([]APIRuleConfig)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -27409,7 +27121,7 @@ func (ec *executionContext) _Rule_mutators(ctx context.Context, field graphql.Co
 			}
 			arr1[idx1] = func() graphql.Marshaler {
 
-				return ec._APIRuleMutator(ctx, field.Selections, &res[idx1])
+				return ec._APIRuleConfig(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -34395,6 +34107,47 @@ func UnmarshalAPIInput(v interface{}) (APIInput, error) {
 			if err != nil {
 				return it, err
 			}
+		case "rules":
+			var err error
+			var rawIf1 []interface{}
+			if v != nil {
+				if tmp1, ok := v.([]interface{}); ok {
+					rawIf1 = tmp1
+				} else {
+					rawIf1 = []interface{}{v}
+				}
+			}
+			it.Rules = make([]RuleInput, len(rawIf1))
+			for idx1 := range rawIf1 {
+				it.Rules[idx1], err = UnmarshalRuleInput(rawIf1[idx1])
+			}
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func UnmarshalAPIRuleConfigInput(v interface{}) (APIRuleConfigInput, error) {
+	var it APIRuleConfigInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "config":
+			var err error
+			err = (&it.Config).UnmarshalGQL(v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -34807,6 +34560,75 @@ func UnmarshalResourceValuesInput(v interface{}) (ResourceValuesInput, error) {
 				it.CPU = &ptr1
 			}
 
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func UnmarshalRuleInput(v interface{}) (RuleInput, error) {
+	var it RuleInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "path":
+			var err error
+			it.Path, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "methods":
+			var err error
+			var rawIf1 []interface{}
+			if v != nil {
+				if tmp1, ok := v.([]interface{}); ok {
+					rawIf1 = tmp1
+				} else {
+					rawIf1 = []interface{}{v}
+				}
+			}
+			it.Methods = make([]string, len(rawIf1))
+			for idx1 := range rawIf1 {
+				it.Methods[idx1], err = graphql.UnmarshalString(rawIf1[idx1])
+			}
+			if err != nil {
+				return it, err
+			}
+		case "accessStrategies":
+			var err error
+			var rawIf1 []interface{}
+			if v != nil {
+				if tmp1, ok := v.([]interface{}); ok {
+					rawIf1 = tmp1
+				} else {
+					rawIf1 = []interface{}{v}
+				}
+			}
+			it.AccessStrategies = make([]APIRuleConfigInput, len(rawIf1))
+			for idx1 := range rawIf1 {
+				it.AccessStrategies[idx1], err = UnmarshalAPIRuleConfigInput(rawIf1[idx1])
+			}
+			if err != nil {
+				return it, err
+			}
+		case "mutators":
+			var err error
+			var rawIf1 []interface{}
+			if v != nil {
+				if tmp1, ok := v.([]interface{}); ok {
+					rawIf1 = tmp1
+				} else {
+					rawIf1 = []interface{}{v}
+				}
+			}
+			it.Mutators = make([]APIRuleConfigInput, len(rawIf1))
+			for idx1 := range rawIf1 {
+				it.Mutators[idx1], err = UnmarshalAPIRuleConfigInput(rawIf1[idx1])
+			}
 			if err != nil {
 				return it, err
 			}
@@ -35846,30 +35668,13 @@ type APIRuleService{
 type Rule {
     path: String!
     methods: [String!]!
-    accessStrategies: [APIRuleAccessStrategy!]!
-    mutators: [APIRuleMutator!]
-
+    accessStrategies: [APIRuleConfig!]!
+    mutators: [APIRuleConfig!]
 }
 
-type APIRuleAccessStrategy {
-    handler: String!
-    config: APIRuleAccessStrategyConfig
-}
-
-type APIRuleAccessStrategyConfig {
-    trustedIssuers: [String!]
-    requiredScope: [String!]
-
-}
-
-type APIRuleMutator {
-    handler: String!
-    config: APIRuleMutatorConfig
-}
-
-# TODO how to model different ory oathkeeper mutators?
-type APIRuleMutatorConfig{
+type APIRuleConfig {
     name: String!
+    config: JSON!
 }
 
 type APIRuleStatuses {
@@ -35889,8 +35694,19 @@ input APIRuleInput {
     serviceName: String!
     servicePort: Int!
     gateway: String!
-    # TODO how to model rules on input? (only input or scalar allowed)
-    #    rules: [Rule!]!
+    rules: [RuleInput!]!
+}
+
+input RuleInput {
+    path: String!
+    methods: [String!]!
+    accessStrategies: [APIRuleConfigInput!]!
+    mutators: [APIRuleConfigInput!]
+}
+
+input APIRuleConfigInput {
+    name: String!
+    config: JSON!
 }
 
 # Backend Module

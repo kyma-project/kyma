@@ -35,31 +35,23 @@ type APIRule struct {
 	Status  *APIRuleStatuses `json:"status"`
 }
 
-type APIRuleAccessStrategy struct {
-	Handler string                       `json:"handler"`
-	Config  *APIRuleAccessStrategyConfig `json:"config"`
+type APIRuleConfig struct {
+	Name   string `json:"name"`
+	Config JSON   `json:"config"`
 }
 
-type APIRuleAccessStrategyConfig struct {
-	TrustedIssuers []string `json:"trustedIssuers"`
-	RequiredScope  []string `json:"requiredScope"`
+type APIRuleConfigInput struct {
+	Name   string `json:"name"`
+	Config JSON   `json:"config"`
 }
 
 type APIRuleInput struct {
-	Name        string `json:"name"`
-	Host        string `json:"host"`
-	ServiceName string `json:"serviceName"`
-	ServicePort int    `json:"servicePort"`
-	Gateway     string `json:"gateway"`
-}
-
-type APIRuleMutator struct {
-	Handler string                `json:"handler"`
-	Config  *APIRuleMutatorConfig `json:"config"`
-}
-
-type APIRuleMutatorConfig struct {
-	Name string `json:"name"`
+	Name        string      `json:"name"`
+	Host        string      `json:"host"`
+	ServiceName string      `json:"serviceName"`
+	ServicePort int         `json:"servicePort"`
+	Gateway     string      `json:"gateway"`
+	Rules       []RuleInput `json:"rules"`
 }
 
 type APIRuleService struct {
@@ -560,10 +552,17 @@ type ResourceValuesInput struct {
 }
 
 type Rule struct {
-	Path             string                  `json:"path"`
-	Methods          []string                `json:"methods"`
-	AccessStrategies []APIRuleAccessStrategy `json:"accessStrategies"`
-	Mutators         []APIRuleMutator        `json:"mutators"`
+	Path             string          `json:"path"`
+	Methods          []string        `json:"methods"`
+	AccessStrategies []APIRuleConfig `json:"accessStrategies"`
+	Mutators         []APIRuleConfig `json:"mutators"`
+}
+
+type RuleInput struct {
+	Path             string               `json:"path"`
+	Methods          []string             `json:"methods"`
+	AccessStrategies []APIRuleConfigInput `json:"accessStrategies"`
+	Mutators         []APIRuleConfigInput `json:"mutators"`
 }
 
 type Secret struct {
