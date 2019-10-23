@@ -156,7 +156,7 @@ func main() {
 	// If OIDC configuration provided, use oidc authenticator
 	if cfg.auth.Authentication.OIDC.IssuerURL != "" {
 
-		oidcAuthenticator, err = setupReloadableOIDCAuthenticator(fileWatcherCtx, cfg.auth.Authentication.OIDC)
+		oidcAuthenticator, err = setupOIDCAuthReloader(fileWatcherCtx, cfg.auth.Authentication.OIDC)
 		if err != nil {
 			glog.Fatalf("Failed to instantiate OIDC authenticator: %v", err)
 		}
@@ -235,14 +235,14 @@ func main() {
 				NextProtos: []string{"h2"},
 			}
 		} else {
-			certProvider, err := setupReloadableTLSCertProvider(fileWatcherCtx, cfg.tls.certFile, cfg.tls.keyFile)
+			certReloader, err := setupTLSCertReloader(fileWatcherCtx, cfg.tls.certFile, cfg.tls.keyFile)
 			if err != nil {
 				glog.Fatalf("Failed to create ReloadableTLSCertProvider: %v", err)
 			}
 
 			//Configure srv with GetCertificate function
 			srv.TLSConfig = &tls.Config{
-				GetCertificate: certProvider.GetCertificateFunc,
+				GetCertificate: certReloader.GetCertificateFunc,
 			}
 		}
 
@@ -375,17 +375,17 @@ func deleteUpstreamCORSHeaders(r *http.Response) error {
 	return nil
 }
 
-func setupReloadableOIDCAuthenticator(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) (authenticator.Request, error) {
+func setupOIDCAuthReloader(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) (authenticator.Request, error) {
 	const eventBatchDelaySeconds = 10
 	filesToWatch := []string{cfg.CAFile}
 
-	//Create ReloadableAuthReq
-	authRequestConstructor := func() (authn.CancellableAuthRequest, error) {
-		glog.Infof("creating new instance of authenticator.Request...")
+	cancelableAuthReqestConstructor := func() (authn.CancelableAuthRequest, error) {
+		glog.Infof("creating new cancelable instance of authenticator.Request...")
 		return authn.NewOIDCAuthenticator(cfg)
 	}
 
-	result, err := reload.NewReloadableAuthReq(authRequestConstructor)
+	//Create reloader
+	result, err := reload.NewCancelableAuthReqestReloader(cancelableAuthReqestConstructor)
 	if err != nil {
 		return nil, err
 	}
@@ -397,16 +397,16 @@ func setupReloadableOIDCAuthenticator(fileWatcherCtx context.Context, cfg *authn
 	return result, nil
 }
 
-func setupReloadableTLSCertProvider(fileWatcherCtx context.Context, certFile, keyFile string) (*reload.ReloadableTLSCertProvider, error) {
+func setupTLSCertReloader(fileWatcherCtx context.Context, certFile, keyFile string) (*reload.TLSCertReloader, error) {
 	const eventBatchDelaySeconds = 10
 
-	//Create ReloadableTLSCertProvider
-	tlsConstructorFunc := func() (*tls.Certificate, error) {
+	tlsConstructor := func() (*tls.Certificate, error) {
 		glog.Infof("Creating new TLS Certificate from data files: %s, %s", certFile, keyFile)
 		res, err := tls.LoadX509KeyPair(certFile, keyFile)
 		return &res, err
 	}
-	result, err := reload.NewReloadableTLSCertProvider(tlsConstructorFunc)
+	//Create reloader
+	result, err := reload.NewTLSCertReloader(tlsConstructor)
 	if err != nil {
 		return nil, err
 	}
