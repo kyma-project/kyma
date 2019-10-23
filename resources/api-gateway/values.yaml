@@ -74,4 +74,4 @@ tests:
     version: "PR-6061"
   env:
     testUser: "admin-user"
-    timeout: 60
+    timeout: "60"
