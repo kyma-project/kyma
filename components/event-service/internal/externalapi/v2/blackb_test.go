@@ -15,28 +15,18 @@ import (
 )
 
 func TestErrorNoContent(t *testing.T) {
-	req, err := http.NewRequest("POST", shared.EventsV2Path, nil)
+	want := &api.Error{
+		Status:  http.StatusBadRequest,
+		Type:    shared.ErrorTypeValidationViolation,
+		Message: shared.ErrorMessageMissingField,
+	}
+
+	result, err := sendAndReceiveError(t, nil)
 	if err != nil {
-		t.Fatal(err)
+		t.Errorf("%s", err)
+	} else {
+		checkResult(t, result, want)
 	}
-	recorder := httptest.NewRecorder()
-	handler := NewEventsHandler(maxRequestSize)
-	handler.ServeHTTP(recorder, req)
-	if status := recorder.Code; status != http.StatusBadRequest {
-		t.Errorf("Wrong status code: got %v want %v", status, http.StatusBadRequest)
-	}
-	body, err := ioutil.ReadAll(recorder.Result().Body)
-	if err != nil {
-		t.Fatal(err)
-	}
-	result := &api.Error{}
-	err = json.Unmarshal(body, result)
-	if err != nil {
-		t.Fatal(err)
-	}
-	wantError := api.Error{Status: http.StatusBadRequest, Type: shared.ErrorTypeBadPayload, Message: shared.ErrorMessageBadPayload,
-		MoreInfo: "Empty request body", Details: []api.ErrorDetail{}}
-	checkEmptyRequest(t, result, &wantError)
 }
 
 func TestErrorNoParameters(t *testing.T) {
@@ -106,7 +96,13 @@ func TestErrorWrongEventId(t *testing.T) {
 }
 
 func sendAndReceiveError(t *testing.T, s *string) (result *api.Error, err error) {
-	req, err := http.NewRequest("POST", shared.EventsV2Path, strings.NewReader(*s))
+	var req *http.Request
+	if s != nil {
+		reader := strings.NewReader(*s)
+		req, err = http.NewRequest("POST", shared.EventsV2Path, reader)
+	} else {
+		req, err = http.NewRequest("POST", shared.EventsV2Path, http.NoBody )
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -166,6 +162,28 @@ func checkWrongParameter(t *testing.T, result *api.Error, wantErrorDetail *api.E
 	}
 }
 
+
+func checkResult(t *testing.T, result *api.Error, want *api.Error) {
+	t.Helper()
+	if result.Status != want.Status {
+		t.Errorf("Wrong result.Status: got %v want %v", result.Status, want.Status)
+	}
+	if result.Type != want.Type {
+		t.Errorf("Wrong result.Type: got %v want %v", result.Type, want.Type)
+	}
+	if result.Message != want.Message {
+		t.Errorf("Wrong result.Message: got %v want %v", result.Message, want.Message)
+	}
+	if want.Details != nil {
+		if result.Details == nil {
+			t.Errorf("Wrong ErrorDetails: got %v want %v", result.Details, want.Details)
+		}
+		if result.Details[0] != want.Details[0] {
+			t.Errorf("Wrong ErrorDetails: got %v want %v", result.Details[0], want.Details[0])
+		}
+	}
+}
+
 func checkWrongEventTime(t *testing.T, result *api.Error) {
 	apiErrorDetail := api.ErrorDetail{Field: shared.FieldEventTimeV2, Type: shared.ErrorTypeInvalidField, Message: shared.ErrorMessageInvalidField, MoreInfo: ""}
 	if result.Status != http.StatusBadRequest {
@@ -209,8 +227,5 @@ func checkBadRequest(t *testing.T, result *api.Error, wantError *api.Error) {
 	}
 	if result.Message != shared.ErrorMessageBadPayload {
 		t.Errorf("Wrong result.Message: got %v want %v", result.Message, shared.ErrorMessageBadPayload)
-	}
-	if len(result.Details) > 0 {
-		t.Errorf("Wrong ErrorDetails: got %v want %v", result.Details, nil)
 	}
 }

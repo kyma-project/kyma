@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -23,7 +22,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/api/publish"
 
 	ce "github.com/cloudevents/sdk-go"
-	cecontext "github.com/cloudevents/sdk-go/pkg/cloudevents/context"
 	cehttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
 	log "github.com/sirupsen/logrus"
 )
@@ -49,7 +47,9 @@ type CloudEventsHandler struct  {
 }
 
 func (h *maxBytesHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	r.Body = http.MaxBytesReader(rw, r.Body, h.limit)
+	if r.Body != http.NoBody {
+		r.Body = http.MaxBytesReader(rw, r.Body, h.limit)
+	}
 	h.next.ServeHTTP(rw, r)
 }
 
@@ -227,16 +227,21 @@ func HandleEvent(ctx context.Context, event ce.Event, eventResponse *ce.EventRes
 func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	ctx = cehttp.WithTransportContext(ctx, cehttp.NewTransportContext(req))
-	logger := cecontext.LoggerFrom(ctx)
+	//logger := cecontext.LoggerFrom(ctx)
 	w.Header().Set("Content-Type", "application/json")
+
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		// TODO(nachtmaar)
-		logger.Errorw("failed to handle request", zap.Error(err))
-		w.WriteHeader(http.StatusBadRequest)
-		_, _ = w.Write([]byte(`{"error":"Invalid request"}`))
-		//r.Error()
+		if err := kymaevent.RespondWithError(w, api.Error{
+			Status:   http.StatusBadRequest,
+			Type:     publish.ErrorTypeBadRequest,
+			Message:  publish.ErrorMessageBadRequest,
+			MoreInfo: "",
+			Details:  nil,
+		}); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 	message := cehttp.Message{

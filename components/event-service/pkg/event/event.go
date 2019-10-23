@@ -17,6 +17,23 @@ import (
 func DecodeMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Message) (*cloudevents.Event, *api.Error, error) {
 	event, err := t.MessageToEvent(ctx, &message)
 	if err != nil {
+		if err.Error() == "transport http failed to convert message: cloudevents version unknown" {
+			apiErr := &api.Error{
+				Status:   http.StatusBadRequest,
+				Type:     shared.ErrorTypeValidationViolation,
+				Message:  shared.ErrorMessageMissingField,
+				MoreInfo: "",
+				Details:  []api.ErrorDetail{
+					api.ErrorDetail{
+					Field:    shared.FieldSpecVersionV2,
+					Type:     shared.ErrorTypeMissingField,
+					Message:  shared.ErrorMessageMissingField,
+					MoreInfo: "",
+					},
+				},
+			}
+			return nil, apiErr, nil
+		}
 		return nil, nil, err
 	}
 	specErrors := []api.ErrorDetail(nil)
@@ -36,15 +53,16 @@ func DecodeMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Mess
 
 	// validate event the Kyma way
 	kymaErrors := Validate(event)
-	allErrors := append(specErrors, kymaErrors...)
+	allErrors := append(kymaErrors, specErrors...)
 	if len(allErrors) != 0 {
-		return event,  &api.Error{
+		return event, &api.Error{
 			Status:  http.StatusBadRequest,
 			Message: shared.ErrorMessageMissingField,
 			Type:    shared.ErrorTypeValidationViolation,
 			Details: allErrors,
 		}, nil
 	}
+
 	return event, nil, nil
 }
 
@@ -69,24 +87,23 @@ func errorToDetails(err error) []api.ErrorDetail {
 	return errors
 }
 
-
 // Further Kyma specific validations in addition to CloudEvents specification
 func Validate(event *cloudevents.Event) []api.ErrorDetail {
 	var errors []api.ErrorDetail
 	eventBytes, err := event.DataBytes()
 	if err != nil {
 		errors = append(errors, api.ErrorDetail{
-			Field:   "data",
-			Type:    shared.ErrorTypeBadPayload,
+			Field:   shared.FieldData,
+			Type:    shared.ErrorTypeMissingField,
 			Message: err.Error(),
 		})
 	}
 	// empty payload is considered as error by earlier /v2 endpoint which was not using cloudevents sdk-go yet
 	if len(eventBytes) == 0 {
 		errors = append(errors, api.ErrorDetail{
-			Field:   "data",
-			Type:    shared.ErrorTypeBadPayload,
-			Message: "payload is missing",
+			Field:   shared.FieldData,
+			Type:    shared.ErrorTypeMissingField,
+			Message: shared.ErrorMessageMissingField,
 		})
 	}
 	_, err = event.Context.GetExtension(shared.FieldEventTypeVersionV2)
