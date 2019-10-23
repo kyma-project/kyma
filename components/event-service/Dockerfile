@@ -1,4 +1,4 @@
-FROM golang:1.9-alpine as builder
+FROM golang:1.12.10-alpine3.10 as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/event-service
 
@@ -19,4 +19,4 @@ LABEL source=git@github.com:kyma-project/kyma.git
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/event-service .
 COPY --from=builder /app/licenses /app/licenses
 
-CMD ["/eventservice"]
+ENTRYPOINT ["/eventservice"]

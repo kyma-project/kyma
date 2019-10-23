@@ -1,4 +1,4 @@
-FROM golang:1.9-alpine3.7
+FROM golang:1.12.10-alpine3.10
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/integration/event-service
 
