@@ -380,12 +380,12 @@ func setupReloadableOIDCAuthenticator(fileWatcherCtx context.Context, cfg *authn
 	filesToWatch := []string{cfg.CAFile}
 
 	//Create ReloadableAuthReq
-	authReqConstructorFunc := func() (authn.CancellableAuthRequest, error) {
+	authRequestConstructor := func() (authn.CancellableAuthRequest, error) {
 		glog.Infof("creating new instance of authenticator.Request...")
 		return authn.NewOIDCAuthenticator(cfg)
 	}
 
-	result, err := reload.NewReloadableAuthReq(authReqConstructorFunc)
+	result, err := reload.NewReloadableAuthReq(authRequestConstructor)
 	if err != nil {
 		return nil, err
 	}
