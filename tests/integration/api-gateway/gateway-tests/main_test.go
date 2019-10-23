@@ -146,7 +146,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
 			//}
 
-			assert.NoError(t, tester.TestUnsecuredAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+			assert.NoError(t, tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 
 			deleteResources(k8sClient, commonResources...)
 
@@ -178,7 +178,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			token, err := oauth2Cfg.Token(context.Background())
 			assert.Equal(t, err, nil)
 			assert.NotNil(t, token)
-			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
+			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
 
 			deleteResources(k8sClient, commonResources...)
 
@@ -219,8 +219,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 			assert.Nil(t, err)
 			assert.NotNil(t, tokenJWT)
 
-			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local/headers", testID), tokenOAUTH.AccessToken))
-			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local/image", testID), tokenJWT))
+			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/headers", testID), tokenOAUTH.AccessToken))
+			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/image", testID), tokenJWT))
 
 			deleteResources(k8sClient, commonResources...)
 
