@@ -19,14 +19,14 @@ type ScenariosItems struct {
 	Enum []string `json:"enum"`
 }
 
-func ToScenarioSchema(response ScenarioLabelDefinitionResponse) (ScenariosSchema, error) {
+func ToScenarioSchema(scenarioLabelDefinition ScenarioLabelDefinition) (ScenariosSchema, error) {
 	var scenarioSchema ScenariosSchema
 
-	if response.Result.Schema == nil {
+	if scenarioLabelDefinition.Schema == nil {
 		return ScenariosSchema{}, nil
 	}
 
-	err := json.Unmarshal([]byte(*response.Result.Schema), &scenarioSchema)
+	err := json.Unmarshal([]byte(*scenarioLabelDefinition.Schema), &scenarioSchema)
 	if err != nil {
 		return ScenariosSchema{}, errors.Wrap(err, "Failed to unmarshall scenario schema")
 	}
