@@ -2,12 +2,12 @@ package applications
 
 import "github.com/kyma-incubator/compass/components/director/pkg/graphql"
 
-type ApplicationInput graphql.ApplicationInput
+type ApplicationCreateInput graphql.ApplicationCreateInput
 
-func NewApplication(name, description string, labels map[string]interface{}) *ApplicationInput {
+func NewApplication(name, description string, labels map[string]interface{}) *ApplicationCreateInput {
 	appLabels := graphql.Labels(labels)
 
-	app := ApplicationInput(graphql.ApplicationInput{
+	app := ApplicationCreateInput(graphql.ApplicationCreateInput{
 		Name:        name,
 		Description: &description,
 		Labels:      &appLabels,
@@ -19,11 +19,11 @@ func NewApplication(name, description string, labels map[string]interface{}) *Ap
 	return &app
 }
 
-func (input *ApplicationInput) ToCompassInput() graphql.ApplicationInput {
-	return graphql.ApplicationInput(*input)
+func (input *ApplicationCreateInput) ToCompassInput() graphql.ApplicationCreateInput {
+	return graphql.ApplicationCreateInput(*input)
 }
 
-func (input *ApplicationInput) WithAPIs(apis []*APIDefinitionInput) *ApplicationInput {
+func (input *ApplicationCreateInput) WithAPIs(apis []*APIDefinitionInput) *ApplicationCreateInput {
 	compassAPIs := make([]*graphql.APIDefinitionInput, len(apis))
 	for i, api := range apis {
 		compassAPIs[i] = api.ToCompassInput()
@@ -34,7 +34,7 @@ func (input *ApplicationInput) WithAPIs(apis []*APIDefinitionInput) *Application
 	return input
 }
 
-func (input *ApplicationInput) WithEventAPIs(apis []*EventAPIDefinitionInput) *ApplicationInput {
+func (input *ApplicationCreateInput) WithEventAPIs(apis []*EventAPIDefinitionInput) *ApplicationCreateInput {
 	compassAPIs := make([]*graphql.EventAPIDefinitionInput, len(apis))
 	for i, api := range apis {
 		compassAPIs[i] = api.ToCompassInput()
@@ -43,4 +43,19 @@ func (input *ApplicationInput) WithEventAPIs(apis []*EventAPIDefinitionInput) *A
 	input.EventAPIs = compassAPIs
 
 	return input
+}
+
+type ApplicationUpdateInput graphql.ApplicationUpdateInput
+
+func NewApplicationUpdateInput(name, description string) *ApplicationUpdateInput {
+	appUpdateInput := ApplicationUpdateInput(graphql.ApplicationUpdateInput{
+		Name:        name,
+		Description: &description,
+	})
+
+	return &appUpdateInput
+}
+
+func (input *ApplicationUpdateInput) ToCompassInput() graphql.ApplicationUpdateInput {
+	return graphql.ApplicationUpdateInput(*input)
 }

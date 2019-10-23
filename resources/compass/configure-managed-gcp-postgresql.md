@@ -10,9 +10,9 @@ To set up the database, create the following:
   - Cloud SQL Editor
   - Cloud SQL Admin
 
-## Install the Compass with managed GCP PostgreSQL database
+## Install Compass with managed GCP PostgreSQL database
 
-To install the Compass with GCP managed Postgres database, set the `database.embedded.enabled` value to `false` inside the `./chart/compass/values.yaml` file, and fill in these values:
+To install Compass with GCP managed Postgres database, set the **database.embedded.enabled** value to `false` inside the `./chart/compass/values.yaml` file, and fill these values:
 
 | Parameter | Description | Values | Default |
 | --- | --- | --- | --- |
