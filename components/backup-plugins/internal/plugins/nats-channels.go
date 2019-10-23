@@ -1,6 +1,8 @@
 package plugins
 
 import (
+	"strings"
+
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/meta"
 
@@ -15,7 +17,7 @@ import (
 )
 
 const (
-	channelNameSuffix = "-kn-channel"
+	serviceNameSuffix = "-kn-channel"
 	channelKind       = "NatssChannel"
 )
 
@@ -50,17 +52,17 @@ func (p *SetNatsChannelOwnerReference) Execute(input *velero.RestoreItemActionEx
 		metadata.GetName(), metadata.GetNamespace())
 
 	evClient, err := evclientset.NewForConfig(config)
-	evClient.MessagingV1alpha1()
-	var messagingChannel messagingv1alpha1Client.MessagingV1alpha1Interface
-	messagingChannel = evClient.MessagingV1alpha1()
-	channelName := metadata.GetName() + channelNameSuffix
+	var messagingChannelInterface messagingv1alpha1Client.MessagingV1alpha1Interface
+	messagingChannelInterface = evClient.MessagingV1alpha1()
+	channelName := strings.TrimRight(metadata.GetName(), serviceNameSuffix)
 	p.Log.Infof("NATS Channel Owner: %s", channelName)
-	natsChannel, err := messagingChannel.Channels(metadata.GetNamespace()).Get(channelName, metav1.GetOptions{})
+	natsChannel, err := messagingChannelInterface.Channels(metadata.GetNamespace()).Get(channelName, metav1.GetOptions{})
 	switch {
 	case err == nil:
+		// Exit since the NATS channel has been found
 	case apierrors.IsNotFound(err):
 		// there's no NATS Channel with such name
-		p.Log.Errorf("Couldn't get NATS Channel %s: %v", metadata.GetName(), err)
+		p.Log.Errorf("Couldn't get NATS Channel %s for service: %s\n %v", channelName, metadata.GetName(), err)
 		return velero.NewRestoreItemActionExecuteOutput(input.Item), nil
 	default:
 		return velero.NewRestoreItemActionExecuteOutput(input.Item), err
