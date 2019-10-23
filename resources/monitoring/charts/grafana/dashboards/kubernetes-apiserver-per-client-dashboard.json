@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 45,
-  "iteration": 1571746159460,
+  "id": 36,
+  "iteration": 1571809361852,
   "links": [],
   "panels": [
     {
@@ -98,11 +98,11 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "reqps",
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": 0,
           "show": true
         },
         {
@@ -185,11 +185,11 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "reqps",
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": 0,
           "show": true
         },
         {
@@ -272,11 +272,11 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "reqps",
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": 0,
           "show": true
         },
         {
@@ -357,10 +357,10 @@
       "yaxes": [
         {
           "format": "short",
-          "label": null,
+          "label": "errors/s",
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": 0,
           "show": true
         },
         {
@@ -386,8 +386,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "apicontroller.test/v0.0.0 (linux/amd64) kubernetes/$Format",
-          "value": "apicontroller.test/v0.0.0 (linux/amd64) kubernetes/$Format"
+          "text": "Browser",
+          "value": "Browser"
         },
         "datasource": "Prometheus",
         "definition": "label_values(client)",

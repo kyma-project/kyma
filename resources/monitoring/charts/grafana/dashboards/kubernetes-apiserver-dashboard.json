@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 44,
+  "id": 35,
   "links": [],
   "panels": [
     {
@@ -431,7 +431,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "s",
           "logBase": 1,
           "show": true
         },
@@ -532,7 +532,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "reqps",
           "logBase": 1,
           "show": true
         },
@@ -615,7 +615,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "reqps",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -704,7 +704,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "reqps",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -794,7 +794,7 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "reqps",
           "label": null,
           "logBase": 1,
           "max": null,
