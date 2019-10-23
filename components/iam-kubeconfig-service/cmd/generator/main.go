@@ -45,7 +45,7 @@ func main() {
 
 	clusterCAProvider, err := setupReloadableClusterCAProvider(fileWatcherCtx, cfg.clusterCAFilePath)
 	if err != nil {
-		log.Fatalf("Cannot create reloadable CA file provider, %v", err)
+		log.Fatalf("Cannot create reloadable cluster CA file provider, %v", err)
 	}
 
 	kubeConfig := kube_config.NewKubeConfig(cfg.clusterName, cfg.apiserverURL, clusterCAProvider.GetString, cfg.namespace)

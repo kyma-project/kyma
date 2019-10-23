@@ -31,17 +31,19 @@ users:
     token: {{.Token}}
 `
 
-type CAProvider func() string
+type CAValueProvider func() string
 
 type KubeConfig struct {
 	clusterName string
 	url         string
-	caProvider  CAProvider
+	caProvider  CAValueProvider
 	namespace   string
 	tmpl        *template.Template
 }
 
-func NewKubeConfig(clusterName, url string, caProvider CAProvider, namespace string) *KubeConfig {
+//NewKubeConfig return new instance of KubeConfig
+//CAValueProvider is used to return current cluster CA data, it can change after cluster certificates renewal.
+func NewKubeConfig(clusterName, url string, caProvider CAValueProvider, namespace string) *KubeConfig {
 
 	tmpl := template.Must(template.New("kubeConfig").Parse(content))
 
