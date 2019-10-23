@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/iam-kubeconfig-service/internal/authn"
+	log "github.com/sirupsen/logrus"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 )
 
@@ -45,7 +45,7 @@ func NewReloadableTLSCertProvider(constructor TLSCertConstructor) (*ReloadableTL
 func (ckpr *ReloadableTLSCertProvider) Reload() {
 	err := ckpr.reload()
 	if err != nil {
-		glog.Errorf("Failed to reload certificate: %v", err)
+		log.Errorf("Failed to reload certificate: %v", err)
 	}
 }
 
@@ -124,7 +124,7 @@ func NewReloadableAuthReq(constructor AuthReqConstructor) (*ReloadableAuthReq, e
 func (rar *ReloadableAuthReq) Reload() {
 	err := rar.reload()
 	if err != nil {
-		glog.Errorf("Failed to reload OIDC Authenticator instance: %v", err)
+		log.Errorf("Failed to reload OIDC Authenticator instance: %v", err)
 	}
 }
 
@@ -138,7 +138,7 @@ func (rar *ReloadableAuthReq) reload() error {
 
 	oldAuthReq := rar.holder.Get()
 	if oldAuthReq != nil {
-		glog.Info("Cancelling previous OIDC Authenticator instance")
+		log.Info("Cancelling previous OIDC Authenticator instance")
 		oldAuthReq.Cancel()
 	}
 

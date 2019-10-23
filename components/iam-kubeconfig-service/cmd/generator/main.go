@@ -7,10 +7,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 
-	"github.com/golang/glog"
 	"github.com/gorilla/mux"
 	r "github.com/kyma-project/kyma/components/iam-kubeconfig-service/cmd/generator/runtime"
 	"github.com/kyma-project/kyma/components/iam-kubeconfig-service/internal/authn"
@@ -32,7 +33,7 @@ func main() {
 
 	cfg := readAppConfig()
 
-	log.Infof("Starting IAM kubeconfig service on port: %d...", cfg.port)
+	log.Info("Starting IAM kubeconfig service")
 
 	fileWatcherCtx, fileWatcherCtxCancel := context.WithCancel(context.Background())
 
@@ -50,9 +51,22 @@ func main() {
 	router.Use(authn.AuthMiddleware(oidcAuthenticator))
 	router.Methods("GET").Path("/kube-config").HandlerFunc(kubeConfigEndpoints.GetKubeConfig)
 
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(cfg.port), router))
+	go func() {
+		err := http.ListenAndServe(":"+strconv.Itoa(cfg.port), router)
+		log.Errorf("Error serving HTTP: %v", err)
+	}()
 
-	fileWatcherCtxCancel()
+	log.Infof("IAM kubeconfig service started on port: %d...", cfg.port)
+
+	term := make(chan os.Signal)
+	signal.Notify(term, os.Interrupt, syscall.SIGTERM)
+
+	select {
+	case <-term:
+		log.Info("Received SIGTERM, exiting gracefully...")
+		fileWatcherCtxCancel()
+	}
+
 	//Allow for file watchers to close gracefully
 	time.Sleep(1 * time.Second)
 }
@@ -182,7 +196,7 @@ func setupReloadableOIDCAuthntr(fileWatcherCtx context.Context, cfg *authn.OIDCC
 
 	//Create ReloadableAuthReq
 	authReqConstructorFunc := func() (authn.CancellableAuthRequest, error) {
-		glog.Infof("creating new instance of authenticator.Request...")
+		log.Infof("creating new instance of authenticator.Request...")
 		return authn.NewOIDCAuthenticator(cfg)
 		//authn.NewOIDCAuthenticator(&cfg.oidc)
 	}

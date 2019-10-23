@@ -7,7 +7,7 @@ import (
 
 	"github.com/howeyc/fsnotify"
 
-	"github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
 )
 
 // Watcher is designed to provide notifications about changes to files mounted inside kubernetes Pod, like Secrets or ConfigMaps
@@ -42,7 +42,7 @@ func NewWatcher(name string, filePaths []string, evBatchDelaySeconds uint8, noti
 
 //Run implements Watcher interface
 func (w *watcher) Run(ctx context.Context) {
-	glog.Infof("Watcher [%s] starts watching for files: %v", w.name, w.filePaths)
+	log.Infof("Watcher [%s] starts watching for files: %v", w.name, w.filePaths)
 
 	watchFileEventsFunc := func(fEventChan <-chan *fsnotify.FileEvent) {
 		w.watchFileEvents(ctx, fEventChan)
@@ -56,7 +56,7 @@ func (w *watcher) Run(ctx context.Context) {
 	}()
 
 	<-ctx.Done()
-	glog.Infof("Watcher [%s] has successfully terminated", w.name)
+	log.Infof("Watcher [%s] has successfully terminated", w.name)
 }
 
 // watchFileEvents watches for changes on a channel and notifies via notifyFn().
@@ -73,7 +73,7 @@ func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan *fsnotify.File
 	for {
 		select {
 		case ev := <-wch:
-			glog.Infof("Watcher[%s]: watchFileEvents: %s", w.name, ev.String())
+			log.Infof("Watcher[%s]: watchFileEvents: %s", w.name, ev.String())
 			if timer != nil {
 				continue
 			}
@@ -86,10 +86,10 @@ func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan *fsnotify.File
 			timer.Stop()
 			timer = nil
 
-			glog.Infof("Watcher[%s]: watchFileEvents: notifying", w.name)
+			log.Infof("Watcher[%s]: watchFileEvents: notifying", w.name)
 			w.notifyFunc()
 		case <-ctx.Done():
-			glog.Infof("Watcher[%s]: watchFileEvents has successfully terminated", w.name)
+			log.Infof("Watcher[%s]: watchFileEvents has successfully terminated", w.name)
 			return
 		}
 	}
@@ -101,21 +101,21 @@ func (w *watcher) watchFileEvents(ctx context.Context, wch <-chan *fsnotify.File
 func (w *watcher) watchForDirs(dirs []string, watchFunc func(fEventChan <-chan *fsnotify.FileEvent)) {
 	fw, err := fsnotify.NewWatcher()
 	if err != nil {
-		glog.Warningf("Watcher[%s]: failed to create a watcher for certificate files: %v", w.name, err)
+		log.Warningf("Watcher[%s]: failed to create a watcher for certificate files: %v", w.name, err)
 		return
 	}
 	defer func() {
 		if err := fw.Close(); err != nil {
-			glog.Warningf("Watcher[%s]: closing watcher encounters an error %v", w.name, err)
+			log.Warningf("Watcher[%s]: closing watcher encounters an error %v", w.name, err)
 		}
 	}()
 
 	for _, dir := range dirs {
 		if err := fw.Watch(dir); err != nil {
-			glog.Warningf("Watcher[%s]: watching %s encountered an error %v", w.name, dir, err)
+			log.Warningf("Watcher[%s]: watching %s encountered an error %v", w.name, dir, err)
 			return
 		}
-		glog.Infof("Watcher[%s]: watching %s for changes", w.name, dir)
+		log.Infof("Watcher[%s]: watching %s for changes", w.name, dir)
 	}
 
 	watchFunc(fw.Event)
