@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"flag"
 	"fmt"
@@ -59,18 +60,20 @@ func TestApiGatewayIntegration(t *testing.T) {
 	oauthClientID := generateRandomString(OauthClientIDLength)
 	oauthClientSecret := generateRandomString(OauthClientSecretLength)
 
-	_ = clientcredentials.Config{
+	oauth2Cfg := clientcredentials.Config{
 		ClientID:     oauthClientID,
 		ClientSecret: oauthClientSecret,
 		TokenURL:     fmt.Sprintf("https://%s/oauth2/token", hydraAddr),
 		Scopes:       []string{"read"},
 	}
 	httpClient, err := ingressgateway.FromEnv().Client()
-	tester := api.NewTester(httpClient, []retry.Option{
+
+	retryOpts := []retry.Option{
 		retry.Delay(time.Second * 5),
 		retry.Attempts(12),
 		retry.DelayType(retry.FixedDelay),
-	})
+	}
+	tester := api.NewTester(httpClient, retryOpts)
 
 	k8sClient := getDynamicClient()
 
@@ -117,6 +120,37 @@ func TestApiGatewayIntegration(t *testing.T) {
 			//}
 
 			assert.NoError(t, tester.TestUnsecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local", testID)))
+
+			deleteResources(k8sClient, commonResources...)
+
+			fmt.Println("test finished")
+		})
+
+		t.Run("expose service a single access strategy on whole service", func(t *testing.T) {
+			t.Parallel()
+			testID := generateRandomString(testIDLength)
+
+			// create common resources from files
+			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			if err != nil {
+				panic(err)
+			}
+			createResources(k8sClient, commonResources...)
+
+			// create api-rule from file
+			oauthStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			if err != nil {
+				panic(err)
+			}
+			createResources(k8sClient, oauthStrategyApiruleResource...)
+
+			//for _, commonResource := range commonResources {
+			//	resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
+			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
+			//}
+			token, err := oauth2Cfg.Token(context.Background())
+			assert.Nil(t, err)
+			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local", testID), token.AccessToken))
 
 			deleteResources(k8sClient, commonResources...)
 
