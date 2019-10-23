@@ -35,8 +35,8 @@ func (car *cancelableAuthRequest) Cancel() {
 	}
 }
 
-// NewOIDCAuthenticator returns OIDC authenticator.
-// It also returns an AuthenticatorCancelFunc that allows to cancel the authenticator once we're done with it.
+// NewOIDCAuthenticator returns OIDC authenticator wrapped as a CancelableAuthRequest instance.
+// CancelableAuthRequest allows users to cancel the authenticator once it's not used anymore.
 func NewOIDCAuthenticator(config *OIDCConfig) (CancelableAuthRequest, error) {
 	tokenAuthenticator, err := oidc.New(oidc.Options{
 		IssuerURL:            config.IssuerURL,
