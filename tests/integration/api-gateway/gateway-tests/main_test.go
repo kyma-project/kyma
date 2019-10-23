@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
+	"log"
 	"math/rand"
 	"path/filepath"
 	"strings"
@@ -18,10 +19,10 @@ import (
 
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/api"
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/ingressgateway"
-
-	"golang.org/x/oauth2/clientcredentials"
+	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/jwt"
 
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/manifestprocessor"
+	"golang.org/x/oauth2/clientcredentials"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -47,11 +48,11 @@ const jwtAndOauthStrategyApiruleFile = "jwt-oauth-strategy.yaml"
 const resourceSeparator = "---"
 
 type Config struct {
-	HydraAddr  string `envconfig:"HYDRA_ADDRESS"`
-	User       string `envconfig:"USER"`
-	Pwd        string `envconfig:"PASSWORD"`
-	ReqTimeout uint   `envconfig:"REQUEST_TIMEOUT"`
-	ReqDelay   uint   `envconfig:"REQUEST_DELAY"`
+	HydraAddr  string `envconfig:"TEST_HYDRA_ADDRESS"`
+	User       string `envconfig:"TEST_USER_EMAIL"`
+	Pwd        string `envconfig:"TEST_USER_PASSWORD"`
+	ReqTimeout uint   `envconfig:"TEST_REQUEST_TIMEOUT,default=100"`
+	ReqDelay   uint   `envconfig:"TEST_REQUEST_DELAY,default=5"`
 }
 
 func TestApiGatewayIntegration(t *testing.T) {
@@ -71,6 +72,12 @@ func TestApiGatewayIntegration(t *testing.T) {
 		TokenURL:     fmt.Sprintf("https://%s/oauth2/token", conf.HydraAddr),
 		Scopes:       []string{"read"},
 	}
+
+	jwtConfig, err := jwt.LoadConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	httpClient, err := ingressgateway.FromEnv().Client()
 
 	tester := api.NewTester(httpClient, []retry.Option{
@@ -137,7 +144,39 @@ func TestApiGatewayIntegration(t *testing.T) {
 			fmt.Println("test finished")
 		})
 
-		t.Run("expose service a single access strategy on whole service", func(t *testing.T) {
+		t.Run("expose service with a single access strategy on whole service", func(t *testing.T) {
+			t.Parallel()
+			testID := generateRandomString(testIDLength)
+
+			// create common resources from files
+			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			if err != nil {
+				panic(err)
+			}
+			createResources(k8sClient, commonResources...)
+
+			// create api-rule from file
+			resources, err := manifestprocessor.ParseFromFileWithTemplate(jwtAndOauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			if err != nil {
+				panic(err)
+			}
+			createResources(k8sClient, resources...)
+
+			//for _, commonResource := range commonResources {
+			//	resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
+			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
+			//}
+			token, err := oauth2Cfg.Token(context.Background())
+			assert.Nil(t, err)
+			assert.NotNil(t, token)
+			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local", testID), token.AccessToken))
+
+			deleteResources(k8sClient, commonResources...)
+
+			fmt.Println("test finished")
+		})
+
+		t.Run("expose service with specific strategy for specific path", func(t *testing.T) {
 			t.Parallel()
 			testID := generateRandomString(testIDLength)
 
@@ -159,15 +198,25 @@ func TestApiGatewayIntegration(t *testing.T) {
 			//	resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
 			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
 			//}
-			token, err := oauth2Cfg.Token(context.Background())
+			tokenOAUTH, err := oauth2Cfg.Token(context.Background())
 			assert.Nil(t, err)
-			assert.NotNil(t, token)
-			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local", testID), token.AccessToken))
+			assert.NotNil(t, tokenOAUTH)
+
+			tokenJWT, err := jwt.Authenticate(jwtConfig.IdProviderConfig)
+			if err != nil {
+				log.Fatal(err)
+			}
+			assert.Nil(t, err)
+			assert.NotNil(t, tokenJWT)
+
+			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local/headers", testID), tokenOAUTH.AccessToken))
+			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local/image", testID), tokenJWT))
 
 			deleteResources(k8sClient, commonResources...)
 
 			fmt.Println("test finished")
 		})
+
 	})
 }
 

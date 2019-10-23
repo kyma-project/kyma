@@ -28,21 +28,21 @@ spec:
         - name: tests
           image: {{ .Values.tests.image.registry }}/api-gateway-integration-tests:{{ .Values.tests.image.version }}
           env:
-          - name: HYDRA_ADDRESS
+          - name: TEST_HYDRA_ADDRESS
             value: "oauth2.{{ .Values.global.ingress.domainName }}"
-          - name: USER
+          - name: TEST_USER_EMAIL
             valueFrom:
               secretKeyRef:
                 name: {{ .Values.tests.env.testUser }}
                 key: email
-          - name: PASSWORD
+          - name: TEST_USER_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: {{ .Values.tests.env.testUser }}
                 key: password
-          - name: REQUEST_TIMEOUT
+          - name: TEST_REQUEST_TIMEOUT
             value: {{ .Values.tests.env.timeout }}
-          - name: REQUEST_DELAY
+          - name: TEST_REQUEST_DELAY
             value: {{ .Values.tests.env.delay }}
       restartPolicy: Never
 {{- end }}
