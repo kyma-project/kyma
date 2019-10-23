@@ -6,11 +6,17 @@ import (
 	cloudevents "github.com/cloudevents/sdk-go"
 	cehttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
+	"regexp"
 	"strings"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	busv2 "github.com/kyma-project/kyma/components/event-service/internal/events/bus/v2"
 	"net/http"
+
+)
+
+var (
+	isValidEventID          = regexp.MustCompile(shared.AllowedEventIDChars).MatchString
 )
 
 // DecodeMessage tries to convert a http.Message to a cloudevent and validates it
@@ -89,6 +95,7 @@ func errorToDetails(err error) []api.ErrorDetail {
 
 // Further Kyma specific validations in addition to CloudEvents specification
 func Validate(event *cloudevents.Event) []api.ErrorDetail {
+
 	var errors []api.ErrorDetail
 	eventBytes, err := event.DataBytes()
 	if err != nil {
@@ -113,6 +120,15 @@ func Validate(event *cloudevents.Event) []api.ErrorDetail {
 			Type:    shared.ErrorTypeMissingField,
 			Message: shared.ErrorMessageMissingField,
 		})
+	}
+
+	if !isValidEventID(event.ID()) {
+		errors = append(errors, api.ErrorDetail{
+			Field:   shared.FieldEventIDV2,
+			Type:    shared.ErrorTypeInvalidField,
+			Message: shared.ErrorMessageInvalidField,
+		})
+
 	}
 
 	return errors
