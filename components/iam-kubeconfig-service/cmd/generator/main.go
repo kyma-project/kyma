@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	r "github.com/kyma-project/kyma/components/iam-kubeconfig-service/cmd/generator/runtime"
+	r "github.com/kyma-project/kyma/components/iam-kubeconfig-service/cmd/generator/reload"
 	"github.com/kyma-project/kyma/components/iam-kubeconfig-service/internal/authn"
 	"github.com/kyma-project/kyma/components/iam-kubeconfig-service/pkg/kube_config"
 	log "github.com/sirupsen/logrus"
