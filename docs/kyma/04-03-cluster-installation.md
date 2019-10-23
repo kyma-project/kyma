@@ -37,17 +37,6 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
   </details>
 
   <details>
-  <summary label="IBM Cloud">
-  IBM Cloud
-  </summary>
-
-- [IBM Cloud](https://cloud.ibm.com/login) account
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6 or higher
-- [IBM Cloud CLI](https://cloud.ibm.com/docs/cli?topic=cloud-cli-getting-started)
-
-  </details>
-
-  <details>
   <summary label="Gardener">
   Gardener
   </summary>
@@ -105,34 +94,6 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
     ```bash
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
-    ```
-  
-  </details>
-
-  <details>
-  <summary label="IBM Cloud">
-  IBM Cloud
-  </summary>
-  
-1. Select a name for your cluster. 
-
-    ```bash
-    todo
-    ```
-
-2. Create a cluster in the defined zone. Run:
-
-    ```bash
-    ```
-
-3. Configure kubectl to use your new cluster. Run:
-
-    ```bash
-    ```
-
-4. Add your account as the cluster administrator:
-
-    ```bash
     ```
   
   </details>

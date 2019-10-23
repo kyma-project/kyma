@@ -35,6 +35,18 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
   </details>
   <details>
+  <summary label="IBM Cloud">
+  IBM Cloud
+  </summary>
+
+- [IBM Cloud](https://cloud.ibm.com/login) account
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.14.6 or higher
+- [IBM Cloud CLI](https://cloud.ibm.com/docs/cli?topic=cloud-cli-getting-started)
+
+>**NOTE:** Running Kyma on IBM Cloud requires three [`b3c.4x16` machines](https://cloud.ibm.com/docs/containers?topic=containers-planning_worker_nodes). You create these machines when you complete the **Prepare the cluster** step.
+
+  </details>
+  <details>
   <summary label="Gardener">
   Gardener
   </summary>
@@ -150,6 +162,41 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 >**CAUTION:** If you define your own Kubernetes jobs on the AKS cluster, follow [this](/components/service-mesh/#troubleshooting-kubernetes-jobs-fail-on-aks) troubleshooting guide to avoid jobs running endlessly on AKS deployments of Kyma.
 
+  </details>
+  <details>
+  <summary label="IBM Cloud">
+  IBM Cloud
+  </summary>
+  
+1. Select a name for your cluster. Export the cluster name and the zone of type ```dc``` you want to deploy to as environment variables. Run:
+
+    ```bash
+    export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
+    export CLUSTER_ZONE={ZONE_TO_DEPLOY_TO}
+    ```
+
+    >**TIP:** Run: ```ibmcloud ks supported-locations``` to list available zones. 
+
+2. Create a cluster in the defined zone. Run:
+
+    ```bash
+    ibmcloud ks cluster create classic --zone ${CLUSTER_ZONE} --machine-type b3c.4x16 --workers 3 --name ${CLUSTER_NAME} --public-service-endpoint
+    ```
+
+3. Configure kubectl to use your new cluster. Run:
+
+    ```bash
+    ibmcloud ks cluster config --cluster ${CLUSTERN_NAME}
+    ```
+
+    >**TIP:** Copy and paste the export command that is displayed in your terminal to set the KUBECONFIG environment variable.
+
+4. Add your account as the cluster administrator:
+
+    ```bash
+    kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$[Your IBM Cloud account email]
+    ```
+  
   </details>
   <details>
   <summary label="Gardener">
