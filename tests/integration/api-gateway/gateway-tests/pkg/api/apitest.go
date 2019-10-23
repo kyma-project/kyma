@@ -50,7 +50,6 @@ func (h *Tester) withRetries(httpCall func() (*http.Response, error), shouldRetr
 
 	if err := retry.Do(func() error {
 
-		var callErr error
 		response, callErr := httpCall()
 		if callErr != nil {
 			return callErr

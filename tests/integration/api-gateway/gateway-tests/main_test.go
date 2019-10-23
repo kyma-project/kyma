@@ -65,6 +65,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 		TokenURL:     fmt.Sprintf("https://%s/oauth2/token", hydraAddr),
 		Scopes:       []string{"read"},
 	}
+
 	httpClient, err := ingressgateway.FromEnv().Client()
 	tester := api.NewTester(httpClient, []retry.Option{
 		retry.Delay(time.Second * 5),
