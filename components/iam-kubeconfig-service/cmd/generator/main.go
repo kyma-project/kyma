@@ -198,7 +198,7 @@ func setupReloadableClusterCAProvider(fileWatcherCtx context.Context, caFilePath
 	filesToWatch := []string{caFilePath}
 
 	caDataConstructorFunc := func() (string, error) {
-		log.Info("Reading Certificate Authority of the Kubernetes cluster from file: %s", caFilePath)
+		log.Infof("Reading Certificate Authority of the Kubernetes cluster from file: %s", caFilePath)
 		caFileData, err := readCAFromFile(caFilePath)
 		if err != nil {
 			log.Errorf("Error while reading Certificate Authority of the Kubernetes cluster. Root cause: %v", err)
