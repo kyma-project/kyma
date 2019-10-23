@@ -14,6 +14,7 @@ import (
 	"github.com/avast/retry-go"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/vrischmann/envconfig"
 
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/api"
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/ingressgateway"
@@ -44,20 +45,21 @@ const oauthStrategyApiruleFile = "oauth-strategy.yaml"
 const jwtAndOauthStrategyApiruleFile = "jwt-oauth-strategy.yaml"
 const resourceSeparator = "---"
 
+type Config struct {
+	HydraAddr  string `envconfig:"HYDRA_ADDRESS,default=oauth2.kyma.local"`
+	User       string `envconfig:"USER"`
+	Pwd        string `envconfig:"PASSWORD"`
+	ReqTimeout uint   `envconfig:"REQUEST_TIMEOUT"`
+	ReqDelay   uint   `envconfig:"REQUEST_DELAY"`
+}
+
 func TestApiGatewayIntegration(t *testing.T) {
-	var hydraAddr string
-	var user string
-	var pwd string
-	var reqTimeout uint
-	var reqDelay uint
 
-	flag.StringVar(&hydraAddr, "hydra-address", "", "Hydra service address")
-	flag.StringVar(&user, "user", "", "User login to fetch JWT token")
-	flag.StringVar(&pwd, "password", "", "User password to fetch JWT token")
-	flag.UintVar(&reqTimeout, "request-timeout", 60, "Time (in seconds) after which requests to API fail")
-	flag.UintVar(&reqDelay, "request-delay", 5, "Delay (in seconds) between requests to API")
-
-	flag.Parse()
+	var conf Config
+	err := envconfig.Init(&conf)
+	if err != nil {
+		panic(err)
+	}
 
 	oauthClientID := generateRandomString(OauthClientIDLength)
 	oauthClientSecret := generateRandomString(OauthClientSecretLength)
@@ -65,15 +67,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 	oauth2Cfg := clientcredentials.Config{
 		ClientID:     oauthClientID,
 		ClientSecret: oauthClientSecret,
-		TokenURL:     fmt.Sprintf("https://%s/oauth2/token", hydraAddr),
+		TokenURL:     fmt.Sprintf("https://%s/oauth2/token", conf.HydraAddr),
 		Scopes:       []string{"read"},
 	}
-
 	httpClient, err := ingressgateway.FromEnv().Client()
 
 	tester := api.NewTester(httpClient, []retry.Option{
-		retry.Delay(time.Duration(reqDelay) * time.Second),
-		retry.Attempts(reqTimeout / reqDelay),
+		retry.Delay(time.Duration(conf.ReqDelay) * time.Second),
+		retry.Attempts(conf.ReqTimeout / conf.ReqDelay),
 		retry.DelayType(retry.FixedDelay),
 	})
 
