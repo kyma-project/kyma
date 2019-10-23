@@ -1,17 +1,22 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"flag"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
+	"github.com/golang/glog"
 	"github.com/gorilla/mux"
+	r "github.com/kyma-project/kyma/components/iam-kubeconfig-service/cmd/generator/runtime"
 	"github.com/kyma-project/kyma/components/iam-kubeconfig-service/internal/authn"
 	"github.com/kyma-project/kyma/components/iam-kubeconfig-service/pkg/kube_config"
 	log "github.com/sirupsen/logrus"
+	"k8s.io/apiserver/pkg/authentication/authenticator"
 )
 
 const (
@@ -29,7 +34,10 @@ func main() {
 
 	log.Infof("Starting IAM kubeconfig service on port: %d...", cfg.port)
 
-	oidcAuthenticator, err := authn.NewOIDCAuthenticator(&cfg.oidc)
+	fileWatcherCtx, fileWatcherCtxCancel := context.WithCancel(context.Background())
+
+	oidcAuthenticator, err := setupReloadableOIDCAuthntr(fileWatcherCtx, &cfg.oidc)
+
 	if err != nil {
 		log.Fatalf("Cannot create OIDC Authenticator, %v", err)
 	}
@@ -43,6 +51,10 @@ func main() {
 	router.Methods("GET").Path("/kube-config").HandlerFunc(kubeConfigEndpoints.GetKubeConfig)
 
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(cfg.port), router))
+
+	fileWatcherCtxCancel()
+	//Allow for file watchers to close gracefully
+	time.Sleep(1 * time.Second)
 }
 
 func readAppConfig() *appConfig {
@@ -162,4 +174,27 @@ func (vals *multiValFlag) String() string {
 func (vals *multiValFlag) Set(value string) error {
 	*vals = append(*vals, value)
 	return nil
+}
+
+func setupReloadableOIDCAuthntr(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) (authenticator.Request, error) {
+	const eventBatchDelaySeconds = 10
+	filesToWatch := []string{cfg.CAFile}
+
+	//Create ReloadableAuthReq
+	authReqConstructorFunc := func() (authn.CancellableAuthRequest, error) {
+		glog.Infof("creating new instance of authenticator.Request...")
+		return authn.NewOIDCAuthenticator(cfg)
+		//authn.NewOIDCAuthenticator(&cfg.oidc)
+	}
+
+	athntctr, err := r.NewReloadableAuthReq(authReqConstructorFunc)
+	if err != nil {
+		return nil, err
+	}
+
+	//Setup file watcher
+	oidcCAFileWatcher := r.NewWatcher("oidc-ca-dex-tls-cert", filesToWatch, eventBatchDelaySeconds, athntctr.Reload)
+	go oidcCAFileWatcher.Run(fileWatcherCtx)
+
+	return athntctr, nil
 }

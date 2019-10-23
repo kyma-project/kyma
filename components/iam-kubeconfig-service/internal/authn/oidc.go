@@ -18,8 +18,26 @@ type OIDCConfig struct {
 	SupportedSigningAlgs []string
 }
 
-// NewOIDCAuthenticator returns OIDC authenticator
-func NewOIDCAuthenticator(config *OIDCConfig) (authenticator.Request, error) {
+//Extends authenticator.Request interface with Cancel() function used to stop underlying authenticator instance once it's not needed anymore
+type CancellableAuthRequest interface {
+	authenticator.Request
+	Cancel() //Cancels (stops) the underlying instance
+}
+
+type cancellableAuthRequest struct {
+	*bearertoken.Authenticator
+	cancelFunc func()
+}
+
+func (car *cancellableAuthRequest) Cancel() {
+	if car.cancelFunc != nil {
+		car.cancelFunc()
+	}
+}
+
+// NewOIDCAuthenticator returns OIDC authenticator wrapped as a CancellableAuthRequest instance.
+// CancellableAuthRequest allows users to cancel the authenticator once it's not used anymore.
+func NewOIDCAuthenticator(config *OIDCConfig) (CancellableAuthRequest, error) {
 	tokenAuthenticator, err := oidc.New(oidc.Options{
 		IssuerURL:            config.IssuerURL,
 		ClientID:             config.ClientID,
@@ -34,5 +52,10 @@ func NewOIDCAuthenticator(config *OIDCConfig) (authenticator.Request, error) {
 		return nil, err
 	}
 
-	return bearertoken.New(tokenAuthenticator), nil
+	athntctr := bearertoken.New(tokenAuthenticator)
+
+	return &cancellableAuthRequest{
+		Authenticator: athntctr,
+		cancelFunc:    tokenAuthenticator.Close,
+	}, nil
 }
