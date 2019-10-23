@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
+	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/ingressgateway"
 	"log"
 	"math/rand"
 	"path/filepath"
@@ -18,7 +19,6 @@ import (
 	"github.com/vrischmann/envconfig"
 
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/api"
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/ingressgateway"
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/jwt"
 
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/manifestprocessor"
@@ -64,6 +64,12 @@ func TestApiGatewayIntegration(t *testing.T) {
 		panic(err)
 	}
 
+	httpClient, err := ingressgateway.FromEnv().Client()
+
+	if err != nil {
+		t.Fatalf("Unnable to initialize ingress gateway client: %v", err)
+	}
+
 	oauthClientID := generateRandomString(OauthClientIDLength)
 	oauthClientSecret := generateRandomString(OauthClientSecretLength)
 
@@ -74,12 +80,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 		Scopes:       []string{"read"},
 	}
 
+	oauthClient := oauth2Cfg.Client(context.Background())
+	tr := httpClient.Transport
+	oauthClient.Transport = tr
+
 	jwtConfig, err := jwt.LoadConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	httpClient, err := ingressgateway.FromEnv().Client()
 
 	tester := api.NewTester(httpClient, []retry.Option{
 		retry.Delay(time.Duration(conf.ReqDelay) * time.Second),
