@@ -256,7 +256,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Request rate per verb by client",
+      "title": "Request rate per verb",
       "tooltip": {
         "shared": true,
         "sort": 0,
