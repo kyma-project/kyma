@@ -110,6 +110,13 @@ func sendAndReceiveError(t *testing.T, s *string) (result *api.Error, err error)
 	if err != nil {
 		t.Fatal(err)
 	}
+	// send CloudEvent in structured encoding
+	req.Header.Add("Content-Type", "application/cloudevents+json")
+
+	// init bus config
+	sourceID, targetURLV1, targetURLV2 := "some dummy source", "http://kyma-domain/v1/events", "http://kyma-domain/v2/events"
+	bus.Init(sourceID, targetURLV1, targetURLV2)
+
 	recorder := httptest.NewRecorder()
 	handler := NewEventsHandler(maxRequestSize)
 	handler.ServeHTTP(recorder, req)

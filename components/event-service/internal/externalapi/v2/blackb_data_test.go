@@ -8,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 )
 
+// TODO(nachtmaar): we cannot check the api.Error.Details except for `Field` since we are using the CE sdk validation
 func TestErrorEmptyData(t *testing.T) {
 	s := "{\"type\":\"order.created\",\"eventtypeversion\":\"v1\",\"specversion\":\"0.3\",\"id\":\"31109198-4d69-4ae0-972d-76117f3748c8\",\"time\":\"2012-11-01T22:08:41+00:00\"}"
 	wantErrorDetail := api.ErrorDetail{Field: shared.FieldData, Type: shared.ErrorTypeMissingField, Message: shared.ErrorMessageMissingField, MoreInfo: ""}

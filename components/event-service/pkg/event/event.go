@@ -20,11 +20,21 @@ func DecodeMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Mess
 		return nil, nil, err
 	}
 	specErrors := []api.ErrorDetail(nil)
+
+	// add source to the incoming request
+	// NOTE: this needs to be done before validating the event via CloudEvents sdk
+	event, err = busv2.AddSource(*event)
+	if err != nil {
+		return event, nil, err
+	}
+
+	// validate event the CloudEvents way
 	err = event.Validate()
 	if err != nil {
 		specErrors = errorToDetails(err)
 	}
 
+	// validate event the Kyma way
 	kymaErrors := Validate(event)
 	allErrors := append(specErrors, kymaErrors...)
 	if len(allErrors) != 0 {
