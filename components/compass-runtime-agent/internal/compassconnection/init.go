@@ -3,6 +3,8 @@ package compassconnection
 import (
 	"time"
 
+	"kyma-project.io/compass-runtime-agent/internal/compass/director"
+
 	"github.com/pkg/errors"
 
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -25,6 +27,7 @@ type DependencyConfig struct {
 	SynchronizationService kyma.Service
 	ConfigProvider         config.Provider
 
+	RuntimeURLsConfig            director.RuntimeURLsConfig
 	CertValidityRenewalThreshold float64
 	MinimalCompassSyncTime       time.Duration
 }
@@ -46,7 +49,8 @@ func (config DependencyConfig) InitializeController() (Supervisor, error) {
 		config.SynchronizationService,
 		config.ConfigProvider,
 		config.CertValidityRenewalThreshold,
-		config.MinimalCompassSyncTime)
+		config.MinimalCompassSyncTime,
+		config.RuntimeURLsConfig)
 
 	if err := InitCompassConnectionController(config.ControllerManager, connectionSupervisor, config.MinimalCompassSyncTime); err != nil {
 		return nil, errors.Wrap(err, "Unable to register controllers to the manager")

@@ -50,7 +50,7 @@ rules:
     - "serviceclasses"
     - "serviceplans"
     - "servicebrokers"
-    verbs: ["create"]
+    verbs: ["list", "get", "create", "patch", "delete"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources:
     - "clusterservicebrokers/status"

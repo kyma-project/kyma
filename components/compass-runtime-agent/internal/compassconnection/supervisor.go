@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"kyma-project.io/compass-runtime-agent/internal/compass/director"
+
 	"kyma-project.io/compass-runtime-agent/internal/compass"
 
 	"kyma-project.io/compass-runtime-agent/internal/config"
@@ -47,6 +49,7 @@ func NewSupervisor(
 	configProvider config.Provider,
 	certValidityRenewalThreshold float64,
 	minimalCompassSyncTime time.Duration,
+	runtimeURLsConfig director.RuntimeURLsConfig,
 ) Supervisor {
 	return &crSupervisor{
 		compassConnector:             connector,
@@ -57,6 +60,7 @@ func NewSupervisor(
 		configProvider:               configProvider,
 		certValidityRenewalThreshold: certValidityRenewalThreshold,
 		minimalCompassSyncTime:       minimalCompassSyncTime,
+		runtimeURLsConfig:            runtimeURLsConfig,
 		log:                          logrus.WithField("Supervisor", "CompassConnection"),
 	}
 }
@@ -70,6 +74,7 @@ type crSupervisor struct {
 	configProvider               config.Provider
 	certValidityRenewalThreshold float64
 	minimalCompassSyncTime       time.Duration
+	runtimeURLsConfig            director.RuntimeURLsConfig
 	log                          *logrus.Entry
 }
 
@@ -125,14 +130,14 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	}
 
 	s.log.Infof("Fetching configuration from Director, from %s url...", connection.Spec.ManagementInfo.DirectorURL)
-	directorClient, err := s.clientsProvider.GetCompassConfigClient(credentials, connection.Spec.ManagementInfo.DirectorURL)
+	directorClient, err := s.clientsProvider.GetDirectorClient(credentials, connection.Spec.ManagementInfo.DirectorURL, runtimeConfig)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to prepare configuration client: %s", err.Error())
 		s.setSyncFailedStatus(connection, syncAttemptTime, errorMsg)
 		return s.updateCompassConnection(connection)
 	}
 
-	applicationsConfig, err := directorClient.FetchConfiguration(connection.Spec.ManagementInfo.DirectorURL, runtimeConfig)
+	applicationsConfig, err := directorClient.FetchConfiguration()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to fetch configuration: %s", err.Error())
 		s.setSyncFailedStatus(connection, syncAttemptTime, errorMsg)
@@ -157,7 +162,17 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 		s.log.Info(res)
 	}
 
-	// TODO: report Results to Director
+	s.log.Infof("Labeling Runtime with URLs...")
+	_, err = directorClient.SetURLsLabels(s.runtimeURLsConfig)
+	if err != nil {
+		connection.Status.State = v1alpha1.MetadataUpdateFailed
+		connection.Status.SynchronizationStatus = &v1alpha1.SynchronizationStatus{
+			LastAttempt:         syncAttemptTime,
+			LastSuccessfulFetch: syncAttemptTime,
+			Error:               fmt.Sprintf("Failed to label Runtime with proper URLs: %s", err.Error()),
+		}
+		return s.updateCompassConnection(connection)
+	}
 
 	// TODO: decide the approach of setting this status. Should it be success even if one App failed?
 	s.setConnectionSynchronizedStatus(connection, syncAttemptTime)

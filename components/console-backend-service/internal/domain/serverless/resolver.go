@@ -25,6 +25,7 @@ type resolver struct {
 type Resolver interface {
 	FunctionsQuery(ctx context.Context, namespace string) ([]gqlschema.Function, error)
 	DeleteFunction(ctx context.Context, name string, namespace string) (gqlschema.FunctionMutationOutput, error)
+	CreateFunction(ctx context.Context, name string, namespace string, labels gqlschema.Labels, size string, runtime string) (gqlschema.Function, error)
 }
 
 func (r *Container) Enable() error {

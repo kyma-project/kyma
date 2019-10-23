@@ -15,7 +15,7 @@ console:
 core_ui:
   image:
     dir:
-    tag: 36ece409
+    tag: 44e9e137
     pullPolicy: IfNotPresent
   service:
     name: nginx
