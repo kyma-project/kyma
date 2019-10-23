@@ -2,6 +2,7 @@ apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
   name: passthrough-unsecured-{{.TestID}}
+  namespace: api-gateway-tests
 spec:
   service:
     host: httpbin-{{.TestID}}.kyma.local

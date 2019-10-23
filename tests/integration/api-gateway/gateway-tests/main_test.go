@@ -4,12 +4,13 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
-	"github.com/avast/retry-go"
 	"math/rand"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/avast/retry-go"
 
 	"github.com/stretchr/testify/assert"
 
@@ -35,7 +36,7 @@ const testIDLength = 8
 const OauthClientSecretLength = 8
 const OauthClientIDLength = 8
 const manifestsDirectory = "manifests/"
-const perScenarioCommonResourcesFile = "per-scenario-commons.yaml"
+const testingAppFile = "testing-app.yaml"
 const globalCommonResourcesFile = "global-commons.yaml"
 const noAccessStrategyApiruleFile = "no_access_strategy.yaml"
 const oauthStrategyApiruleFile = "oauth-strategy.yaml"
@@ -97,7 +98,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			testID := generateRandomString(testIDLength)
 
 			// create common resources from files
-			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(perScenarioCommonResourcesFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
 			if err != nil {
 				panic(err)
 			}
