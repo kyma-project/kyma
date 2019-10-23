@@ -31,7 +31,7 @@ Create an Azure resource group and a storage account. Follow these steps:
     Example:
 
     ```bash
-    export AZ_ACCOUNT_NAME=myStorageAccount
+    export AZ_ACCOUNT_NAME=accountname
     export AZ_RESOURCE_GROUP=my-resource-group
     export AZ_RESOURCE_GROUP_LOCATION=westeurope
     export AZ_SUBSCRIPTION=123456-123456-123456-1234567
@@ -58,7 +58,7 @@ Create an Azure resource group and a storage account. Follow these steps:
 5. Export the access key as an environment variable:
 
     ```bash
-    export AZ_ACCOUNT_KEY=$(az storage account keys list --account-name "${AZURE_ACCOUNT_NAME}" --resource-group "${AZURE_RESOURCE_GROUP}" --query "[?keyName=='key1'].value" --output tsv | base64)
+    export AZ_ACCOUNT_KEY=$(az storage account keys list --account-name "${AZ_ACCOUNT_NAME}" --resource-group "${AZ_RESOURCE_GROUP}" --query "[?keyName=='key1'].value" --output tsv | base64)
     ```
 
 ### Configure Minio Gateway mode
@@ -79,7 +79,7 @@ metadata:
 type: Opaque
 data:
   minio.accessKey: "$(echo "${AZ_ACCOUNT_NAME}" | base64)"
-  minio.secretKey: "${AZURE_ACCOUNT_KEY}"
+  minio.secretKey: "${AZ_ACCOUNT_KEY}"
 ---
 apiVersion: v1
 kind: ConfigMap

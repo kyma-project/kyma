@@ -146,14 +146,6 @@
   version = "v1.1.7"
 
 [[projects]]
-  digest = "1:fd9bea48bbc5bba66d9891c72af7255fbebecdff845c37c679406174ece5ca1b"
-  name = "github.com/kelseyhightower/envconfig"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "0b417c4ec4a8a82eecc22a1459a504aa55163d61"
-  version = "v1.4.0"
-
-[[projects]]
   digest = "1:b472339040c571f1085e429ad08d94218bc3fc7a635c99fd95e3f80382413317"
   name = "github.com/kisielk/errcheck"
   packages = [
@@ -279,6 +271,14 @@
   pruneopts = "UT"
   revision = "05741cdb0871330d8bc980d4afd21ab34eceee83"
   version = "v1.1.2"
+
+[[projects]]
+  digest = "1:bb32a7e267540d9f2d26753426d5e360c5bd858b9b78e26b9f0c99219024d8f5"
+  name = "github.com/vrischmann/envconfig"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "cf601e2565a0a7c7418ed014d28a507be6cb1e45"
+  version = "v1.2.0"
 
 [[projects]]
   branch = "master"
@@ -632,7 +632,6 @@
   input-imports = [
     "github.com/Masterminds/sprig",
     "github.com/gorilla/mux",
-    "github.com/kelseyhightower/envconfig",
     "github.com/kisielk/errcheck",
     "github.com/kyma-incubator/compass/components/director/pkg/graphql",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -645,6 +644,7 @@
     "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
+    "github.com/vrischmann/envconfig",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",

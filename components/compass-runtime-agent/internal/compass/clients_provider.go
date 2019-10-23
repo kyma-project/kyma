@@ -5,12 +5,13 @@ import (
 	"kyma-project.io/compass-runtime-agent/internal/certificates"
 	"kyma-project.io/compass-runtime-agent/internal/compass/connector"
 	"kyma-project.io/compass-runtime-agent/internal/compass/director"
+	"kyma-project.io/compass-runtime-agent/internal/config"
 	"kyma-project.io/compass-runtime-agent/internal/graphql"
 )
 
 //go:generate mockery -name=ClientsProvider
 type ClientsProvider interface {
-	GetCompassConfigClient(credentials certificates.ClientCredentials, url string) (director.ConfigClient, error)
+	GetDirectorClient(credentials certificates.ClientCredentials, url string, runtimeConfig config.RuntimeConfig) (director.DirectorClient, error)
 	GetConnectorClient(url string) (connector.Client, error)
 	GetConnectorCertSecuredClient(credentials certificates.ClientCredentials, url string) (connector.Client, error)
 }
@@ -31,13 +32,13 @@ type clientsProvider struct {
 	enableLogging                   bool
 }
 
-func (cp *clientsProvider) GetCompassConfigClient(credentials certificates.ClientCredentials, url string) (director.ConfigClient, error) {
+func (cp *clientsProvider) GetDirectorClient(credentials certificates.ClientCredentials, url string, runtimeConfig config.RuntimeConfig) (director.DirectorClient, error) {
 	gqlClient, err := cp.gqlClientConstructor(credentials.AsTLSCertificate(), url, cp.enableLogging, cp.insecureConfigFetch)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to create GraphQL client")
 	}
 
-	return director.NewConfigurationClient(gqlClient), nil
+	return director.NewConfigurationClient(gqlClient, runtimeConfig), nil
 }
 
 func (cp *clientsProvider) GetConnectorClient(url string) (connector.Client, error) {

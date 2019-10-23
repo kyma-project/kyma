@@ -39,6 +39,8 @@ spec:
             - "--eventServiceHost=app-{{ .Release.Name }}-event-service:{{ .Values.eventService.service.externalapi.port }}"
             - "--appRegistryPathPrefix=/{{ .Release.Name }}/v1/metadata"
             - "--appRegistryHost={{ .Values.applicationConnectivityValidator.args.appRegistryHost }}"
+            - "--cacheExpirationMinutes={{ .Values.applicationConnectivityValidator.args.cacheExpirationMinutes }}"
+            - "--cacheCleanupMinutes={{ .Values.applicationConnectivityValidator.args.cacheCleanupMinutes }}"
           readinessProbe:
             httpGet:
               path: /v1/health
