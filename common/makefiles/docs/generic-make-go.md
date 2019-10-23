@@ -56,7 +56,7 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 Find the list of available images [here](https://github.com/kyma-project/test-infra/blob/master/templates/config.yaml).
 
 ### Example workflow 
-By example:
+The generic Makefile is used by the CI.
 When CI run`make release` the following steps are executed:
 - rule `release` depends on rules `resolve dep-status verify build-image push-image`
 - rule`resolve` does not appear in the Makefile, but it's generated. 
@@ -85,32 +85,29 @@ These are the possible target types that contain rules:
 - `MOUNT_TARGET` - contains rules which are dynamically created by the `buildpack-mount` function
 - `COPY_TARGET` - contains rules which are dynamically created by the `buildpack-cp-ro` function
 
-## How to adjust makefile
+## Adjust the generic Makefile
 ### Disable the current rule in the local Makefile
 To disable a rule in the new Makefile, follow it with the semicolon `;`.
 For example, write: `{RULE}: ;`.
-This results in the rule being disabled and warnings printed on the console.
-### How to add new local rule, which doesn't need `BUILDPACK`:
-Define rule in local makefile.
-Add this rule to one of the  global rule:
+The warning will appear on the console but the rule will be disabled.
+### Add a new local rule that doesn't need `BUILDPACK`
+To add a new local rule that doesn't need `BUILDPACK`, define a rule in the local Makefile and add this rule to one of the  global rule:
 ```makefile
 verify:: own-rule
 ```
 
-### How to add new rule in local makefile, which needs buildpack:
+### Add a new local rule that needs `BUILDPACK`
 Define rule in local makefile and call function which will create the rule:
 ```makefile
-{my-rule}-local: 
-    do sth
+{RULE}-local: {COMMANDS}
 
 $(eval $(call {BUILDPACK_FUNCTION},my-rule)) # function which will create the new rule
 ```
 
-### Add a new rule in the Generic Makefile
-Definie new local rule in `generic_make_go.mk` file:
+### Add a new rule in the generic Makefile
+To add a new rule in the generic Makefile, define a new local rule in the `generic_make_go.mk` file:
 ```makefile
-your-rule-local:
-    @echo do sth
+{YOUR_RULE}-local:  {COMMANDS}
 ```
 
 Append rule name to the `MOUNT_TARGETS` or `COPY_TARGETS` variables.
