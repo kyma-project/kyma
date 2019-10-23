@@ -22,7 +22,7 @@ spec:
         - name: APP_EXTERNAL_CONNECTOR_URL
           value: 'http://{{ template "fullname" . }}:{{ .Values.global.connector.graphql.external.port }}/graphql'
         - name: APP_INTERNAL_CONNECTOR_URL
-          value: 'http://{{ template "fullname" . }}:{{ .Values.global.connector.graphql.internal.port }}/graphql'
+          value: 'http://{{ template "fullname" . }}-internal:{{ .Values.global.connector.graphql.internal.port }}/graphql'
         - name: APP_CONNECTOR_URL
           value: 'https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql'
         - name: APP_HYDRATOR_URL
