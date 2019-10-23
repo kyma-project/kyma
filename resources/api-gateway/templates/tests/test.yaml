@@ -42,6 +42,8 @@ spec:
                 key: password
           - name: REQUEST_TIMEOUT
             value: {{ .Values.tests.env.timeout }}
+          - name: REQUEST_DELAY
+            value: {{ .Values.tests.env.delay }}
       restartPolicy: Never
 {{- end }}
 {{- end }}
