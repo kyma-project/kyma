@@ -97,7 +97,7 @@ verify:: own-rule
 ```
 
 ### Add a new local rule that needs `BUILDPACK`
-Define rule in local makefile and call function which will create the rule:
+To add a new local rule that needs `BUILDPACK`, define a rule in the local Makefile and call the function that creates the rule:
 ```makefile
 {RULE}-local: {COMMANDS}
 
