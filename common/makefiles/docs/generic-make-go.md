@@ -78,7 +78,7 @@ resolve:
 ```
 As you can see, the `resolve-local` rule is executed inside the container. 
 If the `resolve` rule passes, the next rules are executed.
-If any rule fails, the Makefile also aborts the execution and fails as well.
+If any rule fails, the Makefile aborts the execution and fails as well.
 
 There are two available **BUILDPACK_FUNCTIONS** which generate the rule dynamically:
 - `buildpack-mount` - creates the rule and mounts component's directory as volume
@@ -93,21 +93,21 @@ These are two variables which contain rules names that are created dynamically:
 ### Disable the current rule in the local Makefile
 To disable a rule in the new Makefile, follow it with the semicolon `;`.
 For example, write: `{RULE}: ;`.
-The warning will appear on the console but the rule will be disabled.
+The warning will appear in the console but the rule will be disabled.
 
-### Add a new local rule that doesn't need `BUILDPACK`
-To add a new local rule that doesn't need `BUILDPACK`, define a rule in the local Makefile and add this rule to one of the global rule:
+### Add a new local rule that doesn't need a buildpack
+To add a new local rule that doesn't need a buildpack, define a rule in the local Makefile and add this rule to one of the global rule:
 ```makefile
 verify:: {YOUR_RULE}
 ```
 
-### Add a new local rule that needs `BUILDPACK`
-To add a new local rule that needs `BUILDPACK`, define a rule in the local Makefile and call the function that creates the rule:
+### Add a new local rule that needs a buildpack
+To add a new local rule that needs a buildpack, define a rule in the local Makefile and call the function that creates the rule:
 ```makefile
 {RULE}-local: {COMMANDS}
 
 # Function which creates the new rule dynamically
-$(eval $(call {BUILDPACK_FUNCTION},my-rule)) 
+$(eval $(call {BUILDPACK_FUNCTION},{RULE})) 
 ```
 
 ### Add a new rule in the generic Makefile
