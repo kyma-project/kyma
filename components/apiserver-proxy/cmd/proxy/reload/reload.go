@@ -20,7 +20,7 @@ type TLSCertReloader struct {
 	holder      *TLSCertHolder
 }
 
-//NewTLSCertReloader creates a new instance of reloadableTLSCertProvider.
+//NewTLSCertReloader creates a new instance of TLSCertReloader.
 func NewTLSCertReloader(constructor TLSCertConstructor) (*TLSCertReloader, error) {
 
 	result := &TLSCertReloader{
@@ -91,7 +91,6 @@ func (tlsh *TLSCertHolder) Set(v *tls.Certificate) {
 type CancelableAuthReqestConstructor func() (authn.CancelableAuthRequest, error)
 
 //CancelableAuthReqestReloader enables to create and re-create an instance of authn.CancelableAuthRequest in a thread-safe way.
-//It's used to re-create the instance every time a change in oidc-ca-file is detected.
 //It implements authenticator.Request interface so it can be easily plugged in instead of a "real" instance.
 type CancelableAuthReqestReloader struct {
 	constructor CancelableAuthReqestConstructor
