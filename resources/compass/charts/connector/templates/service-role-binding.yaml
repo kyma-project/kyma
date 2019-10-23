@@ -18,8 +18,8 @@ metadata:
 spec:
   subjects:
 {{ tpl (toYaml .Values.istio.rbac.connectorInternalApi.subjects | indent 4) . }}
-roleRef:
-  kind: ServiceRole
-  name: {{ .Chart.Name }}-internal
+  roleRef:
+    kind: ServiceRole
+    name: {{ .Chart.Name }}-internal
 ---
 {{ end }}
