@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/kyma-project/kyma/components/iam-kubeconfig-service/cmd/generator/reload"
 	"github.com/kyma-project/kyma/components/iam-kubeconfig-service/internal/authn"
-	r "github.com/kyma-project/kyma/components/iam-kubeconfig-service/internal/reload"
 	"github.com/kyma-project/kyma/components/iam-kubeconfig-service/pkg/kube_config"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
@@ -37,18 +37,18 @@ func main() {
 
 	fileWatcherCtx, fileWatcherCtxCancel := context.WithCancel(context.Background())
 
-	oidcAuthenticator, err := setupReloadableOIDCAuthntr(fileWatcherCtx, &cfg.oidc)
+	oidcAuthenticator, err := setupOIDCAuthReloader(fileWatcherCtx, &cfg.oidc)
 
 	if err != nil {
 		log.Fatalf("Cannot create OIDC Authenticator, %v", err)
 	}
 
-	clusterCAProvider, err := setupReloadableClusterCAProvider(fileWatcherCtx, cfg.clusterCAFilePath)
+	clusterCAReloader, err := setupClusterCAValueReloader(fileWatcherCtx, cfg.clusterCAFilePath)
 	if err != nil {
 		log.Fatalf("Cannot create reloadable cluster CA file provider, %v", err)
 	}
 
-	kubeConfig := kube_config.NewKubeConfig(cfg.clusterName, cfg.apiserverURL, clusterCAProvider.GetString, cfg.namespace)
+	kubeConfig := kube_config.NewKubeConfig(cfg.clusterName, cfg.apiserverURL, clusterCAReloader.GetString, cfg.namespace)
 
 	kubeConfigEndpoints := kube_config.NewEndpoints(kubeConfig)
 
@@ -193,7 +193,29 @@ func (vals *multiValFlag) Set(value string) error {
 	return nil
 }
 
-func setupReloadableClusterCAProvider(fileWatcherCtx context.Context, caFilePath string) (*r.ReloadableStringProvider, error) {
+func setupOIDCAuthReloader(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) (authenticator.Request, error) {
+	const eventBatchDelaySeconds = 10
+	filesToWatch := []string{cfg.CAFilePath}
+
+	cancelableAuthReqestConstructor := func() (authn.CancelableAuthRequest, error) {
+		log.Infof("creating a new cancelable instance of authenticator.Request...")
+		return authn.NewOIDCAuthenticator(cfg)
+	}
+
+	//Create reloader
+	result, err := reload.NewCancelableAuthReqestReloader(cancelableAuthReqestConstructor)
+	if err != nil {
+		return nil, err
+	}
+
+	//Setup file watcher
+	oidcCAFileWatcher := reload.NewWatcher("oidc-ca-dex-tls-cert", filesToWatch, eventBatchDelaySeconds, result.Reload)
+	go oidcCAFileWatcher.Run(fileWatcherCtx)
+
+	return result, nil
+}
+
+func setupClusterCAValueReloader(fileWatcherCtx context.Context, caFilePath string) (*reload.StringValueReloader, error) {
 	const eventBatchDelaySeconds = 10
 	filesToWatch := []string{caFilePath}
 
@@ -207,37 +229,15 @@ func setupReloadableClusterCAProvider(fileWatcherCtx context.Context, caFilePath
 		return caFileData, err
 	}
 
-	clusterCAFileReloader, err := r.NewReloadableStringProvider(caDataConstructorFunc)
+	//Create reloader
+	result, err := reload.NewStringValueReloader(caDataConstructorFunc)
 	if err != nil {
 		return nil, err
 	}
 
 	//Setup file watcher
-	clusterCAFileWatcher := r.NewWatcher("cluster-ca-crt", filesToWatch, eventBatchDelaySeconds, clusterCAFileReloader.Reload)
+	clusterCAFileWatcher := reload.NewWatcher("cluster-ca-crt", filesToWatch, eventBatchDelaySeconds, result.Reload)
 	go clusterCAFileWatcher.Run(fileWatcherCtx)
 
-	return clusterCAFileReloader, nil
-}
-
-func setupReloadableOIDCAuthntr(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) (authenticator.Request, error) {
-	const eventBatchDelaySeconds = 10
-	filesToWatch := []string{cfg.CAFilePath}
-
-	authReqConstructorFunc := func() (authn.CancellableAuthRequest, error) {
-		log.Infof("creating new instance of authenticator.Request...")
-		return authn.NewOIDCAuthenticator(cfg)
-		//authn.NewOIDCAuthenticator(&cfg.oidc)
-	}
-
-	//Create ReloadableAuthReq
-	athntctr, err := r.NewReloadableAuthReq(authReqConstructorFunc)
-	if err != nil {
-		return nil, err
-	}
-
-	//Setup file watcher
-	oidcCAFileWatcher := r.NewWatcher("oidc-ca-dex-tls-cert", filesToWatch, eventBatchDelaySeconds, athntctr.Reload)
-	go oidcCAFileWatcher.Run(fileWatcherCtx)
-
-	return athntctr, nil
+	return result, nil
 }
