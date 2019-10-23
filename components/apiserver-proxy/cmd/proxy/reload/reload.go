@@ -62,7 +62,6 @@ func (ckpr *ReloadableTLSCertProvider) reload() error {
 
 //GetCertificateFunc conforms to tls.Config.GetCertificate function type
 func (ckpr *ReloadableTLSCertProvider) GetCertificateFunc(*tls.ClientHelloInfo) (*tls.Certificate, error) {
-	fmt.Println("getCertificateFunc")
 	return ckpr.holder.Get(), nil
 }
 
