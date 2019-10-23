@@ -210,9 +210,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 			}
 			assert.Nil(t, err)
 			assert.NotNil(t, tokenJWT)
-
 			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local/headers", testID), tokenOAUTH.AccessToken))
-			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local/image", testID), tokenJWT))
+			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local/cookies", testID), tokenJWT))
 
 			deleteResources(k8sClient, commonResources...)
 

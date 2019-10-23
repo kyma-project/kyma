@@ -10,14 +10,13 @@ spec:
     port: 8000
     host: httpbin-{{.TestID}}.kyma.local
   rules:
-    - path: /image
+    - path: /cookies
       methods: ["GET"]
       mutators: []
       accessStrategies:
         - handler: jwt
           config:
             trusted_issuers: ["http://dex.kyma.local"]
-            required_scope: []
     - path: /headers
       methods: ["GET"]
       accessStrategies:
