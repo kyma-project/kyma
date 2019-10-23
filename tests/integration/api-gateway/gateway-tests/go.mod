@@ -7,6 +7,7 @@ require (
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.3.0
+	github.com/vrischmann/envconfig v1.2.0
 	golang.org/x/net v0.0.0-20190812203447-cdfb69ac37fc
 	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a
 	golang.org/x/sys v0.0.0-20191010194322-b09406accb47 // indirect

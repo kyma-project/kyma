@@ -40,13 +40,14 @@ const OauthClientIDLength = 8
 const manifestsDirectory = "manifests/"
 const testingAppFile = "testing-app.yaml"
 const globalCommonResourcesFile = "global-commons.yaml"
+const hydraClientFile = "hydra-client.yaml"
 const noAccessStrategyApiruleFile = "no_access_strategy.yaml"
 const oauthStrategyApiruleFile = "oauth-strategy.yaml"
 const jwtAndOauthStrategyApiruleFile = "jwt-oauth-strategy.yaml"
 const resourceSeparator = "---"
 
 type Config struct {
-	HydraAddr  string `envconfig:"HYDRA_ADDRESS,default=oauth2.kyma.local"`
+	HydraAddr  string `envconfig:"HYDRA_ADDRESS"`
 	User       string `envconfig:"USER"`
 	Pwd        string `envconfig:"PASSWORD"`
 	ReqTimeout uint   `envconfig:"REQUEST_TIMEOUT"`
@@ -92,6 +93,13 @@ func TestApiGatewayIntegration(t *testing.T) {
 		panic(err)
 	}
 	createResources(k8sClient, globalCommonResources...)
+	time.Sleep(5 * time.Second)
+
+	hydraClientResource, err := manifestprocessor.ParseFromFile(hydraClientFile, manifestsDirectory, resourceSeparator)
+	if err != nil {
+		panic(err)
+	}
+	createResources(k8sClient, hydraClientResource...)
 	// defer deleting namespace (it will also delete all remaining resources in that namespace)
 	defer func() {
 		time.Sleep(time.Second * 3)
