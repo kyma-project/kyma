@@ -44,6 +44,8 @@ spec:
             value: {{ .Values.tests.env.timeout }}
           - name: TEST_REQUEST_DELAY
             value: {{ .Values.tests.env.delay }}
+          - name: INGRESSGATEWAY_ADDRESS
+            value: istio-ingressgateway.istio-system.svc.cluster.local
       restartPolicy: Never
 {{- end }}
 {{- end }}

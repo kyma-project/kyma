@@ -145,7 +145,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			fmt.Println("test finished")
 		})
 
-		t.Run("expose service with a single access strategy on whole service", func(t *testing.T) {
+		t.Run("Expose full service with OAUTH2 strategy", func(t *testing.T) {
 			t.Parallel()
 			testID := generateRandomString(testIDLength)
 
@@ -157,7 +157,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
-			resources, err := manifestprocessor.ParseFromFileWithTemplate(jwtAndOauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
 			if err != nil {
 				panic(err)
 			}
@@ -168,7 +168,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
 			//}
 			token, err := oauth2Cfg.Token(context.Background())
-			assert.Nil(t, err)
+			assert.Equal(t, err, nil)
 			assert.NotNil(t, token)
 			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
 
@@ -178,7 +178,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			fmt.Println("test finished")
 		})
 
-		t.Run("expose service with specific strategy for specific path", func(t *testing.T) {
+		t.Run("Expose service with OAUTH and JWT on speficic paths", func(t *testing.T) {
 			t.Parallel()
 			testID := generateRandomString(testIDLength)
 
@@ -190,7 +190,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
-			oauthStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			oauthStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(jwtAndOauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
 			if err != nil {
 				panic(err)
 			}
