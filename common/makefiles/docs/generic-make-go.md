@@ -12,7 +12,7 @@ For local usage, you need:
 * [errcheck](https://github.com/kisielk/errcheck)
 * [goimports](https://godoc.org/golang.org/x/tools/cmd/goimports)
 * [dep](https://github.com/golang/dep) v0.5.1 or higher
-* [Mockery](github.com/vektra/mockery)
+* [Mockery](https://github.com/vektra/mockery)
 
 ## Add the generic Makefile
 To add the generic Makefile to your Makefile, add these variables and the statement:
