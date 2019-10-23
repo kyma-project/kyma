@@ -1,8 +1,6 @@
 package reload
 
 import (
-	"crypto/tls"
-	"fmt"
 	"net/http"
 	"sync"
 
@@ -11,25 +9,21 @@ import (
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 )
 
-//TLSCertConstructor knows how to construct a tls.Certificate instance
-type TLSCertConstructor func() (*tls.Certificate, error)
+//StringConstructor knows how to construct a string
+type StringConstructor func() (string, error)
 
-//ReloadableTLSCertProvider enables to create and re-create an instance of tls.Certificate in a thread-safe way.
-//It's GetCertificateFunc conforms to tls.Config.GetCertificate function type.
-type ReloadableTLSCertProvider struct {
-	constructor TLSCertConstructor
-	holder      *TLSCrtKeyPairHolder
+//ReloadableStringProvider enables to create and re-create a string in a thread-safe way.
+type ReloadableStringProvider struct {
+	constructor StringConstructor
+	holder      *StringHolder
 }
 
-//NewReloadableTLSCertProvider creates a new instance of ReloadableTLSCertProvider.
-//notifier parameter is used register a data reloading callback.
-//External code can make use of this callback to trigger data reloading from outside.
-//It's safe to trigger reloading from other goroutines.
-func NewReloadableTLSCertProvider(constructor TLSCertConstructor) (*ReloadableTLSCertProvider, error) {
+//NewReloadableStringProvider creates a new instance of ReloadableStringProvider.
+func NewReloadableStringProvider(constructor StringConstructor) (*ReloadableStringProvider, error) {
 
-	result := &ReloadableTLSCertProvider{
+	result := &ReloadableStringProvider{
 		constructor: constructor,
-		holder:      NewTLSCrtKeyPairHolder(),
+		holder:      NewStringHolder(),
 	}
 
 	//Initial read
@@ -42,50 +36,50 @@ func NewReloadableTLSCertProvider(constructor TLSCertConstructor) (*ReloadableTL
 }
 
 //Reload reloads the internal instance.
-func (ckpr *ReloadableTLSCertProvider) Reload() {
-	err := ckpr.reload()
+//It's purpose is to trigger reloading from other goroutines
+func (rsp *ReloadableStringProvider) Reload() {
+	err := rsp.reload()
 	if err != nil {
-		log.Errorf("Failed to reload certificate: %v", err)
+		log.Errorf("Failed to reload value: %v", err)
 	}
 }
 
 //reloads the internal instance using provided constructor function
 //Note: It must NOT modify the existing value in case of an error!
-func (ckpr *ReloadableTLSCertProvider) reload() error {
-	newCert, err := ckpr.constructor()
+func (rsp *ReloadableStringProvider) reload() error {
+	v, err := rsp.constructor()
 	if err != nil {
 		return err
 	}
-	ckpr.holder.Set(newCert)
+	rsp.holder.Set(v)
 	return nil
 }
 
-//GetCertificateFunc conforms to tls.Config.GetCertificate function type
-func (ckpr *ReloadableTLSCertProvider) GetCertificateFunc(*tls.ClientHelloInfo) (*tls.Certificate, error) {
-	fmt.Println("getCertificateFunc")
-	return ckpr.holder.Get(), nil
+//GetString returns the string value stored in ReloadableStringProvider
+func (rsp *ReloadableStringProvider) GetString() string {
+	return rsp.holder.Get()
 }
 
-//TLSCrtKeyPairHolder keeps a tls.Certificate instance and allows for Get/Set operations in a thread-safe way
-type TLSCrtKeyPairHolder struct {
+//StringHolder keeps a string and allows for Get/Set operations in a thread-safe way
+type StringHolder struct {
 	rwmu  sync.RWMutex
-	value *tls.Certificate
+	value string
 }
 
-//NewTLSCrtKeyPairHolder returns new TLSCrtKeyPairHolder instance
-func NewTLSCrtKeyPairHolder() *TLSCrtKeyPairHolder {
-	return &TLSCrtKeyPairHolder{}
+//NewStringHolder returns new StringHolder instance
+func NewStringHolder() *StringHolder {
+	return &StringHolder{}
 }
 
-//Get returns the tls.Certificate instance stored in the TLSCrtKeyPairHolder
-func (tlsh *TLSCrtKeyPairHolder) Get() *tls.Certificate {
+//Get returns the string stored in the StringHolder
+func (tlsh *StringHolder) Get() string {
 	tlsh.rwmu.RLock()
 	defer tlsh.rwmu.RUnlock()
 	return tlsh.value
 }
 
-//Set stores given tls.Certificate in the TLSCrtKeyPairHolder
-func (tlsh *TLSCrtKeyPairHolder) Set(v *tls.Certificate) {
+//Set stores given string in the StringHolder
+func (tlsh *StringHolder) Set(v string) {
 	tlsh.rwmu.Lock()
 	defer tlsh.rwmu.Unlock()
 	tlsh.value = v

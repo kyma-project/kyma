@@ -43,7 +43,12 @@ func main() {
 		log.Fatalf("Cannot create OIDC Authenticator, %v", err)
 	}
 
-	kubeConfig := kube_config.NewKubeConfig(cfg.clusterName, cfg.apiserverURL, cfg.clusterCA, cfg.namespace)
+	clusterCAProvider, err := setupReloadableClusterCAProvider(fileWatcherCtx, cfg.clusterCAFilePath)
+	if err != nil {
+		log.Fatalf("Cannot create reloadable CA file provider, %v", err)
+	}
+
+	kubeConfig := kube_config.NewKubeConfig(cfg.clusterName, cfg.apiserverURL, clusterCAProvider.GetString, cfg.namespace)
 
 	kubeConfigEndpoints := kube_config.NewEndpoints(kubeConfig)
 
@@ -128,18 +133,16 @@ func readAppConfig() *appConfig {
 		oidcSupportedSigningAlgsArg = []string{"RS256"}
 	}
 
-	clusterCAValue := readCAFromFile(*clusterCAFileArg)
-
 	return &appConfig{
-		port:         *portArg,
-		clusterName:  *clusterNameArg,
-		apiserverURL: *apiserverUrlArg,
-		clusterCA:    clusterCAValue,
-		namespace:    *namespaceArg,
+		port:              *portArg,
+		clusterName:       *clusterNameArg,
+		apiserverURL:      *apiserverUrlArg,
+		clusterCAFilePath: *clusterCAFileArg,
+		namespace:         *namespaceArg,
 		oidc: authn.OIDCConfig{
 			IssuerURL:            *oidcIssuerURLArg,
 			ClientID:             *oidcClientIDArg,
-			CAFile:               *oidcCAFileArg,
+			CAFilePath:           *oidcCAFileArg,
 			UsernameClaim:        *oidcUsernameClaimArg,
 			UsernamePrefix:       *oidcUsernamePrefixArg,
 			GroupsClaim:          *oidcGroupsClaimArg,
@@ -149,23 +152,23 @@ func readAppConfig() *appConfig {
 	}
 }
 
-func readCAFromFile(caFile string) string {
+func readCAFromFile(caFile string) (string, error) {
 
 	caBytes, caErr := ioutil.ReadFile(caFile)
 	if caErr != nil {
-		log.Fatalf("Error while reading Certificate Authority of the Kubernetes cluster. Root cause: %v", caErr)
+		return "", caErr
 	}
 
-	return base64.StdEncoding.EncodeToString(caBytes)
+	return base64.StdEncoding.EncodeToString(caBytes), nil
 }
 
 type appConfig struct {
-	port         int
-	clusterName  string
-	apiserverURL string
-	clusterCA    string
-	namespace    string
-	oidc         authn.OIDCConfig
+	port              int
+	clusterName       string
+	apiserverURL      string
+	clusterCAFilePath string
+	namespace         string
+	oidc              authn.OIDCConfig
 }
 
 //Support for multi-valued flag: -flagName=val1 -flagName=val2 etc.
@@ -190,17 +193,43 @@ func (vals *multiValFlag) Set(value string) error {
 	return nil
 }
 
+func setupReloadableClusterCAProvider(fileWatcherCtx context.Context, caFilePath string) (*r.ReloadableStringProvider, error) {
+	const eventBatchDelaySeconds = 10
+	filesToWatch := []string{caFilePath}
+
+	caDataConstructorFunc := func() (string, error) {
+		log.Info("Reading Certificate Authority of the Kubernetes cluster from file: %s", caFilePath)
+		caFileData, err := readCAFromFile(caFilePath)
+		if err != nil {
+			log.Errorf("Error while reading Certificate Authority of the Kubernetes cluster. Root cause: %v", err)
+		}
+
+		return caFileData, err
+	}
+
+	clusterCAFileReloader, err := r.NewReloadableStringProvider(caDataConstructorFunc)
+	if err != nil {
+		return nil, err
+	}
+
+	//Setup file watcher
+	clusterCAFileWatcher := r.NewWatcher("cluster-ca-crt", filesToWatch, eventBatchDelaySeconds, clusterCAFileReloader.Reload)
+	go clusterCAFileWatcher.Run(fileWatcherCtx)
+
+	return clusterCAFileReloader, nil
+}
+
 func setupReloadableOIDCAuthntr(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) (authenticator.Request, error) {
 	const eventBatchDelaySeconds = 10
-	filesToWatch := []string{cfg.CAFile}
+	filesToWatch := []string{cfg.CAFilePath}
 
-	//Create ReloadableAuthReq
 	authReqConstructorFunc := func() (authn.CancellableAuthRequest, error) {
 		log.Infof("creating new instance of authenticator.Request...")
 		return authn.NewOIDCAuthenticator(cfg)
 		//authn.NewOIDCAuthenticator(&cfg.oidc)
 	}
 
+	//Create ReloadableAuthReq
 	athntctr, err := r.NewReloadableAuthReq(authReqConstructorFunc)
 	if err != nil {
 		return nil, err

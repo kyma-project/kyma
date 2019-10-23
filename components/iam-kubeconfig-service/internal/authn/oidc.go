@@ -10,7 +10,7 @@ import (
 type OIDCConfig struct {
 	IssuerURL            string
 	ClientID             string
-	CAFile               string
+	CAFilePath           string
 	UsernameClaim        string
 	UsernamePrefix       string
 	GroupsClaim          string
@@ -41,7 +41,7 @@ func NewOIDCAuthenticator(config *OIDCConfig) (CancellableAuthRequest, error) {
 	tokenAuthenticator, err := oidc.New(oidc.Options{
 		IssuerURL:            config.IssuerURL,
 		ClientID:             config.ClientID,
-		CAFile:               config.CAFile,
+		CAFile:               config.CAFilePath,
 		UsernameClaim:        config.UsernameClaim,
 		UsernamePrefix:       config.UsernamePrefix,
 		GroupsClaim:          config.GroupsClaim,

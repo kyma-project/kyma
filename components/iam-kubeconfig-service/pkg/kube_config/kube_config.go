@@ -31,22 +31,24 @@ users:
     token: {{.Token}}
 `
 
+type CAProvider func() string
+
 type KubeConfig struct {
 	clusterName string
 	url         string
-	ca          string
+	caProvider  CAProvider
 	namespace   string
 	tmpl        *template.Template
 }
 
-func NewKubeConfig(clusterName, url, ca, namespace string) *KubeConfig {
+func NewKubeConfig(clusterName, url string, caProvider CAProvider, namespace string) *KubeConfig {
 
 	tmpl := template.Must(template.New("kubeConfig").Parse(content))
 
 	return &KubeConfig{
 		clusterName: clusterName,
 		url:         url,
-		ca:          ca,
+		caProvider:  caProvider,
 		namespace:   namespace,
 		tmpl:        tmpl,
 	}
@@ -67,7 +69,7 @@ func (c *KubeConfig) Generate(output io.Writer, token string) {
 	d := data{
 		ClusterName: c.clusterName,
 		URL:         c.url,
-		CA:          c.ca,
+		CA:          c.caProvider(),
 		NS:          c.namespace,
 		Token:       token,
 	}
