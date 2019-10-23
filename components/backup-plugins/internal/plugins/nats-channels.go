@@ -54,7 +54,7 @@ func (p *SetNatsChannelOwnerReference) Execute(input *velero.RestoreItemActionEx
 	evClient, err := evclientset.NewForConfig(config)
 	var messagingChannelInterface messagingv1alpha1Client.MessagingV1alpha1Interface
 	messagingChannelInterface = evClient.MessagingV1alpha1()
-	channelName := strings.TrimRight(metadata.GetName(), serviceNameSuffix)
+	channelName := strings.TrimSuffix(metadata.GetName(), serviceNameSuffix)
 	p.Log.Infof("NATS Channel Owner: %s", channelName)
 	natsChannel, err := messagingChannelInterface.Channels(metadata.GetNamespace()).Get(channelName, metav1.GetOptions{})
 	switch {
