@@ -30,5 +30,5 @@ required = [
 
 [[override]]
   name = "github.com/cloudevents/sdk-go"
-  branch = "master"
+  version = "v0.10.0"
 

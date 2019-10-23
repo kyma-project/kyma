@@ -11,7 +11,7 @@ required = [
 
 [[constraint]]
   name = "github.com/cloudevents/sdk-go"
-  branch = "master"
+  version = "v0.10.0"
 
 [[constraint]]
   name = "github.com/opentracing/opentracing-go"
