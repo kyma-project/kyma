@@ -46,6 +46,12 @@ func (h *Tester) TestUnsecuredAPI(url string) error {
 	}, httpOkPredicate)
 }
 
+func (h *Tester) TestDeletedAPI(url string) error {
+	return h.withRetries(func()(*http.Response,error ) {
+		return h.client.Get(url)
+	}, NotFoundPredicate)
+}
+
 func (h *Tester) withRetries(httpCall func() (*http.Response, error), shouldRetry func(*http.Response) bool) error {
 
 	if err := retry.Do(func() error {
@@ -76,4 +82,8 @@ func httpOkPredicate(response *http.Response) bool {
 func httpUnauthorizedPredicate(response *http.Response) bool {
 	return response.StatusCode != 401
 
+}
+
+func NotFoundPredicate(response *http.Response) bool {
+	return response.StatusCode == http.StatusNotFound
 }

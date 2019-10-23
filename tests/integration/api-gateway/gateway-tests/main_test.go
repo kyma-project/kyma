@@ -52,6 +52,7 @@ type Config struct {
 	Pwd        string `envconfig:"PASSWORD"`
 	ReqTimeout uint   `envconfig:"REQUEST_TIMEOUT"`
 	ReqDelay   uint   `envconfig:"REQUEST_DELAY"`
+	Domain     string `envconfig:"DOMAIN`
 }
 
 func TestApiGatewayIntegration(t *testing.T) {
@@ -130,7 +131,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
 			//}
 
-			assert.NoError(t, tester.TestUnsecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local", testID)))
+			assert.NoError(t, tester.TestUnsecuredAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 
 			deleteResources(k8sClient, commonResources...)
 
@@ -162,10 +163,11 @@ func TestApiGatewayIntegration(t *testing.T) {
 			token, err := oauth2Cfg.Token(context.Background())
 			assert.Nil(t, err)
 			assert.NotNil(t, token)
-			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local", testID), token.AccessToken))
+			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
 
 			deleteResources(k8sClient, commonResources...)
 
+			assert.NoError(t, tester.TestDeletedAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 			fmt.Println("test finished")
 		})
 	})
