@@ -48,12 +48,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 	var hydraAddr string
 	var user string
 	var pwd string
-	var reqTimeout int
+	var reqTimeout uint
+	var reqDelay uint
 
 	flag.StringVar(&hydraAddr, "hydra-address", "", "Hydra service address")
 	flag.StringVar(&user, "user", "", "User login to fetch JWT token")
 	flag.StringVar(&pwd, "password", "", "User password to fetch JWT token")
-	flag.IntVar(&reqTimeout, "request-timeout", 5, "Delay (in seconds) after which requests to API fail")
+	flag.UintVar(&reqTimeout, "request-timeout", 60, "Time (in seconds) after which requests to API fail")
+	flag.UintVar(&reqDelay, "request-delay", 5, "Delay (in seconds) between requests to API")
 
 	flag.Parse()
 
@@ -66,14 +68,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 		TokenURL:     fmt.Sprintf("https://%s/oauth2/token", hydraAddr),
 		Scopes:       []string{"read"},
 	}
+
 	httpClient, err := ingressgateway.FromEnv().Client()
 
-	retryOpts := []retry.Option{
-		retry.Delay(time.Second * 5),
-		retry.Attempts(12),
+	tester := api.NewTester(httpClient, []retry.Option{
+		retry.Delay(time.Duration(reqDelay) * time.Second),
+		retry.Attempts(reqTimeout / reqDelay),
 		retry.DelayType(retry.FixedDelay),
-	}
-	tester := api.NewTester(httpClient, retryOpts)
+	})
 
 	k8sClient := getDynamicClient()
 
@@ -150,6 +152,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			//}
 			token, err := oauth2Cfg.Token(context.Background())
 			assert.Nil(t, err)
+			assert.NotNil(t, token)
 			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local", testID), token.AccessToken))
 
 			deleteResources(k8sClient, commonResources...)
