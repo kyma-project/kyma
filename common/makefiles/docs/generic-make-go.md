@@ -13,17 +13,30 @@ For local usage, you need:
 * [goimports](https://godoc.org/golang.org/x/tools/cmd/goimports)
 * [dep](https://github.com/golang/dep) v0.5.1 or higher
 * [Mockery](github.com/vektra/mockery)
+
+## Add the generic Makefile
+To add the generic Makefile to your Makefile, add these variables and the statement:
+```makefile
+APP_NAME = {APPLICATION NAME}
+APP_PATH = {APPLICATION PATH IN REPOSITORY}
+BUILDPACK = {BUILDPACK IMAGE}
+SCRIPTS_DIR = {GENERIC MAKEFILE PATH} 
+include $(SCRIPTS_DIR)/generic-make-go.mk
+```
+Find the list of available buildpack images [here](https://github.com/kyma-project/test-infra/blob/master/templates/config.yaml).
+
 ## Usage
-This is the basic syntax used in the generic Makefile:
+This is the basic syntax used in Makefiles:
 ```bash
 make {RULE}
 ```
 
-The default rule is `verify`, which means that when you run `make` without specifying any rule, the `verify` rule is executed.
+The default rule in the generic Makefile is `verify`, which means that when you run `make` without specifying any rule, the `verify` rule is executed.
 It runs tests, checks formatting and imports, and runs error checks.
 
 These are the possible rules that you can use:
->**NOTE:** Rules without the `-local` suffix are used inside a Docker container and in the CI environment.
+>**NOTE:** Rules without the `-local` suffix are used inside the Docker container.
+The Docker container is used in the CI environment.
 
 | Rule                              | Description                                                    |
 |-----------------------------------|----------------------------------------------------------------|
@@ -40,26 +53,16 @@ These are the possible rules that you can use:
 | ensure, ensure-local              | Run the `dep ensure -v` command which downloads dependencies defined in the `Gopkg.lock` file and updates the file itself.                               |
 | dep-status, dep-status-local      | Run the `dep status -v` command which prints the status of project dependencies.                                         |
 | build, build-local                | Build Go binary.                                               |
-| vet, vet-local                    | Run the `go vet` command.                                      |
+| vet, vet-local                    | Run the `go vet` command which examines Go source code.                                      |
 | build-image                       | Builds a Docker image used in the CI environment.                 |
 | push-image                        | Pushes the image to the image registry used in the CI environment.           |
 
-### Use generic Makefile
-To add generic Makefile, add to your Makefile following things and fill the variables.
-```makefile
-APP_NAME = {APPLICATION NAME}
-APP_PATH = {APPLICATION PATH IN REPOSITORY}
-BUILDPACK = {BUILDPACK IMAGE}
-SCRIPTS_DIR = {GENERIC MAKEFILE PATH} 
-include $(SCRIPTS_DIR)/generic-make-go.mk
-```
-Find the list of available images [here](https://github.com/kyma-project/test-infra/blob/master/templates/config.yaml).
-
 ### Example workflow 
 The generic Makefile is used by the CI.
-When CI run`make release` the following steps are executed:
-- rule `release` depends on rules `resolve dep-status verify build-image push-image`
-- rule`resolve` does not appear in the Makefile, but it's generated. 
+When a job is triggered, the CI runs the `make release` command.
+The `release` rule depends on the `resolve`, `dep-status`, `verify`, `build-image`, and `push-image` rules.
+Although these rules do not appear in the Makefile, they are generated. 
+ 
 The generic Makefile contains such a line of code:
 ```makefile
 MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate pull-licenses gqlgen
@@ -77,23 +80,25 @@ As you can see, the `resolve-local` rule is executed inside the container.
 If the `resolve` rule passes, the next rules are executed.
 If any rule fails, the Makefile also aborts the execution and fails as well.
 
-List of available BUILDPACK_FUNCTIONS, which generates target dynamically:
-- buildpack-mount - create rule and mount component directory as volume
-- buildpack-cp-ro - create rule and copy components files to docker container.
+There are two available **BUILDPACK_FUNCTIONS** which generate the rule dynamically:
+- `buildpack-mount` - creates the rule and mounts component's directory as volume
+- `buildpack-cp-ro` - creates the rule and copies component's files to a Docker container
 
-These are the possible target types that contain rules:
-- `MOUNT_TARGET` - contains rules which are dynamically created by the `buildpack-mount` function
-- `COPY_TARGET` - contains rules which are dynamically created by the `buildpack-cp-ro` function
+These are two variables which contain rules names that are created dynamically:
+- **MOUNT_TARGET** - contains rules which are dynamically created by the `buildpack-mount` function
+- **COPY_TARGET** - contains rules which are dynamically created by the `buildpack-cp-ro` function
 
 ## Adjust the generic Makefile
+
 ### Disable the current rule in the local Makefile
 To disable a rule in the new Makefile, follow it with the semicolon `;`.
 For example, write: `{RULE}: ;`.
 The warning will appear on the console but the rule will be disabled.
+
 ### Add a new local rule that doesn't need `BUILDPACK`
-To add a new local rule that doesn't need `BUILDPACK`, define a rule in the local Makefile and add this rule to one of the  global rule:
+To add a new local rule that doesn't need `BUILDPACK`, define a rule in the local Makefile and add this rule to one of the global rule:
 ```makefile
-verify:: own-rule
+verify:: {YOUR_RULE}
 ```
 
 ### Add a new local rule that needs `BUILDPACK`
@@ -101,7 +106,8 @@ To add a new local rule that needs `BUILDPACK`, define a rule in the local Makef
 ```makefile
 {RULE}-local: {COMMANDS}
 
-$(eval $(call {BUILDPACK_FUNCTION},my-rule)) # function which will create the new rule
+# Function which creates the new rule dynamically
+$(eval $(call {BUILDPACK_FUNCTION},my-rule)) 
 ```
 
 ### Add a new rule in the generic Makefile
@@ -109,5 +115,4 @@ To add a new rule in the generic Makefile, define a new local rule in the `gener
 ```makefile
 {YOUR_RULE}-local:  {COMMANDS}
 ```
-
-Append rule name to the `MOUNT_TARGETS` or `COPY_TARGETS` variables.
+Then, add {YOUR_RULE} to the **MOUNT_TARGETS** or **COPY_TARGETS** variables.
