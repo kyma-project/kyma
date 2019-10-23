@@ -2,7 +2,6 @@ package reload
 
 import (
 	"crypto/tls"
-	"fmt"
 	"net/http"
 	"sync"
 
@@ -22,9 +21,6 @@ type ReloadableTLSCertProvider struct {
 }
 
 //NewReloadableTLSCertProvider creates a new instance of ReloadableTLSCertProvider.
-//notifier parameter is used register a data reloading callback.
-//External code can make use of this callback to trigger data reloading from outside.
-//It's safe to trigger reloading from other goroutines.
 func NewReloadableTLSCertProvider(constructor TLSCertConstructor) (*ReloadableTLSCertProvider, error) {
 
 	result := &ReloadableTLSCertProvider{
@@ -42,6 +38,7 @@ func NewReloadableTLSCertProvider(constructor TLSCertConstructor) (*ReloadableTL
 }
 
 //Reload reloads the internal instance.
+//It's safe to call it from other goroutines.
 func (ckpr *ReloadableTLSCertProvider) Reload() {
 	err := ckpr.reload()
 	if err != nil {
@@ -91,20 +88,19 @@ func (tlsh *TLSCrtKeyPairHolder) Set(v *tls.Certificate) {
 }
 
 //AuthReqConstructor knows how to construct an authn.CancellableAuthRequest instance
-type AuthReqConstructor func() (authn.CancellableAuthRequest, error)
+type CancellableAuthReqestConstructor func() (authn.CancellableAuthRequest, error)
 
 //ReloadableAuthReq enables to create and re-create an instance of authenticator.Request in a thread-safe way.
 //It's used to re-create authenticator.Request instance every time a change in oidc-ca-file is detected.
 //It implements authenticator.Request interface so it can be easily plugged in instead of a "real" instance.
 type ReloadableAuthReq struct {
-	constructor AuthReqConstructor
-	holder      *AuthReqHolder
+	constructor CancellableAuthReqestConstructor
+	holder      *AuthenticatorRequestHolder
 }
 
 //NewReloadableAuthReq creates a new instance of ReloadableAuthReq.
-//notifier parameter allows to control when the instance is re-created from outside.
-//It's safe to trigger re-creation from other goroutines.
-func NewReloadableAuthReq(constructor AuthReqConstructor) (*ReloadableAuthReq, error) {
+//It requires a constructor to re-create the internal instance once Reload() is invoked.
+func NewReloadableAuthReq(constructor CancellableAuthReqestConstructor) (*ReloadableAuthReq, error) {
 	result := ReloadableAuthReq{
 		constructor: constructor,
 		holder:      NewAuthReqHolder(),
@@ -120,6 +116,7 @@ func NewReloadableAuthReq(constructor AuthReqConstructor) (*ReloadableAuthReq, e
 }
 
 //Reload reloads internal instance.
+//It's safe to call it from other goroutines.
 func (rar *ReloadableAuthReq) Reload() {
 	err := rar.reload()
 	if err != nil {
@@ -128,20 +125,21 @@ func (rar *ReloadableAuthReq) Reload() {
 }
 
 //reloads the internal instance using provided constructor function
+//Because OIDC Authenticators spawn their own goroutines, it also cancels the old object upon creating a new one.
 //Note: It must NOT modify the existing value in case of an error!
 func (rar *ReloadableAuthReq) reload() error {
-	newAuthReq, err := rar.constructor()
+	newObject, err := rar.constructor()
 	if err != nil {
 		return err
 	}
 
-	oldAuthReq := rar.holder.Get()
-	if oldAuthReq != nil {
+	oldObject := rar.holder.Get()
+	if oldObject != nil {
 		glog.Info("Cancelling previous OIDC Authenticator instance")
-		oldAuthReq.Cancel()
+		oldObject.Cancel()
 	}
 
-	rar.holder.Set(newAuthReq)
+	rar.holder.Set(newObject)
 	return nil
 }
 
@@ -151,27 +149,27 @@ func (rar *ReloadableAuthReq) AuthenticateRequest(req *http.Request) (*authentic
 	return rar.holder.Get().AuthenticateRequest(req)
 }
 
-//AuthReqHolder keeps an authenticator.Request and an authn.AuthenticatorCancelFunc instance.
+//AuthenticatorRequestHolder keeps an authenticator.Request instance.
 //It allows for Get/Set operations in a thread-safe way
-type AuthReqHolder struct {
+type AuthenticatorRequestHolder struct {
 	rwmu  sync.RWMutex
 	value authn.CancellableAuthRequest
 }
 
-//NewAuthReqHolder returns new AuthReqHolder instance
-func NewAuthReqHolder() *AuthReqHolder {
-	return &AuthReqHolder{}
+//NewAuthReqHolder returns new AuthenticatorRequestHolder instance
+func NewAuthReqHolder() *AuthenticatorRequestHolder {
+	return &AuthenticatorRequestHolder{}
 }
 
-//Get returns the instances stored in the AuthReqHolder
-func (arh *AuthReqHolder) Get() authn.CancellableAuthRequest {
+//Get returns the instances stored in the AuthenticatorRequestHolder
+func (arh *AuthenticatorRequestHolder) Get() authn.CancellableAuthRequest {
 	arh.rwmu.RLock()
 	defer arh.rwmu.RUnlock()
 	return arh.value
 }
 
-//Set stores given instances in the AuthReqHolder
-func (arh *AuthReqHolder) Set(v authn.CancellableAuthRequest) {
+//Set stores given instances in the AuthenticatorRequestHolder
+func (arh *AuthenticatorRequestHolder) Set(v authn.CancellableAuthRequest) {
 	arh.rwmu.Lock()
 	defer arh.rwmu.Unlock()
 	arh.value = v

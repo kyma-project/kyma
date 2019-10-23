@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/gorilla/handlers"
-	r "github.com/kyma-project/kyma/components/apiserver-proxy/cmd/proxy/reload"
+	"github.com/kyma-project/kyma/components/apiserver-proxy/cmd/proxy/reload"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/spdy"
 
 	"github.com/golang/glog"
@@ -149,21 +149,21 @@ func main() {
 		glog.Fatalf("Failed to instantiate Kubernetes client: %v", err)
 	}
 
-	var athntctr authenticator.Request
+	var oidcAuthenticator authenticator.Request
 
 	fileWatcherCtx, fileWatcherCtxCancel := context.WithCancel(context.Background())
 
 	// If OIDC configuration provided, use oidc authenticator
 	if cfg.auth.Authentication.OIDC.IssuerURL != "" {
 
-		athntctr, err = setupReloadableOIDCAuthr(fileWatcherCtx, cfg.auth.Authentication.OIDC)
+		oidcAuthenticator, err = setupReloadableOIDCAuthenticator(fileWatcherCtx, cfg.auth.Authentication.OIDC)
 		if err != nil {
 			glog.Fatalf("Failed to instantiate OIDC authenticator: %v", err)
 		}
 	} else {
 		//Use Delegating authenticator
 		tokenClient := kubeClient.AuthenticationV1beta1().TokenReviews()
-		athntctr, err = authn.NewDelegatingAuthenticator(tokenClient, cfg.auth.Authentication)
+		oidcAuthenticator, err = authn.NewDelegatingAuthenticator(tokenClient, cfg.auth.Authentication)
 		if err != nil {
 			glog.Fatalf("Failed to instantiate delegating authenticator: %v", err)
 		}
@@ -176,7 +176,7 @@ func main() {
 		glog.Fatalf("Failed to create authorizer: %v", err)
 	}
 
-	authProxy := proxy.New(cfg.auth, authorizer, athntctr)
+	authProxy := proxy.New(cfg.auth, authorizer, oidcAuthenticator)
 
 	if err != nil {
 		glog.Fatalf("Failed to create rbac-proxy: %v", err)
@@ -235,14 +235,14 @@ func main() {
 				NextProtos: []string{"h2"},
 			}
 		} else {
-			rldcp, err := setupReloadableTLSCertProvider(fileWatcherCtx, cfg.tls.certFile, cfg.tls.keyFile)
+			certProvider, err := setupReloadableTLSCertProvider(fileWatcherCtx, cfg.tls.certFile, cfg.tls.keyFile)
 			if err != nil {
 				glog.Fatalf("Failed to create ReloadableTLSCertProvider: %v", err)
 			}
 
 			//Configure srv with GetCertificate function
 			srv.TLSConfig = &tls.Config{
-				GetCertificate: rldcp.GetCertificateFunc,
+				GetCertificate: certProvider.GetCertificateFunc,
 			}
 		}
 
@@ -375,7 +375,7 @@ func deleteUpstreamCORSHeaders(r *http.Response) error {
 	return nil
 }
 
-func setupReloadableOIDCAuthr(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) (authenticator.Request, error) {
+func setupReloadableOIDCAuthenticator(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) (authenticator.Request, error) {
 	const eventBatchDelaySeconds = 10
 	filesToWatch := []string{cfg.CAFile}
 
@@ -385,19 +385,19 @@ func setupReloadableOIDCAuthr(fileWatcherCtx context.Context, cfg *authn.OIDCCon
 		return authn.NewOIDCAuthenticator(cfg)
 	}
 
-	athntctr, err := r.NewReloadableAuthReq(authReqConstructorFunc)
+	result, err := reload.NewReloadableAuthReq(authReqConstructorFunc)
 	if err != nil {
 		return nil, err
 	}
 
 	//Setup file watcher
-	oidcCAFileWatcher := r.NewWatcher("oidc-ca-dex-tls-cert", filesToWatch, eventBatchDelaySeconds, athntctr.Reload)
+	oidcCAFileWatcher := reload.NewWatcher("oidc-ca-dex-tls-cert", filesToWatch, eventBatchDelaySeconds, result.Reload)
 	go oidcCAFileWatcher.Run(fileWatcherCtx)
 
-	return athntctr, nil
+	return result, nil
 }
 
-func setupReloadableTLSCertProvider(fileWatcherCtx context.Context, certFile, keyFile string) (*r.ReloadableTLSCertProvider, error) {
+func setupReloadableTLSCertProvider(fileWatcherCtx context.Context, certFile, keyFile string) (*reload.ReloadableTLSCertProvider, error) {
 	const eventBatchDelaySeconds = 10
 
 	//Create ReloadableTLSCertProvider
@@ -406,14 +406,14 @@ func setupReloadableTLSCertProvider(fileWatcherCtx context.Context, certFile, ke
 		res, err := tls.LoadX509KeyPair(certFile, keyFile)
 		return &res, err
 	}
-	rldcp, err := r.NewReloadableTLSCertProvider(tlsConstructorFunc)
+	result, err := reload.NewReloadableTLSCertProvider(tlsConstructorFunc)
 	if err != nil {
 		return nil, err
 	}
 
 	//Start file watcher for certificate files
-	tlsCertFileWatcher := r.NewWatcher("main-tls-crt/key", []string{certFile, keyFile}, eventBatchDelaySeconds, rldcp.Reload)
+	tlsCertFileWatcher := reload.NewWatcher("main-tls-crt/key", []string{certFile, keyFile}, eventBatchDelaySeconds, result.Reload)
 	go tlsCertFileWatcher.Run(fileWatcherCtx)
 
-	return rldcp, nil
+	return result, nil
 }
