@@ -190,14 +190,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 			// create common resources from files
 			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
 			if err != nil {
-				panic(err)
+				t.Fatalf("failed to process common manifest files for test %s, details %s", t.Name(),err.Error())
 			}
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
 			oauthStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(jwtAndOauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
 			if err != nil {
-				panic(err)
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(),err.Error())
 			}
 			createResources(k8sClient, oauthStrategyApiruleResource...)
 
@@ -212,7 +212,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			tokenJWT, err := jwt.Authenticate(jwtConfig.IdProviderConfig)
 			if err != nil {
-				log.Fatal(err)
+				t.Fatalf("failed to fetch and id_token. %s", err.Error())
 			}
 
 			assert.Nil(t, err)
