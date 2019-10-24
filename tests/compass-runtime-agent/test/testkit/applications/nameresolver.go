@@ -29,8 +29,8 @@ func NewNameResolver(namespace string) *NameResolver {
 }
 
 // GetResourceName returns resource name with given ID
-func (resolver *NameResolver) GetResourceName(applicaton, id string) string {
-	return getResourceNamePrefix(applicaton) + id
+func (resolver *NameResolver) GetResourceName(application, id string) string {
+	return getResourceNamePrefix(application) + id
 }
 
 func (resolver *NameResolver) GetCredentialsSecretName(application, id string) string {
@@ -49,31 +49,31 @@ func (resolver *NameResolver) GetRequestParamsSecretName(application, id string)
 }
 
 // GetGatewayUrl return gateway url with given ID
-func (resolver *NameResolver) GetGatewayUrl(applicaton, id string) string {
-	return fmt.Sprintf(metadataUrlFormat, resolver.GetResourceName(applicaton, id), resolver.namespace)
+func (resolver *NameResolver) GetGatewayUrl(application, id string) string {
+	return fmt.Sprintf(metadataUrlFormat, resolver.GetResourceName(application, id), resolver.namespace)
 }
 
 // ExtractServiceId extracts service ID from given host
-func (resolver *NameResolver) ExtractServiceId(applicaton, host string) string {
+func (resolver *NameResolver) ExtractServiceId(application, host string) string {
 	resourceName := strings.Split(host, ".")[0]
-	return strings.TrimPrefix(resourceName, getResourceNamePrefix(applicaton))
+	return strings.TrimPrefix(resourceName, getResourceNamePrefix(application))
 }
 
-func getResourceNamePrefix(applicaton string) string {
-	truncatedApplicaton := truncateApplicaton(applicaton)
+func getResourceNamePrefix(application string) string {
+	truncatedApplicaton := truncateApplication(application)
 	return fmt.Sprintf(resourceNamePrefixFormat, truncatedApplicaton)
 }
 
-func truncateApplicaton(applicaton string) string {
+func truncateApplication(application string) string {
 	maxResourceNamePrefixLength := maxResourceNameLength - uuidLength
-	testResourceNamePrefix := fmt.Sprintf(resourceNamePrefixFormat, applicaton)
+	testResourceNamePrefix := fmt.Sprintf(resourceNamePrefixFormat, application)
 	testResourceNamePrefixLength := len(testResourceNamePrefix)
 
 	overflowLength := testResourceNamePrefixLength - maxResourceNamePrefixLength
 
 	if overflowLength > 0 {
-		newApplicationLength := len(applicaton) - overflowLength
-		return applicaton[0:newApplicationLength]
+		newApplicationLength := len(application) - overflowLength
+		return application[0:newApplicationLength]
 	}
-	return applicaton
+	return application
 }
