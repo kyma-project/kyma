@@ -10,11 +10,6 @@ on_error() {
 }
 trap on_error ERR
 
-on_exit() {
-    popd > /dev/null
-}
-trap on_exit EXIT
-
 readonly KYMA_PROJECT_IO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 readonly WEBSITE_DIR="website"
@@ -43,6 +38,7 @@ copy-website-repo() {
 }
 
 build-preview() {
+  export PREVIEW_SOURCE_DIR="${KYMA_PROJECT_IO_DIR}/.." 
   make -C "${BUILD_DIR}" netlify-docs-preview
 }
 
