@@ -20,6 +20,6 @@ spec:
 {{ tpl (toYaml .Values.istio.rbac.connectorInternalApi.subjects | indent 4) . }}
   roleRef:
     kind: ServiceRole
-    name: {{ .Chart.Name }}-internal
+    name: {{ template "fullname" . }}-internal
 ---
 {{ end }}
