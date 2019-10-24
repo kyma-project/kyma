@@ -2,14 +2,15 @@ package api_test
 
 import (
 	"fmt"
-	"github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/api"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
 	"time"
+
+	"github.com/avast/retry-go"
+	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/api"
+	"github.com/stretchr/testify/assert"
 )
 
 const testToken = "ZYqT86bNtVT-QViFpKGsmlnKGpovxVCQ8cMGsQQVU8A.WQC8MchDy-uyW2iIdqW7m26yZwmGAk_I6cR-YO-IiPY"
@@ -46,7 +47,7 @@ func TestTestUnsecuredAPI(t *testing.T) {
 	t.Run("should return no error if the endpoint is not secured", func(t *testing.T) {
 
 		//when
-		err := tester.TestUnsecuredAPI(unsecuredEndpoint)
+		err := tester.TestUnsecuredEndpoint(unsecuredEndpoint)
 
 		//then
 		assert.NoError(t, err)
@@ -55,7 +56,7 @@ func TestTestUnsecuredAPI(t *testing.T) {
 	t.Run("should return an error if the endpoint is secured", func(t *testing.T) {
 
 		//when
-		err := tester.TestUnsecuredAPI(securedEndpoint)
+		err := tester.TestUnsecuredEndpoint(securedEndpoint)
 
 		//then
 		assert.Error(t, err)
@@ -73,7 +74,7 @@ func TestTestSecuredAPI(t *testing.T) {
 		t.Run(fmt.Sprintf("case: call secured API should %s has been included in the request", desc), func(t *testing.T) {
 
 			//when
-			err := tester.TestSecuredAPI(securedEndpoint, token)
+			err := tester.TestSecuredEndpoint(securedEndpoint, token)
 
 			//then
 			if token == testToken {
