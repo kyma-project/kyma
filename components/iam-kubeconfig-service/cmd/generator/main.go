@@ -56,15 +56,16 @@ func main() {
 	router.Use(authn.AuthMiddleware(oidcAuthenticator))
 	router.Methods("GET").Path("/kube-config").HandlerFunc(kubeConfigEndpoints.GetKubeConfig)
 
+	term := make(chan os.Signal)
+	signal.Notify(term, os.Interrupt, syscall.SIGTERM)
+
 	go func() {
 		err := http.ListenAndServe(":"+strconv.Itoa(cfg.port), router)
 		log.Errorf("Error serving HTTP: %v", err)
+		term <- os.Interrupt
 	}()
 
 	log.Infof("IAM kubeconfig service started on port: %d...", cfg.port)
-
-	term := make(chan os.Signal)
-	signal.Notify(term, os.Interrupt, syscall.SIGTERM)
 
 	select {
 	case <-term:
