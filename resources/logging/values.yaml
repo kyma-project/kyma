@@ -156,7 +156,7 @@ loki:
           schema: v9
           index:
             prefix: index_
-            period: 144h
+            period: 24h
     server:
       http_listen_port: 3100
     storage_config:
@@ -168,7 +168,7 @@ loki:
       max_look_back_period: 0
     table_manager:
       retention_deletes_enabled: true 
-      retention_period: 144h
+      retention_period: 24h
 
 promtail:
 
