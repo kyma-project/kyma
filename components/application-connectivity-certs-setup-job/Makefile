@@ -1,9 +1,9 @@
 APP_NAME = application-connectivity-certs-setup-job
 APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20191011-51ed45a
-SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/scripts
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-include $(SCRIPTS_DIR)/go-dep.mk
+include $(SCRIPTS_DIR)/generic-make-go.mk
 
 VERIFY_IGNORE := /vendor\|/mocks
 
@@ -20,4 +20,4 @@ verify:: vet
 # Check if tests passed
 # GO FMT
 # GO VET
-# here
+# here# here# here
