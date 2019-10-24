@@ -135,8 +135,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
-			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ APIname string
-			TestID string }{APIname : "unsecured", TestID: testID})
+			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ NamePrefix string
+			TestID string }{NamePrefix : "unsecured", TestID: testID})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -164,8 +164,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
-			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ APIname string
-			TestID string }{APIname : "oauth2", TestID: testID})
+			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ NamePrefix string
+			TestID string }{NamePrefix: "oauth2", TestID: testID})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -236,8 +236,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
-			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ APIname string
-			TestID string }{APIname: "oauth2",TestID: testID})
+			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ NamePrefix string
+			TestID  string }{NamePrefix: "oauth2",TestID: testID})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -249,10 +249,10 @@ func TestApiGatewayIntegration(t *testing.T) {
 			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
 
 			//Update API to give plain access
-			apiNameToUpdate := strings.TrimSuffix(resources[0].GetName(), "-"+testID)
+			namePrefix := strings.TrimSuffix(resources[0].GetName(), "-"+testID)
 
-			unsecuredApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ APIname string
-				TestID string }{APIname : apiNameToUpdate, TestID: testID})
+			unsecuredApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ NamePrefix string
+				TestID  string }{NamePrefix: namePrefix, TestID: testID})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -277,8 +277,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
-			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ APIname string
-				TestID string }{APIname : "unsecured", TestID: testID})
+			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ NamePrefix string
+				TestID string }{NamePrefix : "unsecured", TestID: testID})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -288,10 +288,10 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			//update to secure API
 
-			apiNameToUpdate := strings.TrimSuffix(noAccessStrategyApiruleResource[0].GetName(), "-"+testID)
+			namePrefix := strings.TrimSuffix(noAccessStrategyApiruleResource[0].GetName(), "-"+testID)
 
-			securedApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ APIname string
-				TestID string }{APIname : apiNameToUpdate, TestID: testID})
+			securedApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ NamePrefix string
+				TestID string }{NamePrefix : namePrefix, TestID: testID})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -317,8 +317,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
-			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ APIname string
-				TestID string }{APIname : "unsecured", TestID: testID})
+			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ NamePrefix string
+				TestID string }{NamePrefix : "unsecured", TestID: testID})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
