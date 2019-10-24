@@ -31,5 +31,6 @@ RUN apk update &&\
 	mv kubectl /usr/local/bin/kubectl
 
 COPY --from=builder /test /test
+COPY gateway-tests/manifests /test/manifests
 
 ENTRYPOINT ["/test/app.test"]
