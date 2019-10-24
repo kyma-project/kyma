@@ -11,7 +11,7 @@ import (
 
 //CreateResource creates a given k8s resource
 func CreateResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, manifest unstructured.Unstructured) {
-	result, err := client.Resource(resourceSchema).Namespace(namespace).Create(&manifest, metav1.CreateOptions{})
+	_, err := client.Resource(resourceSchema).Namespace(namespace).Create(&manifest, metav1.CreateOptions{})
 	if err != nil {
 		panic(err)
 	}
@@ -26,7 +26,7 @@ func UpdateResource(client dynamic.Interface, resourceSchema schema.GroupVersion
 		panic(err)
 	}
 	updateTo.SetResourceVersion(toUpdate.GetResourceVersion())
-	result, err := client.Resource(resourceSchema).Namespace(namespace).Update(&updateTo, metav1.UpdateOptions{})
+	_, err = client.Resource(resourceSchema).Namespace(namespace).Update(&updateTo, metav1.UpdateOptions{})
 	if err != nil {
 		panic(err)
 	}
