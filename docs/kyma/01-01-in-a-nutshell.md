@@ -3,8 +3,6 @@ title: In a nutshell
 type: Overview
 ---
 
-dupa
-
 Kyma allows you to connect applications and third-party services in a cloud-native environment. Use it to create extensions for the existing systems, regardless of the language they are written in. Customize extensions with minimum effort and time devoted to learning their configuration details.
 
 Focus purely on coding with these out-of-the-box functionalities at hand:
