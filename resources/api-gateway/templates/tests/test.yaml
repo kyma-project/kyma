@@ -41,11 +41,13 @@ spec:
                 name: {{ .Values.tests.env.testUser }}
                 key: password
           - name: TEST_REQUEST_TIMEOUT
-            value: {{ .Values.tests.env.timeout }}
+            value: {{ .Values.tests.env.timeout | quote }}
           - name: TEST_REQUEST_DELAY
-            value: {{ .Values.tests.env.delay }}
+            value: {{ .Values.tests.env.delay | quote }}
           - name: INGRESSGATEWAY_ADDRESS
             value: istio-ingressgateway.istio-system.svc.cluster.local
+          - name: DOMAIN
+            value: {{ .Values.global.ingress.domainName }}
       restartPolicy: Never
 {{- end }}
 {{- end }}
