@@ -2,19 +2,16 @@
 # Script for build preview of this repo like in https://kyma-project.io/docs/ on every PR.
 # For more information, please contact with: @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
-set -e
-set -o pipefail
-
-pushd "$(pwd)" > /dev/null
+set -eo pipefail
 
 on_error() {
-  echo -e "${RED}✗ Failed${NC}"
-  exit 1
+    echo -e "${RED}✗ Failed${NC}"
+    exit 1
 }
 trap on_error ERR
 
 on_exit() {
-  popd > /dev/null
+    popd > /dev/null
 }
 trap on_exit EXIT
 
@@ -24,8 +21,6 @@ readonly WEBSITE_DIR="website"
 readonly WEBSITE_REPO="https://github.com/magicmatatjahu/website"
 
 readonly BUILD_DIR="${KYMA_PROJECT_IO_DIR}/${WEBSITE_DIR}"
-
-#"https://github.com/kyma-project/website"
 
 # Colors
 readonly RED='\033[0;31m'
@@ -44,11 +39,11 @@ step() {
 }
 
 copy-website-repo() {
-  git clone -b "docs-community-preview" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
+  git clone -b "preview-stateless" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
 }
 
 build-preview() {
-  make -C "${BUILD_DIR}" netlify-kyma-preview
+  make -C "${BUILD_DIR}" netlify-docs-preview
 }
 
 main() {
