@@ -78,8 +78,9 @@ func (p *SetNatsChannelOwnerReference) Execute(input *velero.RestoreItemActionEx
 }
 
 func (p *SetNatsChannelOwnerReference) inClusterClient() (*kubernetes.Clientset, error) {
-	config, err := p.inClusterConfig()
+	config, err := rest.InClusterConfig()
 	if err != nil {
+		p.Log.Errorf("Error getting InClusterConfig: %v", err.Error())
 		return nil, err
 	}
 	clientset, err := kubernetes.NewForConfig(config)
@@ -89,13 +90,4 @@ func (p *SetNatsChannelOwnerReference) inClusterClient() (*kubernetes.Clientset,
 	}
 
 	return clientset, nil
-}
-
-func (p *SetNatsChannelOwnerReference) inClusterConfig() (*rest.Config, error) {
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		p.Log.Errorf("Error getting InClusterConfig: %v", err.Error())
-		return nil, err
-	}
-	return config, nil
 }
