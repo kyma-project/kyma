@@ -132,11 +132,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:70b2bf25c4ed23c61dae668e4151d87a7edc5965bc3ccfecd1b9fe5f1752092a"
+  digest = "1:b871c96bb078cbd962a1044687058f2def71b2fb6bc9e8e70fc2f03953459baa"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "742c48ecaeb7c624c475e02f3eb0827ebb4970d4"
+  revision = "e66fe6eb8e0cbfacade8b490cf55cd2494f4db62"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -183,7 +183,7 @@
     "internal/span",
   ]
   pruneopts = "UT"
-  revision = "0bbdf54effa2d03a4c877d09c98ecf9f5bcfb964"
+  revision = "9525425c6f025712dbab52333bbe1574437bac61"
 
 [[projects]]
   digest = "1:e0a1881f9e0564bebdeac98c75e59f07acdde6ed3a5396e0e613eaad31194866"
@@ -232,7 +232,7 @@
     "pkg/util/wait",
   ]
   pruneopts = "UT"
-  revision = "6c8691705fc5427b8f3866dafc1ee47c1cd8f081"
+  revision = "62ce3d1e6a82ef595e5c3fd80a6cf8a8f53566b4"
 
 [[projects]]
   digest = "1:3c18189c0470d0e1bc194cc492efabe26e833707e5376c84b4c7215d84785811"
@@ -244,8 +244,19 @@
     "plugin/pkg/authenticator/token/oidc",
   ]
   pruneopts = "UT"
-  revision = "bfa5e2e684ad413c22fd0dab55b2592af1ead049"
-  version = "kubernetes-1.16.0"
+  revision = "92cc630367d00d05752f0cf0d6eca534bcd1e5a3"
+  version = "kubernetes-1.15.3"
+
+[[projects]]
+  digest = "1:2813fd1f64c4df2d641501461cb1c10610fdbe1dcd86fbcef19fc76c6dd1ae2c"
+  name = "k8s.io/client-go"
+  packages = [
+    "util/cert",
+    "util/keyutil",
+  ]
+  pruneopts = "UT"
+  revision = "e14f31a72a77f7aa82a95eaf542d1194fb027d04"
+  version = "kubernetes-1.15.3"
 
 [[projects]]
   digest = "1:93e82f25d75aba18436ad1ac042cb49493f096011f2541075721ed6f9e05c044"
