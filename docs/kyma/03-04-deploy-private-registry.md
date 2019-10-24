@@ -26,6 +26,7 @@ kubectl create secret docker-registry {secret-name} --docker-server={registry FQ
 ```
 
 Refer to the following example:
+
 ```bash
 kubectl create secret docker-registry docker-registry-secret --docker-server=myregistry:5000 --docker-username=root --docker-password=password --docker-email=example@github.com --namespace=production
 ```
@@ -38,38 +39,39 @@ The Secret is associated with a specific Namespace. In the example, the Namespac
 
 2. Describe your deployment in the `.yml` file. Refer to the following example:
 
-```yaml
-apiVersion: apps/v1beta2
-kind: Deployment
-metadata:
-  namespace: production # {production/stage/qa}
-  name: my-deployment # Specify the deployment name.
-  annotations:
-    sidecar.istio.io/inject: true
-spec:
-  replicas: 3 # Specify your replica - how many instances you want from that deployment.
-  selector:
-    matchLabels:
-      app: app-name # Specify the app label. It is optional but it is a good practice.
-  template:
-    metadata:
-      labels:
-        app: app-name # Specify app label. It is optional but it is a good practice.
-        version: v1 # Specify your version.
-    spec:
-      containers:
-      - name: container-name # Specify a meaningful container name.
-        image: myregistry:5000/user-name/image-name:latest # Specify your image {registry FQN/your-username/your-space/image-name:image-version}.
-        ports:
-          - containerPort: 80 # Specify the port to your image.
-      imagePullSecrets:
-        - name: docker-registry-secret # Specify the same Secret name you generated in the previous step for this Namespace.
-        - name: example-secret-name # Specify your Namespace Secret, named `example-secret-name`.
+   ```yaml
+   apiVersion: apps/v1beta2
+   kind: Deployment
+   metadata:
+     namespace: production # {production/stage/qa}
+     name: my-deployment # Specify the deployment name.
+     annotations:
+       sidecar.istio.io/inject: true
+   spec:
+     replicas: 3 # Specify your replica - how many instances you want from that deployment.
+     selector:
+       matchLabels:
+         app: app-name # Specify the app label. It is optional but it is a good practice.
+     template:
+       metadata:
+         labels:
+           app: app-name # Specify app label. It is optional but it is a good practice.
+           version: v1 # Specify your version.
+       spec:
+         containers:
+         - name: container-name # Specify a meaningful container name.
+           image: myregistry:5000/user-name/image-name:latest # Specify your image {registry FQN/your-username/your-space/image-name:image-version}.
+           ports:
+             - containerPort: 80 # Specify the port to your image.
+         imagePullSecrets:
+           - name: docker-registry-secret # Specify the same Secret name you generated in the previous step for this Namespace.
+           - name: example-secret-name # Specify your Namespace Secret, named `example-secret-name`.
+   ```
 
-```
 3. Submit your deployment file using this command:
 
-```bash
-kubectl apply -f deployment.yml
-```
+   ```bash
+   kubectl apply -f deployment.yml
+   ```
+
 Your deployment is now running on the Kyma cluster.

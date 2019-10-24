@@ -5,9 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
-	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
 	"github.com/pkg/errors"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -32,7 +30,8 @@ func newClusterAsset(dynamicCli dynamic.Interface, clusterBucketName string, wai
 	}
 }
 
-func (a *clusterAsset) CreateMany(assets []assetData) error {
+func (a *clusterAsset) CreateMany(assets []assetData, testID string, callbacks ...func(...interface{})) (string, error) {
+	initialResourceVersion := ""
 	for _, asset := range assets {
 		asset := &v1alpha2.ClusterAsset{
 			TypeMeta: metav1.TypeMeta{
@@ -41,6 +40,9 @@ func (a *clusterAsset) CreateMany(assets []assetData) error {
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: asset.Name,
+				Labels: map[string]string{
+					"test-id": testID,
+				},
 			},
 			Spec: v1alpha2.ClusterAssetSpec{
 				CommonAssetSpec: v1alpha2.CommonAssetSpec{
@@ -54,60 +56,28 @@ func (a *clusterAsset) CreateMany(assets []assetData) error {
 				},
 			},
 		}
-
-		err := a.resCli.Create(asset)
+		resourceVersion, err := a.resCli.Create(asset, callbacks...)
 		if err != nil {
-			return errors.Wrapf(err, "while creating ClusterAsset %s", asset.Name)
+			return initialResourceVersion, errors.Wrapf(err, "while creating ClusterAsset %s", asset.Name)
 		}
+		if initialResourceVersion != "" {
+			continue
+		}
+		initialResourceVersion = resourceVersion
 	}
-
-	return nil
+	return initialResourceVersion, nil
 }
 
-func (a *clusterAsset) WaitForStatusesReady(assets []assetData) error {
-	err := waiter.WaitAtMost(func() (bool, error) {
-
-		for _, asset := range assets {
-			res, err := a.Get(asset.Name)
-			if err != nil {
-				return false, err
-			}
-
-			if res.Status.Phase != v1alpha2.AssetReady {
-				return false, nil
-			}
-		}
-
-		return true, nil
-	}, a.waitTimeout)
-	if err != nil {
-		return errors.Wrapf(err, "while waiting for ready ClusterAsset resources")
+func (a *clusterAsset) WaitForStatusesReady(assets []assetData, initialResourceVersion string, callbacks ...func(...interface{})) error {
+	var assetNames []string
+	for _, asset := range assets {
+		assetNames = append(assetNames, asset.Name)
 	}
-
-	return nil
-}
-
-func (a *clusterAsset) WaitForDeletedResources(assets []assetData) error {
-	err := waiter.WaitAtMost(func() (bool, error) {
-
-		for _, asset := range assets {
-			_, err := a.Get(asset.Name)
-
-			if err == nil {
-				return false, nil
-			}
-
-			if !apierrors.IsNotFound(err) {
-				return false, nil
-			}
-		}
-
-		return true, nil
-	}, a.waitTimeout)
+	waitForStatusesReady := buildWaitForStatusesReady(a.resCli.ResCli, a.waitTimeout, assetNames...)
+	err := waitForStatusesReady(initialResourceVersion, callbacks...)
 	if err != nil {
-		return errors.Wrapf(err, "while deleting ClusterAsset resources")
+		return errors.Wrapf(err, "while waiting for cluster assets to have ready state")
 	}
-
 	return nil
 }
 
@@ -142,13 +112,18 @@ func (a *clusterAsset) Get(name string) (*v1alpha2.ClusterAsset, error) {
 	return &ca, nil
 }
 
-func (a *clusterAsset) DeleteMany(assets []assetData) error {
+func (a *clusterAsset) DeleteMany(assets []assetData, callbacks ...func(...interface{})) error {
 	for _, asset := range assets {
-		err := a.resCli.Delete(asset.Name)
+		err := a.resCli.Delete(asset.Name, a.waitTimeout, callbacks...)
 		if err != nil {
 			return errors.Wrapf(err, "while deleting ClusterAsset %s", asset.Name)
 		}
 	}
-
 	return nil
+}
+
+func (a *clusterAsset) DeleteLeftovers(testId string, callbacks ...func(...interface{})) error {
+	deleteLeftovers := buildDeleteLeftovers(a.resCli.ResCli, a.waitTimeout)
+	err := deleteLeftovers(testId, callbacks...)
+	return err
 }

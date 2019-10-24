@@ -1,6 +1,26 @@
-FROM alpine:3.9
+FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190913-65b55d1 as builder
+
+ENV BASE_DIR /workspace/go/src/github.com/kyma-project/kyma/tests/integration/apiserver-proxy
+WORKDIR ${BASE_DIR}
+
+COPY ./fetch-token/ ${BASE_DIR}/fetch-token/
+COPY ./licenses/ ${BASE_DIR}/licenses/
+COPY ./vendor/ ${BASE_DIR}/vendor/
+COPY ./test.sh ${BASE_DIR}/test.sh
+
+##
+# BUILD FETCH-TOKEN APP
+##
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o ${BASE_DIR}/app ${BASE_DIR}/fetch-token/main.go
+
+##
+# EXTRACT SCRIPT AND BINARY
+##
+RUN mkdir /test && mv ${BASE_DIR}/app /test/app && mv ${BASE_DIR}/test.sh /test/test.sh && mv ${BASE_DIR}/licenses /test/licenses
+
+FROM alpine:3.10
 LABEL source=git@github.com:kyma-project/kyma.git
-WORKDIR /root
+WORKDIR /test
 
 RUN apk update &&\
 	apk add curl bash grep &&\
@@ -8,8 +28,6 @@ RUN apk update &&\
 	chmod +x kubectl &&\
 	mv kubectl /usr/local/bin/kubectl
 
-ADD ./fetch-token/bin/app ./app
-ADD ./test.sh ./test.sh
-COPY ./licenses/ ./licenses
+COPY --from=builder /test /test
 
-ENTRYPOINT ["/bin/bash", "-c", "/root/test.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "/test/test.sh"]

@@ -1,17 +1,23 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"flag"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
+	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/kyma-project/kyma/components/iam-kubeconfig-service/cmd/generator/reload"
 	"github.com/kyma-project/kyma/components/iam-kubeconfig-service/internal/authn"
 	"github.com/kyma-project/kyma/components/iam-kubeconfig-service/pkg/kube_config"
 	log "github.com/sirupsen/logrus"
+	"k8s.io/apiserver/pkg/authentication/authenticator"
 )
 
 const (
@@ -20,21 +26,29 @@ const (
 	clusterNameFlag   = "kube-config-cluster-name"
 	apiserverURLFlag  = "kube-config-url"
 	clusterCAFileFlag = "kube-config-ca-file"
-	oidcCAFileFlag = "oidc-ca-file"
+	oidcCAFileFlag    = "oidc-ca-file"
 )
 
 func main() {
 
 	cfg := readAppConfig()
 
-	log.Infof("Starting IAM kubeconfig service on port: %d...", cfg.port)
+	log.Info("Starting IAM kubeconfig service")
 
-	oidcAuthenticator, err := authn.NewOIDCAuthenticator(&cfg.oidc)
+	fileWatcherCtx, fileWatcherCtxCancel := context.WithCancel(context.Background())
+
+	oidcAuthenticator, err := setupOIDCAuthReloader(fileWatcherCtx, &cfg.oidc)
+
 	if err != nil {
 		log.Fatalf("Cannot create OIDC Authenticator, %v", err)
 	}
 
-	kubeConfig := kube_config.NewKubeConfig(cfg.clusterName, cfg.apiserverURL, cfg.clusterCA, cfg.namespace)
+	clusterCAReloader, err := setupClusterCAValueReloader(fileWatcherCtx, cfg.clusterCAFilePath)
+	if err != nil {
+		log.Fatalf("Cannot create reloadable cluster CA file provider, %v", err)
+	}
+
+	kubeConfig := kube_config.NewKubeConfig(cfg.clusterName, cfg.apiserverURL, clusterCAReloader.GetString, cfg.namespace)
 
 	kubeConfigEndpoints := kube_config.NewEndpoints(kubeConfig)
 
@@ -42,7 +56,25 @@ func main() {
 	router.Use(authn.AuthMiddleware(oidcAuthenticator))
 	router.Methods("GET").Path("/kube-config").HandlerFunc(kubeConfigEndpoints.GetKubeConfig)
 
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(cfg.port), router))
+	term := make(chan os.Signal)
+	signal.Notify(term, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		err := http.ListenAndServe(":"+strconv.Itoa(cfg.port), router)
+		log.Errorf("Error serving HTTP: %v", err)
+		term <- os.Interrupt
+	}()
+
+	log.Infof("IAM kubeconfig service started on port: %d...", cfg.port)
+
+	select {
+	case <-term:
+		log.Info("Received SIGTERM, exiting gracefully...")
+		fileWatcherCtxCancel()
+	}
+
+	//Allow for file watchers to close gracefully
+	time.Sleep(1 * time.Second)
 }
 
 func readAppConfig() *appConfig {
@@ -102,18 +134,16 @@ func readAppConfig() *appConfig {
 		oidcSupportedSigningAlgsArg = []string{"RS256"}
 	}
 
-	clusterCAValue := readCAFromFile(*clusterCAFileArg)
-
 	return &appConfig{
-		port:         *portArg,
-		clusterName:  *clusterNameArg,
-		apiserverURL: *apiserverUrlArg,
-		clusterCA:    clusterCAValue,
-		namespace:    *namespaceArg,
+		port:              *portArg,
+		clusterName:       *clusterNameArg,
+		apiserverURL:      *apiserverUrlArg,
+		clusterCAFilePath: *clusterCAFileArg,
+		namespace:         *namespaceArg,
 		oidc: authn.OIDCConfig{
 			IssuerURL:            *oidcIssuerURLArg,
 			ClientID:             *oidcClientIDArg,
-			CAFile:               *oidcCAFileArg,
+			CAFilePath:           *oidcCAFileArg,
 			UsernameClaim:        *oidcUsernameClaimArg,
 			UsernamePrefix:       *oidcUsernamePrefixArg,
 			GroupsClaim:          *oidcGroupsClaimArg,
@@ -123,23 +153,23 @@ func readAppConfig() *appConfig {
 	}
 }
 
-func readCAFromFile(caFile string) string {
+func readCAFromFile(caFile string) (string, error) {
 
 	caBytes, caErr := ioutil.ReadFile(caFile)
 	if caErr != nil {
-		log.Fatalf("Error while reading Certificate Authority of the Kubernetes cluster. Root cause: %v", caErr)
+		return "", caErr
 	}
 
-	return base64.StdEncoding.EncodeToString(caBytes)
+	return base64.StdEncoding.EncodeToString(caBytes), nil
 }
 
 type appConfig struct {
-	port         int
-	clusterName  string
-	apiserverURL string
-	clusterCA    string
-	namespace    string
-	oidc         authn.OIDCConfig
+	port              int
+	clusterName       string
+	apiserverURL      string
+	clusterCAFilePath string
+	namespace         string
+	oidc              authn.OIDCConfig
 }
 
 //Support for multi-valued flag: -flagName=val1 -flagName=val2 etc.
@@ -162,4 +192,53 @@ func (vals *multiValFlag) String() string {
 func (vals *multiValFlag) Set(value string) error {
 	*vals = append(*vals, value)
 	return nil
+}
+
+func setupOIDCAuthReloader(fileWatcherCtx context.Context, cfg *authn.OIDCConfig) (authenticator.Request, error) {
+	const eventBatchDelaySeconds = 10
+	filesToWatch := []string{cfg.CAFilePath}
+
+	cancelableAuthReqestConstructor := func() (authn.CancelableAuthRequest, error) {
+		log.Infof("creating a new cancelable instance of authenticator.Request...")
+		return authn.NewOIDCAuthenticator(cfg)
+	}
+
+	//Create reloader
+	result, err := reload.NewCancelableAuthReqestReloader(cancelableAuthReqestConstructor)
+	if err != nil {
+		return nil, err
+	}
+
+	//Setup file watcher
+	oidcCAFileWatcher := reload.NewWatcher("oidc-ca-dex-tls-cert", filesToWatch, eventBatchDelaySeconds, result.Reload)
+	go oidcCAFileWatcher.Run(fileWatcherCtx)
+
+	return result, nil
+}
+
+func setupClusterCAValueReloader(fileWatcherCtx context.Context, caFilePath string) (*reload.StringValueReloader, error) {
+	const eventBatchDelaySeconds = 10
+	filesToWatch := []string{caFilePath}
+
+	caDataConstructorFunc := func() (string, error) {
+		log.Infof("Reading Certificate Authority of the Kubernetes cluster from file: %s", caFilePath)
+		caFileData, err := readCAFromFile(caFilePath)
+		if err != nil {
+			log.Errorf("Error while reading Certificate Authority of the Kubernetes cluster. Root cause: %v", err)
+		}
+
+		return caFileData, err
+	}
+
+	//Create reloader
+	result, err := reload.NewStringValueReloader(caDataConstructorFunc)
+	if err != nil {
+		return nil, err
+	}
+
+	//Setup file watcher
+	clusterCAFileWatcher := reload.NewWatcher("cluster-ca-crt", filesToWatch, eventBatchDelaySeconds, result.Reload)
+	go clusterCAFileWatcher.Run(fileWatcherCtx)
+
+	return result, nil
 }

@@ -3,8 +3,8 @@ title: Helm overrides for Kyma installation
 type: Configuration
 ---
 
-Kyma packages its components into [Helm](https://github.com/helm/helm/tree/master/docs) charts that the [Kyma Operator](https://github.com/kyma-project/kyma/tree/master/components/kyma-operator) uses during installation and updates.
-This document describes how to configure the Kyma Installer with new values for Helm [charts](https://github.com/helm/helm/blob/master/docs/charts.md) to override the default settings in `values.yaml` files.
+Kyma packages its components into [Helm](https://helm.sh/docs/) charts that the [Kyma Operator](https://github.com/kyma-project/kyma/tree/master/components/kyma-operator) uses during installation and updates.
+This document describes how to configure the Kyma Installer with new values for Helm [charts](https://helm.sh/docs/developing_charts/) to override the default settings in `values.yaml` files.
 
 ## Overview
 
@@ -43,7 +43,7 @@ Kyma uses component-specific overrides only for the installation of specific com
 
 Overrides for top-level charts are straightforward. Just use the template value from the chart as the entry key in the ConfigMap or Secret. Leave out the `.Values.` prefix.
 
-See an example:
+See the example:
 
 The Installer uses an `asset-store` top-level chart that contains a template with the following value reference:
 

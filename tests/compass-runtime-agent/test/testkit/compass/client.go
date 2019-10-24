@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
+	"reflect"
 
 	"github.com/sirupsen/logrus"
 
@@ -62,6 +63,21 @@ func (c *Client) SetAccessToken(token string) {
 	c.authorizationToken = token
 }
 
+// Runtimes
+
+func (c *Client) GetRuntime(runtimeId string) (Runtime, error) {
+	query := c.queryProvider.getRuntime(runtimeId)
+	req := c.newRequest(query)
+
+	var runtime Runtime
+	err := c.executeRequest(req, &runtime, &Runtime{})
+	if err != nil {
+		return Runtime{}, errors.Wrap(err, "Failed to get Runtime")
+	}
+
+	return runtime, nil
+}
+
 // Scenario labels
 
 func (c *Client) SetupTestsScenario() error {
@@ -105,13 +121,13 @@ func (c *Client) getScenarios() (ScenariosSchema, error) {
 	query := c.queryProvider.labelDefinition(ScenariosLabelName)
 	req := c.newRequest(query)
 
-	var response ScenarioLabelDefinitionResponse
-	err := c.client.Run(context.Background(), req, &response)
+	var labelDefinition ScenarioLabelDefinition
+	err := c.executeRequest(req, &labelDefinition, &ScenarioLabelDefinition{})
 	if err != nil {
 		return ScenariosSchema{}, errors.Wrap(err, "Failed to get scenarios label definition")
 	}
 
-	scenarioSchema, err := ToScenarioSchema(response)
+	scenarioSchema, err := ToScenarioSchema(labelDefinition)
 	if err != nil {
 		return ScenariosSchema{}, errors.Wrap(err, "Failed to get scenario schema")
 	}
@@ -132,13 +148,13 @@ func (c *Client) updateScenarios(schema ScenariosSchema) (ScenariosSchema, error
 	query := c.queryProvider.updateLabelDefinition(gqlInput)
 	req := c.newRequest(query)
 
-	var response ScenarioLabelDefinitionResponse
-	err = c.client.Run(context.Background(), req, &response)
+	var labelDefinition ScenarioLabelDefinition
+	err = c.executeRequest(req, &labelDefinition, &ScenarioLabelDefinition{})
 	if err != nil {
 		return ScenariosSchema{}, errors.Wrap(err, "Failed to update scenarios label definition")
 	}
 
-	scenarioSchema, err := ToScenarioSchema(response)
+	scenarioSchema, err := ToScenarioSchema(labelDefinition)
 	if err != nil {
 		return ScenariosSchema{}, errors.Wrap(err, "Failed to get scenario schema")
 	}
@@ -151,8 +167,8 @@ func (c *Client) labelRuntime(values []string) error {
 
 	req := c.newRequest(query)
 
-	var response SetRuntimeLabelResponse
-	err := c.client.Run(context.Background(), req, &response)
+	var label *graphql.Label
+	err := c.executeRequest(req, label, graphql.Label{})
 	if err != nil {
 		return errors.Wrap(err, "Failed to label runtime with scenarios")
 	}
@@ -162,10 +178,10 @@ func (c *Client) labelRuntime(values []string) error {
 
 // Applications
 
-func (c *Client) CreateApplication(input graphql.ApplicationInput) (Application, error) {
+func (c *Client) CreateApplication(input graphql.ApplicationCreateInput) (Application, error) {
 	c.setScenarioLabel(&input)
 
-	appInputGQL, err := c.graphqlizer.ApplicationInputToGQL(input)
+	appInputGQL, err := c.graphqlizer.ApplicationCreateInputToGQL(input)
 	if err != nil {
 		return Application{}, errors.Wrap(err, "Failed to convert Application Input to query")
 	}
@@ -173,19 +189,17 @@ func (c *Client) CreateApplication(input graphql.ApplicationInput) (Application,
 	query := c.queryProvider.createApplication(appInputGQL)
 	req := c.newRequest(query)
 
-	var response ApplicationResponse
-	err = c.client.Run(context.Background(), req, &response)
+	var application Application
+	err = c.executeRequest(req, &application, &Application{})
 	if err != nil {
 		return Application{}, errors.Wrap(err, "Failed to create Application")
 	}
 
-	return response.Result, nil
+	return application, nil
 }
 
-func (c *Client) UpdateApplication(applicationId string, input graphql.ApplicationInput) (Application, error) {
-	c.setScenarioLabel(&input)
-
-	appInputGQL, err := c.graphqlizer.ApplicationInputToGQL(input)
+func (c *Client) UpdateApplication(applicationId string, input graphql.ApplicationUpdateInput) (Application, error) {
+	appInputGQL, err := c.graphqlizer.ApplicationUpdateInputToGQL(input)
 	if err != nil {
 		return Application{}, errors.Wrap(err, "Failed to convert Application Input to query")
 	}
@@ -193,13 +207,13 @@ func (c *Client) UpdateApplication(applicationId string, input graphql.Applicati
 	query := c.queryProvider.updateApplication(applicationId, appInputGQL)
 	req := c.newRequest(query)
 
-	var response ApplicationResponse
-	err = c.client.Run(context.Background(), req, &response)
+	var application Application
+	err = c.executeRequest(req, &application, &Application{})
 	if err != nil {
 		return Application{}, errors.Wrap(err, "Failed to update Application")
 	}
 
-	return response.Result, nil
+	return application, nil
 }
 
 func (c *Client) DeleteApplication(id string) (string, error) {
@@ -207,16 +221,16 @@ func (c *Client) DeleteApplication(id string) (string, error) {
 
 	req := c.newRequest(query)
 
-	var response DeleteResponse
-	err := c.client.Run(context.Background(), req, &response)
+	var response IdResponse
+	err := c.executeRequest(req, &response, &IdResponse{})
 	if err != nil {
 		return "", errors.Wrap(err, "Failed to delete Application")
 	}
 
-	return response.Result.ID, nil
+	return response.Id, nil
 }
 
-func (c *Client) setScenarioLabel(input *graphql.ApplicationInput) {
+func (c *Client) setScenarioLabel(input *graphql.ApplicationCreateInput) {
 	var labels = map[string]interface{}{
 		ScenariosLabelName: []string{c.scenarioLabel},
 	}
@@ -254,26 +268,26 @@ func (c *Client) modifyAPI(id string, input graphql.APIDefinitionInput, prepareQ
 	query := prepareQuery(id, appInputGQL)
 	req := c.newRequest(query)
 
-	var response APIResponse
-	err = c.client.Run(context.Background(), req, &response)
+	var apiDef graphql.APIDefinition
+	err = c.executeRequest(req, &apiDef, &graphql.APIDefinition{})
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Result, nil
+	return &apiDef, nil
 }
 
 func (c *Client) DeleteAPI(id string) (string, error) {
 	query := c.queryProvider.deleteAPI(id)
 	req := c.newRequest(query)
 
-	var response DeleteResponse
-	err := c.client.Run(context.Background(), req, &response)
+	var response IdResponse
+	err := c.executeRequest(req, &response, &IdResponse{})
 	if err != nil {
 		return "", err
 	}
 
-	return response.Result.ID, nil
+	return response.Id, nil
 }
 
 // Event APIs
@@ -305,26 +319,26 @@ func (c *Client) modifyEventAPI(id string, input graphql.EventAPIDefinitionInput
 	query := prepareQuery(id, eventAPIInputGQL)
 	req := c.newRequest(query)
 
-	var response CreateEventAPIResponse
-	err = c.client.Run(context.Background(), req, &response)
+	var eventAPIDef graphql.EventAPIDefinition
+	err = c.executeRequest(req, &eventAPIDef, &graphql.EventAPIDefinition{})
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Result, nil
+	return &eventAPIDef, nil
 }
 
 func (c *Client) DeleteEventAPI(id string) (string, error) {
 	query := c.queryProvider.deleteEventAPI(id)
 	req := c.newRequest(query)
 
-	var response DeleteResponse
-	err := c.client.Run(context.Background(), req, &response)
+	var response IdResponse
+	err := c.executeRequest(req, &response, &IdResponse{})
 	if err != nil {
 		return "", err
 	}
 
-	return response.Result.ID, nil
+	return response.Id, nil
 }
 
 func (c *Client) newRequest(query string) *gcli.Request {
@@ -332,4 +346,23 @@ func (c *Client) newRequest(query string) *gcli.Request {
 	req.Header.Set(TenantHeader, c.tenant)
 	req.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", c.authorizationToken))
 	return req
+}
+
+func (c *Client) executeRequest(req *gcli.Request, destination interface{}, emptyObject interface{}) error {
+	if reflect.ValueOf(destination).Kind() != reflect.Ptr {
+		return errors.New("destination is not of pointer type")
+	}
+
+	wrapper := &graphQLResponseWrapper{Result: destination}
+	err := c.client.Run(context.Background(), req, wrapper)
+	if err != nil {
+		return errors.Wrap(err, "Failed to execute request")
+	}
+
+	// Due to GraphQL client not checking response codes we need to relay on result being empty in case of failure
+	if reflect.DeepEqual(destination, emptyObject) {
+		return errors.New("Failed to execute request: received empty object response")
+	}
+
+	return nil
 }

@@ -29,7 +29,6 @@ spec:
       serviceAccountName: {{ template "fullname" . }}
       containers:
       - args:
-        - --enable-leader-election
         - --metrics-addr
         - :{{ .Values.service.internalPort }}
         command:

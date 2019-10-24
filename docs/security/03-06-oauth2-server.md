@@ -25,34 +25,34 @@ Client credentials are stored as Kubernetes Secret in the same Namespace as the 
 
 1. Create a Kubernetes Secret that contains the client ID and secret you want to use to create a client:
 
-```
-apiVersion: v1
-kind: Secret
-metadata:
-  name: {NAME_OF_SECRET}
-  namespace: {CLIENT_NAMESPACE}
-type: Opaque
-data:
-  client_id: {BASE64_ENCODED_ID}
-  client_secret: {BASE64_ENCODED_PASSWORD}
-```
+   ```
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: {NAME_OF_SECRET}
+     namespace: {CLIENT_NAMESPACE}
+   type: Opaque
+   data:
+     client_id: {BASE64_ENCODED_ID}
+     client_secret: {BASE64_ENCODED_PASSWORD}
+   ```
 
 2. Create a CR with the **secretName** property set to the name of Kubernetes Secret you created. Run this command to trigger the creation of a client:
 
-```
-cat <<EOF | kubectl apply -f -
-apiVersion: hydra.ory.sh/v1alpha1
-kind: OAuth2Client
-metadata:
-  name: {NAME_OF_CLIENT}
-  namespace: {CLIENT_NAMESPACE}
-spec:
-  grantTypes:
-    - "client_credentials"
-  scope: "read write"
-  secretName: {NAME_OF_SECRET}
-EOF
-```
+   ```
+   cat <<EOF | kubectl apply -f -
+   apiVersion: hydra.ory.sh/v1alpha1
+   kind: OAuth2Client
+   metadata:
+     name: {NAME_OF_CLIENT}
+     namespace: {CLIENT_NAMESPACE}
+   spec:
+     grantTypes:
+       - "client_credentials"
+     scope: "read write"
+     secretName: {NAME_OF_SECRET}
+   EOF
+   ```
 
 ### Use Hydra-generated credentials
 

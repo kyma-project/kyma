@@ -11,7 +11,7 @@ func TestGetKubeConfig_ShouldReturnKubeConfig(t *testing.T) {
 
 	// given
 	clusterName := "testname"
-	ca := "testca"
+	ca := func() string { return "testca" }
 	url := "testurl"
 	namespace := "testnamespace"
 	token := "testtoken"
@@ -44,7 +44,7 @@ func TestGetKubeConfig_ShouldReturnKubeConfig(t *testing.T) {
 	}
 
 	shouldContain(t, respBody, clusterName, "Response should contain cluster name.")
-	shouldContain(t, respBody, ca, "Response should contain CA.")
+	shouldContain(t, respBody, ca(), "Response should contain CA.")
 	shouldContain(t, respBody, url, "Response should contain URL.")
 	shouldContain(t, respBody, namespace, "Response should contain namespace.")
 	shouldContain(t, respBody, "token: "+token, "Response should contain user token.")
@@ -54,7 +54,7 @@ func TestGetKubeConfig_ShouldReturnBadRequest_IfMissingAuthorization(t *testing.
 
 	// given
 	clusterName := "testname"
-	ca := "testca"
+	ca := func() string { return "testca" }
 	url := "testurl"
 	namespace := "testnamespace"
 
@@ -79,7 +79,7 @@ func TestGetKubeConfig_ShouldReturnBadRequest_IfInvalidAuthorization(t *testing.
 
 	// given
 	clusterName := "testname"
-	ca := "testca"
+	ca := func() string { return "testca" }
 	url := "testurl"
 	namespace := "testnamespace"
 

@@ -15,3 +15,15 @@ spec:
       mode: package
       url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterDocsTopicsVersion }}.zip
       filter: /docs/asset-store/
+    - type: openapi
+      name: asset-metadata-service-openapi
+      mode: single
+      url: https://raw.githubusercontent.com/{{ .Values.global.kymaOrgName }}/kyma/{{ .Values.global.docs.clusterDocsTopicsVersion }}/docs/asset-store/assets/asset-metadata-service-openapi.yaml
+    - type: openapi
+      name: asset-upload-service-openapi
+      mode: single
+      url: https://raw.githubusercontent.com/{{ .Values.global.kymaOrgName }}/kyma/{{ .Values.global.docs.clusterDocsTopicsVersion }}/docs/asset-store/assets/asset-upload-service-openapi.yaml
+    - type: openapi
+      name: example-openapi-service
+      mode: single
+      url: https://raw.githubusercontent.com/{{ .Values.global.kymaOrgName }}/kyma/{{ .Values.global.docs.clusterDocsTopicsVersion }}/docs/asset-store/assets/example-openapi-service.yaml

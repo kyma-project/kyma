@@ -8,8 +8,8 @@ By default, you install Kyma with a set of components provided in the [**Kyma Li
 During installation, the Kyma Installer applies the content of the local or cluster installation file that includes the list of component names and Namespaces in which the components are installed. The Installer skips the lines starting with a hash character (#):
 
 ```
-#- name: "backup"
-#  namespace: "kyma-system"
+# - name: "backup"
+#   namespace: "kyma-system"
 ```
 
 You can modify the component list as follows:
@@ -35,20 +35,23 @@ You can add a component before and after installation.
 1. Download the [newest version](https://github.com/kyma-project/kyma/releases) of Kyma.
 
 2. Customize the installation by adding a component to the list in the installation file or removing the hash character (#) in front of the `name` and `namespace` entries. For example, to enable the Monitoring installation, add or unmark these entries:
+
     ```
     - name: "monitoring"
       namespace: "kyma-system"
     ```
-  * in the `kyma-installer-local.yaml` file for the **local** installation
-  * in the `kyma-installer-cluster.yaml` file for the **cluster** installation
+
+    * in the `kyma-installer-local.yaml` file for the **local** installation
+    * in the `kyma-installer-cluster.yaml` file for the **cluster** installation
 
 3. Follow the installation steps to [install Kyma locally from the release](#installation-install-kyma-locally) or [install Kyma on a cluster](#installation-install-kyma-on-a-cluster).
 
 ### Installation from sources
 
 1. Customize the installation by adding a component to the list of components or removing the hash character (#) in front of the `name` and `namespace` entries in the following installation files:
-  * [`installer-cr.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr.yaml.tpl) for the **local** installation
-  *  [`installer-cr-cluster.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster.yaml.tpl) for the **cluster** installation
+
+   * [`installer-cr.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr.yaml.tpl) for the **local** installation
+   *  [`installer-cr-cluster.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster.yaml.tpl) for the **cluster** installation
 
 2. Follow the installation steps to [install Kyma locally from sources](#installation-install-kyma-locally) or [install Kyma on a cluster](#installation-install-kyma-on-a-cluster).
 

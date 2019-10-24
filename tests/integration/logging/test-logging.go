@@ -30,8 +30,8 @@ func getNumberOfNodes() int {
 	if err != nil {
 		log.Fatalf("Error while kubectl get nodes: %v", string(stdoutStderr))
 	}
-	linesToRemove := 1;
-	if strings.Contains(string(stdoutStderr), "master") && !strings.Contains(string(stdoutStderr), "minikube") {
+	linesToRemove := 1
+	if strings.Contains(string(stdoutStderr), "master") && !strings.Contains(string(stdoutStderr), "minikube") && !strings.Contains(string(stdoutStderr), "control-plane") {
 		linesToRemove++
 	}
 	outputArr := strings.Split(string(stdoutStderr), "\n")
@@ -141,7 +141,7 @@ func testPromtail() {
 				}
 				submatches := testDataRegex.FindStringSubmatch(string(stdoutStderr))
 				if submatches != nil {
-					matchesCount += 1
+					matchesCount++
 					log.Printf("Matched logs from pod: [%s]\n%v", pod, submatches)
 				}
 			}

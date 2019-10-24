@@ -12,6 +12,19 @@ func (qp queryProvider) applicationsForRuntimeQuery(runtimeID string) string {
 }`, runtimeID, applicationsQueryData(runtimeID))
 }
 
+func (qp queryProvider) setRuntimeLabelMutation(runtimeId, key, value string) string {
+	return fmt.Sprintf(`mutation {
+		result: setRuntimeLabel(runtimeID: "%s", key: "%s", value: "%s") {
+			%s
+		}
+	}`, runtimeId, key, value, labelData())
+}
+
+func labelData() string {
+	return `key
+			value`
+}
+
 func applicationsQueryData(runtimeID string) string {
 	return pageData(applicationData(runtimeID))
 }

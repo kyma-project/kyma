@@ -232,6 +232,9 @@
 # Asset Metadata Service
 /components/asset-metadata-service/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
+# Backup Plugins
+/components/backup-plugins/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs
+
 # CMS Controller Manager Component
 /components/cms-controller-manager/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
@@ -311,8 +314,8 @@
 /components/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
 
 # Tests
-# acceptance tests
-/tests/acceptance/ @mszostok @polskikiel @piotrmiskiewicz @aszecowka @PK85 @jasiu001 @adamwalach
+# Service Catalog acceptance tests
+/tests/service-catalog/ @mszostok @polskikiel @piotrmiskiewicz @aszecowka @PK85 @jasiu001 @adamwalach
 
 # Dex integration tests
 /tests/integration/dex @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere

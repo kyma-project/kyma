@@ -1,5 +1,5 @@
 tests:
-  enabled: false
+  enabled: true
 
 bindings:
   kymaEssentials:
@@ -35,6 +35,7 @@ clusterRoles:
       - "testing.kyma-project.io"
       - "addons.kyma-project.io"
       - "installer.kyma-project.io"
+      - "serverless.kyma-project.io"
     monitoring:
       - "monitoring.coreos.com"
     dex:
@@ -42,6 +43,8 @@ clusterRoles:
     ory:
       - "oathkeeper.ory.sh"
       - "hydra.ory.sh"
+    backup:
+      - "velero.io"
   verbs:
     edit:
       - "create"
