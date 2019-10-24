@@ -81,6 +81,9 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: director-config
+            - mountPath: /data
+              name: static-users
+
         {{if eq .Values.global.database.embedded.enabled false}}
             - name: cloudsql-instance-credentials
               mountPath: /secrets/cloudsql-instance-credentials
@@ -104,4 +107,6 @@ spec:
         - name: director-config
           configMap:
             name: {{ template "fullname" . }}-config
-
+        - name: static-users
+          configMap:
+            name: {{ template "fullname" . }}-static-users
