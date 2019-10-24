@@ -14,13 +14,9 @@ APP_NAME = application-gateway-tests-executor
 APP_PATH = tests/$(APP_NAME)
 
 verify:: vet
+test: 
+	@echo "Tests are not to be run at this stage."
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/application-connector"
-
-# DEP ENSURE
-# DEP STATUS
-# GO IMPORTS
-# GO VET
-# here# here# here

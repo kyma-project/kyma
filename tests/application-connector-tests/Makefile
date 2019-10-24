@@ -5,19 +5,9 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-VERIFY_IGNORE := /vendor\|/mocks
-NAMESPACE := kyma-integration
-CENTRAL := false
-SKIP_SSL_VERIFY := true
+test: 
+	@echo "Tests are not to be run at this stage."
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/application-connector"
-
-verify:: vet
-
-# DEP ENSURE
-# DEP STATUS
-# GO FMT
-# GO VET
-# here# here# here
