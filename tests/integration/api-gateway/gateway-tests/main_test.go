@@ -5,13 +5,14 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/ingressgateway"
 	"log"
 	"math/rand"
 	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/ingressgateway"
 
 	"github.com/avast/retry-go"
 
@@ -177,10 +178,6 @@ func TestApiGatewayIntegration(t *testing.T) {
 			}
 			createResources(k8sClient, resources...)
 
-			//for _, commonResource := range commonResources {
-			//	resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
-			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
-			//}
 			token, err := oauth2Cfg.Token(context.Background())
 			assert.Equal(t, err, nil)
 			assert.NotNil(t, token)
