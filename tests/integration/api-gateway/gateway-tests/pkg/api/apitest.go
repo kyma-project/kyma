@@ -65,7 +65,7 @@ func (h *Tester) withRetries(httpCall func() (*http.Response, error), shouldRetr
 		if shouldRetry(response) {
 			body, err := ioutil.ReadAll(response.Body)
 			if err != nil {
-				return errors.Errorf("unexpected response %s. Reason unknown: unable to parse response body.", response.Status)
+				return errors.Errorf("unexpected response %s. Reason unknown: unable to parse response body: %s.", response.Status, err.Error())
 			}
 			return errors.Errorf("unexpected response %s: %s", response.Status, string(body))
 		}
