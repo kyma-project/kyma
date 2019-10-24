@@ -30,7 +30,7 @@ required = [
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.15.3"
+  version = "kubernetes-1.16.0"
 
 [[constraint]]
   name = "github.com/gorilla/mux"

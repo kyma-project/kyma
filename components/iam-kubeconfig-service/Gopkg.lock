@@ -244,19 +244,8 @@
     "plugin/pkg/authenticator/token/oidc",
   ]
   pruneopts = "UT"
-  revision = "92cc630367d00d05752f0cf0d6eca534bcd1e5a3"
-  version = "kubernetes-1.15.3"
-
-[[projects]]
-  digest = "1:2813fd1f64c4df2d641501461cb1c10610fdbe1dcd86fbcef19fc76c6dd1ae2c"
-  name = "k8s.io/client-go"
-  packages = [
-    "util/cert",
-    "util/keyutil",
-  ]
-  pruneopts = "UT"
-  revision = "78d2af792babf2dd937ba2e2a8d99c753a5eda89"
-  version = "v12.0.0"
+  revision = "bfa5e2e684ad413c22fd0dab55b2592af1ead049"
+  version = "kubernetes-1.16.0"
 
 [[projects]]
   digest = "1:93e82f25d75aba18436ad1ac042cb49493f096011f2541075721ed6f9e05c044"
