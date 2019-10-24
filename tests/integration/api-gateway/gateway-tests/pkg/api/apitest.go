@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/avast/retry-go"
@@ -62,7 +63,11 @@ func (h *Tester) withRetries(httpCall func() (*http.Response, error), shouldRetr
 		}
 
 		if shouldRetry(response) {
-			return errors.Errorf("unexpected response: %s", response.Status)
+			body, err := ioutil.ReadAll(response.Body)
+			if err != nil {
+				return errors.Errorf("unexpected response %s. Reason unknown: unable to parse response body.", response.Status)
+			}
+			return errors.Errorf("unexpected response %s: %s", response.Status, string(body))
 		}
 
 		return nil
