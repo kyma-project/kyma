@@ -12,9 +12,6 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       {{ if .Values.global.isLocalEnv }}
@@ -29,7 +26,7 @@ spec:
           image: {{ .Values.tests.image.registry }}/api-gateway-integration-tests:{{ .Values.tests.image.version }}
           env:
           - name: TEST_HYDRA_ADDRESS
-            value: "oauth2.{{ .Values.global.ingress.domainName }}"
+            value: "http://ory-hydra-public.kyma-system.svc.cluster.local:4444"
           - name: TEST_USER_EMAIL
             valueFrom:
               secretKeyRef:
