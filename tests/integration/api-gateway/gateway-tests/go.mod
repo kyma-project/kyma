@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/avast/retry-go v2.4.1+incompatible
 	github.com/golang/protobuf v1.3.2 // indirect
+	github.com/kyma-project/kyma v0.5.1-0.20190909070658-69599d4a33a2
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.3.0
 	github.com/vrischmann/envconfig v1.2.0

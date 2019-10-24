@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/ingressgateway"
+	"github.com/kyma-project/kyma/common/ingressgateway"
 
 	"github.com/avast/retry-go"
 
