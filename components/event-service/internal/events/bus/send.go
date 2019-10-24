@@ -20,6 +20,34 @@ var (
 	httpRequestProvider = httptools.DefaultHTTPRequestProvider
 )
 
+type v2Sender struct {
+	Client cloudevents.Client
+}
+
+func NewSender() (*v2Sender, error) {
+	s := &v2Sender{}
+	options := []cloudeventshttp.Option{
+		cloudevents.WithTarget(eventsTargetURLV2),
+		cloudevents.WithStructuredEncoding(),
+	}
+
+	t, err := cloudevents.NewHTTPTransport(options...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	c, err := cloudevents.NewClient(t,
+		cloudevents.WithTimeNow(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	s.Client = c
+	return s, nil
+}
+
 // InitEventSender initializes an internal httpClientProvider and httpRequestProvider
 func InitEventSender(clientProvider httptools.HTTPClientProvider, requestProvider httptools.HTTPRequestProvider) {
 	httpClientProvider = clientProvider
@@ -103,39 +131,19 @@ func SendEvent(apiVersion string, req interface{}, traceHeaders *map[string]stri
 
 // Send an event to event-bus as CloudEvents 1.0 in structured encoding
 // Use the client from the cloudevents sdk for sending
-func SendEventV2(event cloudevents.Event, traceHeaders map[string]string) (*cloudevents.Event, error) {
+func (s *v2Sender) SendEventV2(event cloudevents.Event, traceHeaders map[string]string) (*cloudevents.Event, error) {
 	ctx := cloudevents.ContextWithEncoding(context.Background(), cloudevents.Structured)
 
-	encoding := cloudevents.HTTPStructuredV1
-
-	options := []cloudeventshttp.Option{
-		cloudevents.WithTarget(eventsTargetURLV2),
-		cloudevents.WithEncoding(encoding),
-	}
-
 	for key, value := range traceHeaders {
-		options = append(options, cloudevents.WitHHeader(key, value))
-	}
-
-	t, err := cloudevents.NewHTTPTransport(options...)
-
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := cloudevents.NewClient(t,
-		cloudevents.WithTimeNow(),
-	)
-	if err != nil {
-		return nil, err
+		ctx = cloudevents.ContextWithHeader(ctx, key, value)
 	}
 
 	// TODO(k15r): is this how you convert to v1?
-	event = cloudevents.Event{
-		Context: event.Context.AsV1(),
-		Data:    event.Data,
-	}
-	_, resp, err := c.Send(ctx, event)
+	//event = cloudevents.Event{
+	//	Context: event.Context.AsV1(),
+	//	Data:    event.Data,
+	//}
+	_, resp, err := s.Client.Send(ctx, event)
 	if err != nil {
 		return nil, err
 	}
