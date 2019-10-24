@@ -10,14 +10,3 @@ VERIFY_IGNORE := /vendor\|/mocks
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/application-connector"
-
-verify:: vet
-
-# DEP ENSURE
-# GO BUILD
-# DEP STATUS
-# GO TEST
-# Check if tests passed
-# GO IMPORTS & FMT
-# GO VET
-# here# here# here

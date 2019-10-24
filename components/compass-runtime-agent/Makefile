@@ -10,13 +10,3 @@ VERIFY_IGNORE := /vendor\|/mocks
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
 	@echo "resources/compass-runtime-agent"
-
-verify:: vet
-
-# GET DEPENDENCIES
-# GO BUILD
-# GO TEST
-# Check if tests passed
-# GO FMT
-# GO VET
-# here# here# here
