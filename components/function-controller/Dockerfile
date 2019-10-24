@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM golang:1.12.7 as builder
+FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder:v20190208-813daef as builder
 #
 # Copy in the go src
 #
