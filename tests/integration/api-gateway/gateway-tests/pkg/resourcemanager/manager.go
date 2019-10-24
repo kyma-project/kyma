@@ -1,8 +1,6 @@
 package resourcemanager
 
 import (
-	"fmt"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -17,7 +15,6 @@ func CreateResource(client dynamic.Interface, resourceSchema schema.GroupVersion
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Created resource %q.\n", result.GetName())
 }
 
 //UpdateResource updates a given k8s resource
@@ -33,7 +30,6 @@ func UpdateResource(client dynamic.Interface, resourceSchema schema.GroupVersion
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Updated resource %q.\n", result.GetName())
 }
 
 //DeleteResource deletes a given k8s resource
@@ -45,6 +41,4 @@ func DeleteResource(client dynamic.Interface, resourceSchema schema.GroupVersion
 	if err := client.Resource(resourceSchema).Namespace(namespace).Delete(resourceName, deleteOptions); err != nil {
 		panic(err)
 	}
-
-	fmt.Printf("Deleted resource %q.\n", resourceName)
 }
