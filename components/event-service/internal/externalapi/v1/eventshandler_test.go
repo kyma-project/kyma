@@ -100,7 +100,9 @@ func TestPropagateTraceHeaders(t *testing.T) {
 	// init source config
 
 	sourceID, targetURLV1, targetURLV2 := "", "http://kyma-domain/v1/events", "http://kyma-domain/v2/events"
-	bus.Init(sourceID, targetURLV1, targetURLV2)
+	if err := bus.Init(sourceID, targetURLV1, targetURLV2); err != nil {
+		t.Fatalf("unable to init bus: %v", err)
+	}
 
 	// simulate request from outside of event-service
 	event := "{\"event-type\":\"order.created\",\"event-type-version\":\"v1\",\"event-id\":\"31109198-4d69-4ae0-972d-76117f3748c8\",\"event-time\":\"2012-11-01T22:08:41+00:00\",\"data\":\"{'key':'value'}\"}"

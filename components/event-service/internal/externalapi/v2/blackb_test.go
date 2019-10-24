@@ -170,7 +170,9 @@ func sendAndReceiveError(t *testing.T, s *string) (result *api.Error, err error)
 
 	// init bus config
 	sourceID, targetURLV1, targetURLV2 := "some dummy source", "http://kyma-domain/v1/events", "http://kyma-domain/v2/events"
-	bus.Init(sourceID, targetURLV1, targetURLV2)
+	if err := bus.Init(sourceID, targetURLV1, targetURLV2); err != nil {
+		t.Fatalf("unable to init bus")
+	}
 
 	recorder := httptest.NewRecorder()
 	handler := NewEventsHandler(maxRequestSize)

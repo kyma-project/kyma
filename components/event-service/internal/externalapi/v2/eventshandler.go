@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -24,6 +23,8 @@ import (
 	ce "github.com/cloudevents/sdk-go"
 	cehttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
 	log "github.com/sirupsen/logrus"
+
+	cloudevents "github.com/cloudevents/sdk-go"
 )
 
 const (
@@ -44,6 +45,7 @@ type maxBytesHandler struct {
 
 type CloudEventsHandler struct  {
 	Transport * cehttp.Transport
+	Client cloudevents.Client
 }
 
 func (h *maxBytesHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
@@ -208,20 +210,20 @@ func getTraceHeaders(ctx context.Context) *map[string]string {
 }
 
 // Receive finally handles the decoded event
-func HandleEvent(ctx context.Context, event ce.Event, eventResponse *ce.EventResponse) error {
-	fmt.Printf("received event %+v", event)
-
-	if _, err := event.Context.GetExtension("event-type-version"); err != nil {
-		// TODO(nachtmaar): set proper status code
-		return errors.New("günther")
-	}
-
-	traceHeaders := getTraceHeaders(ctx)
-
-	bus.SendEventV2(event, *traceHeaders)
-
-	return nil
-}
+//func HandleEvent(ctx context.Context, event ce.Event, eventResponse *ce.EventResponse) error {
+//	fmt.Printf("received event %+v", event)
+//
+//	if _, err := event.Context.GetExtension("event-type-version"); err != nil {
+//		// TODO(nachtmaar): set proper status code
+//		return errors.New("günther")
+//	}
+//
+//	traceHeaders := getTraceHeaders(ctx)
+//
+//	bus.SendEventV2(event, *traceHeaders)
+//
+//	return nil
+//}
 
 
 func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -229,7 +231,6 @@ func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	ctx = cehttp.WithTransportContext(ctx, cehttp.NewTransportContext(req))
 	//logger := cecontext.LoggerFrom(ctx)
 	w.Header().Set("Content-Type", "application/json")
-
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -268,7 +269,13 @@ func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		}
 		return
 	}
-
-
 	fmt.Printf("%v", e)
+
+	respEvent, err := bus.SendEventV2(*e, *getTraceHeaders(ctx))
+	if err != nil {
+		w.WriteHeader(http.StatusBadGateway)
+	}
+	fmt.Printf("%v", respEvent)
+
 }
+

@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
+	cloudevents "github.com/cloudevents/sdk-go"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 
-	cloudevents "github.com/cloudevents/sdk-go"
-	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
@@ -19,34 +19,6 @@ var (
 	httpClientProvider  = httptools.DefaultHTTPClientProvider
 	httpRequestProvider = httptools.DefaultHTTPRequestProvider
 )
-
-type v2Sender struct {
-	Client cloudevents.Client
-}
-
-func NewSender() (*v2Sender, error) {
-	s := &v2Sender{}
-	options := []cloudeventshttp.Option{
-		cloudevents.WithTarget(eventsTargetURLV2),
-		cloudevents.WithStructuredEncoding(),
-	}
-
-	t, err := cloudevents.NewHTTPTransport(options...)
-
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := cloudevents.NewClient(t,
-		cloudevents.WithTimeNow(),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	s.Client = c
-	return s, nil
-}
 
 // InitEventSender initializes an internal httpClientProvider and httpRequestProvider
 func InitEventSender(clientProvider httptools.HTTPClientProvider, requestProvider httptools.HTTPRequestProvider) {
@@ -69,6 +41,7 @@ func SendEvent(apiVersion string, req interface{}, traceHeaders *map[string]stri
 	switch apiVersion {
 	case "v1":
 		reqURL, err = url.ParseRequestURI(eventsTargetURLV1)
+		// TODO(nachtmaar):  remove
 	case "v2":
 		reqURL, err = url.ParseRequestURI(eventsTargetURLV2)
 	}
@@ -129,9 +102,19 @@ func SendEvent(apiVersion string, req interface{}, traceHeaders *map[string]stri
 	return &response, nil
 }
 
+
+
+func addTraceHeaders(httpReq *http.Request, traceHeaders *map[string]string) {
+	if traceHeaders != nil {
+		for key, value := range *traceHeaders {
+			httpReq.Header.Add(key, value)
+		}
+	}
+}
+
 // Send an event to event-bus as CloudEvents 1.0 in structured encoding
 // Use the client from the cloudevents sdk for sending
-func (s *v2Sender) SendEventV2(event cloudevents.Event, traceHeaders map[string]string) (*cloudevents.Event, error) {
+func SendEventV2(event cloudevents.Event, traceHeaders map[string]string) (*cloudevents.Event, error) {
 	ctx := cloudevents.ContextWithEncoding(context.Background(), cloudevents.Structured)
 
 	for key, value := range traceHeaders {
@@ -143,17 +126,12 @@ func (s *v2Sender) SendEventV2(event cloudevents.Event, traceHeaders map[string]
 	//	Context: event.Context.AsV1(),
 	//	Data:    event.Data,
 	//}
-	_, resp, err := s.Client.Send(ctx, event)
+	if clientV2 == nil {
+		return nil, errors.New("cloudevents client not initialized")
+	}
+	_, resp, err := (*clientV2).Send(ctx, event)
 	if err != nil {
 		return nil, err
 	}
 	return resp, nil
-}
-
-func addTraceHeaders(httpReq *http.Request, traceHeaders *map[string]string) {
-	if traceHeaders != nil {
-		for key, value := range *traceHeaders {
-			httpReq.Header.Add(key, value)
-		}
-	}
 }

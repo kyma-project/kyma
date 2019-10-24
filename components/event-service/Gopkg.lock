@@ -556,7 +556,6 @@
   analyzer-version = 1
   input-imports = [
     "github.com/cloudevents/sdk-go",
-    "github.com/cloudevents/sdk-go/pkg/cloudevents/context",
     "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http",
     "github.com/gorilla/mux",
     "github.com/kyma-project/kyma/components/event-bus/api/publish",
@@ -568,7 +567,6 @@
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/mock",
     "github.com/stretchr/testify/require",
-    "go.uber.org/zap",
     "golang.org/x/lint/golint",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/core/v1",

@@ -38,7 +38,10 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
-	bus.Init(options.sourceID, options.eventsTargetURLV1, options.eventsTargetURLV2)
+	if err := bus.Init(options.sourceID, options.eventsTargetURLV1, options.eventsTargetURLV2); err != nil {
+		log.Error("Unable to initialize eventbus", err.Error())
+		return
+	}
 
 	subscriptionsClient, namespacesClient, e := initK8sResourcesClients()
 
