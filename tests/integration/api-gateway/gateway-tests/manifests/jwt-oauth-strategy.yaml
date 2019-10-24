@@ -1,7 +1,7 @@
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
-  name: jwt-and-oauth-{{.TestID}}
+  name: "{{.NamePrefix}}-{{.TestID}}"
   namespace: api-gateway-tests
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local
@@ -10,13 +10,13 @@ spec:
     port: 8000
     host: httpbin-{{.TestID}}.kyma.local
   rules:
-    - path: /cookies
+    - path: /image
       methods: ["GET"]
       mutators: []
       accessStrategies:
         - handler: jwt
           config:
-            trusted_issuers: ["http://dex.kyma.local"]
+            trusted_issuers: ["https://dex.kyma.local"]
     - path: /headers
       methods: ["GET"]
       accessStrategies:

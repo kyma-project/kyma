@@ -1,7 +1,7 @@
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
-  name: oauth-{{.TestID}}
+  name: "{{.NamePrefix}}-{{.TestID}}"
   namespace: api-gateway-tests
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local

@@ -2,9 +2,10 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/avast/retry-go"
 	"github.com/pkg/errors"
-	"net/http"
 )
 
 type Tester struct {
@@ -19,7 +20,7 @@ func NewTester(c *http.Client, opts []retry.Option) *Tester {
 	}
 }
 
-func (h *Tester) TestSecuredAPI(url, token string) error {
+func (h *Tester) TestSecuredEndpoint(url, token string) error {
 
 	err := h.withRetries(func() (*http.Response, error) {
 		return h.client.Get(url)
@@ -34,20 +35,19 @@ func (h *Tester) TestSecuredAPI(url, token string) error {
 		return err
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
-
 	return h.withRetries(func() (*http.Response, error) {
 		return h.client.Do(req)
 	}, httpOkPredicate)
 }
 
-func (h *Tester) TestUnsecuredAPI(url string) error {
+func (h *Tester) TestUnsecuredEndpoint(url string) error {
 	return h.withRetries(func() (*http.Response, error) {
 		return h.client.Get(url)
 	}, httpOkPredicate)
 }
 
 func (h *Tester) TestDeletedAPI(url string) error {
-	return h.withRetries(func()(*http.Response,error ) {
+	return h.withRetries(func() (*http.Response, error) {
 		return h.client.Get(url)
 	}, NotFoundPredicate)
 }
@@ -67,7 +67,7 @@ func (h *Tester) withRetries(httpCall func() (*http.Response, error), shouldRetr
 
 		return nil
 	},
-		h.opts...
+		h.opts...,
 	); err != nil {
 		return err
 	}

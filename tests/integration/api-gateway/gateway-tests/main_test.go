@@ -12,13 +12,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/ingressgateway"
+
 	"github.com/avast/retry-go"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vrischmann/envconfig"
 
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/api"
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/ingressgateway"
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/jwt"
 
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/manifestprocessor"
@@ -64,6 +65,12 @@ func TestApiGatewayIntegration(t *testing.T) {
 		panic(err)
 	}
 
+	httpClient, err := ingressgateway.FromEnv().Client()
+
+	if err != nil {
+		t.Fatalf("Unnable to initialize ingress gateway client: %v", err)
+	}
+
 	oauthClientID := generateRandomString(OauthClientIDLength)
 	oauthClientSecret := generateRandomString(OauthClientSecretLength)
 
@@ -74,12 +81,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 		Scopes:       []string{"read"},
 	}
 
+	oauthClient := oauth2Cfg.Client(context.Background())
+	tr := httpClient.Transport
+	oauthClient.Transport = tr
+
 	jwtConfig, err := jwt.LoadConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	httpClient, err := ingressgateway.FromEnv().Client()
 
 	tester := api.NewTester(httpClient, []retry.Option{
 		retry.Delay(time.Duration(conf.ReqDelay) * time.Second),
@@ -122,14 +131,17 @@ func TestApiGatewayIntegration(t *testing.T) {
 			// create common resources from files
 			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
 			if err != nil {
-				panic(err)
+				t.Fatalf("failed to process common manifest files for test %s, details %s", t.Name(), err.Error())
 			}
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
-			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
+				NamePrefix string
+				TestID     string
+			}{NamePrefix: "unsecured", TestID: testID})
 			if err != nil {
-				panic(err)
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
 			createResources(k8sClient, noAccessStrategyApiruleResource...)
 
@@ -138,11 +150,9 @@ func TestApiGatewayIntegration(t *testing.T) {
 			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
 			//}
 
-			assert.NoError(t, tester.TestUnsecuredAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+			assert.NoError(t, tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 
 			deleteResources(k8sClient, commonResources...)
-
-			fmt.Println("test finished")
 		})
 
 		t.Run("Expose full service with OAUTH2 strategy", func(t *testing.T) {
@@ -152,14 +162,17 @@ func TestApiGatewayIntegration(t *testing.T) {
 			// create common resources from files
 			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
 			if err != nil {
-				panic(err)
+				t.Fatalf("failed to process common manifest files for test %s, details %s", t.Name(), err.Error())
 			}
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
-			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
+				NamePrefix string
+				TestID     string
+			}{NamePrefix: "oauth2", TestID: testID})
 			if err != nil {
-				panic(err)
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
 			createResources(k8sClient, resources...)
 
@@ -170,12 +183,11 @@ func TestApiGatewayIntegration(t *testing.T) {
 			token, err := oauth2Cfg.Token(context.Background())
 			assert.Equal(t, err, nil)
 			assert.NotNil(t, token)
-			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
+			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
 
 			deleteResources(k8sClient, commonResources...)
 
 			assert.NoError(t, tester.TestDeletedAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
-			fmt.Println("test finished")
 		})
 
 		t.Run("Expose service with OAUTH and JWT on speficic paths", func(t *testing.T) {
@@ -185,37 +197,178 @@ func TestApiGatewayIntegration(t *testing.T) {
 			// create common resources from files
 			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
 			if err != nil {
-				panic(err)
+				t.Fatalf("failed to process common manifest files for test %s, details %s", t.Name(), err.Error())
 			}
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
-			oauthStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(jwtAndOauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			oauthStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(jwtAndOauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
+				NamePrefix string
+				TestID     string
+			}{NamePrefix: "jwt-oauth", TestID: testID})
 			if err != nil {
-				panic(err)
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
 			createResources(k8sClient, oauthStrategyApiruleResource...)
 
-			//for _, commonResource := range commonResources {
-			//	resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
-			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
-			//}
 			tokenOAUTH, err := oauth2Cfg.Token(context.Background())
 			assert.Nil(t, err)
 			assert.NotNil(t, tokenOAUTH)
 
 			tokenJWT, err := jwt.Authenticate(jwtConfig.IdProviderConfig)
 			if err != nil {
-				log.Fatal(err)
+				t.Fatalf("failed to fetch and id_token. %s", err.Error())
 			}
+
 			assert.Nil(t, err)
 			assert.NotNil(t, tokenJWT)
-			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local/headers", testID), tokenOAUTH.AccessToken))
-			assert.NoError(t, tester.TestSecuredAPI(fmt.Sprintf("https://httpbin-%s.kyma.local/cookies", testID), tokenJWT))
+
+			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/headers", testID), tokenOAUTH.AccessToken))
+			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/image", testID), tokenJWT))
 
 			deleteResources(k8sClient, commonResources...)
 
-			fmt.Println("test finished")
+			t.Logf("test %s finished", t.Name())
+		})
+
+		t.Run("Expose service with OAUTH and update to plain access ", func(t *testing.T) {
+			t.Parallel()
+			testID := generateRandomString(testIDLength)
+
+			// create common resources from files
+			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			if err != nil {
+				t.Fatalf("failed to process common manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+			createResources(k8sClient, commonResources...)
+
+			// create api-rule from file
+			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
+				NamePrefix string
+				TestID     string
+			}{NamePrefix: "oauth2", TestID: testID})
+			if err != nil {
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+			createResources(k8sClient, resources...)
+
+			token, err := oauth2Cfg.Token(context.Background())
+			assert.Equal(t, err, nil)
+			assert.NotNil(t, token)
+			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
+
+			//Update API to give plain access
+			namePrefix := strings.TrimSuffix(resources[0].GetName(), "-"+testID)
+
+			unsecuredApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
+				NamePrefix string
+				TestID     string
+			}{NamePrefix: namePrefix, TestID: testID})
+			if err != nil {
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+
+			updateResources(k8sClient, unsecuredApiruleResource...)
+
+			assert.NoError(t, tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+
+			deleteResources(k8sClient, commonResources...)
+
+			assert.NoError(t, tester.TestDeletedAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+		})
+
+		t.Run("Expose unsecured API next secure it with OAUTH2 strategy", func(t *testing.T) {
+			t.Parallel()
+			testID := generateRandomString(testIDLength)
+			// create common resources from files
+			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			if err != nil {
+				t.Fatalf("failed to process common manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+			createResources(k8sClient, commonResources...)
+
+			// create api-rule from file
+			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
+				NamePrefix string
+				TestID     string
+			}{NamePrefix: "unsecured", TestID: testID})
+			if err != nil {
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+			createResources(k8sClient, noAccessStrategyApiruleResource...)
+
+			assert.NoError(t, tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+
+			//update to secure API
+
+			namePrefix := strings.TrimSuffix(noAccessStrategyApiruleResource[0].GetName(), "-"+testID)
+
+			securedApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
+				NamePrefix string
+				TestID     string
+			}{NamePrefix: namePrefix, TestID: testID})
+			if err != nil {
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+
+			updateResources(k8sClient, securedApiruleResource...)
+
+			token, err := oauth2Cfg.Token(context.Background())
+			assert.Equal(t, err, nil)
+			assert.NotNil(t, token)
+			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
+
+			deleteResources(k8sClient, commonResources...)
+		})
+
+		t.Run("Expose unsecured API next secure it with OAUTH2 and JWT strategy on paths", func(t *testing.T) {
+			t.Parallel()
+			testID := generateRandomString(testIDLength)
+			// create common resources from files
+			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			if err != nil {
+				t.Fatalf("failed to process common manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+			createResources(k8sClient, commonResources...)
+
+			// create api-rule from file
+			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
+				NamePrefix string
+				TestID     string
+			}{NamePrefix: "unsecured", TestID: testID})
+			if err != nil {
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+			createResources(k8sClient, noAccessStrategyApiruleResource...)
+
+			assert.NoError(t, tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+
+			//update to secure API
+
+			namePrefix := strings.TrimSuffix(noAccessStrategyApiruleResource[0].GetName(), "-"+testID)
+
+			securedApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(jwtAndOauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
+				NamePrefix string
+				TestID     string
+			}{NamePrefix: namePrefix, TestID: testID})
+			if err != nil {
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+
+			updateResources(k8sClient, securedApiruleResource...)
+
+			oauth, err := oauth2Cfg.Token(context.Background())
+			tokenJWT, err := jwt.Authenticate(jwtConfig.IdProviderConfig)
+			if err != nil {
+				t.Fatalf("failed to fetch and id_token. %s", err.Error())
+			}
+
+			assert.Nil(t, err)
+			assert.NotNil(t, tokenJWT)
+
+			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/headers", testID), oauth.AccessToken))
+			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/image", testID), tokenJWT))
+			deleteResources(k8sClient, commonResources...)
 		})
 
 	})
@@ -275,6 +428,13 @@ func createResources(k8sClient dynamic.Interface, resources ...unstructured.Unst
 	for _, resource := range resources {
 		resourceSchema, ns, _ := getResourceSchemaAndNamespace(resource)
 		manager.CreateResource(k8sClient, resourceSchema, ns, resource)
+	}
+}
+
+func updateResources(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) {
+	for _, resource := range resources {
+		resourceSchema, ns, _ := getResourceSchemaAndNamespace(resource)
+		manager.UpdateResource(k8sClient, resourceSchema, ns, resource.GetName(), resource)
 	}
 }
 
