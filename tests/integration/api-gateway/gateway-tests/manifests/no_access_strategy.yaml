@@ -5,7 +5,7 @@ metadata:
   namespace: api-gateway-tests
 spec:
   service:
-    host: httpbin-{{.TestID}}.kyma.local
+    host: "httpbin-{{.TestID}}.{{.Domain}}"
     name: httpbin-{{.TestID}}
     port: 8000
   gateway: kyma-gateway.kyma-system.svc.cluster.local

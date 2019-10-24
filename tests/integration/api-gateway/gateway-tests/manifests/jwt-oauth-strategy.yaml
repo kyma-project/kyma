@@ -8,7 +8,7 @@ spec:
   service:
     name: httpbin-{{.TestID}}
     port: 8000
-    host: httpbin-{{.TestID}}.kyma.local
+    host: "httpbin-{{.TestID}}.{{.Domain}}"
   rules:
     - path: /image
       methods: ["GET"]

@@ -13,7 +13,6 @@ import (
 
 //CreateResource creates a given k8s resource
 func CreateResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, manifest unstructured.Unstructured) {
-	fmt.Println("Creating resource...")
 	result, err := client.Resource(resourceSchema).Namespace(namespace).Create(&manifest, metav1.CreateOptions{})
 	if err != nil {
 		panic(err)
@@ -30,8 +29,6 @@ func UpdateResource(client dynamic.Interface, resourceSchema schema.GroupVersion
 		panic(err)
 	}
 	updateTo.SetResourceVersion(toUpdate.GetResourceVersion())
-	fmt.Printf("Update to: %q\n", updateTo)
-
 	result, err := client.Resource(resourceSchema).Namespace(namespace).Update(&updateTo, metav1.UpdateOptions{})
 	if err != nil {
 		panic(err)
@@ -41,7 +38,6 @@ func UpdateResource(client dynamic.Interface, resourceSchema schema.GroupVersion
 
 //DeleteResource deletes a given k8s resource
 func DeleteResource(client dynamic.Interface, resourceSchema schema.GroupVersionResource, namespace string, resourceName string) {
-	fmt.Println("Deleting resource...")
 	deletePolicy := metav1.DeletePropagationForeground
 	deleteOptions := &metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
