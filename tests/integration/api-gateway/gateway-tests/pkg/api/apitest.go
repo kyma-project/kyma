@@ -34,7 +34,6 @@ func (h *Tester) TestSecuredAPI(url, token string) error {
 		return err
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
-
 	return h.withRetries(func() (*http.Response, error) {
 		return h.client.Do(req)
 	}, httpOkPredicate)

@@ -16,8 +16,7 @@ spec:
       accessStrategies:
         - handler: jwt
           config:
-            trusted_issuers: ["http://dex.kyma.local"]
-            required_scope: []
+            trusted_issuers: ["https://dex.kyma.local"]
     - path: /headers
       methods: ["GET"]
       accessStrategies:

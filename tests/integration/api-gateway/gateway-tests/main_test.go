@@ -130,14 +130,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 			// create common resources from files
 			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
 			if err != nil {
-				panic(err)
+				t.Fatalf("failed to process common manifest files for test %s, details %s", t.Name(),err.Error())
 			}
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
 			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
 			if err != nil {
-				panic(err)
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(),err.Error())
 			}
 			createResources(k8sClient, noAccessStrategyApiruleResource...)
 
@@ -149,8 +149,6 @@ func TestApiGatewayIntegration(t *testing.T) {
 			assert.NoError(t, tester.TestUnsecuredAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 
 			deleteResources(k8sClient, commonResources...)
-
-			fmt.Println("test finished")
 		})
 
 		t.Run("Expose full service with OAUTH2 strategy", func(t *testing.T) {
@@ -160,14 +158,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 			// create common resources from files
 			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
 			if err != nil {
-				panic(err)
+				t.Fatalf("failed to process common manifest files for test %s, details %s", t.Name(),err.Error())
 			}
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
 			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
 			if err != nil {
-				panic(err)
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(),err.Error())
 			}
 			createResources(k8sClient, resources...)
 
@@ -183,7 +181,6 @@ func TestApiGatewayIntegration(t *testing.T) {
 			deleteResources(k8sClient, commonResources...)
 
 			assert.NoError(t, tester.TestDeletedAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
-			fmt.Println("test finished")
 		})
 
 		t.Run("Expose service with OAUTH and JWT on speficic paths", func(t *testing.T) {
@@ -208,6 +205,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			//	resourceSchema, ns, name := getResourceSchemaAndNamespace(commonResource)
 			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
 			//}
+
 			tokenOAUTH, err := oauth2Cfg.Token(context.Background())
 			assert.Nil(t, err)
 			assert.NotNil(t, tokenOAUTH)
@@ -216,6 +214,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			if err != nil {
 				log.Fatal(err)
 			}
+
 			assert.Nil(t, err)
 			assert.NotNil(t, tokenJWT)
 
@@ -224,7 +223,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			deleteResources(k8sClient, commonResources...)
 
-			fmt.Println("test finished")
+			t.Logf("test %s finished", t.Name())
 		})
 
 	})
