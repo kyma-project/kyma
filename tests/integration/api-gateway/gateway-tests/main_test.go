@@ -164,7 +164,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
-			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ APIname string
+			TestID string }{APIname : "oauth2", TestID: testID})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -239,7 +240,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 			createResources(k8sClient, commonResources...)
 
 			// create api-rule from file
-			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			resources, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ APIname string
+			TestID string }{APIname: "oauth2",TestID: testID})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -251,10 +253,10 @@ func TestApiGatewayIntegration(t *testing.T) {
 			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
 
 			//Update API to give plain access
-			apiName := strings.TrimSuffix(resources[0].GetName(), "-"+testID)
+			apiNameToUpdate := strings.TrimSuffix(resources[0].GetName(), "-"+testID)
 
 			unsecuredApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ APIname string
-				TestID string }{APIname : apiName, TestID: testID})
+				TestID string }{APIname : apiNameToUpdate, TestID: testID})
 			if err != nil {
 				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
 			}
@@ -266,6 +268,46 @@ func TestApiGatewayIntegration(t *testing.T) {
 			deleteResources(k8sClient, commonResources...)
 
 			assert.NoError(t, tester.TestDeletedAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+		})
+
+		t.Run("Expose unsecured API next secure it with OAUTH2 strategy", func(t *testing.T) {
+			t.Parallel()
+			testID := generateRandomString(testIDLength)
+			// create common resources from files
+			commonResources, err := manifestprocessor.ParseFromFileWithTemplate(testingAppFile, manifestsDirectory, resourceSeparator, struct{ TestID string }{TestID: testID})
+			if err != nil {
+				t.Fatalf("failed to process common manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+			createResources(k8sClient, commonResources...)
+
+			// create api-rule from file
+			noAccessStrategyApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ APIname string
+				TestID string }{APIname : "unsecured", TestID: testID})
+			if err != nil {
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+			createResources(k8sClient, noAccessStrategyApiruleResource...)
+
+			assert.NoError(t, tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+
+			//update to secure API
+
+			apiNameToUpdate := strings.TrimSuffix(noAccessStrategyApiruleResource[0].GetName(), "-"+testID)
+
+			securedApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(oauthStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct{ APIname string
+				TestID string }{APIname : apiNameToUpdate, TestID: testID})
+			if err != nil {
+				t.Fatalf("failed to process resource manifest files for test %s, details %s", t.Name(), err.Error())
+			}
+
+			updateResources(k8sClient, securedApiruleResource...)
+
+			token, err := oauth2Cfg.Token(context.Background())
+			assert.Equal(t, err, nil)
+			assert.NotNil(t, token)
+			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
+
+			deleteResources(k8sClient, commonResources...)
 		})
 
 	})
