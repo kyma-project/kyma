@@ -5,7 +5,7 @@ SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-EXTRYPOINT := ./cmd/generator/main.go
+ENTRYPOINT := ./cmd/generator/main.go
 
 verify:: vet
 
