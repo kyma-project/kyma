@@ -338,7 +338,7 @@ storageSpec:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 4Gi
+          storage: 20Gi
 
 # default rules are in templates/prometheus.rules.yaml
 # prometheusRules: {}
