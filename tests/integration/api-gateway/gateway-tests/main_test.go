@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"log"
 	"math/rand"
 	"os"
@@ -52,21 +53,21 @@ type Config struct {
 	Pwd        string `envconfig:"TEST_USER_PASSWORD"`
 	ReqTimeout uint   `envconfig:"TEST_REQUEST_TIMEOUT,default=100"`
 	ReqDelay   uint   `envconfig:"TEST_REQUEST_DELAY,default=5"`
-	Domain     string `envconfig:"DOMAIN`
+	Domain     string `envconfig:"DOMAIN"`
 }
 
 func TestApiGatewayIntegration(t *testing.T) {
 
+	assert, require := assert.New(t), require.New(t)
+
 	var conf Config
-	err := envconfig.Init(&conf)
-	if err != nil {
-		panic(err)
+	if err := envconfig.Init(&conf); err != nil {
+		t.Fatalf("Unable to setup config: %v", err)
 	}
 
 	httpClient, err := ingressgateway.FromEnv().Client()
-
 	if err != nil {
-		t.Fatalf("Unnable to initialize ingress gateway client: %v", err)
+		t.Fatalf("Unable to initialize ingress gateway client: %v", err)
 	}
 
 	oauthClientID := generateRandomString(OauthClientIDLength)
@@ -75,13 +76,9 @@ func TestApiGatewayIntegration(t *testing.T) {
 	oauth2Cfg := clientcredentials.Config{
 		ClientID:     oauthClientID,
 		ClientSecret: oauthClientSecret,
-		TokenURL:     fmt.Sprintf("https://%s/oauth2/token", conf.HydraAddr),
+		TokenURL:     fmt.Sprintf("%s/oauth2/token", conf.HydraAddr),
 		Scopes:       []string{"read"},
 	}
-
-	oauthClient := oauth2Cfg.Client(context.Background())
-	tr := httpClient.Transport
-	oauthClient.Transport = tr
 
 	jwtConfig, err := jwt.LoadConfig()
 	if err != nil {
@@ -149,7 +146,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			//	manager.UpdateResource(k8sClient, resourceSchema, ns, name, commonResource)
 			//}
 
-			assert.NoError(t, tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+			assert.NoError(tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 
 			deleteResources(k8sClient, commonResources...)
 		})
@@ -177,13 +174,13 @@ func TestApiGatewayIntegration(t *testing.T) {
 			createResources(k8sClient, resources...)
 
 			token, err := oauth2Cfg.Token(context.Background())
-			assert.Equal(t, err, nil)
-			assert.NotNil(t, token)
-			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
+			require.NoError(err)
+			require.NotNil(token)
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
 
 			deleteResources(k8sClient, commonResources...)
 
-			assert.NoError(t, tester.TestDeletedAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+			assert.NoError(tester.TestDeletedAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 		})
 
 		t.Run("Expose service with OAUTH and JWT on speficic paths", func(t *testing.T) {
@@ -209,19 +206,19 @@ func TestApiGatewayIntegration(t *testing.T) {
 			createResources(k8sClient, oauthStrategyApiruleResource...)
 
 			tokenOAUTH, err := oauth2Cfg.Token(context.Background())
-			assert.Nil(t, err)
-			assert.NotNil(t, tokenOAUTH)
+			require.NoError(err)
+			require.NotNil(tokenOAUTH)
 
 			tokenJWT, err := jwt.Authenticate(jwtConfig.IdProviderConfig)
 			if err != nil {
 				t.Fatalf("failed to fetch and id_token. %s", err.Error())
 			}
 
-			assert.Nil(t, err)
-			assert.NotNil(t, tokenJWT)
+			assert.Nil(err)
+			assert.NotNil(tokenJWT)
 
-			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/headers", testID), tokenOAUTH.AccessToken))
-			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/image", testID), tokenJWT))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/headers", testID), tokenOAUTH.AccessToken))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/image", testID), tokenJWT))
 
 			deleteResources(k8sClient, commonResources...)
 
@@ -250,9 +247,9 @@ func TestApiGatewayIntegration(t *testing.T) {
 			createResources(k8sClient, resources...)
 
 			token, err := oauth2Cfg.Token(context.Background())
-			assert.Equal(t, err, nil)
-			assert.NotNil(t, token)
-			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
+			require.NoError(err)
+			require.NotNil(token)
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
 
 			//Update API to give plain access
 			namePrefix := strings.TrimSuffix(resources[0].GetName(), "-"+testID)
@@ -268,11 +265,11 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			updateResources(k8sClient, unsecuredApiruleResource...)
 
-			assert.NoError(t, tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+			assert.NoError(tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 
 			deleteResources(k8sClient, commonResources...)
 
-			assert.NoError(t, tester.TestDeletedAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+			assert.NoError(tester.TestDeletedAPI(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 		})
 
 		t.Run("Expose unsecured API next secure it with OAUTH2 strategy", func(t *testing.T) {
@@ -296,7 +293,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			}
 			createResources(k8sClient, noAccessStrategyApiruleResource...)
 
-			assert.NoError(t, tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+			assert.NoError(tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 
 			//update to secure API
 
@@ -314,9 +311,9 @@ func TestApiGatewayIntegration(t *testing.T) {
 			updateResources(k8sClient, securedApiruleResource...)
 
 			token, err := oauth2Cfg.Token(context.Background())
-			assert.Equal(t, err, nil)
-			assert.NotNil(t, token)
-			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
+			require.NoError(err)
+			require.NotNil(token)
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), token.AccessToken))
 
 			deleteResources(k8sClient, commonResources...)
 		})
@@ -342,7 +339,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			}
 			createResources(k8sClient, noAccessStrategyApiruleResource...)
 
-			assert.NoError(t, tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
+			assert.NoError(tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 
 			//update to secure API
 
@@ -360,16 +357,19 @@ func TestApiGatewayIntegration(t *testing.T) {
 			updateResources(k8sClient, securedApiruleResource...)
 
 			oauth, err := oauth2Cfg.Token(context.Background())
+			require.NoError(err)
+			require.NotNil(oauth)
+
 			tokenJWT, err := jwt.Authenticate(jwtConfig.IdProviderConfig)
 			if err != nil {
 				t.Fatalf("failed to fetch and id_token. %s", err.Error())
 			}
 
-			assert.Nil(t, err)
-			assert.NotNil(t, tokenJWT)
+			assert.Nil(err)
+			assert.NotNil(tokenJWT)
 
-			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/headers", testID), oauth.AccessToken))
-			assert.NoError(t, tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/image", testID), tokenJWT))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/headers", testID), oauth.AccessToken))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/image", testID), tokenJWT))
 			deleteResources(k8sClient, commonResources...)
 		})
 
