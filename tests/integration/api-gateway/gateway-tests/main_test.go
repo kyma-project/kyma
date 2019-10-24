@@ -3,11 +3,10 @@ package main
 import (
 	"context"
 	"encoding/base64"
-	"flag"
 	"fmt"
 	"log"
 	"math/rand"
-	"path/filepath"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -33,7 +32,6 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 )
 
 const testIDLength = 8
@@ -378,26 +376,24 @@ func TestApiGatewayIntegration(t *testing.T) {
 	})
 }
 
-func getDynamicClient() dynamic.Interface {
-	var kubeconfig *string
-	if home := homedir.HomeDir(); home != "" {
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	} else {
-		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	}
-	flag.Parse()
-	if kubeconfig == "" {
-		config, err := rest.InClusterConfig()
+func loadKubeConfigOrDie() *rest.Config {
+	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
+		cfg, err := rest.InClusterConfig()
 		if err != nil {
-			log.Errorf("Cannot create in-cluster config: %v", err)
 			panic(err)
 		}
+		return cfg
 	}
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+
+	cfg, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
 	if err != nil {
 		panic(err)
 	}
-	client, err := dynamic.NewForConfig(config)
+	return cfg
+}
+
+func getDynamicClient() dynamic.Interface {
+	client, err := dynamic.NewForConfig(loadKubeConfigOrDie())
 	if err != nil {
 		panic(err)
 	}
