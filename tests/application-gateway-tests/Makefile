@@ -1,12 +1,13 @@
 APP_NAME = application-gateway-tests
 TEST_EXECUTOR_APP_NAME = application-gateway-tests-executor
 APP_PATH = tests/$(APP_NAME)
-TEST_EXECUTOR_IMG_NAME = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(TEST_EXECUTOR_APP_NAME)
 
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.11
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
+
+TEST_EXECUTOR_IMG_NAME = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(TEST_EXECUTOR_APP_NAME)
 
 VERIFY_IGNORE := /vendor\|/mocks
 
