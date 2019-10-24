@@ -1,17 +1,17 @@
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
-  name: "{{.APIname}}-{{.TestID}}"
+  name: oauth-{{.TestID}}
   namespace: api-gateway-tests
 spec:
+  gateway: kyma-gateway.kyma-system.svc.cluster.local
   service:
     host: httpbin-{{.TestID}}.kyma.local
     name: httpbin-{{.TestID}}
     port: 8000
-  gateway: kyma-gateway.kyma-system.svc.cluster.local
   rules:
-  - path: /.*
-    methods: ["GET"]
-    accessStrategies:
-    - handler: noop
-    mutators: []
+    - path: /.*
+      methods: ["GET"]
+      accessStrategies:
+        - handler: noop
+      mutators: []
