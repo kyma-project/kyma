@@ -2,7 +2,8 @@ package apigateway
 
 import (
 	"encoding/json"
-	"fmt"
+
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway/pretty"
@@ -12,30 +13,30 @@ import (
 
 type apiRuleConverter struct{}
 
-func toGQLJSON(byte []byte) (gqlschema.JSON, error) {
-	jsonByte, err := json.Marshal(byte)
+func toGQLJSON(config *runtime.RawExtension) (gqlschema.JSON, error) {
+	jsonByte, err := json.Marshal(config)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while marshalling %s with Config `%s`", pretty.APIRule, string(byte))
+		return nil, errors.Wrapf(err, "while marshalling %s with Config `%s`", pretty.APIRule, config)
 	}
 
-	var jsonMap map[string]interface{}
+	jsonMap := make(map[string]interface{})
 	err = json.Unmarshal(jsonByte, &jsonMap)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while unmarshalling %s with Config `%s` to map", pretty.APIRule, string(byte))
+		return nil, errors.Wrapf(err, "while unmarshalling %s with Config `%s` to map", pretty.APIRule, config)
 	}
 
 	var result gqlschema.JSON
 	err = result.UnmarshalGQL(jsonMap)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while unmarshalling %s with Config `%s` to GQL JSON", pretty.APIRule, string(byte))
+		return nil, errors.Wrapf(err, "while unmarshalling %s with Config `%s` to GQL JSON", pretty.APIRule, config)
 	}
 
 	return result, nil
 }
 
-func (c *apiRuleConverter) ToGQL(in *v1alpha1.APIRule) *gqlschema.APIRule {
+func (c *apiRuleConverter) ToGQL(in *v1alpha1.APIRule) (*gqlschema.APIRule, error) {
 	if in == nil {
-		return nil
+		return nil, nil
 	}
 
 	var rules []gqlschema.Rule
@@ -46,10 +47,9 @@ func (c *apiRuleConverter) ToGQL(in *v1alpha1.APIRule) *gqlschema.APIRule {
 		var gqlMutators []gqlschema.APIRuleConfig
 
 		for _, accessStrategy := range rule.AccessStrategies {
-			qglAccessStrategyConfig, err := toGQLJSON(accessStrategy.Config.Raw)
+			qglAccessStrategyConfig, err := toGQLJSON(accessStrategy.Config)
 			if err != nil {
-				fmt.Printf("got error: %s", err)
-				//return nil, errors.Wrapf(err, "while unmarshalling %s with ViewURL `%s` to GQL JSON", pretty.NavigationNode, in.ViewURL)
+				return nil, err
 			}
 
 			gqlAccessStrategies = append(gqlAccessStrategies, gqlschema.APIRuleConfig{
@@ -59,10 +59,9 @@ func (c *apiRuleConverter) ToGQL(in *v1alpha1.APIRule) *gqlschema.APIRule {
 		}
 
 		for _, mutator := range rule.Mutators {
-			gqlMutatorConfig, err := toGQLJSON(mutator.Config.Raw)
+			gqlMutatorConfig, err := toGQLJSON(mutator.Config)
 			if err != nil {
-				fmt.Printf("got error: %s", err)
-				//return nil, errors.Wrapf(err, "while unmarshalling %s with ViewURL `%s` to GQL JSON", pretty.NavigationNode, in.ViewURL)
+				return nil, err
 			}
 
 			gqlMutators = append(gqlMutators, gqlschema.APIRuleConfig{
@@ -102,20 +101,23 @@ func (c *apiRuleConverter) ToGQL(in *v1alpha1.APIRule) *gqlschema.APIRule {
 				Desc: &in.Status.VirtualServiceStatus.Description,
 			},
 		},
-	}
+	}, nil
 }
 
-func (c *apiRuleConverter) ToGQLs(in []*v1alpha1.APIRule) []gqlschema.APIRule {
+func (c *apiRuleConverter) ToGQLs(in []*v1alpha1.APIRule) ([]gqlschema.APIRule, error) {
 	var result []gqlschema.APIRule
 	for _, item := range in {
-		converted := c.ToGQL(item)
+		converted, err := c.ToGQL(item)
+		if err != nil {
+			return nil, err
+		}
 
 		if converted != nil {
 			result = append(result, *converted)
 		}
 	}
 
-	return result
+	return result, nil
 }
 
 func (c *apiRuleConverter) ToApiRule(name string, namespace string, in gqlschema.APIRuleInput) *v1alpha1.APIRule {

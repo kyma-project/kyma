@@ -46,8 +46,8 @@ func (_m *Resolver) APIRulesQuery(ctx context.Context, namespace string, service
 }
 
 // CreateAPIRule provides a failing mock function with given fields: ctx, name, namespace, params
-func (_m *Resolver) CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (gqlschema.APIRule, error) {
-	var r0 gqlschema.APIRule
+func (_m *Resolver) CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error) {
+	var r0 *gqlschema.APIRule
 	var r1 error
 	r1 = _m.err
 
@@ -64,8 +64,8 @@ func (_m *Resolver) DeleteAPIRule(ctx context.Context, name string, namespace st
 }
 
 // UpdateAPIRule provides a failing mock function with given fields: ctx, name, namespace, params
-func (_m *Resolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (gqlschema.APIRule, error) {
-	var r0 gqlschema.APIRule
+func (_m *Resolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error) {
+	var r0 *gqlschema.APIRule
 	var r1 error
 	r1 = _m.err
 

@@ -3,6 +3,8 @@ package listener
 import (
 	"fmt"
 
+	"github.com/pkg/errors"
+
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
 	"github.com/golang/glog"
@@ -11,7 +13,7 @@ import (
 
 //go:generate mockery -name=gqlApiRuleConverter -output=automock -outpkg=automock -case=underscore
 type gqlApiRuleConverter interface {
-	ToGQL(in *v1alpha1.APIRule) *gqlschema.APIRule
+	ToGQL(in *v1alpha1.APIRule) (*gqlschema.APIRule, error)
 }
 
 //go:generate mockery -name=extractor -output=automock -outpkg=automock -case=underscore
@@ -64,7 +66,12 @@ func (l *ApiRuleListener) onEvent(eventType gqlschema.SubscriptionEventType, obj
 }
 
 func (l *ApiRuleListener) notify(eventType gqlschema.SubscriptionEventType, apiRule *v1alpha1.APIRule) {
-	gqlApiRule := l.converter.ToGQL(apiRule)
+	gqlApiRule, err := l.converter.ToGQL(apiRule)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting *APIRule"))
+		return
+	}
+
 	if gqlApiRule == nil {
 		return
 	}

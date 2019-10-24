@@ -407,11 +407,11 @@ func (r *mutationResolver) DeleteAPI(ctx context.Context, name string, namespace
 	return r.ac.DeleteAPI(ctx, name, namespace)
 }
 
-func (r *mutationResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (gqlschema.APIRule, error) {
+func (r *mutationResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error) {
 	return r.ag.CreateAPIRule(ctx, name, namespace, params)
 }
 
-func (r *mutationResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (gqlschema.APIRule, error) {
+func (r *mutationResolver) UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error) {
 	return r.ag.UpdateAPIRule(ctx, name, namespace, params)
 }
 

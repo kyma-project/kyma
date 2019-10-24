@@ -1015,8 +1015,8 @@ type MutationResolver interface {
 	CreateAPI(ctx context.Context, name string, namespace string, params APIInput) (API, error)
 	UpdateAPI(ctx context.Context, name string, namespace string, params APIInput) (API, error)
 	DeleteAPI(ctx context.Context, name string, namespace string) (*API, error)
-	CreateAPIRule(ctx context.Context, name string, namespace string, params APIRuleInput) (APIRule, error)
-	UpdateAPIRule(ctx context.Context, name string, namespace string, params APIRuleInput) (APIRule, error)
+	CreateAPIRule(ctx context.Context, name string, namespace string, params APIRuleInput) (*APIRule, error)
+	UpdateAPIRule(ctx context.Context, name string, namespace string, params APIRuleInput) (*APIRule, error)
 	DeleteAPIRule(ctx context.Context, name string, namespace string) (*APIRule, error)
 	CreateLimitRange(ctx context.Context, namespace string, name string, limitRange LimitRangeInput) (*LimitRange, error)
 	DeleteFunction(ctx context.Context, name string, namespace string) (*FunctionMutationOutput, error)
@@ -19649,14 +19649,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_deleteAPI(ctx, field)
 		case "createAPIRule":
 			out.Values[i] = ec._Mutation_createAPIRule(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		case "updateAPIRule":
 			out.Values[i] = ec._Mutation_updateAPIRule(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		case "deleteAPIRule":
 			out.Values[i] = ec._Mutation_deleteAPIRule(ctx, field)
 		case "createLimitRange":
@@ -21372,16 +21366,17 @@ func (ec *executionContext) _Mutation_createAPIRule(ctx context.Context, field g
 		return ec.resolvers.Mutation().CreateAPIRule(rctx, args["name"].(string), args["namespace"].(string), args["params"].(APIRuleInput))
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(APIRule)
+	res := resTmp.(*APIRule)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._APIRule(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._APIRule(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -21406,16 +21401,17 @@ func (ec *executionContext) _Mutation_updateAPIRule(ctx context.Context, field g
 		return ec.resolvers.Mutation().UpdateAPIRule(rctx, args["name"].(string), args["namespace"].(string), args["params"].(APIRuleInput))
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(APIRule)
+	res := resTmp.(*APIRule)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._APIRule(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._APIRule(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -35952,8 +35948,8 @@ type Mutation {
     updateAPI(name: String!, namespace: String!, params: APIInput!): API! @HasAccess(attributes: {resource: "apis", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
     deleteAPI(name: String!, namespace: String!): API @HasAccess(attributes: {resource: "apis", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace", nameArg: "name"})
 
-    createAPIRule(name: String!, namespace: String!, params: APIRuleInput!): APIRule! @HasAccess(attributes: {resource: "apirules", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
-    updateAPIRule(name: String!, namespace: String!, params: APIRuleInput!): APIRule! @HasAccess(attributes: {resource: "apirules", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    createAPIRule(name: String!, namespace: String!, params: APIRuleInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "create", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
+    updateAPIRule(name: String!, namespace: String!, params: APIRuleInput!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "update", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
     deleteAPIRule(name: String!, namespace: String!): APIRule @HasAccess(attributes: {resource: "apirules", verb: "delete", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
 
     createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange @HasAccess(attributes: {resource: "limitrange", verb: "create", apiGroup: "", apiVersion: "v1"})

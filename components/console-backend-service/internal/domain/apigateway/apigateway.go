@@ -4,6 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/pkg/errors"
+	"k8s.io/client-go/rest"
+
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -12,9 +15,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
-	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/rest"
 )
 
 type PluggableResolver struct {
@@ -91,8 +92,8 @@ type resolverConfig struct {
 type Resolver interface {
 	APIRulesQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.APIRule, error)
 	APIRuleQuery(ctx context.Context, name string, namespace string) (*gqlschema.APIRule, error)
-	CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (gqlschema.APIRule, error)
-	UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (gqlschema.APIRule, error)
+	CreateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error)
+	UpdateAPIRule(ctx context.Context, name string, namespace string, params gqlschema.APIRuleInput) (*gqlschema.APIRule, error)
 	DeleteAPIRule(ctx context.Context, name string, namespace string) (*gqlschema.APIRule, error)
 	APIRuleEventSubscription(ctx context.Context, namespace string, serviceName *string) (<-chan gqlschema.ApiRuleEvent, error)
 }
