@@ -11,8 +11,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
-	apiv2 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v2"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
@@ -24,17 +22,37 @@ const (
 )
 
 func TestEventOk(t *testing.T) {
-	saved := handleEvent
-	defer func() { handleEvent = saved }()
+	//saved := handleEvent
+	//defer func() { handleEvent = saved }()
+	//
+	//handleEvent = func(parameters *apiv2.PublishEventParametersV2, response *api.PublishEventResponses,
+	//	traceHeaders *map[string]string, forwardHeaders *map[string][]string) (err error) {
+	//	ok := api.PublishResponse{EventID: "responseEventId"}
+	//	response.Ok = &ok
+	//	return
+	//}
 
-	handleEvent = func(parameters *apiv2.PublishEventParametersV2, response *api.PublishEventResponses,
-		traceHeaders *map[string]string, forwardHeaders *map[string][]string) (err error) {
-		ok := api.PublishResponse{EventID: "responseEventId"}
-		response.Ok = &ok
-		return
+
+	s := &stupidEventMock{
+		Typ:              "order.created",
+		Eventtypeversion: "v1",
+		Specversion:      "0.3",
+		Id:               "31109198-4d69-4ae0-972d-76117f3748c8",
+		Time:             "2012-11-01T22:08:41+00:00",
+		Data:             "foo",
 	}
-	s := "{\"type\":\"order.created\",\"eventtypeversion\":\"v1\",\"id\":\"31109198-4d69-4ae0-972d-76117f3748c8\",\"time\":\"2012-11-01T22:08:41+00:00\"}"
-	req, err := http.NewRequest(http.MethodPost, shared.EventsV2Path, strings.NewReader(s))
+	ss := eventMockToString(t, s)
+
+	req, err := http.NewRequest(http.MethodPost, shared.EventsV2Path, strings.NewReader(ss))
+	// TODO(nachtmaar): use sendAndReceiveError method
+	// then the following lines are not necessary anymore
+	req.Header.Add("Content-Type", "application/cloudevents+json")
+	// init source config
+	sourceID, targetURLV1, targetURLV2 := "some source ref", "http://kyma-domain/v1/events", "http://kyma-domain/v2/events"
+	if err := bus.Init(sourceID, targetURLV1, targetURLV2); err != nil {
+		t.Fatalf("unable to init bus")
+	}
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,7 +121,6 @@ func TestPropagateTraceHeaders(t *testing.T) {
 	defer func() { bus.InitEventSender(httptools.DefaultHTTPClientProvider, httptools.DefaultHTTPRequestProvider) }()
 
 	// init source config
-
 	sourceID, targetURLV1, targetURLV2 := "", "http://kyma-domain/v1/events", "http://kyma-domain/v2/events"
 	if err := bus.Init(sourceID, targetURLV1, targetURLV2); err != nil {
 		t.Fatalf("unable to init bus")

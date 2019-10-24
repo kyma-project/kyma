@@ -274,8 +274,8 @@ func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	respEvent, err := bus.SendEventV2(*e, *getTraceHeaders(ctx))
 	if err != nil {
 		w.WriteHeader(http.StatusBadGateway)
+		return
 	}
 	fmt.Printf("%v", respEvent)
-
 }
 
