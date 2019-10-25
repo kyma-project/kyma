@@ -3,11 +3,11 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
-      dir: pr/
-      version: "PR-6042"
+      dir:
+      version: PR-6042
     runtimeAgentTests:
-      dir: pr/
-      version: "PR-6042"
+      dir:
+      version: PR-6042
 
 compassRuntimeAgent:
   image:
