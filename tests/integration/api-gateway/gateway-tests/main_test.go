@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"log"
 	"math/rand"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/common/ingressgateway"
 
@@ -217,8 +218,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 			assert.Nil(err)
 			assert.NotNil(tokenJWT)
 
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/headers", testID), tokenOAUTH.AccessToken))
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/image", testID), tokenJWT))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s/headers", testID, conf.Domain), tokenOAUTH.AccessToken))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s/image", testID, conf.Domain), tokenJWT))
 
 			deleteResources(k8sClient, commonResources...)
 
@@ -368,8 +369,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 			assert.Nil(err)
 			assert.NotNil(tokenJWT)
 
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/headers", testID), oauth.AccessToken))
-			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.kyma.local/image", testID), tokenJWT))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s/headers", testID, conf.Domain), oauth.AccessToken))
+			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s/image", testID, conf.Domain), tokenJWT))
 			deleteResources(k8sClient, commonResources...)
 		})
 
