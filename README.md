@@ -70,7 +70,7 @@ Follow these steps:
 Kyma is used in these projects:
 
 <center>
-<img src="https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg" alt="SAP" width="200" /> <img src="https://TODO.svg" alt="NETCONOMY" width="200" />
+<img src="https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg" alt="SAP" width="200" /> <img src="https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg" alt="NETCONOMY" width="200" />
 </center>
 
 Read about their [use cases](https://kyma-project.io/#used-by).
