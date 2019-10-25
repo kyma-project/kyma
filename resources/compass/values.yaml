@@ -21,7 +21,7 @@ global:
       dir:
       version: "e3e84b72"
     provisioner:
-      dir: pr/
+      dir:
       version: "PR-367"
     certs_setup_job:
       containerRegistry:
@@ -36,7 +36,7 @@ global:
         dir: develop/
         version: "67535547"
       provisioner:
-        dir: pr/
+        dir:
         version: "PR-411"
 
   isLocalEnv: false
