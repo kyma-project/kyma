@@ -3,8 +3,8 @@ package testkit
 import (
 	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	subscriptions "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
+	v1 "k8s.io/kubernetes/staging/src/k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const testSubscriptionName = "test-sub-dqwawshakjqmxifnc"
