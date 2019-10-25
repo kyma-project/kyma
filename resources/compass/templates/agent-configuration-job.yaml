@@ -139,10 +139,10 @@ spec:
                 RUNTIME_ID=$(echo $RESPONSE_BODY | jq -e '.data .result .id')
                 RUNTIME_ID="${RUNTIME_ID:1:${#RUNTIME_ID}-2}"
 
-                TOKEN_RESPONSE=$(curl "${CONNECTOR_INTERNAL_URL}" \
+                TOKEN_RESPONSE=$(curl "${DIRECTOR_URL}" \
                     -H 'Content-Type: application/json' \
                     --data-binary '{
-                      "query":"mutation generateRuntimeToken {\n  result: generateRuntimeToken(\n runtimeID: '\\\""${RUNTIME_ID}"\\\"' \n ) {\n   token\n  }\n}\n"
+                      "query":"mutation generateRuntimeToken {\n  result: generateOneTimeTokenForRuntime(\n id: '\\\""${RUNTIME_ID}"\\\"' \n ) {\n   token\n  }\n}\n"
                     }')
                 echo ${TOKEN_RESPONSE}
 
