@@ -11,8 +11,6 @@ TEST_EXECUTOR_IMG_NAME = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(TES
 
 VERIFY_IGNORE := /vendor\|/mocks
 
-verify:: vet
-
 test: 
 	@echo "Tests are not to be run at this stage."
 
