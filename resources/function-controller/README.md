@@ -43,6 +43,7 @@ Follow the steps to install the chart:
     
     FN_REGISTRY=https://index.docker.io/v1/
     FN_REPOSITORY=my-docker-user
+    DOMAIN_NAME=kyma.local
     reg_username=<container registry username>
     reg_password=<container registry password>
     
@@ -53,6 +54,7 @@ Follow the steps to install the chart:
                  --set secret.registryUserName="${reg_username}" \
                  --set secret.registryPassword="${reg_password}" \
                  --set config.dockerRegistry="${FN_REPOSITORY}" \
+                 --set global.ingress.domainName="${DOMAIN_NAME}" \
                  --tls
     ```
 ### Run the first function

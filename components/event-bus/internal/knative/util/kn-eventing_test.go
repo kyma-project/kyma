@@ -1,12 +1,14 @@
 package util
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -343,4 +345,52 @@ func newKnativeLib(client evclientset.Interface, t *testing.T) (*KnativeLib, cha
 	factory.WaitForCacheSync(stopCh)
 
 	return kl, stopCh
+}
+
+func TestHasSynced(t *testing.T) {
+	testCases := map[string]struct {
+		syncFunc  waitForCacheSyncFunc
+		timeout   time.Duration
+		expectErr bool
+	}{
+		"Succeeds with real informers": {
+			syncFunc:  newFakeFactory(t).WaitForCacheSync,
+			timeout:   time.Second * 2,
+			expectErr: false,
+		},
+		"Fails when timeout is exceeded": {
+			// dummy function that blocks forever to ensure we time
+			// out and fail
+			syncFunc:  func(<-chan struct{}) map[reflect.Type]bool { select {} },
+			timeout:   time.Millisecond * 10,
+			expectErr: true,
+		},
+	}
+
+	for n, tc := range testCases {
+		t.Run(n, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(context.Background(), tc.timeout)
+			defer cancel()
+
+			err := hasSynced(ctx, tc.syncFunc)
+
+			if tc.expectErr && err == nil {
+				t.Error("Expected an error but got none")
+			}
+			if !tc.expectErr && err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
+		})
+	}
+}
+
+// newFakeFactory returns an informer factory initialized with a fake client.
+func newFakeFactory(t *testing.T) evinformers.SharedInformerFactory {
+	t.Helper()
+
+	factory := evinformers.NewSharedInformerFactory(evclientsetfake.NewSimpleClientset(), 0)
+	// request channels informer
+	factory.Messaging().V1alpha1().Channels().Informer()
+
+	return factory
 }

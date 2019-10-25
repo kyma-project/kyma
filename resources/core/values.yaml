@@ -19,24 +19,21 @@ global:
   istio:
     gateway:
       name: kyma-gateway
-  acceptance_tests:
-    dir:
-    version: "PR-5891"
   ui_acceptance_tests:
     dir:
-    version: 2ce268ee
+    version: 7f00b4c5
   api_controller:
     dir:
-    version: 8eb3a417
+    version: bdfddb63
   api_controller_integration_tests:
-    dir: develop/
-    version: 665a2857
+    dir:
+    version: 73f8eff7
   apiserver_proxy:
     dir:
-    version: d81e090b
+    version: dfa5f30d
   iam_kubeconfig_service:
     dir:
-    version: 22ed8bc7
+    version: c081698c
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
@@ -52,20 +49,20 @@ global:
     dir: pr/
     version: PR-5226
   apiserver_proxy_integration_tests:
-    dir: develop/
-    version: 4a6bef81
+    dir:
+    version: bdfddb63
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
     dir:
-    version: b71dd1aa
+    version: 4d849b61
   console_backend_service_test:
     dir:
     version: b71dd1aa
   cluster_users_integration_tests:
-    dir: develop/
-    version: "d53509a0"
+    dir:
+    version: 3cf2773d
   xip_patch:
     dir:
     version: 28fc9db3
@@ -95,14 +92,4 @@ test:
   acceptance:
     external_solution:
       enabled: false
-    core:
-      enabled: true
-      # environments used in application acceptance test
-      application:
-        disabled: "true"
-        brokerNamespace: kyma-integration
-        linkingTimeout: 4m
-        unlinkingTimeout: 4m
-        # Currently Pods with istio sidecar they have a long termination time, because of that we need to have
-        # such log timeout for teardown (waiting until namespace will be terminated)
-        tearDownTimeoutPerStep: 3m
+

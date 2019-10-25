@@ -1,16 +1,24 @@
-FROM alpine:3.8
+FROM golang:1.12.10-alpine3.10 as builder
 
-LABEL source="git@github.com:kyma-project/kyma.git"
+ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/integration/monitoring
+ADD . $SRC_DIR
 
+WORKDIR $SRC_DIR
+
+RUN CGO_ENABLED=0 go build -o /test-monitoring
+
+FROM alpine:3.10
+
+RUN apk --no-cache add ca-certificates
 RUN apk add --no-cache curl
 
 RUN curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.15.2/bin/linux/amd64/kubectl && chmod +x /usr/bin/kubectl
 
-# To automatically get the latest version:
-#RUN curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v/bin/linux/amd64/kubectl && chmod +x /usr/bin/kubectl
+# Variables used for labeling created images
+LABEL source=git@github.com:kyma-project/kyma.git
 
 RUN mkdir -p /root/.kube && touch /root/.kube/config
-COPY bin/app /test-monitoring
-COPY ./licenses /licenses
+COPY --from=builder /test-monitoring /test-monitoring
+COPY ./licenses/ /licenses
 
-CMD ["/test-monitoring"]
+ENTRYPOINT ["/test-monitoring"]

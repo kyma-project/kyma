@@ -69,12 +69,12 @@ This guide shows how to call a registered external service from Kyma using a sim
          template:
            metadata:
              labels:
-               app-{APP_NAME}-{SERVICE_ID}: "true"
+               {APP_NAME}-{SERVICE_ID}: "true"
            spec:
              containers:
              - env:
                - name: GATEWAY_URL
-                 value: app-{APP_NAME}-{SERVICE_ID}.kyma-integration
+                 value: {APP_NAME}-{SERVICE_ID}.kyma-integration
      deps: |-
        {
            "name": "example-1",

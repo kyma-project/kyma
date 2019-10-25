@@ -15,7 +15,7 @@ import (
 
 const (
 	serviceId                    = "1234"
-	gatewayUrl                   = "http://app-1234.io"
+	gatewayUrl                   = "http://1234.io"
 	defaultSpecRequestTimeout    = 5
 	defaultSpecRequestSkipVerify = true
 )
@@ -26,7 +26,7 @@ var (
 	baseDocs      = []byte("{\"baseDocs\":\"baseDocs\"}")
 
 	swaggerApiSpec      = []byte("{\"swagger\":\"2.0\"}")
-	modifiedSwaggerSpec = []byte("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"app-1234.io\",\"paths\":null}")
+	modifiedSwaggerSpec = []byte("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"1234.io\",\"paths\":null}")
 )
 
 func TestSpecService_PutSpec(t *testing.T) {
