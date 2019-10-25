@@ -1,5 +1,5 @@
 # Default configuration
-MAIN_PATH := ./main.go
+ENTRYPOINT := ./main.go
 IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG := $(DOCKER_TAG)
 # BASE_PKG is a root packge of the component
@@ -17,7 +17,7 @@ LOCAL_DIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # COMPONENT_DIR is a local path to commponent
 COMPONENT_DIR = $(shell pwd)
 # WORKSPACE_LOCAL_DIR is a path to the scripts folder in the container
-WORKSPACE_LOCAL_DIR = $(IMG_GOPATH)/src/$(BASE_PKG)/scripts
+WORKSPACE_LOCAL_DIR = $(IMG_GOPATH)/src/$(BASE_PKG)/common/makefiles
 # WORKSPACE_COMPONENT_DIR is a path to commponent in hte container
 WORKSPACE_COMPONENT_DIR = $(IMG_GOPATH)/src/$(BASE_PKG)/$(APP_PATH)
 # FILES_TO_CHECK is a command used to determine which files should be verified
@@ -34,6 +34,8 @@ DOCKER_CREATE_OPTS := -v $(LOCAL_DIR):$(WORKSPACE_LOCAL_DIR):delegated --rm -w $
 ifneq (,$(shell go version 2>/dev/null))
 DOCKER_CREATE_OPTS := -v $(shell go env GOCACHE):$(IMG_GOCACHE):delegated -v $(shell go env GOPATH)/pkg/dep:$(IMG_GOPATH)/pkg/dep:delegated $(DOCKER_CREATE_OPTS)
 endif
+
+.DEFAULT_GOAL := verify
 
 # Check if running with TTY
 ifeq (1, $(shell [ -t 0 ] && echo 1))
@@ -62,7 +64,7 @@ $(1):
 	@docker start $(DOCKER_INTERACTIVE_START) $(DOCKER_INTERACTIVE) $$(container)
 endef
 
-.PHONY: verify format release
+.PHONY: verify format release check-gqlgen
 
 # You may add additional targets/commands to be run on format and verify. Declare the target again in your makefile,
 # using two double colons. For example to run errcheck on verify add this to your makefile:
@@ -84,11 +86,11 @@ docker-create-opts:
 	@echo $(DOCKER_CREATE_OPTS)
 
 # Targets mounting sources to buildpack
-MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate pull-licenses
+MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate pull-licenses gqlgen
 $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
 build-local:
-	env CGO_ENABLED=0 go build -o $(APP_NAME) $(MAIN_PATH)
+	env CGO_ENABLED=0 go build -o $(APP_NAME) ./$(ENTRYPOINT)
 	rm $(APP_NAME)
 
 resolve-local:
@@ -101,25 +103,44 @@ dep-status-local:
 	dep status -v
 
 check-imports-local:
-	exit $(shell goimports -l $$($(FILES_TO_CHECK)) | wc -l | xargs)
+	@if [ -n "$$(goimports -l $$($(FILES_TO_CHECK)))" ]; then \
+		echo "✗ some files contain not propery formatted imports. To repair run make imports-local"; \
+		goimports -l $$($(FILES_TO_CHECK)); \
+		exit 1; \
+	fi;
 
 imports-local:
 	goimports -w -l $$($(FILES_TO_CHECK))
 
 check-fmt-local:
-	exit $(shell gofmt -l $$($(FILES_TO_CHECK)) | wc -l | xargs)
+	@if [ -n "$$(gofmt -l $$($(FILES_TO_CHECK)))" ]; then \
+		gofmt -l $$($(FILES_TO_CHECK)); \
+		echo "✗ some files contain not propery formatted imports. To repair run make imports-local"; \
+		exit 1; \
+	fi;
 
 fmt-local:
 	go fmt $$($(DIRS_TO_CHECK))
 
 errcheck-local:
-	errcheck -blank -asserts -ignorepkg '$$($(DIRS_TO_IGNORE) | tr '\n' ',')' -ignoregenerated ./...
+	errcheck -blank -asserts -ignorepkg '$$($(DIRS_TO_CHECK) | tr '\n' ',')' -ignoregenerated ./...
 
 vet-local:
 	go vet $$($(DIRS_TO_CHECK))
 
 generate-local:
 	go generate ./...
+
+gqlgen-local:
+	./gqlgen.sh
+
+check-gqlgen:
+	@echo make gqlgen-check
+	@if [ -n "$$(git status -s pkg/graphql)" ]; then \
+		echo -e "${RED}✗ gqlgen.sh modified some files, schema and code are out-of-sync${NC}"; \
+		git status -s pkg/graphql; \
+		exit 1; \
+	fi;
 
 pull-licenses-local:
 ifdef LICENSE_PULLER_PATH

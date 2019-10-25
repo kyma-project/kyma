@@ -4,7 +4,7 @@ global:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
       dir: pr/
-      version: "PR-5943"
+      version: "PR-5858"
     runtimeAgentTests:
       dir: pr/
       version: "PR-6114"
@@ -45,7 +45,7 @@ compassRuntimeAgent:
       port: 8080
     configApplicationWaitTime: 50s
     proxyInvalidationWaitTime: 120s
-    applicationInstallationTimeout: 150s
+    applicationInstallationTimeout: 180s
     graphqlLogs: false
     director:
       url: "http://compass-director.compass-system.svc.cluster.local:3000/graphql"
