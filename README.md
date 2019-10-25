@@ -12,7 +12,7 @@
 **Kyma** `/kee-ma/` is a platform for extending applications with microservices and [serverless](https://kyma-project.io/docs/components/serverless/) functions. It provides CLI and UI through which you can connect your application to a Kubernetes cluster and expose the application's API or Events securely thanks to the in-built [Application Connector](https://kyma-project.io/docs/components/application-connector/#overview-overview). You can then implement the business logic you require by creating microservices or serverless functions, and triggering them to react to particular Events or calls to your application's API. To limit the time spent on coding, use the in-built cloud services from the [Service Catalog](https://kyma-project.io/docs/components/service-catalog/), exposed by [Service Brokers](https://kyma-project.io/docs/components/service-catalog/#service-brokers-service-brokers) from such cloud providers as GCP, Azure, and AWS.
 
 <p align="center">
-<a href="https://youtu.be/7ePHG8poIHo">
+<a href="https://youtu.be/7ePHG8poIHo" target="_blank">
 <img src="./docs/kyma/assets/withoutprov4.gif" style="max-width:100%;">
 </a>
 </p>
