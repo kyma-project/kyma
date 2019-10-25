@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/resource"
 	"log"
 	"math/rand"
 	"os"
@@ -30,7 +31,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	manager "github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/resourcemanager"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -47,6 +47,8 @@ const noAccessStrategyApiruleFile = "no_access_strategy.yaml"
 const oauthStrategyApiruleFile = "oauth-strategy.yaml"
 const jwtAndOauthStrategyApiruleFile = "jwt-oauth-strategy.yaml"
 const resourceSeparator = "---"
+
+var resourceManager *resource.Manager
 
 type Config struct {
 	HydraAddr  string `envconfig:"TEST_HYDRA_ADDRESS"`
@@ -86,13 +88,16 @@ func TestApiGatewayIntegration(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	tester := api.NewTester(httpClient, []retry.Option{
+	commonRetryOpts := []retry.Option{
 		retry.Delay(time.Duration(conf.ReqDelay) * time.Second),
 		retry.Attempts(conf.ReqTimeout / conf.ReqDelay),
 		retry.DelayType(retry.FixedDelay),
-	})
+	}
+
+	tester := api.NewTester(httpClient, commonRetryOpts)
 
 	k8sClient := getDynamicClient()
+	resourceManager = &resource.Manager{RetryOptions: commonRetryOpts}
 
 	// create common resources for all scenarios
 	globalCommonResources, err := manifestprocessor.ParseFromFileWithTemplate(globalCommonResourcesFile, manifestsDirectory, resourceSeparator, struct {
@@ -105,8 +110,14 @@ func TestApiGatewayIntegration(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+
+	// delete test namespace if the previous test namespace persists
+	nsResourceSchema, ns, name := getResourceSchemaAndNamespace(globalCommonResources[0])
+	resourceManager.DeleteResource(k8sClient, nsResourceSchema, ns, name)
+	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
+
 	createResources(k8sClient, globalCommonResources...)
-	time.Sleep(5 * time.Second)
+	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
 
 	hydraClientResource, err := manifestprocessor.ParseFromFile(hydraClientFile, manifestsDirectory, resourceSeparator)
 	if err != nil {
@@ -116,8 +127,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 	// defer deleting namespace (it will also delete all remaining resources in that namespace)
 	defer func() {
 		time.Sleep(time.Second * 3)
-		nsResourceSchema, ns, name := getResourceSchemaAndNamespace(globalCommonResources[0])
-		manager.DeleteResource(k8sClient, nsResourceSchema, ns, name)
+		resourceManager.DeleteResource(k8sClient, nsResourceSchema, ns, name)
 	}()
 	t.Run("parallel tests", func(t *testing.T) {
 		t.Run("expose service without access strategy (plain access)", func(t *testing.T) {
@@ -432,23 +442,23 @@ func getResourceSchemaAndNamespace(manifest unstructured.Unstructured) (schema.G
 }
 
 func createResources(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) {
-	for _, resource := range resources {
-		resourceSchema, ns, _ := getResourceSchemaAndNamespace(resource)
-		manager.CreateResource(k8sClient, resourceSchema, ns, resource)
+	for _, res := range resources {
+		resourceSchema, ns, _ := getResourceSchemaAndNamespace(res)
+		resourceManager.CreateResource(k8sClient, resourceSchema, ns, res)
 	}
 }
 
 func updateResources(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) {
-	for _, resource := range resources {
-		resourceSchema, ns, _ := getResourceSchemaAndNamespace(resource)
-		manager.UpdateResource(k8sClient, resourceSchema, ns, resource.GetName(), resource)
+	for _, res := range resources {
+		resourceSchema, ns, _ := getResourceSchemaAndNamespace(res)
+		resourceManager.UpdateResource(k8sClient, resourceSchema, ns, res.GetName(), res)
 	}
 }
 
 func deleteResources(k8sClient dynamic.Interface, resources ...unstructured.Unstructured) {
-	for _, resource := range resources {
-		resourceSchema, ns, name := getResourceSchemaAndNamespace(resource)
-		manager.DeleteResource(k8sClient, resourceSchema, ns, name)
+	for _, res := range resources {
+		resourceSchema, ns, name := getResourceSchemaAndNamespace(res)
+		resourceManager.DeleteResource(k8sClient, resourceSchema, ns, name)
 	}
 }
 
