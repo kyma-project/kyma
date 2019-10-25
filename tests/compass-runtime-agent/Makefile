@@ -1,5 +1,5 @@
 APP_NAME = compass-runtime-agent-tests
-APP_PATH = tests/$(APP_NAME)
+APP_PATH = tests/compass-runtime-agent
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.11
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
