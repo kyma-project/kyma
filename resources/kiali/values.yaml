@@ -1,5 +1,5 @@
 tests:
-  enabled: false
+  enabled: true
 
 server:
   # The port that the server will bind to in order to receive console and API requests.
@@ -78,4 +78,4 @@ global:
   alpine_net:
     name: alpine-net
     dir: develop/
-    version: "149967d0"
+    version: "d90ec0fe"
