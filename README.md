@@ -75,7 +75,7 @@ Kyma is used in these projects:
 
 <p align="center">
   <img src="https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg" alt="SAP" width="200" />
-  <img src="https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg" alt="NETCONOMY" width="200" />
+  <img src="https://github.com/kyma-project/website/tree/master/content/adopters/logos/netconomy.svg" alt="NETCONOMY" width="200" />
 </p>
 
 Read about their [use cases](https://kyma-project.io/#used-by).
