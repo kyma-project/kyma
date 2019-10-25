@@ -19,7 +19,7 @@ type TestConfig struct {
 		ConsoleURL string `envconfig:"default=https://console.kyma.local"`
 	}
 
-	DirectorURL                    string        `envconfig:"default=https://compass-gateway-auth-oauth.kyma.local"`
+	DirectorURL                    string        `envconfig:"default=https://compass-director.compass-system.svc.cluster.local:3000"`
 	Namespace                      string        `envconfig:"default=compass-system"`
 	IntegrationNamespace           string        `envconfig:"default=kyma-integration"`
 	TestPodAppLabel                string        `envconfig:"default=compass-runtime-agent-tests"`
