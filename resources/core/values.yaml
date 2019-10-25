@@ -33,7 +33,7 @@ global:
     version: dfa5f30d
   iam_kubeconfig_service:
     dir:
-    version: 2657de9e
+    version: c081698c
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
