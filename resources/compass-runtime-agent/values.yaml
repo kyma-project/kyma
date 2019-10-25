@@ -7,7 +7,7 @@ global:
       version: "PR-5943"
     runtimeAgentTests:
       dir: pr/
-      version: "PR-6081"
+      version: "PR-6114"
 
 compassRuntimeAgent:
   image:
@@ -47,7 +47,7 @@ compassRuntimeAgent:
     proxyInvalidationWaitTime: 120s
     applicationInstallationTimeout: 150s
     graphqlLogs: false
-    oauth:
-      hydra:
-        publicUrl: http://ory-hydra-public.kyma-system:4444
-        adminUrl: http://ory-hydra-admin.kyma-system:4445
+    director:
+      url: "http://compass-director.compass-system.svc.cluster.local:3000/graphql"
+      internalJWT: "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzY29wZXMiOiJhcHBsaWNhdGlvbjpyZWFkIGhlYWx0aF9jaGVja3M6cmVhZCBhcHBsaWNhdGlvbjp3cml0ZSBydW50aW1lOndyaXRlIGxhYmVsX2RlZmluaXRpb246d3JpdGUgbGFiZWxfZGVmaW5pdGlvbjpyZWFkIHJ1bnRpbWU6cmVhZCBpbnRlZ3JhdGlvbl9zeXN0ZW06cmVhZCBpbnRlZ3JhdGlvbl9zeXN0ZW06d3JpdGUiLCJ0ZW5hbnQiOiJiODJlYTdjZC03NDY2LTRhZGUtYjZlOS0yMGZiNzdhMDhjZTYifQ."
+
