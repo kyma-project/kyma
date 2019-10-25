@@ -723,7 +723,7 @@ func getExpectedDefinition(initialDefinition testkit.ServiceDetails, expectedLab
 
 func modifiedSwaggerSpec(appName string, serviceId string, namespace string) []byte {
 	return testkit.Compact([]byte(
-		fmt.Sprintf("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"app-%s-%s.%s.svc.cluster.local\",\"paths\":null}", appName, serviceId, namespace)),
+		fmt.Sprintf("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"%s-%s.%s.svc.cluster.local\",\"paths\":null}", appName, serviceId, namespace)),
 	)
 }
 

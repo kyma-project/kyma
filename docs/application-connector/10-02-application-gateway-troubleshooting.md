@@ -19,7 +19,7 @@ If you call a registered service and receive an error, follow these steps to det
 
     If the call you tried to make is not in the logs, check if an [Access Service](#architecture-application-connector-components-access-service) exists for the service you are trying to call.
     ```
-    kubectl -n kyma-integration get svc app-{APP_NAME}-{SERVICE_ID}
+    kubectl -n kyma-integration get svc {APP_NAME}-{SERVICE_ID}
     ```
 3. Re-register the service.
 

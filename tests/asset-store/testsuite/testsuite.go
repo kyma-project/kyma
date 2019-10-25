@@ -9,11 +9,11 @@ import (
 
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/upload"
 	"github.com/minio/minio-go"
+	"k8s.io/client-go/dynamic"
 
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/namespace"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
-	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 )
@@ -45,6 +45,8 @@ type TestSuite struct {
 	systemBucketName string
 	minioCli         *minio.Client
 	cfg              Config
+
+	testId string
 }
 
 func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWithT) (*TestSuite, error) {
@@ -85,55 +87,94 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		t:             t,
 		g:             g,
 		minioCli:      minioCli,
-
-		cfg: cfg,
+		testId:        "singularity",
+		cfg:           cfg,
 	}, nil
 }
 
 func (t *TestSuite) Run() {
-	err := t.namespace.Create()
+
+	// clean up leftovers from previous tests
+	t.t.Log("Deleting old assets...")
+	err := t.asset.DeleteLeftovers(t.testId)
 	failOnError(t.g, err)
 
-	t.t.Log("Creating buckets...")
-	err = t.createBuckets()
+	t.t.Log("Deleting old cluster assets...")
+	err = t.clusterAsset.DeleteLeftovers(t.testId)
 	failOnError(t.g, err)
 
-	t.t.Log("Waiting for ready buckets...")
-	err = t.waitForBucketsReady()
+	t.t.Log("Deleting old cluster bucket...")
+	err = t.clusterBucket.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Deleting old bucket...")
+	err = t.bucket.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	// setup environment
+	t.t.Log("Creating namespace...")
+	err = t.namespace.Create(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Creating cluster bucket...")
+	var resourceVersion string
+	resourceVersion, err = t.clusterBucket.Create(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Waiting for cluster bucket to have ready phase...")
+	err = t.clusterBucket.WaitForStatusReady(resourceVersion, t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Creating bucket...")
+	resourceVersion, err = t.bucket.Create(t.t.Log)
+	failOnError(t.g, err)
+
+	t.t.Log("Waiting for bucket to have ready phase...")
+	err = t.bucket.WaitForStatusReady(resourceVersion, t.t.Log)
 	failOnError(t.g, err)
 
 	t.t.Log("Uploading test files...")
 	uploadResult, err := t.uploadTestFiles()
 	failOnError(t.g, err)
 
-	t.uploadResult = uploadResult
+	t.t.Log("Uploaded files:\n", uploadResult.UploadedFiles)
 
-	t.systemBucketName = t.systemBucketNameFromUploadResult(uploadResult)
+	t.uploadResult = uploadResult
+	t.systemBucketName = uploadResult.UploadedFiles[0].Bucket
+
+	t.t.Log("Preparing metadata...")
+	t.assetDetails = convertToAssetResourceDetails(uploadResult, t.cfg.CommonAssetPrefix)
 
 	t.t.Log("Creating assets...")
-	err = t.createAssets(uploadResult)
+	resourceVersion, err = t.asset.CreateMany(t.assetDetails, t.testId, t.t.Log)
+	failOnError(t.g, err)
+	t.t.Log("Waiting for assets to have ready phase...")
+	err = t.asset.WaitForStatusesReady(t.assetDetails, resourceVersion, t.t.Log)
 	failOnError(t.g, err)
 
-	t.t.Log("Waiting for ready assets...")
-	err = t.waitForAssetsReady()
+	t.t.Log("Creating cluster assets...")
+	resourceVersion, err = t.clusterAsset.CreateMany(t.assetDetails, t.testId, t.t.Log)
+	failOnError(t.g, err)
+	t.t.Log("Waiting for cluster assets to have ready phase...")
+	err = t.clusterAsset.WaitForStatusesReady(t.assetDetails, resourceVersion, t.t.Log)
 	failOnError(t.g, err)
 
-	files, err := t.populateUploadedFiles()
+	t.t.Log(fmt.Sprintf("asset details:\n%v", t.assetDetails))
+	files, err := t.populateUploadedFiles(t.t.Log)
 	failOnError(t.g, err)
 
 	t.t.Log("Verifying uploaded files...")
 	err = t.verifyUploadedFiles(files)
 	failOnError(t.g, err)
 
-	t.t.Log("Deleting assets...")
-	err = t.deleteAssets()
+	t.t.Log("Removing assets...")
+	err = t.asset.DeleteLeftovers(t.testId, t.t.Log)
 	failOnError(t.g, err)
 
-	t.t.Log("Waiting for deleted assets...")
-	err = t.waitForAssetsDeleted()
+	t.t.Log("Removing cluster assets...")
+	err = t.clusterAsset.DeleteLeftovers(t.testId, t.t.Log)
 	failOnError(t.g, err)
 
-	t.t.Log("Verifying if files have been deleted...")
 	err = t.verifyDeletedFiles(files)
 	failOnError(t.g, err)
 }
@@ -141,32 +182,17 @@ func (t *TestSuite) Run() {
 func (t *TestSuite) Cleanup() {
 	t.t.Log("Cleaning up...")
 
-	err := t.deleteBuckets()
+	err := t.clusterBucket.Delete(t.t.Log)
 	failOnError(t.g, err)
 
-	err = t.namespace.Delete()
+	err = t.bucket.Delete(t.t.Log)
+	failOnError(t.g, err)
+
+	err = t.namespace.Delete(t.t.Log)
 	failOnError(t.g, err)
 
 	err = deleteFiles(t.minioCli, t.uploadResult, t.t.Logf)
 	failOnError(t.g, err)
-}
-
-func (t *TestSuite) createBuckets() error {
-	err := t.bucket.Create()
-	if err != nil {
-		return err
-	}
-
-	err = t.clusterBucket.Create()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (t *TestSuite) systemBucketNameFromUploadResult(result *upload.Response) string {
-	return result.UploadedFiles[0].Bucket
 }
 
 func (t *TestSuite) uploadTestFiles() (*upload.Response, error) {
@@ -182,53 +208,9 @@ func (t *TestSuite) uploadTestFiles() (*upload.Response, error) {
 	return uploadResult, nil
 }
 
-func (t *TestSuite) createAssets(uploadResult *upload.Response) error {
-	t.assetDetails = convertToAssetResourceDetails(uploadResult, t.cfg.CommonAssetPrefix)
-
-	err := t.asset.CreateMany(t.assetDetails)
-	if err != nil {
-		return err
-	}
-
-	err = t.clusterAsset.CreateMany(t.assetDetails)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (t *TestSuite) waitForAssetsReady() error {
-	err := t.asset.WaitForStatusesReady(t.assetDetails)
-	if err != nil {
-		return err
-	}
-
-	err = t.clusterAsset.WaitForStatusesReady(t.assetDetails)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (t *TestSuite) waitForAssetsDeleted() error {
-	err := t.asset.WaitForDeletedResources(t.assetDetails)
-	if err != nil {
-		return err
-	}
-
-	err = t.clusterAsset.WaitForDeletedResources(t.assetDetails)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (t *TestSuite) populateUploadedFiles() ([]uploadedFile, error) {
+func (t *TestSuite) populateUploadedFiles(callbacks ...func(...interface{})) ([]uploadedFile, error) {
 	var allFiles []uploadedFile
-	assetFiles, err := t.asset.PopulateUploadFiles(t.assetDetails)
+	assetFiles, err := t.asset.PopulateUploadFiles(t.assetDetails, callbacks...)
 	if err != nil {
 		return nil, err
 	}
@@ -254,7 +236,6 @@ func (t *TestSuite) verifyUploadedFiles(files []uploadedFile) error {
 	if err != nil {
 		return errors.Wrap(err, "while verifying uploaded files")
 	}
-
 	return nil
 }
 
@@ -263,49 +244,6 @@ func (t *TestSuite) verifyDeletedFiles(files []uploadedFile) error {
 	if err != nil {
 		return errors.Wrap(err, "while verifying deleted files")
 	}
-
-	return nil
-}
-
-func (t *TestSuite) waitForBucketsReady() error {
-	err := t.bucket.WaitForStatusReady()
-	if err != nil {
-		return err
-	}
-
-	err = t.clusterBucket.WaitForStatusReady()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (t *TestSuite) deleteAssets() error {
-	err := t.asset.DeleteMany(t.assetDetails)
-	if err != nil {
-		return err
-	}
-
-	err = t.clusterAsset.DeleteMany(t.assetDetails)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (t *TestSuite) deleteBuckets() error {
-	err := t.bucket.Delete()
-	if err != nil {
-		return err
-	}
-
-	err = t.clusterBucket.Delete()
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 

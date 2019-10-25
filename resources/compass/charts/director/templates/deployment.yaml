@@ -71,14 +71,20 @@ spec:
             - name: APP_CONNECTOR_URL
               value: "http://compass-connector.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.port }}/graphql"
             - name: APP_SCOPES_CONFIGURATION_FILE
-              value: /config/scopes.yaml
+              value: /config/config.yaml
             - name: APP_ALLOW_JWT_SIGNING_NONE
               value: {{ .Values.deployment.allowJWTSigningNone | quote }}
+            - name: APP_OAUTH20_CLIENT_ENDPOINT
+              value: http://ory-hydra-admin.kyma-system.svc.cluster.local:4445/clients
+            - name: APP_OAUTH20_PUBLIC_ACCESS_TOKEN_ENDPOINT
+              value: "https://oauth2.{{ .Values.global.ingress.domainName }}/oauth2/token"
           volumeMounts:
             - mountPath: /config
-              name: scopes-config
-
+              name: director-config
         {{if eq .Values.global.database.embedded.enabled false}}
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql-instance-credentials
+              readOnly: true
         - name: cloudsql-proxy
           image: gcr.io/cloudsql-docker/gce-proxy:1.11
           command: ["/cloud_sql_proxy",
@@ -88,10 +94,6 @@ spec:
           securityContext:
 {{ toYaml . | indent 12 }}
           {{- end }}
-          volumeMounts:
-            - name: cloudsql-instance-credentials
-              mountPath: /secrets/cloudsql-instance-credentials
-              readOnly: true
           {{end}}
       volumes:
         {{if eq .Values.global.database.embedded.enabled false}}
@@ -99,7 +101,7 @@ spec:
           secret:
             secretName: cloudsql-instance-credentials
         {{end}}
-        - name: scopes-config
+        - name: director-config
           configMap:
-            name: {{ template "fullname" . }}-scopes
+            name: {{ template "fullname" . }}-config
 
