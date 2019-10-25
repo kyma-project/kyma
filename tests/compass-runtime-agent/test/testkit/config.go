@@ -11,6 +11,8 @@ type TestConfig struct {
 	Tenant    string
 	RuntimeId string
 
+	InternalDirectorJWT string
+
 	Runtime struct {
 		EventsURL  string `envconfig:"default=https://gateway.kyma.local"`
 		ConsoleURL string `envconfig:"default=https://console.kyma.local"`
@@ -26,8 +28,6 @@ type TestConfig struct {
 	ProxyInvalidationWaitTime      time.Duration `envconfig:"default=150s"`
 	GraphQLLog                     bool          `envconfig:"default=false"`
 	ScenarioLabel                  string        `envconfig:"default=COMPASS_RUNTIME_AGENT_TESTS"`
-	HydraPublicURL                 string        `envconfig:"default=http://ory-hydra-public.kyma-system:4444"`
-	HydraAdminURL                  string        `envconfig:"default=http://ory-hydra-admin.kyma-system:4445"`
 	ApplicationInstallationTimeout time.Duration `envconfig:"default=180s"`
 }
 

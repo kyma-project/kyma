@@ -30,10 +30,12 @@ type Client struct {
 	runtimeId     string
 	scenarioLabel string
 
+	internalJWT string
+
 	authorizationToken string
 }
 
-func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel string, gqlLog bool) *Client {
+func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel, internalJWT string, gqlLog bool) *Client {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
@@ -56,11 +58,8 @@ func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel string, gqlLog 
 		tenant:        tenant,
 		scenarioLabel: scenarioLabel,
 		runtimeId:     runtimeId,
+		internalJWT:   internalJWT,
 	}
-}
-
-func (c *Client) SetAccessToken(token string) {
-	c.authorizationToken = token
 }
 
 // Runtimes
@@ -344,7 +343,7 @@ func (c *Client) DeleteEventAPI(id string) (string, error) {
 func (c *Client) newRequest(query string) *gcli.Request {
 	req := gcli.NewRequest(query)
 	req.Header.Set(TenantHeader, c.tenant)
-	req.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", c.authorizationToken))
+	req.Header.Set(AuthorizationHeader, fmt.Sprintf("Bearer %s", c.internalJWT))
 	return req
 }
 
