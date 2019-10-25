@@ -146,14 +146,6 @@
   version = "v1.1.7"
 
 [[projects]]
-  digest = "1:fd9bea48bbc5bba66d9891c72af7255fbebecdff845c37c679406174ece5ca1b"
-  name = "github.com/kelseyhightower/envconfig"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "0b417c4ec4a8a82eecc22a1459a504aa55163d61"
-  version = "v1.4.0"
-
-[[projects]]
   digest = "1:b472339040c571f1085e429ad08d94218bc3fc7a635c99fd95e3f80382413317"
   name = "github.com/kisielk/errcheck"
   packages = [
@@ -182,7 +174,7 @@
   revision = "23afc5507b023882200255d514b70814b490490e"
 
 [[projects]]
-  digest = "1:db2cb53a6bc7893292053441adac2f3211bd7a613d5a125fc8aab3cf9f41175c"
+  digest = "1:086b02d6865d6b8f88dbafe88956707ab908ce1c4a93531411bdbfa8b8c8bbf7"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -193,15 +185,6 @@
     "components/application-registry/pkg/client/clientset/versioned/scheme",
     "components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2",
     "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
-    "tests/compass-runtime-agent/test/mock",
-    "tests/compass-runtime-agent/test/runtimeagent",
-    "tests/compass-runtime-agent/test/testkit",
-    "tests/compass-runtime-agent/test/testkit/applications",
-    "tests/compass-runtime-agent/test/testkit/assertions",
-    "tests/compass-runtime-agent/test/testkit/compass",
-    "tests/compass-runtime-agent/test/testkit/graphql",
-    "tests/compass-runtime-agent/test/testkit/oauth",
-    "tests/compass-runtime-agent/test/testkit/util",
   ]
   pruneopts = "UT"
   revision = "c9f7a5f5947b9bef289c068b73deb585b636e7a4"
@@ -656,15 +639,6 @@
     "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2",
     "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
-    "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock",
-    "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/runtimeagent",
-    "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit",
-    "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications",
-    "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions",
-    "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass",
-    "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/graphql",
-    "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/oauth",
-    "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/util",
     "github.com/machinebox/graphql",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
