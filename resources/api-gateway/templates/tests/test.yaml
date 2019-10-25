@@ -1,0 +1,53 @@
+{{- if .Values.tests.enabled }}
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app: {{ .Chart.Name }}-tests
+    app.kubernetes.io/name: {{ .Chart.Name }}-tests
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  template:
+    spec:
+      shareProcessNamespace: true
+      serviceAccountName: {{ .Chart.Name }}-tests
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.global.minikubeIP }}
+          hostnames:
+            - "oauth2.{{ .Values.global.ingress.domainName }}"
+            - "dex.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
+      containers:
+        - name: tests
+          image: {{ .Values.tests.image.registry }}/api-gateway-integration-tests:{{ .Values.tests.image.version }}
+          command: ["/bin/bash"]
+          args: ["-c", "sleep 20; ./app.test; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+          env:
+          - name: TEST_HYDRA_ADDRESS
+            value: "http://ory-hydra-public.kyma-system.svc.cluster.local:4444"
+          - name: TEST_USER_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.tests.env.testUser }}
+                key: email
+          - name: TEST_USER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.tests.env.testUser }}
+                key: password
+          - name: TEST_REQUEST_TIMEOUT
+            value: {{ .Values.tests.env.timeout | quote }}
+          - name: TEST_REQUEST_DELAY
+            value: {{ .Values.tests.env.delay | quote }}
+          - name: INGRESSGATEWAY_ADDRESS
+            value: istio-ingressgateway.istio-system.svc.cluster.local
+          - name: DOMAIN
+            value: {{ .Values.global.ingress.domainName }}
+      restartPolicy: Never
+{{- end }}
+{{- end }}
