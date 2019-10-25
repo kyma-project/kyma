@@ -37,8 +37,6 @@ type Client struct {
 
 func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel, internalJWT string, gqlLog bool) *Client {
 
-	logrus.Infof("COMPASS CLIENT ENDPOINT: %s", endpoint)
-
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
