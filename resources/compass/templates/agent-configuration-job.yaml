@@ -105,7 +105,7 @@ spec:
                 while :
                 do
                   RESPONSE_CODE=$(curl -k -s "${DIRECTOR_HEALTHZ_URL}" \
-                    --write-out "%{http_code}\n" --output /dev/null \
+                    --write-out "%{http_code}\n" --output /dev/null)
                   if [[ "$RESPONSE_CODE" == "200" ]]
                     then
                       echo "Director ready."
