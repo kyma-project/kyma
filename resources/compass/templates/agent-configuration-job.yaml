@@ -63,7 +63,6 @@ spec:
               MAX_RETRIES=60
               DIRECTOR_URL=http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/graphql
               DIRECTOR_HEALTHZ_URL=http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}/healthz
-              CONNECTOR_INTERNAL_URL=http://compass-connector.{{ .Release.Namespace }}:{{ .Values.global.connector.graphql.port }}/graphql
               CONNECTOR_EXTERNAL_URL=https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql
               INTERNAL_TOKEN="eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzY29wZXMiOiJhcHBsaWNhdGlvbjp3cml0ZSBsYWJlbF9kZWZpbml0aW9uOndyaXRlIHJ1bnRpbWU6d3JpdGUgcnVudGltZTpyZWFkIGFwcGxpY2F0aW9uOnJlYWQgaGVhbHRoX2NoZWNrczpyZWFkIGxhYmVsX2RlZmluaXRpb246cmVhZCIsInRlbmFudCI6IjJhMTUwMmJhLWFkZWQtMTFlOS1hMmEzLTJhMmFlMmRiY2NlNCJ9."
 
@@ -141,6 +140,7 @@ spec:
 
                 TOKEN_RESPONSE=$(curl "${DIRECTOR_URL}" \
                     -H 'Content-Type: application/json' \
+                    -H "authorization: Bearer ${INTERNAL_TOKEN}" \
                     --data-binary '{
                       "query":"mutation generateRuntimeToken {\n  result: generateOneTimeTokenForRuntime(\n id: '\\\""${RUNTIME_ID}"\\\"' \n ) {\n   token\n  }\n}\n"
                     }')
