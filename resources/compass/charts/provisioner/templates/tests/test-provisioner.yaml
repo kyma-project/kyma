@@ -25,7 +25,7 @@ spec:
         - name: APP_CREDENTIALS_NAMESPACE
           value: {{ .Release.Namespace }}
         - name: APP_GCP_CREDENTIALS
-          value: {{ .Values.tests.gcp.credentials }}
+          value: {{ .Values.tests.gcp.credentials | toJson }}
         - name: APP_GCP_PROJECT_NAME
           value: {{ .Values.tests.gcp.projectName }}
         - name: APP_QUERY_LOGGING
