@@ -27,7 +27,7 @@ type apiRuleSvc interface {
 	Unsubscribe(listener resource.Listener)
 }
 
-//go:generate mockery -name=apiGatewayConv -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=apiRuleConv -output=automock -outpkg=automock -case=underscore
 type apiRuleConv interface {
 	ToGQL(in *v1alpha1.APIRule) (*gqlschema.APIRule, error)
 	ToGQLs(in []*v1alpha1.APIRule) ([]gqlschema.APIRule, error)
@@ -39,7 +39,7 @@ type apiRuleResolver struct {
 	apiRuleCon apiRuleConv
 }
 
-func newApiGatewayResolver(svc apiRuleSvc) (*apiRuleResolver, error) {
+func newApiRuleResolver(svc apiRuleSvc) (*apiRuleResolver, error) {
 	if svc == nil {
 		return nil, errors.New("Nil pointer for apiRuleSvc")
 	}

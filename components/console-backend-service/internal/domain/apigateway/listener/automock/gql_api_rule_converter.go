@@ -16,7 +16,7 @@ type gqlApiRuleConverter struct {
 }
 
 // ToGQL provides a mock function with given fields: in
-func (_m *gqlApiRuleConverter) ToGQL(in *v1alpha1.APIRule) *gqlschema.APIRule {
+func (_m *gqlApiRuleConverter) ToGQL(in *v1alpha1.APIRule) (*gqlschema.APIRule, error) {
 	ret := _m.Called(in)
 
 	var r0 *gqlschema.APIRule
@@ -28,5 +28,12 @@ func (_m *gqlApiRuleConverter) ToGQL(in *v1alpha1.APIRule) *gqlschema.APIRule {
 		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*v1alpha1.APIRule) error); ok {
+		r1 = rf(in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }

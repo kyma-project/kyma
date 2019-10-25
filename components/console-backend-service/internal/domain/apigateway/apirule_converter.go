@@ -1,8 +1,6 @@
 package apigateway
 
 import (
-	"encoding/json"
-
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -14,21 +12,13 @@ import (
 type apiRuleConverter struct{}
 
 func toGQLJSON(config *runtime.RawExtension) (gqlschema.JSON, error) {
-	jsonByte, err := json.Marshal(config)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while marshalling %s with Config `%s`", pretty.APIRule, config)
-	}
+	result := gqlschema.JSON{}
 
-	jsonMap := make(map[string]interface{})
-	err = json.Unmarshal(jsonByte, &jsonMap)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while unmarshalling %s with Config `%s` to map", pretty.APIRule, config)
-	}
-
-	var result gqlschema.JSON
-	err = result.UnmarshalGQL(jsonMap)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while unmarshalling %s with Config `%s` to GQL JSON", pretty.APIRule, config)
+	if config != nil {
+		err := result.UnmarshalGQL(string(config.Raw))
+		if err != nil {
+			return nil, errors.Wrapf(err, "while unmarshalling %s with Config `%s` to GQL JSON", pretty.APIRule, config)
+		}
 	}
 
 	return result, nil

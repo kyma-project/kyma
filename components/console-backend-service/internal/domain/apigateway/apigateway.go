@@ -57,7 +57,7 @@ func (r *PluggableResolver) Enable() error {
 	apiRuleResourceClient := r.cfg.client.Resource(apiRulesGroupVersionResource)
 
 	apiRuleService := newApiRuleService(apiRuleInformer, apiRuleResourceClient)
-	apiRuleResolver, err := newApiGatewayResolver(apiRuleService)
+	apiRuleResolver, err := newApiRuleResolver(apiRuleService)
 	if err != nil {
 		return err
 	}
