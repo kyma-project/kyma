@@ -66,8 +66,10 @@ spec:
               CONNECTOR_EXTERNAL_URL=https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql
 
               TOKEN_PAYLOAD='{"scopes":"application:write label_definition:write runtime:write runtime:read application:read health_checks:read label_definition:read","tenant":"{{ .Values.global.defaultTenant }}"}'
-              ENCODED_TOKEN_PAYLOAD=$(echo $TOKEN_PAYLOAD | base64)
+              ENCODED_TOKEN_PAYLOAD=$(echo -e ${TOKEN_PAYLOAD} | base64 | tr -d \\n)
               INTERNAL_TOKEN="eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.${ENCODED_TOKEN_PAYLOAD//=}."
+
+              echo "Token: ${INTERNAL_TOKEN}"
 
               function kill_proxy_and_exit() {
                 echo 'killing pilot-agent...'
