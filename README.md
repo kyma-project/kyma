@@ -74,8 +74,8 @@ Follow these steps:
 Kyma is used in these projects:
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kyma-project/website/master/content/adopters/logos/sap.svg" alt="SAP" width="100" />
-  <img src="https://raw.githubusercontent.com/kyma-project/website/master/content/adopters/logos/netconomy.svg" alt="NETCONOMY" width="300" />
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/sap.svg" alt="SAP" width="100" />
+  <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/netconomy.svg" alt="NETCONOMY" width="300" />
 </p>
 
 Read about their [use cases](https://kyma-project.io/#used-by).
