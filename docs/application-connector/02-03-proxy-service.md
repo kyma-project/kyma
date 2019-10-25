@@ -12,7 +12,7 @@ which are either unsecured or secured with various security mechanisms and prote
 
 ![Application Gateway Diagram](./assets/003-architecture-proxy-service.svg)
 
-1. A lambda function calls the Access Service. The name of every Access Service follows this format: `app-{application-name}-{service-id}`
+1. A lambda function calls the Access Service. The name of every Access Service follows this format: `{application-name}-{service-id}`
 2. The Access Service exposes the Application Gateway.
 3. The Application Gateway extracts the Application name and the service ID from the name of the Access Service name. Using the extracted Application name, the Application Gateway finds the respective Application custom resource and obtains the information about the registered external API, such as the API URL and security credentials.
 4. The Application Gateway gets a token from the OAuth server.
