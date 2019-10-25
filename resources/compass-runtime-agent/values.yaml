@@ -48,6 +48,6 @@ compassRuntimeAgent:
     applicationInstallationTimeout: 180s
     graphqlLogs: false
     director:
-      url: "http://compass-director.compass-system.svc.cluster.local:3000/graphql"
+      url: "http://compass-director.compass-system.svc.cluster.local:3000"
       internalJWT: "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzY29wZXMiOiAiYXBwbGljYXRpb246cmVhZCBoZWFsdGhfY2hlY2tzOnJlYWQgYXBwbGljYXRpb246d3JpdGUgcnVudGltZTp3cml0ZSBsYWJlbF9kZWZpbml0aW9uOndyaXRlIGxhYmVsX2RlZmluaXRpb246cmVhZCBydW50aW1lOnJlYWQgaW50ZWdyYXRpb25fc3lzdGVtOnJlYWQgaW50ZWdyYXRpb25fc3lzdGVtOndyaXRlIiwgInRlbmFudCI6ICIzZTY0ZWJhZS0zOGI1LTQ2YTAtYjFlZC05Y2NlZTE1M2EwYWUifQ."
 
