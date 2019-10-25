@@ -18,7 +18,7 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir: pr/
-    version: PR-5858
+    version: PR-6042
   application_operator_tests:
     dir: pr/
     version: PR-5858
@@ -45,13 +45,13 @@ global:
     version: PR-5890
   application_connectivity_validator:
     dir: pr/
-    version: PR-5697
+    version: PR-6042
   application_gateway:
     dir: pr/
-    version: PR-5858
+    version: PR-6042
   application_gateway_tests:
     dir: pr/
-    version: PR-5858
+    version: PR-6042
   application_registry:
     dir: pr/
     version: PR-5858
