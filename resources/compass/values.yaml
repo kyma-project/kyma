@@ -21,7 +21,7 @@ global:
       dir:
       version: "e3e84b72"
     provisioner:
-      dir: develop/
+      dir:
       version: "dfdd3057"
     certs_setup_job:
       containerRegistry:
