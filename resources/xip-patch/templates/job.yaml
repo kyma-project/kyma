@@ -2,13 +2,14 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ .Release.Name }}
-  annotations:  
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: hook-succeeded
+  annotations:
 spec:
   template:
     metadata:
       name: {{ .Release.Name }}
+      annotations:
+        helm.sh/hook: post-install,post-upgrade
+        helm.sh/hook-delete-policy: hook-succeeded
     spec:
       serviceAccountName: {{ .Release.Name }}-service-account
       restartPolicy: Never
@@ -44,3 +45,11 @@ spec:
               name: net-global-overrides
               key: global.ingress.tlsKey
               optional: true
+        volumeMounts:
+          - mountPath: /etc/cert-config
+            name: cert-config
+            readOnly: true
+      volumes:
+        - name: cert-config
+          configMap:
+            name: kyma-cert-manager-config

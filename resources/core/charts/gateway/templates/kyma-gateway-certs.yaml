@@ -1,4 +1,4 @@
----
+{{ if .Values.global.ingress.tlsKey }}
 apiVersion: v1
 data:
   "key": {{ .Values.global.ingress.tlsKey }}
@@ -8,3 +8,4 @@ metadata:
   name: {{ .Values.global.istio.gateway.name }}-certs
   namespace: istio-system
 type: Opaque
+{{ end }}

@@ -184,7 +184,7 @@ kiali:
 # addon certmanager configuration
 #
 certmanager:
-  enabled: false
+  enabled: true
   
 #
 # Istio CNI plugin enabled

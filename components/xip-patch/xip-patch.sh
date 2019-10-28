@@ -42,17 +42,40 @@ generateXipDomain() {
 
 generateCerts() {
 
-    XIP_PATCH_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-    KEY_PATH="${XIP_PATCH_DIR}/key.pem"
-    CERT_PATH="${XIP_PATCH_DIR}/cert.pem"
+    rm -f /tmp/ca.key
+    rm -f /tmp/ca.crt
 
-    generateCertificatesForDomain "${INGRESS_DOMAIN}" "${KEY_PATH}" "${CERT_PATH}"
+    # Generate a Root CA private key
+    openssl genrsa -out /tmp/ca.key 2048
 
-    TLS_CERT=$(base64 "${CERT_PATH}" | tr -d '\n')
-    TLS_KEY=$(base64 "${KEY_PATH}" | tr -d '\n')
+    # Create a Root CA: self signed Certificate, valid for 10yrs with the 'signing' option set
+    openssl req -x509 -new -nodes -key /tmp/ca.key -subj "/CN=$INGRESS_DOMAIN" -days 3650 -reqexts v3_req -extensions v3_ca -out /tmp/ca.crt
 
-    rm "${CERT_PATH}"
-    rm "${KEY_PATH}"
+    # Store Root CA key pair as secret (necessary for cert-manager to issue certificates based on the Root CA)
+    kubectl create secret tls kyma-ca-key-pair \
+      --cert=/tmp/ca.crt \
+      --key=/tmp/ca.key \
+      --namespace=istio-system
+
+    # export Root CA public key so internal and external clients can understand certs issued by cert-manager and signed by the Root CA
+    export INGRESS_TLS_CERT=$(base64 < /tmp/ca.crt | tr -d '\n')
+
+    TEMP=$(mktemp /tmp/cert-file.XXXXXXXX)
+    sed 's/{{.Values.global.ingress.domainName}}/'$INGRESS_DOMAIN'/' /etc/cert-config/config.yaml.tpl > ${TEMP}
+
+    echo "DEBUG: ---->"
+    cat ${TEMP}
+    echo "DEBUG: <----"
+    set +e
+
+    msg=$(kubectl create -f ${TEMP} 2>&1)
+    status=$?
+    rm ${TEMP}
+    set -e
+    if [[ $status -ne 0 ]]; then
+        echo "${msg}"
+        exit ${status}
+    fi
 }
 
 createOverridesConfigMap() {
@@ -86,6 +109,7 @@ EOF
     fi
 }
 
+#This does not exist on install (takes fallback value), but it exists on update!
 INGRESS_TLS_CERT="${INGRESS_TLS_CERT:-$GLOBAL_TLS_CERT}"
 INGRESS_TLS_KEY="${INGRESS_TLS_KEY:-$GLOBAL_TLS_KEY}"
 INGRESS_DOMAIN="${INGRESS_DOMAIN:-$GLOBAL_DOMAIN}"
@@ -101,10 +125,9 @@ fi
 
 if [ -z "${INGRESS_TLS_CERT}" ] ; then
     generateCerts
-    INGRESS_TLS_CERT=${TLS_CERT}
-    INGRESS_TLS_KEY=${TLS_KEY}
 fi
 
 createOverridesConfigMap
 
 patchTlsCrtSecret
+

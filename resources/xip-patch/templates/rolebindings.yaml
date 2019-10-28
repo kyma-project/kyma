@@ -40,3 +40,17 @@ roleRef:
   kind: Role
   name: xip-kyma-system-role
   apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: xip-issuers-cluster-role-binding
+subjects:
+- kind: ServiceAccount
+  name: {{ .Release.Name }}-service-account
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: xip-issuers-cluster-role
+

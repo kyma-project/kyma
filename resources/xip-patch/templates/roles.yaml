@@ -18,6 +18,15 @@ rules:
 - apiGroups: [""]
   resources: ["services"]
   verbs: ["get"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["create"]
+- apiGroups: ["certmanager.k8s.io"]
+  resources: ["certificates"]
+  verbs: ["create"]
+- apiGroups: ["certmanager.k8s.io"]
+  resources: ["issuers"]
+  verbs: ["create"]
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -28,3 +37,12 @@ rules:
 - apiGroups: [""]
   resources: ["secrets"]
   verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: xip-issuers-cluster-role
+rules:
+- apiGroups: ["certmanager.k8s.io"]
+  resources: ["clusterissuers"]
+  verbs: ["create"]
