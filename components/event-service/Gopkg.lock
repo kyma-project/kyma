@@ -95,7 +95,7 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:12ba0eb2d76b5ddfa7666b29ffdfec59669b4b1afaee94aaedbc9f6897794be1"
+  digest = "1:7d47ac037ebbcf91df0646481bff53c25c992b128b2c60ccc6c14b1b8fdb9048"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/event-bus/api/push/eventing.kyma-project.io",
@@ -105,8 +105,8 @@
     "components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "ecbd761ec6c8fa4ff000d093dd3f0435cf6a931a"
-  version = "0.9.1"
+  revision = "91bb50b7b6a4501ff44b01664ed68c50a0705164"
+  version = "1.6.0"
 
 [[projects]]
   digest = "1:2f42fa12d6911c7b7659738758631bec870b7e9b4c6be5444f963cdcfccc191f"
