@@ -26,8 +26,8 @@ global:
     certs_setup_job:
       containerRegistry:
         path: eu.gcr.io/kyma-project
-      dir: develop/
-      version: "e029fcf4"
+      dir:
+      version: "0a651695"
     tests:
       e2e:
         dir:
