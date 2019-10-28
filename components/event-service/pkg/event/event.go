@@ -3,24 +3,25 @@ package event
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	cloudevents "github.com/cloudevents/sdk-go"
 	cehttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
+	"reflect"
 	"regexp"
 	"strings"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
-	busv2 "github.com/kyma-project/kyma/components/event-service/internal/events/bus/v2"
 	"net/http"
-
 )
 
 var (
-	isValidEventID          = regexp.MustCompile(shared.AllowedEventIDChars).MatchString
+	isValidEventID = regexp.MustCompile(shared.AllowedEventIDChars).MatchString
 )
 
-// DecodeMessage tries to convert a http.Message to a cloudevent and validates it
-func DecodeMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Message) (*cloudevents.Event, *api.Error, error) {
+// FromMessage tries to convert a http.Message to a cloudevent and validates it
+func FromMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Message) (*cloudevents.Event, *api.Error, error) {
 	event, err := t.MessageToEvent(ctx, &message)
 	if err != nil {
 		if err.Error() == "transport http failed to convert message: cloudevents version unknown" {
@@ -29,12 +30,12 @@ func DecodeMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Mess
 				Type:     shared.ErrorTypeValidationViolation,
 				Message:  shared.ErrorMessageMissingField,
 				MoreInfo: "",
-				Details:  []api.ErrorDetail{
+				Details: []api.ErrorDetail{
 					api.ErrorDetail{
-					Field:    shared.FieldSpecVersionV2,
-					Type:     shared.ErrorTypeMissingField,
-					Message:  shared.ErrorMessageMissingField,
-					MoreInfo: "",
+						Field:    shared.FieldSpecVersionV2,
+						Type:     shared.ErrorTypeMissingField,
+						Message:  shared.ErrorMessageMissingField,
+						MoreInfo: "",
 					},
 				},
 			}
@@ -46,7 +47,7 @@ func DecodeMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Mess
 
 	// add source to the incoming request
 	// NOTE: this needs to be done before validating the event via CloudEvents sdk
-	event, err = busv2.AddSource(*event)
+	event, err = AddSource(*event)
 	if err != nil {
 		return event, nil, err
 	}
@@ -59,6 +60,7 @@ func DecodeMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Mess
 
 	// validate event the Kyma way
 	kymaErrors := Validate(event)
+
 	allErrors := append(kymaErrors, specErrors...)
 	if len(allErrors) != 0 {
 		return event, &api.Error{
@@ -68,6 +70,28 @@ func DecodeMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Mess
 			Details: allErrors,
 		}, nil
 	}
+
+	tmpetv := event.Extensions()[shared.FieldEventTypeVersionV2]
+
+	var etv string
+
+	switch v := tmpetv.(type) {
+	case string:
+		etv = v
+	case *string:
+		etv = *v
+	case json.RawMessage:
+		if err := json.Unmarshal(v, &etv); err != nil {
+			return nil, &api.Error{
+				Status:  http.StatusBadRequest,
+				Message: shared.ErrorMessageMissingField,
+				Type:    shared.ErrorTypeValidationViolation,
+				Details: allErrors,
+			}, err
+		}
+	}
+
+	event.SetExtension(shared.FieldEventTypeVersionV2, etv)
 
 	return event, nil, nil
 }
@@ -132,4 +156,33 @@ func Validate(event *cloudevents.Event) []api.ErrorDetail {
 	}
 
 	return errors
+}
+
+func ToMessage(ctx context.Context, event cloudevents.Event, encoding cehttp.Encoding) (*cehttp.Message, error) {
+
+	codec := &cehttp.Codec{
+		Encoding:                   encoding,
+		DefaultEncodingSelectionFn: nil,
+	}
+
+	message, err := codec.Encode(ctx, event)
+	if err != nil {
+		return nil, err
+	}
+
+	msg, ok := message.(*cehttp.Message)
+	if !ok {
+		return nil, fmt.Errorf("cannot convert to http.Message: %v type: %v", message, reflect.TypeOf(message))
+	}
+
+	return msg, nil
+}
+
+// AddSource adds the "source" related data to the incoming request
+func AddSource(event cloudevents.Event) (*cloudevents.Event, error) {
+	if err := bus.CheckConf(); err != nil {
+		return nil, err
+	}
+	event.SetSource(bus.Conf.SourceID)
+	return &event, nil
 }

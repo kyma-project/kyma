@@ -102,8 +102,6 @@ func SendEvent(apiVersion string, req interface{}, traceHeaders *map[string]stri
 	return &response, nil
 }
 
-
-
 func addTraceHeaders(httpReq *http.Request, traceHeaders *map[string]string) {
 	if traceHeaders != nil {
 		for key, value := range *traceHeaders {
@@ -115,7 +113,7 @@ func addTraceHeaders(httpReq *http.Request, traceHeaders *map[string]string) {
 // Send an event to event-bus as CloudEvents 1.0 in structured encoding
 // Use the client from the cloudevents sdk for sending
 func SendEventV2(event cloudevents.Event, traceHeaders map[string]string) (*cloudevents.Event, error) {
-	ctx := cloudevents.ContextWithEncoding(context.Background(), cloudevents.Structured)
+	ctx := cloudevents.ContextWithEncoding(context.Background(), cloudevents.Binary)
 
 	for key, value := range traceHeaders {
 		ctx = cloudevents.ContextWithHeader(ctx, key, value)
@@ -129,6 +127,9 @@ func SendEventV2(event cloudevents.Event, traceHeaders map[string]string) (*clou
 	if clientV2 == nil {
 		return nil, errors.New("cloudevents client not initialized")
 	}
+
+	//msg, err := kymaevent.EventToMessage(ctx, event, cehttp.BinaryV1)
+	//fmt.Printf("%+v", msg)
 	_, resp, err := (*clientV2).Send(ctx, event)
 	if err != nil {
 		return nil, err

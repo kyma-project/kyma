@@ -209,23 +209,6 @@ func getTraceHeaders(ctx context.Context) *map[string]string {
 	return &traceHeaders
 }
 
-// Receive finally handles the decoded event
-//func HandleEvent(ctx context.Context, event ce.Event, eventResponse *ce.EventResponse) error {
-//	fmt.Printf("received event %+v", event)
-//
-//	if _, err := event.Context.GetExtension("event-type-version"); err != nil {
-//		// TODO(nachtmaar): set proper status code
-//		return errors.New("günther")
-//	}
-//
-//	traceHeaders := getTraceHeaders(ctx)
-//
-//	bus.SendEventV2(event, *traceHeaders)
-//
-//	return nil
-//}
-
-
 func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	ctx = cehttp.WithTransportContext(ctx, cehttp.NewTransportContext(req))
@@ -249,7 +232,7 @@ func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		Header: req.Header,
 		Body:   body,
 	}
-	e, apiError, err := kymaevent.DecodeMessage(h.Transport, ctx, message)
+	e, apiError, err := kymaevent.FromMessage(h.Transport, ctx, message)
 	if err != nil {
 		if err := kymaevent.RespondWithError(w, api.Error{
 			Status:   http.StatusBadRequest,
@@ -270,6 +253,10 @@ func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		return
 	}
 	fmt.Printf("%v", e)
+	msg, err := kymaevent.ToMessage(ctx, *e, cehttp.BinaryV03)
+
+	fmt.Printf("%+v", msg)
+	if err != nil {}
 
 	respEvent, err := bus.SendEventV2(*e, *getTraceHeaders(ctx))
 	if err != nil {

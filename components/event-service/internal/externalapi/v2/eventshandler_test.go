@@ -32,7 +32,6 @@ func TestEventOk(t *testing.T) {
 	//	return
 	//}
 
-
 	s := &stupidEventMock{
 		Typ:              "order.created",
 		Eventtypeversion: "v1",
@@ -121,20 +120,29 @@ func TestPropagateTraceHeaders(t *testing.T) {
 	defer func() { bus.InitEventSender(httptools.DefaultHTTPClientProvider, httptools.DefaultHTTPRequestProvider) }()
 
 	// init source config
-	sourceID, targetURLV1, targetURLV2 := "", "http://kyma-domain/v1/events", "http://kyma-domain/v2/events"
+	sourceID, targetURLV1, targetURLV2 := "some.dummy.source", "http://kyma-domain/v1/events", "http://kyma-domain/v2/events"
 	if err := bus.Init(sourceID, targetURLV1, targetURLV2); err != nil {
 		t.Fatalf("unable to init bus")
 	}
 
 	// simulate request from outside of event-service
-	event := "{\"type\":\"order.created\",\"specversion\":\"0.3\",\"eventtypeversion\":\"v1\",\"id\":\"31109198-4d69-4ae0-972d-76117f3748c8\",\"time\":\"2012-11-01T22:08:41+00:00\",\"data\":\"{'key':'value'}\"}"
-	req, err := http.NewRequest(http.MethodPost, shared.EventsV2Path, strings.NewReader(event))
+	s := &stupidEventMock{
+		Typ:              "order.created",
+		Specversion:      "0.3",
+		Eventtypeversion: "v1",
+		Id:               "31109198-4d69-4ae0-972d-76117f3748c8",
+		Time:             "2012-11-01T22:08:41+00:00",
+		Data:             "{'key':'value'}",
+	}
+	ss := eventMockToString(t, s)
+	req, err := http.NewRequest(http.MethodPost, shared.EventsV2Path, strings.NewReader(ss))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// simulate trace headers added by envoy sidecar
 	traceHeaderKey, traceHeaderVal := "x-b3-traceid", "0887296564d75cda"
+	req.Header.Add("content-type", "application/cloudevents+json")
 	req.Header.Add(traceHeaderKey, traceHeaderVal)
 
 	// add none-trace headers
