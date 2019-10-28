@@ -20,7 +20,7 @@ spec:
       imagePullPolicy: {{ .Values.acceptanceTest.image.pullPolicy }}
       env:
         - name: EVENT_SERVICE_URL
-          value: http://app-{{.Release.Name }}-event-service.{{ .Release.Namespace }}.svc.cluster.local:8081
+          value: http://{{.Release.Name }}-event-service.{{ .Release.Namespace }}.svc.cluster.local:8081
         - name: NAMESPACE
           value: {{ .Release.Namespace }}
         - name: APPLICATION

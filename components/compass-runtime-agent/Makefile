@@ -1,36 +1,30 @@
 APP_NAME = compass-runtime-agent
-IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
-TAG = $(DOCKER_TAG)
+APP_PATH = components/$(APP_NAME)
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20190823-24e14d1
 
-.PHONY: build
-build:
-	./before-commit.sh ci
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-.PHONY: pull-licenses
-pull-licenses:
-ifdef LICENSE_PULLER_PATH
-	bash $(LICENSE_PULLER_PATH)
-else
-	mkdir -p licenses
-endif
+include $(SCRIPTS_DIR)/generic-make-go.mk
 
-.PHONY: build-image
-build-image: pull-licenses
-	docker build -t $(APP_NAME):latest .
+VERIFY_IGNORE := /vendor\|/mocks
 
-.PHONY: push-image
-push-image:
-	docker tag $(APP_NAME) $(IMG):$(TAG)
-	docker push $(IMG):$(TAG)
+verify:: mod-verify
 
-.PHONY: ci-pr
-ci-pr: build build-image push-image
+resolve-local:
+	GO111MODULE=on go mod vendor -v
 
-.PHONY: ci-master
-ci-master: build build-image push-image
+dep-status:
+	@echo "Go modules present in component - omitting."
 
-.PHONY: ci-release
-ci-release: build build-image push-image
+mod-verify-local:
+	GO111MODULE=on go mod verify 
+
+test-local:
+	GO111MODULE=on go test ./... 
+
+$(eval $(call buildpack-cp-ro,resolve)) 
+$(eval $(call buildpack-mount,mod-verify)) 
+$(eval $(call buildpack-mount,test)) 
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:

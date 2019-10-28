@@ -32,6 +32,11 @@ required = [
   name = "k8s.io/apiserver"
   version = "kubernetes-1.15.3"
 
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.15.3"
+
+
 [[constraint]]
   name = "github.com/gorilla/mux"
   version = "1.6.1"

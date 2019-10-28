@@ -1,12 +1,13 @@
 package externalapi
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestApiSpecHandler_HandleRequest(t *testing.T) {
