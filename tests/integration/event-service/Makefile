@@ -11,4 +11,4 @@ test:
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
-	@echo "resources/"
+	@echo "resources/application-connector"
