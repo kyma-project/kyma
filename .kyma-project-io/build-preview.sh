@@ -13,7 +13,7 @@ trap on_error ERR
 readonly KYMA_PROJECT_IO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 readonly WEBSITE_DIR="website"
-readonly WEBSITE_REPO="https://github.com/magicmatatjahu/website"
+readonly WEBSITE_REPO="https://github.com/kyma-project/website"
 
 readonly BUILD_DIR="${KYMA_PROJECT_IO_DIR}/${WEBSITE_DIR}"
 
@@ -34,7 +34,7 @@ step() {
 }
 
 copy-website-repo() {
-  git clone -b "docs-community-preview" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
+  git clone -b "master" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
 }
 
 build-preview() {
