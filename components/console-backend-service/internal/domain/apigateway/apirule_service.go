@@ -60,12 +60,12 @@ func (svc *apiRuleService) List(namespace string, serviceName *string, hostname 
 		}
 		match := true
 		if serviceName != nil {
-			if serviceName != formattedApiRule.Spec.Service.Name {
+			if *serviceName != *formattedApiRule.Spec.Service.Name {
 				match = false
 			}
 		}
 		if hostname != nil {
-			if hostname != formattedApiRule.Spec.Service.Host {
+			if *hostname != *formattedApiRule.Spec.Service.Host {
 				match = false
 			}
 		}

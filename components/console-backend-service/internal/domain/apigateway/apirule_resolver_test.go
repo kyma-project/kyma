@@ -32,7 +32,7 @@ var (
 func TestApiRuleResolver_APIRulesQuery(t *testing.T) {
 
 	t.Run("Should return a list of APIRules for namespace", func(t *testing.T) {
-		apiRules := []*v1alpha1.APIRule{fixTestApiRule(name, hostname1, serviceName1, servicePort1, gateway1), fixTestApiRule("test-2", hostname2, serviceName2, servicePort2, gateway2)}
+		apiRules := []*v1alpha1.APIRule{fixTestApiRule(name, namespace, hostname1, serviceName1, servicePort1, gateway1), fixTestApiRule("test-2", namespace, hostname2, serviceName2, servicePort2, gateway2)}
 
 		expected := []gqlschema.APIRule{testApiRuleToGQL(name, hostname1, serviceName1, servicePort1, gateway1), testApiRuleToGQL("test-2", hostname2, serviceName2, servicePort2, gateway2)}
 
@@ -70,7 +70,7 @@ func TestApiRuleResolver_APIRulesQuery(t *testing.T) {
 
 func TestApiRuleResolver_APIRuleQuery(t *testing.T) {
 	t.Run("Should return a an API in namespace", func(t *testing.T) {
-		apiRule := fixTestApiRule(name, hostname1, serviceName1, servicePort1, gateway1)
+		apiRule := fixTestApiRule(name, namespace, hostname1, serviceName1, servicePort1, gateway1)
 
 		expected := testApiRuleToGQL(name, hostname1, serviceName1, servicePort1, gateway1)
 
@@ -222,7 +222,7 @@ func TestApiRuleResolver_APIRuleQuery(t *testing.T) {
 
 func TestApiRuleResolver_DeleteAPIRule(t *testing.T) {
 	t.Run("Should delete an APIRule", func(t *testing.T) {
-		apiRule := fixTestApiRule(name, hostname1, serviceName1, servicePort1, gateway1)
+		apiRule := fixTestApiRule(name, namespace, hostname1, serviceName1, servicePort1, gateway1)
 
 		expected := testApiRuleToGQL(name, hostname1, serviceName1, servicePort1, gateway1)
 
@@ -255,7 +255,7 @@ func TestApiRuleResolver_DeleteAPIRule(t *testing.T) {
 	})
 
 	t.Run("Should return an error if APIRule couldn't be removed", func(t *testing.T) {
-		apiRule := fixTestApiRule(name, hostname1, serviceName1, servicePort1, gateway1)
+		apiRule := fixTestApiRule(name, namespace, hostname1, serviceName1, servicePort1, gateway1)
 
 		service := automock.NewApiRuleSvc()
 		service.On("Find", name, namespace).Return(apiRule, nil).Once()
@@ -272,10 +272,15 @@ func TestApiRuleResolver_DeleteAPIRule(t *testing.T) {
 	})
 }
 
-func fixTestApiRule(ruleName string, hostName string, serviceName string, servicePort uint32, gateway string) *v1alpha1.APIRule {
+func fixTestApiRule(ruleName string, namespace string, hostName string, serviceName string, servicePort uint32, gateway string) *v1alpha1.APIRule {
 	return &v1alpha1.APIRule{
+		TypeMeta: v1.TypeMeta{
+			APIVersion: "gateway.kyma-project.io/v1alpha1",
+			Kind:       "ApiRule",
+		},
 		ObjectMeta: v1.ObjectMeta{
-			Name: ruleName,
+			Name:      ruleName,
+			Namespace: namespace,
 		},
 		Spec: v1alpha1.APIRuleSpec{
 			Service: &v1alpha1.Service{
