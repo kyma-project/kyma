@@ -76,7 +76,7 @@ func TestController_Reconcile(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Empty(t, result)
-		assertExpectations(t, client.Mock, connectorClient.Mock, preserver.Mock)
+		assertExpectations(t, &client.Mock, &connectorClient.Mock, &preserver.Mock)
 	})
 
 	t.Run("should not fetch certificate if error status present on CR", func(t *testing.T) {
@@ -96,7 +96,7 @@ func TestController_Reconcile(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Empty(t, result)
-		assertExpectations(t, client.Mock, connectorClient.Mock, preserver.Mock)
+		assertExpectations(t, &client.Mock, &connectorClient.Mock, &preserver.Mock)
 	})
 
 	t.Run("should not fail if instance not found", func(t *testing.T) {
@@ -116,7 +116,7 @@ func TestController_Reconcile(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Empty(t, result)
-		assertExpectations(t, client.Mock, connectorClient.Mock, preserver.Mock)
+		assertExpectations(t, &client.Mock, &connectorClient.Mock, &preserver.Mock)
 	})
 
 	t.Run("should return error if failed to get instance", func(t *testing.T) {
@@ -136,7 +136,7 @@ func TestController_Reconcile(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Empty(t, result)
-		assertExpectations(t, client.Mock, connectorClient.Mock, preserver.Mock)
+		assertExpectations(t, &client.Mock, &connectorClient.Mock, &preserver.Mock)
 	})
 
 	t.Run("should set error status when failed to request certificate", func(t *testing.T) {
@@ -159,7 +159,7 @@ func TestController_Reconcile(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Empty(t, result)
-		assertExpectations(t, client.Mock, connectorClient.Mock, preserver.Mock)
+		assertExpectations(t, &client.Mock, &connectorClient.Mock, &preserver.Mock)
 	})
 
 	t.Run("should set error status when failed to preserve certificate", func(t *testing.T) {
@@ -184,7 +184,7 @@ func TestController_Reconcile(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Empty(t, result)
-		assertExpectations(t, client.Mock, connectorClient.Mock, preserver.Mock)
+		assertExpectations(t, &client.Mock, &connectorClient.Mock, &preserver.Mock)
 	})
 
 }
@@ -205,7 +205,7 @@ func setupCertificateRequestWithErrorStatus(args mock.Arguments) {
 	certReqInstance.Status.Error = "Error"
 }
 
-func assertExpectations(t *testing.T, mocks ...mock.Mock) {
+func assertExpectations(t *testing.T, mocks ...*mock.Mock) {
 	for _, m := range mocks {
 		m.AssertExpectations(t)
 	}

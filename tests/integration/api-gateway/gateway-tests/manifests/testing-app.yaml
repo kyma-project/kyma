@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin-{{.TestID}}
+  namespace: api-gateway-tests
+  labels:
+    app: httpbin-{{.TestID}}
+spec:
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 80
+  selector:
+    app: httpbin-{{.TestID}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin-{{.TestID}}
+  namespace: api-gateway-tests
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpbin-{{.TestID}}
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: httpbin-{{.TestID}}
+        version: v1
+    spec:
+      containers:
+      - image: docker.io/kennethreitz/httpbin
+        imagePullPolicy: IfNotPresent
+        name: httpbin
+        ports:
+        - containerPort: 80

@@ -1,9 +1,9 @@
 ---
-title: Set Minio to the Azure Blob Storage Gateway mode
+title: Set MinIO to the Azure Blob Storage Gateway mode
 type: Tutorials
 ---
 
-By default, you install Kyma with the Asset Store in Minio stand-alone mode. This tutorial shows how to set Minio to the Azure Blob Storage Gateway mode using an [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation).
+By default, you install Kyma with the Asset Store in MinIO stand-alone mode. This tutorial shows how to set MinIO to the Azure Blob Storage Gateway mode using an [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation).
 
 ## Prerequisites
 
@@ -13,9 +13,9 @@ By default, you install Kyma with the Asset Store in Minio stand-alone mode. Thi
 
 ## Steps
 
-You can set Minio to the Azure Blob Storage Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an Azure storage account, apply a Secret and ConfigMap with an override onto a cluster or Minikube, and trigger the Kyma installation process.
+You can set MinIO to the Azure Blob Storage Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an Azure storage account, apply a Secret and ConfigMap with an override onto a cluster or Minikube, and trigger the Kyma installation process.
 
->**CAUTION:** Buckets created in Minio without using Bucket CRs are not recreated or migrated while switching to the Minio Gateway mode.
+>**CAUTION:** Buckets created in MinIO without using Bucket CRs are not recreated or migrated while switching to the MinIO Gateway mode.
 
 ### Set up Azure Blob Storage resources
 
@@ -61,7 +61,7 @@ Create an Azure resource group and a storage account. Follow these steps:
     export AZ_ACCOUNT_KEY=$(az storage account keys list --account-name "${AZ_ACCOUNT_NAME}" --resource-group "${AZ_RESOURCE_GROUP}" --query "[?keyName=='key1'].value" --output tsv | base64)
     ```
 
-### Configure Minio Gateway mode
+### Configure MinIO Gateway mode
 
 Apply the following Secret and ConfigMap with an override onto a cluster or Minikube. Run:
 

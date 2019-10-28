@@ -3,11 +3,11 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
-      dir: pr/
-      version: "PR-5943"
+      dir:
+      version: 0a651695
     runtimeAgentTests:
-      dir: pr/
-      version: "PR-6081"
+      dir:
+      version: 0a651695
 
 compassRuntimeAgent:
   image:
@@ -45,9 +45,9 @@ compassRuntimeAgent:
       port: 8080
     configApplicationWaitTime: 50s
     proxyInvalidationWaitTime: 120s
-    applicationInstallationTimeout: 150s
+    applicationInstallationTimeout: 180s
     graphqlLogs: false
-    oauth:
-      hydra:
-        publicUrl: http://ory-hydra-public.kyma-system:4444
-        adminUrl: http://ory-hydra-admin.kyma-system:4445
+    director:
+      url: "http://compass-director.compass-system.svc.cluster.local:3000/graphql"
+      internalJWT: "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzY29wZXMiOiAiYXBwbGljYXRpb246cmVhZCBoZWFsdGhfY2hlY2tzOnJlYWQgYXBwbGljYXRpb246d3JpdGUgcnVudGltZTp3cml0ZSBsYWJlbF9kZWZpbml0aW9uOndyaXRlIGxhYmVsX2RlZmluaXRpb246cmVhZCBydW50aW1lOnJlYWQgaW50ZWdyYXRpb25fc3lzdGVtOnJlYWQgaW50ZWdyYXRpb25fc3lzdGVtOndyaXRlIiwgInRlbmFudCI6ICIzZTY0ZWJhZS0zOGI1LTQ2YTAtYjFlZC05Y2NlZTE1M2EwYWUifQ."
+

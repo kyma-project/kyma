@@ -3,6 +3,7 @@ package secrets
 import (
 	"encoding/json"
 	"fmt"
+
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"

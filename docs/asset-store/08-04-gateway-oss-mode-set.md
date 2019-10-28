@@ -1,11 +1,11 @@
 ---
-title: Set Minio to the Alibaba OSS Gateway mode
+title: Set MinIO to the Alibaba OSS Gateway mode
 type: Tutorials
 ---
 
 >**CAUTION:** Alibaba OSS Gateway Mode was only tested manually on Kyma 1.6. Currently, there is no automated pipeline for it in Kyma.
 
-By default, you install Kyma with the Asset Store in Minio stand-alone mode. This tutorial shows how to set Minio to the Alibaba Object Storage Service (OSS) Gateway mode using an [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation).
+By default, you install Kyma with the Asset Store in MinIO stand-alone mode. This tutorial shows how to set MinIO to the Alibaba Object Storage Service (OSS) Gateway mode using an [override](/root/kyma/#configuration-helm-overrides-for-kyma-installation).
 
 ## Prerequisites
 
@@ -14,9 +14,9 @@ By default, you install Kyma with the Asset Store in Minio stand-alone mode. Thi
 
 ## Steps
 
-You can set Minio to the Alibaba OSS Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an access key for your Alibaba Cloud account, apply a Secret and a ConfigMap with an override onto a cluster or Minikube, and trigger the Kyma installation process.
+You can set MinIO to the Alibaba OSS Gateway mode both during and after Kyma installation. In both cases, you need to create and configure an access key for your Alibaba Cloud account, apply a Secret and a ConfigMap with an override onto a cluster or Minikube, and trigger the Kyma installation process.
 
->**CAUTION:** Buckets created in Minio without using Bucket CRs are not recreated or migrated while switching to the Minio Gateway mode.
+>**CAUTION:** Buckets created in MinIO without using Bucket CRs are not recreated or migrated while switching to the MinIO Gateway mode.
 
 ### Create an Alibaba Cloud access key
 
@@ -33,7 +33,7 @@ Create an Alibaba Cloud access key for a user. Follow these steps:
     export ALIBABA_SECRET_KEY={your-secret-key}
     ```
 
-### Configure Minio Gateway mode
+### Configure MinIO Gateway mode
 
 Export an Alibaba OSS service [endpoint](https://www.alibabacloud.com/help/doc-detail/31837.htm) as an environment variable:
 
