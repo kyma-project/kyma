@@ -18,52 +18,52 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: PR-6042
+    version: 0a65169
   application_operator_tests:
     dir:
-    version: PR-6042
+    version: 0a65169
   connector_service:
     dir:
-    version: PR-6042
+    version: 0a65169
   connector_service_tests:
     dir:
-    version: PR-6042
+    version: 0a65169
   connection_token_handler:
     dir:
-    version: PR-6042
+    version: 0a65169
   connection_token_handler_tests:
     dir:
-    version: PR-6042
+    version: 0a65169
   connectivity_certs_controller:
     dir:
-    version: PR-6042
+    version: 0a65169
   event_service:
     dir: develop/
     version: e029fcf4
   event_service_integration_tests:
-    dir: pr/
-    version: PR-5890
+    dir: develop/
+    version: 6fe0bf1b
   application_connectivity_validator:
     dir:
-    version: PR-6042
+    version: 0a65169
   application_gateway:
     dir:
-    version: PR-6042
+    version: 0a65169
   application_gateway_tests:
     dir:
-    version: PR-6042
+    version: 0a65169
   application_registry:
     dir:
-    version: PR-6042
+    version: 0a65169
   application_registry_tests:
     dir:
-    version: PR-6042
+    version: 0a65169
   application_broker:
     dir: develop/
     version: b1f395fa
   application_connectivity_certs_setup_job:
     dir:
-    version: PR-6042
+    version: 0a65169
 connectivity_certs_controller:
   enabled: false
 
