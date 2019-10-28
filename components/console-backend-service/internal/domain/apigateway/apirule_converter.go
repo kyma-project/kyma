@@ -1,6 +1,10 @@
 package apigateway
 
 import (
+	"bytes"
+
+	alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -77,21 +81,29 @@ func (c *apiRuleConverter) ToGQL(in *v1alpha1.APIRule) (*gqlschema.APIRule, erro
 		},
 		Gateway: *in.Spec.Gateway,
 		Rules:   rules,
-		Status: &gqlschema.APIRuleStatuses{
-			APIRuleStatus: gqlschema.APIRuleStatus{
-				Code: string(in.Status.APIRuleStatus.Code),
-				Desc: &in.Status.APIRuleStatus.Description,
-			},
-			AccessRuleStatus: gqlschema.APIRuleStatus{
-				Code: string(in.Status.AccessRuleStatus.Code),
-				Desc: &in.Status.AccessRuleStatus.Description,
-			},
-			VirtualServiceStatus: gqlschema.APIRuleStatus{
-				Code: string(in.Status.VirtualServiceStatus.Code),
-				Desc: &in.Status.VirtualServiceStatus.Description,
-			},
-		},
+		Status:  getStatus(in.Status),
 	}, nil
+}
+
+func getStatus(status v1alpha1.APIRuleStatus) *gqlschema.APIRuleStatuses {
+	if status.APIRuleStatus == nil || status.AccessRuleStatus == nil || status.VirtualServiceStatus == nil {
+		return nil
+	}
+
+	return &gqlschema.APIRuleStatuses{
+		APIRuleStatus: gqlschema.APIRuleStatus{
+			Code: string(status.APIRuleStatus.Code),
+			Desc: &status.APIRuleStatus.Description,
+		},
+		AccessRuleStatus: gqlschema.APIRuleStatus{
+			Code: string(status.AccessRuleStatus.Code),
+			Desc: &status.AccessRuleStatus.Description,
+		},
+		VirtualServiceStatus: gqlschema.APIRuleStatus{
+			Code: string(status.VirtualServiceStatus.Code),
+			Desc: &status.VirtualServiceStatus.Description,
+		},
+	}
 }
 
 func (c *apiRuleConverter) ToGQLs(in []*v1alpha1.APIRule) ([]gqlschema.APIRule, error) {
@@ -110,8 +122,76 @@ func (c *apiRuleConverter) ToGQLs(in []*v1alpha1.APIRule) ([]gqlschema.APIRule, 
 	return result, nil
 }
 
-func (c *apiRuleConverter) ToApiRule(name string, namespace string, in gqlschema.APIRuleInput) *v1alpha1.APIRule {
-	//TODO create APIRule obj
+func fromGQLJSON(config gqlschema.JSON) *runtime.RawExtension {
+	result := runtime.RawExtension{}
+	if config != nil {
+		var buf bytes.Buffer
+		config.MarshalGQL(&buf)
+		result.Raw = buf.Bytes()
+	}
+	return &result
+}
 
-	return &v1alpha1.APIRule{}
+func (c *apiRuleConverter) ToApiRule(name string, namespace string, in gqlschema.APIRuleInput) *v1alpha1.APIRule {
+	hostPort := uint32(in.ServicePort)
+	return &v1alpha1.APIRule{
+		TypeMeta: v1.TypeMeta{
+			APIVersion: "gateway.kyma-project.io/v1alpha1",
+			Kind:       "APIRule",
+		},
+		ObjectMeta: v1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: v1alpha1.APIRuleSpec{
+			Service: &v1alpha1.Service{
+				Name:       &in.ServiceName,
+				Port:       &hostPort,
+				Host:       &in.Host,
+				IsExternal: nil, // TODO
+			},
+			Gateway: &in.Gateway,
+			Rules:   toRules(in.Rules),
+		},
+	}
+}
+
+func toRules(ruleInputs []gqlschema.RuleInput) []v1alpha1.Rule {
+	var rules []v1alpha1.Rule
+	for _, rule := range ruleInputs {
+
+		rules = append(rules, v1alpha1.Rule{
+			Path:             rule.Path,
+			Methods:          rule.Methods,
+			AccessStrategies: toAccessStrategies(rule.AccessStrategies),
+			Mutators:         toMutators(rule.Mutators),
+		})
+	}
+	return rules
+}
+
+func toAccessStrategies(accessStrategyInputs []gqlschema.APIRuleConfigInput) []*alpha1.Authenticator {
+	var accessStrategies []*alpha1.Authenticator
+	for _, accessStrategy := range accessStrategyInputs {
+		accessStrategies = append(accessStrategies, &alpha1.Authenticator{
+			Handler: &alpha1.Handler{
+				Name:   accessStrategy.Name,
+				Config: fromGQLJSON(accessStrategy.Config),
+			},
+		})
+	}
+	return accessStrategies
+}
+
+func toMutators(mutatorInputs []gqlschema.APIRuleConfigInput) []*alpha1.Mutator {
+	var mutators []*alpha1.Mutator
+	for _, mutator := range mutatorInputs {
+		mutators = append(mutators, &alpha1.Mutator{
+			Handler: &alpha1.Handler{
+				Name:   mutator.Name,
+				Config: fromGQLJSON(mutator.Config),
+			},
+		})
+	}
+	return mutators
 }

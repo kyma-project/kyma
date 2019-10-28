@@ -24,7 +24,7 @@ type apiRuleService struct {
 }
 
 var apiRuleTypeMeta = metav1.TypeMeta{
-	Kind:       "ApiRule",
+	Kind:       "APIRule",
 	APIVersion: "gateway.kyma-project.io/v1alpha1",
 }
 
