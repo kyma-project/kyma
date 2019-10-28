@@ -27,7 +27,7 @@ func TestEventOk(t *testing.T) {
 	saved := handleEvent
 	defer func() { handleEvent = saved }()
 
-	handleEvent = func(parameters *apiv1.PublishEventParametersV1, response *api.PublishEventResponses,
+	handleEvent = func(parameters *apiv1.PublishEventParametersV1, response *api.PublishEventResponse,
 		traceHeaders *map[string]string, forwardHeaders *map[string][]string) (err error) {
 		ok := api.PublishResponse{EventID: "responseEventId"}
 		response.Ok = &ok

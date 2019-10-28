@@ -64,7 +64,7 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 	err = decoder.Decode(&parameters.PublishrequestV1)
 	if err != nil {
-		var resp *api.PublishEventResponses
+		var resp *api.PublishEventResponse
 		if err.Error() == requestBodyTooLargeErrorMessage {
 			resp = shared.ErrorResponseRequestBodyTooLarge(err.Error())
 		} else {
@@ -73,7 +73,7 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 		writeJSONResponse(w, resp)
 		return
 	}
-	resp := &api.PublishEventResponses{}
+	resp := &api.PublishEventResponse{}
 
 	traceHeaders := getTraceHeaders(req)
 
@@ -94,7 +94,7 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	return
 }
 
-var handleEvent = func(publishRequest *apiv1.PublishEventParametersV1, publishResponse *api.PublishEventResponses,
+var handleEvent = func(publishRequest *apiv1.PublishEventParametersV1, publishResponse *api.PublishEventResponse,
 	traceHeaders *map[string]string, forwardHeaders *map[string][]string) (err error) {
 	checkResp := checkParameters(publishRequest)
 	if checkResp.Error != nil {
@@ -116,7 +116,7 @@ var handleEvent = func(publishRequest *apiv1.PublishEventParametersV1, publishRe
 	return err
 }
 
-func checkParameters(parameters *apiv1.PublishEventParametersV1) (response *api.PublishEventResponses) {
+func checkParameters(parameters *apiv1.PublishEventParametersV1) (response *api.PublishEventResponse) {
 	if parameters == nil {
 		return shared.ErrorResponseBadRequest(shared.ErrorMessageBadPayload)
 	}
@@ -144,10 +144,10 @@ func checkParameters(parameters *apiv1.PublishEventParametersV1) (response *api.
 		return shared.ErrorResponseMissingFieldData()
 	}
 	// OK
-	return &api.PublishEventResponses{Ok: nil, Error: nil}
+	return &api.PublishEventResponse{Ok: nil, Error: nil}
 }
 
-func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
+func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponse) {
 	encoder := json.NewEncoder(w)
 	w.Header().Set("Content-Type", httpconsts.ContentTypeApplicationJSON)
 	if resp.Error != nil {

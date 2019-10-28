@@ -28,11 +28,11 @@ type ErrorDetail struct {
 	MoreInfo string `json:"moreInfo,omitempty"`
 }
 
-// PublishEventResponses holds responses of PublishEvent
-type PublishEventResponses struct {
+// PublishEventResponse holds responses of PublishEvent
+type PublishEventResponse struct {
 	Ok    *PublishResponse
 	Error *Error
 }
 
 // SendEventResponse holds the response from outbound messaging API
-type SendEventResponse PublishEventResponses
+type SendEventResponse PublishEventResponse
