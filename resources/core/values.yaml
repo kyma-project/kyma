@@ -43,11 +43,11 @@ global:
     dir: develop/
     version: 8a10f0ed
   kubeless_integration_tests:
-    dir: pr/tests/
-    version: PR-5226
+    dir: develop/tests/
+    version: 1f9dbb20
   kubeless_tests:
-    dir: pr/
-    version: PR-5226
+    dir: develop/
+    version: 716e185b
   apiserver_proxy_integration_tests:
     dir:
     version: bdfddb63
