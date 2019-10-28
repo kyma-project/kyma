@@ -66,4 +66,4 @@ Currently, there is no UI support for the new Function Controller. To use it, fo
 
 ### Override default autoscaler configuration
 
-The function controller uses [Knative Serving](https://github.com/kyma-project/kyma/tree/master/resources/knative-serving) under the hood. This means,the [Knative Pod Autoscaler (KPA)](https://knative.dev/docs/serving/configuring-the-autoscaler/)handles autoscaling by default. If you want to customize the settings, use [Helm overrides](https://kyma-project.io/docs/#configuration-helm-overrides-for-kyma-installation) to override the configuration defined in the `config-autoscaler` ConfigMap.
+The function controller uses [Knative Serving](https://github.com/kyma-project/kyma/tree/master/resources/knative-serving) under the hood. This means that the [Knative Pod Autoscaler (KPA)](https://knative.dev/docs/serving/configuring-the-autoscaler/) handles autoscaling by default. If you want to customize the settings, use [Helm overrides](https://kyma-project.io/docs/#configuration-helm-overrides-for-kyma-installation) to override the configuration defined in the `config-autoscaler` ConfigMap.
