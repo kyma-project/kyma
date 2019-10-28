@@ -82,7 +82,7 @@ data:
 EOF
 ```
 
-Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the values of `512Mi` instead of the default `128Mi` for Minio memory and `250m` instead of `100m` for Minio CPU from the chart's `values.yaml` file.
+Once the installation starts, the Kyma Operator generates overrides based on the ConfigMap entries. The system uses the values of `512Mi` instead of the default `128Mi` for MinIO memory and `250m` instead of `100m` for MinIO CPU from the chart's `values.yaml` file.
 
 For overrides that the system should keep in Secrets, just define a Secret object instead of a ConfigMap with the same key and a base64-encoded value. Be sure to label the Secret.
 

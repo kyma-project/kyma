@@ -63,7 +63,7 @@ The Console is a web-based administrative UI for Kyma. It uses the [Luigi framew
 
 ## Asset Store
 
-The Asset Store is a flexible, scalable, multi-cloud, and location-independent Kubernetes-native solution for storing assets, such as documents, files, images, API specifications, and client-side applications. The Asset Store consists of Minio and custom resources. The custom resources are managed by a controller that communicates through Minio Gateway with external cloud providers.
+The Asset Store is a flexible, scalable, multi-cloud, and location-independent Kubernetes-native solution for storing assets, such as documents, files, images, API specifications, and client-side applications. The Asset Store consists of [MinIO](https://min.io/) and custom resources. The custom resources are managed by a controller that communicates through MinIO Gateway with external cloud providers.
 
 ## Headless CMS
 
