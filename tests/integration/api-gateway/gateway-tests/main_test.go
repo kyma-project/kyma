@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/resource"
-	"istio.io/istio/pkg/test/util/retry"
 	"log"
 	"math/rand"
 	"os"
