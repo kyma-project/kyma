@@ -129,8 +129,8 @@ func TestApiGatewayIntegration(t *testing.T) {
 		time.Sleep(time.Second * 3)
 		resourceManager.DeleteResource(k8sClient, nsResourceSchema, ns, name)
 	}()
-	t.Run("parallel tests", func(t *testing.T) {
-		t.Run("expose service without access strategy (plain access)", func(t *testing.T) {
+	t.Run("API Gateway should", func(t *testing.T) {
+		t.Run("Expose service without access strategy (plain access)", func(t *testing.T) {
 			t.Parallel()
 			testID := generateRandomString(testIDLength)
 
