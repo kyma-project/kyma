@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -43,9 +42,9 @@ type maxBytesHandler struct {
 	limit int64
 }
 
-type CloudEventsHandler struct  {
-	Transport * cehttp.Transport
-	Client cloudevents.Client
+type CloudEventsHandler struct {
+	Transport *cehttp.Transport
+	Client    cloudevents.Client
 }
 
 func (h *maxBytesHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
@@ -62,7 +61,7 @@ func NewEventsHandler(maxRequestSize int64) http.Handler {
 		return nil
 	}
 
-	handler := CloudEventsHandler{Transport:t}
+	handler := CloudEventsHandler{Transport: t}
 
 	return &maxBytesHandler{next: &handler, limit: maxRequestSize}
 }
@@ -96,7 +95,7 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 	err = decoder.Decode(&parameters.EventRequestV2)
 	if err != nil {
-		var resp *api.PublishEventResponses
+		var resp *api.PublishEventResponse
 		if err.Error() == requestBodyTooLargeErrorMessage {
 			resp = shared.ErrorResponseRequestBodyTooLarge(err.Error())
 		} else {
@@ -105,7 +104,7 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 		writeJSONResponse(w, resp)
 		return
 	}
-	resp := &api.PublishEventResponses{}
+	resp := &api.PublishEventResponse{}
 
 	traceHeaders := &map[string]string{} //getTraceHeaders(req)
 
@@ -126,7 +125,7 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	return
 }
 
-var handleEvent = func(publishRequest *apiv2.PublishEventParametersV2, publishResponse *api.PublishEventResponses,
+var handleEvent = func(publishRequest *apiv2.PublishEventParametersV2, publishResponse *api.PublishEventResponse,
 	traceHeaders *map[string]string, forwardHeaders *map[string][]string) (err error) {
 	checkResp := checkParameters(publishRequest)
 	if checkResp.Error != nil {
@@ -148,7 +147,7 @@ var handleEvent = func(publishRequest *apiv2.PublishEventParametersV2, publishRe
 	return err
 }
 
-func checkParameters(parameters *apiv2.PublishEventParametersV2) (response *api.PublishEventResponses) {
+func checkParameters(parameters *apiv2.PublishEventParametersV2) (response *api.PublishEventResponse) {
 	if parameters == nil {
 		return shared.ErrorResponseBadRequest(shared.ErrorMessageBadPayload)
 	}
@@ -182,16 +181,18 @@ func checkParameters(parameters *apiv2.PublishEventParametersV2) (response *api.
 		return ErrorResponseMissingFieldData()
 	}
 	// OK
-	return &api.PublishEventResponses{Ok: nil, Error: nil}
+	return &api.PublishEventResponse{Ok: nil, Error: nil}
 }
 
-func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
+func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponse) {
 	encoder := json.NewEncoder(w)
 	w.Header().Set("Content-Type", httpconsts.ContentTypeApplicationJSON)
 	if resp.Error != nil {
 		w.WriteHeader(resp.Error.Status)
+		// TODO(nachtmaar): handle error
 		encoder.Encode(resp.Error)
 	} else {
+		// TODO(nachtmaar): handle error
 		encoder.Encode(resp.Ok)
 	}
 	return
@@ -221,6 +222,20 @@ func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
+		// check if request is too large
+		if err.Error() == requestBodyTooLargeErrorMessage {
+			if err := kymaevent.RespondWithError(w, api.Error{
+				Status:   http.StatusRequestEntityTooLarge,
+				Type:     publish.ErrorTypeBadRequest,
+				Message:  publish.ErrorMessageBadRequest,
+				MoreInfo: "",
+				Details:  nil,
+			}); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			return
+		}
+		// handle all other read errors
 		if err := kymaevent.RespondWithError(w, api.Error{
 			Status:   http.StatusBadRequest,
 			Type:     publish.ErrorTypeBadRequest,
@@ -257,17 +272,27 @@ func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		}
 		return
 	}
-	fmt.Printf("%v", e)
+	log.Debug("received event", log.WithField("event", e))
 	msg, err := kymaevent.ToMessage(ctx, *e, cehttp.BinaryV03)
 
-	fmt.Printf("%+v", msg)
-	if err != nil {}
+	log.Debug("message from event", log.WithField("message", msg))
+	if err != nil {
+	}
 
-	respEvent, err := bus.SendEventV2(*e, *getTraceHeaders(ctx))
+	resp, err := bus.SendEventV2(*e, *getTraceHeaders(ctx))
 	if err != nil {
 		w.WriteHeader(http.StatusBadGateway)
 		return
 	}
-	fmt.Printf("%v", respEvent)
-}
+	log.Debug("bus response", log.WithField("response", resp))
+	if resp.Ok != nil || resp.Error != nil {
+		tmp := api.PublishEventResponse(*resp)
+		writeJSONResponse(w, &tmp)
+		return
+	}
 
+	log.Println("Cannot process event")
+	http.Error(w, "Cannot process event", http.StatusInternalServerError)
+	return
+
+}
