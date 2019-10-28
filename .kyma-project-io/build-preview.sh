@@ -34,7 +34,7 @@ step() {
 }
 
 copy-website-repo() {
-  git clone -b "preview-stateless" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
+  git clone -b "docs-community-preview" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
 }
 
 build-preview() {
