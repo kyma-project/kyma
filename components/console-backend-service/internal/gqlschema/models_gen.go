@@ -28,11 +28,11 @@ type APIInput struct {
 }
 
 type APIRule struct {
-	Name    string           `json:"name"`
-	Service APIRuleService   `json:"service"`
-	Gateway string           `json:"gateway"`
-	Rules   []Rule           `json:"rules"`
-	Status  *APIRuleStatuses `json:"status"`
+	Name    string          `json:"name"`
+	Service APIRuleService  `json:"service"`
+	Gateway string          `json:"gateway"`
+	Rules   []Rule          `json:"rules"`
+	Status  APIRuleStatuses `json:"status"`
 }
 
 type APIRuleConfig struct {
@@ -46,7 +46,6 @@ type APIRuleConfigInput struct {
 }
 
 type APIRuleInput struct {
-	Name        string      `json:"name"`
 	Host        string      `json:"host"`
 	ServiceName string      `json:"serviceName"`
 	ServicePort int         `json:"servicePort"`
@@ -66,9 +65,9 @@ type APIRuleStatus struct {
 }
 
 type APIRuleStatuses struct {
-	APIRuleStatus        APIRuleStatus `json:"apiRuleStatus"`
-	AccessRuleStatus     APIRuleStatus `json:"accessRuleStatus"`
-	VirtualServiceStatus APIRuleStatus `json:"virtualServiceStatus"`
+	APIRuleStatus        *APIRuleStatus `json:"apiRuleStatus"`
+	AccessRuleStatus     *APIRuleStatus `json:"accessRuleStatus"`
+	VirtualServiceStatus *APIRuleStatus `json:"virtualServiceStatus"`
 }
 
 type AddonsConfiguration struct {

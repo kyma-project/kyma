@@ -132,7 +132,7 @@ func (svc *apiRuleService) Update(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule,
 			Resource: apiRulesGroupVersionResource.Resource,
 		}, apiRule.ObjectMeta.Name)
 	}
-	apiRule.ObjectMeta.ResourceVersion = apiRule.ObjectMeta.ResourceVersion
+	apiRule.ObjectMeta.ResourceVersion = oldApiRule.ObjectMeta.ResourceVersion
 	apiRule.TypeMeta = apiRuleTypeMeta
 
 	u, err := svc.extractor.ToUnstructured(apiRule)

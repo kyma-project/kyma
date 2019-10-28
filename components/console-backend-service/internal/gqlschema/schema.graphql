@@ -845,7 +845,7 @@ type APIRule {
     service: APIRuleService!
     gateway: String!
     rules: [Rule!]!
-    status: APIRuleStatuses
+    status: APIRuleStatuses!
 }
 
 type APIRuleService{
@@ -867,9 +867,9 @@ type APIRuleConfig {
 }
 
 type APIRuleStatuses {
-    apiRuleStatus: APIRuleStatus!
-    accessRuleStatus: APIRuleStatus!
-    virtualServiceStatus: APIRuleStatus!
+    apiRuleStatus: APIRuleStatus
+    accessRuleStatus: APIRuleStatus
+    virtualServiceStatus: APIRuleStatus
 }
 
 type APIRuleStatus {
@@ -878,7 +878,6 @@ type APIRuleStatus {
 }
 
 input APIRuleInput {
-    name: String!
     host: String!
     serviceName: String!
     servicePort: Int!

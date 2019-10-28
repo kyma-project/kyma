@@ -333,14 +333,14 @@ func testApiRuleToGQL(ruleName string, hostName string, serviceName string, serv
 				},
 			},
 		},
-		Status: &gqlschema.APIRuleStatuses{
-			APIRuleStatus: gqlschema.APIRuleStatus{
+		Status: gqlschema.APIRuleStatuses{
+			APIRuleStatus: &gqlschema.APIRuleStatus{
 				Code: "OK",
 			},
-			VirtualServiceStatus: gqlschema.APIRuleStatus{
+			VirtualServiceStatus: &gqlschema.APIRuleStatus{
 				Code: "OK",
 			},
-			AccessRuleStatus: gqlschema.APIRuleStatus{
+			AccessRuleStatus: &gqlschema.APIRuleStatus{
 				Code: "OK",
 			},
 		},

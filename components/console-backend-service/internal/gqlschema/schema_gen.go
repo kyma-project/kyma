@@ -9538,6 +9538,9 @@ func (ec *executionContext) _APIRule(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "status":
 			out.Values[i] = ec._APIRule_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9707,17 +9710,16 @@ func (ec *executionContext) _APIRule_status(ctx context.Context, field graphql.C
 		return obj.Status, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*APIRuleStatuses)
+	res := resTmp.(APIRuleStatuses)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	if res == nil {
-		return graphql.Null
-	}
-
-	return ec._APIRuleStatuses(ctx, field.Selections, res)
+	return ec._APIRuleStatuses(ctx, field.Selections, &res)
 }
 
 var aPIRuleConfigImplementors = []string{"APIRuleConfig"}
@@ -10033,19 +10035,10 @@ func (ec *executionContext) _APIRuleStatuses(ctx context.Context, sel ast.Select
 			out.Values[i] = graphql.MarshalString("APIRuleStatuses")
 		case "apiRuleStatus":
 			out.Values[i] = ec._APIRuleStatuses_apiRuleStatus(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		case "accessRuleStatus":
 			out.Values[i] = ec._APIRuleStatuses_accessRuleStatus(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		case "virtualServiceStatus":
 			out.Values[i] = ec._APIRuleStatuses_virtualServiceStatus(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10073,16 +10066,17 @@ func (ec *executionContext) _APIRuleStatuses_apiRuleStatus(ctx context.Context, 
 		return obj.APIRuleStatus, nil
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(APIRuleStatus)
+	res := resTmp.(*APIRuleStatus)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._APIRuleStatus(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._APIRuleStatus(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -10101,16 +10095,17 @@ func (ec *executionContext) _APIRuleStatuses_accessRuleStatus(ctx context.Contex
 		return obj.AccessRuleStatus, nil
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(APIRuleStatus)
+	res := resTmp.(*APIRuleStatus)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._APIRuleStatus(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._APIRuleStatus(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -10129,16 +10124,17 @@ func (ec *executionContext) _APIRuleStatuses_virtualServiceStatus(ctx context.Co
 		return obj.VirtualServiceStatus, nil
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(APIRuleStatus)
+	res := resTmp.(*APIRuleStatus)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._APIRuleStatus(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._APIRuleStatus(ctx, field.Selections, res)
 }
 
 var addonsConfigurationImplementors = []string{"AddonsConfiguration"}
@@ -34156,12 +34152,6 @@ func UnmarshalAPIRuleInput(v interface{}) (APIRuleInput, error) {
 
 	for k, v := range asMap {
 		switch k {
-		case "name":
-			var err error
-			it.Name, err = graphql.UnmarshalString(v)
-			if err != nil {
-				return it, err
-			}
 		case "host":
 			var err error
 			it.Host, err = graphql.UnmarshalString(v)
@@ -35652,7 +35642,7 @@ type APIRule {
     service: APIRuleService!
     gateway: String!
     rules: [Rule!]!
-    status: APIRuleStatuses
+    status: APIRuleStatuses!
 }
 
 type APIRuleService{
@@ -35674,9 +35664,9 @@ type APIRuleConfig {
 }
 
 type APIRuleStatuses {
-    apiRuleStatus: APIRuleStatus!
-    accessRuleStatus: APIRuleStatus!
-    virtualServiceStatus: APIRuleStatus!
+    apiRuleStatus: APIRuleStatus
+    accessRuleStatus: APIRuleStatus
+    virtualServiceStatus: APIRuleStatus
 }
 
 type APIRuleStatus {
@@ -35685,7 +35675,6 @@ type APIRuleStatus {
 }
 
 input APIRuleInput {
-    name: String!
     host: String!
     serviceName: String!
     servicePort: Int!

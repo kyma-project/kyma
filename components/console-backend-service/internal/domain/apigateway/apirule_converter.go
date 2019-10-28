@@ -81,28 +81,21 @@ func (c *apiRuleConverter) ToGQL(in *v1alpha1.APIRule) (*gqlschema.APIRule, erro
 		},
 		Gateway: *in.Spec.Gateway,
 		Rules:   rules,
-		Status:  getStatus(in.Status),
+		Status: gqlschema.APIRuleStatuses{
+			APIRuleStatus:        getResourceStatusOrNil(in.Status.APIRuleStatus),
+			AccessRuleStatus:     getResourceStatusOrNil(in.Status.AccessRuleStatus),
+			VirtualServiceStatus: getResourceStatusOrNil(in.Status.VirtualServiceStatus),
+		},
 	}, nil
 }
 
-func getStatus(status v1alpha1.APIRuleStatus) *gqlschema.APIRuleStatuses {
-	if status.APIRuleStatus == nil || status.AccessRuleStatus == nil || status.VirtualServiceStatus == nil {
+func getResourceStatusOrNil(status *v1alpha1.APIRuleResourceStatus) *gqlschema.APIRuleStatus {
+	if status == nil {
 		return nil
 	}
-
-	return &gqlschema.APIRuleStatuses{
-		APIRuleStatus: gqlschema.APIRuleStatus{
-			Code: string(status.APIRuleStatus.Code),
-			Desc: &status.APIRuleStatus.Description,
-		},
-		AccessRuleStatus: gqlschema.APIRuleStatus{
-			Code: string(status.AccessRuleStatus.Code),
-			Desc: &status.AccessRuleStatus.Description,
-		},
-		VirtualServiceStatus: gqlschema.APIRuleStatus{
-			Code: string(status.VirtualServiceStatus.Code),
-			Desc: &status.VirtualServiceStatus.Description,
-		},
+	return &gqlschema.APIRuleStatus{
+		Code: string(status.Code),
+		Desc: &status.Description,
 	}
 }
 
