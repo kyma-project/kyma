@@ -18,25 +18,25 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: 0a65169
+    version: 0a651695
   application_operator_tests:
     dir:
-    version: 0a65169
+    version: 0a651695
   connector_service:
     dir:
-    version: 0a65169
+    version: 0a651695
   connector_service_tests:
     dir:
-    version: 0a65169
+    version: 0a651695
   connection_token_handler:
     dir:
-    version: 0a65169
+    version: 0a651695
   connection_token_handler_tests:
     dir:
-    version: 0a65169
+    version: 0a651695
   connectivity_certs_controller:
     dir:
-    version: 0a65169
+    version: 0a651695
   event_service:
     dir: develop/
     version: e029fcf4
@@ -45,25 +45,25 @@ global:
     version: 6fe0bf1b
   application_connectivity_validator:
     dir:
-    version: 0a65169
+    version: 0a651695
   application_gateway:
     dir:
-    version: 0a65169
+    version: 0a651695
   application_gateway_tests:
     dir:
-    version: 0a65169
+    version: 0a651695
   application_registry:
     dir:
-    version: 0a65169
+    version: 0a651695
   application_registry_tests:
     dir:
-    version: 0a65169
+    version: 0a651695
   application_broker:
     dir: develop/
     version: b1f395fa
   application_connectivity_certs_setup_job:
     dir:
-    version: 0a65169
+    version: 0a651695
 connectivity_certs_controller:
   enabled: false
 
@@ -87,5 +87,5 @@ tests:
     skipSslVerify: true
     image:
       dir:
-      version: PR-6042
+      version: 0a651695
       pullPolicy: IfNotPresent
