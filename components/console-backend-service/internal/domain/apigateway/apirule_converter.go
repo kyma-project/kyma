@@ -138,10 +138,9 @@ func (c *apiRuleConverter) ToApiRule(name string, namespace string, in gqlschema
 		},
 		Spec: v1alpha1.APIRuleSpec{
 			Service: &v1alpha1.Service{
-				Name:       &in.ServiceName,
-				Port:       &hostPort,
-				Host:       &in.Host,
-				IsExternal: nil, // TODO
+				Name: &in.ServiceName,
+				Port: &hostPort,
+				Host: &in.Host,
 			},
 			Gateway: &in.Gateway,
 			Rules:   toRules(in.Rules),
