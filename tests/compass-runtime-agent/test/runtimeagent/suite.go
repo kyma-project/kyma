@@ -15,7 +15,6 @@ import (
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/assertions"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/compass"
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/oauth"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -57,7 +56,7 @@ type TestSuite struct {
 
 	mockServiceServer *mock.AppMockServer
 
-	config testkit.TestConfig
+	Config testkit.TestConfig
 
 	mockServiceName string
 	testPodsLabels  string
@@ -108,11 +107,11 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		podClient:           k8sClient.CoreV1().Pods(config.Namespace),
 		ApplicationCRClient: appClient.Applications(),
 		nameResolver:        nameResolver,
-		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.GraphQLLog),
+		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.InternalDirectorJWT, config.GraphQLLog),
 		APIAccessChecker:    assertions.NewAPIAccessChecker(nameResolver),
 		K8sResourceChecker:  assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
 		mockServiceServer:   mock.NewAppMockServer(config.MockServicePort),
-		config:              config,
+		Config:              config,
 		mockServiceName:     config.MockServiceName,
 		testPodsLabels:      testPodLabels,
 	}, nil
@@ -124,14 +123,6 @@ func (ts *TestSuite) Setup() error {
 		return errors.Wrap(err, "Error while waiting for access to API server")
 	}
 	logrus.Infof("Successfully accessed API Server")
-
-	oauthClient := oauth.NewOauthClient(ts.config.HydraPublicURL, ts.config.HydraAdminURL)
-	token, err := oauthClient.GetAccessToken()
-	if err != nil {
-		return errors.Wrap(err, "Error while generating Access Token")
-	}
-
-	ts.CompassClient.SetAccessToken(token)
 
 	ts.mockServiceServer.Start()
 
@@ -174,11 +165,11 @@ func (ts *TestSuite) waitForAccessToAPIServer() error {
 }
 
 func (ts *TestSuite) GetMockServiceURL() string {
-	return fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", ts.mockServiceName, ts.config.Namespace, ts.config.MockServicePort)
+	return fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", ts.mockServiceName, ts.Config.Namespace, ts.Config.MockServicePort)
 }
 
 func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T, applicationName string) {
-	err := testkit.WaitForFunction(defaultCheckInterval, ts.config.ApplicationInstallationTimeout, func() bool {
+	err := testkit.WaitForFunction(defaultCheckInterval, ts.Config.ApplicationInstallationTimeout, func() bool {
 		t.Log("Waiting for Application to be deployed...")
 
 		app, err := ts.ApplicationCRClient.Get(applicationName, metav1.GetOptions{})
@@ -265,11 +256,11 @@ func (ts *TestSuite) getResourceNames(t *testing.T, appId string, apiIds ...stri
 
 func (ts *TestSuite) WaitForProxyInvalidation() {
 	// TODO: we should consider introducing some way to invalidate proxy cache
-	time.Sleep(ts.config.ProxyInvalidationWaitTime)
+	time.Sleep(ts.Config.ProxyInvalidationWaitTime)
 }
 
 func (ts *TestSuite) WaitForConfigurationApplication() {
-	time.Sleep(ts.config.ConfigApplicationWaitTime)
+	time.Sleep(ts.Config.ConfigApplicationWaitTime)
 }
 
 func (ts *TestSuite) updatePod(podName string, updateFunc updatePodFunc) error {

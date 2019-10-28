@@ -24,7 +24,7 @@
             "type": "object",
             "properties": {
                 "auth_enabled": {
-                    "description": "Specifies the authentication mechanism you use to access the logging service. Set it to false to use built-in Istio authentication, or to true to use the basic HTTP authentication instead.",
+                    "description": "Authenticates the tenant sending the request to the logging service when Loki runs in the multi-tenant mode. Setting it to `true` requires authentication using the HTTP (X-Scope-OrgID) header. Since Kyma supports the single-tenant mode only, you must set this parameter to `false`. This way, Loki does not require the `X-Scope-OrgID` and the tenant ID defaults to `fake`. ",
                     "type": "boolean",
                     "default": false
                 },

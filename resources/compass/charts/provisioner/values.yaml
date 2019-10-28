@@ -8,3 +8,6 @@ deployment:
 
 database:
   schemaFilePath: "/assets/database/provisioner.sql"
+
+tests:
+  enabled: false

@@ -314,8 +314,8 @@
 /components/compass-runtime-agent/ @PK85 @aszecowka @crabtree @pkosiec @kfurgol @tgorgol @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
 
 # Tests
-# acceptance tests
-/tests/acceptance/ @mszostok @polskikiel @piotrmiskiewicz @aszecowka @PK85 @jasiu001 @adamwalach
+# Service Catalog acceptance tests
+/tests/service-catalog/ @mszostok @polskikiel @piotrmiskiewicz @aszecowka @PK85 @jasiu001 @adamwalach
 
 # Dex integration tests
 /tests/integration/dex @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -334,6 +334,9 @@
 
 # api-controller integration tests
 /tests/integration/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+
+# api-gateway integration tests
+/tests/integration/api-gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # apiserver-proxy tests
 /tests/integration/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere

@@ -67,7 +67,7 @@ type ServiceData struct {
 }
 
 const (
-	applicationDeletionTimeout       = 120 * time.Second
+	applicationDeletionTimeout       = 180 * time.Second
 	applicationDeletionCheckInterval = 2 * time.Second
 
 	expectedProtocol   v1core.Protocol = v1core.ProtocolTCP
@@ -108,10 +108,10 @@ func NewK8sResourceChecker(serviceClient v1.ServiceInterface, secretClient v1.Se
 }
 
 func (c *K8sResourceChecker) AssertResourcesForApp(t *testing.T, application compass.Application) {
-	appCR, err := c.applicationClient.Get(application.ID, v1meta.GetOptions{})
+	appCR, err := c.applicationClient.Get(application.Name, v1meta.GetOptions{})
 	require.NoError(t, err)
 
-	assert.Equal(t, application.ID, appCR.Name)
+	assert.Equal(t, application.Name, appCR.Name)
 	expectedDescription := ""
 	if application.Description != nil {
 		expectedDescription = *application.Description
@@ -121,59 +121,59 @@ func (c *K8sResourceChecker) AssertResourcesForApp(t *testing.T, application com
 	// TODO: assert labels after proper handling in agent
 
 	if len(application.APIs.Data) > 0 {
-		c.assertAPIs(t, application.ID, application.APIs.Data, appCR)
+		c.assertAPIs(t, application.Name, application.APIs.Data, appCR)
 	}
 	if len(application.EventAPIs.Data) > 0 {
-		c.assertEventAPIs(t, application.ID, application.EventAPIs.Data, appCR)
+		c.assertEventAPIs(t, application.Name, application.EventAPIs.Data, appCR)
 	}
 
 	// TODO: assert Document after implementation in Director and Agent
 }
 
-func (c *K8sResourceChecker) AssertAppResourcesDeleted(t *testing.T, appId string) {
+func (c *K8sResourceChecker) AssertAppResourcesDeleted(t *testing.T, applicationName string) {
 	err := testkit.WaitForFunction(applicationDeletionCheckInterval, applicationDeletionTimeout, func() bool {
-		_, err := c.applicationClient.Get(appId, v1meta.GetOptions{})
+		_, err := c.applicationClient.Get(applicationName, v1meta.GetOptions{})
 		if err == nil {
 			return false
 		}
 
 		return k8serrors.IsNotFound(err)
 	})
-	require.NoError(t, err, fmt.Sprintf("Application %s not deleted", appId))
+	require.NoError(t, err, fmt.Sprintf("Application %s not deleted", applicationName))
 }
 
-func (c *K8sResourceChecker) AssertAPIResources(t *testing.T, appId string, compassAPIs ...*graphql.APIDefinition) {
-	appCR, err := c.applicationClient.Get(appId, v1meta.GetOptions{})
+func (c *K8sResourceChecker) AssertAPIResources(t *testing.T, applicationName string, compassAPIs ...*graphql.APIDefinition) {
+	appCR, err := c.applicationClient.Get(applicationName, v1meta.GetOptions{})
 	require.NoError(t, err)
 
-	c.assertAPIs(t, appId, compassAPIs, appCR)
+	c.assertAPIs(t, applicationName, compassAPIs, appCR)
 }
 
-func (c *K8sResourceChecker) AssertAPIResourcesDeleted(t *testing.T, applicationId, apiId string) {
-	appCR, err := c.applicationClient.Get(applicationId, v1meta.GetOptions{})
+func (c *K8sResourceChecker) AssertAPIResourcesDeleted(t *testing.T, applicationName, apiId string) {
+	appCR, err := c.applicationClient.Get(applicationName, v1meta.GetOptions{})
 	require.NoError(t, err)
 
 	for _, s := range appCR.Spec.Services {
 		assert.NotEqual(t, s.ID, apiId)
 	}
 
-	c.assertServiceDeleted(t, applicationId, apiId)
+	c.assertServiceDeleted(t, applicationName, apiId)
 }
 
-func (c *K8sResourceChecker) AssertEventAPIResources(t *testing.T, appId string, compassEventAPIs ...*graphql.EventAPIDefinition) {
-	appCR, err := c.applicationClient.Get(appId, v1meta.GetOptions{})
+func (c *K8sResourceChecker) AssertEventAPIResources(t *testing.T, applicationName string, compassEventAPIs ...*graphql.EventAPIDefinition) {
+	appCR, err := c.applicationClient.Get(applicationName, v1meta.GetOptions{})
 	require.NoError(t, err)
 
-	c.assertEventAPIs(t, appId, compassEventAPIs, appCR)
+	c.assertEventAPIs(t, applicationName, compassEventAPIs, appCR)
 }
 
-func (c *K8sResourceChecker) assertAPIs(t *testing.T, appId string, compassAPIs []*graphql.APIDefinition, appCR *v1alpha1apps.Application) {
+func (c *K8sResourceChecker) assertAPIs(t *testing.T, applicationName string, compassAPIs []*graphql.APIDefinition, appCR *v1alpha1apps.Application) {
 	for _, api := range compassAPIs {
-		c.assertAPI(t, appId, *api, appCR)
+		c.assertAPI(t, applicationName, *api, appCR)
 	}
 }
 
-func (c *K8sResourceChecker) assertAPI(t *testing.T, appId string, compassAPI graphql.APIDefinition, appCR *v1alpha1apps.Application) {
+func (c *K8sResourceChecker) assertAPI(t *testing.T, applicationName string, compassAPI graphql.APIDefinition, appCR *v1alpha1apps.Application) {
 	t.Logf("Asserting resources for %s API", compassAPI.ID)
 
 	svc := c.assertService(t, compassAPI.ID, compassAPI.Name, compassAPI.Description, appCR)
@@ -182,10 +182,10 @@ func (c *K8sResourceChecker) assertAPI(t *testing.T, appId string, compassAPI gr
 	assert.Equal(t, SpecAPIType, entry.Type)
 	assert.Equal(t, compassAPI.TargetURL, entry.TargetUrl)
 
-	expectedGatewayURL := c.nameResolver.GetGatewayUrl(appId, compassAPI.ID)
+	expectedGatewayURL := c.nameResolver.GetGatewayUrl(applicationName, compassAPI.ID)
 	assert.Equal(t, expectedGatewayURL, entry.GatewayUrl)
 
-	expectedResourceName := c.nameResolver.GetResourceName(appId, compassAPI.ID)
+	expectedResourceName := c.nameResolver.GetResourceName(applicationName, compassAPI.ID)
 	assert.Equal(t, expectedResourceName, entry.AccessLabel)
 
 	c.assertK8sService(t, expectedResourceName)
@@ -205,24 +205,24 @@ func apiSpecProvided(api graphql.APIDefinition) bool {
 	return api.Spec != nil && api.Spec.Data != nil && string(*api.Spec.Data) != ""
 }
 
-func (c *K8sResourceChecker) assertServiceDeleted(t *testing.T, applicationId, apiId string) {
-	resourceName := c.nameResolver.GetResourceName(applicationId, apiId)
+func (c *K8sResourceChecker) assertServiceDeleted(t *testing.T, applicationName, apiId string) {
+	resourceName := c.nameResolver.GetResourceName(applicationName, apiId)
 	c.assertResourcesDoNotExist(t, resourceName, apiId)
 }
 
-func (c *K8sResourceChecker) assertEventAPIs(t *testing.T, appId string, compassEventAPIs []*graphql.EventAPIDefinition, appCR *v1alpha1apps.Application) {
+func (c *K8sResourceChecker) assertEventAPIs(t *testing.T, applicationName string, compassEventAPIs []*graphql.EventAPIDefinition, appCR *v1alpha1apps.Application) {
 	for _, eventAPI := range compassEventAPIs {
-		c.assertEventAPI(t, appId, *eventAPI, appCR)
+		c.assertEventAPI(t, applicationName, *eventAPI, appCR)
 	}
 }
 
-func (c *K8sResourceChecker) assertEventAPI(t *testing.T, appId string, compassEventAPI graphql.EventAPIDefinition, appCR *v1alpha1apps.Application) {
+func (c *K8sResourceChecker) assertEventAPI(t *testing.T, applicationName string, compassEventAPI graphql.EventAPIDefinition, appCR *v1alpha1apps.Application) {
 	svc := c.assertService(t, compassEventAPI.ID, compassEventAPI.Name, compassEventAPI.Description, appCR)
 
 	entry := svc.Entries[0]
 	assert.Equal(t, SpecEventsType, entry.Type)
 
-	expectedResourceName := c.nameResolver.GetResourceName(appId, compassEventAPI.ID)
+	expectedResourceName := c.nameResolver.GetResourceName(applicationName, compassEventAPI.ID)
 	assert.Equal(t, expectedResourceName, entry.AccessLabel)
 
 	if eventAPISpecProvided(compassEventAPI) {

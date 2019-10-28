@@ -27,8 +27,10 @@ spec:
               name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
               optional: true
           env:
+            - name: INTERNAL_DIRECTOR_JWT
+              value: {{ .Values.compassRuntimeAgent.tests.director.internalJWT }}
             - name: DIRECTOR_URL
-              value: "https://compass-gateway-auth-oauth.{{ .Values.global.ingress.domainName }}/director/graphql"
+              value: {{ .Values.compassRuntimeAgent.tests.director.url }}
             - name: NAMESPACE
               value: {{ .Release.Namespace }}
             - name: INTEGRATION_NAMESPACE
@@ -47,12 +49,12 @@ spec:
               value: "{{ .Values.compassRuntimeAgent.tests.graphqlLogs }}"
             - name: SCENARIO_LABEL
               value: "COMPASS_RUNTIME_AGENT_TESTS"
-            - name: HYDRA_PUBLIC_URL
-              value: {{ .Values.compassRuntimeAgent.tests.oauth.hydra.publicUrl }}
-            - name: HYDRA_ADMIN_URL
-              value: {{ .Values.compassRuntimeAgent.tests.oauth.hydra.adminUrl }}
             - name: APPLICATION_INSTALLATION_TIMEOUT
               value: {{ .Values.compassRuntimeAgent.tests.applicationInstallationTimeout }}
+            - name: RUNTIME_EVENTS_URL
+              value: "https://gateway.{{ .Values.global.ingress.domainName }}"
+            - name: RUNTIME_CONSOLE_URL
+              value: "https://console.{{ .Values.global.ingress.domainName }}"
           command:
           - "/bin/sh"
           args:
@@ -66,6 +68,8 @@ spec:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
             - "compass-gateway.{{ .Values.global.ingress.domainName }}"
+            - "compass-gateway-auth-oauth.{{ .Values.global.ingress.domainName }}"
+            - "minio.{{ .Values.global.ingress.domainName }}"
       {{ end }}
     restartPolicy: Never
 {{- end }}

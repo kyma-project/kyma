@@ -7,7 +7,7 @@ The tests are written in Go. Run them as standard Go tests.
 
 ## Usage
 
-This section provides information on versioning of the Docker image, as well as configuring Kyma to use new Compass Runtim Agent image.
+This section provides information on versioning of the Docker image, as well as configuring Kyma to use new Compass Runtime Agent image.
 
 ### Configure Kyma
 

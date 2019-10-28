@@ -20,6 +20,10 @@ data:
     logger:
       level: "info"
       format: "text"
+    {{ if .Values.telemetry.enabled }}
+    telemetry:
+      http: 0.0.0.0:{{.Values.telemetry.port}}
+    {{ end }}
     web:
       http: 0.0.0.0:{{ .Values.containerPort }}
 
