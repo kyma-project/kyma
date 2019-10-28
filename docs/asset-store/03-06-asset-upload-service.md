@@ -3,7 +3,7 @@ title: Asset Upload Service
 type: Details
 ---
 
-The Asset Upload Service is an HTTP server that exposes the file upload functionality for Minio. It contains a simple HTTP endpoint which accepts `multipart/form-data` forms. It can upload files to the private and public system buckets.
+The Asset Upload Service is an HTTP server that exposes the file upload functionality for MinIO. It contains a simple HTTP endpoint which accepts `multipart/form-data` forms. It can upload files to the private and public system buckets.
 
 The main purpose of the service is to provide a solution for hosting static files for components that use the Asset Store, such as the Application Connector.
 You can also use the Asset Upload Service for development purposes to host files for the Asset Store, without the need to rely on external providers.

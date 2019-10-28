@@ -9,13 +9,13 @@ Learn about the lifecycle of the Asset custom resource (CR) and how its creation
 
 ## Create an Asset CR
 
-When you create an Asset CR, the Asset Controller (AC) receives a CR creation Event, reads the CR definition, verifies if the bucket exists, downloads the asset, unpacks it, and stores it in Minio Gateway.
+When you create an Asset CR, the Asset Controller (AC) receives a CR creation Event, reads the CR definition, verifies if the bucket exists, downloads the asset, unpacks it, and stores it in MinIO Gateway.
 
 ![](./assets/create-asset.svg)
 
 ## Remove an Asset CR
 
-When you remove the Asset CR, the AC receives a CR deletion Event and deletes the CR from Minio Gateway.
+When you remove the Asset CR, the AC receives a CR deletion Event and deletes the CR from MinIO Gateway.
 
 ![](./assets/delete-asset.svg)
 
