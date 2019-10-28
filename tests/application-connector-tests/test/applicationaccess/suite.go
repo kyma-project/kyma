@@ -20,7 +20,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	tokenreqversioned "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	tokenreqclient "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	tokenreq "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
@@ -112,8 +111,8 @@ func (ts *TestSuite) PrepareTestApplication(t *testing.T, namePrefix string) *ty
 	name := fmt.Sprintf("%s-%s", namePrefix, rand.String(4))
 
 	application := &types.Application{
-		TypeMeta: v1.TypeMeta{Kind: "Application", APIVersion: types.SchemeGroupVersion.String()},
-		ObjectMeta: v1.ObjectMeta{
+		TypeMeta: metav1.TypeMeta{Kind: "Application", APIVersion: types.SchemeGroupVersion.String()},
+		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 		},
 		Spec: types.ApplicationSpec{
@@ -151,10 +150,10 @@ func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T, applicationNam
 
 func (ts *TestSuite) getInfoURL(t *testing.T, application *types.Application) string {
 	tokenRequest := &tokenreq.TokenRequest{
-		TypeMeta:   v1.TypeMeta{Kind: "TokenRequest", APIVersion: tokenreq.SchemeGroupVersion.String()},
-		ObjectMeta: v1.ObjectMeta{Name: application.Name},
+		TypeMeta:   metav1.TypeMeta{Kind: "TokenRequest", APIVersion: tokenreq.SchemeGroupVersion.String()},
+		ObjectMeta: metav1.ObjectMeta{Name: application.Name},
 		Context:    tokenreq.ClusterContext{Group: application.Spec.Group, Tenant: application.Spec.Tenant},
-		Status:     tokenreq.TokenRequestStatus{ExpireAfter: v1.Date(2999, time.December, 12, 12, 12, 12, 12, time.Local)},
+		Status:     tokenreq.TokenRequestStatus{ExpireAfter: metav1.Date(2999, time.December, 12, 12, 12, 12, 12, time.Local)},
 	}
 
 	tokenRequest, err := ts.tokenRequestClient.Create(tokenRequest)
@@ -165,7 +164,7 @@ func (ts *TestSuite) getInfoURL(t *testing.T, application *types.Application) st
 
 	err = testkit.WaitForFunction(defaultCheckInterval, csrInfoURLRetrievalTimeout, func() bool {
 		t.Log("Waiting for Info URL in Token Request...")
-		tokenRequest, err = ts.tokenRequestClient.Get(tokenRequestName, v1.GetOptions{})
+		tokenRequest, err = ts.tokenRequestClient.Get(tokenRequestName, metav1.GetOptions{})
 		return err == nil && tokenRequest.Status.State == "OK"
 	})
 	require.NoError(t, err)
