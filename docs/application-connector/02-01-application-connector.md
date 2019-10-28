@@ -33,8 +33,8 @@ The system creates a new Kubernetes service for each registered API.
 
 ## Event Service
 
-The Event Service sends events to the Kyma Event Bus and enriches the events with metadata that indicates the source of the event.
-This allows routing the events to lambda functions and services based on their source Application.
+The Event Service sends events to the Kyma Event Bus and enriches events with metadata that indicates the source of the event.
+This allows routing events to lambda functions and services based on their source Application.
 
 ## Application
 
