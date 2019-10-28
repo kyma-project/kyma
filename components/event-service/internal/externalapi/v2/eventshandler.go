@@ -210,6 +210,10 @@ func getTraceHeaders(ctx context.Context) *map[string]string {
 }
 
 func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if bus.CheckConf() != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	ctx := req.Context()
 	ctx = cehttp.WithTransportContext(ctx, cehttp.NewTransportContext(req))
 	//logger := cecontext.LoggerFrom(ctx)
@@ -232,7 +236,8 @@ func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 		Header: req.Header,
 		Body:   body,
 	}
-	e, apiError, err := kymaevent.FromMessage(h.Transport, ctx, message)
+
+	e, apiError, err := kymaevent.FromMessage(h.Transport, ctx, message, bus.Conf.SourceID)
 	if err != nil {
 		if err := kymaevent.RespondWithError(w, api.Error{
 			Status:   http.StatusBadRequest,

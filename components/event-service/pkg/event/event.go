@@ -6,7 +6,6 @@ import (
 	"fmt"
 	cloudevents "github.com/cloudevents/sdk-go"
 	cehttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
-	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	"reflect"
 	"regexp"
@@ -21,7 +20,7 @@ var (
 )
 
 // FromMessage tries to convert a http.Message to a cloudevent and validates it
-func FromMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Message) (*cloudevents.Event, *api.Error, error) {
+func FromMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Message, sourceID string) (*cloudevents.Event, *api.Error, error) {
 	event, err := t.MessageToEvent(ctx, &message)
 	if err != nil {
 		if err.Error() == "transport http failed to convert message: cloudevents version unknown" {
@@ -47,7 +46,7 @@ func FromMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Messag
 
 	// add source to the incoming request
 	// NOTE: this needs to be done before validating the event via CloudEvents sdk
-	event, err = AddSource(*event)
+	event, err = AddSource(*event, sourceID)
 	if err != nil {
 		return event, nil, err
 	}
@@ -179,10 +178,7 @@ func ToMessage(ctx context.Context, event cloudevents.Event, encoding cehttp.Enc
 }
 
 // AddSource adds the "source" related data to the incoming request
-func AddSource(event cloudevents.Event) (*cloudevents.Event, error) {
-	if err := bus.CheckConf(); err != nil {
-		return nil, err
-	}
-	event.SetSource(bus.Conf.SourceID)
+func AddSource(event cloudevents.Event, sourceID string) (*cloudevents.Event, error) {
+	event.SetSource(sourceID)
 	return &event, nil
 }
