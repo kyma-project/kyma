@@ -28,15 +28,16 @@ const (
 	HeaderSourceID = "Source-Id"
 )
 
-type PublishStatus string
+// Status is used to specify the state of publishing a event
+type Status string
 
 const (
-	// PublishFailed status label
-	PublishFailed PublishStatus = "failed"
-	// PublishIgnored status label
-	PublishIgnored PublishStatus = "ignored"
-	// PublishPublished status label
-	PublishPublished PublishStatus = "published"
+	// Failed status label
+	Failed Status = "failed"
+	// Ignored status label
+	Ignored Status = "ignored"
+	// Published status label
+	Published Status = "published"
 )
 
 // Request represents a publish request
@@ -55,9 +56,9 @@ type AnyValue interface{}
 
 // Response represents a successful publish response
 type Response struct {
-	EventID string        `json:"event-id"`
-	Status  PublishStatus `json:"status"`
-	Reason  string        `json:"reason"`
+	EventID string `json:"event-id"`
+	Status  Status `json:"status"`
+	Reason  string `json:"reason"`
 }
 
 // CloudEvent represents the event to be persisted to NATS

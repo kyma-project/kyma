@@ -76,7 +76,7 @@ func (b *eventBuilder) String() string {
 	return fmt.Sprintf(eventFormat, b.Buffer.String())
 }
 
-// BuildPublishV2TestPayload returns a complete payload compliant with CE
+// BuildPublishV2TestHeader returns a complete payload compliant with CE
 func BuildPublishV2TestHeader(sourceID, eventType, eventTypeVersion, eventID, eventTime string) http.Header {
 	return http.Header{
 		"ce-source":           []string{sourceID},

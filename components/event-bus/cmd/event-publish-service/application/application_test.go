@@ -450,6 +450,6 @@ func Test_PublishV1ResponseFields(t *testing.T) {
 	// assert
 	assert.Nil(t, err)
 	assert.Equal(t, testV1.TestEventID, publishResponse.EventID)
-	assert.Equal(t, api.PublishPublished, publishResponse.Status)
+	assert.Equal(t, api.Published, publishResponse.Status)
 	assert.Equal(t, "Message successfully published to the channel", publishResponse.Reason)
 }
