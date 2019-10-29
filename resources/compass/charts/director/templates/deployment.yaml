@@ -70,7 +70,7 @@ spec:
             - name: APP_ONE_TIME_TOKEN_URL
               value: "http://compass-connector-internal.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.internal.port }}/graphql"
             - name: APP_CONNECTOR_URL
-              value: "https://{{ .Values.global.gateway.mtls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql"
+              value: "https://{{ .Values.global.gateway.tls.host }}.{{ .Values.global.ingress.domainName }}/connector/graphql"
             - name: APP_SCOPES_CONFIGURATION_FILE
               value: /config/config.yaml
             - name: APP_ALLOW_JWT_SIGNING_NONE
