@@ -33,7 +33,7 @@ step() {
   echo -e "\\n${YELLOW}${message}${NC}"
 }
 
-remove-cache-content() {
+remove-cached-content() {
   ( rm -rf "${BUILD_DIR}" ) || true
 }
 
@@ -47,8 +47,8 @@ build-preview() {
 }
 
 main() {
-  step "Remove website cache content"
-  remove-cache-content
+  step "Remove website cached content"
+  remove-cached-content
   pass "Removed"
 
   step "Copying kyma/website repo"
