@@ -9,15 +9,15 @@ The Certificates are generated and stored as Kubernetes Secrets by the Applicati
 
 By default, the server key and certificate are automatically generated. 
 You can provide a custom server certificate and key during the installation by setting them as the following overrides:
-```
-global.applicationConnectorCaKey: {BASE64_ENCODED_PRIVATE_KEY}
-global.applicationConnectorCa: {BASE64_ENCODED_CERTIFICATE}
+```yaml
+global.applicationConnectorCaKey: "{BASE64_ENCODED_PRIVATE_KEY}"
+global.applicationConnectorCa: "{BASE64_ENCODED_CERTIFICATE}"
 ```
 
 >**NOTE:** To use a custom certificate and key, you must provide both values through overrides. If either the certificate or key is incorrect or isn't provided, a new certificate and key pair is generated.
 
 This is a sample ConfigMap that contains overrides with a custom certificate and key:
-```
+```yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:

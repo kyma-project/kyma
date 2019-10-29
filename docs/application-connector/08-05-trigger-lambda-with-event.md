@@ -5,11 +5,10 @@ type: Tutorials
 
 To create a simple lambda function and trigger it with an event, you must first register a service using the Application Registry that is a part of the Application Connector. This service then sends the event that triggers the lambda. You must create a Service Instance which enables this event in the Namespace. Follow this guide to learn how to do it. 
 
-
 ## Prerequisites
 
-- An Application bound to a Namespace.
-- Client certificates generated for the connected Application.
+- An Application bound to a Namespace
+- Client certificates generated for the connected Application
 
 >**NOTE:** See the respective tutorials to learn how to [create](#tutorials-create-a-new-application) an Application, [get](#tutorials-get-the-client-certificate) the client certificate, and [bind](#tutorials-bind-an-application-to-a-namespace) an Application to a Namespace.
 
