@@ -11,7 +11,7 @@ import (
 )
 
 type AppMockServer struct {
-	http.Server
+	*http.Server
 	port int32
 }
 
@@ -49,7 +49,7 @@ func NewAppMockServer(port int32) *AppMockServer {
 	}
 
 	return &AppMockServer{
-		Server: server,
+		Server: &server,
 		port:   port,
 	}
 }

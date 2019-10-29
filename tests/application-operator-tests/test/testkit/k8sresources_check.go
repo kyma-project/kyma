@@ -6,8 +6,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -17,12 +16,12 @@ const (
 	applicationGatewayRoleBindingFormat        = "%s-application-gateway"
 	applicationGatewayClusterRoleFormat        = "%s-application-gateway"
 	applicationGatewayClusterRoleBindingFormat = "%s-application-gateway"
-	applicationGatewaySvcFormat                = "app-%s-application-gateway"
+	applicationGatewaySvcFormat                = "%s-application-gateway"
 	applicationGatewayServiceAccountFormat     = "%s-application-gateway"
 	eventServiceDeploymentFormat               = "%s-event-service"
-	eventServiceSvcFormat                      = "app-%s-event-service"
+	eventServiceSvcFormat                      = "%s-event-service"
 	connectivityValidatorDeploymentFormat      = "%s-connectivity-validator"
-	connectivityValidatorSvcFormat             = "app-%s-validator"
+	connectivityValidatorSvcFormat             = "%s-validator"
 
 	resourceCheckInterval = 1 * time.Second
 	resourceCheckTimeout  = 10 * time.Second

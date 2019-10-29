@@ -134,7 +134,7 @@ func (ts *TestSuite) CheckApplicationGatewayHealth(t *testing.T) {
 }
 
 func (ts *TestSuite) CallAccessService(t *testing.T, apiId, path string) *http.Response {
-	url := fmt.Sprintf("http://app-%s-%s/%s", ts.config.Application, apiId, path)
+	url := fmt.Sprintf("http://%s-%s/%s", ts.config.Application, apiId, path)
 
 	t.Log("Waiting for DNS in Istio Proxy...")
 	// Wait for Istio Pilot to propagate DNS
@@ -169,7 +169,7 @@ func (ts *TestSuite) CallAccessService(t *testing.T, apiId, path string) *http.R
 }
 
 func (ts *TestSuite) proxyURL() string {
-	return fmt.Sprintf("http://app-%s-application-gateway:8081", ts.config.Application)
+	return fmt.Sprintf("http://%s-application-gateway:8081", ts.config.Application)
 }
 
 func (ts *TestSuite) GetMockServiceURL() string {
@@ -206,7 +206,7 @@ func (ts *TestSuite) deleteMockService(t *testing.T) {
 
 func (ts *TestSuite) AddDenierLabel(t *testing.T, apiId string) {
 	podName := fmt.Sprintf(testExecutorPodNameFormat, ts.config.Application)
-	serviceName := fmt.Sprintf("app-%s-%s", ts.config.Application, apiId)
+	serviceName := fmt.Sprintf("%s-%s", ts.config.Application, apiId)
 
 	updateFunc := func(pod *v1.Pod) {
 		if pod.Labels == nil {

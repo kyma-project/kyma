@@ -38,9 +38,9 @@ This table lists the non-required configurable parameters, their descriptions, a
 | **configuration.volumeSnapshotLocation.bucket** | Specifies the name of the storage bucket where volume snapshots are uploaded. | None |
 | **configuration.backupStorageLocation.prefix** | Specifies the directory inside a storage bucket where backups are located. | None |
 | **configuration.backupStorageLocation.config.resourceGroup** | Specifies the name of the resource group which contains the storage account for the backup storage location. It only applies to Azure. | None |
-| **configuration.backupStorageLocation.config.s3ForcePathStyle** | Specifies whether to force path style URLs for S3 objects. Set it to `true` if you use a local storage service like Minio. It only applies to AWS. | None |
-| **configuration.backupStorageLocation.config.s3Url** | Specifies the AWS S3 URL. If not provided, Velero generates it from **region** and **bucket**. Use this field for local storage services like Minio. | None |
+| **configuration.backupStorageLocation.config.s3ForcePathStyle** | Specifies whether to force path style URLs for S3 objects. Set it to `true` if you use a local storage service like MinIO. It only applies to AWS. | None |
+| **configuration.backupStorageLocation.config.s3Url** | Specifies the AWS S3 URL. If not provided, Velero generates it from **region** and **bucket**. Use this field for local storage services like MinIO. | None |
 | **configuration.backupStorageLocation.config.kmsKeyId** | Specifies the AWS KMS key ID or alias to enable encryption of the backups stored in S3. It only works with AWS S3 and may require explicitly granting key usage rights. | None |
-| **configuration.backupStorageLocation.config.publicUrl** | Specifies the parameter used instead of **3Url** when generating download URLs, for example for logs. Use this field for local storage services like Minio. | None |
+| **configuration.backupStorageLocation.config.publicUrl** | Specifies the parameter used instead of **3Url** when generating download URLs, for example for logs. Use this field for local storage services like MinIO. | None |
 
 See the official Velero documentation for examples and the full list of [parameters](../../resources/velero/README.md), as well as for [VolumeSnapshotLocation](https://velero.io/docs/v1.0.0/api-types/volumesnapshotlocation/) and [BackupStorageLocation](https://velero.io/docs/v1.0.0/api-types/backupstoragelocation/).

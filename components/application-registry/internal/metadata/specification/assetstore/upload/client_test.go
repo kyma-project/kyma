@@ -3,12 +3,13 @@ package upload
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/application-registry/internal/httpconsts"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/application-registry/internal/httpconsts"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUploadClient(t *testing.T) {

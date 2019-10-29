@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: api-gateway-tests
+---
+apiVersion: v1
+data:
+  client_id: "{{.OauthClientID}}"
+  client_secret: "{{.OauthClientSecret}}"
+kind: Secret
+metadata:
+  name: api-gateway-tests-secret
+  namespace: api-gateway-tests
+type: Opaque

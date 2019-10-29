@@ -1,3 +1,4 @@
+{{ if .Values.tests.enabled }}
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
@@ -26,3 +27,4 @@ spec:
         - "-c"
         - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; sleep 4; exit $exit_code;"
       restartPolicy: Never
+{{ end }}

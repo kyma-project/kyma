@@ -45,7 +45,7 @@ The tracing in Kyma uses the [Jaeger](https://github.com/jaegertracing) distribu
 
 ## API Gateway
 
-The API Gateway aims to provide a set of functionalities which allow developers to expose, secure, and manage their APIs in an easy way. The main element of the API Gateway is the API Gateway Controller, which exposes services in Kyma.
+The API Gateway aims to provide a set of functionalities which allow developers to expose, secure, and manage their APIs in an easy way. The main element of the API Gateway is the API Gateway Controller which exposes services in Kyma.
 
 >**CAUTION:** The API Gateway implementation that uses the API Controller and the Api custom resource is **deprecated** until all of its functionality is covered by the `v2` implementation. The services you exposed and secured so far do not require any action as two implementations co-exist in the cluster. When you expose new services and functions secured with OAuth2, use the `v2` implementation. For more information, read [this](/components/api-gateway-v2#overview-overview) documentation.
 
@@ -63,7 +63,7 @@ The Console is a web-based administrative UI for Kyma. It uses the [Luigi framew
 
 ## Asset Store
 
-The Asset Store is a flexible, scalable, multi-cloud, and location-independent Kubernetes-native solution for storing assets, such as documents, files, images, API specifications, and client-side applications. The Asset Store consists of Minio and custom resources. The custom resources are managed by a controller that communicates through Minio Gateway with external cloud providers.
+The Asset Store is a flexible, scalable, multi-cloud, and location-independent Kubernetes-native solution for storing assets, such as documents, files, images, API specifications, and client-side applications. The Asset Store consists of [MinIO](https://min.io/) and custom resources. The custom resources are managed by a controller that communicates through MinIO Gateway with external cloud providers.
 
 ## Headless CMS
 

@@ -1,4 +1,4 @@
-FROM golang:1.12.5-alpine3.9 as builder
+FROM golang:1.12.9-alpine3.10 as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/compass-runtime-agent
 
@@ -9,7 +9,7 @@ COPY . $SRC_DIR
 
 RUN CGO_ENABLED=0 GOOS=linux go test -c ./test/runtimeagent/test
 
-FROM alpine:3.9
+FROM alpine:3.10
 LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/

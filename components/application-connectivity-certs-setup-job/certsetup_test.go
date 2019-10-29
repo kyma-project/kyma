@@ -306,7 +306,7 @@ func TestCertSetupHandler_SetupApplicationConnectorCertificate_GeneratingCertifi
 				caCertificateSecret:        caSecretNamespacedName,
 				caCertificate:              test.caCert,
 				caKey:                      test.caKey,
-				generatedValidityTime: validityTime,
+				generatedValidityTime:      validityTime,
 			}
 
 			certSetupHandler := NewCertificateSetupHandler(options, secretRepository)

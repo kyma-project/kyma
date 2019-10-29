@@ -1,14 +1,15 @@
 package k8stests
 
 import (
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/connection-token-handler-tests/test/testkit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
-	"testing"
-	"time"
 )
 
 const (
