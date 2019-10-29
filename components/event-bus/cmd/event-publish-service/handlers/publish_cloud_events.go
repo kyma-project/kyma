@@ -21,6 +21,7 @@ import (
 	"strconv"
 )
 
+// A struct which bundles anything required to handle incom	ing cloud events
 type CloudEventHandler struct {
 	KnativePublisher *publisher.KnativePublisher
 	KnativeLib       *knative.KnativeLib
