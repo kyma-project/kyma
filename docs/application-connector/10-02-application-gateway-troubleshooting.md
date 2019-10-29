@@ -8,7 +8,7 @@ If you call a registered service and receive an error, follow these steps to det
 
 1. Check the logs.
 
-    Check the logs from the Application Gateway pod to verify that the call reached the Application Gateway.
+    Check the logs from the Application Gateway Pod to verify that the call reached the Application Gateway.
     To fetch these logs, run this command:
     
     ```bash
