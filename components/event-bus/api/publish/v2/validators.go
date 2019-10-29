@@ -1,8 +1,9 @@
 package v2
 
 import (
-	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	"regexp"
+
+	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 )
 
 var (

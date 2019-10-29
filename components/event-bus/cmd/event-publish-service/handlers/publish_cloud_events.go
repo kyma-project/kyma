@@ -4,6 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"reflect"
+	"strconv"
+
 	cloudevents "github.com/cloudevents/sdk-go"
 	cecontext "github.com/cloudevents/sdk-go/pkg/cloudevents/context"
 	cehttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
@@ -15,10 +20,6 @@ import (
 	kymaevent "github.com/kyma-project/kyma/components/event-bus/pkg/event"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
-	"io/ioutil"
-	"net/http"
-	"reflect"
-	"strconv"
 )
 
 // CloudEventHandler is a struct which bundles anything required to handle incoming cloud events
@@ -208,7 +209,3 @@ func (handler *CloudEventHandler) ServeHTTP(w http.ResponseWriter, req *http.Req
 	// 	eventTypeVersion: headers[HeaderEventTypeVersion][0],
 
 }
-
-
-
-

@@ -3,11 +3,14 @@ package event
 import (
 	"context"
 	"encoding/json"
+
 	cloudevents "github.com/cloudevents/sdk-go"
 	cehttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
+
 	// TODO(k15r): get rid off publish import
-	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	"strings"
+
+	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 
 	"net/http"
 )
@@ -27,7 +30,7 @@ func DecodeMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Mess
 	kymaErrors := Validate(event)
 	allErrors := append(specErrors, kymaErrors...)
 	if len(allErrors) != 0 {
-		return event,  &api.Error{
+		return event, &api.Error{
 			Status:  http.StatusBadRequest,
 			Message: api.ErrorMessageBadRequest,
 			Type:    api.ErrorTypeBadRequest,
@@ -57,7 +60,6 @@ func errorToDetails(err error) []api.ErrorDetail {
 
 	return errors
 }
-
 
 // Further Kyma specific validations in addition to CloudEvents specification
 func Validate(event *cloudevents.Event) []api.ErrorDetail {

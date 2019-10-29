@@ -2,11 +2,11 @@ package trace
 
 const (
 	// EventID used for tracing
-	EventID          = "event-id"
+	EventID = "event-id"
 	// SourceID used for tracing
-	SourceID         = "source-id"
+	SourceID = "source-id"
 	// EventType used for tracing
-	EventType        = "event-type"
+	EventType = "event-type"
 	// EventTypeVersion used for tracing
 	EventTypeVersion = "event-type-ver"
 )
