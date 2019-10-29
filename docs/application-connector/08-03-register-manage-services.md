@@ -209,7 +209,7 @@ This is an example of the `api` section of the request body for an API with a sp
 
 ## Use custom headers and query parameters for fetching API specification from URL 
 
-You can specify additional headers and query parameters to inject to requests to the specification URL.
+You can specify additional headers and query parameters to inject to requests made to the specification URL.
 
 >**NOTE:** These headers and query parameters are used only for requests for fetching an API specification and are not stored in the system.
 

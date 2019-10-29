@@ -29,7 +29,7 @@ This table lists all the possible parameters of a given resource together with t
 
 | Parameter   |      Required      |  Description |
 |----------|:-------------:|------|
-| **metadata.name** | Yes | Specifies the name of the CR and the Application to request a token for. |
+| **metadata.name** | Yes | Specifies the name of the CR and the Application for which to request a token. |
 | **context.tenant**| No | Specifies the name of the Tenant.  |
 | **context.group** | No | Specifies the name of the Group. |
 
