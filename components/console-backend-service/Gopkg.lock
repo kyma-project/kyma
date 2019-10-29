@@ -1151,6 +1151,7 @@
     "github.com/opentracing/opentracing-go/ext",
     "github.com/opentracing/opentracing-go/log",
     "github.com/openzipkin/zipkin-go-opentracing",
+    "github.com/ory/oathkeeper-maester/api/v1alpha1",
     "github.com/pkg/errors",
     "github.com/rs/cors",
     "github.com/stretchr/testify/assert",
