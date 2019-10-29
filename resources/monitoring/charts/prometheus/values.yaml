@@ -145,7 +145,7 @@ isLocalEnv:
 ## this parameter sets in-memory retention time not the persistence one
 retention: 2h
 # disk retetion size
-retentionSize: 8Gi
+retentionSize: 8GB
 
 ## Prefix used to register routes, overriding externalUrl route.
 ## Useful for proxies that rewrite URLs.
