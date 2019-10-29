@@ -33,7 +33,7 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.name** | Yes | Specifies the name of the CR and the ID of the Application service. This field is also used to fetch event schemas from the MinIO storage.  |
 | **metadata.namespace** | Yes | Specifies the Namespace in which the CR is created. |
 | **spec.displayName** | Yes | Specifies a human-readable name of the Application service. |
-| **spec.sourceId** | Yes | Used to construct a Publish-Subscribe (Pub/Sub) topic name where the events are send and from where the events are consumed. |
+| **spec.sourceId** | Yes | Used to construct a Publish-Subscribe (Pub/Sub) topic name where events are sent and from where they are consumed. |
 
 ## Related resources and components
 
