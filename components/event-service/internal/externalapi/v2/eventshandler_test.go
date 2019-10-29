@@ -45,7 +45,7 @@ func TestEventOk(t *testing.T) {
 		Typ:              "order.created",
 		Eventtypeversion: "v1",
 		Specversion:      "0.3",
-		Id:               "31109198-4d69-4ae0-972d-76117f3748c8",
+		ID:               "31109198-4d69-4ae0-972d-76117f3748c8",
 		Time:             "2012-11-01T22:08:41+00:00",
 		Data:             "foo",
 	}
@@ -90,7 +90,7 @@ func TestEventNoGateway(t *testing.T) {
 		Typ:              "order.created",
 		Eventtypeversion: "v1",
 		Specversion:      "0.3",
-		Id:               "31109198-4d69-4ae0-972d-76117f3748c8",
+		ID:               "31109198-4d69-4ae0-972d-76117f3748c8",
 		Time:             "2012-11-01T22:08:41+00:00",
 		Data:             "foo",
 	}
@@ -190,7 +190,7 @@ func TestPropagateTraceHeaders(t *testing.T) {
 		Typ:              "order.created",
 		Specversion:      "0.3",
 		Eventtypeversion: "v1",
-		Id:               "31109198-4d69-4ae0-972d-76117f3748c8",
+		ID:               "31109198-4d69-4ae0-972d-76117f3748c8",
 		Time:             "2012-11-01T22:08:41+00:00",
 		Data:             "{'key':'value'}",
 	}

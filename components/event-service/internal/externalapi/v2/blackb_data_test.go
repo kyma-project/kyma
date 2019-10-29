@@ -13,7 +13,7 @@ type stupidEventMock struct {
 	Typ              string `json:"type,omitempty"`
 	Eventtypeversion string `json:"eventtypeversion,omitempty"`
 	Specversion      string `json:"specversion,omitempty"`
-	Id               string `json:"id,omitempty"`
+	ID               string `json:"id,omitempty"`
 	Time             string `json:"time,omitempty"`
 	Data             string `json:"data,omitempty"`
 }
@@ -24,7 +24,7 @@ func TestErrorEmptyData(t *testing.T) {
 		Typ:              "order.created",
 		Eventtypeversion: "v1",
 		Specversion:      "0.3",
-		Id:               "31109198-4d69-4ae0-972d-76117f3748c8",
+		ID:               "31109198-4d69-4ae0-972d-76117f3748c8",
 		Time:             "2012-11-01T22:08:41+00:00",
 	}
 
@@ -80,7 +80,7 @@ func TestErrorMissingSpecVersion(t *testing.T) {
 	s := &stupidEventMock{
 		Typ:              "order.created",
 		Eventtypeversion: "v1",
-		Id:               "31109198-4d69-4ae0-972d-76117f3748c8",
+		ID:               "31109198-4d69-4ae0-972d-76117f3748c8",
 		Time:             "2012-11-01T22:08:41+00:00",
 		Data:             "foo",
 	}

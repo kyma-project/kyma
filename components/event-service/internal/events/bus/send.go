@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	cloudevents "github.com/cloudevents/sdk-go"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+
+	cloudevents "github.com/cloudevents/sdk-go"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
@@ -112,18 +113,17 @@ func addTraceHeaders(httpReq *http.Request, traceHeaders *map[string]string) {
 	}
 }
 
-// Send an event to event-bus as CloudEvents 1.0 in structured encoding
+// SendEventV2 sends an event to event-bus as CloudEvents 1.0 in structured encoding
 // Use the client from the cloudevents sdk for sending
 func SendEventV2(event cloudevents.Event, traceHeaders map[string]string) (*api.SendEventResponse, error) {
 	ctx := cloudevents.ContextWithEncoding(context.Background(), cloudevents.Binary)
-
 
 	//for key, value := range traceHeaders {
 	//	ctx = cloudevents.ContextWithHeader(ctx, key, value)
 	//}
 
 	// TODO(k15r): make encoding configurable
-	msg, err := kymaevent.ToMessage(ctx,event, cloudevents.HTTPBinaryV1)
+	msg, err := kymaevent.ToMessage(ctx, event, cloudevents.HTTPBinaryV1)
 
 	httpReq, err := httpRequestProvider(http.MethodPost, "", bytes.NewReader(msg.Body))
 	for key, value := range msg.Header {

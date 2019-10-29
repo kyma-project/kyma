@@ -3,12 +3,14 @@ package v2
 import (
 	"context"
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 	kymaevent "github.com/kyma-project/kyma/components/event-service/pkg/event"
-	"io/ioutil"
-	"net/http"
+
 	// TODO(k15r): get rid off publish import
 	"github.com/kyma-project/kyma/components/event-bus/api/publish"
 
@@ -24,7 +26,7 @@ const (
 )
 
 var (
-	traceHeaderKeys         = []string{"x-request-id", "x-b3-traceid", "x-b3-spanid", "x-b3-parentspanid", "x-b3-sampled", "x-b3-flags", "x-ot-span-context"}
+	traceHeaderKeys = []string{"x-request-id", "x-b3-traceid", "x-b3-spanid", "x-b3-parentspanid", "x-b3-sampled", "x-b3-flags", "x-ot-span-context"}
 )
 
 type maxBytesHandler struct {
@@ -32,7 +34,7 @@ type maxBytesHandler struct {
 	limit int64
 }
 
-type CloudEventsHandler struct {
+type cloudEventsHandler struct {
 	Transport *cehttp.Transport
 	Client    cloudevents.Client
 }
@@ -51,11 +53,10 @@ func NewEventsHandler(maxRequestSize int64) http.Handler {
 		return nil
 	}
 
-	handler := CloudEventsHandler{Transport: t}
+	handler := cloudEventsHandler{Transport: t}
 
 	return &maxBytesHandler{next: &handler, limit: maxRequestSize}
 }
-
 
 func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponse) {
 	encoder := json.NewEncoder(w)
@@ -83,7 +84,7 @@ func getTraceHeaders(ctx context.Context) *map[string]string {
 	return &traceHeaders
 }
 
-func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (h *cloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if bus.CheckConf() != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

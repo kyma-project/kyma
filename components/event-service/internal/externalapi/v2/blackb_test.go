@@ -3,12 +3,13 @@ package v2
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
@@ -51,7 +52,7 @@ func TestErrorNoType(t *testing.T) {
 	s := &stupidEventMock{
 		Eventtypeversion: "v1",
 		Specversion:      "0.3",
-		Id:               "31109198-4d69-4ae0-972d-76117f3748c8",
+		ID:               "31109198-4d69-4ae0-972d-76117f3748c8",
 		Time:             "2012-11-01T22:08:41+00:00",
 	}
 
@@ -78,7 +79,7 @@ func TestErrorEmptyType(t *testing.T) {
 		Typ:              "",
 		Eventtypeversion: "v1",
 		Specversion:      "0.3",
-		Id:               "31109198-4d69-4ae0-972d-76117f3748c8",
+		ID:               "31109198-4d69-4ae0-972d-76117f3748c8",
 		Time:             "2012-11-01T22:08:41+00:00",
 	}
 
@@ -133,7 +134,7 @@ func TestErrorEventIdDoesNotMatchUUIDPattern(t *testing.T) {
 		Typ:              "mysupertype",
 		Eventtypeversion: "v1",
 		Specversion:      "0.3",
-		Id:               "31109198",
+		ID:               "31109198",
 		Time:             "2012-11-01T22:08:41+00:00",
 		Data:             "bla",
 	}
