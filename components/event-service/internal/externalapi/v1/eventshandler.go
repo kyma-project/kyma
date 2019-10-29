@@ -133,7 +133,7 @@ func checkParameters(parameters *apiv1.PublishEventParametersV1) (response *api.
 		return shared.ErrorResponseMissingFieldEventTime()
 	}
 	if _, err := time.Parse(time.RFC3339, parameters.PublishrequestV1.EventTime); err != nil {
-		return shared.ErrorResponseWrongEventTime(err)
+		return shared.ErrorResponseWrongEventTime()
 	}
 	if len(parameters.PublishrequestV1.EventID) > 0 && !isValidEventID(parameters.PublishrequestV1.EventID) {
 		return shared.ErrorResponseWrongEventID()

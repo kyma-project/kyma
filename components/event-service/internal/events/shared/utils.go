@@ -41,7 +41,7 @@ func ErrorResponseMissingFieldEventTime() (response *api.PublishEventResponse) {
 }
 
 // ErrorResponseWrongEventTime returns an error of type PublishEventResponse for wrong EventTime field
-func ErrorResponseWrongEventTime(err error) (response *api.PublishEventResponse) {
+func ErrorResponseWrongEventTime() (response *api.PublishEventResponse) {
 	return CreateInvalidFieldError(FieldEventTime)
 }
 

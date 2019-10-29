@@ -208,21 +208,6 @@ func checkEmptyParameter(t *testing.T, result *api.Error, wantErrorDetail *api.E
 	}
 }
 
-func checkWrongParameter(t *testing.T, result *api.Error, wantErrorDetail *api.ErrorDetail) {
-	if result.Status != http.StatusBadRequest {
-		t.Errorf("Wrong result.Status: got %v want %v", result.Status, http.StatusBadRequest)
-	}
-	if result.Type != shared.ErrorTypeValidationViolation {
-		t.Errorf("Wrong result.Type: got %v want %v", result.Type, shared.ErrorTypeValidationViolation)
-	}
-	if result.Message != shared.ErrorMessageInvalidField {
-		t.Errorf("Wrong result.Message: got %v want %v", result.Message, shared.ErrorMessageInvalidField)
-	}
-	if result.Details[0] != *wantErrorDetail {
-		t.Errorf("Wrong ErrorDetails: got %v want %v", result.Details[0], *wantErrorDetail)
-	}
-}
-
 func checkResult(t *testing.T, result *api.Error, want *api.Error) {
 	t.Helper()
 	if want.Status > 0 && result.Status != want.Status {
@@ -263,6 +248,7 @@ func checkWrongEventTime(t *testing.T, result *api.Error) {
 	}
 }
 
+// TODO(nachtmaar): respect wantError
 func checkEmptyRequest(t *testing.T, result *api.Error, wantError *api.Error) {
 	if result.Status != http.StatusBadRequest {
 		t.Errorf("Wrong result.Status: got %v want %v", result.Status, http.StatusBadRequest)

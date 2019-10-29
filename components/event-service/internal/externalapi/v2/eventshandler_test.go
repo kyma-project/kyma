@@ -127,7 +127,7 @@ func TestRequestTooLarge(t *testing.T) {
 		t.Fatalf("unable to init bus")
 	}
 
-	data := base64.StdEncoding.EncodeToString((make([]byte, maxRequestSize+1)))
+	data := base64.StdEncoding.EncodeToString(make([]byte, maxRequestSize+1))
 	s := fmt.Sprintf("{\"type\":\"order.created\",\"eventtypeversion\":\"v1\",\"id\":\"31109198-4d69-4ae0-972d-76117f3748c8\",\"time\":\"2012-11-01T22:08:41+00:00\",\"data\":\"%s\"}", data)
 	req, err := http.NewRequest(http.MethodPost, shared.EventsV2Path, strings.NewReader(s))
 	if err != nil {

@@ -30,7 +30,7 @@ func FromMessage(t *cehttp.Transport, ctx context.Context, message cehttp.Messag
 				Message:  shared.ErrorMessageMissingField,
 				MoreInfo: "",
 				Details: []api.ErrorDetail{
-					api.ErrorDetail{
+					{
 						Field:    shared.FieldSpecVersionV2,
 						Type:     shared.ErrorTypeMissingField,
 						Message:  shared.ErrorMessageMissingField,
@@ -107,9 +107,9 @@ func RespondWithError(w http.ResponseWriter, error api.Error) error {
 func errorToDetails(err error) []api.ErrorDetail {
 	errors := []api.ErrorDetail(nil)
 
-	for _, error := range strings.Split(strings.TrimSuffix(err.Error(), "\n"), "\n") {
+	for _, errorStrings := range strings.Split(strings.TrimSuffix(err.Error(), "\n"), "\n") {
 		errors = append(errors, api.ErrorDetail{
-			Message: error,
+			Message: errorStrings,
 		})
 	}
 
@@ -157,8 +157,8 @@ func Validate(event *cloudevents.Event) []api.ErrorDetail {
 	return errors
 }
 
-func ToMessage(ctx context.Context, event cloudevents.Event, encoding cehttp.Encoding) (*cehttp.Message, error) {
-
+func ToMessage(ctx context.Context, event cloudevents.Event, encoding cehttp.Encoding) (cehttp.Message, error) {
+	tmp := cehttp.Message{}
 	codec := &cehttp.Codec{
 		Encoding:                   encoding,
 		DefaultEncodingSelectionFn: nil,
@@ -166,15 +166,15 @@ func ToMessage(ctx context.Context, event cloudevents.Event, encoding cehttp.Enc
 
 	message, err := codec.Encode(ctx, event)
 	if err != nil {
-		return nil, err
+		return tmp, err
 	}
 
 	msg, ok := message.(*cehttp.Message)
 	if !ok {
-		return nil, fmt.Errorf("cannot convert to http.Message: %v type: %v", message, reflect.TypeOf(message))
+		return tmp, fmt.Errorf("cannot convert to http.Message: %v type: %v", message, reflect.TypeOf(message))
 	}
 
-	return msg, nil
+	return *msg, nil
 }
 
 // AddSource adds the "source" related data to the incoming request

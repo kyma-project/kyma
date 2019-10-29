@@ -177,6 +177,7 @@ func checkWrongEventTime(t *testing.T, result *api.Error) {
 	}
 }
 
+// TODO(nachtmaar): respect wantError
 func checkEmptyRequest(t *testing.T, result *api.Error, wantError *api.Error) {
 	if result.Status != http.StatusBadRequest {
 		t.Errorf("Wrong result.Status: got %v want %v", result.Status, http.StatusBadRequest)
@@ -192,6 +193,7 @@ func checkEmptyRequest(t *testing.T, result *api.Error, wantError *api.Error) {
 	}
 }
 
+// TODO(nachtmaar): implement checking of wantError
 func checkBadRequest(t *testing.T, result *api.Error, wantError *api.Error) {
 	if result.Status != http.StatusBadRequest {
 		t.Errorf("Wrong result.Status: got %v want %v", result.Status, http.StatusBadRequest)

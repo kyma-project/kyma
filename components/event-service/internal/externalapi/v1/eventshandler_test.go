@@ -50,7 +50,7 @@ func TestEventOk(t *testing.T) {
 }
 
 func TestRequestTooLarge(t *testing.T) {
-	data := base64.StdEncoding.EncodeToString((make([]byte, maxRequestSize+1)))
+	data := base64.StdEncoding.EncodeToString(make([]byte, maxRequestSize+1))
 	s := fmt.Sprintf("{\"event-type\":\"order.created\",\"event-type-version\":\"v1\",\"event-id\":\"31109198-4d69-4ae0-972d-76117f3748c8\",\"event-time\":\"2012-11-01T22:08:41+00:00\",\"data\":\"%s\"}", data)
 	req, err := http.NewRequest(http.MethodPost, shared.EventsV1Path, strings.NewReader(s))
 	if err != nil {

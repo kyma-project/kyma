@@ -3,19 +3,12 @@ package v2
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
-	"net/http"
-	"regexp"
-	"strings"
-	"time"
-
-	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
-
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
-	apiv2 "github.com/kyma-project/kyma/components/event-service/internal/events/api/v2"
-	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 	kymaevent "github.com/kyma-project/kyma/components/event-service/pkg/event"
+	"io/ioutil"
+	"net/http"
 	// TODO(k15r): get rid off publish import
 	"github.com/kyma-project/kyma/components/event-bus/api/publish"
 
@@ -31,10 +24,7 @@ const (
 )
 
 var (
-	isValidEventTypeVersion = regexp.MustCompile(shared.AllowedEventTypeVersionChars).MatchString
-	isValidEventID          = regexp.MustCompile(shared.AllowedEventIDChars).MatchString
 	traceHeaderKeys         = []string{"x-request-id", "x-b3-traceid", "x-b3-spanid", "x-b3-parentspanid", "x-b3-sampled", "x-b3-flags", "x-ot-span-context"}
-	specVersion             = "0.3"
 )
 
 type maxBytesHandler struct {
@@ -66,123 +56,6 @@ func NewEventsHandler(maxRequestSize int64) http.Handler {
 	return &maxBytesHandler{next: &handler, limit: maxRequestSize}
 }
 
-// FilterCEHeaders filters Cloud Events Headers
-//TODO(k15r): seems not needed anymore, verify
-func FilterCEHeaders(ctx context.Context) map[string][]string {
-	//forward `ce-` headers only
-	headers := make(map[string][]string)
-
-	tctx := cehttp.TransportContextFrom(ctx)
-
-	for k := range tctx.Header {
-		if strings.HasPrefix(strings.ToUpper(k), "CE-") {
-			headers[k] = tctx.Header[k]
-		}
-	}
-	return headers
-}
-
-// handleEvents handles "/v2/events" requests
-func handleEvents(w http.ResponseWriter, req *http.Request) {
-	if req.Body == nil || req.ContentLength == 0 {
-		resp := shared.ErrorResponseBadRequest(shared.ErrorMessageBadPayload)
-		writeJSONResponse(w, resp)
-		return
-	}
-
-	var err error
-	parameters := &apiv2.PublishEventParametersV2{}
-	decoder := json.NewDecoder(req.Body)
-	err = decoder.Decode(&parameters.EventRequestV2)
-	if err != nil {
-		var resp *api.PublishEventResponse
-		if err.Error() == requestBodyTooLargeErrorMessage {
-			resp = shared.ErrorResponseRequestBodyTooLarge(err.Error())
-		} else {
-			resp = shared.ErrorResponseBadRequest(err.Error())
-		}
-		writeJSONResponse(w, resp)
-		return
-	}
-	resp := &api.PublishEventResponse{}
-
-	traceHeaders := &map[string]string{} //getTraceHeaders(req)
-
-	forwardHeaders := make(map[string][]string) //nil //FilterCEHeaders(req)
-
-	err = handleEvent(parameters, resp, traceHeaders, &forwardHeaders)
-	if err == nil {
-		if resp.Ok != nil || resp.Error != nil {
-			writeJSONResponse(w, resp)
-			return
-		}
-		log.Println("Cannot process event")
-		http.Error(w, "Cannot process event", http.StatusInternalServerError)
-		return
-	}
-	log.Printf("Internal Error: %s\n", err.Error())
-	http.Error(w, err.Error(), http.StatusInternalServerError)
-	return
-}
-
-var handleEvent = func(publishRequest *apiv2.PublishEventParametersV2, publishResponse *api.PublishEventResponse,
-	traceHeaders *map[string]string, forwardHeaders *map[string][]string) (err error) {
-	checkResp := checkParameters(publishRequest)
-	if checkResp.Error != nil {
-		publishResponse.Error = checkResp.Error
-		return
-	}
-	// add source to the incoming request
-	// sendRequest, err := busv2.AddSource(publishRequest)
-	// if err != nil {
-	// 	return err
-	// }
-	// send the event
-	sendEventResponse, err := bus.SendEvent("v2", nil, traceHeaders, forwardHeaders)
-	if err != nil {
-		return err
-	}
-	publishResponse.Ok = sendEventResponse.Ok
-	publishResponse.Error = sendEventResponse.Error
-	return err
-}
-
-func checkParameters(parameters *apiv2.PublishEventParametersV2) (response *api.PublishEventResponse) {
-	if parameters == nil {
-		return shared.ErrorResponseBadRequest(shared.ErrorMessageBadPayload)
-	}
-	if len(parameters.EventRequestV2.EventID) == 0 {
-		return ErrorResponseMissingFieldEventID()
-	}
-	if len(parameters.EventRequestV2.EventType) == 0 {
-		return ErrorResponseMissingFieldEventType()
-	}
-	if len(parameters.EventRequestV2.EventTypeVersion) == 0 {
-		return ErrorResponseMissingFieldEventTypeVersion()
-	}
-	if !isValidEventTypeVersion(parameters.EventRequestV2.EventTypeVersion) {
-		return ErrorResponseWrongEventTypeVersion()
-	}
-	if len(parameters.EventRequestV2.EventTime) == 0 {
-		return ErrorResponseMissingFieldEventTime()
-	}
-	if _, err := time.Parse(time.RFC3339, parameters.EventRequestV2.EventTime); err != nil {
-		return ErrorResponseWrongEventTime()
-	}
-	if len(parameters.EventRequestV2.EventID) > 0 && !isValidEventID(parameters.EventRequestV2.EventID) {
-		return ErrorResponseWrongEventID()
-	}
-	if parameters.EventRequestV2.SpecVersion != specVersion {
-		return ErrorResponseWrongSpecVersion()
-	}
-	if parameters.EventRequestV2.Data == nil {
-		return ErrorResponseMissingFieldData()
-	} else if d, ok := (parameters.EventRequestV2.Data).(string); ok && d == "" {
-		return ErrorResponseMissingFieldData()
-	}
-	// OK
-	return &api.PublishEventResponse{Ok: nil, Error: nil}
-}
 
 func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponse) {
 	encoder := json.NewEncoder(w)
@@ -217,7 +90,6 @@ func (h *CloudEventsHandler) ServeHTTP(w http.ResponseWriter, req *http.Request)
 	}
 	ctx := req.Context()
 	ctx = cehttp.WithTransportContext(ctx, cehttp.NewTransportContext(req))
-	//logger := cecontext.LoggerFrom(ctx)
 	w.Header().Set("Content-Type", "application/json")
 
 	body, err := ioutil.ReadAll(req.Body)
