@@ -2,12 +2,13 @@ package externalapi
 
 import (
 	"errors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
-	certmocks "github.com/kyma-project/kyma/components/connector-service/internal/certificates/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+	certmocks "github.com/kyma-project/kyma/components/connector-service/internal/certificates/mocks"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/revocation/mocks"
 	"github.com/stretchr/testify/assert"

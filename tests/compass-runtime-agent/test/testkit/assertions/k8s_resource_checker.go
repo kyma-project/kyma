@@ -67,7 +67,7 @@ type ServiceData struct {
 }
 
 const (
-	applicationDeletionTimeout       = 120 * time.Second
+	applicationDeletionTimeout       = 180 * time.Second
 	applicationDeletionCheckInterval = 2 * time.Second
 
 	expectedProtocol   v1core.Protocol = v1core.ProtocolTCP

@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/httpconsts"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"time"
+
+	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-registry/internal/httpconsts"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
