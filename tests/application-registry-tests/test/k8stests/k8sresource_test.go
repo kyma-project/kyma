@@ -11,7 +11,7 @@ import (
 
 	"github.com/kyma-project/kyma/tests/application-registry-tests/test/testkit"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -76,7 +76,7 @@ func TestK8sResources(t *testing.T) {
 		serviceId := postResponseData.ID
 		defer metadataServiceClient.DeleteService(t, serviceId)
 
-		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		resourceName := dummyApp.Name + "-" + serviceId
 		paramsSecretName := testkit.CreateParamsSecretName(resourceName)
 
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
@@ -203,7 +203,7 @@ func TestK8sResources(t *testing.T) {
 		serviceId := postResponseData.ID
 		defer metadataServiceClient.DeleteService(t, serviceId)
 
-		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		resourceName := dummyApp.Name + "-" + serviceId
 		paramsSecretName := testkit.CreateParamsSecretName(resourceName)
 
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
@@ -329,7 +329,7 @@ func TestK8sResources(t *testing.T) {
 		serviceId := postResponseData.ID
 		defer metadataServiceClient.DeleteService(t, serviceId)
 
-		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		resourceName := dummyApp.Name + "-" + serviceId
 		paramsSecretName := testkit.CreateParamsSecretName(resourceName)
 
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
@@ -447,7 +447,7 @@ func TestK8sResources(t *testing.T) {
 		serviceId := postResponseData.ID
 		defer metadataServiceClient.DeleteService(t, serviceId)
 
-		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		resourceName := dummyApp.Name + "-" + serviceId
 
 		time.Sleep(crPropagationWaitTime * time.Second)
 
@@ -526,7 +526,7 @@ func TestK8sResources(t *testing.T) {
 		serviceId := postResponseData.ID
 		defer metadataServiceClient.DeleteService(t, serviceId)
 
-		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		resourceName := dummyApp.Name + "-" + serviceId
 
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
@@ -640,7 +640,7 @@ func TestK8sResources(t *testing.T) {
 		serviceId := postResponseData.ID
 		defer metadataServiceClient.DeleteService(t, serviceId)
 
-		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		resourceName := dummyApp.Name + "-" + serviceId
 
 		updatedServiceDefinition := testkit.ServiceDetails{
 			Name:        "updated test service",
@@ -724,7 +724,7 @@ func TestK8sResources(t *testing.T) {
 		serviceId := postResponseData.ID
 		defer metadataServiceClient.DeleteService(t, serviceId)
 
-		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		resourceName := dummyApp.Name + "-" + serviceId
 
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
@@ -827,7 +827,7 @@ func TestK8sResources(t *testing.T) {
 		serviceId := postResponseData.ID
 		defer metadataServiceClient.DeleteService(t, serviceId)
 
-		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		resourceName := dummyApp.Name + "-" + serviceId
 
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
@@ -929,7 +929,7 @@ func TestK8sResources(t *testing.T) {
 		serviceId := postResponseData.ID
 		defer metadataServiceClient.DeleteService(t, serviceId)
 
-		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		resourceName := dummyApp.Name + "-" + serviceId
 
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
@@ -1036,7 +1036,7 @@ func TestK8sResources(t *testing.T) {
 		serviceId := postResponseData.ID
 		defer metadataServiceClient.DeleteService(t, serviceId)
 
-		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		resourceName := dummyApp.Name + "-" + serviceId
 
 		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
@@ -1158,7 +1158,7 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		resourceName := dummyApp.Name + "-" + serviceId
 
 		statusCode, err = metadataServiceClient.DeleteService(t, serviceId)
 		require.NoError(t, err)
@@ -1253,7 +1253,7 @@ func TestK8sApplicationDeletion(t *testing.T) {
 		serviceId := postResponseData.ID
 		defer metadataServiceClient.DeleteService(t, serviceId)
 
-		resourceName := "app-" + dummyApp.Name + "-" + serviceId
+		resourceName := dummyApp.Name + "-" + serviceId
 		paramsSecretName := testkit.CreateParamsSecretName(resourceName)
 
 		//when

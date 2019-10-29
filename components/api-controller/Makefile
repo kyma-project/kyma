@@ -1,11 +1,11 @@
 APP_NAME = api-controller
 APP_PATH = components/api-controller
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190913-65b55d1
-SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/scripts
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-include $(SCRIPTS_DIR)/go-dep.mk
+include $(SCRIPTS_DIR)/generic-make-go.mk
 
-MAIN_PATH := ./cmd/operator/main.go
+ENTRYPOINT := ./cmd/operator/main.go
 
 test-local:
 	go test -short ./...

@@ -4,12 +4,13 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/util"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/util"
 
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization/oauth/tokencache"

@@ -35,7 +35,7 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/somepath/Xyz('123')", nil)
 		require.NoError(t, err)
 
-		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
@@ -80,7 +80,7 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/Xyz('123')", nil)
 		require.NoError(t, err)
 
-		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
@@ -125,7 +125,7 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "?$search=XXX", nil)
 		require.NoError(t, err)
 
-		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
@@ -175,7 +175,7 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
@@ -233,7 +233,7 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
@@ -289,7 +289,7 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 		req.Header.Set(httpconsts.HeaderXForwardedClientCert, "C=US;O=Example Organisation;CN=Test User 1")
 		req.Header.Set(httpconsts.HeaderXForwardedFor, "client")
 		req.Header.Set(httpconsts.HeaderXForwardedProto, "http")
@@ -339,7 +339,7 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
@@ -371,7 +371,7 @@ func TestProxy(t *testing.T) {
 
 		// given
 		nextReq, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
-		nextReq.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		nextReq.Host = "test-uuid-1.namespace.svc.cluster.local"
 		rr = httptest.NewRecorder()
 
 		//when
@@ -403,7 +403,7 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
@@ -456,7 +456,7 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
@@ -508,7 +508,7 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
@@ -553,7 +553,7 @@ func TestProxy(t *testing.T) {
 		// given
 		req, err := http.NewRequest(http.MethodGet, "/", nil)
 		require.NoError(t, err)
-		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 		rr := httptest.NewRecorder()
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
@@ -585,7 +585,7 @@ func TestProxy(t *testing.T) {
 		defer tsf.Close()
 
 		req, _ := http.NewRequest(http.MethodGet, "/orders/123", requestBody)
-		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "test-uuid-1.namespace.svc.cluster.local"
 		req.AddCookie(&http.Cookie{Name: "user-cookie", Value: "user-cookie-value"})
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}

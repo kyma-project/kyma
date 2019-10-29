@@ -30,10 +30,10 @@ global:
     version: 73f8eff7
   apiserver_proxy:
     dir:
-    version: bdfddb63
+    version: dfa5f30d
   iam_kubeconfig_service:
     dir:
-    version: 22ed8bc7
+    version: c081698c
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
@@ -43,11 +43,11 @@ global:
     dir: develop/
     version: 8a10f0ed
   kubeless_integration_tests:
-    dir: pr/tests/
-    version: PR-5226
+    dir: develop/tests/
+    version: 1f9dbb20
   kubeless_tests:
-    dir: pr/
-    version: PR-5226
+    dir: develop/
+    version: 716e185b
   apiserver_proxy_integration_tests:
     dir:
     version: bdfddb63
