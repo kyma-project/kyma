@@ -36,8 +36,8 @@ global:
         dir: develop/
         version: "67535547"
       provisioner:
-        dir: develop/
-        version: "6a37c1f7"
+        dir:
+        version: "3d1df078"
 
   isLocalEnv: false
 
