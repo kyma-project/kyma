@@ -71,7 +71,7 @@ Follow these steps:
 
 ## Kyma users
 
-Kyma is used in these projects:
+Kyma is used by these companies:
 
 <p align="center">
   <img src="https://github.com/kyma-project/website/blob/master/content/adopters/logos/sap.svg" alt="SAP" width="100" />
