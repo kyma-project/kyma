@@ -26,7 +26,7 @@ import (
 )
 
 func main() {
-	sharedmain.Main("sources_controller",
+	sharedmain.Main("event_sources_controller",
 		httpsource.NewController,
 	)
 }

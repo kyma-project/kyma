@@ -3,8 +3,8 @@
   "kind": "Service",
   "metadata": {
     "annotations": {
-      "serving.knative.dev/creator": "system:serviceaccount:kyma-system:sources-controller",
-      "serving.knative.dev/lastModifier": "system:serviceaccount:kyma-system:sources-controller"
+      "serving.knative.dev/creator": "system:serviceaccount:kyma-system:event-sources-controller-manager",
+      "serving.knative.dev/lastModifier": "system:serviceaccount:kyma-system:event-sources-controller-manager"
     },
     "creationTimestamp": "2019-09-23T14:50:03Z",
     "generation": 1,
@@ -61,7 +61,7 @@
             }
           }
         ],
-        "serviceAccountName": "sources-controller",
+        "serviceAccountName": "event-sources-controller-manager",
         "timeoutSeconds": 300
       }
     },

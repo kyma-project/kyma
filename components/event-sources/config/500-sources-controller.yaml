@@ -15,24 +15,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sources-controller
-  namespace: kyma-event-sources
+  name: event-sources-controller-manager
+  namespace: kyma-system
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sources-controller
+      app: event-sources-controller-manager
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: 'false'
       labels:
-        app: sources-controller
+        app: event-sources-controller-manager
     spec:
-      serviceAccountName: sources-controller
+      serviceAccountName: event-sources-controller-manager
       containers:
       - name: controller
-        image: github.com/kyma-project/kyma/components/event-sources/cmd/sources-controller
+        image: github.com/kyma-project/kyma/components/event-sources/cmd/event-sources-controller-manager
         resources:
           requests:
             cpu: 10m

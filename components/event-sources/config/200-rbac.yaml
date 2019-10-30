@@ -15,13 +15,13 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: sources-controller
-  namespace: kyma-event-sources
+  name: event-sources-controller-manager
+  namespace: kyma-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: sources-controller
+  name: event-sources-controller-manager
 rules:
   - apiGroups:
       - ""
@@ -69,12 +69,12 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: sources-controller
+  name: event-sources-controller-manager
 subjects:
   - kind: ServiceAccount
-    name: sources-controller
-    namespace: kyma-event-sources
+    name: event-sources-controller-manager
+    namespace: kyma-system
 roleRef:
   kind: ClusterRole
-  name: sources-controller
+  name: event-sources-controller-manager
   apiGroup: rbac.authorization.k8s.io

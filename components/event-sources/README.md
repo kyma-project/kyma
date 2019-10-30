@@ -20,13 +20,13 @@ Create the CustomResourceDefinitions for event source types.
 $ kubectl create -f config/ -l kyma-project.io/crd-install=true
 ```
 
-Create the `kyma-event-sources` system namespace. The controller watches ConfigMaps inside it.
+Create the `kyma-system` system namespace. The controller watches ConfigMaps inside it.
 
 ```console
 $ kubectl create -f config/100-namespace.yaml
 ```
 
-Create ConfigMaps for logging and observability inside the system namespace (`kyma-event-sources`)
+Create ConfigMaps for logging and observability inside the system namespace (`kyma-system`)
 
 ```console
 $ kubectl create -f config/400-config-logging.yaml
@@ -38,18 +38,18 @@ $ kubectl create -f config/400-config-observability.yaml
 Export the following mandatory environment variables:
 
 * **KUBECONFIG**: path to a local kubeconfig file (if different from the default OS location)
-* **SYSTEM_NAMESPACE**: set to "kyma-event-sources" (see above)
+* **SYSTEM_NAMESPACE**: set to "kyma-system" (see above)
 * **METRICS_DOMAIN**: domain of the exposed Prometheus metrics. Arbitrary value (e.g. "kyma-project.io/event-sources")
 * **HTTP_ADAPTER_IMAGE**: container image of the HTTP receiver adapter
 
 Build the binary
 
 ```console
-$ make cmd/sources-controller
+$ make cmd/controller-manager
 ```
 
 Run the controller
 
 ```console
-$ ./sources-controller
+$ ./controller-manager
 ```

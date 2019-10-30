@@ -56,17 +56,17 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 	knServiceInformer := knserviceinformersv1.Get(ctx)
 	chInformer := messaginginformersv1alpha1.Get(ctx)
 
+	rb := reconciler.NewBase(ctx, controllerAgentName, cmw)
 	r := &Reconciler{
-		Base:             reconciler.NewBase(ctx, controllerAgentName, cmw),
+		Base:             rb,
 		adapterImage:     getAdapterImage(),
 		httpsourceLister: httpSourceInformer.Lister(),
 		ksvcLister:       knServiceInformer.Lister(),
 		chLister:         chInformer.Lister(),
 		sourcesClient:    sourcesclient.Get(ctx).SourcesV1alpha1(),
 		servingClient:    servingclient.Get(ctx).ServingV1(),
+		messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
 	}
-	r.messagingClient = r.EventingClientSet.MessagingV1alpha1()
-
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 
 	r.sinkResolver = resolver.NewURIResolver(ctx, impl.EnqueueKey)
