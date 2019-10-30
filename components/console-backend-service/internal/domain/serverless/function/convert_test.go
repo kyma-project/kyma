@@ -1,8 +1,9 @@
 package function_test
 
 import (
-	"k8s.io/apimachinery/pkg/types"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/function"
 
@@ -146,7 +147,7 @@ func TestConvert_SortFunctions(t *testing.T) {
 					Name:      expectedName,
 					Labels:    expectedLabels,
 					Namespace: expectedNamespace,
-					UID: expectedUID,
+					UID:       expectedUID,
 				},
 			},
 			{
@@ -154,7 +155,7 @@ func TestConvert_SortFunctions(t *testing.T) {
 					Name:      expectedName2,
 					Labels:    expectedLabels2,
 					Namespace: expectedNamespace2,
-					UID: expectedUID2,
+					UID:       expectedUID2,
 				},
 			},
 		}
@@ -184,7 +185,7 @@ func TestConvert_SortFunctions(t *testing.T) {
 					Name:      expectedName,
 					Labels:    expectedLabels,
 					Namespace: expectedNamespace,
-					UID: expectedUID,
+					UID:       expectedUID,
 				},
 			},
 			nil,
