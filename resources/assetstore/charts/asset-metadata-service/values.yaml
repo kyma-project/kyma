@@ -6,6 +6,7 @@ image:
   name: asset-metadata-service
   pullPolicy: IfNotPresent
 service:
+  verbose: "true"
   internalPort: 3000
   externalPort: 80
   protocol: TCP

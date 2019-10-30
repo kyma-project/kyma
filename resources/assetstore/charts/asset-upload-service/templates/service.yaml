@@ -5,7 +5,7 @@ metadata:
     "auth.istio.io/{{ .Values.service.externalPort }}": NONE    
   name: {{ template "fullname" . }}
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "asset-upload-service.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -16,5 +16,5 @@ spec:
     protocol: TCP
     name: http
   selector:
-    app: {{ template "name" . }}
+    app: {{ template "asset-upload-service.name" . }}
     release: {{ .Release.Name }}

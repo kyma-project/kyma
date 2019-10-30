@@ -2,6 +2,7 @@ replicaCount: 1
 image:
   pullPolicy: IfNotPresent
 service:
+  verbose: "true"
   type: ClusterIP
   externalPort: 80
   internalPort: 8080
@@ -15,6 +16,7 @@ resources:
     cpu: 10m
     memory: 32Mi
 
+temporaryDirectory: "/tmp"
 maxAssetConcurrentReconciles: 3
 maxClusterAssetConcurrentReconciles: 3
 storeUploadWorkersCount: 10

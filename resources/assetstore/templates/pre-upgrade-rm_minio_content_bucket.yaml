@@ -45,7 +45,7 @@ spec:
             - configMap:
                 name: {{ template "fullname" . }}-rm-minio-content-bucket
             - secret:
-                name: {{ default "assetstore-minio" .Values.existingSecret }}
+                name: {{ if .Values.global.existingSecret }}{{ .Values.global.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
       containers:
       - name: minio-mc
         image: "{{ .Values.global.minio_client.image }}:{{ .Values.global.minio_client.tag }}"
@@ -55,12 +55,12 @@ spec:
           - name: MINIO_ENDPOINT
             valueFrom:
               configMapKeyRef:
-                name: assetstore-minio-docs-upload
+                name: {{ template "minio.fullname" . }}-docs-upload
                 key: APP_UPLOAD_ENDPOINT
           - name: MINIO_PORT
             valueFrom:
               configMapKeyRef:
-                name: assetstore-minio-docs-upload
+                name: {{ template "minio.fullname" . }}-docs-upload
                 key: APP_UPLOAD_PORT
         volumeMounts:
           - name: minio-configuration

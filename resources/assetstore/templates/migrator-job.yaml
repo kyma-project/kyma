@@ -104,7 +104,7 @@ spec:
             - configMap:
                 name: {{ template "fullname" . }}-migrator
             - secret:
-                name: assetstore-minio
+                name: {{ if .Values.global.existingSecret }}{{ .Values.global.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
         - name: export
           persistentVolumeClaim:
             claimName: {{ template "fullname" . }}-migrator
@@ -130,22 +130,22 @@ spec:
           - name: MINIO_ENDPOINT
             valueFrom:
               configMapKeyRef:
-                name: assetstore-minio-docs-upload
+                name: {{ template "minio.fullname" . }}-docs-upload
                 key: APP_UPLOAD_ENDPOINT
           - name: MINIO_PORT
             valueFrom:
               configMapKeyRef:
-                name: assetstore-minio-docs-upload
+                name: {{ template "minio.fullname" . }}-docs-upload
                 key: APP_UPLOAD_PORT
           - name: PRIVATE_BUCKET
             valueFrom:
               configMapKeyRef:
-                name: asset-upload-service
+                name: {{ template "asset-upload-service.name" . }}
                 key: private
           - name: PUBLIC_BUCKET
             valueFrom:
               configMapKeyRef:
-                name: asset-upload-service
+                name: {{ template "asset-upload-service.name" . }}
                 key: public
           - name: LOCAL_STORAGE
             value: /export
@@ -186,7 +186,7 @@ spec:
             - configMap:
                 name: {{ template "fullname" . }}-migrator
             - secret:
-                name: assetstore-minio
+                name: {{ if .Values.global.existingSecret }}{{ .Values.global.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
         - name: export
           persistentVolumeClaim:
             claimName: {{ template "fullname" . }}-migrator
@@ -199,22 +199,22 @@ spec:
           - name: MINIO_ENDPOINT
             valueFrom:
               configMapKeyRef:
-                name: assetstore-minio-docs-upload
+                name: {{ template "minio.fullname" . }}-docs-upload
                 key: APP_UPLOAD_ENDPOINT
           - name: MINIO_PORT
             valueFrom:
               configMapKeyRef:
-                name: assetstore-minio-docs-upload
+                name: {{ template "minio.fullname" . }}-docs-upload
                 key: APP_UPLOAD_PORT
           - name: PRIVATE_BUCKET
             valueFrom:
               configMapKeyRef:
-                name: asset-upload-service
+                name: {{ template "asset-upload-service.name" . }}
                 key: private
           - name: PUBLIC_BUCKET
             valueFrom:
               configMapKeyRef:
-                name: asset-upload-service
+                name: {{ template "asset-upload-service.name" . }}
                 key: public
           - name: LOCAL_STORAGE
             value: /export

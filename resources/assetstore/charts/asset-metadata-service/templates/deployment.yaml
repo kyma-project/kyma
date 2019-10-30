@@ -27,7 +27,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: APP_VERBOSE
-              value: "true"
+              value: "{{ .Values.service.verbose }}"
             - name: APP_PORT
               value: "{{ .Values.service.internalPort }}"
             - name: APP_HOST

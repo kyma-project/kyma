@@ -46,6 +46,8 @@ configPath: "/root/.minio/"
 configPathmc: "/root/.mc/"
 mountPath: "/export"
 replicas: 4
+metrics:
+  scrapeInterval: 30s
 
 ## TLS Settings for Minio
 tls:
@@ -90,6 +92,7 @@ persistence:
 ##
 
 service:
+  verbose: "true"
   type: ClusterIP
   clusterIP: ~
   port: 9000

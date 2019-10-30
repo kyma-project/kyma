@@ -94,12 +94,12 @@ spec:
             - name: MINIO_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ if .Values.existingSecret }}{{ .Values.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
+                  name: {{ if .Values.global.existingSecret }}{{ .Values.global.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
                   key: accesskey
             - name: MINIO_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ if .Values.existingSecret }}{{ .Values.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
+                  name: {{ if .Values.global.existingSecret }}{{ .Values.global.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
                   key: secretkey
             {{- range $key, $val := .Values.environment }}
             - name: {{ $key }}
@@ -136,7 +136,7 @@ spec:
       volumes:
         - name: minio-user
           secret:
-            secretName: {{ if .Values.existingSecret }}{{ .Values.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
+            secretName: {{ if .Values.global.existingSecret }}{{ .Values.global.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
         - name: minio-config-dir
           emptyDir: {}
         {{- if .Values.tls.enabled }}

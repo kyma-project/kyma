@@ -5,7 +5,7 @@ metadata:
     name: {{ template "fullname" . }}
     labels:
         prometheus: monitoring
-        app: {{ template "name" . }}
+        app: {{ template "asset-upload-service.name" . }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
@@ -19,4 +19,4 @@ spec:
             - "{{ .Release.Namespace }}"
     selector:
         matchLabels:
-            app: {{ template "name" . }}
+            app: {{ template "asset-upload-service.name" . }}

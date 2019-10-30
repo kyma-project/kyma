@@ -34,7 +34,7 @@ spec:
             - configMap:
                 name: {{ template "minio.fullname" . }}
             - secret:
-                name: {{ if .Values.existingSecret }}{{ .Values.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
+                name: {{ if .Values.global.existingSecret }}{{ .Values.global.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
         {{- if .Values.tls.enabled }}
         - name: cert-secret-volume-mc
           secret:

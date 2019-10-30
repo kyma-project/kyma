@@ -13,4 +13,4 @@ data:
   APP_UPLOAD_ENDPOINT_WITH_PORT: '{{ template "minio.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}'
   APP_BUCKET_REGION: us-east-1
   APP_EXTERNAL_ENDPOINT: {{ if .Values.global.minioExternalEndpoint }}{{ .Values.global.minioExternalEndpoint }}{{ else }}'https://minio.{{ .Values.global.ingress.domainName }}'{{ end }}
-  APP_VERBOSE: 'true'
+  APP_VERBOSE: "{{ .Values.service.verbose }}"
