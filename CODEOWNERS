@@ -335,6 +335,9 @@
 # api-controller integration tests
 /tests/integration/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# api-gateway integration tests
+/tests/integration/api-gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
+
 # apiserver-proxy tests
 /tests/integration/apiserver-proxy/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
@@ -374,7 +377,7 @@
 /tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
 
 # The failery directory
-/tools/failery/ @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
+/tools/failery/ @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
 
 # The tools/kyma-installer directory
 /tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
@@ -412,8 +415,11 @@
 # All files and subdirectories in /docs
 /docs/ @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj @majakurcius @alexandra-simeonova
 
+# Owners of the .kyma-project-io folder
+/.kyma-project-io/ @michal-hudy @m00g3n @aerfio @magicmatatjahu
+
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @akucharska @michal-hudy @m00g3n @pkosiec @aerfio @magicmatatjahu
+milv.config.yaml @michal-hudy @m00g3n @aerfio @magicmatatjahu
 
 # performance tests
 /tests/perf/ @a-thaler @hisarbalik @lilitgh @suleymanakbas91 @clebs

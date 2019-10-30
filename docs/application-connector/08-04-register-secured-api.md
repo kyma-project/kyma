@@ -5,7 +5,7 @@ type: Tutorials
 
 The Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750), and client certificates.
 
-You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, the Application Registry returns a `400` code response.
+You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, the Application Registry returns the `400` code response.
 
 Additionally, you can secure the API against cross-site request forgery (CSRF) attacks. CSRF tokens are an additional layer of protection and can accompany any authentication method.  
 
@@ -22,7 +22,7 @@ To register an API secured with Basic Authentication, add a `credentials.basic` 
 
 This is an example of the `api` section of the request body for an API secured with Basic Authentication:
 
-```
+```json
     "api": {
         "targetUrl": "https://sampleapi.targeturl/v1",
         "credentials": {
@@ -31,7 +31,9 @@ This is an example of the `api` section of the request body for an API secured w
                 "password": "{PASSWORD}"
             },
         }  
+    }
 ```
+
 ## Register an OAuth-secured API
 
 To register an API secured with OAuth, add a `credentials.oauth` object to the `api` section of the service registration request body. You must include these fields:
@@ -44,7 +46,7 @@ To register an API secured with OAuth, add a `credentials.oauth` object to the `
 
 This is an example of the `api` section of the request body for an API secured with OAuth:
 
-```
+```json
     "api": {
         "targetUrl": "https://sampleapi.targeturl/v1",
         "credentials": {
@@ -54,6 +56,7 @@ This is an example of the `api` section of the request body for an API secured w
                 "clientSecret": "{CLIENT_SECRET}"
             },
         }  
+    }
 ```
 
 ## Register a client certificate-secured API
@@ -68,7 +71,7 @@ Include this field in the service registration request body:
 
 This is an example of the `api` section of the request body for an API secured with generated client certificates:
 
-```
+```json
     "api": {
         "targetUrl": "https://sampleapi.targeturl/v1",
         "credentials": {
@@ -76,6 +79,7 @@ This is an example of the `api` section of the request body for an API secured w
                 "commonName": "{CERT_NAME}"
             },
         }  
+    }
 ```
 
 >**NOTE:** If you update the registered API and change the `certificateGen.commonName`, the Application Registry generates a new certificate-key pair for that API. When you delete an API secured with generated client certificates, the Application Registry deletes the corresponding certificate and key.
@@ -85,20 +89,22 @@ This is an example of the `api` section of the request body for an API secured w
 When you register an API with the `credentials.certificateGen` object, the Application Registry generates a SHA256withRSA-encrypted certificate and a matching key. To enable communication between Kyma and an API secured with this authentication method, set the certificate as a valid authentication medium for all calls coming from Kyma in your external solution.
 
 You can retrieve the client certificate by sending the following request:
-```
+
+```bash
 curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
+
 A successful call will return a response body with the details of a registered service and a base64-encoded client certificate.
 
 The certificate and key pair is stored in a Secret in the `kyma-integration` Namespace. List all Secrets and find the one created for your API:
 
-```
+```bash
 kubectl -n kyma-integration get secrets
 ```
 
 To fetch the certificate and key encoded with base64, run this command:
 
-```
+```bash
 kubectl -n kyma-integration get secrets app-{APP_NAME}-{SERVICE_ID} -o yaml
 ```
 
@@ -107,7 +113,7 @@ kubectl -n kyma-integration get secrets app-{APP_NAME}-{SERVICE_ID} -o yaml
 
 If the API you registered provides a certificate-key pair or the generated certificate doesn't meet your security standards or specific needs, you can use a custom certificate-key pair for authentication. To replace the Kyma-generated pair with your certificate and key, run this command:
 
-```
+```bash
 kubectl -n kyma-integration patch secrets app-{APP_NAME}-{SERVICE_ID} --patch 'data:
   crt: {BASE64_ENCODED_CRT}
   key: {BASE64_ENCODED_KEY}'
@@ -125,7 +131,7 @@ Include this field in the service registration request body:
 
 This is an example of the `api` section of the request body for an API secured with both Basic Authentication and a CSRF token.
 
-```
+```json
     "api": {
         "targetUrl": "https://sampleapi.targeturl/v1",
         "credentials": {
@@ -137,17 +143,18 @@ This is an example of the `api` section of the request body for an API secured w
                 }
             },
         }
+    }
 ```
 
 
 ### Use headers and query parameters for custom authentication
 
-You can specify additional headers and query parameters that will be injected to requests to the target API.
+You can specify additional headers and query parameters to inject to requests made to the target API.
 The Kubernetes Secret stores headers and query parameters which you can use for custom authentication methods.  
 
 This is an example of the **api** section of the request body for an API secured with Basic Authentication. It is enriched with the **custom-header** header with the `foo` value, and the **param** query parameter with the `bar` value.
 
-```
+```json
     "api": {
         "targetUrl": "https://sampleapi.targeturl/v1",
         "requestParameters": {
@@ -164,4 +171,5 @@ This is an example of the **api** section of the request body for an API secured
                 "password": "{PASSWORD}"
             },
         }
+    }
 ```

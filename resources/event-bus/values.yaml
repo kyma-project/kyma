@@ -64,4 +64,4 @@ e2eTests:
   nameSubscriber: test-event-bus-subscriber
 
 tests:
-  enabled: false
+  enabled: true

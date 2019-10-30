@@ -1,9 +1,9 @@
 APP_NAME = console-backend-service-test
 APP_PATH = tests/console-backend-service
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190930-d28d219
-SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/scripts
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-include $(SCRIPTS_DIR)/go-dep.mk
+include $(SCRIPTS_DIR)/generic-make-go.mk
 
 VERIFY_IGNORE := /vendor\|/automock\|/testdata\|/pkg
 

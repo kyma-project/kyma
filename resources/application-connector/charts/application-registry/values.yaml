@@ -18,6 +18,6 @@ service:
     port: *externalAPIPort
 
 tests:
-  enabled: false
+  enabled: true
   image:
     pullPolicy: IfNotPresent

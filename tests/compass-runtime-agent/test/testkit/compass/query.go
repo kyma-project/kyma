@@ -97,7 +97,7 @@ func (qp queryProvider) createEventAPI(applicationId string, input string) strin
 	result: addEventAPI(applicationID: "%s", in: %s) {
 		%s
 	}
-}`, applicationId, input, apiDefinitionData())
+}`, applicationId, input, eventAPIData())
 }
 
 func (qp queryProvider) updateEventAPI(apiId string, input string) string {
@@ -105,7 +105,7 @@ func (qp queryProvider) updateEventAPI(apiId string, input string) string {
 	result: updateEventAPI(id: "%s", in: %s) {
 		%s
 	}
-}`, apiId, input, apiDefinitionData())
+}`, apiId, input, eventAPIData())
 }
 
 func (qp queryProvider) deleteEventAPI(apiId string) string {

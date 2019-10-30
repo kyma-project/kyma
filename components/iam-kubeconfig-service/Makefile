@@ -1,11 +1,11 @@
 APP_NAME = iam-kubeconfig-service
 APP_PATH = components/iam-kubeconfig-service
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190913-65b55d1
-SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/scripts
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-include $(SCRIPTS_DIR)/go-dep.mk
+include $(SCRIPTS_DIR)/generic-make-go.mk
 
-MAIN_PATH := ./cmd/generator/main.go
+ENTRYPOINT := ./cmd/generator/main.go
 
 verify:: vet
 

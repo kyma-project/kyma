@@ -1,0 +1,35 @@
+{{ if .Values.tests.enabled }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "fullname" . }}-tests-credentials-secrets
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}-tests
+    release: {{ .Chart.Name }}
+rules:
+- apiGroups: ["*"]
+  resources: ["secrets"]
+  verbs: ["get", "update", "create", "delete"]
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "fullname" . }}-credentials-secrets
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}-tests
+    release: {{ .Chart.Name }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "fullname" . }}-tests
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ template "fullname" . }}-tests-credentials-secrets
+  apiGroup: rbac.authorization.k8s.io
+
+---
+{{ end }}
