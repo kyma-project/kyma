@@ -34,7 +34,7 @@ global:
         version: "cfbd8fd4"
       connector:
         dir: develop/
-        version: "ed26afa1"
+        version: "32b69555"
       provisioner:
         dir: develop/
         version: "6a37c1f7"
