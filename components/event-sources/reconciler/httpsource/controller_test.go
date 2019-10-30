@@ -48,7 +48,7 @@ func TestNewController(t *testing.T) {
 	cmw := configmap.NewStaticWatcher()
 	ctx, informers := rt.SetupFakeContext(t)
 
-	// expected infomers: HTTPSource and Knative Service
+	// expected informers: HTTPSource and Knative Service
 	if expect, got := 2, len(informers); got != expect {
 		t.Errorf("Expected %d injected informers, got %d", expect, got)
 	}
@@ -84,15 +84,15 @@ func TestGetAdapterImage(t *testing.T) {
 
 // setAdapterImageEnvVar sets the adapter image env var and returns a function
 // that can be deferred to unset that variable.
-func setAdapterImageEnvVar(val string, t *testing.T) (unset func() error) {
+func setAdapterImageEnvVar(val string, t *testing.T) (unset func()) {
 	t.Helper()
 
 	if err := os.Setenv(adapterImageEnvVar, val); err != nil {
 		t.Errorf("Failed to set env var %s: %v", adapterImageEnvVar, err)
 	}
 
-	return func() error {
-		return os.Unsetenv(adapterImageEnvVar)
+	return func() {
+		_ = os.Unsetenv(adapterImageEnvVar)
 	}
 }
 
