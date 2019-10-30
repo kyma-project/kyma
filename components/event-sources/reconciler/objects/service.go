@@ -54,7 +54,7 @@ type ServiceOption func(*servingv1.Service)
 // WithServiceControllerRef sets the controller reference of a Service.
 func WithServiceControllerRef(or *metav1.OwnerReference) ServiceOption {
 	return func(s *servingv1.Service) {
-		svcOwnerRefs := &s.ObjectMeta.OwnerReferences
+		svcOwnerRefs := &s.OwnerReferences
 
 		switch {
 		case *svcOwnerRefs == nil:
@@ -87,6 +87,10 @@ func WithContainerImage(img string) ServiceOption {
 // Service.
 func WithExistingService(ksvc *servingv1.Service) ServiceOption {
 	return func(s *servingv1.Service) {
+		if ksvc == nil {
+			return
+		}
+
 		// resourceVersion must be returned to the API server
 		// unmodified for optimistic concurrency
 		s.ResourceVersion = ksvc.ResourceVersion
@@ -96,6 +100,12 @@ func WithExistingService(ksvc *servingv1.Service) ServiceOption {
 			if val, ok := ksvc.Annotations[ann]; ok {
 				metav1.SetMetaDataAnnotation(&s.ObjectMeta, ann, val)
 			}
+		}
+
+		// preserve owner references
+		if ksvc.OwnerReferences != nil {
+			s.OwnerReferences = make([]metav1.OwnerReference, len(ksvc.OwnerReferences))
+			copy(s.OwnerReferences, ksvc.OwnerReferences)
 		}
 
 		// preserve status to avoid resetting conditions

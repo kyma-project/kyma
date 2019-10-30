@@ -44,19 +44,6 @@ type ChannelOption func(*messagingv1alpha1.Channel)
 // WithChannelControllerRef sets the controller reference of a Channel.
 func WithChannelControllerRef(or *metav1.OwnerReference) ChannelOption {
 	return func(s *messagingv1alpha1.Channel) {
-		svcOwnerRefs := &s.ObjectMeta.OwnerReferences
-
-		switch {
-		case *svcOwnerRefs == nil:
-			*svcOwnerRefs = []metav1.OwnerReference{*or}
-		case metav1.GetControllerOf(s) == nil:
-			*svcOwnerRefs = append(*svcOwnerRefs, *or)
-		default:
-			for i, r := range *svcOwnerRefs {
-				if r.Controller != nil && *r.Controller {
-					(*svcOwnerRefs)[i] = *or
-				}
-			}
-		}
+		s.OwnerReferences = []metav1.OwnerReference{*or}
 	}
 }

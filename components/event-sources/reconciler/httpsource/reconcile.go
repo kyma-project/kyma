@@ -147,14 +147,15 @@ func (r *Reconciler) getOrCreateChannel(src *v1alpha1.HTTPSource) (*messagingv1a
 // HTTPSource. An optional Knative Service can be passed as parameter, in which
 // case some of its attributes are used to generate the desired state.
 func (r *Reconciler) makeKnService(src *v1alpha1.HTTPSource, currentKsvc ...*servingv1.Service) *servingv1.Service {
-	opts := []objects.ServiceOption{
+	var ksvc *servingv1.Service
+	if len(currentKsvc) == 1 {
+		ksvc = currentKsvc[0]
+	}
+	return objects.NewService(src.Namespace, src.Name,
+		objects.WithExistingService(ksvc),
 		objects.WithContainerImage(r.adapterImage),
 		objects.WithServiceControllerRef(src.ToOwner()),
-	}
-	if len(currentKsvc) == 1 {
-		opts = append(opts, objects.WithExistingService(currentKsvc[0]))
-	}
-	return objects.NewService(src.Namespace, src.Name, opts...)
+	)
 }
 
 // makeChannel returns the desired Channel object for a given HTTPSource.
