@@ -1,6 +1,7 @@
 package function_test
 
 import (
+	"k8s.io/apimachinery/pkg/types"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/function"
@@ -122,6 +123,86 @@ func TestConvert_FunctionsToGQLs(t *testing.T) {
 		var in []*v1alpha1.Function
 
 		result := function.ToGQLs(in)
+
+		assert.Empty(t, result)
+	})
+}
+
+func TestConvert_SortFunctions(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		expectedName := "expectedName"
+		expectedNamespace := "expectedNamespace"
+		expectedLabels := map[string]string{"test": "label"}
+		expectedUID := types.UID('b')
+
+		expectedName2 := "expectedName2"
+		expectedNamespace2 := "expectedNamespace2"
+		expectedLabels2 := map[string]string{"test": "label"}
+		expectedUID2 := types.UID('a')
+
+		in := []*v1alpha1.Function{
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      expectedName,
+					Labels:    expectedLabels,
+					Namespace: expectedNamespace,
+					UID: expectedUID,
+				},
+			},
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      expectedName2,
+					Labels:    expectedLabels2,
+					Namespace: expectedNamespace2,
+					UID: expectedUID2,
+				},
+			},
+		}
+
+		result := function.SortFunctions(in)
+
+		assert.Len(t, result, 2)
+		assert.Equal(t, expectedName, result[1].Name)
+		assert.Equal(t, expectedLabels, result[1].Labels)
+		assert.Equal(t, expectedNamespace, result[1].Namespace)
+		assert.Equal(t, expectedUID, result[1].UID)
+		assert.Equal(t, expectedName2, result[0].Name)
+		assert.Equal(t, expectedLabels2, result[0].Labels)
+		assert.Equal(t, expectedNamespace2, result[0].Namespace)
+		assert.Equal(t, expectedUID2, result[0].UID)
+	})
+
+	t.Run("Return without nil", func(t *testing.T) {
+		expectedName := "expectedName"
+		expectedNamespace := "expectedNamespace"
+		expectedLabels := map[string]string{"test": "label"}
+		expectedUID := types.UID('a')
+
+		in := []*v1alpha1.Function{
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      expectedName,
+					Labels:    expectedLabels,
+					Namespace: expectedNamespace,
+					UID: expectedUID,
+				},
+			},
+			nil,
+		}
+
+		result := function.SortFunctions(in)
+
+		assert.Len(t, result, 1)
+		assert.Equal(t, expectedName, result[0].Name)
+		assert.Equal(t, expectedLabels, result[0].Labels)
+		assert.Equal(t, expectedNamespace, result[0].Namespace)
+		assert.Equal(t, expectedUID, result[0].UID)
+	})
+
+	t.Run("Nil", func(t *testing.T) {
+		var in []*v1alpha1.Function
+
+		result := function.SortFunctions(in)
 
 		assert.Empty(t, result)
 	})

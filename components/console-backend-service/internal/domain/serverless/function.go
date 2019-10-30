@@ -2,8 +2,6 @@ package serverless
 
 import (
 	"context"
-	"sort"
-
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
 
@@ -30,11 +28,9 @@ func (r *resolver) FunctionsQuery(ctx context.Context, namespace string) ([]gqls
 		return nil, gqlerror.New(err, KindFunctions, gqlerror.WithNamespace(namespace))
 	}
 
-	sort.Slice(items, func(i, j int) bool {
-		return items[i].UID < items[j].UID
-	})
+	sortedItems := function.SortFunctions(items)
 
-	functions := function.ToGQLs(items)
+	functions := function.ToGQLs(sortedItems)
 
 	return functions, nil
 }

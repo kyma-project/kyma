@@ -1,6 +1,8 @@
 package function
 
 import (
+	"sort"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -46,6 +48,20 @@ func ToGQLs(in []*v1alpha1.Function) []gqlschema.Function {
 		}
 	}
 	return result
+}
+
+func SortFunctions(in []*v1alpha1.Function) []*v1alpha1.Function {
+	nonEmptyFunctions := make([]*v1alpha1.Function, 0, len(in))
+	for _, item := range in {
+		if item != nil {
+			nonEmptyFunctions = append(nonEmptyFunctions, item)
+		}
+	}
+	sort.Slice(nonEmptyFunctions, func(i, j int) bool {
+		return nonEmptyFunctions[i].UID < nonEmptyFunctions[j].UID
+	})
+
+	return nonEmptyFunctions
 }
 
 func getStatus(status v1alpha1.FunctionCondition) gqlschema.FunctionStatusType {
