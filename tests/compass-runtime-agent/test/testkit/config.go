@@ -30,6 +30,13 @@ type TestConfig struct {
 	GraphQLLog                     bool          `envconfig:"default=false"`
 	ScenarioLabel                  string        `envconfig:"default=COMPASS_RUNTIME_AGENT_TESTS"`
 	ApplicationInstallationTimeout time.Duration `envconfig:"default=180s"`
+
+	IdProvider struct {
+		Domain        string        `envconfig:"default=kyma.local"`
+		UserEmail     string        `envconfig:"default=admin@kyma.cx"`
+		UserPassword  string        `envconfig:"default=nimda"` //TODO: Check the actual default credentials
+		ClientTimeout time.Duration `envconfig:"default=10s"`
+	}
 }
 
 func ReadConfig() (TestConfig, error) {

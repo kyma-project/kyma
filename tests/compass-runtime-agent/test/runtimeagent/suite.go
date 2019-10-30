@@ -2,6 +2,7 @@ package runtimeagent
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/authentication"
 	"testing"
 
 	"path/filepath"
@@ -82,6 +83,16 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		return nil, err
 	}
 
+	directorToken, err := authentication.Authenticate(authentication.BuildIdProviderConfig(authentication.EnvConfig{
+		Domain:        config.IdProvider.Domain,
+		UserEmail:     config.IdProvider.UserEmail,
+		UserPassword:  config.IdProvider.UserPassword,
+		ClientTimeout: config.IdProvider.ClientTimeout,
+	}))
+	if err != nil {
+		return nil, err
+	}
+
 	appClient, err := v1alpha1.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
@@ -107,7 +118,7 @@ func NewTestSuite(config testkit.TestConfig) (*TestSuite, error) {
 		podClient:           k8sClient.CoreV1().Pods(config.Namespace),
 		ApplicationCRClient: appClient.Applications(),
 		nameResolver:        nameResolver,
-		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, config.InternalDirectorJWT, config.GraphQLLog),
+		CompassClient:       compass.NewCompassClient(config.DirectorURL, config.Tenant, config.RuntimeId, config.ScenarioLabel, directorToken, config.GraphQLLog),
 		APIAccessChecker:    assertions.NewAPIAccessChecker(nameResolver),
 		K8sResourceChecker:  assertions.NewK8sResourceChecker(serviceClient, secretsClient, appClient.Applications(), nameResolver, istioClient, clusterDocsTopicClient, config.IntegrationNamespace),
 		mockServiceServer:   mock.NewAppMockServer(config.MockServicePort),
