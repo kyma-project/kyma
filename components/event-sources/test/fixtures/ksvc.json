@@ -1,0 +1,108 @@
+{
+  "apiVersion": "serving.knative.dev/v1",
+  "kind": "Service",
+  "metadata": {
+    "annotations": {
+      "serving.knative.dev/creator": "system:serviceaccount:kyma-system:sources-controller",
+      "serving.knative.dev/lastModifier": "system:serviceaccount:kyma-system:sources-controller"
+    },
+    "creationTimestamp": "2019-09-23T14:50:03Z",
+    "generation": 1,
+    "labels": {
+      "test.kyma-project.io": "test"
+    },
+    "name": "demo",
+    "namespace": "sources",
+    "ownerReferences": [
+      {
+        "apiVersion": "sources.kyma-project.io/v1alpha1",
+        "blockOwnerDeletion": true,
+        "controller": true,
+        "kind": "MQTTSource",
+        "name": "demo",
+        "uid": "6d30dcbc-de11-11e9-907f-42010a840091"
+      }
+    ],
+    "resourceVersion": "49063",
+    "selfLink": "/apis/serving.knative.dev/v1/namespaces/sources/services/demo",
+    "uid": "6d36367d-de11-11e9-907f-42010a840091"
+  },
+  "spec": {
+    "template": {
+      "spec": {
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "FOO",
+                "value": "bar"
+              }
+            ],
+            "image": "example.com/mqttsource-adapter:6b80940e0650785f6b79425a47914935bbfcb181",
+            "name": "user-container",
+            "ports": [
+              {
+                "containerPort": 80,
+                "name": "websocket",
+                "protocol": "TCP"
+              }
+            ],
+            "readinessProbe": {
+              "successThreshold": 1,
+              "tcpSocket": {
+                "port": 0
+              }
+            },
+            "resources": {
+              "requests": {
+                "cpu": "100m",
+                "memory": "30Mi"
+              }
+            }
+          }
+        ],
+        "serviceAccountName": "sources-controller",
+        "timeoutSeconds": 300
+      }
+    },
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 100
+      }
+    ]
+  },
+  "status": {
+    "address": {
+      "url": "http://demo.sources.svc.cluster.local"
+    },
+    "conditions": [
+      {
+        "lastTransitionTime": "2019-09-23T14:51:16Z",
+        "status": "True",
+        "type": "ConfigurationsReady"
+      },
+      {
+        "lastTransitionTime": "2019-09-23T15:14:03Z",
+        "status": "True",
+        "type": "Ready"
+      },
+      {
+        "lastTransitionTime": "2019-09-23T15:14:03Z",
+        "status": "True",
+        "type": "RoutesReady"
+      }
+    ],
+    "latestCreatedRevisionName": "demo-dt5lr",
+    "latestReadyRevisionName": "demo-dt5lr",
+    "observedGeneration": 1,
+    "traffic": [
+      {
+        "latestRevision": true,
+        "percent": 100,
+        "revisionName": "demo-dt5lr"
+      }
+    ],
+    "url": "http://demo.sources.example.com"
+  }
+}
