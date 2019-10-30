@@ -32,6 +32,7 @@ import (
 	// Link fake informers and clients accessed by our controller
 	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
 	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource/fake"
+	_ "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel/fake"
 	_ "knative.dev/serving/pkg/client/injection/client/fake"
 	_ "knative.dev/serving/pkg/client/injection/informers/serving/v1/service/fake"
 )
@@ -48,8 +49,8 @@ func TestNewController(t *testing.T) {
 	cmw := configmap.NewStaticWatcher()
 	ctx, informers := rt.SetupFakeContext(t)
 
-	// expected informers: HTTPSource and Knative Service
-	if expect, got := 2, len(informers); got != expect {
+	// expected informers: HTTPSource Channel and Knative Service
+	if expect, got := 3, len(informers); got != expect {
 		t.Errorf("Expected %d injected informers, got %d", expect, got)
 	}
 

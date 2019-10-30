@@ -22,6 +22,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
 
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	messaginglistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
+	fakeeventingclientset "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 	rt "knative.dev/pkg/reconciler/testing"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	fakeservingclientset "knative.dev/serving/pkg/client/clientset/versioned/fake"
@@ -35,6 +38,7 @@ import (
 var clientSetSchemes = []func(*runtime.Scheme) error{
 	fakeservingclientset.AddToScheme,
 	fakesourcesclientset.AddToScheme,
+	fakeeventingclientset.AddToScheme,
 }
 
 type Listers struct {
@@ -79,6 +83,10 @@ func (l *Listers) GetSourcesObjects() []runtime.Object {
 
 func (l *Listers) GetServiceLister() servinglistersv1.ServiceLister {
 	return servinglistersv1.NewServiceLister(l.IndexerFor(&servingv1.Service{}))
+}
+
+func (l *Listers) GetChannelLister() messaginglistersv1alpha1.ChannelLister {
+	return messaginglistersv1alpha1.NewChannelLister(l.IndexerFor(&messagingv1alpha1.Channel{}))
 }
 
 func (l *Listers) GetHTTPSourceLister() sourceslistersv1alpha1.HTTPSourceLister {

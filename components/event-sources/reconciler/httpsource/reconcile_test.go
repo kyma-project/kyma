@@ -183,15 +183,19 @@ func TestReconcile(t *testing.T) {
 	}
 
 	var ctor Ctor = func(ctx context.Context, ls *Listers, cmw configmap.Watcher) controller.Reconciler {
-		return &Reconciler{
+		r := &Reconciler{
 			Base:             reconciler.NewBase(ctx, controllerAgentName, cmw),
 			httpsourceLister: ls.GetHTTPSourceLister(),
 			ksvcLister:       ls.GetServiceLister(),
+			chLister:         ls.GetChannelLister(),
 			sourcesClient:    fakesourcesclient.Get(ctx).SourcesV1alpha1(),
 			servingClient:    fakeservingclient.Get(ctx).ServingV1(),
 			adapterImage:     tImg,
 			sinkResolver:     resolver.NewURIResolver(ctx, func(types.NamespacedName) {}),
 		}
+		r.messagingClient = r.EventingClientSet.MessagingV1alpha1()
+
+		return r
 	}
 
 	testCases.Test(t, MakeFactory(ctor))

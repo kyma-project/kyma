@@ -55,6 +55,16 @@ rules:
       - watch
       - create
       - update
+  # Channels
+  - apiGroups:
+      - messaging.knative.dev
+    resources:
+      - channels
+    verbs:
+      - list
+      - watch
+      - create
+      - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

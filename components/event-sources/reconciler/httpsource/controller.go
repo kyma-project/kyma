@@ -24,6 +24,7 @@ import (
 
 	"k8s.io/client-go/tools/cache"
 
+	messaginginformersv1alpha1 "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel"
 	"knative.dev/eventing/pkg/reconciler"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
@@ -53,15 +54,19 @@ const (
 func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
 	httpSourceInformer := httpsourceinformersv1alpha1.Get(ctx)
 	knServiceInformer := knserviceinformersv1.Get(ctx)
+	chInformer := messaginginformersv1alpha1.Get(ctx)
 
 	r := &Reconciler{
 		Base:             reconciler.NewBase(ctx, controllerAgentName, cmw),
 		adapterImage:     getAdapterImage(),
 		httpsourceLister: httpSourceInformer.Lister(),
 		ksvcLister:       knServiceInformer.Lister(),
+		chLister:         chInformer.Lister(),
 		sourcesClient:    sourcesclient.Get(ctx).SourcesV1alpha1(),
 		servingClient:    servingclient.Get(ctx).ServingV1(),
 	}
+	r.messagingClient = r.EventingClientSet.MessagingV1alpha1()
+
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)
 
 	r.sinkResolver = resolver.NewURIResolver(ctx, impl.EnqueueKey)

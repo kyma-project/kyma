@@ -26,6 +26,9 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/cache"
 
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
+	messaginglistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
 	"knative.dev/eventing/pkg/reconciler"
 	apisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
 	"knative.dev/pkg/controller"
@@ -52,10 +55,12 @@ type Reconciler struct {
 	// listers index properties about resources
 	httpsourceLister sourceslistersv1alpha1.HTTPSourceLister
 	ksvcLister       servinglistersv1.ServiceLister
+	chLister         messaginglistersv1alpha1.ChannelLister
 
 	// clients allow interactions with API objects
-	sourcesClient sourcesclientv1alpha1.SourcesV1alpha1Interface
-	servingClient servingclientv1.ServingV1Interface
+	sourcesClient   sourcesclientv1alpha1.SourcesV1alpha1Interface
+	servingClient   servingclientv1.ServingV1Interface
+	messagingClient messagingclientv1alpha1.MessagingV1alpha1Interface
 
 	// URI resolver for sink destinations
 	sinkResolver *resolver.URIResolver
@@ -70,6 +75,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 	}
 
 	currentKsvc, err := r.getOrCreateKnService(src)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.getOrCreateChannel(src)
 	if err != nil {
 		return err
 	}
@@ -117,6 +127,22 @@ func (r *Reconciler) getOrCreateKnService(src *v1alpha1.HTTPSource) (*servingv1.
 	return ksvc, nil
 }
 
+// getOrCreateChannel returns the existing Channel for a given
+// HTTPSource, or creates it if it is missing.
+func (r *Reconciler) getOrCreateChannel(src *v1alpha1.HTTPSource) (*messagingv1alpha1.Channel, error) {
+	ch, err := r.chLister.Channels(src.Namespace).Get(src.Name)
+	switch {
+	case apierrors.IsNotFound(err):
+		ch, err = r.messagingClient.Channels(src.Namespace).Create(r.makeChannel(src))
+		if err != nil {
+			return nil, pkgerrors.Wrap(err, "failed to create Channel")
+		}
+	case err != nil:
+		return nil, pkgerrors.Wrap(err, "failed to get Channel from cache")
+	}
+	return ch, nil
+}
+
 // makeKnService returns the desired Knative Service object for a given
 // HTTPSource. An optional Knative Service can be passed as parameter, in which
 // case some of its attributes are used to generate the desired state.
@@ -129,6 +155,12 @@ func (r *Reconciler) makeKnService(src *v1alpha1.HTTPSource, currentKsvc ...*ser
 		opts = append(opts, objects.WithExisting(currentKsvc[0]))
 	}
 	return objects.NewService(src.Namespace, src.Name, opts...)
+}
+
+// makeChannel returns the desired Channel object for a given
+// HTTPSource.
+func (r *Reconciler) makeChannel(src *v1alpha1.HTTPSource) *messagingv1alpha1.Channel {
+	return objects.NewChannel(src.Namespace, src.Name)
 }
 
 // syncKnService synchronizes the desired state of a Knative Service against
