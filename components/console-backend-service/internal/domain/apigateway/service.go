@@ -1,25 +1,69 @@
 package apigateway
 
 import (
-	"fmt"
-
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/client-go/dynamic"
-
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
+	notifierRes "github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/pkg/errors"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/tools/cache"
 )
 
-type apiRuleService struct {
-	informer  cache.SharedIndexInformer
-	client    dynamic.NamespaceableResourceInterface
-	notifier  resource.Notifier
-	extractor ApiRuleUnstructuredExtractor
+type Service struct {
+	*resource.Service
+	notifier notifierRes.Notifier
+}
+
+func NewService(serviceFactory *resource.ServiceFactory) *Service {
+	notifier := notifierRes.NewNotifier()
+	return &Service{
+		Service: serviceFactory.ForResource(schema.GroupVersionResource{
+			Version:  v1alpha1.GroupVersion.Version,
+			Group:    v1alpha1.GroupVersion.Group,
+			Resource: "apirules",
+		}),
+		notifier: notifier,
+	}
+}
+
+func (svc *Service) List(namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error) {
+	items := make([]*v1alpha1.APIRule, 0)
+	err := svc.ListInIndex("namespace", namespace, &items)
+	if err != nil {
+		return nil, err
+	}
+
+	var apiRules []*v1alpha1.APIRule
+	for _, item := range items {
+		match := true
+		if serviceName != nil {
+			if *serviceName != *item.Spec.Service.Name {
+				match = false
+			}
+		}
+		if hostname != nil {
+			if *hostname != *item.Spec.Service.Host {
+				match = false
+			}
+		}
+
+		if match {
+			apiRules = append(apiRules, item)
+		}
+	}
+
+	return apiRules, nil
+}
+
+func (svc *Service) Find(name, namespace string) (*v1alpha1.APIRule, error) {
+	var result *v1alpha1.APIRule
+	err := svc.FindInNamespace(name, namespace, &result)
+	return result, err
+}
+
+func (svc *Service) Delete(name, namespace string) error {
+	return svc.Client.Namespace(namespace).Delete(name, &metav1.DeleteOptions{})
 }
 
 var apiRuleTypeMeta = metav1.TypeMeta{
@@ -27,76 +71,7 @@ var apiRuleTypeMeta = metav1.TypeMeta{
 	APIVersion: "gateway.kyma-project.io/v1alpha1",
 }
 
-func newApiRuleService(informer cache.SharedIndexInformer, client dynamic.NamespaceableResourceInterface) *apiRuleService {
-	notifier := resource.NewNotifier()
-	informer.AddEventHandler(notifier)
-
-	return &apiRuleService{
-		informer:  informer,
-		client:    client,
-		notifier:  notifier,
-		extractor: ApiRuleUnstructuredExtractor{},
-	}
-}
-
-func (svc *apiRuleService) List(namespace string, serviceName *string, hostname *string) ([]*v1alpha1.APIRule, error) {
-	items, err := svc.informer.GetIndexer().ByIndex("namespace", namespace)
-	if err != nil {
-		return nil, err
-	}
-
-	var apiRules []*v1alpha1.APIRule
-	for _, item := range items {
-
-		apiRule, ok := item.(*unstructured.Unstructured)
-		if !ok {
-			return nil, fmt.Errorf("incorrect item type: %T, should be: *unstructured.Unstructured", item)
-		}
-
-		formattedApiRule, err := fromUnstructured(apiRule)
-		if err != nil {
-			return nil, err
-		}
-		match := true
-		if serviceName != nil {
-			if *serviceName != *formattedApiRule.Spec.Service.Name {
-				match = false
-			}
-		}
-		if hostname != nil {
-			if *hostname != *formattedApiRule.Spec.Service.Host {
-				match = false
-			}
-		}
-
-		if match {
-			apiRules = append(apiRules, formattedApiRule)
-		}
-	}
-
-	return apiRules, nil
-}
-
-func (svc *apiRuleService) Find(name string, namespace string) (*v1alpha1.APIRule, error) {
-	key := fmt.Sprintf("%s/%s", namespace, name)
-	item, exists, err := svc.informer.GetStore().GetByKey(key)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while finding APIRule %s", name)
-	}
-
-	if !exists {
-		return nil, nil
-	}
-
-	res, err := svc.extractor.Do(item)
-	if err != nil {
-		return &v1alpha1.APIRule{}, err
-	}
-
-	return res, nil
-}
-
-func (svc *apiRuleService) Create(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule, error) {
+func (svc *Service) Create(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule, error) {
 	apiRule.TypeMeta = apiRuleTypeMeta
 
 	u, err := toUnstructured(apiRule)
@@ -104,22 +79,22 @@ func (svc *apiRuleService) Create(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule,
 		return &v1alpha1.APIRule{}, err
 	}
 
-	created, err := svc.client.Namespace(apiRule.ObjectMeta.Namespace).Create(u, metav1.CreateOptions{})
+	created, err := svc.Client.Namespace(apiRule.ObjectMeta.Namespace).Create(u, metav1.CreateOptions{})
 	if err != nil {
 		return &v1alpha1.APIRule{}, err
 	}
 	return fromUnstructured(created)
 }
 
-func (svc *apiRuleService) Subscribe(listener resource.Listener) {
+func (svc *Service) Subscribe(listener notifierRes.Listener) {
 	svc.notifier.AddListener(listener)
 }
 
-func (svc *apiRuleService) Unsubscribe(listener resource.Listener) {
+func (svc *Service) Unsubscribe(listener notifierRes.Listener) {
 	svc.notifier.DeleteListener(listener)
 }
 
-func (svc *apiRuleService) Update(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule, error) {
+func (svc *Service) Update(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule, error) {
 	oldApiRule, err := svc.Find(apiRule.ObjectMeta.Name, apiRule.ObjectMeta.Namespace)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while finding APIRule %s", apiRule.ObjectMeta.Name)
@@ -139,13 +114,9 @@ func (svc *apiRuleService) Update(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule,
 		return &v1alpha1.APIRule{}, err
 	}
 
-	updated, err := svc.client.Namespace(apiRule.ObjectMeta.Namespace).Update(u, metav1.UpdateOptions{})
+	updated, err := svc.Client.Namespace(apiRule.ObjectMeta.Namespace).Update(u, metav1.UpdateOptions{})
 	if err != nil {
 		return &v1alpha1.APIRule{}, err
 	}
 	return fromUnstructured(updated)
-}
-
-func (svc *apiRuleService) Delete(name string, namespace string) error {
-	return svc.client.Namespace(namespace).Delete(name, nil)
 }

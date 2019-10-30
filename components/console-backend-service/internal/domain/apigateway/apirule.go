@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
+
 	"github.com/pkg/errors"
 	"k8s.io/client-go/rest"
 
@@ -24,6 +26,7 @@ type PluggableResolver struct {
 
 	Resolver
 	informerFactory dynamicinformer.DynamicSharedInformerFactory
+	serviceFactory  *resource.ServiceFactory
 }
 
 var apiRulesGroupVersionResource = schema.GroupVersionResource{
@@ -51,35 +54,23 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Pluggabl
 }
 
 func (r *PluggableResolver) Enable() error {
-	r.informerFactory = dynamicinformer.NewDynamicSharedInformerFactory(r.cfg.client, r.cfg.informerResyncPeriod)
-	apiRuleInformer := r.informerFactory.ForResource(apiRulesGroupVersionResource).Informer()
-
-	apiRuleResourceClient := r.cfg.client.Resource(apiRulesGroupVersionResource)
-
-	apiRuleService := newApiRuleService(apiRuleInformer, apiRuleResourceClient)
+	apiRuleService := NewService(r.serviceFactory)
 	apiRuleResolver, err := newApiRuleResolver(apiRuleService)
 	if err != nil {
 		return err
 	}
 
-	r.Pluggable.EnableAndSyncCache(func(stopCh chan struct{}) {
-		r.informerFactory.Start(stopCh)
-		r.informerFactory.WaitForCacheSync(stopCh)
-
+	r.Pluggable.EnableAndSyncDynamicInformerFactory(r.serviceFactory.InformerFactory, func() {
 		r.Resolver = &domainResolver{
 			apiRuleResolver: apiRuleResolver,
 		}
 	})
-
 	return nil
 }
-
 func (r *PluggableResolver) Disable() error {
 	r.Pluggable.Disable(func(disabledErr error) {
 		r.Resolver = disabled.NewResolver(disabledErr)
-		r.informerFactory = nil
 	})
-
 	return nil
 }
 

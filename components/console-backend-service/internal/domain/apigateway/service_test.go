@@ -4,19 +4,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/pkg/dynamic/dynamicinformer"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
+	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway/listener"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/runtime"
-	dynamicFake "k8s.io/client-go/dynamic/fake"
-	"k8s.io/client-go/tools/cache"
 )
 
 func TestApiRuleService_List(t *testing.T) {
@@ -41,13 +35,10 @@ func TestApiRuleService_List(t *testing.T) {
 		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2)
 		apiRule3 := fixTestApiRule(name3, namespace, hostname, serviceName, servicePort3, gateway3)
 
-		dynamicClient, err := newDynamicClient(apiRule1, apiRule2, apiRule3)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
 		require.NoError(t, err)
-		informer := createApiRuleFakeInformer(dynamicClient)
-		client := createApiRuleDynamicClient(dynamicClient)
-		service := newApiRuleService(informer, client)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.List(namespace, nil, nil)
 
@@ -62,13 +53,10 @@ func TestApiRuleService_List(t *testing.T) {
 		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2)
 		apiRule3 := fixTestApiRule(name3, namespace, "different-hostname", serviceName, servicePort3, gateway3)
 
-		dynamicClient, err := newDynamicClient(apiRule1, apiRule2, apiRule3)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
 		require.NoError(t, err)
-		informer := createApiRuleFakeInformer(dynamicClient)
-		client := createApiRuleDynamicClient(dynamicClient)
-		service := newApiRuleService(informer, client)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.List(namespace, nil, &hostname)
 
@@ -83,13 +71,10 @@ func TestApiRuleService_List(t *testing.T) {
 		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2)
 		apiRule3 := fixTestApiRule(name3, namespace, hostname, "different-service-name", servicePort3, gateway3)
 
-		dynamicClient, err := newDynamicClient(apiRule1, apiRule2, apiRule3)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
 		require.NoError(t, err)
-		informer := createApiRuleFakeInformer(dynamicClient)
-		client := createApiRuleDynamicClient(dynamicClient)
-		service := newApiRuleService(informer, client)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.List(namespace, &serviceName, nil)
 
@@ -104,13 +89,10 @@ func TestApiRuleService_List(t *testing.T) {
 		apiRule2 := fixTestApiRule(name2, "different-namespace", hostname, serviceName, servicePort2, gateway2)
 		apiRule3 := fixTestApiRule(name3, namespace, hostname, "different-service-name", servicePort3, gateway3)
 
-		dynamicClient, err := newDynamicClient(apiRule1, apiRule2, apiRule3)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1, apiRule2, apiRule3)
 		require.NoError(t, err)
-		informer := createApiRuleFakeInformer(dynamicClient)
-		client := createApiRuleDynamicClient(dynamicClient)
-		service := newApiRuleService(informer, client)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.List(namespace, &serviceName, nil)
 
@@ -132,13 +114,10 @@ func TestApiService_Find(t *testing.T) {
 	t.Run("Should find an APIRule", func(t *testing.T) {
 		apiRule1 := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1)
 
-		dynamicClient, err := newDynamicClient(apiRule1)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, apiRule1)
 		require.NoError(t, err)
-		informer := createApiRuleFakeInformer(dynamicClient)
-		client := createApiRuleDynamicClient(dynamicClient)
-		service := newApiRuleService(informer, client)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.Find(name, namespace)
 
@@ -147,10 +126,10 @@ func TestApiService_Find(t *testing.T) {
 	})
 
 	t.Run("Should return nil if not found", func(t *testing.T) {
-		informer := fixAPIRuleInformer(t)
-		service := newApiRuleService(informer, nil)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
+		require.NoError(t, err)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.Find(name, namespace)
 
@@ -171,13 +150,10 @@ func TestApiService_Create(t *testing.T) {
 	newRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1)
 
 	t.Run("Should create an APIRule", func(t *testing.T) {
-		dynamicClient, err := newDynamicClient()
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
-		informer := createApiRuleFakeInformer(dynamicClient)
-		client := createApiRuleDynamicClient(dynamicClient)
-		service := newApiRuleService(informer, client)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.Create(newRule)
 
@@ -187,13 +163,11 @@ func TestApiService_Create(t *testing.T) {
 
 	t.Run("Should throw an error if APIRule already exists", func(t *testing.T) {
 		existingApiRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1)
-		dynamicClient, err := newDynamicClient(existingApiRule)
-		require.NoError(t, err)
-		informer := createApiRuleFakeInformer(dynamicClient)
-		client := createApiRuleDynamicClient(dynamicClient)
-		service := newApiRuleService(informer, client)
 
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, existingApiRule)
+		require.NoError(t, err)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		_, err = service.Create(newRule)
 
@@ -214,13 +188,11 @@ func TestApiRuleService_Update(t *testing.T) {
 
 	t.Run("Should update an APIRule", func(t *testing.T) {
 		existingApiRule := fixTestApiRule(name1, namespace, hostname, serviceName, servicePort1, gateway1)
-		dynamicClient, err := newDynamicClient(existingApiRule)
-		require.NoError(t, err)
-		informer := createApiRuleFakeInformer(dynamicClient)
-		client := createApiRuleDynamicClient(dynamicClient)
-		service := newApiRuleService(informer, client)
 
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme, existingApiRule)
+		require.NoError(t, err)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		result, err := service.Update(newRule)
 
@@ -230,13 +202,10 @@ func TestApiRuleService_Update(t *testing.T) {
 	})
 
 	t.Run("Should throw an error if APIRule doesn't exists", func(t *testing.T) {
-		dynamicClient, err := newDynamicClient()
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
-		informer := createApiRuleFakeInformer(dynamicClient)
-		client := createApiRuleDynamicClient(dynamicClient)
-		service := newApiRuleService(informer, client)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		_, err = service.Update(newRule)
 
@@ -247,20 +216,20 @@ func TestApiRuleService_Update(t *testing.T) {
 
 func TestApiRuleService_Subscribe(t *testing.T) {
 	t.Run("Simple", func(t *testing.T) {
-		informer := fixAPIRuleInformer(t)
-		service := newApiRuleService(informer, nil)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
+		require.NoError(t, err)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		apiRuleListener := listener.NewApiRule(nil, nil, nil, nil)
 		service.Subscribe(apiRuleListener)
 	})
 
 	t.Run("Duplicated", func(t *testing.T) {
-		informer := fixAPIRuleInformer(t)
-		service := newApiRuleService(informer, nil)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
+		require.NoError(t, err)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		apiRuleListener := listener.NewApiRule(nil, nil, nil, nil)
 		service.Subscribe(apiRuleListener)
@@ -268,10 +237,10 @@ func TestApiRuleService_Subscribe(t *testing.T) {
 	})
 
 	t.Run("Multiple", func(t *testing.T) {
-		informer := fixAPIRuleInformer(t)
-		service := newApiRuleService(informer, nil)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
+		require.NoError(t, err)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		apiRuleListener1 := listener.NewApiRule(nil, nil, nil, nil)
 		apiRuleListener2 := listener.NewApiRule(nil, nil, nil, nil)
@@ -281,10 +250,10 @@ func TestApiRuleService_Subscribe(t *testing.T) {
 	})
 
 	t.Run("Nil", func(t *testing.T) {
-		informer := fixAPIRuleInformer(t)
-		service := newApiRuleService(informer, nil)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
+		require.NoError(t, err)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		service.Subscribe(nil)
 	})
@@ -292,10 +261,10 @@ func TestApiRuleService_Subscribe(t *testing.T) {
 
 func TestApiRuleService_Unubscribe(t *testing.T) {
 	t.Run("Simple", func(t *testing.T) {
-		informer := fixAPIRuleInformer(t)
-		service := newApiRuleService(informer, nil)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
+		require.NoError(t, err)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		apiRuleListener := listener.NewApiRule(nil, nil, nil, nil)
 		service.Subscribe(apiRuleListener)
@@ -304,10 +273,10 @@ func TestApiRuleService_Unubscribe(t *testing.T) {
 	})
 
 	t.Run("Duplicated", func(t *testing.T) {
-		informer := fixAPIRuleInformer(t)
-		service := newApiRuleService(informer, nil)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
+		require.NoError(t, err)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		apiRuleListener := listener.NewApiRule(nil, nil, nil, nil)
 		service.Subscribe(apiRuleListener)
@@ -317,10 +286,10 @@ func TestApiRuleService_Unubscribe(t *testing.T) {
 	})
 
 	t.Run("Multiple", func(t *testing.T) {
-		informer := fixAPIRuleInformer(t)
-		service := newApiRuleService(informer, nil)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
+		require.NoError(t, err)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		apiRuleListener1 := listener.NewApiRule(nil, nil, nil, nil)
 		apiRuleListener2 := listener.NewApiRule(nil, nil, nil, nil)
@@ -332,48 +301,11 @@ func TestApiRuleService_Unubscribe(t *testing.T) {
 	})
 
 	t.Run("Nil", func(t *testing.T) {
-		informer := fixAPIRuleInformer(t)
-		service := newApiRuleService(informer, nil)
-
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+		serviceFactory, err := resourceFake.NewFakeServiceFactory(v1alpha1.AddToScheme)
+		require.NoError(t, err)
+		service := NewService(serviceFactory)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, service.Informer)
 
 		service.Unsubscribe(nil)
 	})
-}
-
-func fixAPIRuleInformer(t *testing.T, objects ...runtime.Object) cache.SharedIndexInformer {
-	dynamicClient, err := newDynamicClient(objects...)
-	require.NoError(t, err)
-	return createApiRuleFakeInformer(dynamicClient)
-}
-
-func createApiRuleDynamicClient(dynamicClient dynamic.Interface) dynamic.NamespaceableResourceInterface {
-	return dynamicClient.Resource(schema.GroupVersionResource{
-		Version:  v1alpha1.GroupVersion.Version,
-		Group:    v1alpha1.GroupVersion.Group,
-		Resource: "apirules",
-	})
-}
-
-func createApiRuleFakeInformer(dynamic dynamic.Interface) cache.SharedIndexInformer {
-	informerFactory := dynamicinformer.NewDynamicSharedInformerFactory(dynamic, 10)
-	return informerFactory.ForResource(schema.GroupVersionResource{
-		Version:  v1alpha1.GroupVersion.Version,
-		Group:    v1alpha1.GroupVersion.Group,
-		Resource: "apirules",
-	}).Informer()
-}
-
-func newDynamicClient(objects ...runtime.Object) (*dynamicFake.FakeDynamicClient, error) {
-	scheme := runtime.NewScheme()
-	err := v1alpha1.AddToScheme(scheme)
-	if err != nil {
-		return &dynamicFake.FakeDynamicClient{}, err
-	}
-	result := make([]runtime.Object, len(objects))
-	for i, obj := range objects {
-		converted, _ := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
-		result[i] = &unstructured.Unstructured{Object: converted}
-	}
-	return dynamicFake.NewSimpleDynamicClient(scheme, result...), nil
 }
