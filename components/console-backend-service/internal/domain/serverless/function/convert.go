@@ -1,4 +1,4 @@
-package convert
+package function
 
 import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -7,37 +7,39 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-func FunctionToUnstructured(obj *v1alpha1.Function) (*unstructured.Unstructured, error) {
+func toUnstructured(obj *v1alpha1.Function) (*unstructured.Unstructured, error) {
 	return resource.ToUnstructured(obj)
 }
 
-func UnstructuredToFunction(obj *unstructured.Unstructured) (*v1alpha1.Function, error) {
+func fromUnstructured(obj *unstructured.Unstructured) (*v1alpha1.Function, error) {
 	function := &v1alpha1.Function{}
 	err := resource.FromUnstructured(obj, function)
 	return function, err
 }
 
-func FunctionToGQL(item *v1alpha1.Function) *gqlschema.Function {
+func ToGQL(item *v1alpha1.Function) *gqlschema.Function {
 	if item == nil {
 		return nil
 	}
 
 	function := gqlschema.Function{
-		Name:      item.Name,
-		Namespace: item.Namespace,
-		Labels:    item.Labels,
-		Runtime:   item.Spec.Runtime,
-		Size:      item.Spec.Size,
-		Status:    getStatus(item.Status.Condition),
+		Name:         item.Name,
+		Namespace:    item.Namespace,
+		Labels:       item.Labels,
+		Runtime:      item.Spec.Runtime,
+		Size:         item.Spec.Size,
+		Status:       getStatus(item.Status.Condition),
+		Content:      item.Spec.Function,
+		Dependencies: item.Spec.Deps,
 	}
 
 	return &function
 }
 
-func FunctionsToGQLs(in []*v1alpha1.Function) []gqlschema.Function {
+func ToGQLs(in []*v1alpha1.Function) []gqlschema.Function {
 	var result []gqlschema.Function
 	for _, u := range in {
-		converted := FunctionToGQL(u)
+		converted := ToGQL(u)
 
 		if converted != nil {
 			result = append(result, *converted)

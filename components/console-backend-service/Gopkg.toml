@@ -1,5 +1,5 @@
 required = [
-    "github.com/kyma-project/kyma/tools/failery",
+    "github.com/kyma-project/kyma/tools/failery/cmd/failery",
     "github.com/urfave/cli",
     "k8s.io/code-generator/cmd/defaulter-gen",
     "k8s.io/code-generator/cmd/deepcopy-gen",
