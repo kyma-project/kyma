@@ -25,30 +25,30 @@ import (
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// MQTTSource is a MQTT event source.
-type MQTTSource struct {
+// HTTPSource is a HTTP event source.
+type HTTPSource struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   MQTTSourceSpec   `json:"spec,omitempty"`
-	Status MQTTSourceStatus `json:"status,omitempty"`
+	Spec   HTTPSourceSpec   `json:"spec,omitempty"`
+	Status HTTPSourceStatus `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// MQTTSourceList is a list of MQTTSource.
-type MQTTSourceList struct {
+// HTTPSourceList is a list of HTTPSource.
+type HTTPSourceList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []MQTTSource `json:"items"`
+	Items           []HTTPSource `json:"items"`
 }
 
-// MQTTSourceSpec defines the desired state of MQTTSource.
-type MQTTSourceSpec struct {
+// HTTPSourceSpec defines the desired state of HTTPSource.
+type HTTPSourceSpec struct {
 }
 
-// MQTTSourceStatus defines the observed state of MQTTSource.
-type MQTTSourceStatus struct {
+// HTTPSourceStatus defines the observed state of HTTPSource.
+type HTTPSourceStatus struct {
 	// inherits duck/v1beta1 Status, which currently provides:
 	// * ObservedGeneration - the 'Generation' of the Service that was last processed by the controller.
 	// * Conditions - the latest available observations of a resource's current state.

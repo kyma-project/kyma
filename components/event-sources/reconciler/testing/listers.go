@@ -81,6 +81,6 @@ func (l *Listers) GetServiceLister() servinglistersv1.ServiceLister {
 	return servinglistersv1.NewServiceLister(l.IndexerFor(&servingv1.Service{}))
 }
 
-func (l *Listers) GetMQTTSourceLister() sourceslistersv1alpha1.MQTTSourceLister {
-	return sourceslistersv1alpha1.NewMQTTSourceLister(l.IndexerFor(&sourcesv1alpha1.MQTTSource{}))
+func (l *Listers) GetHTTPSourceLister() sourceslistersv1alpha1.HTTPSourceLister {
+	return sourceslistersv1alpha1.NewHTTPSourceLister(l.IndexerFor(&sourcesv1alpha1.HTTPSource{}))
 }

@@ -31,59 +31,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// MQTTSourceInformer provides access to a shared informer and lister for
-// MQTTSources.
-type MQTTSourceInformer interface {
+// HTTPSourceInformer provides access to a shared informer and lister for
+// HTTPSources.
+type HTTPSourceInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.MQTTSourceLister
+	Lister() v1alpha1.HTTPSourceLister
 }
 
-type mQTTSourceInformer struct {
+type hTTPSourceInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewMQTTSourceInformer constructs a new informer for MQTTSource type.
+// NewHTTPSourceInformer constructs a new informer for HTTPSource type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewMQTTSourceInformer(client internalclientset.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredMQTTSourceInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewHTTPSourceInformer(client internalclientset.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredHTTPSourceInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredMQTTSourceInformer constructs a new informer for MQTTSource type.
+// NewFilteredHTTPSourceInformer constructs a new informer for HTTPSource type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredMQTTSourceInformer(client internalclientset.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredHTTPSourceInformer(client internalclientset.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.SourcesV1alpha1().MQTTSources(namespace).List(options)
+				return client.SourcesV1alpha1().HTTPSources(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.SourcesV1alpha1().MQTTSources(namespace).Watch(options)
+				return client.SourcesV1alpha1().HTTPSources(namespace).Watch(options)
 			},
 		},
-		&sourcesv1alpha1.MQTTSource{},
+		&sourcesv1alpha1.HTTPSource{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *mQTTSourceInformer) defaultInformer(client internalclientset.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredMQTTSourceInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *hTTPSourceInformer) defaultInformer(client internalclientset.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredHTTPSourceInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *mQTTSourceInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&sourcesv1alpha1.MQTTSource{}, f.defaultInformer)
+func (f *hTTPSourceInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&sourcesv1alpha1.HTTPSource{}, f.defaultInformer)
 }
 
-func (f *mQTTSourceInformer) Lister() v1alpha1.MQTTSourceLister {
-	return v1alpha1.NewMQTTSourceLister(f.Informer().GetIndexer())
+func (f *hTTPSourceInformer) Lister() v1alpha1.HTTPSourceLister {
+	return v1alpha1.NewHTTPSourceLister(f.Informer().GetIndexer())
 }

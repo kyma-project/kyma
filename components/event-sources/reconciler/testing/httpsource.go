@@ -28,8 +28,8 @@ const tSinkURI = "http://event-publish-service.kyma-system.svc.cluster.local/"
 
 const uid = types.UID("00000000-0000-0000-0000-000000000000")
 
-func NewMQTTSource(ns, name string, opts ...MQTTSourceOption) *sourcesv1alpha1.MQTTSource {
-	mqttSrc := &sourcesv1alpha1.MQTTSource{
+func NewHTTPSource(ns, name string, opts ...HTTPSourceOption) *sourcesv1alpha1.HTTPSource {
+	src := &sourcesv1alpha1.HTTPSource{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
 			Name:      name,
@@ -38,22 +38,22 @@ func NewMQTTSource(ns, name string, opts ...MQTTSourceOption) *sourcesv1alpha1.M
 	}
 
 	for _, opt := range opts {
-		opt(mqttSrc)
+		opt(src)
 	}
 
-	return mqttSrc
+	return src
 }
 
-type MQTTSourceOption func(s *sourcesv1alpha1.MQTTSource)
+type HTTPSourceOption func(s *sourcesv1alpha1.HTTPSource)
 
-func WithDeployed(s *sourcesv1alpha1.MQTTSource) {
+func WithDeployed(s *sourcesv1alpha1.HTTPSource) {
 	s.Status.PropagateServiceReady(NewService("", "", WithServiceReady))
 }
 
-func WithNotDeployed(s *sourcesv1alpha1.MQTTSource) {
+func WithNotDeployed(s *sourcesv1alpha1.HTTPSource) {
 	s.Status.PropagateServiceReady(NewService("", ""))
 }
 
-func WithSink(s *sourcesv1alpha1.MQTTSource) {
+func WithSink(s *sourcesv1alpha1.HTTPSource) {
 	s.Status.MarkSink(tSinkURI)
 }

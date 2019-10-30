@@ -35,14 +35,14 @@ rules:
   - apiGroups:
       - sources.kyma-project.io
     resources:
-      - mqttsources
+      - httpsources
     verbs:
       - list
       - watch
   - apiGroups:
       - sources.kyma-project.io
     resources:
-      - mqttsources/status
+      - httpsources/status
     verbs:
       - update
   # Knative Services

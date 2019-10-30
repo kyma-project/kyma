@@ -26,7 +26,7 @@ import (
 
 type SourcesV1alpha1Interface interface {
 	RESTClient() rest.Interface
-	MQTTSourcesGetter
+	HTTPSourcesGetter
 }
 
 // SourcesV1alpha1Client is used to interact with features provided by the sources.kyma-project.io group.
@@ -34,8 +34,8 @@ type SourcesV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *SourcesV1alpha1Client) MQTTSources(namespace string) MQTTSourceInterface {
-	return newMQTTSources(c, namespace)
+func (c *SourcesV1alpha1Client) HTTPSources(namespace string) HTTPSourceInterface {
+	return newHTTPSources(c, namespace)
 }
 
 // NewForConfig creates a new SourcesV1alpha1Client for the given config.

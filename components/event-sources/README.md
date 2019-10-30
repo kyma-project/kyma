@@ -2,7 +2,7 @@
 
 Available event sources:
 
-* `MQTTSource`: for SAP S/4 applications emitting MQTT events.
+* `HTTPSource`: for applications emitting HTTP events.
 
 ## Running the controller inside a cluster
 
@@ -40,7 +40,7 @@ Export the following mandatory environment variables:
 * **KUBECONFIG**: path to a local kubeconfig file (if different from the default OS location)
 * **SYSTEM_NAMESPACE**: set to "kyma-event-sources" (see above)
 * **METRICS_DOMAIN**: domain of the exposed Prometheus metrics. Arbitrary value (e.g. "kyma-project.io/event-sources")
-* **MQTT_ADAPTER_IMAGE**: container image of the MQTT server adapter
+* **HTTP_ADAPTER_IMAGE**: container image of the HTTP receiver adapter
 
 Build the binary
 

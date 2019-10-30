@@ -28,8 +28,8 @@ type FakeSourcesV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeSourcesV1alpha1) MQTTSources(namespace string) v1alpha1.MQTTSourceInterface {
-	return &FakeMQTTSources{c, namespace}
+func (c *FakeSourcesV1alpha1) HTTPSources(namespace string) v1alpha1.HTTPSourceInterface {
+	return &FakeHTTPSources{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

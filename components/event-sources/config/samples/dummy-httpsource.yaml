@@ -13,7 +13,7 @@
 # limitations under the License.
 
 apiVersion: sources.kyma-project.io/v1alpha1
-kind: MQTTSource
+kind: HTTPSource
 metadata:
   name: dummy
 spec: {}

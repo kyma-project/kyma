@@ -22,11 +22,11 @@ import (
 
 	"knative.dev/pkg/injection/sharedmain"
 
-	"github.com/kyma-project/kyma/components/event-sources/reconciler/mqttsource"
+	"github.com/kyma-project/kyma/components/event-sources/reconciler/httpsource"
 )
 
 func main() {
 	sharedmain.Main("sources_controller",
-		mqttsource.NewController,
+		httpsource.NewController,
 	)
 }

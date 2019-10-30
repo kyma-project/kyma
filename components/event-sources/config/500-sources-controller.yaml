@@ -32,7 +32,7 @@ spec:
       serviceAccountName: sources-controller
       containers:
       - name: controller
-        image: github.com/antoineco/kyma-event-sources/cmd/sources-controller
+        image: github.com/kyma-project/kyma/components/event-sources/cmd/sources-controller
         resources:
           requests:
             cpu: 10m
@@ -47,5 +47,5 @@ spec:
                 fieldPath: metadata.namespace
           - name: METRICS_DOMAIN
             value: kyma-project.io/event-sources
-          - name: MQTT_ADAPTER_IMAGE
-            value: github.com/antoineco/kyma-event-sources/cmd/mqttsource-adapter
+          - name: HTTP_ADAPTER_IMAGE
+            value: github.com/kyma-project/kyma/components/event-sources/cmd/httpsource-adapter

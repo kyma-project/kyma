@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package mqttsource implements a controller for the MQTTSource custom resource.
-package mqttsource
+// Package httpsource implements a controller for the HTTPSource custom resource.
+package httpsource
 
 import (
 	"context"
@@ -33,31 +33,31 @@ import (
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	sourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client"
-	mqttsourceinformersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/mqttsource"
+	httpsourceinformersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource"
 )
 
 const (
 	// reconcilerName is the name of the reconciler
-	reconcilerName = "MQTTSources"
+	reconcilerName = "HTTPSources"
 
 	// controllerAgentName is the string used by this controller to identify
 	// itself when creating events.
-	controllerAgentName = "mqtt-source-controller"
+	controllerAgentName = "http-source-controller"
 
 	// adapterImageEnvVar is the name of the environment variable containing the
-	// container image of the MQTT adapter.
-	adapterImageEnvVar = "MQTT_ADAPTER_IMAGE"
+	// container image of the HTTP adapter.
+	adapterImageEnvVar = "HTTP_ADAPTER_IMAGE"
 )
 
-// NewController returns a new controller that reconciles MQTTSource objects.
+// NewController returns a new controller that reconciles HTTPSource objects.
 func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
-	mqttSourceInformer := mqttsourceinformersv1alpha1.Get(ctx)
+	httpSourceInformer := httpsourceinformersv1alpha1.Get(ctx)
 	knServiceInformer := knserviceinformersv1.Get(ctx)
 
 	r := &Reconciler{
 		Base:             reconciler.NewBase(ctx, controllerAgentName, cmw),
 		adapterImage:     getAdapterImage(),
-		mqttsourceLister: mqttSourceInformer.Lister(),
+		httpsourceLister: httpSourceInformer.Lister(),
 		ksvcLister:       knServiceInformer.Lister(),
 		sourcesClient:    sourcesclient.Get(ctx).SourcesV1alpha1(),
 		servingClient:    servingclient.Get(ctx).ServingV1(),
@@ -68,10 +68,10 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 
 	// set event handlers
 
-	mqttSourceInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
+	httpSourceInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
 
 	knServiceInformer.Informer().AddEventHandler(cache.FilteringResourceEventHandler{
-		FilterFunc: controller.Filter(sourcesv1alpha1.MQTTSourceGVK()),
+		FilterFunc: controller.Filter(sourcesv1alpha1.HTTPSourceGVK()),
 		Handler:    controller.HandleAll(impl.EnqueueControllerOf),
 	})
 

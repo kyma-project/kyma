@@ -56,7 +56,7 @@ func WithServiceReady(s *servingv1.Service) {
 
 func WithServiceController(srcName string) ServiceOption {
 	return func(s *servingv1.Service) {
-		gvk := sourcesv1alpha1.MQTTSourceGVK()
+		gvk := sourcesv1alpha1.HTTPSourceGVK()
 
 		s.OwnerReferences = []metav1.OwnerReference{{
 			APIVersion:         gvk.GroupVersion().String(),

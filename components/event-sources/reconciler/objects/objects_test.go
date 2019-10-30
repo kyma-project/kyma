@@ -36,7 +36,7 @@ func TestNewService(t *testing.T) {
 		img  = "registry/image:tag"
 	)
 
-	testMQTTSrc := &sourcesv1alpha1.MQTTSource{ObjectMeta: metav1.ObjectMeta{
+	testHTTPSrc := &sourcesv1alpha1.HTTPSource{ObjectMeta: metav1.ObjectMeta{
 		Namespace: ns,
 		Name:      name,
 		UID:       "00000000-0000-0000-0000-000000000000",
@@ -58,7 +58,7 @@ func TestNewService(t *testing.T) {
 			Annotations:     testExistingKsvc.Annotations,
 			ResourceVersion: testExistingKsvc.ResourceVersion,
 			OwnerReferences: []metav1.OwnerReference{
-				*testMQTTSrc.ToOwner(),
+				*testHTTPSrc.ToOwner(),
 			},
 		},
 		Spec: servingv1.ServiceSpec{
@@ -78,7 +78,7 @@ func TestNewService(t *testing.T) {
 
 	ksvc := NewService(ns, name,
 		WithContainerImage(img),
-		WithControllerRef(testMQTTSrc.ToOwner()),
+		WithControllerRef(testHTTPSrc.ToOwner()),
 		WithExisting(testExistingKsvc),
 	)
 

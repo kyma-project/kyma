@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package mqttsource
+package httpsource
 
 import (
 	"context"
@@ -38,7 +38,7 @@ import (
 const (
 	tNs   = "testns"
 	tName = "test"
-	tImg  = "sources.kyma-project.io/mqtt:latest"
+	tImg  = "sources.kyma-project.io/http:latest"
 )
 
 func TestReconcile(t *testing.T) {
@@ -63,7 +63,7 @@ func TestReconcile(t *testing.T) {
 			Name: "Initial source creation",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewMQTTSource(tNs, tName),
+				NewHTTPSource(tNs, tName),
 			},
 			WantCreates: []runtime.Object{
 				NewService(tNs, tName,
@@ -73,7 +73,7 @@ func TestReconcile(t *testing.T) {
 			},
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: NewMQTTSource(tNs, tName,
+				Object: NewHTTPSource(tNs, tName,
 					WithNotDeployed,
 					WithSink,
 				),
@@ -83,7 +83,7 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service up-to-date",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewMQTTSource(tNs, tName,
+				NewHTTPSource(tNs, tName,
 					WithDeployed,
 					WithSink,
 				),
@@ -100,7 +100,7 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service spec does not match expectation",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewMQTTSource(tNs, tName,
+				NewHTTPSource(tNs, tName,
 					WithDeployed,
 					WithSink,
 				),
@@ -125,7 +125,7 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service deployment in progress",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewMQTTSource(tNs, tName,
+				NewHTTPSource(tNs, tName,
 					WithNotDeployed,
 					WithSink,
 				),
@@ -141,7 +141,7 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service became ready",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewMQTTSource(tNs, tName,
+				NewHTTPSource(tNs, tName,
 					WithNotDeployed,
 					WithSink,
 				),
@@ -153,7 +153,7 @@ func TestReconcile(t *testing.T) {
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: NewMQTTSource(tNs, tName,
+				Object: NewHTTPSource(tNs, tName,
 					WithDeployed,
 					WithSink,
 				),
@@ -163,7 +163,7 @@ func TestReconcile(t *testing.T) {
 			Name: "Adapter Service became not ready",
 			Key:  tNs + "/" + tName,
 			Objects: []runtime.Object{
-				NewMQTTSource(tNs, tName,
+				NewHTTPSource(tNs, tName,
 					WithDeployed,
 					WithSink,
 				),
@@ -174,7 +174,7 @@ func TestReconcile(t *testing.T) {
 			WantCreates: nil,
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
-				Object: NewMQTTSource(tNs, tName,
+				Object: NewHTTPSource(tNs, tName,
 					WithNotDeployed,
 					WithSink,
 				),
@@ -185,7 +185,7 @@ func TestReconcile(t *testing.T) {
 	var ctor Ctor = func(ctx context.Context, ls *Listers, cmw configmap.Watcher) controller.Reconciler {
 		return &Reconciler{
 			Base:             reconciler.NewBase(ctx, controllerAgentName, cmw),
-			mqttsourceLister: ls.GetMQTTSourceLister(),
+			httpsourceLister: ls.GetHTTPSourceLister(),
 			ksvcLister:       ls.GetServiceLister(),
 			sourcesClient:    fakesourcesclient.Get(ctx).SourcesV1alpha1(),
 			servingClient:    fakeservingclient.Get(ctx).ServingV1(),

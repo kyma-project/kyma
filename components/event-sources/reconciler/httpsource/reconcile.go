@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package mqttsource
+package httpsource
 
 import (
 	"context"
@@ -41,7 +41,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-sources/reconciler/objects"
 )
 
-// Reconciler reconciles MQTTSource resources.
+// Reconciler reconciles HTTPSource resources.
 type Reconciler struct {
 	// wrapper for core controller components (clients, logger, ...)
 	*reconciler.Base
@@ -50,7 +50,7 @@ type Reconciler struct {
 	adapterImage string
 
 	// listers index properties about resources
-	mqttsourceLister sourceslistersv1alpha1.MQTTSourceLister
+	httpsourceLister sourceslistersv1alpha1.HTTPSourceLister
 	ksvcLister       servinglistersv1.ServiceLister
 
 	// clients allow interactions with API objects
@@ -61,36 +61,36 @@ type Reconciler struct {
 	sinkResolver *resolver.URIResolver
 }
 
-// Reconcile compares the actual state of a MQTTSource object referenced by key
+// Reconcile compares the actual state of a HTTPSource object referenced by key
 // with its desired state, and attempts to converge the two.
 func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
-	mqttSrc, err := mqttSourceByKey(key, r.mqttsourceLister)
+	src, err := httpSourceByKey(key, r.httpsourceLister)
 	if err != nil {
 		return errors.Handle(err, ctx, "Failed to get object from local store")
 	}
 
-	currentKsvc, err := r.getOrCreateKnService(mqttSrc)
+	currentKsvc, err := r.getOrCreateKnService(src)
 	if err != nil {
 		return err
 	}
 
-	desiredKsvc := r.makeKnService(mqttSrc, currentKsvc)
+	desiredKsvc := r.makeKnService(src, currentKsvc)
 	currentKsvc, err = r.syncKnService(currentKsvc, desiredKsvc)
 	if err != nil {
 		return pkgerrors.Wrap(err, "failed to synchronize Knative Service")
 	}
 
-	return r.syncStatus(mqttSrc, currentKsvc)
+	return r.syncStatus(src, currentKsvc)
 }
 
-// mqttSourceByKey retrieves a MQTTSource object from a lister by ns/name key.
-func mqttSourceByKey(key string, l sourceslistersv1alpha1.MQTTSourceLister) (*v1alpha1.MQTTSource, error) {
+// httpSourceByKey retrieves a HTTPSource object from a lister by ns/name key.
+func httpSourceByKey(key string, l sourceslistersv1alpha1.HTTPSourceLister) (*v1alpha1.HTTPSource, error) {
 	ns, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		return nil, controller.NewPermanentError(pkgerrors.Wrap(err, "invalid object key"))
 	}
 
-	mqttSrc, err := l.MQTTSources(ns).Get(name)
+	src, err := l.HTTPSources(ns).Get(name)
 	switch {
 	case apierrors.IsNotFound(err):
 		return nil, errors.NewSkippable(pkgerrors.Wrap(err, "object no longer exists"))
@@ -98,16 +98,16 @@ func mqttSourceByKey(key string, l sourceslistersv1alpha1.MQTTSourceLister) (*v1
 		return nil, err
 	}
 
-	return mqttSrc, nil
+	return src, nil
 }
 
 // getOrCreateKnService returns the existing Knative Service for a given
-// MQTTSource, or creates it if it is missing.
-func (r *Reconciler) getOrCreateKnService(mqttSrc *v1alpha1.MQTTSource) (*servingv1.Service, error) {
-	ksvc, err := r.ksvcLister.Services(mqttSrc.Namespace).Get(mqttSrc.Name)
+// HTTPSource, or creates it if it is missing.
+func (r *Reconciler) getOrCreateKnService(src *v1alpha1.HTTPSource) (*servingv1.Service, error) {
+	ksvc, err := r.ksvcLister.Services(src.Namespace).Get(src.Name)
 	switch {
 	case apierrors.IsNotFound(err):
-		ksvc, err = r.servingClient.Services(mqttSrc.Namespace).Create(r.makeKnService(mqttSrc))
+		ksvc, err = r.servingClient.Services(src.Namespace).Create(r.makeKnService(src))
 		if err != nil {
 			return nil, pkgerrors.Wrap(err, "failed to create Knative Service")
 		}
@@ -118,17 +118,17 @@ func (r *Reconciler) getOrCreateKnService(mqttSrc *v1alpha1.MQTTSource) (*servin
 }
 
 // makeKnService returns the desired Knative Service object for a given
-// MQTTSource. An optional Knative Service can be passed as parameter, in which
+// HTTPSource. An optional Knative Service can be passed as parameter, in which
 // case some of its attributes are used to generate the desired state.
-func (r *Reconciler) makeKnService(mqttSrc *v1alpha1.MQTTSource, currentKsvc ...*servingv1.Service) *servingv1.Service {
+func (r *Reconciler) makeKnService(src *v1alpha1.HTTPSource, currentKsvc ...*servingv1.Service) *servingv1.Service {
 	opts := []objects.ServiceOption{
 		objects.WithContainerImage(r.adapterImage),
-		objects.WithControllerRef(mqttSrc.ToOwner()),
+		objects.WithControllerRef(src.ToOwner()),
 	}
 	if len(currentKsvc) == 1 {
 		opts = append(opts, objects.WithExisting(currentKsvc[0]))
 	}
-	return objects.NewService(mqttSrc.Namespace, mqttSrc.Name, opts...)
+	return objects.NewService(src.Namespace, src.Name, opts...)
 }
 
 // syncKnService synchronizes the desired state of a Knative Service against
@@ -140,12 +140,12 @@ func (r *Reconciler) syncKnService(currentKsvc, desiredKsvc *servingv1.Service) 
 	return r.servingClient.Services(currentKsvc.Namespace).Update(desiredKsvc)
 }
 
-// syncStatus ensures the status of a given MQTTSource is up-to-date.
-func (r *Reconciler) syncStatus(mqttSrc *v1alpha1.MQTTSource, currentKsvc *servingv1.Service) error {
-	statusCpy := mqttSrc.Status.DeepCopy()
+// syncStatus ensures the status of a given HTTPSource is up-to-date.
+func (r *Reconciler) syncStatus(src *v1alpha1.HTTPSource, currentKsvc *servingv1.Service) error {
+	statusCpy := src.Status.DeepCopy()
 	statusCpy.InitializeConditions()
 
-	sinkURI, err := r.sinkResolver.URIFromDestination(getSinkDest(), mqttSrc)
+	sinkURI, err := r.sinkResolver.URIFromDestination(getSinkDest(), src)
 	if err != nil {
 		statusCpy.MarkNoSink("NotFound", "The sink does not exist")
 		return err
@@ -154,13 +154,13 @@ func (r *Reconciler) syncStatus(mqttSrc *v1alpha1.MQTTSource, currentKsvc *servi
 
 	statusCpy.PropagateServiceReady(currentKsvc)
 
-	if !reflect.DeepEqual(statusCpy, &mqttSrc.Status) {
-		mqttSrc = &v1alpha1.MQTTSource{
-			ObjectMeta: mqttSrc.ObjectMeta,
+	if !reflect.DeepEqual(statusCpy, &src.Status) {
+		src = &v1alpha1.HTTPSource{
+			ObjectMeta: src.ObjectMeta,
 			Status:     *statusCpy,
 		}
 
-		_, err = r.sourcesClient.MQTTSources(mqttSrc.Namespace).UpdateStatus(mqttSrc)
+		_, err = r.sourcesClient.HTTPSources(src.Namespace).UpdateStatus(src)
 		if err != nil {
 			return err
 		}

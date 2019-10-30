@@ -18,7 +18,7 @@
         "apiVersion": "sources.kyma-project.io/v1alpha1",
         "blockOwnerDeletion": true,
         "controller": true,
-        "kind": "MQTTSource",
+        "kind": "HTTPSource",
         "name": "demo",
         "uid": "6d30dcbc-de11-11e9-907f-42010a840091"
       }
@@ -38,7 +38,7 @@
                 "value": "bar"
               }
             ],
-            "image": "example.com/mqttsource-adapter:6b80940e0650785f6b79425a47914935bbfcb181",
+            "image": "example.com/httpsource-adapter:6b80940e0650785f6b79425a47914935bbfcb181",
             "name": "user-container",
             "ports": [
               {

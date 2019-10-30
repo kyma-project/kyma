@@ -53,8 +53,8 @@ func (f *genericInformer) Lister() cache.GenericLister {
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
 	// Group=sources.kyma-project.io, Version=v1alpha1
-	case v1alpha1.SchemeGroupVersion.WithResource("mqttsources"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Sources().V1alpha1().MQTTSources().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("httpsources"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Sources().V1alpha1().HTTPSources().Informer()}, nil
 
 	}
 

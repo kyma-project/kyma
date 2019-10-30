@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package mqttsource
+package httpsource
 
 import (
 	"os"
@@ -31,7 +31,7 @@ import (
 
 	// Link fake informers and clients accessed by our controller
 	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client/fake"
-	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/mqttsource/fake"
+	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource/fake"
 	_ "knative.dev/serving/pkg/client/injection/client/fake"
 	_ "knative.dev/serving/pkg/client/injection/informers/serving/v1/service/fake"
 )
@@ -48,7 +48,7 @@ func TestNewController(t *testing.T) {
 	cmw := configmap.NewStaticWatcher()
 	ctx, informers := rt.SetupFakeContext(t)
 
-	// expected infomers: MQTTSource and Knative Service
+	// expected infomers: HTTPSource and Knative Service
 	if expect, got := 2, len(informers); got != expect {
 		t.Errorf("Expected %d injected informers, got %d", expect, got)
 	}

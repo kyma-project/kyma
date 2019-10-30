@@ -43,37 +43,6 @@
   version = "v0.3.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:dd4cc62fe2ebae79d435245c45a01821a3334c5cdb818aa927731f7f4ea5bec2"
-  name = "github.com/antoineco/kyma-event-sources"
-  packages = [
-    "apis/sources",
-    "apis/sources/v1alpha1",
-    "client/generated/clientset/internalclientset",
-    "client/generated/clientset/internalclientset/fake",
-    "client/generated/clientset/internalclientset/scheme",
-    "client/generated/clientset/internalclientset/typed/sources/v1alpha1",
-    "client/generated/clientset/internalclientset/typed/sources/v1alpha1/fake",
-    "client/generated/informer/externalversions",
-    "client/generated/informer/externalversions/internalinterfaces",
-    "client/generated/informer/externalversions/sources",
-    "client/generated/informer/externalversions/sources/v1alpha1",
-    "client/generated/injection/client",
-    "client/generated/injection/client/fake",
-    "client/generated/injection/informers/factory",
-    "client/generated/injection/informers/factory/fake",
-    "client/generated/injection/informers/sources/v1alpha1/mqttsource",
-    "client/generated/injection/informers/sources/v1alpha1/mqttsource/fake",
-    "client/generated/lister/sources/v1alpha1",
-    "reconciler/errors",
-    "reconciler/mqttsource",
-    "reconciler/objects",
-    "reconciler/testing",
-  ]
-  pruneopts = "UT"
-  revision = "6bf50571bf7a8dc8b995605132d2b0f3c041238d"
-
-[[projects]]
   digest = "1:6ef35dfacf196bfad80ffd405ff7999448f1066a49eb2ff9ba8bfa746b294878"
   name = "github.com/aws/aws-sdk-go"
   packages = [
@@ -1314,28 +1283,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/antoineco/kyma-event-sources/apis/sources",
-    "github.com/antoineco/kyma-event-sources/apis/sources/v1alpha1",
-    "github.com/antoineco/kyma-event-sources/client/generated/clientset/internalclientset",
-    "github.com/antoineco/kyma-event-sources/client/generated/clientset/internalclientset/fake",
-    "github.com/antoineco/kyma-event-sources/client/generated/clientset/internalclientset/scheme",
-    "github.com/antoineco/kyma-event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1",
-    "github.com/antoineco/kyma-event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1/fake",
-    "github.com/antoineco/kyma-event-sources/client/generated/informer/externalversions",
-    "github.com/antoineco/kyma-event-sources/client/generated/informer/externalversions/internalinterfaces",
-    "github.com/antoineco/kyma-event-sources/client/generated/informer/externalversions/sources",
-    "github.com/antoineco/kyma-event-sources/client/generated/informer/externalversions/sources/v1alpha1",
-    "github.com/antoineco/kyma-event-sources/client/generated/injection/client",
-    "github.com/antoineco/kyma-event-sources/client/generated/injection/client/fake",
-    "github.com/antoineco/kyma-event-sources/client/generated/injection/informers/factory",
-    "github.com/antoineco/kyma-event-sources/client/generated/injection/informers/factory/fake",
-    "github.com/antoineco/kyma-event-sources/client/generated/injection/informers/sources/v1alpha1/mqttsource",
-    "github.com/antoineco/kyma-event-sources/client/generated/injection/informers/sources/v1alpha1/mqttsource/fake",
-    "github.com/antoineco/kyma-event-sources/client/generated/lister/sources/v1alpha1",
-    "github.com/antoineco/kyma-event-sources/reconciler/errors",
-    "github.com/antoineco/kyma-event-sources/reconciler/mqttsource",
-    "github.com/antoineco/kyma-event-sources/reconciler/objects",
-    "github.com/antoineco/kyma-event-sources/reconciler/testing",
     "github.com/google/go-cmp/cmp",
     "github.com/pkg/errors",
     "go.uber.org/zap",

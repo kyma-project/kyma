@@ -24,8 +24,8 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// MQTTSources returns a MQTTSourceInformer.
-	MQTTSources() MQTTSourceInformer
+	// HTTPSources returns a HTTPSourceInformer.
+	HTTPSources() HTTPSourceInformer
 }
 
 type version struct {
@@ -39,7 +39,7 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// MQTTSources returns a MQTTSourceInformer.
-func (v *version) MQTTSources() MQTTSourceInformer {
-	return &mQTTSourceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+// HTTPSources returns a HTTPSourceInformer.
+func (v *version) HTTPSources() HTTPSourceInformer {
+	return &hTTPSourceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

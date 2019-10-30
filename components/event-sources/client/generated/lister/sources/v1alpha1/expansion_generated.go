@@ -18,10 +18,10 @@ limitations under the License.
 
 package v1alpha1
 
-// MQTTSourceListerExpansion allows custom methods to be added to
-// MQTTSourceLister.
-type MQTTSourceListerExpansion interface{}
+// HTTPSourceListerExpansion allows custom methods to be added to
+// HTTPSourceLister.
+type HTTPSourceListerExpansion interface{}
 
-// MQTTSourceNamespaceListerExpansion allows custom methods to be added to
-// MQTTSourceNamespaceLister.
-type MQTTSourceNamespaceListerExpansion interface{}
+// HTTPSourceNamespaceListerExpansion allows custom methods to be added to
+// HTTPSourceNamespaceLister.
+type HTTPSourceNamespaceListerExpansion interface{}
