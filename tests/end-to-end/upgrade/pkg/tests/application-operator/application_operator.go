@@ -136,7 +136,7 @@ func (ut *UpgradeTest) getImagesConfigFromOperatorOpts() (appImagesConfig, error
 			appImagesConfig.eventServiceImage = strings.TrimPrefix(arg, eventServiceImageOptPrefix)
 		}
 		if strings.HasPrefix(arg, connectivityValidatorImageOptPrefix) {
-			appImagesConfig.appGatewayImage = strings.TrimPrefix(arg, connectivityValidatorImageOptPrefix)
+			appImagesConfig.connectivityValidatorImage = strings.TrimPrefix(arg, connectivityValidatorImageOptPrefix)
 		}
 	}
 
@@ -168,30 +168,6 @@ func getImageVersion(containerName string, containers []core.Container) (string,
 		}
 	}
 	return "", fmt.Errorf(fmt.Sprintf("container name %s not found", containerName))
-}
-
-func (ut *UpgradeTest) createConfigMap(name, namespace, image string, timestamp metav1.Time) error {
-	configMap := &core.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ConfigMap",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Data: map[string]string{
-			imageKey:     image,
-			timestampKey: timestamp.String(),
-		},
-	}
-
-	_, err := ut.k8sCli.CoreV1().ConfigMaps(namespace).Create(configMap)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // TestResources tests resources after backup phase
