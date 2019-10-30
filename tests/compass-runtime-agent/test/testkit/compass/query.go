@@ -60,6 +60,14 @@ func (qp queryProvider) deleteApplication(id string) string {
 }`, id)
 }
 
+func (qp queryProvider) getRuntime(runtimeId string) string {
+	return fmt.Sprintf(`query {
+	result: runtime(id: "%s") {
+		%s
+	}
+}`, runtimeId, runtimeData())
+}
+
 func (qp queryProvider) createAPI(applicationId string, input string) string {
 	return fmt.Sprintf(`mutation {
 	result: addAPI(applicationID: "%s", in: %s) {
@@ -89,7 +97,7 @@ func (qp queryProvider) createEventAPI(applicationId string, input string) strin
 	result: addEventAPI(applicationID: "%s", in: %s) {
 		%s
 	}
-}`, applicationId, input, apiDefinitionData())
+}`, applicationId, input, eventAPIData())
 }
 
 func (qp queryProvider) updateEventAPI(apiId string, input string) string {
@@ -97,7 +105,7 @@ func (qp queryProvider) updateEventAPI(apiId string, input string) string {
 	result: updateEventAPI(id: "%s", in: %s) {
 		%s
 	}
-}`, apiId, input, apiDefinitionData())
+}`, apiId, input, eventAPIData())
 }
 
 func (qp queryProvider) deleteEventAPI(apiId string) string {
@@ -132,6 +140,22 @@ func applicationData() string {
 		eventAPIs {%s}
 		documents {%s}
 	`, pageData(apiDefinitionData()), pageData(eventAPIData()), pageData(documentData()))
+}
+
+func runtimeData() string {
+	return fmt.Sprintf(`
+		id
+		name
+		description
+		labels 
+		status {condition timestamp}
+		auths {%s}`, systemAuthData())
+}
+
+func systemAuthData() string {
+	return fmt.Sprintf(`
+		id
+		auth {%s}`, authData())
 }
 
 func authData() string {

@@ -18,6 +18,15 @@ func NewResolver(err error) *Resolver {
 	return &Resolver{err: err}
 }
 
+// CreateFunction provides a failing mock function with given fields: ctx, name, namespace, labels, size, runtime
+func (_m *Resolver) CreateFunction(ctx context.Context, name string, namespace string, labels gqlschema.Labels, size string, runtime string) (gqlschema.Function, error) {
+	var r0 gqlschema.Function
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // DeleteFunction provides a failing mock function with given fields: ctx, name, namespace
 func (_m *Resolver) DeleteFunction(ctx context.Context, name string, namespace string) (gqlschema.FunctionMutationOutput, error) {
 	var r0 gqlschema.FunctionMutationOutput

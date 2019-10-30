@@ -14,7 +14,7 @@ This guide describes how to update Kyma deployed locally or on a cluster.
 
 ## Overview
 
-Kyma consists of multiple components, installed as [Helm](https://github.com/helm/helm/tree/master/docs) releases.
+Kyma consists of multiple components, installed as [Helm](https://helm.sh/docs/) releases.
 
 Update of an existing deployment can include:
 
@@ -58,7 +58,7 @@ Read about each update step in the following sections.
 
    ```bash
    ./installation/scripts/build-kyma-installer.sh
-   ```  
+   ```
 
    > **NOTE:** If you started Kyma with the `run.sh` script with a `--vm-driver {value}` parameter, provide the same parameter to the `build-kyma-installer.sh` script.
 

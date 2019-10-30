@@ -20,7 +20,7 @@ getConfigFile() {
 
     echo
     echo "===> Fetching Auth token"
-    AUTH_TOKEN=$(/root/app)
+    AUTH_TOKEN=$(/test/app)
     echo "===> Success: Auth token fetched!"
     echo " \=> $(date)"
     echo

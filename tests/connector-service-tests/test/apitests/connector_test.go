@@ -2,12 +2,13 @@ package apitests
 
 import (
 	"crypto/rsa"
-	"github.com/kyma-project/kyma/tests/connector-service-tests/test/testkit"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/url"
 	"testing"
+
+	"github.com/kyma-project/kyma/tests/connector-service-tests/test/testkit"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConnector(t *testing.T) {

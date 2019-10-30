@@ -144,6 +144,8 @@ isLocalEnv:
 ## Reduced to 6h from 24h as to limit Prometheus use a max of 800 Mb memory in nightly azure cluster
 ## this parameter sets in-memory retention time not the persistence one
 retention: 2h
+# disk retetion size
+retentionSize: 8GB
 
 ## Prefix used to register routes, overriding externalUrl route.
 ## Useful for proxies that rewrite URLs.
@@ -338,7 +340,7 @@ storageSpec:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 4Gi
+          storage: 10Gi
 
 # default rules are in templates/prometheus.rules.yaml
 # prometheusRules: {}

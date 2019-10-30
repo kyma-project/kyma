@@ -69,7 +69,7 @@ loki:
 
   resources:
     limits:
-      cpu: 200m
+      cpu: 300m
       memory: 256Mi
     requests:
       cpu: 100m
@@ -156,7 +156,7 @@ loki:
           schema: v9
           index:
             prefix: index_
-            period: 168h
+            period: 24h
     server:
       http_listen_port: 3100
     storage_config:
@@ -167,8 +167,8 @@ loki:
     chunk_store_config:
       max_look_back_period: 0
     table_manager:
-      retention_deletes_enabled: false
-      retention_period: 0
+      retention_deletes_enabled: true 
+      retention_period: 24h
 
 promtail:
 
@@ -211,8 +211,8 @@ promtail:
 
   resources:
     limits:
-      cpu: 200m
-      memory: 128Mi
+      cpu: 300m
+      memory: 256Mi
     requests:
       cpu: 100m
       memory: 128Mi
@@ -306,8 +306,8 @@ global:
     path: eu.gcr.io/kyma-project
   logging_integration_tests:
     name: logging-integration-tests
-    dir: pr/
-    version: PR-5896
+    dir: 
+    version: 5a771fdf
   logging:
     promtail:
       config:

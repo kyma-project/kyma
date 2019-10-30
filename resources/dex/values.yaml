@@ -1,4 +1,4 @@
-imageRegistry: "quay.io/coreos"
+imageRegistry: "quay.io/dexidp"
 
 containerPort: 5556
 
@@ -49,6 +49,10 @@ volumeMountsExtra: |-
 
 volumesExtra: |-
 
+telemetry:
+  enabled: true
+  port: 5558
+
 dex:
   expiry:
     signingKeys: "720h"
@@ -74,5 +78,5 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:
-    dir: develop/
-    version: 665a2857
+    dir:
+    version: bdfddb63

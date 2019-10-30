@@ -1,9 +1,10 @@
 package middlewares
 
 import (
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
-	"net/http"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 
