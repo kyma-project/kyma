@@ -57,11 +57,11 @@ func MakeFactory(ctor Ctor) rt.Factory {
 
 		ctx = logging.WithLogger(ctx, logtesting.TestLogger(t))
 
-		ctx, servingClient := fakeservingclient.With(ctx, ls.GetServingObjects()...)
 		ctx, sourcesClient := fakeclient.With(ctx, ls.GetSourcesObjects()...)
+		ctx, servingClient := fakeservingclient.With(ctx, ls.GetServingObjects()...)
+		ctx, eventingClient := fakeeventingclient.With(ctx, ls.GetEventingObjects()...)
 		// also inject fake clients accessed by reconciler.Base
 		ctx, _ = fakekubeclient.With(ctx)
-		ctx, _ = fakeeventingclient.With(ctx)
 		ctx, _ = fakedynamicclient.With(ctx, NewScheme())
 
 		// set up Controller from fakes
@@ -70,7 +70,7 @@ func MakeFactory(ctor Ctor) rt.Factory {
 		eventRecorder := record.NewFakeRecorder(maxEventBufferSize)
 		ctx = controller.WithEventRecorder(ctx, eventRecorder)
 
-		actionRecorderList := rt.ActionRecorderList{servingClient, sourcesClient}
+		actionRecorderList := rt.ActionRecorderList{sourcesClient, servingClient, eventingClient}
 		eventList := rt.EventList{Recorder: eventRecorder}
 		statsReporter := &rt.FakeStatsReporter{}
 

@@ -75,8 +75,8 @@ func TestReconcile(t *testing.T) {
 			WantUpdates: nil,
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
 				Object: NewHTTPSource(tNs, tName,
-					WithNotDeployed,
-					WithSink(tSinkURI),
+					WithInitConditions,
+					WithNoSink("NotFound", "The sink does not exist or its URL is not set"),
 				),
 			}},
 		},

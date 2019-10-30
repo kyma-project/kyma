@@ -43,6 +43,10 @@ func NewHTTPSource(ns, name string, opts ...HTTPSourceOption) *sourcesv1alpha1.H
 
 type HTTPSourceOption func(s *sourcesv1alpha1.HTTPSource)
 
+func WithInitConditions(s *sourcesv1alpha1.HTTPSource) {
+	s.Status.InitializeConditions()
+}
+
 func WithDeployed(s *sourcesv1alpha1.HTTPSource) {
 	s.Status.PropagateServiceReady(NewService("", "", WithServiceReady))
 }
@@ -54,5 +58,11 @@ func WithNotDeployed(s *sourcesv1alpha1.HTTPSource) {
 func WithSink(uri string) HTTPSourceOption {
 	return func(s *sourcesv1alpha1.HTTPSource) {
 		s.Status.MarkSink(uri)
+	}
+}
+
+func WithNoSink(reason, msg string) HTTPSourceOption {
+	return func(s *sourcesv1alpha1.HTTPSource) {
+		s.Status.MarkNoSink(reason, msg)
 	}
 }

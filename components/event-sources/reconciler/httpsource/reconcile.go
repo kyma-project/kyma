@@ -174,32 +174,42 @@ func (r *Reconciler) syncKnService(currentKsvc, desiredKsvc *servingv1.Service) 
 }
 
 // syncStatus ensures the status of a given HTTPSource is up-to-date.
-func (r *Reconciler) syncStatus(src *v1alpha1.HTTPSource, ch *messagingv1alpha1.Channel, ksvc *servingv1.Service) error {
-	statusCpy := src.Status.DeepCopy()
-	statusCpy.InitializeConditions()
+func (r *Reconciler) syncStatus(src *v1alpha1.HTTPSource, ch *messagingv1alpha1.Channel,
+	ksvc *servingv1.Service) error {
+
+	currentStatus := &src.Status
+	expectedStatus := r.computeStatus(src, ch, ksvc)
+
+	if reflect.DeepEqual(currentStatus, expectedStatus) {
+		return nil
+	}
+
+	src = &v1alpha1.HTTPSource{
+		ObjectMeta: src.ObjectMeta,
+		Status:     *expectedStatus,
+	}
+
+	_, err := r.sourcesClient.HTTPSources(src.Namespace).UpdateStatus(src)
+	return err
+}
+
+// computeStatus returns the expected status of a given HTTPSource.
+func (r *Reconciler) computeStatus(src *v1alpha1.HTTPSource, ch *messagingv1alpha1.Channel,
+	ksvc *servingv1.Service) *v1alpha1.HTTPSourceStatus {
+
+	status := src.Status.DeepCopy()
+	status.InitializeConditions()
 
 	sinkURI, err := r.sinkResolver.URIFromDestination(channelAsDestination(ch), src)
 	if err != nil {
-		statusCpy.MarkNoSink("NotFound", "The sink does not exist")
-		return err
+		status.MarkNoSink("NotFound", "The sink does not exist or its URL is not set")
+		return status
 	}
-	statusCpy.MarkSink(sinkURI)
+	status.MarkSink(sinkURI)
 
-	statusCpy.PropagateServiceReady(ksvc)
+	status.PropagateServiceReady(ksvc)
 
-	if !reflect.DeepEqual(statusCpy, &src.Status) {
-		src = &v1alpha1.HTTPSource{
-			ObjectMeta: src.ObjectMeta,
-			Status:     *statusCpy,
-		}
-
-		_, err = r.sourcesClient.HTTPSources(src.Namespace).UpdateStatus(src)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return status
 }
 
 // channelAsDestination returns a Destination representation of the given

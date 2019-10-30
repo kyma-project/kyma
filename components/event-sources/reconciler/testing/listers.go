@@ -73,12 +73,20 @@ func (l *Listers) IndexerFor(obj runtime.Object) cache.Indexer {
 	return l.sorter.IndexerForObjectType(obj)
 }
 
+func (l *Listers) GetSourcesObjects() []runtime.Object {
+	return l.sorter.ObjectsForSchemeFunc(fakesourcesclientset.AddToScheme)
+}
+
 func (l *Listers) GetServingObjects() []runtime.Object {
 	return l.sorter.ObjectsForSchemeFunc(fakeservingclientset.AddToScheme)
 }
 
-func (l *Listers) GetSourcesObjects() []runtime.Object {
-	return l.sorter.ObjectsForSchemeFunc(fakesourcesclientset.AddToScheme)
+func (l *Listers) GetEventingObjects() []runtime.Object {
+	return l.sorter.ObjectsForSchemeFunc(fakeeventingclientset.AddToScheme)
+}
+
+func (l *Listers) GetHTTPSourceLister() sourceslistersv1alpha1.HTTPSourceLister {
+	return sourceslistersv1alpha1.NewHTTPSourceLister(l.IndexerFor(&sourcesv1alpha1.HTTPSource{}))
 }
 
 func (l *Listers) GetServiceLister() servinglistersv1.ServiceLister {
@@ -87,8 +95,4 @@ func (l *Listers) GetServiceLister() servinglistersv1.ServiceLister {
 
 func (l *Listers) GetChannelLister() messaginglistersv1alpha1.ChannelLister {
 	return messaginglistersv1alpha1.NewChannelLister(l.IndexerFor(&messagingv1alpha1.Channel{}))
-}
-
-func (l *Listers) GetHTTPSourceLister() sourceslistersv1alpha1.HTTPSourceLister {
-	return sourceslistersv1alpha1.NewHTTPSourceLister(l.IndexerFor(&sourcesv1alpha1.HTTPSource{}))
 }

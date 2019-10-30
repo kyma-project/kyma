@@ -73,8 +73,7 @@ func (s *HTTPSourceStatus) MarkSink(uri string) {
 // MarkNoSink sets the SinkProvided condition to False with the given reason
 // and message.
 func (s *HTTPSourceStatus) MarkNoSink(reason, msg string) {
-	httpCondSet.Manage(s).MarkFalse(HTTPConditionSinkProvided,
-		reason, msg)
+	httpCondSet.Manage(s).MarkFalse(HTTPConditionSinkProvided, reason, msg)
 }
 
 // PropagateServiceReady uses the readiness of the provided Knative Service to
