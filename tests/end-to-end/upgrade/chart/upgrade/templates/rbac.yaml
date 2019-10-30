@@ -28,6 +28,9 @@ rules:
 - apiGroups: ["apps"]
   resources: ["deployments"]
   verbs: ["create", "get", "delete", "list"]
+- apiGroups: ["apps"]
+  resources: ["statefulsets"]
+  verbs: ["get"]
 
 # Service catalog
 - apiGroups: ["servicecatalog.k8s.io"]
