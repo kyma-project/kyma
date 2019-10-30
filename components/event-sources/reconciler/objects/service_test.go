@@ -29,7 +29,7 @@ import (
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 )
 
-func TestNewService(t *testing.T) {
+func TestNewChannel(t *testing.T) {
 	const (
 		ns   = "testns"
 		name = "test"
@@ -78,8 +78,8 @@ func TestNewService(t *testing.T) {
 
 	ksvc := NewService(ns, name,
 		WithContainerImage(img),
-		WithControllerRef(testHTTPSrc.ToOwner()),
-		WithExisting(testExistingKsvc),
+		WithServiceControllerRef(testHTTPSrc.ToOwner()),
+		WithExistingService(testExistingKsvc),
 	)
 
 	if d := cmp.Diff(expectKsvc, ksvc); d != "" {

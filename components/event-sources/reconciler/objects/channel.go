@@ -23,7 +23,7 @@ import (
 )
 
 // NewChannel creates a Channel object.
-func NewChannel(ns, name string) *messagingv1alpha1.Channel {
+func NewChannel(ns, name string, opts ...ChannelOption) *messagingv1alpha1.Channel {
 	s := &messagingv1alpha1.Channel{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
@@ -31,5 +31,32 @@ func NewChannel(ns, name string) *messagingv1alpha1.Channel {
 		},
 	}
 
+	for _, opt := range opts {
+		opt(s)
+	}
+
 	return s
+}
+
+// ChannelOption is a functional option for Channel objects.
+type ChannelOption func(*messagingv1alpha1.Channel)
+
+// WithChannelControllerRef sets the controller reference of a Channel.
+func WithChannelControllerRef(or *metav1.OwnerReference) ChannelOption {
+	return func(s *messagingv1alpha1.Channel) {
+		svcOwnerRefs := &s.ObjectMeta.OwnerReferences
+
+		switch {
+		case *svcOwnerRefs == nil:
+			*svcOwnerRefs = []metav1.OwnerReference{*or}
+		case metav1.GetControllerOf(s) == nil:
+			*svcOwnerRefs = append(*svcOwnerRefs, *or)
+		default:
+			for i, r := range *svcOwnerRefs {
+				if r.Controller != nil && *r.Controller {
+					(*svcOwnerRefs)[i] = *or
+				}
+			}
+		}
+	}
 }

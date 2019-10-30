@@ -20,14 +20,16 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"knative.dev/pkg/apis"
 	"knative.dev/serving/pkg/apis/serving"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
-// List of annotations set on Knative Serving objects by the Knative Serving admission webhook.
+// List of annotations set on Knative Serving objects by the Knative Serving
+// admission webhook.
 var knativeServingAnnotations = []string{
-	serving.CreatorAnnotation,
-	serving.UpdaterAnnotation,
+	serving.GroupName + apis.CreatorAnnotationSuffix,
+	serving.GroupName + apis.UpdaterAnnotationSuffix,
 }
 
 // NewService creates a Service object.
@@ -49,8 +51,8 @@ func NewService(ns, name string, opts ...ServiceOption) *servingv1.Service {
 // ServiceOption is a functional option for Service objects.
 type ServiceOption func(*servingv1.Service)
 
-// WithControllerRef sets the controller reference of a Service.
-func WithControllerRef(or *metav1.OwnerReference) ServiceOption {
+// WithServiceControllerRef sets the controller reference of a Service.
+func WithServiceControllerRef(or *metav1.OwnerReference) ServiceOption {
 	return func(s *servingv1.Service) {
 		svcOwnerRefs := &s.ObjectMeta.OwnerReferences
 
@@ -81,8 +83,9 @@ func WithContainerImage(img string) ServiceOption {
 	}
 }
 
-// WithExisting copies some important attributes from an existing Service.
-func WithExisting(ksvc *servingv1.Service) ServiceOption {
+// WithExistingService copies some important attributes from an existing
+// Service.
+func WithExistingService(ksvc *servingv1.Service) ServiceOption {
 	return func(s *servingv1.Service) {
 		// resourceVersion must be returned to the API server
 		// unmodified for optimistic concurrency

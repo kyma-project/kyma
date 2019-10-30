@@ -36,9 +36,10 @@ import (
 )
 
 const (
-	tNs   = "testns"
-	tName = "test"
-	tImg  = "sources.kyma-project.io/http:latest"
+	tNs      = "testns"
+	tName    = "test"
+	tImg     = "sources.kyma-project.io/http:latest"
+	tSinkURI = "http://" + tName + "-kn-channel." + tNs + ".svc.cluster.local"
 )
 
 func TestReconcile(t *testing.T) {
@@ -75,7 +76,7 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
 				Object: NewHTTPSource(tNs, tName,
 					WithNotDeployed,
-					WithSink,
+					WithSink(tSinkURI),
 				),
 			}},
 		},
@@ -85,7 +86,7 @@ func TestReconcile(t *testing.T) {
 			Objects: []runtime.Object{
 				NewHTTPSource(tNs, tName,
 					WithDeployed,
-					WithSink,
+					WithSink(tSinkURI),
 				),
 				NewService(tNs, tName,
 					WithServiceContainer(tImg),
@@ -102,7 +103,7 @@ func TestReconcile(t *testing.T) {
 			Objects: []runtime.Object{
 				NewHTTPSource(tNs, tName,
 					WithDeployed,
-					WithSink,
+					WithSink(tSinkURI),
 				),
 				NewService(tNs, tName,
 					WithServiceContainer("outdated"),
@@ -127,7 +128,7 @@ func TestReconcile(t *testing.T) {
 			Objects: []runtime.Object{
 				NewHTTPSource(tNs, tName,
 					WithNotDeployed,
-					WithSink,
+					WithSink(tSinkURI),
 				),
 				NewService(tNs, tName,
 					WithServiceContainer(tImg),
@@ -143,7 +144,7 @@ func TestReconcile(t *testing.T) {
 			Objects: []runtime.Object{
 				NewHTTPSource(tNs, tName,
 					WithNotDeployed,
-					WithSink,
+					WithSink(tSinkURI),
 				),
 				NewService(tNs, tName,
 					WithServiceContainer(tImg),
@@ -155,7 +156,7 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
 				Object: NewHTTPSource(tNs, tName,
 					WithDeployed,
-					WithSink,
+					WithSink(tSinkURI),
 				),
 			}},
 		},
@@ -165,7 +166,7 @@ func TestReconcile(t *testing.T) {
 			Objects: []runtime.Object{
 				NewHTTPSource(tNs, tName,
 					WithDeployed,
-					WithSink,
+					WithSink(tSinkURI),
 				),
 				NewService(tNs, tName,
 					WithServiceContainer(tImg),
@@ -176,7 +177,7 @@ func TestReconcile(t *testing.T) {
 			WantStatusUpdates: []k8stesting.UpdateActionImpl{{
 				Object: NewHTTPSource(tNs, tName,
 					WithNotDeployed,
-					WithSink,
+					WithSink(tSinkURI),
 				),
 			}},
 		},

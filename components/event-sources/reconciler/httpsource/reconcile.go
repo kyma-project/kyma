@@ -79,7 +79,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 		return err
 	}
 
-	_, err = r.getOrCreateChannel(src)
+	currentCh, err := r.getOrCreateChannel(src)
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 		return pkgerrors.Wrap(err, "failed to synchronize Knative Service")
 	}
 
-	return r.syncStatus(src, currentKsvc)
+	return r.syncStatus(src, currentCh, currentKsvc)
 }
 
 // httpSourceByKey retrieves a HTTPSource object from a lister by ns/name key.
@@ -127,8 +127,8 @@ func (r *Reconciler) getOrCreateKnService(src *v1alpha1.HTTPSource) (*servingv1.
 	return ksvc, nil
 }
 
-// getOrCreateChannel returns the existing Channel for a given
-// HTTPSource, or creates it if it is missing.
+// getOrCreateChannel returns the existing Channel for a given HTTPSource, or
+// creates it if it is missing.
 func (r *Reconciler) getOrCreateChannel(src *v1alpha1.HTTPSource) (*messagingv1alpha1.Channel, error) {
 	ch, err := r.chLister.Channels(src.Namespace).Get(src.Name)
 	switch {
@@ -149,18 +149,19 @@ func (r *Reconciler) getOrCreateChannel(src *v1alpha1.HTTPSource) (*messagingv1a
 func (r *Reconciler) makeKnService(src *v1alpha1.HTTPSource, currentKsvc ...*servingv1.Service) *servingv1.Service {
 	opts := []objects.ServiceOption{
 		objects.WithContainerImage(r.adapterImage),
-		objects.WithControllerRef(src.ToOwner()),
+		objects.WithServiceControllerRef(src.ToOwner()),
 	}
 	if len(currentKsvc) == 1 {
-		opts = append(opts, objects.WithExisting(currentKsvc[0]))
+		opts = append(opts, objects.WithExistingService(currentKsvc[0]))
 	}
 	return objects.NewService(src.Namespace, src.Name, opts...)
 }
 
-// makeChannel returns the desired Channel object for a given
-// HTTPSource.
+// makeChannel returns the desired Channel object for a given HTTPSource.
 func (r *Reconciler) makeChannel(src *v1alpha1.HTTPSource) *messagingv1alpha1.Channel {
-	return objects.NewChannel(src.Namespace, src.Name)
+	return objects.NewChannel(src.Namespace, src.Name,
+		objects.WithChannelControllerRef(src.ToOwner()),
+	)
 }
 
 // syncKnService synchronizes the desired state of a Knative Service against
@@ -173,18 +174,18 @@ func (r *Reconciler) syncKnService(currentKsvc, desiredKsvc *servingv1.Service) 
 }
 
 // syncStatus ensures the status of a given HTTPSource is up-to-date.
-func (r *Reconciler) syncStatus(src *v1alpha1.HTTPSource, currentKsvc *servingv1.Service) error {
+func (r *Reconciler) syncStatus(src *v1alpha1.HTTPSource, ch *messagingv1alpha1.Channel, ksvc *servingv1.Service) error {
 	statusCpy := src.Status.DeepCopy()
 	statusCpy.InitializeConditions()
 
-	sinkURI, err := r.sinkResolver.URIFromDestination(getSinkDest(), src)
+	sinkURI, err := r.sinkResolver.URIFromDestination(channelAsDestination(ch), src)
 	if err != nil {
 		statusCpy.MarkNoSink("NotFound", "The sink does not exist")
 		return err
 	}
 	statusCpy.MarkSink(sinkURI)
 
-	statusCpy.PropagateServiceReady(currentKsvc)
+	statusCpy.PropagateServiceReady(ksvc)
 
 	if !reflect.DeepEqual(statusCpy, &src.Status) {
 		src = &v1alpha1.HTTPSource{
@@ -201,14 +202,17 @@ func (r *Reconciler) syncStatus(src *v1alpha1.HTTPSource, currentKsvc *servingv1
 	return nil
 }
 
-// TODO: find a way to not have this hardcoded
-func getSinkDest() apisv1alpha1.Destination {
+// channelAsDestination returns a Destination representation of the given
+// Channel.
+func channelAsDestination(ch *messagingv1alpha1.Channel) apisv1alpha1.Destination {
+	gvk := ch.GetGroupVersionKind()
+
 	return apisv1alpha1.Destination{
 		Ref: &corev1.ObjectReference{
-			APIVersion: "v1",
-			Kind:       "Service",
-			Namespace:  "kyma-system",
-			Name:       "event-publish-service",
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
+			Namespace:  ch.Namespace,
+			Name:       ch.Name,
 		},
 	}
 }
