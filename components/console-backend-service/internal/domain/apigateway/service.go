@@ -3,7 +3,6 @@ package apigateway
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway/extractor"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
 
@@ -20,7 +19,7 @@ type apiRuleService struct {
 	informer  cache.SharedIndexInformer
 	client    dynamic.NamespaceableResourceInterface
 	notifier  resource.Notifier
-	extractor extractor.ApiRuleUnstructuredExtractor
+	extractor ApiRuleUnstructuredExtractor
 }
 
 var apiRuleTypeMeta = metav1.TypeMeta{
@@ -36,7 +35,7 @@ func newApiRuleService(informer cache.SharedIndexInformer, client dynamic.Namesp
 		informer:  informer,
 		client:    client,
 		notifier:  notifier,
-		extractor: extractor.ApiRuleUnstructuredExtractor{},
+		extractor: ApiRuleUnstructuredExtractor{},
 	}
 }
 
@@ -54,7 +53,7 @@ func (svc *apiRuleService) List(namespace string, serviceName *string, hostname 
 			return nil, fmt.Errorf("incorrect item type: %T, should be: *unstructured.Unstructured", item)
 		}
 
-		formattedApiRule, err := svc.extractor.FromUnstructured(apiRule)
+		formattedApiRule, err := fromUnstructured(apiRule)
 		if err != nil {
 			return nil, err
 		}
@@ -100,7 +99,7 @@ func (svc *apiRuleService) Find(name string, namespace string) (*v1alpha1.APIRul
 func (svc *apiRuleService) Create(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule, error) {
 	apiRule.TypeMeta = apiRuleTypeMeta
 
-	u, err := svc.extractor.ToUnstructured(apiRule)
+	u, err := toUnstructured(apiRule)
 	if err != nil {
 		return &v1alpha1.APIRule{}, err
 	}
@@ -109,7 +108,7 @@ func (svc *apiRuleService) Create(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule,
 	if err != nil {
 		return &v1alpha1.APIRule{}, err
 	}
-	return svc.extractor.FromUnstructured(created)
+	return fromUnstructured(created)
 }
 
 func (svc *apiRuleService) Subscribe(listener resource.Listener) {
@@ -135,7 +134,7 @@ func (svc *apiRuleService) Update(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule,
 	apiRule.ObjectMeta.ResourceVersion = oldApiRule.ObjectMeta.ResourceVersion
 	apiRule.TypeMeta = apiRuleTypeMeta
 
-	u, err := svc.extractor.ToUnstructured(apiRule)
+	u, err := toUnstructured(apiRule)
 	if err != nil {
 		return &v1alpha1.APIRule{}, err
 	}
@@ -144,7 +143,7 @@ func (svc *apiRuleService) Update(apiRule *v1alpha1.APIRule) (*v1alpha1.APIRule,
 	if err != nil {
 		return &v1alpha1.APIRule{}, err
 	}
-	return svc.extractor.FromUnstructured(updated)
+	return fromUnstructured(updated)
 }
 
 func (svc *apiRuleService) Delete(name string, namespace string) error {

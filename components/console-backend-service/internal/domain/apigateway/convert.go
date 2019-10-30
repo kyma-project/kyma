@@ -3,15 +3,56 @@ package apigateway
 import (
 	"bytes"
 
-	alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+
+	alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 )
+
+type ApiRuleUnstructuredExtractor struct{}
+
+func (ext ApiRuleUnstructuredExtractor) Do(obj interface{}) (*v1alpha1.APIRule, error) {
+	u, err := toUnstructured(obj)
+	if err != nil {
+		return nil, err
+	}
+
+	return fromUnstructured(u)
+}
+
+func toUnstructured(obj interface{}) (*unstructured.Unstructured, error) {
+	if obj == nil {
+		return nil, nil
+	}
+
+	u, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while converting resource %s %s to unstructured", pretty.APIRule, obj)
+	}
+	if len(u) == 0 {
+		return nil, nil
+	}
+
+	return &unstructured.Unstructured{Object: u}, nil
+}
+
+func fromUnstructured(obj *unstructured.Unstructured) (*v1alpha1.APIRule, error) {
+	if obj == nil {
+		return nil, nil
+	}
+	var apiRule v1alpha1.APIRule
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(obj.Object, &apiRule)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while converting unstructured to resource %s %s", pretty.APIRule, obj.Object)
+	}
+
+	return &apiRule, nil
+}
 
 type apiRuleConverter struct{}
 

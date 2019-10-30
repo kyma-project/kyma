@@ -5,8 +5,6 @@ import (
 
 	"github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway/extractor"
-
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway/pretty"
@@ -102,7 +100,7 @@ func (ar *apiRuleResolver) APIRuleEventSubscription(ctx context.Context, namespa
 		return apiRule != nil && apiRule.Namespace == namespace && apiRule.Spec.Service.Name == serviceName
 	}
 
-	apiRuleListener := listener.NewApiRule(channel, filter, ar.apiRuleCon, extractor.ApiRuleUnstructuredExtractor{})
+	apiRuleListener := listener.NewApiRule(channel, filter, ar.apiRuleCon, ApiRuleUnstructuredExtractor{})
 
 	ar.apiRuleSvc.Subscribe(apiRuleListener)
 	go func() {
