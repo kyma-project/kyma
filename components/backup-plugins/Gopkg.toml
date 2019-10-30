@@ -26,19 +26,8 @@
 
 required = [
   "golang.org/x/tools/cmd/goimports",
+  "k8s.io/api"
 ]
-
-[[override]]
-  name = "google.golang.org/grpc"
-  version = "~v1.24.0"
-
-[[override]]
-  name = "golang.org/x/oauth2"
-  branch = "master"
-
-[[override]]
-  name = "google.golang.org/api"
-  version = "v0.9.0"
 
 [[constraint]]
   name = "github.com/heptio/velero"
@@ -56,29 +45,13 @@ required = [
   name = "github.com/kubernetes-sigs/service-catalog"
   version = "=v0.2.1"
 
-[[override]]
-  name = "github.com/knative/pkg"
-  branch = "release-0.8"
+[[constraint]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.14.0"
 
 [[constraint]]
-  name = "github.com/knative/eventing"
-  version = "v0.8.0"
-
-[[override]]
-  name = "contrib.go.opencensus.io/exporter/stackdriver"
-  version = "=v0.12.2"
-
-[[override]]
-  name = "k8s.io/client-go"
-  version = "kubernetes-1.12.9"
-
-[[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.12.9"
-
-[[override]]
-  name = "k8s.io/api"
-  version = "kubernetes-1.12.9"
+  version = "kubernetes-1.14.0"
 
 [prune]
   go-tests = true
