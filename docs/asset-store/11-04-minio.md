@@ -1,11 +1,11 @@
 ---
-title: Minio
+title: MinIO
 type: Metrics
 ---
 
-As an external, open-source file storage solution, Minio exposes its own metrics. See the [official documentation](https://github.com/minio/minio/tree/master/docs/metrics) for details. The Asset Stores comes with a preconfigured ServiceMonitor CR that enables Prometheus to scrap Minio metrics. Using the metrics, you can create your own Grafana dashboard or reuse the dashboard that is already prepared.
+As an external, open-source file storage solution, MinIO exposes its own metrics. See the [official documentation](https://github.com/minio/minio/tree/master/docs/metrics) for details. The Asset Stores comes with a preconfigured ServiceMonitor CR that enables Prometheus to scrap MinIO metrics. Using the metrics, you can create your own Grafana dashboard or reuse the dashboard that is already prepared.
 
-Apart from the custom metrics, Minio also exposes default Prometheus metrics for [Go applications](https://prometheus.io/docs/guides/go-application/).
+Apart from the custom metrics, MinIO also exposes default Prometheus metrics for [Go applications](https://prometheus.io/docs/guides/go-application/).
 
 To see a complete list of metrics, run this command:
 

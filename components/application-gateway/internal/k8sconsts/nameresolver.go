@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	resourceNamePrefixFormat = "app-%s-"
+	resourceNamePrefixFormat = "%s-"
 
 	maxResourceNameLength = 63 // Kubernetes limit for services
 	uuidLength            = 36 // UUID has 36 characters

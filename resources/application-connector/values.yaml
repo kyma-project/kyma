@@ -17,53 +17,53 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    dir: pr/
-    version: PR-5697
+    dir:
+    version: 0a651695
   application_operator_tests:
-    dir: develop/
-    version: 2569744b
+    dir:
+    version: 0a651695
   connector_service:
-    dir: develop/
-    version: e029fcf4
+    dir:
+    version: 0a651695
   connector_service_tests:
-    dir: develop/
-    version: b1f395fa
+    dir:
+    version: 0a651695
   connection_token_handler:
-    dir: develop/
-    version: e029fcf4
+    dir:
+    version: 0a651695
   connection_token_handler_tests:
-    dir: develop/
-    version: 2569744b
+    dir:
+    version: 0a651695
   connectivity_certs_controller:
-    dir: develop/
-    version: e029fcf4
+    dir:
+    version: 0a651695
   event_service:
     dir: develop/
-    version: "36059183"
-  event_service_integration_tests:
-    dir: pr/
-    version: PR-5890
-  application_connectivity_validator:
-    dir: pr/
-    version: PR-5697
-  application_gateway:
-    dir: develop/
     version: e029fcf4
+  event_service_integration_tests:
+    dir: develop/
+    version: 6fe0bf1b
+  application_connectivity_validator:
+    dir:
+    version: 0a651695
+  application_gateway:
+    dir:
+    version: 0a651695
   application_gateway_tests:
-    dir: pr/
-    version: PR-5890
+    dir:
+    version: 0a651695
   application_registry:
-    dir: develop/
-    version: c9f7a5f5
+    dir:
+    version: 0a651695
   application_registry_tests:
-    dir: develop/
-    version: 3d15ac72
+    dir:
+    version: 0a651695
   application_broker:
     dir: develop/
     version: b1f395fa
   application_connectivity_certs_setup_job:
-    dir: develop/
-    version: e029fcf4
+    dir:
+    version: 0a651695
 connectivity_certs_controller:
   enabled: false
 
@@ -81,11 +81,11 @@ application_connectivity_certs_setup_job:
 tests:
   application_connector_tests:
 #    enabled: *connectorServiceEnabled
-    enabled: false
+    enabled: true
     connector_service:
       central: false
     skipSslVerify: true
     image:
-      dir: develop/
-      version: b1f395fa
+      dir:
+      version: 0a651695
       pullPolicy: IfNotPresent

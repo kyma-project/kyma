@@ -67,7 +67,7 @@ func TestService_Create(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &modStrategy.Mock, &strategyFactory.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should do nothing if credentials are nil", func(t *testing.T) {
@@ -86,7 +86,7 @@ func TestService_Create(t *testing.T) {
 		assert.NoError(t, err)
 		strategyFactory.AssertNotCalled(t, "NewSecretModificationStrategy")
 		nameResolver.AssertNotCalled(t, "GetResourceName")
-		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &modStrategy.Mock, &strategyFactory.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should return error when failed to initialize strategy", func(t *testing.T) {
@@ -105,7 +105,7 @@ func TestService_Create(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &modStrategy.Mock, &strategyFactory.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should stop execution if credentials not provided", func(t *testing.T) {
@@ -126,7 +126,7 @@ func TestService_Create(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		nameResolver.AssertNotCalled(t, "GetResourceName")
-		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &modStrategy.Mock, &strategyFactory.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should return error when failed to create secret data", func(t *testing.T) {
@@ -150,7 +150,7 @@ func TestService_Create(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &modStrategy.Mock, &strategyFactory.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should return error when failed to create secret", func(t *testing.T) {
@@ -175,7 +175,7 @@ func TestService_Create(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &modStrategy.Mock, &strategyFactory.Mock, &secretsRepository.Mock)
 	})
 }
 
@@ -205,7 +205,7 @@ func TestService_Update(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &modStrategy.Mock, &strategyFactory.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should not updated if content the same", func(t *testing.T) {
@@ -231,7 +231,7 @@ func TestService_Update(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &modStrategy.Mock, &strategyFactory.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should create secret if not found", func(t *testing.T) {
@@ -257,7 +257,7 @@ func TestService_Update(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &modStrategy.Mock, &strategyFactory.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should return error when failed to get secret", func(t *testing.T) {
@@ -282,7 +282,7 @@ func TestService_Update(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &modStrategy.Mock, &strategyFactory.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should return error when failed to update secret", func(t *testing.T) {
@@ -309,7 +309,7 @@ func TestService_Update(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &modStrategy.Mock, &strategyFactory.Mock, &secretsRepository.Mock)
 	})
 }
 
@@ -328,7 +328,7 @@ func TestService_Delete(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assertExpectations(t, nameResolver.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &strategyFactory.Mock, &secretsRepository.Mock)
 	})
 
 	t.Run("should return an error failed to delete secret", func(t *testing.T) {
@@ -345,11 +345,11 @@ func TestService_Delete(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, nameResolver.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, &nameResolver.Mock, &strategyFactory.Mock, &secretsRepository.Mock)
 	})
 }
 
-func assertExpectations(t *testing.T, mocks ...mock.Mock) {
+func assertExpectations(t *testing.T, mocks ...*mock.Mock) {
 	for _, m := range mocks {
 		m.AssertExpectations(t)
 	}

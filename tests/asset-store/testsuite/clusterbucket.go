@@ -5,7 +5,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
-	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -32,7 +31,7 @@ func newClusterBucket(dynamicCli dynamic.Interface, name string, waitTimeout tim
 	}
 }
 
-func (b *clusterBucket) Create() error {
+func (b *clusterBucket) Create(callbacks ...func(...interface{})) (string, error) {
 	clusterBucket := &v1alpha2.ClusterBucket{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterBucket",
@@ -48,33 +47,16 @@ func (b *clusterBucket) Create() error {
 			},
 		},
 	}
-
-	err := b.resCli.Create(clusterBucket)
+	resourceVersion, err := b.resCli.Create(clusterBucket, callbacks...)
 	if err != nil {
-		return errors.Wrapf(err, "while creating ClusterBucket %s", b.name)
+		return resourceVersion, errors.Wrapf(err, "while creating ClusterBucket %s", b.name)
 	}
-
-	return nil
+	return resourceVersion, nil
 }
 
-func (b *clusterBucket) WaitForStatusReady() error {
-	err := waiter.WaitAtMost(func() (bool, error) {
-
-		res, err := b.Get(b.name)
-		if err != nil {
-			return false, err
-		}
-
-		if res.Status.Phase != v1alpha2.BucketReady {
-			return false, nil
-		}
-
-		return true, nil
-	}, b.waitTimeout)
-	if err != nil {
-		return errors.Wrapf(err, "while waiting for ready ClusterBucket resources")
-	}
-
+func (b *clusterBucket) WaitForStatusReady(initialResourceVersion string, callbacks ...func(...interface{})) error {
+	waitForStatusReady := buildWaitForStatusesReady(b.resCli.ResCli, b.waitTimeout, b.name)
+	err := waitForStatusReady(initialResourceVersion, callbacks...)
 	return err
 }
 
@@ -93,11 +75,10 @@ func (b *clusterBucket) Get(name string) (*v1alpha2.ClusterBucket, error) {
 	return &res, nil
 }
 
-func (b *clusterBucket) Delete() error {
-	err := b.resCli.Delete(b.name)
+func (b *clusterBucket) Delete(callbacks ...func(...interface{})) error {
+	err := b.resCli.Delete(b.name, b.waitTimeout, callbacks...)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting ClusterBucket %s", b.name)
 	}
-
 	return nil
 }

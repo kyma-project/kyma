@@ -30,8 +30,12 @@ required = [
 ]
 
 [[constraint]]
-  branch = "master"
   name = "github.com/golang/glog"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/howeyc/fsnotify"
+  version = "0.9.0"
 
 [[constraint]]
   name = "github.com/spf13/pflag"
