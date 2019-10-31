@@ -54,11 +54,17 @@ spec:
             - name: RUNTIME_CONSOLE_URL
               value: "https://console.{{ .Values.global.ingress.domainName }}"
             - name: ID_PROVIDER_DOMAIN
-              value: "{{ .Values.compassRuntimeAgent.tests.idProvider.domain }}"
+              value: "{{ .Values.global.ingress.domainName }}"
             - name: ID_PROVIDER_USER_EMAIL
-              value: "{{ .Values.compassRuntimeAgent.tests.idProvider.userEmail }}"
+              valueFrom:
+                  secretKeyRef:
+                      name: admin-user
+                      key: email
             - name: ID_PROVIDER_USER_PASSWORD
-              value: "{{ .Values.compassRuntimeAgent.tests.idProvider.userPassword }}"
+              valueFrom:
+                  secretKeyRef:
+                      name: admin-user
+                      key: password
             - name: ID_PROVIDER_CLIENT_TIMEOUT
               value: "{{ .Values.compassRuntimeAgent.tests.idProvider.clientTimeout }}"
           command:
@@ -76,6 +82,7 @@ spec:
             - "compass-gateway.{{ .Values.global.ingress.domainName }}"
             - "compass-gateway-auth-oauth.{{ .Values.global.ingress.domainName }}"
             - "minio.{{ .Values.global.ingress.domainName }}"
+            - "dex.{{ .Values.global.ingress.domainName }}"
       {{ end }}
     restartPolicy: Never
 {{- end }}

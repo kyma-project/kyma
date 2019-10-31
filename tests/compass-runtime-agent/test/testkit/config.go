@@ -31,7 +31,7 @@ type TestConfig struct {
 	IdProvider struct {
 		Domain        string        `envconfig:"default=kyma.local"`
 		UserEmail     string        `envconfig:"default=admin@kyma.cx"`
-		UserPassword  string        `envconfig:"default=nimda"` //TODO: Check the actual default credentials
+		UserPassword  string
 		ClientTimeout time.Duration `envconfig:"default=10s"`
 	}
 }
