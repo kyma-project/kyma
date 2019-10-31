@@ -65,7 +65,7 @@ global:
     version: 3cf2773d
   xip_patch:
     dir:
-    version: 28fc9db3
+    version: 4664d0f6
   e2e_external_solution:
     dir: develop/
     version: 3f9dc61a
