@@ -4,14 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless"
-
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
-
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
-
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
@@ -19,8 +12,14 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/authentication"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/cms"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
+
 	"github.com/pkg/errors"
 	"k8s.io/client-go/rest"
 )
@@ -93,7 +92,11 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 	}
 	makePluggable(authenticationResolver)
 
-	serverlessResolver, err := serverless.New(restConfig, informerResyncPeriod)
+	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing serverless service factory")
+	}
+	serverlessResolver, err := serverless.New(serviceFactory)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing serverless resolver")
 	}
@@ -395,12 +398,16 @@ func (r *mutationResolver) CreateLimitRange(ctx context.Context, namespace strin
 	return r.k8s.CreateLimitRange(ctx, namespace, name, limitRange)
 }
 
-func (r *mutationResolver) DeleteFunction(ctx context.Context, name string, namespace string) (gqlschema.FunctionMutationOutput, error) {
+func (r *mutationResolver) DeleteFunction(ctx context.Context, name string, namespace string) (*gqlschema.FunctionMutationOutput, error) {
 	return r.serverless.Resolver.DeleteFunction(ctx, name, namespace)
 }
 
-func (r *mutationResolver) CreateFunction(ctx context.Context, name string, namespace string, labels gqlschema.Labels, size string, runtime string) (gqlschema.Function, error) {
+func (r *mutationResolver) CreateFunction(ctx context.Context, name string, namespace string, labels gqlschema.Labels, size string, runtime string) (*gqlschema.Function, error) {
 	return r.serverless.Resolver.CreateFunction(ctx, name, namespace, labels, size, runtime)
+}
+
+func (r *mutationResolver) UpdateFunction(ctx context.Context, name string, namespace string, params gqlschema.FunctionUpdateInput) (*gqlschema.Function, error) {
+	return r.serverless.Resolver.UpdateFunction(ctx, name, namespace, params)
 }
 
 // Queries
@@ -591,6 +598,10 @@ func (r *queryResolver) SelfSubjectRules(ctx context.Context, namespace *string)
 
 func (r *queryResolver) Functions(ctx context.Context, namespace string) ([]gqlschema.Function, error) {
 	return r.serverless.FunctionsQuery(ctx, namespace)
+}
+
+func (r *queryResolver) Function(ctx context.Context, name string, namespace string) (*gqlschema.Function, error) {
+	return r.serverless.FunctionQuery(ctx, name, namespace)
 }
 
 // Subscriptions
