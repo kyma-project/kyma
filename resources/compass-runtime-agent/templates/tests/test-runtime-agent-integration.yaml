@@ -27,8 +27,6 @@ spec:
               name: {{ .Values.compassRuntimeAgent.config.configMap.name }}
               optional: true
           env:
-            - name: INTERNAL_DIRECTOR_JWT
-              value: {{ .Values.compassRuntimeAgent.tests.director.internalJWT }}
             - name: DIRECTOR_URL
               value: {{ .Values.compassRuntimeAgent.tests.director.url }}
             - name: NAMESPACE
@@ -55,6 +53,14 @@ spec:
               value: "https://gateway.{{ .Values.global.ingress.domainName }}"
             - name: RUNTIME_CONSOLE_URL
               value: "https://console.{{ .Values.global.ingress.domainName }}"
+            - name: ID_PROVIDER_DOMAIN
+              value: "{{ .Values.compassRuntimeAgent.tests.idProvider.domain }}"
+            - name: ID_PROVIDER_USER_EMAIL
+              value: "{{ .Values.compassRuntimeAgent.tests.idProvider.userEmail }}"
+            - name: ID_PROVIDER_USER_PASSWORD
+              value: "{{ .Values.compassRuntimeAgent.tests.idProvider.userPassword }}"
+            - name: ID_PROVIDER_CLIENT_TIMEOUT
+              value: "{{ .Values.compassRuntimeAgent.tests.idProvider.clientTimeout }}"
           command:
           - "/bin/sh"
           args:

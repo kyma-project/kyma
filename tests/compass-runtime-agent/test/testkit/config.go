@@ -11,9 +11,6 @@ type TestConfig struct {
 	Tenant    string
 	RuntimeId string
 
-	// Using internal Director URL and internal JWT is a temporary solution. See https://github.com/kyma-project/kyma/issues/6106
-	InternalDirectorJWT string
-
 	Runtime struct {
 		EventsURL  string `envconfig:"default=https://gateway.kyma.local"`
 		ConsoleURL string `envconfig:"default=https://console.kyma.local"`
