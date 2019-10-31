@@ -29,8 +29,8 @@ type TestConfig struct {
 	ApplicationInstallationTimeout time.Duration `envconfig:"default=180s"`
 
 	IdProvider struct {
-		Domain        string        `envconfig:"default=kyma.local"`
-		UserEmail     string        `envconfig:"default=admin@kyma.cx"`
+		Domain        string `envconfig:"default=kyma.local"`
+		UserEmail     string `envconfig:"default=admin@kyma.cx"`
 		UserPassword  string
 		ClientTimeout time.Duration `envconfig:"default=10s"`
 	}
