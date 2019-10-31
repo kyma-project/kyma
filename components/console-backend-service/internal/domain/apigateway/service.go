@@ -10,6 +10,12 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+var apiRulesGroupVersionResource = schema.GroupVersionResource{
+	Version:  v1alpha1.GroupVersion.Version,
+	Group:    v1alpha1.GroupVersion.Group,
+	Resource: "apirules",
+}
+
 type Service struct {
 	*resource.Service
 	notifier notifierRes.Notifier
@@ -18,11 +24,7 @@ type Service struct {
 func NewService(serviceFactory *resource.ServiceFactory) *Service {
 	notifier := notifierRes.NewNotifier()
 	return &Service{
-		Service: serviceFactory.ForResource(schema.GroupVersionResource{
-			Version:  v1alpha1.GroupVersion.Version,
-			Group:    v1alpha1.GroupVersion.Group,
-			Resource: "apirules",
-		}),
+		Service:  serviceFactory.ForResource(apiRulesGroupVersionResource),
 		notifier: notifier,
 	}
 }
