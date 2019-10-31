@@ -16,8 +16,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
-
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apicontroller"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore"
@@ -46,6 +44,11 @@ type RootResolver struct {
 }
 
 func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles, systemNamespaces []string) (*RootResolver, error) {
+	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing service factory")
+	}
+
 	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing UI resolver")
@@ -93,11 +96,7 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 	}
 	makePluggable(acResolver)
 
-	agServiceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod)
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing apigateway service factory")
-	}
-	agResolver, err := apigateway.New(agServiceFactory)
+	agResolver, err := apigateway.New(serviceFactory)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing apigateway resolver")
 	}
@@ -109,10 +108,6 @@ func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg asset
 	}
 	makePluggable(authenticationResolver)
 
-	serviceFactory, err := resource.NewServiceFactoryForConfig(restConfig, informerResyncPeriod)
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing serverless service factory")
-	}
 	serverlessResolver, err := serverless.New(serviceFactory)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing serverless resolver")

@@ -34099,23 +34099,6 @@ func UnmarshalAPIInput(v interface{}) (APIInput, error) {
 			if err != nil {
 				return it, err
 			}
-		case "rules":
-			var err error
-			var rawIf1 []interface{}
-			if v != nil {
-				if tmp1, ok := v.([]interface{}); ok {
-					rawIf1 = tmp1
-				} else {
-					rawIf1 = []interface{}{v}
-				}
-			}
-			it.Rules = make([]RuleInput, len(rawIf1))
-			for idx1 := range rawIf1 {
-				it.Rules[idx1], err = UnmarshalRuleInput(rawIf1[idx1])
-			}
-			if err != nil {
-				return it, err
-			}
 		}
 	}
 
@@ -34173,6 +34156,23 @@ func UnmarshalAPIRuleInput(v interface{}) (APIRuleInput, error) {
 		case "gateway":
 			var err error
 			it.Gateway, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "rules":
+			var err error
+			var rawIf1 []interface{}
+			if v != nil {
+				if tmp1, ok := v.([]interface{}); ok {
+					rawIf1 = tmp1
+				} else {
+					rawIf1 = []interface{}{v}
+				}
+			}
+			it.Rules = make([]RuleInput, len(rawIf1))
+			for idx1 := range rawIf1 {
+				it.Rules[idx1], err = UnmarshalRuleInput(rawIf1[idx1])
+			}
 			if err != nil {
 				return it, err
 			}
