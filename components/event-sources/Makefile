@@ -12,6 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+APP_NAME = event-sources
+APP_PATH = components/event-sources
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.12
+SCRIPTS_DIR = ../../common/makefiles
+include $(SCRIPTS_DIR)/generic-make-go.mk
+
+.DEFAULT_GOAL := all
+
+
+#########
+#       #
+#  Dev  #
+#       #
+#########
+
 PKG := github.com/kyma-project/kyma/components/event-sources
 
 
