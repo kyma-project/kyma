@@ -45,9 +45,7 @@ type Listers struct {
 	sorter rt.ObjectSorter
 }
 
-func NewListers(objs []runtime.Object) Listers {
-	scheme := NewScheme()
-
+func NewListers(scheme *runtime.Scheme, objs []runtime.Object) Listers {
 	ls := Listers{
 		sorter: rt.NewObjectSorter(scheme),
 	}

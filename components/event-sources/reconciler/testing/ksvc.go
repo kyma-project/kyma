@@ -54,7 +54,7 @@ func WithServiceReady(s *servingv1.Service) {
 	}})
 }
 
-// WithServiceNotReady marks the Service as Not Ready.
+// WithServiceNotReady marks the Service as not Ready.
 func WithServiceNotReady(s *servingv1.Service) {
 	s.Status.SetConditions(apis.Conditions{{
 		Type:   apis.ConditionReady,
@@ -62,6 +62,7 @@ func WithServiceNotReady(s *servingv1.Service) {
 	}})
 }
 
+// WithServiceController sets the controller of a Service.
 func WithServiceController(srcName string) ServiceOption {
 	return func(s *servingv1.Service) {
 		gvk := sourcesv1alpha1.HTTPSourceGVK()
@@ -77,6 +78,7 @@ func WithServiceController(srcName string) ServiceOption {
 	}
 }
 
+// WithServiceContainer configures a container for a Service.
 func WithServiceContainer(img string) ServiceOption {
 	return func(s *servingv1.Service) {
 		s.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers = []corev1.Container{{

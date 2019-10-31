@@ -46,7 +46,7 @@ const (
 	controllerAgentName = "http-source-controller"
 
 	// adapterImageEnvVar is the name of the environment variable containing the
-	// container image of the HTTP adapter.
+	// container image of the HTTP receive adapter.
 	adapterImageEnvVar = "HTTP_ADAPTER_IMAGE"
 )
 

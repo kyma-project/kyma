@@ -61,8 +61,6 @@ func WithSink(uri string) HTTPSourceOption {
 	}
 }
 
-func WithNoSink(reason, msg string) HTTPSourceOption {
-	return func(s *sourcesv1alpha1.HTTPSource) {
-		s.Status.MarkNoSink(reason, msg)
-	}
+func WithNoSink(s *sourcesv1alpha1.HTTPSource) {
+	s.Status.MarkNoSink()
 }

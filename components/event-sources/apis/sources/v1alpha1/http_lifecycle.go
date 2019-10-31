@@ -29,8 +29,8 @@ const (
 	// been configured with a sink target.
 	HTTPConditionSinkProvided apis.ConditionType = "SinkProvided"
 
-	// HTTPConditionDeployed has status True when the HTTPSource adapter
-	// has been successfully deployed.
+	// HTTPConditionDeployed has status True when the HTTPSource receive
+	// adapter has been successfully deployed.
 	HTTPConditionDeployed apis.ConditionType = "Deployed"
 )
 
@@ -54,6 +54,12 @@ func (s *HTTPSource) ToKey() string {
 	return s.Namespace + "/" + s.Name
 }
 
+const (
+	HTTPSourceReasonSinkNotFound    = "NotFound"
+	HTTPSourceReasonSinkEmpty       = "EmptyURI"
+	HTTPSourceReasonServiceNotReady = "ServiceNotReady"
+)
+
 // InitializeConditions sets relevant unset conditions to Unknown state.
 func (s *HTTPSourceStatus) InitializeConditions() {
 	httpCondSet.Manage(s).InitializeConditions()
@@ -64,7 +70,7 @@ func (s *HTTPSourceStatus) MarkSink(uri string) {
 	s.SinkURI = uri
 	if uri == "" {
 		httpCondSet.Manage(s).MarkUnknown(HTTPConditionSinkProvided,
-			"SinkEmpty", "The sink has no URI")
+			HTTPSourceReasonSinkEmpty, "The sink has no URI")
 		return
 	}
 	httpCondSet.Manage(s).MarkTrue(HTTPConditionSinkProvided)
@@ -72,8 +78,10 @@ func (s *HTTPSourceStatus) MarkSink(uri string) {
 
 // MarkNoSink sets the SinkProvided condition to False with the given reason
 // and message.
-func (s *HTTPSourceStatus) MarkNoSink(reason, msg string) {
-	httpCondSet.Manage(s).MarkFalse(HTTPConditionSinkProvided, reason, msg)
+func (s *HTTPSourceStatus) MarkNoSink() {
+	s.SinkURI = ""
+	httpCondSet.Manage(s).MarkFalse(HTTPConditionSinkProvided,
+		HTTPSourceReasonSinkNotFound, "The sink does not exist or its URL is not set")
 }
 
 // PropagateServiceReady uses the readiness of the provided Knative Service to
@@ -85,10 +93,12 @@ func (s *HTTPSourceStatus) PropagateServiceReady(ksvc *servingv1.Service) {
 	}
 
 	msg := "The adapter Service is not yet ready"
-	if ksvcCondReady := ksvc.Status.GetCondition(servingv1.ServiceConditionReady); ksvcCondReady != nil {
+	ksvcCondReady := ksvc.Status.GetCondition(servingv1.ServiceConditionReady)
+	if ksvcCondReady != nil && ksvcCondReady.Message != "" {
 		msg += ": " + ksvcCondReady.Message
 	}
-	httpCondSet.Manage(s).MarkFalse(HTTPConditionDeployed, "KnativeServiceNotReady", msg)
+	httpCondSet.Manage(s).MarkFalse(HTTPConditionDeployed,
+		HTTPSourceReasonServiceNotReady, msg)
 }
 
 // IsReady returns whether the HTTPSource is ready to serve the requested

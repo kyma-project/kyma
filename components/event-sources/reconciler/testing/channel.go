@@ -17,12 +17,14 @@ limitations under the License.
 package testing
 
 import (
+	pkgerrors "github.com/pkg/errors"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"knative.dev/pkg/apis"
-	"knative.dev/pkg/apis/duck/v1alpha1"
-	"knative.dev/pkg/apis/duck/v1beta1"
 
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
+	"knative.dev/pkg/apis"
+	duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
+	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 	"knative.dev/pkg/ptr"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
@@ -36,7 +38,7 @@ func NewChannel(ns, name string, opts ...ChannelOption) *messagingv1alpha1.Chann
 			Name:      name,
 		},
 	}
-	WithChannelController(name)(ch)
+
 	for _, opt := range opts {
 		opt(ch)
 	}
@@ -44,8 +46,10 @@ func NewChannel(ns, name string, opts ...ChannelOption) *messagingv1alpha1.Chann
 	return ch
 }
 
+// ChannelOption is a functional option for Channel objects.
 type ChannelOption func(*messagingv1alpha1.Channel)
 
+// WithChannelController sets the controller of a Channel.
 func WithChannelController(srcName string) ChannelOption {
 	return func(ch *messagingv1alpha1.Channel) {
 		gvk := sourcesv1alpha1.HTTPSourceGVK()
@@ -61,14 +65,17 @@ func WithChannelController(srcName string) ChannelOption {
 	}
 }
 
-// WithSinkURI sets the Channel's sink URI.
-func WithSinkURI(uri string) ChannelOption {
+// WithChannelSinkURI sets the sink URI of a Channel.
+func WithChannelSinkURI(uri string) ChannelOption {
 	return func(ch *messagingv1alpha1.Channel) {
-		ch.Status.Address = &v1alpha1.Addressable{
-			Addressable: v1beta1.Addressable{
-				URL: &apis.URL{
-					Host:uri,
-				},
+		parsedURI, err := apis.ParseURL(uri)
+		if err != nil {
+			panic(pkgerrors.Wrap(err, "parsing Channel URL"))
+		}
+
+		ch.Status.Address = &duckv1alpha1.Addressable{
+			Addressable: duckv1beta1.Addressable{
+				URL: parsedURI,
 			},
 		}
 	}

@@ -83,8 +83,8 @@ func TestGetAdapterImage(t *testing.T) {
 	})
 }
 
-// setAdapterImageEnvVar sets the adapter image env var and returns a function
-// that can be deferred to unset that variable.
+// setAdapterImageEnvVar sets the receive adapter image env var and returns a
+// function that can be deferred to unset that variable.
 func setAdapterImageEnvVar(val string, t *testing.T) (unset func()) {
 	t.Helper()
 

@@ -32,7 +32,7 @@ spec:
       serviceAccountName: event-sources-controller-manager
       containers:
       - name: controller
-        image: github.com/kyma-project/kyma/components/event-sources/cmd/event-sources-controller-manager
+        image: github.com/kyma-project/kyma/components/event-sources/cmd/controller-manager
         resources:
           requests:
             cpu: 10m
