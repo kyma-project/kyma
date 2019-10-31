@@ -17,56 +17,40 @@ limitations under the License.
 package testing
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"knative.dev/pkg/apis"
+	"knative.dev/pkg/apis/duck/v1alpha1"
+	"knative.dev/pkg/apis/duck/v1beta1"
+
+	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	"knative.dev/pkg/ptr"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 )
 
-// NewService creates a Service object.
-func NewService(ns, name string, opts ...ServiceOption) *servingv1.Service {
-	s := &servingv1.Service{
+// NewChannel creates a Channel object.
+func NewChannel(ns, name string, opts ...ChannelOption) *messagingv1alpha1.Channel {
+	ch := &messagingv1alpha1.Channel{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
 			Name:      name,
 		},
 	}
-
+	WithChannelController(name)(ch)
 	for _, opt := range opts {
-		opt(s)
+		opt(ch)
 	}
 
-	return s
+	return ch
 }
 
-// ServiceOption is a functional option for Service objects.
-type ServiceOption func(*servingv1.Service)
+type ChannelOption func(*messagingv1alpha1.Channel)
 
-// WithServiceReady marks the Service as Ready.
-func WithServiceReady(s *servingv1.Service) {
-	s.Status.SetConditions(apis.Conditions{{
-		Type:   apis.ConditionReady,
-		Status: corev1.ConditionTrue,
-	}})
-}
-
-// WithServiceNotReady marks the Service as Not Ready.
-func WithServiceNotReady(s *servingv1.Service) {
-	s.Status.SetConditions(apis.Conditions{{
-		Type:   apis.ConditionReady,
-		Status: corev1.ConditionFalse,
-	}})
-}
-
-func WithServiceController(srcName string) ServiceOption {
-	return func(s *servingv1.Service) {
+func WithChannelController(srcName string) ChannelOption {
+	return func(ch *messagingv1alpha1.Channel) {
 		gvk := sourcesv1alpha1.HTTPSourceGVK()
 
-		s.OwnerReferences = []metav1.OwnerReference{{
+		ch.OwnerReferences = []metav1.OwnerReference{{
 			APIVersion:         gvk.GroupVersion().String(),
 			Kind:               gvk.Kind,
 			Name:               srcName,
@@ -77,10 +61,15 @@ func WithServiceController(srcName string) ServiceOption {
 	}
 }
 
-func WithServiceContainer(img string) ServiceOption {
-	return func(s *servingv1.Service) {
-		s.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers = []corev1.Container{{
-			Image: img,
-		}}
+// WithSinkURI sets the Channel's sink URI.
+func WithSinkURI(uri string) ChannelOption {
+	return func(ch *messagingv1alpha1.Channel) {
+		ch.Status.Address = &v1alpha1.Addressable{
+			Addressable: v1beta1.Addressable{
+				URL: &apis.URL{
+					Host:uri,
+				},
+			},
+		}
 	}
 }
