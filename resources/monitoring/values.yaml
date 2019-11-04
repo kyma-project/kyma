@@ -10,8 +10,10 @@ global:
       namespace: kyma-system
   monitoring_integration_tests:
     name: monitoring-integration-tests
-    dir: develop/
-    version: 7a12b224
+    dir:
+    version: 5a771fdf
+    tests:
+      enabled: true
 
   rbac:
     create: true
@@ -1818,6 +1820,3 @@ prometheus:
     ## https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#podmetricsendpoint
     ##
   # podMetricsEndpoints: []
-
-tests:
-  enabled: false

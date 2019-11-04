@@ -31,7 +31,7 @@ spec:
             - name: APP_DIRECTOR_ORIGIN
               value: "http://compass-director.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.director.port }}"
             - name: APP_CONNECTOR_ORIGIN
-              value: "http://compass-connector.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.port }}"
+              value: "http://compass-connector.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.connector.graphql.external.port }}"
           {{- with .Values.deployment.securityContext }}
           securityContext:
 {{ toYaml . | indent 12 }}
