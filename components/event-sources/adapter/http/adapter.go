@@ -28,7 +28,7 @@ type httpAdapter struct {
 	statsReporter  source.StatsReporter
 	envConfig      *envConfig
 	adapterContext context.Context
-	logger         *zap.SugaredLogger
+	logger         *zap.Logger
 }
 
 const resourceGroup = "http." + sources.GroupName
@@ -50,7 +50,7 @@ func NewAdapter(ctx context.Context, processed adapter.EnvConfigAccessor, ceClie
 		ceClient:       ceClient,
 		statsReporter:  reporter,
 		envConfig:      envConfig,
-		logger:         logging.FromContext(ctx),
+		logger:         logging.FromContext(ctx).Desugar(),
 	}
 }
 
@@ -67,45 +67,33 @@ func (h *httpAdapter) Start(stopCh <-chan struct{}) error {
 	if err != nil {
 		return fmt.Errorf("failed to create transport, %v", err)
 	}
-	decodeTransport, err := cloudevents.NewHTTPTransport()
-	if err != nil {
-		return fmt.Errorf("failed to create transport, %v", err)
-	}
-	c, err := cloudevents.NewClient(t, cloudevents.WithConverterFn(getConverterFunc(decodeTransport, h.envConfig.ApplicationSource)))
+	c, err := cloudevents.NewClient(t)
 	if err != nil {
 		return fmt.Errorf("failed to create client, %v", err)
 	}
 
 	log.Printf("will listen on :%d%s\n", h.envConfig.Port, path)
-	log.Fatalf("failed to start receiver: %s", c.StartReceiver(context.Background(), h.gotEvent))
+	log.Fatalf("failed to start receiver: %s", c.StartReceiver(h.adapterContext, h.serveHTTP))
 
 	<-stopCh
 	logger.Info("stopping adapter")
 	return nil
 }
 
-// getConverterFunc returns a function which enriches the event with the application source
-// the application source is forwarded to this adapter from the http controller which get's it forwarded from the application-operator
-//func getConverterFunc(t *cloudeventshttp.Transport, applicationSource string) func(context.Context, transport.Message, error) (*cloudevents.Event, error) {
-//	return func(ctx context.Context, m transport.Message, err error) (*cloudevents.Event, error) {
-//		if msg, ok := m.(*cloudeventshttp.Message); ok {
-//			event, err := t.MessageToEvent(ctx, msg)
-//			if err != nil {
-//				return nil, err
-//			}
-//			event.SetSource(applicationSource)
-//			return event, nil
-//		}
-//		return nil, fmt.Errorf("expected message type to be http.Message but got %T", m)
-//	}
-//}
+// isSupportedCloudEvent determines if an incoming cloud event is accepted
+func isSupportedCloudEvent(event cloudevents.Event) bool {
+	eventVersion := event.Context.GetSpecVersion()
+	return eventVersion != cloudevents.VersionV01 && eventVersion != cloudevents.VersionV02 && eventVersion != cloudevents.VersionV03
+}
 
-func (h *httpAdapter) gotEvent(ctx context.Context, event cloudevents.Event, resp *cloudevents.EventResponse) error {
-	fmt.Printf("Got Event Context: %+v\n", event.Context)
-	fmt.Printf("Got Transport Context: %+v\n", cloudevents.HTTPTransportContextFrom(ctx))
+func (h *httpAdapter) serveHTTP(ctx context.Context, event cloudevents.Event, resp *cloudevents.EventResponse) error {
+	logger := h.logger
+	logger.Debug("got event", zap.Any("event_context", event.Context))
 
-	fmt.Printf("----------------------------\n")
-
+	if !isSupportedCloudEvent(event) {
+		resp.Error(http.StatusBadRequest, "unsupported cloudevents version")
+		return nil
+	}
 
 	// enrich the event with the application source
 	// the application source is forwarded to this adapter from the http controller which get's it forwarded from the application-operator
@@ -120,7 +108,8 @@ func (h *httpAdapter) gotEvent(ctx context.Context, event cloudevents.Event, res
 	}
 
 	// TODO(nachtmaar): forward event to resp.RespondWith ??
-	rctx, revt, err := h.ceClient.Send(context.TODO(), event)
+	logger.Debug("sending event", zap.Any("sink", h.envConfig.GetSinkURI()))
+	rctx, revt, err := h.ceClient.Send(ctx, event)
 	rtctx := cloudevents.HTTPTransportContextFrom(rctx)
 	if err != nil {
 		h.logger.Error("failed to send cloudevent to sink", zap.Error(err), zap.Any("sink", h.envConfig.GetSinkURI()))
@@ -128,7 +117,7 @@ func (h *httpAdapter) gotEvent(ctx context.Context, event cloudevents.Event, res
 		return nil
 	}
 
-	// report the event
+	// report a sent event
 	if err := h.statsReporter.ReportEventCount(reportArgs, rtctx.StatusCode); err != nil {
 		h.logger.Warn("cannot report event count", zap.Error(err))
 	}

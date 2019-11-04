@@ -1196,7 +1196,7 @@
   revision = "8d271d903fe4c290aa361acfb242cff7bcee96f1"
 
 [[projects]]
-  digest = "1:58f1a1f6c1d4fef1318ffb558df9289807c8241c5d0507cede7711979eaaab0a"
+  digest = "1:24ee92ce6d5e71c9afcb431c7cc78c442e5971b8b588ce6c5ceaff5c0ae488ab"
   name = "knative.dev/eventing"
   packages = [
     "pkg/adapter",
@@ -1238,6 +1238,7 @@
     "pkg/kncloudevents",
     "pkg/reconciler",
     "pkg/tracing",
+    "pkg/utils",
   ]
   pruneopts = "UT"
   revision = "5fe2b0a21aead60f84ecddec224dbbb3a6d62d07"
@@ -1245,7 +1246,7 @@
 
 [[projects]]
   branch = "release-0.10"
-  digest = "1:bb3a5e3f223c0d813326c115ce6ca4a5be1436fd725393e9da35adcaf262c07c"
+  digest = "1:7952f3d8f9659a163510aa31a46aa2e2226156dba8d314d7ab31d69c58bff4cb"
   name = "knative.dev/pkg"
   packages = [
     "apis",
@@ -1257,7 +1258,6 @@
     "changeset",
     "client/injection/kube/client",
     "client/injection/kube/client/fake",
-    "cloudevents",
     "codegen/cmd/injection-gen",
     "codegen/cmd/injection-gen/args",
     "codegen/cmd/injection-gen/generators",
@@ -1358,8 +1358,11 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/cloudevents/sdk-go",
+    "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http",
     "github.com/google/go-cmp/cmp",
     "github.com/pkg/errors",
+    "go.opencensus.io/trace",
     "go.uber.org/zap",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
@@ -1395,13 +1398,13 @@
     "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel/fake",
     "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1",
     "knative.dev/eventing/pkg/reconciler",
+    "knative.dev/eventing/pkg/utils",
     "knative.dev/pkg/apis",
     "knative.dev/pkg/apis/duck/v1",
     "knative.dev/pkg/apis/duck/v1alpha1",
     "knative.dev/pkg/apis/duck/v1beta1",
     "knative.dev/pkg/apis/v1alpha1",
     "knative.dev/pkg/client/injection/kube/client/fake",
-    "knative.dev/pkg/cloudevents",
     "knative.dev/pkg/codegen/cmd/injection-gen",
     "knative.dev/pkg/configmap",
     "knative.dev/pkg/controller",
@@ -1413,6 +1416,7 @@
     "knative.dev/pkg/ptr",
     "knative.dev/pkg/reconciler/testing",
     "knative.dev/pkg/resolver",
+    "knative.dev/pkg/source",
     "knative.dev/serving/pkg/apis/serving",
     "knative.dev/serving/pkg/apis/serving/v1",
     "knative.dev/serving/pkg/apis/serving/v1alpha1",
