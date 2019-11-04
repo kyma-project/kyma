@@ -4,3 +4,6 @@ global:
       secret:
         name: compass-certs
       host: compass-gateway-mtls
+  applicationConnector:
+    secret:
+      name: application-connector-certs

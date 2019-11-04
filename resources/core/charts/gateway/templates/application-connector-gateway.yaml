@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: {{ .Values.global.istio.gateway.name }}-application-gateway
+  name: {{ .Values.global.istio.gateway.name }}-application-connector
   namespace: {{.Release.Namespace }}
 spec:
   selector:
@@ -13,6 +13,6 @@ spec:
         protocol: HTTPS
       tls:
         mode: MUTUAL
-        credentialName: application-connector-certs
+        credentialName: {{ .Values.global.applicationConnector.secret.name }}
       hosts:
         - "gateway.{{.Values.global.ingress.domainName}}"
