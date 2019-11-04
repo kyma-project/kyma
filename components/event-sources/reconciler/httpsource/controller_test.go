@@ -34,7 +34,7 @@ import (
 	_ "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/informers/sources/v1alpha1/httpsource/fake"
 	_ "knative.dev/eventing/pkg/client/injection/informers/messaging/v1alpha1/channel/fake"
 	_ "knative.dev/serving/pkg/client/injection/client/fake"
-	_ "knative.dev/serving/pkg/client/injection/informers/serving/v1/service/fake"
+	_ "knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/service/fake"
 )
 
 func TestNewController(t *testing.T) {

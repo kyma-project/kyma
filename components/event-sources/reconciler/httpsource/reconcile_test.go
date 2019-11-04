@@ -294,7 +294,7 @@ func TestReconcile(t *testing.T) {
 			ksvcLister:       ls.GetServiceLister(),
 			chLister:         ls.GetChannelLister(),
 			sourcesClient:    fakesourcesclient.Get(ctx).SourcesV1alpha1(),
-			servingClient:    fakeservingclient.Get(ctx).ServingV1(),
+			servingClient:    fakeservingclient.Get(ctx).ServingV1alpha1(),
 			messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
 			adapterImage:     tImg,
 			sinkResolver:     resolver.NewURIResolver(ctx, func(types.NamespacedName) {}),

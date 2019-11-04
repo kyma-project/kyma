@@ -26,9 +26,9 @@ import (
 	fakeeventingclientset "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 	messaginglistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
 	rt "knative.dev/pkg/reconciler/testing"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 	fakeservingclientset "knative.dev/serving/pkg/client/clientset/versioned/fake"
-	servinglistersv1 "knative.dev/serving/pkg/client/listers/serving/v1"
+	servinglistersv1alpha1 "knative.dev/serving/pkg/client/listers/serving/v1alpha1"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	fakesourcesclientset "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/fake"
@@ -87,8 +87,8 @@ func (l *Listers) GetHTTPSourceLister() sourceslistersv1alpha1.HTTPSourceLister 
 	return sourceslistersv1alpha1.NewHTTPSourceLister(l.IndexerFor(&sourcesv1alpha1.HTTPSource{}))
 }
 
-func (l *Listers) GetServiceLister() servinglistersv1.ServiceLister {
-	return servinglistersv1.NewServiceLister(l.IndexerFor(&servingv1.Service{}))
+func (l *Listers) GetServiceLister() servinglistersv1alpha1.ServiceLister {
+	return servinglistersv1alpha1.NewServiceLister(l.IndexerFor(&servingv1alpha1.Service{}))
 }
 
 func (l *Listers) GetChannelLister() messaginglistersv1alpha1.ChannelLister {

@@ -1232,7 +1232,7 @@
   revision = "cad41c40ccb5a40de7a3b65097649703c8d96e0b"
 
 [[projects]]
-  digest = "1:f49b1da23f3221f0c6bef596c0e4941e33c4036edc17d9972edd8806607d1268"
+  digest = "1:69532deb2af35d4c1b8e95833039bda0907e51dd1fe4b47de77d0015cb8d60ed"
   name = "knative.dev/serving"
   packages = [
     "pkg/apis/autoscaling",
@@ -1271,8 +1271,8 @@
     "pkg/client/injection/client/fake",
     "pkg/client/injection/informers/factory",
     "pkg/client/injection/informers/factory/fake",
-    "pkg/client/injection/informers/serving/v1/service",
-    "pkg/client/injection/informers/serving/v1/service/fake",
+    "pkg/client/injection/informers/serving/v1alpha1/service",
+    "pkg/client/injection/informers/serving/v1alpha1/service/fake",
     "pkg/client/listers/autoscaling/v1alpha1",
     "pkg/client/listers/networking/v1alpha1",
     "pkg/client/listers/serving/v1",
@@ -1304,7 +1304,6 @@
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/api/meta",
-    "k8s.io/apimachinery/pkg/api/resource",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
     "k8s.io/apimachinery/pkg/conversion",
@@ -1354,13 +1353,14 @@
     "knative.dev/pkg/resolver",
     "knative.dev/serving/pkg/apis/serving",
     "knative.dev/serving/pkg/apis/serving/v1",
+    "knative.dev/serving/pkg/apis/serving/v1alpha1",
     "knative.dev/serving/pkg/client/clientset/versioned/fake",
-    "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1",
+    "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1",
     "knative.dev/serving/pkg/client/injection/client",
     "knative.dev/serving/pkg/client/injection/client/fake",
-    "knative.dev/serving/pkg/client/injection/informers/serving/v1/service",
-    "knative.dev/serving/pkg/client/injection/informers/serving/v1/service/fake",
-    "knative.dev/serving/pkg/client/listers/serving/v1",
+    "knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/service",
+    "knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/service/fake",
+    "knative.dev/serving/pkg/client/listers/serving/v1alpha1",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -18,23 +18,20 @@ package objects
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
-	"reflect"
 	"testing"
 
 	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
 
 const fixtureKsvcPath = "../../test/fixtures/ksvc.json"
 
-var fixtureKsvc *servingv1.Service
+var fixtureKsvc *servingv1alpha1.Service
 
 func TestMain(m *testing.M) {
 	var err error
@@ -47,13 +44,13 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func loadFixtureKsvc() (*servingv1.Service, error) {
+func loadFixtureKsvc() (*servingv1alpha1.Service, error) {
 	data, err := ioutil.ReadFile(fixtureKsvcPath)
 	if err != nil {
 		return nil, err
 	}
 
-	ksvc := &servingv1.Service{}
+	ksvc := &servingv1alpha1.Service{}
 	if err := json.Unmarshal(data, ksvc); err != nil {
 		return nil, err
 	}
@@ -69,25 +66,17 @@ func TestKsvcEqual(t *testing.T) {
 	}
 
 	testCases := map[string]struct {
-		prep   func() *servingv1.Service
+		prep   func() *servingv1alpha1.Service
 		expect bool
 	}{
 		"not equal when one element is nil": {
-			func() *servingv1.Service {
+			func() *servingv1alpha1.Service {
 				return nil
 			},
 			false,
 		},
-		"not equal when labels differ": {
-			func() *servingv1.Service {
-				ksvcCopy := ksvc.DeepCopy()
-				ksvcCopy.Labels["foo"] += "test"
-				return ksvcCopy
-			},
-			false,
-		},
 		"not equal when annotations differ": {
-			func() *servingv1.Service {
+			func() *servingv1alpha1.Service {
 				ksvcCopy := ksvc.DeepCopy()
 				ksvcCopy.Annotations["foo"] += "test"
 				return ksvcCopy
@@ -95,16 +84,14 @@ func TestKsvcEqual(t *testing.T) {
 			false,
 		},
 		"equal when other fields differ": {
-			func() *servingv1.Service {
+			func() *servingv1alpha1.Service {
 				ksvcCopy := ksvc.DeepCopy()
 
 				// metadata
-				lbls := ksvcCopy.Labels
 				anns := ksvcCopy.Annotations
 
 				m := &ksvcCopy.ObjectMeta
 				m.Reset()
-				m.Labels = lbls
 				m.Annotations = anns
 
 				// spec
@@ -112,12 +99,13 @@ func TestKsvcEqual(t *testing.T) {
 
 				ps := sp.ConfigurationSpec.Template.Spec.PodSpec
 
-				*sp = servingv1.ServiceSpec{} // reset
-				sp.ConfigurationSpec.Template.Spec.PodSpec = ps
+				*sp = servingv1alpha1.ServiceSpec{} // reset
+				sp.ConfigurationSpec.Template = &servingv1alpha1.RevisionTemplateSpec{}
+				sp.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec = ps
 
 				// status
 				st := &ksvcCopy.Status
-				*st = servingv1.ServiceStatus{} // reset
+				*st = servingv1alpha1.ServiceStatus{} // reset
 
 				return ksvcCopy
 			},
@@ -205,9 +193,6 @@ func TestContainerEqual(t *testing.T) {
 	if cs == nil {
 		t.Fatalf("Test requires fixture object %s to have a least one Container", fixtureKsvcPath)
 	}
-	if cs[0].Env == nil {
-		t.Fatalf("Test requires fixture object %s to have a least one EnvVar", fixtureKsvcPath)
-	}
 
 	c := &cs[0]
 
@@ -231,120 +216,28 @@ func TestContainerEqual(t *testing.T) {
 			},
 			false,
 		},
-		"not equal when envvar differs": {
+		"not equal when number of envvars differs": {
 			func() *corev1.Container {
 				cCopy := c.DeepCopy()
-				cCopy.Env[0].Value += "test"
+				cCopy.Env = append(cCopy.Env, corev1.EnvVar{})
 				return cCopy
 			},
 			false,
 		},
-	}
+		"equal when other fields differ": {
+			func() *corev1.Container {
+				cCopy := c.DeepCopy()
 
-	for _, fieldName := range []string{
-		"Name",
-		"ContainerPort",
-		"Protocol",
-	} {
-		testCases[fmt.Sprintf("not equal when Port.%s field differs", fieldName)] = struct {
-			prep   func() *corev1.Container
-			expect bool
-		}{
-			func(fieldName string) func() *corev1.Container {
-				return func() *corev1.Container {
-					cCopy := c.DeepCopy()
+				img := cCopy.Image
+				ports := cCopy.Ports
+				env := cCopy.Env
 
-					p := &cCopy.Ports[0]
-					ptrP := reflect.ValueOf(p)
-					pElem := ptrP.Elem()
-					f := pElem.FieldByName(fieldName)
+				cCopy.Reset()
+				cCopy.Image = img
+				cCopy.Ports = ports
+				cCopy.Env = env
 
-					switch f.Kind() {
-					case reflect.String:
-						f.SetString(f.String() + "test")
-					case reflect.Int32:
-						f.SetInt(f.Int() + 1)
-					}
-
-					return cCopy
-				}
-			}(fieldName),
-			false,
-		}
-	}
-
-	for name, tc := range testCases {
-		t.Run(name, func(t *testing.T) {
-			testC := tc.prep()
-			if containerEqual(testC, c) != tc.expect {
-				t.Errorf("Expected output to be %t", tc.expect)
-			}
-		})
-	}
-}
-
-func TestResourceListEqual(t *testing.T) {
-	cs := fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers
-
-	if cs == nil {
-		t.Fatalf("Test requires fixture object %s to have a least one Container", fixtureKsvcPath)
-	}
-	if cs[0].Resources.Requests == nil {
-		t.Fatalf("Test requires fixture object %s to have a least one Request", fixtureKsvcPath)
-	}
-	var hasBinaryRequest bool
-	for r := range cs[0].Resources.Requests {
-		if cs[0].Resources.Requests[r].Format == resource.BinarySI {
-			hasBinaryRequest = true
-			break
-		}
-	}
-	if !hasBinaryRequest {
-		t.Fatalf("Test requires fixture object %s to have a least one Request represented in the binary SI", fixtureKsvcPath)
-	}
-
-	rl := fixtureKsvc.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers[0].Resources.Requests
-
-	testCases := map[string]struct {
-		prep   func() corev1.ResourceList
-		expect bool
-	}{
-		"not equal when resource types differ": {
-			func() corev1.ResourceList {
-				rlCopy := rl.DeepCopy()
-				for k, v := range rlCopy {
-					delete(rlCopy, k)
-					rlCopy[corev1.ResourceName(k+"test")] = v
-				}
-				return rlCopy
-			},
-			false,
-		},
-		"not equal when some resource differs": {
-			func() corev1.ResourceList {
-				rlCopy := rl.DeepCopy()
-				for k, v := range rlCopy {
-					(&v).Add(*resource.NewQuantity(1, resource.DecimalSI))
-					rlCopy[k] = v
-				}
-				return rlCopy
-			},
-			false,
-		},
-		"equal when resources are semantically equal": {
-			func() corev1.ResourceList {
-				rlCopy := rl.DeepCopy()
-				for k, v := range rlCopy {
-					var newVal *resource.Quantity
-					switch v.Format {
-					case resource.DecimalSI:
-						newVal = resource.NewMilliQuantity(v.MilliValue(), resource.BinarySI)
-					default:
-						newVal = resource.NewMilliQuantity(v.MilliValue(), resource.DecimalSI)
-					}
-					rlCopy[k] = *newVal
-				}
-				return rlCopy
+				return cCopy
 			},
 			true,
 		},
@@ -352,8 +245,8 @@ func TestResourceListEqual(t *testing.T) {
 
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-			testRl := tc.prep()
-			if resourceListEqual(testRl, rl) != tc.expect {
+			testC := tc.prep()
+			if containerEqual(testC, c) != tc.expect {
 				t.Errorf("Expected output to be %t", tc.expect)
 			}
 		})

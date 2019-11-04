@@ -30,7 +30,7 @@ import (
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/resolver"
 	servingclient "knative.dev/serving/pkg/client/injection/client"
-	knserviceinformersv1 "knative.dev/serving/pkg/client/injection/informers/serving/v1/service"
+	knserviceinformersv1alpha1 "knative.dev/serving/pkg/client/injection/informers/serving/v1alpha1/service"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	sourcesclient "github.com/kyma-project/kyma/components/event-sources/client/generated/injection/client"
@@ -53,7 +53,7 @@ const (
 // NewController returns a new controller that reconciles HTTPSource objects.
 func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
 	httpSourceInformer := httpsourceinformersv1alpha1.Get(ctx)
-	knServiceInformer := knserviceinformersv1.Get(ctx)
+	knServiceInformer := knserviceinformersv1alpha1.Get(ctx)
 	chInformer := messaginginformersv1alpha1.Get(ctx)
 
 	rb := reconciler.NewBase(ctx, controllerAgentName, cmw)
@@ -64,7 +64,7 @@ func NewController(ctx context.Context, cmw configmap.Watcher) *controller.Impl 
 		ksvcLister:       knServiceInformer.Lister(),
 		chLister:         chInformer.Lister(),
 		sourcesClient:    sourcesclient.Get(ctx).SourcesV1alpha1(),
-		servingClient:    servingclient.Get(ctx).ServingV1(),
+		servingClient:    servingclient.Get(ctx).ServingV1alpha1(),
 		messagingClient:  rb.EventingClientSet.MessagingV1alpha1(),
 	}
 	impl := controller.NewImpl(r, r.Logger, reconcilerName)

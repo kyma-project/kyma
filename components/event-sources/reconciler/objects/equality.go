@@ -22,7 +22,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/conversion"
 
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
 
 // Semantic can do semantic deep equality checks for API objects. Fields which
@@ -32,7 +32,7 @@ var Semantic = conversion.EqualitiesOrDie(
 )
 
 // ksvcEqual asserts the equality of two Knative Service objects.
-func ksvcEqual(s1, s2 *servingv1.Service) bool {
+func ksvcEqual(s1, s2 *servingv1alpha1.Service) bool {
 	if s1 == s2 {
 		return true
 	}
@@ -40,17 +40,25 @@ func ksvcEqual(s1, s2 *servingv1.Service) bool {
 		return false
 	}
 
-	if !reflect.DeepEqual(s1.Labels, s2.Labels) {
-		return false
-	}
 	if !reflect.DeepEqual(s1.Annotations, s2.Annotations) {
 		return false
 	}
 
-	ps1 := &s1.Spec.ConfigurationSpec.Template.Spec.PodSpec
-	ps2 := &s2.Spec.ConfigurationSpec.Template.Spec.PodSpec
-	if !podSpecEqual(ps1, ps2) {
+	cst1 := s1.Spec.ConfigurationSpec.Template
+	cst2 := s2.Spec.ConfigurationSpec.Template
+	if cst1 == nil && cst2 != nil {
 		return false
+	}
+	if cst1 != nil {
+		if cst2 == nil {
+			return false
+		}
+
+		ps1 := &cst1.Spec.RevisionSpec.PodSpec
+		ps2 := &cst2.Spec.RevisionSpec.PodSpec
+		if !podSpecEqual(ps1, ps2) {
+			return false
+		}
 	}
 
 	return true
@@ -88,13 +96,6 @@ func containerEqual(c1, c2 *corev1.Container) bool {
 		return false
 	}
 
-	if !resourceListEqual(c1.Resources.Requests, c2.Resources.Requests) {
-		return false
-	}
-	if !resourceListEqual(c1.Resources.Limits, c2.Resources.Limits) {
-		return false
-	}
-
 	ps1, ps2 := c1.Ports, c2.Ports
 	if len(ps1) != len(ps2) {
 		return false
@@ -112,21 +113,6 @@ func containerEqual(c1, c2 *corev1.Container) bool {
 
 	if !reflect.DeepEqual(c1.Env, c2.Env) {
 		return false
-	}
-
-	return true
-}
-
-// resourceListEqual asserts the equality of two ResourceList objects.
-func resourceListEqual(rl1, rl2 corev1.ResourceList) bool {
-	for resName, q1 := range rl1 {
-		q2, ok := rl2[resName]
-		if !ok {
-			return false
-		}
-		if q1.Cmp(q2) != 0 {
-			return false
-		}
 	}
 
 	return true

@@ -23,13 +23,14 @@ import (
 	"knative.dev/pkg/apis"
 	"knative.dev/pkg/ptr"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 )
 
 // NewService creates a Service object.
-func NewService(ns, name string, opts ...ServiceOption) *servingv1.Service {
-	s := &servingv1.Service{
+func NewService(ns, name string, opts ...ServiceOption) *servingv1alpha1.Service {
+	s := &servingv1alpha1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
 			Name:      name,
@@ -44,10 +45,10 @@ func NewService(ns, name string, opts ...ServiceOption) *servingv1.Service {
 }
 
 // ServiceOption is a functional option for Service objects.
-type ServiceOption func(*servingv1.Service)
+type ServiceOption func(*servingv1alpha1.Service)
 
 // WithServiceReady marks the Service as Ready.
-func WithServiceReady(s *servingv1.Service) {
+func WithServiceReady(s *servingv1alpha1.Service) {
 	s.Status.SetConditions(apis.Conditions{{
 		Type:   apis.ConditionReady,
 		Status: corev1.ConditionTrue,
@@ -55,7 +56,7 @@ func WithServiceReady(s *servingv1.Service) {
 }
 
 // WithServiceNotReady marks the Service as not Ready.
-func WithServiceNotReady(s *servingv1.Service) {
+func WithServiceNotReady(s *servingv1alpha1.Service) {
 	s.Status.SetConditions(apis.Conditions{{
 		Type:   apis.ConditionReady,
 		Status: corev1.ConditionFalse,
@@ -64,7 +65,7 @@ func WithServiceNotReady(s *servingv1.Service) {
 
 // WithServiceController sets the controller of a Service.
 func WithServiceController(srcName string) ServiceOption {
-	return func(s *servingv1.Service) {
+	return func(s *servingv1alpha1.Service) {
 		gvk := sourcesv1alpha1.HTTPSourceGVK()
 
 		s.OwnerReferences = []metav1.OwnerReference{{
@@ -80,9 +81,17 @@ func WithServiceController(srcName string) ServiceOption {
 
 // WithServiceContainer configures a container for a Service.
 func WithServiceContainer(img string) ServiceOption {
-	return func(s *servingv1.Service) {
-		s.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers = []corev1.Container{{
-			Image: img,
-		}}
+	return func(s *servingv1alpha1.Service) {
+		s.Spec.ConfigurationSpec.Template = &servingv1alpha1.RevisionTemplateSpec{
+			Spec: servingv1alpha1.RevisionSpec{
+				RevisionSpec: servingv1.RevisionSpec{
+					PodSpec: corev1.PodSpec{
+						Containers: []corev1.Container{{
+							Image: img,
+						}},
+					},
+				},
+			},
+		}
 	}
 }

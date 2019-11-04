@@ -27,6 +27,7 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	"knative.dev/pkg/ptr"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 )
@@ -51,20 +52,22 @@ func TestNewChannel(t *testing.T) {
 			WithServiceControllerRef(testOwner),
 		)
 
-		expectKsvc := &servingv1.Service{
+		expectKsvc := &servingv1alpha1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace:       ns,
 				Name:            name,
 				OwnerReferences: []metav1.OwnerReference{*testOwner},
 			},
-			Spec: servingv1.ServiceSpec{
-				ConfigurationSpec: servingv1.ConfigurationSpec{
-					Template: servingv1.RevisionTemplateSpec{
-						Spec: servingv1.RevisionSpec{
-							PodSpec: corev1.PodSpec{
-								Containers: []corev1.Container{{
-									Image: img,
-								}},
+			Spec: servingv1alpha1.ServiceSpec{
+				ConfigurationSpec: servingv1alpha1.ConfigurationSpec{
+					Template: &servingv1alpha1.RevisionTemplateSpec{
+						Spec: servingv1alpha1.RevisionSpec{
+							RevisionSpec: servingv1.RevisionSpec{
+								PodSpec: corev1.PodSpec{
+									Containers: []corev1.Container{{
+										Image: img,
+									}},
+								},
 							},
 						},
 					},
@@ -78,7 +81,7 @@ func TestNewChannel(t *testing.T) {
 	})
 
 	t.Run("Attributes from existing Service are preserved", func(t *testing.T) {
-		existingKsvc := &servingv1.Service{
+		existingKsvc := &servingv1alpha1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace:       ns,
 				Name:            name,
@@ -88,7 +91,7 @@ func TestNewChannel(t *testing.T) {
 					"another-annotation":         "some-value",
 				},
 			},
-			Status: servingv1.ServiceStatus{
+			Status: servingv1alpha1.ServiceStatus{
 				Status: duckv1.Status{
 					ObservedGeneration: 1,
 				},
@@ -100,7 +103,7 @@ func TestNewChannel(t *testing.T) {
 			WithServiceControllerRef(testOwner),
 		)
 
-		expectKsvc := &servingv1.Service{
+		expectKsvc := &servingv1alpha1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace:       ns,
 				Name:            name,
@@ -110,7 +113,7 @@ func TestNewChannel(t *testing.T) {
 				},
 				OwnerReferences: []metav1.OwnerReference{*testOwner},
 			},
-			Status: servingv1.ServiceStatus{
+			Status: servingv1alpha1.ServiceStatus{
 				Status: duckv1.Status{
 					ObservedGeneration: 1,
 				},
@@ -154,7 +157,7 @@ func TestNewChannel(t *testing.T) {
 
 		for name, tc := range testCases {
 			t.Run(name, func(t *testing.T) {
-				existingKsvc := &servingv1.Service{
+				existingKsvc := &servingv1alpha1.Service{
 					ObjectMeta: metav1.ObjectMeta{
 						OwnerReferences: tc.existing,
 					},

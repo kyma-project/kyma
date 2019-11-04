@@ -21,7 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"knative.dev/pkg/apis"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
 
 const (
@@ -86,14 +86,14 @@ func (s *HTTPSourceStatus) MarkNoSink() {
 
 // PropagateServiceReady uses the readiness of the provided Knative Service to
 // determine whether the Deployed condition should be marked as true or false.
-func (s *HTTPSourceStatus) PropagateServiceReady(ksvc *servingv1.Service) {
+func (s *HTTPSourceStatus) PropagateServiceReady(ksvc *servingv1alpha1.Service) {
 	if ksvc.Status.IsReady() {
 		httpCondSet.Manage(s).MarkTrue(HTTPConditionDeployed)
 		return
 	}
 
 	msg := "The adapter Service is not yet ready"
-	ksvcCondReady := ksvc.Status.GetCondition(servingv1.ServiceConditionReady)
+	ksvcCondReady := ksvc.Status.GetCondition(servingv1alpha1.ServiceConditionReady)
 	if ksvcCondReady != nil && ksvcCondReady.Message != "" {
 		msg += ": " + ksvcCondReady.Message
 	}

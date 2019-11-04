@@ -22,7 +22,7 @@ import (
 
 	"knative.dev/pkg/apis"
 	"knative.dev/serving/pkg/apis/serving"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
 
 // List of annotations set on Knative Serving objects by the Knative Serving
@@ -33,8 +33,8 @@ var knativeServingAnnotations = []string{
 }
 
 // NewService creates a Service object.
-func NewService(ns, name string, opts ...ServiceOption) *servingv1.Service {
-	s := &servingv1.Service{
+func NewService(ns, name string, opts ...ServiceOption) *servingv1alpha1.Service {
+	s := &servingv1alpha1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
 			Name:      name,
@@ -49,11 +49,11 @@ func NewService(ns, name string, opts ...ServiceOption) *servingv1.Service {
 }
 
 // ServiceOption is a functional option for Service objects.
-type ServiceOption func(*servingv1.Service)
+type ServiceOption func(*servingv1alpha1.Service)
 
 // WithServiceControllerRef sets the controller reference of a Service.
 func WithServiceControllerRef(or *metav1.OwnerReference) ServiceOption {
-	return func(s *servingv1.Service) {
+	return func(s *servingv1alpha1.Service) {
 		svcOwnerRefs := &s.OwnerReferences
 
 		switch {
@@ -74,8 +74,12 @@ func WithServiceControllerRef(or *metav1.OwnerReference) ServiceOption {
 // WithContainerImage sets the container image of a Service. A minimal
 // Container definition is injected if the Service does not contain any.
 func WithContainerImage(img string) ServiceOption {
-	return func(s *servingv1.Service) {
-		containers := &s.Spec.ConfigurationSpec.Template.Spec.PodSpec.Containers
+	return func(s *servingv1alpha1.Service) {
+		if s.Spec.ConfigurationSpec.Template == nil {
+			s.Spec.ConfigurationSpec.Template = &servingv1alpha1.RevisionTemplateSpec{}
+		}
+
+		containers := &s.Spec.ConfigurationSpec.Template.Spec.RevisionSpec.PodSpec.Containers
 		if *containers == nil {
 			*containers = make([]corev1.Container, 1)
 		}
@@ -85,8 +89,8 @@ func WithContainerImage(img string) ServiceOption {
 
 // WithExistingService copies some important attributes from an existing
 // Service.
-func WithExistingService(ksvc *servingv1.Service) ServiceOption {
-	return func(s *servingv1.Service) {
+func WithExistingService(ksvc *servingv1alpha1.Service) ServiceOption {
+	return func(s *servingv1alpha1.Service) {
 		if ksvc == nil {
 			return
 		}

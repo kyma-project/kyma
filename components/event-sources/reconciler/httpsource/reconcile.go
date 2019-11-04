@@ -33,9 +33,9 @@ import (
 	apisv1alpha1 "knative.dev/pkg/apis/v1alpha1"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/resolver"
-	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-	servingclientv1 "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1"
-	servinglistersv1 "knative.dev/serving/pkg/client/listers/serving/v1"
+	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	servingclientv1alpha1 "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
+	servinglistersv1alpha1 "knative.dev/serving/pkg/client/listers/serving/v1alpha1"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
@@ -54,12 +54,12 @@ type Reconciler struct {
 
 	// listers index properties about resources
 	httpsourceLister sourceslistersv1alpha1.HTTPSourceLister
-	ksvcLister       servinglistersv1.ServiceLister
+	ksvcLister       servinglistersv1alpha1.ServiceLister
 	chLister         messaginglistersv1alpha1.ChannelLister
 
 	// clients allow interactions with API objects
 	sourcesClient   sourcesclientv1alpha1.SourcesV1alpha1Interface
-	servingClient   servingclientv1.ServingV1Interface
+	servingClient   servingclientv1alpha1.ServingV1alpha1Interface
 	messagingClient messagingclientv1alpha1.MessagingV1alpha1Interface
 
 	// URI resolver for sink destinations
@@ -113,7 +113,7 @@ func httpSourceByKey(key string, l sourceslistersv1alpha1.HTTPSourceLister) (*so
 
 // getOrCreateKnService returns the existing Knative Service for a given
 // HTTPSource, or creates it if it is missing.
-func (r *Reconciler) getOrCreateKnService(src *sourcesv1alpha1.HTTPSource) (*servingv1.Service, error) {
+func (r *Reconciler) getOrCreateKnService(src *sourcesv1alpha1.HTTPSource) (*servingv1alpha1.Service, error) {
 	ksvc, err := r.ksvcLister.Services(src.Namespace).Get(src.Name)
 	switch {
 	case apierrors.IsNotFound(err):
@@ -147,9 +147,9 @@ func (r *Reconciler) getOrCreateChannel(src *sourcesv1alpha1.HTTPSource) (*messa
 // HTTPSource. An optional Knative Service can be passed as parameter, in which
 // case some of its attributes are used to generate the desired state.
 func (r *Reconciler) makeKnService(src *sourcesv1alpha1.HTTPSource,
-	currentKsvc ...*servingv1.Service) *servingv1.Service {
+	currentKsvc ...*servingv1alpha1.Service) *servingv1alpha1.Service {
 
-	var ksvc *servingv1.Service
+	var ksvc *servingv1alpha1.Service
 	if len(currentKsvc) == 1 {
 		ksvc = currentKsvc[0]
 	}
@@ -169,7 +169,7 @@ func (r *Reconciler) makeChannel(src *sourcesv1alpha1.HTTPSource) *messagingv1al
 
 // syncKnService synchronizes the desired state of a Knative Service against
 // its current state in the running cluster.
-func (r *Reconciler) syncKnService(currentKsvc, desiredKsvc *servingv1.Service) (*servingv1.Service, error) {
+func (r *Reconciler) syncKnService(currentKsvc, desiredKsvc *servingv1alpha1.Service) (*servingv1alpha1.Service, error) {
 	if objects.Semantic.DeepEqual(currentKsvc, desiredKsvc) {
 		return currentKsvc, nil
 	}
@@ -178,7 +178,7 @@ func (r *Reconciler) syncKnService(currentKsvc, desiredKsvc *servingv1.Service) 
 
 // syncStatus ensures the status of a given HTTPSource is up-to-date.
 func (r *Reconciler) syncStatus(src *sourcesv1alpha1.HTTPSource,
-	ch *messagingv1alpha1.Channel, ksvc *servingv1.Service) error {
+	ch *messagingv1alpha1.Channel, ksvc *servingv1alpha1.Service) error {
 
 	currentStatus := &src.Status
 	expectedStatus := r.computeStatus(src, ch, ksvc)
@@ -198,7 +198,7 @@ func (r *Reconciler) syncStatus(src *sourcesv1alpha1.HTTPSource,
 
 // computeStatus returns the expected status of a given HTTPSource.
 func (r *Reconciler) computeStatus(src *sourcesv1alpha1.HTTPSource, ch *messagingv1alpha1.Channel,
-	ksvc *servingv1.Service) *sourcesv1alpha1.HTTPSourceStatus {
+	ksvc *servingv1alpha1.Service) *sourcesv1alpha1.HTTPSourceStatus {
 
 	status := src.Status.DeepCopy()
 	status.InitializeConditions()
