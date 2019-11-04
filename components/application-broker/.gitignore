@@ -104,3 +104,5 @@ fabric.properties
 /vendor
 /deploy/broker/application-broker
 /ab-upgrade-protector
+
+/licenses

@@ -3,14 +3,18 @@ package broker
 import (
 	"context"
 	"testing"
-
 	"time"
+
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
+	bt "github.com/kyma-project/kyma/components/application-broker/internal/broker/testing"
+	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestSuccess(t *testing.T) {
@@ -28,9 +32,21 @@ func TestSuccess(t *testing.T) {
 		Return(nil)
 	ts.mockInstanceStateGetter.On("IsDeprovisioned", fixInstanceID()).Return(false, nil).Once()
 	ts.mockInstanceStateGetter.On("IsDeprovisioningInProgress", fixInstanceID()).Return(internal.OperationID(""), false, nil).Once()
+	ts.mockAppFinder.On("FindOneByServiceID", fixAppServiceID()).
+		Return(fixApp(), nil).
+		Once()
 
 	logSink := spy.NewLogSink()
-	sut := NewDeprovisioner(ts.mockInstanceStorage, ts.mockInstanceStateGetter, ts.mockOperationStorage, ts.mockOperationStorage, ts.OpIDProviderFake, logSink.Logger)
+	sut := NewDeprovisioner(
+		ts.mockInstanceStorage,
+		ts.mockInstanceStateGetter,
+		ts.mockOperationStorage,
+		ts.mockOperationStorage,
+		ts.OpIDProviderFake,
+		ts.mockAppFinder,
+		ts.client,
+		logSink.Logger,
+	)
 
 	asyncFinished := make(chan struct{}, 0)
 	sut.asyncHook = func() {
@@ -65,8 +81,20 @@ func TestErrorInstanceNotFound(t *testing.T) {
 	ts.mockOperationStorage.On("Insert", fixNewRemoveInstanceOperation()).Return(nil)
 	ts.mockInstanceStateGetter.On("IsDeprovisioned", fixInstanceID()).Return(false, nil).Once()
 	ts.mockInstanceStateGetter.On("IsDeprovisioningInProgress", fixInstanceID()).Return(internal.OperationID(""), false, nil).Once()
+	ts.mockAppFinder.On("FindOneByServiceID", fixAppServiceID()).
+		Return(fixApp(), nil).
+		Once()
 
-	sut := NewDeprovisioner(ts.mockInstanceStorage, ts.mockInstanceStateGetter, ts.mockOperationStorage, nil, ts.OpIDProviderFake, spy.NewLogDummy())
+	sut := NewDeprovisioner(
+		ts.mockInstanceStorage,
+		ts.mockInstanceStateGetter,
+		ts.mockOperationStorage,
+		nil,
+		ts.OpIDProviderFake,
+		ts.mockAppFinder,
+		ts.client,
+		spy.NewLogDummy(),
+	)
 
 	// WHEN
 	_, err := sut.Deprovision(context.Background(), osbContext{}, fixDeprovisionRequest())
@@ -90,8 +118,20 @@ func TestErrorOnRemovingInstance(t *testing.T) {
 	ts.mockOperationStorage.On("Insert", fixNewRemoveInstanceOperation()).Return(nil)
 	ts.mockInstanceStateGetter.On("IsDeprovisioned", fixInstanceID()).Return(false, nil).Once()
 	ts.mockInstanceStateGetter.On("IsDeprovisioningInProgress", fixInstanceID()).Return(internal.OperationID(""), false, nil).Once()
+	ts.mockAppFinder.On("FindOneByServiceID", fixAppServiceID()).
+		Return(fixApp(), nil).
+		Once()
 
-	sut := NewDeprovisioner(ts.mockInstanceStorage, ts.mockInstanceStateGetter, ts.mockOperationStorage, nil, ts.OpIDProviderFake, spy.NewLogDummy())
+	sut := NewDeprovisioner(
+		ts.mockInstanceStorage,
+		ts.mockInstanceStateGetter,
+		ts.mockOperationStorage,
+		nil,
+		ts.OpIDProviderFake,
+		ts.mockAppFinder,
+		ts.client,
+		spy.NewLogDummy(),
+	)
 
 	// WHEN
 	_, err := sut.Deprovision(context.Background(), osbContext{}, fixDeprovisionRequest())
@@ -108,13 +148,23 @@ func TestErrorOnIsDeprovisionedInstance(t *testing.T) {
 
 	mockStateGetter.On("IsDeprovisioned", fixInstanceID()).Return(false, fixError())
 
-	sut := NewDeprovisioner(nil, mockStateGetter, nil, nil, nil, spy.NewLogDummy())
+	sut := NewDeprovisioner(
+		nil,
+		mockStateGetter,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		spy.NewLogDummy(),
+	)
+
 	// WHEN
 	_, err := sut.Deprovision(context.Background(), osbContext{}, fixDeprovisionRequest())
 
 	// THEN
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "while checking if instance is already deprovisioned")
+	assert.Contains(t, err.Error(), "checking if instance is already deprovisioned")
 }
 
 func TestErrorOnDeprovisioningInProgressInstance(t *testing.T) {
@@ -125,13 +175,91 @@ func TestErrorOnDeprovisioningInProgressInstance(t *testing.T) {
 	mockStateGetter.On("IsDeprovisioned", fixInstanceID()).Return(false, nil)
 	mockStateGetter.On("IsDeprovisioningInProgress", fixInstanceID()).Return(internal.OperationID(""), false, fixError())
 
-	sut := NewDeprovisioner(nil, mockStateGetter, nil, nil, nil, spy.NewLogDummy())
+	sut := NewDeprovisioner(
+		nil,
+		mockStateGetter,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		spy.NewLogDummy(),
+	)
+
 	// WHEN
 	_, err := sut.Deprovision(context.Background(), osbContext{}, fixDeprovisionRequest())
 
 	// THEN
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "while checking if instance is being deprovisioned")
+	assert.Contains(t, err.Error(), "checking if instance is being deprovisioned")
+}
+
+func TestDoDeprovision(t *testing.T) {
+	var (
+		iID     = fixInstanceID()
+		opID    = fixOperationID()
+		appNs   = fixNs()
+		appName = fixAppName()
+	)
+
+	testCases := map[string]struct {
+		initialObjs   []runtime.Object
+		expectUpdates []runtime.Object
+		expectDeletes []string
+	}{
+		"Nothing to deprovision": {
+			initialObjs:   nil,
+			expectUpdates: nil,
+			expectDeletes: nil,
+		},
+		"Everything gets deprovisioned": {
+			initialObjs: []runtime.Object{
+				bt.NewAppNamespace(string(appNs), true),
+				bt.NewDefaultBroker(string(appNs)),
+				bt.NewAppSubscription(string(appNs), string(appName)),
+			},
+			expectUpdates: []runtime.Object{
+				// injection label gets removed
+				bt.NewAppNamespace(string(appNs), false),
+			},
+			expectDeletes: []string{
+				integrationNamespace + "/" + bt.FakeSubscriptionName, // subscription
+				string(appNs) + "/default",                           // broker
+			},
+		},
+	}
+
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			mockOpUpdater := &automock.OperationStorage{}
+			mockOpUpdater.On("UpdateStateDesc", iID, opID,
+				internal.OperationStateSucceeded,
+				fixDeprovisionSucceeded(),
+			).Return(nil).Once()
+
+			knCli, k8sCli := bt.NewFakeClients(tc.initialObjs...)
+
+			dpr := NewDeprovisioner(
+				nil,
+				nil,
+				nil,
+				mockOpUpdater,
+				nil,
+				nil,
+				knative.NewClient(knCli, k8sCli),
+				spy.NewLogDummy(),
+			)
+
+			// WHEN
+			dpr.do(iID, opID, appName, appNs)
+
+			//THEN
+			actionsAsserter := bt.NewActionsAsserter(t, knCli, k8sCli)
+			actionsAsserter.AssertUpdates(t, tc.expectUpdates)
+			actionsAsserter.AssertDeletes(t, tc.expectDeletes)
+			mockOpUpdater.AssertExpectations(t)
+		})
+	}
 }
 
 func newDeprovisionServiceTestSuite(t *testing.T) *deprovisionServiceTestSuite {
@@ -140,6 +268,8 @@ func newDeprovisionServiceTestSuite(t *testing.T) *deprovisionServiceTestSuite {
 		mockInstanceStateGetter: &automock.InstanceStateGetter{},
 		mockInstanceStorage:     &automock.InstanceStorage{},
 		mockOperationStorage:    &automock.OperationStorage{},
+		mockAppFinder:           &automock.AppFinder{},
+		client:                  knative.NewClient(bt.NewFakeClients()),
 	}
 }
 
@@ -149,6 +279,8 @@ type deprovisionServiceTestSuite struct {
 	mockInstanceStorage     *automock.InstanceStorage
 	mockOperationStorage    *automock.OperationStorage
 	OpIDProviderFake        func() (internal.OperationID, error)
+	mockAppFinder           *automock.AppFinder
+	client                  knative.Client
 }
 
 func (ts *deprovisionServiceTestSuite) AssertExpectations(t *testing.T) {

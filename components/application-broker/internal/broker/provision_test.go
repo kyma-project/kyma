@@ -2,30 +2,33 @@ package broker
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/access"
-	accessAutomock "github.com/kyma-project/kyma/components/application-broker/internal/access/automock"
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
+	"github.com/komkom/go-jsonhash"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 
-	"fmt"
-
-	"net/http"
-
-	"github.com/komkom/go-jsonhash"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8testing "k8s.io/client-go/testing"
+
+	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-broker/internal/access"
+	accessAutomock "github.com/kyma-project/kyma/components/application-broker/internal/access/automock"
+	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
+	bt "github.com/kyma-project/kyma/components/application-broker/internal/broker/testing"
+	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
+	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
+	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
 )
+
+// todo fix all tests
 
 func TestProvisionAsync(t *testing.T) {
 
@@ -107,10 +110,10 @@ func TestProvisionAsync(t *testing.T) {
 			mockInstanceStorage.On("Insert", instance).
 				Return(nil)
 
-			mockAccessChecker.On("CanProvision", fixInstanceID(), internal.ApplicationServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
+			mockAccessChecker.On("CanProvision", fixInstanceID(), fixAppServiceID(), fixNs(), defaultWaitTime).
 				Return(tc.givenCanProvisionOutput, tc.givenCanProvisionError)
 
-			mockAppFinder.On("FindOneByServiceID", internal.ApplicationServiceID(fixServiceID())).
+			mockAppFinder.On("FindOneByServiceID", fixAppServiceID()).
 				Return(fixApp(), nil).
 				Once()
 
@@ -119,10 +122,12 @@ func TestProvisionAsync(t *testing.T) {
 				Once()
 
 			if tc.expectedEventActivationCreated {
-				mockServiceInstanceGetter.On("GetByNamespaceAndExternalID", fixNs(), string(fixInstanceID())).Return(FixServiceInstance(), nil)
+				mockServiceInstanceGetter.On("GetByNamespaceAndExternalID", string(fixNs()), string(fixInstanceID())).Return(FixServiceInstance(), nil)
 			}
 
-			sut := NewProvisioner(mockInstanceStorage, mockInstanceStorage,
+			sut := NewProvisioner(
+				mockInstanceStorage,
+				mockInstanceStorage,
 				mockStateGetter,
 				mockOperationStorage,
 				mockOperationStorage,
@@ -130,8 +135,11 @@ func TestProvisionAsync(t *testing.T) {
 				mockAppFinder,
 				mockServiceInstanceGetter,
 				clientset.ApplicationconnectorV1alpha1(),
+				knative.NewClient(bt.NewFakeClients()),
 				mockInstanceStorage,
-				mockOperationIDProvider, spy.NewLogDummy())
+				mockOperationIDProvider,
+				spy.NewLogDummy(),
+			)
 
 			asyncFinished := make(chan struct{}, 0)
 			sut.asyncHook = func() {
@@ -151,7 +159,8 @@ func TestProvisionAsync(t *testing.T) {
 			select {
 			case <-asyncFinished:
 				if tc.expectedEventActivationCreated == true {
-					eventActivation, err := sut.eaClient.EventActivations(fixNs()).Get(fixServiceID(), v1.GetOptions{})
+					eventActivation, err := sut.eaClient.EventActivations(string(fixNs())).
+						Get(string(fixServiceID()), v1.GetOptions{})
 					assert.Nil(t, err)
 					assert.Equal(t, fixEventActivation(), eventActivation)
 				}
@@ -175,7 +184,23 @@ func TestProvisionWhenAlreadyProvisioned(t *testing.T) {
 	mockInstanceStorage.On("Get", fixInstanceID()).Return(instance, nil)
 	defer mockInstanceStorage.AssertExpectations(t)
 
-	sut := NewProvisioner(nil, mockInstanceStorage, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy())
+	sut := NewProvisioner(
+		nil,
+		mockInstanceStorage,
+		mockStateGetter,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		// TODO
+		nil,
+		nil,
+		nil,
+		spy.NewLogDummy(),
+	)
+
 	// WHEN
 	actResp, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
@@ -199,7 +224,24 @@ func TestProvisionWhenProvisioningInProgress(t *testing.T) {
 	mockInstanceStorage.On("Get", fixInstanceID()).Return(instance, nil)
 	defer mockInstanceStorage.AssertExpectations(t)
 
-	sut := NewProvisioner(nil, mockInstanceStorage, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy()) // WHEN
+	sut := NewProvisioner(
+		nil,
+		mockInstanceStorage,
+		mockStateGetter,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		// TODO
+		nil,
+		nil,
+		nil,
+		spy.NewLogDummy(),
+	)
+
+	// WHEN
 	actResp, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
 	// THEN
@@ -293,17 +335,20 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 			mockInstanceStorage.On("Insert", instance).Return(nil)
 			defer mockInstanceStorage.AssertExpectations(t)
 
-			mockAppFinder.On("FindOneByServiceID", internal.ApplicationServiceID(fixServiceID())).
+			mockAppFinder.On("FindOneByServiceID", fixServiceID()).
 				Return(fixApp(), nil).
 				Once()
 
-			mockAccessChecker.On("CanProvision", fixInstanceID(), internal.ApplicationServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
+			//CanProvision(internal.InstanceID,internal.ApplicationServiceID,internal.Namespace,time.Duration)
+			mockAccessChecker.On("CanProvision", fixInstanceID(), fixAppServiceID(), fixNs(), defaultWaitTime).
 				Return(access.CanProvisionOutput{Allowed: true}, nil)
 
-			mockServiceInstanceGetter.On("GetByNamespaceAndExternalID", fixNs(), string(fixInstanceID())).Return(FixServiceInstance(), nil)
+			mockServiceInstanceGetter.On("GetByNamespaceAndExternalID", string(fixNs()), string(fixInstanceID())).Return(FixServiceInstance(), nil)
 
 			setupMocks(clientset, mockInstanceStorage, mockOperationStorage)
-			sut := NewProvisioner(mockInstanceStorage, mockInstanceStorage,
+			sut := NewProvisioner(
+				mockInstanceStorage,
+				mockInstanceStorage,
 				mockStateGetter,
 				mockOperationStorage,
 				mockOperationStorage,
@@ -311,8 +356,12 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 				mockAppFinder,
 				mockServiceInstanceGetter,
 				clientset.ApplicationconnectorV1alpha1(),
+				// TODO
+				nil,
 				mockInstanceStorage,
-				mockOperationIDProvider, spy.NewLogDummy())
+				mockOperationIDProvider,
+				spy.NewLogDummy(),
+			)
 
 			asyncFinished := make(chan struct{}, 0)
 			sut.asyncHook = func() {
@@ -326,7 +375,7 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 			// THEN
 			select {
 			case <-asyncFinished:
-			case <-time.After(time.Second):
+			case <-time.After(time.Second * 600):
 				assert.Fail(t, "Async processing not finished")
 			}
 		})
@@ -372,14 +421,14 @@ func TestProvisionErrorOnGettingServiceInstance(t *testing.T) {
 	mockInstanceStorage.On("Insert", instance).
 		Return(nil)
 
-	mockAppFinder.On("FindOneByServiceID", internal.ApplicationServiceID(fixServiceID())).
+	mockAppFinder.On("FindOneByServiceID", fixServiceID()).
 		Return(fixApp(), nil).
 		Once()
 
-	mockAccessChecker.On("CanProvision", fixInstanceID(), internal.ApplicationServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
+	mockAccessChecker.On("CanProvision", fixInstanceID(), fixAppServiceID(), fixNs(), defaultWaitTime).
 		Return(access.CanProvisionOutput{Allowed: true}, nil)
 
-	mockServiceInstanceGetter.On("GetByNamespaceAndExternalID", fixNs(), string(fixInstanceID())).Return(nil, errors.New("custom error"))
+	mockServiceInstanceGetter.On("GetByNamespaceAndExternalID", string(fixNs()), string(fixInstanceID())).Return(nil, errors.New("custom error"))
 
 	mockInstanceStorage.On("UpdateState", fixInstanceID(), internal.InstanceStateFailed).
 		Return(nil).
@@ -388,7 +437,9 @@ func TestProvisionErrorOnGettingServiceInstance(t *testing.T) {
 	mockOperationStorage.On("UpdateStateDesc", fixInstanceID(), fixOperationID(), internal.OperationStateFailed, fixErrWhileGettingServiceInstance()).
 		Return(nil)
 
-	sut := NewProvisioner(mockInstanceStorage, mockInstanceStorage,
+	sut := NewProvisioner(
+		mockInstanceStorage,
+		mockInstanceStorage,
 		mockStateGetter,
 		mockOperationStorage,
 		mockOperationStorage,
@@ -396,8 +447,12 @@ func TestProvisionErrorOnGettingServiceInstance(t *testing.T) {
 		mockAppFinder,
 		mockServiceInstanceGetter,
 		clientset.ApplicationconnectorV1alpha1(),
+		// TODO
+		nil,
 		mockInstanceStorage,
-		mockOperationIDProvider, spy.NewLogDummy())
+		mockOperationIDProvider,
+		spy.NewLogDummy(),
+	)
 
 	asyncFinished := make(chan struct{}, 0)
 	sut.asyncHook = func() {
@@ -422,7 +477,23 @@ func TestProvisionErrorOnCheckingIfProvisioned(t *testing.T) {
 	defer mockStateGetter.AssertExpectations(t)
 	mockStateGetter.On("IsProvisioned", fixInstanceID()).Return(false, fixError())
 
-	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy())
+	sut := NewProvisioner(
+		nil,
+		nil,
+		mockStateGetter,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		// TODO
+		nil,
+		nil,
+		nil,
+		spy.NewLogDummy(),
+	)
+
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
@@ -437,7 +508,23 @@ func TestProvisionErrorOnCheckingIfProvisionInProgress(t *testing.T) {
 	mockStateGetter.On("IsProvisioned", fixInstanceID()).Return(false, nil)
 	mockStateGetter.On("IsProvisioningInProgress", fixInstanceID()).Return(internal.OperationID(""), false, fixError())
 
-	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, nil, spy.NewLogDummy())
+	sut := NewProvisioner(
+		nil,
+		nil,
+		mockStateGetter,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		// TODO
+		nil,
+		nil,
+		nil,
+		spy.NewLogDummy(),
+	)
+
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
@@ -459,7 +546,23 @@ func TestProvisionErrorOnIDGeneration(t *testing.T) {
 	mockOperationIDProvider := func() (internal.OperationID, error) {
 		return "", fixError()
 	}
-	sut := NewProvisioner(nil, nil, mockStateGetter, nil, nil, nil, nil, nil, nil, nil, mockOperationIDProvider, spy.NewLogDummy())
+	sut := NewProvisioner(
+		nil,
+		nil,
+		mockStateGetter,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		// TODO
+		nil,
+		nil,
+		mockOperationIDProvider,
+		spy.NewLogDummy(),
+	)
+
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 	// THEN
@@ -488,7 +591,9 @@ func TestProvisionErrorOnInsertingOperation(t *testing.T) {
 	mockOperationStorage.On("Insert", instanceOperation).
 		Return(fixError())
 
-	sut := NewProvisioner(nil, nil,
+	sut := NewProvisioner(
+		nil,
+		nil,
 		mockStateGetter,
 		mockOperationStorage,
 		mockOperationStorage,
@@ -496,8 +601,12 @@ func TestProvisionErrorOnInsertingOperation(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		// TODO
 		nil,
-		mockOperationIDProvider, spy.NewLogDummy())
+		nil,
+		mockOperationIDProvider,
+		spy.NewLogDummy(),
+	)
 
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
@@ -539,7 +648,9 @@ func TestProvisionErrorOnInsertingInstance(t *testing.T) {
 		Return(fixApp(), nil).
 		Once()
 
-	sut := NewProvisioner(mockInstanceStorage, mockInstanceStorage,
+	sut := NewProvisioner(
+		mockInstanceStorage,
+		mockInstanceStorage,
 		mockStateGetter,
 		mockOperationStorage,
 		mockOperationStorage,
@@ -547,8 +658,12 @@ func TestProvisionErrorOnInsertingInstance(t *testing.T) {
 		mockAppFinder,
 		nil,
 		nil,
+		// TODO
 		nil,
-		mockOperationIDProvider, spy.NewLogDummy())
+		nil,
+		mockOperationIDProvider,
+		spy.NewLogDummy(),
+	)
 
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
@@ -575,7 +690,8 @@ func TestProvisionConflictWhenInstanceIsProvisioned(t *testing.T) {
 		return fixOperationID(), nil
 	}
 
-	sut := NewProvisioner(nil,
+	sut := NewProvisioner(
+		nil,
 		mockInstanceStorage,
 		mockStateGetter,
 		mockOperationStorage,
@@ -584,8 +700,12 @@ func TestProvisionConflictWhenInstanceIsProvisioned(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		// TODO
 		nil,
-		mockOperationIDProvider, spy.NewLogDummy())
+		nil,
+		mockOperationIDProvider,
+		spy.NewLogDummy(),
+	)
 
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
@@ -615,7 +735,8 @@ func TestProvisionConflictWhenInstanceIsBeingProvisioned(t *testing.T) {
 		return fixOperationID(), nil
 	}
 
-	sut := NewProvisioner(mockInstanceStorage,
+	sut := NewProvisioner(
+		mockInstanceStorage,
 		mockInstanceStorage,
 		mockStateGetter,
 		mockOperationStorage,
@@ -624,8 +745,12 @@ func TestProvisionConflictWhenInstanceIsBeingProvisioned(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		// TODO
 		nil,
-		mockOperationIDProvider, spy.NewLogDummy())
+		nil,
+		mockOperationIDProvider,
+		spy.NewLogDummy(),
+	)
 
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())

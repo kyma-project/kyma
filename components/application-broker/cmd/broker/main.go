@@ -9,12 +9,21 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
+	eventingCli "github.com/knative/eventing/pkg/client/clientset/versioned"
+
 	scCs "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	catalogInformers "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
+	v1 "k8s.io/client-go/informers/core/v1"
+	"k8s.io/client-go/kubernetes"
+	restclient "k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/cache"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/config"
+	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	"github.com/kyma-project/kyma/components/application-broker/internal/mapping"
 	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
 	"github.com/kyma-project/kyma/components/application-broker/internal/storage"
@@ -25,11 +34,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/platform/logger"
 	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	appInformer "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
-	"github.com/sirupsen/logrus"
-	v1 "k8s.io/client-go/informers/core/v1"
-	"k8s.io/client-go/kubernetes"
-	restclient "k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/cache"
 )
 
 // informerResyncPeriod defines how often informer will execute relist action. Setting to zero disable resync.
@@ -39,8 +43,8 @@ const informerResyncPeriod = 30 * time.Minute
 func main() {
 	verbose := flag.Bool("verbose", false, "specify if log verbosely loading configuration")
 	flag.Parse()
-	cfg, err := config.Load(*verbose)
-	fatalOnError(err)
+	cfg, err1 := config.Load(*verbose)
+	fatalOnError(err1)
 
 	log := logger.New(&cfg.Logger)
 
@@ -51,19 +55,22 @@ func main() {
 	stopCh := make(chan struct{})
 	cancelOnInterrupt(ctx, stopCh, cancelFunc)
 
-	k8sConfig, err := restclient.InClusterConfig()
-	fatalOnError(err)
+	k8sConfig, err1 := restclient.InClusterConfig()
+	fatalOnError(err1)
 
-	appClient, err := appCli.NewForConfig(k8sConfig)
-	fatalOnError(err)
-	mClient, err := mappingCli.NewForConfig(k8sConfig)
-	fatalOnError(err)
-	scClientSet, err := scCs.NewForConfig(k8sConfig)
-	fatalOnError(err)
-	k8sClient, err := kubernetes.NewForConfig(k8sConfig)
-	fatalOnError(err)
+	appClient, err1 := appCli.NewForConfig(k8sConfig)
+	fatalOnError(err1)
+	mClient, err1 := mappingCli.NewForConfig(k8sConfig)
+	fatalOnError(err1)
+	scClientSet, err1 := scCs.NewForConfig(k8sConfig)
+	fatalOnError(err1)
+	k8sClient, err1 := kubernetes.NewForConfig(k8sConfig)
+	fatalOnError(err1)
+	eventingClient, err1 := eventingCli.NewForConfig(k8sConfig)
+	fatalOnError(err1)
+	knClient := knative.NewClient(eventingClient, k8sClient)
 
-	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient)
+	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient, knClient)
 
 	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
 }
@@ -74,7 +81,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	scClientSet scCs.Interface,
 	appClient appCli.Interface,
 	mClient mappingCli.Interface,
-) *broker.Server {
+	knClient knative.Client) *broker.Server {
 
 	// create storage factory
 	storageConfig := storage.ConfigList(cfg.Storage)
@@ -123,8 +130,18 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.Application(), nsBrokerFacade, nsBrokerSyncer, log)
 
 	// create broker
-	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
-		mClient.ApplicationconnectorV1alpha1(), siFacade, mInformersGroup.ApplicationMappings().Lister(), brokerService, log)
+	srv := broker.New(
+		sFact.Application(),
+		sFact.Instance(),
+		sFact.InstanceOperation(),
+		accessChecker,
+		mClient.ApplicationconnectorV1alpha1(),
+		siFacade,
+		mInformersGroup.ApplicationMappings().Lister(),
+		brokerService,
+		log,
+		knClient,
+	)
 
 	// start informers
 	scInformerFactory.Start(stopCh)
