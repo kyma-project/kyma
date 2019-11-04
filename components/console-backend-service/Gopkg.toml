@@ -1,5 +1,5 @@
 required = [
-    "github.com/kyma-project/kyma/tools/failery",
+    "github.com/kyma-project/kyma/tools/failery/cmd/failery",
     "github.com/urfave/cli",
     "k8s.io/code-generator/cmd/defaulter-gen",
     "k8s.io/code-generator/cmd/deepcopy-gen",
@@ -49,7 +49,7 @@ required = [
   name="sigs.k8s.io/controller-runtime"
   version = "v0.2.0"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/api"
   version = "kubernetes-1.15.0"
 
@@ -57,15 +57,15 @@ required = [
   name = "k8s.io/apimachinery"
   version = "kubernetes-1.15.0"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/client-go"
   version = "kubernetes-1.15.0"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/apiserver"
   version = "kubernetes-1.15.0"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/code-generator"
   version = "kubernetes-1.15.0"
 
