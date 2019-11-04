@@ -40,59 +40,63 @@ func init() {
 }
 
 func TestBackupAndRestoreCluster(t *testing.T) {
-	myFunctionTest, err := NewFunctionTest()
-	fatalOnError(t, err, "while creating structure for Function test")
+	/*
+		myFunctionTest, err := NewFunctionTest()
+		fatalOnError(t, err, "while creating structure for Function test")
 
-	myStatefulSetTest, err := NewStatefulSetTest()
-	fatalOnError(t, err, "while creating structure for StatefulSet test")
+		myStatefulSetTest, err := NewStatefulSetTest()
+		fatalOnError(t, err, "while creating structure for StatefulSet test")
 
-	myDeploymentTest, err := NewDeploymentTest()
-	fatalOnError(t, err, "while creating structure for Deployment test")
+		myDeploymentTest, err := NewDeploymentTest()
+		fatalOnError(t, err, "while creating structure for Deployment test")
 
-	myPrometheusTest, err := NewPrometheusTest()
-	fatalOnError(t, err, "while creating structure for Prometheus test")
+		myPrometheusTest, err := NewPrometheusTest()
+		fatalOnError(t, err, "while creating structure for Prometheus test")
 
-	myGrafanaTest, err := NewGrafanaTest()
-	fatalOnError(t, err, "while creating structure for Grafana test")
+		myGrafanaTest, err := NewGrafanaTest()
+		fatalOnError(t, err, "while creating structure for Grafana test")
 
-	scAddonsTest, err := NewServiceCatalogAddonsTest()
-	fatalOnError(t, err, "while creating structure for ScAddons test")
+		scAddonsTest, err := NewServiceCatalogAddonsTest()
+		fatalOnError(t, err, "while creating structure for ScAddons test")
 
-	apiControllerTest, err := NewApiControllerTestFromEnv()
-	fatalOnError(t, err, "while creating structure for ApiController test")
+		apiControllerTest, err := NewApiControllerTestFromEnv()
+		fatalOnError(t, err, "while creating structure for ApiController test")
 
-	myAssetStoreTest, err := NewAssetStoreTest(t)
-	fatalOnError(t, err, "while creating structure for AssetStore test")
+		myAssetStoreTest, err := NewAssetStoreTest(t)
+		fatalOnError(t, err, "while creating structure for AssetStore test")
 
-	myMicroFrontendTest, err := NewMicrofrontendTest()
-	fatalOnError(t, err, "while creating structure for MicroFrontend test")
+		myMicroFrontendTest, err := NewMicrofrontendTest()
+		fatalOnError(t, err, "while creating structure for MicroFrontend test")
 
-	appBrokerTest, err := NewAppBrokerTest()
-	fatalOnError(t, err, "while creating structure for AppBroker test")
+		appBrokerTest, err := NewAppBrokerTest()
+		fatalOnError(t, err, "while creating structure for AppBroker test")
 
-	helmBrokerTest, err := NewHelmBrokerTest()
-	fatalOnError(t, err, "while creating structure for HelmBroker test")
+		helmBrokerTest, err := NewHelmBrokerTest()
+		fatalOnError(t, err, "while creating structure for HelmBroker test")
 
-	//myEventBusTest, err := NewEventBusTest()
-	//fatalOnError(t, err, "while creating structure for EventBus test")
+		myCmsTest, err := NewCmsTest(t)
+		fatalOnError(t, err, "while creating structure for Cms test")
+	*/
 
-	myCmsTest, err := NewCmsTest(t)
-	fatalOnError(t, err, "while creating structure for Cms test")
+	myEventBusTest, err := NewEventBusTest()
+	fatalOnError(t, err, "while creating structure for EventBus test")
 
 	backupTests := []BackupTest{
-		myPrometheusTest,
-		myFunctionTest,
-		myDeploymentTest,
-		myStatefulSetTest,
-		myGrafanaTest,
-		scAddonsTest,
-		myCmsTest,
-		myAssetStoreTest,
-		apiControllerTest,
-		myMicroFrontendTest,
-		appBrokerTest,
-		helmBrokerTest,
-		//myEventBusTest,
+		/*
+			myPrometheusTest,
+			myFunctionTest,
+			myDeploymentTest,
+			myStatefulSetTest,
+			myGrafanaTest,
+			scAddonsTest,
+			myCmsTest,
+			myAssetStoreTest,
+			apiControllerTest,
+			myMicroFrontendTest,
+			appBrokerTest,
+			helmBrokerTest,
+		*/
+		myEventBusTest,
 	}
 	e2eTests := make([]e2eTest, len(backupTests))
 
