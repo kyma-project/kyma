@@ -6,6 +6,6 @@ data:
   "cacert": "" # This value is populated by Application Connectivity Certs Setup Job (resources/application-connector/templates/certs-setup-job.yaml) or Connectivity Certs Controller
 kind: Secret
 metadata:
-  name: compass-certs
+  name: {{ .Values.global.compass.mtls.secret.name }}
   namespace: istio-system
 type: Opaque
