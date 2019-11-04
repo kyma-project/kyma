@@ -59,8 +59,8 @@ metadata:
   name: istio-grafana-post-install-{{ .Values.global.tag | printf "%v" | trunc 32 }}
   namespace: {{ .Release.Namespace }}
   annotations:
-    helm.sh/hook: post-install
-    helm.sh/hook-delete-policy: hook-succeeded
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": hook-succeeded
   labels:
     app: {{ template "grafana.name" . }}
     chart: {{ template "grafana.chart" . }}

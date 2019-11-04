@@ -13,15 +13,13 @@
       - hostPath:
           path: /var/run/sds
         name: sds-uds-path
-      {{- if $.Values.global.sds.useTrustworthyJwt }}
       - name: istio-token
         projected:
           sources:
           - serviceAccountToken:
-              audience: {{ $.Values.global.trustDomain }}
+              audience: {{ $.Values.global.sds.token.aud }}
               expirationSeconds: 43200
               path: istio-token
-      {{- end }}
       {{- end }}
       - name: uds-socket
         emptyDir: {}
@@ -72,11 +70,7 @@
           {{- else }}
           - --useAdapterCRDs=false
           {{- end }}
-          {{- if $.Values.templates.useTemplateCRDs }}
-          - --useTemplateCRDs=true
-          {{- else }}
           - --useTemplateCRDs=false
-          {{- end }}
           {{- if $.Values.global.tracer.zipkin.address }}
           - --trace_zipkin_url=http://{{- $.Values.global.tracer.zipkin.address }}/api/v1/spans
           {{- else }}
@@ -158,6 +152,8 @@
             fieldRef:
               apiVersion: v1
               fieldPath: status.podIP
+        - name: SDS_ENABLED
+          value: "{{ $.Values.global.sds.enabled }}"
         resources:
 {{- if $.Values.global.proxy.resources }}
 {{ toYaml $.Values.global.proxy.resources | indent 10 }}
@@ -172,10 +168,8 @@
         - name: sds-uds-path
           mountPath: /var/run/sds
           readOnly: true
-        {{- if $.Values.global.sds.useTrustworthyJwt }}
         - name: istio-token
           mountPath: /var/run/secrets/tokens
-        {{- end }}
         {{- end }}
         - name: uds-socket
           mountPath: /sock
@@ -187,6 +181,9 @@
 {{- define "telemetry_container" }}
     spec:
       serviceAccountName: istio-mixer-service-account
+{{- if $.Values.global.priorityClassName }}
+      priorityClassName: "{{ $.Values.global.priorityClassName }}"
+{{- end }}
       volumes:
       - name: istio-certs
         secret:
@@ -196,15 +193,13 @@
       - hostPath:
           path: /var/run/sds
         name: sds-uds-path
-      {{- if $.Values.global.sds.useTrustworthyJwt }}
       - name: istio-token
         projected:
           sources:
           - serviceAccountToken:
-              audience: {{ $.Values.global.trustDomain }}
+              audience: {{ $.Values.global.sds.token.aud }}
               expirationSeconds: 43200
               path: istio-token
-      {{- end }}
       {{- end }}
       - name: uds-socket
         emptyDir: {}
@@ -257,11 +252,6 @@
           - --useAdapterCRDs=true
           {{- else }}
           - --useAdapterCRDs=false
-          {{- end }}
-          {{- if $.Values.templates.useTemplateCRDs }}
-          - --useTemplateCRDs=true
-          {{- else }}
-          - --useTemplateCRDs=false
           {{- end }}
           {{- if $.Values.global.tracer.zipkin.address }}
           - --trace_zipkin_url=http://{{- $.Values.global.tracer.zipkin.address }}/api/v1/spans
@@ -348,6 +338,8 @@
             fieldRef:
               apiVersion: v1
               fieldPath: status.podIP
+        - name: SDS_ENABLED
+          value: "{{ $.Values.global.sds.enabled }}"
         resources:
 {{- if $.Values.global.proxy.resources }}
 {{ toYaml $.Values.global.proxy.resources | indent 10 }}
@@ -362,10 +354,8 @@
         - name: sds-uds-path
           mountPath: /var/run/sds
           readOnly: true
-        {{- if $.Values.global.sds.useTrustworthyJwt }}
         - name: istio-token
           mountPath: /var/run/secrets/tokens
-        {{- end }}
         {{- end }}
         - name: uds-socket
           mountPath: /sock
@@ -396,8 +386,8 @@ spec:
 {{- end }}
   strategy:
     rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+      maxSurge: {{ $spec.rollingMaxSurge }}
+      maxUnavailable: {{ $spec.rollingMaxUnavailable }}
   selector:
     matchLabels:
       istio: mixer
