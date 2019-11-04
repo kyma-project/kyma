@@ -130,7 +130,7 @@ Follow the instructions in the tabs to deploy an instance of the HttpBin service
     service:
       name: httpbin
       port: 8000
-      host: httpbin.kyma.local
+      host: httpbin.$DOMAIN
     rules:
       - path: /.*
         methods: ["GET"]
@@ -177,7 +177,7 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
     service:
       name: lambda
       port: 8080
-      host: lambda-example.kyma.local
+      host: lambda-example.$DOMAIN
     rules:
       - path: /lambda
         methods: ["GET"]
