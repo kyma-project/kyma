@@ -35,6 +35,14 @@
   version = "v0.12.5"
 
 [[projects]]
+  digest = "1:371a9396c2c1a6cb1d7d1de3373d06c005c313e1f4c7a58a691e8d1d4e40e483"
+  name = "contrib.go.opencensus.io/exporter/zipkin"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "30f9fad5db2c8944c21d223496e2543aeb445d4c"
+  version = "v0.1.1"
+
+[[projects]]
   digest = "1:9f3b30d9f8e0d7040f729b82dcbc8f0dead820a133b3147ce355fc451f32d761"
   name = "github.com/BurntSushi/toml"
   packages = ["."]
@@ -102,6 +110,27 @@
   pruneopts = "UT"
   revision = "d89fa54de508111353cb0b06403c00569be780d8"
   version = "v0.2.1"
+
+[[projects]]
+  digest = "1:078db1588b2eca641aadbfd9b5b913417d6a49c3af482c84688c9878d2880561"
+  name = "github.com/cloudevents/sdk-go"
+  packages = [
+    ".",
+    "pkg/cloudevents",
+    "pkg/cloudevents/client",
+    "pkg/cloudevents/context",
+    "pkg/cloudevents/datacodec",
+    "pkg/cloudevents/datacodec/json",
+    "pkg/cloudevents/datacodec/text",
+    "pkg/cloudevents/datacodec/xml",
+    "pkg/cloudevents/observability",
+    "pkg/cloudevents/transport",
+    "pkg/cloudevents/transport/http",
+    "pkg/cloudevents/types",
+  ]
+  pruneopts = "UT"
+  revision = "2fa4bb1fbb4aac4d906b0173a2a408f701439b82"
+  version = "v0.10.0"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -273,6 +302,14 @@
   version = "1.1.8"
 
 [[projects]]
+  digest = "1:fd9bea48bbc5bba66d9891c72af7255fbebecdff845c37c679406174ece5ca1b"
+  name = "github.com/kelseyhightower/envconfig"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0b417c4ec4a8a82eecc22a1459a504aa55163d61"
+  version = "v1.4.0"
+
+[[projects]]
   digest = "1:3804a3a02964db8e6db3e5e7960ac1c1a9b12835642dd4f4ac4e56c749ec73eb"
   name = "github.com/markbates/inflect"
   packages = ["."]
@@ -311,6 +348,21 @@
   pruneopts = "UT"
   revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
   version = "1.0.1"
+
+[[projects]]
+  digest = "1:5e77097fe469a5197f48f4625b0de00024529ce29af6b93a6e5635f42a54599a"
+  name = "github.com/openzipkin/zipkin-go"
+  packages = [
+    ".",
+    "idgenerator",
+    "model",
+    "propagation",
+    "reporter",
+    "reporter/http",
+  ]
+  pruneopts = "UT"
+  revision = "c29478e51bfb2e9c93e0e9f5e015e5993a490399"
+  version = "v0.2.2"
 
 [[projects]]
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
@@ -1144,9 +1196,10 @@
   revision = "8d271d903fe4c290aa361acfb242cff7bcee96f1"
 
 [[projects]]
-  digest = "1:1c173360a96c928935dfabb2ea0b52cde9f77478633caf2db5d714adabff3d1b"
+  digest = "1:58f1a1f6c1d4fef1318ffb558df9289807c8241c5d0507cede7711979eaaab0a"
   name = "knative.dev/eventing"
   packages = [
+    "pkg/adapter",
     "pkg/apis/duck",
     "pkg/apis/duck/v1alpha1",
     "pkg/apis/eventing",
@@ -1181,7 +1234,10 @@
     "pkg/client/listers/eventing/v1alpha1",
     "pkg/client/listers/messaging/v1alpha1",
     "pkg/client/listers/sources/v1alpha1",
+    "pkg/configmap",
+    "pkg/kncloudevents",
     "pkg/reconciler",
+    "pkg/tracing",
   ]
   pruneopts = "UT"
   revision = "5fe2b0a21aead60f84ecddec224dbbb3a6d62d07"
@@ -1189,7 +1245,7 @@
 
 [[projects]]
   branch = "release-0.10"
-  digest = "1:27525dfbcb9b9748925108b9ac7717750a336cfc44cc72886e75981b5a3f847d"
+  digest = "1:bb3a5e3f223c0d813326c115ce6ca4a5be1436fd725393e9da35adcaf262c07c"
   name = "knative.dev/pkg"
   packages = [
     "apis",
@@ -1201,6 +1257,7 @@
     "changeset",
     "client/injection/kube/client",
     "client/injection/kube/client/fake",
+    "cloudevents",
     "codegen/cmd/injection-gen",
     "codegen/cmd/injection-gen/args",
     "codegen/cmd/injection-gen/generators",
@@ -1223,8 +1280,11 @@
     "reconciler/testing",
     "resolver",
     "signals",
+    "source",
     "system",
     "system/testing",
+    "tracing",
+    "tracing/config",
     "tracker",
     "webhook",
   ]
@@ -1326,6 +1386,7 @@
     "k8s.io/code-generator/cmd/deepcopy-gen",
     "k8s.io/code-generator/cmd/informer-gen",
     "k8s.io/code-generator/cmd/lister-gen",
+    "knative.dev/eventing/pkg/adapter",
     "knative.dev/eventing/pkg/apis/messaging/v1alpha1",
     "knative.dev/eventing/pkg/client/clientset/versioned/fake",
     "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1",
@@ -1340,6 +1401,7 @@
     "knative.dev/pkg/apis/duck/v1beta1",
     "knative.dev/pkg/apis/v1alpha1",
     "knative.dev/pkg/client/injection/kube/client/fake",
+    "knative.dev/pkg/cloudevents",
     "knative.dev/pkg/codegen/cmd/injection-gen",
     "knative.dev/pkg/configmap",
     "knative.dev/pkg/controller",
