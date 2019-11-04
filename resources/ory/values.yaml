@@ -20,6 +20,11 @@ hpa:
 
 # Overrides for the Hydra chart
 hydra:
+  service:
+    public:
+      enabled: true
+    admin:
+      enabled: true
   ingress:
     public:
       enabled: false
