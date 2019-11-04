@@ -195,7 +195,7 @@ The exposed lambda function requires all `GET` requests to have a valid token wi
   </details>
 </div>
 
->**CAUTION:** When you secure a service, don't create overlapping Access Rules for paths. Doing so can cause unexpected behavior and compromise the security of your implementation.
+>**CAUTION:** When you secure a service, don't create overlapping Access Rules for paths. Doing so can cause unexpected behavior and reduce the security of your implementation.
 
 ## Access the secured resources
 
