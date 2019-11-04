@@ -69,7 +69,7 @@ spec:
 {{- if contains "/" $spec.sds.image }}
           image: "{{ $spec.sds.image }}"
 {{- else }}
-          image: "{{ $.Values.global.hub }}/{{ $spec.sds.image }}:{{ $.Values.global.tag }}"
+          image: "{{ $.Values.global.hub }}/{{ $spec.sds.image }}:1.3.4"
 {{- end }}
           imagePullPolicy: {{ $.Values.global.imagePullPolicy }}
           resources:
@@ -97,7 +97,7 @@ spec:
 {{- if contains "/" $.Values.global.proxy.image }}
           image: "{{ $.Values.global.proxy.image }}"
 {{- else }}
-          image: "{{ $.Values.global.hub }}/{{ $.Values.global.proxy.image }}:{{ $.Values.global.tag }}"
+          image: "{{ $.Values.global.hub }}/{{ $.Values.global.proxy.image }}:1.3.4"
 {{- end }}
           imagePullPolicy: {{ $.Values.global.imagePullPolicy }}
           ports:
