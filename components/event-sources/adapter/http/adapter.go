@@ -58,8 +58,6 @@ func NewAdapter(ctx context.Context, processed adapter.EnvConfigAccessor, ceClie
 func (h *httpAdapter) Start(stopCh <-chan struct{}) error {
 	logger := h.logger
 
-	logger.Info("starting adapter")
-
 	t, err := cloudevents.NewHTTPTransport(
 		cloudevents.WithPort(h.envConfig.Port),
 		cloudevents.WithPath(path),
@@ -73,7 +71,10 @@ func (h *httpAdapter) Start(stopCh <-chan struct{}) error {
 	}
 
 	log.Printf("will listen on :%d%s\n", h.envConfig.Port, path)
-	log.Fatalf("failed to start receiver: %s", c.StartReceiver(h.adapterContext, h.serveHTTP))
+	fmt.Printf("client: %v", c)
+	if err := c.StartReceiver(h.adapterContext, h.serveHTTP); err != nil {
+		log.Fatalf("failed to start receiver: %v", err)
+	}
 
 	<-stopCh
 	logger.Info("stopping adapter")
