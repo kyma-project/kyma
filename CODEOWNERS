@@ -198,6 +198,9 @@
 # The `ory` chart
 /resources/ory/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
+# The `service-broker-proxy` chart
+/resource/service-broker-proxy/ @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
+
 # The `api-gateway` chart
 /resources/api-gateway/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
