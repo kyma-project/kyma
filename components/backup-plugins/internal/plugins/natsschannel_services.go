@@ -17,14 +17,18 @@ limitations under the License.
 package plugins
 
 import (
+	"fmt"
+
 	"github.com/heptio/velero/pkg/plugin/velero"
 	"github.com/sirupsen/logrus"
 
 	apimeta "k8s.io/apimachinery/pkg/api/meta"
 )
 
-const natssChannelLabelKey = "messaging.knative.dev/role=natss-channel"
-const natssChannelLabelValue = "natss-channel"
+const (
+	natssChannelLabelKey   = "messaging.knative.dev/role"
+	natssChannelLabelValue = "natss-channel"
+)
 
 // IgnoreNatssChannelService ignores Services associated to NATSS Channels during restore.
 type IgnoreNatssChannelService struct {
@@ -43,14 +47,22 @@ func (p *IgnoreNatssChannelService) Execute(input *velero.RestoreItemActionExecu
 	item := input.Item
 	meta, err := apimeta.Accessor(item)
 	if err != nil {
-		p.Log.Errorf("Error in Accessor: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("accessing item metadata: %s", err)
 	}
-	labels := meta.GetLabels()
-	if val, ok := labels[natssChannelLabelKey]; ok && val == natssChannelLabelValue {
-		p.Log.Infof("Ignoring restore of Service: %s/%s", meta.GetNamespace(), meta.GetName())
-		return velero.NewRestoreItemActionExecuteOutput(input.Item).WithoutRestore(), nil
+
+	itemStr := fmt.Sprintf("%s %s/%s",
+		item.GetObjectKind().GroupVersionKind().GroupKind(),
+		meta.GetNamespace(),
+		meta.GetName(),
+	)
+
+	restoreOutput := velero.NewRestoreItemActionExecuteOutput(input.Item)
+
+	if meta.GetLabels()[natssChannelLabelKey] == natssChannelLabelValue {
+		p.Log.Infof("Ignoring restore of %s", itemStr)
+		return restoreOutput.WithoutRestore(), nil
 	}
-	p.Log.Infof("Restoring Service: %s/%s", meta.GetNamespace(), meta.GetName())
-	return velero.NewRestoreItemActionExecuteOutput(input.Item), nil
+
+	p.Log.Infof("Restoring %s", itemStr)
+	return restoreOutput, nil
 }
