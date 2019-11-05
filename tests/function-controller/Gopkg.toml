@@ -1,3 +1,8 @@
+required = [
+  # used by before-commit.sh script
+  "golang.org/x/tools/cmd/goimports",
+]
+
 [prune]
   go-tests = true
   unused-packages = true

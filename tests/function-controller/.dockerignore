@@ -1,0 +1,6 @@
+Makefile
+Dockerfile
+Gopkg.*
+*.md
+*.sh
+hack/
