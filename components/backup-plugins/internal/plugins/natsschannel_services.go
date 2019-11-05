@@ -34,19 +34,24 @@ type IgnoreNatssChannelService struct {
 func (p *IgnoreNatssChannelService) AppliesTo() (velero.ResourceSelector, error) {
 	return velero.ResourceSelector{
 		IncludedResources: []string{"services"},
-		LabelSelector:     natssChannelLabel,
+		//LabelSelector:     natssChannelLabel,
 	}, nil
 }
 
 // Execute contains executes the plugin logic on the received object.
 func (p *IgnoreNatssChannelService) Execute(input *velero.RestoreItemActionExecuteInput) (*velero.RestoreItemActionExecuteOutput, error) {
+	p.Log.Infof("Are we ignoring NatssChannel!!")
 	item := input.Item
 	meta, err := apimeta.Accessor(item)
 	if err != nil {
+		p.Log.Errorf("Error in Accessor: %v", err)
 		return nil, err
 	}
-
-	p.Log.Infof("Ignoring restore of %s %s/%s", item.GetObjectKind(), meta.GetNamespace(), meta.GetName())
-
-	return velero.NewRestoreItemActionExecuteOutput(input.Item).WithoutRestore(), nil
+	labels := meta.GetLabels()
+	if val, ok := labels["messaging.knative.dev/role"]; ok && val == "natss-channel" {
+		p.Log.Infof("Ignoring restore of %s %s/%s", item.GetObjectKind(), meta.GetNamespace(), meta.GetName())
+		return velero.NewRestoreItemActionExecuteOutput(input.Item).WithoutRestore(), nil
+	}
+	p.Log.Infof("Restoring %s %s/%s", item.GetObjectKind(), meta.GetNamespace(), meta.GetName())
+	return velero.NewRestoreItemActionExecuteOutput(input.Item), nil
 }
