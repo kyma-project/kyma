@@ -36,7 +36,7 @@ gateways:
         limits:
           cpu: 50m
           memory: 64Mi
-    secretVolumes: []
+    # secretVolumes: []
     ports:
       ## You can add custom gateway ports
       # Note that AWS ELB will by default perform health checks on the first port
@@ -48,10 +48,12 @@ gateways:
       - port: 80
         targetPort: 80
         name: http2
+        nodePort: 31380
         # Kyma specific value, do not remove!
         hostPort: 80
       - port: 443
         name: https
+        nodePort: 31390
         # Kyma specific value, do not remove!
         hostPort: 443
       ### PORTS FOR UI/metrics #####
@@ -59,6 +61,12 @@ gateways:
       - port: 15029
         targetPort: 15029
         name: https-kiali
+      - port: 15030
+        targetPort: 15030
+        name: https-prometheus
+      - port: 15031
+        targetPort: 15031
+        name: https-grafana
       - port: 15032
         targetPort: 15032
         name: https-tracing
