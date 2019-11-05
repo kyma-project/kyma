@@ -1,9 +1,10 @@
 package certificates
 
 import (
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"net/http"
 	"regexp"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
 
 const ClientCertHeader = "X-Forwarded-Client-Cert"

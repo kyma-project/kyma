@@ -134,6 +134,14 @@
   revision = "44145f04b68cf362d9c4df2182967c2275eaefed"
 
 [[projects]]
+  digest = "1:be408f349cae090a7c17a279633d6e62b00068e64af66a582cae0983de8890ea"
+  name = "github.com/golang/mock"
+  packages = ["gomock"]
+  pruneopts = "NUT"
+  revision = "9fa652df1129bef0e734c9cf9bf6dbae9ef3b9fa"
+  version = "1.3.1"
+
+[[projects]]
   digest = "1:63ccdfbd20f7ccd2399d0647a7d100b122f79c13bb83da9660b1598396fd9f62"
   name = "github.com/golang/protobuf"
   packages = [
@@ -269,6 +277,14 @@
   revision = "ccab5234396729fee8dbf70620eafdfbc3d1a6af"
 
 [[projects]]
+  branch = "master"
+  digest = "1:4789ea48dd0ba4c66f4d781f4b929036fd5d19ce34eec33e786e11ca00ce7be5"
+  name = "github.com/kyma-incubator/api-gateway"
+  packages = ["api/v1alpha1"]
+  pruneopts = "NUT"
+  revision = "40f0ce25e03b82593e53885f7c62e3ce1bc94c38"
+
+[[projects]]
   digest = "1:073352c65b34bfc085f68a4444e1752252d0b03d28dd7b5e65a36859f4a48175"
   name = "github.com/kyma-project/helm-broker"
   packages = ["pkg/apis/addons/v1alpha1"]
@@ -276,7 +292,7 @@
   revision = "d07feb2d365a58645031e96b27a95c8d50bb8349"
 
 [[projects]]
-  digest = "1:de4e2643e1567ece9355b44369f41df315a61feddaf3b67401d575c5fd72c60c"
+  digest = "1:95eb7caf596ad92f89afedbee496a66d02c6d3b3ddef282c6fd07a03d9ad7edb"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -336,7 +352,8 @@
     "components/service-binding-usage-controller/pkg/client/informers/externalversions/settings/v1alpha1",
     "components/service-binding-usage-controller/pkg/client/listers/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/client/listers/settings/v1alpha1",
-    "tools/failery",
+    "tools/failery/cmd/failery",
+    "tools/failery/failery",
   ]
   pruneopts = "NUT"
   revision = "1e9aa1b23a3911a42b425dadeb1b8abf39d32ebe"
@@ -406,6 +423,17 @@
   pruneopts = "NUT"
   revision = "f0f479ad013a498e4cbfb369414e5d3880903779"
   version = "v0.3.5"
+
+[[projects]]
+  digest = "1:51927e9c61d145346f4ce5ab02026b91178b1a297edf719ce19270381f9d16be"
+  name = "github.com/ory/oathkeeper-maester"
+  packages = [
+    "api/v1alpha1",
+    "internal/validation",
+  ]
+  pruneopts = "NUT"
+  revision = "cc6c6d43462d250d21c0333fdf983cbad8b4102b"
+  version = "v0.0.2-beta.1"
 
 [[projects]]
   digest = "1:1bf95fa61209ea03139b5708ea26a364209f99a4fb70990a2697070588c156ab"
@@ -1082,6 +1110,7 @@
     "github.com/99designs/gqlgen/graphql/introspection",
     "github.com/99designs/gqlgen/handler",
     "github.com/golang/glog",
+    "github.com/golang/mock/gomock",
     "github.com/googleapis/gnostic/OpenAPIv2",
     "github.com/gorilla/mux",
     "github.com/gorilla/websocket",
@@ -1090,6 +1119,7 @@
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions",
+    "github.com/kyma-incubator/api-gateway/api/v1alpha1",
     "github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned",
@@ -1115,12 +1145,13 @@
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions",
-    "github.com/kyma-project/kyma/tools/failery",
+    "github.com/kyma-project/kyma/tools/failery/cmd/failery",
     "github.com/moby/moby/pkg/namesgenerator",
     "github.com/opentracing/opentracing-go",
     "github.com/opentracing/opentracing-go/ext",
     "github.com/opentracing/opentracing-go/log",
     "github.com/openzipkin/zipkin-go-opentracing",
+    "github.com/ory/oathkeeper-maester/api/v1alpha1",
     "github.com/pkg/errors",
     "github.com/rs/cors",
     "github.com/stretchr/testify/assert",
