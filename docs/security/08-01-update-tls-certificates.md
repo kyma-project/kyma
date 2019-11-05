@@ -5,19 +5,57 @@ type: Tutorials
 
 The TLS certificate is a vital security element. Follow this tutorial to update the TLS certificate in Kyma.
 
->**TIP:** The self-signed certificate used in Kyma instances deployed with `xip.io` is valid for 30 days. If the self-signed certificate expired for your cluster and you can't, for example, log in to the Kyma Console, follow this tutorial to regenerate the certificate.
+>**NOTE:** This procedure can interrupt the communication between your cluster and the outside world for a limited period of time.
+
+## Prerequisites
+
+ - New TLS certificate and key for custom domain deployments, base64-encoded
+ - `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance
 
 ## Steps
 
->**CAUTION:** When you regenerate the SSL certificate for Kyma, the kubeconfig file generated through the Console UI becomes invalid. To complete these steps, use the admin kubeconfig file generated for the Kubernetes cluster that hosts the Kyma instance you're working on.
+<div tabs>
+  <details>
+  <summary>
+  Custom domain certificate
+  </summary>
 
-1. Delete the ConfigMap and the Secret that stores the expired Kyma SSL certificate. Run:
+  >**CAUTION:** When you regenerate the TLS certificate for Kyma, the `kubeconfig` file generated through the Console UI becomes invalid. To complete these steps, use the admin `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance you're working on.
 
-  ```
-  kubectl delete cm -n kyma-installer net-global-overrides ; kubectl delete secret -n kyma-system apiserver-proxy-tls-cert
-  ```
+  1. Edit the `owndomain-overrides` ConfigMap and replace the existing certificate and key found in the **global.tlsCrt** and **global.tlsKey** with a new, base64-encoded pair.
 
-2. Trigger the update process to generate a new certificate. Run:
+    ```
+    kubectl edit cm -n kyma-installer owndomain-overrides
+    ```
+
+    Delete the Secret that stores the expired certificate:
+
+    ```
+    kubectl delete secret -n kyma-system apiserver-proxy-tls-cert
+    ```
+
+  </details>
+  <details>
+  <summary>
+  Self-signed certificate
+  </summary>
+
+  The self-signed TLS certificate used in Kyma instances deployed with `xip.io` is valid for 30 days. If the self-signed certificate expired for your cluster and you can't, for example, log in to the Kyma Console, regenerate the self-signed certificate.
+
+  >**CAUTION:** When you regenerate the TLS certificate for Kyma, the `kubeconfig` file generated through the Console UI becomes invalid. To complete these steps, use the admin `kubeconfig` file generated for the Kubernetes cluster that hosts the Kyma instance you're working on.
+
+  1. Delete the ConfigMap and the Secret that stores the expired Kyma TLS certificate. Run:
+
+    ```
+    kubectl delete cm -n kyma-installer net-global-overrides ; kubectl delete secret -n kyma-system apiserver-proxy-tls-cert
+    ```
+
+  </details>
+
+</div>
+
+
+2. Trigger the update process. Run:
 
   ```
   kubectl label installation/kyma-installation action=install
