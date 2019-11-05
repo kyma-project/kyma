@@ -2,15 +2,14 @@ package runtimeagent
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/authentication"
-	"testing"
-
 	"path/filepath"
+	"testing"
 	"time"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
 	scheme "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
+	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/authentication"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/mock"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit"
 	"github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/applications"

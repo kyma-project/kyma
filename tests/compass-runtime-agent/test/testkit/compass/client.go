@@ -7,12 +7,11 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	gqltools "github.com/kyma-project/kyma/tests/compass-runtime-agent/test/testkit/graphql"
 	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -31,8 +30,6 @@ type Client struct {
 	scenarioLabel string
 
 	directorToken string
-
-	authorizationToken string
 }
 
 func NewCompassClient(endpoint, tenant, runtimeId, scenarioLabel, directorToken string, gqlLog bool) *Client {
