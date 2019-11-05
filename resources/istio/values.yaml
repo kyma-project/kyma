@@ -20,6 +20,8 @@ customization:
 gateways:
   enabled: true
   istio-ingressgateway:
+    rollingMaxSurge: 1
+    rollingMaxUnavailable: 0
     resources:
       requests:
         cpu: 100m
