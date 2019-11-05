@@ -1,0 +1,71 @@
+--- vendor/k8s.io/kubernetes/test/e2e/framework/create.go.orig	2019-09-30 13:06:49.391547627 +0200
++++ vendor/k8s.io/kubernetes/test/e2e/framework/create.go	2019-09-30 13:09:26.535043899 +0200
+@@ -286,6 +286,8 @@
+ 	{"ServiceAccount"}:     &serviceAccountFactory{},
+ 	{"StatefulSet"}:        &statefulSetFactory{},
+ 	{"StorageClass"}:       &storageClassFactory{},
++	{"ReplicaSet"}:         &replicaSetFactory{},
++	{"ConfigMap"}:          &configMapFactory{},
+ }
+ 
+ // PatchName makes the name of some item unique by appending the
+@@ -357,6 +359,10 @@
+ 		f.PatchNamespace(&item.ObjectMeta.Namespace)
+ 	case *apps.DaemonSet:
+ 		f.PatchNamespace(&item.ObjectMeta.Namespace)
++	case *apps.ReplicaSet:
++		f.PatchNamespace(&item.ObjectMeta.Namespace)
++	case *v1.ConfigMap:
++		f.PatchNamespace(&item.ObjectMeta.Namespace)
+ 	default:
+ 		return errors.Errorf("missing support for patching item of type %T", item)
+ 	}
+@@ -575,6 +581,48 @@
+ 	}
+ 	return func() error {
+ 		return client.Delete(item.GetName(), &metav1.DeleteOptions{})
++	}, nil
++}
++
++type replicaSetFactory struct{}
++
++func (f *replicaSetFactory) New() runtime.Object {
++	return &apps.ReplicaSet{}
++}
++
++func (*replicaSetFactory) Create(f *Framework, i interface{}) (func() error, error) {
++	item, ok := i.(*apps.ReplicaSet)
++	if !ok {
++		return nil, errorItemNotSupported
++	}
++
++	client := f.ClientSet.AppsV1().ReplicaSets(f.Namespace.GetName())
++	if _, err := client.Create(item); err != nil {
++		return nil, errors.Wrap(err, "create ReplicaSet")
++	}
++	return func() error {
++		return client.Delete(item.GetName(), &metav1.DeleteOptions{})
++	}, nil
++}
++
++type configMapFactory struct{}
++
++func (f *configMapFactory) New() runtime.Object {
++	return &v1.ConfigMap{}
++}
++
++func (*configMapFactory) Create(f *Framework, i interface{}) (func() error, error) {
++	item, ok := i.(*v1.ConfigMap)
++	if !ok {
++		return nil, errorItemNotSupported
++	}
++
++	client := f.ClientSet.CoreV1().ConfigMaps(f.Namespace.GetName())
++	if _, err := client.Create(item); err != nil {
++		return nil, errors.Wrap(err, "create ConfigMap")
++	}
++	return func() error {
++		return client.Delete(item.GetName(), &metav1.DeleteOptions{})
+ 	}, nil
+ }
+ 

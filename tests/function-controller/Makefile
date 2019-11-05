@@ -4,13 +4,18 @@ build:
 	@echo '+ Performing pre-commit checks'
 	@./before-commit.sh
 
-test:
+test: vendor/k8s.io/kubernetes/test/e2e/framework/create.go
 	@echo '+ Running e2e tests'
 ifdef TEST_ARGS
 	@go test ./ -args $(TEST_ARGS)
 else
 	@go test ./
 endif
+
+# This patch adds support for few extra types to the 'CreateFromManifests' util function.
+vendor/k8s.io/kubernetes/test/e2e/framework/create.go: hack/k8s_framework_create.patch vendor
+	@echo '+ Patching vendored kubernetes/test/e2e/framework'
+	@patch -p0 < hack/k8s_framework_create.patch
 
 vendor: Gopkg.lock
 	@echo '+ Pulling vendored dependencies'

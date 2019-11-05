@@ -21,12 +21,20 @@ import (
 
 	"k8s.io/kubernetes/test/e2e/framework"
 	"k8s.io/kubernetes/test/e2e/framework/log"
+
+	"github.com/kyma-project/kyma/tests/function-controller/framework/registry"
 )
 
-var _ = TestDescribe("Function", func() {
+var _ = Describe("Functions", func() {
+	var registryURL string
+
 	f := framework.NewDefaultFramework("function")
 
+	BeforeEach(func() {
+		registryURL = registry.DeployLocal(f)
+	})
+
 	It("should print this", func() {
-		log.Logf(f.BaseName)
+		log.Logf(registryURL)
 	})
 })

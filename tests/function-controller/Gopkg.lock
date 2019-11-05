@@ -192,7 +192,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:1d1cbf539d9ac35eb3148129f96be5537f1a1330cadcc7e3a83b4e72a59672a3"
+  digest = "1:bf40199583e5143d1472fc34d10d6f4b69d97572142acf343b3e43136da40823"
   name = "github.com/google/go-cmp"
   packages = [
     "cmp",
@@ -202,8 +202,8 @@
     "cmp/internal/value",
   ]
   pruneopts = "UT"
-  revision = "2d0692c2e9617365a95b295612ac0d4415ba4627"
-  version = "v0.3.1"
+  revision = "6f77996f0c42f7b84e5a2b252227263f93432e9b"
+  version = "v0.3.0"
 
 [[projects]]
   digest = "1:a6181aca1fd5e27103f9a920876f29ac72854df7345a39f3b01e61c8c94cc8af"
@@ -1213,7 +1213,7 @@
   revision = "0270cf2f1c1d995d34b36019a6f65d58e6e33ad4"
 
 [[projects]]
-  digest = "1:bb23d306a40dcf1ad02afc74d2e66a166ea9d04397fe3900c6a749b2502924a3"
+  digest = "1:4a831340d100cbb330496603b1764c016e45f6292d63263c2adc5cbac27c5898"
   name = "k8s.io/kubernetes"
   packages = [
     "pkg/api/legacyscheme",
@@ -1328,6 +1328,7 @@
     "test/e2e/framework/ginkgowrapper",
     "test/e2e/framework/log",
     "test/e2e/framework/metrics",
+    "test/e2e/framework/replicaset",
     "test/e2e/framework/ssh",
     "test/e2e/framework/testfiles",
     "test/e2e/framework/viperconfig",
@@ -1408,6 +1409,7 @@
     "github.com/onsi/ginkgo/config",
     "github.com/onsi/ginkgo/reporters",
     "github.com/onsi/gomega",
+    "github.com/pkg/errors",
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/util/runtime",
@@ -1420,6 +1422,7 @@
     "k8s.io/kubernetes/test/e2e/framework/ginkgowrapper",
     "k8s.io/kubernetes/test/e2e/framework/log",
     "k8s.io/kubernetes/test/e2e/framework/metrics",
+    "k8s.io/kubernetes/test/e2e/framework/replicaset",
     "k8s.io/kubernetes/test/e2e/framework/testfiles",
     "k8s.io/kubernetes/test/e2e/framework/viperconfig",
     "k8s.io/kubernetes/test/e2e/manifest",
