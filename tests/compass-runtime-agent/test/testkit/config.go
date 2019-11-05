@@ -28,8 +28,8 @@ type TestConfig struct {
 	ScenarioLabel                  string        `envconfig:"default=COMPASS_RUNTIME_AGENT_TESTS"`
 	ApplicationInstallationTimeout time.Duration `envconfig:"default=180s"`
 
-	DexSecretNamespace      string        `envconfig:"kyma-system"`
-	DexSecretName           string        `envconfig:"admin-user"`
+	DexSecretNamespace      string        `envconfig:"default=kyma-system"`
+	DexSecretName           string        `envconfig:"default=admin-user"`
 	IdProviderDomain        string        `envconfig:"default=kyma.local"`
 	IdProviderClientTimeout time.Duration `envconfig:"default=10s"`
 }
