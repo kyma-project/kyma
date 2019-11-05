@@ -1,10 +1,13 @@
-#Taken witout modifications from https://github.com/coreos/prometheus-operator/blob/master/example/prometheus-operator-crd/servicemonitor.crd.yaml
----
+# Source: https://raw.githubusercontent.com/coreos/kube-prometheus/master/manifests/0prometheus-operator-0servicemonitorCustomResourceDefinition.yaml
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   creationTimestamp: null
   name: servicemonitors.monitoring.coreos.com
+  labels:
+    app: monitoring-operator
+  annotations:
+    "helm.sh/hook": crd-install
 spec:
   group: monitoring.coreos.com
   names:
@@ -53,7 +56,8 @@ spec:
                               be defined
                             type: boolean
                         required:
-                        - key
+                          - key
+                        type: object
                       username:
                         description: SecretKeySelector selects a key of a Secret.
                         properties:
@@ -69,7 +73,9 @@ spec:
                               be defined
                             type: boolean
                         required:
-                        - key
+                          - key
+                        type: object
+                    type: object
                   bearerTokenFile:
                     description: File to read bearer token for scraping targets.
                     type: string
@@ -123,6 +129,7 @@ spec:
                             in a replace action. It is mandatory for replace actions.
                             Regex capture groups are available.
                           type: string
+                      type: object
                     type: array
                   params:
                     description: Optional HTTP URL parameters
@@ -140,7 +147,7 @@ spec:
                     type: string
                   relabelings:
                     description: 'RelabelConfigs to apply to samples before ingestion.
-                      More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#<relabel_config>'
+                      More info: https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config'
                     items:
                       description: 'RelabelConfig allows dynamic rewriting of the
                         label set, being applied to samples before ingestion. It defines
@@ -182,6 +189,7 @@ spec:
                             in a replace action. It is mandatory for replace actions.
                             Regex capture groups are available.
                           type: string
+                      type: object
                     type: array
                   scheme:
                     description: HTTP scheme to use for scraping.
@@ -191,8 +199,8 @@ spec:
                     type: string
                   targetPort:
                     anyOf:
-                    - type: string
-                    - type: integer
+                      - type: string
+                      - type: integer
                   tlsConfig:
                     description: TLSConfig specifies TLS configuration parameters.
                     properties:
@@ -211,6 +219,8 @@ spec:
                       serverName:
                         description: Used to verify the hostname for the targets.
                         type: string
+                    type: object
+                type: object
               type: array
             jobLabel:
               description: The label to use to retrieve the job name from.
@@ -228,6 +238,7 @@ spec:
                   items:
                     type: string
                   type: array
+              type: object
             podTargetLabels:
               description: PodTargetLabels transfers labels on the Kubernetes Pod
                 onto the target.
@@ -271,8 +282,9 @@ spec:
                           type: string
                         type: array
                     required:
-                    - key
-                    - operator
+                      - key
+                      - operator
+                    type: object
                   type: array
                 matchLabels:
                   description: matchLabels is a map of {key,value} pairs. A single
@@ -281,6 +293,7 @@ spec:
                     "In", and the values array contains only "value". The requirements
                     are ANDed.
                   type: object
+              type: object
             targetLabels:
               description: TargetLabels transfers labels on the Kubernetes Service
                 onto the target.
@@ -288,6 +301,9 @@ spec:
                 type: string
               type: array
           required:
-          - endpoints
-          - selector
+            - endpoints
+            - selector
+          type: object
+      type: object
   version: v1
+

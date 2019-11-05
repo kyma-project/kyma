@@ -1,0 +1,1 @@
+Custom resource definition of `crd-alertmanager.yaml`, `crd-podmonitor.yaml`, and `crd-servicemonitor.yaml` moved to `resources/cluster-essentials/templates` and will be maintained in the chart, with next update of prometheus operator chart listed files should be updated in cluster-essential chart.
