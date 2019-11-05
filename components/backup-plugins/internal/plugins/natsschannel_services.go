@@ -23,7 +23,8 @@ import (
 	apimeta "k8s.io/apimachinery/pkg/api/meta"
 )
 
-const natssChannelLabel = "messaging.knative.dev/role=natss-channel"
+const natssChannelLabelKey = "messaging.knative.dev/role=natss-channel"
+const natssChannelLabelValue = "natss-channel"
 
 // IgnoreNatssChannelService ignores Services associated to NATSS Channels during restore.
 type IgnoreNatssChannelService struct {
@@ -34,13 +35,11 @@ type IgnoreNatssChannelService struct {
 func (p *IgnoreNatssChannelService) AppliesTo() (velero.ResourceSelector, error) {
 	return velero.ResourceSelector{
 		IncludedResources: []string{"services"},
-		//LabelSelector:     natssChannelLabel,
 	}, nil
 }
 
 // Execute contains executes the plugin logic on the received object.
 func (p *IgnoreNatssChannelService) Execute(input *velero.RestoreItemActionExecuteInput) (*velero.RestoreItemActionExecuteOutput, error) {
-	p.Log.Infof("Are we ignoring NatssChannel!!")
 	item := input.Item
 	meta, err := apimeta.Accessor(item)
 	if err != nil {
@@ -48,10 +47,10 @@ func (p *IgnoreNatssChannelService) Execute(input *velero.RestoreItemActionExecu
 		return nil, err
 	}
 	labels := meta.GetLabels()
-	if val, ok := labels["messaging.knative.dev/role"]; ok && val == "natss-channel" {
-		p.Log.Infof("Ignoring restore of %s %s/%s", item.GetObjectKind(), meta.GetNamespace(), meta.GetName())
+	if val, ok := labels[natssChannelLabelKey]; ok && val == natssChannelLabelValue {
+		p.Log.Infof("Ignoring restore of Service: %s/%s", meta.GetNamespace(), meta.GetName())
 		return velero.NewRestoreItemActionExecuteOutput(input.Item).WithoutRestore(), nil
 	}
-	p.Log.Infof("Restoring %s %s/%s", item.GetObjectKind(), meta.GetNamespace(), meta.GetName())
+	p.Log.Infof("Restoring Service: %s/%s", meta.GetNamespace(), meta.GetName())
 	return velero.NewRestoreItemActionExecuteOutput(input.Item), nil
 }
