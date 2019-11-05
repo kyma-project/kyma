@@ -11,3 +11,7 @@ database:
 
 tests:
   enabled: false
+  gcp:
+    credentials: ""
+    projectName: ""
+  queryLogging: false

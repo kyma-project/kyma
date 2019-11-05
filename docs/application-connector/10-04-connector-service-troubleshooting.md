@@ -6,6 +6,7 @@ type: Troubleshooting
 ## Invalid Certificate Signing Request (CSR)
 
 If you try to generate a client certificate, you may get this error:
+
 ```json
 {
   "code":403,
@@ -14,7 +15,8 @@ If you try to generate a client certificate, you may get this error:
 ```
 
 This error is caused by applying wrong subject information to your Certificate Signing Request.  
-To ensure CSR was generated properly, check the values returned by the Connector Service with the call that fetched CSR information:
+To ensure CSR was generated properly, check the values returned by the Connector Service with the call that fetched the CSR information:
+
 ```json
 {
   ...
@@ -26,9 +28,10 @@ To ensure CSR was generated properly, check the values returned by the Connector
 }
 ```
 
-Subject values present in CSR should match the subject in the response that you got.
+Subject values present in the CSR should match the subject in the response that you got.
 
 To check the subject of the generated CSR, run this command:
-```
+
+```bash
 openssl req -noout -subject -in {PATH_TO_CSR_FILE}
 ```

@@ -8,22 +8,24 @@ If you call a registered service and receive an error, follow these steps to det
 
 1. Check the logs.
 
-    Check the logs from Application Gateway Pod to verify that the call reached Application Gateway.
+    Check the logs from the Application Gateway Pod to verify that the call reached the Application Gateway.
     To fetch these logs, run this command:
-    ```
+    
+    ```bash
     kubectl -n kyma-integration logs -l app={APP_NAME}-application-gateway -c {APP_NAME}-application-gateway
     ```
-    The request that reached the Pod is logged by Application Gateway.
+   
+    The request that reached the Pod is logged by the Application Gateway.
 
-2. Check for Access Service.
+2. Check for the Access Service.
 
-    If the call you tried to make is not in the logs, check if an [Access Service](#architecture-application-connector-components-access-service) exists for the service you are trying to call.
+    If the call you tried to make is not in the logs, check if the [Access Service](#architecture-application-connector-components-access-service) for the service you are trying to call exists.
     ```
     kubectl -n kyma-integration get svc {APP_NAME}-{SERVICE_ID}
     ```
 3. Re-register the service.
 
-    If Access Service does not exist, run this command to deregister the service you tried to call:
+    If the Access Service does not exist, deregister the service you tried to call.
 
     <div tabs name="deregistration" group="error-when-calling-a-registered-service">
       <details>
@@ -31,7 +33,7 @@ If you call a registered service and receive an error, follow these steps to det
       With a trusted certificate
       </summary>
 
-      ```
+      ```bash
       curl -X DELETE https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE}
       ```
       </details>
@@ -40,7 +42,7 @@ If you call a registered service and receive an error, follow these steps to det
       Without a trusted certificate
       </summary>
 
-      ```
+      ```bash
       curl -X DELETE https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE} -k
       ```
       </details>
@@ -53,7 +55,7 @@ If you call a registered service and receive an error, follow these steps to det
 4. Check the API URL.
 
     If your call reaches the Application Gateway and the Access Service exists, but you still receive an error, check if the API URL in the service definition matches the API URL of the actual service you are trying to call.
-    To check the target URL of the API, fetch the Service definition from Application Registry:
+    To check the target URL of the API, fetch the Service definition from the Application Registry:
 
     <div tabs name="verification" group="error-when-calling-a-registered-service">
       <details>
@@ -61,7 +63,7 @@ If you call a registered service and receive an error, follow these steps to det
       With a trusted certificate
       </summary>
 
-      ```
+      ```bash
       curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE}
       ```
       </details>
@@ -70,7 +72,7 @@ If you call a registered service and receive an error, follow these steps to det
       Without a trusted certificate
       </summary>
 
-      ```
+      ```bash
       curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE} -k
       ```
       </details>

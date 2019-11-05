@@ -33,6 +33,10 @@ step() {
   echo -e "\\n${YELLOW}${message}${NC}"
 }
 
+remove-cached-content() {
+  ( rm -rf "${BUILD_DIR}" ) || true
+}
+
 copy-website-repo() {
   git clone -b "master" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
 }
@@ -43,6 +47,10 @@ build-preview() {
 }
 
 main() {
+  step "Remove website cached content"
+  remove-cached-content
+  pass "Removed"
+
   step "Copying kyma/website repo"
   copy-website-repo
   pass "Copied"

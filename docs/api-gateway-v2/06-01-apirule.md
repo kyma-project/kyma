@@ -47,7 +47,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.rules.path** | **YES** | Specifies the path of the exposed service. |
 | **spec.rules.methods** | **NO** | Specifies the list of HTTP request methods available for **spec.rules.path**. |
 | **spec.rules.mutators** | **NO** | Specifies the array of [Oathkeeper mutators](https://www.ory.sh/docs/oathkeeper/pipeline/mutator). |
-| **spec.rules.accessStrategies** | **YES** | Specifies the array of [Oathkeeper authenticators](https://www.ory.sh/docs/oathkeeper/pipeline/authn). |
+| **spec.rules.accessStrategies** | **YES** | Specifies the array of [Oathkeeper authenticators](https://www.ory.sh/docs/oathkeeper/pipeline/authn). The supported authenticators are `oauth2_introspection`, `jwt`, `noop`, `allow`. |
 
 ## Additional information
 
